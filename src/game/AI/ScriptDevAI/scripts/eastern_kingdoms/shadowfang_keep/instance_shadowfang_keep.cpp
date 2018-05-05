@@ -68,36 +68,6 @@ void instance_shadowfang_keep::OnCreatureCreate(Creature* pCreature)
     m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 }
 
-void instance_shadowfang_keep::OnCreatureDeath(Creature* pCreature)
-{
-    switch (pCreature->GetEntry())
-    {
-        case NPC_LUPINE_HORROR:
-        case NPC_WOLFGUARD_WORG:
-        case NPC_BLEAK_WORG:
-        case NPC_SLAVERING_WORG:
-            if (m_lNandosWolvesGuids.empty())
-                return;
-
-            m_lNandosWolvesGuids.remove(pCreature->GetObjectGuid());
-            // If all wolves are dead, make Wolf Master Nandos engage in combat
-            if (m_lNandosWolvesGuids.empty())
-            {
-                if (Creature* nandos = GetSingleCreatureFromStorage(NPC_MASTER_NANDOS))
-                {
-                    if (nandos->isInCombat())   // Wolf Master Nandos already joined the fight: no need to go further
-                        return;
-                    DoScriptText(YELL_PACK_DEAD, nandos);
-                    nandos->SetWalk(false);
-                    nandos->GetMotionMaster()->MovePoint(0, nandosMovement.fX, nandosMovement.fY, nandosMovement.fZ);
-                }
-            }
-            break;
-        default:
-            return;
-    }
-}
-
 void instance_shadowfang_keep::OnObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())
@@ -141,6 +111,29 @@ void instance_shadowfang_keep::OnCreatureDeath(Creature* pCreature)
         case NPC_BAXTER:
             SetData(TYPE_APOTHECARY, SPECIAL);
             break;
+        case NPC_LUPINE_HORROR:
+        case NPC_WOLFGUARD_WORG:
+        case NPC_BLEAK_WORG:
+        case NPC_SLAVERING_WORG:
+            if (m_lNandosWolvesGuids.empty())
+                return;
+
+            m_lNandosWolvesGuids.remove(pCreature->GetObjectGuid());
+            // If all wolves are dead, make Wolf Master Nandos engage in combat
+            if (m_lNandosWolvesGuids.empty())
+            {
+                if (Creature* nandos = GetSingleCreatureFromStorage(NPC_MASTER_NANDOS))
+                {
+                    if (nandos->isInCombat())   // Wolf Master Nandos already joined the fight: no need to go further
+                        return;
+                    DoScriptText(YELL_PACK_DEAD, nandos);
+                    nandos->SetWalk(false);
+                    nandos->GetMotionMaster()->MovePoint(0, nandosMovement.fX, nandosMovement.fY, nandosMovement.fZ);
+                }
+            }
+            break;
+        default:
+            return;
     }
 }
 

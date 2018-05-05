@@ -69,7 +69,6 @@ class instance_shadowfang_keep : public ScriptedInstance
         void Initialize() override;
 
         void OnCreatureCreate(Creature* pCreature) override;
-        void OnCreatureDeath(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
         void DoSpeech();
 
