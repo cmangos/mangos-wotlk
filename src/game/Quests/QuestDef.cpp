@@ -143,7 +143,10 @@ Quest::Quest(Field* questRecord)
     QuestStartScript = questRecord[139].GetUInt32();
     QuestCompleteScript = questRecord[140].GetUInt32();
 
-    RequiredCondition = questRecord[141].GetUInt32();
+    for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
+        RewMaxRepValue[i] = questRecord[141 + i].GetInt32();
+
+    RequiredCondition = questRecord[146].GetUInt32();
 
     m_isActive = true;
 
