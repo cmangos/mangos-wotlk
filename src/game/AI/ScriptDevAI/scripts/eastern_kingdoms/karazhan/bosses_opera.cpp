@@ -902,6 +902,7 @@ struct boss_julianneAI : public ScriptedAI
 
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        DoResetThreat();
         m_creature->GetMotionMaster()->Clear();
         DoStartMovement(m_creature->getVictim());
     }
@@ -1151,6 +1152,7 @@ struct boss_romuloAI : public ScriptedAI
 
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        DoResetThreat();
         m_creature->GetMotionMaster()->Clear();
         DoStartMovement(m_creature->getVictim());
     }
