@@ -1462,6 +1462,7 @@ enum
 
     // combat spells
     SPELL_POISON                        = 31747,
+    SPELL_POISON_SPIT                   = 32330,
     SPELL_BORE                          = 32738,
     SPELL_ENRAGE                        = 32714,
 
@@ -1471,6 +1472,7 @@ enum
 
     // npcs that don't use bore spell
     NPC_MARAUDING_BURSTER               = 16857,
+    NPC_FULGORGE                        = 18678,
     NPC_GREATER_CRUST_BURSTER           = 21380,
 
     // npcs that use bone bore
@@ -1503,6 +1505,7 @@ struct npc_burster_wormAI : public ScriptedAI
         switch (m_creature->GetEntry())
         {
             case NPC_MARAUDING_BURSTER:
+            case NPC_FULGORGE:
                 return SPELL_TUNNEL_BORE_RED_PASSIVE;
             case NPC_HAISHULUD:
                 return SPELL_DAMAGING_TUNNEL_BORE_BONE_PASSIVE;
@@ -1642,8 +1645,10 @@ struct npc_burster_wormAI : public ScriptedAI
                 DoMeleeAttackIfReady();
             else
             {
-                if (!m_creature->IsNonMeleeSpellCasted(false))
+                if (!m_creature->IsNonMeleeSpellCasted(false) && m_creature->GetEntry() != NPC_FULGORGE)
                     DoCastSpellIfCan(m_creature->getVictim(), SPELL_POISON);
+                else if (!m_creature->IsNonMeleeSpellCasted(false))
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_POISON_SPIT);
 
                 // if target not in range, submerge and chase
                 if (!m_creature->IsInRange(m_creature->getVictim(), 0, 50.0f))
@@ -1654,7 +1659,7 @@ struct npc_burster_wormAI : public ScriptedAI
             }
 
             // bore spell
-            if (m_creature->GetEntry() != NPC_MARAUDING_BURSTER && m_creature->GetEntry() != NPC_GREATER_CRUST_BURSTER)
+            if (m_creature->GetEntry() != NPC_MARAUDING_BURSTER && m_creature->GetEntry() != NPC_FULGORGE && m_creature->GetEntry() != NPC_GREATER_CRUST_BURSTER)
             {
                 if (m_uiBoreTimer < uiDiff)
                 {
