@@ -2556,6 +2556,177 @@ CreatureAI* GetAI_npc_veneratus_spawn_node(Creature* pCreature)
     return new npc_veneratus_spawn_nodeAI(pCreature);
 }
 
+/*######
+## npc_disobedient_dragonmaw_peon
+######*/
+
+enum
+{
+    SAY_IDLE1   = -1001285,
+    SAY_IDLE2   = -1001286,
+    SAY_BOOTERANG1 = -1001287,
+    SAY_BOOTERANG2 = -1001288,
+    SAY_BOOTERANG3 = -1001289,
+    SAY_BOOTERANG4 = -1001290,
+    SAY_BOOTERANG5 = -1001291,
+    SAY_BOOTERANG6 = -1001292,
+
+    SPELL_BOOTERANG                 = 40742,
+    SPELL_LAZY_AND_GOOD_FOR_NOTHING = 40732,
+    SPELL_DEFIANT_AND_ENRAGED       = 40735,
+    SPELL_PEON_CLEAR_ALL            = 40762,
+    
+    NPC_PEON                = 22252,
+    NPC_PEON_WORK_NODE      = 23308,
+    NPC_DISOBEDIENT_PEON    = 23311,
+
+    FACTION_DISOBEDIENT     = 14,
+    FACTION_WHACKED         = 62,
+
+    EMOTE_WORKING           = 233,
+
+    POINT_ARRIVED           = 1,
+};
+
+struct npc_disobedient_dragonmaw_peonAI : public ScriptedAI
+{
+    npc_disobedient_dragonmaw_peonAI(Creature* creature) : ScriptedAI(creature)
+    {
+        Reset();
+    }
+
+    uint32 m_angryTimer;
+    uint32 m_booterangTimer;
+    ObjectGuid m_lastPlayerGuid;
+
+    void Reset() override
+    {
+        if (m_lastPlayerGuid.IsEmpty())
+        {
+            if (m_creature->HasAura(SPELL_LAZY_AND_GOOD_FOR_NOTHING))
+                m_angryTimer = 0;
+            else
+                m_angryTimer = urand(6000, 10000);
+            m_booterangTimer = 0;
+        }
+    }
+
+    void MovementInform(uint32 movementType, uint32 data) override
+    {
+        if (movementType == POINT_MOTION_TYPE)
+        {
+            if (data == POINT_ARRIVED)
+            {
+                Creature* node = GetClosestCreatureWithEntry(m_creature, NPC_PEON_WORK_NODE, 10.f);
+                if (node)
+                {
+                    float angle = m_creature->GetAngle(node);
+                    m_creature->SetOrientation(angle);
+                    m_creature->SetFacingTo(angle);
+                }
+                if (Player* player = m_creature->GetMap()->GetPlayer(m_lastPlayerGuid))
+                    player->RewardPlayerAndGroupAtEvent(NPC_DISOBEDIENT_PEON, m_creature);
+
+                m_lastPlayerGuid = ObjectGuid();
+                m_creature->UpdateEntry(NPC_PEON);
+                m_creature->HandleEmote(EMOTE_WORKING);
+                m_creature->ForcedDespawn(90000);
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveIdle();
+            }
+        }
+    }
+
+    void SpellHit(Unit* caster, const SpellEntry* spell) override
+    {
+        if (spell->Id == SPELL_BOOTERANG)
+            HandleBooterang(caster);
+    }
+
+    void HandleAngry()
+    {
+        DoCastSpellIfCan(nullptr, SPELL_DEFIANT_AND_ENRAGED);
+        uint32 textId = 0;
+        switch (urand(0, 4))
+        {
+            case 0: textId = SAY_IDLE1; break;
+            case 1: textId = SAY_IDLE2; break;
+            default: break;
+        }
+        if (textId)
+            DoScriptText(textId, m_creature);
+    }
+
+    void HandleBooterang(Unit* caster)
+    {
+        if (caster->GetTypeId() != TYPEID_PLAYER && m_lastPlayerGuid.IsEmpty())
+            return;
+
+        Player* player = static_cast<Player*>(caster);
+        m_lastPlayerGuid = player->GetObjectGuid();
+
+        uint32 textId = 0;
+        switch (urand(0, 5))
+        {
+            case 0: textId = SAY_BOOTERANG1; break;
+            case 1: textId = SAY_BOOTERANG2; break;
+            case 2: textId = SAY_BOOTERANG3; break;
+            case 3: textId = SAY_BOOTERANG4; break;
+            case 4: textId = SAY_BOOTERANG5; break;
+            case 5: textId = SAY_BOOTERANG6; break;
+        }
+        float angle = m_creature->GetAngle(player);
+        m_creature->SetOrientation(angle);
+        m_creature->SetFacingTo(angle);
+        DoScriptText(textId, m_creature, player);
+
+        DoCastSpellIfCan(nullptr, SPELL_PEON_CLEAR_ALL); // clears combat and removes aura
+        m_creature->setFaction(FACTION_WHACKED);
+
+        m_booterangTimer = 3000;
+        m_angryTimer = 0;
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!m_creature->isInCombat())
+        {
+            if (m_angryTimer)
+            {
+                if (m_angryTimer <= diff)
+                {
+                    HandleAngry();
+                    m_angryTimer = urand(6000, 10000);
+                }
+                else m_angryTimer -= diff;
+            }
+
+            if (m_booterangTimer)
+            {
+                if (m_booterangTimer <= diff)
+                {
+                    float x, y, z;
+                    Creature* node = GetClosestCreatureWithEntry(m_creature, NPC_PEON_WORK_NODE, 60.f);
+                    if (node)
+                        node->GetNearPoint(m_creature, x, y, z, m_creature->GetObjectBoundingRadius(), 5.f, node->GetAngle(m_creature));
+                    else // failsafe
+                        m_creature->GetPosition(x, y, z);
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ARRIVED, x, y, z);
+                    m_booterangTimer = 0;
+                }
+                else m_booterangTimer -= diff;
+            }
+        }
+
+        ScriptedAI::UpdateAI(diff);
+    }
+};
+
+CreatureAI* GetAI_npc_disobedient_dragonmaw_peon(Creature* pCreature)
+{
+    return new npc_disobedient_dragonmaw_peonAI(pCreature);
+}
+
 void AddSC_shadowmoon_valley()
 {
     Script* pNewScript;
@@ -2638,5 +2809,10 @@ void AddSC_shadowmoon_valley()
     pNewScript = new Script;
     pNewScript->Name = "npc_veneratus_spawn_node";
     pNewScript->GetAI = &GetAI_npc_veneratus_spawn_node;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_disobedient_dragonmaw_peon";
+    pNewScript->GetAI = &GetAI_npc_disobedient_dragonmaw_peon;
     pNewScript->RegisterSelf();
 }

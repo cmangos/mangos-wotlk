@@ -6732,6 +6732,39 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NOT_TRADING;
     }
 
+    switch (m_spellInfo->Id)
+    {
+        case 30077: // Carinda's Retribution
+            if (ObjectGuid target = m_caster->GetSelectionGuid())
+                if (!(target.GetEntry() == 17226))
+                    return SPELL_FAILED_BAD_TARGETS;
+            break;
+        case 31958: // Fire Bomb Halaa - Must be Taxi Flying
+            if (!m_caster->IsTaxiFlying())
+                return SPELL_FAILED_ONLY_MOUNTED;
+            break;
+        case 36867: // Creature - Summon Event Ethereal
+            if (m_caster->GetMap()->SpawnedCountForEntry(21445) >= 1 || m_caster->GetMap()->SpawnedCountForEntry(22285) >= 1)
+                return SPELL_FAILED_DONT_REPORT;
+            break;
+        case 38170: // Spin Nether-weather Vane - requires Soaring
+            if (!m_caster->HasAura(37968))
+                return SPELL_FAILED_FIZZLE;
+            break;
+        case 38915: // Mental Interference
+            if (ObjectGuid target = m_caster->GetSelectionGuid())
+                if (!(target.GetEntry() == 16943 || target.GetEntry() == 20928))  // Mental Interference can be cast only on these two targets
+                    return SPELL_FAILED_BAD_TARGETS;
+            break;
+        case 40472: // Booterang -  Must have aura Defiant And Enraged
+        {
+            Unit* target = m_targets.getUnitTarget();
+            if (!target || !target->HasAura(40735))
+                return SPELL_FAILED_BAD_TARGETS;
+            break;
+        }
+    }
+
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_TAME_BEAST))
     {
         Player* player = (Player*)m_caster;

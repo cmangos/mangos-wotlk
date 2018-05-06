@@ -1218,6 +1218,7 @@ UPDATE creature_template SET ScriptName='npc_shadowmoon_tuber_node' WHERE entry=
 UPDATE creature_template SET ScriptName='npc_veneratus_spawn_node' WHERE entry=21334;
 UPDATE creature_template SET ScriptName='mob_shadowmoon_soulstealer' WHERE entry=22061;
 UPDATE creature_template SET ScriptName='npc_shadowlord_deathwail' WHERE entry=22006;
+UPDATE creature_template SET ScriptName='npc_disobedient_dragonmaw_peon' WHERE entry IN(23311);
 
 /* SHATTRATH */
 UPDATE creature_template SET ScriptName='npc_dirty_larry' WHERE entry=19720;
@@ -3079,6 +3080,14 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001282,'Enemy sighted!  Fall into formation and prepare for bombing maneuvers!',0,6,0,1,'Skyguard Ace SAY_SPAWN'),
 (-1001283,'Quickly! Use the flames and support the ground troops. Its ancient magic should cleanse Terokk''s shield.',0,6,0,1,'Skyguard Ace SAY_FLAMES'),
 (-1001284,'They did it!  Enemy down!  Return to base!',0,6,0,1,'Skyguard Ace SAY_TEROKK_DOWN'),
+(-1001285,'Work is da poop! NO MORE!',0,0,0,15,'Dosobedient Dragonmaw Peon SAY_IDLE1'),
+(-1001286,'Me no work no more!',0,0,0,15,'Dosobedient Dragonmaw Peon SAY_IDLE2'),
+(-1001287,'HEY! No more booterang! Me sorry! Me work!',0,0,0,34,'Dosobedient Dragonmaw Peon SAY_BOOTERANG1'),
+(-1001288,'ARGH! BOOTERANG!',0,0,0,34,'Dosobedient Dragonmaw Peon SAY_BOOTERANG2'),
+(-1001289,'OWWWW! Ok, ok, me go back to work!',0,0,0,34,'Dosobedient Dragonmaw Peon SAY_BOOTERANG3'),
+(-1001290,'WHY IT PUT DA BOOTERANG ON DA SKIN?? WHY??',0,0,0,34,'Dosobedient Dragonmaw Peon SAY_BOOTERANG4'),
+(-1001291,'AYAYA! One day me have dat booterang...',0,0,0,34,'Dosobedient Dragonmaw Peone SAY_BOOTERANG5'),
+(-1001292,'OOF! Booterang hurted me! Me tink work better den booterang!',0,0,0,34,'Dosobedient Dragonmaw Peon SAY_BOOTERANG6'),
 -- warning ids pending export
 (-1001312,'WE STRIKE!',0,1,0,15,'proudhoof SAY_QUEST_START'),
 (-1001313,'$N is going to join us on our assault. Let us bring peace to my ancestors!',0,0,0,396,'proudhoof SAY_QUEST_INTRO'),

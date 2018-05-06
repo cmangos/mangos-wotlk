@@ -8821,6 +8821,21 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 39504, TRIGGERED_NONE);
                     return;
                 }
+                case 40742:                                 // Booterang
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, damage, TRIGGERED_NONE);
+                    return;
+                }
+                case 40762:                                 // Clear Peon All
+                {
+                    m_caster->CombatStop(true);
+                    m_caster->RemoveAurasDueToSpell(40735); // Defiant and Enraged
+                    m_caster->RemoveAurasDueToSpell(40732); // Lazy and Good for Nothing
+                    return;
+                }
                 case 41055:                                 // Copy Weapon
                 case 63416:                                 // Copy Weapon
                 case 69891:                                 // Copy Weapon (No Threat)
