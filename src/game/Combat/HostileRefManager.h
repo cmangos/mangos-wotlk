@@ -53,7 +53,7 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
         // Remove specific faction references
         void deleteReferencesForFaction(uint32 faction);
 
-        HostileReference* getFirst() { return ((HostileReference*) RefManager<Unit, ThreatManager>::getFirst()); }
+        HostileReference* getFirst() { return static_cast<HostileReference*>(RefManager<Unit, ThreatManager>::getFirst()); }
 
         void updateThreatTables();
 
@@ -61,10 +61,10 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
         void updateOnlineOfflineState(bool pIsOnline);
 
         // set state for one reference, defined by Unit
-        void setOnlineOfflineState(Unit* pCreature, bool pIsOnline);
+        void setOnlineOfflineState(Unit* pVictim, bool pIsOnline);
 
         // delete one reference, defined by Unit
-        void deleteReference(Unit* pCreature);
+        void deleteReference(Unit* pVictim);
 
         // redirection threat data
         void SetThreatRedirection(ObjectGuid guid, uint32 pct)
