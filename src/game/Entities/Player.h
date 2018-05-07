@@ -28,6 +28,7 @@
 #include "Quests/QuestDef.h"
 #include "Groups/Group.h"
 #include "Entities/Bag.h"
+#include "Entities/Taxi.h"
 #include "Server/WorldSession.h"
 #include "Entities/Pet.h"
 #include "Maps/MapReference.h"
@@ -897,36 +898,10 @@ class PlayerTaxi
         }
         void AppendTaximaskTo(ByteBuffer& data, bool all);
 
-        // Destinations
-        bool LoadTaxiDestinationsFromString(const std::string& values, Team team);
-        std::string SaveTaxiDestinationsToString();
-
-        void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }
-        void AddTaxiDestination(uint32 dest) { m_TaxiDestinations.push_back(dest); }
-        uint32 GetTaxiSource() const { return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front(); }
-        uint32 GetNextTaxiDestination() const { return m_TaxiDestinations.size() < 2 ? 0 : m_TaxiDestinations[1]; }
-        uint32 GetFinalTaxiDestination() const { return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.back(); }
-        uint32 GetCurrentTaxiPath() const;
-        uint32 NextTaxiDestination()
-        {
-            m_TaxiDestinations.pop_front();
-            return GetNextTaxiDestination();
-        }
-        bool empty() const { return m_TaxiDestinations.empty(); }
-        FactionTemplateEntry const* GetFlightMasterFactionTemplate() const;
-        void SetFlightMasterFactionTemplateId(uint32 factionTemplateId) { m_flightMasterFactionId = factionTemplateId; }
-
         friend std::ostringstream& operator<<(std::ostringstream& ss, PlayerTaxi const& taxi);
 
-        std::deque<uint32> const& GetPath() const { return m_TaxiDestinations; }
-
-        uint32 GetLastNode() { return m_lastNode; }
-        void SetLastNode(uint32 lastNode) { m_lastNode = lastNode; }
     private:
         TaxiMask m_taximask;
-        std::deque<uint32> m_TaxiDestinations;
-        uint32 m_lastNode;
-        uint32 m_flightMasterFactionId;
 };
 
 std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
@@ -935,7 +910,7 @@ std::ostringstream& operator<< (std::ostringstream& ss, PlayerTaxi const& taxi);
 struct BGData
 {
     BGData() : bgInstanceID(0), bgTypeID(BATTLEGROUND_TYPE_NONE), bgAfkReportedCount(0), bgAfkReportedTimer(0),
-        bgTeam(TEAM_NONE), mountSpell(0), m_needSave(false) { ClearTaxiPath(); }
+        bgTeam(TEAM_NONE), mountSpell(0), m_needSave(false) {}
 
     uint32 bgInstanceID;                                    ///< This variable is set to bg->m_InstanceID, saved
     ///  when player is teleported to BG - (it is battleground's GUID)
@@ -948,14 +923,10 @@ struct BGData
     Team bgTeam;                                            ///< What side the player will be added to, saved
 
     uint32 mountSpell;                                      ///< Mount used before join to bg, saved
-    uint32 taxiPath[2];                                     ///< Current taxi active path start/end nodes, saved
 
     WorldLocation joinPos;                                  ///< From where player entered BG, saved
 
     bool m_needSave;                                        ///< true, if saved to DB fields modified after prev. save (marked as "saved" above)
-
-    void ClearTaxiPath()     { taxiPath[0] = taxiPath[1] = 0; }
-    bool HasTaxiPath() const { return taxiPath[0] && taxiPath[1]; }
 };
 
 struct TradeStatusInfo
@@ -1086,12 +1057,6 @@ class Player : public Unit
         PlayerSocial* GetSocial() { return m_social; }
         const PlayerSocial* GetSocial() const { return m_social; }
 
-        PlayerTaxi m_taxi;
-        void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(getRace(), getClass(), getLevel()); }
-        bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc = nullptr, uint32 spellid = 0);
-        bool ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid = 0);
-        // mount_id can be used in scripting calls
-        void ContinueTaxiFlight() const;
         bool isAcceptTickets() const { return GetSession()->GetSecurity() >= SEC_GAMEMASTER && (m_ExtraFlags & PLAYER_EXTRA_GM_ACCEPT_TICKETS); }
         void SetAcceptTicket(bool on) { if (on) m_ExtraFlags |= PLAYER_EXTRA_GM_ACCEPT_TICKETS; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_ACCEPT_TICKETS; }
         bool isAcceptWhispers() const { return !!(m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS); }
@@ -1168,6 +1133,39 @@ class Player : public Unit
         void Yell(const std::string& text, const uint32 language) const;
         void TextEmote(const std::string& text) const;
         void Whisper(const std::string& text, const uint32 language, ObjectGuid receiver);
+
+        /*********************************************************/
+        /***                    TAXI SYSTEM                    ***/
+        /*********************************************************/
+
+        // Legacy taxi system
+        PlayerTaxi m_taxi;
+
+        void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(getRace(), getClass(), getLevel()); }
+
+        bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc = nullptr, uint32 spellid = 0);
+        bool ActivateTaxiPathTo(uint32 path_id, uint32 spellid = 0);
+
+        // New taxi system
+        void TaxiFlightResume();
+        bool TaxiFlightInterrupt(bool cancel = true);
+
+        bool IsTaxiDebug() const { return m_taxiTracker.m_debug; }
+        void ToggleTaxiDebug() { m_taxiTracker.m_debug = !m_taxiTracker.m_debug; }
+
+        Taxi::Map const& GetTaxiPathSpline() const;
+        size_t GetTaxiSplinePathOffset() const;
+
+        void OnTaxiFlightStart(const TaxiPathEntry* path);
+        void OnTaxiFlightEnd(const TaxiPathEntry* path);
+        void OnTaxiFlightEject(bool clear = true);
+        bool OnTaxiFlightUpdate(const size_t waypointIndex, const bool movement);
+        void OnTaxiFlightSplineStart(const TaxiPathNodeEntry* node);
+        void OnTaxiFlightSplineEnd();
+        bool OnTaxiFlightSplineUpdate();
+        void OnTaxiFlightRouteStart(uint32 pathID, bool initial);
+        void OnTaxiFlightRouteEnd(uint32 pathID, bool final);
+        void OnTaxiFlightRouteProgress(const TaxiPathNodeEntry* node, const TaxiPathNodeEntry* next = nullptr);
 
         /*********************************************************/
         /***                    STORAGE SYSTEM                 ***/
@@ -2654,6 +2652,8 @@ class Player : public Unit
             if (operation < DELAYED_END)
                 m_DelayedOperations |= operation;
         }
+
+        Taxi::Tracker m_taxiTracker;
 
         void _fillGearScoreData(Item* item, GearScoreVec* gearScore, uint32& twoHandScore);
 

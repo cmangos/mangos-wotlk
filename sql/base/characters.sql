@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_13963_01_characters_account_instances_entered` bit(1) DEFAULT NULL
+  `required_13973_01_characters_taxi_system_update` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -395,8 +395,6 @@ CREATE TABLE `character_battleground_data` (
   `join_z` float NOT NULL DEFAULT '0',
   `join_o` float NOT NULL DEFAULT '0',
   `join_map` int(11) NOT NULL DEFAULT '0',
-  `taxi_start` int(11) NOT NULL DEFAULT '0',
-  `taxi_end` int(11) NOT NULL DEFAULT '0',
   `mount_spell` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';

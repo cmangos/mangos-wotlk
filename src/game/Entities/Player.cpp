@@ -148,7 +148,7 @@ static const uint32 corpseReclaimDelay[MAX_DEATH_COUNT] = {30, 60, 120};
 
 //== PlayerTaxi ================================================
 
-PlayerTaxi::PlayerTaxi() : m_flightMasterFactionId(0)
+PlayerTaxi::PlayerTaxi()
 {
     // Taxi nodes
     memset(m_taximask, 0, sizeof(m_taximask));
@@ -223,78 +223,12 @@ void PlayerTaxi::AppendTaximaskTo(ByteBuffer& data, bool all)
     }
 }
 
-bool PlayerTaxi::LoadTaxiDestinationsFromString(const std::string& values, Team team)
-{
-    ClearTaxiDestinations();
-
-    Tokens tokens = StrSplit(values, " ");
-
-    for (Tokens::iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
-    {
-        uint32 node = std::stoul(iter->c_str());
-        AddTaxiDestination(node);
-    }
-
-    if (m_TaxiDestinations.empty())
-        return true;
-
-    // Check integrity
-    if (m_TaxiDestinations.size() < 2)
-        return false;
-
-    for (size_t i = 1; i < m_TaxiDestinations.size(); ++i)
-    {
-        uint32 cost;
-        uint32 path;
-        sObjectMgr.GetTaxiPath(m_TaxiDestinations[i - 1], m_TaxiDestinations[i], path, cost);
-        if (!path)
-            return false;
-    }
-
-    // can't load taxi path without mount set (quest taxi path?)
-    if (!sObjectMgr.GetTaxiMountDisplayId(GetTaxiSource(), team, true))
-        return false;
-
-    return true;
-}
-
-std::string PlayerTaxi::SaveTaxiDestinationsToString()
-{
-    if (m_TaxiDestinations.empty())
-        return "";
-
-    std::ostringstream ss;
-
-    for (size_t i = 0; i < (sWorld.getConfig(CONFIG_BOOL_LONG_TAXI_PATHS_PERSISTENCE) ? m_TaxiDestinations.size() : 2); ++i)
-        ss << m_TaxiDestinations[i] << " ";
-
-    return ss.str();
-}
-
-uint32 PlayerTaxi::GetCurrentTaxiPath() const
-{
-    if (m_TaxiDestinations.size() < 2)
-        return 0;
-
-    uint32 path;
-    uint32 cost;
-
-    sObjectMgr.GetTaxiPath(m_TaxiDestinations[0], m_TaxiDestinations[1], path, cost);
-
-    return path;
-}
-
 std::ostringstream& operator<<(std::ostringstream& ss, PlayerTaxi const& taxi)
 {
     for (int i = 0; i < TaxiMaskSize; ++i)
         ss << taxi.m_taximask[i] << " ";
     return ss;
 }
-FactionTemplateEntry const* PlayerTaxi::GetFlightMasterFactionTemplate() const
-{
-    return sFactionTemplateStore.LookupEntry(m_flightMasterFactionId);
-}
-
 //== TradeData =================================================
 
 TradeData* TradeData::GetTraderData() const
@@ -408,7 +342,7 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 
 UpdateMask Player::updateVisualBits;
 
-Player::Player(WorldSession* session): Unit(), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this)
 {
     m_transport = nullptr;
 
@@ -2051,16 +1985,7 @@ void Player::ProcessDelayedOperations()
     }
 
     if (m_DelayedOperations & DELAYED_BG_TAXI_RESTORE)
-    {
-        if (m_bgData.HasTaxiPath())
-        {
-            m_taxi.AddTaxiDestination(m_bgData.taxiPath[0]);
-            m_taxi.AddTaxiDestination(m_bgData.taxiPath[1]);
-            m_bgData.ClearTaxiPath();
-
-            ContinueTaxiFlight();
-        }
-    }
+        TaxiFlightResume();
 
     // we have executed ALL delayed ops, so clear the flag
     m_DelayedOperations = 0;
@@ -15469,9 +15394,7 @@ void Player::_LoadBGData(QueryResult* result)
                                           fields[3].GetFloat(),     // Y
                                           fields[4].GetFloat(),     // Z
                                           fields[5].GetFloat());    // Orientation
-    m_bgData.taxiPath[0]  = fields[7].GetUInt32();
-    m_bgData.taxiPath[1]  = fields[8].GetUInt32();
-    m_bgData.mountSpell   = fields[9].GetUInt32();
+    m_bgData.mountSpell   = fields[7].GetUInt32();
 
     delete result;
 }
@@ -15982,19 +15905,11 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     SetUInt32Value(PLAYER_CHOSEN_TITLE, curTitle);
 
-    // Not finish taxi flight path
-    if (m_bgData.HasTaxiPath())
-    {
-        m_taxi.ClearTaxiDestinations();
-        for (int i = 0; i < 2; ++i)
-            m_taxi.AddTaxiDestination(m_bgData.taxiPath[i]);
-    }
-    else if (!m_taxi.LoadTaxiDestinationsFromString(taxi_nodes, GetTeam()))
+    Taxi::DestID destOrphan = 0;
+    if (!m_taxiTracker.Load(taxi_nodes, destOrphan))
     {
         // problems with taxi path loading
-        TaxiNodesEntry const* nodeEntry = nullptr;
-        if (uint32 node_id = m_taxi.GetTaxiSource())
-            nodeEntry = sTaxiNodesStore.LookupEntry(node_id);
+        TaxiNodesEntry const* nodeEntry = (destOrphan ? sTaxiNodesStore.LookupEntry(destOrphan) : nullptr);
 
         if (!nodeEntry)                                     // don't know taxi start node, to homebind
         {
@@ -16012,21 +15927,28 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         // so we need to get a new Map pointer!
         SetMap(sMapMgr.CreateMap(GetMapId(), this));
         SaveRecallPosition();                           // save as recall also to prevent recall and fall from sky
-
-        m_taxi.ClearTaxiDestinations();
     }
-
-    if (uint32 node_id = m_taxi.GetTaxiSource())
+    else if (!m_taxiTracker.GetRoadmap().empty() && !m_taxiTracker.GetAtlas().empty())
     {
-        // save source node as recall coord to prevent recall and fall from sky
-        TaxiNodesEntry const* nodeEntry = sTaxiNodesStore.LookupEntry(node_id);
-        MANGOS_ASSERT(nodeEntry);                           // checked in m_taxi.LoadTaxiDestinationsFromString
-        m_recallMap = nodeEntry->map_id;
-        m_recallX = nodeEntry->x;
-        m_recallY = nodeEntry->y;
-        m_recallZ = nodeEntry->z;
+        if (size_t nodeResume = m_taxiTracker.GetResumeWaypointIndex())
+        {
+            const TaxiPathNodeEntry* entry = m_taxiTracker.GetMap().at(nodeResume);
+            MANGOS_ASSERT(entry);
+            Relocate(entry->x, entry->y, entry->z, GetOrientation());
+        }
 
-        // flight will started later
+        // save source node as recall coord to prevent recall and fall from sky
+        if (uint32 destSource = m_taxiTracker.GetRoute().destStart)
+        {
+            TaxiNodesEntry const* destination = sTaxiNodesStore.LookupEntry(destSource);
+            MANGOS_ASSERT(destination);
+            m_recallMap = destination->map_id;
+            m_recallX = destination->x;
+            m_recallY = destination->y;
+            m_recallZ = destination->z;
+
+        }
+        // flight will start later
     }
 
     // has to be called after last Relocate() in Player::LoadFromDB
@@ -17430,7 +17352,7 @@ void Player::SaveToDB()
 
     uberInsert.addUInt64(uint64(m_deathExpireTime));
 
-    ss << m_taxi.SaveTaxiDestinationsToString();       // string
+    ss << m_taxiTracker.Save();
     uberInsert.addString(ss);
 
     uberInsert.addUInt32(GetArenaPoints());
@@ -19040,158 +18962,285 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc 
     // stop trade (client cancel trade at taxi map open but cheating tools can be used for reopen it)
     TradeCancel(true);
 
-    // clean not finished taxi path if any
-    m_taxi.ClearTaxiDestinations();
-
-    // 0 element current node
-    m_taxi.AddTaxiDestination(sourcenode);
-
-    // fill destinations path tail
-    uint32 sourcepath = 0;
-    uint32 totalcost = 0;
-    uint32 firstcost = 0;
-
-    uint32 prevnode = sourcenode;
-    uint32 lastnode = 0;
-
-    for (uint32 i = 1; i < nodes.size(); ++i)
-    {
-        uint32 path, cost;
-        lastnode = nodes[i];
-        sObjectMgr.GetTaxiPath(prevnode, lastnode, path, cost);
-
-        if (!path)
-        {
-            m_taxi.ClearTaxiDestinations();
-            return false;
-        }
-
-        totalcost += cost;
-        if (i == 1)
-            firstcost = cost;
-
-        if (prevnode == sourcenode)
-            sourcepath = path;
-
-        m_taxi.AddTaxiDestination(lastnode);
-
-        prevnode = lastnode;
-    }
-
-    m_taxi.SetLastNode(lastnode);
-
-    // get mount model (in case non taximaster (npc==nullptr) allow more wide lookup)
-    uint32 mount_display_id = sObjectMgr.GetTaxiMountDisplayId(sourcenode, GetTeam(), npc == nullptr);
-
-    // in spell case allow 0 model
-    if ((mount_display_id == 0 && spellid == 0) || sourcepath == 0)
+    if (!m_taxiTracker.AddRoutes(nodes, (npc ? GetReputationPriceDiscount(npc) : 0.0f), !spellid))
     {
         GetSession()->SendActivateTaxiReply(ERR_TAXIUNSPECIFIEDSERVERERROR);
-
-        m_taxi.ClearTaxiDestinations();
         return false;
     }
 
-    uint32 money = GetMoney();
-
-    if (npc)
-    {
-        float discount = GetReputationPriceDiscount(npc);
-        totalcost = uint32(ceil(totalcost * discount));
-        firstcost = uint32(ceil(firstcost * discount));
-        m_taxi.SetFlightMasterFactionTemplateId(npc->getFaction());
-    }
-    else
-        m_taxi.SetFlightMasterFactionTemplateId(0);
-
-    if (money < totalcost)
+    if (GetMoney() < m_taxiTracker.GetCostTotal())
     {
         GetSession()->SendActivateTaxiReply(ERR_TAXINOTENOUGHMONEY);
-
-        m_taxi.ClearTaxiDestinations();
+        m_taxiTracker.Clear();
         return false;
     }
 
-    // Checks and preparations done, DO FLIGHT
-    ModifyMoney(-(int32)firstcost);
-    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_TRAVELLING, totalcost);
-    GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_FLIGHT_PATHS_TAKEN, 1);
+    if (!m_taxiTracker.Prepare())
+        return false;
 
     // prevent stealth flight
     RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
     GetSession()->SendActivateTaxiReply(ERR_TAXIOK);
-    GetSession()->SendDoFlight(mount_display_id, sourcepath);
+
+    GetMotionMaster()->MoveTaxiFlight();
 
     return true;
 }
 
-bool Player::ActivateTaxiPathTo(uint32 taxi_path_id, uint32 spellid /*= 0*/)
+bool Player::ActivateTaxiPathTo(uint32 path_id, uint32 spellid /*= 0*/)
 {
-    TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(taxi_path_id);
+    TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(path_id);
     if (!entry)
         return false;
 
-    std::vector<uint32> nodes;
-
-    nodes.resize(2);
-    nodes[0] = entry->from;
-    nodes[1] = entry->to;
-
-    return ActivateTaxiPathTo(nodes, nullptr, spellid);
+    return ActivateTaxiPathTo({ entry->from, entry->to }, nullptr, spellid);
 }
 
-// TODO: Check for bugs
-void Player::ContinueTaxiFlight() const
+void Player::TaxiFlightResume()
 {
-    uint32 sourceNode = m_taxi.GetTaxiSource();
-    if (!sourceNode)
+    if (m_taxiTracker.GetState() < Taxi::TRACKER_STANDBY || hasUnitState(UNIT_STAT_TAXI_FLIGHT))
         return;
 
-    DEBUG_LOG("WORLD: Restart character %u taxi flight", GetGUIDLow());
+    DEBUG_LOG("WORLD: Resuming taxi flight for character %u", GetGUIDLow());
 
-    uint32 mountDisplayId = sObjectMgr.GetTaxiMountDisplayId(sourceNode, GetTeam(), true);
-    uint32 path = m_taxi.GetCurrentTaxiPath();
+    GetMotionMaster()->MoveTaxiFlight();
+}
 
-    // search appropriate start path node
-    uint32 startNode = 0;
-
-    TaxiPathNodeList const& nodeList = sTaxiPathNodesByPath[path];
-
-    float distNext =
-        (nodeList[0]->x - GetPositionX()) * (nodeList[0]->x - GetPositionX()) +
-        (nodeList[0]->y - GetPositionY()) * (nodeList[0]->y - GetPositionY()) +
-        (nodeList[0]->z - GetPositionZ()) * (nodeList[0]->z - GetPositionZ());
-
-    for (uint32 i = 1; i < nodeList.size(); ++i)
+bool Player::TaxiFlightInterrupt(bool cancel /*= true*/)
+{
+    // Simply pauses if bool is not set (for example, storing the flight for one reason or another)
+    if (GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE)
     {
-        TaxiPathNodeEntry const& node = *nodeList[i];
-        TaxiPathNodeEntry const& prevNode = *nodeList[i - 1];
+        OnTaxiFlightEject(cancel);
+        GetMotionMaster()->MovementExpired();
+        return true;
+    }
+    return false;
+}
 
-        // skip nodes at another map
-        if (node.mapid != GetMapId())
-            continue;
+const Taxi::Map& Player::GetTaxiPathSpline() const
+{
+    // Bugcheck: container continuity error
+    MANGOS_ASSERT(!m_taxiTracker.GetAtlas().empty());
+    return m_taxiTracker.GetMap();
+}
 
-        float distPrev = distNext;
+size_t Player::GetTaxiSplinePathOffset() const
+{
+    return m_taxiTracker.GetResumeWaypointIndex();
+}
 
-        distNext =
-            (node.x - GetPositionX()) * (node.x - GetPositionX()) +
-            (node.y - GetPositionY()) * (node.y - GetPositionY()) +
-            (node.z - GetPositionZ()) * (node.z - GetPositionZ());
+void Player::OnTaxiFlightStart(const TaxiPathEntry* /*path*/)
+{
 
-        float distNodes =
-            (node.x - prevNode.x) * (node.x - prevNode.x) +
-            (node.y - prevNode.y) * (node.y - prevNode.y) +
-            (node.z - prevNode.z) * (node.z - prevNode.z);
+}
 
-        if (distNext + distPrev < distNodes)
+void Player::OnTaxiFlightEnd(const TaxiPathEntry* path)
+{
+    // Final destination
+    if (const TaxiNodesEntry* destination = sTaxiNodesStore.LookupEntry(path->to))
+        TeleportTo(GetMap()->GetId(), destination->x, destination->y, destination->z, GetOrientation());
+
+    if (pvpInfo.inPvPEnforcedArea)
+        CastSpell(this, 2479, TRIGGERED_OLD_TRIGGERED);
+
+    /*
+    NOTE: B clearly has some form of extra scripts on certain fly path ends. Nodes contain extra events, that can be done using dbscript_on_event,
+    but these extra scripts have no EventID in the DBC. In future if this place fills up, need to consider moving it to a more generic way of scripting.
+    */
+    if (path)
+    {
+        switch (path->to)
         {
-            startNode = i;
-            break;
+            case 91:        // Susurrus
+                RemoveAurasDueToSpell(32474);
+                break;
+            case 158:        // Vision Guide
+                AreaExploredOrEventHappens(10525);
+                RemoveAurasDueToSpell(36573);
+                break;
+            default:
+                break;
         }
     }
+}
 
-    GetSession()->SendDoFlight(mountDisplayId, path, startNode);
+void Player::OnTaxiFlightEject(bool clear /*= true*/)
+{
+    OnTaxiFlightSplineEnd();
+    if (clear)
+        m_taxiTracker.Clear(true);
+}
+
+bool Player::OnTaxiFlightUpdate(const size_t waypointIndex, const bool movement)
+{
+    switch (m_taxiTracker.GetState())
+    {
+        case Taxi::TRACKER_FLIGHT:
+        {
+            // Bugcheck: container continuity error
+            MANGOS_ASSERT(!m_taxiTracker.GetAtlas().empty());
+
+            // Check for spline interference before updating the container
+            if (!movement)
+            {
+                float x, y, z;
+                GetPosition(x, y, z);
+                const TaxiPathNodeEntry* dest = m_taxiTracker.GetMap().back();
+                if (int32(x * 100) != int32(dest->x * 100) || int32(y * 100) != int32(dest->y * 100) || int32(z * 100) != int32(dest->z * 100))
+                    return false;
+            }
+
+            // Due to nature of update ticks, we have to check if we have queued up several nodes inbetween updates
+            const size_t current = m_taxiTracker.GetCurrentWaypointIndex();
+            const bool start = (!waypointIndex && !m_taxiTracker.GetCurrentWaypoint());
+            if (waypointIndex > current || start)
+            {
+                Taxi::Map map = m_taxiTracker.GetMap();
+                for (size_t next = (start ? current : current + 1); next <= waypointIndex; ++next)
+                {
+
+                    const TaxiPathNodeEntry* entry = map.at(next);
+                    const bool last = (entry == map.back());
+                    Taxi::PathID startID = 0;
+                    Taxi::PathID endID = 0;
+                    // Notify taxi container, check if we advanced to next route
+                    if (m_taxiTracker.UpdateRoute(entry, startID, endID))
+                    {
+                        if (endID)
+                            OnTaxiFlightRouteEnd(endID, last);
+                        if (startID)
+                            OnTaxiFlightRouteStart(startID, (entry == map.front()));
+                    }
+                    OnTaxiFlightRouteProgress(entry, (last ? nullptr : map.at(next + 1)));
+                }
+            }
+            return true;
+        }
+        case Taxi::TRACKER_STANDBY:
+        case Taxi::TRACKER_TRANSFER:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
+void Player::OnTaxiFlightSplineStart(const TaxiPathNodeEntry* node)
+{
+    if (m_taxiTracker.GetState() == Taxi::TRACKER_TRANSFER)
+        UpdateClientControl(this, false);
+
+    if (const TaxiPathEntry* path = sTaxiPathStore.LookupEntry(node->path))
+        Mount(m_taxiTracker.GetMountDisplayId());
+
+    getHostileRefManager().setOnlineOfflineState(false);
+
+    // Bugcheck: container continuity error
+    MANGOS_ASSERT(m_taxiTracker.SetState(Taxi::TRACKER_FLIGHT));
+}
+
+void Player::OnTaxiFlightSplineEnd()
+{
+    Unmount();
+
+    getHostileRefManager().setOnlineOfflineState(true);
+
+    // Note: only gets set by itself when container does not end up empty
+    m_taxiTracker.SetState(Taxi::TRACKER_TRANSFER);
+}
+
+bool Player::OnTaxiFlightSplineUpdate()
+{
+    switch (m_taxiTracker.GetState())
+    {
+        case Taxi::TRACKER_FLIGHT:
+        case Taxi::TRACKER_STANDBY:
+        case Taxi::TRACKER_TRANSFER:
+        {
+            // Bugcheck: container continuity error
+            MANGOS_ASSERT(!m_taxiTracker.GetAtlas().empty());
+
+            const Taxi::Map& map = m_taxiTracker.GetMap();
+
+            // Bugcheck: spline is too short for a taxi
+            MANGOS_ASSERT(map.size() > 1);
+
+            uint32 mapid = GetMapId();
+
+            size_t nodeResume = m_taxiTracker.GetResumeWaypointIndex();
+            const TaxiPathNodeEntry* first = (nodeResume ? map.at(nodeResume) : map.front());
+
+            // Check if we are starting on the same game level with the spline
+            if (first->mapid == mapid)
+            {
+                OnTaxiFlightSplineStart(first);
+                return true;
+            }
+            else if (m_taxiTracker.GetState() == Taxi::TRACKER_TRANSFER)
+            {
+                OnTaxiFlightSplineEnd();
+                TeleportTo(first->mapid, first->x, first->y, first->z, GetOrientation());
+            }
+            break;
+        }
+        default:
+            // All done, simply finalize
+            OnTaxiFlightSplineEnd();
+            break;
+    }
+    return false;
+}
+
+void Player::OnTaxiFlightRouteStart(uint32 pathID, bool initial)
+{
+    if (IsTaxiDebug())
+        ChatHandler(this).PSendSysMessage(LANG_TAXI_DEBUG_PATH, pathID);
+
+    if (initial)
+    {
+        ModifyMoney(-int32(m_taxiTracker.GetCost()));
+
+        if (const TaxiPathEntry* path = sTaxiPathStore.LookupEntry(pathID))
+            OnTaxiFlightStart(path);
+    }
+}
+
+void Player::OnTaxiFlightRouteEnd(uint32 pathID, bool final)
+{
+    if (final)
+    {
+        if (const TaxiPathEntry* path = sTaxiPathStore.LookupEntry(pathID))
+            OnTaxiFlightEnd(path);
+    }
+    else
+        ModifyMoney(-int32(m_taxiTracker.GetCost()));
+}
+
+void Player::OnTaxiFlightRouteProgress(const TaxiPathNodeEntry* node, const TaxiPathNodeEntry* next /*= nullptr*/)
+{
+    if (!node)
+        return;
+
+    if (IsTaxiDebug())
+    {
+        if (next)
+            ChatHandler(this).PSendSysMessage(LANG_TAXI_DEBUG_NODE, node->path, node->index, next->path, next->index);
+        else
+            ChatHandler(this).PSendSysMessage(LANG_TAXI_DEBUG_NODE_FINAL, node->path, node->index);
+    }
+
+    // Needs to be confirmed: first one shouldn't fire arrival event, final one shouldnt fire departure event?
+    for (int arrival = 1; arrival > -int(bool(next)); --arrival)
+    {
+        if (uint32 eventid = (arrival ? node->arrivalEventID : node->departureEventID))
+        {
+            const char* desc = (arrival ? "arrival" : "departure");
+            DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Taxi %s event %u of node %u of path %u for player %s", desc, eventid, node->index, node->path, GetName());
+            StartEvents_Event(GetMap(), eventid, this, this, !arrival);
+        }
+    }
 }
 
 void Player::InitDataForForm(bool reapplyMods)
@@ -19822,11 +19871,9 @@ void Player::ToggleMetaGemsActive(uint8 exceptslot, bool apply)
 void Player::SetBattleGroundEntryPoint()
 {
     // Taxi path store
-    if (!m_taxi.empty())
+    if (m_taxiTracker.GetState() >= Taxi::TRACKER_STANDBY)
     {
         m_bgData.mountSpell  = 0;
-        m_bgData.taxiPath[0] = m_taxi.GetTaxiSource();
-        m_bgData.taxiPath[1] = m_taxi.GetNextTaxiDestination();
 
         // On taxi we don't need check for dungeon
         m_bgData.joinPos = WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
@@ -19835,8 +19882,6 @@ void Player::SetBattleGroundEntryPoint()
     }
     else
     {
-        m_bgData.ClearTaxiPath();
-
         // Mount spell id storing
         if (IsMounted())
         {
@@ -20853,11 +20898,7 @@ void Player::SummonIfPossible(bool agree)
         return;
 
     // stop taxi flight at summon
-    if (IsTaxiFlying())
-    {
-        GetMotionMaster()->MovementExpired();
-        m_taxi.ClearTaxiDestinations();
-    }
+    TaxiFlightInterrupt();
 
     // drop flag at summon
     // this code can be reached only when GM is summoning player who carries flag, because player should be immune to summoning spells when he carries flag
@@ -22846,7 +22887,7 @@ void Player::_SaveBGData()
 
     if (m_bgData.bgInstanceID)
     {
-        stmt = CharacterDatabase.CreateStatement(insBGData, "INSERT INTO character_battleground_data VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+        stmt = CharacterDatabase.CreateStatement(insBGData, "INSERT INTO character_battleground_data VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
         /* guid, bgInstanceID, bgTeam, x, y, z, o, map, taxi[0], taxi[1], mountSpell */
         stmt.addUInt32(GetGUIDLow());
         stmt.addUInt32(m_bgData.bgInstanceID);
@@ -22856,8 +22897,6 @@ void Player::_SaveBGData()
         stmt.addFloat(m_bgData.joinPos.coord_z);
         stmt.addFloat(m_bgData.joinPos.orientation);
         stmt.addUInt32(m_bgData.joinPos.mapid);
-        stmt.addUInt32(m_bgData.taxiPath[0]);
-        stmt.addUInt32(m_bgData.taxiPath[1]);
         stmt.addUInt32(m_bgData.mountSpell);
 
         stmt.Execute();
