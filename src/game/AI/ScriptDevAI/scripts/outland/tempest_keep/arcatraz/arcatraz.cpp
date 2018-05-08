@@ -390,7 +390,7 @@ struct npc_arcatraz_defenderAI : public ScriptedAI
             m_uiFlamingWeaponTimer -= uiDiff;
 
         // this spell should only be used against Protean Horror and Protean Nightmare, never players
-        if (m_creature->getVictim()->GetTypeId() != TYPEID_PLAYER)
+        if (m_creature->getVictim() && m_creature->getVictim()->GetTypeId() != TYPEID_PLAYER)
         {
             if (m_uiProteanSubdualTimer < uiDiff)
             {
