@@ -3194,8 +3194,14 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                             target->RemoveAurasDueToSpell(32172);
                     }
                     return;
-                case 32567:                             // Green Banish State
+                case 32567:                                 // Green Banish State
                 {
+                    target->SetHover(apply);
+                    return;
+                }
+                case 35519:                                 // White Beam
+                {
+                    target->SetLevitate(apply);
                     target->SetHover(apply);
                     return;
                 }
