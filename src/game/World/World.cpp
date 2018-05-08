@@ -1045,9 +1045,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Creature Model for race...");   // must be after creature templates
     sObjectMgr.LoadCreatureModelRace();
 
-    sLog.outString("Loading SpellsScriptTarget...");
-    sSpellMgr.LoadSpellScriptTarget();                      // must be after LoadCreatureTemplates and LoadGameobjectInfo
-
     sLog.outString("Loading Vehicle Accessory...");         // must be after LoadCreatureTemplates
     sObjectMgr.LoadVehicleAccessory();
 
@@ -1068,6 +1065,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Creature Data...");
     sObjectMgr.LoadCreatures();
+
+    sLog.outString("Loading SpellsScriptTarget...");
+    sSpellMgr.LoadSpellScriptTarget();                      // must be after LoadCreatureTemplates, LoadCreatures and LoadGameobjectInfo
 
     sLog.outString("Loading pet levelup spells...");
     sSpellMgr.LoadPetLevelupSpellMap();
