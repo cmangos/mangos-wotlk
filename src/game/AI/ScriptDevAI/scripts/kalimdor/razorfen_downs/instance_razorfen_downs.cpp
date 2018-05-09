@@ -146,6 +146,8 @@ void instance_razorfen_downs::DoSpawnWaveIfCan(GameObject* pGo)
     if (!m_lSpawnedMobsList.empty())
         return;
 
+    pGo->SendGameObjectCustomAnim(pGo->GetObjectGuid());
+
     if (m_uiWaveCounter >= MAX_WAVES)
         return;
 
