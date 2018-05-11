@@ -28,6 +28,18 @@ npc_bloodmaul_stout_trigger
 npc_simon_game_bunny
 npc_light_orb_collector
 npc_bloodmaul_dire_wolf
+npc_frequency_scanner
+npc_fel_cannon
+npc_warp_gate
+npc_grimgut
+npc_obelisk_trigger
+npc_vimgol
+npc_vimgol_visual_bunny
+npc_vimgol_middle_bunny
+npc_bird_spirit
+npc_soulgrinder
+npc_supplicant
+npc_spirit_prisoner_of_bladespire
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -891,7 +903,7 @@ CreatureAI* GetAI_npc_light_orb_collector(Creature* pCreature)
 }
 
 /*######
-## Grimoire business AIs
+## npc_vimgol
 ######*/
 
 enum
@@ -981,6 +993,10 @@ CreatureAI* GetAI_npc_vimgol(Creature* pCreature)
     return new npc_vimgol_AI(pCreature);
 }
 
+/*######
+## npc_vimgol_visual_bunny
+######*/
+
 struct npc_vimgol_visual_bunnyAI : public ScriptedAI
 {
     npc_vimgol_visual_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -1050,6 +1066,10 @@ CreatureAI* GetAI_npc_vimgol_visual_bunny(Creature* pCreature)
 {
     return new npc_vimgol_visual_bunnyAI(pCreature);
 }
+
+/*######
+## npc_vimgol_middle_bunny
+######*/
 
 struct npc_vimgol_middle_bunnyAI : public ScriptedAI
 {
