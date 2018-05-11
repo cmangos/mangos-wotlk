@@ -1709,7 +1709,7 @@ void Guild::AppendDisplayGuildBankSlot(WorldPacket& data, GuildBankTab const* ta
 
         data << uint32(pItem->GetCount());                  // +12 ITEM_FIELD_STACK_COUNT
         data << uint32(0);                                  // +16 Unknown value
-        data << uint8(0);                                   // +20
+        data << uint8(abs(pItem->GetSpellCharges()));       // Charges
 
         uint8 enchCount = 0;
         size_t enchCountPos = data.wpos();
