@@ -166,12 +166,12 @@ struct npc_saplingAI  : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_warp_splinter(Creature* pCreature)
+UnitAI* GetAI_boss_warp_splinter(Creature* pCreature)
 {
     return new boss_warp_splinterAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_sapling(Creature* pCreature)
+UnitAI* GetAI_npc_sapling(Creature* pCreature)
 {
     return new npc_saplingAI(pCreature);
 }

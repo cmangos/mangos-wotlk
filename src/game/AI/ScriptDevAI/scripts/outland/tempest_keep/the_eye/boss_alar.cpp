@@ -445,7 +445,7 @@ struct boss_alarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_alar(Creature* pCreature)
+UnitAI* GetAI_boss_alar(Creature* pCreature)
 {
     return new boss_alarAI(pCreature);
 }

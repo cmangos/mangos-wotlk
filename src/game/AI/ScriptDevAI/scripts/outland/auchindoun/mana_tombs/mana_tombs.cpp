@@ -105,7 +105,7 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
 
     void Reset() override { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -274,7 +274,7 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_shaheen(Creature* pCreature)
+UnitAI* GetAI_npc_shaheen(Creature* pCreature)
 {
     return new npc_shaheenAI(pCreature);
 }

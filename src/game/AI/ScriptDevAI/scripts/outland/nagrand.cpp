@@ -137,7 +137,7 @@ struct mob_lumpAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_lump(Creature* pCreature)
+UnitAI* GetAI_mob_lump(Creature* pCreature)
 {
     return new mob_lumpAI(pCreature);
 }
@@ -200,7 +200,7 @@ struct npc_nagrand_captiveAI : public npc_escortAI
         m_uiFrostShockTimer = 6000;
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -398,7 +398,7 @@ bool QuestAccept_npc_nagrand_captive(Player* pPlayer, Creature* pCreature, const
     return false;
 }
 
-CreatureAI* GetAI_npc_nagrand_captive(Creature* pCreature)
+UnitAI* GetAI_npc_nagrand_captive(Creature* pCreature)
 {
     return new npc_nagrand_captiveAI(pCreature);
 }
@@ -436,7 +436,7 @@ struct npc_creditmarker_visit_with_ancestorsAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_creditmarker_visit_with_ancestors(Creature* pCreature)
+UnitAI* GetAI_npc_creditmarker_visit_with_ancestors(Creature* pCreature)
 {
     return new npc_creditmarker_visit_with_ancestorsAI(pCreature);
 }
@@ -595,7 +595,7 @@ struct npc_rethhedronAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_rethhedron(Creature* pCreature)
+UnitAI* GetAI_npc_rethhedron(Creature* pCreature)
 {
     return new npc_rethhedronAI(pCreature);
 }

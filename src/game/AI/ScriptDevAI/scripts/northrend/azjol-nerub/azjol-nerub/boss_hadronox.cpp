@@ -282,7 +282,7 @@ struct boss_hadronoxAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_hadronox(Creature* pCreature)
+UnitAI* GetAI_boss_hadronox(Creature* pCreature)
 {
     return new boss_hadronoxAI(pCreature);
 }

@@ -167,7 +167,7 @@ struct mob_vrykul_skeletonAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_vrykul_skeleton(Creature* pCreature)
+UnitAI* GetAI_mob_vrykul_skeleton(Creature* pCreature)
 {
     return new mob_vrykul_skeletonAI(pCreature);
 }
@@ -333,7 +333,7 @@ struct boss_kelesethAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_keleseth(Creature* pCreature)
+UnitAI* GetAI_boss_keleseth(Creature* pCreature)
 {
     return new boss_kelesethAI(pCreature);
 }

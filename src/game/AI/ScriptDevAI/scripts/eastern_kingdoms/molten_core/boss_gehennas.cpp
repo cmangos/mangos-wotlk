@@ -118,7 +118,7 @@ struct boss_gehennasAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_gehennas(Creature* pCreature)
+UnitAI* GetAI_boss_gehennas(Creature* pCreature)
 {
     return new boss_gehennasAI(pCreature);
 }

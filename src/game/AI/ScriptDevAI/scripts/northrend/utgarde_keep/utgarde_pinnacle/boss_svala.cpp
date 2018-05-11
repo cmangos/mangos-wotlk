@@ -336,7 +336,7 @@ struct boss_svalaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_svala(Creature* pCreature)
+UnitAI* GetAI_boss_svala(Creature* pCreature)
 {
     return new boss_svalaAI(pCreature);
 }

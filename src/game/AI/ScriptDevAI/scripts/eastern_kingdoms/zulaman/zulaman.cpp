@@ -103,7 +103,7 @@ struct npc_forest_frogAI : public ScriptedAI
         }
     }
 };
-CreatureAI* GetAI_npc_forest_frog(Creature* pCreature)
+UnitAI* GetAI_npc_forest_frog(Creature* pCreature)
 {
     return new npc_forest_frogAI(pCreature);
 }
@@ -203,7 +203,7 @@ bool GossipSelect_npc_harrison_jones_za(Player* pPlayer, Creature* pCreature, ui
     return true;
 }
 
-CreatureAI* GetAI_npc_harrison_jones_za(Creature* pCreature)
+UnitAI* GetAI_npc_harrison_jones_za(Creature* pCreature)
 {
     return new npc_harrison_jones_zaAI(pCreature);
 }

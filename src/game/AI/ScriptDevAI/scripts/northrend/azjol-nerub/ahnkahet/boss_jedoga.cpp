@@ -398,7 +398,7 @@ struct boss_jedogaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_jedoga(Creature* pCreature)
+UnitAI* GetAI_boss_jedoga(Creature* pCreature)
 {
     return new boss_jedogaAI(pCreature);
 }
@@ -434,7 +434,7 @@ struct npc_twilight_volunteerAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_twilight_volunteer(Creature* pCreature)
+UnitAI* GetAI_npc_twilight_volunteer(Creature* pCreature)
 {
     return new npc_twilight_volunteerAI(pCreature);
 }

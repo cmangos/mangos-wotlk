@@ -158,7 +158,7 @@ struct boss_maiden_of_griefAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_maiden_of_grief(Creature* pCreature)
+UnitAI* GetAI_boss_maiden_of_grief(Creature* pCreature)
 {
     return new boss_maiden_of_griefAI(pCreature);
 }

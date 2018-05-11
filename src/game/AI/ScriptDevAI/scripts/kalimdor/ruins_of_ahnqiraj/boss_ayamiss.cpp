@@ -251,7 +251,7 @@ struct boss_ayamissAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ayamiss(Creature* pCreature)
+UnitAI* GetAI_boss_ayamiss(Creature* pCreature)
 {
     return new boss_ayamissAI(pCreature);
 }
@@ -307,7 +307,7 @@ struct npc_hive_zara_larvaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_hive_zara_larva(Creature* pCreature)
+UnitAI* GetAI_npc_hive_zara_larva(Creature* pCreature)
 {
     return new npc_hive_zara_larvaAI(pCreature);
 }

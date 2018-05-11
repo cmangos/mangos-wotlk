@@ -188,7 +188,7 @@ struct boss_anomalusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_anomalus(Creature* pCreature)
+UnitAI* GetAI_boss_anomalus(Creature* pCreature)
 {
     return new boss_anomalusAI(pCreature);
 }
@@ -251,7 +251,7 @@ struct mob_chaotic_riftAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_mob_chaotic_rift(Creature* pCreature)
+UnitAI* GetAI_mob_chaotic_rift(Creature* pCreature)
 {
     return new mob_chaotic_riftAI(pCreature);
 }

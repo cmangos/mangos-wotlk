@@ -490,7 +490,7 @@ struct npc_a_special_surpriseAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_a_special_surprise(Creature* pCreature)
+UnitAI* GetAI_npc_a_special_surprise(Creature* pCreature)
 {
     return new npc_a_special_surpriseAI(pCreature);
 }
@@ -579,7 +579,7 @@ struct npc_death_knight_initiateAI : public ScriptedAI
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // start duel
         if (eventType == AI_EVENT_START_EVENT && pInvoker->GetTypeId() == TYPEID_PLAYER)
@@ -707,7 +707,7 @@ struct npc_death_knight_initiateAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_death_knight_initiate(Creature* pCreature)
+UnitAI* GetAI_npc_death_knight_initiate(Creature* pCreature)
 {
     return new npc_death_knight_initiateAI(pCreature);
 }
@@ -809,7 +809,7 @@ struct npc_unworthy_initiate_anchorAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_unworthy_initiate_anchor(Creature* pCreature)
+UnitAI* GetAI_npc_unworthy_initiate_anchor(Creature* pCreature)
 {
     return new npc_unworthy_initiate_anchorAI(pCreature);
 }
@@ -995,7 +995,7 @@ struct npc_unworthy_initiateAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_unworthy_initiate(Creature* pCreature)
+UnitAI* GetAI_npc_unworthy_initiate(Creature* pCreature)
 {
     return new npc_unworthy_initiateAI(pCreature);
 }
@@ -1167,7 +1167,7 @@ struct npc_eye_of_acherusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_eye_of_acherus(Creature* pCreature)
+UnitAI* GetAI_npc_eye_of_acherus(Creature* pCreature)
 {
     return new npc_eye_of_acherusAI(pCreature);
 }
@@ -1291,7 +1291,7 @@ bool EffectDummyCreature_npc_scarlet_ghoul(Unit* pCaster, uint32 uiSpellId, Spel
     return false;
 }
 
-CreatureAI* GetAI_npc_scarlet_ghoul(Creature* pCreature)
+UnitAI* GetAI_npc_scarlet_ghoul(Creature* pCreature)
 {
     return new npc_scarlet_ghoulAI(pCreature);
 }
@@ -2626,7 +2626,7 @@ bool GossipSelect_npc_highlord_darion_mograine(Player* pPlayer, Creature* pCreat
     return false;
 }
 
-CreatureAI* GetAI_npc_highlord_darion_mograine(Creature* pCreature)
+UnitAI* GetAI_npc_highlord_darion_mograine(Creature* pCreature)
 {
     return new npc_highlord_darion_mograineAI(pCreature);
 }
@@ -2759,7 +2759,7 @@ struct npc_fellow_death_knightAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_fellow_death_knight(Creature* pCreature)
+UnitAI* GetAI_npc_fellow_death_knight(Creature* pCreature)
 {
     return new npc_fellow_death_knightAI(pCreature);
 }
@@ -2775,7 +2775,7 @@ struct npc_lich_king_light_dawnAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_lich_king_light_dawn(Creature* pCreature)
+UnitAI* GetAI_npc_lich_king_light_dawn(Creature* pCreature)
 {
     return new npc_lich_king_light_dawnAI(pCreature);
 }
@@ -2897,7 +2897,7 @@ struct npc_scarlet_courierAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_scarlet_courier(Creature* pCreature)
+UnitAI* GetAI_npc_scarlet_courier(Creature* pCreature)
 {
     return new npc_scarlet_courierAI(pCreature);
 }

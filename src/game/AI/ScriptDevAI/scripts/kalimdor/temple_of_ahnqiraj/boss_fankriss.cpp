@@ -167,7 +167,7 @@ struct boss_fankrissAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_fankriss(Creature* pCreature)
+UnitAI* GetAI_boss_fankriss(Creature* pCreature)
 {
     return new boss_fankrissAI(pCreature);
 }

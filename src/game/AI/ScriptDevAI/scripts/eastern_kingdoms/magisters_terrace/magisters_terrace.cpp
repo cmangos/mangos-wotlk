@@ -97,7 +97,7 @@ struct npc_kalecgosAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_kalecgos(Creature* pCreature)
+UnitAI* GetAI_npc_kalecgos(Creature* pCreature)
 {
     return new npc_kalecgosAI(pCreature);
 }

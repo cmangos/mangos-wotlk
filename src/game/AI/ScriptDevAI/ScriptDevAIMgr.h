@@ -11,7 +11,7 @@
 
 class Player;
 class Creature;
-class CreatureAI;
+class UnitAI;
 class InstanceData;
 class Quest;
 class Item;
@@ -103,7 +103,7 @@ struct Script
     std::function<bool(Unit*)>* pTrapSearching;
 
     GameObjectAI* (*GetGameObjectAI)(GameObject*);
-    CreatureAI* (*GetAI)(Creature*);
+    UnitAI* (*GetAI)(Creature*);
     InstanceData* (*GetInstanceData)(Map*);
 
     void RegisterSelf(bool bReportError = true);
@@ -150,7 +150,7 @@ class ScriptDevAIMgr
         uint32 GetScriptId(const char* name) const;
         uint32 GetScriptIdsCount() const { return m_scriptNames.size(); }
 
-        CreatureAI* GetCreatureAI(Creature* creature);
+        UnitAI* GetCreatureAI(Creature* creature);
         GameObjectAI* GetGameObjectAI(GameObject* gameobject);
 
         InstanceData* CreateInstanceData(Map* pMap);

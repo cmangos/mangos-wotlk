@@ -264,7 +264,7 @@ struct boss_ahuneAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_boss_ahune(Creature* pCreature)
+UnitAI* GetAI_boss_ahune(Creature* pCreature)
 {
     return new boss_ahuneAI(pCreature);
 }
@@ -310,7 +310,7 @@ struct npc_frozen_coreAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_frozen_core(Creature* pCreature)
+UnitAI* GetAI_npc_frozen_core(Creature* pCreature)
 {
     return new npc_frozen_coreAI(pCreature);
 }
@@ -338,7 +338,7 @@ struct npc_ice_spear_bunnyAI : public Scripted_NoMovementAI
             m_iceSpearGuid = pGo->GetObjectGuid();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -368,7 +368,7 @@ struct npc_ice_spear_bunnyAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_ice_spear_bunny(Creature* pCreature)
+UnitAI* GetAI_npc_ice_spear_bunny(Creature* pCreature)
 {
     return new npc_ice_spear_bunnyAI(pCreature);
 }

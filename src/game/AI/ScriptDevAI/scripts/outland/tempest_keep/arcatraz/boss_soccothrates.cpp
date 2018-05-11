@@ -279,7 +279,7 @@ struct boss_soccothratesAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_boss_soccothrates(Creature* pCreature)
+UnitAI* GetAI_boss_soccothrates(Creature* pCreature)
 {
     return new boss_soccothratesAI(pCreature);
 }

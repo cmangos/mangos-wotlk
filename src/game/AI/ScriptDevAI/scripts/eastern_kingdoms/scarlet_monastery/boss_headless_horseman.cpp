@@ -210,7 +210,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // rejoin head on request
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_HEAD_OF_HORSEMAN)
@@ -344,7 +344,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_headless_horseman(Creature* pCreature)
+UnitAI* GetAI_boss_headless_horseman(Creature* pCreature)
 {
     return new boss_headless_horsemanAI(pCreature);
 }
@@ -393,7 +393,7 @@ struct boss_head_of_horsemanAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (pInvoker->GetEntry() != NPC_HEADLESS_HORSEMAN)
             return;
@@ -435,7 +435,7 @@ struct boss_head_of_horsemanAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override { }
 };
 
-CreatureAI* GetAI_boss_head_of_horseman(Creature* pCreature)
+UnitAI* GetAI_boss_head_of_horseman(Creature* pCreature)
 {
     return new boss_head_of_horsemanAI(pCreature);
 }

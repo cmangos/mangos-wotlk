@@ -215,7 +215,7 @@ struct boss_darkweaver_sythAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_darkweaver_syth(Creature* pCreature)
+UnitAI* GetAI_boss_darkweaver_syth(Creature* pCreature)
 {
     return new boss_darkweaver_sythAI(pCreature);
 }

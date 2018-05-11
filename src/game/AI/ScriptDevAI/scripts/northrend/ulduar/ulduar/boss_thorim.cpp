@@ -670,7 +670,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_boss_thorim(Creature* pCreature)
+UnitAI* GetAI_boss_thorim(Creature* pCreature)
 {
     return new boss_thorimAI(pCreature);
 }
@@ -737,7 +737,7 @@ struct boss_sifAI : public ScriptedAI
         Reset();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // activate attack on hard mode
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_THORIM)
@@ -818,7 +818,7 @@ struct boss_sifAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_sif(Creature* pCreature)
+UnitAI* GetAI_boss_sif(Creature* pCreature)
 {
     return new boss_sifAI(pCreature);
 }
@@ -994,7 +994,7 @@ struct npc_runic_colossusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_runic_colossus(Creature* pCreature)
+UnitAI* GetAI_npc_runic_colossus(Creature* pCreature)
 {
     return new npc_runic_colossusAI(pCreature);
 }
@@ -1045,7 +1045,7 @@ struct npc_thunder_orbAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_thunder_orb(Creature* pCreature)
+UnitAI* GetAI_npc_thunder_orb(Creature* pCreature)
 {
     return new npc_thunder_orbAI(pCreature);
 }

@@ -104,7 +104,7 @@ struct boss_hungarfenAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_hungarfen(Creature* pCreature)
+UnitAI* GetAI_boss_hungarfen(Creature* pCreature)
 {
     return new boss_hungarfenAI(pCreature);
 }
@@ -169,7 +169,7 @@ struct mob_underbog_mushroomAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_underbog_mushroom(Creature* pCreature)
+UnitAI* GetAI_mob_underbog_mushroom(Creature* pCreature)
 {
     return new mob_underbog_mushroomAI(pCreature);
 }

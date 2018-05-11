@@ -131,7 +131,7 @@ struct npc_soulflayerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_soulflayer(Creature* pCreature)
+UnitAI* GetAI_npc_soulflayer(Creature* pCreature)
 {
     return new npc_soulflayerAI(pCreature);
 }

@@ -292,12 +292,12 @@ struct npc_baltharus_cloneAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_baltharus(Creature* pCreature)
+UnitAI* GetAI_boss_baltharus(Creature* pCreature)
 {
     return new boss_baltharusAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_baltharus_clone(Creature* pCreature)
+UnitAI* GetAI_npc_baltharus_clone(Creature* pCreature)
 {
     return new npc_baltharus_cloneAI(pCreature);
 }

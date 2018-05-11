@@ -456,7 +456,7 @@ struct boss_sindragosaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_sindragosa(Creature* pCreature)
+UnitAI* GetAI_boss_sindragosa(Creature* pCreature)
 {
     return new boss_sindragosaAI(pCreature);
 }
@@ -650,7 +650,7 @@ struct npc_rimefang_iccAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_rimefang_icc(Creature* pCreature)
+UnitAI* GetAI_npc_rimefang_icc(Creature* pCreature)
 {
     return new npc_rimefang_iccAI(pCreature);
 }
@@ -788,7 +788,7 @@ struct npc_spinestalker_iccAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_spinestalker_icc(Creature* pCreature)
+UnitAI* GetAI_npc_spinestalker_icc(Creature* pCreature)
 {
     return new npc_spinestalker_iccAI(pCreature);
 }
@@ -842,7 +842,7 @@ struct mob_frost_bombAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_frost_bomb(Creature* pCreature)
+UnitAI* GetAI_mob_frost_bomb(Creature* pCreature)
 {
     return new mob_frost_bombAI(pCreature);
 }

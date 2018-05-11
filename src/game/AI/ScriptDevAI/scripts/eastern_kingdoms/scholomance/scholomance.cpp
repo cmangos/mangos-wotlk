@@ -116,7 +116,7 @@ struct npc_spectral_tutorAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_spectral_tutor(Creature* pCreature)
+UnitAI* GetAI_npc_spectral_tutor(Creature* pCreature)
 {
     return new npc_spectral_tutorAI(pCreature);
 }

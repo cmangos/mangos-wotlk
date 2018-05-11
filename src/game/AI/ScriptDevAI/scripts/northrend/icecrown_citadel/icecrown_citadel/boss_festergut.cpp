@@ -300,7 +300,7 @@ struct boss_festergutAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_festergut(Creature* pCreature)
+UnitAI* GetAI_boss_festergut(Creature* pCreature)
 {
     return new boss_festergutAI(pCreature);
 }
@@ -351,7 +351,7 @@ struct npc_orange_gas_stalkerAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_orange_gas_stalker(Creature* pCreature)
+UnitAI* GetAI_npc_orange_gas_stalker(Creature* pCreature)
 {
     return new npc_orange_gas_stalkerAI(pCreature);
 }

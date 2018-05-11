@@ -172,7 +172,7 @@ bool QuestAccept_npc_miran(Player* pPlayer, Creature* pCreature, const Quest* pQ
     return true;
 }
 
-CreatureAI* GetAI_npc_miran(Creature* pCreature)
+UnitAI* GetAI_npc_miran(Creature* pCreature)
 {
     return new npc_miranAI(pCreature);
 }

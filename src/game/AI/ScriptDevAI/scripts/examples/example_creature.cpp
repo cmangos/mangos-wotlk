@@ -246,7 +246,7 @@ struct example_creatureAI : public ScriptedAI
 
 // This is the GetAI method used by all scripts that involve AI
 // It is called every time a new creature using this script is created
-CreatureAI* GetAI_example_creature(Creature* pCreature)
+UnitAI* GetAI_example_creature(Creature* pCreature)
 {
     return new example_creatureAI(pCreature);
 }

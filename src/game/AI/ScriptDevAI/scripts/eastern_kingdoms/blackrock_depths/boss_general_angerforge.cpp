@@ -109,7 +109,7 @@ struct boss_general_angerforgeAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_general_angerforge(Creature* pCreature)
+UnitAI* GetAI_boss_general_angerforge(Creature* pCreature)
 {
     return new boss_general_angerforgeAI(pCreature);
 }

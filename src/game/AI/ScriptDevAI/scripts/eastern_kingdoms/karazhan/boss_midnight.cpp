@@ -190,7 +190,7 @@ struct boss_midnightAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_midnight(Creature* pCreature)
+UnitAI* GetAI_boss_midnight(Creature* pCreature)
 {
     return new boss_midnightAI(pCreature);
 }
@@ -323,7 +323,7 @@ struct boss_attumenAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_attumen(Creature* pCreature)
+UnitAI* GetAI_boss_attumen(Creature* pCreature)
 {
     return new boss_attumenAI(pCreature);
 }

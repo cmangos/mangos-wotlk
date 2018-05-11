@@ -396,7 +396,7 @@ bool QuestAccept_boss_vaelastrasz(Player* pPlayer, Creature* pCreature, const Qu
     return true;
 }
 
-CreatureAI* GetAI_boss_vaelastrasz(Creature* pCreature)
+UnitAI* GetAI_boss_vaelastrasz(Creature* pCreature)
 {
     return new boss_vaelastraszAI(pCreature);
 }

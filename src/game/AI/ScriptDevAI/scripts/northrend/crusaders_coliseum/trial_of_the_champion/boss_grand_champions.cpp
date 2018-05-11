@@ -232,7 +232,7 @@ struct trial_companion_commonAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_B)
         {
@@ -429,7 +429,7 @@ struct boss_champion_warriorAI : public trial_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_champion_warrior(Creature* pCreature)
+UnitAI* GetAI_boss_champion_warrior(Creature* pCreature)
 {
     return new boss_champion_warriorAI(pCreature);
 }
@@ -523,7 +523,7 @@ struct boss_champion_mageAI : public trial_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_champion_mage(Creature* pCreature)
+UnitAI* GetAI_boss_champion_mage(Creature* pCreature)
 {
     return new boss_champion_mageAI(pCreature);
 }
@@ -603,7 +603,7 @@ struct boss_champion_shamanAI : public trial_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_champion_shaman(Creature* pCreature)
+UnitAI* GetAI_boss_champion_shaman(Creature* pCreature)
 {
     return new boss_champion_shamanAI(pCreature);
 }
@@ -711,7 +711,7 @@ struct boss_champion_hunterAI : public trial_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_champion_hunter(Creature* pCreature)
+UnitAI* GetAI_boss_champion_hunter(Creature* pCreature)
 {
     return new boss_champion_hunterAI(pCreature);
 }
@@ -786,7 +786,7 @@ struct boss_champion_rogueAI : public trial_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_champion_rogue(Creature* pCreature)
+UnitAI* GetAI_boss_champion_rogue(Creature* pCreature)
 {
     return new boss_champion_rogueAI(pCreature);
 }
@@ -873,7 +873,7 @@ struct npc_trial_grand_championAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_trial_grand_champion(Creature* pCreature)
+UnitAI* GetAI_npc_trial_grand_champion(Creature* pCreature)
 {
     return new npc_trial_grand_championAI(pCreature);
 }
@@ -925,7 +925,7 @@ struct npc_champion_mountAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -958,7 +958,7 @@ struct npc_champion_mountAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_champion_mount(Creature* pCreature)
+UnitAI* GetAI_npc_champion_mount(Creature* pCreature)
 {
     return new npc_champion_mountAI(pCreature);
 }

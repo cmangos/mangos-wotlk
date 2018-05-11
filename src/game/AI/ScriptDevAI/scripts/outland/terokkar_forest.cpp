@@ -125,7 +125,7 @@ struct mob_unkor_the_ruthlessAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_unkor_the_ruthless(Creature* pCreature)
+UnitAI* GetAI_mob_unkor_the_ruthless(Creature* pCreature)
 {
     return new mob_unkor_the_ruthlessAI(pCreature);
 }
@@ -175,7 +175,7 @@ struct mob_netherweb_victimAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_netherweb_victim(Creature* pCreature)
+UnitAI* GetAI_mob_netherweb_victim(Creature* pCreature)
 {
     return new mob_netherweb_victimAI(pCreature);
 }
@@ -279,7 +279,7 @@ bool QuestAccept_npc_akuno(Player* pPlayer, Creature* pCreature, const Quest* pQ
     return true;
 }
 
-CreatureAI* GetAI_npc_akuno(Creature* pCreature)
+UnitAI* GetAI_npc_akuno(Creature* pCreature)
 {
     return new npc_akunoAI(pCreature);
 }
@@ -367,7 +367,7 @@ struct npc_hungry_nether_rayAI : public ScriptedPetAI
     }
 };
 
-CreatureAI* GetAI_npc_hungry_nether_ray(Creature* pCreature)
+UnitAI* GetAI_npc_hungry_nether_ray(Creature* pCreature)
 {
     return new npc_hungry_nether_rayAI(pCreature);
 }
@@ -601,7 +601,7 @@ struct npc_letollAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_letoll(Creature* pCreature)
+UnitAI* GetAI_npc_letoll(Creature* pCreature)
 {
     return new npc_letollAI(pCreature);
 }
@@ -769,7 +769,7 @@ bool QuestAccept_npc_isla_starmane(Player* pPlayer, Creature* pCreature, const Q
     return true;
 }
 
-CreatureAI* GetAI_npc_isla_starmane(Creature* pCreature)
+UnitAI* GetAI_npc_isla_starmane(Creature* pCreature)
 {
     return new npc_isla_starmaneAI(pCreature);
 }
@@ -895,7 +895,7 @@ bool QuestAccept_npc_skywing(Player* pPlayer, Creature* pCreature, const Quest* 
     return true;
 }
 
-CreatureAI* GetAI_npc_skywing(Creature* pCreature)
+UnitAI* GetAI_npc_skywing(Creature* pCreature)
 {
     return new npc_skywingAI(pCreature);
 }
@@ -986,7 +986,7 @@ struct npc_cenarion_sparrowhawkAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_cenarion_sparrowhawk(Creature* pCreature)
+UnitAI* GetAI_npc_cenarion_sparrowhawk(Creature* pCreature)
 {
     return new npc_cenarion_sparrowhawkAI(pCreature);
 }
@@ -1017,7 +1017,7 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
 
     void Reset() override { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -1107,7 +1107,7 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_skyguard_prisoner(Creature* pCreature)
+UnitAI* GetAI_npc_skyguard_prisoner(Creature* pCreature)
 {
     return new npc_skyguard_prisonerAI(pCreature);
 }
@@ -1192,7 +1192,7 @@ struct npc_avatar_of_terokkAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_avatar_of_terokk(Creature* pCreature)
+UnitAI* GetAI_npc_avatar_of_terokk(Creature* pCreature)
 {
     return new npc_avatar_of_terokkAI(pCreature);
 }
@@ -1225,7 +1225,7 @@ struct npc_minion_of_terokkAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_minion_of_terokk(Creature* pCreature)
+UnitAI* GetAI_npc_minion_of_terokk(Creature* pCreature)
 {
     return new npc_minion_of_terokkAI(pCreature);
 }

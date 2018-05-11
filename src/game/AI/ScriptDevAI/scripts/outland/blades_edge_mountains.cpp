@@ -221,7 +221,7 @@ struct mobs_nether_drakeAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mobs_nether_drake(Creature* pCreature)
+UnitAI* GetAI_mobs_nether_drake(Creature* pCreature)
 {
     return new mobs_nether_drakeAI(pCreature);
 }
@@ -261,7 +261,7 @@ struct npc_daranelleAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_daranelle(Creature* pCreature)
+UnitAI* GetAI_npc_daranelle(Creature* pCreature)
 {
     return new npc_daranelleAI(pCreature);
 }
@@ -385,7 +385,7 @@ struct npc_bloodmaul_stout_triggerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_bloodmaul_stout_trigger(Creature* pCreature)
+UnitAI* GetAI_npc_bloodmaul_stout_trigger(Creature* pCreature)
 {
     return new npc_bloodmaul_stout_triggerAI(pCreature);
 }
@@ -661,7 +661,7 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
         m_creature->ForcedDespawn();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         switch (m_uiGamePhase)
         {
@@ -773,7 +773,7 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_simon_game_bunny(Creature* pCreature)
+UnitAI* GetAI_npc_simon_game_bunny(Creature* pCreature)
 {
     return new npc_simon_game_bunnyAI(pCreature);
 }
@@ -898,7 +898,7 @@ struct npc_light_orb_collectorAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_light_orb_collector(Creature* pCreature)
+UnitAI* GetAI_npc_light_orb_collector(Creature* pCreature)
 {
     return new npc_light_orb_collectorAI(pCreature);
 }
@@ -989,7 +989,7 @@ struct npc_vimgol_AI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_vimgol(Creature* pCreature)
+UnitAI* GetAI_npc_vimgol(Creature* pCreature)
 {
     return new npc_vimgol_AI(pCreature);
 }
@@ -1063,7 +1063,7 @@ struct npc_vimgol_visual_bunnyAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_vimgol_visual_bunny(Creature* pCreature)
+UnitAI* GetAI_npc_vimgol_visual_bunny(Creature* pCreature)
 {
     return new npc_vimgol_visual_bunnyAI(pCreature);
 }
@@ -1219,7 +1219,7 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_vimgol_middle_bunny(Creature* pCreature)
+UnitAI* GetAI_npc_vimgol_middle_bunny(Creature* pCreature)
 {
     return new npc_vimgol_middle_bunnyAI(pCreature);
 }
@@ -1252,7 +1252,7 @@ struct npc_bloodmaul_dire_wolfAI : public ScriptedAI
         m_uiRendTimer       = urand(3000, 6000);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
             m_uiUnfriendlyTimer = 60000;
@@ -1284,7 +1284,7 @@ struct npc_bloodmaul_dire_wolfAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_bloodmaul_dire_wolf(Creature* pCreature)
+UnitAI* GetAI_npc_bloodmaul_dire_wolf(Creature* pCreature)
 {
     return new npc_bloodmaul_dire_wolfAI(pCreature);
 }
@@ -1324,7 +1324,7 @@ struct npc_spirit_prisoner_of_bladespire : public ScriptedAI
 
     void Reset() override {}
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -1340,7 +1340,7 @@ struct npc_spirit_prisoner_of_bladespire : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_spirit_prisoner_of_bladespire(Creature* pCreature)
+UnitAI* GetAI_npc_spirit_prisoner_of_bladespire(Creature* pCreature)
 {
     return new npc_spirit_prisoner_of_bladespire(pCreature);
 }
@@ -1447,7 +1447,7 @@ struct npc_deadsoul_orb : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_deadsoul_orb(Creature* pCreature)
+UnitAI* GetAI_npc_deadsoul_orb(Creature* pCreature)
 {
     return new npc_deadsoul_orb(pCreature);
 }
@@ -1539,7 +1539,7 @@ struct npc_evergrove_druidAI : public ScriptedAI
         m_creature->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_FLY_OFF_SCRIPT, m_creature, m_summoner);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
         if (sender != m_creature) // Sender should always be creature itself
             return;
@@ -1584,7 +1584,7 @@ bool QuestAccept_npc_evergrove_druid(Player* player, Creature* creature, const Q
     return true;
 }
 
-CreatureAI* GetAI_npc_evergrove_druidAI(Creature* creature)
+UnitAI* GetAI_npc_evergrove_druidAI(Creature* creature)
 {
     return new npc_evergrove_druidAI(creature);
 }

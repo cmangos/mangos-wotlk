@@ -219,7 +219,7 @@ struct npc_kelerun_bloodmournAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_kelerun_bloodmourn(Creature* pCreature)
+UnitAI* GetAI_npc_kelerun_bloodmourn(Creature* pCreature)
 {
     return new npc_kelerun_bloodmournAI(pCreature);
 }
@@ -271,7 +271,7 @@ enum
 
 struct npc_prospector_anvilwardAI : public npc_escortAI
 {
-    // CreatureAI functions
+    // UnitAI functions
     npc_prospector_anvilwardAI(Creature* pCreature) : npc_escortAI(pCreature) {Reset();}
 
     void Reset() override { }
@@ -300,7 +300,7 @@ struct npc_prospector_anvilwardAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_prospector_anvilward(Creature* pCreature)
+UnitAI* GetAI_npc_prospector_anvilward(Creature* pCreature)
 {
     return new npc_prospector_anvilwardAI(pCreature);
 }
@@ -447,7 +447,7 @@ bool QuestAccept_unexpected_results(Player* pPlayer, Creature* pCreature, const 
     return true;
 }
 
-CreatureAI* GetAI_npc_apprentice_mirvedaAI(Creature* pCreature)
+UnitAI* GetAI_npc_apprentice_mirvedaAI(Creature* pCreature)
 {
     return new npc_apprentice_mirvedaAI(pCreature);
 }
@@ -547,7 +547,7 @@ struct npc_infused_crystalAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_infused_crystalAI(Creature* pCreature)
+UnitAI* GetAI_npc_infused_crystalAI(Creature* pCreature)
 {
     return new npc_infused_crystalAI(pCreature);
 }

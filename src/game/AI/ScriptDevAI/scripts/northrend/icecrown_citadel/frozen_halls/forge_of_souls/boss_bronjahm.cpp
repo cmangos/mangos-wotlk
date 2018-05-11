@@ -206,7 +206,7 @@ struct boss_bronjahmAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_bronjahm(Creature* pCreature)
+UnitAI* GetAI_boss_bronjahm(Creature* pCreature)
 {
     return new boss_bronjahmAI(pCreature);
 }
@@ -254,7 +254,7 @@ struct npc_corrupted_soul_fragmentAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_corrupted_soul_fragment(Creature* pCreature)
+UnitAI* GetAI_npc_corrupted_soul_fragment(Creature* pCreature)
 {
     return new npc_corrupted_soul_fragmentAI(pCreature);
 }

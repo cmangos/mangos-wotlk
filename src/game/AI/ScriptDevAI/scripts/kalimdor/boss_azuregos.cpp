@@ -150,7 +150,7 @@ struct boss_azuregosAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_azuregos(Creature* pCreature)
+UnitAI* GetAI_boss_azuregos(Creature* pCreature)
 {
     return new boss_azuregosAI(pCreature);
 }

@@ -77,7 +77,7 @@ struct npc_kayaAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_kaya(Creature* pCreature)
+UnitAI* GetAI_npc_kaya(Creature* pCreature)
 {
     return new npc_kayaAI(pCreature);
 }

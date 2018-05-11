@@ -105,7 +105,7 @@ struct boss_maleki_the_pallidAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_maleki_the_pallid(Creature* pCreature)
+UnitAI* GetAI_boss_maleki_the_pallid(Creature* pCreature)
 {
     return new boss_maleki_the_pallidAI(pCreature);
 }

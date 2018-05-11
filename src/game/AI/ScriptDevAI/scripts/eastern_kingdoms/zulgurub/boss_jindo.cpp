@@ -196,12 +196,12 @@ struct mob_healing_wardAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_jindo(Creature* pCreature)
+UnitAI* GetAI_boss_jindo(Creature* pCreature)
 {
     return new boss_jindoAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_healing_ward(Creature* pCreature)
+UnitAI* GetAI_mob_healing_ward(Creature* pCreature)
 {
     return new mob_healing_wardAI(pCreature);
 }

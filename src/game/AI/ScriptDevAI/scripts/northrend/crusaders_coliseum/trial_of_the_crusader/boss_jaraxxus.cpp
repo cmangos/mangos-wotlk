@@ -271,7 +271,7 @@ struct boss_jaraxxusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_jaraxxus(Creature* pCreature)
+UnitAI* GetAI_boss_jaraxxus(Creature* pCreature)
 {
     return new boss_jaraxxusAI(pCreature);
 }

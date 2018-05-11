@@ -124,7 +124,7 @@ struct npc_ancient_male_vrykulAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_ancient_male_vrykul(Creature* pCreature)
+UnitAI* GetAI_npc_ancient_male_vrykul(Creature* pCreature)
 {
     return new npc_ancient_male_vrykulAI(pCreature);
 }
@@ -246,7 +246,7 @@ struct npc_silvermoon_harryAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_silvermoon_harry(Creature* pCreature)
+UnitAI* GetAI_npc_silvermoon_harry(Creature* pCreature)
 {
     return new npc_silvermoon_harryAI(pCreature);
 }
@@ -431,7 +431,7 @@ struct npc_lich_king_villageAI : public ScriptedAI, private DialogueHelper
     void UpdateAI(const uint32 uiDiff) override { DialogueUpdate(uiDiff); }
 };
 
-CreatureAI* GetAI_npc_lich_king_village(Creature* pCreature)
+UnitAI* GetAI_npc_lich_king_village(Creature* pCreature)
 {
     return new npc_lich_king_villageAI(pCreature);
 }
@@ -555,7 +555,7 @@ struct npc_king_ymironAI : public ScriptedAI, private DialogueHelper
         return NULL;
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -602,7 +602,7 @@ struct npc_king_ymironAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_king_ymiron(Creature* pCreature)
+UnitAI* GetAI_npc_king_ymiron(Creature* pCreature)
 {
     return new npc_king_ymironAI(pCreature);
 }
@@ -715,7 +715,7 @@ struct npc_firecrackers_bunnyAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_firecrackers_bunny(Creature* pCreature)
+UnitAI* GetAI_npc_firecrackers_bunny(Creature* pCreature)
 {
     return new npc_firecrackers_bunnyAI(pCreature);
 }
@@ -756,7 +756,7 @@ struct npc_apothecary_hanesAI : public npc_escortAI
         m_uiHealingTimer = 0;
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -839,7 +839,7 @@ struct npc_apothecary_hanesAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_apothecary_hanes(Creature* pCreature)
+UnitAI* GetAI_npc_apothecary_hanes(Creature* pCreature)
 {
     return new npc_apothecary_hanesAI(pCreature);
 }

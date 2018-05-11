@@ -555,7 +555,7 @@ struct boss_flame_leviathanAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_flame_leviathan(Creature* pCreature)
+UnitAI* GetAI_boss_flame_leviathan(Creature* pCreature)
 {
     return new boss_flame_leviathanAI(pCreature);
 }
@@ -626,7 +626,7 @@ struct npc_hodir_fury_reticleAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_hodir_fury_reticle(Creature* pCreature)
+UnitAI* GetAI_npc_hodir_fury_reticle(Creature* pCreature)
 {
     return new npc_hodir_fury_reticleAI(pCreature);
 }
@@ -646,7 +646,7 @@ struct npc_hodir_furyAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_hodir_fury(Creature* pCreature)
+UnitAI* GetAI_npc_hodir_fury(Creature* pCreature)
 {
     return new npc_hodir_furyAI(pCreature);
 }
@@ -688,7 +688,7 @@ struct npc_freya_wardAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_freya_ward(Creature* pCreature)
+UnitAI* GetAI_npc_freya_ward(Creature* pCreature)
 {
     return new npc_freya_wardAI(pCreature);
 }
@@ -724,7 +724,7 @@ struct npc_mimiron_infernoAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_mimiron_inferno(Creature* pCreature)
+UnitAI* GetAI_npc_mimiron_inferno(Creature* pCreature)
 {
     return new npc_mimiron_infernoAI(pCreature);
 }

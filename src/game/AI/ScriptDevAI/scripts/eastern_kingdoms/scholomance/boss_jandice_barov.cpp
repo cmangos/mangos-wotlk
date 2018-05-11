@@ -96,7 +96,7 @@ struct boss_jandicebarovAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_jandicebarov(Creature* pCreature)
+UnitAI* GetAI_boss_jandicebarov(Creature* pCreature)
 {
     return new boss_jandicebarovAI(pCreature);
 }

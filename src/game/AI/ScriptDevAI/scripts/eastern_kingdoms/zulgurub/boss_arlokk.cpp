@@ -320,12 +320,12 @@ struct npc_zulian_prowlerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_arlokk(Creature* pCreature)
+UnitAI* GetAI_boss_arlokk(Creature* pCreature)
 {
     return new boss_arlokkAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_zulian_prowler(Creature* pCreature)
+UnitAI* GetAI_npc_zulian_prowler(Creature* pCreature)
 {
     return new npc_zulian_prowlerAI(pCreature);
 }

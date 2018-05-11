@@ -370,7 +370,7 @@ struct boss_ragnarosAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_boss_ragnaros(Creature* pCreature)
+UnitAI* GetAI_boss_ragnaros(Creature* pCreature)
 {
     return new boss_ragnarosAI(pCreature);
 }

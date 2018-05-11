@@ -184,7 +184,7 @@ struct boss_vexallusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_vexallus(Creature* pCreature)
+UnitAI* GetAI_boss_vexallus(Creature* pCreature)
 {
     return new boss_vexallusAI(pCreature);
 };
@@ -216,7 +216,7 @@ struct mob_pure_energyAI : public ScriptedAI
     void AttackStart(Unit* /*pWho*/) override {}
 };
 
-CreatureAI* GetAI_mob_pure_energy(Creature* pCreature)
+UnitAI* GetAI_mob_pure_energy(Creature* pCreature)
 {
     return new mob_pure_energyAI(pCreature);
 };

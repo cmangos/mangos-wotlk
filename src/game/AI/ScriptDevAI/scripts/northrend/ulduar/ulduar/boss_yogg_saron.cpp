@@ -595,7 +595,7 @@ struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_boss_sara(Creature* pCreature)
+UnitAI* GetAI_boss_sara(Creature* pCreature)
 {
     return new boss_saraAI(pCreature);
 }
@@ -647,7 +647,7 @@ struct boss_yogg_saronAI : public Scripted_NoMovementAI
         m_creature->ForcedDespawn();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         // AI event received at 30% health
         if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_YOGG_BRAIN && m_uiPhase == PHASE_VISIONS)
@@ -733,7 +733,7 @@ struct boss_yogg_saronAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_boss_yogg_saron(Creature* pCreature)
+UnitAI* GetAI_boss_yogg_saron(Creature* pCreature)
 {
     return new boss_yogg_saronAI(pCreature);
 }
@@ -794,7 +794,7 @@ struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
     void AttackStart(Unit* /*pWho*/) override { }
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         switch (eventType)
         {
@@ -972,7 +972,7 @@ struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_voice_yogg_saron(Creature* pCreature)
+UnitAI* GetAI_npc_voice_yogg_saron(Creature* pCreature)
 {
     return new npc_voice_yogg_saronAI(pCreature);
 }
@@ -1015,7 +1015,7 @@ struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHe
     void AttackStart(Unit* /*pWho*/) override { }
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         // start illusion when informed by the voice controller
         if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_VOICE_OF_YOGG)
@@ -1208,7 +1208,7 @@ struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHe
     }
 };
 
-CreatureAI* GetAI_npc_brain_yogg_saron(Creature* pCreature)
+UnitAI* GetAI_npc_brain_yogg_saron(Creature* pCreature)
 {
     return new npc_brain_yogg_saronAI(pCreature);
 }
@@ -1304,7 +1304,7 @@ struct npc_guardian_of_yoggAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_guardian_of_yogg(Creature* pCreature)
+UnitAI* GetAI_npc_guardian_of_yogg(Creature* pCreature)
 {
     return new npc_guardian_of_yoggAI(pCreature);
 }
@@ -1370,7 +1370,7 @@ struct npc_immortal_guardianAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_immortal_guardian(Creature* pCreature)
+UnitAI* GetAI_npc_immortal_guardian(Creature* pCreature)
 {
     return new npc_immortal_guardianAI(pCreature);
 }
@@ -1430,7 +1430,7 @@ struct npc_constrictor_tentacleAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_constrictor_tentacle(Creature* pCreature)
+UnitAI* GetAI_npc_constrictor_tentacle(Creature* pCreature)
 {
     return new npc_constrictor_tentacleAI(pCreature);
 }
@@ -1488,7 +1488,7 @@ struct npc_ominous_cloudAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_ominous_cloud(Creature* pCreature)
+UnitAI* GetAI_npc_ominous_cloud(Creature* pCreature)
 {
     return new npc_ominous_cloudAI(pCreature);
 }
@@ -1530,7 +1530,7 @@ struct npc_death_rayAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_death_ray(Creature* pCreature)
+UnitAI* GetAI_npc_death_ray(Creature* pCreature)
 {
     return new npc_death_rayAI(pCreature);
 }
@@ -1551,7 +1551,7 @@ struct npc_descent_madnessAI : public Scripted_NoMovementAI
 
     void Reset() override { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_EVENT)
             m_uiCurentSpell = uiMiscValue;
@@ -1560,7 +1560,7 @@ struct npc_descent_madnessAI : public Scripted_NoMovementAI
     uint32 GetCurrentSpell() { return m_uiCurentSpell; }
 };
 
-CreatureAI* GetAI_npc_descent_madness(Creature* pCreature)
+UnitAI* GetAI_npc_descent_madness(Creature* pCreature)
 {
     return new npc_descent_madnessAI(pCreature);
 }
@@ -1599,7 +1599,7 @@ struct npc_laughing_skullAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_laughing_skull(Creature* pCreature)
+UnitAI* GetAI_npc_laughing_skull(Creature* pCreature)
 {
     return new npc_laughing_skullAI(pCreature);
 }
@@ -1622,7 +1622,7 @@ struct npc_keeper_mimironAI : public Scripted_NoMovementAI
     void AttackStart(Unit* /*pWho*/) override { }
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_START_EVENT && pInvoker->GetEntry() == NPC_SARA)
             m_uiMatrixTimer = 30000;
@@ -1643,7 +1643,7 @@ struct npc_keeper_mimironAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_keeper_mimiron(Creature* pCreature)
+UnitAI* GetAI_npc_keeper_mimiron(Creature* pCreature)
 {
     return new npc_keeper_mimironAI(pCreature);
 }
@@ -1663,7 +1663,7 @@ struct npc_keeper_thorimAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_keeper_thorim(Creature* pCreature)
+UnitAI* GetAI_npc_keeper_thorim(Creature* pCreature)
 {
     return new npc_keeper_thorimAI(pCreature);
 }

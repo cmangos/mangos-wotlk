@@ -162,7 +162,7 @@ struct npc_kyle_the_frenziedAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_kyle_the_frenzied(Creature* pCreature)
+UnitAI* GetAI_npc_kyle_the_frenzied(Creature* pCreature)
 {
     return new npc_kyle_the_frenziedAI(pCreature);
 }

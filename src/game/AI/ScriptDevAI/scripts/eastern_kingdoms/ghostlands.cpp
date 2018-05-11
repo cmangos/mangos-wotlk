@@ -136,7 +136,7 @@ struct npc_ranger_lilathaAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_ranger_lilathaAI(Creature* pCreature)
+UnitAI* GetAI_npc_ranger_lilathaAI(Creature* pCreature)
 {
     return new npc_ranger_lilathaAI(pCreature);
 }

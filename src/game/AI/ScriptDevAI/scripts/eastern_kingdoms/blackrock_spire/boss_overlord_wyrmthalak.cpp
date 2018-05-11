@@ -141,7 +141,7 @@ struct boss_overlordwyrmthalakAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_overlordwyrmthalak(Creature* pCreature)
+UnitAI* GetAI_boss_overlordwyrmthalak(Creature* pCreature)
 {
     return new boss_overlordwyrmthalakAI(pCreature);
 }

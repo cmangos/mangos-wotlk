@@ -452,7 +452,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_boss_brutallus(Creature* pCreature)
+UnitAI* GetAI_boss_brutallus(Creature* pCreature)
 {
     return new boss_brutallusAI(pCreature);
 }

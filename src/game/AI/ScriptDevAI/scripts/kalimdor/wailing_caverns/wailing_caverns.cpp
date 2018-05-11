@@ -484,7 +484,7 @@ bool GossipSelect_npc_disciple_of_naralex(Player* pPlayer, Creature* pCreature, 
     return true;
 }
 
-CreatureAI* GetAI_npc_disciple_of_naralex(Creature* pCreature)
+UnitAI* GetAI_npc_disciple_of_naralex(Creature* pCreature)
 {
     return new npc_disciple_of_naralexAI(pCreature);
 }

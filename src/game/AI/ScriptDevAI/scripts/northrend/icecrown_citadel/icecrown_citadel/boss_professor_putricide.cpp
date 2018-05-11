@@ -288,7 +288,7 @@ struct boss_professor_putricideAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         if (!m_pInstance)
             return;
@@ -477,7 +477,7 @@ struct boss_professor_putricideAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_professor_putricide(Creature* pCreature)
+UnitAI* GetAI_boss_professor_putricide(Creature* pCreature)
 {
     return new boss_professor_putricideAI(pCreature);
 }
@@ -619,7 +619,7 @@ struct npc_volatile_ooze_iccAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_volatile_ooze_icc(Creature* pCreature)
+UnitAI* GetAI_npc_volatile_ooze_icc(Creature* pCreature)
 {
     return new npc_volatile_ooze_iccAI(pCreature);
 }
@@ -677,7 +677,7 @@ struct npc_gas_cloud_iccAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_gas_cloud_icc(Creature* pCreature)
+UnitAI* GetAI_npc_gas_cloud_icc(Creature* pCreature)
 {
     return new npc_gas_cloud_iccAI(pCreature);
 }
@@ -697,7 +697,7 @@ struct npc_growing_ooze_puddleAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_growing_ooze_puddle(Creature* pCreature)
+UnitAI* GetAI_npc_growing_ooze_puddle(Creature* pCreature)
 {
     return new npc_growing_ooze_puddleAI(pCreature);
 }
@@ -746,7 +746,7 @@ struct npc_choking_gas_bombAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_choking_gas_bomb(Creature* pCreature)
+UnitAI* GetAI_npc_choking_gas_bomb(Creature* pCreature)
 {
     return new npc_choking_gas_bombAI(pCreature);
 }
@@ -766,7 +766,7 @@ struct npc_puddle_stalkerAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_puddle_stalker(Creature* pCreature)
+UnitAI* GetAI_npc_puddle_stalker(Creature* pCreature)
 {
     return new npc_puddle_stalkerAI(pCreature);
 }

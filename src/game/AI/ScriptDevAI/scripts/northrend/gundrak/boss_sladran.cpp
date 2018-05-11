@@ -203,7 +203,7 @@ struct boss_sladranAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_sladran(Creature* pCreature)
+UnitAI* GetAI_boss_sladran(Creature* pCreature)
 {
     return new boss_sladranAI(pCreature);
 }

@@ -576,27 +576,27 @@ struct boss_croneAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_dorothee(Creature* pCreature)
+UnitAI* GetAI_boss_dorothee(Creature* pCreature)
 {
     return new boss_dorotheeAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_strawman(Creature* pCreature)
+UnitAI* GetAI_boss_strawman(Creature* pCreature)
 {
     return new boss_strawmanAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_tinhead(Creature* pCreature)
+UnitAI* GetAI_boss_tinhead(Creature* pCreature)
 {
     return new boss_tinheadAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_roar(Creature* pCreature)
+UnitAI* GetAI_boss_roar(Creature* pCreature)
 {
     return new boss_roarAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_crone(Creature* pCreature)
+UnitAI* GetAI_boss_crone(Creature* pCreature)
 {
     return new boss_croneAI(pCreature);
 }
@@ -724,7 +724,7 @@ struct boss_bigbadwolfAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_bigbadwolf(Creature* pCreature)
+UnitAI* GetAI_boss_bigbadwolf(Creature* pCreature)
 {
     return new boss_bigbadwolfAI(pCreature);
 }
@@ -1252,12 +1252,12 @@ struct boss_romuloAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_julianne(Creature* pCreature)
+UnitAI* GetAI_boss_julianne(Creature* pCreature)
 {
     return new boss_julianneAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_romulo(Creature* pCreature)
+UnitAI* GetAI_boss_romulo(Creature* pCreature)
 {
     return new boss_romuloAI(pCreature);
 }

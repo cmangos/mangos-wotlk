@@ -211,7 +211,7 @@ struct boss_teron_gorefiendAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_teron_gorefiend(Creature* pCreature)
+UnitAI* GetAI_boss_teron_gorefiend(Creature* pCreature)
 {
     return new boss_teron_gorefiendAI(pCreature);
 }

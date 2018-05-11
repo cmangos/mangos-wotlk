@@ -566,7 +566,7 @@ struct boss_crusader_druid_restoAI : public trial_crusader_commonAI
         trial_crusader_commonAI::Aggro(pWho);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         uint8 uiIndex = 99;
         switch (eventType)
@@ -595,7 +595,7 @@ struct boss_crusader_druid_restoAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_druid_resto(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_druid_resto(Creature* pCreature)
 {
     return new boss_crusader_druid_restoAI(pCreature);
 }
@@ -628,7 +628,7 @@ struct boss_crusader_paladin_holyAI : public trial_crusader_commonAI
         trial_crusader_commonAI::Reset();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         uint8 uiIndex = 99;
         uint32 uiSpellEntry = 0;
@@ -674,7 +674,7 @@ struct boss_crusader_paladin_holyAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_paladin_holy(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_paladin_holy(Creature* pCreature)
 {
     return new boss_crusader_paladin_holyAI(pCreature);
 }
@@ -706,7 +706,7 @@ struct boss_crusader_priest_discAI : public trial_crusader_commonAI
         trial_crusader_commonAI::Reset();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         uint8 uiIndex = 99;
         uint32 uiSpellEntry = 0;
@@ -752,7 +752,7 @@ struct boss_crusader_priest_discAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_priest_disc(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_priest_disc(Creature* pCreature)
 {
     return new boss_crusader_priest_discAI(pCreature);
 }
@@ -784,7 +784,7 @@ struct boss_crusader_shaman_restoAI : public trial_crusader_commonAI
         trial_crusader_commonAI::Reset();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         uint8 uiIndex = 99;
         uint32 uiSpellEntry = 0;
@@ -830,7 +830,7 @@ struct boss_crusader_shaman_restoAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_shaman_resto(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_shaman_resto(Creature* pCreature)
 {
     return new boss_crusader_shaman_restoAI(pCreature);
 }
@@ -868,7 +868,7 @@ struct boss_crusader_druid_balanceAI : public trial_crusader_commonAI
         trial_crusader_commonAI::Reset();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         uint8 uiIndex = 99;
         switch (eventType)
@@ -892,7 +892,7 @@ struct boss_crusader_druid_balanceAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_druid_balance(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_druid_balance(Creature* pCreature)
 {
     return new boss_crusader_druid_balanceAI(pCreature);
 }
@@ -926,7 +926,7 @@ struct boss_crusader_hunterAI : public trial_crusader_commonAI
         trial_crusader_commonAI::Reset();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
             DoCastSpellIfCan(m_creature, SPELL_CALL_PET);
@@ -959,7 +959,7 @@ struct boss_crusader_hunterAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_hunter(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_hunter(Creature* pCreature)
 {
     return new boss_crusader_hunterAI(pCreature);
 }
@@ -993,7 +993,7 @@ struct boss_crusader_mageAI : public trial_crusader_commonAI
         trial_crusader_commonAI::Reset();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         uint8 uiIndex = 99;
         switch (eventType)
@@ -1019,7 +1019,7 @@ struct boss_crusader_mageAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_mage(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_mage(Creature* pCreature)
 {
     return new boss_crusader_mageAI(pCreature);
 }
@@ -1052,7 +1052,7 @@ struct boss_crusader_priest_shadowAI : public trial_crusader_commonAI
         trial_crusader_commonAI::Reset();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         uint8 uiIndex = 99;
         uint32 uiSpellEntry = 0;
@@ -1092,7 +1092,7 @@ struct boss_crusader_priest_shadowAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_priest_shadow(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_priest_shadow(Creature* pCreature)
 {
     return new boss_crusader_priest_shadowAI(pCreature);
 }
@@ -1126,7 +1126,7 @@ struct boss_crusader_warlockAI : public trial_crusader_commonAI
         trial_crusader_commonAI::Reset();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
             DoCastSpellIfCan(m_creature, SPELL_SUMMON_FELHUNTER);
@@ -1155,7 +1155,7 @@ struct boss_crusader_warlockAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_warlock(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_warlock(Creature* pCreature)
 {
     return new boss_crusader_warlockAI(pCreature);
 }
@@ -1188,7 +1188,7 @@ struct boss_crusader_death_knightAI : public trial_crusader_commonAI
         trial_crusader_commonAI::Reset();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         uint8 uiIndex = 99;
 
@@ -1213,7 +1213,7 @@ struct boss_crusader_death_knightAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_death_knight(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_death_knight(Creature* pCreature)
 {
     return new boss_crusader_death_knightAI(pCreature);
 }
@@ -1241,7 +1241,7 @@ struct boss_crusader_warriorAI : public trial_crusader_commonAI
 
     void Reset() override { trial_crusader_commonAI::Reset(); }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         uint8 uiIndex = 99;
         switch (eventType)
@@ -1265,7 +1265,7 @@ struct boss_crusader_warriorAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_warrior(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_warrior(Creature* pCreature)
 {
     return new boss_crusader_warriorAI(pCreature);
 }
@@ -1290,7 +1290,7 @@ struct boss_crusader_paladin_retriAI : public trial_crusader_commonAI
 
     void Reset() override { trial_crusader_commonAI::Reset(); }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
             DoCastSpellIfCan(m_creature, SPELL_SEAL_OF_COMMAND);
@@ -1319,7 +1319,7 @@ struct boss_crusader_paladin_retriAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_paladin_retri(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_paladin_retri(Creature* pCreature)
 {
     return new boss_crusader_paladin_retriAI(pCreature);
 }
@@ -1345,7 +1345,7 @@ struct boss_crusader_shaman_enhaAI : public trial_crusader_commonAI
     void Reset() override { trial_crusader_commonAI::Reset(); }
 };
 
-CreatureAI* GetAI_boss_crusader_shaman_enha(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_shaman_enha(Creature* pCreature)
 {
     return new boss_crusader_shaman_enhaAI(pCreature);
 }
@@ -1372,7 +1372,7 @@ struct boss_crusader_rogueAI : public trial_crusader_commonAI
 
     void Reset() override { trial_crusader_commonAI::Reset(); }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         uint8 uiIndex = 99;
         switch (eventType)
@@ -1396,7 +1396,7 @@ struct boss_crusader_rogueAI : public trial_crusader_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_crusader_rogue(Creature* pCreature)
+UnitAI* GetAI_boss_crusader_rogue(Creature* pCreature)
 {
     return new boss_crusader_rogueAI(pCreature);
 }

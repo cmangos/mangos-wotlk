@@ -128,7 +128,7 @@ struct boss_herodAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_herod(Creature* pCreature)
+UnitAI* GetAI_boss_herod(Creature* pCreature)
 {
     return new boss_herodAI(pCreature);
 }
@@ -166,7 +166,7 @@ struct mob_scarlet_traineeAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_mob_scarlet_trainee(Creature* pCreature)
+UnitAI* GetAI_mob_scarlet_trainee(Creature* pCreature)
 {
     return new mob_scarlet_traineeAI(pCreature);
 }

@@ -147,7 +147,7 @@ struct boss_zarithrianAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_zarithrian(Creature* pCreature)
+UnitAI* GetAI_boss_zarithrian(Creature* pCreature)
 {
     return new boss_zarithrianAI(pCreature);
 }

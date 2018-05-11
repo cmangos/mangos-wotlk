@@ -113,7 +113,7 @@ struct npc_aged_dying_ancient_kodoAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_aged_dying_ancient_kodo(Creature* pCreature)
+UnitAI* GetAI_npc_aged_dying_ancient_kodo(Creature* pCreature)
 {
     return new npc_aged_dying_ancient_kodoAI(pCreature);
 }
@@ -193,7 +193,7 @@ struct npc_dalinda_malemAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_dalinda_malem(Creature* pCreature)
+UnitAI* GetAI_npc_dalinda_malem(Creature* pCreature)
 {
     return new npc_dalinda_malemAI(pCreature);
 }
@@ -371,7 +371,7 @@ struct npc_melizza_brimbuzzleAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_melizza_brimbuzzle(Creature* pCreature)
+UnitAI* GetAI_npc_melizza_brimbuzzle(Creature* pCreature)
 {
     return new npc_melizza_brimbuzzleAI(pCreature);
 }
@@ -463,7 +463,7 @@ struct npc_cork_gizeltonAI : public ScriptedAI
         uiQuestStatus = 0;
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
             m_playerGuid = pInvoker->GetObjectGuid();
@@ -617,7 +617,7 @@ struct npc_cork_gizeltonAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_cork_gizelton(Creature* pCreature)
+UnitAI* GetAI_npc_cork_gizelton(Creature* pCreature)
 {
     return new npc_cork_gizeltonAI(pCreature);
 }
@@ -649,7 +649,7 @@ struct npc_rigger_gizeltonAI : public ScriptedAI
     void Reset() override {}
 };
 
-CreatureAI* GetAI_npc_rigger_gizelton(Creature* pCreature)
+UnitAI* GetAI_npc_rigger_gizelton(Creature* pCreature)
 {
     return new npc_rigger_gizeltonAI(pCreature);
 }
@@ -738,7 +738,7 @@ struct npc_magrami_spectre : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_magrami_spectre(Creature* pCreature)
+UnitAI* GetAI_npc_magrami_spectre(Creature* pCreature)
 {
     return new npc_magrami_spectre(pCreature);
 }

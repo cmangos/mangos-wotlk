@@ -200,7 +200,7 @@ bool GossipSelect_npc_barrett_ramsey(Player* pPlayer, Creature* pCreature, uint3
     return true;
 }
 
-CreatureAI* GetAI_npc_barrett_ramsey(Creature* pCreature)
+UnitAI* GetAI_npc_barrett_ramsey(Creature* pCreature)
 {
     return new npc_barrett_ramseyAI(pCreature);
 }

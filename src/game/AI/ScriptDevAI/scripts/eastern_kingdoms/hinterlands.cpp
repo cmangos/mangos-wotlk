@@ -155,7 +155,7 @@ bool QuestAccept_npc_00x09hl(Player* pPlayer, Creature* pCreature, const Quest* 
     return true;
 }
 
-CreatureAI* GetAI_npc_00x09hl(Creature* pCreature)
+UnitAI* GetAI_npc_00x09hl(Creature* pCreature)
 {
     return new npc_00x09hlAI(pCreature);
 }
@@ -348,7 +348,7 @@ bool QuestAccept_npc_rinji(Player* pPlayer, Creature* pCreature, const Quest* pQ
     return true;
 }
 
-CreatureAI* GetAI_npc_rinji(Creature* pCreature)
+UnitAI* GetAI_npc_rinji(Creature* pCreature)
 {
     return new npc_rinjiAI(pCreature);
 }

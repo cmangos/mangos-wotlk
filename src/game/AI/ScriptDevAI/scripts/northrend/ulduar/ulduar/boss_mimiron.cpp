@@ -556,7 +556,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
             pSummoned->GetMotionMaster()->MovePoint(1, afAerialMovePos[0], afAerialMovePos[1], afAerialMovePos[2]);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         switch (eventType)
         {
@@ -771,7 +771,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_boss_mimiron(Creature* pCreature)
+UnitAI* GetAI_boss_mimiron(Creature* pCreature)
 {
     return new boss_mimironAI(pCreature);
 }
@@ -944,7 +944,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         // switch to full robot abilities
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -1055,7 +1055,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_leviathan_mk2(Creature* pCreature)
+UnitAI* GetAI_boss_leviathan_mk2(Creature* pCreature)
 {
     return new boss_leviathan_mk2AI(pCreature);
 }
@@ -1194,7 +1194,7 @@ struct boss_vx001AI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         // switch to full robot abilities
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -1354,7 +1354,7 @@ struct boss_vx001AI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_vx001(Creature* pCreature)
+UnitAI* GetAI_boss_vx001(Creature* pCreature)
 {
     return new boss_vx001AI(pCreature);
 }
@@ -1491,7 +1491,7 @@ struct boss_aerial_unitAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         // switch to full robot abilities
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -1608,7 +1608,7 @@ struct boss_aerial_unitAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_aerial_unit(Creature* pCreature)
+UnitAI* GetAI_boss_aerial_unit(Creature* pCreature)
 {
     return new boss_aerial_unitAI(pCreature);
 }
@@ -1657,7 +1657,7 @@ struct npc_proximity_mineAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_proximity_mine(Creature* pCreature)
+UnitAI* GetAI_npc_proximity_mine(Creature* pCreature)
 {
     return new npc_proximity_mineAI(pCreature);
 }
@@ -1688,7 +1688,7 @@ struct npc_bot_triggerAI : public Scripted_NoMovementAI
     void AttackStart(Unit* /*pWho*/) override { }
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -1728,7 +1728,7 @@ struct npc_bot_triggerAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_bot_trigger(Creature* pCreature)
+UnitAI* GetAI_npc_bot_trigger(Creature* pCreature)
 {
     return new npc_bot_triggerAI(pCreature);
 }
@@ -1848,7 +1848,7 @@ struct npc_mimiron_flamesAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_mimiron_flames(Creature* pCreature)
+UnitAI* GetAI_npc_mimiron_flames(Creature* pCreature)
 {
     return new npc_mimiron_flamesAI(pCreature);
 }
@@ -1906,7 +1906,7 @@ struct npc_frost_bombAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_frost_bomb(Creature* pCreature)
+UnitAI* GetAI_npc_frost_bomb(Creature* pCreature)
 {
     return new npc_frost_bombAI(pCreature);
 }
@@ -1936,7 +1936,7 @@ struct npc_rocket_strikeAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_rocket_strike(Creature* pCreature)
+UnitAI* GetAI_npc_rocket_strike(Creature* pCreature)
 {
     return new npc_rocket_strikeAI(pCreature);
 }
@@ -1956,7 +1956,7 @@ struct boss_leviathan_mk2_turretAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_boss_leviathan_mk2_turret(Creature* pCreature)
+UnitAI* GetAI_boss_leviathan_mk2_turret(Creature* pCreature)
 {
     return new boss_leviathan_mk2_turretAI(pCreature);
 }
@@ -1976,7 +1976,7 @@ struct npc_computerAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_computer(Creature* pCreature)
+UnitAI* GetAI_npc_computer(Creature* pCreature)
 {
     return new npc_computerAI(pCreature);
 }

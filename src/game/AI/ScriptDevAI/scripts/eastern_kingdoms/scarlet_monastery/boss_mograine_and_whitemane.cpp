@@ -376,12 +376,12 @@ struct boss_high_inquisitor_whitemaneAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_scarlet_commander_mograine(Creature* pCreature)
+UnitAI* GetAI_boss_scarlet_commander_mograine(Creature* pCreature)
 {
     return new boss_scarlet_commander_mograineAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_high_inquisitor_whitemane(Creature* pCreature)
+UnitAI* GetAI_boss_high_inquisitor_whitemane(Creature* pCreature)
 {
     return new boss_high_inquisitor_whitemaneAI(pCreature);
 }

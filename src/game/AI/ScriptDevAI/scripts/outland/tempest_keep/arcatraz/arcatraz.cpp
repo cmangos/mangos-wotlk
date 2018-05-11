@@ -247,7 +247,7 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_millhouse_manastorm(Creature* pCreature)
+UnitAI* GetAI_npc_millhouse_manastorm(Creature* pCreature)
 {
     return new npc_millhouse_manastormAI(pCreature);
 }
@@ -341,7 +341,7 @@ struct npc_warden_mellicharAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_warden_mellichar(Creature* pCreature)
+UnitAI* GetAI_npc_warden_mellichar(Creature* pCreature)
 {
     return new npc_warden_mellicharAI(pCreature);
 }
@@ -405,7 +405,7 @@ struct npc_arcatraz_defenderAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_arcatraz_defender(Creature* pCreature)
+UnitAI* GetAI_npc_arcatraz_defender(Creature* pCreature)
 {
     return new npc_arcatraz_defenderAI(pCreature);
 }

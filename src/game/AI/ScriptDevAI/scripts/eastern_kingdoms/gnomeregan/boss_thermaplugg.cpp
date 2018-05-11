@@ -229,7 +229,7 @@ struct boss_thermapluggAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_thermaplugg(Creature* pCreature)
+UnitAI* GetAI_boss_thermaplugg(Creature* pCreature)
 {
     return new boss_thermapluggAI(pCreature);
 }

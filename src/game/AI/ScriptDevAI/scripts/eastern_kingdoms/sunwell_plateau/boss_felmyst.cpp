@@ -454,7 +454,7 @@ struct boss_felmystAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_felmyst(Creature* pCreature)
+UnitAI* GetAI_boss_felmyst(Creature* pCreature)
 {
     return new boss_felmystAI(pCreature);
 }
@@ -488,7 +488,7 @@ struct npc_demonic_vaporAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_demonic_vapor(Creature* pCreature)
+UnitAI* GetAI_npc_demonic_vapor(Creature* pCreature)
 {
     return new npc_demonic_vaporAI(pCreature);
 }

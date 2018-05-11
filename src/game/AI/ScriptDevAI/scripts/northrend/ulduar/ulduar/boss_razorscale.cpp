@@ -233,7 +233,7 @@ struct boss_razorscaleAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // inform about the harpoon repair event
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -640,7 +640,7 @@ struct boss_razorscaleAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_razorscale(Creature* pCreature)
+UnitAI* GetAI_boss_razorscale(Creature* pCreature)
 {
     return new boss_razorscaleAI(pCreature);
 }
@@ -728,7 +728,7 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // start intro dialogue
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetTypeId() == TYPEID_PLAYER)
@@ -741,7 +741,7 @@ struct npc_expedition_commanderAI : public ScriptedAI, private DialogueHelper
     void UpdateAI(const uint32 uiDiff) override { DialogueUpdate(uiDiff); }
 };
 
-CreatureAI* GetAI_npc_expedition_commander(Creature* pCreature)
+UnitAI* GetAI_npc_expedition_commander(Creature* pCreature)
 {
     return new npc_expedition_commanderAI(pCreature);
 }
@@ -800,7 +800,7 @@ struct npc_razorscale_spawnerAI : public Scripted_NoMovementAI
         pGo->Use(m_creature);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // inform that it should spawn a sentinel
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -828,7 +828,7 @@ struct npc_razorscale_spawnerAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_razorscale_spawner(Creature* pCreature)
+UnitAI* GetAI_npc_razorscale_spawner(Creature* pCreature)
 {
     return new npc_razorscale_spawnerAI(pCreature);
 }
@@ -848,7 +848,7 @@ struct npc_harpoon_fire_stateAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_harpoon_fire_state(Creature* pCreature)
+UnitAI* GetAI_npc_harpoon_fire_state(Creature* pCreature)
 {
     return new npc_harpoon_fire_stateAI(pCreature);
 }

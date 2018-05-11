@@ -46,7 +46,7 @@ enum
     GOSSIP_MENU_ID_DEFAULT          = 907,                  // this is wrong, but currently we don't know which are the right ids
 };
 
-CreatureAI* GetAI_npc_jaina_proudmoore(Creature* pCreature)
+UnitAI* GetAI_npc_jaina_proudmoore(Creature* pCreature)
 {
     hyjalAI* pTempAI = new hyjalAI(pCreature);
 
@@ -122,7 +122,7 @@ bool GossipSelect_npc_jaina_proudmoore(Player* pPlayer, Creature* pCreature, uin
     return true;
 }
 
-CreatureAI* GetAI_npc_thrall(Creature* pCreature)
+UnitAI* GetAI_npc_thrall(Creature* pCreature)
 {
     hyjalAI* pTempAI = new hyjalAI(pCreature);
 

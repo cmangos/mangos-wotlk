@@ -473,7 +473,7 @@ struct boss_zuljinAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_zuljin(Creature* pCreature)
+UnitAI* GetAI_boss_zuljin(Creature* pCreature)
 {
     return new boss_zuljinAI(pCreature);
 }
@@ -512,7 +512,7 @@ struct npc_feather_vortexAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_feather_vortex(Creature* pCreature)
+UnitAI* GetAI_npc_feather_vortex(Creature* pCreature)
 {
     return new npc_feather_vortexAI(pCreature);
 }

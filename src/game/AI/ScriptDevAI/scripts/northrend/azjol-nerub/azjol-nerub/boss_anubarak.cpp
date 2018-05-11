@@ -316,7 +316,7 @@ struct boss_anubarakAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_anubarak(Creature* pCreature)
+UnitAI* GetAI_boss_anubarak(Creature* pCreature)
 {
     return new boss_anubarakAI(pCreature);
 }
@@ -371,7 +371,7 @@ struct npc_impale_targetAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_impale_target(Creature* pCreature)
+UnitAI* GetAI_npc_impale_target(Creature* pCreature)
 {
     return new npc_impale_targetAI(pCreature);
 }

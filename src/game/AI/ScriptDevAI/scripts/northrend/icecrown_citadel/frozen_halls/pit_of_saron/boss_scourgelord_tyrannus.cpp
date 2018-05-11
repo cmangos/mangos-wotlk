@@ -198,7 +198,7 @@ struct boss_tyrannusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_tyrannus(Creature* pCreature)
+UnitAI* GetAI_boss_tyrannus(Creature* pCreature)
 {
     return new boss_tyrannusAI(pCreature);
 }
@@ -311,7 +311,7 @@ struct boss_rimefang_posAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_rimefang_pos(Creature* pCreature)
+UnitAI* GetAI_boss_rimefang_pos(Creature* pCreature)
 {
     return new boss_rimefang_posAI(pCreature);
 }

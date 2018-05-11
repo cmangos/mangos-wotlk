@@ -153,7 +153,7 @@ struct boss_general_vezaxAI : public ScriptedAI
             pSummoned->SetInCombatWithZone();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         if (pSender->GetEntry() == NPC_SARONITE_VAPOR)
         {
@@ -344,7 +344,7 @@ struct boss_general_vezaxAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_general_vezax(Creature* pCreature)
+UnitAI* GetAI_boss_general_vezax(Creature* pCreature)
 {
     return new boss_general_vezaxAI(pCreature);
 }
@@ -391,7 +391,7 @@ struct npc_saronite_vaporAI : public Scripted_NoMovementAI
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
 };
 
-CreatureAI* GetAI_npc_saronite_vapor(Creature* pCreature)
+UnitAI* GetAI_npc_saronite_vapor(Creature* pCreature)
 {
     return new npc_saronite_vaporAI(pCreature);
 }

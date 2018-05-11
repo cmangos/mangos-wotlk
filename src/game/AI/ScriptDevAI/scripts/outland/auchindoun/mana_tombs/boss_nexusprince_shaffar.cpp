@@ -171,7 +171,7 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_nexusprince_shaffar(Creature* pCreature)
+UnitAI* GetAI_boss_nexusprince_shaffar(Creature* pCreature)
 {
     return new boss_nexusprince_shaffarAI(pCreature);
 }

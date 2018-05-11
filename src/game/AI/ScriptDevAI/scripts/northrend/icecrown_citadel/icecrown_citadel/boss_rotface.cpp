@@ -258,7 +258,7 @@ struct boss_rotfaceAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_rotface(Creature* pCreature)
+UnitAI* GetAI_boss_rotface(Creature* pCreature)
 {
     return new boss_rotfaceAI(pCreature);
 }
@@ -305,7 +305,7 @@ struct mob_little_oozeAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_little_ooze(Creature* pCreature)
+UnitAI* GetAI_mob_little_ooze(Creature* pCreature)
 {
     return new mob_little_oozeAI(pCreature);
 }
@@ -339,7 +339,7 @@ struct mob_big_oozeAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_BIG_OOZE_BUFF_COMB, CAST_TRIGGERED);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -411,7 +411,7 @@ struct mob_big_oozeAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_big_ooze(Creature* pCreature)
+UnitAI* GetAI_mob_big_ooze(Creature* pCreature)
 {
     return new mob_big_oozeAI(pCreature);
 }

@@ -444,7 +444,7 @@ struct boss_gothikAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_gothik(Creature* pCreature)
+UnitAI* GetAI_boss_gothik(Creature* pCreature)
 {
     return new boss_gothikAI(pCreature);
 }

@@ -249,7 +249,7 @@ struct boss_gruulAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_gruul(Creature* pCreature)
+UnitAI* GetAI_boss_gruul(Creature* pCreature)
 {
     return new boss_gruulAI(pCreature);
 }

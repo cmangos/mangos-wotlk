@@ -242,7 +242,7 @@ struct boss_skarvaldAI : public boss_s_and_d_dummyAI
     }
 };
 
-CreatureAI* GetAI_boss_skarvald(Creature* pCreature)
+UnitAI* GetAI_boss_skarvald(Creature* pCreature)
 {
     return new boss_skarvaldAI(pCreature);
 }
@@ -313,7 +313,7 @@ struct boss_dalronnAI : public boss_s_and_d_dummyAI
     }
 };
 
-CreatureAI* GetAI_boss_dalronn(Creature* pCreature)
+UnitAI* GetAI_boss_dalronn(Creature* pCreature)
 {
     return new boss_dalronnAI(pCreature);
 }

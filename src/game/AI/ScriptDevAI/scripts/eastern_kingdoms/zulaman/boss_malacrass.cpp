@@ -436,7 +436,7 @@ struct boss_malacrassAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_malacrass(Creature* pCreature)
+UnitAI* GetAI_boss_malacrass(Creature* pCreature)
 {
     return new boss_malacrassAI(pCreature);
 }

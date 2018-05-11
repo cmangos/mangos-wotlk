@@ -563,7 +563,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_boss_malygos(Creature* pCreature)
+UnitAI* GetAI_boss_malygos(Creature* pCreature)
 {
     return new boss_malygosAI(pCreature);
 }
@@ -600,7 +600,7 @@ struct npc_power_sparkAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_power_spark(Creature* pCreature)
+UnitAI* GetAI_npc_power_spark(Creature* pCreature)
 {
     return new npc_power_sparkAI(pCreature);
 }
@@ -660,7 +660,7 @@ struct npc_wyrmrest_skytalonAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_wyrmrest_skytalon(Creature* pCreature)
+UnitAI* GetAI_npc_wyrmrest_skytalon(Creature* pCreature)
 {
     return new npc_wyrmrest_skytalonAI(pCreature);
 }

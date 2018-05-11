@@ -203,7 +203,7 @@ struct boss_omor_the_unscarredAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_omor_the_unscarredAI(Creature* pCreature)
+UnitAI* GetAI_boss_omor_the_unscarredAI(Creature* pCreature)
 {
     return new boss_omor_the_unscarredAI(pCreature);
 }

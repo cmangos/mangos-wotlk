@@ -704,7 +704,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_the_lich_king_icc(Creature* pCreature)
+UnitAI* GetAI_boss_the_lich_king_icc(Creature* pCreature)
 {
     return new boss_the_lich_king_iccAI(pCreature);
 }

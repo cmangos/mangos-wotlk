@@ -460,12 +460,12 @@ struct mob_solarium_priestAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_solarium_priest(Creature* pCreature)
+UnitAI* GetAI_mob_solarium_priest(Creature* pCreature)
 {
     return new mob_solarium_priestAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_high_astromancer_solarian(Creature* pCreature)
+UnitAI* GetAI_boss_high_astromancer_solarian(Creature* pCreature)
 {
     return new boss_high_astromancer_solarianAI(pCreature);
 }

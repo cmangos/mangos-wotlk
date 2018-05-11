@@ -954,7 +954,7 @@ struct npc_rookery_hatcherAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_rookery_hatcher(Creature* pCreature)
+UnitAI* GetAI_npc_rookery_hatcher(Creature* pCreature)
 {
     return new npc_rookery_hatcherAI(pCreature);
 }

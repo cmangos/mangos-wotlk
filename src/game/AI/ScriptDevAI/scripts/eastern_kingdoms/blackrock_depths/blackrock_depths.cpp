@@ -520,7 +520,7 @@ struct npc_grimstoneAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_grimstone(Creature* pCreature)
+UnitAI* GetAI_npc_grimstone(Creature* pCreature)
 {
     return new npc_grimstoneAI(pCreature);
 }
@@ -676,7 +676,7 @@ struct npc_phalanxAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_phalanx(Creature* pCreature)
+UnitAI* GetAI_npc_phalanx(Creature* pCreature)
 {
     return new npc_phalanxAI(pCreature);
 }
@@ -847,7 +847,7 @@ bool QuestRewarded_npc_mistress_nagmara(Player* pPlayer, Creature* pCreature, Qu
     return true;
 }
 
-CreatureAI* GetAI_npc_mistress_nagmara(Creature* pCreature)
+UnitAI* GetAI_npc_mistress_nagmara(Creature* pCreature)
 {
     return new npc_mistress_nagmaraAI(pCreature);
 }
@@ -1070,7 +1070,7 @@ struct npc_rocknotAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_rocknot(Creature* pCreature)
+UnitAI* GetAI_npc_rocknot(Creature* pCreature)
 {
     return new npc_rocknotAI(pCreature);
 }
@@ -1344,7 +1344,7 @@ struct npc_marshal_windsorAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_marshal_windsor(Creature* pCreature)
+UnitAI* GetAI_npc_marshal_windsor(Creature* pCreature)
 {
     return new npc_marshal_windsorAI(pCreature);
 }
@@ -1560,7 +1560,7 @@ struct npc_hurley_blackbreathAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_hurley_blackbreath(Creature* pCreature)
+UnitAI* GetAI_npc_hurley_blackbreath(Creature* pCreature)
 {
     return new npc_hurley_blackbreathAI(pCreature);
 }
@@ -1795,7 +1795,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_plugger_spazzring(Creature* pCreature)
+UnitAI* GetAI_boss_plugger_spazzring(Creature* pCreature)
 {
     return new boss_plugger_spazzringAI(pCreature);
 }
@@ -1890,7 +1890,7 @@ struct npc_ironhand_guardianAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_ironhand_guardian(Creature* pCreature)
+UnitAI* GetAI_npc_ironhand_guardian(Creature* pCreature)
 {
     return new npc_ironhand_guardianAI(pCreature);
 }

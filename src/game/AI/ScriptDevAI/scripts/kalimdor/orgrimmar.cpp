@@ -107,7 +107,7 @@ struct npc_shenthulAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_shenthul(Creature* pCreature)
+UnitAI* GetAI_npc_shenthul(Creature* pCreature)
 {
     return new npc_shenthulAI(pCreature);
 }

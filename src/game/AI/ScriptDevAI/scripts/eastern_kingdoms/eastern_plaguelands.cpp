@@ -338,7 +338,7 @@ struct npc_eris_havenfireAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_eris_havenfire(Creature* pCreature)
+UnitAI* GetAI_npc_eris_havenfire(Creature* pCreature)
 {
     return new npc_eris_havenfireAI(pCreature);
 }

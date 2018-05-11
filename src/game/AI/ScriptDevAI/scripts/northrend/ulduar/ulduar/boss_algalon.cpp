@@ -430,7 +430,7 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // notify boss that time is over
         // this will trigger the wipe spell and make the boss evade and finally despawn
@@ -612,7 +612,7 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_boss_algalon(Creature* pCreature)
+UnitAI* GetAI_boss_algalon(Creature* pCreature)
 {
     return new boss_algalonAI(pCreature);
 }
@@ -640,7 +640,7 @@ struct npc_living_constellationAI : public ScriptedAI
     void AttackStart(Unit* /*pWho*/) override { }
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // start casting Arcane Barrage
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -665,7 +665,7 @@ struct npc_living_constellationAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_living_constellation(Creature* pCreature)
+UnitAI* GetAI_npc_living_constellation(Creature* pCreature)
 {
     return new npc_living_constellationAI(pCreature);
 }
@@ -712,7 +712,7 @@ struct npc_worm_holeAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_worm_hole(Creature* pCreature)
+UnitAI* GetAI_npc_worm_hole(Creature* pCreature)
 {
     return new npc_worm_holeAI(pCreature);
 }
@@ -759,7 +759,7 @@ struct npc_black_holeAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_black_hole(Creature* pCreature)
+UnitAI* GetAI_npc_black_hole(Creature* pCreature)
 {
     return new npc_black_holeAI(pCreature);
 }
@@ -778,7 +778,7 @@ struct npc_collapsing_starAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_collapsing_star(Creature* pCreature)
+UnitAI* GetAI_npc_collapsing_star(Creature* pCreature)
 {
     return new npc_collapsing_starAI(pCreature);
 }

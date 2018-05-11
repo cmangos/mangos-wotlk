@@ -142,7 +142,7 @@ struct boss_valithria_dreamwalkerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_valithria_dreamwalker(Creature* pCreature)
+UnitAI* GetAI_boss_valithria_dreamwalker(Creature* pCreature)
 {
     return new boss_valithria_dreamwalkerAI(pCreature);
 };

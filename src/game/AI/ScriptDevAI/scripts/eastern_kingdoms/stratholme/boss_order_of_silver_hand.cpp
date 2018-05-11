@@ -165,7 +165,7 @@ struct boss_silver_hand_bossesAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_silver_hand_bossesAI(Creature* pCreature)
+UnitAI* GetAI_boss_silver_hand_bossesAI(Creature* pCreature)
 {
     return new boss_silver_hand_bossesAI(pCreature);
 }

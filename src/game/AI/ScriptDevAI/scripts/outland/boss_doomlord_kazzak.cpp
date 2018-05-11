@@ -189,7 +189,7 @@ struct boss_doomlordkazzakAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_doomlordkazzak(Creature* pCreature)
+UnitAI* GetAI_boss_doomlordkazzak(Creature* pCreature)
 {
     return new boss_doomlordkazzakAI(pCreature);
 }

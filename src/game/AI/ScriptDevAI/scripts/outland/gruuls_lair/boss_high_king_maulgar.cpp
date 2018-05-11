@@ -540,27 +540,27 @@ struct boss_krosh_firehandAI : public Council_Base_AI
     }
 };
 
-CreatureAI* GetAI_boss_high_king_maulgar(Creature* pCreature)
+UnitAI* GetAI_boss_high_king_maulgar(Creature* pCreature)
 {
     return new boss_high_king_maulgarAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_olm_the_summoner(Creature* pCreature)
+UnitAI* GetAI_boss_olm_the_summoner(Creature* pCreature)
 {
     return new boss_olm_the_summonerAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_kiggler_the_crazed(Creature* pCreature)
+UnitAI* GetAI_boss_kiggler_the_crazed(Creature* pCreature)
 {
     return new boss_kiggler_the_crazedAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_blindeye_the_seer(Creature* pCreature)
+UnitAI* GetAI_boss_blindeye_the_seer(Creature* pCreature)
 {
     return new boss_blindeye_the_seerAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_krosh_firehand(Creature* pCreature)
+UnitAI* GetAI_boss_krosh_firehand(Creature* pCreature)
 {
     return new boss_krosh_firehandAI(pCreature);
 }

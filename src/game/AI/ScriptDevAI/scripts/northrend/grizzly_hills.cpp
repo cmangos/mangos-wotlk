@@ -62,7 +62,7 @@ struct npc_depleted_war_golemAI : public ScriptedPetAI
     }
 };
 
-CreatureAI* GetAI_npc_depleted_war_golem(Creature* pCreature)
+UnitAI* GetAI_npc_depleted_war_golem(Creature* pCreature)
 {
     return new npc_depleted_war_golemAI(pCreature);
 }
@@ -161,7 +161,7 @@ struct npc_harrison_jonesAI : public npc_escortAI
         npc_escortAI::JustDied(pKiller);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -347,7 +347,7 @@ struct npc_harrison_jonesAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_harrison_jones(Creature* pCreature)
+UnitAI* GetAI_npc_harrison_jones(Creature* pCreature)
 {
     return new npc_harrison_jonesAI(pCreature);
 }
@@ -398,7 +398,7 @@ struct npc_emilyAI : public npc_escortAI
 
     void Reset() override { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -509,7 +509,7 @@ struct npc_emilyAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_emily(Creature* pCreature)
+UnitAI* GetAI_npc_emily(Creature* pCreature)
 {
     return new npc_emilyAI(pCreature);
 }

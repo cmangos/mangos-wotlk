@@ -47,67 +47,67 @@ EndContentData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/guard_ai.h"
 
-CreatureAI* GetAI_guard_azuremyst(Creature* pCreature)
+UnitAI* GetAI_guard_azuremyst(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_bluffwatcher(Creature* pCreature)
+UnitAI* GetAI_guard_bluffwatcher(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_contested(Creature* pCreature)
+UnitAI* GetAI_guard_contested(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_darnassus(Creature* pCreature)
+UnitAI* GetAI_guard_darnassus(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_dunmorogh(Creature* pCreature)
+UnitAI* GetAI_guard_dunmorogh(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_durotar(Creature* pCreature)
+UnitAI* GetAI_guard_durotar(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_elwynnforest(Creature* pCreature)
+UnitAI* GetAI_guard_elwynnforest(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_eversong(Creature* pCreature)
+UnitAI* GetAI_guard_eversong(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_exodar(Creature* pCreature)
+UnitAI* GetAI_guard_exodar(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_ironforge(Creature* pCreature)
+UnitAI* GetAI_guard_ironforge(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_mulgore(Creature* pCreature)
+UnitAI* GetAI_guard_mulgore(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_orgrimmar(Creature* pCreature)
+UnitAI* GetAI_guard_orgrimmar(Creature* pCreature)
 {
     return new guardAI_orgrimmar(pCreature);
 }
 
-CreatureAI* GetAI_guard_shattrath(Creature* pCreature)
+UnitAI* GetAI_guard_shattrath(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
@@ -174,7 +174,7 @@ struct guard_shattrath_aldorAI : public guardAI
     }
 };
 
-CreatureAI* GetAI_guard_shattrath_aldor(Creature* pCreature)
+UnitAI* GetAI_guard_shattrath_aldor(Creature* pCreature)
 {
     return new guard_shattrath_aldorAI(pCreature);
 }
@@ -241,32 +241,32 @@ struct guard_shattrath_scryerAI : public guardAI
     }
 };
 
-CreatureAI* GetAI_guard_shattrath_scryer(Creature* pCreature)
+UnitAI* GetAI_guard_shattrath_scryer(Creature* pCreature)
 {
     return new guard_shattrath_scryerAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_silvermoon(Creature* pCreature)
+UnitAI* GetAI_guard_silvermoon(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_stormwind(Creature* pCreature)
+UnitAI* GetAI_guard_stormwind(Creature* pCreature)
 {
     return new guardAI_stormwind(pCreature);
 }
 
-CreatureAI* GetAI_guard_teldrassil(Creature* pCreature)
+UnitAI* GetAI_guard_teldrassil(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_tirisfal(Creature* pCreature)
+UnitAI* GetAI_guard_tirisfal(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }
 
-CreatureAI* GetAI_guard_undercity(Creature* pCreature)
+UnitAI* GetAI_guard_undercity(Creature* pCreature)
 {
     return new guardAI(pCreature);
 }

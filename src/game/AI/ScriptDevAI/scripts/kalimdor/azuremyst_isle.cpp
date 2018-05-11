@@ -171,7 +171,7 @@ struct npc_draenei_survivorAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_draenei_survivor(Creature* pCreature)
+UnitAI* GetAI_npc_draenei_survivor(Creature* pCreature)
 {
     return new npc_draenei_survivorAI(pCreature);
 }
@@ -257,7 +257,7 @@ struct npc_magwinAI : public npc_escortAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -275,7 +275,7 @@ bool QuestAccept_npc_magwin(Player* pPlayer, Creature* pCreature, const Quest* p
     return true;
 }
 
-CreatureAI* GetAI_npc_magwinAI(Creature* pCreature)
+UnitAI* GetAI_npc_magwinAI(Creature* pCreature)
 {
     return new npc_magwinAI(pCreature);
 }

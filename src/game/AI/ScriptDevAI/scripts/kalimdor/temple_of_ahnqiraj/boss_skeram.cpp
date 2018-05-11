@@ -241,7 +241,7 @@ struct boss_skeramAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_skeram(Creature* pCreature)
+UnitAI* GetAI_boss_skeram(Creature* pCreature)
 {
     return new boss_skeramAI(pCreature);
 }

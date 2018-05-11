@@ -272,7 +272,7 @@ struct boss_priestess_delrissaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_priestess_delrissa(Creature* pCreature)
+UnitAI* GetAI_boss_priestess_delrissa(Creature* pCreature)
 {
     return new boss_priestess_delrissaAI(pCreature);
 }
@@ -476,7 +476,7 @@ struct npc_kagani_nightstrikeAI : public priestess_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_npc_kagani_nightstrike(Creature* pCreature)
+UnitAI* GetAI_npc_kagani_nightstrike(Creature* pCreature)
 {
     return new npc_kagani_nightstrikeAI(pCreature);
 }
@@ -602,7 +602,7 @@ struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_npc_ellris_duskhallow(Creature* pCreature)
+UnitAI* GetAI_npc_ellris_duskhallow(Creature* pCreature)
 {
     return new npc_ellris_duskhallowAI(pCreature);
 }
@@ -655,7 +655,7 @@ struct npc_eramas_brightblazeAI : public priestess_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_npc_eramas_brightblaze(Creature* pCreature)
+UnitAI* GetAI_npc_eramas_brightblaze(Creature* pCreature)
 {
     return new npc_eramas_brightblazeAI(pCreature);
 }
@@ -790,7 +790,7 @@ struct npc_yazzaiAI : public priestess_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_npc_yazzai(Creature* pCreature)
+UnitAI* GetAI_npc_yazzai(Creature* pCreature)
 {
     return new npc_yazzaiAI(pCreature);
 }
@@ -901,7 +901,7 @@ struct npc_warlord_salarisAI : public priestess_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_npc_warlord_salaris(Creature* pCreature)
+UnitAI* GetAI_npc_warlord_salaris(Creature* pCreature)
 {
     return new npc_warlord_salarisAI(pCreature);
 }
@@ -1024,7 +1024,7 @@ struct npc_garaxxasAI : public priestess_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_npc_garaxxas(Creature* pCreature)
+UnitAI* GetAI_npc_garaxxas(Creature* pCreature)
 {
     return new npc_garaxxasAI(pCreature);
 }
@@ -1125,7 +1125,7 @@ struct npc_apokoAI : public priestess_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_npc_apoko(Creature* pCreature)
+UnitAI* GetAI_npc_apoko(Creature* pCreature)
 {
     return new npc_apokoAI(pCreature);
 }
@@ -1237,7 +1237,7 @@ struct npc_zelfanAI : public priestess_companion_commonAI
     }
 };
 
-CreatureAI* GetAI_npc_zelfan(Creature* pCreature)
+UnitAI* GetAI_npc_zelfan(Creature* pCreature)
 {
     return new npc_zelfanAI(pCreature);
 }

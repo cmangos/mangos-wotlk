@@ -142,7 +142,7 @@ struct boss_nethermancer_sepethreaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_nethermancer_sepethrea(Creature* pCreature)
+UnitAI* GetAI_boss_nethermancer_sepethrea(Creature* pCreature)
 {
     return new boss_nethermancer_sepethreaAI(pCreature);
 }
@@ -230,7 +230,7 @@ struct npc_raging_flamesAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_raging_flames(Creature* pCreature)
+UnitAI* GetAI_npc_raging_flames(Creature* pCreature)
 {
     return new npc_raging_flamesAI(pCreature);
 }

@@ -273,7 +273,7 @@ struct boss_the_lurker_belowAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_boss_the_lurker_below(Creature* pCreature)
+UnitAI* GetAI_boss_the_lurker_below(Creature* pCreature)
 {
     return new boss_the_lurker_belowAI(pCreature);
 }

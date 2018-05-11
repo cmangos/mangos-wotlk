@@ -321,7 +321,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_blood_queen_lanathel(Creature* pCreature)
+UnitAI* GetAI_boss_blood_queen_lanathel(Creature* pCreature)
 {
     return new boss_blood_queen_lanathelAI(pCreature);
 }

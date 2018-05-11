@@ -277,7 +277,7 @@ struct boss_tharonjaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_tharonja(Creature* pCreature)
+UnitAI* GetAI_boss_tharonja(Creature* pCreature)
 {
     return new boss_tharonjaAI(pCreature);
 }

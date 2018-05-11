@@ -126,7 +126,7 @@ struct boss_magtheridonAI : public ScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -502,17 +502,17 @@ struct mob_abyssalAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_magtheridon(Creature* pCreature)
+UnitAI* GetAI_boss_magtheridon(Creature* pCreature)
 {
     return new boss_magtheridonAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_hellfire_channeler(Creature* pCreature)
+UnitAI* GetAI_mob_hellfire_channeler(Creature* pCreature)
 {
     return new mob_hellfire_channelerAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_abyssalAI(Creature* pCreature)
+UnitAI* GetAI_mob_abyssalAI(Creature* pCreature)
 {
     return new mob_abyssalAI(pCreature);
 }

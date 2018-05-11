@@ -299,7 +299,7 @@ struct boss_skadiAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_skadi(Creature* pCreature)
+UnitAI* GetAI_boss_skadi(Creature* pCreature)
 {
     return new boss_skadiAI(pCreature);
 }
@@ -467,7 +467,7 @@ struct npc_graufAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_grauf(Creature* pCreature)
+UnitAI* GetAI_npc_grauf(Creature* pCreature)
 {
     return new npc_graufAI(pCreature);
 }

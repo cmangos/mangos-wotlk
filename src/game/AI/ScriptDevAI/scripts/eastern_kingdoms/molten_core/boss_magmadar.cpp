@@ -136,7 +136,7 @@ struct boss_magmadarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_magmadar(Creature* pCreature)
+UnitAI* GetAI_boss_magmadar(Creature* pCreature)
 {
     return new boss_magmadarAI(pCreature);
 }

@@ -166,7 +166,7 @@ struct boss_lokenAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_loken(Creature* pCreature)
+UnitAI* GetAI_boss_loken(Creature* pCreature)
 {
     return new boss_lokenAI(pCreature);
 }

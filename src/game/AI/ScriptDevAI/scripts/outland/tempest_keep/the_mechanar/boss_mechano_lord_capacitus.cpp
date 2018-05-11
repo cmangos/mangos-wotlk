@@ -216,7 +216,7 @@ struct boss_mechano_lord_capacitusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_mechano_lord_capacitus(Creature* creature)
+UnitAI* GetAI_boss_mechano_lord_capacitus(Creature* creature)
 {
     return new boss_mechano_lord_capacitusAI(creature);
 }

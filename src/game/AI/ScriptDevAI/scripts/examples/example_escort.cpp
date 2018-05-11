@@ -52,7 +52,7 @@ enum
 
 struct example_escortAI : public npc_escortAI
 {
-    // CreatureAI functions
+    // UnitAI functions
     example_escortAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
     uint32 m_uiDeathCoilTimer;
@@ -172,7 +172,7 @@ struct example_escortAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_example_escort(Creature* pCreature)
+UnitAI* GetAI_example_escort(Creature* pCreature)
 {
     return new example_escortAI(pCreature);
 }

@@ -224,7 +224,7 @@ struct boss_black_knightAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // finish transition
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -348,7 +348,7 @@ struct boss_black_knightAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_black_knight(Creature* pCreature)
+UnitAI* GetAI_boss_black_knight(Creature* pCreature)
 {
     return new boss_black_knightAI(pCreature);
 }
@@ -430,7 +430,7 @@ struct npc_black_knight_ghoulAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_black_knight_ghoul(Creature* pCreature)
+UnitAI* GetAI_npc_black_knight_ghoul(Creature* pCreature)
 {
     return new npc_black_knight_ghoulAI(pCreature);
 }
@@ -450,7 +450,7 @@ struct npc_black_knight_gryphonAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_black_knight_gryphon(Creature* pCreature)
+UnitAI* GetAI_npc_black_knight_gryphon(Creature* pCreature)
 {
     return new npc_black_knight_gryphonAI(pCreature);
 }

@@ -288,7 +288,7 @@ struct boss_ionarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ionar(Creature* pCreature)
+UnitAI* GetAI_boss_ionar(Creature* pCreature)
 {
     return new boss_ionarAI(pCreature);
 }
@@ -366,7 +366,7 @@ struct mob_spark_of_ionarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_spark_of_ionar(Creature* pCreature)
+UnitAI* GetAI_mob_spark_of_ionar(Creature* pCreature)
 {
     return new mob_spark_of_ionarAI(pCreature);
 }

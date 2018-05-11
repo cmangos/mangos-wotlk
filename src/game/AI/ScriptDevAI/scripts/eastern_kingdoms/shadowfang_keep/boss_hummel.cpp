@@ -235,7 +235,7 @@ struct npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_valentine_boss_manager(Creature* pCreature)
+UnitAI* GetAI_npc_valentine_boss_manager(Creature* pCreature)
 {
     return new npc_valentine_boss_managerAI(pCreature);
 }

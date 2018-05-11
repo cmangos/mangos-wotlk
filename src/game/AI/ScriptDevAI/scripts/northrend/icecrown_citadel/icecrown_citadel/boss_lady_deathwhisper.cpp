@@ -462,7 +462,7 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_lady_deathwhisper(Creature* pCreature)
+UnitAI* GetAI_boss_lady_deathwhisper(Creature* pCreature)
 {
     return new boss_lady_deathwhisperAI(pCreature);
 }

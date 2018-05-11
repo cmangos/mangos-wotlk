@@ -279,7 +279,7 @@ struct boss_volazjAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_volazj(Creature* pCreature)
+UnitAI* GetAI_boss_volazj(Creature* pCreature)
 {
     return new boss_volazjAI(pCreature);
 }

@@ -258,7 +258,7 @@ struct boss_grandmaster_vorpilAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_grandmaster_vorpil(Creature* pCreature)
+UnitAI* GetAI_boss_grandmaster_vorpil(Creature* pCreature)
 {
     return new boss_grandmaster_vorpilAI(pCreature);
 }
@@ -314,7 +314,7 @@ struct npc_void_travelerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_void_traveler(Creature* pCreature)
+UnitAI* GetAI_npc_void_traveler(Creature* pCreature)
 {
     return new npc_void_travelerAI(pCreature);
 }

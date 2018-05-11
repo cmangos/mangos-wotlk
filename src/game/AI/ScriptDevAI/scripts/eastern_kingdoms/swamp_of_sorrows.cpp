@@ -145,7 +145,7 @@ bool QuestAccept_npc_galen_goodward(Player* pPlayer, Creature* pCreature, const 
     return true;
 }
 
-CreatureAI* GetAI_npc_galen_goodward(Creature* pCreature)
+UnitAI* GetAI_npc_galen_goodward(Creature* pCreature)
 {
     return new npc_galen_goodwardAI(pCreature);
 }

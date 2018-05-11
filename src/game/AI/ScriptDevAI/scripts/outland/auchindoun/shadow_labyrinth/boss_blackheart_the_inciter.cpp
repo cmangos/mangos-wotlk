@@ -185,7 +185,7 @@ struct boss_blackheart_the_inciterAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_blackheart_the_inciter(Creature* pCreature)
+UnitAI* GetAI_boss_blackheart_the_inciter(Creature* pCreature)
 {
     return new boss_blackheart_the_inciterAI(pCreature);
 }

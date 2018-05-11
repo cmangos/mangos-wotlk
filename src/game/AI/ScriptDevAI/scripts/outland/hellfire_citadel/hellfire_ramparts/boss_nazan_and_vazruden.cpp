@@ -334,7 +334,7 @@ struct boss_vazruden_heraldAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_vazruden_herald(Creature* pCreature)
+UnitAI* GetAI_boss_vazruden_herald(Creature* pCreature)
 {
     return new boss_vazruden_heraldAI(pCreature);
 }
@@ -419,7 +419,7 @@ struct boss_vazrudenAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_vazruden(Creature* pCreature)
+UnitAI* GetAI_boss_vazruden(Creature* pCreature)
 {
     return new boss_vazrudenAI(pCreature);
 }

@@ -107,7 +107,7 @@ struct boss_darkmaster_gandlingAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_darkmaster_gandling(Creature* pCreature)
+UnitAI* GetAI_boss_darkmaster_gandling(Creature* pCreature)
 {
     return new boss_darkmaster_gandlingAI(pCreature);
 }

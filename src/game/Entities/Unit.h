@@ -41,7 +41,7 @@
 #include "Server/DBCStructure.h"
 #include "WorldPacket.h"
 #include "Timer.h"
-#include "AI/BaseAI/CreatureAI.h"
+#include "AI/BaseAI/UnitAI.h"
 
 #include <list>
 
@@ -1205,7 +1205,7 @@ struct CharmInfo
             m_openerMaxRange = maxRange;
         }
 
-        CreatureAI* GetAI() { return m_ai; }
+        UnitAI* GetAI() { return m_ai; }
         CombatData* GetCombatData() { return m_combatData; };
 
         void SetUnitFlagSave(uint32 save) { m_unitFlagSave = save; }
@@ -1213,7 +1213,7 @@ struct CharmInfo
 
     private:
         Unit*               m_unit;
-        CreatureAI*         m_ai;
+        UnitAI*             m_ai;
         CombatData*         m_combatData;
         UnitActionBarEntry  PetActionBar[MAX_UNIT_ACTION_BAR_INDEX];
         CharmSpellEntry     m_charmspells[CREATURE_MAX_SPELLS];
@@ -2494,7 +2494,7 @@ class Unit : public WorldObject
         float GetAttackDistance(Unit const* pl) const;
         virtual uint32 GetDetectionRange() const { return 20.f; }
 
-        virtual CreatureAI* AI() { return nullptr; }
+        virtual UnitAI* AI() { return nullptr; }
         virtual CombatData* GetCombatData() { return m_combatData; }
 
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0) override;

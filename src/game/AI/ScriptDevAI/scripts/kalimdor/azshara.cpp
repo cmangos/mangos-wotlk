@@ -182,7 +182,7 @@ struct npc_rizzle_sprysprocketAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_rizzle_sprysprocket(Creature* pCreature)
+UnitAI* GetAI_npc_rizzle_sprysprocket(Creature* pCreature)
 {
     return new npc_rizzle_sprysprocketAI(pCreature);
 }
@@ -223,7 +223,7 @@ struct npc_depth_chargeAI : public ScriptedAI
     void Reset() override { }
 };
 
-CreatureAI* GetAI_npc_depth_charge(Creature* pCreature)
+UnitAI* GetAI_npc_depth_charge(Creature* pCreature)
 {
     return new npc_depth_chargeAI(pCreature);
 }
@@ -396,7 +396,7 @@ struct mobs_spitelashesAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mobs_spitelashes(Creature* pCreature)
+UnitAI* GetAI_mobs_spitelashes(Creature* pCreature)
 {
     return new mobs_spitelashesAI(pCreature);
 }
@@ -577,7 +577,7 @@ struct npc_felhound_trackerAI : public ScriptedPetAI
     }
 };
 
-CreatureAI* GetAI_npc_felhound_tracker(Creature* pCreature)
+UnitAI* GetAI_npc_felhound_tracker(Creature* pCreature)
 {
     return new npc_felhound_trackerAI(pCreature);
 }

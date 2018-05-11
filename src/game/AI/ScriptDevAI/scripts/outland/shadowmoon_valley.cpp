@@ -183,7 +183,7 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_mature_netherwing_drake(Creature* pCreature)
+UnitAI* GetAI_mob_mature_netherwing_drake(Creature* pCreature)
 {
     return new mob_mature_netherwing_drakeAI(pCreature);
 }
@@ -289,7 +289,7 @@ struct mob_enslaved_netherwing_drakeAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_enslaved_netherwing_drake(Creature* pCreature)
+UnitAI* GetAI_mob_enslaved_netherwing_drake(Creature* pCreature)
 {
     return new mob_enslaved_netherwing_drakeAI(pCreature);
 }
@@ -431,7 +431,7 @@ struct npc_dragonmaw_peonAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_dragonmaw_peon(Creature* pCreature)
+UnitAI* GetAI_npc_dragonmaw_peon(Creature* pCreature)
 {
     return new npc_dragonmaw_peonAI(pCreature);
 }
@@ -669,7 +669,7 @@ struct npc_wildaAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_wilda(Creature* pCreature)
+UnitAI* GetAI_npc_wilda(Creature* pCreature)
 {
     return new npc_wildaAI(pCreature);
 }
@@ -949,7 +949,7 @@ struct mob_torlothAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_torloth(Creature* pCreature)
+UnitAI* GetAI_mob_torloth(Creature* pCreature)
 {
     return new mob_torlothAI(pCreature);
 }
@@ -1173,7 +1173,7 @@ struct npc_lord_illidan_stormrageAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_lord_illidan_stormrage(Creature * (pCreature))
+UnitAI* GetAI_npc_lord_illidan_stormrage(Creature * (pCreature))
 {
     return new npc_lord_illidan_stormrageAI(pCreature);
 }
@@ -1292,7 +1292,7 @@ struct npc_totem_of_spiritsAI : public ScriptedPetAI
     }
 };
 
-CreatureAI* GetAI_npc_totem_of_spirits(Creature* pCreature)
+UnitAI* GetAI_npc_totem_of_spirits(Creature* pCreature)
 {
     return new npc_totem_of_spiritsAI(pCreature);
 }
@@ -1788,7 +1788,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_shadowlord_deathwail(Creature* pCreature)
+UnitAI* GetAI_npc_shadowlord_deathwail(Creature* pCreature)
 {
     return new npc_shadowlord_deathwailAI(pCreature);
 }
@@ -1892,7 +1892,7 @@ struct mob_shadowmoon_soulstealerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_shadowmoon_soulstealer(Creature* pCreature)
+UnitAI* GetAI_mob_shadowmoon_soulstealer(Creature* pCreature)
 {
     return new mob_shadowmoon_soulstealerAI(pCreature);
 }
@@ -2359,7 +2359,7 @@ struct npc_spawned_oronok_tornheartAI : public ScriptedAI, private DialogueHelpe
     }
 };
 
-CreatureAI* GetAI_npc_spawned_oronok_tornheart(Creature* pCreature)
+UnitAI* GetAI_npc_spawned_oronok_tornheart(Creature* pCreature)
 {
     return new npc_spawned_oronok_tornheartAI(pCreature);
 }
@@ -2436,7 +2436,7 @@ struct npc_domesticated_felboarAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_START_EVENT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -2490,7 +2490,7 @@ struct npc_domesticated_felboarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_domesticated_felboar(Creature* pCreature)
+UnitAI* GetAI_npc_domesticated_felboar(Creature* pCreature)
 {
     return new npc_domesticated_felboarAI(pCreature);
 }
@@ -2551,7 +2551,7 @@ struct npc_veneratus_spawn_nodeAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 uiDiff) override { }
 };
 
-CreatureAI* GetAI_npc_veneratus_spawn_node(Creature* pCreature)
+UnitAI* GetAI_npc_veneratus_spawn_node(Creature* pCreature)
 {
     return new npc_veneratus_spawn_nodeAI(pCreature);
 }
@@ -2722,7 +2722,7 @@ struct npc_disobedient_dragonmaw_peonAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_disobedient_dragonmaw_peon(Creature* pCreature)
+UnitAI* GetAI_npc_disobedient_dragonmaw_peon(Creature* pCreature)
 {
     return new npc_disobedient_dragonmaw_peonAI(pCreature);
 }

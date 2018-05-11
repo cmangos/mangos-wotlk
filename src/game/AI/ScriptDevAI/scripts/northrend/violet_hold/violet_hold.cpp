@@ -154,7 +154,7 @@ struct npc_sinclariAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_sinclari(Creature* pCreature)
+UnitAI* GetAI_npc_sinclari(Creature* pCreature)
 {
     return new npc_sinclariAI(pCreature);
 }
@@ -400,7 +400,7 @@ struct npc_prison_event_controllerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_prison_event_controller(Creature* pCreature)
+UnitAI* GetAI_npc_prison_event_controller(Creature* pCreature)
 {
     return new npc_prison_event_controllerAI(pCreature);
 }
@@ -578,7 +578,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_teleportation_portal(Creature* pCreature)
+UnitAI* GetAI_npc_teleportation_portal(Creature* pCreature)
 {
     return new npc_teleportation_portalAI(pCreature);
 }

@@ -133,7 +133,7 @@ struct boss_kurinnaxxAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_kurinnaxx(Creature* pCreature)
+UnitAI* GetAI_boss_kurinnaxx(Creature* pCreature)
 {
     return new boss_kurinnaxxAI(pCreature);
 }

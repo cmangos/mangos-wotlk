@@ -180,7 +180,7 @@ struct boss_archaedasAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_archaedas(Creature* pCreature)
+UnitAI* GetAI_boss_archaedas(Creature* pCreature)
 {
     return new boss_archaedasAI(pCreature);
 }

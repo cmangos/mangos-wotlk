@@ -358,7 +358,7 @@ struct boss_deathbringer_saurfangAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_deathbringer_saurfang(Creature* pCreature)
+UnitAI* GetAI_boss_deathbringer_saurfang(Creature* pCreature)
 {
     return new boss_deathbringer_saurfangAI(pCreature);
 }

@@ -1207,37 +1207,37 @@ struct mob_phoenix_egg_tkAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_boss_kaelthas(Creature* pCreature)
+UnitAI* GetAI_boss_kaelthas(Creature* pCreature)
 {
     return new boss_kaelthasAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_thaladred_the_darkener(Creature* pCreature)
+UnitAI* GetAI_boss_thaladred_the_darkener(Creature* pCreature)
 {
     return new boss_thaladred_the_darkenerAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_lord_sanguinar(Creature* pCreature)
+UnitAI* GetAI_boss_lord_sanguinar(Creature* pCreature)
 {
     return new boss_lord_sanguinarAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_grand_astromancer_capernian(Creature* pCreature)
+UnitAI* GetAI_boss_grand_astromancer_capernian(Creature* pCreature)
 {
     return new boss_grand_astromancer_capernianAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_master_engineer_telonicus(Creature* pCreature)
+UnitAI* GetAI_boss_master_engineer_telonicus(Creature* pCreature)
 {
     return new boss_master_engineer_telonicusAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_phoenix_tk(Creature* pCreature)
+UnitAI* GetAI_mob_phoenix_tk(Creature* pCreature)
 {
     return new mob_phoenix_tkAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_phoenix_egg_tk(Creature* pCreature)
+UnitAI* GetAI_mob_phoenix_egg_tk(Creature* pCreature)
 {
     return new mob_phoenix_egg_tkAI(pCreature);
 }

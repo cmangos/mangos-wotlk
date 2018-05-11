@@ -161,7 +161,7 @@ struct boss_watchkeeper_gargolmarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_watchkeeper_gargolmarAI(Creature* pCreature)
+UnitAI* GetAI_boss_watchkeeper_gargolmarAI(Creature* pCreature)
 {
     return new boss_watchkeeper_gargolmarAI(pCreature);
 }

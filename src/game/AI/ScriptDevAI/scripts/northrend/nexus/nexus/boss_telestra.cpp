@@ -271,7 +271,7 @@ struct boss_telestraAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_telestra(Creature* pCreature)
+UnitAI* GetAI_boss_telestra(Creature* pCreature)
 {
     return new boss_telestraAI(pCreature);
 }

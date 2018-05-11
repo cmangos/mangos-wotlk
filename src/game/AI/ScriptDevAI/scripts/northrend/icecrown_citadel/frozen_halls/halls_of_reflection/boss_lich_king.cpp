@@ -188,7 +188,7 @@ struct boss_lich_king_horAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -366,7 +366,7 @@ struct boss_lich_king_horAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_lich_king_hor(Creature* pCreature)
+UnitAI* GetAI_boss_lich_king_hor(Creature* pCreature)
 {
     return new boss_lich_king_horAI(pCreature);
 }
@@ -447,7 +447,7 @@ struct npc_jaina_sylvanas_horAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_jaina_sylvanas_hor(Creature* pCreature)
+UnitAI* GetAI_npc_jaina_sylvanas_hor(Creature* pCreature)
 {
     return new npc_jaina_sylvanas_horAI(pCreature);
 }

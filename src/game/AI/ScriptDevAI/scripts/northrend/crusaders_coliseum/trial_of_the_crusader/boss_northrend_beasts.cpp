@@ -345,7 +345,7 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_beast_combat_stalker(Creature* pCreature)
+UnitAI* GetAI_npc_beast_combat_stalker(Creature* pCreature)
 {
     return new npc_beast_combat_stalkerAI(pCreature);
 }
@@ -511,7 +511,7 @@ struct boss_gormokAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_gormok(Creature* pCreature)
+UnitAI* GetAI_boss_gormok(Creature* pCreature)
 {
     return new boss_gormokAI(pCreature);
 }
@@ -589,7 +589,7 @@ struct twin_jormungars_commonAI : public ScriptedAI
             pSummned->CastSpell(pSummned, SPELL_SLIME_POOL_AURA, TRIGGERED_NONE);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         // inform when submerged
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -796,7 +796,7 @@ struct boss_acidmawAI : public twin_jormungars_commonAI
     uint32 GetBiteSpell() { return SPELL_PARALYTIC_BITE; }
 };
 
-CreatureAI* GetAI_boss_acidmaw(Creature* pCreature)
+UnitAI* GetAI_boss_acidmaw(Creature* pCreature)
 {
     return new boss_acidmawAI(pCreature);
 }
@@ -867,7 +867,7 @@ struct boss_dreadscaleAI : public twin_jormungars_commonAI
     uint32 GetBiteSpell() { return SPELL_BURNING_BITE; }
 };
 
-CreatureAI* GetAI_boss_dreadscale(Creature* pCreature)
+UnitAI* GetAI_boss_dreadscale(Creature* pCreature)
 {
     return new boss_dreadscaleAI(pCreature);
 }
@@ -1123,7 +1123,7 @@ struct boss_icehowlAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_icehowl(Creature* pCreature)
+UnitAI* GetAI_boss_icehowl(Creature* pCreature)
 {
     return new boss_icehowlAI(pCreature);
 }

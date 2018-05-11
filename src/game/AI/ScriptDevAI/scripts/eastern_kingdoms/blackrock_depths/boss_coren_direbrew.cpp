@@ -151,7 +151,7 @@ struct boss_coren_direbrewAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_coren_direbrew(Creature* pCreature)
+UnitAI* GetAI_boss_coren_direbrew(Creature* pCreature)
 {
     return new boss_coren_direbrewAI(pCreature);
 }

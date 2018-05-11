@@ -202,7 +202,7 @@ struct boss_akilzonAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_akilzon(Creature* pCreature)
+UnitAI* GetAI_boss_akilzon(Creature* pCreature)
 {
     return new boss_akilzonAI(pCreature);
 }
@@ -299,7 +299,7 @@ struct mob_soaring_eagleAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_soaring_eagle(Creature* pCreature)
+UnitAI* GetAI_mob_soaring_eagle(Creature* pCreature)
 {
     return new mob_soaring_eagleAI(pCreature);
 }

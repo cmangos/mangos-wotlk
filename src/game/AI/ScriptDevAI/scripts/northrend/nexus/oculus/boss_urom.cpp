@@ -357,7 +357,7 @@ struct boss_uromAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_urom(Creature* pCreature)
+UnitAI* GetAI_boss_urom(Creature* pCreature)
 {
     return new boss_uromAI(pCreature);
 }

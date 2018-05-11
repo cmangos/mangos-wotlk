@@ -177,7 +177,7 @@ struct npc_heliceAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_helice(Creature* pCreature)
+UnitAI* GetAI_npc_helice(Creature* pCreature)
 {
     return new npc_heliceAI(pCreature);
 }
@@ -275,7 +275,7 @@ struct npc_injured_rainspeakerAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_injured_rainspeaker(Creature* pCreature)
+UnitAI* GetAI_npc_injured_rainspeaker(Creature* pCreature)
 {
     return new npc_injured_rainspeakerAI(pCreature);
 }
@@ -488,7 +488,7 @@ struct npc_tipsy_mcmanusAI : public ScriptedAI
         m_uiActionTimer     = 0;
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (pInvoker->GetTypeId() != TYPEID_PLAYER)
             return;
@@ -623,7 +623,7 @@ struct npc_tipsy_mcmanusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_tipsy_mcmanus(Creature* pCreature)
+UnitAI* GetAI_npc_tipsy_mcmanus(Creature* pCreature)
 {
     return new npc_tipsy_mcmanusAI(pCreature);
 }

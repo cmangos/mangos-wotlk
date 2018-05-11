@@ -185,7 +185,7 @@ struct boss_void_reaverAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_void_reaver(Creature* pCreature)
+UnitAI* GetAI_boss_void_reaver(Creature* pCreature)
 {
     return new boss_void_reaverAI(pCreature);
 }

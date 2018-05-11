@@ -285,7 +285,7 @@ struct boss_forgemaster_garfrostAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_forgemaster_garfrost(Creature* pCreature)
+UnitAI* GetAI_boss_forgemaster_garfrost(Creature* pCreature)
 {
     return new boss_forgemaster_garfrostAI(pCreature);
 }

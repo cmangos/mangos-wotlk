@@ -82,7 +82,7 @@ struct npc_ymirjar_deathbringerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_ymirjar_deathbringer(Creature* pCreature)
+UnitAI* GetAI_npc_ymirjar_deathbringer(Creature* pCreature)
 {
     return new npc_ymirjar_deathbringerAI(pCreature);
 }
@@ -141,7 +141,7 @@ struct npc_collapsing_icicleAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_collapsing_icicle(Creature* pCreature)
+UnitAI* GetAI_npc_collapsing_icicle(Creature* pCreature)
 {
     return new npc_collapsing_icicleAI(pCreature);
 }

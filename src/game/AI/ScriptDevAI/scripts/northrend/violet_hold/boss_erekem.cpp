@@ -168,7 +168,7 @@ struct boss_erekemAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_erekem(Creature* pCreature)
+UnitAI* GetAI_boss_erekem(Creature* pCreature)
 {
     return new boss_erekemAI(pCreature);
 }
@@ -241,7 +241,7 @@ struct npc_erekem_guardAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_erekem_guard(Creature* pCreature)
+UnitAI* GetAI_npc_erekem_guard(Creature* pCreature)
 {
     return new npc_erekem_guardAI(pCreature);
 }

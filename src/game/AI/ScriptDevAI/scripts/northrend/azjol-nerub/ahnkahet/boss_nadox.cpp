@@ -98,7 +98,7 @@ struct mob_ahnkahar_eggAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_ahnkahar_egg(Creature* pCreature)
+UnitAI* GetAI_mob_ahnkahar_egg(Creature* pCreature)
 {
     return new mob_ahnkahar_eggAI(pCreature);
 }
@@ -234,7 +234,7 @@ struct boss_nadoxAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_nadox(Creature* pCreature)
+UnitAI* GetAI_boss_nadox(Creature* pCreature)
 {
     return new boss_nadoxAI(pCreature);
 }

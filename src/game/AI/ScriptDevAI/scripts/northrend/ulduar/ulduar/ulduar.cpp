@@ -455,7 +455,7 @@ struct npc_storm_tempered_keeperAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_storm_tempered_keeper(Creature* pCreature)
+UnitAI* GetAI_npc_storm_tempered_keeper(Creature* pCreature)
 {
     return new npc_storm_tempered_keeperAI(pCreature);
 }
@@ -488,7 +488,7 @@ struct npc_charged_sphereAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 uiMiscValue) override
     {
         // inity entry of the buddy keeper
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -499,7 +499,7 @@ struct npc_charged_sphereAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_charged_sphere(Creature* pCreature)
+UnitAI* GetAI_npc_charged_sphere(Creature* pCreature)
 {
     return new npc_charged_sphereAI(pCreature);
 }

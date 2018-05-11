@@ -160,7 +160,7 @@ struct npc_calvin_montagueAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_calvin_montague(Creature* pCreature)
+UnitAI* GetAI_npc_calvin_montague(Creature* pCreature)
 {
     return new npc_calvin_montagueAI(pCreature);
 }

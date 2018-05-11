@@ -150,7 +150,7 @@ struct boss_thespiaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_thespiaAI(Creature* pCreature)
+UnitAI* GetAI_boss_thespiaAI(Creature* pCreature)
 {
     return new boss_thespiaAI(pCreature);
 }

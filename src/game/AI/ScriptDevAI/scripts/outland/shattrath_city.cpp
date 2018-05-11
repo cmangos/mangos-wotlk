@@ -287,7 +287,7 @@ bool GossipSelect_npc_dirty_larry(Player* pPlayer, Creature* pCreature, uint32 /
     return true;
 }
 
-CreatureAI* GetAI_npc_dirty_larry(Creature* pCreature)
+UnitAI* GetAI_npc_dirty_larry(Creature* pCreature)
 {
     return new npc_dirty_larryAI(pCreature);
 }
@@ -578,7 +578,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_khadgars_servant(Creature* pCreature)
+UnitAI* GetAI_npc_khadgars_servant(Creature* pCreature)
 {
     return new npc_khadgars_servantAI(pCreature);
 }
@@ -636,7 +636,7 @@ struct npc_salsalabimAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_salsalabim(Creature* pCreature)
+UnitAI* GetAI_npc_salsalabim(Creature* pCreature)
 {
     return new npc_salsalabimAI(pCreature);
 }

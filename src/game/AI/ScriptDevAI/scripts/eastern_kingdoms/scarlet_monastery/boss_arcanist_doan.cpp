@@ -125,7 +125,7 @@ struct boss_arcanist_doanAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_arcanist_doan(Creature* pCreature)
+UnitAI* GetAI_boss_arcanist_doan(Creature* pCreature)
 {
     return new boss_arcanist_doanAI(pCreature);
 }

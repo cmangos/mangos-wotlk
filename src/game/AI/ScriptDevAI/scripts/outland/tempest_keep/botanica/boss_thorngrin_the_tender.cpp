@@ -130,7 +130,7 @@ struct boss_thorngrinAI : ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_thorngrin(Creature* pCreature)
+UnitAI* GetAI_boss_thorngrin(Creature* pCreature)
 {
     return new boss_thorngrinAI(pCreature);
 }

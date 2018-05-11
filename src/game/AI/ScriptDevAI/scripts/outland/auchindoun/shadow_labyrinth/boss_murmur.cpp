@@ -195,7 +195,7 @@ struct boss_murmurAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_boss_murmur(Creature* pCreature)
+UnitAI* GetAI_boss_murmur(Creature* pCreature)
 {
     return new boss_murmurAI(pCreature);
 }

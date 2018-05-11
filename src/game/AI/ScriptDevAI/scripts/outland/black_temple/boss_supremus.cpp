@@ -304,17 +304,17 @@ struct boss_supremusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_supremus(Creature* pCreature)
+UnitAI* GetAI_boss_supremus(Creature* pCreature)
 {
     return new boss_supremusAI(pCreature);
 }
 
-CreatureAI* GetAI_molten_flame(Creature* pCreature)
+UnitAI* GetAI_molten_flame(Creature* pCreature)
 {
     return new molten_flameAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_volcano(Creature* pCreature)
+UnitAI* GetAI_npc_volcano(Creature* pCreature)
 {
     return new npc_volcanoAI(pCreature);
 }

@@ -127,7 +127,7 @@ struct mob_aquementasAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_aquementas(Creature* pCreature)
+UnitAI* GetAI_mob_aquementas(Creature* pCreature)
 {
     return new mob_aquementasAI(pCreature);
 }
@@ -216,7 +216,7 @@ struct npc_custodian_of_timeAI : public npc_escortAI
     void Reset() override { }
 };
 
-CreatureAI* GetAI_npc_custodian_of_time(Creature* pCreature)
+UnitAI* GetAI_npc_custodian_of_time(Creature* pCreature)
 {
     return new npc_custodian_of_timeAI(pCreature);
 }
@@ -316,7 +316,7 @@ struct npc_oox17tnAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_oox17tn(Creature* pCreature)
+UnitAI* GetAI_npc_oox17tn(Creature* pCreature)
 {
     return new npc_oox17tnAI(pCreature);
 }
@@ -535,7 +535,7 @@ struct npc_toogaAI : public FollowerAI
     }
 };
 
-CreatureAI* GetAI_npc_tooga(Creature* pCreature)
+UnitAI* GetAI_npc_tooga(Creature* pCreature)
 {
     return new npc_toogaAI(pCreature);
 }

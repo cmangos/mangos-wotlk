@@ -80,7 +80,7 @@ struct npc_dalaran_guardian_mageAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override {}
 };
 
-CreatureAI* GetAI_npc_dalaran_guardian_mage(Creature* pCreature)
+UnitAI* GetAI_npc_dalaran_guardian_mage(Creature* pCreature)
 {
     return new npc_dalaran_guardian_mageAI(pCreature);
 }

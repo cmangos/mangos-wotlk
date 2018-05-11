@@ -295,7 +295,7 @@ struct boss_lord_marrowgarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_lord_marrowgar(Creature* pCreature)
+UnitAI* GetAI_boss_lord_marrowgar(Creature* pCreature)
 {
     return new boss_lord_marrowgarAI(pCreature);
 }
@@ -373,7 +373,7 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_bone_spike(Creature* pCreature)
+UnitAI* GetAI_npc_bone_spike(Creature* pCreature)
 {
     return new npc_bone_spikeAI(pCreature);
 }
@@ -393,7 +393,7 @@ struct npc_coldflameAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_coldflame(Creature* pCreature)
+UnitAI* GetAI_npc_coldflame(Creature* pCreature)
 {
     return new npc_coldflameAI(pCreature);
 }

@@ -231,7 +231,7 @@ struct boss_heiganAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_heigan(Creature* pCreature)
+UnitAI* GetAI_boss_heigan(Creature* pCreature)
 {
     return new boss_heiganAI(pCreature);
 }

@@ -202,7 +202,7 @@ struct boss_ormorokAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ormorok(Creature* pCreature)
+UnitAI* GetAI_boss_ormorok(Creature* pCreature)
 {
     return new boss_ormorokAI(pCreature);
 }

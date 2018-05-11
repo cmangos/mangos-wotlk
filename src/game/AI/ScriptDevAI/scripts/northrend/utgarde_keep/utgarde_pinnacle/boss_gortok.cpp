@@ -132,7 +132,7 @@ struct boss_gortokAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_gortok(Creature* pCreature)
+UnitAI* GetAI_boss_gortok(Creature* pCreature)
 {
     return new boss_gortokAI(pCreature);
 }

@@ -464,7 +464,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
             m_pInstance->SetData(TYPE_ARTHAS_ESCORT_EVENT, FAIL);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 uiMiscValue) override
     {
         // on Malganis encounter finished -> evade
         if (pSender->GetEntry() == NPC_MALGANIS && eventType == AI_EVENT_CUSTOM_EVENTAI_B)
@@ -871,7 +871,7 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_arthas(Creature* pCreature)
+UnitAI* GetAI_npc_arthas(Creature* pCreature)
 {
     return new npc_arthasAI(pCreature);
 }

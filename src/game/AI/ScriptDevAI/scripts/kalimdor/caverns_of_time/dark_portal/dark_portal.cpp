@@ -65,7 +65,7 @@ struct npc_medivh_black_morassAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_medivh_black_morass(Creature* pCreature)
+UnitAI* GetAI_npc_medivh_black_morass(Creature* pCreature)
 {
     return new npc_medivh_black_morassAI(pCreature);
 }
@@ -361,7 +361,7 @@ struct npc_time_riftAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_time_rift(Creature* pCreature)
+UnitAI* GetAI_npc_time_rift(Creature* pCreature)
 {
     return new npc_time_riftAI(pCreature);
 }

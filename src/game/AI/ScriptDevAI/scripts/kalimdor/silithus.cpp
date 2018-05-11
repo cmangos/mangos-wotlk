@@ -643,7 +643,7 @@ struct npc_anachronos_the_ancientAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_anachronos_the_ancient(Creature* pCreature)
+UnitAI* GetAI_npc_anachronos_the_ancient(Creature* pCreature)
 {
     return new npc_anachronos_the_ancientAI(pCreature);
 }
@@ -945,7 +945,7 @@ bool GossipSelect_npc_solenor(Player* pPlayer, Creature* pCreature, uint32 uiSen
     return true;
 }
 
-CreatureAI* GetAI_npc_solenor(Creature* pCreature)
+UnitAI* GetAI_npc_solenor(Creature* pCreature)
 {
     return new npc_solenorAI(pCreature);
 }

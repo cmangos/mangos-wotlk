@@ -171,7 +171,7 @@ struct boss_krikthirAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_krikthir(Creature* pCreature)
+UnitAI* GetAI_boss_krikthir(Creature* pCreature)
 {
     return new boss_krikthirAI(pCreature);
 }

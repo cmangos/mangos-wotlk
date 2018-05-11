@@ -269,17 +269,17 @@ struct mob_demon_chainAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_boss_terestian_illhoof(Creature* pCreature)
+UnitAI* GetAI_boss_terestian_illhoof(Creature* pCreature)
 {
     return new boss_terestianAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_fiendish_portal(Creature* pCreature)
+UnitAI* GetAI_npc_fiendish_portal(Creature* pCreature)
 {
     return new npc_fiendish_portalAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_demon_chain(Creature* pCreature)
+UnitAI* GetAI_mob_demon_chain(Creature* pCreature)
 {
     return new mob_demon_chainAI(pCreature);
 }

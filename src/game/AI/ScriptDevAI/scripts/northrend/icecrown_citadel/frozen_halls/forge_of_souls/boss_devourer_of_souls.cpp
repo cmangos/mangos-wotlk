@@ -315,7 +315,7 @@ struct boss_devourer_of_soulsAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_devourer_of_souls(Creature* pCreature)
+UnitAI* GetAI_boss_devourer_of_souls(Creature* pCreature)
 {
     return new boss_devourer_of_soulsAI(pCreature);
 }

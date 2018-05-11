@@ -178,7 +178,7 @@ struct boss_xt_002AI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // enable hard mode
         if (eventType == AI_EVENT_CUSTOM_B && pInvoker->GetEntry() == NPC_HEART_DECONSTRUCTOR)
@@ -359,7 +359,7 @@ struct boss_xt_002AI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_xt_002(Creature* pCreature)
+UnitAI* GetAI_boss_xt_002(Creature* pCreature)
 {
     return new boss_xt_002AI(pCreature);
 }
@@ -411,7 +411,7 @@ struct boss_heart_deconstructorAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // start XT phase switch and start recharging robots
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_XT002)
@@ -474,7 +474,7 @@ struct boss_heart_deconstructorAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_heart_deconstructor(Creature* pCreature)
+UnitAI* GetAI_boss_heart_deconstructor(Creature* pCreature)
 {
     return new boss_heart_deconstructorAI(pCreature);
 }
@@ -507,7 +507,7 @@ struct npc_scrapbotAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_scrapbot(Creature* pCreature)
+UnitAI* GetAI_npc_scrapbot(Creature* pCreature)
 {
     return new npc_scrapbotAI(pCreature);
 }
@@ -527,7 +527,7 @@ struct npc_xt_toy_pileAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_xt_toy_pile(Creature* pCreature)
+UnitAI* GetAI_npc_xt_toy_pile(Creature* pCreature)
 {
     return new npc_xt_toy_pileAI(pCreature);
 }

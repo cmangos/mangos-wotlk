@@ -399,12 +399,12 @@ struct boss_warbringer_omroggAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_warbringer_omrogg(Creature* pCreature)
+UnitAI* GetAI_boss_warbringer_omrogg(Creature* pCreature)
 {
     return new boss_warbringer_omroggAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_omrogg_heads(Creature* pCreature)
+UnitAI* GetAI_mob_omrogg_heads(Creature* pCreature)
 {
     return new mob_omrogg_headsAI(pCreature);
 }

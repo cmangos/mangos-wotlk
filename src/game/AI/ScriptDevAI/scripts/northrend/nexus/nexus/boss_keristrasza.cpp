@@ -239,7 +239,7 @@ struct boss_keristraszaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_keristrasza(Creature* pCreature)
+UnitAI* GetAI_boss_keristrasza(Creature* pCreature)
 {
     return new boss_keristraszaAI(pCreature);
 }

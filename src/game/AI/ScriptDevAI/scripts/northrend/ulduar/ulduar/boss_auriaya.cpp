@@ -204,7 +204,7 @@ struct boss_auriayaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_auriaya(Creature* pCreature)
+UnitAI* GetAI_boss_auriaya(Creature* pCreature)
 {
     return new boss_auriayaAI(pCreature);
 }
@@ -372,7 +372,7 @@ struct boss_feral_defenderAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_feral_defender(Creature* pCreature)
+UnitAI* GetAI_boss_feral_defender(Creature* pCreature)
 {
     return new boss_feral_defenderAI(pCreature);
 }

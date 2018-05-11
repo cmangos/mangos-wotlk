@@ -85,7 +85,7 @@ struct boss_noxxionAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_noxxion(Creature* pCreature)
+UnitAI* GetAI_boss_noxxion(Creature* pCreature)
 {
     return new boss_noxxionAI(pCreature);
 }

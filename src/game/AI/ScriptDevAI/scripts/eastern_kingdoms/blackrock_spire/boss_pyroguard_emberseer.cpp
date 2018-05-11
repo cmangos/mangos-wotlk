@@ -186,7 +186,7 @@ struct boss_pyroguard_emberseerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_pyroguard_emberseer(Creature* pCreature)
+UnitAI* GetAI_boss_pyroguard_emberseer(Creature* pCreature)
 {
     return new boss_pyroguard_emberseerAI(pCreature);
 }

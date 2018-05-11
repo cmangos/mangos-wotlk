@@ -492,12 +492,12 @@ bool GOUse_go_shield_generator(Player* /*pPlayer*/, GameObject* pGo)
     return false;
 }
 
-CreatureAI* GetAI_boss_lady_vashj(Creature* pCreature)
+UnitAI* GetAI_boss_lady_vashj(Creature* pCreature)
 {
     return new boss_lady_vashjAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_enchanted_elemental(Creature* pCreature)
+UnitAI* GetAI_mob_enchanted_elemental(Creature* pCreature)
 {
     return new mob_enchanted_elementalAI(pCreature);
 }

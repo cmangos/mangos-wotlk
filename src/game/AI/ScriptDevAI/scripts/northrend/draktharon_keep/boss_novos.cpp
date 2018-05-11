@@ -314,7 +314,7 @@ struct boss_novosAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_boss_novos(Creature* pCreature)
+UnitAI* GetAI_boss_novos(Creature* pCreature)
 {
     return new boss_novosAI(pCreature);
 }
@@ -366,7 +366,7 @@ struct npc_crystal_channel_targetAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_crystal_channel_target(Creature* pCreature)
+UnitAI* GetAI_npc_crystal_channel_target(Creature* pCreature)
 {
     return new npc_crystal_channel_targetAI(pCreature);
 }

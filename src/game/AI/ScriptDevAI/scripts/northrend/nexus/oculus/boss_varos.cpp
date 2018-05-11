@@ -215,7 +215,7 @@ struct boss_varosAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_varos(Creature* pCreature)
+UnitAI* GetAI_boss_varos(Creature* pCreature)
 {
     return new boss_varosAI(pCreature);
 }
@@ -299,7 +299,7 @@ struct npc_azure_ring_captainAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_azure_ring_captain(Creature* pCreature)
+UnitAI* GetAI_npc_azure_ring_captain(Creature* pCreature)
 {
     return new npc_azure_ring_captainAI(pCreature);
 }
@@ -330,7 +330,7 @@ struct npc_arcane_beamAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_arcane_beam(Creature* pCreature)
+UnitAI* GetAI_npc_arcane_beam(Creature* pCreature)
 {
     return new npc_arcane_beamAI(pCreature);
 }
@@ -351,7 +351,7 @@ struct npc_centrifuge_coreAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_centrifuge_core(Creature* pCreature)
+UnitAI* GetAI_npc_centrifuge_core(Creature* pCreature)
 {
     return new npc_centrifuge_coreAI(pCreature);
 }

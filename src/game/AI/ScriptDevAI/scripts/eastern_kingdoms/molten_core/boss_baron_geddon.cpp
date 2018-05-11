@@ -128,7 +128,7 @@ struct boss_baron_geddonAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_baron_geddon(Creature* pCreature)
+UnitAI* GetAI_boss_baron_geddon(Creature* pCreature)
 {
     return new boss_baron_geddonAI(pCreature);
 }

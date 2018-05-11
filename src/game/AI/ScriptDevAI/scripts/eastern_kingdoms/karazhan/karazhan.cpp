@@ -175,7 +175,7 @@ struct npc_barnesAI : public npc_escortAI, private DialogueHelper
     void UpdateEscortAI(const uint32 uiDiff) { DialogueUpdate(uiDiff); }
 };
 
-CreatureAI* GetAI_npc_barnesAI(Creature* pCreature)
+UnitAI* GetAI_npc_barnesAI(Creature* pCreature)
 {
     return new npc_barnesAI(pCreature);
 }
@@ -441,7 +441,7 @@ struct npc_image_of_medivhAI : public ScriptedAI, private DialogueHelper
     void UpdateAI(const uint32 uiDiff) { DialogueUpdate(uiDiff); }
 };
 
-CreatureAI* GetAI_npc_image_of_medivhAI(Creature* pCreature)
+UnitAI* GetAI_npc_image_of_medivhAI(Creature* pCreature)
 {
     return new npc_image_of_medivhAI(pCreature);
 }
@@ -475,7 +475,7 @@ struct npc_image_arcanagosAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_image_arcanagosAI(Creature* pCreature)
+UnitAI* GetAI_npc_image_arcanagosAI(Creature* pCreature)
 {
     return new npc_image_arcanagosAI(pCreature);
 }

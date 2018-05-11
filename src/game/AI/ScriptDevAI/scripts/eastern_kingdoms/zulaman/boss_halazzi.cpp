@@ -291,7 +291,7 @@ struct boss_halazziAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_halazzi(Creature* pCreature)
+UnitAI* GetAI_boss_halazzi(Creature* pCreature)
 {
     return new boss_halazziAI(pCreature);
 }
@@ -369,7 +369,7 @@ struct boss_spirit_lynxAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_spirit_lynx(Creature* pCreature)
+UnitAI* GetAI_boss_spirit_lynx(Creature* pCreature)
 {
     return new boss_spirit_lynxAI(pCreature);
 }

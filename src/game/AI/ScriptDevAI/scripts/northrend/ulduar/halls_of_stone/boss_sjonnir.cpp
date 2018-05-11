@@ -269,7 +269,7 @@ struct boss_sjonnirAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_sjonnir(Creature* pCreature)
+UnitAI* GetAI_boss_sjonnir(Creature* pCreature)
 {
     return new boss_sjonnirAI(pCreature);
 }

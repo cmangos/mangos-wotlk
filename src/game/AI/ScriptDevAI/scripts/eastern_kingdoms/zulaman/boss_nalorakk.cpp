@@ -292,7 +292,7 @@ struct boss_nalorakkAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_nalorakk(Creature* pCreature)
+UnitAI* GetAI_boss_nalorakk(Creature* pCreature)
 {
     return new boss_nalorakkAI(pCreature);
 }

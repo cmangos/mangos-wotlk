@@ -142,7 +142,7 @@ struct boss_shirrakAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_shirrak(Creature* pCreature)
+UnitAI* GetAI_boss_shirrak(Creature* pCreature)
 {
     return new boss_shirrakAI(pCreature);
 }

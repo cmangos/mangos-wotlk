@@ -54,7 +54,7 @@ struct npc_ragged_johnAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_ragged_john(Creature* pCreature)
+UnitAI* GetAI_npc_ragged_john(Creature* pCreature)
 {
     return new npc_ragged_johnAI(pCreature);
 }
@@ -329,7 +329,7 @@ struct npc_grark_lorkrubAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_grark_lorkrub(Creature* pCreature)
+UnitAI* GetAI_npc_grark_lorkrub(Creature* pCreature)
 {
     return new npc_grark_lorkrubAI(pCreature);
 }
@@ -591,7 +591,7 @@ bool GossipSelect_npc_klinfran(Player* pPlayer, Creature* pCreature, uint32 uiSe
     return true;
 }
 
-CreatureAI* GetAI_npc_klinfran(Creature* pCreature)
+UnitAI* GetAI_npc_klinfran(Creature* pCreature)
 {
     return new npc_klinfranAI(pCreature);
 }

@@ -398,7 +398,7 @@ struct npc_putricides_trapAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_putricides_trap(Creature* pCreature)
+UnitAI* GetAI_npc_putricides_trap(Creature* pCreature)
 {
     return new npc_putricides_trapAI(pCreature);
 };

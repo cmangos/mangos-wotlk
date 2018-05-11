@@ -295,7 +295,7 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // count the summoned Rubble
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_RUBBLE_STALKER)
@@ -464,7 +464,7 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_boss_kologarn(Creature* pCreature)
+UnitAI* GetAI_boss_kologarn(Creature* pCreature)
 {
     return new boss_kologarnAI(pCreature);
 }
@@ -496,7 +496,7 @@ struct npc_focused_eyebeamAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_focused_eyebeam(Creature* pCreature)
+UnitAI* GetAI_npc_focused_eyebeam(Creature* pCreature)
 {
     return new npc_focused_eyebeamAI(pCreature);
 }
@@ -532,7 +532,7 @@ struct npc_rubble_stalkerAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_rubble_stalker(Creature* pCreature)
+UnitAI* GetAI_npc_rubble_stalker(Creature* pCreature)
 {
     return new npc_rubble_stalkerAI(pCreature);
 }

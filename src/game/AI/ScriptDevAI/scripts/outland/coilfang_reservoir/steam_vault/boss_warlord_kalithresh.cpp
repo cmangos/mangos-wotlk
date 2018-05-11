@@ -225,12 +225,12 @@ struct mob_naga_distillerAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_boss_warlord_kalithresh(Creature* pCreature)
+UnitAI* GetAI_boss_warlord_kalithresh(Creature* pCreature)
 {
     return new boss_warlord_kalithreshAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_naga_distiller(Creature* pCreature)
+UnitAI* GetAI_mob_naga_distiller(Creature* pCreature)
 {
     return new mob_naga_distillerAI(pCreature);
 }

@@ -401,7 +401,7 @@ struct boss_ymironAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ymiron(Creature* pCreature)
+UnitAI* GetAI_boss_ymiron(Creature* pCreature)
 {
     return new boss_ymironAI(pCreature);
 }

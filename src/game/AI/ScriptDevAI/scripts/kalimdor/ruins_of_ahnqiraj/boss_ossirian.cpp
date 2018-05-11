@@ -270,7 +270,7 @@ struct boss_ossirianAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ossirian(Creature* pCreature)
+UnitAI* GetAI_boss_ossirian(Creature* pCreature)
 {
     return new boss_ossirianAI(pCreature);
 }

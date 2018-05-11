@@ -392,12 +392,12 @@ struct npc_doomfire_spiritAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_archimonde(Creature* pCreature)
+UnitAI* GetAI_boss_archimonde(Creature* pCreature)
 {
     return new boss_archimondeAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_doomfire_spirit(Creature* pCreature)
+UnitAI* GetAI_npc_doomfire_spirit(Creature* pCreature)
 {
     return new npc_doomfire_spiritAI(pCreature);
 }

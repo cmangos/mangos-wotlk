@@ -420,7 +420,7 @@ struct boss_freyaAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         // handle Allies of Nature spawn
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -702,7 +702,7 @@ struct boss_freyaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_freya(Creature* pCreature)
+UnitAI* GetAI_boss_freya(Creature* pCreature)
 {
     return new boss_freyaAI(pCreature);
 }
@@ -828,7 +828,7 @@ struct npc_water_spiritAI : public three_nature_alliesAI
     }
 };
 
-CreatureAI* GetAI_npc_water_spirit(Creature* pCreature)
+UnitAI* GetAI_npc_water_spirit(Creature* pCreature)
 {
     return new npc_water_spiritAI(pCreature);
 }
@@ -852,7 +852,7 @@ struct npc_snaplasherAI : public three_nature_alliesAI
     }
 };
 
-CreatureAI* GetAI_npc_snaplasher(Creature* pCreature)
+UnitAI* GetAI_npc_snaplasher(Creature* pCreature)
 {
     return new npc_snaplasherAI(pCreature);
 }
@@ -906,7 +906,7 @@ struct npc_storm_lasherAI : public three_nature_alliesAI
     }
 };
 
-CreatureAI* GetAI_npc_storm_lasher(Creature* pCreature)
+UnitAI* GetAI_npc_storm_lasher(Creature* pCreature)
 {
     return new npc_storm_lasherAI(pCreature);
 }
@@ -946,7 +946,7 @@ struct npc_eonars_giftAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_eonars_gift(Creature* pCreature)
+UnitAI* GetAI_npc_eonars_gift(Creature* pCreature)
 {
     return new npc_eonars_giftAI(pCreature);
 }
@@ -996,7 +996,7 @@ struct npc_nature_bombAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_nature_bomb(Creature* pCreature)
+UnitAI* GetAI_npc_nature_bomb(Creature* pCreature)
 {
     return new npc_nature_bombAI(pCreature);
 }
@@ -1033,7 +1033,7 @@ struct npc_iron_rootsAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_iron_roots(Creature* pCreature)
+UnitAI* GetAI_npc_iron_roots(Creature* pCreature)
 {
     return new npc_iron_rootsAI(pCreature);
 }
@@ -1060,7 +1060,7 @@ struct npc_healthy_sporeAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_healthy_spore(Creature* pCreature)
+UnitAI* GetAI_npc_healthy_spore(Creature* pCreature)
 {
     return new npc_healthy_sporeAI(pCreature);
 }

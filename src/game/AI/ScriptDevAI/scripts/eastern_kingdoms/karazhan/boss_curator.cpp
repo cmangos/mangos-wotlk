@@ -217,7 +217,7 @@ struct boss_curatorAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_curator(Creature* pCreature)
+UnitAI* GetAI_boss_curator(Creature* pCreature)
 {
     return new boss_curatorAI(pCreature);
 }

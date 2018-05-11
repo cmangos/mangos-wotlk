@@ -142,7 +142,7 @@ struct mob_dragonflayer_forge_masterAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_dragonflayer_forge_master(Creature* pCreature)
+UnitAI* GetAI_mob_dragonflayer_forge_master(Creature* pCreature)
 {
     return new mob_dragonflayer_forge_masterAI(pCreature);
 }

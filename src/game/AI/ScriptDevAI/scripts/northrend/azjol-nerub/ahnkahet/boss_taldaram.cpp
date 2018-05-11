@@ -286,7 +286,7 @@ struct boss_taldaramAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_taldaram(Creature* pCreature)
+UnitAI* GetAI_boss_taldaram(Creature* pCreature)
 {
     return new boss_taldaramAI(pCreature);
 }

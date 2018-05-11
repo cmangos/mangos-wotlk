@@ -219,7 +219,7 @@ struct boss_talon_king_ikissAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_talon_king_ikiss(Creature* pCreature)
+UnitAI* GetAI_boss_talon_king_ikiss(Creature* pCreature)
 {
     return new boss_talon_king_ikissAI(pCreature);
 }

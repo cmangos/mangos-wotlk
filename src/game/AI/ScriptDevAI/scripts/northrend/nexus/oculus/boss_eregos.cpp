@@ -231,7 +231,7 @@ struct boss_eregosAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_eregos(Creature* pCreature)
+UnitAI* GetAI_boss_eregos(Creature* pCreature)
 {
     return new boss_eregosAI(pCreature);
 }
@@ -292,7 +292,7 @@ struct npc_planar_anomalyAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_planar_anomaly(Creature* pCreature)
+UnitAI* GetAI_npc_planar_anomaly(Creature* pCreature)
 {
     return new npc_planar_anomalyAI(pCreature);
 }

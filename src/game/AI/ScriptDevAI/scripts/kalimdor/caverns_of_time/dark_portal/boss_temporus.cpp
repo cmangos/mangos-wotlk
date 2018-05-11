@@ -143,7 +143,7 @@ struct boss_temporusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_temporus(Creature* pCreature)
+UnitAI* GetAI_boss_temporus(Creature* pCreature)
 {
     return new boss_temporusAI(pCreature);
 }

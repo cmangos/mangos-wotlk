@@ -526,7 +526,7 @@ struct boss_onyxiaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_onyxia(Creature* pCreature)
+UnitAI* GetAI_boss_onyxia(Creature* pCreature)
 {
     return new boss_onyxiaAI(pCreature);
 }

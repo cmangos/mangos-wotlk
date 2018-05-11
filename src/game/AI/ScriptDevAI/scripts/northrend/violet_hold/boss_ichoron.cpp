@@ -145,7 +145,7 @@ struct boss_ichoronAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ichoron(Creature* pCreature)
+UnitAI* GetAI_boss_ichoron(Creature* pCreature)
 {
     return new boss_ichoronAI(pCreature);
 }

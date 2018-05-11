@@ -418,7 +418,7 @@ struct boss_majordomoAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_majordomo(Creature* pCreature)
+UnitAI* GetAI_boss_majordomo(Creature* pCreature)
 {
     return new boss_majordomoAI(pCreature);
 }

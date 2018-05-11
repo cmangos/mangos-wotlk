@@ -257,12 +257,12 @@ struct mob_nether_wraithAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_pathaleon_the_calculator(Creature* pCreature)
+UnitAI* GetAI_boss_pathaleon_the_calculator(Creature* pCreature)
 {
     return new boss_pathaleon_the_calculatorAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_nether_wraith(Creature* pCreature)
+UnitAI* GetAI_mob_nether_wraith(Creature* pCreature)
 {
     return new mob_nether_wraithAI(pCreature);
 }

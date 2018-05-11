@@ -184,7 +184,7 @@ struct boss_eadricAI : public argent_champion_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_eadric(Creature* pCreature)
+UnitAI* GetAI_boss_eadric(Creature* pCreature)
 {
     return new boss_eadricAI(pCreature);
 }
@@ -335,7 +335,7 @@ struct boss_paletressAI : public argent_champion_commonAI
     }
 };
 
-CreatureAI* GetAI_boss_paletress(Creature* pCreature)
+UnitAI* GetAI_boss_paletress(Creature* pCreature)
 {
     return new boss_paletressAI(pCreature);
 }

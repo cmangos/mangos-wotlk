@@ -417,7 +417,7 @@ struct boss_brundirAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_brundir(Creature* pCreature)
+UnitAI* GetAI_boss_brundir(Creature* pCreature)
 {
     return new boss_brundirAI(pCreature);
 }
@@ -602,7 +602,7 @@ struct boss_molgeimAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_molgeim(Creature* pCreature)
+UnitAI* GetAI_boss_molgeim(Creature* pCreature)
 {
     return new boss_molgeimAI(pCreature);
 }
@@ -752,7 +752,7 @@ struct boss_steelbreakerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_steelbreaker(Creature* pCreature)
+UnitAI* GetAI_boss_steelbreaker(Creature* pCreature)
 {
     return new boss_steelbreakerAI(pCreature);
 }

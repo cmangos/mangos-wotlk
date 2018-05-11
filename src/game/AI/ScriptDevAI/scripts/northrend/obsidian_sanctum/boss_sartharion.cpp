@@ -521,7 +521,7 @@ struct boss_sartharionAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_sartharion(Creature* pCreature)
+UnitAI* GetAI_boss_sartharion(Creature* pCreature)
 {
     return new boss_sartharionAI(pCreature);
 }
@@ -850,7 +850,7 @@ struct mob_tenebronAI : public dummy_dragonAI
         pSummoned->SetPhaseMask(PHASEMASK_TWILIGHT_REALM, true);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_TWILIGHT_EGG_CONTROLLER)
         {
@@ -903,7 +903,7 @@ struct mob_tenebronAI : public dummy_dragonAI
     }
 };
 
-CreatureAI* GetAI_mob_tenebron(Creature* pCreature)
+UnitAI* GetAI_mob_tenebron(Creature* pCreature)
 {
     return new mob_tenebronAI(pCreature);
 }
@@ -1021,7 +1021,7 @@ struct mob_shadronAI : public dummy_dragonAI
     }
 };
 
-CreatureAI* GetAI_mob_shadron(Creature* pCreature)
+UnitAI* GetAI_mob_shadron(Creature* pCreature)
 {
     return new mob_shadronAI(pCreature);
 }
@@ -1131,7 +1131,7 @@ struct mob_vesperonAI : public dummy_dragonAI
     }
 };
 
-CreatureAI* GetAI_mob_vesperon(Creature* pCreature)
+UnitAI* GetAI_mob_vesperon(Creature* pCreature)
 {
     return new mob_vesperonAI(pCreature);
 }
@@ -1182,7 +1182,7 @@ struct mob_twilight_eggsAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_mob_twilight_eggs(Creature* pCreature)
+UnitAI* GetAI_mob_twilight_eggs(Creature* pCreature)
 {
     return new mob_twilight_eggsAI(pCreature);
 }
@@ -1232,7 +1232,7 @@ struct npc_tenebron_egg_controllerAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_tenebron_egg_controller(Creature* pCreature)
+UnitAI* GetAI_npc_tenebron_egg_controller(Creature* pCreature)
 {
     return new npc_tenebron_egg_controllerAI(pCreature);
 }
@@ -1285,7 +1285,7 @@ struct npc_flame_tsunamiAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_flame_tsunami(Creature* pCreature)
+UnitAI* GetAI_npc_flame_tsunami(Creature* pCreature)
 {
     return new npc_flame_tsunamiAI(pCreature);
 }
@@ -1323,7 +1323,7 @@ struct npc_fire_cycloneAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_fire_cyclone(Creature* pCreature)
+UnitAI* GetAI_npc_fire_cyclone(Creature* pCreature)
 {
     return new npc_fire_cycloneAI(pCreature);
 }

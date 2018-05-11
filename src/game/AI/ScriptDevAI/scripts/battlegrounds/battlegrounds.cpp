@@ -97,7 +97,7 @@ bool GossipHello_npc_spirit_guide(Player* pPlayer, Creature* /*pCreature*/)
     return true;
 }
 
-CreatureAI* GetAI_npc_spirit_guide(Creature* pCreature)
+UnitAI* GetAI_npc_spirit_guide(Creature* pCreature)
 {
     return new npc_spirit_guideAI(pCreature);
 }

@@ -153,7 +153,7 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_lady_sylvanas_windrunner(Creature* pCreature)
+UnitAI* GetAI_npc_lady_sylvanas_windrunner(Creature* pCreature)
 {
     return new npc_lady_sylvanas_windrunnerAI(pCreature);
 }

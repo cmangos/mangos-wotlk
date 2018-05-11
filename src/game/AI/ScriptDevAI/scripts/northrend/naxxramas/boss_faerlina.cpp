@@ -189,7 +189,7 @@ struct boss_faerlinaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_faerlina(Creature* pCreature)
+UnitAI* GetAI_boss_faerlina(Creature* pCreature)
 {
     return new boss_faerlinaAI(pCreature);
 }

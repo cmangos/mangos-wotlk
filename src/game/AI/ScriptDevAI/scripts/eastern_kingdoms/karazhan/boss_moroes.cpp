@@ -276,7 +276,7 @@ struct boss_moroesAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_moroes(Creature* pCreature)
+UnitAI* GetAI_boss_moroes(Creature* pCreature)
 {
     return new boss_moroesAI(pCreature);
 }

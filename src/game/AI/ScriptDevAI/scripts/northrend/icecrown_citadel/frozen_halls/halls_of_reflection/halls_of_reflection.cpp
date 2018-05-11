@@ -222,7 +222,7 @@ struct npc_phantom_mageAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_phantom_mage(Creature* pCreature)
+UnitAI* GetAI_npc_phantom_mage(Creature* pCreature)
 {
     return new npc_phantom_mageAI(pCreature);
 }

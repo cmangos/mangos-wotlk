@@ -829,22 +829,22 @@ struct npc_power_blue_flightAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_kiljaeden(Creature* pCreature)
+UnitAI* GetAI_boss_kiljaeden(Creature* pCreature)
 {
     return new boss_kiljaedenAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_kiljaeden_controller(Creature* pCreature)
+UnitAI* GetAI_npc_kiljaeden_controller(Creature* pCreature)
 {
     return new npc_kiljaeden_controllerAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_shield_orb(Creature* pCreature)
+UnitAI* GetAI_npc_shield_orb(Creature* pCreature)
 {
     return new npc_shield_orbAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_power_blue_flight(Creature* pCreature)
+UnitAI* GetAI_npc_power_blue_flight(Creature* pCreature)
 {
     return new npc_power_blue_flightAI(pCreature);
 }

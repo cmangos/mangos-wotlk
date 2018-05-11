@@ -661,7 +661,7 @@ bool GossipSelect_npc_brann_hos(Player* pPlayer, Creature* pCreature, uint32 /*u
     return true;
 }
 
-CreatureAI* GetAI_npc_brann_hos(Creature* pCreature)
+UnitAI* GetAI_npc_brann_hos(Creature* pCreature)
 {
     return new npc_brann_hosAI(pCreature);
 }
@@ -742,7 +742,7 @@ struct npc_dark_matterAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_dark_matter(Creature* pCreature)
+UnitAI* GetAI_npc_dark_matter(Creature* pCreature)
 {
     return new npc_dark_matterAI(pCreature);
 }
@@ -774,7 +774,7 @@ struct npc_searing_gazeAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_searing_gaze(Creature* pCreature)
+UnitAI* GetAI_npc_searing_gaze(Creature* pCreature)
 {
     return new npc_searing_gazeAI(pCreature);
 }

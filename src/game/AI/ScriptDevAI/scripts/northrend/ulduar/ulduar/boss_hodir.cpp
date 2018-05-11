@@ -299,7 +299,7 @@ struct boss_hodirAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_hodir(Creature* pCreature)
+UnitAI* GetAI_boss_hodir(Creature* pCreature)
 {
     return new boss_hodirAI(pCreature);
 }
@@ -380,7 +380,7 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_flash_freeze(Creature* pCreature)
+UnitAI* GetAI_npc_flash_freeze(Creature* pCreature)
 {
     return new npc_flash_freezeAI(pCreature);
 }
@@ -443,7 +443,7 @@ struct npc_icicle_targetAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_icicle_target(Creature* pCreature)
+UnitAI* GetAI_npc_icicle_target(Creature* pCreature)
 {
     return new npc_icicle_targetAI(pCreature);
 }

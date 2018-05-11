@@ -264,7 +264,7 @@ struct boss_volkhanAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_volkhan(Creature* pCreature)
+UnitAI* GetAI_boss_volkhan(Creature* pCreature)
 {
     return new boss_volkhanAI(pCreature);
 }
@@ -405,7 +405,7 @@ struct mob_molten_golemAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_molten_golem(Creature* pCreature)
+UnitAI* GetAI_mob_molten_golem(Creature* pCreature)
 {
     return new mob_molten_golemAI(pCreature);
 }

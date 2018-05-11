@@ -272,7 +272,7 @@ struct boss_fjolaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_fjola(Creature* pCreature)
+UnitAI* GetAI_boss_fjola(Creature* pCreature)
 {
     return new boss_fjolaAI(pCreature);
 }
@@ -347,7 +347,7 @@ struct boss_eydisAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_eydis(Creature* pCreature)
+UnitAI* GetAI_boss_eydis(Creature* pCreature)
 {
     return new boss_eydisAI(pCreature);
 }
@@ -397,7 +397,7 @@ struct npc_concentrated_bulletAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_concentrated_bullet(Creature* pCreature)
+UnitAI* GetAI_npc_concentrated_bullet(Creature* pCreature)
 {
     return new npc_concentrated_bulletAI(pCreature);
 }
@@ -417,7 +417,7 @@ struct npc_valkyr_stalkerAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_valkyr_stalker(Creature* pCreature)
+UnitAI* GetAI_npc_valkyr_stalker(Creature* pCreature)
 {
     return new npc_valkyr_stalkerAI(pCreature);
 }

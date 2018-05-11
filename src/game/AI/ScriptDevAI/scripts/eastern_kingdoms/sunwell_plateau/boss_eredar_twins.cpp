@@ -543,17 +543,17 @@ struct npc_shadow_imageAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_alythess(Creature* pCreature)
+UnitAI* GetAI_boss_alythess(Creature* pCreature)
 {
     return new boss_alythessAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_sacrolash(Creature* pCreature)
+UnitAI* GetAI_boss_sacrolash(Creature* pCreature)
 {
     return new boss_sacrolashAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_shadow_image(Creature* pCreature)
+UnitAI* GetAI_npc_shadow_image(Creature* pCreature)
 {
     return new npc_shadow_imageAI(pCreature);
 }

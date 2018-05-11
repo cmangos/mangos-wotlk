@@ -397,7 +397,7 @@ struct boss_anubarak_trialAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_anubarak_trial(Creature* pCreature)
+UnitAI* GetAI_boss_anubarak_trial(Creature* pCreature)
 {
     return new boss_anubarak_trialAI(pCreature);
 }
@@ -514,7 +514,7 @@ struct npc_anubarak_trial_spikeAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_anubarak_trial_spike(Creature* pCreature)
+UnitAI* GetAI_npc_anubarak_trial_spike(Creature* pCreature)
 {
     return new npc_anubarak_trial_spikeAI(pCreature);
 }
@@ -598,7 +598,7 @@ struct npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_anubarak_trial_frostsphere(Creature* pCreature)
+UnitAI* GetAI_npc_anubarak_trial_frostsphere(Creature* pCreature)
 {
     return new npc_anubarak_trial_frostsphereAI(pCreature);
 }
@@ -618,7 +618,7 @@ struct npc_nerubian_borrowAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_nerubian_borrow(Creature* pCreature)
+UnitAI* GetAI_npc_nerubian_borrow(Creature* pCreature)
 {
     return new npc_nerubian_borrowAI(pCreature);
 }

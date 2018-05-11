@@ -247,7 +247,7 @@ struct boss_halion_realAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
             DoRemoveTwilightPhaseAura();
@@ -559,12 +559,12 @@ struct boss_halion_twilightAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_halion_real(Creature* pCreature)
+UnitAI* GetAI_boss_halion_real(Creature* pCreature)
 {
     return new boss_halion_realAI(pCreature);
 };
 
-CreatureAI* GetAI_boss_halion_twilight(Creature* pCreature)
+UnitAI* GetAI_boss_halion_twilight(Creature* pCreature)
 {
     return new boss_halion_twilightAI(pCreature);
 };

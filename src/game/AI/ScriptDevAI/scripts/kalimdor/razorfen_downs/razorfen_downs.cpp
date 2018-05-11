@@ -283,7 +283,7 @@ struct npc_belnistraszAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_belnistrasz(Creature* pCreature)
+UnitAI* GetAI_npc_belnistrasz(Creature* pCreature)
 {
     return new npc_belnistraszAI(pCreature);
 }

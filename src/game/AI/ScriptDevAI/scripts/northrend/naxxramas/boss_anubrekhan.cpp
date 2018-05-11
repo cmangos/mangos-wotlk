@@ -224,7 +224,7 @@ struct boss_anubrekhanAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_anubrekhan(Creature* pCreature)
+UnitAI* GetAI_boss_anubrekhan(Creature* pCreature)
 {
     return new boss_anubrekhanAI(pCreature);
 }

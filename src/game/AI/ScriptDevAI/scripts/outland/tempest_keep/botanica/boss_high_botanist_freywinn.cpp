@@ -190,7 +190,7 @@ struct boss_high_botanist_freywinnAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_high_botanist_freywinn(Creature* pCreature)
+UnitAI* GetAI_boss_high_botanist_freywinn(Creature* pCreature)
 {
     return new boss_high_botanist_freywinnAI(pCreature);
 }

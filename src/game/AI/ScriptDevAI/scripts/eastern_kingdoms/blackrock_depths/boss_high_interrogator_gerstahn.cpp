@@ -100,7 +100,7 @@ struct boss_high_interrogator_gerstahnAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_high_interrogator_gerstahn(Creature* pCreature)
+UnitAI* GetAI_boss_high_interrogator_gerstahn(Creature* pCreature)
 {
     return new boss_high_interrogator_gerstahnAI(pCreature);
 }

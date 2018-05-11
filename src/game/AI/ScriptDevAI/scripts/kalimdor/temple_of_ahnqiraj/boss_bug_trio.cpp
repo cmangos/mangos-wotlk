@@ -264,17 +264,17 @@ struct boss_yaujAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_yauj(Creature* pCreature)
+UnitAI* GetAI_boss_yauj(Creature* pCreature)
 {
     return new boss_yaujAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_vem(Creature* pCreature)
+UnitAI* GetAI_boss_vem(Creature* pCreature)
 {
     return new boss_vemAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_kri(Creature* pCreature)
+UnitAI* GetAI_boss_kri(Creature* pCreature)
 {
     return new boss_kriAI(pCreature);
 }

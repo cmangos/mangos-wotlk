@@ -246,7 +246,7 @@ struct boss_selin_fireheartAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_selin_fireheart(Creature* pCreature)
+UnitAI* GetAI_boss_selin_fireheart(Creature* pCreature)
 {
     return new boss_selin_fireheartAI(pCreature);
 };
@@ -308,7 +308,7 @@ struct mob_fel_crystalAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_fel_crystal(Creature* pCreature)
+UnitAI* GetAI_mob_fel_crystal(Creature* pCreature)
 {
     return new mob_fel_crystalAI(pCreature);
 };

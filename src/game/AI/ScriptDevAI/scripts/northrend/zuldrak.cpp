@@ -92,7 +92,7 @@ bool QuestAccept_npc_gurgthock(Player* pPlayer, Creature* pCreature, const Quest
     return true;
 }
 
-CreatureAI* GetAI_npc_gurgthock(Creature* pCreature)
+UnitAI* GetAI_npc_gurgthock(Creature* pCreature)
 {
     return new npc_gurgthockAI(pCreature);
 }
@@ -121,7 +121,7 @@ struct npc_ghoul_feeding_bunnyAI : public ScriptedAI
         m_uiAttractTimer = 1000;
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_DECAYING_GHOUL)
         {
@@ -152,7 +152,7 @@ struct npc_ghoul_feeding_bunnyAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_ghoul_feeding_bunny(Creature* pCreature)
+UnitAI* GetAI_npc_ghoul_feeding_bunny(Creature* pCreature)
 {
     return new npc_ghoul_feeding_bunnyAI(pCreature);
 }
@@ -208,7 +208,7 @@ struct npc_decaying_ghoulAI : public ScriptedAI
             SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pBunny);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_GHOUL_FEEDING_BUNNY)
         {
@@ -251,7 +251,7 @@ struct npc_decaying_ghoulAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_decaying_ghoul(Creature* pCreature)
+UnitAI* GetAI_npc_decaying_ghoul(Creature* pCreature)
 {
     return new npc_decaying_ghoulAI(pCreature);
 }

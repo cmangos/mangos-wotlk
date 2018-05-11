@@ -202,7 +202,7 @@ struct boss_najentusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_najentus(Creature* pCreature)
+UnitAI* GetAI_boss_najentus(Creature* pCreature)
 {
     return new boss_najentusAI(pCreature);
 }

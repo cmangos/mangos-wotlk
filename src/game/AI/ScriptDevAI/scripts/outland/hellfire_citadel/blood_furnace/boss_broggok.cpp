@@ -134,12 +134,12 @@ struct mob_broggok_poisoncloudAI : public ScriptedAI
     void AttackStart(Unit* /*who*/) override { }
 };
 
-CreatureAI* GetAI_boss_broggok(Creature* pCreature)
+UnitAI* GetAI_boss_broggok(Creature* pCreature)
 {
     return new boss_broggokAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_broggok_poisoncloud(Creature* pCreature)
+UnitAI* GetAI_mob_broggok_poisoncloud(Creature* pCreature)
 {
     return new mob_broggok_poisoncloudAI(pCreature);
 }

@@ -160,7 +160,7 @@ struct npc_destructive_wardAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_destructive_ward(Creature* pCreature)
+UnitAI* GetAI_npc_destructive_ward(Creature* pCreature)
 {
     return new npc_destructive_wardAI(pCreature);
 }

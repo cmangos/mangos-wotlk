@@ -323,7 +323,7 @@ struct boss_leotheras_the_blindAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_leotheras_the_blind(Creature* pCreature)
+UnitAI* GetAI_boss_leotheras_the_blind(Creature* pCreature)
 {
     return new boss_leotheras_the_blindAI(pCreature);
 }

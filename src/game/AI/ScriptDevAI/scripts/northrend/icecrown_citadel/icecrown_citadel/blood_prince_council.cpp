@@ -220,7 +220,7 @@ struct npc_queen_lanathel_introAI : public ScriptedAI, private DialogueHelper
     void UpdateAI(const uint32 uiDiff) { DialogueUpdate(uiDiff); }
 };
 
-CreatureAI* GetAI_npc_queen_lanathel_intro(Creature* pCreature)
+UnitAI* GetAI_npc_queen_lanathel_intro(Creature* pCreature)
 {
     return new npc_queen_lanathel_introAI(pCreature);
 }
@@ -272,7 +272,7 @@ struct npc_ball_of_flameAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_ball_of_flame(Creature* pCreature)
+UnitAI* GetAI_npc_ball_of_flame(Creature* pCreature)
 {
     return new npc_ball_of_flameAI(pCreature);
 };
@@ -313,7 +313,7 @@ struct npc_kinetic_bombAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_kinetic_bomb(Creature* pCreature)
+UnitAI* GetAI_npc_kinetic_bomb(Creature* pCreature)
 {
     return new npc_kinetic_bombAI(pCreature);
 };
@@ -365,7 +365,7 @@ struct npc_dark_nucleusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_dark_nucleus(Creature* pCreature)
+UnitAI* GetAI_npc_dark_nucleus(Creature* pCreature)
 {
     return new npc_dark_nucleusAI(pCreature);
 };
@@ -457,7 +457,7 @@ struct npc_blood_orb_controlAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_blood_orb_control(Creature* pCreature)
+UnitAI* GetAI_npc_blood_orb_control(Creature* pCreature)
 {
     return new npc_blood_orb_controlAI(pCreature);
 }
@@ -668,7 +668,7 @@ struct boss_valanar_iccAI : public blood_prince_council_baseAI
     }
 };
 
-CreatureAI* GetAI_boss_valanar_icc(Creature* pCreature)
+UnitAI* GetAI_boss_valanar_icc(Creature* pCreature)
 {
     return new boss_valanar_iccAI(pCreature);
 }
@@ -748,7 +748,7 @@ struct boss_keleseth_iccAI : public blood_prince_council_baseAI
     }
 };
 
-CreatureAI* GetAI_boss_keleseth_icc(Creature* pCreature)
+UnitAI* GetAI_boss_keleseth_icc(Creature* pCreature)
 {
     return new boss_keleseth_iccAI(pCreature);
 }
@@ -835,7 +835,7 @@ struct boss_taldaram_iccAI : public blood_prince_council_baseAI
     }
 };
 
-CreatureAI* GetAI_boss_taldaram_icc(Creature* pCreature)
+UnitAI* GetAI_boss_taldaram_icc(Creature* pCreature)
 {
     return new boss_taldaram_iccAI(pCreature);
 }

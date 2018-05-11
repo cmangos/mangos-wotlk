@@ -656,27 +656,27 @@ struct npc_enslaved_soulAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_reliquary_of_souls(Creature* pCreature)
+UnitAI* GetAI_boss_reliquary_of_souls(Creature* pCreature)
 {
     return new boss_reliquary_of_soulsAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_essence_of_suffering(Creature* pCreature)
+UnitAI* GetAI_boss_essence_of_suffering(Creature* pCreature)
 {
     return new boss_essence_of_sufferingAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_essence_of_desire(Creature* pCreature)
+UnitAI* GetAI_boss_essence_of_desire(Creature* pCreature)
 {
     return new boss_essence_of_desireAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_essence_of_anger(Creature* pCreature)
+UnitAI* GetAI_boss_essence_of_anger(Creature* pCreature)
 {
     return new boss_essence_of_angerAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_enslaved_soul(Creature* pCreature)
+UnitAI* GetAI_npc_enslaved_soul(Creature* pCreature)
 {
     return new npc_enslaved_soulAI(pCreature);
 }

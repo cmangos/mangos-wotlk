@@ -372,7 +372,7 @@ struct boss_malchezaarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_malchezaar(Creature* pCreature)
+UnitAI* GetAI_boss_malchezaar(Creature* pCreature)
 {
     return new boss_malchezaarAI(pCreature);
 }
@@ -392,7 +392,7 @@ struct npc_infernal_targetAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_infernal_target(Creature* pCreature)
+UnitAI* GetAI_npc_infernal_target(Creature* pCreature)
 {
     return new npc_infernal_targetAI(pCreature);
 }

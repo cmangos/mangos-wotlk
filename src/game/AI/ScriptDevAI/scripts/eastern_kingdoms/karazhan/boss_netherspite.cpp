@@ -310,7 +310,7 @@ struct boss_netherspiteAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_netherspite(Creature* pCreature)
+UnitAI* GetAI_boss_netherspite(Creature* pCreature)
 {
     return new boss_netherspiteAI(pCreature);
 }
@@ -341,7 +341,7 @@ struct npc_netherspite_portalAI : public Scripted_NoMovementAI
     void MoveInLineOfSight(Unit* pWho) { }
     void AttackStart(Unit* pWho) { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -401,7 +401,7 @@ struct npc_netherspite_portalAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_netherspite_portal(Creature* pCreature)
+UnitAI* GetAI_npc_netherspite_portal(Creature* pCreature)
 {
     return new npc_netherspite_portalAI(pCreature);
 }

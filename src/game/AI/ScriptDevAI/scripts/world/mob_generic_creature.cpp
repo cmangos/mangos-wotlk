@@ -162,7 +162,7 @@ struct generic_creatureAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_generic_creature(Creature* pCreature)
+UnitAI* GetAI_generic_creature(Creature* pCreature)
 {
     return new generic_creatureAI(pCreature);
 }

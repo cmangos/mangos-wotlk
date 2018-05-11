@@ -355,7 +355,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_hydross_the_unstable(Creature* pCreature)
+UnitAI* GetAI_boss_hydross_the_unstable(Creature* pCreature)
 {
     return new boss_hydross_the_unstableAI(pCreature);
 }

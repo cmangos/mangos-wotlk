@@ -681,22 +681,22 @@ struct mob_ashtongue_sorcererAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override {}
 };
 
-CreatureAI* GetAI_npc_akama_shade(Creature* pCreature)
+UnitAI* GetAI_npc_akama_shade(Creature* pCreature)
 {
     return new npc_akamaAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_shade_of_akama(Creature* pCreature)
+UnitAI* GetAI_boss_shade_of_akama(Creature* pCreature)
 {
     return new boss_shade_of_akamaAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_ashtongue_channeler(Creature* pCreature)
+UnitAI* GetAI_mob_ashtongue_channeler(Creature* pCreature)
 {
     return new mob_ashtongue_channelerAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_ashtongue_sorcerer(Creature* pCreature)
+UnitAI* GetAI_mob_ashtongue_sorcerer(Creature* pCreature)
 {
     return new mob_ashtongue_sorcererAI(pCreature);
 }

@@ -71,7 +71,7 @@ struct mob_webbed_creatureAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_mob_webbed_creature(Creature* pCreature)
+UnitAI* GetAI_mob_webbed_creature(Creature* pCreature)
 {
     return new mob_webbed_creatureAI(pCreature);
 }
@@ -183,7 +183,7 @@ struct npc_demolitionist_legosoAI : public npc_escortAI, private DialogueHelper
 
     void Reset() override { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 uiMiscValue) override
     {
         // start quest
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
@@ -416,7 +416,7 @@ struct npc_demolitionist_legosoAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_demolitionist_legoso(Creature* pCreature)
+UnitAI* GetAI_npc_demolitionist_legoso(Creature* pCreature)
 {
     return new npc_demolitionist_legosoAI(pCreature);
 }

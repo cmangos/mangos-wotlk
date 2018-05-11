@@ -155,7 +155,7 @@ struct boss_ambassador_hellmawAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ambassador_hellmaw(Creature* pCreature)
+UnitAI* GetAI_boss_ambassador_hellmaw(Creature* pCreature)
 {
     return new boss_ambassador_hellmawAI(pCreature);
 }

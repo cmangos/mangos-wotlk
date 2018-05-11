@@ -468,22 +468,22 @@ struct boss_fathomguard_caribdisAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_fathomlord_karathress(Creature* pCreature)
+UnitAI* GetAI_boss_fathomlord_karathress(Creature* pCreature)
 {
     return new boss_fathomlord_karathressAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_fathomguard_sharkkis(Creature* pCreature)
+UnitAI* GetAI_boss_fathomguard_sharkkis(Creature* pCreature)
 {
     return new boss_fathomguard_sharkkisAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_fathomguard_tidalvess(Creature* pCreature)
+UnitAI* GetAI_boss_fathomguard_tidalvess(Creature* pCreature)
 {
     return new boss_fathomguard_tidalvessAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_fathomguard_caribdis(Creature* pCreature)
+UnitAI* GetAI_boss_fathomguard_caribdis(Creature* pCreature)
 {
     return new boss_fathomguard_caribdisAI(pCreature);
 }

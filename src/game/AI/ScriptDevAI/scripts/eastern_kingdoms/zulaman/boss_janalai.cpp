@@ -369,7 +369,7 @@ struct boss_janalaiAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_janalaiAI(Creature* pCreature)
+UnitAI* GetAI_boss_janalaiAI(Creature* pCreature)
 {
     return new boss_janalaiAI(pCreature);
 }
@@ -478,7 +478,7 @@ struct npc_amanishi_hatcherAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_amanishi_hatcherAI(Creature* pCreature)
+UnitAI* GetAI_npc_amanishi_hatcherAI(Creature* pCreature)
 {
     return new npc_amanishi_hatcherAI(pCreature);
 }
@@ -495,7 +495,7 @@ struct npc_dragonhawk_eggAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override {}
 };
 
-CreatureAI* GetAI_npc_dragonhawk_eggAI(Creature* pCreature)
+UnitAI* GetAI_npc_dragonhawk_eggAI(Creature* pCreature)
 {
     return new npc_dragonhawk_eggAI(pCreature);
 }
@@ -512,7 +512,7 @@ struct npc_janalai_firebombAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override {}
 };
 
-CreatureAI* GetAI_npc_janalai_firebombAI(Creature* pCreature)
+UnitAI* GetAI_npc_janalai_firebombAI(Creature* pCreature)
 {
     return new npc_janalai_firebombAI(pCreature);
 }

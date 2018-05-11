@@ -177,7 +177,7 @@ struct boss_harbinger_skyrissAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_harbinger_skyriss(Creature* pCreature)
+UnitAI* GetAI_boss_harbinger_skyriss(Creature* pCreature)
 {
     return new boss_harbinger_skyrissAI(pCreature);
 }

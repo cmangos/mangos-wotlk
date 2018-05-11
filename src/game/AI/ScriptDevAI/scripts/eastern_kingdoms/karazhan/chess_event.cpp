@@ -254,7 +254,7 @@ struct npc_echo_of_medivhAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_echo_of_medivh(Creature* pCreature)
+UnitAI* GetAI_npc_echo_of_medivh(Creature* pCreature)
 {
     return new npc_echo_of_medivhAI(pCreature);
 }
@@ -346,7 +346,7 @@ struct npc_chess_piece_genericAI : public ScriptedAI
         // ToDo: remove corpse after 10 sec
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // handle move event
         if (eventType == AI_EVENT_CUSTOM_A)
@@ -737,7 +737,7 @@ struct npc_king_llaneAI : public npc_chess_piece_genericAI
     }
 };
 
-CreatureAI* GetAI_npc_king_llane(Creature* pCreature)
+UnitAI* GetAI_npc_king_llane(Creature* pCreature)
 {
     return new npc_king_llaneAI(pCreature);
 }
@@ -848,7 +848,7 @@ struct npc_warchief_blackhandAI : public npc_chess_piece_genericAI
     }
 };
 
-CreatureAI* GetAI_npc_warchief_blackhand(Creature* pCreature)
+UnitAI* GetAI_npc_warchief_blackhand(Creature* pCreature)
 {
     return new npc_warchief_blackhandAI(pCreature);
 }
@@ -924,7 +924,7 @@ struct npc_human_conjurerAI : public npc_chess_piece_genericAI
     }
 };
 
-CreatureAI* GetAI_npc_human_conjurer(Creature* pCreature)
+UnitAI* GetAI_npc_human_conjurer(Creature* pCreature)
 {
     return new npc_human_conjurerAI(pCreature);
 }
@@ -1000,7 +1000,7 @@ struct npc_orc_warlockAI : public npc_chess_piece_genericAI
     }
 };
 
-CreatureAI* GetAI_npc_orc_warlock(Creature* pCreature)
+UnitAI* GetAI_npc_orc_warlock(Creature* pCreature)
 {
     return new npc_orc_warlockAI(pCreature);
 }
@@ -1090,7 +1090,7 @@ struct npc_human_footmanAI : public npc_chess_piece_genericAI
     }
 };
 
-CreatureAI* GetAI_npc_human_footman(Creature* pCreature)
+UnitAI* GetAI_npc_human_footman(Creature* pCreature)
 {
     return new npc_human_footmanAI(pCreature);
 }
@@ -1180,7 +1180,7 @@ struct npc_orc_gruntAI : public npc_chess_piece_genericAI
     }
 };
 
-CreatureAI* GetAI_npc_orc_grunt(Creature* pCreature)
+UnitAI* GetAI_npc_orc_grunt(Creature* pCreature)
 {
     return new npc_orc_gruntAI(pCreature);
 }
@@ -1256,7 +1256,7 @@ struct npc_water_elementalAI : public npc_chess_piece_genericAI
     }
 };
 
-CreatureAI* GetAI_npc_water_elemental(Creature* pCreature)
+UnitAI* GetAI_npc_water_elemental(Creature* pCreature)
 {
     return new npc_water_elementalAI(pCreature);
 }
@@ -1332,7 +1332,7 @@ struct npc_summoned_daemonAI : public npc_chess_piece_genericAI
     }
 };
 
-CreatureAI* GetAI_npc_summoned_daemon(Creature* pCreature)
+UnitAI* GetAI_npc_summoned_daemon(Creature* pCreature)
 {
     return new npc_summoned_daemonAI(pCreature);
 }
@@ -1408,7 +1408,7 @@ struct npc_human_chargerAI : public npc_chess_piece_genericAI
     }
 };
 
-CreatureAI* GetAI_npc_human_charger(Creature* pCreature)
+UnitAI* GetAI_npc_human_charger(Creature* pCreature)
 {
     return new npc_human_chargerAI(pCreature);
 }
@@ -1484,7 +1484,7 @@ struct npc_orc_wolfAI : public npc_chess_piece_genericAI
     }
 };
 
-CreatureAI* GetAI_npc_orc_wolf(Creature* pCreature)
+UnitAI* GetAI_npc_orc_wolf(Creature* pCreature)
 {
     return new npc_orc_wolfAI(pCreature);
 }
@@ -1560,7 +1560,7 @@ struct npc_human_clericAI : public npc_chess_piece_genericAI
     }
 };
 
-CreatureAI* GetAI_npc_human_cleric(Creature* pCreature)
+UnitAI* GetAI_npc_human_cleric(Creature* pCreature)
 {
     return new npc_human_clericAI(pCreature);
 }
@@ -1636,7 +1636,7 @@ struct npc_orc_necrolyteAI : public npc_chess_piece_genericAI
     }
 };
 
-CreatureAI* GetAI_npc_orc_necrolyte(Creature* pCreature)
+UnitAI* GetAI_npc_orc_necrolyte(Creature* pCreature)
 {
     return new npc_orc_necrolyteAI(pCreature);
 }

@@ -229,7 +229,7 @@ struct boss_trollgoreAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_trollgore(Creature* pCreature)
+UnitAI* GetAI_boss_trollgore(Creature* pCreature)
 {
     return new boss_trollgoreAI(pCreature);
 }

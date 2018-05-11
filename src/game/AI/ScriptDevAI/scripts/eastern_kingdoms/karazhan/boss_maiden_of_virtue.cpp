@@ -147,7 +147,7 @@ struct boss_maiden_of_virtueAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_maiden_of_virtue(Creature* pCreature)
+UnitAI* GetAI_boss_maiden_of_virtue(Creature* pCreature)
 {
     return new boss_maiden_of_virtueAI(pCreature);
 }

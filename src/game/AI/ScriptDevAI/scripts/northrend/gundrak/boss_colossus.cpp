@@ -142,7 +142,7 @@ struct boss_drakkari_elementalAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_drakkari_elemental(Creature* pCreature)
+UnitAI* GetAI_boss_drakkari_elemental(Creature* pCreature)
 {
     return new boss_drakkari_elementalAI(pCreature);
 }
@@ -297,7 +297,7 @@ struct boss_drakkari_colossusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_drakkari_colossus(Creature* pCreature)
+UnitAI* GetAI_boss_drakkari_colossus(Creature* pCreature)
 {
     return new boss_drakkari_colossusAI(pCreature);
 }
@@ -400,7 +400,7 @@ struct npc_living_mojoAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_living_mojo(Creature* pCreature)
+UnitAI* GetAI_npc_living_mojo(Creature* pCreature)
 {
     return new npc_living_mojoAI(pCreature);
 };

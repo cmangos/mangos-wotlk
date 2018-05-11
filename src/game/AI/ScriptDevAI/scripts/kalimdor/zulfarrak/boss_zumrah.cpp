@@ -200,7 +200,7 @@ struct boss_zumrahAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_zumrah(Creature* pCreature)
+UnitAI* GetAI_boss_zumrah(Creature* pCreature)
 {
     return new boss_zumrahAI(pCreature);
 }

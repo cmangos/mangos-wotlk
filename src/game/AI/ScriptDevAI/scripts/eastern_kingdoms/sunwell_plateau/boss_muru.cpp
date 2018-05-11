@@ -482,27 +482,27 @@ struct npc_singularityAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_boss_muru(Creature* pCreature)
+UnitAI* GetAI_boss_muru(Creature* pCreature)
 {
     return new boss_muruAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_entropius(Creature* pCreature)
+UnitAI* GetAI_boss_entropius(Creature* pCreature)
 {
     return new boss_entropiusAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_portal_target(Creature* pCreature)
+UnitAI* GetAI_npc_portal_target(Creature* pCreature)
 {
     return new npc_portal_targetAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_darkness(Creature* pCreature)
+UnitAI* GetAI_npc_darkness(Creature* pCreature)
 {
     return new npc_darknessAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_singularity(Creature* pCreature)
+UnitAI* GetAI_npc_singularity(Creature* pCreature)
 {
     return new npc_singularityAI(pCreature);
 }

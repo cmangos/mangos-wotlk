@@ -136,7 +136,7 @@ struct npc_oculus_drakeAI : public ScriptedAI
     */
 };
 
-CreatureAI* GetAI_npc_oculus_drake(Creature* pCreature)
+UnitAI* GetAI_npc_oculus_drake(Creature* pCreature)
 {
     return new npc_oculus_drakeAI(pCreature);
 }

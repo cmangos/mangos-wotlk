@@ -186,7 +186,7 @@ struct boss_amanitarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_amanitar(Creature* pCreature)
+UnitAI* GetAI_boss_amanitar(Creature* pCreature)
 {
     return new boss_amanitarAI(pCreature);
 }
@@ -206,7 +206,7 @@ struct npc_amanitar_mushroomAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_amanitar_mushroom(Creature* pCreature)
+UnitAI* GetAI_npc_amanitar_mushroom(Creature* pCreature)
 {
     return new npc_amanitar_mushroomAI(pCreature);
 }

@@ -130,7 +130,7 @@ struct mob_stolen_soulAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_stolen_soul(Creature* pCreature)
+UnitAI* GetAI_mob_stolen_soul(Creature* pCreature)
 {
     return new mob_stolen_soulAI(pCreature);
 }
@@ -306,7 +306,7 @@ struct boss_exarch_maladaarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_exarch_maladaar(Creature* pCreature)
+UnitAI* GetAI_boss_exarch_maladaar(Creature* pCreature)
 {
     return new boss_exarch_maladaarAI(pCreature);
 }

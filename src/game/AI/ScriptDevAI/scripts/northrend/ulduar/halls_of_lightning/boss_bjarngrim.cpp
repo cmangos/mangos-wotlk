@@ -367,12 +367,12 @@ struct mob_stormforged_lieutenantAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_bjarngrim(Creature* pCreature)
+UnitAI* GetAI_boss_bjarngrim(Creature* pCreature)
 {
     return new boss_bjarngrimAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_stormforged_lieutenant(Creature* pCreature)
+UnitAI* GetAI_mob_stormforged_lieutenant(Creature* pCreature)
 {
     return new mob_stormforged_lieutenantAI(pCreature);
 }

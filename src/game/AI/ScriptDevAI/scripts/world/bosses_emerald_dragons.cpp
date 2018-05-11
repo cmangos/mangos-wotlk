@@ -208,7 +208,7 @@ struct boss_emerissAI : public boss_emerald_dragonAI
     }
 };
 
-CreatureAI* GetAI_boss_emeriss(Creature* pCreature)
+UnitAI* GetAI_boss_emeriss(Creature* pCreature)
 {
     return new boss_emerissAI(pCreature);
 }
@@ -304,12 +304,12 @@ struct npc_spirit_shadeAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_boss_lethon(Creature* pCreature)
+UnitAI* GetAI_boss_lethon(Creature* pCreature)
 {
     return new boss_lethonAI(pCreature);
 }
 
-CreatureAI* GetAI_npc_spirit_shade(Creature* pCreature)
+UnitAI* GetAI_npc_spirit_shade(Creature* pCreature)
 {
     return new npc_spirit_shadeAI(pCreature);
 }
@@ -446,7 +446,7 @@ struct boss_taerarAI : public boss_emerald_dragonAI
     }
 };
 
-CreatureAI* GetAI_boss_taerar(Creature* pCreature)
+UnitAI* GetAI_boss_taerar(Creature* pCreature)
 {
     return new boss_taerarAI(pCreature);
 }
@@ -511,7 +511,7 @@ struct boss_ysondreAI : public boss_emerald_dragonAI
     }
 };
 
-CreatureAI* GetAI_boss_ysondre(Creature* pCreature)
+UnitAI* GetAI_boss_ysondre(Creature* pCreature)
 {
     return new boss_ysondreAI(pCreature);
 }

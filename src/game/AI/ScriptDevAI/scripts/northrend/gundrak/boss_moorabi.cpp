@@ -175,7 +175,7 @@ struct boss_moorabiAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_moorabi(Creature* pCreature)
+UnitAI* GetAI_boss_moorabi(Creature* pCreature)
 {
     return new boss_moorabiAI(pCreature);
 }

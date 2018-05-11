@@ -102,7 +102,7 @@ struct npc_aeranasAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_aeranas(Creature* pCreature)
+UnitAI* GetAI_npc_aeranas(Creature* pCreature)
 {
     return new npc_aeranasAI(pCreature);
 }
@@ -162,7 +162,7 @@ struct npc_ancestral_wolfAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_ancestral_wolf(Creature* pCreature)
+UnitAI* GetAI_npc_ancestral_wolf(Creature* pCreature)
 {
     return new npc_ancestral_wolfAI(pCreature);
 }
@@ -306,7 +306,7 @@ struct npc_demoniac_scryerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_demoniac_scryer(Creature* pCreature)
+UnitAI* GetAI_npc_demoniac_scryer(Creature* pCreature)
 {
     return new npc_demoniac_scryerAI(pCreature);
 }
@@ -431,7 +431,7 @@ struct npc_wounded_blood_elfAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_wounded_blood_elf(Creature* pCreature)
+UnitAI* GetAI_npc_wounded_blood_elf(Creature* pCreature)
 {
     return new npc_wounded_blood_elfAI(pCreature);
 }
@@ -518,7 +518,7 @@ struct npc_fel_guard_houndAI : public ScriptedPetAI
     }
 };
 
-CreatureAI* GetAI_npc_fel_guard_hound(Creature* pCreature)
+UnitAI* GetAI_npc_fel_guard_hound(Creature* pCreature)
 {
     return new npc_fel_guard_houndAI(pCreature);
 }
@@ -648,7 +648,7 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
 
     bool IsExorcismComplete() { return m_bEventComplete; }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_START_EVENT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -790,7 +790,7 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_anchorite_barada(Creature* pCreature)
+UnitAI* GetAI_npc_anchorite_barada(Creature* pCreature)
 {
     return new npc_anchorite_baradaAI(pCreature);
 }
@@ -989,7 +989,7 @@ struct npc_magister_aledisAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_magister_aledis(Creature* pCreature)
+UnitAI* GetAI_npc_magister_aledis(Creature* pCreature)
 {
     return new npc_magister_aledisAI(pCreature);
 }
@@ -1034,7 +1034,7 @@ struct npc_living_flareAI : public ScriptedPetAI
         DoCastSpellIfCan(m_creature, SPELL_LIVING_COSMETIC);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -1112,7 +1112,7 @@ struct npc_living_flareAI : public ScriptedPetAI
     }
 };
 
-CreatureAI* GetAI_npc_living_flare(Creature* pCreature)
+UnitAI* GetAI_npc_living_flare(Creature* pCreature)
 {
     return new npc_living_flareAI(pCreature);
 }
@@ -1218,7 +1218,7 @@ struct npc_danath_trollbaneAI : public ScriptedAI
         DoMeleeAttackIfReady(); // be sure to fight back if in combat
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*miscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 /*miscValue*/) override
     {
         if (eventType == AI_EVENT_START_EVENT && pSender == m_creature) // sanity check
             if (m_bYelling == false) // don't override anything if yelling already...
@@ -1242,7 +1242,7 @@ bool QuestComplete_npc_trollbane(Player* pPlayer, Creature* pCreature, const Que
     return true;
 }
 
-CreatureAI* GetAI_danath_trollbane(Creature* pCreature)
+UnitAI* GetAI_danath_trollbane(Creature* pCreature)
 {
     return new npc_danath_trollbaneAI(pCreature);
 }
@@ -1301,7 +1301,7 @@ struct npc_nazgrelAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* pInvoker, uint32 /*miscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 /*miscValue*/) override
     {
         if (eventType == AI_EVENT_START_EVENT && pSender == m_creature) // sanity check
         {
@@ -1325,7 +1325,7 @@ bool QuestComplete_npc_nazgrel(Player* pPlayer, Creature* pCreature, const Quest
     return true;
 }
 
-CreatureAI* GetAI_nazgrel(Creature* pCreature)
+UnitAI* GetAI_nazgrel(Creature* pCreature)
 {
     return new npc_nazgrelAI(pCreature);
 }

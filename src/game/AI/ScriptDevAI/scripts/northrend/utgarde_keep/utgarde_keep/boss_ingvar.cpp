@@ -293,7 +293,7 @@ struct boss_ingvarAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ingvar(Creature* pCreature)
+UnitAI* GetAI_boss_ingvar(Creature* pCreature)
 {
     return new boss_ingvarAI(pCreature);
 }
@@ -386,7 +386,7 @@ struct npc_annhyldeAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_annhylde(Creature* pCreature)
+UnitAI* GetAI_npc_annhylde(Creature* pCreature)
 {
     return new npc_annhyldeAI(pCreature);
 }

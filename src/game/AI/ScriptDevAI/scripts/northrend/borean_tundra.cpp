@@ -167,7 +167,7 @@ struct npc_nesingwary_trapperAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_nesingwary_trapper(Creature* pCreature)
+UnitAI* GetAI_npc_nesingwary_trapper(Creature* pCreature)
 {
     return new npc_nesingwary_trapperAI(pCreature);
 }
@@ -245,7 +245,7 @@ struct npc_oil_stained_wolfAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_oil_stained_wolf(Creature* pCreature)
+UnitAI* GetAI_npc_oil_stained_wolf(Creature* pCreature)
 {
     return new npc_oil_stained_wolfAI(pCreature);
 }
@@ -384,7 +384,7 @@ struct npc_sinkhole_kill_creditAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_sinkhole_kill_credit(Creature* pCreature)
+UnitAI* GetAI_npc_sinkhole_kill_credit(Creature* pCreature)
 {
     return new npc_sinkhole_kill_creditAI(pCreature);
 }
@@ -525,7 +525,7 @@ bool QuestAccept_npc_lurgglbr(Player* pPlayer, Creature* pCreature, const Quest*
     return true;
 }
 
-CreatureAI* GetAI_npc_lurgglbr(Creature* pCreature)
+UnitAI* GetAI_npc_lurgglbr(Creature* pCreature)
 {
     return new npc_lurgglbrAI(pCreature);
 }
@@ -685,7 +685,7 @@ struct npc_nexus_drake_hatchlingAI : public FollowerAI
         FollowerAI::JustRespawned();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // start following
         if (eventType == AI_EVENT_START_EVENT && pInvoker->GetTypeId() == TYPEID_PLAYER)
@@ -739,7 +739,7 @@ struct npc_nexus_drake_hatchlingAI : public FollowerAI
     }
 };
 
-CreatureAI* GetAI_npc_nexus_drake_hatchling(Creature* pCreature)
+UnitAI* GetAI_npc_nexus_drake_hatchling(Creature* pCreature)
 {
     return new npc_nexus_drake_hatchlingAI(pCreature);
 }
@@ -932,7 +932,7 @@ struct npc_scourged_flamespitterAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_scourged_flamespitter(Creature* pCreature)
+UnitAI* GetAI_npc_scourged_flamespitter(Creature* pCreature)
 {
     return new npc_scourged_flamespitterAI(pCreature);
 }
@@ -985,7 +985,7 @@ struct npc_bonker_togglevoltAI : public npc_escortAI
             DoScriptText(SAY_BONKER_AGGRO, m_creature);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -1023,7 +1023,7 @@ struct npc_bonker_togglevoltAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_bonker_togglevolt(Creature* pCreature)
+UnitAI* GetAI_npc_bonker_togglevolt(Creature* pCreature)
 {
     return new npc_bonker_togglevoltAI(pCreature);
 }
@@ -1071,7 +1071,7 @@ struct npc_jennyAI : public ScriptedPetAI
 
     void Reset() override { }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A && !m_bEventComplete)
         {
@@ -1103,7 +1103,7 @@ struct npc_jennyAI : public ScriptedPetAI
     }
 };
 
-CreatureAI* GetAI_npc_jenny(Creature* pCreature)
+UnitAI* GetAI_npc_jenny(Creature* pCreature)
 {
     return new npc_jennyAI(pCreature);
 }
@@ -1157,7 +1157,7 @@ struct npc_seaforium_depth_chargeAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_seaforium_depth_charge(Creature* pCreature)
+UnitAI* GetAI_npc_seaforium_depth_charge(Creature* pCreature)
 {
     return new npc_seaforium_depth_chargeAI(pCreature);
 }
@@ -1263,7 +1263,7 @@ struct npc_mootoo_the_youngerAI : public npc_escortAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
             Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
@@ -1281,7 +1281,7 @@ bool QuestAccept_npc_mootoo_the_younger(Player* pPlayer, Creature* pCreature, co
     return false;
 }
 
-CreatureAI* GetAI_npc_mootoo_the_youngerAI(Creature* pCreature)
+UnitAI* GetAI_npc_mootoo_the_youngerAI(Creature* pCreature)
 {
     return new npc_mootoo_the_youngerAI(pCreature);
 }
@@ -1364,7 +1364,7 @@ struct npc_proudhoofAI : public npc_escortAI
             DoScriptText(SAY_AGGRO, m_creature);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -1460,7 +1460,7 @@ struct npc_proudhoofAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_proudhoof(Creature* pCreature)
+UnitAI* GetAI_npc_proudhoof(Creature* pCreature)
 {
     return new npc_proudhoofAI(pCreature);
 }
@@ -1516,7 +1516,7 @@ struct npc_orphaned_mammoth_calfAI : public ScriptedPetAI
     }
 };
 
-CreatureAI* GetAI_npc_orphaned_mammoth_calf(Creature* pCreature)
+UnitAI* GetAI_npc_orphaned_mammoth_calf(Creature* pCreature)
 {
     return new npc_orphaned_mammoth_calfAI(pCreature);
 }

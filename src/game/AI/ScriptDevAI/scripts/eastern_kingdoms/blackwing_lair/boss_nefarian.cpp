@@ -281,7 +281,7 @@ struct boss_nefarianAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_nefarian(Creature* pCreature)
+UnitAI* GetAI_boss_nefarian(Creature* pCreature)
 {
     return new boss_nefarianAI(pCreature);
 }

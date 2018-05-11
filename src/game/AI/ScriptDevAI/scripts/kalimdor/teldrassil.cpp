@@ -85,7 +85,7 @@ struct npc_mistAI : public FollowerAI
     }*/
 };
 
-CreatureAI* GetAI_npc_mist(Creature* pCreature)
+UnitAI* GetAI_npc_mist(Creature* pCreature)
 {
     return new npc_mistAI(pCreature);
 }

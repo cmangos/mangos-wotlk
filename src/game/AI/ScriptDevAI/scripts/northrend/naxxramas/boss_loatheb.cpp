@@ -175,7 +175,7 @@ struct boss_loathebAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_loatheb(Creature* pCreature)
+UnitAI* GetAI_boss_loatheb(Creature* pCreature)
 {
     return new boss_loathebAI(pCreature);
 }

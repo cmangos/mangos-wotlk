@@ -623,22 +623,22 @@ struct mob_arcane_sphereAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_felblood_kaelthas(Creature* pCreature)
+UnitAI* GetAI_boss_felblood_kaelthas(Creature* pCreature)
 {
     return new boss_felblood_kaelthasAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_arcane_sphere(Creature* pCreature)
+UnitAI* GetAI_mob_arcane_sphere(Creature* pCreature)
 {
     return new mob_arcane_sphereAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_felkael_phoenix(Creature* pCreature)
+UnitAI* GetAI_mob_felkael_phoenix(Creature* pCreature)
 {
     return new mob_felkael_phoenixAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_felkael_phoenix_egg(Creature* pCreature)
+UnitAI* GetAI_mob_felkael_phoenix_egg(Creature* pCreature)
 {
     return new mob_felkael_phoenix_eggAI(pCreature);
 }

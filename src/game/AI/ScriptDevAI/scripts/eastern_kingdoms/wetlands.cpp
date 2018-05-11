@@ -153,7 +153,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         // start escort
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
@@ -193,7 +193,7 @@ struct npc_tapoke_slim_jahnAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_tapoke_slim_jahn(Creature* pCreature)
+UnitAI* GetAI_npc_tapoke_slim_jahn(Creature* pCreature)
 {
     return new npc_tapoke_slim_jahnAI(pCreature);
 }

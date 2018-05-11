@@ -979,7 +979,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_thrall_old_hillsbrad(Creature* pCreature)
+UnitAI* GetAI_npc_thrall_old_hillsbrad(Creature* pCreature)
 {
     return new npc_thrall_old_hillsbradAI(pCreature);
 }
@@ -1249,7 +1249,7 @@ struct npc_tarethaAI : public npc_escortAI, private DialogueHelper
     }
 };
 
-CreatureAI* GetAI_npc_taretha(Creature* pCreature)
+UnitAI* GetAI_npc_taretha(Creature* pCreature)
 {
     return new npc_tarethaAI(pCreature);
 }

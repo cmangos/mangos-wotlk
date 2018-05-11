@@ -220,7 +220,7 @@ struct boss_anzuAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_anzu(Creature* pCreature)
+UnitAI* GetAI_boss_anzu(Creature* pCreature)
 {
     return new boss_anzuAI(pCreature);
 }

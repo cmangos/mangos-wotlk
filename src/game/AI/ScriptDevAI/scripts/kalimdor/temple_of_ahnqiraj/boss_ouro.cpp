@@ -249,7 +249,7 @@ struct boss_ouroAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_boss_ouro(Creature* pCreature)
+UnitAI* GetAI_boss_ouro(Creature* pCreature)
 {
     return new boss_ouroAI(pCreature);
 }
@@ -289,7 +289,7 @@ struct npc_ouro_spawnerAI : public Scripted_NoMovementAI
 
 };
 
-CreatureAI* GetAI_npc_ouro_spawner(Creature* pCreature)
+UnitAI* GetAI_npc_ouro_spawner(Creature* pCreature)
 {
     return new npc_ouro_spawnerAI(pCreature);
 }

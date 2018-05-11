@@ -163,7 +163,7 @@ struct boss_chromaggusAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_chromaggus(Creature* pCreature)
+UnitAI* GetAI_boss_chromaggus(Creature* pCreature)
 {
     return new boss_chromaggusAI(pCreature);
 }

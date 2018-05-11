@@ -125,7 +125,7 @@ struct npc_squad_leaderAI : public npc_escortAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -287,7 +287,7 @@ struct npc_squad_leaderAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_squad_leader(Creature* pCreature)
+UnitAI* GetAI_npc_squad_leader(Creature* pCreature)
 {
     return new npc_squad_leaderAI(pCreature);
 }
@@ -361,7 +361,7 @@ struct npc_infantryAI : public ScriptedAI
         m_bEscortActive = false;
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* pSender, Unit* /*pInvoker*/, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 uiMiscValue) override
     {
         // start following the squad leader
         if (eventType == AI_EVENT_CUSTOM_A && (pSender->GetEntry() == NPC_SKYBREAKER_SQUAD_LEADER || pSender->GetEntry() == NPC_KORKRON_SQUAD_LEADER))
@@ -398,7 +398,7 @@ struct npc_infantryAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_infantry(Creature* pCreature)
+UnitAI* GetAI_npc_infantry(Creature* pCreature)
 {
     return new npc_infantryAI(pCreature);
 }
@@ -471,7 +471,7 @@ struct npc_father_kamarosAI : public npc_escortAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -540,7 +540,7 @@ struct npc_father_kamarosAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_father_kamaros(Creature* pCreature)
+UnitAI* GetAI_npc_father_kamaros(Creature* pCreature)
 {
     return new npc_father_kamarosAI(pCreature);
 }
@@ -736,7 +736,7 @@ struct npc_grand_admiral_westwindAI : public ScriptedAI
         DoScriptText(SAY_AGGRO, m_creature);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -914,7 +914,7 @@ struct npc_grand_admiral_westwindAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_grand_admiral_westwind(Creature* pCreature)
+UnitAI* GetAI_npc_grand_admiral_westwind(Creature* pCreature)
 {
     return new npc_grand_admiral_westwindAI(pCreature);
 }

@@ -727,32 +727,32 @@ struct boss_veras_darkshadowAI : public boss_illidari_councilAI
     }
 };
 
-CreatureAI* GetAI_mob_blood_elf_council_voice_trigger(Creature* pCreature)
+UnitAI* GetAI_mob_blood_elf_council_voice_trigger(Creature* pCreature)
 {
     return new mob_blood_elf_council_voice_triggerAI(pCreature);
 }
 
-CreatureAI* GetAI_mob_illidari_council(Creature* pCreature)
+UnitAI* GetAI_mob_illidari_council(Creature* pCreature)
 {
     return new mob_illidari_councilAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_gathios_the_shatterer(Creature* pCreature)
+UnitAI* GetAI_boss_gathios_the_shatterer(Creature* pCreature)
 {
     return new boss_gathios_the_shattererAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_lady_malande(Creature* pCreature)
+UnitAI* GetAI_boss_lady_malande(Creature* pCreature)
 {
     return new boss_lady_malandeAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_veras_darkshadow(Creature* pCreature)
+UnitAI* GetAI_boss_veras_darkshadow(Creature* pCreature)
 {
     return new boss_veras_darkshadowAI(pCreature);
 }
 
-CreatureAI* GetAI_boss_high_nethermancer_zerevor(Creature* pCreature)
+UnitAI* GetAI_boss_high_nethermancer_zerevor(Creature* pCreature)
 {
     return new boss_high_nethermancer_zerevorAI(pCreature);
 }

@@ -212,7 +212,7 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_mekgineer_steamrigger(Creature* pCreature)
+UnitAI* GetAI_boss_mekgineer_steamrigger(Creature* pCreature)
 {
     return new boss_mekgineer_steamriggerAI(pCreature);
 }
@@ -275,7 +275,7 @@ struct mob_steamrigger_mechanicAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mob_steamrigger_mechanic(Creature* pCreature)
+UnitAI* GetAI_mob_steamrigger_mechanic(Creature* pCreature)
 {
     return new mob_steamrigger_mechanicAI(pCreature);
 }

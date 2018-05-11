@@ -245,7 +245,7 @@ struct boss_terokkAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -400,7 +400,7 @@ struct boss_terokkAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_terokk(Creature* pCreature)
+UnitAI* GetAI_boss_terokk(Creature* pCreature)
 {
     return new boss_terokkAI(pCreature);
 }

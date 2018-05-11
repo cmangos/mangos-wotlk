@@ -135,7 +135,7 @@ struct boss_moamAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_moam(Creature* pCreature)
+UnitAI* GetAI_boss_moam(Creature* pCreature)
 {
     return new boss_moamAI(pCreature);
 }

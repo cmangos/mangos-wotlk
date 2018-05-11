@@ -280,7 +280,7 @@ struct boss_ickAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_ick(Creature* pCreature)
+UnitAI* GetAI_boss_ick(Creature* pCreature)
 {
     return new boss_ickAI(pCreature);
 }
@@ -350,7 +350,7 @@ struct boss_krickAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_krick(Creature* pCreature)
+UnitAI* GetAI_boss_krick(Creature* pCreature)
 {
     return new boss_krickAI(pCreature);
 }
@@ -393,7 +393,7 @@ struct npc_exploding_orbAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-CreatureAI* GetAI_npc_exploding_orb(Creature* pCreature)
+UnitAI* GetAI_npc_exploding_orb(Creature* pCreature)
 {
     return new npc_exploding_orbAI(pCreature);
 }

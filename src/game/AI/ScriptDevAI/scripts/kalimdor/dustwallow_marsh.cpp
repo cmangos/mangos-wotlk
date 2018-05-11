@@ -117,7 +117,7 @@ struct mobs_risen_husk_spiritAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_mobs_risen_husk_spirit(Creature* pCreature)
+UnitAI* GetAI_mobs_risen_husk_spirit(Creature* pCreature)
 {
     return new mobs_risen_husk_spiritAI(pCreature);
 }
@@ -175,7 +175,7 @@ struct npc_restless_apparitionAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_npc_restless_apparition(Creature* pCreature)
+UnitAI* GetAI_npc_restless_apparition(Creature* pCreature)
 {
     return new npc_restless_apparitionAI(pCreature);
 }
@@ -286,7 +286,7 @@ struct npc_morokkAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_morokk(Creature* pCreature)
+UnitAI* GetAI_npc_morokk(Creature* pCreature)
 {
     return new npc_morokkAI(pCreature);
 }
@@ -603,7 +603,7 @@ bool QuestAccept_npc_ogron(Player* pPlayer, Creature* pCreature, const Quest* pQ
     return true;
 }
 
-CreatureAI* GetAI_npc_ogron(Creature* pCreature)
+UnitAI* GetAI_npc_ogron(Creature* pCreature)
 {
     return new npc_ogronAI(pCreature);
 }
@@ -766,7 +766,7 @@ bool QuestAccept_npc_private_hendel(Player* pPlayer, Creature* pCreature, const 
     return true;
 }
 
-CreatureAI* GetAI_npc_private_hendel(Creature* pCreature)
+UnitAI* GetAI_npc_private_hendel(Creature* pCreature)
 {
     return new npc_private_hendelAI(pCreature);
 }
@@ -816,7 +816,7 @@ struct npc_stinky_ignatzAI : public npc_escortAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Creature* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
@@ -880,7 +880,7 @@ struct npc_stinky_ignatzAI : public npc_escortAI
     }
 };
 
-CreatureAI* GetAI_npc_stinky_ignatz(Creature* pCreature)
+UnitAI* GetAI_npc_stinky_ignatz(Creature* pCreature)
 {
     return new npc_stinky_ignatzAI(pCreature);
 }
@@ -1159,7 +1159,7 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_boss_tethyr(Creature* pCreature)
+UnitAI* GetAI_boss_tethyr(Creature* pCreature)
 {
     return new boss_tethyrAI(pCreature);
 }
@@ -1238,7 +1238,7 @@ bool AreaTrigger_at_sentry_point(Player* pPlayer, const AreaTriggerEntry* /*pAt*
     return true;
 };
 
-CreatureAI* GetAI_npc_mottled_drywallow_crocolisk(Creature* pCreature)
+UnitAI* GetAI_npc_mottled_drywallow_crocolisk(Creature* pCreature)
 {
     return new npc_mottled_drywallow_crocoliskAI(pCreature);
 }

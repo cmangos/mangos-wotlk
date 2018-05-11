@@ -206,7 +206,7 @@ struct boss_savianaAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_saviana(Creature* pCreature)
+UnitAI* GetAI_boss_saviana(Creature* pCreature)
 {
     return new boss_savianaAI(pCreature);
 }

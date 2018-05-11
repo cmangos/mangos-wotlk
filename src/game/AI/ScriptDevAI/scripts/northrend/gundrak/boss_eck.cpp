@@ -139,7 +139,7 @@ struct boss_eckAI : public ScriptedAI
     }
 };
 
-CreatureAI* GetAI_boss_eck(Creature* pCreature)
+UnitAI* GetAI_boss_eck(Creature* pCreature)
 {
     return new boss_eckAI(pCreature);
 }
