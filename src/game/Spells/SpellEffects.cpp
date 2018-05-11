@@ -1899,6 +1899,24 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastCustomSpell(unitTarget, 37675, &basepoints0, nullptr, nullptr, (TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_HIT_CALCULATION));
                     return;
                 }
+                case 37867:                                 // Arcano-Scorp Control
+                case 37892:
+                case 37894:
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint32 spellId;
+                    switch (m_spellInfo->Id)
+                    {
+                        case 37867: spellId = 37868; break;
+                        case 37892: spellId = 37893; break;
+                        case 37894: spellId = 37895; break;
+                    }
+
+                    unitTarget->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 38002:                                 // Fel Reaver Controller
                 case 38120:
                 case 38122:
@@ -1928,6 +1946,42 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 38022, TRIGGERED_NONE); // FRS Quest Credit
                     return;
                 }
+                case 38173:                             // Summon Spirit
+                {
+                    if (eff_idx == 0)
+                    {
+                        if (unitTarget->GetObjectGuid().GetEntry() == 22160)
+                        {
+                            bool checkTaskmaster = false;
+                            bool checkSoothsayer = false;
+                            ObjectGuid taskmaster;
+                            for (auto& target : m_UniqueTargetInfo)
+                            {
+                                if (target.targetGUID.GetEntry() == 22160)
+                                {
+                                    taskmaster = target.targetGUID;
+                                    checkTaskmaster = true;
+                                }
+                                else if (target.targetGUID.GetEntry() == 22384)
+                                {
+                                    checkSoothsayer = true;
+                                }
+                            }
+                            if (checkSoothsayer&&checkTaskmaster)
+                            {
+                                Creature* bird = m_caster->SummonCreature(22023, m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), TEMPSPAWN_MANUAL_DESPAWN, 0);
+                                if (Player* player = dynamic_cast<Player*>(m_caster))
+                                {
+                                    player->RewardPlayerAndGroupAtEvent(22383, bird);
+                                }
+                                bird->SetWalk(false, true);
+                                Creature* taskM = m_caster->GetMap()->GetCreature(taskmaster);
+                                bird->SetTarget(taskM);
+                            }
+                        }
+                    }
+                    return;
+                }
                 case 39096:                                 // Polarity Shift
                 {
                     if (!unitTarget)
@@ -1955,24 +2009,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             unitTarget->CastSpell(unitTarget, urand(0, 1) ? 39088 : 39091, TRIGGERED_OLD_TRIGGERED);
                             break;
                     }
-                    return;
-                }
-                case 37867:                                 // Arcano-Scorp Control
-                case 37892:
-                case 37894:
-                {
-                    if (!unitTarget)
-                        return;
-
-                    uint32 spellId;
-                    switch (m_spellInfo->Id)
-                    {
-                        case 37867: spellId = 37868; break;
-                        case 37892: spellId = 37893; break;
-                        case 37894: spellId = 37895; break;
-                    }
-
-                    unitTarget->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 39189:                                 // Sha'tari Torch

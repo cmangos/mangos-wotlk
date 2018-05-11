@@ -40,6 +40,7 @@ npc_bird_spirit
 npc_soulgrinder
 npc_supplicant
 npc_spirit_prisoner_of_bladespire
+npc_evergrove_druid
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -1451,6 +1452,143 @@ CreatureAI* GetAI_npc_deadsoul_orb(Creature* pCreature)
     return new npc_deadsoul_orb(pCreature);
 }
 
+/*######
+## npc_evergrove_druid
+######*/
+
+enum
+{
+    SPELL_DRUID_SIGNAL = 38782,
+    SPELL_EVERGROVE_DRUID_TRANSFORM_CROW = 38776,
+    SPELL_EVERGROVE_DRUID_TRANSFORM_DRUID = 39158,
+
+    DBSCRIPT_LANDING_SCRIPT = 10074,
+    DBSCRIPT_FLY_OFF_SCRIPT = 10075
+};
+
+struct npc_evergrove_druidAI : public ScriptedAI
+{
+    npc_evergrove_druidAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+
+    Player* m_summoner;
+    uint32 returnTimer;
+    bool landingDone;
+    bool alreadySummoned;
+
+    void Reset() override {}
+
+    void JustRespawned() override
+    {
+        landingDone = false;
+        alreadySummoned = false;
+        returnTimer = 0;
+    }
+
+    void SpellHit(Unit* caster, const SpellEntry* spell) override
+    {
+        if (alreadySummoned)
+            return;
+
+        if (caster->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        if (spell->Id == SPELL_DRUID_SIGNAL)
+        {
+            alreadySummoned = true;
+            m_summoner = (Player*)caster;
+            m_creature->CastSpell(m_creature, SPELL_EVERGROVE_DRUID_TRANSFORM_CROW, TRIGGERED_NONE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->GetMotionMaster()->MoveFollow(caster, 1.f, 0.f);
+        }
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (landingDone)
+            return;
+
+        if (who->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        if (who != m_summoner)
+            return;
+
+        if (m_creature->IsWithinDistInMap(who, 5.0f))
+        {
+            landingDone = true;
+            returnTimer = 120000;
+
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_creature->SetLevitate(true);
+            m_creature->SetHover(false);
+            m_creature->SetCanFly(false);
+            m_creature->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_LANDING_SCRIPT, m_creature, who);
+        }
+    }
+
+    void ReturnToSpawn(Player* questAccepter = nullptr)
+    {
+        if (!m_summoner)
+            return;
+
+        if (questAccepter) // Only return to spawn if it's the original player accepting a quest
+            if (questAccepter != m_summoner)
+                return;
+
+        returnTimer = 0;
+        m_creature->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_FLY_OFF_SCRIPT, m_creature, m_summoner);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Creature* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (sender != m_creature) // Sender should always be creature itself
+            return;
+
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            m_creature->SetLevitate(false);
+            m_creature->SetHover(true);
+            m_creature->SetCanFly(true);
+        }
+        else if (eventType == AI_EVENT_CUSTOM_B)
+        {
+            m_creature->GetMotionMaster()->MoveTargetedHome();
+        }
+    }
+
+    void JustReachedHome() override
+    {
+        m_creature->ForcedDespawn();
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (returnTimer)
+        {
+            if (returnTimer <= uiDiff)
+            {
+                ReturnToSpawn();
+            }
+            else
+                returnTimer -= uiDiff;
+        }
+    }
+};
+
+bool QuestAccept_npc_evergrove_druid(Player* player, Creature* creature, const Quest* quest)
+{
+    // As soon as the player has accepted a quest, return to spawn again
+    if (npc_evergrove_druidAI* druidAI = dynamic_cast<npc_evergrove_druidAI*>(creature->AI()))
+        druidAI->ReturnToSpawn(player);
+
+    return true;
+}
+
+CreatureAI* GetAI_npc_evergrove_druidAI(Creature* creature)
+{
+    return new npc_evergrove_druidAI(creature);
+}
+
 void AddSC_blades_edge_mountains()
 {
     Script* pNewScript;
@@ -1511,5 +1649,11 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "npc_deadsoul_orb";
     pNewScript->GetAI = &GetAI_npc_deadsoul_orb;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_evergrove_druid";
+    pNewScript->GetAI = &GetAI_npc_evergrove_druidAI;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_evergrove_druid;
     pNewScript->RegisterSelf();
 }

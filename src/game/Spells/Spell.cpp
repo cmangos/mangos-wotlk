@@ -7929,6 +7929,10 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
                 return false;
             break;
         }
+        case 38782:											// Druid Signal
+            if (target->HasAura(38776) || target->HasAura(39158)) // Don't target druids that have already been summoned by another player
+                return false;
+            break;
         case 39090:                                         // Positive Charge
             if (!target->HasAura(39091))                    // Only deal damage if target has Negative Charge
                 return false;

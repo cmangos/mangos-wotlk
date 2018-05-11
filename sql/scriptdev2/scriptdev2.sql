@@ -423,6 +423,7 @@ UPDATE creature_template SET ScriptName='npc_vimgol_middle_bunny' WHERE entry=23
 UPDATE creature_template SET ScriptName='npc_vimgol' WHERE entry=22911;
 UPDATE creature_template SET ScriptName='npc_spirit_prisoner_of_bladespire' WHERE entry IN(22460);
 UPDATE creature_template SET ScriptName='npc_deadsoul_orb' WHERE entry=20845;
+UPDATE creature_template SET ScriptName='npc_evergrove_druid' WHERE entry=22423;
 
 /* BLASTED LANDS */
 UPDATE creature_template SET ScriptName='npc_fallen_hero_of_horde' WHERE entry=7572;
