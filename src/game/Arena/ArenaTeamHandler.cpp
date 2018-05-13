@@ -208,6 +208,9 @@ void WorldSession::HandleArenaTeamLeaveOpcode(WorldPacket& recv_data)
     if (!at)
         return;
 
+    if (_player->InBattleGroundQueue() || _player->InArena())
+        return;
+
     if (_player->GetObjectGuid() == at->GetCaptainGuid() && at->GetMembersSize() > 1)
     {
         // check for correctness
@@ -287,6 +290,10 @@ void WorldSession::HandleArenaTeamRemoveOpcode(WorldPacket& recv_data)
         SendArenaTeamCommandResult(ERR_ARENA_TEAM_QUIT_S, "", "", ERR_ARENA_TEAM_LEADER_LEAVE_S);
         return;
     }
+
+    Player* player = ObjectAccessor::FindPlayer(member->guid);
+    if (player && (player->InBattleGroundQueue() || player->InArena()))
+        return;
 
     at->DelMember(member->guid);
 
