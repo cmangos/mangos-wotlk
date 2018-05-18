@@ -87,9 +87,6 @@ struct boss_emerald_dragonAI : public ScriptedAI
     {
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             pSummoned->AI()->AttackStart(pTarget);
-
-        if (pSummoned->GetEntry() == NPC_DREAM_FOG)
-            pSummoned->CastSpell(pSummoned, SPELL_DREAM_FOG, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
     }
 
     // Return true, if succeeded
