@@ -163,7 +163,7 @@ struct npc_injured_minerAI : public npc_escortAI
                 DoScriptText(SAY_MINER_COMPLETE, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
-                    pPlayer->GroupEventHappens(QUEST_ID_BITTER_DEPARTURE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_BITTER_DEPARTURE, m_creature);
                     m_creature->SetFacingToObject(pPlayer);
                 }
                 break;

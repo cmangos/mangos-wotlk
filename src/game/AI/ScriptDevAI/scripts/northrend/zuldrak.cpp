@@ -71,7 +71,7 @@ struct npc_gurgthockAI : public ScriptedAI
             if (uiEntry == m_auiBosses[i])
             {
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                    pPlayer->GroupEventHappens(QUEST_FROM_BEYOND, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_FROM_BEYOND, m_creature);
 
                 m_playerGuid.Clear();
                 return;

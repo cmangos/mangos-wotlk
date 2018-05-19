@@ -185,7 +185,7 @@ struct npc_anchorite_truuenAI: public npc_escortAI
                 m_creature->SummonCreature(NPC_GHOST_OF_UTHER, 972.96f, -1824.82f, 82.54f, 0.27f, TEMPSPAWN_TIMED_DESPAWN, 45000);
                 // complete the quest - the event continues with the dialogue
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_TOMB_LIGHTBRINGER, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_TOMB_LIGHTBRINGER, m_creature);
                 break;
             case 39:
                 if (Creature* pUther = m_creature->GetMap()->GetCreature(m_utherGhostGuid))
@@ -654,7 +654,7 @@ struct npc_taelan_fordringAI: public npc_escortAI, private DialogueHelper
                 {
                     if (Player* pPlayer = GetPlayerForEscort())
                     {
-                        pPlayer->GroupEventHappens(QUEST_ID_IN_DREAMS, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_IN_DREAMS, m_creature);
                         pTirion->SetFacingToObject(pPlayer);
                     }
 

@@ -385,7 +385,7 @@ struct npc_demolitionist_legosoAI : public npc_escortAI, private DialogueHelper
                 m_creature->HandleEmote(EMOTE_ONESHOT_CHEER_NOSHEATHE);
                 // complete quest
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ENDING_THEIR_WORLD, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ENDING_THEIR_WORLD, m_creature);
                 break;
             case POINT_ID_EXPLOSIVES_9:
                 // event complete

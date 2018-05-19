@@ -143,7 +143,7 @@ struct npc_kayra_longmaneAI : public npc_escortAI
                 break;
             case 26:
                 DoScriptText(SAY_END, m_creature, pPlayer);
-                pPlayer->GroupEventHappens(QUEST_ESCAPE_FROM, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_FROM, m_creature);
                 m_creature->ForcedDespawn(10000);
                 break;
         }
@@ -299,7 +299,7 @@ struct npc_fhwoorAI : public npc_escortAI
             case 93:
                 DoScriptText(SAY_ESCORT_COMPLETE, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_FHWOOR_SMASH, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_FHWOOR_SMASH, m_creature);
                 break;
         }
     }

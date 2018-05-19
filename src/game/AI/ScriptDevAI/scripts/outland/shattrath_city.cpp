@@ -224,7 +224,7 @@ struct npc_dirty_larryAI : public ScriptedAI
             m_creature->CombatStop();
 
             if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                pPlayer->GroupEventHappens(QUEST_WHAT_BOOK, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_WHAT_BOOK, m_creature);
 
             if (Creature* pCreepjack = m_creature->GetMap()->GetCreature(m_creepjackGuid))
             {
@@ -612,7 +612,7 @@ struct npc_salsalabimAI : public ScriptedAI
         {
             if (m_creature->GetHealthPercent() < 20.0f)
             {
-                ((Player*)pDoneBy)->GroupEventHappens(QUEST_10004, m_creature);
+                ((Player*)pDoneBy)->RewardPlayerAndGroupAtEventExplored(QUEST_10004, m_creature);
                 uiDamage = 0;
                 EnterEvadeMode();
             }

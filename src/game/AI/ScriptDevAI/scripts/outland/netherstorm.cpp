@@ -656,7 +656,7 @@ struct npc_bessyAI : public npc_escortAI
                 break;
             case 12:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_COWS_COME_HOME, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_COWS_COME_HOME, m_creature);
                 break;
         }
     }
@@ -752,7 +752,7 @@ struct npc_maxx_a_million_escortAI : public npc_escortAI
                 break;
             case 36:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_MARK_V_IS_ALIVE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_MARK_V_IS_ALIVE, m_creature);
 
                 if (Creature* pAlley = m_creature->GetMap()->GetCreature(m_alleyGuid))
                     DoScriptText(SAY_ALLEY_FINISH, pAlley);
@@ -984,7 +984,7 @@ struct npc_protectorate_demolitionistAI : public npc_escortAI
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     m_creature->SetFacingToObject(pPlayer);
-                    pPlayer->GroupEventHappens(QUEST_ID_DELIVERING_MESSAGE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_DELIVERING_MESSAGE, m_creature);
                 }
                 SetEscortPaused(true);
                 m_uiEventTimer = 6000;
@@ -1080,7 +1080,7 @@ struct npc_captured_vanguardAI : public npc_escortAI
         {
             case 15:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_ESCAPE_STAGING_GROUNDS, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_ESCAPE_STAGING_GROUNDS, m_creature);
                 break;
             case 16:
                 DoScriptText(SAY_VANGUARD_FINISH, m_creature);
@@ -1342,7 +1342,7 @@ struct npc_drijyaAI : public npc_escortAI
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_DRIJYA_COMPLETE, m_creature, pPlayer);
-                    pPlayer->GroupEventHappens(QUEST_ID_WARP_GATE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_WARP_GATE, m_creature);
                 }
                 m_creature->ClearTemporaryFaction();
                 break;
@@ -2597,7 +2597,7 @@ struct npc_adyen_the_lightwardenAI : public ScriptedAI
     void EndEvent(Creature* ishanah)
     {
         if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
-            player->GroupEventHappens(QUEST_DEATHBLOW_TO_THE_LEGION, m_creature);
+            player->RewardPlayerAndGroupAtEventExplored(QUEST_DEATHBLOW_TO_THE_LEGION, m_creature);
         if (Creature* orelis = m_creature->GetMap()->GetCreature(m_orelisGuid))
             orelis->ForcedDespawn(60000); // can be dead
         if (Creature* karja = m_creature->GetMap()->GetCreature(m_karjaGuid))

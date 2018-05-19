@@ -98,7 +98,7 @@ struct npc_heliceAI : public npc_escortAI
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_HELICE_COMPLETE, m_creature, pPlayer);
-                    pPlayer->GroupEventHappens(QUEST_ENGINEERING_DISASTER, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ENGINEERING_DISASTER, m_creature);
                 }
                 break;
             }

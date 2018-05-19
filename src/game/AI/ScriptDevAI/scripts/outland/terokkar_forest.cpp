@@ -235,7 +235,7 @@ struct npc_akunoAI : public npc_escortAI
                 DoScriptText(SAY_AKU_COMPLETE, m_creature);
 
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ESCAPING_TOMB, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPING_TOMB, m_creature);
 
                 break;
         }
@@ -581,7 +581,7 @@ struct npc_letollAI : public npc_escortAI
                             if (Player* pPlayer = GetPlayerForEscort())
                             {
                                 DoScriptText(SAY_LE_THANKS, m_creature, pPlayer);
-                                pPlayer->GroupEventHappens(QUEST_DIGGING_BONES, m_creature);
+                                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_DIGGING_BONES, m_creature);
                             }
 
                             SetEscortPaused(false);
@@ -697,7 +697,7 @@ struct npc_isla_starmaneAI : public npc_escortAI
                 break;
             case 61:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(pPlayer->GetTeam() == ALLIANCE ? QUEST_ESCAPE_FROM_FIREWING_POINT_A : QUEST_ESCAPE_FROM_FIREWING_POINT_H, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(pPlayer->GetTeam() == ALLIANCE ? QUEST_ESCAPE_FROM_FIREWING_POINT_A : QUEST_ESCAPE_FROM_FIREWING_POINT_H, m_creature);
                 break;
             case 67:
                 if (Player* pPlayer = GetPlayerForEscort())
@@ -842,7 +842,7 @@ struct npc_skywingAI : public npc_escortAI
                 DoScriptText(SAY_SKYWING_END, m_creature);
 
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_SKYWING, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_SKYWING, m_creature);
         }
     }
 
@@ -1094,7 +1094,7 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
                 SetRun();
 
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_ESCAPE_SKETTIS, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_ESCAPE_SKETTIS, m_creature);
 
                 break;
 
@@ -1171,7 +1171,7 @@ struct npc_avatar_of_terokkAI : public ScriptedAI
             GetPlayerListWithEntryInWorld(playerList, m_creature, 50.0f);
             for (auto& player : playerList)
                 if (player->IsActiveQuest(QUEST_SKETTIS_OFFENSIVE))
-                    player->GroupEventHappens(QUEST_SKETTIS_OFFENSIVE, m_creature);
+                    player->RewardPlayerAndGroupAtEventExplored(QUEST_SKETTIS_OFFENSIVE, m_creature);
         }
     }
 

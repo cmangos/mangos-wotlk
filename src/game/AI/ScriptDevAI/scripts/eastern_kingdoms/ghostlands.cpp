@@ -113,7 +113,7 @@ struct npc_ranger_lilathaAI : public npc_escortAI
                 SetRun(false);
                 break;
             case 30:
-                pPlayer->GroupEventHappens(QUEST_CATACOMBS, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_CATACOMBS, m_creature);
                 break;
             case 32:
                 DoScriptText(SAY_END1, m_creature, pPlayer);

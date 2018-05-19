@@ -226,7 +226,7 @@ struct npc_magwinAI : public npc_escortAI
                 SetRun();
                 DoScriptText(SAY_END1, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_A_CRY_FOR_HELP, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_A_CRY_FOR_HELP, m_creature);
                 if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_COWLEN, 30.0f))
                 {
                     pFather->SetStandState(UNIT_STAND_STATE_STAND);

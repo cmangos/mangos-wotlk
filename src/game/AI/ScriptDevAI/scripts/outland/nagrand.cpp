@@ -259,7 +259,7 @@ struct npc_nagrand_captiveAI : public npc_escortAI
                     DoScriptText(SAY_MAG_COMPLETE, m_creature);
 
                     if (Player* pPlayer = GetPlayerForEscort())
-                        pPlayer->GroupEventHappens(QUEST_TOTEM_KARDASH_H, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TOTEM_KARDASH_H, m_creature);
 
                     SetRun();
                     break;
@@ -289,7 +289,7 @@ struct npc_nagrand_captiveAI : public npc_escortAI
                     DoScriptText(SAY_KUR_COMPLETE, m_creature);
 
                     if (Player* pPlayer = GetPlayerForEscort())
-                        pPlayer->GroupEventHappens(QUEST_TOTEM_KARDASH_A, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TOTEM_KARDASH_A, m_creature);
 
                     SetRun();
                     break;

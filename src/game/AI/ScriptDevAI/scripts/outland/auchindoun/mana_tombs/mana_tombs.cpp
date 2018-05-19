@@ -209,7 +209,7 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
                 break;
             case 43:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_HARD_WORK_PAYS_OFF, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_HARD_WORK_PAYS_OFF, m_creature);
                 break;
         }
     }

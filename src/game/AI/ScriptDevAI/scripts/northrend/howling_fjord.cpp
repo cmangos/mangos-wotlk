@@ -814,7 +814,7 @@ struct npc_apothecary_hanesAI : public npc_escortAI
                 break;
             case 44:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_TRIAL_OF_FIRE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_TRIAL_OF_FIRE, m_creature);
                 break;
         }
     }

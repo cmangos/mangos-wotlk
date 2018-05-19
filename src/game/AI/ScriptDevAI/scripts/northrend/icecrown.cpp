@@ -510,7 +510,7 @@ struct npc_father_kamarosAI : public npc_escortAI
                 SetRun();
                 DoScriptText(SAY_KAMAROS_COMPLETE_2, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(m_uiCurrentQuestId, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(m_uiCurrentQuestId, m_creature);
                 break;
         }
     }
@@ -784,7 +784,7 @@ struct npc_grand_admiral_westwindAI : public ScriptedAI
 
                 // kill credit
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
-                    pPlayer->RewardPlayerAndGroupAtEvent(NPC_WESTWIND_CREDIT_BUNNY, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventCredit(NPC_WESTWIND_CREDIT_BUNNY, m_creature);
             }
         }
     }

@@ -553,7 +553,7 @@ struct npc_wildaAI : public npc_escortAI
                     DoDespawnSpirits();
                     m_creature->SetFacingToObject(pPlayer);
                     DoScriptText(SAY_WIL_END, m_creature, pPlayer);
-                    pPlayer->GroupEventHappens(QUEST_ESCAPE_COILSCAR, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_COILSCAR, m_creature);
                 }
                 break;
         }
@@ -896,7 +896,7 @@ struct mob_torlothAI : public ScriptedAI
     {
         if (Player* pPlayer = pKiller->GetBeneficiaryPlayer())
         {
-            pPlayer->GroupEventHappens(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, m_creature);
+            pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_BATTLE_OF_THE_CRIMSON_WATCH, m_creature);
 
             if (Creature* pLordIllidan = m_creature->GetMap()->GetCreature(m_lordIllidanGuid))
             {
@@ -2625,7 +2625,7 @@ struct npc_disobedient_dragonmaw_peonAI : public ScriptedAI
                     m_creature->SetFacingTo(angle);
                 }
                 if (Player* player = m_creature->GetMap()->GetPlayer(m_lastPlayerGuid))
-                    player->RewardPlayerAndGroupAtEvent(NPC_DISOBEDIENT_PEON, m_creature);
+                    player->RewardPlayerAndGroupAtEventCredit(NPC_DISOBEDIENT_PEON, m_creature);
 
                 m_lastPlayerGuid = ObjectGuid();
                 m_creature->UpdateEntry(NPC_PEON);

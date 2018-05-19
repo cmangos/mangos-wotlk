@@ -301,7 +301,7 @@ struct npc_harrison_jonesAI : public npc_escortAI
                 DoScriptText(SAY_HARRISON_ESCORT_COMPELTE, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
-                    pPlayer->GroupEventHappens(QUEST_ID_DUN_DA_DUN_TAH, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_DUN_DA_DUN_TAH, m_creature);
                     m_creature->SetFacingToObject(pPlayer);
                 }
                 break;
@@ -496,7 +496,7 @@ struct npc_emilyAI : public npc_escortAI
                 DoScriptText(SAY_RESUME_ESCORT, m_creature);
                 SetRun();
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ID_MR_FLOPPY_ADVENTURE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_MR_FLOPPY_ADVENTURE, m_creature);
                 break;
             case 25:
                 DoScriptText(SAY_ESCORT_COMPLETE, m_creature);

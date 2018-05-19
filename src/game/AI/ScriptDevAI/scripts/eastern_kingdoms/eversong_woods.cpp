@@ -180,7 +180,7 @@ struct npc_kelerun_bloodmournAI : public ScriptedAI
                     // count starts at 0
                     if (m_uiChallengerCount == MAX_CHALLENGER)
                     {
-                        pPlayer->GroupEventHappens(QUEST_SECOND_TRIAL, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_SECOND_TRIAL, m_creature);
                         Reset();
                         return;
                     }
@@ -400,7 +400,7 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
         Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
         if (pPlayer && pPlayer->GetQuestStatus(QUEST_UNEXPECTED_RESULT) == QUEST_STATUS_INCOMPLETE)
-            pPlayer->GroupEventHappens(QUEST_UNEXPECTED_RESULT, m_creature);
+            pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_UNEXPECTED_RESULT, m_creature);
 
         m_playerGuid.Clear();
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);

@@ -494,7 +494,7 @@ struct npc_lurgglbrAI : public npc_escortAI
                             m_uiSayTimer = 3000;
                             break;
                         case 1:
-                            pPlayer->GroupEventHappens(QUEST_ESCAPE_FROM_WINTERFIN_CAVERNS, m_creature);
+                            pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_FROM_WINTERFIN_CAVERNS, m_creature);
                             m_uiSayTimer = 0;
                             break;
                     }
@@ -1015,7 +1015,7 @@ struct npc_bonker_togglevoltAI : public npc_escortAI
             case 32:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
-                    pPlayer->GroupEventHappens(QUEST_ID_GET_ME_OUTA_HERE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_GET_ME_OUTA_HERE, m_creature);
                     DoScriptText(SAY_BONKER_COMPLETE, m_creature, pPlayer);
                 }
                 break;
@@ -1243,7 +1243,7 @@ struct npc_mootoo_the_youngerAI : public npc_escortAI
                 break;
             case 23:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_ESCAPING_THE_MIST, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPING_THE_MIST, m_creature);
                 if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_ELDER_MOOTOO, 30.0f))
                     DoScriptText(SAY_1_ELDER_MOOTOO, pFather);
                 break;
@@ -1433,7 +1433,7 @@ struct npc_proudhoofAI : public npc_escortAI
                 break;
             case 21:
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_WE_STRIKE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_WE_STRIKE, m_creature);
                 break;
             case 22:
                 DoScriptText(SAY_QUEST_END, m_creature);

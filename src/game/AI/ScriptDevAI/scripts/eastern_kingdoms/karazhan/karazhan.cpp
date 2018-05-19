@@ -397,7 +397,7 @@ struct npc_image_of_medivhAI : public ScriptedAI, private DialogueHelper
                 m_creature->GetMotionMaster()->MovePoint(0, afMedivhExitLoc[0], afMedivhExitLoc[1], afMedivhExitLoc[2]);
                 // complete quest
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_eventStarterGuid))
-                    pPlayer->GroupEventHappens(QUEST_MASTERS_TERRACE, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_MASTERS_TERRACE, m_creature);
                 break;
         }
     }

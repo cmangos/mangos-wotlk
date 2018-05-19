@@ -1310,7 +1310,7 @@ struct npc_marshal_windsorAI : public npc_escortAI
                     m_pInstance->SetData(TYPE_QUEST_JAIL_BREAK, DONE);
 
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_JAIL_BREAK, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_JAIL_BREAK, m_creature);
                 break;
         }
     }

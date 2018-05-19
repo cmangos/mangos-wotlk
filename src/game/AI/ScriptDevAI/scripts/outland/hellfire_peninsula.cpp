@@ -405,7 +405,7 @@ struct npc_wounded_blood_elfAI : public npc_escortAI
                 m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
                 break;
             case 40:
-                pPlayer->GroupEventHappens(QUEST_ROAD_TO_FALCON_WATCH, m_creature);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ROAD_TO_FALCON_WATCH, m_creature);
                 pPlayer->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_END_TALERIS_INT, m_creature, m_creature);
                 break;
         }
@@ -841,7 +841,7 @@ bool GossipHello_npc_colonel_jules(Player* pPlayer, Creature* pCreature)
             if (pAnchoriteAI->IsExorcismComplete())
             {
                 // kill credit
-                pPlayer->RewardPlayerAndGroupAtEvent(pCreature->GetEntry(), pCreature);
+                pPlayer->RewardPlayerAndGroupAtEventCredit(pCreature->GetEntry(), pCreature);
 
                 // reset Anchorite and Colonel
                 pAnchorite->AI()->EnterEvadeMode();

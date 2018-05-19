@@ -65,7 +65,7 @@ struct npc_ame01AI : public npc_escortAI
             case 37:
                 DoScriptText(SAY_AME_END, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
-                    pPlayer->GroupEventHappens(QUEST_CHASING_AME, m_creature);
+                    pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_CHASING_AME, m_creature);
                 break;
         }
     }
@@ -176,7 +176,7 @@ struct npc_ringoAI : public FollowerAI
                 if (Player* pPlayer = GetLeaderForFollower())
                 {
                     if (pPlayer->GetQuestStatus(QUEST_A_LITTLE_HELP) == QUEST_STATUS_INCOMPLETE)
-                        pPlayer->GroupEventHappens(QUEST_A_LITTLE_HELP, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_A_LITTLE_HELP, m_creature);
                 }
 
                 pSpraggle = pWho;

@@ -1972,7 +1972,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                                 Creature* bird = m_caster->SummonCreature(22023, m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), TEMPSPAWN_MANUAL_DESPAWN, 0);
                                 if (Player* player = dynamic_cast<Player*>(m_caster))
                                 {
-                                    player->RewardPlayerAndGroupAtEvent(22383, bird);
+                                    player->RewardPlayerAndGroupAtEventCredit(22383, bird);
                                 }
                                 bird->SetWalk(false, true);
                                 Creature* taskM = m_caster->GetMap()->GetCreature(taskmaster);
@@ -8840,6 +8840,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 38920:                                 // Detonate Teleporter
+                {
+                    if (Player* pPlayer = m_caster->GetBeneficiaryPlayer())
+                        pPlayer->RewardPlayerAndGroupAtEventCredit(unitTarget->GetEntry(), unitTarget);
+
+                    return;
+                }
                 case 39338:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Horde
                 case 39342:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Alliance
                 {
@@ -12787,7 +12794,7 @@ void Spell::EffectKillCreditGroup(SpellEffectIndex eff_idx)
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    ((Player*)unitTarget)->RewardPlayerAndGroupAtEvent(m_spellInfo->EffectMiscValue[eff_idx], unitTarget);
+    ((Player*)unitTarget)->RewardPlayerAndGroupAtEventCredit(m_spellInfo->EffectMiscValue[eff_idx], unitTarget);
 }
 
 void Spell::EffectQuestFail(SpellEffectIndex eff_idx)

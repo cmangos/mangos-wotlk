@@ -566,7 +566,7 @@ struct npc_brann_hosAI : public npc_escortAI
 
                     Player* pPlayer = GetPlayerForEscort();
                     if (pPlayer)
-                        pPlayer->GroupEventHappens(QUEST_HALLS_OF_STONE, m_creature);
+                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_HALLS_OF_STONE, m_creature);
 
                     m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                     m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
