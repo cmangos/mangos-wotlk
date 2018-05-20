@@ -773,7 +773,7 @@ UPDATE instance_template SET ScriptName='instance_ramparts' WHERE map=543;
 UPDATE creature_template SET ScriptName='boss_grand_warlock_nethekurse' WHERE entry=16807;
 UPDATE creature_template SET ScriptName='boss_warbringer_omrogg' WHERE entry=16809;
 UPDATE creature_template SET ScriptName='mob_fel_orc_convert' WHERE entry=17083;
-UPDATE creature_template SET ScriptName='mob_lesser_shadow_fissure' WHERE entry=17471;
+UPDATE creature_template SET ScriptName='mob_lesser_shadow_fissure' WHERE entry IN (17471,18370);
 UPDATE creature_template SET ScriptName='mob_omrogg_heads' WHERE entry IN (19523,19524);
 UPDATE creature_template SET ScriptName='boss_warchief_kargath_bladefist' WHERE entry=16808;
 UPDATE instance_template SET ScriptName='instance_shattered_halls' WHERE map=540;
@@ -4205,24 +4205,24 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 540 000 SHATTERED HALLS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
-(-1540000,'You wish to fight us all at once? This should be amusing!',10262,1,0,0,'nethekurse SAY_INTRO'),
-(-1540001,'You can have that one. I no longer need him.',10263,1,0,0,'nethekurse PEON_ATTACK_1'),
-(-1540002,'Yes, beat him mercilessly. His skull is a thick as an ogres.',10264,1,0,0,'nethekurse PEON_ATTACK_2'),
-(-1540003,'Don\'t waste your time on that one. He\'s weak!',10265,1,0,0,'nethekurse PEON_ATTACK_3'),
-(-1540004,'You want him? Very well, take him!',10266,1,0,0,'nethekurse PEON_ATTACK_4'),
-(-1540005,'One pitiful wretch down. Go on, take another one.',10267,1,0,0,'nethekurse PEON_DIE_1'),
-(-1540006,'Ahh, what a waste... Next!',10268,1,0,0,'nethekurse PEON_DIE_2'),
-(-1540007,'I was going to kill him anyway!',10269,1,0,0,'nethekurse PEON_DIE_3'),
-(-1540008,'Thank you for saving me the trouble! Now it\'s my turn to have some fun...',10270,1,0,0,'nethekurse PEON_DIE_4'),
-(-1540009,'Beg for your pittyfull life!',10259,1,0,0,'nethekurse SAY_TAUNT_1'),
-(-1540010,'Run covad, ruun!',10260,1,0,0,'nethekurse SAY_TAUNT_2'),
-(-1540011,'Your pain amuses me.',10261,1,0,0,'nethekurse SAY_TAUNT_3'),
-(-1540012,'I\'m already bored.',10271,1,0,0,'nethekurse SAY_AGGRO_1'),
-(-1540013,'Come on! ... Show me a real fight.',10272,1,0,0,'nethekurse SAY_AGGRO_2'),
-(-1540014,'I had more fun torturing the peons.',10273,1,0,0,'nethekurse SAY_AGGRO_3'),
-(-1540015,'You Loose.',10274,1,0,0,'nethekurse SAY_SLAY_1'),
-(-1540016,'Ohh! Just die.',10275,1,0,0,'nethekurse SAY_SLAY_2'),
-(-1540017,'What a ... a shame.',10276,1,0,0,'nethekurse SAY_DIE'),
+(-1540000,'You wish to fight us all at once? This should be amusing!',10262,1,0,0,'nethekurse SAY_AGGRO_1'),
+(-1540001,'Thank you for saving me the trouble. Now it''s my turn to have some fun!',10270,1,0,0,'nethekurse SAY_AGGRO_2'),
+(-1540002,'Come on, show me a real fight!',10272,1,0,0,'nethekurse SAY_AGGRO_3'),
+(-1540003,'You can have that one, I no longer need him!',10263,1,0,11,'nethekurse PEON_ATTACK_1'),
+(-1540004,'Yes, beat him mercilessly! His skull is as thick as an ogre''s!',10264,1,0,0,'nethekurse PEON_ATTACK_2'),
+(-1540005,'Don''t waste your time on that one, he''s weak!',10265,1,0,11,'nethekurse PEON_ATTACK_3'),
+(-1540006,'You want him? Very well, take him!',10266,1,0,0,'nethekurse PEON_ATTACK_4'),
+(-1540007,'One pitiful wretch down. Go on, take another one.',10267,1,0,0,'nethekurse PEON_DIE_1'),
+(-1540008,'Ah, what a waste... next!',10268,1,0,0,'nethekurse PEON_DIE_2'),
+(-1540009,'I was going to kill him anyway!',10269,1,0,0,'nethekurse PEON_DIE_3'),
+(-1540010,'Beg for your pitiful life!',10259,1,0,0,'nethekurse SAY_TAUNT_1'),
+(-1540011,'Run, coward, run!   ',10260,1,0,11,'nethekurse SAY_TAUNT_2'),
+(-1540012,'Your pain amuses me!',10261,1,0,11,'nethekurse SAY_TAUNT_3'),
+(-1540013,'I had more fun torturing the peons!',10273,1,0,0,'nethekurse SAY_SLAY_1'),
+(-1540014,'I''m already bored!',10271,1,0,0,'nethekurse SAY_SAY_2'),
+(-1540015,'You lose.',10274,1,0,0,'nethekurse SAY_SLAY_3'),
+(-1540016,'Oh, just die!',10275,1,0,0,'nethekurse SAY_SLAY_4'),
+(-1540017,'What... a shame.',10276,1,0,0,'nethekurse SAY_DIE'),
 
 (-1540018,'Smash!',10306,1,0,0,'omrogg GoCombat_1'),
 (-1540019,'If you nice me let you live.',10308,1,0,0,'omrogg GoCombat_2'),
