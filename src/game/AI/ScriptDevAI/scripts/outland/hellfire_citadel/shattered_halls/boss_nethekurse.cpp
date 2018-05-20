@@ -162,6 +162,9 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         for (Creature* convert : lFelConverts)
             m_vFelConverts.push_back(convert->GetObjectGuid());
 
+        if (m_vFelConverts.size() == 0)
+            return;
+
         switch (urand(0, 2))
         {
             case 0:
