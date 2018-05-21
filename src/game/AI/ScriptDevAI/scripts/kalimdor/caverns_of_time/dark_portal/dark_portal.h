@@ -86,6 +86,16 @@ enum
 
     AREATRIGGER_MEDIVH      = 4288,
     AREATRIGGER_ENTER       = 4485,
+
+    // Post event steps
+    POST_EVENT_1_MEDIVH_YELL        = 1,
+    POST_EVENT_2_MEDIVH_NPCFLAGS    = 2,
+    POST_EVENT_3_SUMMON_ORCS_1      = 3,
+    POST_EVENT_4_SUMMON_ORCS_2      = 4,
+    POST_EVENT_5_SUMMON_ORCS_3      = 5,
+    POST_EVENT_6_SUMMON_ORCS_4      = 6,
+
+    GO_DARK_PORTAL          = 185103,
 };
 
 struct PortalData
@@ -115,6 +125,7 @@ class instance_dark_portal : public ScriptedInstance
 
         void OnPlayerEnter(Player* pPlayer) override;
         void OnCreatureCreate(Creature* pCreature) override;
+        void OnObjectCreate(GameObject* pGo) override;
 
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureEvade(Creature* pCreature);
@@ -137,6 +148,8 @@ class instance_dark_portal : public ScriptedInstance
         void UpdateWorldState(bool bEnable = true);
         void DoSpawnNextPortal();
         void DoResetEvent();
+        void StartPostEvent();
+        void ExecutePostEventStep();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
@@ -152,6 +165,9 @@ class instance_dark_portal : public ScriptedInstance
         uint32 m_uiNextPortalTimer;
         uint32 m_uiSummonCrystalTimer;
         uint8 m_uiCurrentRiftId;
+
+        uint32 m_uiPostEventTimer;
+        uint8 m_uiPostEventStep;
 };
 
 #endif

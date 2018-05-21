@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Instance_Dark_Portal
 SD%Complete: 75
-SDComment: Quest support: 9836, 10297. Some visuals for the event are missing; Event epilogue NYI.
+SDComment: Quest support: 9836, 10297. Some visuals for the event are missing;
 SDCategory: Caverns of Time, The Dark Portal
 EndScriptData */
 
@@ -33,7 +33,8 @@ instance_dark_portal::instance_dark_portal(Map* pMap) : ScriptedInstance(pMap),
     m_bHasIntroYelled(false),
     m_uiMedivhYellCount(1),
     m_uiNextPortalTimer(0),
-
+    m_uiPostEventTimer(0),
+    m_uiPostEventStep(0),
     m_uiSummonCrystalTimer(0),
     m_uiCurrentRiftId(0)
 {
@@ -90,9 +91,6 @@ void instance_dark_portal::DoHandleAreaTrigger(uint32 uiTriggerId)
         // Start Dark Portal event
         if (GetData(TYPE_MEDIVH) == NOT_STARTED || GetData(TYPE_MEDIVH) == FAIL)
             SetData(TYPE_MEDIVH, IN_PROGRESS);
-        // Start Epilogue
-        else if (GetData(TYPE_AEONUS) == DONE && GetData(TYPE_MEDIVH) != DONE)
-            SetData(TYPE_MEDIVH, DONE);
     }
 }
 
@@ -108,6 +106,16 @@ void instance_dark_portal::OnCreatureCreate(Creature* pCreature)
     }
 }
 
+void instance_dark_portal::OnObjectCreate(GameObject* pGo)
+{
+    switch (pGo->GetEntry())
+    {
+        case GO_DARK_PORTAL:
+            m_goEntryGuidStore[GO_DARK_PORTAL] = pGo->GetObjectGuid();
+            break;
+    }
+}
+
 void instance_dark_portal::SetData(uint32 uiType, uint32 uiData)
 {
     switch (uiType)
@@ -119,7 +127,12 @@ void instance_dark_portal::SetData(uint32 uiType, uint32 uiData)
                 if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
                 {
                     if (pMedivh->isAlive())
+                    {
                         DoScriptText(SAY_MEDIVH_ENTER, pMedivh);
+
+                        if (Creature* pSaat = GetSingleCreatureFromStorage(NPC_SAAT)) // Sa'at is not a questgiver while event is in progress
+                            pSaat->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    }
                     // If Medivh is not available the do not store the uiData;
                     else
                         return;
@@ -134,35 +147,18 @@ void instance_dark_portal::SetData(uint32 uiType, uint32 uiData)
             }
             if (uiData == DONE)
             {
-                // Yell for event finished
-                if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
-                {
-                    DoScriptText(SAY_MEDIVH_WIN, pMedivh);
-                    pMedivh->SetFacingTo(6.15f);
-                    pMedivh->InterruptNonMeleeSpells(false);
-                    pMedivh->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-                }
+                StartPostEvent();
 
-                // this may be completed further out in the post-event
-                Map::PlayerList const& players = instance->GetPlayers();
-
-                if (!players.isEmpty())
-                {
-                    for (const auto& player : players)
-                    {
-                        if (Player* pPlayer = player.getSource())
-                        {
-                            if (pPlayer->GetQuestStatus(QUEST_OPENING_PORTAL) == QUEST_STATUS_INCOMPLETE)
-                                pPlayer->AreaExploredOrEventHappens(QUEST_OPENING_PORTAL);
-
-                            if (pPlayer->GetQuestStatus(QUEST_MASTER_TOUCH) == QUEST_STATUS_INCOMPLETE)
-                                pPlayer->AreaExploredOrEventHappens(QUEST_MASTER_TOUCH);
-                        }
-                    }
-                }
+                if (Creature* pSaat = GetSingleCreatureFromStorage(NPC_SAAT))
+                    pSaat->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
             }
             if (uiData == FAIL)
+            {
                 DoResetEvent();
+
+                if (Creature* pSaat = GetSingleCreatureFromStorage(NPC_SAAT))
+                    pSaat->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            }
             m_auiEncounter[uiType] = uiData;
             break;
         }
@@ -217,7 +213,10 @@ void instance_dark_portal::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_AEONUS:
             if (uiData == DONE)
+            {
                 UpdateWorldState(false);
+                SetData(TYPE_MEDIVH, DONE); // Start Post Event
+            }
             m_auiEncounter[uiType] = uiData;
             break;
         default:
@@ -371,8 +370,136 @@ void instance_dark_portal::DoSpawnNextPortal()
     }
 }
 
+void instance_dark_portal::StartPostEvent()
+{
+    if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
+        pMedivh->InterruptNonMeleeSpells(false);
+    m_uiPostEventStep = POST_EVENT_1_MEDIVH_YELL;
+    m_uiPostEventTimer = 10000;
+
+    // Quests are completed instantly on Aeonus death, but can't be turned in until Medivh gets Quest NPCFlag
+    Map::PlayerList const& players = instance->GetPlayers();
+
+    if (!players.isEmpty())
+    {
+        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        {
+            if (Player* pPlayer = itr->getSource())
+            {
+                if (pPlayer->GetQuestStatus(QUEST_OPENING_PORTAL) == QUEST_STATUS_INCOMPLETE)
+                    pPlayer->AreaExploredOrEventHappens(QUEST_OPENING_PORTAL);
+
+                if (pPlayer->GetQuestStatus(QUEST_MASTER_TOUCH) == QUEST_STATUS_INCOMPLETE)
+                    pPlayer->AreaExploredOrEventHappens(QUEST_MASTER_TOUCH);
+            }
+        }
+    }
+}
+
+void instance_dark_portal::ExecutePostEventStep()
+{
+    switch (m_uiPostEventStep)
+    {
+    case POST_EVENT_1_MEDIVH_YELL:
+    {
+        if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
+        {
+            DoScriptText(SAY_MEDIVH_WIN, pMedivh);
+            pMedivh->SetFacingTo(6.265732f);
+            pMedivh->HandleEmoteState(378);
+        }
+        DoRespawnGameObject(GO_DARK_PORTAL, WEEK);
+        m_uiPostEventTimer = 16700;
+        m_uiPostEventStep++;
+        break;
+    }
+    case POST_EVENT_2_MEDIVH_NPCFLAGS:
+    {
+        if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
+        {
+            pMedivh->SetFacingTo(3.001966f);
+            pMedivh->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            pMedivh->HandleEmoteState(0);
+        }
+        m_uiPostEventTimer = 800;
+        m_uiPostEventStep++;
+        break;
+    }
+    case POST_EVENT_3_SUMMON_ORCS_1:
+    {
+        if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
+        {
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2086.848f, 7132.722f, 34.67148f, 6.126106f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 1);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2087.195f, 7129.969f, 34.67148f, 6.143559f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 2);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2087.48f, 7127.273f, 34.67148f, 6.161012f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 3);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2087.801f, 7124.51f, 34.67148f, 6.178465f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 4);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2088.082f, 7121.888f, 34.67148f, 6.195919f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 5);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2088.386f, 7119.379f, 34.67148f, 6.213372f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 6);
+        }
+        m_uiPostEventTimer = 2000;
+        m_uiPostEventStep++;
+        break;
+    }
+    case POST_EVENT_4_SUMMON_ORCS_2:
+    {
+        if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
+        {
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2086.572f, 7132.635f, 34.67148f, 6.126106f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 7);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2086.985f, 7129.968f, 34.67148f, 6.143559f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 8);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2087.409f, 7127.203f, 34.67148f, 6.161012f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 9);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2087.883f, 7124.376f, 34.67148f, 6.178465f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 10);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2088.225f, 7121.99f, 34.67147f, 6.195919f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 11);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2088.599f, 7119.243f, 34.67148f, 6.213372f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 12);
+        }
+        m_uiPostEventTimer = 2400;
+        m_uiPostEventStep++;
+        break;
+    }
+    case POST_EVENT_5_SUMMON_ORCS_3:
+    {
+        if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
+        {
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2086.509f, 7132.678f, 34.67148f, 6.126106f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 13);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2086.954f, 7129.987f, 34.67148f, 6.143559f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 14);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2087.31f, 7127.19f, 34.67148f, 6.161012f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 15);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2087.646f, 7124.358f, 34.67148f, 6.178465f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 16);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2088.013f, 7121.874f, 34.67148f, 6.195919f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 17);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2088.501f, 7119.221f, 34.67148f, 6.213372f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 18);
+        }
+        m_uiPostEventTimer = 2400;
+        m_uiPostEventStep++;
+        break;
+    }
+    case POST_EVENT_6_SUMMON_ORCS_4:
+    {
+        if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
+        {
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2086.459f, 7132.609f, 34.67148f, 6.149603f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 19);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2086.878f, 7129.967f, 34.67148f, 6.097349f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 20);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2087.149f, 7127.205f, 34.67148f, 6.089332f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 21);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2087.488f, 7124.414f, 34.67148f, 6.143568f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 22);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2087.892f, 7121.918f, 34.67148f, 6.139006f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 23);
+            pMedivh->SummonCreature(NPC_COUNCIL_ENFORCER, -2088.388f, 7119.204f, 34.67148f, 6.178112f, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, 24);
+        }
+        m_uiPostEventTimer = 0;
+        m_uiPostEventStep = 0;
+        break;
+    }
+    }
+}
+
 void instance_dark_portal::Update(uint32 uiDiff)
 {
+    if (m_uiPostEventTimer && GetData(TYPE_MEDIVH) == DONE)
+    {
+        if (m_uiPostEventTimer <= uiDiff)
+        {
+            ExecutePostEventStep();
+        }
+        else
+            m_uiPostEventTimer -= uiDiff;
+    }
+
     if (GetData(TYPE_MEDIVH) != IN_PROGRESS)
         return;
 
