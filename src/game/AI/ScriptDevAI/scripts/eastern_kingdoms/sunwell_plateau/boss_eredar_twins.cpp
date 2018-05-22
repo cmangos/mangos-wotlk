@@ -74,6 +74,9 @@ enum
     SPELL_BLAZE                             = 45235,        // On main target every 3 secs; should trigger 45236 which leaves a fire on the ground
     SPELL_FLAME_SEAR                        = 46771,        // A few random targets debuff
     SPELL_CONFLAGRATION_UNK                 = 45333,        // Unknown
+
+    DARK_FLAME_AURA_ALYTHESS                = 47300,        // Aura buff that make flame touched spell proc - for Alythess
+    DARK_FLAME_AURA_SCAROLASH               = 45343,        // Aura buff that make dark touched spell proc  - for Scarolash
 };
 
 static const DialogueEntry aIntroDialogue[] =
@@ -121,6 +124,7 @@ struct boss_alythessAI : public ScriptedAI
         m_uiBlazeTimer          = 1000;
         m_uiFlameSearTimer      = 5000;
         m_bDidIntro = false;
+        DoCastSpellIfCan(m_creature, DARK_FLAME_AURA_ALYTHESS, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
     }
 
     void JustReachedHome() override
@@ -183,36 +187,10 @@ struct boss_alythessAI : public ScriptedAI
                     m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                     DoScriptText(SAY_SACROLASH_EMPOWER, pSacrolash);
                     pSacrolash->InterruptNonMeleeSpells(true);
+                    pSacrolash->CastSpell(pSacrolash, DARK_FLAME_AURA_ALYTHESS, TRIGGERED_NONE);
                     pSacrolash->CastSpell(pSacrolash, SPELL_EMPOWER, TRIGGERED_NONE);
                 }
             }
-        }
-    }
-
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        if (pTarget->HasAura(SPELL_DARK_FLAME))
-            return;
-
-        if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
-        {
-            if (pTarget->HasAura(SPELL_DARK_TOUCHED))
-            {
-                pTarget->RemoveAurasDueToSpell(SPELL_DARK_TOUCHED);
-                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, TRIGGERED_OLD_TRIGGERED);
-            }
-            else
-                pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, TRIGGERED_OLD_TRIGGERED);
-        }
-        else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
-        {
-            if (pTarget->HasAura(SPELL_FLAME_TOUCHED))
-            {
-                pTarget->RemoveAurasDueToSpell(SPELL_FLAME_TOUCHED);
-                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, TRIGGERED_OLD_TRIGGERED);
-            }
-            else
-                pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
@@ -314,6 +292,7 @@ struct boss_sacrolashAI : public ScriptedAI
         m_uiConfoundingBlowTimer = 30000;
         m_uiShadowBladesTimer    = 15000;
         m_uiSummonShadowImage    = 10000;
+        DoCastSpellIfCan(m_creature, DARK_FLAME_AURA_ALYTHESS, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
     }
 
     void JustReachedHome() override
@@ -363,36 +342,10 @@ struct boss_sacrolashAI : public ScriptedAI
                     m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
                     DoScriptText(SAY_ALYTHESS_EMPOWER, pAlythess);
                     pAlythess->InterruptNonMeleeSpells(true);
+                    pAlythess->CastSpell(pAlythess, DARK_FLAME_AURA_SCAROLASH, TRIGGERED_NONE);
                     pAlythess->CastSpell(pAlythess, SPELL_EMPOWER, TRIGGERED_NONE);
                 }
             }
-        }
-    }
-
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        if (pTarget->HasAura(SPELL_DARK_FLAME))
-            return;
-
-        if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_FIRE)
-        {
-            if (pTarget->HasAura(SPELL_DARK_TOUCHED))
-            {
-                pTarget->RemoveAurasDueToSpell(SPELL_DARK_TOUCHED);
-                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, TRIGGERED_OLD_TRIGGERED);
-            }
-            else
-                pTarget->CastSpell(pTarget, SPELL_FLAME_TOUCHED, TRIGGERED_OLD_TRIGGERED);
-        }
-        else if (pSpell->SchoolMask == SPELL_SCHOOL_MASK_SHADOW)
-        {
-            if (pTarget->HasAura(SPELL_FLAME_TOUCHED))
-            {
-                pTarget->RemoveAurasDueToSpell(SPELL_FLAME_TOUCHED);
-                pTarget->CastSpell(pTarget, SPELL_DARK_FLAME, TRIGGERED_OLD_TRIGGERED);
-            }
-            else
-                pTarget->CastSpell(pTarget, SPELL_DARK_TOUCHED, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
