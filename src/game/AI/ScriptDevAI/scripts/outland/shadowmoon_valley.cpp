@@ -40,6 +40,7 @@ EndContentData */
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"
 #include "Entities/TemporarySpawn.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 /*#####
 # mob_mature_netherwing_drake
@@ -2726,6 +2727,453 @@ UnitAI* GetAI_npc_disobedient_dragonmaw_peon(Creature* pCreature)
     return new npc_disobedient_dragonmaw_peonAI(pCreature);
 }
 
+/*######
+## Deadliest Trap Ever Laid commander NPC AIs
+######*/
+
+enum
+{
+    SAY_EVENT_ACCEPT_ARCUS = -1001293,
+    SAY_EVENT_START_ARCUS  = -1001294,
+    SAY_EVENT_END_ARCUS    = -1001295,
+
+    SAY_EVENT_ACCEPT_HOBB  = -1001296,
+    SAY_EVENT_START_HOBB   = -1001297,
+    SAY_EVENT_END_HOBB     = -1001298,
+
+    QUEST_DEADLIEST_TRAP_SCRYERS = 11097,
+    QUEST_DEADLIEST_TRAP_ALDOR   = 11101,
+
+    // Combat spells
+    SPELL_AIMED_SHOT    = 38370,
+    SPELL_SHOOT         = 41440,
+    SPELL_MULTI_SHOT    = 41448,
+
+    // Emotes
+    // EMOTE_STATE_READYRIFLE
+    // EMOTE_ONESHOT_READYBOW
+
+    NPC_SANCTUM_DEFENDER = 23435,
+    NPC_ALTAR_DEFENDER   = 23453,
+
+    NPC_SCRYERS_DRAGONMAW_SKYBREAKER = 23440,
+    NPC_ALDOR_DRAGONMAW_SKYBREAKER   = 23441,
+
+    COMMANDER_HOBB          = 0,
+    COMMANDER_ARCUS         = 1,
+    COMMANDER_COUNT         = 2,
+    DEFENDER_SPAWN_COUNT    = 10, // per commander
+
+    DRAGONMAW_SPAWN_COUNT   = 9, // per commander
+
+    // Paths
+    LAST_POINT_HOBB         = 2,
+    LAST_POINT_ARCUS        = 6,
+
+    POINT_HOME              = 1,
+
+    DRAGONMAW_KILL_COUNT    = 30,
+};
+
+enum CommanderActions : uint32
+{
+    COMMANDER_COMBAT_ACTION_AIMED_SHOT,
+    COMMANDER_COMBAT_ACTION_MULTI_SHOT,
+    COMMANDER_COMBAT_ACTION_SHOOT,
+    COMMANDER_COMBAT_ACTION_MAX,
+    COMMANDER_ACTION_START_QUEST_FLAGS,
+    COMMANDER_ACTION_START_QUEST_TEXT,
+    COMMANDER_ACTION_START_QUEST_MOVEMENT,
+    COMMANDER_ACTION_POST_MOVEMENT_TEXT,
+    COMMANDER_ACTION_POST_MOVEMENT_FACE_DIRECTION, // Only for aldor
+    COMMANDER_ACTION_POST_MOVEMENT_START_EVENT,
+    COMMANDER_ACTION_WIN_RETURN,
+};
+
+struct SpawnData
+{
+    float x, y, z, ori;
+};
+
+static SpawnData defenderSpawns[COMMANDER_COUNT][DEFENDER_SPAWN_COUNT] =
+{
+    { // scryer
+        { -4084.224f,1066.301f,31.44092f,5.427974f },
+        { -4077.014f,1070.703f,31.12169f,5.375614f },
+        { -4070.818f,1074.806f,31.39684f,5.393067f },
+        { -4063.517f,1079.07f, 32.32865f,5.462881f },
+        { -4086.24f, 1060.344f,31.0915f, 5.305801f },
+        { -4078.464f,1065.285f,31.17392f,5.358161f },
+        { -4071.446f,1070.082f,30.65687f,5.358161f },
+        { -4064.422f,1074.611f,31.13296f,5.323254f },
+        { -4056.84f, 1079.573f,32.50325f,5.5676f   },
+        { -4074.189f,1076.387f,31.9625f, 5.358161f }
+    },
+    { // aldor
+        { -3094.992f,662.7219f,-12.76196f,2.583087f },
+        { -3091.117f,678.4016f,-16.35974f,3.036873f },
+        { -3088.423f,684.4808f,-17.56973f,3.141593f },
+        { -3093.32f, 673.4081f,-15.20303f,2.879793f },
+        { -3085.618f,692.2532f,-17.65626f,3.089233f },
+        { -3096.634f,667.7632f,-13.79022f,2.775074f },
+        { -3083.601f,687.3881f,-17.03627f,3.089233f },
+        { -3086.168f,680.5683f,-15.94252f,2.984513f },
+        { -3088.57f, 674.317f, -14.89533f,2.75762f  },
+        { -3091.114f,668.1656f,-14.13708f,2.740167f }
+    }
+};
+
+static SpawnData dragonmawSpawns[COMMANDER_COUNT][DRAGONMAW_SPAWN_COUNT] =
+{ // orientations are not sniffed
+    { // scryer
+        { -4063.342f, 928.9622f, 82.92392f, 0.f},
+        { -4101.632f, 942.9062f, 58.77553f, 0.f},
+        { -3996.584f, 984.6102f, 39.35212f, 0.f},
+        { -4059.524f, 924.002f,  65.44735f, 0.f},
+        { -4037.429f, 946.7924f, 83.17754f, 0.f},
+        { -4088.804f, 925.6664f, 67.03867f, 0.f},
+        { -4037.43f,  934.6457f, 40.03371f, 0.f},
+        { -4079.224f, 931.5303f, 76.49546f, 0.f},
+        { -4108.912f, 938.1812f, 94.50812f, 0.f},
+    },
+    { // aldor
+        { -3277.004f, 696.5723f, 35.61721f, 0.f},
+        { -2953.928f, 533.5043f, 92.35249f, 0.f},
+        { -3276.309f, 709.3771f, 25.12147f, 0.f},
+        { -2992.797f, 545.8665f, 70.36189f, 0.f},
+        { -3287.957f, 725.9796f, 51.60571f, 0.f},
+        { -3293.602f, 759.0432f, 44.21932f, 0.f},
+        { -3286.902f, 732.0245f, 27.88107f, 0.f},
+        { -3016.981f, 534.4969f, 21.01351f, 0.f},
+        { -3269.654f, 687.1747f, 33.11995f, 0.f},
+    }
+};
+
+struct DeadliestScriptInfo
+{
+    uint32 dragonmawNpc;
+    uint32 defenderNpc;
+    uint32 lastPointInPath;
+    int32 startText;
+    int32 midText;
+    int32 winText;
+    int32 deathText;
+    uint32 questId;
+};
+
+static DeadliestScriptInfo deadliestScriptInfo[COMMANDER_COUNT] =
+{
+    // TODO: Scryers on death text not confirmed
+    { NPC_SCRYERS_DRAGONMAW_SKYBREAKER, NPC_SANCTUM_DEFENDER, LAST_POINT_HOBB, SAY_EVENT_ACCEPT_HOBB, SAY_EVENT_START_HOBB, SAY_EVENT_END_HOBB, SAY_EVENT_ACCEPT_ARCUS, QUEST_DEADLIEST_TRAP_SCRYERS },
+    { NPC_ALDOR_DRAGONMAW_SKYBREAKER,   NPC_ALTAR_DEFENDER,   LAST_POINT_ARCUS, SAY_EVENT_ACCEPT_ARCUS, SAY_EVENT_START_ARCUS, SAY_EVENT_END_ARCUS, SAY_EVENT_ACCEPT_ARCUS, QUEST_DEADLIEST_TRAP_ALDOR }
+};
+
+struct npc_commanderAI : public ScriptedAI, public TimerAI
+{
+    npc_commanderAI(Creature* creature, uint8 commanderId) : ScriptedAI(creature), TimerAI(COMMANDER_COMBAT_ACTION_MAX), m_commanderId(commanderId),
+            m_defenderSpawns(DEFENDER_SPAWN_COUNT), m_dragonmawSpawns(DRAGONMAW_SPAWN_COUNT), m_killCounter(0)
+    {
+        m_attackDistance = 30.f;
+        m_meleeEnabled = false;
+        AddCombatAction(COMMANDER_COMBAT_ACTION_AIMED_SHOT, 0);
+        AddCombatAction(COMMANDER_COMBAT_ACTION_MULTI_SHOT, 0);
+        AddCombatAction(COMMANDER_COMBAT_ACTION_SHOOT, 0);
+
+        AddCustomAction(COMMANDER_ACTION_START_QUEST_FLAGS, 0, [&]() { m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); }, true);
+        AddCustomAction(COMMANDER_ACTION_START_QUEST_TEXT, 0, [&]()
+        { DoScriptText(deadliestScriptInfo[m_commanderId].startText, m_creature, m_creature->GetMap()->GetPlayer(m_startingPlayer)); }, true);
+        AddCustomAction(COMMANDER_ACTION_START_QUEST_MOVEMENT, 0, [&]() { m_creature->GetMotionMaster()->MoveWaypoint(); }, true);
+        AddCustomAction(COMMANDER_ACTION_POST_MOVEMENT_TEXT, 0, [&]()
+        { DoScriptText(deadliestScriptInfo[m_commanderId].midText, m_creature, m_creature->GetMap()->GetPlayer(m_startingPlayer)); }, true);
+        AddCustomAction(COMMANDER_ACTION_POST_MOVEMENT_START_EVENT, 0, [&]() { StartAttackingEvent(); }, true);
+        AddCustomAction(COMMANDER_ACTION_WIN_RETURN, 0, [&]()
+        {
+            float x, y, z, ori;
+            m_creature->GetRespawnCoord(x, y, z, &ori);
+            m_creature->GetMotionMaster()->MovePoint(POINT_HOME, x, y, z);
+        }, true);
+    }
+
+    GuidVector m_defenderSpawns;
+    GuidVector m_dragonmawSpawns;
+    ObjectGuid m_startingPlayer;
+
+    uint8 m_killCounter;
+    uint8 m_commanderId;
+
+    void Reset() override
+    {
+        ResetTimer(COMMANDER_COMBAT_ACTION_AIMED_SHOT, GetRepeatingCombatActionTimer(COMMANDER_COMBAT_ACTION_AIMED_SHOT));
+        ResetTimer(COMMANDER_COMBAT_ACTION_MULTI_SHOT, GetRepeatingCombatActionTimer(COMMANDER_COMBAT_ACTION_MULTI_SHOT));
+        ResetTimer(COMMANDER_COMBAT_ACTION_SHOOT,      GetRepeatingCombatActionTimer(COMMANDER_COMBAT_ACTION_SHOOT));
+    }
+
+    uint32 GetInitialCombatActionTimer(uint32 index)
+    {
+        switch (index)
+        {
+            case COMMANDER_COMBAT_ACTION_AIMED_SHOT: return 5000;
+            case COMMANDER_COMBAT_ACTION_MULTI_SHOT: return 10000;
+            case COMMANDER_COMBAT_ACTION_SHOOT:      return 0;
+        }
+        return 0;
+    }
+
+    uint32 GetRepeatingCombatActionTimer(uint32 index)
+    {
+        switch (index)
+        {
+            case COMMANDER_COMBAT_ACTION_AIMED_SHOT: return 10000;
+            case COMMANDER_COMBAT_ACTION_MULTI_SHOT: return 15000;
+            case COMMANDER_COMBAT_ACTION_SHOOT:      return 3000;
+        }
+        return 0;
+    }
+
+    void ExecuteActions() override
+    {
+        if (!CanExecuteCombatAction())
+            return;
+
+        for (uint32 i = 0; i < COMMANDER_COMBAT_ACTION_MAX; ++i)
+        {
+            if (!GetActionReadyStatus(i))
+                continue;
+
+            switch (i)
+            {
+                case COMMANDER_COMBAT_ACTION_AIMED_SHOT:
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_AIMED_SHOT) == CAST_OK)
+                    {
+                        SetActionReadyStatus(i, false);
+                        ResetTimer(i, GetRepeatingCombatActionTimer(i));
+                        return;
+                    }
+                    continue;
+                case COMMANDER_COMBAT_ACTION_MULTI_SHOT:
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MULTI_SHOT) == CAST_OK)
+                    {
+                        SetActionReadyStatus(i, false);
+                        ResetTimer(i, GetRepeatingCombatActionTimer(i));
+                        return;
+                    }
+                    continue;
+                case COMMANDER_COMBAT_ACTION_SHOOT:
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT) == CAST_OK)
+                    {
+                        SetActionReadyStatus(i, false);
+                        ResetTimer(i, GetRepeatingCombatActionTimer(i));
+                        return;
+                    }
+                    continue;
+            }
+        }
+    }
+
+    void SpawnDefenders()
+    {
+        for (uint32 i = 0; i < DEFENDER_SPAWN_COUNT; ++i)
+        {
+            Creature* defender = m_creature->SummonCreature(deadliestScriptInfo[m_commanderId].defenderNpc, defenderSpawns[m_commanderId][i].x,
+                    defenderSpawns[m_commanderId][i].y, defenderSpawns[m_commanderId][i].z, defenderSpawns[m_commanderId][i].ori, TEMPSPAWN_CORPSE_DESPAWN, 1000, true);
+            defender->HandleEmote(EMOTE_STATE_READYRIFLE);
+            m_defenderSpawns[i] = defender->GetObjectGuid();
+        }
+    }
+
+    void DespawnDefenders()
+    {
+        for (ObjectGuid& guid : m_defenderSpawns)
+            if (Creature* defender = m_creature->GetMap()->GetCreature(guid))
+                defender->ForcedDespawn();
+    }
+
+    void SpawnDragonmaw()
+    {
+        for (uint32 i = 0; i < DRAGONMAW_SPAWN_COUNT; ++i)
+            SpawnSpecificDragonmaw(i);
+    }
+
+    void SpawnSpecificDragonmaw(uint32 i)
+    {
+        Creature* dragonmaw = m_creature->SummonCreature(deadliestScriptInfo[m_commanderId].dragonmawNpc, dragonmawSpawns[m_commanderId][i].x,
+            dragonmawSpawns[m_commanderId][i].y, dragonmawSpawns[m_commanderId][i].z, dragonmawSpawns[m_commanderId][i].ori, TEMPSPAWN_CORPSE_DESPAWN, 1000, true, true, i);
+        m_dragonmawSpawns[i] = dragonmaw->GetObjectGuid();
+    }
+
+    void DespawnDragonmaw()
+    {
+        for (ObjectGuid& guid : m_dragonmawSpawns)
+            if (Creature* dragonmaw = m_creature->GetMap()->GetCreature(guid))
+                dragonmaw->ForcedDespawn();
+    }
+
+    void StartEvent(Player* player)
+    {
+        m_startingPlayer = player->GetObjectGuid();
+        SpawnDefenders();
+        m_killCounter = 0;
+        m_creature->SetWalk(false);
+        ResetTimer(COMMANDER_ACTION_START_QUEST_FLAGS, 1000);
+        ResetTimer(COMMANDER_ACTION_START_QUEST_TEXT, 2000);
+        ResetTimer(COMMANDER_ACTION_START_QUEST_MOVEMENT, 4500);
+    }
+
+    virtual void FinishedWaypointMovement()
+    {
+        m_creature->GetMotionMaster()->Clear(false, true);
+        m_creature->GetMotionMaster()->MoveIdle();
+        m_creature->SetSheath(SHEATH_STATE_RANGED);
+    }
+
+    virtual void StartAttackingEvent()
+    {
+        SpawnDragonmaw();
+    }
+
+    void WinEvent()
+    {
+        if (Player* player = m_creature->GetMap()->GetPlayer(m_startingPlayer))
+            player->RewardPlayerAndGroupAtEventExplored(deadliestScriptInfo[m_commanderId].questId, m_creature);
+
+        DoScriptText(deadliestScriptInfo[m_commanderId].winText, m_creature, m_creature->GetMap()->GetPlayer(m_startingPlayer));
+
+        ResetTimer(COMMANDER_ACTION_WIN_RETURN, 3000);
+        ResetEvent();
+    }
+
+    void FailEvent()
+    {
+        DoScriptText(deadliestScriptInfo[m_commanderId].deathText, m_creature, m_creature->GetMap()->GetPlayer(m_startingPlayer));
+        ResetEvent();
+    }
+
+    void ResetEvent()
+    {
+        DespawnDefenders();
+        DespawnDragonmaw();
+        m_startingPlayer = ObjectGuid();
+        m_creature->SetSheath(SHEATH_STATE_MELEE);
+    }
+
+    void MovementInform(uint32 movementType, uint32 data) override
+    {
+        switch (movementType)
+        {
+            case WAYPOINT_MOTION_TYPE:
+                if (deadliestScriptInfo[m_commanderId].lastPointInPath == data)
+                    FinishedWaypointMovement();
+                break;
+            case POINT_MOTION_TYPE:
+                if (data == POINT_HOME)
+                {
+                    float x, y, z, ori;
+                    m_creature->GetRespawnCoord(x, y, z, &ori);
+                    m_creature->SetOrientation(ori); m_creature->SetFacingTo(ori);
+                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                }
+                break;
+        }
+    }
+
+    void SummonedCreatureJustDied(Creature* summoned) override
+    {
+        if (summoned->GetEntry() == deadliestScriptInfo[m_commanderId].dragonmawNpc)
+        {
+            ++m_killCounter;
+            if (m_killCounter >= DRAGONMAW_KILL_COUNT)
+            {
+                WinEvent();
+                return;
+            }
+            ObjectGuid const& guid = summoned->GetObjectGuid();
+            for (uint32 i = 0; i < m_dragonmawSpawns.size(); ++i)
+            {
+                if (guid == m_dragonmawSpawns[i])
+                {
+                    SpawnSpecificDragonmaw(i);
+                    break;
+                }
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff);
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        ExecuteActions();
+    }
+};
+
+struct npc_commander_hobbAI : public npc_commanderAI
+{
+    npc_commander_hobbAI(Creature* creature) : npc_commanderAI(creature, COMMANDER_HOBB) {}
+
+    void FinishedWaypointMovement() override
+    {
+        npc_commanderAI::FinishedWaypointMovement();
+        ResetTimer(COMMANDER_ACTION_POST_MOVEMENT_TEXT, 1000);
+        ResetTimer(COMMANDER_ACTION_POST_MOVEMENT_START_EVENT, 1000);
+    }
+
+    void StartAttackingEvent() override
+    {
+        m_creature->HandleEmote(EMOTE_ONESHOT_READYBOW);
+        m_creature->SetOrientation(5.340707f); m_creature->SetFacingTo(5.340707f);
+        npc_commanderAI::StartAttackingEvent();
+    }
+};
+
+struct npc_commander_arcusAI : public npc_commanderAI
+{
+    npc_commander_arcusAI(Creature* creature) : npc_commanderAI(creature, COMMANDER_ARCUS)
+    {
+        AddCustomAction(COMMANDER_ACTION_POST_MOVEMENT_FACE_DIRECTION, 0, [&]() { m_creature->SetOrientation(2.949606f); m_creature->SetFacingTo(2.949606f); }, true);
+    }
+
+    void FinishedWaypointMovement() override
+    {
+        npc_commanderAI::FinishedWaypointMovement();
+        ResetTimer(COMMANDER_ACTION_POST_MOVEMENT_TEXT, 1000);
+        ResetTimer(COMMANDER_ACTION_POST_MOVEMENT_FACE_DIRECTION, 5000);
+        ResetTimer(COMMANDER_ACTION_POST_MOVEMENT_START_EVENT, 6000);
+    }
+
+    void StartAttackingEvent() override
+    {
+        m_creature->HandleEmote(EMOTE_STATE_READYRIFLE);
+        npc_commanderAI::StartAttackingEvent();
+    }
+};
+
+UnitAI* GetAI_npc_commander_hobb(Creature* pCreature)
+{
+    return new npc_commander_hobbAI(pCreature);
+}
+
+UnitAI* GetAI_npc_commander_arcus(Creature* pCreature)
+{
+    return new npc_commander_arcusAI(pCreature);
+}
+
+bool QuestAccept_npc_commander(Player* player, Creature* questgiver, Quest const* quest)
+{
+    switch (quest->GetQuestId())
+    {
+        case QUEST_DEADLIEST_TRAP_SCRYERS:
+        case QUEST_DEADLIEST_TRAP_ALDOR:
+            if (npc_commanderAI* ai = static_cast<npc_commanderAI*>(questgiver->AI()))
+                ai->StartEvent(player);
+            return true;
+    }
+
+    return false;
+}
+
 void AddSC_shadowmoon_valley()
 {
     Script* pNewScript = new Script;
@@ -2811,5 +3259,17 @@ void AddSC_shadowmoon_valley()
     pNewScript = new Script;
     pNewScript->Name = "npc_disobedient_dragonmaw_peon";
     pNewScript->GetAI = &GetAI_npc_disobedient_dragonmaw_peon;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_commander_hobb";
+    pNewScript->GetAI = &GetAI_npc_commander_hobb;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_commander;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_commander_arcus";
+    pNewScript->GetAI = &GetAI_npc_commander_arcus;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_commander;
     pNewScript->RegisterSelf();
 }
