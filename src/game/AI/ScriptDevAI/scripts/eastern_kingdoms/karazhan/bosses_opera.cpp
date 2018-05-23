@@ -618,8 +618,19 @@ enum
     SPELL_TERRIFYING_HOWL           = 30752,
     SPELL_WIDE_SWIPE                = 30761,
 
-    GOSSIP_ITEM_GRANDMA             = -3532005,
-    TEXT_ID_GRANDMA                 = 8990,
+    GOSSIP_ITEM_GRANDMA_FIRST       = -3532020,
+    GOSSIP_ITEM_GRANDMA_SECOND      = -3532021,
+    GOSSIP_ITEM_GRANDMA_THIRD       = -3532005,
+
+    TEXT_ID_GRANDMA_FIRST           = 9009,
+    TEXT_ID_GRANDMA_SECOND          = 9010,
+    TEXT_ID_GRANDMA_THIRD           = 9011,
+
+    GOSSIP_MENU_ID_GRANDMA_FIRST    = 7441,
+    GOSSIP_MENU_ID_GRANDMA_SECOND   = 7442,
+    GOSSIP_MENU_ID_GRANDMA_THIRD    = 7443,
+
+    TEXT_ID_GRANDMA                 = 8990, // Unk purpose
 
     /**** The Wolf's Entry ****/
     NPC_BIG_BAD_WOLF                = 17521
@@ -627,20 +638,32 @@ enum
 
 bool GossipHello_npc_grandmother(Player* pPlayer, Creature* pCreature)
 {
-    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_GRANDMA, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
-    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_GRANDMA, pCreature->GetObjectGuid());
+    pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_GRANDMA_FIRST, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
+    pPlayer->SET_GOSSIP_MENU_ID(GOSSIP_MENU_ID_GRANDMA_FIRST);
+    pPlayer->SEND_GOSSIP_MENU(TEXT_ID_GRANDMA_FIRST, pCreature->GetObjectGuid());
 
     return true;
 }
 
 bool GossipSelect_npc_grandmother(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
 {
-    if (uiAction == GOSSIP_ACTION_INFO_DEF)
+    switch (uiAction)
     {
-        if (Creature* pBigBadWolf = pCreature->SummonCreature(NPC_BIG_BAD_WOLF, 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
-            pBigBadWolf->AI()->AttackStart(pPlayer);
-
-        pCreature->ForcedDespawn();
+        case GOSSIP_ACTION_INFO_DEF:
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_GRANDMA_SECOND, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            pPlayer->SET_GOSSIP_MENU_ID(GOSSIP_MENU_ID_GRANDMA_SECOND);
+            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_GRANDMA_SECOND, pCreature->GetObjectGuid());
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 1:
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_GRANDMA_THIRD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            pPlayer->SET_GOSSIP_MENU_ID(GOSSIP_MENU_ID_GRANDMA_THIRD);
+            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_GRANDMA_THIRD, pCreature->GetObjectGuid());
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 2:
+            if (Creature* pBigBadWolf = pCreature->SummonCreature(NPC_BIG_BAD_WOLF, 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+                pBigBadWolf->AI()->AttackStart(pPlayer);
+            pCreature->ForcedDespawn();
+            break;
     }
 
     return true;
