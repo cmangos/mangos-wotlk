@@ -23,6 +23,7 @@ EndScriptData */
 
 #include <utility>
 #include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 enum
 {
@@ -87,33 +88,9 @@ enum TerokkActions
     TEROKK_ACTION_ACE_CAST,
 };
 
-struct Timer
+struct boss_terokkAI : public ScriptedAI, public TimerAI
 {
-    Timer(TerokkActions id, uint32 timer, std::function<void()> functor, bool disabled = false) : id(id), timer(timer), disabled(disabled), functor(std::move(functor)) {}
-    TerokkActions id;
-    uint32 timer;
-    bool disabled;
-    std::function<void()> functor;
-
-    bool UpdateTimer(uint32 const diff)
-    {
-        if (!disabled)
-        {
-            if (timer <= diff)
-            {
-                timer = 0;
-                disabled = true;
-                return true;
-            }
-            timer -= diff;
-        }
-        return false;
-    }
-};
-
-struct boss_terokkAI : public ScriptedAI
-{
-    boss_terokkAI(Creature* creature) : ScriptedAI(creature)
+    boss_terokkAI(Creature* creature) : ScriptedAI(creature), TimerAI(TEROKK_COMBAT_ACTION_MAX)
     {
         AddCustomAction(TEROKK_ACTION_SPAWN, 0, [&] { m_creature->CastSpell(nullptr, SPELL_RED_BEAM, TRIGGERED_OLD_TRIGGERED); });
         AddCustomAction(TEROKK_ACTION_SAY, 2000, [&]
@@ -142,45 +119,7 @@ struct boss_terokkAI : public ScriptedAI
     bool m_phase;
     GuidVector m_aces;
 
-    // timer code
-    std::map<uint32, Timer> m_timers;
-    bool m_actionReadyStatus[TEROKK_COMBAT_ACTION_MAX];
-
-    void AddCombatAction(TerokkActions id, uint32 timer)
-    {
-        m_timers.emplace(id, Timer(id, timer, [&,id]{ m_actionReadyStatus[id] = true; }));
-    }
-
-    void AddCustomAction(TerokkActions id, uint32 timer, std::function<void()> functor, bool disabled = false)
-    {
-        m_timers.emplace(id, Timer(id, timer, std::move(functor), disabled));
-    }
-
-    void UpdateTimers(const uint32 diff)
-    {
-        for (auto itr = m_timers.begin(); itr != m_timers.end();)
-        {
-            Timer& timer = (*itr).second;
-            if (timer.UpdateTimer(diff))
-                timer.functor();
-            else ++itr;
-        }
-    }
-
-    inline void SetActionReadyStatus(uint32 index, bool state) { m_actionReadyStatus[index] = state; }
-    inline bool GetActionReadyStatus(uint32 index) { return m_actionReadyStatus[index]; }
-    inline void ResetTimer(uint32 index, uint32 timer)
-    {
-        auto data = m_timers.find(index);        
-        (*data).second.timer = timer; (*data).second.disabled = false;
-    }
-    inline void DisableTimer(uint32 index)
-    {
-        auto data = m_timers.find(index);
-        (*data).second.timer = 0; (*data).second.disabled = true;
-    }
-
-    uint32 GetInitialActionTimer(TerokkActions id) const
+    uint32 GetInitialActionTimer(TerokkActions id)
     {
         switch (id)
         {
@@ -205,7 +144,6 @@ struct boss_terokkAI : public ScriptedAI
             default: return 0;
         }
     }
-    // timer code end
 
     void Reset() override
     {
@@ -301,7 +239,7 @@ struct boss_terokkAI : public ScriptedAI
         }
     }
 
-    void ExecuteActions()
+    void ExecuteActions() override
     {
         if (!CanExecuteCombatAction())
             return;
