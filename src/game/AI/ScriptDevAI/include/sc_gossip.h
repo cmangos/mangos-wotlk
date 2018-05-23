@@ -138,6 +138,9 @@ enum
 #define ADD_GOSSIP_ITEM_ID(icon, textId, sender, optionId)   PlayerTalkClass->GetGossipMenu().AddMenuItem(icon, textId, sender, optionId, 0, 0)
 #define ADD_GOSSIP_ITEM_EXTENDED(icon, text, sender, optionId, boxMessage, boxMoney, code)   PlayerTalkClass->GetGossipMenu().AddMenuItem(icon, text, sender, optionId, boxMessage, boxMoney, code)
 
+// Sets proper 2.4+ gossip menu id
+#define SET_GOSSIP_MENU_ID(id)      PlayerTalkClass->GetGossipMenu().SetMenuId(id)
+
 // This fuction Sends the current menu to show to client
 // uiTextId - NPCTEXTID (uint32)
 // guid - npc guid (ObjectGuid)
