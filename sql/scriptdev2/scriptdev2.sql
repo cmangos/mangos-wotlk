@@ -7068,7 +7068,7 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3532017,'Control King Llane','king llane GOSSIP_ITEM_KING_LLANE'),
 (-3532018,'Please reset the chess board, we would like to play again.','medivh GOSSIP_ITEM_RESET_BOARD'),
 (-3532019,'I''ll nail it!','barnes GOSSIP_ITEM_OPERA_OZ_WIPE'),
-(-3532020,'Oh, grandmother, what big ears you have.','grandma GOSSIP_ITEM_GRANDMA_FIRST')
+(-3532020,'Oh, grandmother, what big ears you have.','grandma GOSSIP_ITEM_GRANDMA_FIRST'),
 (-3532021,'Oh, grandmother, what big eyes you have.','grandma GOSSIP_ITEM_GRANDMA_SECOND');
 
 -- -3 534 000 THE BATTLE OF MT. HYJAL
