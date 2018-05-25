@@ -38,6 +38,7 @@ enum
     SAY_WHIRLWIND_2                 = -1552037,
     SAY_DEATH                       = -1552038,
 
+    SPELL_DOUBLE_ATTACK             = 19818,
     SPELL_GIFT_DOOMSAYER            = 36173,
     SPELL_GIFT_DOOMSAYER_H          = 39009,
     SPELL_HEAL                      = 36144,
@@ -73,6 +74,8 @@ struct boss_dalliahAI : public ScriptedAI
         m_uiShadowWaveTimer     = urand(9000, 13000);
 
         m_bHasTaunted           = false;
+
+        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void Aggro(Unit* /*pWho*/) override
