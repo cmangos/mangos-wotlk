@@ -71,7 +71,7 @@ struct Script
         pQuestRewardedNPC(nullptr), pQuestRewardedGO(nullptr),
         pGOUse(nullptr), pItemUse(nullptr), pAreaTrigger(nullptr), pItemLoot(nullptr), pNpcSpellClick(nullptr), pProcessEventId(nullptr),
         pEffectDummyNPC(nullptr), pEffectDummyGO(nullptr), pEffectDummyItem(nullptr), pEffectScriptEffectNPC(nullptr),
-        pEffectAuraDummy(nullptr), GetGameObjectAI(nullptr), GetAI(nullptr), GetInstanceData(nullptr)
+        pEffectAuraDummy(nullptr), GetGameObjectAI(nullptr), GetAI(nullptr), GetInstanceData(nullptr), pTrapSearching(nullptr)
     {}
 
     std::string Name;
