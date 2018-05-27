@@ -2131,6 +2131,7 @@ void Aura::TriggerSpell()
                 return;
             }
             case 33419:                                     // Arcane Missiles - TODO: Review other spells with TARGET_UNIT_ENEMY
+            case 40106:                                     // Merge
             case 42483:                                     // Ooze Channel
             {
                 triggerCaster = GetCaster();
