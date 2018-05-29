@@ -1469,6 +1469,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 24886:                                 // Despawn Taerar Shades
+                {
+                    if (unitTarget && unitTarget->GetEntry() == 15302)
+                    {
+                        ((Creature*)unitTarget)->ForcedDespawn();
+                        ((Creature*)unitTarget)->RemoveFromWorld();
+                    }
+
+                    return;
+                }
                 case 24930:                                 // Hallow's End Treat
                 {
                     // 24924 = Larger and Orange | 24925 = Skeleton | 24926 = Pirate | 24927 = Ghost
