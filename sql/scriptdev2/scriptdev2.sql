@@ -1227,6 +1227,7 @@ UPDATE creature_template SET ScriptName='npc_veneratus_spawn_node' WHERE entry=2
 UPDATE creature_template SET ScriptName='mob_shadowmoon_soulstealer' WHERE entry=22061;
 UPDATE creature_template SET ScriptName='npc_shadowlord_deathwail' WHERE entry=22006;
 UPDATE creature_template SET ScriptName='npc_disobedient_dragonmaw_peon' WHERE entry IN(23311);
+UPDATE creature_template SET ScriptName='npc_murag_muckjaw' WHERE entry=23340;
 
 /* SHATTRATH */
 UPDATE creature_template SET ScriptName='npc_dirty_larry' WHERE entry=19720;
@@ -3114,6 +3115,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001296,'Defenders, show these mongrels the fury of a Scryer!',0,1,0,22,'Commander Hobb SAY_EVENT_ACCEPT'),
 (-1001297,'Stand tall, soldiers. Show them no quarter!',0,0,0,1,'Commander Hobb SAY_EVENT_START'),
 (-1001298,'Victory to the Scryers! The Dragonmaw have been defeated!',0,1,0,0,'Commander Hobb SAY_EVENT_END'),
+(-1001299,'I may be old but I can still take on a young whippersnapper like you, $n. Try not to fall behind...',0,0,0,0,'Murg "Oldie" Muckjaw SAY_MUCKJAW_START'),
+(-1001300,'Well, you won... I guess.',0,0,0,0,'Murg "Oldie" Muckjaw SAY_MUCKJAW_END'),
 -- warning ids pending export
 (-1001312,'WE STRIKE!',0,1,0,15,'proudhoof SAY_QUEST_START'),
 (-1001313,'$N is going to join us on our assault. Let us bring peace to my ancestors!',0,0,0,396,'proudhoof SAY_QUEST_INTRO'),

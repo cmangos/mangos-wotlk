@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Shadowmoon_Valley
 SD%Complete: 100
-SDComment: Quest support: 10451, 10458, 10480, 10481, 10514, 10540, 10588, 10707, 10781, 10804, 10854, 11020.
+SDComment: Quest support: 10451, 10458, 10480, 10481, 10514, 10540, 10588, 10707, 10781, 10804, 10854, 11020, 11064.
 SDCategory: Shadowmoon Valley
 EndScriptData */
 
@@ -34,6 +34,7 @@ go_crystal_prison
 npc_spawned_oronok_tornheart
 npc_domesticated_felboar
 npc_veneratus_spawn_node
+npc_murag_muckjaw
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -3174,6 +3175,79 @@ bool QuestAccept_npc_commander(Player* player, Creature* questgiver, Quest const
     return false;
 }
 
+/*######
+# npc_murag_muckjaw
+######*/
+
+enum
+{
+    SAY_MUCKJAW_START       = -1001299,
+    SAY_MUCKJAW_END         = -1001300,
+
+    SPELL_AGGRO_CHECK_AURA	= 40847, // purpose unk, something to do with failing quest?
+
+    QUEST_BALLAD_OF_OLDIE	= 11064,
+};
+
+struct npc_murag_muckjawAI : public npc_escortAI
+{
+    npc_murag_muckjawAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        Reset();
+    }
+
+    void Reset() override
+    {
+        m_creature->SetCanFly(false);
+        m_creature->SetWalk(true);
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+    }
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+        case 3:
+            m_creature->SetCanFly(true);
+            break;
+        case 6:
+            DoCastSpellIfCan(m_creature, SPELL_AGGRO_CHECK_AURA);
+            m_creature->SetWalk(false);
+            break;
+        case 34:
+            if (Player* pPlayer = GetPlayerForEscort())
+            {
+                DoScriptText(SAY_MUCKJAW_END, m_creature, pPlayer);
+                m_creature->SetCanFly(false);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_BALLAD_OF_OLDIE, m_creature);
+            }
+            break;
+        case 36:
+            m_creature->SetWalk(true);
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            break;
+        }
+    }
+};
+
+UnitAI* GetAI_npc_murag_muckjaw(Creature* pCreature)
+{
+    return new npc_murag_muckjawAI(pCreature);
+}
+
+bool QuestAccept_npc_murag_muckjaw(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_BALLAD_OF_OLDIE)
+    {
+        DoScriptText(SAY_MUCKJAW_START, pCreature, pPlayer);
+        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+        if (npc_murag_muckjawAI* pEscortAI = dynamic_cast<npc_murag_muckjawAI*>(pCreature->AI()))
+            pEscortAI->Start(false, pPlayer, pQuest, true, true);
+    }
+    return true;
+}
+
 void AddSC_shadowmoon_valley()
 {
     Script* pNewScript = new Script;
@@ -3271,5 +3345,11 @@ void AddSC_shadowmoon_valley()
     pNewScript->Name = "npc_commander_arcus";
     pNewScript->GetAI = &GetAI_npc_commander_arcus;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_commander;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_murag_muckjaw";
+    pNewScript->GetAI = &GetAI_npc_murag_muckjaw;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_murag_muckjaw;
     pNewScript->RegisterSelf();
 }
