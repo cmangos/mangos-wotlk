@@ -1283,7 +1283,7 @@ GM.InvisibleAura         = 37800
 ###################################################################################################################
 
 Visibility.FogOfWar.Stealth = 0
-Visibility.FogOfWar.Health  = 0
+Visibility.FogOfWar.Health  = 2
 Visibility.FogOfWar.Stats   = 0
 Visibility.Distance.Continents    = 90
 Visibility.Distance.Instances     = 120
