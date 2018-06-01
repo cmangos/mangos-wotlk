@@ -1238,9 +1238,9 @@ GM.InvisibleAura         = 37800
 #
 #    Visibility.FogOfWar.Health
 #        Sets visibility mode for absolute health values. Fog Of War settings are not applied to GMs.
-#        Default: 0 (Pre-3.0 standard setting: players can see health values of units in their own group)
+#                 0 (Pre-3.0 standard setting: players can see health values of units in their own group)
 #                 1 (players can see health values of same faction units)
-#                 2 (Post-3.0 standard setting: players can see health values of all units)
+#        Default: 2 (Post-3.0 standard setting: players can see health values of all units)
 #
 #    Visibility.FogOfWar.Stats
 #        Sets visibility mode for values of character attributes and attack stats. Fog Of War settings are not applied to GMs.
