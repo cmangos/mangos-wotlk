@@ -150,7 +150,7 @@ void WorldSession::HandleRideVehicleInteract(WorldPacket& recvPacket)
         return;
 
     // Only allowed if in same raid
-    if (!vehicle->IsInSameRaidWith(_player))
+    if (!vehicle->IsInGroup(_player))
         return;
 
     _player->CastSpell(vehicle, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
