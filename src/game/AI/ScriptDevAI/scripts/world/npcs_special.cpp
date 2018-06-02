@@ -39,7 +39,7 @@ npc_doctor              100%    Gustaf Vanhowzen and Gregory Victor, quest 6622 
 npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
 npc_spring_rabbit         1%    Used for pet "Spring Rabbit" of Noblegarden
 npc_redemption_target   100%    Used for the paladin quests: 1779,1781,9600,9685
-npc_burster_worm        100%    Used for the crust burster worms in Outland. Npc entries: 16844, 16857, 16968, 21380, 21849, 22038, 22466, 22482, 23285
+npc_burster_worm        100%    Used for the crust burster worms in Outland. Npc entries: 16844, 16857, 16968, 17075, 18678, 21380, 21849, 22038, 22466, 22482, 23285
 npc_mage_mirror_image    90%    mage mirror image pet
 EndContentData */
 
@@ -1445,7 +1445,7 @@ bool EffectDummyCreature_npc_redemption_target(Unit* pCaster, uint32 uiSpellId, 
 ## npc_burster_worm
 ######*/
 
-enum
+enum npc_burster_worm
 {
     // visual and idle spells
     SPELL_TUNNEL_BORE_PASSIVE           = 29147,                // added by c_t_a
@@ -1465,6 +1465,8 @@ enum
     SPELL_POISON_SPIT                   = 32330,
     SPELL_BORE                          = 32738,
     SPELL_ENRAGE                        = 32714,
+    SPELL_WORM_SWEEP                    = 30732,
+    SPELL_WORM_BLAST                    = 31378,
 
     // npcs that get enrage
     NPC_TUNNELER                        = 16968,
@@ -1472,6 +1474,7 @@ enum
 
     // npcs that don't use bore spell
     NPC_MARAUDING_BURSTER               = 16857,
+    NPC_SAND_WORM                       = 17075,
     NPC_FULGORGE                        = 18678,
     NPC_GREATER_CRUST_BURSTER           = 21380,
 
@@ -1501,6 +1504,7 @@ struct npc_burster_wormAI : public ScriptedAI
     uint32 m_uiEnrageTimer;
     uint32 m_uiBorePassive;
     uint32 m_boreDamageSpell;
+    uint32 m_uiWormSweepTimer;
 
     inline uint32 SetBorePassive()
     {
@@ -1543,6 +1547,7 @@ struct npc_burster_wormAI : public ScriptedAI
         m_uiBoreTimer       = 0;
         m_uiBirthDelayTimer = 0;
         m_uiEnrageTimer     = 0;
+        m_uiWormSweepTimer  = urand(5000, 15000);
 
         SetCombatMovement(false);
 
@@ -1641,12 +1646,17 @@ struct npc_burster_wormAI : public ScriptedAI
             // If we are within range melee the target
             if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
                 DoMeleeAttackIfReady();
-            else
+            else if (!m_creature->IsNonMeleeSpellCasted(false))
             {
-                if (!m_creature->IsNonMeleeSpellCasted(false) && m_creature->GetEntry() != NPC_FULGORGE)
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_POISON);
-                else if (!m_creature->IsNonMeleeSpellCasted(false))
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_POISON_SPIT);
+                switch (m_creature->GetEntry())
+                {
+                    case NPC_FULGORGE:
+                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_POISON_SPIT);
+                    case NPC_SAND_WORM:
+                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_WORM_BLAST);
+                    default:
+                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_POISON);
+                }
 
                 // if target not in range, submerge and chase
                 if (!m_creature->IsInRange(m_creature->getVictim(), 0, 50.0f))
@@ -1657,7 +1667,7 @@ struct npc_burster_wormAI : public ScriptedAI
             }
 
             // bore spell
-            if (m_creature->GetEntry() != NPC_MARAUDING_BURSTER && m_creature->GetEntry() != NPC_FULGORGE && m_creature->GetEntry() != NPC_GREATER_CRUST_BURSTER)
+            if (m_creature->GetEntry() != NPC_MARAUDING_BURSTER && m_creature->GetEntry() != NPC_SAND_WORM && m_creature->GetEntry() != NPC_FULGORGE && m_creature->GetEntry() != NPC_GREATER_CRUST_BURSTER)
             {
                 if (m_uiBoreTimer < uiDiff)
                 {
@@ -1678,6 +1688,18 @@ struct npc_burster_wormAI : public ScriptedAI
                 }
                 else
                     m_uiEnrageTimer -= uiDiff;
+            }
+
+            // worm sweep spell
+            if (m_creature->GetEntry() == NPC_SAND_WORM)
+            {
+                if (m_uiWormSweepTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_WORM_SWEEP) == CAST_OK)
+                        m_uiWormSweepTimer = urand(15000, 25000);
+                }
+                else
+                    m_uiWormSweepTimer -= uiDiff;
             }
         }
         // chase target
