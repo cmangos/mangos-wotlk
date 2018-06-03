@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Shadowmoon_Valley
 SD%Complete: 100
-SDComment: Quest support: 10451, 10458, 10480, 10481, 10514, 10540, 10588, 10707, 10781, 10804, 10854, 11020, 11064.
+SDComment: Quest support: 10451, 10458, 10480, 10481, 10514, 10540, 10588, 10707, 10781, 10804, 10854, 11020, 11064, 11067.
 SDCategory: Shadowmoon Valley
 EndScriptData */
 
@@ -35,6 +35,7 @@ npc_spawned_oronok_tornheart
 npc_domesticated_felboar
 npc_veneratus_spawn_node
 npc_murag_muckjaw
+npc_trope
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -3184,9 +3185,9 @@ enum
     SAY_MUCKJAW_START       = -1001299,
     SAY_MUCKJAW_END         = -1001300,
 
-    SPELL_AGGRO_CHECK_AURA	= 40847, // purpose unk, something to do with failing quest?
+    SPELL_AGGRO_CHECK_MUCKJAW   = 40847, // purpose unk, something to do with failing quest?
 
-    QUEST_BALLAD_OF_OLDIE	= 11064,
+    QUEST_BALLAD_OF_OLDIE      = 11064,
 };
 
 struct npc_murag_muckjawAI : public npc_escortAI
@@ -3211,7 +3212,7 @@ struct npc_murag_muckjawAI : public npc_escortAI
             m_creature->SetCanFly(true);
             break;
         case 6:
-            DoCastSpellIfCan(m_creature, SPELL_AGGRO_CHECK_AURA);
+            DoCastSpellIfCan(m_creature, SPELL_AGGRO_CHECK_MUCKJAW);
             m_creature->SetWalk(false);
             break;
         case 34:
@@ -3243,6 +3244,119 @@ bool QuestAccept_npc_murag_muckjaw(Player* pPlayer, Creature* pCreature, const Q
         pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
 
         if (npc_murag_muckjawAI* pEscortAI = dynamic_cast<npc_murag_muckjawAI*>(pCreature->AI()))
+            pEscortAI->Start(false, pPlayer, pQuest, true, true);
+    }
+    return true;
+}
+
+/*######
+# npc_trope
+######*/
+
+enum
+{
+    SAY_TROPE_START         = -1001301,
+    SAY_TROPE_END           = -1001302,
+
+    SPELL_AGGRO_CHECK_TROPE = 40984, // Dragonmaw Knockdown: The Aggro Check Aura - triggers 40985 Dragonmaw Knockdown: The Aggro Check
+    SPELL_AGGRO_BURST_TROPE = 40986, // Dragonmaw Knockdown: The Aggro Burst - triggers 40987 Dragonmaw Knockdown Choose Loc
+    // spell 40988 (serverside) summons NPC 23357 "Dragonmaw Race: Trope's Target"
+
+    SPELL_SLIME_CANNON      = 40909, // Trope's Slime Cannon - targets NPC 23357
+    SPELL_SKULL_BARRAGE     = 40900, // Corlok's Skull Barrage Knockdown - casted by NPC 23357 when hit by spell 40909?
+
+    NPC_TROPE_TARGET        = 23357,
+
+    QUEST_TROPE             = 11067,
+};
+
+struct npc_tropeAI : public npc_escortAI
+{
+    npc_tropeAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+
+    uint32 m_uiSlimeTimer;
+
+    void Reset() override
+    {
+        m_creature->SetCanFly(false);
+        m_creature->SetWalk(true);
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        m_uiSlimeTimer = 0;
+    }
+
+    void UpdateEscortAI(const uint32 uiDiff) override
+    {
+        if (m_uiSlimeTimer)
+        {
+            if (m_uiSlimeTimer < uiDiff)
+            {
+                if (Player* pPlayer = GetPlayerForEscort())
+                {
+                    float fX, fY, fZ;
+                    m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
+                    m_creature->SummonCreature(NPC_TROPE_TARGET, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 6000);
+                    m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
+                    m_creature->SummonCreature(NPC_TROPE_TARGET, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 6000);
+                }
+                m_uiSlimeTimer = 4000;
+            }
+            else
+                m_uiSlimeTimer -= uiDiff;
+        }
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        DoCastSpellIfCan(pSummoned, SPELL_SLIME_CANNON);
+    }
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+        case 4:
+            m_creature->SetCanFly(true);
+            break;
+        case 6:
+            DoCastSpellIfCan(m_creature, SPELL_AGGRO_CHECK_TROPE);
+            m_creature->SetWalk(false);
+            break;
+        case 9:
+            DoCastSpellIfCan(m_creature, SPELL_AGGRO_BURST_TROPE);
+            m_uiSlimeTimer = 1000;
+            m_creature->SetWalk(false);
+            break;
+        case 52:
+            m_uiSlimeTimer = 0;
+
+            if (Player* pPlayer = GetPlayerForEscort())
+            {
+                DoScriptText(SAY_TROPE_END, m_creature, pPlayer);
+                m_creature->SetCanFly(false);
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TROPE, m_creature);
+            }
+            break;
+        case 59:
+            m_creature->SetWalk(true);
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            break;
+        }
+    }
+};
+
+UnitAI* GetAI_npc_trope(Creature* pCreature)
+{
+    return new npc_tropeAI(pCreature);
+}
+
+bool QuestAccept_npc_trope(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+{
+    if (pQuest->GetQuestId() == QUEST_TROPE)
+    {
+        DoScriptText(SAY_TROPE_START, pCreature, pPlayer);
+        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+        if (npc_tropeAI* pEscortAI = dynamic_cast<npc_tropeAI*>(pCreature->AI()))
             pEscortAI->Start(false, pPlayer, pQuest, true, true);
     }
     return true;
@@ -3351,5 +3465,11 @@ void AddSC_shadowmoon_valley()
     pNewScript->Name = "npc_murag_muckjaw";
     pNewScript->GetAI = &GetAI_npc_murag_muckjaw;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_murag_muckjaw;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_trope";
+    pNewScript->GetAI = &GetAI_npc_trope;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_trope;
     pNewScript->RegisterSelf();
 }
