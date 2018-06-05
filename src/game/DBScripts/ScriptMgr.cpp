@@ -1815,6 +1815,8 @@ bool ScriptAction::HandleScriptStep()
             switch (m_script->movement.movementType)
             {
                 case IDLE_MOTION_TYPE:
+                    source->StopMoving();
+                    source->GetMotionMaster()->Clear(false, true);
                     source->GetMotionMaster()->MoveIdle();
                     break;
                 case RANDOM_MOTION_TYPE:
