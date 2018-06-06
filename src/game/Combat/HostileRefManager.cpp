@@ -19,6 +19,7 @@
 #include "Combat/HostileRefManager.h"
 #include "Combat/ThreatManager.h"
 #include "Entities/Unit.h"
+#include "Entities/Player.h"
 #include "Server/DBCStructure.h"
 #include "Spells/SpellMgr.h"
 #include "Maps/Map.h"
@@ -78,6 +79,24 @@ void HostileRefManager::setOnlineOfflineState(bool pIsOnline)
         ref->setOnlineOfflineState(pIsOnline);
         ref = ref->next();
     }
+}
+
+void HostileRefManager::updateOnlineOfflineState(bool pIsOnline)
+{
+    if (pIsOnline && iOwner)
+    {
+        // Check for causes which prevent setting online state
+
+        // Do not set online while feigning death in combat
+        if (iOwner->IsFeigningDeathSuccessfully() && iOwner->isInCombat())
+            return;
+
+        // Do not set online if player is in GM mode or on taxi path
+        const Player* player = iOwner->GetControllingPlayer();
+        if (player && (player->IsTaxiFlying() || !player->isGameMaster()))
+            return;
+    }
+    setOnlineOfflineState(pIsOnline);
 }
 
 //=================================================

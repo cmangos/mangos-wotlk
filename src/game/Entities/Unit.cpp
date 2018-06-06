@@ -10680,7 +10680,7 @@ void Unit::CleanupsBeforeDelete()
         ClearComboPointHolders();
         DeleteThreatList();
         if (GetTypeId() == TYPEID_PLAYER)
-            getHostileRefManager().setOnlineOfflineState(false);
+            getHostileRefManager().updateOnlineOfflineState(false);
         else
             getHostileRefManager().deleteReferences();
         RemoveAllAuras(AURA_REMOVE_BY_DELETE);
@@ -11478,10 +11478,24 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/, u
         {
             if (success)
             {
-                // Successful FD: set state, stop attack (+clear target for player-controlled npcs) and clear combat
+                // Successful FD: set state, stop attack (+clear target for player-controlled npcs) and clear combat if applicable
                 addUnitState(UNIT_STAT_FEIGN_DEATH);
-                CombatStop();
-                getHostileRefManager().deleteReferences();
+
+                InstanceData* instance = GetInstanceData();
+                if (instance && sWorld.getConfig(CONFIG_BOOL_INSTANCE_STRICT_COMBAT_LOCKDOWN) && instance->IsEncounterInProgress())
+                {
+                    // This rule was introduced in 2.3.0+: do not clear combat state if zone is in combat lockdown by encounter
+                    if (GetTypeId() == TYPEID_PLAYER)
+                        static_cast<Player*>(this)->SendAttackSwingCancelAttack();
+                    AttackStop(true, false, true);
+                    getHostileRefManager().addThreatPercent(-100);
+                    getHostileRefManager().updateOnlineOfflineState(false);
+                }
+                else
+                {
+                    CombatStop();
+                    getHostileRefManager().deleteReferences();
+                }
             }
             else
             {
@@ -11499,6 +11513,8 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/, u
             // NPC FD is always successful, but never observed to disengage from combat
             addUnitState(UNIT_STAT_FEIGN_DEATH);
             AttackStop(true, false, true);
+            getHostileRefManager().addThreatPercent(-100);
+            getHostileRefManager().updateOnlineOfflineState(false);
         }
 
         // blizz like 2.0.x
@@ -11519,6 +11535,8 @@ void Unit::SetFeignDeath(bool apply, ObjectGuid casterGuid /*= ObjectGuid()*/, u
     }
     else if (IsFeigningDeath())
     {
+        getHostileRefManager().updateOnlineOfflineState(true);
+
         clearUnitState(UNIT_STAT_FEIGN_DEATH);
 
         // blizz like 2.0.x
