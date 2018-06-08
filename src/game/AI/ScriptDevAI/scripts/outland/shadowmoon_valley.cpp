@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Shadowmoon_Valley
 SD%Complete: 100
-SDComment: Quest support: 10451, 10458, 10480, 10481, 10514, 10540, 10588, 10707, 10781, 10804, 10854, 11020, 11064, 11067.
+SDComment: Quest support: 10451, 10458, 10480, 10481, 10514, 10540, 10588, 10707, 10781, 10804, 10854, 11020, 11064, 11067, 11068, 11069, 11070, 11071.
 SDCategory: Shadowmoon Valley
 EndScriptData */
 
@@ -34,8 +34,6 @@ go_crystal_prison
 npc_spawned_oronok_tornheart
 npc_domesticated_felboar
 npc_veneratus_spawn_node
-npc_murag_muckjaw
-npc_trope
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -3177,32 +3175,170 @@ bool QuestAccept_npc_commander(Player* player, Creature* questgiver, Quest const
 }
 
 /*######
-# npc_murag_muckjaw
+# Dragonmaw Racer NPC AIs (Netherwing faction questline)
 ######*/
 
 enum
 {
-    SAY_MUCKJAW_START       = -1001299,
-    SAY_MUCKJAW_END         = -1001300,
+    QUEST_MUCKJAW                   = 11064,
+    QUEST_TROPE                     = 11067,
+    QUEST_CORLOK                    = 11068,
+    QUEST_ICHMAN                    = 11069,
+    QUEST_MULVERICK                 = 11070,
+    QUEST_SKYSHATTER                = 11071,
 
-    SPELL_AGGRO_CHECK_MUCKJAW   = 40847, // purpose unk, something to do with failing quest?
+    SAY_START_MUCKJAW               = -1001299,
+    SAY_END_MUCKJAW                 = -1001300,
+    SAY_START_TROPE                 = -1001301,
+    SAY_END_TROPE                   = -1001302,
+    SAY_START_CORLOK                = -1001303,
+    SAY_END_CORLOK                  = -1001304,
+    SAY_START_ICHMAN                = -1001305,
+    SAY_END_ICHMAN                  = -1001306,
+    SAY_START_MULVERICK             = -1001307,
+    SAY_END_MULVERICK               = -1001308,
+    SAY_START_SKYSHATTER            = -1001309,
+    SAY_MID_SKYSHATTER              = -1001310,
+    SAY_END_SKYSHATTER              = -1001311,
 
-    QUEST_BALLAD_OF_OLDIE      = 11064,
+    // purpose of aggro check/burst unknown, something to do with failing quest?
+
+    SPELL_AGGRO_CHECK_MUCKJAW       = 40847,
+    SPELL_AGGRO_CHECK_TROPE         = 40984,
+    SPELL_AGGRO_CHECK_CORLOK        = 40992,
+    SPELL_AGGRO_CHECK_ICHMAN        = 41006,
+    SPELL_AGGRO_CHECK_MULVERICK     = 41014,
+    SPELL_AGGRO_CHECK_SKYSHATTER    = 41020,
+
+    SPELL_AGGRO_BURST_MUCKJAW       = 40850,
+    SPELL_AGGRO_BURST_TROPE         = 40986,
+    SPELL_AGGRO_BURST_CORLOK        = 40994,
+    SPELL_AGGRO_BURST_ICHMAN        = 41008,
+    SPELL_AGGRO_BURST_MULVERICK     = 41016,
+    SPELL_AGGRO_BURST_SKYSHATTER    = 41023,
+
+    SPELL_ATTACK_TROPE              = 40909,
+    SPELL_ATTACK_CORLOK             = 40894,
+    SPELL_ATTACK_ICHMAN             = 40928,
+    SPELL_ATTACK_MULVERICK          = 40930,
+    SPELL_ATTACK_SKYSHATTER         = 40945,
+
+    // responses of target NPCs handled in ACID
+    NPC_TARGET_TROPE                = 23357,
+    NPC_TARGET_CORLOK               = 23358,
+    NPC_TARGET_ICHMAN               = 23359,
+    NPC_TARGET_MULVERICK            = 23360,
+    NPC_TARGET_SKYSHATTER           = 23361,
+
+    RACER_MUCKJAW                   = 0,
+    RACER_TROPE                     = 1,
+    RACER_CORLOK                    = 2,
+    RACER_ICHMAN                    = 3,
+    RACER_MULVERICK                 = 4,
+    RACER_SKYSHATTER                = 5,
+
+    RACER_COUNT                     = 6
 };
 
-struct npc_murag_muckjawAI : public npc_escortAI
+struct DragonmawRacerScriptInfo
 {
-    npc_murag_muckjawAI(Creature* pCreature) : npc_escortAI(pCreature)
-    {
-        Reset();
-    }
+    uint32 questId;
+    int32 startText;
+    int32 attackSpellId;
+    uint32 targetNpc;
+    int32 checkSpellId;
+    int32 burstSpellId;
+    int32 winText;
+};
+
+static DragonmawRacerScriptInfo dragonmawRacesScriptInfo[RACER_COUNT] =
+{
+    { QUEST_MUCKJAW, SAY_START_MUCKJAW, 0, 0, SPELL_AGGRO_CHECK_MUCKJAW, SPELL_AGGRO_BURST_MUCKJAW, SAY_END_MUCKJAW }, // doesn't attack and has no target NPC
+    { QUEST_TROPE, SAY_START_TROPE, SPELL_ATTACK_TROPE, NPC_TARGET_TROPE, SPELL_AGGRO_CHECK_TROPE, SPELL_AGGRO_BURST_TROPE, SAY_END_TROPE },
+    { QUEST_CORLOK, SAY_START_CORLOK, SPELL_ATTACK_CORLOK, NPC_TARGET_CORLOK, SPELL_AGGRO_CHECK_CORLOK, SPELL_AGGRO_BURST_CORLOK, SAY_END_CORLOK },
+    { QUEST_ICHMAN, SAY_START_ICHMAN, SPELL_ATTACK_ICHMAN, NPC_TARGET_ICHMAN, SPELL_AGGRO_CHECK_ICHMAN, SPELL_AGGRO_BURST_ICHMAN, SAY_END_ICHMAN },
+    { QUEST_MULVERICK, SAY_START_MULVERICK, SPELL_ATTACK_MULVERICK, NPC_TARGET_MULVERICK, SPELL_AGGRO_CHECK_MULVERICK, SPELL_AGGRO_BURST_MULVERICK, SAY_END_MULVERICK },
+    { QUEST_SKYSHATTER, SAY_START_SKYSHATTER, SPELL_ATTACK_SKYSHATTER, NPC_TARGET_SKYSHATTER, SPELL_AGGRO_CHECK_SKYSHATTER, SPELL_AGGRO_BURST_SKYSHATTER, SAY_END_SKYSHATTER }
+};
+
+struct npc_dragonmaw_racerAI : public npc_escortAI
+{
+    npc_dragonmaw_racerAI(Creature* creature, uint8 racerId) : npc_escortAI(creature), m_racerId(racerId) { Reset(); }
+
+    uint8 m_racerId;
+    uint32 m_uiAttackTimer;
 
     void Reset() override
     {
         m_creature->SetCanFly(false);
         m_creature->SetWalk(true);
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        m_uiAttackTimer = 0;
     }
+
+    void UpdateEscortAI(const uint32 uiDiff) override
+    {
+        if (m_uiAttackTimer)
+        {
+            if (m_uiAttackTimer < uiDiff)
+            {
+                AttackPlayer();
+            }
+            else
+                m_uiAttackTimer -= uiDiff;
+        }
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        DoCastSpellIfCan(pSummoned, dragonmawRacesScriptInfo[m_racerId].attackSpellId);
+    }
+
+    void StartRace()
+    {
+        m_creature->SetWalk(false);
+
+        if (dragonmawRacesScriptInfo[m_racerId].checkSpellId)
+            DoCastSpellIfCan(m_creature, dragonmawRacesScriptInfo[m_racerId].checkSpellId);
+    }
+
+    void StartAttack()
+    {
+        if (dragonmawRacesScriptInfo[m_racerId].attackSpellId)
+            m_uiAttackTimer = urand(1000,3000);
+
+        if (dragonmawRacesScriptInfo[m_racerId].burstSpellId)
+            DoCastSpellIfCan(m_creature, dragonmawRacesScriptInfo[m_racerId].burstSpellId);
+    }
+
+    virtual void AttackPlayer()
+    {
+        if (Player* pPlayer = GetPlayerForEscort())
+        {
+            float fX, fY, fZ;
+            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f, fX, fY, fZ);
+            m_creature->SummonCreature(dragonmawRacesScriptInfo[m_racerId].targetNpc, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 6000);
+            m_creature->GetRandomPoint(pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), 10.0f, fX, fY, fZ);
+            m_creature->SummonCreature(dragonmawRacesScriptInfo[m_racerId].targetNpc, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 6000);
+        }
+        m_uiAttackTimer = 4000;
+    }
+
+    void FinishRace()
+    {
+        m_uiAttackTimer = 0;
+        if (Player* pPlayer = GetPlayerForEscort())
+        {
+            DoScriptText(dragonmawRacesScriptInfo[m_racerId].winText, m_creature, pPlayer);
+            m_creature->SetCanFly(false);
+            pPlayer->RewardPlayerAndGroupAtEventExplored(dragonmawRacesScriptInfo[m_racerId].questId, m_creature);
+        }
+    }
+};
+
+struct npc_dragonmaw_racer_muckjawAI : public npc_dragonmaw_racerAI
+{
+    npc_dragonmaw_racer_muckjawAI(Creature* creature) : npc_dragonmaw_racerAI(creature, RACER_MUCKJAW) {}
 
     void WaypointReached(uint32 uiPointId) override
     {
@@ -3212,103 +3348,21 @@ struct npc_murag_muckjawAI : public npc_escortAI
             m_creature->SetCanFly(true);
             break;
         case 6:
-            DoCastSpellIfCan(m_creature, SPELL_AGGRO_CHECK_MUCKJAW);
-            m_creature->SetWalk(false);
+            npc_dragonmaw_racerAI::StartRace();
+            break;
+        case 8:
+            npc_dragonmaw_racerAI::StartAttack();
             break;
         case 34:
-            if (Player* pPlayer = GetPlayerForEscort())
-            {
-                DoScriptText(SAY_MUCKJAW_END, m_creature, pPlayer);
-                m_creature->SetCanFly(false);
-                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_BALLAD_OF_OLDIE, m_creature);
-            }
-            break;
-        case 36:
-            m_creature->SetWalk(true);
-            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            npc_dragonmaw_racerAI::FinishRace();
             break;
         }
     }
 };
 
-UnitAI* GetAI_npc_murag_muckjaw(Creature* pCreature)
+struct npc_dragonmaw_racer_tropeAI : public npc_dragonmaw_racerAI
 {
-    return new npc_murag_muckjawAI(pCreature);
-}
-
-bool QuestAccept_npc_murag_muckjaw(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
-{
-    if (pQuest->GetQuestId() == QUEST_BALLAD_OF_OLDIE)
-    {
-        DoScriptText(SAY_MUCKJAW_START, pCreature, pPlayer);
-        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-
-        if (npc_murag_muckjawAI* pEscortAI = dynamic_cast<npc_murag_muckjawAI*>(pCreature->AI()))
-            pEscortAI->Start(false, pPlayer, pQuest, true, true);
-    }
-    return true;
-}
-
-/*######
-# npc_trope
-######*/
-
-enum
-{
-    SAY_TROPE_START         = -1001301,
-    SAY_TROPE_END           = -1001302,
-
-    SPELL_AGGRO_CHECK_TROPE = 40984, // Dragonmaw Knockdown: The Aggro Check Aura - triggers 40985 Dragonmaw Knockdown: The Aggro Check
-    SPELL_AGGRO_BURST_TROPE = 40986, // Dragonmaw Knockdown: The Aggro Burst - triggers 40987 Dragonmaw Knockdown Choose Loc
-    // spell 40988 (serverside) summons NPC 23357 "Dragonmaw Race: Trope's Target"
-
-    SPELL_SLIME_CANNON      = 40909, // Trope's Slime Cannon - targets NPC 23357
-    SPELL_SKULL_BARRAGE     = 40900, // Corlok's Skull Barrage Knockdown - casted by NPC 23357 when hit by spell 40909?
-
-    NPC_TROPE_TARGET        = 23357,
-
-    QUEST_TROPE             = 11067,
-};
-
-struct npc_tropeAI : public npc_escortAI
-{
-    npc_tropeAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
-
-    uint32 m_uiSlimeTimer;
-
-    void Reset() override
-    {
-        m_creature->SetCanFly(false);
-        m_creature->SetWalk(true);
-        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-        m_uiSlimeTimer = 0;
-    }
-
-    void UpdateEscortAI(const uint32 uiDiff) override
-    {
-        if (m_uiSlimeTimer)
-        {
-            if (m_uiSlimeTimer < uiDiff)
-            {
-                if (Player* pPlayer = GetPlayerForEscort())
-                {
-                    float fX, fY, fZ;
-                    m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
-                    m_creature->SummonCreature(NPC_TROPE_TARGET, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 6000);
-                    m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
-                    m_creature->SummonCreature(NPC_TROPE_TARGET, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 6000);
-                }
-                m_uiSlimeTimer = 4000;
-            }
-            else
-                m_uiSlimeTimer -= uiDiff;
-        }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        DoCastSpellIfCan(pSummoned, SPELL_SLIME_CANNON);
-    }
+    npc_dragonmaw_racer_tropeAI(Creature* creature) : npc_dragonmaw_racerAI(creature, RACER_TROPE) {}
 
     void WaypointReached(uint32 uiPointId) override
     {
@@ -3318,48 +3372,186 @@ struct npc_tropeAI : public npc_escortAI
             m_creature->SetCanFly(true);
             break;
         case 6:
-            DoCastSpellIfCan(m_creature, SPELL_AGGRO_CHECK_TROPE);
-            m_creature->SetWalk(false);
+            npc_dragonmaw_racerAI::StartRace();
             break;
         case 9:
-            DoCastSpellIfCan(m_creature, SPELL_AGGRO_BURST_TROPE);
-            m_uiSlimeTimer = 1000;
-            m_creature->SetWalk(false);
+            npc_dragonmaw_racerAI::StartAttack();
             break;
         case 52:
-            m_uiSlimeTimer = 0;
-
-            if (Player* pPlayer = GetPlayerForEscort())
-            {
-                DoScriptText(SAY_TROPE_END, m_creature, pPlayer);
-                m_creature->SetCanFly(false);
-                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_TROPE, m_creature);
-            }
-            break;
-        case 59:
-            m_creature->SetWalk(true);
-            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            npc_dragonmaw_racerAI::FinishRace();
             break;
         }
     }
 };
 
-UnitAI* GetAI_npc_trope(Creature* pCreature)
+struct npc_dragonmaw_racer_corlokAI : public npc_dragonmaw_racerAI
 {
-    return new npc_tropeAI(pCreature);
+    npc_dragonmaw_racer_corlokAI(Creature* creature) : npc_dragonmaw_racerAI(creature, RACER_CORLOK) {}
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+        case 5:
+            m_creature->SetCanFly(true);
+            break;
+        case 8:
+            npc_dragonmaw_racerAI::StartRace();
+            break;
+        case 11:
+            npc_dragonmaw_racerAI::StartAttack();
+            break;
+        case 78:
+            npc_dragonmaw_racerAI::FinishRace();
+            break;
+        }
+    }
+};
+
+struct npc_dragonmaw_racer_ichmanAI : public npc_dragonmaw_racerAI
+{
+    npc_dragonmaw_racer_ichmanAI(Creature* creature) : npc_dragonmaw_racerAI(creature, RACER_ICHMAN) {}
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+        case 3:
+            m_creature->SetCanFly(true);
+            npc_dragonmaw_racerAI::StartRace();
+            break;
+        case 11:
+            npc_dragonmaw_racerAI::StartAttack();
+            break;
+        case 106:
+            npc_dragonmaw_racerAI::FinishRace();
+            break;
+        }
+    }
+};
+
+struct npc_dragonmaw_racer_mulverickAI : public npc_dragonmaw_racerAI
+{
+    npc_dragonmaw_racer_mulverickAI(Creature* creature) : npc_dragonmaw_racerAI(creature, RACER_MULVERICK) {}
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+        case 4:
+            m_creature->SetCanFly(true);
+            break;
+        case 8:
+            npc_dragonmaw_racerAI::StartRace();
+            break;
+        case 11:
+            npc_dragonmaw_racerAI::StartAttack();
+            break;
+        case 165:
+            npc_dragonmaw_racerAI::FinishRace();
+            break;
+        }
+    }
+
+    void AttackPlayer() override
+    {
+        if (Player* pPlayer = GetPlayerForEscort())
+        {
+            float fX, fY, fZ;
+            m_creature->GetRandomPoint(pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), 10.0f, fX, fY, fZ);
+            m_creature->SummonCreature(dragonmawRacesScriptInfo[m_racerId].targetNpc, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 6000);
+        }
+        m_uiAttackTimer = urand(1000,4000);
+    }
+};
+
+struct npc_dragonmaw_racer_skyshatterAI : public npc_dragonmaw_racerAI
+{
+    npc_dragonmaw_racer_skyshatterAI(Creature* creature) : npc_dragonmaw_racerAI(creature, RACER_SKYSHATTER) {}
+
+    void WaypointReached(uint32 uiPointId) override
+    {
+        switch (uiPointId)
+        {
+        case 2:
+            m_creature->SetCanFly(true);
+            break;
+        case 6:
+            if (Player* pPlayer = GetPlayerForEscort())
+                DoScriptText(SAY_MID_SKYSHATTER, m_creature, pPlayer);
+
+            npc_dragonmaw_racerAI::StartRace();
+            break;
+        case 9:
+            npc_dragonmaw_racerAI::StartAttack();
+            break;
+        case 139:
+            npc_dragonmaw_racerAI::FinishRace();
+            break;
+        }
+    }
+
+    void AttackPlayer() override
+    {
+        if (Player* pPlayer = GetPlayerForEscort())
+        {
+            float fX, fY, fZ;
+            m_creature->GetRandomPoint(pPlayer->GetPositionX(), pPlayer->GetPositionY(), pPlayer->GetPositionZ(), 5.0f, fX, fY, fZ);
+            m_creature->SummonCreature(dragonmawRacesScriptInfo[m_racerId].targetNpc, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 6000);
+        }
+        m_uiAttackTimer = urand(1000, 2000);
+    }
+};
+
+UnitAI* GetAI_npc_dragonmaw_racer_muckjaw(Creature* pCreature)
+{
+    return new npc_dragonmaw_racer_muckjawAI(pCreature);
 }
 
-bool QuestAccept_npc_trope(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+UnitAI* GetAI_npc_dragonmaw_racer_trope(Creature* pCreature)
 {
-    if (pQuest->GetQuestId() == QUEST_TROPE)
-    {
-        DoScriptText(SAY_TROPE_START, pCreature, pPlayer);
-        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+    return new npc_dragonmaw_racer_tropeAI(pCreature);
+}
 
-        if (npc_tropeAI* pEscortAI = dynamic_cast<npc_tropeAI*>(pCreature->AI()))
-            pEscortAI->Start(false, pPlayer, pQuest, true, true);
+UnitAI* GetAI_npc_dragonmaw_racer_corlok(Creature* pCreature)
+{
+    return new npc_dragonmaw_racer_corlokAI(pCreature);
+}
+
+UnitAI* GetAI_npc_dragonmaw_racer_ichman(Creature* pCreature)
+{
+    return new npc_dragonmaw_racer_ichmanAI(pCreature);
+}
+
+UnitAI* GetAI_npc_dragonmaw_racer_mulverick(Creature* pCreature)
+{
+    return new npc_dragonmaw_racer_mulverickAI(pCreature);
+}
+
+UnitAI* GetAI_npc_dragonmaw_racer_skyshatter(Creature* pCreature)
+{
+    return new npc_dragonmaw_racer_skyshatterAI(pCreature);
+}
+
+bool QuestAccept_npc_dragonmaw_racer(Player* player, Creature* questgiver, Quest const* quest)
+{
+    switch (quest->GetQuestId())
+    {
+    case QUEST_MUCKJAW:
+    case QUEST_TROPE:
+    case QUEST_CORLOK:
+    case QUEST_ICHMAN:
+    case QUEST_MULVERICK:
+    case QUEST_SKYSHATTER:
+        if (npc_dragonmaw_racerAI* ai = static_cast<npc_dragonmaw_racerAI*>(questgiver->AI()))
+        {
+            DoScriptText(dragonmawRacesScriptInfo[ai->m_racerId].startText, questgiver, player);
+            ai->Start(false, player, quest, true);
+        }
+        return true;
     }
-    return true;
+
+    return false;
 }
 
 void AddSC_shadowmoon_valley()
@@ -3462,14 +3654,38 @@ void AddSC_shadowmoon_valley()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "npc_murag_muckjaw";
-    pNewScript->GetAI = &GetAI_npc_murag_muckjaw;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_murag_muckjaw;
+    pNewScript->Name = "npc_dragonmaw_racer_muckjaw";
+    pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_muckjaw;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "npc_trope";
-    pNewScript->GetAI = &GetAI_npc_trope;
-    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_trope;
+    pNewScript->Name = "npc_dragonmaw_racer_trope";
+    pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_trope;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_dragonmaw_racer_corlok";
+    pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_corlok;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_dragonmaw_racer_ichman";
+    pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_ichman;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_dragonmaw_racer_mulverick";
+    pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_mulverick;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_dragonmaw_racer_skyshatter";
+    pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_skyshatter;
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
     pNewScript->RegisterSelf();
 }
