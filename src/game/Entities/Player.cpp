@@ -1178,7 +1178,7 @@ void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
     SendMessageToSet(data, true);
 }
 
-void Player::Update(uint32 update_diff, uint32 p_time)
+void Player::Update(const uint32 diff)
 {
     if (!IsInWorld())
         return;
@@ -1198,31 +1198,31 @@ void Player::Update(uint32 update_diff, uint32 p_time)
 
     // Update player only attacks
     if (uint32 ranged_att = getAttackTimer(RANGED_ATTACK))
-        setAttackTimer(RANGED_ATTACK, (update_diff >= ranged_att ? 0 : ranged_att - update_diff));
+        setAttackTimer(RANGED_ATTACK, (diff >= ranged_att ? 0 : ranged_att - diff));
 
     // Update cinematic location
     if (m_cinematicMgr)
     {
-        m_cinematicMgr->m_cinematicDiff += p_time;
+        m_cinematicMgr->m_cinematicDiff += diff;
         // update only if CINEMATIC_UPDATEDIFF have passed
         if (WorldTimer::getMSTimeDiff(m_cinematicMgr->m_lastCinematicCheck, WorldTimer::getMSTime()) > CINEMATIC_UPDATEDIFF)
         {
             m_cinematicMgr->m_lastCinematicCheck = WorldTimer::getMSTime();
-            if (!m_cinematicMgr->UpdateCinematicLocation(p_time))
+            if (!m_cinematicMgr->UpdateCinematicLocation(diff))
                 m_cinematicMgr.reset(nullptr);             // if any problem occur during cinematic update we can delete it
         }
     }
 
     // Used to implement delayed far teleports
     SetCanDelayTeleport(true);
-    Unit::Update(update_diff, p_time);
+    Unit::Update(diff);
     SetCanDelayTeleport(false);
 
     time_t now = time(nullptr);
 
-    UpdatePvPFlagTimer(update_diff);
+    UpdatePvPFlagTimer(diff);
 
-    UpdatePvPContestedFlagTimer(update_diff);
+    UpdatePvPContestedFlagTimer(diff);
 
     UpdateDuelFlag(now);
 
@@ -1240,7 +1240,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
         while (iter != m_timedquests.end())
         {
             QuestStatusData& q_status = mQuestStatus[*iter];
-            if (q_status.m_timer <= update_diff)
+            if (q_status.m_timer <= diff)
             {
                 uint32 quest_id  = *iter;
                 ++iter;                                     // Current iter will be removed in FailQuest
@@ -1248,7 +1248,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             }
             else
             {
-                q_status.m_timer -= update_diff;
+                q_status.m_timer -= diff;
                 if (q_status.uState != QUEST_NEW) q_status.uState = QUEST_CHANGED;
                 ++iter;
             }
@@ -1286,31 +1286,31 @@ void Player::Update(uint32 update_diff, uint32 p_time)
 
     if (m_regenTimer)
     {
-        if (update_diff >= m_regenTimer)
+        if (diff >= m_regenTimer)
             m_regenTimer = 0;
         else
-            m_regenTimer -= update_diff;
+            m_regenTimer -= diff;
     }
 
     if (m_positionStatusUpdateTimer)
     {
-        if (update_diff >= m_positionStatusUpdateTimer)
+        if (diff >= m_positionStatusUpdateTimer)
             m_positionStatusUpdateTimer = 0;
         else
-            m_positionStatusUpdateTimer -= update_diff;
+            m_positionStatusUpdateTimer -= diff;
     }
 
     if (m_weaponChangeTimer > 0)
     {
-        if (update_diff >= m_weaponChangeTimer)
+        if (diff >= m_weaponChangeTimer)
             m_weaponChangeTimer = 0;
         else
-            m_weaponChangeTimer -= update_diff;
+            m_weaponChangeTimer -= diff;
     }
 
     if (m_zoneUpdateTimer > 0)
     {
-        if (update_diff >= m_zoneUpdateTimer)
+        if (diff >= m_zoneUpdateTimer)
         {
             uint32 newzone, newarea;
             GetZoneAndAreaId(newzone, newarea);
@@ -1328,15 +1328,15 @@ void Player::Update(uint32 update_diff, uint32 p_time)
             }
         }
         else
-            m_zoneUpdateTimer -= update_diff;
+            m_zoneUpdateTimer -= diff;
     }
 
     if (m_timeSyncTimer > 0)
     {
-        if (update_diff >= m_timeSyncTimer)
+        if (diff >= m_timeSyncTimer)
             SendTimeSync();
         else
-            m_timeSyncTimer -= update_diff;
+            m_timeSyncTimer -= diff;
     }
 
     if (isAlive())
@@ -1354,29 +1354,29 @@ void Player::Update(uint32 update_diff, uint32 p_time)
 
     if (m_nextSave > 0)
     {
-        if (update_diff >= m_nextSave)
+        if (diff >= m_nextSave)
         {
             // m_nextSave reseted in SaveToDB call
             SaveToDB();
             DETAIL_LOG("Player '%s' (GUID: %u) saved", GetName(), GetGUIDLow());
         }
         else
-            m_nextSave -= update_diff;
+            m_nextSave -= diff;
     }
 
     // Handle Water/drowning
-    HandleDrowning(update_diff);
+    HandleDrowning(diff);
 
     // Handle detect stealth players
     if (m_DetectInvTimer > 0)
     {
-        if (update_diff >= m_DetectInvTimer)
+        if (diff >= m_DetectInvTimer)
         {
             HandleStealthedUnitsDetection();
             m_DetectInvTimer = 3000;
         }
         else
-            m_DetectInvTimer -= update_diff;
+            m_DetectInvTimer -= diff;
     }
 
     // Played time
@@ -1390,7 +1390,7 @@ void Player::Update(uint32 update_diff, uint32 p_time)
 
     if (GetDrunkValue())
     {
-        m_drunkTimer += update_diff;
+        m_drunkTimer += diff;
 
         if (m_drunkTimer > 9 * IN_MILLISECONDS)
             HandleSobering();
@@ -1399,26 +1399,26 @@ void Player::Update(uint32 update_diff, uint32 p_time)
     // Not auto-free ghost from body in instances; also check for resurrection prevention
     if (m_deathTimer > 0  && !GetMap()->Instanceable() && !HasAuraType(SPELL_AURA_PREVENT_RESURRECTION) && !IsGhouled())
     {
-        if (p_time >= m_deathTimer)
+        if (diff >= m_deathTimer)
         {
             m_deathTimer = 0;
             BuildPlayerRepop();
             RepopAtGraveyard();
         }
         else
-            m_deathTimer -= p_time;
+            m_deathTimer -= diff;
     }
 
-    UpdateEnchantTime(update_diff);
-    UpdateHomebindTime(update_diff);
+    UpdateEnchantTime(diff);
+    UpdateHomebindTime(diff);
 
-    if (m_createdInstanceClearTimer < update_diff)
+    if (m_createdInstanceClearTimer < diff)
     {
         m_createdInstanceClearTimer = MINUTE * IN_MILLISECONDS;
         UpdateNewInstanceIdTimers(std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now()));
     }
     else
-        m_createdInstanceClearTimer -= update_diff;
+        m_createdInstanceClearTimer -= diff;
 
     // Group update
     SendUpdateToOutOfRangeGroupMembers();
@@ -1432,9 +1432,9 @@ void Player::Update(uint32 update_diff, uint32 p_time)
 
 #ifdef BUILD_PLAYERBOT
     if (m_playerbotAI)
-        m_playerbotAI->UpdateAI(p_time);
+        m_playerbotAI->UpdateAI(diff);
     else if (m_playerbotMgr)
-        m_playerbotMgr->UpdateAI(p_time);
+        m_playerbotMgr->UpdateAI(diff);
 #endif
 }
 

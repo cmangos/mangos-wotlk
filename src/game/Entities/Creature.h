@@ -584,7 +584,7 @@ class Creature : public Unit
 
         char const* GetSubName() const { return GetCreatureInfo()->SubName; }
 
-        void Update(uint32 update_diff, uint32 diff) override;  // overwrite Unit::Update
+        void Update(const uint32 diff) override;  // overwrite Unit::Update
 
         virtual void RegenerateAll(uint32 update_diff);
         uint32 GetEquipmentId() const { return m_equipmentId; }
