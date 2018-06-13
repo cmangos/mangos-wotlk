@@ -174,7 +174,14 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
         return;
     }
 
-    uint32 cost = items_count ? 30 * items_count : 30;      // price hardcoded in client
+    if (money && COD) // cannot send money in a COD mail
+    {
+        // TODO: Add hack logging since this is not normally possible
+        pl->SendMailResult(0, MAIL_SEND, MAIL_ERR_INTERNAL_ERROR);
+        return;
+    }
+
+    uint32 cost = items_count ? 30 * items_count : 30; // price hardcoded in client
 
     uint32 reqmoney = cost + money;
 
