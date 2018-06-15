@@ -149,8 +149,7 @@ class ArenaTeam
         size_t GetMembersSize() const         { return m_members.size(); }
         size_t GetMaxMembersSize() const      { return size_t(GetType() * 2); }
         bool   Empty() const                  { return m_members.empty(); }
-        MemberList::iterator m_membersBegin() { return m_members.begin(); }
-        MemberList::iterator m_membersEnd()   { return m_members.end(); }
+        MemberList& GetMembers()              { return m_members; }
         bool HaveMember(ObjectGuid guid) const;
 
         ArenaTeamMember* GetMember(ObjectGuid guid)
@@ -205,6 +204,7 @@ class ArenaTeam
 
         void FinishWeek();
         void FinishGame(int32 mod);
+        void FinishSeason();
 
         // Calendar
         void MassInviteToEvent(WorldSession* session);

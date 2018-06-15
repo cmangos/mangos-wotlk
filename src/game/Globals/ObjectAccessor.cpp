@@ -120,13 +120,20 @@ Player* ObjectAccessor::FindPlayerByName(char const* name, bool inWorld /*=true*
     return player;
 }
 
-void
-ObjectAccessor::SaveAllPlayers() const
+void ObjectAccessor::SaveAllPlayers() const
 {
     HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
     HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
     for (auto& itr : m)
         itr.second->SaveToDB();
+}
+
+void ObjectAccessor::ExecuteOnAllPlayers(std::function<void(Player*)> executor)
+{
+    HashMapHolder<Player>::ReadGuard g(HashMapHolder<Player>::GetLock());
+    HashMapHolder<Player>::MapType& m = sObjectAccessor.GetPlayers();
+    for (HashMapHolder<Player>::MapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+        executor(itr->second);
 }
 
 void ObjectAccessor::KickPlayer(ObjectGuid guid)

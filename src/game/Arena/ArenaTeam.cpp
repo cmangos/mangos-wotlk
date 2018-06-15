@@ -778,6 +778,24 @@ bool ArenaTeam::IsFighting() const
     return false;
 }
 
+void ArenaTeam::FinishSeason()
+{
+    m_stats.rank = 0;
+    m_stats.wins_season = 0;
+    m_stats.games_season = 0;
+    m_stats.rating = 0;
+    m_stats.games_week = 0;
+    m_stats.wins_week = 0;
+    for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    {
+        itr->games_week = 0;
+        itr->wins_week = 0;
+        itr->games_season = 0;
+        itr->wins_season = 0;
+        itr->personal_rating = 0;
+    }
+}
+
 // add new arena event to all already connected team members
 void ArenaTeam::MassInviteToEvent(WorldSession* session)
 {

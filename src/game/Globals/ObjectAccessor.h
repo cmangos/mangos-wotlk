@@ -110,6 +110,7 @@ class ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, MaNGOS::ClassLev
         }
 
         void SaveAllPlayers() const;
+        void ExecuteOnAllPlayers(std::function<void(Player*)> executor);
 
         // Corpse access
         Corpse* GetCorpseForPlayerGUID(ObjectGuid guid);

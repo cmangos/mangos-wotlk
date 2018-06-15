@@ -7240,9 +7240,29 @@ bool ChatHandler::HandleSendMessageCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleFlushArenaPointsCommand(char* /*args*/)
+bool ChatHandler::HandleArenaFlushPointsCommand(char* /*args*/)
 {
     sBattleGroundMgr.DistributeArenaPoints();
+    return true;
+}
+
+bool ChatHandler::HandleArenaSeasonRewardsCommand(char* args)
+{
+    uint32 seasonId;
+    if (!ExtractUInt32(&args, seasonId))
+        return false;
+
+    if (seasonId > 4 || seasonId == 0)
+        return false;
+
+    sBattleGroundMgr.RewardArenaSeason(seasonId);
+    return true;
+}
+
+bool ChatHandler::HandleArenaDataReset(char* args)
+{
+    PSendSysMessage("Resetting all arena data.");
+    sBattleGroundMgr.ResetAllArenaData();
     return true;
 }
 

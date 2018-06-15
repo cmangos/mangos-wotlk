@@ -641,7 +641,6 @@ class ChatHandler
         bool HandleRespawnCommand(char* args);
         bool HandleComeToMeCommand(char* args);
         bool HandleCombatStopCommand(char* args);
-        bool HandleFlushArenaPointsCommand(char* args);
         bool HandleRepairitemsCommand(char* args);
         bool HandleStableCommand(char* args);
         bool HandleWaterwalkCommand(char* args);
@@ -650,6 +649,10 @@ class ChatHandler
 #ifdef BUILD_PLAYERBOT
         bool HandlePlayerbotCommand(char* args);
 #endif
+
+        bool HandleArenaFlushPointsCommand(char* args);
+        bool HandleArenaSeasonRewardsCommand(char* args);
+        bool HandleArenaDataReset(char* args);
 
         bool HandleMmapPathCommand(char* args);
         bool HandleMmapLocCommand(char* args);

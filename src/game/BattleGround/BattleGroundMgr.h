@@ -236,6 +236,8 @@ class BattleGroundMgr
 
         void InitAutomaticArenaPointDistribution();
         void DistributeArenaPoints() const;
+        void RewardArenaSeason(uint32 seasonId);
+        void ResetAllArenaData();
         void ToggleArenaTesting();
         void ToggleTesting();
 
