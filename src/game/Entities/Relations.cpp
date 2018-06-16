@@ -1252,7 +1252,7 @@ bool Unit::IsFogOfWarVisibleHealth(Unit const* other) const
 
     switch (sWorld.getConfig(CONFIG_UINT32_FOGOFWAR_HEALTH))
     {
-        case 0:  return IsInGroup(other);
+        case 0:  return IsInGroup(other, false, true);
         case 1:  return CanCooperate(other);
         default: return true;
     }
