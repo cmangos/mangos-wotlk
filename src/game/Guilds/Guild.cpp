@@ -802,7 +802,7 @@ void Guild::Roster(WorldSession* session /*= nullptr*/)
             data << uint8(0);                               // new 2.4.0
             data << uint32(pl->GetZoneId());
             data << itr->second.Pnote;
-            data << itr->second.OFFnote;
+            data << ((session && HasRankRight(session->GetPlayer()->GetRank(), GR_RIGHT_VIEWOFFNOTE)) ? itr->second.OFFnote : "");
         }
         else
         {
@@ -816,7 +816,7 @@ void Guild::Roster(WorldSession* session /*= nullptr*/)
             data << uint32(itr->second.ZoneId);
             data << float(float(time(nullptr) - itr->second.LogoutTime) / DAY);
             data << itr->second.Pnote;
-            data << itr->second.OFFnote;
+            data << ((session && HasRankRight(session->GetPlayer()->GetRank(), GR_RIGHT_VIEWOFFNOTE)) ? itr->second.OFFnote : "");
         }
     }
     if (session)
