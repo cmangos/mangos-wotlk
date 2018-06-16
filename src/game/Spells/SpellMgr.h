@@ -439,6 +439,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
     switch (spellInfo->Id)
     {
         case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
+        case 22735:         // Spirit of Runn Tum
         case 31332:         // Dire Wolf Visual
         case 31690:         // Putrid Mushroom
         case 32007:         // Mo'arg Engineer Transform Visual
