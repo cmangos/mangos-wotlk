@@ -169,10 +169,7 @@ struct boss_vazruden_heraldAI : public ScriptedAI
                     // undo flying
                     m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
                     m_creature->SetLevitate(false);
-
-                    Player* pPlayer = m_creature->GetMap()->GetPlayer(m_lastSeenPlayerGuid);
-                    if (pPlayer && pPlayer->isAlive())
-                        AttackStart(pPlayer);
+                    m_creature->SetInCombatWithZone();
 
                     // Initialize for combat
                     m_uiFireballTimer = urand(5200, 16500);
@@ -234,8 +231,7 @@ struct boss_vazruden_heraldAI : public ScriptedAI
         if (pSummoned->GetEntry() != NPC_VAZRUDEN)
             return;
 
-        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_lastSeenPlayerGuid))
-            pSummoned->AI()->AttackStart(pPlayer);
+        pSummoned->SetInCombatWithZone();
 
         m_vazrudenGuid = pSummoned->GetObjectGuid();
 
