@@ -1604,7 +1604,8 @@ class Unit : public WorldObject
         virtual bool CanAttackSpell(Unit const* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const override;
         virtual bool CanAssistSpell(Unit const* target, SpellEntry const* spellInfo = nullptr) const override;
 
-        virtual bool CanAttackOnSight(Unit const* target); // Used in MoveInLineOfSight checks
+        bool CanAttackOnSight(Unit const* target) const; // Used in MoveInLineOfSight checks
+        bool CanAssistInCombatAgainst(Unit const* who, Unit const* enemy) const;
 
         // Serverside fog of war settings
         bool IsFogOfWarVisibleStealth(Unit const* other) const;

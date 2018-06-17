@@ -1066,7 +1066,7 @@ bool DynamicObject::IsFriend(Unit const* unit) const
 /// Dynamic objects act as serverside proxy casters for units.
 /// It utilizes owners CanAttackSpell if owner exists
 /////////////////////////////////////////////////
-bool DynamicObject::CanAttackSpell(const Unit* target, SpellEntry const* spellInfo, bool isAOE) const
+bool DynamicObject::CanAttackSpell(Unit const* target, SpellEntry const* spellInfo, bool isAOE) const
 {
     if (Unit* owner = GetCaster())
         return owner->CanAttackSpell(target, spellInfo, isAOE);
@@ -1082,7 +1082,7 @@ bool DynamicObject::CanAttackSpell(const Unit* target, SpellEntry const* spellIn
 /// Dynamic objects act as serverside proxy casters for units.
 /// It utilizes owners CanAssistSpell if owner exists
 /////////////////////////////////////////////////
-bool DynamicObject::CanAssistSpell(const Unit* target, SpellEntry const* spellInfo) const
+bool DynamicObject::CanAssistSpell(Unit const* target, SpellEntry const* spellInfo) const
 {
     if (Unit* owner = GetCaster())
         return owner->CanAttackSpell(target, spellInfo);
@@ -1098,7 +1098,7 @@ bool DynamicObject::CanAssistSpell(const Unit* target, SpellEntry const* spellIn
 /// Some gameobjects can be involved in spell casting, so server needs additional API support.
 /// It utilizes owners CanAttackSpell if owner exists
 /////////////////////////////////////////////////
-bool GameObject::CanAttackSpell(const Unit* target, SpellEntry const* spellInfo, bool isAOE) const
+bool GameObject::CanAttackSpell(Unit const* target, SpellEntry const* spellInfo, bool isAOE) const
 {
     Unit* owner = GetOwner();
     if (owner)
@@ -1116,7 +1116,7 @@ bool GameObject::CanAttackSpell(const Unit* target, SpellEntry const* spellInfo,
 /// Some gameobjects can be involved in spell casting, so server needs additional API support.
 /// It utilizes owners CanAssistSpell if owner exists
 /////////////////////////////////////////////////
-bool GameObject::CanAssistSpell(const Unit* target, SpellEntry const* spellInfo) const
+bool GameObject::CanAssistSpell(Unit const* target, SpellEntry const* spellInfo) const
 {
     Unit* owner = GetOwner();
     if (owner)
@@ -1135,7 +1135,7 @@ bool GameObject::CanAssistSpell(const Unit* target, SpellEntry const* spellInfo)
 /// Also an additional fine grained check needs to be done for AOE spells, because they
 /// need to skip PVP enabled targets in some special cases. (Chain spells, AOE)
 /////////////////////////////////////////////////
-bool Unit::CanAttackSpell(const Unit* target, SpellEntry const* spellInfo, bool isAOE) const
+bool Unit::CanAttackSpell(Unit const* target, SpellEntry const* spellInfo, bool isAOE) const
 {
     if (spellInfo)
     {
@@ -1191,7 +1191,7 @@ bool Unit::CanAttackSpell(const Unit* target, SpellEntry const* spellInfo, bool 
 /// This function is not intented to have client-side counterpart by original design.
 /// It utilizes owners CanAssistSpell if owner exists
 /////////////////////////////////////////////////
-bool Unit::CanAssistSpell(const Unit* target, SpellEntry const* spellInfo) const
+bool Unit::CanAssistSpell(Unit const* target, SpellEntry const* spellInfo) const
 {
     return CanAssist(target);
 }
@@ -1205,7 +1205,7 @@ bool Unit::CanAssistSpell(const Unit* target, SpellEntry const* spellInfo) const
 /// It utilizes CanAttack with a small exclusion for Feign-Death targets and a hostile-only check.
 /// Typically used in AIs in MoveInLineOfSight
 /////////////////////////////////////////////////
-bool Unit::CanAttackOnSight(const Unit* target)
+bool Unit::CanAttackOnSight(Unit const* target) const
 {
     return CanAttack(target) && !target->IsFeigningDeathSuccessfully() && IsEnemy(target);
 }
@@ -1273,4 +1273,27 @@ bool Unit::IsFogOfWarVisibleStats(Unit const* other) const
         case 1:  return CanCooperate(other);
         case 2:  return true;
     }
+}
+
+/////////////////////////////////////////////////
+/// [Serverside] Opposition: this can assist who in attacking enemy
+///
+/// @note Relations API Tier 3
+///
+/// This function is not intented to have client-side counterpart by original design.
+/// A helper function used to determine if current unit can assist who against enemy
+/// Used in several assistance checks
+/////////////////////////////////////////////////
+bool Unit::CanAssistInCombatAgainst(Unit const* who, Unit const* enemy) const
+{
+    if (GetMap()->Instanceable()) // in dungeons nothing else needs to be evaluated
+        return true;
+
+    if (isInCombat()) // if fighting something else, do not assist
+        return false;
+
+    if (CanAssist(who) && CanAttackOnSight(enemy))
+        return true;
+
+    return false;
 }
