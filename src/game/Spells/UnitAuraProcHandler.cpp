@@ -33,7 +33,7 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS] =
     &Unit::HandleNULLProc,                                  //  0 SPELL_AURA_NONE
     &Unit::HandleNULLProc,                                  //  1 SPELL_AURA_BIND_SIGHT
     &Unit::HandleNULLProc,                                  //  2 SPELL_AURA_MOD_POSSESS
-    &Unit::HandleNULLProc,                                  //  3 SPELL_AURA_PERIODIC_DAMAGE
+    &Unit::HandlePeriodicAuraProc,                          //  3 SPELL_AURA_PERIODIC_DAMAGE
     &Unit::HandleDummyAuraProc,                             //  4 SPELL_AURA_DUMMY
     &Unit::HandleNULLProc,                                  //  5 SPELL_AURA_MOD_CONFUSE
     &Unit::HandleNULLProc,                                  //  6 SPELL_AURA_MOD_CHARM
@@ -4582,5 +4582,23 @@ SpellAuraProcResult Unit::HandleInvisibilityAuraProc(ProcExecutionData& data)
         return SPELL_AURA_PROC_FAILED;
 
     RemoveAurasDueToSpell(triggeredByAura->GetId());
+    return SPELL_AURA_PROC_OK;
+}
+
+SpellAuraProcResult Unit::HandlePeriodicAuraProc(ProcExecutionData& data)
+{
+    Unit* pVictim = data.victim; uint32 damage = data.damage; Aura* triggeredByAura = data.triggeredByAura; SpellEntry const* procSpell = data.procSpell; uint32 procFlags = data.procFlags; uint32 procEx = data.procExtra; uint32 cooldown = data.cooldown;
+
+    SpellEntry const* auraInfo = triggeredByAura->GetSpellProto();
+    switch (auraInfo->Id)
+    {
+        case 32065: // Fungal Decay - all three consume one stack on proc
+        case 35244: // Choking Vines
+        case 36659: // Tail Sting
+            if (triggeredByAura->GetHolder()->ModStackAmount(-1, nullptr)) // Remove aura on return true
+                RemoveSpellAuraHolder(triggeredByAura->GetHolder(), AURA_REMOVE_BY_DEFAULT);
+            break;
+    }
+
     return SPELL_AURA_PROC_OK;
 }
