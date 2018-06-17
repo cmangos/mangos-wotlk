@@ -158,6 +158,7 @@ UPDATE creature_template SET ScriptName='npc_the_cleaner' WHERE entry=14503;
 UPDATE creature_template SET ScriptName='npc_shaman_earth_elemental' WHERE entry IN(15352); -- greater earth elemental
 UPDATE creature_template SET ScriptName='npc_shaman_fire_elemental' WHERE entry IN(15438); -- greater fire elemental
 UPDATE creature_template SET ScriptName='npc_snakes' WHERE entry IN(19921,19833);
+UPDATE creature_template SET ScriptName='npc_nether_ray' WHERE entry IN(18880,21901,23501);
 UPDATE creature_template SET ScriptName='npc_mage_mirror_image' WHERE entry=31216;
 
 /*Quest (quest scripts which are not in one zone)*/

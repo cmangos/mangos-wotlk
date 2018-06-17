@@ -27,6 +27,8 @@ EndScriptData
 #include "AI/ScriptDevAI/base/pet_ai.h"
 #include "Globals/ObjectMgr.h"
 #include "GameEvents/GameEventMgr.h"
+#include "Entities/TemporarySpawn.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 /* ContentData
 npc_air_force_bots       80%    support for misc (invisible) guard bots in areas where player allowed to fly. Summon guards after a preset time if tagged by spell
@@ -1970,6 +1972,126 @@ UnitAI* GetAI_npc_snakes(Creature* pCreature)
     return new npc_snakesAI(pCreature);
 }
 
+enum
+{
+    SPELL_DRAIN_MANA = 17008,
+    SPELL_TAIL_STING = 36659,
+    SPELL_NETHER_SHOCK = 35334,
+};
+
+enum RayActions
+{
+    RAY_ACTION_NETHER_SHOCK,
+    RAY_ACTION_DRAIN_MANA,
+    RAY_ACTION_TAIL_STING,
+    RAY_ACTION_MAX,
+};
+
+struct npc_nether_rayAI : public ScriptedAI, public TimerAI
+{
+    npc_nether_rayAI(Creature* creature) : ScriptedAI(creature), TimerAI(RAY_ACTION_MAX)
+    {
+        AddCombatAction(RAY_ACTION_DRAIN_MANA, 0);
+        AddCombatAction(RAY_ACTION_TAIL_STING, 0);
+        AddCombatAction(RAY_ACTION_NETHER_SHOCK, 0);
+    }
+
+    uint32 GetInitialActionTimer(RayActions id)
+    {
+        switch (id)
+        {
+            case RAY_ACTION_DRAIN_MANA: return 2000;
+            case RAY_ACTION_TAIL_STING: return 2000;
+            case RAY_ACTION_NETHER_SHOCK: return 0;
+            default: return 0;
+        }
+    }
+
+    uint32 GetSubsequentActionTimer(RayActions id)
+    {
+        switch (id)
+        {
+            case RAY_ACTION_DRAIN_MANA: return urand(10000, 15000);
+            case RAY_ACTION_TAIL_STING: return 23000;
+            case RAY_ACTION_NETHER_SHOCK: return 5000;
+            default: return 0;
+        }
+    }
+
+    void Reset() override
+    {
+        for (uint32 i = 0; i < RAY_ACTION_MAX; ++i)
+            SetActionReadyStatus(i, false);
+
+        ResetTimer(RAY_ACTION_DRAIN_MANA, GetInitialActionTimer(RAY_ACTION_DRAIN_MANA));
+        ResetTimer(RAY_ACTION_TAIL_STING, GetInitialActionTimer(RAY_ACTION_TAIL_STING));
+        ResetTimer(RAY_ACTION_NETHER_SHOCK, GetInitialActionTimer(RAY_ACTION_NETHER_SHOCK));
+    }
+
+    void ExecuteActions() override
+    {
+        if (!CanExecuteCombatAction())
+            return;
+
+        for (uint32 i = 0; i < RAY_ACTION_MAX; ++i)
+        {
+            if (!GetActionReadyStatus(i))
+                continue;
+
+            switch (i)
+            {
+                case RAY_ACTION_DRAIN_MANA:
+                    if (!m_creature->getVictim() || !m_creature->getVictim()->HasMana())
+                        continue;
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DRAIN_MANA) == CAST_OK)
+                    {
+                        SetActionReadyStatus(i, false);
+                        ResetTimer(i, GetSubsequentActionTimer(RayActions(i)));
+                        return;
+                    }
+                    continue;
+                case RAY_ACTION_TAIL_STING:
+                    if (!m_creature->getVictim() || m_creature->getVictim()->HasMana())
+                        continue;
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TAIL_STING) == CAST_OK)
+                    {
+                        SetActionReadyStatus(i, false);
+                        ResetTimer(i, GetSubsequentActionTimer(RayActions(i)));
+                        return;
+                    }
+                    continue;
+                case RAY_ACTION_NETHER_SHOCK:
+                    if (!m_creature->getVictim())
+                        continue;
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_NETHER_SHOCK) == CAST_OK)
+                    {
+                        SetActionReadyStatus(i, false);
+                        ResetTimer(i, GetSubsequentActionTimer(RayActions(i)));
+                        return;
+                    }
+                    continue;
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        UpdateTimers(diff);
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        ExecuteActions();
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+UnitAI* GetAI_npc_nether_ray(Creature* creature)
+{
+    return new npc_nether_rayAI(creature);
+}
+
 /*######
 ## npc_mage_mirror_image
 ######*/
@@ -2126,6 +2248,11 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_snakes";
     pNewScript->GetAI = &GetAI_npc_snakes;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_nether_ray";
+    pNewScript->GetAI = &GetAI_npc_nether_ray;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
