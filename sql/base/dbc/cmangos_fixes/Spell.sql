@@ -57,6 +57,13 @@ INSERT INTO spell_template(Id,SpellName,Attributes,DurationIndex,SpellIconID,Eff
 (16369,'Bugs',0x00000190,5,1,28,4,2,18,10461,64),
 (16371,'Rats',0x00000190,5,1,28,4,2,18,10441,64);
 
+ALTER TABLE spell_template ADD COLUMN `AttributesServerside` int(11) unsigned NOT NULL DEFAULT '0';
+
+UPDATE spell_template SET AttributesServerside= AttributesServerside|1 WHERE id IN(770,778,9749,9806,9907,9991,13424,13752,16857,17390,17391,17392,26993,27011); -- all spells with Cannot stealth or turn invisible in tooltip
+
+-- Zangarmarsh insects stealth prevention
+UPDATE spell_template SET AttributesServerside= AttributesServerside|1 WHERE id IN(35329,35331,35325,35328);
+
 -- trap used to tame bear is no longer present in TBC/WOTLK yet still present in trap data
 INSERT INTO spell_template (Id, Attributes, CastingTimeIndex, ProcChance, SpellLevel, RangeIndex, EquippedItemClass, Effect1, EffectDieSides1, EffectBaseDice1, EffectImplicitTargetA1, SpellIconID, SpellName, MaxTargetLevel, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, IsServerSide) VALUES
 ('9439', '256', '1', '101', '1', '12', '-1', '3', '1', '1', '38', '1', 'Bear Captured in Trap', '60', '1', '1', '1', '1');

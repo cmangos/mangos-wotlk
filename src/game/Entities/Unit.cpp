@@ -444,6 +444,30 @@ void Unit::Update(uint32 update_diff, uint32 p_time)
     }
 }
 
+void Unit::AddCooldown(SpellEntry const & spellEntry, ItemPrototype const * itemProto, bool permanent, uint32 forcedDuration)
+{
+    uint32 recTimeDuration = forcedDuration ? forcedDuration : spellEntry.RecoveryTime;
+    if (recTimeDuration || spellEntry.CategoryRecoveryTime)
+    {
+        m_cooldownMap.AddCooldown(GetMap()->GetCurrentClockTime(), spellEntry.Id, recTimeDuration, spellEntry.Category, spellEntry.CategoryRecoveryTime);
+
+        if (spellEntry.AttributesServerside & SPELL_ATTR_SS_SEND_COOLDOWN)
+        {
+            Player const* player = GetClientControlling();
+            if (player)
+            {
+                // send to client
+                WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + 4);
+                data << GetObjectGuid();
+                data << uint8(1);
+                data << uint32(spellEntry.Id);
+                data << uint32(recTimeDuration);
+                player->GetSession()->SendPacket(data);
+            }
+        }
+    }
+}
+
 void Unit::TriggerEvadeEvents()
 {
     if (InstanceData* mapInstance = GetInstanceData())

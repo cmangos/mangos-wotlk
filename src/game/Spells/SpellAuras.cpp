@@ -9508,7 +9508,7 @@ void SpellAuraHolder::_AddSpellAuraHolder()
             m_target->ModifyAuraState(AURA_STATE_CONFLAGRATE, true);
 
         // Faerie Fire (druid versions)
-        if (m_spellProto->IsFitToFamily(SPELLFAMILY_DRUID, uint64(0x0000000000000400)))
+        if (m_spellProto->HasAttribute(SPELL_ATTR_SS_PREVENT_INVIS))
             m_target->ModifyAuraState(AURA_STATE_FAERIE_FIRE, true);
 
         // Victorious
@@ -9623,9 +9623,7 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
                 }
                 break;
             case SPELLFAMILY_DRUID:
-                if (m_spellProto->IsFitToFamilyMask(uint64(0x0000000000000400)))
-                    removeState = AURA_STATE_FAERIE_FIRE;   // Faerie Fire (druid versions)
-                else if (m_spellProto->IsFitToFamilyMask(uint64(0x0000000000000050)))
+                if (m_spellProto->IsFitToFamilyMask(uint64(0x0000000000000050)))
                 {
                     removeFamilyFlag = ClassFamilyMask(uint64(0x00000000000050));
                     removeState = AURA_STATE_SWIFTMEND;     // Swiftmend aura state
@@ -9643,6 +9641,9 @@ void SpellAuraHolder::_RemoveSpellAuraHolder()
                 if (m_spellProto->IsFitToFamilyMask(uint64(0x1000000000000000)))
                     removeState = AURA_STATE_FAERIE_FIRE;   // Sting (hunter versions)
         }
+
+        if (m_spellProto->HasAttribute(SPELL_ATTR_SS_PREVENT_INVIS))
+            removeState = AURA_STATE_FAERIE_FIRE;   // Faerie Fire
 
         // Remove state (but need check other auras for it)
         if (removeState)

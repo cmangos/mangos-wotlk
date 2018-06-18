@@ -537,6 +537,12 @@ enum SpellAttributesEx7
     SPELL_ATTR_EX7_UNK31                       = 0x80000000,// 31
 };
 
+enum SpellAttributesServerside
+{
+    SPELL_ATTR_SS_PREVENT_INVIS = 0x00000001,
+    SPELL_ATTR_SS_SEND_COOLDOWN = 0x00000002,
+};
+
 #define MAX_TALENT_SPEC_COUNT   2
 #define MAX_GLYPH_SLOT_INDEX    6
 

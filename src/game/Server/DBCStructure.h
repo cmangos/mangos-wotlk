@@ -1757,7 +1757,10 @@ struct SpellEntry
         // float   effectBonusCoefficient[3];               // 229-231  m_effectBonusCoefficient
         // uint32  spellDescriptionVariableID;              // 232      m_descriptionVariablesID
         uint32  SpellDifficultyId;                          // 233      m_difficulty (SpellDifficulty.dbc)
-        uint32  IsServerSide;
+
+        // custom
+        uint32    IsServerSide;                             // 234
+        uint32    AttributesServerside;                     // 235
 
         // helpers
         int32 CalculateSimpleValue(SpellEffectIndex eff) const { return EffectBasePoints[eff] + int32(1); }
@@ -1794,6 +1797,9 @@ struct SpellEntry
         inline bool HasAttribute(SpellAttributesEx5 attribute) const { return !!(AttributesEx5 & attribute); }
         inline bool HasAttribute(SpellAttributesEx6 attribute) const { return !!(AttributesEx6 & attribute); }
         inline bool HasAttribute(SpellAttributesEx7 attribute) const { return !!(AttributesEx7 & attribute); }
+
+        // custom
+        bool HasAttribute(SpellAttributesServerside attribute) const { return !!(AttributesServerside & attribute); }
 
     private:
         // prevent creating custom entries (copy data from original in fact)
