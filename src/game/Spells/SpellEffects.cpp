@@ -8787,7 +8787,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
                     // despawn delay depends on the distance between caster and target
-                    ((Creature*)unitTarget)->ForcedDespawn(100 * unitTarget->GetDistance2d(m_caster));
+                    ((Creature*)unitTarget)->ForcedDespawn(100 * unitTarget->GetDistance(m_caster, false, DIST_CALC_BOUNDING_RADIUS));
                     return;
                 }
                 case 44364:                                 // Rock Falcon Primer
@@ -11935,7 +11935,7 @@ void Spell::EffectPlayerPull(SpellEffectIndex eff_idx)
 
     float x, y, z;
     m_caster->GetPosition(x, y, z);
-    float dist = unitTarget->GetDistance2d(m_caster);
+    float dist = unitTarget->GetDistance(m_caster, false);
 
     // Projectile motion
     float speedXY = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.1f;

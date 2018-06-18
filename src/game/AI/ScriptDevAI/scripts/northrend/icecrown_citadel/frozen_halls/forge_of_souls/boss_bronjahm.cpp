@@ -167,7 +167,7 @@ struct boss_bronjahmAI : public ScriptedAI
 
             // Use ShadowBolt as default attack if victim is not in range
             // TODO - not entirely clear how this works in case the tank is out of shadow-bolt range
-            if (!m_uiShadowboltTimer && !m_creature->CanReachWithMeleeAttack(m_creature->getVictim()) && m_creature->GetCombatDistance(m_creature->getVictim(), false) < 20.0f)
+            if (!m_uiShadowboltTimer && !m_creature->CanReachWithMeleeAttack(m_creature->getVictim()) && m_creature->GetDistance(m_creature->getVictim(), true, DIST_CALC_COMBAT_REACH) < 20.0f)
             {
                 if (IsCombatMovement())
                 {

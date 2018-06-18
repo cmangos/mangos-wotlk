@@ -277,7 +277,7 @@ struct boss_supremusAI : public ScriptedAI
 
             if (m_uiMoltenPunchTimer < uiDiff)
             {
-                if (m_creature->GetCombatDistance(m_creature->getVictim(), false) < RANGE_MOLTEN_PUNCH)
+                if (m_creature->GetDistance(m_creature->getVictim(), true, DIST_CALC_COMBAT_REACH) < RANGE_MOLTEN_PUNCH)
                 {
                     DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHARGE);
                     DoScriptText(EMOTE_PUNCH_GROUND, m_creature);
