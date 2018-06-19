@@ -74,7 +74,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleNoImmediateEffect,                         // 14 SPELL_AURA_MOD_DAMAGE_TAKEN   implemented in Unit::MeleeDamageBonusTaken and Unit::SpellBaseDamageBonusTaken
     &Aura::HandleNoImmediateEffect,                         // 15 SPELL_AURA_DAMAGE_SHIELD      implemented in Unit::DealMeleeDamage
     &Aura::HandleModStealth,                                // 16 SPELL_AURA_MOD_STEALTH
-    &Aura::HandleNoImmediateEffect,                         // 17 SPELL_AURA_MOD_STEALTH_DETECT implemented in Unit::isVisibleForOrDetect
+    &Aura::HandleNoImmediateEffect,                         // 17 SPELL_AURA_MOD_STEALTH_DETECT implemented in Unit::IsVisibleForOrDetect
     &Aura::HandleInvisibility,                              // 18 SPELL_AURA_MOD_INVISIBILITY
     &Aura::HandleInvisibilityDetect,                        // 19 SPELL_AURA_MOD_INVISIBILITY_DETECTION
     &Aura::HandleAuraModTotalHealthPercentRegen,            // 20 SPELL_AURA_OBS_MOD_HEALTH
@@ -211,7 +211,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleAuraTrackStealthed,                        //151 SPELL_AURA_TRACK_STEALTHED
     &Aura::HandleNoImmediateEffect,                         //152 SPELL_AURA_MOD_DETECTED_RANGE         implemented in Creature::GetAttackDistance
     &Aura::HandleNoImmediateEffect,                         //153 SPELL_AURA_SPLIT_DAMAGE_FLAT          implemented in Unit::CalculateAbsorbAndResist
-    &Aura::HandleNoImmediateEffect,                         //154 SPELL_AURA_MOD_STEALTH_LEVEL          implemented in Unit::isVisibleForOrDetect
+    &Aura::HandleNoImmediateEffect,                         //154 SPELL_AURA_MOD_STEALTH_LEVEL          implemented in Unit::IsVisibleForOrDetect
     &Aura::HandleNoImmediateEffect,                         //155 SPELL_AURA_MOD_WATER_BREATHING        implemented in Player::getMaxTimer
     &Aura::HandleNoImmediateEffect,                         //156 SPELL_AURA_MOD_REPUTATION_GAIN        implemented in Player::CalculateReputationGain
     &Aura::HandleUnused,                                    //157 SPELL_AURA_PET_DAMAGE_MULTI (single test like spell 20782, also single for 214 aura)
@@ -318,7 +318,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleNULL,                                      //258 SPELL_AURA_MOD_SPELL_VISUAL
     &Aura::HandleNoImmediateEffect,                         //259 SPELL_AURA_MOD_PERIODIC_HEAL                    implemented in Unit::SpellHealingBonus
     &Aura::HandleNoImmediateEffect,                         //260 SPELL_AURA_SCREEN_EFFECT (miscvalue = id in ScreenEffect.dbc) not required any code
-    &Aura::HandlePhase,                                     //261 SPELL_AURA_PHASE undetectable invisibility?     implemented in Unit::isVisibleForOrDetect
+    &Aura::HandlePhase,                                     //261 SPELL_AURA_PHASE undetectable invisibility?     implemented in Unit::IsVisibleForOrDetect
     &Aura::HandleNoImmediateEffect,                         //262 SPELL_AURA_IGNORE_UNIT_STATE                    implemented in Unit::isIgnoreUnitState & Spell::CheckCast
     &Aura::HandleNoImmediateEffect,                         //263 SPELL_AURA_ALLOW_ONLY_ABILITY                   implemented in Spell::CheckCasterAuras, lool enum IgnoreUnitState for known misc values
     &Aura::HandleUnused,                                    //264 unused (3.0.8a-3.2.2a)
@@ -4930,10 +4930,9 @@ void Aura::HandleInvisibility(bool apply, bool Real)
 {
     Unit* target = GetTarget();
 
+    target->SetInvisibilityMask(m_modifier.m_miscvalue, apply);
     if (apply)
     {
-        target->m_invisibilityMask |= (1 << m_modifier.m_miscvalue);
-
         target->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_IMMUNE_OR_LOST_SELECTION);
 
         if (Real && target->GetTypeId() == TYPEID_PLAYER)
@@ -4956,13 +4955,12 @@ void Aura::HandleInvisibility(bool apply, bool Real)
     else
     {
         // recalculate value at modifier remove (current aura already removed)
-        target->m_invisibilityMask = 0;
         Unit::AuraList const& auras = target->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
-        for (auto aura : auras)
-            target->m_invisibilityMask |= (1 << aura->GetModifier()->m_miscvalue);
+        for (Aura* aura : auras)
+            target->SetInvisibilityMask(aura->GetModifier()->m_miscvalue, apply);
 
         // only at real aura remove and if not have different invisibility auras.
-        if (Real && target->m_invisibilityMask == 0)
+        if (Real && target->GetInvisibilityMask() == 0)
         {
             // remove glow vision
             if (target->GetTypeId() == TYPEID_PLAYER)
@@ -4986,17 +4984,12 @@ void Aura::HandleInvisibilityDetect(bool apply, bool Real)
 {
     Unit* target = GetTarget();
 
-    if (apply)
+    target->SetInvisibilityDetectMask(m_modifier.m_miscvalue, apply);
+    if (!apply)
     {
-        target->m_detectInvisibilityMask |= (1 << m_modifier.m_miscvalue);
-    }
-    else
-    {
-        // recalculate value at modifier remove (current aura already removed)
-        target->m_detectInvisibilityMask = 0;
         Unit::AuraList const& auras = target->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
-        for (auto aura : auras)
-            target->m_detectInvisibilityMask |= (1 << aura->GetModifier()->m_miscvalue);
+        for (Aura* aura : auras)
+            target->SetInvisibilityDetectMask(aura->GetModifier()->m_miscvalue, true);
     }
     if (Real && target->GetTypeId() == TYPEID_PLAYER)
         ((Player*)target)->GetCamera().UpdateVisibilityForOwner();

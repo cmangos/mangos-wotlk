@@ -2130,8 +2130,6 @@ class Unit : public WorldObject
         void DecreaseCastCounter() { if (m_castCounter) --m_castCounter; }
 
         ObjectGuid m_ObjectSlotGuid[4];
-        uint32 m_detectInvisibilityMask;
-        uint32 m_invisibilityMask;
 
         ShapeshiftForm GetShapeshiftForm() const { return ShapeshiftForm(GetByteValue(UNIT_FIELD_BYTES_2, 3)); }
         void  SetShapeshiftForm(ShapeshiftForm form) { SetByteValue(UNIT_FIELD_BYTES_2, 3, form); }
@@ -2204,11 +2202,14 @@ class Unit : public WorldObject
         void UpdateVisibilityAndView() override;            // overwrite WorldObject::UpdateVisibilityAndView()
 
         // common function for visibility checks for player/creatures with detection code
-        bool isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true) const;
+        bool IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool inVisibleList = false, bool is3dDistance = true) const;
         float GetVisibleDistance(Unit const * target, bool alert = false) const;
-        bool canDetectInvisibilityOf(Unit const* u) const;
-        float GetVisibleDist(Unit const* u);
-        void SetPhaseMask(uint32 newPhaseMask, bool update) override;// overwrite WorldObject::SetPhaseMask
+        bool CanDetectInvisibilityOf(Unit const* u) const;
+        uint32 GetInvisibilityDetectMask() const;
+        void SetInvisibilityDetectMask(uint32 index, bool apply);
+        uint32 GetInvisibilityMask() const;
+        void SetInvisibilityMask(uint32 index, bool apply);
+        void SetPhaseMask(uint32 newPhaseMask, bool update) override; // overwrite WorldObject::SetPhaseMask
 
         // virtual functions for all world objects types
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
@@ -2674,6 +2675,10 @@ class Unit : public WorldObject
 
         uint32 m_evadeTimer; // Used for evade during combat when mob is not running home and target isnt reachable
         bool m_evadeMode; // Used for evade during running home
+
+        // invisibility data
+        uint32 m_invisibilityMask;
+        uint32 m_detectInvisibilityMask; // is inherited from controller in PC case
 
     private:                                                // Error traps for some wrong args using
         // this will catch and prevent build for any cases when all optional args skipped and instead triggered used non boolean type
