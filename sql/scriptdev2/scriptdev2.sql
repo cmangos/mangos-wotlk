@@ -3050,13 +3050,14 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001273,'Oh, please!  This is sickening; I''m going to have to kill you all myself.', '0', '1', '0', '0','SAY_SOCRETHAR_6'),
 -- warning ids pending export
 (-1001277,'That could have gone better. $n, come here, please. I have something I need you to take care of for me.','0','4','0','0','Ambassador Sunsorrow - During Lament of the Highborne script'),
-(-1001278,'WE STRIKE!',0,1,0,15,'proudhoof SAY_QUEST_START'),
-(-1001279,'$N is going to join us on our assault. Let us bring peace to my ancestors!',0,0,0,396,'proudhoof SAY_QUEST_INTRO'),
-(-1001280,'An ambush. Return them to their rest!',0,0,0,5,'proudhoof SAY_AMBUSH'),
-(-1001281,'I will not stop until this place is once again at peace.',0,0,0,0,'proudhoof SAY_AGGRO'),
-(-1001282,'Regain your strength. The place where Steeljaw was felled is just ahead.',0,0,0,396,'proudhoof SAY_AMBUSH_COMPLETE'),
-(-1001283,'There\'s the dog\'s banner and there\'s his corpse. What\'s that? He\'s upon us!',0,0,0,25,'proudhoof SAY_FINAL_BATTLE'),
-(-1001284,'You fought well. Now go north to your orc outpost and inform Overlord Bor\'gorok of our success!',0,0,0,113,'proudhoof SAY_QUEST_END');
+-- warning ids pending export
+(-1001312,'WE STRIKE!',0,1,0,15,'proudhoof SAY_QUEST_START'),
+(-1001313,'$N is going to join us on our assault. Let us bring peace to my ancestors!',0,0,0,396,'proudhoof SAY_QUEST_INTRO'),
+(-1001314,'An ambush. Return them to their rest!',0,0,0,5,'proudhoof SAY_AMBUSH'),
+(-1001315,'I will not stop until this place is once again at peace.',0,0,0,0,'proudhoof SAY_AGGRO'),
+(-1001316,'Regain your strength. The place where Steeljaw was felled is just ahead.',0,0,0,396,'proudhoof SAY_AMBUSH_COMPLETE'),
+(-1001317,'There\'s the dog\'s banner and there\'s his corpse. What\'s that? He\'s upon us!',0,0,0,25,'proudhoof SAY_FINAL_BATTLE'),
+(-1001318,'You fought well. Now go north to your orc outpost and inform Overlord Bor\'gorok of our success!',0,0,0,113,'proudhoof SAY_QUEST_END');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

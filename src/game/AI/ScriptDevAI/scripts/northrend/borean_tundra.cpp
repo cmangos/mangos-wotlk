@@ -1311,13 +1311,13 @@ bool NpcSpellClick_npc_storm_totem(Player* pPlayer, Creature* pClickedCreature, 
 
 enum
 {
-    SAY_QUEST_START         = -1001278,
-    SAY_QUEST_INTRO         = -1001279,
-    SAY_AMBUSH              = -1001280,
-    SAY_AGGRO               = -1001281,
-    SAY_AMBUSH_COMPLETE     = -1001282,
-    SAY_FINAL_BATTLE        = -1001283,
-    SAY_QUEST_END           = -1001284,
+    SAY_QUEST_START         = -1001312,
+    SAY_QUEST_INTRO         = -1001313,
+    SAY_AMBUSH              = -1001314,
+    SAY_AGGRO               = -1001315,
+    SAY_AMBUSH_COMPLETE     = -1001316,
+    SAY_FINAL_BATTLE        = -1001317,
+    SAY_QUEST_END           = -1001318,
 
     SPELL_FORCEFUL_CLEAVE   = 35473,
 
