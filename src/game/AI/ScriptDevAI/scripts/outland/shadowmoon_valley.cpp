@@ -2908,6 +2908,16 @@ struct npc_commanderAI : public ScriptedAI, public TimerAI
         ResetTimer(COMMANDER_COMBAT_ACTION_SHOOT,      GetRepeatingCombatActionTimer(COMMANDER_COMBAT_ACTION_SHOOT));
     }
 
+    void GetAIInformation(ChatHandler& reader) override
+    {
+        ScriptedAI::GetAIInformation(reader);
+        TimerAI::GetAIInformation(reader);
+        reader.PSendSysMessage("Defender Spawn Count: %lu", m_defenderSpawns.size());
+        reader.PSendSysMessage("Dragonmaw Spawn Count: %lu", m_dragonmawSpawns.size());
+        reader.PSendSysMessage("Starting player: %lu", m_startingPlayer.GetRawValue());
+        reader.PSendSysMessage("Kill counter: %u", m_killCounter);
+    }
+
     uint32 GetInitialCombatActionTimer(uint32 index)
     {
         switch (index)
