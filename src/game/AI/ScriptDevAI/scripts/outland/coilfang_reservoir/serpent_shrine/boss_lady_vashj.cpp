@@ -32,7 +32,7 @@ enum
     SAY_AGGRO2                  = -1548044,
     SAY_AGGRO3                  = -1548045,
     SAY_AGGRO4                  = -1548046,
-    SAY_PHASE1                  = -1548047,
+    SAY_AGGRO5                  = -1548047,
     SAY_PHASE2                  = -1548048,
     SAY_PHASE3                  = -1548049,
     SAY_BOWSHOT1                = -1548050,
@@ -162,12 +162,13 @@ struct boss_lady_vashjAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        switch (urand(0, 3))
+        switch (urand(0, 4))
         {
             case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
             case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
             case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
             case 3: DoScriptText(SAY_AGGRO4, m_creature); break;
+            case 4: DoScriptText(SAY_AGGRO5, m_creature); break;
         }
 
         if (m_pInstance)
