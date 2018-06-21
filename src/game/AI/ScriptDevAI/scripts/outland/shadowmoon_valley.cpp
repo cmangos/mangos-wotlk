@@ -1951,7 +1951,7 @@ bool EffectDummyCreature_npc_shadowmoon_tuber_node(Unit* pCaster, uint32 uiSpell
         {
             // Check if tuber mound exists or it's spawned
             GameObject* pTuber = GetClosestGameObjectWithEntry(pCreatureTarget, GO_SHADOWMOON_TUBER_MOUND, 1.0f);
-            if (!pTuber || !pTuber->isSpawned())
+            if (!pTuber || !pTuber->IsSpawned())
                 return true;
 
             // Call nearby felboar

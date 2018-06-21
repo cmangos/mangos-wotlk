@@ -341,7 +341,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
                 }
             }
 
-            if (isSpawned())
+            if (IsSpawned())
             {
                 // Check if all charges were consumed
                 GameObjectInfo const* goInfo = GetGOInfo();
@@ -600,7 +600,7 @@ void GameObject::Refresh()
     if (m_respawnTime > 0 && m_spawnedByDefault)
         return;
 
-    if (isSpawned())
+    if (IsSpawned())
         GetMap()->Add(this);
 }
 
@@ -867,7 +867,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
     if (!u->isGameMaster())
     {
         // despawned and then not visible for non-GM in GM-mode
-        if (!isSpawned())
+        if (!IsSpawned())
             return false;
 
         // special invisibility cases
@@ -1085,7 +1085,7 @@ GameObject* GameObject::LookupFishingHoleAround(float range) const
 
 bool GameObject::IsCollisionEnabled() const
 {
-    if (!isSpawned())
+    if (!IsSpawned())
         return false;
 
     // TODO: Possible that this function must consider multiple checks
@@ -1447,7 +1447,7 @@ void GameObject::Use(Unit* user)
             if (player->GetObjectGuid() != GetOwnerGuid())
                 return;
 
-            switch (getLootState())
+            switch (GetLootState())
             {
                 case GO_READY:                              // ready for loot
                 {

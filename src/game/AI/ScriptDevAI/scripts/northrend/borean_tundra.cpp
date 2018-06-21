@@ -104,7 +104,7 @@ struct npc_nesingwary_trapperAI : public ScriptedAI
             // respawn the Quality Fur
             if (GameObject* pGoFur = GetClosestGameObjectWithEntry(pTrap, GO_QUALITY_FUR, INTERACTION_DISTANCE))
             {
-                if (!pGoFur->isSpawned())
+                if (!pGoFur->IsSpawned())
                 {
                     pGoFur->SetRespawnTime(10);
                     pGoFur->Refresh();

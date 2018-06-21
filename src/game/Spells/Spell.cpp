@@ -7760,7 +7760,7 @@ bool Spell::CheckTargetGOScript(GameObject* target, SpellEffectIndex eff) const
     switch (m_spellInfo->Id)
     {
         case 38054: // Random rocket missile
-            if (target->getLootState() == GO_ACTIVATED) // can only hit unused ones
+            if (target->GetLootState() == GO_ACTIVATED) // can only hit unused ones
                 return false;
             break;
         default: break;

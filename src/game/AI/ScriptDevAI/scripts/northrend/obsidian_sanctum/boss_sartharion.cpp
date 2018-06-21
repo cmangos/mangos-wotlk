@@ -675,7 +675,7 @@ struct dummy_dragonAI : public ScriptedAI
 
         // By using SetRespawnTime() we will actually "spawn" the object with our defined time.
         // Once time is up, portal will disappear again.
-        if (pPortal && !pPortal->isSpawned())
+        if (pPortal && !pPortal->IsSpawned())
         {
             pPortal->SetRespawnTime(HOUR * IN_MILLISECONDS);
             pPortal->Refresh();

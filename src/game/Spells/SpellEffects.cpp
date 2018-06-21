@@ -2326,7 +2326,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     Cell::VisitGridObjects(unitTarget, checker1, fMaxDist);
 
-                    if (pGo && !pGo->isSpawned())
+                    if (pGo && !pGo->IsSpawned())
                     {
                         pGo->SetRespawnTime(MINUTE / 2);
                         pGo->Refresh();
@@ -2342,7 +2342,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     for (std::list<GameObject*>::iterator iter = lList.begin(); iter != lList.end(); ++iter)
                     {
-                        if (!(*iter)->isSpawned())
+                        if (!(*iter)->IsSpawned())
                         {
                             (*iter)->SetRespawnTime(MINUTE / 2);
                             (*iter)->Refresh();
@@ -2474,7 +2474,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     Cell::VisitGridObjects(unitTarget, checker, fMaxDist);
 
-                    if (pGo && !pGo->isSpawned())
+                    if (pGo && !pGo->IsSpawned())
                     {
                         pGo->SetRespawnTime(MINUTE / 2);
                         pGo->Refresh();
@@ -3037,7 +3037,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     for (std::list<GameObject*>::iterator iter = lList.begin(); iter != lList.end(); ++iter)
                     {
-                        if (!(*iter)->isSpawned())
+                        if (!(*iter)->IsSpawned())
                         {
                             (*iter)->SetRespawnTime(MINUTE / 2);
                             (*iter)->Refresh();

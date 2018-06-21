@@ -108,7 +108,7 @@ bool AreaTrigger_at_coilfang_waterfall(Player* pPlayer, AreaTriggerEntry const* 
 {
     if (GameObject* pGo = GetClosestGameObjectWithEntry(pPlayer, GO_COILFANG_WATERFALL, 35.0f))
     {
-        if (pGo->getLootState() == GO_READY)
+        if (pGo->GetLootState() == GO_READY)
             pGo->UseDoorOrButton();
     }
     return false;

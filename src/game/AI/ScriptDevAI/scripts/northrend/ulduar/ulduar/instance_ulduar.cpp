@@ -551,7 +551,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (GameObject* pHarpoon = instance->GetGameObject(*itr))
                     {
-                        if (!pHarpoon->isSpawned())
+                        if (!pHarpoon->IsSpawned())
                             pHarpoon->Respawn();
                     }
                 }
@@ -559,7 +559,7 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (GameObject* pHarpoon = instance->GetGameObject(*itr))
                     {
-                        if (pHarpoon->isSpawned())
+                        if (pHarpoon->IsSpawned())
                             pHarpoon->SetLootState(GO_JUST_DEACTIVATED);
                     }
                 }

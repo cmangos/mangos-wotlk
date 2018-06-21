@@ -88,9 +88,9 @@ struct mob_dragonflayer_forge_masterAI : public ScriptedAI
 
             lGOList.sort(ObjectDistanceOrder(m_creature));
 
-            if (lGOList.front()->getLootState() == GO_READY)
+            if (lGOList.front()->GetLootState() == GO_READY)
                 lGOList.front()->UseDoorOrButton(DAY);
-            else if (lGOList.front()->getLootState() == GO_ACTIVATED)
+            else if (lGOList.front()->GetLootState() == GO_ACTIVATED)
                 lGOList.front()->ResetDoorOrButton();
 
             switch (lGOList.front()->GetEntry())
@@ -102,9 +102,9 @@ struct mob_dragonflayer_forge_masterAI : public ScriptedAI
 
             if (GameObject* pGOTemp = m_pInstance->GetSingleGameObjectFromStorage(uiGOFire))
             {
-                if (pGOTemp->getLootState() == GO_READY)
+                if (pGOTemp->GetLootState() == GO_READY)
                     pGOTemp->UseDoorOrButton(DAY);
-                else if (pGOTemp->getLootState() == GO_ACTIVATED)
+                else if (pGOTemp->GetLootState() == GO_ACTIVATED)
                     pGOTemp->ResetDoorOrButton();
             }
         }
