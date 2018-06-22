@@ -419,6 +419,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
 
     switch (spellInfo->Id)
     {
+        case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
         case 32007:         // Mo'arg Engineer Transform Visual
         case 35596:         // Power of the Legion
         case 39311:         // Scrapped Fel Reaver transform aura that is never removed even on evade
