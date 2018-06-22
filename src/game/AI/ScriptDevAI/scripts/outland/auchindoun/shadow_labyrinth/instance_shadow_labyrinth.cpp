@@ -91,7 +91,7 @@ void instance_shadow_labyrinth::SetData(uint32 uiType, uint32 uiData)
 
         case TYPE_VORPIL:
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_SCREAMING_HALL_DOOR);
+                // DoUseDoorOrButton(GO_SCREAMING_HALL_DOOR); should be handled when players move close to -166.0127, -270.3628, 17.0875, SMSG_UPDATE_WORLD_STATE VariableID: 13437 - Value: 247303520
             m_auiEncounter[2] = uiData;
             break;
 
