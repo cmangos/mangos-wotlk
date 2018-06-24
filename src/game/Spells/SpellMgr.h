@@ -803,7 +803,7 @@ inline bool IsNeutralTarget(uint32 target)
         case TARGET_RANDOM_NEARBY_DEST:
         case TARGET_88:
         case TARGET_DIRECTLY_FORWARD:
-        case TARGET_91:
+        case TARGET_DEST_RADIUS:
         case TARGET_SUMMONER:
         case TARGET_VEHICLE_DRIVER:
         case TARGET_VEHICLE_PASSENGER_0:

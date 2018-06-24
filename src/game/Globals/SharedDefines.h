@@ -1330,7 +1330,7 @@ enum Targets
     TARGET_88                          = 88,                // Smoke Flare(s) and Hurricane
     TARGET_DIRECTLY_FORWARD            = 89,
     TARGET_NONCOMBAT_PET               = 90,
-    TARGET_91                          = 91,
+    TARGET_DEST_RADIUS                 = 91,
     TARGET_SUMMONER                    = 92,
     TARGET_CONTROLLED_VEHICLE          = 94,
     TARGET_VEHICLE_DRIVER              = 95,

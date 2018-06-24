@@ -748,6 +748,7 @@ void Spell::FillTargetMap()
                         case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
                         case TARGET_AREAEFFECT_GO_AROUND_DEST:
                         case TARGET_RANDOM_NEARBY_DEST:
+                        case TARGET_DEST_RADIUS:
                         // target pre-selection required
                         case TARGET_INNKEEPER_COORDINATES:
                         case TARGET_TABLE_X_Y_Z_COORDINATES:
@@ -1883,7 +1884,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 targetUnitMap.push_back(m_caster);
             break;
         }
-        case TARGET_91:
+        case TARGET_DEST_RADIUS:
         case TARGET_RANDOM_NEARBY_DEST:
         {
             // Get a random point IN the CIRCEL around current M_TARGETS COORDINATES(!).
