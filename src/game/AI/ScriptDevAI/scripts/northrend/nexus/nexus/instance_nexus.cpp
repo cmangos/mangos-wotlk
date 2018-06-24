@@ -38,7 +38,12 @@ bool GOUse_go_containment_sphere(Player* /*pPlayer*/, GameObject* pGo)
         case GO_CONTAINMENT_SPHERE_ORMOROK:  pInstance->SetData(TYPE_ORMOROK, SPECIAL);  break;
     }
 
+    // disable the go and stop the breath casting
     pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+
+    if (Creature* pCaster = GetClosestCreatureWithEntry(pGo, NPC_BREATH_CASTER, 20.0f))
+        pCaster->RemoveAurasDueToSpell(SPELL_FROST_BREATH);
+
     return false;
 }
 
@@ -135,10 +140,10 @@ void instance_nexus::SetData(uint32 uiType, uint32 uiData)
             return;
     }
 
-    if (m_auiEncounter[TYPE_TELESTRA] == SPECIAL && m_auiEncounter[TYPE_ANOMALUS] == SPECIAL && m_auiEncounter[TYPE_ORMOROK] == SPECIAL)
+    if (m_auiEncounter[TYPE_TELESTRA] == SPECIAL && m_auiEncounter[TYPE_ANOMALUS] == SPECIAL && m_auiEncounter[TYPE_ORMOROK] == SPECIAL && uiType != TYPE_KERISTRASZA)
     {
         // release Keristrasza from her prison here
-        m_auiEncounter[TYPE_KERISTRASZA] = SPECIAL;
+        SetData(TYPE_KERISTRASZA, SPECIAL);
 
         Creature* pCreature = GetSingleCreatureFromStorage(NPC_KERISTRASZA);
         if (pCreature && pCreature->isAlive())
@@ -148,7 +153,7 @@ void instance_nexus::SetData(uint32 uiType, uint32 uiData)
         }
     }
 
-    if (uiData == DONE)
+    if (uiData == DONE || uiData == SPECIAL)
     {
         OUT_SAVE_INST_DATA;
 

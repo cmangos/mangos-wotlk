@@ -23,12 +23,14 @@ enum
     NPC_ANOMALUS                   = 26763,
     NPC_ORMOROK                    = 26794,
     NPC_KERISTRASZA                = 26723,
+    NPC_BREATH_CASTER              = 27048,
 
     GO_CONTAINMENT_SPHERE_TELESTRA = 188526,
     GO_CONTAINMENT_SPHERE_ANOMALUS = 188527,
     GO_CONTAINMENT_SPHERE_ORMOROK  = 188528,
 
     SPELL_FROZEN_PRISON             = 47854,
+    SPELL_FROST_BREATH              = 47842,
 
     ACHIEV_CRIT_CHAOS_THEORY        = 7316,                 // Anomalus, achiev 2037
     ACHIEV_CRIT_INTENSE_COLD        = 7315,                 // Keristrasza, achiev 2036

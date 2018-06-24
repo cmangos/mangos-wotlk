@@ -131,7 +131,10 @@ struct boss_anomalusAI : public ScriptedAI
             if (!m_uiChaoticRiftCount)
             {
                 if (m_creature->HasAura(SPELL_RIFT_SHIELD))
+                {
                     m_creature->RemoveAurasDueToSpell(SPELL_RIFT_SHIELD);
+                    m_creature->InterruptNonMeleeSpells(false);
+                }
             }
         }
     }
@@ -148,8 +151,8 @@ struct boss_anomalusAI : public ScriptedAI
             if (DoCastSpellIfCan(m_creature, SPELL_CREATE_RIFT, CAST_TRIGGERED) == CAST_OK)
             {
                 // emotes are in this order
-                DoScriptText(EMOTE_SHIELD, m_creature);
                 DoScriptText(SAY_SHIELD, m_creature);
+                DoScriptText(EMOTE_SHIELD, m_creature);
                 DoScriptText(EMOTE_OPEN_RIFT, m_creature);
 
                 DoCastSpellIfCan(m_creature, SPELL_RIFT_SHIELD, CAST_TRIGGERED);
@@ -220,7 +223,7 @@ struct mob_chaotic_riftAI : public Scripted_NoMovementAI
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
         // When hit with Charge Rift cast the Charged Rift spells
-        if (pSpell->Id == SPELL_CHARGE_RIFT)
+        if (pSpell->Id == SPELL_CHARGE_RIFT && m_creature->getVictim())
         {
             DoCastSpellIfCan(m_creature, SPELL_CHARGED_RIFT_AURA, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_CHARGED_RIFT_SUMMON_AURA, CAST_TRIGGERED);
