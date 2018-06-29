@@ -241,15 +241,15 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit* pTarget)
     switch (spec)
     {
         case WARLOCK_SPEC_AFFLICTION:
-            if (CURSE_OF_AGONY && m_ai->In_Reach(pTarget, CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
+            if (CURSE_OF_AGONY && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
                 return RETURN_CONTINUE;
-            if (CORRUPTION && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+            if (CORRUPTION && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
                 return RETURN_CONTINUE;
-            if (FIRE && m_ai->In_Reach(pTarget, FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
+            if (FIRE && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
                 return RETURN_CONTINUE;
-            if (HAUNT && m_ai->In_Reach(pTarget, HAUNT) && m_bot->IsSpellReady(HAUNT) && CastSpell(HAUNT, pTarget))
+            if (HAUNT && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, HAUNT) && m_bot->IsSpellReady(HAUNT) && CastSpell(HAUNT, pTarget))
                 return RETURN_CONTINUE;
-            if (SHADOW_BOLT && m_ai->In_Reach(pTarget, SHADOW_BOLT) && CastSpell(SHADOW_BOLT, pTarget))
+            if (SHADOW_BOLT && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SHADOW_BOLT) && CastSpell(SHADOW_BOLT, pTarget))
                 return RETURN_CONTINUE;
 
             return RETURN_NO_ACTION_OK;
@@ -257,33 +257,33 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit* pTarget)
         case WARLOCK_SPEC_DEMONOLOGY:
             if (pet && DEMONIC_EMPOWERMENT && m_bot->IsSpellReady(DEMONIC_EMPOWERMENT) && CastSpell(DEMONIC_EMPOWERMENT))
                 return RETURN_CONTINUE;
-            if (CURSE_OF_AGONY && m_ai->In_Reach(pTarget, CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
+            if (CURSE_OF_AGONY && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
                 return RETURN_CONTINUE;
-            if (CORRUPTION && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+            if (CORRUPTION && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
                 return RETURN_CONTINUE;
-            if (FIRE && m_ai->In_Reach(pTarget, FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
+            if (FIRE && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
                 return RETURN_CONTINUE;
-            if (INCINERATE && m_ai->In_Reach(pTarget, INCINERATE) && pTarget->HasAura(FIRE) && CastSpell(INCINERATE, pTarget))
+            if (INCINERATE && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, INCINERATE) && pTarget->HasAura(FIRE) && CastSpell(INCINERATE, pTarget))
                 return RETURN_CONTINUE;
-            if (SHADOW_BOLT && m_ai->In_Reach(pTarget, SHADOW_BOLT) && CastSpell(SHADOW_BOLT, pTarget))
+            if (SHADOW_BOLT && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SHADOW_BOLT) && CastSpell(SHADOW_BOLT, pTarget))
                 return RETURN_CONTINUE;
 
             return RETURN_NO_ACTION_OK;
 
         case WARLOCK_SPEC_DESTRUCTION:
-            if (CURSE_OF_AGONY && m_ai->In_Reach(pTarget, CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
+            if (CURSE_OF_AGONY && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CURSE_OF_AGONY) && !pTarget->HasAura(CURSE_OF_AGONY) && CastSpell(CURSE_OF_AGONY, pTarget))
                 return RETURN_CONTINUE;
-            if (CORRUPTION && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
+            if (CORRUPTION && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
                 return RETURN_CONTINUE;
-            if (FIRE && m_ai->In_Reach(pTarget, FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
+            if (FIRE && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
                 return RETURN_CONTINUE;
-            if (CONFLAGRATE && m_ai->In_Reach(pTarget, CONFLAGRATE) && pTarget->HasAura(FIRE) && m_bot->IsSpellReady(CONFLAGRATE) && CastSpell(CONFLAGRATE, pTarget))
+            if (CONFLAGRATE && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, CONFLAGRATE) && pTarget->HasAura(FIRE) && m_bot->IsSpellReady(CONFLAGRATE) && CastSpell(CONFLAGRATE, pTarget))
                 return RETURN_CONTINUE;
             if (CHAOS_BOLT && m_ai->In_Reach(pTarget, CHAOS_BOLT) && m_bot->IsSpellReady(CHAOS_BOLT) && CastSpell(CHAOS_BOLT, pTarget))
                 return RETURN_CONTINUE;
-            if (INCINERATE && m_ai->In_Reach(pTarget, INCINERATE) && pTarget->HasAura(FIRE) && CastSpell(INCINERATE, pTarget))
+            if (INCINERATE && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, INCINERATE) && pTarget->HasAura(FIRE) && CastSpell(INCINERATE, pTarget))
                 return RETURN_CONTINUE;
-            if (SHADOW_BOLT && m_ai->In_Reach(pTarget, SHADOW_BOLT) && CastSpell(SHADOW_BOLT, pTarget))
+            if (SHADOW_BOLT && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SHADOW_BOLT) && CastSpell(SHADOW_BOLT, pTarget))
                 return RETURN_CONTINUE;
 
             return RETURN_NO_ACTION_OK;
@@ -337,9 +337,9 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // No spec due to low level OR no spell found yet
     if (CORRUPTION && m_ai->In_Reach(pTarget, CORRUPTION) && !pTarget->HasAura(CORRUPTION) && CastSpell(CORRUPTION, pTarget))
         return RETURN_CONTINUE;
-    if (FIRE && m_ai->In_Reach(pTarget, FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
+    if (FIRE && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_FIRE) && m_ai->In_Reach(pTarget, FIRE) && !pTarget->HasAura(FIRE) && CastSpell(FIRE, pTarget))
         return RETURN_CONTINUE;
-    if (SHADOW_BOLT && m_ai->In_Reach(pTarget, SHADOW_BOLT))
+    if (SHADOW_BOLT && !m_ai->IsImmuneToSchool(pTarget, SPELL_SCHOOL_MASK_SHADOW) && m_ai->In_Reach(pTarget, SHADOW_BOLT))
         return CastSpell(SHADOW_BOLT, pTarget);
 
     return RETURN_NO_ACTION_OK;
