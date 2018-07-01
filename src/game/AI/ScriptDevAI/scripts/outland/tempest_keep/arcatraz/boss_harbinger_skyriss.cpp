@@ -119,7 +119,7 @@ struct boss_harbinger_skyrissAI : public ScriptedAI
 
         if (m_uiMindRendTimer < uiDiff)
         {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
             if (!pTarget)
                 pTarget = m_creature->getVictim();
 
@@ -131,7 +131,7 @@ struct boss_harbinger_skyrissAI : public ScriptedAI
 
         if (m_uiFearTimer < uiDiff)
         {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
             if (!pTarget)
                 pTarget = m_creature->getVictim();
 
@@ -162,7 +162,7 @@ struct boss_harbinger_skyrissAI : public ScriptedAI
         {
             if (m_uiManaBurnTimer < uiDiff)
             {
-                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA);
                 if (!pTarget)
                     pTarget = m_creature->getVictim();
 

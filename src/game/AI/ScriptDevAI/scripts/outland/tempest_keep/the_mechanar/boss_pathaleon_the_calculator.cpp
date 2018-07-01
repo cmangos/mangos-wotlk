@@ -129,7 +129,7 @@ struct boss_pathaleon_the_calculatorAI : public ScriptedAI
 
         if (m_uiManaTapTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MANA_TAP, SELECT_FLAG_POWER_MANA))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MANA_TAP, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_MANA_TAP) == CAST_OK)
                     m_uiManaTapTimer = urand(16000, 34000);
@@ -148,7 +148,7 @@ struct boss_pathaleon_the_calculatorAI : public ScriptedAI
 
         if (m_uiDominationTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DOMINATION) == CAST_OK)
                 {
@@ -229,7 +229,7 @@ struct mob_nether_wraithAI : public ScriptedAI
 
         if (m_uiArcaneMissilesTimer < uiDiff)
         {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
             if (!pTarget)
                 pTarget = m_creature->getVictim();
 

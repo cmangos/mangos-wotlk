@@ -109,7 +109,7 @@ struct boss_thespiaAI : public ScriptedAI
         // LightningCloud_Timer
         if (m_uiLightningCloudTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_LIGHTNING_CLOUD) == CAST_OK)
                 {
@@ -125,7 +125,7 @@ struct boss_thespiaAI : public ScriptedAI
         // LungBurst_Timer
         if (m_uiLungBurstTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_LUNG_BURST) == CAST_OK)
                     m_uiLungBurstTimer = urand(7000, 12000);
@@ -137,7 +137,7 @@ struct boss_thespiaAI : public ScriptedAI
         // EnvelopingWinds_Timer
         if (m_uiEnvelopingWindsTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_ENVELOPING_WINDS) == CAST_OK)
                     m_uiEnvelopingWindsTimer = m_bIsRegularMode ? 10000 : 15000;

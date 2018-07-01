@@ -178,7 +178,7 @@ struct boss_high_king_maulgarAI : public ScriptedAI
             {
                 if (m_uiChargeTimer <= uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_CHARGE) == CAST_OK)
                             m_uiChargeTimer = urand(14000, 20000);

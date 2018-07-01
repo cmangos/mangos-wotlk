@@ -523,7 +523,7 @@ struct boss_high_nethermancer_zerevorAI : public boss_illidari_councilAI
 
         if (m_uiBlizzardTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_BLIZZARD) == CAST_OK)
                 {
@@ -537,7 +537,7 @@ struct boss_high_nethermancer_zerevorAI : public boss_illidari_councilAI
 
         if (m_uiFlamestrikeTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_FLAMESTRIKE) == CAST_OK)
                 {
@@ -593,7 +593,7 @@ struct boss_lady_malandeAI : public boss_illidari_councilAI
 
         if (m_uiEmpoweredSmiteTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_EMPOWERED_SMITE) == CAST_OK)
                     m_uiEmpoweredSmiteTimer = urand(5000, 15000);
@@ -612,7 +612,7 @@ struct boss_lady_malandeAI : public boss_illidari_councilAI
 
         if (m_uiDivineWrathTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DIVINE_WRATH) == CAST_OK)
                     m_uiDivineWrathTimer = urand(2000, 5000);

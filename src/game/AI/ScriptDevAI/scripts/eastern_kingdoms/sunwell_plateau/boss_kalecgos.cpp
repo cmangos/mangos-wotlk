@@ -293,7 +293,7 @@ struct boss_kalecgosAI : public ScriptedAI
 
         if (m_uiWildMagicTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, aWildMagicSpells[urand(0, 5)]) == CAST_OK)
                     m_uiWildMagicTimer = 19000;
@@ -467,7 +467,7 @@ struct boss_sathrovarrAI : public ScriptedAI
 
         if (m_uiCurseOfBoundlessAgonyTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_CURSE_OF_BOUNDLESS_AGONY) == CAST_OK)
                     m_uiCurseOfBoundlessAgonyTimer = 35000;

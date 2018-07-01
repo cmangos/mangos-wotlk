@@ -158,7 +158,7 @@ struct boss_teron_gorefiendAI : public ScriptedAI
 
         if (m_uiIncinerateTimer < uiDiff)
         {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
 
             if (DoCastSpellIfCan(pTarget ? pTarget : m_creature->getVictim(), SPELL_INCINERATE) == CAST_OK)
                 m_uiIncinerateTimer = urand(20000, 50000);

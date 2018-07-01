@@ -249,7 +249,7 @@ struct boss_zuljinAI : public ScriptedAI
                 m_lSummonsList.push_back(pSummoned->GetObjectGuid());
 
                 // Attack random target
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
                 break;
             case NPC_COLUMN_OF_FIRE:
@@ -367,7 +367,7 @@ struct boss_zuljinAI : public ScriptedAI
 
                 if (m_uiGrievousThrowTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_GRIEVOUS_THROW) == CAST_OK)
                             m_uiGrievousThrowTimer = 10000;
@@ -422,7 +422,7 @@ struct boss_zuljinAI : public ScriptedAI
                         DoCastSpellIfCan(m_creature, SPELL_LYNX_RUSH);
                     else
                     {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                             DoCastSpellIfCan(pTarget, SPELL_LYNX_RUSH_CHARGE);
                     }
 
@@ -501,8 +501,8 @@ struct npc_feather_vortexAI : public ScriptedAI
             if (Creature* pZuljin = m_pInstance->GetSingleCreatureFromStorage(NPC_ZULJIN))
             {
                 // Change target on player hit
-                if (Unit* newTarget = pZuljin->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    m_creature->GetMotionMaster()->MoveFollow(newTarget, 0, 0);
+                if (Unit* newTarget = pZuljin->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                    m_creature->GetMotionMaster()->MoveFollow(newTarget, 0.f, 0.f);
             }
         }
     }

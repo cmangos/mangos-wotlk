@@ -273,7 +273,7 @@ struct boss_halazziAI : public ScriptedAI
 
             if (m_uiShockTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, urand(0, 1) ? SPELL_EARTHSHOCK : SPELL_FLAMESHOCK) == CAST_OK)
                         m_uiShockTimer = urand(10000, 14000);

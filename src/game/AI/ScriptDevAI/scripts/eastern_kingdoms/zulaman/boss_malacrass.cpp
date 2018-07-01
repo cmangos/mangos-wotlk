@@ -357,7 +357,7 @@ struct boss_malacrassAI : public ScriptedAI
                 pTarget = m_creature->getVictim();
                 break;
             case TARGET_TYPE_RANDOM:
-                pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER);
                 break;
             case TARGET_TYPE_FRIENDLY:
                 pTarget = DoSelectLowestHpFriendly(50.0f);

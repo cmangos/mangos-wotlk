@@ -271,7 +271,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         {
             if (m_uiShadowFissureTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     DoCastSpellIfCan(pTarget, SPELL_SHADOW_FISSURE);
                 m_uiShadowFissureTimer = urand(7500, 15000);
             }
@@ -280,7 +280,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
 
             if (m_uiDeathCoilTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     DoCastSpellIfCan(pTarget, SPELL_DEATH_COIL);
                 m_uiDeathCoilTimer = urand(15000, 20000);
             }

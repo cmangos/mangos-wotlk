@@ -279,7 +279,7 @@ struct boss_entropiusAI : public ScriptedAI
 
         if (m_uiBlackHoleTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SUMMON_BLACK_HOLE) == CAST_OK)
                     m_uiBlackHoleTimer = 15000;
@@ -290,7 +290,7 @@ struct boss_entropiusAI : public ScriptedAI
 
         if (m_uiDarknessTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SUMMON_DARKNESS) == CAST_OK)
                     m_uiDarknessTimer = urand(15000, 20000);

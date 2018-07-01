@@ -244,7 +244,7 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
         else
         {
             // Attack or follow target
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (pSummoned->GetEntry() == NPC_ARCANE_SPHERE)
                     pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
@@ -325,7 +325,7 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
 
             if (m_uiFireballTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
                         m_uiFireballTimer = urand(2000, 4000);
@@ -347,7 +347,7 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
 
             if (m_uiFlameStrikeTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_FLAME_STRIKE) == CAST_OK)
                     {
@@ -612,7 +612,7 @@ struct mob_arcane_sphereAI : public ScriptedAI
             // Follow the target - do not attack
             if (Creature* pKael = m_pInstance->GetSingleCreatureFromStorage(NPC_KAELTHAS))
             {
-                if (Unit* pTarget = pKael->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = pKael->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     m_creature->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
             }
 

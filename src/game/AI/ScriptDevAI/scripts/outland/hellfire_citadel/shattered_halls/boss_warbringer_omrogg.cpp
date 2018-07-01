@@ -368,7 +368,7 @@ struct boss_warbringer_omroggAI : public ScriptedAI
 
         if (m_uiResetThreatTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 DoYellForThreat();
                 DoResetThreat();

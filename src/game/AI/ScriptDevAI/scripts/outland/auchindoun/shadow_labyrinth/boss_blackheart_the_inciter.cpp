@@ -163,10 +163,15 @@ struct boss_blackheart_the_inciterAI : public ScriptedAI
         // Charge Timer
         if (m_uiChargeTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_CHARGE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
+            m_uiChargeTimer = 0;
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_CHARGE, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_CHARGE) == CAST_OK)
+                {
                     m_uiChargeTimer = urand(30000, 43000);
+                    DoResetThreat();
+                    return;
+                }
             }
         }
         else

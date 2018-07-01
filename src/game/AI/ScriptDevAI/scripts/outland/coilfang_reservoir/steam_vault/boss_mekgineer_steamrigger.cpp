@@ -166,7 +166,7 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
 
         if (m_uiSawBladeTimer < uiDiff)
         {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
             if (!pTarget)
                 pTarget = m_creature->getVictim();
 
@@ -181,7 +181,7 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
 
         if (m_uiElectrifiedNetTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_ELECTRIFIED_NET) == CAST_OK)
                     m_uiElectrifiedNetTimer = 10000;

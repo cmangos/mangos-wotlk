@@ -243,7 +243,7 @@ struct boss_grandmaster_vorpilAI : public ScriptedAI
         {
             if (m_uiBanishTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_BANISH_H) == CAST_OK)
                         m_uiBanishTimer = urand(17000, 23000);

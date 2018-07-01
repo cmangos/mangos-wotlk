@@ -278,7 +278,7 @@ struct boss_vazruden_heraldAI : public ScriptedAI
                 {
                     if (Creature* pVazruden = m_creature->GetMap()->GetCreature(m_vazrudenGuid))
                     {
-                        if (Unit* pEnemy = pVazruden->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                        if (Unit* pEnemy = pVazruden->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                         {
                             if (DoCastSpellIfCan(pEnemy, m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H, 0, pVazruden->GetObjectGuid()) == CAST_OK)
                                 m_uiFireballTimer = urand(2100, 7300);
@@ -298,7 +298,7 @@ struct boss_vazruden_heraldAI : public ScriptedAI
         // In Combat
         if (m_uiFireballTimer < uiDiff)
         {
-            if (Unit* pEnemy = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pEnemy = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pEnemy, m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
                     m_uiFireballTimer = urand(7300, 13200);

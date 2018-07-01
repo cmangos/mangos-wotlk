@@ -287,7 +287,7 @@ struct boss_archimondeAI : public ScriptedAI
 
         if (m_uiGripOfTheLegionTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_GRIP_OF_THE_LEGION) == CAST_OK)
                     m_uiGripOfTheLegionTimer = urand(5000, 25000);
@@ -334,7 +334,7 @@ struct boss_archimondeAI : public ScriptedAI
         {
             if (!m_creature->IsNonMeleeSpellCasted(false))
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     DoCastSpellIfCan(pTarget, SPELL_FINGER_DEATH);
             }
         }

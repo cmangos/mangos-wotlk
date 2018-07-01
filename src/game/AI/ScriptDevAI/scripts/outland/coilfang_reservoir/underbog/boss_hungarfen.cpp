@@ -81,7 +81,7 @@ struct boss_hungarfenAI : public ScriptedAI
         if (m_uiMushroomTimer < uiDiff)
         {
             // Summon a mushroom exactly on target position
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 m_creature->SummonCreature(NPC_UNDERBOG_MUSHROOM, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
 
             m_uiMushroomTimer = m_bIsRegularMode ? 10000 : 5000;
@@ -89,16 +89,19 @@ struct boss_hungarfenAI : public ScriptedAI
         else
             m_uiMushroomTimer -= uiDiff;
 
-        if (m_uiAcidGeyserTimer < uiDiff)
+        if (!m_bIsRegularMode)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (m_uiAcidGeyserTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_ACID_GEYSER) == CAST_OK)
-                    m_uiAcidGeyserTimer = urand(10000, 17500);
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                {
+                    if (DoCastSpellIfCan(pTarget, SPELL_ACID_GEYSER) == CAST_OK)
+                        m_uiAcidGeyserTimer = urand(10000, 17500);
+                }
             }
+            else
+                m_uiAcidGeyserTimer -= uiDiff;
         }
-        else
-            m_uiAcidGeyserTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }

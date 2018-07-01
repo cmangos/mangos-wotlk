@@ -654,7 +654,7 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
 
                 if (m_uiLegionLightingTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_LEGION_LIGHTING) == CAST_OK)
                             m_uiLegionLightingTimer = urand(10000, 15000);

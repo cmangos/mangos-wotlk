@@ -180,7 +180,7 @@ struct boss_selin_fireheartAI : public ScriptedAI
             {
                 if (m_uiDrainLifeTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_DRAIN_LIFE : SPELL_DRAIN_LIFE_H) == CAST_OK)
                             m_uiDrainLifeTimer = 10000;
@@ -194,7 +194,7 @@ struct boss_selin_fireheartAI : public ScriptedAI
                 {
                     if (m_uiDrainManaTimer < uiDiff)
                     {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DRAIN_MANA, SELECT_FLAG_POWER_MANA))
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DRAIN_MANA, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
                         {
                             if (DoCastSpellIfCan(pTarget, SPELL_DRAIN_MANA) == CAST_OK)
                                 m_uiDrainManaTimer = 10000;

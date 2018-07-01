@@ -195,7 +195,7 @@ struct npc_raging_flamesAI : public ScriptedAI
         DoResetThreat();
 
         if (Creature* pSummoner = m_creature->GetMap()->GetCreature(m_summonerGuid))
-            if (Unit* pNewTarget = pSummoner->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+            if (Unit* pNewTarget = pSummoner->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
                 m_creature->AddThreat(pNewTarget, 10000000.0f);
     }
 

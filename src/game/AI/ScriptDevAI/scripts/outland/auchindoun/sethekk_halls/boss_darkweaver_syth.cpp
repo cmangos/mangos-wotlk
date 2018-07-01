@@ -158,7 +158,7 @@ struct boss_darkweaver_sythAI : public ScriptedAI
 
         if (m_uiFlameshockTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FLAME_SHOCK : SPELL_FLAME_SHOCK_H) == CAST_OK)
                     m_uiFlameshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000);
@@ -169,7 +169,7 @@ struct boss_darkweaver_sythAI : public ScriptedAI
 
         if (m_uiArcaneshockTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ARCANE_SHOCK : SPELL_ARCANE_SHOCK_H) == CAST_OK)
                     m_uiArcaneshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000);
@@ -180,7 +180,7 @@ struct boss_darkweaver_sythAI : public ScriptedAI
 
         if (m_uiFrostshockTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FROST_SHOCK : SPELL_FROST_SHOCK_H) == CAST_OK)
                     m_uiFrostshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000);
@@ -191,7 +191,7 @@ struct boss_darkweaver_sythAI : public ScriptedAI
 
         if (m_uiShadowshockTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_SHOCK : SPELL_SHADOW_SHOCK_H) == CAST_OK)
                     m_uiShadowshockTimer = m_bIsRegularMode ? urand(13000, 28000) : urand(11000, 20000);
@@ -202,7 +202,7 @@ struct boss_darkweaver_sythAI : public ScriptedAI
 
         if (m_uiChainlightningTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
                     m_uiChainlightningTimer = m_bIsRegularMode ? urand(14000, 26000) : urand(13000, 19000);

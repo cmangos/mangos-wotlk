@@ -832,7 +832,7 @@ struct boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
 
                 if (m_uiFireballTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_FIREBALL) == CAST_OK)
                             m_uiFireballTimer = urand(2000, 3000);
@@ -843,7 +843,7 @@ struct boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
 
                 if (m_uiDarkBarrageTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_DARK_BARRAGE) == CAST_OK)
                             m_uiDarkBarrageTimer = 45000;

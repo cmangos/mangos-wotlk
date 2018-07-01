@@ -263,7 +263,7 @@ struct boss_janalaiAI : public ScriptedAI
 
         if (m_uiFireBreathTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_FLAME_BREATH) == CAST_OK)
                     m_uiFireBreathTimer = 8000;

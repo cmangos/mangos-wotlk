@@ -177,7 +177,7 @@ struct boss_dorotheeAI : public ScriptedAI
 
         if (m_uiWaterBoltTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_WATERBOLT) == CAST_OK)
                     m_uiWaterBoltTimer = m_bTitoDied ? 1500 : 5000;
@@ -286,7 +286,7 @@ struct boss_strawmanAI : public ScriptedAI
 
         if (m_uiBrainWipeTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_BRAIN_WIPE) == CAST_OK)
                     m_uiBrainWipeTimer = 20000;
@@ -563,7 +563,7 @@ struct boss_croneAI : public ScriptedAI
 
         if (m_uiChainLightningTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_CHAIN_LIGHTNING) == CAST_OK)
                     m_uiChainLightningTimer = 15000;
@@ -991,7 +991,7 @@ struct boss_julianneAI : public ScriptedAI
 
         if (m_uiBlindingPassionTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_BLINDING_PASSION) == CAST_OK)
                     m_uiBlindingPassionTimer = urand(30000, 45000);
@@ -1254,7 +1254,7 @@ struct boss_romuloAI : public ScriptedAI
 
         if (m_uiDeadlySwatheTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DEADLY_SWATHE) == CAST_OK)
                     m_uiDeadlySwatheTimer = urand(15000, 25000);

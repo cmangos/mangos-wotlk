@@ -188,7 +188,7 @@ struct boss_anzuAI : public ScriptedAI
 
         if (m_uiSpellBombTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SPELL_BOMB) == CAST_OK)
                 {
@@ -207,7 +207,7 @@ struct boss_anzuAI : public ScriptedAI
 
         if (m_uiCycloneTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_CYCLONE) == CAST_OK)
                     m_uiCycloneTimer = 21000;

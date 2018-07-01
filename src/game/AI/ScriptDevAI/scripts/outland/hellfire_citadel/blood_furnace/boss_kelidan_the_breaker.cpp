@@ -376,7 +376,7 @@ struct mob_shadowmoon_channelerAI : public ScriptedAI
 
         if (m_uiMarkOfShadowTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_MARK_OF_SHADOW) == CAST_OK)
                     m_uiMarkOfShadowTimer = urand(15000, 20000);
@@ -387,7 +387,7 @@ struct mob_shadowmoon_channelerAI : public ScriptedAI
 
         if (m_uiShadowBoltTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
                     m_uiShadowBoltTimer = urand(5000, 6000);

@@ -124,7 +124,7 @@ struct boss_maiden_of_virtueAI : public ScriptedAI
 
         if (m_uiHolyfireTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_HOLYFIRE) == CAST_OK)
                     m_uiHolyfireTimer = urand(8000, 23000);
@@ -135,7 +135,7 @@ struct boss_maiden_of_virtueAI : public ScriptedAI
 
         if (m_uiHolywrathTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 DoCastSpellIfCan(pTarget, SPELL_HOLYWRATH);
 
             m_uiHolywrathTimer = urand(20000, 25000);

@@ -362,7 +362,7 @@ struct boss_felmystAI : public ScriptedAI
 
                 if (m_uiEncapsulateTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_ENCAPSULATE_CHANNEL) == CAST_OK)
                             m_uiEncapsulateTimer = urand(30000, 40000);

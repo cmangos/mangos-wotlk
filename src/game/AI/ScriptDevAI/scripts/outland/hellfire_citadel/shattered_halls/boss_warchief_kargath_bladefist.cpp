@@ -270,7 +270,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
             {
                 if (m_uiChargeTimer <= uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                         DoCastSpellIfCan(pTarget, SPELL_CHARGE_H);
 
                     m_uiChargeTimer = 0;

@@ -438,7 +438,7 @@ struct mob_solarium_priestAI : public ScriptedAI
 
         if (m_uiHolySmiteTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SOLARIUM_HOLY_SMITE) == CAST_OK)
                     m_uiHolySmiteTimer = 4000;

@@ -140,7 +140,7 @@ struct boss_doomlordkazzakAI : public ScriptedAI
         // MarkOfKazzak_Timer
         if (m_uiMarkOfKazzakTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MARK_OF_KAZZAK, SELECT_FLAG_POWER_MANA))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MARK_OF_KAZZAK, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_MARK_OF_KAZZAK) == CAST_OK)
                     m_uiMarkOfKazzakTimer = 20000;

@@ -285,7 +285,7 @@ struct boss_exarch_maladaarAI : public ScriptedAI
 
         if (m_uiRibbonOfSoulsTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_RIBBON_OF_SOULS) == CAST_OK)
                     m_uiRibbonOfSoulsTimer = urand(4000, 18000);

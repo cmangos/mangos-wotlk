@@ -226,7 +226,7 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI
         {
             if (m_bIsPhase1)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 {
                     // Buff self
                     if (DoCastSpellIfCan(m_creature, SPELL_FEL_RAGE) == CAST_OK)

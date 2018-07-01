@@ -146,9 +146,9 @@ struct boss_omor_the_unscarredAI : public ScriptedAI
             if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
                 pTemp = m_creature->getVictim();
             else
-                pTemp = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                pTemp = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_IN_MELEE_RANGE);
 
-            if (pTemp && pTemp->GetTypeId() == TYPEID_PLAYER)
+            if (pTemp)
             {
                 if (DoCastSpellIfCan(pTemp, SPELL_ORBITAL_STRIKE) == CAST_OK)
                 {

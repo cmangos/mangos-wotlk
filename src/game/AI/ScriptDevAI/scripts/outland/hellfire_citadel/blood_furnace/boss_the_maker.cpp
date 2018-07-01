@@ -112,7 +112,7 @@ struct boss_the_makerAI : public ScriptedAI
 
         if (m_uiExplodingBreakerTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_EXPLODING_BREAKER : SPELL_EXPLODING_BREAKER_H) == CAST_OK)
                     m_uiExplodingBreakerTimer = urand(4000, 12000);
@@ -123,7 +123,7 @@ struct boss_the_makerAI : public ScriptedAI
 
         if (m_uiDominationTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DOMINATION) == CAST_OK)
                     m_uiDominationTimer = urand(15000, 25000);

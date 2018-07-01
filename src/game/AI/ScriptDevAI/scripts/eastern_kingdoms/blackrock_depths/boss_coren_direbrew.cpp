@@ -128,7 +128,7 @@ struct boss_coren_direbrewAI : public ScriptedAI
 
         if (m_uiChargeTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DIREBREW_CHARGE, SELECT_FLAG_NOT_IN_MELEE_RANGE))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DIREBREW_CHARGE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DIREBREW_CHARGE) == CAST_OK)
                     m_uiChargeTimer = urand(5000, 10000);

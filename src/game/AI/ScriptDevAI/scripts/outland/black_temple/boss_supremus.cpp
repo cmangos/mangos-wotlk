@@ -147,7 +147,7 @@ struct boss_supremusAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_STALKER)
         {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
             if (!pTarget)
                 pTarget = m_creature->getVictim();
 
@@ -257,7 +257,7 @@ struct boss_supremusAI : public ScriptedAI
         {
             if (m_uiSwitchTargetTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 {
                     m_creature->FixateTarget(pTarget);
                     DoScriptText(EMOTE_NEW_TARGET, m_creature);
@@ -269,7 +269,7 @@ struct boss_supremusAI : public ScriptedAI
 
             if (m_uiSummonVolcanoTimer < uiDiff)
             {
-                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
 
                 if (DoCastSpellIfCan(pTarget ? pTarget : m_creature->getVictim(), SPELL_VOLCANIC_ERUPTION_BOSS) == CAST_OK)
                 {

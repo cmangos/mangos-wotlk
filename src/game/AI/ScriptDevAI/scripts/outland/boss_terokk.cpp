@@ -303,7 +303,7 @@ struct boss_terokkAI : public ScriptedAI, public TimerAI
                     }
                     continue;
                 case TEROKK_COMBAT_ACTION_CHOSEN_ONE:
-                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(target, SPELL_CHOSEN_ONE) == CAST_OK)
                         {

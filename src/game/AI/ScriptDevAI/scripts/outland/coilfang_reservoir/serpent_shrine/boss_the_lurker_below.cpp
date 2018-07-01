@@ -246,7 +246,7 @@ struct boss_the_lurker_belowAI : public Scripted_NoMovementAI
                     {
                         if (!m_creature->IsNonMeleeSpellCasted(false))
                         {
-                            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                                 DoCastSpellIfCan(pTarget, SPELL_WATERBOLT);
                         }
                     }

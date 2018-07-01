@@ -232,7 +232,7 @@ struct boss_alythessAI : public ScriptedAI
         {
             Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 3);
             if (!pTarget)
-                pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER);
 
             // If sister is dead cast shadownova instead of conflagration
             bool bSwitchSpell = m_creature->HasAura(SPELL_EMPOWER);
@@ -366,7 +366,7 @@ struct boss_sacrolashAI : public ScriptedAI
 
         if (!m_vRangeTargets.empty())
             return m_vRangeTargets[urand(0, m_vRangeTargets.size() - 1)];
-        return m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+        return m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -408,7 +408,7 @@ struct boss_sacrolashAI : public ScriptedAI
         {
             Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 2);
             if (!pTarget)
-                pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0);
+                pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER);
 
             // If sister is dead cast conflagration instead of shadownova
             bool bSwitchSpell = m_creature->HasAura(SPELL_EMPOWER);

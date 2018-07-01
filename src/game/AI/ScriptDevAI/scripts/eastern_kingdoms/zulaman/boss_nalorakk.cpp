@@ -211,7 +211,7 @@ struct boss_nalorakkAI : public ScriptedAI
             if (m_uiSurgeTimer < uiDiff)
             {
                 // select a random unit other than the main tank
-                Unit* pTtarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+                Unit* pTtarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
 
                 // if there aren't other units, cast on the tank
                 if (!pTtarget)

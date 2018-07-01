@@ -251,7 +251,7 @@ struct boss_priestess_delrissaAI : public ScriptedAI
 
         if (m_uiSWPainTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_WORD_PAIN : SPELL_SHADOW_WORD_PAIN_H) == CAST_OK)
                     m_uiSWPainTimer = 10000;
@@ -340,7 +340,7 @@ struct priestess_companion_commonAI : public ScriptedAI
         // Change target
         if (m_uiResetThreatTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
             {
                 DoResetThreat();
                 AttackStart(pTarget);
@@ -435,7 +435,7 @@ struct npc_kagani_nightstrikeAI : public priestess_companion_commonAI
             if (DoCastSpellIfCan(m_creature, SPELL_VANISH) == CAST_OK)
             {
                 // Prefer targets with mana
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_POWER_MANA))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_POWER_MANA | SELECT_FLAG_PLAYER))
                 {
                     DoResetThreat();
                     AttackStart(pTarget);
@@ -534,7 +534,7 @@ struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
     {
         if (m_uiImmolateTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ?  SPELL_IMMOLATE : SPELL_IMMOLATE_H) == CAST_OK)
                     m_uiImmolateTimer = 6000;
@@ -545,7 +545,7 @@ struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
 
         if (m_uiShadowBoltTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
                     m_uiShadowBoltTimer = 5000;
@@ -556,7 +556,7 @@ struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
 
         if (m_uiSeedCorruptionTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_SEED_OF_CORRUPTION) == CAST_OK)
                     m_uiSeedCorruptionTimer = 10000;
@@ -567,7 +567,7 @@ struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
 
         if (m_uiCurseAgonyTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CURSE_OF_AGONY : SPELL_CURSE_OF_AGONY_H) == CAST_OK)
                     m_uiCurseAgonyTimer = 13000;
@@ -578,7 +578,7 @@ struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
 
         if (m_uiFearTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_FEAR) == CAST_OK)
                     m_uiFearTimer = 10000;
@@ -589,7 +589,7 @@ struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
 
         if (m_uiDeathCoilTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_DEATH_COIL) == CAST_OK)
                     m_uiDeathCoilTimer = urand(8000, 13000);
@@ -716,7 +716,7 @@ struct npc_yazzaiAI : public priestess_companion_commonAI
     {
         if (m_uiPolymorphTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_POLYMORPH) == CAST_OK)
                     m_uiPolymorphTimer = 20000;
@@ -733,7 +733,7 @@ struct npc_yazzaiAI : public priestess_companion_commonAI
 
         if (m_uiBlizzardTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_BLIZZARD : SPELL_BLIZZARD_H) == CAST_OK)
                     m_uiBlizzardTimer = urand(8000, 15000);
@@ -744,7 +744,7 @@ struct npc_yazzaiAI : public priestess_companion_commonAI
 
         if (m_uiIceLanceTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ICE_LANCE : SPELL_ICE_LANCE_H) == CAST_OK)
                     m_uiIceLanceTimer = 12000;
@@ -763,7 +763,7 @@ struct npc_yazzaiAI : public priestess_companion_commonAI
 
         if (m_uiFrostboltTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FROSTBOLT : SPELL_FROSTBOLT_H) == CAST_OK)
                     m_uiFrostboltTimer = 8000;
@@ -845,7 +845,7 @@ struct npc_warlord_salarisAI : public priestess_companion_commonAI
             // if nobody is in melee range than try to use Intercept
             if (!m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_IN_MELEE_RANGE))
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_INTERCEPT_STUN, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_IN_LOS))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_INTERCEPT_STUN, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_IN_LOS))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_INTERCEPT_STUN) == CAST_OK)
                         m_uiInterceptStunTimer = 10000;
@@ -977,7 +977,7 @@ struct npc_garaxxasAI : public priestess_companion_commonAI
         {
             if (m_uiConcussiveShotTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_CONCUSSIVE_SHOT) == CAST_OK)
                         m_uiConcussiveShotTimer = 8000;
@@ -988,7 +988,7 @@ struct npc_garaxxasAI : public priestess_companion_commonAI
 
             if (m_uiMultiShotTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_MULTI_SHOT : SPELL_MULTI_SHOT_H) == CAST_OK)
                         m_uiMultiShotTimer = 10000;
@@ -999,7 +999,7 @@ struct npc_garaxxasAI : public priestess_companion_commonAI
 
             if (m_uiAimedShotTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_AIMED_SHOT) == CAST_OK)
                         m_uiAimedShotTimer = 6000;
@@ -1093,7 +1093,7 @@ struct npc_apokoAI : public priestess_companion_commonAI
 
         if (m_uiPurgeTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_PURGE) == CAST_OK)
                     m_uiPurgeTimer = 15000;
@@ -1185,7 +1185,7 @@ struct npc_zelfanAI : public priestess_companion_commonAI
 
         if (m_uiRocketLaunchTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ROCKET_LAUNCH : SPELL_ROCKET_LAUNCH_H) == CAST_OK)
                     m_uiRocketLaunchTimer = 9000;
@@ -1196,7 +1196,7 @@ struct npc_zelfanAI : public priestess_companion_commonAI
 
         if (m_uiFelIronBombTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_FEL_IRON_BOMB : SPELL_FEL_IRON_BOMB_H) == CAST_OK)
                     m_uiFelIronBombTimer = 15000;
