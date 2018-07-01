@@ -1507,8 +1507,19 @@ void Aura::TriggerSpell()
                         break;
 //                    // Mark of Death
 //                    case 37125: break;
-//                    // Arcane Flurry
-//                    case 37268: break;
+                    case 37268:                               // Arcane Flurry (Melee Component)
+                    {
+                        trigger_spell_id = 37271;       // (Range Component, parentspell 37269)
+
+                        if (GetTarget()->GetTypeId() != TYPEID_UNIT)
+                            return;
+
+                        triggerTarget = ((Creature*)GetTarget())->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, trigger_spell_id, SELECT_FLAG_PLAYER);
+                        if (!triggerTarget)
+                            return;
+
+                        break;
+                    }
                     case 37429:                             // Spout (left)
                     case 37430:                             // Spout (right)
                     {
