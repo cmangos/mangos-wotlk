@@ -43,8 +43,6 @@ void instance_blood_furnace::OnCreatureCreate(Creature* pCreature)
     {
         case NPC_BROGGOK:
             pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         case NPC_KELIDAN_THE_BREAKER:
         case NPC_MAGTHERIDON:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
@@ -218,8 +216,6 @@ void instance_blood_furnace::DoNextBroggokEventPhase()
         if (Creature* pBroggok = GetSingleCreatureFromStorage(NPC_BROGGOK))
         {
             pBroggok->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            pBroggok->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-            pBroggok->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             pBroggok->GetMotionMaster()->MoveWaypoint();
         }
     }

@@ -35,6 +35,7 @@ enum
     SPELL_POISON_BOLT_H     = 38459,
 
     SPELL_POISON            = 30914,
+    SPELL_POISON_H          = 38462,
 
     POINT_EVENT_COMBAT      = 7,
 };
@@ -73,7 +74,7 @@ struct boss_broggokAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->CastSpell(pSummoned, SPELL_POISON, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
+        pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_POISON : SPELL_POISON_H, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     void JustDied(Unit* /*pWho*/) override
