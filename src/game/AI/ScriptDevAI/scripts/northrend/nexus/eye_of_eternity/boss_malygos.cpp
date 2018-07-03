@@ -3,7 +3,7 @@
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
- *
+ * Copyright (C) 2008-2018 TrinityCore <https://www.trinitycore.org/>
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
@@ -127,6 +127,14 @@ enum
     PHASE_DRAGONS                   = 5,
 
     POINT_ID_COMBAT                 = 1,
+    
+    // Zone Lights
+    AREA_EYE_OF_ETERNITY            = 4500,
+    LIGHT_GET_DEFAULT_FOR_MAP       = 0,
+    LIGHT_OBSCURE_SPACE             = 1822,
+    LIGHT_CHANGE_DIMENSIONS         = 1823,
+    LIGHT_ARCANE_RUNES              = 1824,
+    LIGHT_OBSCURE_ARCANE_RUNES      = 1825,
 };
 
 static const DialogueEntry aIntroDialogue[] =
