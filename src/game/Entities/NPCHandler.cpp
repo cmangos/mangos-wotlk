@@ -515,7 +515,7 @@ void WorldSession::SendStablePet(ObjectGuid guid) const
             firstSlot = PET_SAVE_AS_CURRENT;
         else
         {
-            QueryResult* result = CharacterDatabase.PQuery("SELECT owner, id, entry, level, name, loyalty FROM character_pet WHERE owner = '%u' AND slot = '%u' ORDER BY slot",
+            QueryResult* result = CharacterDatabase.PQuery("SELECT owner, id, entry, level, name FROM character_pet WHERE owner = '%u' AND slot = '%u' ORDER BY slot",
                 _player->GetGUIDLow(), uint32(PET_SAVE_NOT_IN_SLOT));
 
             if (result) // dismissed pet
@@ -528,7 +528,6 @@ void WorldSession::SendStablePet(ObjectGuid guid) const
                     data << uint32(fields[2].GetUInt32());          // creature entry
                     data << uint32(fields[3].GetUInt32());          // level
                     data << fields[4].GetString();                  // name
-                    data << uint32(fields[5].GetUInt32());          // loyalty
                     data << uint8(0x01);       // slot
 
                     ++num;
