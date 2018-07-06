@@ -388,7 +388,7 @@ struct boss_vazrudenAI : public ScriptedAI
 
     void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
-        if (!m_bHealthBelow && m_pInstance && (float(m_creature->GetHealth() - uiDamage) / m_creature->GetMaxHealth()) < 0.30f)
+        if (!m_bHealthBelow && m_pInstance && (float(m_creature->GetHealth() - uiDamage) / m_creature->GetMaxHealth()) < 0.40f)
         {
             if (Creature* pNazan = m_pInstance->GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
                 if (boss_vazruden_heraldAI* pNazanAI = dynamic_cast<boss_vazruden_heraldAI*>(pNazan->AI()))
