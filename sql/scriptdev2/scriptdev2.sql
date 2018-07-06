@@ -3076,6 +3076,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 015 000 TBC texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1015001, '%s lets loose a low, gultural growl.', '0', '2', '0', '0', 'Enraged Netherwing Drake - EMOTE on script spell hit'),
 (-1015002, 'You will never get the Heart of Fury!  Its power belongs to Illidan!', '0', '1', '0', '0', 'Shadowlord Deathwail - yell on descent'),
 (-1015003, '%s retrieves the Heart of Fury.', '0', '2', '0', '0', 'Shadowlord Deathwail - grabs heart'),
 (-1015004, 'Master... I\'ve failed you...', '0', '1', '0', '0', 'Shadowlord Deathwail - death');

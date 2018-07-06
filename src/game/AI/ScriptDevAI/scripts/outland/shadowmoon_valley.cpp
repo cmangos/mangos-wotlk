@@ -199,6 +199,8 @@ enum
     SPELL_HIT_FORCE_OF_NELTHARAKU   = 38762,
     SPELL_FORCE_OF_NELTHARAKU       = 38775,
 
+    EMOTE_ON_HIT_FORCE              = -1015001,
+
     QUEST_FORCE_OF_NELT             = 10854,
     NPC_DRAGONMAW_SUBJUGATOR        = 21718,
     NPC_ESCAPE_DUMMY                = 21348
@@ -225,6 +227,8 @@ struct mob_enslaved_netherwing_drakeAI : public ScriptedAI
             {
                 m_uiFlyTimer = 2500;
                 m_playerGuid = pPlayer->GetObjectGuid();
+
+                DoScriptText(EMOTE_ON_HIT_FORCE, m_creature);
 
                 m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
 
