@@ -8817,6 +8817,19 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     possessor->CastSpell(possessor, spellId, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 38794:                                 // Murmur's Touch - Heroic
+                {
+                    std::list<Unit*> objectList;
+                    MaNGOS::AnyFriendlyUnitInObjectRangeCheck check(unitTarget, nullptr, 100.f);
+                    MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(objectList, check);
+                    Cell::VisitAllObjects(unitTarget, searcher, 100.0f);
+                    objectList.remove(unitTarget); // remove target
+
+                    for (Unit* pullTarget : objectList)
+                        unitTarget->CastSpell(pullTarget, 28337, TRIGGERED_OLD_TRIGGERED); // this is guesswork based on sniff
+
+                    return;
+                }
                 case 39338:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Horde
                 case 39342:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Alliance
                 {

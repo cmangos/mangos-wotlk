@@ -5561,6 +5561,11 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 if (Unit* caster = GetCaster())
                     caster->CastSpell(target, 32830, TRIGGERED_NONE);
                 return;
+            case 33711:                                     // Murmur's Touch normal and heroic
+            case 38794:
+                target->CastSpell(nullptr, 33686, TRIGGERED_OLD_TRIGGERED, nullptr, this); // cast Shockwave
+                target->CastSpell(nullptr, 33673, TRIGGERED_OLD_TRIGGERED); // cast Shockwave knockup serverside
+                return;
             case 35515:                                     // Salaadin's Tesla
                 if ((m_removeMode != AURA_REMOVE_BY_STACK) && (!target->HasAura(35515)))
                     if (Creature* creature = (Creature*)target)

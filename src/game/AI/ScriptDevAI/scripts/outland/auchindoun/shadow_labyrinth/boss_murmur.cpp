@@ -156,7 +156,7 @@ struct boss_murmurAI : public Scripted_NoMovementAI
 		    //Sonic Shock
             if (m_uiSonicShockTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SONIC_SHOCK, SELECT_FLAG_IN_MELEE_RANGE))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SONIC_SHOCK, SELECT_FLAG_PLAYER | SELECT_FLAG_IN_MELEE_RANGE))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_SONIC_SHOCK) == CAST_OK)
                         m_uiSonicShockTimer = urand(SPELL_SONIC_SHOCK_MIN_TIMER, SPELL_SONIC_SHOCK_MAX_TIMER);
