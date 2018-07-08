@@ -1435,7 +1435,7 @@ struct npc_deadsoul_orb : public ScriptedAI
             m_creature->GetMotionMaster()->MovePoint(pointCount, 2809.716f, 5250.526f, 274.4666f);
         else
         {
-            if (Creature* waypointTrigger = GetClosestCreatureWithEntry(m_creature, nextTrigger, 95.f))
+            if (Creature* waypointTrigger = GetClosestCreatureWithEntry(m_creature, nextTrigger, 95))
             {
                 m_creature->GetMotionMaster()->MovePoint(pointCount, waypointTrigger->GetPositionX(), waypointTrigger->GetPositionY(), waypointTrigger->GetPositionZ());
             }
