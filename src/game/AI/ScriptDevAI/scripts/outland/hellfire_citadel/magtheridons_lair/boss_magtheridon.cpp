@@ -43,6 +43,7 @@ enum
     SPELL_BLASTNOVA             = 30616,
     SPELL_CLEAVE                = 30619,
     SPELL_QUAKE                 = 30657,                    // spell may be related but probably used in the recent versions of the script
+    SPELL_QUAKE_REMOVAL         = 30572,                    // removes quake from all triggers if blastnova starts during
     // SPELL_QUAKE_TRIGGER      = 30576,                    // spell removed from DBC - triggers 30571
     // SPELL_QUAKE_KNOCKBACK    = 30571,
     SPELL_BLAZE                 = 30541,                    // triggers 30542
@@ -52,7 +53,8 @@ enum
     // phase 3 spells
     SPELL_CAMERA_SHAKE          = 36455,
     SPELL_DEBRIS_KNOCKDOWN      = 36449,
-    SPELL_QUAKE_EFFECT          = 30572,                    // sets the debris during phase 3 - triggers 30632
+    SPELL_DEBRIS_1              = 30629,                    // selects target
+    SPELL_DEBRIS_2              = 30630,                    // spawns trigger NPC which casts debris spell
     SPELL_DEBRIS_DAMAGE         = 30631,
     SPELL_DEBRIS_VISUAL         = 30632,
 
@@ -97,6 +99,7 @@ struct boss_magtheridonAI : public ScriptedAI
 
     uint32 m_uiBerserkTimer;
     uint32 m_uiQuakeTimer;
+    uint32 m_quakeStunTimer;
     uint32 m_uiCleaveTimer;
     uint32 m_uiBlastNovaTimer;
     uint32 m_uiBlazeTimer;
@@ -117,6 +120,7 @@ struct boss_magtheridonAI : public ScriptedAI
         m_uiTransitionTimer = 0;
         m_uiTransitionCount = 0;
         m_uiDebrisTimer     = urand(20000, 30000);
+        m_quakeStunTimer    = 0;
 
         m_bIsPhase3         = false;
 
@@ -192,6 +196,17 @@ struct boss_magtheridonAI : public ScriptedAI
                 m_uiBerserkTimer -= uiDiff;
         }
 
+        if (m_quakeStunTimer)
+        {
+            if (m_quakeStunTimer <= uiDiff)
+            {
+                m_creature->SetImmobilizedState(false, true);
+                m_quakeStunTimer = 0;
+            }
+            else
+                m_quakeStunTimer -= uiDiff;
+        }
+
         // Transition to phase 3
         if (m_uiTransitionTimer)
         {
@@ -235,7 +250,11 @@ struct boss_magtheridonAI : public ScriptedAI
                 if (m_uiQuakeTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_QUAKE) == CAST_OK)
+                    {
+                        m_creature->SetImmobilizedState(true, true);
+                        m_quakeStunTimer = 7000;
                         m_uiQuakeTimer = 50000;
+                    }
                 }
                 else
                     m_uiQuakeTimer -= uiDiff;
@@ -252,7 +271,12 @@ struct boss_magtheridonAI : public ScriptedAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_BLASTNOVA) == CAST_OK)
                     {
-                        m_creature->RemoveAurasDueToSpell(SPELL_QUAKE);
+                        if (m_quakeStunTimer)
+                        {
+                            m_creature->SetImmobilizedState(false, true);
+                            m_quakeStunTimer = 0;
+                            m_creature->CastSpell(nullptr, SPELL_QUAKE_REMOVAL, TRIGGERED_OLD_TRIGGERED);
+                        }
                         DoScriptText(EMOTE_BLASTNOVA, m_creature);
                         m_uiBlastNovaTimer = 60000;
                     }
@@ -273,9 +297,8 @@ struct boss_magtheridonAI : public ScriptedAI
                 {
                     if (m_uiDebrisTimer < uiDiff)
                     {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1)) // dont use selecting for ID due to spell being "Self Only"
-                            if (m_creature->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), SPELL_DEBRIS_VISUAL, TRIGGERED_NONE) == SPELL_CAST_OK)
-                                m_uiDebrisTimer = urand(20000, 30000);
+                        if (DoCastSpellIfCan(m_creature, SPELL_DEBRIS_1) == CAST_OK)
+                            m_uiBlazeTimer = urand(10000, 15000);
                     }
                     else
                         m_uiDebrisTimer -= uiDiff;
@@ -388,7 +411,7 @@ struct mob_hellfire_channelerAI : public ScriptedAI
 
         if (m_uiFearTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_FEAR) == CAST_OK)
                     m_uiFearTimer = urand(25000, 40000);
@@ -401,7 +424,7 @@ struct mob_hellfire_channelerAI : public ScriptedAI
         {
             if (m_uiInfernalTimer <= uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_BURNING_ABYSSAL) == CAST_OK)
                         m_uiInfernalTimer = 0;
@@ -418,7 +441,6 @@ struct mob_hellfire_channelerAI : public ScriptedAI
 /*######
 ## go_manticron_cube
 ######*/
-
 struct go_manticron_cubeAI : public GameObjectAI
 {
     go_manticron_cubeAI(GameObject* go) : GameObjectAI(go), m_lastUser(ObjectGuid()) {}

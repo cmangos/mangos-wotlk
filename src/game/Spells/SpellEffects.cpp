@@ -8611,6 +8611,16 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
+                case 30572:                                 // Quake - Magtheridon
+                {
+                    unitTarget->RemoveAurasDueToSpell(30657);   // Remove quake from all triggers
+                    return;
+                }
+                case 30629:                                 // Debris - Magtheridon
+                {
+                    unitTarget->CastSpell(nullptr, 30630, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 30769:                                 // Pick Red Riding Hood
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
