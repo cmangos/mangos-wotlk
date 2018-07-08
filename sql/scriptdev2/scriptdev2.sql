@@ -429,6 +429,10 @@ INSERT INTO scripted_areatrigger VALUES
 (4615, "mobs_grishna_arrakoa"),
 (4616, "mobs_grishna_arrakoa"),
 (4617, "mobs_grishna_arrakoa");
+UPDATE creature_template SET ScriptName='npc_soulgrinder' WHERE entry=23019;
+UPDATE creature_template SET ScriptName='npc_mogdorg_the_wizened' WHERE entry=22941;
+UPDATE creature_template SET ScriptName='npc_supplicant' WHERE entry IN(23052,23053);
+INSERT INTO scripted_event_id VALUES(14739,'event_into_the_soulgrinder');
 
 /* BLASTED LANDS */
 UPDATE creature_template SET ScriptName='npc_fallen_hero_of_horde' WHERE entry=7572;
@@ -3121,7 +3125,20 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1015012,'From the darkest night shall rise again the raven, shall take flight in the shadows, shall reveal the nature of its kind. Prepare yourself for its coming, for the faithful shall be elevated to take flight with the raven, the rest be forgotten to walk upon the the ground, clipped wings and shame.', 0,4,0,0,'First Prophecy for Whispers of the Raven God'),
 (-1015013,'Steel your minds and guard your thoughts. The dark wings will cloud and consume the minds of the weak, a flock of thralls whose feet may never leave the ground.', 0,4,0,0,'Second Prophecy for Whispers of the Raven God'),
 (-1015014,'The old blood will flow once again with the coming of the raven, the return of darkness in the skies. Scarlet night, and the rise of the old.', 0,4,0,0,'Third Prophecy for Whispers of the Raven God'),
-(-1015015,'The raven was struck down once for flying too high, unready. The eons have prepared the Dark Watcher for its ascent, to draw the dark cloak across the horizon.', 0,4,0,0,'Fourth Prophecy for Whispers of the Raven God');
+(-1015015,'The raven was struck down once for flying too high, unready. The eons have prepared the Dark Watcher for its ascent, to draw the dark cloak across the horizon.', 0,4,0,0,'Fourth Prophecy for Whispers of the Raven God'),
+(-1015016,'Argh! I will shred your soul and grind it to dust!',0,1,0,0,'Skulloc Soulgrinder on last unbanishing phase.'),
+(-1015017,'Weak, little bugs!  Your souls aren''t worth eating...',0,1,0,0,'Skulloc Soulgrinder on last unbanishing phase.'),
+(-1015018,'%s brushes up against $n and farts like only an ogre can.',0,2,0,0,'Generic Blades Edge Ogre /fart emote response'),
+(-1015019,'Me like to fart, too!',0,0,0,1,'Generic Blades Edge Ogre /fart emote response'),
+(-1015020,'The %s cowers at the sight of his angered $g king : queen;.',0,2,0,0,'Generic Blades Edge Ogre /angry emote response'),
+(-1015021,'Shh... quiet, it da new $g king : queen;.',0,0,0,0,'Bloodmaul/Bladespire Supplicant LoS text'),
+(-1015022,'$G King : Queen; $n.',0,0,0,0,'Bloodmaul/Bladespire Supplicant LoS text'),
+(-1015023,'All hail, $n, the new King of the ogres!!!',0,6,0,22,'Mog''dorg the Wizened on quest end Into the Soulgrinder'),s
+(-1015024,'Aw, me not think it work out between us.',0,0,0,1,'Generic Blades Edge Ogre /kiss emote response'),
+(-1015025,'What me do wrong, my $g king : queen;?',0,0,0,16,'Generic Blades Edge Ogre /point emote response'),
+(-1015026,'$G Him : Her; so tiny!  How $g him : her; rule?',0,0,0,0,'Bloodmaul/Bladespire Supplicant LoS text'),
+(-1015027,'$G Him : Her; look too pretty to be da ruler.',0,0,0,0,'Bloodmaul/Bladespire Supplicant LoS text'),
+(-1015028,'Me live to serve.',0,0,0,0,'Bloodmaul/Bladespire Supplicant LoS text');
 
 -- -1 020 000 WOTLK texts
 

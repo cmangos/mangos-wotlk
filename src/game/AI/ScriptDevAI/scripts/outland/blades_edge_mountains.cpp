@@ -1373,6 +1373,685 @@ bool AreaTrigger_at_raven_prophecy(Player* pPlayer, AreaTriggerEntry const* pAt)
     return false;
 }
 
+/*######
+## npc_soulgrinder
+######*/
+
+enum
+{
+    NPC_SOULGRINDER = 23019,
+    NPC_OGRE_SPIRIT = 22912,
+    NPC_SKULLOC_SOULGRINDER = 22910,
+    NPC_SOULGRINDER_BUNNY = 23037,
+
+    SPELL_SOULGRINDER_RITUAL_VISUAL_BUNNY = 39936,
+    SPELL_BEAM = 39920,
+    SPELL_SHADOWFORM_1 = 39943,
+    SPELL_SHADOWFORM_2 = 39944,
+    SPELL_SHADOWFORM_3 = 39946,
+    SPELL_SHADOWFORM_4 = 39947,
+    SPELL_SHADOWFORM_TEST = 39951,
+
+    SPELL_VIMGOL_CANTATION                      = 40328, // item spell that triggers event
+    SPELL_SOULGRINDER_RITUAL_VISUAL_IN_PROGRESS = 39918, // added in creature_template_addon
+    SPELL_SCARE_SOULGRINDER_GHOST = 39914,
+
+    SPELL_SOULGRINDER_GHOST_TRANSFORM   = 39916,
+    SPELL_SPIRIT_PARTICLES_PURPLE       = 28126,
+    SPELL_SOULGRINDER_GHOST_SPAWN_IN    = 17321,
+
+    SAY_SKULLOC_SOULGRINDER = -1001230,
+    SAY_FAIL_QUEST          = -1001231,
+};
+
+bool ProcessEventId_Soulgrinder(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart)
+{
+    if (Creature* bunny = GetClosestCreatureWithEntry((WorldObject*)pSource, NPC_SOULGRINDER, 20))
+    {
+        return false;
+    }
+    else
+    {
+        Player* player = (Player*)pSource;
+        player->SummonCreature(NPC_SOULGRINDER, 3535.111f, 5590.628f, 0.3859383f, 0.7853982f, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 265000);
+        return true;
+    }
+}
+
+struct npc_soulgrinderAI : public ScriptedAI
+{
+    npc_soulgrinderAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        SetReactState(REACT_PASSIVE);
+        m_uiTimer = 7000; // need to be set once, without regard for combat
+        m_uiPhase = 0;
+        m_uiOgreCounter = 0;
+        m_ogreAttackTimer = 0;
+        Reset();
+    }
+
+    uint8 m_uiPhase;
+    uint32 m_uiTimer;
+    uint8 m_uiOgreCounter;
+    uint32 m_ogreAttackTimer;
+    GuidVector m_ogreSpirits;
+    GuidVector m_soulgrinderDummies;
+    ObjectGuid m_skullocSoulgrinder;
+
+    void Reset() override
+    {
+
+    }
+
+    void JustRespawned() override
+    {
+        // 26 spawns that are spawned immediately with this NPC
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3574.525f, 5624.78f,  -9.746364f, 5.707227f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3558.613f, 5543.979f, -2.24089f, 0.9948376f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3542.293f, 5546.184f, -2.307737f, 5.096361f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3507.783f, 5607.564f, -2.115761f, 2.146755f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3525.318f, 5624.862f, -5.340961f, 0.2792527f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3573.157f, 5592.371f, -4.614707f, 2.984513f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3542.814f, 5622.923f, -3.886532f, 0.1919862f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3574.056f, 5574.628f, -5.577652f, 0.2792527f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3559.653f, 5559.587f, -2.850421f, 3.01942f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3574.718f, 5609.495f, -3.285291f, 1.32645f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3541.38f,  5559.73f,  -2.665792f, 2.827433f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3542.222f, 5573.395f, -2.64414f, 4.276057f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3557.254f, 5591.203f, -2.993953f, 3.01942f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3558.495f, 5577.132f, -3.076451f, 3.892084f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3557.081f, 5612.431f, -4.562363f, 1.518436f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3542.203f, 5608.064f, -3.378048f, 0.1570796f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3558.009f, 5626.f   , -5.146327f, 3.857178f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3524.67f,  5608.019f, -3.321486f, 2.042035f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3510.031f, 5575.792f, -1.80589f, 4.904375f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3508.348f, 5589.707f, -0.8961017f, 1.623156f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3507.988f, 5561.777f,  1.993673f, 2.80998f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3509.509f, 5625.191f, -4.461998f, 0.06981317f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3525.131f, 5573.122f, -1.622976f, 6.126106f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3493.974f, 5594.064f, -0.03712566f, 2.670354f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3526.678f, 5560.159f, -0.8016807f, 0.9424778f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+        m_creature->SummonCreature(NPC_OGRE_SPIRIT, 3574.228f, 5559.057f, -6.009155f, 6.021386f, TEMPSPAWN_CORPSE_DESPAWN, 1000);
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        switch (summoned->GetEntry())
+        {
+            case NPC_OGRE_SPIRIT:
+                m_ogreSpirits.push_back(summoned->GetObjectGuid());
+                break;
+            case NPC_SKULLOC_SOULGRINDER:
+                m_skullocSoulgrinder = summoned->GetObjectGuid();
+                break;
+            case NPC_SOULGRINDER_BUNNY:
+                m_soulgrinderDummies.push_back(summoned->GetObjectGuid());
+                break;
+        }
+    }
+
+    void JustDied(Unit* /*pKiller*/) override
+    {
+        for (ObjectGuid& guid : m_soulgrinderDummies)
+            if (Creature* dummy = m_creature->GetMap()->GetCreature(guid))
+                dummy->ForcedDespawn();
+
+        for (ObjectGuid& guid : m_ogreSpirits)
+            if (Creature* spirit = m_creature->GetMap()->GetCreature(guid))
+                spirit->ForcedDespawn();
+
+        if (Player* summoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
+            summoner->FailQuest(11000);
+
+        if (Creature* gronn = m_creature->GetMap()->GetCreature(m_skullocSoulgrinder))
+        {
+            DoScriptText(SAY_FAIL_QUEST, gronn);
+            gronn->ForcedDespawn();
+        }
+    }
+
+    void SummonedCreatureJustDied(Creature* pSummoned) override
+    {
+        if (pSummoned->GetEntry() == NPC_SKULLOC_SOULGRINDER)
+        {
+            for (ObjectGuid& guid : m_soulgrinderDummies)
+                if (Creature* dummy = m_creature->GetMap()->GetCreature(guid))
+                    dummy->ForcedDespawn();
+
+            m_creature->ForcedDespawn();
+        }
+    }
+
+    void SummonedCreatureDespawn(Creature* pSummoned) override
+    {
+        if (pSummoned == m_creature)
+        {
+            for (ObjectGuid& guid : m_soulgrinderDummies)
+                if (Creature* dummy = m_creature->GetMap()->GetCreature(guid))
+                    dummy->ForcedDespawn();
+
+            if (Creature* gronn = m_creature->GetMap()->GetCreature(m_skullocSoulgrinder))
+                if (gronn->isAlive())
+                    gronn->ForcedDespawn();
+        }
+    }
+
+    void SpawnCreature()
+    {
+        if (Creature* ogre = m_creature->GetMap()->GetCreature(m_ogreSpirits[m_uiOgreCounter]))
+        {
+            ogre->AI()->SetReactState(REACT_DEFENSIVE);
+            ogre->CastSpell(ogre, SPELL_SOULGRINDER_GHOST_TRANSFORM, TRIGGERED_NONE);
+            ogre->CastSpell(ogre, SPELL_SPIRIT_PARTICLES_PURPLE, TRIGGERED_NONE);
+            ogre->CastSpell(ogre, SPELL_SOULGRINDER_GHOST_SPAWN_IN, TRIGGERED_NONE);
+            ogre->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            ogre->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+            ogre->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            m_ogreAttackTimer = urand(2000,4000);
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_ogreAttackTimer) // Spirits attack 2 seconds after being "spawned in"
+        {
+            if (m_ogreAttackTimer <= uiDiff)
+            {
+                m_ogreAttackTimer = 0;
+                if (Creature* ogre = m_creature->GetMap()->GetCreature(m_ogreSpirits[m_uiOgreCounter - 1]))
+                {
+                    ogre->AI()->AttackStart(m_creature);
+                    ogre->AI()->SetReactState(REACT_AGGRESSIVE);
+                }
+            }
+            else
+                m_ogreAttackTimer -= uiDiff;
+        }
+
+        if (m_uiTimer)
+        {
+            if (m_uiTimer <= uiDiff)
+            {
+                switch (m_uiPhase)
+                {
+                    case 0:
+                    {
+                        SpawnCreature();
+                        m_uiTimer = 6000;
+                        m_uiOgreCounter++;
+                        if (m_uiOgreCounter == 2)
+                        {
+                            Creature * bunny = m_creature->SummonCreature(NPC_SOULGRINDER_BUNNY, 3491.224f, 5529.023f, 17.14335f, 6.195919f, TEMPSPAWN_MANUAL_DESPAWN, 0);
+                            Creature * gronn = m_creature->SummonCreature(NPC_SKULLOC_SOULGRINDER, 3478.563f, 5550.74f, 7.838801f, 0.3665192f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 300000);
+                            bunny->CastSpell(m_creature, SPELL_BEAM, TRIGGERED_NONE);
+                            gronn->GetMotionMaster()->MoveIdle();
+                            gronn->CastSpell(gronn, SPELL_SHADOWFORM_1, TRIGGERED_NONE);
+                        }
+                        else if (m_uiOgreCounter == 8)
+                        {
+                            Creature * bunny = m_creature->SummonCreature(NPC_SOULGRINDER_BUNNY, 3464.954f, 5564.684f, 17.99977f, 5.67232f, TEMPSPAWN_MANUAL_DESPAWN, 0);
+                            bunny->CastSpell(m_creature, SPELL_BEAM, TRIGGERED_NONE);
+                            if (Creature* gronn = m_creature->GetMap()->GetCreature(m_skullocSoulgrinder))
+                            {
+                                gronn->CastSpell(gronn, SPELL_SHADOWFORM_2, TRIGGERED_NONE);
+                                gronn->CastSpell(gronn, SPELL_SHADOWFORM_TEST, TRIGGERED_NONE);
+                            }
+                        }
+                        else if (m_uiOgreCounter == 14)
+                        {
+                            Creature * bunny = m_creature->SummonCreature(NPC_SOULGRINDER_BUNNY, 3515.02f, 5524.39f, 16.8927f, 3.560477f, TEMPSPAWN_MANUAL_DESPAWN, 0);
+                            bunny->CastSpell(m_creature, SPELL_BEAM, TRIGGERED_NONE);
+                            if (Creature* gronn = m_creature->GetMap()->GetCreature(m_skullocSoulgrinder))
+                            {
+                                gronn->CastSpell(gronn, SPELL_SHADOWFORM_3, TRIGGERED_NONE);
+                                gronn->CastSpell(gronn, SPELL_SHADOWFORM_TEST, TRIGGERED_NONE);
+                            }
+                        }
+                        else if (m_uiOgreCounter == 20)
+                        {
+                            Creature * bunny = m_creature->SummonCreature(NPC_SOULGRINDER_BUNNY, 3468.82f, 5581.41f, 17.5205f, 0.0174533f, TEMPSPAWN_MANUAL_DESPAWN, 0);
+                            bunny->CastSpell(m_creature, SPELL_BEAM, TRIGGERED_NONE);
+                            if (Creature* gronn = m_creature->GetMap()->GetCreature(m_skullocSoulgrinder))
+                            {
+                                gronn->RemoveAurasDueToSpell(SPELL_SHADOWFORM_1);
+                                gronn->RemoveAurasDueToSpell(SPELL_SHADOWFORM_2);
+                                gronn->RemoveAurasDueToSpell(SPELL_SHADOWFORM_3);
+                                gronn->CastSpell(gronn, SPELL_SHADOWFORM_4, TRIGGERED_NONE);
+                                gronn->CastSpell(gronn, SPELL_SHADOWFORM_TEST, TRIGGERED_NONE);
+                            }
+                        }
+                        else if (m_uiOgreCounter == 25)
+                        {
+                            for (ObjectGuid& guid : m_soulgrinderDummies)
+                                if (Creature* dummy = m_creature->GetMap()->GetCreature(guid))
+                                    dummy->InterruptSpell(CURRENT_CHANNELED_SPELL);
+
+                            for (ObjectGuid& guid : m_ogreSpirits)
+                                if (Creature* spirit = m_creature->GetMap()->GetCreature(guid))
+                                    spirit->ForcedDespawn();
+                            
+                            m_creature->CastSpell(nullptr, SPELL_SCARE_SOULGRINDER_GHOST, TRIGGERED_NONE);
+                            if (Creature* gronn = m_creature->GetMap()->GetCreature(m_skullocSoulgrinder))
+                            {
+                                gronn->RemoveAurasDueToSpell(SPELL_SHADOWFORM_4);
+                                gronn->CastSpell(gronn, SPELL_SHADOWFORM_4, TRIGGERED_NONE);
+                                gronn->CastSpell(gronn, SPELL_SHADOWFORM_TEST, TRIGGERED_NONE);
+                                m_creature->CastSpell(gronn, SPELL_BEAM, TRIGGERED_NONE);
+                            }
+                            m_uiTimer = 4000;
+                            m_uiPhase++;
+                        }
+                        return;
+                    }
+                    case 1:
+                    {
+                        if (Creature* gronn = m_creature->GetMap()->GetCreature(m_skullocSoulgrinder))
+                        {
+                            DoScriptText(SAY_SKULLOC_SOULGRINDER, gronn);
+                            gronn->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                            gronn->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        }
+                        m_uiTimer = 6000;
+                        m_uiPhase++;
+                        return;
+                    }
+                    case 2:
+                    {
+                        if (Creature* gronn = m_creature->GetMap()->GetCreature(m_skullocSoulgrinder))
+                        {
+                            gronn->RemoveAurasDueToSpell(SPELL_SHADOWFORM_4);
+                            m_creature->InterruptSpell(CURRENT_CHANNELED_SPELL);
+                        }
+                        m_uiTimer = 0;
+                        return;
+                    }
+                }
+            }
+            else
+                m_uiTimer -= uiDiff;
+        }
+    }
+};
+
+UnitAI* GetAI_npc_soulgrinder(Creature* pCreature)
+{
+    return new npc_soulgrinderAI(pCreature);
+}
+
+/*######
+## npc_supplicant
+######*/
+
+enum
+{
+    QUEST_INTO_THE_SOULGRINDER = 11000,
+
+    NPC_BLOODMAUL_SUPPLICANT = 23052,
+    NPC_BLADESPIRE_SUPPLICANT = 23053,
+    NPC_OGRE_DRUM_BUNNY = 23056,
+
+    MUG_EQUIP = 2703,
+    DRUMMER_EQUIP = 5301,
+
+    SAY_MOGDORG_1 = -1001181,
+
+    SAY_SUPPLICANT_LOS_1 = -1001186,
+    SAY_SUPPLICANT_LOS_2 = -1001187,
+    SAY_SUPPLICANT_LOS_3 = -1001188,
+    SAY_SUPPLICANT_LOS_4 = -1001235,
+    SAY_SUPPLICANT_LOS_5 = -1001236,
+    SAY_EMOTE_RESPONSE_KISS = -1001184,
+    SAY_EMOTE_RESPONSE_POINT = -1001185,
+    SAY_EMOTE_RESPONSE_ANGRY = -1001234,
+    SAY_EMOTE_RESPONSE_FART_1 = -1001232,
+    SAY_EMOTE_RESPONSE_FART_2 = -1001233,
+
+    SPELL_OGRE_FORCE_REACTION = 39960,
+    SPELL_BLOODMAUL_INTOXICATION_VISUAL = 35777,
+
+    RANDOM_SOUND_1 = 11627,
+    RANDOM_SOUND_2 = 11628,
+    RANDOM_SOUND_3 = 11629,
+    RANDOM_SOUND_4 = 11630,
+    CHEER_SOUND = 396,
+    ROAR_SOUND = 402,
+
+    DBSCRIPT_SPAWN_OGRES = 10104,
+
+    PHASE_KNEEL_TO_PLAYER = 1,
+    PHASE_UNKNEEL_TO_PLAYER = 2,
+    PHASE_TURN_TO_OGRE = 3,
+    PHASE_MASS_KNEEL_TO_PLAYER = 4,
+    PHASE_DRUMMER = 5
+};
+
+bool QuestRewarded_into_the_soulgrinder(Player* player, Creature* pCreature, Quest const* pQuest)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+    if (!pInstance)
+        return true;
+
+    if (pQuest->GetQuestId() == QUEST_INTO_THE_SOULGRINDER)
+    {
+        DoScriptText(SAY_MOGDORG_1, pCreature, player);
+        player->CastSpell(player, SPELL_OGRE_FORCE_REACTION, TRIGGERED_OLD_TRIGGERED);
+        player->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_SPAWN_OGRES, player, pCreature);
+    }
+
+    return true;
+}
+
+struct npc_supplicantAI : public ScriptedAI
+{
+    npc_supplicantAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_summonerGuid = m_creature->GetSpawnerGuid();
+        m_last = -1;
+        Reset();
+    }
+
+    ObjectGuid m_summonerGuid; // player who summoned this
+
+    uint32 m_timer;
+    uint32 m_randomStuffTimer;
+    uint32 m_drinkTimer;
+    uint32 m_randomSoundTimer;
+
+    uint8 m_phase;
+
+    GuidVector m_supplicants;
+    uint32 m_last;
+
+    void Reset() override
+    {
+        m_timer = 0;
+        m_randomStuffTimer = 0;
+        m_drinkTimer = 0;
+        m_randomSoundTimer = 0;
+
+        m_phase = PHASE_MASS_KNEEL_TO_PLAYER;
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    {
+        if (pSender != m_creature) // Sender should always be the creature itself
+            return;
+
+        if (eventType == AI_EVENT_CUSTOM_A) // Start doing random dance/turn/roar etc.
+        {
+            std::list<Creature*> list;
+            GetCreatureListWithEntryInGrid(list, m_creature, NPC_BLOODMAUL_SUPPLICANT, 10.f); // guesswork
+            GetCreatureListWithEntryInGrid(list, m_creature, NPC_BLADESPIRE_SUPPLICANT, 10.f);
+
+            for (Creature* supplicant : list)
+                m_supplicants.push_back(supplicant->GetObjectGuid());
+
+            m_phase = PHASE_TURN_TO_OGRE;
+            m_timer = 1;
+            m_randomStuffTimer = 1;
+        }
+        else if (eventType == AI_EVENT_CUSTOM_B) // Initial kneel
+        {
+            if (Unit* summoner = ((TemporarySpawn*)m_creature)->GetSpawner())
+                m_creature->SetFacingToObject(summoner);
+        }
+        else if (eventType == AI_EVENT_CUSTOM_C) // Drummers
+        {
+            m_phase = PHASE_DRUMMER;
+            m_timer = 1;
+            // Equip should change after the initial kneel
+            m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, DRUMMER_EQUIP);
+        }
+        else if (eventType == AI_EVENT_CUSTOM_D) // Ogres making random sounds
+        {
+            m_randomSoundTimer = urand(4000, 15000);
+        }
+    }
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (pWho->GetObjectGuid() != m_summonerGuid)
+            return;
+
+        if (m_phase == PHASE_MASS_KNEEL_TO_PLAYER || m_phase == PHASE_KNEEL_TO_PLAYER || m_phase == PHASE_UNKNEEL_TO_PLAYER || m_phase == PHASE_DRUMMER)
+            return;
+
+        if (m_creature->IsWithinDistInMap(pWho, 7.0f))
+        {
+            ResetOgreState(true);
+
+            m_creature->SetFacingToObject(pWho);
+
+            if (urand(0, 100) <= 5)
+            {
+                switch (urand(0, 4))
+                {
+                case 0:
+                    DoScriptText(SAY_SUPPLICANT_LOS_1, m_creature, pWho);
+                    break;
+                case 1:
+                    DoScriptText(SAY_SUPPLICANT_LOS_2, m_creature, pWho);
+                    break;
+                case 2:
+                    DoScriptText(SAY_SUPPLICANT_LOS_3, m_creature, pWho);
+                    break;
+                case 3:
+                    DoScriptText(SAY_SUPPLICANT_LOS_4, m_creature, pWho);
+                    break;
+                case 4:
+                    DoScriptText(SAY_SUPPLICANT_LOS_5, m_creature, pWho);
+                    break;
+                default:
+                    m_creature->MonsterSay("Error", 0);
+                    break;
+                }
+            }
+
+            m_phase = PHASE_KNEEL_TO_PLAYER;
+            m_timer = 1500;
+        }
+    }
+
+    void ReceiveEmote(Player* pPlayer, uint32 uiEmote) override
+    {
+        if (pPlayer->GetObjectGuid() != m_summonerGuid)
+            return;
+
+        switch (uiEmote)
+        {
+        case TEXTEMOTE_DANCE:
+            m_creature->HandleEmote(EMOTE_ONESHOT_DANCE);
+            break;
+        case TEXTEMOTE_WAVE:
+            m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
+            break;
+        case TEXTEMOTE_ROAR:
+            m_creature->HandleEmote(EMOTE_ONESHOT_ROAR);
+            break;
+        case TEXTEMOTE_POINT:
+            DoScriptText(SAY_EMOTE_RESPONSE_POINT, m_creature, pPlayer);
+            break;
+        case TEXTEMOTE_KISS:
+            DoScriptText(SAY_EMOTE_RESPONSE_KISS, m_creature, pPlayer);
+            break;
+        case TEXTEMOTE_ANGRY:
+            DoScriptText(SAY_EMOTE_RESPONSE_ANGRY, m_creature, pPlayer);
+            break;
+        case TEXTEMOTE_FART:
+            DoScriptText(SAY_EMOTE_RESPONSE_FART_1, m_creature, pPlayer);
+            DoScriptText(SAY_EMOTE_RESPONSE_FART_2, m_creature, pPlayer);
+            break;
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_timer)
+        {
+            if (m_timer <= uiDiff)
+            {
+                switch (m_phase)
+                {
+                case PHASE_KNEEL_TO_PLAYER:
+                {
+                    m_randomStuffTimer = 0;
+                    m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
+
+                    m_phase = PHASE_UNKNEEL_TO_PLAYER;
+                    m_timer = 15000;
+                    break;
+                }
+                case PHASE_UNKNEEL_TO_PLAYER:
+                {
+                    m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+
+                    m_phase = PHASE_TURN_TO_OGRE;
+                    m_timer = 1200;
+                    m_randomStuffTimer = 5000;
+
+                    break;
+                }
+                case PHASE_TURN_TO_OGRE:
+                {
+                    m_creature->HandleEmoteState(EMOTE_STATE_NONE); // Stop dancing
+
+                    // turn to random ogre
+                    if (m_supplicants.size() > 1) // safeguard
+                    {
+                        uint32 random = urand(0, m_supplicants.size() - 1);
+                        if (random == m_last)
+                            m_last = (m_last + 1) % (m_supplicants.size() - 1);
+                        if (Creature* supplicant = m_creature->GetMap()->GetCreature(m_supplicants[random]))
+                            m_creature->SetFacingToObject(supplicant);
+                        m_last = random;
+                    }
+                    else if (m_supplicants.size() == 1 && m_last == -1) // only need to do this once
+                    {
+                        if (Creature* supplicant = m_creature->GetMap()->GetCreature(m_supplicants[0]))
+                            m_creature->SetFacingToObject(supplicant);
+                        m_last = 0;
+                    }
+
+                    m_timer = urand(3600, 45000);
+                    break;
+                }
+                case PHASE_DRUMMER:
+                {
+                    if (Creature* drumBunny = GetClosestCreatureWithEntry(m_creature, NPC_OGRE_DRUM_BUNNY, 10))
+                    {
+                        m_creature->SetFacingToObject(drumBunny);
+                        m_creature->HandleEmote(EMOTE_ONESHOT_CUSTOMSPELL01);
+                    }
+
+                    m_timer = urand(3600, 7300);
+                    break;
+                }
+                }
+            }
+            else
+                m_timer -= uiDiff;
+
+            if (m_randomStuffTimer)
+            {
+                if (m_randomStuffTimer <= uiDiff)
+                {
+                    ResetOgreState(false);
+
+                    // Do random stuff
+                    switch (urand(0, 4))
+                    {
+                    case 0:
+                        m_creature->HandleEmoteState(EMOTE_STATE_DANCE);
+                        break;
+                    case 1:
+                        m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, MUG_EQUIP);
+                        m_creature->CastSpell(m_creature, SPELL_BLOODMAUL_INTOXICATION_VISUAL, TRIGGERED_NONE);
+                        m_drinkTimer = 1;
+                        break;
+                    case 2:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_ROAR);
+                        if (urand(0, 100) <= 20)
+                            m_creature->PlayDistanceSound(ROAR_SOUND);
+                        break;
+                    case 3:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_CHEER);
+                        if (urand(0, 100) <= 20)
+                            m_creature->PlayDistanceSound(CHEER_SOUND);
+                        break;
+                    case 4:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_TALK);
+                        break;
+                    default:
+                        m_creature->MonsterSay("Error", 0);
+                        break;
+                    }
+
+                    m_randomStuffTimer = urand(4800, 16000);
+                }
+                else
+                    m_randomStuffTimer -= uiDiff;
+            }
+
+            if (m_drinkTimer)
+            {
+                if (m_drinkTimer <= uiDiff)
+                {
+                    m_creature->HandleEmote(EMOTE_ONESHOT_EAT_NOSHEATHE);
+                    m_drinkTimer = 1200;
+                }
+                else
+                    m_drinkTimer -= uiDiff;
+            }
+
+            if (m_randomSoundTimer)
+            {
+                if (m_randomSoundTimer <= uiDiff)
+                {
+                    switch (urand(1, 4))
+                    {
+                    case 1:
+                        m_creature->PlayDirectSound(RANDOM_SOUND_1);
+                        break;
+                    case 2:
+                        m_creature->PlayDirectSound(RANDOM_SOUND_2);
+                        break;
+                    case 3:
+                        m_creature->PlayDirectSound(RANDOM_SOUND_3);
+                        break;
+                    case 4:
+                        m_creature->PlayDirectSound(RANDOM_SOUND_4);
+                        break;
+                    }
+                    m_randomSoundTimer = urand(10000, 37000);
+                }
+                else
+                    m_randomSoundTimer -= uiDiff;
+            }
+        }
+    }
+
+    void ResetOgreState(bool stopRandomStuff)
+    {
+        if (stopRandomStuff)
+            m_randomStuffTimer = 0;
+
+        m_creature->HandleEmoteState(EMOTE_STATE_NONE); // Stop dancing
+        m_drinkTimer = 0; // Stop drinking
+        m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true); // Set default equipment
+        m_creature->RemoveAurasDueToSpell(SPELL_BLOODMAUL_INTOXICATION_VISUAL); // Remove intoxication aura
+    }
+};
+
+UnitAI* GetAI_npc_supplicant(Creature* pCreature)
+{
+    return new npc_supplicantAI(pCreature);
+}
+
+/*######
+## npc_spirit_prisoner_of_bladespire
+######*/
+
 enum
 {
     POINT_PLAYER_POSITION = 1,
@@ -1704,6 +2383,26 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "mobs_grishna_arrakoa";
     pNewScript->pAreaTrigger = &AreaTrigger_at_raven_prophecy;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "event_into_the_soulgrinder";
+    pNewScript->pProcessEventId = &ProcessEventId_Soulgrinder;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_soulgrinder";
+    pNewScript->GetAI = &GetAI_npc_soulgrinder;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_mogdorg_the_wizened";
+    pNewScript->pQuestRewardedNPC = &QuestRewarded_into_the_soulgrinder;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_supplicant";
+    pNewScript->GetAI = &GetAI_npc_supplicant;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
