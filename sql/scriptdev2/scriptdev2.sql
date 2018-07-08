@@ -424,6 +424,11 @@ UPDATE creature_template SET ScriptName='npc_vimgol' WHERE entry=22911;
 UPDATE creature_template SET ScriptName='npc_spirit_prisoner_of_bladespire' WHERE entry IN(22460);
 UPDATE creature_template SET ScriptName='npc_deadsoul_orb' WHERE entry=20845;
 UPDATE creature_template SET ScriptName='npc_evergrove_druid' WHERE entry=22423;
+INSERT INTO scripted_areatrigger VALUES
+(4613, "mobs_grishna_arrakoa"),
+(4615, "mobs_grishna_arrakoa"),
+(4616, "mobs_grishna_arrakoa"),
+(4617, "mobs_grishna_arrakoa");
 
 /* BLASTED LANDS */
 UPDATE creature_template SET ScriptName='npc_fallen_hero_of_horde' WHERE entry=7572;
@@ -3112,7 +3117,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1015008,'Ah! Cease the incantations, Anchorite! Cease, or I will show you such pain that your pathetic people have never imagined!','colonel jules SAY_EXORCISM_RANDOM_3'),
 (-1015009, 'You... will... leave... this... man!', 'anchorite barada SAY_EXORCISM_RANDOM_2'),
 (-1015010, 'In the name of the Light! It is Light that commands you! It is Light that flung you to the depths of darkness!', 'anchorite barada SAY_EXORCISM_RANDOM_4'),
-(-1015011, 'You will not succeed, mortal! This shell will lie decrepit, blistered and bleeding before I am done with it. And its spirit will be long cast into darkness.', 'colonel jules SAY_EXORCISM_RANDOM_4');
+(-1015011, 'You will not succeed, mortal! This shell will lie decrepit, blistered and bleeding before I am done with it. And its spirit will be long cast into darkness.', 'colonel jules SAY_EXORCISM_RANDOM_4'),
+(-1015012,'From the darkest night shall rise again the raven, shall take flight in the shadows, shall reveal the nature of its kind. Prepare yourself for its coming, for the faithful shall be elevated to take flight with the raven, the rest be forgotten to walk upon the the ground, clipped wings and shame.', 0,4,0,0,'First Prophecy for Whispers of the Raven God'),
+(-1015013,'Steel your minds and guard your thoughts. The dark wings will cloud and consume the minds of the weak, a flock of thralls whose feet may never leave the ground.', 0,4,0,0,'Second Prophecy for Whispers of the Raven God'),
+(-1015014,'The old blood will flow once again with the coming of the raven, the return of darkness in the skies. Scarlet night, and the rise of the old.', 0,4,0,0,'Third Prophecy for Whispers of the Raven God'),
+(-1015015,'The raven was struck down once for flying too high, unready. The eons have prepared the Dark Watcher for its ascent, to draw the dark cloak across the horizon.', 0,4,0,0,'Fourth Prophecy for Whispers of the Raven God');
 
 -- -1 020 000 WOTLK texts
 

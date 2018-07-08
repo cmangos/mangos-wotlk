@@ -1313,6 +1313,66 @@ bool EffectScriptEffectCreature_spell_diminution_powder(Unit* pCaster, uint32 ui
     return false;
 }
 
+/*######
+## mobs_grishna_arrakoa
+######*/
+
+struct Prophecy
+{
+    uint32 creature; // Dummy quest credit creature
+    int32 text; // Text whisper id
+    float x; // Positions for tempsummon
+    float y;
+    float z;
+    float o;
+};
+
+static const std::unordered_map<uint32, Prophecy> prophecies =
+{
+    {4613,{ (uint32)22798, (int32)-1015012, 3779.987061f, 6729.603027f, 180.498413f, 5.71490f }},
+    {4615,{ (uint32)22799, (int32)-1015013, 3629.285889f, 6542.140137f, 155.004669f, 2.56267f }},
+    {4616,{ (uint32)22800, (int32)-1015014, 3736.950439f, 6640.749023f, 133.674530f, 3.33629f }},
+    {4617,{ (uint32)22801, (int32)-1015015, 3572.574219f, 6669.196289f, 128.455444f, 5.62290f }}
+};
+
+enum
+{
+    UNDERSTAND_RAVENSPEECH_SPELL    = 37466,
+    UNDERSTAND_RAVENSPEECH_AURA     = 37642,
+    QUEST_WHISPERS_OF_THE_RAVEN_GOD = 10607,
+    NPC_WHISPER_RAVEN_GOD_TEMPLATE  = 21851,
+    NPC_VISION_RAVEN_GOD_TEMPLATE   = 21861,
+};
+
+bool AreaTrigger_at_raven_prophecy(Player* pPlayer, AreaTriggerEntry const* pAt)
+{
+    if (/*pPlayer->isGameMaster() ||*/ pPlayer->isAlive() &&
+        pPlayer->HasAura(UNDERSTAND_RAVENSPEECH_AURA) &&
+        pPlayer->GetQuestStatus(QUEST_WHISPERS_OF_THE_RAVEN_GOD) == QUEST_STATUS_INCOMPLETE)
+    {
+        auto prophecyIterator = prophecies.find(pAt->id);
+        if (prophecyIterator != prophecies.end())
+        {
+            Prophecy prophecy = prophecyIterator->second;
+            //The quest required IDs are negative when they are game object so we must negate the game object ID
+            if (pPlayer->GetReqKillOrCastCurrentCount(QUEST_WHISPERS_OF_THE_RAVEN_GOD, prophecy.creature) == 0)
+            {
+                if (Creature* whisper = ((ScriptedMap*)pPlayer->GetInstanceData())->GetSingleCreatureFromStorage(NPC_WHISPER_RAVEN_GOD_TEMPLATE))
+                {
+                    if (Creature* vision = pPlayer->SummonCreature(NPC_VISION_RAVEN_GOD_TEMPLATE, prophecy.x, prophecy.y, prophecy.z, prophecy.o, TEMPSPAWN_TIMED_DESPAWN, 6000))
+                    {
+                        DoScriptText(prophecy.text, whisper, pPlayer);
+
+                        //giving credit for the game object automatically negates the id, so we don't have to negate it 
+                        pPlayer->KilledMonsterCredit(prophecy.creature);
+                    }
+                }
+            }
+        }
+    }
+    return false;
+}
+
 enum
 {
     POINT_PLAYER_POSITION = 1,
@@ -1621,12 +1681,6 @@ void AddSC_blades_edge_mountains()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "npc_bloodmaul_dire_wolf";
-    pNewScript->GetAI = &GetAI_npc_bloodmaul_dire_wolf;
-    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_diminution_powder;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "npc_vimgol_visual_bunny";
     pNewScript->GetAI = &GetAI_npc_vimgol_visual_bunny;
     pNewScript->RegisterSelf();
@@ -1639,6 +1693,17 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "npc_vimgol";
     pNewScript->GetAI = &GetAI_npc_vimgol;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_bloodmaul_dire_wolf";
+    pNewScript->GetAI = &GetAI_npc_bloodmaul_dire_wolf;
+    pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_diminution_powder;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "mobs_grishna_arrakoa";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_raven_prophecy;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
