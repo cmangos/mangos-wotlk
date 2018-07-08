@@ -3105,7 +3105,14 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1015001, '%s lets loose a low, gultural growl.', '0', '2', '0', '0', 'Enraged Netherwing Drake - EMOTE on script spell hit'),
 (-1015002, 'You will never get the Heart of Fury!  Its power belongs to Illidan!', '0', '1', '0', '0', 'Shadowlord Deathwail - yell on descent'),
 (-1015003, '%s retrieves the Heart of Fury.', '0', '2', '0', '0', 'Shadowlord Deathwail - grabs heart'),
-(-1015004, 'Master... I\'ve failed you...', '0', '1', '0', '0', 'Shadowlord Deathwail - death');
+(-1015004, 'Master... I\'ve failed you...', '0', '1', '0', '0', 'Shadowlord Deathwail - death'),
+(-1015005,'The power of Light compels you! Back to your pit!','anchorite barada SAY_EXORCISM_RANDOM_6'),
+(-1015006,'All is lost, Anchorite! Abandon what hope remains.','colonel jules SAY_EXORCISM_RANDOM_2'),
+(-1015007,'The Light is my guide... it is my sustenance!','anchorite barada SAY_EXORCISM_RANDOM_7'),
+(-1015008,'Ah! Cease the incantations, Anchorite! Cease, or I will show you such pain that your pathetic people have never imagined!','colonel jules SAY_EXORCISM_RANDOM_3'),
+(-1015009, 'You... will... leave... this... man!', 'anchorite barada SAY_EXORCISM_RANDOM_2'),
+(-1015010, 'In the name of the Light! It is Light that commands you! It is Light that flung you to the depths of darkness!', 'anchorite barada SAY_EXORCISM_RANDOM_4'),
+(-1015011, 'You will not succeed, mortal! This shell will lie decrepit, blistered and bleeding before I am done with it. And its spirit will be long cast into darkness.', 'colonel jules SAY_EXORCISM_RANDOM_4');
 
 -- -1 020 000 WOTLK texts
 

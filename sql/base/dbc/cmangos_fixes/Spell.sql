@@ -1,5 +1,4 @@
 INSERT INTO spell_template(Id, Attributes, AttributesEx,AttributesEx2,AttributesEx3,ProcFlags,ProcChance,DurationIndex,Effect1,EffectImplicitTargetA1,EffectImplicitTargetB1,EffectRadiusIndex1,EffectApplyAuraName1,EffectMiscValue1,EffectMiscValueB1,EffectTriggerSpell1,IsServerSide,SpellName) VALUES
-('17694','256','268435456','0','0','0','101','4','28','47','0','9','0','11296','61','0','1','Summon Darrowshire Poltergeist (DND)'),
 ('21387','320','268435456','0','0','40','15','21','6','1','0','0','42','0','0','21388','1','Melt-Weapon trigger aura related used by Ragnaros'),
 ('21883','384','268435456','0','0','0','101','225','76','22','0','0','0','178904','0','0','1','Summon Healed Celebrian Vine'),
 ('23363','256','0','0','0','0','101','21','76','18','0','0','0','179804','0','0','1','Summon Drakonid Corpse Trigger'),
@@ -60,6 +59,19 @@ INSERT INTO spell_template(Id,SpellName,Attributes,DurationIndex,SpellIconID,Eff
 ALTER TABLE spell_template ADD COLUMN `AttributesServerside` int(11) unsigned NOT NULL DEFAULT '0';
 
 UPDATE spell_template SET AttributesServerside= AttributesServerside|1 WHERE id IN(770,778,9749,9806,9907,9991,13424,13752,16857,17390,17391,17392,26993,27011); -- all spells with Cannot stealth or turn invisible in tooltip
+
+-- Serverside spell added
+-- Player from time to time will summon ghost of Darrowshire Poltergeist
+INSERT INTO spell_template (Id, Attributes, AttributesEx, DurationIndex, Effect1, EffectImplicitTargetA1, EffectImplicitTargetB1, EffectRadiusIndex1, EffectMiscValue1, EffectMiscValueB1, SpellName) VALUES
+(17694, 0x00000100, 0x10000000, 4, 28, 47, 0, 9, 11296, 61, 'Summon Darrowshire Poltergeist (DND)');
+
+-- The Exorcism of Colonel Jules
+INSERT INTO spell_template (Id, SchoolMask, Attributes, CastingTimeIndex, procChance, DurationIndex, rangeIndex, EquippedItemClass, Effect1, EffectImplicitTargetA1, EffectMiscValue1, SpellIconID, DmgMultiplier1, EffectMiscValueB1, SpellName) VALUES
+(39305, 1, 256, 1, 101, 64, 1, -1, 28, 18, 22507, 1, 1, 64, 'Summon Flying Skull');
+INSERT INTO spell_template (Id, SchoolMask, Attributes, AttributesEx, AttributesEx2, AttributesEx3, CastingTimeIndex, procChance, DurationIndex, rangeIndex, EquippedItemClass, Effect1, EffectImplicitTargetA1, EffectApplyAuraName1, SpellIconID, DmgMultiplier1, SpellName) VALUES
+(39304, 1, 8388864, 268435456, 1, 1048576, 1, 101, 21, 1, -1, 6, 1, 4, 1, 1, 'Flying Skull PATH (DND)');
+INSERT INTO spell_template (Id, SchoolMask, Attributes, CastingTimeIndex, procChance, DurationIndex, rangeIndex, EquippedItemClass, Effect1, EffectImplicitTargetA1, EffectRadiusIndex1, EffectMiscValue1, SpellIconID, DmgMultiplier1, EffectMiscValueB1, SpellName) VALUES
+(39302, 1, 256, 1, 101, 9, 7, -1, 28, 18, 8, 22506, 1, 1, 64, 'Quest - The Exorcism, Summon Foul Purge');
 
 -- Zangarmarsh insects stealth prevention
 UPDATE spell_template SET AttributesServerside= AttributesServerside|1 WHERE id IN(35329,35331,35325,35328);
