@@ -3032,7 +3032,7 @@ bool AreaTrigger_at_socrethar_seat(Player* player, AreaTriggerEntry const* /*at*
 
 bool GossipHello_npc_adyen_the_lightwarden(Player* player, Creature* creature)
 {
-    uint32 gossipId = GOSSIP_SOCRETHAR_DEAD_PLACEHOLDER_ID;
+    uint32 gossipId = GOSSIP_NETHERSTORM;
 
     // custom code required because it utilizes two entries
     if (creature->getFaction() == FACTION_SHATTRATH)
@@ -3041,15 +3041,9 @@ bool GossipHello_npc_adyen_the_lightwarden(Player* player, Creature* creature)
     {
         if (npc_adyen_the_lightwardenAI* ai = dynamic_cast<npc_adyen_the_lightwardenAI*>(creature->AI()))
         {
-            if (ai->m_eventStarted)
-                gossipId = GOSSIP_NETHERSTORM;
-            else if (Creature* socrethar = ((ScriptedInstance*)creature->GetMap()->GetInstanceData())->GetSingleCreatureFromStorage(NPC_SOCRETHAR))
-            {
-                if (socrethar->isAlive())
-                    gossipId = GOSSIP_NETHERSTORM;
-                else
-                    ai->DespawnEvent();
-            }
+            Creature* socrethar = ((ScriptedInstance*)creature->GetMap()->GetInstanceData())->GetSingleCreatureFromStorage(NPC_SOCRETHAR);
+            if (!socrethar || !socrethar->isAlive() || socrethar->isInCombat())
+                ai->DespawnEvent();
         }
     }
     player->PrepareGossipMenu(creature, gossipId);
@@ -3065,8 +3059,9 @@ bool GossipSelect_npc_adyen_the_lightwarden(Player* player, Creature* creature, 
             ai->StartEvent(player);
 
         player->CLOSE_GOSSIP_MENU();
+        return true;
     }
-    return true;
+    return false;
 }
 
 void AddSC_netherstorm()
