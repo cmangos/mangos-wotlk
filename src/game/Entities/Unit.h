@@ -2542,6 +2542,8 @@ class Unit : public WorldObject
         void _UpdateSpells(uint32 time);
         void _UpdateAutoRepeatSpell();
 
+        EvadeState GetEvade() const { return m_evadeMode; }
+
         uint32 m_attackTimer[MAX_ATTACK];
 
         float m_createStats[MAX_STATS];
