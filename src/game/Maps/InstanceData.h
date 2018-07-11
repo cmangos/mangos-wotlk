@@ -51,6 +51,8 @@ enum InstanceConditionIDs                                   // Suggested values 
 
     INSTANCE_CONDITION_ID_SOCRETHAR_GOSSIP  = 8215,
 
+    INSTANCE_CONDITION_ID_SAAT_BEACON               = 20201,
+
     // to check vehicles in Ulduar
     INSTANCE_CONDITION_ID_ULDUAR            = 33113,
 };

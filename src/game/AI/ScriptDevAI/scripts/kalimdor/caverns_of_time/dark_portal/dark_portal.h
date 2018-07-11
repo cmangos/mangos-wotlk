@@ -150,6 +150,7 @@ class instance_dark_portal : public ScriptedInstance
         void DoResetEvent();
         void StartPostEvent();
         void ExecutePostEventStep();
+        bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;

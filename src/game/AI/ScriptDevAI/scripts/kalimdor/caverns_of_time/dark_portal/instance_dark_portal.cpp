@@ -537,6 +537,33 @@ void instance_dark_portal::Update(uint32 uiDiff)
     }
 }
 
+bool instance_dark_portal::CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const
+{
+    switch (uiInstanceConditionId)
+    {
+        case INSTANCE_CONDITION_ID_SAAT_BEACON: // Event not in progress and Medivh is spawned and alive
+        {
+            if (GetData(TYPE_MEDIVH) == IN_PROGRESS)
+                return false;
+
+            if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
+            {
+                if (pMedivh->isAlive())
+                    return true;
+                else
+                    return false;
+            }
+            else
+                return false;
+        }
+    }
+
+    script_error_log("instance_mount_hyjal::CheckConditionCriteriaMeet called with unsupported Id %u. Called with param plr %s, src %s, condition source type %u",
+        uiInstanceConditionId, pPlayer ? pPlayer->GetGuidStr().c_str() : "nullptr", pConditionSource ? pConditionSource->GetGuidStr().c_str() : "nullptr", conditionSourceType);
+    return false;
+}
+
+
 InstanceData* GetInstanceData_instance_dark_portal(Map* pMap)
 {
     return new instance_dark_portal(pMap);
