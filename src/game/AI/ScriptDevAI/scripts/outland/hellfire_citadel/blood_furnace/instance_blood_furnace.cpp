@@ -244,6 +244,7 @@ void instance_blood_furnace::DoNextBroggokEventPhase()
         if (Creature* pBroggok = GetSingleCreatureFromStorage(NPC_BROGGOK))
         {
             pBroggok->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            pBroggok->SetWalk(false);
             pBroggok->GetMotionMaster()->MoveWaypoint();
         }
     }
@@ -259,7 +260,7 @@ void instance_blood_furnace::DoNextBroggokEventPhase()
         {
             if (Creature* pOrc = instance->GetCreature(m_sSortedOrcGuid))
             {
-                pOrc->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE + UNIT_FLAG_NON_ATTACKABLE);
+                pOrc->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 pOrc->SetInCombatWithZone();
             }
         }
