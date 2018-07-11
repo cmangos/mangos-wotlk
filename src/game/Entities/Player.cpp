@@ -3138,11 +3138,15 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                     break;
                 }
             }
-            // We do not learn previous rank if its owned by a talent we don't know
-            if (!IsInWorld() || disabled || talent)        // at spells loading, no output, but allow save
-                addSpell(prev_spell, active, true, true, disabled);
-            else                                            // at normal learning
-                learnSpell(prev_spell, true);
+
+            if (!talent)
+            {
+                // We do not learn previous rank if its owned by a talent we don't know
+                if (!IsInWorld() || disabled)        // at spells loading, no output, but allow save
+                    addSpell(prev_spell, active, true, true, disabled);
+                else                                            // at normal learning
+                    learnSpell(prev_spell, true);
+            }
         }
 
         PlayerSpell newspell;
