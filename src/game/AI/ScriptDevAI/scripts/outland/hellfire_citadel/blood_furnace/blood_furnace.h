@@ -64,6 +64,8 @@ class instance_blood_furnace : public ScriptedInstance
 
         void Initialize() override;
 
+        void OnPlayerEnter(Player* player) override;
+
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
@@ -97,6 +99,8 @@ class instance_blood_furnace : public ScriptedInstance
 
         GuidList m_luiNascentOrcGuids;
         GuidList m_lChannelersGuids;
+
+        bool m_firstPlayer;
 };
 
 #endif
