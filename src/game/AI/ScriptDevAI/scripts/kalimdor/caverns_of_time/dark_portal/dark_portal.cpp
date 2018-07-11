@@ -116,6 +116,8 @@ enum
     SPELL_TEMPORUS                  = 31392,
     SPELL_INFINITE_TIMEREAVER       = 37178,
     SPELL_RIFT_END_BOSS             = 31393,
+
+    SPELL_QUIET_SUICIDE_UNUSED      = 3617, // Currently unused. Should be used by Medivh on self when shield runs out, 3 sec after he says his death text
 };
 
 struct RiftWaveData
