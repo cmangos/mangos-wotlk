@@ -58,8 +58,10 @@ struct npc_medivh_black_morassAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MEDIVH, FAIL);
-
+        
         DoScriptText(SAY_DEATH, m_creature);
+
+        m_creature->ForcedDespawn(17000);
     }
 
     void UpdateAI(const uint32 /*uiDiff*/) override { }
