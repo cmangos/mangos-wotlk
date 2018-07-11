@@ -3541,7 +3541,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1269017,'It is only a matter...of time.',10405,1,0,0,'aeonus SAY_DEATH'),
 (-1269018,'REUSE ME',0,0,0,0,'REUSE ME'),
 
-(-1269019,'Stop! Do not go further, mortals. You are ill-prepared to face the forces of the Infinite Dragonflight. Come, let me help you.',0,0,0,0,'saat SAY_SAAT_WELCOME'),
+(-1269019,'Stop! Do not go any further, mortal. You are ill-prepared to face the forces of the Infinite Dragonflight. Come, let me help you.',0,0,0,0,'saat SAY_SAAT_WELCOME'),
 
 (-1269020,'The time has come! Gul\'dan, order your warlocks to double their efforts! Moments from now the gateway will open, and your Horde will be released upon this ripe, unsuspecting world!',10435,1,0,0,'medivh SAY_ENTER'),
 (-1269021,'What is this? Champions, coming to my aid? I sense the hand of the dark one in this. Truly this sacred event bears his blessing?',10436,1,0,0,'medivh SAY_INTRO'),
