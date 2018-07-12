@@ -401,6 +401,8 @@ enum
     NPC_NETHERMANCER_SEPETHREA  = 19221,
     NPC_MOROES                  = 15687,
     NPC_MOROGRIM_TIDEWALKER     = 21213,
+    NPC_VAZRUDEN_THE_HERALD     = 17307,
+    NPC_VAZRUDEN                = 17537,
     NPC_ANUBARAK                = 29120,
     NPC_SINDRAGOSA              = 36853,
     NPC_ZARITHRIAN              = 39746,
@@ -469,6 +471,11 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
             break;
         case NPC_ZARITHRIAN:
             if (z > 87.0f)
+                return false;
+            break;
+        case NPC_VAZRUDEN:
+        case NPC_VAZRUDEN_THE_HERALD:
+            if (x < -1336.0f)
                 return false;
             break;
         default:

@@ -327,6 +327,18 @@ struct boss_vazruden_heraldAI : public ScriptedAI
         }
 
         DoMeleeAttackIfReady();
+
+        if (EnterEvadeIfOutOfCombatArea(uiDiff))
+        {
+            if (m_vazrudenGuid)
+            {
+                if (Creature* pVazruden = m_creature->GetMap()->GetCreature(m_vazrudenGuid))
+                {
+                    DoScriptText(SAY_TAUNT, pVazruden);
+                    pVazruden->AI()->EnterEvadeMode();
+                }
+            }
+        }
     }
 };
 
@@ -412,6 +424,13 @@ struct boss_vazrudenAI : public ScriptedAI
             m_uiRevengeTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
+
+        if (EnterEvadeIfOutOfCombatArea(uiDiff))
+        {
+            DoScriptText(SAY_TAUNT, m_creature);
+            if (Creature* pNazan = m_pInstance->GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
+                pNazan->AI()->EnterEvadeMode();
+        }
     }
 };
 
