@@ -20,6 +20,7 @@
 #include "World/World.h"
 #include "Entities/Creature.h"
 #include "Entities/Vehicle.h"
+#include "Server/DBCStores.h"
 
 CreatureAI::CreatureAI(Creature* creature) :
     UnitAI(creature),
