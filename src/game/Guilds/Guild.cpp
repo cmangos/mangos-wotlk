@@ -1720,7 +1720,7 @@ void Guild::AppendDisplayGuildBankSlot(WorldPacket& data, GuildBankTab const* ta
         {
             if (uint32 enchantId = item->GetEnchantmentId(EnchantmentSlot(socketSlot)))
             {
-                data << uint8(socketSlot);
+                data << uint8(socketSlot - SOCK_ENCHANTMENT_SLOT); // BC client count gems slot from 0
                 data << uint32(enchantId);
                 ++socketCount;
             }
