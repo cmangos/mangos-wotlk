@@ -41,9 +41,16 @@ enum
     SPELL_CRUSH_ARMOR           = 33661,
     SPELL_LIGHTNING_WRATH       = 33665,
     SPELL_OVERRUN               = 32636,
+    SPELL_OVERRUN_TRIGGER_SPAWN = 32632,
+    SPELL_OVERRUN_DAMAGE        = 32637,
     SPELL_ENRAGE                = 33653,
     SPELL_MARK_OF_DEATH_PLAYER  = 37128,
     SPELL_MARK_OF_DEATH_AURA    = 37125,        // triggers 37131 on target if it has aura 37128
+
+    SPELL_EARTHQUAKE_VISUAL     = 41966,        // used in OOC sequence for RP
+
+    COUNT_OVERRUN               = 5,
+    POINT_OVERRUN               = 1,
 };
 
 struct boss_doomwalkerAI : public ScriptedAI
@@ -55,6 +62,11 @@ struct boss_doomwalkerAI : public ScriptedAI
     uint32 m_uiQuakeTimer;
     uint32 m_uiArmorTimer;
 
+    uint32 m_overrunTargets;
+    uint32 m_overrunExecTimer;
+    GuidVector m_overrunCandidates;
+    SelectAttackingTargetParams m_overrunParams;
+
     bool m_bHasEnrage;
 
     void Reset() override
@@ -65,6 +77,12 @@ struct boss_doomwalkerAI : public ScriptedAI
         m_uiOverrunTimer   = urand(30000, 45000);
 
         m_bHasEnrage       = false;
+
+        m_overrunTargets = 0;
+        m_overrunCandidates.clear();
+
+        m_overrunParams.range.minRange = 0;
+        m_overrunParams.range.maxRange = 30;
 
         m_creature->RemoveAurasDueToSpell(SPELL_MARK_OF_DEATH_AURA);
     }
@@ -87,9 +105,37 @@ struct boss_doomwalkerAI : public ScriptedAI
         }
     }
 
+    void MovementInform(uint32 movementType, uint32 data) override
+    {
+        if (movementType == POINT_MOTION_TYPE && data == POINT_OVERRUN)
+        {
+            if (Unit* victim = m_creature->getVictim())
+            {
+                m_creature->MeleeAttackStart(victim);
+                m_creature->SetTarget(victim);
+                DoStartMovement(victim);
+            }
+            SetCombatScriptStatus(false);
+            m_creature->RemoveAurasDueToSpell(SPELL_OVERRUN);
+            DoResetThreat();
+        }
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        m_creature->MeleeAttackStop(m_creature->getVictim());
+        m_creature->SetTarget(nullptr);
+        SetCombatScriptStatus(true);
+        float x, y, z;
+        summoned->GetNearPoint(m_creature, x, y, z, 0.f, 0.f, summoned->GetAngle(m_creature));
+        m_creature->GetMotionMaster()->MovePoint(POINT_OVERRUN, x, y, z);
+        m_overrunExecTimer = 250;
+    }
+
     void JustDied(Unit* /*pKiller*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
+        m_creature->RemoveAurasDueToSpell(SPELL_MARK_OF_DEATH_AURA);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -102,6 +148,18 @@ struct boss_doomwalkerAI : public ScriptedAI
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
+
+        if (GetCombatScriptStatus())
+        {
+            if (m_overrunExecTimer <= uiDiff)
+            {
+                m_creature->CastSpell(nullptr, SPELL_OVERRUN_DAMAGE, TRIGGERED_NONE);
+                m_overrunExecTimer = 250;
+            }
+            else
+                m_overrunExecTimer -= uiDiff;
+            return;
+        }
 
         // Spell Enrage, when hp <= 20% gain enrage
         if (m_creature->GetHealthPercent() <= 20.0f && !m_bHasEnrage)
@@ -116,8 +174,18 @@ struct boss_doomwalkerAI : public ScriptedAI
         // Spell Overrun
         if (m_uiOverrunTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_OVERRUN) == CAST_OK)
+            std::vector<Unit*> targets;
+            m_creature->SelectAttackingTargets(targets, ATTACKING_TARGET_ALL_SUITABLE, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_RANGE_AOE_RANGE, m_overrunParams);
+            while (targets.size() > COUNT_OVERRUN)
+                targets.erase(targets.begin() + urand(0, targets.size() - 1));
+
+            if (targets.size() > 0)
             {
+                float angle = m_creature->GetAngle(targets[0]);
+                m_creature->SetFacingTo(angle);
+                m_creature->SetOrientation(angle);
+                m_creature->CastSpell(nullptr, SPELL_OVERRUN, TRIGGERED_NONE);
+                m_creature->CastSpell(nullptr, SPELL_OVERRUN_TRIGGER_SPAWN, TRIGGERED_OLD_TRIGGERED); // shouldnt be sent to client
                 DoScriptText(urand(0, 1) ? SAY_OVERRUN_1 : SAY_OVERRUN_2, m_creature);
                 m_uiOverrunTimer = urand(25000, 40000);
             }
@@ -140,7 +208,7 @@ struct boss_doomwalkerAI : public ScriptedAI
         // Spell Chain Lightning
         if (m_uiChainTimer < uiDiff)
         {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
             if (!pTarget)
                 pTarget = m_creature->getVictim();
 
