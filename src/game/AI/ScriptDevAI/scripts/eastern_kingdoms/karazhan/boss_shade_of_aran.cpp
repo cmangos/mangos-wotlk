@@ -453,13 +453,17 @@ struct boss_aranAI : public ScriptedAI
                 {
                     case 0:
                         if (DoCastSpellIfCan(m_creature, SPELL_CONJURE_WATER) == CAST_OK)
+                        {
                             m_uiManaRecoveryTimer = 2000;
+                            ++m_uiManaRecoveryStage;
+                        }
                         break;
                     case 1:
                         if (DoCastSpellIfCan(m_creature, SPELL_DRINK) == CAST_OK)
                         {
                             m_creature->SetStandState(UNIT_STAND_STATE_SIT);
                             m_uiManaRecoveryTimer = 5000;
+                            ++m_uiManaRecoveryStage;
                         }
                         break;
                     case 2:
@@ -475,7 +479,6 @@ struct boss_aranAI : public ScriptedAI
                         }
                         break;
                 }
-                ++m_uiManaRecoveryStage;
             }
             else
                 m_uiManaRecoveryTimer -= uiDiff;
