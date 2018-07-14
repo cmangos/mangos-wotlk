@@ -7914,6 +7914,17 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
             if (target->GetTypeId() == TYPEID_UNIT && target->GetEntry() != 15689)
                 return false;
             break;
+        case 30835:                                         // Infernal Relay - Malchezaar - must only hit unused infernals
+        {
+            Creature* creature = nullptr;
+            MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck creature_check(*target, 17646, true, false, 2.0f, true);
+            MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(creature, creature_check);
+            Cell::VisitGridObjects(target, searcher, 2.0f);
+            if (creature)
+                if (target->GetPositionX() == creature->GetPositionX() && target->GetPositionY() == creature->GetPositionY())
+                    return false;
+            break;
+        }
         case 33812:                                         // Gruul the Dragonkiller - Hurtful Strike Primer
             if (target->GetTypeId() != TYPEID_PLAYER || !m_caster->CanReachWithMeleeAttack(target))
                 return false;
@@ -7967,7 +7978,7 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
             if (target->GetTypeId() != TYPEID_UNIT || target->GetEntry() != 23040 || m_caster->GetTypeId() != TYPEID_UNIT || m_caster->GetEntry() != 23040)
                 return false;
 
-            uint8 pBunnyId = ((Creature*)m_caster)->AI()->GetScriptData();
+            uint8 pBunnyId = m_caster->AI()->GetScriptData();
 
             std::list<Creature*> creatureList;
             MaNGOS::AllCreaturesOfEntryInRangeCheck check(target, 23040, 60.f);
@@ -7977,8 +7988,8 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
             for (auto& creature : creatureList)
             {
                 // Check that both have AI() before accessing
-                if (creature->AI() && ((Creature*)target)->AI() &&
-                        creature->AI()->GetScriptData() == ((Creature*)target)->AI()->GetScriptData())
+                if (creature->AI() && target->AI() &&
+                        creature->AI()->GetScriptData() == target->AI()->GetScriptData())
                     pBunnyId = creature->AI()->GetScriptData();
             }
 

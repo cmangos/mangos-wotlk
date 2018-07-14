@@ -51,13 +51,14 @@ enum
     SPELL_EQUIP_AXES            = 30857,                    // Visual for axe equiping - transition to phase 2
     SPELL_AMPLIFY_DAMAGE        = 39095,                    // Amplifiy during phase 3 3
     // SPELL_CLEAVE              = 30131,                   // spell not confirmed
-    // SPELL_INFERNAL_RELAY      = 30834,                   // TBC: possible cast from the far Infernal Relay to the close Infernal Relay; currently not used because of map issues
+    SPELL_INFERNAL_RELAY        = 30834,                    // purpose unk
     SPELL_INFERNAL_RELAY_SUMMON = 30835,                    // triggers 30836, which summons an infernal
 
     SPELL_HELLFIRE              = 30859,                    // Infernal damage aura
 
     NPC_NETHERSPITE_INFERNAL    = 17646,                    // The netherspite infernal creature
     NPC_MALCHEZARS_AXE          = 17650,                    // Malchezar's axes summoned during phase 3
+    //NPC_INFERNAL_RELAY          = 17645,
 
     EQUIP_ID_AXE                = 23996,                    // Axes info
 
@@ -67,19 +68,15 @@ enum
     MAX_ENFEEBLE_TARGETS        = 5,
 };
 
-/*######
-## boss_malchezaar
-######*/
-
 struct boss_malchezaarAI : public ScriptedAI
 {
     boss_malchezaarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance  = (instance_karazhan*)pCreature->GetInstanceData();
+        m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
     }
 
-    instance_karazhan* m_pInstance;
+    ScriptedInstance* m_pInstance;
 
     uint8 m_uiEnfeebleIndex;
     uint32 m_uiEnfeebleTimer;
@@ -89,6 +86,8 @@ struct boss_malchezaarAI : public ScriptedAI
     uint32 m_uiSunderArmorTimer;
     uint32 m_uiAmplifyDamageTimer;
     uint32 m_uiInfernalTimer;
+    ObjectGuid m_uiRelayGuidClose;
+    ObjectGuid m_uiRelayGuidFar;
 
     ObjectGuid m_aEnfeebleTargetGuid[MAX_ENFEEBLE_TARGETS];
     uint32 m_auiEnfeebleHealth[MAX_ENFEEBLE_TARGETS];
@@ -144,6 +143,36 @@ struct boss_malchezaarAI : public ScriptedAI
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
+        /*std::list<Creature*> creatureList;
+        m_creature->GetMap()->ForceLoadGrid(-10833.1, -2151.58);
+        m_creature->GetMap()->ForceLoadGrid(-10893.51, -2081.342);
+        GetCreatureListWithEntryInGrid(creatureList,m_creature, NPC_INFERNAL_RELAY,400.0f);*/
+        float z = 0;
+        if (instance_karazhan* kara = dynamic_cast<instance_karazhan*>(m_pInstance))
+        {
+            for (auto& relayGuid : kara->m_vInfernalRelays)
+            {
+                if (z == 0)
+                {
+                    Creature* relay = m_creature->GetMap()->GetCreature(relayGuid);
+                    m_uiRelayGuidClose = relayGuid;
+                    m_uiRelayGuidFar = relayGuid;
+                    z = relay->GetPositionZ();
+                }
+                else
+                {
+                    Creature* relay = m_creature->GetMap()->GetCreature(relayGuid);
+                    if (relay->GetPositionZ() < z)
+                    {
+                        m_uiRelayGuidClose = relayGuid;
+                    }
+                    else
+                    {
+                        m_uiRelayGuidFar = relayGuid;
+                    }
+                }
+            }
+        }
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MALCHEZZAR, IN_PROGRESS);
     }
@@ -159,10 +188,11 @@ struct boss_malchezaarAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        if (pSummoned->GetEntry() == NPC_NETHERSPITE_INFERNAL)
-            pSummoned->CastSpell(pSummoned, SPELL_HELLFIRE, TRIGGERED_NONE);
-        else if (pSummoned->GetEntry() == NPC_MALCHEZARS_AXE)
+        if (pSummoned->GetEntry() == NPC_MALCHEZARS_AXE)
+        {
+            pSummoned->SetForceAttackingCapability(true); // has to be able to attack even if not selectable or attackable
             pSummoned->SetInCombatWithZone();
+        }
     }
 
     void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
@@ -195,38 +225,6 @@ struct boss_malchezaarAI : public ScriptedAI
         m_uiEnfeebleIndex = 0;
     }
 
-    // Function that returns a valid relay target
-    Unit* GetInfernalRelayTarget()
-    {
-        if (!m_pInstance)
-            return nullptr;
-
-        // Check if the Infernal targets doesn't already have a Netherspite infernal
-        GuidList lTargetsGuidList;
-        m_pInstance->GetInfernalTargetsList(lTargetsGuidList);
-
-        std::vector<Creature*> vAvailableTargets;
-        vAvailableTargets.reserve(lTargetsGuidList.size());
-
-        for (GuidList::const_iterator itr = lTargetsGuidList.begin(); itr != lTargetsGuidList.end(); ++itr)
-        {
-            if (Creature* pInfernalTarget = m_creature->GetMap()->GetCreature(*itr))
-            {
-                if (!GetClosestCreatureWithEntry(pInfernalTarget, NPC_NETHERSPITE_INFERNAL, 5.0f))
-                    vAvailableTargets.push_back(pInfernalTarget);
-            }
-        }
-
-        if (vAvailableTargets.empty())
-            return nullptr;
-
-        Creature* pTarget = vAvailableTargets[urand(0, vAvailableTargets.size() - 1)];
-        if (pTarget)
-            return pTarget;
-
-        return nullptr;
-    }
-
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -246,6 +244,7 @@ struct boss_malchezaarAI : public ScriptedAI
                     SetEquipmentSlots(false, EQUIP_ID_AXE, EQUIP_ID_AXE, EQUIP_NO_CHANGE);
                     m_creature->SetAttackTime(BASE_ATTACK, ATTACK_TIMER_AXES);
                     m_uiPhase = 2;
+                    m_creature->SetCanParry(true);
                 }
             }
         }
@@ -271,6 +270,7 @@ struct boss_malchezaarAI : public ScriptedAI
                     m_uiShadowNovaTimer = m_uiEnfeebleTimer + 5000;
                     m_uiInfernalTimer = 15000;
                     m_uiPhase = 3;
+                    m_creature->SetCanParry(false);
 
                     return;
                 }
@@ -299,19 +299,14 @@ struct boss_malchezaarAI : public ScriptedAI
         // Summon an infernal on timer
         if (m_uiInfernalTimer < uiDiff)
         {
-            if (m_pInstance)
+            if (Creature* relayClose = m_creature->GetMap()->GetCreature(m_uiRelayGuidClose))
             {
-                if (Creature* pRelay = m_creature->GetMap()->GetCreature(m_pInstance->GetRelayGuid(true)))
+                if (Creature* relayFar = m_creature->GetMap()->GetCreature(m_uiRelayGuidFar))
                 {
-                    if (Unit* pTarget = GetInfernalRelayTarget())
-                    {
-                        pRelay->CastSpell(pTarget, SPELL_INFERNAL_RELAY_SUMMON, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-                        DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
-                        m_uiInfernalTimer =  m_uiPhase == 3 ? 17000 : 45000;
-                    }
+                    relayFar->CastSpell(relayClose, SPELL_INFERNAL_RELAY, TRIGGERED_NONE);
+                    DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
+                    m_uiInfernalTimer = m_uiPhase == 3 ? 17000 : 45000;
                 }
-                else
-                    script_error_log("Instance Karazhan: ERROR Failed to properly load Infernal Relays for creature %u.", m_creature->GetEntry());
             }
         }
         else
@@ -377,10 +372,6 @@ UnitAI* GetAI_boss_malchezaar(Creature* pCreature)
     return new boss_malchezaarAI(pCreature);
 }
 
-/*######
-## npc_infernal_target
-######*/
-
 // TODO Remove this 'script' when combat can be proper prevented from core-side
 struct npc_infernal_targetAI : public Scripted_NoMovementAI
 {
@@ -397,6 +388,30 @@ UnitAI* GetAI_npc_infernal_target(Creature* pCreature)
     return new npc_infernal_targetAI(pCreature);
 }
 
+struct npc_infernal_relayAI : public Scripted_NoMovementAI
+{
+    npc_infernal_relayAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+    void Reset() override
+    {
+
+    }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        pSummoned->CastSpell(pSummoned, SPELL_HELLFIRE, TRIGGERED_OLD_TRIGGERED);
+    }
+
+    void AttackStart(Unit* /*pWho*/) override { }
+    void UpdateAI(const uint32 /*uiDiff*/) override { }
+};
+
+UnitAI* GetAI_npc_infernal_relay(Creature* pCreature)
+{
+    return new npc_infernal_relayAI(pCreature);
+}
+
 void AddSC_boss_prince_malchezaar()
 {
     Script* pNewScript;
@@ -409,5 +424,10 @@ void AddSC_boss_prince_malchezaar()
     pNewScript = new Script;
     pNewScript->Name = "npc_infernal_target";
     pNewScript->GetAI = &GetAI_npc_infernal_target;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_infernal_relay";
+    pNewScript->GetAI = &GetAI_npc_infernal_relay;
     pNewScript->RegisterSelf();
 }
