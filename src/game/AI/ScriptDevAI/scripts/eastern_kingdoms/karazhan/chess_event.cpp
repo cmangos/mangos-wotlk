@@ -297,9 +297,9 @@ bool GossipSelect_npc_echo_of_medivh(Player* pPlayer, Creature* pCreature, uint3
 ## npc_chess_piece_generic
 ######*/
 
-struct npc_chess_piece_genericAI : public ScriptedAI
+struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
 {
-    npc_chess_piece_genericAI(Creature* pCreature) : ScriptedAI(pCreature)
+    npc_chess_piece_genericAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
         m_pInstance = (instance_karazhan*)pCreature->GetInstanceData();
         Reset();
@@ -326,8 +326,9 @@ struct npc_chess_piece_genericAI : public ScriptedAI
         // cancel move timer for player faction npcs or for friendly games
         if (m_pInstance)
         {
-            if ((m_pInstance->GetPlayerTeam() == ALLIANCE && m_creature->getFaction() == FACTION_ID_CHESS_ALLIANCE) ||
-                    (m_pInstance->GetPlayerTeam() == HORDE && m_creature->getFaction() == FACTION_ID_CHESS_HORDE) ||
+            // Reason why != is because when player takes control, chess piece gets his faction
+            if ((m_pInstance->GetPlayerTeam() == ALLIANCE && m_creature->getFaction() != FACTION_ID_CHESS_HORDE) ||
+                    (m_pInstance->GetPlayerTeam() == HORDE && m_creature->getFaction() != FACTION_ID_CHESS_ALLIANCE) ||
                     m_pInstance->GetData(TYPE_CHESS) == DONE)
                 m_uiMoveCommandTimer = 0;
         }
@@ -343,7 +344,13 @@ struct npc_chess_piece_genericAI : public ScriptedAI
         if (Creature* pSquare = m_creature->GetMap()->GetCreature(m_currentSquareGuid))
             pSquare->RemoveAllAuras();
 
+        if (Unit* player = m_creature->GetCharmer())
+        {
+            player->RemoveAurasDueToSpell(SPELL_CONTROL_PIECE);
+        }
+
         // ToDo: remove corpse after 10 sec
+        m_creature->ForcedDespawn(10000);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
@@ -356,6 +363,7 @@ struct npc_chess_piece_genericAI : public ScriptedAI
                 pSquare->RemoveAllAuras();
 
             m_currentSquareGuid = pInvoker->GetObjectGuid();
+            m_fCurrentOrientation = m_creature->GetOrientation();
             m_uiMoveTimer = 2000;
         }
         // handle encounter start event
@@ -375,6 +383,8 @@ struct npc_chess_piece_genericAI : public ScriptedAI
             pInvoker->CastSpell(pInvoker, SPELL_DISABLE_SQUARE, TRIGGERED_OLD_TRIGGERED);
             pInvoker->CastSpell(pInvoker, SPELL_IS_SQUARE_USED, TRIGGERED_OLD_TRIGGERED);
         }
+        else if (eventType == AI_EVENT_CUSTOM_C)
+            m_fCurrentOrientation = m_creature->GetOrientation();
     }
 
     void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
@@ -386,7 +396,10 @@ struct npc_chess_piece_genericAI : public ScriptedAI
         if (Unit* pTarget = GetTargetByType(TARGET_TYPE_RANDOM, 5.0f))
             DoCastSpellIfCan(pTarget, SPELL_CHANGE_FACING);
         else
+        {
             m_creature->SetFacingTo(m_fCurrentOrientation);
+        }
+            
     }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
@@ -493,7 +506,7 @@ struct npc_chess_piece_genericAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_pInstance || m_pInstance->GetData(TYPE_CHESS) != IN_PROGRESS)
+        if (!m_pInstance || (m_pInstance->GetData(TYPE_CHESS) != IN_PROGRESS && m_pInstance->GetData(TYPE_CHESS) != SPECIAL))
             return;
 
         // issue move command
@@ -566,8 +579,8 @@ struct npc_chess_piece_genericAI : public ScriptedAI
                 m_uiMoveTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        /*if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;*/
     }
 };
 
@@ -604,7 +617,7 @@ bool EffectDummyCreature_npc_chess_generic(Unit* pCaster, uint32 uiSpellId, Spel
             pCaster->CastSpell(pCaster, SPELL_DISABLE_SQUARE, TRIGGERED_OLD_TRIGGERED);
             pCaster->CastSpell(pCaster, SPELL_IS_SQUARE_USED, TRIGGERED_OLD_TRIGGERED);
 
-            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_MOVE_COOLDOWN, TRIGGERED_OLD_TRIGGERED);
+            pCreatureTarget->CastSpell(pCreatureTarget, SPELL_MOVE_COOLDOWN, TRIGGERED_NONE);
             pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
         }
 
@@ -630,7 +643,7 @@ bool EffectDummyCreature_npc_chess_generic(Unit* pCaster, uint32 uiSpellId, Spel
             case NPC_ORC_WOLF:              uiMeleeSpell = SPELL_MELEE_WOLF;                break;
             case NPC_SUMMONED_DAEMON:       uiMeleeSpell = SPELL_MELEE_DAEMON;              break;
         }
-
+        
         pCreatureTarget->CastSpell(pCreatureTarget, uiMeleeSpell, TRIGGERED_OLD_TRIGGERED);
         return true;
     }
@@ -638,7 +651,11 @@ bool EffectDummyCreature_npc_chess_generic(Unit* pCaster, uint32 uiSpellId, Spel
     else if (uiSpellId == SPELL_FACE_SQUARE && uiEffIndex == EFFECT_INDEX_0)
     {
         if (pCaster->GetTypeId() == TYPEID_UNIT)
+        {
+            pCreatureTarget->SetInFront(pCaster);         // set movementinfo orientation, needed for next movement if any
             pCreatureTarget->SetFacingToObject(pCaster);
+            pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCaster, pCreatureTarget);
+        }
 
         return true;
     }
@@ -817,6 +834,8 @@ struct npc_warchief_blackhandAI : public npc_chess_piece_genericAI
         }
 
         m_pInstance->DoMoveChessPieceToSides(SPELL_TRANSFORM_BLACKHAND, FACTION_ID_CHESS_HORDE, true);
+
+        m_creature->ForcedDespawn(10000);
     }
 
     uint32 DoCastPrimarySpell() override

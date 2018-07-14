@@ -36,8 +36,6 @@ enum
     NPC_NIGHTBANE_HELPER            = 17260,
     NPC_NETHERSPITE                 = 15689,
     NPC_ECHO_MEDIVH                 = 16816,
-    NPC_INFERNAL_RELAY              = 17645,                    // helper for the Netherspite infernals for Prince Malchezaar
-    NPC_INFERNAL_TARGET             = 17644,                    // targets for the Netherspite infernals
     NPC_INVISIBLE_STALKER           = 22519,                    // placeholder for dead chess npcs
     NPC_CHESS_STATUS_BAR            = 22520,                    // npc that controlls the transformation of dead pieces
     NPC_CHESS_VICTORY_CONTROLLER    = 22524,
@@ -47,6 +45,7 @@ enum
     NPC_SQUARE_BLACK                = 17305,                    // chess black square
     // NPC_SQUARE_OUTSIDE_BLACK     = 17316,                    // outside chess black square
     // NPC_SQUARE_OUTSIDE_WHITE     = 17317,                    // outside chess white square
+    NPC_VICTORY_DUMMY_TOOL          = 22523,
 
     // Moroes event related
     NPC_LADY_KEIRA_BERRYBUCK        = 17007,
@@ -98,6 +97,9 @@ enum
     NPC_COLDMIST_STALKER            = 16170,
     NPC_COLDMIST_WIDOW              = 16171,
 
+    //prince malchezaar
+    NPC_INFERNAL_RELAY = 17645,
+
     GO_STAGE_CURTAIN                = 183932,
     GO_STAGE_DOOR_LEFT              = 184278,
     GO_STAGE_DOOR_RIGHT             = 184279,
@@ -127,6 +129,7 @@ enum
     SPELL_GAME_IN_SESSION           = 39331,                    // debuff on players received while the game is in session
     SPELL_FORCE_KILL_BUNNY          = 45260,                    // triggers 45259
     SPELL_GAME_OVER                 = 39401,                    // cast by Medivh on game end
+    SPELL_BOARD_VISUAL              = 39390,
     SPELL_VICTORY_VISUAL            = 39395,                    // cast by the Victory controller on game end
 
     FACTION_ID_CHESS_HORDE          = 1689,
@@ -204,17 +207,18 @@ class instance_karazhan : public ScriptedInstance
         uint32 GetPlayerTeam() { return m_uiTeam; }
         bool IsFriendlyGameReady() { return m_bFriendlyGame; }
         void DoMoveChessPieceToSides(uint32 uiSpellId, uint32 uiFaction, bool bGameEnd = false);
+        void DoFailChessEvent();
+        void DoFinishChessEvent();
         void GetChessPiecesByFaction(GuidList& lList, uint32 uiFaction) { lList = uiFaction == FACTION_ID_CHESS_ALLIANCE ? m_lChessPiecesAlliance : m_lChessPiecesHorde; }
 
         void GetNightbaneTriggers(GuidList& lList, bool bGround) { lList = bGround ? m_lNightbaneGroundTriggers : m_lNightbaneAirTriggers; }
-
-        ObjectGuid GetRelayGuid(bool bLower) { return bLower ? m_LowerRelayGuid : m_HigherRelayGuid; }
-        void GetInfernalTargetsList(GuidList& lList) { lList = m_lInfernalTargetsGuidList; }
 
         void Load(const char* chrIn) override;
         const char* Save() const override { return m_strInstData.c_str(); }
 
         void Update(uint32 uiDiff) override;
+
+        GuidVector m_vInfernalRelays;
 
     private:
         void DoPrepareChessEvent();
@@ -226,18 +230,19 @@ class instance_karazhan : public ScriptedInstance
         uint32 m_uiOzDeathCount;
         uint32 m_uiTeam;                                    // Team of first entered player, used for the Chess event
         uint32 m_uiChessResetTimer;
+        uint32 m_uiChessEndingTimer;
+        uint32 m_uiVictoryControllerTimer;
+        uint32 m_uiVictoryToolTimers[8];
 
         uint8 m_uiAllianceStalkerCount;
         uint8 m_uiHordeStalkerCount;
 
         bool m_bFriendlyGame;
         bool m_bBasementBossReady;
+        bool m_uiVictoryTimersPhase[8];
 
         ObjectGuid m_HordeStatusGuid;
         ObjectGuid m_AllianceStatusGuid;
-
-        ObjectGuid m_LowerRelayGuid;
-        ObjectGuid m_HigherRelayGuid;
 
         GuidList m_lOperaTreeGuidList;
         GuidList m_lOperaHayGuidList;
@@ -251,8 +256,8 @@ class instance_karazhan : public ScriptedInstance
         GuidList m_lChessPiecesHorde;
         GuidVector m_vHordeStalkers;
         GuidVector m_vAllianceStalkers;
-
-        GuidList m_lInfernalTargetsGuidList;
+        GuidVector m_vVictoryDummyTools;
+        GuidVector m_vChessSquares;
 };
 
 #endif

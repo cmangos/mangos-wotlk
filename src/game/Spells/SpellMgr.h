@@ -1069,6 +1069,24 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
                     break;
             }
             break;
+        case SPELL_EFFECT_SCHOOL_DAMAGE:
+        {
+            switch (spellproto->Id)
+            {
+                case 32247: // chess damage spells - Neutral
+                case 37459:
+                case 37461:
+                case 37462:
+                case 37463:
+                case 37474:
+                case 37476:
+                case 39384:
+                    return false;
+                default:
+                    break;
+            }
+            break;
+        }
         // Aura exceptions:
         case SPELL_EFFECT_APPLY_AURA:
         case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
@@ -1106,6 +1124,25 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
                             break;
                     }
                     break;
+                }
+                default:
+                    break;
+            }
+            break;
+        }
+        case SPELL_EFFECT_PERSISTENT_AREA_AURA:
+        {
+            switch (spellproto->EffectApplyAuraName[effIndex])
+            {
+                case SPELL_AURA_PERIODIC_DAMAGE: // possible TODO: make all return false
+                {
+                    switch (spellproto->Id)
+                    {
+                        case 37465: // chess rain of fire and poison cloud spells
+                        case 37469:
+                        case 37775:
+                            return false;
+                    }
                 }
                 default:
                     break;

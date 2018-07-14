@@ -43,6 +43,7 @@ instance_karazhan::instance_karazhan(Map* pMap) : ScriptedInstance(pMap),
     m_uiOzDeathCount(0),
     m_uiTeam(0),
     m_uiChessResetTimer(0),
+    m_uiChessEndingTimer(0),
     m_uiAllianceStalkerCount(0),
     m_uiHordeStalkerCount(0),
     m_bFriendlyGame(false),
@@ -104,6 +105,13 @@ void instance_karazhan::OnCreatureCreate(Creature* pCreature)
         case NPC_CHESS_VICTORY_CONTROLLER:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
+        case NPC_VICTORY_DUMMY_TOOL:
+            m_vVictoryDummyTools.push_back(pCreature->GetObjectGuid());
+            break;
+        case NPC_SQUARE_WHITE:
+        case NPC_SQUARE_BLACK:
+            m_vChessSquares.push_back(pCreature->GetObjectGuid());
+            break;
         case NPC_NIGHTBANE_HELPER:
             if (pCreature->GetPositionZ() < 100.0f)
                 m_lNightbaneGroundTriggers.push_back(pCreature->GetObjectGuid());
@@ -139,14 +147,7 @@ void instance_karazhan::OnCreatureCreate(Creature* pCreature)
             m_lChessPiecesHorde.push_back(pCreature->GetObjectGuid());
             break;
         case NPC_INFERNAL_RELAY:
-            if (pCreature->GetPositionZ() < 350.0f)
-                m_LowerRelayGuid = pCreature->GetObjectGuid();
-            // Note: upper trigger isn't used because the map is unable to load it at the moment (too far away)
-            //else
-            //    m_HigherRelayGuid = pCreature->GetObjectGuid();
-            break;
-        case NPC_INFERNAL_TARGET:
-            m_lInfernalTargetsGuidList.push_back(pCreature->GetObjectGuid());
+            m_vInfernalRelays.push_back(pCreature->GetObjectGuid());
             break;
     }
 }
@@ -193,7 +194,6 @@ void instance_karazhan::OnObjectCreate(GameObject* pGo)
         case GO_HOOD_TREE:
             m_lOperaTreeGuidList.push_back(pGo->GetObjectGuid());
             return;
-
         default:
             return;
     }
@@ -254,55 +254,9 @@ void instance_karazhan::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_CHESS:
             if (uiData == DONE)
-            {
-                // doors and loot are not handled for friendly games
-                if (GetData(TYPE_CHESS) != SPECIAL)
-                {
-                    DoUseDoorOrButton(GO_GAMESMANS_HALL_EXIT_DOOR);
-                    DoRespawnGameObject(GO_DUST_COVERED_CHEST, DAY);
-                    DoToggleGameObjectFlags(GO_DUST_COVERED_CHEST, GO_FLAG_NO_INTERACT, false);
-                }
-
-                // cast game end spells
-                if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH))
-                {
-                    pMedivh->CastSpell(pMedivh, SPELL_FORCE_KILL_BUNNY, TRIGGERED_OLD_TRIGGERED);
-                    pMedivh->CastSpell(pMedivh, SPELL_GAME_OVER, TRIGGERED_OLD_TRIGGERED);
-                    pMedivh->CastSpell(pMedivh, SPELL_CLEAR_BOARD, TRIGGERED_OLD_TRIGGERED);
-                }
-                if (Creature* pController = GetSingleCreatureFromStorage(NPC_CHESS_VICTORY_CONTROLLER))
-                    pController->CastSpell(pController, SPELL_VICTORY_VISUAL, TRIGGERED_OLD_TRIGGERED);
-
-                // remove silence debuff
-                Map::PlayerList const& players = instance->GetPlayers();
-                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                {
-                    if (Player* pPlayer = itr->getSource())
-                        pPlayer->RemoveAurasDueToSpell(SPELL_GAME_IN_SESSION);
-                }
-
-                m_bFriendlyGame = false;
-                m_uiChessResetTimer = 35000;
-            }
+                DoFinishChessEvent();
             else if (uiData == FAIL)
-            {
-                // clean the board for reset
-                if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH))
-                {
-                    pMedivh->CastSpell(pMedivh, SPELL_GAME_OVER, TRIGGERED_OLD_TRIGGERED);
-                    pMedivh->CastSpell(pMedivh, SPELL_CLEAR_BOARD, TRIGGERED_OLD_TRIGGERED);
-                }
-
-                // remove silence debuff
-                Map::PlayerList const& players = instance->GetPlayers();
-                for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
-                {
-                    if (Player* pPlayer = itr->getSource())
-                        pPlayer->RemoveAurasDueToSpell(SPELL_GAME_IN_SESSION);
-                }
-
-                m_uiChessResetTimer = 35000;
-            }
+                DoFailChessEvent();
             else if (uiData == IN_PROGRESS || uiData == SPECIAL)
                 DoPrepareChessEvent();
             m_auiEncounter[uiType] = uiData;
@@ -385,6 +339,11 @@ void instance_karazhan::Load(const char* chrIn)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)               // Do not load an encounter as "In Progress" - reset it instead.
             m_auiEncounter[i] = NOT_STARTED;
+    }
+
+    if (m_auiEncounter[8] == DONE) // if chess event is done, enable friendly games
+    {
+        m_bFriendlyGame = true;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -580,6 +539,123 @@ void instance_karazhan::DoMoveChessPieceToSides(uint32 uiSpellId, uint32 uiFacti
     }
 }
 
+void instance_karazhan::DoFailChessEvent()
+{
+    // clean the board for reset
+    if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH))
+    {
+        pMedivh->CastSpell(pMedivh, SPELL_GAME_OVER, TRIGGERED_OLD_TRIGGERED);
+        pMedivh->CastSpell(pMedivh, SPELL_CLEAR_BOARD, TRIGGERED_OLD_TRIGGERED);
+    }
+
+    // remove silence debuff
+    Map::PlayerList const& players = instance->GetPlayers();
+    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    {
+        if (Player* pPlayer = itr->getSource())
+            pPlayer->RemoveAurasDueToSpell(SPELL_GAME_IN_SESSION);
+    }
+
+    // chess figures stop attacking
+    for (ObjectGuid guid : m_lChessPiecesAlliance)
+    {
+        if (Creature* pTemp = instance->GetCreature(guid))
+        {
+            pTemp->RemoveAurasDueToSpell(32226); // remove attack timer
+            if (Unit* player = pTemp->GetCharmer())
+            {
+                player->RemoveAurasDueToSpell(30019); // remove charm effect on game end/fail
+            }
+        }
+    }
+    for (ObjectGuid guid : m_lChessPiecesHorde)
+    {
+        if (Creature* pTemp = instance->GetCreature(guid))
+        {
+            pTemp->RemoveAurasDueToSpell(32226);
+            if (Unit* player = pTemp->GetCharmer())
+            {
+                player->RemoveAurasDueToSpell(30019);
+            }
+        }
+    }
+
+    for (ObjectGuid guid : m_vChessSquares)
+    {
+        if (Creature* square = instance->GetCreature(guid))
+        {
+            square->RemoveAurasDueToSpell(32745); // remove occupied square spells
+            square->RemoveAurasDueToSpell(39400);
+        }
+    }
+
+    m_uiChessResetTimer = 35000;
+}
+
+void instance_karazhan::DoFinishChessEvent()
+{
+    // doors and loot are not handled for friendly games
+    if (GetData(TYPE_CHESS) != SPECIAL)
+    {
+        DoUseDoorOrButton(GO_GAMESMANS_HALL_EXIT_DOOR);
+        DoRespawnGameObject(GO_DUST_COVERED_CHEST, DAY);
+        DoToggleGameObjectFlags(GO_DUST_COVERED_CHEST, GO_FLAG_NO_INTERACT, false);
+    }
+
+    // cast game end spells
+    if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH))
+    {
+        pMedivh->CastSpell(pMedivh, SPELL_FORCE_KILL_BUNNY, TRIGGERED_OLD_TRIGGERED);
+        pMedivh->CastSpell(pMedivh, SPELL_GAME_OVER, TRIGGERED_OLD_TRIGGERED);
+        pMedivh->CastSpell(pMedivh, SPELL_CLEAR_BOARD, TRIGGERED_OLD_TRIGGERED);
+    }    
+
+    // remove silence debuff
+    Map::PlayerList const& players = instance->GetPlayers();
+    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    {
+        if (Player* pPlayer = itr->getSource())
+            pPlayer->RemoveAurasDueToSpell(SPELL_GAME_IN_SESSION);
+    }
+
+    // chess figures stop attacking
+    for (ObjectGuid guid : m_lChessPiecesAlliance)
+    {
+        if (Creature* pTemp = instance->GetCreature(guid))
+        {
+            pTemp->RemoveAurasDueToSpell(32226); // remove attack timer
+            if (Unit* player = pTemp->GetCharmer())
+            {
+                player->RemoveAurasDueToSpell(30019); // remove charm effect on game end/fail
+            }
+        }
+    }
+    for (ObjectGuid guid : m_lChessPiecesHorde)
+    {
+        if (Creature* pTemp = instance->GetCreature(guid))
+        {
+            pTemp->RemoveAurasDueToSpell(32226);
+            if (Unit* player = pTemp->GetCharmer())
+            {
+                player->RemoveAurasDueToSpell(30019);
+            }
+        }
+    }
+
+    for (ObjectGuid guid : m_vChessSquares)
+    {
+        if (Creature* square = instance->GetCreature(guid))
+        {
+            square->RemoveAurasDueToSpell(32745); // remove occupied square spells
+            square->RemoveAurasDueToSpell(39400);
+        }
+    }
+
+    m_bFriendlyGame = false;
+    m_uiChessResetTimer = 35000;
+    m_uiChessEndingTimer = 30000;
+}
+
 void instance_karazhan::DoPrepareOperaStage(Creature* pOrganizer)
 {
     if (!pOrganizer)
@@ -659,6 +735,94 @@ void instance_karazhan::Update(uint32 uiDiff)
         }
         else
             m_uiChessResetTimer -= uiDiff;
+    }
+
+    if (m_uiChessEndingTimer)
+    {
+        if (m_uiChessEndingTimer <= uiDiff)
+        {
+            m_uiChessEndingTimer = 0;
+        }
+        else
+        {
+            if (m_uiChessEndingTimer == 30000) // pick first 4 spots for visual
+            {
+                m_uiVictoryControllerTimer = 1000;
+                bool tools[8];
+
+                for (uint32 i = 0; i < 8; ++i)
+                {
+                    m_uiVictoryToolTimers[i] = 0;
+                    tools[i] = false;
+                    m_uiVictoryTimersPhase[i] = false;
+                }
+
+                if (Creature* pController = GetSingleCreatureFromStorage(NPC_CHESS_VICTORY_CONTROLLER))
+                    pController->CastSpell(pController, SPELL_VICTORY_VISUAL, TRIGGERED_OLD_TRIGGERED);
+
+                uint8 previous = 0;
+                for (uint32 i = 0; i < 4; ++i)
+                {
+                    int k;
+                    previous = (previous + urand(0, 7)) % 8;
+                    for (k = previous; tools[k % 8] == true && k < 16; ++k);
+                    previous = k % 8;
+                    tools[previous] = true;
+                    m_uiVictoryToolTimers[previous] = urand(4, 6) * 500;
+                }
+
+                for (uint32 i = 0; i < 8; i++)
+                {
+                    if (tools[i])
+                    {
+                        if (Creature* tool = instance->GetCreature(m_vVictoryDummyTools[i]))
+                            tool->CastSpell(tool, SPELL_BOARD_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                    }
+                    else
+                        m_uiVictoryToolTimers[i] = urand(4, 6) * 500;
+                }
+            }
+            else
+            {
+                if (m_uiVictoryControllerTimer <= uiDiff) // randomized visual all over the chess board
+                {
+                    m_uiVictoryControllerTimer = 1000;
+                    if (Creature* pController = GetSingleCreatureFromStorage(NPC_CHESS_VICTORY_CONTROLLER))
+                        pController->CastSpell(pController, SPELL_VICTORY_VISUAL, TRIGGERED_NONE);
+                }
+                else
+                    m_uiVictoryControllerTimer -= uiDiff;
+
+                for (uint32 i = 0; i < 8; i++)
+                {
+                    if (m_uiVictoryToolTimers[i] <= uiDiff)
+                    {                   
+                        if (m_uiVictoryTimersPhase[i] == false)
+                        {
+                            if (Creature* tool = instance->GetCreature(m_vVictoryDummyTools[i]))
+                            {
+                                if (Creature* square = instance->GetCreature(m_vChessSquares[urand(0, m_vChessSquares.size()-1)]))
+                                    tool->NearTeleportTo(square->GetPositionX(), square->GetPositionY(), square->GetPositionZ(), square->GetOrientation());
+                            }
+
+                            m_uiVictoryToolTimers[i] = 500;
+                            m_uiVictoryTimersPhase[i] = true;
+                        }
+                        else
+                        {
+                            m_uiVictoryToolTimers[i] = urand(4, 6) * 500;
+                            m_uiVictoryTimersPhase[i] = false;
+
+                            if (Creature* tool = instance->GetCreature(m_vVictoryDummyTools[i]))
+                                tool->CastSpell(tool, SPELL_BOARD_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                        }
+                    }
+                    else
+                        m_uiVictoryToolTimers[i] -= uiDiff;
+                }
+            }
+            m_uiChessEndingTimer -= uiDiff;
+        }
     }
 }
 

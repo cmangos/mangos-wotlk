@@ -2777,6 +2777,21 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 28084:                                     // Negative Charge
                 target->RemoveAurasDueToSpell(29660);
                 return;
+            case 30019:                                     // Control Piece - Chess
+            {
+                if (target->GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                target->CastSpell(target, 30529, TRIGGERED_OLD_TRIGGERED);
+                target->RemoveAurasDueToSpell(30019);
+                target->RemoveAurasDueToSpell(30532);
+
+                Unit* chessPiece = target->GetCharm();
+                if (chessPiece)
+                    chessPiece->RemoveAurasDueToSpell(30019);
+
+                return;
+            }
             case 30410:                                     // Shadow Grasp - upon trigger
             {
                 target->InterruptSpell(CURRENT_CHANNELED_SPELL);
@@ -8301,20 +8316,6 @@ void Aura::PeriodicDummyTick()
                             target->CastSpell(target, (spell->Id == 21094 ? 21095 : 23492), TRIGGERED_OLD_TRIGGERED, nullptr);      // Spell 21095: Separation Anxiety for Majordomo Executus' adds, 23492: Separation Anxiety for Garr's adds
                     }
                     return;
-                case 30019:                                 // Control Piece
-                {
-                    if (target->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    Unit* chessPiece = target->GetCharm();
-                    if (!chessPiece)
-                    {
-                        target->CastSpell(target, 30529, TRIGGERED_OLD_TRIGGERED);
-                        target->RemoveAurasDueToSpell(30019);
-                        target->RemoveAurasDueToSpell(30532);
-                    }
-                    return;
-                }
 //              // Gossip NPC Periodic - Talk
                 case 32441:                                 // Brittle Bones
                     if (roll_chance_i(33))
