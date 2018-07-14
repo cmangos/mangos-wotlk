@@ -679,6 +679,7 @@ class Spell
         void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap, CheckException& exception);
         bool CheckAndAddMagnetTarget(Unit* unitTarget, SpellEffectIndex effIndex, UnitList& targetUnitMap, CheckException& exception);
         static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry>& bounds, UnitList& tempTargetUnitMap, UnitList& targetUnitMap, SpellEffectIndex effIndex);
+        void FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex);
 
         void FillAreaTargets(UnitList& targetUnitMap, float radius, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = nullptr);
         void FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* center, float radius, bool raid, bool withPets, bool withcaster) const;

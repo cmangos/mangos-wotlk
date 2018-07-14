@@ -932,6 +932,9 @@ void Spell::FillTargetMap()
             }
         }
 
+        // Secial target filter before adding targets to list
+        FilterTargetMap(tmpUnitLists[effToIndex[i]], SpellEffectIndex(i));
+
         for (UnitList::const_iterator iunit = tmpUnitLists[effToIndex[i]].begin(); iunit != tmpUnitLists[effToIndex[i]].end(); ++iunit)
             AddUnitTarget((*iunit), SpellEffectIndex(i));
     }
@@ -7910,8 +7913,25 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
             if (target->GetTypeId() == TYPEID_PLAYER && target == m_caster->getVictim())
                 return false;
             break;
-        case 30469:                                         // Nether Beam special include only players and boss
+        case 30469:                                         // Nether Beam - Netherspite - special include only players and boss
             if (target->GetTypeId() == TYPEID_UNIT && target->GetEntry() != 15689)
+                return false;
+            switch (m_triggeredByAuraSpell->Id)
+            {
+                case 30396: // Perseverance passive
+                    if (target->HasAura(38637))
+                        return false;
+                    break;
+                case 30397: // Serenity passive
+                    if (target->HasAura(38638))
+                        return false;
+                    break;
+                case 30398: // Dominance passive
+                    if (target->HasAura(38639))
+                        return false;
+                    break;
+            }
+            if (!target->isAlive())
                 return false;
             break;
         case 30835:                                         // Infernal Relay - Malchezaar - must only hit unused infernals
@@ -8697,6 +8717,39 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, uin
         }
         default:
             break;
+    }
+}
+
+void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex)
+{
+    switch (m_spellInfo->Id)
+    {
+        case 30469: // Nether Beam - Netherspite - Picks closest target - can maybe be reused in future
+        {
+            auto itr = filterUnitList.begin();
+            if (itr == filterUnitList.end())
+                return;
+            float closestDistance = (*itr)->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_BOUNDING_RADIUS);
+            Unit* closestUnit = *itr;
+            ++itr;
+
+            for (UnitList::iterator itr = filterUnitList.begin(); itr != filterUnitList.end(); ++itr)
+            {
+                float dist = (*itr)->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_BOUNDING_RADIUS);
+                if (closestDistance > dist && *itr != closestUnit)
+                {
+                    closestDistance = dist;
+                    closestUnit = *itr;
+                }
+            }
+
+            if (!closestUnit)
+                return;
+
+            filterUnitList.clear();
+            filterUnitList.push_back(closestUnit);
+            return;
+        }
     }
 }
 

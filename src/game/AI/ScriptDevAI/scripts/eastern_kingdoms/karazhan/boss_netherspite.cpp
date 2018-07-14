@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Netherspite
-SD%Complete: 75
-SDComment: Nether portals partially implemented. Find spell ID for tail swipe added in patch 3.0.2
+SD%Complete: 100
+SDComment:
 SDCategory: Karazhan
 EndScriptData */
 
@@ -28,7 +28,7 @@ enum
 {
     // netherspite spells
     SPELL_NETHERBURN            = 30522,
-    SPELL_VOID_ZONE             = 37063,
+    SPELL_VOID_ZONE             = 37063,                // NOTE: all void zone spells have Consumption spell associated with them
     SPELL_NETHERBREATH          = 38523,
     SPELL_EMPOWERMENT           = 38549,
     SPELL_NETHER_INFUSION       = 38688,                // hard enrage spell
@@ -52,14 +52,14 @@ enum
     SPELL_PERSEVERENCE_PLR      = 30421,
 
     // beam debuffs (player with this aura cannot gain the same color buff)
+    SPELL_EXHAUSTION_PER        = 38637,
     SPELL_EXHAUSTION_SER        = 38638,
     SPELL_EXHAUSTION_DOM        = 38639,
-    SPELL_EXHAUSTION_PER        = 38637,
 
     // spells which hit players (used only for visual - as seen from spell description)
+    SPELL_BEAM_PER              = 30400,
     SPELL_BEAM_SER              = 30401,
     SPELL_BEAM_DOM              = 30402,
-    SPELL_BEAM_PER              = 30400,
 
     // spells which hit Netherspite
     SPELL_BEAM_GREEN            = 30464,
@@ -72,10 +72,9 @@ enum
     SPELL_RED_PORTAL            = 30487,
 
     // passive auras
+    SPELL_PERSEVERANCE_PASSIVE  = 30396,
     SPELL_SERENITY_PASSIVE      = 30397,
     SPELL_DOMINANCE_PASSIVE     = 30398,
-    // note: for Perseverence, there isn't any passive spell - currently we use script timer
-    SPELL_NETHER_BEAM           = 30469,                // spell triggered by the passive auras
     // SPELL_CLEAR_NETHER_BEAM  = 37072,                // not clear how to use this
 
     // emotes
@@ -142,6 +141,8 @@ struct boss_netherspiteAI : public ScriptedAI
 
     std::vector<uint32> m_vPortalEntryList;
 
+    std::vector<ObjectGuid> m_vPortalGuidList;
+
     void Reset() override
     {
         m_uiActivePhase       = BEAM_PHASE;
@@ -159,6 +160,8 @@ struct boss_netherspiteAI : public ScriptedAI
 
         for (uint8 i = 0; i < MAX_PORTALS; ++i)
             m_vPortalEntryList[i] = auiPortals[i];
+
+        m_creature->FixateTarget(nullptr);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -180,6 +183,13 @@ struct boss_netherspiteAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_NETHERSPITE, FAIL);
+
+        
+        for (ObjectGuid& portalGuid : m_vPortalGuidList)
+            if(Creature* portal = m_creature->GetMap()->GetCreature(portalGuid))
+                portal->ForcedDespawn();
+
+        m_vPortalGuidList.clear();
     }
 
     void SwitchPhases()
@@ -190,9 +200,12 @@ struct boss_netherspiteAI : public ScriptedAI
             {
                 DoCastSpellIfCan(m_creature, SPELL_SHADOWFORM, CAST_TRIGGERED);
                 m_creature->RemoveAurasDueToSpell(SPELL_EMPOWERMENT);
+                m_creature->RemoveAurasDueToSpell(SPELL_NETHERBURN);
 
                 SetCombatMovement(false);
                 m_creature->GetMotionMaster()->MoveIdle();
+                m_creature->AttackStop();
+                m_creature->SetTurningOff(true);
 
                 m_uiActivePhase = BANISH_PHASE;
                 DoScriptText(EMOTE_PHASE_BANISH, m_creature);
@@ -203,9 +216,13 @@ struct boss_netherspiteAI : public ScriptedAI
         }
         else
         {
+            DoCastSpellIfCan(m_creature, SPELL_NETHERBURN, CAST_TRIGGERED);
             m_creature->RemoveAurasDueToSpell(SPELL_SHADOWFORM);
             SetCombatMovement(true);
-            DoStartMovement(m_creature->getVictim());
+            m_creature->SetTurningOff(false);
+
+            if (m_creature->getVictim())
+                DoStartMovement(m_creature->getVictim());
 
             m_uiActivePhase = BEAM_PHASE;
             DoScriptText(EMOTE_PHASE_BEAM, m_creature);
@@ -230,11 +247,10 @@ struct boss_netherspiteAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
+        m_vPortalGuidList.push_back(pSummoned->GetObjectGuid());
+
         switch (pSummoned->GetEntry())
         {
-            case NPC_VOID_ZONE:
-                pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION, TRIGGERED_NONE);
-                break;
             case NPC_PORTAL_RED:
                 pSummoned->CastSpell(pSummoned, SPELL_RED_PORTAL, TRIGGERED_NONE);
                 break;
@@ -249,8 +265,9 @@ struct boss_netherspiteAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
+        if (m_uiActivePhase == BEAM_PHASE)
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
 
         if (m_uiPhaseSwitchTimer <= uiDiff)
             SwitchPhases();
@@ -272,7 +289,7 @@ struct boss_netherspiteAI : public ScriptedAI
         {
             if (m_uiVoidZoneTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_VOID_ZONE) == CAST_OK)
                         m_uiVoidZoneTimer = 15000;
@@ -301,8 +318,12 @@ struct boss_netherspiteAI : public ScriptedAI
         {
             if (m_uiNetherbreathTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_NETHERBREATH) == CAST_OK)
-                    m_uiNetherbreathTimer = urand(4000, 5000);
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_NETHERBREATH, SELECT_FLAG_PLAYER))
+                {
+                    m_creature->SetInFront(pTarget);
+                    if (DoCastSpellIfCan(pTarget, SPELL_NETHERBREATH) == CAST_OK)
+                        m_uiNetherbreathTimer = urand(4000, 5000);
+                }
             }
             else
                 m_uiNetherbreathTimer -= uiDiff;
@@ -329,17 +350,16 @@ struct npc_netherspite_portalAI : public Scripted_NoMovementAI
 
     ScriptedInstance* m_pInstance;
 
-    uint32 m_uiPassiveSpellTimer;
     uint32 m_uiOrientationTimer;
 
-    void Reset()
-    {
-        m_uiPassiveSpellTimer = 0;
-        m_uiOrientationTimer = 0;
-    }
+    ObjectGuid m_uiCurrentBeamTarget;
 
-    void MoveInLineOfSight(Unit* pWho) { }
-    void AttackStart(Unit* pWho) { }
+    void Reset() override
+    {
+        m_uiOrientationTimer = 0;
+
+        m_uiCurrentBeamTarget = ObjectGuid();;
+    }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
@@ -355,35 +375,42 @@ struct npc_netherspite_portalAI : public Scripted_NoMovementAI
             switch (m_creature->GetEntry())
             {
                 case NPC_PORTAL_GREEN:
-                    if (!m_creature->HasAura(SPELL_SERENITY_PASSIVE))
-                        DoCastSpellIfCan(m_creature, SPELL_SERENITY_PASSIVE, CAST_TRIGGERED);
+                    DoCastSpellIfCan(nullptr, SPELL_SERENITY_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                     break;
                 case NPC_PORTAL_BLUE:
-                    if (!m_creature->HasAura(SPELL_DOMINANCE_PASSIVE))
-                        DoCastSpellIfCan(m_creature, SPELL_DOMINANCE_PASSIVE, CAST_TRIGGERED);
+                    DoCastSpellIfCan(nullptr, SPELL_DOMINANCE_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                     break;
                 case NPC_PORTAL_RED:
-                    // Red portal spell is missing - handled in script
-                    if (!m_uiPassiveSpellTimer)
-                        m_uiPassiveSpellTimer = 1000;
+                    DoCastSpellIfCan(nullptr, SPELL_PERSEVERANCE_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                     break;
             }
         }
     }
 
-    void UpdateAI(const uint32 uiDiff)
+    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
-        if (m_uiPassiveSpellTimer)
+        if (pTarget->GetObjectGuid() != m_uiCurrentBeamTarget)
         {
-            if (m_uiPassiveSpellTimer <= uiDiff)
+            switch (pSpell->Id)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_NETHER_BEAM, CAST_TRIGGERED) == CAST_OK)
-                    m_uiPassiveSpellTimer = 1000;
+                case SPELL_BEAM_PER:
+                    if (Creature* pNetherspite = m_pInstance->GetSingleCreatureFromStorage(NPC_NETHERSPITE))
+                        pNetherspite->FixateTarget(pTarget);
+                case SPELL_BEAM_SER:
+                case SPELL_BEAM_DOM:
+                    m_uiCurrentBeamTarget = pTarget->GetObjectGuid();
+                    break;
+                case SPELL_BEAM_RED:
+                case SPELL_BEAM_BLUE:
+                case SPELL_BEAM_GREEN:
+                    m_uiCurrentBeamTarget = pTarget->GetObjectGuid();
+                    break;
             }
-            else
-                m_uiPassiveSpellTimer -= uiDiff;
         }
+    }
 
+    void UpdateAI(const uint32 uiDiff) override
+    {
         if (m_uiOrientationTimer)
         {
             if (m_uiOrientationTimer <= uiDiff)

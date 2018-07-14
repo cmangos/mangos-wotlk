@@ -8557,7 +8557,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 30542, TRIGGERED_OLD_TRIGGERED);
                     break;
                 }
-                case 30469:                                 // Nether Beam
+                case 30469:                                 // Nether Beam - Netherspite
                 {
                     if (!unitTarget)
                         return;
@@ -8571,22 +8571,25 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                                 if (unitTarget->HasAura(38638))
                                     return;
 
-                                m_caster->CastSpell(unitTarget, 30401, TRIGGERED_OLD_TRIGGERED);
-                                m_caster->CastSpell(unitTarget, 30422, TRIGGERED_OLD_TRIGGERED);
+                                unitTarget->CastSpell(unitTarget, 30422, TRIGGERED_OLD_TRIGGERED);
+                                if (!unitTarget->HasAura(30401))
+                                    m_caster->CastSpell(unitTarget, 30401, TRIGGERED_NONE);
                                 break;
                             case 17368:
                                 if (unitTarget->HasAura(38639))
                                     return;
 
-                                m_caster->CastSpell(unitTarget, 30402, TRIGGERED_OLD_TRIGGERED);
-                                m_caster->CastSpell(unitTarget, 30423, TRIGGERED_OLD_TRIGGERED);
+                                unitTarget->CastSpell(unitTarget, 30423, TRIGGERED_OLD_TRIGGERED);
+                                if (!unitTarget->HasAura(30402))
+                                    m_caster->CastSpell(unitTarget, 30402, TRIGGERED_NONE);
                                 break;
                             case 17369:
                                 if (unitTarget->HasAura(38637))
                                     return;
 
-                                m_caster->CastSpell(unitTarget, 30400, TRIGGERED_OLD_TRIGGERED);
-                                m_caster->CastSpell(unitTarget, 30421, TRIGGERED_OLD_TRIGGERED);
+                                unitTarget->CastSpell(unitTarget, 30421, TRIGGERED_OLD_TRIGGERED);
+                                if (!unitTarget->HasAura(30400))
+                                    m_caster->CastSpell(unitTarget, 30400, TRIGGERED_NONE);
                                 break;
                         }
                     }
@@ -8596,16 +8599,19 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         switch (m_caster->GetEntry())
                         {
                             case 17367:
-                                m_caster->CastSpell(unitTarget, 30464, TRIGGERED_OLD_TRIGGERED);
-                                m_caster->CastSpell(unitTarget, 30467, TRIGGERED_OLD_TRIGGERED);
+                                unitTarget->CastSpell(unitTarget, 30467, TRIGGERED_OLD_TRIGGERED);
+                                if (!unitTarget->HasAura(30464))
+                                    m_caster->CastSpell(unitTarget, 30464, TRIGGERED_NONE);
                                 break;
                             case 17368:
-                                m_caster->CastSpell(unitTarget, 30463, TRIGGERED_OLD_TRIGGERED);
-                                m_caster->CastSpell(unitTarget, 30468, TRIGGERED_OLD_TRIGGERED);
+                                unitTarget->CastSpell(unitTarget, 30468, TRIGGERED_OLD_TRIGGERED);
+                                if (!unitTarget->HasAura(30463))
+                                    m_caster->CastSpell(unitTarget, 30463, TRIGGERED_NONE);
                                 break;
                             case 17369:
-                                m_caster->CastSpell(unitTarget, 30465, TRIGGERED_OLD_TRIGGERED);
-                                m_caster->CastSpell(unitTarget, 30466, TRIGGERED_OLD_TRIGGERED);
+                                unitTarget->CastSpell(unitTarget, 30466, TRIGGERED_OLD_TRIGGERED);
+                                if (!unitTarget->HasAura(30465))
+                                    m_caster->CastSpell(unitTarget, 30465, TRIGGERED_NONE);
                                 break;
                         }
                     }
