@@ -2777,21 +2777,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 28084:                                     // Negative Charge
                 target->RemoveAurasDueToSpell(29660);
                 return;
-            case 30019:                                     // Control Piece - Chess
-            {
-                if (target->GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                target->CastSpell(target, 30529, TRIGGERED_OLD_TRIGGERED);
-                target->RemoveAurasDueToSpell(30019);
-                target->RemoveAurasDueToSpell(30532);
-
-                Unit* chessPiece = target->GetCharm();
-                if (chessPiece)
-                    chessPiece->RemoveAurasDueToSpell(30019);
-
-                return;
-            }
             case 30410:                                     // Shadow Grasp - upon trigger
             {
                 target->InterruptSpell(CURRENT_CHANNELED_SPELL);
@@ -5713,24 +5698,42 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
             if (!target)
                 return;
 
-            if (spell->Id == 36207) // Steal Weapon
+            switch (spell->Id)
             {
-                if (target->GetTypeId() != TYPEID_UNIT)
-                    return;
-
-                if (apply)
+                case 36207:                                     // Steal Weapon
                 {
-                    if (Player* playerCaster = GetCaster()->GetBeneficiaryPlayer())
+                    if (target->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (apply)
                     {
-                        if (Item* item = playerCaster->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                        if (Player* playerCaster = GetCaster()->GetBeneficiaryPlayer())
                         {
-                            ((Creature*)target)->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, item->GetEntry());
+                            if (Item* item = playerCaster->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                            {
+                                ((Creature*)target)->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, item->GetEntry());
+                            }
                         }
                     }
+                    else
+                    {
+                        ((Creature*)target)->LoadEquipment(((Creature*)target)->GetCreatureInfo()->EquipmentTemplateId, true);
+                    }
                 }
-                else
+                case 30019:                                     // Control Piece - Chess
                 {
-                    ((Creature*)target)->LoadEquipment(((Creature*)target)->GetCreatureInfo()->EquipmentTemplateId, true);
+                    if (apply || target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    target->CastSpell(target, 30529, TRIGGERED_OLD_TRIGGERED);
+                    target->RemoveAurasDueToSpell(30019);
+                    target->RemoveAurasDueToSpell(30532);
+
+                    Unit* chessPiece = target->GetCharm();
+                    if (chessPiece)
+                        chessPiece->RemoveAurasDueToSpell(30019);
+
+                    return;
                 }
             }
         }
