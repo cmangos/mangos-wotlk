@@ -4355,7 +4355,7 @@ bool ChatHandler::HandleNpcInfoCommand(char* /*args*/)
         curRespawnDelay = 0;
     std::string curRespawnDelayStr = secsToTimeString(curRespawnDelay, true);
     std::string defRespawnDelayStr = secsToTimeString(target->GetRespawnDelay(), true);
-    std::string curCorpseDecayStr = secsToTimeString(time_t(target->GetCorpseDecayTimer() / IN_MILLISECONDS), true);
+    std::string curCorpseDecayStr = secsToTimeString(std::chrono::system_clock::to_time_t(target->GetCorpseDecayTimer()), true);
 
     // Send information dependend on difficulty mode
     CreatureInfo const* baseInfo = ObjectMgr::GetCreatureTemplate(Entry);
