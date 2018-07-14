@@ -1573,8 +1573,30 @@ void Aura::TriggerSpell()
 //                    case 38672: break;
 //                    // Tomb Guarding Charging
 //                    case 38751: break;
-//                    // Murmur's Touch
-//                    case 38794: break;
+                    // Murmur's Touch
+                    case 33711:
+                        switch (GetAuraTicks())
+                        {
+                            case 7:
+                            case 10:
+                            case 12:
+                            case 13:
+                            case 14:
+                                target->CastSpell(target, 33760, TRIGGERED_OLD_TRIGGERED);
+                                break;
+                        }
+                        return;
+                    // Murmur's Touch
+                    case 38794:
+                        switch (GetAuraTicks())
+                        {
+                            case 3:
+                            case 6:
+                            case 7:
+                                target->CastSpell(target, 33760, TRIGGERED_OLD_TRIGGERED);
+                                break;
+                        }
+                        return;
                     case 39105:                             // Activate Nether-wraith Beacon (31742 Nether-wraith Beacon item)
                     {
                         float fX, fY, fZ;
