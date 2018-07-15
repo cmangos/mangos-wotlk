@@ -1040,7 +1040,7 @@ class Player : public Unit
                 m_ExtraFlags |= PLAYER_EXTRA_AUCTION_NEUTRAL;
         }
 
-        void GiveXP(uint32 xp, Creature* victim);
+        void GiveXP(uint32 xp, Creature* victim, float groupRate = 1.f);
         void GiveLevel(uint32 level);
 
         void InitStatsForLevel(bool reapplyMods = false);
@@ -1785,7 +1785,7 @@ class Player : public Unit
 
         void BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const override;
         void DestroyForPlayer(Player* target, bool anim = false) const override;
-        void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP) const;
+        void SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP, float groupRate) const;
 
         uint8 LastSwingErrorMsg() const { return m_swingErrorMsg; }
         void SwingErrorMsg(uint8 val) { m_swingErrorMsg = val; }
