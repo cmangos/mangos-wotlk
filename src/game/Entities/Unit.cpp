@@ -10137,13 +10137,17 @@ int32 Unit::CalculateSpellDamage(Unit const* target, SpellEntry const* spellProt
             switch (effect)
             {
                 case SPELL_EFFECT_SCHOOL_DAMAGE:
+                case SPELL_EFFECT_POWER_DRAIN:
                 case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
                 case SPELL_EFFECT_HEALTH_LEECH:
+                case SPELL_EFFECT_HEAL:
+                case SPELL_EFFECT_SUMMON:
                 case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
                     //   SPELL_EFFECT_WEAPON_PERCENT_DAMAGE: excluded, abs values only
                 case SPELL_EFFECT_WEAPON_DAMAGE:
                 case SPELL_EFFECT_POWER_BURN:
                 case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                case SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE:
                     damage = true;
             }
         }
