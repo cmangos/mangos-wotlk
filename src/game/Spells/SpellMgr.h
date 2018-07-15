@@ -900,7 +900,8 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
         case 39495: // Remove Tainted Cores
         case 39497: // Remove Enchanted Weapons - both should hit all players in zone with the given items, uses a neutral target type
         case 34700: // Allergic Reaction - Neutral target type - needs to be a debuff
-        case 36717: // Neutral spell with SPELL_ATTR_EX3_TARGET_ONLY_PLAYER as a filter
+        case 36717: // Neutral spells with SPELL_ATTR_EX3_TARGET_ONLY_PLAYER as a filter
+        case 38829:
             return false;
     }
 
