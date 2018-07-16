@@ -42,6 +42,7 @@ class TotemAI : public CreatureEventAI
         static int Permissible(const Creature* creature);
 
     protected:
+        std::string GetAIName() override { return "TotemAI"; }
         Totem& getTotem() const;
 
     private:
