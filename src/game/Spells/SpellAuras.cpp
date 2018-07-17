@@ -1457,8 +1457,19 @@ void Aura::TriggerSpell()
 //                    case 34683: break;
 //                    // Frostbite Rotate
 //                    case 34748: break;
-//                    // Arcane Flurry
-//                    case 34821: break;
+                    case 34821:                               // Arcane Flurry (Melee Component)
+                    {
+                        trigger_spell_id = 34824;       // (Range Component)
+
+                        if (GetTarget()->GetTypeId() != TYPEID_UNIT)
+                            return;
+
+                        triggerTarget = ((Creature*)GetTarget())->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, trigger_spell_id, SELECT_FLAG_PLAYER);
+                        if (!triggerTarget)
+                            return;
+
+                        break;
+                    }
 //                    // Interrupt Shutdown
 //                    case 35016: break;
 //                    // Interrupt Shutdown
