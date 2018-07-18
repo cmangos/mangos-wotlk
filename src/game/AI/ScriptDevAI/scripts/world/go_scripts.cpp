@@ -34,6 +34,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "GameEvents/GameEventMgr.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 /*######
 ## go_ethereum_prison
@@ -60,50 +61,156 @@ enum
     SAY_CE         = -1000178,
     SAY_CON        = -1000179,
     SAY_KT         = -1000180,
-    SAY_SPOR       = -1000181
+    SAY_SPOR       = -1000181,
+
+    NPC_PRISONER = 20520,
+    NPC_FORGOSH  = 20788,
+
+    SPELL_C_C_D               = 35465,
+    SPELL_PURPLE_BANISH_STATE = 32566,
+
+    SPELL_SHADOWFORM_1 = 39579, // on NPC_FORGOSH
+    SPELL_SHADOWFORM_2 = 37816, // on NPC_FORGOSH
+
+    FACTION_HOSTILE = 14,
 };
 
-const uint32 uiNpcPrisonEntry[] =
+enum PrisonerActions
+{
+    PRISONER_ATTACK,
+    PRISONER_TALK,
+    PRISONER_CAST,
+};
+
+const uint32 npcPrisonEntry[] =
 {
     22810, 22811, 22812, 22813, 22814, 22815,               // good guys
     20783, 20784, 20785, 20786, 20788, 20789, 20790         // bad guys
 };
 
-bool GOUse_go_ethereum_prison(Player* pPlayer, GameObject* pGo)
+struct npc_ethereum_prisonerAI : public ScriptedAI, public TimerAI
 {
-    uint8 uiRandom = urand(0, countof(uiNpcPrisonEntry) - 1);
-
-    if (Creature* pCreature = pPlayer->SummonCreature(uiNpcPrisonEntry[uiRandom],
-                              pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetAngle(pPlayer),
-                              TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000))
+    npc_ethereum_prisonerAI(Creature* creature) : ScriptedAI(creature), TimerAI(0)
     {
-        if (!pCreature->IsEnemy(pPlayer))
+        AddCustomAction(PRISONER_ATTACK, 0, [&]
         {
-            uint32 uiSpell = 0;
+            m_creature->SetImmuneToNPC(false);
+            m_creature->SetImmuneToPlayer(false);
+            m_creature->setFaction(FACTION_HOSTILE);
+            if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                AttackStart(player);
+        }, true);
+        AddCustomAction(PRISONER_TALK, 0, [&]
+        {
+            if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                DoScriptText(GetTextId(), m_creature, player);
+            ResetTimer(PRISONER_CAST, 6000);
+        }, true);
+        AddCustomAction(PRISONER_CAST, 0, [&]
+        {
+            if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                DoCastSpellIfCan(player, GetSpellId());
+            m_creature->ForcedDespawn(2000);
+        }, true);
+        JustRespawned();
+    }
 
-            if (FactionTemplateEntry const* pFaction = pCreature->getFactionTemplateEntry())
+    void JustRespawned() override
+    {
+        DoCastSpellIfCan(nullptr, SPELL_C_C_D, (CAST_AURA_NOT_PRESENT | CAST_TRIGGERED));
+        DoCastSpellIfCan(nullptr, SPELL_PURPLE_BANISH_STATE, (CAST_AURA_NOT_PRESENT | CAST_TRIGGERED));
+    }
+
+    ObjectGuid m_playerGuid;
+
+    void StartEvent(Player* player)
+    {
+        uint8 uiRandom = urand(0, countof(npcPrisonEntry) - 1);
+        m_playerGuid = player->GetObjectGuid();
+        m_creature->RemoveAurasDueToSpell(SPELL_C_C_D);
+        m_creature->RemoveAurasDueToSpell(SPELL_PURPLE_BANISH_STATE);
+        uint32 newEntry = npcPrisonEntry[uiRandom];
+        m_creature->UpdateEntry(newEntry);
+        switch (newEntry)
+        {
+            case NPC_FORGOSH:
+                DoCastSpellIfCan(nullptr, SPELL_SHADOWFORM_1, (CAST_AURA_NOT_PRESENT | CAST_TRIGGERED));
+                DoCastSpellIfCan(nullptr, SPELL_SHADOWFORM_2, (CAST_AURA_NOT_PRESENT | CAST_TRIGGERED));
+                break;
+        }
+        if (m_creature->IsEnemy(player))
+            ResetTimer(PRISONER_ATTACK, 1000);
+        else
+            ResetTimer(PRISONER_TALK, 3500);
+    }
+
+    void Reset() override
+    {
+
+    }
+
+    int32 GetTextId()
+    {
+        int32 textId = 0;
+        if (FactionTemplateEntry const* pFaction = m_creature->GetFactionTemplateEntry())
+        {
+            switch (pFaction->faction)
             {
-                int32 textId = 0;
-
-                switch (pFaction->faction)
-                {
-                    case FACTION_LC:   uiSpell = SPELL_REP_LC;   textId = SAY_LC;    break;
-                    case FACTION_SHAT: uiSpell = SPELL_REP_SHAT; textId = SAY_SHAT;  break;
-                    case FACTION_CE:   uiSpell = SPELL_REP_CE;   textId = SAY_CE;    break;
-                    case FACTION_CON:  uiSpell = SPELL_REP_CON;  textId = SAY_CON;   break;
-                    case FACTION_KT:   uiSpell = SPELL_REP_KT;   textId = SAY_KT;    break;
-                    case FACTION_SPOR: uiSpell = SPELL_REP_SPOR; textId = SAY_SPOR;  break;
-                }
-
-                if (textId)
-                    DoScriptText(textId, pCreature, pPlayer);
-
-                if (uiSpell)
-                    pCreature->CastSpell(pPlayer, uiSpell, TRIGGERED_NONE);
-                else
-                    script_error_log("go_ethereum_prison summoned creature (entry %u) but faction (%u) are not expected by script.", pCreature->GetEntry(), pCreature->getFaction());
+                case FACTION_LC:   textId = SAY_LC;    break;
+                case FACTION_SHAT: textId = SAY_SHAT;  break;
+                case FACTION_CE:   textId = SAY_CE;    break;
+                case FACTION_CON:  textId = SAY_CON;   break;
+                case FACTION_KT:   textId = SAY_KT;    break;
+                case FACTION_SPOR: textId = SAY_SPOR;  break;
             }
         }
+        return textId;
+    }
+
+    uint32 GetSpellId()
+    {
+        uint32 spellId = 0;
+        if (FactionTemplateEntry const* pFaction = m_creature->GetFactionTemplateEntry())
+        {
+            switch (pFaction->faction)
+            {
+                case FACTION_LC:   spellId = SPELL_REP_LC;   break;
+                case FACTION_SHAT: spellId = SPELL_REP_SHAT; break;
+                case FACTION_CE:   spellId = SPELL_REP_CE;   break;
+                case FACTION_CON:  spellId = SPELL_REP_CON;  break;
+                case FACTION_KT:   spellId = SPELL_REP_KT;   break;
+                case FACTION_SPOR: spellId = SPELL_REP_SPOR; break;
+            }
+        }
+        return spellId;
+    }
+
+    void ExecuteActions() override {}
+
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff);
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        ExecuteActions();
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+UnitAI* GetAInpc_ethereum_prisoner(Creature* creature)
+{
+    return new npc_ethereum_prisonerAI(creature);
+}
+
+bool GOUse_go_ethereum_prison(Player* player, GameObject* go)
+{
+    if (Creature* prisoner = GetClosestCreatureWithEntry(go, NPC_PRISONER, 5.f))
+    {
+        npc_ethereum_prisonerAI* ai = static_cast<npc_ethereum_prisonerAI*>(prisoner->AI());
+        ai->StartEvent(player);
     }
 
     return false;
@@ -868,6 +975,11 @@ void AddSC_go_scripts()
     Script* pNewScript = new Script;
     pNewScript->Name = "go_ethereum_prison";
     pNewScript->pGOUse =          &GOUse_go_ethereum_prison;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_ethereum_prisoner";
+    pNewScript->GetAI = &GetAInpc_ethereum_prisoner;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
