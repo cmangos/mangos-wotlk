@@ -325,7 +325,7 @@ void instance_blood_furnace::Update(uint32 uiDiff)
     if (m_auiEncounter[TYPE_BROGGOK_EVENT] == IN_PROGRESS)
         if (m_uiBroggokEventPhase <= MAX_ORC_WAVES)
         {
-            if (!GetPlayerInMap(true, true))
+            if (!GetPlayerInMap(true, false))
                 SetData(TYPE_BROGGOK_EVENT, FAIL);
             else if (!instance->IsRegularDifficulty())
             {
