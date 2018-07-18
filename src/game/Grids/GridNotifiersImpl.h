@@ -152,7 +152,7 @@ inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(PlayerMapType& m)
     for (auto& iter : m)
     {
         Player* player = iter.getSource();
-        if (player->isAlive() && !player->IsTaxiFlying())
+        if (!player->isAlive() || player->IsTaxiFlying())
             continue;
 
         if (player->AI())
