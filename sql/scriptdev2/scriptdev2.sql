@@ -4277,7 +4277,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1540040,'I...hate...you...',10322,1,0,0,'omrogg YELL_DIE_R'),
 (-1540041,'%s enrages!',0,2,0,0,'omrogg EMOTE_ENRAGE'),
 
-(-1540042,'Ours is the true Horde! The only Horde!',10323,1,0,0,'kargath SAY_AGGRO1'),
+(-1540042,'Ours is the TRUE Horde! The only Horde!',10323,1,0,0,'kargath SAY_AGGRO1'),
 (-1540043,'I\'ll carve the meat from your bones!',10324,1,0,0,'kargath SAY_AGGRO2'),
 (-1540044,'I am called Bladefist for a reason, as you will see!',10325,1,0,0,'kargath SAY_AGGRO3'),
 (-1540045,'For the real Horde!',10326,1,0,0,'kargath SAY_SLAY1'),
