@@ -1708,7 +1708,7 @@ void Guild::AppendDisplayGuildBankSlot(WorldPacket& data, GuildBankTab const* ta
         if (item->GetItemRandomPropertyId())
             data << uint32(item->GetItemSuffixFactor());                                    // +4 Suffix factor
 
-        data << uint8(item->GetCount());                                                    // +12 ITEM_FIELD_STACK_COUNT
+        data << uint32(item->GetCount());                                                   // +12 ITEM_FIELD_STACK_COUNT
         data << uint32(item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT));                      // +16 Permanent enchantment
         data << uint8(abs(item->GetSpellCharges()));                                        // +20 Charges
 
@@ -1720,7 +1720,7 @@ void Guild::AppendDisplayGuildBankSlot(WorldPacket& data, GuildBankTab const* ta
         {
             if (uint32 enchantId = item->GetEnchantmentId(EnchantmentSlot(socketSlot)))
             {
-                data << uint8(socketSlot - SOCK_ENCHANTMENT_SLOT); // BC client count gems slot from 0
+                data << uint8(socketSlot - SOCK_ENCHANTMENT_SLOT); // client count gems slot from 0
                 data << uint32(enchantId);
                 ++socketCount;
             }
