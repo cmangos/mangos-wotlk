@@ -91,10 +91,11 @@ UPDATE creature_template SET ScriptName='npc_spirit_shade' WHERE entry=15261;
 
 /* GO */
 UPDATE gameobject_template SET ScriptName='go_ethereum_prison' WHERE entry BETWEEN 184418 AND 184431;
-UPDATE creature_template SET ScriptName='npc_ethereum_prisoner' WHERE entry IN(20520);
+UPDATE creature_template SET ScriptName='npc_ethereum_prisoner' WHERE entry IN(20520,20889);
 UPDATE gameobject_template SET ScriptName='go_ethereum_stasis' WHERE entry BETWEEN 185465 AND 185467;
 UPDATE gameobject_template SET ScriptName='go_ethereum_stasis' WHERE entry=184595;
 UPDATE gameobject_template SET ScriptName='go_ethereum_stasis' WHERE entry BETWEEN 185461 AND 185464;
+UPDATE gameobject_template SET ScriptName='go_stasis_chamber_alpha' WHERE entry IN(185512);
 UPDATE gameobject_template SET ScriptName='go_jump_a_tron' WHERE entry=183146;
 UPDATE gameobject_template SET ScriptName='go_mysterious_snow_mound' WHERE entry=195308;
 UPDATE gameobject_template SET ScriptName='go_tele_to_dalaran_crystal' WHERE entry=191230;
@@ -233,6 +234,9 @@ UPDATE creature_template SET ScriptName='npc_feero_ironhand' WHERE entry=4484;
 UPDATE creature_template SET ScriptName='boss_pandemonius' WHERE entry=18341;
 UPDATE creature_template SET ScriptName='boss_nexusprince_shaffar' WHERE entry=18344;
 UPDATE creature_template SET ScriptName='npc_shaheen' WHERE entry=19671;
+UPDATE creature_template SET ScriptName='npc_ethereum_prisoner_dungeon' WHERE entry IN(22927);
+UPDATE gameobject_template SET ScriptName='go_stasis_chamber_mana_tombs' WHERE entry IN(185512);
+UPDATE gameobject_template SET ScriptName='go_stasis_chamber_shaffar' WHERE entry IN(185522);
 
 /* AUCHENAI CRYPTS */
 UPDATE creature_template SET ScriptName='boss_exarch_maladaar' WHERE entry=18373;
@@ -3175,7 +3179,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1015025,'What me do wrong, my $g king : queen;?',0,0,0,16,'Generic Blades Edge Ogre /point emote response'),
 (-1015026,'$G Him : Her; so tiny!  How $g him : her; rule?',0,0,0,0,'Bloodmaul/Bladespire Supplicant LoS text'),
 (-1015027,'$G Him : Her; look too pretty to be da ruler.',0,0,0,0,'Bloodmaul/Bladespire Supplicant LoS text'),
-(-1015028,'Me live to serve.',0,0,0,0,'Bloodmaul/Bladespire Supplicant LoS text');
+(-1015028,'Me live to serve.',0,0,0,0,'Bloodmaul/Bladespire Supplicant LoS text'),
+(-1015029,'For the Deceiver! For Kil''jaeden!',0,0,0,0,'Trelopades on aggro 1'),
+(-1015030,'Only flesh and blood...',0,0,0,0,'Trelopades on aggro 2');
 
 -- -1 020 000 WOTLK texts
 
@@ -4755,7 +4761,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1557032,'%s checks to make sure his body is intact.',0,2,0,0,'sha\'heen EMOTE_TELEPORT'),
 (-1557033,'You made it! Well done, $r. Now if you''ll excuse me, I have to get the rest of our crew inside.',0,0,0,1,'sha\'heen SAY_SPAWN'),
 (-1557034,'%s expertly manipulates the control panel.',0,2,0,28,'sha\'heen EMOTE_PANEL'),
-(-1557035,'Let''s not waste any time! Take anything that isn''t nailed down to the floor and teleport directly to Stormspire! Chop chop!',0,0,0,1,'sha\'heen SAY_ESCORT_READY');
+(-1557035,'Let''s not waste any time! Take anything that isn''t nailed down to the floor and teleport directly to Stormspire! Chop chop!',0,0,0,1,'sha\'heen SAY_ESCORT_READY'),
+
+(-1557036,'I... I am free! Ethereum were planning on torturing me until I gave in to their requests. I fear that, had you not come along, I would have surely given in to their torment.',0,0,0,1,'Ambassador SAY_RELEASED_1'),
+(-1557037,'Know this, $r. Within Shaffar''s chambers at the end of these tombs rests a creature of unimaginable power. It is held in check by the power of the stasis chamber. You must return to Ameer before you venture further if you wish to destroy it!',0,0,0,1,'Ambassador SAY_RELEASED_2');
 
 -- -1 558 000 AUCHENAI CRYPTS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

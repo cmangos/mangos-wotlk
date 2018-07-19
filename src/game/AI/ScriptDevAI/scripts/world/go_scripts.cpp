@@ -66,6 +66,13 @@ enum
     NPC_PRISONER = 20520,
     NPC_FORGOSH  = 20788,
 
+    // alpha
+    NPC_THUK     = 22920,
+
+    // group
+    NPC_PRISONER_GROUP = 20889,
+    NPC_TRELOPADES     = 22828,
+
     SPELL_C_C_D               = 35465,
     SPELL_PURPLE_BANISH_STATE = 32566,
 
@@ -73,6 +80,16 @@ enum
     SPELL_SHADOWFORM_2 = 37816, // on NPC_FORGOSH
 
     FACTION_HOSTILE = 14,
+
+    SAY_TRELOPADES_AGGRO_1 = -1015029,
+    SAY_TRELOPADES_AGGRO_2 = -1015030,
+};
+
+enum StasisType
+{
+    EVENT_PRISON = 0,
+    EVENT_PRISON_ALPHA = 1,
+    EVENT_PRISON_GROUP = 2,
 };
 
 enum PrisonerActions
@@ -88,6 +105,11 @@ const uint32 npcPrisonEntry[] =
     20783, 20784, 20785, 20786, 20788, 20789, 20790         // bad guys
 };
 
+const uint32 npcStasisEntry[] =
+{
+    22825, 20888, 22827, 22826, 22828
+};
+
 struct npc_ethereum_prisonerAI : public ScriptedAI, public TimerAI
 {
     npc_ethereum_prisonerAI(Creature* creature) : ScriptedAI(creature), TimerAI(0)
@@ -97,7 +119,13 @@ struct npc_ethereum_prisonerAI : public ScriptedAI, public TimerAI
             m_creature->SetImmuneToNPC(false);
             m_creature->SetImmuneToPlayer(false);
             m_creature->setFaction(FACTION_HOSTILE);
-            if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+            Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid);
+            switch (m_creature->GetEntry()) // Group mobs have texts, only have text for one atm
+            {
+                case NPC_TRELOPADES: DoScriptText(urand(0, 1) ? SAY_TRELOPADES_AGGRO_1 : SAY_TRELOPADES_AGGRO_2, m_creature, player); break;
+                default: break;
+            }
+            if (player)
                 AttackStart(player);
         }, true);
         AddCustomAction(PRISONER_TALK, 0, [&]
@@ -119,17 +147,28 @@ struct npc_ethereum_prisonerAI : public ScriptedAI, public TimerAI
     {
         DoCastSpellIfCan(nullptr, SPELL_C_C_D, (CAST_AURA_NOT_PRESENT | CAST_TRIGGERED));
         DoCastSpellIfCan(nullptr, SPELL_PURPLE_BANISH_STATE, (CAST_AURA_NOT_PRESENT | CAST_TRIGGERED));
+        if (m_stasisGuid)
+            if (GameObject* stasis = m_creature->GetMap()->GetGameObject(m_stasisGuid))
+                stasis->ResetDoorOrButton();
     }
 
     ObjectGuid m_playerGuid;
+    ObjectGuid m_stasisGuid;
 
-    void StartEvent(Player* player)
+    void StartEvent(Player* player, GameObject* go, StasisType type)
     {
-        uint8 uiRandom = urand(0, countof(npcPrisonEntry) - 1);
         m_playerGuid = player->GetObjectGuid();
+        if (go)
+            m_stasisGuid = go->GetObjectGuid();
         m_creature->RemoveAurasDueToSpell(SPELL_C_C_D);
         m_creature->RemoveAurasDueToSpell(SPELL_PURPLE_BANISH_STATE);
-        uint32 newEntry = npcPrisonEntry[uiRandom];
+        uint32 newEntry;
+        switch (type)
+        {
+            case EVENT_PRISON: newEntry = npcPrisonEntry[urand(0, countof(npcPrisonEntry) - 1)]; break;
+            case EVENT_PRISON_ALPHA: newEntry = NPC_THUK; break;
+            case EVENT_PRISON_GROUP: newEntry = npcStasisEntry[urand(0, countof(npcStasisEntry) - 1)]; break;
+        }
         m_creature->UpdateEntry(newEntry);
         switch (newEntry)
         {
@@ -207,10 +246,10 @@ UnitAI* GetAInpc_ethereum_prisoner(Creature* creature)
 
 bool GOUse_go_ethereum_prison(Player* player, GameObject* go)
 {
-    if (Creature* prisoner = GetClosestCreatureWithEntry(go, NPC_PRISONER, 5.f))
+    if (Creature* prisoner = GetClosestCreatureWithEntry(go, NPC_PRISONER, 1.f))
     {
         npc_ethereum_prisonerAI* ai = static_cast<npc_ethereum_prisonerAI*>(prisoner->AI());
-        ai->StartEvent(player);
+        ai->StartEvent(player, go, EVENT_PRISON);
     }
 
     return false;
@@ -220,18 +259,24 @@ bool GOUse_go_ethereum_prison(Player* player, GameObject* go)
 ## go_ethereum_stasis
 ######*/
 
-const uint32 uiNpcStasisEntry[] =
+bool GOUse_go_ethereum_stasis(Player* player, GameObject* go)
 {
-    22825, 20888, 22827, 22826, 22828
-};
+    if (Creature* prisoner = GetClosestCreatureWithEntry(go, NPC_PRISONER_GROUP, 1.f))
+    {
+        npc_ethereum_prisonerAI* ai = static_cast<npc_ethereum_prisonerAI*>(prisoner->AI());
+        ai->StartEvent(player, go, EVENT_PRISON_GROUP);
+    }
 
-bool GOUse_go_ethereum_stasis(Player* pPlayer, GameObject* pGo)
+    return false;
+}
+
+bool GOUse_go_stasis_chamber_alpha(Player* player, GameObject* go)
 {
-    uint8 uiRandom = urand(0, countof(uiNpcStasisEntry) - 1);
-
-    pPlayer->SummonCreature(uiNpcStasisEntry[uiRandom],
-                            pGo->GetPositionX(), pGo->GetPositionY(), pGo->GetPositionZ(), pGo->GetAngle(pPlayer),
-                            TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+    if (Creature* prisoner = GetClosestCreatureWithEntry(go, NPC_PRISONER_GROUP, 1.f))
+    {
+        npc_ethereum_prisonerAI* ai = static_cast<npc_ethereum_prisonerAI*>(prisoner->AI());
+        ai->StartEvent(player, go, EVENT_PRISON_ALPHA);
+    }
 
     return false;
 }
@@ -974,7 +1019,7 @@ void AddSC_go_scripts()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "go_ethereum_prison";
-    pNewScript->pGOUse =          &GOUse_go_ethereum_prison;
+    pNewScript->pGOUse = &GOUse_go_ethereum_prison;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -983,8 +1028,13 @@ void AddSC_go_scripts()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
+    pNewScript->Name = "go_stasis_chamber_alpha";
+    pNewScript->pGOUse = &GOUse_go_stasis_chamber_alpha;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
     pNewScript->Name = "go_ethereum_stasis";
-    pNewScript->pGOUse =          &GOUse_go_ethereum_stasis;
+    pNewScript->pGOUse = &GOUse_go_ethereum_stasis;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
