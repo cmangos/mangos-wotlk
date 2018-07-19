@@ -21243,14 +21243,13 @@ void Player::UpdateForQuestWorldObjects()
     if (m_clientGUIDs.empty())
         return;
 
-    UpdateData udata;
-    WorldPacket packet;
+    UpdateData updateData;
     for (auto m_clientGUID : m_clientGUIDs)
     {
         if (m_clientGUID.IsGameObject())
         {
             if (GameObject* obj = GetMap()->GetGameObject(m_clientGUID))
-                obj->BuildValuesUpdateBlockForPlayer(&udata, this);
+                obj->BuildValuesUpdateBlockForPlayer(&updateData, this);
         }
         else if (m_clientGUID.IsCreatureOrVehicle())
         {
@@ -21267,14 +21266,19 @@ void Player::UpdateForQuestWorldObjects()
             {
                 if (_itr->second.questStart || _itr->second.questEnd)
                 {
-                    obj->BuildCreateUpdateBlockForPlayer(&udata, this);
+                    obj->BuildCreateUpdateBlockForPlayer(&updateData, this);
                     break;
                 }
             }
         }
     }
-    udata.BuildPacket(packet);
-    GetSession()->SendPacket(packet);
+    WorldPacket packet;
+    for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
+    {
+        updateData.BuildPacket(packet, i);
+        GetSession()->SendPacket(packet);
+        packet.clear();
+    }
 }
 
 void Player::UpdateEverything()
@@ -21295,10 +21299,10 @@ void Player::UpdateEverything()
                 obj->BuildValuesUpdateBlockForPlayer(&updateDataRest, this);
         }
     }
-    updateDataCreature.BuildPacket(packet); // protection against too big packets - TODO: extend to all
+    updateDataCreature.BuildPacket(packet, 0); // protection against too big packets - TODO: extend to all
     GetSession()->SendPacket(packet);
     packet.clear();
-    updateDataRest.BuildPacket(packet);
+    updateDataRest.BuildPacket(packet, 0);
     GetSession()->SendPacket(packet);
 }
 
