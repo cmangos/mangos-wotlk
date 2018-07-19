@@ -2355,6 +2355,7 @@ class Player : public Unit
             }
         }
 
+        void UpdateEverything();
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

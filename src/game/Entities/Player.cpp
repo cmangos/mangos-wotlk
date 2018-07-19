@@ -2367,7 +2367,7 @@ void Player::SetGameMaster(bool on)
 
     m_camera.UpdateVisibilityForOwner();
     UpdateObjectVisibility();
-    UpdateForQuestWorldObjects();
+    UpdateEverything();
 }
 
 void Player::SetGMVisible(bool on)
@@ -20935,6 +20935,31 @@ void Player::UpdateForQuestWorldObjects()
         }
     }
     udata.BuildPacket(packet);
+    GetSession()->SendPacket(packet);
+}
+
+void Player::UpdateEverything()
+{
+    if (m_clientGUIDs.empty())
+        return;
+
+    UpdateData updateDataCreature;
+    UpdateData updateDataRest;
+    WorldPacket packet;
+    for (GuidSet::const_iterator itr = m_clientGUIDs.begin(); itr != m_clientGUIDs.end(); ++itr)
+    {
+        if (WorldObject* obj = GetMap()->GetWorldObject(*itr))
+        {
+            if (obj->GetTypeId() == TYPEID_UNIT)
+                obj->BuildForcedValuesUpdateBlockForPlayer(&updateDataCreature, this);
+            else
+                obj->BuildValuesUpdateBlockForPlayer(&updateDataRest, this);
+        }
+    }
+    updateDataCreature.BuildPacket(packet); // protection against too big packets - TODO: extend to all
+    GetSession()->SendPacket(packet);
+    packet.clear();
+    updateDataRest.BuildPacket(packet);
     GetSession()->SendPacket(packet);
 }
 

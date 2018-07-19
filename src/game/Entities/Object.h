@@ -387,6 +387,7 @@ class Object
         void SendForcedObjectUpdate();
 
         void BuildValuesUpdateBlockForPlayer(UpdateData* data, Player* target) const;
+        void BuildForcedValuesUpdateBlockForPlayer(UpdateData* data, Player* target) const;
         void BuildOutOfRangeUpdateBlock(UpdateData* data) const;
         void BuildMovementUpdateBlock(UpdateData* data, uint16 flags = 0) const;
 
