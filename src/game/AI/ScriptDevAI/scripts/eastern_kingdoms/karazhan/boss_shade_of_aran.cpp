@@ -301,7 +301,7 @@ struct boss_aranAI : public ScriptedAI
                         case ARAN_ACTION_DRINK:
                             if (DoCastSpellIfCan(m_creature, SPELL_MASS_POLYMORPH) == CAST_OK)
                             {
-                                m_creature->CastSpell(nullptr, SPELL_DISPEL_BLIZZARD, TRIGGERED_NONE);
+                                m_creature->CastSpell(nullptr, SPELL_DISPEL_BLIZZARD, TRIGGERED_OLD_TRIGGERED);
                                 DoScriptText(SAY_DRINK, m_creature);
                                 SetCombatMovement(false);
                                 SetCombatScriptStatus(true);
@@ -467,6 +467,11 @@ struct boss_aranAI : public ScriptedAI
                         }
                         break;
                     case 2:
+                        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                        m_uiManaRecoveryTimer = 1000;
+                        ++m_uiManaRecoveryStage;
+                        break;
+                    case 3:
                         if (DoCastSpellIfCan(m_creature, SPELL_PYROBLAST) == CAST_OK)
                         {
                             SetCombatMovement(true);
