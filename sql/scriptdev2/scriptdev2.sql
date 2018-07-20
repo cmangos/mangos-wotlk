@@ -235,7 +235,7 @@ UPDATE creature_template SET ScriptName='boss_pandemonius' WHERE entry=18341;
 UPDATE creature_template SET ScriptName='boss_nexusprince_shaffar' WHERE entry=18344;
 UPDATE creature_template SET ScriptName='npc_shaheen' WHERE entry=19671;
 UPDATE creature_template SET ScriptName='npc_ethereum_prisoner_dungeon' WHERE entry IN(22927);
-UPDATE gameobject_template SET ScriptName='go_stasis_chamber_mana_tombs' WHERE entry IN(185512);
+UPDATE gameobject_template SET ScriptName='go_stasis_chamber_mana_tombs' WHERE entry IN(185519);
 UPDATE gameobject_template SET ScriptName='go_stasis_chamber_shaffar' WHERE entry IN(185522);
 
 /* AUCHENAI CRYPTS */
