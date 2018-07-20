@@ -2688,6 +2688,7 @@ struct npc_adyen_the_lightwardenAI : public ScriptedAI
                     case 8:
                         summoned->GetMotionMaster()->Clear(false, true);
                         summoned->GetMotionMaster()->MoveIdle();
+                        summoned->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         if (Creature* kaylaan = m_creature->GetMap()->GetCreature(m_kaylaanGuid))
                         {
                             DoScriptText(SAY_KAYLAAN_6, kaylaan, GetPlayerTarget());
@@ -2771,6 +2772,7 @@ struct npc_adyen_the_lightwardenAI : public ScriptedAI
         {
             Creature* ishanah = m_creature->SummonCreature(NPC_ISHANAH, 4866.2f, 3799.016f, 199.141f, 0.4680258f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 3600000, true, true, 1, FACTION_DEATHBLOW);
             ishanah->SetUInt32Value(UNIT_NPC_FLAGS, 0);
+            ishanah->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC); // fix for blizzlike bug that can occur on retail
             ishanah->GetMotionMaster()->Clear(false, true);
             ishanah->GetMotionMaster()->MoveWaypoint(PATH_ID_DEATHBLOW);
             if (Creature* socrethar = m_creature->GetMap()->GetCreature(m_socretharGuid))
