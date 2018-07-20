@@ -452,7 +452,7 @@ enum
 
     SPELL_CRIPPLE                   = 41281,
     SPELL_SHADOW_BOLT               = 41280,
-    SPELL_ABYSSAL_TOSS              = 41283,                // summon npc 23416 at target position
+    SPELL_ABYSSAL_TOSS              = 41283,                // Casts toss at summoned npc
     SPELL_ABYSSAL_IMPACT            = 41284,
     // SPELL_GROUND_AIR_PULSE       = 41270,                // spell purpose unk
     // SPELL_AGGRO_CHECK            = 41285,                // spell purpose unk
@@ -462,21 +462,20 @@ enum
     SPELL_QUEST_COMPLETE            = 41340,
 
     NPC_SPELLBINDER                 = 22342,
-    NPC_RETHHEDRONS_TARGET          = 23416,
+    NPC_RETHHEDRONS_TARGET          = 23416,                // Summoned through missing serveride 41288
 
-    POINT_ID_PORTAL_FRONT           = 0,
-    POINT_ID_PORTAL                 = 1,
-};
+    PATH_ID_OUTRO                   = 1,
 
-static const float afRethhedronPos[2][3] =
-{
-    { -1502.39f, 9772.33f, 200.421f},
-    { -1557.93f, 9834.34f, 200.949f}
+    POINT_ID_PORTAL_YELL            = 1,
+    POINT_ID_PORTAL_FRONT           = 2,
+    POINT_ID_PORTAL_FINAL           = 3,
+
+    SOUND_ID_ABYSSAL_TOSS           = 10667,                // Played after abyssal toss
 };
 
 struct npc_rethhedronAI : public ScriptedAI
 {
-    npc_rethhedronAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_rethhedronAI(Creature* pCreature) : ScriptedAI(pCreature) { JustRespawned(); Reset(); }
 
     uint32 m_uiCrippleTimer;
     uint32 m_uiShadowBoltTimer;
@@ -491,70 +490,64 @@ struct npc_rethhedronAI : public ScriptedAI
         m_uiCrippleTimer     = urand(5000, 9000);
         m_uiShadowBoltTimer  = urand(1000, 3000);
         m_uiAbyssalTossTimer = 0;
-        m_uiDelayTimer       = 0;
 
         m_attackDistance = 30.0f;
 
         m_bLowHpYell        = false;
-        m_bEventFinished    = false;
+
+        m_attackDistance = 30.0f;
+    }
+
+    void JustRespawned() override
+    {
+        SetReactState(REACT_AGGRESSIVE);
+        SetCombatMovement(true);
+        SetCombatScriptStatus(false);
+        m_bEventFinished = false;
+        m_meleeEnabled = true;
+        ScriptedAI::JustRespawned();
     }
 
     void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
+        uiDamage = std::min(m_creature->GetHealth() - 1, uiDamage);
+
         // go to epilog at 10% health
-        if (!m_bEventFinished && m_creature->GetHealthPercent() < 10.0f)
+        if (!m_bEventFinished && m_creature->GetHealth() - uiDamage < m_creature->GetMaxHealth() * 0.1f)
         {
+            SetReactState(REACT_PASSIVE);
+            SetCombatMovement(false);
+            SetCombatScriptStatus(true);
+            m_meleeEnabled = false;
+            m_creature->MeleeAttackStop(m_creature->getVictim());
+            m_creature->SetTarget(nullptr);
             m_creature->InterruptNonMeleeSpells(false);
-            m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MovePoint(POINT_ID_PORTAL_FRONT, afRethhedronPos[0][0], afRethhedronPos[0][1], afRethhedronPos[0][2]);
+            m_creature->GetMotionMaster()->Clear(false, true);
+            m_creature->GetMotionMaster()->MoveWaypoint(PATH_ID_OUTRO);
             m_bEventFinished = true;
         }
-
-        // npc is not allowed to die
-        if (m_creature->GetHealth() < uiDamage)
-            uiDamage = 0;
     }
 
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
-        if (uiMoveType != POINT_MOTION_TYPE)
+        if (uiMoveType != WAYPOINT_MOTION_TYPE || m_creature->GetMotionMaster()->GetPathId() != PATH_ID_OUTRO)
             return;
 
-        if (uiPointId == POINT_ID_PORTAL_FRONT)
+        switch (uiPointId)
         {
-            DoScriptText(SAY_EVENT_END, m_creature);
-            m_creature->GetMotionMaster()->MoveIdle();
-            m_uiDelayTimer = 2000;
+            case POINT_ID_PORTAL_YELL:
+                DoScriptText(SAY_EVENT_END, m_creature);
+                break;
+            case POINT_ID_PORTAL_FINAL:
+                DoCastSpellIfCan(m_creature, SPELL_QUEST_COMPLETE, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_COSMETIC_LEGION_RING, CAST_TRIGGERED);
+                m_creature->ForcedDespawn(2000);
+                break;
         }
-        else if (uiPointId == POINT_ID_PORTAL)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_COSMETIC_LEGION_RING, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_QUEST_COMPLETE, CAST_TRIGGERED);
-            m_creature->GetMotionMaster()->MoveIdle();
-            m_creature->ForcedDespawn(2000);
-        }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_RETHHEDRONS_TARGET)
-            pSummoned->CastSpell(pSummoned, SPELL_ABYSSAL_IMPACT, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiDelayTimer)
-        {
-            if (m_uiDelayTimer <= uiDiff)
-            {
-                m_creature->GetMotionMaster()->Clear();
-                m_creature->GetMotionMaster()->MovePoint(POINT_ID_PORTAL, afRethhedronPos[1][0], afRethhedronPos[1][1], afRethhedronPos[1][2]);
-                m_uiDelayTimer = 0;
-            }
-            else
-                m_uiDelayTimer -= uiDiff;
-        }
-
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
@@ -579,8 +572,18 @@ struct npc_rethhedronAI : public ScriptedAI
 
         if (m_uiAbyssalTossTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ABYSSAL_TOSS) == CAST_OK)
-                m_uiAbyssalTossTimer = urand(500, 2000);
+            if (Unit* victim = m_creature->getVictim())
+            {
+                if (!m_creature->CanReachWithMeleeAttack(victim))
+                {
+                    Creature* rethedronTarget = m_creature->SummonCreature(NPC_RETHHEDRONS_TARGET, victim->GetPositionX(), victim->GetPositionY(), victim->GetPositionZ(), 0, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 30000);;
+                    if (DoCastSpellIfCan(rethedronTarget, SPELL_ABYSSAL_TOSS) == CAST_OK)
+                    {
+                        m_creature->PlayDistanceSound(SOUND_ID_ABYSSAL_TOSS);
+                        m_uiAbyssalTossTimer = urand(500, 2000);
+                    }
+                }
+            }
         }
         else
             m_uiAbyssalTossTimer -= uiDiff;

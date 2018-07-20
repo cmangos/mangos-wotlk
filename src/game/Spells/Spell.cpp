@@ -2296,6 +2296,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 case 39497: // remove weapons on kael, should hit all players, including the ones MCed
                 case 30571: // this spell needs custom targeting and is handled later, in sniff faction has 35 and no matter to what positive effect is set it doesnt work
                 case 39977: // needs to hit all targets, due to being neutral spell, it checks for specific aura
+                case 41284: // needs to hit everything, including self
                     targetB = SPELL_TARGETS_ALL;
                     break;
                 case 45339:
