@@ -326,10 +326,30 @@ UnitAI* GetAI_boss_warchief_kargath_bladefist(Creature* pCreature)
     return new boss_warchief_kargath_bladefistAI(pCreature);
 }
 
+struct npc_blade_dance_targetAI : public ScriptedAI
+{
+    npc_blade_dance_targetAI(Creature* creature) : ScriptedAI(creature) {}
+    void Reset() override {}
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    {
+        uiDamage = std::min(m_creature->GetHealth() - 1, uiDamage);
+    }
+};
+
+UnitAI* GetAI_npc_blade_dance_target(Creature* pCreature)
+{
+    return new npc_blade_dance_targetAI(pCreature);
+}
+
 void AddSC_boss_warchief_kargath_bladefist()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_warchief_kargath_bladefist";
     pNewScript->GetAI = &GetAI_boss_warchief_kargath_bladefist;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_blade_dance_target";
+    pNewScript->GetAI = &GetAI_npc_blade_dance_target;
     pNewScript->RegisterSelf();
 }

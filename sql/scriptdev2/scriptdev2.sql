@@ -782,6 +782,7 @@ UPDATE creature_template SET ScriptName='mob_fel_orc_convert' WHERE entry=17083;
 UPDATE creature_template SET ScriptName='mob_lesser_shadow_fissure' WHERE entry IN (17471,18370);
 UPDATE creature_template SET ScriptName='mob_omrogg_heads' WHERE entry IN (19523,19524);
 UPDATE creature_template SET ScriptName='boss_warchief_kargath_bladefist' WHERE entry=16808;
+UPDATE creature_template SET ScriptName='npc_blade_dance_target' WHERE entry IN(20709);
 UPDATE instance_template SET ScriptName='instance_shattered_halls' WHERE map=540;
 
 /* MAGTHERIDON'S LAIR */
