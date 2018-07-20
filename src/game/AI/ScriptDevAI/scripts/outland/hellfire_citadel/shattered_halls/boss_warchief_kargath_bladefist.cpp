@@ -87,8 +87,6 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
 
     void Reset() override
     {
-        m_creature->SetSpeedRate(MOVE_RUN, 2.0f);
-
         m_uiSummoned = 2;
         m_bInBlade = false;
         m_uiWaitTimer = 0;
@@ -191,12 +189,8 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
                 m_bladeDanceTargetGuids.push_back(target->GetObjectGuid());
                 break;
             case SPELL_BLADE_DANCE_CHARGE:
-                if (m_uiTargetNum > 0) // to prevent loops
-                {
-                    m_uiWaitTimer = 1;
-                    m_creature->CastSpell(nullptr, SPELL_BLADE_DANCE, TRIGGERED_OLD_TRIGGERED);
-                    --m_uiTargetNum;
-                }
+                m_uiWaitTimer = 1;
+                m_creature->CastSpell(nullptr, SPELL_BLADE_DANCE, TRIGGERED_OLD_TRIGGERED);
                 break;
         }            
     }
@@ -272,13 +266,14 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
         {
             if (m_uiBladeDanceTimer < uiDiff)
             {
-                m_uiTargetNum = TARGET_NUM;
                 m_uiWaitTimer = 1;
                 m_bInBlade = true;
                 SetCombatScriptStatus(true);
+                SetCombatMovement(false);
                 m_uiBladeDanceTimer = 30000;
                 m_bladeDanceTargetGuids.clear();
                 m_creature->CastSpell(nullptr, SPELL_BLADE_DANCE_TARGETING, TRIGGERED_NONE);
+                m_uiTargetNum = std::min(m_bladeDanceTargetGuids.size(), size_t(TARGET_NUM));
                 return;
             }
             m_uiBladeDanceTimer -= uiDiff;
