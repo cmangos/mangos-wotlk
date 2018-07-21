@@ -41,11 +41,17 @@ enum
     SPELL_ARCANE_VOLLEY         = 36705,
     SPELL_ARCANE_VOLLEY_H       = 39133,
 
+    SPELL_ANCESTRAL_LIFE        = 34742,            // Periodic trigger of 34741
+    
+    // saplings
+    SPELL_MOONFIRE_VISUAL       = 36704,
+
     NPC_SAPLING                 = 19949,
 };
 
 // Summon Saplings spells (too many to declare them above)
-static const uint32 aSaplingsSummonSpells[10] = {34727, 34730, 34731, 34732, 34733, 34734, 34735, 34736, 34737, 34739};
+// static const uint32 aSaplingsSummonSpells[10] = {34727, 34730, 34731, 34732, 34733, 34734, 34735, 34736, 34737, 34739};
+static const uint32 aSaplingsSummonSpells[10] = { 34727, 34731, 34733, 34734, 34736, 34739 }; // actually ones used on retail
 
 struct boss_warp_splinterAI : public ScriptedAI
 {
@@ -92,14 +98,12 @@ struct boss_warp_splinterAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_SAPLING)
-            pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0, 0);
+            pSummoned->SetInCombatWithZone();
     }
 
     // Wrapper to summon all Saplings
     void SummonTreants()
     {
-        // Choose 6 random spells out of 10
-        std::random_shuffle(m_vSummonSpells.begin(), m_vSummonSpells.end());
         for (uint8 i = 0; i < 6; ++i)
             DoCastSpellIfCan(m_creature, m_vSummonSpells[i], CAST_TRIGGERED);
 
@@ -150,10 +154,19 @@ struct npc_saplingAI  : public ScriptedAI
 {
     npc_saplingAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
-    void Reset() override
+    void Reset() override {}
+
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spell) override
     {
-        // ToDo: This one may need further reserch
-        // m_creature->SetSpeedRate(MOVE_RUN, 0.5f);
+        if (spell->Id == SPELL_ANCESTRAL_LIFE)
+        {
+            SetCombatScriptStatus(true);
+            SetCombatMovement(false);
+            SetMeleeEnabled(false);
+            m_creature->SetTarget(nullptr);
+            m_creature->ForcedDespawn(4000);
+            DoCastSpellIfCan(nullptr, SPELL_MOONFIRE_VISUAL);
+        }
     }
 
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
