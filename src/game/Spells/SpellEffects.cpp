@@ -4783,6 +4783,8 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
                 pet->CastSpell(pet, 28305, TRIGGERED_OLD_TRIGGERED);
             return;
         }
+        case 47531: // Dismiss pet - suppress error
+            return;
         case 53258:                                         // Empower Rune Weapon
         {
             // remove cooldown of frost/death, undead/blood activated in main spell

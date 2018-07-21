@@ -2113,6 +2113,8 @@ void Aura::TriggerSpell()
                 triggerCaster->CastCustomSpell(triggerTarget, triggeredSpellInfo, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this, casterGUID);
                 return;
             }
+            case 32930:                                     // Blue beam
+                return; // Never seems to go off in sniffs - hides errors
             case 33525:                                     // Ground Slam
                 triggerTarget->CastSpell(triggerTarget, trigger_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this, casterGUID);
                 return;
