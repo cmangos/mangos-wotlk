@@ -933,12 +933,10 @@ struct boss_julianneAI : public ScriptedAI
     // Wrapper to start phase 3
     void DoHandleRomuloResurrect()
     {
-        if (DoCastSpellIfCan(m_creature, SPELL_UNDYING_LOVE) == CAST_OK)
-        {
-            DoCastSpellIfCan(m_creature, SPELL_FULL_HEALTH, CAST_TRIGGERED);
-            DoScriptText(SAY_JULIANNE_RESURRECT, m_creature);
-            DoRemoveFakeDeath();
-        }
+        m_creature->CastSpell(nullptr, SPELL_FULL_HEALTH, TRIGGERED_NONE);
+        DoRemoveFakeDeath();
+        DoCastSpellIfCan(m_creature, SPELL_UNDYING_LOVE);
+        DoScriptText(SAY_JULIANNE_RESURRECT, m_creature);
     }
 
     void UpdateAI(const uint32 uiDiff) override
