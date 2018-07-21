@@ -34,7 +34,9 @@ enum
     SPELL_ATTRACT_MAGIC             = 32265,
 
     SPELL_FOCUS_TARGET_VISUAL       = 32286,
-    NPC_FOCUS_FIRE                  = 18374
+    SPELL_BIRTH                     = 26262, // supposed to remove unit flag 2, which now it doesnt
+    SPELL_FOCUS_FIRE_SUMMON         = 32283,
+    NPC_FOCUS_FIRE                  = 18374  // summoned by 32283 
 };
 
 struct boss_shirrakAI : public ScriptedAI
@@ -70,13 +72,6 @@ struct boss_shirrakAI : public ScriptedAI
         m_creature->RemoveAurasDueToSpell(SPELL_INHIBIT_MAGIC_TRIGGER); // TODO: Investigate passive spell removal on death
     }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // The focus fire creature casts the focus fire visual
-        if (pSummoned->GetEntry() == NPC_FOCUS_FIRE)
-            pSummoned->CastSpell(pSummoned, SPELL_FOCUS_TARGET_VISUAL, TRIGGERED_OLD_TRIGGERED);
-    }
-
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -101,20 +96,20 @@ struct boss_shirrakAI : public ScriptedAI
         if (m_uiFocusFireTimer < uiDiff)
         {
             ++m_uiFocusFireCount;
-            Unit* pTarget = nullptr;
+            Unit* target = nullptr;
 
             switch (m_uiFocusFireCount)
             {
                 case 1:
                 {
                     // engage the target
-                    pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, uint32(0), SELECT_FLAG_PLAYER);
+                    target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
 
-                    if (!pTarget)
-                        pTarget = m_creature->getVictim();
+                    if (!target)
+                        target = m_creature->getVictim();
 
-                    DoScriptText(EMOTE_FOCUS, m_creature, pTarget);
-                    m_focusTargetGuid = pTarget->GetObjectGuid();
+                    DoScriptText(EMOTE_FOCUS, m_creature, target);
+                    m_focusTargetGuid = target->GetObjectGuid();
                     // no break;
                 }
                 case 2:
@@ -128,12 +123,12 @@ struct boss_shirrakAI : public ScriptedAI
                     break;
             }
 
-            if (!pTarget)
-                pTarget = m_creature->GetMap()->GetUnit(m_focusTargetGuid);
+            if (!target)
+                target = m_creature->GetMap()->GetUnit(m_focusTargetGuid);
 
             // Summon focus fire at target location
-            if (pTarget)
-                m_creature->SummonCreature(NPC_FOCUS_FIRE, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 10000);
+            if (target)
+                target->CastSpell(nullptr, SPELL_FOCUS_FIRE_SUMMON, TRIGGERED_OLD_TRIGGERED);
         }
         else
             m_uiFocusFireTimer -= uiDiff;

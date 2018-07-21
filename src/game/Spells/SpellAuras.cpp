@@ -2894,13 +2894,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 return;
             }
-            case 32286:                                     // Focus Target Visual
-            {
-                if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
-                    target->CastSpell(target, 32301, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-
-                return;
-            }
             case 35079:                                     // Misdirection, triggered buff
             case 59628:                                     // Tricks of the Trade, triggered buff
             {
