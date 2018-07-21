@@ -6384,6 +6384,7 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
                     m_caster->CastSpell(summon, 20882, TRIGGERED_OLD_TRIGGERED);
                     summon->CastSpell(nullptr, 22699, TRIGGERED_NONE);  // Inferno effect
                     summon->CastSpell(itr.x, itr.y, itr.z, 20310, TRIGGERED_NONE);  // Stun
+                    summon->CastSpell(nullptr, 19483, TRIGGERED_NONE); // Immolation - needs to be cast after level update
                     break;
                 }
                 case 37390:
