@@ -1672,6 +1672,7 @@ INSERT INTO scripted_event_id VALUES (11225,'event_taxi_stormcrow');
 UPDATE creature_template SET ScriptName='npc_cooshcoosh' WHERE entry=18586;
 UPDATE creature_template SET ScriptName='npc_kayra_longmane' WHERE entry=17969;
 UPDATE creature_template SET ScriptName='npc_fhwoor' WHERE entry=17877;
+UPDATE creature_template SET ScriptName='npc_frostbite' WHERE entry=20061;
 
 /* ZUL'AMAN */
 UPDATE instance_template SET ScriptName='instance_zulaman' WHERE map=568;

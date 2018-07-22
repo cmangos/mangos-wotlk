@@ -345,6 +345,83 @@ bool QuestAccept_npc_fhwoor(Player* pPlayer, Creature* pCreature, const Quest* p
     return false;
 }
 
+/*######
+## npc_frostbite
+######*/
+
+enum
+{
+    SPELL_FROSTBITE_ROTATE = 34748,
+    SPELL_PERIODIC_TRIGGER_DUMMY = 30023,
+    SPELL_FROST_RING_FRONT = 34740,
+    SPELL_FROST_RING_BEHIND = 34746,
+    SPELL_FREEZING_CIRCLE = 34779
+};
+
+struct npc_frostbiteAI : public ScriptedAI
+{
+    npc_frostbiteAI(Creature* creature) : ScriptedAI(creature)
+    {
+        Reset();
+        tick = 0;
+    }
+
+    uint8 tick;
+
+    void Reset() override
+    {
+        m_creature->CastSpell(m_creature, SPELL_FROSTBITE_ROTATE, TRIGGERED_NONE);
+    }
+    
+    void SpellHit(Unit* caster, const SpellEntry* spell) override
+    {
+        if (caster != m_creature)
+            return;
+
+        if (spell->Id != SPELL_PERIODIC_TRIGGER_DUMMY)
+            return;
+
+        switch (tick)
+        {
+            case 0:
+            case 1:
+            case 2:
+            {
+                float newAngle = m_creature->GetOrientation();
+
+                newAngle += M_PI_F / 3;
+
+                newAngle = MapManager::NormalizeOrientation(newAngle);
+
+                m_creature->SetFacingTo(newAngle);
+                m_creature->SetOrientation(newAngle);
+
+                m_creature->CastSpell(m_creature, SPELL_FROST_RING_FRONT, TRIGGERED_NONE);
+                m_creature->CastSpell(m_creature, SPELL_FROST_RING_BEHIND, TRIGGERED_NONE);
+
+                tick++;
+                break;
+            }
+            case 3:
+                m_creature->CastSpell(m_creature, SPELL_FREEZING_CIRCLE, TRIGGERED_NONE);
+                tick++;
+                break;
+            default:
+                m_creature->ForcedDespawn();
+                break;
+        }
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+    }
+};
+
+UnitAI* GetAI_npc_frostbite(Creature* creature)
+{
+    return new npc_frostbiteAI(creature);
+}
+
 void AddSC_zangarmarsh()
 {
     Script* pNewScript = new Script;
@@ -367,5 +444,10 @@ void AddSC_zangarmarsh()
     pNewScript->Name = "npc_fhwoor";
     pNewScript->GetAI = &GetAI_npc_fhwoor;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_fhwoor;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_frostbite";
+    pNewScript->GetAI = &GetAI_npc_frostbite;
     pNewScript->RegisterSelf();
 }
