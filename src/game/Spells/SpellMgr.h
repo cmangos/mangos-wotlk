@@ -444,6 +444,8 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 31690:         // Putrid Mushroom
         case 32007:         // Mo'arg Engineer Transform Visual
         case 35596:         // Power of the Legion
+        case 35841:         // Draenei Spirit Visual
+        case 35850:         // Draenei Spirit Visual 2
         case 39311:         // Scrapped Fel Reaver transform aura that is never removed even on evade
         case 39918:         // visual auras in Soulgrinder script
         case 39920:
