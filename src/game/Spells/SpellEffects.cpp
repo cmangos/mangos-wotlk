@@ -580,6 +580,14 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                     uint32 used_energy = energy > 30 ? 30 : energy;
                     damage += int32(used_energy * multiple);
                     m_caster->SetPower(POWER_ENERGY, energy - used_energy);
+                    break;
+                }
+
+                // L5 Arcane Charge - Promenade Sentinal 23394
+                if (m_spellInfo->Id == 41360)
+                {
+                    damage = unitTarget->GetMaxHealth();
+                    break;
                 }
                 break;
             }
