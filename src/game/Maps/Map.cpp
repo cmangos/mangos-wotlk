@@ -64,6 +64,11 @@ Map::~Map()
     m_weatherSystem = nullptr;
 }
 
+uint32 Map::GetCurrentMSTime() const
+{
+    return World::GetCurrentMSTime();
+}
+
 TimePoint Map::GetCurrentClockTime() const
 {
     return World::GetCurrentClockTime();
