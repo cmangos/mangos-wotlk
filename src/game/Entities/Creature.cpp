@@ -366,7 +366,11 @@ bool Creature::InitEntry(uint32 Entry, CreatureData const* data /*=nullptr*/, Ga
         m_movementInfo.AddMovementFlag(MOVEFLAG_SWIMMING);  // add swimming movement
 
     // checked at loading
-    m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
+    if (data)
+        m_defaultMovementType = MovementGeneratorType(data->movementType);
+    else
+        m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
+
     SetMeleeDamageSchool(SpellSchools(cinfo->DamageSchool));
 
     SetCanParry(!(cinfo->ExtraFlags & CREATURE_EXTRA_FLAG_NO_PARRY));
@@ -551,7 +555,7 @@ void Creature::Update(uint32 update_diff, uint32 diff)
 
                 // need to preserve gameevent state
                 GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(GetGUIDLow());
-                UpdateEntry(m_originalEntry, TEAM_NONE, nullptr, eventData);
+                UpdateEntry(m_originalEntry, TEAM_NONE, sObjectMgr.GetCreatureData(GetGUIDLow()), eventData);
 
                 CreatureInfo const* cinfo = GetCreatureInfo();
 
@@ -1526,7 +1530,7 @@ bool Creature::LoadFromDB(uint32 guidlow, Map* map)
     SetPower(POWER_MANA, data->curmana);
 
     // checked at creature_template loading
-    m_defaultMovementType = MovementGeneratorType(data->movementType);
+
 
     map->Add(this);
 
