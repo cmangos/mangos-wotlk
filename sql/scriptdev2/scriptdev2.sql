@@ -4476,22 +4476,22 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 550 000 THE EYE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
-(-1550000,'Alert, you are marked for extermination!',11213,1,0,0,'voidreaver SAY_AGGRO'),
+(-1550000,'Alert! You are marked for extermination.',11213,1,0,0,'voidreaver SAY_AGGRO'),
 (-1550001,'Extermination, successful.',11215,1,0,0,'voidreaver SAY_SLAY1'),
 (-1550002,'Imbecile life form, no longer functional.',11216,1,0,0,'voidreaver SAY_SLAY2'),
 (-1550003,'Threat neutralized.',11217,1,0,0,'voidreaver SAY_SLAY3'),
-(-1550004,'Systems... shutting... down...',11214,1,0,0,'voidreaver SAY_DEATH'),
+(-1550004,'Systems... shutting... d-o-w-n...',11214,1,0,0,'voidreaver SAY_DEATH'),
 (-1550005,'Alternative measure commencing...',11218,1,0,0,'voidreaver SAY_POUNDING1'),
 (-1550006,'Calculating force parameters...',11219,1,0,0,'voidreaver SAY_POUNDING2'),
 
-(-1550007,'Tal anu\'men no Sin\'dorei!',11134,1,0,0,'solarian SAY_AGGRO'),
+(-1550007,'Tal anu\'men no sin\'dorei!',11134,1,0,0,'solarian SAY_AGGRO'),
 (-1550008,'Ha ha ha! You are hopelessly outmatched!',11139,1,0,0,'solarian SAY_SUMMON1'),
 (-1550009,'I will crush your delusions of grandeur!',11140,1,0,0,'solarian SAY_SUMMON2'),
 (-1550010,'Your soul belongs to the Abyss!',11136,1,0,0,'solarian SAY_KILL1'),
 (-1550011,'By the blood of the Highborne!',11137,1,0,0,'solarian SAY_KILL2'),
 (-1550012,'For the Sunwell!',11138,1,0,0,'solarian SAY_KILL3'),
 (-1550013,'The warmth of the sun... awaits.',11135,1,0,0,'solarian SAY_DEATH'),
-(-1550014,'Enough of this! Now I call upon the fury of the cosmos itself.',0,1,0,0,'solarian SAY_VOIDA'),
+(-1550014,'Enough of this!  Now I call upon the fury of the cosmos itself.',0,1,0,0,'solarian SAY_VOIDA'),
 (-1550015,'I become ONE... with the VOID!',0,1,0,0,'solarian SAY_VOIDB'),
 
 (-1550016,'Energy. Power. My people are addicted to it... a dependence made manifest after the Sunwell was destroyed. Welcome... to the future. A pity you are too late to stop it. No one can stop me now! Selama ashal\'anore!',11256,1,0,0,'kaelthas SAY_INTRO'),
