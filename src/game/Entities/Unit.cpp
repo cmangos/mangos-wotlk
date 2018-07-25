@@ -10044,7 +10044,7 @@ bool Unit::SelectHostileTarget()
                 if (!IsInEvadeMode())
                     StartEvadeTimer();
             }
-            else if (m_evadeTimer)
+            else if (IsInEvadeMode())
                 StopEvade();
         }
         return true;
