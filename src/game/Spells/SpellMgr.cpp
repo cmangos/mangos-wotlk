@@ -4629,6 +4629,7 @@ bool IsCreatureDRSpell(SpellEntry const* spellInfo)
     switch (spellInfo->Id)
     {
         case 36924: // Harbinger Skyriss - Mind Rend
+        case 31408: // Lesser Doomguard - War Stomp
         case 31480: return true; // Kazrogal War Stomp - confirmed via video
         default: return false;
     }
