@@ -133,7 +133,10 @@ struct boss_warlord_kalithreshAI : public ScriptedAI
                 if (DoCastSpellIfCan(m_creature, SPELL_WARLORDS_RAGE) == CAST_OK)
                 {
                     DoScriptText(SAY_REGEN, m_creature);
-                    SetCombatMovement(true);
+                    SetCombatScriptStatus(false);
+                    m_creature->SetTarget(m_creature->getVictim());
+                    SetMeleeEnabled(true);
+                    SetCombatMovement(true, true);
                     m_uiRageCastTimer = 0;
 
                     // Also make the distiller cast
@@ -157,6 +160,9 @@ struct boss_warlord_kalithreshAI : public ScriptedAI
                 pDistiller->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
                 m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                 SetCombatMovement(false);
+                SetCombatScriptStatus(true);
+                m_creature->SetTarget(nullptr);
+                SetMeleeEnabled(false);
                 m_distillerGuid = pDistiller->GetObjectGuid();
             }
 
@@ -190,27 +196,6 @@ struct boss_warlord_kalithreshAI : public ScriptedAI
     }
 };
 
-bool EffectAuraDummy_spell_aura_dummy_warlord_rage(const Aura* pAura, bool bApply)
-{
-    if (pAura->GetId() == SPELL_WARLORDS_RAGE && pAura->GetEffIndex() == EFFECT_INDEX_0)
-    {
-        if (Creature* pTarget = (Creature*)pAura->GetTarget())
-        {
-            // Resume combat when the cast is finished or interrupted
-            if (!bApply)
-            {
-                if (pTarget->getVictim())
-                {
-                    pTarget->GetMotionMaster()->MovementExpired();
-                    pTarget->GetMotionMaster()->MoveChase(pTarget->getVictim());
-                }
-            }
-        }
-    }
-
-    return true;
-}
-
 struct mob_naga_distillerAI : public Scripted_NoMovementAI
 {
     mob_naga_distillerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
@@ -240,7 +225,6 @@ void AddSC_boss_warlord_kalithresh()
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_warlord_kalithresh";
     pNewScript->GetAI = &GetAI_boss_warlord_kalithresh;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_warlord_rage;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
