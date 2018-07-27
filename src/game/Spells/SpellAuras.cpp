@@ -10241,7 +10241,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     break;
                 }
                 default:
-                    break;
+                    break; // Break here for poly below - 2.4.2+ only player poly regens
             }
             break;
         }
