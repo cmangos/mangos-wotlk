@@ -10249,7 +10249,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     break;
                 }
                 default:
-                    return;
+                    break;
             }
             break;
         }
@@ -10404,7 +10404,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     spellId2 = 63230;                       // Dispersion
                     break;
                 default:
-                    return;
+                    break;
             }
             break;
         }
@@ -10761,6 +10761,9 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         default:
             return;
     }
+
+    if (GetSpellProto()->Mechanic == MECHANIC_POLYMORPH)
+        spellId4 = 12939; // Just so that this doesnt conflict with others
 
     if (apply || cast_at_remove)
     {
