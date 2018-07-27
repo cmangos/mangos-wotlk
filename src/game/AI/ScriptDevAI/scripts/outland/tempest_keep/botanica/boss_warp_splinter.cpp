@@ -50,17 +50,13 @@ enum
 };
 
 // Summon Saplings spells (too many to declare them above)
-// static const uint32 aSaplingsSummonSpells[10] = {34727, 34730, 34731, 34732, 34733, 34734, 34735, 34736, 34737, 34739};
-static const uint32 aSaplingsSummonSpells[10] = { 34727, 34731, 34733, 34734, 34736, 34739 }; // actually ones used on retail
+// static const uint32 saplingsSummonSpells[10] = {34727, 34730, 34731, 34732, 34733, 34734, 34735, 34736, 34737, 34739};
+static const uint32 saplingsSummonSpells[6] = { 34727, 34731, 34733, 34734, 34736, 34739 }; // actually ones used on retail
 
 struct boss_warp_splinterAI : public ScriptedAI
 {
     boss_warp_splinterAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        // Add the summon spells to a vector for better handling
-        for (unsigned int aSaplingsSummonSpell : aSaplingsSummonSpells)
-            m_vSummonSpells.push_back(aSaplingsSummonSpell);
-
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -71,13 +67,14 @@ struct boss_warp_splinterAI : public ScriptedAI
     uint32 m_uiSummonTreantsTimer;
     uint32 m_uiArcaneVolleyTimer;
 
-    std::vector<uint32> m_vSummonSpells;
+    GuidVector m_saplings;
 
     void Reset() override
     {
         m_uiWarStompTimer       = urand(6000, 7000);
         m_uiSummonTreantsTimer  = urand(25000, 35000);
         m_uiArcaneVolleyTimer   = urand(12000, 14500);
+        m_saplings.clear();
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -95,17 +92,26 @@ struct boss_warp_splinterAI : public ScriptedAI
         DoScriptText(SAY_DEATH, m_creature);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_SAPLING)
-            pSummoned->SetInCombatWithZone();
+        if (summoned->GetEntry() == NPC_SAPLING)
+        {
+            m_saplings.push_back(summoned->GetObjectGuid());
+            summoned->SetInCombatWithZone();
+        }
+    }
+
+    void EnterEvadeMode() override
+    {
+        ScriptedAI::EnterEvadeMode();
+        DespawnGuids(m_saplings);
     }
 
     // Wrapper to summon all Saplings
     void SummonTreants()
     {
         for (uint8 i = 0; i < 6; ++i)
-            DoCastSpellIfCan(m_creature, m_vSummonSpells[i], CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, saplingsSummonSpells[i], CAST_TRIGGERED);
 
         DoCastSpellIfCan(m_creature, SPELL_SUMMON_SAPLINGS, CAST_TRIGGERED);
         DoScriptText(urand(0, 1) ? SAY_SUMMON_1 : SAY_SUMMON_2, m_creature);
@@ -173,7 +179,7 @@ struct npc_saplingAI  : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            m_creature->ForcedDespawn();
+            return;
 
         DoMeleeAttackIfReady();
     }
