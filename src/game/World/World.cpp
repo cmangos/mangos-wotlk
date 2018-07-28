@@ -1270,6 +1270,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Questgiver Greetings...");
     sObjectMgr.LoadQuestgiverGreeting();
 
+    sLog.outString("Loading Trainer Greetings...");
+    sObjectMgr.LoadTrainerGreetings();
+
     ///- Loading localization data
     sLog.outString("Loading Localization strings...");
     sObjectMgr.LoadCreatureLocales();                       // must be after CreatureInfo loading
@@ -1281,6 +1284,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadGossipMenuItemsLocales();                // must be after gossip menu items loading
     sObjectMgr.LoadPointOfInterestLocales();                // must be after POI loading
     sObjectMgr.LoadQuestgiverGreetingLocales();
+    sObjectMgr.LoadTrainerGreetingLocales();                // must be after CreatureInfo loading
     sLog.outString(">>> Localization strings loaded");
     sLog.outString();
 
