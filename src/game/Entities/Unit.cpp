@@ -10891,7 +10891,7 @@ CharmInfo::CharmInfo(Unit* unit) :
     m_petnumber(0), m_opener(0), m_openerMinRange(0),
     m_openerMaxRange(0), m_unitFieldFlags(0), m_unitFieldBytes2_1(0), m_retreating(false), m_stayPosSet(false),
     m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0),
-    m_stayPosO(0), m_unitFlagSave(0)
+    m_stayPosO(0)
 {
     for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
         m_charmspells[i].SetActionAndType(0, ACT_DISABLED);
@@ -10916,9 +10916,8 @@ void CharmInfo::SetCharmState(std::string const& ainame /*= "PetAI"*/, bool with
     // Save specific pre-charm flags
     // Save entire bytes2_1
     m_unitFieldBytes2_1 = m_unit->GetByteValue(UNIT_FIELD_BYTES_2, 1);
-    // Save select unit flags
-    const uint32 flags = (UNIT_FLAG_PLAYER_CONTROLLED | UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
-    m_unitFieldFlags = (m_unit->GetUInt32Value(UNIT_FIELD_FLAGS) & flags);
+    // Save unit flags
+    m_unitFieldFlags = m_unit->GetUInt32Value(UNIT_FIELD_FLAGS);
 }
 
 void CharmInfo::ResetCharmState()
@@ -10926,9 +10925,24 @@ void CharmInfo::ResetCharmState()
     // Restore specific pre-charm flags
     // Restore entire bytes2_1
     m_unit->SetByteValue(UNIT_FIELD_BYTES_2, 1, m_unitFieldBytes2_1);
-    // Restore select unit flags
-    const uint32 flags = (UNIT_FLAG_PLAYER_CONTROLLED | UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
-    m_unit->SetUInt32Value(UNIT_FIELD_FLAGS, ((m_unit->GetUInt32Value(UNIT_FIELD_FLAGS) & ~flags) | m_unitFieldFlags));
+    // Restore unit flags
+    uint32 savedUnitFlags = m_unitFieldFlags;
+    if (savedUnitFlags & UNIT_FLAG_PLAYER_CONTROLLED)
+        m_unit->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+    else
+        m_unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+    if (savedUnitFlags & UNIT_FLAG_IMMUNE_TO_PLAYER)
+        m_unit->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+    else
+        m_unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+
+    if (savedUnitFlags & UNIT_FLAG_IMMUNE_TO_NPC)
+        m_unit->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+    else
+        m_unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+
+    m_unit->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 }
 
 void CharmInfo::InitPetActionBar()
@@ -12644,12 +12658,7 @@ bool Unit::TakePossessOf(Unit* possessed)
     Creature* possessedCreature = nullptr;
     Player* possessedPlayer = nullptr;
     CharmInfo* charmInfo = possessed->InitCharmInfo(possessed);
-    charmInfo->SetUnitFlagSave(possessed->GetUInt32Value(UNIT_FIELD_FLAGS));
-
-    possessed->addUnitState(UNIT_STAT_POSSESSED);
-    possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
     possessed->SetCharmerGuid(GetObjectGuid());
-
     SetCharm(possessed);
 
     // stop any generated movement TODO:: this may not be correct! what about possessing a feared creature?
@@ -12675,6 +12684,10 @@ bool Unit::TakePossessOf(Unit* possessed)
 
         charmInfo->SetCharmState("PossessedAI");
     }
+
+    // Manipulate unit flags after SetCharmState
+    possessed->addUnitState(UNIT_STAT_POSSESSED);
+    possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
 
     // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
@@ -12747,7 +12760,6 @@ bool Unit::TakeCharmOf(Unit* charmed, bool advertised /*= true*/)
         m_charmedUnitsPrivate.insert(charmed->GetObjectGuid());
 
     CharmInfo* charmInfo = charmed->InitCharmInfo(charmed);
-    charmInfo->SetUnitFlagSave(charmed->GetUInt32Value(UNIT_FIELD_FLAGS));
     charmed->DeleteThreatList();
 
     if (charmed->GetTypeId() == TYPEID_PLAYER)
@@ -13007,24 +13019,6 @@ void Unit::Uncharm(Unit* charmed)
     // Update possessed's client control status after altering flags
     if (const Player* controllingClientPlayer = charmed->GetClientControlling())
         controllingClientPlayer->UpdateClientControl(charmed, true);
-
-    uint32 savedUnitFlags = charmInfo->GetUnitFlagSave();
-    if (savedUnitFlags & UNIT_FLAG_PLAYER_CONTROLLED)
-        charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-    else
-        charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-
-    if (savedUnitFlags & UNIT_FLAG_IMMUNE_TO_PLAYER)
-        charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-    else
-        charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-
-    if (savedUnitFlags & UNIT_FLAG_IMMUNE_TO_NPC)
-        charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-    else
-        charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-
-    charmed->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
     if (charmed->isAlive()) // must be done after flag update
     {
