@@ -8176,6 +8176,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 19633:
                         case 25778:
                         case 31389:
+                        case 37102:                                 // Knock Away - Crystalcore Devastator 20040
                         case 40486:
                             pct = -25;
                             break;
