@@ -3974,17 +3974,25 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             {
                 if (unitTarget && (int32(unitTarget->GetHealth()) > damage))
                 {
-                    // Shouldn't Appear in Combat Log
-                    unitTarget->ModifyHealth(-damage);
-
                     int32 spell_power = m_caster->SpellBaseDamageBonusDone(GetSpellSchoolMask(m_spellInfo));
                     int32 mana = damage + spell_power / 2;
 
-                    // Improved Life Tap mod
                     Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-                    for (auto itr : auraDummy)
-                        if (itr->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && itr->GetSpellProto()->SpellIconID == 208)
-                            mana = (itr->GetModifier()->m_amount + 100) * mana / 100;
+                    for (Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
+                    {
+                        if ((*itr)->isAffectedOnSpell(m_spellInfo))
+                        {
+                            switch ((*itr)->GetSpellProto()->Id)
+                            {
+                                case 28830: // Plagueheart Rainment - reduce hp cost
+                                    damage += damage * (*itr)->GetModifier()->m_amount / 100; break;
+                                    // Improved Life Tap
+                                default: mana = ((*itr)->GetModifier()->m_amount + 100) * mana / 100; break;
+                            }
+                        }
+                    }
+                    // Shouldn't Appear in Combat Log
+                    unitTarget->ModifyHealth(-damage);
 
                     m_caster->CastCustomSpell(unitTarget, 31818, &mana, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
 
