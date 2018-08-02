@@ -220,6 +220,26 @@ enum MovePoint
     POINT_SPIRIT_BOMB           = 7, // Spirit Bomb moving down
 };
 
+enum MiscData
+{
+    LIGHT_ID_SNOWSTORM             = 2490,
+    LIGHT_ID_SOULSTORM             = 2508,
+
+    MUSIC_ID_FROZEN_THRONE         = 17457,
+    MUSIC_ID_SPECIAL               = 17458,    // Summon Shambling Horror, Remorseless Winter, Quake, Summon Val'kyr Periodic, Harvest Soul, Vile Spirits
+    MUSIC_ID_FURY_OF_FROSTMOURNE   = 17459,
+    MUSIC_ID_FINAL                 = 17460,    // Raise Dead, Light's Blessing
+
+    SOUND_ID_PAIN                  = 17360,    // separate sound, not attached to any text
+
+    EQUIP_ID_ASHBRINGER_GLOWING    = 50442,
+    EQUIP_ID_BROKEN_FROSTMOURNE    = 50840,
+
+    MOVIE_ID_FALL_OF_THE_LICH_KING = 16,
+
+    AREA_ID_THE_FROZEN_THRONE      = 4859,
+};
+
 static const float fLichKingPosition[11][3] =
 {
     {458.59f, -2122.71f, 1040.86f},    // 0 Lich King Intro

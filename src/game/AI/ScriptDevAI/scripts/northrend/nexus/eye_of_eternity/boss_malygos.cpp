@@ -127,6 +127,14 @@ enum
     PHASE_DRAGONS                   = 5,
 
     POINT_ID_COMBAT                 = 1,
+
+    // light overrid id
+    LIGHT_ID_OBSCURE_SPACE          = 1822,
+    LIGHT_ID_CHANGE_DIMENSIONS      = 1823,
+    LIGHT_ID_ARCANE_RUNES           = 1824,
+    LIGHT_ID_OBSCURE_ARCANE_RUNES   = 1825,
+
+    AREA_ID_EYE_OF_ETERNITY         = 4500,
 };
 
 static const DialogueEntry aIntroDialogue[] =
