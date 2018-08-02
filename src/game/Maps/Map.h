@@ -83,6 +83,18 @@ enum LevelRequirementVsMode
     LEVELREQUIREMENT_HEROIC = 70
 };
 
+struct ZoneDynamicInfo
+{
+    ZoneDynamicInfo() : musicId(0), weatherId(0), weatherGrade(0.0f),
+        overrideLightId(0), lightFadeInTime(0) { }
+
+    uint32 musicId;
+    uint32 weatherId;
+    float  weatherGrade;
+    uint32 overrideLightId;
+    uint32 lightFadeInTime;
+};
+
 #if defined( __GNUC__ )
 #pragma pack()
 #else
@@ -90,6 +102,8 @@ enum LevelRequirementVsMode
 #endif
 
 #define MIN_UNLOAD_DELAY      1                             // immediate unload
+
+typedef std::unordered_map<uint32 /*zoneId*/, ZoneDynamicInfo> ZoneDynamicInfoMap;
 
 class Map : public GridRefManager<NGridType>
 {
@@ -325,6 +339,10 @@ class Map : public GridRefManager<NGridType>
         TimePoint GetCurrentClockTime();
         uint32 GetCurrentDiff();
 
+        void SetZoneMusic(uint32 zoneId, uint32 musicId);
+        void SetZoneWeather(uint32 zoneId, uint32 weatherId, float weatherGrade);
+        void SetZoneOverrideLight(uint32 zoneId, uint32 lightId, uint32 fadeInTime);
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 
@@ -334,6 +352,8 @@ class Map : public GridRefManager<NGridType>
 
         void SendInitTransports(Player* player) const;
         void SendRemoveTransports(Player* player) const;
+
+        void SendZoneDynamicInfo(Player* player) const;
 
         bool CreatureCellRelocation(Creature* creature, const Cell& new_cell);
 
@@ -425,6 +445,9 @@ class Map : public GridRefManager<NGridType>
         WeatherSystem* m_weatherSystem;
 
         std::unordered_map<uint32, std::set<ObjectGuid>> m_spawnedCount;
+
+        ZoneDynamicInfoMap m_zoneDynamicInfo;
+        uint32 i_defaultLight;
 };
 
 class WorldMap : public Map

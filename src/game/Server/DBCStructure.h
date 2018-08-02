@@ -1263,6 +1263,25 @@ struct ItemSetEntry
     m_target_level_max
 };*/
 
+struct LightEntry
+{
+    uint32 id;                                              // 0
+    uint32 mapId;                                           // 1
+    float x;                                                // 2
+    float y;                                                // 3
+    float z;                                                // 4
+    //float falloffStart;                                   // 5
+    //float falloffEnd;                                     // 6
+    //uint32 skyAndFog;                                     // 7
+    //uint32 waterSettings;                                 // 8
+    //uint32 sunsetParams;                                  // 9
+    //uint32 otherParams;                                   // 10
+    //uint32 deathParams;                                   // 11
+    //uint32 unknown;                                       // 12
+    //uint32 unknown;                                       // 13
+    //uint32 unknown;                                       // 14
+};
+
 struct LiquidTypeEntry
 {
     uint32 Id;                                              // 0

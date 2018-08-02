@@ -97,6 +97,8 @@ PvPDifficultyEntry const* GetBattlegroundBracketById(uint32 mapid, BattleGroundB
 uint32 GetCreatureModelRace(uint32 modelId);
 float GetModelMidpoint(uint32 modelId);
 
+uint32 GetDefaultMapLight(uint32 mapId);
+
 extern DBCStorage <AchievementEntry>             sAchievementStore;
 extern DBCStorage <AchievementCriteriaEntry>     sAchievementCriteriaStore;
 extern DBCStorage <AreaTableEntry>               sAreaStore;// recommend access using functions
