@@ -173,6 +173,7 @@ enum
     MIN_ATTUNED_NATURE_STACKS           = 25,
     MAX_ALLIES_SPELLS                   = 3,
     MAX_ALLIES_WAVES                    = 6,
+    MIN_DEFORESTATION_COUNT             = 2,
 };
 
 static const uint32 aAlliesSpawnSpells[MAX_ALLIES_SPELLS] = {SPELL_SUMMON_WAVE_1, SPELL_SUMMON_WAVE_3, SPELL_SUMMON_WAVE_10};
@@ -201,6 +202,7 @@ struct boss_freyaAI : public ScriptedAI
     instance_ulduar* m_pInstance;
     bool m_bIsRegularMode;
     bool m_bEventFinished;
+    bool m_bDeforestationComplete;
 
     uint32 m_uiEpilogueTimer;
     uint32 m_uiBerserkTimer;
@@ -217,6 +219,11 @@ struct boss_freyaAI : public ScriptedAI
     uint32 m_uiUnstableEnergyTimer;
     uint32 m_uiIronRootsTimer;
     uint32 m_uiGroundTremorTimer;
+
+    uint32 m_uiDeforestationTimer;
+    uint8 m_uiWaterSpiritDeadCount;
+    uint8 m_uiSnaplasherDeadCount;
+    uint8 m_uiStormlasherDeadCount;
 
     ObjectGuid m_waterSpiritGuid;
     ObjectGuid m_stormLasherGuid;
@@ -240,8 +247,15 @@ struct boss_freyaAI : public ScriptedAI
         m_uiGroundTremorTimer       = 0;
         m_uiDrainEldersTimer        = 0;
 
+        m_uiDeforestationTimer      = 0;
+        m_uiWaterSpiritDeadCount    = 0;
+        m_uiSnaplasherDeadCount     = 0;
+        m_uiStormlasherDeadCount    = 0;
+
         // make the spawn spells random
         std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+
+        m_bDeforestationComplete    = false;
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -416,7 +430,46 @@ struct boss_freyaAI : public ScriptedAI
             case NPC_STORM_LASHER:
             case NPC_SNAPLASHER:
                 pSummoned->CastSpell(m_creature, SPELL_ATTUNED_10_STACKS, TRIGGERED_OLD_TRIGGERED);
+
+                // start achiev timer and reset the counter
+                if (!m_uiDeforestationTimer && !m_bDeforestationComplete)
+                {
+                    m_uiDeforestationTimer      = 10000;
+                    m_uiWaterSpiritDeadCount    = 0;
+                    m_uiSnaplasherDeadCount     = 0;
+                    m_uiStormlasherDeadCount    = 0;
+                }
                 break;
+        }
+
+        // Deforestation achiev
+        if (m_uiDeforestationTimer)
+        {
+            switch (pSummoned->GetEntry())
+            {
+                case NPC_WATER_SPIRIT:
+                    ++m_uiWaterSpiritDeadCount;
+                    break;
+                case NPC_STORM_LASHER:
+                    ++m_uiStormlasherDeadCount;
+                    break;
+                case NPC_SNAPLASHER:
+                    ++m_uiSnaplasherDeadCount;
+                    break;
+            }
+
+            // give achiev credit
+            if (m_uiWaterSpiritDeadCount >= MIN_DEFORESTATION_COUNT && m_uiStormlasherDeadCount >= MIN_DEFORESTATION_COUNT && m_uiSnaplasherDeadCount >= MIN_DEFORESTATION_COUNT)
+            {
+                if (m_pInstance)
+                {
+                    if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_FREYA_ACHIEV_TRIGGER))
+                        pTrigger->CastSpell(pTrigger, SPELL_DEFORESTATION_CREDIT, TRIGGERED_OLD_TRIGGERED);
+
+                    m_bDeforestationComplete = true;
+                    m_uiDeforestationTimer = 0;
+                }
+            }
         }
     }
 
@@ -576,6 +629,15 @@ struct boss_freyaAI : public ScriptedAI
             }
             else
                 m_uiBerserkTimer -= uiDiff;
+        }
+
+        // Deforestation achiev timer
+        if (m_uiDeforestationTimer)
+        {
+            if (m_uiDeforestationTimer <= uiDiff)
+                m_uiDeforestationTimer = 0;
+            else
+                m_uiDeforestationTimer -= uiDiff;
         }
 
         // Drain elders after hard mode aggro

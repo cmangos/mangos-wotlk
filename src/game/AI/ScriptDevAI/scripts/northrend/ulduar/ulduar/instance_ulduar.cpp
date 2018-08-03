@@ -205,6 +205,7 @@ void instance_ulduar::OnCreatureCreate(Creature* pCreature)
         case NPC_ELDER_BRIGHTLEAF:
         case NPC_ELDER_IRONBRACH:
         case NPC_ELDER_STONEBARK:
+        case NPC_FREYA_ACHIEV_TRIGGER:
         case NPC_VEZAX:
         case NPC_SARONITE_ANIMUS:
         case NPC_YOGGSARON:
