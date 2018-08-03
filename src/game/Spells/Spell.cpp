@@ -610,6 +610,10 @@ void Spell::FillTargetMap()
                                     }
                                     tmpUnitLists[i].push_back(m_caster); // add caster so that we can cast dest only effects
                                 }
+                                else if (m_spellInfo->Targets & (TARGET_FLAG_GLYPH))
+                                {
+                                    tmpUnitLists[i].push_back(m_caster); // add caster so that we can cast dest only effects
+                                }
                                 break; // uses flag for target
                             }
                             switch (m_spellInfo->Effect[i])
@@ -623,7 +627,6 @@ void Spell::FillTargetMap()
                                 case SPELL_EFFECT_SKILL_STEP:
                                 case SPELL_EFFECT_SKILL:
                                 case SPELL_EFFECT_BREAK_PLAYER_TARGETING:
-                                case SPELL_EFFECT_APPLY_GLYPH:
                                 case SPELL_EFFECT_RESURRECT: // no spell guesswork
                                 case SPELL_EFFECT_RESURRECT_NEW: // no spell guesswork
                                 case SPELL_EFFECT_SKIN_PLAYER_CORPSE: // no spell guesswork
@@ -677,6 +680,7 @@ void Spell::FillTargetMap()
                                 }
                                 case SPELL_EFFECT_STUCK: // guessed based on 7355
                                 case SPELL_EFFECT_TRIGGER_SPELL: // guessed based on 37851
+                                case SPELL_EFFECT_APPLY_GLYPH:
                                     SetTargetMap(SpellEffectIndex(i), TARGET_SELF, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                                     break;
                                 case SPELL_EFFECT_SUMMON: // no spell guesswork - dest only effect
