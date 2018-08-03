@@ -1348,11 +1348,17 @@ inline bool IsPartyOrRaidTarget(uint32 target)
     }
 }
 
-inline bool IsGroupBuff(SpellEntry const* spellInfo)
+inline bool IsGroupRestrictedBuff(SpellEntry const* spellInfo)
 {
-    for (unsigned int i : spellInfo->EffectImplicitTargetA)
+    switch (spellInfo->Id)
     {
-        if (IsPartyOrRaidTarget(i))
+        // Soulstone Ressurection - Patch 2.1.0
+        case 20707:
+        case 20762:
+        case 20763:
+        case 20764:
+        case 20765:
+        case 27239:
             return true;
     }
 
