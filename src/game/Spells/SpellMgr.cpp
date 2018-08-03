@@ -2092,6 +2092,21 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
                     if ((spellInfo_1->Id == 71259 && spellInfo_2->Id == 71280) ||
                             (spellInfo_2->Id == 71259 && spellInfo_1->Id == 71280))
                         return false;
+
+                    // Mirror image auras (aura 247) and Copy Weapon
+                    if ((spellInfo_1->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MIRROR_IMAGE && spellInfo_2->Id == 41054) ||
+                            (spellInfo_2->Id == 41054 && spellInfo_1->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MIRROR_IMAGE))
+                        return false;
+
+                    // Mirror image auras (aura 247) and Copy Offhand Weapon
+                    if ((spellInfo_1->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MIRROR_IMAGE && spellInfo_2->Id == 45205) ||
+                            (spellInfo_2->Id == 45205 && spellInfo_1->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MIRROR_IMAGE))
+                        return false;
+
+                    // Mirror image auras (aura 247) and Mirror name auras (aura 279) - auras are always on index 0
+                    if ((spellInfo_1->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MIRROR_IMAGE && spellInfo_2->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MIRROR_NAME) ||
+                        (spellInfo_2->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MIRROR_IMAGE && spellInfo_1->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MIRROR_NAME))
+                        return false;
                     break;
                 }
                 case SPELLFAMILY_MAGE:
