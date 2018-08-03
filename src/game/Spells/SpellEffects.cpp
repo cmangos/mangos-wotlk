@@ -9810,6 +9810,18 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     caster->CastSpell(caster, damage, TRIGGERED_NONE);
                     break;
                 }
+                case 51854:                                 // Deathbolt
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // reflect spell if target has Freya's Ward aura
+                    if (unitTarget->HasAura(51845))
+                        unitTarget->CastSpell(m_caster, 51855, TRIGGERED_OLD_TRIGGERED);
+                    else
+                        m_caster->CastSpell(unitTarget, 51855, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 51864:                                 // Player Summon Nass
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
