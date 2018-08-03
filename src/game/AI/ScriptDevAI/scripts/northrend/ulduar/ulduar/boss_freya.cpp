@@ -1065,6 +1065,26 @@ UnitAI* GetAI_npc_healthy_spore(Creature* pCreature)
     return new npc_healthy_sporeAI(pCreature);
 }
 
+/*######
+## npc_freya_deforestation
+######*/
+
+// TODO Remove this 'script' when combat can be proper prevented from core-side
+struct npc_freya_deforestationAI : public Scripted_NoMovementAI
+{
+    npc_freya_deforestationAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+
+    void Reset() override { }
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+    void UpdateAI(const uint32 /*uiDiff*/) override { }
+};
+
+CreatureAI* GetAI_npc_freya_deforestation(Creature* pCreature)
+{
+    return new npc_freya_deforestationAI(pCreature);
+}
+
 void AddSC_boss_freya()
 {
     Script* pNewScript;
@@ -1108,5 +1128,10 @@ void AddSC_boss_freya()
     pNewScript = new Script;
     pNewScript->Name = "npc_healthy_spore";
     pNewScript->GetAI = GetAI_npc_healthy_spore;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_freya_deforestation";
+    pNewScript->GetAI = GetAI_npc_freya_deforestation;
     pNewScript->RegisterSelf();
 }

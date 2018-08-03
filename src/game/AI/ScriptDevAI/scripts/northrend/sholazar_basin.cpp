@@ -28,6 +28,7 @@ npc_mosswalker_victim
 npc_tipsy_mcmanus
 npc_wants_fruit_credit
 go_quest_still_at_it_credit
+new npc_avatar_of_freya
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -682,6 +683,51 @@ bool GOUse_go_quest_still_at_it_credit(Player* pPlayer, GameObject* pGo)
     return false;
 }
 
+/*######
+## npc_avatar_of_freya
+######*/
+
+enum
+{
+    SPELL_FREYA_DUMMY         = 51318,            // Dummy visual spells. Random action - kill 28108 or revive 29036. Target select random, but both should have spell_script_target for this.
+    NPC_SERVANT_OF_FREYA      = 29036,            // Avatar of Freya allies.
+    NPC_BONESCYTHE_RAVAGER    = 28108,            // Avatar of Freya enemy.
+};
+
+struct npc_avatar_of_freyaAI : public Scripted_NoMovementAI
+{
+    npc_avatar_of_freyaAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+        Reset();
+    }
+
+    uint32 m_uiFreyaDummyTimer;
+
+    void Reset() override
+    {
+        m_uiFreyaDummyTimer = 5000;
+    }
+
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiFreyaDummyTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_FREYA_DUMMY) == CAST_OK)
+                m_uiFreyaDummyTimer = urand(5000, 7000);
+        }
+        else
+            m_uiFreyaDummyTimer -= uiDiff;
+    }
+};
+
+CreatureAI* GetAI_npc_avatar_of_freya(Creature* pCreature)
+{
+    return new npc_avatar_of_freyaAI(pCreature);
+}
+
 void AddSC_sholazar_basin()
 {
     Script* pNewScript;
@@ -721,5 +767,9 @@ void AddSC_sholazar_basin()
     pNewScript = new Script;
     pNewScript->Name = "go_quest_still_at_it_credit";
     pNewScript->pGOUse = &GOUse_go_quest_still_at_it_credit;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_avatar_of_freya";
     pNewScript->RegisterSelf();
 }
