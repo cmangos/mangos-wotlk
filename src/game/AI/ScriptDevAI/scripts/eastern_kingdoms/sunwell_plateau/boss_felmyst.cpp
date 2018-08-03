@@ -217,6 +217,12 @@ struct boss_felmystAI : public ScriptedAI
         }
     }
 
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    {
+        if (m_uiPhase != PHASE_GROUND && uiDamage >= m_creature->GetHealth())
+            uiDamage = 0;
+    }
+
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE)
