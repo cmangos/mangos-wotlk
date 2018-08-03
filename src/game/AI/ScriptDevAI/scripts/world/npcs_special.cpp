@@ -40,6 +40,7 @@ npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
 npc_spring_rabbit         1%    Used for pet "Spring Rabbit" of Noblegarden
 npc_redemption_target   100%    Used for the paladin quests: 1779,1781,9600,9685
 npc_burster_worm        100%    Used for the crust burster worms in Outland. Npc entries: 16844, 16857, 16968, 21380, 21849, 22038, 22466, 22482, 23285
+npc_mage_mirror_image    10%    mage mirror image pet
 EndContentData */
 
 /*########
@@ -1950,6 +1951,54 @@ UnitAI* GetAI_npc_snakes(Creature* pCreature)
     return new npc_snakesAI(pCreature);
 }
 
+/*######
+## npc_mage_mirror_image
+######*/
+
+enum
+{
+    SPELL_MAGE_CLONE_ME                 = 45204,
+    SPELL_MAGE_MASTERS_THREAT_LIST      = 58838,
+
+    SPELL_MAGE_FROST_BOLT               = 59638,
+    SPELL_MAGE_FIRE_BLAST               = 59637,
+};
+
+struct npc_mage_mirror_imageAI : public ScriptedAI
+{
+    npc_mage_mirror_imageAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        if (Player* pOwner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
+        {
+            pOwner->CastSpell(m_creature, SPELL_MAGE_CLONE_ME, TRIGGERED_OLD_TRIGGERED);
+            m_creature->GetMotionMaster()->MoveFollow(pOwner, PET_FOLLOW_DIST, pOwner->GetAngle(m_creature) + M_PI_F/2);
+        }
+    }
+
+    uint32 m_uiFireBlastTimer;
+
+    void Reset() override
+    {
+        m_uiFireBlastTimer = 0;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        // always check if the owner is alive
+        Player* pOwner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid());
+        if (!pOwner || !pOwner->isAlive())
+            m_creature->ForcedDespawn();
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+    }
+};
+
+UnitAI* GetAI_npc_mage_mirror_image(Creature* pCreature)
+{
+    return new npc_mage_mirror_imageAI(pCreature);
+}
+
 void AddSC_npcs_special()
 {
     Script* pNewScript;
@@ -2032,5 +2081,10 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_snakes";
     pNewScript->GetAI = &GetAI_npc_snakes;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_mage_mirror_image";
+    pNewScript->GetAI = &GetAI_npc_mage_mirror_image;
     pNewScript->RegisterSelf();
 }
