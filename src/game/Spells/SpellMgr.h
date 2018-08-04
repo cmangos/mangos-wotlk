@@ -414,7 +414,8 @@ inline bool IsSpellSetRun(SpellEntry const* spellInfo)
 
 inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
 {
-    if (IsSpellHaveAura(spellInfo, SPELL_AURA_FLY) || IsSpellHaveAura(spellInfo, SPELL_AURA_CONTROL_VEHICLE))
+    if (IsSpellHaveAura(spellInfo, SPELL_AURA_FLY) || IsSpellHaveAura(spellInfo, SPELL_AURA_CONTROL_VEHICLE) ||
+            IsSpellHaveAura(spellInfo, SPELL_AURA_MIRROR_IMAGE) || IsSpellHaveAura(spellInfo, SPELL_AURA_MIRROR_NAME))
         return false;
 
     switch (spellInfo->Id)
