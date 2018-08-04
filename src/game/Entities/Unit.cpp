@@ -3942,16 +3942,21 @@ float Unit::GetHitChance(const SpellEntry* entry, SpellSchoolMask schoolMask) co
     if (!entry)
         return 0.0f;
 
-    // Add own hit chance
-    switch (entry->DmgClass)
+    if (entry->HasAttribute(SPELL_ATTR_EX5_USE_PHYSICAL_HIT_CHANCE))
+        chance += GetHitChance(GetWeaponAttackType(entry));
+    else
     {
-        case SPELL_DAMAGE_CLASS_MAGIC:
-            chance += GetHitChance(schoolMask);
-            break;
-        case SPELL_DAMAGE_CLASS_MELEE:
-        case SPELL_DAMAGE_CLASS_RANGED:
-            chance += GetHitChance(GetWeaponAttackType(entry));
-            break;
+        // Add own hit chance
+        switch (entry->DmgClass)
+        {
+            case SPELL_DAMAGE_CLASS_MAGIC:
+                chance += GetHitChance(schoolMask);
+                break;
+            case SPELL_DAMAGE_CLASS_MELEE:
+            case SPELL_DAMAGE_CLASS_RANGED:
+                chance += GetHitChance(GetWeaponAttackType(entry));
+                break;
+        }
     }
     // Add mod
     if (Player* modOwner = GetSpellModOwner())
@@ -3992,17 +3997,22 @@ float Unit::GetMissChance(const SpellEntry* entry, SpellSchoolMask schoolMask) c
     if (!entry)
         return 0.0f;
 
-    // Add own miss chance
-    switch (entry->DmgClass)
+    if (entry->HasAttribute(SPELL_ATTR_EX5_USE_PHYSICAL_HIT_CHANCE))
+        chance += GetMissChance(GetWeaponAttackType(entry));
+    else
     {
-        case SPELL_DAMAGE_CLASS_MELEE:
-        case SPELL_DAMAGE_CLASS_RANGED:
-            chance += GetMissChance(GetWeaponAttackType(entry));
-            break;
-        // By default, we use spell miss chance even for spells without dmgclass
-        default:
-            chance += GetMissChance(schoolMask);
-            break;
+        // Add own miss chance
+        switch (entry->DmgClass)
+        {
+            case SPELL_DAMAGE_CLASS_MELEE:
+            case SPELL_DAMAGE_CLASS_RANGED:
+                chance += GetMissChance(GetWeaponAttackType(entry));
+                break;
+                // By default, we use spell miss chance even for spells without dmgclass
+            default:
+                chance += GetMissChance(schoolMask);
+                break;
+        }
     }
     // AoE avoidance
     if (IsAreaOfEffectSpell(entry))
