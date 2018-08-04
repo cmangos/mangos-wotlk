@@ -40,7 +40,7 @@ npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
 npc_spring_rabbit         1%    Used for pet "Spring Rabbit" of Noblegarden
 npc_redemption_target   100%    Used for the paladin quests: 1779,1781,9600,9685
 npc_burster_worm        100%    Used for the crust burster worms in Outland. Npc entries: 16844, 16857, 16968, 21380, 21849, 22038, 22466, 22482, 23285
-npc_mage_mirror_image    10%    mage mirror image pet
+npc_mage_mirror_image    90%    mage mirror image pet
 EndContentData */
 
 /*########
@@ -1972,25 +1972,53 @@ struct npc_mage_mirror_imageAI : public ScriptedAI
         {
             pOwner->CastSpell(m_creature, SPELL_MAGE_CLONE_ME, TRIGGERED_OLD_TRIGGERED);
             m_creature->GetMotionMaster()->MoveFollow(pOwner, PET_FOLLOW_DIST, pOwner->GetAngle(m_creature) + M_PI_F/2);
+            SetMoveChaseParams(3 * ATTACK_DISTANCE, 0.0f, false);
+            SetReactState(REACT_DEFENSIVE);
         }
     }
 
     uint32 m_uiFireBlastTimer;
+    uint32 m_uiThreatUpdateTimer;
 
     void Reset() override
     {
+        m_uiThreatUpdateTimer = 1000;
         m_uiFireBlastTimer = 0;
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        // always check if the owner is alive
-        Player* pOwner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid());
-        if (!pOwner || !pOwner->isAlive())
-            m_creature->ForcedDespawn();
+        // update threat and owner on 1 sec timer
+        if (m_uiThreatUpdateTimer < uiDiff)
+        {
+            Player* pOwner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid());
+            if (!pOwner || !pOwner->isAlive())
+            {
+                m_creature->ForcedDespawn();
+                return;
+            }
+
+            if (DoCastSpellIfCan(m_creature, SPELL_MAGE_MASTERS_THREAT_LIST) == CAST_OK)
+                m_uiThreatUpdateTimer = 1000;
+        }
+        else
+            m_uiThreatUpdateTimer -= uiDiff;
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
+
+        // cast fire blast and frostbolt alternatively
+        if (m_uiFireBlastTimer <= uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MAGE_FIRE_BLAST) == CAST_OK)
+                m_uiFireBlastTimer = 6500;
+        }
+        else
+        {
+            m_uiFireBlastTimer -= uiDiff;
+
+            DoCastSpellIfCan(m_creature->getVictim(), SPELL_MAGE_FROST_BOLT);
+        }
     }
 };
 
