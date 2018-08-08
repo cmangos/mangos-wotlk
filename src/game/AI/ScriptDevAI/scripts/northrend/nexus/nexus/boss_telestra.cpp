@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Telestra
-SD%Complete: 80%
-SDComment: script depend on database spell support and eventAi for clones. transition to phase 2 also not fully implemented
+SD%Complete: 90%
+SDComment: script depend on database spell support and eventAi for clones.
 SDCategory: Nexus
 EndScriptData */
 
@@ -108,7 +108,8 @@ struct boss_telestraAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true);
     }
 
     void AttackStart(Unit* pWho) override
@@ -168,7 +169,8 @@ struct boss_telestraAI : public ScriptedAI
                     m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_CLONES);
                     m_creature->CastSpell(m_creature, SPELL_SPAWN_BACK_IN, TRIGGERED_NONE);
 
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true);
 
                     DoScriptText(SAY_MERGE, m_creature);
 
@@ -185,7 +187,8 @@ struct boss_telestraAI : public ScriptedAI
                 break;
             }
             case SPELL_SUMMON_CLONES:
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, 0);
                 break;
         }
     }

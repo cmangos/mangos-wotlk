@@ -1091,7 +1091,6 @@ INSERT INTO scripted_event_id VALUES
 
 /* NEXUS */
 UPDATE creature_template SET ScriptName='boss_anomalus' WHERE entry=26763;
-UPDATE creature_template SET ScriptName='mob_chaotic_rift' WHERE entry=26918;
 UPDATE creature_template SET ScriptName='boss_keristrasza' WHERE entry=26723;
 UPDATE creature_template SET ScriptName='boss_ormorok' WHERE entry=26794;
 UPDATE creature_template SET ScriptName='npc_crystal_spike_trigger' WHERE entry IN (27101, 27079);

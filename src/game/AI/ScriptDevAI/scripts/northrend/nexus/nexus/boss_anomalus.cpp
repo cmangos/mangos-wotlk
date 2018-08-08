@@ -42,16 +42,7 @@ enum
     SPELL_SPARK                        = 47751,
     SPELL_SPARK_H                      = 57062,
 
-    // Chaotic Rift
-    SPELL_RIFT_AURA                    = 47687,
-    SPELL_RIFT_SUMMON_AURA             = 47732,
-
-    // Charged Chaotic Rift
-    SPELL_CHARGED_RIFT_AURA            = 47733,
-    SPELL_CHARGED_RIFT_SUMMON_AURA     = 47742,
-
-    NPC_CHAOTIC_RIFT                   = 26918,
-    NPC_CRAZED_MANA_WRAITH             = 26746
+    NPC_CHAOTIC_RIFT                   = 26918
 };
 
 /*######
@@ -193,69 +184,6 @@ UnitAI* GetAI_boss_anomalus(Creature* pCreature)
     return new boss_anomalusAI(pCreature);
 }
 
-struct mob_chaotic_riftAI : public Scripted_NoMovementAI
-{
-    mob_chaotic_riftAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
-
-    uint32 m_uiChargedRemoveTimer;
-
-    void Reset() override
-    {
-        m_uiChargedRemoveTimer = 0;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        // Auras are applied on aggro because there are many npcs with this entry in the instance
-        DoCastSpellIfCan(m_creature, SPELL_RIFT_AURA, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_RIFT_SUMMON_AURA, CAST_TRIGGERED);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_CRAZED_MANA_WRAITH)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                pSummoned->AI()->AttackStart(pTarget);
-        }
-    }
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        // When hit with Charge Rift cast the Charged Rift spells
-        if (pSpell->Id == SPELL_CHARGE_RIFT && m_creature->getVictim())
-        {
-            DoCastSpellIfCan(m_creature, SPELL_CHARGED_RIFT_AURA, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_CHARGED_RIFT_SUMMON_AURA, CAST_TRIGGERED);
-            m_uiChargedRemoveTimer = 45000;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_uiChargedRemoveTimer)
-        {
-            // The charged spells need to be removed by casting the normal ones in case the npc isn't killed
-            if (m_uiChargedRemoveTimer <= uiDiff)
-            {
-                DoCastSpellIfCan(m_creature, SPELL_RIFT_AURA, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_RIFT_SUMMON_AURA, CAST_TRIGGERED);
-                m_uiChargedRemoveTimer = 0;
-            }
-            else
-                m_uiChargedRemoveTimer -= uiDiff;
-        }
-    }
-};
-
-UnitAI* GetAI_mob_chaotic_rift(Creature* pCreature)
-{
-    return new mob_chaotic_riftAI(pCreature);
-}
-
 void AddSC_boss_anomalus()
 {
     Script* pNewScript;
@@ -263,10 +191,5 @@ void AddSC_boss_anomalus()
     pNewScript = new Script;
     pNewScript->Name = "boss_anomalus";
     pNewScript->GetAI = &GetAI_boss_anomalus;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "mob_chaotic_rift";
-    pNewScript->GetAI = &GetAI_mob_chaotic_rift;
     pNewScript->RegisterSelf();
 }
