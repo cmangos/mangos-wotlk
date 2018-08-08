@@ -230,7 +230,8 @@ Unit::Unit() :
     m_vehicleInfo(nullptr),
     m_combatData(new CombatData(this)),
     m_spellUpdateHappening(false),
-    m_spellProcsHappening(false)
+    m_spellProcsHappening(false),
+    m_auraUpdateMask(0)
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -11817,17 +11818,13 @@ void Unit::UpdateAuraForGroup(uint8 slot)
             player->SetAuraUpdateMask(slot);
         }
     }
-    else if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet())
+    else if (GetTypeId() == TYPEID_UNIT && HasCharmer() && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
-        Pet* pet = ((Pet*)this);
-        if (pet->isControlled())
+        Unit* charmer = GetCharmer();
+        if (charmer && (charmer->GetTypeId() == TYPEID_PLAYER) && ((Player*)charmer)->GetGroup())
         {
-            Unit* owner = GetOwner();
-            if (owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
-            {
-                ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_AURAS);
-                pet->SetAuraUpdateMask(slot);
-            }
+            ((Player*)charmer)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_AURAS);
+            SetAuraUpdateMask(slot);
         }
     }
 }
@@ -12750,6 +12747,9 @@ bool Unit::TakePossessOf(Unit* possessed)
         // Take away client control immediately if we are not supposed to have control at the moment
         if (!possessed->IsClientControlled(player))
             player->UpdateClientControl(possessed, false);
+
+        if (player->GetGroup())
+            player->SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
 
     return true;
@@ -12859,7 +12859,11 @@ bool Unit::TakeCharmOf(Unit* charmed, bool advertised /*= true*/)
         charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
     if (charmerPlayer && advertised)
+    {
         charmerPlayer->CharmSpellInitialize();
+        if (charmerPlayer->GetGroup())
+            charmerPlayer->SetGroupUpdateFlag(GROUP_UPDATE_PET);
+    }
 
     return true;
 }
@@ -13078,6 +13082,9 @@ void Unit::Uncharm(Unit* charmed)
                 player->RemovePetActionBar();
             else
                 player->PetSpellInitialize();   // reset spell on pet bar
+
+            if (player->GetGroup())
+                player->SetGroupUpdateFlag(GROUP_UPDATE_PET);
         }
     }
 
