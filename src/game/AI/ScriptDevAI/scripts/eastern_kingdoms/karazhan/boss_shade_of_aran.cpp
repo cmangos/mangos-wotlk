@@ -307,7 +307,7 @@ struct boss_aranAI : public ScriptedAI
                             SetCombatMovement(false);
                             SetCombatScriptStatus(true);
                             SetMeleeEnabled(false);
-
+                            m_creature->SetTarget(nullptr);
                             m_uiManaRecoveryStage = 0;
                             m_uiManaRecoveryTimer = 2000;
                             m_bDrinkInterrupted = false;
