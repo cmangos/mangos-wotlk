@@ -42,6 +42,7 @@ npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
 npc_spring_rabbit         1%    Used for pet "Spring Rabbit" of Noblegarden
 npc_redemption_target   100%    Used for the paladin quests: 1779,1781,9600,9685
 npc_burster_worm        100%    Used for the crust burster worms in Outland. Npc entries: 16844, 16857, 16968, 17075, 18678, 21380, 21849, 22038, 22466, 22482, 23285
+npc_aoe_damage_trigger   75%    Used for passive aoe damage triggers in various encounters with overlapping usage of entries: 16697, 17471, 20570
 npc_mage_mirror_image    90%    mage mirror image pet
 EndContentData */
 
@@ -1733,6 +1734,59 @@ UnitAI* GetAI_npc_burster_worm(Creature* pCreature)
 }
 
 /*######
+## npc_aoe_damage_trigger
+######*/
+
+enum npc_aoe_damage_trigger
+{
+    // trigger npcs
+    NPC_VOID_ZONE = 16697,
+    NPC_LESSER_SHADOW_FISSURE = 17471,
+    NPC_LESSER_SHADOW_FISSURE_H = 20570,
+
+    // m_uiAuraPassive
+    SPELL_CONSUMPTION_NPC_16697 = 28874,
+    SPELL_CONSUMPTION_NPC_17471 = 30497,
+    SPELL_CONSUMPTION_NPC_20570 = 35952,
+};
+
+struct npc_aoe_damage_triggerAI : public Scripted_NoMovementAI
+{
+    npc_aoe_damage_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature), m_uiAuraPassive(SetAuraPassive()) { }
+
+    uint32 m_uiAuraPassive;
+
+    inline uint32 SetAuraPassive()
+    {
+        switch (m_creature->GetCreatureInfo()->Entry)
+        {
+            case NPC_VOID_ZONE:
+                return SPELL_CONSUMPTION_NPC_16697;
+            case NPC_LESSER_SHADOW_FISSURE:
+                return SPELL_CONSUMPTION_NPC_17471;
+            case NPC_LESSER_SHADOW_FISSURE_H:
+                return SPELL_CONSUMPTION_NPC_20570;
+            default:
+                return SPELL_CONSUMPTION_NPC_17471;
+        }
+    }
+
+    void Reset() override
+    {
+        DoCastSpellIfCan(m_creature, m_uiAuraPassive, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+    void UpdateAI(const uint32 uiDiff) override {}
+};
+
+UnitAI* GetAI_npc_aoe_damage_trigger(Creature* pCreature)
+{
+    return new npc_aoe_damage_triggerAI(pCreature);
+}
+
+/*######
 ## npc_the_cleaner
 ######*/
 enum
@@ -2253,6 +2307,11 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_nether_ray";
     pNewScript->GetAI = &GetAI_npc_nether_ray;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_aoe_damage_trigger";
+    pNewScript->GetAI = &GetAI_npc_aoe_damage_trigger;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

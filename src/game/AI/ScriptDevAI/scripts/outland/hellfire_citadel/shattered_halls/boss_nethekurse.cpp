@@ -387,16 +387,6 @@ struct mob_fel_orc_convertAI : public ScriptedAI
     }
 };
 
-// NOTE: this creature are also summoned by other spells, for different creatures
-struct mob_lesser_shadow_fissureAI : public Scripted_NoMovementAI
-{
-    mob_lesser_shadow_fissureAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
-
-    void Reset() override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-};
-
 UnitAI* GetAI_boss_grand_warlock_nethekurse(Creature* pCreature)
 {
     return new boss_grand_warlock_nethekurseAI(pCreature);
@@ -405,11 +395,6 @@ UnitAI* GetAI_boss_grand_warlock_nethekurse(Creature* pCreature)
 UnitAI* GetAI_mob_fel_orc_convert(Creature* pCreature)
 {
     return new mob_fel_orc_convertAI(pCreature);
-}
-
-UnitAI* GetAI_mob_lesser_shadow_fissure(Creature* pCreature)
-{
-    return new mob_lesser_shadow_fissureAI(pCreature);
 }
 
 void AddSC_boss_grand_warlock_nethekurse()
@@ -422,10 +407,5 @@ void AddSC_boss_grand_warlock_nethekurse()
     pNewScript = new Script;
     pNewScript->Name = "mob_fel_orc_convert";
     pNewScript->GetAI = &GetAI_mob_fel_orc_convert;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "mob_lesser_shadow_fissure";
-    pNewScript->GetAI = &GetAI_mob_lesser_shadow_fissure;
     pNewScript->RegisterSelf();
 }
