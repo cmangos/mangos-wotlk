@@ -755,14 +755,17 @@ namespace MaNGOS
     class AllGameObjectEntriesListInPosRangeCheck
     {
         public:
-            AllGameObjectEntriesListInPosRangeCheck(WorldObject const& obj, float x, float y, float z, std::set<uint32>& entries, float range, bool is3D = true) : i_x(x), i_y(y), i_z(z), i_entries(entries), i_range(range), i_is3D(is3D), i_obj(obj) {}
-            WorldObject const& GetFocusObject() const { return i_obj; }
+            AllGameObjectEntriesListInPosRangeCheck(WorldObject const& obj, float x, float y, float z, std::set<uint32>& entries, float range, bool is3D = true) : i_obj(obj), i_x(x), i_y(y), i_z(z), i_entries(entries), i_range(range), i_is3D(is3D) {}
             bool operator()(GameObject* go)
             {
-                return go->IsSpawned() && i_entries.find(go->GetEntry()) != i_entries.end() && go->IsWithinDist3d(i_x, i_y, i_z, i_range);
+                if (go->IsSpawned() && i_entries.find(go->GetEntry()) != i_entries.end() && go->GetDistance(i_x, i_y, i_z, DIST_CALC_COMBAT_REACH) < i_range)
+                    return true;
+
+                return false;
             }
 
             std::vector<uint32> i_ranges;
+            WorldObject const& GetFocusObject() const { return i_obj; }
         private:
             float i_x, i_y, i_z;
             std::set<uint32>& i_entries;

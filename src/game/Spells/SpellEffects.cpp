@@ -349,7 +349,9 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                     }
                     case 33671:                             // Shatter - Gruul
                     {
-                        damage = (20 - m_caster->GetDistance(unitTarget))*(damage / 20);
+                        float x, y, z;
+                        unitTarget->GetPosition(x, y, z);
+                        damage = (20 - m_caster->GetDistance(x, y, z, DIST_CALC_COMBAT_REACH))*(damage / 20);
                         break;
                     }
                     // Intercept (warrior spell trigger)
