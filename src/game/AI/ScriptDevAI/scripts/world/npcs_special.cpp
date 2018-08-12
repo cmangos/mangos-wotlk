@@ -42,7 +42,7 @@ npc_innkeeper            25%    ScriptName not assigned. Innkeepers in general.
 npc_spring_rabbit         1%    Used for pet "Spring Rabbit" of Noblegarden
 npc_redemption_target   100%    Used for the paladin quests: 1779,1781,9600,9685
 npc_burster_worm        100%    Used for the crust burster worms in Outland. Npc entries: 16844, 16857, 16968, 17075, 18678, 21380, 21849, 22038, 22466, 22482, 23285
-npc_aoe_damage_trigger   75%    Used for passive aoe damage triggers in various encounters with overlapping usage of entries: 16697, 17471, 20570
+npc_aoe_damage_trigger   75%    Used for passive aoe damage triggers in various encounters with overlapping usage of entries: 16697, 17471, 20570, 18370, 20598
 npc_mage_mirror_image    90%    mage mirror image pet
 EndContentData */
 
@@ -1743,6 +1743,8 @@ enum npc_aoe_damage_trigger
     NPC_VOID_ZONE = 16697,
     NPC_LESSER_SHADOW_FISSURE = 17471,
     NPC_LESSER_SHADOW_FISSURE_H = 20570,
+    NPC_WILD_SHADOW_FISSURE = 18370,
+    NPC_WILD_SHADOW_FISSURE_H = 20598,
 
     // m_uiAuraPassive
     SPELL_CONSUMPTION_NPC_16697 = 28874,

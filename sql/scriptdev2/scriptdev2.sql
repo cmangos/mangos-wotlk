@@ -156,6 +156,7 @@ UPDATE creature_template SET ScriptName='npc_prof_leather' WHERE entry IN (7866,
 UPDATE creature_template SET ScriptName='npc_spring_rabbit' WHERE entry=32791;
 UPDATE creature_template SET ScriptName='npc_redemption_target' WHERE entry IN (6172,6177,17542,17768);
 UPDATE creature_template SET ScriptName='npc_burster_worm' WHERE entry IN (16844,16857,16968,17075,18678,21380,21849,22038,22466,22482,23285);
+UPDATE creature_template SET ScriptName='npc_aoe_damage_trigger' WHERE entry IN (16697,17471,18370);
 UPDATE creature_template SET ScriptName='npc_the_cleaner' WHERE entry=14503;
 UPDATE creature_template SET ScriptName='npc_shaman_earth_elemental' WHERE entry IN(15352); -- greater earth elemental
 UPDATE creature_template SET ScriptName='npc_shaman_fire_elemental' WHERE entry IN(15438); -- greater fire elemental
@@ -779,7 +780,6 @@ UPDATE instance_template SET ScriptName='instance_ramparts' WHERE map=543;
 UPDATE creature_template SET ScriptName='boss_grand_warlock_nethekurse' WHERE entry=16807;
 UPDATE creature_template SET ScriptName='boss_warbringer_omrogg' WHERE entry=16809;
 UPDATE creature_template SET ScriptName='mob_fel_orc_convert' WHERE entry=17083;
-UPDATE creature_template SET ScriptName='mob_lesser_shadow_fissure' WHERE entry IN (17471,18370);
 UPDATE creature_template SET ScriptName='mob_omrogg_heads' WHERE entry IN (19523,19524);
 UPDATE creature_template SET ScriptName='boss_warchief_kargath_bladefist' WHERE entry=16808;
 UPDATE creature_template SET ScriptName='npc_blade_dance_target' WHERE entry IN(20709);
