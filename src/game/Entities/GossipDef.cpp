@@ -825,7 +825,8 @@ void PlayerMenu::SendQuestGiverRequestItems(Quest const* pQuest, ObjectGuid npcG
         }
     }
 
-    if (!pQuest->GetReqItemsCount() && Completable)
+    // Only shown for incomplete quests, or ones that require items.
+    if (RequestItemsText.empty() || ((pQuest->GetReqItemsCount() == 0) && Completable))
     {
         SendQuestGiverOfferReward(pQuest, npcGUID, true);
         return;
