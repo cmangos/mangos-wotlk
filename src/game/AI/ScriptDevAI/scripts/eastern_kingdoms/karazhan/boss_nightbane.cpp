@@ -179,6 +179,7 @@ struct boss_nightbaneAI : public npc_escortAI
         if (uiPointId == 31)
         {
             SetEscortPaused(true);
+            m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
             m_creature->SetCanFly(false);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
