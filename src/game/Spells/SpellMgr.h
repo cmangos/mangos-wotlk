@@ -1021,6 +1021,7 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
         case 37277: // Summon Infernal - neutral spell with TARGET_DUELVSPLAYER which evaluates as hostile due to neutral factions, with delay and gets removed by !IsPositiveSpell check
         case 42399: // Neutral spell with TARGET_DUELVSPLAYER, caster faction 14, target faction 14, evaluates as negative spell
                     // because of POS/NEG decision, should in fact be NEUTRAL decision TODO: Increase check fidelity
+        case 52149: // Rain of Darkness - factions and unitflags of target/caster verified - TARGET_DUELVSPLAYER - neutral target type
             return true;
         case 34190: // Arcane Orb - should be negative
             /*34172 is cast onto friendly target, and fails bcs its delayed and we remove negative delayed on friendlies due to Duel code, if we change target pos code
