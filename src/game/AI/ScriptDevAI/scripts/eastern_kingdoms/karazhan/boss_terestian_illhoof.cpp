@@ -52,7 +52,7 @@ enum
     SPELL_SUMMON_FIENDISH_IMP   = 30184,
 
     // Kilrek
-    SPELL_BROKEN_PACT           = 30065,                    // All damage taken increased by 25%.
+    SPELL_BROKEN_PACT           = 30065,                    // All damage taken increased by 25%, TODO: Sends AI event for Imp Timer
 
     // summoned npcs
     NPC_DEMONCHAINS             = 17248,
@@ -72,6 +72,7 @@ struct boss_terestianAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
 
     ObjectGuid m_sacrificeGuid;
+    ObjectGuid m_kilrek;
 
     uint32 m_uiSummonKilrekTimer;
     uint32 m_uiSacrificeTimer;
@@ -110,6 +111,9 @@ struct boss_terestianAI : public ScriptedAI
 
     void JustReachedHome() override
     {
+        if (Creature* kilrek = m_creature->GetMap()->GetCreature(m_kilrek))
+            kilrek->ForcedDespawn();
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_TERESTIAN, FAIL);
     }
@@ -126,7 +130,7 @@ struct boss_terestianAI : public ScriptedAI
                 }
                 break;
             case NPC_KILREK:
-                m_creature->RemoveAurasDueToSpell(SPELL_BROKEN_PACT);
+                m_kilrek = pSummoned->GetObjectGuid();
                 pSummoned->SetInCombatWithZone();
                 break;
             case NPC_DEMONCHAINS:
@@ -176,7 +180,7 @@ struct boss_terestianAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (m_uiSacrificeTimer < uiDiff)
+        if (m_uiSacrificeTimer <= uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SACRIFICE, SELECT_FLAG_PLAYER))
             {
@@ -192,7 +196,7 @@ struct boss_terestianAI : public ScriptedAI
         else
             m_uiSacrificeTimer -= uiDiff;
 
-        if (m_uiShadowboltTimer < uiDiff)
+        if (m_uiShadowboltTimer <= uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
                 m_uiShadowboltTimer = 10000;
@@ -248,7 +252,7 @@ struct npc_fiendish_portalAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiSummonTimer < uiDiff)
+        if (m_uiSummonTimer <= uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_FIENDISH_IMP) == CAST_OK)
                 m_uiSummonTimer = 5000;
