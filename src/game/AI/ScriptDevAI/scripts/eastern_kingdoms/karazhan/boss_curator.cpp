@@ -70,8 +70,6 @@ struct boss_curatorAI : public ScriptedAI
         m_uiBerserkTimer     = 10 * MINUTE * IN_MILLISECONDS;
         m_bIsEnraged         = false;
 
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_POWER_DRAIN, true);
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_POWER_BURN, true);
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DISPEL, DISPEL_POISON, true);

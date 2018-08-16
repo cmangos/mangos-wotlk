@@ -73,9 +73,6 @@ struct boss_midnightAI : public ScriptedAI
         m_uiKnockDown = urand(6000, 9000);
 
         SetCombatMovement(true);
-
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -222,9 +219,6 @@ struct boss_attumenAI : public ScriptedAI
         m_uiKnockDown       = urand(6000, 9000);
 
         m_bHasSummonRider   = false;
-
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_MOD_TAUNT, true);
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_ATTACK_ME, true);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
