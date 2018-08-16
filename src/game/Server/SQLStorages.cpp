@@ -43,6 +43,7 @@ const char VehicleAccessoryDstFmt[] = "iii";
 const char CreatureTemplateSpellsFmt[] = "iiiiiiiii";
 const char SpellScriptTargetFmt[] = "iiii";
 const char SpellEntryfmt[] = "iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiiiiiiiifffiiiiiiiiiiiiiiifffiiiiiiiiiiiiiissssssssssssssssssssssssssssssssiiiiiLiiiifffiiiiiiii";
+const char SpellConefmt[] = "ii";
 const char DungeonEncounterFmt[] = "iiiiissssssssssssssssxx";
 const char AreaGroupEntryFmt[] = "iiiiiiii";
 
@@ -57,6 +58,7 @@ SQLStorage sInstanceTemplate(InstanceTemplatesrcfmt, InstanceTemplatedstfmt, "ma
 SQLStorage sWorldTemplate(WorldTemplatesrcfmt, WorldTemplatedstfmt, "map", "world_template");
 SQLStorage sConditionStorage(ConditionsFmt, "condition_entry", "conditions");
 SQLStorage sSpellTemplate(SpellEntryfmt, "id", "spell_template");
+SQLStorage sSpellCones(SpellConefmt, "id", "spell_cone");
 SQLStorage sDungeonEncounterStore(DungeonEncounterFmt, "id", "instance_dungeon_encounters");
 SQLStorage sAreaGroupStore(AreaGroupEntryFmt, "id", "area_group_template");
 SQLStorage sCreatureConditionalSpawnStore(CreatureConditionalSpawnSrcFmt, CreatureConditionalSpawnDstFmt, "guid", "creature_conditional_spawn");

@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_13982_01_mangos_event_ai` bit(1) DEFAULT NULL
+  `required_13983_01_mangos_cones` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --

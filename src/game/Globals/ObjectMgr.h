@@ -787,6 +787,8 @@ class ObjectMgr
         void LoadQuestPOI();
 
         void LoadNPCSpellClickSpells();
+        void LoadSpellTemplate();
+        void CheckSpellCones();
         void LoadCreatureTemplateSpells();
 
         void LoadGameTele();
@@ -795,7 +797,6 @@ class ObjectMgr
 
         void LoadGossipMenus();
 
-        void LoadSpellTemplate();
         void LoadDungeonEncounters();
         void LoadAreaGroups();
         void LoadSQLDBCs();
