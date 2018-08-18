@@ -67,8 +67,6 @@ struct boss_omor_the_unscarredAI : public ScriptedAI
 
     void Reset() override
     {
-        DoScriptText(SAY_WIPE, m_creature);
-
         m_uiOrbitalStrikeTimer = 25000;
         m_uiShadowWhipTimer = 3500;
         m_uiAuraTimer = urand(12300, 23300);
@@ -108,6 +106,13 @@ struct boss_omor_the_unscarredAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         DoScriptText(SAY_DIE, m_creature);
+    }
+
+    void EnterEvadeMode() override
+    {
+        DoScriptText(SAY_WIPE, m_creature);
+
+        ScriptedAI::EnterEvadeMode();
     }
 
     void UpdateAI(const uint32 uiDiff) override
