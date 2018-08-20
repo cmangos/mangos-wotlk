@@ -8844,13 +8844,13 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex)
             auto itr = filterUnitList.begin();
             if (itr == filterUnitList.end())
                 return;
-            float closestDistance = (*itr)->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_COMBAT_REACH);
+            float closestDistance = (*itr)->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_NONE);
             Unit* closestUnit = *itr;
             ++itr;
 
             for (auto& unit : filterUnitList)
             {
-                float dist = unit->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_COMBAT_REACH);
+                float dist = unit->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_NONE);
                 if (closestDistance > dist && unit != closestUnit)
                 {
                     closestDistance = dist;
