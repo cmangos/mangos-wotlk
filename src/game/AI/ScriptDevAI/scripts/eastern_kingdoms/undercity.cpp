@@ -51,12 +51,12 @@ enum
     MAX_LAMENTERS               = 4,
 };
 
-static const float aHighborneLoc[MAX_LAMENTERS][4] =
+static const float aHighborneLoc[MAX_LAMENTERS][5] =
 {
-    {1285.41f, 312.47f, -61.0f, 0.51f},
-    {1286.96f, 310.40f, -61.0f, 1.00f},
-    {1289.66f, 309.66f, -61.0f, 1.52f},
-    {1292.51f, 310.50f, -61.0f, 1.99f},
+    {1286.178f, 312.7989f, -56.15427 - 5.0f, 1.133142f, 1.0f},
+    {1287.959f, 311.534f, -56.26538 - 5.0f, 0.760652f, 2.0f},
+    {1290.516f, 311.1839f, -56.20983 - 5.0f, 1.628063f, 3.0f},
+    {1292.552f, 311.8947f, -56.07092 - 5.0f, 1.960982f, 4.0f},
 };
 
 struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
@@ -84,11 +84,6 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
         else if (pSummoned->GetEntry() == NPC_HIGHBORNE_LAMENTER)
         {
             pSummoned->CastSpell(pSummoned, SPELL_HIGHBORNE_AURA, TRIGGERED_NONE);
-
-            pSummoned->SetLevitate(true);
-            pSummoned->GetMotionMaster()->MovePoint(0, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ() + 5.0f);
-
-            pSummoned->SetFacingToObject(m_creature);
         }
     }
 
@@ -137,8 +132,8 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
         {
             if (m_uiSummonTimer <= uiDiff)
             {
-                for (auto i : aHighborneLoc)
-                    m_creature->SummonCreature(NPC_HIGHBORNE_LAMENTER, i[0], i[1], i[2], i[3], TEMPSPAWN_TIMED_DESPAWN, 160000);
+                for (auto& i : aHighborneLoc)
+                    m_creature->SummonCreature(NPC_HIGHBORNE_LAMENTER, i[0], i[1], i[2], i[3], TEMPSPAWN_TIMED_DESPAWN, 160000, false, false, i[4]);
 
                 m_uiSummonTimer = 0;
             }
