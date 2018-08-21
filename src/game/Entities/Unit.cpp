@@ -334,6 +334,8 @@ Unit::Unit() :
     m_isCreatureLinkingTrigger = false;
     m_isSpawningLinked = false;
 
+    m_canEnterCombat = true;
+
     m_extraAttacksExecuting = false;
 
     m_baseSpeedWalk = 1.f;
@@ -1059,7 +1061,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         pVictim->ModifyHealth(- (int32)damage);
 
         if (CanAttack(pVictim) && (!spellProto || (!spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
-            !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))))
+            !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))) && CanEnterCombat() && pVictim->CanEnterCombat())
         {
             float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
             pVictim->AddThreat(this, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto);
@@ -2792,24 +2794,27 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
         DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
                          GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), meleeDamageInfo.totalDamage, totalAbsorb, meleeDamageInfo.blocked_amount, totalResist);
 
-    if (Unit* owner = GetOwner())
-        if (owner->GetTypeId() == TYPEID_UNIT)
-        {
-            owner->SetInCombatWith(pVictim);
-            owner->AddThreat(pVictim);
-            pVictim->SetInCombatWith(owner);
-        }
+    if (CanEnterCombat() && pVictim->CanEnterCombat())
+    {
+        // if damage pVictim call AI reaction
+        pVictim->AttackedBy(this);
 
-    for (auto m_guardianPet : m_guardianPets)
-        if (Unit* pet = (Unit*)GetMap()->GetPet(m_guardianPet))
-        {
-            pet->SetInCombatWith(pVictim);
-            pet->AddThreat(pVictim);
-            pVictim->SetInCombatWith(pet);
-        }
+        if (Unit* owner = GetOwner())
+            if (owner->GetTypeId() == TYPEID_UNIT)
+            {
+                owner->AddThreat(pVictim);
+                owner->SetInCombatWith(pVictim);
+                pVictim->SetInCombatWith(owner);
+            }
 
-    // if damage pVictim call AI reaction
-    pVictim->AttackedBy(this);
+        for (auto m_guardianPet : m_guardianPets)
+            if (Unit* pet = (Unit*)GetMap()->GetPet(m_guardianPet))
+            {
+                pet->AddThreat(pVictim);
+                pet->SetInCombatWith(pVictim);
+                pVictim->SetInCombatWith(pet);
+            }
+    }
 }
 
 void Unit::DoExtraAttacks(Unit* pVictim)
@@ -6505,7 +6510,7 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
             return;
 
         // Hostile spell hits count as attack made against target (if detected), stealth removed at Spell::cast if spell break it
-        const bool attack = (!IsPositiveSpell(spellInfo->Id, realCaster, target) && IsVisibleForOrDetect(target, target, false));
+        const bool attack = (!IsPositiveSpell(spellInfo->Id, realCaster, target) && IsVisibleForOrDetect(target, target, false) && CanEnterCombat() && target->CanEnterCombat());
 
         if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
         {
@@ -6545,7 +6550,7 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
     else if (realCaster->CanAssist(target) && target->isInCombat())
     {
         // assisting case, healing and resurrection
-        if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
+        if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT) && CanEnterCombat() && target->CanEnterCombat())
         {
             realCaster->SetInCombatWithAssisted(target);
             target->getHostileRefManager().threatAssist(realCaster, 0.0f, spellInfo, false);
