@@ -179,11 +179,12 @@ struct boss_netherspiteAI : public ScriptedAI
             m_pInstance->SetData(TYPE_NETHERSPITE, DONE);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
+        ScriptedAI::EnterEvadeMode();
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_NETHERSPITE, FAIL);
-
         
         for (ObjectGuid& portalGuid : m_vPortalGuidList)
             if(Creature* portal = m_creature->GetMap()->GetCreature(portalGuid))
