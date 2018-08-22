@@ -161,8 +161,7 @@ struct boss_talon_king_ikissAI : public ScriptedAI
 
         if (m_uiSheepTimer < uiDiff)
         {
-            // second top aggro target in normal, random target in heroic
-            if (Unit* pTarget = m_bIsRegularMode ? m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 1) : m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
                 DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_POLYMORPH : SPELL_POLYMORPH_H);
             m_uiSheepTimer = urand(15000, 17500);
         }
