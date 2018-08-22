@@ -1066,6 +1066,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading Points Of Interest Data...");
     sObjectMgr.LoadPointsOfInterest();
 
+    sLog.outString("Loading Creature Conditional Spawn Data...");  // must be after LoadCreatureTemplates and before LoadCreatures
+    sObjectMgr.LoadCreatureConditionalSpawn();
+
     sLog.outString("Loading Creature Data...");
     sObjectMgr.LoadCreatures();
 

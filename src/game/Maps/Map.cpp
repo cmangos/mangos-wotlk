@@ -1361,7 +1361,7 @@ WorldPersistentState* WorldMap::GetPersistanceState() const
 
 DungeonMap::DungeonMap(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
     : Map(id, expiry, InstanceId, SpawnMode),
-      m_resetAfterUnload(false), m_unloadWhenEmpty(false)
+      m_resetAfterUnload(false), m_unloadWhenEmpty(false), m_team(TEAM_NONE)
 {
     MANGOS_ASSERT(i_mapEntry->IsDungeon());
 
@@ -1494,6 +1494,9 @@ bool DungeonMap::Add(Player* player)
     m_unloadTimer = 0;
     m_resetAfterUnload = false;
     m_unloadWhenEmpty = false;
+
+    if (!m_team)
+        m_team = player->GetTeam();
 
     if (i_mapEntry->IsNonRaidDungeon() && GetDifficulty() == DUNGEON_DIFFICULTY_NORMAL)
         player->AddNewInstanceId(GetInstanceId());
