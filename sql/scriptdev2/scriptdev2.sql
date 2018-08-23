@@ -676,7 +676,6 @@ INSERT INTO scripted_areatrigger VALUES
 (302,'at_sentry_point');
 INSERT INTO scripted_areatrigger VALUES
 (4752,'at_nats_landing');
-UPDATE creature_template SET ScriptName = 'npc_mottled_drywallow_crocolisk' WHERE entry = 4344;
 
 /* EASTERN PLAGUELANDS */
 UPDATE creature_template SET ScriptName='npc_eris_havenfire' WHERE entry=14494;

@@ -1165,46 +1165,6 @@ UnitAI* GetAI_boss_tethyr(Creature* pCreature)
 }
 
 /*######
-## npc_mottled_drywallow_crocolisks
-######*/
-
-enum
-{
-    QUEST_THE_GRIMTOTEM_WEAPON = 11169,
-    SPELL_CAPTURED_CREDIT      = 42455,
-    AURA_CAPTURED_TOTEM        = 42454,
-    NPC_CAPTURED_TOTEM         = 23811
-};
-
-struct npc_mottled_drywallow_crocoliskAI : public ScriptedAI
-{
-    npc_mottled_drywallow_crocoliskAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    void Reset() override {}
-
-    void JustDied(Unit* pVictim) override
-    {
-        if (Unit* totem = GetClosestCreatureWithEntry(m_creature, NPC_CAPTURED_TOTEM, 8.0f))
-        {
-            if (pVictim && pVictim->GetTypeId() == TYPEID_PLAYER &&
-                    ((Player*)pVictim)->GetQuestStatus(QUEST_THE_GRIMTOTEM_WEAPON) == QUEST_STATUS_INCOMPLETE)
-            {
-                totem->CastSpell(pVictim, SPELL_CAPTURED_CREDIT, TRIGGERED_NONE);
-                ((Player*)pVictim)->KilledMonsterCredit(NPC_CAPTURED_TOTEM);
-            }
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        DoMeleeAttackIfReady();
-    }
-};
-
-/*######
 ## at_sentry_point
 ######*/
 
@@ -1237,11 +1197,6 @@ bool AreaTrigger_at_sentry_point(Player* pPlayer, const AreaTriggerEntry* /*pAt*
 
     return true;
 };
-
-UnitAI* GetAI_npc_mottled_drywallow_crocolisk(Creature* pCreature)
-{
-    return new npc_mottled_drywallow_crocoliskAI(pCreature);
-}
 
 void AddSC_dustwallow_marsh()
 {
@@ -1292,10 +1247,5 @@ void AddSC_dustwallow_marsh()
     pNewScript = new Script;
     pNewScript->Name = "boss_tethyr";
     pNewScript->GetAI = &GetAI_boss_tethyr;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_mottled_drywallow_crocolisk";
-    pNewScript->GetAI = &GetAI_npc_mottled_drywallow_crocolisk;
     pNewScript->RegisterSelf();
 }
