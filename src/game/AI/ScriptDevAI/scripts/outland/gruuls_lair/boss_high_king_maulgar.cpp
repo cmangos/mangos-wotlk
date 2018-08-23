@@ -341,7 +341,7 @@ struct boss_kiggler_the_crazedAI : public Council_Base_AI
 
     void ExecuteActions()
     {
-        if (m_creature->IsNonMeleeSpellCasted(false) || !CanExecuteCombatAction())
+        if (!CanExecuteCombatAction())
             return;
 
         for (uint32 i = 0; i < KIGGLER_ACTION_MAX; ++i)
