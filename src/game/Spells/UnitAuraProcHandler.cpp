@@ -1136,6 +1136,17 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         ((Player*)this)->Say("This is Madness!", LANG_UNIVERSAL);
                     break;
                 }
+                case 42454: // Captured Totem - procs on death quest credit
+                {
+                    Unit* caster = triggeredByAura->GetCaster();
+                    if (!caster)
+                        return SPELL_AURA_PROC_FAILED;
+                    Unit* owner = caster->GetOwner();
+                    if (!owner)
+                        return SPELL_AURA_PROC_FAILED;
+                    CastSpell(owner, 42455, TRIGGERED_NONE);
+                    break;
+                }
                 // Sunwell Exalted Caster Neck (Shattered Sun Pendant of Acumen neck)
                 // cast 45479 Light's Wrath if Exalted by Aldor
                 // cast 45429 Arcane Bolt if Exalted by Scryers
