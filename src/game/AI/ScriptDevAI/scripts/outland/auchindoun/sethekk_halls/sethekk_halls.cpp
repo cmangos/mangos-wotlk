@@ -23,8 +23,9 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "sethekk_halls.h"
+#include "Entities/TemporarySpawn.h"
 
-instance_sethekk_halls::instance_sethekk_halls(Map* pMap) : ScriptedInstance(pMap)
+instance_sethekk_halls::instance_sethekk_halls(Map* pMap) : ScriptedInstance(pMap), m_anzuTimer(0), m_anzuStage(0)
 {
     Initialize();
 }
@@ -35,8 +36,17 @@ void instance_sethekk_halls::Initialize()
 
 void instance_sethekk_halls::OnCreatureCreate(Creature* pCreature)
 {
-    if (pCreature->GetEntry() == NPC_ANZU)
-        m_npcEntryGuidStore[NPC_ANZU] = pCreature->GetObjectGuid();
+    switch (pCreature->GetEntry())
+    {
+        case NPC_INVIS_RAVEN_GOD_CASTER:
+            m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
+            break;
+        case NPC_INVIS_RAVEN_GOD_PORTAL:
+        case NPC_INVIS_RAVEN_GOD_TARGET:
+        case NPC_ANZU:
+            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+    }
 }
 
 void instance_sethekk_halls::OnObjectCreate(GameObject* pGo)
@@ -52,8 +62,9 @@ void instance_sethekk_halls::OnObjectCreate(GameObject* pGo)
                 pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT | GO_FLAG_INTERACT_COND);
             break;
         case GO_RAVENS_CLAW:
+        case GO_MOONSTONE:
+        case GO_TEST_RIFT:
             break;
-
         default:
             return;
     }
@@ -133,6 +144,139 @@ void instance_sethekk_halls::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
+enum AnzuIntro
+{
+    TRIGGER_COUNT = 14,
+
+    SPELL_OTHERWORLDLY_PORTAL = 39952,
+    SPELL_PURPLE_BANISH_STATE = 32566,
+    SPELL_RAVEN_GOD_SUMMON_BEAMS = 39978,
+    SPELL_ULTRIS_DESTROYED = 35757,
+    SPELL_RED_LIGHTNING_BOLT = 39990,
+};
+
+float triggerPositions[TRIGGER_COUNT][4] =
+{
+    { -55.26986f, 313.4585f, 50.90593f, 0.3316126f},
+    { -59.17055f, 314.39f, 51.65655f, 0.541052f},
+    { -79.32272f, 314.4245f, 50.42631f, 2.181662f},
+    { -86.93535f, 314.4072f, 50.36619f, 5.916666f},
+    { -82.65174f, 314.4917f, 49.48673f, 0.4712389f},
+    { -110.0913f, 314.4524f, 50.17954f, 1.43117f},
+    { -113.7065f, 314.51f, 51.44148f, 0.2617994f},
+    { -112.4148f, 258.7079f, 50.66346f, 0.4363323f},
+    { -108.5766f, 258.7865f, 51.30656f, 3.124139f},
+    { -88.22328f, 258.7913f, 50.12397f, 2.600541f},
+    { -84.26708f, 258.7147f, 49.33371f, 4.328416f},
+    { -80.07829f, 258.7955f, 50.39458f, 0.2268928f},
+    { -59.91186f, 259.3824f, 50.82623f, 1.37881f},
+    { -55.34531f, 258.1663f, 51.48593f, 1.623156f},
+};
+
+void instance_sethekk_halls::StartAnzuIntro(Player* player)
+{
+    Creature* target = player->SummonCreature(NPC_INVIS_RAVEN_GOD_TARGET, -87.08602f, 287.8433f, 83.77484f, 3.455752f, TEMPSPAWN_MANUAL_DESPAWN, 0, true);
+    target->CastSpell(nullptr, SPELL_PURPLE_BANISH_STATE, TRIGGERED_NONE);
+    Creature* portal = player->SummonCreature(NPC_INVIS_RAVEN_GOD_PORTAL, -87.28478f, 287.6349f, 27.17761f, 0.5759587f, TEMPSPAWN_MANUAL_DESPAWN, 0, true);
+    portal->CastSpell(nullptr, SPELL_OTHERWORLDLY_PORTAL, TRIGGERED_NONE);
+    for (uint32 i = 0; i < TRIGGER_COUNT; ++i)
+    {
+        Creature* caster = player->SummonCreature(NPC_INVIS_RAVEN_GOD_CASTER, triggerPositions[i][0], triggerPositions[i][1], triggerPositions[i][2], triggerPositions[i][3], TEMPSPAWN_MANUAL_DESPAWN, 0, true);
+        caster->CastSpell(nullptr, SPELL_RAVEN_GOD_SUMMON_BEAMS, TRIGGERED_NONE);
+    }
+    GameObject* moonstone = GetSingleGameObjectFromStorage(GO_MOONSTONE);
+    moonstone->SetLootState(GO_READY);
+    moonstone->SetRespawnTime(2 * MINUTE * IN_MILLISECONDS);
+    moonstone->Refresh();
+    GameObject* testRift = GetSingleGameObjectFromStorage(GO_TEST_RIFT);
+    testRift->SetLootState(GO_READY);
+    testRift->SetRespawnTime(2 * MINUTE * IN_MILLISECONDS);
+    testRift->Refresh();
+    m_anzuTimer = 6000;
+    m_anzuStage = 0;
+}
+
+void instance_sethekk_halls::FinishAnzuIntro()
+{
+    Creature* target = GetSingleCreatureFromStorage(NPC_INVIS_RAVEN_GOD_TARGET, true);
+    target->SummonCreature(NPC_ANZU, -89.20406f, 287.9736f, 26.5665f, 3.001966f, TEMPSPAWN_MANUAL_DESPAWN, 0);
+    static_cast<TemporarySpawn*>(target)->UnSummon();
+    GuidVector casterVector;
+    GetCreatureGuidVectorFromStorage(NPC_INVIS_RAVEN_GOD_CASTER, casterVector);
+    for (ObjectGuid guid : casterVector)
+        if (Creature* caster = instance->GetCreature(guid))
+            static_cast<TemporarySpawn*>(caster)->UnSummon();
+    Creature* portal = GetSingleCreatureFromStorage(NPC_INVIS_RAVEN_GOD_PORTAL, true);
+    static_cast<TemporarySpawn*>(portal)->UnSummon();
+    GameObject* ravensClaw = GetSingleGameObjectFromStorage(GO_RAVENS_CLAW);
+    ravensClaw->SetRespawnTime(7 * DAY);
+    ravensClaw->SetLootState(GO_JUST_DEACTIVATED);
+    GameObject* moonstone = GetSingleGameObjectFromStorage(GO_MOONSTONE);
+    moonstone->SetLootState(GO_JUST_DEACTIVATED);
+    GameObject* testRift = GetSingleGameObjectFromStorage(GO_TEST_RIFT);
+    testRift->SetLootState(GO_JUST_DEACTIVATED);
+}
+
+void instance_sethekk_halls::Update(uint32 diff)
+{
+    if (m_anzuTimer)
+    {
+        if (m_anzuTimer <= diff)
+        {
+            switch (m_anzuStage)
+            {
+                case 0: // make target move
+                {
+                    Creature * target = GetSingleCreatureFromStorage(NPC_INVIS_RAVEN_GOD_TARGET, true);
+                    target->GetMotionMaster()->MovePoint(0, -87.14738f, 287.8225f, 33.48315f);
+                    m_anzuTimer = 20000;
+                    break;
+                }
+                case 1:
+                {
+                    Creature* target = GetSingleCreatureFromStorage(NPC_INVIS_RAVEN_GOD_TARGET, true);
+                    target->CastSpell(nullptr, SPELL_ULTRIS_DESTROYED, TRIGGERED_NONE);
+                    m_anzuTimer = 9000;
+                    break;
+                }
+                case 2:
+                {
+                    Creature * target = GetSingleCreatureFromStorage(NPC_INVIS_RAVEN_GOD_TARGET, true);
+                    target->CastSpell(nullptr, SPELL_RED_LIGHTNING_BOLT, TRIGGERED_NONE);
+                    m_anzuTimer = 1000;
+                    break;
+                }
+                case 3: // done
+                    FinishAnzuIntro();
+                    break;
+            }
+            ++m_anzuStage;
+        }
+        else m_anzuTimer -= diff;
+    }
+}
+
+bool ProcessEventId_event_spell_summon_raven_god(uint32 /*uiEventId*/, Object* source, Object* /*pTarget*/, bool bIsStart)
+{
+    if (bIsStart && source->GetTypeId() == TYPEID_PLAYER)
+    {
+        Player* player = static_cast<Player*>(source);
+        if (instance_sethekk_halls* instance = (instance_sethekk_halls*)(player->GetInstanceData()))
+        {
+            // This should be checked by despawning the Raven Claw Go; However it's better to double check the condition
+            if (instance->GetData(TYPE_ANZU) == DONE || instance->GetData(TYPE_ANZU) == IN_PROGRESS)
+                return true;
+
+            // Don't summon him twice
+            if (instance->GetSingleCreatureFromStorage(NPC_ANZU, true))
+                return true;
+
+            instance->StartAnzuIntro(player);
+        }
+    }
+    return false;
+}
+
 bool instance_sethekk_halls::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* /*pTarget*/, uint32 /*uiMiscValue1 = 0*/) const
 {
     if (uiCriteriaId != ACHIEV_CRITA_TURKEY_TIME)
@@ -142,32 +286,12 @@ bool instance_sethekk_halls::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, P
         return false;
 
     return pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_HAT, 1) && (pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_DRESS, 1)
-            || pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_ROBE, 1) || pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_ATTIRE, 1));
+        || pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_ROBE, 1) || pSource->HasItemOrGemWithIdEquipped(ITEM_PILGRIMS_ATTIRE, 1));
 }
 
 InstanceData* GetInstanceData_instance_sethekk_halls(Map* pMap)
 {
     return new instance_sethekk_halls(pMap);
-}
-
-bool ProcessEventId_event_spell_summon_raven_god(uint32 /*uiEventId*/, Object* pSource, Object* /*pTarget*/, bool bIsStart)
-{
-    if (bIsStart && pSource->GetTypeId() == TYPEID_PLAYER)
-    {
-        if (instance_sethekk_halls* pInstance = (instance_sethekk_halls*)((Player*)pSource)->GetInstanceData())
-        {
-            // This should be checked by despawning the Raven Claw Go; However it's better to double check the condition
-            if (pInstance->GetData(TYPE_ANZU) == DONE || pInstance->GetData(TYPE_ANZU) == IN_PROGRESS)
-                return true;
-
-            // Don't summon him twice
-            if (pInstance->GetSingleCreatureFromStorage(NPC_ANZU, true))
-                return true;
-
-            // ToDo: add more code here to handle the summoning event. For the moment it's handled in DB because of the missing info
-        }
-    }
-    return false;
 }
 
 void AddSC_instance_sethekk_halls()

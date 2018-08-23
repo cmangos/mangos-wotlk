@@ -14,14 +14,18 @@ enum
     TYPE_IKISS                  = 2,
 
     NPC_ANZU                    = 23035,
-    NPC_RAVEN_GOD_TARGET        = 23057,
+
+    NPC_BROOD_OF_ANZU           = 23132,
+
+    NPC_INVIS_RAVEN_GOD_PORTAL  = 23046,
+    NPC_INVIS_RAVEN_GOD_TARGET  = 23057,
+    NPC_INVIS_RAVEN_GOD_CASTER  = 23058,
 
     GO_IKISS_DOOR               = 177203,
     GO_IKISS_CHEST              = 187372,
     GO_RAVENS_CLAW              = 185554,
-
-    SAY_ANZU_INTRO_1            = -1556016,
-    SAY_ANZU_INTRO_2            = -1556017,
+    GO_MOONSTONE                = 185590,
+    GO_TEST_RIFT                = 185595,
 
     // possible spells used for Anzu summoning event
     SPELL_PORTAL                = 39952,
@@ -54,9 +58,16 @@ class instance_sethekk_halls : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
+        void Update(uint32 diff) override;
+        void StartAnzuIntro(Player* player);
+        void FinishAnzuIntro();
     private:
+
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
+
+        uint32 m_anzuTimer;
+        uint32 m_anzuStage;
 };
 
 #endif

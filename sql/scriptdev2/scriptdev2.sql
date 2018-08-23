@@ -251,6 +251,7 @@ UPDATE creature_template SET ScriptName='boss_darkweaver_syth' WHERE entry=18472
 UPDATE creature_template SET ScriptName='boss_anzu' WHERE entry=23035;
 INSERT INTO scripted_event_id VALUES
 (14797,'event_spell_summon_raven_god');
+UPDATE creature_template SET ScriptName='npc_anzu_bird_spirit' WHERE entry IN(23134,23135,23136);
 
 /* SHADOW LABYRINTH */
 UPDATE instance_template SET ScriptName='instance_shadow_labyrinth' WHERE map=555;

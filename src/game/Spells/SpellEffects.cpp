@@ -1725,6 +1725,25 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             unitTarget->CastSpell(unitTarget, 29949, TRIGGERED_NONE);
                             return;
                         }
+                        case 40250: // Improved Duration - Anzu spirits
+                        {
+                            auto periodicAuraList = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
+                            uint32 duration = 0;
+                            for (auto itr = periodicAuraList.rbegin(); itr != periodicAuraList.rend(); ++itr)
+                            {
+                                if ((*itr)->GetHolder()->GetSpellProto()->IsFitToFamily(SPELLFAMILY_DRUID, 0x0000001000000050)) // only Rejuvenation, Regrowth and Lifebloom
+                                {
+                                    Aura* lastPeriodic = *itr; // get last applied druid HOT
+                                    duration = lastPeriodic->GetHolder()->GetAuraDuration();
+                                    duration = duration * 2 > 60000 ? 60000 : duration * 2;
+                                    lastPeriodic->GetHolder()->SetAuraDuration(duration); // double duration up to 60 seconds
+                                    lastPeriodic->GetHolder()->SetAuraMaxDuration(duration);
+                                    lastPeriodic->GetHolder()->SendAuraUpdate(false);
+                                }
+                            }
+                            unitTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, unitTarget, unitTarget, duration);
+                            return;
+                        }
                         default:
                             break;
                     }
