@@ -311,7 +311,7 @@ struct boss_kiggler_the_crazedAI : public Council_Base_AI
 
     void Reset() override
     {
-        m_actionTimers[KIGGLER_ACTION_GREATER_POLYMORPH] = 15000;
+        m_actionTimers[KIGGLER_ACTION_GREATER_POLYMORPH] = 5000;
         m_actionTimers[KIGGLER_ACTION_LIGHTNING_BOLT] = 0;
         m_actionTimers[KIGGLER_ACTION_ARCANE_SHOCK] = 20000;
         m_actionTimers[KIGGLER_ACTION_ARCANE_EXPLOSION] = 30000;
@@ -353,7 +353,7 @@ struct boss_kiggler_the_crazedAI : public Council_Base_AI
                     case KIGGLER_ACTION_GREATER_POLYMORPH:
                         if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GREATER_POLYMORPH) == CAST_OK)
                         {
-                            m_actionTimers[KIGGLER_ACTION_GREATER_POLYMORPH] = urand(15000, 20000);
+                            m_actionTimers[KIGGLER_ACTION_GREATER_POLYMORPH] = 11000;
                             m_actionReadyStatus[i] = false;
                             return;
                         }
