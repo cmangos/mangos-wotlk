@@ -211,7 +211,6 @@ struct boss_gruulAI : public ScriptedAI
                         m_actionReadyStatus[i] = false;
                         return;
                     }
-                    continue;
                 }
             }
         }

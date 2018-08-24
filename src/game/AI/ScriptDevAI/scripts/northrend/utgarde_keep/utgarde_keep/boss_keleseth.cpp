@@ -124,7 +124,6 @@ struct mob_vrykul_skeletonAI : public ScriptedAI
             m_creature->GetMotionMaster()->Clear();
             m_creature->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-            return;
         }
     }
 

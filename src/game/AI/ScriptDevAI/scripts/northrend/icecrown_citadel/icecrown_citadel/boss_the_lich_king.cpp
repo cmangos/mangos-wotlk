@@ -549,7 +549,6 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                     m_uiPhase = (m_uiPhase == PHASE_QUAKE_ONE ? PHASE_TWO : PHASE_THREE);
                     m_creature->GetMotionMaster()->Clear();
                     m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-                    return;
                 }
                 else
                     m_uiPhaseTimer -= uiDiff;
@@ -708,7 +707,6 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                     m_uiPhase = PHASE_THREE;
                     if (m_creature->getVictim())
                         m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
-                    return;
                 }
                 else
                     m_uiFrostmournePhaseTimer -= uiDiff;

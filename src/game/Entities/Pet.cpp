@@ -514,7 +514,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
         {
             ss << uint32(m_charmInfo->GetActionBarEntry(i)->GetType()) << " "
                << uint32(m_charmInfo->GetActionBarEntry(i)->GetAction()) << " ";
-        };
+        }
         savePet.addString(ss);
 
         savePet.addUInt64(uint64(time(nullptr)));
@@ -1256,8 +1256,6 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     // Remove rage bar from pets (By setting rage = 0, and ensuring it stays that way by setting max rage = 0 as well)
     SetMaxPower(POWER_RAGE, 0);
     SetPower(POWER_RAGE, 0);
-
-    return;
 }
 
 void Pet::InitPetScalingAuras()

@@ -4815,7 +4815,6 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                 return;
 
             caster->CastSpell(target, spellInfo, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-            return;
         }
     }
 }
@@ -5396,7 +5395,6 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
             // Handle OPVP script condition change on aura apply; Specific for Zangarmarsh outdoor pvp
             if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(3521))
                 outdoorPvP->HandleConditionStateChange(uint32(GetSpellProto()->Id == 32431), apply);
-            return;
         }
     }
 }
@@ -5532,7 +5530,6 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
             case 29946:
                 if (target->HasAura(29947))
                     target->RemoveAurasDueToSpellByCancel(29947);
-                return;
             default:
                 break;
         }
@@ -5607,7 +5604,6 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                         ((Creature*)target)->ForcedDespawn();
                     }
                 }
-                return;
             default:
                 break;
         }
@@ -6573,7 +6569,7 @@ void Aura::HandleAuraModParryPercent(bool apply, bool /*Real*/)
     {
         target->m_modParryChance += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
         return;
-    };
+    }
 
     ((Player*)target)->UpdateParryPercentage();
 }

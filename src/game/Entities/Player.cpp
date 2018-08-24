@@ -8468,7 +8468,8 @@ void Player::SetSheath(SheathState sheathed)
             SetVirtualItemSlot(0, GetWeaponForAttack(BASE_ATTACK, true, true));
             SetVirtualItemSlot(1, GetWeaponForAttack(OFF_ATTACK, true, true));
             SetVirtualItemSlot(2, nullptr);
-        };  break;
+        }
+        break;
         case SHEATH_STATE_RANGED:                           // prepared ranged weapon
             SetVirtualItemSlot(0, nullptr);
             SetVirtualItemSlot(1, nullptr);
@@ -14868,9 +14869,6 @@ void Player::KilledMonsterCredit(uint32 entry, ObjectGuid guid)
 
                         if (CanCompleteQuest(questid))
                             CompleteQuest(questid);
-
-                        // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
-                        continue;
                     }
                 }
             }
@@ -14993,9 +14991,6 @@ void Player::TalkedToCreature(uint32 entry, ObjectGuid guid)
                         }
                         if (CanCompleteQuest(questid))
                             CompleteQuest(questid);
-
-                        // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
-                        continue;
                     }
                 }
             }
@@ -17918,7 +17913,7 @@ void Player::_SaveQuestStatus()
             break;
             case QUEST_UNCHANGED:
                 break;
-        };
+        }
         questStatus.uState = QUEST_UNCHANGED;
     }
 }
@@ -18035,7 +18030,7 @@ void Player::_SaveSkills()
             case SKILL_DELETED:
                 MANGOS_ASSERT(false);
                 break;
-        };
+        }
         itr->second.uState = SKILL_UNCHANGED;
 
         ++itr;
@@ -19379,7 +19374,6 @@ void Player::InitDisplayIds()
             break;
         default:
             sLog.outError("Invalid gender %u for player", gender);
-            return;
     }
 }
 

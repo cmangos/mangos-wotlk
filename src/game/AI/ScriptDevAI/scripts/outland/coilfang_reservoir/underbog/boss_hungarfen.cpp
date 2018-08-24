@@ -126,8 +126,10 @@ struct mob_underbog_mushroomAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_PUTRID_MUSHROOM);
     }
 
-    void MoveInLineOfSight(Unit* /*pWho*/) override { return; }
-    void AttackStart(Unit* /*pWho*/) override { return; }
+    void MoveInLineOfSight(Unit* /*pWho*/) override {
+    }
+    void AttackStart(Unit* /*pWho*/) override {
+    }
 
     void UpdateAI(const uint32 uiDiff) override
     {

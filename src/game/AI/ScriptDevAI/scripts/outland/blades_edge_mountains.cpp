@@ -884,7 +884,7 @@ struct npc_light_orb_collectorAI : public ScriptedAI
                 pSelectedOrb->SetWalk(false);
 
                 // Move orb to the collector
-                float fX, fY, fZ;;
+                float fX, fY, fZ;
                 pSelectedOrb->GetMotionMaster()->MoveIdle();
                 m_creature->GetContactPoint(pSelectedOrb, fX, fY, fZ);
                 pSelectedOrb->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
@@ -1663,7 +1663,6 @@ struct npc_soulgrinderAI : public ScriptedAI
                             m_creature->InterruptSpell(CURRENT_CHANNELED_SPELL);
                         }
                         m_uiTimer = 0;
-                        return;
                     }
                 }
             }

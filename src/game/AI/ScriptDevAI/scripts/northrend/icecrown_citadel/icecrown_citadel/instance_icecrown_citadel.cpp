@@ -199,7 +199,6 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
                 m_leftScientistStalkerGuid = pCreature->GetObjectGuid();
             else
                 m_rightScientistStalkerGuid = pCreature->GetObjectGuid();
-            return;
     }
 }
 
@@ -450,7 +449,6 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
                         DoToggleGameObjectFlags(pOrb->GetObjectGuid(), GO_FLAG_NO_INTERACT, false);
                 }
             }
-            return;
     }
 }
 

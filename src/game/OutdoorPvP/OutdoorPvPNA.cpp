@@ -107,8 +107,6 @@ void OutdoorPvPNA::HandlePlayerKillInsideArea(Player* player, Unit* victim)
             // check capture point team
             if (player->GetTeam() == m_zoneOwner)
                 player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_NAGRAND_TOKEN_ALLIANCE : SPELL_NAGRAND_TOKEN_HORDE, TRIGGERED_OLD_TRIGGERED);
-
-            return;
         }
     }
 }

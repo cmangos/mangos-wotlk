@@ -347,7 +347,6 @@ struct mob_fel_orc_convertAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* /*pWho*/) override
     {
-        return;
     }
 
     void Aggro(Unit* pWho) override

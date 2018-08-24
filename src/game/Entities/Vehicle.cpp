@@ -67,7 +67,6 @@ void ObjectMgr::LoadVehicleAccessory()
         {
             sLog.outErrorDb("Table `vehicle_accessory` has entry (vehicle entry: %u, seat %u, passenger %u) where seat is invalid (must be between 0 and %u), skip vehicle.", itr->vehicleEntry, itr->seatId, itr->passengerEntry, MAX_VEHICLE_SEAT - 1);
             sVehicleAccessoryStorage.EraseEntry(itr->vehicleEntry);
-            continue;
         }
     }
 

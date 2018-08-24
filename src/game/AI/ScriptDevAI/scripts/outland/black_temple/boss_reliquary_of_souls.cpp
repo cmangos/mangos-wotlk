@@ -211,7 +211,7 @@ struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
         {
             case NPC_ESSENCE_SUFFERING:
                 DoScriptText(SUFF_SAY_AFTER, pSummoned);
-                m_uiPhase = PHASE_2_DESIRE;;
+                m_uiPhase = PHASE_2_DESIRE;
                 break;
             case NPC_ESSENCE_DESIRE:
                 DoScriptText(DESI_SAY_AFTER, pSummoned);

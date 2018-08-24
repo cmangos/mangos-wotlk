@@ -261,7 +261,7 @@ bool OutdoorPvPZM::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team
 
     SendUpdateWorldState(m_towerMapState[towerId], WORLD_STATE_REMOVE);
     m_towerMapState[towerId] = newMapState;
-    SendUpdateWorldState(m_towerMapState[towerId], WORLD_STATE_ADD);;
+    SendUpdateWorldState(m_towerMapState[towerId], WORLD_STATE_ADD);
 
     // update capture point owner
     m_towerOwner[towerId] = team;

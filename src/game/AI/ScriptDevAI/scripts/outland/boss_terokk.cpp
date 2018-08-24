@@ -382,7 +382,6 @@ struct boss_terokkAI : public ScriptedAI
                         ResetTimer(i, GetSubsequentActionTimer(TerokkActions(i)));
                         return;
                     }
-                    continue;
             }
         }
     }

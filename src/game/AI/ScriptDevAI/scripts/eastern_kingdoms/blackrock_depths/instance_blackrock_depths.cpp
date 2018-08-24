@@ -680,7 +680,6 @@ void instance_blackrock_depths::HandleBarPatrons(uint8 uiEventType)
                 pNagmara->CastSpell(pNagmara, SPELL_NAGMARA_VANISH, TRIGGERED_OLD_TRIGGERED);
                 pNagmara->ForcedDespawn();
             }
-            return;
     }
 }
 

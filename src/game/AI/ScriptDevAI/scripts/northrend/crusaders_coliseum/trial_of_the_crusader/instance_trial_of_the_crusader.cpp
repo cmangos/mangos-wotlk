@@ -506,7 +506,7 @@ void instance_trial_of_the_crusader::OnCreatureDeath(Creature* pCreature)
         case NPC_SNOBOLD_VASSAL:
         case NPC_MISTRESS_OF_PAIN:
             m_lSummonedGuidsList.remove(pCreature->GetObjectGuid());
-            break;;
+            break;
     }
 }
 

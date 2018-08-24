@@ -618,7 +618,7 @@ struct boss_kaelthasAI : public ScriptedAI
                     {
                         if (DoCastSpellIfCan(m_creature, SPELL_GRAVITY_LAPSE) == CAST_OK)
                         {
-                            DoScriptText(urand(0, 1) ? SAY_GRAVITYLAPSE1 : SAY_GRAVITYLAPSE2, m_creature);;
+                            DoScriptText(urand(0, 1) ? SAY_GRAVITYLAPSE1 : SAY_GRAVITYLAPSE2, m_creature);
                             m_uiGravityIndex       = 0;
                             m_uiNetherBeamTimer    = 8000;
                             m_uiNetherVaporTimer   = 4000;

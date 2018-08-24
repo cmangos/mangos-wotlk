@@ -5120,7 +5120,6 @@ void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target
                     }
                 }
             }
-            return;
         }
     }
 }
@@ -5844,7 +5843,6 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
                     TakeCastItem();
                 }
                 loot->ShowContentTo((Player*)m_caster);
-                return;
             }
             break;
         }
@@ -5860,7 +5858,6 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
                     TakeCastItem();
                 }
                 loot->ShowContentTo((Player*)m_caster);
-                return;
             }
 
             break;
@@ -10208,7 +10205,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 62440: ownerAura = 62438; break;
                         case 63598: ownerAura = 62930; break;
                         case 63601: ownerAura = 62861; break;
-                    };
+                    }
 
                     if (Unit* summoner = unitTarget->GetMap()->GetUnit(unitTarget->GetSpawnerGuid()))
                         summoner->RemoveAurasDueToSpell(ownerAura);
@@ -10250,7 +10247,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 62524: numStacks = 2;  break;
                         case 62525: numStacks = 10; break;
                         case 62521: numStacks = 25; break;
-                    };
+                    }
 
                     uint32 spellId = m_spellInfo->CalculateSimpleValue(eff_idx);
                     unitTarget->RemoveAuraHolderFromStack(spellId, numStacks);

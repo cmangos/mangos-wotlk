@@ -437,7 +437,7 @@ struct boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
         {
             uiDamage = 0;
             return;
-        };
+        }
 
         uiDamage = 0;
         m_creature->InterruptNonMeleeSpells(true);

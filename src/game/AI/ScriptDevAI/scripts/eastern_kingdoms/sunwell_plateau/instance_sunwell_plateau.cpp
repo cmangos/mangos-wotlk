@@ -130,7 +130,6 @@ void instance_sunwell_plateau::OnCreatureCreate(Creature* pCreature)
         case NPC_DARK_FIEND:
         case NPC_VOID_SENTINEL:
             m_lMuruTrashGuidList.push_back(pCreature->GetObjectGuid());
-            return;
     }
 }
 
