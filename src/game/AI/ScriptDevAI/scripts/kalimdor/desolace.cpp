@@ -287,7 +287,7 @@ struct npc_melizza_brimbuzzleAI : public npc_escortAI, private DialogueHelper
         if (uiEntry == NPC_MELIZZA)
             return m_creature;
 
-        return NULL;
+        return nullptr;
     }
 
     void WaypointReached(uint32 uiPointId) override

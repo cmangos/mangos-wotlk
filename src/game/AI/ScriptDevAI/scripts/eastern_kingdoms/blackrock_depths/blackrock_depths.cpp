@@ -992,7 +992,7 @@ struct npc_rocknotAI : public npc_escortAI
         if (m_pInstance->GetData(TYPE_NAGMARA) == SPECIAL)
         {
             m_pInstance->SetData(TYPE_NAGMARA, IN_PROGRESS);
-            Start(false, NULL, NULL, true);
+            Start(false, nullptr, nullptr, true);
             return;
         }
 
@@ -1036,7 +1036,7 @@ struct npc_rocknotAI : public npc_escortAI
                 if (Creature* pPhalanx = m_pInstance->GetSingleCreatureFromStorage(NPC_PHALANX))
                 {
                     if (npc_phalanxAI* pEscortAI = dynamic_cast<npc_phalanxAI*>(pPhalanx->AI()))
-                        pEscortAI->Start(false, NULL, NULL, true);
+                        pEscortAI->Start(false, nullptr, nullptr, true);
                 }
                 m_pInstance->SetData(TYPE_ROCKNOT, DONE);
 
@@ -1682,7 +1682,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
         if (Creature* pPhalanx = m_pInstance->GetSingleCreatureFromStorage(NPC_PHALANX))
         {
             if (npc_phalanxAI* pEscortAI = dynamic_cast<npc_phalanxAI*>(pPhalanx->AI()))
-                pEscortAI->Start(false, NULL, NULL, true);
+                pEscortAI->Start(false, nullptr, nullptr, true);
         }
         m_pInstance->HandleBarPatrons(PATRON_HOSTILE);
         m_pInstance->SetData(TYPE_PLUGGER, IN_PROGRESS); // The event is set IN_PROGRESS even if Plugger is dead because his death triggers more actions that are part of the event

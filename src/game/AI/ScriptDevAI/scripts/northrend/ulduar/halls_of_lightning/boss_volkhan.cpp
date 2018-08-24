@@ -375,7 +375,7 @@ struct mob_molten_golemAI : public ScriptedAI
         if (pSpell->Id == SPELL_SHATTER || pSpell->Id == SPELL_SHATTER_H)
         {
             if (m_creature->GetEntry() == NPC_BRITTLE_GOLEM)
-                m_creature->DealDamage(m_creature, m_creature->GetHealth(),  NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         }
     }
 

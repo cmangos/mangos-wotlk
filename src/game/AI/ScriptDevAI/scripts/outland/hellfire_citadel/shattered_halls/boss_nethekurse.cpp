@@ -173,7 +173,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         std::list<Creature*> lFelConverts;
         GetCreatureListWithEntryInGrid(lFelConverts, m_creature, NPC_FEL_ORC_CONVERT, 40.0f);
         for (std::list<Creature*>::iterator itr = lFelConverts.begin(); itr != lFelConverts.end(); ++itr)
-            (*itr)->DealDamage(*itr, (*itr)->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            (*itr)->DealDamage(*itr, (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
 
         m_bIsIntroEvent = false;
         m_uiPeonEngagedCount = 4;
@@ -229,7 +229,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         pSummoned->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-        pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+        pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     void KilledUnit(Unit* /*pVictim*/) override

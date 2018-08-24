@@ -191,7 +191,7 @@ void instance_dark_portal::SetData(uint32 uiType, uint32 uiData)
                     if (Creature* pMedivh = GetSingleCreatureFromStorage(NPC_MEDIVH))
                     {
                         if (pMedivh->isAlive())
-                            pMedivh->DealDamage(pMedivh, pMedivh->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                            pMedivh->DealDamage(pMedivh, pMedivh->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                     }
                 }
             }

@@ -294,7 +294,7 @@ struct boss_feral_defenderAI : public ScriptedAI
     {
         // Cast seeping feral essence on the summoned
         if (pSummoned->GetEntry() == NPC_SEEPING_FERAL_ESSENCE)
-            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_SEEPING_FERAL_ESSENCE : SPELL_SEEPING_FERAL_ESSENCE_H, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_SEEPING_FERAL_ESSENCE : SPELL_SEEPING_FERAL_ESSENCE_H, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     void UpdateAI(const uint32 uiDiff) override

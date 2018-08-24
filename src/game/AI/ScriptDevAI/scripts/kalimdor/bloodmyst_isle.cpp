@@ -399,7 +399,7 @@ struct npc_demolitionist_legosoAI : public npc_escortAI, private DialogueHelper
         if (uiEntry == NPC_LEGOSO)
             return m_creature;
 
-        return NULL;
+        return nullptr;
     }
 
     void UpdateEscortAI(const uint32 uiDiff) override

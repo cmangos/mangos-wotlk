@@ -919,7 +919,7 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
             case NPC_COLONEL_JULES:         return m_creature->GetMap()->GetCreature(m_colonelGuid);
 
             default:
-                return NULL;
+                return nullptr;
         }
     }
 
@@ -1089,7 +1089,7 @@ struct npc_magister_aledisAI : public ScriptedAI
                 m_creature->GetMotionMaster()->MoveIdle();
         }
 
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
 
         Reset();
     }

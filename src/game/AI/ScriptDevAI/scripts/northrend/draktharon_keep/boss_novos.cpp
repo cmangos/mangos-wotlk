@@ -202,7 +202,7 @@ struct boss_novosAI : public Scripted_NoMovementAI
             if (m_pInstance)
             {
                 if (Creature* pTarget = m_pInstance->GetNextCrystalTarget(pSummoned, uiIndex))
-                    pSummoned->CastSpell(pTarget, aCrystalHandlerDeathSpells[uiIndex], TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                    pSummoned->CastSpell(pTarget, aCrystalHandlerDeathSpells[uiIndex], TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             }
         }
     }
@@ -233,7 +233,7 @@ struct boss_novosAI : public Scripted_NoMovementAI
                 if (m_uiSummonShadowcasterTimer < uiDiff)
                 {
                     if (Creature* pSummoner = m_pInstance->GetSummonDummy())
-                        pSummoner->CastSpell(pSummoner, SPELL_SUMMON_RISON_SHADOWCASTER, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+                        pSummoner->CastSpell(pSummoner, SPELL_SUMMON_RISON_SHADOWCASTER, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
                     m_uiSummonShadowcasterTimer = 25000;
                 }
                 else
@@ -242,7 +242,7 @@ struct boss_novosAI : public Scripted_NoMovementAI
                 if (m_uiSummonFetidTrollTimer < uiDiff)
                 {
                     if (Creature* pSummoner = m_pInstance->GetSummonDummy())
-                        pSummoner->CastSpell(pSummoner, SPELL_SUMMON_FETID_TROLL_CORPSE, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+                        pSummoner->CastSpell(pSummoner, SPELL_SUMMON_FETID_TROLL_CORPSE, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
                     m_uiSummonFetidTrollTimer = 5000;
                 }
                 else
@@ -251,7 +251,7 @@ struct boss_novosAI : public Scripted_NoMovementAI
                 if (m_uiSummonHulkingCorpseTimer < uiDiff)
                 {
                     if (Creature* pSummoner = m_pInstance->GetSummonDummy())
-                        pSummoner->CastSpell(pSummoner, SPELL_SUMMON_HULKING_CORPSE, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+                        pSummoner->CastSpell(pSummoner, SPELL_SUMMON_HULKING_CORPSE, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
                     m_uiSummonHulkingCorpseTimer = 30000;
                 }
                 else

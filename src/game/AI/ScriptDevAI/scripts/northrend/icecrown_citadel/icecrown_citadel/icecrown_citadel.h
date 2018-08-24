@@ -292,7 +292,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         void DoPreparePutricideDoor() { m_uiPutricideValveTimer = 15000; }
 
         void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget = NULL, uint32 uiMiscvalue1 = 0) const override;
+        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget = nullptr, uint32 uiMiscvalue1 = 0) const override;
 
         void Update(uint32 uiDiff) override;
 

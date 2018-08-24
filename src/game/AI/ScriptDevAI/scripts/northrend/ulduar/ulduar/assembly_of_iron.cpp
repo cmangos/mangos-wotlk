@@ -497,7 +497,7 @@ struct boss_molgeimAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_RUNE_OF_SUMMONING)
-            pSummoned->CastSpell(pSummoned, SPELL_RUNE_OF_SUMMONING_AURA, true, NULL, NULL, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_RUNE_OF_SUMMONING_AURA, true, nullptr, nullptr, m_creature->GetObjectGuid());
         else if (pSummoned->GetEntry() == NPC_RUNE_OF_POWER)
             pSummoned->CastSpell(pSummoned, SPELL_RUNE_OF_POWER_AURA, TRIGGERED_OLD_TRIGGERED);
         else if (pSummoned->GetEntry() == NPC_LIGHTNING_ELEMENTAL)

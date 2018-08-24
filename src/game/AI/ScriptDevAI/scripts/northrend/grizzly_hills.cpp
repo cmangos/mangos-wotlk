@@ -326,7 +326,7 @@ struct npc_harrison_jonesAI : public npc_escortAI
                         if (Creature* pBunny = m_creature->GetMap()->GetCreature(m_lImmolationBunnyGuids.front()))
                         {
                             pTecahuna->CastSpell(pBunny, SPELL_TECAHUNA_SPIRIT_BEAM, TRIGGERED_OLD_TRIGGERED);
-                            pBunny->CastSpell(pBunny, SPELL_SUMMON_DRAKKARI_KING, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                            pBunny->CastSpell(pBunny, SPELL_SUMMON_DRAKKARI_KING, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                             pBunny->RemoveAurasDueToSpell(SPELL_BUNNY_IMMOLATION);
                             m_lImmolationBunnyGuids.remove(m_lImmolationBunnyGuids.front());
                         }

@@ -383,7 +383,7 @@ struct npc_lich_king_villageAI : public ScriptedAI, private DialogueHelper
                 {
                     DoCastSpellIfCan(pPlayer, SPELL_WRATH_LICH_KING_FIRST);
                     // handle spell scriptEffect in the script
-                    m_creature->DealDamage(pPlayer, pPlayer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    m_creature->DealDamage(pPlayer, pPlayer->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                 }
                 break;
             case SPELL_WRATH_LICH_KING:
@@ -391,7 +391,7 @@ struct npc_lich_king_villageAI : public ScriptedAI, private DialogueHelper
                 {
                     DoCastSpellIfCan(pPlayer, SPELL_WRATH_LICH_KING);
                     // handle spell scriptEffect in the script
-                    m_creature->DealDamage(pPlayer, pPlayer->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                    m_creature->DealDamage(pPlayer, pPlayer->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                 }
                 break;
             case NPC_LICH_KING_WYRMSKULL:
@@ -425,7 +425,7 @@ struct npc_lich_king_villageAI : public ScriptedAI, private DialogueHelper
         if (uiEntry == NPC_LICH_KING_WYRMSKULL)
             return m_creature;
 
-        return NULL;
+        return nullptr;
     }
 
     void UpdateAI(const uint32 uiDiff) override { DialogueUpdate(uiDiff); }
@@ -552,7 +552,7 @@ struct npc_king_ymironAI : public ScriptedAI, private DialogueHelper
         if (uiEntry == NPC_KING_YMIRON)
             return m_creature;
 
-        return NULL;
+        return nullptr;
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
@@ -680,7 +680,7 @@ struct npc_firecrackers_bunnyAI : public ScriptedAI
                 lBatsList.sort(ObjectDistanceOrder(m_creature));
 
                 std::list<Creature*>::const_iterator batItr = lBatsList.begin();
-                Creature* pBat = NULL;
+                Creature* pBat = nullptr;
 
                 do
                 {

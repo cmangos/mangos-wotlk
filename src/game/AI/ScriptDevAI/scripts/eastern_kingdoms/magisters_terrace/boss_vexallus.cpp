@@ -113,8 +113,8 @@ struct boss_vexallusAI : public ScriptedAI
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0.0f, 0.0f);
 
-        pSummoned->CastSpell(pSummoned, SPELL_ENERGY_PASSIVE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
-        pSummoned->CastSpell(pSummoned, SPELL_ENERGY_BOLT, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+        pSummoned->CastSpell(pSummoned, SPELL_ENERGY_PASSIVE, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+        pSummoned->CastSpell(pSummoned, SPELL_ENERGY_BOLT, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -207,7 +207,7 @@ struct mob_pure_energyAI : public ScriptedAI
                     return;
 
                 if (Player* pPlayer = pKiller->GetBeneficiaryPlayer())
-                    pPlayer->CastSpell(pPlayer, SPELL_ENERGY_FEEDBACK, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pVex->GetObjectGuid());
+                    pPlayer->CastSpell(pPlayer, SPELL_ENERGY_FEEDBACK, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pVex->GetObjectGuid());
             }
         }
     }

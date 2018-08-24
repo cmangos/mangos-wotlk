@@ -258,7 +258,7 @@ struct boss_kelesethAI : public ScriptedAI
         }
 
         if (pSummoned->GetEntry() == NPC_FROST_TOMB)
-            pSummoned->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_FROST, true);
+            pSummoned->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_FROST, true);
     }
 
     void JustDied(Unit* /*pKiller*/) override

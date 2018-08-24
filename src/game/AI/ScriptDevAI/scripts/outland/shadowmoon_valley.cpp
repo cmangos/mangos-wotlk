@@ -1087,7 +1087,7 @@ struct npc_lord_illidan_stormrageAI : public Scripted_NoMovementAI
             uint8 uiDeadMemberCount = 0;
             uint8 uiFailedMemberCount = 0;
 
-            for (GroupReference* pRef = pEventGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
+            for (GroupReference* pRef = pEventGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
             {
                 if (Player* pMember = pRef->getSource())
                 {
@@ -1120,7 +1120,7 @@ struct npc_lord_illidan_stormrageAI : public Scripted_NoMovementAI
 
             if (pEventGroup->GetMembersCount() == uiDeadMemberCount)
             {
-                for (GroupReference* pRef = pEventGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
+                for (GroupReference* pRef = pEventGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
                 {
                     if (Player* pMember = pRef->getSource())
                     {
@@ -2179,7 +2179,7 @@ struct npc_spawned_oronok_tornheartAI : public ScriptedAI, private DialogueHelpe
         m_creature->CombatStop(true);
         m_creature->LoadCreatureAddon(true);
 
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
 
         Reset();
 

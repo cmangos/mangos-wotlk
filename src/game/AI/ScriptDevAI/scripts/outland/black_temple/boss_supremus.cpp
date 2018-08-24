@@ -155,18 +155,18 @@ struct boss_supremusAI : public ScriptedAI
             {
                 pSummoned->GetMotionMaster()->Clear();
                 pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0.0f, 0.0f);
-                pSummoned->CastSpell(pSummoned, SPELL_MOLTEN_FLAME, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+                pSummoned->CastSpell(pSummoned, SPELL_MOLTEN_FLAME, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
             }
         }
 
         else if (pSummoned->GetEntry() == NPC_VOLCANO)
-            pSummoned->CastSpell(pSummoned, SPELL_VOLCANIC_ERUPTION_VOLCANO, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_VOLCANIC_ERUPTION_VOLCANO, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     Unit* GetHatefulStrikeTarget()
     {
         uint32 uiHealth = 0;
-        Unit* pTarget = NULL;
+        Unit* pTarget = nullptr;
 
         ThreatList const& tList = m_creature->getThreatManager().getThreatList();
         for (ThreatList::const_iterator iter = tList.begin(); iter != tList.end(); ++iter)
@@ -224,7 +224,7 @@ struct boss_supremusAI : public ScriptedAI
             {
                 m_bTankPhase = true;
                 m_creature->RemoveAurasDueToSpell(SPELL_SLOW_SELF);
-                m_creature->FixateTarget(NULL);
+                m_creature->FixateTarget(nullptr);
             }
             else
             {

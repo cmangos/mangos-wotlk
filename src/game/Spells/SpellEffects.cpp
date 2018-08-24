@@ -10740,7 +10740,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // combine two small oozes, spawn a large ooze and despawn the caster (the target is killed by spell)
                     m_caster->CastSpell(unitTarget, 69889, TRIGGERED_OLD_TRIGGERED);
-                    m_caster->DealDamage(m_caster, m_caster->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    m_caster->DealDamage(m_caster, m_caster->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
                     return;
                 }
                 case 69553:                                 // Large Ooze Combine
@@ -10750,7 +10750,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // increase the unstable ooze stack on the big ooze and kill the target
                     unitTarget->CastSpell(m_caster, 69644, TRIGGERED_OLD_TRIGGERED);
-                    unitTarget->DealDamage(unitTarget, unitTarget->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    unitTarget->DealDamage(unitTarget, unitTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
                     return;
                 }
                 case 69610:                                 // Large Ooze Buff Combine
@@ -10774,7 +10774,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // increase the unstable ooze stack on the big ooze and kill the target
                     resultingCaster->CastSpell(resultingTarget, 69644, TRIGGERED_OLD_TRIGGERED);
-                    resultingCaster->DealDamage(resultingCaster, resultingCaster->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    resultingCaster->DealDamage(resultingCaster, resultingCaster->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
                     return;
                 }
                 case 69674:                                 // Mutated Infection
@@ -10782,7 +10782,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_caster->GetObjectGuid());
+                    unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
                     return;
                 }
                 case 69828:                                 // Halls of Reflection Clone
@@ -10873,7 +10873,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // cast Gastric Explosion on 10 stacks
                     if (auraStacks >= 10)
-                        unitTarget->CastSpell(unitTarget, 72227, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_caster->GetObjectGuid());
+                        unitTarget->CastSpell(unitTarget, 72227, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
                     return;
                 }
                 case 72257:                                 // Remove Marks of the Fallen Champion

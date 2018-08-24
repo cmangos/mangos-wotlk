@@ -132,7 +132,7 @@ struct boss_zarithrianAI : public ScriptedAI
             for (GuidList::const_iterator itr = m_lStalkersGuidList.begin(); itr != m_lStalkersGuidList.end(); ++itr)
             {
                 if (Creature* pStalker = m_creature->GetMap()->GetCreature(*itr))
-                    pStalker->CastSpell(pStalker, SPELL_SUMMON_FLAMECALLER, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                    pStalker->CastSpell(pStalker, SPELL_SUMMON_FLAMECALLER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             }
 
             DoScriptText(SAY_SUMMON, m_creature);

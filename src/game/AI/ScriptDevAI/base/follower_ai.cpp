@@ -300,7 +300,7 @@ Player* FollowerAI::GetLeaderForFollower()
     }
 
     debug_log("SD2: FollowerAI GetLeader can not find suitable leader.");
-    return NULL;
+    return nullptr;
 }
 
 void FollowerAI::SetFollowComplete(bool withEndEvent)

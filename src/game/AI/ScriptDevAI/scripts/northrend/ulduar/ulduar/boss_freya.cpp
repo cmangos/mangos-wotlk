@@ -524,7 +524,7 @@ struct boss_freyaAI : public ScriptedAI
         {
             if (pElder->isAlive())
             {
-                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_BRIGHTLEAF_ESSENCE_CHANNEL : SPELL_BRIGHTLEAF_ESSENCE_CHANNEL_H, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_BRIGHTLEAF_ESSENCE_CHANNEL : SPELL_BRIGHTLEAF_ESSENCE_CHANNEL_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
                 pElder->CastSpell(pElder, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiUnstableEnergyTimer = 25000;
@@ -535,7 +535,7 @@ struct boss_freyaAI : public ScriptedAI
         {
             if (pElder->isAlive())
             {
-                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_IRONBRANCH_ESSENCE_CHANNEL : SPELL_IRONBRANCH_ESSENCE_CHANNEL_H, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_IRONBRANCH_ESSENCE_CHANNEL : SPELL_IRONBRANCH_ESSENCE_CHANNEL_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
                 pElder->CastSpell(pElder, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiIronRootsTimer = 60000;
@@ -546,7 +546,7 @@ struct boss_freyaAI : public ScriptedAI
         {
             if (pElder->isAlive())
             {
-                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_STONEBARK_ESSEMCE_CHANNEL : SPELL_STONEBARK_ESSEMCE_CHANNEL_H, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+                pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_STONEBARK_ESSEMCE_CHANNEL : SPELL_STONEBARK_ESSEMCE_CHANNEL_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
                 pElder->CastSpell(pElder, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiGroundTremorTimer = 10000;
@@ -664,9 +664,9 @@ struct boss_freyaAI : public ScriptedAI
 
                 if (pSpirit->HasAura(SPELL_FEIGN_DEATH) && pStormLasher->HasAura(SPELL_FEIGN_DEATH) && pSnapLasher->HasAura(SPELL_FEIGN_DEATH))
                 {
-                    m_creature->DealDamage(pSpirit, pSpirit->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
-                    m_creature->DealDamage(pStormLasher, pStormLasher->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
-                    m_creature->DealDamage(pSnapLasher, pSnapLasher->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    m_creature->DealDamage(pSpirit, pSpirit->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                    m_creature->DealDamage(pStormLasher, pStormLasher->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                    m_creature->DealDamage(pSnapLasher, pSnapLasher->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
                 }
                 else
                 {

@@ -962,7 +962,7 @@ bool EffectDummyCreature_npc_spell_dummy_crusader_strike(Unit* /*pCaster*/, uint
     {
         // only apply this for certain citizens
         if (pCreatureTarget->GetEntry() == NPC_STRATHOLME_RESIDENT || pCreatureTarget->GetEntry() == NPC_STRATHOLME_CITIZEN)
-            pCreatureTarget->DealDamage(pCreatureTarget, pCreatureTarget->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+            pCreatureTarget->DealDamage(pCreatureTarget, pCreatureTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
         // always return true when we are handling this spell and effect
         return true;
     }

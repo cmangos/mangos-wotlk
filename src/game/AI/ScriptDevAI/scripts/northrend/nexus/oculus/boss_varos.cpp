@@ -153,7 +153,7 @@ struct boss_varosAI : public ScriptedAI
 
                 if (DoCastSpellIfCan(m_creature, SPELL_CENTRIFUGE_SHIELD) == CAST_OK)
                 {
-                    m_creature->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
+                    m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
                     m_uiShieldTimer = 0;
                 }
             }

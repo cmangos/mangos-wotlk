@@ -64,7 +64,7 @@ struct mobs_risen_husk_spiritAI : public ScriptedAI
         m_uiConsumeFlesh_Timer = 10000;
         m_uiIntangiblePresence_Timer = 5000;
 
-        m_pCreditPlayer = NULL;
+        m_pCreditPlayer = nullptr;
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -402,7 +402,7 @@ struct npc_ogronAI : public npc_escortAI
             }
         }
 
-        return NULL;
+        return nullptr;
     }
 
     void WaypointReached(uint32 uiPointId) override

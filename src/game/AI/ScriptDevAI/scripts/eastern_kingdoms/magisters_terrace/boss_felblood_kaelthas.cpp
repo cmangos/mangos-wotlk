@@ -232,7 +232,7 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
                 break;
             case NPC_PHOENIX_EGG:
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                 break;
         }
     }
@@ -240,7 +240,7 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_FLAME_STRIKE_TRIGGER)
-            pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_FLAME_STRIKE_DUMMY, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
         else
         {
             // Attack or follow target
@@ -260,8 +260,8 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
         if (pSpell->Id == SPELL_GRAVITY_LAPSE && pTarget->GetTypeId() == TYPEID_PLAYER)
         {
             DoCastSpellIfCan(pTarget, aGravityLapseSpells[m_uiGravityIndex], CAST_TRIGGERED);
-            pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_FLY, TRIGGERED_OLD_TRIGGERED, 0, 0, m_creature->GetObjectGuid());
-            pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_DOT, TRIGGERED_OLD_TRIGGERED, 0, 0, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_FLY, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, SPELL_GRAVITY_LAPSE_DOT, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             ++m_uiGravityIndex;
         }
     }
@@ -520,7 +520,7 @@ struct mob_felkael_phoenixAI : public ScriptedAI
     {
         // Self kill if the egg is killed
         if (m_bFakeDeath)
-            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -539,7 +539,7 @@ struct mob_felkael_phoenixAI : public ScriptedAI
             if (uiDmg > m_creature->GetHealth())
                 DoSetFakeDeath();
             else
-                m_creature->DealDamage(m_creature, uiDmg, 0, DOT, SPELL_SCHOOL_MASK_FIRE, NULL, false);
+                m_creature->DealDamage(m_creature, uiDmg, nullptr, DOT, SPELL_SCHOOL_MASK_FIRE, nullptr, false);
 
             m_uiBurnTimer = 2000;
         }
@@ -598,7 +598,7 @@ struct mob_arcane_sphereAI : public ScriptedAI
         // Should despawn when aura 44251 expires
         if (m_uiDespawnTimer < uiDiff)
         {
-            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
             m_uiDespawnTimer = 0;
         }
         else

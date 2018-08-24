@@ -249,14 +249,14 @@ struct mob_illidari_councilAI : public ScriptedAI
         {
             Creature* pMember = m_pInstance->GetSingleCreatureFromStorage(aCouncilMember[i]);
             if (pMember && pMember->isAlive())
-                pMember->DealDamage(pMember, pMember->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                pMember->DealDamage(pMember, pMember->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         }
 
         // Self kill the voice trigger and the controller
         if (Creature* pVoiceTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_COUNCIL_VOICE))
-            pVoiceTrigger->DealDamage(pVoiceTrigger, pVoiceTrigger->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            pVoiceTrigger->DealDamage(pVoiceTrigger, pVoiceTrigger->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
 
-        m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+        m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -337,13 +337,13 @@ struct boss_illidari_councilAI : public ScriptedAI
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
     {
         int32 uiDamageTaken = (int32)uiDamage;
-        m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_DAM, &uiDamageTaken, NULL, NULL, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_DAM, &uiDamageTaken, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
     }
 
     void HealedBy(Unit* pHealer, uint32& uiHealedAmount) override
     {
         int32 uHealTaken = (int32)uiHealedAmount;
-        m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_HEAL, &uHealTaken, NULL, NULL, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_HEAL, &uHealTaken, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
     }
 };
 

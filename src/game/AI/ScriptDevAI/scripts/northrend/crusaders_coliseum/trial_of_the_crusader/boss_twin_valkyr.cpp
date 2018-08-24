@@ -161,7 +161,7 @@ struct boss_fjolaAI : public ScriptedAI
             return false;
 
         // choose the caster; it always alternates
-        Unit* pCaster = NULL;
+        Unit* pCaster = nullptr;
         uint32 uiSpell = 0;
         uint32 uiShieldSpell = 0;
 

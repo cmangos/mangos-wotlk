@@ -243,7 +243,7 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
         }
 
         if (vCultists.empty())
-            return NULL;
+            return nullptr;
 
         return vCultists[urand(0, vCultists.size() - 1)];
     }

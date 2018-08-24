@@ -264,7 +264,7 @@ void instance_violet_hold::SetData(uint32 uiType, uint32 uiData)
                     break;
                 case FAIL:
                     if (Creature* pSinclari = GetSingleCreatureFromStorage(NPC_SINCLARI))
-                        pSinclari->DealDamage(pSinclari, pSinclari->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        pSinclari->DealDamage(pSinclari, pSinclari->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                     if (Creature* pController = GetSingleCreatureFromStorage(NPC_EVENT_CONTROLLER))
                         pController->AI()->EnterEvadeMode();
                     // Reset the event (creature cleanup is handled in creature_linking)
@@ -737,7 +737,7 @@ BossInformation const* instance_violet_hold::GetBossInformation(uint32 uiEntry/*
     }
 
     if (!mEntry)
-        return NULL;
+        return nullptr;
 
     for (uint8 i = 0; i < MAX_MINIBOSSES; ++i)
     {
@@ -745,7 +745,7 @@ BossInformation const* instance_violet_hold::GetBossInformation(uint32 uiEntry/*
             return &aBossInformation[i];
     }
 
-    return NULL;
+    return nullptr;
 }
 
 instance_violet_hold::~instance_violet_hold()

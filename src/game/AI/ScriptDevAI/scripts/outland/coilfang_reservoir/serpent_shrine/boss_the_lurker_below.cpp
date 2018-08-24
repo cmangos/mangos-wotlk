@@ -136,7 +136,7 @@ struct boss_the_lurker_belowAI : public Scripted_NoMovementAI
     // Custom threat management
     bool SelectHostileTarget()
     {
-        Unit* pTarget = NULL;
+        Unit* pTarget = nullptr;
         Unit* pOldTarget = m_creature->getVictim();
 
         if (!m_creature->getThreatManager().isThreatListEmpty())

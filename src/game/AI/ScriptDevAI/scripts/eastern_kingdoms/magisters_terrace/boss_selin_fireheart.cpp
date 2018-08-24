@@ -235,7 +235,7 @@ struct boss_selin_fireheartAI : public ScriptedAI
                     // Kill the drained crystal
                     Creature* pCrystalChosen = m_creature->GetMap()->GetCreature(m_crystalGuid);
                     if (pCrystalChosen && pCrystalChosen->isAlive())
-                        pCrystalChosen->DealDamage(pCrystalChosen, pCrystalChosen->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        pCrystalChosen->DealDamage(pCrystalChosen, pCrystalChosen->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
 
                     m_uiManaRageTimer = 0;
                 }

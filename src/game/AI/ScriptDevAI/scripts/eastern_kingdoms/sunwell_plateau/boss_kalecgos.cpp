@@ -130,7 +130,7 @@ struct boss_kalecgosAI : public ScriptedAI
             m_creature->CombatStop(true);
             m_creature->LoadCreatureAddon(true);
 
-            m_creature->SetLootRecipient(NULL);
+            m_creature->SetLootRecipient(nullptr);
             m_creature->GetMotionMaster()->MoveIdle();
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
             return;
@@ -179,7 +179,7 @@ struct boss_kalecgosAI : public ScriptedAI
         {
             // The teleport spell doesn't work right for this, so we need to teleport him manually
             pSathrovarr->NearTeleportTo(1704.34f, 928.17f, 53.08f, 0);
-            pSathrovarr->DealDamage(pSathrovarr, pSathrovarr->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            pSathrovarr->DealDamage(pSathrovarr, pSathrovarr->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         }
 
         if (Creature* pKalec = m_pInstance->GetSingleCreatureFromStorage(NPC_KALECGOS_HUMAN))

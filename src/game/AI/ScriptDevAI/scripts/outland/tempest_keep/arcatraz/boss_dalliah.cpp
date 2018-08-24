@@ -109,7 +109,7 @@ struct boss_dalliahAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_DALLIAH, FAIL);
 
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
 
         Reset();
     }

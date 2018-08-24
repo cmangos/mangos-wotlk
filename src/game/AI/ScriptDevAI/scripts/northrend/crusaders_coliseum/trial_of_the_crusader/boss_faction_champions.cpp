@@ -392,7 +392,7 @@ struct trial_crusader_commonAI : public ScriptedAI
 
     bool CanUseSpecialAbility(uint32 uiSpellId, uint32 uiTargetType, SelectFlags selectFlag, uint32 uiMaxHpPct)
     {
-        Unit* pTarget = NULL;
+        Unit* pTarget = nullptr;
 
         switch (uiTargetType)
         {
@@ -505,8 +505,8 @@ struct trial_crusader_commonAI : public ScriptedAI
                         m_uiTrinketCooldownTimer = 120000;
                 }
 
-                SendAIEventAround(AI_EVENT_GOT_CCED, NULL, 0, CRUSADER_AIEVENT_THROW_RADIUS);
-                SendAIEvent(AI_EVENT_GOT_CCED, NULL, m_creature);
+                SendAIEventAround(AI_EVENT_GOT_CCED, nullptr, 0, CRUSADER_AIEVENT_THROW_RADIUS);
+                SendAIEvent(AI_EVENT_GOT_CCED, nullptr, m_creature);
                 m_uiIsCCTimer = 5000;
             }
             else

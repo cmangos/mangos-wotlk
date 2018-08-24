@@ -656,7 +656,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                 // Harvest Soul
                 if (m_uiHarvestSoulTimer < uiDiff)
                 {
-                    Unit* pTarget = NULL;
+                    Unit* pTarget = nullptr;
                     bool m_bIsHeroic = m_pInstance && m_pInstance->IsHeroicDifficulty();
                     if (m_bIsHeroic)
                         pTarget = m_creature;

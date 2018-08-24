@@ -172,7 +172,7 @@ struct boss_felmystAI : public ScriptedAI
             m_creature->GetMotionMaster()->MovePoint(PHASE_GROUND, fX, fY, 50.083f, false);
         }
 
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
 
         Reset();
     }
@@ -295,7 +295,7 @@ struct boss_felmystAI : public ScriptedAI
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
         if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_ENCAPSULATE_CHANNEL)
-            pTarget->CastSpell(pTarget, SPELL_ENCAPSULATE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, SPELL_ENCAPSULATE, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
     void UpdateAI(const uint32 uiDiff) override

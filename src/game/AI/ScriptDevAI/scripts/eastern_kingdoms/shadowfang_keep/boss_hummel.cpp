@@ -226,7 +226,7 @@ struct npc_valentine_boss_managerAI : public ScriptedAI, private DialogueHelper
         if (m_uiCrazedApothecaryTimer < uiDiff)
         {
             if (Creature* pGenerator = m_pInstance->GetSingleCreatureFromStorage(NPC_APOTHECARY_GENERATOR))
-                pGenerator->CastSpell(pGenerator, SPELL_SUMMON_VALENTINE_ADD, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                pGenerator->CastSpell(pGenerator, SPELL_SUMMON_VALENTINE_ADD, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
 
             m_uiCrazedApothecaryTimer = 30000;
         }

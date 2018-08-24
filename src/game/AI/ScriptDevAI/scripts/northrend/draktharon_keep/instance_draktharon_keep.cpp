@@ -175,7 +175,7 @@ void instance_draktharon_keep::DoSortNovosDummies()
 
 Creature* instance_draktharon_keep::GetNextCrystalTarget(Creature* pCrystalHandler, uint8& uiIndex)
 {
-    Creature* pTarget = NULL;
+    Creature* pTarget = nullptr;
     uiIndex = 0;
 
     for (uint8 i = 0; i < MAX_CRYSTALS; ++i)
@@ -206,7 +206,7 @@ void instance_draktharon_keep::DoHandleCrystal(uint8 uiIndex)
 Creature* instance_draktharon_keep::GetSummonDummy()
 {
     if (m_vSummonDummyGuids.empty())
-        return NULL;
+        return nullptr;
 
     return instance->GetCreature(m_vSummonDummyGuids[urand(0, m_vSummonDummyGuids.size() - 1)]);
 }

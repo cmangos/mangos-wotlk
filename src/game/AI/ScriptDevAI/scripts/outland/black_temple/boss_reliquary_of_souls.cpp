@@ -198,7 +198,7 @@ struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI
     {
         // Self kill when the Essence of Anger is killed
         if (pSummoned->GetEntry() == NPC_ESSENCE_ANGER)
-            m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
     }
 
     void SummonedMovementInform(Creature* pSummoned, uint32 uiMoveType, uint32 uiPointId) override

@@ -190,7 +190,7 @@ void instance_oculus::OnCreatureDeath(Creature* pCreature)
             {
                 if (Creature* pVaros = GetSingleCreatureFromStorage(NPC_VAROS))
                 {
-                    pVaros->ApplySpellImmune(0, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
+                    pVaros->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
                     pVaros->InterruptNonMeleeSpells(false);
                 }
             }

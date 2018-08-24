@@ -364,7 +364,7 @@ struct npc_akamaAI : public ScriptedAI, private DialogueHelper
 
         // Summon mobs by spell
         if (uiSpellId)
-            pGenerator->CastSpell(pGenerator, uiSpellId, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+            pGenerator->CastSpell(pGenerator, uiSpellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
         // Summon ashtongue pack
         else
         {

@@ -181,7 +181,7 @@ struct boss_alarAI : public ScriptedAI
         {
             // Check first if we have enough health to drain
             if (m_creature->GetMaxHealth()*.03f > m_creature->GetHealth())
-                m_creature->DealDamage(m_creature, m_creature->GetMaxHealth()*.03f, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                m_creature->DealDamage(m_creature, m_creature->GetMaxHealth()*.03f, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         }
     }
 

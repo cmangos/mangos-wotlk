@@ -152,10 +152,10 @@ struct boss_jaraxxusAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_INFERNAL_VOLCANO:
-                pSummoned->CastSpell(pSummoned, SPELL_ERUPTION, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                pSummoned->CastSpell(pSummoned, SPELL_ERUPTION, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                 break;
             case NPC_NETHER_PORTAL:
-                pSummoned->CastSpell(pSummoned, SPELL_NETHER_PORTAL, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                pSummoned->CastSpell(pSummoned, SPELL_NETHER_PORTAL, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                 break;
         }
     }

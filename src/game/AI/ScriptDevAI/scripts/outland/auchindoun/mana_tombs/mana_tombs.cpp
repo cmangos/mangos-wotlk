@@ -257,7 +257,7 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
             case NPC_ENGINEER_SHAEEN:        return m_creature;
             case NPC_SHADOW_LORD_XIRAXIS:    return m_creature->GetMap()->GetCreature(m_xiraxisGuid);
             default:
-                return NULL;
+                return nullptr;
         }
     }
 

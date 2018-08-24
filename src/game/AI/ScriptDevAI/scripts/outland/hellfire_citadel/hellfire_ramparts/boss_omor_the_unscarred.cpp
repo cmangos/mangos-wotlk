@@ -141,7 +141,7 @@ struct boss_omor_the_unscarredAI : public ScriptedAI
         }
         else if (m_uiOrbitalStrikeTimer < uiDiff)
         {
-            Unit* pTemp = NULL;
+            Unit* pTemp = nullptr;
             if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
                 pTemp = m_creature->getVictim();
             else

@@ -218,5 +218,5 @@ Battlefield* OutdoorPvPMgr::GetBattlefieldById(uint32 id)
             if (script->IsBattlefield() && ((Battlefield*)script)->GetBattlefieldId() == id)
                 return (Battlefield*)script;
 
-    return NULL;
+    return nullptr;
 }

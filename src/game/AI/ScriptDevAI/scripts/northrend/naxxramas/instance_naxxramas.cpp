@@ -698,7 +698,7 @@ Creature* instance_naxxramas::GetClosestAnchorForGoth(Creature* pSource, bool bR
         return lList.front();
     }
 
-    return NULL;
+    return nullptr;
 }
 
 void instance_naxxramas::GetGothSummonPointCreatures(std::list<Creature*>& lList, bool bRightSide)

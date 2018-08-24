@@ -232,7 +232,7 @@ struct boss_nightbaneAI : public npc_escortAI
         if (!m_pInstance)
             return;
 
-        Unit* pChosenTrigger = NULL;
+        Unit* pChosenTrigger = nullptr;
         GuidList lTriggersList;
         float fX, fY, fZ;
 

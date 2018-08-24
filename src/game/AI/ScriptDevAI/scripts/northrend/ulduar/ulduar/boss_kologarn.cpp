@@ -195,7 +195,7 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
             case NPC_RIGHT_ARM:
             {
                 int32 uiSeat = (int32)SEAT_ID_RIGHT;
-                pSummoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &uiSeat, NULL, NULL, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &uiSeat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->CastSpell(pSummoned, SPELL_ARM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
                 if (m_creature->getVictim())
@@ -205,7 +205,7 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
             case NPC_LEFT_ARM:
             {
                 int32 uiSeat = (int32)SEAT_ID_LEFT;
-                pSummoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &uiSeat, NULL, NULL, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &uiSeat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->CastSpell(pSummoned, SPELL_ARM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
                 if (m_creature->getVictim())

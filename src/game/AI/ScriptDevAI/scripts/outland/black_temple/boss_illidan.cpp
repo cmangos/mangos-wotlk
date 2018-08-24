@@ -1329,7 +1329,7 @@ struct boss_maievAI : public ScriptedAI, private DialogueHelper
         m_creature->CombatStop(true);
         m_creature->LoadCreatureAddon(true);
 
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
 
         Reset();
     }
@@ -1345,7 +1345,7 @@ struct boss_maievAI : public ScriptedAI, private DialogueHelper
                 if (m_pInstance)
                 {
                     if (Creature* pIllidan = m_pInstance->GetSingleCreatureFromStorage(NPC_ILLIDAN_STORMRAGE))
-                        pIllidan->DealDamage(pIllidan, pIllidan->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                        pIllidan->DealDamage(pIllidan, pIllidan->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
                 }
                 break;
             case SPELL_TELEPORT_VISUAL:

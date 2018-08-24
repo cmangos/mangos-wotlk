@@ -135,7 +135,7 @@ struct boss_galdarahAI : public ScriptedAI
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, m_bIsRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, SELECT_FLAG_PLAYER))
             {
-                pSummoned->CastSpell(pTarget, m_bIsRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, TRIGGERED_NONE, NULL, NULL, m_creature->GetObjectGuid());
+                pSummoned->CastSpell(pTarget, m_bIsRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
 
                 // Store the player guid in order to count it for the achievement
                 if (m_pInstance)

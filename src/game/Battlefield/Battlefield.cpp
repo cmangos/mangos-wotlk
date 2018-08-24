@@ -433,7 +433,7 @@ Group* Battlefield::GetFreeRaid(PvpTeamIndex teamIdx)
             return *itr;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -452,7 +452,7 @@ Group* Battlefield::GetGroupFor(ObjectGuid playerGuid)
         }
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /**
@@ -535,7 +535,7 @@ Function that checks if the battlefield has the player
 */
 bool Battlefield::HasPlayer(ObjectGuid playerGuid)
 {
-    return GetGroupFor(playerGuid) != NULL;
+    return GetGroupFor(playerGuid) != nullptr;
 }
 
 /**

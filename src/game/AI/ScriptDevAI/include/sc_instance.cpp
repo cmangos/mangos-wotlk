@@ -144,7 +144,7 @@ Player* ScriptedInstance::GetPlayerInMap(bool bOnlyAlive /*=false*/, bool bCanBe
             return pPlayer;
     }
 
-    return NULL;
+    return nullptr;
 }
 
 /// Returns a pointer to a loaded GameObject that was stored in m_goEntryGuidStore. Can return nullptr
@@ -157,7 +157,7 @@ GameObject* ScriptedInstance::GetSingleGameObjectFromStorage(uint32 entry)
     // Output log, possible reason is not added GO to map, or not yet loaded;
     script_error_log("Script requested gameobject with entry %u, but no gameobject of this entry was created yet, or it was not stored by script for map %u.", entry, instance->GetId());
 
-    return NULL;
+    return nullptr;
 }
 
 /// Returns a pointer to a loaded Creature that was stored in m_goEntryGuidStore. Can return nullptr
@@ -171,7 +171,7 @@ Creature* ScriptedInstance::GetSingleCreatureFromStorage(uint32 entry, bool skip
     if (!skipDebugLog)
         script_error_log("Script requested creature with entry %u, but no npc of this entry was created yet, or it was not stored by script for map %u.", entry, instance->GetId());
 
-    return NULL;
+    return nullptr;
 }
 
 /**

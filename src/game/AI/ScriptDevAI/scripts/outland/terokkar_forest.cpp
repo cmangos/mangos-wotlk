@@ -460,7 +460,7 @@ struct npc_letollAI : public npc_escortAI
             }
         }
 
-        return NULL;
+        return nullptr;
     }
 
     void JustStartedEscort() override

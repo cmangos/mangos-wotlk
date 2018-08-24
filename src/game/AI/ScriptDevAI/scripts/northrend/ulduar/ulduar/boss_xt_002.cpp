@@ -439,10 +439,10 @@ struct boss_heart_deconstructorAI : public ScriptedAI
         {
             // spawn a bunch of scrap bots
             for (uint8 i = 0; i < MAX_SCRAPBOTS; ++i)
-                pTarget->CastSpell(pTarget, SPELL_RECHARGE_ROBOT_1, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                pTarget->CastSpell(pTarget, SPELL_RECHARGE_ROBOT_1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
 
             // spawn a boombot or pummeller, depending on chance
-            pTarget->CastSpell(pTarget, roll_chance_i(80) ? SPELL_RECHARGE_ROBOT_2 : SPELL_RECHARGE_ROBOT_3, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, roll_chance_i(80) ? SPELL_RECHARGE_ROBOT_2 : SPELL_RECHARGE_ROBOT_3, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
         }
     }
 

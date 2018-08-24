@@ -177,7 +177,7 @@ void instance_azjol_nerub::Update(uint32 uiDiff)
 
 void instance_azjol_nerub::DoSendWatcherOrKrikthir()
 {
-    Creature* pAttacker = NULL;
+    Creature* pAttacker = nullptr;
     Creature* pKrikthir = GetSingleCreatureFromStorage(NPC_KRIKTHIR);
 
     if (!pKrikthir)

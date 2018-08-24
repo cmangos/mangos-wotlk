@@ -609,7 +609,7 @@ struct npc_death_knight_initiateAI : public ScriptedAI
                 m_bIsDuelComplete = true;
                 m_creature->RemoveAllAurasOnEvade();
                 m_creature->CombatStop(true);
-                m_creature->SetLootRecipient(NULL);
+                m_creature->SetLootRecipient(nullptr);
 
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_duelerGuid))
                 {
@@ -1246,7 +1246,7 @@ struct npc_scarlet_ghoulAI : public ScriptedPetAI
         {
             if (m_uiUnsummonTimer <= uiDiff)
             {
-                m_creature->DealDamage(m_creature, m_creature->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                 if (m_creature->IsPet())
                     ((Pet*)m_creature)->Unsummon(PET_SAVE_AS_DELETED);
                 return;
@@ -1627,7 +1627,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                 for (GuidList::const_iterator itr = m_lAttackersGUIDs.begin(); itr != m_lAttackersGUIDs.end(); ++itr)
                 {
                     if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                        pTemp->DealDamage(pTemp, pTemp->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        pTemp->DealDamage(pTemp, pTemp->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                 }
 
                 // light fighters despawn
@@ -2236,7 +2236,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                                 for (GuidList::const_iterator itr = m_lDefendersGUIDs.begin(); itr != m_lDefendersGUIDs.end(); ++itr)
                                 {
                                     if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                                        pTemp->DealDamage(pTemp, pTemp->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, TRIGGERED_NONE);
+                                        pTemp->DealDamage(pTemp, pTemp->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, TRIGGERED_NONE);
                                 }
                                 // workaround for the light champions - spell doesn't work right
                                 for (uint8 i = 0; i < MAX_LIGHT_CHAMPIONS; i++)
@@ -2694,7 +2694,7 @@ struct npc_fellow_death_knightAI : public ScriptedAI
             m_creature->RemoveAllAurasOnEvade();
             m_creature->CombatStop(true);
             m_creature->LoadCreatureAddon(true);
-            m_creature->SetLootRecipient(NULL);
+            m_creature->SetLootRecipient(nullptr);
 
             Reset();
 

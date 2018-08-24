@@ -750,7 +750,7 @@ void WorldSession::HandleUpdateMissileTrajectory(WorldPacket& recv_data)
     if (!unit)
         return;
 
-    Spell* spell = unit ? unit->GetCurrentSpell(CURRENT_GENERIC_SPELL) : NULL;
+    Spell* spell = unit ? unit->GetCurrentSpell(CURRENT_GENERIC_SPELL) : nullptr;
     if (!spell || spell->m_spellInfo->Id != spellId || !(spell->m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
         return;
 

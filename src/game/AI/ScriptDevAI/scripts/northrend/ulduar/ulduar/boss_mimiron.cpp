@@ -695,9 +695,9 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                     StartNextDialogueText(SPELL_SLEEP_VISUAL);
 
                     // kill the robot parts
-                    m_creature->DealDamage(pLeviathan, pLeviathan->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
-                    m_creature->DealDamage(pVx001, pVx001->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
-                    m_creature->DealDamage(pAerial, pAerial->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                    m_creature->DealDamage(pLeviathan, pLeviathan->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                    m_creature->DealDamage(pVx001, pVx001->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                    m_creature->DealDamage(pAerial, pAerial->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
                 }
                 m_uiWakeUpTimer = 0;
             }
@@ -847,7 +847,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
                     if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
                     {
                         m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, pTurret->GetObjectGuid());
-                        m_creature->DealDamage(pTurret, pTurret->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, NULL, false);
+                        m_creature->DealDamage(pTurret, pTurret->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
                     }
                 }
 
@@ -979,7 +979,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
                 if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
                 {
                     int32 iSeat = (int32)SEAT_ID_TURRET;
-                    pTurret->CastCustomSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, &iSeat, NULL, NULL, TRIGGERED_OLD_TRIGGERED);
+                    pTurret->CastCustomSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, &iSeat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                 }
 
                 if (Creature* pMimiron = m_pInstance->GetSingleCreatureFromStorage(NPC_MIMIRON))
@@ -1227,7 +1227,7 @@ struct boss_vx001AI : public ScriptedAI
     // Custom threat management
     bool SelectCustomHostileTarget()
     {
-        Unit* pTarget = NULL;
+        Unit* pTarget = nullptr;
         Unit* pOldTarget = m_creature->getVictim();
 
         if (!m_creature->getThreatManager().isThreatListEmpty())
@@ -1805,11 +1805,11 @@ struct npc_mimiron_flamesAI : public Scripted_NoMovementAI
     Unit* SelectClosestSpreadTarget()
     {
         if (!m_pInstance)
-            return NULL;
+            return nullptr;
 
         Creature* pLeviathan = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK);
         if (!pLeviathan)
-            return NULL;
+            return nullptr;
 
         std::list<Unit*> lTargets;
         ThreatList const& threatList = pLeviathan->getThreatManager().getThreatList();
@@ -1830,7 +1830,7 @@ struct npc_mimiron_flamesAI : public Scripted_NoMovementAI
             return lTargets.front();
         }
 
-        return NULL;
+        return nullptr;
     }
 
     void UpdateAI(const uint32 uiDiff) override

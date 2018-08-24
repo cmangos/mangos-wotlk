@@ -304,7 +304,7 @@ class instance_trial_of_the_crusader : public ScriptedInstance, private Dialogue
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
-        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget = NULL, uint32 uiMiscvalue1 = 0) const override;
+        bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget = nullptr, uint32 uiMiscvalue1 = 0) const override;
 
         void DoSetCrusadersInCombat(Unit* pTarget);
         void DoOpenMainGate(uint32 uiResetTimer);

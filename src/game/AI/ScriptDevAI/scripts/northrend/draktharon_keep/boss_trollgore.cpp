@@ -151,7 +151,7 @@ struct boss_trollgoreAI : public ScriptedAI
         {
             // Summon a troll in the corner and 2 trolls in the air
             if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetTrollgoreCornerTrigger()))
-                pTrigger->CastSpell(pTrigger, roll_chance_i(20) ? SPELL_SUMMON_INVADER_1 : SPELL_SUMMON_INVADER_2, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                pTrigger->CastSpell(pTrigger, roll_chance_i(20) ? SPELL_SUMMON_INVADER_1 : SPELL_SUMMON_INVADER_2, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
 
             // get two random outside triggers
             uint8 uiMaxTriggers = m_vTriggers.size();
@@ -159,9 +159,9 @@ struct boss_trollgoreAI : public ScriptedAI
             uint8 uiPos2 = (uiPos1 + urand(1, uiMaxTriggers  - 1)) % uiMaxTriggers;
 
             if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_vTriggers[uiPos1]))
-                pTrigger->CastSpell(pTrigger, roll_chance_i(30) ? SPELL_SUMMON_INVADER_1 : SPELL_SUMMON_INVADER_2, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                pTrigger->CastSpell(pTrigger, roll_chance_i(30) ? SPELL_SUMMON_INVADER_1 : SPELL_SUMMON_INVADER_2, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_vTriggers[uiPos2]))
-                pTrigger->CastSpell(pTrigger, roll_chance_i(30) ? SPELL_SUMMON_INVADER_1 : SPELL_SUMMON_INVADER_2, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                pTrigger->CastSpell(pTrigger, roll_chance_i(30) ? SPELL_SUMMON_INVADER_1 : SPELL_SUMMON_INVADER_2, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
         }
         else
         {
@@ -169,7 +169,7 @@ struct boss_trollgoreAI : public ScriptedAI
             for (uint8 i = 0; i < m_vTriggers.size(); ++i)
             {
                 if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_vTriggers[i]))
-                    pTrigger->CastSpell(pTrigger, roll_chance_i(30) ? SPELL_SUMMON_INVADER_1 : SPELL_SUMMON_INVADER_2, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                    pTrigger->CastSpell(pTrigger, roll_chance_i(30) ? SPELL_SUMMON_INVADER_1 : SPELL_SUMMON_INVADER_2, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             }
         }
     }

@@ -344,7 +344,7 @@ struct npc_bloodmaul_stout_triggerAI : public ScriptedAI
                 lOgreList.sort(ObjectDistanceOrder(m_creature));
 
                 std::list<Creature*>::const_iterator ogreItr = lOgreList.begin();
-                Creature* pOgre = NULL;
+                Creature* pOgre = nullptr;
 
                 do
                 {
@@ -614,7 +614,7 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
         {
             if (Group* pGroup = pPlayer->GetGroup())
             {
-                for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != NULL; pRef = pRef->next())
+                for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
                 {
                     if (Player* pMember = pRef->getSource())
                     {

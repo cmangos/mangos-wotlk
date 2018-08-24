@@ -264,8 +264,8 @@ struct npc_brann_hosAI : public npc_escortAI
 
                 uint32 uiSpawnNumber = (m_bIsRegularMode ? 2 : 3);
                 for (uint8 i = 0; i < uiSpawnNumber; ++i)
-                    pStalker->CastSpell(pStalker, SPELL_SUMMON_PROTECTOR, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
-                pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                    pStalker->CastSpell(pStalker, SPELL_SUMMON_PROTECTOR, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+                pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                 break;
             }
             case NPC_DARK_RUNE_STORMCALLER:
@@ -275,7 +275,7 @@ struct npc_brann_hosAI : public npc_escortAI
                     return;
 
                 for (uint8 i = 0; i < 2; ++i)
-                    pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                    pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                 break;
             }
             case NPC_IRON_GOLEM_CUSTODIAN:
@@ -284,7 +284,7 @@ struct npc_brann_hosAI : public npc_escortAI
                 if (!pStalker)
                     return;
 
-                pStalker->CastSpell(pStalker, SPELL_SUMMON_CUSTODIAN, TRIGGERED_OLD_TRIGGERED, NULL, NULL, m_creature->GetObjectGuid());
+                pStalker->CastSpell(pStalker, SPELL_SUMMON_CUSTODIAN, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                 break;
             }
         }

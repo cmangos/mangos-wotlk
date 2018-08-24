@@ -157,7 +157,7 @@ struct boss_soccothratesAI : public ScriptedAI, private DialogueHelper
         if (m_pInstance)
             m_pInstance->SetData(TYPE_SOCCOTHRATES, FAIL);
 
-        m_creature->SetLootRecipient(NULL);
+        m_creature->SetLootRecipient(nullptr);
 
         Reset();
     }

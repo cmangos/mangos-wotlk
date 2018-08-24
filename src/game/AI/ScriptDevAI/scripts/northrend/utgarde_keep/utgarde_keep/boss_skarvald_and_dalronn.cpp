@@ -90,7 +90,7 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
     Creature* GetBuddy()
     {
         if (!m_pInstance)
-            return NULL;
+            return nullptr;
 
         return m_pInstance->GetSingleCreatureFromStorage(m_creature->GetEntry() == NPC_DALRONN ? NPC_SKARVALD : NPC_DALRONN);
     }

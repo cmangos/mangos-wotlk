@@ -214,8 +214,8 @@ struct boss_volazjAI : public ScriptedAI
                 m_pInstance->SetData64(DATA_INSANITY_PLAYER, pTarget->GetObjectGuid());
 
             // Phase and summon a Visage for each player
-            pTarget->CastSpell(pTarget, aInsanityPhaseSpells[m_uiInsanityIndex], TRIGGERED_OLD_TRIGGERED, 0, 0, m_creature->GetObjectGuid());
-            pTarget->CastSpell(pTarget, aSpawnVisageSpells[m_uiInsanityIndex], TRIGGERED_OLD_TRIGGERED, 0, 0, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, aInsanityPhaseSpells[m_uiInsanityIndex], TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+            pTarget->CastSpell(pTarget, aSpawnVisageSpells[m_uiInsanityIndex], TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             ++m_uiInsanityIndex;
         }
     }

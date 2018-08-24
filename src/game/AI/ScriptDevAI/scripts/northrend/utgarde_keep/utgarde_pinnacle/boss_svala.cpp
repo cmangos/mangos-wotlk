@@ -102,7 +102,7 @@ struct boss_svalaAI : public ScriptedAI
 
     void Reset() override
     {
-        pArthas = NULL;
+        pArthas = nullptr;
 
         m_uiIntroTimer = 2500;
         m_uiIntroCount = 0;
@@ -179,7 +179,7 @@ struct boss_svalaAI : public ScriptedAI
     void SummonedCreatureDespawn(Creature* pDespawned) override
     {
         if (pDespawned->GetEntry() == NPC_ARTHAS_IMAGE)
-            pArthas = NULL;
+            pArthas = nullptr;
     }
 
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
