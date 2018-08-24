@@ -136,13 +136,13 @@ class instance_halls_of_reflection : public ScriptedInstance, private DialogueHe
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
 
-        uint32 GetPlayerTeam() { return m_uiTeam; }
+        uint32 GetPlayerTeam() const { return m_uiTeam; }
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
-        void GetDungeonTrapsGUIDList(GuidList& lList) { lList = m_lDungeonTrapsGuids; }
-        void GetReflectionsGUIDList(GuidList& lList) { lList = m_lSpiritReflectionsGuids; }
+        void GetDungeonTrapsGUIDList(GuidList& lList) const { lList = m_lDungeonTrapsGuids; }
+        void GetReflectionsGUIDList(GuidList& lList) const { lList = m_lSpiritReflectionsGuids; }
 
         void Update(uint32 uiDiff);
 

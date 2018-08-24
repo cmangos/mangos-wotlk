@@ -5201,7 +5201,7 @@ static const float PLAYER_AGI_TO_CRIT_TO_DODGE[MAX_CLASSES] =
     2.00f / 1.15f, // [11] Druid
 };
 
-float Player::GetDodgeFromAgility(float amount)
+float Player::GetDodgeFromAgility(float amount) const
 {
     const uint32 pclass = getClass();
     if (pclass >= MAX_CLASSES)
@@ -21703,7 +21703,7 @@ bool ItemPosCount::isContainedIn(ItemPosCountVec const& vec) const
     return false;
 }
 
-bool Player::CanUseBattleGroundObject()
+bool Player::CanUseBattleGroundObject() const
 {
     // TODO : some spells gives player ForceReaction to one faction (ReputationMgr::ApplyForceReaction)
     // maybe gameobject code should handle that ForceReaction usage

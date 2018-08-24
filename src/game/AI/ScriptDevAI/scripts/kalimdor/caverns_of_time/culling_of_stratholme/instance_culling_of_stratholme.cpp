@@ -829,7 +829,7 @@ void instance_culling_of_stratholme::DoSpawnBurningCityUndead(Unit* pSummoner)
 }
 
 // function that returns a random scourge mob of a specified type
-uint32 instance_culling_of_stratholme::GetRandomMobOfType(uint8 uiType)
+uint32 instance_culling_of_stratholme::GetRandomMobOfType(uint8 uiType) const
 {
     switch (uiType)
     {

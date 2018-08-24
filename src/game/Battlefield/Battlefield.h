@@ -61,17 +61,17 @@ class BattlefieldBuilding
 
         virtual void SetupBuilding(Team owner, bool reset) {};
 
-        bool IsIntact() { return state == BF_GO_STATE_NEUTRAL_INTACT || state == BF_GO_STATE_HORDE_INTACT || state == BF_GO_STATE_ALLIANCE_INTACT; };
-        bool IsDamaged() { return state == BF_GO_STATE_NEUTRAL_DAMAGED || state == BF_GO_STATE_HORDE_DAMAGED || state == BF_GO_STATE_ALLIANCE_DAMAGED; };
-        bool IsDestroyed() { return state == BF_GO_STATE_NEUTRAL_DESTROYED || state == BF_GO_STATE_HORDE_DESTROYED || state == BF_GO_STATE_ALLIANCE_DESTROYED; };
+        bool IsIntact() const { return state == BF_GO_STATE_NEUTRAL_INTACT || state == BF_GO_STATE_HORDE_INTACT || state == BF_GO_STATE_ALLIANCE_INTACT; };
+        bool IsDamaged() const { return state == BF_GO_STATE_NEUTRAL_DAMAGED || state == BF_GO_STATE_HORDE_DAMAGED || state == BF_GO_STATE_ALLIANCE_DAMAGED; };
+        bool IsDestroyed() const { return state == BF_GO_STATE_NEUTRAL_DESTROYED || state == BF_GO_STATE_HORDE_DESTROYED || state == BF_GO_STATE_ALLIANCE_DESTROYED; };
 
-        Team GetOwner() { return owner; }
+        Team GetOwner() const { return owner; }
         void SetOwner(Team newOwner) { owner = newOwner; }
 
-        uint32 GetWorldState() { return worldState; }
+        uint32 GetWorldState() const { return worldState; }
         void SetWorldState(uint32 newWorldState) { worldState = newWorldState; }
 
-        uint32 GetGoState() { return (uint32)state; }
+        uint32 GetGoState() const { return (uint32)state; }
         void SetGoState(BattlefieldGoState newState) { state = newState; };
 
     private:

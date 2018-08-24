@@ -50,7 +50,7 @@ class instance_shadow_labyrinth : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
-        bool IsHellmawUnbanished() { return m_sRitualistsAliveGUIDSet.empty(); }
+        bool IsHellmawUnbanished() const { return m_sRitualistsAliveGUIDSet.empty(); }
 
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];

@@ -119,7 +119,7 @@ struct npc_a_special_surpriseAI : public ScriptedAI
         m_playerGuid.Clear();
     }
 
-    bool MeetQuestCondition(Player* pPlayer)
+    bool MeetQuestCondition(Player* pPlayer) const
     {
         switch (m_creature->GetEntry())
         {
@@ -869,12 +869,12 @@ struct npc_unworthy_initiateAI : public ScriptedAI
         Reset();
     }
 
-    int32 GetTextId()
+    int32 GetTextId() const
     {
         return m_uiPhase == PHASE_DRESSUP ? SAY_START - urand(0, 7) : SAY_AGGRO - urand(0, 7);
     }
 
-    Creature* GetAnchor()
+    Creature* GetAnchor() const
     {
         if (m_myAnchorGuid)
             return m_creature->GetMap()->GetCreature(m_myAnchorGuid);

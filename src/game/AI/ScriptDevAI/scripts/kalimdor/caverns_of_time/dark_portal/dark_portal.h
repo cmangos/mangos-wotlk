@@ -128,12 +128,12 @@ class instance_dark_portal : public ScriptedInstance
 
         void DoHandleAreaTrigger(uint32 uiTriggerId);
 
-        uint32 GetCurrentRiftId() { return m_uiWorldStateRiftCount; }
+        uint32 GetCurrentRiftId() const { return m_uiWorldStateRiftCount; }
 
         void Update(uint32 uiDiff) override;
 
     private:
-        bool IsBossTimeRift() { return m_uiWorldStateRiftCount == 6 || m_uiWorldStateRiftCount == 12; }
+        bool IsBossTimeRift() const { return m_uiWorldStateRiftCount == 6 || m_uiWorldStateRiftCount == 12; }
         void UpdateWorldState(bool bEnable = true);
         void DoSpawnNextPortal();
         void DoResetEvent();

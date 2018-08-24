@@ -74,14 +74,14 @@ class instance_ruby_sanctum : public ScriptedInstance
 
         void Update(uint32 uiDiff) override;
 
-        void GetSpawnStalkersGuidList(GuidList& lList) { lList = m_lSpawnStalkersGuidList; }
+        void GetSpawnStalkersGuidList(GuidList& lList) const { lList = m_lSpawnStalkersGuidList; }
 
         const char* Save() const override { return strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
         // Difficulty wrappers
-        bool IsHeroicDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
-        bool Is25ManDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
+        bool IsHeroicDifficulty() const { return instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
+        bool Is25ManDifficulty() const { return instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
 
     protected:
         void DoHandleZarithrianDoor();

@@ -205,7 +205,7 @@ struct npc_silvermoon_harryAI : public ScriptedAI
         }
     }
 
-    bool IsBeaten()
+    bool IsBeaten() const
     {
         return m_bHarryBeaten;
     }

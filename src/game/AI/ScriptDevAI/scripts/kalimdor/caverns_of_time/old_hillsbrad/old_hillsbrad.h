@@ -79,7 +79,7 @@ class instance_old_hillsbrad : public ScriptedInstance
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
 
-        uint32 GetThrallEventCount() { return m_uiThrallEventCount; }
+        uint32 GetThrallEventCount() const { return m_uiThrallEventCount; }
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;

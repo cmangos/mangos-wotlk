@@ -211,7 +211,7 @@ struct Glyph
 
     Glyph() : id(0), uState(GLYPH_UNCHANGED) { }
 
-    uint32 GetId() { return id; }
+    uint32 GetId() const { return id; }
 
     void SetId(uint32 newId)
     {
@@ -1606,7 +1606,7 @@ class Player : public Unit
         void SetGlyphSlot(uint8 slot, uint32 slottype) { SetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + slot, slottype); }
         uint32 GetGlyphSlot(uint8 slot) const { return GetUInt32Value(PLAYER_FIELD_GLYPH_SLOTS_1 + slot); }
         void SetGlyph(uint8 slot, uint32 glyph) { m_glyphs[m_activeSpec][slot].SetId(glyph); }
-        uint32 GetGlyph(uint8 slot) { return m_glyphs[m_activeSpec][slot].GetId(); }
+        uint32 GetGlyph(uint8 slot) const { return m_glyphs[m_activeSpec][slot].GetId(); }
         void ApplyGlyph(uint8 slot, bool apply);
         void ApplyGlyphs(bool apply);
 
@@ -1744,7 +1744,7 @@ class Player : public Unit
 
         void UpdateDefenseBonusesMod();
         float GetMeleeCritFromAgility() const;
-        float GetDodgeFromAgility(float amount);
+        float GetDodgeFromAgility(float amount) const;
         float GetSpellCritFromIntellect() const;
         float OCTRegenHPPerSpirit() const;
         float OCTRegenMPPerSpirit() const;
@@ -2089,7 +2089,7 @@ class Player : public Unit
         void ClearAfkReports() { m_bgData.bgAfkReporter.clear(); }
 
         bool GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const;
-        bool CanUseBattleGroundObject();
+        bool CanUseBattleGroundObject() const;
         bool isTotalImmune() const;
 
         // returns true if the player is in active state for capture point capturing

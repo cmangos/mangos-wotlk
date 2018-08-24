@@ -2507,7 +2507,7 @@ struct npc_adyen_the_lightwardenAI : public ScriptedAI
         }
     }
 
-    Player* GetPlayerTarget()
+    Player* GetPlayerTarget() const
     {
         return m_creature->GetMap()->GetPlayer(m_playerGuid);
     }

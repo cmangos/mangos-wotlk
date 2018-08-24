@@ -290,7 +290,7 @@ class instance_trial_of_the_champion : public ScriptedInstance, private Dialogue
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
 
-        uint32 GetPlayerTeam() { return m_uiTeam; }
+        uint32 GetPlayerTeam() const { return m_uiTeam; }
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
@@ -308,7 +308,7 @@ class instance_trial_of_the_champion : public ScriptedInstance, private Dialogue
 
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
 
-        uint32 GetMountEntryForChampion() { return m_uiTeam == ALLIANCE ? NPC_BATTLEWORG_ALLIANCE : NPC_WARHORSE_HORDE; }
+        uint32 GetMountEntryForChampion() const { return m_uiTeam == ALLIANCE ? NPC_BATTLEWORG_ALLIANCE : NPC_WARHORSE_HORDE; }
         bool IsArenaChallengeComplete(uint32 uiType);
 
         void Update(uint32 uiDiff) override;

@@ -91,7 +91,7 @@ class GameEventMgr
         template<typename T>
         int16 GetGameEventId(uint32 guid_or_poolid);
 
-        std::unordered_map<uint32, std::vector<uint32>> const& GetEventGroups() { return mGameEventGroups; }
+        std::unordered_map<uint32, std::vector<uint32>> const& GetEventGroups() const { return mGameEventGroups; }
 
         GameEventCreatureData const* GetCreatureUpdateDataForActiveEvent(uint32 lowguid) const;
     private:

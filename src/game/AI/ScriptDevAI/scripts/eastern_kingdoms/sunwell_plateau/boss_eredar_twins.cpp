@@ -350,7 +350,7 @@ struct boss_sacrolashAI : public ScriptedAI
     }
 
     // Return a random target which it's not in range of 10 yards of boss
-    Unit* GetRandomTargetAtDist(float fDist)
+    Unit* GetRandomTargetAtDist(float fDist) const
     {
         std::vector<Unit*> m_vRangeTargets;
 

@@ -295,11 +295,11 @@ class instance_trial_of_the_crusader : public ScriptedInstance, private Dialogue
         uint32 GetData(uint32 uiType) const override;
 
         // Difficulty wrappers
-        bool IsHeroicDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
-        bool Is25ManDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
+        bool IsHeroicDifficulty() const { return instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
+        bool Is25ManDifficulty() const { return instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
 
-        uint32 GetPlayerTeam() { return m_uiTeam; }
-        void GetStalkersGUIDVector(GuidVector& vVector) { vVector = m_vStalkersGuidsVector; }
+        uint32 GetPlayerTeam() const { return m_uiTeam; }
+        void GetStalkersGUIDVector(GuidVector& vVector) const { vVector = m_vStalkersGuidsVector; }
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;

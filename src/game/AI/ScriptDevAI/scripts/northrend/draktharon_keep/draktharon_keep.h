@@ -70,15 +70,15 @@ class instance_draktharon_keep : public ScriptedInstance
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
-        void GetTrollgoreOutsideTriggers(GuidVector& vTriggers) { vTriggers = m_vTriggerGuids; }
-        ObjectGuid GetTrollgoreCornerTrigger() { return m_trollgoreCornerTriggerGuid; }
+        void GetTrollgoreOutsideTriggers(GuidVector& vTriggers) const { vTriggers = m_vTriggerGuids; }
+        ObjectGuid GetTrollgoreCornerTrigger() const { return m_trollgoreCornerTriggerGuid; }
 
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
-        Creature* GetNextCrystalTarget(Creature* pCrystalHandler, uint8& uiIndex);
+        Creature* GetNextCrystalTarget(Creature* pCrystalHandler, uint8& uiIndex) const;
         void DoHandleCrystal(uint8 uiIndex);
         Creature* GetSummonDummy();
 

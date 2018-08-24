@@ -167,7 +167,7 @@ class instance_zulaman : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
-        bool IsBearPhaseInProgress() { return m_bIsBearPhaseInProgress; }
+        bool IsBearPhaseInProgress() const { return m_bIsBearPhaseInProgress; }
         void SetBearEventProgress(bool bIsInProgress) { m_bIsBearPhaseInProgress = bIsInProgress; }
         void SendNextBearWave(Unit* pTarget);
 

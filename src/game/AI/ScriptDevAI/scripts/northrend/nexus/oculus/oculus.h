@@ -88,7 +88,7 @@ class instance_oculus : public ScriptedInstance
         void Load(const char* chrIn) override;
 
         // Check Varos' shield
-        bool IsShieldBroken() { return m_sConstructsAliveGUIDSet.empty(); }
+        bool IsShieldBroken() const { return m_sConstructsAliveGUIDSet.empty(); }
 
     protected:
         void DoSpawnNextBossIfCan();

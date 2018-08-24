@@ -171,7 +171,7 @@ struct boss_aranAI : public ScriptedAI
         SetCombatMovement(true);
     }
 
-    uint32 GetNormalSpellId(uint32 index)
+    uint32 GetNormalSpellId(uint32 index) const
     {
         switch (index)
         {
@@ -182,7 +182,7 @@ struct boss_aranAI : public ScriptedAI
         }
     }
 
-    uint32 GetNormalSpellCooldown(uint32 spellId)
+    uint32 GetNormalSpellCooldown(uint32 spellId) const
     {
         switch (spellId)
         {

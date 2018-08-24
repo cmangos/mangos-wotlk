@@ -74,8 +74,8 @@ class instance_serpentshrine_cavern : public ScriptedInstance
 
         bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
 
-        void GetBeamHelpersGUIDList(GuidList& lList) { lList = m_lBeamHelpersGUIDList; }
-        void GetShieldGeneratorsGUIDList(GuidList& lList) { lList = m_lShieldGeneratorGUIDList; }
+        void GetBeamHelpersGUIDList(GuidList& lList) const { lList = m_lBeamHelpersGUIDList; }
+        void GetShieldGeneratorsGUIDList(GuidList& lList) const { lList = m_lShieldGeneratorGUIDList; }
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;

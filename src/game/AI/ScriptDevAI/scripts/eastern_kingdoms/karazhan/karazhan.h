@@ -204,8 +204,8 @@ class instance_karazhan : public ScriptedInstance
 
         void DoPrepareOperaStage(Creature* pOrganizer);
 
-        uint32 GetPlayerTeam() { return m_uiTeam; }
-        bool IsFriendlyGameReady() { return m_bFriendlyGame; }
+        uint32 GetPlayerTeam() const { return m_uiTeam; }
+        bool IsFriendlyGameReady() const { return m_bFriendlyGame; }
         void DoMoveChessPieceToSides(uint32 uiSpellId, uint32 uiFaction, bool bGameEnd = false);
         void DoFailChessEvent();
         void DoFinishChessEvent();

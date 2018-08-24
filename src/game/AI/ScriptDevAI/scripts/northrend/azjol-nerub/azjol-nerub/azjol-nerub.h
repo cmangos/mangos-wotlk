@@ -68,11 +68,11 @@ class instance_azjol_nerub : public ScriptedInstance
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
 
         ObjectGuid GetRandomAssassinTrigger();
-        ObjectGuid GetGuardianTrigger() { return m_guardianSummonTarget; }
-        ObjectGuid GetDarterTrigger() { return m_darterSummonTarget; }
-        ObjectGuid GetAnubTrigger() { return m_anubSummonTarget; }
+        ObjectGuid GetGuardianTrigger() const { return m_guardianSummonTarget; }
+        ObjectGuid GetDarterTrigger() const { return m_darterSummonTarget; }
+        ObjectGuid GetAnubTrigger() const { return m_anubSummonTarget; }
 
-        void GetHadronoxTriggerList(GuidList& lList) { lList = m_lSpiderTriggersGuids; }
+        void GetHadronoxTriggerList(GuidList& lList) const { lList = m_lSpiderTriggersGuids; }
         void ResetHadronoxTriggers();
 
         void SetHadronoxDeniedAchievCriteria(bool bIsMet) { m_bHadronoxDenied = bIsMet; }

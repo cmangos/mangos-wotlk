@@ -87,7 +87,7 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
     bool m_bIsRegularMode;
     ObjectGuid m_ghostGuid;
 
-    Creature* GetBuddy()
+    Creature* GetBuddy() const
     {
         if (!m_pInstance)
             return nullptr;

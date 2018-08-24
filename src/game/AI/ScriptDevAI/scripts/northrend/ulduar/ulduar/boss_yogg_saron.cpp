@@ -1557,7 +1557,7 @@ struct npc_descent_madnessAI : public Scripted_NoMovementAI
             m_uiCurentSpell = uiMiscValue;
     }
 
-    uint32 GetCurrentSpell() { return m_uiCurentSpell; }
+    uint32 GetCurrentSpell() const { return m_uiCurentSpell; }
 };
 
 UnitAI* GetAI_npc_descent_madness(Creature* pCreature)

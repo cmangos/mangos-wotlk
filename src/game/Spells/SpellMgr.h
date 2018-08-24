@@ -2010,7 +2010,7 @@ class SpellMgr
 
         bool IsRankSpellDueToSpell(SpellEntry const* spellInfo_1, uint32 spellId_2) const;
         bool IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const;
-        bool IsSingleTargetSpell(SpellEntry const* entry)
+        bool IsSingleTargetSpell(SpellEntry const* entry) const
         {
             if (entry->HasAttribute(SPELL_ATTR_EX5_SINGLE_TARGET_SPELL))
                 return true;
@@ -2024,7 +2024,7 @@ class SpellMgr
             return false;
         }
 
-        bool IsSingleTargetSpells(SpellEntry const* entry1, SpellEntry const* entry2)
+        bool IsSingleTargetSpells(SpellEntry const* entry1, SpellEntry const* entry2) const
         {
             if (!IsSingleTargetSpell(entry1) || !IsSingleTargetSpell(entry2))
                 return false;

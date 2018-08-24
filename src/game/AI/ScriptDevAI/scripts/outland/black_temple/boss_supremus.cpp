@@ -163,7 +163,7 @@ struct boss_supremusAI : public ScriptedAI
             pSummoned->CastSpell(pSummoned, SPELL_VOLCANIC_ERUPTION_VOLCANO, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
     }
 
-    Unit* GetHatefulStrikeTarget()
+    Unit* GetHatefulStrikeTarget() const
     {
         uint32 uiHealth = 0;
         Unit* pTarget = nullptr;

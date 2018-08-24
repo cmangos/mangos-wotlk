@@ -206,15 +206,15 @@ class instance_violet_hold : public ScriptedInstance
 
         void CallGuards(bool bRespawn);
 
-        uint32 GetRandomPortalEliteEntry() { return (urand(0, 1) ? NPC_PORTAL_GUARDIAN : NPC_PORTAL_KEEPER); }
-        uint32 GetRandomMobForNormalPortal() { return aRandomPortalNpcs[urand(0, 4)]; }
-        uint32 GetRandomMobForIntroPortal() { return aRandomIntroNpcs[urand(0, 3)]; }
+        uint32 GetRandomPortalEliteEntry() const { return (urand(0, 1) ? NPC_PORTAL_GUARDIAN : NPC_PORTAL_KEEPER); }
+        uint32 GetRandomMobForNormalPortal() const { return aRandomPortalNpcs[urand(0, 4)]; }
+        uint32 GetRandomMobForIntroPortal() const { return aRandomIntroNpcs[urand(0, 3)]; }
 
-        uint32 GetCurrentPortalNumber() { return m_uiWorldStatePortalCount; }
+        uint32 GetCurrentPortalNumber() const { return m_uiWorldStatePortalCount; }
 
         BossInformation const* GetBossInformation(uint32 uiEntry = 0);
 
-        bool IsCurrentPortalForTrash()
+        bool IsCurrentPortalForTrash() const
         {
             if (m_uiWorldStatePortalCount % MAX_MINIBOSSES)
                 return true;
@@ -225,7 +225,7 @@ class instance_violet_hold : public ScriptedInstance
         void ProcessActivationCrystal(Unit* pUser, bool bIsIntro = false);
 
         void GetErekemGuardList(GuidList& lGuardList) { lGuardList = GetData(TYPE_EREKEM) != DONE ? m_lErekemGuardList : m_lArakkoaGuardList; }
-        void GetIchoronTriggerList(GuidList& lList) { lList = m_lIchoronTargetsList; }
+        void GetIchoronTriggerList(GuidList& lList) const { lList = m_lIchoronTargetsList; }
 
         void OnPlayerEnter(Player* pPlayer) override;
 
@@ -246,7 +246,7 @@ class instance_violet_hold : public ScriptedInstance
         typedef std::multimap<uint32, ObjectGuid> BossToCellMap;
 
     protected:
-        PortalData const* GetPortalData() { return &afPortalLocation[m_uiPortalId]; }
+        PortalData const* GetPortalData() const { return &afPortalLocation[m_uiPortalId]; }
 
         void UpdateWorldState(bool bEnable = true);
 
@@ -258,7 +258,7 @@ class instance_violet_hold : public ScriptedInstance
         void ResetAll();
         void ResetVariables();
 
-        bool IsNextPortalForTrash()
+        bool IsNextPortalForTrash() const
         {
             if ((m_uiWorldStatePortalCount + 1) % MAX_MINIBOSSES)
                 return true;

@@ -762,7 +762,7 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
         ScriptedAI::EnterEvadeMode();
     }
 
-    bool IsExorcismComplete() { return m_bEventComplete; }
+    bool IsExorcismComplete() const { return m_bEventComplete; }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {

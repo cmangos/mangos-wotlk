@@ -587,7 +587,7 @@ void instance_blackrock_depths::DoCallNextDwarf()
 }
 
 // function that replaces the princess if requirements are met
-bool instance_blackrock_depths::CanReplacePrincess()
+bool instance_blackrock_depths::CanReplacePrincess() const
 {
     Map::PlayerList const& players = instance->GetPlayers();
     if (players.isEmpty())

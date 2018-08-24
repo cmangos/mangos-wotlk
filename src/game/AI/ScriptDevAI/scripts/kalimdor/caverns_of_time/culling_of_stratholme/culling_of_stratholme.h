@@ -222,7 +222,7 @@ class instance_culling_of_stratholme : public ScriptedInstance
         void DoChromieWhisper(int32 iEntry);
         void DoUpdateZombieResidents();
         void DoSpawnNextScourgeWave();
-        uint32 GetRandomMobOfType(uint8 uiType);
+        uint32 GetRandomMobOfType(uint8 uiType) const;
         uint8 GetInstancePosition();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];

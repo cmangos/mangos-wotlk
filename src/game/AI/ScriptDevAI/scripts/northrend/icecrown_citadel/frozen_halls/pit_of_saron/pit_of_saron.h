@@ -153,7 +153,7 @@ class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
 
-        uint32 GetPlayerTeam() { return m_uiTeam; }
+        uint32 GetPlayerTeam() const { return m_uiTeam; }
 
         void DoStartAmbushEvent();
 

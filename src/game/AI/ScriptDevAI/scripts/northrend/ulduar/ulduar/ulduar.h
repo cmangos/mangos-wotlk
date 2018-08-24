@@ -598,15 +598,15 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         ObjectGuid GetKoloRubbleStalker(bool bRightSide) { return bRightSide ? m_rightKoloStalkerGuid : m_leftKoloStalkerGuid; }
         ObjectGuid GetVezaxBunnyGuid(bool bAnimus) { return bAnimus ? m_animusVezaxBunnyGuid : m_vaporVezaxBunnyGuid; }
 
-        void GetDefenderGuids(GuidList& lDefenders) { lDefenders = m_lDefendersGuids; }
-        void GetEngineersGuids(GuidList& lEngineers) { lEngineers = m_lEngineersGuids; }
-        void GetTrappersGuids(GuidList& lTrappers) { lTrappers = m_lTrappersGuids; }
-        void GetHarpoonsGuids(GuidVector& vHarpoons) { vHarpoons = m_vBrokenHarpoonsGuids; }
-        void GetToyPileGuids(GuidVector& vToyPiles) { vToyPiles = m_vToyPileGuidVector; }
+        void GetDefenderGuids(GuidList& lDefenders) const { lDefenders = m_lDefendersGuids; }
+        void GetEngineersGuids(GuidList& lEngineers) const { lEngineers = m_lEngineersGuids; }
+        void GetTrappersGuids(GuidList& lTrappers) const { lTrappers = m_lTrappersGuids; }
+        void GetHarpoonsGuids(GuidVector& vHarpoons) const { vHarpoons = m_vBrokenHarpoonsGuids; }
+        void GetToyPileGuids(GuidVector& vToyPiles) const { vToyPiles = m_vToyPileGuidVector; }
         void GetThorimBunniesGuids(GuidList& lBunnies, bool bUpper) { lBunnies = bUpper ? m_lUpperBunniesGuids : m_lThorimBunniesGuids; }
-        void GetThunderOrbsGuids(GuidList& lOrbs) { lOrbs = m_lUpperThunderOrbsGuids; }
+        void GetThunderOrbsGuids(GuidList& lOrbs) const { lOrbs = m_lUpperThunderOrbsGuids; }
         void GetSmashTargetsGuids(GuidList& lTargets, bool bLeft) { lTargets = bLeft ? m_lLeftHandBunniesGuids : m_lRightHandBunniesGuids; }
-        void GetOminousCloudGuids(GuidList& lClouds) { lClouds = m_lOminousCloudsGuids; }
+        void GetOminousCloudGuids(GuidList& lClouds) const { lClouds = m_lOminousCloudsGuids; }
 
         void Update(uint32 uiDiff);
 

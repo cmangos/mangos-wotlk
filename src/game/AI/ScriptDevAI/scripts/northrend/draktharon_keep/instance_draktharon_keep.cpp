@@ -173,7 +173,7 @@ void instance_draktharon_keep::DoSortNovosDummies()
     m_lNovosDummyGuids.clear();
 }
 
-Creature* instance_draktharon_keep::GetNextCrystalTarget(Creature* pCrystalHandler, uint8& uiIndex)
+Creature* instance_draktharon_keep::GetNextCrystalTarget(Creature* pCrystalHandler, uint8& uiIndex) const
 {
     Creature* pTarget = nullptr;
     uiIndex = 0;

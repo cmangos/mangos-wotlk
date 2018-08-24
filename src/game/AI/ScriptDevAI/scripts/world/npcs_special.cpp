@@ -151,7 +151,7 @@ struct npc_air_force_botsAI : public ScriptedAI
         return pSummoned;
     }
 
-    Creature* GetSummonedGuard()
+    Creature* GetSummonedGuard() const
     {
         Creature* pCreature = m_creature->GetMap()->GetCreature(m_spawnedGuid);
 
@@ -1194,7 +1194,7 @@ struct npc_spring_rabbitAI : public ScriptedPetAI
         m_fMoveAngle = 0.0f;
     }
 
-    bool CanStartWhatRabbitsDo() { return !m_partnerGuid && !m_uiStepTimer; }
+    bool CanStartWhatRabbitsDo() const { return !m_partnerGuid && !m_uiStepTimer; }
 
     void StartWhatRabbitsDo(Creature* pPartner)
     {
@@ -1212,7 +1212,7 @@ struct npc_spring_rabbitAI : public ScriptedPetAI
     }
 
     // Helper to get the Other Bunnies AI
-    npc_spring_rabbitAI* GetPartnerAI(Creature* pBunny = nullptr)
+    npc_spring_rabbitAI* GetPartnerAI(Creature* pBunny = nullptr) const
     {
         if (!pBunny)
             pBunny = m_creature->GetMap()->GetAnyTypeCreature(m_partnerGuid);
@@ -1594,7 +1594,7 @@ struct npc_burster_wormAI : public ScriptedAI
     }
 
     // function to check for bone worms
-    bool IsBoneWorm()
+    bool IsBoneWorm() const
     {
         if (m_creature->GetEntry() == NPC_BONE_CRAWLER || m_creature->GetEntry() == NPC_HAISHULUD || m_creature->GetEntry() == NPC_BONE_SIFTER
                 || m_creature->GetEntry() == NPC_MATURE_BONE_SIFTER)

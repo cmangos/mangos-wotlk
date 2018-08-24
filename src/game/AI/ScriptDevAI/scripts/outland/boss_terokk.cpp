@@ -179,7 +179,7 @@ struct boss_terokkAI : public ScriptedAI
         (*data).second.timer = 0; (*data).second.disabled = true;
     }
 
-    uint32 GetInitialActionTimer(TerokkActions id)
+    uint32 GetInitialActionTimer(TerokkActions id) const
     {
         switch (id)
         {
@@ -192,7 +192,7 @@ struct boss_terokkAI : public ScriptedAI
         }
     }
 
-    uint32 GetSubsequentActionTimer(TerokkActions id)
+    uint32 GetSubsequentActionTimer(TerokkActions id) const
     {
         switch (id)
         {

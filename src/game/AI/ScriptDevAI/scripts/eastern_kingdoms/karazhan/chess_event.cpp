@@ -410,7 +410,7 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
     }
 
     // Function which returns a random target by type and range
-    Unit* GetTargetByType(uint8 uiType, float fRange, float fArc = M_PI_F)
+    Unit* GetTargetByType(uint8 uiType, float fRange, float fArc = M_PI_F) const
     {
         if (!m_pInstance)
             return nullptr;
@@ -451,7 +451,7 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
     }
 
     // Function to get a square as close as possible to the enemy
-    Unit* GetMovementSquare()
+    Unit* GetMovementSquare() const
     {
         if (!m_pInstance)
             return nullptr;

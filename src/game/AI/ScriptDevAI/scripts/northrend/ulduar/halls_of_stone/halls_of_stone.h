@@ -95,9 +95,9 @@ class instance_halls_of_stone : public ScriptedInstance
         void DoFaceSpeak(uint8 uiFace, int32 iTextId);
         void SetBrannSpankin(bool bIsMet) { m_bIsBrannSpankin = bIsMet; }
 
-        ObjectGuid GetProtectorStalkerGuid() { return m_protectorStalkerGuid; }
-        ObjectGuid GeStormcallerStalkerGuid() { return m_stormcallerStalkerGuid; }
-        ObjectGuid GetCustodianStalkerGuid() { return m_custodianStalkerGuid; }
+        ObjectGuid GetProtectorStalkerGuid() const { return m_protectorStalkerGuid; }
+        ObjectGuid GeStormcallerStalkerGuid() const { return m_stormcallerStalkerGuid; }
+        ObjectGuid GetCustodianStalkerGuid() const { return m_custodianStalkerGuid; }
 
     private:
         void SortFaces();

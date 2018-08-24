@@ -281,11 +281,11 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         void DoHandleCitadelAreaTrigger(uint32 uiTriggerId, Player* pPlayer);
 
         // Difficulty wrappers
-        bool IsHeroicDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
-        bool Is25ManDifficulty() { return instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
+        bool IsHeroicDifficulty() const { return instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
+        bool Is25ManDifficulty() const { return instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_NORMAL || instance->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC; }
 
-        void GetDeathwhisperStalkersList(GuidList& lList) { lList = m_lDeathwhisperStalkersGuids; }
-        void GetRotfaceStalkersList(GuidList& lList) { lList = m_lRotfaceUpperStalkersGuids; }
+        void GetDeathwhisperStalkersList(GuidList& lList) const { lList = m_lDeathwhisperStalkersGuids; }
+        void GetRotfaceStalkersList(GuidList& lList) const { lList = m_lRotfaceUpperStalkersGuids; }
         ObjectGuid GetScientistStalkerGuid(bool bLeft) { return bLeft ? m_leftScientistStalkerGuid : m_rightScientistStalkerGuid; }
 
         // Open Putricide door in a few seconds
