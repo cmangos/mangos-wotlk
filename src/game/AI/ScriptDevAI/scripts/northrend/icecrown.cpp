@@ -935,9 +935,7 @@ bool EffectDummyCreature_npc_grand_admiral_westwind(Unit* pCaster, uint32 uiSpel
 
 void AddSC_icecrown()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_squad_leader";
     pNewScript->GetAI = &GetAI_npc_squad_leader;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_squad_leader;

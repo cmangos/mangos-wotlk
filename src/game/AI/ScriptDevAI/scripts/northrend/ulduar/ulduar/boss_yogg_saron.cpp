@@ -944,10 +944,10 @@ struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
                 if (Creature* pYogg = m_pInstance->GetSingleCreatureFromStorage(NPC_YOGGSARON))
                     DoScriptText(SAY_MADNESS, pYogg);
 
-                float fX, fY, fZ, fAng;
+                float fX, fY, fZ;
                 for (uint8 i = 0; i < m_uiMaxPortals; ++i)
                 {
-                    fAng = (2 * M_PI_F / m_uiMaxPortals) * i;
+                    float fAng = (2 * M_PI_F / m_uiMaxPortals) * i;
                     m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 22.0f, fAng);
                     m_creature->SummonCreature(NPC_DESCEND_INTO_MADNESS, fX, fY, fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 }
@@ -1670,9 +1670,7 @@ UnitAI* GetAI_npc_keeper_thorim(Creature* pCreature)
 
 void AddSC_boss_yogg_saron()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_sara";
     pNewScript->GetAI = &GetAI_boss_sara;
     pNewScript->RegisterSelf();

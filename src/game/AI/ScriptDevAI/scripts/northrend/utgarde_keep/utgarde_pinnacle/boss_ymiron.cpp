@@ -421,9 +421,7 @@ bool ProcessEventId_event_achiev_kings_bane(uint32 /*uiEventId*/, Object* pSourc
 
 void AddSC_boss_ymiron()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ymiron";
     pNewScript->GetAI = &GetAI_boss_ymiron;
     pNewScript->RegisterSelf();

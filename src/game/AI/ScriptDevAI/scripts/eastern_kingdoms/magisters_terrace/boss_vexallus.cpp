@@ -223,9 +223,7 @@ UnitAI* GetAI_mob_pure_energy(Creature* pCreature)
 
 void AddSC_boss_vexallus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_vexallus";
     pNewScript->GetAI = &GetAI_boss_vexallus;
     pNewScript->RegisterSelf();

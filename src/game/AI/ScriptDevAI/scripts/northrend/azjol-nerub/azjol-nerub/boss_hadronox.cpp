@@ -289,9 +289,7 @@ UnitAI* GetAI_boss_hadronox(Creature* pCreature)
 
 void AddSC_boss_hadronox()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_hadronox";
     pNewScript->GetAI = &GetAI_boss_hadronox;
     pNewScript->RegisterSelf();

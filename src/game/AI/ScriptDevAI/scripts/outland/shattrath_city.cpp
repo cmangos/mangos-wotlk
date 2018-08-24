@@ -689,9 +689,7 @@ bool QuestRewarded_npc_adal(Player* player, Creature* creature, Quest const* que
 
 void AddSC_shattrath_city()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_dirty_larry";
     pNewScript->GetAI = &GetAI_npc_dirty_larry;
     pNewScript->pGossipHello = &GossipHello_npc_dirty_larry;

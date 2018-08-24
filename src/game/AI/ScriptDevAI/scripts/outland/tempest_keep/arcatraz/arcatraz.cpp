@@ -412,9 +412,7 @@ UnitAI* GetAI_npc_arcatraz_defender(Creature* pCreature)
 
 void AddSC_arcatraz()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_millhouse_manastorm";
     pNewScript->GetAI = &GetAI_npc_millhouse_manastorm;
     pNewScript->RegisterSelf();

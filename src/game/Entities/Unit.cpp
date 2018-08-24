@@ -4395,8 +4395,8 @@ void Unit::_UpdateSpells(uint32 time)
 
     if (!m_gameObj.empty())
     {
-        GameObjectList::iterator ite1, dnext1;
-        for (ite1 = m_gameObj.begin(); ite1 != m_gameObj.end(); ite1 = dnext1)
+        GameObjectList::iterator dnext1;
+        for (GameObjectList::iterator ite1 = m_gameObj.begin(); ite1 != m_gameObj.end(); ite1 = dnext1)
         {
             dnext1 = ite1;
             //(*i)->Update( difftime );
@@ -5139,8 +5139,8 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!spellInfo)
         return;
-    SpellAuraHolderMap::const_iterator i, next;
-    for (i = m_spellAuraHolders.begin(); i != m_spellAuraHolders.end(); i = next)
+    SpellAuraHolderMap::const_iterator next;
+    for (SpellAuraHolderMap::const_iterator i = m_spellAuraHolders.begin(); i != m_spellAuraHolders.end(); i = next)
     {
         next = i;
         ++next;
@@ -5162,8 +5162,8 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
 
 void Unit::RemoveAllGroupBuffsFromCaster(ObjectGuid casterGuid)
 {
-    SpellAuraHolderMap::const_iterator i, next;
-    for (i = m_spellAuraHolders.begin(); i != m_spellAuraHolders.end(); i = next)
+    SpellAuraHolderMap::const_iterator next;
+    for (SpellAuraHolderMap::const_iterator i = m_spellAuraHolders.begin(); i != m_spellAuraHolders.end(); i = next)
     {
         next = i;
         ++next;
@@ -5197,8 +5197,8 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 
     SpellSpecific spellId_spec = GetSpellSpecific(spellId);
 
-    SpellAuraHolderMap::iterator i, next;
-    for (i = m_spellAuraHolders.begin(); i != m_spellAuraHolders.end(); i = next)
+    SpellAuraHolderMap::iterator next;
+    for (SpellAuraHolderMap::iterator i = m_spellAuraHolders.begin(); i != m_spellAuraHolders.end(); i = next)
     {
         next = i;
         ++next;
@@ -6220,8 +6220,8 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
     if (m_gameObj.empty())
         return;
 
-    GameObjectList::iterator i, next;
-    for (i = m_gameObj.begin(); i != m_gameObj.end(); i = next)
+    GameObjectList::iterator next;
+    for (GameObjectList::iterator i = m_gameObj.begin(); i != m_gameObj.end(); i = next)
     {
         next = i;
         if (spellid == 0 || (*i)->GetSpellId() == spellid)

@@ -787,9 +787,7 @@ bool EffectScriptEffectCreature_spell_ooze_flood(Unit* pCaster, uint32 uiSpellId
 
 void AddSC_boss_professor_putricide()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_professor_putricide";
     pNewScript->GetAI = &GetAI_boss_professor_putricide;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_putricide;

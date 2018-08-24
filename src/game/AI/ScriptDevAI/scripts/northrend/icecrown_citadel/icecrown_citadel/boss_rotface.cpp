@@ -450,9 +450,7 @@ bool EffectScriptEffectCreature_spell_unstable_ooze(Unit* pCaster, uint32 uiSpel
 
 void AddSC_boss_rotface()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_rotface";
     pNewScript->GetAI = &GetAI_boss_rotface;
     pNewScript->RegisterSelf();

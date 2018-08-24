@@ -340,9 +340,7 @@ InstanceData* GetInstanceData_instance_draktharon_keep(Map* pMap)
 
 void AddSC_instance_draktharon_keep()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_draktharon_keep";
     pNewScript->GetInstanceData = &GetInstanceData_instance_draktharon_keep;
     pNewScript->RegisterSelf();

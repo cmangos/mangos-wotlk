@@ -196,9 +196,7 @@ bool ProcessEventId_event_spell_gortok_event(uint32 /*uiEventId*/, Object* pSour
 
 void AddSC_boss_gortok()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_gortok";
     pNewScript->GetAI = &GetAI_boss_gortok;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_awaken_gortok;

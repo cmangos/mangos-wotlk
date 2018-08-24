@@ -405,9 +405,7 @@ UnitAI* GetAI_npc_putricides_trap(Creature* pCreature)
 
 void AddSC_icecrown_citadel()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "go_icc_teleporter";
     pNewScript->pGossipHelloGO = &GossipHello_go_icc_teleporter;
     pNewScript->pGossipSelectGO = &GossipSelect_go_icc_teleporter;

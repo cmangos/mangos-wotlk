@@ -379,9 +379,7 @@ UnitAI* GetAI_boss_feral_defender(Creature* pCreature)
 
 void AddSC_boss_auriaya()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_auriaya";
     pNewScript->GetAI = GetAI_boss_auriaya;
     pNewScript->RegisterSelf();

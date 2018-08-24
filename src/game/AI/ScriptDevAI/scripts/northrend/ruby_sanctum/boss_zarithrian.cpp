@@ -154,9 +154,7 @@ UnitAI* GetAI_boss_zarithrian(Creature* pCreature)
 
 void AddSC_boss_zarithrian()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_zarithrian";
     pNewScript->GetAI = &GetAI_boss_zarithrian;
     pNewScript->RegisterSelf();

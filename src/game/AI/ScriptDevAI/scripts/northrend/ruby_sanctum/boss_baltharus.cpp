@@ -304,9 +304,7 @@ UnitAI* GetAI_npc_baltharus_clone(Creature* pCreature)
 
 void AddSC_boss_baltharus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_baltharus";
     pNewScript->GetAI = &GetAI_boss_baltharus;
     pNewScript->RegisterSelf();

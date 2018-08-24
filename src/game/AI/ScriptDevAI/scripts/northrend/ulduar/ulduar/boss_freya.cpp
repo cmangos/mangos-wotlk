@@ -1129,9 +1129,7 @@ UnitAI* GetAI_npc_healthy_spore(Creature* pCreature)
 
 void AddSC_boss_freya()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_freya";
     pNewScript->GetAI = GetAI_boss_freya;
     pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_boss_freya;

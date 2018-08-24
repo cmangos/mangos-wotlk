@@ -241,9 +241,7 @@ UnitAI* GetAI_boss_doomwalker(Creature* pCreature)
 
 void AddSC_boss_doomwalker()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_doomwalker";
     pNewScript->GetAI = &GetAI_boss_doomwalker;
     pNewScript->RegisterSelf();

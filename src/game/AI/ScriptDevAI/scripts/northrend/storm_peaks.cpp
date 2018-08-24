@@ -225,9 +225,7 @@ bool QuestAccept_npc_injured_miner(Player* pPlayer, Creature* pCreature, const Q
 
 void AddSC_storm_peaks()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_floating_spirit";
     pNewScript->GetAI = &GetAI_npc_floating_spirit;
     pNewScript->RegisterSelf();

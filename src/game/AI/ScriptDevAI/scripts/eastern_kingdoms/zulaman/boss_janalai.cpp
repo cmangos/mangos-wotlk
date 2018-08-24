@@ -519,9 +519,7 @@ UnitAI* GetAI_npc_janalai_firebombAI(Creature* pCreature)
 
 void AddSC_boss_janalai()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_janalai";
     pNewScript->GetAI = &GetAI_boss_janalaiAI;
     pNewScript->RegisterSelf();

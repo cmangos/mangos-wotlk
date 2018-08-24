@@ -361,9 +361,7 @@ bool EffectScriptEffectCreature_npc_scorch(Unit* pCaster, uint32 uiSpellId, Spel
 
 void AddSC_boss_ignis()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ignis";
     pNewScript->GetAI = GetAI_boss_ignis;
     pNewScript->RegisterSelf();

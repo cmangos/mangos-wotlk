@@ -729,9 +729,7 @@ UnitAI* GetAI_boss_the_lich_king_icc(Creature* pCreature)
 
 void AddSC_boss_the_lich_king()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_the_lich_king_icc";
     pNewScript->GetAI = &GetAI_boss_the_lich_king_icc;
     pNewScript->RegisterSelf();

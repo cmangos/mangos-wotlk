@@ -149,9 +149,7 @@ UnitAI* GetAI_boss_shirrak(Creature* pCreature)
 
 void AddSC_boss_shirrak()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_shirrak";
     pNewScript->GetAI = &GetAI_boss_shirrak;
     pNewScript->RegisterSelf();

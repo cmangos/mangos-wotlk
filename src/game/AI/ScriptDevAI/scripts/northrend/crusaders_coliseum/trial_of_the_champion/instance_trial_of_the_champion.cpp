@@ -1187,9 +1187,7 @@ InstanceData* GetInstanceData_instance_trial_of_the_champion(Map* pMap)
 
 void AddSC_instance_trial_of_the_champion()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_trial_of_the_champion";
     pNewScript->GetInstanceData = &GetInstanceData_instance_trial_of_the_champion;
     pNewScript->RegisterSelf();

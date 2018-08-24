@@ -186,9 +186,7 @@ UnitAI* GetAI_boss_anomalus(Creature* pCreature)
 
 void AddSC_boss_anomalus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_anomalus";
     pNewScript->GetAI = &GetAI_boss_anomalus;
     pNewScript->RegisterSelf();

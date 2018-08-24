@@ -38,12 +38,10 @@ QueryResultMysql::~QueryResultMysql()
 
 bool QueryResultMysql::NextRow()
 {
-    MYSQL_ROW row;
-
     if (!mResult)
         return false;
 
-    row = mysql_fetch_row(mResult);
+    MYSQL_ROW row = mysql_fetch_row(mResult);
     if (!row)
     {
         EndQuery();

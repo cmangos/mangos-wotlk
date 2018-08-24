@@ -972,9 +972,7 @@ bool EffectDummyCreature_npc_spell_dummy_crusader_strike(Unit* /*pCaster*/, uint
 
 void AddSC_culling_of_stratholme()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_chromie";
     pNewScript->pGossipHello = &GossipHello_npc_chromie;
     pNewScript->pGossipSelect = &GossipSelect_npc_chromie;

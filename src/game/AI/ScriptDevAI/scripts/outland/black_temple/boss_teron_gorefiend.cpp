@@ -218,9 +218,7 @@ UnitAI* GetAI_boss_teron_gorefiend(Creature* pCreature)
 
 void AddSC_boss_teron_gorefiend()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_teron_gorefiend";
     pNewScript->GetAI = &GetAI_boss_teron_gorefiend;
     pNewScript->RegisterSelf();

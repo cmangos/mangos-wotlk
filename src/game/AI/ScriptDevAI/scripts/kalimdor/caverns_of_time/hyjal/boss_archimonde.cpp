@@ -404,9 +404,7 @@ UnitAI* GetAI_npc_doomfire_spirit(Creature* pCreature)
 
 void AddSC_boss_archimonde()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_archimonde";
     pNewScript->GetAI = &GetAI_boss_archimonde;
     pNewScript->RegisterSelf();

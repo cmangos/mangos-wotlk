@@ -114,7 +114,7 @@ bool instance_forge_of_souls::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, 
         case ACHIEV_CRIT_PHANTOM_BLAST:
             return !m_bCriteriaPhantomBlastFailed;
         default:
-            return 0;
+            return false;
     }
 }
 
@@ -205,9 +205,7 @@ InstanceData* GetInstanceData_instance_forge_of_souls(Map* pMap)
 
 void AddSC_instance_forge_of_souls()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_forge_of_souls";
     pNewScript->GetInstanceData = &GetInstanceData_instance_forge_of_souls;
     pNewScript->RegisterSelf();

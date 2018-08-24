@@ -237,9 +237,7 @@ UnitAI* GetAI_mob_naga_distiller(Creature* pCreature)
 
 void AddSC_boss_warlord_kalithresh()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_warlord_kalithresh";
     pNewScript->GetAI = &GetAI_boss_warlord_kalithresh;
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_warlord_rage;

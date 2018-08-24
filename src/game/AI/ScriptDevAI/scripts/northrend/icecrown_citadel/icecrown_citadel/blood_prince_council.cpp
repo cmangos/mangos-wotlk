@@ -842,9 +842,7 @@ UnitAI* GetAI_boss_taldaram_icc(Creature* pCreature)
 
 void AddSC_blood_prince_council()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_queen_lanathel_intro";
     pNewScript->GetAI = &GetAI_npc_queen_lanathel_intro;
     pNewScript->RegisterSelf();

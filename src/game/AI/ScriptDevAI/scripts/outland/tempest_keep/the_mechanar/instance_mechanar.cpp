@@ -248,9 +248,7 @@ InstanceData* GetInstanceData_instance_mechanar(Map* pMap)
 
 void AddSC_instance_mechanar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_mechanar";
     pNewScript->GetInstanceData = &GetInstanceData_instance_mechanar;
     pNewScript->RegisterSelf();

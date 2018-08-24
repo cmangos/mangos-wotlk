@@ -452,9 +452,7 @@ UnitAI* GetAI_boss_alar(Creature* pCreature)
 
 void AddSC_boss_alar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_alar";
     pNewScript->GetAI = &GetAI_boss_alar;
     pNewScript->RegisterSelf();

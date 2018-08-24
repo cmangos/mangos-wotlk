@@ -448,9 +448,7 @@ bool EffectScriptEffectCreature_spell_portal_attunement(Unit* pCaster, uint32 ui
 
 void AddSC_boss_netherspite()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_netherspite";
     pNewScript->GetAI = &GetAI_boss_netherspite;
     pNewScript->RegisterSelf();

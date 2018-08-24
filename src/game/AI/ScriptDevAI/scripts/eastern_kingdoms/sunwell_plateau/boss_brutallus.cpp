@@ -512,9 +512,7 @@ bool AreaTrigger_at_madrigosa(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 
 void AddSC_boss_brutallus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_brutallus";
     pNewScript->GetAI = &GetAI_boss_brutallus;
     pNewScript->RegisterSelf();

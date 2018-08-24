@@ -276,9 +276,7 @@ UnitAI* GetAI_boss_sjonnir(Creature* pCreature)
 
 void AddSC_boss_sjonnir()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_sjonnir";
     pNewScript->GetAI = &GetAI_boss_sjonnir;
     pNewScript->RegisterSelf();

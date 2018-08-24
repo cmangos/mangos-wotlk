@@ -104,9 +104,7 @@ bool GossipHello_npc_naturalist_bite(Player* player, Creature* creature)
 
 void AddSC_instance_slave_pens()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_slave_pens";
     pNewScript->GetInstanceData = &GetInstanceData_instance_slave_pens;
     pNewScript->RegisterSelf();

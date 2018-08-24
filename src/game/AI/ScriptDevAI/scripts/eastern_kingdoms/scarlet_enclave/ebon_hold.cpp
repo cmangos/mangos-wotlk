@@ -2904,9 +2904,7 @@ UnitAI* GetAI_npc_scarlet_courier(Creature* pCreature)
 
 void AddSC_ebon_hold()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_a_special_surprise";
     pNewScript->GetAI = &GetAI_npc_a_special_surprise;
     pNewScript->RegisterSelf();

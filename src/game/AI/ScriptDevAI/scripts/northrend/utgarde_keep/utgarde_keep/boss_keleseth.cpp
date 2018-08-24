@@ -339,9 +339,7 @@ UnitAI* GetAI_boss_keleseth(Creature* pCreature)
 
 void AddSC_boss_keleseth()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_keleseth";
     pNewScript->GetAI = &GetAI_boss_keleseth;
     pNewScript->RegisterSelf();

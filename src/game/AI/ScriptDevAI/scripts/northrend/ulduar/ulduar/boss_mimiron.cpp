@@ -2005,9 +2005,7 @@ bool GOUse_go_big_red_button(Player* pPlayer, GameObject* pGo)
 
 void AddSC_boss_mimiron()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_mimiron";
     pNewScript->GetAI = GetAI_boss_mimiron;
     pNewScript->RegisterSelf();

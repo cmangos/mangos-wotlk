@@ -1264,10 +1264,8 @@ UnitAI* GetAI_boss_romulo(Creature* pCreature)
 
 void AddSC_bosses_opera()
 {
-    Script* pNewScript;
-
     // Oz
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_dorothee";
     pNewScript->GetAI = &GetAI_boss_dorothee;
     pNewScript->RegisterSelf();

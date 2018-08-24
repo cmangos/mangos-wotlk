@@ -1244,9 +1244,7 @@ UnitAI* GetAI_mob_phoenix_egg_tk(Creature* pCreature)
 
 void AddSC_boss_kaelthas()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_kaelthas";
     pNewScript->GetAI = &GetAI_boss_kaelthas;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_kael_phase_2;

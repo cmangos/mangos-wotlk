@@ -850,9 +850,7 @@ bool ProcessEventId_event_gameobject_citadel_valve(uint32 /*uiEventId*/, Object*
 
 void AddSC_instance_icecrown_citadel()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_icecrown_citadel";
     pNewScript->GetInstanceData = &GetInstanceData_instance_icecrown_citadel;
     pNewScript->RegisterSelf();

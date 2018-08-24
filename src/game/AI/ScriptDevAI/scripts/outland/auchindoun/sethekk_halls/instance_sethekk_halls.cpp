@@ -172,9 +172,7 @@ bool ProcessEventId_event_spell_summon_raven_god(uint32 /*uiEventId*/, Object* p
 
 void AddSC_instance_sethekk_halls()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_sethekk_halls";
     pNewScript->GetInstanceData = &GetInstanceData_instance_sethekk_halls;
     pNewScript->RegisterSelf();

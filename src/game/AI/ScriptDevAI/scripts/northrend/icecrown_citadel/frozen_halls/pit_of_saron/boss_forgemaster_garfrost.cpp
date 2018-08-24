@@ -292,9 +292,7 @@ UnitAI* GetAI_boss_forgemaster_garfrost(Creature* pCreature)
 
 void AddSC_boss_garfrost()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_forgemaster_garfrost";
     pNewScript->GetAI = &GetAI_boss_forgemaster_garfrost;
     pNewScript->RegisterSelf();

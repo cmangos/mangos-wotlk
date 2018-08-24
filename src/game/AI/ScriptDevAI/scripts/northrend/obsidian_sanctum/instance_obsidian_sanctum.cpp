@@ -144,9 +144,7 @@ InstanceData* GetInstanceData_instance_obsidian_sanctum(Map* pMap)
 
 void AddSC_instance_obsidian_sanctum()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_obsidian_sanctum";
     pNewScript->GetInstanceData = GetInstanceData_instance_obsidian_sanctum;
     pNewScript->RegisterSelf();

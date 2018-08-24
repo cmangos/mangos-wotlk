@@ -282,9 +282,7 @@ UnitAI* GetAI_npc_magwinAI(Creature* pCreature)
 
 void AddSC_azuremyst_isle()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_draenei_survivor";
     pNewScript->GetAI = &GetAI_npc_draenei_survivor;
     pNewScript->RegisterSelf();

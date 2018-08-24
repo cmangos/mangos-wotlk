@@ -299,9 +299,7 @@ UnitAI* GetAI_boss_nalorakk(Creature* pCreature)
 
 void AddSC_boss_nalorakk()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_nalorakk";
     pNewScript->GetAI = &GetAI_boss_nalorakk;
     pNewScript->RegisterSelf();

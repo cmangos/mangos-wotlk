@@ -190,9 +190,7 @@ InstanceData* GetInstanceData_instance_utgarde_keep(Map* pMap)
 
 void AddSC_instance_utgarde_keep()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_utgarde_keep";
     pNewScript->GetInstanceData = GetInstanceData_instance_utgarde_keep;
     pNewScript->RegisterSelf();

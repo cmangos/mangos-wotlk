@@ -292,9 +292,7 @@ bool QuestAccept_npc_shaheen(Player* pPlayer, Creature* pCreature, const Quest* 
 
 void AddSC_mana_tombs()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_shaheen";
     pNewScript->GetAI = &GetAI_npc_shaheen;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_shaheen;

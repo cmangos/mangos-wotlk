@@ -213,9 +213,7 @@ UnitAI* GetAI_npc_amanitar_mushroom(Creature* pCreature)
 
 void AddSC_boss_amanitar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_amanitar";
     pNewScript->GetAI = &GetAI_boss_amanitar;
     pNewScript->RegisterSelf();

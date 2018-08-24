@@ -450,9 +450,7 @@ UnitAI* GetAI_npc_icicle_target(Creature* pCreature)
 
 void AddSC_boss_hodir()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_hodir";
     pNewScript->GetAI = GetAI_boss_hodir;
     pNewScript->RegisterSelf();

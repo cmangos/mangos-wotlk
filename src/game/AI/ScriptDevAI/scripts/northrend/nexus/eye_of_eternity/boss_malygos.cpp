@@ -705,9 +705,7 @@ bool ProcessEventId_event_go_focusing_iris(uint32 /*uiEventId*/, Object* pSource
 
 void AddSC_boss_malygos()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_malygos";
     pNewScript->GetAI = &GetAI_boss_malygos;
     pNewScript->RegisterSelf();

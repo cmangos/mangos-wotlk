@@ -178,9 +178,7 @@ UnitAI* GetAI_boss_nexusprince_shaffar(Creature* pCreature)
 
 void AddSC_boss_nexusprince_shaffar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_nexusprince_shaffar";
     pNewScript->GetAI = &GetAI_boss_nexusprince_shaffar;
     pNewScript->RegisterSelf();

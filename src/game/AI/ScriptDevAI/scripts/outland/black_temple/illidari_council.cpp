@@ -759,9 +759,7 @@ UnitAI* GetAI_boss_high_nethermancer_zerevor(Creature* pCreature)
 
 void AddSC_boss_illidari_council()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mob_illidari_council";
     pNewScript->GetAI = &GetAI_mob_illidari_council;
     pNewScript->RegisterSelf();

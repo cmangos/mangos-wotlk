@@ -238,9 +238,7 @@ UnitAI* GetAI_boss_heigan(Creature* pCreature)
 
 void AddSC_boss_heigan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_heigan";
     pNewScript->GetAI = &GetAI_boss_heigan;
     pNewScript->RegisterSelf();

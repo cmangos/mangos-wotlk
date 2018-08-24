@@ -474,9 +474,7 @@ InstanceData* GetInstanceData_instance_gundrak(Map* pMap)
 
 void AddSC_instance_gundrak()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "go_gundrak_altar";
     pNewScript->pGOUse = &GOUse_go_gundrak_altar;
     pNewScript->RegisterSelf();

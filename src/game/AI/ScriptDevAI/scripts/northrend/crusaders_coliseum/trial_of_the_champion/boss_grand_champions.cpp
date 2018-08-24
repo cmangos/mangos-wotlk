@@ -965,9 +965,7 @@ UnitAI* GetAI_npc_champion_mount(Creature* pCreature)
 
 void AddSC_boss_grand_champions()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_champion_warrior";
     pNewScript->GetAI = &GetAI_boss_champion_warrior;
     pNewScript->RegisterSelf();

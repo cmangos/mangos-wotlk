@@ -246,9 +246,7 @@ UnitAI* GetAI_boss_keristrasza(Creature* pCreature)
 
 void AddSC_boss_keristrasza()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_keristrasza";
     pNewScript->GetAI = &GetAI_boss_keristrasza;
     pNewScript->RegisterSelf();

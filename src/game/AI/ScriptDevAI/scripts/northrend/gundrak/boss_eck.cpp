@@ -146,9 +146,7 @@ UnitAI* GetAI_boss_eck(Creature* pCreature)
 
 void AddSC_boss_eck()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_eck";
     pNewScript->GetAI = &GetAI_boss_eck;
     pNewScript->RegisterSelf();

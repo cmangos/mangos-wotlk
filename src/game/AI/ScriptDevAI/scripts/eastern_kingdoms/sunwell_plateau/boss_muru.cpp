@@ -509,9 +509,7 @@ UnitAI* GetAI_npc_singularity(Creature* pCreature)
 
 void AddSC_boss_muru()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_muru";
     pNewScript->GetAI = &GetAI_boss_muru;
     pNewScript->RegisterSelf();

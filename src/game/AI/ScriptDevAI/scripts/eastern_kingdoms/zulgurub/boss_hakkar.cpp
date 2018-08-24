@@ -235,9 +235,7 @@ UnitAI* GetAI_boss_hakkar(Creature* pCreature)
 
 void AddSC_boss_hakkar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_hakkar";
     pNewScript->GetAI = &GetAI_boss_hakkar;
     pNewScript->RegisterSelf();

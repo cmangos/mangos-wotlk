@@ -645,9 +645,7 @@ UnitAI* GetAI_mob_felkael_phoenix_egg(Creature* pCreature)
 
 void AddSC_boss_felblood_kaelthas()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_felblood_kaelthas";
     pNewScript->GetAI = &GetAI_boss_felblood_kaelthas;
     pNewScript->RegisterSelf();

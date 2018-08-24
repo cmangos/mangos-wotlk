@@ -321,9 +321,7 @@ UnitAI* GetAI_npc_void_traveler(Creature* pCreature)
 
 void AddSC_boss_grandmaster_vorpil()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_grandmaster_vorpil";
     pNewScript->GetAI = &GetAI_boss_grandmaster_vorpil;
     pNewScript->RegisterSelf();

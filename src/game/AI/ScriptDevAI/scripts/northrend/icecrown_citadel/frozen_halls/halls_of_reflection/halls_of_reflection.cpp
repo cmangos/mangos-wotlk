@@ -389,9 +389,7 @@ bool AreaTrigger_at_queldelar_start(Player* pPlayer, AreaTriggerEntry const* pAt
 
 void AddSC_halls_of_reflection()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "at_frostmourne_chamber";
     pNewScript->pAreaTrigger = &AreaTrigger_at_frostmourne_chamber;
     pNewScript->RegisterSelf();

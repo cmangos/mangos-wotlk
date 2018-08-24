@@ -490,9 +490,7 @@ UnitAI* GetAI_boss_fathomguard_caribdis(Creature* pCreature)
 
 void AddSC_boss_fathomlord_karathress()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_fathomlord_karathress";
     pNewScript->GetAI = &GetAI_boss_fathomlord_karathress;
     pNewScript->RegisterSelf();

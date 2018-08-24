@@ -457,9 +457,7 @@ bool EffectAuraDummy_spell_aura_dummy_sacrifice_beam(const Aura* pAura, bool bAp
 
 void AddSC_boss_jedoga()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_jedoga";
     pNewScript->GetAI = &GetAI_boss_jedoga;
     pNewScript->RegisterSelf();

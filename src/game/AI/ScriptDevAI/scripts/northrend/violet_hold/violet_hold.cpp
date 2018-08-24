@@ -350,12 +350,11 @@ struct npc_prison_event_controllerAI : public ScriptedAI
                     if (m_pInstance)
                         m_pInstance->GetErekemGuardList(lAddGuids);
 
-                    float fMoveX;
                     for (GuidList::const_iterator itr = lAddGuids.begin(); itr != lAddGuids.end(); ++itr)
                     {
                         if (Creature* pAdd = m_pInstance->instance->GetCreature(*itr))
                         {
-                            fMoveX = (pData->fX - pAdd->GetPositionX()) * .25;
+                            float fMoveX = (pData->fX - pAdd->GetPositionX()) * .25;
                             pAdd->GetMotionMaster()->MovePoint(0, pData->fX - fMoveX, pData->fY, pData->fZ);
                             pAdd->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         }
@@ -600,9 +599,7 @@ bool EffectDummyCreature_npc_teleportation_portal(Unit* /*pCaster*/, uint32 uiSp
 
 void AddSC_violet_hold()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "go_activation_crystal";
     pNewScript->pGOUse = &GOUse_go_activation_crystal;
     pNewScript->RegisterSelf();

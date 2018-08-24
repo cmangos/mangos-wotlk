@@ -322,9 +322,7 @@ UnitAI* GetAI_boss_devourer_of_souls(Creature* pCreature)
 
 void AddSC_boss_devourer_of_souls()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_devourer_of_souls";
     pNewScript->GetAI = &GetAI_boss_devourer_of_souls;
     pNewScript->RegisterSelf();

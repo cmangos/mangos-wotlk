@@ -1004,11 +1004,10 @@ struct npc_lord_illidan_stormrageAI : public Scripted_NoMovementAI
 
         for (uint8 i = 0; i < uiCount; ++i)
         {
-            float fLocX, fLocY, fLocZ, fOrient;
-            fLocX = SpawnLocation[uiLocIndex + i].fLocX;
-            fLocY = SpawnLocation[uiLocIndex + i].fLocY;
-            fLocZ = SpawnLocation[uiLocIndex + i].fLocZ;
-            fOrient = SpawnLocation[uiLocIndex + i].fOrient;
+            float fLocX = SpawnLocation[uiLocIndex + i].fLocX;
+            float fLocY = SpawnLocation[uiLocIndex + i].fLocY;
+            float fLocZ = SpawnLocation[uiLocIndex + i].fLocZ;
+            float fOrient = SpawnLocation[uiLocIndex + i].fOrient;
 
             if (Creature* pSpawn = m_creature->SummonCreature(WavesInfo[m_uiWaveCount].uiCreatureId, fLocX, fLocY, fLocZ, fOrient, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 15000))
             {
@@ -2729,9 +2728,7 @@ UnitAI* GetAI_npc_disobedient_dragonmaw_peon(Creature* pCreature)
 
 void AddSC_shadowmoon_valley()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mob_mature_netherwing_drake";
     pNewScript->GetAI = &GetAI_mob_mature_netherwing_drake;
     pNewScript->RegisterSelf();

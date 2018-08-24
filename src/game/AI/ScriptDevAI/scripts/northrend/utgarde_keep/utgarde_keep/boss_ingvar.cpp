@@ -393,9 +393,7 @@ UnitAI* GetAI_npc_annhylde(Creature* pCreature)
 
 void AddSC_boss_ingvar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ingvar";
     pNewScript->GetAI = &GetAI_boss_ingvar;
     pNewScript->RegisterSelf();

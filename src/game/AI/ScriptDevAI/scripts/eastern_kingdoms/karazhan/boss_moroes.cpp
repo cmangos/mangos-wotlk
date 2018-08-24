@@ -283,9 +283,7 @@ UnitAI* GetAI_boss_moroes(Creature* pCreature)
 
 void AddSC_boss_moroes()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_moroes";
     pNewScript->GetAI = &GetAI_boss_moroes;
     pNewScript->RegisterSelf();

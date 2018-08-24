@@ -884,9 +884,7 @@ bool NpcSpellClick_npc_scalawag_frog(Player* pPlayer, Creature* pClickedCreature
 
 void AddSC_howling_fjord()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_ancient_male_vrykul";
     pNewScript->GetAI = &GetAI_npc_ancient_male_vrykul;
     pNewScript->RegisterSelf();

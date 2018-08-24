@@ -337,9 +337,7 @@ InstanceData* GetInstanceData_instance_pinnacle(Map* pMap)
 
 void AddSC_instance_pinnacle()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_pinnacle";
     pNewScript->GetInstanceData = &GetInstanceData_instance_pinnacle;
     pNewScript->RegisterSelf();

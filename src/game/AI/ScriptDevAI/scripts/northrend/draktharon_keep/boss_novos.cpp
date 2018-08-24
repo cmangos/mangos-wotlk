@@ -406,9 +406,7 @@ bool EffectAuraDummy_npc_crystal_channel_target(const Aura* pAura, bool bApply)
 
 void AddSC_boss_novos()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_novos";
     pNewScript->GetAI = &GetAI_boss_novos;
     pNewScript->RegisterSelf();

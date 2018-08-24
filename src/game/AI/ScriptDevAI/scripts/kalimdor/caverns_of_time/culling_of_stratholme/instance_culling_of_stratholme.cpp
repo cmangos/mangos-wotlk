@@ -747,8 +747,8 @@ void instance_culling_of_stratholme::DoSpawnNextScourgeWave()
         if (!uiEntry)
             continue;
 
-        float fX, fY, fZ, fO;
-        fO = m_aScourgeWavesLocs[m_uiCurrentUndeadPos].m_fO;
+        float fX, fY, fZ;
+        float fO = m_aScourgeWavesLocs[m_uiCurrentUndeadPos].m_fO;
 
         // bosses get exact location
         if (uiScourgeWaveDef[m_uiScourgeWaveCount - 1][i] == SCOURGE_TYPE_BOSS || uiScourgeWaveDef[m_uiScourgeWaveCount - 1][i] == SCOURGE_TYPE_ACOLYTES)
@@ -954,9 +954,7 @@ bool AreaTrigger_at_culling_of_stratholme(Player* pPlayer, AreaTriggerEntry cons
 
 void AddSC_instance_culling_of_stratholme()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_culling_of_stratholme";
     pNewScript->GetInstanceData = &GetInstanceData_instance_culling_of_stratholme;
     pNewScript->RegisterSelf();

@@ -134,9 +134,7 @@ UnitAI* GetAI_boss_pandemonius(Creature* pCreature)
 
 void AddSC_boss_pandemonius()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_pandemonius";
     pNewScript->GetAI = &GetAI_boss_pandemonius;
     pNewScript->RegisterSelf();

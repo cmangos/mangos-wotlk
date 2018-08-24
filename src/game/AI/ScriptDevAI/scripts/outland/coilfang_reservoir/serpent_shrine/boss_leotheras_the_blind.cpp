@@ -330,9 +330,7 @@ UnitAI* GetAI_boss_leotheras_the_blind(Creature* pCreature)
 
 void AddSC_boss_leotheras_the_blind()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_leotheras_the_blind";
     pNewScript->GetAI = &GetAI_boss_leotheras_the_blind;
     pNewScript->RegisterSelf();

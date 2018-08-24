@@ -177,9 +177,7 @@ InstanceData* GetInstanceData_instance_halls_of_lightning(Map* pMap)
 
 void AddSC_instance_halls_of_lightning()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_halls_of_lightning";
     pNewScript->GetInstanceData = &GetInstanceData_instance_halls_of_lightning;
     pNewScript->RegisterSelf();

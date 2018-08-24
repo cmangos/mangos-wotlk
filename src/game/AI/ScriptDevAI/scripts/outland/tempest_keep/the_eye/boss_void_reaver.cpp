@@ -192,9 +192,7 @@ UnitAI* GetAI_boss_void_reaver(Creature* pCreature)
 
 void AddSC_boss_void_reaver()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_void_reaver";
     pNewScript->GetAI = &GetAI_boss_void_reaver;
     pNewScript->RegisterSelf();

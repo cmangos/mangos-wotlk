@@ -423,9 +423,7 @@ InstanceData* GetInstanceData_instance_halls_of_stone(Map* pMap)
 
 void AddSC_instance_halls_of_stone()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_halls_of_stone";
     pNewScript->GetInstanceData = &GetInstanceData_instance_halls_of_stone;
     pNewScript->RegisterSelf();

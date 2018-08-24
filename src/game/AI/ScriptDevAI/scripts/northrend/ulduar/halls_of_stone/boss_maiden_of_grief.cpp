@@ -165,9 +165,7 @@ UnitAI* GetAI_boss_maiden_of_grief(Creature* pCreature)
 
 void AddSC_boss_maiden_of_grief()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_maiden_of_grief";
     pNewScript->GetAI = &GetAI_boss_maiden_of_grief;
     pNewScript->RegisterSelf();

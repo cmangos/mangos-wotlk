@@ -272,9 +272,7 @@ bool EffectDummyCreature_npc_decaying_ghoul(Unit* pCaster, uint32 uiSpellId, Spe
 
 void AddSC_zuldrak()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_gurgthock";
     pNewScript->GetAI = &GetAI_npc_gurgthock;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_gurgthock;

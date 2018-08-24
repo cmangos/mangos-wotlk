@@ -209,9 +209,7 @@ UnitAI* GetAI_boss_najentus(Creature* pCreature)
 
 void AddSC_boss_najentus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_najentus";
     pNewScript->GetAI = &GetAI_boss_najentus;
     pNewScript->RegisterSelf();

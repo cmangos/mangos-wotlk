@@ -436,7 +436,6 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
     DEBUG_LOG("Received opcode CMSG_PETITION_SIGN");    // ok
     // recv_data.hexlike();
 
-    Field* fields;
     ObjectGuid petitionGuid;
     uint8 unk;
     recv_data >> petitionGuid;                              // petition guid
@@ -456,7 +455,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket& recv_data)
         return;
     }
 
-    fields = result->Fetch();
+    Field* fields = result->Fetch();
     uint32 ownerLowGuid = fields[0].GetUInt32();
     ObjectGuid ownerGuid = ObjectGuid(HIGHGUID_PLAYER, ownerLowGuid);
     uint8 signs = fields[1].GetUInt8();

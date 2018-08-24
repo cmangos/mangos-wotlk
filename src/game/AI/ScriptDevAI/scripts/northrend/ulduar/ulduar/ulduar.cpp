@@ -593,9 +593,7 @@ bool GossipSelect_npc_ulduar_keeper(Player* pPlayer, Creature* pCreature, uint32
 
 void AddSC_ulduar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "go_ulduar_teleporter";
     pNewScript->pGossipHelloGO = &GossipHello_go_ulduar_teleporter;
     pNewScript->pGossipSelectGO = &GossipSelect_go_ulduar_teleporter;

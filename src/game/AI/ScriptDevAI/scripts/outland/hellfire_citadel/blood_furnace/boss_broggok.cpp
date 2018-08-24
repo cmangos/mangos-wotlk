@@ -146,9 +146,7 @@ UnitAI* GetAI_mob_broggok_poisoncloud(Creature* pCreature)
 
 void AddSC_boss_broggok()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_broggok";
     pNewScript->GetAI = &GetAI_boss_broggok;
     pNewScript->RegisterSelf();

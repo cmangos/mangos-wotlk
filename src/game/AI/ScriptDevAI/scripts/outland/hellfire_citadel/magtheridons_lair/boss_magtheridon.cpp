@@ -541,9 +541,7 @@ UnitAI* GetAI_mob_abyssalAI(Creature* pCreature)
 
 void AddSC_boss_magtheridon()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_magtheridon";
     pNewScript->GetAI = &GetAI_boss_magtheridon;
     pNewScript->RegisterSelf();

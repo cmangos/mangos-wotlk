@@ -178,9 +178,7 @@ UnitAI* GetAI_boss_krikthir(Creature* pCreature)
 
 void AddSC_boss_krikthir()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_krikthir";
     pNewScript->GetAI = &GetAI_boss_krikthir;
     pNewScript->RegisterSelf();

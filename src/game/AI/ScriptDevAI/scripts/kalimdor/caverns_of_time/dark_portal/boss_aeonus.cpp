@@ -151,9 +151,7 @@ UnitAI* GetAI_boss_aeonus(Creature* pCreature)
 
 void AddSC_boss_aeonus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_aeonus";
     pNewScript->GetAI = &GetAI_boss_aeonus;
     pNewScript->RegisterSelf();

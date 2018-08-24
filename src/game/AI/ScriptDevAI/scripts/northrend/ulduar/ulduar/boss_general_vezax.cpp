@@ -412,9 +412,7 @@ bool ProcessEventId_event_spell_saronite_barrier(uint32 /*uiEventId*/, Object* p
 
 void AddSC_boss_general_vezax()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_general_vezax";
     pNewScript->GetAI = &GetAI_boss_general_vezax;
     pNewScript->RegisterSelf();

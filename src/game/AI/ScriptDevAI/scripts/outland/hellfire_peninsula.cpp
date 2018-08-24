@@ -1482,9 +1482,7 @@ UnitAI* GetAI_nazgrel(Creature* pCreature)
 
 void AddSC_hellfire_peninsula()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_aeranas";
     pNewScript->GetAI = &GetAI_npc_aeranas;
     pNewScript->RegisterSelf();

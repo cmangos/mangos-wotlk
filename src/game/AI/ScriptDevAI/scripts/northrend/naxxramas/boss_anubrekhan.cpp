@@ -231,9 +231,7 @@ UnitAI* GetAI_boss_anubrekhan(Creature* pCreature)
 
 void AddSC_boss_anubrekhan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_anubrekhan";
     pNewScript->GetAI = &GetAI_boss_anubrekhan;
     pNewScript->RegisterSelf();

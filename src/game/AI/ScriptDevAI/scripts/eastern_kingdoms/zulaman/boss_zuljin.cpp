@@ -519,9 +519,7 @@ UnitAI* GetAI_npc_feather_vortex(Creature* pCreature)
 
 void AddSC_boss_zuljin()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_zuljin";
     pNewScript->GetAI = &GetAI_boss_zuljin;
     pNewScript->RegisterSelf();

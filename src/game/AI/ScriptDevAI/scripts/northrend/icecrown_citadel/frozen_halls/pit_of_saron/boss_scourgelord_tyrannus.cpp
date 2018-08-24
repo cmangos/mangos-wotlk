@@ -318,9 +318,7 @@ UnitAI* GetAI_boss_rimefang_pos(Creature* pCreature)
 
 void AddSC_boss_tyrannus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_tyrannus";
     pNewScript->GetAI = &GetAI_boss_tyrannus;
     pNewScript->RegisterSelf();

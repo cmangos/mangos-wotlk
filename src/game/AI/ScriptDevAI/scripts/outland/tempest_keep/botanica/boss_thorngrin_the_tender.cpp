@@ -137,9 +137,7 @@ UnitAI* GetAI_boss_thorngrin(Creature* pCreature)
 
 void AddSC_boss_thorngrin()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_thorngrin";
     pNewScript->GetAI = &GetAI_boss_thorngrin;
     pNewScript->RegisterSelf();

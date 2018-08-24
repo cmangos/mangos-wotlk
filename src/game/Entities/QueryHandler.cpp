@@ -207,13 +207,9 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
     const GameObjectInfo* info = ObjectMgr::GetGameObjectInfo(entryID);
     if (info)
     {
-        std::string Name;
-        std::string IconName;
-        std::string CastBarCaption;
-
-        Name = info->name;
-        IconName = info->IconName;
-        CastBarCaption = info->castBarCaption;
+        std::string Name = info->name;
+        std::string IconName = info->IconName;
+        std::string CastBarCaption = info->castBarCaption;
 
         int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)

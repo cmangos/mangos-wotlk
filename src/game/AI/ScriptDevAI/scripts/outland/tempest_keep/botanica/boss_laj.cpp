@@ -218,9 +218,7 @@ UnitAI* GetAI_boss_laj(Creature* pCreature)
 
 void AddSC_boss_laj()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_laj";
     pNewScript->GetAI = &GetAI_boss_laj;
     pNewScript->RegisterSelf();

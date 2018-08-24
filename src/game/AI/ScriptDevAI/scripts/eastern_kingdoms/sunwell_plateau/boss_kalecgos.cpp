@@ -607,9 +607,7 @@ bool EffectDummyCreature_spell_spectral_realm_notify(Unit* pCaster, uint32 uiSpe
 
 void AddSC_boss_kalecgos()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_kalecgos";
     pNewScript->GetAI = &GetAI_boss_kalecgos;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_spectral_realm_notify;

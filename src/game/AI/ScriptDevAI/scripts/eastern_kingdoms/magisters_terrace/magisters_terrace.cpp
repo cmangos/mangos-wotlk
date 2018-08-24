@@ -118,9 +118,7 @@ bool ProcessEventId_event_go_scrying_orb(uint32 /*uiEventId*/, Object* pSource, 
 
 void AddSC_magisters_terrace()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_kalecgos";
     pNewScript->GetAI = &GetAI_npc_kalecgos;
     pNewScript->RegisterSelf();

@@ -240,9 +240,7 @@ bool GOUse_go_strange_gong(Player* /*pPlayer*/, GameObject* pGo)
 
 void AddSC_zulaman()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_forest_frog";
     pNewScript->GetAI = &GetAI_npc_forest_frog;
     pNewScript->RegisterSelf();

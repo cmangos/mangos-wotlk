@@ -150,9 +150,7 @@ UnitAI* GetAI_boss_temporus(Creature* pCreature)
 
 void AddSC_boss_temporus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_temporus";
     pNewScript->GetAI = &GetAI_boss_temporus;
     pNewScript->RegisterSelf();

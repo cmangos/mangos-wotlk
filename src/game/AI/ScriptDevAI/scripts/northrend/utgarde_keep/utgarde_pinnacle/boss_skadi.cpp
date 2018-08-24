@@ -528,9 +528,7 @@ bool AreaTrigger_at_skadi(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 
 void AddSC_boss_skadi()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_skadi";
     pNewScript->GetAI = &GetAI_boss_skadi;
     pNewScript->RegisterSelf();

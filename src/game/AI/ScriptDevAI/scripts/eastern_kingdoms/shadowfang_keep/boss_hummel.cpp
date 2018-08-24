@@ -259,9 +259,7 @@ bool QuestRewarded_npc_apothecary_hummel(Player* pPlayer, Creature* pCreature, Q
 
 void AddSC_boss_hummel()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_valentine_boss_manager";
     pNewScript->GetAI = GetAI_npc_valentine_boss_manager;
     pNewScript->RegisterSelf();

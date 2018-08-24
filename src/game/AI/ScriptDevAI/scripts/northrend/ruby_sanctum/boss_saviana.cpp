@@ -213,9 +213,7 @@ UnitAI* GetAI_boss_saviana(Creature* pCreature)
 
 void AddSC_boss_saviana()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_saviana";
     pNewScript->GetAI = &GetAI_boss_saviana;
     pNewScript->RegisterSelf();

@@ -171,9 +171,7 @@ bool QuestRewarded_npc_lady_sylvanas_windrunner(Player* pPlayer, Creature* pCrea
 
 void AddSC_undercity()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_lady_sylvanas_windrunner";
     pNewScript->GetAI = &GetAI_npc_lady_sylvanas_windrunner;
     pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_lady_sylvanas_windrunner;

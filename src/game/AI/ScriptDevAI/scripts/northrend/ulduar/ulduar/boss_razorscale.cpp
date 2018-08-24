@@ -911,9 +911,7 @@ bool ProcessEventId_event_spell_harpoon_shot(uint32 /*uiEventId*/, Object* pSour
 
 void AddSC_boss_razorscale()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_razorscale";
     pNewScript->GetAI = GetAI_boss_razorscale;
     pNewScript->RegisterSelf();

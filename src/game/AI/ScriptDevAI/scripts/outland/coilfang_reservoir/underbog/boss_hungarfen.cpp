@@ -178,9 +178,7 @@ UnitAI* GetAI_mob_underbog_mushroom(Creature* pCreature)
 
 void AddSC_boss_hungarfen()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_hungarfen";
     pNewScript->GetAI = &GetAI_boss_hungarfen;
     pNewScript->RegisterSelf();

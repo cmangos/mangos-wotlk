@@ -241,9 +241,7 @@ UnitAI* GetAI_boss_nadox(Creature* pCreature)
 
 void AddSC_boss_nadox()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_nadox";
     pNewScript->GetAI = &GetAI_boss_nadox;
     pNewScript->RegisterSelf();

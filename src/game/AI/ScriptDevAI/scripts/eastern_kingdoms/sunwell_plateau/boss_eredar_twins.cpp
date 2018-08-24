@@ -559,9 +559,7 @@ UnitAI* GetAI_npc_shadow_image(Creature* pCreature)
 
 void AddSC_boss_eredar_twins()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_alythess";
     pNewScript->GetAI = &GetAI_boss_alythess;
     pNewScript->RegisterSelf();

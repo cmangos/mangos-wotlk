@@ -534,9 +534,7 @@ UnitAI* GetAI_npc_xt_toy_pile(Creature* pCreature)
 
 void AddSC_boss_xt_002()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_xt_002";
     pNewScript->GetAI = GetAI_boss_xt_002;
     pNewScript->RegisterSelf();

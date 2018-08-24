@@ -390,9 +390,7 @@ bool EffectDummyCreature_npc_ice_spear_bunny(Unit* pCaster, uint32 uiSpellId, Sp
 
 void AddSC_boss_ahune()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ahune";
     pNewScript->GetAI = &GetAI_boss_ahune;
     pNewScript->RegisterSelf();

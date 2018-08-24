@@ -567,9 +567,7 @@ UnitAI* GetAI_boss_krosh_firehand(Creature* pCreature)
 
 void AddSC_boss_high_king_maulgar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_high_king_maulgar";
     pNewScript->GetAI = &GetAI_boss_high_king_maulgar;
     pNewScript->RegisterSelf();

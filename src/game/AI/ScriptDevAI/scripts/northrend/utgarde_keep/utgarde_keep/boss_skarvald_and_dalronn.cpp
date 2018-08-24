@@ -320,9 +320,7 @@ UnitAI* GetAI_boss_dalronn(Creature* pCreature)
 
 void AddSC_boss_skarvald_and_dalronn()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_skarvald";
     pNewScript->GetAI = &GetAI_boss_skarvald;
     pNewScript->RegisterSelf();

@@ -632,7 +632,6 @@ uint32 GameEventMgr::Update(ActiveEvents const* activeAtShutdown /*= nullptr*/)
     time_t currenttime = time(nullptr);
 
     uint32 nextEventDelay = max_ge_check_delay;             // 1 day
-    uint32 calcDelay;
     for (uint16 itr = 1; itr < mGameEvent.size(); ++itr)
     {
         if (mGameEvent[itr].occurence == 0 || mGameEvent[itr].eventGroup)
@@ -670,7 +669,7 @@ uint32 GameEventMgr::Update(ActiveEvents const* activeAtShutdown /*= nullptr*/)
                 }
             }
         }
-        calcDelay = NextCheck(itr);
+        uint32 calcDelay = NextCheck(itr);
         if (calcDelay < nextEventDelay)
             nextEventDelay = calcDelay;
     }
@@ -951,8 +950,7 @@ void GameEventMgr::UpdateCreatureData(int16 event_id, bool activate)
 
 void GameEventMgr::UpdateEventQuests(uint16 event_id, bool Activate)
 {
-    QuestList::iterator itr;
-    for (itr = mGameEventQuests[event_id].begin(); itr != mGameEventQuests[event_id].end(); ++itr)
+    for (QuestList::iterator itr = mGameEventQuests[event_id].begin(); itr != mGameEventQuests[event_id].end(); ++itr)
     {
         const Quest* pQuest = sObjectMgr.GetQuestTemplate(*itr);
 

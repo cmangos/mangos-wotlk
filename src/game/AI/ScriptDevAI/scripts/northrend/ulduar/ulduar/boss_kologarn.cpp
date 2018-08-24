@@ -539,9 +539,7 @@ UnitAI* GetAI_npc_rubble_stalker(Creature* pCreature)
 
 void AddSC_boss_kologarn()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_kologarn";
     pNewScript->GetAI = GetAI_boss_kologarn;
     pNewScript->RegisterSelf();

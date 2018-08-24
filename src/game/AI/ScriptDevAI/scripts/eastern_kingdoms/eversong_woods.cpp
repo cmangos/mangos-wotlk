@@ -554,9 +554,7 @@ UnitAI* GetAI_npc_infused_crystalAI(Creature* pCreature)
 
 void AddSC_eversong_woods()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_kelerun_bloodmourn";
     pNewScript->GetAI = &GetAI_npc_kelerun_bloodmourn;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_kelerun_bloodmourn;

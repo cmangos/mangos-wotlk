@@ -407,9 +407,7 @@ UnitAI* GetAI_npc_living_mojo(Creature* pCreature)
 
 void AddSC_boss_colossus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_drakkari_colossus";
     pNewScript->GetAI = &GetAI_boss_drakkari_colossus;
     pNewScript->RegisterSelf();

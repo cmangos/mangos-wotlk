@@ -1330,9 +1330,7 @@ UnitAI* GetAI_npc_fire_cyclone(Creature* pCreature)
 
 void AddSC_boss_sartharion()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_sartharion";
     pNewScript->GetAI = &GetAI_boss_sartharion;
     pNewScript->RegisterSelf();

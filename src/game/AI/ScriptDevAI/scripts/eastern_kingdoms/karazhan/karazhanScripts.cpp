@@ -504,9 +504,7 @@ bool ProcessEventId_event_spell_medivh_journal(uint32 /*uiEventId*/, Object* pSo
 
 void AddSC_karazhan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_barnes";
     pNewScript->GetAI = &GetAI_npc_barnesAI;
     pNewScript->pGossipHello = &GossipHello_npc_barnes;

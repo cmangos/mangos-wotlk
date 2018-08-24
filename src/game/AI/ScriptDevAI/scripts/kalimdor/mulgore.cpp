@@ -169,9 +169,7 @@ UnitAI* GetAI_npc_kyle_the_frenzied(Creature* pCreature)
 
 void AddSC_mulgore()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_kyle_the_frenzied";
     pNewScript->GetAI = &GetAI_npc_kyle_the_frenzied;
     pNewScript->RegisterSelf();

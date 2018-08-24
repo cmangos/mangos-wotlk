@@ -501,9 +501,7 @@ UnitAI* GetAI_npc_demonic_vapor(Creature* pCreature)
 
 void AddSC_boss_felmyst()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_felmyst";
     pNewScript->GetAI = &GetAI_boss_felmyst;
     pNewScript->RegisterSelf();

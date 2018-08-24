@@ -431,9 +431,7 @@ bool AreaTrigger_at_dark_portal(Player* pPlayer, AreaTriggerEntry const* pAt)
 
 void AddSC_instance_dark_portal()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_dark_portal";
     pNewScript->GetInstanceData = &GetInstanceData_instance_dark_portal;
     pNewScript->RegisterSelf();

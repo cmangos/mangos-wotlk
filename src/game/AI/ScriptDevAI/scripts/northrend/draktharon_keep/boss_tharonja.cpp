@@ -284,9 +284,7 @@ UnitAI* GetAI_boss_tharonja(Creature* pCreature)
 
 void AddSC_boss_tharonja()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_tharonja";
     pNewScript->GetAI = &GetAI_boss_tharonja;
     pNewScript->RegisterSelf();

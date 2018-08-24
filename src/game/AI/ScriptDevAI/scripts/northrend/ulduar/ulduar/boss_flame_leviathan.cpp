@@ -731,9 +731,7 @@ UnitAI* GetAI_npc_mimiron_inferno(Creature* pCreature)
 
 void AddSC_boss_flame_leviathan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_flame_leviathan";
     pNewScript->GetAI = GetAI_boss_flame_leviathan;
     pNewScript->RegisterSelf();

@@ -139,9 +139,7 @@ InstanceData* GetInstanceData_instance_eye_of_eternity(Map* pMap)
 
 void AddSC_instance_eye_of_eternity()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_eye_of_eternity";
     pNewScript->GetInstanceData = &GetInstanceData_instance_eye_of_eternity;
     pNewScript->RegisterSelf();

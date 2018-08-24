@@ -781,9 +781,7 @@ UnitAI* GetAI_npc_searing_gaze(Creature* pCreature)
 
 void AddSC_halls_of_stone()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_brann_hos";
     pNewScript->GetAI = &GetAI_npc_brann_hos;
     pNewScript->pGossipHello = &GossipHello_npc_brann_hos;

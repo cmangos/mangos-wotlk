@@ -225,9 +225,7 @@ UnitAI* GetAI_boss_shahraz(Creature* pCreature)
 
 void AddSC_boss_mother_shahraz()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_mother_shahraz";
     pNewScript->GetAI = &GetAI_boss_shahraz;
     pNewScript->RegisterSelf();

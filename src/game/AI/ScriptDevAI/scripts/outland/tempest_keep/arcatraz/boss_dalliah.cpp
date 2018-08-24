@@ -207,9 +207,7 @@ UnitAI* GetAI_boss_dalliah(Creature* pCreature)
 
 void AddSC_boss_dalliah()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_dalliah";
     pNewScript->GetAI = &GetAI_boss_dalliah;
     pNewScript->RegisterSelf();

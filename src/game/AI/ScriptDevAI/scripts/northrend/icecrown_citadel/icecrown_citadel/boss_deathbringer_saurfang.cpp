@@ -365,9 +365,7 @@ UnitAI* GetAI_boss_deathbringer_saurfang(Creature* pCreature)
 
 void AddSC_boss_deathbringer_saurfang()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_deathbringer_saurfang";
     pNewScript->GetAI = &GetAI_boss_deathbringer_saurfang;
     pNewScript->RegisterSelf();

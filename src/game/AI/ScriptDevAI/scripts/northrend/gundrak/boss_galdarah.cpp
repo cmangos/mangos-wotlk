@@ -262,9 +262,7 @@ UnitAI* GetAI_boss_galdarah(Creature* pCreature)
 
 void AddSC_boss_galdarah()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_galdarah";
     pNewScript->GetAI = &GetAI_boss_galdarah;
     pNewScript->RegisterSelf();

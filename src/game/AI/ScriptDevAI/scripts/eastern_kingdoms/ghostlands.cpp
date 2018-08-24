@@ -155,9 +155,7 @@ bool QuestAccept_npc_ranger_lilatha(Player* pPlayer, Creature* pCreature, const 
 
 void AddSC_ghostlands()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_ranger_lilatha";
     pNewScript->GetAI = &GetAI_npc_ranger_lilathaAI;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_ranger_lilatha;

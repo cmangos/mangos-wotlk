@@ -703,9 +703,7 @@ UnitAI* GetAI_mob_ashtongue_sorcerer(Creature* pCreature)
 
 void AddSC_boss_shade_of_akama()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_akama_shade";
     pNewScript->GetAI = &GetAI_npc_akama_shade;
     pNewScript->pGossipHello = &GossipHello_npc_akama;

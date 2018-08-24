@@ -296,9 +296,7 @@ InstanceData* GetInstanceData_instance_black_temple(Map* pMap)
 
 void AddSC_instance_black_temple()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_black_temple";
     pNewScript->GetInstanceData = &GetInstanceData_instance_black_temple;
     pNewScript->RegisterSelf();

@@ -357,9 +357,7 @@ bool ProcessEventId_event_go_barrel_old_hillsbrad(uint32 /*uiEventId*/, Object* 
 
 void AddSC_instance_old_hillsbrad()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_old_hillsbrad";
     pNewScript->GetInstanceData = &GetInstanceData_instance_old_hillsbrad;
     pNewScript->RegisterSelf();

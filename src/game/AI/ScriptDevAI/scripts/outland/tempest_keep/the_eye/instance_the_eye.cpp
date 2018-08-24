@@ -130,9 +130,7 @@ InstanceData* GetInstanceData_instance_the_eye(Map* pMap)
 
 void AddSC_instance_the_eye()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_the_eye";
     pNewScript->GetInstanceData = &GetInstanceData_instance_the_eye;
     pNewScript->RegisterSelf();

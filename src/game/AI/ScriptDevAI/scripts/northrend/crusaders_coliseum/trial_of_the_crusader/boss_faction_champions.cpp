@@ -1403,9 +1403,7 @@ UnitAI* GetAI_boss_crusader_rogue(Creature* pCreature)
 
 void AddSC_boss_faction_champions()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_crusader_death_knight";
     pNewScript->GetAI = &GetAI_boss_crusader_death_knight;
     pNewScript->RegisterSelf();

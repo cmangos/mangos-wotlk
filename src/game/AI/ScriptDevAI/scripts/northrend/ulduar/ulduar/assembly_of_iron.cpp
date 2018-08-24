@@ -759,9 +759,7 @@ UnitAI* GetAI_boss_steelbreaker(Creature* pCreature)
 
 void AddSC_boss_assembly_of_iron()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_brundir";
     pNewScript->GetAI = GetAI_boss_brundir;
     pNewScript->RegisterSelf();

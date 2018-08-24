@@ -986,9 +986,7 @@ bool GOUse_go_omen_cluster(Player* /*pPlayer*/, GameObject* pGo)
 
 void AddSC_moonglade()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_clintar_dw_spirit";
     pNewScript->GetAI = &GetAI_npc_clintar_dw_spirit;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_clintar_dw_spirit;

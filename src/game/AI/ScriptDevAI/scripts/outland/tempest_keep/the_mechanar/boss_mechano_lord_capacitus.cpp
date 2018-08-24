@@ -223,9 +223,7 @@ UnitAI* GetAI_boss_mechano_lord_capacitus(Creature* creature)
 
 void AddSC_boss_mechano_lord_capacitus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_mechano_lord_capacitus";
     pNewScript->GetAI = &GetAI_boss_mechano_lord_capacitus;
     pNewScript->RegisterSelf();

@@ -229,9 +229,7 @@ InstanceData* GetInstanceData_instance_magisters_terrace(Map* pMap)
 
 void AddSC_instance_magisters_terrace()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_magisters_terrace";
     pNewScript->GetInstanceData = &GetInstanceData_instance_magisters_terrace;
     pNewScript->RegisterSelf();

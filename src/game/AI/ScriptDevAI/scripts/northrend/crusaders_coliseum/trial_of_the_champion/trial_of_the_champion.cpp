@@ -95,9 +95,7 @@ bool GossipSelect_npc_toc_herald(Player* pPlayer, Creature* pCreature, uint32 /*
 
 void AddSC_trial_of_the_champion()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_toc_herald";
     pNewScript->pGossipHello = &GossipHello_npc_toc_herald;
     pNewScript->pGossipSelect = &GossipSelect_npc_toc_herald;

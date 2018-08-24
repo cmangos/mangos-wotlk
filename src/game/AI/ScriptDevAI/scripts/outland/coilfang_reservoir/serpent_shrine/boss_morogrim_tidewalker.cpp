@@ -280,9 +280,7 @@ UnitAI* GetAI_mob_water_globule(Creature* pCreature)
 
 void AddSC_boss_morogrim_tidewalker()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_morogrim_tidewalker";
     pNewScript->GetAI = &GetAI_boss_morogrim_tidewalker;
     pNewScript->RegisterSelf();

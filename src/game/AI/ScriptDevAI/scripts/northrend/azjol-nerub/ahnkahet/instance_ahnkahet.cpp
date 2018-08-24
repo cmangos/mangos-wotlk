@@ -422,9 +422,7 @@ InstanceData* GetInstanceData_instance_ahnkahet(Map* pMap)
 
 void AddSC_instance_ahnkahet()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_ahnkahet";
     pNewScript->GetInstanceData = &GetInstanceData_instance_ahnkahet;
     pNewScript->RegisterSelf();

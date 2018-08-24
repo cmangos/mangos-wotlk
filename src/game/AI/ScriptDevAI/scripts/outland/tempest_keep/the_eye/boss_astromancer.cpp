@@ -472,9 +472,7 @@ UnitAI* GetAI_boss_high_astromancer_solarian(Creature* pCreature)
 
 void AddSC_boss_high_astromancer_solarian()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_high_astromancer_solarian";
     pNewScript->GetAI = &GetAI_boss_high_astromancer_solarian;
     pNewScript->RegisterSelf();

@@ -426,9 +426,7 @@ UnitAI* GetAI_boss_vazruden(Creature* pCreature)
 
 void AddSC_boss_nazan_and_vazruden()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_vazruden";
     pNewScript->GetAI = &GetAI_boss_vazruden;
     pNewScript->RegisterSelf();

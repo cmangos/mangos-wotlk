@@ -157,9 +157,7 @@ UnitAI* GetAI_boss_thespiaAI(Creature* pCreature)
 
 void AddSC_boss_hydromancer_thespia()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_hydromancer_thespia";
     pNewScript->GetAI = &GetAI_boss_thespiaAI;
     pNewScript->RegisterSelf();

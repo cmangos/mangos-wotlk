@@ -442,9 +442,7 @@ UnitAI* GetAI_boss_head_of_horseman(Creature* pCreature)
 
 void AddSC_boss_headless_horseman()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_headless_horseman";
     pNewScript->GetAI = GetAI_boss_headless_horseman;
     pNewScript->RegisterSelf();

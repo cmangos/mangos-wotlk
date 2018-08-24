@@ -2329,9 +2329,7 @@ UnitAI* GetAI_npc_evergrove_druidAI(Creature* creature)
 
 void AddSC_blades_edge_mountains()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mobs_nether_drake";
     pNewScript->GetAI = &GetAI_mobs_nether_drake;
     pNewScript->RegisterSelf();

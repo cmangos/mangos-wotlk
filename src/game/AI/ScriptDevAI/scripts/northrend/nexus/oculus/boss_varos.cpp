@@ -358,9 +358,7 @@ UnitAI* GetAI_npc_centrifuge_core(Creature* pCreature)
 
 void AddSC_boss_varos()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_varos";
     pNewScript->GetAI = &GetAI_boss_varos;
     pNewScript->RegisterSelf();

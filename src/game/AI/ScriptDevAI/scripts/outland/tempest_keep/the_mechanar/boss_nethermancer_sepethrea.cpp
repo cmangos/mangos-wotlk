@@ -237,9 +237,7 @@ UnitAI* GetAI_npc_raging_flames(Creature* pCreature)
 
 void AddSC_boss_nethermancer_sepethrea()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_nethermancer_sepethrea";
     pNewScript->GetAI = &GetAI_boss_nethermancer_sepethrea;
     pNewScript->RegisterSelf();

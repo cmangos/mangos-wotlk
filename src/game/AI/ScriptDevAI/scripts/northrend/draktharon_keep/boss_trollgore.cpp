@@ -236,9 +236,7 @@ UnitAI* GetAI_boss_trollgore(Creature* pCreature)
 
 void AddSC_boss_trollgore()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_trollgore";
     pNewScript->GetAI = &GetAI_boss_trollgore;
     pNewScript->RegisterSelf();

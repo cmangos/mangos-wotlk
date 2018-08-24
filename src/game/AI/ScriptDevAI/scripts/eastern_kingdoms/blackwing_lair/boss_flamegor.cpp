@@ -136,9 +136,7 @@ UnitAI* GetAI_boss_flamegor(Creature* pCreature)
 
 void AddSC_boss_flamegor()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_flamegor";
     pNewScript->GetAI = &GetAI_boss_flamegor;
     pNewScript->RegisterSelf();

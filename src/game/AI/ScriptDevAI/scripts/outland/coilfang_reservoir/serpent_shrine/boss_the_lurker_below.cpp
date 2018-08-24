@@ -299,9 +299,7 @@ bool GOUse_go_strange_pool(Player* pPlayer, GameObject* pGo)
 
 void AddSC_boss_the_lurker_below()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_the_lurker_below";
     pNewScript->GetAI = &GetAI_boss_the_lurker_below;
     pNewScript->RegisterSelf();

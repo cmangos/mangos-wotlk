@@ -125,9 +125,7 @@ UnitAI* GetAI_boss_gehennas(Creature* pCreature)
 
 void AddSC_boss_gehennas()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_gehennas";
     pNewScript->GetAI = &GetAI_boss_gehennas;
     pNewScript->RegisterSelf();

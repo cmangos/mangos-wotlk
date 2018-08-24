@@ -278,12 +278,11 @@ void AuctionHouseMgr::LoadAuctionItems()
 
     uint32 count = 0;
 
-    Field* fields;
     do
     {
         bar.step();
 
-        fields = result->Fetch();
+        Field* fields = result->Fetch();
         uint32 item_guid        = fields[2].GetUInt32();
         uint32 item_template    = fields[3].GetUInt32();
 

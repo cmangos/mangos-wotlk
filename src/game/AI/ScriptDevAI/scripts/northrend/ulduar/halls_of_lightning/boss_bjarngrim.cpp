@@ -379,9 +379,7 @@ UnitAI* GetAI_mob_stormforged_lieutenant(Creature* pCreature)
 
 void AddSC_boss_bjarngrim()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_bjarngrim";
     pNewScript->GetAI = &GetAI_boss_bjarngrim;
     pNewScript->RegisterSelf();

@@ -571,9 +571,7 @@ UnitAI* GetAI_boss_halion_twilight(Creature* pCreature)
 
 void AddSC_boss_halion()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_halion_real";
     pNewScript->GetAI = &GetAI_boss_halion_real;
     pNewScript->RegisterSelf();

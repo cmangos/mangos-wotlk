@@ -411,9 +411,7 @@ UnitAI* GetAI_mob_omrogg_heads(Creature* pCreature)
 
 void AddSC_boss_warbringer_omrogg()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_warbringer_omrogg";
     pNewScript->GetAI = &GetAI_boss_warbringer_omrogg;
     pNewScript->RegisterSelf();

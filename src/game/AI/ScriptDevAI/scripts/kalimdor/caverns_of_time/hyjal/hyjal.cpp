@@ -221,9 +221,7 @@ bool GossipSelect_npc_tyrande_whisperwind(Player* pPlayer, Creature* /*pCreature
 
 void AddSC_hyjal()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_jaina_proudmoore";
     pNewScript->GetAI = &GetAI_npc_jaina_proudmoore;
     pNewScript->pGossipHello = &GossipHello_npc_jaina_proudmoore;

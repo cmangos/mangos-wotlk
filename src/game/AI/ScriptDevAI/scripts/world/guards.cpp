@@ -336,9 +336,7 @@ bool EffectDummyCreature_npc_city_guard(Unit* pCaster, uint32 uiSpellId, SpellEf
 
 void AddSC_guards()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "guard_azuremyst";
     pNewScript->GetAI = &GetAI_guard_azuremyst;
     pNewScript->RegisterSelf();

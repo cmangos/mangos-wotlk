@@ -78,9 +78,7 @@ UnitAI* GetAI_npc_converted_sentry(Creature* pCreature)
 
 void AddSC_isle_of_queldanas()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_converted_sentry";
     pNewScript->GetAI = &GetAI_npc_converted_sentry;
     pNewScript->RegisterSelf();

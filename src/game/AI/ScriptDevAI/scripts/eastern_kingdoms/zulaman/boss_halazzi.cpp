@@ -376,9 +376,7 @@ UnitAI* GetAI_boss_spirit_lynx(Creature* pCreature)
 
 void AddSC_boss_halazzi()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_halazzi";
     pNewScript->GetAI = &GetAI_boss_halazzi;
     pNewScript->RegisterSelf();

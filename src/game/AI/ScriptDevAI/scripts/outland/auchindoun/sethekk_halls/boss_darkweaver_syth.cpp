@@ -222,9 +222,7 @@ UnitAI* GetAI_boss_darkweaver_syth(Creature* pCreature)
 
 void AddSC_boss_darkweaver_syth()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_darkweaver_syth";
     pNewScript->GetAI = &GetAI_boss_darkweaver_syth;
     pNewScript->RegisterSelf();

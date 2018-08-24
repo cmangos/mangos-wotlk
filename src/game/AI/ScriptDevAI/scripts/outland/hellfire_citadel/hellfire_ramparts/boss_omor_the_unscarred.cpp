@@ -210,9 +210,7 @@ UnitAI* GetAI_boss_omor_the_unscarredAI(Creature* pCreature)
 
 void AddSC_boss_omor_the_unscarred()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_omor_the_unscarred";
     pNewScript->GetAI = &GetAI_boss_omor_the_unscarredAI;
     pNewScript->RegisterSelf();

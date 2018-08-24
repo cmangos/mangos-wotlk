@@ -269,9 +269,7 @@ UnitAI* GetAI_mob_nether_wraith(Creature* pCreature)
 
 void AddSC_boss_pathaleon_the_calculator()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_pathaleon_the_calculator";
     pNewScript->GetAI = &GetAI_boss_pathaleon_the_calculator;
     pNewScript->RegisterSelf();

@@ -378,9 +378,7 @@ UnitAI* GetAI_npc_impale_target(Creature* pCreature)
 
 void AddSC_boss_anubarak()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_anubarak";
     pNewScript->GetAI = &GetAI_boss_anubarak;
     pNewScript->RegisterSelf();

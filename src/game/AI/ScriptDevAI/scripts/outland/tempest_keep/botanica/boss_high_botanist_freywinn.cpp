@@ -197,9 +197,7 @@ UnitAI* GetAI_boss_high_botanist_freywinn(Creature* pCreature)
 
 void AddSC_boss_high_botanist_freywinn()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_high_botanist_freywinn";
     pNewScript->GetAI = &GetAI_boss_high_botanist_freywinn;
     pNewScript->RegisterSelf();

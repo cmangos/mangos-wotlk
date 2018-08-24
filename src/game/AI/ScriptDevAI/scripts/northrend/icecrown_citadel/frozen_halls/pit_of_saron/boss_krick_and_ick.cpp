@@ -400,9 +400,7 @@ UnitAI* GetAI_npc_exploding_orb(Creature* pCreature)
 
 void AddSC_boss_krick_and_ick()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ick";
     pNewScript->GetAI = &GetAI_boss_ick;
     pNewScript->RegisterSelf();

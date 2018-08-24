@@ -457,9 +457,7 @@ UnitAI* GetAI_npc_black_knight_gryphon(Creature* pCreature)
 
 void AddSC_boss_black_knight()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_black_knight";
     pNewScript->GetAI = &GetAI_boss_black_knight;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_black_knight_res;

@@ -373,9 +373,7 @@ UnitAI* GetAI_mob_spark_of_ionar(Creature* pCreature)
 
 void AddSC_boss_ionar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ionar";
     pNewScript->GetAI = &GetAI_boss_ionar;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_boss_ionar;

@@ -195,9 +195,7 @@ bool NpcSpellClick_npc_crystalline_ice_giant(Player* pPlayer, Creature* pClicked
 
 void AddSC_dragonblight()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_destructive_ward";
     pNewScript->GetAI = &GetAI_npc_destructive_ward;
     pNewScript->RegisterSelf();

@@ -400,9 +400,7 @@ UnitAI* GetAI_npc_coldflame(Creature* pCreature)
 
 void AddSC_boss_lord_marrowgar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_lord_marrowgar";
     pNewScript->GetAI = &GetAI_boss_lord_marrowgar;
     pNewScript->RegisterSelf();

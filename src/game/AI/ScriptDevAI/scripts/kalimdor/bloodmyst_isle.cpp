@@ -431,9 +431,7 @@ bool QuestAccept_npc_demolitionist_legoso(Player* pPlayer, Creature* pCreature, 
 
 void AddSC_bloodmyst_isle()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mob_webbed_creature";
     pNewScript->GetAI = &GetAI_mob_webbed_creature;
     pNewScript->RegisterSelf();

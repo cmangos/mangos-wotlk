@@ -584,9 +584,7 @@ UnitAI* GetAI_npc_felhound_tracker(Creature* pCreature)
 
 void AddSC_azshara()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_rizzle_sprysprocket";
     pNewScript->GetAI = &GetAI_npc_rizzle_sprysprocket;
     pNewScript->pGossipHello = &GossipHello_npc_rizzle_sprysprocket;

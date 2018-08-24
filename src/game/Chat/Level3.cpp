@@ -2872,11 +2872,9 @@ bool ChatHandler::HandleListItemCommand(char* args)
     if (!ExtractOptUInt32(&args, count, 10))
         return false;
 
-    QueryResult* result;
-
     // inventory case
     uint32 inv_count = 0;
-    result = CharacterDatabase.PQuery("SELECT COUNT(item_template) FROM character_inventory WHERE item_template='%u'", item_id);
+    QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(item_template) FROM character_inventory WHERE item_template='%u'", item_id);
     if (result)
     {
         inv_count = (*result)[0].GetUInt32();
@@ -3095,10 +3093,8 @@ bool ChatHandler::HandleListObjectCommand(char* args)
     if (!ExtractOptUInt32(&args, count, 10))
         return false;
 
-    QueryResult* result;
-
     uint32 obj_count = 0;
-    result = WorldDatabase.PQuery("SELECT COUNT(guid) FROM gameobject WHERE id='%u'", go_id);
+    QueryResult* result = WorldDatabase.PQuery("SELECT COUNT(guid) FROM gameobject WHERE id='%u'", go_id);
     if (result)
     {
         obj_count = (*result)[0].GetUInt32();
@@ -3166,10 +3162,8 @@ bool ChatHandler::HandleListCreatureCommand(char* args)
     if (!ExtractOptUInt32(&args, count, 10))
         return false;
 
-    QueryResult* result;
-
     uint32 cr_count = 0;
-    result = WorldDatabase.PQuery("SELECT COUNT(guid) FROM creature WHERE id='%u'", cr_id);
+    QueryResult* result = WorldDatabase.PQuery("SELECT COUNT(guid) FROM creature WHERE id='%u'", cr_id);
     if (result)
     {
         cr_count = (*result)[0].GetUInt32();
@@ -3939,11 +3933,9 @@ bool ChatHandler::HandleGetDistanceCommand(char* args)
     }
 
     Player* player = m_session->GetPlayer();
-    // Calculate point-to-point distance
-    float dx, dy, dz;
-    dx = player->GetPositionX() - obj->GetPositionX();
-    dy = player->GetPositionY() - obj->GetPositionY();
-    dz = player->GetPositionZ() - obj->GetPositionZ();
+    float dx = player->GetPositionX() - obj->GetPositionX();
+    float dy = player->GetPositionY() - obj->GetPositionY();
+    float dz = player->GetPositionZ() - obj->GetPositionZ();
 
     PSendSysMessage(LANG_DISTANCE, player->GetDistance(obj), player->GetDistance(obj, false), sqrt(dx * dx + dy * dy + dz * dz));
 

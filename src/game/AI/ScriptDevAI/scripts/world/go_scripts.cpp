@@ -862,9 +862,7 @@ std::function<bool(Unit*)> function = &TrapTargetSearch;
 
 void AddSC_go_scripts()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "go_ethereum_prison";
     pNewScript->pGOUse =          &GOUse_go_ethereum_prison;
     pNewScript->RegisterSelf();

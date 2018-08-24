@@ -361,9 +361,7 @@ InstanceData* GetInstanceData_instance_azjol_nerub(Map* pMap)
 
 void AddSC_instance_azjol_nerub()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_azjol-nerub";
     pNewScript->GetInstanceData = &GetInstanceData_instance_azjol_nerub;
     pNewScript->RegisterSelf();

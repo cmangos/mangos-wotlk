@@ -184,9 +184,7 @@ UnitAI* GetAI_boss_harbinger_skyriss(Creature* pCreature)
 
 void AddSC_boss_harbinger_skyriss()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_harbinger_skyriss";
     pNewScript->GetAI = &GetAI_boss_harbinger_skyriss;
     pNewScript->RegisterSelf();

@@ -684,9 +684,7 @@ bool GOUse_go_quest_still_at_it_credit(Player* pPlayer, GameObject* pGo)
 
 void AddSC_sholazar_basin()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_helice";
     pNewScript->GetAI = &GetAI_npc_helice;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_helice;

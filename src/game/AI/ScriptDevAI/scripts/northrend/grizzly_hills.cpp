@@ -527,9 +527,7 @@ bool QuestAccept_npc_emily(Player* pPlayer, Creature* pCreature, const Quest* pQ
 
 void AddSC_grizzly_hills()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_depleted_war_golem";
     pNewScript->GetAI = &GetAI_npc_depleted_war_golem;
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_depleted_war_golem;

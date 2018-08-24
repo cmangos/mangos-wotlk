@@ -495,9 +495,7 @@ InstanceData* GetInstanceData_instance_arcatraz(Map* pMap)
 
 void AddSC_instance_arcatraz()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_arcatraz";
     pNewScript->GetInstanceData = &GetInstanceData_instance_arcatraz;
     pNewScript->RegisterSelf();

@@ -347,9 +347,7 @@ bool QuestAccept_npc_fhwoor(Player* pPlayer, Creature* pCreature, const Quest* p
 
 void AddSC_zangarmarsh()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_cooshcoosh";
     pNewScript->GetAI = &GetAI_npc_cooshcoosh;
     pNewScript->RegisterSelf();

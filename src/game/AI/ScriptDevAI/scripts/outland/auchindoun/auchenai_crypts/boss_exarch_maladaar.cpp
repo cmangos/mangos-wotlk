@@ -313,9 +313,7 @@ UnitAI* GetAI_boss_exarch_maladaar(Creature* pCreature)
 
 void AddSC_boss_exarch_maladaar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_exarch_maladaar";
     pNewScript->GetAI = &GetAI_boss_exarch_maladaar;
     pNewScript->RegisterSelf();

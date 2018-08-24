@@ -224,9 +224,7 @@ UnitAI* GetAI_boss_curator(Creature* pCreature)
 
 void AddSC_boss_curator()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_curator";
     pNewScript->GetAI = &GetAI_boss_curator;
     pNewScript->RegisterSelf();

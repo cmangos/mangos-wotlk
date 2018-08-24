@@ -1244,9 +1244,7 @@ UnitAI* GetAI_npc_zelfan(Creature* pCreature)
 
 void AddSC_boss_priestess_delrissa()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_priestess_delrissa";
     pNewScript->GetAI = &GetAI_boss_priestess_delrissa;
     pNewScript->RegisterSelf();

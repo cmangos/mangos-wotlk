@@ -85,9 +85,7 @@ bool AreaTrigger_at_ghazan_surface(Player* player, AreaTriggerEntry const* /*pAt
 
 void AddSC_instance_underbog()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_underbog";
     pNewScript->GetInstanceData = &GetInstanceData_instance_underbog;
     pNewScript->RegisterSelf();

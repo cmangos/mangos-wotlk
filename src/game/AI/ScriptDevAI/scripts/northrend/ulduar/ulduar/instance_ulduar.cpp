@@ -1707,9 +1707,7 @@ bool ProcessEventId_event_ulduar(uint32 uiEventId, Object* pSource, Object* /*pT
 
 void AddSC_instance_ulduar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_ulduar";
     pNewScript->GetInstanceData = &GetInstanceData_instance_ulduar;
     pNewScript->RegisterSelf();

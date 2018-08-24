@@ -183,9 +183,7 @@ bool AreaTrigger_at_pit_of_saron(Player* pPlayer, AreaTriggerEntry const* pAt)
 
 void AddSC_pit_of_saron()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_ymirjar_deathbringer";
     pNewScript->GetAI = &GetAI_npc_ymirjar_deathbringer;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_summon_undead;

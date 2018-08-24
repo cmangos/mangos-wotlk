@@ -308,7 +308,6 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
     ObjectGuid guid = _player->GetObjectGuid();
     DEBUG_LOG("WORLD: Received opcode CMSG_CALENDAR_UPDATE_EVENT [%s]", guid.GetString().c_str());
 
-    time_t oldEventTime;
     uint64 eventId;
     uint64 inviteId;
     std::string title;
@@ -349,7 +348,7 @@ void WorldSession::HandleCalendarUpdateEvent(WorldPacket& recv_data)
             }
         }
 
-        oldEventTime = event->EventTime;
+        time_t oldEventTime = event->EventTime;
 
         event->Type = CalendarEventType(type);
         event->Flags = flags;

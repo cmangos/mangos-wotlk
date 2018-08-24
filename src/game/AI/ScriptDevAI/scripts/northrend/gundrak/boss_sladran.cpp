@@ -210,9 +210,7 @@ UnitAI* GetAI_boss_sladran(Creature* pCreature)
 
 void AddSC_boss_sladran()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_sladran";
     pNewScript->GetAI = &GetAI_boss_sladran;
     pNewScript->RegisterSelf();

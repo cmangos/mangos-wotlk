@@ -261,9 +261,7 @@ UnitAI* GetAI_npc_corrupted_soul_fragment(Creature* pCreature)
 
 void AddSC_boss_bronjahm()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_bronjahm";
     pNewScript->GetAI = &GetAI_boss_bronjahm;
     pNewScript->RegisterSelf();

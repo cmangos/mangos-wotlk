@@ -350,9 +350,7 @@ bool EffectDummyCreature_spell_mount_attumen(Unit* pCaster, uint32 uiSpellId, Sp
 
 void AddSC_boss_attumen()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_attumen";
     pNewScript->GetAI = &GetAI_boss_attumen;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_mount_attumen;

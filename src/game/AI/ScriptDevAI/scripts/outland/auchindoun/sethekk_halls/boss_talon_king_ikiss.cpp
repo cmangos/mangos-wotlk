@@ -226,9 +226,7 @@ UnitAI* GetAI_boss_talon_king_ikiss(Creature* pCreature)
 
 void AddSC_boss_talon_king_ikiss()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_talon_king_ikiss";
     pNewScript->GetAI = &GetAI_boss_talon_king_ikiss;
     pNewScript->RegisterSelf();

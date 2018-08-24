@@ -149,9 +149,7 @@ InstanceData* GetInstanceData_instance_wailing_caverns(Map* pMap)
 
 void AddSC_instance_wailing_caverns()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_wailing_caverns";
     pNewScript->GetInstanceData = &GetInstanceData_instance_wailing_caverns;
     pNewScript->RegisterSelf();

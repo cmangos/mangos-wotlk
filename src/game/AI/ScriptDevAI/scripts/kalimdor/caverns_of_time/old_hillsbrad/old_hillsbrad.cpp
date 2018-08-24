@@ -1298,9 +1298,7 @@ bool GossipSelect_npc_taretha(Player* pPlayer, Creature* pCreature, uint32 /*uiS
 
 void AddSC_old_hillsbrad()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_erozion";
     pNewScript->pGossipHello = &GossipHello_npc_erozion;
     pNewScript->pGossipSelect = &GossipSelect_npc_erozion;

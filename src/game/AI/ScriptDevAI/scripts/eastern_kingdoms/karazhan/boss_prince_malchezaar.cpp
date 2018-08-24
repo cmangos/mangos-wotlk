@@ -414,9 +414,7 @@ UnitAI* GetAI_npc_infernal_relay(Creature* pCreature)
 
 void AddSC_boss_prince_malchezaar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_malchezaar";
     pNewScript->GetAI = &GetAI_boss_malchezaar;
     pNewScript->RegisterSelf();

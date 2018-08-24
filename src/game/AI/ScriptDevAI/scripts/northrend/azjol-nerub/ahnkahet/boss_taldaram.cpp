@@ -327,9 +327,7 @@ bool GOUse_go_nerubian_device(Player* /*pPlayer*/, GameObject* pGo)
 
 void AddSC_boss_taldaram()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_taldaram";
     pNewScript->GetAI = &GetAI_boss_taldaram;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_conjure_flame_orbs;

@@ -642,9 +642,7 @@ InstanceData* GetInstanceData_instance_pit_of_saron(Map* pMap)
 
 void AddSC_instance_pit_of_saron()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_pit_of_saron";
     pNewScript->GetInstanceData = &GetInstanceData_instance_pit_of_saron;
     pNewScript->RegisterSelf();

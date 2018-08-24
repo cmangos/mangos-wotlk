@@ -296,10 +296,9 @@ struct boss_sindragosaAI : public ScriptedAI
 
     void DoFrostBomb()
     {
-        float x, y, z;
-        x = frand(FROST_BOMB_MIN_X, FROST_BOMB_MAX_X);
-        y = frand(FROST_BOMB_MIN_Y, FROST_BOMB_MAX_Y);
-        z = SindragosaPosition[0][2]; // platform height
+        float x = frand(FROST_BOMB_MIN_X, FROST_BOMB_MAX_X);
+        float y = frand(FROST_BOMB_MIN_Y, FROST_BOMB_MAX_Y);
+        float z = SindragosaPosition[0][2]; // platform height
 
         m_creature->CastSpell(x, y, z, SPELL_FROST_BOMB, TRIGGERED_NONE);
     }
@@ -849,9 +848,7 @@ UnitAI* GetAI_mob_frost_bomb(Creature* pCreature)
 
 void AddSC_boss_sindragosa()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_sindragosa";
     pNewScript->GetAI = &GetAI_boss_sindragosa;
     pNewScript->RegisterSelf();

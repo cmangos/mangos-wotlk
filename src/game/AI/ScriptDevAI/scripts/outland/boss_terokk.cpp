@@ -414,9 +414,7 @@ bool ProcessEventId_event_summon_terokk(uint32 eventId, Object* source, Object* 
 
 void AddSC_boss_terokk()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "event_summon_terokk";
     pNewScript->pProcessEventId = &ProcessEventId_event_summon_terokk;
     pNewScript->RegisterSelf();

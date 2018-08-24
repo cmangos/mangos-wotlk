@@ -2029,9 +2029,7 @@ UnitAI* GetAI_npc_mage_mirror_image(Creature* pCreature)
 
 void AddSC_npcs_special()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_air_force_bots";
     pNewScript->GetAI = &GetAI_npc_air_force_bots;
     pNewScript->RegisterSelf();

@@ -342,9 +342,7 @@ UnitAI* GetAI_boss_paletress(Creature* pCreature)
 
 void AddSC_boss_argent_challenge()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_eadric";
     pNewScript->GetAI = &GetAI_boss_eadric;
     pNewScript->RegisterSelf();

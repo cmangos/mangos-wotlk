@@ -466,8 +466,8 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
             pSummoned->CastSpell(pSummoned, SPELL_SHADOW_BOLT_AURA, TRIGGERED_OLD_TRIGGERED);
 
             // Start the movement of the shadow orb - calculate new position based on the angle between the boss and orb
-            float fX, fY, fAng;
-            fAng = m_creature->GetAngle(pSummoned) + M_PI_F / 8;
+            float fX, fY;
+            float fAng = m_creature->GetAngle(pSummoned) + M_PI_F / 8;
             // Normalize angle
             if (fAng > 2 * M_PI_F)
                 fAng = fAng - 2 * M_PI_F;
@@ -685,9 +685,9 @@ struct boss_kiljaedenAI : public Scripted_NoMovementAI, private DialogueHelper
                     if (m_uiShieldOrbTimer < uiDiff)
                     {
                         // Get some random coords for the Orb
-                        float fX, fY, fZ;
+                        float fX, fY;
                         m_creature->GetNearPoint2D(fX, fY, 25.0f, frand(0, 2 * M_PI_F));
-                        fZ = frand(35.0f, 45.0f);
+                        float fZ = frand(35.0f, 45.0f);
 
                         m_creature->SummonCreature(NPC_SHIELD_ORB, fX, fY, fZ, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
                         ++m_uiShieldOrbCount;
@@ -754,8 +754,8 @@ struct npc_shield_orbAI : public ScriptedAI
         if (Creature* pSummoner = m_pInstance->GetSingleCreatureFromStorage(NPC_KILJAEDEN))
         {
             // Calculate new position based on the angle between the boss and self
-            float fX, fY, fAng;
-            fAng = pSummoner->GetAngle(m_creature) + M_PI_F / 8;
+            float fX, fY;
+            float fAng = pSummoner->GetAngle(m_creature) + M_PI_F / 8;
             // Normalize angle
             if (fAng > 2 * M_PI_F)
                 fAng = fAng - 2 * M_PI_F;
@@ -851,9 +851,7 @@ UnitAI* GetAI_npc_power_blue_flight(Creature* pCreature)
 
 void AddSC_boss_kiljaeden()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_kiljaeden";
     pNewScript->GetAI = &GetAI_boss_kiljaeden;
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_darkness_of_souls;

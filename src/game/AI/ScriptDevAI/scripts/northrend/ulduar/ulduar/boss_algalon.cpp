@@ -803,9 +803,7 @@ bool GOUse_go_celestial_access(Player* pPlayer, GameObject* pGo)
 
 void AddSC_boss_algalon()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_algalon";
     pNewScript->GetAI = GetAI_boss_algalon;
     pNewScript->RegisterSelf();

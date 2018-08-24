@@ -149,9 +149,7 @@ UnitAI* GetAI_boss_valithria_dreamwalker(Creature* pCreature)
 
 void AddSC_boss_valithria_dreamwalker()
 {
-    Script* pNewscript;
-
-    pNewscript = new Script;
+    Script* pNewscript = new Script;
     pNewscript->Name = "boss_valithria_dreamwalker";
     pNewscript->GetAI = &GetAI_boss_valithria_dreamwalker;
     pNewscript->RegisterSelf();

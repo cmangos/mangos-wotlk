@@ -178,9 +178,7 @@ UnitAI* GetAI_npc_sapling(Creature* pCreature)
 
 void AddSC_boss_warp_splinter()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_warp_splinter";
     pNewScript->GetAI = &GetAI_boss_warp_splinter;
     pNewScript->RegisterSelf();

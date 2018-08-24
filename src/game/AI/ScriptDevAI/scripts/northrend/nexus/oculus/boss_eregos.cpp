@@ -299,9 +299,7 @@ UnitAI* GetAI_npc_planar_anomaly(Creature* pCreature)
 
 void AddSC_boss_eregos()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_eregos";
     pNewScript->GetAI = &GetAI_boss_eregos;
     pNewScript->RegisterSelf();

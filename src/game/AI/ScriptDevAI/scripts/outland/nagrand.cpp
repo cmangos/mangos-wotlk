@@ -602,9 +602,7 @@ UnitAI* GetAI_npc_rethhedron(Creature* pCreature)
 
 void AddSC_nagrand()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mob_lump";
     pNewScript->GetAI = &GetAI_mob_lump;
     pNewScript->RegisterSelf();

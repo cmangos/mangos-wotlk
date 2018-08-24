@@ -1052,9 +1052,7 @@ UnitAI* GetAI_npc_thunder_orb(Creature* pCreature)
 
 void AddSC_boss_thorim()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_thorim";
     pNewScript->GetAI = GetAI_boss_thorim;
     pNewScript->RegisterSelf();

@@ -1271,7 +1271,7 @@ bool GossipHello_npc_akama_illidan(Player* pPlayer, Creature* pCreature)
 
 bool GossipSelect_npc_akama_illidan(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
 {
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1 || GOSSIP_ACTION_INFO_DEF + 2)
+    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1 || true)
     {
         pPlayer->CLOSE_GOSSIP_MENU();
 
@@ -1685,9 +1685,7 @@ UnitAI* GetAI_npc_blade_of_azzinoth(Creature* pCreature)
 
 void AddSC_boss_illidan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_illidan_stormrage";
     pNewScript->GetAI = &GetAI_boss_illidan_stormrage;
     pNewScript->RegisterSelf();

@@ -173,9 +173,7 @@ UnitAI* GetAI_boss_loken(Creature* pCreature)
 
 void AddSC_boss_loken()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_loken";
     pNewScript->GetAI = &GetAI_boss_loken;
     pNewScript->RegisterSelf();

@@ -263,9 +263,7 @@ bool EffectAuraDummy_spell_aura_dummy_crystal_spike_visual(const Aura* pAura, bo
 
 void AddSC_boss_ormorok()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_ormorok";
     pNewScript->GetAI = &GetAI_boss_ormorok;
     pNewScript->RegisterSelf();

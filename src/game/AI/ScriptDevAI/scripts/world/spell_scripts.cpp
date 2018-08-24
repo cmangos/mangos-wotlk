@@ -1017,9 +1017,7 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
 
 void AddSC_spell_scripts()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "spell_dummy_go";
     pNewScript->pEffectDummyGO = &EffectDummyGameObj_spell_dummy_go;
     pNewScript->RegisterSelf();

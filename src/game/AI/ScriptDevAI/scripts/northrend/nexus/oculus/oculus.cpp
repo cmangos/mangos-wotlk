@@ -143,9 +143,7 @@ UnitAI* GetAI_npc_oculus_drake(Creature* pCreature)
 
 void AddSC_oculus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_oculus_drake";
     pNewScript->GetAI = &GetAI_npc_oculus_drake;
     pNewScript->RegisterSelf();

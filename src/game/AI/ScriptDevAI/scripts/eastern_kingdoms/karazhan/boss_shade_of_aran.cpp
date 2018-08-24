@@ -582,9 +582,7 @@ UnitAI* GetAI_npc_shade_of_aran_blizzard(Creature* pCreature)
 
 void AddSC_boss_shade_of_aran()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_shade_of_aran";
     pNewScript->GetAI = &GetAI_boss_aran;
     pNewScript->RegisterSelf();

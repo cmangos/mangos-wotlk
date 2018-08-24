@@ -765,9 +765,7 @@ InstanceData* GetInstanceData_instance_violet_hold(Map* pMap)
 
 void AddSC_instance_violet_hold()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_violet_hold";
     pNewScript->GetInstanceData = GetInstanceData_instance_violet_hold;
     pNewScript->RegisterSelf();

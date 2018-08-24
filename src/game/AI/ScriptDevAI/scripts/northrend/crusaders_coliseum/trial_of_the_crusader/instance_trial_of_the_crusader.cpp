@@ -768,13 +768,12 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
 
                 // summon the crusaders
                 m_vCrusadersGuidsVector.clear();
-                float fX, fY, fZ, fO;
                 for (uint8 i = 0; i < uiMaxCrusaders; ++i)
                 {
-                    fX = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fSourceX : aAllyCrusadersLoc[i].fSourceX;
-                    fY = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fSourceY : aAllyCrusadersLoc[i].fSourceY;
-                    fZ = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fSourceZ : aAllyCrusadersLoc[i].fSourceZ;
-                    fO = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fSourceO : aAllyCrusadersLoc[i].fSourceO;
+                    float fX = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fSourceX : aAllyCrusadersLoc[i].fSourceX;
+                    float fY = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fSourceY : aAllyCrusadersLoc[i].fSourceY;
+                    float fZ = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fSourceZ : aAllyCrusadersLoc[i].fSourceZ;
+                    float fO = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fSourceO : aAllyCrusadersLoc[i].fSourceO;
 
                     if (Creature* pCrusader = pPlayer->SummonCreature(m_vCrusadersEntries[i], fX, fY, fZ, fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                         m_vCrusadersGuidsVector.push_back(pCrusader->GetObjectGuid());
@@ -788,12 +787,11 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
             // make the champions jump
             uint8 uiMaxCrusaders = Is25ManDifficulty() ? MAX_CRUSADERS_25MAN : MAX_CRUSADERS_10MAN;
 
-            float fX, fY, fZ;
             for (uint8 i = 0; i < uiMaxCrusaders; ++i)
             {
-                fX = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fTargetX : aAllyCrusadersLoc[i].fTargetX;
-                fY = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fTargetY : aAllyCrusadersLoc[i].fTargetY;
-                fZ = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fTargetZ : aAllyCrusadersLoc[i].fTargetZ;
+                float fX = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fTargetX : aAllyCrusadersLoc[i].fTargetX;
+                float fY = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fTargetY : aAllyCrusadersLoc[i].fTargetY;
+                float fZ = m_uiTeam == ALLIANCE ? aHordeCrusadersLoc[i].fTargetZ : aAllyCrusadersLoc[i].fTargetZ;
 
                 // ToDo: use spell 67382 when proper implemented in the core
                 if (Creature* pCrusader = instance->GetCreature(m_vCrusadersGuidsVector[i]))
@@ -908,9 +906,7 @@ InstanceData* GetInstanceData_instance_trial_of_the_crusader(Map* pMap)
 
 void AddSC_instance_trial_of_the_crusader()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_trial_of_the_crusader";
     pNewScript->GetInstanceData = &GetInstanceData_instance_trial_of_the_crusader;
     pNewScript->RegisterSelf();

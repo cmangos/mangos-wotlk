@@ -251,9 +251,7 @@ InstanceData* GetInstanceData_instance_oculus(Map* pMap)
 
 void AddSC_instance_oculus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_oculus";
     pNewScript->GetInstanceData = &GetInstanceData_instance_oculus;
     pNewScript->RegisterSelf();

@@ -625,9 +625,7 @@ UnitAI* GetAI_npc_nerubian_borrow(Creature* pCreature)
 
 void AddSC_boss_anubarak_trial()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_anubarak_trial";
     pNewScript->GetAI = &GetAI_boss_anubarak_trial;
     pNewScript->RegisterSelf();

@@ -424,9 +424,7 @@ UnitAI* GetAI_npc_valkyr_stalker(Creature* pCreature)
 
 void AddSC_twin_valkyr()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_fjola";
     pNewScript->GetAI = &GetAI_boss_fjola;
     pNewScript->RegisterSelf();

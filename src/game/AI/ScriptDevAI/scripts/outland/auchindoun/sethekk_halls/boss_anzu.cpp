@@ -136,10 +136,10 @@ struct boss_anzuAI : public ScriptedAI
 
     void DoSummonBirdHelpers()
     {
-        float fX, fY, fZ, fAng;
+        float fX, fY, fZ;
         for (uint8 i = 0; i < 3; ++i)
         {
-            fAng = 2 * M_PI_F / 3 * i;
+            float fAng = 2 * M_PI_F / 3 * i;
             m_creature->GetNearPoint(m_creature, fX, fY, fZ, 0, 15.0f, fAng);
             m_creature->SummonCreature(aSpiritsEntries[i], fX, fY, fZ, fAng + M_PI_F, TEMPSPAWN_CORPSE_DESPAWN, 0);
         }
@@ -227,9 +227,7 @@ UnitAI* GetAI_boss_anzu(Creature* pCreature)
 
 void AddSC_boss_anzu()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_anzu";
     pNewScript->GetAI = &GetAI_boss_anzu;
     pNewScript->RegisterSelf();

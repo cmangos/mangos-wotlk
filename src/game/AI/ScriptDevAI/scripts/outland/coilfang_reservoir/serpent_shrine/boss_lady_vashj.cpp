@@ -513,9 +513,7 @@ bool OnLootItemTaintedCore(Player* player, Item* item, bool apply)
 
 void AddSC_boss_lady_vashj()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_lady_vashj";
     pNewScript->GetAI = &GetAI_boss_lady_vashj;
     pNewScript->RegisterSelf();

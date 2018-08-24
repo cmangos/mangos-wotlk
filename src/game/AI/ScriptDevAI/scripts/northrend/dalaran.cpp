@@ -87,9 +87,7 @@ UnitAI* GetAI_npc_dalaran_guardian_mage(Creature* pCreature)
 
 void AddSC_dalaran()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_dalaran_guardian_mage";
     pNewScript->GetAI = &GetAI_npc_dalaran_guardian_mage;
     pNewScript->RegisterSelf();

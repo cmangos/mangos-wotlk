@@ -291,9 +291,7 @@ UnitAI* GetAI_boss_gurtogg_bloodboil(Creature* pCreature)
 
 void AddSC_boss_gurtogg_bloodboil()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_gurtogg_bloodboil";
     pNewScript->GetAI = &GetAI_boss_gurtogg_bloodboil;
     pNewScript->RegisterSelf();

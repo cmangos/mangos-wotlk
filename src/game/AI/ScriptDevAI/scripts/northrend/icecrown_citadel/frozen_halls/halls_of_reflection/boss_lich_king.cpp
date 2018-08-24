@@ -497,9 +497,7 @@ bool ProcessEventId_event_spell_summon_ice_wall(uint32 uiEventId, Object* pSourc
 
 void AddSC_boss_lich_king()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_lich_king_hor";
     pNewScript->GetAI = &GetAI_boss_lich_king_hor;
     pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_stun_break;

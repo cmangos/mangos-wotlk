@@ -358,9 +358,7 @@ UnitAI* GetAI_npc_orange_gas_stalker(Creature* pCreature)
 
 void AddSC_boss_festergut()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_festergut";
     pNewScript->GetAI = &GetAI_boss_festergut;
     pNewScript->pEffectScriptEffectNPC = &EffectScriptEffectCreature_spell_inhale_blight;

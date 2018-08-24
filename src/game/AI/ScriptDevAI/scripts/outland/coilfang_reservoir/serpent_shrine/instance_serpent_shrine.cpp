@@ -256,9 +256,7 @@ InstanceData* GetInstanceData_instance_serpentshrine_cavern(Map* pMap)
 
 void AddSC_instance_serpentshrine_cavern()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "instance_serpent_shrine";
     pNewScript->GetInstanceData = &GetInstanceData_instance_serpentshrine_cavern;
     pNewScript->RegisterSelf();

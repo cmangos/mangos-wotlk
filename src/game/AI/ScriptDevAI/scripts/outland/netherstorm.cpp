@@ -3040,9 +3040,7 @@ bool GossipSelect_npc_adyen_the_lightwarden(Player* player, Creature* creature, 
 
 void AddSC_netherstorm()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "go_manaforge_control_console";
     pNewScript->pGOUse = &GOUse_go_manaforge_control_console;
     pNewScript->RegisterSelf();

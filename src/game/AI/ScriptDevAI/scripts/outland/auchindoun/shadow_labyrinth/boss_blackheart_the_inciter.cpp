@@ -192,9 +192,7 @@ UnitAI* GetAI_boss_blackheart_the_inciter(Creature* pCreature)
 
 void AddSC_boss_blackheart_the_inciter()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_blackheart_the_inciter";
     pNewScript->GetAI = &GetAI_boss_blackheart_the_inciter;
     pNewScript->RegisterSelf();

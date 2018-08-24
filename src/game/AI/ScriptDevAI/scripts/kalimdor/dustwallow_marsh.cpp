@@ -1245,9 +1245,7 @@ UnitAI* GetAI_npc_mottled_drywallow_crocolisk(Creature* pCreature)
 
 void AddSC_dustwallow_marsh()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "mobs_risen_husk_spirit";
     pNewScript->GetAI = &GetAI_mobs_risen_husk_spirit;
     pNewScript->RegisterSelf();

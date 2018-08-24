@@ -248,9 +248,7 @@ UnitAI* GetAI_npc_erekem_guard(Creature* pCreature)
 
 void AddSC_boss_erekem()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_erekem";
     pNewScript->GetAI = &GetAI_boss_erekem;
     pNewScript->RegisterSelf();

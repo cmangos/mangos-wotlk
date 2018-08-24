@@ -1523,9 +1523,7 @@ UnitAI* GetAI_npc_orphaned_mammoth_calf(Creature* pCreature)
 
 void AddSC_borean_tundra()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_nesingwary_trapper";
     pNewScript->GetAI = &GetAI_npc_nesingwary_trapper;
     pNewScript->RegisterSelf();

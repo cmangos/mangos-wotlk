@@ -306,9 +306,7 @@ UnitAI* GetAI_mob_soaring_eagle(Creature* pCreature)
 
 void AddSC_boss_akilzon()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_akilzon";
     pNewScript->GetAI = &GetAI_boss_akilzon;
     pNewScript->RegisterSelf();

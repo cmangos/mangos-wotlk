@@ -412,9 +412,7 @@ UnitAI* GetAI_mob_molten_golem(Creature* pCreature)
 
 void AddSC_boss_volkhan()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_volkhan";
     pNewScript->GetAI = &GetAI_boss_volkhan;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_boss_volkhan;

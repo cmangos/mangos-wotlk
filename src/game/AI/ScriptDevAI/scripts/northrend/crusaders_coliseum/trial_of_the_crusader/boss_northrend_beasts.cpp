@@ -1130,9 +1130,7 @@ UnitAI* GetAI_boss_icehowl(Creature* pCreature)
 
 void AddSC_northrend_beasts()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_beast_combat_stalker";
     pNewScript->GetAI = &GetAI_npc_beast_combat_stalker;
     pNewScript->RegisterSelf();

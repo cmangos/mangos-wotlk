@@ -58,9 +58,7 @@ bool GossipSelect_npc_spirit_of_olum(Player* pPlayer, Creature* /*pCreature*/, u
 
 void AddSC_black_temple()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_spirit_of_olum";
     pNewScript->pGossipHello = &GossipHello_npc_spirit_of_olum;
     pNewScript->pGossipSelect = &GossipSelect_npc_spirit_of_olum;

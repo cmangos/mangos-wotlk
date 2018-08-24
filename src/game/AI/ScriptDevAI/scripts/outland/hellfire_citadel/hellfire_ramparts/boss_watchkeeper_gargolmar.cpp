@@ -168,9 +168,7 @@ UnitAI* GetAI_boss_watchkeeper_gargolmarAI(Creature* pCreature)
 
 void AddSC_boss_watchkeeper_gargolmar()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_watchkeeper_gargolmar";
     pNewScript->GetAI = &GetAI_boss_watchkeeper_gargolmarAI;
     pNewScript->RegisterSelf();

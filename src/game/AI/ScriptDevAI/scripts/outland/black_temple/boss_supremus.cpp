@@ -321,9 +321,7 @@ UnitAI* GetAI_npc_volcano(Creature* pCreature)
 
 void AddSC_boss_supremus()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_supremus";
     pNewScript->GetAI = &GetAI_boss_supremus;
     pNewScript->RegisterSelf();

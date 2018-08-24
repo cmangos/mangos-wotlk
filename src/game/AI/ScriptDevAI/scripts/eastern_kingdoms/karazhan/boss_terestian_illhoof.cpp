@@ -286,9 +286,7 @@ UnitAI* GetAI_mob_demon_chain(Creature* pCreature)
 
 void AddSC_boss_terestian_illhoof()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_terestian_illhoof";
     pNewScript->GetAI = &GetAI_boss_terestian_illhoof;
     pNewScript->RegisterSelf();

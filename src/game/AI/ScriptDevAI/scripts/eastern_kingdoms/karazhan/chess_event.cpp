@@ -1677,9 +1677,7 @@ bool GossipHello_npc_orc_necrolyte(Player* pPlayer, Creature* pCreature)
 
 void AddSC_chess_event()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "npc_echo_of_medivh";
     pNewScript->GetAI = GetAI_npc_echo_of_medivh;
     pNewScript->pGossipHello = GossipHello_npc_echo_of_medivh;
