@@ -758,7 +758,7 @@ namespace MaNGOS
     class AllGameObjectEntriesListInPosRangeCheck
     {
         public:
-            AllGameObjectEntriesListInPosRangeCheck(WorldObject const& obj, float x, float y, float z, std::set<uint32>& entries, float range, bool is3D = true) : i_obj(obj), i_x(x), i_y(y), i_z(z), i_entries(entries), i_range(range), i_is3D(is3D) {}
+            AllGameObjectEntriesListInPosRangeCheck(WorldObject const& obj, float x, float y, float z, std::set<uint32>& entries, float range, bool is3D = true) : i_x(x), i_y(y), i_z(z), i_entries(entries), i_range(range), i_is3D(is3D), i_obj(obj) {}
             WorldObject const& GetFocusObject() const { return i_obj; }
             bool operator()(GameObject* go)
             {
@@ -1060,7 +1060,7 @@ namespace MaNGOS
     {
         public:
             AnyFriendlyOrGroupMemberUnitInUnitRangeCheck(Unit const* obj, Group const* group, SpellEntry const* spellInfo, float range)
-                : i_obj(obj), i_group(group), i_spellInfo(spellInfo), i_range(range) {}
+                : i_group(group), i_obj(obj), i_spellInfo(spellInfo), i_range(range) {}
             Unit const& GetFocusObject() const { return *i_obj; }
             bool operator()(Unit* u)
             {
