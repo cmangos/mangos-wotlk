@@ -2326,7 +2326,6 @@ bool WorldObject::CheckLockout(SpellSchoolMask schoolMask) const
 
 bool WorldObject::GetExpireTime(SpellEntry const& spellEntry, TimePoint& expireTime, bool& isPermanent) const
 {
-    TimePoint resultExpireTime;
     auto spellItr = m_cooldownMap.FindBySpellId(spellEntry.Id);
     if (spellItr != m_cooldownMap.end())
     {
