@@ -4248,17 +4248,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     static_cast<Player*>(m_caster)->RemoveSomeCooldown(cdCheck);
                     return;
                 }
-                case 37506:                                 // Scatter Shot
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // break Auto Shot and autohit
-                    m_caster->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-                    m_caster->AttackStop();
-                    ((Player*)m_caster)->SendAttackSwingCancelAttack();
-                    return;
-                }
                 // Last Stand
                 case 53478:
                 {
