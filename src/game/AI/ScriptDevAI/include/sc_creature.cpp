@@ -447,7 +447,7 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
             break;
         }
         case NPC_KARGATH_BLADEFIST:
-            if (x < 255.0f && x > 205.0f)
+            if (x < 270.0f && x > 185.0f)
                 return false;
             break;
         case NPC_NETHERMANCER_SEPETHREA:
