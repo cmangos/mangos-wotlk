@@ -455,7 +455,7 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
                 return false;
             break;
         case NPC_MOROES:                                    // Moroes - Generate bounding box - TODO: Despawn Remaining Adds upon Evade after Death
-            if (x > -11027.73f && x < -10946.64f && y > -1952.38f && y < -1861.11f)
+            if (x > -11030.f && x < -10943.f && y > -1955.f && y < -1860.f)
                 return false;
             break;
         case NPC_MOROGRIM_TIDEWALKER:                       // Morogrim - Natural Box made by room
