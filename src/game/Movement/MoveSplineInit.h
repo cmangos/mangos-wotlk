@@ -55,7 +55,7 @@ namespace Movement
              * @param start_time - delay between movement starting time and beginning to move by parabolic trajectory
              * can't be combined with final animation
              */
-            void SetParabolic(float amplitude, float start_time);
+            void SetParabolic(float amplitude, float time_shift);
             /* Plays animation after movement done
              * can't be combined with parabolic movement
              */
@@ -66,18 +66,18 @@ namespace Movement
              * you can have only one final facing: previous will be overriden
              */
             void SetFacing(float angle);
-            void SetFacing(Vector3 const& point);
+            void SetFacing(Vector3 const& spot);
             void SetFacing(const Unit* target);
 
             /* Initializes movement by path
              * @param path - array of points, shouldn't be empty
              * @param pointId - Id of fisrt point of the path. Example: when third path point will be done it will notify that pointId + 3 done
              */
-            void MovebyPath(const PointsArray& path, int32 pointId = 0);
+            void MovebyPath(const PointsArray& controls, int32 path_offset = 0);
 
             /* Initializes simple A to B mition, A is current unit's position, B is destination
              */
-            void MoveTo(const Vector3& destination, bool generatePath = false, bool forceDestination = false);
+            void MoveTo(const Vector3& dest, bool generatePath = false, bool forceDestination = false);
             void MoveTo(float x, float y, float z, bool generatePath = false, bool forceDestination = false);
 
             /* Sets Id of fisrt point of the path. When N-th path point will be done ILisener will notify that pointId + N done
@@ -113,7 +113,7 @@ namespace Movement
              * Has no effect if falling mode enabled
              * velocity shouldn't be negative
              */
-            void SetVelocity(float velocity);
+            void SetVelocity(float vel);
 
             /* Sets BoardVehicle flag
              */

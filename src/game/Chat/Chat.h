@@ -97,7 +97,7 @@ class ChatHandler
         bool ParseCommands(const char* text);
         ChatCommand const* FindCommand(char const* text);
 
-        bool isValidChatMessage(const char* msg) const;
+        bool isValidChatMessage(const char* message) const;
         bool HasSentErrorMessage() const { return sentErrorMessage;}
 
         /**
@@ -141,11 +141,11 @@ class ChatHandler
         virtual int GetSessionDbLocaleIndex() const;
 
         bool HasLowerSecurity(Player* target, ObjectGuid guid = ObjectGuid(), bool strong = false);
-        bool HasLowerSecurityAccount(WorldSession* target, uint32 account, bool strong = false);
+        bool HasLowerSecurityAccount(WorldSession* target, uint32 target_account, bool strong = false);
 
         void SendGlobalSysMessage(const char* str) const;
 
-        bool SetDataForCommandInTable(ChatCommand* table, const char* text, uint32 security, std::string const& help);
+        bool SetDataForCommandInTable(ChatCommand* commandTable, const char* text, uint32 security, std::string const& help);
         void ExecuteCommand(const char* text);
         void LogCommand(char const* fullcmd) const;
 

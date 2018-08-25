@@ -179,7 +179,7 @@ struct boss_doomwalkerAI : public ScriptedAI
             while (targets.size() > COUNT_OVERRUN)
                 targets.erase(targets.begin() + urand(0, targets.size() - 1));
 
-            if (targets.size() > 0)
+            if (!targets.empty())
             {
                 float angle = m_creature->GetAngle(targets[0]);
                 m_creature->SetFacingTo(angle);

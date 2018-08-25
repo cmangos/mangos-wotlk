@@ -424,7 +424,7 @@ typedef wchar_t const* const* wstrlist;
 std::wstring GetMainPartOfName(const std::wstring& wname, uint32 declension)
 {
     // supported only Cyrillic cases
-    if (wname.size() < 1 || !isCyrillicCharacter(wname[0]) || declension > 5)
+    if (wname.empty() || !isCyrillicCharacter(wname[0]) || declension > 5)
         return wname;
 
     // Important: end length must be <= MAX_INTERNAL_PLAYER_NAME-MAX_PLAYER_NAME (3 currently)
@@ -509,10 +509,7 @@ bool Utf8FitTo(const std::string& str, const std::wstring& search)
     // converting to lower case
     wstrToLower(temp);
 
-    if (temp.find(search) == std::wstring::npos)
-        return false;
-
-    return true;
+    return temp.find(search) != std::wstring::npos;
 }
 
 void utf8printf(FILE* out, const char* str, ...)

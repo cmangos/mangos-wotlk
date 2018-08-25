@@ -253,7 +253,7 @@ void instance_azjol_nerub::DoSortWorldTriggers()
 ObjectGuid instance_azjol_nerub::GetRandomAssassinTrigger()
 {
     // Get a random summon target
-    if (m_vAssassinSummonTargetsVect.size() > 0)
+    if (!m_vAssassinSummonTargetsVect.empty())
         return m_vAssassinSummonTargetsVect[urand(0, m_vAssassinSummonTargetsVect.size() - 1)];
     else
         return ObjectGuid();

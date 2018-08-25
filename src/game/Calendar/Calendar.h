@@ -162,7 +162,7 @@ class CalendarEvent
 
         bool RemoveInviteById(uint64 inviteId, Player* remover);
         void RemoveInviteByGuid(ObjectGuid const& playerGuid);
-        void RemoveAllInvite(ObjectGuid const& remover);
+        void RemoveAllInvite(ObjectGuid const& removerGuid);
 
         uint64 EventId;                         // unique ID for that event
         ObjectGuid CreatorGuid;                 // ObjectGuid of the event creator

@@ -45,7 +45,7 @@ class GameObjectModel
         VMAP::WorldModel* iModel;
 
         GameObjectModel() : phasemask(0), iInvScale(0), iScale(0), iModel(nullptr) {}
-        bool initialize(const GameObject* const pGo, const GameObjectDisplayInfoEntry* info);
+        bool initialize(const GameObject* const pGo, const GameObjectDisplayInfoEntry* pDisplayInfo);
 
     public:
         std::string name;
@@ -60,7 +60,7 @@ class GameObjectModel
         void disable() { phasemask = 0;}
         void enable(uint32 ph_mask) { phasemask = ph_mask;}
 
-        bool intersectRay(const G3D::Ray& Ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
+        bool intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
 
         static GameObjectModel* construct(const GameObject* const pGo);
 };

@@ -77,7 +77,7 @@ struct AuctionEntry
     bool BuildAuctionInfo(WorldPacket& data) const;
     void DeleteFromDB() const;
     void SaveToDB() const;
-    void AuctionBidWinning(Player* bidder = nullptr);
+    void AuctionBidWinning(Player* newbidder = nullptr);
 
     // -1,0,+1 order result
     int CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Player* viewPlayer) const;

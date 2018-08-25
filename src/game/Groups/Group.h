@@ -283,9 +283,9 @@ class Group
         void LinkMember(GroupReference* pRef) { m_memberMgr.insertFirst(pRef); }
         void DelinkMember(GroupReference* /*pRef*/) const { }
 
-        InstanceGroupBind* BindToInstance(DungeonPersistentState* save, bool permanent, bool load = false);
+        InstanceGroupBind* BindToInstance(DungeonPersistentState* state, bool permanent, bool load = false);
         void UnbindInstance(uint32 mapid, uint8 difficulty, bool unload = false);
-        InstanceGroupBind* GetBoundInstance(uint32 mapId);
+        InstanceGroupBind* GetBoundInstance(uint32 mapid);
         InstanceGroupBind* GetBoundInstance(Map* aMap, Difficulty difficulty);
         BoundInstancesMap& GetBoundInstances(Difficulty difficulty) { return m_boundInstances[difficulty]; }
 

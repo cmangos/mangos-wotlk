@@ -268,7 +268,7 @@ class WorldSession
         void SendGroupInvite(Player* player, bool alreadyInGroup = false) const;
         void SendAreaTriggerMessage(const char* Text, ...) const ATTR_PRINTF(2, 3);
         void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0) const;
-        void SendSetPhaseShift(uint32 phaseShift) const;
+        void SendSetPhaseShift(uint32 PhaseShift) const;
         void SendQueryTimeResponse() const;
         void SendRedirectClient(std::string& ip, uint16 port) const;
 

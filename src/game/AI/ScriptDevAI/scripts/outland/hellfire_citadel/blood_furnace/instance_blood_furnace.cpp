@@ -135,7 +135,7 @@ void instance_blood_furnace::SetData(uint32 uiType, uint32 uiData)
                 {
                     m_uiBroggokEventPhase = 0;
 
-                    if (m_aBroggokEvent[0].m_sSortedOrcGuids.size() == 0)
+                    if (m_aBroggokEvent[0].m_sSortedOrcGuids.empty())
                         DoSortBroggokOrcs();
     
                     // open first cage

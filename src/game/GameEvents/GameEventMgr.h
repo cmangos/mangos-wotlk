@@ -100,8 +100,8 @@ class GameEventMgr
         void GameEventSpawn(int16 event_id);
         void GameEventUnspawn(int16 event_id);
         void UpdateCreatureData(int16 event_id, bool activate);
-        void UpdateEventQuests(uint16 event_id, bool activate);
-        void UpdateWorldStates(uint16 event_id, bool activate);
+        void UpdateEventQuests(uint16 event_id, bool Activate);
+        void UpdateWorldStates(uint16 event_id, bool Activate);
         void SendEventMails(int16 event_id);
         void OnEventHappened(uint16 event_id, bool activate, bool resume);
     protected:

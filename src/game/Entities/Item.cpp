@@ -1002,7 +1002,7 @@ bool Item::GemsFitSockets() const
             }
         }
 
-        fits &= (GemColor & SocketColor) ? true : false;
+        fits &= (GemColor & SocketColor) != 0;
     }
     return fits;
 }

@@ -255,7 +255,7 @@ class WorldPacket;
 class AchievementMgr
 {
     public:
-        AchievementMgr(Player* pl);
+        AchievementMgr(Player* player);
         ~AchievementMgr();
 
         void Reset();
@@ -280,10 +280,10 @@ class AchievementMgr
 
         bool HasAchievement(uint32 achievement_id) const { return GetCompleteData(achievement_id) != nullptr; }
         CompletedAchievementMap const& GetCompletedAchievements() const { return m_completedAchievements; }
-        bool IsCompletedCriteria(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement) const;
+        bool IsCompletedCriteria(AchievementCriteriaEntry const* achievementCriteria, AchievementEntry const* achievement) const;
 
         uint32 GetCriteriaProgressCounter(AchievementCriteriaEntry const* entry) const;
-        static uint32 GetCriteriaProgressMaxCounter(AchievementCriteriaEntry const* entry, AchievementEntry const* achievement);
+        static uint32 GetCriteriaProgressMaxCounter(AchievementCriteriaEntry const* achievementCriteria, AchievementEntry const* achievement);
 
         // Use PROGRESS_SET only for reset/downgrade criteria progress
         enum ProgressType { PROGRESS_SET, PROGRESS_ACCUMULATE, PROGRESS_HIGHEST };
@@ -293,8 +293,8 @@ class AchievementMgr
         void SendAchievementEarned(AchievementEntry const* achievement) const;
         void SendCriteriaUpdate(uint32 id, CriteriaProgress const* progress) const;
         void CompletedCriteriaFor(AchievementEntry const* achievement);
-        void CompletedAchievement(AchievementEntry const* entry);
-        void IncompletedAchievement(AchievementEntry const* entry);
+        void CompletedAchievement(AchievementEntry const* achievement);
+        void IncompletedAchievement(AchievementEntry const* achievement);
         bool IsCompletedAchievement(AchievementEntry const* entry);
         void BuildAllDataPacket(WorldPacket& data);
 

@@ -97,7 +97,7 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
     ServerPktHeader header(pct.size() + 2, pct.GetOpcode());
     m_crypt.EncryptSend((uint8*)header.header, header.getHeaderLength());
 
-    if (pct.size() > 0)
+    if (!pct.empty())
         Write(reinterpret_cast<const char*>(&header.header), header.getHeaderLength(), reinterpret_cast<const char*>(pct.contents()), pct.size());
     else
         Write(reinterpret_cast<const char*>(&header.header), header.getHeaderLength());

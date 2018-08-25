@@ -131,7 +131,7 @@ class Map : public GridRefManager<NGridType>
         template<class T> void Add(T*);
         template<class T> void Remove(T*, bool);
 
-        static void DeleteFromWorld(Player* player);        // player object will deleted at call
+        static void DeleteFromWorld(Player* pl);        // player object will deleted at call
 
         virtual void Update(const uint32&);
 
@@ -152,8 +152,8 @@ class Map : public GridRefManager<NGridType>
         // function for setting up visibility distance for maps on per-type/per-Id basis
         virtual void InitVisibilityDistance();
 
-        void PlayerRelocation(Player*, float x, float y, float z, float angl);
-        void CreatureRelocation(Creature* creature, float x, float y, float z, float orientation);
+        void PlayerRelocation(Player*, float x, float y, float z, float orientation);
+        void CreatureRelocation(Creature* creature, float x, float y, float z, float ang);
 
         template<class T, class CONTAINER> void Visit(const Cell& cell, TypeContainerVisitor<T, CONTAINER>& visitor);
 
@@ -300,7 +300,7 @@ class Map : public GridRefManager<NGridType>
         // Dynamic VMaps
         float GetHeight(uint32 phasemask, float x, float y, float z) const;
         bool GetHeightInRange(uint32 phasemask, float x, float y, float& z, float maxSearchDist = 4.0f) const;
-        bool IsInLineOfSight(float x1, float y1, float z1, float x2, float y2, float z2, uint32 phasemask, bool ignoreM2Model) const;
+        bool IsInLineOfSight(float srcX, float srcY, float srcZ, float destX, float destY, float destZ, uint32 phasemask, bool ignoreM2Model) const;
         bool GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float& destY, float& destZ, uint32 phasemask, float modifyDist) const;
 
         // Object Model insertion/remove/test for dynamic vmaps use
@@ -355,7 +355,7 @@ class Map : public GridRefManager<NGridType>
 
         void SendZoneDynamicInfo(Player* player) const;
 
-        bool CreatureCellRelocation(Creature* creature, const Cell& new_cell);
+        bool CreatureCellRelocation(Creature* c, const Cell& new_cell);
 
         bool loaded(const GridPair&) const;
         void EnsureGridCreated(const GridPair&);

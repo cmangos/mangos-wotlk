@@ -101,7 +101,7 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
     void Reset() override
     {
         m_bIsPhaseOne                   = true;
-        m_bIsLeftSideSummon             = roll_chance_i(50) ? true : false;
+        m_bIsLeftSideSummon             = roll_chance_i(50);
         m_uiBerserkTimer                = 10 * MINUTE * IN_MILLISECONDS;
         m_uiSummonWaveTimer             = 10000;
         m_uiCultistBuffTimer            = 0;
@@ -366,7 +366,7 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
                 if (m_uiCultistBuffTimer <= uiDiff)
                 {
                     // Choose a random of Fanatic or Adherent
-                    bool bIsFanatic = roll_chance_i(50) ? true : false;
+                    bool bIsFanatic = roll_chance_i(50);
                     uint32 uiNpcEntry = bIsFanatic ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT;
                     uint32 uiSpellEntry = bIsFanatic ? SPELL_DARK_TRANSFORMATION : SPELL_DARK_EMPOWERMENT;
                     int32 iTextEntry = bIsFanatic ? SAY_DARK_TRANSFORMATION : SAY_DARK_EMPOWERMENT;

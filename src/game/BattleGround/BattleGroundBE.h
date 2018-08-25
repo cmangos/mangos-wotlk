@@ -39,9 +39,9 @@ class BattleGroundBE : public BattleGround
         virtual void StartingEventOpenDoors() override;
 
         void RemovePlayer(Player* plr, ObjectGuid guid) override;
-        virtual void FillInitialWorldStates(WorldPacket& d, uint32& count) override;
+        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         void HandleKillPlayer(Player* player, Player* killer) override;
-        bool HandlePlayerUnderMap(Player* plr) override;
+        bool HandlePlayerUnderMap(Player* player) override;
 
         /* Scorekeeping */
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;

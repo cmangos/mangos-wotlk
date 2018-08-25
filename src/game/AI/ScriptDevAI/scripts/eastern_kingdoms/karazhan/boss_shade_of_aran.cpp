@@ -422,7 +422,7 @@ struct boss_aranAI : public ScriptedAI
                                     m_choiceVector.push_back(i);
                             }
 
-                            if (m_choiceVector.size() == 0)
+                            if (m_choiceVector.empty())
                             {
                                 m_attackDistance = 0; // go into melee range
                                 DoStartMovement(m_creature->getVictim());

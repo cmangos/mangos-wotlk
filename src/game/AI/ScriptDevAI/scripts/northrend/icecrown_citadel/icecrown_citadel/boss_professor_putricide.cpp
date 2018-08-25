@@ -164,7 +164,7 @@ struct boss_professor_putricideAI : public ScriptedAI
 
     void Reset() override
     {
-        m_bIsOrange                 = urand(0, 1) ? true : false;
+        m_bIsOrange                 = urand(0, 1) != 0;
         m_uiPhase                   = PHASE_ONE;
         m_uiEnrageTimer             = 10 * MINUTE * IN_MILLISECONDS;
         m_uiTransitionTimer         = 0;

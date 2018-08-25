@@ -765,7 +765,7 @@ void instance_karazhan::Update(uint32 uiDiff)
                 {
                     int k;
                     previous = (previous + urand(0, 7)) % 8;
-                    for (k = previous; tools[k % 8] == true && k < 16; ++k);
+                    for (k = previous; tools[k % 8] && k < 16; ++k);
                     previous = k % 8;
                     tools[previous] = true;
                     m_uiVictoryToolTimers[previous] = urand(4, 6) * 500;
@@ -797,7 +797,7 @@ void instance_karazhan::Update(uint32 uiDiff)
                 {
                     if (m_uiVictoryToolTimers[i] <= uiDiff)
                     {                   
-                        if (m_uiVictoryTimersPhase[i] == false)
+                        if (!m_uiVictoryTimersPhase[i])
                         {
                             if (Creature* tool = instance->GetCreature(m_vVictoryDummyTools[i]))
                             {

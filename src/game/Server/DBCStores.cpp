@@ -254,7 +254,7 @@ static uint32 ReadDBCBuild(const std::string& dbc_path, LocaleNameStr const* loc
     size_t pos = text.find("version=\"");
     size_t pos1 = pos + strlen("version=\"");
     size_t pos2 = text.find("\"", pos1);
-    if (pos == text.npos || pos2 == text.npos || pos1 >= pos2)
+    if (pos == std::string::npos || pos2 == std::string::npos || pos1 >= pos2)
         return 0;
 
     std::string build_str = text.substr(pos1, pos2 - pos1);
@@ -840,10 +840,7 @@ bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredT
 bool MapCoordinateVsZoneCheck(float x, float y, uint32 mapid, uint32 zone)
 {
     WorldMapAreaEntry const* WmaEntry = sWorldMapAreaStore.LookupEntry(zone);
-    if (WmaEntry && mapid == WmaEntry->map_id &&
-            x >= WmaEntry->x2 && x <= WmaEntry->x1 && y >= WmaEntry->y2 && y <= WmaEntry->y1)
-        return true;
-    return false;
+    return WmaEntry && mapid == WmaEntry->map_id && x >= WmaEntry->x2 && x <= WmaEntry->x1 && y >= WmaEntry->y2 && y <= WmaEntry->y1;
 }
 
 bool Zone2MapCoordinates(float& x, float& y, uint32 zone)

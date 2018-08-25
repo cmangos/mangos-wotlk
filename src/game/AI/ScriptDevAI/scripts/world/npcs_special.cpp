@@ -1596,11 +1596,7 @@ struct npc_burster_wormAI : public ScriptedAI
     // function to check for bone worms
     bool IsBoneWorm() const
     {
-        if (m_creature->GetEntry() == NPC_BONE_CRAWLER || m_creature->GetEntry() == NPC_HAISHULUD || m_creature->GetEntry() == NPC_BONE_SIFTER
-                || m_creature->GetEntry() == NPC_MATURE_BONE_SIFTER)
-            return true;
-
-        return false;
+        return m_creature->GetEntry() == NPC_BONE_CRAWLER || m_creature->GetEntry() == NPC_HAISHULUD || m_creature->GetEntry() == NPC_BONE_SIFTER || m_creature->GetEntry() == NPC_MATURE_BONE_SIFTER;
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -1831,7 +1827,7 @@ struct npc_shaman_fire_elementalAI : public ScriptedAI
         {
             std::vector<Unit*> unitVector;
             m_creature->SelectAttackingTargets(unitVector, ATTACKING_TARGET_ALL_SUITABLE, uint32(0), uint32(0), SELECT_FLAG_RANGE_AOE_RANGE, m_fireNovaParams);
-            if (unitVector.size() >= 1)
+            if (!unitVector.empty())
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_FIRE_NOVA) == CAST_OK)
                 {
@@ -1882,7 +1878,7 @@ struct npc_shaman_earth_elementalAI : public ScriptedAI
             m_angeredEarthTimer = 0;
             std::vector<Unit*> unitVector;
             m_creature->SelectAttackingTargets(unitVector, ATTACKING_TARGET_ALL_SUITABLE, uint32(0), uint32(0), SELECT_FLAG_RANGE_AOE_RANGE, m_angeredEarthParams);
-            if (unitVector.size() >= 1)
+            if (!unitVector.empty())
                 if (DoCastSpellIfCan(nullptr, SPELL_ANGERED_EARTH) == CAST_OK)
                     m_angeredEarthTimer = 15000;
         }

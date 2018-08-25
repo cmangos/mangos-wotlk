@@ -312,7 +312,7 @@ struct npc_living_mojoAI : public ScriptedAI
     {
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         m_pInstance = (instance_gundrak*)pCreature->GetInstanceData();
-        m_bIsPartOfColossus = pCreature->GetPositionX() > 1650.0f ? true : false;
+        m_bIsPartOfColossus = pCreature->GetPositionX() > 1650.0f;
         Reset();
     }
 

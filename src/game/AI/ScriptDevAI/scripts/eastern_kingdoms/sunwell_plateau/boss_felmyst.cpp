@@ -407,7 +407,7 @@ struct boss_felmystAI : public ScriptedAI
                                     return;
 
                                 // select the side on which we want to fly
-                                m_bIsLeftSide = urand(0, 1) ? true : false;
+                                m_bIsLeftSide = urand(0, 1) != 0;
                                 m_uiCorruptionCount = 0;
                                 m_uiSubPhase = SUBPHASE_BREATH_PREPARE;
                                 if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(m_bIsLeftSide ? NPC_FLIGHT_TRIGGER_LEFT : NPC_FLIGHT_TRIGGER_RIGHT))

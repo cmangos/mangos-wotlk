@@ -1632,7 +1632,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
     {
         m_lSoulstealers.remove(unit);
 
-        if (m_bEventInProgress && !m_bDeathwailGrounded && m_lSoulstealers.size() == 0)
+        if (m_bEventInProgress && !m_bDeathwailGrounded && m_lSoulstealers.empty())
             DoBeginDescent();
     }
 
@@ -1663,7 +1663,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
         {
             ThreatList const& threatList = soulstealer->getThreatManager().getThreatList();
 
-            if (threatList.size() == 0)
+            if (threatList.empty())
                 return false;
         }
 

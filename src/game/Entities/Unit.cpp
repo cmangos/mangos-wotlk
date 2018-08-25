@@ -355,10 +355,10 @@ Unit::~Unit()
     delete movespline;
 
     // those should be already removed at "RemoveFromWorld()" call
-    MANGOS_ASSERT(m_gameObj.size() == 0);
-    MANGOS_ASSERT(m_dynObjGUIDs.size() == 0);
-    MANGOS_ASSERT(m_deletedAuras.size() == 0);
-    MANGOS_ASSERT(m_deletedHolders.size() == 0);
+    MANGOS_ASSERT(m_gameObj.empty());
+    MANGOS_ASSERT(m_dynObjGUIDs.empty());
+    MANGOS_ASSERT(m_deletedAuras.empty());
+    MANGOS_ASSERT(m_deletedHolders.empty());
 }
 
 void Unit::Update(uint32 update_diff, uint32 p_time)
@@ -609,10 +609,7 @@ bool Unit::haveOffhandWeapon() const
         uint32 ItemId = GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1);
         ItemEntry const* itemInfo = sItemStore.LookupEntry(ItemId);
 
-        if (itemInfo && itemInfo->Class == ITEM_CLASS_WEAPON)
-            return true;
-
-        return false;
+        return itemInfo && itemInfo->Class == ITEM_CLASS_WEAPON;
     }
 }
 
@@ -9897,9 +9894,7 @@ bool Unit::CanHaveThreatList(bool ignoreAliveState/*=false*/) const
     if (creature->IsPet() && creature->GetOwnerGuid().IsPlayer())
     {
         Pet const* pet = static_cast<Pet const*>(creature);
-        if (pet->getPetType() == GUARDIAN_PET || pet->getPetType() == PROTECTOR_PET)
-            return true;
-        return false;
+        return pet->getPetType() == GUARDIAN_PET || pet->getPetType() == PROTECTOR_PET;
     }
 
     // charmed units can not have a threat list if charmed by player
@@ -9999,10 +9994,7 @@ bool Unit::SelectHostileTarget()
             if (Unit* target = GetMap()->GetUnit(GetTargetGuid()))
                 SetInFront(target);
 
-        if (AI()->GetCombatScriptStatus() && getThreatManager().isThreatListEmpty())
-            return false;
-
-        return true;
+        return !(AI()->GetCombatScriptStatus() && getThreatManager().isThreatListEmpty());
     }
 
     Unit* target = nullptr;
@@ -11161,9 +11153,9 @@ void CharmInfo::LoadPetActionBar(const std::string& data)
     for (iter = tokens.begin(), index = ACTION_BAR_INDEX_START; index < ACTION_BAR_INDEX_END; ++iter, ++index)
     {
         // use unsigned cast to avoid sign negative format use at long-> ActiveStates (int) conversion
-        uint8 type  = (uint8)std::stoul((*iter).c_str());
+        uint8 type  = (uint8)std::stoul(*iter);
         ++iter;
-        uint32 action = std::stoul((*iter).c_str());
+        uint32 action = std::stoul(*iter);
 
         PetActionBar[index].SetActionAndType(action, ActiveStates(type));
 
@@ -12353,10 +12345,7 @@ bool Unit::IsAllowedDamageInArea(Unit* pVictim) const
 
     // can't damage player controlled unit by player controlled unit in sanctuary
     AreaTableEntry const* area = GetAreaEntryByAreaID(pVictim->GetAreaId());
-    if (area && area->flags & AREA_FLAG_SANCTUARY)
-        return false;
-
-    return true;
+    return !(area && area->flags & AREA_FLAG_SANCTUARY);
 }
 
 class UnitVisitObjectsInRangeNotifyEvent : public BasicEvent

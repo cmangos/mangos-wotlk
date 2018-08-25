@@ -224,10 +224,7 @@ bool GridMap::loadHolesData(FILE* in, uint32 offset, uint32 /*size*/)
     if (fseek(in, offset, SEEK_SET) != 0)
         return false;
     m_holes = new uint16[16 * 16];
-    if (fread(m_holes, sizeof(uint16), 16 * 16, in) != 16 * 16)
-        return false;
-
-    return true;
+    return fread(m_holes, sizeof(uint16), 16 * 16, in) == 16 * 16;
 }
 
 bool GridMap::loadGridMapLiquidData(FILE* in, uint32 offset, uint32 /*size*/)
@@ -1333,7 +1330,7 @@ void TerrainManager::UnloadTerrain(const uint32 mapId)
     {
         TerrainInfo* ptr = (*iter).second;
         // lets check if this object can be actually freed
-        if (ptr->IsReferenced() == false)
+        if (!ptr->IsReferenced())
         {
             i_TerrainMap.erase(iter);
             delete ptr;

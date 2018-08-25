@@ -1975,10 +1975,7 @@ bool AchievementMgr::IsCompletedAchievement(AchievementEntry const* entry)
     }
 
     // all criterias completed requirement
-    if (completed_all && achievementForTestCount == 0)
-        return true;
-
-    return false;
+    return completed_all && achievementForTestCount == 0;
 }
 
 void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteria, AchievementEntry const* achievement, uint32 changeValue, ProgressType ptype)

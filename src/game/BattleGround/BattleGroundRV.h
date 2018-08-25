@@ -69,12 +69,12 @@ class BattleGroundRV : public BattleGround
         /* inherited from BattlegroundClass */
         virtual void AddPlayer(Player* plr) override;
         virtual void StartingEventOpenDoors() override;
-        virtual void FillInitialWorldStates(WorldPacket& d, uint32& count) override;
+        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
         void RemovePlayer(Player* plr, ObjectGuid guid) override;
         bool HandleAreaTrigger(Player* plr, uint32 triggerId) override;
-        void HandleKillPlayer(Player* plr, Player* killer) override;
-        bool HandlePlayerUnderMap(Player* plr) override;
+        void HandleKillPlayer(Player* player, Player* killer) override;
+        bool HandlePlayerUnderMap(Player* player) override;
 
         void HandleGameObjectCreate(GameObject* go) override;
 

@@ -216,10 +216,7 @@ class instance_violet_hold : public ScriptedInstance
 
         bool IsCurrentPortalForTrash() const
         {
-            if (m_uiWorldStatePortalCount % MAX_MINIBOSSES)
-                return true;
-
-            return false;
+            return (m_uiWorldStatePortalCount % MAX_MINIBOSSES) != 0;
         }
 
         void ProcessActivationCrystal(Unit* pUser, bool bIsIntro = false);
@@ -260,10 +257,7 @@ class instance_violet_hold : public ScriptedInstance
 
         bool IsNextPortalForTrash() const
         {
-            if ((m_uiWorldStatePortalCount + 1) % MAX_MINIBOSSES)
-                return true;
-
-            return false;
+            return ((m_uiWorldStatePortalCount + 1) % MAX_MINIBOSSES) != 0;
         }
 
         BossSpawn* CreateBossSpawnByEntry(uint32 uiEntry);

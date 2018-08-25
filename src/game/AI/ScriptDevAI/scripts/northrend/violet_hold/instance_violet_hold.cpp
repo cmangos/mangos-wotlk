@@ -230,7 +230,7 @@ void instance_violet_hold::UpdateWorldState(bool bEnable)
 
 void instance_violet_hold::OnPlayerEnter(Player* /*pPlayer*/)
 {
-    UpdateWorldState(m_auiEncounter[TYPE_MAIN] == IN_PROGRESS ? true : false);
+    UpdateWorldState(m_auiEncounter[TYPE_MAIN] == IN_PROGRESS);
 
     if (m_vRandomBosses.empty())
     {
@@ -730,7 +730,7 @@ BossInformation const* instance_violet_hold::GetBossInformation(uint32 uiEntry/*
     uint32 mEntry = uiEntry;
     if (!mEntry)
     {
-        if (GetCurrentPortalNumber() == 6 && m_vRandomBosses.size() >= 1)
+        if (GetCurrentPortalNumber() == 6 && !m_vRandomBosses.empty())
             mEntry = m_vRandomBosses[0]->uiEntry;
         else if (GetCurrentPortalNumber() == 12 && m_vRandomBosses.size() >= 2)
             mEntry = m_vRandomBosses[1]->uiEntry;

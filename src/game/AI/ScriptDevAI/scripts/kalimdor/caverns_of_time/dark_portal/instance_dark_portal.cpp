@@ -70,7 +70,7 @@ void instance_dark_portal::UpdateWorldState(bool bEnable)
 
 void instance_dark_portal::OnPlayerEnter(Player* /*pPlayer*/)
 {
-    UpdateWorldState(m_auiEncounter[TYPE_MEDIVH] == IN_PROGRESS ? true : false);
+    UpdateWorldState(m_auiEncounter[TYPE_MEDIVH] == IN_PROGRESS);
 }
 
 void instance_dark_portal::DoHandleAreaTrigger(uint32 uiTriggerId)

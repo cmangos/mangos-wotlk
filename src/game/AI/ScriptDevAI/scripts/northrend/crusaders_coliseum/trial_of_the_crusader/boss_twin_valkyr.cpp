@@ -195,7 +195,7 @@ struct boss_fjolaAI : public ScriptedAI
             DoScriptText(SAY_COLORSWITCH, pCaster);
         }
 
-        m_bIsVortex = urand(0, 1) ? true : false;
+        m_bIsVortex = urand(0, 1) != 0;
         m_bIsLightTwin = !m_bIsLightTwin;
         return true;
     }

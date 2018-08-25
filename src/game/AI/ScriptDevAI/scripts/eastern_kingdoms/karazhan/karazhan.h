@@ -200,7 +200,7 @@ class instance_karazhan : public ScriptedInstance
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
 
-        void SetData64(uint32 uiType, uint64 uiGuid) override;
+        void SetData64(uint32 uiData, uint64 uiGuid) override;
 
         void DoPrepareOperaStage(Creature* pOrganizer);
 

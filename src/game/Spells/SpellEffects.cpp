@@ -3765,9 +3765,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     {
                         if (spellEntry.Id == 11958 || spellEntry.SpellFamilyName != SPELLFAMILY_MAGE)
                             return false;
-                        if ((GetSpellSchoolMask(&spellEntry) & SPELL_SCHOOL_MASK_FROST) && GetSpellRecoveryTime(&spellEntry) > 0)
-                            return true;
-                        return false;
+                        return (GetSpellSchoolMask(&spellEntry) & SPELL_SCHOOL_MASK_FROST) && GetSpellRecoveryTime(&spellEntry) > 0;
                     };
                     static_cast<Player*>(m_caster)->RemoveSomeCooldown(cdCheck);
                     return;

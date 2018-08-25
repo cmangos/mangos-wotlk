@@ -202,7 +202,7 @@ class ThreatManager
 
         void processThreatEvent(ThreatRefStatusChangeEvent* threatRefStatusChangeEvent);
 
-        void UpdateForClient(uint32 time);
+        void UpdateForClient(uint32 diff);
 
         HostileReference* getCurrentVictim() const { return iCurrentVictim; }
 

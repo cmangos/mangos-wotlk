@@ -198,7 +198,7 @@ class Pet : public Creature
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);
         void SynchronizeLevelWithOwner();
-        void InitStatsForLevel(uint32 level);
+        void InitStatsForLevel(uint32 petlevel);
         void InitPetScalingAuras();
         bool HaveInDiet(ItemPrototype const* item) const;
         uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel) const;
@@ -217,7 +217,7 @@ class Pet : public Creature
         void UpdateAttackPowerAndDamage(bool ranged = false) override;
         void UpdateDamagePhysical(WeaponAttackType attType) override;
 
-        bool CanTakeMoreActiveSpells(uint32 SpellIconID);
+        bool CanTakeMoreActiveSpells(uint32 spellid);
         void ToggleAutocast(uint32 spellid, bool apply);
 
         void SetModeFlags(PetModeFlags mode);

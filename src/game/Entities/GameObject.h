@@ -664,7 +664,7 @@ class GameObject : public WorldObject
         int64 GetPackedWorldRotation() const { return m_packedRotation; }
 
         // overwrite WorldObject function for proper name localization
-        const char* GetNameForLocaleIdx(int32 locale_idx) const override;
+        const char* GetNameForLocaleIdx(int32 loc_idx) const override;
 
         void SaveToDB();
         void SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask) const;
@@ -733,7 +733,7 @@ class GameObject : public WorldObject
         void Use(Unit* user);
 
         LootState GetLootState() const { return m_lootState; }
-        void SetLootState(LootState s);
+        void SetLootState(LootState state);
 
         void AddToSkillupList(Player* player);
         bool IsInSkillupList(Player* player) const;

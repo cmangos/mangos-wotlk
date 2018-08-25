@@ -1371,7 +1371,7 @@ struct npc_danath_trollbaneAI : public ScriptedAI
     void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 /*miscValue*/) override
     {
         if (eventType == AI_EVENT_START_EVENT && pSender == m_creature) // sanity check
-            if (m_bYelling == false) // don't override anything if yelling already...
+            if (!m_bYelling) // don't override anything if yelling already...
             {
                 m_uiYell1DelayRemaining = YELL_1_DELAY;
                 m_uiYell2DelayRemaining = YELL_2_DELAY;
@@ -1455,7 +1455,7 @@ struct npc_nazgrelAI : public ScriptedAI
     {
         if (eventType == AI_EVENT_START_EVENT && pSender == m_creature) // sanity check
         {
-            if (m_bYelling == false) // don't override anything if yelling already...
+            if (!m_bYelling) // don't override anything if yelling already...
             {
                 m_uiYell1DelayRemaining = YELL_1_DELAY;
                 m_uiYell2DelayRemaining = YELL_2_DELAY;

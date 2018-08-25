@@ -205,7 +205,7 @@ void PlayerTaxi::LoadTaxiMask(const char* data)
             (index < TaxiMaskSize) && (iter != tokens.end()); ++iter, ++index)
     {
         // load and set bits only for existing taxi nodes
-        m_taximask[index] = sTaxiNodesMask[index] & uint32(std::stoul((*iter).c_str()));
+        m_taximask[index] = sTaxiNodesMask[index] & uint32(std::stoul(*iter));
     }
 }
 
@@ -13387,7 +13387,7 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
             QEmote qe;
             qe._Delay = 0;
             qe._Emote = 0;
-            std::string title = "";
+            std::string title;
 
             // need pet case for some quests
             if (Creature* pCreature = GetMap()->GetAnyTypeCreature(guid))
@@ -13545,11 +13545,7 @@ bool Player::CanCompleteQuest(uint32 quest_id) const
     if (qInfo->HasQuestFlag(QUEST_FLAGS_AUTO_REWARDED))
     {
         // a few checks, not all "satisfy" is needed
-        if (SatisfyQuestPreviousQuest(qInfo, false) && SatisfyQuestLevel(qInfo, false) &&
-                SatisfyQuestSkill(qInfo, false) && SatisfyQuestCondition(qInfo, false) && SatisfyQuestRace(qInfo, false) && SatisfyQuestClass(qInfo, false))
-            return true;
-
-        return false;
+        return SatisfyQuestPreviousQuest(qInfo, false) && SatisfyQuestLevel(qInfo, false) && SatisfyQuestSkill(qInfo, false) && SatisfyQuestCondition(qInfo, false) && SatisfyQuestRace(qInfo, false) && SatisfyQuestClass(qInfo, false);
     }
 
     // auto complete quest
@@ -13596,10 +13592,7 @@ bool Player::CanCompleteQuest(uint32 quest_id) const
     }
 
     uint32 repFacId = qInfo->GetRepObjectiveFaction();
-    if (repFacId && GetReputationMgr().GetReputation(repFacId) < qInfo->GetRepObjectiveValue())
-        return false;
-
-    return true;
+    return !(repFacId && GetReputationMgr().GetReputation(repFacId) < qInfo->GetRepObjectiveValue());
 }
 
 bool Player::CanCompleteRepeatableQuest(Quest const* pQuest) const
@@ -15486,7 +15479,7 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
     uint32 index;
     for (iter = tokens.begin(), index = 0; index < count; ++iter, ++index)
     {
-        m_uint32Values[startOffset + index] = std::stoul((*iter).c_str());
+        m_uint32Values[startOffset + index] = std::stoul(*iter);
     }
 }
 
@@ -19833,13 +19826,13 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
         switch (Condition->Comparator[i])
         {
             case 2:                                         // requires less <color> than (<value> || <comparecolor>) gems
-                activate &= (_cur_gem < _cmp_gem) ? true : false;
+                activate &= _cur_gem < _cmp_gem;
                 break;
             case 3:                                         // requires more <color> than (<value> || <comparecolor>) gems
-                activate &= (_cur_gem > _cmp_gem) ? true : false;
+                activate &= _cur_gem > _cmp_gem;
                 break;
             case 5:                                         // requires at least <color> than (<value> || <comparecolor>) gems
-                activate &= (_cur_gem >= _cmp_gem) ? true : false;
+                activate &= _cur_gem >= _cmp_gem;
                 break;
         }
     }
@@ -20001,19 +19994,13 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
 bool Player::CanJoinToBattleground() const
 {
     // check Deserter debuff
-    if (GetDummyAura(26013))
-        return false;
-
-    return true;
+    return GetDummyAura(26013) == nullptr;
 }
 
 bool Player::CanReportAfkDueToLimit()
 {
     // a player can complain about 15 people per 5 minutes
-    if (m_bgData.bgAfkReportedCount++ >= 15)
-        return false;
-
-    return true;
+    return m_bgData.bgAfkReportedCount++ < 15;
 }
 
 /// This player has been blamed to be inactive in a battleground
@@ -20765,10 +20752,7 @@ BattleGround* Player::GetBattleGround() const
 bool Player::InArena() const
 {
     BattleGround* bg = GetBattleGround();
-    if (!bg || !bg->isArena())
-        return false;
-
-    return true;
+    return !(!bg || !bg->isArena());
 }
 
 bool Player::GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const
@@ -20783,10 +20767,7 @@ bool Player::GetBGAccessByLevel(BattleGroundTypeId bgTypeId) const
     if (level > DEFAULT_MAX_LEVEL)
         level = DEFAULT_MAX_LEVEL;
 
-    if (level < bg->GetMinLevel() || level > bg->GetMaxLevel())
-        return false;
-
-    return true;
+    return !(level < bg->GetMinLevel() || level > bg->GetMaxLevel());
 }
 
 float Player::GetReputationPriceDiscount(Creature const* creature) const
@@ -21075,10 +21056,7 @@ bool Player::CanNoReagentCast(SpellEntry const* spellInfo) const
     // Check no reagent use mask
     uint64 noReagentMask_0_1 = GetUInt64Value(PLAYER_NO_REAGENT_COST_1);
     uint32 noReagentMask_2   = GetUInt32Value(PLAYER_NO_REAGENT_COST_1 + 2);
-    if (spellInfo->IsFitToFamilyMask(noReagentMask_0_1, noReagentMask_2))
-        return true;
-
-    return false;
+    return spellInfo->IsFitToFamilyMask(noReagentMask_0_1, noReagentMask_2);
 }
 
 void Player::RemoveItemDependentAurasAndCasts(Item* pItem)

@@ -1661,7 +1661,7 @@ struct npc_salhadaarAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiFoundBalls == false)
+        if (!m_uiFoundBalls)
         {
             std::list<Creature*> creatureList;
             GetCreatureListWithEntryInGrid(creatureList, m_creature, NPC_ENERGY_BALL, 50.0f);
@@ -1701,7 +1701,7 @@ struct npc_salhadaarAI : public ScriptedAI
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
                 return;
 
-            if (m_uiUsedMirrorImage == false && m_creature->GetHealthPercent() < 25) // at 25% hp cast mirror image, its two spells
+            if (!m_uiUsedMirrorImage && m_creature->GetHealthPercent() < 25) // at 25% hp cast mirror image, its two spells
             {
                 m_creature->CastSpell(m_creature, SPELL_MIRROR_IMAGE_1, TRIGGERED_OLD_TRIGGERED);
                 m_creature->CastSpell(m_creature, SPELL_MIRROR_IMAGE_2, TRIGGERED_OLD_TRIGGERED);

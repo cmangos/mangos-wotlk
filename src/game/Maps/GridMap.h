@@ -170,7 +170,7 @@ class GridMap
         GridMap();
         ~GridMap();
 
-        bool loadData(char const* filaname);
+        bool loadData(char const* filename);
         void unloadData();
 
         static bool ExistMap(uint32 mapid, int gx, int gy);
@@ -211,7 +211,7 @@ class Referencable
 class TerrainInfo : public Referencable<std::atomic_long>
 {
     public:
-        TerrainInfo(uint32 mapId);
+        TerrainInfo(uint32 mapid);
         ~TerrainInfo();
 
         uint32 GetMapId() const { return m_mapId; }
@@ -221,7 +221,7 @@ class TerrainInfo : public Referencable<std::atomic_long>
         float GetHeightStatic(float x, float y, float z, bool useVmaps = true, float maxSearchDist = DEFAULT_HEIGHT_SEARCH) const;
         float GetWaterLevel(float x, float y, float z, float* pGround = nullptr) const;
         float GetWaterOrGroundLevel(float x, float y, float z, float* pGround = nullptr, bool swim = false) const;
-        bool IsInWater(float x, float y, float z, GridMapLiquidData* data = nullptr, float min_depth = 2.0f) const;
+        bool IsInWater(float x, float y, float pZ, GridMapLiquidData* data = nullptr, float min_depth = 2.0f) const;
         bool IsSwimmable(float x, float y, float pZ, float radius = 1.5f, GridMapLiquidData* data = nullptr) const;
         bool IsAboveWater(float x, float y, float z, float* pWaterZ = nullptr) const;
         bool IsUnderWater(float x, float y, float z, float* pWaterZ = nullptr) const;
@@ -235,7 +235,7 @@ class TerrainInfo : public Referencable<std::atomic_long>
         uint32 GetZoneId(float x, float y, float z) const;
         void GetZoneAndAreaId(uint32& zoneid, uint32& areaid, float x, float y, float z) const;
 
-        bool GetAreaInfo(float x, float y, float z, uint32& mogpflags, int32& adtId, int32& rootId, int32& groupId) const;
+        bool GetAreaInfo(float x, float y, float z, uint32& flags, int32& adtId, int32& rootId, int32& groupId) const;
         bool IsOutdoors(float x, float y, float z) const;
 
         // this method should be used only by TerrainManager
