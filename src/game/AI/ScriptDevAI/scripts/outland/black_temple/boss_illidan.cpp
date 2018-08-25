@@ -1271,7 +1271,7 @@ bool GossipHello_npc_akama_illidan(Player* pPlayer, Creature* pCreature)
 
 bool GossipSelect_npc_akama_illidan(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
 {
-    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1 || true)
+    if (uiAction == GOSSIP_ACTION_INFO_DEF + 1 || uiAction == GOSSIP_ACTION_INFO_DEF + 2)
     {
         pPlayer->CLOSE_GOSSIP_MENU();
 
