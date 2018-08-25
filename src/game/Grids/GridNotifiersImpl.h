@@ -109,7 +109,7 @@ inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(CreatureMapType& m)
     if (!i_player.isAlive() || i_player.IsTaxiFlying())
         return;
 
-    bool playerHasAI = i_player.AI();
+    bool playerHasAI = i_player.AI() != nullptr;
 
     for (auto& iter : m)
     {
@@ -130,7 +130,7 @@ inline void MaNGOS::PlayerVisitObjectsNotifier::Visit(PlayerMapType& m)
     if (!i_player.isAlive() || i_player.IsTaxiFlying())
         return;
 
-    bool playerHasAI = i_player.AI();
+    bool playerHasAI = i_player.AI() != nullptr;
 
     for (auto& iter : m)
     {

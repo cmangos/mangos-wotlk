@@ -37,7 +37,7 @@ void instance_underbog::Initialize()
 void instance_underbog::SetData(uint32 type, uint32 data)
 {
     if (type == DATA_GHAZAN_SURFACE)
-        m_bGhazanSurfaced = bool(data);
+        m_bGhazanSurfaced = data != 0;
 }
 
 uint32 instance_underbog::GetData(uint32 type) const

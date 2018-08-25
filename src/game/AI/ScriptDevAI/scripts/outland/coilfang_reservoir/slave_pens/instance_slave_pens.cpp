@@ -37,7 +37,7 @@ void instance_slave_pens::Initialize()
 void instance_slave_pens::SetData(uint32 type, uint32 data)
 {
     if (type == DATA_NATURALIST)
-        m_naturalistYelled = bool(data);
+        m_naturalistYelled = data != 0;
 }
 
 uint32 instance_slave_pens::GetData(uint32 type) const

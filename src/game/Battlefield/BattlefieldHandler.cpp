@@ -120,7 +120,7 @@ void WorldSession::HandleBattlefieldQueueResponse(WorldPacket& recv_data)
     DEBUG_LOG("HandleBattlefieldQueueResponse: battlefieldId: %u accepted: %u", battlefieldId, accepted);
 
     if (Battlefield* battlefield = sOutdoorPvPMgr.GetBattlefieldById(battlefieldId))
-        battlefield->HandleQueueInviteResponse(GetPlayer(), accepted);
+        battlefield->HandleQueueInviteResponse(GetPlayer(), accepted != 0);
 }
 
 // Sent by client when player clicks accept / reject war invitation
@@ -133,7 +133,7 @@ void WorldSession::HandleBattlefieldWarResponse(WorldPacket& recv_data)
     DEBUG_LOG("HandleBattlefieldWarResponse: battlefieldId: %u accepted: %u", battlefieldId, accepted);
 
     if (Battlefield* battlefield = sOutdoorPvPMgr.GetBattlefieldById(battlefieldId))
-        battlefield->HandleWarInviteResponse(GetPlayer(), accepted);
+        battlefield->HandleWarInviteResponse(GetPlayer(), accepted != 0);
 }
 
 // Sent by client when player exits the battlefield

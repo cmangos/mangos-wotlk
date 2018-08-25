@@ -18363,7 +18363,7 @@ void Player::UpdatePvPFlagTimer(uint32 diff)
     if (!pvpInfo.inPvPCombat && !pvpInfo.inPvPEnforcedArea && !pvpInfo.inPvPCapturePoint && !pvpInfo.isPvPFlagCarrier && !HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_PVP_DESIRED))
     {
         pvpInfo.timerPvPRemaining -= std::min(pvpInfo.timerPvPRemaining, diff);
-        ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER, pvpInfo.timerPvPRemaining);
+        ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER, pvpInfo.timerPvPRemaining != 0);
     }
     else
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_PVP_TIMER);
@@ -19246,7 +19246,7 @@ void Player::OnTaxiFlightRouteProgress(const TaxiPathNodeEntry* node, const Taxi
     }
 
     // Needs to be confirmed: first one shouldn't fire arrival event, final one shouldnt fire departure event?
-    for (int arrival = 1; arrival > -int(bool(next)); --arrival)
+    for (int arrival = 1; arrival > -int(next != nullptr); --arrival)
     {
         if (uint32 eventid = (arrival ? node->arrivalEventID : node->departureEventID))
         {
