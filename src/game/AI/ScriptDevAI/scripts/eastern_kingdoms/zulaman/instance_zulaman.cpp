@@ -146,9 +146,9 @@ void instance_zulaman::OnCreatureEvade(Creature* pCreature)
         case NPC_TRIBES_MAN:
         case NPC_WARBRINGER:
         case NPC_AXETHROWER:
-            for (GuidSet::const_iterator itr = m_aNalorakkEvent[m_uiBearEventPhase].sBearTrashGuidSet.begin(); itr != m_aNalorakkEvent[m_uiBearEventPhase].sBearTrashGuidSet.end(); ++itr)
+            for (auto itr : m_aNalorakkEvent[m_uiBearEventPhase].sBearTrashGuidSet)
             {
-                Creature* pTemp = instance->GetCreature(*itr);
+                Creature* pTemp = instance->GetCreature(itr);
                 if (pTemp && !pTemp->isAlive())
                     pTemp->Respawn();
             }
@@ -223,12 +223,12 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
                 DoTimeRunSay(RUN_FAIL);
                 DoUpdateWorldState(WORLD_STATE_ID, 0);
                 // Kill remaining Event NPCs
-                for (uint8 i = 0; i < MAX_CHESTS; ++i)
+                for (auto& i : m_aEventNpcInfo)
                 {
                     // Not yet rescued, so too late
-                    if (!m_aEventNpcInfo[i].uiSavePosition)
+                    if (!i.uiSavePosition)
                     {
-                        if (Creature* pCreature = instance->GetCreature(m_aEventNpcInfo[i].npGuid))
+                        if (Creature* pCreature = instance->GetCreature(i.npGuid))
                             pCreature->ForcedDespawn();
                     }
                 }
@@ -383,9 +383,9 @@ uint32 instance_zulaman::GetData(uint32 uiType) const
 
 void instance_zulaman::SendNextBearWave(Unit* pTarget)
 {
-    for (GuidSet::const_iterator itr = m_aNalorakkEvent[m_uiBearEventPhase].sBearTrashGuidSet.begin(); itr != m_aNalorakkEvent[m_uiBearEventPhase].sBearTrashGuidSet.end(); ++itr)
+    for (auto itr : m_aNalorakkEvent[m_uiBearEventPhase].sBearTrashGuidSet)
     {
-        Creature* pTemp = instance->GetCreature(*itr);
+        Creature* pTemp = instance->GetCreature(itr);
         if (pTemp && pTemp->isAlive())
         {
             pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);

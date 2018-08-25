@@ -296,8 +296,8 @@ struct boss_kaelthasAI : public ScriptedAI
         // Handle summon weapons event
         if (pSpell->Id == SPELL_SUMMON_WEAPONS)
         {
-            for (uint8 i = 0; i < MAX_WEAPONS; ++i)
-                DoCastSpellIfCan(m_creature, m_auiSpellSummonWeapon[i], CAST_TRIGGERED);
+            for (unsigned int i : m_auiSpellSummonWeapon)
+                DoCastSpellIfCan(m_creature, i, CAST_TRIGGERED);
 
             m_uiPhase      = PHASE_2_WEAPON;
             m_uiPhaseTimer = 120000;

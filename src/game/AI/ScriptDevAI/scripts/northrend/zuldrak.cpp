@@ -66,9 +66,9 @@ struct npc_gurgthockAI : public ScriptedAI
     void SummonedCreatureJustDied(Creature* pSummoned) override
     {
         uint32 uiEntry = pSummoned->GetEntry();
-        for (uint8 i = 0; i < 4; ++i)
+        for (unsigned int m_auiBosse : m_auiBosses)
         {
-            if (uiEntry == m_auiBosses[i])
+            if (uiEntry == m_auiBosse)
             {
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_FROM_BEYOND, m_creature);

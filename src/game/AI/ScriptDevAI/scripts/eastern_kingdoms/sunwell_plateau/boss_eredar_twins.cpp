@@ -355,9 +355,9 @@ struct boss_sacrolashAI : public ScriptedAI
         std::vector<Unit*> m_vRangeTargets;
 
         ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-        for (ThreatList::const_iterator iter = tList.begin(); iter != tList.end(); ++iter)
+        for (auto iter : tList)
         {
-            if (Unit* pTempTarget = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid()))
+            if (Unit* pTempTarget = m_creature->GetMap()->GetUnit(iter->getUnitGuid()))
             {
                 if (!pTempTarget->IsWithinDistInMap(m_creature, fDist))
                     m_vRangeTargets.push_back(pTempTarget);

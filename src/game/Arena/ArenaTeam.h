@@ -155,18 +155,18 @@ class ArenaTeam
 
         ArenaTeamMember* GetMember(ObjectGuid guid)
         {
-            for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-                if (itr->guid == guid)
-                    return &(*itr);
+            for (auto& m_member : m_members)
+                if (m_member.guid == guid)
+                    return &m_member;
 
             return nullptr;
         }
 
         ArenaTeamMember* GetMember(const std::string& name)
         {
-            for (MemberList::iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-                if (itr->name == name)
-                    return &(*itr);
+            for (auto& m_member : m_members)
+                if (m_member.name == name)
+                    return &m_member;
 
             return nullptr;
         }

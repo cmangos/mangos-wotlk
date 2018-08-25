@@ -169,8 +169,8 @@ void instance_pit_of_saron::Initialize()
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
     InitializeDialogueHelper(this);
 
-    for (uint8 i = 0; i < MAX_SPECIAL_ACHIEV_CRITS; ++i)
-        m_abAchievCriteria[i] = false;
+    for (bool& i : m_abAchievCriteria)
+        i = false;
 }
 
 void instance_pit_of_saron::OnPlayerEnter(Player* pPlayer)
@@ -195,14 +195,14 @@ void instance_pit_of_saron::ProcessIntroEventNpcs(Player* pPlayer)
     StartNextDialogueText(NPC_TYRANNUS_INTRO);
 
     // Spawn Begin Mobs
-    for (uint8 i = 0; i < countof(aEventBeginLocations); ++i)
+    for (const auto& aEventBeginLocation : aEventBeginLocations)
     {
         // ToDo: maybe despawn the intro npcs when the other events occur
-        if (Creature* pSummon = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocations[i].uiEntryHorde : aEventBeginLocations[i].uiEntryAlliance,
-                                aEventBeginLocations[i].fX, aEventBeginLocations[i].fY, aEventBeginLocations[i].fZ, aEventBeginLocations[i].fO, TEMPSPAWN_TIMED_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
+        if (Creature* pSummon = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
+            aEventBeginLocation.fX, aEventBeginLocation.fY, aEventBeginLocation.fZ, aEventBeginLocation.fO, TEMPSPAWN_TIMED_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
         {
             pSummon->SetWalk(false);
-            pSummon->GetMotionMaster()->MovePoint(0, aEventBeginLocations[i].fMoveX, aEventBeginLocations[i].fMoveY, aEventBeginLocations[i].fMoveZ);
+            pSummon->GetMotionMaster()->MovePoint(0, aEventBeginLocation.fMoveX, aEventBeginLocation.fMoveY, aEventBeginLocation.fMoveZ);
         }
     }
 }
@@ -346,10 +346,10 @@ void instance_pit_of_saron::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -381,13 +381,13 @@ void instance_pit_of_saron::OnCreatureEnterCombat(Creature* pCreature)
             pTyrannus->GetMotionMaster()->MovePoint(0, afTyrannusMovePos[2][0], afTyrannusMovePos[2][1], afTyrannusMovePos[2][2]);
 
             // Spawn Mobs
-            for (uint8 i = 0; i < countof(aEventSecondAmbushLocations); ++i)
+            for (const auto& aEventSecondAmbushLocation : aEventSecondAmbushLocations)
             {
-                if (Creature* pSummon = pTyrannus->SummonCreature(aEventSecondAmbushLocations[i].uiEntryHorde, aEventSecondAmbushLocations[i].fX, aEventSecondAmbushLocations[i].fY,
-                                        aEventSecondAmbushLocations[i].fZ, aEventSecondAmbushLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+                if (Creature* pSummon = pTyrannus->SummonCreature(aEventSecondAmbushLocation.uiEntryHorde, aEventSecondAmbushLocation.fX, aEventSecondAmbushLocation.fY,
+                    aEventSecondAmbushLocation.fZ, aEventSecondAmbushLocation.fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pSummon->SetWalk(false);
-                    pSummon->GetMotionMaster()->MovePoint(1, aEventSecondAmbushLocations[i].fMoveX, aEventSecondAmbushLocations[i].fMoveY, aEventSecondAmbushLocations[i].fMoveZ);
+                    pSummon->GetMotionMaster()->MovePoint(1, aEventSecondAmbushLocation.fMoveX, aEventSecondAmbushLocation.fMoveY, aEventSecondAmbushLocation.fMoveZ);
                 }
             }
         }
@@ -495,13 +495,13 @@ void instance_pit_of_saron::JustDidDialogueStep(int32 iEntry)
                 return;
 
             // Spawn tunnel end event mobs
-            for (uint8 i = 0; i < countof(aEventTunnelEndLocations); ++i)
+            for (const auto& aEventTunnelEndLocation : aEventTunnelEndLocations)
             {
-                if (Creature* pSummon = pTyrannus->SummonCreature(m_uiTeam == HORDE ? aEventTunnelEndLocations[i].uiEntryHorde : aEventTunnelEndLocations[i].uiEntryAlliance,
-                                        aEventTunnelEndLocations[i].fX, aEventTunnelEndLocations[i].fY, aEventTunnelEndLocations[i].fZ, aEventTunnelEndLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+                if (Creature* pSummon = pTyrannus->SummonCreature(m_uiTeam == HORDE ? aEventTunnelEndLocation.uiEntryHorde : aEventTunnelEndLocation.uiEntryAlliance,
+                    aEventTunnelEndLocation.fX, aEventTunnelEndLocation.fY, aEventTunnelEndLocation.fZ, aEventTunnelEndLocation.fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pSummon->SetWalk(false);
-                    pSummon->GetMotionMaster()->MovePoint(0, aEventTunnelEndLocations[i].fMoveX, aEventTunnelEndLocations[i].fMoveY, aEventTunnelEndLocations[i].fMoveZ);
+                    pSummon->GetMotionMaster()->MovePoint(0, aEventTunnelEndLocation.fMoveX, aEventTunnelEndLocation.fMoveY, aEventTunnelEndLocation.fMoveZ);
                 }
             }
             break;
@@ -600,13 +600,13 @@ void instance_pit_of_saron::DoStartAmbushEvent()
     DoScriptText(SAY_TYRANNUS_AMBUSH_1, pTyrannus);
 
     // Spawn Mobs
-    for (uint8 i = 0; i < countof(aEventFirstAmbushLocations); ++i)
+    for (const auto& aEventFirstAmbushLocation : aEventFirstAmbushLocations)
     {
-        if (Creature* pSummon = pTyrannus->SummonCreature(aEventFirstAmbushLocations[i].uiEntryHorde, aEventFirstAmbushLocations[i].fX, aEventFirstAmbushLocations[i].fY,
-                                aEventFirstAmbushLocations[i].fZ, aEventFirstAmbushLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+        if (Creature* pSummon = pTyrannus->SummonCreature(aEventFirstAmbushLocation.uiEntryHorde, aEventFirstAmbushLocation.fX, aEventFirstAmbushLocation.fY,
+            aEventFirstAmbushLocation.fZ, aEventFirstAmbushLocation.fO, TEMPSPAWN_DEAD_DESPAWN, 0))
         {
             pSummon->SetWalk(false);
-            pSummon->GetMotionMaster()->MovePoint(1, aEventFirstAmbushLocations[i].fMoveX, aEventFirstAmbushLocations[i].fMoveY, aEventFirstAmbushLocations[i].fMoveZ);
+            pSummon->GetMotionMaster()->MovePoint(1, aEventFirstAmbushLocation.fMoveX, aEventFirstAmbushLocation.fMoveY, aEventFirstAmbushLocation.fMoveZ);
         }
     }
 }

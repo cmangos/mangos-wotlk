@@ -1265,9 +1265,9 @@ struct npc_guardian_of_yoggAI : public ScriptedAI
                         return;
 
                     // whisper to all players
-                    for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                    for (const auto& lPlayer : lPlayers)
                     {
-                        if (Player* pPlayer = itr->getSource())
+                        if (Player* pPlayer = lPlayer.getSource())
                             DoScriptText(SAY_WIPE_PHASE_1, pVoice, pPlayer);
                     }
                 }

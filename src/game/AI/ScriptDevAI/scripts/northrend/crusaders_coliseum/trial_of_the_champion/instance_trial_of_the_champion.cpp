@@ -453,10 +453,10 @@ void instance_trial_of_the_champion::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -601,9 +601,9 @@ bool instance_trial_of_the_champion::IsArenaChallengeComplete(uint32 uiType)
         uiStandState = UNIT_STAND_STATE_KNEEL;
 
     // check if all champions are defeated
-    for (uint8 i = 0; i < MAX_CHAMPIONS_ARENA; ++i)
+    for (auto m_ArenaChampionsGuid : m_ArenaChampionsGuids)
     {
-        if (Creature* pChampion = instance->GetCreature(m_ArenaChampionsGuids[i]))
+        if (Creature* pChampion = instance->GetCreature(m_ArenaChampionsGuid))
         {
             if (pChampion->getStandState() != uiStandState)
                 return false;
@@ -627,8 +627,8 @@ void instance_trial_of_the_champion::DoSummonHeraldIfNeeded(Unit* pSummoner)
     // summon champion mounts if required
     if (GetData(TYPE_GRAND_CHAMPIONS) != DONE)
     {
-        for (uint8 i = 0; i < MAX_CHAMPIONS_MOUNTS; ++i)
-            pSummoner->SummonCreature(m_uiTeam == ALLIANCE ? aTrialChampionsMounts[i].uiEntryAlliance : aTrialChampionsMounts[i].uiEntryHorde, aTrialChampionsMounts[i].fX, aTrialChampionsMounts[i].fY, aTrialChampionsMounts[i].fZ, aTrialChampionsMounts[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+        for (const auto& aTrialChampionsMount : aTrialChampionsMounts)
+            pSummoner->SummonCreature(m_uiTeam == ALLIANCE ? aTrialChampionsMount.uiEntryAlliance : aTrialChampionsMount.uiEntryHorde, aTrialChampionsMount.fX, aTrialChampionsMount.fY, aTrialChampionsMount.fZ, aTrialChampionsMount.fO, TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 }
 
@@ -663,9 +663,9 @@ void instance_trial_of_the_champion::DoSendNextArenaWave()
     // send trash waves of champions in the arena
     else
     {
-        for (GuidSet::const_iterator itr = m_sArenaHelpersGuids[m_uiArenaStage].begin(); itr != m_sArenaHelpersGuids[m_uiArenaStage].end(); ++itr)
+        for (auto itr : m_sArenaHelpersGuids[m_uiArenaStage])
         {
-            if (Creature* pHelper = instance->GetCreature(*itr))
+            if (Creature* pHelper = instance->GetCreature(itr))
             {
                 pHelper->SetWalk(false);
                 pCenterTrigger->GetContactPoint(pHelper, fX, fY, fZ, 2 * INTERACTION_DISTANCE);
@@ -688,9 +688,9 @@ void instance_trial_of_the_champion::DoCleanupArenaOnWipe()
         if (Creature* pChampion = instance->GetCreature(m_ArenaChampionsGuids[i]))
             pChampion->ForcedDespawn();
 
-        for (GuidSet::const_iterator itr = m_sArenaHelpersGuids[i].begin(); itr != m_sArenaHelpersGuids[i].end(); ++itr)
+        for (auto itr : m_sArenaHelpersGuids[i])
         {
-            if (Creature* pHelper = instance->GetCreature(*itr))
+            if (Creature* pHelper = instance->GetCreature(itr))
                 pHelper->ForcedDespawn();
         }
 
@@ -766,9 +766,9 @@ void instance_trial_of_the_champion::InformChampionReachHome()
     uint8 j = 0;
 
     // move helpers to the right point
-    for (GuidSet::const_iterator itr = m_sArenaHelpersGuids[m_uiIntroStage - 1].begin(); itr != m_sArenaHelpersGuids[m_uiIntroStage - 1].end(); ++itr)
+    for (auto itr : m_sArenaHelpersGuids[m_uiIntroStage - 1])
     {
-        if (Creature* pHelper = instance->GetCreature(*itr))
+        if (Creature* pHelper = instance->GetCreature(itr))
         {
             pTrigger->GetNearPoint(pTrigger, fX, fY, fZ, 0, 5.0f, pTrigger->GetAngle(pCenterTrigger) - (M_PI_F * 0.25f) + j * (M_PI_F * 0.25f));
             pHelper->GetMotionMaster()->Clear();
@@ -788,9 +788,9 @@ void instance_trial_of_the_champion::InformChampionReachHome()
 void instance_trial_of_the_champion::DoSendChampionsToExit()
 {
     // move the champions to the gate
-    for (uint8 i = 0; i < MAX_CHAMPIONS_ARENA; ++i)
+    for (auto m_ArenaChampionsGuid : m_ArenaChampionsGuids)
     {
-        if (Creature* pChampion = instance->GetCreature(m_ArenaChampionsGuids[i]))
+        if (Creature* pChampion = instance->GetCreature(m_ArenaChampionsGuid))
         {
             // kill credit spell on completion
             if (GetData(TYPE_GRAND_CHAMPIONS) == DONE)
@@ -806,9 +806,9 @@ void instance_trial_of_the_champion::DoSendChampionsToExit()
 // Function that will set all the champions in combat with the target
 void instance_trial_of_the_champion::DoSetChamptionsInCombat(Unit* pTarget)
 {
-    for (uint8 i = 0; i < MAX_CHAMPIONS_ARENA; ++i)
+    for (auto m_ArenaChampionsGuid : m_ArenaChampionsGuids)
     {
-        if (Creature* pChampion = instance->GetCreature(m_ArenaChampionsGuids[i]))
+        if (Creature* pChampion = instance->GetCreature(m_ArenaChampionsGuid))
             pChampion->AI()->AttackStart(pTarget);
     }
 }

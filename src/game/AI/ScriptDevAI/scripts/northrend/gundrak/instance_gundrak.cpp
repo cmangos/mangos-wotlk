@@ -156,14 +156,14 @@ void instance_gundrak::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[TYPE_SLADRAN] >> m_auiEncounter[TYPE_MOORABI] >> m_auiEncounter[TYPE_COLOSSUS] >> m_auiEncounter[TYPE_GALDARAH] >> m_auiEncounter[TYPE_ECK];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
 
         // TODO: REMOVE when bridge/ collision reloading correctly working
-        if (m_auiEncounter[i] == SPECIAL)
-            m_auiEncounter[i] = DONE;
+        if (i == SPECIAL)
+            i = DONE;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -206,9 +206,9 @@ void instance_gundrak::SetData(uint32 uiType, uint32 uiData)
                     pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             if (uiData == FAIL)
             {
-                for (GuidSet::const_iterator itr = m_sColossusMojosGuids.begin(); itr != m_sColossusMojosGuids.end(); ++itr)
+                for (auto m_sColossusMojosGuid : m_sColossusMojosGuids)
                 {
-                    if (Creature* pMojo = instance->GetCreature(*itr))
+                    if (Creature* pMojo = instance->GetCreature(m_sColossusMojosGuid))
                         pMojo->Respawn();
                 }
             }
@@ -297,9 +297,9 @@ void instance_gundrak::OnCreatureEnterCombat(Creature* pCreature)
             return;
 
         // Move all 4 Mojos to evade and move to the Colossus position
-        for (GuidSet::const_iterator itr = m_sColossusMojosGuids.begin(); itr != m_sColossusMojosGuids.end(); ++itr)
+        for (auto m_sColossusMojosGuid : m_sColossusMojosGuids)
         {
-            if (Creature* pMojo = instance->GetCreature(*itr))
+            if (Creature* pMojo = instance->GetCreature(m_sColossusMojosGuid))
                 pMojo->AI()->EnterEvadeMode();
         }
     }

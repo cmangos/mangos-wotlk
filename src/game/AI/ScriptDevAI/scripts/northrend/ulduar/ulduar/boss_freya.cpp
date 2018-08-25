@@ -191,8 +191,8 @@ struct boss_freyaAI : public ScriptedAI
 
         // init the Allies of Nature spells
         spawnSpellsVector.reserve(MAX_ALLIES_SPELLS);
-        for (uint8 i = 0; i < MAX_ALLIES_SPELLS; ++i)
-            spawnSpellsVector.push_back(aAlliesSpawnSpells[i]);
+        for (unsigned int aAlliesSpawnSpell : aAlliesSpawnSpells)
+            spawnSpellsVector.push_back(aAlliesSpawnSpell);
 
         m_bEventFinished = false;
         m_uiEpilogueTimer = 0;

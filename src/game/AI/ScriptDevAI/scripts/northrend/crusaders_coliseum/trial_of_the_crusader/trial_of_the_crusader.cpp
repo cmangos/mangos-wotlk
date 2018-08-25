@@ -178,19 +178,19 @@ bool GossipSelect_npc_barrett_ramsey(Player* pPlayer, Creature* pCreature, uint3
         return true;
     }
 
-    for (uint8 i = 0; i < countof(aRamseyInfo); ++i)
+    for (const auto& i : aRamseyInfo)
     {
-        if (pCreature->GetEntry() == aRamseyInfo[i].uiEntry && aRamseyInfo[i].uiOptionId)
+        if (pCreature->GetEntry() == i.uiEntry && i.uiOptionId)
         {
-            if (pInstance->GetData(aRamseyInfo[i].uiOptionId) == FAIL)
+            if (pInstance->GetData(i.uiOptionId) == FAIL)
             {
-                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, aRamseyInfo[i].iWipeGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + aRamseyInfo[i].uiOptionId);
-                pPlayer->SEND_GOSSIP_MENU(aRamseyInfo[i].uiWipeTextEntry, pCreature->GetObjectGuid());
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, i.iWipeGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + i.uiOptionId);
+                pPlayer->SEND_GOSSIP_MENU(i.uiWipeTextEntry, pCreature->GetObjectGuid());
             }
             else
             {
-                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, aRamseyInfo[i].iGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + aRamseyInfo[i].uiOptionId);
-                pPlayer->SEND_GOSSIP_MENU(aRamseyInfo[i].uiTextEntry, pCreature->GetObjectGuid());
+                pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, i.iGossipItem, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + i.uiOptionId);
+                pPlayer->SEND_GOSSIP_MENU(i.uiTextEntry, pCreature->GetObjectGuid());
             }
 
             return true;

@@ -378,8 +378,8 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
 
 bool AchievementCriteriaRequirementSet::Meets(Player const* source, Unit const* target, uint32 miscvalue /*= 0*/) const
 {
-    for (Storage::const_iterator itr = storage.begin(); itr != storage.end(); ++itr)
-        if (!itr->Meets(criteria_id, source, target, miscvalue))
+    for (AchievementCriteriaRequirement itr : storage)
+        if (!itr.Meets(criteria_id, source, target, miscvalue))
             return false;
 
     return true;
@@ -426,10 +426,8 @@ void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uin
         return;
 
     AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
-    for (AchievementCriteriaEntryList::const_iterator i = achievementCriteriaList.begin(); i != achievementCriteriaList.end(); ++i)
+    for (auto achievementCriteria : achievementCriteriaList)
     {
-        AchievementCriteriaEntry const* achievementCriteria = (*i);
-
         AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
         // Checked in LoadAchievementCriteriaList
 
@@ -475,48 +473,48 @@ void AchievementMgr::SaveToDB()
     if (!m_completedAchievements.empty())
     {
         // delete existing achievements in the loop
-        for (CompletedAchievementMap::iterator iter = m_completedAchievements.begin(); iter != m_completedAchievements.end(); ++iter)
+        for (auto& m_completedAchievement : m_completedAchievements)
         {
-            if (!iter->second.changed)
+            if (!m_completedAchievement.second.changed)
                 continue;
 
             /// mark as saved in db
-            iter->second.changed = false;
+            m_completedAchievement.second.changed = false;
 
             SqlStatement stmt = CharacterDatabase.CreateStatement(delComplAchievements, "DELETE FROM character_achievement WHERE guid = ? AND achievement = ?");
-            stmt.PExecute(GetPlayer()->GetGUIDLow(), iter->first);
+            stmt.PExecute(GetPlayer()->GetGUIDLow(), m_completedAchievement.first);
 
             stmt = CharacterDatabase.CreateStatement(insComplAchievements, "INSERT INTO character_achievement (guid, achievement, date) VALUES (?, ?, ?)");
-            stmt.PExecute(GetPlayer()->GetGUIDLow(), iter->first, uint64(iter->second.date));
+            stmt.PExecute(GetPlayer()->GetGUIDLow(), m_completedAchievement.first, uint64(m_completedAchievement.second.date));
         }
     }
 
     if (!m_criteriaProgress.empty())
     {
         // insert achievements
-        for (CriteriaProgressMap::iterator iter = m_criteriaProgress.begin(); iter != m_criteriaProgress.end(); ++iter)
+        for (auto& m_criteriaProgres : m_criteriaProgress)
         {
-            if (!iter->second.changed)
+            if (!m_criteriaProgres.second.changed)
                 continue;
 
             /// mark as updated in db
-            iter->second.changed = false;
+            m_criteriaProgres.second.changed = false;
 
             // new/changed record data
             SqlStatement stmt = CharacterDatabase.CreateStatement(delProgress, "DELETE FROM character_achievement_progress WHERE guid = ? AND criteria = ?");
-            stmt.PExecute(GetPlayer()->GetGUIDLow(), iter->first);
+            stmt.PExecute(GetPlayer()->GetGUIDLow(), m_criteriaProgres.first);
 
-            bool needSave = iter->second.counter != 0;
+            bool needSave = m_criteriaProgres.second.counter != 0;
             if (!needSave)
             {
-                AchievementCriteriaEntry const* criteria = sAchievementCriteriaStore.LookupEntry(iter->first);
+                AchievementCriteriaEntry const* criteria = sAchievementCriteriaStore.LookupEntry(m_criteriaProgres.first);
                 needSave = criteria && criteria->timeLimit > 0;
             }
 
             if (needSave)
             {
                 stmt = CharacterDatabase.CreateStatement(insProgress, "INSERT INTO character_achievement_progress (guid, criteria, counter, date) VALUES (?, ?, ?, ?)");
-                stmt.PExecute(GetPlayer()->GetGUIDLow(), iter->first, iter->second.counter, uint64(iter->second.date));
+                stmt.PExecute(GetPlayer()->GetGUIDLow(), m_criteriaProgres.first, m_criteriaProgres.second.counter, uint64(m_criteriaProgres.second.date));
             }
         }
     }
@@ -701,10 +699,8 @@ void AchievementMgr::StartTimedAchievementCriteria(AchievementCriteriaTypes type
         return;
 
     AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
-    for (AchievementCriteriaEntryList::const_iterator i = achievementCriteriaList.begin(); i != achievementCriteriaList.end(); ++i)
+    for (auto achievementCriteria : achievementCriteriaList)
     {
-        AchievementCriteriaEntry const* achievementCriteria = (*i);
-
         // only apply to specific timedRequirementId related criteria
         if (achievementCriteria->timedCriteriaMiscId != timedRequirementId)
             continue;
@@ -808,10 +804,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
         return;
 
     AchievementCriteriaEntryList const& achievementCriteriaList = sAchievementMgr.GetAchievementCriteriaByType(type);
-    for (AchievementCriteriaEntryList::const_iterator itr = achievementCriteriaList.begin(); itr != achievementCriteriaList.end(); ++itr)
+    for (auto achievementCriteria : achievementCriteriaList)
     {
-        AchievementCriteriaEntry const* achievementCriteria = *itr;
-
         AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
         // Checked in LoadAchievementCriteriaList
 
@@ -1342,9 +1336,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     break;
 
                 bool matchFound = false;
-                for (int j = 0; j < MAX_WORLD_MAP_OVERLAY_AREA_IDX; ++j)
+                for (unsigned int area_id : worldOverlayEntry->areatableID)
                 {
-                    uint32 area_id = worldOverlayEntry->areatableID[j];
                     if (!area_id)                           // array have 0 only in empty tail
                         break;
 
@@ -1937,10 +1930,8 @@ bool AchievementMgr::IsCompletedAchievement(AchievementEntry const* entry)
     // Oddly, the target count is NOT countained in the achievement, but in each individual criteria
     if (entry->flags & ACHIEVEMENT_FLAG_SUMM)
     {
-        for (AchievementCriteriaEntryList::const_iterator itr = cList->begin(); itr != cList->end(); ++itr)
+        for (auto criteria : *cList)
         {
-            AchievementCriteriaEntry const* criteria = *itr;
-
             CriteriaProgressMap::const_iterator itrProgress = m_criteriaProgress.find(criteria->ID);
             if (itrProgress == m_criteriaProgress.end())
                 continue;
@@ -1957,10 +1948,8 @@ bool AchievementMgr::IsCompletedAchievement(AchievementEntry const* entry)
 
     // Default case - need complete all or
     bool completed_all = true;
-    for (AchievementCriteriaEntryList::const_iterator itr = cList->begin(); itr != cList->end(); ++itr)
+    for (auto criteria : *cList)
     {
-        AchievementCriteriaEntry const* criteria = *itr;
-
         bool completed = IsCompletedCriteria(criteria, entry);
 
         // found an uncompleted criteria, but DONT return false yet - there might be a completed criteria with ACHIEVEMENT_CRITERIA_COMPLETE_FLAG_ALL
@@ -2066,9 +2055,9 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
 
         if (AchievementEntryList const* achRefList = sAchievementMgr.GetAchievementByReferencedId(achievement->ID))
         {
-            for (AchievementEntryList::const_iterator itr = achRefList->begin(); itr != achRefList->end(); ++itr)
-                if (IsCompletedAchievement(*itr))
-                    CompletedAchievement(*itr);
+            for (auto itr : *achRefList)
+                if (IsCompletedAchievement(itr))
+                    CompletedAchievement(itr);
         }
     }
     // update dependent achievements state at criteria incomplete
@@ -2086,10 +2075,10 @@ void AchievementMgr::SetCriteriaProgress(AchievementCriteriaEntry const* criteri
                 IncompletedAchievement(achievement);
 
         if (AchievementEntryList const* achRefList = sAchievementMgr.GetAchievementByReferencedId(achievement->ID))
-            for (AchievementEntryList::const_iterator itr = achRefList->begin(); itr != achRefList->end(); ++itr)
-                if (HasAchievement((*itr)->ID))
-                    if (!IsCompletedAchievement(*itr))
-                        IncompletedAchievement(*itr);
+            for (auto itr : *achRefList)
+                if (HasAchievement(itr->ID))
+                    if (!IsCompletedAchievement(itr))
+                        IncompletedAchievement(itr);
     }
 }
 

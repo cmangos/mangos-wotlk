@@ -183,9 +183,9 @@ void instance_azjol_nerub::DoSendWatcherOrKrikthir()
     if (!pKrikthir)
         return;
 
-    for (uint8 i = 0; i < countof(aWatchers); ++i)
+    for (unsigned int aWatcher : aWatchers)
     {
-        if (Creature* pTemp = GetSingleCreatureFromStorage(aWatchers[i]))
+        if (Creature* pTemp = GetSingleCreatureFromStorage(aWatcher))
         {
             if (pTemp->isAlive())
             {
@@ -345,10 +345,10 @@ void instance_azjol_nerub::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;

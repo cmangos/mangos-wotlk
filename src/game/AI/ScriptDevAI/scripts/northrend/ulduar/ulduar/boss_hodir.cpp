@@ -176,13 +176,13 @@ struct boss_hodirAI : public ScriptedAI
             {
                 // Inform the faction helpers that the fight is over
                 ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-                for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+                for (auto itr : threatList)
                 {
                     // only check creatures
-                    if (!(*itr)->getUnitGuid().IsCreature())
+                    if (!itr->getUnitGuid().IsCreature())
                         continue;
 
-                    if (Creature* pTarget = m_creature->GetMap()->GetCreature((*itr)->getUnitGuid()))
+                    if (Creature* pTarget = m_creature->GetMap()->GetCreature(itr->getUnitGuid()))
                         pTarget->AI()->EnterEvadeMode();
                 }
 

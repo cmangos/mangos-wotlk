@@ -471,9 +471,9 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
         std::vector<Unit*> suitableTargets;
         ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
 
-        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+        for (auto itr : threatList)
         {
-            if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+            if (Unit* pTarget = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
             {
                 if (pTarget->GetTypeId() == TYPEID_PLAYER && pTarget->IsWithinDistInMap(pTrigger, 50.0f) && pTarget->IsWithinLOSInMap(pTrigger))
                     suitableTargets.push_back(pTarget);

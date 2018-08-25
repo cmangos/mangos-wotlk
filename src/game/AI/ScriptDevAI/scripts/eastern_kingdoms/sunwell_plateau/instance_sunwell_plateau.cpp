@@ -61,9 +61,9 @@ void instance_sunwell_plateau::Initialize()
 
 bool instance_sunwell_plateau::IsEncounterInProgress() const
 {
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
+        if (i == IN_PROGRESS)
             return true;
     }
 
@@ -365,10 +365,10 @@ void instance_sunwell_plateau::Load(const char* in)
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >>
                m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -399,12 +399,12 @@ void instance_sunwell_plateau::DoSortFlightTriggers()
 
     // sort the flight triggers; first by position X, then group them by Y (left and right)
     lTriggers.sort(sortByPositionX);
-    for (std::list<Creature*>::iterator itr = lTriggers.begin(); itr != lTriggers.end(); ++itr)
+    for (auto& lTrigger : lTriggers)
     {
-        if ((*itr)->GetPositionY() < 600.0f)
-            m_vRightFlightTriggersVect.push_back((*itr)->GetObjectGuid());
+        if (lTrigger->GetPositionY() < 600.0f)
+            m_vRightFlightTriggersVect.push_back(lTrigger->GetObjectGuid());
         else
-            m_vLeftFlightTriggersVect.push_back((*itr)->GetObjectGuid());
+            m_vLeftFlightTriggersVect.push_back(lTrigger->GetObjectGuid());
     }
 }
 
@@ -421,9 +421,9 @@ ObjectGuid instance_sunwell_plateau::SelectFelmystFlightTrigger(bool bLeftSide, 
 
 void instance_sunwell_plateau::DoEjectSpectralPlayers()
 {
-    for (GuidSet::const_iterator itr = m_spectralRealmPlayers.begin(); itr != m_spectralRealmPlayers.end(); ++itr)
+    for (auto m_spectralRealmPlayer : m_spectralRealmPlayers)
     {
-        if (Player* pPlayer = instance->GetPlayer(*itr))
+        if (Player* pPlayer = instance->GetPlayer(m_spectralRealmPlayer))
         {
             if (!pPlayer->HasAura(SPELL_SPECTRAL_REALM_AURA))
                 continue;

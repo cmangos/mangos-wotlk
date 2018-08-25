@@ -283,10 +283,10 @@ void instance_old_hillsbrad::Load(const char* chrIn)
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     // custom reload - if the escort event or the Epoch event are not done, then reset the escort
@@ -307,9 +307,9 @@ void instance_old_hillsbrad::UpdateLodgeQuestCredit()
 
     if (!players.isEmpty())
     {
-        for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+        for (const auto& player : players)
         {
-            if (Player* pPlayer = itr->getSource())
+            if (Player* pPlayer = player.getSource())
                 pPlayer->KilledMonsterCredit(NPC_LODGE_QUEST_TRIGGER);
         }
     }

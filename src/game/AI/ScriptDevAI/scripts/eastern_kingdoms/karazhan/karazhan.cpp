@@ -59,9 +59,9 @@ void instance_karazhan::Initialize()
 
 bool instance_karazhan::IsEncounterInProgress() const
 {
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
+        if (i == IN_PROGRESS)
             return true;
     }
 
@@ -335,10 +335,10 @@ void instance_karazhan::Load(const char* chrIn)
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_uiOperaEvent;
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)               // Do not load an encounter as "In Progress" - reset it instead.
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)               // Do not load an encounter as "In Progress" - reset it instead.
+            i = NOT_STARTED;
     }
 
     if (m_auiEncounter[8] == DONE) // if chess event is done, enable friendly games
@@ -445,9 +445,9 @@ void instance_karazhan::DoPrepareChessEvent()
 
     // add silence debuff
     Map::PlayerList const& players = instance->GetPlayers();
-    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    for (const auto& player : players)
     {
-        if (Player* pPlayer = itr->getSource())
+        if (Player* pPlayer = player.getSource())
             pPlayer->CastSpell(pPlayer, SPELL_GAME_IN_SESSION, TRIGGERED_OLD_TRIGGERED);
     }
 
@@ -550,9 +550,9 @@ void instance_karazhan::DoFailChessEvent()
 
     // remove silence debuff
     Map::PlayerList const& players = instance->GetPlayers();
-    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    for (const auto& player : players)
     {
-        if (Player* pPlayer = itr->getSource())
+        if (Player* pPlayer = player.getSource())
             pPlayer->RemoveAurasDueToSpell(SPELL_GAME_IN_SESSION);
     }
 
@@ -612,9 +612,9 @@ void instance_karazhan::DoFinishChessEvent()
 
     // remove silence debuff
     Map::PlayerList const& players = instance->GetPlayers();
-    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+    for (const auto& player : players)
     {
-        if (Player* pPlayer = itr->getSource())
+        if (Player* pPlayer = player.getSource())
             pPlayer->RemoveAurasDueToSpell(SPELL_GAME_IN_SESSION);
     }
 
@@ -667,8 +667,8 @@ void instance_karazhan::DoPrepareOperaStage(Creature* pOrganizer)
     switch (GetData(TYPE_OPERA_PERFORMANCE))
     {
         case OPERA_EVENT_WIZARD_OZ:
-            for (uint8 i = 0; i < MAX_OZ_OPERA_MOBS; ++i)
-                pOrganizer->SummonCreature(aOperaLocOz[i].uiEntry, aOperaLocOz[i].fX, aOperaLocOz[i].fY, aOperaLocOz[i].fZ, aOperaLocOz[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+            for (const auto& i : aOperaLocOz)
+                pOrganizer->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, i.fO, TEMPSPAWN_DEAD_DESPAWN, 0);
             DoRespawnGameObject(GO_OZ_BACKDROP, 12 * HOUR);
             for (GuidList::const_iterator itr = m_lOperaHayGuidList.begin(); itr != m_lOperaHayGuidList.end(); ++itr)
                 DoRespawnGameObject(*itr, 12 * HOUR);

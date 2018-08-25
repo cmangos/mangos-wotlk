@@ -107,11 +107,11 @@ struct npc_air_force_botsAI : public ScriptedAI
         m_pSpawnAssoc = nullptr;
 
         // find the correct spawnhandling
-        for (uint8 i = 0; i < countof(m_aSpawnAssociations); ++i)
+        for (auto& m_aSpawnAssociation : m_aSpawnAssociations)
         {
-            if (m_aSpawnAssociations[i].m_uiThisCreatureEntry == pCreature->GetEntry())
+            if (m_aSpawnAssociation.m_uiThisCreatureEntry == pCreature->GetEntry())
             {
-                m_pSpawnAssoc = &m_aSpawnAssociations[i];
+                m_pSpawnAssoc = &m_aSpawnAssociation;
                 break;
             }
         }
@@ -663,12 +663,12 @@ void npc_doctorAI::BeginEvent(Player* pPlayer)
     switch (m_creature->GetEntry())
     {
         case DOCTOR_ALLIANCE:
-            for (uint8 i = 0; i < ALLIANCE_COORDS; ++i)
-                m_vPatientSummonCoordinates.push_back(&AllianceCoords[i]);
+            for (auto& AllianceCoord : AllianceCoords)
+                m_vPatientSummonCoordinates.push_back(&AllianceCoord);
             break;
         case DOCTOR_HORDE:
-            for (uint8 i = 0; i < HORDE_COORDS; ++i)
-                m_vPatientSummonCoordinates.push_back(&HordeCoords[i]);
+            for (auto& HordeCoord : HordeCoords)
+                m_vPatientSummonCoordinates.push_back(&HordeCoord);
             break;
         default:
             script_error_log("Invalid entry for Triage doctor. Please check your database");

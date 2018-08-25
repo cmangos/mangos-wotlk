@@ -159,17 +159,17 @@ Function that initializes all players before the battle starts
 */
 void Battlefield::InitPlayersBeforeBattle()
 {
-    for (BattlefieldPlayerMap::iterator itr = m_activePlayers.begin(); itr != m_activePlayers.end(); ++itr)
-        delete itr->second;
+    for (auto& m_activePlayer : m_activePlayers)
+        delete m_activePlayer.second;
 
     m_activePlayers.clear();
 
-    for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
+    for (auto& m_zonePlayer : m_zonePlayers)
     {
-        if (!itr->first)
+        if (!m_zonePlayer.first)
             continue;
 
-        Player* player = sObjectMgr.GetPlayer(itr->first);
+        Player* player = sObjectMgr.GetPlayer(m_zonePlayer.first);
         if (!player)
             continue;
 
@@ -225,36 +225,36 @@ void Battlefield::StartBattle(Team defender)
     InitPlayersBeforeBattle();
 
     DEBUG_LOG("Disbanding groups");
-    for (uint32 i = 0; i < PVP_TEAM_COUNT; ++i)
+    for (auto& m_battlefieldRaid : m_battlefieldRaids)
     {
-        while (!m_battlefieldRaids[i].empty())
+        while (!m_battlefieldRaid.empty())
         {
-            Group* group = *m_battlefieldRaids[i].begin();
+            Group* group = *m_battlefieldRaid.begin();
             group->Disband();
             delete group;
         }
     }
 
-    for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
+    for (auto& m_zonePlayer : m_zonePlayers)
     {
-        if (!itr->first)
+        if (!m_zonePlayer.first)
             continue;
 
-        Player* plr = sObjectMgr.GetPlayer(itr->first);
+        Player* plr = sObjectMgr.GetPlayer(m_zonePlayer.first);
         if (!plr)
             continue;
 
         uint8 idx = 0;
-        std::set<ObjectGuid>::iterator itr2 = m_queuedPlayers[idx].find(itr->first);
+        std::set<ObjectGuid>::iterator itr2 = m_queuedPlayers[idx].find(m_zonePlayer.first);
         if (itr2 == m_queuedPlayers[idx].end())
         {
             ++idx;
-            itr2 = m_queuedPlayers[idx].find(itr->first);
+            itr2 = m_queuedPlayers[idx].find(m_zonePlayer.first);
         }
 
         if (itr2 != m_queuedPlayers[idx].end())
         {
-            m_invitedPlayers[idx][itr->first] = time(nullptr) + BF_TIME_TO_ACCEPT;
+            m_invitedPlayers[idx][m_zonePlayer.first] = time(nullptr) + BF_TIME_TO_ACCEPT;
             plr->GetSession()->SendBattlefieldWarInvite(m_battleFieldId, m_zoneId, BF_TIME_TO_ACCEPT);
             m_queuedPlayers[idx].erase(itr2);
         }
@@ -262,10 +262,10 @@ void Battlefield::StartBattle(Team defender)
         {
             plr->GetSession()->SendBattlefieldLeaveMessage(m_battleFieldId, BATTLEFIELD_LEAVE_REASON_EXITED);
             SendRemoveWorldStates(plr);
-            if (m_activePlayers.find(itr->first) != m_activePlayers.end())
+            if (m_activePlayers.find(m_zonePlayer.first) != m_activePlayers.end())
             {
-                m_activePlayers[itr->first]->removeTime = time(nullptr);
-                m_activePlayers[itr->first]->removeDelay = BF_UNACCEPTED_REMOVE_DELAY;
+                m_activePlayers[m_zonePlayer.first]->removeTime = time(nullptr);
+                m_activePlayers[m_zonePlayer.first]->removeDelay = BF_UNACCEPTED_REMOVE_DELAY;
             }
         }
     }
@@ -328,12 +328,12 @@ void Battlefield::Update(uint32 diff)
     if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN && m_timer <= m_startInviteDelay && !m_playersInvited)
     {
         m_playersInvited = true;
-        for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
+        for (auto& m_zonePlayer : m_zonePlayers)
         {
-            if (!itr->first)
+            if (!m_zonePlayer.first)
                 continue;
 
-            Player* player = sObjectMgr.GetPlayer(itr->first);
+            Player* player = sObjectMgr.GetPlayer(m_zonePlayer.first);
             if (!player)
                 continue;
 
@@ -344,16 +344,16 @@ void Battlefield::Update(uint32 diff)
     // kick all the players marked to leave
     if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS)
     {
-        for (uint32 i = 0; i < PVP_TEAM_COUNT; ++i)
+        for (auto& m_invitedPlayer : m_invitedPlayers)
         {
-            for (std::map<ObjectGuid, time_t>::iterator itr = m_invitedPlayers[i].begin(); itr != m_invitedPlayers[i].end();)
+            for (std::map<ObjectGuid, time_t>::iterator itr = m_invitedPlayer.begin(); itr != m_invitedPlayer.end();)
             {
                 if (itr->second < time(nullptr))
                 {
                     if (Player* player = sObjectMgr.GetPlayer(itr->first))
                         player->GetSession()->SendBattlefieldLeaveMessage(m_battleFieldId, BATTLEFIELD_LEAVE_REASON_EXITED);
 
-                    m_invitedPlayers[i].erase(itr++);
+                    m_invitedPlayer.erase(itr++);
                 }
                 else
                     ++itr;
@@ -366,12 +366,12 @@ void Battlefield::Update(uint32 diff)
     {
         m_queueUpdateTimer = 30000;
 
-        for (uint32 i = 0; i < PVP_TEAM_COUNT; ++i)
+        for (auto& m_queuedPlayer : m_queuedPlayers)
         {
-            for (std::set<ObjectGuid>::iterator itr = m_queuedPlayers[i].begin(); itr != m_queuedPlayers[i].end();)
+            for (std::set<ObjectGuid>::iterator itr = m_queuedPlayer.begin(); itr != m_queuedPlayer.end();)
             {
                 if (!sObjectMgr.GetPlayer(*itr, true))
-                    m_queuedPlayers[i].erase(itr++);
+                    m_queuedPlayer.erase(itr++);
                 else
                     ++itr;
             }
@@ -384,12 +384,12 @@ void Battlefield::Update(uint32 diff)
 // ToDo: requires review
 void Battlefield::SetupPlayerPositions()
 {
-    for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
+    for (auto& m_zonePlayer : m_zonePlayers)
     {
-        if (!itr->first || !HasPlayer(itr->first))
+        if (!m_zonePlayer.first || !HasPlayer(m_zonePlayer.first))
             continue;
 
-        Player* plr = sObjectMgr.GetPlayer(itr->first);
+        Player* plr = sObjectMgr.GetPlayer(m_zonePlayer.first);
         if (!plr)
             continue;
 
@@ -400,12 +400,12 @@ void Battlefield::SetupPlayerPositions()
 // ToDo: requires review
 void Battlefield::QuestCreditTeam(uint32 credit, Team team, WorldObject* source, float radius)
 {
-    for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
+    for (auto& m_zonePlayer : m_zonePlayers)
     {
-        if (!itr->first || !HasPlayer(itr->first))
+        if (!m_zonePlayer.first || !HasPlayer(m_zonePlayer.first))
             continue;
 
-        Player* plr = sObjectMgr.GetPlayer(itr->first);
+        Player* plr = sObjectMgr.GetPlayer(m_zonePlayer.first);
         if (!plr)
             continue;
 
@@ -427,10 +427,10 @@ Function that returns a non full group for a specified team index
 */
 Group* Battlefield::GetFreeRaid(PvpTeamIndex teamIdx)
 {
-    for (std::set<Group*>::iterator itr = m_battlefieldRaids[teamIdx].begin(); itr != m_battlefieldRaids[teamIdx].end(); ++itr)
+    for (auto itr : m_battlefieldRaids[teamIdx])
     {
-        if (!(*itr)->IsFull())
-            return *itr;
+        if (!itr->IsFull())
+            return itr;
     }
 
     return nullptr;
@@ -443,9 +443,9 @@ Function that returns the group of a specified player
 */
 Group* Battlefield::GetGroupFor(ObjectGuid playerGuid)
 {
-    for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
+    for (auto& m_battlefieldRaid : m_battlefieldRaids)
     {
-        for (std::set<Group*>::iterator itr = m_battlefieldRaids[i].begin(); itr != m_battlefieldRaids[i].end(); ++itr)
+        for (std::set<Group*>::iterator itr = m_battlefieldRaid.begin(); itr != m_battlefieldRaid.end(); ++itr)
         {
             if ((*itr)->IsMember(playerGuid))
                 return *itr;
@@ -546,8 +546,8 @@ Function that returns the number of players depending on the team
 uint32 Battlefield::GetPlayerCountByTeam(PvpTeamIndex teamIdx)
 {
     uint32 count = 0;
-    for (std::set<Group*>::iterator itr = m_battlefieldRaids[teamIdx].begin(); itr != m_battlefieldRaids[teamIdx].end(); ++itr)
-        count += (*itr)->GetMembersCount();
+    for (auto itr : m_battlefieldRaids[teamIdx])
+        count += itr->GetMembersCount();
 
     return count;
 }
@@ -569,13 +569,13 @@ Function that checks if a battlefield group can be deleted
 */
 bool Battlefield::CanDeleteBattlefieldGroup(Group* group)
 {
-    for (uint32 i = 0; i < PVP_TEAM_COUNT; ++i)
+    for (auto& m_battlefieldRaid : m_battlefieldRaids)
     {
-        for (std::set<Group*>::iterator itr = m_battlefieldRaids[i].begin(); itr != m_battlefieldRaids[i].end(); ++itr)
+        for (std::set<Group*>::iterator itr = m_battlefieldRaid.begin(); itr != m_battlefieldRaid.end(); ++itr)
         {
             if (*itr == group)
             {
-                m_battlefieldRaids[i].erase(itr);
+                m_battlefieldRaid.erase(itr);
                 return true;
             }
         }
@@ -770,12 +770,12 @@ Function that sends a zone wide warning to all players
 */
 void Battlefield::SendZoneWarning(int32 entry, WorldObject* source)
 {
-    for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
+    for (auto& m_zonePlayer : m_zonePlayers)
     {
-        if (!itr->first)
+        if (!m_zonePlayer.first)
             continue;
 
-        Player* player = sObjectMgr.GetPlayer(itr->first);
+        Player* player = sObjectMgr.GetPlayer(m_zonePlayer.first);
         if (!player)
             continue;
 

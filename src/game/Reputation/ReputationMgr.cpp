@@ -177,9 +177,9 @@ void ReputationMgr::SendState(FactionState const* faction, bool anyRankIncreased
     data << uint32(faction->ReputationListID);
     data << uint32(faction->Standing);
 
-    for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+    for (auto& m_faction : m_factions)
     {
-        FactionState& subFaction = itr->second;
+        FactionState& subFaction = m_faction.second;
         if (subFaction.needSend)
         {
             subFaction.needSend = false;
@@ -204,20 +204,20 @@ void ReputationMgr::SendInitialReputations()
 
     RepListID a = 0;
 
-    for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+    for (auto& m_faction : m_factions)
     {
         // fill in absent fields
-        for (; a != itr->first; ++a)
+        for (; a != m_faction.first; ++a)
         {
             data << uint8(0x00);
             data << uint32(0x00000000);
         }
 
         // fill in encountered data
-        data << uint8(itr->second.Flags);
-        data << uint32(itr->second.Standing);
+        data << uint8(m_faction.second.Flags);
+        data << uint32(m_faction.second.Standing);
 
-        itr->second.needSend = false;
+        m_faction.second.needSend = false;
 
         ++a;
     }
@@ -325,9 +325,9 @@ void ReputationMgr::SetReputation(FactionEntry const* factionEntry, int32 standi
         if (flist)
         {
             // Spillover to affiliated factions
-            for (SimpleFactionsList::const_iterator itr = flist->begin(); itr != flist->end(); ++itr)
+            for (std::_Simple_types<unsigned int>::value_type itr : *flist)
             {
-                if (FactionEntry const* factionEntryCalc = sFactionStore.LookupEntry(*itr))
+                if (FactionEntry const* factionEntryCalc = sFactionStore.LookupEntry(itr))
                 {
                     if (factionEntryCalc == factionEntry || GetRank(factionEntryCalc) > ReputationRank(factionEntryCalc->spilloverMaxRankIn))
                         continue;
@@ -585,9 +585,9 @@ void ReputationMgr::SaveToDB()
     SqlStatement stmtDel = CharacterDatabase.CreateStatement(delRep, "DELETE FROM character_reputation WHERE guid = ? AND faction=?");
     SqlStatement stmtIns = CharacterDatabase.CreateStatement(insRep, "INSERT INTO character_reputation (guid,faction,standing,flags) VALUES (?, ?, ?, ?)");
 
-    for (FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+    for (auto& m_faction : m_factions)
     {
-        FactionState& faction = itr->second;
+        FactionState& faction = m_faction.second;
         if (faction.needSave)
         {
             stmtDel.PExecute(m_player->GetGUIDLow(), faction.ID);

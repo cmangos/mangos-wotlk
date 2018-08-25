@@ -151,8 +151,8 @@ void BattleGroundEY::EndBattleGround(Team winner)
     RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
 
     // disable capture points
-    for (uint8 i = 0; i < EY_NODES_MAX; ++i)
-        if (GameObject* go = GetBgMap()->GetGameObject(m_towers[i]))
+    for (auto m_tower : m_towers)
+        if (GameObject* go = GetBgMap()->GetGameObject(m_tower))
             go->SetLootState(GO_JUST_DEACTIVATED);
 
     BattleGround::EndBattleGround(winner);
@@ -606,8 +606,8 @@ WorldSafeLocsEntry const* BattleGroundEY::GetClosestGraveYard(Player* player)
 
 bool BattleGroundEY::IsAllNodesControlledByTeam(Team team) const
 {
-    for (uint8 i = 0; i < EY_NODES_MAX; ++i)
-        if (m_towerOwner[i] != team)
+    for (auto i : m_towerOwner)
+        if (i != team)
             return false;
 
     return true;

@@ -30,9 +30,9 @@ using namespace MaNGOS;
 
 void VisibleChangesNotifier::Visit(CameraMapType& m)
 {
-    for (CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        iter->getSource()->UpdateVisibilityOf(&i_object);
+        iter.getSource()->UpdateVisibilityOf(&i_object);
     }
 }
 
@@ -43,14 +43,14 @@ void VisibleNotifier::Notify()
     // but exist one case when this possible and object not out of range: transports
     if (Transport* transport = player.GetTransport())
     {
-        for (Transport::PlayerSet::const_iterator itr = transport->GetPassengers().begin(); itr != transport->GetPassengers().end(); ++itr)
+        for (auto itr : transport->GetPassengers())
         {
-            if (i_clientGUIDs.find((*itr)->GetObjectGuid()) != i_clientGUIDs.end())
+            if (i_clientGUIDs.find(itr->GetObjectGuid()) != i_clientGUIDs.end())
             {
                 // ignore far sight case
-                (*itr)->UpdateVisibilityOf(*itr, &player);
-                player.UpdateVisibilityOf(&player, *itr, i_data, i_visibleNow);
-                i_clientGUIDs.erase((*itr)->GetObjectGuid());
+                itr->UpdateVisibilityOf(itr, &player);
+                player.UpdateVisibilityOf(&player, itr, i_data, i_visibleNow);
+                i_clientGUIDs.erase(itr->GetObjectGuid());
             }
         }
     }
@@ -74,12 +74,12 @@ void VisibleNotifier::Notify()
 
         // send out of range to other players if need
         GuidSet const& oor = i_data.GetOutOfRangeGUIDs();
-        for (GuidSet::const_iterator iter = oor.begin(); iter != oor.end(); ++iter)
+        for (auto iter : oor)
         {
-            if (!iter->IsPlayer())
+            if (!iter.IsPlayer())
                 continue;
 
-            if (Player* plr = ObjectAccessor::FindPlayer(*iter))
+            if (Player* plr = ObjectAccessor::FindPlayer(iter))
                 plr->UpdateVisibilityOf(plr->GetCamera().GetBody(), &player);
         }
     }
@@ -87,23 +87,23 @@ void VisibleNotifier::Notify()
     // Now do operations that required done at object visibility change to visible
 
     // send data at target visibility change (adding to client)
-    for (std::set<WorldObject*>::const_iterator vItr = i_visibleNow.begin(); vItr != i_visibleNow.end(); ++vItr)
+    for (auto vItr : i_visibleNow)
     {
         // target aura duration for caster show only if target exist at caster client
-        if ((*vItr) != &player && (*vItr)->isType(TYPEMASK_UNIT))
-            player.SendAurasForTarget((Unit*)(*vItr));
+        if (vItr != &player && vItr->isType(TYPEMASK_UNIT))
+            player.SendAurasForTarget((Unit*)vItr);
     }
 }
 
 void MessageDeliverer::Visit(CameraMapType& m)
 {
-    for (CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        Player* owner = iter->getSource()->GetOwner();
+        Player* owner = iter.getSource()->GetOwner();
 
         if (i_toSelf || owner != &i_player)
         {
-            if (!i_player.InSamePhase(iter->getSource()->GetBody()))
+            if (!i_player.InSamePhase(iter.getSource()->GetBody()))
                 continue;
 
             if (WorldSession* session = owner->GetSession())
@@ -114,9 +114,9 @@ void MessageDeliverer::Visit(CameraMapType& m)
 
 void MessageDelivererExcept::Visit(CameraMapType& m)
 {
-    for (CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        Player* owner = iter->getSource()->GetOwner();
+        Player* owner = iter.getSource()->GetOwner();
 
         if (!owner->InSamePhase(i_phaseMask) || owner == i_skipped_receiver)
             continue;
@@ -128,27 +128,27 @@ void MessageDelivererExcept::Visit(CameraMapType& m)
 
 void ObjectMessageDeliverer::Visit(CameraMapType& m)
 {
-    for (CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        if (!iter->getSource()->GetBody()->InSamePhase(i_phaseMask))
+        if (!iter.getSource()->GetBody()->InSamePhase(i_phaseMask))
             continue;
 
-        if (WorldSession* session = iter->getSource()->GetOwner()->GetSession())
+        if (WorldSession* session = iter.getSource()->GetOwner()->GetSession())
             session->SendPacket(i_message);
     }
 }
 
 void MessageDistDeliverer::Visit(CameraMapType& m)
 {
-    for (CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        Player* owner = iter->getSource()->GetOwner();
+        Player* owner = iter.getSource()->GetOwner();
 
         if ((i_toSelf || owner != &i_player) &&
                 (!i_ownTeamOnly || owner->GetTeam() == i_player.GetTeam()) &&
-                (!i_dist || iter->getSource()->GetBody()->IsWithinDist(&i_player, i_dist)))
+                (!i_dist || iter.getSource()->GetBody()->IsWithinDist(&i_player, i_dist)))
         {
-            if (!i_player.InSamePhase(iter->getSource()->GetBody()))
+            if (!i_player.InSamePhase(iter.getSource()->GetBody()))
                 continue;
 
             if (WorldSession* session = owner->GetSession())
@@ -159,14 +159,14 @@ void MessageDistDeliverer::Visit(CameraMapType& m)
 
 void ObjectMessageDistDeliverer::Visit(CameraMapType& m)
 {
-    for (CameraMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for (auto& iter : m)
     {
-        if (!i_dist || iter->getSource()->GetBody()->IsWithinDist(&i_object, i_dist))
+        if (!i_dist || iter.getSource()->GetBody()->IsWithinDist(&i_object, i_dist))
         {
-            if (!i_object.InSamePhase(iter->getSource()->GetBody()))
+            if (!i_object.InSamePhase(iter.getSource()->GetBody()))
                 continue;
 
-            if (WorldSession* session = iter->getSource()->GetOwner()->GetSession())
+            if (WorldSession* session = iter.getSource()->GetOwner()->GetSession())
                 session->SendPacket(i_message);
         }
     }

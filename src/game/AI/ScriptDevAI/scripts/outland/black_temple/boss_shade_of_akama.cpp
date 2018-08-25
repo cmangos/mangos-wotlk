@@ -369,10 +369,10 @@ struct npc_akamaAI : public ScriptedAI, private DialogueHelper
         else
         {
             float fX, fY, fZ;
-            for (uint8 i = 0; i < countof(auiRandSpawnEntry); ++i)
+            for (unsigned int i : auiRandSpawnEntry)
             {
                 pGenerator->GetRandomPoint(pGenerator->GetPositionX(), pGenerator->GetPositionY(), pGenerator->GetPositionZ(), 5.0f, fX, fY, fZ);
-                m_creature->SummonCreature(auiRandSpawnEntry[i], fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                m_creature->SummonCreature(i, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
     }
@@ -386,13 +386,13 @@ struct npc_akamaAI : public ScriptedAI, private DialogueHelper
         float fX, fY, fZ;
 
         // Spawn 4 Broken in the center and behind the column
-        for (uint8 i = 0; i < countof(afBrokenSpawnLoc); ++i)
+        for (auto i : afBrokenSpawnLoc)
         {
             for (uint8 j = 0; j < 4; ++j)
             {
-                fX = afBrokenSpawnLoc[i].m_fX;
-                fY = afBrokenSpawnLoc[i].m_fY + (j * 7);
-                fZ = afBrokenSpawnLoc[i].m_fZ;
+                fX = i.m_fX;
+                fY = i.m_fY + (j * 7);
+                fZ = i.m_fZ;
 
                 m_creature->SummonCreature(NPC_ASH_BROKEN, fX, fY, fZ, 0, TEMPSPAWN_TIMED_DESPAWN, 10 * MINUTE * IN_MILLISECONDS);
             }
@@ -402,9 +402,9 @@ struct npc_akamaAI : public ScriptedAI, private DialogueHelper
         m_pInstance->GetGeneratorGuidVector(vGeneratorsVect);
 
         // Spawn 4 Broken at each generator
-        for (uint8 i = 0; i < vGeneratorsVect.size(); ++i)
+        for (auto i : vGeneratorsVect)
         {
-            if (Creature* pGenerator = m_creature->GetMap()->GetCreature(vGeneratorsVect[i]))
+            if (Creature* pGenerator = m_creature->GetMap()->GetCreature(i))
             {
                 for (uint8 j = 0; j < 4; ++j)
                 {

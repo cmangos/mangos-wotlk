@@ -47,8 +47,8 @@ void WorldSession::SendNameQueryOpcode(Player* p) const
     if (DeclinedName const* names = p->GetDeclinedNames())
     {
         data << uint8(1);                                   // is declined
-        for (int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            data << names->name[i];
+        for (const auto& i : names->name)
+            data << i;
     }
     else
         data << uint8(0);                                   // is not declined
@@ -173,14 +173,14 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         data << uint32(ci->KillCredit[0]);                  // new in 3.1, kill credit
         data << uint32(ci->KillCredit[1]);                  // new in 3.1, kill credit
 
-        for (int i = 0; i < MAX_CREATURE_MODEL; ++i)
-            data << uint32(ci->ModelId[i]);
+        for (unsigned int i : ci->ModelId)
+            data << uint32(i);
 
         data << float(ci->HealthMultiplier);                // health multiplier
         data << float(ci->PowerMultiplier);                 // power multiplier
         data << uint8(ci->RacialLeader);
-        for (uint32 i = 0; i < 6; ++i)
-            data << uint32(ci->QuestItems[i]);              // itemId[6], quest drop
+        for (unsigned int QuestItem : ci->QuestItems)
+            data << uint32(QuestItem);              // itemId[6], quest drop
         data << uint32(ci->MovementTemplateId);             // CreatureMovementInfo.dbc
         SendPacket(data);
         DEBUG_LOG("WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE");
@@ -235,8 +235,8 @@ void WorldSession::HandleGameObjectQueryOpcode(WorldPacket& recv_data)
         data << info->unk1;                                 // 2.0.3, string
         data.append(info->raw.data, 24);
         data << float(info->size);                          // go size
-        for (uint32 i = 0; i < 6; ++i)
-            data << uint32(info->questItems[i]);            // itemId[6], quest drop
+        for (unsigned int questItem : info->questItems)
+            data << uint32(questItem);            // itemId[6], quest drop
         SendPacket(data);
         DEBUG_LOG("WORLD: Sent SMSG_GAMEOBJECT_QUERY_RESPONSE");
     }
@@ -362,10 +362,10 @@ void WorldSession::HandleNpcTextQueryOpcode(WorldPacket& recv_data)
 
             data << pGossip->Options[i].Language;
 
-            for (int j = 0; j < 3; ++j)
+            for (auto Emote : pGossip->Options[i].Emotes)
             {
-                data << pGossip->Options[i].Emotes[j]._Delay;
-                data << pGossip->Options[i].Emotes[j]._Emote;
+                data << Emote._Delay;
+                data << Emote._Emote;
             }
         }
     }
@@ -491,18 +491,18 @@ void WorldSession::HandleQuestPOIQueryOpcode(WorldPacket& recv_data)
                 data << uint32(questId);                    // quest ID
                 data << uint32(POI->size());                // POI count
 
-                for (QuestPOIVector::const_iterator itr = POI->begin(); itr != POI->end(); ++itr)
+                for (const auto& itr : *POI)
                 {
-                    data << uint32(itr->PoiId);             // POI index
-                    data << int32(itr->ObjectiveIndex);     // objective index
-                    data << uint32(itr->MapId);             // mapid
-                    data << uint32(itr->MapAreaId);         // world map area id
-                    data << uint32(itr->FloorId);           // floor id
-                    data << uint32(itr->Unk3);              // unknown
-                    data << uint32(itr->Unk4);              // unknown
-                    data << uint32(itr->points.size());     // POI points count
+                    data << uint32(itr.PoiId);             // POI index
+                    data << int32(itr.ObjectiveIndex);     // objective index
+                    data << uint32(itr.MapId);             // mapid
+                    data << uint32(itr.MapAreaId);         // world map area id
+                    data << uint32(itr.FloorId);           // floor id
+                    data << uint32(itr.Unk3);              // unknown
+                    data << uint32(itr.Unk4);              // unknown
+                    data << uint32(itr.points.size());     // POI points count
 
-                    for (std::vector<QuestPOIPoint>::const_iterator itr2 = itr->points.begin(); itr2 != itr->points.end(); ++itr2)
+                    for (std::vector<QuestPOIPoint>::const_iterator itr2 = itr.points.begin(); itr2 != itr.points.end(); ++itr2)
                     {
                         data << int32(itr2->x);             // POI point x
                         data << int32(itr2->y);             // POI point y

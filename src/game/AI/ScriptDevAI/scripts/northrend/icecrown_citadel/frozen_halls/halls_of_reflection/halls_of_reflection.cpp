@@ -268,9 +268,9 @@ bool AreaTrigger_at_frostworn_general(Player* pPlayer, AreaTriggerEntry const* p
         if (allPlayers.isEmpty())
             return false;
 
-        for (Map::PlayerList::const_iterator itr = allPlayers.begin(); itr != allPlayers.end(); ++itr)
+        for (const auto& allPlayer : allPlayers)
         {
-            Player* pPlayerTarget = itr->getSource();
+            Player* pPlayerTarget = allPlayer.getSource();
             if (!pPlayerTarget)
                 continue;
 

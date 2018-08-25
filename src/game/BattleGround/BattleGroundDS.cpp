@@ -54,9 +54,9 @@ void BattleGroundDS::Update(uint32 diff)
             }
 
             // knockback players manually due to missing triggered spell 61698
-            for (BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+            for (const auto& itr : GetPlayers())
             {
-                Player* plr = sObjectMgr.GetPlayer(itr->first);
+                Player* plr = sObjectMgr.GetPlayer(itr.first);
                 if (!plr)
                     continue;
 

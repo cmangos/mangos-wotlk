@@ -196,9 +196,9 @@ struct boss_kelthuzadAI : public ScriptedAI
     {
         if (m_pInstance)
         {
-            for (GuidSet::const_iterator itr = m_lIntroMobsSet.begin(); itr != m_lIntroMobsSet.end(); ++itr)
+            for (auto itr : m_lIntroMobsSet)
             {
-                if (Creature* pCreature = m_pInstance->instance->GetCreature(*itr))
+                if (Creature* pCreature = m_pInstance->instance->GetCreature(itr))
                     pCreature->ForcedDespawn();
             }
         }
@@ -210,9 +210,9 @@ struct boss_kelthuzadAI : public ScriptedAI
     {
         if (m_pInstance)
         {
-            for (GuidSet::const_iterator itr = m_lAddsSet.begin(); itr != m_lAddsSet.end(); ++itr)
+            for (auto itr : m_lAddsSet)
             {
-                if (Creature* pCreature = m_pInstance->instance->GetCreature(*itr))
+                if (Creature* pCreature = m_pInstance->instance->GetCreature(itr))
                 {
                     if (pCreature->isAlive())
                     {

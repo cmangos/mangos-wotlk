@@ -160,13 +160,13 @@ struct boss_aranAI : public ScriptedAI
 
         m_attackDistance        = 100.f;
 
-        for (uint32 i = 0; i < ARAN_ACTION_MAX; ++i)
-            m_actionReadyStatus[i] = false;
+        for (bool& m_actionReadyStatu : m_actionReadyStatus)
+            m_actionReadyStatu = false;
 
         m_actionReadyStatus[ARAN_ACTION_PRIMARY_SPELL] = true;
 
-        for (uint32 i = 0; i < NORMAL_SPELL_COUNT; ++i)
-            m_normalSpellCooldown[i] = 0;
+        for (unsigned int& i : m_normalSpellCooldown)
+            i = 0;
 
         SetCombatMovement(true);
     }
@@ -541,14 +541,14 @@ struct boss_aranAI : public ScriptedAI
                 m_uiBerserkTimer -= uiDiff;
         }
 
-        for (uint32 i = 0; i < NORMAL_SPELL_COUNT; ++i)
+        for (unsigned int& i : m_normalSpellCooldown)
         {
-            if (m_normalSpellCooldown[i])
+            if (i)
             {
-                if (m_normalSpellCooldown[i] <= uiDiff)
-                    m_normalSpellCooldown[i] = 0;
+                if (i <= uiDiff)
+                    i = 0;
                 else
-                    m_normalSpellCooldown[i] -= uiDiff;
+                    i -= uiDiff;
             }
         }
 

@@ -398,10 +398,10 @@ void instance_violet_hold::Load(const char* chrIn)
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
                >> m_auiEncounter[8] >> m_auiEncounter[9];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -473,10 +473,10 @@ BossSpawn* instance_violet_hold::CreateBossSpawnByEntry(uint32 uiEntry)
 void instance_violet_hold::SetRandomBosses()
 {
     // Store bosses that are already done
-    for (uint8 i = 0; i < MAX_MINIBOSSES; ++i)
+    for (const auto& i : aBossInformation)
     {
-        if (m_auiEncounter[aBossInformation[i].uiType] == DONE)
-            m_vRandomBosses.push_back(CreateBossSpawnByEntry(aBossInformation[i].uiEntry));
+        if (m_auiEncounter[i.uiType] == DONE)
+            m_vRandomBosses.push_back(CreateBossSpawnByEntry(i.uiEntry));
     }
 
     if (m_vRandomBosses.size() < 2)                         // Get some new random bosses
@@ -739,10 +739,10 @@ BossInformation const* instance_violet_hold::GetBossInformation(uint32 uiEntry/*
     if (!mEntry)
         return nullptr;
 
-    for (uint8 i = 0; i < MAX_MINIBOSSES; ++i)
+    for (const auto& i : aBossInformation)
     {
-        if (aBossInformation[i].uiEntry == mEntry)
-            return &aBossInformation[i];
+        if (i.uiEntry == mEntry)
+            return &i;
     }
 
     return nullptr;

@@ -152,9 +152,9 @@ struct boss_alarAI : public ScriptedAI
         // Handle quest completion
         ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
 
-        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+        for (auto itr : threatList)
         {
-            if (Unit* pPlayer = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+            if (Unit* pPlayer = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
             {
                 if (pPlayer->GetTypeId() == TYPEID_PLAYER && pPlayer->IsWithinDist(m_creature, DEFAULT_VISIBILITY_INSTANCE))
                     if (pPlayer->HasAura(SPELL_ASHTONGUE_RUSE) && ((Player*)pPlayer)->GetQuestStatus(QUEST_RUSE_ASHTONGUE) == QUEST_STATUS_INCOMPLETE)

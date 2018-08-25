@@ -169,9 +169,9 @@ struct boss_supremusAI : public ScriptedAI
         Unit* pTarget = nullptr;
 
         ThreatList const& tList = m_creature->getThreatManager().getThreatList();
-        for (ThreatList::const_iterator iter = tList.begin(); iter != tList.end(); ++iter)
+        for (auto iter : tList)
         {
-            Unit* pUnit = m_creature->GetMap()->GetUnit((*iter)->getUnitGuid());
+            Unit* pUnit = m_creature->GetMap()->GetUnit(iter->getUnitGuid());
 
             if (pUnit && m_creature->CanReachWithMeleeAttack(pUnit))
             {

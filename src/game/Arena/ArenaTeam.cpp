@@ -542,8 +542,8 @@ uint8 ArenaTeam::GetSlotByType(ArenaType type)
 
 bool ArenaTeam::HaveMember(ObjectGuid guid) const
 {
-    for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
-        if (itr->guid == guid)
+    for (const auto& m_member : m_members)
+        if (m_member.guid == guid)
             return true;
 
     return false;
@@ -641,22 +641,22 @@ int32 ArenaTeam::LostAgainst(uint32 againstRating)
 void ArenaTeam::MemberLost(Player* plr, uint32 againstRating)
 {
     // called for each participant of a match after losing
-    for (MemberList::iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
+    for (auto& m_member : m_members)
     {
-        if (itr->guid == plr->GetObjectGuid())
+        if (m_member.guid == plr->GetObjectGuid())
         {
             // update personal rating
-            float chance = GetChanceAgainst(itr->personal_rating, againstRating);
-            float K = (itr->personal_rating < 1000) ? 48.0f : 32.0f;
+            float chance = GetChanceAgainst(m_member.personal_rating, againstRating);
+            float K = (m_member.personal_rating < 1000) ? 48.0f : 32.0f;
             // calculate the rating modification (ELO system with k=32 or k=48 if rating<1000)
             int32 mod = (int32)ceil(K * (0.0f - chance));
-            itr->ModifyPersonalRating(plr, mod, GetSlot());
+            m_member.ModifyPersonalRating(plr, mod, GetSlot());
             // update personal played stats
-            itr->games_week += 1;
-            itr->games_season += 1;
+            m_member.games_week += 1;
+            m_member.games_season += 1;
             // update the unit fields
-            plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_WEEK,  itr->games_week);
-            plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_SEASON,  itr->games_season);
+            plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_WEEK, m_member.games_week);
+            plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_SEASON, m_member.games_season);
             return;
         }
     }
@@ -665,22 +665,22 @@ void ArenaTeam::MemberLost(Player* plr, uint32 againstRating)
 void ArenaTeam::OfflineMemberLost(ObjectGuid guid, uint32 againstRating)
 {
     // called for offline player after ending rated arena match!
-    for (MemberList::iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
+    for (auto& m_member : m_members)
     {
-        if (itr->guid == guid)
+        if (m_member.guid == guid)
         {
             // update personal rating
-            float chance = GetChanceAgainst(itr->personal_rating, againstRating);
-            float K = (itr->personal_rating < 1000) ? 48.0f : 32.0f;
+            float chance = GetChanceAgainst(m_member.personal_rating, againstRating);
+            float K = (m_member.personal_rating < 1000) ? 48.0f : 32.0f;
             // calculate the rating modification (ELO system with k=32 or k=48 if rating<1000)
             int32 mod = (int32)ceil(K * (0.0f - chance));
-            if (int32(itr->personal_rating) + mod < 0)
-                itr->personal_rating = 0;
+            if (int32(m_member.personal_rating) + mod < 0)
+                m_member.personal_rating = 0;
             else
-                itr->personal_rating += mod;
+                m_member.personal_rating += mod;
             // update personal played stats
-            itr->games_week += 1;
-            itr->games_season += 1;
+            m_member.games_week += 1;
+            m_member.games_season += 1;
             return;
         }
     }
@@ -689,24 +689,24 @@ void ArenaTeam::OfflineMemberLost(ObjectGuid guid, uint32 againstRating)
 void ArenaTeam::MemberWon(Player* plr, uint32 againstRating)
 {
     // called for each participant after winning a match
-    for (MemberList::iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
+    for (auto& m_member : m_members)
     {
-        if (itr->guid == plr->GetObjectGuid())
+        if (m_member.guid == plr->GetObjectGuid())
         {
             // update personal rating
-            float chance = GetChanceAgainst(itr->personal_rating, againstRating);
-            float K = (itr->personal_rating < 1000) ? 48.0f : 32.0f;
+            float chance = GetChanceAgainst(m_member.personal_rating, againstRating);
+            float K = (m_member.personal_rating < 1000) ? 48.0f : 32.0f;
             // calculate the rating modification (ELO system with k=32 or k=48 if rating<1000)
             int32 mod = (int32)floor(K * (1.0f - chance));
-            itr->ModifyPersonalRating(plr, mod, GetSlot());
+            m_member.ModifyPersonalRating(plr, mod, GetSlot());
             // update personal stats
-            itr->games_week += 1;
-            itr->games_season += 1;
-            itr->wins_season += 1;
-            itr->wins_week += 1;
+            m_member.games_week += 1;
+            m_member.games_season += 1;
+            m_member.wins_season += 1;
+            m_member.wins_week += 1;
             // update unit fields
-            plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_WEEK, itr->games_week);
-            plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_SEASON, itr->games_season);
+            plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_WEEK, m_member.games_week);
+            plr->SetArenaTeamInfoField(GetSlot(), ARENA_TEAM_GAMES_SEASON, m_member.games_season);
             return;
         }
     }
@@ -758,18 +758,18 @@ void ArenaTeam::FinishWeek()
 {
     m_stats.games_week = 0;                                 // played this week
     m_stats.wins_week = 0;                                  // wins this week
-    for (MemberList::iterator itr = m_members.begin(); itr !=  m_members.end(); ++itr)
+    for (auto& m_member : m_members)
     {
-        itr->games_week = 0;
-        itr->wins_week = 0;
+        m_member.games_week = 0;
+        m_member.wins_week = 0;
     }
 }
 
 bool ArenaTeam::IsFighting() const
 {
-    for (MemberList::const_iterator itr = m_members.begin(); itr != m_members.end(); ++itr)
+    for (const auto& m_member : m_members)
     {
-        if (Player* p = sObjectMgr.GetPlayer(itr->guid))
+        if (Player* p = sObjectMgr.GetPlayer(m_member.guid))
         {
             if (p->GetMap()->IsBattleArena())
                 return true;

@@ -661,10 +661,10 @@ void instance_trial_of_the_crusader::DoSelectCrusaders()
     }
 
     // set the final list of crusaders
-    for (uint8 i = 0; i < vCrusaderHealers.size(); ++i)
-        m_vCrusadersEntries.push_back(vCrusaderHealers[i]);
-    for (uint8 i = 0; i < vCrusaderOthers.size(); ++i)
-        m_vCrusadersEntries.push_back(vCrusaderOthers[i]);
+    for (unsigned int vCrusaderHealer : vCrusaderHealers)
+        m_vCrusadersEntries.push_back(vCrusaderHealer);
+    for (unsigned int vCrusaderOther : vCrusaderOthers)
+        m_vCrusadersEntries.push_back(vCrusaderOther);
 }
 
 // Function that will cleanup the crusaders

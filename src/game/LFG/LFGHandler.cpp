@@ -142,9 +142,9 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry) const
     data << uint32(playersSize);                            // players count
     data << uint32(playersSize);                            // players count (total?)
 
-    for (HashMapHolder<Player>::MapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
+    for (const auto& player : players)
     {
-        Player* plr = iter->second;
+        Player* plr = player.second;
 
         if (!plr || plr->GetTeam() != _player->GetTeam())
             continue;

@@ -51,9 +51,9 @@ void BattlefieldWG::Reset()
     m_sentPrebattleWarning = false;
 
     // load the defender buildings
-    for (uint8 i = 0; i < countof(wgFortressData); ++i)
+    for (const auto& i : wgFortressData)
     {
-        BattlefieldBuilding* building = new BattlefieldBuilding(wgFortressData[i].goEntry);
+        BattlefieldBuilding* building = new BattlefieldBuilding(i.goEntry);
 
         BattlefieldGoState goState = BF_GO_STATE_NEUTRAL_INTACT;
         if (GetDefender() && GetDefender() != TEAM_NONE)
@@ -61,14 +61,14 @@ void BattlefieldWG::Reset()
 
         building->SetGoState(goState);
         building->SetOwner(GetDefender());
-        building->SetWorldState(wgFortressData[i].worldState);
+        building->SetWorldState(i.worldState);
         m_keepBuildings.push_back(building);
     }
 
     // load the attacker buildings
-    for (uint8 i = 0; i < countof(wgOffensiveData); ++i)
+    for (const auto& i : wgOffensiveData)
     {
-        BattlefieldBuilding* building = new BattlefieldBuilding(wgOffensiveData[i].goEntry);
+        BattlefieldBuilding* building = new BattlefieldBuilding(i.goEntry);
 
         BattlefieldGoState goState = BF_GO_STATE_NEUTRAL_INTACT;
         if (GetAttacker() && GetDefender() != TEAM_NONE)
@@ -76,7 +76,7 @@ void BattlefieldWG::Reset()
 
         building->SetGoState(goState);
         building->SetOwner(GetAttacker());
-        building->SetWorldState(wgOffensiveData[i].worldState);
+        building->SetWorldState(i.worldState);
         m_offensiveBuildings.push_back(building);
     }
 }

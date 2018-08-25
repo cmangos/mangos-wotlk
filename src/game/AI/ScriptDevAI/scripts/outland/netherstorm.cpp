@@ -2349,15 +2349,15 @@ struct npc_adyen_the_lightwardenAI : public ScriptedAI
     {
         std::vector<uint32> removedTimers;
 
-        for (auto iter = m_timers.begin(); iter != m_timers.end(); ++iter)
+        for (auto& m_timer : m_timers)
         {
-            if ((*iter).second <= diff)
+            if (m_timer.second <= diff)
             {
-                ExecuteTimer((*iter).first);
-                removedTimers.push_back((*iter).first);
+                ExecuteTimer(m_timer.first);
+                removedTimers.push_back(m_timer.first);
             }
             else
-                (*iter).second -= diff;
+                m_timer.second -= diff;
         }
 
         for (uint32 id : removedTimers)

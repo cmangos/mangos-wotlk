@@ -981,8 +981,8 @@ void ScriptMgr::LoadDbScriptStrings()
     CheckScriptTexts(sCreatureMovementScripts, ids);
     CheckScriptTexts(sRelayScripts, ids);
 
-    for (std::set<int32>::const_iterator itr = ids.begin(); itr != ids.end(); ++itr)
-        sLog.outErrorDb("Table `dbscript_string` has unused string id %u", *itr);
+    for (std::_Simple_types<int>::value_type id : ids)
+    sLog.outErrorDb("Table `dbscript_string` has unused string id %u", id);
 }
 
 void ScriptMgr::LoadDbScriptRandomTemplates()
@@ -1034,13 +1034,13 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32
         {
             if (itrM->second.command == SCRIPT_COMMAND_TALK)
             {
-                for (int i = 0; i < MAX_TEXT_ID; ++i)
+                for (int i : itrM->second.textId)
                 {
-                    if (itrM->second.textId[i] && !sObjectMgr.GetMangosStringLocale(itrM->second.textId[i]))
-                        sLog.outErrorDb("Table `dbscript_string` is missing string id %u, used in database script table %s id %u.", itrM->second.textId[i], scripts.first, itrMM->first);
+                    if (i && !sObjectMgr.GetMangosStringLocale(i))
+                        sLog.outErrorDb("Table `dbscript_string` is missing string id %u, used in database script table %s id %u.", i, scripts.first, itrMM->first);
 
-                    if (ids.find(itrM->second.textId[i]) != ids.end())
-                        ids.erase(itrM->second.textId[i]);
+                    if (ids.find(i) != ids.end())
+                        ids.erase(i);
                 }
 
                 if (itrM->second.talk.stringTemplateId)
@@ -1394,11 +1394,11 @@ bool ScriptAction::HandleScriptStep()
 
             std::vector<uint32> emotes;
             emotes.push_back(m_script->emote.emoteId);
-            for (int i = 0; i < MAX_TEXT_ID; ++i)
+            for (int i : m_script->textId)
             {
-                if (!m_script->textId[i])
+                if (!i)
                     break;
-                emotes.push_back(uint32(m_script->textId[i]));
+                emotes.push_back(uint32(i));
             }
 
             ((Unit*)pSource)->HandleEmote(emotes[urand(0, emotes.size() - 1)]);
@@ -2468,11 +2468,11 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
     }
 
     // Load all possible event entries from taxi path nodes
-    for (size_t path_idx = 0; path_idx < sTaxiPathNodesByPath.size(); ++path_idx)
+    for (auto& path_idx : sTaxiPathNodesByPath)
     {
-        for (size_t node_idx = 0; node_idx < sTaxiPathNodesByPath[path_idx].size(); ++node_idx)
+        for (size_t node_idx = 0; node_idx < path_idx.size(); ++node_idx)
         {
-            TaxiPathNodeEntry const& node = *sTaxiPathNodesByPath[path_idx][node_idx];
+            TaxiPathNodeEntry const& node = *path_idx[node_idx];
 
             if (node.arrivalEventID)
                 eventIds.insert(node.arrivalEventID);

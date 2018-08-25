@@ -933,9 +933,9 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
 
         if (!lPlayerList.isEmpty())
         {
-            for (Map::PlayerList::const_iterator itr = lPlayerList.begin(); itr != lPlayerList.end(); ++itr)
+            for (const auto& itr : lPlayerList)
             {
-                if (Player* pPlayer = itr->getSource())
+                if (Player* pPlayer = itr.getSource())
                     pPlayer->KilledMonsterCredit(NPC_THRALL_QUEST_TRIGGER, m_creature->GetObjectGuid());
             }
         }

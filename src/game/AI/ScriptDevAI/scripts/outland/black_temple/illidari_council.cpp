@@ -165,9 +165,9 @@ struct mob_blood_elf_council_voice_triggerAI : public ScriptedAI
             if (m_uiEnrageTimer <= uiDiff)
             {
                 // Cast berserk on all members
-                for (uint8 i = 0; i < 4; ++i)
+                for (unsigned int i : aCouncilMember)
                 {
-                    if (Creature* pMember = m_pInstance->GetSingleCreatureFromStorage(aCouncilMember[i]))
+                    if (Creature* pMember = m_pInstance->GetSingleCreatureFromStorage(i))
                         pMember->CastSpell(pMember, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                 }
                 // Start yells
@@ -245,9 +245,9 @@ struct mob_illidari_councilAI : public ScriptedAI
         m_bEventEnd = true;
 
         // Kill all the other council members
-        for (uint8 i = 0; i < 4; ++i)
+        for (unsigned int i : aCouncilMember)
         {
-            Creature* pMember = m_pInstance->GetSingleCreatureFromStorage(aCouncilMember[i]);
+            Creature* pMember = m_pInstance->GetSingleCreatureFromStorage(i);
             if (pMember && pMember->isAlive())
                 pMember->DealDamage(pMember, pMember->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         }

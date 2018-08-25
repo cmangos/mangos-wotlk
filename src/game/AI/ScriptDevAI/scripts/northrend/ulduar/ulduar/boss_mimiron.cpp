@@ -1713,9 +1713,9 @@ struct npc_bot_triggerAI : public Scripted_NoMovementAI
                 }
 
                 // search for a nearby teleporter and disable the visual
-                for (uint8 i = 0; i < countof(aMimironTeleporters); ++i)
+                for (unsigned int aMimironTeleporter : aMimironTeleporters)
                 {
-                    if (GameObject* pTeleporter = GetClosestGameObjectWithEntry(m_creature, aMimironTeleporters[i], 2.0f))
+                    if (GameObject* pTeleporter = GetClosestGameObjectWithEntry(m_creature, aMimironTeleporter, 2.0f))
                     {
                         pTeleporter->ResetDoorOrButton();
                         break;
@@ -1761,9 +1761,9 @@ bool EffectDummyCreature_npc_bot_trigger(Unit* pCaster, uint32 uiSpellId, SpellE
         pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget, uiSummonSpell);
 
         // search for a nearby teleporter and enable the visual
-        for (uint8 i = 0; i < countof(aMimironTeleporters); ++i)
+        for (unsigned int aMimironTeleporter : aMimironTeleporters)
         {
-            if (GameObject* pTeleporter = GetClosestGameObjectWithEntry(pCreatureTarget, aMimironTeleporters[i], 2.0f))
+            if (GameObject* pTeleporter = GetClosestGameObjectWithEntry(pCreatureTarget, aMimironTeleporter, 2.0f))
             {
                 pTeleporter->UseDoorOrButton();
                 break;
@@ -1814,9 +1814,9 @@ struct npc_mimiron_flamesAI : public Scripted_NoMovementAI
         std::list<Unit*> lTargets;
         ThreatList const& threatList = pLeviathan->getThreatManager().getThreatList();
 
-        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+        for (auto itr : threatList)
         {
-            if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+            if (Unit* pTarget = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
             {
                 if (pTarget->GetTypeId() == TYPEID_PLAYER)
                     lTargets.push_back(pTarget);

@@ -253,7 +253,7 @@ static uint32 ReadDBCBuild(const std::string& dbc_path, LocaleNameStr const* loc
 
     size_t pos = text.find("version=\"");
     size_t pos1 = pos + strlen("version=\"");
-    size_t pos2 = text.find("\"", pos1);
+    size_t pos2 = text.find('\"', pos1);
     if (pos == std::string::npos || pos2 == std::string::npos || pos1 >= pos2)
         return 0;
 
@@ -610,10 +610,10 @@ void LoadDBCStores(const std::string& dataPath)
             if (src_i != sTaxiPathSetBySource.end() && !src_i->second.empty())
             {
                 bool ok = false;
-                for (TaxiPathSetForSource::const_iterator dest_i = src_i->second.begin(); dest_i != src_i->second.end(); ++dest_i)
+                for (const auto& dest_i : src_i->second)
                 {
                     // not spell path
-                    if (spellPaths.find(dest_i->second.ID) == spellPaths.end())
+                    if (spellPaths.find(dest_i.second.ID) == spellPaths.end())
                     {
                         ok = true;
                         break;
@@ -665,8 +665,8 @@ void LoadDBCStores(const std::string& dataPath)
     else if (!bad_dbc_files.empty())
     {
         std::string str;
-        for (std::list<std::string>::iterator i = bad_dbc_files.begin(); i != bad_dbc_files.end(); ++i)
-            str += *i + "\n";
+        for (auto& bad_dbc_file : bad_dbc_files)
+            str += bad_dbc_file + "\n";
 
         sLog.outError("\nSome required *.dbc files (%u from %d) not found or not compatible:\n%s", (uint32)bad_dbc_files.size(), DBCFilesCount, str.c_str());
         Log::WaitBeforeContinueIfNeed();

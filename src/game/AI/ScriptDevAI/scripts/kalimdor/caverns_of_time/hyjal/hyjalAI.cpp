@@ -196,9 +196,9 @@ bool hyjalAI::IsEventInProgress() const
         return true;
 
     // The boss might still be around and alive
-    for (uint8 i = 0; i < 2; ++i)
+    for (auto i : m_aBossGuid)
     {
-        Creature* pBoss = m_creature->GetMap()->GetCreature(m_aBossGuid[i]);
+        Creature* pBoss = m_creature->GetMap()->GetCreature(i);
         if (pBoss && pBoss->isAlive())
             return true;
     }
@@ -273,12 +273,12 @@ void hyjalAI::JustSummoned(Creature* pSummoned)
 
     HyjalLocation const* pMove = nullptr;
 
-    for (uint32 i = 0; i < countof(aHyjalWaveMoveTo); ++i)
+    for (const auto& i : aHyjalWaveMoveTo)
     {
-        if (aHyjalWaveMoveTo[i].m_pBaseArea != (eBaseArea)m_uiBase)
+        if (i.m_pBaseArea != (eBaseArea)m_uiBase)
             continue;
 
-        pMove = &aHyjalWaveMoveTo[i];
+        pMove = &i;
         break;
     }
 
@@ -343,10 +343,10 @@ void hyjalAI::SummonNextWave()
 
     m_uiEnemyCount = m_pInstance->GetData(TYPE_TRASH_COUNT);
 
-    for (uint8 i = 0; i < MAX_WAVE_MOB; ++i)
+    for (unsigned int i : pWaveData->m_auiMobEntry)
     {
-        if (pWaveData->m_auiMobEntry[i])
-            SpawnCreatureForWave(pWaveData->m_auiMobEntry[i]);
+        if (i)
+            SpawnCreatureForWave(i);
     }
 
     if (!pWaveData->m_bIsBoss)
@@ -417,9 +417,9 @@ void hyjalAI::DoTalk(YellType pYellType)
 
     bool bGetNext = false;
 
-    for (uint32 i = 0; i < countof(aHyjalYell); ++i)
+    for (const auto& i : aHyjalYell)
     {
-        if (aHyjalYell[i].uiCreatureEntry == m_creature->GetEntry() && aHyjalYell[i].m_pYellType == pYellType)
+        if (i.uiCreatureEntry == m_creature->GetEntry() && i.m_pYellType == pYellType)
         {
             // this would not be safe unless we knew these had two entries in m_aYell
             if (pYellType == ATTACKED || pYellType == RALLY)
@@ -431,7 +431,7 @@ void hyjalAI::DoTalk(YellType pYellType)
                 }
             }
 
-            pYell = &aHyjalYell[i];
+            pYell = &i;
             break;
         }
     }

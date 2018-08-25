@@ -137,8 +137,8 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
         {
             if (m_uiSummonTimer <= uiDiff)
             {
-                for (uint8 i = 0; i < MAX_LAMENTERS; ++i)
-                    m_creature->SummonCreature(NPC_HIGHBORNE_LAMENTER, aHighborneLoc[i][0], aHighborneLoc[i][1], aHighborneLoc[i][2], aHighborneLoc[i][3], TEMPSPAWN_TIMED_DESPAWN, 160000);
+                for (auto i : aHighborneLoc)
+                    m_creature->SummonCreature(NPC_HIGHBORNE_LAMENTER, i[0], i[1], i[2], i[3], TEMPSPAWN_TIMED_DESPAWN, 160000);
 
                 m_uiSummonTimer = 0;
             }

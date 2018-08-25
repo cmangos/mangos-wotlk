@@ -723,9 +723,9 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
         // get the personal ratings for queue
         uint32 avg_pers_rating = 0;
 
-        for (Group::member_citerator citr = grp->GetMemberSlots().begin(); citr != grp->GetMemberSlots().end(); ++citr)
+        for (const auto& citr : grp->GetMemberSlots())
         {
-            ArenaTeamMember const* at_member = at->GetMember(citr->guid);
+            ArenaTeamMember const* at_member = at->GetMember(citr.guid);
             if (!at_member)                                 // group member joining to arena must be in leader arena team
                 return;
 

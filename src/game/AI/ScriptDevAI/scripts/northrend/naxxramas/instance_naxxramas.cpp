@@ -63,8 +63,8 @@ void instance_naxxramas::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
-    for (uint8 i = 0; i < MAX_SPECIAL_ACHIEV_CRITS; ++i)
-        m_abAchievCriteria[i] = false;
+    for (bool& i : m_abAchievCriteria)
+        i = false;
 
     m_dialogueHelper.InitializeDialogueHelper(this, true);
 }
@@ -510,10 +510,10 @@ void instance_naxxramas::Load(const char* chrIn)
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11]
                >> m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14] >> m_auiEncounter[15];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -677,15 +677,15 @@ Creature* instance_naxxramas::GetClosestAnchorForGoth(Creature* pSource, bool bR
 {
     std::list<Creature* > lList;
 
-    for (std::unordered_map<ObjectGuid, GothTrigger>::iterator itr = m_mGothTriggerMap.begin(); itr != m_mGothTriggerMap.end(); ++itr)
+    for (auto& itr : m_mGothTriggerMap)
     {
-        if (!itr->second.bIsAnchorHigh)
+        if (!itr.second.bIsAnchorHigh)
             continue;
 
-        if (itr->second.bIsRightSide != bRightSide)
+        if (itr.second.bIsRightSide != bRightSide)
             continue;
 
-        if (Creature* pCreature = instance->GetCreature(itr->first))
+        if (Creature* pCreature = instance->GetCreature(itr.first))
             lList.push_back(pCreature);
     }
 
@@ -700,15 +700,15 @@ Creature* instance_naxxramas::GetClosestAnchorForGoth(Creature* pSource, bool bR
 
 void instance_naxxramas::GetGothSummonPointCreatures(std::list<Creature*>& lList, bool bRightSide)
 {
-    for (std::unordered_map<ObjectGuid, GothTrigger>::iterator itr = m_mGothTriggerMap.begin(); itr != m_mGothTriggerMap.end(); ++itr)
+    for (auto& itr : m_mGothTriggerMap)
     {
-        if (itr->second.bIsAnchorHigh)
+        if (itr.second.bIsAnchorHigh)
             continue;
 
-        if (itr->second.bIsRightSide != bRightSide)
+        if (itr.second.bIsRightSide != bRightSide)
             continue;
 
-        if (Creature* pCreature = instance->GetCreature(itr->first))
+        if (Creature* pCreature = instance->GetCreature(itr.first))
             lList.push_back(pCreature);
     }
 }

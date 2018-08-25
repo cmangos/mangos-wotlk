@@ -691,8 +691,8 @@ struct ItemPrototype
         if (Delay == 0)
             return 0;
         float temp = 0;
-        for (int i = 0; i < MAX_ITEM_PROTO_DAMAGES; ++i)
-            temp += Damage[i].DamageMin + Damage[i].DamageMax;
+        for (auto i : Damage)
+            temp += i.DamageMin + i.DamageMax;
         return temp * 500 / Delay;
     }
 

@@ -19,6 +19,7 @@
 #ifndef MANGOS_CALENDAR_H
 #define MANGOS_CALENDAR_H
 
+#include <utility>
 #include "Common.h"
 #include "Entities/ObjectGuid.h"
 
@@ -141,8 +142,8 @@ class CalendarEvent
         CalendarEvent(uint64 eventId, uint64 creatorGUID, uint32 guildId, CalendarEventType type, int32 dungeonId,
                       time_t eventTime, uint32 flags, time_t unknownTime, std::string title, std::string description) :
             EventId(eventId), CreatorGuid(creatorGUID), GuildId(guildId), Type(type), Repeatable(), DungeonId(dungeonId),
-            EventTime(eventTime), Flags(flags), UnknownTime(unknownTime), Title(title),
-            Description(description) { }
+            EventTime(eventTime), Flags(flags), UnknownTime(unknownTime), Title(std::move(title)),
+            Description(std::move(description)) { }
 
         CalendarEvent() : EventId(0), CreatorGuid(uint64(0)), GuildId(0), Type(CALENDAR_TYPE_OTHER), Repeatable(), DungeonId(-1), EventTime(0),
             Flags(0), UnknownTime(0) { }
@@ -259,7 +260,7 @@ class CalendarMgr
         void SendCalendarRaidLockoutRemove(Player* player, DungeonPersistentState const* save) const;
         void SendCalendarRaidLockoutAdd(Player* player, DungeonPersistentState const* save) const;
 
-        void SendPacketToAllEventRelatives(WorldPacket packet, CalendarEvent const* event) const;
+        void SendPacketToAllEventRelatives(const WorldPacket& packet, CalendarEvent const* event) const;
 
     private:
         uint64 GetNewEventId() { return ++m_MaxEventId; }

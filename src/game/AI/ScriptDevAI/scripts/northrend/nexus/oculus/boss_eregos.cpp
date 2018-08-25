@@ -162,9 +162,9 @@ struct boss_eregosAI : public ScriptedAI
                 m_uiAnomalyTargetIndex = 0;
 
                 ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-                for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+                for (auto itr : threatList)
                 {
-                    if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                    if (Unit* pTarget = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                     {
                         if (pTarget->GetEntry() == NPC_RUBY_DRAKE || pTarget->GetEntry() == NPC_AMBER_DRAKE || pTarget->GetEntry() == NPC_EMERALD_DRAKE)
                             m_vAnomalyTargets.push_back(pTarget->GetObjectGuid());

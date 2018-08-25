@@ -54,12 +54,12 @@ static uint32 TriggerOrphanSpell[6][3] =
 
 bool AreaTrigger_at_childrens_week_spot(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    for (uint8 i = 0; i < 6; ++i)
+    for (auto& i : TriggerOrphanSpell)
     {
-        if (pAt->id == TriggerOrphanSpell[i][0] &&
-                pPlayer->GetMiniPet() && pPlayer->GetMiniPet()->GetEntry() == TriggerOrphanSpell[i][1])
+        if (pAt->id == i[0] &&
+                pPlayer->GetMiniPet() && pPlayer->GetMiniPet()->GetEntry() == i[1])
         {
-            pPlayer->CastSpell(pPlayer, TriggerOrphanSpell[i][2], TRIGGERED_OLD_TRIGGERED);
+            pPlayer->CastSpell(pPlayer, i[2], TRIGGERED_OLD_TRIGGERED);
             return true;
         }
     }
@@ -352,14 +352,14 @@ bool AreaTrigger_at_hot_on_the_trail(Player* pPlayer, AreaTriggerEntry const* pA
     if (pPlayer->isGameMaster() || !pPlayer->isAlive())
         return false;
 
-    for (uint8 i = 0; i < 6; ++i)
+    for (auto aHotOnTrailValue : aHotOnTrailValues)
     {
-        if (pAt->id == aHotOnTrailValues[i].uiAtEntry)
+        if (pAt->id == aHotOnTrailValue.uiAtEntry)
         {
-            if (pPlayer->GetQuestStatus(aHotOnTrailValues[i].uiQuestEntry) == QUEST_STATUS_INCOMPLETE &&
-                    pPlayer->GetReqKillOrCastCurrentCount(aHotOnTrailValues[i].uiQuestEntry, aHotOnTrailValues[i].uiCreditEntry) == 0)
+            if (pPlayer->GetQuestStatus(aHotOnTrailValue.uiQuestEntry) == QUEST_STATUS_INCOMPLETE &&
+                    pPlayer->GetReqKillOrCastCurrentCount(aHotOnTrailValue.uiQuestEntry, aHotOnTrailValue.uiCreditEntry) == 0)
             {
-                pPlayer->CastSpell(pPlayer, aHotOnTrailValues[i].uiSpellEntry, TRIGGERED_OLD_TRIGGERED);
+                pPlayer->CastSpell(pPlayer, aHotOnTrailValue.uiSpellEntry, TRIGGERED_OLD_TRIGGERED);
                 return true;
             }
         }
@@ -408,8 +408,8 @@ bool AreaTrigger_at_ancient_leaf(Player* pPlayer, AreaTriggerEntry const* pAt)
         if (GetClosestCreatureWithEntry(pPlayer, NPC_VARTRUS, 50.0f) || GetClosestCreatureWithEntry(pPlayer, NPC_STOMA, 50.0f) || GetClosestCreatureWithEntry(pPlayer, NPC_HASTAT, 50.0f))
             return true;
 
-        for (uint8 i = 0; i < MAX_ANCIENTS; ++i)
-            pPlayer->SummonCreature(afSpawnLocations[i].uiEntry, afSpawnLocations[i].fX, afSpawnLocations[i].fY, afSpawnLocations[i].fZ, afSpawnLocations[i].fO, TEMPSPAWN_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+        for (const auto& afSpawnLocation : afSpawnLocations)
+            pPlayer->SummonCreature(afSpawnLocation.uiEntry, afSpawnLocation.fX, afSpawnLocation.fY, afSpawnLocation.fZ, afSpawnLocation.fO, TEMPSPAWN_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
     }
 
     return false;

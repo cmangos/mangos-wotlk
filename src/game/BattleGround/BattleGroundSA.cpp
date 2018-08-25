@@ -210,6 +210,6 @@ void BattleGroundSA::Reset()
     m_battleRoundTimer = BG_SA_TIMER_ROUND_LENGTH;
 
     // set initial gate state values
-    for (uint8 i = 0; i < BG_SA_MAX_GATES; ++i)
-        m_gateStateValue[i] = BG_SA_STATE_VALUE_GATE_INTACT;
+    for (unsigned int& i : m_gateStateValue)
+        i = BG_SA_STATE_VALUE_GATE_INTACT;
 }

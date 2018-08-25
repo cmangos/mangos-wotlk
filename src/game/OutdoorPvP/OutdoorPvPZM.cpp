@@ -39,8 +39,8 @@ OutdoorPvPZM::OutdoorPvPZM() : OutdoorPvP(),
     m_towerMapState[0] = WORLD_STATE_ZM_BEACON_EAST_NEUTRAL;
     m_towerMapState[1] = WORLD_STATE_ZM_BEACON_WEST_NEUTRAL;
 
-    for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
-        m_towerOwner[i] = TEAM_NONE;
+    for (auto& i : m_towerOwner)
+        i = TEAM_NONE;
 
     for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
     {
@@ -148,9 +148,9 @@ void OutdoorPvPZM::HandleGameObjectCreate(GameObject* go)
 // Cast player spell on opponent kill
 void OutdoorPvPZM::HandlePlayerKillInsideArea(Player* player, Unit* victim)
 {
-    for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
+    for (auto m_towerBanner : m_towerBanners)
     {
-        if (GameObject* capturePoint = player->GetMap()->GetGameObject(m_towerBanners[i]))
+        if (GameObject* capturePoint = player->GetMap()->GetGameObject(m_towerBanner))
         {
             // check capture point range
             GameObjectInfo const* info = capturePoint->GetGOInfo();

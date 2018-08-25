@@ -413,9 +413,9 @@ bool VehicleInfo::CanBoard(Unit* passenger) const
 
 Unit* VehicleInfo::GetPassenger(uint8 seat) const
 {
-    for (PassengerMap::const_iterator itr = m_passengers.begin(); itr != m_passengers.end(); ++itr)
-        if (itr->second->GetTransportSeat() == seat)
-            return (Unit*)itr->first;
+    for (const auto& m_passenger : m_passengers)
+        if (m_passenger.second->GetTransportSeat() == seat)
+            return (Unit*)m_passenger.first;
 
     return nullptr;
 }
@@ -432,9 +432,9 @@ void VehicleInfo::CalculateBoardingPositionOf(float gx, float gy, float gz, floa
 void VehicleInfo::RemoveAccessoriesFromMap()
 {
     // Remove all accessories
-    for (GuidSet::const_iterator itr = m_accessoryGuids.begin(); itr != m_accessoryGuids.end(); ++itr)
+    for (auto m_accessoryGuid : m_accessoryGuids)
     {
-        if (Creature* pAccessory = m_owner->GetMap()->GetCreature(*itr))
+        if (Creature* pAccessory = m_owner->GetMap()->GetCreature(m_accessoryGuid))
         {
             // TODO - unclear how long to despawn, also maybe some flag etc depending
             pAccessory->ForcedDespawn(5000);
@@ -496,8 +496,8 @@ uint8 VehicleInfo::GetTakenSeatsMask() const
 {
     uint8 takenSeatsMask = 0;
 
-    for (PassengerMap::const_iterator itr = m_passengers.begin(); itr != m_passengers.end(); ++itr)
-        takenSeatsMask |= 1 << itr->second->GetTransportSeat();
+    for (const auto& m_passenger : m_passengers)
+        takenSeatsMask |= 1 << m_passenger.second->GetTransportSeat();
 
     return takenSeatsMask;
 }

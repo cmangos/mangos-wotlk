@@ -35,8 +35,8 @@ void instance_pinnacle::Initialize()
 {
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 
-    for (uint8 i = 0; i < MAX_SPECIAL_ACHIEV_CRITS; ++i)
-        m_abAchievCriteria[i] = false;
+    for (bool& i : m_abAchievCriteria)
+        i = false;
 }
 
 void instance_pinnacle::OnCreatureCreate(Creature* pCreature)
@@ -121,10 +121,10 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
                     pOrb->GetMotionMaster()->MoveTargetedHome();
                 }
 
-                for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+                for (unsigned int aGortokMiniBosse : aGortokMiniBosses)
                 {
                     // Reset each miniboss
-                    if (Creature* pTemp = GetSingleCreatureFromStorage(aGortokMiniBosses[i]))
+                    if (Creature* pTemp = GetSingleCreatureFromStorage(aGortokMiniBosse))
                     {
                         if (!pTemp->isAlive())
                             pTemp->Respawn();
@@ -231,10 +231,10 @@ void instance_pinnacle::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;

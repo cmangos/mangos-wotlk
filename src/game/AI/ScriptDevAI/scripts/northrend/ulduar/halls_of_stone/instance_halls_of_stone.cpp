@@ -132,26 +132,26 @@ void instance_halls_of_stone::SetData(uint32 uiType, uint32 uiData)
                     DoUseDoorOrButton(GO_DOOR_SJONNIR);
                     break;
                 case FAIL:
-                    for (uint8 i = 0; i < MAX_FACES; ++i)
+                    for (auto& m_aFace : m_aFaces)
                     {
                         // Shut down the faces
-                        if (m_aFaces[i].m_bIsActive)
-                            DoUseDoorOrButton(m_aFaces[i].m_goFaceGuid);
-                        m_aFaces[i].m_bIsActive = false;
-                        m_aFaces[i].m_uiTimer = 1000;
+                        if (m_aFace.m_bIsActive)
+                            DoUseDoorOrButton(m_aFace.m_goFaceGuid);
+                        m_aFace.m_bIsActive = false;
+                        m_aFace.m_uiTimer = 1000;
                     }
                     break;
                 case SPECIAL:
-                    for (uint8 i = 0; i < MAX_FACES; ++i)
+                    for (auto& m_aFace : m_aFaces)
                     {
-                        m_aFaces[i].m_bIsActive = false;
-                        m_aFaces[i].m_uiTimer = 1000;
+                        m_aFace.m_bIsActive = false;
+                        m_aFace.m_uiTimer = 1000;
                         // TODO - Check which stay red and how long (also find out how they get red..)
 
                         // Cleanup when finished
-                        if (Creature* pEye = instance->GetCreature(m_aFaces[i].m_leftEyeGuid))
+                        if (Creature* pEye = instance->GetCreature(m_aFace.m_leftEyeGuid))
                             pEye->CastSpell(pEye, SPELL_KILL_TRIBUNAL_ADD, TRIGGERED_OLD_TRIGGERED);
-                        if (Creature* pEye = instance->GetCreature(m_aFaces[i].m_rightEyeGuid))
+                        if (Creature* pEye = instance->GetCreature(m_aFace.m_rightEyeGuid))
                             pEye->CastSpell(pEye, SPELL_KILL_TRIBUNAL_ADD, TRIGGERED_OLD_TRIGGERED);
                     }
                     break;
@@ -371,10 +371,10 @@ void instance_halls_of_stone::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;

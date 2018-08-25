@@ -454,8 +454,8 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
     // function which summons constellations
     void DoSpawnConstellations()
     {
-        for (uint8 i = 0; i < MAX_CONSTELATIONS; ++i)
-            m_creature->SummonCreature(NPC_LIVING_CONSTELLATION, afConstellations[i][0], afConstellations[i][1], afConstellations[i][2], afConstellations[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
+        for (auto afConstellation : afConstellations)
+            m_creature->SummonCreature(NPC_LIVING_CONSTELLATION, afConstellation[0], afConstellation[1], afConstellation[2], afConstellation[3], TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 
     // Activate a random Constellation
@@ -604,8 +604,8 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
             }
 
             // spawn new worm holes
-            for (uint8 i = 0; i < MAX_WORM_HOLES; ++i)
-                m_creature->SummonCreature(NPC_WORM_HOLE, afWormHoles[i][0], afWormHoles[i][1], afWormHoles[i][2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+            for (auto afWormHole : afWormHoles)
+                m_creature->SummonCreature(NPC_WORM_HOLE, afWormHole[0], afWormHole[1], afWormHole[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
 
         DoMeleeAttackIfReady();

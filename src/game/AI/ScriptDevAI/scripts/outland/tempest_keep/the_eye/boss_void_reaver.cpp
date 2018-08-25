@@ -134,9 +134,9 @@ struct boss_void_reaverAI : public ScriptedAI
             std::vector<Unit*> suitableTargets;
             ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
 
-            for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+            for (auto itr : threatList)
             {
-                if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                if (Unit* pTarget = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                 {
                     if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->IsWithinDist(m_creature, 18.0f))
                         suitableTargets.push_back(pTarget);

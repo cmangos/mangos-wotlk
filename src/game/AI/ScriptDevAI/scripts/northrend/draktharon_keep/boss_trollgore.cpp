@@ -166,9 +166,9 @@ struct boss_trollgoreAI : public ScriptedAI
         else
         {
             // Summon 3 trolls in the air
-            for (uint8 i = 0; i < m_vTriggers.size(); ++i)
+            for (auto m_vTrigger : m_vTriggers)
             {
-                if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_vTriggers[i]))
+                if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_vTrigger))
                     pTrigger->CastSpell(pTrigger, roll_chance_i(30) ? SPELL_SUMMON_INVADER_1 : SPELL_SUMMON_INVADER_2, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
             }
         }

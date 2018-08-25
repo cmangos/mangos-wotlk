@@ -195,8 +195,8 @@ struct boss_flame_leviathanAI : public ScriptedAI
     {
         DoCastSpellIfCan(m_creature, SPELL_INVISIBILITY_DETECTION, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
 
-        for (uint8 i = 0; i < KEEPER_ENCOUNTER; ++i)
-            m_bUlduarTower[i] = false;
+        for (bool& i : m_bUlduarTower)
+            i = false;
 
         m_uiBatteringRamTimer   = 10000;
         m_uiFlameVentsTimer     = 30000;
@@ -377,14 +377,14 @@ struct boss_flame_leviathanAI : public ScriptedAI
     // Functions which handle the spawn of each type of add
     void DoSpawnHodirFury()
     {
-        for (uint8 i = 0; i < MAX_HODIR_FURY; ++i)
-            m_creature->SummonCreature(NPC_HODIR_FURY_VEHICLE, afHodirFury[i][0], afHodirFury[i][1], afHodirFury[i][2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+        for (auto i : afHodirFury)
+            m_creature->SummonCreature(NPC_HODIR_FURY_VEHICLE, i[0], i[1], i[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 
     void DoSpawnFreyaWard()
     {
-        for (uint8 i = 0; i < MAX_FREYA_WARD; ++i)
-            m_creature->SummonCreature(NPC_FREYA_WARD_VEHICLE, afFreyaWard[i][0], afFreyaWard[i][1], afFreyaWard[i][2], afFreyaWard[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
+        for (auto i : afFreyaWard)
+            m_creature->SummonCreature(NPC_FREYA_WARD_VEHICLE, i[0], i[1], i[2], i[3], TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 
     void DoSpawnMimironInferno()

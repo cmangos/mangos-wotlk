@@ -247,10 +247,10 @@ void BattleGroundAB::FillInitialWorldStates(WorldPacket& data, uint32& count)
 
     // How many bases each team owns
     uint8 ally = 0, horde = 0;
-    for (uint8 node = 0; node < BG_AB_NODES_MAX; ++node)
-        if (m_Nodes[node] == BG_AB_NODE_STATUS_ALLY_OCCUPIED)
+    for (unsigned char m_Node : m_Nodes)
+        if (m_Node == BG_AB_NODE_STATUS_ALLY_OCCUPIED)
             ++ally;
-        else if (m_Nodes[node] == BG_AB_NODE_STATUS_HORDE_OCCUPIED)
+        else if (m_Node == BG_AB_NODE_STATUS_HORDE_OCCUPIED)
             ++horde;
 
     FillInitialWorldState(data, count, BG_AB_OP_OCCUPIED_BASES_ALLY, ally);
@@ -280,10 +280,10 @@ void BattleGroundAB::_SendNodeUpdate(uint8 node)
 
     // How many bases each team owns
     uint8 ally = 0, horde = 0;
-    for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
-        if (m_Nodes[i] == BG_AB_NODE_STATUS_ALLY_OCCUPIED)
+    for (unsigned char m_Node : m_Nodes)
+        if (m_Node == BG_AB_NODE_STATUS_ALLY_OCCUPIED)
             ++ally;
-        else if (m_Nodes[i] == BG_AB_NODE_STATUS_HORDE_OCCUPIED)
+        else if (m_Node == BG_AB_NODE_STATUS_HORDE_OCCUPIED)
             ++horde;
 
     UpdateWorldState(BG_AB_OP_OCCUPIED_BASES_ALLY, ally);
@@ -293,9 +293,9 @@ void BattleGroundAB::_SendNodeUpdate(uint8 node)
 void BattleGroundAB::_NodeOccupied(uint8 node, Team team)
 {
     uint8 capturedNodes = 0;
-    for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
+    for (unsigned int m_NodeTimer : m_NodeTimers)
     {
-        if (m_Nodes[node] == GetTeamIndexByTeamId(team) + BG_AB_NODE_TYPE_OCCUPIED && !m_NodeTimers[i])
+        if (m_Nodes[node] == GetTeamIndexByTeamId(team) + BG_AB_NODE_TYPE_OCCUPIED && !m_NodeTimer)
             ++capturedNodes;
     }
     if (capturedNodes >= 5)
@@ -475,9 +475,9 @@ WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
         float plr_y = player->GetPositionY();
 
         float mindist = 999999.0f;
-        for (uint8 i = 0; i < nodes.size(); ++i)
+        for (unsigned char node : nodes)
         {
-            WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(BG_AB_GraveyardIds[nodes[i]]);
+            WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(BG_AB_GraveyardIds[node]);
             if (!entry)
                 continue;
             float dist = (entry->x - plr_x) * (entry->x - plr_x) + (entry->y - plr_y) * (entry->y - plr_y);
@@ -518,9 +518,9 @@ void BattleGroundAB::UpdatePlayerScore(Player* source, uint32 type, uint32 value
 
 bool BattleGroundAB::IsAllNodesControlledByTeam(Team team) const
 {
-    for (uint8 i = 0; i < BG_AB_NODES_MAX; ++i)
-        if ((team == ALLIANCE && m_Nodes[i] != BG_AB_NODE_STATUS_ALLY_OCCUPIED) ||
-                (team == HORDE && m_Nodes[i] != BG_AB_NODE_STATUS_HORDE_OCCUPIED))
+    for (unsigned char m_Node : m_Nodes)
+        if ((team == ALLIANCE && m_Node != BG_AB_NODE_STATUS_ALLY_OCCUPIED) ||
+                (team == HORDE && m_Node != BG_AB_NODE_STATUS_HORDE_OCCUPIED))
             return false;
 
     return true;

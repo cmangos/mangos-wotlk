@@ -21,6 +21,7 @@ SDComment:
 SDCategory: Terokkar Forest
 EndScriptData */
 
+#include <utility>
 #include "AI/ScriptDevAI/include/precompiled.h"
 
 enum
@@ -88,7 +89,7 @@ enum TerokkActions
 
 struct Timer
 {
-    Timer(TerokkActions id, uint32 timer, std::function<void()> functor, bool disabled = false) : id(id), timer(timer), disabled(disabled), functor(functor) {}
+    Timer(TerokkActions id, uint32 timer, std::function<void()> functor, bool disabled = false) : id(id), timer(timer), disabled(disabled), functor(std::move(functor)) {}
     TerokkActions id;
     uint32 timer;
     bool disabled;
@@ -152,7 +153,7 @@ struct boss_terokkAI : public ScriptedAI
 
     void AddCustomAction(TerokkActions id, uint32 timer, std::function<void()> functor, bool disabled = false)
     {
-        m_timers.emplace(id, Timer(id, timer, functor, disabled));
+        m_timers.emplace(id, Timer(id, timer, std::move(functor), disabled));
     }
 
     void UpdateTimers(const uint32 diff)

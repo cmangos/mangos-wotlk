@@ -67,10 +67,10 @@ void instance_forge_of_souls::ProcessEventNpcs(Player* pPlayer, bool bChanged)
     if (m_auiEncounter[0] != DONE || m_auiEncounter[1] != DONE)
     {
         // Spawn Begin Mobs
-        for (uint8 i = 0; i < countof(aEventBeginLocations); ++i)
+        for (const auto& aEventBeginLocation : aEventBeginLocations)
         {
-            if (Creature* pSummon = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocations[i].uiEntryHorde : aEventBeginLocations[i].uiEntryAlliance,
-                                    aEventBeginLocations[i].fSpawnX, aEventBeginLocations[i].fSpawnY, aEventBeginLocations[i].fSpawnZ, aEventBeginLocations[i].fSpawnO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
+            if (Creature* pSummon = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
+                aEventBeginLocation.fSpawnX, aEventBeginLocation.fSpawnY, aEventBeginLocation.fSpawnZ, aEventBeginLocation.fSpawnO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
                 m_lEventMobGUIDs.push_back(pSummon->GetObjectGuid());
         }
     }
@@ -85,10 +85,10 @@ void instance_forge_of_souls::ProcessEventNpcs(Player* pPlayer, bool bChanged)
                     pSummoned->ForcedDespawn();
             }
 
-            for (uint8 i = 0; i < countof(aEventEndLocations); ++i)
+            for (const auto& aEventEndLocation : aEventEndLocations)
             {
-                pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventEndLocations[i].uiEntryHorde : aEventEndLocations[i].uiEntryAlliance,
-                                        aEventEndLocations[i].fSpawnX, aEventEndLocations[i].fSpawnY, aEventEndLocations[i].fSpawnZ, aEventEndLocations[i].fStartO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS);
+                pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventEndLocation.uiEntryHorde : aEventEndLocation.uiEntryAlliance,
+                    aEventEndLocation.fSpawnX, aEventEndLocation.fSpawnY, aEventEndLocation.fSpawnZ, aEventEndLocation.fStartO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS);
 
                 // TODO: Let the NPCs Move along their paths
             }
@@ -96,10 +96,10 @@ void instance_forge_of_souls::ProcessEventNpcs(Player* pPlayer, bool bChanged)
         else
         {
             // Summon at end, without event
-            for (uint8 i = 0; i < countof(aEventEndLocations); ++i)
+            for (const auto& aEventEndLocation : aEventEndLocations)
             {
-                pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventEndLocations[i].uiEntryHorde : aEventEndLocations[i].uiEntryAlliance,
-                                        aEventEndLocations[i].fEndX, aEventEndLocations[i].fEndY, aEventEndLocations[i].fEndZ, aEventEndLocations[i].fEndO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS);
+                pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventEndLocation.uiEntryHorde : aEventEndLocation.uiEntryAlliance,
+                    aEventEndLocation.fEndX, aEventEndLocation.fEndY, aEventEndLocation.fEndZ, aEventEndLocation.fEndO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS);
             }
         }
     }
@@ -170,10 +170,10 @@ void instance_forge_of_souls::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;

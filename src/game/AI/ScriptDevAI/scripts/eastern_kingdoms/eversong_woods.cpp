@@ -101,11 +101,11 @@ struct npc_kelerun_bloodmournAI : public ScriptedAI
         m_uiEngageTimer = 0;
 
         m_bIsEventInProgress = false;
-        for (uint8 i = 0; i < MAX_CHALLENGER; ++i)          // Despawn challengers
+        for (auto& m_aChallengerGuid : m_aChallengerGuids)          // Despawn challengers
         {
-            if (Creature* pChallenger = m_creature->GetMap()->GetCreature(m_aChallengerGuids[i]))
+            if (Creature* pChallenger = m_creature->GetMap()->GetCreature(m_aChallengerGuid))
                 pChallenger->ForcedDespawn(1000);
-            m_aChallengerGuids[i].Clear();
+            m_aChallengerGuid.Clear();
         }
     }
 

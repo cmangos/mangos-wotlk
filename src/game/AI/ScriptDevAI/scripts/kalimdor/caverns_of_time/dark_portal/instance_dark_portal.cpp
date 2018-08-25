@@ -148,9 +148,9 @@ void instance_dark_portal::SetData(uint32 uiType, uint32 uiData)
 
                 if (!players.isEmpty())
                 {
-                    for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+                    for (const auto& player : players)
                     {
-                        if (Player* pPlayer = itr->getSource())
+                        if (Player* pPlayer = player.getSource())
                         {
                             if (pPlayer->GetQuestStatus(QUEST_OPENING_PORTAL) == QUEST_STATUS_INCOMPLETE)
                                 pPlayer->AreaExploredOrEventHappens(QUEST_OPENING_PORTAL);
@@ -261,10 +261,10 @@ void instance_dark_portal::Load(const char* chrIn)
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                >> m_auiEncounter[4] >> m_auiEncounter[5];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;

@@ -185,9 +185,9 @@ void world_map_ebon_hold::DoUpdateBattleWorldState(uint32 uiStateId, uint32 uiSt
 {
     Map::PlayerList const& lPlayers = instance->GetPlayers();
 
-    for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+    for (const auto& lPlayer : lPlayers)
     {
-        if (Player* pPlayer = itr->getSource())
+        if (Player* pPlayer = lPlayer.getSource())
         {
             // we need to manually check the phase mask because the value from DBC is not used yet
             if (pPlayer->HasAura(SPELL_CHAPTER_IV) || pPlayer->isGameMaster())
@@ -216,9 +216,9 @@ void world_map_ebon_hold::DoResetBattle()
     }
 
     // despawn the argent dawn
-    for (uint8 i = 0; i < MAX_LIGHT_CHAMPIONS; i++)
+    for (auto& i : aLightArmySpawnLoc)
     {
-        if (Creature* pTemp = GetSingleCreatureFromStorage(aLightArmySpawnLoc[i].m_uiEntry))
+        if (Creature* pTemp = GetSingleCreatureFromStorage(i.m_uiEntry))
             pTemp->ForcedDespawn();
     }
 

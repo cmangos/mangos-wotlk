@@ -257,9 +257,9 @@ bool GOUse_go_scourge_enclosure(Player* pPlayer, GameObject* pGo)
     GetCreatureListWithEntryInGrid(m_lResearchersList, pGo, NPC_GYMER_LOCK_DUMMY, 15.0f);
     if (!m_lResearchersList.empty())
     {
-        for (std::list<Creature*>::iterator itr = m_lResearchersList.begin(); itr != m_lResearchersList.end(); ++itr)
+        for (auto& itr : m_lResearchersList)
         {
-            (*itr)->CastSpell((*itr), SPELL_GYMER_LOCK_EXPLOSION, TRIGGERED_OLD_TRIGGERED);
+            itr->CastSpell(itr, SPELL_GYMER_LOCK_EXPLOSION, TRIGGERED_OLD_TRIGGERED);
         }
     }
     pPlayer->KilledMonsterCredit(NPC_GYMER_LOCK_DUMMY);

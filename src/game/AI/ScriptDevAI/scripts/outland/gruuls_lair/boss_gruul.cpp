@@ -81,8 +81,8 @@ struct boss_gruulAI : public ScriptedAI
     {
         SetCombatMovement(true);
 
-        for (uint32 i = 0; i < GRUUL_ACTION_MAX; ++i)
-            m_actionReadyStatus[i] = false;
+        for (bool& m_actionReadyStatu : m_actionReadyStatus)
+            m_actionReadyStatu = false;
 
         m_timers[GRUUL_ACTION_GROW] = 30000;
         m_timers[GRUUL_ACTION_CAVE_IN] = 10000;

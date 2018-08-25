@@ -130,8 +130,8 @@ struct boss_grandmaster_vorpilAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_VOID_PORTAL_A);
 
         // summon the other 4 portals
-        for (uint8 i = 0; i < MAX_PORTALS; ++i)
-            m_creature->SummonCreature(NPC_VOID_PORTAL, aVorpilLocation[i].m_fX, aVorpilLocation[i].m_fY, aVorpilLocation[i].m_fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
+        for (auto i : aVorpilLocation)
+            m_creature->SummonCreature(NPC_VOID_PORTAL, i.m_fX, i.m_fY, i.m_fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VORPIL, IN_PROGRESS);

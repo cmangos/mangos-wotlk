@@ -142,9 +142,9 @@ void instance_shattered_halls::SetData(uint32 uiType, uint32 uiData)
                 {
                     Map::PlayerList const& lPlayers = instance->GetPlayers();
 
-                    for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+                    for (const auto& lPlayer : lPlayers)
                     {
-                        if (Player* pPlayer = itr->getSource())
+                        if (Player* pPlayer = lPlayer.getSource())
                             pPlayer->KilledMonsterCredit(pOfficer->GetEntry(), pOfficer->GetObjectGuid());
                     }
                 }
@@ -179,10 +179,10 @@ void instance_shattered_halls::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -280,9 +280,9 @@ void instance_shattered_halls::DoCastGroupDebuff(uint32 uiSpellId)
 {
     Map::PlayerList const& lPlayers = instance->GetPlayers();
 
-    for (Map::PlayerList::const_iterator itr = lPlayers.begin(); itr != lPlayers.end(); ++itr)
+    for (const auto& lPlayer : lPlayers)
     {
-        Player* pPlayer = itr->getSource();
+        Player* pPlayer = lPlayer.getSource();
         if (pPlayer && !pPlayer->HasAura(uiSpellId))
             pPlayer->CastSpell(pPlayer, uiSpellId, TRIGGERED_OLD_TRIGGERED);
     }

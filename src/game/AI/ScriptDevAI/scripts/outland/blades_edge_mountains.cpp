@@ -331,8 +331,8 @@ struct npc_bloodmaul_stout_triggerAI : public ScriptedAI
             {
                 // get all the ogres in range
                 std::list<Creature*> lOgreList;
-                for (uint8 i = 0; i < countof(aOgreEntries); ++i)
-                    GetCreatureListWithEntryInGrid(lOgreList, m_creature,  aOgreEntries[i], 30.0f);
+                for (unsigned int aOgreEntrie : aOgreEntries)
+                    GetCreatureListWithEntryInGrid(lOgreList, m_creature, aOgreEntrie, 30.0f);
 
                 if (lOgreList.empty())
                 {
@@ -1097,8 +1097,8 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
     {
         m_uiSpawned = false;
 
-        for (int i = 0; i < 5; i++)
-            m_uiActiveCircles[i] = false;
+        for (bool& m_uiActiveCircle : m_uiActiveCircles)
+            m_uiActiveCircle = false;
 
         m_uiScanTimer = 0;
         m_uiBeamTimer = 5;
@@ -1120,25 +1120,25 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
             m_pMap->GetCreatureGuidVectorFromStorage(NPC_VIMGOL_VISUAL_BUNNY, m_uiBunnyGuids);
         }
 
-        for (int i = 0; i < 5; i++)
-            m_uiActiveCircles[i] = false;
+        for (bool& m_uiActiveCircle : m_uiActiveCircles)
+            m_uiActiveCircle = false;
 
         std::list<Player*> playerList;
         GetPlayerListWithEntryInWorld(playerList, m_creature, 30);
-        for (auto itr = playerList.begin(); itr != playerList.end(); ++itr)
+        for (auto& itr : playerList)
         {
-            if (!(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_A) && !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_B) && !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_C) &&
-                    !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_D) && !(*itr)->HasAura(SPELL_VIMGOL_POP_TEST_E))
+            if (!itr->HasAura(SPELL_VIMGOL_POP_TEST_A) && !itr->HasAura(SPELL_VIMGOL_POP_TEST_B) && !itr->HasAura(SPELL_VIMGOL_POP_TEST_C) &&
+                    !itr->HasAura(SPELL_VIMGOL_POP_TEST_D) && !itr->HasAura(SPELL_VIMGOL_POP_TEST_E))
                 continue;
 
             for (auto it = m_uiBunnyGuids.begin(); it != m_uiBunnyGuids.end(); ++it)
             {
-                for (int i = 0; i < 5; ++i)
+                for (unsigned int tmpAura : tmpAuras)
                 {
-                    if (!(*itr)->GetAura(tmpAuras[i], SpellEffectIndex(0)))
+                    if (!itr->GetAura(tmpAura, SpellEffectIndex(0)))
                         continue;
 
-                    if ((*it) != (*itr)->GetAura(tmpAuras[i], SpellEffectIndex(0))->GetCasterGuid())
+                    if ((*it) != itr->GetAura(tmpAura, SpellEffectIndex(0))->GetCasterGuid())
                         continue;
 
                     m_uiActiveCircles[std::distance(m_uiBunnyGuids.begin(), it)] = true;
@@ -1146,8 +1146,8 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
             }
         }
 
-        for (int i = 0; i < 5; i++)
-            if (m_uiActiveCircles[i])
+        for (bool m_uiActiveCircle : m_uiActiveCircles)
+            if (m_uiActiveCircle)
                 ++tmpCounter;
 
         return tmpCounter;
@@ -1173,8 +1173,8 @@ struct npc_vimgol_middle_bunnyAI : public ScriptedAI
         CastBunnySpell(nullptr, SPELL_PENTAGRAM_BEAM);
         m_uiSpawned = true;
 
-        for (int i = 0; i < 5; i++)
-            m_uiActiveCircles[i] = false;
+        for (bool& m_uiActiveCircle : m_uiActiveCircles)
+            m_uiActiveCircle = false;
     }
 
     void UpdateAI(const uint32 uiDiff) override

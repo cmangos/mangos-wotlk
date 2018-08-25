@@ -334,11 +334,11 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recv_data)
         }
         data << pProto->ScalingStatDistribution;            // scaling stats distribution
         data << pProto->ScalingStatValue;                   // some kind of flags used to determine stat values column
-        for (int i = 0; i < MAX_ITEM_PROTO_DAMAGES; ++i)
+        for (auto i : pProto->Damage)
         {
-            data << pProto->Damage[i].DamageMin;
-            data << pProto->Damage[i].DamageMax;
-            data << pProto->Damage[i].DamageType;
+            data << i.DamageMin;
+            data << i.DamageMax;
+            data << i.DamageType;
         }
 
         // resistances (7)
@@ -354,26 +354,26 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recv_data)
         data << pProto->AmmoType;
         data << pProto->RangedModRange;
 
-        for (int s = 0; s < MAX_ITEM_PROTO_SPELLS; ++s)
+        for (const auto& Spell : pProto->Spells)
         {
             // send DBC data for cooldowns in same way as it used in Spell::SendSpellCooldown
             // use `item_template` or if not set then only use spell cooldowns
-            SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(pProto->Spells[s].SpellId);
+            SpellEntry const* spell = sSpellTemplate.LookupEntry<SpellEntry>(Spell.SpellId);
             if (spell)
             {
-                bool db_data = pProto->Spells[s].SpellCooldown >= 0 || pProto->Spells[s].SpellCategoryCooldown >= 0;
+                bool db_data = Spell.SpellCooldown >= 0 || Spell.SpellCategoryCooldown >= 0;
 
-                data << pProto->Spells[s].SpellId;
-                data << pProto->Spells[s].SpellTrigger;
+                data << Spell.SpellId;
+                data << Spell.SpellTrigger;
 
                 // let the database control the sign here.  negative means that the item should be consumed once the charges are consumed.
-                data << pProto->Spells[s].SpellCharges;
+                data << Spell.SpellCharges;
 
                 if (db_data)
                 {
-                    data << uint32(pProto->Spells[s].SpellCooldown);
-                    data << uint32(pProto->Spells[s].SpellCategory);
-                    data << uint32(pProto->Spells[s].SpellCategoryCooldown);
+                    data << uint32(Spell.SpellCooldown);
+                    data << uint32(Spell.SpellCategory);
+                    data << uint32(Spell.SpellCategoryCooldown);
                 }
                 else
                 {
@@ -410,10 +410,10 @@ void WorldSession::HandleItemQuerySingleOpcode(WorldPacket& recv_data)
         data << pProto->Map;                                // Added in 1.12.x & 2.0.1 client branch
         data << pProto->BagFamily;
         data << pProto->TotemCategory;
-        for (int s = 0; s < MAX_ITEM_PROTO_SOCKETS; ++s)
+        for (auto s : pProto->Socket)
         {
-            data << pProto->Socket[s].Color;
-            data << pProto->Socket[s].Content;
+            data << s.Color;
+            data << s.Content;
         }
         data << uint32(pProto->socketBonus);
         data << uint32(pProto->GemProperties);
@@ -1216,8 +1216,8 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     if (!itemGuid.IsItem())
         return;
 
-    for (int i = 0; i < MAX_GEM_SOCKETS; ++i)
-        recv_data >> gemGuids[i];
+    for (auto& gemGuid : gemGuids)
+        recv_data >> gemGuid;
 
     // cheat -> tried to socket same gem multiple times
     for (int i = 0; i < MAX_GEM_SOCKETS; ++i)

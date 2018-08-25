@@ -56,9 +56,9 @@ class instance_obsidian_sanctum : public ScriptedInstance
 
         bool IsActivePortal()
         {
-            for (uint8 i = 0; i < MAX_TWILIGHT_DRAGONS; ++i)
+            for (bool i : m_bPortalActive)
             {
-                if (m_bPortalActive[i])
+                if (i)
                     return true;
             }
 

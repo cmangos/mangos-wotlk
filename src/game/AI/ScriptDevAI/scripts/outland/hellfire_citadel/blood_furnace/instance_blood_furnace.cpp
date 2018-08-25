@@ -147,14 +147,14 @@ void instance_blood_furnace::SetData(uint32 uiType, uint32 uiData)
                 // On wipe we reset only the orcs; if the party wipes at the boss itself then the orcs don't reset
                 if (m_uiBroggokEventPhase <= MAX_ORC_WAVES)
                 {
-                    for (uint8 i = 0; i < MAX_ORC_WAVES; ++i)
+                    for (auto& i : m_aBroggokEvent)
                     {
                         // Reset Orcs
-                        if (!m_aBroggokEvent[i].m_bIsCellOpened)
+                        if (!i.m_bIsCellOpened)
                             continue;
 
-                        m_aBroggokEvent[i].m_uiKilledOrcCount = 0;
-                        for (GuidSet::const_iterator itr = m_aBroggokEvent[i].m_sSortedOrcGuids.begin(); itr != m_aBroggokEvent[i].m_sSortedOrcGuids.end(); ++itr)
+                        i.m_uiKilledOrcCount = 0;
+                        for (GuidSet::const_iterator itr = i.m_sSortedOrcGuids.begin(); itr != i.m_sSortedOrcGuids.end(); ++itr)
                         {
                             if (Creature* pOrc = instance->GetCreature(*itr))
                             {
@@ -168,8 +168,8 @@ void instance_blood_furnace::SetData(uint32 uiType, uint32 uiData)
                         }
 
                         // Close Door
-                        DoUseDoorOrButton(m_aBroggokEvent[i].m_cellGuid);
-                        m_aBroggokEvent[i].m_bIsCellOpened = false;
+                        DoUseDoorOrButton(i.m_cellGuid);
+                        i.m_bIsCellOpened = false;
                     }
  
                     if (m_lLeverGO)
@@ -231,9 +231,9 @@ void instance_blood_furnace::DoNextBroggokEventPhase()
 
         m_aBroggokEvent[m_uiBroggokEventPhase].m_bIsCellOpened = true;
 
-        for (GuidSet::const_iterator itr = m_aBroggokEvent[m_uiBroggokEventPhase].m_sSortedOrcGuids.begin(); itr != m_aBroggokEvent[m_uiBroggokEventPhase].m_sSortedOrcGuids.end(); ++itr)
+        for (auto m_sSortedOrcGuid : m_aBroggokEvent[m_uiBroggokEventPhase].m_sSortedOrcGuids)
         {
-            if (Creature* pOrc = instance->GetCreature(*itr))
+            if (Creature* pOrc = instance->GetCreature(m_sSortedOrcGuid))
             {
                 pOrc->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE + UNIT_FLAG_NON_ATTACKABLE);
                 pOrc->SetInCombatWithZone();
@@ -344,16 +344,16 @@ void instance_blood_furnace::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-        if (m_auiEncounter[i] == IN_PROGRESS || m_auiEncounter[i] == FAIL)
-            m_auiEncounter[i] = NOT_STARTED;
+    for (unsigned int& i : m_auiEncounter)
+        if (i == IN_PROGRESS || i == FAIL)
+            i = NOT_STARTED;
 
     OUT_LOAD_INST_DATA_COMPLETE;
 
     for (GuidList::const_iterator itr = m_luiNascentOrcGuids.begin(); itr != m_luiNascentOrcGuids.end(); ++itr)
         if (Creature* pOrc = instance->GetCreature(*itr))
-            for (uint8 i = 0; i < MAX_ORC_WAVES; ++i)
-                if (GameObject* pDoor = instance->GetGameObject(m_aBroggokEvent[i].m_cellGuid))
+            for (auto& i : m_aBroggokEvent)
+                if (GameObject* pDoor = instance->GetGameObject(i.m_cellGuid))
                     if (pOrc->IsWithinDistInMap(pDoor, 5.0f) && pOrc->GetPositionZ() < 10.0f)
                         pOrc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
 }
@@ -365,13 +365,13 @@ void instance_blood_furnace::DoSortBroggokOrcs()
     {
         if (Creature* pOrc = instance->GetCreature(*itr))
         {
-            for (uint8 i = 0; i < MAX_ORC_WAVES; ++i)
+            for (auto& i : m_aBroggokEvent)
             {
-                if (GameObject* pDoor = instance->GetGameObject(m_aBroggokEvent[i].m_cellGuid))
+                if (GameObject* pDoor = instance->GetGameObject(i.m_cellGuid))
                 {
                     if (pOrc->IsWithinDistInMap(pDoor, 5.0f) && pOrc->GetPositionZ() < 10.0f)
                     {
-                        m_aBroggokEvent[i].m_sSortedOrcGuids.insert(pOrc->GetObjectGuid());
+                        i.m_sSortedOrcGuids.insert(pOrc->GetObjectGuid());
                         if (!pOrc->isAlive())
                             pOrc->Respawn();
                         break;

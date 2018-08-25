@@ -155,27 +155,27 @@ Quest::Quest(Field* questRecord)
     m_rewitemscount = 0;
     m_rewchoiceitemscount = 0;
 
-    for (int i = 0; i < QUEST_ITEM_OBJECTIVES_COUNT; ++i)
+    for (unsigned int i : ReqItemId)
     {
-        if (ReqItemId[i])
+        if (i)
             ++m_reqitemscount;
     }
 
-    for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+    for (int i : ReqCreatureOrGOId)
     {
-        if (ReqCreatureOrGOId[i])
+        if (i)
             ++m_reqCreatureOrGOcount;
     }
 
-    for (int i = 0; i < QUEST_REWARDS_COUNT; ++i)
+    for (unsigned int i : RewItemId)
     {
-        if (RewItemId[i])
+        if (i)
             ++m_rewitemscount;
     }
 
-    for (int i = 0; i < QUEST_REWARD_CHOICES_COUNT; ++i)
+    for (unsigned int i : RewChoiceItemId)
     {
-        if (RewChoiceItemId[i])
+        if (i)
             ++m_rewchoiceitemscount;
     }
 }

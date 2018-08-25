@@ -37,6 +37,7 @@
 #include "Common.h"
 #include "Entities/ObjectGuid.h"
 #include <map>
+#include <utility>
 
 struct AuctionEntry;
 class Item;
@@ -210,7 +211,7 @@ class MailDraft
          * @param itemText The text of the body of the mail.
          */
         MailDraft(std::string subject, std::string body)
-            : m_mailTemplateId(0), m_mailTemplateItemsNeed(false), m_subject(subject), m_body(body), m_money(0), m_COD(0) {}
+            : m_mailTemplateId(0), m_mailTemplateItemsNeed(false), m_subject(std::move(subject)), m_body(std::move(body)), m_money(0), m_COD(0) {}
     public:                                                 // Accessors
         /// Returns the template ID used for this MailDraft.
         uint16 GetMailTemplateId() const { return m_mailTemplateId; }

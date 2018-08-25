@@ -701,10 +701,10 @@ struct dummy_dragonAI : public ScriptedAI
             if (PlayerList.isEmpty())
                 return;
 
-            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            for (const auto& i : PlayerList)
             {
-                if (i->getSource()->isAlive() && i->getSource()->HasAura(uiSpellId))
-                    i->getSource()->RemoveAurasDueToSpell(uiSpellId);
+                if (i.getSource()->isAlive() && i.getSource()->HasAura(uiSpellId))
+                    i.getSource()->RemoveAurasDueToSpell(uiSpellId);
             }
         }
     }

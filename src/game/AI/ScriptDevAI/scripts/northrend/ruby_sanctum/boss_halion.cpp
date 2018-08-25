@@ -239,10 +239,10 @@ struct boss_halion_realAI : public ScriptedAI
             if (PlayerList.isEmpty())
                 return;
 
-            for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+            for (const auto& i : PlayerList)
             {
-                if (i->getSource()->isAlive() && i->getSource()->HasAuraType(SPELL_AURA_PHASE))
-                    i->getSource()->RemoveSpellsCausingAura(SPELL_AURA_PHASE);
+                if (i.getSource()->isAlive() && i.getSource()->HasAuraType(SPELL_AURA_PHASE))
+                    i.getSource()->RemoveSpellsCausingAura(SPELL_AURA_PHASE);
             }
         }
     }

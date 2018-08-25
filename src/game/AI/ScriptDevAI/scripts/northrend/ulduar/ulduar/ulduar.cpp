@@ -329,8 +329,8 @@ bool ProcessEventId_event_go_ulduar_tower(uint32 uiEventId, Object* pSource, Obj
         // despawn all generators in range
         std::list<Creature*> lGenerators;
         GetCreatureListWithEntryInGrid(lGenerators, (GameObject*)pSource, NPC_GENERATOR_SMALL, 100.0f);
-        for (std::list<Creature*>::iterator itr = lGenerators.begin(); itr != lGenerators.end(); ++itr)
-            (*itr)->ForcedDespawn();
+        for (auto& lGenerator : lGenerators)
+            lGenerator->ForcedDespawn();
 
         // allow further DB processing
         return false;

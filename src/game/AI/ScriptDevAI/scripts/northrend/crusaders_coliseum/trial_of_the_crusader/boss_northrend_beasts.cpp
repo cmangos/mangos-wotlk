@@ -89,9 +89,9 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_NORTHREND_BEASTS, FAIL);
 
-        for (uint8 i = 0; i < 4; ++i)
+        for (auto i : m_aSummonedBossGuid)
         {
-            if (Creature* pBoss = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[i]))
+            if (Creature* pBoss = m_creature->GetMap()->GetCreature(i))
                 pBoss->ForcedDespawn();
         }
 
@@ -248,9 +248,9 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
         {
             if (m_uiBerserkTimer < uiDiff)
             {
-                for (uint8 i = 0; i < 4; ++i)
+                for (auto i : m_aSummonedBossGuid)
                 {
-                    Creature* pBoss = m_creature->GetMap()->GetCreature(m_aSummonedBossGuid[i]);
+                    Creature* pBoss = m_creature->GetMap()->GetCreature(i);
                     if (pBoss && pBoss->isAlive())
                         pBoss->CastSpell(pBoss, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                 }
@@ -1013,10 +1013,10 @@ struct boss_icehowlAI : public ScriptedAI
         if (PlayerList.isEmpty())
             return;
 
-        for (Map::PlayerList::const_iterator i = PlayerList.begin(); i != PlayerList.end(); ++i)
+        for (const auto& i : PlayerList)
         {
-            if (i->getSource()->isAlive())
-                i->getSource()->CastSpell(i->getSource(), SPELL_SURGE_OF_ADRENALINE, TRIGGERED_OLD_TRIGGERED);
+            if (i.getSource()->isAlive())
+                i.getSource()->CastSpell(i.getSource(), SPELL_SURGE_OF_ADRENALINE, TRIGGERED_OLD_TRIGGERED);
         }
     }
 

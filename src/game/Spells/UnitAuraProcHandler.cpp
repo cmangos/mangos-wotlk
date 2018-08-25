@@ -944,9 +944,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     // find Mage Armor
                     bool found = false;
                     AuraList const& mRegenInterrupt = GetAurasByType(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);
-                    for (AuraList::const_iterator iter = mRegenInterrupt.begin(); iter != mRegenInterrupt.end(); ++iter)
+                    for (auto iter : mRegenInterrupt)
                     {
-                        if (SpellEntry const* iterSpellProto = (*iter)->GetSpellProto())
+                        if (SpellEntry const* iterSpellProto = iter->GetSpellProto())
                         {
                             if (iterSpellProto->SpellFamilyName == SPELLFAMILY_MAGE && (iterSpellProto->SpellFamilyFlags & uint64(0x10000000)))
                             {
@@ -2095,13 +2095,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 // "refresh your Slice and Dice duration to its 5 combo point maximum"
                 // lookup Slice and Dice
                 AuraList const& sd = GetAurasByType(SPELL_AURA_MOD_MELEE_HASTE);
-                for (AuraList::const_iterator itr = sd.begin(); itr != sd.end(); ++itr)
+                for (auto itr : sd)
                 {
-                    SpellEntry const* spellProto = (*itr)->GetSpellProto();
+                    SpellEntry const* spellProto = itr->GetSpellProto();
                     if (spellProto->SpellFamilyName == SPELLFAMILY_ROGUE &&
                             (spellProto->SpellFamilyFlags & uint64(0x0000000000040000)))
                     {
-                        (*itr)->GetHolder()->RefreshHolder();
+                        itr->GetHolder()->RefreshHolder();
                         return SPELL_AURA_PROC_OK;
                     }
                 }
@@ -2400,11 +2400,11 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     // find caster main aura at beacon
                     Aura* dummy = nullptr;
                     Unit::AuraList const& baa = beacon->GetAurasByType(SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-                    for (Unit::AuraList::const_iterator i = baa.begin(); i != baa.end(); ++i)
+                    for (auto i : baa)
                     {
-                        if ((*i)->GetId() == 53563 && (*i)->GetCasterGuid() == pVictim->GetObjectGuid())
+                        if (i->GetId() == 53563 && i->GetCasterGuid() == pVictim->GetObjectGuid())
                         {
-                            dummy = (*i);
+                            dummy = i;
                             break;
                         }
                     }
@@ -2433,11 +2433,11 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     // Add 5-stack effect from Blood Corruption
                     uint32 stacks = 0;
                     AuraList const& auras = target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                    for (AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                    for (auto aura : auras)
                     {
-                        if (((*itr)->GetId() == 53742) && (*itr)->GetCasterGuid() == GetObjectGuid())
+                        if ((aura->GetId() == 53742) && aura->GetCasterGuid() == GetObjectGuid())
                         {
-                            stacks = (*itr)->GetStackAmount();
+                            stacks = aura->GetStackAmount();
                             break;
                         }
                     }
@@ -2723,13 +2723,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
 
                     // find totem aura bonus
                     AuraList const& spellPower = totem->GetAurasByType(SPELL_AURA_NONE);
-                    for (AuraList::const_iterator i = spellPower.begin(); i != spellPower.end(); ++i)
+                    for (auto i : spellPower)
                     {
                         // select proper aura for format aura type in spell proto
-                        if ((*i)->GetTarget() == totem && (*i)->GetSpellProto()->EffectApplyAuraName[(*i)->GetEffIndex()] == SPELL_AURA_MOD_HEALING_DONE &&
-                                (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && (*i)->GetSpellProto()->SpellFamilyFlags & uint64(0x0000000004000000))
+                        if (i->GetTarget() == totem && i->GetSpellProto()->EffectApplyAuraName[i->GetEffIndex()] == SPELL_AURA_MOD_HEALING_DONE &&
+                            i->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && i->GetSpellProto()->SpellFamilyFlags & uint64(0x0000000004000000))
                         {
-                            basepoints[0] = triggerAmount * (*i)->GetModifier()->m_amount / 100;
+                            basepoints[0] = triggerAmount * i->GetModifier()->m_amount / 100;
                             break;
                         }
                     }
@@ -2846,12 +2846,12 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     return SPELL_AURA_PROC_FAILED;
                 // lookup water shield
                 AuraList const& vs = GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
-                for (AuraList::const_iterator itr = vs.begin(); itr != vs.end(); ++itr)
+                for (auto v : vs)
                 {
-                    if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN &&
-                            ((*itr)->GetSpellProto()->SpellFamilyFlags & uint64(0x0000002000000000)))
+                    if (v->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN &&
+                            (v->GetSpellProto()->SpellFamilyFlags & uint64(0x0000002000000000)))
                     {
-                        uint32 spell = (*itr)->GetSpellProto()->EffectTriggerSpell[(*itr)->GetEffIndex()];
+                        uint32 spell = v->GetSpellProto()->EffectTriggerSpell[v->GetEffIndex()];
                         CastSpell(this, spell, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
                         return SPELL_AURA_PROC_OK;
                     }
@@ -2917,13 +2917,13 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
             {
                 // lookup Lightning Shield
                 AuraList const& vs = GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
-                for (AuraList::const_iterator itr = vs.begin(); itr != vs.end(); ++itr)
+                for (auto v : vs)
                 {
-                    if ((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN &&
-                            ((*itr)->GetSpellProto()->SpellFamilyFlags & uint64(0x0000000000000400)))
+                    if (v->GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN &&
+                            (v->GetSpellProto()->SpellFamilyFlags & uint64(0x0000000000000400)))
                     {
                         uint32 spell;
-                        switch ((*itr)->GetId())
+                        switch (v->GetId())
                         {
                             case   324: spell = 26364; break;
                             case   325: spell = 26365; break;
@@ -2940,8 +2940,8 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                                 return SPELL_AURA_PROC_FAILED;
                         }
                         CastSpell(target, spell, TRIGGERED_OLD_TRIGGERED, castItem, triggeredByAura);
-                        if ((*itr)->GetHolder()->DropAuraCharge())
-                            RemoveAuraHolderFromStack((*itr)->GetId());
+                        if (v->GetHolder()->DropAuraCharge())
+                            RemoveAuraHolderFromStack(v->GetId());
                         return SPELL_AURA_PROC_OK;
                     }
                 }
@@ -3527,12 +3527,12 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
             {
                 // search for "Improved Drain Soul" dummy aura
                 Unit::AuraList const& mDummyAura = GetAurasByType(SPELL_AURA_DUMMY);
-                for (Unit::AuraList::const_iterator i = mDummyAura.begin(); i != mDummyAura.end(); ++i)
+                for (auto i : mDummyAura)
                 {
-                    if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (*i)->GetSpellProto()->SpellIconID == 113)
+                    if (i->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && i->GetSpellProto()->SpellIconID == 113)
                     {
                         // basepoints of trigger spell stored in dummyeffect of spellProto
-                        basepoints[EFFECT_INDEX_0] = GetMaxPower(POWER_MANA) * (*i)->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2) / 100;
+                        basepoints[EFFECT_INDEX_0] = GetMaxPower(POWER_MANA) * i->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2) / 100;
                         trigger_spell_id = 18371;
                         break;
                     }
@@ -4003,11 +4003,11 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
 
             // percent stored in owner talent dummy
             AuraList const& dummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
-            for (AuraList::const_iterator i = dummyAuras.begin(); i != dummyAuras.end(); ++i)
+            for (auto dummyAura : dummyAuras)
             {
-                if ((*i)->GetSpellProto()->SpellIconID == 3220)
+                if (dummyAura->GetSpellProto()->SpellIconID == 3220)
                 {
-                    basepoints[0] = basepoints[1] = int32(spellDamage * (*i)->GetModifier()->m_amount / 100);
+                    basepoints[0] = basepoints[1] = int32(spellDamage * dummyAura->GetModifier()->m_amount / 100);
                     break;
                 }
             }
@@ -4042,9 +4042,9 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
             {
                 bool found = false;
                 AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                for (AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
+                for (auto i : mOverrideClassScript)
                 {
-                    int32 script = (*i)->GetModifier()->m_miscvalue;
+                    int32 script = i->GetModifier()->m_miscvalue;
                     if (script == 836 || script == 988 || script == 989)
                     {
                         found = true;

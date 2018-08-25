@@ -1675,9 +1675,9 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                 }
 
                 // ligth champs evade to their summon points
-                for (uint8 i = 0; i < MAX_LIGHT_CHAMPIONS; i++)
+                for (auto& i : aLightArmySpawnLoc)
                 {
-                    if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(aLightArmySpawnLoc[i].m_uiEntry))
+                    if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(i.m_uiEntry))
                     {
                         // normally it shouldn't happen
                         if (!pTemp->isAlive())
@@ -1694,9 +1694,9 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                 m_lDefendersGUIDs.clear();
 
                 // spawn soldiers
-                for (uint8 i = 0; i < MAX_LIGHT_GUARDS; ++i)
+                for (auto& i : aGuardsSpawnLoc)
                 {
-                    if (Creature* pGuard = m_creature->SummonCreature(NPC_DEFENDER_OF_THE_LIGHT, aGuardsSpawnLoc[i].m_fX, aGuardsSpawnLoc[i].m_fY, aGuardsSpawnLoc[i].m_fZ, aGuardsSpawnLoc[i].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0))
+                    if (Creature* pGuard = m_creature->SummonCreature(NPC_DEFENDER_OF_THE_LIGHT, i.m_fX, i.m_fY, i.m_fZ, i.m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0))
                     {
                         // make guard passive and with weapon
                         pGuard->SetFacingToObject(m_creature);
@@ -1745,8 +1745,8 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
         {
             case 0:
                 // summon light champions
-                for (uint8 i = 0; i < MAX_LIGHT_CHAMPIONS; i++)
-                    m_creature->SummonCreature(aLightArmySpawnLoc[i].m_uiEntry, aLightArmySpawnLoc[i].m_fX, aLightArmySpawnLoc[i].m_fY, aLightArmySpawnLoc[i].m_fZ, aLightArmySpawnLoc[i].m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+                for (auto& i : aLightArmySpawnLoc)
+                    m_creature->SummonCreature(i.m_uiEntry, i.m_fX, i.m_fY, i.m_fZ, i.m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
 
                 // summon light soldiers
                 float fX, fY, fZ;
@@ -1856,9 +1856,9 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
     {
         Map::PlayerList const& PlayerList = m_creature->GetMap()->GetPlayers();
 
-        for (Map::PlayerList::const_iterator itr = PlayerList.begin(); itr != PlayerList.end(); ++itr)
+        for (const auto& itr : PlayerList)
         {
-            Player* pPlayer = itr->getSource();
+            Player* pPlayer = itr.getSource();
             if (pPlayer && pPlayer->GetQuestStatus(QUEST_ID_LIGHT_OF_DAWN) == QUEST_STATUS_INCOMPLETE && pPlayer->isAlive() && m_creature->IsWithinDistInMap(pPlayer, 50.0f))
                 pPlayer->CastSpell(pPlayer, SPELL_THE_LIGHT_OF_DAWN_CREDIT, TRIGGERED_OLD_TRIGGERED);
         }
@@ -2203,9 +2203,9 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                                         //pTemp->AI()->AttackStart(pLichKing);
                                     }
                                 }
-                                for (uint8 i = 0; i < MAX_LIGHT_CHAMPIONS; i++)
+                                for (auto& i : aLightArmySpawnLoc)
                                 {
-                                    if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(aLightArmySpawnLoc[i].m_uiEntry))
+                                    if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(i.m_uiEntry))
                                     {
                                         pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                                         pTemp->SetWalk(false);
@@ -2239,9 +2239,9 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                                         pTemp->DealDamage(pTemp, pTemp->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, TRIGGERED_NONE);
                                 }
                                 // workaround for the light champions - spell doesn't work right
-                                for (uint8 i = 0; i < MAX_LIGHT_CHAMPIONS; i++)
+                                for (auto& i : aLightArmySpawnLoc)
                                 {
-                                    if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(aLightArmySpawnLoc[i].m_uiEntry))
+                                    if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(i.m_uiEntry))
                                     {
                                         pTemp->SetStandState(UNIT_STAND_STATE_DEAD);
                                         pTemp->KnockBackFrom(pLichKing, 50, float(urand(44, 87)) / 10);
@@ -2349,9 +2349,9 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                                 pTirion->GetMotionMaster()->MovePoint(POINT_MOVE_OTHER, fX, fY, fZ);
                             }
                             // make champions stand
-                            for (uint8 i = 0; i < MAX_LIGHT_CHAMPIONS; i++)
+                            for (auto& i : aLightArmySpawnLoc)
                             {
-                                if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(aLightArmySpawnLoc[i].m_uiEntry))
+                                if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(i.m_uiEntry))
                                 {
                                     pTemp->SetStandState(UNIT_STAND_STATE_STAND);
                                     pTemp->SetFacingToObject(m_creature);
@@ -2444,9 +2444,9 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                                 pThassarian->ForcedDespawn();
                             if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_HIGHLORD_TIRION_FORDRING))
                                 pTirion->ForcedDespawn();
-                            for (uint8 i = 0; i < MAX_LIGHT_CHAMPIONS; i++)
+                            for (auto& i : aLightArmySpawnLoc)
                             {
-                                if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(aLightArmySpawnLoc[i].m_uiEntry))
+                                if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(i.m_uiEntry))
                                     pTemp->ForcedDespawn();
                             }
 

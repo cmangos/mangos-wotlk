@@ -37,9 +37,9 @@ void instance_the_eye::Initialize()
 
 bool instance_the_eye::IsEncounterInProgress() const
 {
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
+        if (i == IN_PROGRESS)
             return true;
     }
 
@@ -99,9 +99,9 @@ void instance_the_eye::SetData(uint32 uiType, uint32 uiData)
                     pGo->ResetDoorOrButton();
 
                 // Respawn or reset the advisors
-                for (uint8 i = 0; i < MAX_ADVISORS; ++i)
+                for (unsigned int aAdvisor : aAdvisors)
                 {
-                    if (Creature* pTemp = GetSingleCreatureFromStorage(aAdvisors[i]))
+                    if (Creature* pTemp = GetSingleCreatureFromStorage(aAdvisor))
                     {
                         if (!pTemp->isAlive())
                             pTemp->Respawn();

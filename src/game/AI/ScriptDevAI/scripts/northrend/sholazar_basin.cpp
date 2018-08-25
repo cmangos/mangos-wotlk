@@ -503,18 +503,18 @@ struct npc_tipsy_mcmanusAI : public ScriptedAI
         // check fruit tasks
         else if (eventType == AI_EVENT_CUSTOM_A)
         {
-            for (uint8 i = 0; i < 3; ++i)
+            for (auto aStillAtItFruit : aStillAtItFruits)
             {
-                if (aStillAtItFruits[i].uiOwnerEntry == uiMiscValue)
+                if (aStillAtItFruit.uiOwnerEntry == uiMiscValue)
                     DoCheckDistillationTask(uiMiscValue);
             }
         }
         // check machine tasks
         else if (eventType == AI_EVENT_CUSTOM_B)
         {
-            for (uint8 i = 0; i < 2; ++i)
+            for (auto aStillAtItMachine : aStillAtItMachines)
             {
-                if (aStillAtItMachines[i].uiOwnerEntry == uiMiscValue)
+                if (aStillAtItMachine.uiOwnerEntry == uiMiscValue)
                     DoCheckDistillationTask(uiMiscValue);
             }
         }

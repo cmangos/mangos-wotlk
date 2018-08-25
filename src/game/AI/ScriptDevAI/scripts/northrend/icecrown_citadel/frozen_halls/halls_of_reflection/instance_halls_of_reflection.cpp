@@ -92,10 +92,10 @@ void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
         if (GetData(TYPE_FROSTMOURNE_INTRO) != DONE)
         {
             // Spawn intro npcs and make the start the movement
-            for (uint8 i = 0; i < countof(aEventBeginLocations); ++i)
+            for (const auto& aEventBeginLocation : aEventBeginLocations)
             {
-                if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocations[i].uiEntryHorde : aEventBeginLocations[i].uiEntryAlliance,
-                                          aEventBeginLocations[i].fX, aEventBeginLocations[i].fY, aEventBeginLocations[i].fZ, aEventBeginLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true))
+                if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
+                    aEventBeginLocation.fX, aEventBeginLocation.fY, aEventBeginLocation.fZ, aEventBeginLocation.fO, TEMPSPAWN_DEAD_DESPAWN, 0, true))
                 {
                     pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
                     pCreature->GetMotionMaster()->MoveWaypoint();
@@ -324,10 +324,10 @@ void instance_halls_of_reflection::Load(const char* chrIn)
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >>
                m_auiEncounter[3] >> m_auiEncounter[4] >> m_auiEncounter[5];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -543,10 +543,10 @@ void instance_halls_of_reflection::DoCleanupFrostmourneEvent()
 void instance_halls_of_reflection::DoSetupEscapeEvent(Player* pPlayer)
 {
     // Spawn npc for the last encounter
-    for (uint8 i = 0; i < countof(aEventKingLocations); ++i)
+    for (const auto& aEventKingLocation : aEventKingLocations)
     {
-        if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventKingLocations[i].uiEntryHorde : aEventKingLocations[i].uiEntryAlliance,
-                                  aEventKingLocations[i].fX, aEventKingLocations[i].fY, aEventKingLocations[i].fZ, aEventKingLocations[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true))
+        if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventKingLocation.uiEntryHorde : aEventKingLocation.uiEntryAlliance,
+            aEventKingLocation.fX, aEventKingLocation.fY, aEventKingLocation.fZ, aEventKingLocation.fO, TEMPSPAWN_DEAD_DESPAWN, 0, true))
             pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     }
 }

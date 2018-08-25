@@ -99,9 +99,9 @@ void instance_draktharon_keep::DoSortNovosDummies()
         return;
 
     // First sort the Dummies to the Crystals
-    for (uint8 i = 0; i < MAX_CRYSTALS; ++i)
+    for (auto& i : m_aNovosCrystalInfo)
     {
-        GameObject* pCrystal = instance->GetGameObject(m_aNovosCrystalInfo[i].m_crystalGuid);
+        GameObject* pCrystal = instance->GetGameObject(i.m_crystalGuid);
         if (!pCrystal)
             continue;
 
@@ -117,7 +117,7 @@ void instance_draktharon_keep::DoSortNovosDummies()
             // Check if dummy fits to crystal
             if (pCrystal->IsWithinDistInMap(pDummy, INTERACTION_DISTANCE, false))
             {
-                m_aNovosCrystalInfo[i].m_channelGuid = pDummy->GetObjectGuid();
+                i.m_channelGuid = pDummy->GetObjectGuid();
                 m_lNovosDummyGuids.erase(itr);
                 break;
             }
@@ -242,13 +242,13 @@ void instance_draktharon_keep::SetData(uint32 uiType, uint32 uiData)
 
                 // Cast some visual spells
                 Creature* pTarget = instance->GetCreature(m_novosChannelGuid);
-                for (uint8 i = 0; i < MAX_CRYSTALS; ++i)
+                for (auto& i : m_aNovosCrystalInfo)
                 {
-                    Creature* pCaster = instance->GetCreature(m_aNovosCrystalInfo[i].m_channelGuid);
+                    Creature* pCaster = instance->GetCreature(i.m_channelGuid);
                     if (pCaster && pTarget)
                         pCaster->CastSpell(pTarget, SPELL_BEAM_CHANNEL, TRIGGERED_NONE);
 
-                    m_aNovosCrystalInfo[i].m_bWasUsed = false;
+                    i.m_bWasUsed = false;
                 }
 
                 // Achievement related
@@ -262,14 +262,14 @@ void instance_draktharon_keep::SetData(uint32 uiType, uint32 uiData)
             else if (uiData == FAIL)
             {
                 // Interrupt casted spells
-                for (uint8 i = 0; i < MAX_CRYSTALS; ++i)
+                for (auto& i : m_aNovosCrystalInfo)
                 {
-                    Creature* pDummy = instance->GetCreature(m_aNovosCrystalInfo[i].m_channelGuid);
+                    Creature* pDummy = instance->GetCreature(i.m_channelGuid);
                     if (pDummy)
                         pDummy->InterruptNonMeleeSpells(false);
                     // And reset used crystals
-                    if (m_aNovosCrystalInfo[i].m_bWasUsed)
-                        DoUseDoorOrButton(m_aNovosCrystalInfo[i].m_crystalGuid);
+                    if (i.m_bWasUsed)
+                        DoUseDoorOrButton(i.m_crystalGuid);
                 }
             }
             m_auiEncounter[uiType] = uiData;
@@ -311,10 +311,10 @@ void instance_draktharon_keep::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;

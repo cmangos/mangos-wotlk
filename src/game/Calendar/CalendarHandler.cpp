@@ -872,9 +872,9 @@ void CalendarMgr::SendCalendarEvent(Player* player, CalendarEvent const* event, 
 
     CalendarInviteMap const* cInvMap = event->GetInviteMap();
     data << (uint32)cInvMap->size();
-    for (CalendarInviteMap::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
+    for (const auto& itr : *cInvMap)
     {
-        CalendarInvite const* invite = itr->second;
+        CalendarInvite const* invite = itr.second;
         ObjectGuid inviteeGuid = invite->InviteeGuid;
         Player* invitee = sObjectMgr.GetPlayer(inviteeGuid);
 
@@ -886,7 +886,7 @@ void CalendarMgr::SendCalendarEvent(Player* player, CalendarEvent const* event, 
         data << uint8(invite->Status);
         data << uint8(invite->Rank);
         data << uint8(event->IsGuildEvent() && event->GuildId == inviteeGuildId);
-        data << uint64(itr->first);
+        data << uint64(itr.first);
         data << secsToTimeBitFields(invite->LastUpdateTime);
         data << invite->Text;
 
@@ -990,7 +990,7 @@ void CalendarMgr::SendCalendarEventUpdateAlert(CalendarEvent const* event, time_
     SendPacketToAllEventRelatives(data, event);
 }
 
-void CalendarMgr::SendPacketToAllEventRelatives(WorldPacket packet, CalendarEvent const* event) const
+void CalendarMgr::SendPacketToAllEventRelatives(const WorldPacket& packet, CalendarEvent const* event) const
 {
     // Send packet to all guild members
     if (event->IsGuildEvent() || event->IsGuildAnnouncement())
@@ -999,8 +999,8 @@ void CalendarMgr::SendPacketToAllEventRelatives(WorldPacket packet, CalendarEven
 
     // Send packet to all invitees if event is non-guild, in other case only to non-guild invitees (packet was broadcasted for them)
     CalendarInviteMap const* cInvMap = event->GetInviteMap();
-    for (CalendarInviteMap::const_iterator itr = cInvMap->begin(); itr != cInvMap->end(); ++itr)
-        if (Player* player = sObjectMgr.GetPlayer(itr->second->InviteeGuid))
+    for (const auto& itr : *cInvMap)
+        if (Player* player = sObjectMgr.GetPlayer(itr.second->InviteeGuid))
             if (!event->IsGuildEvent() || (event->IsGuildEvent() && player->GetGuildId() != event->GuildId))
                 player->SendDirectMessage(packet);
 }

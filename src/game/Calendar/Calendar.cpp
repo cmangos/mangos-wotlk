@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include <utility>
 #include "Calendar/Calendar.h"
 #include "Mails/Mail.h"
 #include "Globals/ObjectMgr.h"
@@ -179,7 +180,7 @@ CalendarInvite::CalendarInvite(CalendarEvent* event, uint64 inviteId, ObjectGuid
     LastUpdateTime(statusTime),
     Status(status),
     Rank(rank),
-    Text(text),
+    Text(std::move(text)),
     m_calendarEvent(event)
 {
     // only for pre invite case
@@ -201,9 +202,9 @@ void CalendarMgr::GetPlayerEventsList(ObjectGuid const& guid, CalendarEventsList
     else
         guildId = Player::GetGuildIdFromDB(guid);
 
-    for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
+    for (auto& itr : m_EventStore)
     {
-        CalendarEvent* event = &itr->second;
+        CalendarEvent* event = &itr.second;
 
         // add own event and same guild event or announcement
         if ((event->CreatorGuid == guid) || ((event->IsGuildAnnouncement() || event->IsGuildEvent()) && event->GuildId == guildId))
@@ -221,9 +222,9 @@ void CalendarMgr::GetPlayerEventsList(ObjectGuid const& guid, CalendarEventsList
 // fill all player invites in provided CalendarInvitesList
 void CalendarMgr::GetPlayerInvitesList(ObjectGuid const& guid, CalendarInvitesList& calInvList)
 {
-    for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
+    for (auto& itr : m_EventStore)
     {
-        CalendarEvent* event = &itr->second;
+        CalendarEvent* event = &itr.second;
 
         if (event->IsGuildAnnouncement())
             continue;
@@ -686,8 +687,8 @@ bool CalendarMgr::CanAddEvent(ObjectGuid const& guid)
 {
     uint32 totalEvents = 0;
     // count all event created by guid
-    for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
-        if ((itr->second.CreatorGuid == guid) && (++totalEvents >= CALENDAR_MAX_EVENTS))
+    for (auto& itr : m_EventStore)
+        if ((itr.second.CreatorGuid == guid) && (++totalEvents >= CALENDAR_MAX_EVENTS))
             return false;
     return true;
 }
@@ -700,8 +701,8 @@ bool CalendarMgr::CanAddGuildEvent(uint32 guildId)
 
     uint32 totalEvents = 0;
     // count all guild events in a guild
-    for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
-        if ((itr->second.GuildId == guildId) && (++totalEvents >= CALENDAR_MAX_GUILD_EVENTS))
+    for (auto& itr : m_EventStore)
+        if ((itr.second.GuildId == guildId) && (++totalEvents >= CALENDAR_MAX_GUILD_EVENTS))
             return false;
     return true;
 }
@@ -711,9 +712,9 @@ bool CalendarMgr::CanAddInviteTo(ObjectGuid const& guid)
 {
     uint32 totalInvites = 0;
 
-    for (CalendarEventStore::iterator itr = m_EventStore.begin(); itr != m_EventStore.end(); ++itr)
+    for (auto& itr : m_EventStore)
     {
-        CalendarEvent* event = &itr->second;
+        CalendarEvent* event = &itr.second;
 
         if (event->IsGuildAnnouncement())
             continue;

@@ -1210,8 +1210,8 @@ struct npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
         {
             if (m_uiSummonMinionTimer < uiDiff)
             {
-                for (uint8 i = 0; i < MAX_ILLIDARI_ELITES; ++i)
-                    m_creature->SummonCreature(NPC_ILLIDARI_ELITE, aIllidariElitesPos[i].fX, aIllidariElitesPos[i].fY, aIllidariElitesPos[i].fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                for (auto aIllidariElitesPo : aIllidariElitesPos)
+                    m_creature->SummonCreature(NPC_ILLIDARI_ELITE, aIllidariElitesPo.fX, aIllidariElitesPo.fY, aIllidariElitesPo.fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                 m_uiSummonMinionTimer = urand(35000, 50000);
             }
@@ -1433,11 +1433,11 @@ struct npc_cage_trap_triggerAI : public ScriptedAI
             pWho->CastSpell(pWho, SPELL_CAGED, TRIGGERED_OLD_TRIGGERED);
 
             // Cast the visual effects
-            for (uint8 i = 0; i < MAX_CAGE_SPELLS; ++i)
-                DoCastSpellIfCan(m_creature, aCagedSummonSpells[i], CAST_TRIGGERED);
+            for (unsigned int aCagedSummonSpell : aCagedSummonSpells)
+                DoCastSpellIfCan(m_creature, aCagedSummonSpell, CAST_TRIGGERED);
 
-            for (uint8 i = 0; i < MAX_CAGE_SPELLS; ++i)
-                DoCastSpellIfCan(m_creature, aCagedVisualSpells[i], CAST_TRIGGERED);
+            for (unsigned int aCagedVisualSpell : aCagedVisualSpells)
+                DoCastSpellIfCan(m_creature, aCagedVisualSpell, CAST_TRIGGERED);
 
             if (GameObject* pCageTrap = GetClosestGameObjectWithEntry(m_creature, GO_CAGE_TRAP, 5.0f))
                 pCageTrap->Use(m_creature);
@@ -1528,9 +1528,9 @@ struct npc_flame_of_azzinothAI : public ScriptedAI
             std::vector<Unit*> suitableTargets;
             ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
 
-            for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+            for (auto itr : threatList)
             {
-                if (Unit* pTarget = m_creature->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                if (Unit* pTarget = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                 {
                     if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->IsWithinDist(m_creature, 30.0f))
                         suitableTargets.push_back(pTarget);

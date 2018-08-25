@@ -45,8 +45,8 @@ void instance_mount_hyjal::Initialize()
 
 bool instance_mount_hyjal::IsEncounterInProgress() const
 {
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-        if (m_auiEncounter[i] == IN_PROGRESS) return true;
+    for (unsigned int i : m_auiEncounter)
+        if (i == IN_PROGRESS) return true;
 
     return false;
 }
@@ -222,9 +222,9 @@ void instance_mount_hyjal::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3] >> m_auiEncounter[4];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
-        if (m_auiEncounter[i] == IN_PROGRESS)               // Do not load an encounter as IN_PROGRESS - reset it instead.
-            m_auiEncounter[i] = NOT_STARTED;
+    for (unsigned int& i : m_auiEncounter)
+        if (i == IN_PROGRESS)               // Do not load an encounter as IN_PROGRESS - reset it instead.
+            i = NOT_STARTED;
 
     OUT_LOAD_INST_DATA_COMPLETE;
 }

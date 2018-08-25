@@ -233,14 +233,14 @@ bool ProcessEventId_event_spell_call_captain(uint32 uiEventId, Object* pSource, 
             return false;
 
         // each guardian has it's own spawn position
-        for (uint8 i = 0; i < MAX_CAPTAIN_EVENTS; ++i)
+        for (const auto& i : aVarosCaptainData)
         {
-            if (uiEventId == aVarosCaptainData[i].uiEventId)
+            if (uiEventId == i.uiEventId)
             {
-                if (Creature* pGuardian = pVaros->SummonCreature(NPC_AZURE_RING_CAPTAIN, aVarosCaptainData[i].fX, aVarosCaptainData[i].fY, aVarosCaptainData[i].fZ, aVarosCaptainData[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+                if (Creature* pGuardian = pVaros->SummonCreature(NPC_AZURE_RING_CAPTAIN, i.fX, i.fY, i.fZ, i.fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pGuardian->SetWalk(false);
-                    pGuardian->GetMotionMaster()->MovePoint(1, aVarosCaptainData[i].fDestX, aVarosCaptainData[i].fDestY, aVarosCaptainData[i].fDestZ);
+                    pGuardian->GetMotionMaster()->MovePoint(1, i.fDestX, i.fDestY, i.fDestZ);
                 }
 
                 return true;

@@ -85,11 +85,11 @@ bool VendorItemData::RemoveItem(uint32 item_id)
 
 VendorItem const* VendorItemData::FindItemCostPair(uint32 item_id, uint32 extendedCost) const
 {
-    for (VendorItemList::const_iterator i = m_items.begin(); i != m_items.end(); ++i)
+    for (auto m_item : m_items)
     {
         // Skip checking for conditions, condition system is powerfull enough to not require additional entries only for the conditions
-        if ((*i)->item == item_id && (*i)->ExtendedCost == extendedCost)
-            return *i;
+        if (m_item->item == item_id && m_item->ExtendedCost == extendedCost)
+            return m_item;
     }
     return nullptr;
 }
@@ -147,8 +147,8 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_regenTimer = 200;
     m_valuesCount = UNIT_END;
 
-    for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
-        m_spells[i] = 0;
+    for (unsigned int& m_spell : m_spells)
+        m_spell = 0;
 
     SetWalk(true, true);
 }
@@ -704,17 +704,17 @@ void Creature::RegeneratePower()
 
     // Apply modifiers (if any)
     AuraList const& ModPowerRegenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
-    for (AuraList::const_iterator i = ModPowerRegenAuras.begin(); i != ModPowerRegenAuras.end(); ++i)
+    for (auto ModPowerRegenAura : ModPowerRegenAuras)
     {
-        Modifier const* modifier = (*i)->GetModifier();
+        Modifier const* modifier = ModPowerRegenAura->GetModifier();
         if (modifier->m_miscvalue == int32(powerType))
             addValue += modifier->m_amount;
     }
 
     AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for (AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+    for (auto ModPowerRegenPCTAura : ModPowerRegenPCTAuras)
     {
-        Modifier const* modifier = (*i)->GetModifier();
+        Modifier const* modifier = ModPowerRegenPCTAura->GetModifier();
         if (modifier->m_miscvalue == int32(powerType))
             addValue *= (modifier->m_amount + 100) / 100.0f;
     }
@@ -1805,24 +1805,24 @@ SpellEntry const* Creature::ReachWithSpellAttack(Unit* pVictim)
     if (!pVictim)
         return nullptr;
 
-    for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+    for (unsigned int m_spell : m_spells)
     {
-        if (!m_spells[i])
+        if (!m_spell)
             continue;
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_spells[i]);
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_spell);
         if (!spellInfo)
         {
-            sLog.outError("WORLD: unknown spell id %i", m_spells[i]);
+            sLog.outError("WORLD: unknown spell id %i", m_spell);
             continue;
         }
 
         bool bcontinue = true;
-        for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+        for (unsigned int j : spellInfo->Effect)
         {
-            if ((spellInfo->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE)       ||
-                    (spellInfo->Effect[j] == SPELL_EFFECT_INSTAKILL)            ||
-                    (spellInfo->Effect[j] == SPELL_EFFECT_ENVIRONMENTAL_DAMAGE) ||
-                    (spellInfo->Effect[j] == SPELL_EFFECT_HEALTH_LEECH)
+            if ((j == SPELL_EFFECT_SCHOOL_DAMAGE)       ||
+                    (j == SPELL_EFFECT_INSTAKILL)            ||
+                    (j == SPELL_EFFECT_ENVIRONMENTAL_DAMAGE) ||
+                    (j == SPELL_EFFECT_HEALTH_LEECH)
                )
             {
                 bcontinue = false;
@@ -1857,21 +1857,21 @@ SpellEntry const* Creature::ReachWithSpellCure(Unit* pVictim)
     if (!pVictim)
         return nullptr;
 
-    for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+    for (unsigned int m_spell : m_spells)
     {
-        if (!m_spells[i])
+        if (!m_spell)
             continue;
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_spells[i]);
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(m_spell);
         if (!spellInfo)
         {
-            sLog.outError("WORLD: unknown spell id %i", m_spells[i]);
+            sLog.outError("WORLD: unknown spell id %i", m_spell);
             continue;
         }
 
         bool bcontinue = true;
-        for (int j = 0; j < MAX_EFFECT_INDEX; ++j)
+        for (unsigned int j : spellInfo->Effect)
         {
-            if ((spellInfo->Effect[j] == SPELL_EFFECT_HEAL))
+            if ((j == SPELL_EFFECT_HEAL))
             {
                 bcontinue = false;
                 break;
@@ -2139,9 +2139,9 @@ void Creature::SetInCombatWithZone()
     if (PlList.isEmpty())
         return;
 
-    for (Map::PlayerList::const_iterator i = PlList.begin(); i != PlList.end(); ++i)
+    for (const auto& i : PlList)
     {
-        if (Player* pPlayer = i->getSource())
+        if (Player* pPlayer = i.getSource())
         {
             if (pPlayer->isGameMaster())
                 continue;

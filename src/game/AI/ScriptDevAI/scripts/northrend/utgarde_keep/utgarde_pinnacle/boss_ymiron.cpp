@@ -210,9 +210,9 @@ struct boss_ymironAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        for (uint8 i = 0; i < MAX_BOATS; ++i)
+        for (auto aYmironBoatsSpirit : aYmironBoatsSpirits)
         {
-            if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aYmironBoatsSpirits[i].uiSpiritTarget))
+            if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aYmironBoatsSpirit.uiSpiritTarget))
                 pSpirit->AI()->EnterEvadeMode();
         }
     }

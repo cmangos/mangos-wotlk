@@ -109,9 +109,9 @@ struct boss_hadronoxAI : public ScriptedAI
         // Force the spiders to attack him
         if (pWho->GetTypeId() == TYPEID_UNIT && m_creature->IsWithinDistInMap(pWho, 2 * ATTACK_DISTANCE) && !pWho->getVictim())
         {
-            for (uint8 i = 0; i < MAX_SPIDERS; ++i)
+            for (unsigned int aSpiderEntrie : aSpiderEntries)
             {
-                if (pWho->GetEntry() == aSpiderEntries[i])
+                if (pWho->GetEntry() == aSpiderEntrie)
                     ((Creature*)pWho)->AI()->AttackStart(m_creature);
             }
         }

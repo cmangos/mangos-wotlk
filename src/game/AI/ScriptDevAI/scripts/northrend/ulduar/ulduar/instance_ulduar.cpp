@@ -92,8 +92,8 @@ void instance_ulduar::Initialize()
 
     InitializeDialogueHelper(this);
 
-    for (uint8 i = 0; i < MAX_SPECIAL_ACHIEV_CRITS; ++i)
-        m_abAchievCriteria[i] = false;
+    for (bool& i : m_abAchievCriteria)
+        i = false;
 }
 
 void instance_ulduar::OnPlayerEnter(Player* pPlayer)
@@ -131,18 +131,18 @@ void instance_ulduar::OnPlayerEnter(Player* pPlayer)
     // spawn frienly keepers in the central hall, keeper helpers for Yogg-Saron and all the other faction npcs
     if (!m_bHelpersLoaded)
     {
-        for (uint8 i = 0; i < countof(m_aKeepersSpawnLocs); ++i)
+        for (auto& m_aKeepersSpawnLoc : m_aKeepersSpawnLocs)
         {
-            if (GetData(m_aKeepersSpawnLocs[i].uiType) == DONE)
-                pPlayer->SummonCreature(m_aKeepersSpawnLocs[i].uiEntry, m_aKeepersSpawnLocs[i].fX, m_aKeepersSpawnLocs[i].fY, m_aKeepersSpawnLocs[i].fZ, m_aKeepersSpawnLocs[i].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true);
+            if (GetData(m_aKeepersSpawnLoc.uiType) == DONE)
+                pPlayer->SummonCreature(m_aKeepersSpawnLoc.uiEntry, m_aKeepersSpawnLoc.fX, m_aKeepersSpawnLoc.fY, m_aKeepersSpawnLoc.fZ, m_aKeepersSpawnLoc.fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true);
         }
 
         if (GetData(TYPE_YOGGSARON) != DONE)
         {
-            for (uint8 i = 0; i < countof(m_aKeeperHelperLocs); ++i)
+            for (auto& m_aKeeperHelperLoc : m_aKeeperHelperLocs)
             {
-                if (GetData(m_aKeeperHelperLocs[i].uiType) == DONE)
-                    pPlayer->SummonCreature(m_aKeeperHelperLocs[i].uiEntry, m_aKeeperHelperLocs[i].fX, m_aKeeperHelperLocs[i].fY, m_aKeeperHelperLocs[i].fZ, m_aKeeperHelperLocs[i].fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true);
+                if (GetData(m_aKeeperHelperLoc.uiType) == DONE)
+                    pPlayer->SummonCreature(m_aKeeperHelperLoc.uiEntry, m_aKeeperHelperLoc.fX, m_aKeeperHelperLoc.fY, m_aKeeperHelperLoc.fZ, m_aKeeperHelperLoc.fO, TEMPSPAWN_CORPSE_DESPAWN, 0, true);
             }
         }
 
@@ -832,11 +832,11 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
                     pDoor->ResetDoorOrButton();
 
                 // reset all helpers
-                for (uint8 i = 0; i < countof(m_aKeeperHelperLocs); ++i)
+                for (auto& m_aKeeperHelperLoc : m_aKeeperHelperLocs)
                 {
-                    if (GetData(m_aKeeperHelperLocs[i].uiType) == DONE)
+                    if (GetData(m_aKeeperHelperLoc.uiType) == DONE)
                     {
-                        if (Creature* pHelper = GetSingleCreatureFromStorage(m_aKeeperHelperLocs[i].uiEntry))
+                        if (Creature* pHelper = GetSingleCreatureFromStorage(m_aKeeperHelperLoc.uiEntry))
                         {
                             if (uiData == FAIL)
                             {
@@ -1329,10 +1329,10 @@ void instance_ulduar::Load(const char* strIn)
                >> m_auiUlduarTowers[0] >> m_auiUlduarTowers[1] >> m_auiUlduarTowers[2] >> m_auiUlduarTowers[3]
                >> m_auiAchievEncounter[ACHIEV_FREYA_CONSPEEDATORY];
 
-    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    for (unsigned int& i : m_auiEncounter)
     {
-        if (m_auiEncounter[i] == IN_PROGRESS)
-            m_auiEncounter[i] = NOT_STARTED;
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
@@ -1513,13 +1513,13 @@ void instance_ulduar::DoCallLeviathanHelp()
     if (!pLeviathan)
         return;
 
-    for (uint8 i = 0; i < countof(afReinforcementsNormal); ++i)
-        pLeviathan->SummonCreature(afReinforcementsNormal[i].uiEntry, afReinforcementsNormal[i].fX, afReinforcementsNormal[i].fY, afReinforcementsNormal[i].fZ, afReinforcementsNormal[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
+    for (const auto& i : afReinforcementsNormal)
+        pLeviathan->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, i.fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
 
     if (!instance->IsRegularDifficulty())
     {
-        for (uint8 i = 0; i < countof(afReinforcementsHeroic); ++i)
-            pLeviathan->SummonCreature(afReinforcementsHeroic[i].uiEntry, afReinforcementsHeroic[i].fX, afReinforcementsHeroic[i].fY, afReinforcementsHeroic[i].fZ, afReinforcementsHeroic[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
+        for (const auto& i : afReinforcementsHeroic)
+            pLeviathan->SummonCreature(i.uiEntry, i.fX, i.fY, i.fZ, i.fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
     }
 }
 
@@ -1536,13 +1536,13 @@ void instance_ulduar::DoSpawnHodirNpcs(Player* pSummoner)
 {
     if (GetData(TYPE_HODIR) != DONE)
     {
-        for (uint8 i = 0; i < countof(afHodirHelpersNormal); ++i)
-            pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afHodirHelpersNormal[i].uiAllyEntry : afHodirHelpersNormal[i].uiHordeEntry, afHodirHelpersNormal[i].fX, afHodirHelpersNormal[i].fY, afHodirHelpersNormal[i].fZ, afHodirHelpersNormal[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
+        for (const auto& i : afHodirHelpersNormal)
+            pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? i.uiAllyEntry : i.uiHordeEntry, i.fX, i.fY, i.fZ, i.fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
 
         if (!instance->IsRegularDifficulty())
         {
-            for (uint8 i = 0; i < countof(afHodirHelpersHeroic); ++i)
-                pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afHodirHelpersHeroic[i].uiAllyEntry : afHodirHelpersHeroic[i].uiHordeEntry, afHodirHelpersHeroic[i].fX, afHodirHelpersHeroic[i].fY, afHodirHelpersHeroic[i].fZ, afHodirHelpersHeroic[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
+            for (const auto& i : afHodirHelpersHeroic)
+                pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? i.uiAllyEntry : i.uiHordeEntry, i.fX, i.fY, i.fZ, i.fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
         }
     }
 }
@@ -1551,8 +1551,8 @@ void instance_ulduar::DoSpawnThorimNpcs(Player* pSummoner)
 {
     if (GetData(TYPE_THORIM) != DONE)
     {
-        for (uint8 i = 0; i < countof(afThorimSpawns); ++i)
-            pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afThorimSpawns[i].uiAllyEntry : afThorimSpawns[i].uiHordeEntry, afThorimSpawns[i].fX, afThorimSpawns[i].fY, afThorimSpawns[i].fZ, afThorimSpawns[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
+        for (const auto& afThorimSpawn : afThorimSpawns)
+            pSummoner->SummonCreature(pSummoner->GetTeam() == ALLIANCE ? afThorimSpawn.uiAllyEntry : afThorimSpawn.uiHordeEntry, afThorimSpawn.fX, afThorimSpawn.fY, afThorimSpawn.fZ, afThorimSpawn.fO, TEMPSPAWN_DEAD_DESPAWN, 0, true);
     }
 }
 

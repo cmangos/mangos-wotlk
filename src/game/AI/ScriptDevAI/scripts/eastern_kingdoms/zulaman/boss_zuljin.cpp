@@ -193,9 +193,9 @@ struct boss_zuljinAI : public ScriptedAI
         DoDespawnVortexes();
 
         // Reset all spirits
-        for (uint8 i = 0; i < MAX_VORTEXES; ++i)
+        for (const auto& aZuljinPhase : aZuljinPhases)
         {
-            if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aZuljinPhases[i].uiSpiritId))
+            if (Creature* pSpirit = m_pInstance->GetSingleCreatureFromStorage(aZuljinPhase.uiSpiritId))
             {
                 pSpirit->SetStandState(UNIT_STAND_STATE_STAND);
                 pSpirit->AI()->EnterEvadeMode();

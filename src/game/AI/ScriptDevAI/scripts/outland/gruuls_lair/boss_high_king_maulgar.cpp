@@ -319,8 +319,8 @@ struct boss_kiggler_the_crazedAI : public Council_Base_AI
         m_attackDistance = 35.0f;
         m_meleeEnabled = false;
 
-        for (uint32 i = 0; i < KIGGLER_ACTION_MAX; ++i)
-            m_actionReadyStatus[i] = false;
+        for (bool& m_actionReadyStatu : m_actionReadyStatus)
+            m_actionReadyStatu = false;
 
         m_actionReadyStatus[KIGGLER_ACTION_LIGHTNING_BOLT] = true;
     }

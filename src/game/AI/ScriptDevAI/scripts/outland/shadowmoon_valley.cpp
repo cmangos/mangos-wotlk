@@ -1594,13 +1594,13 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
             std::list<Creature*> lOtherChannelers;
             GetCreatureListWithEntryInGrid(lOtherChannelers, m_creature, NPC_SHADOWMOON_SOULSTEALER, 175.0f);
 
-            for (std::list<Creature*>::iterator itr = lOtherChannelers.begin(); itr != lOtherChannelers.end(); ++itr)
-                if ((*itr)->isAlive())
+            for (auto& lOtherChanneler : lOtherChannelers)
+                if (lOtherChanneler->isAlive())
                 {
-                    (*itr)->SetInCombatWith(attacker);
-                    attacker->SetInCombatWith((*itr));
-                    (*itr)->SetActiveObjectState(true);
-                    (*itr)->AddThreat(attacker);
+                    lOtherChanneler->SetInCombatWith(attacker);
+                    attacker->SetInCombatWith(lOtherChanneler);
+                    lOtherChanneler->SetActiveObjectState(true);
+                    lOtherChanneler->AddThreat(attacker);
 
                     // agro on party members
                     if (Player* player = m_creature->GetMap()->GetPlayer(attacker->GetObjectGuid()))
@@ -1610,13 +1610,13 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
                                 Player* member = ref->getSource();
                                 if (member && member->isAlive() && m_cHOFVisualTrigger && m_cHOFVisualTrigger->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
                                 {
-                                    (*itr)->SetInCombatWith(member);
-                                    member->SetInCombatWith((*itr));
-                                    (*itr)->AddThreat(member);
+                                    lOtherChanneler->SetInCombatWith(member);
+                                    member->SetInCombatWith(lOtherChanneler);
+                                    lOtherChanneler->AddThreat(member);
                                 }
                             }
 
-                    m_lSoulstealers.push_back((*itr));
+                    m_lSoulstealers.push_back(lOtherChanneler);
                 }
 
             m_playerGuid = attacker->GetObjectGuid();

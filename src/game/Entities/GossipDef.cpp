@@ -299,10 +299,10 @@ void PlayerMenu::SendTalking(uint32 textID) const
 
             data << pGossip->Options[i].Language;
 
-            for (int j = 0; j < 3; ++j)
+            for (auto Emote : pGossip->Options[i].Emotes)
             {
-                data << pGossip->Options[i].Emotes[j]._Delay;
-                data << pGossip->Options[i].Emotes[j]._Emote;
+                data << Emote._Delay;
+                data << Emote._Emote;
             }
         }
     }
@@ -524,11 +524,11 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
     data << uint32(0);                                      // bonus arena points
     data << uint32(0);                                      // rep reward show mask?
 
-    for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward factions ids
-        data << uint32(pQuest->RewRepFaction[i]);
+    for (unsigned int i : pQuest->RewRepFaction)       // reward factions ids
+        data << uint32(i);
 
-    for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // columnid in QuestFactionReward.dbc (if negative, from second row)
-        data << int32(pQuest->RewRepValueId[i]);
+    for (int i : pQuest->RewRepValueId)       // columnid in QuestFactionReward.dbc (if negative, from second row)
+        data << int32(i);
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No bonus is expected given
         data << int32(0);
@@ -647,11 +647,11 @@ void PlayerMenu::SendQuestQueryResponse(Quest const* pQuest) const
         }
     }
 
-    for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward factions ids
-        data << uint32(pQuest->RewRepFaction[i]);
+    for (unsigned int i : pQuest->RewRepFaction)       // reward factions ids
+        data << uint32(i);
 
-    for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // columnid in QuestFactionReward.dbc (if negative, from second row)
-        data << int32(pQuest->RewRepValueId[i]);
+    for (int i : pQuest->RewRepValueId)       // columnid in QuestFactionReward.dbc (if negative, from second row)
+        data << int32(i);
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No bonus is expected given
         data << int32(0);
@@ -727,9 +727,9 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
     data << uint32(pQuest->GetSuggestedPlayers());          // SuggestedGroupNum
 
     uint32 EmoteCount = 0;
-    for (uint32 i = 0; i < QUEST_EMOTE_COUNT; ++i)
+    for (unsigned int i : pQuest->OfferRewardEmote)
     {
-        if (pQuest->OfferRewardEmote[i] <= 0)
+        if (i <= 0)
             break;
         ++EmoteCount;
     }
@@ -791,11 +791,11 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
     data << uint32(0);                                      // bonus arena points
     data << uint32(0);                                      // rew rep show mask?
 
-    for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward factions ids
-        data << uint32(pQuest->RewRepFaction[i]);
+    for (unsigned int i : pQuest->RewRepFaction)       // reward factions ids
+        data << uint32(i);
 
-    for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // columnid in QuestFactionReward.dbc (if negative, from second row)
-        data << int32(pQuest->RewRepValueId[i]);
+    for (int i : pQuest->RewRepValueId)       // columnid in QuestFactionReward.dbc (if negative, from second row)
+        data << int32(i);
 
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No diplomacy bonus is expected given, reward also does not display in chat window
         data << int32(0);

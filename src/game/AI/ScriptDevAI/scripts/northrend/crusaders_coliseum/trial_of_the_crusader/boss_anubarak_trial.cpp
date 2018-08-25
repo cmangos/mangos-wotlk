@@ -203,8 +203,8 @@ struct boss_anubarak_trialAI : public ScriptedAI
         }
 
         // It's not clear if these should be spawned by DB or summoned
-        for (uint8 i = 0; i < MAX_BURROWS; ++i)
-            m_creature->SummonCreature(NPC_BURROW, aBurrowSpawnPositions[i][0], aBurrowSpawnPositions[i][1], aBurrowSpawnPositions[i][2], aBurrowSpawnPositions[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
+        for (auto aBurrowSpawnPosition : aBurrowSpawnPositions)
+            m_creature->SummonCreature(NPC_BURROW, aBurrowSpawnPosition[0], aBurrowSpawnPosition[1], aBurrowSpawnPosition[2], aBurrowSpawnPosition[3], TEMPSPAWN_DEAD_DESPAWN, 0);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ANUBARAK, IN_PROGRESS);

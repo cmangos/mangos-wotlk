@@ -86,8 +86,8 @@ Group::~Group()
     // it is undefined whether objectmgr (which stores the groups) or instancesavemgr
     // will be unloaded first so we must be prepared for both cases
     // this may unload some dungeon persistent state
-    for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
-        for (BoundInstancesMap::iterator itr2 = m_boundInstances[i].begin(); itr2 != m_boundInstances[i].end(); ++itr2)
+    for (auto& m_boundInstance : m_boundInstances)
+        for (BoundInstancesMap::iterator itr2 = m_boundInstance.begin(); itr2 != m_boundInstance.end(); ++itr2)
             itr2->second.state->RemoveGroup(this);
 
     // Sub group counters clean up
@@ -278,27 +278,27 @@ uint32 Group::RemoveInvite(Player* player)
 
 void Group::RemoveAllInvites()
 {
-    for (InvitesList::iterator itr = m_invitees.begin(); itr != m_invitees.end(); ++itr)
-        (*itr)->SetGroupInvite(nullptr);
+    for (auto m_invitee : m_invitees)
+        m_invitee->SetGroupInvite(nullptr);
 
     m_invitees.clear();
 }
 
 Player* Group::GetInvited(ObjectGuid guid) const
 {
-    for (InvitesList::const_iterator itr = m_invitees.begin(); itr != m_invitees.end(); ++itr)
-        if ((*itr)->GetObjectGuid() == guid)
-            return (*itr);
+    for (auto m_invitee : m_invitees)
+        if (m_invitee->GetObjectGuid() == guid)
+            return m_invitee;
 
     return nullptr;
 }
 
 Player* Group::GetInvited(const std::string& name) const
 {
-    for (InvitesList::const_iterator itr = m_invitees.begin(); itr != m_invitees.end(); ++itr)
+    for (auto m_invitee : m_invitees)
     {
-        if ((*itr)->GetName() == name)
-            return (*itr);
+        if (m_invitee->GetName() == name)
+            return m_invitee;
     }
     return nullptr;
 }
@@ -805,8 +805,8 @@ bool Group::_addMember(ObjectGuid guid, const char* name, bool isAssistant, uint
 
     if (!isRaidGroup())                                     // reset targetIcons for non-raid-groups
     {
-        for (int i = 0; i < TARGET_ICON_COUNT; ++i)
-            m_targetIcons[i].Clear();
+        for (auto& m_targetIcon : m_targetIcons)
+            m_targetIcon.Clear();
     }
 
     if (!isBGGroup())
@@ -932,14 +932,14 @@ void Group::_setLeader(ObjectGuid guid)
 
         if (player)
         {
-            for (uint8 i = 0; i < MAX_DIFFICULTY; ++i)
+            for (auto& m_boundInstance : m_boundInstances)
             {
-                for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end();)
+                for (BoundInstancesMap::iterator itr = m_boundInstance.begin(); itr != m_boundInstance.end();)
                 {
                     if (itr->second.perm)
                     {
                         itr->second.state->RemoveGroup(this);
-                        m_boundInstances[i].erase(itr++);
+                        m_boundInstance.erase(itr++);
                     }
                     else
                         ++itr;

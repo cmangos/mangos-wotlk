@@ -377,9 +377,9 @@ struct npc_putricides_trapAI : public ScriptedAI
 
                 if (!pAllPlayers.isEmpty())
                 {
-                    for (Map::PlayerList::const_iterator itr = pAllPlayers.begin(); itr != pAllPlayers.end(); ++itr)
+                    for (const auto& pAllPlayer : pAllPlayers)
                     {
-                        if (Player* pPlayer = itr->getSource())
+                        if (Player* pPlayer = pAllPlayer.getSource())
                         {
                             if (pPlayer->isAlive() && pPlayer->IsWithinLOSInMap(m_creature))
                                 bEventFailed = false;

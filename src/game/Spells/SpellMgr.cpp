@@ -418,9 +418,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             {
                 bool food = false;
                 bool drink = false;
-                for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+                for (unsigned int i : spellInfo->EffectApplyAuraName)
                 {
-                    switch (spellInfo->EffectApplyAuraName[i])
+                    switch (i)
                     {
                         // Food
                         case SPELL_AURA_MOD_REGEN:
@@ -3571,9 +3571,9 @@ bool SpellMgr::LoadPetDefaultSpells_helper(CreatureInfo const* cInfo, PetDefault
 {
     // skip empty list;
     bool have_spell = false;
-    for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
+    for (unsigned int j : petDefSpells.spellid)
     {
-        if (petDefSpells.spellid[j])
+        if (j)
         {
             have_spell = true;
             break;
@@ -3585,16 +3585,16 @@ bool SpellMgr::LoadPetDefaultSpells_helper(CreatureInfo const* cInfo, PetDefault
     // remove duplicates with levelupSpells if any
     if (PetLevelupSpellSet const* levelupSpells = cInfo->Family ? GetPetLevelupSpellList(cInfo->Family) : nullptr)
     {
-        for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
+        for (unsigned int& j : petDefSpells.spellid)
         {
-            if (!petDefSpells.spellid[j])
+            if (!j)
                 continue;
 
-            for (PetLevelupSpellSet::const_iterator itr = levelupSpells->begin(); itr != levelupSpells->end(); ++itr)
+            for (const auto& levelupSpell : *levelupSpells)
             {
-                if (itr->second == petDefSpells.spellid[j])
+                if (levelupSpell.second == j)
                 {
-                    petDefSpells.spellid[j] = 0;
+                    j = 0;
                     break;
                 }
             }
@@ -3603,9 +3603,9 @@ bool SpellMgr::LoadPetDefaultSpells_helper(CreatureInfo const* cInfo, PetDefault
 
     // skip empty list;
     have_spell = false;
-    for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
+    for (unsigned int j : petDefSpells.spellid)
     {
-        if (petDefSpells.spellid[j])
+        if (j)
         {
             have_spell = true;
             break;
@@ -3766,16 +3766,16 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
 
     if (need_check_reagents)
     {
-        for (int j = 0; j < MAX_SPELL_REAGENTS; ++j)
+        for (int j : spellInfo->Reagent)
         {
-            if (spellInfo->Reagent[j] > 0 && !ObjectMgr::GetItemPrototype(spellInfo->Reagent[j]))
+            if (j > 0 && !ObjectMgr::GetItemPrototype(j))
             {
                 if (msg)
                 {
                     if (pl)
-                        ChatHandler(pl).PSendSysMessage("Craft spell %u requires reagent item (Entry: %u) but item does not exist in item_template.", spellInfo->Id, spellInfo->Reagent[j]);
+                        ChatHandler(pl).PSendSysMessage("Craft spell %u requires reagent item (Entry: %u) but item does not exist in item_template.", spellInfo->Id, j);
                     else
-                        sLog.outErrorDb("Craft spell %u requires reagent item (Entry: %u) but item does not exist in item_template.", spellInfo->Id, spellInfo->Reagent[j]);
+                        sLog.outErrorDb("Craft spell %u requires reagent item (Entry: %u) but item does not exist in item_template.", spellInfo->Id, j);
                 }
                 return false;
             }
@@ -4002,8 +4002,8 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
         AreaGroupEntry const* groupEntry = sAreaGroupStore.LookupEntry<AreaGroupEntry>(areaGroupId);
         while (groupEntry)
         {
-            for (uint32 i = 0; i < 6; ++i)
-                if (groupEntry->AreaId[i] == zone_id || groupEntry->AreaId[i] == area_id)
+            for (unsigned int i : groupEntry->AreaId)
+                if (i == zone_id || i == area_id)
                     found = true;
             if (found || !groupEntry->nextGroup)
                 break;

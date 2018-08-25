@@ -17,6 +17,7 @@
  */
 
 #include <zlib.h>
+#include <utility>
 
 #include "Common.h"
 #include "Tools/Language.h"
@@ -490,7 +491,7 @@ void WorldSession::HandleAddFriendOpcodeCallBack(QueryResult* result, uint32 acc
                 DEBUG_LOG("WORLD: %s's friend list is full.", player->GetName());
             }
 
-            player->GetSocial()->SetFriendNote(friendGuid, friendNote);
+            player->GetSocial()->SetFriendNote(friendGuid, std::move(friendNote));
         }
     }
 

@@ -518,9 +518,9 @@ void instance_culling_of_stratholme::DoChromieWhisper(int32 iEntry)
         Map::PlayerList const& players = instance->GetPlayers();
         if (!players.isEmpty())
         {
-            for (Map::PlayerList::const_iterator itr = players.begin(); itr != players.end(); ++itr)
+            for (const auto& player : players)
             {
-                if (Player* pPlayer = itr->getSource())
+                if (Player* pPlayer = player.getSource())
                     DoScriptText(iEntry, pChromie, pPlayer);
             }
         }
@@ -791,20 +791,20 @@ void instance_culling_of_stratholme::DoSpawnNextScourgeWave()
 // function that spawns all the scourge elites in burning stratholme
 void instance_culling_of_stratholme::DoSpawnBurningCityUndead(Unit* pSummoner)
 {
-    for (uint8 i = 0; i < MAX_BURNING_SCOURGE_POS; ++i)
+    for (auto& m_aBurningScourgeLoc : m_aBurningScourgeLocs)
     {
-        uint32 uiEntry = GetRandomMobOfType(m_aBurningScourgeLocs[i].m_uiType);
+        uint32 uiEntry = GetRandomMobOfType(m_aBurningScourgeLoc.m_uiType);
         if (!uiEntry)
             continue;
 
         float fX, fY, fZ;
 
         // special requirement for acolytes - spawn a pack of 3
-        if (m_aBurningScourgeLocs[i].m_uiType == SCOURGE_TYPE_ACOLYTES)
+        if (m_aBurningScourgeLoc.m_uiType == SCOURGE_TYPE_ACOLYTES)
         {
             for (uint8 j = 0; j < 3; ++j)
             {
-                pSummoner->GetRandomPoint(m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 5.0f, fX, fY, fZ);
+                pSummoner->GetRandomPoint(m_aBurningScourgeLoc.m_fX, m_aBurningScourgeLoc.m_fY, m_aBurningScourgeLoc.m_fZ, 5.0f, fX, fY, fZ);
 
                 if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
                     pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
@@ -813,14 +813,14 @@ void instance_culling_of_stratholme::DoSpawnBurningCityUndead(Unit* pSummoner)
         // spawn the selected mob
         else
         {
-            if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+            if (Creature* pUndead = pSummoner->SummonCreature(uiEntry, m_aBurningScourgeLoc.m_fX, m_aBurningScourgeLoc.m_fY, m_aBurningScourgeLoc.m_fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
                 pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);
         }
 
         // spawn a few random zombies
         for (uint8 j = 0; j < 5; ++j)
         {
-            pSummoner->GetRandomPoint(m_aBurningScourgeLocs[i].m_fX, m_aBurningScourgeLocs[i].m_fY, m_aBurningScourgeLocs[i].m_fZ, 20.0f, fX, fY, fZ);
+            pSummoner->GetRandomPoint(m_aBurningScourgeLoc.m_fX, m_aBurningScourgeLoc.m_fY, m_aBurningScourgeLoc.m_fZ, 20.0f, fX, fY, fZ);
 
             if (Creature* pUndead = pSummoner->SummonCreature(NPC_ZOMBIE, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
                 pUndead->GetMotionMaster()->MoveRandomAroundPoint(pUndead->GetPositionX(), pUndead->GetPositionY(), pUndead->GetPositionZ(), 10.0f);

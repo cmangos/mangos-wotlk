@@ -362,9 +362,9 @@ struct boss_razorscaleAI : public ScriptedAI
 
         // Check if there are still enemies (players)
         ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-        for (ThreatList::const_iterator itr = threatList.begin(); itr != threatList.end(); ++itr)
+        for (auto itr : threatList)
         {
-            if ((*itr)->getUnitGuid().IsPlayer())
+            if (itr->getUnitGuid().IsPlayer())
                 return true;
         }
 

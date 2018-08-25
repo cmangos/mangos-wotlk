@@ -79,9 +79,9 @@ bool Player::UpdateStats(Stats stat)
     // Update ratings in exist SPELL_AURA_MOD_RATING_FROM_STAT and only depends from stat
     uint32 mask = 0;
     AuraList const& modRatingFromStat = GetAurasByType(SPELL_AURA_MOD_RATING_FROM_STAT);
-    for (AuraList::const_iterator i = modRatingFromStat.begin(); i != modRatingFromStat.end(); ++i)
-        if (Stats((*i)->GetMiscBValue()) == stat)
-            mask |= (*i)->GetMiscValue();
+    for (auto i : modRatingFromStat)
+        if (Stats(i->GetMiscBValue()) == stat)
+            mask |= i->GetMiscValue();
     if (mask)
     {
         for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
@@ -170,11 +170,11 @@ void Player::UpdateArmor()
 
     // add dynamic flat mods
     AuraList const& mResbyIntellect = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT);
-    for (AuraList::const_iterator i = mResbyIntellect.begin(); i != mResbyIntellect.end(); ++i)
+    for (auto i : mResbyIntellect)
     {
-        Modifier* mod = (*i)->GetModifier();
+        Modifier* mod = i->GetModifier();
         if (mod->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
-            value += int32(GetStat(Stats((*i)->GetMiscBValue())) * mod->m_amount / 100.0f);
+            value += int32(GetStat(Stats(i->GetMiscBValue())) * mod->m_amount / 100.0f);
     }
 
     value *= GetModifierValue(unitMod, TOTAL_PCT);
@@ -303,17 +303,17 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
                     case FORM_MOONKIN:
                     {
                         Unit::AuraList const& mDummy = GetAurasByType(SPELL_AURA_DUMMY);
-                        for (Unit::AuraList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)
+                        for (auto itr : mDummy)
                         {
-                            if ((*itr)->GetSpellProto()->SpellIconID != 1563)
+                            if (itr->GetSpellProto()->SpellIconID != 1563)
                                 continue;
 
                             // Predatory Strikes (effect 0)
-                            if ((*itr)->GetEffIndex() == EFFECT_INDEX_0 && IsInFeralForm())
-                                mLevelBonus = getLevel() * (*itr)->GetModifier()->m_amount / 100.0f;
+                            if (itr->GetEffIndex() == EFFECT_INDEX_0 && IsInFeralForm())
+                                mLevelBonus = getLevel() * itr->GetModifier()->m_amount / 100.0f;
                             // Predatory Strikes (effect 1)
-                            else if ((*itr)->GetEffIndex() == EFFECT_INDEX_1)
-                                mBonusWeaponAtt = (*itr)->GetModifier()->m_amount * m_baseFeralAP / 100.0f;
+                            else if (itr->GetEffIndex() == EFFECT_INDEX_1)
+                                mBonusWeaponAtt = itr->GetModifier()->m_amount * m_baseFeralAP / 100.0f;
 
                             if (mLevelBonus != 0.0f && mBonusWeaponAtt != 0.0f)
                                 break;
@@ -354,20 +354,20 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
         if ((getClassMask() & CLASSMASK_WAND_USERS) == 0)
         {
             AuraList const& mRAPbyStat = GetAurasByType(SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT);
-            for (AuraList::const_iterator i = mRAPbyStat.begin(); i != mRAPbyStat.end(); ++i)
-                attPowerMod += int32(GetStat(Stats((*i)->GetModifier()->m_miscvalue)) * (*i)->GetModifier()->m_amount / 100.0f);
+            for (auto i : mRAPbyStat)
+                attPowerMod += int32(GetStat(Stats(i->GetModifier()->m_miscvalue)) * i->GetModifier()->m_amount / 100.0f);
         }
     }
     else
     {
         AuraList const& mAPbyStat = GetAurasByType(SPELL_AURA_MOD_ATTACK_POWER_OF_STAT_PERCENT);
-        for (AuraList::const_iterator i = mAPbyStat.begin(); i != mAPbyStat.end(); ++i)
-            attPowerMod += int32(GetStat(Stats((*i)->GetModifier()->m_miscvalue)) * (*i)->GetModifier()->m_amount / 100.0f);
+        for (auto i : mAPbyStat)
+            attPowerMod += int32(GetStat(Stats(i->GetModifier()->m_miscvalue)) * i->GetModifier()->m_amount / 100.0f);
 
         AuraList const& mAPbyArmor = GetAurasByType(SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR);
-        for (AuraList::const_iterator iter = mAPbyArmor.begin(); iter != mAPbyArmor.end(); ++iter)
+        for (auto iter : mAPbyArmor)
             // always: ((*i)->GetModifier()->m_miscvalue == 1 == SPELL_SCHOOL_MASK_NORMAL)
-            attPowerMod += int32(GetArmor() / (*iter)->GetModifier()->m_amount);
+            attPowerMod += int32(GetArmor() / iter->GetModifier()->m_amount);
     }
 
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
@@ -678,14 +678,14 @@ void Player::UpdateExpertise(WeaponAttackType attack)
     Item* weapon = GetWeaponForAttack(attack);
 
     AuraList const& expAuras = GetAurasByType(SPELL_AURA_MOD_EXPERTISE);
-    for (AuraList::const_iterator itr = expAuras.begin(); itr != expAuras.end(); ++itr)
+    for (auto expAura : expAuras)
     {
         // item neutral spell
-        if ((*itr)->GetSpellProto()->EquippedItemClass == -1)
-            expertise += (*itr)->GetModifier()->m_amount;
+        if (expAura->GetSpellProto()->EquippedItemClass == -1)
+            expertise += expAura->GetModifier()->m_amount;
         // item dependent spell
-        else if (weapon && weapon->IsFitToSpellRequirements((*itr)->GetSpellProto()))
-            expertise += (*itr)->GetModifier()->m_amount;
+        else if (weapon && weapon->IsFitToSpellRequirements(expAura->GetSpellProto()))
+            expertise += expAura->GetModifier()->m_amount;
     }
 
     if (expertise < 0)
@@ -704,12 +704,12 @@ void Player::UpdateArmorPenetration()
     m_armorPenetrationPct = GetRatingBonusValue(CR_ARMOR_PENETRATION);
 
     AuraList const& armorAuras = GetAurasByType(SPELL_AURA_MOD_TARGET_ARMOR_PCT);
-    for (AuraList::const_iterator itr = armorAuras.begin(); itr != armorAuras.end(); ++itr)
+    for (auto armorAura : armorAuras)
     {
         // affects all weapons
-        if ((*itr)->GetSpellProto()->EquippedItemClass == -1)
+        if (armorAura->GetSpellProto()->EquippedItemClass == -1)
         {
-            m_armorPenetrationPct += (*itr)->GetModifier()->m_amount;
+            m_armorPenetrationPct += armorAura->GetModifier()->m_amount;
             continue;
         }
 
@@ -717,9 +717,9 @@ void Player::UpdateArmorPenetration()
         for (uint8 i = 0; i < MAX_ATTACK; ++i)
         {
             Item* weapon = GetWeaponForAttack(WeaponAttackType(i));
-            if (weapon && weapon->IsFitToSpellRequirements((*itr)->GetSpellProto()))
+            if (weapon && weapon->IsFitToSpellRequirements(armorAura->GetSpellProto()))
             {
-                m_armorPenetrationPct += (*itr)->GetModifier()->m_amount;
+                m_armorPenetrationPct += armorAura->GetModifier()->m_amount;
                 break;
             }
         }
@@ -745,9 +745,9 @@ void Player::UpdateManaRegen()
 
     // Get bonus from SPELL_AURA_MOD_MANA_REGEN_FROM_STAT aura
     AuraList const& regenAura = GetAurasByType(SPELL_AURA_MOD_MANA_REGEN_FROM_STAT);
-    for (AuraList::const_iterator i = regenAura.begin(); i != regenAura.end(); ++i)
+    for (auto i : regenAura)
     {
-        Modifier* mod = (*i)->GetModifier();
+        Modifier* mod = i->GetModifier();
         power_regen_mp5 += GetStat(Stats(mod->m_miscvalue)) * mod->m_amount / 500.0f;
     }
 

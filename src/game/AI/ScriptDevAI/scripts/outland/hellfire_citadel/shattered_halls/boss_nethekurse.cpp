@@ -172,8 +172,8 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
 
         std::list<Creature*> lFelConverts;
         GetCreatureListWithEntryInGrid(lFelConverts, m_creature, NPC_FEL_ORC_CONVERT, 40.0f);
-        for (std::list<Creature*>::iterator itr = lFelConverts.begin(); itr != lFelConverts.end(); ++itr)
-            (*itr)->DealDamage(*itr, (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+        for (auto& lFelConvert : lFelConverts)
+            lFelConvert->DealDamage(lFelConvert, lFelConvert->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
 
         m_bIsIntroEvent = false;
         m_uiPeonEngagedCount = 4;
@@ -254,10 +254,10 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
 
         std::list<Creature*> lFelConverts;
         GetCreatureListWithEntryInGrid(lFelConverts, m_creature, NPC_FEL_ORC_CONVERT, 40.0f);
-        for (std::list<Creature*>::iterator itr = lFelConverts.begin(); itr != lFelConverts.end(); ++itr)
+        for (auto& lFelConvert : lFelConverts)
         {
-            if (!(*itr)->isAlive())
-                (*itr)->Respawn();
+            if (!lFelConvert->isAlive())
+                lFelConvert->Respawn();
         }
     }
 

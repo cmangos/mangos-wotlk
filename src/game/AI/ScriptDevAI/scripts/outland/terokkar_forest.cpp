@@ -430,12 +430,12 @@ struct npc_letollAI : public npc_escortAI
     {
         uint32 uiCount = 0;
 
-        for (std::list<Creature*>::iterator itr = m_lResearchersList.begin(); itr != m_lResearchersList.end(); ++itr)
+        for (auto& itr : m_lResearchersList)
         {
             float fAngle = uiCount < MAX_RESEARCHER ? M_PI / MAX_RESEARCHER - (uiCount * 2 * M_PI / MAX_RESEARCHER) : 0.0f;
 
-            if ((*itr)->isAlive() && !(*itr)->isInCombat())
-                (*itr)->GetMotionMaster()->MoveFollow(m_creature, 2.5f, fAngle);
+            if (itr->isAlive() && !itr->isInCombat())
+                itr->GetMotionMaster()->MoveFollow(m_creature, 2.5f, fAngle);
 
             ++uiCount;
         }
@@ -447,7 +447,7 @@ struct npc_letollAI : public npc_escortAI
         {
             uint8 uiNum = 1;
 
-            for (std::list<Creature*>::iterator itr = m_lResearchersList.begin(); itr != m_lResearchersList.end(); ++itr)
+            for (auto& itr : m_lResearchersList)
             {
                 if (uiListNum && uiListNum != uiNum)
                 {
@@ -455,8 +455,8 @@ struct npc_letollAI : public npc_escortAI
                     continue;
                 }
 
-                if ((*itr)->isAlive() && (*itr)->IsWithinDistInMap(m_creature, 20.0f))
-                    return (*itr);
+                if (itr->isAlive() && itr->IsWithinDistInMap(m_creature, 20.0f))
+                    return itr;
             }
         }
 

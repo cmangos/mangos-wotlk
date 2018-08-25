@@ -97,10 +97,10 @@ LanguageDesc lang_description[LANGUAGES_COUNT] =
 
 LanguageDesc const* GetLanguageDescByID(uint32 lang)
 {
-    for (int i = 0; i < LANGUAGES_COUNT; ++i)
+    for (auto& i : lang_description)
     {
-        if (uint32(lang_description[i].lang_id) == lang)
-            return &lang_description[i];
+        if (uint32(i.lang_id) == lang)
+            return &i;
     }
 
     return nullptr;
@@ -157,35 +157,35 @@ ObjectMgr::ObjectMgr() :
 
 ObjectMgr::~ObjectMgr()
 {
-    for (QuestMap::iterator i = mQuestTemplates.begin(); i != mQuestTemplates.end(); ++i)
-        delete i->second;
+    for (auto& mQuestTemplate : mQuestTemplates)
+        delete mQuestTemplate.second;
 
-    for (PetLevelInfoMap::iterator i = petInfo.begin(); i != petInfo.end(); ++i)
-        delete[] i->second;
+    for (auto& i : petInfo)
+        delete[] i.second;
 
     // free only if loaded
-    for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
-        delete[] playerClassInfo[class_].levelInfo;
+    for (auto& class_ : playerClassInfo)
+        delete[] class_.levelInfo;
 
-    for (int race = 0; race < MAX_RACES; ++race)
+    for (auto& race : playerInfo)
         for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
-            delete[] playerInfo[race][class_].levelInfo;
+            delete[] race[class_].levelInfo;
 
     // free objects
-    for (GroupMap::iterator itr = mGroupMap.begin(); itr != mGroupMap.end(); ++itr)
-        delete itr->second;
+    for (auto& itr : mGroupMap)
+        delete itr.second;
 
-    for (ArenaTeamMap::iterator itr = mArenaTeamMap.begin(); itr != mArenaTeamMap.end(); ++itr)
-        delete itr->second;
+    for (auto& itr : mArenaTeamMap)
+        delete itr.second;
 
-    for (CacheVendorItemMap::iterator itr = m_mCacheVendorTemplateItemMap.begin(); itr != m_mCacheVendorTemplateItemMap.end(); ++itr)
-        itr->second.Clear();
+    for (auto& itr : m_mCacheVendorTemplateItemMap)
+        itr.second.Clear();
 
-    for (CacheVendorItemMap::iterator itr = m_mCacheVendorItemMap.begin(); itr != m_mCacheVendorItemMap.end(); ++itr)
-        itr->second.Clear();
+    for (auto& itr : m_mCacheVendorItemMap)
+        itr.second.Clear();
 
-    for (CacheTrainerSpellMap::iterator itr = m_mCacheTrainerSpellMap.begin(); itr != m_mCacheTrainerSpellMap.end(); ++itr)
-        itr->second.Clear();
+    for (auto& itr : m_mCacheTrainerSpellMap)
+        itr.second.Clear();
 }
 
 Group* ObjectMgr::GetGroupById(uint32 id) const
@@ -208,18 +208,18 @@ ArenaTeam* ObjectMgr::GetArenaTeamById(uint32 arenateamid) const
 
 ArenaTeam* ObjectMgr::GetArenaTeamByName(const std::string& arenateamname) const
 {
-    for (ArenaTeamMap::const_iterator itr = mArenaTeamMap.begin(); itr != mArenaTeamMap.end(); ++itr)
-        if (itr->second->GetName() == arenateamname)
-            return itr->second;
+    for (const auto& itr : mArenaTeamMap)
+        if (itr.second->GetName() == arenateamname)
+            return itr.second;
 
     return nullptr;
 }
 
 ArenaTeam* ObjectMgr::GetArenaTeamByCaptain(ObjectGuid guid) const
 {
-    for (ArenaTeamMap::const_iterator itr = mArenaTeamMap.begin(); itr != mArenaTeamMap.end(); ++itr)
-        if (itr->second->GetCaptainGuid() == guid)
-            return itr->second;
+    for (const auto& itr : mArenaTeamMap)
+        if (itr.second->GetCaptainGuid() == guid)
+            return itr.second;
 
     return nullptr;
 }
@@ -777,10 +777,10 @@ void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* 
     const_cast<uint32*&>(addon->auras) = new uint32[val.size() + 1];
 
     uint32 i = 0;
-    for (uint32 j = 0; j < val.size(); ++j)
+    for (int j : val)
     {
         uint32& cAura = const_cast<uint32&>(addon->auras[i]);
-        cAura = uint32(val[j]);
+        cAura = uint32(j);
 
         SpellEntry const* AdditionalSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(cAura);
         if (!AdditionalSpellInfo)
@@ -2002,13 +2002,13 @@ void ObjectMgr::LoadItemPrototypes()
             continue;
         }
 
-        for (uint32 k = 0; k < MAX_ITEM_PROTO_SPELLS; k++)
-            if (proto->Spells[k].SpellCategory && proto->Spells[k].SpellId)
+        for (const auto& Spell : proto->Spells)
+            if (Spell.SpellCategory && Spell.SpellId)
             {
-                if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(proto->Spells[k].SpellId))
-                    sItemSpellCategoryStore[proto->Spells[k].SpellCategory].insert(ItemCategorySpellPair(proto->Spells[k].SpellId, i));
+                if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(Spell.SpellId))
+                    sItemSpellCategoryStore[Spell.SpellCategory].insert(ItemCategorySpellPair(Spell.SpellId, i));
                 else
-                    sLog.outErrorDb("Item (Entry: %u) not correct %u spell id, must exist in spell table.", i, proto->Spells[k].SpellId);
+                    sLog.outErrorDb("Item (Entry: %u) not correct %u spell id, must exist in spell table.", i, Spell.SpellId);
             }
 
         if (dbcitem)
@@ -2150,9 +2150,9 @@ void ObjectMgr::LoadItemPrototypes()
             bool req = proto->InventoryType != INVTYPE_NON_EQUIP || proto->PageText;
             if (!req)
             {
-                for (int j = 0; j < MAX_ITEM_PROTO_SPELLS; ++j)
+                for (const auto& Spell : proto->Spells)
                 {
-                    if (proto->Spells[j].SpellId)
+                    if (Spell.SpellId)
                     {
                         req = true;
                         break;
@@ -2541,12 +2541,12 @@ void ObjectMgr::LoadItemPrototypes()
         if (!entry)
             continue;
 
-        for (int j = 0; j < MAX_OUTFIT_ITEMS; ++j)
+        for (int j : entry->ItemId)
         {
-            if (entry->ItemId[j] <= 0)
+            if (j <= 0)
                 continue;
 
-            uint32 item_id = entry->ItemId[j];
+            uint32 item_id = j;
 
             if (!GetItemPrototype(item_id))
                 if (item_id != 40582)                       // nonexistent item by default but referenced in DBC, skip it from errors
@@ -2554,8 +2554,8 @@ void ObjectMgr::LoadItemPrototypes()
         }
     }
 
-    for (std::set<uint32>::const_iterator itr = notFoundOutfit.begin(); itr != notFoundOutfit.end(); ++itr)
-        sLog.outErrorDb("Item (Entry: %u) not exist in `item_template` but referenced in `CharStartOutfit.dbc`", *itr);
+    for (std::_Simple_types<unsigned int>::value_type itr : notFoundOutfit)
+    sLog.outErrorDb("Item (Entry: %u) not exist in `item_template` but referenced in `CharStartOutfit.dbc`", itr);
 
     sLog.outString(">> Loaded %u item prototypes", sItemStorage.GetRecordCount());
     sLog.outString();
@@ -2722,11 +2722,11 @@ void ObjectMgr::LoadItemRequiredTarget()
 
         bool bIsItemSpellValid = false;
 
-        for (int i = 0; i < MAX_ITEM_PROTO_SPELLS; ++i)
+        for (const auto& Spell : pItemProto->Spells)
         {
-            if (SpellEntry const* pSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(pItemProto->Spells[i].SpellId))
+            if (SpellEntry const* pSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(Spell.SpellId))
             {
-                if (pItemProto->Spells[i].SpellTrigger == ITEM_SPELLTRIGGER_ON_USE)
+                if (Spell.SpellTrigger == ITEM_SPELLTRIGGER_ON_USE)
                 {
                     SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(pSpellInfo->Id);
                     if (bounds.first != bounds.second)
@@ -2859,14 +2859,14 @@ void ObjectMgr::LoadPetLevelInfo()
     delete result;
 
     // Fill gaps and check integrity
-    for (PetLevelInfoMap::iterator itr = petInfo.begin(); itr != petInfo.end(); ++itr)
+    for (auto& itr : petInfo)
     {
-        PetLevelInfo* pInfo = itr->second;
+        PetLevelInfo* pInfo = itr.second;
 
         // fatal error if no level 1 data
         if (!pInfo || pInfo[0].health == 0)
         {
-            sLog.outErrorDb("Creature %u does not have pet stats data for Level 1!", itr->first);
+            sLog.outErrorDb("Creature %u does not have pet stats data for Level 1!", itr.first);
             Log::WaitBeforeContinueIfNeed();
             exit(1);
         }
@@ -2876,7 +2876,7 @@ void ObjectMgr::LoadPetLevelInfo()
         {
             if (pInfo[level].health == 0)
             {
-                sLog.outErrorDb("Creature %u has no data for Level %i pet stats data, using data of Level %i.", itr->first, level + 1, level);
+                sLog.outErrorDb("Creature %u has no data for Level %i pet stats data, using data of Level %i.", itr.first, level + 1, level);
                 pInfo[level] = pInfo[level - 1];
             }
         }
@@ -3896,9 +3896,9 @@ void ObjectMgr::LoadQuests()
 
     std::map<uint32, uint32> usedMailTemplates;
 
-    for (QuestMap::iterator iter = mQuestTemplates.begin(); iter != mQuestTemplates.end(); ++iter)
+    for (auto& mQuestTemplate : mQuestTemplates)
     {
-        Quest* qinfo = iter->second;
+        Quest* qinfo = mQuestTemplate.second;
 
         // additional quest integrity checks (GO, creature_template and item_template must be loaded already)
 
@@ -4676,8 +4676,8 @@ void ObjectMgr::LoadPageTexts()
             {
                 std::ostringstream ss;
                 ss << "The text page(s) ";
-                for (std::set<uint32>::iterator itr = checkedPages.begin(); itr != checkedPages.end(); ++itr)
-                    ss << *itr << " ";
+                for (std::_Simple_types<unsigned int>::value_type checkedPage : checkedPages)
+                    ss << checkedPage << " ";
                 ss << "create(s) a circular reference, which can cause the server to freeze. Changing Next_Page of page "
                    << pageItr->Page_ID << " to 0";
                 sLog.outErrorDb("%s", ss.str().c_str());
@@ -4931,9 +4931,9 @@ void ObjectMgr::LoadConditions()
         }
     }
 
-    for (QuestMap::iterator iter = mQuestTemplates.begin(); iter != mQuestTemplates.end(); ++iter) // needs to be checked after loading conditions
+    for (auto& mQuestTemplate : mQuestTemplates) // needs to be checked after loading conditions
     {
-        Quest* qinfo = iter->second;
+        Quest* qinfo = mQuestTemplate.second;
 
         if (qinfo->RequiredCondition)
         {
@@ -4990,18 +4990,18 @@ void ObjectMgr::LoadGossipText()
 
         GossipText& gText = mGossipText[Text_ID];
 
-        for (int i = 0; i < MAX_GOSSIP_TEXT_OPTIONS; ++i)
+        for (auto& Option : gText.Options)
         {
-            gText.Options[i].Text_0           = fields[cic++].GetCppString();
-            gText.Options[i].Text_1           = fields[cic++].GetCppString();
+            Option.Text_0           = fields[cic++].GetCppString();
+            Option.Text_1           = fields[cic++].GetCppString();
 
-            gText.Options[i].Language         = fields[cic++].GetUInt32();
-            gText.Options[i].Probability      = fields[cic++].GetFloat();
+            Option.Language         = fields[cic++].GetUInt32();
+            Option.Probability      = fields[cic++].GetFloat();
 
             for (int j = 0; j < 3; ++j)
             {
-                gText.Options[i].Emotes[j]._Delay  = fields[cic++].GetUInt32();
-                gText.Options[i].Emotes[j]._Emote  = fields[cic++].GetUInt32();
+                Option.Emotes[j]._Delay  = fields[cic++].GetUInt32();
+                Option.Emotes[j]._Emote  = fields[cic++].GetUInt32();
             }
         }
     }
@@ -5100,8 +5100,8 @@ QuestgiverGreeting const* ObjectMgr::GetQuestgiverGreetingData(uint32 entry, uin
 
 void ObjectMgr::LoadQuestgiverGreeting()
 {
-    for (uint32 i = 0; i < QUESTGIVER_TYPE_MAX; i++) // Reload Case
-        m_questgiverGreetingMap[i].clear();
+    for (auto& i : m_questgiverGreetingMap) // Reload Case
+        i.clear();
 
     QueryResult* result = WorldDatabase.Query("SELECT Entry, Type, Text, EmoteId, EmoteDelay FROM questgiver_greeting");
     int count = 0;
@@ -5170,8 +5170,8 @@ void ObjectMgr::LoadQuestgiverGreeting()
 
 void ObjectMgr::LoadQuestgiverGreetingLocales()
 {
-    for (uint32 i = 0; i < QUESTGIVER_TYPE_MAX; i++)        // need for reload case
-        m_questgiverGreetingLocaleMap[i].clear();
+    for (auto& i : m_questgiverGreetingLocaleMap)        // need for reload case
+        i.clear();
 
     QueryResult* result = WorldDatabase.Query("SELECT Entry, Type, Text_loc1, Text_loc2, Text_loc3, Text_loc4, Text_loc5, Text_loc6, Text_loc7, Text_loc8 FROM locales_questgiver_greeting");
     int count = 0;
@@ -5423,8 +5423,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             if (m->messageType != MAIL_NORMAL || (m->checked & (MAIL_CHECK_MASK_COD_PAYMENT | MAIL_CHECK_MASK_RETURNED)))
             {
                 // mail open and then not returned
-                for (MailItemInfoVec::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
-                    CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'", itr2->item_guid);
+                for (auto& item : m->items)
+                    CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'", item.item_guid);
             }
             else
             {
@@ -6144,18 +6144,18 @@ AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 map_id) const
     // Try to find one that teleports to the map we want to enter
     std::list<AreaTrigger const*> ghostTrigger;
     AreaTrigger const* compareTrigger = nullptr;
-    for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
+    for (const auto& mAreaTrigger : mAreaTriggers)
     {
-        if (itr->second.target_mapId == uint32(mapEntry->ghost_entrance_map))
+        if (mAreaTrigger.second.target_mapId == uint32(mapEntry->ghost_entrance_map))
         {
-            ghostTrigger.push_back(&itr->second);
+            ghostTrigger.push_back(&mAreaTrigger.second);
             // First run, only consider AreaTrigger that teleport in the proper map
-            if ((!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger)) && sAreaTriggerStore.LookupEntry(itr->first)->mapid == map_id)
+            if ((!compareTrigger || mAreaTrigger.second.IsLessOrEqualThan(compareTrigger)) && sAreaTriggerStore.LookupEntry(mAreaTrigger.first)->mapid == map_id)
             {
-                if (itr->second.IsMinimal())
-                    return &itr->second;
+                if (mAreaTrigger.second.IsMinimal())
+                    return &mAreaTrigger.second;
 
-                compareTrigger = &itr->second;
+                compareTrigger = &mAreaTrigger.second;
             }
         }
     }
@@ -6185,24 +6185,24 @@ AreaTrigger const* ObjectMgr::GetMapEntranceTrigger(uint32 Map) const
     AreaTrigger const* compareTrigger = nullptr;
     MapEntry const* mEntry = sMapStore.LookupEntry(Map);
 
-    for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); ++itr)
+    for (const auto& mAreaTrigger : mAreaTriggers)
     {
-        if (itr->second.target_mapId == Map)
+        if (mAreaTrigger.second.target_mapId == Map)
         {
             if (mEntry->Instanceable())
             {
                 // Remark that IsLessOrEqualThan is no total order, and a->IsLeQ(b) != !b->IsLeQ(a)
-                if (!compareTrigger || compareTrigger->IsLessOrEqualThan(&itr->second))
-                    compareTrigger = &itr->second;
+                if (!compareTrigger || compareTrigger->IsLessOrEqualThan(&mAreaTrigger.second))
+                    compareTrigger = &mAreaTrigger.second;
             }
             else
             {
-                if (!compareTrigger || itr->second.IsLessOrEqualThan(compareTrigger))
+                if (!compareTrigger || mAreaTrigger.second.IsLessOrEqualThan(compareTrigger))
                 {
-                    if (itr->second.IsMinimal())
-                        return &itr->second;
+                    if (mAreaTrigger.second.IsMinimal())
+                        return &mAreaTrigger.second;
 
-                    compareTrigger = &itr->second;
+                    compareTrigger = &mAreaTrigger.second;
                 }
             }
         }
@@ -6249,14 +6249,14 @@ void ObjectMgr::PackGroupIds()
 
     uint32 groupId = 1;
     // we do assume std::set is sorted properly on integer value
-    for (std::set<uint32>::iterator i = groupIds.begin(); i != groupIds.end(); ++i)
+    for (std::_Simple_types<unsigned int>::value_type i : groupIds)
     {
-        if (*i != groupId)
+        if (i != groupId)
         {
             // remap group id
             CharacterDatabase.BeginTransaction();
-            CharacterDatabase.PExecute("UPDATE groups SET groupId = '%u' WHERE groupId = '%u'", groupId, *i);
-            CharacterDatabase.PExecute("UPDATE group_member SET groupId = '%u' WHERE groupId = '%u'", groupId, *i);
+            CharacterDatabase.PExecute("UPDATE groups SET groupId = '%u' WHERE groupId = '%u'", groupId, i);
+            CharacterDatabase.PExecute("UPDATE group_member SET groupId = '%u' WHERE groupId = '%u'", groupId, i);
             CharacterDatabase.CommitTransaction();
         }
 
@@ -7243,13 +7243,13 @@ void ObjectMgr::LoadQuestPOI()
 
             QuestPOIVector& vect = mQuestPOIMap[questId];
 
-            for (QuestPOIVector::iterator itr = vect.begin(); itr != vect.end(); ++itr)
+            for (auto& itr : vect)
             {
-                if (itr->PoiId != poiId)
+                if (itr.PoiId != poiId)
                     continue;
 
                 QuestPOIPoint point(x, y);
-                itr->points.push_back(point);
+                itr.points.push_back(point);
                 break;
             }
         }
@@ -7513,13 +7513,13 @@ void ObjectMgr::LoadGameobjectQuestRelations()
 {
     LoadQuestRelationsHelper(m_GOQuestRelations, "gameobject_questrelation");
 
-    for (QuestRelationsMap::iterator itr = m_GOQuestRelations.begin(); itr != m_GOQuestRelations.end(); ++itr)
+    for (auto& m_GOQuestRelation : m_GOQuestRelations)
     {
-        GameObjectInfo const* goInfo = GetGameObjectInfo(itr->first);
+        GameObjectInfo const* goInfo = GetGameObjectInfo(m_GOQuestRelation.first);
         if (!goInfo)
-            sLog.outErrorDb("Table `gameobject_questrelation` have data for nonexistent gameobject entry (%u) and existing quest %u", itr->first, itr->second);
+            sLog.outErrorDb("Table `gameobject_questrelation` have data for nonexistent gameobject entry (%u) and existing quest %u", m_GOQuestRelation.first, m_GOQuestRelation.second);
         else if (goInfo->type != GAMEOBJECT_TYPE_QUESTGIVER)
-            sLog.outErrorDb("Table `gameobject_questrelation` have data gameobject entry (%u) for quest %u, but GO is not GAMEOBJECT_TYPE_QUESTGIVER", itr->first, itr->second);
+            sLog.outErrorDb("Table `gameobject_questrelation` have data gameobject entry (%u) for quest %u, but GO is not GAMEOBJECT_TYPE_QUESTGIVER", m_GOQuestRelation.first, m_GOQuestRelation.second);
     }
 }
 
@@ -7527,13 +7527,13 @@ void ObjectMgr::LoadGameobjectInvolvedRelations()
 {
     LoadQuestRelationsHelper(m_GOQuestInvolvedRelations, "gameobject_involvedrelation");
 
-    for (QuestRelationsMap::iterator itr = m_GOQuestInvolvedRelations.begin(); itr != m_GOQuestInvolvedRelations.end(); ++itr)
+    for (auto& m_GOQuestInvolvedRelation : m_GOQuestInvolvedRelations)
     {
-        GameObjectInfo const* goInfo = GetGameObjectInfo(itr->first);
+        GameObjectInfo const* goInfo = GetGameObjectInfo(m_GOQuestInvolvedRelation.first);
         if (!goInfo)
-            sLog.outErrorDb("Table `gameobject_involvedrelation` have data for nonexistent gameobject entry (%u) and existing quest %u", itr->first, itr->second);
+            sLog.outErrorDb("Table `gameobject_involvedrelation` have data for nonexistent gameobject entry (%u) and existing quest %u", m_GOQuestInvolvedRelation.first, m_GOQuestInvolvedRelation.second);
         else if (goInfo->type != GAMEOBJECT_TYPE_QUESTGIVER)
-            sLog.outErrorDb("Table `gameobject_involvedrelation` have data gameobject entry (%u) for quest %u, but GO is not GAMEOBJECT_TYPE_QUESTGIVER", itr->first, itr->second);
+            sLog.outErrorDb("Table `gameobject_involvedrelation` have data gameobject entry (%u) for quest %u, but GO is not GAMEOBJECT_TYPE_QUESTGIVER", m_GOQuestInvolvedRelation.first, m_GOQuestInvolvedRelation.second);
     }
 }
 
@@ -7541,11 +7541,11 @@ void ObjectMgr::LoadCreatureQuestRelations()
 {
     LoadQuestRelationsHelper(m_CreatureQuestRelations, "creature_questrelation");
 
-    for (QuestRelationsMap::iterator itr = m_CreatureQuestRelations.begin(); itr != m_CreatureQuestRelations.end(); ++itr)
+    for (auto& m_CreatureQuestRelation : m_CreatureQuestRelations)
     {
-        CreatureInfo const* cInfo = GetCreatureTemplate(itr->first);
+        CreatureInfo const* cInfo = GetCreatureTemplate(m_CreatureQuestRelation.first);
         if (!cInfo)
-            sLog.outErrorDb("Table `creature_questrelation` have data for nonexistent creature entry (%u) and existing quest %u", itr->first, itr->second);
+            sLog.outErrorDb("Table `creature_questrelation` have data for nonexistent creature entry (%u) and existing quest %u", m_CreatureQuestRelation.first, m_CreatureQuestRelation.second);
     }
 }
 
@@ -7553,11 +7553,11 @@ void ObjectMgr::LoadCreatureInvolvedRelations()
 {
     LoadQuestRelationsHelper(m_CreatureQuestInvolvedRelations, "creature_involvedrelation");
 
-    for (QuestRelationsMap::iterator itr = m_CreatureQuestInvolvedRelations.begin(); itr != m_CreatureQuestInvolvedRelations.end(); ++itr)
+    for (auto& m_CreatureQuestInvolvedRelation : m_CreatureQuestInvolvedRelations)
     {
-        CreatureInfo const* cInfo = GetCreatureTemplate(itr->first);
+        CreatureInfo const* cInfo = GetCreatureTemplate(m_CreatureQuestInvolvedRelation.first);
         if (!cInfo)
-            sLog.outErrorDb("Table `creature_involvedrelation` have data for nonexistent creature entry (%u) and existing quest %u", itr->first, itr->second);
+            sLog.outErrorDb("Table `creature_involvedrelation` have data for nonexistent creature entry (%u) and existing quest %u", m_CreatureQuestInvolvedRelation.first, m_CreatureQuestInvolvedRelation.second);
     }
 }
 
@@ -8210,8 +8210,8 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         case CONDITION_AD_COMMISSION_AURA:
         {
             Unit::SpellAuraHolderMap const& auras = player->GetSpellAuraHolderMap();
-            for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-                if ((itr->second->GetSpellProto()->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_MOUNTED) || itr->second->GetSpellProto()->HasAttribute(SPELL_ATTR_ABILITY)) && itr->second->GetSpellProto()->SpellVisual[0] == 3580)
+            for (const auto& aura : auras)
+                if ((aura.second->GetSpellProto()->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_MOUNTED) || aura.second->GetSpellProto()->HasAttribute(SPELL_ATTR_ABILITY)) && aura.second->GetSpellProto()->SpellVisual[0] == 3580)
                     return true;
             return false;
         }
@@ -8445,9 +8445,9 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
                     else
                         return !player->isAlive() || (m_value2 && source && !source->IsWithinDistInMap(player, m_value2));
                 case 2:                                     // All players in instance dead or out of range
-                    for (Map::PlayerList::const_iterator itr = map->GetPlayers().begin(); itr != map->GetPlayers().end(); ++itr)
+                    for (const auto& itr : map->GetPlayers())
                     {
-                        Player const* plr = itr->getSource();
+                        Player const* plr = itr.getSource();
                         if (plr && plr->isAlive() && !plr->isGameMaster() && (!m_value2 || !source || source->IsWithinDistInMap(plr, m_value2)))
                             return false;
                     }
@@ -9102,11 +9102,11 @@ GameTele const* ObjectMgr::GetGameTele(const std::string& name) const
 
     // Alternative first GameTele what contains wnameLow as substring in case no GameTele location found
     const GameTele* alt = nullptr;
-    for (GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
-        if (itr->second.wnameLow == wname)
-            return &itr->second;
-        else if (alt == nullptr && itr->second.wnameLow.find(wname) != std::wstring::npos)
-            alt = &itr->second;
+    for (const auto& itr : m_GameTeleMap)
+        if (itr.second.wnameLow == wname)
+            return &itr.second;
+        else if (alt == nullptr && itr.second.wnameLow.find(wname) != std::wstring::npos)
+            alt = &itr.second;
 
     return alt;
 }
@@ -9230,8 +9230,8 @@ void ObjectMgr::LoadTrainers(char const* tableName, bool isTemplates)
     CacheTrainerSpellMap& trainerList = isTemplates ? m_mCacheTrainerTemplateSpellMap : m_mCacheTrainerSpellMap;
 
     // For reload case
-    for (CacheTrainerSpellMap::iterator itr = trainerList.begin(); itr != trainerList.end(); ++itr)
-        itr->second.Clear();
+    for (auto& itr : trainerList)
+        itr.second.Clear();
     trainerList.clear();
 
     std::set<uint32> skip_trainers;
@@ -9420,8 +9420,8 @@ void ObjectMgr::LoadTrainerTemplates()
         }
     }
 
-    for (std::set<uint32>::const_iterator tItr = trainer_ids.begin(); tItr != trainer_ids.end(); ++tItr)
-        sLog.outErrorDb("Table `npc_trainer_template` has trainer template %u not used by any trainers ", *tItr);
+    for (std::_Simple_types<unsigned int>::value_type trainer_id : trainer_ids)
+    sLog.outErrorDb("Table `npc_trainer_template` has trainer template %u not used by any trainers ", trainer_id);
 
     if (hasErrored || !trainer_ids.empty())                 // Append extra line in case of reported errors
         sLog.outString();
@@ -9432,8 +9432,8 @@ void ObjectMgr::LoadVendors(char const* tableName, bool isTemplates)
     CacheVendorItemMap& vendorList = isTemplates ? m_mCacheVendorTemplateItemMap : m_mCacheVendorItemMap;
 
     // For reload case
-    for (CacheVendorItemMap::iterator itr = vendorList.begin(); itr != vendorList.end(); ++itr)
-        itr->second.Clear();
+    for (auto& itr : vendorList)
+        itr.second.Clear();
     vendorList.clear();
 
     std::set<uint32> skip_vendors;
@@ -9505,8 +9505,8 @@ void ObjectMgr::LoadVendorTemplates()
         }
     }
 
-    for (std::set<uint32>::const_iterator vItr = vendor_ids.begin(); vItr != vendor_ids.end(); ++vItr)
-        sLog.outErrorDb("Table `npc_vendor_template` has vendor template %u not used by any vendors ", *vItr);
+    for (std::_Simple_types<unsigned int>::value_type vendor_id : vendor_ids)
+    sLog.outErrorDb("Table `npc_vendor_template` has vendor template %u not used by any vendors ", vendor_id);
 }
 
 /* This function is supposed to take care of three things:
@@ -9522,16 +9522,16 @@ void ObjectMgr::LoadActiveEntities(Map* _map)
     if (!_map)
     {
         uint32 continents[] = {0, 1, 530, 571};
-        for (int i = 0; i < countof(continents); ++i)
+        for (unsigned int continent : continents)
         {
-            _map = sMapMgr.FindMap(continents[i]);
+            _map = sMapMgr.FindMap(continent);
             if (!_map)
-                _map = sMapMgr.CreateMap(continents[i], nullptr);
+                _map = sMapMgr.CreateMap(continent, nullptr);
 
             if (_map)
                 LoadActiveEntities(_map);
             else
-                sLog.outError("ObjectMgr::LoadActiveEntities - Unable to create Map %u", continents[i]);
+                sLog.outError("ObjectMgr::LoadActiveEntities - Unable to create Map %u", continent);
         }
 
         return;
@@ -9862,8 +9862,8 @@ void ObjectMgr::LoadGossipMenuItems(std::set<uint32>& gossipScriptSet)
 
     if (!sLog.HasLogFilter(LOG_FILTER_DB_STRICTED_CHECK))
     {
-        for (std::set<uint32>::const_iterator itr = menu_ids.begin(); itr != menu_ids.end(); ++itr)
-            sLog.outErrorDb("Table `gossip_menu` contain unused (in creature or GO or menu options) menu id %u.", *itr);
+        for (std::_Simple_types<unsigned int>::value_type menu_id : menu_ids)
+        sLog.outErrorDb("Table `gossip_menu` contain unused (in creature or GO or menu options) menu id %u.", menu_id);
     }
 
     sLog.outString(">> Loaded %u gossip_menu_option entries", count);
@@ -9883,8 +9883,8 @@ void ObjectMgr::LoadGossipMenus()
     sLog.outString("(Re)Loading Gossip menu options...");
     LoadGossipMenuItems(gossipScriptSet);
 
-    for (std::set<uint32>::const_iterator itr = gossipScriptSet.begin(); itr != gossipScriptSet.end(); ++itr)
-        sLog.outErrorDb("Table `dbscripts_on_gossip` contains unused script, id %u.", *itr);
+    for (std::_Simple_types<unsigned int>::value_type itr : gossipScriptSet)
+    sLog.outErrorDb("Table `dbscripts_on_gossip` contains unused script, id %u.", itr);
 }
 
 void ObjectMgr::AddVendorItem(uint32 entry, uint32 item, uint32 maxcount, uint32 incrtime, uint32 extendedcost)
