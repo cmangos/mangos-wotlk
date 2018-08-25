@@ -374,7 +374,7 @@ class Object
         void SetObjectScale(float newScale);
 
         uint8 GetTypeId() const { return m_objectTypeId; }
-        bool isType(TypeMask mask) const { return !!(mask & m_objectType); }
+        bool isType(TypeMask mask) const { return (mask & m_objectType) != 0; }
 
         virtual void BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const;
         void SendCreateUpdateToPlayer(Player* player) const;
@@ -741,7 +741,7 @@ class WorldObject : public Object
         virtual void SetPhaseMask(uint32 newPhaseMask, bool update);
         uint32 GetPhaseMask() const { return m_phaseMask; }
         bool InSamePhase(WorldObject const* obj) const { return InSamePhase(obj->GetPhaseMask()); }
-        bool InSamePhase(uint32 phasemask) const { return !!(GetPhaseMask() & phasemask); }
+        bool InSamePhase(uint32 phasemask) const { return (GetPhaseMask() & phasemask) != 0; }
 
         uint32 GetZoneId() const;
         uint32 GetAreaId() const;

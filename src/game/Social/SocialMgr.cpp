@@ -165,7 +165,7 @@ bool PlayerSocial::HasFriend(ObjectGuid friend_guid)
 bool PlayerSocial::HasIgnore(ObjectGuid ignore_guid)
 {
     PlayerSocialMap::const_iterator itr = m_playerSocialMap.find(ignore_guid.GetCounter());
-    return itr == m_playerSocialMap.end() ? false : !!(itr->second.Flags & SOCIAL_FLAG_IGNORED);
+    return itr == m_playerSocialMap.end() ? false : (itr->second.Flags & SOCIAL_FLAG_IGNORED) != 0;
 }
 
 SocialMgr::SocialMgr()

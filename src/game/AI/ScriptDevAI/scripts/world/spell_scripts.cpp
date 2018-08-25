@@ -830,7 +830,7 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
         {
             if (uiEffIndex == EFFECT_INDEX_0)
             {
-                const bool isMale = !!urand(0, 1);
+                const bool isMale = urand(0, 1) != 0;
                 Player* pPlayer = pCreatureTarget->GetLootRecipient();
 
                 if (isMale)

@@ -80,7 +80,7 @@ class MapPersistentState
            but that would depend on a lot of things that can easily change in future */
         Difficulty GetDifficulty() const { return m_difficulty; }
 
-        bool IsUsedByMap() const { return !!m_usedByMap; }
+        bool IsUsedByMap() const { return m_usedByMap != nullptr; }
         Map* GetMap() const { return m_usedByMap; }         // Can be nullptr if map not loaded for persistent state
         void SetUsedByMapState(Map* map)
         {

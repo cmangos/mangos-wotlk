@@ -405,10 +405,10 @@ bool VehicleInfo::CanBoard(Unit* passenger) const
 
     // Check for empty player seats
     if (passenger->GetTypeId() == TYPEID_PLAYER)
-        return !!(GetEmptySeatsMask() & m_playerSeats);
+        return (GetEmptySeatsMask() & m_playerSeats) != 0;
 
     // Check for empty creature seats
-    return !!(GetEmptySeatsMask() & m_creatureSeats);
+    return (GetEmptySeatsMask() & m_creatureSeats) != 0;
 }
 
 Unit* VehicleInfo::GetPassenger(uint8 seat) const

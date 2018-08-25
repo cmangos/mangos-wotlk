@@ -895,11 +895,11 @@ inline bool IsOutdoorWMO(uint32 mogpFlags, WMOAreaTableEntry const* wmoEntry, Ar
         if (wmoEntry->Flags & 4)
             return true;
 
-        if (!!(wmoEntry->Flags & 2))
+        if ((wmoEntry->Flags & 2) != 0)
             return false;
     }
 
-    return !!(mogpFlags & 0x8);
+    return (mogpFlags & 0x8) != 0;
 }
 
 bool TerrainInfo::IsOutdoors(float x, float y, float z) const

@@ -702,7 +702,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
         if (grp->GetLeaderGuid() != _player->GetObjectGuid())
             return;
         // may be Group::CanJoinBattleGroundQueue should be moved to player class...
-        err = grp->CanJoinBattleGroundQueue(bg, bgQueueTypeId, arenatype, arenatype, !!isRated, arenaslot);
+        err = grp->CanJoinBattleGroundQueue(bg, bgQueueTypeId, arenatype, arenatype, isRated != 0, arenaslot);
     }
 
     uint32 ateamId = 0;
@@ -752,9 +752,9 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
                 DEBUG_LOG("Battleground: arena team id %u, leader %s queued with rating %u for type %u", _player->GetArenaTeamId(arenaslot), _player->GetName(), arenaRating, arenatype);
 
             // set arena rated type to show correct minimap arena icon
-            bg->SetRated(!!isRated);
+            bg->SetRated(isRated != 0);
 
-            GroupQueueInfo* ginfo = bgQueue.AddGroup(_player, grp, bgTypeId, bracketEntry, arenatype, !!isRated, false, arenaRating, ateamId);
+            GroupQueueInfo* ginfo = bgQueue.AddGroup(_player, grp, bgTypeId, bracketEntry, arenatype, isRated != 0, false, arenaRating, ateamId);
             avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry->GetBracketId());
         }
 
@@ -787,7 +787,7 @@ void WorldSession::HandleBattlemasterJoinArena(WorldPacket& recv_data)
     }
     else
     {
-        GroupQueueInfo* ginfo = bgQueue.AddGroup(_player, nullptr, bgTypeId, bracketEntry, arenatype, !!isRated, false, arenaRating, ateamId);
+        GroupQueueInfo* ginfo = bgQueue.AddGroup(_player, nullptr, bgTypeId, bracketEntry, arenatype, isRated != 0, false, arenaRating, ateamId);
         uint32 avgTime = bgQueue.GetAverageQueueWaitTime(ginfo, bracketEntry->GetBracketId());
         uint32 queueSlot = _player->AddBattleGroundQueueId(bgQueueTypeId);
 

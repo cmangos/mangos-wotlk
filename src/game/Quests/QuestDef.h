@@ -263,13 +263,13 @@ class Quest
         uint32 GetQuestStartScript() const { return QuestStartScript; }
         uint32 GetQuestCompleteScript() const { return QuestCompleteScript; }
 
-        bool   IsRepeatable() const { return !!(m_SpecialFlags & QUEST_SPECIAL_FLAG_REPEATABLE); }
+        bool   IsRepeatable() const { return (m_SpecialFlags & QUEST_SPECIAL_FLAG_REPEATABLE) != 0; }
         bool   IsAutoComplete() const { return !QuestMethod; }
-        bool   IsDaily() const { return !!(m_QuestFlags & QUEST_FLAGS_DAILY); }
-        bool   IsWeekly() const { return !!(m_QuestFlags & QUEST_FLAGS_WEEKLY); }
-        bool   IsMonthly() const { return !!(m_SpecialFlags & QUEST_SPECIAL_FLAG_MONTHLY); }
-        bool   IsDailyOrWeekly() const { return !!(m_QuestFlags & (QUEST_FLAGS_DAILY | QUEST_FLAGS_WEEKLY)); }
-        bool   IsAutoAccept() const { return !!(m_QuestFlags & QUEST_FLAGS_AUTO_ACCEPT); }
+        bool   IsDaily() const { return (m_QuestFlags & QUEST_FLAGS_DAILY) != 0; }
+        bool   IsWeekly() const { return (m_QuestFlags & QUEST_FLAGS_WEEKLY) != 0; }
+        bool   IsMonthly() const { return (m_SpecialFlags & QUEST_SPECIAL_FLAG_MONTHLY) != 0; }
+        bool   IsDailyOrWeekly() const { return (m_QuestFlags & (QUEST_FLAGS_DAILY | QUEST_FLAGS_WEEKLY)) != 0; }
+        bool   IsAutoAccept() const { return (m_QuestFlags & QUEST_FLAGS_AUTO_ACCEPT) != 0; }
         bool   IsAllowedInRaid() const;
 
         // quest can be fully deactivated and will not be available for any player

@@ -1517,7 +1517,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
             reader.PSendSysMessage("Current state for TYPE_BATTLE: %u", m_pInstance->GetData(TYPE_BATTLE));
 
         reader.PSendSysMessage("Current Event step: %u (%s)", m_uiEventStep, (m_uiEventStep == 0 ? "Not-Started" : (m_uiEventStep < 7 ? "Intro"  : (m_uiEventStep < 10 ? "Battle" : "Outro"))));
-        reader.PSendSysMessage("Event-processing is %s, Fighting is %s", reader.GetOnOffStr(!!m_uiEventTimer), reader.GetOnOffStr(!!m_uiFightTimer));
+        reader.PSendSysMessage("Event-processing is %s, Fighting is %s", reader.GetOnOffStr(m_uiEventTimer != 0), reader.GetOnOffStr(m_uiFightTimer != 0));
     }
 
     void Aggro(Unit* /*pWho*/) override

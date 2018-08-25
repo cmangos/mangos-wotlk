@@ -659,7 +659,7 @@ void WorldSession::HandleAuctionListItems(WorldPacket& recv_data)
     wstrToLower(wsearchedname);
 
     BuildListAuctionItems(auctions, data, wsearchedname, listfrom, levelmin, levelmax, usable,
-                          auctionSlotID, auctionMainCategory, auctionSubCategory, quality, count, totalcount, !!isFull);
+                          auctionSlotID, auctionMainCategory, auctionSubCategory, quality, count, totalcount, isFull != 0);
 
     data.put<uint32>(0, count);
     data << uint32(totalcount);
