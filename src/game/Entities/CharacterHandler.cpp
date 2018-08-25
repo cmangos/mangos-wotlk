@@ -1138,12 +1138,9 @@ void WorldSession::HandleAlterAppearanceOpcode(WorldPacket& recv_data)
         SendPacket(data);
         return;
     }
-    else
-    {
-        WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
-        data << uint32(0);                                  // ok
-        SendPacket(data);
-    }
+    WorldPacket data(SMSG_BARBER_SHOP_RESULT, 4);
+    data << uint32(0);                                  // ok
+    SendPacket(data);
 
     _player->ModifyMoney(-int32(Cost));                     // it isn't free
     _player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_AT_BARBER, Cost);

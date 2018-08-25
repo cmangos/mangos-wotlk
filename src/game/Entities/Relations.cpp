@@ -280,7 +280,7 @@ ReputationRank GameObject::GetReactionTo(Unit const* unit) const
 
     if (const Unit* owner = GetOwner())
         return owner->GetReactionTo(unit);
-    else if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
+    if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
     {
         if (const FactionTemplateEntry* factionTemplate = sFactionTemplateStore.LookupEntry(faction))
             return GetFactionReaction(factionTemplate, unit);
@@ -420,15 +420,12 @@ bool Unit::CanAttack(const Unit* unit) const
 
             return false;
         }
-        else
-        {
-            // WotLK+: generic sanctuary cross-check (moved down here from immunity flag checks in tbc)
-            if (thisPlayerControlled && unit->IsPvPSanctuary())
-                return false;
+        // WotLK+: generic sanctuary cross-check (moved down here from immunity flag checks in tbc)
+        if (thisPlayerControlled && unit->IsPvPSanctuary())
+            return false;
 
-            if (unitPlayerControlled && IsPvPSanctuary())
-                return false;
-        }
+        if (unitPlayerControlled && IsPvPSanctuary())
+            return false;
         return (!IsFriend(unit));
     }
     return (IsEnemy(unit) || unit->IsEnemy(this));
@@ -960,7 +957,7 @@ bool GameObject::IsEnemy(Unit const* unit) const
 
     if (const Unit* owner = GetOwner())
         return owner->IsEnemy(unit);
-    else if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
+    if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
     {
         if (const FactionTemplateEntry* factionTemplate = sFactionTemplateStore.LookupEntry(faction))
             return (GetFactionReaction(factionTemplate, unit) < REP_UNFRIENDLY);
@@ -985,7 +982,7 @@ bool GameObject::IsFriend(Unit const* unit) const
 
     if (const Unit* owner = GetOwner())
         return owner->IsFriend(unit);
-    else if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
+    if (const uint32 faction = GetUInt32Value(GAMEOBJECT_FACTION))
     {
         if (const FactionTemplateEntry* factionTemplate = sFactionTemplateStore.LookupEntry(faction))
             return (GetFactionReaction(factionTemplate, unit) > REP_NEUTRAL);
@@ -1073,8 +1070,7 @@ bool DynamicObject::CanAttackSpell(const Unit* target, SpellEntry const* spellIn
 {
     if (Unit* owner = GetCaster())
         return owner->CanAttackSpell(target, spellInfo, isAOE);
-    else
-        return false;
+    return false;
 }
 
 /////////////////////////////////////////////////
@@ -1090,8 +1086,7 @@ bool DynamicObject::CanAssistSpell(const Unit* target, SpellEntry const* spellIn
 {
     if (Unit* owner = GetCaster())
         return owner->CanAttackSpell(target, spellInfo);
-    else
-        return false;
+    return false;
 }
 
 /////////////////////////////////////////////////
@@ -1185,7 +1180,7 @@ bool Unit::CanAttackSpell(const Unit* target, SpellEntry const* spellInfo, bool 
 
         return true;
     }
-    else return false;
+    return false;
 }
 
 /////////////////////////////////////////////////

@@ -409,7 +409,7 @@ bool ChatHandler::HandleNamegoCommand(char* args)
                 return false;
             }
             // if both players are in different bgs
-            else if (target->GetBattleGroundId() && player->GetBattleGroundId() != target->GetBattleGroundId())
+            if (target->GetBattleGroundId() && player->GetBattleGroundId() != target->GetBattleGroundId())
             {
                 PSendSysMessage(LANG_CANNOT_GO_TO_BG_FROM_BG, nameLink.c_str());
                 SetSentErrorMessage(true);
@@ -515,7 +515,7 @@ bool ChatHandler::HandleGonameCommand(char* args)
                 return false;
             }
             // if both players are in different bgs
-            else if (_player->GetBattleGroundId() && _player->GetBattleGroundId() != target->GetBattleGroundId())
+            if (_player->GetBattleGroundId() && _player->GetBattleGroundId() != target->GetBattleGroundId())
             {
                 PSendSysMessage(LANG_CANNOT_GO_TO_BG_FROM_BG, chrNameLink.c_str());
                 SetSentErrorMessage(true);
@@ -919,7 +919,7 @@ bool ChatHandler::HandleModifyTalentCommand(char* args)
         ((Player*)target)->SendTalentsInfoData(false);
         return true;
     }
-    else if (((Creature*)target)->IsPet())
+    if (((Creature*)target)->IsPet())
     {
         Unit* owner = target->GetOwner();
         if (owner && owner->GetTypeId() == TYPEID_PLAYER && ((Pet*)target)->isControlled())
@@ -1818,19 +1818,16 @@ bool ChatHandler::HandleTeleNameCommand(char* args)
 
         return HandleGoHelper(target, tele->mapId, tele->position_x, tele->position_y, &tele->position_z, &tele->orientation);
     }
-    else
-    {
-        // check offline security
-        if (HasLowerSecurity(nullptr, target_guid))
-            return false;
+    // check offline security
+    if (HasLowerSecurity(nullptr, target_guid))
+        return false;
 
-        std::string nameLink = playerLink(target_name);
+    std::string nameLink = playerLink(target_name);
 
-        PSendSysMessage(LANG_TELEPORTING_TO, nameLink.c_str(), GetMangosString(LANG_OFFLINE), tele->name.c_str());
-        Player::SavePositionInDB(target_guid, tele->mapId,
-                                 tele->position_x, tele->position_y, tele->position_z, tele->orientation,
-                                 sTerrainMgr.GetZoneId(tele->mapId, tele->position_x, tele->position_y, tele->position_z));
-    }
+    PSendSysMessage(LANG_TELEPORTING_TO, nameLink.c_str(), GetMangosString(LANG_OFFLINE), tele->name.c_str());
+    Player::SavePositionInDB(target_guid, tele->mapId,
+        tele->position_x, tele->position_y, tele->position_z, tele->orientation,
+        sTerrainMgr.GetZoneId(tele->mapId, tele->position_x, tele->position_y, tele->position_z));
 
     return true;
 }

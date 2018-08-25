@@ -918,21 +918,16 @@ bool Aura::CanProcFrom(SpellEntry const* spell, uint32 /*procFlag*/, uint32 Even
                 // No extra req, so can trigger only for active (damage/healing present) and hit/crit
                 return ((procEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)) && active) || procEx == PROC_EX_CAST_END;
             }
-            else // Passive spells hits here only if resist/reflect/immune/evade
-            {
-                // Passive spells can`t trigger if need hit (exclude cases when procExtra include non-active flags)
-                if ((EventProcEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT) & procEx) && !active)
-                    return false;
-            }
+                // Passive spells hits here only if resist/reflect/immune/evade
+            // Passive spells can`t trigger if need hit (exclude cases when procExtra include non-active flags)
+            if ((EventProcEx & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT) & procEx) && !active)
+                return false;
         }
         return true;
     }
-    else
-    {
-        // SpellFamilyName check is performed in SpellMgr::IsSpellProcEventCanTriggeredBy and it is done once for whole holder
-        // note: SpellFamilyName is not checked if no spell_proc_event is defined
-        return mask.IsFitToFamilyMask(spell->SpellFamilyFlags);
-    }
+    // SpellFamilyName check is performed in SpellMgr::IsSpellProcEventCanTriggeredBy and it is done once for whole holder
+    // note: SpellFamilyName is not checked if no spell_proc_event is defined
+    return mask.IsFitToFamilyMask(spell->SpellFamilyFlags);
 }
 
 void Aura::ReapplyAffectedPassiveAuras(Unit* target, bool owner_mode)
@@ -5445,8 +5440,7 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
                 target->RemoveAurasDueToSpell(spell->Id);
                 if (Auras.empty())
                     break;
-                else
-                    next = Auras.begin();
+                next = Auras.begin();
             }
         }
     }
@@ -9887,11 +9881,11 @@ bool SpellAuraHolder::IsNeedVisibleSlot(Unit const* caster) const
 
     if (m_spellProto->procFlags)
         return true;
-    else if (IsSpellTriggerSpellByAura(m_spellProto))
+    if (IsSpellTriggerSpellByAura(m_spellProto))
         return true;
-    else if (IsSpellHaveAura(m_spellProto, SPELL_AURA_MOD_IGNORE_SHAPESHIFT))
+    if (IsSpellHaveAura(m_spellProto, SPELL_AURA_MOD_IGNORE_SHAPESHIFT))
         return true;
-    else if (IsSpellHaveAura(m_spellProto, SPELL_AURA_IGNORE_UNIT_STATE))
+    if (IsSpellHaveAura(m_spellProto, SPELL_AURA_IGNORE_UNIT_STATE))
         return true;
 
     // passive auras (except totem auras) do not get placed in the slots

@@ -65,8 +65,7 @@ bool MapPersistentState::UnloadIfEmpty()
         sMapPersistentStateMgr.RemovePersistentState(GetMapId(), GetInstanceId());
         return false;
     }
-    else
-        return true;
+    return true;
 }
 
 void MapPersistentState::SaveCreatureRespawnTime(uint32 loguid, time_t t)
@@ -286,8 +285,7 @@ time_t DungeonPersistentState::GetResetTimeForDB() const
     const MapEntry* entry = sMapStore.LookupEntry(GetMapId());
     if (!entry || entry->map_type == MAP_RAID || GetDifficulty() == DUNGEON_DIFFICULTY_HEROIC)
         return 0;
-    else
-        return GetResetTime();
+    return GetResetTime();
 }
 
 void DungeonPersistentState::UpdateEncounterState(EncounterCreditType type, uint32 creditEntry)
@@ -696,11 +694,8 @@ MapPersistentState* MapPersistentStateManager::GetPersistentState(uint32 mapId, 
         PersistentStateMap::iterator itr = m_instanceSaveByInstanceId.find(instanceId);
         return itr != m_instanceSaveByInstanceId.end() ? itr->second : nullptr;
     }
-    else
-    {
-        PersistentStateMap::iterator itr = m_instanceSaveByMapId.find(mapId);
-        return itr != m_instanceSaveByMapId.end() ? itr->second : nullptr;
-    }
+    PersistentStateMap::iterator itr = m_instanceSaveByMapId.find(mapId);
+    return itr != m_instanceSaveByMapId.end() ? itr->second : nullptr;
 }
 
 void MapPersistentStateManager::DeleteInstanceFromDB(uint32 instanceid)

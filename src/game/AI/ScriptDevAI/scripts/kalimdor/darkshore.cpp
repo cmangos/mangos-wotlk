@@ -723,8 +723,7 @@ struct npc_rabid_bearAI : public ScriptedAI
                 m_creature->ForcedDespawn();
                 return;
             }
-            else
-                m_uiDespawnTimer -= uiDiff;
+            m_uiDespawnTimer -= uiDiff;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())

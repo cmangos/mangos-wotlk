@@ -519,8 +519,7 @@ struct boss_flame_leviathanAI : public ScriptedAI
                                     ++m_uiHardModeStep;
                                     break;
                                 }
-                                else
-                                    ++m_uiHardModeStep;
+                                ++m_uiHardModeStep;
 
                                 // stop the timer after the final element
                                 if (i == KEEPER_ENCOUNTER - 1)

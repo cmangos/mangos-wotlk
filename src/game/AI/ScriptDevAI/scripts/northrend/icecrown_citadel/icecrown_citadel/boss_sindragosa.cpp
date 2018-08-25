@@ -615,8 +615,7 @@ struct npc_rimefang_iccAI : public ScriptedAI
                 m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_AIR, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 20.0f, false);
                 return;
             }
-            else
-                m_uiPhaseTimer -= uiDiff;
+            m_uiPhaseTimer -= uiDiff;
 
             DoMeleeAttackIfReady();
         }

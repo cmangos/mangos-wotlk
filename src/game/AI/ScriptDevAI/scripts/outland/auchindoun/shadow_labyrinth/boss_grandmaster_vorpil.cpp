@@ -206,8 +206,7 @@ struct boss_grandmaster_vorpilAI : public ScriptedAI
 
                 return;                                     // Nothing more todo after the players had been teleported
             }
-            else
-                m_uiRainOfFireTimer -= uiDiff;
+            m_uiRainOfFireTimer -= uiDiff;
         }
 
         if (m_uiShadowBoltVolleyTimer < uiDiff)

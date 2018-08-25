@@ -788,7 +788,7 @@ bool EffectDummyCreature_npc_simon_game_bunny(Unit* pCaster, uint32 uiSpellId, S
         pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
         return true;
     }
-    else if (uiSpellId == SPELL_PRE_EVENT_TIMER && uiEffIndex == EFFECT_INDEX_0)
+    if (uiSpellId == SPELL_PRE_EVENT_TIMER && uiEffIndex == EFFECT_INDEX_0)
     {
         pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pCaster, pCreatureTarget);
         return true;
@@ -1410,12 +1410,9 @@ bool ProcessEventId_Soulgrinder(uint32 uiEventId, Object* pSource, Object* pTarg
     {
         return false;
     }
-    else
-    {
-        Player* player = (Player*)pSource;
-        player->SummonCreature(NPC_SOULGRINDER, 3535.111f, 5590.628f, 0.3859383f, 0.7853982f, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 265000);
-        return true;
-    }
+    Player* player = (Player*)pSource;
+    player->SummonCreature(NPC_SOULGRINDER, 3535.111f, 5590.628f, 0.3859383f, 0.7853982f, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 265000);
+    return true;
 }
 
 struct npc_soulgrinderAI : public ScriptedAI

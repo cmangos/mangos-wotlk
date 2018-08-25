@@ -158,8 +158,7 @@ WorldSession* World::FindSession(uint32 id) const
 
     if (itr != m_sessions.end())
         return itr->second;                                 // also can return nullptr for kicked session
-    else
-        return nullptr;
+    return nullptr;
 }
 
 /// Remove a given session
@@ -1825,8 +1824,8 @@ BanReturn World::BanAccount(BanMode mode, std::string nameOrIP, uint32 duration_
     {
         if (mode == BAN_IP)
             return BAN_SUCCESS;                             // ip correctly banned but nobody affected (yet)
-        else
-            return BAN_NOTFOUND;                            // Nobody to ban
+        return BAN_NOTFOUND;
+        // Nobody to ban
     }
 
     ///- Disconnect all affected players (for IP it can be several)

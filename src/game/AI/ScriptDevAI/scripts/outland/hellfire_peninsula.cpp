@@ -1007,7 +1007,7 @@ bool GossipHello_npc_colonel_jules(Player* pPlayer, Creature* pCreature)
         return true;
     }
     // quest active but not complete
-    else if (pPlayer->IsCurrentQuest(QUEST_ID_EXORCISM, 1))
+    if (pPlayer->IsCurrentQuest(QUEST_ID_EXORCISM, 1))
     {
         Creature* pAnchorite = GetClosestCreatureWithEntry(pCreature, NPC_ANCHORITE_BARADA, 15.0f);
         if (!pAnchorite)

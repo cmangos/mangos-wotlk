@@ -543,7 +543,7 @@ bool EffectScriptEffectCreature_npc_putricide(Unit* pCaster, uint32 uiSpellId, S
 
         return true;
     }
-    else if (uiSpellId == SPELL_UNSTABLE_EXPERIMENT && uiEffIndex == EFFECT_INDEX_0)
+    if (uiSpellId == SPELL_UNSTABLE_EXPERIMENT && uiEffIndex == EFFECT_INDEX_0)
     {
         pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
         return true;

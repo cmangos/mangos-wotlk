@@ -361,8 +361,7 @@ struct mob_fel_orc_convertAI : public ScriptedAI
 
                 if (m_pInstance->GetData(TYPE_NETHEKURSE) == IN_PROGRESS)
                     return;
-                else
-                    m_pInstance->SetData(TYPE_NETHEKURSE, IN_PROGRESS);
+                m_pInstance->SetData(TYPE_NETHEKURSE, IN_PROGRESS);
             }
         }
     }

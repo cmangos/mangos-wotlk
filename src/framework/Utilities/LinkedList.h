@@ -134,8 +134,7 @@ class LinkedListHead
 
                 return result;
             }
-            else
-                return iSize;
+            return iSize;
         }
 
         void incSize() { ++iSize; }

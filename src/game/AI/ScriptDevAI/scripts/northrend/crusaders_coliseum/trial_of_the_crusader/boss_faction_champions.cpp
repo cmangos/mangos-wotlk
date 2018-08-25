@@ -448,22 +448,19 @@ struct trial_crusader_commonAI : public ScriptedAI
                 m_uiAbilityTimer = 2000;
                 return;
             }
-            else
+            uint32 uiSpellId = m_pAbilityArray[uiIndex].m_uiSpellId;
+
+            // special case for heroism / bloodlust
+            if (uiSpellId == SPELL_HEROISM && m_pInstance && m_pInstance->GetPlayerTeam() == ALLIANCE)
+                uiSpellId = SPELL_BLOODLUST;
+
+            if (CanUseSpecialAbility(uiSpellId, uiTargetType, spellSelectFlag, uiMinHealth))
             {
-                uint32 uiSpellId = m_pAbilityArray[uiIndex].m_uiSpellId;
-
-                // special case for heroism / bloodlust
-                if (uiSpellId == SPELL_HEROISM && m_pInstance && m_pInstance->GetPlayerTeam() == ALLIANCE)
-                    uiSpellId = SPELL_BLOODLUST;
-
-                if (CanUseSpecialAbility(uiSpellId, uiTargetType, spellSelectFlag, uiMinHealth))
-                {
-                    m_uiSpellTimer[uiIndex] = m_pAbilityArray[uiIndex].m_uiCooldown;
-                    m_uiAbilityTimer = urand(2000, 6000);
-                }
-                else
-                    m_uiAbilityTimer = 2000;
+                m_uiSpellTimer[uiIndex] = m_pAbilityArray[uiIndex].m_uiCooldown;
+                m_uiAbilityTimer = urand(2000, 6000);
             }
+            else
+                m_uiAbilityTimer = 2000;
         }
         else
             m_uiAbilityTimer -= uiDiff;
@@ -656,11 +653,8 @@ struct boss_crusader_paladin_holyAI : public trial_crusader_commonAI
         {
             if (uiIndex > MAX_PALADIN_HOLY_SPELLS - 1)
                 return;
-            else
-            {
-                uiSpellEntry = m_aPaladinHealerAbilities[uiIndex].m_uiSpellId;
-                uiSpellTimer = m_aPaladinHealerAbilities[uiIndex].m_uiCooldown;
-            }
+            uiSpellEntry = m_aPaladinHealerAbilities[uiIndex].m_uiSpellId;
+            uiSpellTimer = m_aPaladinHealerAbilities[uiIndex].m_uiCooldown;
         }
 
         if (!m_uiSpellTimer[uiIndex])
@@ -734,11 +728,8 @@ struct boss_crusader_priest_discAI : public trial_crusader_commonAI
         {
             if (uiIndex > MAX_PRIEST_DISC_SPELLS - 1)
                 return;
-            else
-            {
-                uiSpellEntry = m_aPriestHealerAbilities[uiIndex].m_uiSpellId;
-                uiSpellTimer = m_aPriestHealerAbilities[uiIndex].m_uiCooldown;
-            }
+            uiSpellEntry = m_aPriestHealerAbilities[uiIndex].m_uiSpellId;
+            uiSpellTimer = m_aPriestHealerAbilities[uiIndex].m_uiCooldown;
         }
 
         if (!m_uiSpellTimer[uiIndex])
@@ -812,11 +803,8 @@ struct boss_crusader_shaman_restoAI : public trial_crusader_commonAI
         {
             if (uiIndex > MAX_SHAMAN_RESTO_SPELLS - 1)
                 return;
-            else
-            {
-                uiSpellEntry = m_aShamanHealerAbilities[uiIndex].m_uiSpellId;
-                uiSpellTimer = m_aShamanHealerAbilities[uiIndex].m_uiCooldown;
-            }
+            uiSpellEntry = m_aShamanHealerAbilities[uiIndex].m_uiSpellId;
+            uiSpellTimer = m_aShamanHealerAbilities[uiIndex].m_uiCooldown;
         }
 
         if (!m_uiSpellTimer[uiIndex])
@@ -1074,11 +1062,8 @@ struct boss_crusader_priest_shadowAI : public trial_crusader_commonAI
         {
             if (uiIndex > MAX_PRIEST_DAMAGE_SPELLS - 1)
                 return;
-            else
-            {
-                uiSpellEntry = m_aPriestDamageAbilities[uiIndex].m_uiSpellId;
-                uiSpellTimer = m_aPriestDamageAbilities[uiIndex].m_uiCooldown;
-            }
+            uiSpellEntry = m_aPriestDamageAbilities[uiIndex].m_uiSpellId;
+            uiSpellTimer = m_aPriestDamageAbilities[uiIndex].m_uiCooldown;
         }
 
         if (!m_uiSpellTimer[uiIndex])

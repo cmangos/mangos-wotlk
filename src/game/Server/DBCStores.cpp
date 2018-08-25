@@ -226,8 +226,7 @@ static bool ReadDBCBuildFileText(const std::string& dbc_path, char const* locale
         text = &buf[0];
         return true;
     }
-    else
-        return false;
+    return false;
 }
 
 static uint32 ReadDBCBuild(const std::string& dbc_path, LocaleNameStr const* localeNameStr = nullptr)
@@ -662,7 +661,7 @@ void LoadDBCStores(const std::string& dataPath)
         Log::WaitBeforeContinueIfNeed();
         exit(1);
     }
-    else if (!bad_dbc_files.empty())
+    if (!bad_dbc_files.empty())
     {
         std::string str;
         for (auto& bad_dbc_file : bad_dbc_files)
@@ -772,8 +771,7 @@ uint32 GetAreaFlagByMapId(uint32 mapid)
     AreaFlagByMapID::iterator i = sAreaFlagByMapID.find(mapid);
     if (i == sAreaFlagByMapID.end())
         return 0;
-    else
-        return i->second;
+    return i->second;
 }
 
 uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId)

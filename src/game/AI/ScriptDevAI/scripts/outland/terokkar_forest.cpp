@@ -1186,8 +1186,7 @@ struct npc_avatar_of_terokkAI : public ScriptedAI
             m_creature->CastSpell(m_creature->getVictim(), SPELL_FEATHER_BURST, TRIGGERED_NONE);
             return;
         }
-        else
-            m_uiAbilityTimer -= uiDiff;
+        m_uiAbilityTimer -= uiDiff;
         DoMeleeAttackIfReady();
     }
 };
@@ -1219,8 +1218,7 @@ struct npc_minion_of_terokkAI : public ScriptedAI
             m_creature->CastSpell(m_creature->getVictim(), SPELL_TERRIFYING_SCREECH, TRIGGERED_NONE);
             return;
         }
-        else
-            m_uiAbilityTimer -= uiDiff;
+        m_uiAbilityTimer -= uiDiff;
         DoMeleeAttackIfReady();
     }
 };

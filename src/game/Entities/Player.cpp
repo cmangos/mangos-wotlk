@@ -2970,11 +2970,8 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool dependen
                     next_active_spell_id = next_itr->second;
                     break;
                 }
-                else
-                {
-                    tempSpellId = next_itr->second;
-                    next_itr = nextMap.lower_bound(next_itr->second);
-                }
+                tempSpellId = next_itr->second;
+                next_itr = nextMap.lower_bound(next_itr->second);
             }
         }
 
@@ -3722,31 +3719,25 @@ uint32 Player::resetTalentsCost() const
     if (m_resetTalentsCost < 1 * GOLD)
         return 1 * GOLD;
     // then 5 gold
-    else if (m_resetTalentsCost < 5 * GOLD)
+    if (m_resetTalentsCost < 5 * GOLD)
         return 5 * GOLD;
     // After that it increases in increments of 5 gold
-    else if (m_resetTalentsCost < 10 * GOLD)
+    if (m_resetTalentsCost < 10 * GOLD)
         return 10 * GOLD;
-    else
+    time_t months = (sWorld.GetGameTime() - m_resetTalentsTime) / MONTH;
+    if (months > 0)
     {
-        time_t months = (sWorld.GetGameTime() - m_resetTalentsTime) / MONTH;
-        if (months > 0)
-        {
-            // This cost will be reduced by a rate of 5 gold per month
-            int32 new_cost = int32((m_resetTalentsCost) - 5 * GOLD * months);
-            // to a minimum of 10 gold.
-            return uint32(new_cost < 10 * GOLD ? 10 * GOLD : new_cost);
-        }
-        else
-        {
-            // After that it increases in increments of 5 gold
-            int32 new_cost = m_resetTalentsCost + 5 * GOLD;
-            // until it hits a cap of 50 gold.
-            if (new_cost > 50 * GOLD)
-                new_cost = 50 * GOLD;
-            return new_cost;
-        }
+        // This cost will be reduced by a rate of 5 gold per month
+        int32 new_cost = int32((m_resetTalentsCost) - 5 * GOLD * months);
+        // to a minimum of 10 gold.
+        return uint32(new_cost < 10 * GOLD ? 10 * GOLD : new_cost);
     }
+    // After that it increases in increments of 5 gold
+    int32 new_cost = m_resetTalentsCost + 5 * GOLD;
+    // until it hits a cap of 50 gold.
+    if (new_cost > 50 * GOLD)
+        new_cost = 50 * GOLD;
+    return new_cost;
 }
 
 bool Player::resetTalents(bool no_cost, bool all_specs)
@@ -5528,15 +5519,17 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLeve
         case SKILL_INSCRIPTION:
             return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator, gathering_skill_gain);
         case SKILL_SKINNING:
+        {
             if (sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_SKINNING_STEPS) == 0)
                 return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator, gathering_skill_gain);
-            else
-                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator) >> (SkillValue / sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_SKINNING_STEPS)), gathering_skill_gain);
+            return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator) >> (SkillValue / sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_SKINNING_STEPS)), gathering_skill_gain);
+        }
         case SKILL_MINING:
+        {
             if (sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_MINING_STEPS) == 0)
                 return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator, gathering_skill_gain);
-            else
-                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator) >> (SkillValue / sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_MINING_STEPS)), gathering_skill_gain);
+            return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel + 100, RedLevel + 50, RedLevel + 25) * Multiplicator) >> (SkillValue / sWorld.getConfig(CONFIG_UINT32_SKILL_CHANCE_MINING_STEPS)), gathering_skill_gain);
+        }
     }
     return false;
 }
@@ -6086,15 +6079,15 @@ bool Player::IsActionButtonDataValid(uint8 button, uint32 action, uint8 type, Pl
                         sLog.outError("Spell action %u not added into button %u for player %s: player don't known this spell", action, button, player->GetName());
                     return false;
                 }
-                else if (IsPassiveSpell(spellProto))
+                if (IsPassiveSpell(spellProto))
                 {
                     if (msg)
                         sLog.outError("Spell action %u not added into button %u for player %s: spell is passive", action, button, player->GetName());
                     return false;
                 }
-                // current range for button of totem bar is from ACTION_BUTTON_SHAMAN_TOTEMS_BAR to (but not including) ACTION_BUTTON_SHAMAN_TOTEMS_BAR + 12
-                else if (button >= ACTION_BUTTON_SHAMAN_TOTEMS_BAR && button < (ACTION_BUTTON_SHAMAN_TOTEMS_BAR + 12)
-                         && !spellProto->HasAttribute(SPELL_ATTR_EX7_TOTEM_SPELL))
+                    // current range for button of totem bar is from ACTION_BUTTON_SHAMAN_TOTEMS_BAR to (but not including) ACTION_BUTTON_SHAMAN_TOTEMS_BAR + 12
+                if (button >= ACTION_BUTTON_SHAMAN_TOTEMS_BAR && button < (ACTION_BUTTON_SHAMAN_TOTEMS_BAR + 12)
+                    && !spellProto->HasAttribute(SPELL_ATTR_EX7_TOTEM_SPELL))
                 {
                     if (msg)
                         sLog.outError("Spell action %u not added into button %u for player %s: attempt to add non totem spell to totem bar", action, button, player->GetName());
@@ -6855,8 +6848,7 @@ uint32 Player::GetRankFromDB(ObjectGuid guid)
         delete result;
         return v;
     }
-    else
-        return 0;
+    return 0;
 }
 
 uint32 Player::GetArenaTeamIdFromDB(ObjectGuid guid, ArenaType type)
@@ -8958,8 +8950,8 @@ Item* Player::GetItemByPos(uint8 bag, uint8 slot) const
 {
     if (bag == INVENTORY_SLOT_BAG_0 && (slot < BANK_SLOT_BAG_END || (slot >= KEYRING_SLOT_START && slot < CURRENCYTOKEN_SLOT_END)))
         return m_items[slot];
-    else if ((bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END)
-             || (bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END))
+    if ((bag >= INVENTORY_SLOT_BAG_START && bag < INVENTORY_SLOT_BAG_END)
+        || (bag >= BANK_SLOT_BAG_START && bag < BANK_SLOT_BAG_END))
     {
         Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, bag);
         if (pBag)
@@ -10726,7 +10718,7 @@ InventoryResult Player::CanUseItem(ItemPrototype const* pProto) const
         {
             if (GetSkillValue(pProto->RequiredSkill) == 0)
                 return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
-            else if (GetSkillValue(pProto->RequiredSkill) < pProto->RequiredSkillRank)
+            if (GetSkillValue(pProto->RequiredSkill) < pProto->RequiredSkillRank)
                 return EQUIP_ERR_CANT_EQUIP_SKILL;
         }
 
@@ -10923,41 +10915,38 @@ Item* Player::_StoreItem(uint16 pos, Item* pItem, uint32 count, bool clone, bool
 
         return pItem;
     }
-    else
+    ItemPrototype const* itemProto = pItem2->GetProto();
+    if (itemProto->Bonding == BIND_WHEN_PICKED_UP
+        || itemProto->Bonding == BIND_QUEST_ITEM
+        || (itemProto->Bonding == BIND_WHEN_EQUIPPED && IsBagPos(pos)))
+        pItem2->SetBinding(true);
+
+    pItem2->SetCount(pItem2->GetCount() + count);
+    if (IsInWorld() && update)
+        pItem2->SendCreateUpdateToPlayer(this);
+
+    if (!clone)
     {
-        ItemPrototype const* itemProto = pItem2->GetProto();
-        if (itemProto->Bonding == BIND_WHEN_PICKED_UP
-                || itemProto->Bonding == BIND_QUEST_ITEM
-                || (itemProto->Bonding == BIND_WHEN_EQUIPPED && IsBagPos(pos)))
-            pItem2->SetBinding(true);
-
-        pItem2->SetCount(pItem2->GetCount() + count);
+        // delete item (it not in any slot currently)
         if (IsInWorld() && update)
-            pItem2->SendCreateUpdateToPlayer(this);
-
-        if (!clone)
         {
-            // delete item (it not in any slot currently)
-            if (IsInWorld() && update)
-            {
-                pItem->RemoveFromWorld();
-                pItem->DestroyForPlayer(this);
-            }
-
-            RemoveEnchantmentDurations(pItem);
-            RemoveItemDurations(pItem);
-
-            pItem->SetOwnerGuid(GetObjectGuid());           // prevent error at next SetState in case trade/mail/buy from vendor
-            pItem->SetState(ITEM_REMOVED, this);
+            pItem->RemoveFromWorld();
+            pItem->DestroyForPlayer(this);
         }
 
-        // AddItemDurations(pItem2); - pItem2 already have duration listed for player
-        AddEnchantmentDurations(pItem2);
+        RemoveEnchantmentDurations(pItem);
+        RemoveItemDurations(pItem);
 
-        pItem2->SetState(ITEM_CHANGED, this);
-
-        return pItem2;
+        pItem->SetOwnerGuid(GetObjectGuid());           // prevent error at next SetState in case trade/mail/buy from vendor
+        pItem->SetState(ITEM_REMOVED, this);
     }
+
+    // AddItemDurations(pItem2); - pItem2 already have duration listed for player
+    AddEnchantmentDurations(pItem2);
+
+    pItem2->SetState(ITEM_CHANGED, this);
+
+    return pItem2;
 }
 
 Item* Player::EquipNewItem(uint16 pos, uint32 item, bool update)
@@ -13241,7 +13230,7 @@ uint32 Player::GetDefaultGossipMenuForSource(WorldObject* pSource) const
 {
     if (pSource->GetTypeId() == TYPEID_UNIT)
         return ((Creature*)pSource)->GetCreatureInfo()->GossipMenuId;
-    else if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
+    if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
         return ((GameObject*)pSource)->GetGOInfo()->GetGossipMenuId();
 
     return 0;
@@ -14139,8 +14128,7 @@ bool Player::SatisfyQuestCondition(Quest const* qInfo, bool msg) const
 
         return result;
     }
-    else
-        return true;
+    return true;
 }
 
 bool Player::SatisfyQuestLevel(Quest const* qInfo, bool msg) const
@@ -14520,8 +14508,7 @@ bool Player::CanGiveQuestSourceItemIfNeed(Quest const* pQuest, ItemPosCountVec* 
 
         if (msg == EQUIP_ERR_OK)
             return true;
-        else
-            SendEquipError(msg, nullptr, nullptr, srcitem);
+        SendEquipError(msg, nullptr, nullptr, srcitem);
         return false;
     }
 
@@ -16999,8 +16986,7 @@ InstancePlayerBind* Player::GetBoundInstance(uint32 mapid, Difficulty difficulty
     BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
     if (itr != m_boundInstances[difficulty].end())
         return &itr->second;
-    else
-        return nullptr;
+    return nullptr;
 }
 
 void Player::UnbindInstance(uint32 mapid, Difficulty difficulty, bool unload)
@@ -17061,8 +17047,7 @@ InstancePlayerBind* Player::BindToInstance(DungeonPersistentState* state, bool p
                       GetName(), GetGUIDLow(), state->GetMapId(), state->GetInstanceId(), state->GetDifficulty());
         return &bind;
     }
-    else
-        return nullptr;
+    return nullptr;
 }
 
 DungeonPersistentState* Player::GetBoundInstanceSaveForSelfOrGroup(uint32 mapid)
@@ -19207,7 +19192,7 @@ bool Player::OnTaxiFlightSplineUpdate()
                 OnTaxiFlightSplineStart(first);
                 return true;
             }
-            else if (m_taxiTracker.GetState() == Taxi::TRACKER_TRANSFER)
+            if (m_taxiTracker.GetState() == Taxi::TRACKER_TRANSFER)
             {
                 OnTaxiFlightSplineEnd();
                 TeleportTo(first->mapid, first->x, first->y, first->z, GetOrientation());
@@ -19908,37 +19893,33 @@ void Player::SetBattleGroundEntryPoint()
         m_bgData.m_needSave = true;
         return;
     }
-    else
+    // Mount spell id storing
+    if (IsMounted())
     {
-        // Mount spell id storing
-        if (IsMounted())
-        {
-            AuraList const& auras = GetAurasByType(SPELL_AURA_MOUNTED);
-            if (!auras.empty())
-                m_bgData.mountSpell = (*auras.begin())->GetId();
-        }
-        else
-            m_bgData.mountSpell = 0;
+        AuraList const& auras = GetAurasByType(SPELL_AURA_MOUNTED);
+        if (!auras.empty())
+            m_bgData.mountSpell = (*auras.begin())->GetId();
+    }
+    else
+        m_bgData.mountSpell = 0;
 
-        // If map is dungeon find linked graveyard
-        if (GetMap()->IsDungeon())
+    // If map is dungeon find linked graveyard
+    if (GetMap()->IsDungeon())
+    {
+        if (const WorldSafeLocsEntry* entry = sObjectMgr.GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam()))
         {
-            if (const WorldSafeLocsEntry* entry = sObjectMgr.GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam()))
-            {
-                m_bgData.joinPos = WorldLocation(entry->map_id, entry->x, entry->y, entry->z, 0.0f);
-                m_bgData.m_needSave = true;
-                return;
-            }
-            else
-                sLog.outError("SetBattleGroundEntryPoint: Dungeon map %u has no linked graveyard, setting home location as entry point.", GetMapId());
-        }
-        // If new entry point is not BG or arena set it
-        else if (!GetMap()->IsBattleGroundOrArena())
-        {
-            m_bgData.joinPos = WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+            m_bgData.joinPos = WorldLocation(entry->map_id, entry->x, entry->y, entry->z, 0.0f);
             m_bgData.m_needSave = true;
             return;
         }
+        sLog.outError("SetBattleGroundEntryPoint: Dungeon map %u has no linked graveyard, setting home location as entry point.", GetMapId());
+    }
+        // If new entry point is not BG or arena set it
+    else if (!GetMap()->IsBattleGroundOrArena())
+    {
+        m_bgData.joinPos = WorldLocation(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
+        m_bgData.m_needSave = true;
+        return;
     }
 
     // In error cases use homebind position
@@ -20398,17 +20379,19 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
             GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_MAX_PLAYERS);
             break;
         case AREA_LOCKSTATUS_QUEST_NOT_COMPLETED:
+        {
             if (mapEntry->MapID == 269)                     // Exception for Black Morass
             {
                 GetSession()->SendAreaTriggerMessage("%s", GetSession()->GetMangosString(LANG_TELEREQ_QUEST_BLACK_MORASS));
                 break;
             }
-            else if (mapEntry->IsContinent())               // do not report anything for quest areatrigge
+            if (mapEntry->IsContinent())               // do not report anything for quest areatrigge
             {
                 DEBUG_LOG("SendTransferAbortedByLockStatus: LockAreaStatus %u, do not teleport, no message sent (mapId %u)", lockStatus, mapEntry->MapID);
                 break;
             }
-        // No break here!
+        }
+            // No break here!
         case AREA_LOCKSTATUS_MISSING_ITEM:
             GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_DIFFICULTY, GetDifficulty(mapEntry->IsRaid()));
             break;
@@ -22252,16 +22235,14 @@ PlayerTalent const* Player::GetKnownTalentById(int32 talentId) const
     PlayerTalentMap::const_iterator itr = m_talents[m_activeSpec].find(talentId);
     if (itr != m_talents[m_activeSpec].end() && itr->second.state != PLAYERSPELL_REMOVED)
         return &itr->second;
-    else
-        return nullptr;
+    return nullptr;
 }
 
 SpellEntry const* Player::GetKnownTalentRankById(int32 talentId) const
 {
     if (PlayerTalent const* talent = GetKnownTalentById(talentId))
         return sSpellTemplate.LookupEntry<SpellEntry>(talent->talentEntry->RankID[talent->currentRank]);
-    else
-        return nullptr;
+    return nullptr;
 }
 
 void Player::LearnTalent(uint32 talentId, uint32 talentRank)
@@ -23356,8 +23337,7 @@ uint32 Player::GetEquipGearScore(bool withBags, bool withBank)
 
         return res;
     }
-    else
-        return 0;
+    return 0;
 }
 
 void Player::_fillGearScoreData(Item* item, GearScoreVec* gearScore, uint32& twoHandScore)
@@ -23626,24 +23606,21 @@ float Player::GetCollisionHeight(bool mounted) const
 
         return scaleMod * mountModelData->MountHeight + modelData->CollisionHeight * 0.5f;
     }
-    else
+    // use native model collision height in dismounted case
+    CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
+    if (!displayInfo)
     {
-        // use native model collision height in dismounted case
-        CreatureDisplayInfoEntry const* displayInfo = sCreatureDisplayInfoStore.LookupEntry(GetNativeDisplayId());
-        if (!displayInfo)
-        {
-            sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
-            return 0;
-        }
-        CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
-        if (!modelData)
-        {
-            sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
-            return 0;
-        }
-
-        return modelData->CollisionHeight;
+        sLog.outError("GetCollisionHeight::Unable to find CreatureDisplayInfoEntry for %u", GetNativeDisplayId());
+        return 0;
     }
+    CreatureModelDataEntry const* modelData = sCreatureModelDataStore.LookupEntry(displayInfo->ModelId);
+    if (!modelData)
+    {
+        sLog.outError("GetCollisionHeight::Unable to find CreatureModelDataEntry for %u", displayInfo->ModelId);
+        return 0;
+    }
+
+    return modelData->CollisionHeight;
 }
 
 // set data to accept next resurrect response and process it with required data

@@ -421,7 +421,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             his_trade->SetAccepted(false);
             return;
         }
-        else if (hisCanCompleteInfo.Result != EQUIP_ERR_OK)
+        if (hisCanCompleteInfo.Result != EQUIP_ERR_OK)
         {
             clearAcceptTradeMode(my_trade, his_trade);
 

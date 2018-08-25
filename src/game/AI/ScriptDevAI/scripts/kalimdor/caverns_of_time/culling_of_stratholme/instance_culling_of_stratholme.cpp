@@ -532,20 +532,19 @@ uint8 instance_culling_of_stratholme::GetInstancePosition()
 {
     if (m_auiEncounter[TYPE_MALGANIS_EVENT] == DONE)
         return POS_INSTANCE_FINISHED;
-    else if (m_auiEncounter[TYPE_ARTHAS_ESCORT_EVENT] == DONE)
+    if (m_auiEncounter[TYPE_ARTHAS_ESCORT_EVENT] == DONE)
         return POS_ARTHAS_MALGANIS;
-    else if (m_auiEncounter[TYPE_EPOCH_EVENT] == DONE)
+    if (m_auiEncounter[TYPE_EPOCH_EVENT] == DONE)
         return POS_ARTHAS_ESCORTING;
-    else if (m_auiEncounter[TYPE_SALRAMM_EVENT] == DONE)
+    if (m_auiEncounter[TYPE_SALRAMM_EVENT] == DONE)
         return POS_ARTHAS_TOWNHALL;
-    else if (m_auiEncounter[TYPE_MEATHOOK_EVENT] == DONE)
+    if (m_auiEncounter[TYPE_MEATHOOK_EVENT] == DONE)
         return POS_ARTHAS_WAVES;
-    else if (m_auiEncounter[TYPE_ARTHAS_INTRO_EVENT] == DONE)
+    if (m_auiEncounter[TYPE_ARTHAS_INTRO_EVENT] == DONE)
         return POS_ARTHAS_WAVES;
-    else if (m_auiEncounter[TYPE_GRAIN_EVENT] == DONE)
+    if (m_auiEncounter[TYPE_GRAIN_EVENT] == DONE)
         return POS_ARTHAS_INTRO;
-    else
-        return 0;
+    return 0;
 }
 
 // Sorting function
@@ -844,10 +843,12 @@ uint32 instance_culling_of_stratholme::GetRandomMobOfType(uint8 uiType) const
         case SCOURGE_TYPE_GOLEM:
             return urand(0, 1) ? NPC_BILE_GOLEM : NPC_PATCHWORK_CONSTRUCT;
         case SCOURGE_TYPE_BOSS:
+        {
             if (GetData(TYPE_MEATHOOK_EVENT) == IN_PROGRESS)
                 return NPC_MEATHOOK;
-            else if (GetData(TYPE_SALRAMM_EVENT) == IN_PROGRESS)
+            if (GetData(TYPE_SALRAMM_EVENT) == IN_PROGRESS)
                 return NPC_SALRAMM_THE_FLESHCRAFTER;
+        }
     }
 
     return 0;

@@ -105,7 +105,7 @@ struct Timer
                 disabled = true;
                 return true;
             }
-            else timer -= diff;
+            timer -= diff;
         }
         return false;
     }

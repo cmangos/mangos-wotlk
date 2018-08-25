@@ -264,8 +264,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
                 m_creature->SetSpeedRate(MOVE_RUN, 4.0f);
                 return;
             }
-            else
-                m_uiBladeDanceTimer -= uiDiff;
+            m_uiBladeDanceTimer -= uiDiff;
 
             if (m_uiChargeTimer)
             {

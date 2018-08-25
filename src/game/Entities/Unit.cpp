@@ -604,13 +604,10 @@ bool Unit::haveOffhandWeapon() const
 
     if (GetTypeId() == TYPEID_PLAYER)
         return !!((Player*)this)->GetWeaponForAttack(OFF_ATTACK, true, true);
-    else
-    {
-        uint32 ItemId = GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1);
-        ItemEntry const* itemInfo = sItemStore.LookupEntry(ItemId);
+    uint32 ItemId = GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + 1);
+    ItemEntry const* itemInfo = sItemStore.LookupEntry(ItemId);
 
-        return itemInfo && itemInfo->Class == ITEM_CLASS_WEAPON;
-    }
+    return itemInfo && itemInfo->Class == ITEM_CLASS_WEAPON;
 }
 
 void Unit::SendHeartBeat()
@@ -2958,8 +2955,7 @@ uint32 Unit::GetDefenseSkillValue(Unit const* target) const
         value += uint32(((Player*)this)->GetRatingBonusValue(CR_DEFENSE_SKILL));
         return value;
     }
-    else
-        return GetUnitMeleeSkill(target);
+    return GetUnitMeleeSkill(target);
 }
 
 bool Unit::CanCrush() const
@@ -4240,7 +4236,7 @@ float Unit::CalculateEffectiveMagicResistancePercent(const Unit* attacker, Spell
                 break;
             }
             // Else if first school encountered or more vulnerable: memorize and continue
-            else if (!resistance || amount < resistance)
+            if (!resistance || amount < resistance)
                 resistance = amount;
         }
         schools >>= 1;
@@ -4434,7 +4430,7 @@ void Unit::_UpdateAutoRepeatSpell()
             return;
         }
         // auto shot is delayed by everything, except ranged(!) CURRENT_GENERIC_SPELL's -> recheck that
-        else if (!(m_currentSpells[CURRENT_GENERIC_SPELL] && m_currentSpells[CURRENT_GENERIC_SPELL]->IsRangedSpell()))
+        if (!(m_currentSpells[CURRENT_GENERIC_SPELL] && m_currentSpells[CURRENT_GENERIC_SPELL]->IsRangedSpell()))
             return;
     }
 
@@ -4622,14 +4618,14 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
         return true;
 
     // channeled spells may be delayed, but they are still considered casted
-    else if (!skipChanneled && m_currentSpells[CURRENT_CHANNELED_SPELL] &&
-            !m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING) &&
-            !m_currentSpells[CURRENT_CHANNELED_SPELL]->m_IsTriggeredSpell &&
-            (m_currentSpells[CURRENT_CHANNELED_SPELL]->getState() != SPELL_STATE_FINISHED))
+    if (!skipChanneled && m_currentSpells[CURRENT_CHANNELED_SPELL] &&
+        !m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING) &&
+        !m_currentSpells[CURRENT_CHANNELED_SPELL]->m_IsTriggeredSpell &&
+        (m_currentSpells[CURRENT_CHANNELED_SPELL]->getState() != SPELL_STATE_FINISHED))
         return true;
 
     // autorepeat spells may be finished or delayed, but they are still considered casted
-    else if (!skipAutorepeat && m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
+    if (!skipAutorepeat && m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
         return true;
 
     return false;
@@ -4684,8 +4680,7 @@ bool Unit::isInAccessablePlaceFor(Unit const* unit) const
 {
     if (IsInWater())
         return unit->CanSwim();
-    else
-        return unit->CanWalk() || unit->CanFly();
+    return unit->CanWalk() || unit->CanFly();
 }
 
 bool Unit::IsInWater() const
@@ -5150,8 +5145,7 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
 
                 if (m_spellAuraHolders.empty())
                     break;
-                else
-                    next =  m_spellAuraHolders.begin();
+                next =  m_spellAuraHolders.begin();
             }
         }
     }
@@ -5171,8 +5165,7 @@ void Unit::RemoveAllGroupBuffsFromCaster(ObjectGuid casterGuid)
 
             if (m_spellAuraHolders.empty())
                 break;
-            else
-                next = m_spellAuraHolders.begin();
+            next = m_spellAuraHolders.begin();
         }
     }
 }
@@ -5241,8 +5234,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 
             if (m_spellAuraHolders.empty())
                 break;
-            else
-                next =  m_spellAuraHolders.begin();
+            next =  m_spellAuraHolders.begin();
 
             continue;
         }
@@ -5260,8 +5252,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 
             if (m_spellAuraHolders.empty())
                 break;
-            else
-                next =  m_spellAuraHolders.begin();
+            next =  m_spellAuraHolders.begin();
 
             continue;
         }
@@ -5279,8 +5270,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 
                 if (m_spellAuraHolders.empty())
                     break;
-                else
-                    next = m_spellAuraHolders.begin();
+                next = m_spellAuraHolders.begin();
             }
             continue;
         }
@@ -5297,8 +5287,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 
                 if (m_spellAuraHolders.empty())
                     break;
-                else
-                    next =  m_spellAuraHolders.begin();
+                next =  m_spellAuraHolders.begin();
             }
         }
     }
@@ -5693,15 +5682,12 @@ void Unit::RemoveNotOwnTrackedTargetAuras(uint32 newPhase)
                 iter = m_spellAuraHolders.begin();
                 continue;
             }
-            else
+            Unit* caster = iter->second->GetCaster();
+            if (!caster || !caster->InSamePhase(newPhase))
             {
-                Unit* caster = iter->second->GetCaster();
-                if (!caster || !caster->InSamePhase(newPhase))
-                {
-                    RemoveSpellAuraHolder(iter->second);
-                    iter = m_spellAuraHolders.begin();
-                    continue;
-                }
+                RemoveSpellAuraHolder(iter->second);
+                iter = m_spellAuraHolders.begin();
+                continue;
             }
         }
 
@@ -5730,20 +5716,17 @@ void Unit::RemoveNotOwnTrackedTargetAuras(uint32 newPhase)
                     itr = scTargets.begin();                    // list can be changed at remove aura
                     continue;
                 }
-                else
+                Unit* itr_target = GetMap()->GetUnit(itr_targetGuid);
+                if (!itr_target || !itr_target->InSamePhase(newPhase))
                 {
-                    Unit* itr_target = GetMap()->GetUnit(itr_targetGuid);
-                    if (!itr_target || !itr_target->InSamePhase(newPhase))
-                    {
-                        scTargets.erase(itr);               // remove for caster in any case
+                    scTargets.erase(itr);               // remove for caster in any case
 
-                        // remove from target if target found
-                        if (itr_target)
-                            itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, GetObjectGuid());
+                    // remove from target if target found
+                    if (itr_target)
+                        itr_target->RemoveAurasByCasterSpell(itr_spellEntry->Id, GetObjectGuid());
 
-                        itr = scTargets.begin();            // list can be changed at remove aura
-                        continue;
-                    }
+                    itr = scTargets.begin();            // list can be changed at remove aura
+                    continue;
                 }
             }
 
@@ -8979,7 +8962,7 @@ float Unit::GetWeaponProcChance() const
     // (odd formula...)
     if (isAttackReady(BASE_ATTACK))
         return (GetAttackTime(BASE_ATTACK) * 1.8f / 1000.0f);
-    else if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
+    if (haveOffhandWeapon() && isAttackReady(OFF_ATTACK))
         return (GetAttackTime(OFF_ATTACK) * 1.6f / 1000.0f);
 
     return 0.0f;
@@ -9377,8 +9360,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     {
         if (GetTypeId() == TYPEID_PLAYER)
             return ((Player*)this)->GetSession()->GetSecurity() <= ((Player*)u)->GetSession()->GetSecurity();
-        else
-            return true;
+        return true;
     }
 
     // non faction visibility non-breakable for non-GMs
@@ -9585,12 +9567,13 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
         case MOVE_RUN:
         case MOVE_WALK:
         case MOVE_SWIM:
+        {
             if (Unit* charmer = GetCharmer())
             {
                 SetSpeedRate(mtype, charmer->GetSpeedRate(mtype), forced);
                 return;
             }
-            else if (GetTypeId() == TYPEID_UNIT)
+            if (GetTypeId() == TYPEID_UNIT)
             {
                 Creature* creature = static_cast<Creature*>(this);
                 if (creature->IsPet() && hasUnitState(UNIT_STAT_FOLLOW))
@@ -9602,6 +9585,7 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced, float ratio)
                     }
                 }
             }
+        }
             break;
         default:
             break;
@@ -10041,8 +10025,9 @@ bool Unit::SelectHostileTarget()
         }
         return true;
     }
-    else if (IsIgnoringRangedTargets() && !getThreatManager().isThreatListEmpty())
-        return true; // return true but no target
+    if (IsIgnoringRangedTargets() && !getThreatManager().isThreatListEmpty())
+        return true;
+    // return true but no target
 
     // no target but something prevent go to evade mode
     if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT))
@@ -10282,10 +10267,7 @@ DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
             return DIMINISHING_LEVEL_1;
         }
         // or else increase the count.
-        else
-        {
-            return DiminishingLevels(i.hitCount);
-        }
+        return DiminishingLevels(i.hitCount);
     }
     return DIMINISHING_LEVEL_1;
 }
@@ -10419,11 +10401,9 @@ uint32 Unit::GetCreatureType() const
         SpellShapeshiftFormEntry const* ssEntry = sSpellShapeshiftFormStore.LookupEntry(GetShapeshiftForm());
         if (ssEntry && ssEntry->creatureType > 0)
             return ssEntry->creatureType;
-        else
-            return CREATURE_TYPE_HUMANOID;
+        return CREATURE_TYPE_HUMANOID;
     }
-    else
-        return ((Creature*)this)->GetCreatureInfo()->CreatureType;
+    return ((Creature*)this)->GetCreatureInfo()->CreatureType;
 }
 
 /*#######################################
@@ -10618,13 +10598,10 @@ float Unit::GetTotalAttackPowerValue(WeaponAttackType attType) const
             return 0.0f;
         return ap * (1.0f + GetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER));
     }
-    else
-    {
-        int32 ap = GetInt32Value(UNIT_FIELD_ATTACK_POWER) + GetInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
-        if (ap < 0)
-            return 0.0f;
-        return ap * (1.0f + GetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER));
-    }
+    int32 ap = GetInt32Value(UNIT_FIELD_ATTACK_POWER) + GetInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
+    if (ap < 0)
+        return 0.0f;
+    return ap * (1.0f + GetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER));
 }
 
 float Unit::GetWeaponDamageRange(WeaponAttackType attType, WeaponDamageRange type) const
@@ -11354,8 +11331,7 @@ void Unit::SetIncapacitatedState(bool apply, uint32 state, ObjectGuid casterGuid
         {
             if (state == UNIT_FLAG_FLEEING)
                 return;
-            else
-                state &= ~UNIT_FLAG_FLEEING;
+            state &= ~UNIT_FLAG_FLEEING;
         }
 
         // Apply confusion or fleeing: update client control state before altering flags
@@ -11875,8 +11851,7 @@ void Unit::RemoveAurasAtMechanicImmunity(uint32 mechMask, uint32 exceptSpellId, 
 
             if (auras.empty())
                 break;
-            else
-                iter = auras.begin();
+            iter = auras.begin();
         }
         else
             ++iter;
@@ -12137,7 +12112,7 @@ float Unit::GetCombatRatingReduction(CombatRating cr) const
 {
     if (GetTypeId() == TYPEID_PLAYER)
         return ((Player const*)this)->GetRatingBonusValue(cr);
-    else if (((Creature const*)this)->IsPet())
+    if (((Creature const*)this)->IsPet())
     {
         // Player's pet get 100% resilience from owner
         if (Unit* owner = GetOwner())

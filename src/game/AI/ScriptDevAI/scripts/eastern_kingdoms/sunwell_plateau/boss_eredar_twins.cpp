@@ -366,8 +366,7 @@ struct boss_sacrolashAI : public ScriptedAI
 
         if (!m_vRangeTargets.empty())
             return m_vRangeTargets[urand(0, m_vRangeTargets.size() - 1)];
-        else
-            return m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+        return m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
     }
 
     void JustSummoned(Creature* pSummoned) override

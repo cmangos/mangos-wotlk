@@ -1253,8 +1253,7 @@ struct npc_spring_rabbitAI : public ScriptedPetAI
             m_uiStep = 2;
             return true;
         }
-        else
-            return false;
+        return false;
     }
 
     void MovementInform(uint32 uiMovementType, uint32 uiData) override

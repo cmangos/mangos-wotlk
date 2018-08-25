@@ -862,8 +862,7 @@ bool Map::CreatureRespawnRelocation(Creature* c)
         c->OnRelocated();
         return true;
     }
-    else
-        return false;
+    return false;
 }
 
 bool Map::UnloadGrid(const uint32& x, const uint32& y, bool pForce)
@@ -929,15 +928,13 @@ uint32 Map::GetMaxPlayers() const
     {
         if (mapDiff->maxPlayers || IsRegularDifficulty())   // Normal case (expect that regular difficulty always have correct maxplayers)
             return mapDiff->maxPlayers;
-        else                                                // DBC have 0 maxplayers for heroic instances with expansion < 2
-        {
-            // The heroic entry exists, so we don't have to check anything, simply return normal max players
-            MapDifficultyEntry const* normalDiff = GetMapDifficultyData(i_id, REGULAR_DIFFICULTY);
-            return normalDiff ? normalDiff->maxPlayers : 0;
-        }
+            // DBC have 0 maxplayers for heroic instances with expansion < 2
+        // The heroic entry exists, so we don't have to check anything, simply return normal max players
+        MapDifficultyEntry const* normalDiff = GetMapDifficultyData(i_id, REGULAR_DIFFICULTY);
+        return normalDiff ? normalDiff->maxPlayers : 0;
     }
-    else                                                    // I'd rather ASSERT(false);
-        return 0;
+        // I'd rather ASSERT(false);
+    return 0;
 }
 
 uint32 Map::GetMaxResetDelay() const

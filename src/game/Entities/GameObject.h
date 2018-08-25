@@ -689,8 +689,7 @@ class GameObject : public WorldObject
             time_t now = time(nullptr);
             if (m_respawnTime > now)
                 return m_respawnTime;
-            else
-                return now;
+            return now;
         }
 
         void SetRespawnTime(time_t respawn)

@@ -153,7 +153,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 sLog.outErrorDb("Table `%s` has buddyEntry = %u in command %u for script id %u, but this creature_template does not exist, skipping.", tablename, tmp.buddyEntry, tmp.command, tmp.id);
                 continue;
             }
-            else if (!tmp.IsCreatureBuddy() && !ObjectMgr::GetGameObjectInfo(tmp.buddyEntry))
+            if (!tmp.IsCreatureBuddy() && !ObjectMgr::GetGameObjectInfo(tmp.buddyEntry))
             {
                 sLog.outErrorDb("Table `%s` has buddyEntry = %u in command %u for script id %u, but this gameobject_template does not exist, skipping.", tablename, tmp.buddyEntry, tmp.command, tmp.id);
                 continue;
@@ -654,7 +654,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                     sLog.outErrorDb("Table `%s` has npc entry = '%u' in SCRIPT_COMMAND_TERMINATE_SCRIPT for script id %u, but this npc entry does not exist.", tablename, tmp.terminateScript.npcEntry, tmp.id);
                     continue;
                 }
-                else if (tmp.terminateScript.poolId && tmp.terminateScript.poolId > sPoolMgr.GetMaxPoolId())
+                if (tmp.terminateScript.poolId && tmp.terminateScript.poolId > sPoolMgr.GetMaxPoolId())
                 {
                     sLog.outErrorDb("Table `%s` has pool id = '%u' in SCRIPT_COMMAND_TERMINATE_SCRIPT for script id %u, but this pool id does not exist.", tablename, tmp.terminateScript.poolId, tmp.id);
                     continue;
@@ -2385,18 +2385,15 @@ int32 ScriptMgr::GetRandomScriptTemplateId(uint32 id, uint8 templateType)
         uint32 random = urand(0, scriptTemplate.size() - 1);
         return scriptTemplate[random].first;
     }
-    else
+    uint32 random = urand(0, totalChance);
+    uint32 cumulativeChance = 0;
+    for (auto& data : scriptTemplate)
     {
-        uint32 random = urand(0, totalChance);
-        uint32 cumulativeChance = 0;
-        for (auto& data : scriptTemplate)
-        {
-            cumulativeChance += data.second;
-            if (cumulativeChance >= random)
-                return data.first;
-        }
-        return 0; // should never get here - error suppression
+        cumulativeChance += data.second;
+        if (cumulativeChance >= random)
+            return data.first;
     }
+    return 0; // should never get here - error suppression
 }
 
 int32 ScriptMgr::GetRandomScriptStringFromTemplate(uint32 id)

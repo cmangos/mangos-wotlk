@@ -4490,13 +4490,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 return;
             }
             // Hungering Cold
-            else if (m_spellInfo->SpellFamilyFlags & uint64(0x0000100000000000))
+            if (m_spellInfo->SpellFamilyFlags & uint64(0x0000100000000000))
             {
                 m_caster->CastSpell(m_caster, 51209, TRIGGERED_OLD_TRIGGERED);
                 return;
             }
-            // Death Strike
-            else if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000000000010))
+                // Death Strike
+            if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000000000010))
             {
                 uint32 count = 0;
                 Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
@@ -4530,7 +4530,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 return;
             }
             // Death Grip
-            else if (m_spellInfo->Id == 49576)
+            if (m_spellInfo->Id == 49576)
             {
                 if (!unitTarget)
                     return;
@@ -4538,8 +4538,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 m_caster->CastSpell(unitTarget, 49560, TRIGGERED_OLD_TRIGGERED);
                 return;
             }
-            // Death Grip
-            else if (m_spellInfo->Id == 49560)
+                // Death Grip
+            if (m_spellInfo->Id == 49560)
             {
                 if (!unitTarget || unitTarget == m_caster)
                     return;
@@ -4551,7 +4551,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 return;
             }
             // Obliterate
-            else if (m_spellInfo->SpellFamilyFlags & uint64(0x0002000000000000))
+            if (m_spellInfo->SpellFamilyFlags & uint64(0x0002000000000000))
             {
                 // search for Annihilation
                 Unit::AuraList const& dummyList = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
@@ -4561,15 +4561,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     {
                         if (roll_chance_i(itr->GetModifier()->m_amount)) // don't consume if found
                             return;
-                        else
-                            break;
+                        break;
                     }
                 }
 
                 // consume diseases
                 unitTarget->RemoveAurasWithDispelType(DISPEL_DISEASE, m_caster->GetObjectGuid());
             }
-            // Raise ally
+                // Raise ally
             else if (m_spellInfo->Id == 61999)
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -9407,8 +9406,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (!m_caster->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
                         return;
                     // "escort" aura is present so break; and let DB table dbscripts_on_spell be used and process further.
-                    else
-                        break;
+                    break;
                 }
                 case 46203:                                 // Goblin Weather Machine
                 {
@@ -10333,7 +10331,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     if (unitTarget->HasAura(63132))
                         return;
-                    else if (unitTarget->HasAura(63131))
+                    if (unitTarget->HasAura(63131))
                     {
                         unitTarget->RemoveAurasDueToSpell(63131);
                         unitTarget->CastSpell(unitTarget, 63132, TRIGGERED_OLD_TRIGGERED);         // Shield Level 3
@@ -10344,7 +10342,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         unitTarget->CastSpell(unitTarget, 63131, TRIGGERED_OLD_TRIGGERED);         // Shield Level 2
                     }
                     else
-                        unitTarget->CastSpell(unitTarget, 63130, TRIGGERED_OLD_TRIGGERED);         // Shield Level 1
+                        unitTarget->CastSpell(unitTarget, 63130, TRIGGERED_OLD_TRIGGERED);
+                    // Shield Level 1
                     return;
                 }
                 case 63122:                                 // Clear Insane
@@ -10965,7 +10964,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                             rank = 1;
                             break;
                         }
-                        else if (mDummyAura->GetId() == 18693)
+                        if (mDummyAura->GetId() == 18693)
                         {
                             rank = 2;
                             break;
@@ -12269,8 +12268,7 @@ void Spell::EffectDispelMechanic(SpellEffectIndex eff_idx)
             unitTarget->RemoveAurasDueToSpell(spell->Id);
             if (Auras.empty())
                 break;
-            else
-                next = Auras.begin();
+            next = Auras.begin();
         }
     }
 }

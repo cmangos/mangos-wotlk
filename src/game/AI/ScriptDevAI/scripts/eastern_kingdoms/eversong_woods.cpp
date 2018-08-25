@@ -184,8 +184,7 @@ struct npc_kelerun_bloodmournAI : public ScriptedAI
                         Reset();
                         return;
                     }
-                    else
-                        m_uiEngageTimer = 15000;
+                    m_uiEngageTimer = 15000;
                 }
                 m_uiCheckAliveStateTimer = 2500;
             }

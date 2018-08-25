@@ -128,8 +128,7 @@ struct npc_shadowfang_prisonerAI : public npc_escortAI
         {
             if (pWho->GetEntry() == NPC_ASH || pWho->GetEntry() == NPC_ADA)
                 return;
-            else
-                ScriptedAI::AttackStart(pWho);
+            ScriptedAI::AttackStart(pWho);
         }
     }
 };

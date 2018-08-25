@@ -1686,15 +1686,11 @@ struct npc_salhadaarAI : public ScriptedAI
                     m_creature->SetFactionTemporary(FACTION_SALHADAAR_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_TOGGLE_NOT_SELECTABLE);
                     return;
                 }
-                else
-                {
-                    Reset();
-                    m_creature->ForcedDespawn();
-                    return;
-                }
+                Reset();
+                m_creature->ForcedDespawn();
+                return;
             }
-            else
-                m_uiAttackTimer -= uiDiff;
+            m_uiAttackTimer -= uiDiff;
         }
         if (m_creature->isInCombat())
         {
@@ -1715,8 +1711,7 @@ struct npc_salhadaarAI : public ScriptedAI
                     m_creature->CastSpell(m_creature, SPELL_GRAVITY_FLUX, TRIGGERED_NONE); // cast gravity flux every 15 seconds
                     return;
                 }
-                else
-                    m_uiGravityFlux -= uiDiff;
+                m_uiGravityFlux -= uiDiff;
 
                 if (m_uiStasisTimer <= uiDiff)
                 {

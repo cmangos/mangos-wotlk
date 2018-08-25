@@ -399,7 +399,7 @@ void instance_naxxramas::SetData(uint32 uiType, uint32 uiData)
                 // Don't store special data
                 return;
             }
-            else if (uiData == FAIL)
+            if (uiData == FAIL)
                 m_uiHorseMenKilled = 0;
             else if (uiData == DONE)
             {

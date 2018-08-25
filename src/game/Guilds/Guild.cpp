@@ -1522,10 +1522,9 @@ void Guild::LoadGuildBankEventLogFromDB()
                 sLog.outError("GuildBankEventLog ERROR: MoneyEvent LogGuid %u for Guild %u had incorrectly set its TabId to %u, correcting it to %u TabId", logGuid, m_Id, tabId, GUILD_BANK_MONEY_LOGS_TAB);
                 continue;
             }
-            else
                 // add event to list
                 // events are ordered from oldest (in beginning) to latest (in the end)
-                m_GuildBankEventLog_Item[tabId].push_front(NewEvent);
+            m_GuildBankEventLog_Item[tabId].push_front(NewEvent);
 
             if (!isNextLogGuidSet)
             {
@@ -1785,21 +1784,18 @@ Item* Guild::_StoreItem(uint8 tab, uint8 slot, Item* pItem, uint32 count, bool c
 
         return pItem;
     }
-    else
+    pItem2->SetCount(pItem2->GetCount() + count);
+    pItem2->FSetState(ITEM_CHANGED);
+    pItem2->SaveToDB();                                 // not in inventory and can be save standalone
+
+    if (!clone)
     {
-        pItem2->SetCount(pItem2->GetCount() + count);
-        pItem2->FSetState(ITEM_CHANGED);
-        pItem2->SaveToDB();                                 // not in inventory and can be save standalone
-
-        if (!clone)
-        {
-            pItem->RemoveFromWorld();
-            pItem->DeleteFromDB();
-            delete pItem;
-        }
-
-        return pItem2;
+        pItem->RemoveFromWorld();
+        pItem->DeleteFromDB();
+        delete pItem;
     }
+
+    return pItem2;
 }
 
 void Guild::RemoveItem(uint8 tab, uint8 slot)
@@ -2002,8 +1998,9 @@ void Guild::SwapItems(Player* pl, uint8 BankTab, uint8 BankTabSlot, uint8 BankTa
 
     if (SplitedAmount > pItemSrc->GetCount())
         return;                                         // cheating?
-    else if (SplitedAmount == pItemSrc->GetCount())
-        SplitedAmount = 0;                              // no split
+    if (SplitedAmount == pItemSrc->GetCount())
+        SplitedAmount = 0;
+    // no split
 
     Item* pItemDst = GetItem(BankTabDst, BankTabSlotDst);
 
@@ -2124,8 +2121,9 @@ void Guild::MoveFromBankToChar(Player* pl, uint8 BankTab, uint8 BankTabSlot, uin
 
     if (SplitedAmount > pItemBank->GetCount())
         return;                                         // cheating?
-    else if (SplitedAmount == pItemBank->GetCount())
-        SplitedAmount = 0;                              // no split
+    if (SplitedAmount == pItemBank->GetCount())
+        SplitedAmount = 0;
+    // no split
 
     if (SplitedAmount)
     {
@@ -2281,8 +2279,9 @@ void Guild::MoveFromCharToBank(Player* pl, uint8 PlayerBag, uint8 PlayerSlot, ui
 
     if (SplitedAmount > pItemChar->GetCount())
         return;                                             // cheating?
-    else if (SplitedAmount == pItemChar->GetCount())
-        SplitedAmount = 0;                                  // no split
+    if (SplitedAmount == pItemChar->GetCount())
+        SplitedAmount = 0;
+    // no split
 
     if (SplitedAmount)
     {

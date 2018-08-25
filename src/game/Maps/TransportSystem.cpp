@@ -148,8 +148,7 @@ bool TransportBase::HasOnBoard(WorldObject const* passenger) const
         // pasenger is boarded onto this
         if (passenger->GetTransportInfo()->GetTransport() == m_owner)
             return true;
-        else
-            passenger = passenger->GetTransportInfo()->GetTransport();
+        passenger = passenger->GetTransportInfo()->GetTransport();
     }
 
     return false;

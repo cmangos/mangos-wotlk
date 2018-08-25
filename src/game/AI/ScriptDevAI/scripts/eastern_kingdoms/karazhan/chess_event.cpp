@@ -624,7 +624,7 @@ bool EffectDummyCreature_npc_chess_generic(Unit* pCaster, uint32 uiSpellId, Spel
         return true;
     }
     // generic melee tick
-    else if (uiSpellId == SPELL_ACTION_MELEE && uiEffIndex == EFFECT_INDEX_0)
+    if (uiSpellId == SPELL_ACTION_MELEE && uiEffIndex == EFFECT_INDEX_0)
     {
         uint32 uiMeleeSpell = 0;
 
@@ -647,8 +647,8 @@ bool EffectDummyCreature_npc_chess_generic(Unit* pCaster, uint32 uiSpellId, Spel
         pCreatureTarget->CastSpell(pCreatureTarget, uiMeleeSpell, TRIGGERED_OLD_TRIGGERED);
         return true;
     }
-    // square facing
-    else if (uiSpellId == SPELL_FACE_SQUARE && uiEffIndex == EFFECT_INDEX_0)
+        // square facing
+    if (uiSpellId == SPELL_FACE_SQUARE && uiEffIndex == EFFECT_INDEX_0)
     {
         if (pCaster->GetTypeId() == TYPEID_UNIT)
         {

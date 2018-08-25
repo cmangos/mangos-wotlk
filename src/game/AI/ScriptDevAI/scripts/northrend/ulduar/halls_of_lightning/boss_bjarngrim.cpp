@@ -213,8 +213,7 @@ struct boss_bjarngrimAI : public ScriptedAI
             m_uiChangeStanceTimer = urand(20000, 25000);
             return;
         }
-        else
-            m_uiChangeStanceTimer -= uiDiff;
+        m_uiChangeStanceTimer -= uiDiff;
 
         switch (m_uiStance)
         {

@@ -336,12 +336,14 @@ WeaponAttackType GetWeaponAttackType(SpellEntry const* spellInfo)
             return RANGED_ATTACK;
         default:
             // Wands
+        {
+            // Wands
             if (spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))
                 return RANGED_ATTACK;
-            else if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQ_OFFHAND))
+            if (spellInfo->HasAttribute(SPELL_ATTR_EX3_REQ_OFFHAND))
                 return OFF_ATTACK;
-            else
-                return BASE_ATTACK;
+            return BASE_ATTACK;
+        }
             break;
     }
 }
@@ -397,7 +399,7 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2)
             int32 diff = spellInfo_1->EffectBasePoints[i] - spellInfo_2->EffectBasePoints[i];
             if (spellInfo_1->CalculateSimpleValue(SpellEffectIndex(i)) < 0 && spellInfo_2->CalculateSimpleValue(SpellEffectIndex(i)) < 0)
                 return -diff;
-            else return diff;
+            return diff;
         }
     }
     return 0;
@@ -439,9 +441,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 
                 if (food && drink)
                     return SPELL_FOOD_AND_DRINK;
-                else if (food)
+                if (food)
                     return SPELL_FOOD;
-                else if (drink)
+                if (drink)
                     return SPELL_DRINK;
             }
             else
@@ -956,7 +958,7 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 f
     {
         if (spellInfo->HasAttribute(SPELL_ATTR_NOT_SHAPESHIFT)) // not while shapeshifted
             return SPELL_FAILED_NOT_SHAPESHIFT;
-        else if (spellInfo->Stances != 0)                   // needs other shapeshift
+        if (spellInfo->Stances != 0)                   // needs other shapeshift
             return SPELL_FAILED_ONLY_SHAPESHIFT;
     }
     else
@@ -1075,11 +1077,8 @@ struct SpellRankHelper
                 if (!worker.IsValidCustomRank(entry, spell_id, first_id))
                     return;
                 // for later check that first rank also added
-                else
-                {
-                    firstRankSpellsWithCustomRanks.insert(first_id);
-                    ++customRank;
-                }
+                firstRankSpellsWithCustomRanks.insert(first_id);
+                ++customRank;
             }
         }
 
@@ -3872,7 +3871,7 @@ void SpellMgr::LoadSpellAreas()
             sLog.outErrorDb("Spell %u listed in `spell_area` have wrong conditionId (%u) requirement", spell, spellArea.conditionId);
             continue;
         }
-        else if (!spellArea.conditionId)
+        if (!spellArea.conditionId)
         {
             if (spellArea.questStart && !sObjectMgr.GetQuestTemplate(spellArea.questStart))
             {
@@ -4451,10 +4450,10 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             if (spellproto->IsFitToFamilyMask(uint64(0x00001000000)))
                 return DIMINISHING_FEAR_CHARM_BLIND;
             // Cheap Shot
-            else if (spellproto->IsFitToFamilyMask(uint64(0x00000000400)))
+            if (spellproto->IsFitToFamilyMask(uint64(0x00000000400)))
                 return DIMINISHING_CHEAPSHOT_POUNCE;
-            // Crippling poison - Limit to 10 seconds in PvP (No SpellFamilyFlags)
-            else if (spellproto->SpellIconID == 163)
+                // Crippling poison - Limit to 10 seconds in PvP (No SpellFamilyFlags)
+            if (spellproto->SpellIconID == 163)
                 return DIMINISHING_LIMITONLY;
             break;
         }
@@ -4485,10 +4484,10 @@ DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto
             if (spellproto->IsFitToFamilyMask(uint64(0x02000000000)))
                 return DIMINISHING_CYCLONE;
             // Pounce
-            else if (spellproto->IsFitToFamilyMask(uint64(0x00000020000)))
+            if (spellproto->IsFitToFamilyMask(uint64(0x00000020000)))
                 return DIMINISHING_CHEAPSHOT_POUNCE;
             // Faerie Fire
-            else if (spellproto->IsFitToFamilyMask(uint64(0x00000000400)))
+            if (spellproto->IsFitToFamilyMask(uint64(0x00000000400)))
                 return DIMINISHING_LIMITONLY;
             break;
         }
@@ -4680,9 +4679,8 @@ bool SpellArea::IsFitToRequirements(Player const* player, uint32 newZone, uint32
         if (auraSpell > 0)
             // have expected aura
             return player->HasAura(auraSpell);
-        else
             // not have expected aura
-            return !player->HasAura(-auraSpell);
+        return !player->HasAura(-auraSpell);
     }
 
     return true;

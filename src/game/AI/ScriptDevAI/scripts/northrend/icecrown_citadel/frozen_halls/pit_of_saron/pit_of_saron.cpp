@@ -169,7 +169,7 @@ bool AreaTrigger_at_pit_of_saron(Player* pPlayer, AreaTriggerEntry const* pAt)
         pInstance->SetData(TYPE_AMBUSH, IN_PROGRESS);
         return true;
     }
-    else if (pAt->id == AREATRIGGER_ID_TUNNEL_END)
+    if (pAt->id == AREATRIGGER_ID_TUNNEL_END)
     {
         if (pInstance->GetData(TYPE_AMBUSH) != IN_PROGRESS)
             return false;

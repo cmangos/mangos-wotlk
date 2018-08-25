@@ -30,22 +30,20 @@ namespace Movement
         {
             if (moveFlags & MOVEFLAG_BACKWARD /*&& speed_obj.flight >= speed_obj.flight_back*/)
                 return MOVE_FLIGHT_BACK;
-            else
-                return MOVE_FLIGHT;
+            return MOVE_FLIGHT;
         }
-        else if (moveFlags & MOVEFLAG_SWIMMING)
+        if (moveFlags & MOVEFLAG_SWIMMING)
         {
             if (moveFlags & MOVEFLAG_BACKWARD /*&& speed_obj.swim >= speed_obj.swim_back*/)
                 return MOVE_SWIM_BACK;
-            else
-                return MOVE_SWIM;
+            return MOVE_SWIM;
         }
-        else if (moveFlags & MOVEFLAG_WALK_MODE)
+        if (moveFlags & MOVEFLAG_WALK_MODE)
         {
             // if ( speed_obj.run > speed_obj.walk )
             return MOVE_WALK;
         }
-        else if (moveFlags & MOVEFLAG_BACKWARD /*&& speed_obj.run >= speed_obj.run_back*/)
+        if (moveFlags & MOVEFLAG_BACKWARD /*&& speed_obj.run >= speed_obj.run_back*/)
             return MOVE_RUN_BACK;
 
         return MOVE_RUN;

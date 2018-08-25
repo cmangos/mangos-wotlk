@@ -428,16 +428,13 @@ struct boss_aranAI : public ScriptedAI
                                 DoStartMovement(m_creature->getVictim());
                                 return;
                             }
-                            else
-                            {
-                                uint32 currentSpellIndex = urand(0, m_choiceVector.size() - 1);
-                                uint32 currentSpellId = GetNormalSpellId(currentSpellIndex);
-                                DoCastSpellIfCan(pTarget, currentSpellId);
-                                m_normalSpellCooldown[currentSpellIndex] = GetNormalSpellCooldown(currentSpellId);
-                                m_attackDistance = 100.f;
-                                DoStartMovement(m_creature->getVictim());
-                                return;
-                            }                            
+                            uint32 currentSpellIndex = urand(0, m_choiceVector.size() - 1);
+                            uint32 currentSpellId = GetNormalSpellId(currentSpellIndex);
+                            DoCastSpellIfCan(pTarget, currentSpellId);
+                            m_normalSpellCooldown[currentSpellIndex] = GetNormalSpellCooldown(currentSpellId);
+                            m_attackDistance = 100.f;
+                            DoStartMovement(m_creature->getVictim());
+                            return;
                         }
                     }
                 }

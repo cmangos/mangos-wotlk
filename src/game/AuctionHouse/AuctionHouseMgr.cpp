@@ -647,7 +647,7 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
                 return 0;
             if (itemProto1->RequiredLevel < itemProto2->RequiredLevel)
                 return -1;
-            else if (itemProto1->RequiredLevel > itemProto2->RequiredLevel)
+            if (itemProto1->RequiredLevel > itemProto2->RequiredLevel)
                 return +1;
             break;
         }
@@ -659,7 +659,7 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
                 return 0;
             if (itemProto1->Quality < itemProto2->Quality)
                 return -1;
-            else if (itemProto1->Quality > itemProto2->Quality)
+            if (itemProto1->Quality > itemProto2->Quality)
                 return +1;
             break;
         }
@@ -668,29 +668,33 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
             {
                 if (buyout < auc->buyout)
                     return -1;
-                else if (buyout > auc->buyout)
+                if (buyout > auc->buyout)
                     return +1;
             }
             else
             {
                 if (bid < auc->bid)
                     return -1;
-                else if (bid > auc->bid)
+                if (bid > auc->bid)
                     return +1;
             }
             break;
         case 3:                                             // duration = 3
+        {
             if (expireTime < auc->expireTime)
                 return -1;
-            else if (expireTime > auc->expireTime)
+            if (expireTime > auc->expireTime)
                 return +1;
-            break;
+        }
+        break;
         case 4:                                             // status = 4
+        {
             if (bidder < auc->bidder)
                 return -1;
-            else if (bidder > auc->bidder)
+            if (bidder > auc->bidder)
                 return +1;
-            break;
+        }
+        break;
         case 5:                                             // name = 5
         {
             ItemPrototype const* itemProto1 = ObjectMgr::GetItemPrototype(itemTemplate);
@@ -720,14 +724,14 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
             {
                 if (bid1 < bid2)
                     return -1;
-                else if (bid1 > bid2)
+                if (bid1 > bid2)
                     return +1;
             }
             else
             {
                 if (buyout < auc->buyout)
                     return -1;
-                else if (buyout > auc->buyout)
+                if (buyout > auc->buyout)
                     return +1;
             }
 
@@ -742,7 +746,7 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
 
             if (bid1 < bid2)
                 return -1;
-            else if (bid1 > bid2)
+            if (bid1 > bid2)
                 return +1;
             break;
         }
@@ -750,16 +754,18 @@ int AuctionEntry::CompareAuctionEntry(uint32 column, const AuctionEntry* auc, Pl
         {
             if (itemCount < auc->itemCount)
                 return -1;
-            else if (itemCount > auc->itemCount)
+            if (itemCount > auc->itemCount)
                 return +1;
             break;
         }
         case 10:                                            // buyout = 10
+        {
             if (buyout < auc->buyout)
                 return -1;
-            else if (buyout > auc->buyout)
+            if (buyout > auc->buyout)
                 return +1;
-            break;
+        }
+        break;
         case 11:                                            // unused = 11
         default:
             break;
@@ -1039,9 +1045,7 @@ bool AuctionEntry::UpdateBid(uint32 newbid, Player* newbidder /*=nullptr*/)
         CharacterDatabase.CommitTransaction();
         return true;
     }
-    else                                                    // buyout
-    {
-        AuctionBidWinning(newbidder);
-        return false;
-    }
+        // buyout
+    AuctionBidWinning(newbidder);
+    return false;
 }

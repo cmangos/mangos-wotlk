@@ -1036,11 +1036,9 @@ CreatureModelInfo const* ObjectMgr::GetCreatureModelRandomGender(uint32 display_
             sLog.outErrorDb("Model (Entry: %u) has modelid_other_gender %u not found in table `creature_model_info`. ", minfo->modelid, minfo->modelid_other_gender);
             return minfo;                                   // not fatal, just use the previous one
         }
-        else
-            return minfo_tmp;
+        return minfo_tmp;
     }
-    else
-        return minfo;
+    return minfo;
 }
 
 uint32 ObjectMgr::GetModelForRace(uint32 sourceModelId, uint32 racemask)
@@ -2828,7 +2826,7 @@ void ObjectMgr::LoadPetLevelInfo()
             }
             continue;
         }
-        else if (current_level < 1)
+        if (current_level < 1)
         {
             sLog.outErrorDb("Wrong (<1) level %u in `pet_levelstats` table, ignoring.", current_level);
             continue;
@@ -3217,7 +3215,7 @@ void ObjectMgr::LoadPlayerInfo()
                 sLog.outErrorDb("Wrong level %u in `player_classlevelstats` table, ignoring.", current_level);
                 continue;
             }
-            else if (current_level > sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+            if (current_level > sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
             {
                 if (current_level > STRONG_MAX_LEVEL)       // hardcoded level maximum
                     sLog.outErrorDb("Wrong (> %u) level %u in `player_classlevelstats` table, ignoring.", STRONG_MAX_LEVEL, current_level);
@@ -5095,7 +5093,7 @@ QuestgiverGreeting const* ObjectMgr::GetQuestgiverGreetingData(uint32 entry, uin
 {
     auto itr = m_questgiverGreetingMap[type].find(entry);
     if (itr == m_questgiverGreetingMap[type].end()) return nullptr;
-    else return &itr->second;
+    return &itr->second;
 }
 
 void ObjectMgr::LoadQuestgiverGreeting()
@@ -7318,7 +7316,7 @@ void ObjectMgr::LoadNPCSpellClickSpells()
             sLog.outErrorDb("Table npc_spellclick_spells references unknown condition %u. Skipping entry.", info.conditionId);
             continue;
         }
-        else if (!info.conditionId)                         // TODO Drop block after finished converting
+        if (!info.conditionId)                         // TODO Drop block after finished converting
         {
             // quest might be 0 to enable spellclick independent of any quest
             if (info.questStart && mQuestTemplates.find(info.questStart) == mQuestTemplates.end())
@@ -7968,7 +7966,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
             _DoStringError(start_value, "Table `%s` contain reserved entry 0, ignored.", table);
             continue;
         }
-        else if (entry < start_value || entry >= end_value)
+        if (entry < start_value || entry >= end_value)
         {
             _DoStringError(start_value, "Table `%s` contain entry %i out of allowed range (%d - %d), ignored.", table, entry, min_value, max_value);
             continue;
@@ -8061,8 +8059,7 @@ const char* ObjectMgr::GetMangosString(int32 entry, int locale_idx) const
     {
         if ((int32)msl->Content.size() > locale_idx + 1 && !msl->Content[locale_idx + 1].empty())
             return msl->Content[locale_idx + 1].c_str();
-        else
-            return msl->Content[0].c_str();
+        return msl->Content[0].c_str();
     }
 
     _DoStringError(entry, "Entry %i not found but requested", entry);
@@ -8198,8 +8195,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         {
             if (conditionSourceType == CONDITION_FROM_REFERING_LOOT && sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
                 return true;
-            else
-                return uint32(player->GetTeam()) == m_value1;
+            return uint32(player->GetTeam()) == m_value1;
         }
         case CONDITION_SKILL:
             return player->HasSkill(m_value1) && player->GetBaseSkillValue(m_value1) >= m_value2;
@@ -8353,8 +8349,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         {
             if (m_value2 == 1)
                 return !player->HasSkill(m_value1);
-            else
-                return player->HasSkill(m_value1) && player->GetBaseSkillValue(m_value1) < m_value2;
+            return player->HasSkill(m_value1) && player->GetBaseSkillValue(m_value1) < m_value2;
         }
         case CONDITION_REPUTATION_RANK_MAX:
         {
@@ -8442,8 +8437,7 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
                         }
                         return true;
                     }
-                    else
-                        return !player->isAlive() || (m_value2 && source && !source->IsWithinDistInMap(player, m_value2));
+                    return !player->isAlive() || (m_value2 && source && !source->IsWithinDistInMap(player, m_value2));
                 case 2:                                     // All players in instance dead or out of range
                     for (const auto& itr : map->GetPlayers())
                     {
@@ -9004,25 +8998,29 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const* pSkill, bool racial)
     {
         case SKILL_CATEGORY_LANGUAGES: return SKILL_RANGE_LANGUAGE;
         case SKILL_CATEGORY_WEAPON:
+        {
             if (pSkill->id != SKILL_FIST_WEAPONS)
                 return SKILL_RANGE_LEVEL;
-            else
-                return SKILL_RANGE_MONO;
+            return SKILL_RANGE_MONO;
+        }
         case SKILL_CATEGORY_ARMOR:
         case SKILL_CATEGORY_CLASS:
+        {
             if (pSkill->id != SKILL_LOCKPICKING)
                 return SKILL_RANGE_MONO;
-            else
-                return SKILL_RANGE_LEVEL;
+            return SKILL_RANGE_LEVEL;
+        }
         case SKILL_CATEGORY_SECONDARY:
         case SKILL_CATEGORY_PROFESSION:
             // not set skills for professions and racial abilities
+        {
+            // not set skills for professions and racial abilities
             if (IsProfessionSkill(pSkill->id))
                 return SKILL_RANGE_RANK;
-            else if (racial)
+            if (racial)
                 return SKILL_RANGE_NONE;
-            else
-                return SKILL_RANGE_MONO;
+            return SKILL_RANGE_MONO;
+        }
         default:
         case SKILL_CATEGORY_ATTRIBUTES:                     // not found in dbc
         case SKILL_CATEGORY_GENERIC:                        // only GENERIC(DND)
@@ -9103,10 +9101,12 @@ GameTele const* ObjectMgr::GetGameTele(const std::string& name) const
     // Alternative first GameTele what contains wnameLow as substring in case no GameTele location found
     const GameTele* alt = nullptr;
     for (const auto& itr : m_GameTeleMap)
+    {
         if (itr.second.wnameLow == wname)
             return &itr.second;
-        else if (alt == nullptr && itr.second.wnameLow.find(wname) != std::wstring::npos)
+        if (alt == nullptr && itr.second.wnameLow.find(wname) != std::wstring::npos)
             alt = &itr.second;
+    }
 
     return alt;
 }
@@ -9970,13 +9970,13 @@ bool ObjectMgr::IsVendorItemValid(bool isTemplate, char const* tableName, uint32
                             tableName, maxcount, item_id, idStr, vendor_entry);
         return false;
     }
-    else if (maxcount == 0 && incrtime > 0)
+    if (maxcount == 0 && incrtime > 0)
     {
         if (pl)
             ChatHandler(pl).PSendSysMessage("MaxCount==0 but IncrTime<>=0");
         else
             sLog.outErrorDb("Table `%s` has `maxcount`=0 for item %u of %s %u but `incrtime`<>0, ignoring",
-                            tableName, item_id, idStr, vendor_entry);
+                    tableName, item_id, idStr, vendor_entry);
         return false;
     }
 

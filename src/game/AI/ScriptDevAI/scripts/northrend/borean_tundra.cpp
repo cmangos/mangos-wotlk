@@ -763,7 +763,7 @@ bool EffectAuraDummy_npc_nexus_drake_hatchling(const Aura* pAura, bool bApply)
         pCaster->CastSpell(pCreature, SPELL_RED_DRAGONBLOOD, TRIGGERED_OLD_TRIGGERED);
         return true;
     }
-    else if (pAura->GetId() == SPELL_RED_DRAGONBLOOD && pAura->GetEffIndex() == EFFECT_INDEX_0)
+    if (pAura->GetId() == SPELL_RED_DRAGONBLOOD && pAura->GetEffIndex() == EFFECT_INDEX_0)
     {
         Creature* pCreature = (Creature*)pAura->GetTarget();
         Unit* pCaster = pAura->GetCaster();
@@ -778,7 +778,7 @@ bool EffectAuraDummy_npc_nexus_drake_hatchling(const Aura* pAura, bool bApply)
 
         return true;
     }
-    else if (pAura->GetId() == SPELL_SUBDUED && pAura->GetEffIndex() == EFFECT_INDEX_0 && !bApply)
+    if (pAura->GetId() == SPELL_SUBDUED && pAura->GetEffIndex() == EFFECT_INDEX_0 && !bApply)
     {
         Creature* pCreature = (Creature*)pAura->GetTarget();
         if (!pCreature || pCreature->GetEntry() != NPC_NEXUS_DRAKE_HATCHLING)
@@ -822,7 +822,7 @@ bool EffectDummyCreature_npc_nexus_drake_hatchling(Unit* pCaster, uint32 uiSpell
 
         return true;
     }
-    else if (uiSpellId == SPELL_DRAKE_TURN_IN && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_NEXUS_DRAKE_HATCHLING)
+    if (uiSpellId == SPELL_DRAKE_TURN_IN && uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetEntry() == NPC_NEXUS_DRAKE_HATCHLING)
     {
         if (Creature* pRaelorasz = GetClosestCreatureWithEntry(pCreatureTarget, NPC_RAELORASZ, 30.0f))
         {

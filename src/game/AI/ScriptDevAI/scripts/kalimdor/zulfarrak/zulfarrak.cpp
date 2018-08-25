@@ -45,8 +45,8 @@ bool ProcessEventId_event_go_zulfarrak_gong(uint32 /*uiEventId*/, Object* pSourc
                 pInstance->SetData(TYPE_GAHZRILLA, IN_PROGRESS);
                 return false;                               // Summon Gahz'rilla by Database Script
             }
-            else
-                return true;                                // Prevent DB script summoning Gahz'rilla
+            return true;
+            // Prevent DB script summoning Gahz'rilla
         }
     }
     return false;
@@ -67,8 +67,7 @@ bool ProcessEventId_event_spell_unlocking(uint32 /*uiEventId*/, Object* pSource,
                 pInstance->SetData(TYPE_PYRAMID_EVENT, IN_PROGRESS);
                 return false;                               // Summon pyramid trolls by Database Script
             }
-            else
-                return true;
+            return true;
         }
     }
     return false;

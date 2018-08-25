@@ -2048,7 +2048,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 return SPELL_AURA_PROC_FAILED;
             }
             // Living Seed
-            else if (dummySpell->SpellIconID == 2860)
+            if (dummySpell->SpellIconID == 2860)
             {
                 triggered_spell_id = 48504;
                 basepoints[0] = triggerAmount * damage / 100;
@@ -2192,7 +2192,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 return SPELL_AURA_PROC_OK;
             }
             // Misdirection
-            else if (dummySpell->Id == 34477)
+            if (dummySpell->Id == 34477)
             {
                 triggered_spell_id = 35079;                 // 4 sec buff on self
                 target = this;
@@ -2495,8 +2495,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         CastSpell(pVictim, !haveOffhandWeapon() || roll_chance_i(50) ? 71433 : 71434, TRIGGERED_OLD_TRIGGERED);
                         return SPELL_AURA_PROC_OK;
                     }
-                    else
-                        triggered_spell_id = 71432;
+                    triggered_spell_id = 71432;
 
                     break;
                 }
@@ -3505,7 +3504,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                 trigger_spell_id = 12721;
                 break;
             }
-            else if (auraSpellInfo->SpellIconID == 2961)    // Taste for Blood
+            if (auraSpellInfo->SpellIconID == 2961)    // Taste for Blood
             {
                 // only at real damage
                 if (!damage)
@@ -4112,7 +4111,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
     if (!target || (target != this && !target->isAlive()))
         return SPELL_AURA_PROC_FAILED;
     // Quick check for target modes for procs: do not cast offensive procs on friendly targets and in reverse
-    else if (!(procEx & PROC_EX_REFLECT))
+    if (!(procEx & PROC_EX_REFLECT))
     {
         if (IsPositiveSpellTargetMode(triggerEntry, this, target) != CanAssist(target))
             return SPELL_AURA_PROC_FAILED;

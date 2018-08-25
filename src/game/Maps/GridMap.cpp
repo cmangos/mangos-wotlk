@@ -870,8 +870,8 @@ float TerrainInfo::GetHeightStatic(float x, float y, float z, bool useVmaps/*=tr
             // or if the distance of the vmap height is less the land height distance
             if (vmapHeight > mapHeight || fabs(mapHeight - z) > fabs(vmapHeight - z))
                 return vmapHeight;
-            else
-                return mapHeight;                           // better use .map surface height
+            return mapHeight;
+            // better use .map surface height
         }
         return vmapHeight;                                  // we have only vmapHeight (if have)
     }
@@ -984,8 +984,7 @@ uint8 TerrainInfo::GetTerrainType(float x, float y) const
 {
     if (GridMap* gmap = const_cast<TerrainInfo*>(this)->GetGrid(x, y))
         return gmap->getTerrainType(x, y);
-    else
-        return 0;
+    return 0;
 }
 
 uint32 TerrainInfo::GetAreaId(float x, float y, float z) const
@@ -1111,8 +1110,7 @@ bool TerrainInfo::IsInWater(float x, float y, float pZ, GridMapLiquidData* data,
         {
             if (liquid_ptr && (liquid_ptr->level - liquid_ptr->depth_level > min_depth)) // avoid water with depth < 2
                 return true;
-            else
-                return false;
+            return false;
         }
     }
     return false;
@@ -1194,8 +1192,7 @@ float TerrainInfo::GetWaterOrGroundLevel(float x, float y, float z, float* pGrou
 
         if (!IsInWater(x, y, z, &liquid_status))
             return ground_z;
-        else
-            return swim ? liquid_status.level - 2.0f : liquid_status.level;
+        return swim ? liquid_status.level - 2.0f : liquid_status.level;
     }
 
     return VMAP_INVALID_HEIGHT_VALUE;
@@ -1359,8 +1356,7 @@ uint32 TerrainManager::GetAreaIdByAreaFlag(uint16 areaflag, uint32 map_id)
 
     if (entry)
         return entry->ID;
-    else
-        return 0;
+    return 0;
 }
 
 uint32 TerrainManager::GetZoneIdByAreaFlag(uint16 areaflag, uint32 map_id)
@@ -1369,8 +1365,7 @@ uint32 TerrainManager::GetZoneIdByAreaFlag(uint16 areaflag, uint32 map_id)
 
     if (entry)
         return (entry->zone != 0) ? entry->zone : entry->ID;
-    else
-        return 0;
+    return 0;
 }
 
 void TerrainManager::GetZoneAndAreaIdByAreaFlag(uint32& zoneid, uint32& areaid, uint16 areaflag, uint32 map_id)

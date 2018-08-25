@@ -317,8 +317,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
                     // Do nothing more, if phase switched
                     return;
                 }
-                else
-                    m_uiSplitTimer -= uiDiff;
+                m_uiSplitTimer -= uiDiff;
 
                 DoMeleeAttackIfReady();
                 break;

@@ -283,8 +283,7 @@ void GameObject::Update(uint32 update_diff, uint32 p_time)
 
                         return;
                     }
-                    else
-                        m_lootState = GO_READY;
+                    m_lootState = GO_READY;
                 }
                 default:
                     break;
@@ -901,8 +900,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
             {
                 if (this->IsFriend(u))
                     return true;
-                else
-                    trapNotVisible = true;
+                trapNotVisible = true;
             }
 
             // only rogue have skill for traps detection

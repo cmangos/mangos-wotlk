@@ -313,7 +313,7 @@ bool EffectDummyCreature_boss_ionar(Unit* /*pCaster*/, uint32 uiSpellId, SpellEf
         // always return true when we are handling this spell and effect
         return true;
     }
-    else if (uiSpellId == SPELL_SPARK_DESPAWN && uiEffIndex == EFFECT_INDEX_0)
+    if (uiSpellId == SPELL_SPARK_DESPAWN && uiEffIndex == EFFECT_INDEX_0)
     {
         if (pCreatureTarget->GetEntry() != NPC_IONAR)
             return true;

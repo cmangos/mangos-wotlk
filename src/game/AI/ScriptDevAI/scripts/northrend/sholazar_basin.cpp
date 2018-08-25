@@ -377,8 +377,7 @@ bool GossipSelect_npc_mosswalker_victim(Player* pPlayer, Creature* pCreature, ui
         // just to prevent double credit
         if (pCreature->GetLootRecipient())
             return true;
-        else
-            pCreature->SetLootRecipient(pPlayer);
+        pCreature->SetLootRecipient(pPlayer);
 
         if (urand(0, 2))                                    // die
         {

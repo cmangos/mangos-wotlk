@@ -191,8 +191,7 @@ void instance_azjol_nerub::DoSendWatcherOrKrikthir()
             {
                 if (pAttacker && urand(0, 1))
                     continue;
-                else
-                    pAttacker = pTemp;
+                pAttacker = pTemp;
             }
         }
     }
@@ -255,8 +254,7 @@ ObjectGuid instance_azjol_nerub::GetRandomAssassinTrigger()
     // Get a random summon target
     if (!m_vAssassinSummonTargetsVect.empty())
         return m_vAssassinSummonTargetsVect[urand(0, m_vAssassinSummonTargetsVect.size() - 1)];
-    else
-        return ObjectGuid();
+    return ObjectGuid();
 }
 
 void instance_azjol_nerub::ResetHadronoxTriggers()

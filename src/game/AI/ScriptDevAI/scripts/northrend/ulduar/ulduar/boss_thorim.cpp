@@ -487,8 +487,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
             m_uiStormHammerTimer = 60000;
             return nullptr;
         }
-        else
-            return suitableTargets[urand(0, suitableTargets.size() - 1)];
+        return suitableTargets[urand(0, suitableTargets.size() - 1)];
     }
 
     // function to spawn a random pack of dwarfes

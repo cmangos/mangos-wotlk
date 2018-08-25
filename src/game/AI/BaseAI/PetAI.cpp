@@ -158,8 +158,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
             return;
         }
-        else
-            charminfo->SetIsRetreating();
+        charminfo->SetIsRetreating();
     }
     else if (charminfo->GetSpellOpener() != 0) // have opener stored
     {
@@ -412,7 +411,7 @@ void PetAI::UpdateAllies()
 
     if (!owner)
         return;
-    else if (owner->GetTypeId() == TYPEID_PLAYER)
+    if (owner->GetTypeId() == TYPEID_PLAYER)
         group = ((Player*)owner)->GetGroup();
 
     // only pet and owner/not in group->ok

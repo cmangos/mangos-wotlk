@@ -176,13 +176,10 @@ struct boss_curatorAI : public ScriptedAI
                         }
                         return;
                     }
-                    else
+                    switch (urand(0, 3))
                     {
-                        switch (urand(0, 3))
-                        {
-                            case 0: DoScriptText(SAY_SUMMON1, m_creature); break;
-                            case 1: DoScriptText(SAY_SUMMON2, m_creature); break;
-                        }
+                        case 0: DoScriptText(SAY_SUMMON1, m_creature); break;
+                        case 1: DoScriptText(SAY_SUMMON2, m_creature); break;
                     }
                 }
             }

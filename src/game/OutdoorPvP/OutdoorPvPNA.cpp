@@ -424,7 +424,7 @@ bool OutdoorPvPNA::HandleGameObjectUse(Player* player, GameObject* go)
                 // no need to iterate the other roosts
                 return false;
             }
-            else if (go->GetEntry() == nagrandRoostsBrokenAlliance[i])
+            if (go->GetEntry() == nagrandRoostsBrokenAlliance[i])
             {
                 // update roost states
                 UpdateWyvernsWorldState(WORLD_STATE_REMOVE);
@@ -438,7 +438,7 @@ bool OutdoorPvPNA::HandleGameObjectUse(Player* player, GameObject* go)
                 // no need to iterate the other roosts
                 return false;
             }
-            else if (go->GetEntry() == nagrandRoostsAlliance[i])
+            if (go->GetEntry() == nagrandRoostsAlliance[i])
             {
                 // mark player as pvp
                 player->UpdatePvP(true);
@@ -469,7 +469,7 @@ bool OutdoorPvPNA::HandleGameObjectUse(Player* player, GameObject* go)
                 // no need to iterate the other roosts
                 return false;
             }
-            else if (go->GetEntry() == nagrandRoostsBrokenHorde[i])
+            if (go->GetEntry() == nagrandRoostsBrokenHorde[i])
             {
                 // update roost states
                 UpdateWyvernsWorldState(WORLD_STATE_REMOVE);
@@ -483,7 +483,7 @@ bool OutdoorPvPNA::HandleGameObjectUse(Player* player, GameObject* go)
                 // no need to iterate the other roosts
                 return false;
             }
-            else if (go->GetEntry() == nagrandRoostsHorde[i])
+            if (go->GetEntry() == nagrandRoostsHorde[i])
             {
                 // mark player as pvp
                 player->UpdatePvP(true);

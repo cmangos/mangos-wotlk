@@ -878,8 +878,7 @@ struct npc_unworthy_initiateAI : public ScriptedAI
     {
         if (m_myAnchorGuid)
             return m_creature->GetMap()->GetCreature(m_myAnchorGuid);
-        else
-            return GetClosestCreatureWithEntry(m_creature, NPC_ANCHOR, INTERACTION_DISTANCE * 2);
+        return GetClosestCreatureWithEntry(m_creature, NPC_ANCHOR, INTERACTION_DISTANCE * 2);
     }
 
     void SetAnchor()
@@ -1251,8 +1250,7 @@ struct npc_scarlet_ghoulAI : public ScriptedPetAI
                     ((Pet*)m_creature)->Unsummon(PET_SAVE_AS_DELETED);
                 return;
             }
-            else
-                m_uiUnsummonTimer -= uiDiff;
+            m_uiUnsummonTimer -= uiDiff;
         }
 
         if (m_bIsJumping)
