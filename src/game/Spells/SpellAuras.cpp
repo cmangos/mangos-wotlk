@@ -971,7 +971,7 @@ void Aura::ReapplyAffectedPassiveAuras(Unit* target, bool owner_mode)
     if (!affectedAuraCaster.empty())
     {
         Unit* caster = GetCaster();
-        for (std::_Simple_types<unsigned int>::value_type set_itr : affectedAuraCaster)
+        for (uint32 set_itr : affectedAuraCaster)
         {
             target->RemoveAurasDueToSpell(set_itr);
             if (caster)

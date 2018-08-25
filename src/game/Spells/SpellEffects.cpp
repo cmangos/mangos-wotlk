@@ -6943,7 +6943,7 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
             data << m_caster->GetObjectGuid();              // Caster GUID
             data << unitTarget->GetObjectGuid();            // Victim GUID
             data << uint32(m_spellInfo->Id);                // Dispel spell id
-            for (std::_Simple_types<unsigned int>::value_type& j : fail_list)
+            for (uint32& j : fail_list)
                 data << uint32(j);                         // Spell Id
             m_caster->SendMessageToSet(data, true);
         }

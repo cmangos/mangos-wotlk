@@ -255,7 +255,7 @@ inline bool isNumeric(char const* str)
 
 inline bool isNumeric(std::string const& str)
 {
-    for (std::_Simple_types<char>::value_type itr : str)
+    for (char itr : str)
         if (!isNumeric(itr))
             return false;
 
@@ -264,7 +264,7 @@ inline bool isNumeric(std::string const& str)
 
 inline bool isNumeric(std::wstring const& str)
 {
-    for (std::_Simple_types<wchar_t>::value_type itr : str)
+    for (wchar_t itr : str)
         if (!isNumeric(itr))
             return false;
 

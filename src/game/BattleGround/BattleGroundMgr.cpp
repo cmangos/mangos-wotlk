@@ -1842,7 +1842,7 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket& data, ObjectGuid 
             {
                 BattleGroundBracketId bracketId = bracketEntry->GetBracketId();
                 ClientBattleGroundIdSet const& ids = m_ClientBattleGroundIds[bgTypeId][bracketId];
-                for (std::_Simple_types<unsigned int>::value_type id : ids)
+                for (uint32 id : ids)
                 {
                     data << uint32(id);
                     ++count;

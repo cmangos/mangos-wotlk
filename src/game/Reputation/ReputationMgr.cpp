@@ -325,7 +325,7 @@ void ReputationMgr::SetReputation(FactionEntry const* factionEntry, int32 standi
         if (flist)
         {
             // Spillover to affiliated factions
-            for (std::_Simple_types<unsigned int>::value_type itr : *flist)
+            for (uint32 itr : *flist)
             {
                 if (FactionEntry const* factionEntryCalc = sFactionStore.LookupEntry(itr))
                 {
