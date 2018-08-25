@@ -2844,6 +2844,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 49761:                                 // Rocket-Propelled Goblin Grenade
+                {
+                    if (unitTarget)
+                        m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
+
+                    return;
+                }
                 case 49859:                                 // Rune of Command
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
@@ -10021,11 +10028,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     break;
                 }
                 case 56659:                                 // Build Demolisher (Force)
-                case 56662:                                 // Build Siege Vehicle (Force)
+                case 56662:                                 // Build Siege Vehicle (Force) - alliance version
                 case 56664:                                 // Build Catapult (Force)
                 case 56666:                                 // Build Fighter Jet (Force)
                 case 56668:                                 // Build Bomber (Force)
                 case 56670:                                 // Build Shredder (Force)
+                case 61409:                                 // Build Siege Vehicle (Force) - horde version
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;

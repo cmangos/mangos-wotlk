@@ -155,10 +155,8 @@ void BattlefieldWG::HandlePlayerEnterArea(Player* player, uint32 areaId, bool is
 {
     switch (areaId)
     {
-        case AREA_ID_WINTERGRASP_FORTRESS:
         case AREA_ID_THE_SUNKEN_RING:
         case AREA_ID_THE_BROKEN_TEMPLE:
-        case AREA_ID_THE_CHILLED_QUAGMIRE:
         case AREA_ID_WESTPARK_WORKSHOP:
         case AREA_ID_EASTPARK_WORKSHOP:
             // ToDo: handle SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE and SPELL_HORDE_CONTROLS_FACTORY_PHASE
@@ -168,7 +166,16 @@ void BattlefieldWG::HandlePlayerEnterArea(Player* player, uint32 areaId, bool is
 
 void BattlefieldWG::HandlePlayerLeaveArea(Player* player, uint32 areaId, bool isMainZone)
 {
-    // ToDo: handle SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE and SPELL_HORDE_CONTROLS_FACTORY_PHASE
+    switch (areaId)
+    {
+        case AREA_ID_THE_SUNKEN_RING:
+        case AREA_ID_THE_BROKEN_TEMPLE:
+        case AREA_ID_WESTPARK_WORKSHOP:
+        case AREA_ID_EASTPARK_WORKSHOP:
+            player->RemoveAurasDueToSpell(SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE);
+            player->RemoveAurasDueToSpell(SPELL_HORDE_CONTROLS_FACTORY_PHASE);
+            return;
+    }
 }
 
 void BattlefieldWG::HandleCreatureCreate(Creature* creature)
@@ -230,12 +237,21 @@ void BattlefieldWG::StartBattle(Team defender)
 
     SendZoneWarning(LANG_OPVP_WG_BATTLE_BEGIN);
 
+    // remove essence of WG phase
+    BuffTeam(ALLIANCE, SPELL_ESSENCE_WINTERGRASP_ZONE, true);
+    BuffTeam(HORDE, SPELL_ESSENCE_WINTERGRASP_ZONE, true);
+
     // Enable restricted flight area - handled in Player::UpdateArea()
+
+    // note: at the beginning the entire area is reset to the following status
+    // the defender starts by owning the fortress and the sunken ring and broken temple
+    // the attacker starts by owning all three towers plus the two eastpart and westpark workshops
 }
 
 void BattlefieldWG::EndBattle(Team winner, bool byTimer)
 {
-
+    // note: at the end of the battle the workshops stay in the possesion of whoever owned them in the battle
+    // the towers however reset to neutral
 }
 
 void BattlefieldWG::RewardPlayersOnBattleEnd(Team winner)
