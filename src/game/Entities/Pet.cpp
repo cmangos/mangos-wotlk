@@ -311,17 +311,18 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     m_resetTalentsCost = fields[15].GetUInt32();
     m_resetTalentsTime = fields[16].GetUInt64();
 
-    delete result;
-
     // load spells/cooldowns/auras
     _LoadAuras(timediff);
+
+    // remove arena auras if in arena - but only DB loaded ones
+    if (map->IsBattleArena())
+        RemoveArenaAuras();
 
     // init AB
     LearnPetPassives();
     CastPetAuras(current);
     CastOwnerTalentAuras();
     InitTamedPetPassives(owner);
-    UpdateAllStats();
 
     // Those two following call was moved here to fix health is not full after pet invocation (before, they where placed after map->Add())
     _LoadSpells();
@@ -329,9 +330,7 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
     // TODO: confirm two line above work in all situation
     InitPetScalingAuras();
 
-    // remove arena auras if in arena
-    if (map->IsBattleArena())
-        RemoveArenaAuras();
+    UpdateAllStats();
 
     // failsafe check
     savedhealth = savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth;

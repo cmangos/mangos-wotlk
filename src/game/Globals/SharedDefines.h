@@ -456,7 +456,7 @@ enum SpellAttributesEx5
 {
     SPELL_ATTR_EX5_CAN_CHANNEL_WHEN_MOVING     = 0x00000001,// 0 don't interrupt channeling spells when moving
     SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP       = 0x00000002,// 1 not need reagents if UNIT_FLAG_PREPARATION
-    SPELL_ATTR_EX5_REMOVE_AT_ENTER_ARENA       = 0x00000004,// 2 removed at enter arena (e.g. 31850 since 3.3.3)
+    SPELL_ATTR_EX5_REMOVE_ON_ARENA_ENTER       = 0x00000004,// 2 removed at enter arena (e.g. 31850 since 3.3.3)
     SPELL_ATTR_EX5_USABLE_WHILE_STUNNED        = 0x00000008,// 3 usable while stunned
     SPELL_ATTR_EX5_UNK4                        = 0x00000010,// 4
     SPELL_ATTR_EX5_SINGLE_TARGET_SPELL         = 0x00000020,// 5 Only one target can be apply at a time

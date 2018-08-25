@@ -416,7 +416,7 @@ void BattleGround::Update(uint32 diff)
                     if (Player* player = sObjectMgr.GetPlayer(itr->first))
                     {
                         player->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
-                        player->RemoveAurasWithAttribute(SPELL_ATTR_EX5_REMOVE_AT_ENTER_ARENA);
+                        player->RemoveAurasWithAttribute(SPELL_ATTR_EX5_REMOVE_ON_ARENA_ENTER);
                     }
                 }
 

@@ -6036,8 +6036,10 @@ void Unit::RemoveArenaAuras(bool onleave)
                 !iter->second->IsPassive() &&               // don't remove passive auras
                 (!iter->second->GetSpellProto()->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY) ||
                  !iter->second->GetSpellProto()->HasAttribute(SPELL_ATTR_HIDE_IN_COMBAT_LOG)) &&
+                !HasAreaAuraEffect(iter->second->GetSpellProto()) &&
                 // not unaffected by invulnerability auras or not having that unknown flag (that seemed the most probable)
-                (iter->second->IsPositive() != onleave))    // remove positive buffs on enter, negative buffs on leave
+                (iter->second->IsPositive() != onleave)    // remove positive buffs on enter, negative buffs on leave
+                || iter->second->GetSpellProto()->HasAttribute(SPELL_ATTR_EX5_REMOVE_ON_ARENA_ENTER))
         {
             RemoveSpellAuraHolder(iter->second);
             iter = m_spellAuraHolders.begin();
