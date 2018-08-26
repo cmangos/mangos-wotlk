@@ -113,7 +113,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     }
 
     Group* initiatorGroup = initiator->GetGroup();
-    if (initiatorGroup && initiatorGroup->isBGGroup())
+    if (initiatorGroup && initiatorGroup->isBattleGroup())
         initiatorGroup = initiator->GetOriginalGroup();
     if (!initiatorGroup)
         initiatorGroup = initiator->GetGroupInvite();
@@ -132,7 +132,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     }
 
     Group* recipientGroup = recipient->GetGroup();
-    if (recipientGroup && recipientGroup->isBGGroup())
+    if (recipientGroup && recipientGroup->isBattleGroup())
         recipientGroup = recipient->GetOriginalGroup();
 
     // player already in another group
