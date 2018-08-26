@@ -3461,6 +3461,8 @@ SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* trigger
 
 void Spell::Prepare()
 {
+    OnSuccessfulSpellStart();
+
     m_spellState = SPELL_STATE_CASTING;
 
     // Prepare data for triggers
@@ -8886,5 +8888,59 @@ bool Spell::IsEffectWithImplementedMultiplier(uint32 effectId) const
             return true;
         default:
             return false;
+    }
+}
+
+void Spell::OnSuccessfulSpellStart()
+{
+    switch (m_spellInfo->Id)
+    {
+        case 5308: // Warrior - Execute
+        case 20658:
+        case 20660:
+        case 20661:
+        case 20662:
+        case 25234:
+        case 25236:
+        case 47470:
+        case 47471:
+        {
+            uint32 rage = m_caster->GetPower(POWER_RAGE);
+            // up to max 30 rage cost
+            if (rage > 300)
+                rage = 300;
+
+            // Glyph of Execution bonus
+            uint32 rage_modified = rage;
+
+            if (Aura* aura = m_caster->GetDummyAura(58367))
+                rage_modified += aura->GetModifier()->m_amount * 10;
+
+            int32 basePoints0 = damage + int32(rage_modified * m_spellInfo->DmgMultiplier[0] + m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2f);
+            SpellCastResult result = m_caster->CastCustomSpell(m_targets.getUnitTarget(), 20647, &basePoints0, nullptr, nullptr, TRIGGERED_NONE, nullptr);
+            m_powerCost = 0;
+            break;
+        }
+    }
+}
+
+void Spell::OnSuccessfulSpellFinish()
+{
+    switch (m_spellInfo->Id)
+    {
+        case 32053: // Soul Charge - drop either stack or charge
+        case 32054:
+        case 32057:
+        {
+            uint32 parentSpell;
+            switch (m_spellInfo->Id)
+            {
+                case 32053: parentSpell = 32052; break;
+                case 32054: parentSpell = 32045; break;
+                case 32057: parentSpell = 32051; break;
+            }
+            m_caster->RemoveAuraStack(parentSpell);
+            break;
+        }
     }
 }

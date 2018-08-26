@@ -453,6 +453,33 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 12 / 100);
                 }
+
+                if (m_spellInfo->Id == 20647)
+                {
+                    uint32 rage = m_caster->GetPower(POWER_RAGE);
+
+                    // up to max 30 rage cost
+                    if (rage > 300)
+                        rage = 300;
+                    // Sudden Death
+                    if (m_caster->HasAura(52437))
+                    {
+                        Unit::AuraList const& auras = m_caster->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
+                        for (auto aura : auras)
+                        {
+                            // Only Sudden Death have this SpellIconID with SPELL_AURA_PROC_TRIGGER_SPELL
+                            if (aura->GetSpellProto()->SpellIconID == 1989)
+                            {
+                                // saved rage top stored in next affect
+                                uint32 lastrage = aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1) * 10;
+                                if (lastrage < rage)
+                                    rage -= lastrage;
+                                break;
+                            }
+                        }
+                    }
+                    m_caster->SetPower(POWER_RAGE, rage);
+                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
@@ -3851,50 +3878,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             {
                 int32 chargeBasePoints0 = damage;
                 m_caster->CastCustomSpell(m_caster, 34846, &chargeBasePoints0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-                return;
-            }
-            // Execute
-            if (m_spellInfo->SpellFamilyFlags & uint64(0x20000000))
-            {
-                if (!unitTarget)
-                    return;
-
-                uint32 rage = m_caster->GetPower(POWER_RAGE);
-
-                // up to max 30 rage cost
-                if (rage > 300)
-                    rage = 300;
-
-                // Glyph of Execution bonus
-                uint32 rage_modified = rage;
-
-                if (Aura* aura = m_caster->GetDummyAura(58367))
-                    rage_modified +=  aura->GetModifier()->m_amount * 10;
-
-                int32 basePoints0 = damage + int32(rage_modified * m_spellInfo->DmgMultiplier[eff_idx] +
-                                                   m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.2f);
-
-                m_caster->CastCustomSpell(unitTarget, 20647, &basePoints0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_HIT_CALCULATION, nullptr);
-
-                // Sudden Death
-                if (m_caster->HasAura(52437))
-                {
-                    Unit::AuraList const& auras = m_caster->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
-                    for (auto aura : auras)
-                    {
-                        // Only Sudden Death have this SpellIconID with SPELL_AURA_PROC_TRIGGER_SPELL
-                        if (aura->GetSpellProto()->SpellIconID == 1989)
-                        {
-                            // saved rage top stored in next affect
-                            uint32 lastrage = aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1) * 10;
-                            if (lastrage < rage)
-                                rage -= lastrage;
-                            break;
-                        }
-                    }
-                }
-
-                m_caster->SetPower(POWER_RAGE, m_caster->GetPower(POWER_RAGE) - rage);
                 return;
             }
             // Slam
