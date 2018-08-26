@@ -3773,7 +3773,7 @@ bool ChatHandler::HandleGuildCreateCommand(char* args)
     if (!guildStr)
         return false;
 
-    std::string guildname = guildStr;
+    const std::string& guildname = guildStr;
 
     if (target->GetGuildId())
     {

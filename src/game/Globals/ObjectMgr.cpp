@@ -6804,8 +6804,8 @@ void ObjectMgr::LoadPetNumber()
 
 std::string ObjectMgr::GeneratePetName(uint32 entry)
 {
-    std::vector<std::string>& list0 = PetHalfName0[entry];
-    std::vector<std::string>& list1 = PetHalfName1[entry];
+    const std::vector<std::string>& list0 = PetHalfName0[entry];
+    const std::vector<std::string>& list1 = PetHalfName1[entry];
 
     if (list0.empty() || list1.empty())
     {

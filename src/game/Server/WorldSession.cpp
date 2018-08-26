@@ -598,7 +598,7 @@ void WorldSession::SendMotd()
     std::vector<std::string> lines;
     std::string token;
 
-    std::string motd = sWorld.GetMotd();
+    const std::string& motd = sWorld.GetMotd();
     std::istringstream ss(motd);
 
     while (std::getline(ss, token, '@'))

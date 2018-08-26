@@ -357,7 +357,7 @@ bool Guild::LoadRanksFromDB(QueryResult* guildRanksResult)
             break;
 
         uint32 rankID        = fields[1].GetUInt32();
-        std::string rankName = fields[2].GetCppString();
+        const std::string& rankName = fields[2].GetCppString();
         uint32 rankRights    = fields[3].GetUInt32();
         uint32 rankMoney     = fields[4].GetUInt32();
 
