@@ -80,7 +80,7 @@ void OutdoorPvP::HandleGameObjectCreate(GameObject* go)
         if (itr != capturePoints->end())
             go->SetCapturePointSlider(itr->second.Value, itr->second.IsLocked);
         else
-            go->SetCapturePointSlider(CAPTURE_SLIDER_MIDDLE, false);
+            go->SetCapturePointSlider(go->GetGOInfo()->capturePoint.startingValue, false);
     }
 }
 
