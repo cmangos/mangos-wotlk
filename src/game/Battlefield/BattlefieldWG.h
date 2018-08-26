@@ -202,8 +202,8 @@ enum
 
     // ***** Gameobjects *****
     // titan relics
-    // GO_TITAN_RELIC_ALLIANCE                  = 192834,           // both send event id 22097
-    // GO_TITAN_RELIC_HORDE                     = 192829,
+    GO_TITAN_RELIC_ALLIANCE                     = 192834,           // both send event id 22097
+    GO_TITAN_RELIC_HORDE                        = 192829,
 
     // fortress walls
     GO_WG_FORTRESS_DOOR                         = 191810,
@@ -244,12 +244,12 @@ enum
     GO_TOWER_FLAMEWATCH                         = 190358,
 
     // workshops - friendly buildings (for all factions)
-    // GO_WORKSHOP_KEEP_WEST                    = 192028,
-    // GO_WORKSHOP_KEEP_EAST                    = 192029,
-    // GO_WORKSHOP_BROKEN_TEMPLE                = 192030,
-    // GO_WORKSHOP_SUNKEN_RING                  = 192031,
-    // GO_WORKSHOP_WESTPARK                     = 192032,
-    // GO_WORKSHOP_EASTPARK                     = 192033,
+    GO_WORKSHOP_KEEP_WEST                       = 192028,
+    GO_WORKSHOP_KEEP_EAST                       = 192029,
+    GO_WORKSHOP_BROKEN_TEMPLE                   = 192030,
+    GO_WORKSHOP_SUNKEN_RING                     = 192031,
+    GO_WORKSHOP_WESTPARK                        = 192032,
+    GO_WORKSHOP_EASTPARK                        = 192033,
 
     // capture points
     // each faction has a different starting value for the capture point; the objects are phased based on the zone defender
@@ -273,10 +273,6 @@ enum
     // GO_VEHICLE_TELEPORTER                    = 192951,               // generic object; the actual teleport is handled in a different way
     // GO_PORTAL_TO_WINTERGRASP                 = 193772,               // portal from dalaran to WG
 
-    // factions
-    FACTION_GO_ALLIANCE                         = 1732,
-    FACTION_GO_HORDE                            = 1735,
-
     // ***** Graveyards *****
     GRAVEYARD_ID_KEEP_1                         = 1285,
     GRAVEYARD_ID_KEEP_2                         = 1328,
@@ -287,31 +283,11 @@ enum
 
 
     // ***** Events *****
-    // capture points events (identical between horde and alliance GO versions)
-    EVENT_BROKEN_TEMPLE_CONTEST_ALLIANCE        = 20787,
-    EVENT_BROKEN_TEMPLE_CONTEST_HORDE           = 20788,
-    EVENT_BROKEN_TEMPLE_PROGRESS_ALLIANCE       = 19612,
-    EVENT_BROKEN_TEMPLE_PROGRESS_HORDE          = 19611,
-
-    EVENT_WESTPARK_CONTEST_ALLIANCE             = 21568,
-    EVENT_WESTPARK_CONTEST_HORDE                = 21569,
-    EVENT_WESTPARK_PROGRESS_ALLIANCE            = 21562,
-    EVENT_WESTPARK_PROGRESS_HORDE               = 21560,
-
-    EVENT_EASTPARK_CONTEST_ALLIANCE             = 21566,
-    EVENT_EASTPARK_CONTEST_HORDE                = 21567,
-    EVENT_EASTPARK_PROGRESS_ALLIANCE            = 21565,
-    EVENT_EASTPARK_PROGRESS_HORDE               = 21563,
-
-    EVENT_SUNKEN_RING_CONTEST_ALLIANCE          = 20785,
-    EVENT_SUNKEN_RING_CONTEST_HORDE             = 20786,
-    EVENT_SUNKEN_RING_PROGRESS_ALLIANCE         = 19610,
-    EVENT_SUNKEN_RING_PROGRESS_HORDE            = 19609,
+    // capture points events (identical between horde and alliance GO versions) - defined in wgCapturePointData
 
     // other events
     // destructible building events are defined below - too many to add here
     EVENT_TITAN_RELIC                           = 22097,                // event sent by the Titan relic
-
 
     // ***** world states *****
     // generic world states
@@ -385,10 +361,10 @@ enum
     FACTION_ID_WARSONG                          = 1979,
     FACTION_ID_VALLIANCE                        = 1891,
 
-    FACTION_ID_ALLIANCE_GENERIC_1               = 1732,             // used by GOs and creatures
-    FACTION_ID_ALLIANCE_GENERIC_2               = 1733,             // ToDo: to be confirmed
-    FACTION_ID_HORDE_GENERIC_1                  = 1734,             // ToDo: to be confirmed
-    FACTION_ID_HORDE_GENERIC_2                  = 1735,             // used by GOs and creatures
+    FACTION_ID_ALLIANCE_GENERIC                 = 1732,             // used by GOs and creatures
+    // FACTION_ID_ALLIANCE_GENERIC_2            = 1733,             // ToDo: to be confirmed
+    // FACTION_ID_HORDE_GENERIC_2               = 1734,             // ToDo: to be confirmed
+    FACTION_ID_HORDE_GENERIC                    = 1735,             // used by GOs and creatures
 
 
     // ***** Condition entries *****
@@ -434,8 +410,6 @@ static const WintergraspGoData wgFortressData[] =
     {GO_WG_TOWER_SOUTHWEST,     WORLD_STATE_WG_KEEP_TOWER_SOUTHWEST,    19667,  19659,  19662,  19459},
     {GO_WG_TOWER_SOUTHEAST,     WORLD_STATE_WG_KEEP_TOWER_SOUTHEAST,    19668,  19660,  19664,  19457},
     {GO_WG_TOWER_EAST,          WORLD_STATE_WG_KEEP_TOWER_EAST,         19666,  19658,  19663,  19458},
-    // {GO_WORKSHOP_KEEP_WEST,     WORLD_STATE_WG_WORKSHOP_KEEP_WEST,      19790,  19782,  19786,  19794},
-    // {GO_WORKSHOP_KEEP_EAST,     WORLD_STATE_WG_WORKSHOP_KEEP_EAST,      19791,  19783,  19787,  19795},
 };
 
 static const WintergraspGoData wgOffensiveData[] =
@@ -443,10 +417,37 @@ static const WintergraspGoData wgOffensiveData[] =
     {GO_TOWER_SHADOWSIGHT,      WORLD_STATE_WG_TOWER_SHADOWSIGHT,       19671,  19674,  19677,  19680},
     {GO_TOWER_WINTERS_EDGE,     WORLD_STATE_WG_TOWER_WINTERS_EDGE,      19670,  19673,  19676,  19679},
     {GO_TOWER_FLAMEWATCH,       WORLD_STATE_WG_TOWER_FLAMEWATCH,        19669,  19672,  19675,  19678},
-    // {GO_WORKSHOP_BROKEN_TEMPLE, WORLD_STATE_WG_WORKSHOP_BROKEN_TEMPLE,  19775,  19777,  19779,  19781},
-    // {GO_WORKSHOP_SUNKEN_RING,   WORLD_STATE_WG_WORKSHOP_SUNKEN_RING,    19774,  19776,  19778,  19780},
-    // {GO_WORKSHOP_WESTPARK,      WORLD_STATE_WG_WORKSHOP_WESTPARK,       19792,  19784,  19788,  19796},
-    // {GO_WORKSHOP_EASTPARK,      WORLD_STATE_WG_WORKSHOP_EASTPARK,       19793,  19785,  19789,  19797},
+};
+
+static const WintergraspGoData wgFortressWorkshopsData[] =
+{
+    {GO_WORKSHOP_KEEP_WEST,     WORLD_STATE_WG_WORKSHOP_KEEP_WEST,      19790,  19782,  19786,  19794},
+    {GO_WORKSHOP_KEEP_EAST,     WORLD_STATE_WG_WORKSHOP_KEEP_EAST,      19791,  19783,  19787,  19795},
+};
+
+static const WintergraspGoData wgDefendeWorkshopsData[] =
+{
+    {GO_WORKSHOP_BROKEN_TEMPLE, WORLD_STATE_WG_WORKSHOP_BROKEN_TEMPLE,  19775,  19777,  19779,  19781},
+    {GO_WORKSHOP_SUNKEN_RING,   WORLD_STATE_WG_WORKSHOP_SUNKEN_RING,    19774,  19776,  19778,  19780},
+};
+
+static const WintergraspGoData wgOffensiveWorkshopsData[] =
+{
+    {GO_WORKSHOP_WESTPARK,      WORLD_STATE_WG_WORKSHOP_WESTPARK,       19792,  19784,  19788,  19796},
+    {GO_WORKSHOP_EASTPARK,      WORLD_STATE_WG_WORKSHOP_EASTPARK,       19793,  19785,  19789,  19797},
+};
+
+struct WintergraspCapturePointData
+{
+    uint32 goEntryAlliance, goEntryHorde, goEntryWorkshop, areaId, worldState, eventContestedAlliance, eventContestedHorde, eventProgressAlliance, eventProgressHorde;
+};
+
+static const WintergraspCapturePointData wgCapturePointData[] =
+{
+    {GO_CAPTUREPOINT_BROKEN_TEMPLE_A,   GO_CAPTUREPOINT_BROKEN_TEMPLE_H,    GO_WORKSHOP_BROKEN_TEMPLE,  AREA_ID_THE_BROKEN_TEMPLE,  WORLD_STATE_WG_WORKSHOP_BROKEN_TEMPLE,  20787,  20788,  19612,  19611},
+    {GO_CAPTUREPOINT_SUNKEN_RING_A,     GO_CAPTUREPOINT_SUNKEN_RING_H,      GO_WORKSHOP_SUNKEN_RING,    AREA_ID_THE_SUNKEN_RING,    WORLD_STATE_WG_WORKSHOP_SUNKEN_RING,    20785,  20786,  19610,  19609},
+    {GO_CAPTUREPOINT_WESTPARK_A,        GO_CAPTUREPOINT_WESTPARK_H,         GO_WORKSHOP_WESTPARK,       AREA_ID_WESTPARK_WORKSHOP,  WORLD_STATE_WG_WORKSHOP_WESTPARK,       21568,  21569,  21562,  21560},
+    {GO_CAPTUREPOINT_EASTPARK_A,        GO_CAPTUREPOINT_EASTPARK_H,         GO_WORKSHOP_EASTPARK,       AREA_ID_EASTPARK_WORKSHOP,  WORLD_STATE_WG_WORKSHOP_EASTPARK,       21566,  21567,  21565,  21563},
 };
 
 enum WGRank
@@ -523,6 +524,7 @@ class BattlefieldWG : public Battlefield
         void HandleConditionStateChange(uint32 conditionId, bool state) override;
 
     private:
+
         void InitPlayerBattlefieldData(Player* player) override;
         bool GetPlayerKickLocation(Player* player, float& x, float& y, float& z) override;
 
@@ -530,6 +532,8 @@ class BattlefieldWG : public Battlefield
 
         bool HandleCapturePointEvent(uint32 eventId, GameObject* go);
         bool HandleDestructibleBuildingEvent(uint32 eventId, GameObject* go);
+
+        void ResetBattlefield(const WorldObject* objRef);
 
         bool m_sentPrebattleWarning;
 
@@ -556,6 +560,12 @@ class BattlefieldWG : public Battlefield
 
         std::list<BattlefieldBuilding*> m_keepBuildings;
         std::list<BattlefieldBuilding*> m_offensiveBuildings;
+
+        std::list<BattlefieldBuilding*> m_defenseWorkshops;
+        std::list<BattlefieldBuilding*> m_capturableWorkshops;
+
+        GuidList m_defenseCannonsGuids;
+        GuidList m_attackCannonsGuids;
 };
 
 #endif

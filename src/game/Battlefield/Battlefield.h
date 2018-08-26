@@ -75,7 +75,11 @@ class BattlefieldBuilding
         void SetWorldState(uint32 newWorldState) { worldState = newWorldState; }
 
         uint32 GetGoState() const { return (uint32)state; }
-        void SetGoState(BattlefieldGoState newState) { state = newState; };
+        void SetGoState(BattlefieldGoState newState) { state = newState; }
+
+        void SetGoGuid(ObjectGuid goGuid) { guid = goGuid; }
+        ObjectGuid GetGoGuid() { return guid; }
+        uint32 GetGoEntry() const { return entry; }
 
     private:
         Team owner;
