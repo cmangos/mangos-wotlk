@@ -1808,7 +1808,7 @@ int32 ObjectMgr::GetPlayerMapIdByGUID(ObjectGuid const& guid) const
 }
 
 // name must be checked to correctness (if received) before call this function
-ObjectGuid ObjectMgr::GetPlayerGuidByName(std::string& name) const
+ObjectGuid ObjectMgr::GetPlayerGuidByName(std::string name) const
 {
     ObjectGuid guid;
 
