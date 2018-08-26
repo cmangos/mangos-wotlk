@@ -1508,8 +1508,7 @@ void GameObject::Use(Unit* user)
                         }
                         else
                         {
-                            if (loot)
-                                delete loot;
+                            delete loot;
                             loot = new Loot(player, this, success ? LOOT_FISHING : LOOT_FISHING_FAIL);
                             loot->ShowContentTo(player);
                         }
@@ -1688,9 +1687,8 @@ void GameObject::Use(Unit* user)
                 return;
 
             Player* player = (Player*)user;
-
-            if (loot)
-                delete loot;
+            
+            delete loot;
             loot = new Loot(player, this, LOOT_FISHINGHOLE);
             loot->ShowContentTo(player);
 
