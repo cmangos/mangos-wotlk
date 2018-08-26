@@ -16,6 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef MANGOSSERVER_SPLINE_IMPL_H
+#define MANGOSSERVER_SPLINE_IMPL_H
+
 namespace Movement
 {
     template<typename length_type> void Spline<length_type>::evaluate_percent(float t, Vector3& c) const
@@ -94,3 +97,5 @@ namespace Movement
         lengths.clear();
     }
 }
+
+#endif // MANGOSSERVER_SPLINE_IMPL_H
