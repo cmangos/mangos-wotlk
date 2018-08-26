@@ -754,7 +754,7 @@ void WorldSession::HandleUpdateMissileTrajectory(WorldPacket& recv_data)
     if (!spell || spell->m_spellInfo->Id != spellId || !(spell->m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
         return;
 
-    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WorldSession::HandleUpdateMissileTrajectory spell %u ajusted coords: %f/%f %f/%f %f/%f speed %f/%f elevation %f/%f",
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WorldSession::HandleUpdateMissileTrajectory spell %u ajusted coords: %f/%f %f/%f %f/%f %f/%f %f/%f %f/%f speed %f/%f elevation %f/%f",
         spellId,
         spell->m_targets.m_srcX, srcX, spell->m_targets.m_srcY, srcY, spell->m_targets.m_srcZ, srcZ,
         spell->m_targets.m_destX, dstX, spell->m_targets.m_destY, dstY, spell->m_targets.m_destZ, dstZ,
