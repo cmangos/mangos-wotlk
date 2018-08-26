@@ -2052,7 +2052,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         case 1: spellId = 39245; break; // Summon Mature Bone Sifter 2x
                         case 2: spellId = 39247; break; // Summon Sand Gnome 2x
                     }
-                    m_caster->CastSpell(unitTarget, 39248, TRIGGERED_OLD_TRIGGERED);
+                    m_caster->CastSpell(unitTarget, spellId, TRIGGERED_OLD_TRIGGERED);
 
                     ((Creature*)unitTarget)->ForcedDespawn();
                     return;
