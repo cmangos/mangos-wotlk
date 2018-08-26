@@ -57,7 +57,9 @@ enum BattlefieldGoState
 class BattlefieldBuilding
 {
     public:
-        BattlefieldBuilding(uint32 goEntry) : entry(goEntry) {};
+        BattlefieldBuilding(uint32 goEntry): owner(), entry(goEntry), worldState(0), state()
+        {
+        }
         virtual ~BattlefieldBuilding() = default;
 
         virtual void SetupBuilding(Team owner, bool reset) {};

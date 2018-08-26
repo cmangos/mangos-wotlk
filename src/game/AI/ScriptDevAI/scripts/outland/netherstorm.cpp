@@ -2313,7 +2313,9 @@ enum
 
 struct npc_adyen_the_lightwardenAI : public ScriptedAI
 {
-    npc_adyen_the_lightwardenAI(Creature* creature) : ScriptedAI(creature), m_eventStarted(false) {}
+    npc_adyen_the_lightwardenAI(Creature* creature) : ScriptedAI(creature), m_crusaderStrikeTimer(0), m_hammerOfJusticeTimer(0), m_eventStarted(false)
+    {
+    }
 
     ObjectGuid m_playerGuid;
     ObjectGuid m_orelisGuid;
@@ -2791,7 +2793,9 @@ enum KaylaanActions
 
 struct npc_kaylaan_the_lostAI : public ScriptedAI
 {
-    npc_kaylaan_the_lostAI(Creature* creature) : ScriptedAI(creature), m_deathPrevented(false) {}
+    npc_kaylaan_the_lostAI(Creature* creature) : ScriptedAI(creature), m_deathPrevented(false), m_avengersShieldTimer(0), m_burningLightTimer(0), m_healTimer(0), m_holySlamTimer(0)
+    {
+    }
 
     bool m_deathPrevented;
 

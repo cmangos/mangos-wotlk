@@ -63,9 +63,9 @@ GroupMemberStatus GetGroupMemberStatus(const Player* member = nullptr)
 //============== Group ==============================
 //===================================================
 
-Group::Group() : m_Id(0), m_groupType(GROUPTYPE_NORMAL),
+Group::Group() : m_Id(0), m_leaderLastOnline(0), m_groupType(GROUPTYPE_NORMAL),
     m_dungeonDifficulty(REGULAR_DIFFICULTY), m_raidDifficulty(REGULAR_DIFFICULTY),
-    m_bgGroup(nullptr), m_lootMethod(FREE_FOR_ALL), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
+    m_bgGroup(nullptr), m_bfGroup(nullptr), m_lootMethod(FREE_FOR_ALL), m_lootThreshold(ITEM_QUALITY_UNCOMMON),
     m_subGroupsCounts(nullptr)
 {
 }

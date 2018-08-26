@@ -89,13 +89,16 @@ inline bool IsEventFlagsFitForNormalMap(uint8 eFlags)
 }
 
 CreatureEventAI::CreatureEventAI(Creature* creature) : CreatureAI(creature),
+    m_EventUpdateTime(0),
+    m_EventDiff(0),
     m_Phase(0),
     m_DynamicMovement(false),
     m_HasOOCLoSEvent(false),
     m_InvinceabilityHpLevel(0),
     m_throwAIEventMask(0),
     m_throwAIEventStep(0),
-    m_LastSpellMaxRange(0)
+    m_LastSpellMaxRange(0),
+    m_eventTarget(nullptr)
 {
     // Need make copy for filter unneeded steps and safe in case table reload
     CreatureEventAI_Event_Map::const_iterator creatureEventsItr = sEventAIMgr.GetCreatureEventAIMap().find(m_creature->GetEntry());

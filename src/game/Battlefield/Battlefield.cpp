@@ -28,7 +28,7 @@
 #include "Entities/Unit.h"
 #include "Chat/Chat.h"
 
-Battlefield::Battlefield() : OutdoorPvP(), m_battleFieldId(0)
+Battlefield::Battlefield() : OutdoorPvP(), m_battleFieldId(0), m_zoneId(0), m_queueUpdateTimer(0), m_playersUpdateTimer(0), m_status(), m_zoneOwner(), m_timer(0), m_startTime(0), m_playersInvited(false)
 {
     m_isBattlefield = true;
 

@@ -557,7 +557,7 @@ enum BrewfestMusicEvents
 
 struct go_brewfest_music : public GameObjectAI
 {
-    go_brewfest_music(GameObject* go) : GameObjectAI(go), m_zoneTeam(GetZoneAlignment(go))
+    go_brewfest_music(GameObject* go) : GameObjectAI(go), m_zoneTeam(GetZoneAlignment(go)), m_rand(0)
     {
         m_musicSelectTimer = 1000;
         m_musicStartTimer = 1000;

@@ -1489,7 +1489,9 @@ enum
 // TODO: Add random repositioning logic
 struct npc_burster_wormAI : public ScriptedAI
 {
-    npc_burster_wormAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiBorePassive(SetBorePassive()), m_boreDamageSpell(SetBoreDamageSpell()) { }
+    npc_burster_wormAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiPhase(0), m_uiChaseTimer(0), m_uiBirthDelayTimer(0), m_uiBoreTimer(0), m_uiEnrageTimer(0), m_uiBorePassive(SetBorePassive()), m_boreDamageSpell(SetBoreDamageSpell())
+    {
+    }
 
     uint8 m_uiPhase;
 

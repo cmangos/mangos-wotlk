@@ -24,7 +24,7 @@
 #include "Globals/ObjectMgr.h"
 #include "WorldPacket.h"
 
-BattleGroundDS::BattleGroundDS()
+BattleGroundDS::BattleGroundDS(): m_uiFlushTimer(0), m_uiWaterfallTimer(0), m_uiWaterfallSpellTimer(0), m_uiWaterfallStage(0)
 {
     m_StartDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_1M;
     m_StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_30S;

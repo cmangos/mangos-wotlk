@@ -22,7 +22,7 @@
 #include "BattleGroundSA.h"
 #include "Tools/Language.h"
 
-BattleGroundSA::BattleGroundSA()
+BattleGroundSA::BattleGroundSA(): m_attackingTeamIdx(), m_battleRoundTimer(0), m_boatStartTimer(0)
 {
     // TODO FIX ME!
     m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;

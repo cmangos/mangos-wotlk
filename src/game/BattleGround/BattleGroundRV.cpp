@@ -24,7 +24,7 @@
 #include "Globals/ObjectMgr.h"
 #include "WorldPacket.h"
 
-BattleGroundRV::BattleGroundRV()
+BattleGroundRV::BattleGroundRV(): m_uiPillarTimer(0)
 {
     m_StartDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_1M;
     m_StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_30S;

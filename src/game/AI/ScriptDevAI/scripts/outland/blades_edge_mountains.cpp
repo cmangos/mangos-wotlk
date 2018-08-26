@@ -2203,7 +2203,9 @@ enum
 
 struct npc_evergrove_druidAI : public ScriptedAI
 {
-    npc_evergrove_druidAI(Creature* pCreature) : ScriptedAI(pCreature) {}
+    npc_evergrove_druidAI(Creature* pCreature) : ScriptedAI(pCreature), m_summoner(nullptr), returnTimer(0), landingDone(false), alreadySummoned(false)
+    {
+    }
 
     Player* m_summoner;
     uint32 returnTimer;
