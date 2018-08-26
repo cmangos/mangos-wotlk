@@ -23,7 +23,6 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "stratholme.h"
-#include <random>
 
 instance_stratholme::instance_stratholme(Map* pMap) : ScriptedInstance(pMap),
     m_uiBaronRunTimer(0),
@@ -840,7 +839,7 @@ void instance_stratholme::DoSpawnScourgeInvaders(uint8 uiStep, Player* pSummoner
     }
 
     uiMobList.push_back(uiMobEntry);
-    std::shuffle(uiMobList.begin(), uiMobList.end(), std::mt19937(std::random_device()()));
+    std::random_shuffle(uiMobList.begin(), uiMobList.end());
 
     // Define the correct index for the spawn/move coords table
     switch (uiStep)

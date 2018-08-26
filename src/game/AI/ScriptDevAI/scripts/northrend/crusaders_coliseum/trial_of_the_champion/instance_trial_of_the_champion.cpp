@@ -23,7 +23,6 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "trial_of_the_champion.h"
-#include <random>
 
 /* Trial of the Champion encounters:
 0 - Grand Champions
@@ -196,7 +195,7 @@ void instance_trial_of_the_champion::OnPlayerEnter(Player* pPlayer)
                 m_vChampionsIndex[i] = i;
 
             // set a random champion list
-            std::shuffle(m_vChampionsIndex.begin(), m_vChampionsIndex.end(), std::mt19937(std::random_device()()));
+            std::random_shuffle(m_vChampionsIndex.begin(), m_vChampionsIndex.end());
         }
     }
 

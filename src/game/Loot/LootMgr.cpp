@@ -28,7 +28,6 @@
 #include "Server/SQLStorages.h"
 #include "BattleGround/BattleGroundAV.h"
 #include "Entities/ItemEnchantmentMgr.h"
-#include <random>
 
 INSTANTIATE_SINGLETON_1(LootMgr);
 
@@ -2213,7 +2212,7 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
             lootStoreItemVector.push_back(&itr);
 
         // randomize the new vector
-        std::shuffle(lootStoreItemVector.begin(), lootStoreItemVector.end(), std::mt19937(std::random_device()()));
+        random_shuffle(lootStoreItemVector.begin(), lootStoreItemVector.end());
 
         float chance = rand_chance_f();
 
@@ -2246,7 +2245,7 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
             lootStoreItemVector.push_back(&itr);
 
         // randomize the new vector
-        std::shuffle(lootStoreItemVector.begin(), lootStoreItemVector.end(), std::mt19937(std::random_device()()));
+        random_shuffle(lootStoreItemVector.begin(), lootStoreItemVector.end());
 
         // as the new vector is randomized we can start from first element and stop at first one that meet the condition
         for (std::vector <LootStoreItem const*>::const_iterator itr = lootStoreItemVector.begin(); itr != lootStoreItemVector.end(); ++itr)

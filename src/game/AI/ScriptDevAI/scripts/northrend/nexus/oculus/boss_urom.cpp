@@ -23,7 +23,6 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "oculus.h"
-#include <random>
 
 enum
 {
@@ -119,7 +118,7 @@ struct boss_uromAI : public ScriptedAI
 
         ResetPlatformVariables();
 
-        std::shuffle(m_vuiTrashPacksIds.begin(), m_vuiTrashPacksIds.end(), std::mt19937(std::random_device()()));
+        std::random_shuffle(m_vuiTrashPacksIds.begin(), m_vuiTrashPacksIds.end());
     }
 
     void ResetPlatformVariables()

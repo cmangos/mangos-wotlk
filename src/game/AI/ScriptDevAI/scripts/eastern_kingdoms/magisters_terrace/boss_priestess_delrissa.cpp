@@ -23,7 +23,6 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "magisters_terrace.h"
-#include <random>
 
 enum
 {
@@ -131,7 +130,7 @@ struct boss_priestess_delrissaAI : public ScriptedAI
             for (uint8 i = 0; i < MAX_COMPANIONS; ++i)
                 m_vuiLackeyEnties[i] = aDelrissaLackeys[i];
 
-            std::shuffle(m_vuiLackeyEnties.begin(), m_vuiLackeyEnties.end(), std::mt19937(std::random_device()()));
+            std::random_shuffle(m_vuiLackeyEnties.begin(), m_vuiLackeyEnties.end());
 
             // Summon the 4 entries
             for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)

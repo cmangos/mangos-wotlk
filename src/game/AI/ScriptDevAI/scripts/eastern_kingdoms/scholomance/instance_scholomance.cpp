@@ -24,7 +24,6 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "scholomance.h"
 #include "GameEvents/GameEventMgr.h"
-#include <random>
 
 instance_scholomance::instance_scholomance(Map* pMap) : ScriptedInstance(pMap),
     m_uiGambitTransformTimer(0),
@@ -140,7 +139,7 @@ void instance_scholomance::DoRespawnEntranceRoom(Player* pSummoner)
         }
 
         uiMobList.push_back(uiMobEntry);
-        std::shuffle(uiMobList.begin(), uiMobList.end(), std::mt19937(std::random_device()()));
+        std::random_shuffle(uiMobList.begin(), uiMobList.end());
 
         for (uint8 j = 0; j < MAX_NPC_PER_GROUP; ++j)
             pSummoner->SummonCreature(uiMobList[j], aEntranceRoomSpawnLocs[4 * i + j].m_fX, aEntranceRoomSpawnLocs[4 * i + j].m_fY, aEntranceRoomSpawnLocs[4 * i + j].m_fZ, aEntranceRoomSpawnLocs[4 * i + j].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);
