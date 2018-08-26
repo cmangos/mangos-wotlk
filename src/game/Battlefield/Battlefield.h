@@ -58,6 +58,7 @@ class BattlefieldBuilding
 {
     public:
         BattlefieldBuilding(uint32 goEntry) : entry(goEntry) {};
+        virtual ~BattlefieldBuilding() = default;
 
         virtual void SetupBuilding(Team owner, bool reset) {};
 
