@@ -956,9 +956,9 @@ struct npc_storm_lasherAI : public three_nature_alliesAI
 
         if (m_uiStormBoltTimer < uiDiff)
         {
-            if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
             {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_STORMBOLT : SPELL_STORMBOLT_H) == CAST_OK)
+                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_STORMBOLT : SPELL_STORMBOLT_H) == CAST_OK)
                     m_uiStormBoltTimer = 5000;
             }
         }

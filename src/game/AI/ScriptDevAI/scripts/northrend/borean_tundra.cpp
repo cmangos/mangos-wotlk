@@ -1254,9 +1254,8 @@ struct npc_mootoo_the_youngerAI : public npc_escortAI
                         DoScriptText(SAY_2_ELDER_MOOTOO, pFather, pPlayer);
                 break;
             case 25:
-                if (GetPlayerForEscort())
-                    if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_ELDER_MOOTOO, 30.0f))
-                        pFather->HandleEmote(EMOTE_ONESHOT_BOW);
+                if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_ELDER_MOOTOO, 30.0f))
+                    pFather->HandleEmote(EMOTE_ONESHOT_BOW);
                 SetEscortPaused(true);
                 m_creature->ForcedDespawn(10000);
                 break;
