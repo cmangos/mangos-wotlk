@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "utgarde_pinnacle.h"
+#include <random>
 
 enum
 {
@@ -159,7 +160,7 @@ struct boss_ymironAI : public ScriptedAI
         m_uiCurrentSpiritGuid.Clear();
 
         // Randomize spirit order
-        std::random_shuffle(m_vuiBoatPhases.begin(), m_vuiBoatPhases.end());
+        std::shuffle(m_vuiBoatPhases.begin(), m_vuiBoatPhases.end(), std::mt19937(std::random_device()()));
     }
 
     void Aggro(Unit* /*pWho*/) override

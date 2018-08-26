@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "ulduar.h"
+#include <random>
 
 enum
 {
@@ -253,7 +254,7 @@ struct boss_freyaAI : public ScriptedAI
         m_uiStormlasherDeadCount    = 0;
 
         // make the spawn spells random
-        std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+        std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), std::mt19937(std::random_device()()));
 
         m_bDeforestationComplete    = false;
     }
@@ -498,11 +499,11 @@ struct boss_freyaAI : public ScriptedAI
             if (m_uiAlliesWaveCount == MAX_ALLIES_SPELLS)
             {
                 uint32 uiLastSpell = spawnSpellsVector[MAX_ALLIES_SPELLS - 1];
-                std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+                std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), std::mt19937(std::random_device()()));
 
                 // make sure we won't repeat the last spell
                 while (spawnSpellsVector[0] == uiLastSpell)
-                    std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+                    std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), std::mt19937(std::random_device()()));
             }
         }
         else if (eventType == AI_EVENT_CUSTOM_B)

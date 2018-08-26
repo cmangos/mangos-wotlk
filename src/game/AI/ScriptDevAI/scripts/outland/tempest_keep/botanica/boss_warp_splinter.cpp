@@ -22,6 +22,7 @@ SDCategory: Tempest Keep, The Botanica
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
+#include <random>
 
 /*#####
 # boss_warp_splinter
@@ -99,7 +100,7 @@ struct boss_warp_splinterAI : public ScriptedAI
     void SummonTreants()
     {
         // Choose 6 random spells out of 10
-        std::random_shuffle(m_vSummonSpells.begin(), m_vSummonSpells.end());
+        std::shuffle(m_vSummonSpells.begin(), m_vSummonSpells.end(), std::mt19937(std::random_device()()));
         for (uint8 i = 0; i < 6; ++i)
             DoCastSpellIfCan(m_creature, m_vSummonSpells[i], CAST_TRIGGERED);
 

@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "ulduar.h"
+#include <random>
 
 enum
 {
@@ -503,7 +504,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
                     if (Creature* pBunny = m_creature->GetMap()->GetCreature(*itr))
                         vBunnies.push_back(pBunny);
                 }
-                std::random_shuffle(vBunnies.begin(), vBunnies.end());
+                std::shuffle(vBunnies.begin(), vBunnies.end(), std::mt19937(std::random_device()()));
 
                 uint8 uiMaxCommoners = urand(6, 7);
                 if (uiMaxCommoners > vBunnies.size() - 1)

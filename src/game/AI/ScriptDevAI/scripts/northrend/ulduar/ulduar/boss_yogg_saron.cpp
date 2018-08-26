@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "ulduar.h"
 #include "Entities/TemporarySpawn.h"
+#include <random>
 
 enum
 {
@@ -788,7 +789,7 @@ struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
         m_uiPortalsCount                = 0;
         m_uiMaxPortals                  = m_bIsRegularMode ? 4 : 10;
 
-        std::random_shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end());
+        std::shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end(), std::mt19937(std::random_device()()));
     }
 
     void AttackStart(Unit* /*pWho*/) override { }
