@@ -87,7 +87,7 @@ namespace Taxi
             /// Save contents: string serialization
             std::string Save();
             /// Load contents: string deserialization
-            bool Load(std::string& string, DestID& destOrphan);
+            bool Load(const std::string& string, DestID& destOrphan);
 
             TrackerState GetState() const { return m_state; }
             /// Notify the container to switch into certain state if applicable

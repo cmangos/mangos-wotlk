@@ -101,7 +101,7 @@ class FreezeDetectorRunnable : public MaNGOS::Runnable
 int Master::Run()
 {
     /// worldd PID file creation
-    std::string pidfile = sConfig.GetStringDefault("PidFile");
+    const std::string& pidfile = sConfig.GetStringDefault("PidFile");
     if (!pidfile.empty())
     {
         uint32 pid = CreatePIDFile(pidfile);
@@ -321,9 +321,9 @@ int Master::Run()
 bool Master::_StartDB()
 {
     ///- Get world database info from configuration file
-    std::string dbstring = sConfig.GetStringDefault("WorldDatabaseInfo");
+    const std::string& worldString = sConfig.GetStringDefault("WorldDatabaseInfo");
     int nConnections = sConfig.GetIntDefault("WorldDatabaseConnections", 1);
-    if (dbstring.empty())
+    if (worldString.empty())
     {
         sLog.outError("Database not specified in configuration file");
         return false;
@@ -331,9 +331,9 @@ bool Master::_StartDB()
     sLog.outString("World Database total connections: %i", nConnections + 1);
 
     ///- Initialise the world database
-    if (!WorldDatabase.Initialize(dbstring.c_str(), nConnections))
+    if (!WorldDatabase.Initialize(worldString.c_str(), nConnections))
     {
-        sLog.outError("Cannot connect to world database %s", dbstring.c_str());
+        sLog.outError("Cannot connect to world database %s", worldString.c_str());
         return false;
     }
 
@@ -344,9 +344,9 @@ bool Master::_StartDB()
         return false;
     }
 
-    dbstring = sConfig.GetStringDefault("CharacterDatabaseInfo");
+    const std::string& characterString = sConfig.GetStringDefault("CharacterDatabaseInfo");
     nConnections = sConfig.GetIntDefault("CharacterDatabaseConnections", 1);
-    if (dbstring.empty())
+    if (characterString.empty())
     {
         sLog.outError("Character Database not specified in configuration file");
 
@@ -357,9 +357,9 @@ bool Master::_StartDB()
     sLog.outString("Character Database total connections: %i", nConnections + 1);
 
     ///- Initialise the Character database
-    if (!CharacterDatabase.Initialize(dbstring.c_str(), nConnections))
+    if (!CharacterDatabase.Initialize(characterString.c_str(), nConnections))
     {
-        sLog.outError("Cannot connect to Character database %s", dbstring.c_str());
+        sLog.outError("Cannot connect to Character database %s", characterString.c_str());
 
         ///- Wait for already started DB delay threads to end
         WorldDatabase.HaltDelayThread();
@@ -383,9 +383,9 @@ bool Master::_StartDB()
     }
 #endif
     ///- Get login database info from configuration file
-    dbstring = sConfig.GetStringDefault("LoginDatabaseInfo");
+    const std::string& loginString = sConfig.GetStringDefault("LoginDatabaseInfo");
     nConnections = sConfig.GetIntDefault("LoginDatabaseConnections", 1);
-    if (dbstring.empty())
+    if (loginString.empty())
     {
         sLog.outError("Login database not specified in configuration file");
 
@@ -397,9 +397,9 @@ bool Master::_StartDB()
 
     ///- Initialise the login database
     sLog.outString("Login Database total connections: %i", nConnections + 1);
-    if (!LoginDatabase.Initialize(dbstring.c_str(), nConnections))
+    if (!LoginDatabase.Initialize(loginString.c_str(), nConnections))
     {
-        sLog.outError("Cannot connect to login database %s", dbstring.c_str());
+        sLog.outError("Cannot connect to login database %s", loginString.c_str());
 
         ///- Wait for already started DB delay threads to end
         WorldDatabase.HaltDelayThread();

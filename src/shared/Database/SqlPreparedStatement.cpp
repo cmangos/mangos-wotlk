@@ -116,7 +116,7 @@ void SqlPlainPreparedStatement::bind(const SqlStmtParameters& holder)
         nLastPos = m_szPlainRequest.find('?', nLastPos);
         if (nLastPos != std::string::npos)
         {
-            std::string tmp = fmt.str();
+            const std::string& tmp = fmt.str();
             m_szPlainRequest.replace(nLastPos, 1, tmp);
             nLastPos += tmp.length();
         }

@@ -385,7 +385,7 @@ bool ChatHandler::HandleNamegoCommand(char* args)
 
     if (target)
     {
-        std::string nameLink = playerLink(target_name);
+        const std::string& nameLink = playerLink(target_name);
         // check online security
         if (HasLowerSecurity(target))
             return false;
@@ -463,7 +463,7 @@ bool ChatHandler::HandleNamegoCommand(char* args)
         if (HasLowerSecurity(nullptr, target_guid))
             return false;
 
-        std::string nameLink = playerLink(target_name);
+        const std::string& nameLink = playerLink(target_name);
 
         PSendSysMessage(LANG_SUMMONING, nameLink.c_str(), GetMangosString(LANG_OFFLINE));
 
@@ -502,7 +502,7 @@ bool ChatHandler::HandleGonameCommand(char* args)
         if (HasLowerSecurity(target))
             return false;
 
-        std::string chrNameLink = playerLink(target_name);
+        const std::string& chrNameLink = playerLink(target_name);
 
         Map* cMap = target->GetMap();
         if (cMap->IsBattleGroundOrArena())
@@ -601,7 +601,7 @@ bool ChatHandler::HandleGonameCommand(char* args)
         if (HasLowerSecurity(nullptr, target_guid))
             return false;
 
-        std::string nameLink = playerLink(target_name);
+        const std::string& nameLink = playerLink(target_name);
 
         PSendSysMessage(LANG_APPEARING_AT, nameLink.c_str());
 
@@ -1002,7 +1002,7 @@ bool ChatHandler::HandleModifyASpeedCommand(char* args)
     if (HasLowerSecurity(chr))
         return false;
 
-    std::string chrNameLink = GetNameLink(chr);
+    const std::string& chrNameLink = GetNameLink(chr);
 
     if (chr->IsTaxiFlying())
     {
@@ -1050,7 +1050,7 @@ bool ChatHandler::HandleModifySpeedCommand(char* args)
     if (HasLowerSecurity(chr))
         return false;
 
-    std::string chrNameLink = GetNameLink(chr);
+    const std::string& chrNameLink = GetNameLink(chr);
 
     if (chr->IsTaxiFlying())
     {
@@ -1095,7 +1095,7 @@ bool ChatHandler::HandleModifySwimCommand(char* args)
     if (HasLowerSecurity(chr))
         return false;
 
-    std::string chrNameLink = GetNameLink(chr);
+    const std::string& chrNameLink = GetNameLink(chr);
 
     if (chr->IsTaxiFlying())
     {
@@ -1140,7 +1140,7 @@ bool ChatHandler::HandleModifyBWalkCommand(char* args)
     if (HasLowerSecurity(chr))
         return false;
 
-    std::string chrNameLink = GetNameLink(chr);
+    const std::string& chrNameLink = GetNameLink(chr);
 
     if (chr->IsTaxiFlying())
     {
@@ -1772,7 +1772,7 @@ bool ChatHandler::HandleSendMailCommand(char* args)
 
     draft.SendMailTo(MailReceiver(target, target_guid), sender);
 
-    std::string nameLink = playerLink(target_name);
+    const std::string& nameLink = playerLink(target_name);
     PSendSysMessage(LANG_MAIL_SENT, nameLink.c_str());
     return true;
 }
@@ -1803,7 +1803,7 @@ bool ChatHandler::HandleTeleNameCommand(char* args)
         if (HasLowerSecurity(target))
             return false;
 
-        std::string chrNameLink = playerLink(target_name);
+        const std::string& chrNameLink = playerLink(target_name);
 
         if (target->IsBeingTeleported())
         {
@@ -1822,7 +1822,7 @@ bool ChatHandler::HandleTeleNameCommand(char* args)
     if (HasLowerSecurity(nullptr, target_guid))
         return false;
 
-    std::string nameLink = playerLink(target_name);
+    const std::string& nameLink = playerLink(target_name);
 
     PSendSysMessage(LANG_TELEPORTING_TO, nameLink.c_str(), GetMangosString(LANG_OFFLINE), tele->name.c_str());
     Player::SavePositionInDB(target_guid, tele->mapId,
@@ -1859,7 +1859,7 @@ bool ChatHandler::HandleTeleGroupCommand(char* args)
         return false;
     }
 
-    std::string nameLink = GetNameLink(player);
+    const std::string& nameLink = GetNameLink(player);
 
     Group* grp = player->GetGroup();
     if (!grp)
@@ -1880,7 +1880,7 @@ bool ChatHandler::HandleTeleGroupCommand(char* args)
         if (HasLowerSecurity(pl))
             return false;
 
-        std::string plNameLink = GetNameLink(pl);
+        const std::string& plNameLink = GetNameLink(pl);
 
         if (pl->IsBeingTeleported())
         {
@@ -1916,7 +1916,7 @@ bool ChatHandler::HandleGroupgoCommand(char* args)
 
     Group* grp = target->GetGroup();
 
-    std::string nameLink = GetNameLink(target);
+    const std::string& nameLink = GetNameLink(target);
 
     if (!grp)
     {
@@ -1951,7 +1951,7 @@ bool ChatHandler::HandleGroupgoCommand(char* args)
         if (HasLowerSecurity(pl))
             return false;
 
-        std::string plNameLink = GetNameLink(pl);
+        const std::string& plNameLink = GetNameLink(pl);
 
         if (pl->IsBeingTeleported())
         {

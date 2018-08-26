@@ -310,7 +310,7 @@ PlayerSocial* SocialMgr::LoadFromDB(QueryResult* result, ObjectGuid guid)
 
         uint32 friend_guid = fields[0].GetUInt32();
         uint32 flags = fields[1].GetUInt32();
-        std::string note = fields[2].GetCppString();
+        const std::string& note = fields[2].GetCppString();
 
         if ((flags & SOCIAL_FLAG_IGNORED) && ignoreCounter >= SOCIALMGR_IGNORE_LIMIT)
             continue;

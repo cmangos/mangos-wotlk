@@ -201,7 +201,7 @@ namespace VMAP
 
     bool TileAssembler::readMapSpawns()
     {
-        std::string fname = iSrcDir + "/dir_bin";
+        const std::string& fname = iSrcDir + "/dir_bin";
         FILE* dirf = fopen(fname.c_str(), "rb");
         if (!dirf)
         {
@@ -240,7 +240,7 @@ namespace VMAP
 
     bool TileAssembler::calculateTransformedBound(ModelSpawn& spawn)
     {
-        std::string modelFilename = iSrcDir + "/" + spawn.name;
+        const std::string& modelFilename = iSrcDir + "/" + spawn.name;
         ModelPosition modelPosition;
         modelPosition.iDir = spawn.iRot;
         modelPosition.iScale = spawn.iScale;

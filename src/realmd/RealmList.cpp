@@ -152,7 +152,7 @@ void RealmList::UpdateRealms(bool init)
             Field* fields = result->Fetch();
 
             uint32 Id                  = fields[0].GetUInt32();
-            std::string name           = fields[1].GetCppString();
+            const std::string& name    = fields[1].GetCppString();
             uint8 realmflags           = fields[5].GetUInt8();
             uint8 allowedSecurityLevel = fields[7].GetUInt8();
 

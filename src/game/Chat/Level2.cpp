@@ -98,7 +98,7 @@ bool ChatHandler::HandleMuteCommand(char* args)
     if (target)
         ChatHandler(target).PSendSysMessage(LANG_YOUR_CHAT_DISABLED, notspeaktime);
 
-    std::string nameLink = playerLink(target_name);
+    const std::string& nameLink = playerLink(target_name);
 
     PSendSysMessage(LANG_YOU_DISABLE_CHAT, nameLink.c_str(), notspeaktime);
     return true;
@@ -143,7 +143,7 @@ bool ChatHandler::HandleUnmuteCommand(char* args)
     if (target)
         ChatHandler(target).PSendSysMessage(LANG_YOUR_CHAT_ENABLED);
 
-    std::string nameLink = playerLink(target_name);
+    const std::string& nameLink = playerLink(target_name);
 
     PSendSysMessage(LANG_YOU_ENABLE_CHAT, nameLink.c_str());
     return true;
@@ -881,8 +881,8 @@ bool ChatHandler::HandleGameObjectTargetCommand(char* args)
         if (curRespawnDelay < 0)
             curRespawnDelay = 0;
 
-        std::string curRespawnDelayStr = secsToTimeString(curRespawnDelay, true);
-        std::string defRespawnDelayStr = secsToTimeString(target->GetRespawnDelay(), true);
+        const std::string& curRespawnDelayStr = secsToTimeString(curRespawnDelay, true);
+        const std::string& defRespawnDelayStr = secsToTimeString(target->GetRespawnDelay(), true);
 
         PSendSysMessage(LANG_COMMAND_RAWPAWNTIMES, defRespawnDelayStr.c_str(), curRespawnDelayStr.c_str());
 
@@ -1316,7 +1316,7 @@ bool ChatHandler::HandleGUIDCommand(char* /*args*/)
 
 void ChatHandler::ShowAchievementListHelper(AchievementEntry const* achEntry, LocaleConstant loc, time_t const* date /*= nullptr*/, Player* target /*= nullptr */)
 {
-    std::string name = achEntry->name[loc];
+    const std::string& name = achEntry->name[loc];
 
     ObjectGuid guid = target ? target->GetObjectGuid() : ObjectGuid();
 
@@ -1447,7 +1447,7 @@ bool ChatHandler::HandleCharacterAchievementsCommand(char* args)
 
 void ChatHandler::ShowFactionListHelper(FactionEntry const* factionEntry, LocaleConstant loc, FactionState const* repState /*= nullptr*/, Player* target /*= nullptr */)
 {
-    std::string name = factionEntry->name[loc];
+    const std::string& name = factionEntry->name[loc];
 
     // send faction in "id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
     // or              "id - [faction] [no reputation]" format
@@ -1460,7 +1460,7 @@ void ChatHandler::ShowFactionListHelper(FactionEntry const* factionEntry, Locale
     if (repState)                               // and then target!=nullptr also
     {
         ReputationRank rank = target->GetReputationMgr().GetRank(factionEntry);
-        std::string rankName = GetMangosString(ReputationRankStrIndex[rank]);
+        const std::string& rankName = GetMangosString(ReputationRankStrIndex[rank]);
 
         ss << " " << rankName << "|h|r (" << target->GetReputationMgr().GetReputation(factionEntry) << ")";
 
@@ -1779,8 +1779,8 @@ bool ChatHandler::HandleNpcAIInfoCommand(char* /*args*/)
 
     PSendSysMessage(LANG_NPC_AI_HEADER, pTarget->GetEntry());
 
-    std::string strScript = pTarget->GetScriptName();
-    std::string strAI = pTarget->GetAIName();
+    const std::string& strScript = pTarget->GetScriptName();
+    const std::string& strAI = pTarget->GetAIName();
     UnitAI* ai = pTarget->AI();
     char const* cstrAIClass = ai ? typeid(*ai).name() : " - ";
 
@@ -2631,11 +2631,11 @@ bool ChatHandler::HandlePInfoCommand(char* args)
         delete result;
     }
 
-    std::string nameLink = playerLink(target_name);
+    const std::string& nameLink = playerLink(target_name);
 
     PSendSysMessage(LANG_PINFO_ACCOUNT, (target ? "" : GetMangosString(LANG_OFFLINE)), nameLink.c_str(), target_guid.GetCounter(), username.c_str(), accId, uint32(security), last_ip.c_str(), last_login.c_str(), latency);
 
-    std::string timeStr = secsToTimeString(total_player_time, true, true);
+    const std::string& timeStr = secsToTimeString(total_player_time, true, true);
     uint32 gold = money / GOLD;
     uint32 silv = (money % GOLD) / SILVER;
     uint32 copp = (money % GOLD) % SILVER;
@@ -2647,13 +2647,13 @@ bool ChatHandler::HandlePInfoCommand(char* args)
 // show tickets
 void ChatHandler::ShowTicket(GMTicket const* ticket)
 {
-    std::string lastupdated = TimeToTimestampStr(ticket->GetLastUpdate());
+    const std::string& lastupdated = TimeToTimestampStr(ticket->GetLastUpdate());
 
     std::string name;
     if (!sObjectMgr.GetPlayerNameByGUID(ticket->GetPlayerGuid(), name))
         name = GetMangosString(LANG_UNKNOWN);
 
-    std::string nameLink = playerLink(name);
+    const std::string& nameLink = playerLink(name);
 
     char const* response = ticket->GetResponse();
 
@@ -2867,7 +2867,7 @@ bool ChatHandler::HandleDelTicketCommand(char* args)
     if (target)
         target->GetSession()->SendGMTicketGetTicket(0x0A);
 
-    std::string nameLink = playerLink(target_name);
+    const std::string& nameLink = playerLink(target_name);
 
     PSendSysMessage(LANG_COMMAND_TICKETPLAYERDEL, nameLink.c_str());
     return true;
@@ -3125,7 +3125,7 @@ bool ChatHandler::HandleWpModifyCommand(char* args)
     if (!subCmd_str)
         return false;
 
-    std::string subCmd = subCmd_str;
+    std::string subCmd(subCmd_str);
     // Check
     // Remember: "show" must also be the name of a column!
     if ((subCmd != "waittime") && (subCmd != "scriptid") && (subCmd != "orientation") && (subCmd != "del") && (subCmd != "move"))
@@ -3341,7 +3341,7 @@ bool ChatHandler::HandleWpShowCommand(char* args)
     char* subCmd_str = ExtractLiteralArg(&args);
     if (!subCmd_str)
         return false;
-    std::string subCmd = subCmd_str;                        ///< info, on, off, first, last
+    std::string subCmd(subCmd_str);                         ///< info, on, off, first, last
 
     uint32 dbGuid = 0;
     uint32 wpPathId = 0;
@@ -3707,7 +3707,7 @@ bool ChatHandler::HandleCharacterRenameCommand(char* args)
         if (HasLowerSecurity(nullptr, target_guid))
             return false;
 
-        std::string oldNameLink = playerLink(target_name);
+        const std::string& oldNameLink = playerLink(target_name);
 
         PSendSysMessage(LANG_RENAME_PLAYER_GUID, oldNameLink.c_str(), target_guid.GetCounter());
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '1' WHERE guid = '%u'", target_guid.GetCounter());
@@ -3733,7 +3733,7 @@ bool ChatHandler::HandleCharacterCustomizeCommand(char* args)
     }
     else
     {
-        std::string oldNameLink = playerLink(target_name);
+        const std::string& oldNameLink = playerLink(target_name);
 
         PSendSysMessage(LANG_CUSTOMIZE_PLAYER_GUID, oldNameLink.c_str(), target_guid.GetCounter());
         CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '8' WHERE guid = '%u'", target_guid.GetCounter());
@@ -3885,7 +3885,7 @@ bool ChatHandler::HandleEventListCommand(char* args)
 {
     uint32 counter = 0;
     bool all = false;
-    std::string arg = args;
+    std::string arg(args);
     if (arg == "all")
         all = true;
 
@@ -3948,15 +3948,15 @@ bool ChatHandler::HandleEventInfoCommand(char* args)
 
     char const* activeStr = sGameEventMgr.IsActiveEvent(event_id) ? GetMangosString(LANG_ACTIVE) : "";
 
-    std::string startTimeStr = TimeToTimestampStr(eventData.start);
-    std::string endTimeStr = TimeToTimestampStr(eventData.end);
+    const std::string& startTimeStr = TimeToTimestampStr(eventData.start);
+    const std::string& endTimeStr = TimeToTimestampStr(eventData.end);
 
     uint32 delay = sGameEventMgr.NextCheck(event_id);
     time_t nextTime = time(nullptr) + delay;
-    std::string nextStr = nextTime >= eventData.start && nextTime < eventData.end ? TimeToTimestampStr(time(nullptr) + delay) : "-";
+    const std::string& nextStr = nextTime >= eventData.start && nextTime < eventData.end ? TimeToTimestampStr(time(nullptr) + delay) : "-";
 
-    std::string occurenceStr = secsToTimeString(eventData.occurence * MINUTE);
-    std::string lengthStr = secsToTimeString(eventData.length * MINUTE);
+    const std::string& occurenceStr = secsToTimeString(eventData.occurence * MINUTE);
+    const std::string& lengthStr = secsToTimeString(eventData.length * MINUTE);
 
     PSendSysMessage(LANG_EVENT_INFO, event_id, eventData.description.c_str(), activeStr,
                     startTimeStr.c_str(), endTimeStr.c_str(), occurenceStr.c_str(), lengthStr.c_str(),
@@ -4196,7 +4196,7 @@ bool ChatHandler::HandleLookupAccountEmailCommand(char* args)
     if (!ExtractOptUInt32(&args, limit, 100))
         return false;
 
-    std::string email = emailStr;
+    std::string email(emailStr);
     LoginDatabase.escape_string(email);
     //                                                 0   1         2        3        4
     QueryResult* result = LoginDatabase.PQuery("SELECT id, username, last_ip, gmlevel, expansion FROM account WHERE email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), email.c_str());
@@ -4214,7 +4214,7 @@ bool ChatHandler::HandleLookupAccountIpCommand(char* args)
     if (!ExtractOptUInt32(&args, limit, 100))
         return false;
 
-    std::string ip = ipStr;
+    std::string ip(ipStr);
     LoginDatabase.escape_string(ip);
 
     //                                                 0   1         2        3        4
@@ -4233,7 +4233,7 @@ bool ChatHandler::HandleLookupAccountNameCommand(char* args)
     if (!ExtractOptUInt32(&args, limit, 100))
         return false;
 
-    std::string account = accountStr;
+    std::string account(accountStr);
     if (!AccountMgr::normalizeString(account))
         return false;
 
@@ -4306,7 +4306,7 @@ bool ChatHandler::HandleLookupPlayerIpCommand(char* args)
     if (!ExtractOptUInt32(&args, limit, 100))
         return false;
 
-    std::string ip = ipStr;
+    std::string ip(ipStr);
     LoginDatabase.escape_string(ip);
 
     QueryResult* result = LoginDatabase.PQuery("SELECT id,username FROM account WHERE last_ip " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), ip.c_str());
@@ -4324,7 +4324,7 @@ bool ChatHandler::HandleLookupPlayerAccountCommand(char* args)
     if (!ExtractOptUInt32(&args, limit, 100))
         return false;
 
-    std::string account = accountStr;
+    std::string account(accountStr);
     if (!AccountMgr::normalizeString(account))
         return false;
 
@@ -4345,7 +4345,7 @@ bool ChatHandler::HandleLookupPlayerEmailCommand(char* args)
     if (!ExtractOptUInt32(&args, limit, 100))
         return false;
 
-    std::string email = emailStr;
+    std::string email(emailStr);
     LoginDatabase.escape_string(email);
 
     QueryResult* result = LoginDatabase.PQuery("SELECT id,username FROM account WHERE email " _LIKE_ " " _CONCAT3_("'%%'", "'%s'", "'%%'"), email.c_str());
@@ -4376,7 +4376,7 @@ bool ChatHandler::LookupPlayerSearchCommand(QueryResult* result, uint32* limit)
 
         Field* fields = result->Fetch();
         uint32 acc_id = fields[0].GetUInt32();
-        std::string acc_name = fields[1].GetCppString();
+        const std::string& acc_name = fields[1].GetCppString();
 
         ///- Get the characters for account id
         QueryResult* chars = CharacterDatabase.PQuery("SELECT guid, name, race, class, level FROM characters WHERE account = %u", acc_id);
@@ -4534,7 +4534,7 @@ bool ChatHandler::HandlePoolInfoCommand(char* args)
     MapPersistentState* mapState = player ? player->GetMap()->GetPersistentState() : nullptr;
     SpawnedPoolData const* spawns = mapState ? &mapState->GetSpawnedPoolData() : nullptr;
 
-    std::string active_str = GetMangosString(LANG_ACTIVE);
+    const std::string& active_str = GetMangosString(LANG_ACTIVE);
 
     PoolTemplateData const& pool_template = sPoolMgr.GetPoolTemplate(pool_id);
     uint32 mother_pool_id = sPoolMgr.IsPartOfAPool<Pool>(pool_id);
@@ -4862,7 +4862,7 @@ bool ChatHandler::HandleTitlesAddCommand(char* args)
         return false;
     }
 
-    std::string tNameLink = GetNameLink(target);
+    const std::string& tNameLink = GetNameLink(target);
 
     char const* targetName = target->GetName();
     char titleNameStr[80];
@@ -4910,7 +4910,7 @@ bool ChatHandler::HandleTitlesRemoveCommand(char* args)
 
     target->SetTitle(titleInfo, true);
 
-    std::string tNameLink = GetNameLink(target);
+    const std::string& tNameLink = GetNameLink(target);
 
     char const* targetName = target->GetName();
     char titleNameStr[80];
@@ -5040,7 +5040,7 @@ bool ChatHandler::HandleTitlesCurrentCommand(char* args)
         return false;
     }
 
-    std::string tNameLink = GetNameLink(target);
+    const std::string& tNameLink = GetNameLink(target);
 
     target->SetTitle(titleInfo);                            // to be sure that title now known
     target->SetUInt32Value(PLAYER_CHOSEN_TITLE, titleInfo->bit_index);

@@ -201,7 +201,7 @@ void ChatHandler::HandleCharacterDeletedListHelper(DeletedInfoList const& foundL
 
     for (const auto& itr : foundList)
     {
-        std::string dateStr = TimeToTimestampStr(itr.deleteDate);
+        const std::string& dateStr = TimeToTimestampStr(itr.deleteDate);
 
         if (!m_session)
             PSendSysMessage(LANG_CHARACTER_DELETED_LIST_LINE_CONSOLE,
@@ -270,7 +270,8 @@ void ChatHandler::HandleCharacterDeletedRestoreHelper(DeletedInfo const& delInfo
         return;
     }
 
-    if (sObjectMgr.GetPlayerGuidByName(delInfo.name))
+    std::string name = delInfo.name;
+    if (sObjectMgr.GetPlayerGuidByName(name))
     {
         PSendSysMessage(LANG_CHARACTER_DELETED_SKIP_NAME, delInfo.name.c_str(), delInfo.lowguid, delInfo.accountId);
         return;

@@ -215,7 +215,7 @@ std::string AcceptableClientBuildsListStr()
 
 static bool ReadDBCBuildFileText(const std::string& dbc_path, char const* localeName, std::string& text)
 {
-    std::string filename  = dbc_path + "component.wow-" + localeName + ".txt";
+    const std::string& filename = dbc_path + "component.wow-" + localeName + ".txt";
 
     if (FILE* file = fopen(filename.c_str(), "rb"))
     {
@@ -255,7 +255,7 @@ static uint32 ReadDBCBuild(const std::string& dbc_path, LocaleNameStr const* loc
     if (pos == std::string::npos || pos2 == std::string::npos || pos1 >= pos2)
         return 0;
 
-    std::string build_str = text.substr(pos1, pos2 - pos1);
+    const std::string& build_str = text.substr(pos1, pos2 - pos1);
 
     int build = atoi(build_str.c_str());
     if (build <= 0)
@@ -290,7 +290,7 @@ inline void LoadDBC(LocalData& localeData, BarGoLink& bar, StoreProblemList& err
     // compatibility format and C++ structure sizes
     MANGOS_ASSERT(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()) == sizeof(T) || LoadDBC_assert_print(DBCFileLoader::GetFormatRecordSize(storage.GetFormat()), sizeof(T), filename));
 
-    std::string dbc_filename = dbc_path + filename;
+    const std::string& dbc_filename = dbc_path + filename;
     if (storage.Load(dbc_filename.c_str()))
     {
         bar.step();
@@ -301,7 +301,7 @@ inline void LoadDBC(LocalData& localeData, BarGoLink& bar, StoreProblemList& err
 
             LocaleNameStr const* localStr = &fullLocaleNameList[i];
 
-            std::string dbc_dir_loc = dbc_path + localStr->name + "/";
+            const std::string& dbc_dir_loc = dbc_path + localStr->name + "/";
 
             if (!(localeData.checkedDbcLocaleBuilds & (1 << i)))
             {
@@ -315,7 +315,7 @@ inline void LoadDBC(LocalData& localeData, BarGoLink& bar, StoreProblemList& err
                     // exist but wrong build
                     if (build_loc)
                     {
-                        std::string dbc_filename_loc = dbc_path + localStr->name + "/" + filename;
+                        const std::string& dbc_filename_loc = dbc_path + localStr->name + "/" + filename;
                         char buf[200];
                         snprintf(buf, 200, " (exist, but DBC locale subdir %s have DBCs for build %u instead expected build %u, it and other DBC from subdir skipped)", localStr->name, build_loc, localeData.main_build);
                         errlist.push_back(dbc_filename_loc + buf);
@@ -325,7 +325,7 @@ inline void LoadDBC(LocalData& localeData, BarGoLink& bar, StoreProblemList& err
                 }
             }
 
-            std::string dbc_filename_loc = dbc_path + localStr->name + "/" + filename;
+            const std::string& dbc_filename_loc = dbc_path + localStr->name + "/" + filename;
             if (!storage.LoadStringsFrom(dbc_filename_loc.c_str()))
                 localeData.availableDbcLocales &= ~(1 << i);// mark as not available for speedup next checks
         }
@@ -348,7 +348,7 @@ inline void LoadDBC(LocalData& localeData, BarGoLink& bar, StoreProblemList& err
 
 void LoadDBCStores(const std::string& dataPath)
 {
-    std::string dbcPath = dataPath + "dbc/";
+    const std::string& dbcPath = dataPath + "dbc/";
 
     uint32 build = ReadDBCBuild(dbcPath);
 

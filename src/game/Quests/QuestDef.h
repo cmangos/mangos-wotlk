@@ -237,13 +237,13 @@ class Quest
         uint32 GetSrcItemId() const { return SrcItemId; }
         uint32 GetSrcItemCount() const { return SrcItemCount; }
         uint32 GetSrcSpell() const { return SrcSpell; }
-        std::string GetTitle() const { return Title; }
-        std::string GetDetails() const { return Details; }
-        std::string GetObjectives() const { return Objectives; }
-        std::string GetOfferRewardText() const { return OfferRewardText; }
-        std::string GetRequestItemsText() const { return RequestItemsText; }
-        std::string GetEndText() const { return EndText; }
-        std::string GetCompletedText() const { return CompletedText; }
+        const std::string& GetTitle() const { return Title; }
+        const std::string& GetDetails() const { return Details; }
+        const std::string& GetObjectives() const { return Objectives; }
+        const std::string& GetOfferRewardText() const { return OfferRewardText; }
+        const std::string& GetRequestItemsText() const { return RequestItemsText; }
+        const std::string& GetEndText() const { return EndText; }
+        const std::string& GetCompletedText() const { return CompletedText; }
         int32  GetRewOrReqMoney() const;
         uint32 GetRewHonorAddition() const { return RewHonorAddition; }
         float GetRewHonorMultiplier() const { return RewHonorMultiplier; }

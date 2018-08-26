@@ -4216,8 +4216,8 @@ void SpellMgr::CheckUsedSpells(char const* table) const
         int32  effectType  = fields[7].GetInt32();
         int32  auraType    = fields[8].GetInt32();
         int32  effectIdx   = fields[9].GetInt32();
-        std::string name   = fields[10].GetCppString();
-        std::string code   = fields[11].GetCppString();
+        const std::string& name = fields[10].GetCppString();
+        const std::string& code = fields[11].GetCppString();
 
         // checks of correctness requirements itself
 

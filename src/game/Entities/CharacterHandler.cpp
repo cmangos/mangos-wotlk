@@ -555,7 +555,7 @@ void WorldSession::HandleCharDeleteOpcode(WorldPacket& recv_data)
 
     if (sLog.IsOutCharDump())                               // optimize GetPlayerDump call
     {
-        std::string dump = PlayerDumpWriter().GetDump(lowguid);
+        const std::string& dump = PlayerDumpWriter().GetDump(lowguid);
         sLog.outCharDump(dump.c_str(), GetAccountId(), lowguid, name.c_str());
     }
 
@@ -993,7 +993,7 @@ void WorldSession::HandleChangePlayerNameOpcodeCallBack(QueryResult* result, uin
 
     uint32 guidLow = result->Fetch()[0].GetUInt32();
     ObjectGuid guid = ObjectGuid(HIGHGUID_PLAYER, guidLow);
-    std::string oldname = result->Fetch()[1].GetCppString();
+    const std::string& oldname = result->Fetch()[1].GetCppString();
 
     delete result;
 
