@@ -159,7 +159,7 @@ class Group
         ObjectGuid GetObjectGuid() const { return ObjectGuid(HIGHGUID_GROUP, GetId()); }
         bool IsFull() const { return (m_groupType == GROUPTYPE_NORMAL) ? (m_memberSlots.size() >= MAX_GROUP_SIZE) : (m_memberSlots.size() >= MAX_RAID_SIZE); }
         bool isRaidGroup() const { return (m_groupType & GROUPTYPE_RAID) != 0; }
-        bool isBattleGroup() const { return m_bgGroup != NULL || m_bfGroup != NULL; }
+        bool isBattleGroup() const { return m_bgGroup != nullptr || m_bfGroup != nullptr; }
         bool IsCreated()   const { return GetMembersCount() > 0; }
         ObjectGuid const& GetLeaderGuid() const { return m_leaderGuid; }
         const char*       GetLeaderName() const { return m_leaderName.c_str(); }
