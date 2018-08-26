@@ -254,7 +254,6 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
             }
             else
             {
-                pNewLeader = m_creature;
                 m_bIsLeader = true;
                 m_bWPDone = true;
             }

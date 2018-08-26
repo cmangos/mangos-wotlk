@@ -1371,7 +1371,6 @@ void Loot::GroupCheck()
     {
         case MASTER_LOOT:
         {
-            Player* masterLooter = nullptr;
             uint8 playerCount = 0;
             WorldPacket data(SMSG_LOOT_MASTER_LIST);
             data << uint8(0);
@@ -1380,9 +1379,6 @@ void Loot::GroupCheck()
                 Player* looter = sObjectAccessor.FindPlayer(itr);
                 if (!looter)
                     continue;
-
-                if (itr == m_masterOwnerGuid)
-                    masterLooter = looter;
 
                 data << itr;
                 ++playerCount;

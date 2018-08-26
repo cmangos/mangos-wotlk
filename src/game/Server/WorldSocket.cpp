@@ -59,7 +59,7 @@ struct ServerPktHeader
         header[headerIndex++] = 0xFF & size;
 
         header[headerIndex++] = 0xFF & cmd;
-        header[headerIndex++] = 0xFF & (cmd >> 8);
+        header[headerIndex]   = 0xFF & (cmd >> 8);
     }
 
     uint8 getHeaderLength() const

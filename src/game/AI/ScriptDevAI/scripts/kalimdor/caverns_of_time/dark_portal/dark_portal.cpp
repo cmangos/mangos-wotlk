@@ -137,7 +137,6 @@ struct npc_time_riftAI : public ScriptedAI
         m_pInstance = (instance_dark_portal*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         m_bIsFirstSummon = true;
-        m_uiRiftNumber   = 0;
         m_uiRiftWaveId   = 0;
         DoCastSpellIfCan(m_creature, SPELL_RIFT_PERIODIC);
         SetReactState(REACT_PASSIVE);

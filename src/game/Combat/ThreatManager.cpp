@@ -470,7 +470,6 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
                 if (redirectedTarget != getOwner() && redirectedTarget->isAlive())
                 {
                     float redirectedThreat = threat * redirectedMod;
-                    threat -= redirectedThreat;
                     addThreatDirectly(redirectedTarget, redirectedThreat);
                 }
             }

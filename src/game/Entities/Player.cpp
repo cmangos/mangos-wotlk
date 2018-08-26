@@ -12035,7 +12035,6 @@ void Player::AddItemToBuyBackSlot(Item* pItem, uint32 money)
             // found empty
             if (!m_items[i])
             {
-                slot = i;
                 break;
             }
 
@@ -15743,8 +15742,6 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             RelocateToHomebind();
 
             m_movementInfo.ClearTransportData();
-
-            transGUID = 0;
         }
     }
     else                                                    // not transport case

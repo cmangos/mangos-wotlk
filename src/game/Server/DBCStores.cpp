@@ -239,7 +239,6 @@ static uint32 ReadDBCBuild(const std::string& dbc_path, LocaleNameStr const* loc
         {
             if (ReadDBCBuildFileText(dbc_path, itr->name, text))
             {
-                localeNameStr = itr;
                 break;
             }
         }

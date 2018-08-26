@@ -1516,20 +1516,20 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
         if (both)
         {
             // Wave starting indoors
-            Creature* pSummoned = m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupOneSpawnCoords[0].xCoord, WaveGroupOneSpawnCoords[0].yCoord, WaveGroupOneSpawnCoords[0].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 1);
-            pSummoned = m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupOneSpawnCoords[1].xCoord, WaveGroupOneSpawnCoords[1].yCoord, WaveGroupOneSpawnCoords[1].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 2);
-            pSummoned = m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupOneSpawnCoords[2].xCoord, WaveGroupOneSpawnCoords[2].yCoord, WaveGroupOneSpawnCoords[2].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 3);
+            m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupOneSpawnCoords[0].xCoord, WaveGroupOneSpawnCoords[0].yCoord, WaveGroupOneSpawnCoords[0].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 1);
+            m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupOneSpawnCoords[1].xCoord, WaveGroupOneSpawnCoords[1].yCoord, WaveGroupOneSpawnCoords[1].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 2);
+            m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupOneSpawnCoords[2].xCoord, WaveGroupOneSpawnCoords[2].yCoord, WaveGroupOneSpawnCoords[2].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 3);
         
             // Wave starting outdoors
-            pSummoned = m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupTwoSpawnCoords[0].xCoord, WaveGroupTwoSpawnCoords[0].yCoord, WaveGroupTwoSpawnCoords[0].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 4);
-            pSummoned = m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupTwoSpawnCoords[1].xCoord, WaveGroupTwoSpawnCoords[1].yCoord, WaveGroupTwoSpawnCoords[1].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 5);
-            pSummoned = m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupTwoSpawnCoords[2].xCoord, WaveGroupTwoSpawnCoords[2].yCoord, WaveGroupTwoSpawnCoords[2].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 6);
+            m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupTwoSpawnCoords[0].xCoord, WaveGroupTwoSpawnCoords[0].yCoord, WaveGroupTwoSpawnCoords[0].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 4);
+            m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupTwoSpawnCoords[1].xCoord, WaveGroupTwoSpawnCoords[1].yCoord, WaveGroupTwoSpawnCoords[1].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 5);
+            m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupTwoSpawnCoords[2].xCoord, WaveGroupTwoSpawnCoords[2].yCoord, WaveGroupTwoSpawnCoords[2].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 6);
         }
         else
         {
-            Creature* pSummoned = m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupThreeSpawnCoords[0].xCoord, WaveGroupThreeSpawnCoords[0].yCoord, WaveGroupThreeSpawnCoords[0].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 1);
-            pSummoned = m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupThreeSpawnCoords[1].xCoord, WaveGroupThreeSpawnCoords[1].yCoord, WaveGroupThreeSpawnCoords[1].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 2);
-            pSummoned = m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupThreeSpawnCoords[2].xCoord, WaveGroupThreeSpawnCoords[2].yCoord, WaveGroupThreeSpawnCoords[2].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 3);
+            m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupThreeSpawnCoords[0].xCoord, WaveGroupThreeSpawnCoords[0].yCoord, WaveGroupThreeSpawnCoords[0].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 1);
+            m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupThreeSpawnCoords[1].xCoord, WaveGroupThreeSpawnCoords[1].yCoord, WaveGroupThreeSpawnCoords[1].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 2);
+            m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupThreeSpawnCoords[2].xCoord, WaveGroupThreeSpawnCoords[2].yCoord, WaveGroupThreeSpawnCoords[2].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 3);
         }
     }
 

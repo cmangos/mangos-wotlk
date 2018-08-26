@@ -5600,7 +5600,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                     {
                         if (!target_hostile_checked)
                         {
-                            target_hostile_checked = true;
                             target_hostile = m_caster->CanAttack(target) && m_caster->IsEnemy(target);
                         }
 
@@ -5611,7 +5610,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                     {
                         if (!target_friendly_checked)
                         {
-                            target_friendly_checked = true;
                             target_friendly = m_caster->CanAssist(target) && m_caster->IsFriend(target);
                         }
 
