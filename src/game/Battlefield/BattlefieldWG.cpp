@@ -51,6 +51,7 @@ void BattlefieldWG::Reset()
     m_sentPrebattleWarning = false;
 
     // load the defender buildings
+    m_keepBuildings.reserve(countof(wgFortressData));
     for (const auto& i : wgFortressData)
     {
         BattlefieldBuilding* building = new BattlefieldBuilding(i.goEntry);
@@ -66,6 +67,7 @@ void BattlefieldWG::Reset()
     }
 
     // load the attacker buildings
+    m_offensiveBuildings.reserve(countof(wgOffensiveData));
     for (const auto& i : wgOffensiveData)
     {
         BattlefieldBuilding* building = new BattlefieldBuilding(i.goEntry);
@@ -81,6 +83,7 @@ void BattlefieldWG::Reset()
     }
 
     // load the defense workshops - only inside the fortress
+    m_defenseWorkshops.reserve(countof(wgFortressWorkshopsData));
     for (const auto& i : wgFortressWorkshopsData)
     {
         BattlefieldBuilding* building = new BattlefieldBuilding(i.goEntry);
@@ -96,6 +99,7 @@ void BattlefieldWG::Reset()
     }
 
     // load the capturable workshops
+    m_capturableWorkshops.reserve(countof(wgCapturePointData));
     for (const auto& i : wgCapturePointData)
     {
         BattlefieldBuilding* building = new BattlefieldBuilding(i.goEntryWorkshop);
@@ -134,17 +138,17 @@ void BattlefieldWG::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, WORLD_STATE_WG_MAX_VEHICLE_H, m_workshopCount[1] * 4);
 
     // display all the walls, towers and workshops
-    for (std::list<BattlefieldBuilding*>::const_iterator itr = m_keepBuildings.begin(); itr != m_keepBuildings.end(); ++itr)
-        FillInitialWorldState(data, count, (*itr)->GetWorldState(), (*itr)->GetGoState());
+    for (auto building : m_keepBuildings)
+        FillInitialWorldState(data, count, building->GetWorldState(), building->GetGoState());
+    
+    for (auto building : m_offensiveBuildings)
+        FillInitialWorldState(data, count, building->GetWorldState(), building->GetGoState());
 
-    for (std::list<BattlefieldBuilding*>::const_iterator itr = m_offensiveBuildings.begin(); itr != m_offensiveBuildings.end(); ++itr)
-        FillInitialWorldState(data, count, (*itr)->GetWorldState(), (*itr)->GetGoState());
+    for (auto building : m_defenseWorkshops)
+        FillInitialWorldState(data, count, building->GetWorldState(), building->GetGoState());
 
-    for (std::list<BattlefieldBuilding*>::const_iterator itr = m_defenseWorkshops.begin(); itr != m_defenseWorkshops.end(); ++itr)
-        FillInitialWorldState(data, count, (*itr)->GetWorldState(), (*itr)->GetGoState());
-
-    for (std::list<BattlefieldBuilding*>::const_iterator itr = m_capturableWorkshops.begin(); itr != m_capturableWorkshops.end(); ++itr)
-        FillInitialWorldState(data, count, (*itr)->GetWorldState(), (*itr)->GetGoState());
+    for (auto building : m_capturableWorkshops)
+        FillInitialWorldState(data, count, building->GetWorldState(), building->GetGoState());
 }
 
 void BattlefieldWG::SendRemoveWorldStates(Player* player)
@@ -249,12 +253,12 @@ void BattlefieldWG::HandleGameObjectCreate(GameObject* go)
     OutdoorPvP::HandleGameObjectCreate(go);
 
     // load the attacker buildings
-    for (std::list<BattlefieldBuilding*>::const_iterator itr = m_offensiveBuildings.begin(); itr != m_offensiveBuildings.end(); ++itr)
+    for (auto building : m_offensiveBuildings)
     {
-        if ((*itr)->GetGoEntry() == go->GetEntry())
+        if (building->GetGoEntry() == go->GetEntry())
         {
             // store the object guid and set the correct faction
-            (*itr)->SetGoGuid(go->GetObjectGuid());
+            building->SetGoGuid(go->GetObjectGuid());
 
             if (GetAttacker() != TEAM_NONE)
                 go->SetFaction(GetAttacker() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
@@ -265,12 +269,12 @@ void BattlefieldWG::HandleGameObjectCreate(GameObject* go)
     }
 
     // load the defender buildings
-    for (std::list<BattlefieldBuilding*>::const_iterator itr = m_keepBuildings.begin(); itr != m_keepBuildings.end(); ++itr)
+    for (auto building : m_keepBuildings)
     {
-        if ((*itr)->GetGoEntry() == go->GetEntry())
+        if (building->GetGoEntry() == go->GetEntry())
         {
             // store the object guid and set the correct faction
-            (*itr)->SetGoGuid(go->GetObjectGuid());
+            building->SetGoGuid(go->GetObjectGuid());
 
             if (GetDefender() != TEAM_NONE)
                 go->SetFaction(GetDefender() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
@@ -414,61 +418,61 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
     SendUpdateWorldState(WORLD_STATE_WG_MAX_VEHICLE_H, m_workshopCount[1] * 4);
 
     // reset and respawn buildings
-    for (std::list<BattlefieldBuilding*>::const_iterator itr = m_offensiveBuildings.begin(); itr != m_offensiveBuildings.end(); ++itr)
+    for (auto building : m_offensiveBuildings)
     {
-        if (GameObject* gameObject = objRef->GetMap()->GetGameObject((*itr)->GetGoGuid()))
+        if (GameObject* gameObject = objRef->GetMap()->GetGameObject(building->GetGoGuid()))
         {
             gameObject->SetFaction(GetAttacker() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
             gameObject->RebuildGameObject((Unit*)objRef);
         }
 
-        (*itr)->SetOwner(GetAttacker() == ALLIANCE ? ALLIANCE : HORDE);
-        (*itr)->SetGoState(GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-        SendUpdateWorldState((*itr)->GetWorldState(), (*itr)->GetGoState());
+        building->SetOwner(GetAttacker() == ALLIANCE ? ALLIANCE : HORDE);
+        building->SetGoState(GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
+        SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
     }
-
-    for (std::list<BattlefieldBuilding*>::const_iterator itr = m_keepBuildings.begin(); itr != m_keepBuildings.end(); ++itr)
+    
+    for (auto building : m_keepBuildings)
     {
-        if (GameObject* gameObject = objRef->GetMap()->GetGameObject((*itr)->GetGoGuid()))
+        if (GameObject* gameObject = objRef->GetMap()->GetGameObject(building->GetGoGuid()))
         {
             gameObject->SetFaction(GetDefender() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
             gameObject->RebuildGameObject((Unit*)objRef);
         }
 
-        (*itr)->SetOwner(GetDefender() == ALLIANCE ? ALLIANCE : HORDE);
-        (*itr)->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-        SendUpdateWorldState((*itr)->GetWorldState(), (*itr)->GetGoState());
+        building->SetOwner(GetDefender() == ALLIANCE ? ALLIANCE : HORDE);
+        building->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
+        SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
     }
 
     // reset workshops
-    for (std::list<BattlefieldBuilding*>::const_iterator itr = m_defenseWorkshops.begin(); itr != m_defenseWorkshops.end(); ++itr)
+    for (auto building : m_defenseWorkshops)
     {
-        (*itr)->SetOwner(GetDefender() == ALLIANCE ? ALLIANCE : HORDE);
-        (*itr)->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-        SendUpdateWorldState((*itr)->GetWorldState(), (*itr)->GetGoState());
+        building->SetOwner(GetDefender() == ALLIANCE ? ALLIANCE : HORDE);
+        building->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
+        SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
     }
-
-    for (std::list<BattlefieldBuilding*>::const_iterator itr = m_capturableWorkshops.begin(); itr != m_capturableWorkshops.end(); ++itr)
+    
+    for (auto building : m_capturableWorkshops)
     {
-        Team comparableTeam = (*itr)->GetGoEntry() == GO_WORKSHOP_BROKEN_TEMPLE || (*itr)->GetGoEntry() == GO_WORKSHOP_SUNKEN_RING ? GetDefender() : GetAttacker();
-        (*itr)->SetOwner(comparableTeam == ALLIANCE ? ALLIANCE : HORDE);
-        (*itr)->SetGoState(comparableTeam == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-        SendUpdateWorldState((*itr)->GetWorldState(), (*itr)->GetGoState());
+        Team comparableTeam = building->GetGoEntry() == GO_WORKSHOP_BROKEN_TEMPLE || building->GetGoEntry() == GO_WORKSHOP_SUNKEN_RING ? GetDefender() : GetAttacker();
+        building->SetOwner(comparableTeam == ALLIANCE ? ALLIANCE : HORDE);
+        building->SetGoState(comparableTeam == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
+        SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
     }
 
     // reset and respawn cannons
-    for (GuidList::const_iterator itr = m_attackCannonsGuids.begin(); itr != m_attackCannonsGuids.end(); ++itr)
+    for (const auto& guid : m_attackCannonsGuids)
     {
-        if (Creature* cannon = objRef->GetMap()->GetCreature((*itr)))
+        if (Creature* cannon = objRef->GetMap()->GetCreature(guid))
         {
             cannon->setFaction(GetAttacker() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
             cannon->Respawn();
         }
     }
-
-    for (GuidList::const_iterator itr = m_defenseCannonsGuids.begin(); itr != m_defenseCannonsGuids.end(); ++itr)
+    
+    for (const auto& guid : m_defenseCannonsGuids)
     {
-        if (Creature* cannon = objRef->GetMap()->GetCreature((*itr)))
+        if (Creature* cannon = objRef->GetMap()->GetCreature(guid))
         {
             cannon->setFaction(GetDefender() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
             cannon->Respawn();

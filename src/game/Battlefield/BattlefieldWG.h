@@ -477,7 +477,7 @@ class WGTower : public BattlefieldBuilding
         void SetupBuilding(Team owner, bool reset);
         void SpawnCannons(bool despawn = false);
 
-        std::list<ObjectGuid> cannons;
+        std::vector<ObjectGuid> cannons;
 };
 
 class WGPlayerScore : public BattlefieldPlayer
@@ -542,10 +542,10 @@ class BattlefieldWG : public Battlefield
         uint32 m_destroyedTowers[PVP_TEAM_COUNT];
         uint32 m_workshopCount[PVP_TEAM_COUNT];
 
-        std::list<ObjectGuid> m_zoneTrashGUIDs;
-        std::list<ObjectGuid> m_keepCannonGUIDs;
-        std::list<ObjectGuid> m_portalGUIDs;
-        std::list<ObjectGuid> m_vehicleGUIDs[PVP_TEAM_COUNT];
+        std::vector<ObjectGuid> m_zoneTrashGUIDs;
+        std::vector<ObjectGuid> m_keepCannonGUIDs;
+        std::vector<ObjectGuid> m_portalGUIDs;
+        std::vector<ObjectGuid> m_vehicleGUIDs[PVP_TEAM_COUNT];
 
         ObjectGuid m_keepDoorGUID;
         ObjectGuid m_keepGateGUID;
@@ -555,14 +555,14 @@ class BattlefieldWG : public Battlefield
 
         std::map<uint8, WGTower*> m_attackTowers;
         std::map<uint8, WGTower*> m_defenseTowers;
-        std::list<BattlefieldBuilding*> m_keepWalls;
+        std::vector<BattlefieldBuilding*> m_keepWalls;
         std::map<uint8, WGWorkShop*> m_workshops;
 
-        std::list<BattlefieldBuilding*> m_keepBuildings;
-        std::list<BattlefieldBuilding*> m_offensiveBuildings;
+        std::vector<BattlefieldBuilding*> m_keepBuildings;
+        std::vector<BattlefieldBuilding*> m_offensiveBuildings;
 
-        std::list<BattlefieldBuilding*> m_defenseWorkshops;
-        std::list<BattlefieldBuilding*> m_capturableWorkshops;
+        std::vector<BattlefieldBuilding*> m_defenseWorkshops;
+        std::vector<BattlefieldBuilding*> m_capturableWorkshops;
 
         GuidList m_defenseCannonsGuids;
         GuidList m_attackCannonsGuids;
