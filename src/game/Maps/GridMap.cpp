@@ -1108,9 +1108,7 @@ bool TerrainInfo::IsInWater(float x, float y, float pZ, GridMapLiquidData* data,
         if ((status & LIQUID_MAP_IN_WATER) ||
                 (status & LIQUID_MAP_UNDER_WATER))
         {
-            if (liquid_ptr && (liquid_ptr->level - liquid_ptr->depth_level > min_depth)) // avoid water with depth < 2
-                return true;
-            return false;
+            return liquid_ptr && liquid_ptr->level - liquid_ptr->depth_level > min_depth; // avoid water with depth < 2
         }
     }
     return false;
