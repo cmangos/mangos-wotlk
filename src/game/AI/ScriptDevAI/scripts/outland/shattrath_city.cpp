@@ -681,7 +681,6 @@ bool QuestRewarded_npc_adal(Player* player, Creature* creature, Quest const* que
             sWorldState.HandleExternalEvent(CUSTOM_EVENT_ADALS_SONG_OF_BATTLE);
             player->GetMap()->ScriptsStart(sRelayScripts, SCRIPT_RELAY_ID, creature, player, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE); // only once active per adal
             return true; // handled
-            break;
     }
 
     return false; // unhandled

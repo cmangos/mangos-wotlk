@@ -339,7 +339,6 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[TYPE_DEATHBRINGER_SAURFANG] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
-            break;
         case GO_TRANSPORTER_LIGHTS_HAMMER:
         case GO_TRANSPORTER_ORATORY_DAMNED:
             if (m_auiEncounter[TYPE_MARROWGAR] == DONE)
