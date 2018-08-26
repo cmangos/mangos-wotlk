@@ -1097,7 +1097,7 @@ struct npc_eye_of_acherusAI : public ScriptedAI
         switch (m_phase)
         {
             case 0: // initialization > move to start position
-                if (Player* player = m_creature->GetBeneficiaryPlayer())
+                if (m_creature->GetBeneficiaryPlayer())
                 {
                     m_creature->SetPhaseMask(2, true);              // HACK remove when summon spells and auras are implemented properly in mangos
                     m_creature->SetDisplayId(26320);                // HACK remove when correct modelid will be taken by core

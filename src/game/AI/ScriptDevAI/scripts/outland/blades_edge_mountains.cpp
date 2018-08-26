@@ -556,9 +556,9 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
                 m_masterPlayerGuid = m_creature->GetSpawnerGuid();
 
             // Get closest apexis
-            if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_RELIC, 5.0f))
+            if (GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_RELIC, 5.0f))
                 m_bIsLargeEvent = false;
-            else if (GameObject* pGo = GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_MONUMENT, 17.0f))
+            else if (GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_MONUMENT, 17.0f))
                 m_bIsLargeEvent = true;
         }
 
@@ -1359,7 +1359,7 @@ bool AreaTrigger_at_raven_prophecy(Player* pPlayer, AreaTriggerEntry const* pAt)
             {
                 if (Creature* whisper = ((ScriptedMap*)pPlayer->GetInstanceData())->GetSingleCreatureFromStorage(NPC_WHISPER_RAVEN_GOD_TEMPLATE))
                 {
-                    if (Creature* vision = pPlayer->SummonCreature(NPC_VISION_RAVEN_GOD_TEMPLATE, prophecy.x, prophecy.y, prophecy.z, prophecy.o, TEMPSPAWN_TIMED_DESPAWN, 6000))
+                    if (pPlayer->SummonCreature(NPC_VISION_RAVEN_GOD_TEMPLATE, prophecy.x, prophecy.y, prophecy.z, prophecy.o, TEMPSPAWN_TIMED_DESPAWN, 6000))
                     {
                         DoScriptText(prophecy.text, whisper, pPlayer);
 
@@ -1406,7 +1406,7 @@ enum
 
 bool ProcessEventId_Soulgrinder(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart)
 {
-    if (Creature* bunny = GetClosestCreatureWithEntry((WorldObject*)pSource, NPC_SOULGRINDER, 20))
+    if (GetClosestCreatureWithEntry((WorldObject*)pSource, NPC_SOULGRINDER, 20))
     {
         return false;
     }

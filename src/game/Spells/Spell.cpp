@@ -2334,7 +2334,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             else                                            // can also happen for GO_AROUND_SOURCE without SOURCE_LOCATION
                 m_caster->GetPosition(x, y, z);
 
-            bool fixedTargetExist = false;
             std::set<uint32> entriesToUse;
 
             SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(m_spellInfo->Id);
@@ -6190,7 +6189,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (Unit* target = m_targets.getUnitTarget())
                 {
                     float range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
-                    float angle = target->GetAngle(m_caster) - target->GetOrientation();
 
                     WorldLocation pos;
                     target->GetFirstCollisionPosition(pos, target->GetCombatReach(), target->GetAngle(m_caster));

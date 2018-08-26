@@ -767,7 +767,6 @@ void WorldSession::HandleUpdateMissileTrajectory(WorldPacket& recv_data)
 
     if (moveFlag)
     {
-        ObjectGuid guid2;                               // unk guid (possible - active mover) - unused
         MovementInfo movementInfo;                      // MovementInfo
 
         recv_data >> Unused<uint32>();                  // >> MSG_MOVE_STOP
