@@ -470,8 +470,6 @@ bool Creature::UpdateEntry(uint32 Entry, Team team, const CreatureData* data /*=
             const bool sanctuary = (zone && (zone->flags & AREA_FLAG_SANCTUARY));
             SetPvP(!sanctuary);
         }
-        else
-            SetPvP(false);
     }
 
     // Try difficulty dependent version before falling back to base entry
