@@ -607,7 +607,7 @@ void WorldSession::SendMotd()
     WorldPacket data(SMSG_MOTD, 4);
     data << (uint32) lines.size();
 
-    for (std::string line : lines)
+    for (const std::string& line : lines)
         data << line;
 
     SendPacket(data);
