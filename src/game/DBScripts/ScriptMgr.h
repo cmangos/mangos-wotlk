@@ -612,7 +612,6 @@ class ScriptMgr
 
         ScriptTemplateMap       m_scriptTemplates[MAX_TYPE];
         ScriptNameMap           m_scriptNames;
-        MANGOS_LIBRARY_HANDLE   m_hScriptLib;
 
         // atomic op counter for active scripts amount
         std::atomic_long m_scheduledScripts;
