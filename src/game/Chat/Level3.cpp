@@ -6207,7 +6207,7 @@ bool ChatHandler::HandlePDumpLoadCommand(char* args)
         }
     }
 
-    switch (PlayerDumpReader().LoadDump(file, account_id, name, lowguid))
+    switch (PlayerDumpReader::LoadDump(file, account_id, name, lowguid))
     {
         case DUMP_SUCCESS:
             PSendSysMessage(LANG_COMMAND_IMPORT_SUCCESS);
