@@ -216,8 +216,8 @@ bool Guild::AddMember(ObjectGuid plGuid, uint32 plRank)
     }
 
     newmember.RankId  = plRank;
-    newmember.OFFnote = "";
-    newmember.Pnote   = "";
+    newmember.OFFnote = (std::string)"";
+    newmember.Pnote   = (std::string)"";
     newmember.LogoutTime = time(nullptr);
     newmember.BankResetTimeMoney = 0;                       // this will force update at first query
     for (unsigned int& i : newmember.BankResetTimeTab)
@@ -357,7 +357,7 @@ bool Guild::LoadRanksFromDB(QueryResult* guildRanksResult)
             break;
 
         uint32 rankID        = fields[1].GetUInt32();
-        const std::string& rankName = fields[2].GetCppString();
+        std::string rankName = fields[2].GetCppString();
         uint32 rankRights    = fields[3].GetUInt32();
         uint32 rankMoney     = fields[4].GetUInt32();
 

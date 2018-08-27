@@ -58,7 +58,7 @@ SqlPreparedStatement* SqlConnection::GetStmt(uint32 nIndex)
     if (m_holder[nIndex] == nullptr)
     {
         // obtain SQL request string
-        const std::string& fmt = m_db.GetStmtString(nIndex);
+        std::string fmt = m_db.GetStmtString(nIndex);
         MANGOS_ASSERT(fmt.length());
         // allocate SQlPreparedStatement object
         pStmt = CreateStatement(fmt);
@@ -266,7 +266,7 @@ bool Database::PExecuteLog(const char* format, ...)
         char fName[128];
         sprintf(fName, "%04d-%02d-%02d_logSQL.sql", local.tm_year + 1900, local.tm_mon + 1, local.tm_mday);
 
-        const std::string& logsDir_fname = m_logsDir + fName;
+        std::string logsDir_fname = m_logsDir + fName;
         FILE* log_file = fopen(logsDir_fname.c_str(), "a");
         if (log_file)
         {
@@ -484,7 +484,7 @@ bool Database::CheckRequiredField(char const* table_name, char const* required_n
 
         delete result2;
 
-        const std::string& cur_sql_update_name = reqName.substr(strlen("required_"), std::string::npos);
+        std::string cur_sql_update_name = reqName.substr(strlen("required_"), std::string::npos);
 
         if (!reqName.empty())
         {

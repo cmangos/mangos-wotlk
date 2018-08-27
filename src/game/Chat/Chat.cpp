@@ -891,7 +891,7 @@ ChatCommand* ChatHandler::getCommandTable()
             do
             {
                 Field* fields = result->Fetch();
-                const std::string& name = fields[0].GetCppString();
+                std::string name = fields[0].GetCppString();
 
                 SetDataForCommandInTable(commandTable, name.c_str(), fields[1].GetUInt16(), fields[2].GetCppString());
             }
@@ -1272,7 +1272,7 @@ ChatCommandSearchResult ChatHandler::FindCommand(ChatCommand* table, char const*
  */
 void ChatHandler::ExecuteCommand(const char* text)
 {
-    std::string fullcmd(text);                             // original `text` can't be used. It content destroyed in command code processing.
+    std::string fullcmd = text;                             // original `text` can't be used. It content destroyed in command code processing.
 
     ChatCommand* command = nullptr;
     ChatCommand* parentCommand = nullptr;
@@ -1335,7 +1335,7 @@ void ChatHandler::ExecuteCommand(const char* text)
  */
 bool ChatHandler::SetDataForCommandInTable(ChatCommand* commandTable, const char* text, uint32 security, std::string const& help)
 {
-    std::string fullcommand(text);                         // original `text` can't be used. It content destroyed in command code processing.
+    std::string fullcommand = text;                         // original `text` can't be used. It content destroyed in command code processing.
 
     ChatCommand* command = nullptr;
     std::string cmdName;
@@ -1518,7 +1518,7 @@ bool ChatHandler::isValidChatMessage(const char* message) const
     // more simple checks
     if (sWorld.getConfig(CONFIG_UINT32_CHAT_STRICT_LINK_CHECKING_SEVERITY) < 3)
     {
-        const std::string validCommands("cHhr|");
+        const std::string validCommands = "cHhr|";
 
         while (*message)
         {

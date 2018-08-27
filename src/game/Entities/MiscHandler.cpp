@@ -1221,7 +1221,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
     if (lastip.empty())
         lastip = "Unknown";
 
-    const std::string& msg = charname + "'s " + "account is " + acc + ", e-mail: " + email + ", last ip: " + lastip;
+    std::string msg = charname + "'s " + "account is " + acc + ", e-mail: " + email + ", last ip: " + lastip;
 
     WorldPacket data(SMSG_WHOIS, msg.size() + 1);
     data << msg;

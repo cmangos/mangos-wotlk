@@ -4196,8 +4196,8 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
                     uint16 mailType      = fields[1].GetUInt16();
                     uint16 mailTemplateId = fields[2].GetUInt16();
                     uint32 sender        = fields[3].GetUInt32();
-                    const std::string& subject = fields[4].GetCppString();
-                    const std::string& body = fields[5].GetCppString();
+                    std::string subject  = fields[4].GetCppString();
+                    std::string body     = fields[5].GetCppString();
                     uint32 money         = fields[6].GetUInt32();
                     bool has_items       = fields[7].GetBool();
 
@@ -5020,7 +5020,7 @@ void Player::UpdateLocalChannels(uint32 newZone)
     if (!cMgr)
         return;
 
-    const std::string& current_zone_name = current_zone->area_name[GetSession()->GetSessionDbcLocale()];
+    std::string current_zone_name = current_zone->area_name[GetSession()->GetSessionDbcLocale()];
 
     for (JoinedChannelsList::iterator i = m_channels.begin(), next; i != m_channels.end(); i = next)
     {
@@ -5048,7 +5048,7 @@ void Player::UpdateLocalChannels(uint32 newZone)
 
             // leave old channel
             (*i)->Leave(this, false);                       // not send leave channel, it already replaced at client
-            const std::string& name = (*i)->GetName();      // store name, (*i)erase in LeftChannel
+            std::string name = (*i)->GetName();             // store name, (*i)erase in LeftChannel
             LeftChannel(*i);                                // remove from player's channel list
             cMgr->LeftChannel(name);                        // delete if empty
         }
@@ -12853,7 +12853,7 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                         break;
                     }
 
-                    const std::string& reqQuestIds = botConfig.GetStringDefault("PlayerbotAI.BotguyQuests", "");
+                    std::string reqQuestIds = botConfig.GetStringDefault("PlayerbotAI.BotguyQuests", "");
                     uint32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost", 0);
                     if ((reqQuestIds == "" || requiredQuests(reqQuestIds.c_str())) && !pCreature->isInnkeeper() && this->GetMoney() >= cost)
                         pCreature->LoadBotMenu(this);
@@ -15822,7 +15822,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     if (m_deathExpireTime > now + MAX_DEATH_COUNT * DEATH_EXPIRE_STEP)
         m_deathExpireTime = now + MAX_DEATH_COUNT * DEATH_EXPIRE_STEP - 1;
 
-    const std::string& taxi_nodes = fields[37].GetCppString();
+    std::string taxi_nodes = fields[37].GetCppString();
 
     // clear channel spell data (if saved at channel spell casting)
     SetChannelObjectGuid(ObjectGuid());
@@ -16408,7 +16408,7 @@ void Player::_LoadInventory(QueryResult* result, uint32 timediff)
         // send by mail problematic items
         while (!problematicItems.empty())
         {
-            const std::string& subject = GetSession()->GetMangosString(LANG_NOT_EQUIPPED_ITEM);
+            std::string subject = GetSession()->GetMangosString(LANG_NOT_EQUIPPED_ITEM);
 
             // fill mail
             MailDraft draft(subject, "There's were problems with equipping item(s).");
@@ -20953,7 +20953,7 @@ void Player::AutoUnequipOffhandIfNeed()
         offItem->SaveToDB();                                // recursive and not have transaction guard into self, item not in inventory and can be save standalone
         CharacterDatabase.CommitTransaction();
 
-        const std::string& subject = GetSession()->GetMangosString(LANG_NOT_EQUIPPED_ITEM);
+        std::string subject = GetSession()->GetMangosString(LANG_NOT_EQUIPPED_ITEM);
         MailDraft(subject, "There's were problems with equipping this item.").AddItem(offItem).SendMailTo(this, MailSender(this, MAIL_STATIONERY_GM), MAIL_CHECK_MASK_COPIED);
     }
 }

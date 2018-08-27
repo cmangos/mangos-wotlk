@@ -201,7 +201,7 @@ void ChatHandler::HandleCharacterDeletedListHelper(DeletedInfoList const& foundL
 
     for (const auto& itr : foundList)
     {
-        const std::string& dateStr = TimeToTimestampStr(itr.deleteDate);
+        std::string dateStr = TimeToTimestampStr(itr.deleteDate);
 
         if (!m_session)
             PSendSysMessage(LANG_CHARACTER_DELETED_LIST_LINE_CONSOLE,

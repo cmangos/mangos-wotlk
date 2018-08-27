@@ -612,7 +612,7 @@ class World
         char const* GetDBVersion() const { return m_DBVersion.c_str(); }
         char const* GetCreatureEventAIVersion() const { return m_CreatureEventAIVersion.c_str(); }
 
-        const std::vector<std::string>& GetSpamRecords() const { return m_spamRecords; }
+        std::vector<std::string> GetSpamRecords() const { return m_spamRecords; }
 
         /**
         * \brief: force all client to request player data

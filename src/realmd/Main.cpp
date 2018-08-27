@@ -165,7 +165,7 @@ int main(int argc, char* argv[])
     }
 
     /// realmd PID file creation
-    const std::string& pidfile = sConfig.GetStringDefault("PidFile");
+    std::string pidfile = sConfig.GetStringDefault("PidFile");
     if (!pidfile.empty())
     {
         uint32 pid = CreatePIDFile(pidfile);
@@ -310,7 +310,7 @@ void OnSignal(int s)
 /// Initialize connection to the database
 bool StartDB()
 {
-    const std::string& dbstring = sConfig.GetStringDefault("LoginDatabaseInfo");
+    std::string dbstring = sConfig.GetStringDefault("LoginDatabaseInfo");
     if (dbstring.empty())
     {
         sLog.outError("Database not specified");

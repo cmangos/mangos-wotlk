@@ -270,7 +270,7 @@ class WorldSession
         void SendTransferAborted(uint32 mapid, uint8 reason, uint8 arg = 0) const;
         void SendSetPhaseShift(uint32 PhaseShift) const;
         void SendQueryTimeResponse() const;
-        void SendRedirectClient(const std::string& ip, uint16 port) const;
+        void SendRedirectClient(std::string& ip, uint16 port) const;
 
         AccountTypes GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }

@@ -68,7 +68,7 @@ static DumpTable dumpTables[] =
 };
 
 // Low level functions
-static bool findtoknth(const std::string& str, int n, std::string::size_type& s, std::string::size_type& e)
+static bool findtoknth(std::string& str, int n, std::string::size_type& s, std::string::size_type& e)
 {
     int i; s = e = 0;
     std::string::size_type size = str.size();
@@ -81,7 +81,7 @@ static bool findtoknth(const std::string& str, int n, std::string::size_type& s,
     return e != std::string::npos;
 }
 
-std::string gettoknth(const std::string& str, int n)
+std::string gettoknth(std::string& str, int n)
 {
     std::string::size_type s = 0, e = 0;
     if (!findtoknth(str, n, s, e))
@@ -90,7 +90,7 @@ std::string gettoknth(const std::string& str, int n)
     return str.substr(s, e - s);
 }
 
-bool findnth(const std::string& str, int n, std::string::size_type& s, std::string::size_type& e)
+bool findnth(std::string& str, int n, std::string::size_type& s, std::string::size_type& e)
 {
     s = str.find("VALUES ('") + 9;
     if (s == std::string::npos)
@@ -118,7 +118,7 @@ bool findnth(const std::string& str, int n, std::string::size_type& s, std::stri
     return true;
 }
 
-std::string gettablename(const std::string& str)
+std::string gettablename(std::string& str)
 {
     std::string::size_type s = 13;
     std::string::size_type e = str.find(_TABLE_SIM_, s);
@@ -144,7 +144,7 @@ bool changenth(std::string& str, int n, const char* with, bool insert = false, b
     return true;
 }
 
-std::string getnth(const std::string& str, int n)
+std::string getnth(std::string& str, int n)
 {
     std::string::size_type s, e;
     if (!findnth(str, n, s, e))
@@ -499,7 +499,7 @@ DumpReturn PlayerDumpReader::LoadDump(const std::string& file, uint32 account, s
         }
 
         // determine table name and load type
-        const std::string& tn = gettablename(line);
+        std::string tn = gettablename(line);
         if (tn.empty())
         {
             sLog.outError("LoadPlayerDump: Can't extract table name from line: '%s'!", line.c_str());

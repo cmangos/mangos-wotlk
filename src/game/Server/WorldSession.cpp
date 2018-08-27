@@ -598,7 +598,7 @@ void WorldSession::SendMotd()
     std::vector<std::string> lines;
     std::string token;
 
-    const std::string& motd = sWorld.GetMotd();
+    std::string motd = sWorld.GetMotd();
     std::istringstream ss(motd);
 
     while (std::getline(ss, token, '@'))
@@ -1045,7 +1045,7 @@ void WorldSession::SetPlayer(Player* plr)
         m_GUIDLow = _player->GetGUIDLow();
 }
 
-void WorldSession::SendRedirectClient(const std::string& ip, uint16 port) const
+void WorldSession::SendRedirectClient(std::string& ip, uint16 port) const
 {
     const uint32 ip2 = static_cast<uint32>(boost::asio::ip::address_v4::from_string(ip).to_ulong());
     WorldPacket pkt(SMSG_CONNECT_TO, 4 + 2 + 4 + 20);

@@ -317,7 +317,7 @@ void WorldSession::SendPetitionQueryOpcode(ObjectGuid petitionguid) const
 
     Field* fields = result->Fetch();
     ObjectGuid ownerGuid = ObjectGuid(HIGHGUID_PLAYER, fields[0].GetUInt32());
-    const std::string& name = fields[1].GetCppString();
+    std::string name = fields[1].GetCppString();
     //uint8 signs = fields[2].GetUInt8();
     uint32 type = fields[3].GetUInt32();
     delete result;

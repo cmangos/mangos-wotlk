@@ -448,11 +448,11 @@ bool AuthSocket::_HandleLogonChallenge()
                 else
                 {
                     ///- Get the password from the account table, upper it, and make the SRP6 calculation
-                    const std::string& rI = fields[0].GetCppString();
+                    std::string rI = fields[0].GetCppString();
 
                     ///- Don't calculate (v, s) if there are already some in the database
-                    const std::string& databaseV = fields[5].GetCppString();
-                    const std::string& databaseS = fields[6].GetCppString();
+                    std::string databaseV = fields[5].GetCppString();
+                    std::string databaseS = fields[6].GetCppString();
 
                     DEBUG_LOG("database authentication values: v='%s' s='%s'", databaseV.c_str(), databaseS.c_str());
 

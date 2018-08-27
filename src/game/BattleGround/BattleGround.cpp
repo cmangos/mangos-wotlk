@@ -45,7 +45,7 @@ namespace MaNGOS
                 char const* text = sObjectMgr.GetMangosString(i_textId, loc_idx);
 
                 ObjectGuid sourceGuid = i_source ? i_source ->GetObjectGuid() : ObjectGuid();
-                const std::string& sourceName = i_source ? i_source ->GetName() : "";
+                std::string sourceName = i_source ? i_source ->GetName() : "";
 
                 if (i_args)
                 {

@@ -148,7 +148,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
         {
             if (!_player->CanSpeak())
             {
-                const std::string& timeStr = secsToTimeString(m_muteTime - time(nullptr));
+                std::string timeStr = secsToTimeString(m_muteTime - time(nullptr));
                 SendNotification(GetMangosString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
                 return;
             }
@@ -557,7 +557,7 @@ void WorldSession::HandleTextEmoteOpcode(WorldPacket& recv_data)
 
     if (!GetPlayer()->CanSpeak())
     {
-        const std::string& timeStr = secsToTimeString(m_muteTime - time(nullptr));
+        std::string timeStr = secsToTimeString(m_muteTime - time(nullptr));
         SendNotification(GetMangosString(LANG_WAIT_BEFORE_SPEAKING), timeStr.c_str());
         return;
     }

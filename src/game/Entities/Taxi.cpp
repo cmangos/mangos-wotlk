@@ -61,7 +61,7 @@ std::string Tracker::Save()
     return stream.str();
 }
 
-bool Tracker::Load(const std::string& string, DestID &destOrphan)
+bool Tracker::Load(std::string& string, DestID &destOrphan)
 {
     if (!Clear())
         return false;

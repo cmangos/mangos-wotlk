@@ -224,7 +224,7 @@ namespace VMAP
         if (basePath.length() > 0 && (basePath[basePath.length() - 1] != '/' && basePath[basePath.length() - 1] != '\\'))
             basePath.append("/");
 
-        const std::string& fullname = basePath + VMapManager2::getMapFileName(mapID);
+        std::string fullname = basePath + VMapManager2::getMapFileName(mapID);
         FILE* rf = fopen(fullname.c_str(), "rb");
         if (!rf)
             return false;
@@ -240,7 +240,7 @@ namespace VMAP
 
         if (tiled)
         {
-            const std::string& tilefile = basePath + getTileFileName(mapID, tileX, tileY);
+            std::string tilefile = basePath + getTileFileName(mapID, tileX, tileY);
             FILE* tf = fopen(tilefile.c_str(), "rb");
             if (!tf)
                 return false;
@@ -263,7 +263,7 @@ namespace VMAP
 
         FILE* rf = nullptr;
         {
-            const std::string& fullname = iBasePath + fname;
+            std::string fullname = iBasePath + fname;
             rf = fopen(fullname.c_str(), "rb");
             if (!rf)
                 return false;
@@ -368,7 +368,7 @@ namespace VMAP
         }
         bool result = true;
 
-        const std::string& tilefile = iBasePath + getTileFileName(iMapID, tileX, tileY);
+        std::string tilefile = iBasePath + getTileFileName(iMapID, tileX, tileY);
         FILE* tf = fopen(tilefile.c_str(), "rb");
         if (tf)
         {
@@ -444,7 +444,7 @@ namespace VMAP
         }
         if (tile->second) // file associated with tile
         {
-            const std::string& tilefile = iBasePath + getTileFileName(iMapID, tileX, tileY);
+            std::string tilefile = iBasePath + getTileFileName(iMapID, tileX, tileY);
             FILE* tf = fopen(tilefile.c_str(), "rb");
             if (tf)
             {

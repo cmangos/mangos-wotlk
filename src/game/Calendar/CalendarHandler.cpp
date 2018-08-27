@@ -80,7 +80,7 @@ void WorldSession::HandleCalendarGetCalendar(WorldPacket& /*recv_data*/)
         data << int32(event->DungeonId);
         data << event->CreatorGuid.WriteAsPacked();
 
-        const std::string& timeStr = TimeToTimestampStr(event->EventTime);
+        std::string timeStr = TimeToTimestampStr(event->EventTime);
         DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "Events> EventId[" UI64FMTD "], Title[%s], Time[%s], Type[%u],  Flag[%u], DungeonId[%d], CreatorGuid[%s]",
                          event->EventId, event->Title.c_str(), timeStr.c_str(), uint32(event->Type),
                          uint32(event->Flags), event->DungeonId, event->CreatorGuid.GetString().c_str());
