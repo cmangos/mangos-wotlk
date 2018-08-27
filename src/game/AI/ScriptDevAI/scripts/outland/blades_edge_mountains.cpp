@@ -1757,7 +1757,7 @@ struct npc_supplicantAI : public ScriptedAI
     uint8 m_phase;
 
     GuidVector m_supplicants;
-    uint32 m_last;
+    int32 m_last;
 
     void Reset() override
     {
