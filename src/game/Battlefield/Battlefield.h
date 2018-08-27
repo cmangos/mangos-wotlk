@@ -62,7 +62,7 @@ class BattlefieldBuilding
         }
         virtual ~BattlefieldBuilding() = default;
 
-        virtual void SetupBuilding(Team owner, bool reset) {};
+        virtual void SetupBuilding(bool reset) {};
 
         bool IsIntact() const { return state == BF_GO_STATE_NEUTRAL_INTACT || state == BF_GO_STATE_HORDE_INTACT || state == BF_GO_STATE_ALLIANCE_INTACT; };
         bool IsDamaged() const { return state == BF_GO_STATE_NEUTRAL_DAMAGED || state == BF_GO_STATE_HORDE_DAMAGED || state == BF_GO_STATE_ALLIANCE_DAMAGED; };

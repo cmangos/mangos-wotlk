@@ -463,7 +463,7 @@ class WGWorkShop : public BattlefieldBuilding
     public:
         WGWorkShop(uint8 assignedId) : BattlefieldBuilding(assignedId) {};
 
-        void SetupBuilding(Team owner, bool reset);
+        void SetupBuilding(bool reset);
         void SendUpdateWorldState();
 
         ObjectGuid capturePoint;
@@ -474,7 +474,7 @@ class WGTower : public BattlefieldBuilding
     public:
         WGTower(uint8 assignedId) : BattlefieldBuilding(assignedId) {};
 
-        void SetupBuilding(Team owner, bool reset);
+        void SetupBuilding(bool reset);
         void SpawnCannons(bool despawn = false);
 
         std::vector<ObjectGuid> cannons;

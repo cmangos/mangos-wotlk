@@ -174,8 +174,8 @@ void OutdoorPvPMgr::HandlePlayerEnterArea(Player* player, uint32 zoneId, uint32 
 {
     if (OutdoorPvP* script = GetScript(zoneId))
         script->HandlePlayerEnterArea(player, areaId, true);
-    else if (OutdoorPvP* script = GetScriptOfAffectedZone(zoneId))
-        script->HandlePlayerEnterArea(player, areaId, false);
+    else if (OutdoorPvP* affectedScript = GetScriptOfAffectedZone(zoneId))
+        affectedScript->HandlePlayerEnterArea(player, areaId, false);
 }
 
 /**
@@ -189,8 +189,8 @@ void OutdoorPvPMgr::HandlePlayerLeaveArea(Player* player, uint32 zoneId, uint32 
 {
     if (OutdoorPvP* script = GetScript(zoneId))
         script->HandlePlayerLeaveArea(player, areaId, true);
-    else if (OutdoorPvP* script = GetScriptOfAffectedZone(zoneId))
-        script->HandlePlayerLeaveArea(player, areaId, false);
+    else if (OutdoorPvP* affectedScript = GetScriptOfAffectedZone(zoneId))
+        affectedScript->HandlePlayerLeaveArea(player, areaId, false);
 }
 
 void OutdoorPvPMgr::Update(uint32 diff)

@@ -1694,8 +1694,8 @@ void World::SendWorldTextToAboveSecurity(uint32 securityLevel, int32 string_id, 
         {
             Player* player = session->GetPlayer();
             if (player && player->IsInWorld())
-                if (WorldSession* session = player->GetSession())
-                    if (uint32(session->GetSecurity()) >= securityLevel)
+                if (WorldSession* playerSession = player->GetSession())
+                    if (uint32(playerSession->GetSecurity()) >= securityLevel)
                         wt_do(player);
         }
     }

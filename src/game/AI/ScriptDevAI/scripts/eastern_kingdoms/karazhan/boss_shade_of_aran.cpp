@@ -330,7 +330,7 @@ struct boss_aranAI : public ScriptedAI
                         }
                         case ARAN_ACTION_BERSERK:
                         {
-                            for (uint8 i = 0; i < MAX_SHADOWS_OF_ARAN; ++i)
+                            for (uint8 j = 0; j < MAX_SHADOWS_OF_ARAN; ++j)
                                 m_creature->SummonCreature(NPC_SHADOW_OF_ARAN, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
 
                             DoScriptText(SAY_TIMEOVER, m_creature);
@@ -415,11 +415,11 @@ struct boss_aranAI : public ScriptedAI
 
                             m_choiceVector.clear();
 
-                            for (uint32 i = 0; i < NORMAL_SPELL_COUNT; ++i)
+                            for (uint32 j = 0; j < NORMAL_SPELL_COUNT; ++j)
                             {
-                                uint32 spellId = GetNormalSpellId(i);
-                                if (m_normalSpellCooldown[i] == 0 && m_creature->IsSpellReady(spellId))
-                                    m_choiceVector.push_back(i);
+                                uint32 spellId = GetNormalSpellId(j);
+                                if (m_normalSpellCooldown[j] == 0 && m_creature->IsSpellReady(spellId))
+                                    m_choiceVector.push_back(j);
                             }
 
                             if (m_choiceVector.empty())

@@ -1948,6 +1948,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                             m_uiEventTimer = 6000;
                             break;
                         case 8:
+                        {
                             // start attack (escort)
                             DoScriptText(EMOTE_LIGHT_OF_DAWN_ARMY_MARCH, m_creature);
                             m_creature->SetActiveObjectState(true);
@@ -1988,6 +1989,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                             m_pInstance->DoMoveArmy();
                             m_uiEventTimer = 0;
                             break;
+                        }
                         case 9:
                             // after the battle
                             if (Creature* pTirion = m_pInstance->GetSingleCreatureFromStorage(NPC_HIGHLORD_TIRION_FORDRING))

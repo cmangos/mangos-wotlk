@@ -64,9 +64,9 @@ void instance_violet_hold::ResetAll()
     SetIntroPortals(false);
     // ToDo: reset the activation crystals when implemented
 
-    for (std::vector<BossSpawn*>::const_iterator itr = m_vRandomBosses.begin(); itr != m_vRandomBosses.end(); ++itr)
+    for (auto spawn : m_vRandomBosses)
     {
-        const BossInformation* pData = GetBossInformation((*itr)->uiEntry);
+        const BossInformation* pData = GetBossInformation(spawn->uiEntry);
         if (pData && m_auiEncounter[pData->uiType] == DONE)
         {
             // Despawn ghost boss
@@ -75,15 +75,15 @@ void instance_violet_hold::ResetAll()
 
             // Spawn new boss replacement
             if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_SINCLARI_ALT))
-                pSummoner->SummonCreature(pData->uiGhostEntry, (*itr)->fX, (*itr)->fY, (*itr)->fZ, (*itr)->fO, TEMPSPAWN_DEAD_DESPAWN, 0);
+                pSummoner->SummonCreature(pData->uiGhostEntry, spawn->fX, spawn->fY, spawn->fZ, spawn->fO, TEMPSPAWN_DEAD_DESPAWN, 0);
 
             // Replace Erekem guards
             if (pData->uiType == TYPE_EREKEM)
             {
                 // Despawn ghost guards
-                for (GuidList::const_iterator itr = m_lArakkoaGuardList.begin(); itr != m_lArakkoaGuardList.end(); ++itr)
+                for (const auto& guid : m_lArakkoaGuardList)
                 {
-                    if (Creature* pGhostGuard = instance->GetCreature(*itr))
+                    if (Creature* pGhostGuard = instance->GetCreature(guid))
                         pGhostGuard->ForcedDespawn();
                 }
 
@@ -91,9 +91,9 @@ void instance_violet_hold::ResetAll()
 
                 // Spawn new guards replacement
                 float fX, fY, fZ, fO;
-                for (GuidList::const_iterator itr = m_lErekemGuardList.begin(); itr != m_lErekemGuardList.end(); ++itr)
+                for (const auto& guid : m_lErekemGuardList)
                 {
-                    if (Creature* pGuard = instance->GetCreature(*itr))
+                    if (Creature* pGuard = instance->GetCreature(guid))
                     {
                         // Don't allow alive original guards while the boss is dead
                         if (!pGuard->isDead())

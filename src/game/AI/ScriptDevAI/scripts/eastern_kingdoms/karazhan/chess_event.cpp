@@ -537,8 +537,8 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
                         //DoCastSpellIfCan(m_creature, uiMoveSpell, CAST_TRIGGERED);
 
                         // workaround which provides specific move target
-                        if (Unit* pTarget = GetMovementSquare())
-                            DoCastSpellIfCan(pTarget, SPELL_MOVE_GENERIC, CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS);
+                        if (Unit* spellTarget = GetMovementSquare())
+                            DoCastSpellIfCan(spellTarget, SPELL_MOVE_GENERIC, CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS);
 
                         m_fCurrentOrientation = m_creature->GetOrientation();
                     }

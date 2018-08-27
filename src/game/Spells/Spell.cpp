@@ -1836,9 +1836,9 @@ class ChainHealingFullHealth: std::unary_function<const Unit*, bool>
         }
 };
 
-bool Spell::CheckAndAddMagnetTarget(Unit* unitTarget, SpellEffectIndex effIndex, UnitList& targetUnitMap, CheckException& exception)
+bool Spell::CheckAndAddMagnetTarget(Unit* target, SpellEffectIndex effIndex, UnitList& targetUnitMap, CheckException& exception)
 {
-    if (Unit* magnetTarget = m_caster->SelectMagnetTarget(unitTarget, this, effIndex))
+    if (Unit* magnetTarget = m_caster->SelectMagnetTarget(target, this, effIndex))
     {
         // Found. Push totem as target instead.
         m_targets.setUnitTarget(magnetTarget);
@@ -2400,8 +2400,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                     // Mind Sear, triggered
                     if (m_spellInfo->IsFitToFamily(SPELLFAMILY_PRIEST, uint64(0x0008000000000000)))
-                        if (Unit* unitTarget = m_targets.getUnitTarget())
-                            targetUnitMap.remove(unitTarget);
+                        if (Unit* target = m_targets.getUnitTarget())
+                            targetUnitMap.remove(target);
 
                     break;
             }
@@ -2457,15 +2457,15 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         case TARGET_SINGLE_FRIEND:
         case TARGET_SINGLE_FRIEND_2:
         {
-            if (Unit* unitTarget = m_targets.getUnitTarget())
+            if (Unit* target = m_targets.getUnitTarget())
             {
-                if (m_caster->CanAssistSpell(unitTarget, m_spellInfo))
-                    targetUnitMap.push_back(unitTarget);
+                if (m_caster->CanAssistSpell(target, m_spellInfo))
+                    targetUnitMap.push_back(target);
                 else
                 {
                     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_TARGET_OF_TARGET_AS_TARGET))
                     {
-                        if (Unit* targetOfUnitTarget = unitTarget->GetTarget(m_caster))
+                        if (Unit* targetOfUnitTarget = target->GetTarget(m_caster))
                         {
                             if (m_caster->CanAssistSpell(targetOfUnitTarget, m_spellInfo))
                             {
@@ -8724,13 +8724,13 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex)
             Unit* closestUnit = *itr;
             ++itr;
 
-            for (auto& itr : filterUnitList)
+            for (auto& unit : filterUnitList)
             {
-                float dist = itr->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_BOUNDING_RADIUS);
-                if (closestDistance > dist && itr != closestUnit)
+                float dist = unit->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_BOUNDING_RADIUS);
+                if (closestDistance > dist && unit != closestUnit)
                 {
                     closestDistance = dist;
-                    closestUnit = itr;
+                    closestUnit = unit;
                 }
             }
 

@@ -586,7 +586,8 @@ void instance_culling_of_stratholme::DoSpawnArthasIfNeeded(Unit* pSummoner)
     // no gossip flag in the following positions
     if (uiPosition == POS_ARTHAS_INTRO || uiPosition == POS_ARTHAS_WAVES)
     {
-        if (Creature* pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS))
+        pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS);
+        if (pArthas)
             pArthas->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     }
 
@@ -594,7 +595,8 @@ void instance_culling_of_stratholme::DoSpawnArthasIfNeeded(Unit* pSummoner)
     if (uiPosition == POS_ARTHAS_INTRO)
     {
         // start intro event by dbscripts
-        if (Creature* pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS))
+        pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS);
+        if (pArthas)
         {
             pArthas->SetWalk(false);
             pArthas->GetMotionMaster()->MoveWaypoint();
@@ -672,8 +674,7 @@ void instance_culling_of_stratholme::DoSpawnCorruptorIfNeeded(Unit* pSummoner)
     if (!pSummoner)
         return;
 
-    Creature* pCorruptor = GetSingleCreatureFromStorage(NPC_INFINITE_CORRUPTER, true);
-    if (pCorruptor)
+    if (GetSingleCreatureFromStorage(NPC_INFINITE_CORRUPTER, true))
         return;
 
     pSummoner->SummonCreature(NPC_TIME_RIFT, m_aHeroicEventSpawnLocs[1].m_fX, m_aHeroicEventSpawnLocs[1].m_fY, m_aHeroicEventSpawnLocs[1].m_fZ, m_aHeroicEventSpawnLocs[1].m_fO, TEMPSPAWN_DEAD_DESPAWN, 0);

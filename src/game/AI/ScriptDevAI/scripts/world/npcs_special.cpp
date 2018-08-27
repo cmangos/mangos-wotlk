@@ -1202,7 +1202,7 @@ struct npc_spring_rabbitAI : public ScriptedPetAI
         m_uiStep = 1;
         m_uiStepTimer = 30000;
         // Calculate meeting position
-        float m_fMoveAngle = m_creature->GetAngle(pPartner);
+        m_fMoveAngle = m_creature->GetAngle(pPartner);
         float fDist = m_creature->GetDistance(pPartner);
         float fX, fY, fZ;
         m_creature->GetNearPoint(m_creature, fX, fY, fZ, m_creature->GetObjectBoundingRadius(), fDist * 0.5f, m_fMoveAngle);

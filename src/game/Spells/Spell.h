@@ -677,7 +677,7 @@ class Spell
         //*****************************************
         void FillTargetMap();
         void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList& targetUnitMap, CheckException& exception);
-        bool CheckAndAddMagnetTarget(Unit* unitTarget, SpellEffectIndex effIndex, UnitList& targetUnitMap, CheckException& exception);
+        bool CheckAndAddMagnetTarget(Unit* target, SpellEffectIndex effIndex, UnitList& targetUnitMap, CheckException& exception);
         static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry>& bounds, UnitList& tempTargetUnitMap, UnitList& targetUnitMap, SpellEffectIndex effIndex);
         void FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex);
 

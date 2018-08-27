@@ -265,7 +265,8 @@ struct boss_anubarak_trialAI : public ScriptedAI
                 continue;
 
             // Summon a new frost sphere instead of the killed one
-            if (Creature* pTemp = m_creature->SummonCreature(NPC_FROSTSPHERE, aFrostSphereSpawnPositions[i][0], aFrostSphereSpawnPositions[i][1], aFrostSphereSpawnPositions[i][2], 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+            pTemp = m_creature->SummonCreature(NPC_FROSTSPHERE, aFrostSphereSpawnPositions[i][0], aFrostSphereSpawnPositions[i][1], aFrostSphereSpawnPositions[i][2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+            if (pTemp)
                 m_vSpheresGuidVector[i] = pTemp->GetObjectGuid();
         }
     }

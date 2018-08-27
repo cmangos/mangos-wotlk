@@ -4595,8 +4595,8 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     UpdateObjectVisibility();
 
     if (IsInWorld())
-        if (InstanceData* data = GetMap()->GetInstanceData())
-            data->OnPlayerResurrect(this);
+        if (InstanceData* instanceData = GetMap()->GetInstanceData())
+            instanceData->OnPlayerResurrect(this);
 
     if (!applySickness)
         return;
@@ -8237,19 +8237,19 @@ void Player::RemovedInsignia(Player* looterPlr)
     // We store the level of our player in the gold field
     // We retrieve this information at Player::SendLoot()
     bones->lootRecipient = looterPlr;
-    Loot*& loot = bones->loot;
-    if (!loot)
-        loot = new Loot(looterPlr, bones, LOOT_INSIGNIA);
+    Loot*& bonesLoot = bones->loot;
+    if (!bonesLoot)
+        bonesLoot = new Loot(looterPlr, bones, LOOT_INSIGNIA);
     else
     {
-        if (loot->GetLootType() != LOOT_INSIGNIA)
+        if (bonesLoot->GetLootType() != LOOT_INSIGNIA)
         {
-            delete loot;
-            loot = new Loot(looterPlr, bones, LOOT_INSIGNIA);
+            delete bonesLoot;
+            bonesLoot = new Loot(looterPlr, bones, LOOT_INSIGNIA);
         }
     }
 
-    loot->ShowContentTo(looterPlr);
+    bonesLoot->ShowContentTo(looterPlr);
 }
 
 void Player::SendUpdateWorldState(uint32 Field, uint32 Value) const
@@ -8476,9 +8476,9 @@ uint8 Player::FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) 
     {
         if (swap || !GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
         {
-            for (unsigned char i : slots)
+            for (uint8 currentSlot : slots)
             {
-                if (i == slot)
+                if (currentSlot == slot)
                     return slot;
             }
         }
@@ -8486,21 +8486,21 @@ uint8 Player::FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) 
     else
     {
         // search free slot at first
-        for (unsigned char slot : slots)
+        for (uint8 currentSlot : slots)
         {
-            if (slot != NULL_SLOT && !GetItemByPos(INVENTORY_SLOT_BAG_0, slot))
+            if (currentSlot != NULL_SLOT && !GetItemByPos(INVENTORY_SLOT_BAG_0, currentSlot))
             {
                 // in case 2hand equipped weapon (without titan grip) offhand slot empty but not free
-                if (slot != EQUIPMENT_SLOT_OFFHAND || !IsTwoHandUsed())
-                    return slot;
+                if (currentSlot != EQUIPMENT_SLOT_OFFHAND || !IsTwoHandUsed())
+                    return currentSlot;
             }
         }
 
         // if not found free and can swap return first appropriate from used
-        for (unsigned char slot : slots)
+        for (uint8 currentSlot : slots)
         {
-            if (slot != NULL_SLOT && swap)
-                return slot;
+            if (currentSlot != NULL_SLOT && swap)
+                return currentSlot;
         }
     }
 

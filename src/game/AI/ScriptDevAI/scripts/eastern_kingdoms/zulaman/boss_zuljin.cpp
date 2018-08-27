@@ -501,8 +501,8 @@ struct npc_feather_vortexAI : public ScriptedAI
             if (Creature* pZuljin = m_pInstance->GetSingleCreatureFromStorage(NPC_ZULJIN))
             {
                 // Change target on player hit
-                if (Unit* pTarget = pZuljin->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    m_creature->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
+                if (Unit* newTarget = pZuljin->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    m_creature->GetMotionMaster()->MoveFollow(newTarget, 0, 0);
             }
         }
     }

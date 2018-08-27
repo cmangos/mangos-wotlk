@@ -584,7 +584,7 @@ void PoolManager::LoadFromDB()
     do
     {
         ++count;
-        Field* fields = result->Fetch();
+        fields = result->Fetch();
 
         bar.step();
 
@@ -624,7 +624,7 @@ void PoolManager::LoadFromDB()
         BarGoLink bar2(result->GetRowCount());
         do
         {
-            Field* fields = result->Fetch();
+            fields = result->Fetch();
 
             bar2.step();
 
@@ -685,7 +685,7 @@ void PoolManager::LoadFromDB()
         BarGoLink bar2(result->GetRowCount());
         do
         {
-            Field* fields = result->Fetch();
+            fields = result->Fetch();
 
             bar2.step();
 
@@ -762,7 +762,7 @@ void PoolManager::LoadFromDB()
         BarGoLink bar2(result->GetRowCount());
         do
         {
-            Field* fields = result->Fetch();
+            fields = result->Fetch();
 
             bar2.step();
 
@@ -824,7 +824,7 @@ void PoolManager::LoadFromDB()
         BarGoLink bar2(result->GetRowCount());
         do
         {
-            Field* fields = result->Fetch();
+            fields = result->Fetch();
 
             bar2.step();
 
@@ -899,7 +899,7 @@ void PoolManager::LoadFromDB()
         BarGoLink bar2(result->GetRowCount());
         do
         {
-            Field* fields = result->Fetch();
+            fields = result->Fetch();
 
             bar2.step();
 

@@ -225,13 +225,13 @@ bool EffectDummyCreature_npc_crystal_spike_trigger(Unit* /*pCaster*/, uint32 uiS
             // The following spells define the direction of the spike line
             // All of the spells are targeting the back of the caster, but some take a small turn to left or right
             // The exact algorithm is unk but we know that the chances of getting a straight line are about 75%. The other two directions are about 12.5% each
-            uint32 uiSpellId = 0;
+            uint32 castSpellId;
             if (roll_chance_i(75))
-                uiSpellId = SPELL_CRYSTAL_SPIKE_BACK;
+                castSpellId = SPELL_CRYSTAL_SPIKE_BACK;
             else
-                uiSpellId = urand(0, 1) ? SPELL_CRYSTAL_SPIKE_LEFT : SPELL_CRYSTAL_SPIKE_RIGHT;
+                castSpellId = urand(0, 1) ? SPELL_CRYSTAL_SPIKE_LEFT : SPELL_CRYSTAL_SPIKE_RIGHT;
 
-            pCreatureTarget->CastSpell(pCreatureTarget, uiSpellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pOrmorok->GetObjectGuid());
+            pCreatureTarget->CastSpell(pCreatureTarget, castSpellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pOrmorok->GetObjectGuid());
             // always return true when we are handling this spell and effect
             return true;
         }
