@@ -71,7 +71,7 @@ namespace Movement
 
     void MoveSpline::computeParabolicElevation(float& el) const
     {
-        if (time_passed > effect_start_time)
+        if (time_passed > static_cast<uint32>(effect_start_time))
         {
             float t_passedf = MSToSec(time_passed - effect_start_time);
             float t_durationf = MSToSec(Duration() - effect_start_time); // client use not modified duration here
@@ -187,7 +187,7 @@ namespace Movement
         if (args.flags & (MoveSplineFlag::Parabolic | MoveSplineFlag::Animation))
         {
             effect_start_time = Duration() * args.time_perc;
-            if (args.flags.parabolic && effect_start_time < Duration())
+            if (args.flags.parabolic && static_cast<uint32>(effect_start_time) < Duration())
             {
                 float f_duration = MSToSec(Duration() - effect_start_time);
                 vertical_acceleration = args.parabolic_amplitude * 8.f / (f_duration * f_duration);

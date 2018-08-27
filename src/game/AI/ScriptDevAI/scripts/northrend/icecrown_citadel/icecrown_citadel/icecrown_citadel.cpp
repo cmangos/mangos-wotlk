@@ -135,7 +135,7 @@ bool GossipSelect_go_icc_teleporter(Player* pPlayer, GameObject* pGo, uint32 uiS
             break;
         // Sindragosa's Lair
         case GOSSIP_ACTION_INFO_DEF + 5:
-            pPlayer->CastSpell(pPlayer, GOSSIP_ITEM_TELE_SINDRAGOSAS_LAIR, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pGo->GetObjectGuid());
+            pPlayer->CastSpell(pPlayer, SPELL_TELE_SINDRAGOSAS_LAIR, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pGo->GetObjectGuid());
             break;
         default:
             return true;

@@ -1107,7 +1107,7 @@ void WorldSession::HandleAlterAppearanceOpcode(WorldPacket& recv_data)
     uint32 Hair, Color, FacialHair, skinTone;
     recv_data >> Hair >> Color >> FacialHair >> skinTone;
 
-    uint32 skinTone_id = -1;
+    uint32 skinTone_id = static_cast<uint32>(-1);
     if (_player->getRace() == RACE_TAUREN)
     {
         BarberShopStyleEntry const* bs_skinTone = sBarberShopStyleStore.LookupEntry(skinTone);

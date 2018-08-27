@@ -213,7 +213,7 @@ bool GossipHello_npc_barnes(Player* pPlayer, Creature* pCreature)
                         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_HOOD", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
                         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_RAJ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
                     }
-                    uint32 gossipItemText;
+                    int32 gossipItemText;
                     uint32 gossipMenuText;
                     switch (pInstance->GetData(TYPE_OPERA_PERFORMANCE))
                     {

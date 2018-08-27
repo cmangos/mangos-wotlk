@@ -1743,7 +1743,7 @@ struct npc_supplicantAI : public ScriptedAI
     npc_supplicantAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_summonerGuid = m_creature->GetSpawnerGuid();
-        m_last = -1;
+        m_last = static_cast<uint32>(-1);
         Reset();
     }
 

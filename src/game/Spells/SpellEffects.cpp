@@ -2835,7 +2835,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     {
                         const SpellEntry* pSpell = sSpellTemplate.LookupEntry<SpellEntry>(i);
 
-                        if (pSpell->EffectMiscValue[EFFECT_INDEX_0] == unitTarget->GetEntry())
+                        if (pSpell->EffectMiscValue[EFFECT_INDEX_0] == static_cast<int32>(unitTarget->GetEntry()))
                         {
                             m_caster->CastSpell(m_caster, i, TRIGGERED_OLD_TRIGGERED);
                             break;
@@ -12303,7 +12303,7 @@ void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)
     pet->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_NONE);
     pet->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
     pet->SetDeathState(ALIVE);
-    pet->clearUnitState(UNIT_STAT_ALL_STATE);
+    pet->clearUnitState(static_cast<uint32>(UNIT_STAT_ALL_STATE));
     pet->SetHealth(uint32(pet->GetMaxHealth() * (float(damage) / 100)));
 
     // _player->PetSpellInitialize(); // action bar not removed at death and not required send at revive

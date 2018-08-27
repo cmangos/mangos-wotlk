@@ -2645,15 +2645,12 @@ struct npc_disobedient_dragonmaw_peonAI : public ScriptedAI
     void HandleAngry()
     {
         DoCastSpellIfCan(nullptr, SPELL_DEFIANT_AND_ENRAGED);
-        uint32 textId = 0;
         switch (urand(0, 4))
         {
-            case 0: textId = SAY_IDLE1; break;
-            case 1: textId = SAY_IDLE2; break;
+            case 0: DoScriptText(SAY_IDLE1, m_creature); break;
+            case 1: DoScriptText(SAY_IDLE2, m_creature); break;
             default: break;
         }
-        if (textId)
-            DoScriptText(textId, m_creature);
     }
 
     void HandleBooterang(Unit* caster)
@@ -2664,20 +2661,18 @@ struct npc_disobedient_dragonmaw_peonAI : public ScriptedAI
         Player* player = static_cast<Player*>(caster);
         m_lastPlayerGuid = player->GetObjectGuid();
 
-        uint32 textId = 0;
         switch (urand(0, 5))
         {
-            case 0: textId = SAY_BOOTERANG1; break;
-            case 1: textId = SAY_BOOTERANG2; break;
-            case 2: textId = SAY_BOOTERANG3; break;
-            case 3: textId = SAY_BOOTERANG4; break;
-            case 4: textId = SAY_BOOTERANG5; break;
-            case 5: textId = SAY_BOOTERANG6; break;
+            case 0: DoScriptText(SAY_BOOTERANG1, m_creature, player); break;
+            case 1: DoScriptText(SAY_BOOTERANG2, m_creature, player); break;
+            case 2: DoScriptText(SAY_BOOTERANG3, m_creature, player); break;
+            case 3: DoScriptText(SAY_BOOTERANG4, m_creature, player); break;
+            case 4: DoScriptText(SAY_BOOTERANG5, m_creature, player); break;
+            case 5: DoScriptText(SAY_BOOTERANG6, m_creature, player); break;
         }
         float angle = m_creature->GetAngle(player);
         m_creature->SetOrientation(angle);
         m_creature->SetFacingTo(angle);
-        DoScriptText(textId, m_creature, player);
 
         DoCastSpellIfCan(nullptr, SPELL_PEON_CLEAR_ALL); // clears combat and removes aura
         m_creature->setFaction(FACTION_WHACKED);

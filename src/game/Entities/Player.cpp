@@ -2323,7 +2323,7 @@ void Player::SetGameMaster(bool on)
 
         CombatStopWithPets();
 
-        SetPhaseMask(PHASEMASK_ANYWHERE, false);            // see and visible in all phases
+        SetPhaseMask(static_cast<uint32>(PHASEMASK_ANYWHERE), false);            // see and visible in all phases
     }
     else
     {
@@ -20145,7 +20145,7 @@ void Player::SetPhaseMask(uint32 newPhaseMask, bool update)
 {
     // GM-mode have mask PHASEMASK_ANYWHERE always
     if (isGameMaster())
-        newPhaseMask = PHASEMASK_ANYWHERE;
+        newPhaseMask = static_cast<uint32>(PHASEMASK_ANYWHERE);
 
     // phase auras normally not expected at BG but anyway better check
     if (BattleGround* bg = GetBattleGround())

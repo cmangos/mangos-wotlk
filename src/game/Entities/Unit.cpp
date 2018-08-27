@@ -9216,7 +9216,7 @@ void Unit::ClearInCombat()
         static_cast<Player*>(this)->UpdatePotionCooldown();
     }
 
-    RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LEAVE_COMBAT);
+    RemoveAurasWithInterruptFlags(static_cast<uint32>(AURA_INTERRUPT_FLAG_LEAVE_COMBAT));
 }
 
 int32 Unit::ModifyHealth(int32 dVal)

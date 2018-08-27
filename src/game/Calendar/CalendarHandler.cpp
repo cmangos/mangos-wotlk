@@ -418,7 +418,7 @@ void WorldSession::HandleCalendarEventInvite(WorldPacket& recv_data)
     bool isGuildEvent;
 
     ObjectGuid inviteeGuid;
-    uint32 inviteeTeam = 0;
+    Team inviteeTeam = TEAM_NONE;
     uint32 inviteeGuildId = 0;
     bool isIgnored = false;
 
