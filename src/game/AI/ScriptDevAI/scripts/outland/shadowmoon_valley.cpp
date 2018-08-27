@@ -1569,7 +1569,9 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
                     goHoF->SetRespawnTime(5 * MINUTE);
                     goHoF->Refresh();
                 }
-                if (m_cHOFVisualTrigger || (m_cHOFVisualTrigger = GetClosestCreatureWithEntry(m_creature, NPC_HOF_VISUAL_TRIGGER, 175.0f)))
+                if (!m_cHOFVisualTrigger)
+                    m_cHOFVisualTrigger = GetClosestCreatureWithEntry(m_creature, NPC_HOF_VISUAL_TRIGGER, 175.0f);
+                if (m_cHOFVisualTrigger)
                     m_cHOFVisualTrigger->ForcedDespawn();
 
                 m_creature->GetMotionMaster()->Clear(false, true);

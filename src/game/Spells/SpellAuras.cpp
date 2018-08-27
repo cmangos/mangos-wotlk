@@ -10154,13 +10154,16 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             else if (m_spellProto->IsFitToFamilyMask(uint64(0x0000000000000000), 0x00000002))
             {
                 // Glyph of Shadowflame
-                Unit* caster;
                 if (!apply)
                     spellId1 = 63311;
-                else if (((caster = GetCaster())) && caster->HasAura(63310))
-                    spellId1 = 63311;
                 else
-                    return;
+                {
+                    Unit* caster = GetCaster();
+                    if (caster && caster->HasAura(63310))
+                        spellId1 = 63311;
+                    else
+                        return;
+                }
             }
             else
                 return;

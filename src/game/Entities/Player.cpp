@@ -1601,7 +1601,8 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket& p_data)
             if (!enchantId)
                 continue;
 
-            if ((enchant = sSpellItemEnchantmentStore.LookupEntry(enchantId)))
+            enchant = sSpellItemEnchantmentStore.LookupEntry(enchantId);
+            if (enchant)
                 break;
         }
 
@@ -7472,7 +7473,8 @@ void Player::_ApplyItemBonuses(ItemPrototype const* proto, uint8 slot, bool appl
     // If set dpsMod in ScalingStatValue use it for min (70% from average), max (130% from average) damage
     if (ssv)
     {
-        if ((extraDPS = ssv->getDPSMod(proto->ScalingStatValue)))
+        extraDPS = ssv->getDPSMod(proto->ScalingStatValue);
+        if (extraDPS)
         {
             float average = extraDPS * proto->Delay / 1000.0f;
             minDamage = 0.7f * average;
