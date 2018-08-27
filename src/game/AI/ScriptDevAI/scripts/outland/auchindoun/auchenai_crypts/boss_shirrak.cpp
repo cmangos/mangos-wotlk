@@ -64,7 +64,7 @@ struct boss_shirrakAI : public ScriptedAI
         m_uiAttractMagicTimer       = urand(20000, 24000);
         m_uiFocusFireCount          = 0;
 
-        DoCastSpellIfCan(m_creature, SPELL_INHIBIT_MAGIC_TRIGGER);
+        DoCastSpellIfCan(m_creature, SPELL_INHIBIT_MAGIC_TRIGGER, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void JustDied(Unit* /*killer*/) override
