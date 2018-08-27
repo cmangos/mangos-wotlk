@@ -2118,7 +2118,8 @@ bool Map::GetHitPosition(float srcX, float srcY, float srcZ, float& destX, float
 // Find an height within a reasonable range of provided Z. This method may fail so we have to handle that case.
 bool Map::GetHeightInRange(uint32 phasemask, float x, float y, float& z, float maxSearchDist /*= 4.0f*/) const
 {
-    float height, mapHeight;
+    float height;
+    float mapHeight = INVALID_HEIGHT_VALUE;
     float vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
 
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();

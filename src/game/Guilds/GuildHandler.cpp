@@ -979,9 +979,10 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recv_data)
     uint8 BankTab, BankTabSlot, AutoStore;
     uint8 PlayerSlot = NULL_SLOT;
     uint8 PlayerBag = NULL_BAG;
-    uint8 BankTabDst, BankTabSlotDst, unk2;
+    uint8 BankTabDst = 0;
+    uint8 BankTabSlotDst = 0;
     uint8 ToChar = 1;
-    uint32 ItemEntry, unk1;
+    uint32 ItemEntry;
     uint32 AutoStoreCount = 0;
     uint32 SplitedAmount = 0;
 
@@ -1005,11 +1006,11 @@ void WorldSession::HandleGuildBankSwapItems(WorldPacket& recv_data)
     {
         recv_data >> BankTabDst;
         recv_data >> BankTabSlotDst;
-        recv_data >> unk1;                                  // always 0
+        recv_data.read_skip<uint32>();                      // always 0
         recv_data >> BankTab;
         recv_data >> BankTabSlot;
         recv_data >> ItemEntry;
-        recv_data >> unk2;                                  // always 0
+        recv_data.read_skip<uint8>();                       // always 0
         recv_data >> SplitedAmount;
 
         if (BankTabSlotDst >= GUILD_BANK_MAX_SLOTS ||

@@ -2074,6 +2074,7 @@ void Aura::TriggerSpell()
                         buffAuraId = 39089;
                         range = 10.f;
                         break;
+                    default:
                     case 39091:
                         buffAuraId = 39092;
                         range = 10.f;

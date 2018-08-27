@@ -1912,6 +1912,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         case 37867: spellId = 37868; break;
                         case 37892: spellId = 37893; break;
                         case 37894: spellId = 37895; break;
+                        default:
+                            return;
                     }
 
                     unitTarget->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
@@ -2034,6 +2036,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     switch (urand(0, 1))
                     {
                         case 0: spellId = 39241; break; // Summon Mature Bone Sifter
+                        default:
                         case 1: spellId = 39240; break; // Summon Sand Gnome
                     }
 
@@ -2050,6 +2053,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     {
                         case 0: spellId = 39248; break; // Summon Hai'Shulud
                         case 1: spellId = 39245; break; // Summon Mature Bone Sifter 2x
+                        default:
                         case 2: spellId = 39247; break; // Summon Sand Gnome 2x
                     }
                     m_caster->CastSpell(unitTarget, spellId, TRIGGERED_OLD_TRIGGERED);
@@ -6841,13 +6845,9 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
         {
             if (holder->GetSpellProto()->Dispel == DISPEL_MAGIC)
             {
-                bool positive;
-                if (!holder->IsPositive())
-                    positive = false;
-
                 // do not remove positive auras if friendly target
                 //               negative auras if non-friendly target
-                if (positive == m_caster->CanAssist(unitTarget))
+                if (holder->IsPositive() == m_caster->CanAssist(unitTarget))
                     continue;
             }
             // Unholy Blight prevents dispel of diseases from target
@@ -8844,6 +8844,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 22356: spellId = 38996; break; // [DND]Green Spot Grog Keg Credit
                         case 22367: spellId = 38997; break; // [DND]Ripe Moonshine Keg Credit
                         case 22368: spellId = 38998; break; // [DND]Fermented Seed Beer Keg Credit
+                        default:
+                            return;
                     }
 
                     Player* possessor = static_cast<Player*>(master);

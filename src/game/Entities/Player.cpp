@@ -11847,7 +11847,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
     {
         InventoryResult msg;
         ItemPosCountVec sDest;
-        uint16 eDest;
+        uint16 eDest = 0;
         if (IsInventoryPos(dst))
             msg = CanStoreItem(dstbag, dstslot, sDest, pSrcItem, false);
         else if (IsBankPos(dst))
@@ -11892,7 +11892,7 @@ void Player::SwapItem(uint16 src, uint16 dst)
     }
 
     // impossible merge/fill, do real swap
-    InventoryResult msg;
+    InventoryResult msg = EQUIP_ERR_CANT_DO_RIGHT_NOW;
 
     // check src->dest move possibility
     ItemPosCountVec sDest;
@@ -13019,7 +13019,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
     }
 
     GossipMenuItemData const* pMenuData = gossipmenu.GetItemData(gossipListId);
-    GossipMenuItemData menuData;
+    GossipMenuItemData menuData = {};
 
     // if pMenuData exist we need to keep a copy of actual data for the following code to process
     // call like PrepareGossipMenu or SendPreparedGossip might change the value
@@ -13322,7 +13322,7 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
     uint32 type;
     if (guid.IsCreature())
         type = QUESTGIVER_CREATURE;
-    else if (guid.IsGameObject())
+    else
         type = QUESTGIVER_GAMEOBJECT;
 
     if (QuestgiverGreeting const* data = sObjectMgr.GetQuestgiverGreetingData(guid.GetEntry(), type))

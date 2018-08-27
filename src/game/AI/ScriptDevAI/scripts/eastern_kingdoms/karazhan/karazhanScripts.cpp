@@ -219,6 +219,7 @@ bool GossipHello_npc_barnes(Player* pPlayer, Creature* pCreature)
                     {
                         case OPERA_EVENT_WIZARD_OZ: gossipItemText = GOSSIP_ITEM_OPERA_OZ_WIPE; gossipMenuText = TEXT_ID_OPERA_OZ_WIPE; break;
                         case OPERA_EVENT_RED_RIDING_HOOD: gossipItemText = GOSSIP_ITEM_WOLF_WIPE; gossipMenuText = TEXT_ID_OPERA_WOLF_WIPE; break;
+                        default:
                         case OPERA_EVENT_ROMULO_AND_JUL:  gossipItemText = GOSSIP_ITEM_JUL_WIPE; gossipMenuText = TEXT_ID_OPERA_JUL_WIPE; break;
                     }
                     pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, gossipItemText, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);

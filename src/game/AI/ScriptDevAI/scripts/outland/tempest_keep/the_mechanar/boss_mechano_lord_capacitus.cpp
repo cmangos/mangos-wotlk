@@ -179,6 +179,7 @@ struct boss_mechano_lord_capacitusAI : public ScriptedAI
                 case 0: spellId = SPELL_SUMMON_NETHER_CHARGE_NE; break;
                 case 1: spellId = SPELL_SUMMON_NETHER_CHARGE_NW; break;
                 case 2: spellId = SPELL_SUMMON_NETHER_CHARGE_SE; break;
+                default:
                 case 3: spellId = SPELL_SUMMON_NETHER_CHARGE_SW; break;
             }
             m_creature->CastSpell(m_creature, spellId, TRIGGERED_NONE);
