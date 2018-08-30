@@ -3348,7 +3348,9 @@ void SpellMgr::LoadSpellScriptTarget()
                     spellProto->EffectImplicitTargetA[i] == TARGET_NARROW_FRONTAL_CONE ||
                     spellProto->EffectImplicitTargetB[i] == TARGET_NARROW_FRONTAL_CONE ||
                     spellProto->EffectImplicitTargetA[i] == TARGET_NARROW_FRONTAL_CONE_2 ||
-                    spellProto->EffectImplicitTargetB[i] == TARGET_NARROW_FRONTAL_CONE_2)
+                    spellProto->EffectImplicitTargetB[i] == TARGET_NARROW_FRONTAL_CONE_2 ||
+                    spellProto->EffectImplicitTargetA[i] == TARGET_LARGE_FRONTAL_CONE ||
+                    spellProto->EffectImplicitTargetB[i] == TARGET_LARGE_FRONTAL_CONE)
             {
                 targetfound = true;
                 break;

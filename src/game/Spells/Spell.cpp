@@ -8094,7 +8094,9 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, CheckException excep
                     m_spellInfo->EffectImplicitTargetA[eff] != TARGET_NARROW_FRONTAL_CONE &&
                     m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE &&
                     m_spellInfo->EffectImplicitTargetA[eff] != TARGET_NARROW_FRONTAL_CONE_2 &&
-                    m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE_2)
+                    m_spellInfo->EffectImplicitTargetB[eff] != TARGET_NARROW_FRONTAL_CONE_2 &&
+                    m_spellInfo->EffectImplicitTargetA[eff] != TARGET_LARGE_FRONTAL_CONE &&
+                    m_spellInfo->EffectImplicitTargetB[eff] != TARGET_LARGE_FRONTAL_CONE)
                 return false;
         }
 
