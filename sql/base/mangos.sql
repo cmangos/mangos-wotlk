@@ -4882,6 +4882,7 @@ INSERT INTO `mangos_string` VALUES
 (1634,'|cffffff00Halaa is defenseless!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1635,'|cffffff00The Horde has collected 200 silithyst!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1636,'|cffffff00The Alliance has collected 200 silithyst!|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+<<<<<<< HEAD
 (1637,'The battle for Wintergrasp is about to begin!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1638,'Let the battle begin!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1639,'The Alliance has defended Wintergrasp Fortress!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -4921,6 +4922,9 @@ INSERT INTO `mangos_string` VALUES
 (1673,'You have reached Rank 1: Corporal',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1674,'You have reached Rank 2: First Lieutenant',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (1702,'Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat and taunt state %u',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+=======
+(1702,'Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat, taunt state %u and hostile state %u.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+>>>>>>> fc06e8af713... Implement suppression logic in threat manager
 (1703,'Showing threat for %s [Entry %u]',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `mangos_string` ENABLE KEYS */;
 UNLOCK TABLES;

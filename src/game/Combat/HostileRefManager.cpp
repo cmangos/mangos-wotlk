@@ -107,15 +107,8 @@ void HostileRefManager::updateOnlineOfflineState(bool pIsOnline)
 {
     if (pIsOnline && iOwner)
     {
-        // Check for causes which prevent setting online state
-
         // Do not set online while feigning death in combat
         if (iOwner->IsFeigningDeathSuccessfully() && iOwner->isInCombat())
-            return;
-
-        // Do not set online if player is in GM mode or on taxi path
-        const Player* player = iOwner->GetControllingPlayer();
-        if (player && (player->IsTaxiFlying() || !player->isGameMaster()))
             return;
     }
     setOnlineOfflineState(pIsOnline);
@@ -213,6 +206,40 @@ Unit* HostileRefManager::GetThreatRedirectionTarget() const
 HostileReference* HostileRefManager::getFirst()
 {
     return static_cast<HostileReference*>(RefManager<Unit, ThreatManager>::getFirst());
+}
+
+void HostileRefManager::HandleSuppressed(bool apply, bool immunity)
+{
+    if (apply)
+    {
+        for (auto& data : *this)
+        {
+            HostileReference& ref = static_cast<HostileReference&>(data);
+            if (immunity)
+            {
+                Unit* source = ref.getSource()->getOwner();
+                Unit* target = ref.getTarget();
+                if (!target->IsImmuneToDamage(source->GetMeleeDamageSchoolMask()))
+                    continue;
+            }
+            ref.SetHostileState(STATE_SUPPRESSED);
+        }
+    }
+    else
+    {
+        for (auto& data : *this)
+        {
+            HostileReference& ref = static_cast<HostileReference&>(data);
+            Unit* source = ref.getSource()->getOwner();
+            Unit* target = ref.getTarget();
+            if (!target->IsSuppressedTarget(source))
+            {
+                ref.SetSuppressabilityToggle();
+                continue;
+            }
+            ref.SetHostileState(STATE_SUPPRESSED);
+        }
+    }
 }
 
 //=================================================

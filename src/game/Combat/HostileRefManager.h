@@ -82,6 +82,9 @@ class HostileRefManager : public RefManager<Unit, ThreatManager>
         float GetThreatRedirectionMod() const { return m_redirectionMod; }
         Unit*  GetThreatRedirectionTarget() const;
 
+        // Suppression
+        void HandleSuppressed(bool apply, bool immunity = false);
+
     private:
         Unit* iOwner;                                       // owner of manager variable, back ref. to it, always exist
 
