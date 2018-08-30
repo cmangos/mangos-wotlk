@@ -3280,6 +3280,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 case 47178:                                 // Plague Effect Self
                     target->SetFeared(apply, GetCasterGuid(), GetId());
                     return;
+                case 50241:                                 // Evasive Charges
+                    target->ModifyAuraState(AURA_STATE_UNKNOWN22, apply);
+                    return;
                 case 56422:                                 // Nerubian Submerge
                 case 70733:                                 // Stoneform
                     // not known if there are other things todo, only flag are confirmed valid
