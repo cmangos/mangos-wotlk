@@ -3280,6 +3280,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 case 47178:                                 // Plague Effect Self
                     target->SetFeared(apply, GetCasterGuid(), GetId());
                     return;
+                case 50053:                                 // Centrifuge Shield
+                    target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER, apply);
+                    target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC, apply);
+                    return;
                 case 50241:                                 // Evasive Charges
                     target->ModifyAuraState(AURA_STATE_UNKNOWN22, apply);
                     return;

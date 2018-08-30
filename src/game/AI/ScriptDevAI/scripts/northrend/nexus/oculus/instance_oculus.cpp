@@ -188,11 +188,9 @@ void instance_oculus::OnCreatureDeath(Creature* pCreature)
 
             if (m_sConstructsAliveGUIDSet.empty())
             {
+                // force Varos to interrupt the channel
                 if (Creature* pVaros = GetSingleCreatureFromStorage(NPC_VAROS))
-                {
-                    pVaros->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, false);
                     pVaros->InterruptNonMeleeSpells(false);
-                }
             }
             break;
     }

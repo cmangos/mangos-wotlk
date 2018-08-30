@@ -151,11 +151,9 @@ struct boss_varosAI : public ScriptedAI
                     return;
                 }
 
+                // spell will set the proper immunity flags
                 if (DoCastSpellIfCan(m_creature, SPELL_CENTRIFUGE_SHIELD) == CAST_OK)
-                {
-                    m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ALL, true);
                     m_uiShieldTimer = 0;
-                }
             }
             else
                 m_uiShieldTimer -= uiDiff;
@@ -273,6 +271,8 @@ struct npc_azure_ring_captainAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_ARCANE_BEAM)
         {
+            pSummoned->SetDisplayId(11686);                     // HACK remove when correct modelid will be taken by core
+
             pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BEAM_PERIODIC, TRIGGERED_OLD_TRIGGERED);
             pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BEAM_SPAWN, TRIGGERED_OLD_TRIGGERED);
             m_arcaneBeamGuid = pSummoned->GetObjectGuid();
