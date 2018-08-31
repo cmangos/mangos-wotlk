@@ -8172,6 +8172,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 32077:                                 // Boglord Bash
                 case 32637:                                 // Overrun - Doomwalker
                 case 32959:                                 // Knock Away
+                case 37102:                                 // Knock Away - Crystalcore Devastator 20040
                 case 37597:                                 // Meat Slap
                 case 40486:                                 // Eject - Bloodboil
                 {
