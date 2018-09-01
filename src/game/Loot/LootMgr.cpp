@@ -455,9 +455,11 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
     {
         if (loot->m_lootMethod == NOT_GROUP_TYPE_LOOT || loot->m_lootMethod == FREE_FOR_ALL)
             return LOOT_SLOT_OWNER;
+
         // Check if its turn of that player to loot a not party loot. The loot may be released or the item may be passed by currentLooter
         if (loot->m_isReleased || currentLooterPass || loot->m_currentLooterGuid == player->GetObjectGuid())
             return LOOT_SLOT_OWNER;
+
         return MAX_LOOT_SLOT_TYPE;
     }
 
@@ -472,6 +474,7 @@ LootSlotType LootItem::GetSlotTypeForSharedLoot(Player const* player, Loot const
             {
                 if (loot->m_isReleased || player->GetObjectGuid() == loot->m_currentLooterGuid)
                     return LOOT_SLOT_NORMAL;
+
                 return MAX_LOOT_SLOT_TYPE;
             }
             return LOOT_SLOT_VIEW;
@@ -1459,11 +1462,13 @@ bool IsEligibleForLoot(Player* looter, WorldObject* lootTarget)
 {
     if (looter->IsAtGroupRewardDistance(lootTarget))
         return true;
+
     if (lootTarget->GetTypeId() == TYPEID_UNIT)
     {
         Unit* creature = (Unit*)lootTarget;
         return creature->getThreatManager().HasThreat(looter);
     }
+
     return false;
 }
 
@@ -2208,7 +2213,7 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
         std::vector <LootStoreItem const*> lootStoreItemVector; // we'll use new vector to make easy the randomization
 
         // fill the new vector with correct pointer to our item list
-        for (auto itr : ExplicitlyChanced)
+        for (auto& itr : ExplicitlyChanced)
             lootStoreItemVector.push_back(&itr);
 
         // randomize the new vector
@@ -2241,7 +2246,7 @@ LootStoreItem const* LootTemplate::LootGroup::Roll(Loot const& loot, Player cons
         std::vector <LootStoreItem const*> lootStoreItemVector; // we'll use new vector to make easy the randomization
 
         // fill the new vector with correct pointer to our item list
-        for (auto itr : EqualChanced)
+        for (auto& itr : EqualChanced)
             lootStoreItemVector.push_back(&itr);
 
         // randomize the new vector
