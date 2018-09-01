@@ -32,21 +32,28 @@ enum
     MAX_WG_WORKSHOPS                            = 4,                // refers to the capturable workshops
 
     // ***** Spells *****
-    // battle spells
-    SPELL_RECRUIT                               = 37795,
-    SPELL_CORPORAL                              = 33280,
-    SPELL_LIEUTENANT                            = 55629,
-    SPELL_TENACITY                              = 58549,
+    // player rank spells
+    SPELL_RECRUIT                               = 37795,            // player receives it by default on join
+    SPELL_CORPORAL                              = 33280,            // 5 enemy kills - allowed for catapults
+    SPELL_LIEUTENANT                            = 55629,            // 10 more enemy kills - allowed for all vehicles
+
+    // tenacity - used to balance the groups
+    SPELL_TENACITY                              = 58549,            // received by the smaller team; the smaller the team, the more stacks it receives
     SPELL_TENACITY_VEHICLE                      = 59911,
-    SPELL_TOWER_CONTROL                         = 62064,
-    SPELL_SPIRITUAL_IMMUNITY                    = 58729,
+
+    SPELL_TOWER_CONTROL                         = 62064,            // tower control buff
+    SPELL_SPIRITUAL_IMMUNITY                    = 58729,            // temporary protection after ressurection
+
+    // tenacity reward spells
     SPELL_GREAT_HONOR                           = 58555,
-    SPELL_GREATER_HONOR                         = 58556,
-    SPELL_GREATEST_HONOR                        = 58557,
-    SPELL_ALLIANCE_FLAG                         = 14268,
-    SPELL_HORDE_FLAG                            = 14267,
-    SPELL_GRAB_PASSENGER                        = 61178,
-    SPELL_ACTIVATE_ROBOTIC_ARMS                 = 49899,
+    SPELL_GREATER_HONOR                         = 58556,            // received when the opponent has more than 10 stacks of tenacity
+    SPELL_GREATEST_HONOR                        = 58557,            // received when the opponent has 20 stacks of tenacity
+
+    // SPELL_ALLIANCE_FLAG                      = 14268,
+    // SPELL_HORDE_FLAG                         = 14267,
+
+    // SPELL_GRAB_PASSENGER                     = 61178,
+    // SPELL_ACTIVATE_ROBOTIC_ARMS              = 49899,
 
     // reward spells
     SPELL_WINTERGRASP_VICTORY                   = 56902,
@@ -54,7 +61,7 @@ enum
     SPELL_DAMAGED_TOWER                         = 59135,
     SPELL_DESTROYED_TOWER                       = 59136,
     SPELL_DAMAGED_BUILDING                      = 59201,
-    SPELL_INTACT_BUILDING                       = 59203,
+    SPELL_INTACT_BUILDING_DEFEND                = 59203,
 
     // misc spells
     // SPELL_WINTERGRASP_WATER                  = 36444,            // water damage against vehicles - applied automatically by the map
@@ -276,8 +283,8 @@ enum
     // GO_PORTAL_TO_WINTERGRASP                 = 193772,               // portal from dalaran to WG
 
     // ***** Graveyards *****
-    GRAVEYARD_ID_KEEP_WEST                      = 1285,
-    GRAVEYARD_ID_KEEP_EAST                      = 1328,
+    GRAVEYARD_ID_KEEP_EAST                      = 1285,
+    GRAVEYARD_ID_KEEP_WEST                      = 1328,
     GRAVEYARD_ID_SUNKEN_RING                    = 1329,
     GRAVEYARD_ID_BROKEN_TEMPLE                  = 1330,
     GRAVEYARD_ID_EASTPARK                       = 1333,
@@ -293,10 +300,10 @@ enum
     EVENT_KEEP_DOOR_DESTROY                     = 19448,
 
     // capture points events (identical between horde and alliance GO versions)
-    EVENT_BROKEN_TEMPLE_CONTEST_ALLIANCE        = 20787,
-    EVENT_BROKEN_TEMPLE_CONTEST_HORDE           = 20788,
-    EVENT_BROKEN_TEMPLE_PROGRESS_ALLIANCE       = 19612,
-    EVENT_BROKEN_TEMPLE_PROGRESS_HORDE          = 19611,
+    EVENT_BROKEN_TEMPLE_CONTEST_ALLIANCE        = 20787,                // horde -> neutral
+    EVENT_BROKEN_TEMPLE_CONTEST_HORDE           = 20788,                // alliance -> neutral
+    EVENT_BROKEN_TEMPLE_PROGRESS_ALLIANCE       = 19612,                // neutral -> alliance
+    EVENT_BROKEN_TEMPLE_PROGRESS_HORDE          = 19611,                // neutral -> horde
 
     EVENT_WESTPARK_CONTEST_ALLIANCE             = 21568,
     EVENT_WESTPARK_CONTEST_HORDE                = 21569,
@@ -515,26 +522,26 @@ struct WintergraspCapturePointEventData
 static const WintergraspCapturePointEventData wgCapturePointEventData[MAX_WG_WORKSHOPS][4] =
 {
     {
-        {EVENT_SUNKEN_RING_CONTEST_ALLIANCE,        ALLIANCE,       LANG_OPVP_WG_SUNKEN_RING_ATTACK_A,      BF_GO_STATE_ALLIANCE_INTACT,    0,  0},
-        {EVENT_SUNKEN_RING_CONTEST_HORDE,           HORDE,          LANG_OPVP_WG_SUNKEN_RING_ATTACK_H,      BF_GO_STATE_HORDE_INTACT,       0,  0},
+        {EVENT_SUNKEN_RING_CONTEST_ALLIANCE,        HORDE,          LANG_OPVP_WG_SUNKEN_RING_ATTACK_A,      BF_GO_STATE_HORDE_INTACT,       0,  0},
+        {EVENT_SUNKEN_RING_CONTEST_HORDE,           ALLIANCE,       LANG_OPVP_WG_SUNKEN_RING_ATTACK_H,      BF_GO_STATE_ALLIANCE_INTACT,    0,  0},
         {EVENT_SUNKEN_RING_PROGRESS_ALLIANCE,       ALLIANCE,       LANG_OPVP_WG_SUNKEN_RING_CAPTURE_A,     BF_GO_STATE_ALLIANCE_INTACT,    CAPTURE_ARTKIT_ALLIANCE,    CAPTURE_ANIM_ALLIANCE},
         {EVENT_SUNKEN_RING_PROGRESS_HORDE,          HORDE,          LANG_OPVP_WG_SUNKEN_RING_CAPTURE_H,     BF_GO_STATE_HORDE_INTACT,       CAPTURE_ARTKIT_HORDE,       CAPTURE_ANIM_HORDE},
     },
     {
-        {EVENT_BROKEN_TEMPLE_CONTEST_ALLIANCE,      ALLIANCE,       LANG_OPVP_WG_BR_TEMPLE_ATTACK_A,        BF_GO_STATE_ALLIANCE_INTACT,    0,  0},
-        {EVENT_BROKEN_TEMPLE_CONTEST_HORDE,         HORDE,          LANG_OPVP_WG_BR_TEMPLE_ATTACK_H,        BF_GO_STATE_HORDE_INTACT,       0,  0},
+        {EVENT_BROKEN_TEMPLE_CONTEST_ALLIANCE,      HORDE,          LANG_OPVP_WG_BR_TEMPLE_ATTACK_A,        BF_GO_STATE_HORDE_INTACT,       0,  0},
+        {EVENT_BROKEN_TEMPLE_CONTEST_HORDE,         ALLIANCE,       LANG_OPVP_WG_BR_TEMPLE_ATTACK_H,        BF_GO_STATE_ALLIANCE_INTACT,    0,  0},
         {EVENT_BROKEN_TEMPLE_PROGRESS_ALLIANCE,     ALLIANCE,       LANG_OPVP_WG_BR_TEMPLE_CAPTURE_A,       BF_GO_STATE_ALLIANCE_INTACT,    CAPTURE_ARTKIT_ALLIANCE,    CAPTURE_ANIM_ALLIANCE},
         {EVENT_BROKEN_TEMPLE_PROGRESS_HORDE,        HORDE,          LANG_OPVP_WG_BR_TEMPLE_CAPTURE_H,       BF_GO_STATE_HORDE_INTACT,       CAPTURE_ARTKIT_HORDE,       CAPTURE_ANIM_HORDE},
     },
     {
-        {EVENT_EASTPARK_CONTEST_ALLIANCE,           ALLIANCE,       LANG_OPVP_WG_EASTPARK_ATTACK_A,         BF_GO_STATE_ALLIANCE_INTACT,    0,  0},
-        {EVENT_EASTPARK_CONTEST_HORDE,              HORDE,          LANG_OPVP_WG_EASTPARK_ATTACK_H,         BF_GO_STATE_HORDE_INTACT,       0,  0},
+        {EVENT_EASTPARK_CONTEST_ALLIANCE,           HORDE,          LANG_OPVP_WG_EASTPARK_ATTACK_A,         BF_GO_STATE_HORDE_INTACT,       0,  0},
+        {EVENT_EASTPARK_CONTEST_HORDE,              ALLIANCE,       LANG_OPVP_WG_EASTPARK_ATTACK_H,         BF_GO_STATE_ALLIANCE_INTACT,    0,  0},
         {EVENT_EASTPARK_PROGRESS_ALLIANCE,          ALLIANCE,       LANG_OPVP_WG_EASTPARK_CAPTURE_A,        BF_GO_STATE_ALLIANCE_INTACT,    CAPTURE_ARTKIT_ALLIANCE,    CAPTURE_ANIM_ALLIANCE},
         {EVENT_EASTPARK_PROGRESS_HORDE,             HORDE,          LANG_OPVP_WG_EASTPARK_CAPTURE_H,        BF_GO_STATE_HORDE_INTACT,       CAPTURE_ARTKIT_HORDE,       CAPTURE_ANIM_HORDE},
     },
     {
-        {EVENT_WESTPARK_CONTEST_ALLIANCE,           ALLIANCE,       LANG_OPVP_WG_WESTPARK_ATTACK_A,         BF_GO_STATE_ALLIANCE_INTACT,    0,  0},
-        {EVENT_WESTPARK_CONTEST_HORDE,              HORDE,          LANG_OPVP_WG_WESTPARK_ATTACK_H,         BF_GO_STATE_HORDE_INTACT,       0,  0},
+        {EVENT_WESTPARK_CONTEST_ALLIANCE,           HORDE,          LANG_OPVP_WG_WESTPARK_ATTACK_A,         BF_GO_STATE_HORDE_INTACT,       0,  0},
+        {EVENT_WESTPARK_CONTEST_HORDE,              ALLIANCE,       LANG_OPVP_WG_WESTPARK_ATTACK_H,         BF_GO_STATE_ALLIANCE_INTACT,    0,  0},
         {EVENT_WESTPARK_PROGRESS_ALLIANCE,          ALLIANCE,       LANG_OPVP_WG_WESTPARK_CAPTURE_A,        BF_GO_STATE_ALLIANCE_INTACT,    CAPTURE_ARTKIT_ALLIANCE,    CAPTURE_ANIM_ALLIANCE},
         {EVENT_WESTPARK_PROGRESS_HORDE,             HORDE,          LANG_OPVP_WG_WESTPARK_CAPTURE_H,        BF_GO_STATE_HORDE_INTACT,       CAPTURE_ARTKIT_HORDE,       CAPTURE_ANIM_HORDE},
     },
@@ -654,7 +661,6 @@ class BattlefieldWG : public Battlefield
         bool m_sentPrebattleWarning;
 
         // counters
-        uint32 m_damagedTowers[PVP_TEAM_COUNT];
         uint32 m_destroyedTowers[PVP_TEAM_COUNT];
         uint32 m_workshopCount[PVP_TEAM_COUNT];
 

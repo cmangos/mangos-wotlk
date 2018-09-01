@@ -39,7 +39,6 @@ void BattlefieldWG::Reset()
 
     for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
     {
-        m_damagedTowers[i] = 0;
         m_destroyedTowers[i] = 0;
         m_workshopCount[i] = 0;
     }
@@ -503,6 +502,9 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
             {
                 tower->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DESTROYED : BF_GO_STATE_HORDE_DESTROYED);
                 SendZoneWarning(wgFortressTowersData[index].eventDestroyed);
+
+                ++m_destroyedTowers[GetTeamIndexByTeamId(GetDefender())];
+                // ToDo: handle possible yell
             }
             else if (eventId == wgFortressTowersData[index].eventIntact)
             {
@@ -535,6 +537,13 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
             {
                 tower->SetGoState(GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DESTROYED : BF_GO_STATE_HORDE_DESTROYED);
                 SendZoneWarning(wgOffenseData[index].eventDestroyed);
+
+                // handle tower buffs
+                BuffTeam(GetAttacker(), SPELL_TOWER_CONTROL, true);
+                BuffTeam(GetDefender(), SPELL_TOWER_CONTROL);
+
+                ++m_destroyedTowers[GetTeamIndexByTeamId(GetAttacker())];
+                // ToDo: handle some yell from the Fortress commander
             }
             else if (eventId == wgOffenseData[index].eventIntact)
             {
@@ -713,6 +722,12 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
 
     DEBUG_LOG("Battlefield WG: Making Wintergrasp ready for battle.");
 
+    for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
+    {
+        m_destroyedTowers[i] = 0;
+        m_workshopCount[i] = 0;
+    }
+
     // ***** Update Wintergrasp phasing **** //
     // remove essence of WG phase
     // ToDo: needs to be enabled when phase stacking is supported
@@ -721,9 +736,6 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
     // add proper battlefield phasing (can be reduntant)
     BuffTeam(ALLIANCE, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())]);
     BuffTeam(HORDE, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())]);
-
-    // ***** Update world stated **** //
-    SendUpdateAllWorldStates();
 
     // ***** Rebuild and reset the buildings **** //
     // rebuild attack tower - factions handled by event
@@ -736,6 +748,9 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
             building->SetGoState(GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
             SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
         }
+
+        // Buff attacker for each tower
+        BuffTeam(GetAttacker(), SPELL_TOWER_CONTROL);
     }
 
     // rebuild fortress - factions handled by event
@@ -769,6 +784,8 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
         workshop->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
         SendUpdateWorldState(workshop->GetWorldState(), workshop->GetGoState());
         sObjectMgr.SetGraveYardLinkTeam(workshop->GetGraveyardId(), ZONE_ID_WINTERGRASP, GetDefender());
+
+        ++m_workshopCount[GetTeamIndexByTeamId(GetDefender())];
     }
 
     // reset the other workshops
@@ -779,6 +796,8 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
         workshop->SetGoState(owner == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
         SendUpdateWorldState(workshop->GetWorldState(), workshop->GetGoState());
         sObjectMgr.SetGraveYardLinkTeam(workshop->GetGraveyardId(), ZONE_ID_WINTERGRASP, owner);
+
+        ++m_workshopCount[GetTeamIndexByTeamId(owner)];
 
         // unlock the workshop
         LockWorkshops(false, objRef, workshop);
@@ -808,6 +827,9 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
         }
     }
 
+    // ***** Update world stated **** //
+    SendUpdateAllWorldStates();
+
     // ToDo: research if the fortress vendors are despawned during the battle
 }
 
@@ -834,7 +856,16 @@ void BattlefieldWG::SendUpdateAllWorldStates()
 
 void BattlefieldWG::HandlePlayerKillInsideArea(Player* player, Unit* victim)
 {
-
+    //if (victim->GetTypeId() == TYPEID_UNIT)
+    //{
+    //    switch (victim->GetEntry())
+    //    {
+    //        case NPC_VALLIANCE_EXPEDITION_CHAMPION:
+    //        case NPC_WARSONG_CHAMPION:
+    //            // ToDo: handle player scores when killing opposing faction npcs
+    //            break;
+    //    }
+    //}
 }
 
 void BattlefieldWG::RewardPlayersOnBattleEnd(Team winner)
@@ -875,9 +906,7 @@ void BattlefieldWG::Update(uint32 diff)
 
     // end battle on timer
     if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && m_timer < diff)
-    {
         EndBattle(GetDefender());
-    }
 }
 
 bool BattlefieldWG::IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType)
