@@ -90,7 +90,7 @@ class OutdoorPvP
         void HandlePlayerKill(Player* killer, Unit* victim);
 
         // applies buff to a team inside the specific zone
-        void BuffTeam(Team team, uint32 spellId, bool remove = false);
+        void BuffTeam(Team team, uint32 spellId, bool remove = false, const uint32 areaId = 0);
 
         // send world state update to all players present
         void SendUpdateWorldState(uint32 field, uint32 value);

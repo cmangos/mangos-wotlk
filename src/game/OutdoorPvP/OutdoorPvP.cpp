@@ -130,13 +130,17 @@ void OutdoorPvP::HandlePlayerKill(Player* killer, Unit* victim)
 }
 
 // apply a team buff for the main and affected zones
-void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/)
+void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/, const uint32 areaId /*= 0*/)
 {
     for (GuidZoneMap::const_iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
         Player* player = sObjectMgr.GetPlayer(itr->first);
         if (player && player->GetTeam() == team)
         {
+            // validate area id for buffs which aren't applied to the entire zone
+            if (areaId && player->GetAreaId() != areaId)
+                continue;
+
             if (remove)
             {
                 ObjectGuid guid = player->GetObjectGuid();
