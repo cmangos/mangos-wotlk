@@ -216,15 +216,17 @@ Function that starts battlefield battle
 */
 void Battlefield::StartBattle(Team defender)
 {
-    m_startTime = time(nullptr);
-    m_status = BF_STATUS_IN_PROGRESS;
-    m_timer = m_battleDuration;
-    m_zoneOwner = defender;
+    DEBUG_LOG("Battlefield: Battle has started. Defender Team: %s.", defender == ALLIANCE ? "Alliance" : "Horde");
+
+    m_startTime     = time(nullptr);
+    m_status        = BF_STATUS_IN_PROGRESS;
+    m_timer         = m_battleDuration;
+    m_zoneOwner     = defender;
 
     // refresh all players before battle
     InitPlayersBeforeBattle();
 
-    DEBUG_LOG("Disbanding groups");
+    // disband existing raid groups
     for (auto& m_battlefieldRaid : m_battlefieldRaids)
     {
         while (!m_battlefieldRaid.empty())
@@ -288,26 +290,40 @@ void Battlefield::StartBattle(Team defender)
 
 /**
 Function that ends battlefield battle
+
+@param   winner team
+@param   reference object
 */
-void Battlefield::EndBattle(Team winner, bool byTimer)
+void Battlefield::EndBattle(Team winner, const WorldObject* objRef /* = nullptr*/)
 {
-    m_zoneOwner = winner;
-    m_status = BF_STATUS_COOLDOWN;
-    m_timer = m_cooldownDuration;
+    // set the new zone owner; change status and timer
+    m_zoneOwner      = winner;
+    m_status         = BF_STATUS_COOLDOWN;
+    m_timer          = m_cooldownDuration;
     m_playersInvited = false;
 
+    // no reward when there is no winner - battlefield initialization failed
+    if (winner == TEAM_NONE)
+        return;
+
+    // reward players and reset
     RewardPlayersOnBattleEnd(winner);
-    Reset();
+
+    DEBUG_LOG("Battlefield: Battle has ended. Winner Team: %s.", winner == ALLIANCE ? "Alliance" : "Horde");
 }
 
+/**
+Battlefield update function
+*/
 void Battlefield::Update(uint32 diff)
 {
+    // global battlefield timer
     if (m_timer < diff)
     {
         if (m_status == BF_STATUS_COOLDOWN)
             StartBattle(m_zoneOwner);
         else if (m_status == BF_STATUS_IN_PROGRESS)
-            EndBattle(m_zoneOwner, true);
+            EndBattle(m_zoneOwner);
     }
     else
         m_timer -= diff;
@@ -490,7 +506,7 @@ bool Battlefield::CanAddPlayerToRaid(Player* player)
         if (group->Create(player->GetObjectGuid(), player->GetName()))
             DEBUG_LOG("Battlefield: Successfully created new group %s", group->GetObjectGuid().GetString().c_str());
         else
-            DEBUG_LOG("Failed to create group!");
+            sLog.outError("Battlefield: Failed to create group for player %s.", player->GetGuidStr().c_str());
 
         m_battlefieldRaids[teamIdx].insert(group);
     }

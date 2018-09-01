@@ -57,38 +57,37 @@ enum BattlefieldGoState
 class BattlefieldBuilding
 {
     public:
-        BattlefieldBuilding(uint32 goEntry): owner(), entry(goEntry), worldState(0), state()
+        BattlefieldBuilding(uint32 goEntry): m_entry(goEntry), m_worldState(0), m_goState(BattlefieldGoState()), m_guid(ObjectGuid())
         {
         }
         virtual ~BattlefieldBuilding() = default;
 
-        virtual void SetupBuilding(bool reset) {};
+        // check the object physical state
+        bool IsIntact() const { return m_goState == BF_GO_STATE_NEUTRAL_INTACT || m_goState == BF_GO_STATE_HORDE_INTACT || m_goState == BF_GO_STATE_ALLIANCE_INTACT; };
+        bool IsDamaged() const { return m_goState == BF_GO_STATE_NEUTRAL_DAMAGED || m_goState == BF_GO_STATE_HORDE_DAMAGED || m_goState == BF_GO_STATE_ALLIANCE_DAMAGED; };
+        bool IsDestroyed() const { return m_goState == BF_GO_STATE_NEUTRAL_DESTROYED || m_goState == BF_GO_STATE_HORDE_DESTROYED || m_goState == BF_GO_STATE_ALLIANCE_DESTROYED; };
 
-        bool IsIntact() const { return state == BF_GO_STATE_NEUTRAL_INTACT || state == BF_GO_STATE_HORDE_INTACT || state == BF_GO_STATE_ALLIANCE_INTACT; };
-        bool IsDamaged() const { return state == BF_GO_STATE_NEUTRAL_DAMAGED || state == BF_GO_STATE_HORDE_DAMAGED || state == BF_GO_STATE_ALLIANCE_DAMAGED; };
-        bool IsDestroyed() const { return state == BF_GO_STATE_NEUTRAL_DESTROYED || state == BF_GO_STATE_HORDE_DESTROYED || state == BF_GO_STATE_ALLIANCE_DESTROYED; };
+        // get and set object world state identifier
+        uint32 GetWorldState() const { return m_worldState; }
+        void SetWorldState(uint32 newWorldState) { m_worldState = newWorldState; }
 
-        Team GetOwner() const { return owner; }
-        void SetOwner(Team newOwner) { owner = newOwner; }
+        // get and set object physical state (intact / damaged / destroyed)
+        BattlefieldGoState GetGoState() const { return m_goState; }
+        void SetGoState(BattlefieldGoState newState) { m_goState = newState; }
 
-        uint32 GetWorldState() const { return worldState; }
-        void SetWorldState(uint32 newWorldState) { worldState = newWorldState; }
+        // get and set object guid
+        void SetGoGuid(ObjectGuid goGuid) { m_guid = goGuid; }
+        ObjectGuid GetGoGuid() { return m_guid; }
 
-        uint32 GetGoState() const { return (uint32)state; }
-        void SetGoState(BattlefieldGoState newState) { state = newState; }
-
-        void SetGoGuid(ObjectGuid goGuid) { guid = goGuid; }
-        ObjectGuid GetGoGuid() { return guid; }
-        uint32 GetGoEntry() const { return entry; }
+        // get object entry
+        uint32 GetGoEntry() const { return m_entry; }
 
     private:
-        Team owner;
+        uint32 m_entry;
+        uint32 m_worldState;
 
-        uint32 entry;
-        uint32 worldState;
-
-        BattlefieldGoState state;
-        ObjectGuid guid;
+        BattlefieldGoState m_goState;
+        ObjectGuid m_guid;
 };
 
 class BattlefieldPlayer
@@ -124,7 +123,7 @@ class Battlefield : public OutdoorPvP
 
         // handle battle start and end
         virtual void StartBattle(Team /*defender*/);
-        virtual void EndBattle(Team /*winner*/, bool /*byTimer*/);
+        virtual void EndBattle(Team /*winner*/, const WorldObject* objRef = nullptr);
 
         virtual void Update(uint32 /*diff*/) override;
 
@@ -177,9 +176,6 @@ class Battlefield : public OutdoorPvP
 
         // sends a raid warning to all players in the zone
         void SendZoneWarning(int32 /*entry*/, WorldObject* source = nullptr);
-
-        // update the graveyard on capture event
-        virtual void UpdateGraveyardOwner(uint8 id, PvpTeamIndex newOwner) {};
 
         // reward players
         virtual void RewardPlayersOnBattleEnd(Team /*winner*/) {};

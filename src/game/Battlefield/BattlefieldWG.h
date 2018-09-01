@@ -29,6 +29,8 @@ class BattlefieldWG;
 
 enum
 {
+    MAX_WG_WORKSHOPS                            = 4,                // refers to the capturable workshops
+
     // ***** Spells *****
     // battle spells
     SPELL_RECRUIT                               = 37795,
@@ -274,8 +276,8 @@ enum
     // GO_PORTAL_TO_WINTERGRASP                 = 193772,               // portal from dalaran to WG
 
     // ***** Graveyards *****
-    GRAVEYARD_ID_KEEP_1                         = 1285,
-    GRAVEYARD_ID_KEEP_2                         = 1328,
+    GRAVEYARD_ID_KEEP_WEST                      = 1285,
+    GRAVEYARD_ID_KEEP_EAST                      = 1328,
     GRAVEYARD_ID_SUNKEN_RING                    = 1329,
     GRAVEYARD_ID_BROKEN_TEMPLE                  = 1330,
     GRAVEYARD_ID_EASTPARK                       = 1333,
@@ -288,6 +290,28 @@ enum
     // other events
     // destructible building events are defined below - too many to add here
     EVENT_TITAN_RELIC                           = 22097,                // event sent by the Titan relic
+    EVENT_KEEP_DOOR_DESTROY                     = 19448,
+
+    // capture points events (identical between horde and alliance GO versions)
+    EVENT_BROKEN_TEMPLE_CONTEST_ALLIANCE        = 20787,
+    EVENT_BROKEN_TEMPLE_CONTEST_HORDE           = 20788,
+    EVENT_BROKEN_TEMPLE_PROGRESS_ALLIANCE       = 19612,
+    EVENT_BROKEN_TEMPLE_PROGRESS_HORDE          = 19611,
+
+    EVENT_WESTPARK_CONTEST_ALLIANCE             = 21568,
+    EVENT_WESTPARK_CONTEST_HORDE                = 21569,
+    EVENT_WESTPARK_PROGRESS_ALLIANCE            = 21562,
+    EVENT_WESTPARK_PROGRESS_HORDE               = 21560,
+
+    EVENT_EASTPARK_CONTEST_ALLIANCE             = 21566,
+    EVENT_EASTPARK_CONTEST_HORDE                = 21567,
+    EVENT_EASTPARK_PROGRESS_ALLIANCE            = 21565,
+    EVENT_EASTPARK_PROGRESS_HORDE               = 21563,
+
+    EVENT_SUNKEN_RING_CONTEST_ALLIANCE          = 20785,
+    EVENT_SUNKEN_RING_CONTEST_HORDE             = 20786,
+    EVENT_SUNKEN_RING_PROGRESS_ALLIANCE         = 19610,
+    EVENT_SUNKEN_RING_PROGRESS_HORDE            = 19609,
 
     // ***** world states *****
     // generic world states
@@ -357,9 +381,9 @@ enum
     SOUND_ID_WG_START                           = 3439,
 
 
-    // ***** Factions *****
-    FACTION_ID_WARSONG                          = 1979,
-    FACTION_ID_VALLIANCE                        = 1891,
+    // ***** NPC Factions *****
+    // FACTION_ID_WARSONG                       = 1979,
+    // FACTION_ID_VALLIANCE                     = 1891,
 
     FACTION_ID_ALLIANCE_GENERIC                 = 1732,             // used by GOs and creatures
     // FACTION_ID_ALLIANCE_GENERIC_2            = 1733,             // ToDo: to be confirmed
@@ -374,11 +398,19 @@ enum
     OPVP_COND_WG_BATTLEFIELD_IN_PROGRESS        = 2,
 };
 
+// *** Battlefield factions *** //
+const uint32 wgTeamFactions[PVP_TEAM_COUNT] = { FACTION_ID_ALLIANCE_GENERIC, FACTION_ID_HORDE_GENERIC };
+
+// *** Battlefield phasing auras *** //
+const uint32 wgTeamControlAuras[PVP_TEAM_COUNT] = { SPELL_ALLIANCE_CONTROL_PHASE, SPELL_HORDE_CONTROL_PHASE };
+const uint32 wgTeamFactoryAuras[PVP_TEAM_COUNT] = { SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE, SPELL_HORDE_CONTROLS_FACTORY_PHASE };
+
 struct WintergraspGoData
 {
-    uint32 goEntry, worldState, eventIntact, eventDataged, eventDestroyed, eventRebuild;
+    uint32 goEntry, worldState, eventIntact, eventDamaged, eventDestroyed, eventRebuild, messageDamaged, messagedDestroyed, graveyardId;
 };
 
+// *** Fortress data *** //
 static const WintergraspGoData wgFortressData[] =
 {
     {GO_WG_FORTRESS_DOOR,       WORLD_STATE_WG_FORTRESS_DOOR,           19955,  19448,  19607,  19448},
@@ -406,48 +438,148 @@ static const WintergraspGoData wgFortressData[] =
     {GO_WG_WALL_1,              WORLD_STATE_WG_WALL_1,                  19931,  19940,  19949,  0},
     {GO_WG_WALL_2,              WORLD_STATE_WG_WALL_2,                  19928,  19937,  19946,  0},
     {GO_WG_WALL_3,              WORLD_STATE_WG_WALL_3,                  19925,  19934,  19943,  0},
-    {GO_WG_TOWER_WEST,          WORLD_STATE_WG_KEEP_TOWER_WEST,         19665,  19657,  19661,  19460},
-    {GO_WG_TOWER_SOUTHWEST,     WORLD_STATE_WG_KEEP_TOWER_SOUTHWEST,    19667,  19659,  19662,  19459},
-    {GO_WG_TOWER_SOUTHEAST,     WORLD_STATE_WG_KEEP_TOWER_SOUTHEAST,    19668,  19660,  19664,  19457},
-    {GO_WG_TOWER_EAST,          WORLD_STATE_WG_KEEP_TOWER_EAST,         19666,  19658,  19663,  19458},
 };
 
-static const WintergraspGoData wgOffensiveData[] =
+// *** Defense towers data *** //
+static const WintergraspGoData wgFortressTowersData[] =
 {
-    {GO_TOWER_SHADOWSIGHT,      WORLD_STATE_WG_TOWER_SHADOWSIGHT,       19671,  19674,  19677,  19680},
-    {GO_TOWER_WINTERS_EDGE,     WORLD_STATE_WG_TOWER_WINTERS_EDGE,      19670,  19673,  19676,  19679},
-    {GO_TOWER_FLAMEWATCH,       WORLD_STATE_WG_TOWER_FLAMEWATCH,        19669,  19672,  19675,  19678},
+    {GO_WG_TOWER_WEST,          WORLD_STATE_WG_KEEP_TOWER_WEST,         19665,  19657,  19661,  19460,  LANG_OPVP_WG_NW_KEEP_TOWER_DAMAGE,  LANG_OPVP_WG_NW_KEEP_TOWER_DESTROY},
+    {GO_WG_TOWER_SOUTHWEST,     WORLD_STATE_WG_KEEP_TOWER_SOUTHWEST,    19667,  19659,  19662,  19459,  LANG_OPVP_WG_SW_KEEP_TOWER_DAMAGE,  LANG_OPVP_WG_SW_KEEP_TOWER_DESTROY},
+    {GO_WG_TOWER_SOUTHEAST,     WORLD_STATE_WG_KEEP_TOWER_SOUTHEAST,    19668,  19660,  19664,  19457,  LANG_OPVP_WG_SE_KEEP_TOWER_DAMAGE,  LANG_OPVP_WG_SE_KEEP_TOWER_DESTROY},
+    {GO_WG_TOWER_EAST,          WORLD_STATE_WG_KEEP_TOWER_EAST,         19666,  19658,  19663,  19458,  LANG_OPVP_WG_NE_KEEP_TOWER_DAMAGE,  LANG_OPVP_WG_NE_KEEP_TOWER_DESTROY},
 };
 
+// *** Attack towers data *** //
+static const WintergraspGoData wgOffenseData[] =
+{
+    {GO_TOWER_SHADOWSIGHT,      WORLD_STATE_WG_TOWER_SHADOWSIGHT,       19671,  19674,  19677,  19680,  LANG_OPVP_WG_WEST_TOWER_DAMAGE,     LANG_OPVP_WG_WEST_TOWER_DESTROY},
+    {GO_TOWER_WINTERS_EDGE,     WORLD_STATE_WG_TOWER_WINTERS_EDGE,      19670,  19673,  19676,  19679,  LANG_OPVP_WG_SOUTH_TOWER_DAMAGE,    LANG_OPVP_WG_SOUTH_TOWER_DESTROY},
+    {GO_TOWER_FLAMEWATCH,       WORLD_STATE_WG_TOWER_FLAMEWATCH,        19669,  19672,  19675,  19678,  LANG_OPVP_WG_EAST_TOWER_DAMAGE,     LANG_OPVP_WG_EAST_TOWER_DESTROY},
+};
+
+// *** Fortress Workshop data *** //
 static const WintergraspGoData wgFortressWorkshopsData[] =
 {
-    {GO_WORKSHOP_KEEP_WEST,     WORLD_STATE_WG_WORKSHOP_KEEP_WEST,      19790,  19782,  19786,  19794},
-    {GO_WORKSHOP_KEEP_EAST,     WORLD_STATE_WG_WORKSHOP_KEEP_EAST,      19791,  19783,  19787,  19795},
+    {GO_WORKSHOP_KEEP_WEST,     WORLD_STATE_WG_WORKSHOP_KEEP_WEST,      19790,  19782,  19786,  19794, 0, 0, GRAVEYARD_ID_KEEP_WEST},
+    {GO_WORKSHOP_KEEP_EAST,     WORLD_STATE_WG_WORKSHOP_KEEP_EAST,      19791,  19783,  19787,  19795, 0, 0, GRAVEYARD_ID_KEEP_EAST},
 };
 
+// *** Middle-ground Workshop data *** //
 static const WintergraspGoData wgDefendeWorkshopsData[] =
 {
     {GO_WORKSHOP_BROKEN_TEMPLE, WORLD_STATE_WG_WORKSHOP_BROKEN_TEMPLE,  19775,  19777,  19779,  19781},
     {GO_WORKSHOP_SUNKEN_RING,   WORLD_STATE_WG_WORKSHOP_SUNKEN_RING,    19774,  19776,  19778,  19780},
 };
 
+// *** Attacker Workshop data *** //
 static const WintergraspGoData wgOffensiveWorkshopsData[] =
 {
     {GO_WORKSHOP_WESTPARK,      WORLD_STATE_WG_WORKSHOP_WESTPARK,       19792,  19784,  19788,  19796},
     {GO_WORKSHOP_EASTPARK,      WORLD_STATE_WG_WORKSHOP_EASTPARK,       19793,  19785,  19789,  19797},
 };
 
-struct WintergraspCapturePointData
+// *** Battlefield capture point visuals *** //
+const CapturePointArtKits wgCapturePointArtKits[PVP_TEAM_COUNT] = { CAPTURE_ARTKIT_ALLIANCE, CAPTURE_ARTKIT_HORDE };
+const CapturePointAnimations wgCapturePointAnims[PVP_TEAM_COUNT] = { CAPTURE_ANIM_ALLIANCE, CAPTURE_ANIM_HORDE };
+
+// *** Capture point data *** //
+static const uint32 wgCapturePoints[PVP_TEAM_COUNT][MAX_WG_WORKSHOPS] =
 {
-    uint32 goEntryAlliance, goEntryHorde, goEntryWorkshop, areaId, worldState, eventContestedAlliance, eventContestedHorde, eventProgressAlliance, eventProgressHorde;
+    {GO_CAPTUREPOINT_SUNKEN_RING_A, GO_CAPTUREPOINT_BROKEN_TEMPLE_A, GO_CAPTUREPOINT_EASTPARK_A, GO_CAPTUREPOINT_WESTPARK_A},
+    {GO_CAPTUREPOINT_SUNKEN_RING_H, GO_CAPTUREPOINT_BROKEN_TEMPLE_H, GO_CAPTUREPOINT_EASTPARK_H, GO_CAPTUREPOINT_WESTPARK_H},
 };
 
-static const WintergraspCapturePointData wgCapturePointData[] =
+struct WintergraspCapturePointData
 {
-    {GO_CAPTUREPOINT_BROKEN_TEMPLE_A,   GO_CAPTUREPOINT_BROKEN_TEMPLE_H,    GO_WORKSHOP_BROKEN_TEMPLE,  AREA_ID_THE_BROKEN_TEMPLE,  WORLD_STATE_WG_WORKSHOP_BROKEN_TEMPLE,  20787,  20788,  19612,  19611},
-    {GO_CAPTUREPOINT_SUNKEN_RING_A,     GO_CAPTUREPOINT_SUNKEN_RING_H,      GO_WORKSHOP_SUNKEN_RING,    AREA_ID_THE_SUNKEN_RING,    WORLD_STATE_WG_WORKSHOP_SUNKEN_RING,    20785,  20786,  19610,  19609},
-    {GO_CAPTUREPOINT_WESTPARK_A,        GO_CAPTUREPOINT_WESTPARK_H,         GO_WORKSHOP_WESTPARK,       AREA_ID_WESTPARK_WORKSHOP,  WORLD_STATE_WG_WORKSHOP_WESTPARK,       21568,  21569,  21562,  21560},
-    {GO_CAPTUREPOINT_EASTPARK_A,        GO_CAPTUREPOINT_EASTPARK_H,         GO_WORKSHOP_EASTPARK,       AREA_ID_EASTPARK_WORKSHOP,  WORLD_STATE_WG_WORKSHOP_EASTPARK,       21566,  21567,  21565,  21563},
+    uint32 goEntryAlliance, goEntryHorde, workshopEntry, areaId, worldState, graveyardId;
+};
+
+static const WintergraspCapturePointData wgCapturePointData[MAX_WG_WORKSHOPS] =
+{
+    {GO_CAPTUREPOINT_SUNKEN_RING_A,     GO_CAPTUREPOINT_SUNKEN_RING_H,      GO_WORKSHOP_SUNKEN_RING,     AREA_ID_THE_SUNKEN_RING,    WORLD_STATE_WG_WORKSHOP_SUNKEN_RING,   GRAVEYARD_ID_SUNKEN_RING},
+    {GO_CAPTUREPOINT_BROKEN_TEMPLE_A,   GO_CAPTUREPOINT_BROKEN_TEMPLE_H,    GO_WORKSHOP_BROKEN_TEMPLE,   AREA_ID_THE_BROKEN_TEMPLE,  WORLD_STATE_WG_WORKSHOP_BROKEN_TEMPLE, GRAVEYARD_ID_BROKEN_TEMPLE},
+    {GO_CAPTUREPOINT_EASTPARK_A,        GO_CAPTUREPOINT_EASTPARK_H,         GO_WORKSHOP_EASTPARK,        AREA_ID_EASTPARK_WORKSHOP,  WORLD_STATE_WG_WORKSHOP_EASTPARK,      GRAVEYARD_ID_EASTPARK},
+    {GO_CAPTUREPOINT_WESTPARK_A,        GO_CAPTUREPOINT_WESTPARK_H,         GO_WORKSHOP_WESTPARK,        AREA_ID_WESTPARK_WORKSHOP,  WORLD_STATE_WG_WORKSHOP_WESTPARK,      GRAVEYARD_ID_WESTPARK},
+};
+
+struct WintergraspCapturePointEventData
+{
+    uint32  eventEntry;
+    Team    team;
+    uint32  defenseMessage;
+    BattlefieldGoState  objectState;
+    uint32  bannerArtKit;
+    uint32  bannerAnim;
+};
+
+static const WintergraspCapturePointEventData wgCapturePointEventData[MAX_WG_WORKSHOPS][4] =
+{
+    {
+        {EVENT_SUNKEN_RING_CONTEST_ALLIANCE,        ALLIANCE,       LANG_OPVP_WG_SUNKEN_RING_ATTACK_A,      BF_GO_STATE_ALLIANCE_INTACT,    0,  0},
+        {EVENT_SUNKEN_RING_CONTEST_HORDE,           HORDE,          LANG_OPVP_WG_SUNKEN_RING_ATTACK_H,      BF_GO_STATE_HORDE_INTACT,       0,  0},
+        {EVENT_SUNKEN_RING_PROGRESS_ALLIANCE,       ALLIANCE,       LANG_OPVP_WG_SUNKEN_RING_CAPTURE_A,     BF_GO_STATE_ALLIANCE_INTACT,    CAPTURE_ARTKIT_ALLIANCE,    CAPTURE_ANIM_ALLIANCE},
+        {EVENT_SUNKEN_RING_PROGRESS_HORDE,          HORDE,          LANG_OPVP_WG_SUNKEN_RING_CAPTURE_H,     BF_GO_STATE_HORDE_INTACT,       CAPTURE_ARTKIT_HORDE,       CAPTURE_ANIM_HORDE},
+    },
+    {
+        {EVENT_BROKEN_TEMPLE_CONTEST_ALLIANCE,      ALLIANCE,       LANG_OPVP_WG_BR_TEMPLE_ATTACK_A,        BF_GO_STATE_ALLIANCE_INTACT,    0,  0},
+        {EVENT_BROKEN_TEMPLE_CONTEST_HORDE,         HORDE,          LANG_OPVP_WG_BR_TEMPLE_ATTACK_H,        BF_GO_STATE_HORDE_INTACT,       0,  0},
+        {EVENT_BROKEN_TEMPLE_PROGRESS_ALLIANCE,     ALLIANCE,       LANG_OPVP_WG_BR_TEMPLE_CAPTURE_A,       BF_GO_STATE_ALLIANCE_INTACT,    CAPTURE_ARTKIT_ALLIANCE,    CAPTURE_ANIM_ALLIANCE},
+        {EVENT_BROKEN_TEMPLE_PROGRESS_HORDE,        HORDE,          LANG_OPVP_WG_BR_TEMPLE_CAPTURE_H,       BF_GO_STATE_HORDE_INTACT,       CAPTURE_ARTKIT_HORDE,       CAPTURE_ANIM_HORDE},
+    },
+    {
+        {EVENT_EASTPARK_CONTEST_ALLIANCE,           ALLIANCE,       LANG_OPVP_WG_EASTPARK_ATTACK_A,         BF_GO_STATE_ALLIANCE_INTACT,    0,  0},
+        {EVENT_EASTPARK_CONTEST_HORDE,              HORDE,          LANG_OPVP_WG_EASTPARK_ATTACK_H,         BF_GO_STATE_HORDE_INTACT,       0,  0},
+        {EVENT_EASTPARK_PROGRESS_ALLIANCE,          ALLIANCE,       LANG_OPVP_WG_EASTPARK_CAPTURE_A,        BF_GO_STATE_ALLIANCE_INTACT,    CAPTURE_ARTKIT_ALLIANCE,    CAPTURE_ANIM_ALLIANCE},
+        {EVENT_EASTPARK_PROGRESS_HORDE,             HORDE,          LANG_OPVP_WG_EASTPARK_CAPTURE_H,        BF_GO_STATE_HORDE_INTACT,       CAPTURE_ARTKIT_HORDE,       CAPTURE_ANIM_HORDE},
+    },
+    {
+        {EVENT_WESTPARK_CONTEST_ALLIANCE,           ALLIANCE,       LANG_OPVP_WG_WESTPARK_ATTACK_A,         BF_GO_STATE_ALLIANCE_INTACT,    0,  0},
+        {EVENT_WESTPARK_CONTEST_HORDE,              HORDE,          LANG_OPVP_WG_WESTPARK_ATTACK_H,         BF_GO_STATE_HORDE_INTACT,       0,  0},
+        {EVENT_WESTPARK_PROGRESS_ALLIANCE,          ALLIANCE,       LANG_OPVP_WG_WESTPARK_CAPTURE_A,        BF_GO_STATE_ALLIANCE_INTACT,    CAPTURE_ARTKIT_ALLIANCE,    CAPTURE_ANIM_ALLIANCE},
+        {EVENT_WESTPARK_PROGRESS_HORDE,             HORDE,          LANG_OPVP_WG_WESTPARK_CAPTURE_H,        BF_GO_STATE_HORDE_INTACT,       CAPTURE_ARTKIT_HORDE,       CAPTURE_ANIM_HORDE},
+    },
+};
+
+class WintergraspFactory : public BattlefieldBuilding
+{
+    public:
+        WintergraspFactory(uint32 entry) : BattlefieldBuilding(entry), m_objectOwner(TEAM_NONE), m_graveyardId(0), m_areaId(0)
+        {
+            for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
+            {
+                m_capturePointGuid[i] = ObjectGuid();
+                m_capturePointEntry[i] = 0;
+            }
+        };
+
+        // get and set object owner team
+        Team GetOwner() const { return m_objectOwner; }
+        void SetOwner(Team newOwner) { m_objectOwner = newOwner; }
+
+        // get and set capture point entry
+        void SetCapturePointEntry(PvpTeamIndex teamIndex, uint32 entry) { m_capturePointEntry[teamIndex] = entry; }
+        uint32 GetCapturePointEntry(PvpTeamIndex teamIndex) { return m_capturePointEntry[teamIndex]; }
+
+        // get and set capture point objectGuid
+        void SetCapturePointGuid(PvpTeamIndex teamIndex, ObjectGuid guid) { m_capturePointGuid[teamIndex] = guid; }
+        ObjectGuid GetCapturePointGuid(PvpTeamIndex teamIndex) { return m_capturePointGuid[teamIndex]; }
+
+        // get and set graveyard id
+        void SetGraveyardId(uint32 id) { m_graveyardId = id; }
+        uint32 GetGraveyardId() { return m_graveyardId; }
+
+        // get and set area id
+        void SetAreaId(uint32 id) { m_areaId = id; }
+        uint32 GetAreaId() { return m_areaId; }
+
+    protected:
+        Team m_objectOwner;
+
+        ObjectGuid m_capturePointGuid[PVP_TEAM_COUNT];
+
+        uint32 m_capturePointEntry[PVP_TEAM_COUNT];
+        uint32 m_graveyardId;
+        uint32 m_areaId;
 };
 
 enum WGRank
@@ -456,28 +588,6 @@ enum WGRank
     WG_RANK_RECRUIT     = 1,
     WG_RANK_CORPORAL    = 2,
     WG_RANK_LIEUTENANT  = 3,
-};
-
-class WGWorkShop : public BattlefieldBuilding
-{
-    public:
-        WGWorkShop(uint8 assignedId) : BattlefieldBuilding(assignedId) {};
-
-        void SetupBuilding(bool reset);
-        void SendUpdateWorldState();
-
-        ObjectGuid capturePoint;
-};
-
-class WGTower : public BattlefieldBuilding
-{
-    public:
-        WGTower(uint8 assignedId) : BattlefieldBuilding(assignedId) {};
-
-        void SetupBuilding(bool reset);
-        void SpawnCannons(bool despawn = false);
-
-        std::vector<ObjectGuid> cannons;
 };
 
 class WGPlayerScore : public BattlefieldPlayer
@@ -513,12 +623,10 @@ class BattlefieldWG : public Battlefield
         void Update(uint32 diff) override;
 
         void StartBattle(Team defender) override;
-        void EndBattle(Team winner, bool byTimer) override;
+        void EndBattle(Team winner, const WorldObject* objRef = nullptr) override;
         void RewardPlayersOnBattleEnd(Team winner) override;
 
         void UpdatePlayerOnWarResponse(Player* player) override;
-
-        void UpdateGraveyardOwner(uint8 id, PvpTeamIndex newOwner) override;
 
         bool IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType) override;
         void HandleConditionStateChange(uint32 conditionId, bool state) override;
@@ -530,10 +638,18 @@ class BattlefieldWG : public Battlefield
 
         void SetupPlayerPosition(Player* player) override;
 
+        // functions to handle the battlefield events
         bool HandleCapturePointEvent(uint32 eventId, GameObject* go);
         bool HandleDestructibleBuildingEvent(uint32 eventId, GameObject* go);
 
+        // handle lock / unlock of the workshops
+        void LockWorkshops(bool lock, const WorldObject* objRef, WintergraspFactory* workshop);
+
+        // battlefield reset
         void ResetBattlefield(const WorldObject* objRef);
+
+        // update all world states
+        void SendUpdateAllWorldStates();
 
         bool m_sentPrebattleWarning;
 
@@ -542,30 +658,29 @@ class BattlefieldWG : public Battlefield
         uint32 m_destroyedTowers[PVP_TEAM_COUNT];
         uint32 m_workshopCount[PVP_TEAM_COUNT];
 
-        std::vector<ObjectGuid> m_zoneTrashGUIDs;
+        /*std::vector<ObjectGuid> m_zoneTrashGUIDs;
         std::vector<ObjectGuid> m_keepCannonGUIDs;
         std::vector<ObjectGuid> m_portalGUIDs;
-        std::vector<ObjectGuid> m_vehicleGUIDs[PVP_TEAM_COUNT];
 
         ObjectGuid m_keepDoorGUID;
         ObjectGuid m_keepGateGUID;
-        ObjectGuid m_titanRelicGUID;
         ObjectGuid m_zannethGuid;
-        ObjectGuid m_dardoshGuid;
+        ObjectGuid m_dardoshGuid;*/
 
-        std::map<uint8, WGTower*> m_attackTowers;
-        std::map<uint8, WGTower*> m_defenseTowers;
-        std::vector<BattlefieldBuilding*> m_keepWalls;
-        std::map<uint8, WGWorkShop*> m_workshops;
+        // object storage
+        ObjectGuid m_relicGuid[PVP_TEAM_COUNT];
 
         std::vector<BattlefieldBuilding*> m_keepBuildings;
-        std::vector<BattlefieldBuilding*> m_offensiveBuildings;
+        std::vector<BattlefieldBuilding*> m_defenseTowers;
+        std::vector<BattlefieldBuilding*> m_offenseTowers;
 
-        std::vector<BattlefieldBuilding*> m_defenseWorkshops;
-        std::vector<BattlefieldBuilding*> m_capturableWorkshops;
+        std::vector<WintergraspFactory*> m_defenseWorkshops;
+        std::vector<WintergraspFactory*> m_capturableWorkshops;
 
         GuidList m_defenseCannonsGuids;
         GuidList m_attackCannonsGuids;
+
+        GuidVector m_vehicleGuids[PVP_TEAM_COUNT];
 };
 
 #endif

@@ -50,6 +50,10 @@ void BattlefieldWG::Reset()
     m_playersInvited = false;
     m_sentPrebattleWarning = false;
 
+    // ToDo: initialize zone owner from DB in case of server restart
+
+    DEBUG_LOG("Battlefield WG: Initializing battlefield buildings.");
+
     // load the defender buildings
     m_keepBuildings.reserve(countof(wgFortressData));
     for (const auto& i : wgFortressData)
@@ -61,30 +65,13 @@ void BattlefieldWG::Reset()
             goState = GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT;
 
         building->SetGoState(goState);
-        building->SetOwner(GetDefender());
         building->SetWorldState(i.worldState);
         m_keepBuildings.push_back(building);
     }
 
-    // load the attacker buildings
-    m_offensiveBuildings.reserve(countof(wgOffensiveData));
-    for (const auto& i : wgOffensiveData)
-    {
-        BattlefieldBuilding* building = new BattlefieldBuilding(i.goEntry);
-
-        BattlefieldGoState goState = BF_GO_STATE_NEUTRAL_INTACT;
-        if (GetAttacker() && GetDefender() != TEAM_NONE)
-            goState = GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT;
-
-        building->SetGoState(goState);
-        building->SetOwner(GetAttacker());
-        building->SetWorldState(i.worldState);
-        m_offensiveBuildings.push_back(building);
-    }
-
-    // load the defense workshops - only inside the fortress
-    m_defenseWorkshops.reserve(countof(wgFortressWorkshopsData));
-    for (const auto& i : wgFortressWorkshopsData)
+    // load the defender towers buildings
+    m_defenseTowers.reserve(countof(wgFortressTowersData));
+    for (const auto& i : wgFortressTowersData)
     {
         BattlefieldBuilding* building = new BattlefieldBuilding(i.goEntry);
 
@@ -93,28 +80,74 @@ void BattlefieldWG::Reset()
             goState = GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT;
 
         building->SetGoState(goState);
-        building->SetOwner(GetDefender());
         building->SetWorldState(i.worldState);
-        m_defenseWorkshops.push_back(building);
+        m_defenseTowers.push_back(building);
+    }
+
+    // load the attacker buildings
+    m_offenseTowers.reserve(countof(wgOffenseData));
+    for (const auto& i : wgOffenseData)
+    {
+        BattlefieldBuilding* building = new BattlefieldBuilding(i.goEntry);
+
+        BattlefieldGoState goState = BF_GO_STATE_NEUTRAL_INTACT;
+        if (GetAttacker() && GetDefender() != TEAM_NONE)
+            goState = GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT;
+
+        building->SetGoState(goState);
+        building->SetWorldState(i.worldState);
+        m_offenseTowers.push_back(building);
+    }
+
+    // load the defense workshops - only inside the fortress
+    m_defenseWorkshops.reserve(countof(wgFortressWorkshopsData));
+    for (const auto& i : wgFortressWorkshopsData)
+    {
+        WintergraspFactory* factory = new WintergraspFactory(i.goEntry);
+
+        BattlefieldGoState goState = BF_GO_STATE_NEUTRAL_INTACT;
+        if (GetDefender() && GetDefender() != TEAM_NONE)
+        {
+            goState = GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT;
+            sObjectMgr.SetGraveYardLinkTeam(i.graveyardId, ZONE_ID_WINTERGRASP, GetDefender());
+        }
+        else
+            sObjectMgr.SetGraveYardLinkTeam(i.graveyardId, ZONE_ID_WINTERGRASP, TEAM_INVALID);
+
+        factory->SetGoState(goState);
+        factory->SetOwner(GetDefender());
+        factory->SetWorldState(i.worldState);
+        factory->SetGraveyardId(i.graveyardId);
+        m_defenseWorkshops.push_back(factory);
     }
 
     // load the capturable workshops
     m_capturableWorkshops.reserve(countof(wgCapturePointData));
     for (const auto& i : wgCapturePointData)
     {
-        BattlefieldBuilding* building = new BattlefieldBuilding(i.goEntryWorkshop);
+        WintergraspFactory* factory = new WintergraspFactory(i.workshopEntry);
 
         BattlefieldGoState goState = BF_GO_STATE_NEUTRAL_INTACT;
+        Team comparableTeam = TEAM_NONE;
+
         if (GetDefender() && GetDefender() != TEAM_NONE)
         {
-            Team comparableTeam = i.goEntryWorkshop == GO_WORKSHOP_BROKEN_TEMPLE || i.goEntryWorkshop == GO_WORKSHOP_SUNKEN_RING ? GetDefender() : GetAttacker();
+            Team comparableTeam = i.workshopEntry == GO_WORKSHOP_BROKEN_TEMPLE || i.workshopEntry == GO_WORKSHOP_SUNKEN_RING ? GetDefender() : GetAttacker();
             goState = comparableTeam == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT;
-        }
 
-        building->SetGoState(goState);
-        building->SetOwner(GetDefender());
-        building->SetWorldState(i.worldState);
-        m_capturableWorkshops.push_back(building);
+            sObjectMgr.SetGraveYardLinkTeam(i.graveyardId, ZONE_ID_WINTERGRASP, comparableTeam);
+        }
+        else
+            sObjectMgr.SetGraveYardLinkTeam(i.graveyardId, ZONE_ID_WINTERGRASP, TEAM_INVALID);
+
+        factory->SetGoState(goState);
+        factory->SetOwner(comparableTeam);
+        factory->SetWorldState(i.worldState);
+        factory->SetCapturePointEntry(TEAM_INDEX_ALLIANCE, i.goEntryAlliance);
+        factory->SetCapturePointEntry(TEAM_INDEX_HORDE, i.goEntryHorde);
+        factory->SetGraveyardId(i.graveyardId);
+        factory->SetAreaId(i.areaId);
+        m_capturableWorkshops.push_back(factory);
     }
 }
 
@@ -131,20 +164,23 @@ void BattlefieldWG::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, WORLD_STATE_WG_ALLIANCE_DEFENDER, GetDefender() == ALLIANCE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
     FillInitialWorldState(data, count, WORLD_STATE_WG_HORDE_DEFENDER, GetDefender() == HORDE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
 
-    FillInitialWorldState(data, count, WORLD_STATE_WG_VEHICLE_A, uint32(m_vehicleGUIDs[0].size()));
-    FillInitialWorldState(data, count, WORLD_STATE_WG_MAX_VEHICLE_A, m_workshopCount[0] * 4);
+    FillInitialWorldState(data, count, WORLD_STATE_WG_VEHICLE_A, uint32(m_vehicleGuids[TEAM_INDEX_ALLIANCE].size()));
+    FillInitialWorldState(data, count, WORLD_STATE_WG_MAX_VEHICLE_A, m_workshopCount[TEAM_INDEX_ALLIANCE] * 4);
 
-    FillInitialWorldState(data, count, WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGUIDs[1].size()));
-    FillInitialWorldState(data, count, WORLD_STATE_WG_MAX_VEHICLE_H, m_workshopCount[1] * 4);
+    FillInitialWorldState(data, count, WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGuids[TEAM_INDEX_HORDE].size()));
+    FillInitialWorldState(data, count, WORLD_STATE_WG_MAX_VEHICLE_H, m_workshopCount[TEAM_INDEX_HORDE] * 4);
 
     // display all the walls, towers and workshops
     for (auto building : m_keepBuildings)
         FillInitialWorldState(data, count, building->GetWorldState(), building->GetGoState());
-    
-    for (auto building : m_offensiveBuildings)
+
+    for (auto building : m_defenseTowers)
         FillInitialWorldState(data, count, building->GetWorldState(), building->GetGoState());
 
     for (auto building : m_defenseWorkshops)
+        FillInitialWorldState(data, count, building->GetWorldState(), building->GetGoState());
+    
+    for (auto building : m_offenseTowers)
         FillInitialWorldState(data, count, building->GetWorldState(), building->GetGoState());
 
     for (auto building : m_capturableWorkshops)
@@ -158,20 +194,23 @@ void BattlefieldWG::SendRemoveWorldStates(Player* player)
 
 void BattlefieldWG::HandlePlayerEnterZone(Player* player, bool isMainZone)
 {
+    // If battlefield is in progress and the first player joins after the battle has started, then he needs to reset the battlefield first
+    if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && m_zonePlayers.empty())
+        ResetBattlefield(player);
+
     Battlefield::HandlePlayerEnterZone(player, isMainZone);
 
     // phase each player based on the defender (if there is one)
     if (GetDefender() != TEAM_NONE)
-        player->CastSpell(player, GetDefender() == ALLIANCE ? SPELL_ALLIANCE_CONTROL_PHASE : SPELL_HORDE_CONTROL_PHASE, TRIGGERED_OLD_TRIGGERED);
+        player->CastSpell(player, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())], TRIGGERED_OLD_TRIGGERED);
 
     // defenders are phased and get increase XP
     if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN && GetDefender() == player->GetTeam())
         player->CastSpell(player, SPELL_ESSENCE_WINTERGRASP_ZONE, TRIGGERED_OLD_TRIGGERED);
 
-    // Note: flight restriction during combat - Implemented in Player::UpdateArea()
+    // flight restriction - applied based on AREA_FLAG_CANNOT_FLY in Player::UpdateArea
 
-    // ToDo:
-    // update tower control aura and the score aura
+    // ToDo: update tower control aura and the score aura
 }
 
 void BattlefieldWG::HandlePlayerLeaveZone(Player* player, bool isMainZone)
@@ -189,8 +228,7 @@ void BattlefieldWG::HandlePlayerLeaveZone(Player* player, bool isMainZone)
     player->RemoveAurasDueToSpell(SPELL_LIEUTENANT);
     player->RemoveAurasDueToSpell(SPELL_TOWER_CONTROL);
 
-    // remove flight restriction (not required - removed by timer)
-    // player->RemoveAurasDueToSpell(SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA);
+    // flight restriction - removed based on AREA_FLAG_CANNOT_FLY in Player::UpdateArea
 }
 
 void BattlefieldWG::HandlePlayerEnterArea(Player* player, uint32 areaId, bool isMainZone)
@@ -201,7 +239,13 @@ void BattlefieldWG::HandlePlayerEnterArea(Player* player, uint32 areaId, bool is
         case AREA_ID_THE_BROKEN_TEMPLE:
         case AREA_ID_WESTPARK_WORKSHOP:
         case AREA_ID_EASTPARK_WORKSHOP:
-            // ToDo: handle SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE and SPELL_HORDE_CONTROLS_FACTORY_PHASE
+            // apply corresponding workshop aura
+            // ToDo: needs to be enabled when phase stacking is supported
+            /*for (auto workshop : m_capturableWorkshops)
+            {
+                if (areaId == workshop->GetAreaId() && workshop->GetOwner() != TEAM_NONE)
+                     player->CastSpell(player, wgTeamFactoryAuras[GetTeamIndexByTeamId(workshop->GetOwner())], TRIGGERED_OLD_TRIGGERED);
+            }*/
             return;
     }
 }
@@ -214,8 +258,9 @@ void BattlefieldWG::HandlePlayerLeaveArea(Player* player, uint32 areaId, bool is
         case AREA_ID_THE_BROKEN_TEMPLE:
         case AREA_ID_WESTPARK_WORKSHOP:
         case AREA_ID_EASTPARK_WORKSHOP:
-            player->RemoveAurasDueToSpell(SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE);
-            player->RemoveAurasDueToSpell(SPELL_HORDE_CONTROLS_FACTORY_PHASE);
+            // ToDo: needs to be enabled when phase stacking is supported
+            /*player->RemoveAurasDueToSpell(SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE);
+            player->RemoveAurasDueToSpell(SPELL_HORDE_CONTROLS_FACTORY_PHASE);*/
             return;
     }
 }
@@ -225,91 +270,150 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
     switch (creature->GetEntry())
     {
         case NPC_WINTERGRASP_TOWER_CANNON:
+            // handle attacker cannons
             if (creature->GetPositionX() < 5000.0f)
             {
                 if (GetAttacker() != TEAM_NONE)
-                    creature->setFaction(GetAttacker() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
+                    creature->setFaction(wgTeamFactions[GetTeamIndexByTeamId(GetAttacker())]);
 
                 m_attackCannonsGuids.push_back(creature->GetObjectGuid());
             }
+            // handle defender cannons
             else
             {
                 if (GetDefender() != TEAM_NONE)
-                    creature->setFaction(GetDefender() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
+                    creature->setFaction(wgTeamFactions[GetTeamIndexByTeamId(GetDefender())]);
 
                 m_defenseCannonsGuids.push_back(creature->GetObjectGuid());
             }
+            break;
+        case NPC_INVISIBLE_STALKER:
+            // ToDo: load for zone warnings
             break;
     }
 }
 
 void BattlefieldWG::HandleCreatureDeath(Creature* creature)
 {
-
+    // ToDo: update vehicle counters
 }
 
 void BattlefieldWG::HandleGameObjectCreate(GameObject* go)
 {
     OutdoorPvP::HandleGameObjectCreate(go);
 
-    // load the attacker buildings
-    for (auto building : m_offensiveBuildings)
+    // *** Load Wintergrasp Destructible buildings *** //
+    if (go->GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
     {
-        if (building->GetGoEntry() == go->GetEntry())
+        // load the defender buildings
+        for (auto building : m_keepBuildings)
         {
-            // store the object guid and set the correct faction
-            building->SetGoGuid(go->GetObjectGuid());
+            if (go->GetEntry() == building->GetGoEntry())
+            {
+                // store the object guid and set the correct faction
+                building->SetGoGuid(go->GetObjectGuid());
 
-            if (GetAttacker() != TEAM_NONE)
-                go->SetFaction(GetAttacker() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
+                if (GetDefender() != TEAM_NONE)
+                    go->SetFaction(wgTeamFactions[GetTeamIndexByTeamId(GetDefender())]);
 
-            // no other actions required
-            return;
+                // no further actions required
+                return;
+            }
         }
+
+        // load the defender towers
+        for (auto building : m_defenseTowers)
+        {
+            if (go->GetEntry() == building->GetGoEntry())
+            {
+                // store the object guid and set the correct faction
+                building->SetGoGuid(go->GetObjectGuid());
+
+                if (GetDefender() != TEAM_NONE)
+                    go->SetFaction(wgTeamFactions[GetTeamIndexByTeamId(GetDefender())]);
+
+                // no further actions required
+                return;
+            }
+        }
+
+        // load the attacker buildings
+        for (auto building : m_offenseTowers)
+        {
+            if (go->GetEntry() == building->GetGoEntry())
+            {
+                // store the object guid and set the correct faction
+                building->SetGoGuid(go->GetObjectGuid());
+
+                if (GetAttacker() != TEAM_NONE)
+                    go->SetFaction(wgTeamFactions[GetTeamIndexByTeamId(GetAttacker())]);
+
+                // no further actions required
+                return;
+            }
+        }
+
+        // no further action required
+        return;
     }
 
-    // load the defender buildings
-    for (auto building : m_keepBuildings)
+    // *** Load Wintergrasp Capture points *** //
+    if (go->GetGoType() == GAMEOBJECT_TYPE_CAPTURE_POINT)
     {
-        if (building->GetGoEntry() == go->GetEntry())
+        // load the capture points
+        for (auto workshop : m_capturableWorkshops)
         {
-            // store the object guid and set the correct faction
-            building->SetGoGuid(go->GetObjectGuid());
+            if (go->GetEntry() == workshop->GetCapturePointEntry(TEAM_INDEX_ALLIANCE) || go->GetEntry() == workshop->GetCapturePointEntry(TEAM_INDEX_HORDE))
+            {
+                // store the object guid
+                if (workshop->GetCapturePointEntry(TEAM_INDEX_ALLIANCE) == go->GetEntry())
+                    workshop->SetCapturePointGuid(TEAM_INDEX_ALLIANCE, go->GetObjectGuid());
+                else
+                    workshop->SetCapturePointGuid(TEAM_INDEX_HORDE, go->GetObjectGuid());
 
-            if (GetDefender() != TEAM_NONE)
-                go->SetFaction(GetDefender() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
+                // set the object artkit
+                if (workshop->GetOwner() != TEAM_NONE)
+                    go->SetGoArtKit(wgCapturePointArtKits[GetTeamIndexByTeamId(workshop->GetOwner())]);
+                else
+                    go->SetGoArtKit(CAPTURE_ARTKIT_NEUTRAL);
 
-            // no other actions required
-            return;
+                // capture points are locked during cooldown
+                if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
+                    go->SetLootState(GO_JUST_DEACTIVATED);
+
+                // no further actions required
+                return;
+            }
         }
+
+        // no further action required
+        return;
     }
 
+    // *** Load Wintergrasp other gameobjects *** //
     switch (go->GetEntry())
     {
-        case GO_CAPTUREPOINT_BROKEN_TEMPLE_A:
-        case GO_CAPTUREPOINT_BROKEN_TEMPLE_H:
-        case GO_CAPTUREPOINT_SUNKEN_RING_A:
-        case GO_CAPTUREPOINT_SUNKEN_RING_H:
-        case GO_CAPTUREPOINT_WESTPARK_A:
-        case GO_CAPTUREPOINT_WESTPARK_H:
-        case GO_CAPTUREPOINT_EASTPARK_A:
-        case GO_CAPTUREPOINT_EASTPARK_H:
-            // ToDo: fix this. It has to get the real time owner
-            if (go->GetCapturePointSliderValue() == 100)
-                go->SetGoArtKit(CAPTURE_ARTKIT_ALLIANCE);
-            else if (go->GetCapturePointSliderValue() == 0)
-                go->SetGoArtKit(CAPTURE_ARTKIT_HORDE);
-            break;
+        case GO_TITAN_RELIC_ALLIANCE:
+            m_relicGuid[TEAM_INDEX_ALLIANCE] = go->GetObjectGuid();
+            return;
+        case GO_TITAN_RELIC_HORDE:
+            m_relicGuid[TEAM_INDEX_HORDE] = go->GetObjectGuid();
+            return;
     }
-}
-
-void BattlefieldWG::HandlePlayerKillInsideArea(Player* player, Unit* victim)
-{
-
 }
 
 bool BattlefieldWG::HandleEvent(uint32 eventId, GameObject* go)
 {
+    if (GetDefender() == TEAM_NONE)
+    {
+        sLog.outError("Battlefield WG: Gameobject events cannot be handled when there is no zone defender.");
+        return true;
+    }
+
+    // no events handled during cooldown
+    if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
+        return true;
+
     bool returnValue = false;
 
     // handle capture points
@@ -318,32 +422,191 @@ bool BattlefieldWG::HandleEvent(uint32 eventId, GameObject* go)
     // handle destructible buildings
     else if (go->GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
         returnValue = HandleDestructibleBuildingEvent(eventId, go);
-    // handle titan relic capture
+    // handle titan relic capture - get winner faction depending on the relic faction
     else if (go->GetGoType() == GAMEOBJECT_TYPE_GOOBER && eventId == EVENT_TITAN_RELIC)
-    {
-        if (GetBattlefieldStatus() != BF_STATUS_IN_PROGRESS)
-            return true;
-
-        // get winner faction depending on the relic faction
-        EndBattle(go->GetEntry() == GO_TITAN_RELIC_ALLIANCE ? ALLIANCE : HORDE, false);
-    }
+        EndBattle(go->GetEntry() == GO_TITAN_RELIC_ALLIANCE ? ALLIANCE : HORDE, go);
 
     return returnValue;
 }
 
-void BattlefieldWG::Update(uint32 diff)
+// Function that handles all capture point events
+bool BattlefieldWG::HandleCapturePointEvent(uint32 eventId, GameObject* go)
 {
-    Battlefield::Update(diff);
-
-    if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN && m_timer <= 3 * MINUTE * IN_MILLISECONDS && !m_sentPrebattleWarning)
+    uint8 index = 0;
+    for (auto workshop : m_capturableWorkshops)
     {
-        m_sentPrebattleWarning = true;
-        SendZoneWarning(LANG_OPVP_WG_ABOUT_TO_BEGIN);
+        // capture points are always phased based on zone defender
+        Team owner = workshop->GetGoEntry() == GO_WORKSHOP_BROKEN_TEMPLE || workshop->GetGoEntry() == GO_WORKSHOP_SUNKEN_RING ? GetDefender() : GetAttacker();
+        if (go->GetEntry() == workshop->GetCapturePointEntry(GetTeamIndexByTeamId(owner)))
+        {
+            // loop through all the 4 possible events for each capture point
+            for (uint8 i = 0; i < 4; ++i)
+            {
+                if (eventId == wgCapturePointEventData[index][i].eventEntry)
+                {
+                    DEBUG_LOG("Battlefield WG: Handle Wintergrasp Capture point event %u from gameobject id %u", eventId, go->GetEntry());
+
+                    // set owner and new object state (faction based)
+                    workshop->SetOwner(wgCapturePointEventData[index][i].team);
+                    workshop->SetGoState(wgCapturePointEventData[index][i].objectState);
+
+                    // send zone warning and update world state
+                    SendZoneWarning(wgCapturePointEventData[index][i].defenseMessage);
+                    SendUpdateWorldState(workshop->GetWorldState(), workshop->GetGoState());
+
+                    // change the banner visuals (if required)
+                    if (wgCapturePointEventData[index][i].bannerArtKit)
+                        SetBannerVisual(go, wgCapturePointEventData[index][i].bannerArtKit, wgCapturePointEventData[index][i].bannerAnim);
+
+                    // update graveyard links
+                    sObjectMgr.SetGraveYardLinkTeam(workshop->GetGraveyardId(), ZONE_ID_WINTERGRASP, wgCapturePointEventData[index][i].team);
+
+                    // change area phasing
+                    // ToDo: needs to be enabled when phase stacking is supported
+                    // BuffTeam(wgCapturePointEventData[index][i].team, wgTeamFactoryAuras[GetTeamIndexByTeamId(workshop->GetOwner())], false, workshop->GetAreaId());
+                    return true;
+                }
+            }
+        }
+        ++index;
     }
 
-    if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && m_timer < diff)
+    return false;
+}
+
+// Function that handles all destructible buildings events
+bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* go)
+{
+    // special event for the fortress door
+    if (go->GetEntry() == GO_WG_FORTRESS_DOOR && eventId == EVENT_KEEP_DOOR_DESTROY)
     {
-        EndBattle(GetDefender(), true);
+        // Remove the no interact flag when door is destroyed
+        if (GameObject* relic = go->GetMap()->GetGameObject(m_relicGuid[GetTeamIndexByTeamId(GetAttacker())]))
+            relic->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+    }
+
+    // loop through defense tower
+    uint8 index = 0;
+    for (auto tower : m_defenseTowers)
+    {
+        if (go->GetEntry() == tower->GetGoEntry())
+        {
+            DEBUG_LOG("Battlefield WG: Handle Wintergrasp Defender tower event %u from gameobject id %u", eventId, go->GetEntry());
+
+            // update tower based on event id
+            if (eventId == wgFortressTowersData[index].eventDamaged)
+            {
+                tower->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DAMAGED : BF_GO_STATE_HORDE_DAMAGED);
+                SendZoneWarning(wgFortressTowersData[index].messageDamaged);
+            }
+            else if (eventId == wgFortressTowersData[index].eventDestroyed)
+            {
+                tower->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DESTROYED : BF_GO_STATE_HORDE_DESTROYED);
+                SendZoneWarning(wgFortressTowersData[index].eventDestroyed);
+            }
+            else if (eventId == wgFortressTowersData[index].eventIntact)
+            {
+                go->SetFaction(wgTeamFactions[GetTeamIndexByTeamId(GetDefender())]);
+                tower->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
+            }
+
+            // send world state updatem
+            SendUpdateWorldState(tower->GetWorldState(), tower->GetGoState());
+            return true;
+        }
+        ++index;
+    }
+
+    // loop through the offensive towers
+    index = 0;
+    for (auto tower : m_offenseTowers)
+    {
+        if (go->GetEntry() == tower->GetGoEntry())
+        {
+            DEBUG_LOG("Battlefield WG: Handle Wintergrasp Attacker tower event %u from gameobject id %u", eventId, go->GetEntry());
+
+            // update tower based on event id
+            if (eventId == wgOffenseData[index].eventDamaged)
+            {
+                tower->SetGoState(GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DAMAGED : BF_GO_STATE_HORDE_DAMAGED);
+                SendZoneWarning(wgOffenseData[index].messageDamaged);
+            }
+            else if (eventId == wgOffenseData[index].eventDestroyed)
+            {
+                tower->SetGoState(GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DESTROYED : BF_GO_STATE_HORDE_DESTROYED);
+                SendZoneWarning(wgOffenseData[index].eventDestroyed);
+            }
+            else if (eventId == wgOffenseData[index].eventIntact)
+            {
+                go->SetFaction(wgTeamFactions[GetTeamIndexByTeamId(GetAttacker())]);
+                tower->SetGoState(GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
+            }
+
+            // send world state update
+            SendUpdateWorldState(tower->GetWorldState(), tower->GetGoState());
+            return true;
+        }
+        ++index;
+    }
+
+    // loop through the keep walls (and gate / door)
+    index = 0;
+    for (auto wall : m_keepBuildings)
+    {
+        if (go->GetEntry() == wall->GetGoEntry())
+        {
+            DEBUG_LOG("Battlefield WG: Handle Wintergrasp Fortress wall event %u from gameobject id %u", eventId, go->GetEntry());
+
+            // update wall state based on even id
+            if (eventId == wgFortressData[index].eventDamaged)
+                wall->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DAMAGED : BF_GO_STATE_HORDE_DAMAGED);
+            else if (eventId == wgFortressData[index].eventDestroyed)
+                wall->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DESTROYED : BF_GO_STATE_HORDE_DESTROYED);
+            else if (eventId == wgFortressData[index].eventIntact)
+            {
+                go->SetFaction(wgTeamFactions[GetTeamIndexByTeamId(GetDefender())]);
+                wall->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
+            }
+
+            // send world state update
+            SendUpdateWorldState(wall->GetWorldState(), wall->GetGoState());
+            return true;
+        }
+        ++index;
+    }
+
+    return false;
+}
+
+// Function that handles the lock or unlock of the workshops
+void BattlefieldWG::LockWorkshops(bool lock, const WorldObject* objRef, WintergraspFactory* workshop)
+{
+    if (lock)
+    {
+        if (GameObject* go = objRef->GetMap()->GetGameObject(workshop->GetCapturePointGuid(GetTeamIndexByTeamId(workshop->GetOwner()))))
+            go->SetLootState(GO_JUST_DEACTIVATED);
+        else
+        {
+            // if grid is unloaded, changing the saved slider value is enough
+            CapturePointSlider value(workshop->GetOwner() == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE : CAPTURE_SLIDER_HORDE, true);
+            sOutdoorPvPMgr.SetCapturePointSlider(workshop->GetCapturePointEntry(GetTeamIndexByTeamId(workshop->GetOwner())), value);
+        }
+    }
+    else
+    {
+        // set the capture point value and visual
+        if (GameObject* go = objRef->GetMap()->GetGameObject(workshop->GetCapturePointGuid(GetTeamIndexByTeamId(workshop->GetOwner()))))
+        {
+            go->SetCapturePointSlider(go->GetGOInfo()->capturePoint.startingValue, false);
+            // visual update needed because banner still has artkit from previous owner
+            SetBannerVisual(go, wgCapturePointArtKits[GetTeamIndexByTeamId(workshop->GetOwner())], wgCapturePointAnims[GetTeamIndexByTeamId(workshop->GetOwner())]);
+        }
+        else
+        {
+            // if grid is unloaded, changing the saved slider value is enough
+            CapturePointSlider value(workshop->GetOwner() == ALLIANCE ? CAPTURE_SLIDER_ALLIANCE : CAPTURE_SLIDER_HORDE, false);
+            sOutdoorPvPMgr.SetCapturePointSlider(workshop->GetCapturePointEntry(GetTeamIndexByTeamId(workshop->GetOwner())), value);
+        }
     }
 }
 
@@ -351,16 +614,20 @@ void BattlefieldWG::StartBattle(Team defender)
 {
     // set the defender if there isn't any
     if (GetDefender() == TEAM_NONE)
+    {
         defender = urand(0, 1) ? ALLIANCE : HORDE;
+        DEBUG_LOG("Battlefield WG: No Defender team found. Choosing a random team.");
+    }
 
+    // call main battlefield start function
     Battlefield::StartBattle(defender);
 
+    // ToDo: use the invisible stalker to send the raid emotes
     SendZoneWarning(LANG_OPVP_WG_BATTLE_BEGIN);
 
-    // remove essence of WG phase
-    BuffTeam(GetDefender() == ALLIANCE ? ALLIANCE : HORDE, SPELL_ESSENCE_WINTERGRASP_ZONE, true);
+    // flight restriction - applied based on AREA_FLAG_CANNOT_FLY in Player::UpdateArea
 
-    // reset battlefield
+    // get a player reference in order to reset the battlefield
     for (GuidZoneMap::const_iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
         // Find player who is in main zone
@@ -368,39 +635,186 @@ void BattlefieldWG::StartBattle(Team defender)
             continue;
 
         if (Player* player = sObjectMgr.GetPlayer(itr->first))
+        {
             ResetBattlefield(player);
+            break;
+        }
+    }
+}
+
+void BattlefieldWG::EndBattle(Team winner, const WorldObject* objRef /* = nullptr*/)
+{
+    // send messages
+    if (GetDefender() == winner)
+        sWorld.SendDefenseMessage(ZONE_ID_WINTERGRASP, winner == ALLIANCE ? LANG_OPVP_WG_ALLIANCE_DEFENDED : LANG_OPVP_WG_HORDE_DEFENDED);
+    else
+    {
+        sWorld.SendDefenseMessage(ZONE_ID_WINTERGRASP, winner == ALLIANCE ? LANG_OPVP_WG_ALLIANCE_CAPTURED : LANG_OPVP_WG_HORDE_CAPTURED);
+
+        // inverse the zone phasing
+        BuffTeam(ALLIANCE, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())], true);
+        BuffTeam(HORDE, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())], true);
+
+        BuffTeam(ALLIANCE, wgTeamControlAuras[GetTeamIndexByTeamId(winner)]);
+        BuffTeam(HORDE, wgTeamControlAuras[GetTeamIndexByTeamId(winner)]);
     }
 
-    // Enable restricted flight area - handled in Player::UpdateArea()
+    // apply reward buff
+    // ToDo: needs to be enabled when phase stacking is supported
+    // BuffTeam(GetDefender(), SPELL_ESSENCE_WINTERGRASP_ZONE);
 
-    // note: at the beginning the entire area is reset to the following status
-    // the defender starts by owning the fortress and the sunken ring and broken temple
-    // the attacker starts by owning all three towers plus the two eastpart and westpark workshops
+    // lock the capture points; note: at the end of the battle the workshops stay in the possesion of whoever owned them in the battle
+    if (objRef)
+    {
+        for (auto workshop : m_capturableWorkshops)
+            LockWorkshops(true, objRef, workshop);
+    }
+    else
+    {
+        for (GuidZoneMap::const_iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
+        {
+            // Find player who is in main zone
+            if (!itr->second)
+                continue;
+
+            if (Player* player = sObjectMgr.GetPlayer(itr->first))
+            {
+                for (auto workshop : m_capturableWorkshops)
+                    LockWorkshops(true, player, workshop);
+
+                break;
+            }
+        }
+    }
+
+    Battlefield::EndBattle(winner);
+
+    // Update all world states
+    SendUpdateAllWorldStates();
+
+    // reset variables
+    m_playersInvited = false;
+    m_sentPrebattleWarning = false;
+
+    // ToDo: respawn vendors; despawn vehicles; repair fortress (maybe)
+    // ToDo: reset attack towers to neutral - to be confirmed
 }
 
-void BattlefieldWG::EndBattle(Team winner, bool byTimer)
-{
-    // note: at the end of the battle the workshops stay in the possesion of whoever owned them in the battle
-    // the towers however reset to neutral
-
-    Battlefield::EndBattle(winner, byTimer);
-
-    // ToDo: update phasing; respawn vendors; despawn vehicles; repair fortress (maybe)
-}
-
+// Function that will (re)set the battlefield
 void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
 {
     // add owner phase to both teams; redundant check
     if (GetDefender() == TEAM_NONE)
+    {
+        sLog.outError("Battlefield WG: Battlefield reset failed. Defender team could not be found.");
+        EndBattle(TEAM_NONE);
         return;
+    }
 
-    // add proper team buff
-    BuffTeam(ALLIANCE, GetDefender() == ALLIANCE ? SPELL_ALLIANCE_CONTROL_PHASE : SPELL_HORDE_CONTROL_PHASE);
-    BuffTeam(HORDE, GetDefender() == ALLIANCE ? SPELL_ALLIANCE_CONTROL_PHASE : SPELL_HORDE_CONTROL_PHASE);
+    DEBUG_LOG("Battlefield WG: Making Wintergrasp ready for battle.");
 
-    // Note: research if the fortress vendors are despawned during the battle
+    // ***** Update Wintergrasp phasing **** //
+    // remove essence of WG phase
+    // ToDo: needs to be enabled when phase stacking is supported
+    // BuffTeam(GetDefender(), SPELL_ESSENCE_WINTERGRASP_ZONE, true);
 
-    // update world states
+    // add proper battlefield phasing (can be reduntant)
+    BuffTeam(ALLIANCE, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())]);
+    BuffTeam(HORDE, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())]);
+
+    // ***** Update world stated **** //
+    SendUpdateAllWorldStates();
+
+    // ***** Rebuild and reset the buildings **** //
+    // rebuild attack tower - factions handled by event
+    for (auto building : m_offenseTowers)
+    {
+        if (GameObject* gameObject = objRef->GetMap()->GetGameObject(building->GetGoGuid()))
+            gameObject->RebuildGameObject((Unit*)objRef);
+        else
+        {
+            building->SetGoState(GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
+            SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
+        }
+    }
+
+    // rebuild fortress - factions handled by event
+    for (auto building : m_keepBuildings)
+    {
+        if (GameObject* gameObject = objRef->GetMap()->GetGameObject(building->GetGoGuid()))
+            gameObject->RebuildGameObject((Unit*)objRef);
+        else
+        {
+            building->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
+            SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
+        }
+    }
+
+    // rebuild defense towers - factions handled by event
+    for (auto building : m_defenseTowers)
+    {
+        if (GameObject* gameObject = objRef->GetMap()->GetGameObject(building->GetGoGuid()))
+            gameObject->RebuildGameObject((Unit*)objRef);
+        else
+        {
+            building->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
+            SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
+        }
+    }
+
+    // reset defense workshops
+    for (auto workshop : m_defenseWorkshops)
+    {
+        workshop->SetOwner(GetDefender());
+        workshop->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
+        SendUpdateWorldState(workshop->GetWorldState(), workshop->GetGoState());
+        sObjectMgr.SetGraveYardLinkTeam(workshop->GetGraveyardId(), ZONE_ID_WINTERGRASP, GetDefender());
+    }
+
+    // reset the other workshops
+    for (auto workshop : m_capturableWorkshops)
+    {
+        Team owner = workshop->GetGoEntry() == GO_WORKSHOP_BROKEN_TEMPLE || workshop->GetGoEntry() == GO_WORKSHOP_SUNKEN_RING ? GetDefender() : GetAttacker();
+        workshop->SetOwner(owner);
+        workshop->SetGoState(owner == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
+        SendUpdateWorldState(workshop->GetWorldState(), workshop->GetGoState());
+        sObjectMgr.SetGraveYardLinkTeam(workshop->GetGraveyardId(), ZONE_ID_WINTERGRASP, owner);
+
+        // unlock the workshop
+        LockWorkshops(false, objRef, workshop);
+    }
+
+    // reset relic for the attacker
+    if (GameObject* relic = objRef->GetMap()->GetGameObject(m_relicGuid[GetTeamIndexByTeamId(GetAttacker())]))
+        relic->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+
+    // ***** Reset Wintergrasp cannons **** //
+    // reset and respawn cannons
+    for (const auto& guid : m_attackCannonsGuids)
+    {
+        if (Creature* cannon = objRef->GetMap()->GetCreature(guid))
+        {
+            cannon->setFaction(wgTeamFactions[GetTeamIndexByTeamId(GetAttacker())]);
+            cannon->Respawn();
+        }
+    }
+    
+    for (const auto& guid : m_defenseCannonsGuids)
+    {
+        if (Creature* cannon = objRef->GetMap()->GetCreature(guid))
+        {
+            cannon->setFaction(wgTeamFactions[GetTeamIndexByTeamId(GetDefender())]);
+            cannon->Respawn();
+        }
+    }
+
+    // ToDo: research if the fortress vendors are despawned during the battle
+}
+
+// Function that will update all world states on start and end
+void BattlefieldWG::SendUpdateAllWorldStates()
+{
+    // update global states
     SendUpdateWorldState(WORLD_STATE_WG_SHOW_COOLDOWN, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
     SendUpdateWorldState(WORLD_STATE_WG_TIME_TO_NEXT_BATTLE, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? uint32(time(nullptr) + m_timer / 1000) : 0);
 
@@ -411,75 +825,17 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
     SendUpdateWorldState(WORLD_STATE_WG_ALLIANCE_DEFENDER, GetDefender() == ALLIANCE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
     SendUpdateWorldState(WORLD_STATE_WG_HORDE_DEFENDER, GetDefender() == HORDE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
 
-    SendUpdateWorldState(WORLD_STATE_WG_VEHICLE_A, uint32(m_vehicleGUIDs[0].size()));
-    SendUpdateWorldState(WORLD_STATE_WG_MAX_VEHICLE_A, m_workshopCount[0] * 4);
+    SendUpdateWorldState(WORLD_STATE_WG_VEHICLE_A, uint32(m_vehicleGuids[TEAM_INDEX_ALLIANCE].size()));
+    SendUpdateWorldState(WORLD_STATE_WG_MAX_VEHICLE_A, m_workshopCount[TEAM_INDEX_ALLIANCE] * 4);
 
-    SendUpdateWorldState(WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGUIDs[1].size()));
-    SendUpdateWorldState(WORLD_STATE_WG_MAX_VEHICLE_H, m_workshopCount[1] * 4);
-
-    // reset and respawn buildings
-    for (auto building : m_offensiveBuildings)
-    {
-        if (GameObject* gameObject = objRef->GetMap()->GetGameObject(building->GetGoGuid()))
-        {
-            gameObject->SetFaction(GetAttacker() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
-            gameObject->RebuildGameObject((Unit*)objRef);
-        }
-
-        building->SetOwner(GetAttacker() == ALLIANCE ? ALLIANCE : HORDE);
-        building->SetGoState(GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-        SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
-    }
-    
-    for (auto building : m_keepBuildings)
-    {
-        if (GameObject* gameObject = objRef->GetMap()->GetGameObject(building->GetGoGuid()))
-        {
-            gameObject->SetFaction(GetDefender() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
-            gameObject->RebuildGameObject((Unit*)objRef);
-        }
-
-        building->SetOwner(GetDefender() == ALLIANCE ? ALLIANCE : HORDE);
-        building->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-        SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
-    }
-
-    // reset workshops
-    for (auto building : m_defenseWorkshops)
-    {
-        building->SetOwner(GetDefender() == ALLIANCE ? ALLIANCE : HORDE);
-        building->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-        SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
-    }
-    
-    for (auto building : m_capturableWorkshops)
-    {
-        Team comparableTeam = building->GetGoEntry() == GO_WORKSHOP_BROKEN_TEMPLE || building->GetGoEntry() == GO_WORKSHOP_SUNKEN_RING ? GetDefender() : GetAttacker();
-        building->SetOwner(comparableTeam == ALLIANCE ? ALLIANCE : HORDE);
-        building->SetGoState(comparableTeam == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
-        SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
-    }
-
-    // reset and respawn cannons
-    for (const auto& guid : m_attackCannonsGuids)
-    {
-        if (Creature* cannon = objRef->GetMap()->GetCreature(guid))
-        {
-            cannon->setFaction(GetAttacker() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
-            cannon->Respawn();
-        }
-    }
-    
-    for (const auto& guid : m_defenseCannonsGuids)
-    {
-        if (Creature* cannon = objRef->GetMap()->GetCreature(guid))
-        {
-            cannon->setFaction(GetDefender() == ALLIANCE ? FACTION_ID_ALLIANCE_GENERIC : FACTION_ID_HORDE_GENERIC);
-            cannon->Respawn();
-        }
-    }
+    SendUpdateWorldState(WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGuids[TEAM_INDEX_HORDE].size()));
+    SendUpdateWorldState(WORLD_STATE_WG_MAX_VEHICLE_H, m_workshopCount[TEAM_INDEX_HORDE] * 4);
 }
 
+void BattlefieldWG::HandlePlayerKillInsideArea(Player* player, Unit* victim)
+{
+
+}
 
 void BattlefieldWG::RewardPlayersOnBattleEnd(Team winner)
 {
@@ -496,11 +852,6 @@ void BattlefieldWG::SetupPlayerPosition(Player* player)
 
 }
 
-void BattlefieldWG::UpdateGraveyardOwner(uint8 id, PvpTeamIndex newOwner)
-{
-
-}
-
 bool BattlefieldWG::GetPlayerKickLocation(Player* player, float& x, float& y, float& z)
 {
     return false;
@@ -511,47 +862,22 @@ void BattlefieldWG::UpdatePlayerOnWarResponse(Player* player)
 
 }
 
-// Function that handles all capture point events
-bool BattlefieldWG::HandleCapturePointEvent(uint32 eventId, GameObject* go)
+void BattlefieldWG::Update(uint32 diff)
 {
-    for (const auto& i : wgCapturePointData)
+    Battlefield::Update(diff);
+
+    // send battle warning
+    if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN && m_timer <= 3 * MINUTE * IN_MILLISECONDS && !m_sentPrebattleWarning)
     {
-        if (go->GetEntry() == i.goEntryAlliance || go->GetEntry() == i.goEntryHorde)
-        {
-            if (eventId == i.eventContestedAlliance || eventId == i.eventContestedHorde)
-            {
-                // ToDo: send some warning
-            }
-            else if (eventId == i.eventProgressAlliance)
-            {
-                SetBannerVisual(go, CAPTURE_ARTKIT_ALLIANCE, CAPTURE_ANIM_ALLIANCE);
-
-                // ToDo: SendUpdateWorldState(); send text; switch owner; change phase aura
-            }
-            else if (eventId == i.eventProgressHorde)
-            {
-                SetBannerVisual(go, CAPTURE_ARTKIT_HORDE, CAPTURE_ANIM_HORDE);
-
-
-                 // ToDo: SendUpdateWorldState(); send text; switch owner; change phase aura
-            }
-        }
+        m_sentPrebattleWarning = true;
+        SendZoneWarning(LANG_OPVP_WG_ABOUT_TO_BEGIN);
     }
 
-    return false;
-}
-
-// Function that handles all destructible buildings events
-bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* go)
-{
-    switch (go->GetEntry())
+    // end battle on timer
+    if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && m_timer < diff)
     {
-        case GO_WG_FORTRESS_DOOR:
-            // ToDo: on destroy remove flag 16 from the titan relic
-            break;
+        EndBattle(GetDefender());
     }
-
-    return false;
 }
 
 bool BattlefieldWG::IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType)
