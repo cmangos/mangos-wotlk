@@ -789,8 +789,10 @@ class GameObject : public WorldObject
         bool CanAttackSpell(Unit const* target, SpellEntry const* spellInfo = nullptr, bool isAOE = false) const override;
         bool CanAssistSpell(Unit const* target, SpellEntry const* spellInfo = nullptr) const override;
 
-        void SummonLinkedTrapIfAny() const;
+        GameObject* SummonLinkedTrapIfAny() const;
         void TriggerLinkedGameObject(Unit* target) const;
+        GameObject* GetLinkedTrap();
+        void SetLinkedTrap(GameObject* linkedTrap) { m_linkedTrap = linkedTrap->GetObjectGuid(); }
 
         // Destructible GO handling
         void DealGameObjectDamage(uint32 damage, uint32 spell, Unit* caster);
@@ -863,6 +865,8 @@ class GameObject : public WorldObject
         uint32 m_delayedActionTimer;                        // used for delayed GO actions
 
         ObjectGuid m_actionTarget;                          // used for setting target of Summoning rituals
+
+        ObjectGuid m_linkedTrap;
 
         std::unique_ptr<GameObjectAI> m_AI;
 
