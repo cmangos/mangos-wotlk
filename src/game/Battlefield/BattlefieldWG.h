@@ -385,7 +385,11 @@ enum
     // ***** Sound ids *****
     SOUND_ID_WG_HORDE_WINS                      = 8454,
     SOUND_ID_WG_ALLIANCE_WINS                   = 8455,
-    SOUND_ID_WG_START                           = 3439,
+    SOUND_ID_WG_HORDE_WARNING                   = 8457,
+    SOUND_ID_WG_ALLIANCE_WARNING                = 8456,
+    SOUND_ID_WG_ENTER_QUEUE                     = 8458,             // also 8462
+    SOUND_ID_WG_ENTER_THROUGH                   = 8459,             // also 8463
+    // SOUND_ID_WG_START                        = 3439,             // to be confirmed
 
 
     // ***** NPC Factions *****
@@ -630,7 +634,7 @@ class BattlefieldWG : public Battlefield
         void Update(uint32 diff) override;
 
         void StartBattle(Team defender) override;
-        void EndBattle(Team winner, const WorldObject* objRef = nullptr) override;
+        void EndBattle(Team winner) override;
         void RewardPlayersOnBattleEnd(Team winner) override;
 
         void UpdatePlayerOnWarResponse(Player* player) override;
@@ -657,6 +661,12 @@ class BattlefieldWG : public Battlefield
 
         // update all world states
         void SendUpdateAllWorldStates();
+
+        // send battlefield warning
+        void SendWintergraspWarning(int32 messageId, const WorldObject* objRef, uint32 soundId = 0);
+
+        // retrieve an available player in zone
+        Player* GetPlayerInZone();
 
         bool m_sentPrebattleWarning;
 
@@ -685,6 +695,7 @@ class BattlefieldWG : public Battlefield
 
         GuidList m_defenseCannonsGuids;
         GuidList m_attackCannonsGuids;
+        GuidList m_stalkersGuids;
 
         GuidVector m_vehicleGuids[PVP_TEAM_COUNT];
 };

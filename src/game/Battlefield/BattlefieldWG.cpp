@@ -287,7 +287,7 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
             }
             break;
         case NPC_INVISIBLE_STALKER:
-            // ToDo: load for zone warnings
+            m_stalkersGuids.push_back(creature->GetObjectGuid());
             break;
     }
 }
@@ -423,7 +423,7 @@ bool BattlefieldWG::HandleEvent(uint32 eventId, GameObject* go)
         returnValue = HandleDestructibleBuildingEvent(eventId, go);
     // handle titan relic capture - get winner faction depending on the relic faction
     else if (go->GetGoType() == GAMEOBJECT_TYPE_GOOBER && eventId == EVENT_TITAN_RELIC)
-        EndBattle(go->GetEntry() == GO_TITAN_RELIC_ALLIANCE ? ALLIANCE : HORDE, go);
+        EndBattle(go->GetEntry() == GO_TITAN_RELIC_ALLIANCE ? ALLIANCE : HORDE);
 
     return returnValue;
 }
@@ -450,7 +450,7 @@ bool BattlefieldWG::HandleCapturePointEvent(uint32 eventId, GameObject* go)
                     workshop->SetGoState(wgCapturePointEventData[index][i].objectState);
 
                     // send zone warning and update world state
-                    SendZoneWarning(wgCapturePointEventData[index][i].defenseMessage);
+                    SendWintergraspWarning(wgCapturePointEventData[index][i].defenseMessage, go);
                     SendUpdateWorldState(workshop->GetWorldState(), workshop->GetGoState());
 
                     // change the banner visuals (if required)
@@ -496,12 +496,12 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
             if (eventId == wgFortressTowersData[index].eventDamaged)
             {
                 tower->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DAMAGED : BF_GO_STATE_HORDE_DAMAGED);
-                SendZoneWarning(wgFortressTowersData[index].messageDamaged);
+                SendWintergraspWarning(wgFortressTowersData[index].messageDamaged, go);
             }
             else if (eventId == wgFortressTowersData[index].eventDestroyed)
             {
                 tower->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DESTROYED : BF_GO_STATE_HORDE_DESTROYED);
-                SendZoneWarning(wgFortressTowersData[index].eventDestroyed);
+                SendWintergraspWarning(wgFortressTowersData[index].messagedDestroyed, go);
 
                 ++m_destroyedTowers[GetTeamIndexByTeamId(GetDefender())];
                 // ToDo: handle possible yell
@@ -531,12 +531,12 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
             if (eventId == wgOffenseData[index].eventDamaged)
             {
                 tower->SetGoState(GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DAMAGED : BF_GO_STATE_HORDE_DAMAGED);
-                SendZoneWarning(wgOffenseData[index].messageDamaged);
+                SendWintergraspWarning(wgOffenseData[index].messageDamaged, go);
             }
             else if (eventId == wgOffenseData[index].eventDestroyed)
             {
                 tower->SetGoState(GetAttacker() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DESTROYED : BF_GO_STATE_HORDE_DESTROYED);
-                SendZoneWarning(wgOffenseData[index].eventDestroyed);
+                SendWintergraspWarning(wgOffenseData[index].messagedDestroyed, go);
 
                 // handle tower buffs
                 BuffTeam(GetAttacker(), SPELL_TOWER_CONTROL, true);
@@ -631,34 +631,28 @@ void BattlefieldWG::StartBattle(Team defender)
     // call main battlefield start function
     Battlefield::StartBattle(defender);
 
-    // ToDo: use the invisible stalker to send the raid emotes
-    SendZoneWarning(LANG_OPVP_WG_BATTLE_BEGIN);
-
     // flight restriction - applied based on AREA_FLAG_CANNOT_FLY in Player::UpdateArea
 
-    // get a player reference in order to reset the battlefield
-    for (GuidZoneMap::const_iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
-    {
-        // Find player who is in main zone
-        if (!itr->second)
-            continue;
-
-        if (Player* player = sObjectMgr.GetPlayer(itr->first))
-        {
-            ResetBattlefield(player);
-            break;
-        }
-    }
+    // get a player reference in order to start the battlefield
+    if (Player* player = GetPlayerInZone())
+        ResetBattlefield(player);
 }
 
-void BattlefieldWG::EndBattle(Team winner, const WorldObject* objRef /* = nullptr*/)
+void BattlefieldWG::EndBattle(Team winner)
 {
+    Battlefield::EndBattle(winner);
+
+    // get player reference in order to end the battlefield
+    Player* player = GetPlayerInZone();
+    if (!player)
+        return;
+
     // send messages
     if (GetDefender() == winner)
-        sWorld.SendDefenseMessage(ZONE_ID_WINTERGRASP, winner == ALLIANCE ? LANG_OPVP_WG_ALLIANCE_DEFENDED : LANG_OPVP_WG_HORDE_DEFENDED);
+        SendWintergraspWarning(winner == ALLIANCE ? LANG_OPVP_WG_ALLIANCE_DEFENDED : LANG_OPVP_WG_HORDE_DEFENDED, player, winner == ALLIANCE ? SOUND_ID_WG_ALLIANCE_WINS : SOUND_ID_WG_HORDE_WINS);
     else
     {
-        sWorld.SendDefenseMessage(ZONE_ID_WINTERGRASP, winner == ALLIANCE ? LANG_OPVP_WG_ALLIANCE_CAPTURED : LANG_OPVP_WG_HORDE_CAPTURED);
+        SendWintergraspWarning(winner == ALLIANCE ? LANG_OPVP_WG_ALLIANCE_CAPTURED : LANG_OPVP_WG_HORDE_CAPTURED, player, winner == ALLIANCE ? SOUND_ID_WG_ALLIANCE_WINS : SOUND_ID_WG_HORDE_WINS);
 
         // inverse the zone phasing
         BuffTeam(ALLIANCE, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())], true);
@@ -668,35 +662,13 @@ void BattlefieldWG::EndBattle(Team winner, const WorldObject* objRef /* = nullpt
         BuffTeam(HORDE, wgTeamControlAuras[GetTeamIndexByTeamId(winner)]);
     }
 
+    // lock the capture points; note: at the end of the battle the workshops stay in the possesion of whoever owned them in the battle
+    for (auto workshop : m_capturableWorkshops)
+        LockWorkshops(true, player, workshop);
+
     // apply reward buff
     // ToDo: needs to be enabled when phase stacking is supported
     // BuffTeam(GetDefender(), SPELL_ESSENCE_WINTERGRASP_ZONE);
-
-    // lock the capture points; note: at the end of the battle the workshops stay in the possesion of whoever owned them in the battle
-    if (objRef)
-    {
-        for (auto workshop : m_capturableWorkshops)
-            LockWorkshops(true, objRef, workshop);
-    }
-    else
-    {
-        for (GuidZoneMap::const_iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
-        {
-            // Find player who is in main zone
-            if (!itr->second)
-                continue;
-
-            if (Player* player = sObjectMgr.GetPlayer(itr->first))
-            {
-                for (auto workshop : m_capturableWorkshops)
-                    LockWorkshops(true, player, workshop);
-
-                break;
-            }
-        }
-    }
-
-    Battlefield::EndBattle(winner);
 
     // Update all world states
     SendUpdateAllWorldStates();
@@ -727,6 +699,9 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
         m_destroyedTowers[i] = 0;
         m_workshopCount[i] = 0;
     }
+
+    // send message start warning
+    SendWintergraspWarning(LANG_OPVP_WG_BATTLE_BEGIN, objRef);
 
     // ***** Update Wintergrasp phasing **** //
     // remove essence of WG phase
@@ -893,6 +868,36 @@ void BattlefieldWG::UpdatePlayerOnWarResponse(Player* player)
 
 }
 
+// Function to handle the warnings
+void BattlefieldWG::SendWintergraspWarning(int32 messageId, const WorldObject* objRef, uint32 soundId)
+{
+    // Attempt to get one stalker from the list; The battlefield expects at least one active stalker
+    for (const auto& guid : m_stalkersGuids)
+    {
+        if (Creature* stalker = objRef->GetMap()->GetCreature(guid))
+        {
+            SendZoneWarning(stalker, messageId, soundId);
+            break;
+        }
+    }
+}
+
+// Get player in zone
+Player* BattlefieldWG::GetPlayerInZone()
+{
+    for (auto& m_zonePlayer : m_zonePlayers)
+    {
+        if (!m_zonePlayer.first)
+            continue;
+
+        Player* player = sObjectMgr.GetPlayer(m_zonePlayer.first);
+        if (player)
+            return player;
+    }
+
+    return nullptr;
+}
+
 void BattlefieldWG::Update(uint32 diff)
 {
     Battlefield::Update(diff);
@@ -901,7 +906,8 @@ void BattlefieldWG::Update(uint32 diff)
     if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN && m_timer <= 3 * MINUTE * IN_MILLISECONDS && !m_sentPrebattleWarning)
     {
         m_sentPrebattleWarning = true;
-        SendZoneWarning(LANG_OPVP_WG_ABOUT_TO_BEGIN);
+        if (Player* player = GetPlayerInZone())
+            SendWintergraspWarning(LANG_OPVP_WG_ABOUT_TO_BEGIN, player);
     }
 
     // end battle on timer

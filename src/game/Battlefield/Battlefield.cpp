@@ -294,7 +294,7 @@ Function that ends battlefield battle
 @param   winner team
 @param   reference object
 */
-void Battlefield::EndBattle(Team winner, const WorldObject* objRef /* = nullptr*/)
+void Battlefield::EndBattle(Team winner)
 {
     // set the new zone owner; change status and timer
     m_zoneOwner      = winner;
@@ -781,10 +781,11 @@ void Battlefield::HandleExitRequest(Player* player)
 /**
 Function that sends a zone wide warning to all players
 
-@param   text id
-@param   source object. Can be null
+@param   source object
+@param   text entry
+@param   sound id
 */
-void Battlefield::SendZoneWarning(int32 entry, WorldObject* source)
+void Battlefield::SendZoneWarning(WorldObject* source, int32 textEntry, uint32 soundId)
 {
     for (auto& m_zonePlayer : m_zonePlayers)
     {
@@ -800,12 +801,12 @@ void Battlefield::SendZoneWarning(int32 entry, WorldObject* source)
 
         int32 locIdx = player->GetSession()->GetSessionDbLocaleIndex();
 
-        char const* text = sObjectMgr.GetMangosString(entry, locIdx);
+        char const* text = sObjectMgr.GetMangosString(textEntry, locIdx);
 
-        WorldPacket data;
-        ChatHandler::BuildChatPacket(data, CHAT_MSG_RAID_BOSS_EMOTE, text, LANG_UNIVERSAL, CHAT_TAG_NONE,
-            source ? source->GetObjectGuid() : ObjectGuid(), source ? source->GetName() : "", player->GetObjectGuid(), player->GetName());
-
-        player->GetSession()->SendPacket(data);
+        source->MonsterTextEmote(text, player, true);
     }
+
+    // play sound id, if provided
+    if (soundId)
+        source->PlayDirectSound(soundId, PlayPacketParameters(PLAY_ZONE, ZONE_ID_WINTERGRASP));
 }

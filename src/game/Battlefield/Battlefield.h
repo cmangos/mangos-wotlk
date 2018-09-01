@@ -123,7 +123,7 @@ class Battlefield : public OutdoorPvP
 
         // handle battle start and end
         virtual void StartBattle(Team /*defender*/);
-        virtual void EndBattle(Team /*winner*/, const WorldObject* objRef = nullptr);
+        virtual void EndBattle(Team /*winner*/);
 
         virtual void Update(uint32 /*diff*/) override;
 
@@ -175,7 +175,7 @@ class Battlefield : public OutdoorPvP
         void UpdateBattlefieldPlayers();
 
         // sends a raid warning to all players in the zone
-        void SendZoneWarning(int32 /*entry*/, WorldObject* source = nullptr);
+        void SendZoneWarning(WorldObject* /*source*/, int32 /*textEntry*/, uint32 soundId = 0);
 
         // reward players
         virtual void RewardPlayersOnBattleEnd(Team /*winner*/) {};
