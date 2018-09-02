@@ -132,7 +132,7 @@ class BattlefieldPlayer
         uint32 removeDelay;
 };
 
-typedef std::map<ObjectGuid /*playerGuid*/, BattlefieldPlayer* /*playerData*/> BattlefieldPlayerMap;
+typedef std::map<ObjectGuid /*playerGuid*/, BattlefieldPlayer* /*playerData*/> BattlefieldPlayerDataMap;
 
 class Battlefield : public OutdoorPvP
 {
@@ -159,6 +159,9 @@ class Battlefield : public OutdoorPvP
         virtual void EndBattle(Team /*winner*/);
 
         virtual void Update(uint32 /*diff*/) override;
+
+        // send timer update to players
+        virtual void SendBattlefieldTimerUpdate() {};
 
         // get defender or attacker team
         Team GetDefender() const { return m_zoneOwner; }
@@ -213,8 +216,8 @@ class Battlefield : public OutdoorPvP
         // reward players
         virtual void RewardPlayersOnBattleEnd(Team /*winner*/) {};
 
-        // ToDo!!! for review!
-        void QuestCreditTeam(uint32 credit, Team team, WorldObject* source = nullptr, float radius = -1.0f);
+        // reward player quest credit
+        void QuestCreditTeam(uint32 credit, Team team, WorldObject* source);
 
         // Group system
         bool CanAddPlayerToRaid(Player* /*player*/);
@@ -228,7 +231,7 @@ class Battlefield : public OutdoorPvP
         virtual void SetupPlayerPosition(Player* player) { };
 
         // variables
-        BattlefieldPlayerMap m_activePlayers;
+        BattlefieldPlayerDataMap m_activePlayers;
 
         std::set<Group*> m_battlefieldRaids[PVP_TEAM_COUNT];
         std::set<ObjectGuid> m_queuedPlayers[PVP_TEAM_COUNT];           // players that are in queue

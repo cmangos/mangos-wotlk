@@ -305,8 +305,10 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
             m_detectionUnitsGuids.push_back(creature->GetObjectGuid());
             break;
             // alliance vendors
-        case NPC_ANCHORITE_TESSA:
         case NPC_COMMANDER_ZANNETH:
+            m_zannethGuid = creature->GetObjectGuid();
+            // no break;
+        case NPC_ANCHORITE_TESSA:
         case NPC_SENIOR_DEMOLITIONIST_LEGOSO:
         case NPC_SIEGE_MASTER_STOUTHANDLE:
         case NPC_SORCERESS_KAYLANA:
@@ -321,6 +323,8 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
             break;
             // horde vendors
         case NPC_COMMANDER_DARDOSH:
+            m_dardoshGuid = creature->GetObjectGuid();
+            // no break;
         case NPC_HOODOO_MASTER_FUJIN:
         case NPC_LEUTENANT_MURP:
         case NPC_PRIMALIST_MULFORT:
@@ -359,6 +363,33 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
         case NPC_CHILLED_EARTH_ELEMENTAL:
             m_trashMobsGuids.push_back(creature->GetObjectGuid());
             break;
+    }
+}
+
+void BattlefieldWG::HandleCreatureDeath(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_WINTERGRASP_CATAPULT:
+        case NPC_WINTERGRASP_DEMOLISHER:
+        case NPC_WINTERGRASP_SIEGE_ENGINE_A:
+        case NPC_WINTERGRASP_SIEGE_ENGINE_H:
+        {
+            // update world state on vehicle death
+            if (creature->IsTemporarySummon())
+            {
+                if (Player* creator = creature->GetMap()->GetPlayer(creature->GetSpawnerGuid()))
+                {
+                    Team creatorTeam = creator->GetTeam();
+                    m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].remove(creature->GetObjectGuid());
+                    SendUpdateWorldState(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
+
+                    // update quest credit around for opponent
+                    QuestCreditTeam(NPC_QUEST_CREDIT_KILL_VEHICLE, creatorTeam == ALLIANCE ? HORDE : ALLIANCE, creature);
+                }
+            }
+            break;
+        }
     }
 }
 
@@ -463,6 +494,9 @@ void BattlefieldWG::HandleGameObjectCreate(GameObject* go)
         case GO_TITAN_RELIC_HORDE:
             m_relicGuid[TEAM_INDEX_HORDE] = go->GetObjectGuid();
             return;
+        case GO_WG_FORTRESS_DOOR_COLLISION:
+            m_fortressDoorGuid = go->GetObjectGuid();
+            return;
     }
 }
 
@@ -566,6 +600,8 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
         // Remove the no interact flag when door is destroyed
         if (GameObject* relic = go->GetMap()->GetGameObject(m_relicGuid[GetTeamIndexByTeamId(GetAttacker())]))
             relic->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+
+        // ToDo: open the invisible door
     }
 
     // loop through defense tower
@@ -627,6 +663,9 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
                 // handle tower buffs
                 BuffTeam(GetAttacker(), SPELL_TOWER_CONTROL, true);
                 BuffTeam(GetDefender(), SPELL_TOWER_CONTROL);
+
+                // award quest credit
+                QuestCreditTeam(NPC_QUEST_CREDIT_KILL_SOUTHERN_TOWER, GetDefender(), go);
 
                 ++m_destroyedTowers[GetTeamIndexByTeamId(GetAttacker())];
                 // ToDo: handle some yell from the Fortress commander
@@ -1007,24 +1046,6 @@ void BattlefieldWG::HandlePlayerKillInsideArea(Player* player, Unit* victim)
     {
         switch (victim->GetEntry())
         {
-            case NPC_WINTERGRASP_CATAPULT:
-            case NPC_WINTERGRASP_DEMOLISHER:
-            case NPC_WINTERGRASP_SIEGE_ENGINE_A:
-            case NPC_WINTERGRASP_SIEGE_ENGINE_H:
-            {
-                // update world state on vehicle death
-                Creature* vehicle = (Creature*)victim;
-                if (vehicle->IsTemporarySummon())
-                {
-                    if (Player* creator = vehicle->GetMap()->GetPlayer(vehicle->GetSpawnerGuid()))
-                    {
-                        Team creatorTeam = creator->GetTeam();
-                        m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].remove(vehicle->GetObjectGuid());
-                        SendUpdateWorldState(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
-                    }
-                }
-                break;
-            }
             case NPC_VALLIANCE_EXPEDITION_CHAMPION:
             case NPC_VALLIANCE_EXPEDITION_GUARD:
             case NPC_WARSONG_GUARD:
@@ -1063,14 +1084,11 @@ void BattlefieldWG::UpdatePlayerOnWarResponse(Player* player)
 // Function to handle the warnings
 void BattlefieldWG::SendWintergraspWarning(int32 messageId, const WorldObject* objRef, uint32 soundId)
 {
-    // Attempt to get one stalker from the list; The battlefield expects at least one active stalker
+    // Each stalker will do a raid emote - they are located far enough to not intersect
     for (const auto& guid : m_stalkersGuids)
     {
         if (Creature* stalker = objRef->GetMap()->GetCreature(guid))
-        {
             SendZoneWarning(stalker, messageId, soundId);
-            break;
-        }
     }
 }
 
@@ -1105,6 +1123,15 @@ void BattlefieldWG::Update(uint32 diff)
     // end battle on timer
     if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && m_timer < diff)
         EndBattle(GetDefender());
+}
+
+void BattlefieldWG::SendBattlefieldTimerUpdate()
+{
+    SendUpdateWorldState(WORLD_STATE_WG_SHOW_COOLDOWN, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
+    SendUpdateWorldState(WORLD_STATE_WG_TIME_TO_NEXT_BATTLE, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? uint32(time(nullptr) + m_timer / 1000) : 0);
+
+    SendUpdateWorldState(WORLD_STATE_WG_SHOW_BATTLE, GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
+    SendUpdateWorldState(WORLD_STATE_WG_TIME_TO_END, GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS ? uint32(time(nullptr) + m_timer / 1000) : 0);
 }
 
 bool BattlefieldWG::IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType)

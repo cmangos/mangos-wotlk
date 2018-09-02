@@ -42,10 +42,10 @@ Battlefield::Battlefield() : OutdoorPvP(), m_battleFieldId(0), m_zoneId(0), m_qu
 }
 
 /**
-Function that adds a player to the players of the affected battlefield zones
+  Function that adds a player to the players of the affected battlefield zones
 
-@param   player to add
-@param   whether zone is main outdoor pvp zone or a affected zone
+  @param   player to add
+  @param   whether zone is main outdoor pvp zone or a affected zone
 */
 void Battlefield::HandlePlayerEnterZone(Player* player, bool isMainZone)
 {
@@ -64,7 +64,7 @@ void Battlefield::HandlePlayerEnterZone(Player* player, bool isMainZone)
     }
 
     // check if player is already marked as active
-    BattlefieldPlayerMap::iterator itr = m_activePlayers.find(player->GetObjectGuid());
+    BattlefieldPlayerDataMap::iterator itr = m_activePlayers.find(player->GetObjectGuid());
     if (itr == m_activePlayers.end())
         InitPlayerBattlefieldData(player);
     else
@@ -77,16 +77,16 @@ void Battlefield::HandlePlayerEnterZone(Player* player, bool isMainZone)
 }
 
 /**
-Function that removes a player from the players of the affected battlefield zones
+  Function that removes a player from the players of the affected battlefield zones
 
-@param   player to remove
-@param   whether zone is main outdoor pvp zone or a affected zone
+  @param   player to remove
+  @param   whether zone is main outdoor pvp zone or a affected zone
 */
 void Battlefield::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 {
     OutdoorPvP::HandlePlayerLeaveZone(player, isMainZone);
 
-    BattlefieldPlayerMap::iterator itr = m_activePlayers.find(player->GetObjectGuid());
+    BattlefieldPlayerDataMap::iterator itr = m_activePlayers.find(player->GetObjectGuid());
     if (itr != m_activePlayers.end())
     {
         // remove from battlefield if active
@@ -102,9 +102,9 @@ void Battlefield::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 }
 
 /**
-Function that initializes the player data
+  Function that initializes the player data
 
-@param   player to load
+  @param   player to load
 */
 void Battlefield::InitPlayerBattlefieldData(Player* player)
 {
@@ -112,9 +112,9 @@ void Battlefield::InitPlayerBattlefieldData(Player* player)
 }
 
 /**
-Function that kicks the player from the battlefield
+  Function that kicks the player from the battlefield
 
-@param   player to kick
+  @param   player to kick
 */
 void Battlefield::KickBattlefieldPlayer(Player* player)
 {
@@ -126,9 +126,9 @@ void Battlefield::KickBattlefieldPlayer(Player* player)
 }
 
 /**
-Function that handles the AFK status
+  Function that handles the AFK status
 
-@param   player to be punished
+  @param   player to be punished
 */
 void Battlefield::HandlePlayerAFK(Player* player)
 {
@@ -141,9 +141,9 @@ void Battlefield::HandlePlayerAFK(Player* player)
 }
 
 /**
-Function that handles the player which just logged in
+  Function that handles the player which just logged in
 
-@param   player
+  @param   player
 */
 void Battlefield::HandlePlayerLoggedIn(Player* player)
 {
@@ -155,7 +155,7 @@ void Battlefield::HandlePlayerLoggedIn(Player* player)
 }
 
 /**
-Function that initializes all players before the battle starts
+  Function that initializes all players before the battle starts
 */
 void Battlefield::InitPlayersBeforeBattle()
 {
@@ -178,12 +178,12 @@ void Battlefield::InitPlayersBeforeBattle()
 }
 
 /**
-Function that refresh all battlefield players
+  Function that refresh all battlefield players
 */
 void Battlefield::UpdateBattlefieldPlayers()
 {
     bool bRemoved = false;
-    for (BattlefieldPlayerMap::iterator itr = m_activePlayers.begin(); itr != m_activePlayers.end();)
+    for (BattlefieldPlayerDataMap::iterator itr = m_activePlayers.begin(); itr != m_activePlayers.end();)
     {
         if (itr->second->removeTime && itr->second->removeTime + itr->second->removeDelay < time(nullptr))
         {
@@ -210,9 +210,9 @@ void Battlefield::UpdateBattlefieldPlayers()
 }
 
 /**
-Function that starts battlefield battle
+  Function that starts battlefield battle
 
-@param   defender team
+  @param   defender team
 */
 void Battlefield::StartBattle(Team defender)
 {
@@ -289,10 +289,10 @@ void Battlefield::StartBattle(Team defender)
 }
 
 /**
-Function that ends battlefield battle
+  Function that ends battlefield battle
 
-@param   winner team
-@param   reference object
+  @param   winner team
+  @param   reference object
 */
 void Battlefield::EndBattle(Team winner)
 {
@@ -316,10 +316,13 @@ void Battlefield::EndBattle(Team winner)
 }
 
 /**
-Battlefield update function
+  Battlefield update function
 */
 void Battlefield::Update(uint32 diff)
 {
+    // update battlefield timer to everyone
+    SendBattlefieldTimerUpdate();
+
     // global battlefield timer
     if (m_timer < diff)
     {
@@ -416,8 +419,14 @@ void Battlefield::SetupPlayerPositions()
     }
 }
 
-// ToDo: requires review
-void Battlefield::QuestCreditTeam(uint32 credit, Team team, WorldObject* source, float radius)
+/**
+  Function that rewards the given team players
+
+  @param   kill credit
+  @param   team
+  @param   source object
+*/
+void Battlefield::QuestCreditTeam(uint32 credit, Team team, WorldObject* source)
 {
     for (auto& m_zonePlayer : m_zonePlayers)
     {
@@ -428,7 +437,8 @@ void Battlefield::QuestCreditTeam(uint32 credit, Team team, WorldObject* source,
         if (!plr)
             continue;
 
-        if ((plr->GetTeam() != team || source) && radius > 0.0f && source->GetDistance2d(plr->GetPositionX(), plr->GetPositionY()) > radius)
+        // check if player is eligible for kill credit
+        if (!source || !credit || plr->GetTeam() != team || !plr->IsAtGroupRewardDistance(source))
             continue;
 
         plr->KilledMonsterCredit(credit);
@@ -440,9 +450,9 @@ void Battlefield::QuestCreditTeam(uint32 credit, Team team, WorldObject* source,
 /*********************************************************/
 
 /**
-Function that returns a non full group for a specified team index
+  Function that returns a non full group for a specified team index
 
-@param   team index
+  @param   team index
 */
 Group* Battlefield::GetFreeRaid(PvpTeamIndex teamIdx)
 {
@@ -456,9 +466,9 @@ Group* Battlefield::GetFreeRaid(PvpTeamIndex teamIdx)
 }
 
 /**
-Function that returns the group of a specified player
+  Function that returns the group of a specified player
 
-@param   player guid
+  @param   player guid
 */
 Group* Battlefield::GetGroupFor(ObjectGuid playerGuid)
 {
@@ -475,9 +485,9 @@ Group* Battlefield::GetGroupFor(ObjectGuid playerGuid)
 }
 
 /**
-Function that checks if the player can be added to a raid group
+  Function that checks if the player can be added to a raid group
 
-@param   player to be added to raid
+  @param   player to be added to raid
 */
 bool Battlefield::CanAddPlayerToRaid(Player* player)
 {
@@ -534,9 +544,9 @@ bool Battlefield::CanAddPlayerToRaid(Player* player)
 }
 
 /**
-Function that removes a player from a raid group
+  Function that removes a player from a raid group
 
-@param   player guid to be removed
+  @param   player guid to be removed
 */
 void Battlefield::RemovePlayerFromRaid(ObjectGuid playerGuid)
 {
@@ -548,9 +558,9 @@ void Battlefield::RemovePlayerFromRaid(ObjectGuid playerGuid)
 }
 
 /**
-Function that checks if the battlefield has the player
+  Function that checks if the battlefield has the player
 
-@param   player guid to be removed
+  @param   player guid to be removed
 */
 bool Battlefield::HasPlayer(ObjectGuid playerGuid)
 {
@@ -558,9 +568,9 @@ bool Battlefield::HasPlayer(ObjectGuid playerGuid)
 }
 
 /**
-Function that returns the number of players depending on the team
+  Function that returns the number of players depending on the team
 
-@param   team index
+  @param   team index
 */
 uint32 Battlefield::GetPlayerCountByTeam(PvpTeamIndex teamIdx)
 {
@@ -572,9 +582,9 @@ uint32 Battlefield::GetPlayerCountByTeam(PvpTeamIndex teamIdx)
 }
 
 /**
-Function that checks if a team is already full
+  Function that checks if a team is already full
 
-@param   team index
+  @param   team index
 */
 bool Battlefield::IsTeamFull(PvpTeamIndex teamIdx)
 {
@@ -582,9 +592,9 @@ bool Battlefield::IsTeamFull(PvpTeamIndex teamIdx)
 }
 
 /**
-Function that checks if a battlefield group can be deleted
+  Function that checks if a battlefield group can be deleted
 
-@param   group to be deleted
+  @param   group to be deleted
 */
 bool Battlefield::CanDeleteBattlefieldGroup(Group* group)
 {
@@ -604,9 +614,9 @@ bool Battlefield::CanDeleteBattlefieldGroup(Group* group)
 }
 
 /**
-Function that handles the disband of the group
+  Function that handles the disband of the group
 
-@param   player that is affected by the group disband
+  @param   player that is affected by the group disband
 */
 void Battlefield::HandleBattlefieldGroupDisband(Player* player)
 {
@@ -624,9 +634,9 @@ void Battlefield::HandleBattlefieldGroupDisband(Player* player)
 /*********************************************************/
 
 /**
-Function that handles player invite to queue
+  Function that handles player invite to queue
 
-@param   player to be invited
+  @param   player to be invited
 */
 void Battlefield::InvitePlayerToQueue(Player* player)
 {
@@ -648,10 +658,10 @@ void Battlefield::InvitePlayerToQueue(Player* player)
 }
 
 /**
-Function that handles player invite response
+  Function that handles player invite response
 
-@param   player that responded
-@param   whether the player has accepted or not
+  @param   player that responded
+  @param   whether the player has accepted or not
 */
 void Battlefield::HandleQueueInviteResponse(Player* player, bool accepted)
 {
@@ -688,10 +698,10 @@ void Battlefield::HandleQueueInviteResponse(Player* player, bool accepted)
 }
 
 /**
-Function that handles player teleport response
+  Function that handles player teleport response
 
-@param   player that responded
-@param   wether the player has accepted or not
+  @param   player that responded
+  @param   wether the player has accepted or not
 */
 void Battlefield::HandleWarInviteResponse(Player* player, bool accepted)
 {
@@ -743,9 +753,9 @@ void Battlefield::HandleWarInviteResponse(Player* player, bool accepted)
 }
 
 /**
-Function that handles player queue exit request
+  Function that handles player queue exit request
 
-@param   player to exit queue
+  @param   player to exit queue
 */
 void Battlefield::HandleExitRequest(Player* player)
 {
@@ -782,11 +792,11 @@ void Battlefield::HandleExitRequest(Player* player)
 }
 
 /**
-Function that sends a zone wide warning to all players
+  Function that sends a zone wide warning to all players
 
-@param   source object
-@param   text entry
-@param   sound id
+  @param   source object
+  @param   text entry
+  @param   sound id
 */
 void Battlefield::SendZoneWarning(WorldObject* source, int32 textEntry, uint32 soundId)
 {
@@ -807,9 +817,9 @@ void Battlefield::SendZoneWarning(WorldObject* source, int32 textEntry, uint32 s
         char const* text = sObjectMgr.GetMangosString(textEntry, locIdx);
 
         source->MonsterTextEmote(text, player, true);
-    }
 
-    // play sound id, if provided
-    if (soundId)
-        source->PlayDirectSound(soundId, PlayPacketParameters(PLAY_ZONE, ZONE_ID_WINTERGRASP));
+        // play sound id, if provided
+        if (soundId)
+            source->PlayDirectSound(soundId, PlayPacketParameters(PLAY_TARGET, (Player const*)player));
+    }
 }

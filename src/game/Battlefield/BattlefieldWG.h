@@ -114,7 +114,7 @@ enum
     QUEST_ID_VICTORY_IN_WINTERGRASP_H           = 13183,
 
     // ***** Kill credits *****
-    NPC_QUEST_CREDIT_KILL_VEHICLE               = 31093,
+    NPC_QUEST_CREDIT_KILL_VEHICLE               = 31093,            // kill enemy vehicle
     NPC_QUEST_CREDIT_DEFEND_VEHICLE             = 31284,
     NPC_QUEST_CREDIT_KILL_ALLIANCE              = 31086,
     NPC_QUEST_CREDIT_KILL_TOWER                 = 31156,
@@ -123,7 +123,7 @@ enum
     NPC_QUEST_CREDIT_KILL_WALL                  = 31287,
     NPC_QUEST_CREDIT_KILL_WORKSHOP              = 31288,
     NPC_QUEST_CREDIT_KILL_GATE                  = 31289,
-    NPC_QUEST_CREDIT_KILL_SOUTHERN_TOWER        = 35074,
+    NPC_QUEST_CREDIT_KILL_SOUTHERN_TOWER        = 35074,            // destroy any of the 3 southern towers
     NPC_QUEST_CREDIT_KILL_HORDE                 = 39019,
 
 
@@ -222,6 +222,7 @@ enum
     GO_TITAN_RELIC_HORDE                        = 192829,
 
     // fortress walls
+    GO_WG_FORTRESS_DOOR_COLLISION               = 194162,           // invisible door - needs to be manually open when the real door is destroyed
     GO_WG_FORTRESS_DOOR                         = 191810,
     GO_WG_FORTRESS_GATE                         = 190375,
     GO_WG_FORTRESS_WALL_1                       = 190220,
@@ -394,12 +395,11 @@ enum
     // ***** Sound ids *****
     SOUND_ID_WG_HORDE_WINS                      = 8454,
     SOUND_ID_WG_ALLIANCE_WINS                   = 8455,
-    SOUND_ID_WG_HORDE_WARNING                   = 8457,
-    SOUND_ID_WG_ALLIANCE_WARNING                = 8456,
-    SOUND_ID_WG_ENTER_QUEUE                     = 8458,             // also 8462
-    SOUND_ID_WG_ENTER_THROUGH                   = 8459,             // also 8463
+    // SOUND_ID_WG_HORDE_WARNING                = 8457,
+    // SOUND_ID_WG_ALLIANCE_WARNING             = 8456,
+    // SOUND_ID_WG_ENTER_QUEUE                  = 8458,             // also 8462
+    // SOUND_ID_WG_ENTER_THROUGH                = 8459,             // also 8463
     // SOUND_ID_WG_START                        = 3439,             // to be confirmed
-
 
     // ***** NPC Factions *****
     // FACTION_ID_WARSONG                       = 1979,
@@ -612,20 +612,22 @@ class WintergraspFactory : public BattlefieldBuilding
         uint32 m_conditionId;
 };
 
-enum WGRank
+enum WintergraspRank
 {
     WG_RANK_NONE        = 0,
-    WG_RANK_RECRUIT     = 1,
-    WG_RANK_CORPORAL    = 2,
-    WG_RANK_LIEUTENANT  = 3,
+    WG_RANK_RECRUIT     = 1,            // player gets this by default when battle starts
+    WG_RANK_CORPORAL    = 2,            // gained after 5 enemy (creature / player) kills
+    WG_RANK_LIEUTENANT  = 3,            // gained after 10 enemy kills from the previous promotion
 };
 
-class WGPlayerScore : public BattlefieldPlayer
+class WintergraspPlayer : public BattlefieldPlayer
 {
     public:
-        WGPlayerScore() : BattlefieldPlayer(), rank(0) { }
+        WintergraspPlayer() : BattlefieldPlayer(), rank(WG_RANK_NONE) { }
 
-        WGRank GetRank() const;
+        WintergraspRank GetPlayerRank() const;
+
+    protected:
         uint32 rank;
 };
 
@@ -647,12 +649,15 @@ class BattlefieldWG : public Battlefield
         bool HandleEvent(uint32 eventId, GameObject* go) override;
 
         void HandleCreatureCreate(Creature* creature) override;
+        void HandleCreatureDeath(Creature* creature) override;
         void HandleGameObjectCreate(GameObject* go) override;
 
         bool HandleGameObjectUse(Player* player, GameObject* go) override;
 
         void HandlePlayerKillInsideArea(Player* player, Unit* victim) override;
         void Update(uint32 diff) override;
+
+        void SendBattlefieldTimerUpdate() override;
 
         void StartBattle(Team defender) override;
         void EndBattle(Team winner) override;
@@ -696,11 +701,11 @@ class BattlefieldWG : public Battlefield
         uint32 m_destroyedTowers[PVP_TEAM_COUNT];
         uint32 m_workshopCount[PVP_TEAM_COUNT];
 
-        /*std::vector<ObjectGuid> m_keepCannonGUIDs;
-        std::vector<ObjectGuid> m_portalGUIDs;
-
+        // Wintergrasp leaders - used to handle yells
         ObjectGuid m_zannethGuid;
-        ObjectGuid m_dardoshGuid;*/
+        ObjectGuid m_dardoshGuid;
+
+        ObjectGuid m_fortressDoorGuid;
 
         // object storage
         ObjectGuid m_relicGuid[PVP_TEAM_COUNT];
