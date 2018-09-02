@@ -50,8 +50,8 @@ enum
     SPELL_GREATER_HONOR                         = 58556,            // received when the opponent has more than 10 stacks of tenacity
     SPELL_GREATEST_HONOR                        = 58557,            // received when the opponent has 20 stacks of tenacity
 
-    // SPELL_ALLIANCE_FLAG                      = 14268,            // used on vehicles
-    // SPELL_HORDE_FLAG                         = 14267,
+    SPELL_ALLIANCE_FLAG                         = 14268,            // used on vehicles
+    SPELL_HORDE_FLAG                            = 14267,
 
     // SPELL_GRAB_PASSENGER                     = 61178,
     // SPELL_ACTIVATE_ROBOTIC_ARMS              = 49899,

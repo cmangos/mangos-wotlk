@@ -345,6 +345,9 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
                     Team creatorTeam = creator->GetTeam();
                     m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].push_back(creature->GetObjectGuid());
                     SendUpdateWorldState(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
+
+                    // apply faction flag; ToDo: need to research if faction is also updated
+                    creature->CastSpell(creature, creatorTeam == ALLIANCE ? SPELL_ALLIANCE_FLAG : SPELL_HORDE_FLAG, TRIGGERED_OLD_TRIGGERED);
                 }
             }
             break;
@@ -1109,9 +1112,9 @@ bool BattlefieldWG::IsConditionFulfilled(Player const* source, uint32 conditionI
     switch (conditionId)
     {
         case OPVP_COND_WG_MAX_ALLIANCE_VEHICLES:
-            return uint32(m_vehicleGuids[TEAM_INDEX_ALLIANCE].size()) < m_workshopCount[TEAM_INDEX_ALLIANCE] * 4;
+            return GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && uint32(m_vehicleGuids[TEAM_INDEX_ALLIANCE].size()) < m_workshopCount[TEAM_INDEX_ALLIANCE] * 4;
         case OPVP_COND_WG_MAX_HORDE_VEHICLES:
-            return uint32(m_vehicleGuids[TEAM_INDEX_HORDE].size()) < m_workshopCount[TEAM_INDEX_HORDE] * 4;
+            return GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && uint32(m_vehicleGuids[TEAM_INDEX_HORDE].size()) < m_workshopCount[TEAM_INDEX_HORDE] * 4;
         case OPVP_COND_WG_BATTLEFIELD_IN_PROGRESS:
             return GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS;
         case OPVP_COND_WG_FORTRESS_ACCESS_ALLOWED:
