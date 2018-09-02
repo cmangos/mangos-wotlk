@@ -146,6 +146,7 @@ void BattlefieldWG::Reset()
         factory->SetCapturePointEntry(TEAM_INDEX_HORDE, i.goEntryHorde);
         factory->SetGraveyardId(i.graveyardId);
         factory->SetAreaId(i.areaId);
+        factory->SetConditionId(i.conditionId);
         m_capturableWorkshops.push_back(factory);
     }
 }
@@ -195,7 +196,7 @@ void BattlefieldWG::HandlePlayerEnterZone(Player* player, bool isMainZone)
 {
     // If battlefield is in progress and the first player joins after the battle has started, then he needs to reset the battlefield first
     if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && m_zonePlayers.empty())
-        ResetBattlefield(player);
+        GetBattlefieldReady(player);
 
     Battlefield::HandlePlayerEnterZone(player, isMainZone);
 
@@ -209,7 +210,15 @@ void BattlefieldWG::HandlePlayerEnterZone(Player* player, bool isMainZone)
 
     // flight restriction - applied based on AREA_FLAG_CANNOT_FLY in Player::UpdateArea
 
-    // ToDo: update tower control aura and the score aura
+    // set the tower control buff
+    if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS)
+    {
+        uint32 maxBuff = player->GetTeam() == GetAttacker() ? MAX_WG_OFFENSE_TOWERS - m_destroyedTowers[GetTeamIndexByTeamId(GetAttacker())] : m_destroyedTowers[GetTeamIndexByTeamId(GetAttacker())];
+        for (uint8 i = 0; i < maxBuff; ++i)
+            player->CastSpell(player, SPELL_TOWER_CONTROL, TRIGGERED_OLD_TRIGGERED);
+    }
+
+    // ToDo: update score aura
 }
 
 void BattlefieldWG::HandlePlayerLeaveZone(Player* player, bool isMainZone)
@@ -285,16 +294,69 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
 
                 m_defenseCannonsGuids.push_back(creature->GetObjectGuid());
             }
+            // cannons are despawned during cooldown
+            if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
+                creature->ForcedDespawn();
             break;
         case NPC_INVISIBLE_STALKER:
             m_stalkersGuids.push_back(creature->GetObjectGuid());
             break;
+        case NPC_WINTERGRASP_DETECTION_UNIT:
+            m_detectionUnitsGuids.push_back(creature->GetObjectGuid());
+            break;
+            // alliance vendors
+        case NPC_ANCHORITE_TESSA:
+        case NPC_COMMANDER_ZANNETH:
+        case NPC_SENIOR_DEMOLITIONIST_LEGOSO:
+        case NPC_SIEGE_MASTER_STOUTHANDLE:
+        case NPC_SORCERESS_KAYLANA:
+        case NPC_TACTICAL_OFFICER_AHBRAMIS:
+        case NPC_BOWYER_RANDOLPH:
+        case NPC_KNIGHT_DAMERON:
+        case NPC_MARSHAL_MAGRUDER:
+        case NPC_MORGAN_DAY:
+        case NPC_TRAVIS_DAY:
+        case NPC_ALLIANCE_BRIGADIER_GENERAL:
+            m_vendorGuids[TEAM_INDEX_ALLIANCE].push_back(creature->GetObjectGuid());
+            break;
+            // horde vendors
+        case NPC_COMMANDER_DARDOSH:
+        case NPC_HOODOO_MASTER_FUJIN:
+        case NPC_LEUTENANT_MURP:
+        case NPC_PRIMALIST_MULFORT:
+        case NPC_SIEGESMITH_STRONGHOOF:
+        case NPC_TACTICAL_OFFICER_KILRATH:
+        case NPC_VIERON_BLAZEFEATHER:
+        case NPC_STONE_GUARD_MUKAR:
+        case NPC_CHAMPION_ROSSLAI:
+        case NPC_HORDE_WARBRINGER:
+            m_vendorGuids[TEAM_INDEX_HORDE].push_back(creature->GetObjectGuid());
+            break;
+        case NPC_WINTERGRASP_CATAPULT:
+        case NPC_WINTERGRASP_DEMOLISHER:
+        case NPC_WINTERGRASP_SIEGE_ENGINE_A:
+        case NPC_WINTERGRASP_SIEGE_ENGINE_H:
+            m_activeVehiclesGuids.push_back(creature->GetObjectGuid());
+            // increase the vehicle count and update world states
+            if (creature->IsTemporarySummon())
+            {
+                if (Player* creator = creature->GetMap()->GetPlayer(creature->GetSpawnerGuid()))
+                {
+                    Team creatorTeam = creator->GetTeam();
+                    m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].push_back(creature->GetObjectGuid());
+                    SendUpdateWorldState(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
+                }
+            }
+            break;
+        case NPC_WANDERING_SHADOW:
+        case NPC_LIVING_LASHER:
+        case NPC_GLACIAL_SPIRIT:
+        case NPC_RAGING_FLAME:
+        case NPC_WHISPERING_WIND:
+        case NPC_CHILLED_EARTH_ELEMENTAL:
+            m_trashMobsGuids.push_back(creature->GetObjectGuid());
+            break;
     }
-}
-
-void BattlefieldWG::HandleCreatureDeath(Creature* creature)
-{
-    // ToDo: update vehicle counters
 }
 
 void BattlefieldWG::HandleGameObjectCreate(GameObject* go)
@@ -421,11 +483,30 @@ bool BattlefieldWG::HandleEvent(uint32 eventId, GameObject* go)
     // handle destructible buildings
     else if (go->GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
         returnValue = HandleDestructibleBuildingEvent(eventId, go);
-    // handle titan relic capture - get winner faction depending on the relic faction
-    else if (go->GetGoType() == GAMEOBJECT_TYPE_GOOBER && eventId == EVENT_TITAN_RELIC)
-        EndBattle(go->GetEntry() == GO_TITAN_RELIC_ALLIANCE ? ALLIANCE : HORDE);
 
     return returnValue;
+}
+
+bool BattlefieldWG::HandleGameObjectUse(Player* player, GameObject* go)
+{
+    if (GetDefender() == TEAM_NONE)
+    {
+        sLog.outError("Battlefield WG: Gameobject use cannot be handled when there is no zone defender.");
+        return true;
+    }
+
+    // no events handled during cooldown
+    if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
+        return true;
+
+    // handle titan relic capture - get winner faction depending on the relic faction
+    if (go->GetEntry() == GO_TITAN_RELIC_ALLIANCE || go->GetEntry() == GO_TITAN_RELIC_HORDE)
+    {
+        go->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+        EndBattle(go->GetEntry() == GO_TITAN_RELIC_ALLIANCE ? ALLIANCE : HORDE);
+    }
+
+    return false;
 }
 
 // Function that handles all capture point events
@@ -505,6 +586,8 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
 
                 ++m_destroyedTowers[GetTeamIndexByTeamId(GetDefender())];
                 // ToDo: handle possible yell
+
+                // ToDo: despawn banner
             }
             else if (eventId == wgFortressTowersData[index].eventIntact)
             {
@@ -544,6 +627,8 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
 
                 ++m_destroyedTowers[GetTeamIndexByTeamId(GetAttacker())];
                 // ToDo: handle some yell from the Fortress commander
+
+                // ToDo: despawn banner
             }
             else if (eventId == wgOffenseData[index].eventIntact)
             {
@@ -568,7 +653,11 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
 
             // update wall state based on even id
             if (eventId == wgFortressData[index].eventDamaged)
+            {
                 wall->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DAMAGED : BF_GO_STATE_HORDE_DAMAGED);
+
+                // ToDo: despawn banner if any
+            }
             else if (eventId == wgFortressData[index].eventDestroyed)
                 wall->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DESTROYED : BF_GO_STATE_HORDE_DESTROYED);
             else if (eventId == wgFortressData[index].eventIntact)
@@ -635,54 +724,24 @@ void BattlefieldWG::StartBattle(Team defender)
 
     // get a player reference in order to start the battlefield
     if (Player* player = GetPlayerInZone())
-        ResetBattlefield(player);
+        GetBattlefieldReady(player);
 }
 
 void BattlefieldWG::EndBattle(Team winner)
 {
+    // get player reference in order to end the battlefield
+    if (Player* player = GetPlayerInZone())
+        CleanupBattlefield(player, winner);
+
+    // must be called after cleanup
     Battlefield::EndBattle(winner);
 
-    // get player reference in order to end the battlefield
-    Player* player = GetPlayerInZone();
-    if (!player)
-        return;
-
-    // send messages
-    if (GetDefender() == winner)
-        SendWintergraspWarning(winner == ALLIANCE ? LANG_OPVP_WG_ALLIANCE_DEFENDED : LANG_OPVP_WG_HORDE_DEFENDED, player, winner == ALLIANCE ? SOUND_ID_WG_ALLIANCE_WINS : SOUND_ID_WG_HORDE_WINS);
-    else
-    {
-        SendWintergraspWarning(winner == ALLIANCE ? LANG_OPVP_WG_ALLIANCE_CAPTURED : LANG_OPVP_WG_HORDE_CAPTURED, player, winner == ALLIANCE ? SOUND_ID_WG_ALLIANCE_WINS : SOUND_ID_WG_HORDE_WINS);
-
-        // inverse the zone phasing
-        BuffTeam(ALLIANCE, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())], true);
-        BuffTeam(HORDE, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())], true);
-
-        BuffTeam(ALLIANCE, wgTeamControlAuras[GetTeamIndexByTeamId(winner)]);
-        BuffTeam(HORDE, wgTeamControlAuras[GetTeamIndexByTeamId(winner)]);
-    }
-
-    // lock the capture points; note: at the end of the battle the workshops stay in the possesion of whoever owned them in the battle
-    for (auto workshop : m_capturableWorkshops)
-        LockWorkshops(true, player, workshop);
-
-    // apply reward buff
-    // ToDo: needs to be enabled when phase stacking is supported
-    // BuffTeam(GetDefender(), SPELL_ESSENCE_WINTERGRASP_ZONE);
-
-    // Update all world states
-    SendUpdateAllWorldStates();
-
     // reset variables
-    m_playersInvited = false;
     m_sentPrebattleWarning = false;
-
-    // ToDo: respawn vendors; despawn vehicles; repair fortress (maybe)
-    // ToDo: reset attack towers to neutral - to be confirmed
 }
 
 // Function that will (re)set the battlefield
-void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
+void BattlefieldWG::GetBattlefieldReady(const WorldObject* objRef)
 {
     // add owner phase to both teams; redundant check
     if (GetDefender() == TEAM_NONE)
@@ -727,7 +786,6 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
         // Buff attacker for each tower
         BuffTeam(GetAttacker(), SPELL_TOWER_CONTROL);
     }
-
     // rebuild fortress - factions handled by event
     for (auto building : m_keepBuildings)
     {
@@ -739,7 +797,6 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
             SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
         }
     }
-
     // rebuild defense towers - factions handled by event
     for (auto building : m_defenseTowers)
     {
@@ -751,7 +808,6 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
             SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
         }
     }
-
     // reset defense workshops
     for (auto workshop : m_defenseWorkshops)
     {
@@ -762,7 +818,6 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
 
         ++m_workshopCount[GetTeamIndexByTeamId(GetDefender())];
     }
-
     // reset the other workshops
     for (auto workshop : m_capturableWorkshops)
     {
@@ -780,7 +835,10 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
 
     // reset relic for the attacker
     if (GameObject* relic = objRef->GetMap()->GetGameObject(m_relicGuid[GetTeamIndexByTeamId(GetAttacker())]))
+    {
         relic->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+        relic->Respawn();           // note: on some new versions the relic is allowed to despawn when clicked
+    }
 
     // ***** Reset Wintergrasp cannons **** //
     // reset and respawn cannons
@@ -792,7 +850,6 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
             cannon->Respawn();
         }
     }
-    
     for (const auto& guid : m_defenseCannonsGuids)
     {
         if (Creature* cannon = objRef->GetMap()->GetCreature(guid))
@@ -802,14 +859,122 @@ void BattlefieldWG::ResetBattlefield(const WorldObject* objRef)
         }
     }
 
-    // ***** Update world stated **** //
-    SendUpdateAllWorldStates();
+    // despawn the trash mobs
+    for (const auto& guid : m_trashMobsGuids)
+    {
+        if (Creature* trash = objRef->GetMap()->GetCreature(guid))
+        {
+            trash->SetRespawnDelay(m_battleDuration);
+            trash->ForcedDespawn();
+        }
+    }
 
-    // ToDo: research if the fortress vendors are despawned during the battle
+    // ***** Update general stated **** //
+    SendUpdateGeneralWorldStates();
+}
+
+// Function that will cleanup the battlefield after battle has ended
+void BattlefieldWG::CleanupBattlefield(const WorldObject* objRef, Team winner)
+{
+    // ***** Send messages and apply buffs **** //
+    if (GetDefender() == winner)
+        SendWintergraspWarning(winner == ALLIANCE ? LANG_OPVP_WG_ALLIANCE_DEFENDED : LANG_OPVP_WG_HORDE_DEFENDED, objRef, winner == ALLIANCE ? SOUND_ID_WG_ALLIANCE_WINS : SOUND_ID_WG_HORDE_WINS);
+    else
+    {
+        SendWintergraspWarning(winner == ALLIANCE ? LANG_OPVP_WG_ALLIANCE_CAPTURED : LANG_OPVP_WG_HORDE_CAPTURED, objRef, winner == ALLIANCE ? SOUND_ID_WG_ALLIANCE_WINS : SOUND_ID_WG_HORDE_WINS);
+
+        // inverse the zone phasing
+        BuffTeam(ALLIANCE, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())], true);
+        BuffTeam(HORDE, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())], true);
+
+        BuffTeam(ALLIANCE, wgTeamControlAuras[GetTeamIndexByTeamId(winner)]);
+        BuffTeam(HORDE, wgTeamControlAuras[GetTeamIndexByTeamId(winner)]);
+    }
+
+    // remove tower buffs
+    for (uint8 i = 0; i < MAX_WG_OFFENSE_TOWERS; ++i)
+    {
+        BuffTeam(ALLIANCE, SPELL_TOWER_CONTROL, true);
+        BuffTeam(HORDE, SPELL_TOWER_CONTROL, true);
+    }
+
+    // apply reward buff
+    // ToDo: needs to be enabled when phase stacking is supported
+    // BuffTeam(GetDefender(), SPELL_ESSENCE_WINTERGRASP_ZONE);
+
+    // ***** Reset creatures **** //
+    // despawn cannons
+    for (const auto& guid : m_attackCannonsGuids)
+    {
+        if (Creature* cannon = objRef->GetMap()->GetCreature(guid))
+            cannon->ForcedDespawn();
+    }
+    for (const auto& guid : m_defenseCannonsGuids)
+    {
+        if (Creature* cannon = objRef->GetMap()->GetCreature(guid))
+            cannon->ForcedDespawn();
+    }
+    // despawn vehicles
+    for (const auto& guid : m_activeVehiclesGuids)
+    {
+        if (Creature* vehicle = objRef->GetMap()->GetCreature(guid))
+            vehicle->ForcedDespawn();
+    }
+    m_activeVehiclesGuids.clear();
+    // respawn all vendors
+    for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
+    {
+        for (const auto& guid : m_vendorGuids[i])
+        {
+            if (Creature* vendor = objRef->GetMap()->GetCreature(guid))
+                vendor->Respawn();
+        }
+    }
+    // respawn trash mobs
+    for (const auto& guid : m_trashMobsGuids)
+    {
+        if (Creature* trash = objRef->GetMap()->GetCreature(guid))
+        {
+            trash->SetRespawnDelay(10 * MINUTE * IN_MILLISECONDS);
+            trash->Respawn();
+        }
+    }
+
+    // ***** Reset towers and fortress **** //
+    // note: at the end of the battle the workshops stay in the possesion of whoever owned them in the battle
+    // lock the capture points
+    for (auto workshop : m_capturableWorkshops)
+        LockWorkshops(true, objRef, workshop);
+
+    // buildings are not repaired; only the owner world state is updated if the owner has changed
+    if (GetDefender() != winner)
+    {
+        // reset fortress owner
+        for (auto building : m_keepBuildings)
+        {
+            building->SetGoState(building->GetOppositeGoState());
+            SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
+        }
+        // reset defense tower owner
+        for (auto building : m_defenseTowers)
+        {
+            building->SetGoState(building->GetOppositeGoState());
+            SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
+        }
+    }
+    // set attacker towers to neutral and keep the object state
+    for (auto building : m_offenseTowers)
+    {
+        building->SetGoState(building->GetNeutralGoState());
+        SendUpdateWorldState(building->GetWorldState(), building->GetGoState());
+    }
+
+    // ***** Update general stated **** //
+    SendUpdateGeneralWorldStates();
 }
 
 // Function that will update all world states on start and end
-void BattlefieldWG::SendUpdateAllWorldStates()
+void BattlefieldWG::SendUpdateGeneralWorldStates()
 {
     // update global states
     SendUpdateWorldState(WORLD_STATE_WG_SHOW_COOLDOWN, GetBattlefieldStatus() == BF_STATUS_COOLDOWN ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
@@ -831,16 +996,40 @@ void BattlefieldWG::SendUpdateAllWorldStates()
 
 void BattlefieldWG::HandlePlayerKillInsideArea(Player* player, Unit* victim)
 {
-    //if (victim->GetTypeId() == TYPEID_UNIT)
-    //{
-    //    switch (victim->GetEntry())
-    //    {
-    //        case NPC_VALLIANCE_EXPEDITION_CHAMPION:
-    //        case NPC_WARSONG_CHAMPION:
-    //            // ToDo: handle player scores when killing opposing faction npcs
-    //            break;
-    //    }
-    //}
+    // nothing happens during cooldown
+    if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
+        return;
+
+    if (victim->GetTypeId() == TYPEID_UNIT)
+    {
+        switch (victim->GetEntry())
+        {
+            case NPC_WINTERGRASP_CATAPULT:
+            case NPC_WINTERGRASP_DEMOLISHER:
+            case NPC_WINTERGRASP_SIEGE_ENGINE_A:
+            case NPC_WINTERGRASP_SIEGE_ENGINE_H:
+            {
+                // update world state on vehicle death
+                Creature* vehicle = (Creature*)victim;
+                if (vehicle->IsTemporarySummon())
+                {
+                    if (Player* creator = vehicle->GetMap()->GetPlayer(vehicle->GetSpawnerGuid()))
+                    {
+                        Team creatorTeam = creator->GetTeam();
+                        m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].remove(vehicle->GetObjectGuid());
+                        SendUpdateWorldState(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
+                    }
+                }
+                break;
+            }
+            case NPC_VALLIANCE_EXPEDITION_CHAMPION:
+            case NPC_VALLIANCE_EXPEDITION_GUARD:
+            case NPC_WARSONG_GUARD:
+            case NPC_WARSONG_CHAMPION:
+                // ToDo: handle player scores when killing opposing faction npcs
+                break;
+        }
+    }
 }
 
 void BattlefieldWG::RewardPlayersOnBattleEnd(Team winner)
@@ -920,11 +1109,24 @@ bool BattlefieldWG::IsConditionFulfilled(Player const* source, uint32 conditionI
     switch (conditionId)
     {
         case OPVP_COND_WG_MAX_ALLIANCE_VEHICLES:
+            return uint32(m_vehicleGuids[TEAM_INDEX_ALLIANCE].size()) < m_workshopCount[TEAM_INDEX_ALLIANCE] * 4;
         case OPVP_COND_WG_MAX_HORDE_VEHICLES:
-            // Todo: return false if the max allowed vehicles for ally / horde is has been reached
-            return false;
+            return uint32(m_vehicleGuids[TEAM_INDEX_HORDE].size()) < m_workshopCount[TEAM_INDEX_HORDE] * 4;
         case OPVP_COND_WG_BATTLEFIELD_IN_PROGRESS:
             return GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS;
+        case OPVP_COND_WG_FORTRESS_ACCESS_ALLOWED:
+            return source->GetTeam() == GetDefender();
+        case OPVP_COND_WG_ALLOW_TELE_SUNKEN_RING:
+        case OPVP_COND_WG_ALLOW_TELE_BROKEN_TEMPLE:
+        case OPVP_COND_WG_ALLOW_TELE_EASTPARK:
+        case OPVP_COND_WG_ALLOW_TELE_WESTPARK:
+            // allow teleport only if the team owns the factory
+            for (auto workshop : m_capturableWorkshops)
+            {
+                if (conditionId == workshop->GetConditionId())
+                    return source->GetTeam() == workshop->GetOwner();
+            }
+            break;
     }
 
     return false;

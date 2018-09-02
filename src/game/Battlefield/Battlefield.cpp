@@ -304,7 +304,10 @@ void Battlefield::EndBattle(Team winner)
 
     // no reward when there is no winner - battlefield initialization failed
     if (winner == TEAM_NONE)
+    {
+        sLog.outError("Battlefield: Battle ended with winner %u.", winner);
         return;
+    }
 
     // reward players and reset
     RewardPlayersOnBattleEnd(winner);

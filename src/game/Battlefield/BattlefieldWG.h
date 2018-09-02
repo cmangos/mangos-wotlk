@@ -30,6 +30,7 @@ class BattlefieldWG;
 enum
 {
     MAX_WG_WORKSHOPS                            = 4,                // refers to the capturable workshops
+    MAX_WG_OFFENSE_TOWERS                       = 3,                // maximum towers available for the attacker team
 
     // ***** Spells *****
     // player rank spells
@@ -42,14 +43,14 @@ enum
     SPELL_TENACITY_VEHICLE                      = 59911,
 
     SPELL_TOWER_CONTROL                         = 62064,            // tower control buff
-    SPELL_SPIRITUAL_IMMUNITY                    = 58729,            // temporary protection after ressurection
+    // SPELL_SPIRITUAL_IMMUNITY                 = 58729,            // temporary protection after ressurection - handled by spirit healer
 
-    // tenacity reward spells
-    SPELL_GREAT_HONOR                           = 58555,
+    // tenacity reward spells - the exact tenacity stack count has to be confirmed
+    SPELL_GREAT_HONOR                           = 58555,            // received when the opponent has at least 5 stacks of tenacity
     SPELL_GREATER_HONOR                         = 58556,            // received when the opponent has more than 10 stacks of tenacity
     SPELL_GREATEST_HONOR                        = 58557,            // received when the opponent has 20 stacks of tenacity
 
-    // SPELL_ALLIANCE_FLAG                      = 14268,
+    // SPELL_ALLIANCE_FLAG                      = 14268,            // used on vehicles
     // SPELL_HORDE_FLAG                         = 14267,
 
     // SPELL_GRAB_PASSENGER                     = 61178,
@@ -82,13 +83,16 @@ enum
     SPELL_TELEPORT_DALARAN                      = 53360,
     SPELL_TELEPORT_BRIDGE                       = 59096,
     SPELL_TELEPORT_DALARAN_TO_WG                = 60035,
-    SPELL_TELEPORT_FORTRESS_GRAVEYARD           = 59760,
-    SPELL_TELEPORT_SUNKEN_RING                  = 59762,
-    SPELL_TELEPORT_BROKEN_TEMPLE                = 59763,
-    SPELL_TELEPORT_HORDE_LANDING                = 59765,
-    SPELL_TELEPORT_WESTPARK_GRAVEYARD           = 59766,
-    SPELL_TELEPORT_EASTPARK_GRAVEYARD           = 59767,
-    SPELL_TELEPORT_ALLIANCE_LANDING             = 59769,
+
+    // Spirit healer teleport spells - handled by dbscript on gossip
+    // SPELL_TELEPORT_FORTRESS_GRAVEYARD        = 59760,
+    // SPELL_TELEPORT_SUNKEN_RING               = 59762,
+    // SPELL_TELEPORT_BROKEN_TEMPLE             = 59763,
+    // SPELL_TELEPORT_HORDE_LANDING             = 59765,
+    // SPELL_TELEPORT_WESTPARK_GRAVEYARD        = 59766,
+    // SPELL_TELEPORT_EASTPARK_GRAVEYARD        = 59767,
+    // SPELL_TELEPORT_ALLIANCE_LANDING          = 59769,
+
     SPELL_TELEPORT_PORTAL                       = 54643,
     SPELL_TELEPORT_VEHICLE                      = 49759,
 
@@ -104,10 +108,10 @@ enum
     // SPELL_BUILD_SIEGE_VEHICLE_A_FORCE        = 56662,
     // SPELL_BUILD_SIEGE_VEHICLE_H_FORCE        = 61409,
 
+
     // ***** Quests *****
     QUEST_ID_VICTORY_IN_WINTERGRASP_A           = 13181,
     QUEST_ID_VICTORY_IN_WINTERGRASP_H           = 13183,
-
 
     // ***** Kill credits *****
     NPC_QUEST_CREDIT_KILL_VEHICLE               = 31093,
@@ -130,71 +134,67 @@ enum
     // ***** Area ids *****
     AREA_ID_THE_SUNKEN_RING                     = 4538,
     AREA_ID_THE_BROKEN_TEMPLE                   = 4539,
-    AREA_ID_WINTERGRASP_FORTRESS                = 4575,
-    AREA_ID_CENTRAL_BRIDGE                      = 4576,
-    AREA_ID_EASTERN_BRIDGE                      = 4577,
-    AREA_ID_WESTERN_BRIDGE                      = 4578,
-    AREA_ID_FLAMEWATCH_TOWER                    = 4581,
-    AREA_ID_WINTERS_EDGE_TOWER                  = 4582,
-    AREA_ID_SHADOWSIGHT_TOWER                   = 4583,
-    AREA_ID_THE_CAULDRON_OF_FLAMES              = 4584,
-    AREA_ID_GLACIAL_FALLS                       = 4585,
-    AREA_ID_WINDY_BLUFFS                        = 4586,
-    AREA_ID_THE_FOREST_OF_SHADOWS               = 4587,
-    AREA_ID_THE_CHILLED_QUAGMIRE                = 4589,
-    AREA_ID_THE_STEPPE_OF_LIFE                  = 4590,
+    // AREA_ID_WINTERGRASP_FORTRESS             = 4575,
+    // AREA_ID_CENTRAL_BRIDGE                   = 4576,
+    // AREA_ID_EASTERN_BRIDGE                   = 4577,
+    // AREA_ID_WESTERN_BRIDGE                   = 4578,
+    // AREA_ID_FLAMEWATCH_TOWER                 = 4581,
+    // AREA_ID_WINTERS_EDGE_TOWER               = 4582,
+    // AREA_ID_SHADOWSIGHT_TOWER                = 4583,
+    // AREA_ID_THE_CAULDRON_OF_FLAMES           = 4584,
+    // AREA_ID_GLACIAL_FALLS                    = 4585,
+    // AREA_ID_WINDY_BLUFFS                     = 4586,
+    // AREA_ID_THE_FOREST_OF_SHADOWS            = 4587,
+    // AREA_ID_THE_CHILLED_QUAGMIRE             = 4589,
+    // AREA_ID_THE_STEPPE_OF_LIFE               = 4590,
     AREA_ID_WESTPARK_WORKSHOP                   = 4611,
     AREA_ID_EASTPARK_WORKSHOP                   = 4612,
 
     // ***** Creatures *****
-    // ally creatures
-    // NPC_ANCHORITE_TESSA                      = 31054,
-    // NPC_COMMANDER_ZANNETH                    = 31036,
-    // NPC_SENIOR_DEMOLITIONIST_LEGOSO          = 31109,
-    // NPC_SIEGE_MASTER_STOUTHANDLE             = 31108,
-    // NPC_SORCERESS_KAYLANA                    = 31051,
-    // NPC_TACTICAL_OFFICER_AHBRAMIS            = 31153,
-    // NPC_BOWYER_RANDOLPH                      = 31052,
-
-    // NPC_KNIGHT_DAMERON                       = 32294,                // phased; available for battlefield defender only
-    // NPC_MARSHAL_MAGRUDER                     = 39172,
-
-    // NPC_MORGAN_DAY                           = 30489,
-    // NPC_TRAVIS_DAY                           = 30488,
+    // ally creatures and vendors
+    NPC_ANCHORITE_TESSA                         = 31054,
+    NPC_COMMANDER_ZANNETH                       = 31036,
+    NPC_SENIOR_DEMOLITIONIST_LEGOSO             = 31109,
+    NPC_SIEGE_MASTER_STOUTHANDLE                = 31108,
+    NPC_SORCERESS_KAYLANA                       = 31051,
+    NPC_TACTICAL_OFFICER_AHBRAMIS               = 31153,
+    NPC_BOWYER_RANDOLPH                         = 31052,
+    NPC_KNIGHT_DAMERON                          = 32294,                // phased; available for battlefield defender only
+    NPC_MARSHAL_MAGRUDER                        = 39172,
+    NPC_MORGAN_DAY                              = 30489,
+    NPC_TRAVIS_DAY                              = 30488,
+    NPC_ALLIANCE_BRIGADIER_GENERAL              = 32626,
 
     // horde creatures
-    // NPC_COMMANDER_DARDOSH                    = 31091,
-    // NPC_HOODOO_MASTER_FUJIN                  = 31101,
-    // NPC_LEUTENANT_MURP                       = 31107,
-    // NPC_PRIMALIST_MULFORT                    = 31053,
-    // NPC_SIEGESMITH_STRONGHOOF                = 31106,
-    // NPC_TACTICAL_OFFICER_KILRATH             = 31151,
-    // NPC_VIERON_BLAZEFEATHER                  = 31102,
+    NPC_COMMANDER_DARDOSH                       = 31091,
+    NPC_HOODOO_MASTER_FUJIN                     = 31101,
+    NPC_LEUTENANT_MURP                          = 31107,
+    NPC_PRIMALIST_MULFORT                       = 31053,
+    NPC_SIEGESMITH_STRONGHOOF                   = 31106,
+    NPC_TACTICAL_OFFICER_KILRATH                = 31151,
+    NPC_VIERON_BLAZEFEATHER                     = 31102,
+    NPC_STONE_GUARD_MUKAR                       = 32296,                // phased; available for battlefield defender only
+    NPC_CHAMPION_ROSSLAI                        = 39173,
+    NPC_HORDE_WARBRINGER                        = 32615,
 
-    // NPC_STONE_GUARD_MUKAR                    = 32296,                // phased; available for battlefield defender only
-    // NPC_CHAMPION_ROSSLAI                     = 39173,
-
-    // Note: trash mobs have phase 256; this makes them visible only for battlefield winner; handled by DB
-    // the gnome / goblin mechanics are also phased based on factory owner; handled by DB
-
-    // Other trash npcs
-    NPC_ALLIANCE_SPIRIT_GUIDE                   = 31842,
-    NPC_HORDE_SPIRIT_GUIDE                      = 31841,
-
+    // Alliance and horde guards - phased and with auto respawn of 3 min
     NPC_VALLIANCE_EXPEDITION_CHAMPION           = 30740,
-    // NPC_VALLIANCE_EXPEDITION_GUARD           = 32308,            // not found
-
+    NPC_VALLIANCE_EXPEDITION_GUARD              = 32308,                // no spawns found
     NPC_WARSONG_CHAMPION                        = 30739,
-    // NPC_WARSONG_GUARD                        = 32307,            // not found
+    NPC_WARSONG_GUARD                           = 32307,                // no spawns found
 
-    // NPC_ALLIANCE_BRIGADIER_GENERAL           = 32626,
-    // NPC_HORDE_WARBRINGER                     = 32615,
+    // spirit guides
+    // NPC_SPIRIT_GUIDE_ALLIANCE                = 31842,                // they have aura 58729
+    // NPC_SPIRIT_GUIDE_HORDE                   = 31841,
+
+    // Note: revenants phase 256; this makes them visible only for battlefield winner; handled by DB
+    // the gnome / goblin mechanics are also phased based on factory owner; handled by DB
 
     // PvP related npcs and vehicles
     NPC_WINTERGRASP_CATAPULT                    = 27881,
     NPC_WINTERGRASP_DEMOLISHER                  = 28094,
-    // NPC_WINTERGRASP_SIEGE_ENGINE_A           = 28312,
-    // NPC_WINTERGRASP_SIEGE_ENGINE_H           = 32627,
+    NPC_WINTERGRASP_SIEGE_ENGINE_A              = 28312,                // has accessory 28319
+    NPC_WINTERGRASP_SIEGE_ENGINE_H              = 32627,                // has accessory 32629
     // NPC_WINTERGRASP_SIEGE_TURRET_A           = 28319,
     // NPC_WINTERGRASP_SIEGE_TURRET_H           = 32629,
     NPC_WINTERGRASP_TOWER_CANNON                = 28366,
@@ -205,9 +205,16 @@ enum
     // dummy npcs / helpers
     // NPC_WORLD_TRIGGER                        = 23472,            // used as teleport target
     NPC_INVISIBLE_STALKER                       = 15214,            // sends raid emotes
-    NPC_WINTERGRASP_DETECTION_UNIT              = 27869,            // use unk; has unk aura 57577
+    NPC_WINTERGRASP_DETECTION_UNIT              = 27869,            // use unk; has unk aura 57577; loaded as active object in order to keep the grid active
 
-    // note: wintergrasp portals are phased based on battlefield defender; handled by DB
+    // lesser trash mobs; have to be manually despawned during the battle; The Revenants are phased for the owner, so they don't need to be despawned
+    NPC_WANDERING_SHADOW                        = 30842,
+    NPC_LIVING_LASHER                           = 30845,
+    NPC_GLACIAL_SPIRIT                          = 30846,
+    NPC_RAGING_FLAME                            = 30847,
+    NPC_WHISPERING_WIND                         = 30848,
+    NPC_CHILLED_EARTH_ELEMENTAL                 = 30849,
+
 
     // ***** Gameobjects *****
     // titan relics
@@ -252,7 +259,7 @@ enum
     GO_TOWER_WINTERS_EDGE                       = 190357,
     GO_TOWER_FLAMEWATCH                         = 190358,
 
-    // workshops - friendly buildings (for all factions)
+    // workshops - friendly buildings; cannot be destoryed (as of 3.2)
     GO_WORKSHOP_KEEP_WEST                       = 192028,
     GO_WORKSHOP_KEEP_EAST                       = 192029,
     GO_WORKSHOP_BROKEN_TEMPLE                   = 192030,
@@ -271,7 +278,6 @@ enum
     GO_CAPTUREPOINT_EASTPARK_H                  = 194960,
     GO_CAPTUREPOINT_SUNKEN_RING_A               = 192626,
     GO_CAPTUREPOINT_SUNKEN_RING_H               = 190475,
-
     // note: wintergrasp flag banners are phased based on battlefield or factory owner; handled by DB
 
     // portal GOs
@@ -281,6 +287,12 @@ enum
     // GO_DEFENDERS_PORTAL_GENERIC              = 192819,               // portal inside the fortress
     // GO_VEHICLE_TELEPORTER                    = 192951,               // generic object; the actual teleport is handled in a different way
     // GO_PORTAL_TO_WINTERGRASP                 = 193772,               // portal from dalaran to WG
+
+    GO_WINTERGRASP_ALLIANCE_BANNER              = 192487,               // banners that have to be despawned when object is damaged or destroyed
+    GO_WINTERGRASP_HORDE_BANNER                 = 192488,
+
+    // note: wintergrasp portal objects are phased based on battlefield defender; handled by DB
+
 
     // ***** Graveyards *****
     GRAVEYARD_ID_KEEP_EAST                      = 1285,
@@ -292,14 +304,11 @@ enum
 
 
     // ***** Events *****
-    // capture points events (identical between horde and alliance GO versions) - defined in wgCapturePointData
-
-    // other events
     // destructible building events are defined below - too many to add here
-    EVENT_TITAN_RELIC                           = 22097,                // event sent by the Titan relic
+    // EVENT_TITAN_RELIC                        = 22097,                // event sent by the Titan relic - handled by HandleGameObjectUse
     EVENT_KEEP_DOOR_DESTROY                     = 19448,
 
-    // capture points events (identical between horde and alliance GO versions)
+    // capture points events (identical between horde and alliance GO versions) - defined in wgCapturePointEventData
     EVENT_BROKEN_TEMPLE_CONTEST_ALLIANCE        = 20787,                // horde -> neutral
     EVENT_BROKEN_TEMPLE_CONTEST_HORDE           = 20788,                // alliance -> neutral
     EVENT_BROKEN_TEMPLE_PROGRESS_ALLIANCE       = 19612,                // neutral -> alliance
@@ -404,9 +413,14 @@ enum
 
     // ***** Condition entries *****
     // used to check the gossip options in DB for various npcs
-    OPVP_COND_WG_MAX_ALLIANCE_VEHICLES          = 0,
+    OPVP_COND_WG_MAX_ALLIANCE_VEHICLES          = 0,                // check if player is allowed to build more vehicles
     OPVP_COND_WG_MAX_HORDE_VEHICLES             = 1,
-    OPVP_COND_WG_BATTLEFIELD_IN_PROGRESS        = 2,
+    OPVP_COND_WG_BATTLEFIELD_IN_PROGRESS        = 2,                // check if battlefield is in progress
+    OPVP_COND_WG_FORTRESS_ACCESS_ALLOWED        = 3,                // check if player is allowed to enter or teleport inside fortress
+    OPVP_COND_WG_ALLOW_TELE_SUNKEN_RING         = 4,
+    OPVP_COND_WG_ALLOW_TELE_BROKEN_TEMPLE       = 5,
+    OPVP_COND_WG_ALLOW_TELE_EASTPARK            = 6,
+    OPVP_COND_WG_ALLOW_TELE_WESTPARK            = 7,
 };
 
 // *** Battlefield factions *** //
@@ -502,15 +516,15 @@ static const uint32 wgCapturePoints[PVP_TEAM_COUNT][MAX_WG_WORKSHOPS] =
 
 struct WintergraspCapturePointData
 {
-    uint32 goEntryAlliance, goEntryHorde, workshopEntry, areaId, worldState, graveyardId;
+    uint32 goEntryAlliance, goEntryHorde, workshopEntry, areaId, worldState, graveyardId, conditionId;
 };
 
 static const WintergraspCapturePointData wgCapturePointData[MAX_WG_WORKSHOPS] =
 {
-    {GO_CAPTUREPOINT_SUNKEN_RING_A,     GO_CAPTUREPOINT_SUNKEN_RING_H,      GO_WORKSHOP_SUNKEN_RING,     AREA_ID_THE_SUNKEN_RING,    WORLD_STATE_WG_WORKSHOP_SUNKEN_RING,   GRAVEYARD_ID_SUNKEN_RING},
-    {GO_CAPTUREPOINT_BROKEN_TEMPLE_A,   GO_CAPTUREPOINT_BROKEN_TEMPLE_H,    GO_WORKSHOP_BROKEN_TEMPLE,   AREA_ID_THE_BROKEN_TEMPLE,  WORLD_STATE_WG_WORKSHOP_BROKEN_TEMPLE, GRAVEYARD_ID_BROKEN_TEMPLE},
-    {GO_CAPTUREPOINT_EASTPARK_A,        GO_CAPTUREPOINT_EASTPARK_H,         GO_WORKSHOP_EASTPARK,        AREA_ID_EASTPARK_WORKSHOP,  WORLD_STATE_WG_WORKSHOP_EASTPARK,      GRAVEYARD_ID_EASTPARK},
-    {GO_CAPTUREPOINT_WESTPARK_A,        GO_CAPTUREPOINT_WESTPARK_H,         GO_WORKSHOP_WESTPARK,        AREA_ID_WESTPARK_WORKSHOP,  WORLD_STATE_WG_WORKSHOP_WESTPARK,      GRAVEYARD_ID_WESTPARK},
+    {GO_CAPTUREPOINT_SUNKEN_RING_A,     GO_CAPTUREPOINT_SUNKEN_RING_H,      GO_WORKSHOP_SUNKEN_RING,     AREA_ID_THE_SUNKEN_RING,    WORLD_STATE_WG_WORKSHOP_SUNKEN_RING,   GRAVEYARD_ID_SUNKEN_RING,   OPVP_COND_WG_ALLOW_TELE_SUNKEN_RING},
+    {GO_CAPTUREPOINT_BROKEN_TEMPLE_A,   GO_CAPTUREPOINT_BROKEN_TEMPLE_H,    GO_WORKSHOP_BROKEN_TEMPLE,   AREA_ID_THE_BROKEN_TEMPLE,  WORLD_STATE_WG_WORKSHOP_BROKEN_TEMPLE, GRAVEYARD_ID_BROKEN_TEMPLE, OPVP_COND_WG_ALLOW_TELE_BROKEN_TEMPLE},
+    {GO_CAPTUREPOINT_EASTPARK_A,        GO_CAPTUREPOINT_EASTPARK_H,         GO_WORKSHOP_EASTPARK,        AREA_ID_EASTPARK_WORKSHOP,  WORLD_STATE_WG_WORKSHOP_EASTPARK,      GRAVEYARD_ID_EASTPARK,      OPVP_COND_WG_ALLOW_TELE_EASTPARK},
+    {GO_CAPTUREPOINT_WESTPARK_A,        GO_CAPTUREPOINT_WESTPARK_H,         GO_WORKSHOP_WESTPARK,        AREA_ID_WESTPARK_WORKSHOP,  WORLD_STATE_WG_WORKSHOP_WESTPARK,      GRAVEYARD_ID_WESTPARK,      OPVP_COND_WG_ALLOW_TELE_WESTPARK},
 };
 
 struct WintergraspCapturePointEventData
@@ -554,7 +568,7 @@ static const WintergraspCapturePointEventData wgCapturePointEventData[MAX_WG_WOR
 class WintergraspFactory : public BattlefieldBuilding
 {
     public:
-        WintergraspFactory(uint32 entry) : BattlefieldBuilding(entry), m_objectOwner(TEAM_NONE), m_graveyardId(0), m_areaId(0)
+        WintergraspFactory(uint32 entry) : BattlefieldBuilding(entry), m_objectOwner(TEAM_NONE), m_graveyardId(0), m_areaId(0), m_conditionId(0)
         {
             for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
             {
@@ -583,6 +597,10 @@ class WintergraspFactory : public BattlefieldBuilding
         void SetAreaId(uint32 id) { m_areaId = id; }
         uint32 GetAreaId() { return m_areaId; }
 
+        // get and set condition id
+        void SetConditionId(uint32 id) { m_conditionId = id; }
+        uint32 GetConditionId() { return m_conditionId; }
+
     protected:
         Team m_objectOwner;
 
@@ -591,6 +609,7 @@ class WintergraspFactory : public BattlefieldBuilding
         uint32 m_capturePointEntry[PVP_TEAM_COUNT];
         uint32 m_graveyardId;
         uint32 m_areaId;
+        uint32 m_conditionId;
 };
 
 enum WGRank
@@ -621,6 +640,7 @@ class BattlefieldWG : public Battlefield
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;
         void HandlePlayerEnterArea(Player* player, uint32 areaId, bool isMainZone) override;
         void HandlePlayerLeaveArea(Player* player, uint32 areaId, bool isMainZone) override;
+
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         void SendRemoveWorldStates(Player* player) override;
 
@@ -628,7 +648,8 @@ class BattlefieldWG : public Battlefield
 
         void HandleCreatureCreate(Creature* creature) override;
         void HandleGameObjectCreate(GameObject* go) override;
-        void HandleCreatureDeath(Creature* creature) override;
+
+        bool HandleGameObjectUse(Player* player, GameObject* go) override;
 
         void HandlePlayerKillInsideArea(Player* player, Unit* victim) override;
         void Update(uint32 diff) override;
@@ -657,10 +678,11 @@ class BattlefieldWG : public Battlefield
         void LockWorkshops(bool lock, const WorldObject* objRef, WintergraspFactory* workshop);
 
         // battlefield reset
-        void ResetBattlefield(const WorldObject* objRef);
+        void GetBattlefieldReady(const WorldObject* objRef);
+        void CleanupBattlefield(const WorldObject* objRef, Team winner);
 
         // update all world states
-        void SendUpdateAllWorldStates();
+        void SendUpdateGeneralWorldStates();
 
         // send battlefield warning
         void SendWintergraspWarning(int32 messageId, const WorldObject* objRef, uint32 soundId = 0);
@@ -674,12 +696,9 @@ class BattlefieldWG : public Battlefield
         uint32 m_destroyedTowers[PVP_TEAM_COUNT];
         uint32 m_workshopCount[PVP_TEAM_COUNT];
 
-        /*std::vector<ObjectGuid> m_zoneTrashGUIDs;
-        std::vector<ObjectGuid> m_keepCannonGUIDs;
+        /*std::vector<ObjectGuid> m_keepCannonGUIDs;
         std::vector<ObjectGuid> m_portalGUIDs;
 
-        ObjectGuid m_keepDoorGUID;
-        ObjectGuid m_keepGateGUID;
         ObjectGuid m_zannethGuid;
         ObjectGuid m_dardoshGuid;*/
 
@@ -696,8 +715,12 @@ class BattlefieldWG : public Battlefield
         GuidList m_defenseCannonsGuids;
         GuidList m_attackCannonsGuids;
         GuidList m_stalkersGuids;
+        GuidList m_activeVehiclesGuids;
+        GuidList m_detectionUnitsGuids;
+        GuidList m_trashMobsGuids;
+        GuidList m_vendorGuids[PVP_TEAM_COUNT];
 
-        GuidVector m_vehicleGuids[PVP_TEAM_COUNT];
+        GuidList m_vehicleGuids[PVP_TEAM_COUNT];
 };
 
 #endif

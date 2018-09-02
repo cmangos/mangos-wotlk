@@ -75,6 +75,39 @@ class BattlefieldBuilding
         BattlefieldGoState GetGoState() const { return m_goState; }
         void SetGoState(BattlefieldGoState newState) { m_goState = newState; }
 
+        // get the corresponding neutral state
+        BattlefieldGoState GetNeutralGoState() const
+        {
+            switch (m_goState)
+            {
+                case BF_GO_STATE_HORDE_INTACT:
+                case BF_GO_STATE_ALLIANCE_INTACT:
+                    return BF_GO_STATE_NEUTRAL_INTACT;
+                case BF_GO_STATE_HORDE_DAMAGED:
+                case BF_GO_STATE_ALLIANCE_DAMAGED:
+                    return BF_GO_STATE_NEUTRAL_DAMAGED;
+                case BF_GO_STATE_HORDE_DESTROYED:
+                case BF_GO_STATE_ALLIANCE_DESTROYED:
+                    return BF_GO_STATE_NEUTRAL_DESTROYED;
+            }
+            return m_goState;
+        }
+
+        // get the opposite faction state
+        BattlefieldGoState GetOppositeGoState() const
+        {
+            switch (m_goState)
+            {
+                case BF_GO_STATE_HORDE_INTACT:       return BF_GO_STATE_ALLIANCE_INTACT;
+                case BF_GO_STATE_ALLIANCE_INTACT:    return BF_GO_STATE_HORDE_INTACT;
+                case BF_GO_STATE_HORDE_DAMAGED:      return BF_GO_STATE_ALLIANCE_DAMAGED;
+                case BF_GO_STATE_ALLIANCE_DAMAGED:   return BF_GO_STATE_HORDE_DAMAGED;
+                case BF_GO_STATE_HORDE_DESTROYED:    return BF_GO_STATE_ALLIANCE_DESTROYED;
+                case BF_GO_STATE_ALLIANCE_DESTROYED: return BF_GO_STATE_HORDE_DESTROYED;
+            }
+            return m_goState;
+        }
+
         // get and set object guid
         void SetGoGuid(ObjectGuid goGuid) { m_guid = goGuid; }
         ObjectGuid GetGoGuid() { return m_guid; }
