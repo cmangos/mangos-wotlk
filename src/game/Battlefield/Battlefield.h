@@ -196,7 +196,13 @@ class Battlefield : public OutdoorPvP
         virtual void OnBattlefieldPlayersUpdate() {};
 
         // called when the player accepts the battlefield teleport
-        virtual void UpdatePlayerOnWarResponse(Player* /*player*/) {};
+        virtual void UpdatePlayerBattleResponse(Player* /*player*/) {};
+
+        // called when the player exits the battlefield
+        virtual void UpdatePlayerExitRequest(Player* /*player*/) {};
+
+        // called when the group disbands
+        virtual void UpdatePlayerGroupDisband(Player* /*player*/) {};
 
         // invite player to join battlefield queue
         void InvitePlayerToQueue(Player* /*player*/);
@@ -216,6 +222,9 @@ class Battlefield : public OutdoorPvP
         // reward players
         virtual void RewardPlayersOnBattleEnd(Team /*winner*/) {};
 
+        // load player positions
+        virtual void SetupPlayerPosition(Player* player) { };
+
         // reward player quest credit
         void QuestCreditTeam(uint32 credit, Team team, WorldObject* source);
 
@@ -225,10 +234,6 @@ class Battlefield : public OutdoorPvP
         Group* GetFreeRaid(PvpTeamIndex /*teamIdx*/);
         Group* GetGroupFor(ObjectGuid /*playerGuid*/);
         uint32 GetPlayerCountByTeam(PvpTeamIndex /*teamIdx*/);
-
-        // load player positions
-        void SetupPlayerPositions();
-        virtual void SetupPlayerPosition(Player* player) { };
 
         // variables
         BattlefieldPlayerDataMap m_activePlayers;

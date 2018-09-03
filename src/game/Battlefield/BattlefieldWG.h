@@ -31,6 +31,8 @@ enum
 {
     MAX_WG_WORKSHOPS                            = 4,                // refers to the capturable workshops
     MAX_WG_OFFENSE_TOWERS                       = 3,                // maximum towers available for the attacker team
+    MAX_WG_CORPORAL_KILLS                       = 5,                // maximum number of kills required for rank promotion
+    MAX_WG_LIEUTENANT_KILLS                     = 15,
 
     // ***** Spells *****
     // player rank spells
@@ -38,17 +40,17 @@ enum
     SPELL_CORPORAL                              = 33280,            // 5 enemy kills - allowed for catapults
     SPELL_LIEUTENANT                            = 55629,            // 10 more enemy kills - allowed for all vehicles
 
+    SPELL_TOWER_CONTROL                         = 62064,            // tower control buff
+    // SPELL_SPIRITUAL_IMMUNITY                 = 58729,            // temporary protection after ressurection - handled by spirit healer
+
     // tenacity - used to balance the groups
     SPELL_TENACITY                              = 58549,            // received by the smaller team; the smaller the team, the more stacks it receives
     SPELL_TENACITY_VEHICLE                      = 59911,
 
-    SPELL_TOWER_CONTROL                         = 62064,            // tower control buff
-    // SPELL_SPIRITUAL_IMMUNITY                 = 58729,            // temporary protection after ressurection - handled by spirit healer
-
     // tenacity reward spells - the exact tenacity stack count has to be confirmed
-    SPELL_GREAT_HONOR                           = 58555,            // received when the opponent has at least 5 stacks of tenacity
-    SPELL_GREATER_HONOR                         = 58556,            // received when the opponent has more than 10 stacks of tenacity
-    SPELL_GREATEST_HONOR                        = 58557,            // received when the opponent has 20 stacks of tenacity
+    SPELL_GREAT_HONOR                           = 58555,            // received when the player has at least 5 stacks of tenacity
+    SPELL_GREATER_HONOR                         = 58556,            // received when the player has more than 10 stacks of tenacity
+    SPELL_GREATEST_HONOR                        = 58557,            // received when the player has 20 stacks of tenacity
 
     SPELL_ALLIANCE_FLAG                         = 14268,            // used on vehicles
     SPELL_HORDE_FLAG                            = 14267,
@@ -57,9 +59,10 @@ enum
     // SPELL_ACTIVATE_ROBOTIC_ARMS              = 49899,
 
     // reward spells
-    SPELL_WINTERGRASP_VICTORY                   = 56902,
-    SPELL_WINTERGRASP_DEFEAT                    = 58494,
-    SPELL_DAMAGED_TOWER                         = 59135,
+    SPELL_WINTERGRASP_VICTORY                   = 56902,            // add 3000 honor and a WG mark of honor
+    SPELL_WINTERGRASP_DEFEAT                    = 58494,            // add 1250 honor and a WG mark of honor
+
+    SPELL_DAMAGED_TOWER                         = 59135,            // honor award spells for specific actions; Require more research
     SPELL_DESTROYED_TOWER                       = 59136,
     SPELL_DAMAGED_BUILDING                      = 59201,
     SPELL_INTACT_BUILDING_DEFEND                = 59203,
@@ -79,11 +82,6 @@ enum
     SPELL_HORDE_CONTROL_PHASE                   = 55773,            // phase 65 - zone phase aura
     SPELL_ESSENCE_WINTERGRASP_ZONE              = 58045,            // phasing 257 - zone specific buff - allows the player to see the Greater Elemental Spirits
 
-    // Teleport spells
-    SPELL_TELEPORT_DALARAN                      = 53360,
-    SPELL_TELEPORT_BRIDGE                       = 59096,
-    SPELL_TELEPORT_DALARAN_TO_WG                = 60035,
-
     // Spirit healer teleport spells - handled by dbscript on gossip
     // SPELL_TELEPORT_FORTRESS_GRAVEYARD        = 59760,
     // SPELL_TELEPORT_SUNKEN_RING               = 59762,
@@ -93,8 +91,14 @@ enum
     // SPELL_TELEPORT_EASTPARK_GRAVEYARD        = 59767,
     // SPELL_TELEPORT_ALLIANCE_LANDING          = 59769,
 
-    SPELL_TELEPORT_PORTAL                       = 54643,
-    SPELL_TELEPORT_VEHICLE                      = 49759,
+    // Teleport spells used during the battle
+    // SPELL_TELEPORT_PORTAL                    = 54643,            // triggered from 54640; cast by the teleport object
+    SPELL_TELEPORT_VEHICLE                      = 49759,            // logic has to be confirmed
+
+    // Teleport spells - to and from Wintergrasp
+    SPELL_TELEPORT_DALARAN                      = 53360,
+    SPELL_TELEPORT_BRIDGE                       = 59096,
+    SPELL_TELEPORT_DALARAN_TO_WG                = 60035,
 
     SPELL_TELEPORT_WINTERGRASP                  = 58622,            // source spell; used by go 193772
     SPELL_TELEPORT_WINTERGRASP_ALLIANCE         = 58633,            // to alliance landing
@@ -117,12 +121,12 @@ enum
     NPC_QUEST_CREDIT_KILL_VEHICLE               = 31093,            // kill enemy vehicle
     NPC_QUEST_CREDIT_DEFEND_VEHICLE             = 31284,
     NPC_QUEST_CREDIT_KILL_ALLIANCE              = 31086,
-    NPC_QUEST_CREDIT_KILL_TOWER                 = 31156,
-    NPC_QUEST_CREDIT_KILL_STRUCTURE             = 31244,
-    NPC_QUEST_CREDIT_KILL_BRIDGE                = 31286,
-    NPC_QUEST_CREDIT_KILL_WALL                  = 31287,
-    NPC_QUEST_CREDIT_KILL_WORKSHOP              = 31288,
-    NPC_QUEST_CREDIT_KILL_GATE                  = 31289,
+    // NPC_QUEST_CREDIT_KILL_TOWER              = 31156,
+    // NPC_QUEST_CREDIT_KILL_STRUCTURE          = 31244,
+    // NPC_QUEST_CREDIT_KILL_BRIDGE             = 31286,
+    // NPC_QUEST_CREDIT_KILL_WALL               = 31287,
+    // NPC_QUEST_CREDIT_KILL_WORKSHOP           = 31288,
+    // NPC_QUEST_CREDIT_KILL_GATE               = 31289,
     NPC_QUEST_CREDIT_KILL_SOUTHERN_TOWER        = 35074,            // destroy any of the 3 southern towers
     NPC_QUEST_CREDIT_KILL_HORDE                 = 39019,
 
@@ -302,12 +306,13 @@ enum
     GRAVEYARD_ID_BROKEN_TEMPLE                  = 1330,
     GRAVEYARD_ID_EASTPARK                       = 1333,
     GRAVEYARD_ID_WESTPARK                       = 1334,
+    GRAVEYARD_ID_FORTRESS_INDOOR                = 1474,                 // fortress indoor graveyard id; inactive during the battle
 
 
     // ***** Events *****
     // destructible building events are defined below - too many to add here
     // EVENT_TITAN_RELIC                        = 22097,                // event sent by the Titan relic - handled by HandleGameObjectUse
-    EVENT_KEEP_DOOR_DESTROY                     = 19448,
+    EVENT_KEEP_DOOR_DESTROY                     = 19607,
 
     // capture points events (identical between horde and alliance GO versions) - defined in wgCapturePointEventData
     EVENT_BROKEN_TEMPLE_CONTEST_ALLIANCE        = 20787,                // horde -> neutral
@@ -623,12 +628,18 @@ enum WintergraspRank
 class WintergraspPlayer : public BattlefieldPlayer
 {
     public:
-        WintergraspPlayer() : BattlefieldPlayer(), rank(WG_RANK_NONE) { }
+        WintergraspPlayer() : BattlefieldPlayer(), killCount(0), playerRank(WG_RANK_NONE) { }
 
-        WintergraspRank GetPlayerRank() const;
+        void SetPlayerRank(WintergraspRank rank) { playerRank = rank; }
+        WintergraspRank GetPlayerRank() const { return playerRank; }
+
+        // Set and get the kill count
+        void IncreaseKillCount() { ++killCount; }
+        uint32 GetKillCount() { return killCount; }
 
     protected:
-        uint32 rank;
+        uint32 killCount;
+        WintergraspRank playerRank;
 };
 
 class BattlefieldWG : public Battlefield
@@ -663,7 +674,11 @@ class BattlefieldWG : public Battlefield
         void EndBattle(Team winner) override;
         void RewardPlayersOnBattleEnd(Team winner) override;
 
-        void UpdatePlayerOnWarResponse(Player* player) override;
+        void OnBattlefieldPlayersUpdate() override;
+
+        void UpdatePlayerBattleResponse(Player* player) override;
+        void UpdatePlayerExitRequest(Player* player) override;
+        void UpdatePlayerGroupDisband(Player* player) override;
 
         bool IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType) override;
         void HandleConditionStateChange(uint32 conditionId, bool state) override;
@@ -695,20 +710,28 @@ class BattlefieldWG : public Battlefield
         // retrieve an available player in zone
         Player* GetPlayerInZone();
 
+        // update player data
+        void UpdatePlayerScore(Player* player);
+
+        // update group tenacities
+        void UpdateTenacities(const WorldObject* objRef);
+
+        // get current player rank
+        WintergraspRank GetPlayerRank(Player* player);
+
+        // send promotion to player
+        void SendPromotionWhisper(Player* player, int32 textEntry);
+
         bool m_sentPrebattleWarning;
 
         // counters
         uint32 m_destroyedTowers[PVP_TEAM_COUNT];
         uint32 m_workshopCount[PVP_TEAM_COUNT];
 
-        // Wintergrasp leaders - used to handle yells
-        ObjectGuid m_zannethGuid;
-        ObjectGuid m_dardoshGuid;
-
-        ObjectGuid m_fortressDoorGuid;
-
         // object storage
         ObjectGuid m_relicGuid[PVP_TEAM_COUNT];
+        ObjectGuid m_zoneLeaderGuid[PVP_TEAM_COUNT];
+        ObjectGuid m_fortressDoorGuid;
 
         std::vector<BattlefieldBuilding*> m_keepBuildings;
         std::vector<BattlefieldBuilding*> m_defenseTowers;
@@ -720,12 +743,12 @@ class BattlefieldWG : public Battlefield
         GuidList m_defenseCannonsGuids;
         GuidList m_attackCannonsGuids;
         GuidList m_stalkersGuids;
-        GuidList m_activeVehiclesGuids;
         GuidList m_detectionUnitsGuids;
         GuidList m_trashMobsGuids;
-        GuidList m_vendorGuids[PVP_TEAM_COUNT];
 
-        GuidList m_vehicleGuids[PVP_TEAM_COUNT];
+        GuidList m_vendorGuids[PVP_TEAM_COUNT];
+        GuidList m_activeVehiclesGuids[PVP_TEAM_COUNT];
+        GuidList m_towerBannersGuids[PVP_TEAM_COUNT];
 };
 
 #endif

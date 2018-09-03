@@ -403,22 +403,6 @@ void Battlefield::Update(uint32 diff)
         m_queueUpdateTimer -= diff;
 }
 
-// ToDo: requires review
-void Battlefield::SetupPlayerPositions()
-{
-    for (auto& m_zonePlayer : m_zonePlayers)
-    {
-        if (!m_zonePlayer.first || !HasPlayer(m_zonePlayer.first))
-            continue;
-
-        Player* plr = sObjectMgr.GetPlayer(m_zonePlayer.first);
-        if (!plr)
-            continue;
-
-        SetupPlayerPosition(plr);
-    }
-}
-
 /**
   Function that rewards the given team players
 
@@ -433,15 +417,15 @@ void Battlefield::QuestCreditTeam(uint32 credit, Team team, WorldObject* source)
         if (!m_zonePlayer.first || !HasPlayer(m_zonePlayer.first))
             continue;
 
-        Player* plr = sObjectMgr.GetPlayer(m_zonePlayer.first);
-        if (!plr)
+        Player* player = sObjectMgr.GetPlayer(m_zonePlayer.first);
+        if (!player)
             continue;
 
         // check if player is eligible for kill credit
-        if (!source || !credit || plr->GetTeam() != team || !plr->IsAtGroupRewardDistance(source))
+        if (!source || !credit || player->GetTeam() != team || !player->IsAtGroupRewardDistance(source))
             continue;
 
-        plr->KilledMonsterCredit(credit);
+        player->KilledMonsterCredit(credit);
     }
 }
 
@@ -627,6 +611,9 @@ void Battlefield::HandleBattlefieldGroupDisband(Player* player)
         m_activePlayers[player->GetObjectGuid()]->removeTime = time(nullptr);
         m_activePlayers[player->GetObjectGuid()]->removeDelay = BF_UNACCEPTED_REMOVE_DELAY;
     }
+
+    // notify battlefield
+    UpdatePlayerGroupDisband(player);
 }
 
 /*********************************************************/
@@ -733,9 +720,6 @@ void Battlefield::HandleWarInviteResponse(Player* player, bool accepted)
             if (m_activePlayers.find(player->GetObjectGuid()) == m_activePlayers.end())  // must never happen
                 InitPlayerBattlefieldData(player);
         }
-
-        // control the rest in battlefield script
-        UpdatePlayerOnWarResponse(player);
     }
     else
     {
@@ -750,6 +734,9 @@ void Battlefield::HandleWarInviteResponse(Player* player, bool accepted)
             }
         }
     }
+
+    // notify battlefield
+    UpdatePlayerBattleResponse(player);
 }
 
 /**
@@ -789,6 +776,9 @@ void Battlefield::HandleExitRequest(Player* player)
             }
         }
     }
+
+    // notify battlefield
+    UpdatePlayerExitRequest(player);
 }
 
 /**

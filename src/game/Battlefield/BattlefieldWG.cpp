@@ -164,10 +164,10 @@ void BattlefieldWG::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, WORLD_STATE_WG_ALLIANCE_DEFENDER, GetDefender() == ALLIANCE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
     FillInitialWorldState(data, count, WORLD_STATE_WG_HORDE_DEFENDER, GetDefender() == HORDE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
 
-    FillInitialWorldState(data, count, WORLD_STATE_WG_VEHICLE_A, uint32(m_vehicleGuids[TEAM_INDEX_ALLIANCE].size()));
+    FillInitialWorldState(data, count, WORLD_STATE_WG_VEHICLE_A, uint32(m_activeVehiclesGuids[TEAM_INDEX_ALLIANCE].size()));
     FillInitialWorldState(data, count, WORLD_STATE_WG_MAX_VEHICLE_A, m_workshopCount[TEAM_INDEX_ALLIANCE] * 4);
 
-    FillInitialWorldState(data, count, WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGuids[TEAM_INDEX_HORDE].size()));
+    FillInitialWorldState(data, count, WORLD_STATE_WG_VEHICLE_H, uint32(m_activeVehiclesGuids[TEAM_INDEX_HORDE].size()));
     FillInitialWorldState(data, count, WORLD_STATE_WG_MAX_VEHICLE_H, m_workshopCount[TEAM_INDEX_HORDE] * 4);
 
     // display all the walls, towers and workshops
@@ -218,7 +218,8 @@ void BattlefieldWG::HandlePlayerEnterZone(Player* player, bool isMainZone)
             player->CastSpell(player, SPELL_TOWER_CONTROL, TRIGGERED_OLD_TRIGGERED);
     }
 
-    // ToDo: update score aura
+    // update score upon entering
+    UpdatePlayerScore(player);
 }
 
 void BattlefieldWG::HandlePlayerLeaveZone(Player* player, bool isMainZone)
@@ -306,7 +307,7 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
             break;
             // alliance vendors
         case NPC_COMMANDER_ZANNETH:
-            m_zannethGuid = creature->GetObjectGuid();
+            m_zoneLeaderGuid[TEAM_INDEX_ALLIANCE] = creature->GetObjectGuid();
             // no break;
         case NPC_ANCHORITE_TESSA:
         case NPC_SENIOR_DEMOLITIONIST_LEGOSO:
@@ -323,7 +324,7 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
             break;
             // horde vendors
         case NPC_COMMANDER_DARDOSH:
-            m_dardoshGuid = creature->GetObjectGuid();
+            m_zoneLeaderGuid[TEAM_INDEX_HORDE] = creature->GetObjectGuid();
             // no break;
         case NPC_HOODOO_MASTER_FUJIN:
         case NPC_LEUTENANT_MURP:
@@ -340,18 +341,18 @@ void BattlefieldWG::HandleCreatureCreate(Creature* creature)
         case NPC_WINTERGRASP_DEMOLISHER:
         case NPC_WINTERGRASP_SIEGE_ENGINE_A:
         case NPC_WINTERGRASP_SIEGE_ENGINE_H:
-            m_activeVehiclesGuids.push_back(creature->GetObjectGuid());
             // increase the vehicle count and update world states
             if (creature->IsTemporarySummon())
             {
                 if (Player* creator = creature->GetMap()->GetPlayer(creature->GetSpawnerGuid()))
                 {
                     Team creatorTeam = creator->GetTeam();
-                    m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].push_back(creature->GetObjectGuid());
-                    SendUpdateWorldState(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
+                    m_activeVehiclesGuids[GetTeamIndexByTeamId(creatorTeam)].push_back(creature->GetObjectGuid());
+                    SendUpdateWorldState(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_activeVehiclesGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
 
-                    // apply faction flag; ToDo: need to research if faction is also updated
+                    // apply faction and faction flag
                     creature->CastSpell(creature, creatorTeam == ALLIANCE ? SPELL_ALLIANCE_FLAG : SPELL_HORDE_FLAG, TRIGGERED_OLD_TRIGGERED);
+                    creature->setFaction(wgTeamFactions[GetTeamIndexByTeamId(creatorTeam)]);
                 }
             }
             break;
@@ -381,11 +382,8 @@ void BattlefieldWG::HandleCreatureDeath(Creature* creature)
                 if (Player* creator = creature->GetMap()->GetPlayer(creature->GetSpawnerGuid()))
                 {
                     Team creatorTeam = creator->GetTeam();
-                    m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].remove(creature->GetObjectGuid());
-                    SendUpdateWorldState(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
-
-                    // update quest credit around for opponent
-                    QuestCreditTeam(NPC_QUEST_CREDIT_KILL_VEHICLE, creatorTeam == ALLIANCE ? HORDE : ALLIANCE, creature);
+                    m_activeVehiclesGuids[GetTeamIndexByTeamId(creatorTeam)].remove(creature->GetObjectGuid());
+                    SendUpdateWorldState(creatorTeam == ALLIANCE ? WORLD_STATE_WG_VEHICLE_A : WORLD_STATE_WG_VEHICLE_H, uint32(m_activeVehiclesGuids[GetTeamIndexByTeamId(creatorTeam)].size()));
                 }
             }
             break;
@@ -497,6 +495,12 @@ void BattlefieldWG::HandleGameObjectCreate(GameObject* go)
         case GO_WG_FORTRESS_DOOR_COLLISION:
             m_fortressDoorGuid = go->GetObjectGuid();
             return;
+        case GO_WINTERGRASP_ALLIANCE_BANNER:
+            m_towerBannersGuids[TEAM_INDEX_ALLIANCE].push_back(go->GetObjectGuid());
+            return;
+        case GO_WINTERGRASP_HORDE_BANNER:
+            m_towerBannersGuids[TEAM_INDEX_HORDE].push_back(go->GetObjectGuid());
+            return;
     }
 }
 
@@ -601,7 +605,9 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
         if (GameObject* relic = go->GetMap()->GetGameObject(m_relicGuid[GetTeamIndexByTeamId(GetAttacker())]))
             relic->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
 
-        // ToDo: open the invisible door
+        // open the invisible door
+        if (GameObject* collision = go->GetMap()->GetGameObject(m_fortressDoorGuid))
+            collision->UseDoorOrButton();
     }
 
     // loop through defense tower
@@ -882,6 +888,10 @@ void BattlefieldWG::GetBattlefieldReady(const WorldObject* objRef)
         relic->Respawn();           // note: on some new versions the relic is allowed to despawn when clicked
     }
 
+    // reset the collision door
+    if (GameObject* collision = objRef->GetMap()->GetGameObject(m_fortressDoorGuid))
+        collision->ResetDoorOrButton();
+
     // ***** Reset Wintergrasp cannons **** //
     // reset and respawn cannons
     for (const auto& guid : m_attackCannonsGuids)
@@ -910,6 +920,9 @@ void BattlefieldWG::GetBattlefieldReady(const WorldObject* objRef)
             trash->ForcedDespawn();
         }
     }
+
+    // unlink fortress graveyard
+    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_FORTRESS_INDOOR, ZONE_ID_WINTERGRASP, TEAM_INVALID);
 
     // ***** Update general stated **** //
     SendUpdateGeneralWorldStates();
@@ -944,6 +957,9 @@ void BattlefieldWG::CleanupBattlefield(const WorldObject* objRef, Team winner)
     // ToDo: needs to be enabled when phase stacking is supported
     // BuffTeam(GetDefender(), SPELL_ESSENCE_WINTERGRASP_ZONE);
 
+    // link fortress graveyard
+    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_FORTRESS_INDOOR, ZONE_ID_WINTERGRASP, winner);
+
     // ***** Reset creatures **** //
     // despawn cannons
     for (const auto& guid : m_attackCannonsGuids)
@@ -956,21 +972,22 @@ void BattlefieldWG::CleanupBattlefield(const WorldObject* objRef, Team winner)
         if (Creature* cannon = objRef->GetMap()->GetCreature(guid))
             cannon->ForcedDespawn();
     }
-    // despawn vehicles
-    for (const auto& guid : m_activeVehiclesGuids)
-    {
-        if (Creature* vehicle = objRef->GetMap()->GetCreature(guid))
-            vehicle->ForcedDespawn();
-    }
-    m_activeVehiclesGuids.clear();
-    // respawn all vendors
     for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
     {
+        // respawn all vendors
         for (const auto& guid : m_vendorGuids[i])
         {
             if (Creature* vendor = objRef->GetMap()->GetCreature(guid))
                 vendor->Respawn();
         }
+
+        // despawn vehicles
+        for (const auto& guid : m_activeVehiclesGuids[i])
+        {
+            if (Creature* vehicle = objRef->GetMap()->GetCreature(guid))
+                vehicle->ForcedDespawn();
+        }
+        m_activeVehiclesGuids[i].clear();
     }
     // respawn trash mobs
     for (const auto& guid : m_trashMobsGuids)
@@ -1029,10 +1046,10 @@ void BattlefieldWG::SendUpdateGeneralWorldStates()
     SendUpdateWorldState(WORLD_STATE_WG_ALLIANCE_DEFENDER, GetDefender() == ALLIANCE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
     SendUpdateWorldState(WORLD_STATE_WG_HORDE_DEFENDER, GetDefender() == HORDE ? WORLD_STATE_ADD : WORLD_STATE_REMOVE);
 
-    SendUpdateWorldState(WORLD_STATE_WG_VEHICLE_A, uint32(m_vehicleGuids[TEAM_INDEX_ALLIANCE].size()));
+    SendUpdateWorldState(WORLD_STATE_WG_VEHICLE_A, uint32(m_activeVehiclesGuids[TEAM_INDEX_ALLIANCE].size()));
     SendUpdateWorldState(WORLD_STATE_WG_MAX_VEHICLE_A, m_workshopCount[TEAM_INDEX_ALLIANCE] * 4);
 
-    SendUpdateWorldState(WORLD_STATE_WG_VEHICLE_H, uint32(m_vehicleGuids[TEAM_INDEX_HORDE].size()));
+    SendUpdateWorldState(WORLD_STATE_WG_VEHICLE_H, uint32(m_activeVehiclesGuids[TEAM_INDEX_HORDE].size()));
     SendUpdateWorldState(WORLD_STATE_WG_MAX_VEHICLE_H, m_workshopCount[TEAM_INDEX_HORDE] * 4);
 }
 
@@ -1042,43 +1059,252 @@ void BattlefieldWG::HandlePlayerKillInsideArea(Player* player, Unit* victim)
     if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
         return;
 
-    if (victim->GetTypeId() == TYPEID_UNIT)
+    BattlefieldPlayerDataMap::iterator itr = m_activePlayers.find(player->GetObjectGuid());
+    if (itr == m_activePlayers.end())
+        return;
+
+    WintergraspPlayer* playerData = (WintergraspPlayer*)itr->second;
+    if (!playerData)
+        return;
+
+    if (victim->GetTypeId() == TYPEID_PLAYER)
     {
+        // award kill credit for player
+        playerData->IncreaseKillCount();
+        player->KilledMonsterCredit(((Player*)victim)->GetTeam() == ALLIANCE ? NPC_QUEST_CREDIT_KILL_ALLIANCE : NPC_QUEST_CREDIT_KILL_HORDE);
+    }
+    else if (victim->GetTypeId() == TYPEID_UNIT)
+    {
+        // award kill credit for creatures
         switch (victim->GetEntry())
         {
             case NPC_VALLIANCE_EXPEDITION_CHAMPION:
             case NPC_VALLIANCE_EXPEDITION_GUARD:
+                playerData->IncreaseKillCount();
+                player->KilledMonsterCredit(NPC_QUEST_CREDIT_KILL_ALLIANCE);
+                break;
             case NPC_WARSONG_GUARD:
             case NPC_WARSONG_CHAMPION:
-                // ToDo: handle player scores when killing opposing faction npcs
+                playerData->IncreaseKillCount();
+                player->KilledMonsterCredit(NPC_QUEST_CREDIT_KILL_HORDE);
                 break;
+            case NPC_WINTERGRASP_CATAPULT:
+            case NPC_WINTERGRASP_DEMOLISHER:
+            case NPC_WINTERGRASP_SIEGE_ENGINE_A:
+            case NPC_WINTERGRASP_SIEGE_ENGINE_H:
+                if (player->GetTeam() == GetDefender())
+                    player->KilledMonsterCredit(NPC_QUEST_CREDIT_KILL_VEHICLE);
+                // no break;
+            case NPC_WINTERGRASP_TOWER_CANNON:
+                playerData->IncreaseKillCount();
+                break;
+            default:
+                return;
         }
     }
+
+    UpdatePlayerScore(player);
+}
+
+// Function that updates the rank and score of the player
+void BattlefieldWG::UpdatePlayerScore(Player* player)
+{
+    BattlefieldPlayerDataMap::iterator itr = m_activePlayers.find(player->GetObjectGuid());
+    if (itr == m_activePlayers.end())
+        return;
+
+    WintergraspPlayer* playerData = (WintergraspPlayer*)itr->second;;
+    if (!playerData)
+        return;
+
+    uint32 playerKills = playerData->GetKillCount();
+
+    // set player rank based on kills
+    switch (playerKills)
+    {
+        case 0:
+            playerData->SetPlayerRank(WG_RANK_RECRUIT);
+            break;
+        case MAX_WG_CORPORAL_KILLS:
+            playerData->SetPlayerRank(WG_RANK_CORPORAL);
+            SendPromotionWhisper(player, LANG_OPVP_WG_REACHED_RANK_1);
+            break;
+        case MAX_WG_LIEUTENANT_KILLS:
+            playerData->SetPlayerRank(WG_RANK_LIEUTENANT);
+            SendPromotionWhisper(player, LANG_OPVP_WG_REACHED_RANK_2);
+            break;
+    }
+
+    WintergraspRank rank = playerData->GetPlayerRank();
+
+    // update buffs and rank
+    switch (rank)
+    {
+        // recruit and corporal auras increase the buff by every kill
+        case WG_RANK_RECRUIT:
+            player->CastSpell(player, SPELL_RECRUIT, TRIGGERED_OLD_TRIGGERED);
+            break;
+        case WG_RANK_CORPORAL:
+            if (player->HasAura(SPELL_RECRUIT))
+                player->RemoveAurasDueToSpell(SPELL_RECRUIT);
+
+            player->CastSpell(player, SPELL_CORPORAL, TRIGGERED_OLD_TRIGGERED);
+            break;
+        case WG_RANK_LIEUTENANT:
+            if (player->HasAura(SPELL_CORPORAL))
+                player->RemoveAurasDueToSpell(SPELL_CORPORAL);
+
+            if (!player->HasAura(SPELL_LIEUTENANT))
+                player->CastSpell(player, SPELL_LIEUTENANT, TRIGGERED_OLD_TRIGGERED);
+            break;
+    }
+}
+
+// Function to send promotion whisper to player
+void BattlefieldWG::SendPromotionWhisper(Player* player, int32 textEntry)
+{
+    int32 locIdx = player->GetSession()->GetSessionDbLocaleIndex();
+    char const* text = sObjectMgr.GetMangosString(textEntry, locIdx);
+
+    player->MonsterWhisper(text, player, true);
 }
 
 void BattlefieldWG::RewardPlayersOnBattleEnd(Team winner)
 {
+    for (auto& m_zonePlayer : m_zonePlayers)
+    {
+        if (!m_zonePlayer.first)
+            continue;
 
+        Player* player = sObjectMgr.GetPlayer(m_zonePlayer.first);
+        if (!player)
+            continue;
+
+        // award quest and honor
+        if (player->GetTeam() == winner)
+        {
+            player->CastSpell(player, SPELL_WINTERGRASP_VICTORY, TRIGGERED_OLD_TRIGGERED);
+            player->AreaExploredOrEventHappens(winner == ALLIANCE ? QUEST_ID_VICTORY_IN_WINTERGRASP_A : QUEST_ID_VICTORY_IN_WINTERGRASP_H);
+        }
+        else
+            player->CastSpell(player, SPELL_WINTERGRASP_DEFEAT, TRIGGERED_OLD_TRIGGERED);
+    }
+}
+
+void BattlefieldWG::OnBattlefieldPlayersUpdate()
+{
+    // update tenacities on group refresh
+    if (Player* player = GetPlayerInZone())
+        UpdateTenacities(player);
 }
 
 void BattlefieldWG::InitPlayerBattlefieldData(Player* player)
 {
-
+    m_activePlayers[player->GetObjectGuid()] = new WintergraspPlayer();
+    UpdatePlayerScore(player);
 }
 
 void BattlefieldWG::SetupPlayerPosition(Player* player)
 {
-
+    // ToDo: logic to be confirmed
+    // Function is supposed to teleport player to the battlefield by getting the right position; Some players are teleported at the bridge, others to the fortress
+    //if (player->GetTeam() != GetDefender() && player->GetPositionX() > 5395.0f && player->GetPositionY() > 2802.0f && player->GetPositionY() < 2879.0f && player->GetPositionZ() < 476.0f)
+    //    player->CastSpell(player, SPELL_TELEPORT_BRIDGE, TRIGGERED_OLD_TRIGGERED);
 }
 
 bool BattlefieldWG::GetPlayerKickLocation(Player* player, float& x, float& y, float& z)
 {
+    // ToDo: logic to be confirmed
     return false;
 }
 
-void BattlefieldWG::UpdatePlayerOnWarResponse(Player* player)
+// Return player rank in the battlefield
+WintergraspRank BattlefieldWG::GetPlayerRank(Player* player)
 {
+    BattlefieldPlayerDataMap::iterator itr = m_activePlayers.find(player->GetObjectGuid());
+    if (itr == m_activePlayers.end())
+        return WG_RANK_NONE;
 
+    return ((WintergraspPlayer*)itr->second)->GetPlayerRank();
+}
+
+void BattlefieldWG::UpdatePlayerBattleResponse(Player* player)
+{
+    UpdateTenacities(player);
+    UpdatePlayerScore(player);
+}
+
+void BattlefieldWG::UpdatePlayerExitRequest(Player* player)
+{
+    UpdateTenacities(player);
+}
+
+void BattlefieldWG::UpdatePlayerGroupDisband(Player* player)
+{
+    UpdateTenacities(player);
+}
+
+// Function used to balance the raid
+void BattlefieldWG::UpdateTenacities(const WorldObject* objRef)
+{
+    // The bigger the gap between the alliance and horde group number, the higher the tenacity buffs the dissadvantaged team receives
+    // In average the tenacity stacks is defined by the group difference gap divided by 10; however this has to be scaled based on the team size
+
+    // ToDo: verify the calculation
+    int32 allyPlayerCount = GetPlayerCountByTeam(TEAM_INDEX_ALLIANCE);
+    int32 hordePlayerCount = GetPlayerCountByTeam(TEAM_INDEX_HORDE);
+    uint32 playerDiff = abs(allyPlayerCount - hordePlayerCount);
+
+    // divide the difference by ten
+    playerDiff = playerDiff * .1;
+
+    for (auto& m_zonePlayer : m_zonePlayers)
+    {
+        if (!m_zonePlayer.first)
+            continue;
+
+        Player* player = sObjectMgr.GetPlayer(m_zonePlayer.first);
+        if (!player)
+            continue;
+
+        // reset all players tenacities
+        player->RemoveAurasDueToSpell(SPELL_TENACITY);
+
+        // Note: the exact values have to be confirmed
+
+        // cast the tenacity stacks
+        if (playerDiff && (player->GetTeam() == ALLIANCE && allyPlayerCount > hordePlayerCount) || (player->GetTeam() == HORDE && hordePlayerCount > allyPlayerCount))
+        {
+            for (uint8 i = 0; i < playerDiff; ++i)
+                player->CastSpell(player, SPELL_TENACITY, TRIGGERED_OLD_TRIGGERED);
+
+            // outnumbered team also get more honor
+            if (playerDiff > 10)
+                player->CastSpell(player, SPELL_GREATEST_HONOR, TRIGGERED_OLD_TRIGGERED);
+            else if (playerDiff > 5)
+                player->CastSpell(player, SPELL_GREATER_HONOR, TRIGGERED_OLD_TRIGGERED);
+            else
+                player->CastSpell(player, SPELL_GREAT_HONOR, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+
+    // update vehicle tenacities
+    for (uint32 i = 0; i < PVP_TEAM_COUNT; ++i)
+    {
+        for (const auto& guid : m_activeVehiclesGuids[i])
+        {
+            if (Creature* vehicle = objRef->GetMap()->GetCreature(guid))
+            {
+                vehicle->RemoveAurasDueToSpell(SPELL_TENACITY_VEHICLE);
+
+                if (playerDiff && (i == TEAM_INDEX_ALLIANCE && allyPlayerCount > hordePlayerCount) || (i == TEAM_INDEX_HORDE && hordePlayerCount > allyPlayerCount))
+                {
+                    for (uint32 i = 0; i < playerDiff; ++i)
+                        vehicle->CastSpell(vehicle, SPELL_TENACITY_VEHICLE, TRIGGERED_OLD_TRIGGERED);
+                }
+            }
+        }
+    }
 }
 
 // Function to handle the warnings
@@ -1139,9 +1365,9 @@ bool BattlefieldWG::IsConditionFulfilled(Player const* source, uint32 conditionI
     switch (conditionId)
     {
         case OPVP_COND_WG_MAX_ALLIANCE_VEHICLES:
-            return GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && uint32(m_vehicleGuids[TEAM_INDEX_ALLIANCE].size()) < m_workshopCount[TEAM_INDEX_ALLIANCE] * 4;
+            return GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && uint32(m_activeVehiclesGuids[TEAM_INDEX_ALLIANCE].size()) < m_workshopCount[TEAM_INDEX_ALLIANCE] * 4;
         case OPVP_COND_WG_MAX_HORDE_VEHICLES:
-            return GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && uint32(m_vehicleGuids[TEAM_INDEX_HORDE].size()) < m_workshopCount[TEAM_INDEX_HORDE] * 4;
+            return GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS && uint32(m_activeVehiclesGuids[TEAM_INDEX_HORDE].size()) < m_workshopCount[TEAM_INDEX_HORDE] * 4;
         case OPVP_COND_WG_BATTLEFIELD_IN_PROGRESS:
             return GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS;
         case OPVP_COND_WG_FORTRESS_ACCESS_ALLOWED:
