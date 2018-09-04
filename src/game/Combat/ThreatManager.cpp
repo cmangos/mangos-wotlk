@@ -161,7 +161,7 @@ void HostileReference::updateOnlineStatus()
     // ref is valid
     // target is not gamemaster
     // target is not in flight
-    bool validTarget = getTarget() && (getTarget()->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(getTarget())->isGameMaster() || !getTarget()->IsTaxiFlying());
+    bool validTarget = getTarget() && ((getTarget()->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(getTarget())->isGameMaster()) || !getTarget()->IsTaxiFlying());
     if (isValid() && validTarget)
     {
         Unit* unit = getSourceUnit();

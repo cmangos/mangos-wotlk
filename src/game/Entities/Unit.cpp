@@ -911,7 +911,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
         if (damagetype != INSTAKILL)
         {
-            if (pKiller && pKiller != pVictim && (pKiller == pTapper || pKiller->GetGroup() == pTapperGroup && pTapperGroup))
+            if (pKiller && pKiller != pVictim && (pKiller == pTapper || (pTapperGroup &&  pKiller->GetGroup() == pTapperGroup)))
             {
                 WorldPacket data(SMSG_PARTYKILLLOG, (8 + 8));   // send event PARTY_KILL
                 data << pKiller->GetObjectGuid();            // player with killing blow
@@ -927,7 +927,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
         // proc only once for victim
         if (Unit* owner = GetOwner())
             owner->ProcDamageAndSpell(ProcSystemArguments(pVictim, PROC_FLAG_KILL, PROC_FLAG_NONE, PROC_EX_NONE, 0));
-        
+
         ProcDamageAndSpell(ProcSystemArguments(pVictim, PROC_FLAG_KILL, PROC_FLAG_KILLED, PROC_EX_NONE, 0));
 
         // Reward player, his pets, and group/raid members
@@ -1048,8 +1048,8 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
 
         pVictim->ModifyHealth(- (int32)damage);
 
-        if (CanAttack(pVictim) && (!spellProto || !spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
-            !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT)))
+        if (CanAttack(pVictim) && (!spellProto || (!spellProto->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
+            !spellProto->HasAttribute(SPELL_ATTR_EX_NO_THREAT))))
         {
             float threat = damage * sSpellMgr.GetSpellThreatMultiplier(spellProto);
             pVictim->AddThreat(this, threat, (cleanDamage && cleanDamage->hitOutCome == MELEE_HIT_CRIT), damageSchoolMask, spellProto);
@@ -4503,7 +4503,7 @@ void Unit::SetCurrentCastedSpell(Spell* pSpell)
             {
                 if(!pSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
                     InterruptSpell(CURRENT_CHANNELED_SPELL, false);
-            }            
+            }
 
             // autorepeat breaking
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
@@ -6402,7 +6402,7 @@ bool Unit::CanInitiateAttack() const
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
         if (GetTypeId() != TYPEID_UNIT || (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->GetForceAttackingCapability()))
             return false;
-           
+
     if (GetTypeId() == TYPEID_UNIT && !((Creature*)this)->CanAggro())
         return false;
 
@@ -8397,7 +8397,7 @@ int32 Unit::SpellBaseHealingBonusDone(SpellSchoolMask schoolMask)
 
     AuraList const& mHealingDone = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE);
     for (auto i : mHealingDone)
-        if (!i->GetModifier()->m_miscvalue || (i->GetModifier()->m_miscvalue & schoolMask) != 0)
+        if ((i->GetModifier()->m_miscvalue & schoolMask) != 0)
             AdvertisedBenefit += i->GetModifier()->m_amount;
 
     // Healing bonus of spirit, intellect and strength
@@ -8575,7 +8575,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
     int32 APbonus   = 0;
 
     // ..done flat, already included in weapon damage based spells
-    if (!isWeaponDamageBasedSpell || spellProto && schoolMask &~ SPELL_SCHOOL_MASK_NORMAL)
+    if (!isWeaponDamageBasedSpell || (spellProto && (schoolMask &~ SPELL_SCHOOL_MASK_NORMAL) != 0))
     {
         AuraList const& mModDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
         for (auto i : mModDamageDone)
@@ -8905,7 +8905,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackTy
     // =================
 
     // scaling of non weapon based spells
-    if (!isWeaponDamageBasedSpell || spellProto && schoolMask &~ SPELL_SCHOOL_MASK_NORMAL)
+    if (!isWeaponDamageBasedSpell || (spellProto && (schoolMask &~ SPELL_SCHOOL_MASK_NORMAL) != 0))
     {
         // apply benefit affected by spell power implicit coeffs and spell level penalties
         TakenAdvertisedBenefit = pCaster->SpellBonusWithCoeffs(spellProto, 0, TakenAdvertisedBenefit, 0, damagetype, false);
@@ -9163,7 +9163,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
     if (!isAlive())
         return;
 
-    if (PvP || GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsTotem())
+    if (PvP || (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsTotem()))
         m_CombatTimer = 5000;
 
     bool creatureNotInCombat = GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
