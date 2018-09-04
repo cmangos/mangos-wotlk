@@ -232,9 +232,9 @@ UnitAI* GetAI_mobs_nether_drake(Creature* pCreature)
 
 enum
 {
-    SAY_SPELL_INFLUENCE     = -1000174,
-    NPC_KALIRI_AURA_DISPEL  = 21511,
-    SPELL_LASHHAN_CHANNEL   = 36904
+    SAY_SPELL_INFLUENCE         = -1000174,
+    SPELL_LASHHAN_CHANNEL       = 36904,
+    SPELL_DISPELLING_ANALYSIS   = 37028
 };
 
 struct npc_daranelleAI : public ScriptedAI
@@ -251,9 +251,7 @@ struct npc_daranelleAI : public ScriptedAI
             {
                 DoScriptText(SAY_SPELL_INFLUENCE, m_creature, pWho);
 
-                // TODO: Move the below to updateAI and run if this statement == true
-                ((Player*)pWho)->KilledMonsterCredit(NPC_KALIRI_AURA_DISPEL, m_creature->GetObjectGuid());
-                pWho->RemoveAurasDueToSpell(SPELL_LASHHAN_CHANNEL);
+                m_creature->CastSpell(pWho, SPELL_DISPELLING_ANALYSIS, TRIGGERED_NONE);
             }
         }
 

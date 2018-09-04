@@ -1855,7 +1855,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000172,'No doubt the fools that banished me are long dead. I shall take wing survey my demense. Pray to whatever gods you hold dear that we do not meet again.',0,1,0,0,'nether_drake SAY_NIHIL_4'),
 (-1000173,'NOOOOooooooo!',0,1,0,0,'nether_drake SAY_NIHIL_INTERRUPT'),
 
-(-1000174,'Good $N, you are under the spell\'s influence. I must analyze it quickly, then we can talk.',0,0,7,0,'daranelle SAY_SPELL_INFLUENCE'),
+(-1000174,'Good, $n, you are under the spell\'s influence. I must analyze it quickly, then we can talk.',0,0,0,0,'daranelle SAY_SPELL_INFLUENCE'),
 
 (-1000175,'Thank you, mortal.',0,0,11,0,' SAY_JUST_EATEN'),
 

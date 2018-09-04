@@ -8857,6 +8857,24 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_NONE);
                     return;
                 }
+                case 37013:                                 // Despawn Kaliri Totem
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (unitTarget->GetEntry() == 21468)
+                        ((Creature*)unitTarget)->ForcedDespawn(0);
+                    return;
+                }
+                case 37028:                                 // Dispelling Analysis
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(36904);
+                    unitTarget->CastSpell(unitTarget, 37013, TRIGGERED_NONE);
+                    return;
+                }
                 case 37431:                                 // Spout
                 {
                     if (!unitTarget)
