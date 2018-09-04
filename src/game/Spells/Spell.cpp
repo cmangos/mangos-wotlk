@@ -8503,6 +8503,9 @@ WorldObject* Spell::GetCastingObject() const
 {
     if (m_originalCasterGUID.IsGameObject())
         return m_caster->IsInWorld() ? m_caster->GetMap()->GetGameObject(m_originalCasterGUID) : nullptr;
+    else if (m_originalCasterGUID.IsDynamicObject())
+        return m_caster->IsInWorld() ? m_caster->GetMap()->GetDynamicObject(m_originalCasterGUID) : nullptr;
+
     return m_caster;
 }
 
