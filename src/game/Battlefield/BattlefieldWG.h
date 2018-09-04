@@ -93,7 +93,7 @@ enum
 
     // Teleport spells used during the battle
     // SPELL_TELEPORT_PORTAL                    = 54643,            // triggered from 54640; cast by the teleport object
-    SPELL_TELEPORT_VEHICLE                      = 49759,            // logic has to be confirmed
+    // SPELL_TELEPORT_VEHICLE                   = 49759,            // handled in wintergrasp scripts
 
     // Teleport spells - to and from Wintergrasp
     SPELL_TELEPORT_DALARAN                      = 53360,
@@ -207,7 +207,6 @@ enum
     // NPC_CONTROL_ARMS                         = 27852,            // has some animation during vehicle summmon
 
     // dummy npcs / helpers
-    // NPC_WORLD_TRIGGER                        = 23472,            // used as teleport target
     NPC_INVISIBLE_STALKER                       = 15214,            // sends raid emotes
     NPC_WINTERGRASP_DETECTION_UNIT              = 27869,            // use unk; has unk aura 57577; loaded as active object in order to keep the grid active
 
@@ -221,12 +220,16 @@ enum
 
 
     // ***** Gameobjects *****
-    // titan relics
+    // titan relics (goobers)
     GO_TITAN_RELIC_ALLIANCE                     = 192834,           // both send event id 22097
     GO_TITAN_RELIC_HORDE                        = 192829,
 
+    // fortress doors (literally door objects)
+    GO_WG_FORTRESS_COLLISION_DOOR               = 194162,           // invisible door - needs to be manually open when the real door is destroyed
+    GO_WG_FORTRESS_COLLISION_WALL               = 194323,
+
+    // *** Destructible objects ***
     // fortress walls
-    GO_WG_FORTRESS_DOOR_COLLISION               = 194162,           // invisible door - needs to be manually open when the real door is destroyed
     GO_WG_FORTRESS_DOOR                         = 191810,
     GO_WG_FORTRESS_GATE                         = 190375,
     GO_WG_FORTRESS_WALL_1                       = 190220,
@@ -272,7 +275,7 @@ enum
     GO_WORKSHOP_WESTPARK                        = 192032,
     GO_WORKSHOP_EASTPARK                        = 192033,
 
-    // capture points
+    // *** Capture points ***
     // each faction has a different starting value for the capture point; the objects are phased based on the zone defender
     // each object pair share the same event id
     GO_CAPTUREPOINT_BROKEN_TEMPLE_A             = 192627,
@@ -293,6 +296,7 @@ enum
     // GO_VEHICLE_TELEPORTER                    = 192951,               // generic object; the actual teleport is handled in a different way
     // GO_PORTAL_TO_WINTERGRASP                 = 193772,               // portal from dalaran to WG
 
+    // banners
     GO_WINTERGRASP_ALLIANCE_BANNER              = 192487,               // banners that have to be despawned when object is damaged or destroyed
     GO_WINTERGRASP_HORDE_BANNER                 = 192488,
 
@@ -649,45 +653,61 @@ class BattlefieldWG : public Battlefield
 
         void Reset();
 
+        // player enter / exit zone
         void HandlePlayerEnterZone(Player* player, bool isMainZone) override;
         void HandlePlayerLeaveZone(Player* player, bool isMainZone) override;
+
+        // player enter / exit area - used for factories
         void HandlePlayerEnterArea(Player* player, uint32 areaId, bool isMainZone) override;
         void HandlePlayerLeaveArea(Player* player, uint32 areaId, bool isMainZone) override;
 
+        // update world states
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         void SendRemoveWorldStates(Player* player) override;
 
+        // handle gameobject events
         bool HandleEvent(uint32 eventId, GameObject* go) override;
 
+        // handle creature create or death
         void HandleCreatureCreate(Creature* creature) override;
         void HandleCreatureDeath(Creature* creature) override;
-        void HandleGameObjectCreate(GameObject* go) override;
 
+        // handle gameobject create or death
+        void HandleGameObjectCreate(GameObject* go) override;
         bool HandleGameObjectUse(Player* player, GameObject* go) override;
 
+        // handle player kills
         void HandlePlayerKillInsideArea(Player* player, Unit* victim) override;
-        void Update(uint32 diff) override;
 
+        // update functions
+        void Update(uint32 diff) override;
         void SendBattlefieldTimerUpdate() override;
 
+        // start and end battle
         void StartBattle(Team defender) override;
         void EndBattle(Team winner) override;
+
+        // reward teams
         void RewardPlayersOnBattleEnd(Team winner) override;
 
+        // player and group updates
         void OnBattlefieldPlayersUpdate() override;
-
         void UpdatePlayerBattleResponse(Player* player) override;
         void UpdatePlayerExitRequest(Player* player) override;
         void UpdatePlayerGroupDisband(Player* player) override;
 
+        // conditions
         bool IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType) override;
-        void HandleConditionStateChange(uint32 conditionId, bool state) override;
 
     private:
 
+        // load player data: rank and killcount
         void InitPlayerBattlefieldData(Player* player) override;
+
+        // get player kickout location
         bool GetPlayerKickLocation(Player* player, float& x, float& y, float& z) override;
 
+        // set the position for player to enter the battlefield (done by spell)
         void SetupPlayerPosition(Player* player) override;
 
         // functions to handle the battlefield events
@@ -697,7 +717,7 @@ class BattlefieldWG : public Battlefield
         // handle lock / unlock of the workshops
         void LockWorkshops(bool lock, const WorldObject* objRef, WintergraspFactory* workshop);
 
-        // battlefield reset
+        // battlefield reset before and after the battle
         void GetBattlefieldReady(const WorldObject* objRef);
         void CleanupBattlefield(const WorldObject* objRef, Team winner);
 
@@ -707,13 +727,13 @@ class BattlefieldWG : public Battlefield
         // send battlefield warning
         void SendWintergraspWarning(int32 messageId, const WorldObject* objRef, uint32 soundId = 0);
 
-        // retrieve an available player in zone
+        // retrieve any available player in zone
         Player* GetPlayerInZone();
 
         // update player data
         void UpdatePlayerScore(Player* player);
 
-        // update group tenacities
+        // update group tenacities - custom way to balance the teams
         void UpdateTenacities(const WorldObject* objRef);
 
         // get current player rank
@@ -722,6 +742,7 @@ class BattlefieldWG : public Battlefield
         // send promotion to player
         void SendPromotionWhisper(Player* player, int32 textEntry);
 
+        // variables
         bool m_sentPrebattleWarning;
 
         // counters
@@ -731,8 +752,11 @@ class BattlefieldWG : public Battlefield
         // object storage
         ObjectGuid m_relicGuid[PVP_TEAM_COUNT];
         ObjectGuid m_zoneLeaderGuid[PVP_TEAM_COUNT];
-        ObjectGuid m_fortressDoorGuid;
 
+        ObjectGuid m_fortressDoorGuid;
+        ObjectGuid m_fortressDoorWallGuid;
+
+        // buildings
         std::vector<BattlefieldBuilding*> m_keepBuildings;
         std::vector<BattlefieldBuilding*> m_defenseTowers;
         std::vector<BattlefieldBuilding*> m_offenseTowers;
@@ -740,6 +764,7 @@ class BattlefieldWG : public Battlefield
         std::vector<WintergraspFactory*> m_defenseWorkshops;
         std::vector<WintergraspFactory*> m_capturableWorkshops;
 
+        // guid lists
         GuidList m_defenseCannonsGuids;
         GuidList m_attackCannonsGuids;
         GuidList m_stalkersGuids;

@@ -1637,6 +1637,10 @@ UPDATE creature_template SET ScriptName='npc_defias_traitor' WHERE entry=467;
 UPDATE creature_template SET ScriptName='npc_tapoke_slim_jahn' WHERE entry=4962;
 UPDATE creature_template SET ScriptName='npc_mikhail' WHERE entry=4963;
 
+/* WINTERGRASP */
+UPDATE creature_template SET ScriptName='npc_spirit_guide_wintergrasp' WHERE entry IN (31841,31842);
+UPDATE gameobject_template SET ScriptName='go_vehicle_teleporter' WHERE entry=192951;
+
 /* WINTERSPRING */
 UPDATE creature_template SET ScriptName='npc_ranshalla' WHERE entry=10300;
 UPDATE gameobject_template SET ScriptName='go_elune_fire' WHERE entry IN (177417, 177404);

@@ -17,15 +17,171 @@
 /* ScriptData
 SDName: Wintergrasp
 SD%Complete: 0
-SDComment: Placeholder
+SDComment: Wintergrasp battlefield related scripts
 SDCategory: Wintergrasp
 EndScriptData */
 
 /* ContentData
+npc_spirit_guide_wintergrasp
+go_vehicle_teleporter
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
+#include "Battlefield/BattlefieldWG.h"
+
+enum
+{
+    // Wintergrasp spirit healer (copy from battleground)
+    SPELL_SPIRIT_HEAL_CHANNEL       = 22011,                // Spirit Heal Channel
+
+    SPELL_SPIRIT_HEAL               = 22012,                // Spirit Heal
+    SPELL_SPIRIT_HEAL_MANA          = 44535,                // in battlegrounds player get this no-mana-cost-buff
+
+    SPELL_WAITING_TO_RESURRECT      = 2584,                 // players who cancel this aura don't want a resurrection
+
+
+    // vehicle teleporter
+    MAX_WINTERGRASP_VEHICLES        = 4,
+
+    SPELL_TELEPORT_VEHICLE          = 49759,                // teleport all vehicles in range
+
+    NPC_WORLD_TRIGGER               = 23472,                // used as teleport target
+};
+
+static const uint32 aWintergraspVehicles[MAX_WINTERGRASP_VEHICLES] = { NPC_WINTERGRASP_CATAPULT, NPC_WINTERGRASP_DEMOLISHER, NPC_WINTERGRASP_SIEGE_ENGINE_A, NPC_WINTERGRASP_SIEGE_ENGINE_H };
+
+/*###############
+## npc_spirit_guide_wintergrasp
+################*/
+
+struct npc_spirit_guide_wintergraspAI : public ScriptedAI
+{
+    npc_spirit_guide_wintergraspAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        // initialize area script
+        OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(pCreature->GetZoneId());
+        if (outdoorPvP && outdoorPvP->IsBattlefield())
+            m_battlefield = (Battlefield*)outdoorPvP;
+
+        Reset();
+    }
+
+    Battlefield* m_battlefield;
+
+    void Reset() override {}
+
+    void UpdateAI(const uint32 /*uiDiff*/) override
+    {
+        if (!m_battlefield)
+            return;
+
+        if (m_battlefield->GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
+            return;
+
+        // auto cast the whole time this spell
+        if (!m_creature->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+            m_creature->CastSpell(m_creature, SPELL_SPIRIT_HEAL_CHANNEL, TRIGGERED_NONE);
+    }
+
+    void SpellHitTarget(Unit* pUnit, const SpellEntry* pSpellEntry) override
+    {
+        if (pSpellEntry->Id == SPELL_SPIRIT_HEAL && pUnit->GetTypeId() == TYPEID_PLAYER
+                && pUnit->HasAura(SPELL_WAITING_TO_RESURRECT))
+            pUnit->CastSpell(pUnit, SPELL_SPIRIT_HEAL_MANA, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+UnitAI* GetAI_npc_spirit_guide_wintergrasp(Creature* pCreature)
+{
+    return new npc_spirit_guide_wintergraspAI(pCreature);
+}
+
+/*###############
+## go_vehicle_teleporter
+################*/
+
+struct go_vehicle_teleporter : public GameObjectAI
+{
+    go_vehicle_teleporter(GameObject* go) : GameObjectAI(go)
+    {
+        // initialize area script
+        OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(go->GetZoneId());
+        if (outdoorPvP && outdoorPvP->IsBattlefield())
+            m_battlefield = (Battlefield*)outdoorPvP;
+
+        m_gameobject = go;
+        m_uiTeleportTimer = 1000;
+    }
+
+    Battlefield* m_battlefield;
+    GameObject* m_gameobject;
+
+    uint32 m_uiTeleportTimer;
+
+    // Return the teleport destination target
+    Unit* GetTeleportTarget(Creature* source)
+    {
+        // The destination trigger is between 64 and 69 away; no more than 70
+        std::list<Creature*> lTriggersInRange;
+        GetCreatureListWithEntryInGrid(lTriggersInRange, source, NPC_WORLD_TRIGGER, 70.0f);
+
+        if (lTriggersInRange.empty())
+            return nullptr;
+
+        lTriggersInRange.sort(ObjectDistanceOrderReversed(source));
+        return lTriggersInRange.front();
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_battlefield || !m_gameobject)
+            return;
+
+        if (m_battlefield->GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
+            return;
+
+        if (m_uiTeleportTimer < uiDiff)
+        {
+            for (uint8 i = 0; i < MAX_WINTERGRASP_VEHICLES; ++i)
+            {
+                // Note: the object has a very large range; might need to be corrected in DB
+                if (Creature* vehicle = GetClosestCreatureWithEntry(m_gameobject, aWintergraspVehicles[i], 0.1f))
+                {
+                    if (vehicle->HasAura(SPELL_TELEPORT_VEHICLE))
+                        continue;
+
+                    // validate vehicle ownership against the flag it carries
+                    if ((m_battlefield->GetDefender() == ALLIANCE && vehicle->HasAura(SPELL_ALLIANCE_FLAG)) ||
+                        m_battlefield->GetDefender() == HORDE && vehicle->HasAura(SPELL_HORDE_FLAG))
+                    {
+                        // teleport to the trigger which is furthest away
+                        if (Unit* target = GetTeleportTarget(vehicle))
+                            vehicle->CastSpell(target, SPELL_TELEPORT_VEHICLE, TRIGGERED_OLD_TRIGGERED);
+                    }
+                }
+            }
+            m_uiTeleportTimer = 1000;
+        }
+        else
+            m_uiTeleportTimer -= uiDiff;
+    }
+};
+
+
+GameObjectAI* GetAI_go_vehicle_teleporter(GameObject* go)
+{
+    return new go_vehicle_teleporter(go);
+}
 
 void AddSC_wintergrasp()
 {
+    Script* pNewScript = new Script;
+    pNewScript->Name = "npc_spirit_guide_wintergrasp";
+    pNewScript->GetAI = &GetAI_npc_spirit_guide_wintergrasp;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_vehicle_teleporter";
+    pNewScript->GetGameObjectAI = &GetAI_go_vehicle_teleporter;
+    pNewScript->RegisterSelf();
 }

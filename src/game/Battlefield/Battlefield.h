@@ -204,6 +204,12 @@ class Battlefield : public OutdoorPvP
         // called when the group disbands
         virtual void UpdatePlayerGroupDisband(Player* /*player*/) {};
 
+        // reward players
+        virtual void RewardPlayersOnBattleEnd(Team /*winner*/) {};
+
+        // load player positions
+        virtual void SetupPlayerPosition(Player* /*player*/) { };
+
         // invite player to join battlefield queue
         void InvitePlayerToQueue(Player* /*player*/);
 
@@ -219,14 +225,8 @@ class Battlefield : public OutdoorPvP
         // sends a raid warning to all players in the zone
         void SendZoneWarning(WorldObject* /*source*/, int32 /*textEntry*/, uint32 soundId = 0);
 
-        // reward players
-        virtual void RewardPlayersOnBattleEnd(Team /*winner*/) {};
-
-        // load player positions
-        virtual void SetupPlayerPosition(Player* player) { };
-
-        // reward player quest credit
-        void QuestCreditTeam(uint32 credit, Team team, WorldObject* source);
+        // reward player group quest kill credit
+        void QuestCreditTeam(uint32 /*credit*/, Team /*team*/, WorldObject* /*source*/);
 
         // Group system
         bool CanAddPlayerToRaid(Player* /*player*/);

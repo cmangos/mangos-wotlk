@@ -492,8 +492,11 @@ void BattlefieldWG::HandleGameObjectCreate(GameObject* go)
         case GO_TITAN_RELIC_HORDE:
             m_relicGuid[TEAM_INDEX_HORDE] = go->GetObjectGuid();
             return;
-        case GO_WG_FORTRESS_DOOR_COLLISION:
+        case GO_WG_FORTRESS_COLLISION_DOOR:
             m_fortressDoorGuid = go->GetObjectGuid();
+            return;
+        case GO_WG_FORTRESS_COLLISION_WALL:
+            m_fortressDoorWallGuid = go->GetObjectGuid();
             return;
         case GO_WINTERGRASP_ALLIANCE_BANNER:
             m_towerBannersGuids[TEAM_INDEX_ALLIANCE].push_back(go->GetObjectGuid());
@@ -605,8 +608,10 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
         if (GameObject* relic = go->GetMap()->GetGameObject(m_relicGuid[GetTeamIndexByTeamId(GetAttacker())]))
             relic->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
 
-        // open the invisible door
+        // open the invisible door and wall
         if (GameObject* collision = go->GetMap()->GetGameObject(m_fortressDoorGuid))
+            collision->UseDoorOrButton();
+        if (GameObject* collision = go->GetMap()->GetGameObject(m_fortressDoorWallGuid))
             collision->UseDoorOrButton();
     }
 
@@ -642,7 +647,9 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
 
             // send world state updatem
             SendUpdateWorldState(tower->GetWorldState(), tower->GetGoState());
-            return true;
+
+            // allow further DB script processing
+            return false;
         }
         ++index;
     }
@@ -674,8 +681,9 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
                 QuestCreditTeam(NPC_QUEST_CREDIT_KILL_SOUTHERN_TOWER, GetDefender(), go);
 
                 ++m_destroyedTowers[GetTeamIndexByTeamId(GetAttacker())];
-                // ToDo: handle some yell from the Fortress commander
 
+                // note: maybe handle the following by DB
+                // ToDo: handle some yell from the Fortress commander
                 // ToDo: despawn banner
             }
             else if (eventId == wgOffenseData[index].eventIntact)
@@ -686,7 +694,9 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
 
             // send world state update
             SendUpdateWorldState(tower->GetWorldState(), tower->GetGoState());
-            return true;
+
+            // allow further DB script processing
+            return false;
         }
         ++index;
     }
@@ -716,7 +726,9 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
 
             // send world state update
             SendUpdateWorldState(wall->GetWorldState(), wall->GetGoState());
-            return true;
+
+            // allow further DB script processing
+            return false;
         }
         ++index;
     }
@@ -888,9 +900,21 @@ void BattlefieldWG::GetBattlefieldReady(const WorldObject* objRef)
         relic->Respawn();           // note: on some new versions the relic is allowed to despawn when clicked
     }
 
-    // reset the collision door
+    // reset the collision door and wall
     if (GameObject* collision = objRef->GetMap()->GetGameObject(m_fortressDoorGuid))
         collision->ResetDoorOrButton();
+    if (GameObject* collision = objRef->GetMap()->GetGameObject(m_fortressDoorWallGuid))
+        collision->ResetDoorOrButton();
+
+    // respawn the tower banners
+    for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
+    {
+        for (const auto& guid : m_towerBannersGuids[i])
+        {
+            if (GameObject* banner = objRef->GetMap()->GetGameObject(guid))
+                banner->Respawn();
+        }
+    }
 
     // ***** Reset Wintergrasp cannons **** //
     // reset and respawn cannons
@@ -1386,9 +1410,4 @@ bool BattlefieldWG::IsConditionFulfilled(Player const* source, uint32 conditionI
     }
 
     return false;
-}
-
-void BattlefieldWG::HandleConditionStateChange(uint32 conditionId, bool state)
-{
-
 }
