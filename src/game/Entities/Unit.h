@@ -1093,6 +1093,7 @@ enum CurrentSpellTypes
 
 #define CURRENT_FIRST_NON_MELEE_SPELL 1
 #define CURRENT_MAX_SPELL             4
+#define INVISIBILITY_MAX              32
 
 enum ActiveStates
 {
@@ -2210,6 +2211,7 @@ class Unit : public WorldObject
         // Visibility system
         UnitVisibility GetVisibility() const { return m_Visibility; }
         void SetVisibility(UnitVisibility x);
+        void SetVisibilityWithoutUpdate(UnitVisibility x) { m_Visibility = x; }
         void UpdateVisibilityAndView() override;            // overwrite WorldObject::UpdateVisibilityAndView()
 
         // common function for visibility checks for player/creatures with detection code
@@ -2220,6 +2222,10 @@ class Unit : public WorldObject
         void SetInvisibilityDetectMask(uint32 index, bool apply);
         uint32 GetInvisibilityMask() const;
         void SetInvisibilityMask(uint32 index, bool apply);
+        void AddInvisibilityValue(uint32 index, int32 value) { m_invisibilityValues[index] += value; }
+        void AddInvisibilityDetectValue(uint32 index, int32 value) { m_invisibilityDetectValues[index] += value; }
+        int32 GetInvisibilityValue(uint32 index) const;
+        int32 GetInvisibilityDetectValue(uint32 index) const;
         void SetPhaseMask(uint32 newPhaseMask, bool update) override; // overwrite WorldObject::SetPhaseMask
 
         // virtual functions for all world objects types
@@ -2703,6 +2709,8 @@ class Unit : public WorldObject
         // invisibility data
         uint32 m_invisibilityMask;
         uint32 m_detectInvisibilityMask; // is inherited from controller in PC case
+        int32 m_invisibilityValues[INVISIBILITY_MAX];
+        int32 m_invisibilityDetectValues[INVISIBILITY_MAX];
 
         uint64 m_auraUpdateMask;
 
