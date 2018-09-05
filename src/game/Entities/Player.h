@@ -1734,7 +1734,8 @@ class Player : public Unit
         void UpdateShieldBlockValue();
         void UpdateDamagePhysical(WeaponAttackType attType) override;
         void ApplySpellPowerBonus(int32 amount, bool apply);
-        void UpdateSpellDamageAndHealingBonus();
+        void UpdateSpellHealingBonus();
+        void UpdateSpellDamageBonus();
         void ApplyRatingMod(CombatRating cr, int32 value, bool apply);
         void UpdateRating(CombatRating cr);
         void UpdateAllRatings();
