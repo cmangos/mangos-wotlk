@@ -10109,10 +10109,7 @@ void SpellAuraHolder::SendAuraUpdate(bool remove) const
 void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 {
     bool cast_at_remove = false;                            // if spell must be casted at last aura from stack remove
-    uint32 spellId1 = 0;
-    uint32 spellId2 = 0;
-    uint32 spellId3 = 0;
-    uint32 spellId4 = 0;
+    std::vector<uint32> boostSpells;
 
     switch (GetSpellProto()->SpellFamilyName)
     {
@@ -10125,44 +10122,44 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     if (!apply && m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     {
                         cast_at_remove = true;
-                        spellId1 = 55594;
+                        boostSpells.push_back(55594);
                     }
                     else
                         return;
                     break;
                 }
                 case 32830: // Possess
-                    spellId1 = 32831;
+                    boostSpells.push_back(32831);
                     break;
                 case 33896: // Desperate Defense
-                    spellId1 = 33897;
+                    boostSpells.push_back(33897);
                     break;
                 case 36797: // Mind Control - Kaelthas
-                    spellId1 = 36798;
+                    boostSpells.push_back(36798);
                     break;
                 case 38511: // Persuasion - Vashj
-                    spellId1 = 38514;
+                    boostSpells.push_back(38514);
                     break;
                 case 55053:                                 // Deathbloom (25 man)
                 {
                     if (!apply && m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     {
                         cast_at_remove = true;
-                        spellId1 = 55601;
+                        boostSpells.push_back(55601);
                     }
                     else
                         return;
                     break;
                 }
                 case 50720:                                 // Vigilance (warrior spell but not have warrior family)
-                    spellId1 = 68066;                       // Damage Reduction
+                    boostSpells.push_back(68066);                       // Damage Reduction
                     break;
                 case 57350:                                 // Illusionary Barrier
                 {
                     if (!apply && m_target->GetPowerType() == POWER_MANA)
                     {
                         cast_at_remove = true;
-                        spellId1 = 60242;                   // Darkmoon Card: Illusion
+                        boostSpells.push_back(60242);                   // Darkmoon Card: Illusion
                     }
                     else
                         return;
@@ -10177,14 +10174,14 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     return;
                 }
                 case 62692:                                 // Aura of Despair
-                    spellId1 = 64848;
+                    boostSpells.push_back(64848);
                     break;
                 case 71905:                                 // Soul Fragment
                 {
                     if (!apply)
                     {
-                        spellId1 = 72521;                   // Shadowmourne Visual Low
-                        spellId2 = 72523;                   // Shadowmourne Visual High
+                        boostSpells.push_back(72521);                   // Shadowmourne Visual Low
+                        boostSpells.push_back(72523);                   // Shadowmourne Visual High
                     }
                     else
                         return;
@@ -10211,7 +10208,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             cast_at_remove = true;
                             // first rank have 50% chance
                             if (dummyAura->GetId() != 44745 || roll_chance_i(50))
-                                spellId1 = 55080;
+                                boostSpells.push_back(55080);
                             break;
                         }
                     }
@@ -10226,7 +10223,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 11129:                                 // Combustion (remove triggered aura stack)
                 {
                     if (!apply)
-                        spellId1 = 28682;
+                        boostSpells.push_back(28682);
                     else
                         return;
                     break;
@@ -10234,7 +10231,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 28682:                                 // Combustion (remove main aura)
                 {
                     if (!apply)
-                        spellId1 = 11129;
+                        boostSpells.push_back(11129);
                     else
                         return;
                     break;
@@ -10252,7 +10249,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             return;
 
                         cast_at_remove = true;
-                        spellId1 = 70753;                   // Pushing the Limit
+                        boostSpells.push_back(70753);                   // Pushing the Limit
                     }
                     else
                         return;
@@ -10261,7 +10258,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 74396:                                 // Fingers of Frost (remove main aura)
                 {
                     if (!apply)
-                        spellId1 = 44544;
+                        boostSpells.push_back(44544);
                     else
                         return;
                     break;
@@ -10287,8 +10284,8 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         i->GetSpellProto()->Mechanic == MECHANIC_BLEED)
                         return;
 
-                spellId1 = 30069;                           // Blood Frenzy (Rank 1)
-                spellId2 = 30070;                           // Blood Frenzy (Rank 2)
+                boostSpells.push_back(30069);                           // Blood Frenzy (Rank 1)
+                boostSpells.push_back(30070);                           // Blood Frenzy (Rank 2)
             }
             break;
         }
@@ -10314,9 +10311,9 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             switch (dummyAura->GetModifier()->m_amount)
                             {
                                 // Rank 1
-                                case 0: spellId1 = 60946; break;
+                                case 0: boostSpells.push_back(60946); break;
                                 // Rank 1
-                                case 1: spellId1 = 60947; break;
+                                case 1: boostSpells.push_back(60947); break;
                             }
                             break;
                         }
@@ -10330,12 +10327,12 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             {
                 // Glyph of Shadowflame
                 if (!apply)
-                    spellId1 = 63311;
+                    boostSpells.push_back(63311);
                 else
                 {
                     Unit* caster = GetCaster();
                     if (caster && caster->HasAura(63310))
-                        spellId1 = 63311;
+                        boostSpells.push_back(63311);
                     else
                         return;
                 }
@@ -10410,16 +10407,16 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         }
 
                         if (roll_chance_i(chance))
-                            spellId1 = 64134;               // Body and Soul (periodic dispel effect)
+                            boostSpells.push_back(64134);               // Body and Soul (periodic dispel effect)
                     }
                     else
-                        spellId1 = 64134;                   // Body and Soul (periodic dispel effect)
+                                boostSpells.push_back(64134);                   // Body and Soul (periodic dispel effect)
                     break;
                 }
                 // Dispersion mana reg and immunity
                 case 47585:
-                    spellId1 = 60069;                       // Dispersion
-                    spellId2 = 63230;                       // Dispersion
+                    boostSpells.push_back(60069);                       // Dispersion
+                    boostSpells.push_back(63230);                       // Dispersion
                     break;
                 default:
                     break;
@@ -10430,9 +10427,9 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
         {
             // Barkskin
             if (GetId() == 22812 && m_target->HasAura(63057)) // Glyph of Barkskin
-                spellId1 = 63058;                           // Glyph - Barkskin 01
+                boostSpells.push_back(63058);                           // Glyph - Barkskin 01
             else if (!apply && GetId() == 5229)             // Enrage (Druid Bear)
-                spellId1 = 51185;                           // King of the Jungle (Enrage damage aura)
+                boostSpells.push_back(51185);                           // King of the Jungle (Enrage damage aura)
             else
                 return;
             break;
@@ -10442,7 +10439,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             if (GetSpellProto()->SpellFamilyFlags & uint64(0x0000000000000040) && GetSpellProto()->Category == 44)
             {
                 if (!apply || m_target->HasAura(58039))     // Glyph of Blurred Speed
-                    spellId1 = 61922;                       // Sprint (waterwalk)
+                    boostSpells.push_back(61922);                       // Sprint (waterwalk)
                 else
                     return;
             }
@@ -10456,7 +10453,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 34074:                                 // Aspect of the Viper
                 {
                     if (!apply || m_target->HasAura(60144)) // Viper Attack Speed
-                        spellId1 = 61609;                   // Vicious Viper
+                        boostSpells.push_back(61609);                   // Vicious Viper
                     else
                         return;
                     break;
@@ -10464,10 +10461,10 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 19574:                                 // Bestial Wrath - immunity
                 case 34471:                                 // The Beast Within - immunity
                 {
-                    spellId1 = 24395;
-                    spellId2 = 24396;
-                    spellId3 = 24397;
-                    spellId4 = 26592;
+                    boostSpells.push_back(24395);
+                    boostSpells.push_back(24396);
+                    boostSpells.push_back(24397);
+                    boostSpells.push_back(26592);
                     break;
                 }
                 case 34027:                                 // Kill Command, owner aura (spellmods)
@@ -10475,17 +10472,17 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     if (apply)
                     {
                         if (m_target->HasAura(35029))       // Focused Fire, rank 1
-                            spellId1 = 60110;               // Kill Command, Focused Fire rank 1 bonus
+                            boostSpells.push_back(60110);               // Kill Command, Focused Fire rank 1 bonus
                         else if (m_target->HasAura(35030))  // Focused Fire, rank 2
-                            spellId1 = 60113;               // Kill Command, Focused Fire rank 2 bonus
+                            boostSpells.push_back(60113);               // Kill Command, Focused Fire rank 2 bonus
                         else
                             return;
                     }
                     else
                     {
-                        spellId1 = 34026;                   // Kill Command, owner casting aura
-                        spellId2 = 60110;                   // Kill Command, Focused Fire rank 1 bonus
-                        spellId3 = 60113;                   // Kill Command, Focused Fire rank 2 bonus
+                        boostSpells.push_back(34026);                   // Kill Command, owner casting aura
+                        boostSpells.push_back(60110);                   // Kill Command, Focused Fire rank 1 bonus
+                        boostSpells.push_back(60113);                   // Kill Command, Focused Fire rank 2 bonus
                         if (Unit* pet = m_target->GetPet())
                             pet->RemoveAurasDueToSpell(58914); // Kill Command, pet aura
                     }
@@ -10496,7 +10493,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     if (apply && !m_target->HasAura(34027)) // Kill Command, owner casting aura
                         return;
 
-                    spellId1 = 60110;                       // Kill Command, Focused Fire rank 1 bonus
+                    boostSpells.push_back(60110);                       // Kill Command, Focused Fire rank 1 bonus
                     break;
                 }
                 case 35030:                                 // Focused Fire, rank 2
@@ -10504,7 +10501,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     if (apply && !m_target->HasAura(34027)) // Kill Command, owner casting aura
                         return;
 
-                    spellId1 = 60113;                       // Kill Command, Focused Fire rank 2 bonus
+                    boostSpells.push_back(60113);                       // Kill Command, Focused Fire rank 2 bonus
                     break;
                 }
                 default:
@@ -10518,7 +10515,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             if (caster && caster->HasAura(56845))
                             {
                                 cast_at_remove = true;
-                                spellId1 = 61394;
+                                boostSpells.push_back(61394);
                             }
                             else
                                 return;
@@ -10529,7 +10526,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     // Aspect of the Dragonhawk dodge
                     else if (GetSpellProto()->IsFitToFamilyMask(uint64(0x0000000000000000), 0x00001000))
                     {
-                        spellId1 = 61848;
+                        boostSpells.push_back(61848);
 
                         // triggered spell have same category as main spell and cooldown
                         if (apply && m_target->GetTypeId() == TYPEID_PLAYER)
@@ -10546,7 +10543,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             if (m_spellProto->Id == 31884)                  // Avenging Wrath
             {
                 if (!apply)
-                    spellId1 = 57318;                       // Sanctified Wrath (triggered)
+                    boostSpells.push_back(57318);                       // Sanctified Wrath (triggered)
                 else
                 {
                     int32 percent = 0;
@@ -10563,9 +10560,9 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                     // apply in special way
                     if (percent)
                     {
-                        spellId1 = 57318;                   // Sanctified Wrath (triggered)
+                        // Sanctified Wrath (triggered)
                         // prevent aura deletion, specially in multi-boost case
-                        m_target->CastCustomSpell(m_target, spellId1, &percent, &percent, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
+                        m_target->CastCustomSpell(m_target, 57318, &percent, &percent, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
                     }
                     return;
                 }
@@ -10582,11 +10579,11 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 
             // Sanctified Retribution and Swift Retribution (they share one aura), but not Retribution Aura (already gets modded)
             if ((GetSpellProto()->SpellFamilyFlags & uint64(0x0000000000000008)) == 0)
-                spellId1 = 63531;                           // placeholder for talent spell mods
+                boostSpells.push_back(63531);                           // placeholder for talent spell mods
             // Improved Concentration Aura (auras bonus)
-            spellId2 = 63510;                               // placeholder for talent spell mods
+            boostSpells.push_back(63510);                               // placeholder for talent spell mods
             // Improved Devotion Aura (auras bonus)
-            spellId3 = 63514;                               // placeholder for talent spell mods
+            boostSpells.push_back(63514);                               // placeholder for talent spell mods
             break;
         }
         case SPELLFAMILY_DEATHKNIGHT:
@@ -10594,7 +10591,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
             // second part of spell apply
             switch (GetId())
             {
-                case 49039: spellId1 = 50397; break;        // Lichborne
+                case 49039: boostSpells.push_back(50397); break;        // Lichborne
 
                 case 48263:                                 // Frost Presence
                 case 48265:                                 // Unholy Presence
@@ -10626,7 +10623,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             m_target->RemoveAurasDueToSpell(63611);
                     }
                     else
-                        spellId1 = 63611;                   // Improved Blood Presence, trigger for heal
+                        boostSpells.push_back(63611);                   // Improved Blood Presence, trigger for heal
 
                     if (GetId() == 48263 || GetId() == 48266) // Frost Presence or Blood Presence
                     {
@@ -10647,10 +10644,10 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             }
                         }
                         if (power_pct || !apply)
-                            spellId2 = 49772;               // Unholy Presence, speed part, spell1 used for Improvement presence fit to own presence
+                            boostSpells.push_back(49772);               // Unholy Presence, speed part, spell1 used for Improvement presence fit to own presence
                     }
                     else
-                        spellId1 = 49772;                   // Unholy Presence move speed
+                                boostSpells.push_back(49772);                   // Unholy Presence move speed
 
                     if (GetId() == 48265 || GetId() == 48266)   // Unholy Presence or Blood Presence
                     {
@@ -10677,7 +10674,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                             m_target->RemoveAurasDueToSpell(61261);
                     }
                     else
-                        spellId1 = 61261;                   // Frost Presence, stamina
+                        boostSpells.push_back(61261);                   // Frost Presence, stamina
 
                     if (GetId() == 48265)                   // Unholy Presence
                     {
@@ -10769,7 +10766,7 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
 
                 // if presence active: Frost Presence or Blood Presence
                 if (!apply || m_target->HasAura(48263) || m_target->HasAura(48266))
-                    spellId1 = 49772;
+                    boostSpells.push_back(49772);
                 else
                     return;
                 break;
@@ -10781,29 +10778,35 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
     }
 
     if (GetSpellProto()->Mechanic == MECHANIC_POLYMORPH)
-        spellId4 = 12939; // Just so that this doesnt conflict with others
+        boostSpells.push_back(12939); // Just so that this doesnt conflict with others
 
-    if (apply || cast_at_remove)
+    if (boostSpells.empty())
+        return;
+
+    for (uint32 spellId : boostSpells)
     {
-        if (spellId1)
-            m_target->CastSpell(m_target, spellId1, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCasterGuid());
-        if (spellId2 && !IsDeleted())
-            m_target->CastSpell(m_target, spellId2, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCasterGuid());
-        if (spellId3 && !IsDeleted())
-            m_target->CastSpell(m_target, spellId3, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCasterGuid());
-        if (spellId4 && !IsDeleted())
-            m_target->CastSpell(m_target, spellId4, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCasterGuid());
-    }
-    else
-    {
-        if (spellId1)
-            m_target->RemoveAurasByCasterSpell(spellId1, GetCasterGuid());
-        if (spellId2)
-            m_target->RemoveAurasByCasterSpell(spellId2, GetCasterGuid());
-        if (spellId3)
-            m_target->RemoveAurasByCasterSpell(spellId3, GetCasterGuid());
-        if (spellId4)
-            m_target->RemoveAurasByCasterSpell(spellId4, GetCasterGuid());
+        Unit* boostCaster = m_target;
+        Unit* boostTarget = nullptr;
+        ObjectGuid casterGuid = m_target->GetObjectGuid(); // caster can be nullptr, but guid is still valid for removal
+        SpellEntry const* boostEntry = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+        for (uint32 target : boostEntry->EffectImplicitTargetA)
+        {
+            switch (target)
+            {
+                case TARGET_UNIT_ENEMY:
+                case TARGET_UNIT:
+                    if (apply) // optimization
+                        boostCaster = GetCaster();
+                    else
+                        casterGuid = GetCasterGuid();
+                    boostTarget = m_target;
+                    break;
+            }
+        }
+        if (apply || cast_at_remove)
+            boostCaster->CastSpell(boostTarget, boostEntry, TRIGGERED_OLD_TRIGGERED);
+        else
+            m_target->RemoveAurasByCasterSpell(spellId, casterGuid);
     }
 }
 
