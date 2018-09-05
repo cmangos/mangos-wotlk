@@ -10093,6 +10093,33 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 58622:                                 // Teleport to Lake Wintergrasp
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(ZONE_ID_WINTERGRASP);
+                    if (outdoorPvP && outdoorPvP->IsBattlefield())
+                    {
+                        Player* player = (Player*)unitTarget;
+                        Battlefield* battlefield = (Battlefield*)outdoorPvP;
+
+                        if (!player || !battlefield)
+                            return;
+
+                        // teleport to Wintergrasp, depending on location and battlefield status
+                        if (battlefield->GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS || battlefield->GetTimer() < battlefield->GetStartInviteDelay())
+                            player->CastSpell(player, player->GetTeam() == battlefield->GetDefender() ? 60035 : 59096, TRIGGERED_OLD_TRIGGERED);
+                        if (battlefield->GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
+                        {
+                            if (player->GetTeam() == battlefield->GetDefender())
+                                player->CastSpell(player, 58681, TRIGGERED_OLD_TRIGGERED);
+                            else
+                                player->CastSpell(player, player->GetTeam() == ALLIANCE ? 58633 : 58632, TRIGGERED_OLD_TRIGGERED);
+                        }
+                    }
+                    return;
+                }
                 case 59317:                                 // Teleporting
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)

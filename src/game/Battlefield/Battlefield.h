@@ -178,6 +178,13 @@ class Battlefield : public OutdoorPvP
 
         // get or set the cooldown/battle timer
         void SetTimer(uint32 value) { m_timer = value; }
+        uint32 GetTimer() const { return m_timer; }
+
+        // get various timers
+        uint32 GetBattleDuration() const { return m_battleDuration; }
+        uint32 GetStartInviteDelay() const { return m_startInviteDelay; }
+        uint32 GetCooldownDuration() const { return m_cooldownDuration; }
+        uint32 GetMaxPlayersPerTeam() const { return m_maxPlayersPerTeam; }
 
         // get battlefield id
         uint32 GetBattlefieldId() const { return m_battleFieldId; }
@@ -188,9 +195,6 @@ class Battlefield : public OutdoorPvP
 
         // store the player data for the current battlefield
         virtual void InitPlayerBattlefieldData(Player* /*player*/);
-
-        // get the kick location for players depending on the current battlefield
-        virtual bool GetPlayerKickLocation(Player* player, float& x, float& y, float& z) { return false; }
 
         // called when the battlefield player composition is updated
         virtual void OnBattlefieldPlayersUpdate() {};
@@ -210,11 +214,11 @@ class Battlefield : public OutdoorPvP
         // load player positions
         virtual void SetupPlayerPosition(Player* /*player*/) { };
 
+        // kick player from battlefield
+        virtual void KickBattlefieldPlayer(Player* /*player*/) { };
+
         // invite player to join battlefield queue
         void InvitePlayerToQueue(Player* /*player*/);
-
-        // kick player from battlefield
-        void KickBattlefieldPlayer(Player* /*player*/);
 
         // init all players on battle start
         void InitPlayersBeforeBattle();

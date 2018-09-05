@@ -51,7 +51,7 @@ void Battlefield::HandlePlayerEnterZone(Player* player, bool isMainZone)
 {
     OutdoorPvP::HandlePlayerEnterZone(player, isMainZone);
 
-    // invite to group or que
+    // invite to group or queue
     if (!HasPlayer(player->GetObjectGuid()))
     {
         if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS)
@@ -109,20 +109,6 @@ void Battlefield::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 void Battlefield::InitPlayerBattlefieldData(Player* player)
 {
     m_activePlayers[player->GetObjectGuid()] = new BattlefieldPlayer();
-}
-
-/**
-  Function that kicks the player from the battlefield
-
-  @param   player to kick
-*/
-void Battlefield::KickBattlefieldPlayer(Player* player)
-{
-    float x, y, z;
-    if (!GetPlayerKickLocation(player, x, y, z))
-        return;
-
-    player->TeleportTo(player->GetMapId(), x, y, z, player->GetOrientation());
 }
 
 /**

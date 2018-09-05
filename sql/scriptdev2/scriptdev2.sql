@@ -1640,6 +1640,14 @@ UPDATE creature_template SET ScriptName='npc_mikhail' WHERE entry=4963;
 /* WINTERGRASP */
 UPDATE creature_template SET ScriptName='npc_spirit_guide_wintergrasp' WHERE entry IN (31841,31842);
 UPDATE gameobject_template SET ScriptName='go_vehicle_teleporter' WHERE entry=192951;
+INSERT INTO scripted_event_id VALUES
+(19677,'event_go_tower_destroy'),
+(19676,'event_go_tower_destroy'),
+(19675,'event_go_tower_destroy'),
+(19661,'event_go_tower_destroy'),
+(19662,'event_go_tower_destroy'),
+(19663,'event_go_tower_destroy'),
+(19664,'event_go_tower_destroy');
 
 /* WINTERSPRING */
 UPDATE creature_template SET ScriptName='npc_ranshalla' WHERE entry=10300;

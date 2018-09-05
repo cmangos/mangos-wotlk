@@ -95,16 +95,16 @@ enum
     // SPELL_TELEPORT_PORTAL                    = 54643,            // triggered from 54640; cast by the teleport object
     // SPELL_TELEPORT_VEHICLE                   = 49759,            // handled in wintergrasp scripts
 
-    // Teleport spells - to and from Wintergrasp
-    SPELL_TELEPORT_DALARAN                      = 53360,
-    SPELL_TELEPORT_BRIDGE                       = 59096,
-    SPELL_TELEPORT_DALARAN_TO_WG                = 60035,
+    // Teleport spells - to and from Wintergrasp; used during the battle
+    SPELL_TELEPORT_DALARAN                      = 53360,            // teleport back to Dalaran
+    SPELL_TELEPORT_BRIDGE                       = 59096,            // description is that it teleports to the Fortress, but it's actually the bridge
+    SPELL_TELEPORT_DALARAN_TO_WG                = 60035,            // teleports to the middle of the fortress
 
-    SPELL_TELEPORT_WINTERGRASP                  = 58622,            // source spell; used by go 193772
+    // Dalaran to Wintergrasp teleport object
+    // SPELL_TELEPORT_WINTERGRASP               = 58622,            // source spell; used by go 193772; teleports the player to WG based on the battlefield status
     SPELL_TELEPORT_WINTERGRASP_ALLIANCE         = 58633,            // to alliance landing
     SPELL_TELEPORT_WINTERGRASP_HORDE            = 58632,            // to horde landing
-    SPELL_TELEPORT_WINTERGRASP_AIR              = 58681,            // has safe fall aura
-    SPELL_TELEPORT_WINTERGRASP_FORTRESS         = 59096,            // appears to be the teleport inside the fortress
+    SPELL_TELEPORT_WINTERGRASP_FORTRESS         = 58681,            // teleport in front of the Fortress' door
 
     // Vehicle build spells - handled by dbscript on gossip
     // SPELL_BUILD_CATAPULT_FORCE               = 56664,
@@ -704,8 +704,8 @@ class BattlefieldWG : public Battlefield
         // load player data: rank and killcount
         void InitPlayerBattlefieldData(Player* player) override;
 
-        // get player kickout location
-        bool GetPlayerKickLocation(Player* player, float& x, float& y, float& z) override;
+        // kick afk players
+        void KickBattlefieldPlayer(Player* player) override;
 
         // set the position for player to enter the battlefield (done by spell)
         void SetupPlayerPosition(Player* player) override;

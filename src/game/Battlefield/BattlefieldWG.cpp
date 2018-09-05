@@ -637,7 +637,7 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
                 ++m_destroyedTowers[GetTeamIndexByTeamId(GetDefender())];
                 // ToDo: handle possible yell
 
-                // ToDo: despawn banner
+                // note: banner despawned by event script
             }
             else if (eventId == wgFortressTowersData[index].eventIntact)
             {
@@ -682,9 +682,26 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
 
                 ++m_destroyedTowers[GetTeamIndexByTeamId(GetAttacker())];
 
-                // note: maybe handle the following by DB
-                // ToDo: handle some yell from the Fortress commander
-                // ToDo: despawn banner
+                AIEventType aiEvent;
+                switch (m_destroyedTowers[GetTeamIndexByTeamId(GetAttacker())])
+                {
+                    case 1: aiEvent = AI_EVENT_CUSTOM_EVENTAI_A; break;
+                    case 2: aiEvent = AI_EVENT_CUSTOM_EVENTAI_B; break;
+                    case 3: aiEvent = AI_EVENT_CUSTOM_EVENTAI_C; break;
+                }
+
+                // handled yell by eventAI
+                if (aiEvent)
+                {
+                    if (Creature* commander = go->GetMap()->GetCreature(m_zoneLeaderGuid[GetTeamIndexByTeamId(GetDefender())]))
+                        commander->AI()->SendAIEvent(aiEvent, commander, commander);
+                }
+
+                // if all 3 towers are destroyed, reduce timer with 10 min
+                if (m_destroyedTowers[GetTeamIndexByTeamId(GetAttacker())] == MAX_WG_OFFENSE_TOWERS)
+                    SetTimer(GetTimer() - 10 * MINUTE * IN_MILLISECONDS);
+
+                // note: banner despawned by event script
             }
             else if (eventId == wgOffenseData[index].eventIntact)
             {
@@ -711,11 +728,8 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
 
             // update wall state based on even id
             if (eventId == wgFortressData[index].eventDamaged)
-            {
+                // note: banner despawned by event DB script
                 wall->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DAMAGED : BF_GO_STATE_HORDE_DAMAGED);
-
-                // ToDo: despawn banner if any
-            }
             else if (eventId == wgFortressData[index].eventDestroyed)
                 wall->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DESTROYED : BF_GO_STATE_HORDE_DESTROYED);
             else if (eventId == wgFortressData[index].eventIntact)
@@ -1212,6 +1226,11 @@ void BattlefieldWG::RewardPlayersOnBattleEnd(Team winner)
         }
         else
             player->CastSpell(player, SPELL_WINTERGRASP_DEFEAT, TRIGGERED_OLD_TRIGGERED);
+
+        // remove rank auras
+        player->RemoveAurasDueToSpell(SPELL_RECRUIT);
+        player->RemoveAurasDueToSpell(SPELL_CORPORAL);
+        player->RemoveAurasDueToSpell(SPELL_LIEUTENANT);
     }
 }
 
@@ -1230,16 +1249,14 @@ void BattlefieldWG::InitPlayerBattlefieldData(Player* player)
 
 void BattlefieldWG::SetupPlayerPosition(Player* player)
 {
-    // ToDo: logic to be confirmed
-    // Function is supposed to teleport player to the battlefield by getting the right position; Some players are teleported at the bridge, others to the fortress
-    //if (player->GetTeam() != GetDefender() && player->GetPositionX() > 5395.0f && player->GetPositionY() > 2802.0f && player->GetPositionY() < 2879.0f && player->GetPositionZ() < 476.0f)
-    //    player->CastSpell(player, SPELL_TELEPORT_BRIDGE, TRIGGERED_OLD_TRIGGERED);
+    // Note: this logic has to be confirmed
+    player->CastSpell(player, player->GetTeam() == GetDefender() ? SPELL_TELEPORT_DALARAN_TO_WG : SPELL_TELEPORT_BRIDGE, TRIGGERED_OLD_TRIGGERED);
 }
 
-bool BattlefieldWG::GetPlayerKickLocation(Player* player, float& x, float& y, float& z)
+void BattlefieldWG::KickBattlefieldPlayer(Player* player)
 {
-    // ToDo: logic to be confirmed
-    return false;
+    // Note: this logic has to be confirmed
+    player->CastSpell(player, SPELL_TELEPORT_DALARAN, TRIGGERED_OLD_TRIGGERED);
 }
 
 // Return player rank in the battlefield

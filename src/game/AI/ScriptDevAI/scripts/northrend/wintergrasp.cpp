@@ -24,6 +24,7 @@ EndScriptData */
 /* ContentData
 npc_spirit_guide_wintergrasp
 go_vehicle_teleporter
+event_go_tower_destroy
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -123,7 +124,7 @@ struct go_vehicle_teleporter : public GameObjectAI
     {
         // The destination trigger is between 64 and 69 away; no more than 70
         std::list<Creature*> lTriggersInRange;
-        GetCreatureListWithEntryInGrid(lTriggersInRange, source, NPC_WORLD_TRIGGER, 70.0f);
+        GetCreatureListWithEntryInGrid(lTriggersInRange, m_gameobject, NPC_WORLD_TRIGGER, 70.0f);
 
         if (lTriggersInRange.empty())
             return nullptr;
@@ -173,6 +174,41 @@ GameObjectAI* GetAI_go_vehicle_teleporter(GameObject* go)
     return new go_vehicle_teleporter(go);
 }
 
+/*###############
+## event_go_tower_destroy
+################*/
+
+bool ProcessEventId_event_go_tower_destroy(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool bIsStart)
+{
+    if (bIsStart && pSource->GetTypeId() == TYPEID_GAMEOBJECT)
+    {
+        // despawn nearby flags and cannons
+        GameObject* tower = (GameObject*)pSource;
+        if (!pSource)
+            return false;
+
+        std::list<Creature*> lCannonsInRange;
+        GetCreatureListWithEntryInGrid(lCannonsInRange, tower, NPC_WINTERGRASP_TOWER_CANNON, 50.0f);
+        for (auto& cannon : lCannonsInRange)
+            cannon->ForcedDespawn();
+
+        std::list<GameObject*> lAllianceBanners;
+        GetGameObjectListWithEntryInGrid(lAllianceBanners, tower, GO_WINTERGRASP_ALLIANCE_BANNER, 50.0f);
+        for (auto& banner : lAllianceBanners)
+            banner->SetLootState(GO_JUST_DEACTIVATED);
+
+        std::list<GameObject*> lHordeBanners;
+        GetGameObjectListWithEntryInGrid(lHordeBanners, tower, GO_WINTERGRASP_HORDE_BANNER, 50.0f);
+        for (auto& banner : lHordeBanners)
+            banner->SetLootState(GO_JUST_DEACTIVATED);
+
+    }
+
+    // always return false to allow battlefield script to process
+    return false;
+}
+
+
 void AddSC_wintergrasp()
 {
     Script* pNewScript = new Script;
@@ -183,5 +219,10 @@ void AddSC_wintergrasp()
     pNewScript = new Script;
     pNewScript->Name = "go_vehicle_teleporter";
     pNewScript->GetGameObjectAI = &GetAI_go_vehicle_teleporter;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "event_go_tower_destroy";
+    pNewScript->pProcessEventId = &ProcessEventId_event_go_tower_destroy;
     pNewScript->RegisterSelf();
 }
