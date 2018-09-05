@@ -310,7 +310,7 @@ struct boss_moroesAI : public ScriptedAI, public TimerAI
 
     void UpdateAI(const uint32 diff) override
     {
-        UpdateTimers(diff);
+        UpdateTimers(diff, m_creature->isInCombat());
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;

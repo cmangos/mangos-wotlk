@@ -2132,7 +2132,7 @@ struct npc_nether_rayAI : public ScriptedAI, public TimerAI
 
     void UpdateAI(const uint32 diff)
     {
-        UpdateTimers(diff);
+        UpdateTimers(diff, m_creature->isInCombat());
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;

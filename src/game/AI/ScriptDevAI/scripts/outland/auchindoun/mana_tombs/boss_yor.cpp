@@ -166,7 +166,7 @@ struct boss_yorAI : public ScriptedAI, public TimerAI
 
     void UpdateAI(const uint32 diff) override
     {
-        UpdateTimers(diff);
+        UpdateTimers(diff, m_creature->isInCombat());
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
@@ -253,7 +253,7 @@ struct npc_ethereum_prisoner_dungeonAI : public ScriptedAI, public TimerAI
 
     void UpdateAI(const uint32 diff) override
     {
-        UpdateTimers(diff);
+        UpdateTimers(diff, m_creature->isInCombat());
     }
 };
 
