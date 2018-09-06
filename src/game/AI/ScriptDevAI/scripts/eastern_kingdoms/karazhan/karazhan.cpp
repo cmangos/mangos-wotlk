@@ -349,6 +349,25 @@ void instance_karazhan::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
+void instance_karazhan::OnCreatureEvade(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_LADY_KEIRA_BERRYBUCK:
+        case NPC_LADY_CATRIONA_VON_INDI:
+        case NPC_LORD_CRISPIN_FERENCE:
+        case NPC_BARON_RAFE_DREUGER:
+        case NPC_BARONESS_DOROTHEA_MILLSTIPE:
+        case NPC_LORD_ROBIN_DARIS:
+        {
+            if (Creature* moroes = GetSingleCreatureFromStorage(NPC_MOROES, true))
+                if (moroes->isAlive() && moroes->isInCombat())
+                    moroes->AI()->EnterEvadeMode();
+            break;
+        }
+    }
+}
+
 void instance_karazhan::OnCreatureDeath(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
