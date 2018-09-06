@@ -173,10 +173,12 @@ void Battlefield::UpdateBattlefieldPlayers()
     {
         if (itr->second->removeTime && itr->second->removeTime + itr->second->removeDelay < time(nullptr))
         {
+            // kick player from zone
             delete itr->second;
             if (Player* player = sObjectMgr.GetPlayer(itr->first))
                 KickBattlefieldPlayer(player);
 
+            // remove player from group
             if (HasPlayer(itr->first))
             {
                 RemovePlayerFromRaid(itr->first);
@@ -215,12 +217,12 @@ void Battlefield::StartBattle(Team defender)
     // disband existing raid groups
     for (auto& m_battlefieldRaid : m_battlefieldRaids)
     {
-        while (!m_battlefieldRaid.empty())
+        for (auto group : m_battlefieldRaid)
         {
-            Group* group = *m_battlefieldRaid.begin();
             group->Disband();
             delete group;
         }
+        m_battlefieldRaid.clear();
     }
 
     for (auto& m_zonePlayer : m_zonePlayers)
@@ -228,8 +230,8 @@ void Battlefield::StartBattle(Team defender)
         if (!m_zonePlayer.first)
             continue;
 
-        Player* plr = sObjectMgr.GetPlayer(m_zonePlayer.first);
-        if (!plr)
+        Player* player = sObjectMgr.GetPlayer(m_zonePlayer.first);
+        if (!player)
             continue;
 
         uint8 idx = 0;
@@ -240,16 +242,18 @@ void Battlefield::StartBattle(Team defender)
             itr2 = m_queuedPlayers[idx].find(m_zonePlayer.first);
         }
 
+        // send battle invite to players added to queue
         if (itr2 != m_queuedPlayers[idx].end())
         {
             m_invitedPlayers[idx][m_zonePlayer.first] = time(nullptr) + BF_TIME_TO_ACCEPT;
-            plr->GetSession()->SendBattlefieldWarInvite(m_battleFieldId, m_zoneId, BF_TIME_TO_ACCEPT);
+            player->GetSession()->SendBattlefieldWarInvite(m_battleFieldId, m_zoneId, BF_TIME_TO_ACCEPT);
             m_queuedPlayers[idx].erase(itr2);
         }
+        // kick players not in queue
         else
         {
-            plr->GetSession()->SendBattlefieldLeaveMessage(m_battleFieldId, BATTLEFIELD_LEAVE_REASON_EXITED);
-            SendRemoveWorldStates(plr);
+            player->GetSession()->SendBattlefieldLeaveMessage(m_battleFieldId, BATTLEFIELD_LEAVE_REASON_EXITED);
+            SendRemoveWorldStates(player);
             if (m_activePlayers.find(m_zonePlayer.first) != m_activePlayers.end())
             {
                 m_activePlayers[m_zonePlayer.first]->removeTime = time(nullptr);
@@ -332,7 +336,7 @@ void Battlefield::Update(uint32 diff)
             m_playersUpdateTimer -= diff;
     }
 
-    // invite players to queue
+    // invite all players in zone to queue
     if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN && m_timer <= m_startInviteDelay && !m_playersInvited)
     {
         m_playersInvited = true;
@@ -444,10 +448,10 @@ Group* Battlefield::GetGroupFor(ObjectGuid playerGuid)
 {
     for (auto& m_battlefieldRaid : m_battlefieldRaids)
     {
-        for (std::set<Group*>::iterator itr = m_battlefieldRaid.begin(); itr != m_battlefieldRaid.end(); ++itr)
+        for (auto group : m_battlefieldRaid)
         {
-            if ((*itr)->IsMember(playerGuid))
-                return *itr;
+            if (group->IsMember(playerGuid))
+                return group;
         }
     }
 
@@ -643,11 +647,6 @@ void Battlefield::HandleQueueInviteResponse(Player* player, bool accepted)
 
     PvpTeamIndex teamIdx = GetTeamIndexByTeamId(player->GetTeam());
 
-    // ToDo: not needed
-    //std::map<ObjectGuid, time_t>::iterator itr = m_invitedPlayers[teamIdx].find(player->GetObjectGuid());
-    //if (itr != m_invitedPlayers[teamIdx].end())
-    //    m_invitedPlayers[teamIdx].erase(itr);
-
     // reject if queue battlefield is full
     if (IsTeamFull(teamIdx))
     {
@@ -674,7 +673,7 @@ void Battlefield::HandleQueueInviteResponse(Player* player, bool accepted)
   Function that handles player teleport response
 
   @param   player that responded
-  @param   wether the player has accepted or not
+  @param   whether the player has accepted or not
 */
 void Battlefield::HandleWarInviteResponse(Player* player, bool accepted)
 {

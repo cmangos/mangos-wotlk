@@ -24,7 +24,7 @@
 
 enum
 {
-    TIMER_OPVP_MGR_UPDATE           = 5 * IN_MILLISECONDS       // 5 milliseconds are required for Wintergrasp
+    TIMER_OPVP_MGR_UPDATE           = 1 * IN_MILLISECONDS       // 1 milliseconds are required for Wintergrasp
 };
 
 enum OutdoorPvPTypes

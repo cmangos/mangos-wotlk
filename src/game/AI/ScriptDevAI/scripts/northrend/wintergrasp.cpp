@@ -189,17 +189,17 @@ bool ProcessEventId_event_go_tower_destroy(uint32 uiEventId, Object* pSource, Ob
 
         std::list<Creature*> lCannonsInRange;
         GetCreatureListWithEntryInGrid(lCannonsInRange, tower, NPC_WINTERGRASP_TOWER_CANNON, 50.0f);
-        for (auto& cannon : lCannonsInRange)
+        for (auto cannon : lCannonsInRange)
             cannon->ForcedDespawn();
 
         std::list<GameObject*> lAllianceBanners;
         GetGameObjectListWithEntryInGrid(lAllianceBanners, tower, GO_WINTERGRASP_ALLIANCE_BANNER, 50.0f);
-        for (auto& banner : lAllianceBanners)
+        for (auto banner : lAllianceBanners)
             banner->SetLootState(GO_JUST_DEACTIVATED);
 
         std::list<GameObject*> lHordeBanners;
         GetGameObjectListWithEntryInGrid(lHordeBanners, tower, GO_WINTERGRASP_HORDE_BANNER, 50.0f);
-        for (auto& banner : lHordeBanners)
+        for (auto banner : lHordeBanners)
             banner->SetLootState(GO_JUST_DEACTIVATED);
 
     }
