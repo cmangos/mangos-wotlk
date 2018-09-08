@@ -7179,6 +7179,7 @@ void Spell::EffectSpawn(SpellEffectIndex /*eff_idx*/)
 {
     switch (m_spellInfo->Id)
     {
+        case 15750: // Rookery Whelp Spawn-in Spell
         case 26262: // Birth
             m_caster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             break;
