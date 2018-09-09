@@ -1303,6 +1303,7 @@ enum Targets
     TARGET_FRIENDLY_FRONTAL_CONE       = 59,
     TARGET_NARROW_FRONTAL_CONE         = 60,
     TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,
+    TARGET_62                          = 62,
     TARGET_DUELVSPLAYER_COORDINATES    = 63,
     TARGET_INFRONT_OF_VICTIM           = 64,
     TARGET_BEHIND_VICTIM               = 65,                // used in teleport behind spells, caster/target dependent from spell effect
@@ -1332,6 +1333,7 @@ enum Targets
     TARGET_NONCOMBAT_PET               = 90,
     TARGET_DEST_RADIUS                 = 91,
     TARGET_SUMMONER                    = 92,
+    TARGET_93                          = 93,
     TARGET_CONTROLLED_VEHICLE          = 94,
     TARGET_VEHICLE_DRIVER              = 95,
     TARGET_VEHICLE_PASSENGER_0         = 96,
