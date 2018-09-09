@@ -9039,6 +9039,22 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 39504, TRIGGERED_NONE);
                     return;
                 }
+                case 39995:                                 // Four Dragons: Dummy to Dragon
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(m_caster, 39998, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 40022:                                 // Four Dragons: Aggro Check
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, m_spellInfo->EffectBasePoints[0], TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 40742:                                 // Booterang
                 {
                     if (!unitTarget)
