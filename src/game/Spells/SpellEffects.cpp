@@ -6717,7 +6717,8 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
 
     spawnCreature->InitStatsForLevel(level);
 
-    spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
+    if (CharmInfo* charmInfo = spawnCreature->GetCharmInfo())
+        charmInfo->SetPetNumber(pet_number, (m_caster->GetTypeId() == TYPEID_PLAYER && spawnCreature->isControlled()));
 
     spawnCreature->InitPetCreateSpells();
     spawnCreature->InitLevelupSpellsForLevel();
@@ -7395,7 +7396,7 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     if (plr->IsPvPSanctuary())
         pet->SetPvPSanctuary(true);
 
-    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
+    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), (m_caster->GetTypeId() == TYPEID_PLAYER));
 
     // level of hunter pet can't be less owner level at 5 levels
     uint32 cLevel = creatureTarget->getLevel();
@@ -7406,8 +7407,6 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     pet->InitTalentForLevel();
 
     pet->SetHealthPercent(creatureTarget->GetHealthPercent());
-
-    pet->GetCharmInfo()->SetPetNumber(sObjectMgr.GeneratePetNumber(), true);
 
     // destroy creature object
     creatureTarget->ForcedDespawn();
@@ -7550,7 +7549,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
         NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_AURAS);
 
-        NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
+        NewSummon->GetCharmInfo()->SetPetNumber(pet_number, (m_caster->GetTypeId() == TYPEID_PLAYER));
 
         // generate new name for summon pet
         NewSummon->SetName(sObjectMgr.GeneratePetName(petentry));
@@ -13157,7 +13156,7 @@ void Spell::EffectCreateTamedPet(SpellEffectIndex eff_idx)
     newTamedPet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
     newTamedPet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
-    newTamedPet->GetCharmInfo()->SetPetNumber(petNumber, true);
+    newTamedPet->GetCharmInfo()->SetPetNumber(petNumber, (m_caster->GetTypeId() == TYPEID_PLAYER));
 
     if (unitTarget->IsPvP())
         newTamedPet->SetPvP(true);
