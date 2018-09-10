@@ -1521,9 +1521,9 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
 
     Unit* realCaster = GetAffectiveCaster();
 
+    const bool traveling = (GetSpellSpeed() > 0.0f);
+
     // Recheck immune (only for delayed spells)
-    const float speed = GetSpellSpeed();
-    const bool traveling = (speed > 0.0f);
     if (traveling && (
                 unit->IsImmuneToDamage(GetSpellSchoolMask(m_spellInfo)) ||
                 unit->IsImmuneToSpell(m_spellInfo, unit == realCaster)))
@@ -1561,6 +1561,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
             if (traveling && unit == m_targets.getUnitTarget() &&
                     !unit->isVisibleForOrDetect(m_caster, m_caster, false))
             {
+                realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
                 ResetEffectDamageAndHeal();
                 return;
             }
