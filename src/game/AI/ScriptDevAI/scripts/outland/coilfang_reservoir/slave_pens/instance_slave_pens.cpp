@@ -53,7 +53,6 @@ void instance_slave_pens::OnCreatureCreate(Creature* creature)
     switch (creature->GetEntry())
     {
         case NPC_NATURALIST_BITE:
-        case NPC_NATURALIST_BITE_H:
             m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
     }
@@ -83,7 +82,7 @@ bool AreaTrigger_at_naturalist_bite(Player* player, AreaTriggerEntry const* /*pA
     ScriptedInstance* instance = (ScriptedInstance*)player->GetMap()->GetInstanceData();
     if (instance->GetData(DATA_NATURALIST) == 0)
     {
-        if (Unit* naturalist = instance->GetSingleCreatureFromStorage(player->GetMap()->IsRegularDifficulty() ? NPC_NATURALIST_BITE : NPC_NATURALIST_BITE_H))
+        if (Unit* naturalist = instance->GetSingleCreatureFromStorage(NPC_NATURALIST_BITE))
         {
             DoScriptText(SAY_AREATRIGGER, naturalist, player);
         }

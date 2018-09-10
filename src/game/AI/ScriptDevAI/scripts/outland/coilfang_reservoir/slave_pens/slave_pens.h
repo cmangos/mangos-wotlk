@@ -8,7 +8,6 @@
 enum
 {
     NPC_NATURALIST_BITE     = 17893,
-    NPC_NATURALIST_BITE_H   = 22938,
 
     DATA_NATURALIST = 0,
 };

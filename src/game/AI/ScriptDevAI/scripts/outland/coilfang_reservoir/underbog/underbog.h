@@ -8,7 +8,6 @@
 enum
 {
     NPC_GHAZAN = 18105,
-    NPC_GHAZAN_H = 20168,
 
     DATA_GHAZAN_SURFACE = 0,
 };

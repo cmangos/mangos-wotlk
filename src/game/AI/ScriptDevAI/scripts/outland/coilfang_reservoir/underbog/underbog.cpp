@@ -53,7 +53,6 @@ void instance_underbog::OnCreatureCreate(Creature* creature)
     switch (creature->GetEntry())
     {
     case NPC_GHAZAN:
-    case NPC_GHAZAN_H:
         m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
         break;
     }
@@ -73,7 +72,7 @@ bool AreaTrigger_at_ghazan_surface(Player* player, AreaTriggerEntry const* /*pAt
     ScriptedInstance* instance = (ScriptedInstance*)player->GetMap()->GetInstanceData();
     if (instance->GetData(DATA_GHAZAN_SURFACE) == 0)
     {
-        if (Unit* ghazan = instance->GetSingleCreatureFromStorage(player->GetMap()->IsRegularDifficulty() ? NPC_GHAZAN : NPC_GHAZAN_H))
+        if (Unit* ghazan = instance->GetSingleCreatureFromStorage(NPC_GHAZAN))
         {
             ghazan->GetMotionMaster()->Clear(false, true);
             ghazan->GetMotionMaster()->MoveWaypoint(1);
