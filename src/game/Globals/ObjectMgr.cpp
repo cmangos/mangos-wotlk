@@ -1412,9 +1412,9 @@ void ObjectMgr::LoadCreatures()
         data.movementType       = fields[16].GetUInt8();
         data.spawnMask          = fields[17].GetUInt8();
         data.phaseMask          = fields[18].GetUInt16();
-        int16 gameEvent         = fields[19].GetInt16();
-        int16 GuidPoolId        = fields[20].GetInt16();
-        int16 EntryPoolId       = fields[21].GetInt16();
+        data.gameEvent          = fields[19].GetInt16();
+        data.GuidPoolId         = fields[20].GetInt16();
+        data.EntryPoolId        = fields[21].GetInt16();
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
@@ -1503,7 +1503,15 @@ void ObjectMgr::LoadCreatures()
             data.phaseMask = 1;
         }
 
-        if (gameEvent == 0 && GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
+        if (mapEntry->IsContinent())
+        {
+            auto terrainInfo = sTerrainMgr.LoadTerrain(data.mapid);
+            data.OriginalZoneId = terrainInfo->GetZoneId(data.posX, data.posY, data.posZ);
+        }
+        else
+            data.OriginalZoneId = 0;
+
+        if (data.IsNotPartOfPoolOrEvent()) // if not this is to be managed by GameEvent System or Pool system
         {
             AddCreatureToGrid(guid, &data);
 
@@ -1643,9 +1651,9 @@ void ObjectMgr::LoadGameObjects()
         uint32 go_state       = fields[14].GetUInt32();
         data.spawnMask        = fields[15].GetUInt8();
         data.phaseMask        = fields[16].GetUInt16();
-        int16 gameEvent       = fields[17].GetInt16();
-        int16 GuidPoolId      = fields[18].GetInt16();
-        int16 EntryPoolId     = fields[19].GetInt16();
+        data.gameEvent        = fields[17].GetInt16();
+        data.GuidPoolId       = fields[18].GetInt16();
+        data.EntryPoolId      = fields[19].GetInt16();
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
@@ -1712,12 +1720,16 @@ void ObjectMgr::LoadGameObjects()
             data.phaseMask = 1;
         }
 
-        if (gameEvent == 0 && GuidPoolId == 0 && EntryPoolId == 0) // if not this is to be managed by GameEvent System or Pool system
-            AddGameobjectToGrid(guid, &data);
+        if (mapEntry->IsContinent())
+        {
+            auto terrainInfo = sTerrainMgr.LoadTerrain(data.mapid);
+            data.OriginalZoneId = terrainInfo->GetZoneId(data.posX, data.posY, data.posZ);
+        }
+        else
+            data.OriginalZoneId = 0;
 
-        //uint32 zoneId, areaId;
-        //sTerrainMgr.LoadTerrain(data.mapid)->GetZoneAndAreaId(zoneId, areaId, data.posX, data.posY, data.posZ);
-        //sLog.outErrorDb("UPDATE gameobject SET zone_id=%u, area_id=%u WHERE guid=%u;", zoneId, areaId, guid);
+        if (data.IsNotPartOfPoolOrEvent()) // if not this is to be managed by GameEvent System or Pool system
+            AddGameobjectToGrid(guid, &data);
 
         ++count;
     }
