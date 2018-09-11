@@ -4080,6 +4080,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
             }
             switch (m_spellInfo->Id)
             {
+                case 5229:                                  // Enrage
+                {
+                    int32 reductionMod = -27;
+                    if (m_caster->HasAura(9634)) // If in Dire Bear form only 16%
+                        reductionMod = -16;
+                    m_caster->CastCustomSpell(nullptr, 25503, &reductionMod, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 29284:                                 // Brittle Armor - dummy exists so that max stacks are added
                 {
                     m_caster->CastSpell(unitTarget, 24575, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID);
