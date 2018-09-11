@@ -472,7 +472,7 @@ bool Battlefield::CanAddPlayerToRaid(Player* player)
 
     if (Group* group = player->GetGroup())
     {
-        DEBUG_LOG("Battlefield: Player %s already has group %s, uninviting", player->GetGuidStr().c_str(), group->GetObjectGuid().GetString().c_str());
+        DEBUG_LOG("Battlefield: Player %s already has group %s, uninviting", player->GetGuidStr().c_str(), group->GetGuidStr().c_str());
         group->RemoveMember(player->GetObjectGuid(), 0);
     }
 
@@ -491,7 +491,7 @@ bool Battlefield::CanAddPlayerToRaid(Player* player)
         group = new Group;
         group->SetBattlefieldGroup(this);
         if (group->Create(player->GetObjectGuid(), player->GetName()))
-            DEBUG_LOG("Battlefield: Successfully created new group %s", group->GetObjectGuid().GetString().c_str());
+            DEBUG_LOG("Battlefield: Successfully created new group %s", group->GetGuidStr().c_str());
         else
             sLog.outError("Battlefield: Failed to create group for player %s.", player->GetGuidStr().c_str());
 
@@ -507,7 +507,7 @@ bool Battlefield::CanAddPlayerToRaid(Player* player)
     {
         if (IsTeamFull(teamIdx))
         {
-            DEBUG_LOG("Battlefield: Group %s found, but battlefield is full! Can't add player %s!", group->GetObjectGuid().GetString().c_str(), player->GetGuidStr().c_str());
+            DEBUG_LOG("Battlefield: Group %s found, but battlefield is full! Can't add player %s!", group->GetGuidStr().c_str(), player->GetGuidStr().c_str());
             return false;
         }
 

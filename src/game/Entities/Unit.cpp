@@ -7222,7 +7222,7 @@ Unit* Unit::GetCharm(WorldObject const* pov /*= nullptr*/) const
             }
             // Bugcheck
             sLog.outDebug("Unit::GetCharm: Guid field management continuity violation for %s, can't look up %s while accessor is outside of the world",
-                          GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
+                          GetGuidStr().c_str(), guid.GetString().c_str());
             return nullptr;
         }
         // We need a unit in the same map only
@@ -7230,7 +7230,7 @@ Unit* Unit::GetCharm(WorldObject const* pov /*= nullptr*/) const
             return unit;
         // Bugcheck
         sLog.outDebug("Unit::GetCharm: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",
-                      GetObjectGuid().GetString().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
+                      GetGuidStr().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
         // const_cast<Unit*>(this)->SetCharm(nullptr);
     }
     return nullptr;
@@ -7251,7 +7251,7 @@ Unit* Unit::GetCharmer(WorldObject const* pov /*= nullptr*/) const
             }
             // Bugcheck
             sLog.outDebug("Unit::GetCharmer: Guid field management continuity violation for %s, can't look up %s while accessor is outside of the world",
-                          GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
+                          GetGuidStr().c_str(), guid.GetString().c_str());
             return nullptr;
         }
         // We need a unit in the same map only
@@ -7259,7 +7259,7 @@ Unit* Unit::GetCharmer(WorldObject const* pov /*= nullptr*/) const
             return unit;
         // Bugcheck
         sLog.outDebug("Unit::GetCharmer: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",
-                      GetObjectGuid().GetString().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
+                      GetGuidStr().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
         // const_cast<Unit*>(this)->SetCharmer(nullptr);
     }
     return nullptr;
@@ -7280,7 +7280,7 @@ Unit* Unit::GetCreator(WorldObject const* pov /*= nullptr*/) const
             }
             // Bugcheck
             sLog.outDebug("Unit::GetCreator: Guid field management continuity violation for %s, can't look up %s while accessor is outside of the world",
-                          GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
+                          GetGuidStr().c_str(), guid.GetString().c_str());
             return nullptr;
         }
         // We need a unit in the same map only
@@ -7288,7 +7288,7 @@ Unit* Unit::GetCreator(WorldObject const* pov /*= nullptr*/) const
             return unit;
         // Bugcheck
         sLog.outDebug("Unit::GetCreator: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",
-                      GetObjectGuid().GetString().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
+                      GetGuidStr().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
         // const_cast<Unit*>(this)->SetCreator(nullptr);
     }
     return nullptr;
@@ -7309,7 +7309,7 @@ Unit* Unit::GetTarget(WorldObject const* pov /*= nullptr*/) const
             }
             // Bugcheck
             sLog.outDebug("Unit::GetTarget: Guid field management continuity violation for %s, can't look up %s while accessor is outside of the world",
-                          GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
+                          GetGuidStr().c_str(), guid.GetString().c_str());
             return nullptr;
         }
         // We need a unit in the same map only
@@ -7317,7 +7317,7 @@ Unit* Unit::GetTarget(WorldObject const* pov /*= nullptr*/) const
             return unit;
         // Bugcheck
         sLog.outDebug("Unit::GetTarget: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",
-                      GetObjectGuid().GetString().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
+                      GetGuidStr().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
         // const_cast<Unit*>(this)->SetTarget(nullptr);
     }
     return nullptr;
@@ -7338,7 +7338,7 @@ Unit* Unit::GetChannelObject(WorldObject const* pov /*= nullptr*/) const
             }
             // Bugcheck
             sLog.outDebug("Unit::GetChannelObject: Guid field management continuity violation for %s, can't look up %s while accessor is outside of the world",
-                          GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
+                          GetGuidStr().c_str(), guid.GetString().c_str());
             return nullptr;
         }
         // We need a unit in the same map only
@@ -7346,7 +7346,7 @@ Unit* Unit::GetChannelObject(WorldObject const* pov /*= nullptr*/) const
             return unit;
         // Bugcheck
         sLog.outDebug("Unit::GetChannelObject: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",
-                      GetObjectGuid().GetString().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
+                      GetGuidStr().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
         // const_cast<Unit*>(this)->SetChannelObject(nullptr);
     }
     return nullptr;
@@ -7386,7 +7386,7 @@ Unit* Unit::GetSpawner(WorldObject const* pov /*= nullptr*/) const
             }
             // Bugcheck
             sLog.outDebug("Unit::GetSpawner: Guid field management continuity violation for %s, can't look up %s while accessor is outside of the world",
-                          GetObjectGuid().GetString().c_str(), guid.GetString().c_str());
+                          GetGuidStr().c_str(), guid.GetString().c_str());
             return nullptr;
         }
         // We need a unit in the same map only
@@ -7394,7 +7394,7 @@ Unit* Unit::GetSpawner(WorldObject const* pov /*= nullptr*/) const
             return unit;
         // Bugcheck
         sLog.outDebug("Unit::GetSpawner: Guid field management continuity violation for %s in map '%s', %s does not exist in this instance",
-                      GetObjectGuid().GetString().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
+                      GetGuidStr().c_str(), accessor->GetMap()->GetMapName(), guid.GetString().c_str());
     }
     return nullptr;
 }
