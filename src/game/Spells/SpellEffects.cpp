@@ -2145,6 +2145,23 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 41466, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
                     return;
                 }
+                case 39995:                                 // Four Dragons: Dummy to Dragon
+                {
+                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->PlayDirectSound(3520);
+                    unitTarget->CastSpell(m_caster, 40032, TRIGGERED_NONE);
+                    return;
+                }
+                case 40032:                                 // Fiery Breath (Patch 2.4.2 (2008-05-13): Dragons in Blade's Edge Mountains will no longer instantly knock you off your flying mount.)
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 39998, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 40802:                                 // Mingo's Fortune Generator (Mingo's Fortune Giblets)
                 {
                     // selecting one from Bloodstained Fortune item
@@ -9039,20 +9056,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 39504, TRIGGERED_NONE);
                     return;
                 }
-                case 39995:                                 // Four Dragons: Dummy to Dragon
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    m_caster->CastSpell(m_caster, 39998, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 40022:                                 // Four Dragons: Aggro Check
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    unitTarget->CastSpell(m_caster, m_spellInfo->EffectBasePoints[0], TRIGGERED_OLD_TRIGGERED);
+                    unitTarget->CastSpell(m_caster, damage, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 40742:                                 // Booterang

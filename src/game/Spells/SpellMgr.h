@@ -898,8 +898,9 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
         case 42867:
         case 34786: // Temporal Analysis - factions and unitflags of target/caster verified, should not incur combat
         case 39384: // Fury Of Medivh visual - Burning Flames - Fury of medivh is friendly to all, and it hits all chess pieces, basically friendly fire damage
-        case 37277: // Summon Infernal - neutral spell with TARGET_UNIT which evaluates as hostile due to neutral factions, with delay and gets removed by !IsPositiveSpell check
-        case 42399: // Neutral spell with TARGET_UNIT, caster faction 14, target faction 14, evaluates as negative spell
+        case 37277: // Summon Infernal - neutral spell with TARGET_DUELVSPLAYER which evaluates as hostile due to neutral factions, with delay and gets removed by !IsPositiveSpell check
+        case 42399: // Neutral spell with TARGET_DUELVSPLAYER, caster faction 14, target faction 14, evaluates as negative spell
+        case 39995: // Four Dragons: Dummy to Dragon - Dummy effect need to trigger even if target is immune
                     // because of POS/NEG decision, should in fact be NEUTRAL decision TODO: Increase check fidelity
         case 52149: // Rain of Darkness - factions and unitflags of target/caster verified - TARGET_DUELVSPLAYER - neutral target type
             return true;
