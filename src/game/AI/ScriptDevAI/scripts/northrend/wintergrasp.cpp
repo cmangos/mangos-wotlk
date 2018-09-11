@@ -123,7 +123,7 @@ struct go_vehicle_teleporter : public GameObjectAI
     Unit* GetTeleportTarget(Creature* source)
     {
         // The destination trigger is between 64 and 69 away; no more than 70
-        std::list<Creature*> lTriggersInRange;
+        CreatureList lTriggersInRange;
         GetCreatureListWithEntryInGrid(lTriggersInRange, m_gameobject, NPC_WORLD_TRIGGER, 70.0f);
 
         if (lTriggersInRange.empty())
@@ -187,17 +187,17 @@ bool ProcessEventId_event_go_tower_destroy(uint32 uiEventId, Object* pSource, Ob
         if (!pSource)
             return false;
 
-        std::list<Creature*> lCannonsInRange;
+        CreatureList lCannonsInRange;
         GetCreatureListWithEntryInGrid(lCannonsInRange, tower, NPC_WINTERGRASP_TOWER_CANNON, 50.0f);
         for (auto cannon : lCannonsInRange)
             cannon->ForcedDespawn();
 
-        std::list<GameObject*> lAllianceBanners;
+        GameObjectList lAllianceBanners;
         GetGameObjectListWithEntryInGrid(lAllianceBanners, tower, GO_WINTERGRASP_ALLIANCE_BANNER, 50.0f);
         for (auto banner : lAllianceBanners)
             banner->SetLootState(GO_JUST_DEACTIVATED);
 
-        std::list<GameObject*> lHordeBanners;
+        GameObjectList lHordeBanners;
         GetGameObjectListWithEntryInGrid(lHordeBanners, tower, GO_WINTERGRASP_HORDE_BANNER, 50.0f);
         for (auto banner : lHordeBanners)
             banner->SetLootState(GO_JUST_DEACTIVATED);

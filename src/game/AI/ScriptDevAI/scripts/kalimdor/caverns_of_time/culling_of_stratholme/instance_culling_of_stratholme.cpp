@@ -554,9 +554,9 @@ static bool sortFromEastToWest(Creature* pFirst, Creature* pSecond)
 }
 
 // return the ordered list of Grain Crate Helpers
-void instance_culling_of_stratholme::GetCratesBunnyOrderedList(std::list<Creature*>& lList)
+void instance_culling_of_stratholme::GetCratesBunnyOrderedList(CreatureList& lList)
 {
-    std::list<Creature*> lCratesBunnyList;
+    CreatureList lCratesBunnyList;
     for (GuidList::const_iterator itr = m_luiCratesBunnyGUIDs.begin(); itr != m_luiCratesBunnyGUIDs.end(); ++itr)
     {
         if (Creature* pBunny = instance->GetCreature(*itr))

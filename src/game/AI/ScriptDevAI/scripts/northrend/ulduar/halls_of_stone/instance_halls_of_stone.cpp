@@ -220,7 +220,7 @@ struct SortHelper
 };
 
 // Small Helper-function
-static void GetValidNPCsOfList(Map* pMap, GuidList& lGUIDs, std::list<Creature*>& lNPCs)
+static void GetValidNPCsOfList(Map* pMap, GuidList& lGUIDs, CreatureList& lNPCs)
 {
     lNPCs.clear();
     for (GuidList::const_iterator itr = lGUIDs.begin(); itr != lGUIDs.end(); ++itr)
@@ -232,7 +232,7 @@ static void GetValidNPCsOfList(Map* pMap, GuidList& lGUIDs, std::list<Creature*>
 
 void instance_halls_of_stone::SortFaces()
 {
-    std::list<Creature*> lPossibleEyes;
+    CreatureList lPossibleEyes;
     GameObject* pFace = instance->GetGameObject(m_aFaces[FACE_MARNAK].m_goFaceGuid);
 
     // FACE_MARNAK
@@ -243,7 +243,7 @@ void instance_halls_of_stone::SortFaces()
         if (lPossibleEyes.size() > 1)
         {
             lPossibleEyes.sort(SortHelper(pFace));
-            std::list<Creature*>::const_iterator itr = lPossibleEyes.begin();
+            CreatureList::const_iterator itr = lPossibleEyes.begin();
             m_aFaces[FACE_MARNAK].m_leftEyeGuid = (*itr)->GetObjectGuid();
             ++itr;
             m_aFaces[FACE_MARNAK].m_speakerGuid = (*itr)->GetObjectGuid();
@@ -266,7 +266,7 @@ void instance_halls_of_stone::SortFaces()
         if (lPossibleEyes.size() > 1)
         {
             lPossibleEyes.sort(SortHelper(pFace));
-            std::list<Creature*>::const_iterator itr = lPossibleEyes.begin();
+            CreatureList::const_iterator itr = lPossibleEyes.begin();
             m_aFaces[FACE_ABEDNEUM].m_leftEyeGuid = (*itr)->GetObjectGuid();
             ++itr;
             m_aFaces[FACE_ABEDNEUM].m_speakerGuid = (*itr)->GetObjectGuid();
@@ -289,7 +289,7 @@ void instance_halls_of_stone::SortFaces()
         if (lPossibleEyes.size() > 1)
         {
             lPossibleEyes.sort(SortHelper(pFace));
-            std::list<Creature*>::const_iterator itr = lPossibleEyes.begin();
+            CreatureList::const_iterator itr = lPossibleEyes.begin();
             m_aFaces[FACE_KADDRAK].m_leftEyeGuid = (*itr)->GetObjectGuid();
             ++itr;
             m_aFaces[FACE_KADDRAK].m_speakerGuid = (*itr)->GetObjectGuid();

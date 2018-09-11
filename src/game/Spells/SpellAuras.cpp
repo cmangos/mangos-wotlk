@@ -594,7 +594,7 @@ void AreaAura::Update(uint32 diff)
             Unit* owner = caster->GetMaster();
             if (!owner)
                 owner = caster;
-            Spell::UnitList targets;
+            UnitList targets;
 
             switch (m_areaAuraType)
             {
@@ -2081,7 +2081,7 @@ void Aura::TriggerSpell()
                         break;
                 }
                 uint32 curCount = 0;
-                std::list<Player*> playerList;
+                PlayerList playerList;
                 GetPlayerListWithEntryInWorld(playerList, target, range); // official range
                 for (Player* player : playerList)
                     if (target != player && player->HasAura(auraId))
@@ -8879,7 +8879,7 @@ void Aura::PeriodicDummyTick()
                     if (target->hasUnitState(UNIT_STAT_STUNNED) || target->isFeared())
                         return;
 
-                    Spell::UnitList targets;
+                    UnitList targets;
                     {
                         // eff_radius ==0
                         float radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spell->rangeIndex));
@@ -8892,7 +8892,7 @@ void Aura::PeriodicDummyTick()
                     if (targets.empty())
                         return;
 
-                    Spell::UnitList::const_iterator itr = targets.begin();
+                    UnitList::const_iterator itr = targets.begin();
                     std::advance(itr, urand() % targets.size());
                     Unit* victim = *itr;
 

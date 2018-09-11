@@ -1372,9 +1372,9 @@ struct npc_proudhoofAI : public npc_escortAI
             m_creature->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
 
             // change faction to the guards as well
-            std::list<Creature*> lGuardsList;
+            CreatureList lGuardsList;
             GetCreatureListWithEntryInGrid(lGuardsList, m_creature, NPC_CARAVAN_GUARD, 20.0f);
-            for (std::list<Creature*>::const_iterator itr = lGuardsList.begin(); itr != lGuardsList.end(); ++itr)
+            for (CreatureList::const_iterator itr = lGuardsList.begin(); itr != lGuardsList.end(); ++itr)
             {
                 if (!(*itr)->isAlive())
                     continue;

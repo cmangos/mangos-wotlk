@@ -362,7 +362,7 @@ struct npc_ogronAI : public npc_escortAI
         Reset();
     }
 
-    std::list<Creature*> lCreatureList;
+    CreatureList lCreatureList;
 
     uint32 m_uiPhase;
     uint32 m_uiPhaseCounter;
@@ -702,10 +702,10 @@ struct npc_private_hendelAI : public ScriptedAI
             EnterEvadeMode();
 
             // Make the two sentries flee and despawn
-            std::list<Creature*> lSentryList;
+            CreatureList lSentryList;
             GetCreatureListWithEntryInGrid(lSentryList, m_creature, NPC_SENTRY, 40.0f);
 
-            for (std::list<Creature*>::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
+            for (CreatureList::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
             {
                 if ((*itr)->isAlive())
                 {
@@ -750,10 +750,10 @@ bool QuestAccept_npc_private_hendel(Player* pPlayer, Creature* pCreature, const 
 
         // Find the nearby sentries in order to make them attack
         // The two sentries are linked to Private Hendel in DB to ensure they respawn together
-        std::list<Creature*> lSentryList;
+        CreatureList lSentryList;
         GetCreatureListWithEntryInGrid(lSentryList, pCreature, NPC_SENTRY, 40.0f);
 
-        for (std::list<Creature*>::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
+        for (CreatureList::const_iterator itr = lSentryList.begin(); itr != lSentryList.end(); ++itr)
         {
             if ((*itr)->isAlive())
             {
@@ -1003,17 +1003,17 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
             if (uiPointId == 12)
             {
                 // make cannons usable
-                std::list<GameObject*> lCannonsInRange;
+                GameObjectList lCannonsInRange;
                 GetGameObjectListWithEntryInGrid(lCannonsInRange, m_creature, GO_COVE_CANNON, 100.0f);
 
-                for (std::list<GameObject*>::const_iterator itr = lCannonsInRange.begin(); itr != lCannonsInRange.end(); ++itr)
+                for (GameObjectList::const_iterator itr = lCannonsInRange.begin(); itr != lCannonsInRange.end(); ++itr)
                     (*itr)->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
 
                 // attack all marksmen
-                std::list<Creature*> lMarksmenInRange;
+                CreatureList lMarksmenInRange;
                 GetCreatureListWithEntryInGrid(lMarksmenInRange, m_creature, NPC_THERAMORE_MARKSMAN, 100.0f);
 
-                for (std::list<Creature*>::const_iterator itr = lMarksmenInRange.begin(); itr != lMarksmenInRange.end(); ++itr)
+                for (CreatureList::const_iterator itr = lMarksmenInRange.begin(); itr != lMarksmenInRange.end(); ++itr)
                 {
                     (*itr)->AI()->AttackStart(m_creature);
                     AttackStart(*itr);
@@ -1084,17 +1084,17 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
             pSummoner->SendUpdateWorldState(WORLD_STATE_TETHYR_SHOW, 0);
 
         // reset all cannons
-        std::list<GameObject*> lCannonsInRange;
+        GameObjectList lCannonsInRange;
         GetGameObjectListWithEntryInGrid(lCannonsInRange, m_creature, GO_COVE_CANNON, 100.0f);
 
-        for (std::list<GameObject*>::const_iterator itr = lCannonsInRange.begin(); itr != lCannonsInRange.end(); ++itr)
+        for (GameObjectList::const_iterator itr = lCannonsInRange.begin(); itr != lCannonsInRange.end(); ++itr)
             (*itr)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
 
         // despawn all marksmen
-        std::list<Creature*> lMarksmenInRange;
+        CreatureList lMarksmenInRange;
         GetCreatureListWithEntryInGrid(lMarksmenInRange, m_creature, NPC_THERAMORE_MARKSMAN, 100.0f);
 
-        for (std::list<Creature*>::const_iterator itr = lMarksmenInRange.begin(); itr != lMarksmenInRange.end(); ++itr)
+        for (CreatureList::const_iterator itr = lMarksmenInRange.begin(); itr != lMarksmenInRange.end(); ++itr)
             (*itr)->ForcedDespawn(30000);
     }
 

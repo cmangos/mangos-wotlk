@@ -216,12 +216,12 @@ bool EffectAuraDummy_spell_aura_dummy_npc_crates_dummy(const Aura* pAura, bool b
             if (pTarget->GetEntry() != NPC_GRAIN_CRATE_HELPER)
                 return true;
 
-            std::list<Creature*> lCrateBunnyList;
+            CreatureList lCrateBunnyList;
             if (instance_culling_of_stratholme* pInstance = (instance_culling_of_stratholme*)pTarget->GetInstanceData())
             {
                 pInstance->GetCratesBunnyOrderedList(lCrateBunnyList);
                 uint8 i = 0;
-                for (std::list<Creature*>::const_iterator itr = lCrateBunnyList.begin(); itr != lCrateBunnyList.end(); ++itr)
+                for (CreatureList::const_iterator itr = lCrateBunnyList.begin(); itr != lCrateBunnyList.end(); ++itr)
                 {
                     ++i;
                     if (*itr == pTarget)

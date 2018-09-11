@@ -375,7 +375,7 @@ struct mob_big_oozeAI : public ScriptedAI
         {
             if (m_uiUnstableExplosionTimer <= uiDiff)
             {
-                std::list<Creature*> lTargetsInRange;
+                CreatureList lTargetsInRange;
                 GetCreatureListWithEntryInGrid(lTargetsInRange, m_creature, NPC_OOZE_EXPLOSION_STALKER, DEFAULT_VISIBILITY_INSTANCE);
 
                 if (lTargetsInRange.empty())
@@ -386,7 +386,7 @@ struct mob_big_oozeAI : public ScriptedAI
                 }
 
                 // explode all the summoned triggers
-                for (std::list<Creature*>::const_iterator itr = lTargetsInRange.begin(); itr != lTargetsInRange.end(); ++itr)
+                for (CreatureList::const_iterator itr = lTargetsInRange.begin(); itr != lTargetsInRange.end(); ++itr)
                 {
                     DoCastSpellIfCan(*itr, SPELL_OOZE_EXPLOSION, CAST_TRIGGERED);
                     (*itr)->ForcedDespawn(10000);

@@ -336,7 +336,7 @@ void instance_ahnkahet::HandleInsanitySwitch(Player* pPhasedPlayer)
 
     uint32 uiPhaseAura = (*lAuraList.begin())->GetId();
 
-    std::list<Player*> lSamePhasePlayers;
+    PlayerList lSamePhasePlayers;
     std::vector<Player*> vOtherPhasePlayers;
 
     // Sort the insanity players, into those which have same phase and others
@@ -367,7 +367,7 @@ void instance_ahnkahet::HandleInsanitySwitch(Player* pPhasedPlayer)
     uint32 uiNewPhaseAura = (*lNewAuraList.begin())->GetId();
 
     // Move the same phase players to the new phase
-    for (std::list<Player*>::const_iterator itr = lSamePhasePlayers.begin(); itr != lSamePhasePlayers.end(); ++itr)
+    for (PlayerList::const_iterator itr = lSamePhasePlayers.begin(); itr != lSamePhasePlayers.end(); ++itr)
         (*itr)->CastSpell((*itr), uiNewPhaseAura, TRIGGERED_OLD_TRIGGERED);
 }
 

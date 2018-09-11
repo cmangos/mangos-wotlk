@@ -253,7 +253,7 @@ enum
 
 bool GOUse_go_scourge_enclosure(Player* pPlayer, GameObject* pGo)
 {
-    std::list<Creature*> m_lResearchersList;
+    CreatureList m_lResearchersList;
     GetCreatureListWithEntryInGrid(m_lResearchersList, pGo, NPC_GYMER_LOCK_DUMMY, 15.0f);
     if (!m_lResearchersList.empty())
     {
@@ -826,7 +826,7 @@ struct go_elemental_rift : public GameObjectAI
                 return;
         }
 
-        std::list<Creature*> lElementalList;
+        CreatureList lElementalList;
         GetCreatureListWithEntryInGrid(lElementalList, m_go, elementalEntry, 35.0f);
         // Do nothing if at least three elementals are found nearby
         if (lElementalList.size() >= 3)

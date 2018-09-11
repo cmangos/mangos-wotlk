@@ -1071,10 +1071,10 @@ struct npc_brain_yogg_saronAI : public Scripted_NoMovementAI, private DialogueHe
             m_pInstance->DoUseDoorOrButton(aMadnessChamberDoors[m_uiIllusionIndex]);
 
             // respawn all nearby portals
-            std::list<GameObject*> lFleePortals;
+            GameObjectList lFleePortals;
             GetGameObjectListWithEntryInGrid(lFleePortals, m_creature, GO_FLEE_TO_SURFACE, 40.0f);
 
-            for (std::list<GameObject*>::const_iterator itr = lFleePortals.begin(); itr != lFleePortals.end(); ++itr)
+            for (GameObjectList::const_iterator itr = lFleePortals.begin(); itr != lFleePortals.end(); ++itr)
                 m_pInstance->DoRespawnGameObject((*itr)->GetObjectGuid(), 30);
         }
     }

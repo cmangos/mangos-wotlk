@@ -193,7 +193,7 @@ struct npc_snufflenose_gopherAI : public ScriptedPetAI
     // Function to search for new tubber in range
     void DoFindNewTubber()
     {
-        std::list<GameObject*> lTubbersInRange;
+        GameObjectList lTubbersInRange;
         GetGameObjectListWithEntryInGrid(lTubbersInRange, m_creature, GO_BLUELEAF_TUBBER, 40.0f);
 
         if (lTubbersInRange.empty())
@@ -203,7 +203,7 @@ struct npc_snufflenose_gopherAI : public ScriptedPetAI
         GameObject* pNearestTubber = nullptr;
 
         // Always need to find new ones
-        for (std::list<GameObject*>::const_iterator itr = lTubbersInRange.begin(); itr != lTubbersInRange.end(); ++itr)
+        for (GameObjectList::const_iterator itr = lTubbersInRange.begin(); itr != lTubbersInRange.end(); ++itr)
         {
             if (!(*itr)->IsSpawned() && (*itr)->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND) && (*itr)->IsWithinLOSInMap(m_creature))
             {

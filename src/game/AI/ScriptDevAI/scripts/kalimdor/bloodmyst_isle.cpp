@@ -258,7 +258,7 @@ struct npc_demolitionist_legosoAI : public npc_escortAI, private DialogueHelper
     // Function to respawn GOs
     void DoRespawnObjects(uint32 uiEntry, float fRange)
     {
-        std::list<GameObject*> lBarrelsInRange;
+        GameObjectList lBarrelsInRange;
         m_lExplosivesGuidsList.clear();
         GetGameObjectListWithEntryInGrid(lBarrelsInRange, m_creature, uiEntry, fRange);
 
@@ -269,7 +269,7 @@ struct npc_demolitionist_legosoAI : public npc_escortAI, private DialogueHelper
         }
 
         // respawn explosives and store for future use
-        for (std::list<GameObject*>::const_iterator itr = lBarrelsInRange.begin(); itr != lBarrelsInRange.end(); ++itr)
+        for (GameObjectList::const_iterator itr = lBarrelsInRange.begin(); itr != lBarrelsInRange.end(); ++itr)
         {
             (*itr)->SetRespawnTime(5 * MINUTE);
             (*itr)->Refresh();
@@ -293,7 +293,7 @@ struct npc_demolitionist_legosoAI : public npc_escortAI, private DialogueHelper
     // Function to respawn fire GOs
     void DoRespawnFires(bool bFirstEvent)
     {
-        std::list<GameObject*> lFiresInRange;
+        GameObjectList lFiresInRange;
         GetGameObjectListWithEntryInGrid(lFiresInRange, m_creature, GO_COIL_FIRE_L, 110.0f);
         GetGameObjectListWithEntryInGrid(lFiresInRange, m_creature, GO_COIL_FIRE_S, 110.0f);
 
@@ -303,7 +303,7 @@ struct npc_demolitionist_legosoAI : public npc_escortAI, private DialogueHelper
             return;
         }
 
-        for (std::list<GameObject*>::const_iterator itr = lFiresInRange.begin(); itr != lFiresInRange.end(); ++itr)
+        for (GameObjectList::const_iterator itr = lFiresInRange.begin(); itr != lFiresInRange.end(); ++itr)
         {
             if ((bFirstEvent && (*itr)->GetPositionZ() < 150.0f) || (!bFirstEvent && (*itr)->GetPositionZ() > 150.0f))
             {

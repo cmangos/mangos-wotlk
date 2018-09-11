@@ -160,7 +160,7 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
         if (!lAddGuids.empty())
         {
             m_vAddGuids.reserve(lAddGuids.size());
-            std::list<Creature*> lAdds;
+            CreatureList lAdds;
             for (GuidList::const_iterator itr = lAddGuids.begin(); itr != lAddGuids.end(); ++itr)
             {
                 if (Creature* pAdd = m_pInstance->instance->GetCreature(*itr))
@@ -168,7 +168,7 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
             }
             // Sort them by angle
             lAdds.sort(SortByAngle(m_creature));
-            for (std::list<Creature*>::const_iterator itr = lAdds.begin(); itr != lAdds.end(); ++itr)
+            for (CreatureList::const_iterator itr = lAdds.begin(); itr != lAdds.end(); ++itr)
                 m_vAddGuids.push_back((*itr)->GetObjectGuid());
         }
 

@@ -24,6 +24,7 @@
 #include "Entities/UpdateFields.h"
 #include "Entities/UpdateData.h"
 #include "Entities/ObjectGuid.h"
+#include "Entities/EntitiesMgr.h"
 #include "Globals/SharedDefines.h"
 #include "Camera.h"
 #include "Server/DBCStructure.h"

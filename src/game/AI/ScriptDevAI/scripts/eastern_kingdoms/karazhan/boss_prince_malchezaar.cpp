@@ -143,7 +143,7 @@ struct boss_malchezaarAI : public ScriptedAI
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        /*std::list<Creature*> creatureList;
+        /*CreatureList creatureList;
         m_creature->GetMap()->ForceLoadGrid(-10833.1, -2151.58);
         m_creature->GetMap()->ForceLoadGrid(-10893.51, -2081.342);
         GetCreatureListWithEntryInGrid(creatureList,m_creature, NPC_INFERNAL_RELAY,400.0f);*/

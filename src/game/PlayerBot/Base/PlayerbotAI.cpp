@@ -7179,7 +7179,7 @@ void PlayerbotAI::findNearbyGO()
     if (m_collectObjects.empty())
         return;
 
-    std::list<GameObject*> tempTargetGOList;
+    GameObjectList tempTargetGOList;
 
     for (BotEntryList::iterator itr = m_collectObjects.begin(); itr != m_collectObjects.end(); itr++)
     {
@@ -7214,7 +7214,7 @@ void PlayerbotAI::findNearbyGO()
             continue;
 
         // add any objects found to our lootTargets
-        for (std::list<GameObject*>::iterator iter = tempTargetGOList.begin(); iter != tempTargetGOList.end(); iter++)
+        for (GameObjectList::iterator iter = tempTargetGOList.begin(); iter != tempTargetGOList.end(); iter++)
         {
             GameObject* go = (*iter);
 
@@ -7230,7 +7230,7 @@ void PlayerbotAI::findNearbyGO()
 
 void PlayerbotAI::findNearbyCorpse()
 {
-    std::list<Unit*> corpseList;
+    UnitList corpseList;
     float radius = float(m_mgr->m_confCollectDistance);
 
     MaNGOS::AnyDeadUnitCheck corpse_check(m_bot);
@@ -7240,7 +7240,7 @@ void PlayerbotAI::findNearbyCorpse()
     //if (!corpseList.empty())
     //    TellMaster("Found %i Corpse(s)", corpseList.size());
 
-    for (std::list<Unit*>::const_iterator i = corpseList.begin(); i != corpseList.end(); ++i)
+    for (UnitList::const_iterator i = corpseList.begin(); i != corpseList.end(); ++i)
     {
         Creature* corpse = (Creature*)*i;
         if (!corpse)
@@ -7264,7 +7264,7 @@ void PlayerbotAI::findNearbyCorpse()
 
 void PlayerbotAI::findNearbyCreature()
 {
-    std::list<Creature*> creatureList;
+    CreatureList creatureList;
     float radius = INTERACTION_DISTANCE;
 
     CellPair pair(MaNGOS::ComputeCellPair(m_bot->GetPositionX(), m_bot->GetPositionY()));
@@ -7280,7 +7280,7 @@ void PlayerbotAI::findNearbyCreature()
     // if (!creatureList.empty())
     //    TellMaster("Found %i Creatures & size of m_findNPC (%i)", creatureList.size(),m_findNPC.size());
 
-    for (std::list<Creature*>::iterator iter = creatureList.begin(); iter != creatureList.end(); iter++)
+    for (CreatureList::iterator iter = creatureList.begin(); iter != creatureList.end(); iter++)
     {
         Creature* currCreature = *iter;
 

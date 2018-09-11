@@ -634,7 +634,7 @@ void Spell::FillTargetMap()
                                 case SPELL_EFFECT_SUMMON_PLAYER: // guessed based on 7720 sniff data
                                     SetTargetMap(SpellEffectIndex(i), TARGET_DUELVSPLAYER, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                                     break;
-                                case SPELL_EFFECT_LEARN_PET_SPELL: // Always targets pet supplied from client             
+                                case SPELL_EFFECT_LEARN_PET_SPELL: // Always targets pet supplied from client
                                     SetTargetMap(SpellEffectIndex(i), TARGET_PET, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]); // No spell like this exists, guesswork
                                     break;
                                 case SPELL_EFFECT_DUMMY:
@@ -1511,7 +1511,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             m_caster->AddDelayedHolderDueToProc(m_spellAuraHolder);
         else
             m_spellAuraHolder->SetState(SPELLAURAHOLDER_STATE_READY);
-    }        
+    }
 }
 
 void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
@@ -1878,7 +1878,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         unMaxTargets += m->GetModifier()->m_amount;
     }
 
-    std::list<GameObject*> tempTargetGOList;
+    GameObjectList tempTargetGOList;
 
     switch (targetMode)
     {
@@ -2383,7 +2383,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
 
             // Filter some targets for special target-type
-            for (std::list<GameObject*>::iterator itr = tempTargetGOList.begin(); itr != tempTargetGOList.end();)
+            for (GameObjectList::iterator itr = tempTargetGOList.begin(); itr != tempTargetGOList.end();)
             {
                 switch (targetMode)
                 {
@@ -2858,7 +2858,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
                 //if target and caster are members in the same group then apply member only filtering
                 //in regards to mc by player concerns the mc'ed player has simple toolbar thus chain heal not available
-                //TODO: in regards to mc by npc concerns this is something that needs to be answered 
+                //TODO: in regards to mc by npc concerns this is something that needs to be answered
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 {
                     if (Group* casterGroup = static_cast<Player*>(m_caster)->GetGroup())
@@ -2900,7 +2900,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 if (tempTargetUnitMap.empty())
                     break;
 
-                //remove root target unit since it already defaults to the first target 
+                //remove root target unit since it already defaults to the first target
                 tempTargetUnitMap.remove(pUnitTarget);
 
                 targetUnitMap.push_back(pUnitTarget);
@@ -3321,7 +3321,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
         {
             // make sure one go is always removed per iteration
             uint32 removed_utarget = 0;
-            for (std::list<GameObject*>::iterator itr = tempTargetGOList.begin(), next; itr != tempTargetGOList.end(); itr = next)
+            for (GameObjectList::iterator itr = tempTargetGOList.begin(), next; itr != tempTargetGOList.end(); itr = next)
             {
                 next = itr;
                 ++next;
@@ -3337,7 +3337,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             while (tempTargetGOList.size() > unMaxTargets - removed_utarget)
             {
                 uint32 poz = urand(0, tempTargetGOList.size() - 1);
-                for (std::list<GameObject*>::iterator itr = tempTargetGOList.begin(); itr != tempTargetGOList.end(); ++itr, --poz)
+                for (GameObjectList::iterator itr = tempTargetGOList.begin(); itr != tempTargetGOList.end(); ++itr, --poz)
                 {
                     if (!*itr) continue;
 
@@ -3350,7 +3350,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
         }
 
-        for (std::list<GameObject*>::iterator iter = tempTargetGOList.begin(); iter != tempTargetGOList.end();)
+        for (GameObjectList::iterator iter = tempTargetGOList.begin(); iter != tempTargetGOList.end();)
         {
             if (CheckTargetGOScript(*iter, SpellEffectIndex(effIndex)))
                 ++iter;
@@ -5745,8 +5745,8 @@ SpellCastResult Spell::CheckCast(bool strict)
                     range = m_caster->GetMap()->IsDungeon() ? DEFAULT_VISIBILITY_INSTANCE : DEFAULT_VISIBILITY_DISTANCE;
 
                 uint32 targetCount = std::max(m_spellInfo->EffectChainTarget[j], uint32(1));
-                std::list<Creature*> foundScriptCreatureTargets;
-                std::list<GameObject*> foundScriptGOTargets;
+                CreatureList foundScriptCreatureTargets;
+                GameObjectList foundScriptGOTargets;
                 std::set<uint32> entriesToUse;
                 uint32 type = MAX_SPELL_TARGET_TYPE;
                 bool foundButOutOfRange = false;
@@ -7977,7 +7977,7 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
 
             uint8 pBunnyId = m_caster->AI()->GetScriptData();
 
-            std::list<Creature*> creatureList;
+            CreatureList creatureList;
             MaNGOS::AllCreaturesOfEntryInRangeCheck check(target, 23040, 60.f);
             MaNGOS::CreatureListSearcher<MaNGOS::AllCreaturesOfEntryInRangeCheck> searcher(creatureList, check);
             Cell::VisitGridObjects(target, searcher, 60.f);
@@ -7990,7 +7990,7 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
                     pBunnyId = creature->AI()->GetScriptData();
             }
 
-            std::list<Player*> playerList;
+            PlayerList playerList;
             MaNGOS::AnyPlayerInObjectRangeCheck checkPlayer(target, 4.f);
             MaNGOS::PlayerListSearcher<MaNGOS::AnyPlayerInObjectRangeCheck> playerSearcher(playerList, checkPlayer);
             Cell::VisitWorldObjects(target, playerSearcher, 4.f);

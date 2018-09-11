@@ -2434,7 +2434,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
 
                     // small fire
-                    std::list<GameObject*> lList;
+                    GameObjectList lList;
 
                     MaNGOS::GameObjectEntryInPosRangeCheck go_check_small(*unitTarget, 187676, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), fMaxDist);
                     MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectEntryInPosRangeCheck> checker2(lList, go_check_small);
@@ -3134,7 +3134,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 46419, TRIGGERED_OLD_TRIGGERED);
 
                     // look for gameobjects within max spell range of unitTarget, and respawn if found
-                    std::list<GameObject*> lList;
+                    GameObjectList lList;
 
                     float fMaxDist = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
 
@@ -8862,7 +8862,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
                 case 38794:                                 // Murmur's Touch - Heroic
                 {
-                    std::list<Unit*> objectList;
+                    UnitList objectList;
                     MaNGOS::AnyFriendlyUnitInObjectRangeCheck check(unitTarget, nullptr, 100.f);
                     MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(objectList, check);
                     Cell::VisitAllObjects(unitTarget, searcher, 100.0f);

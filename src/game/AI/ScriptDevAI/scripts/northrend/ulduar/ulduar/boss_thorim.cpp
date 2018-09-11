@@ -447,7 +447,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
         if (m_lLowerBunniesGuids.empty())
             return nullptr;
 
-        std::list<Creature*> lBunnies;
+        CreatureList lBunnies;
         for (GuidList::const_iterator itr = m_lLowerBunniesGuids.begin(); itr != m_lLowerBunniesGuids.end(); ++itr)
         {
             if (Creature* pBunny = m_creature->GetMap()->GetCreature(*itr))

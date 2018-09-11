@@ -180,12 +180,12 @@ struct npc_harrison_jonesAI : public npc_escortAI
             m_tecahunaGuid = pSummoned->GetObjectGuid();
 
             // sort the mummies based on the distance
-            std::list<Creature*> lBunniesInRange;
+            CreatureList lBunniesInRange;
             GetCreatureListWithEntryInGrid(lBunniesInRange, m_creature, NPC_MUMMY_EFFECT_BUNNY, 50.0f);
 
             lBunniesInRange.sort(ObjectDistanceOrder(pSummoned));
 
-            for (std::list<Creature*>::const_iterator itr = lBunniesInRange.begin(); itr != lBunniesInRange.end(); ++itr)
+            for (CreatureList::const_iterator itr = lBunniesInRange.begin(); itr != lBunniesInRange.end(); ++itr)
                 m_lImmolationBunnyGuids.push_back((*itr)->GetObjectGuid());
         }
         else if (pSummoned->GetEntry() == NPC_ANCIENT_DRAKKARI_KING)
@@ -208,10 +208,10 @@ struct npc_harrison_jonesAI : public npc_escortAI
             pDoor->ResetDoorOrButton();
 
         // clear auras
-        std::list<Creature*> lBunniesInRange;
+        CreatureList lBunniesInRange;
         GetCreatureListWithEntryInGrid(lBunniesInRange, m_creature, NPC_MUMMY_EFFECT_BUNNY, 50.0f);
 
-        for (std::list<Creature*>::const_iterator itr = lBunniesInRange.begin(); itr != lBunniesInRange.end(); ++itr)
+        for (CreatureList::const_iterator itr = lBunniesInRange.begin(); itr != lBunniesInRange.end(); ++itr)
             (*itr)->RemoveAurasDueToSpell(SPELL_BUNNY_IMMOLATION);
 
         m_uiActivateMummiesTimer = 0;
@@ -257,10 +257,10 @@ struct npc_harrison_jonesAI : public npc_escortAI
             case 16:
             {
                 // set mummies in fire
-                std::list<Creature*> lBunniesInRange;
+                CreatureList lBunniesInRange;
                 GetCreatureListWithEntryInGrid(lBunniesInRange, m_creature, NPC_MUMMY_EFFECT_BUNNY, 50.0f);
 
-                for (std::list<Creature*>::const_iterator itr = lBunniesInRange.begin(); itr != lBunniesInRange.end(); ++itr)
+                for (CreatureList::const_iterator itr = lBunniesInRange.begin(); itr != lBunniesInRange.end(); ++itr)
                     (*itr)->CastSpell((*itr), SPELL_BUNNY_IMMOLATION, TRIGGERED_OLD_TRIGGERED);
 
                 m_creature->SetFacingTo(5.0f);

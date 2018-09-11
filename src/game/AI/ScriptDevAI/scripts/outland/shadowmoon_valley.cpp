@@ -599,7 +599,7 @@ struct npc_wildaAI : public npc_escortAI
     // free the water spirits
     void DoFreeSpirits()
     {
-        std::list<Creature*> lSpiritsInRange;
+        CreatureList lSpiritsInRange;
         GetCreatureListWithEntryInGrid(lSpiritsInRange, m_creature, NPC_CAPTURED_WATER_SPIRIT, 50.0f);
 
         if (lSpiritsInRange.empty())
@@ -619,14 +619,14 @@ struct npc_wildaAI : public npc_escortAI
 
     void DoDespawnSpirits()
     {
-        std::list<Creature*> lSpiritsInRange;
+        CreatureList lSpiritsInRange;
         GetCreatureListWithEntryInGrid(lSpiritsInRange, m_creature, NPC_CAPTURED_WATER_SPIRIT, 50.0f);
 
         if (lSpiritsInRange.empty())
             return;
 
         // all spirits follow
-        for (std::list<Creature*>::const_iterator itr = lSpiritsInRange.begin(); itr != lSpiritsInRange.end(); ++itr)
+        for (CreatureList::const_iterator itr = lSpiritsInRange.begin(); itr != lSpiritsInRange.end(); ++itr)
         {
             (*itr)->ForcedDespawn(6000);
             (*itr)->SetLevitate(true);
@@ -1451,7 +1451,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
 
     ObjectGuid m_playerGuid;
 
-    std::list<Creature*> m_lSoulstealers;
+    CreatureList m_lSoulstealers;
 
     Creature* m_cHOFVisualTrigger;
     Creature* m_cDeathwailTrigger;
@@ -1593,7 +1593,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
             m_cHOFVisualTrigger = GetClosestCreatureWithEntry(m_creature, NPC_HOF_VISUAL_TRIGGER, 175.0f);
             m_cDeathwailTrigger = GetClosestCreatureWithEntry(m_creature, NPC_DEATHWAIL_VISUAL_TRIG, 175.0f);
 
-            std::list<Creature*> lOtherChannelers;
+            CreatureList lOtherChannelers;
             GetCreatureListWithEntryInGrid(lOtherChannelers, m_creature, NPC_SHADOWMOON_SOULSTEALER, 175.0f);
 
             for (auto& lOtherChanneler : lOtherChannelers)

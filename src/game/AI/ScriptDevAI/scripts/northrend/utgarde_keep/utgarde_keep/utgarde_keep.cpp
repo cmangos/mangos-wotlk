@@ -64,7 +64,7 @@ struct mob_dragonflayer_forge_masterAI : public ScriptedAI
 
     void SetMyForge()
     {
-        std::list<GameObject*> lGOList;
+        GameObjectList lGOList;
         uint32 uiGOBellow = 0;
         uint32 uiGOFire = 0;
 

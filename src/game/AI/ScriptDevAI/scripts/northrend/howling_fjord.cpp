@@ -521,11 +521,11 @@ struct npc_king_ymironAI : public ScriptedAI, private DialogueHelper
             if (pWho->isAlive() && m_creature->IsWithinDistInMap(pWho, 60.0) && ((Player*)pWho)->GetQuestStatus(QUEST_ID_ANGUISH_OF_NIFFLEVAR) == QUEST_STATUS_INCOMPLETE
                     && pWho->HasAura(SPELL_ECHO_OF_YMIRON_NIFFLEVAR))
             {
-                std::list<Creature*> lCrowdList;
+                CreatureList lCrowdList;
                 GetCreatureListWithEntryInGrid(lCrowdList, m_creature, NPC_CITIZEN_OF_NIFFLEVAR_MALE, 60.0f);
                 GetCreatureListWithEntryInGrid(lCrowdList, m_creature, NPC_CITIZEN_OF_NIFFLEVAR_FEMALE, 60.0f);
 
-                for (std::list<Creature*>::const_iterator itr = lCrowdList.begin(); itr != lCrowdList.end(); ++itr)
+                for (CreatureList::const_iterator itr = lCrowdList.begin(); itr != lCrowdList.end(); ++itr)
                     m_lCrowdGuidList.push_back((*itr)->GetObjectGuid());
 
                 m_uiCrowdSpeechTimer = 1000;
@@ -667,7 +667,7 @@ struct npc_firecrackers_bunnyAI : public ScriptedAI
             if (m_uiStartTimer <= uiDiff)
             {
                 // get all the bats list in range; note: this will compare the 2D distance
-                std::list<Creature*> lBatsList;
+                CreatureList lBatsList;
                 GetCreatureListWithEntryInGrid(lBatsList, m_creature, NPC_DARKCLAW_BAT, 10.0f);
 
                 if (lBatsList.empty())
@@ -679,7 +679,7 @@ struct npc_firecrackers_bunnyAI : public ScriptedAI
                 // sort by distance and get only the closest
                 lBatsList.sort(ObjectDistanceOrder(m_creature));
 
-                std::list<Creature*>::const_iterator batItr = lBatsList.begin();
+                CreatureList::const_iterator batItr = lBatsList.begin();
                 Creature* pBat = nullptr;
 
                 do
@@ -784,10 +784,10 @@ struct npc_apothecary_hanesAI : public npc_escortAI
                 m_creature->HandleEmote(EMOTE_ONESHOT_ATTACK1H);
 
                 // set all nearby triggers on fire - ToDo: research if done by spell!
-                std::list<Creature*> lTriggersInRange;
+                CreatureList lTriggersInRange;
                 GetCreatureListWithEntryInGrid(lTriggersInRange, m_creature, NPC_HANES_TRIGGER, 10.0f);
 
-                for (std::list<Creature*>::const_iterator itr = lTriggersInRange.begin(); itr != lTriggersInRange.end(); ++itr)
+                for (CreatureList::const_iterator itr = lTriggersInRange.begin(); itr != lTriggersInRange.end(); ++itr)
                 {
                     (*itr)->CastSpell((*itr), SPELL_LOW_POLY_FIRE, TRIGGERED_OLD_TRIGGERED);
                     (*itr)->ForcedDespawn(30000);

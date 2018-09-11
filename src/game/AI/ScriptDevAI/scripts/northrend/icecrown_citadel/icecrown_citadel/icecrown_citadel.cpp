@@ -193,10 +193,10 @@ bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
     // search for the first set of Nerubar Broodkeepers and lower them to the ground
     if (pAt->id == AT_LIGHTS_HAMMER_INTRO_1)
     {
-        std::list<Creature*> lKeepersInRange;
+        CreatureList lKeepersInRange;
         GetCreatureListWithEntryInGrid(lKeepersInRange, pPlayer, NPC_NERUBAR_BROODKEEPER, 150.0f);
 
-        for (std::list<Creature*>::const_iterator itr = lKeepersInRange.begin(); itr != lKeepersInRange.end(); ++itr)
+        for (CreatureList::const_iterator itr = lKeepersInRange.begin(); itr != lKeepersInRange.end(); ++itr)
         {
             if ((*itr)->GetPositionZ() >= 75.0f && (*itr)->GetPositionZ() < 82.0f)
             {
@@ -210,10 +210,10 @@ bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
     // search for the second set of Nerubar Broodkeepers and lower them to the ground
     else if (pAt->id == AT_LIGHTS_HAMMER_INTRO_2)
     {
-        std::list<Creature*> lKeepersInRange;
+        CreatureList lKeepersInRange;
         GetCreatureListWithEntryInGrid(lKeepersInRange, pPlayer, NPC_NERUBAR_BROODKEEPER, 150.0f);
 
-        for (std::list<Creature*>::const_iterator itr = lKeepersInRange.begin(); itr != lKeepersInRange.end(); ++itr)
+        for (CreatureList::const_iterator itr = lKeepersInRange.begin(); itr != lKeepersInRange.end(); ++itr)
         {
             if ((*itr)->GetPositionZ() >= 85.0f)
             {

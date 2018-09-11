@@ -37,7 +37,7 @@ namespace MaNGOS
         Camera& i_camera;
         UpdateData i_data;
         GuidSet i_clientGUIDs;
-        std::set<WorldObject*> i_visibleNow;
+        WorldObjectSet i_visibleNow;
 
         explicit VisibleNotifier(Camera& c) : i_camera(c), i_clientGUIDs(c.GetOwner()->m_clientGUIDs) {}
         template<class T> void Visit(GridRefManager<T>& m);
@@ -223,10 +223,10 @@ namespace MaNGOS
     struct WorldObjectListSearcher
     {
         uint32 i_phaseMask;
-        std::list<WorldObject*>& i_objects;
+        WorldObjectList& i_objects;
         Check& i_check;
 
-        WorldObjectListSearcher(std::list<WorldObject*>& objects, Check& check)
+        WorldObjectListSearcher(WorldObjectList& objects, Check& check)
             : i_phaseMask(check.GetFocusObject().GetPhaseMask()), i_objects(objects), i_check(check) {}
 
         void Visit(PlayerMapType& m);
@@ -321,10 +321,10 @@ namespace MaNGOS
     struct GameObjectListSearcher
     {
         uint32 i_phaseMask;
-        std::list<GameObject*>& i_objects;
+        GameObjectList& i_objects;
         Check& i_check;
 
-        GameObjectListSearcher(std::list<GameObject*>& objects, Check& check)
+        GameObjectListSearcher(GameObjectList& objects, Check& check)
             : i_phaseMask(check.GetFocusObject().GetPhaseMask()), i_objects(objects), i_check(check) {}
 
         void Visit(GameObjectMapType& m);
@@ -373,10 +373,10 @@ namespace MaNGOS
     struct UnitListSearcher
     {
         uint32 i_phaseMask;
-        std::list<Unit*>& i_objects;
+        UnitList& i_objects;
         Check& i_check;
 
-        UnitListSearcher(std::list<Unit*>& objects, Check& check)
+        UnitListSearcher(UnitList& objects, Check& check)
             : i_phaseMask(check.GetFocusObject().GetPhaseMask()), i_objects(objects), i_check(check) {}
 
         void Visit(PlayerMapType& m);
@@ -422,10 +422,10 @@ namespace MaNGOS
     struct CreatureListSearcher
     {
         uint32 i_phaseMask;
-        std::list<Creature*>& i_objects;
+        CreatureList& i_objects;
         Check& i_check;
 
-        CreatureListSearcher(std::list<Creature*>& objects, Check& check)
+        CreatureListSearcher(CreatureList& objects, Check& check)
             : i_phaseMask(check.GetFocusObject().GetPhaseMask()), i_objects(objects), i_check(check) {}
 
         void Visit(CreatureMapType& m);
@@ -473,10 +473,10 @@ namespace MaNGOS
     struct PlayerListSearcher
     {
         uint32 i_phaseMask;
-        std::list<Player*>& i_objects;
+        PlayerList& i_objects;
         Check& i_check;
 
-        PlayerListSearcher(std::list<Player*>& objects, Check& check)
+        PlayerListSearcher(PlayerList& objects, Check& check)
             : i_phaseMask(check.GetFocusObject().GetPhaseMask()), i_objects(objects), i_check(check) {}
 
         void Visit(PlayerMapType& m);
@@ -1079,7 +1079,7 @@ namespace MaNGOS
             SpellEntry const* i_spellInfo;
             float i_range;
     };
- 
+
     class AnyUnitInObjectRangeCheck
     {
         public:

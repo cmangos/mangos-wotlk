@@ -190,8 +190,8 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
     // Wrapper to help sort the summoning stalkers
     void DoSortSummoningStalkers(GuidList& lDeathwhisperStalkers)
     {
-        std::list<Creature*> lRightStalkers;
-        std::list<Creature*> lLeftStalkers;
+        CreatureList lRightStalkers;
+        CreatureList lLeftStalkers;
 
         if (!lDeathwhisperStalkers.empty())
         {
@@ -212,9 +212,9 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
             lRightStalkers.sort(sortFromNorthToSouth);
 
             // Store the sorted stalkers in a vector for each side
-            for (std::list<Creature*>::const_iterator itr = lLeftStalkers.begin(); itr != lLeftStalkers.end(); ++itr)
+            for (CreatureList::const_iterator itr = lLeftStalkers.begin(); itr != lLeftStalkers.end(); ++itr)
                 m_vLeftStalkersGuidVector.push_back((*itr)->GetObjectGuid());
-            for (std::list<Creature*>::const_iterator itr = lRightStalkers.begin(); itr != lRightStalkers.end(); ++itr)
+            for (CreatureList::const_iterator itr = lRightStalkers.begin(); itr != lRightStalkers.end(); ++itr)
                 m_vRightStalkersGuidVector.push_back((*itr)->GetObjectGuid());
         }
     }

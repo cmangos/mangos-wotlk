@@ -457,7 +457,7 @@ void instance_karazhan::DoPrepareChessEvent()
     m_vAllianceStalkers.clear();
 
     // sort stalkers depending on side
-    std::list<Creature*> lStalkers;
+    CreatureList lStalkers;
     for (GuidList::const_iterator itr = m_lChessHordeStalkerList.begin(); itr != m_lChessHordeStalkerList.end(); ++itr)
     {
         if (Creature* pTemp = instance->GetCreature(*itr))
@@ -476,7 +476,7 @@ void instance_karazhan::DoPrepareChessEvent()
         return;
 
     lStalkers.sort(ObjectDistanceOrder(pStatusBar));
-    for (std::list<Creature*>::const_iterator itr = lStalkers.begin(); itr != lStalkers.end(); ++itr)
+    for (CreatureList::const_iterator itr = lStalkers.begin(); itr != lStalkers.end(); ++itr)
         m_vHordeStalkers.push_back((*itr)->GetObjectGuid());
 
     lStalkers.clear();
@@ -498,7 +498,7 @@ void instance_karazhan::DoPrepareChessEvent()
         return;
 
     lStalkers.sort(ObjectDistanceOrder(pStatusBar));
-    for (std::list<Creature*>::const_iterator itr = lStalkers.begin(); itr != lStalkers.end(); ++itr)
+    for (CreatureList::const_iterator itr = lStalkers.begin(); itr != lStalkers.end(); ++itr)
         m_vAllianceStalkers.push_back((*itr)->GetObjectGuid());
 }
 

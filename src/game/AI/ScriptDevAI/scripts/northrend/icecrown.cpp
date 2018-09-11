@@ -241,11 +241,11 @@ struct npc_squad_leaderAI : public npc_escortAI
                 DoScriptText(SAY_EVENT_COMPLETE, m_creature);
 
                 // get all the soldiers around
-                std::list<Creature*> lSoldiersList;
+                CreatureList lSoldiersList;
                 GetCreatureListWithEntryInGrid(lSoldiersList, m_creature, m_creature->GetEntry() == NPC_SKYBREAKER_SQUAD_LEADER ? NPC_SKYBREAKER_INFANTRY : NPC_KORKRON_INFANTRY, 30.0f);
 
                 // for each soldier alive cast the kill credit
-                for (std::list<Creature*>::const_iterator itr = lSoldiersList.begin(); itr != lSoldiersList.end(); ++itr)
+                for (CreatureList::const_iterator itr = lSoldiersList.begin(); itr != lSoldiersList.end(); ++itr)
                 {
                     if ((*itr) && (*itr)->isAlive())
                     {

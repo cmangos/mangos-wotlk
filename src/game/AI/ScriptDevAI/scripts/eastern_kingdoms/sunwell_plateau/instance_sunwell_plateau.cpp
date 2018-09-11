@@ -387,7 +387,7 @@ void instance_sunwell_plateau::DoSortFlightTriggers()
         return;
     }
 
-    std::list<Creature*> lTriggers;                         // Valid pointers, only used locally
+    CreatureList lTriggers;                         // Valid pointers, only used locally
     for (GuidList::const_iterator itr = m_lAllFlightTriggersList.begin(); itr != m_lAllFlightTriggersList.end(); ++itr)
     {
         if (Creature* pTrigger = instance->GetCreature(*itr))

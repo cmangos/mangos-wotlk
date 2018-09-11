@@ -330,7 +330,7 @@ void instance_gundrak::DoAltarVisualEffect(uint8 uiType)
         if (GameObject* pCollusAltar = GetSingleGameObjectFromStorage(GO_ALTAR_OF_COLOSSUS))
             fHeight += pCollusAltar->GetPositionZ();
 
-        std::list<Creature*> lStalkerTargets, lStalkerCasters;
+        CreatureList lStalkerTargets, lStalkerCasters;
         for (GuidList::const_iterator itr = m_luiStalkerGUIDs.begin(); itr != m_luiStalkerGUIDs.end(); ++itr)
         {
             if (Creature* pStalker = instance->GetCreature(*itr))
@@ -346,9 +346,9 @@ void instance_gundrak::DoAltarVisualEffect(uint8 uiType)
         lStalkerTargets.sort(sortFromEastToWest);
         lStalkerCasters.sort(sortFromEastToWest);
 
-        for (std::list<Creature*>::const_iterator itr = lStalkerTargets.begin(); itr != lStalkerTargets.end(); ++itr)
+        for (CreatureList::const_iterator itr = lStalkerTargets.begin(); itr != lStalkerTargets.end(); ++itr)
             m_vStalkerTargetGuids.push_back((*itr)->GetObjectGuid());
-        for (std::list<Creature*>::const_iterator itr = lStalkerCasters.begin(); itr != lStalkerCasters.end(); ++itr)
+        for (CreatureList::const_iterator itr = lStalkerCasters.begin(); itr != lStalkerCasters.end(); ++itr)
             m_vStalkerCasterGuids.push_back((*itr)->GetObjectGuid());
     }
 

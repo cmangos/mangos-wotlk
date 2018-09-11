@@ -1811,7 +1811,7 @@ struct npc_mimiron_flamesAI : public Scripted_NoMovementAI
         if (!pLeviathan)
             return nullptr;
 
-        std::list<Unit*> lTargets;
+        UnitList lTargets;
         ThreatList const& threatList = pLeviathan->getThreatManager().getThreatList();
 
         for (auto itr : threatList)

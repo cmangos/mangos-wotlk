@@ -418,7 +418,7 @@ struct npc_letollAI : public npc_escortAI
         Reset();
     }
 
-    std::list<Creature*> m_lResearchersList;
+    CreatureList m_lResearchersList;
 
     uint32 m_uiEventTimer;
     uint32 m_uiEventCount;
@@ -1137,7 +1137,7 @@ enum
 
 bool AttackPlayerWithQuest(Creature* creature)
 {
-    std::list<Player*> playerList;
+    PlayerList playerList;
     GetPlayerListWithEntryInWorld(playerList, creature, 50.0f);
     for (auto& player : playerList)
     {
@@ -1167,7 +1167,7 @@ struct npc_avatar_of_terokkAI : public ScriptedAI
         {
             DoScriptText(SAY_DEFENDER_GRASHNA, grashna);
 
-            std::list<Player*> playerList;
+            PlayerList playerList;
             GetPlayerListWithEntryInWorld(playerList, m_creature, 50.0f);
             for (auto& player : playerList)
                 if (player->IsActiveQuest(QUEST_SKETTIS_OFFENSIVE))

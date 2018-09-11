@@ -516,7 +516,7 @@ struct npc_felhound_trackerAI : public ScriptedPetAI
     // Function to search for new tubber in range
     void DoFindNewCrystal(Player* pMaster)
     {
-        std::list<GameObject*> lCrystalsInRange;
+        GameObjectList lCrystalsInRange;
         for (unsigned int i : aGOList)
         {
             GetGameObjectListWithEntryInGrid(lCrystalsInRange, m_creature, i, 40.0f);
@@ -534,7 +534,7 @@ struct npc_felhound_trackerAI : public ScriptedPetAI
         GameObject* pNearestCrystal = nullptr;
 
         // Always need to find new ones
-        for (std::list<GameObject*>::const_iterator itr = lCrystalsInRange.begin(); itr != lCrystalsInRange.end(); ++itr)
+        for (GameObjectList::const_iterator itr = lCrystalsInRange.begin(); itr != lCrystalsInRange.end(); ++itr)
         {
             if ((*itr)->HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_INTERACT_COND))
             {

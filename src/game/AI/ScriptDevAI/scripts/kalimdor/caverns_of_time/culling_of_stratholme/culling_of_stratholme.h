@@ -207,7 +207,7 @@ class instance_culling_of_stratholme : public ScriptedInstance
 
         void Update(uint32 uiDiff) override;
 
-        void GetCratesBunnyOrderedList(std::list<Creature*>& lList);
+        void GetCratesBunnyOrderedList(CreatureList& lList);
 
         void DoSpawnChromieIfNeeded(Unit* pSummoner);
         void DoSpawnArthasIfNeeded(Unit* pSummoner);

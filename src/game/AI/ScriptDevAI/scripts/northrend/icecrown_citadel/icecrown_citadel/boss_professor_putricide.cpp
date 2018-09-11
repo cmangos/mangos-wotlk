@@ -520,14 +520,14 @@ bool EffectScriptEffectCreature_npc_putricide(Unit* pCaster, uint32 uiSpellId, S
 
         // get the nearest twin tap stalker
         Creature* pNearTarget = nullptr;
-        std::list<Creature*> lTargetsInRange;
+        CreatureList lTargetsInRange;
         GetCreatureListWithEntryInGrid(lTargetsInRange, pTarget, pTarget->GetEntry(), 30.0f);
 
         if (lTargetsInRange.empty())
             return false;
 
         // find only the nearest tap trigger
-        for (std::list<Creature*>::const_iterator itr = lTargetsInRange.begin(); itr != lTargetsInRange.end(); ++itr)
+        for (CreatureList::const_iterator itr = lTargetsInRange.begin(); itr != lTargetsInRange.end(); ++itr)
         {
             if ((*itr)->GetPositionZ() > 370.0f)
                 pNearTarget = *itr;

@@ -170,7 +170,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
             case 2: DoScriptText(SAY_TAUNT_3, m_creature); break;
         }
 
-        std::list<Creature*> lFelConverts;
+        CreatureList lFelConverts;
         GetCreatureListWithEntryInGrid(lFelConverts, m_creature, NPC_FEL_ORC_CONVERT, 40.0f);
         for (auto& lFelConvert : lFelConverts)
             lFelConvert->DealDamage(lFelConvert, lFelConvert->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
@@ -252,7 +252,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_NETHEKURSE, FAIL);
 
-        std::list<Creature*> lFelConverts;
+        CreatureList lFelConverts;
         GetCreatureListWithEntryInGrid(lFelConverts, m_creature, NPC_FEL_ORC_CONVERT, 40.0f);
         for (auto& lFelConvert : lFelConverts)
         {

@@ -218,7 +218,7 @@ struct boss_priestess_delrissaAI : public ScriptedAI
         if (m_uiDispelTimer < uiDiff)
         {
             Unit* pTarget = nullptr;
-            std::list<Creature*> lTempList = DoFindFriendlyCC(50.0f);
+            CreatureList lTempList = DoFindFriendlyCC(50.0f);
 
             if (!lTempList.empty())
                 pTarget = *(lTempList.begin());
@@ -1209,7 +1209,7 @@ struct npc_zelfanAI : public priestess_companion_commonAI
         {
             // Note: this should be casted only on Polyformed targets
             Unit* pTarget = nullptr;
-            std::list<Creature*> lTempList = DoFindFriendlyCC(50.0f);
+            CreatureList lTempList = DoFindFriendlyCC(50.0f);
 
             if (!lTempList.empty())
                 pTarget = *(lTempList.begin());

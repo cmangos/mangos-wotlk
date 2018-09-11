@@ -459,7 +459,7 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
         // define distance based on the spell radius
         // this will replace the targeting sysmte of spells SPELL_MOVE_1 and SPELL_MOVE_2
         float fRadius = 10.0f;
-        std::list<Creature*> lSquaresList;
+        CreatureList lSquaresList;
 
         // some pieces have special distance
         switch (m_creature->GetEntry())
@@ -481,7 +481,7 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
 
         // Get the list of enemies
         GuidList lTempList;
-        std::list<Creature*> lEnemies;
+        CreatureList lEnemies;
 
         m_pInstance->GetChessPiecesByFaction(lTempList, m_creature->getFaction() == FACTION_ID_CHESS_ALLIANCE ? FACTION_ID_CHESS_HORDE : FACTION_ID_CHESS_ALLIANCE);
         for (GuidList::const_iterator itr = lTempList.begin(); itr != lTempList.end(); ++itr)

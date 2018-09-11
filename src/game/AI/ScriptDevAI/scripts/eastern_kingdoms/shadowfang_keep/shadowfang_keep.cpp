@@ -221,7 +221,7 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
         }
         else
         {
-            std::list<Creature*> lVoidwalkerList;
+            CreatureList lVoidwalkerList;
             Creature* pNewLeader = nullptr;
             uint8 uiHighestPosition = 0;
             GetCreatureListWithEntryInGrid(lVoidwalkerList, m_creature, NPC_VOIDWALKER, 50.0f);
@@ -346,7 +346,7 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
 
     void SendWaypoint()
     {
-        std::list<Creature*> lVoidwalkerList;
+        CreatureList lVoidwalkerList;
         GetCreatureListWithEntryInGrid(lVoidwalkerList, m_creature, NPC_VOIDWALKER, 50.0f);
         for (auto& itr : lVoidwalkerList)
         {
