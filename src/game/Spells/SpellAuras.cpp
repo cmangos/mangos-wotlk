@@ -3810,7 +3810,10 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
             switch (form)
             {
-                case FORM_CAT:
+                case FORM_CAT: // need to cast Track Humanoids if no other tracking is on
+                    if (target->HasSpell(5225) && !target->HasAura(2383) && !target->HasAura(2580))
+                        target->CastSpell(nullptr, 5225, TRIGGERED_OLD_TRIGGERED);
+                    // no break
                 case FORM_BEAR:
                 case FORM_DIREBEAR:
                 {
