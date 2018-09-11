@@ -58,6 +58,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
     public:
         typedef std::map<MapID, Map* > MapMapType;
 
+        void CreateContinents();
         Map* CreateMap(uint32, const WorldObject* obj);
         Map* CreateBgMap(uint32 mapid, BattleGround* bg);
         Map* FindMap(uint32 mapid, uint32 instanceId = 0) const;
@@ -138,7 +139,6 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
         TransportMap m_TransportsByMap;
 
         void InitializeVisibilityDistanceInfo();
-
         /* statistics */
         uint32 GetNumInstances();
         uint32 GetNumPlayersInInstances();

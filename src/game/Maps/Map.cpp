@@ -91,6 +91,11 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
       i_data(nullptr), i_script_id(0), i_defaultLight(GetDefaultMapLight(id))
 {
+    m_weatherSystem = new WeatherSystem(this);
+}
+
+void Map::Initialize(bool loadInstanceData /*= true*/)
+{
     m_CreatureGuids.Set(sObjectMgr.GetFirstTemporaryCreatureLowGuid());
     m_GameObjectGuids.Set(sObjectMgr.GetFirstTemporaryGameObjectLowGuid());
 
@@ -110,10 +115,13 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
     // add reference for TerrainData object
     m_TerrainData->AddRef();
 
+    CreateInstanceData(loadInstanceData);
+
     m_persistentState = sMapPersistentStateMgr.AddPersistentState(i_mapEntry, GetInstanceId(), GetDifficulty(), 0, IsDungeon());
     m_persistentState->SetUsedByMapState(this);
+    m_persistentState->InitPools();
 
-    m_weatherSystem = new WeatherSystem(this);
+    sObjectMgr.LoadActiveEntities(this);
 }
 
 void Map::InitVisibilityDistance()
@@ -1639,6 +1647,17 @@ BattleGroundMap::BattleGroundMap(uint32 id, time_t expiry, uint32 InstanceId, ui
 
 BattleGroundMap::~BattleGroundMap()
 {
+}
+
+void BattleGroundMap::Initialize(bool)
+{
+    CreateInstanceData(false);
+
+    m_persistentState = sMapPersistentStateMgr.AddPersistentState(i_mapEntry, GetInstanceId(), GetDifficulty(), 0, IsDungeon());
+    m_persistentState->SetUsedByMapState(this);
+    m_persistentState->InitPools();
+
+    sObjectMgr.LoadActiveEntities(this);
 }
 
 void BattleGroundMap::Update(const uint32& diff)
