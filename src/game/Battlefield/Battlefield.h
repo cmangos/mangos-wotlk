@@ -89,6 +89,8 @@ class BattlefieldBuilding
                 case BF_GO_STATE_HORDE_DESTROYED:
                 case BF_GO_STATE_ALLIANCE_DESTROYED:
                     return BF_GO_STATE_NEUTRAL_DESTROYED;
+                default:
+                    break;
             }
             return m_goState;
         }
@@ -104,6 +106,8 @@ class BattlefieldBuilding
                 case BF_GO_STATE_ALLIANCE_DAMAGED:   return BF_GO_STATE_HORDE_DAMAGED;
                 case BF_GO_STATE_HORDE_DESTROYED:    return BF_GO_STATE_ALLIANCE_DESTROYED;
                 case BF_GO_STATE_ALLIANCE_DESTROYED: return BF_GO_STATE_HORDE_DESTROYED;
+                default:
+                    break;
             }
             return m_goState;
         }

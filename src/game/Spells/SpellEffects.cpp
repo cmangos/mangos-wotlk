@@ -12285,7 +12285,7 @@ void Spell::EffectPlayerPull(SpellEffectIndex eff_idx)
     float speedZ = ((m_caster->GetPositionZ() - unitTarget->GetPositionZ()) + 0.5f * time * time * Movement::gravity) / time;
     float moveTimeHalf = speedZ / Movement::gravity;
     float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -speedZ);
-    unitTarget->GetMotionMaster()->MoveJump(x, y, z, speedXY, max_height, 2.5f);
+    unitTarget->GetMotionMaster()->MoveJump(x, y, z, speedXY, max_height, 2);
 }
 
 void Spell::EffectDispelMechanic(SpellEffectIndex eff_idx)

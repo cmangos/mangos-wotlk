@@ -1361,12 +1361,12 @@ bool ProcessEventId_event_spell_soul_captured_credit(uint32 uiEventId, Object* p
 #npc_shadowlord_deathwail
 #####*/
 
-struct WaveCoords 
+struct WaveCoords
 {
     float xCoord, yCoord, zCoord;
 };
 
-const static WaveCoords WaveSpawnCoords[3][3] = 
+const static WaveCoords WaveSpawnCoords[3][3] =
 {
     {
         /////////////GROUP 1//////////// 0
@@ -1392,7 +1392,7 @@ const static WaveCoords* WaveGroupOneSpawnCoords	= WaveSpawnCoords[0];
 const static WaveCoords* WaveGroupTwoSpawnCoords	= WaveSpawnCoords[1];
 const static WaveCoords* WaveGroupThreeSpawnCoords	= WaveSpawnCoords[2];
 
-const static WaveCoords DeathwailDescentCoords[] = 
+const static WaveCoords DeathwailDescentCoords[] =
 {
     {-3245.675f, 298.3688f, 171.9848f},
     {-3251.500f, 301.2324f, 167.3459f},
@@ -1476,7 +1476,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
         m_lSoulstealers.clear();
         m_cHOFVisualTrigger = nullptr;
         m_cDeathwailTrigger = nullptr;
-        
+
         m_uiFelFireballTimer		= FEL_FIREBALL_CD;
         m_uiFearTimer				= 8000 + urand(0, 5000);
         m_uiShadowBoltTimer			= SHADOW_BOLT_CD;
@@ -1504,7 +1504,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
                 soulstealer->CombatStop();
                 soulstealer->SetActiveObjectState(false);
             }
-        
+
         m_bEventInProgress = false;
 
         m_creature->SetActiveObjectState(false);
@@ -1519,7 +1519,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
             m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupOneSpawnCoords[0].xCoord, WaveGroupOneSpawnCoords[0].yCoord, WaveGroupOneSpawnCoords[0].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 1);
             m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupOneSpawnCoords[1].xCoord, WaveGroupOneSpawnCoords[1].yCoord, WaveGroupOneSpawnCoords[1].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 2);
             m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupOneSpawnCoords[2].xCoord, WaveGroupOneSpawnCoords[2].yCoord, WaveGroupOneSpawnCoords[2].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 3);
-        
+
             // Wave starting outdoors
             m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupTwoSpawnCoords[0].xCoord, WaveGroupTwoSpawnCoords[0].yCoord, WaveGroupTwoSpawnCoords[0].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 4);
             m_creature->SummonCreature(NPC_SHADOWMOON_RETAINER, WaveGroupTwoSpawnCoords[1].xCoord, WaveGroupTwoSpawnCoords[1].yCoord, WaveGroupTwoSpawnCoords[1].zCoord, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, RETAINER_DESPAWN_TIME, true, true, 5);
@@ -1670,6 +1670,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
         }
 
         if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid)) // can find player
+        {
             if (Group* group = player->GetGroup()) // player in group
             {
                 for (GroupReference* ref = group->GetFirstMember(); ref != nullptr; ref = ref->next())
@@ -1684,6 +1685,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
                 if (player->isAlive() && m_cHOFVisualTrigger && m_cHOFVisualTrigger->IsWithinDistInMap(player, MAX_PLAYER_DISTANCE))
                     return true;
             }
+        }
 
         return false;
     }
@@ -1766,7 +1768,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
                     if (m_creature->CastSpell(m_cDeathwailTrigger, SPELL_FEL_FIREBALL, TRIGGERED_NONE) == SPELL_CAST_OK)
                     {
                         // TODO: creature summoning should be handled by spell, not here?
-                        m_creature->SummonCreature(NPC_FELFIRE_SUMMONER, 
+                        m_creature->SummonCreature(NPC_FELFIRE_SUMMONER,
                                                     m_cDeathwailTrigger->GetPositionX(),
                                                     m_cDeathwailTrigger->GetPositionY(),
                                                     m_cDeathwailTrigger->GetPositionZ(), 0.0f, TEMPSPAWN_TIMED_DESPAWN, 6000, true);
@@ -1841,11 +1843,12 @@ struct mob_shadowmoon_soulstealerAI : public ScriptedAI
             if (npc_shadowlord_deathwailAI* DeathwailAI = dynamic_cast<npc_shadowlord_deathwailAI*>(m_cDeathwail->AI()))
             {
                 if (!who->GetObjectGuid().IsPlayer()) // not attacked by player
+                {
                     if (Unit* attackerOwner = m_creature->GetMap()->GetPlayer(who->GetOwnerGuid()))
                         who = attackerOwner;
                     else // not attacked by player, nor NPC owned by player... just ignore
                         exitCombat = true;
-
+                }
                 if (!exitCombat && DeathwailAI->SoulstealerEnteredCombat(m_creature, who))
                 {
                     m_creature->AI()->SetReactState(REACT_PASSIVE);
@@ -1863,7 +1866,7 @@ struct mob_shadowmoon_soulstealerAI : public ScriptedAI
             m_creature->CombatStop();
     }
 
-    void JustDied(Unit* /*killer*/) override 
+    void JustDied(Unit* /*killer*/) override
     {
         if (m_cDeathwail)
             if (npc_shadowlord_deathwailAI* DeathwailAI = dynamic_cast<npc_shadowlord_deathwailAI*>(m_cDeathwail->AI()))
@@ -2576,7 +2579,7 @@ enum
     SPELL_LAZY_AND_GOOD_FOR_NOTHING = 40732,
     SPELL_DEFIANT_AND_ENRAGED       = 40735,
     SPELL_PEON_CLEAR_ALL            = 40762,
-    
+
     NPC_PEON                = 22252,
     NPC_PEON_WORK_NODE      = 23308,
     NPC_DISOBEDIENT_PEON    = 23311,
@@ -2762,7 +2765,7 @@ void AddSC_shadowmoon_valley()
     pNewScript->GetAI = &GetAI_npc_totem_of_spirits;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_totem_of_spirits;
     pNewScript->RegisterSelf();
-    
+
     pNewScript = new Script;
     pNewScript->Name = "npc_shadowlord_deathwail";
     pNewScript->GetAI = &GetAI_npc_shadowlord_deathwail;

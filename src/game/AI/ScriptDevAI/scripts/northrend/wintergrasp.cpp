@@ -153,7 +153,7 @@ struct go_vehicle_teleporter : public GameObjectAI
 
                     // validate vehicle ownership against the flag it carries
                     if ((m_battlefield->GetDefender() == ALLIANCE && vehicle->HasAura(SPELL_ALLIANCE_FLAG)) ||
-                        m_battlefield->GetDefender() == HORDE && vehicle->HasAura(SPELL_HORDE_FLAG))
+                        (m_battlefield->GetDefender() == HORDE && vehicle->HasAura(SPELL_HORDE_FLAG)))
                     {
                         // teleport to the trigger which is furthest away
                         if (Unit* target = GetTeleportTarget(vehicle))

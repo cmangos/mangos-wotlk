@@ -659,6 +659,8 @@ struct go_brewfest_music : public GameObjectAI
                 case HORDE:
                     PlayHordeMusic();
                     break;
+                default:
+                    break;
             }
             m_musicStartTimer = 5000;
         }

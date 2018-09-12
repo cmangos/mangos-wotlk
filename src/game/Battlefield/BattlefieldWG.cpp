@@ -179,7 +179,7 @@ void BattlefieldWG::FillInitialWorldStates(WorldPacket& data, uint32& count)
 
     for (auto building : m_defenseWorkshops)
         FillInitialWorldState(data, count, building->GetWorldState(), building->GetGoState());
-    
+
     for (auto building : m_offenseTowers)
         FillInitialWorldState(data, count, building->GetWorldState(), building->GetGoState());
 
@@ -1195,6 +1195,8 @@ void BattlefieldWG::UpdatePlayerScore(Player* player)
             if (!player->HasAura(SPELL_LIEUTENANT))
                 player->CastSpell(player, SPELL_LIEUTENANT, TRIGGERED_OLD_TRIGGERED);
             break;
+        default:
+            break;
     }
 }
 
@@ -1314,7 +1316,7 @@ void BattlefieldWG::UpdateTenacities(const WorldObject* objRef)
         // Note: the exact values have to be confirmed
 
         // cast the tenacity stacks
-        if (playerDiff && (player->GetTeam() == ALLIANCE && allyPlayerCount > hordePlayerCount) || (player->GetTeam() == HORDE && hordePlayerCount > allyPlayerCount))
+        if (playerDiff && ((player->GetTeam() == ALLIANCE && allyPlayerCount > hordePlayerCount) || (player->GetTeam() == HORDE && hordePlayerCount > allyPlayerCount)))
         {
             for (uint8 i = 0; i < playerDiff; ++i)
                 player->CastSpell(player, SPELL_TENACITY, TRIGGERED_OLD_TRIGGERED);
@@ -1338,7 +1340,7 @@ void BattlefieldWG::UpdateTenacities(const WorldObject* objRef)
             {
                 vehicle->RemoveAurasDueToSpell(SPELL_TENACITY_VEHICLE);
 
-                if (playerDiff && (i == TEAM_INDEX_ALLIANCE && allyPlayerCount > hordePlayerCount) || (i == TEAM_INDEX_HORDE && hordePlayerCount > allyPlayerCount))
+                if (playerDiff && ((i == TEAM_INDEX_ALLIANCE && allyPlayerCount > hordePlayerCount) || (i == TEAM_INDEX_HORDE && hordePlayerCount > allyPlayerCount)))
                 {
                     for (uint32 i = 0; i < playerDiff; ++i)
                         vehicle->CastSpell(vehicle, SPELL_TENACITY_VEHICLE, TRIGGERED_OLD_TRIGGERED);

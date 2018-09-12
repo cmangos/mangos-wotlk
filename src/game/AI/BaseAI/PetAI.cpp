@@ -48,6 +48,8 @@ PetAI::PetAI(Creature* creature) : UnitAI(creature), m_creature(creature), inCom
         case MINI_PET:
             SetReactState(REACT_PASSIVE);
             break;
+        default:
+            break;
     }
 
     switch (creature->GetUInt32Value(UNIT_CREATED_BY_SPELL))
