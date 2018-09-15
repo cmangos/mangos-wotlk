@@ -24,11 +24,10 @@
 
 BattleGroundSA::BattleGroundSA(): m_attackingTeamIdx(), m_battleRoundTimer(0), m_boatStartTimer(0)
 {
-    // TODO FIX ME!
-    m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
-    m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_WS_START_ONE_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_WS_START_HALF_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_WS_HAS_BEGUN;
+    m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_SA_START_TWO_MINUTES;
+    m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_SA_START_ONE_MINUTE;
+    m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_SA_START_HALF_MINUTE;
+    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_SA_BEGIN;
 }
 
 void BattleGroundSA::Update(uint32 diff)
@@ -90,29 +89,29 @@ void BattleGroundSA::Update(uint32 diff)
     }
 }
 
-void BattleGroundSA::AddPlayer(Player* plr)
+void BattleGroundSA::AddPlayer(Player* player)
 {
-    BattleGround::AddPlayer(plr);
+    BattleGround::AddPlayer(player);
     // create score and add it to map, default values are set in constructor
-    BattleGroundSAScore* sc = new BattleGroundSAScore;
+    BattleGroundSAScore* score = new BattleGroundSAScore;
 
-    m_PlayerScores[plr->GetObjectGuid()] = sc;
-
-    // add phase aura
-    plr->CastSpell(plr, m_attackingTeamIdx == TEAM_INDEX_ALLIANCE ? BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT : BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT, TRIGGERED_OLD_TRIGGERED);
+    m_PlayerScores[player->GetObjectGuid()] = score;
 
     // Teleport player to the correct location
-    if (GetTeamIndexByTeamId(plr->GetTeam()) == m_attackingTeamIdx)
+    if (GetTeamIndexByTeamId(player->GetTeam()) == m_attackingTeamIdx)
     {
         // TODO: make this location more dyanmic, depending on the transport position
-        plr->CastSpell(plr, BG_SA_SPELL_TELEPORT_ATTACKERS, TRIGGERED_OLD_TRIGGERED);
+        player->CastSpell(player, BG_SA_SPELL_TELEPORT_ATTACKERS, TRIGGERED_OLD_TRIGGERED);
 
         // Note: the following code is temporary until spell effect 60178 is implemented
         uint8 randLoc = (urand(0, 1));
-        plr->TeleportTo(plr->GetMapId(), strandTeleportLoc[randLoc][0], strandTeleportLoc[randLoc][1], strandTeleportLoc[randLoc][2], strandTeleportLoc[randLoc][3]);
+        player->TeleportTo(player->GetMapId(), strandTeleportLoc[randLoc][0], strandTeleportLoc[randLoc][1], strandTeleportLoc[randLoc][2], strandTeleportLoc[randLoc][3]);
     }
     else
-        plr->CastSpell(plr, BG_SA_SPELL_TELEPORT_DEFENDER, TRIGGERED_OLD_TRIGGERED);
+        player->CastSpell(player, BG_SA_SPELL_TELEPORT_DEFENDER, TRIGGERED_OLD_TRIGGERED);
+
+    // add phase aura
+    player->CastSpell(player, m_attackingTeamIdx == TEAM_INDEX_ALLIANCE ? BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT : BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT, TRIGGERED_OLD_TRIGGERED);
 }
 
 void BattleGroundSA::StartingEventOpenDoors()
@@ -197,6 +196,13 @@ void BattleGroundSA::FillInitialWorldStates(WorldPacket& data, uint32& count)
 
     // fill graveyard states
     // ToDo:
+}
+
+// process the gate events
+bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go)
+{
+    // ToDo:
+    return false;
 }
 
 void BattleGroundSA::Reset()

@@ -19,6 +19,8 @@
 #ifndef __BATTLEGROUNDSA_H
 #define __BATTLEGROUNDSA_H
 
+#include "Tools/Language.h"
+
 class BattleGround;
 
 #define BG_SA_EVENT_START_BATTLE_1      23748       // Ally / Horde likely
@@ -76,18 +78,27 @@ enum
     BG_SA_VEHICLE_DEMOLISHER                    = 28781,
     BG_SA_VEHICLE_CANNON                        = 27894,
 
+    BG_SA_NPC_KANRETHAD                         = 29,
+    BG_SA_NPC_INVISIBLE_STALKER                 = 15214,                // related to the start locations of the teams; possible target for teleport?
+    BG_SA_NPC_WORLD_TRIGGER                     = 22515,                // emote handler
+    // BG_SA_NPC_WORLD_TRIGGER_LARGE            = 23472,                // gate teleport target
+
+    // workshop owners - used when the attacker takes over the east / west graveyard
+    BG_SA_NPC_RIGGER_SPARKLIGHT                 = 29260,
+    BG_SA_NPC_GORGRIL_RIGSPARK                  = 29262,
+
     // gameobjects
     // Main gates
     BG_SA_GO_GATE_GREEN_EMERALD                 = 190722,
-    BG_SA_GO_GATE_MAUVE_AMETHYST                = 190723,
+    BG_SA_GO_GATE_PURPLE_AMETHYST               = 190723,
     BG_SA_GO_GATE_BLUE_SAPHIRE                  = 190724,
     BG_SA_GO_GATE_RED_SUN                       = 190726,
     BG_SA_GO_GATE_YELLOW_MOON                   = 190727,
     BG_SA_GO_GATE_ANCIENT_SHRINE                = 192549,
 
     // Relics - main objective of the battleground (has same faction as the attackers)
-    BG_SA_GO_TITAN_RELIC_HORDE                   = 194082,
-    BG_SA_GO_TITAN_RELIC_ALLIANCE                = 194083,
+    BG_SA_GO_TITAN_RELIC_HORDE                  = 194082,               // phased for attacker
+    BG_SA_GO_TITAN_RELIC_ALLIANCE               = 194083,
 
     // Sigils - used for decoration purpose
     BG_SA_GO_SIGIL_YELLOW_MOON                  = 192685,
@@ -97,9 +108,10 @@ enum
     BG_SA_GO_SIGIL_PURPLE_MOON                  = 192691,
 
     // various objects (have same faction as the defenders)
-    BG_SA_GO_DEFENDERS_PORTAL_ALLIANCE          = 191575,
+    BG_SA_GO_DEFENDERS_PORTAL_ALLIANCE          = 191575,               // phased for defender
     BG_SA_GO_DEFENDERS_PORTAL_HORDE             = 190763,
-    BG_SA_GO_SEAFORIUM_BOMB_ALLIANCE            = 190753,
+
+    BG_SA_GO_SEAFORIUM_BOMB_ALLIANCE            = 190753,               // phased for attacker
     BG_SA_GO_SEAFORIUM_BOMB_HORDE               = 194086,
 
     // graveyard flags
@@ -111,21 +123,51 @@ enum
     BG_SA_GO_GY_FLAG_HORDE_3                    = 191309,
 
     // transport ships
-    BG_SA_GO_TRANSPORT_SHIP_HORDE_1             = 193183,
+    BG_SA_GO_TRANSPORT_SHIP_HORDE_1             = 193183,               // phased for attacker
     BG_SA_GO_TRANSPORT_SHIP_HORDE_2             = 193184,
     BG_SA_GO_TRANSPORT_SHIP_ALLIANCE_1          = 193182,
     BG_SA_GO_TRANSPORT_SHIP_ALLIANCE_2          = 193185,
 
     // spells
-    BG_SA_SPELL_TELEPORT_DEFENDER               = 52364,
+    BG_SA_SPELL_TELEPORT_DEFENDER               = 52364,                // teleport defender team to the south graveyard platform
     BG_SA_SPELL_TELEPORT_ATTACKERS              = 60178,
-    BG_SA_SPELL_END_OF_ROUND                    = 52459,
+    BG_SA_SPELL_END_OF_ROUND                    = 52459,                // stun the players at the end of the round; after 5 seconds, teleport and reset for round 2
     BG_SA_SPELL_REMOVE_SEAFORIUM                = 59077,
-    BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT    = 60027,
-    BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT       = 60028,
+    BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT    = 60027,                // phase 65 - alliance is defender
+    BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT       = 60028,                // phase 129 - horde is defender
+
+    BG_SA_EVENT_ID_RELIC                        = 20572,                // event used to end the round
+    BG_SA_EVENT_ID_SHIP_PAUSE_1                 = 22095,                // events used to pause the ships
+    BG_SA_EVENT_ID_SHIP_PAUSE_2                 = 18829,
+
+    // factions
+    BG_SA_FACTION_ID_ALLIANCE                   = 1732,
+    BG_SA_FACTION_ID_HORDE                      = 1735,
 };
 
 static const uint32 strandGates[BG_SA_MAX_GATES] = { BG_SA_STATE_PURPLE_GATE, BG_SA_STATE_RED_GATE, BG_SA_STATE_BLUE_GATE, BG_SA_STATE_GREEN_GATE, BG_SA_STATE_YELLOW_GATE, BG_SA_STATE_ANCIENT_GATE };
+
+// *** Battleground factions *** //
+const uint32 sotaTeamFactions[PVP_TEAM_COUNT] = { BG_SA_FACTION_ID_ALLIANCE, BG_SA_FACTION_ID_HORDE };
+
+// *** Battleground phasing auras *** //
+const uint32 sotaTeamControlAuras[PVP_TEAM_COUNT] = { BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT, BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT };
+
+struct StrandGoData
+{
+    uint32 goEntry, worldState, eventDamaged, eventDestroyed, eventRebuild, messageDamaged, messagedDestroyed;
+};
+
+// *** Battleground object data *** //
+static const StrandGoData sotaObjectData[] =
+{
+    {BG_SA_GO_GATE_GREEN_EMERALD,   BG_SA_STATE_GREEN_GATE,     19041,  19046,  21630,  LANG_BG_SA_GATE_GREEN_ATTACK,   LANG_BG_SA_GATE_GREEN_DESTROY},
+    {BG_SA_GO_GATE_PURPLE_AMETHYST, BG_SA_STATE_PURPLE_GATE,    19043,  19048,  21630,  LANG_BG_SA_GATE_PURPLE_ATTACK,  LANG_BG_SA_GATE_PURPLE_DESTROY},
+    {BG_SA_GO_GATE_BLUE_SAPHIRE,    BG_SA_STATE_BLUE_GATE,      19040,  19045,  21630,  LANG_BG_SA_GATE_BLUE_ATTACK,    LANG_BG_SA_GATE_BLUE_DESTROY},
+    {BG_SA_GO_GATE_RED_SUN,         BG_SA_STATE_RED_GATE,       19042,  19047,  21630,  LANG_BG_SA_GATE_RED_ATTACK,     LANG_BG_SA_GATE_RED_DESTROY},
+    {BG_SA_GO_GATE_YELLOW_MOON,     BG_SA_STATE_YELLOW_GATE,    19044,  19049,  21630,  LANG_BG_SA_GATE_YELLOW_ATTACK,  LANG_BG_SA_GATE_YELLOW_DESTROY},
+    {BG_SA_GO_GATE_ANCIENT_SHRINE,  BG_SA_STATE_ANCIENT_GATE,   19836,  19837,  21630,  LANG_BG_SA_CHAMBER_ATTACK,      LANG_BG_SA_CHAMBER_BREACH},
+};
 
 static const float strandTeleportLoc[3][4] =
 {
@@ -156,6 +198,8 @@ class BattleGroundSA : public BattleGround
 
         void HandleCreatureCreate(Creature* creature) override;
         void HandleGameObjectCreate(GameObject* go) override;
+
+        bool HandleEvent(uint32 eventId, GameObject* go) override;
 
         /* Scorekeeping */
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;

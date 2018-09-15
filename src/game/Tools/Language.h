@@ -644,11 +644,42 @@ enum MangosStrings
     LANG_BG_WS_F_PLACED                 = 613,
     LANG_BG_WS_ALLIANCE_FLAG_RESPAWNED  = 614,
     LANG_BG_WS_HORDE_FLAG_RESPAWNED     = 615,
-    // 616 - 635 not used
+
+    LANG_BG_SA_START_TWO_MINUTES        = 616,
+    LANG_BG_SA_START_ONE_MINUTE         = 617,
+    LANG_BG_SA_START_HALF_MINUTE        = 618,
+    LANG_BG_SA_BEGIN                    = 619,
+    LANG_BG_SA_ROUND_FINISHED           = 620,
+    LANG_BG_SA_ROUND_START_ONE_MINUTE   = 621,
+    LANG_BG_SA_ROUND_START_HALF_MINUTE  = 622,
+    LANG_BG_SA_BATTLE_ENDED             = 623,
+    LANG_BG_SA_GATE_GREEN_ATTACK        = 624,
+    LANG_BG_SA_GATE_GREEN_DESTROY       = 625,
+    LANG_BG_SA_GATE_PURPLE_ATTACK       = 626,
+    LANG_BG_SA_GATE_PURPLE_DESTROY      = 627,
+    LANG_BG_SA_GATE_BLUE_ATTACK         = 628,
+    LANG_BG_SA_GATE_BLUE_DESTROY        = 629,
+    LANG_BG_SA_GATE_RED_ATTACK          = 630,
+    LANG_BG_SA_GATE_RED_DESTROY         = 631,
+    LANG_BG_SA_GATE_YELLOW_ATTACK       = 632,
+    LANG_BG_SA_GATE_YELLOW_DESTROY      = 633,
+    LANG_BG_SA_CHAMBER_ATTACK           = 634,
+    LANG_BG_SA_CHAMBER_BREACH           = 635,
+
     LANG_BG_EY_START_ONE_MINUTE         = 636,
     LANG_BG_EY_START_HALF_MINUTE        = 637,
     LANG_BG_EY_HAS_BEGUN                = 638,
-    // 639 - 649 not used
+
+    LANG_BG_SA_PORTAL_ALLIANCE          = 639,
+    LANG_BG_SA_PORTAL_HORDE             = 640,
+    LANG_BG_SA_GRAVE_EAST_HORDE         = 641,
+    LANG_BG_SA_GRAVE_WEST_HORDE         = 642,
+    LANG_BG_SA_GRAVE_SOUTH_HORDE        = 643,
+    LANG_BG_SA_GRAVE_EAST_ALLIANCE      = 644,
+    LANG_BG_SA_GRAVE_WEST_ALLIANCE      = 645,
+    LANG_BG_SA_GRAVE_SOUTH_ALLIANCE     = 646,
+
+    // 647 - 649 not used
     LANG_BG_ALLY                        = 650,
     LANG_BG_HORDE                       = 651,
 
