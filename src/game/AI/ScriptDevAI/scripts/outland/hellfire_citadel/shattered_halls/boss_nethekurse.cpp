@@ -269,6 +269,14 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
 
         if (m_firstPhase)
         {
+            if (m_uiCleaveTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHADOW_CLEAVE : SPELL_SHADOW_SLAM_H);
+                m_uiCleaveTimer = urand(6000, 8500);
+            }
+            else
+                m_uiCleaveTimer -= uiDiff;
+
             if (m_uiShadowFissureTimer < uiDiff)
             {
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
@@ -300,14 +308,6 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
                 DoCastSpellIfCan(nullptr, SPELL_DARK_SPIN);
                 m_bSpinOnce = true;
             }
-
-            if (m_uiCleaveTimer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHADOW_CLEAVE : SPELL_SHADOW_SLAM_H);
-                m_uiCleaveTimer = urand(6000, 8500);
-            }
-            else
-                m_uiCleaveTimer -= uiDiff;
         }
     }
 };
