@@ -5724,6 +5724,21 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
 
                     return;
                 }
+                case 47214: // Burninate Effect
+                {
+                    if (apply)
+                    {
+                        Unit* caster = GetCaster();
+                        if (!caster)
+                            return;
+
+                        target->CastSpell(caster, 47208, TRIGGERED_NONE);
+                        target->CastSpell(nullptr, 42726, TRIGGERED_NONE);
+                    }
+                    else // kill self on removal
+                        target->CastSpell(nullptr, 51744, TRIGGERED_NONE);
+                    break;
+                }
             }
         }
         case SPELLFAMILY_ROGUE:
