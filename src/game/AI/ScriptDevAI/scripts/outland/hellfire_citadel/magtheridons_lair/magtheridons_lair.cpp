@@ -39,7 +39,7 @@ void instance_magtheridons_lair::Initialize()
 
 bool instance_magtheridons_lair::IsEncounterInProgress() const
 {
-    for (unsigned int i : m_auiEncounter)
+    for (uint32 i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             return true;

@@ -371,7 +371,7 @@ void instance_halls_of_stone::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3];
 
-    for (unsigned int& i : m_auiEncounter)
+    for (uint32& i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             i = NOT_STARTED;

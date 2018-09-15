@@ -233,7 +233,7 @@ void instance_oculus::Load(const char* chrIn)
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[TYPE_DRAKOS] >> m_auiEncounter[TYPE_VAROS] >> m_auiEncounter[TYPE_UROM] >> m_auiEncounter[TYPE_EREGOS];
 
-    for (unsigned int& i : m_auiEncounter)
+    for (uint32& i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             i = NOT_STARTED;

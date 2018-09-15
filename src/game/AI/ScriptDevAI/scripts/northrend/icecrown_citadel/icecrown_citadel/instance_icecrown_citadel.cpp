@@ -78,7 +78,7 @@ void instance_icecrown_citadel::Initialize()
 
 bool instance_icecrown_citadel::IsEncounterInProgress() const
 {
-    for (unsigned int i : m_auiEncounter)
+    for (uint32 i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             return true;
@@ -780,7 +780,7 @@ void instance_icecrown_citadel::Load(const char* strIn)
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11]
                >> m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14];
 
-    for (unsigned int& i : m_auiEncounter)
+    for (uint32& i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             i = NOT_STARTED;

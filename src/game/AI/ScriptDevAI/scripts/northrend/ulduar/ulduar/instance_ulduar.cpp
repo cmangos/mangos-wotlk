@@ -1329,7 +1329,7 @@ void instance_ulduar::Load(const char* strIn)
                >> m_auiUlduarTowers[0] >> m_auiUlduarTowers[1] >> m_auiUlduarTowers[2] >> m_auiUlduarTowers[3]
                >> m_auiAchievEncounter[ACHIEV_FREYA_CONSPEEDATORY];
 
-    for (unsigned int& i : m_auiEncounter)
+    for (uint32& i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             i = NOT_STARTED;

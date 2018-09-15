@@ -59,7 +59,7 @@ void instance_karazhan::Initialize()
 
 bool instance_karazhan::IsEncounterInProgress() const
 {
-    for (unsigned int i : m_auiEncounter)
+    for (uint32 i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             return true;
@@ -335,7 +335,7 @@ void instance_karazhan::Load(const char* chrIn)
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_uiOperaEvent;
 
-    for (unsigned int& i : m_auiEncounter)
+    for (uint32& i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)               // Do not load an encounter as "In Progress" - reset it instead.
             i = NOT_STARTED;

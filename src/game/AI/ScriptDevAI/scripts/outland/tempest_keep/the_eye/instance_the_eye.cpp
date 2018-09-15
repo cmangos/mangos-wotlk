@@ -37,7 +37,7 @@ void instance_the_eye::Initialize()
 
 bool instance_the_eye::IsEncounterInProgress() const
 {
-    for (unsigned int i : m_auiEncounter)
+    for (uint32 i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             return true;

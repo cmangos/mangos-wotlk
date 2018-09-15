@@ -46,7 +46,7 @@ void instance_serpentshrine_cavern::Initialize()
 
 bool instance_serpentshrine_cavern::IsEncounterInProgress() const
 {
-    for (unsigned int i : m_auiEncounter)
+    for (uint32 i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             return true;
@@ -173,7 +173,7 @@ void instance_serpentshrine_cavern::Load(const char* chrIn)
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                >> m_auiEncounter[4] >> m_auiEncounter[5];
 
-    for (unsigned int& i : m_auiEncounter)
+    for (uint32& i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             i = NOT_STARTED;
