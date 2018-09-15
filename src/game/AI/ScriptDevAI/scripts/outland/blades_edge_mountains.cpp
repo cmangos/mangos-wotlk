@@ -1400,8 +1400,8 @@ enum
     SPELL_SPIRIT_PARTICLES_PURPLE       = 28126,
     SPELL_SOULGRINDER_GHOST_SPAWN_IN    = 17321,
 
-    SAY_SKULLOC_SOULGRINDER = -1001230,
-    SAY_FAIL_QUEST          = -1001231,
+    SAY_SKULLOC_SOULGRINDER = -1015016,
+    SAY_FAIL_QUEST          = -1015017,
 };
 
 bool ProcessEventId_Soulgrinder(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart)
