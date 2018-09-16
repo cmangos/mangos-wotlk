@@ -7787,58 +7787,58 @@ void Aura::PeriodicTick()
                 return;
             }
 
-            // some auras remove at specific health level or more
+            // ignore non positive values (can be result apply spellmods to aura damage
+            uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
+
+            uint32 pdamage;
             if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
+                pdamage = amount;
+            else
+                pdamage = uint32(target->GetMaxHealth() * amount / 100);
+
+            // some auras remove at specific health level or more or have damage interactions
+            switch (GetId())
             {
-                switch (GetId())
+                case 43093: case 31956: case 38801:
+                case 35321: case 38363: case 39215:
+                case 48920:
                 {
-                    case 43093: case 31956: case 38801:
-                    case 35321: case 38363: case 39215:
-                    case 48920:
+                    if (target->GetHealth() == target->GetMaxHealth())
                     {
-                        if (target->GetHealth() == target->GetMaxHealth())
-                        {
-                            target->RemoveAurasDueToSpell(GetId());
-                            return;
-                        }
-                        break;
+                        target->RemoveAurasDueToSpell(GetId());
+                        return;
                     }
-                    case 38772:
-                    {
-                        uint32 percent =
-                            GetEffIndex() < EFFECT_INDEX_2 && spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_DUMMY ?
-                            pCaster->CalculateSpellDamage(target, spellProto, SpellEffectIndex(GetEffIndex() + 1)) :
-                            100;
-                        if (target->GetHealth() * 100 >= target->GetMaxHealth() * percent)
-                        {
-                            target->RemoveAurasDueToSpell(GetId());
-                            return;
-                        }
-                        break;
-                    }
-                    case 29964: // Dragons Breath
-                    {
-                        target->CastSpell(nullptr, 29965, TRIGGERED_OLD_TRIGGERED);
-                        break;
-                    }
-                    default:
-                        break;
+                    break;
                 }
+                case 38772:
+                {
+                    uint32 percent =
+                        GetEffIndex() < EFFECT_INDEX_2 && spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_DUMMY ?
+                        pCaster->CalculateSpellDamage(target, spellProto, SpellEffectIndex(GetEffIndex() + 1)) :
+                        100;
+                    if (target->GetHealth() * 100 >= target->GetMaxHealth() * percent)
+                    {
+                        target->RemoveAurasDueToSpell(GetId());
+                        return;
+                    }
+                    break;
+                }
+                case 29964: // Dragons Breath
+                {
+                    target->CastSpell(nullptr, 29965, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                }
+                case 31258: // Death & Decay - Rage Winterchill
+                    if (target->GetEntry() == 17772) // Only Jaina receives less damage
+                        pdamage = uint32(target->GetMaxHealth() * 0.5f / 100);
+                    break;
+                default:
+                    break;
             }
 
             uint32 absorb = 0;
             uint32 resist = 0;
             CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
-
-            // ignore non positive values (can be result apply spellmods to aura damage
-            uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
-
-            uint32 pdamage;
-
-            if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
-                pdamage = amount;
-            else
-                pdamage = uint32(target->GetMaxHealth() * amount / 100);
 
             // SpellDamageBonus for magic spells
             if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
