@@ -7674,7 +7674,10 @@ void Aura::PeriodicTick()
 
             // Check for immune (not use charges)
             if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+            {
+                pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
                 return;
+            }
 
             // some auras remove at specific health level or more
             if (m_modifier.m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
@@ -7821,7 +7824,10 @@ void Aura::PeriodicTick()
 
             // Check for immune
             if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+            {
+                pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
                 return;
+            }
 
             uint32 absorb = 0;
             uint32 resist = 0;
@@ -7905,7 +7911,10 @@ void Aura::PeriodicTick()
                 return;
 
             if (target->IsImmuneToSchool(spellProto))
+            {
+                pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
                 return;
+            }
 
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
@@ -8018,7 +8027,10 @@ void Aura::PeriodicTick()
 
             // Check for immune (not use charges)
             if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+            {
+                pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
                 return;
+            }
 
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
@@ -8113,6 +8125,17 @@ void Aura::PeriodicTick()
             if (!target->isAlive())
                 return;
 
+            Unit* pCaster = GetCaster();
+
+            if (pCaster)
+            {
+                if (target->IsImmuneToSchool(spellProto))
+                {
+                    pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
+                    return;
+                }
+            }
+
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
@@ -8132,7 +8155,7 @@ void Aura::PeriodicTick()
 
             int32 gain = target->ModifyPower(power, pdamage);
 
-            if (Unit* pCaster = GetCaster())
+            if (pCaster)
                 target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
             break;
         }
@@ -8141,6 +8164,17 @@ void Aura::PeriodicTick()
             // don't energize target if not alive, possible death persistent effects
             if (!target->isAlive())
                 return;
+
+            Unit* pCaster = GetCaster();
+
+            if (pCaster)
+            {
+                if (target->IsImmuneToSchool(spellProto))
+                {
+                    pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
+                    return;
+                }
+            }
 
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
@@ -8158,7 +8192,7 @@ void Aura::PeriodicTick()
 
             int32 gain = target->ModifyPower(POWER_MANA, pdamage);
 
-            if (Unit* pCaster = GetCaster())
+            if (pCaster)
                 target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
             break;
         }
@@ -8174,7 +8208,10 @@ void Aura::PeriodicTick()
 
             // Check for immune (not use charges)
             if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+            {
+                pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
                 return;
+            }
 
             int32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
