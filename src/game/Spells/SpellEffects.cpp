@@ -3973,7 +3973,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 30284:                                 // Change Facing
                 {
-                    if (!unitTarget)
+                    if (!unitTarget || eff_idx != EFFECT_INDEX_0)
                         return;
 
                     unitTarget->CastSpell(m_caster, 30270, TRIGGERED_OLD_TRIGGERED);
