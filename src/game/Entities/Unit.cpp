@@ -2029,7 +2029,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
                     SpellEntry const* i_spellProto = (*i)->GetSpellProto();
 
                     // Damage shield can be resisted...
-                    if (SpellMissInfo missInfo = pVictim->SpellHitResult(this, i_spellProto, false))
+                    if (SpellMissInfo missInfo = pVictim->SpellHitResult(this, i_spellProto, (1 << (*i)->GetEffIndex())))
                     {
                         pVictim->SendSpellMiss(this, i_spellProto->Id, missInfo);
                         continue;
