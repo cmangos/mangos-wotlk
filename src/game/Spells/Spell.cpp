@@ -1544,12 +1544,10 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
     if (realCaster && realCaster->GetTypeId() == TYPEID_PLAYER)
         ((Player*)realCaster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL2, m_spellInfo->Id, 0, unit);
 
-    if (realCaster && realCaster != unit)
+    if (traveling && realCaster && realCaster != unit)
     {
         // Recheck  UNIT_FLAG_NON_ATTACKABLE for delayed spells
-        if (traveling &&
-                unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) &&
-                unit->GetMasterGuid() != m_caster->GetObjectGuid())
+        if (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE) && unit->GetMasterGuid() != m_caster->GetObjectGuid())
         {
             realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
             ResetEffectDamageAndHeal();
@@ -1559,8 +1557,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
         if (realCaster->CanAttack(unit))
         {
             // for delayed spells ignore not visible explicit target
-            if (traveling && unit == m_targets.getUnitTarget() &&
-                    !unit->isVisibleForOrDetect(m_caster, m_caster, false))
+            if (unit == m_targets.getUnitTarget() && !unit->isVisibleForOrDetect(m_caster, m_caster, false))
             {
                 realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
                 ResetEffectDamageAndHeal();
@@ -1570,7 +1567,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
         else
         {
             // for delayed spells ignore negative spells (after duel end) for friendly targets
-            if (traveling && !IsPositiveSpell(m_spellInfo->Id, realCaster, unit))
+            if (!IsPositiveSpell(m_spellInfo->Id, realCaster, unit))
             {
                 realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
                 ResetEffectDamageAndHeal();
