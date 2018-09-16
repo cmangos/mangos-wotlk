@@ -255,6 +255,7 @@ class ChatHandler
         bool HandleDebugSendLargePacketCommand(char* args);
         bool HandleDebugSendOpcodeCommand(char* args);
         bool HandleDebugSendPoiCommand(char* args);
+        bool HandleDebugSendQuestFailedMsgCommand(char* args);
         bool HandleDebugSendQuestPartyMsgCommand(char* args);
         bool HandleDebugSendQuestInvalidMsgCommand(char* args);
         bool HandleDebugSendSellErrorCommand(char* args);

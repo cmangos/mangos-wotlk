@@ -368,6 +368,20 @@ bool ChatHandler::HandleDebugSendChatMsgCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleDebugSendQuestFailedMsgCommand(char* args)
+{
+    uint32 questId;
+    if (!ExtractUInt32(&args, questId))
+        return false;
+
+    uint32 reason;
+    if (!ExtractUInt32(&args, reason))
+        return false;
+
+    m_session->GetPlayer()->SendQuestFailed(questId, InventoryResult(reason));
+    return true;
+}
+
 bool ChatHandler::HandleDebugSendQuestPartyMsgCommand(char* args)
 {
     uint32 msg;
