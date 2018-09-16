@@ -302,6 +302,7 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
     npc_chess_piece_genericAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
         m_pInstance = (instance_karazhan*)pCreature->GetInstanceData();
+        m_creature->SetCanEnterCombat(false); // chess pieces never enter combat
         Reset();
     }
 
@@ -338,6 +339,7 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
     void AttackStart(Unit* /*pWho*/) override { }
     void EnterEvadeMode() override { }
+    bool CanHandleCharm() override { return true; }
 
     void JustDied(Unit* /*pKiller*/) override
     {

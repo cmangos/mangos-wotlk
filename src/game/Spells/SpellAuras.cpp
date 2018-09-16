@@ -4627,10 +4627,10 @@ void Aura::HandleModCharm(bool apply, bool Real)
         if (playerCaster)
             caster->BreakCharmOutgoing(true);
 
-        caster->TakeCharmOf(target);
+        caster->TakeCharmOf(target, GetId());
     }
     else
-        caster->Uncharm(target);
+        caster->Uncharm(target, GetId());
 
     if (apply)
     {
@@ -4680,9 +4680,9 @@ void Aura::HandleAoECharm(bool apply, bool Real)
 
     if (apply)
         // AoE charm: non-advertised type of charm - co-exists with other charms
-        caster->TakeCharmOf(target, false);
+        caster->TakeCharmOf(target, GetId(), false);
     else
-        caster->Uncharm(target);
+        caster->Uncharm(target, GetId());
 }
 
 void Aura::HandleModConfuse(bool apply, bool Real)

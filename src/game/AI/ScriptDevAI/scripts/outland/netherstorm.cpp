@@ -1867,6 +1867,8 @@ struct npc_scrap_reaverAI : ScriptedPetAI
 
     }
 
+    bool CanHandleCharm() override { return true; }
+
     void JustRespawned() override
     {
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
