@@ -252,12 +252,12 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
 
     void DistanceYourself()
     {
-        SetCombatScriptStatus(true);
-        SetCombatMovement(false);
-        SetMeleeEnabled(false);
         if (Unit* victim = m_creature->getVictim()) // make sure target didnt die
         {
             float x, y, z;
+            SetCombatScriptStatus(true);
+            SetCombatMovement(false);
+            SetMeleeEnabled(false);
             m_creature->getVictim()->GetNearPoint(m_creature, x, y, z, m_creature->GetObjectBoundingRadius(), DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim), victim->GetAngle(m_creature));
             m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_DISTANCE, x, y, z);
         }
