@@ -346,6 +346,8 @@ class Map : public GridRefManager<NGridType>
         void SetZoneWeather(uint32 zoneId, uint32 weatherId, float weatherGrade);
         void SetZoneOverrideLight(uint32 zoneId, uint32 lightId, uint32 fadeInTime);
 
+        void CreatePlayerOnClient(Player* player);
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 

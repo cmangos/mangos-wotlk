@@ -573,13 +573,42 @@ void WorldSession::HandlePlayerLoginOpcode(WorldPacket& recv_data)
     ObjectGuid playerGuid;
     recv_data >> playerGuid;
 
-    if (PlayerLoading() || GetPlayer() != nullptr)
+    Player* pCurrChar = nullptr;
+    pCurrChar = ObjectAccessor::FindPlayer(playerGuid, false);
+
+    WorldPacket data(SMSG_CHARACTER_LOGIN_FAILED, 1);
+
+    if (PlayerLoading())
     {
-        sLog.outError("Player tryes to login again, AccountId = %d", GetAccountId());
+        sLog.outError("HandlePlayerLoginOpcode> Player try to login again while already in loading stage, AccountId = %u", GetAccountId());
+        data << (uint8)CHAR_LOGIN_DUPLICATE_CHARACTER;
+        SendPacket(data);
         return;
     }
 
-    m_playerLoading = true;
+    if (_player)
+    {
+        // player is reconnecting
+
+        if (!isLogingOut())
+        {
+            sLog.outError("HandlePlayerLoginOpcode> %s try to login again, AccountId = %u", pCurrChar->GetGuidStr().c_str(), GetAccountId());
+            data << (uint8)CHAR_LOGIN_FAILED;
+            SendPacket(data);
+            return;
+        }
+
+        if (!pCurrChar)
+        {
+            sLog.outError("HandlePlayerLoginOpcode> %s try to login a second char, AccountId = %u", _player->GetGuidStr().c_str(), GetAccountId());
+            data << (uint8)CHAR_LOGIN_DUPLICATE_CHARACTER;
+            SendPacket(data);
+            return;
+        }
+
+        HandlePlayerReconnect();
+        return;
+    }
 
     DEBUG_LOG("WORLD: Received opcode Player Logon Message");
 
@@ -623,6 +652,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     Player* pCurrChar = new Player(this);
     pCurrChar->GetMotionMaster()->Initialize();
+    SetPlayer(pCurrChar, playerGuid);
+    m_playerLoading = true;
 
     // "GetAccountId()==db stored account id" checked in LoadFromDB (prevent login not own character using cheating tools)
     if (!pCurrChar->LoadFromDB(playerGuid, holder))
@@ -631,10 +662,14 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         delete pCurrChar;                                   // delete it manually
         delete holder;                                      // delete all unprocessed queries
         m_playerLoading = false;
+
+        sLog.outError("HandlePlayerLogin> LoadFromDB failed to load %s, AccountId = %u", pCurrChar->GetGuidStr().c_str(), GetAccountId());
+
+        WorldPacket data(SMSG_CHARACTER_LOGIN_FAILED, 1);
+        data << (uint8)CHAR_LOGIN_NO_CHARACTER;
+        SendPacket(data);
         return;
     }
-
-    SetPlayer(pCurrChar);
 
     pCurrChar->SendDungeonDifficulty(false);
 
@@ -850,6 +885,116 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     pCurrChar->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ON_LOGIN, 1);
 
     delete holder;
+}
+
+void WorldSession::HandlePlayerReconnect()
+{
+    // stop logout timer if need
+    LogoutRequest(0);
+
+    // set loading flag
+    m_playerLoading = true;
+
+    // reset all visible objects to be able to resend them
+    _player->m_clientGUIDs.clear();
+
+    _player->SendDungeonDifficulty(false);
+    WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
+    data << _player->GetMapId();
+    data << _player->GetPositionX();
+    data << _player->GetPositionY();
+    data << _player->GetPositionZ();
+    data << _player->GetOrientation();
+    SendPacket(data);
+
+    SendAccountDataTimes(PER_CHARACTER_CACHE_MASK);
+
+    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 2);         // added in 2.2.0
+    data << uint8(2);                                       // Can complain (0 = disabled, 1 = enabled, don't auto ignore, 2 = enabled, auto ignore)
+    data << uint8(0);                                       // Voice chat is enabled
+    SendPacket(data);
+
+    // Send Spam records
+    SendExpectedSpamRecords();
+    SendMotd();
+
+    if (_player->GetGuildId() != 0)
+    {
+        Guild* guild = sGuildMgr.GetGuildById(_player->GetGuildId());
+        if (guild)
+        {
+            data.Initialize(SMSG_GUILD_EVENT, (1 + 1 + guild->GetMOTD().size() + 1));
+            data << uint8(GE_MOTD);
+            data << uint8(1);
+            data << guild->GetMOTD();
+            SendPacket(data);
+            DEBUG_LOG("WORLD: Sent guild-motd (SMSG_GUILD_EVENT)");
+
+            guild->BroadcastEvent(GE_SIGNED_ON, _player->GetObjectGuid(), _player->GetName());
+        }
+        else
+        {
+            // remove wrong guild data
+            sLog.outError("Player %s (GUID: %u) marked as member of nonexistent guild (id: %u), removing guild membership for player.", _player->GetName(), _player->GetGUIDLow(), _player->GetGuildId());
+            _player->SetInGuild(0);
+        }
+    }
+
+    if (!_player->isAlive())
+        _player->SendCorpseReclaimDelay(true);
+
+    data.Initialize(SMSG_LEARNED_DANCE_MOVES, 4 + 4);
+    data << uint32(0);
+    data << uint32(0);
+    SendPacket(data);
+
+    _player->SendInitialPacketsBeforeAddToMap();
+
+    _player->GetMap()->CreatePlayerOnClient(_player);
+
+    _player->GetSocial()->SendSocialList();
+    uint32 areaId = 0;
+    uint32 zoneId = 0;
+    _player->GetZoneAndAreaId(zoneId, areaId);
+    _player->SendInitWorldStates(zoneId, areaId);
+    _player->CastSpell(_player, 836, TRIGGERED_OLD_TRIGGERED);       // LOGINEFFECT
+    _player->SendEnchantmentDurations();                             // must be after add to map
+    _player->SendItemDurations();                                    // must be after add to map
+
+    // announce group about member online (must be after add to player list to receive announce to self)
+    if (Group* group = _player->GetGroup())
+        group->UpdatePlayerOnlineStatus(_player);
+
+    // friend status
+    sSocialMgr.SendFriendStatus(_player, FRIEND_ONLINE, _player->GetObjectGuid(), true);
+
+    // show time before shutdown if shutdown planned.
+    if (sWorld.IsShutdowning())
+        sWorld.ShutdownMsg(true, _player);
+
+    if (sWorld.getConfig(CONFIG_BOOL_ALL_TAXI_PATHS))
+        _player->SetTaxiCheater(true);
+
+    if (_player->isGameMaster())
+        SendNotification(LANG_GM_ON);
+
+    std::string IP_str = GetRemoteAddress();
+    sLog.outChar("Account: %d (IP: %s) Login Character:[%s] (guid: %u)",
+        GetAccountId(), IP_str.c_str(), _player->GetName(), _player->GetGUIDLow());
+
+    // sync client auras timer
+    _player->UpdateClientAuras();
+
+    // sync client control (if taxi flying the client is already sync)
+    if (_player->IsTaxiFlying())
+        _player->TaxiFlightResume(true);
+    else if (!_player->IsClientControlled(_player))
+        _player->UpdateClientControl(_player, false);
+
+    // initialize client pet bar if need
+    _player->SendPetBar();
+
+    m_playerLoading = false;
 }
 
 void WorldSession::HandleSetFactionAtWarOpcode(WorldPacket& recv_data)

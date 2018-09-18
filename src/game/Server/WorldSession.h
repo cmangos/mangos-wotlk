@@ -199,6 +199,13 @@ enum TutorialDataState
     TUTORIALDATA_NEW       = 2
 };
 
+enum WorldSessionState
+{
+    WORLD_SESSION_STATE_CREATED     = 0,
+    WORLD_SESSION_STATE_READY       = 1,
+    WORLD_SESSION_STATE_OFFLINE     = 2
+};
+
 // class to deal with packet processing
 // allows to determine if next packet is safe to be processed
 class PacketFilter
@@ -246,6 +253,14 @@ class WorldSession
         WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale);
         ~WorldSession();
 
+        // Set this session have no attached socket but keep it alive for short period of time to permit a possible reconnection
+        void SetOffline();
+
+        // Request set offline, close socket and put session offline
+        bool RequestNewSocket(WorldSocket* socket);
+        bool IsOffline() const { return m_sessionState == WORLD_SESSION_STATE_OFFLINE; }
+        WorldSessionState GetState() const { return m_sessionState; }
+
         bool PlayerLoading() const { return m_playerLoading; }
         bool PlayerLogout() const { return m_playerLogout; }
         bool PlayerLogoutWithSave() const { return m_playerLogout && m_playerSave; }
@@ -283,7 +298,7 @@ class WorldSession
 #else
         const std::string GetRemoteAddress() const { return m_Socket->GetRemoteAddress(); }
 #endif
-        void SetPlayer(Player* plr);
+        void SetPlayer(Player* plr, uint32 playerGuid);
         uint8 Expansion() const { return m_expansion; }
 
         /// Session in auth.queue currently
@@ -420,6 +435,8 @@ class WorldSession
         void SendKnockBack(float angle, float horizontalSpeed, float verticalSpeed) const;
         void SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) const;
 
+        void SendAuthOk() const;
+        void SendAuthQueued() const;
         // opcodes handlers
         void Handle_NULL(WorldPacket& recvPacket);          // not used
         void Handle_EarlyProccess(WorldPacket& recvPacket); // just mark packets processed in WorldSocket::OnRead
@@ -432,6 +449,7 @@ class WorldSession
         void HandlePlayerLoginOpcode(WorldPacket& recvPacket);
         void HandleCharEnum(QueryResult* result);
         void HandlePlayerLogin(LoginQueryHolder* holder);
+        void HandlePlayerReconnect();
 
         // played time
         void HandlePlayedTime(WorldPacket& recvPacket);
@@ -918,6 +936,8 @@ class WorldSession
         uint32 m_GUIDLow;                                   // set logged or recently logout player (while m_playerRecentlyLogout set)
         Player* _player;
         std::shared_ptr<WorldSocket> m_Socket;              // socket pointer is owned by the network thread which created it
+        std::shared_ptr<WorldSocket> m_requestSocket;       // a new socket for this session is requested (double connection)
+        WorldSessionState m_sessionState;                   // this session state
 
         AccountTypes _security;
         uint32 _accountId;

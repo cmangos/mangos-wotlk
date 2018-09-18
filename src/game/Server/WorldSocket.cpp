@@ -452,15 +452,38 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     SqlStatement stmt = LoginDatabase.CreateStatement(updAccount, "UPDATE account SET last_ip = ? WHERE username = ?");
     stmt.PExecute(address.c_str(), account.c_str());
 
-    m_session = new WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale);
-
     m_crypt.Init(&K);
 
-    m_session->LoadGlobalAccountData();
-    m_session->LoadTutorialsData();
-    m_session->ReadAddonsInfo(recvPacket);
+    m_session = sWorld.FindSession(id);
+    if (m_session)
+    {
+        // Session exist so player is reconnecting
+        // check if we can request a new socket
+        if (!m_session->RequestNewSocket(this))
+            return false;
 
-    sWorld.AddSession(m_session);
+        // wait session going to be ready
+        while (m_session->GetState() != WORLD_SESSION_STATE_READY)
+        {
+            // just wait
+            std::this_thread::sleep_for(std::chrono::milliseconds(1));
+
+            if (IsClosed())
+                return false;
+        }
+    }
+    else
+    {
+        // new session
+        if (!(m_session = new WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale)))
+            return false;
+
+        m_session->LoadGlobalAccountData();
+        m_session->LoadTutorialsData();
+        m_session->ReadAddonsInfo(recvPacket);
+
+        sWorld.AddSession(m_session);
+    }
 
     return true;
 }

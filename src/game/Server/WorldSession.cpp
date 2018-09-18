@@ -95,8 +95,8 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     m_muteTime(mute_time), m_GUIDLow(0), _player(nullptr), m_Socket(sock ? sock->shared<WorldSocket>() : nullptr), _security(sec), _accountId(id), m_expansion(expansion),
     _logoutTime(0), m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
-    m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED)
-{}
+    m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED), m_sessionState(WORLD_SESSION_STATE_CREATED),
+    m_requestSocket(nullptr) {}
 
 /// WorldSession destructor
 WorldSession::~WorldSession()
@@ -108,7 +108,47 @@ WorldSession::~WorldSession()
     // marks this session as finalized in the socket which references (BUT DOES NOT OWN) it.
     // this lets the socket handling code know that the socket can be safely deleted
     if (m_Socket)
+    {
+        if (!m_Socket->IsClosed())
+            m_Socket->Close();
+
         m_Socket->FinalizeSession();
+    }
+}
+
+void WorldSession::SetOffline()
+{
+    if (_player)
+    {
+        // friend status
+        sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetObjectGuid(), true);
+        _player->CleanupChannels();
+        LogoutRequest(time(nullptr));
+    }
+
+    // be sure its closed (may occur when second session is opened)
+    if (m_Socket)
+    {
+        if (!m_Socket->IsClosed())
+            m_Socket->Close();
+
+        // unexpected socket close, let it be deleted
+        m_Socket->FinalizeSession();
+        m_Socket = nullptr;
+    }
+
+    m_sessionState = WORLD_SESSION_STATE_OFFLINE;
+}
+
+bool WorldSession::RequestNewSocket(WorldSocket* socket)
+{
+    std::lock_guard<std::mutex> guard(m_recvQueueLock);
+    if (m_requestSocket)
+        return false;
+
+    m_requestSocket = socket->shared<WorldSocket>();
+    m_sessionState = WORLD_SESSION_STATE_CREATED;
+    return true;
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
@@ -135,12 +175,9 @@ void WorldSession::SendPacket(WorldPacket const& packet) const
         else if (GetPlayer()->GetPlayerbotMgr())
             GetPlayer()->GetPlayerbotMgr()->HandleMasterOutgoingPacket(packet);
     }
-
-    if (!m_Socket)
-        return;
 #endif
 
-    if (m_Socket->IsClosed())
+    if (!m_Socket || m_Socket->IsClosed())
         return;
 
 #ifdef MANGOS_DEBUG
@@ -350,15 +387,61 @@ bool WorldSession::Update(PacketFilter& updater)
     // logout procedure should happen only in World::UpdateSessions() method!!!
     if (updater.ProcessLogout())
     {
-        ///- If necessary, log the player out
-        const time_t currTime = time(nullptr);
+        switch (m_sessionState)
+        {
+            case WORLD_SESSION_STATE_CREATED:
+            {
+                if (m_requestSocket)
+                {
+                    if (!IsOffline())
+                        SetOffline();
 
-        if (!m_Socket || m_Socket->IsClosed() || (ShouldLogOut(currTime) && !m_playerLoading))
-            LogoutPlayer(true);
+                    m_Socket = m_requestSocket;
+                    m_requestSocket = nullptr;
 
-        // finalize the session if disconnected.
-        if (!m_Socket || m_Socket->IsClosed())
-            return false;
+                    SendAuthOk();
+                }
+                else
+                {
+                    if (m_inQueue)
+                        SendAuthQueued();
+                    else
+                        SendAuthOk();
+                }
+                m_sessionState = WORLD_SESSION_STATE_READY;
+                return true;
+            }
+
+            case WORLD_SESSION_STATE_READY:
+            {
+                if (m_Socket && m_Socket->IsClosed())
+                {
+                    if (!_player)
+                        return false;
+
+                    // give the opportunity for this player to reconnect within 20 sec
+                    SetOffline();
+                }
+                else if (ShouldLogOut(time(nullptr)) && !m_playerLoading)   // check if delayed logout is fired
+                    LogoutPlayer(true);
+
+                return true;
+            }
+
+            case WORLD_SESSION_STATE_OFFLINE:
+            {
+                if (ShouldLogOut(time(nullptr)))   // check if delayed logout is fired
+                {
+                    LogoutPlayer(true);
+                    if (!m_requestSocket && (!m_Socket || m_Socket->IsClosed()))
+                        return false;
+                }
+
+                return true;
+            }
+            default:
+                break;
+        }
     }
 
     return true;
@@ -387,6 +470,9 @@ void WorldSession::LogoutPlayer(bool Save)
         if (Loot* loot = sLootMgr.GetLoot(_player))
             loot->Release(_player);
 
+        // remove all references to this pointer
+        _player->getHostileRefManager().deleteReferences();
+
         ///- If the player just died before logging out, make him appear as a ghost
         // FIXME: logout must be delayed in case lost connection with client in time of combat
         if (_player->GetDeathTimer())
@@ -398,7 +484,6 @@ void WorldSession::LogoutPlayer(bool Save)
         else if (!_player->getAttackers().empty())
         {
             _player->CombatStop();
-            _player->getHostileRefManager().updateOnlineOfflineState(false);
             _player->RemoveAllAurasOnDeath();
 
             // build set of player who attack _player or who have pet attacking of _player
@@ -541,7 +626,7 @@ void WorldSession::LogoutPlayer(bool Save)
             Map::DeleteFromWorld(_player);
         }
 
-        SetPlayer(nullptr);                                    // deleted in Remove/DeleteFromWorld call
+        SetPlayer(nullptr, 0);                                    // deleted in Remove/DeleteFromWorld call
 
         ///- Send the 'logout complete' packet to the client
         WorldPacket data(SMSG_LOGOUT_COMPLETE, 0);
@@ -576,6 +661,9 @@ void WorldSession::LogoutPlayer(bool Save)
 /// Kick a player out of the World
 void WorldSession::KickPlayer()
 {
+    if (_player)
+        LogoutPlayer(false);
+
     if (m_Socket && !m_Socket->IsClosed())
         m_Socket->Close();
 }
@@ -710,19 +798,9 @@ void WorldSession::Handle_Deprecated(WorldPacket& recvPacket)
 void WorldSession::SendAuthWaitQue(uint32 position) const
 {
     if (position == 0)
-    {
-        WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
-        packet << uint8(AUTH_OK);
-        SendPacket(packet);
-    }
+        SendAuthOk();
     else
-    {
-        WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1);
-        packet << uint8(AUTH_WAIT_QUEUE);
-        packet << uint32(position);
-        packet << uint8(0);                                 // unk 3.3.0
-        SendPacket(packet);
-    }
+        SendAuthQueued();
 }
 
 void WorldSession::LoadGlobalAccountData()
@@ -1036,13 +1114,10 @@ void WorldSession::SendAddonsInfo()
     SendPacket(data);
 }
 
-void WorldSession::SetPlayer(Player* plr)
+void WorldSession::SetPlayer(Player* plr, uint32 playerGuid)
 {
     _player = plr;
-
-    // set m_GUID that can be used while player loggined and later until m_playerRecentlyLogout not reset
-    if (_player)
-        m_GUIDLow = _player->GetGUIDLow();
+    m_GUIDLow = playerGuid;
 }
 
 void WorldSession::SendRedirectClient(std::string& ip, uint16 port) const
@@ -1094,4 +1169,20 @@ void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) cons
     data << guid;
     data << spellArtKit;                                    // index from SpellVisualKit.dbc
     SendPacket(data);
+}
+
+void WorldSession::SendAuthOk() const
+{
+    WorldPacket packet(SMSG_AUTH_RESPONSE, 1);
+    packet << uint8(AUTH_OK);
+    SendPacket(packet);
+}
+
+void WorldSession::SendAuthQueued() const
+{
+    WorldPacket packet(SMSG_AUTH_RESPONSE, 1 + 4 + 1);
+    packet << uint8(AUTH_WAIT_QUEUE);
+    packet << uint32(sWorld.GetQueuedSessionPos(this));     // position in queue
+    packet << uint8(0);                                     // unk 3.3.0
+    SendPacket(packet);
 }
