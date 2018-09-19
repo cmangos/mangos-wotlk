@@ -195,7 +195,7 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
         {
             if (m_uiMechanicTimer < uiDiff)
             {
-                m_creature->SummonCreature(NPC_STEAMRIGGER_MECHANIC, aSteamriggerSpawnLocs[2].m_fX, aSteamriggerSpawnLocs[2].m_fY, aSteamriggerSpawnLocs[2].m_fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
+                m_creature->SummonCreature(NPC_STEAMRIGGER_MECHANIC, aSteamriggerSpawnLocs[2].m_fX, aSteamriggerSpawnLocs[2].m_fY, aSteamriggerSpawnLocs[2].m_fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5000);
                 m_uiMechanicTimer = 20000;
             }
             else
