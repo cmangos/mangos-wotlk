@@ -77,10 +77,7 @@ class WorldState
         virtual void HandleGameObjectUse(GameObject* go, Unit* user);
         virtual void HandleGameObjectRevertState(GameObject* go);
 
-        // called when a player enters an outdoor pvp area
         void HandlePlayerEnterZone(Player* player, uint32 zoneId);
-
-        // called when player leaves an outdoor pvp area
         void HandlePlayerLeaveZone(Player* player, uint32 zoneId);
 
         bool IsConditionFulfilled(uint32 conditionId, uint32 state) const;
@@ -107,7 +104,7 @@ class WorldState
         GuidVector m_adalSongOfBattlePlayers;
         uint32 m_adalSongOfBattleTimer;
 
-        std::mutex m_mutex; // all World State operations are threat unsafe
+        std::mutex m_mutex; // all World State operations are thread unsafe
 };
 
 #define sWorldState MaNGOS::Singleton<WorldState>::Instance()
