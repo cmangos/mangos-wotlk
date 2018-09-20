@@ -33,6 +33,9 @@ enum
     // Quest 10998
     NPC_VIMGOL_VISUAL_BUNNY     = 23040,
 
+    // Quest 10607
+    NPC_WHISPER_RAVEN_GOD_TEMPLATE = 21851,
+
     // Quest 10310
     GO_ROCKET_FIRE              = 183987,
     GO_ROCKET_SMOKE             = 183988,
@@ -67,6 +70,10 @@ enum
     GO_WATER_RIFT               = 179665,
     GO_FIRE_RIFT                = 179666,
     GO_AIR_RIFT                 = 179667,
+
+    // Deaths Door gates
+    NPC_DEATHS_DOOR_NORTH_WARP_GATE = 22471,
+    NPC_DEATHS_DOOR_SOUTH_WARP_GATE = 22472,
 };
 
 enum ElementalInvasionIndexes

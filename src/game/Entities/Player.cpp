@@ -7014,6 +7014,14 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea)
         }
     }
 
+    if (m_areaUpdateId != newArea)
+    {
+        SendInitWorldStates(newZone, newArea);              // only if really enters to new zone, not just area change, works strange...
+
+        sWorldState.HandlePlayerLeaveArea(this, m_areaUpdateId);
+        sWorldState.HandlePlayerEnterArea(this, newArea);
+    }
+
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
 

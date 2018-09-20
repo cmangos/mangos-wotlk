@@ -24,6 +24,8 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "world_map_scripts.h"
 #include "World/WorldState.h"
+#include <array>
+#include <ctime>
 
 /* *********************************************************
  *                  EASTERN KINGDOMS
@@ -382,24 +384,49 @@ struct world_map_outland : public ScriptedMap
     world_map_outland(Map* pMap) : ScriptedMap(pMap) { Initialize(); }
 
     uint8 m_uiEmissaryOfHate_KilledAddCount;
+    uint8 m_uiRazaan_KilledAddCount;
 
-    void Initialize()
+    // Worldstate variables
+    uint32 m_deathsDoorEventActive;
+    int32 m_deathsDoorNorthHP;
+    int32 m_deathsDoorSouthHP;
+
+    uint32 m_shartuulEventActive;
+    uint32 m_shartuulShieldPercent;
+
+    std::tm m_bashirTime;
+    uint32 m_bashirTimer;
+
+    void Initialize() override
     {
         m_uiEmissaryOfHate_KilledAddCount = 0;
+        m_uiRazaan_KilledAddCount = 0;
+
+        m_deathsDoorEventActive = 1;
+        m_deathsDoorNorthHP = 100;
+        m_deathsDoorSouthHP = 100;
+
+        m_shartuulEventActive = 1;
+        m_shartuulShieldPercent = 100;
+
+        std::time_t now = time(nullptr);
+        m_bashirTime = *std::gmtime(&now);
+        m_bashirTimer = (60 - m_bashirTime.tm_sec) * IN_MILLISECONDS;
     }
 
     void OnCreatureCreate(Creature* pCreature)
     {
         switch (pCreature->GetEntry())
         {
-            case NPC_EMISSARY_OF_HATE:
-                m_npcEntryGuidStore[NPC_EMISSARY_OF_HATE] = pCreature->GetObjectGuid();
-                break;
             case NPC_VIMGOL_VISUAL_BUNNY:
                 m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
                 break;
+            case NPC_EMISSARY_OF_HATE:
+            case NPC_WHISPER_RAVEN_GOD_TEMPLATE:
             case NPC_SOCRETHAR:
-                m_npcEntryGuidStore[NPC_SOCRETHAR] = pCreature->GetObjectGuid();
+            case NPC_DEATHS_DOOR_NORTH_WARP_GATE:
+            case NPC_DEATHS_DOOR_SOUTH_WARP_GATE:
+                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
         }
     }
@@ -446,11 +473,61 @@ struct world_map_outland : public ScriptedMap
                 if (!socrethar || !socrethar->isAlive() || socrethar->isInCombat())
                     return true;
                 return false;
+            case INSTANCE_CONDITION_ID_BASHIR_FLYING: // TODO: Implement
+            case INSTANCE_CONDITION_ID_BASHIR_IN_PROGRESS:
+                return false;
         }
 
         script_error_log("instance_serpentshrine_cavern::CheckConditionCriteriaMeet called with unsupported Id %u. Called with param plr %s, src %s, condition source type %u",
             instanceConditionId, player ? player->GetGuidStr().c_str() : "nullptr", conditionSource ? conditionSource->GetGuidStr().c_str() : "nullptr", conditionSourceType);
         return false;
+    }
+
+    uint32 CalculateBashirTimerValue()
+    {
+        return 60 - m_bashirTime.tm_min + 60 * (m_bashirTime.tm_hour % 2);
+    }
+
+    void FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 /*zoneId*/, uint32 areaId) override
+    {
+        switch (areaId)
+        {
+            case AREAID_DEATHS_DOOR:
+            {
+                FillInitialWorldStateData(data, count, WORLD_STATE_DEATHS_DOOR_NORTH_WARP_GATE_HEALTH, m_deathsDoorNorthHP);
+                FillInitialWorldStateData(data, count, WORLD_STATE_DEATHS_DOOR_SOUTH_WARP_GATE_HEALTH, m_deathsDoorSouthHP);
+                FillInitialWorldStateData(data, count, WORLD_STATE_DEATHS_DOOR_EVENT_ACTIVE, m_deathsDoorEventActive);
+                break;
+            }
+            case AREAID_SHARTUUL_TRANSPORTER:
+            {
+                FillInitialWorldStateData(data, count, WORLD_STATE_SHARTUUL_SHIELD_REMAINING, m_shartuulShieldPercent);
+                FillInitialWorldStateData(data, count, WORLD_STATE_SHARTUUL_EVENT_ACTIVE, m_shartuulEventActive);
+                break;
+            }
+            case AREAID_SKYGUARD_OUTPOST:
+            {
+                FillInitialWorldStateData(data, count, WORLD_STATE_BASHIR_TIMER_WOTLK, CalculateBashirTimerValue());
+                break;
+            }
+            default: break;
+        }
+    }
+
+    void Update(const uint32 diff) override
+    {
+        if (m_bashirTimer <= diff)
+        {
+            std::time_t now = time(nullptr);
+            m_bashirTime = *std::gmtime(&now);
+            m_bashirTimer = 60 * IN_MILLISECONDS;
+            uint32 timerValue = CalculateBashirTimerValue();
+            sWorldState.ExecuteOnAreaPlayers(AREAID_SKYGUARD_OUTPOST, [=](Player* player)->void
+            {
+                player->SendUpdateWorldState(WORLD_STATE_BASHIR_TIMER_WOTLK, timerValue);
+            });
+        }
+        else m_bashirTimer -= diff;
     }
 };
 

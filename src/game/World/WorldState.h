@@ -41,6 +41,13 @@ enum ZoneIds
     ZONEID_MECHANAR     = 3849,
 };
 
+enum AreaIds
+{
+    AREAID_SKYGUARD_OUTPOST     = 3964,
+    AREAID_SHARTUUL_TRANSPORTER = 4008,
+    AREAID_DEATHS_DOOR          = 3831,
+};
+
 enum SpellId
 {
     SPELL_TROLLBANES_COMMAND    = 39911,
@@ -80,10 +87,14 @@ class WorldState
         void HandlePlayerEnterZone(Player* player, uint32 zoneId);
         void HandlePlayerLeaveZone(Player* player, uint32 zoneId);
 
+        void HandlePlayerEnterArea(Player* player, uint32 areaId);
+        void HandlePlayerLeaveArea(Player* player, uint32 areaId);
+
         bool IsConditionFulfilled(uint32 conditionId, uint32 state) const;
         void HandleConditionStateChange(uint32 conditionId, uint32 state);
 
         void HandleExternalEvent(uint32 eventId);
+        void ExecuteOnAreaPlayers(uint32 areaId, std::function<void(Player*)> executor);
 
         void BuffMagtheridonTeam(Team team);
         void DispelMagtheridonTeam(Team team);
@@ -103,6 +114,8 @@ class WorldState
 
         GuidVector m_adalSongOfBattlePlayers;
         uint32 m_adalSongOfBattleTimer;
+
+        std::map<uint32, GuidVector> m_areaPlayers;
 
         std::mutex m_mutex; // all World State operations are thread unsafe
 };

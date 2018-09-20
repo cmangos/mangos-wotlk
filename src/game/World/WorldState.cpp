@@ -174,6 +174,40 @@ void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
     }
 }
 
+void WorldState::HandlePlayerEnterArea(Player* player, uint32 areaId)
+{
+    switch (areaId)
+    {
+        case AREAID_SKYGUARD_OUTPOST:
+        case AREAID_SHARTUUL_TRANSPORTER:
+        case AREAID_DEATHS_DOOR:
+        {
+            std::lock_guard<std::mutex> guard(m_mutex);
+            m_areaPlayers[areaId].push_back(player->GetObjectGuid());
+            break;
+        }
+        default: break;
+    }
+}
+
+void WorldState::HandlePlayerLeaveArea(Player* player, uint32 areaId)
+{
+    switch (areaId)
+    {
+        case AREAID_SKYGUARD_OUTPOST:
+        case AREAID_SHARTUUL_TRANSPORTER:
+        case AREAID_DEATHS_DOOR:
+        {
+            std::lock_guard<std::mutex> guard(m_mutex);
+            auto position = std::find(m_areaPlayers[areaId].begin(), m_areaPlayers[areaId].end(), player->GetObjectGuid());
+            if (position != m_areaPlayers[areaId].end()) // == myVector.end() means the element was not found
+                m_areaPlayers[areaId].erase(position);
+            break;
+        }
+        default: break;
+    }
+}
+
 bool WorldState::IsConditionFulfilled(uint32 conditionId, uint32 state) const
 {
     return m_transportStates.at(conditionId) == state;
@@ -290,4 +324,12 @@ void WorldState::DispelAdalsSongOfBattle()
             });
         }
     }
+}
+
+void WorldState::ExecuteOnAreaPlayers(uint32 areaId, std::function<void(Player*)> executor)
+{
+    std::lock_guard<std::mutex> guard(m_mutex);
+    for (ObjectGuid guid : m_areaPlayers[areaId])
+        if (Player* player = sObjectMgr.GetPlayer(guid))
+            executor(player);
 }
