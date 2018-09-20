@@ -117,6 +117,7 @@ class FlightPathMovementGenerator
         bool Update(Player&, const uint32&);
         MovementGeneratorType GetMovementGeneratorType() const override { return FLIGHT_MOTION_TYPE; }
         void DoEventIfAny(Player& player, TaxiPathNodeEntry const* node, bool departure);
+        bool Resume(Player& player) const;
 };
 
 #endif
