@@ -463,7 +463,23 @@ struct world_map_outland : public ScriptedMap
         }
     }
 
-    void SetData(uint32 /*uiType*/, uint32 /*uiData*/) override {}
+    void SetData(uint32 type, uint32 data) override
+    {
+        switch (type)
+        {
+            case TYPE_DEATHS_DOOR_NORTH:
+                m_deathsDoorNorthHP = std::max(0, 100 - int32(data * 15));
+                sWorldState.ExecuteOnAreaPlayers(AREAID_DEATHS_DOOR, [=](Player* player)->void {player->SendUpdateWorldState(WORLD_STATE_DEATHS_DOOR_NORTH_WARP_GATE_HEALTH, m_deathsDoorNorthHP); });
+                break;
+            case TYPE_DEATHS_DOOR_SOUTH:
+                m_deathsDoorSouthHP = std::max(0, 100 - int32(data * 15));
+                sWorldState.ExecuteOnAreaPlayers(AREAID_DEATHS_DOOR, [=](Player* player)->void {player->SendUpdateWorldState(WORLD_STATE_DEATHS_DOOR_SOUTH_WARP_GATE_HEALTH, m_deathsDoorSouthHP); });
+                break;
+            case TYPE_SHARTUUL:
+                // TODO: add calculation
+                break;
+        }
+    }
 
     bool CheckConditionCriteriaMeet(Player const* player, uint32 instanceConditionId, WorldObject const* conditionSource, uint32 conditionSourceType) const override
     {

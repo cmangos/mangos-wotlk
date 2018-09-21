@@ -72,6 +72,11 @@ INSERT INTO `spell_template` (`Id`,`SpellName`,`Effect1`,`DurationIndex`,`Effect
 
 UPDATE `spell_template` SET `AttributesEx3`=AttributesEx3|0x00000080 WHERE `Id`=37408;
 
+-- TODO: remove in favor of prespawned gos - custom
+INSERT INTO spell_template(Id,SpellName,Targets,Effect1,EffectMiscValue1,EffectImplicitTargetA1,DurationIndex) VALUES(49910,'Summon Warp-Gate Small Fire',0x00000040,76,185317,87,4);
+INSERT INTO spell_template(Id,SpellName,Targets,Effect1,EffectMiscValue1,EffectImplicitTargetA1,DurationIndex) VALUES(49911,'Summon Warp-Gate Smoke',0x00000040,76,185318,87,4);
+INSERT INTO spell_template(Id,SpellName,Targets,Effect1,EffectMiscValue1,EffectImplicitTargetA1,DurationIndex) VALUES(49912,'Summon Warp-Gate Big Fire',0x00000040,76,185319,87,4);
+
 -- Make Unstable Fel-Imp transform death persistent
 UPDATE `spell_template` SET `AttributesEx3`=AttributesEx3|0x00100000 WHERE `id`=39227;
 

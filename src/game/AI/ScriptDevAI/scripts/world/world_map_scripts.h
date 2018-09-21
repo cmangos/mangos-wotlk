@@ -74,6 +74,10 @@ enum
     // Deaths Door gates
     NPC_DEATHS_DOOR_NORTH_WARP_GATE = 22471,
     NPC_DEATHS_DOOR_SOUTH_WARP_GATE = 22472,
+
+    TYPE_DEATHS_DOOR_NORTH      = 0,
+    TYPE_DEATHS_DOOR_SOUTH      = 1,
+    TYPE_SHARTUUL               = 2,
 };
 
 enum ElementalInvasionIndexes
