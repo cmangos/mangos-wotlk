@@ -57,36 +57,43 @@ static const uint32 aWintergraspVehicles[MAX_WINTERGRASP_VEHICLES] = { NPC_WINTE
 
 struct npc_spirit_guide_wintergraspAI : public ScriptedAI
 {
-    npc_spirit_guide_wintergraspAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        // initialize area script
-        OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(pCreature->GetZoneId());
-        if (outdoorPvP && outdoorPvP->IsBattlefield())
-            m_battlefield = (Battlefield*)outdoorPvP;
-        else
-        {
-            sLog.outError("Wintergrasp: Could not find battlefield for unit entry %u, guid %S.", m_creature->GetEntry(), m_creature->GetGuidStr().c_str());
-            m_battlefield = nullptr;
-        }
-
-        Reset();
-    }
+    npc_spirit_guide_wintergraspAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
     Battlefield* m_battlefield;
 
-    void Reset() override {}
+    uint32 m_uiHealChannelTimer;
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
+    void Reset() override
     {
-        if (!m_battlefield)
-            return;
+        m_battlefield = nullptr;
+        m_uiHealChannelTimer = 1000;
+    }
 
-        if (m_battlefield->GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
-            return;
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiHealChannelTimer < uiDiff)
+        {
+            m_uiHealChannelTimer = 1000;
 
-        // auto cast the whole time this spell
-        if (!m_creature->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-            m_creature->CastSpell(m_creature, SPELL_SPIRIT_HEAL_CHANNEL, TRIGGERED_NONE);
+            if (!m_battlefield)
+            {
+                // attempt to initialize the opvp
+                OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(m_creature->GetZoneId());
+                if (outdoorPvP && outdoorPvP->IsBattlefield())
+                    m_battlefield = (Battlefield*)outdoorPvP;
+                else
+                    return;
+            }
+
+            if (m_battlefield->GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
+                return;
+
+            // auto cast the whole time this spell
+            if (!m_creature->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+                m_creature->CastSpell(m_creature, SPELL_SPIRIT_HEAL_CHANNEL, TRIGGERED_NONE);
+        }
+        else
+            m_uiHealChannelTimer -= uiDiff;
     }
 
     void SpellHitTarget(Unit* pUnit, const SpellEntry* pSpellEntry) override
@@ -110,16 +117,7 @@ struct go_vehicle_teleporter : public GameObjectAI
 {
     go_vehicle_teleporter(GameObject* go) : GameObjectAI(go)
     {
-        // initialize area script
-        OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(go->GetZoneId());
-        if (outdoorPvP && outdoorPvP->IsBattlefield())
-            m_battlefield = (Battlefield*)outdoorPvP;
-        else
-        {
-            sLog.outError("Wintergrasp: Could not find battlefield for gameobject entry %u, guid %S.", go->GetEntry(), go->GetGuidStr().c_str());
-            m_battlefield = nullptr;
-        }
-
+        m_battlefield = nullptr;
         m_gameobject = go;
         m_uiTeleportTimer = 1000;
     }
@@ -145,14 +143,26 @@ struct go_vehicle_teleporter : public GameObjectAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_battlefield || !m_gameobject)
-            return;
-
-        if (m_battlefield->GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
-            return;
-
         if (m_uiTeleportTimer < uiDiff)
         {
+            m_uiTeleportTimer = 1000;
+
+            if (!m_gameobject)
+                return;
+
+            if (!m_battlefield)
+            {
+                // attempt to initialize the opvp
+                OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(m_gameobject->GetZoneId());
+                if (outdoorPvP && outdoorPvP->IsBattlefield())
+                    m_battlefield = (Battlefield*)outdoorPvP;
+                else
+                    return;
+            }
+
+            if (m_battlefield->GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
+                return;
+
             for (uint8 i = 0; i < MAX_WINTERGRASP_VEHICLES; ++i)
             {
                 // Note: the object has a very large range; might need to be corrected in DB
@@ -171,7 +181,6 @@ struct go_vehicle_teleporter : public GameObjectAI
                     }
                 }
             }
-            m_uiTeleportTimer = 1000;
         }
         else
             m_uiTeleportTimer -= uiDiff;
