@@ -63,6 +63,11 @@ struct npc_spirit_guide_wintergraspAI : public ScriptedAI
         OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(pCreature->GetZoneId());
         if (outdoorPvP && outdoorPvP->IsBattlefield())
             m_battlefield = (Battlefield*)outdoorPvP;
+        else
+        {
+            sLog.outError("Wintergrasp: Could not find battlefield for unit entry %u, guid %S.", m_creature->GetEntry(), m_creature->GetGuidStr().c_str());
+            m_battlefield = nullptr;
+        }
 
         Reset();
     }
@@ -109,6 +114,11 @@ struct go_vehicle_teleporter : public GameObjectAI
         OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(go->GetZoneId());
         if (outdoorPvP && outdoorPvP->IsBattlefield())
             m_battlefield = (Battlefield*)outdoorPvP;
+        else
+        {
+            sLog.outError("Wintergrasp: Could not find battlefield for gameobject entry %u, guid %S.", go->GetEntry(), go->GetGuidStr().c_str());
+            m_battlefield = nullptr;
+        }
 
         m_gameobject = go;
         m_uiTeleportTimer = 1000;
