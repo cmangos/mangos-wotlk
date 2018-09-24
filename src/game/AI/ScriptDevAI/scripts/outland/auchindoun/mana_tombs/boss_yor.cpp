@@ -60,9 +60,9 @@ enum PrisonerActions
     PRISONER_CREDIT,
 };
 
-struct boss_yorAI : public ScriptedAI, public TimerAI
+struct boss_yorAI : public ScriptedAI, public CombatTimerAI
 {
-    boss_yorAI(Creature* creature) : ScriptedAI(creature), TimerAI(YOR_COMBAT_ACTION_MAX)
+    boss_yorAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(YOR_COMBAT_ACTION_MAX)
     {
         AddCustomAction(YOR_ATTACK, 0, [&]
         {
@@ -198,9 +198,9 @@ enum
     SPELL_QID_10977 = 39660,
 };
 
-struct npc_ethereum_prisoner_dungeonAI : public ScriptedAI, public TimerAI
+struct npc_ethereum_prisoner_dungeonAI : public ScriptedAI, public CombatTimerAI
 {
-    npc_ethereum_prisoner_dungeonAI(Creature* creature) : ScriptedAI(creature), TimerAI(0)
+    npc_ethereum_prisoner_dungeonAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(0)
     {
         AddCustomAction(PRISONER_CREDIT, 0, [&]
         {

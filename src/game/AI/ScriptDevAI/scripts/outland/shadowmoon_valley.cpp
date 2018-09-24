@@ -2868,9 +2868,9 @@ static DeadliestScriptInfo deadliestScriptInfo[COMMANDER_COUNT] =
     { NPC_ALDOR_DRAGONMAW_SKYBREAKER,   NPC_ALTAR_DEFENDER,   LAST_POINT_ARCUS, SAY_EVENT_ACCEPT_ARCUS, SAY_EVENT_START_ARCUS, SAY_EVENT_END_ARCUS, SAY_EVENT_ACCEPT_ARCUS, QUEST_DEADLIEST_TRAP_ALDOR }
 };
 
-struct npc_commanderAI : public ScriptedAI, public TimerAI
+struct npc_commanderAI : public ScriptedAI, public CombatTimerAI
 {
-    npc_commanderAI(Creature* creature, uint8 commanderId) : ScriptedAI(creature), TimerAI(COMMANDER_COMBAT_ACTION_MAX), m_commanderId(commanderId),
+    npc_commanderAI(Creature* creature, uint8 commanderId) : ScriptedAI(creature), CombatTimerAI(COMMANDER_COMBAT_ACTION_MAX), m_commanderId(commanderId),
             m_defenderSpawns(DEFENDER_SPAWN_COUNT), m_dragonmawSpawns(DRAGONMAW_SPAWN_COUNT), m_killCounter(0)
     {
         m_attackDistance = 30.f;
@@ -2911,7 +2911,7 @@ struct npc_commanderAI : public ScriptedAI, public TimerAI
     void GetAIInformation(ChatHandler& reader) override
     {
         ScriptedAI::GetAIInformation(reader);
-        TimerAI::GetAIInformation(reader);
+        CombatTimerAI::GetAIInformation(reader);
         reader.PSendSysMessage("Defender Spawn Count: %lu", m_defenderSpawns.size());
         reader.PSendSysMessage("Dragonmaw Spawn Count: %lu", m_dragonmawSpawns.size());
         reader.PSendSysMessage("Starting player: %lu", m_startingPlayer.GetRawValue());

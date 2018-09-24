@@ -88,9 +88,9 @@ enum TerokkActions
     TEROKK_ACTION_ACE_CAST,
 };
 
-struct boss_terokkAI : public ScriptedAI, public TimerAI
+struct boss_terokkAI : public ScriptedAI, public CombatTimerAI
 {
-    boss_terokkAI(Creature* creature) : ScriptedAI(creature), TimerAI(TEROKK_COMBAT_ACTION_MAX)
+    boss_terokkAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(TEROKK_COMBAT_ACTION_MAX)
     {
         AddCustomAction(TEROKK_ACTION_SPAWN, 0, [&] { m_creature->CastSpell(nullptr, SPELL_RED_BEAM, TRIGGERED_OLD_TRIGGERED); });
         AddCustomAction(TEROKK_ACTION_SAY, 2000, [&]

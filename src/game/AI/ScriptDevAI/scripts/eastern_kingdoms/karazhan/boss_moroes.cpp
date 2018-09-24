@@ -75,9 +75,9 @@ enum MoroesActions
     MOROES_ACTION_GAROTTE,
 };
 
-struct boss_moroesAI : public ScriptedAI, public TimerAI
+struct boss_moroesAI : public ScriptedAI, public CombatTimerAI
 {
-    boss_moroesAI(Creature* pCreature) : ScriptedAI(pCreature), TimerAI(MOROES_ACTION_MAX)
+    boss_moroesAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(MOROES_ACTION_MAX)
     {
         m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
         AddCombatAction(MOROES_ACTION_VANISH, 0);
