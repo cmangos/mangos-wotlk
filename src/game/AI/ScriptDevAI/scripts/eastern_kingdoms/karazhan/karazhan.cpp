@@ -149,6 +149,16 @@ void instance_karazhan::OnCreatureCreate(Creature* pCreature)
         case NPC_INFERNAL_RELAY:
             m_vInfernalRelays.push_back(pCreature->GetObjectGuid());
             break;
+        case NPC_TELEPORT_N:
+        case NPC_TELEPORT_S:
+        case NPC_TELEPORT_E:
+        case NPC_TELEPORT_W:
+        case NPC_TELEPORT_NE:
+        case NPC_TELEPORT_SE:
+        case NPC_TELEPORT_SW:
+        case NPC_TELEPORT_NW:
+            m_aranTeleportNPCs.push_back(pCreature->GetObjectGuid());
+            return;
     }
 }
 

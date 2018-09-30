@@ -116,11 +116,11 @@ struct boss_aranAI : public ScriptedAI
 {
     boss_aranAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = (instance_karazhan*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_karazhan* m_pInstance;
 
     uint32 m_uiSecondarySpellTimer;
     uint32 m_uiNormalCastTimer;
@@ -169,6 +169,14 @@ struct boss_aranAI : public ScriptedAI
             i = 0;
 
         SetCombatMovement(true);
+
+        for (ObjectGuid guid : m_pInstance->GetAranTeleportNPCs())
+            if (Creature* teleport = m_creature->GetMap()->GetCreature(guid))
+            {
+                teleport->ResetEntry();
+                teleport->AI()->EnterEvadeMode();
+                teleport->AIM_Initialize();
+            }
     }
 
     uint32 GetNormalSpellId(uint32 index) const
@@ -251,8 +259,9 @@ struct boss_aranAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_WATER_ELEMENTAL:
-            case NPC_SHADOW_OF_ARAN:
                 pSummoned->SetInCombatWithZone();
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SELECT_FLAG_PLAYER))
+                    pSummoned->AddThreat(pTarget, 100000.f);
                 break;
         }
     }
@@ -331,8 +340,13 @@ struct boss_aranAI : public ScriptedAI
                     }
                     case ARAN_ACTION_BERSERK:
                     {
-                        for (uint8 i = 0; i < MAX_SHADOWS_OF_ARAN; ++i)
-                            m_creature->SummonCreature(NPC_SHADOW_OF_ARAN, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 5000);
+                        for (ObjectGuid guid : m_pInstance->GetAranTeleportNPCs())
+                            if (Creature* teleport = m_creature->GetMap()->GetCreature(guid))
+                            {
+                                teleport->UpdateEntry(NPC_SHADOW_OF_ARAN);
+                                teleport->AIM_Initialize();
+                                teleport->SetInCombatWithZone();
+                            }
 
                         DoScriptText(SAY_TIMEOVER, m_creature);
                         m_uiBerserkTimer = 0;
