@@ -294,9 +294,9 @@ class WorldSession
         void SetSecurity(AccountTypes security) { _security = security; }
 #ifdef BUILD_PLAYERBOT
         // Players connected without socket are bot
-        const std::string GetRemoteAddress() const { return m_Socket ? m_Socket->GetRemoteAddress() : "bot"; }
+        const std::string GetRemoteAddress() const { return m_Socket ? m_Socket->GetRemoteAddress() : "disconnected/bot"; }
 #else
-        const std::string GetRemoteAddress() const { return m_Socket->GetRemoteAddress(); }
+        const std::string GetRemoteAddress() const { return m_Socket ? m_Socket->GetRemoteAddress() : "disconnected"; }
 #endif
         void SetPlayer(Player* plr, uint32 playerGuid);
         uint8 Expansion() const { return m_expansion; }
