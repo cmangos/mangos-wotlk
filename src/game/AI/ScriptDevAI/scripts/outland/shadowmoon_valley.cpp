@@ -218,7 +218,11 @@ struct mob_enslaved_netherwing_drakeAI : public ScriptedAI
     ObjectGuid m_playerGuid;
     uint32 m_uiFlyTimer;
 
-    void Reset() override { }
+    void Reset() override
+    {
+        m_creature->SetCanFly(false);
+        m_creature->SetHover(false);
+    }
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
     {
@@ -233,7 +237,7 @@ struct mob_enslaved_netherwing_drakeAI : public ScriptedAI
 
                 m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
 
-                if (Creature* pDragonmaw = GetClosestCreatureWithEntry(m_creature, NPC_DRAGONMAW_SUBJUGATOR, 50.0f))
+                if (Creature* pDragonmaw = GetClosestCreatureWithEntry(m_creature, NPC_DRAGONMAW_SUBJUGATOR, 20.0f))
                     AttackStart(pDragonmaw);
             }
         }
@@ -258,24 +262,22 @@ struct mob_enslaved_netherwing_drakeAI : public ScriptedAI
                 {
                     if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                     {
-                        if (pPlayer->GetQuestStatus(QUEST_FORCE_OF_NELT) == QUEST_STATUS_INCOMPLETE)
+                        DoCastSpellIfCan(pPlayer, SPELL_FORCE_OF_NELTHARAKU, CAST_TRIGGERED);
+                        m_playerGuid.Clear();
+
+                        float fX, fY, fZ;
+
+                        // Get an escape position
+                        if (Creature* pEscapeDummy = GetClosestCreatureWithEntry(m_creature, NPC_ESCAPE_DUMMY, 50.0f))
+                            pEscapeDummy->GetPosition(fX, fY, fZ);
+                        else
                         {
-                            DoCastSpellIfCan(pPlayer, SPELL_FORCE_OF_NELTHARAKU, CAST_TRIGGERED);
-                            m_playerGuid.Clear();
-
-                            float fX, fY, fZ;
-
-                            // Get an escape position
-                            if (Creature* pEscapeDummy = GetClosestCreatureWithEntry(m_creature, NPC_ESCAPE_DUMMY, 50.0f))
-                                pEscapeDummy->GetPosition(fX, fY, fZ);
-                            else
-                            {
-                                m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-                                fZ += 25;
-                            }
-
-                            m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+                            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
+                            fZ += 25;
                         }
+                        m_creature->SetCanFly(true);
+                        m_creature->SetHover(true);
+                        m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                     }
                     m_uiFlyTimer = 0;
                 }
