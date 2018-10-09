@@ -5104,8 +5104,15 @@ void Spell::TakeAmmo() const
                 player->DestroyItemCount(pItem, count, true);
             }
         }
-        else if (uint32 ammo = player->GetUInt32Value(PLAYER_AMMO_ID))
+        else if (uint32 ammo = player->GetUInt32Value(PLAYER_AMMO_ID)) {
+            // some spells may be exempt from ammo cost (Wild Quiver talent for MM Hunters)
+            for (const auto& aura : player->GetAurasByType(AuraType::SPELL_AURA_ABILITY_CONSUME_NO_AMMO)) {
+                if (aura->isAffectedOnSpell(m_spellInfo)) {
+                    return;
+                }
+            }
             player->DestroyItemCount(ammo, 1, true);
+        }
     }
 }
 
