@@ -1156,4 +1156,5 @@ INSERT INTO spell_template(Id, SchoolMask, Category, Dispel, Mechanic, Attribute
 INSERT INTO spell_template(Id,Attributes,AttributesEx,AttributesEx3,AttributesEx4,AttributesEx5,CastingTimeIndex,ProcChance,DurationIndex,rangeIndex,EquippedItemClass,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectMiscValue1,EffectApplyAuraName1,SchoolMask,SpellName,IsServerSide) VALUES
 (43062,2147483904,268435456,1048576,4160,402653696,1,101,21,1,-1,6,1,4999,1,8,18,1,'Alpha Worg: Garwal\'s Invisibility',1);
 
-
+-- Implement SPELL_AURA_ABILITY_CONSUME_NO_AMMO -> https://github.com/cmangos/mangos-wotlk/pull/262
+UPDATE spell_template SET EffectSpellClassMask1_1 = 4097 WHERE id IN (53215, 53216, 53217);
