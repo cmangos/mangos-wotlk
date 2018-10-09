@@ -413,7 +413,7 @@ enum AuraType
     SPELL_AURA_MOD_DAMAGE_FROM_CASTER = 271,
     SPELL_AURA_MAELSTROM_WEAPON = 272,
     SPELL_AURA_X_RAY = 273,
-    SPELL_AURA_274 = 274,
+    SPELL_AURA_ABILITY_CONSUME_NO_AMMO = 274,
     SPELL_AURA_MOD_IGNORE_SHAPESHIFT = 275,
     SPELL_AURA_276 = 276,                                   // Only "Test Mod Damage % Mechanic" spell, possible mod damage done
     SPELL_AURA_MOD_MAX_AFFECTED_TARGETS = 277,
