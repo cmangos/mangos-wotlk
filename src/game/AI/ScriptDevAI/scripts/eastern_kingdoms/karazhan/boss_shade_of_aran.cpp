@@ -173,9 +173,12 @@ struct boss_aranAI : public ScriptedAI
         for (ObjectGuid guid : m_pInstance->GetAranTeleportNPCs())
             if (Creature* teleport = m_creature->GetMap()->GetCreature(guid))
             {
-                teleport->ResetEntry();
-                teleport->AI()->EnterEvadeMode();
-                teleport->AIM_Initialize();
+                if (teleport->GetCreatureInfo()->Entry == NPC_SHADOW_OF_ARAN) // avoid case on spawn
+                {
+                    teleport->ResetEntry();
+                    teleport->AI()->EnterEvadeMode();
+                    teleport->AIM_Initialize();
+                }
             }
     }
 
