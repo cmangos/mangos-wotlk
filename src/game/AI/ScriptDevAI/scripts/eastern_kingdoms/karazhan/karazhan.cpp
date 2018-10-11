@@ -176,6 +176,7 @@ void instance_karazhan::OnObjectCreate(GameObject* pGo)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_SIDE_ENTRANCE_DOOR:
+        case GO_SERVANTS_ACCESS_DOOR:
             if (m_auiEncounter[3] == DONE)
                 pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
             break;
@@ -241,6 +242,7 @@ void instance_karazhan::SetData(uint32 uiType, uint32 uiData)
             {
                 DoUseDoorOrButton(GO_STAGE_DOOR_LEFT);
                 DoUseDoorOrButton(GO_STAGE_DOOR_RIGHT);
+                DoToggleGameObjectFlags(GO_SERVANTS_ACCESS_DOOR, GO_FLAG_LOCKED, false);
                 DoToggleGameObjectFlags(GO_SIDE_ENTRANCE_DOOR, GO_FLAG_LOCKED, false);
             }
             // use curtain only for event start or fail
