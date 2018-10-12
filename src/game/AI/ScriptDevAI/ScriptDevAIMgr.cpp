@@ -492,10 +492,9 @@ void ScriptDevAIMgr::Initialize()
     // Load database (must be called after SD2Config.SetSource).
     LoadDatabase();
 
-    outstring_log("SD2: Loading C++ scripts");
+    outstring_log("SD2: Loading C++ scripts\n");
     BarGoLink bar(1);
     bar.step();
-    outstring_log();
 
     // Resize script ids to needed amount of assigned ScriptNames (from core)
     m_scripts.resize(GetScriptIdsCount(), nullptr);
@@ -513,8 +512,7 @@ void ScriptDevAIMgr::Initialize()
 
     outstring_log(">> Loaded %i C++ Scripts.", num_sc_scripts);
 #else
-    outstring_log();
-    outstring_log(">> ScriptDev is disabled!");
+    outstring_log(">> ScriptDev is disabled!\n");
 #endif
 }
 
