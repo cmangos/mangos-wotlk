@@ -46,6 +46,9 @@ EndContentData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/scripts/world/world_map_scripts.h"
 #include "Entities/TemporarySpawn.h"
+#include "Reputation/ReputationMgr.h"
+#include "Spells/Spell.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 /*######
 ## mobs_nether_drake
@@ -2617,6 +2620,218 @@ UnitAI* GetAI_npc_evergrove_druidAI(Creature* creature)
     return new npc_evergrove_druidAI(creature);
 }
 
+/*######
+## npc_apexis_flayer
+######*/
+
+enum
+{
+    NPC_NETHERSTORM_TRIGGER = 19656,
+
+    FLAYER_SPELL_SPECIAL_UNARMED = 33334,
+    FLAYER_SPELL_REND = 13443,
+    FLAYER_SPELL_SHRED_ARMOR = 40770,
+};
+
+enum FlayerActions
+{
+    FLAYER_ACTION_REND,
+    FLAYER_ACTION_SHRED_ARMOR,
+    FLAYER_ACTION_MAX,
+};
+
+struct npc_apexis_flayerAI : public ScriptedAI, public CombatTimerAI
+{
+    npc_apexis_flayerAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(FLAYER_ACTION_MAX)
+    { 
+        AddCombatAction(FLAYER_ACTION_REND, 0);
+        AddCombatAction(FLAYER_ACTION_SHRED_ARMOR, 0);
+        Reset();
+    }
+
+    uint8 strikeCount;
+    uint32 idleTimer;
+    uint32 crystalTimer;
+    uint32 rendTimer;
+    uint32 shredArmorTimer;
+
+    void Reset() override 
+    {
+        for (uint32 i = 0; i < FLAYER_ACTION_MAX; ++i)
+            SetActionReadyStatus(i, false);
+
+        ResetTimer(FLAYER_ACTION_REND, GetInitialActionTimer(FLAYER_ACTION_REND));
+        ResetTimer(FLAYER_ACTION_SHRED_ARMOR, GetInitialActionTimer(FLAYER_ACTION_SHRED_ARMOR));
+
+        idleTimer = urand(15000, 20000);
+        crystalTimer = 0;
+        strikeCount = 0;
+    }
+
+    uint32 GetInitialActionTimer(uint32 id) // Timers are copied from the EventAI script
+    {
+        switch (id)
+        {
+            case FLAYER_ACTION_REND: return urand(8300, 13300);
+            case FLAYER_ACTION_SHRED_ARMOR: return urand(4200, 6200);
+            default: return 0; // never occurs but for compiler
+        }
+    }
+
+    uint32 GetSubsequentActionTimer(uint32 id) // Timers are copied from the EventAI script
+    {
+        switch (id)
+        {
+            case FLAYER_ACTION_REND: return urand(22000, 26000);
+            case FLAYER_ACTION_SHRED_ARMOR: return urand(28100, 31600);
+            default: return 0; // never occurs but for compiler
+        }
+    }
+
+    void ExecuteActions() override
+    {
+        if (!CanExecuteCombatAction())
+            return;
+
+        for (uint32 i = 0; i < FLAYER_ACTION_MAX; ++i)
+        {
+            if (GetActionReadyStatus(i))
+            {
+                switch (i)
+                {
+                    case FLAYER_ACTION_REND:
+                    {
+                        if (Unit* target = m_creature->getVictim())
+                        {
+                            if (DoCastSpellIfCan(target, FLAYER_SPELL_REND) == CAST_OK)
+                            {
+                                ResetTimer(i, GetSubsequentActionTimer(i));
+                                SetActionReadyStatus(i, false);
+                                return;
+                            }
+                        }
+                        continue;
+                    }
+                    case FLAYER_ACTION_SHRED_ARMOR:
+                    {
+                        if (Unit* target = m_creature->getVictim())
+                        {
+                            if (DoCastSpellIfCan(target, FLAYER_SPELL_SHRED_ARMOR) == CAST_OK)
+                            {
+                                ResetTimer(i, GetSubsequentActionTimer(i));
+                                SetActionReadyStatus(i, false);
+                                return;
+                            }
+                        }
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
+            if (idleTimer)
+            {
+                if (idleTimer <= diff)
+                {
+                    MoveToCrystal();
+                    idleTimer = 0;
+                }
+                else
+                    idleTimer -= diff;
+            }
+
+            if (crystalTimer)
+            {
+                if (crystalTimer <= diff)
+                {
+                    CrystalStrike();
+                }
+                else
+                    crystalTimer -= diff;
+            }
+        }
+        else
+        {
+            UpdateTimers(diff, m_creature->isInCombat());
+            ExecuteActions();
+
+            DoMeleeAttackIfReady();
+        }
+    }
+
+    void MoveToCrystal()
+    {
+        if (Creature* triggerNPC = GetClosestCreatureWithEntry(m_creature, NPC_NETHERSTORM_TRIGGER, 15))
+        {
+            float fX, fY, fZ;
+            m_creature->GetContactPoint(triggerNPC, fX, fY, fZ);
+            m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+        }
+    }
+
+    void CrystalStrike()
+    {
+        switch (strikeCount)
+        {
+            case 0:
+                m_creature->CastSpell(m_creature, FLAYER_SPELL_SPECIAL_UNARMED, TRIGGERED_NONE);
+                crystalTimer = 2400;
+                strikeCount++;
+                break;
+            case 1:
+                m_creature->CastSpell(m_creature, FLAYER_SPELL_SPECIAL_UNARMED, TRIGGERED_NONE);
+                crystalTimer = 2400;
+                strikeCount++;
+                break;
+            case 2:
+                m_creature->CastSpell(m_creature, FLAYER_SPELL_SPECIAL_UNARMED, TRIGGERED_NONE);
+                crystalTimer = 2400;
+                strikeCount++;
+                break;
+            case 3:
+                m_creature->CastSpell(m_creature, FLAYER_SPELL_SPECIAL_UNARMED, TRIGGERED_NONE);
+                crystalTimer = 2400;
+                strikeCount++;
+                break;
+            case 4:
+                float respX, respY, respZ, respO, wander_distance;
+                m_creature->GetRespawnCoord(respX, respY, respZ, &respO, &wander_distance);
+                m_creature->GetMotionMaster()->MoveRandomAroundPoint(respX, respY, respZ, wander_distance);
+                crystalTimer = 0;
+                strikeCount = 0;
+                idleTimer = urand(15000, 20000);
+                break;
+            default:
+                break;
+        }
+    }
+
+    void MovementInform(uint32 /*movementType*/, uint32 data) override
+    {
+        switch (data)
+        {
+            case 1:
+            {
+                m_creature->GetMotionMaster()->MoveIdle();
+                crystalTimer = 1;
+                break;
+            }
+        }
+    }
+};
+
+UnitAI* GetAI_npc_apexis_flayerAI(Creature* creature)
+{
+    return new npc_apexis_flayerAI(creature);
+}
+
+
 void AddSC_blades_edge_mountains()
 {
     Script* pNewScript = new Script;
@@ -2716,5 +2931,10 @@ void AddSC_blades_edge_mountains()
     pNewScript->Name = "npc_evergrove_druid";
     pNewScript->GetAI = &GetAI_npc_evergrove_druidAI;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_evergrove_druid;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_apexis_flayer";
+    pNewScript->GetAI = &GetAI_npc_apexis_flayerAI;
     pNewScript->RegisterSelf();
 }
