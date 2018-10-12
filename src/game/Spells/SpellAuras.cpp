@@ -890,8 +890,14 @@ bool Aura::isAffectedOnSpell(SpellEntry const* spell) const
     return spell->IsFitToFamily(SpellFamily(GetSpellProto()->SpellFamilyName), GetAuraSpellClassMask());
 }
 
-bool Aura::CanProcFrom(SpellEntry const* spell, uint32 /*procFlag*/, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const
+bool Aura::CanProcFrom(SpellEntry const* spell, uint32 procFlag, uint32 EventProcEx, uint32 procEx, bool active, bool useClassMask) const
 {
+    // successful melee / ranged hits seem to ignore SpellClassMask (see spells 53215 - 53217)
+    if ((procFlag & PROC_FLAG_SUCCESSFUL_MELEE_HIT) && spell->Id == 6603 ||
+        (procFlag & PROC_FLAG_SUCCESSFUL_RANGED_HIT) && spell->Id == 75) {
+        return true;
+    }
+
     // Check EffectClassMask
     ClassFamilyMask const& mask  = GetAuraSpellClassMask();
 
