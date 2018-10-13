@@ -238,6 +238,10 @@ void instance_karazhan::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             if (uiData == IN_PROGRESS)
                 m_uiOzDeathCount = 0;
+            if (uiData == FAIL)
+            {
+                DoUseDoorOrButton(GO_STAGE_DOOR_LEFT);
+            }
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_STAGE_DOOR_LEFT);

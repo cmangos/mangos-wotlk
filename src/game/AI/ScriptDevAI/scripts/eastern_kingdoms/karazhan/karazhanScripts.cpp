@@ -130,7 +130,8 @@ struct npc_barnesAI : public npc_escortAI, private DialogueHelper
         {
             case 0:
                 DoCastSpellIfCan(m_creature, SPELL_TUXEDO);
-                m_pInstance->DoUseDoorOrButton(GO_STAGE_DOOR_LEFT);
+                if (m_pInstance->GetData(TYPE_OPERA) != FAIL)
+                    m_pInstance->DoUseDoorOrButton(GO_STAGE_DOOR_LEFT);
                 break;
             case 4:
                 switch (m_pInstance->GetData(TYPE_OPERA_PERFORMANCE))
