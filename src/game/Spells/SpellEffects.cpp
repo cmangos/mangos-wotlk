@@ -9035,6 +9035,17 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->RemoveAurasDueToSpell(40732); // Lazy and Good for Nothing
                     return;
                 }
+                case 40828:                                 // Banish the Demons: Cast Kill Credit on Master
+                {
+                    if (!unitTarget)
+                        return;
+
+                    // Serverside 40829 does not exist
+                    if (Unit* spawner = unitTarget->GetSpawner())
+                        ((Player*)spawner)->RewardPlayerAndGroupAtEventCredit(unitTarget->GetEntry(), unitTarget);
+
+                    return;
+                }
                 case 41055:                                 // Copy Weapon
                 case 63416:                                 // Copy Weapon
                 case 69891:                                 // Copy Weapon (No Threat)

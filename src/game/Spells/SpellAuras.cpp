@@ -2926,6 +2926,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 39091:                                     // Negative Charge
                 target->RemoveAurasDueToSpell(39092);
                 return;
+            case 40830:                                     // Banish the Demons: Banishment Beam Periodic Aura Effect
+            {
+                if (m_removeMode == AURA_REMOVE_BY_DEATH)
+                    target->CastSpell(nullptr, 40828, TRIGGERED_OLD_TRIGGERED);
+                return;
+            }
             case 41099:                                     // Battle Stance
             {
                 // Battle Aura
