@@ -1840,9 +1840,6 @@ void Aura::TriggerSpell()
             {
                 switch (auraId)
                 {
-                    case 66:                                // Invisibility
-                        // Here need periodic trigger reducing threat spell (or do it manually)
-                        return;
                     default:
                         break;
                 }
