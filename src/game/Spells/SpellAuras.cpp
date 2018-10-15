@@ -8362,6 +8362,12 @@ void Aura::PeriodicDummyTick()
                             target->CastSpell(target, (spell->Id == 21094 ? 21095 : 23492), TRIGGERED_OLD_TRIGGERED, nullptr);      // Spell 21095: Separation Anxiety for Majordomo Executus' adds, 23492: Separation Anxiety for Garr's adds
                     }
                     return;
+                case 27769:                                 // Whisper Gulch: Yogg-Saron Whisper
+                {
+                    if (roll_chance_i(20))
+                        target->CastSpell(nullptr, 29072, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
 //              // Gossip NPC Periodic - Talk
                 case 32441:                                 // Brittle Bones
                     if (roll_chance_i(33))
