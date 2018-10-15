@@ -9085,7 +9085,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // Serverside 40829 does not exist
                     if (Unit* spawner = unitTarget->GetSpawner())
-                        ((Player*)spawner)->RewardPlayerAndGroupAtEventCredit(unitTarget->GetEntry(), unitTarget);
+                        if (spawner->GetTypeId() == TYPEID_PLAYER)
+                            ((Player*)spawner)->RewardPlayerAndGroupAtEventCredit(unitTarget->GetEntry(), unitTarget);
 
                     return;
                 }
