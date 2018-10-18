@@ -2165,18 +2165,20 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 40160:                                 // Throw Bomb
                 {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    Creature* creature = GetClosestCreatureWithEntry(unitTarget, 23119, 30.f);
-                    GameObject* go = GetClosestGameObjectWithEntry(unitTarget, 185861, 30.f);
+                    static_cast<Player*>(m_caster)->RewardPlayerAndGroupAtEventCredit(unitTarget->GetEntry(), unitTarget);
+
+                    Creature* creature = GetClosestCreatureWithEntry(unitTarget, 23119, 5.f);
+                    GameObject* go = GetClosestGameObjectWithEntry(unitTarget, 185861, 5.f);
                     if (creature)
                     {
                         creature->CastSpell(nullptr, 40162, TRIGGERED_OLD_TRIGGERED);
                         creature->ForcedDespawn(4000);
                     }
                     if (go)
-                        go->SetLootState(GO_JUST_DEACTIVATED);
+                        go->AddObjectToRemoveList();
                     static_cast<Creature*>(unitTarget)->ForcedDespawn();
                     return;
                 }
