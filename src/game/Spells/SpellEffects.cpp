@@ -55,6 +55,7 @@
 #include "G3D/Vector3.h"
 #include "Loot/LootMgr.h"
 #include "Movement/MoveSpline.h"
+#include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS] =
 {
@@ -2160,6 +2161,23 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
 
                     unitTarget->CastSpell(unitTarget, 39998, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 40160:                                 // Throw Bomb
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    Creature* creature = GetClosestCreatureWithEntry(unitTarget, 23119, 30.f);
+                    GameObject* go = GetClosestGameObjectWithEntry(unitTarget, 185861, 30.f);
+                    if (creature)
+                    {
+                        creature->CastSpell(nullptr, 40162, TRIGGERED_OLD_TRIGGERED);
+                        creature->ForcedDespawn(4000);
+                    }
+                    if (go)
+                        go->SetLootState(GO_JUST_DEACTIVATED);
+                    static_cast<Creature*>(unitTarget)->ForcedDespawn();
                     return;
                 }
                 case 40802:                                 // Mingo's Fortune Generator (Mingo's Fortune Giblets)
