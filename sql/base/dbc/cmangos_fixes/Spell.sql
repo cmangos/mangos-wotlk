@@ -1216,3 +1216,8 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`
 -- Implement SPELL_AURA_ABILITY_CONSUME_NO_AMMO -> https://github.com/cmangos/mangos-wotlk/pull/262
 UPDATE `spell_template` SET `EffectSpellClassMask1_1`=4097 WHERE `id` IN(53215,53216,53217);
 
+-- Add serverside spell triggered by 40198 on Bombing Run quest complete
+-- Note that this spell is guesswork. We have no official source for what effects it should have
+INSERT INTO `spell_template` (`Id`, `Attributes`, `CastingTimeIndex`, `procChance`, `Effect1`, `EffectImplicitTargetA1`, `SpellIconID`, `SpellName`, `DmgMultiplier1`, `DmgMultiplier2`, `DmgMultiplier3`) VALUES 
+('40200', '150995200', '1', '101', '3', '1', '1', 'Bombing Run: Remove See Invisibility', '1', '1', '1');
+
