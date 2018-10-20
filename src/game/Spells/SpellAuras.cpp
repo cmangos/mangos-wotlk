@@ -2440,6 +2440,28 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (roll_chance_i(20))              // backfire stun
                             target->CastSpell(target, 51581, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         return;
+                    case 40856:                                     // Wrangling Rope
+                    {
+                        if (target->GetTypeId() != TYPEID_UNIT)
+                            return;
+
+                        if (Unit* caster = GetCaster())
+                            target->CastSpell(caster, 40917, TRIGGERED_NONE); // Wrangle Aether Rays: Character Force Cast
+
+                        static_cast<Creature*>(target)->ForcedDespawn();
+
+                        return;
+                    }
+                    case 40926:                                     // Wrangle Aether Rays: Wrangling Rope Channel
+                    {
+                        if (target->GetTypeId() != TYPEID_PLAYER)
+                            return;
+
+                        if (Unit* caster = GetCaster())
+                            caster->GetMotionMaster()->MoveFollow(target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, true);
+
+                        return;
+                    }
                     case 42416:                             // Apexis Mob Faction Check Aura
                     {
                         if (target->GetTypeId() != TYPEID_UNIT)
