@@ -179,6 +179,15 @@ struct boss_netherspiteAI : public ScriptedAI
             m_pInstance->SetData(TYPE_NETHERSPITE, DONE);
     }
 
+    void DespawnPortals()
+    {
+        for (ObjectGuid& portalGuid : m_vPortalGuidList)
+            if (Creature* portal = m_creature->GetMap()->GetCreature(portalGuid))
+                portal->ForcedDespawn();
+
+        m_vPortalGuidList.clear();
+    }
+
     void EnterEvadeMode() override
     {
         ScriptedAI::EnterEvadeMode();
@@ -186,33 +195,31 @@ struct boss_netherspiteAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_NETHERSPITE, FAIL);
         
-        for (ObjectGuid& portalGuid : m_vPortalGuidList)
-            if(Creature* portal = m_creature->GetMap()->GetCreature(portalGuid))
-                portal->ForcedDespawn();
-
-        m_vPortalGuidList.clear();
+        DespawnPortals();
     }
 
     void SwitchPhases()
     {
         if (m_uiActivePhase == BEAM_PHASE)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_NETHERSPITE_ROAR) == CAST_OK)
+        {            
+            if (DoCastSpellIfCan(m_creature, SPELL_SHADOWFORM, CAST_TRIGGERED) == CAST_OK)
             {
-                DoCastSpellIfCan(m_creature, SPELL_SHADOWFORM, CAST_TRIGGERED);
                 m_creature->RemoveAurasDueToSpell(SPELL_EMPOWERMENT);
                 m_creature->RemoveAurasDueToSpell(SPELL_NETHERBURN);
+                DoCastSpellIfCan(m_creature, SPELL_NETHERSPITE_ROAR);
 
                 SetCombatMovement(false);
-                m_creature->GetMotionMaster()->MoveIdle();
-                m_creature->AttackStop();
-                m_creature->SetTurningOff(true);
+                SetCombatScriptStatus(true);
+                SetMeleeEnabled(false);
+                m_creature->SetTarget(nullptr);
 
                 m_uiActivePhase = BANISH_PHASE;
                 DoScriptText(EMOTE_PHASE_BANISH, m_creature);
 
                 m_uiNetherbreathTimer = 2000;
                 m_uiPhaseSwitchTimer  = 30000;
+
+                DespawnPortals();
             }
         }
         else
@@ -220,10 +227,14 @@ struct boss_netherspiteAI : public ScriptedAI
             DoCastSpellIfCan(m_creature, SPELL_NETHERBURN, CAST_TRIGGERED);
             m_creature->RemoveAurasDueToSpell(SPELL_SHADOWFORM);
             SetCombatMovement(true);
-            m_creature->SetTurningOff(false);
+            SetCombatScriptStatus(false);
+            SetMeleeEnabled(true);
 
             if (m_creature->getVictim())
+            {
+                m_creature->SetTarget(m_creature->getVictim());
                 DoStartMovement(m_creature->getVictim());
+            }
 
             m_uiActivePhase = BEAM_PHASE;
             DoScriptText(EMOTE_PHASE_BEAM, m_creature);
@@ -240,7 +251,7 @@ struct boss_netherspiteAI : public ScriptedAI
     void DoSummonPortals()
     {
         for (uint8 i = 0; i < MAX_PORTALS; ++i)
-            m_creature->SummonCreature(m_vPortalEntryList[i], aPortalCoordinates[i].fX, aPortalCoordinates[i].fY, aPortalCoordinates[i].fZ, aPortalCoordinates[i].fO, TEMPSPAWN_TIMED_DESPAWN, 60000);
+            m_creature->SummonCreature(m_vPortalEntryList[i], aPortalCoordinates[i].fX, aPortalCoordinates[i].fY, aPortalCoordinates[i].fZ, aPortalCoordinates[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0);
 
         // randomize the portals after the first summon
         std::random_shuffle(m_vPortalEntryList.begin(), m_vPortalEntryList.end());
@@ -266,9 +277,8 @@ struct boss_netherspiteAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiActivePhase == BEAM_PHASE)
-            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-                return;
+        if (!m_creature->SelectHostileTarget())
+            return;
 
         if (m_uiPhaseSwitchTimer <= uiDiff)
             SwitchPhases();
