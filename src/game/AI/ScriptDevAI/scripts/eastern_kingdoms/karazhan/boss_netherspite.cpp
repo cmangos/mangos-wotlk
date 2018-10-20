@@ -226,6 +226,7 @@ struct boss_netherspiteAI : public ScriptedAI
         {
             DoCastSpellIfCan(m_creature, SPELL_NETHERBURN, CAST_TRIGGERED);
             m_creature->RemoveAurasDueToSpell(SPELL_SHADOWFORM);
+            DoCastSpellIfCan(m_creature, SPELL_NETHERSPITE_ROAR);
             SetCombatMovement(true);
             SetCombatScriptStatus(false);
             SetMeleeEnabled(true);
