@@ -626,7 +626,6 @@ void Spell::FillTargetMap()
                                 case SPELL_EFFECT_RESURRECT: // no spell guesswork
                                 case SPELL_EFFECT_RESURRECT_NEW: // no spell guesswork
                                 case SPELL_EFFECT_SKIN_PLAYER_CORPSE: // no spell guesswork
-                                case SPELL_EFFECT_APPLY_AURA:
                                 case SPELL_EFFECT_SUMMON_PLAYER: // guessed based on 7720 sniff data
                                     SetTargetMap(SpellEffectIndex(i), TARGET_UNIT, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                                     break;
@@ -676,6 +675,8 @@ void Spell::FillTargetMap()
                                 }
                                 case SPELL_EFFECT_STUCK: // guessed based on 7355
                                 case SPELL_EFFECT_TRIGGER_SPELL: // guessed based on 37851
+                                case SPELL_EFFECT_SEND_TAXI: // based on 42295
+                                case SPELL_EFFECT_APPLY_AURA:
                                 case SPELL_EFFECT_APPLY_GLYPH:
                                     SetTargetMap(SpellEffectIndex(i), TARGET_UNIT_CASTER, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                                     break;
