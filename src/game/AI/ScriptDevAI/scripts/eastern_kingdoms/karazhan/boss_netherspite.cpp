@@ -177,6 +177,8 @@ struct boss_netherspiteAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_NETHERSPITE, DONE);
+
+        DespawnPortals();
     }
 
     void DespawnPortals()

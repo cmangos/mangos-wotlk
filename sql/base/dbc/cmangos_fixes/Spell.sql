@@ -1221,3 +1221,6 @@ UPDATE `spell_template` SET `EffectSpellClassMask1_1`=4097 WHERE `id` IN(53215,5
 INSERT INTO `spell_template` (`Id`, `Attributes`, `CastingTimeIndex`, `procChance`, `Effect1`, `EffectImplicitTargetA1`, `SpellIconID`, `SpellName`, `DmgMultiplier1`, `DmgMultiplier2`, `DmgMultiplier3`) VALUES 
 ('40200', '150995200', '1', '101', '3', '1', '1', 'Bombing Run: Remove See Invisibility', '1', '1', '1');
 
+-- Netherspite roar should never be interruptible - likely blizz copy paste - verified with retail
+UPDATE spell_template SET InterruptFlags=0 WHERE Id IN(38684);
+
