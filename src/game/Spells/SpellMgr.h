@@ -25,6 +25,7 @@
 #include "Common.h"
 #include "Globals/SharedDefines.h"
 #include "Spells/SpellAuraDefines.h"
+#include "Spells/SpellTargetDefines.h"
 #include "Server/DBCStructure.h"
 #include "Server/DBCStores.h"
 #include "Entities/DynamicObject.h"
@@ -160,8 +161,8 @@ inline bool IsDestinationOnlyEffect(SpellEntry const* spellInfo, SpellEffectInde
             {
                 switch (spellInfo->EffectImplicitTargetA[effIdx])
                 {
-                    case TARGET_AREAEFFECT_CUSTOM:
-                    case TARGET_CURRENT_ENEMY_COORDINATES:
+                    case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DEST_LOC:
+                    case TARGET_LOCATION_CASTER_TARGET_POSITION:
                         return true;
                 }
             }
@@ -241,7 +242,7 @@ inline bool IsSealSpell(SpellEntry const* spellInfo)
     // Collection of all the seal family flags. No other paladin spell has any of those.
     return spellInfo->IsFitToFamily(SPELLFAMILY_PALADIN, uint64(0x26000C000A000000)) &&
            // avoid counting target triggered effect as seal for avoid remove it or seal by it.
-           spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0] == TARGET_SELF;
+           spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0] == TARGET_UNIT_CASTER;
 }
 
 inline bool IsAllowingDeadTarget(SpellEntry const* spellInfo)
@@ -555,25 +556,24 @@ inline bool IsCasterSourceTarget(uint32 target)
 {
     switch (target)
     {
-        case TARGET_SELF:
-        case TARGET_PET:
-        case TARGET_ALL_PARTY_AROUND_CASTER:
-        case TARGET_IN_FRONT_OF_CASTER:
-        case TARGET_MASTER:
-        case TARGET_MINION:
-        case TARGET_ALL_PARTY:
-        case TARGET_ALL_PARTY_AROUND_CASTER_2:
-        case TARGET_SELF_FISHING:
-        case TARGET_TOTEM_EARTH:
-        case TARGET_TOTEM_WATER:
-        case TARGET_TOTEM_AIR:
-        case TARGET_TOTEM_FIRE:
-        case TARGET_AREAEFFECT_GO_AROUND_DEST:
-        case TARGET_ALL_RAID_AROUND_CASTER:
-        case TARGET_DEST_DESTINATION:
-        case TARGET_DIRECTLY_FORWARD:
-        case TARGET_NONCOMBAT_PET:
-        case TARGET_IN_FRONT_OF_CASTER_30:
+        case TARGET_UNIT_CASTER:
+        case TARGET_UNIT_CASTER_PET:
+        case TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE:
+        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24:
+        case TARGET_UNIT_CASTER_MASTER:
+        case TARGET_LOCATION_UNIT_MINION_POSITION:
+        case TARGET_ENUM_UNITS_PARTY_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_PARTY_AOE_AT_DEST_LOC:
+        case TARGET_LOCATION_CASTER_FISHING_SPOT:
+        case TARGET_LOCATION_CASTER_FRONT_RIGHT:
+        case TARGET_LOCATION_CASTER_BACK_RIGHT:
+        case TARGET_LOCATION_CASTER_BACK_LEFT:
+        case TARGET_LOCATION_CASTER_FRONT_LEFT:
+        case TARGET_ENUM_GAMEOBJECTS_SCRIPT_AOE_AT_DEST_LOC:
+        case TARGET_ENUM_UNITS_RAID_WITHIN_CASTER_RANGE:
+        case TARGET_UNIT_CASTER_COMPANION:
+        case TARGET_LOCATION_RANDOM_CIRCUMFERENCE:
+        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_104:
             return true;
         default:
             break;
@@ -589,7 +589,7 @@ inline bool IsSpellWithScriptUnitTarget(SpellEntry const* spellInfo)
             continue;
         switch (spellInfo->EffectImplicitTargetA[i])
         {
-            case TARGET_SCRIPT:
+            case TARGET_UNIT_SCRIPT_NEAR_CASTER:
                 return true;
         }
     }
@@ -618,25 +618,25 @@ inline bool IsSpellWithCasterSourceTargetsOnly(SpellEntry const* spellInfo)
     return true;
 }
 
-inline bool IsPointEffectTarget(Targets target)
+inline bool IsPointEffectTarget(SpellTarget target)
 {
     switch (target)
     {
-        case TARGET_INNKEEPER_COORDINATES:
-        case TARGET_TABLE_X_Y_Z_COORDINATES:
-        case TARGET_CASTER_COORDINATES:
-        case TARGET_SCRIPT_COORDINATES:
-        case TARGET_CURRENT_ENEMY_COORDINATES:
-        case TARGET_DUELVSPLAYER_COORDINATES:
-        case TARGET_DYNAMIC_OBJECT_COORDINATES:
-        case TARGET_POINT_AT_NORTH:
-        case TARGET_POINT_AT_SOUTH:
-        case TARGET_POINT_AT_EAST:
-        case TARGET_POINT_AT_WEST:
-        case TARGET_POINT_AT_NE:
-        case TARGET_POINT_AT_NW:
-        case TARGET_POINT_AT_SE:
-        case TARGET_POINT_AT_SW:
+        case TARGET_LOCATION_CASTER_HOME_BIND:
+        case TARGET_LOCATION_DATABASE:
+        case TARGET_LOCATION_CASTER_SRC:
+        case TARGET_LOCATION_SCRIPT_NEAR_CASTER:
+        case TARGET_LOCATION_CASTER_TARGET_POSITION:
+        case TARGET_LOCATION_UNIT_POSITION:
+        case TARGET_LOCATION_DYNOBJ_POSITION:
+        case TARGET_LOCATION_NORTH:
+        case TARGET_LOCATION_SOUTH:
+        case TARGET_LOCATION_EAST:
+        case TARGET_LOCATION_WEST:
+        case TARGET_LOCATION_NE:
+        case TARGET_LOCATION_NW:
+        case TARGET_LOCATION_SE:
+        case TARGET_LOCATION_SW:
             return true;
         default:
             break;
@@ -644,18 +644,18 @@ inline bool IsPointEffectTarget(Targets target)
     return false;
 }
 
-inline bool IsAreaEffectPossitiveTarget(Targets target)
+inline bool IsAreaEffectPossitiveTarget(SpellTarget target)
 {
     switch (target)
     {
-        case TARGET_ALL_PARTY_AROUND_CASTER:
-        case TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER:
-        case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
-        case TARGET_ALL_PARTY:
-        case TARGET_ALL_PARTY_AROUND_CASTER_2:
-        case TARGET_AREAEFFECT_PARTY:
-        case TARGET_ALL_RAID_AROUND_CASTER:
-        case TARGET_AREAEFFECT_PARTY_AND_CLASS:
+        case TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE:
+        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DEST_LOC:
+        case TARGET_ENUM_UNITS_PARTY_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_PARTY_AOE_AT_DEST_LOC:
+        case TARGET_UNIT_FRIEND_AND_PARTY:
+        case TARGET_ENUM_UNITS_RAID_WITHIN_CASTER_RANGE:
+        case TARGET_UNIT_RAID_AND_CLASS:
             return true;
         default:
             break;
@@ -663,26 +663,26 @@ inline bool IsAreaEffectPossitiveTarget(Targets target)
     return false;
 }
 
-inline bool IsAreaEffectTarget(Targets target)
+inline bool IsAreaEffectTarget(SpellTarget target)
 {
     switch (target)
     {
-        case TARGET_AREAEFFECT_INSTANT:
-        case TARGET_AREAEFFECT_CUSTOM:
-        case TARGET_ALL_ENEMY_IN_AREA:
-        case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
-        case TARGET_ALL_PARTY_AROUND_CASTER:
-        case TARGET_IN_FRONT_OF_CASTER:
-        case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
-        case TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER:
-        case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
-        case TARGET_ALL_PARTY:
-        case TARGET_ALL_PARTY_AROUND_CASTER_2:
-        case TARGET_AREAEFFECT_PARTY:
-        case TARGET_AREAEFFECT_GO_AROUND_DEST:
-        case TARGET_ALL_RAID_AROUND_CASTER:
-        case TARGET_AREAEFFECT_PARTY_AND_CLASS:
-        case TARGET_IN_FRONT_OF_CASTER_30:
+        case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DEST_LOC:
+        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC:
+        case TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE:
+        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24:
+        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC:
+        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DEST_LOC:
+        case TARGET_ENUM_UNITS_PARTY_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_PARTY_AOE_AT_DEST_LOC:
+        case TARGET_UNIT_FRIEND_AND_PARTY:
+        case TARGET_ENUM_GAMEOBJECTS_SCRIPT_AOE_AT_DEST_LOC:
+        case TARGET_ENUM_UNITS_RAID_WITHIN_CASTER_RANGE:
+        case TARGET_UNIT_RAID_AND_CLASS:
+        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_104:
             return true;
         default:
             break;
@@ -692,11 +692,11 @@ inline bool IsAreaEffectTarget(Targets target)
 
 inline bool IsAreaOfEffectSpell(SpellEntry const* spellInfo)
 {
-    if (IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[EFFECT_INDEX_0])))
+    if (IsAreaEffectTarget(SpellTarget(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])) || IsAreaEffectTarget(SpellTarget(spellInfo->EffectImplicitTargetB[EFFECT_INDEX_0])))
         return true;
-    if (IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_1])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[EFFECT_INDEX_1])))
+    if (IsAreaEffectTarget(SpellTarget(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_1])) || IsAreaEffectTarget(SpellTarget(spellInfo->EffectImplicitTargetB[EFFECT_INDEX_1])))
         return true;
-    if (IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_2])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[EFFECT_INDEX_2])))
+    if (IsAreaEffectTarget(SpellTarget(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_2])) || IsAreaEffectTarget(SpellTarget(spellInfo->EffectImplicitTargetB[EFFECT_INDEX_2])))
         return true;
     return false;
 }
@@ -736,16 +736,16 @@ inline bool IsOnlySelfTargeting(SpellEntry const* spellInfo)
 
         switch (spellInfo->EffectImplicitTargetA[i])
         {
-            case TARGET_SELF:
-            case TARGET_DEST_DESTINATION:
+            case TARGET_UNIT_CASTER:
+            case TARGET_LOCATION_CURRENT_REFERENCE:
                 break;
             default:
                 return false;
         }
         switch (spellInfo->EffectImplicitTargetB[i])
         {
-            case TARGET_SELF:
-            case TARGET_DEST_DESTINATION:
+            case TARGET_UNIT_CASTER:
+            case TARGET_LOCATION_CURRENT_REFERENCE:
             case TARGET_NONE:
                 break;
             default:
@@ -759,8 +759,8 @@ inline bool IsUnitTargetTarget(uint32 target)
 {
     switch (target)
     {
-        case TARGET_CHAIN_DAMAGE:
-        case TARGET_DUELVSPLAYER: return true;
+        case TARGET_UNIT_ENEMY:
+        case TARGET_UNIT: return true;
         default: return false;
     }
 }
@@ -769,14 +769,14 @@ inline bool IsScriptTarget(uint32 target)
 {
     switch (target)
     {
-        case TARGET_SCRIPT:
-        case TARGET_SCRIPT_COORDINATES:
-        case TARGET_FOCUS_OR_SCRIPTED_GAMEOBJECT:
-        case TARGET_AREAEFFECT_INSTANT:
-        case TARGET_AREAEFFECT_CUSTOM:
-        case TARGET_AREAEFFECT_GO_AROUND_SOURCE:
-        case TARGET_AREAEFFECT_GO_AROUND_DEST:
-        case TARGET_NARROW_FRONTAL_CONE:
+        case TARGET_UNIT_SCRIPT_NEAR_CASTER:
+        case TARGET_LOCATION_SCRIPT_NEAR_CASTER:
+        case TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER:
+        case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DEST_LOC:
+        case TARGET_ENUM_GAMEOBJECTS_SCRIPT_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_GAMEOBJECTS_SCRIPT_AOE_AT_DEST_LOC:
+        case TARGET_ENUM_UNITS_SCRIPT_IN_CONE_60:
             return true;
         default:
             break;
@@ -789,15 +789,15 @@ inline bool IsHarmfulSpellTargetAtClient(uint32 target)
 {
     switch (target)
     {
-        case TARGET_RANDOM_ENEMY_CHAIN_IN_AREA:
-        case TARGET_CHAIN_DAMAGE:
-        case TARGET_ALL_ENEMY_IN_AREA:
-        case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
-        case TARGET_IN_FRONT_OF_CASTER:
-        case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
-        case TARGET_CURRENT_ENEMY_COORDINATES:
-        case TARGET_LARGE_FRONTAL_CONE:
-        case TARGET_93:
+        case TARGET_UNIT_ENEMY_NEAR_CASTER:
+        case TARGET_UNIT_ENEMY:
+        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC:
+        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24:
+        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC:
+        case TARGET_LOCATION_CASTER_TARGET_POSITION:
+        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_54:
+        case TARGET_CORPSE_ENEMY_NEAR_CASTER_NYI:
             return true;
         default:
             return false;
@@ -809,26 +809,26 @@ inline bool IsHelpfulSpellTargetAtClient(uint32 target)
 {
     switch (target)
     {
-        case TARGET_SELF:
-        case TARGET_RANDOM_FRIEND_CHAIN_IN_AREA:
-        case TARGET_RANDOM_UNIT_CHAIN_IN_AREA:
-        case TARGET_PET:
-        case TARGET_ALL_PARTY_AROUND_CASTER:
-        case TARGET_SINGLE_FRIEND:
-        case TARGET_MASTER:
-        case TARGET_29:
-        case TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER:
-        case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
-        case TARGET_ALL_PARTY:
-        case TARGET_ALL_PARTY_AROUND_CASTER_2:
-        case TARGET_SINGLE_PARTY:
-        case TARGET_CHAIN_HEAL:
-        case TARGET_ALL_RAID_AROUND_CASTER:
-        case TARGET_SINGLE_FRIEND_2:
-        case TARGET_58:
-        case TARGET_FRIENDLY_FRONTAL_CONE:
-        case TARGET_AREAEFFECT_PARTY_AND_CLASS:
-        case TARGET_62:
+        case TARGET_UNIT_CASTER:
+        case TARGET_UNIT_FRIEND_NEAR_CASTER:
+        case TARGET_UNIT_NEAR_CASTER:
+        case TARGET_UNIT_CASTER_PET:
+        case TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE:
+        case TARGET_UNIT_FRIEND:
+        case TARGET_UNIT_CASTER_MASTER:
+        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DYNOBJ_LOC:
+        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DEST_LOC:
+        case TARGET_ENUM_UNITS_PARTY_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_PARTY_AOE_AT_DEST_LOC:
+        case TARGET_UNIT_PARTY:
+        case TARGET_UNIT_FRIEND_CHAIN_HEAL:
+        case TARGET_ENUM_UNITS_RAID_WITHIN_CASTER_RANGE:
+        case TARGET_UNIT_RAID:
+        case TARGET_UNIT_RAID_NEAR_CASTER:
+        case TARGET_ENUM_UNITS_FRIEND_IN_CONE:
+        case TARGET_UNIT_RAID_AND_CLASS:
+        case TARGET_PLAYER_RAID_NYI:
             return true;
         default:
             return false;
@@ -846,13 +846,13 @@ inline bool IsHelpfulSpellEffectAtClient(const SpellEntry &entry, SpellEffectInd
 {
     if (IsHelpfulSpellTargetAtClient(entry.EffectImplicitTargetA[effIndex]))
     {
-        if (entry.EffectImplicitTargetA[effIndex] != TARGET_SELF || entry.EffectApplyAuraName[effIndex] != SPELL_AURA_DUMMY)
+        if (entry.EffectImplicitTargetA[effIndex] != TARGET_UNIT_CASTER || entry.EffectApplyAuraName[effIndex] != SPELL_AURA_DUMMY)
             return true;
     }
 
     if (IsHelpfulSpellTargetAtClient(entry.EffectImplicitTargetB[effIndex]))
     {
-        if (entry.EffectImplicitTargetB[effIndex] != TARGET_SELF || entry.EffectApplyAuraName[effIndex] != SPELL_AURA_DUMMY)
+        if (entry.EffectImplicitTargetB[effIndex] != TARGET_UNIT_CASTER || entry.EffectApplyAuraName[effIndex] != SPELL_AURA_DUMMY)
             return true;
     }
 
@@ -900,62 +900,62 @@ inline bool IsNeutralTarget(uint32 target)
     switch (target)
     {
         case TARGET_NONE:
-        case TARGET_RANDOM_UNIT_CHAIN_IN_AREA:
-        case TARGET_INNKEEPER_COORDINATES:
-        case TARGET_11:
-        case TARGET_TABLE_X_Y_Z_COORDINATES:
-        case TARGET_EFFECT_SELECT:
-        case TARGET_CASTER_COORDINATES:
+        case TARGET_UNIT_NEAR_CASTER:
+        case TARGET_LOCATION_CASTER_HOME_BIND:
+        case TARGET_PLAYER_NYI:
+        case TARGET_LOCATION_DATABASE:
+        case TARGET_LOCATION_CASTER_DEST:
+        case TARGET_LOCATION_CASTER_SRC:
         case TARGET_GAMEOBJECT:
-        case TARGET_DUELVSPLAYER:
-        case TARGET_GAMEOBJECT_ITEM:
-        case TARGET_29:
-        case TARGET_TOTEM_EARTH:
-        case TARGET_TOTEM_WATER:
-        case TARGET_TOTEM_AIR:
-        case TARGET_TOTEM_FIRE:
-        case TARGET_DYNAMIC_OBJECT_FRONT:
-        case TARGET_DYNAMIC_OBJECT_BEHIND:
-        case TARGET_DYNAMIC_OBJECT_LEFT_SIDE:
-        case TARGET_DYNAMIC_OBJECT_RIGHT_SIDE:
-        case TARGET_DEST_CASTER_FRONT_LEAP:
-        case TARGET_58:
-        case TARGET_DUELVSPLAYER_COORDINATES:
-        case TARGET_INFRONT_OF_VICTIM:
-        case TARGET_BEHIND_VICTIM:
-        case TARGET_RIGHT_FROM_VICTIM:
-        case TARGET_LEFT_FROM_VICTIM:
-        case TARGET_70:
-        case TARGET_RANDOM_DEST_CASTER:
-        case TARGET_RANDOM_DEST_CASTER_CIRCUMFERENCE:
-        case TARGET_RANDOM_DEST_TARGET:
-        case TARGET_RANDOM_DEST_TARGET_CIRCUMFERENCE:
-        case TARGET_DYNAMIC_OBJECT_COORDINATES:
-        case TARGET_POINT_AT_NORTH:
-        case TARGET_POINT_AT_SOUTH:
-        case TARGET_POINT_AT_EAST:
-        case TARGET_POINT_AT_WEST:
-        case TARGET_POINT_AT_NE:
-        case TARGET_POINT_AT_NW:
-        case TARGET_POINT_AT_SE:
-        case TARGET_POINT_AT_SW:
-        case TARGET_RANDOM_NEARBY_DEST:
-        case TARGET_88:
-        case TARGET_DIRECTLY_FORWARD:
-        case TARGET_DEST_RADIUS:
-        case TARGET_SUMMONER:
-        case TARGET_VEHICLE_DRIVER:
-        case TARGET_VEHICLE_PASSENGER_0:
-        case TARGET_VEHICLE_PASSENGER_1:
-        case TARGET_VEHICLE_PASSENGER_2:
-        case TARGET_VEHICLE_PASSENGER_3:
-        case TARGET_VEHICLE_PASSENGER_4:
-        case TARGET_VEHICLE_PASSENGER_5:
-        case TARGET_VEHICLE_PASSENGER_6:
-        case TARGET_VEHICLE_PASSENGER_7:
-        case TARGET_105:
-        case TARGET_106:
-        case TARGET_GO_IN_FRONT_OF_CASTER_90:
+        case TARGET_UNIT:
+        case TARGET_LOCKED:
+        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DYNOBJ_LOC:
+        case TARGET_LOCATION_CASTER_FRONT_RIGHT:
+        case TARGET_LOCATION_CASTER_BACK_RIGHT:
+        case TARGET_LOCATION_CASTER_BACK_LEFT:
+        case TARGET_LOCATION_CASTER_FRONT_LEFT:
+        case TARGET_LOCATION_CASTER_FRONT:
+        case TARGET_LOCATION_CASTER_BACK:
+        case TARGET_LOCATION_CASTER_LEFT:
+        case TARGET_LOCATION_CASTER_RIGHT:
+        case TARGET_LOCATION_CASTER_FRONT_LEAP:
+        case TARGET_UNIT_RAID_NEAR_CASTER:
+        case TARGET_LOCATION_UNIT_POSITION:
+        case TARGET_LOCATION_UNIT_FRONT:
+        case TARGET_LOCATION_UNIT_BACK:
+        case TARGET_LOCATION_UNIT_RIGHT:
+        case TARGET_LOCATION_UNIT_LEFT:
+        case TARGET_LOCATION_UNIT_BACK_LEFT:
+        case TARGET_LOCATION_CASTER_RANDOM_SIDE:
+        case TARGET_LOCATION_CASTER_RANDOM_CIRCUMFERENCE:
+        case TARGET_LOCATION_UNIT_RANDOM_SIDE:
+        case TARGET_LOCATION_UNIT_RANDOM_CIRCUMFERENCE:
+        case TARGET_LOCATION_DYNOBJ_POSITION:
+        case TARGET_LOCATION_NORTH:
+        case TARGET_LOCATION_SOUTH:
+        case TARGET_LOCATION_EAST:
+        case TARGET_LOCATION_WEST:
+        case TARGET_LOCATION_NE:
+        case TARGET_LOCATION_NW:
+        case TARGET_LOCATION_SE:
+        case TARGET_LOCATION_SW:
+        case TARGET_LOCATION_RANDOM_SIDE:
+        case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DYNOBJ_LOC:
+        case TARGET_LOCATION_TRAJECTORY:
+        case TARGET_LOCATION_RANDOM_CIRCUMFERENCE:
+        case TARGET_UNIT_CASTER_SUMMONER:
+        case TARGET_UNIT_CASTER_VEHICLE:
+        case TARGET_UNIT_CASTER_PASSENGER_0:
+        case TARGET_UNIT_CASTER_PASSENGER_1:
+        case TARGET_UNIT_CASTER_PASSENGER_2:
+        case TARGET_UNIT_CASTER_PASSENGER_3:
+        case TARGET_UNIT_CASTER_PASSENGER_4:
+        case TARGET_UNIT_CASTER_PASSENGER_5:
+        case TARGET_UNIT_CASTER_PASSENGER_6:
+        case TARGET_UNIT_CASTER_PASSENGER_7:
+        case TARGET_UNIT_105_NYI:
+        case TARGET_LOCATION_106_NYI:
+        case TARGET_ENUM_GAMEOBJECTS_IN_CONE:
             return true;
         default:
             break;
@@ -968,29 +968,29 @@ inline bool IsFriendlyTarget(uint32 target)
     // This is an exhaustive list for demonstrativeness and global search reasons.
     switch (target)
     {
-        case TARGET_SELF:
-        case TARGET_RANDOM_FRIEND_CHAIN_IN_AREA:
-        case TARGET_PET:
-        case TARGET_ALL_PARTY_AROUND_CASTER:
-        case TARGET_SINGLE_FRIEND:
-        case TARGET_MASTER:
-        case TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER:
-        case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
-        case TARGET_MINION:
-        case TARGET_ALL_PARTY:
-        case TARGET_ALL_PARTY_AROUND_CASTER_2:
-        case TARGET_SINGLE_PARTY:
-        case TARGET_AREAEFFECT_PARTY:
-        case TARGET_SELF_FISHING:
-        case TARGET_CHAIN_HEAL:
-        case TARGET_ALL_RAID_AROUND_CASTER:
-        case TARGET_SINGLE_FRIEND_2:
-        case TARGET_FRIENDLY_FRONTAL_CONE:
-        case TARGET_AREAEFFECT_PARTY_AND_CLASS:
-        case TARGET_DEST_DESTINATION:
-        case TARGET_NONCOMBAT_PET:
-        case TARGET_CONTROLLED_VEHICLE:
-        case TARGET_NARROW_FRONTAL_CONE_2:
+        case TARGET_UNIT_CASTER:
+        case TARGET_UNIT_FRIEND_NEAR_CASTER:
+        case TARGET_UNIT_CASTER_PET:
+        case TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE:
+        case TARGET_UNIT_FRIEND:
+        case TARGET_UNIT_CASTER_MASTER:
+        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DEST_LOC:
+        case TARGET_LOCATION_UNIT_MINION_POSITION:
+        case TARGET_ENUM_UNITS_PARTY_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_PARTY_AOE_AT_DEST_LOC:
+        case TARGET_UNIT_PARTY:
+        case TARGET_UNIT_FRIEND_AND_PARTY:
+        case TARGET_LOCATION_CASTER_FISHING_SPOT:
+        case TARGET_UNIT_FRIEND_CHAIN_HEAL:
+        case TARGET_ENUM_UNITS_RAID_WITHIN_CASTER_RANGE:
+        case TARGET_UNIT_RAID:
+        case TARGET_ENUM_UNITS_FRIEND_IN_CONE:
+        case TARGET_UNIT_RAID_AND_CLASS:
+        case TARGET_LOCATION_CURRENT_REFERENCE:
+        case TARGET_UNIT_CASTER_COMPANION:
+        case TARGET_UNIT_CASTER_VEHICLE:
+        case TARGET_ENUM_UNITS_SCRIPT_IN_CONE_110:
             return true;
         default:
             break;
@@ -1003,16 +1003,16 @@ inline bool IsHostileTarget(uint32 target)
     // This is an exhaustive list for demonstrativeness and global search reasons.
     switch (target)
     {
-        case TARGET_RANDOM_ENEMY_CHAIN_IN_AREA:
-        case TARGET_CHAIN_DAMAGE:
-        case TARGET_ALL_ENEMY_IN_AREA:
-        case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
-        case TARGET_IN_FRONT_OF_CASTER:
-        case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
-        case TARGET_ALL_HOSTILE_UNITS_AROUND_CASTER:
-        case TARGET_CURRENT_ENEMY_COORDINATES:
-        case TARGET_LARGE_FRONTAL_CONE:
-        case TARGET_IN_FRONT_OF_CASTER_30:
+        case TARGET_UNIT_ENEMY_NEAR_CASTER:
+        case TARGET_UNIT_ENEMY:
+        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DEST_LOC:
+        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24:
+        case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC:
+        case TARGET_ENUM_UNITS_ENEMY_WITHIN_CASTER_RANGE:
+        case TARGET_LOCATION_CASTER_TARGET_POSITION:
+        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_54:
+        case TARGET_ENUM_UNITS_ENEMY_IN_CONE_104:
             return true;
         default:
             break;
@@ -1044,25 +1044,25 @@ inline bool IsNeutralEffectTargetPositive(uint32 etarget, const WorldObject* cas
 {
     switch (etarget)
     {
-        case TARGET_RANDOM_UNIT_CHAIN_IN_AREA:
-        case TARGET_11:
-        case TARGET_DUELVSPLAYER:
-        case TARGET_29:
-        case TARGET_58:
-        case TARGET_70:
-        case TARGET_RANDOM_DEST_TARGET:
-        case TARGET_RANDOM_DEST_TARGET_CIRCUMFERENCE:
-        case TARGET_SUMMONER:
-        case TARGET_VEHICLE_DRIVER:
-        case TARGET_VEHICLE_PASSENGER_0:
-        case TARGET_VEHICLE_PASSENGER_1:
-        case TARGET_VEHICLE_PASSENGER_2:
-        case TARGET_VEHICLE_PASSENGER_3:
-        case TARGET_VEHICLE_PASSENGER_4:
-        case TARGET_VEHICLE_PASSENGER_5:
-        case TARGET_VEHICLE_PASSENGER_6:
-        case TARGET_VEHICLE_PASSENGER_7:
-        case TARGET_105:
+        case TARGET_UNIT_NEAR_CASTER:
+        case TARGET_PLAYER_NYI:
+        case TARGET_UNIT:
+        case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DYNOBJ_LOC:
+        case TARGET_UNIT_RAID_NEAR_CASTER:
+        case TARGET_LOCATION_UNIT_BACK_LEFT:
+        case TARGET_LOCATION_UNIT_RANDOM_SIDE:
+        case TARGET_LOCATION_UNIT_RANDOM_CIRCUMFERENCE:
+        case TARGET_UNIT_CASTER_SUMMONER:
+        case TARGET_UNIT_CASTER_VEHICLE:
+        case TARGET_UNIT_CASTER_PASSENGER_0:
+        case TARGET_UNIT_CASTER_PASSENGER_1:
+        case TARGET_UNIT_CASTER_PASSENGER_2:
+        case TARGET_UNIT_CASTER_PASSENGER_3:
+        case TARGET_UNIT_CASTER_PASSENGER_4:
+        case TARGET_UNIT_CASTER_PASSENGER_5:
+        case TARGET_UNIT_CASTER_PASSENGER_6:
+        case TARGET_UNIT_CASTER_PASSENGER_7:
+        case TARGET_UNIT_105_NYI:
             break;
         default:
             return true; // Some gameobjects or coords, who cares
@@ -1118,7 +1118,7 @@ inline bool IsPositiveEffectTargetMode(const SpellEntry* entry, SpellEffectIndex
         return entry->HasAttribute(SPELL_ATTR_PASSIVE);
     }
     if (IsEffectTargetNeutral(a, b))
-        return (IsPointEffectTarget(Targets(b ? b : a)) || IsNeutralEffectTargetPositive((b ? b : a), caster, target));
+        return (IsPointEffectTarget(SpellTarget(b ? b : a)) || IsNeutralEffectTargetPositive((b ? b : a), caster, target));
 
     // If we ever get to this point, we have unhandled target. Gotta say something about it.
     if (entry->Effect[effIndex])
@@ -1138,8 +1138,8 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
         case 42867:
         case 34786: // Temporal Analysis - factions and unitflags of target/caster verified, should not incur combat
         case 39384: // Fury Of Medivh visual - Burning Flames - Fury of medivh is friendly to all, and it hits all chess pieces, basically friendly fire damage
-        case 37277: // Summon Infernal - neutral spell with TARGET_DUELVSPLAYER which evaluates as hostile due to neutral factions, with delay and gets removed by !IsPositiveSpell check
-        case 42399: // Neutral spell with TARGET_DUELVSPLAYER, caster faction 14, target faction 14, evaluates as negative spell
+        case 37277: // Summon Infernal - neutral spell with TARGET_UNIT which evaluates as hostile due to neutral factions, with delay and gets removed by !IsPositiveSpell check
+        case 42399: // Neutral spell with TARGET_UNIT, caster faction 14, target faction 14, evaluates as negative spell
                     // because of POS/NEG decision, should in fact be NEUTRAL decision TODO: Increase check fidelity
         case 52149: // Rain of Darkness - factions and unitflags of target/caster verified - TARGET_DUELVSPLAYER - neutral target type
             return true;
@@ -1479,7 +1479,7 @@ inline bool IsIgnoreLosSpell(SpellEntry const* spellInfo)
         case 31630:                                 // Green Beam
         case 31631:                                 // Green Beam
         case 24742:                                 // Magic Wings
-        case 42867:                                 // both need LOS, likely TARGET_DUELVSPLAYER should use LOS ignore from normal radius, not per-effect radius WIP
+        case 42867:                                 // both need LOS, likely TARGET_UNIT should use LOS ignore from normal radius, not per-effect radius WIP
             return true;
         default:
             break;
@@ -1493,7 +1493,7 @@ inline bool IsIgnoreLosSpellEffect(SpellEntry const* spellInfo, SpellEffectIndex
     // TODO: Move this to target logic
     switch (spellInfo->EffectImplicitTargetA[effIdx])
     {
-        case TARGET_AREAEFFECT_PARTY_AND_CLASS: return true;
+        case TARGET_UNIT_RAID_AND_CLASS: return true;
         default: break;
     }
 
@@ -1577,16 +1577,16 @@ inline bool IsPartyOrRaidTarget(uint32 target)
 {
     switch (target)
     {
-        case TARGET_RANDOM_FRIEND_CHAIN_IN_AREA:
-        case TARGET_ALL_PARTY_AROUND_CASTER:
-        case TARGET_ALL_PARTY:
-        case TARGET_ALL_PARTY_AROUND_CASTER_2:
-        case TARGET_SINGLE_PARTY:
-        case TARGET_AREAEFFECT_PARTY:
-        case TARGET_ALL_RAID_AROUND_CASTER:
-        case TARGET_SINGLE_FRIEND_2:
-        case TARGET_58:
-        case TARGET_AREAEFFECT_PARTY_AND_CLASS:
+        case TARGET_UNIT_FRIEND_NEAR_CASTER:
+        case TARGET_ENUM_UNITS_PARTY_WITHIN_CASTER_RANGE:
+        case TARGET_ENUM_UNITS_PARTY_AOE_AT_SRC_LOC:
+        case TARGET_ENUM_UNITS_PARTY_AOE_AT_DEST_LOC:
+        case TARGET_UNIT_PARTY:
+        case TARGET_UNIT_FRIEND_AND_PARTY:
+        case TARGET_ENUM_UNITS_RAID_WITHIN_CASTER_RANGE:
+        case TARGET_UNIT_RAID:
+        case TARGET_UNIT_RAID_NEAR_CASTER:
+        case TARGET_UNIT_RAID_AND_CLASS:
             return true;
         default:
             return false;

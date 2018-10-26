@@ -547,7 +547,7 @@ Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* curr
 
     if (SpellEntry const* triggeredSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(triggeredSpellId))
         for (unsigned int i : triggeredSpellInfo->EffectImplicitTargetA)
-            if (i == TARGET_SINGLE_ENEMY)
+            if (i == TARGET_UNIT_CHANNEL_TARGET)
                 return new SingleEnemyTargetAura(spellproto, eff, currentBasePoints, holder, target, caster, castItem);
 
     return new Aura(spellproto, eff, currentBasePoints, holder, target, caster, castItem);
@@ -1966,17 +1966,17 @@ void Aura::TriggerSpell()
 
             switch (triggeredSpellInfo->EffectImplicitTargetA[0])
             {
-                case TARGET_RANDOM_DEST_TARGET: // fireball barrage
-                case TARGET_CHAIN_DAMAGE:
-                case TARGET_DUELVSPLAYER:
+                case TARGET_LOCATION_UNIT_RANDOM_SIDE: // fireball barrage
+                case TARGET_UNIT_ENEMY:
+                case TARGET_UNIT:
                     triggerCaster = GetCaster();
                     triggerTarget = target;
                     break;
-                case TARGET_SELF:
+                case TARGET_UNIT_CASTER:
                     triggerCaster = target;
                     triggerTarget = target;
                     break;
-                case TARGET_CASTER_COORDINATES: // TODO: this needs to be done whenever target isnt important, doing it per case for safety
+                case TARGET_LOCATION_CASTER_SRC: // TODO: this needs to be done whenever target isnt important, doing it per case for safety
                     triggerTarget = nullptr;
                     break;
             }
@@ -2108,7 +2108,7 @@ void Aura::TriggerSpell()
                 target->CastSpell(target->getVictim(), trigger_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
-            case 33419:                                     // Arcane Missiles - TODO: Review other spells with TARGET_CHAIN_DAMAGE
+            case 33419:                                     // Arcane Missiles - TODO: Review other spells with TARGET_UNIT_ENEMY
             case 42483:                                     // Ooze Channel
             {
                 triggerCaster = GetCaster();
@@ -4235,7 +4235,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             for (auto otherTransform : otherTransforms)
             {
                 // negative auras are preferred
-                if (!IsPositiveSpell(otherTransform->GetSpellProto()->Id, otherTransform->GetCaster(), target))
+                if (!otherTransform->IsPositive())
                 {
                     handledAura = otherTransform;
                     break;

@@ -170,8 +170,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellid))
         {
             // for implicit area/coord target spells
-            if (IsPointEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])) ||
-                    IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])))
+            if (IsPointEffectTarget(SpellTarget(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])) ||
+                    IsAreaEffectTarget(SpellTarget(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0])))
                 Spell::SendCastResult(_player, spellInfo, cast_count, SPELL_FAILED_NO_VALID_TARGETS);
             // for explicit target spells
             else
@@ -463,7 +463,7 @@ void WorldSession::HandleCancelAuraOpcode(WorldPacket& recvPacket)
     if (!holder)
         return;
 
-    if (!IsPositiveSpell(spellId, holder->GetCaster(), _player))
+    if (!holder->IsPositive())
     {
         // ignore for remote control state
         if (!_player->IsSelfMover())
