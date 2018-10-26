@@ -346,38 +346,54 @@ enum
     NPC_ANGERSHADE          = 15656
 };
 
+// TODO: add monitoring to script
 struct npc_apprentice_mirvedaAI : public ScriptedAI
 {
-    npc_apprentice_mirvedaAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_apprentice_mirvedaAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiMobCount(0) { Reset(); }
 
-    uint8 m_uiMobCount;
+    uint32 m_uiMobCount;
     uint32 m_uiFireballTimer;
     ObjectGuid m_playerGuid;
-    std::vector<ObjectGuid> summons;
+    std::vector<ObjectGuid> m_summons;
 
     void Reset() override
     {
-        m_uiMobCount      = 0;
         m_playerGuid.Clear();
         m_uiFireballTimer = 0;
+        m_creature->ClearTemporaryFaction();
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        m_creature->SetActiveObjectState(false);
+        m_summons.clear();
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void GetAIInformation(ChatHandler& reader) override
+    {
+        ScriptedAI::GetAIInformation(reader);
+        reader.PSendSysMessage("Apprentice Mirveda: mob count: %u, player guid: %" PRIu64 ", summons size: %zu", m_uiMobCount, m_playerGuid.GetRawValue(), m_summons.size());
+    }
+
+    void FailEvent()
     {
         Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
         if (pPlayer && pPlayer->GetQuestStatus(QUEST_UNEXPECTED_RESULT) == QUEST_STATUS_INCOMPLETE)
             pPlayer->SendQuestFailed(QUEST_UNEXPECTED_RESULT);
 
-        for (ObjectGuid& guid : summons)
+        for (ObjectGuid& guid : m_summons)
             if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
                 creature->ForcedDespawn();
-        summons.clear();
+
+        Reset();
+    }
+
+    void JustDied(Unit* /*pKiller*/) override
+    {
+        FailEvent();
     }
 
     void JustRespawned() override // moved from JustDied to prevent getting stuck in a crash scenario
     {
-        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        m_uiMobCount = 0;
         m_creature->SetActiveObjectState(false);
         ScriptedAI::JustRespawned();
     }
@@ -385,12 +401,14 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         pSummoned->AI()->AttackStart(m_creature);
-        summons.push_back(pSummoned->GetObjectGuid());
+        m_summons.push_back(pSummoned->GetObjectGuid());
         ++m_uiMobCount;
     }
 
-    void SummonedCreatureJustDied(Creature* /*pKilled*/) override
+    void SummonedCreatureJustDied(Creature* pKilled) override
     {
+        m_summons.erase(std::remove(m_summons.begin(), m_summons.end(), pKilled->GetObjectGuid()), m_summons.end());
+
         --m_uiMobCount;
 
         if (m_uiMobCount)
@@ -401,21 +419,37 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
         if (pPlayer && pPlayer->GetQuestStatus(QUEST_UNEXPECTED_RESULT) == QUEST_STATUS_INCOMPLETE)
             pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_UNEXPECTED_RESULT, m_creature);
 
-        m_playerGuid.Clear();
-        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+        Reset();
+    }
 
-        m_creature->SetActiveObjectState(false);
-        summons.clear();
+    void SummonedCreatureDespawn(Creature* summoned) override
+    {
+        auto itr = std::remove(m_summons.begin(), m_summons.end(), summoned->GetObjectGuid());
+        if (itr != m_summons.end())
+        {
+            m_summons.erase(itr, m_summons.end());
+
+            --m_uiMobCount;
+
+            if (!m_uiMobCount)
+                FailEvent();
+        }
     }
 
     void StartEvent(Player* pPlayer)
     {
+        if (m_uiMobCount != 0)
+            sLog.outCustomLog("Apprentice Mirveda invalid state, investigate further.");
+
+        m_creature->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         m_playerGuid = pPlayer->GetObjectGuid();
 
-        m_creature->SummonCreature(NPC_GHARSUL,    8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 4000);
-        m_creature->SummonCreature(NPC_ANGERSHADE, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 4000);
-        m_creature->SummonCreature(NPC_ANGERSHADE, 8745.0f, -7134.32f, 35.22f, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 4000);
+        m_creature->SummonCreature(NPC_GHARSUL, 8778.208f, -7109.625f, 35.42597f, 3.816502f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
+        m_creature->SummonCreature(NPC_ANGERSHADE, 8756.398f, -7122.784f, 35.32643f, 3.925692f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
+        m_creature->SummonCreature(NPC_ANGERSHADE, 8788.446f, -7112.482f, 35.42597f, 3.664015f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
+        // third is not sniffed due to no longer spawning on retail - guesswork
+        m_creature->SummonCreature(NPC_ANGERSHADE, 8789.f, -7115.f, 36.46296f, 3.8f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
 
         m_creature->SetActiveObjectState(true);
     }
