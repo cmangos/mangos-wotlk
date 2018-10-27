@@ -1774,6 +1774,23 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 30658:                                 // Quake - magtheridon
+                {
+                    if (urand(0, 2))
+                        m_caster->CastSpell(m_caster, 30571, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                }
+                case 31617:                                 // Raise Dead
+                case 31624:
+                case 31625:
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    static_cast<Creature*>(unitTarget)->ForcedDespawn();
+
+                    break;
+                }
                 case 32027:                                 // Expedition Flare
                 {
                     // 32029 = Expedition Preserver | 32030 = Expedition Scout
