@@ -459,7 +459,7 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
             return nullptr;
 
         // define distance based on the spell radius
-        // this will replace the targeting sysmte of spells SPELL_MOVE_1 and SPELL_MOVE_2
+        // this will replace the targeting sysmte of spells SPELL_MOVE_1 and SPELL_MOVE_2 - HACK
         float fRadius = 10.0f;
         CreatureList lSquaresList;
 
@@ -477,6 +477,16 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
         // get all available squares for movement
         GetCreatureListWithEntryInGrid(lSquaresList, m_creature, NPC_SQUARE_BLACK, fRadius);
         GetCreatureListWithEntryInGrid(lSquaresList, m_creature, NPC_SQUARE_WHITE, fRadius);
+
+        for (auto itr = lSquaresList.begin(); itr != lSquaresList.end(); )
+        {
+            Creature* square = (*itr);
+            if (square->HasAura(SPELL_IS_SQUARE_USED))
+                itr = lSquaresList.erase(itr);
+            else
+                ++itr;
+        }
+            
 
         if (lSquaresList.empty())
             return nullptr;
