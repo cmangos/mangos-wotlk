@@ -25,6 +25,12 @@ EndScriptData */
 
 enum
 {
+    NPC_DREADLORD               = 21166,
+    NPC_ILLIDARI_RAVAGER        = 22857,
+    NPC_SHADOWHOOF_ASSASSIN     = 22858,
+    NPC_SHADOWHOOF_SUMMONER     = 22859,
+    NPC_ILLIDARI_SUCCUBUS       = 22860,
+
     SAY_AGGRO                   = -1000159,
     SAY_EARTHQUAKE_1            = -1000160,
     SAY_EARTHQUAKE_2            = -1000161,
@@ -130,6 +136,41 @@ struct boss_doomwalkerAI : public ScriptedAI
         summoned->GetNearPoint(m_creature, x, y, z, 0.f, 0.f, summoned->GetAngle(m_creature));
         m_creature->GetMotionMaster()->MovePoint(POINT_OVERRUN, x, y, z);
         m_overrunExecTimer = 250;
+    }
+
+    void JustRespawned() override
+    {
+        Reset();
+
+        std::list<Creature*> npcList;
+        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_DREADLORD, 500.0f);
+
+        for (std::list<Creature*>::iterator itr = npcList.begin(); itr != npcList.end(); ++itr)
+            (*itr)->DealDamage((*itr), (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+
+        npcList.clear();
+        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_ILLIDARI_RAVAGER, 500.0f);
+
+        for (std::list<Creature*>::iterator itr = npcList.begin(); itr != npcList.end(); ++itr)
+            (*itr)->DealDamage((*itr), (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+
+        npcList.clear();
+        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_SHADOWHOOF_ASSASSIN, 500.0f);
+
+        for (std::list<Creature*>::iterator itr = npcList.begin(); itr != npcList.end(); ++itr)
+            (*itr)->DealDamage((*itr), (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+
+        npcList.clear();
+        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_SHADOWHOOF_SUMMONER, 500.0f);
+
+        for (std::list<Creature*>::iterator itr = npcList.begin(); itr != npcList.end(); ++itr)
+            (*itr)->DealDamage((*itr), (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+
+        npcList.clear();
+        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_ILLIDARI_SUCCUBUS, 500.0f);
+
+        for (std::list<Creature*>::iterator itr = npcList.begin(); itr != npcList.end(); ++itr)
+            (*itr)->DealDamage((*itr), (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
     }
 
     void JustDied(Unit* /*pKiller*/) override
