@@ -886,21 +886,6 @@ void Spell::FillTargetMap()
             }
         }
 
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            Player* me = (Player*)m_caster;
-            for (UnitList::const_iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end(); ++itr)
-            {
-                Player* targetOwner = (*itr)->GetBeneficiaryPlayer();
-                if (targetOwner && targetOwner != me && targetOwner->IsPvP() && !me->IsInDuelWith(targetOwner))
-                {
-                    me->UpdatePvP(true);
-                    me->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
-                    break;
-                }
-            }
-        }
-
         for (UnitList::iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end();)
         {
             if (!CheckTarget(*itr, SpellEffectIndex(i), effException[effToIndex[i]]))
@@ -910,6 +895,9 @@ void Spell::FillTargetMap()
             else
                 ++itr;
         }
+
+        // Secial target filter before adding targets to list
+        FilterTargetMap(tmpUnitLists[effToIndex[i]], SpellEffectIndex(i));
 
         if (m_affectedTargetCount && tmpUnitLists[effToIndex[i]].size() > m_affectedTargetCount)
         {
@@ -930,8 +918,20 @@ void Spell::FillTargetMap()
             }
         }
 
-        // Secial target filter before adding targets to list
-        FilterTargetMap(tmpUnitLists[effToIndex[i]], SpellEffectIndex(i));
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player* me = (Player*)m_caster;
+            for (UnitList::const_iterator itr = tmpUnitLists[effToIndex[i]].begin(); itr != tmpUnitLists[effToIndex[i]].end(); ++itr)
+            {
+                Player* targetOwner = (*itr)->GetBeneficiaryPlayer();
+                if (targetOwner && targetOwner != me && targetOwner->IsPvP() && !me->IsInDuelWith(targetOwner))
+                {
+                    me->UpdatePvP(true);
+                    me->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+                    break;
+                }
+            }
+        }
 
         for (UnitList::const_iterator iunit = tmpUnitLists[effToIndex[i]].begin(); iunit != tmpUnitLists[effToIndex[i]].end(); ++iunit)
             AddUnitTarget((*iunit), SpellEffectIndex(i));
