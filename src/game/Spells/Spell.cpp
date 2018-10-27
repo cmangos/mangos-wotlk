@@ -8058,6 +8058,19 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
             if (target->GetTypeId() != TYPEID_PLAYER || !m_caster->CanReachWithMeleeAttack(target))
                 return false;
             break;
+        case 36819:                                         // Always should hit main tank, no clue why rigged as AOE
+            if (m_caster->getVictim() && target != m_caster->getVictim())
+                return false;
+            break;
+        case 37144:                                         // Move - Chess event
+        case 37146:
+        case 37148:
+        case 37151:
+        case 37152:
+        case 37153:
+            if (target->HasAura(39400))
+                return false;
+            break;
         case 37433:                                         // Spout (The Lurker Below), only players affected if its not in water
             if (target->IsInWater())
                 return false;
@@ -8867,18 +8880,31 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex)
 {
     switch (m_spellInfo->Id)
     {
-        case 30469: // Nether Beam - Netherspite - Picks closest target - can maybe be reused in future
+        case 30284: // Change Facing - Chess event - QOL to pick deterministically closest target
+        case 37144: // Move - Chess event - same QOL change
+        case 37146:
+        case 37148:
+        case 37151:
+        case 37152:
+        case 37153:
+        case 30469: // Nether Beam - Netherspite - Picks closest target
         {
             auto itr = filterUnitList.begin();
             if (itr == filterUnitList.end())
                 return;
-            float closestDistance = (*itr)->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_NONE);
+            float x, y, z;
+            switch (m_spellInfo->EffectImplicitTargetA[effIndex])
+            {
+                case TARGET_ENUM_UNITS_SCRIPT_IN_CONE_60: m_caster->GetPosition(x, y, z); break;
+                case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DEST_LOC: m_targets.getDestination(x, y, z); break;
+            }
+            float closestDistance = (*itr)->GetDistance(x, y, z, DIST_CALC_NONE);
             Unit* closestUnit = *itr;
             ++itr;
 
             for (auto& unit : filterUnitList)
             {
-                float dist = unit->GetDistance(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), DIST_CALC_NONE);
+                float dist = unit->GetDistance(x, y, z, DIST_CALC_NONE);
                 if (closestDistance > dist && unit != closestUnit)
                 {
                     closestDistance = dist;

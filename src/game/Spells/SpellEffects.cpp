@@ -4011,7 +4011,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 30012:                                 // Move
                 {
-                    if (!unitTarget || unitTarget->HasAura(39400))
+                    if (!unitTarget)
                         return;
 
                     unitTarget->CastSpell(m_caster, 30253, TRIGGERED_OLD_TRIGGERED);
