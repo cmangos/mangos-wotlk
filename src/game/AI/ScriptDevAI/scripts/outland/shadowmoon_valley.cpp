@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Shadowmoon_Valley
 SD%Complete: 100
-SDComment: Quest support: 10451, 10458, 10480, 10481, 10514, 10540, 10588, 10707, 10781, 10804, 10854, 11020, 11064, 11067, 11068, 11069, 11070, 11071.
+SDComment: Quest support: 10451, 10458, 10480, 10481, 10514, 10540, 10588, 10707, 10781, 10804, 10854, 10985, 11020, 11064, 11067, 11068, 11069, 11070, 11071.
 SDCategory: Shadowmoon Valley
 EndScriptData */
 
@@ -3566,6 +3566,1664 @@ bool QuestAccept_npc_dragonmaw_racer(Player* player, Creature* questgiver, Quest
     return false;
 }
 
+/*######
+## mob_bt_battle_fighter
+######*/
+
+enum {
+    NPC_FORMATION_MARKER      = 19179,
+    NPC_ILLIDARI_RAVAGER      = 22857,
+    NPC_SHADOWHOOF_ASSASSIN   = 22858,
+    NPC_ILLIDARI_SUCCUBUS     = 22860,
+    NPC_LIGHTSWORN_VINDICATOR = 22861,
+    NPC_ANCHORITE_CAALEN      = 22862,
+    NPC_SEASONED_MAGISTER     = 22863,
+    NPC_FYRA_DAWNSTAR         = 22864,
+    NPC_BT_BATTLE_SENOR       = 22934,
+    NPC_SHADOWLORD            = 22988,
+
+    SAY_MAG_ON_AGGRO_1        = -10782,
+    SAY_MAG_ON_AGGRO_2        = -10783,
+    SAY_CAALEN_FORWARD        = -1015032,
+    SAY_FYRA_ONWARD	          = -1015031,
+
+    ILLIDARI_ATTACK_INTERVAL  = 90000,
+    REINFORCE_INTERVAL        = 30000,
+
+    // Spells
+    SPELL_BATTLE_FLOW_REGULATOR        = 39699, // The BT Battle Sensor NPC casts this spell/aura, presumably using it to control the constant demon/aldor/scryer fight outside of BT, no clue how it works
+                                       
+    SPELL_RAVAGER_CLEAVE               = 15496,
+    SPELL_RAVAGER_CUTDOWN              = 32009,
+    SPELL_RAVAGER_DEMORALIZING_SHOUT   = 16244,
+
+    SPELL_ASSASSIN_DEBILITATING_STRIKE = 37577,
+    SPELL_ASSASSIN_SINISTER_STRIKE     = 14873,
+                                       
+    SPELL_SUCCUBUS_LASH_OF_PAIN        = 32202,
+    SPELL_SUCCUBUS_SEDUCTION           = 31865,
+                                       
+    SPELL_VINDICATOR_EXORCISM          = 33632,
+    SPELL_VINDICATOR_HAMMER            = 13005,
+    SPELL_VINDICATOR_HOLY_LIGHT        = 13952,
+    SPELL_VINDICATOR_SEAL_OF_SAC       = 13903,
+                                       
+    SPELL_CAALEN_HOLY_SMITE            = 20696,
+    SPELL_CAALEN_PRAYER_OF_HEALING     = 35943,
+                                       
+    SPELL_MAGISTER_FIREBALL            = 9053,
+                                       
+    SPELL_SHADOWLORD_INFERNO           = 39941,
+    SPELL_SHADOWLORD_CARRION_SWARM     = 39942,
+    SPELL_SHADOWLORD_SLEEP             = 12098,
+};
+
+enum
+{
+    ILLIDARI_CLEAVE,
+    ILLIDARI_CUTDOWN,
+    ILLIDARI_DEMORALIZING_SHOUT,
+    ILLIDARI_ACTION_MAX,
+};
+
+enum
+{
+    ASSASSIN_DEBILITATING_STRIKE,
+    ASSASSIN_SINISTER_STRIKE,
+    ASSASSIN_ACTION_MAX,
+};
+
+enum
+{
+    SUCCUBUS_LASH_OF_PAIN,
+    SUCCUBUS_SEDUCTION,
+    SUCCUBUS_ACTION_MAX,
+};
+
+enum
+{
+    VINDICATOR_EXORCISM,
+    VINDICATOR_HAMMER,
+    VINDICATOR_HOLY_LIGHT,
+    VINDICATOR_SEAL_OF_SAC,
+    VINDICATOR_ACTION_MAX,
+};
+
+enum
+{
+    CAALEN_HOLY_SMITE,
+    CAALEN_PRAYER_OF_HEALING,
+    CAALEN_ACTION_MAX,
+};
+
+enum
+{
+    MAGISTER_FIREBALL, // FLEE AT 15%
+    MAGISTER_ACTION_MAX,
+};
+
+enum
+{
+    SHADOWLORD_INFERNO,
+    SHADOWLORD_CARRION_SWARM,
+    SHADOWLORD_SLEEP,
+    SHADOWLORD_ACTION_MAX,
+};
+
+struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatTimerAI
+{
+    uint8 m_uiPathId = 0; // only used for the Shadowlords
+    uint8 m_uiLastWaypoint = 0;
+    bool m_bIsWaypointing = true;
+
+    mob_bt_battle_fighterAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(VINDICATOR_ACTION_MAX)
+    {
+        switch (m_creature->GetEntry())
+        {
+            case NPC_ILLIDARI_RAVAGER:
+            {
+                AddCombatAction(ILLIDARI_CLEAVE, 0);
+                AddCombatAction(ILLIDARI_CUTDOWN, 0);
+                AddCombatAction(ILLIDARI_DEMORALIZING_SHOUT, 0);
+                break;
+            }
+            case NPC_SHADOWHOOF_ASSASSIN:
+            {
+                AddCombatAction(ASSASSIN_DEBILITATING_STRIKE, 0);
+                AddCombatAction(ASSASSIN_SINISTER_STRIKE, 0);
+                break;
+            }
+            case NPC_ILLIDARI_SUCCUBUS:
+            {
+                AddCombatAction(SUCCUBUS_LASH_OF_PAIN, 0);
+                AddCombatAction(SUCCUBUS_SEDUCTION, 0);
+                break;
+            }
+            case NPC_LIGHTSWORN_VINDICATOR:
+            {
+                AddCombatAction(VINDICATOR_EXORCISM, 0);
+                AddCombatAction(VINDICATOR_HAMMER, 0);
+                AddCombatAction(VINDICATOR_HOLY_LIGHT, 0);
+                AddCombatAction(VINDICATOR_SEAL_OF_SAC, 0);
+                break;
+            }
+            case NPC_ANCHORITE_CAALEN:
+            {
+                AddCombatAction(CAALEN_HOLY_SMITE, 0);
+                AddCombatAction(CAALEN_PRAYER_OF_HEALING, 0);
+                break;
+            }
+            case NPC_SEASONED_MAGISTER:
+            {
+                AddCombatAction(MAGISTER_FIREBALL, 0);
+                break;
+            }
+            case NPC_SHADOWLORD:
+            {
+                AddCombatAction(SHADOWLORD_INFERNO, 0);
+                AddCombatAction(SHADOWLORD_CARRION_SWARM, 0);
+                AddCombatAction(SHADOWLORD_SLEEP, 0);
+
+                float m_fMidPoint = -3558.0f;
+                bool left_side = (m_creature->GetPositionX() < m_fMidPoint);
+                m_uiPathId = left_side ? 0 : 1;
+
+                break;
+            }
+        }
+
+        Reset();
+    }
+
+    void Reset() override
+    {
+        switch (m_creature->GetEntry())
+        {
+            case NPC_ILLIDARI_RAVAGER:
+            {
+                for (uint32 i = 0; i < ILLIDARI_ACTION_MAX; ++i)
+                    SetActionReadyStatus(i, false);
+
+                ResetTimer(ILLIDARI_CLEAVE, GetInitialActionTimer(ILLIDARI_CLEAVE));
+                ResetTimer(ILLIDARI_CUTDOWN, GetInitialActionTimer(ILLIDARI_CUTDOWN));
+                ResetTimer(ILLIDARI_DEMORALIZING_SHOUT, GetInitialActionTimer(ILLIDARI_DEMORALIZING_SHOUT));
+
+                break;
+            }
+            case NPC_SHADOWHOOF_ASSASSIN:
+            {
+                for (uint32 i = 0; i < ASSASSIN_ACTION_MAX; ++i)
+                    SetActionReadyStatus(i, false);
+
+                ResetTimer(ASSASSIN_DEBILITATING_STRIKE, GetInitialActionTimer(ASSASSIN_DEBILITATING_STRIKE));
+                ResetTimer(ASSASSIN_SINISTER_STRIKE, GetInitialActionTimer(ASSASSIN_SINISTER_STRIKE));
+
+                break;
+            }
+            case NPC_ILLIDARI_SUCCUBUS:
+            {
+                for (uint32 i = 0; i < SUCCUBUS_ACTION_MAX; ++i)
+                    SetActionReadyStatus(i, false);
+
+                ResetTimer(SUCCUBUS_LASH_OF_PAIN, GetInitialActionTimer(SUCCUBUS_LASH_OF_PAIN));
+                ResetTimer(SUCCUBUS_SEDUCTION, GetInitialActionTimer(SUCCUBUS_SEDUCTION));
+
+                break;
+            }
+            case NPC_LIGHTSWORN_VINDICATOR:
+            {
+                for (uint32 i = 0; i < VINDICATOR_ACTION_MAX; ++i)
+                    SetActionReadyStatus(i, false);
+
+                ResetTimer(VINDICATOR_EXORCISM, GetInitialActionTimer(VINDICATOR_EXORCISM));
+                ResetTimer(VINDICATOR_HAMMER, GetInitialActionTimer(VINDICATOR_HAMMER));
+                ResetTimer(VINDICATOR_HOLY_LIGHT, GetInitialActionTimer(VINDICATOR_HOLY_LIGHT));
+                ResetTimer(VINDICATOR_SEAL_OF_SAC, GetInitialActionTimer(VINDICATOR_SEAL_OF_SAC));
+
+                break;
+            }
+            case NPC_ANCHORITE_CAALEN:
+            {
+                for (uint32 i = 0; i < CAALEN_ACTION_MAX; ++i)
+                    SetActionReadyStatus(i, false);
+
+                ResetTimer(CAALEN_HOLY_SMITE, GetInitialActionTimer(CAALEN_HOLY_SMITE));
+                ResetTimer(CAALEN_PRAYER_OF_HEALING, GetInitialActionTimer(CAALEN_PRAYER_OF_HEALING));
+
+                break;
+            }
+            case NPC_SEASONED_MAGISTER:
+            {
+                for (uint32 i = 0; i < MAGISTER_ACTION_MAX; ++i)
+                    SetActionReadyStatus(i, false);
+
+                ResetTimer(MAGISTER_FIREBALL, GetInitialActionTimer(MAGISTER_FIREBALL));
+                SetCombatMovement(true);
+
+                break;
+            }
+            case NPC_SHADOWLORD:
+            {
+                for (uint32 i = 0; i < SHADOWLORD_ACTION_MAX; ++i)
+                    SetActionReadyStatus(i, false);
+
+                ResetTimer(SHADOWLORD_INFERNO, GetInitialActionTimer(SHADOWLORD_INFERNO));
+                ResetTimer(SHADOWLORD_CARRION_SWARM, GetInitialActionTimer(SHADOWLORD_CARRION_SWARM));
+                ResetTimer(SHADOWLORD_SLEEP, GetInitialActionTimer(SHADOWLORD_SLEEP));
+
+                break;
+            }
+        }
+
+        SetCombatScriptStatus(false);
+        SetCombatMovement(true);
+    }
+
+    uint32 GetInitialActionTimer(const uint32 action) const
+    {
+        switch (m_creature->GetEntry())
+        {
+            case NPC_ILLIDARI_RAVAGER:
+            {
+                switch (action)
+                {
+                case ILLIDARI_CLEAVE: return urand(4000, 7000);
+                case ILLIDARI_CUTDOWN: return 6000;
+                case ILLIDARI_DEMORALIZING_SHOUT: return 8000;
+                }
+            }
+            case NPC_SHADOWHOOF_ASSASSIN:
+            {
+                switch (action)
+                {
+                case ASSASSIN_DEBILITATING_STRIKE: return urand(3500, 4000);
+                case ASSASSIN_SINISTER_STRIKE: return urand(6000, 8000);
+                default: return 0;
+                }
+            }
+            case NPC_ILLIDARI_SUCCUBUS:
+            {
+                switch (action)
+                {
+                case SUCCUBUS_LASH_OF_PAIN: return urand(2000, 4000);
+                case SUCCUBUS_SEDUCTION: return urand(5000, 14000);
+                default: return 0;
+                }
+            }
+            case NPC_LIGHTSWORN_VINDICATOR:
+            {
+                switch (action)
+                {
+                case VINDICATOR_EXORCISM: return urand(3000, 12000);
+                case VINDICATOR_HAMMER: return urand(5000, 15000);
+                case VINDICATOR_HOLY_LIGHT: return urand(2500, 4000);
+                case VINDICATOR_SEAL_OF_SAC: return urand(1000, 4000);
+                default: return 0;
+                }
+            }
+            case NPC_ANCHORITE_CAALEN:
+            {
+                switch (action)
+                {
+                case CAALEN_HOLY_SMITE: return urand(3000, 9000);
+                case CAALEN_PRAYER_OF_HEALING: return urand(9000, 12000);
+                default: return 0;
+                }
+            }
+            case NPC_SEASONED_MAGISTER:
+            {
+                switch (action)
+                {
+                case MAGISTER_FIREBALL: return urand(0, 1000);
+                default: return 0;
+                }
+            }
+            case NPC_SHADOWLORD:
+            {
+                switch (action)
+                {
+                case SHADOWLORD_INFERNO: return urand(5000, 10000);
+                case SHADOWLORD_CARRION_SWARM: return urand(0, 2000);
+                case SHADOWLORD_SLEEP: return urand(1500, 5000);
+                default: return 0;
+                }
+            }
+        }
+    }
+
+    uint32 GetSubsequentActionTimer(const uint32 action) const
+    {
+        switch (m_creature->GetEntry())
+        {
+            case NPC_ILLIDARI_RAVAGER:
+            {
+                switch (action)
+                {
+                case ILLIDARI_CLEAVE: return urand(9500, 12000);
+                case ILLIDARI_CUTDOWN: return urand(14000, 16000);
+                case ILLIDARI_DEMORALIZING_SHOUT: return urand(15000, 18000);
+                default: return 0;
+                }
+            }
+            case NPC_SHADOWHOOF_ASSASSIN:
+            {
+                switch (action)
+                {
+                case ASSASSIN_DEBILITATING_STRIKE: return urand(10000, 12000);
+                case ASSASSIN_SINISTER_STRIKE: return urand(11000, 18000);
+                default: return 0;
+                }
+            }
+            case NPC_ILLIDARI_SUCCUBUS:
+            {
+                switch (action)
+                {
+                case SUCCUBUS_LASH_OF_PAIN: return urand(4000, 7000);
+                case SUCCUBUS_SEDUCTION: return urand(12000, 18000);
+                default: return 0;
+                }
+            }
+            case NPC_LIGHTSWORN_VINDICATOR:
+            {
+                switch (action)
+                {
+                case VINDICATOR_EXORCISM: return urand(15000, 28000);
+                case VINDICATOR_HAMMER: return urand(18000, 24000);
+                case VINDICATOR_HOLY_LIGHT: return urand(12000, 18000);
+                case VINDICATOR_SEAL_OF_SAC: return urand(30000, 45000);
+                default: return 0;
+                }
+            }
+            case NPC_ANCHORITE_CAALEN:
+            {
+                switch (action)
+                {
+                case CAALEN_HOLY_SMITE: return urand(8000, 13000);
+                case CAALEN_PRAYER_OF_HEALING: return urand(12000, 15000);
+                default: return 0;
+                }
+            }
+            case NPC_SEASONED_MAGISTER:
+            {
+                switch (action)
+                {
+                case MAGISTER_FIREBALL: return urand(3400, 4800);
+                default: return 0;
+                }
+            }
+            case NPC_SHADOWLORD:
+            {
+                switch (action)
+                {
+                case SHADOWLORD_INFERNO: return urand(15000, 25000);
+                case SHADOWLORD_CARRION_SWARM: return urand(10000, 12000);
+                case SHADOWLORD_SLEEP: return urand(10000, 16000);
+                default: return 0;
+                }
+            }
+        }
+    }
+
+    void ExecuteActions()
+    {
+        if (!CanExecuteCombatAction())
+            return;
+
+        switch (m_creature->GetEntry())
+        {
+            case NPC_ILLIDARI_RAVAGER:		ExecuteRavagerActions(); break;
+            case NPC_SHADOWHOOF_ASSASSIN:   ExecuteAssassinActions(); break;
+            case NPC_ILLIDARI_SUCCUBUS:		ExecuteSuccubusActions(); break;
+            case NPC_LIGHTSWORN_VINDICATOR:	ExecuteVindicatorActions(); break;
+            case NPC_ANCHORITE_CAALEN:		ExecuteCaalenActions(); break;
+            case NPC_SEASONED_MAGISTER:		ExecuteMagisterActions(); break;
+            case NPC_SHADOWLORD:			ExecuteShadowlordActions(); break;
+        }
+    }
+
+    void ExecuteRavagerActions()
+    {
+        for (uint32 i = 0; i < ILLIDARI_ACTION_MAX; ++i)
+            if (GetActionReadyStatus(i))
+                switch (i)
+                {
+                    case ILLIDARI_CLEAVE:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAVAGER_CLEAVE) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                    case ILLIDARI_CUTDOWN:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAVAGER_CUTDOWN) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                    case ILLIDARI_DEMORALIZING_SHOUT:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAVAGER_DEMORALIZING_SHOUT) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                }
+    }
+
+    void ExecuteAssassinActions()
+    {
+        for (uint32 i = 0; i < ASSASSIN_ACTION_MAX; ++i)
+            if (GetActionReadyStatus(i))
+                switch (i)
+                {
+                    case ASSASSIN_DEBILITATING_STRIKE:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ASSASSIN_DEBILITATING_STRIKE) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                    case ASSASSIN_SINISTER_STRIKE:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ASSASSIN_SINISTER_STRIKE) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                }
+    }
+
+    void ExecuteSuccubusActions()
+    {
+        for (uint32 i = 0; i < SUCCUBUS_ACTION_MAX; ++i)
+            if (GetActionReadyStatus(i))
+                switch (i)
+                {
+                    case SUCCUBUS_LASH_OF_PAIN:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUCCUBUS_LASH_OF_PAIN) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                    case SUCCUBUS_SEDUCTION:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUCCUBUS_SEDUCTION) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                }
+    }
+
+    void ExecuteVindicatorActions()
+    {
+        for (uint32 i = 0; i < VINDICATOR_ACTION_MAX; ++i)
+            if (GetActionReadyStatus(i))
+                switch (i)
+                {
+                    case VINDICATOR_EXORCISM:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VINDICATOR_EXORCISM) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                    case VINDICATOR_HAMMER:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VINDICATOR_HAMMER) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                    case VINDICATOR_HOLY_LIGHT:
+                    {
+                        if (Unit* pUnit = DoSelectLowestHpFriendly(20.0f, 1))
+                            DoCastSpellIfCan(pUnit, SPELL_VINDICATOR_HOLY_LIGHT);
+
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        break;
+                    }
+                    case VINDICATOR_SEAL_OF_SAC:
+                    {
+                        if (Unit* pUnit = DoSelectLowestHpFriendly(20.0f, 1))
+                        {
+                            DoCastSpellIfCan(pUnit, SPELL_VINDICATOR_SEAL_OF_SAC);
+
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                }
+    }
+
+    void ExecuteCaalenActions()
+    {
+        for (uint32 i = 0; i < CAALEN_ACTION_MAX; ++i)
+            if (GetActionReadyStatus(i))
+                switch (i)
+                {
+                    case CAALEN_HOLY_SMITE:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CAALEN_HOLY_SMITE) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                    case CAALEN_PRAYER_OF_HEALING:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CAALEN_PRAYER_OF_HEALING) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                }
+    }
+
+    void ExecuteMagisterActions()
+    {
+        for (uint32 i = 0; i < MAGISTER_ACTION_MAX; ++i)
+            if (GetActionReadyStatus(i))
+                switch (i)
+                {
+                    case MAGISTER_FIREBALL:
+                    {
+                        CanCastResult canCast = DoCastSpellIfCan(m_creature->getVictim(), SPELL_MAGISTER_FIREBALL);
+
+                        switch (canCast)
+                        {
+                        case CAST_OK:
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+
+                            break;
+                        }
+                        case CAST_FAIL_NOT_IN_LOS:
+                        case CAST_FAIL_TOO_CLOSE:
+                        case CAST_FAIL_TOO_FAR:
+                        case CAST_FAIL_POWER:
+                        {
+                            SetCombatMovement(true);
+                            break;
+                        }
+                        default: break;
+                        }
+
+                        break;
+                    }
+                }
+    }
+
+    void ExecuteShadowlordActions()
+    {
+        for (uint32 i = 0; i < SHADOWLORD_ACTION_MAX; ++i)
+            if (GetActionReadyStatus(i))
+                switch (i)
+                {
+                    case SHADOWLORD_INFERNO:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWLORD_INFERNO) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                    case SHADOWLORD_CARRION_SWARM:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWLORD_CARRION_SWARM) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                    case SHADOWLORD_SLEEP:
+                    {
+                        // Pretty much guessing how this spell should be used
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWLORD_SLEEP) == CAST_OK)
+                        {
+                            m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -90);
+
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                        }
+                        break;
+                    }
+                }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        UpdateTimers(uiDiff, m_creature->isInCombat());
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        ExecuteActions();
+
+        DoMeleeAttackIfReady();
+    }
+
+    void Aggro(Unit* who) override
+    {
+        if (m_creature->GetEntry() == NPC_SEASONED_MAGISTER)
+        {
+            if (!urand(0, 9))
+                DoScriptText(urand(0, 1) ? SAY_MAG_ON_AGGRO_1 : SAY_MAG_ON_AGGRO_2, m_creature, who);
+
+            SetCombatMovement(false);
+        }
+    }
+
+    /*void JustRespawned() override
+    {
+
+    }*/
+
+    void JustReachedHome() override
+    {
+        if (!m_bIsWaypointing)
+            return;
+
+        switch (m_creature->GetEntry())
+        {
+            case NPC_ILLIDARI_RAVAGER:
+            case NPC_SHADOWHOOF_ASSASSIN:
+            case NPC_ILLIDARI_SUCCUBUS:
+            {
+                m_creature->GetMotionMaster()->MoveWaypoint(0, 1, 1000);
+                m_creature->GetMotionMaster()->SetNextWaypoint(m_uiLastWaypoint + 1);
+                break;
+            }
+            case NPC_LIGHTSWORN_VINDICATOR:
+            case NPC_ANCHORITE_CAALEN:
+            case NPC_SEASONED_MAGISTER:
+            case NPC_FYRA_DAWNSTAR:
+            {
+                m_creature->GetMotionMaster()->MoveWaypoint(0, 2, 1000);
+                m_creature->GetMotionMaster()->SetNextWaypoint(m_uiLastWaypoint + 1);
+                break;
+            }
+            case NPC_SHADOWLORD:
+            {
+                if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                {
+                    m_creature->GetMotionMaster()->MoveWaypoint(m_uiPathId, 2, 1000);
+                    m_creature->GetMotionMaster()->SetNextWaypoint(m_uiLastWaypoint + 1);
+                }
+                break;
+            }
+        }
+    }
+
+    void MovementInform(uint32 movementType, uint32 data) override
+    {
+        if (movementType == WAYPOINT_MOTION_TYPE)
+            m_uiLastWaypoint = data;
+    }
+};
+
+UnitAI* GetAI_mob_bt_battle_fighter(Creature* pCreature)
+{
+    return new mob_bt_battle_fighterAI(pCreature);
+}
+
+/*######
+## npc_bt_battle_sensor
+######*/
+
+struct FormationMap
+{
+    std::map<ObjectGuid, ObjectGuid> markerToOccupant;
+    std::map<ObjectGuid, ObjectGuid> occupantToMarker;
+
+    void clearMaps()
+    {
+        markerToOccupant.clear();
+        occupantToMarker.clear();
+    }
+
+    void registerFormationMarker(ObjectGuid marker)
+    {
+        markerToOccupant[marker] = ObjectGuid();
+    }
+
+    // Returns the marker claimed
+    ObjectGuid claimFormationMarker(ObjectGuid occupant)
+    {
+        if (occupant.IsEmpty())
+            return ObjectGuid();
+
+        if (occupantToMarker.count(occupant))
+            return occupantToMarker[occupant];
+
+        std::vector<ObjectGuid> openMarkers;
+
+        for (std::map<ObjectGuid, ObjectGuid>::iterator itr = markerToOccupant.begin(); itr != markerToOccupant.end(); ++itr)
+            if (itr->second.IsEmpty())
+                openMarkers.push_back(itr->first);
+
+        ObjectGuid marker;
+
+        if (openMarkers.size() > 0)
+        {
+            marker = openMarkers[urand(0, openMarkers.size() - 1)];
+
+            markerToOccupant[marker] = occupant;
+            occupantToMarker[occupant] = marker;
+
+            return marker;
+        }
+        else
+            return marker;
+    }
+
+    bool releaseFormationMarker(ObjectGuid occupant)
+    {
+        if (!occupantToMarker.count(occupant))
+            return false;
+
+        markerToOccupant[occupantToMarker[occupant]] = ObjectGuid();
+        occupantToMarker.erase(occupant);
+        return true;
+    }
+
+    ObjectGuid getRandomOccupant()
+    {
+        if (occupantToMarker.empty())
+            return ObjectGuid();
+
+        uint32 chance = occupantToMarker.size();
+        for (auto itr = occupantToMarker.begin(); itr != occupantToMarker.end(); ++itr)
+        {
+            if (urand(0, chance--) == 0)
+                return itr->first;
+        }
+
+        return ObjectGuid();
+    }
+
+    void EngageInBlackTempleAssault(int numberTroops, int point, Map* map)
+    {
+        int count = 0;
+
+        GuidVector guids;
+
+        for (auto itr = occupantToMarker.begin(); itr != occupantToMarker.end(); ++itr)
+        {
+            if (Creature* occupant = map->GetCreature(itr->first))
+            {
+                if (occupant->isInCombat())
+                    continue;
+
+                occupant->GetMotionMaster()->MoveWaypoint(0, 2, 0);
+                occupant->GetMotionMaster()->SetNextWaypoint(point);
+                occupant->SetWalk(false);
+
+                if (mob_bt_battle_fighterAI* occupantAI = dynamic_cast<mob_bt_battle_fighterAI*>(occupant->AI()))
+                    occupantAI->m_bIsWaypointing = true;
+
+                guids.push_back(itr->first);
+
+                ++count;
+            }
+
+            if (count >= numberTroops)
+                break;
+        }
+
+        for (ObjectGuid guid : guids)
+            releaseFormationMarker(guid);
+    }
+};
+
+struct npc_bt_battle_sensor : public ScriptedAI
+{
+    npc_bt_battle_sensor(Creature* creature) : ScriptedAI(creature)
+    {
+        Reset();
+    }
+
+    enum IllidariAttackGroup {
+        NONE = 0,
+        RAVAGERS_1 = 1,
+        RAVAGERS_2 = 2,
+        RAVAGERS_3 = 4,
+        RAVAGERS_4 = 8,
+        SHADOWHOOF_1 = 16,
+        SHADOWHOOF_2 = 32,
+        SHADOWHOOF_3 = 64
+    };
+
+    FormationMap m_forwardFormationMap;
+    FormationMap m_rearFormationMapAldor;
+    FormationMap m_rearFormationMapScryer;
+
+    ObjectGuid m_caalenGuid;
+    ObjectGuid m_fyraGuid;
+
+    ObjectGuid m_ravagerLeader1;
+    ObjectGuid m_ravagerLeader2;
+    ObjectGuid m_ravagerLeader3;
+    ObjectGuid m_ravagerLeader4;
+    ObjectGuid m_ShadowhoofLeader1;
+    ObjectGuid m_ShadowhoofLeader2;
+    ObjectGuid m_ShadowhoofLeader3;
+
+    uint8 m_attackReadyMask;
+
+    GuidList m_lIllidariInBattle;
+    GuidList m_lGoodGuysInBattle;
+
+    float m_fIllidariAttackTimer;
+    float m_fAldorScryerReinforceTimer;
+    float m_fMidPoint = -3558.0f;
+
+    uint8 m_uiMaxNumTroopsForward = 8;
+    uint8 m_uiNumLightswornForward;
+    uint8 m_uiNumMagisterForward;
+
+    void Reset() override
+    {
+        m_forwardFormationMap.clearMaps();
+        m_rearFormationMapAldor.clearMaps();
+        m_rearFormationMapScryer.clearMaps();
+
+        m_caalenGuid.Clear();
+        m_fyraGuid.Clear();
+
+        m_ravagerLeader1.Clear();
+        m_ravagerLeader2.Clear();
+        m_ravagerLeader3.Clear();
+        m_ravagerLeader4.Clear();
+        m_ShadowhoofLeader1.Clear();
+        m_ShadowhoofLeader2.Clear();
+        m_ShadowhoofLeader3.Clear();
+
+        m_attackReadyMask = 0;
+
+        m_lIllidariInBattle.clear();
+        m_lGoodGuysInBattle.clear();
+
+        m_fIllidariAttackTimer = ILLIDARI_ATTACK_INTERVAL;
+        m_fAldorScryerReinforceTimer = REINFORCE_INTERVAL;
+
+        m_uiNumLightswornForward = 0;
+        m_uiNumMagisterForward = 0;
+    }
+
+    /*void SpellHit(Unit* caster, const SpellEntry* spell) override
+    {
+        if (spell->Id == SPELL_BATTLE_FLOW_REGULATOR)
+        {
+        }
+    }*/
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* invoker, uint32 miscValue) override
+    {
+        const ObjectGuid senderGuid = sender->GetObjectGuid();
+
+        switch (sender->GetEntry())
+        {
+            case NPC_ILLIDARI_RAVAGER:
+                /* Expected events:
+                * A: Ravager group 1 ready
+                * B: Ravager group 2 ready
+                * C: Ravager group 3 ready
+                * D: Ravager group 4 ready
+                * E: Left Ravager leader spawned
+                * F: Right Ravager leader spawned
+                * Custom_A: Attack */
+                switch (eventType)
+                {
+                    case AI_EVENT_JUST_DIED:
+                        m_fIllidariAttackTimer *= 0.75f;
+                        break;
+                    case AI_EVENT_CUSTOM_EVENTAI_A:
+                        if (Creature* leader = m_creature->GetMap()->GetCreature(m_ravagerLeader1))
+                        {
+                            leader->GetMotionMaster()->Clear(false, true);
+                            leader->GetMotionMaster()->MoveIdle();
+                            leader->SetWalk(false);
+
+                            if (mob_bt_battle_fighterAI* occupantAI = dynamic_cast<mob_bt_battle_fighterAI*>(leader->AI()))
+                                occupantAI->m_bIsWaypointing = false;
+                        }
+
+                        m_attackReadyMask += RAVAGERS_1;
+                        break;
+                    case AI_EVENT_CUSTOM_EVENTAI_B:
+                        if (Creature* leader = m_creature->GetMap()->GetCreature(m_ravagerLeader2))
+                        {
+                            leader->GetMotionMaster()->Clear(false, true);
+                            leader->GetMotionMaster()->MoveIdle();
+                            leader->SetWalk(false);
+
+                            if (mob_bt_battle_fighterAI* occupantAI = dynamic_cast<mob_bt_battle_fighterAI*>(leader->AI()))
+                                occupantAI->m_bIsWaypointing = false;
+                        }
+
+                        m_attackReadyMask += RAVAGERS_2;
+                        break;
+                    case AI_EVENT_CUSTOM_EVENTAI_C:
+                        if (Creature* leader = m_creature->GetMap()->GetCreature(m_ravagerLeader3))
+                        {
+                            leader->GetMotionMaster()->Clear(false, true);
+                            leader->GetMotionMaster()->MoveIdle();
+                            leader->SetWalk(false);
+
+                            if (mob_bt_battle_fighterAI* occupantAI = dynamic_cast<mob_bt_battle_fighterAI*>(leader->AI()))
+                                occupantAI->m_bIsWaypointing = false;
+                        }
+
+                        m_attackReadyMask += RAVAGERS_3;
+                        break;
+                    case AI_EVENT_CUSTOM_EVENTAI_D:
+                        if (Creature* leader = m_creature->GetMap()->GetCreature(m_ravagerLeader4))
+                        {
+                            leader->GetMotionMaster()->Clear(false, true);
+                            leader->GetMotionMaster()->MoveIdle();
+                            leader->SetWalk(false);
+
+                            if (mob_bt_battle_fighterAI* occupantAI = dynamic_cast<mob_bt_battle_fighterAI*>(leader->AI()))
+                                occupantAI->m_bIsWaypointing = false;
+                        }
+
+                        m_attackReadyMask += RAVAGERS_4;
+                        break;
+                    case AI_EVENT_CUSTOM_EVENTAI_E:
+                    {
+                        bool left_side = (sender->GetPositionX() < m_fMidPoint);
+
+                        if (left_side)
+                            m_ravagerLeader1 = senderGuid;
+                        else
+                            m_ravagerLeader2 = senderGuid;
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_EVENTAI_F:
+                    {
+                        bool left_side = (sender->GetPositionX() < m_fMidPoint);
+
+                        if (left_side)
+                            m_ravagerLeader3 = senderGuid;
+                        else
+                            m_ravagerLeader4 = senderGuid;
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_A:
+                    {
+                        IllidariAttackNearestEnemy(sender);
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_B:
+                    {
+                        if (Creature* senderCreature = dynamic_cast<Creature*>(sender))
+                        {
+                            senderCreature->ForcedDespawn(30000);
+                            senderCreature->GetMotionMaster()->MoveRandomAroundPoint(sender->GetPositionX(), sender->GetPositionY(), sender->GetPositionZ(), 15.0f);
+                        }
+                        if (mob_bt_battle_fighterAI* senderAI = dynamic_cast<mob_bt_battle_fighterAI*>(sender->AI()))
+                            senderAI->m_bIsWaypointing = false;
+
+                        break;
+                    }
+                }
+
+                break;
+            case NPC_SHADOWHOOF_ASSASSIN:
+                /* Expected events:
+                * Died: died
+                * A: Shadowhoof Group 1 ready
+                * B: Shadowhoof Group 2 ready
+                * C: Shadowhoof Group 3 ready
+                * D: Shadowhoof Group 1 leader spawned
+                * E: Shadowhoof Group 2 leader spawned
+                * F: Shadowhoof Group 3 leader spawned
+                * Custom_A: Attack */
+                switch (eventType)
+                {
+                    case AI_EVENT_JUST_DIED:
+                        m_fIllidariAttackTimer *= 0.85f;
+                        break;
+                    case AI_EVENT_CUSTOM_EVENTAI_A:
+                        if (Creature* leader = m_creature->GetMap()->GetCreature(m_ShadowhoofLeader1))
+                        {
+                            leader->GetMotionMaster()->Clear(false, true);
+                            leader->GetMotionMaster()->MoveIdle();
+                            leader->SetWalk(false);
+
+                            if (mob_bt_battle_fighterAI* occupantAI = dynamic_cast<mob_bt_battle_fighterAI*>(leader->AI()))
+                                occupantAI->m_bIsWaypointing = false;
+                        }
+
+                        m_attackReadyMask += SHADOWHOOF_1;
+                        break;
+                    case AI_EVENT_CUSTOM_EVENTAI_B:
+                        if (Creature* leader = m_creature->GetMap()->GetCreature(m_ShadowhoofLeader2))
+                        {
+                            leader->GetMotionMaster()->Clear(false, true);
+                            leader->GetMotionMaster()->MoveIdle();
+                            leader->SetWalk(false);
+
+                            if (mob_bt_battle_fighterAI* occupantAI = dynamic_cast<mob_bt_battle_fighterAI*>(leader->AI()))
+                                occupantAI->m_bIsWaypointing = false;
+                        }
+
+                        m_attackReadyMask += SHADOWHOOF_2;
+                        break;
+                    case AI_EVENT_CUSTOM_EVENTAI_C:
+                        if (Creature* leader = m_creature->GetMap()->GetCreature(m_ShadowhoofLeader3))
+                        {
+                            leader->GetMotionMaster()->Clear(false, true);
+                            leader->GetMotionMaster()->MoveIdle();
+                            leader->SetWalk(false);
+
+                            if (mob_bt_battle_fighterAI* occupantAI = dynamic_cast<mob_bt_battle_fighterAI*>(leader->AI()))
+                                occupantAI->m_bIsWaypointing = false;
+                        }
+
+                        m_attackReadyMask += SHADOWHOOF_3;
+                        break;
+                    case AI_EVENT_CUSTOM_EVENTAI_D:
+                    {
+                        m_ShadowhoofLeader1 = senderGuid;
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_EVENTAI_E:
+                    {
+                        m_ShadowhoofLeader2 = senderGuid;
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_EVENTAI_F:
+                    {
+                        m_ShadowhoofLeader3 = senderGuid;
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_A:
+                    {
+                        IllidariAttackNearestEnemy(sender);
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_B:
+                    {
+                        if (Creature* senderCreature = dynamic_cast<Creature*>(sender))
+                        {
+                            senderCreature->ForcedDespawn(30000);
+                            senderCreature->GetMotionMaster()->MoveRandomAroundPoint(sender->GetPositionX(), sender->GetPositionY(), sender->GetPositionZ(), 15.0f);
+                        }
+                        if (mob_bt_battle_fighterAI* senderAI = dynamic_cast<mob_bt_battle_fighterAI*>(sender->AI()))
+                            senderAI->m_bIsWaypointing = false;
+
+                        break;
+                    }
+                }
+
+                break;
+            case NPC_LIGHTSWORN_VINDICATOR:
+                /* Expected events:
+                * Died: died
+                * A: Aldor/Scryer guys need formation assignment 
+                * B: Begin running around if nobody to fight */
+                switch (eventType)
+                {
+                    case AI_EVENT_JUST_DIED:
+                    {
+                        if (m_forwardFormationMap.releaseFormationMarker(senderGuid))
+                            --m_uiNumLightswornForward;
+                        else
+                            m_rearFormationMapAldor.releaseFormationMarker(senderGuid);
+
+                        if (Creature* senderCreature = dynamic_cast<Creature*>(sender))
+                            senderCreature->SetActiveObjectState(true);
+
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_EVENTAI_A:
+                    {
+                        ObjectGuid marker = GetAvailableMarkerFromMap(m_rearFormationMapAldor, senderGuid);
+
+                        if (!marker.IsEmpty())
+                            if (Creature* markerCreature = m_creature->GetMap()->GetCreature(marker))
+                            {
+                                sender->GetMotionMaster()->Clear(false, true);
+                                sender->GetMotionMaster()->MoveIdle();
+                                sender->GetMotionMaster()->MovePoint(0, markerCreature->GetPositionX(), markerCreature->GetPositionY(), markerCreature->GetPositionZ());
+
+                                if (Creature* senderCreature = dynamic_cast<Creature*>(sender))
+                                {
+                                    senderCreature->SetWalk(true);
+                                    senderCreature->SetActiveObjectState(false);
+                                }
+
+                                if (mob_bt_battle_fighterAI* senderAI = dynamic_cast<mob_bt_battle_fighterAI*>(sender->AI()))
+                                    senderAI->m_bIsWaypointing = false;
+
+
+
+                                return;
+                            }
+
+                        sender->GetMotionMaster()->Clear(false, true);
+                        sender->GetMotionMaster()->MoveIdle();
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_EVENTAI_B:
+                        if (urand(0, 1))
+                        {
+                            sender->GetMotionMaster()->Clear(false, true);
+                            sender->GetMotionMaster()->MoveWaypoint(0, 3, 0);
+                            sender->GetMotionMaster()->SetNextWaypoint(urand(0, 8));
+
+                            if (Creature* senderAI = dynamic_cast<Creature*>(sender))
+                                senderAI->ForcedDespawn(90000);
+                        }
+                        break;
+                }
+
+                break;
+            case NPC_SEASONED_MAGISTER:
+                switch (eventType)
+                {
+                    case AI_EVENT_JUST_DIED:
+                    {
+                        if (m_forwardFormationMap.releaseFormationMarker(senderGuid))
+                            --m_uiNumMagisterForward;
+                        else
+                            m_rearFormationMapScryer.releaseFormationMarker(senderGuid);
+                        
+                        if (Creature* senderCreature = dynamic_cast<Creature*>(sender))
+                            senderCreature->SetActiveObjectState(true);
+
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_EVENTAI_A:
+                    {
+                        ObjectGuid marker = GetAvailableMarkerFromMap(m_rearFormationMapScryer, senderGuid);
+
+                        if (!marker.IsEmpty())
+                            if (Creature* markerCreature = m_creature->GetMap()->GetCreature(marker))
+                            {
+                                sender->GetMotionMaster()->Clear(false, true);
+                                sender->GetMotionMaster()->MoveIdle();
+                                sender->GetMotionMaster()->MovePoint(0, markerCreature->GetPositionX(), markerCreature->GetPositionY(), markerCreature->GetPositionZ());
+
+                                if (Creature* senderCreature = dynamic_cast<Creature*>(sender))
+                                {
+                                    senderCreature->SetWalk(true);
+                                    senderCreature->SetActiveObjectState(false);
+                                }
+
+                                if (mob_bt_battle_fighterAI* senderAI = dynamic_cast<mob_bt_battle_fighterAI*>(sender->AI()))
+                                    senderAI->m_bIsWaypointing = false;
+
+                                return;
+                            }
+
+                        sender->GetMotionMaster()->Clear(false, true);
+                        sender->GetMotionMaster()->MoveIdle();
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_EVENTAI_B:
+                        if (urand(0, 1))
+                        {
+                            sender->GetMotionMaster()->Clear(false, true);
+                            sender->GetMotionMaster()->MoveWaypoint(0, 3, 0);
+                            sender->GetMotionMaster()->SetNextWaypoint(urand(0, 8));
+
+                            if (Creature* senderAI = dynamic_cast<Creature*>(sender))
+                                senderAI->ForcedDespawn(90000);
+                        }
+                        break;
+                }
+
+                break;
+            case NPC_ANCHORITE_CAALEN:
+                switch (eventType)
+                {
+                    case AI_EVENT_JUST_DIED:
+                    {
+                        m_caalenGuid.Clear();
+                        
+                        if (Creature* senderCreature = dynamic_cast<Creature*>(sender))
+                            senderCreature->SetActiveObjectState(true);
+
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_EVENTAI_A:
+                    {
+                        sender->GetMotionMaster()->Clear(false, true);
+                        sender->GetMotionMaster()->MoveIdle();
+
+                        if (Creature* senderCreature = dynamic_cast<Creature*>(sender))
+                            senderCreature->SetActiveObjectState(false);
+
+                        m_caalenGuid = senderGuid;
+                        break;
+                    }
+                }
+
+                break;
+            case NPC_FYRA_DAWNSTAR:
+                switch (eventType)
+                {
+                    case AI_EVENT_JUST_DIED:
+                    {
+                        m_fyraGuid.Clear();
+
+                        if (Creature* senderCreature = dynamic_cast<Creature*>(sender))
+                            senderCreature->SetActiveObjectState(true);
+
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_EVENTAI_A:
+                    {
+                        sender->GetMotionMaster()->Clear(false, true);
+                        sender->GetMotionMaster()->MoveIdle();
+
+                        if (Creature* senderCreature = dynamic_cast<Creature*>(sender))
+                            senderCreature->SetActiveObjectState(false);
+
+                        m_fyraGuid = senderGuid;
+                        break;
+                    }
+                    case AI_EVENT_CUSTOM_EVENTAI_B:
+                        if (urand(0, 1))
+                        {
+                            sender->GetMotionMaster()->Clear(false, true);
+                            sender->GetMotionMaster()->MoveWaypoint(0, 3, 0);
+                            sender->GetMotionMaster()->SetNextWaypoint(0);
+
+                            if (Creature* senderAI = dynamic_cast<Creature*>(sender))
+                                senderAI->ForcedDespawn(90000);
+                        }
+                        break;
+                }
+
+                break;
+            case NPC_BT_BATTLE_SENOR:
+                /* Expected events:
+                * A: Fyra/Caalen yells
+                * B: CHAAAARGE */
+                if (eventType == AI_EVENT_CUSTOM_EVENTAI_A)
+                {
+                    if (urand(0, 1))
+                    {
+                        if (Creature* caalen = m_creature->GetMap()->GetCreature(m_caalenGuid))
+                            DoScriptText(SAY_CAALEN_FORWARD, caalen);
+                    }
+                    else
+                        if (Creature* fyra = m_creature->GetMap()->GetCreature(m_fyraGuid))
+                            DoScriptText(SAY_FYRA_ONWARD, fyra);
+                }
+                else if (eventType == AI_EVENT_CUSTOM_EVENTAI_B)
+                {
+                    m_rearFormationMapScryer.EngageInBlackTempleAssault(3, 0, m_creature->GetMap());
+                    m_rearFormationMapScryer.EngageInBlackTempleAssault(3, 9, m_creature->GetMap());
+                    m_rearFormationMapScryer.EngageInBlackTempleAssault(2, 0, m_creature->GetMap());
+
+                    m_rearFormationMapAldor.EngageInBlackTempleAssault(2, 0, m_creature->GetMap());
+                    m_rearFormationMapAldor.EngageInBlackTempleAssault(2, 6, m_creature->GetMap());
+                    m_rearFormationMapAldor.EngageInBlackTempleAssault(4, 13, m_creature->GetMap());
+
+                    m_forwardFormationMap.EngageInBlackTempleAssault(4, 3, m_creature->GetMap());
+                    m_forwardFormationMap.EngageInBlackTempleAssault(m_uiMaxNumTroopsForward, 12, m_creature->GetMap());
+
+                    if (Creature* caalen = m_creature->GetMap()->GetCreature(m_caalenGuid))
+                    {
+                        caalen->GetMotionMaster()->MoveWaypoint(0, 2, 0);
+                        caalen->GetMotionMaster()->SetNextWaypoint(0);
+                        caalen->SetWalk(false);
+
+                        if (mob_bt_battle_fighterAI* caalenAI = dynamic_cast<mob_bt_battle_fighterAI*>(caalen->AI()))
+                            caalenAI->m_bIsWaypointing = true;
+                    }
+                    if (Creature* fyra = m_creature->GetMap()->GetCreature(m_fyraGuid))
+                    {
+                        fyra->GetMotionMaster()->MoveWaypoint(0, 2, 0);
+                        fyra->GetMotionMaster()->SetNextWaypoint(0);
+                        fyra->SetWalk(false);
+
+                        if (mob_bt_battle_fighterAI* fyraAI = dynamic_cast<mob_bt_battle_fighterAI*>(fyra->AI()))
+                            fyraAI->m_bIsWaypointing = false;
+                    }
+
+                    m_uiNumLightswornForward = 0;
+                    m_uiNumMagisterForward = 0;
+                }
+
+                break;
+        }
+    }
+
+    void IllidariAttackNearestEnemy(Unit* attacker)
+    {
+        Creature* nearestLightsworn;
+        Creature* nearestMagister;
+
+        nearestLightsworn = GetClosestCreatureWithEntry(attacker, NPC_LIGHTSWORN_VINDICATOR, 55.0f);
+        nearestMagister = GetClosestCreatureWithEntry(attacker, NPC_SEASONED_MAGISTER, 55.0f);
+
+        if (!nearestLightsworn && !nearestMagister)
+            return;
+
+        float distLightsworn = ((nearestLightsworn == nullptr) ? 9999.0f : attacker->GetDistance(nearestLightsworn));
+
+        if (nearestMagister)
+        {
+            float distMagister = attacker->GetDistance(nearestMagister);
+            nearestLightsworn = (distLightsworn < distMagister) ? nearestLightsworn : nearestMagister;
+        }
+
+        attacker->SetInCombatWith(nearestLightsworn);
+        attacker->AddThreat(nearestLightsworn);
+        attacker->AI()->AttackStart(nearestLightsworn);
+    }
+
+    ObjectGuid GetAvailableMarkerFromMap(FormationMap& map, ObjectGuid occupant)
+    {
+        ObjectGuid marker = map.claimFormationMarker(occupant);
+
+        if (!marker.IsEmpty())
+            return marker;
+        else
+        {
+            FindFormationMarkers();
+            return map.claimFormationMarker(occupant);
+        }
+    }
+
+    bool FindFormationMarkers()
+    {
+        m_rearFormationMapScryer.clearMaps();
+        m_rearFormationMapAldor.clearMaps();
+        std::list<Creature*> lFormationMarkers;
+
+        GetCreatureListWithEntryInGrid(lFormationMarkers, m_creature, NPC_FORMATION_MARKER, 300.0f);
+
+        for (std::list<Creature*>::iterator itr = lFormationMarkers.begin(); itr != lFormationMarkers.end(); ++itr)
+            if ((*itr)->GetPositionY() < 540.0f)
+                m_forwardFormationMap.registerFormationMarker((*itr)->GetObjectGuid());
+            else
+            {
+                bool left_side = ((*itr)->GetPositionX() < m_fMidPoint);
+                bool CaalenFyra = ((*itr)->GetPositionY() > 582.5f);
+
+                if (left_side)
+                {
+                    if (CaalenFyra)
+                        m_fyraGuid = (*itr)->GetObjectGuid();
+                    else
+                        m_rearFormationMapScryer.registerFormationMarker((*itr)->GetObjectGuid());
+                }
+                else
+                {
+                    if (CaalenFyra)
+                        m_caalenGuid = (*itr)->GetObjectGuid();
+                    else
+                        m_rearFormationMapAldor.registerFormationMarker((*itr)->GetObjectGuid());
+                }
+            }
+
+        if (lFormationMarkers.size() > 0)
+            return true;
+
+        return false;
+    }
+
+    void ReinforceAldorScryerFrontline()
+    {
+        while ((m_uiNumLightswornForward + m_uiNumMagisterForward) < m_uiMaxNumTroopsForward)
+        {
+            ObjectGuid fighter;
+
+            if (urand(0, m_uiMaxNumTroopsForward + m_uiNumLightswornForward - m_uiNumMagisterForward) < m_uiMaxNumTroopsForward)
+                fighter = m_rearFormationMapAldor.getRandomOccupant();
+            else
+                fighter = m_rearFormationMapScryer.getRandomOccupant();
+
+            if (fighter.IsEmpty())
+                return;
+
+            ObjectGuid marker = GetAvailableMarkerFromMap(m_forwardFormationMap, fighter);
+
+            if (!marker.IsEmpty())
+                if (Creature* fighterCreature = m_creature->GetMap()->GetCreature(fighter))
+                    if (!fighterCreature->isInCombat())
+                        if (Creature* markerCreature = m_creature->GetMap()->GetCreature(marker))
+                        {
+                            fighterCreature->GetMotionMaster()->Clear(false, true);
+                            fighterCreature->SetWalk(false);
+                            fighterCreature->GetMotionMaster()->MovePoint(0, markerCreature->GetPositionX(), markerCreature->GetPositionY(), markerCreature->GetPositionZ());
+
+                            if (fighterCreature->GetEntry() == NPC_LIGHTSWORN_VINDICATOR)
+                            {
+                                ++m_uiNumLightswornForward;
+                                m_rearFormationMapAldor.releaseFormationMarker(fighter);
+                            }
+                            else
+                            {
+                                ++m_uiNumMagisterForward;
+                                m_rearFormationMapScryer.releaseFormationMarker(fighter);
+                            }
+                        }
+
+            fighter.Clear();
+            marker.Clear();
+        }
+    }
+
+    void SendIllidariAttack()
+    {
+        IllidariAttackGroup attackGroup = ChooseIllidariAttack();
+        ObjectGuid leaderGuid;
+        uint32 waypoint = 0;
+
+        switch (attackGroup)
+        {
+            case NONE:
+                break;
+            case RAVAGERS_1:
+                leaderGuid = m_ravagerLeader1;
+                m_ravagerLeader1.Clear();
+                waypoint = 5;
+                break;
+            case RAVAGERS_2:
+                leaderGuid = m_ravagerLeader2;
+                m_ravagerLeader2.Clear();
+                waypoint = 5;
+                break;
+            case RAVAGERS_3:
+                leaderGuid = m_ravagerLeader3;
+                m_ravagerLeader3.Clear();
+                waypoint = 3;
+                break;
+            case RAVAGERS_4:
+                leaderGuid = m_ravagerLeader4;
+                m_ravagerLeader4.Clear();
+                waypoint = 3;
+                break;
+            case SHADOWHOOF_1:
+                leaderGuid = m_ShadowhoofLeader1;
+                m_ShadowhoofLeader1.Clear();
+                waypoint = 5;
+                break;
+            case SHADOWHOOF_2:
+                leaderGuid = m_ShadowhoofLeader2;
+                m_ShadowhoofLeader2.Clear();
+                waypoint = 3;
+                break;
+            case SHADOWHOOF_3:
+                leaderGuid = m_ShadowhoofLeader3;
+                m_ShadowhoofLeader3.Clear();
+                waypoint = 4;
+                break;
+        }
+
+        if (Creature* leader = m_creature->GetMap()->GetCreature(leaderGuid))
+        {
+            leader->GetMotionMaster()->MoveWaypoint(0, 1);
+            leader->GetMotionMaster()->SetNextWaypoint(waypoint);
+            m_attackReadyMask -= attackGroup;
+            
+            if (mob_bt_battle_fighterAI* leaderAI = dynamic_cast<mob_bt_battle_fighterAI*>(leader->AI()))
+                leaderAI->m_bIsWaypointing = true;
+        }
+    }
+
+    /* Most of the time send ravager group 3 or 4
+    *  rest of the time send one of the others randomly */
+    IllidariAttackGroup ChooseIllidariAttack()
+    {
+        if (m_attackReadyMask == 0)
+            return NONE;
+        else
+        {
+            uint8 rav3or4_mask = m_attackReadyMask & (RAVAGERS_3 | RAVAGERS_4);
+            uint8 everythingElse_mask = m_attackReadyMask & ~(RAVAGERS_3 | RAVAGERS_4);
+
+            if (rav3or4_mask && !everythingElse_mask)
+            {
+                return ChooseIllidariRavagers3or4(rav3or4_mask);
+            }
+            else if (!rav3or4_mask && everythingElse_mask)
+            {
+                return ChooseIllidariNotRavagers3or4(everythingElse_mask);
+            }
+            else
+            {
+                if (urand(0, 9) >= 3)
+                    return ChooseIllidariRavagers3or4(rav3or4_mask);
+                else
+                    return ChooseIllidariNotRavagers3or4(everythingElse_mask);
+            }
+        }
+
+        return NONE;
+    }
+
+    IllidariAttackGroup ChooseIllidariRavagers3or4(uint8 readyMask)
+    {
+        switch (readyMask)
+        {
+            case RAVAGERS_3 | RAVAGERS_4:
+                if (urand(0, 1))
+                    return RAVAGERS_3;
+                else
+                    return RAVAGERS_4;
+            case RAVAGERS_3:
+                return RAVAGERS_3;
+            case RAVAGERS_4:
+                return RAVAGERS_4;
+            default:
+                return NONE;
+        }
+    }
+
+    IllidariAttackGroup ChooseIllidariNotRavagers3or4(uint8 readyMask)
+    {
+        if (urand(0, 5) <= 2)
+        {
+            readyMask = readyMask & (RAVAGERS_1 | RAVAGERS_2);
+            switch (readyMask)
+            {
+                case RAVAGERS_1 | RAVAGERS_2:
+                    if (urand(0, 1))
+                        return RAVAGERS_1;
+                    else
+                        return RAVAGERS_2;
+                case RAVAGERS_1:
+                    return RAVAGERS_1;
+                case RAVAGERS_2:
+                    return RAVAGERS_2;
+                default:
+                    return NONE;
+            }
+        }
+        else
+        {
+            readyMask = readyMask & (SHADOWHOOF_1 | SHADOWHOOF_2 | SHADOWHOOF_3);
+            switch (readyMask)
+            {
+                case SHADOWHOOF_1 | SHADOWHOOF_2 | SHADOWHOOF_3:
+                    if (!urand(0, 2))
+                        return SHADOWHOOF_1;
+                    else if (urand(0, 1))
+                        return SHADOWHOOF_2;
+                    else
+                        return SHADOWHOOF_3;
+                case SHADOWHOOF_1 | SHADOWHOOF_2:
+                    return SHADOWHOOF_2;
+                case SHADOWHOOF_1 | SHADOWHOOF_3:
+                    return SHADOWHOOF_1;
+                case SHADOWHOOF_2 | SHADOWHOOF_3:
+                    return SHADOWHOOF_3;
+                case SHADOWHOOF_1:
+                    return SHADOWHOOF_1;
+                case SHADOWHOOF_2:
+                    return SHADOWHOOF_2;
+                case SHADOWHOOF_3:
+                    return SHADOWHOOF_3;
+                default:
+                    return NONE;
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (m_fIllidariAttackTimer < diff)
+        {
+            SendIllidariAttack();
+
+            m_fIllidariAttackTimer = ILLIDARI_ATTACK_INTERVAL;
+        }
+        else
+            m_fIllidariAttackTimer -= diff;
+
+        if (m_fAldorScryerReinforceTimer < diff)
+        {
+            ReinforceAldorScryerFrontline();
+
+            m_fAldorScryerReinforceTimer = REINFORCE_INTERVAL;
+        }
+        else
+            m_fAldorScryerReinforceTimer -= diff;
+    }
+};
+
+UnitAI* GetAI_npc_bt_battle_sensor(Creature* pCreature)
+{
+    return new npc_bt_battle_sensor(pCreature);
+}
+
 void AddSC_shadowmoon_valley()
 {
     Script* pNewScript = new Script;
@@ -3699,5 +5357,15 @@ void AddSC_shadowmoon_valley()
     pNewScript->Name = "npc_dragonmaw_racer_skyshatter";
     pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_skyshatter;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "mob_bt_battle_fighter";
+    pNewScript->GetAI = &GetAI_mob_bt_battle_fighter;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_bt_battle_sensor";
+    pNewScript->GetAI = &GetAI_npc_bt_battle_sensor;
     pNewScript->RegisterSelf();
 }

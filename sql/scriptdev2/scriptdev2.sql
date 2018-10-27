@@ -309,7 +309,7 @@ UPDATE creature_template SET ScriptName='npc_gallywix' WHERE entry=7288;
 
 /* BLACK TEMPLE */
 UPDATE instance_template SET ScriptName='instance_black_temple' WHERE map=564;
-UPDATE creature_template SET ScriptName='npc_akama_shade' WHERE entry=22990; -- Akama at Shade of Akama
+UPDATE creature_template SET ScriptName='npc_akama_shade' WHERE entry=23191; -- Akama at Shade of Akama
 UPDATE creature_template SET ScriptName='npc_akama_illidan' WHERE entry=23089; -- Akama at Illidan
 UPDATE creature_template SET ScriptName='mob_illidari_council' WHERE entry=23426; -- Illidari Council controller mob
 UPDATE creature_template SET ScriptName='mob_blood_elf_council_voice_trigger' WHERE entry=23499; -- Voice Trigger Mob (Controls Aggro + Enrage yells)
@@ -1243,6 +1243,8 @@ UPDATE creature_template SET ScriptName='npc_dragonmaw_racer_corlok' WHERE entry
 UPDATE creature_template SET ScriptName='npc_dragonmaw_racer_ichman' WHERE entry=23345;
 UPDATE creature_template SET ScriptName='npc_dragonmaw_racer_mulverick' WHERE entry=23346;
 UPDATE creature_template SET ScriptName='npc_dragonmaw_racer_skyshatter' WHERE entry=23348;
+UPDATE creature_template SET ScriptName='mob_bt_battle_fighter' WHERE entry IN (22857, 22858, 22860, 22861, 22862, 22863, 22864, 22988);
+UPDATE creature_template SET ScriptName='npc_bt_battle_sensor' WHERE entry=22934;
 
 /* SHATTRATH */
 UPDATE creature_template SET ScriptName='npc_dirty_larry' WHERE entry=19720;
@@ -3186,8 +3188,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1015027,'$G Him : Her; look too pretty to be da ruler.',0,0,0,0,'Bloodmaul/Bladespire Supplicant LoS text'),
 (-1015028,'Me live to serve.',0,0,0,0,'Bloodmaul/Bladespire Supplicant LoS text'),
 (-1015029,'For the Deceiver! For Kil''jaeden!',0,0,0,0,'Trelopades on aggro 1'),
-(-1015030,'Only flesh and blood...',0,0,0,0,'Trelopades on aggro 2');
-
+(-1015030,'Only flesh and blood...',0,0,0,0,'Trelopades on aggro 2'),
+(-1015031, 'Onward, Scryers!  Show Illidan\'s lackeys the temper of our steel!', 0, 1, 0, 0, 'Onward Scryers'),
+(-1015032, 'Forward, vindicators!  Drive these demons from our sacred temple!', 0, 1, 0, 0, 'Forward vindicators');
 -- -1 020 000 WOTLK texts
 
 -- -1 033 000 SHADOWFANG KEEP
@@ -9980,6 +9983,33 @@ INSERT INTO script_waypoint VALUES
 (22458,0,21,-3728.77,5385.65,-3.704,0,0,0,''),
 (22458,0,22,-3733.33,5389.24,-5.331,0,0,0,''),
 (22458,0,23,-3739.91,5393.69,-4.213,0,0,0,''),
+(22861,0,0,-3567.673,390.162,31.162,0,0,0,''),
+(22861,0,1,-3558.926,410.604,29.328,0,0,0,''),
+(22861,0,2,-3569.454,408.951,29.623,0,0,0,''),
+(22861,0,3,-3552.207,393.217,31.119,0,0,0,''),
+(22861,0,4,-3565.558,398.519,30.333,0,0,0,''),
+(22861,0,5,-3550.822,406.948,30.070,0,0,0,''),
+(22861,0,6,-3573.805,401.071,30.696,0,0,0,''),
+(22861,0,7,-3569.454,408.951,29.623,0,0,0,''),
+(22861,0,8,-3560.967,404.486,29.785,0,0,0,''),
+(22863,0,0,-3567.673,390.162,31.162,0,0,0,''),
+(22863,0,1,-3558.926,410.604,29.328,0,0,0,''),
+(22863,0,2,-3569.454,408.951,29.623,0,0,0,''),
+(22863,0,3,-3552.207,393.217,31.119,0,0,0,''),
+(22863,0,4,-3565.558,398.519,30.333,0,0,0,''),
+(22863,0,5,-3550.822,406.948,30.070,0,0,0,''),
+(22863,0,6,-3573.805,401.071,30.696,0,0,0,''),
+(22863,0,7,-3569.454,408.951,29.623,0,0,0,''),
+(22863,0,8,-3560.967,404.486,29.785,0,0,0,''),
+(22864,0,0,-3567.673,390.162,31.162,0,0,0,''),
+(22864,0,1,-3558.926,410.604,29.328,0,0,0,''),
+(22864,0,2,-3569.454,408.951,29.623,0,0,0,''),
+(22864,0,3,-3552.207,393.217,31.119,0,0,0,''),
+(22864,0,4,-3565.558,398.519,30.333,0,0,0,''),
+(22864,0,5,-3550.822,406.948,30.070,0,0,0,''),
+(22864,0,6,-3573.805,401.071,30.696,0,0,0,''),
+(22864,0,7,-3569.454,408.951,29.623,0,0,0,''),
+(22864,0,8,-3560.967,404.486,29.785,0,0,0,''),
 (22916,0,0,7461.49,-3121.06,438.21,0,7000,0,'SAY_START'),
 (22916,0,1,7465.26,-3115.5,439.315,0,0,0,''),
 (22916,0,2,7470.03,-3109.29,439.333,0,0,0,''),
