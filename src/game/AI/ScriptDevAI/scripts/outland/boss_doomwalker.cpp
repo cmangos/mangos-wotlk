@@ -143,31 +143,11 @@ struct boss_doomwalkerAI : public ScriptedAI
         Reset();
 
         std::list<Creature*> npcList;
-        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_DREADLORD, 500.0f);
-
-        for (std::list<Creature*>::iterator itr = npcList.begin(); itr != npcList.end(); ++itr)
-            (*itr)->DealDamage((*itr), (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-
-        npcList.clear();
-        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_ILLIDARI_RAVAGER, 500.0f);
-
-        for (std::list<Creature*>::iterator itr = npcList.begin(); itr != npcList.end(); ++itr)
-            (*itr)->DealDamage((*itr), (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-
-        npcList.clear();
-        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_SHADOWHOOF_ASSASSIN, 500.0f);
-
-        for (std::list<Creature*>::iterator itr = npcList.begin(); itr != npcList.end(); ++itr)
-            (*itr)->DealDamage((*itr), (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-
-        npcList.clear();
-        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_SHADOWHOOF_SUMMONER, 500.0f);
-
-        for (std::list<Creature*>::iterator itr = npcList.begin(); itr != npcList.end(); ++itr)
-            (*itr)->DealDamage((*itr), (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-
-        npcList.clear();
-        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_ILLIDARI_SUCCUBUS, 500.0f);
+        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_DREADLORD, 200.0f);
+        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_ILLIDARI_RAVAGER, 200.0f);
+        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_SHADOWHOOF_ASSASSIN, 200.0f);
+        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_SHADOWHOOF_SUMMONER, 200.0f);
+        GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_ILLIDARI_SUCCUBUS, 200.0f);
 
         for (std::list<Creature*>::iterator itr = npcList.begin(); itr != npcList.end(); ++itr)
             (*itr)->DealDamage((*itr), (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
