@@ -969,20 +969,11 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
             break;
         case SPELL_EFFECT_SCHOOL_DAMAGE:
         {
-            switch (spellproto->Id)
-            {
-                case 32247: // chess damage spells - Neutral
-                case 37459:
-                case 37461:
-                case 37462:
-                case 37463:
-                case 37474:
-                case 37476:
-                case 39384:
-                    return false;
-                default:
-                    break;
-            }
+            //switch (spellproto->Id)
+            //{
+            //    default:
+            //        break;
+            //}
             break;
         }
         // Aura exceptions:
