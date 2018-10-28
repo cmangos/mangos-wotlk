@@ -24,7 +24,6 @@ EndScriptData */
 /* ContentData
 mob_stolen_soul
 boss_exarch_maladaar
-mob_avatar_of_martyred
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -169,6 +168,7 @@ struct boss_exarch_maladaarAI : public ScriptedAI
     }
 
     ObjectGuid m_targetGuid;
+    ObjectGuid m_avatar;
 
     uint32 m_uiFearTimer;
     uint32 m_uiRibbonOfSoulsTimer;
@@ -180,6 +180,8 @@ struct boss_exarch_maladaarAI : public ScriptedAI
     void Reset() override
     {
         m_targetGuid.Clear();
+        if (Creature* avatar = m_creature->GetMap()->GetCreature(m_avatar))
+            avatar->ForcedDespawn();
 
         m_uiFearTimer          = urand(11000, 29000);
         m_uiRibbonOfSoulsTimer = urand(4000, 8000);
@@ -211,21 +213,27 @@ struct boss_exarch_maladaarAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        if (pSummoned->GetEntry() == NPC_STOLEN_SOUL)
+        switch (pSummoned->GetEntry())
         {
-            // SPELL_STOLEN_SOUL_VISUAL has shapeshift effect, but not implemented feature in mangos for this spell.
-            pSummoned->CastSpell(pSummoned, SPELL_STOLEN_SOUL_VISUAL, TRIGGERED_NONE);
-
-            if (Player* pTarget = m_creature->GetMap()->GetPlayer(m_targetGuid))
+            case NPC_STOLEN_SOUL:
             {
-                if (mob_stolen_soulAI* pSoulAI = dynamic_cast<mob_stolen_soulAI*>(pSummoned->AI()))
-                    pSoulAI->SetSoulInfo(pTarget);
+                // SPELL_STOLEN_SOUL_VISUAL has shapeshift effect, but not implemented feature in mangos for this spell.
+                pSummoned->CastSpell(pSummoned, SPELL_STOLEN_SOUL_VISUAL, TRIGGERED_NONE);
 
-                pSummoned->AI()->AttackStart(pTarget);
+                if (Player* pTarget = m_creature->GetMap()->GetPlayer(m_targetGuid))
+                {
+                    if (mob_stolen_soulAI* pSoulAI = dynamic_cast<mob_stolen_soulAI*>(pSummoned->AI()))
+                        pSoulAI->SetSoulInfo(pTarget);
+
+                    pSummoned->AI()->AttackStart(pTarget);
+                }
+            }
+            case NPC_AVATAR_MARTYRED:
+            {
+                pSummoned->CastSpell(pSummoned, SPELL_PHASE_IN, TRIGGERED_NONE);
+                m_avatar = pSummoned->GetObjectGuid();
             }
         }
-        else if (pSummoned->GetEntry() == NPC_AVATAR_MARTYRED)
-            pSummoned->CastSpell(pSummoned, SPELL_PHASE_IN, TRIGGERED_NONE);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
