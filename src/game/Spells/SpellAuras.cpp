@@ -5698,6 +5698,10 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
             case 37670:                                     // Nether Charge Timer
                 target->CastSpell(nullptr, GetSpellProto()->EffectTriggerSpell[m_effIndex], TRIGGERED_OLD_TRIGGERED);
                 break;
+            case 39828:                                     // Light of the Naaru
+                target->CastSpell(nullptr, 39831, TRIGGERED_NONE);
+                target->CastSpell(nullptr, 39832, TRIGGERED_NONE);
+                break;
             case 42783:                                     // Wrath of the Astrom...
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE && GetEffIndex() + 1 < MAX_EFFECT_INDEX)
                     target->CastSpell(target, GetSpellProto()->CalculateSimpleValue(SpellEffectIndex(GetEffIndex() + 1)), TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCasterGuid());
