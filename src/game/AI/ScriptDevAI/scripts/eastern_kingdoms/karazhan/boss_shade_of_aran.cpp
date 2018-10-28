@@ -263,7 +263,7 @@ struct boss_aranAI : public ScriptedAI
         {
             case NPC_WATER_ELEMENTAL:
                 pSummoned->SetInCombatWithZone();
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SELECT_FLAG_PLAYER))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     pSummoned->AddThreat(pTarget, 100000.f);
                 break;
         }
