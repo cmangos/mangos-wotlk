@@ -33,6 +33,9 @@ enum
     SAY_DEATH               = -1269017,
     EMOTE_GENERIC_FRENZY    = -1000002,
 
+    SPELL_THRASH            = 8876,
+    SPELL_DOUBLE_ATTACK     = 19818,
+
     SPELL_CLEAVE            = 40504,
     SPELL_TIME_STOP         = 31422,
     SPELL_ENRAGE            = 37605,
@@ -63,6 +66,8 @@ struct boss_aeonusAI : public ScriptedAI
         m_uiTimeStopTimer   = urand(10000, 15000);
         m_uiFrenzyTimer     = urand(30000, 45000);
         m_uiCleaveTimer     = urand(5000, 9000);
+
+        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_THRASH : SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void Aggro(Unit* /*pWho*/) override
