@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "black_temple.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 enum
 {
@@ -31,17 +32,25 @@ enum
     EMOTE_GROUND_CRACK              = -1564012,
 
     // Spells
-    SPELL_MOLTEN_PUNCH              = 40126,
+    SPELL_BERSERK                   = 45078,
     // Phase 1
     SPELL_HATEFUL_STRIKE            = 41926,
-    SPELL_MOLTEN_FLAME              = 40980,
-    SPELL_BERSERK                   = 45078,
+    SPELL_MOLTEN_PUNCH              = 40126,
+
+    // Molten punch spells
+    SPELL_MOLTEN_FLAME              = 40980, // Punch stalker puts it on himself
+
     // Phase 2
-    SPELL_CHARGE                    = 41581,
-    SPELL_VOLCANIC_ERUPTION_BOSS    = 40276,
-    SPELL_VOLCANIC_ERUPTION_VOLCANO = 40117,
+    SPELL_CHARGE                    = 41581, // used when fixate target is too far in second phase
+    SPELL_VOLCANIC_ERUPTION         = 40276,
     SPELL_SLOW_SELF                 = 41922,
     SPELL_RANDOM_TARGET             = 41951, // Serverside in tbc/wotlk - sometime later changed to Fixate and visible in client
+
+    // NPC Volcano Spells
+    SPELL_VOLCANIC_ERUPTION_SELF    = 40117, // Applied to Volcano upon spawn - Cast on self - casts 40118 & 42055
+    SPELL_TARGET_RANDOM_LOCATION    = 40118, // Used to select a random location within 15.00 yards around the volcano - DUMMY - Is the visual
+    SPELL_VOLCANO_AOE               = 42052, // AOE Damage used by NPC - 15yard radius - TARGET_ALL_ENEMY_IN_AREA - Applied by 42055
+    SPELL_TRIGGER_VOLCANO_AOE       = 42055, // AOE Trigger spell
 
     NPC_VOLCANO                     = 23085,
     NPC_STALKER                     = 23095,
@@ -54,7 +63,7 @@ enum
  * Supremus: 33420 41582 41925 41951
  */
 
-const float RANGE_MOLTEN_PUNCH      = 40.0;
+const float RANGE_MOLTEN_PUNCH      = 40.0; // Not sure why this is here?
 
 /* These floats are related to the speed-hack near end of script;
  * Statet at wowwiki: "If the gaze target is further away than 40 yards, he dashes at about five times the normal run speed until the range is about 20 yards."
@@ -64,77 +73,106 @@ const float RANGE_MOLTEN_PUNCH      = 40.0;
  * const float SPEED_CHASE             = 0.9f;
  */
 
-// TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct molten_flameAI : public Scripted_NoMovementAI
+enum SupremusActions // order based on priority
 {
-    molten_flameAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
-
-    void Reset() override {}
-    void AttackStart(Unit* /*pWho*/) override {}
-    void MoveInLineOfSight(Unit* /*pWho*/) override {}
-    void UpdateAI(const uint32 /*uiDiff*/) override {}
+    SUPREMUS_ACTION_PHASE_SWITCH,
+    SUPREMUS_ACTION_BERSERK,
+    SUPREMUS_ACTION_MOLTEN_PUNCH,
+    SUPREMUS_ACTION_VOLCANIC_ERUPTION,
+    SUPREMUS_ACTION_SWITCH_TARGET,
+    SUPREMUS_ACTION_HATEFUL_STRIKE,
+    SUPREMUS_ACTION_MAX,
+    SUPREMUS_ACTION_DELAY,
 };
 
-// TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct npc_volcanoAI : public Scripted_NoMovementAI
+struct boss_supremusAI : public ScriptedAI, CombatActions
 {
-    npc_volcanoAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
-
-    void Reset() override {}
-    void AttackStart(Unit* /*pWho*/) override {}
-    void MoveInLineOfSight(Unit* /*pWho*/) override {}
-    void UpdateAI(const uint32 /*uiDiff*/) override {}
-};
-
-struct boss_supremusAI : public ScriptedAI
-{
-    boss_supremusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_supremusAI(Creature* creature) : ScriptedAI(creature), CombatActions(SUPREMUS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        AddCombatAction(SUPREMUS_ACTION_PHASE_SWITCH, 0u);
+        AddCombatAction(SUPREMUS_ACTION_BERSERK, 0u);
+        AddCombatAction(SUPREMUS_ACTION_MOLTEN_PUNCH, 0u);
+        AddCombatAction(SUPREMUS_ACTION_VOLCANIC_ERUPTION, 0u);
+        AddCombatAction(SUPREMUS_ACTION_SWITCH_TARGET, 0u);
+        AddCombatAction(SUPREMUS_ACTION_HATEFUL_STRIKE, 0u);
+        AddCustomAction(SUPREMUS_ACTION_DELAY, true, [&]
+        {
+            SetCombatScriptStatus(false);
+            SetCombatMovement(true);
+            if (!m_bTankPhase)
+                ResetTimer(SUPREMUS_ACTION_SWITCH_TARGET, 0); // switch target immediately
+            DoStartMovement(m_creature->getVictim());
+        });
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiSummonFlameTimer;
-    uint32 m_uiSwitchTargetTimer;
-    uint32 m_uiPhaseSwitchTimer;
-    uint32 m_uiSummonVolcanoTimer;
-    uint32 m_uiHatefulStrikeTimer;
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiMoltenPunchTimer;
+    ScriptedInstance* m_instance;
 
     bool m_bTankPhase;
-
     GuidList m_lSummonedGUIDs;
 
     void Reset() override
     {
-        m_uiHatefulStrikeTimer = 5000;
-        m_uiSummonFlameTimer   = 20000;
-        m_uiPhaseSwitchTimer   = 60000;
-        m_uiMoltenPunchTimer   = 8000;
-        m_uiBerserkTimer       = 15 * MINUTE * IN_MILLISECONDS;
+        for (uint32 i = 0; i < SUPREMUS_ACTION_MAX; ++i)
+            SetActionReadyStatus(i, false);
+
+        ResetTimer(SUPREMUS_ACTION_PHASE_SWITCH, GetInitialActionTimer(SUPREMUS_ACTION_PHASE_SWITCH));
+        ResetTimer(SUPREMUS_ACTION_BERSERK, GetInitialActionTimer(SUPREMUS_ACTION_BERSERK));
+        ResetTimer(SUPREMUS_ACTION_MOLTEN_PUNCH, GetInitialActionTimer(SUPREMUS_ACTION_MOLTEN_PUNCH));
+        ResetTimer(SUPREMUS_ACTION_HATEFUL_STRIKE, GetInitialActionTimer(SUPREMUS_ACTION_HATEFUL_STRIKE));
+
+        DisableTimer(SUPREMUS_ACTION_SWITCH_TARGET);
+        DisableTimer(SUPREMUS_ACTION_VOLCANIC_ERUPTION);
+
+        DisableTimer(SUPREMUS_ACTION_DELAY);
 
         m_bTankPhase = true;
     }
 
+    uint32 GetInitialActionTimer(SupremusActions id)
+    {
+        switch (id)
+        {
+            case SUPREMUS_ACTION_PHASE_SWITCH: return 60000;
+            case SUPREMUS_ACTION_BERSERK: return 900000;
+            case SUPREMUS_ACTION_MOLTEN_PUNCH: return urand(11000, 14700);
+            case SUPREMUS_ACTION_VOLCANIC_ERUPTION: return 6000;
+            case SUPREMUS_ACTION_SWITCH_TARGET: return 9000;
+            case SUPREMUS_ACTION_HATEFUL_STRIKE: return 5000;
+            default: return 0;
+        }
+    }
+
+    uint32 GetSubsequentActionTimer(SupremusActions id)
+    {
+        switch (id)
+        {
+            case SUPREMUS_ACTION_PHASE_SWITCH: return 60000;
+            case SUPREMUS_ACTION_BERSERK: return 0;
+            case SUPREMUS_ACTION_MOLTEN_PUNCH: return urand(15000, 20000);
+            case SUPREMUS_ACTION_VOLCANIC_ERUPTION: return urand(3000, 6000);
+            case SUPREMUS_ACTION_SWITCH_TARGET: return 11000;
+            case SUPREMUS_ACTION_HATEFUL_STRIKE: return 1200;
+            default: return 0;
+        }
+    }
+
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SUPREMUS, NOT_STARTED);
+        if (m_instance)
+            m_instance->SetData(TYPE_SUPREMUS, NOT_STARTED);
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SUPREMUS, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_SUPREMUS, IN_PROGRESS);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SUPREMUS, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_SUPREMUS, DONE);
 
         for (GuidList::const_iterator itr = m_lSummonedGUIDs.begin(); itr != m_lSummonedGUIDs.end(); ++itr)
         {
@@ -143,29 +181,10 @@ struct boss_supremusAI : public ScriptedAI
         }
     }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_STALKER)
-        {
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
-            if (!pTarget)
-                pTarget = m_creature->getVictim();
-
-            if (pTarget)
-            {
-                pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0.0f, 0.0f);
-                pSummoned->CastSpell(pSummoned, SPELL_MOLTEN_FLAME, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
-            }
-        }
-
-        else if (pSummoned->GetEntry() == NPC_VOLCANO)
-            pSummoned->CastSpell(pSummoned, SPELL_VOLCANIC_ERUPTION_VOLCANO, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
-    }
-
     Unit* GetHatefulStrikeTarget() const
     {
         uint32 uiHealth = 0;
-        Unit* pTarget = nullptr;
+        Unit* target = nullptr;
 
         ThreatList const& tList = m_creature->getThreatManager().getThreatList();
         for (auto iter : tList)
@@ -177,128 +196,161 @@ struct boss_supremusAI : public ScriptedAI
                 if (pUnit->GetHealth() > uiHealth)
                 {
                     uiHealth = pUnit->GetHealth();
-                    pTarget = pUnit;
+                    target = pUnit;
                 }
             }
         }
+        return target;
+    }
 
-        return pTarget;
+    void JustSummoned(Creature* summoned) override
+    {
+        switch (summoned->GetEntry())
+        {
+            case NPC_VOLCANO:
+            {
+                summoned->AI()->SetReactState(REACT_PASSIVE);
+                summoned->AI()->SetCombatMovement(false);
+                summoned->SetCanEnterCombat(false);
+                summoned->CastSpell(nullptr, SPELL_VOLCANIC_ERUPTION_SELF, TRIGGERED_NONE);
+                break;
+            }
+            case NPC_STALKER:
+            {
+                Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
+                if (!target)
+                    target = m_creature->getVictim();
+
+                summoned->CastSpell(nullptr, SPELL_MOLTEN_FLAME, TRIGGERED_NONE);
+                summoned->SetInCombatWithZone();
+                if (target)
+                    summoned->AddThreat(target, 1000000.f);
+                break;
+            }
+        }
     }
 
     void KilledUnit(Unit* pKilled) override
     {
         // The current target is the fixated target - repick a new one
         if (!m_bTankPhase && pKilled == m_creature->getVictim())
-            m_uiSwitchTargetTimer = 0;
+            ResetTimer(SUPREMUS_ACTION_SWITCH_TARGET, 1000); //TODO - Find a better way to do this
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteActions()
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!CanExecuteCombatAction())
             return;
 
-        if (m_uiBerserkTimer)
+        for (uint32 i = 0; i < SUPREMUS_ACTION_MAX; ++i)
         {
-            if (m_uiBerserkTimer <= uiDiff)
+            if (GetActionReadyStatus(i))
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                    m_uiBerserkTimer = 0;
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
-
-        if (m_uiSummonFlameTimer < uiDiff)
-        {
-            // This currently is entirely screwed, because the npc is summoned somewhere far away as of big bounding box of supremus
-            if (DoCastSpellIfCan(m_creature, SPELL_MOLTEN_PUNCH) == CAST_OK)
-                m_uiSummonFlameTimer = 20000;
-        }
-        else
-            m_uiSummonFlameTimer -= uiDiff;
-
-        if (m_uiPhaseSwitchTimer < uiDiff)
-        {
-            if (!m_bTankPhase)
-            {
-                m_bTankPhase = true;
-                m_creature->RemoveAurasDueToSpell(SPELL_SLOW_SELF);
-                m_creature->FixateTarget(nullptr);
-            }
-            else
-            {
-                m_bTankPhase = false;
-                m_uiSwitchTargetTimer = 0;
-                m_uiSummonVolcanoTimer = 2000;
-
-                DoCastSpellIfCan(m_creature, SPELL_SLOW_SELF, CAST_INTERRUPT_PREVIOUS);
-            }
-
-            m_uiPhaseSwitchTimer = MINUTE * IN_MILLISECONDS;
-        }
-        else
-            m_uiPhaseSwitchTimer -= uiDiff;
-
-        if (m_bTankPhase)
-        {
-            if (m_uiHatefulStrikeTimer < uiDiff)
-            {
-                if (Unit* pTarget = GetHatefulStrikeTarget())
+                switch (i)
                 {
-                    if (DoCastSpellIfCan(pTarget, SPELL_HATEFUL_STRIKE) == CAST_OK)
-                        m_uiHatefulStrikeTimer = 5000;
+                    case SUPREMUS_ACTION_PHASE_SWITCH:
+                    {
+                        if (m_bTankPhase)
+                        {
+                            m_creature->CastSpell(nullptr, SPELL_SLOW_SELF, TRIGGERED_OLD_TRIGGERED);
+                            DoScriptText(EMOTE_GROUND_CRACK, m_creature);
+                            m_bTankPhase = false;
+                            DisableTimer(SUPREMUS_ACTION_HATEFUL_STRIKE);
+                            SetActionReadyStatus(SUPREMUS_ACTION_HATEFUL_STRIKE, false);
+                            ResetTimer(SUPREMUS_ACTION_SWITCH_TARGET, GetInitialActionTimer(SUPREMUS_ACTION_SWITCH_TARGET));
+                            ResetTimer(SUPREMUS_ACTION_VOLCANIC_ERUPTION, GetInitialActionTimer(SUPREMUS_ACTION_VOLCANIC_ERUPTION));
+                            SetCombatScriptStatus(true);
+                            SetCombatMovement(false, true);
+                            m_creature->AttackStop(true);
+                            ResetTimer(SUPREMUS_ACTION_DELAY, 1500);
+                        }
+                        else
+                        {
+                            if (m_creature->HasAura(SPELL_SLOW_SELF))
+                                m_creature->RemoveAurasDueToSpell(SPELL_SLOW_SELF);
+
+                            m_creature->FixateTarget(nullptr);
+                            m_bTankPhase = true;
+                            DoResetThreat();
+                            DoScriptText(EMOTE_PUNCH_GROUND, m_creature);
+                            DisableCombatAction(SUPREMUS_ACTION_SWITCH_TARGET);
+                            DisableCombatAction(SUPREMUS_ACTION_VOLCANIC_ERUPTION);
+                            ResetTimer(SUPREMUS_ACTION_HATEFUL_STRIKE, GetInitialActionTimer(SUPREMUS_ACTION_HATEFUL_STRIKE));
+                            SetCombatScriptStatus(true);
+                            SetCombatMovement(false, true);
+                            m_creature->AttackStop(true);
+                            ResetTimer(SUPREMUS_ACTION_DELAY, 1500);
+                        }
+
+                        ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
+                        SetActionReadyStatus(i, false);
+                        return;
+                    }
+                    case SUPREMUS_ACTION_BERSERK:
+                        if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
+                            SetActionReadyStatus(i, false);
+                            return;
+                        }
+                        break;
+                    case SUPREMUS_ACTION_MOLTEN_PUNCH:
+                        if (DoCastSpellIfCan(nullptr, SPELL_MOLTEN_PUNCH) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
+                            SetActionReadyStatus(i, false);
+                            return;
+                        }
+                        break;
+                    case SUPREMUS_ACTION_VOLCANIC_ERUPTION:
+                    {
+                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
+                        {
+                            if (DoCastSpellIfCan(target, SPELL_VOLCANIC_ERUPTION) == CAST_OK)
+                            {
+                                ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
+                                SetActionReadyStatus(i, false);
+                                return;
+                            }
+                        }
+                        return;
+                    }
+                    case SUPREMUS_ACTION_SWITCH_TARGET:
+                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER)) // TODO - Check if it only targets players, or can target pets
+                        {
+                            m_creature->FixateTarget(target);
+                            DoStartMovement(target);
+                            DoScriptText(EMOTE_NEW_TARGET, m_creature);
+                            DoCastSpellIfCan(target, SPELL_CHARGE);
+                            ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
+                            SetActionReadyStatus(i, false);
+                            return;
+                        }
+                        break;
+                    case SUPREMUS_ACTION_HATEFUL_STRIKE:
+                        if (Unit* target = GetHatefulStrikeTarget())
+                        {
+                            if (DoCastSpellIfCan(target, SPELL_HATEFUL_STRIKE) == CAST_OK)
+                            {
+                                ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
+                                SetActionReadyStatus(i, false);
+                            }
+                            return;
+                        }
+                        break;
                 }
             }
-            else
-                m_uiHatefulStrikeTimer -= uiDiff;
         }
-        else                                                // !m_bTankPhase
-        {
-            if (m_uiSwitchTargetTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                {
-                    m_creature->FixateTarget(pTarget);
-                    DoScriptText(EMOTE_NEW_TARGET, m_creature);
-                    m_uiSwitchTargetTimer = 10000;
-                }
-            }
-            else
-                m_uiSwitchTargetTimer -= uiDiff;
+    }
 
-            if (m_uiSummonVolcanoTimer < uiDiff)
-            {
-                Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff, m_creature->isInCombat());
 
-                if (DoCastSpellIfCan(pTarget ? pTarget : m_creature->getVictim(), SPELL_VOLCANIC_ERUPTION_BOSS) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_GROUND_CRACK, m_creature);
-                    m_uiSummonVolcanoTimer = 10000;
-                }
-            }
-            else
-                m_uiSummonVolcanoTimer -= uiDiff;
-
-            if (m_uiMoltenPunchTimer < uiDiff)
-            {
-                if (m_creature->GetDistance(m_creature->getVictim(), true, DIST_CALC_COMBAT_REACH) < RANGE_MOLTEN_PUNCH)
-                {
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHARGE);
-                    DoScriptText(EMOTE_PUNCH_GROUND, m_creature);
-                }
-                m_uiMoltenPunchTimer = 8000;                // might be better with small timer and some sort of cast-chance
-            }
-            else
-                m_uiMoltenPunchTimer -= uiDiff;
-
-            /* Not understood how this really must work
-             * if (m_creature->GetSpeedRate(MOVE_RUN) > SPEED_CHASE && m_creature->GetCombatDistance(m_creature->getVictim()) < RANGE_MIN_DASHING)
-             *     m_creature->SetSpeedRate(MOVE_RUN, SPEED_CHASE);
-             * else if (m_creature->GetCombatDistance(m_creature->getVictim()) > RANGE_MOLTEN_PUNCH)
-             *     m_creature->SetSpeedRate(MOVE_RUN, SPEED_DASHING);
-             */
-        }
-
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+        
+        ExecuteActions();
         DoMeleeAttackIfReady();
     }
 };
@@ -308,30 +360,10 @@ UnitAI* GetAI_boss_supremus(Creature* pCreature)
     return new boss_supremusAI(pCreature);
 }
 
-UnitAI* GetAI_molten_flame(Creature* pCreature)
-{
-    return new molten_flameAI(pCreature);
-}
-
-UnitAI* GetAI_npc_volcano(Creature* pCreature)
-{
-    return new npc_volcanoAI(pCreature);
-}
-
 void AddSC_boss_supremus()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_supremus";
     pNewScript->GetAI = &GetAI_boss_supremus;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "molten_flame";
-    pNewScript->GetAI = &GetAI_molten_flame;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_volcano";
-    pNewScript->GetAI = &GetAI_npc_volcano;
     pNewScript->RegisterSelf();
 }

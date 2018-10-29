@@ -2260,6 +2260,14 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 41466, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
                     return;
                 }
+                case 39992:                                 // Needle Spine Targeting
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 39835, TRIGGERED_NONE);
+                    return;
+                }
                 case 39995:                                 // Four Dragons: Dummy to Dragon
                 {
                     if (!unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -9429,6 +9437,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 39502, TRIGGERED_NONE);
                     unitTarget->CastSpell(unitTarget, 39503, TRIGGERED_NONE);
                     unitTarget->CastSpell(unitTarget, 39504, TRIGGERED_NONE);
+                    return;
+                }
+                case 39835:                                 // Needle Spine
+                {
+                    unitTarget->CastSpell(nullptr, 39968, TRIGGERED_NONE);
                     return;
                 }
                 case 40022:                                 // Four Dragons: Aggro Check

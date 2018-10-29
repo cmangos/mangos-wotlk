@@ -7774,6 +7774,7 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
         case 31298:                             // Sleep
         case 31347:                             // Doom
         case 36797:                             // Mind Control (Kael'thas)
+        case 40243:                             // Crushing Shadows - Teron Gorefiend
         case 41376:                             // Spite
         case 62166:                             // Stone Grip
         case 63981:                             // Stone Grip (h)
@@ -7806,6 +7807,10 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
                 return false;
 
             if (!target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED)) // not MCed
+                return false;
+            break;
+        case 39992:                             // Needle Spine Targeting - Najentus
+            if (target->HasAura(39837)) // Impaling Spine - skip
                 return false;
             break;
         case 68921:                                         // Soulstorm (FoS), only targets farer than 10 away
@@ -8641,8 +8646,8 @@ SpellCastResult Spell::OnCheckCast(bool strict)
                 return SPELL_FAILED_BAD_TARGETS;
             break;
         }
-        case 30077:
-            if (ObjectGuid target = m_caster->GetSelectionGuid())
+        case 30077: // Carinda's Retribution
+            if (ObjectGuid target = m_targets.getUnitTargetGuid())
                 if (target.GetEntry() != 17226)
                     return SPELL_FAILED_BAD_TARGETS;
             break;
@@ -8658,9 +8663,14 @@ SpellCastResult Spell::OnCheckCast(bool strict)
             if (!m_caster->HasAura(37968))
                 return SPELL_FAILED_FIZZLE;
             break;
-        case 38915:
-            if (ObjectGuid target = m_caster->GetSelectionGuid())
+        case 38915: // Mental Interference (0)
+            if (ObjectGuid target = m_targets.getUnitTargetGuid())
                 if (target.GetEntry() != 16943 && target.GetEntry() != 20928)  // Mental Interference can be cast only on these two targets
+                    return SPELL_FAILED_BAD_TARGETS;
+            break;
+        case 40157: // Spirit Lance - Teron Gorefiend - can only be used on spirits
+            if (ObjectGuid target = m_targets.getUnitTargetGuid())
+                if (target.GetEntry() != 23111)
                     return SPELL_FAILED_BAD_TARGETS;
             break;
         case 40472: // Booterang -  Must have aura Defiant And Enraged or Lazy and Good for Nothing
@@ -8671,7 +8681,7 @@ SpellCastResult Spell::OnCheckCast(bool strict)
             break;
         }
         case 40856: // Wrangling rope - should only be usable on aether rays
-            if (ObjectGuid target = m_caster->GetSelectionGuid())
+            if (ObjectGuid target = m_targets.getUnitTargetGuid())
                 if (target.GetEntry() != 22181)
                     return SPELL_FAILED_BAD_TARGETS;
             break;

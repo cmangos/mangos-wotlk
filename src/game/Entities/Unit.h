@@ -1790,6 +1790,9 @@ class Unit : public WorldObject
         float CalculateSpellCritChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const;
         float CalculateSpellMissChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const;
 
+        /*Hack to support always hitting creatures. TODO: investigate Serpentshrine Parasite*/
+        void SetAlwaysHit(bool value) { m_alwaysHit = value; }
+
         bool RollSpellCritOutcome(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const;
 
         float GetExpertisePercent(WeaponAttackType attType) const;
@@ -2751,6 +2754,8 @@ class Unit : public WorldObject
         // Need to safeguard aura proccing in Unit::ProcDamageAndSpell
         bool m_spellProcsHappening;
         std::vector<SpellAuraHolder*> m_delayedSpellAuraHolders;
+
+        bool m_alwaysHit;
 
         // guard to prevent chaining extra attacks
         bool m_extraAttacksExecuting;

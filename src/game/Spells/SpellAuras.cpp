@@ -1686,8 +1686,9 @@ void Aura::TriggerSpell()
 //                    case 40041: break;
 //                    // Knockdown Fel Cannon: The Aggro Check Aura
 //                    case 40113: break;
-//                    // Spirit Lance
-//                    case 40157: break;
+                    case 40157:                             // Spirit Lance - Teron Gorefiend - Remove stack on tick
+                        target->RemoveAuraStack(40157);
+                        return;
                     case 40398:                             // Demon Transform 2
                         switch (GetAuraTicks())
                         {
@@ -2597,6 +2598,14 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         if (roll_chance_i(20))              // backfire stun
                             target->CastSpell(target, 51581, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         return;
+                    case 40607:                             // Fixate - Shade of Akama
+                    {
+                        if (target->GetTypeId() != TYPEID_UNIT)
+                            return;
+
+                        target->FixateTarget(GetCaster());
+                        return;
+                    }
                     case 40856:                                     // Wrangling Rope
                     {
                         if (target->GetTypeId() != TYPEID_UNIT)
@@ -3150,6 +3159,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 39091:                                     // Negative Charge
                 target->RemoveAurasDueToSpell(39092);
                 return;
+            case 40401:                                     // Shade Soul Channel
+                target->RemoveAuraStack(40520);
+                return;
             case 40830:                                     // Banish the Demons: Banishment Beam Periodic Aura Effect
             {
                 if (m_removeMode == AURA_REMOVE_BY_DEATH)
@@ -3639,6 +3651,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->RemoveAurasDueToSpell(40216);
                         target->RemoveAurasDueToSpell(42016);
                     }
+                    return;
+                }
+                case 41999:                             // Shadow of Death Remove - Teron Gorefiend
+                {
+                    target->RemoveAurasDueToSpell(40251); // Remove Shadow of Death
                     return;
                 }
                 case 42515:                                 // Jarl Beam
@@ -4873,6 +4890,16 @@ void Aura::HandleModPossess(bool apply, bool Real)
                 if (!apply)
                     caster->RemoveAurasDueToSpell(37748);
                 break;
+            case 40268: // Spiritual Vengeance - Teron Gorefiend - kill player and despawn spirit
+                if (!apply)
+                {
+                    caster->RemoveAurasDueToSpell(40268);
+                    caster->RemoveAurasDueToSpell(40282);
+                    caster->CastSpell(nullptr, 29878, TRIGGERED_OLD_TRIGGERED);
+                    if (target->GetTypeId() == TYPEID_UNIT)
+                        static_cast<Creature*>(target)->ForcedDespawn();
+                }
+                break;
         }
     }
 }
@@ -5877,6 +5904,7 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
             }
         }
     }
+
     if (Real && GetSpellProto()->Mechanic == MECHANIC_BANISH)
     {
         if (apply)
@@ -5917,6 +5945,13 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
         case 28200:                                         // Ascendance (Talisman of Ascendance trinket)
             if (apply)
                 GetHolder()->SetAuraCharges(6);
+            break;
+        case 39057: // Serpentshrine Parasite - always hit with melee
+            GetTarget()->SetAlwaysHit(apply);
+            break;
+        case 40594: // Felrage - Gurtogg Bloodboil - remove Fury on removal of Felrage
+            if (!apply)
+                GetTarget()->RemoveAurasDueToSpell(40601);
             break;
         case 50720:                                         // Vigilance (threat transfering)
             if (apply)
@@ -6938,6 +6973,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
         case 28726:                                         // Nightmare Seed
         case 31616:                                         // Nature's Guardian (Cast with percentage-value by CastCustomSpell)
         case 34511:                                         // Valor (Bulwark of Kings, Bulwark of the Ancient Kings)
+        case 40604:                                         // Fel Rage - Gurtogg Bloodboil
         case 44055: case 55915: case 55917: case 67596:     // Tremendous Fortitude (Battlemaster's Alacrity)
         case 50322:                                         // Survival Instincts (Cast with percentage-value by CastCustomSpell)
         case 53479:                                         // Hunter pet - Last Stand (Cast with percentage-value by CastCustomSpell)
@@ -8105,10 +8141,25 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
     }
     else
     {
-        if (spellProto->Id == 33810 && m_removeMode == AURA_REMOVE_BY_SHIELD_BREAK) // Rock Shell
+        switch (spellProto->Id)
         {
-            caster->CastSpell(caster, 33811, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-            return;
+            case 33810: // Rock Shell
+                if (m_removeMode == AURA_REMOVE_BY_SHIELD_BREAK)
+                    caster->CastSpell(caster, 33811, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                break;
+            case 40251: // Shadow of Death - Teron Gorefiend
+                target->DeleteThreatList();
+                caster->AddThreat(target);
+                target->getHostileRefManager().setOnlineOfflineState(false);
+                target->RemoveAllAurasOnDeath(); // removes all effects that could prevent success of the spells after this
+                target->CastSpell(nullptr, 40266, TRIGGERED_NONE); // Summon Spirit
+                target->CastSpell(nullptr, 40270, TRIGGERED_NONE); // Summon Skeleton
+                target->CastSpell(nullptr, 41948, TRIGGERED_NONE); // Summon Skeleton
+                target->CastSpell(nullptr, 41949, TRIGGERED_NONE); // Summon Skeleton
+                target->CastSpell(nullptr, 41950, TRIGGERED_NONE); // Summon Skeleton
+                target->CastSpell(nullptr, 40282, TRIGGERED_NONE); // Possess Spirit Immune
+                target->CastSpell(nullptr, 40268, TRIGGERED_NONE); // Spiritual Vengeance
+                break;
         }
         if (caster &&
                 // Power Word: Shield
@@ -10087,6 +10138,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
         case 32065:                                         // Fungal Decay
         case 34027:                                         // Kill Command
         case 36659:                                         // Tail Sting
+        case 40157:                                         // Spirit Lance
         case 55166:                                         // Tidal Force
         case 58914:                                         // Kill Command (pet part)
         case 62519:                                         // Attuned to Nature

@@ -1360,6 +1360,27 @@ UPDATE spell_template SET `AttributesEx5`=`AttributesEx5`|0x00000001 WHERE `Id`=
 -- Disgruntled, used by Bonechewer Taskmaster (23028) - only hits one Bonechewer Worker (22963)
 UPDATE spell_template SET `MaxAffectedTargets`=1 WHERE id=40851;
 
+-- Teron Gorefiend - suicide spell
+INSERT INTO spell_template(Id, SchoolMask, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, AttributesEx5, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, CasterAuraState, TargetAuraState, CasterAuraStateNot, TargetAuraStateNot, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, procFlags, procChance, procCharges, maxLevel, baseLevel, spellLevel, DurationIndex, powerType, manaCost, manaCostPerLevel, manaPerSecond, manaPerSecondPerLevel, rangeIndex, speed, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectDicePerLevel1, EffectDicePerLevel2, EffectDicePerLevel3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBasePoints1, EffectBasePoints2, EffectBasePoints3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, activeIconID, spellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, TotemCategory1, TotemCategory2, AreaId) VALUES
+('29878', '1', '0', '0', '0', '536871168', '0', '4', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '190', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Instakill Self', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0');
+
+-- Supremus - summoned volcanoes behave like wild summons and not like guardians per sniff data
+UPDATE `spell_template` SET `EffectMiscValueB1`=64 WHERE `Id` IN(40276);
+
+-- Teron Gorefiend - Shadow of Death should not be resistable
+UPDATE spell_template SET AttributesEx4=AttributesEx4|0x00000001 WHERE Id IN(40251);
+
+-- Supremus - volcano damage should not be delayed
+UPDATE spell_template SET Speed=0 WHERE Id IN(42052);
+
+-- Najentus - Tidal Burst - not a single resist in all of combat logs - IGNORE_RESISTANCES attribute
+UPDATE spell_template SET AttributesEx4=AttributesEx4|0x00000001 WHERE Id IN(39878);
+
+-- Teron Gorefiend - Shadow Strikes - its a hostile spell with TARGET_UNIT_ENEMY, as a result it needs to be not selfcast and the constructs have a scripted immunity
+-- this is most likely a workaround, the spell got changed in 7.2.5 and from cata with old data, to legion with new data behaves same in sniffs
+-- that leads me to believe blizzard changed target type serverside and didnt export it until legion
+UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(40334);
+
 -- Power of Arrazius - should only hit one player
 UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id` IN(34094);
 

@@ -23,6 +23,7 @@ enum
     // NPC_SUPREMUS                 = 22898,
     NPC_SHADE_OF_AKAMA              = 22841,
     NPC_AKAMA_SHADE                 = 23191,
+    NPC_TERON_GOREFIEND             = 22871,
     NPC_RELIQUARY_OF_SOULS          = 22856,
     NPC_ILLIDARI_COUNCIL            = 23426,
     NPC_COUNCIL_VOICE               = 23499,
@@ -42,6 +43,18 @@ enum
     NPC_GLAIVE_TARGET               = 23448,
     NPC_SPIRIT_OF_OLUM              = 23411,
     NPC_SPIRIT_OF_UDALO             = 23410,
+    NPC_BLACK_TEMPLE_TRIGGER        = 22984,
+    NPC_SHADOWY_CONSTRUCT           = 23111,
+    NPC_VENGEFUL_SPIRIT             = 23109,
+
+    // Ashtongue
+    NPC_ASHTONGUE_BATTLELORD        = 22844,
+    NPC_ASHTONGUE_MYSTIC            = 22845,
+    NPC_ASHTONGUE_STORMCALLER       = 22846,
+    NPC_ASHTONGUE_PRIMALIST         = 22847,
+    NPC_STORM_FURY                  = 22848,
+    NPC_ASHTONGUE_FERAL_SPIRIT      = 22849,
+    NPC_ASHTONGUE_STALKER           = 23374,
 
     GO_NAJENTUS_GATE                = 185483,
     GO_SUPREMUS_DOORS               = 185882,
@@ -55,27 +68,37 @@ enum
     GO_ILLIDAN_GATE                 = 185905,
     GO_ILLIDAN_DOOR_R               = 186261,
     GO_ILLIDAN_DOOR_L               = 186262,
+
+    GO_IMPALING_SPINE               = 185584,
+
+    EMOTE_OPEN_NAJENTUS_DOOR        = -1564137,
+
+    FACTION_ASHTONGUE_FRIENDLY      = 1820,
 };
 
 class instance_black_temple : public ScriptedInstance
 {
     public:
-        instance_black_temple(Map* pMap);
+        instance_black_temple(Map* map);
 
         void Initialize() override;
 
         bool IsEncounterInProgress() const override;
 
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
+        void OnPlayerEnter(Player* player) override;
+        void OnCreatureCreate(Creature* creature) override;
+        void OnObjectCreate(GameObject* go) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
+        void SetData(uint32 type, uint32 data) override;
+        uint32 GetData(uint32 type) const override;
 
-        void GetChannelersGuidList(GuidList& lList) const { lList = m_lChannelersGuidList; }
-        void GetGeneratorGuidVector(GuidVector& vVector) const { vVector = m_vCreatureGeneratorGuidVector; }
-        void GetGlaiveTargetGuidVector(GuidVector& vVector) const { vVector = m_vGlaiveTargetGuidVector; }
+        GuidVector const& GetChannelersGuidList() const { return m_channelersGuidVector; }
+        GuidVector const& GetGeneratorGuidVector() const { return m_creatureGeneratorGuidVector; }
+        GuidVector& GetShadowyConstructGuidVector() { return m_shadowyConstructs; } // alterable
+        void GetGlaiveTargetGuidVector(GuidVector& vector) const { vector = m_vGlaiveTargetGuidVector; }
+
+        void DespawnImpalingSpines();
+        void RespawnChannelers();
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
@@ -87,9 +110,12 @@ class instance_black_temple : public ScriptedInstance
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
-        GuidList m_lChannelersGuidList;
-        GuidVector m_vCreatureGeneratorGuidVector;
+        GuidVector m_channelersGuidVector;
+        GuidVector m_creatureGeneratorGuidVector;
         GuidVector m_vGlaiveTargetGuidVector;
+        GuidVector m_ashtongue;
+        GuidVector m_impalingSpines;
+        GuidVector m_shadowyConstructs;
 };
 
 #endif

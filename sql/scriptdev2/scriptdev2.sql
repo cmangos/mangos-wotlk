@@ -340,8 +340,12 @@ UPDATE creature_template SET ScriptName='mob_illidari_council' WHERE entry=23426
 UPDATE creature_template SET ScriptName='mob_blood_elf_council_voice_trigger' WHERE entry=23499; -- Voice Trigger Mob (Controls Aggro + Enrage yells)
 UPDATE creature_template SET ScriptName='boss_veras_darkshadow' WHERE entry=22952; -- Rogue of Illidari Council
 UPDATE creature_template SET ScriptName='boss_teron_gorefiend' WHERE entry=22871; -- Teron Gorefiend
+UPDATE creature_template SET ScriptName='npc_doom_blossom' WHERE entry=23123; -- Doom Blossom
+UPDATE creature_template SET ScriptName='npc_shadow_construct' WHERE entry IN(23111); -- Shadowy Construct
+INSERT INTO scripted_areatrigger VALUES (4665, 'at_teron_gorefiend');
 UPDATE creature_template SET ScriptName='boss_supremus' WHERE entry=22898; -- Supremus
 UPDATE creature_template SET ScriptName='boss_shade_of_akama' WHERE entry=22841; -- Shade of Akama
+UPDATE creature_template SET ScriptName='npc_creature_generator' WHERE entry IN(23210);
 UPDATE creature_template SET ScriptName='boss_reliquary_of_souls' WHERE entry=22856; -- Reliquary Controller Mob
 UPDATE creature_template SET ScriptName='boss_essence_of_suffering' WHERE entry=23418; -- Essence Of Suffering
 UPDATE creature_template SET ScriptName='boss_essence_of_desire' WHERE entry=23419; -- Essence of Desire
@@ -358,8 +362,6 @@ UPDATE creature_template SET ScriptName='mob_flame_of_azzinoth' WHERE entry=2299
 UPDATE creature_template SET ScriptName='mob_blade_of_azzinoth' WHERE entry=22996; -- Blade of Azzinoth (Illidan Phase 2)
 UPDATE creature_template SET ScriptName='mob_cage_trap_trigger' WHERE entry=23304; -- Cage Trap mob in Illidan Phase 3/4 Normal
 UPDATE creature_template SET ScriptName='mob_shadow_demon' WHERE entry=23375; -- Shadow Demon in Illidan Demon Form
-UPDATE creature_template SET ScriptName='npc_volcano' WHERE entry=23085; -- Supremus Volcano
-UPDATE creature_template SET ScriptName='molten_flame' WHERE entry=23095; -- Molten Flame in SUpremus
 UPDATE creature_template SET ScriptName='mob_ashtongue_channeler' WHERE entry=23421; -- Ashtongue CHanneler in Shade of AKama
 UPDATE creature_template SET ScriptName='mob_ashtongue_sorcerer' WHERE entry=23215; -- Ashtongue Sorcerer in Shade of Akama
 UPDATE creature_template SET ScriptName='npc_enslaved_soul' WHERE entry=23469;
@@ -4992,19 +4994,20 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1564002,'I\'ll deal with you later!',11452,1,0,0,'SAY_NEEDLE2'),
 (-1564003,'Your success was short lived!',11455,1,0,0,'SAY_SLAY1'),
 (-1564004,'Time for you to go!',11456,1,0,0,'SAY_SLAY2'),
-(-1564005,'Bel\'anen dal\'lorei!',11453,1,0,0,'SAY_SPECIAL1'),
+(-1564005,'Be''lanen dalorai!',11453,1,0,0,'SAY_SPECIAL1'),
 (-1564006,'Blood will flow!',11454,1,0,0,'SAY_SPECIAL2'),
-(-1564007,'Bal\'amer ch\'itah!',11457,1,0,0,'SAY_ENRAGE1'),
-(-1564008,'My patience has ran out! Die, DIE!',11458,1,0,0,'SAY_ENRAGE2'),
+(-1564007,'Bal, lamer zhita!',11457,1,0,0,'SAY_ENRAGE1'),
+(-1564008,'Enough! Taste the full fury of High Warlord Naj''entus!',0,1,0,0,'SAY_ENRAGE2'),
 (-1564009,'Lord Illidan will... crush you!',11459,1,0,0,'SAY_DEATH'),
+(-1564138,'My patience has ran out! Die! Die!',11458,1,0,0,'SAY_UNK'),
 
-(-1564010,'%s acquires a new target!',0,3,0,0,'supremus EMOTE_NEW_TARGET'),
-(-1564011,'%s punches the ground in anger!',0,3,0,0,'supremus EMOTE_PUNCH_GROUND'),
+(-1564010,'Supremus acquires a new target!',0,3,0,0,'supremus EMOTE_NEW_TARGET'), -- note: intentionally literal
+(-1564011,'Supremus punches the ground in anger!',0,3,53,0,'supremus EMOTE_PUNCH_GROUND'), -- note: intentionally literal
 (-1564012,'The ground begins to crack open!',0,3,0,0,'supremus EMOTE_GROUND_CRACK'),
 
 (-1564013,'No! Not yet...',11386,1,0,0,'akama shade SAY_LOW_HEALTH'),
 (-1564014,'I will not last much longer...',11385,1,0,0,'akama shade SAY_DEATH'),
-(-1564015,'Come out from the shadows! I\'ve returned to lead you against our true enemy! Shed your chains and raise your weapons against your Illidari masters!',0,1,0,0,'akama shade SAY_FREE'),
+(-1564015,'Come out from the shadows! I\'ve returned to lead you against our true enemy! Shed your chains and raise your weapons against your Illidari masters!',0,1,0,397,'akama shade SAY_FREE_3'),
 (-1564016,'Hail our leader! Hail Akama!',0,1,0,0,'akama shade broken SAY_BROKEN_FREE_01'),
 (-1564017,'Hail Akama!',0,1,0,0,'akama shade broken SAY_BROKEN_FREE_02'),
 
@@ -5037,7 +5040,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1564042,'Death really isn\'t so bad.',11516,1,0,0,'teron SAY_SPELL2'),
 (-1564043,'Give in.',11518,1,0,0,'teron SAY_SPECIAL1'),
 (-1564044,'I have something for you...',11519,1,0,0,'teron SAY_SPECIAL2'),
-(-1564045,'YOU WILL SHOW THE PROPER RESPECT!',11520,1,0,0,'teron SAY_ENRAGE'),
+(-1564045,'YOU WILL SHOW THE PROPER RESPECT!',11520,1,0,0,'teron SAY_UNK'),
 (-1564046,'The wheel... spins... again.',11521,1,0,0,'teron SAY_DEATH'),
 
 (-1564047,'Pain and suffering are all that await you!',11415,1,0,0,'essence SUFF_SAY_FREED'),
@@ -5123,7 +5126,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1564117,'Bleed as I have bled!',11494,1,0,0,'maiev SAY_MAIEV_TAUNT_2'),
 (-1564118,'There shall be no prison for you this time!',11495,1,0,0,'maiev SAY_MAIEV_TRAP'),
 (-1564119,'Meet your end, demon!',11500,1,0,0,'maiev SAY_MAIEV_TAUNT_4'),
-(-1564120,'Be wary friends, The Betrayer meditates in the court just beyond.',11388,1,0,0,'akama(illidan) SAY_AKAMA_BEWARE'),
+(-1564120,'Be wary friends, The Betrayer meditates in the court just beyond.',11388,0,0,0,'akama(illidan) SAY_AKAMA_BEWARE'),
 (-1564121,'Come, my minions. Deal with this traitor as he deserves!',11465,1,0,0,'illidan SAY_AKAMA_MINION'),
 (-1564122,'I\'ll deal with these mongrels. Strike now, friends! Strike at the betrayer!',11390,1,0,22,'akama(illidan) SAY_AKAMA_LEAVE'),
 (-1564123,'Who shall be next to taste my blades?!',11473,1,0,0,'illidan SAY_KILL1'),
@@ -5134,12 +5137,18 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1564128,'Behold the power... of the demon within!',11475,1,0,0,'illidan SAY_MORPH'),
 (-1564129,'You\'ve wasted too much time mortals, now you shall fall!',11474,1,0,0,'illidan SAY_ENRAGE'),
 
-(-1564130,'Broken of the Ashtongue tribe, your leader speaks!',0,1,0,0,'akama(shade) SAY_FREE_1'),
+(-1564130,'Broken of the Ashtongue tribe, your leader speaks!',0,1,0,15,'akama(shade) SAY_FREE_1'),
 
 (-1564131,'This door is all that stands between us and the Betrayer.  Stand aside, friends.',0,0,0,1,'akama(illidan) SAY_OPEN_DOOR_1'),
-(-1564132,'I cannot do this alone...',0,0,0,0,'akama(illidan) SAY_OPEN_DOOR_2'),
+(-1564132,'I cannot do this alone...',0,0,0,274,'akama(illidan) SAY_OPEN_DOOR_2'),
 (-1564133,'You are not alone, Akama.',0,0,0,0,'spirit_Udalo SAY_OPEN_DOOR_3'),
-(-1564134,'Your people will always be with you!',0,0,0,0,'spirit_Olum SAY_OPEN_DOOR_4');
+(-1564134,'Your people will always be with you!',0,0,0,0,'spirit_Olum SAY_OPEN_DOOR_4'),
+(-1564135,'The Betrayer no longer holds sway over us.  His dark magic over the Ashtongue soul has been destroyed!',0,1,0,1,'akama shade SAY_FREE_2'),
+(-1564136,'I thank you for your aid, brothers.  Our people will be redeemed!',0,0,0,66,'akama(illidan) SAY_OPEN_DOOR_5'),
+
+(-1564137,'You hear a loud rumble of metal grinding on stone...',0,2,0,0,'Black Temple Trigger - Open Najentus Door');
+-- -1564138 taken on najentus
+
 
 -- -1 565 000 GRUUL'S LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -10419,37 +10428,33 @@ INSERT INTO script_waypoint VALUES
 (23002,0,72,1780.24,-3775.53,30.5931,0,0,0,''),
 (23002,0,73,1753.28,-3786.79,30.7445,0,0,0,''),
 (23002,0,74,1731.09,-3796.64,36.8866,0,0,0,''),
-(23089,0,0,660.22,305.74,271.688,0,0,0,'escort paused - GOSSIP_ITEM_PREPARE'),
-(23089,0,1,675.1,343.3,271.688,0,0,0,''),
-(23089,0,2,694.01,374.84,271.687,0,0,0,''),
-(23089,0,3,706.22,375.75,274.888,0,0,0,''),
-(23089,0,4,720.48,370.38,281.3,0,0,0,''),
-(23089,0,5,733.3,357.66,292.477,0,0,0,''),
-(23089,0,6,740.4,344.39,300.92,0,0,0,''),
-(23089,0,7,747.54,329.03,308.509,0,0,0,''),
-(23089,0,8,748.24,318.78,311.781,0,0,0,''),
-(23089,0,9,752.41,304.31,312.077,0,0,0,'escort paused - SAY_AKAMA_OPEN_DOOR_1'),
-(23089,0,10,770.27,304.89,312.35,0,0,0,''),
-(23089,0,11,780.18,305.26,319.71,0,0,0,''),
-(23089,0,12,791.45,289.27,319.8,0,0,0,''),
-(23089,0,13,790.41,262.7,341.42,0,0,0,''),
-(23089,0,14,782.88,250.2,341.6,0,0,0,''),
-(23089,0,15,765.35,241.4,353.62,0,0,0,''),
-(23089,0,16,750.61,235.63,353.02,0,0,0,'escort paused - GOSSIP_ITEM_START_EVENT'),
-(23089,0,17,748.87,304.93,352.99,0,0,0,'escort paused - SAY_ILLIDAN_SPEECH_1'),
-(23089,0,18,737.92,368.15,352.99,0,0,0,''),
-(23089,0,19,749.64,378.69,352.99,0,0,0,''),
-(23089,0,20,766.49,371.79,353.63,0,0,0,''),
-(23089,0,21,784.98,361.89,341.41,0,0,0,''),
+(23089,0,0,660.7646,305.7663,271.7023,0,0,0,'escort paused - GOSSIP_ITEM_PREPARE'),
+(23089,0,1,673.1424,354.9833,271.6941,0,0,0,''),
+(23089,0,2,696.6788,380.0098,271.8946,0,0,0,''),
+(23089,0,3,721.3693,374.3735,280.9952,0,0,0,''),
+(23089,0,4,736.7919,352.5067,296.4388,0,0,0,''),
+(23089,0,5,745.5639,336.7462,306.2994,0,0,0,''),
+(23089,0,6,749.1409,319.2256,311.6859,0,0,0,''),
+(23089,0,7,755.7801,304.4006,312.1697,6.27,0,0,'escort paused - SAY_AKAMA_OPEN_DOOR_1'),
+(23089,0,8,788.4127,296.7718,319.7609,0,0,0,''),
+(23089,0,9,798.0642,282.9705,324.8198,0,0,0,''),
+(23089,0,10,795.3637,264.1908,340.1823,0,0,0,''),
+(23089,0,11,772.6248,242.5376,349.0187,0,0,0,''),
+(23089,0,12,748.4362,235.8051,353.0343,0,0,0,'escort paused - GOSSIP_ITEM_START_EVENT'),
+(23089,0,13,748.87,304.93,352.99,0,0,0,'escort paused - SAY_ILLIDAN_SPEECH_1'),
+(23089,0,14,737.92,368.15,352.99,0,0,0,''),
+(23089,0,15,749.64,378.69,352.99,0,0,0,''),
+(23089,0,16,766.49,371.79,353.63,0,0,0,''),
+(23089,0,17,784.98,361.89,341.41,0,0,0,''),
+(23089,0,18,791.44,347.1,341.41,0,0,0,''),
+(23089,0,19,794.8,319.47,319.75,0,0,0,''),
+(23089,0,20,794.34,304.34,319.75,0,0,0,'escort paused - fight illidari elites'),
+(23089,0,21,794.8,319.47,319.75,0,0,0,''),
 (23089,0,22,791.44,347.1,341.41,0,0,0,''),
-(23089,0,23,794.8,319.47,319.75,0,0,0,''),
-(23089,0,24,794.34,304.34,319.75,0,0,0,'escort paused - fight illidari elites'),
-(23089,0,25,794.8,319.47,319.75,0,0,0,''),
-(23089,0,26,791.44,347.1,341.41,0,0,0,''),
-(23089,0,27,784.98,361.89,341.41,0,0,0,''),
-(23089,0,28,766.49,371.79,353.63,0,0,0,''),
-(23089,0,29,749.64,378.69,352.99,0,0,0,''),
-(23089,0,30,737.92,368.15,352.99,0,0,0,'escort paused'),
+(23089,0,23,784.98,361.89,341.41,0,0,0,''),
+(23089,0,24,766.49,371.79,353.63,0,0,0,''),
+(23089,0,25,749.64,378.69,352.99,0,0,0,''),
+(23089,0,26,737.92,368.15,352.99,0,0,0,'escort paused'),
 (23340,0,0,-5100.367,646.988,86.75992,0,0,0,''),
 (23340,0,1,-5098.652,661.8313,87.08841,0,0,0,''),
 (23340,0,2,-5092.219,664.3353,87.73563,0,0,0,''),

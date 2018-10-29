@@ -34,6 +34,7 @@ enum
     SAY_AKAMA_OPEN_DOOR_2           = -1564132,
     SAY_UDALO_OPEN_DOOR_3           = -1564133,
     SAY_OLUM_OPEN_DOOR_4            = -1564134,
+    SAY_AKAMA_OPEN_DOOR_5           = -1564136,
 
     // Gossip for when a player clicks Akama
     GOSSIP_ITEM_PREPARE             = -3564001,
@@ -128,6 +129,9 @@ enum
     SPELL_HEALING_POTION            = 40535,                // Akama uses this to heal himself to full.
     SPELL_CHAIN_LIGHTNING           = 40536,
 
+    // Door Trigger
+    SPELL_ARCANE_EXPL_VISUAL        = 35426,
+
     // Maiev
     SPELL_SHADOW_STRIKE             = 40685,
     SPELL_THROW_DAGGER              = 41152,
@@ -194,14 +198,17 @@ static const uint32 aCagedVisualSpells[MAX_CAGE_SPELLS] = { 40704, 40707, 40708,
 
 static const DialogueEntry aIntroDialogue[] =
 {
-    {SAY_AKAMA_OPEN_DOOR_1,     NPC_AKAMA,              4000},
-    {SPELL_AKAMA_DOOR_FAIL,     0,                      9000},
+    {DUMMY_EMOTE_ID_1,          0,                      5000},
+    {SAY_AKAMA_OPEN_DOOR_1,     NPC_AKAMA,              3500},
+    {SPELL_AKAMA_DOOR_FAIL,     0,                      10000},
     {SAY_AKAMA_OPEN_DOOR_2,     NPC_AKAMA,              6000},
-    {NPC_SPIRIT_OF_OLUM,        0,                      2000},
-    {SAY_UDALO_OPEN_DOOR_3,     NPC_SPIRIT_OF_UDALO,    2000},
-    {SAY_OLUM_OPEN_DOOR_4,      NPC_SPIRIT_OF_OLUM,     4000},
+    {NPC_SPIRIT_OF_OLUM,        0,                      1500},
+    {SAY_UDALO_OPEN_DOOR_3,     NPC_SPIRIT_OF_UDALO,    6000},
+    {SAY_OLUM_OPEN_DOOR_4,      NPC_SPIRIT_OF_OLUM,     8000},
     {SPELL_AKAMA_DOOR_CHANNEL,  0,                      11000},
-    {GO_ILLIDAN_GATE,           0,                      4000},
+    {GO_ILLIDAN_GATE,           0,                      6500},
+    {SAY_AKAMA_OPEN_DOOR_5,     NPC_AKAMA,              8000},
+    {EMOTE_ONESHOT_SALUTE,      0,                      3000},
     {NPC_SPIRIT_OF_UDALO,       0,                      0},
     {0, 0, 0},
 };
@@ -1080,16 +1087,16 @@ struct npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
                 SetEscortPaused(true);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 break;
-            case 9:
+            case 7:
                 SetEscortPaused(true);
                 if (m_pInstance)
                 {
                     if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_ILLIDAN_DOOR_TRIGGER))
                         m_creature->SetFacingToObject(pTrigger);
                 }
-                StartNextDialogueText(SAY_AKAMA_OPEN_DOOR_1);
+                StartNextDialogueText(DUMMY_EMOTE_ID_1);
                 break;
-            case 16:
+            case 12:
                 SetEscortPaused(true);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 if (m_pInstance)
@@ -1097,8 +1104,9 @@ struct npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
                     if (Creature* pIllidan = m_pInstance->GetSingleCreatureFromStorage(NPC_ILLIDAN_STORMRAGE))
                         m_creature->SetFacingToObject(pIllidan);
                 }
+                DoScriptText(SAY_AKAMA_BEWARE, m_creature);
                 break;
-            case 17:
+            case 13:
                 SetEscortPaused(true);
                 if (m_pInstance)
                 {
@@ -1111,11 +1119,11 @@ struct npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
                     }
                 }
                 break;
-            case 24:
+            case 20:
                 SetEscortPaused(true);
                 m_bFightMinions = true;
                 break;
-            case 30:
+            case 26:
                 SetEscortPaused(true);
                 if (m_pInstance)
                 {
@@ -1157,9 +1165,9 @@ struct npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
                 DoCastSpellIfCan(m_creature, SPELL_AKAMA_DOOR_FAIL);
                 break;
             case NPC_SPIRIT_OF_OLUM:
-                m_creature->SummonCreature(NPC_SPIRIT_OF_OLUM, 751.64f, 297.22f, 312.21f, 6.03f, TEMPSPAWN_TIMED_DESPAWN, 25000);
-                m_creature->SummonCreature(NPC_SPIRIT_OF_UDALO, 751.47f, 311.01f, 312.19f, 0.0f, TEMPSPAWN_TIMED_DESPAWN, 25000);
-                break;
+                m_creature->SummonCreature(NPC_SPIRIT_OF_OLUM,  751.6437f, 297.2233f, 312.2083f, 6.03f, TEMPSPAWN_TIMED_DESPAWN, 50000);
+                m_creature->SummonCreature(NPC_SPIRIT_OF_UDALO, 751.4565f, 311.0107f, 312.19f, 0.0f, TEMPSPAWN_TIMED_DESPAWN, 50000);
+                break; 
             case SPELL_AKAMA_DOOR_CHANNEL:
                 DoCastSpellIfCan(m_creature, SPELL_AKAMA_DOOR_CHANNEL);
                 if (m_pInstance)
@@ -1172,10 +1180,26 @@ struct npc_akama_illidanAI : public npc_escortAI, private DialogueHelper
                 break;
             case GO_ILLIDAN_GATE:
                 if (m_pInstance)
+                {
+                    if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_ILLIDAN_DOOR_TRIGGER))
+                        pTrigger->CastSpell(pTrigger, SPELL_ARCANE_EXPL_VISUAL, TRIGGERED_OLD_TRIGGERED);
+
                     m_pInstance->DoUseDoorOrButton(GO_ILLIDAN_GATE);
+                }
+                break;
+            case EMOTE_ONESHOT_SALUTE:
+                if (m_pInstance)
+                {
+                    if (Creature* pOlum = m_pInstance->GetSingleCreatureFromStorage(NPC_SPIRIT_OF_OLUM))
+                        pOlum->HandleEmote(EMOTE_ONESHOT_SALUTE);
+                    if (Creature* pUdalo = m_pInstance->GetSingleCreatureFromStorage(NPC_SPIRIT_OF_UDALO))
+                        pUdalo->HandleEmote(EMOTE_ONESHOT_SALUTE);
+                }
                 break;
             case NPC_SPIRIT_OF_UDALO:
                 SetEscortPaused(false);
+                break;
+            case DUMMY_EMOTE_ID_1:
                 break;
         }
     }
