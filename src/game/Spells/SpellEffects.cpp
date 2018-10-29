@@ -11714,6 +11714,10 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
             switch (m_spellInfo->Id)
             {
                 case 24731:
+                case 40964:         // Fel Crystalforge: Create 1 Flask
+                case 40965:         // Fel Crystalforge: Create 5 Flasks
+                case 40968:         // Bash'ir Crystalforge: Create 1 Flask
+                case 40970:         // Bash'ir Crystalforge: Create 5 Flasks
                 case 42868:
                     gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
                     break;
