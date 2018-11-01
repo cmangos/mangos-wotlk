@@ -67,7 +67,8 @@ struct mob_webbed_creatureAI : public Scripted_NoMovementAI
         }
 
         if (uiSpawnCreatureEntry)
-            m_creature->SummonCreature(uiSpawnCreatureEntry, 0.0f, 0.0f, 0.0f, m_creature->GetOrientation(), TEMPSPAWN_TIMED_OOC_DESPAWN, 25000);
+            if (Creature* spawnedCreature = m_creature->SummonCreature(uiSpawnCreatureEntry, 0.0f, 0.0f, 0.0f, m_creature->GetOrientation(), TEMPSPAWN_TIMED_OOC_DESPAWN, 25000))
+                spawnedCreature->GetMotionMaster()->MoveRandomAroundPoint(spawnedCreature->GetPositionX(), spawnedCreature->GetPositionY(), spawnedCreature->GetPositionZ(), 5.f); // Needed because one or more of the spawned creatures has MovementType 2 by default, causing them to go flying to the first default waypoint
     }
 };
 
