@@ -1318,3 +1318,6 @@ UPDATE spell_template SET Mechanic=12 WHERE Id IN(25900);
 -- sweeping strikes should not be lost on stance change to defensive
 UPDATE spell_template SET Attributes=Attributes|0x00010000 WHERE Id IN(12328);
 
+-- Seed of Corruption - Patch 2.3.0 - Seed now obeys LOS - confirmed with 2.2.3 client that this change never made it to client
+UPDATE spell_template SET AttributesEx2=AttributesEx2&~4 WHERE Id IN(27285);
+
