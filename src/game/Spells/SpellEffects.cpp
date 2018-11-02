@@ -12232,7 +12232,7 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
     m_spellLog.AddLog(m_spellInfo->Effect[eff_idx], pGameObj->GetPackGUID());
 
     if (GameObject* linkedGO = pGameObj->GetLinkedTrap())
-        m_spellLog.AddLog(uint32(SPELL_EFFECT_SUMMON_OBJECT_WILD), linkedGO->GetPackGUID());
+        m_spellLog.AddLog(m_spellInfo->Effect[eff_idx], linkedGO->GetPackGUID());
 }
 
 void Spell::EffectResurrect(SpellEffectIndex /*eff_idx*/)
@@ -12875,7 +12875,7 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
     m_spellLog.AddLog(uint32(SPELL_EFFECT_TRANS_DOOR), pGameObj->GetPackGUID());
 
     if (GameObject* linkedGO = pGameObj->GetLinkedTrap())
-        m_spellLog.AddLog(uint32(SPELL_EFFECT_SUMMON_OBJECT_WILD), linkedGO->GetPackGUID());
+        m_spellLog.AddLog(uint32(SPELL_EFFECT_TRANS_DOOR), linkedGO->GetPackGUID());
 }
 
 void Spell::EffectProspecting(SpellEffectIndex /*eff_idx*/)
