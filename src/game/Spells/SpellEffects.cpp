@@ -1933,6 +1933,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 34819, TRIGGERED_OLD_TRIGGERED); // Summon 20078 front of the caster
                     return;
                 }
+                case 35517:                                 // Teleport
+                {
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
+                        ((Creature*)unitTarget)->ForcedDespawn(1000);
+
+                    return;
+                }
                 case 35598:                                 // Wrath of Socrethar (pretend to kill Ishanah)
                 {
                     unitTarget->CastSpell(unitTarget, 29266, TRIGGERED_NONE); // Permanent Feign Death

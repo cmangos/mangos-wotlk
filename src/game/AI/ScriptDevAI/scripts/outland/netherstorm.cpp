@@ -32,6 +32,7 @@ npc_protectorate_demolitionist
 npc_captured_vanguard
 npc_drijya
 npc_dimensius
+npc_saeed
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -1985,6 +1986,251 @@ bool QuestAccept_npc_drijya(Player* pPlayer, Creature* pCreature, const Quest* p
 }
 
 /*######
+## npc_saeed
+######*/
+
+enum
+{
+    QUEST_DIMENSIUS_ALL_DEVOURING   = 10439,
+
+    NPC_PROTECTORATE_DEFENDER       = 20984,
+    NPC_PROTECTORATE_REGENERATOR    = 21783,
+    NPC_PROTECTORATE_AVENGER        = 21805,
+    NPC_DIMENSIUS                   = 19554,
+
+    FACTION_PROTECTORATE_ESCORT     = 1807,
+
+    SAY_SAEED_START                 = -1015033,
+    SAY_SAEED_PREPARE               = -1015034,
+    SAY_SAEED_ATTACK                = -1015035,
+    EMOTE_DIMENSIUS_LAUGH           = -1015036,
+    SAY_SAEED_TAUNT                 = -1015037,
+    SAY_AVENGER_QUEST_COMPLETE      = -1015038,
+
+    SPELL_SAEED_CLEAVE              = 15496,
+    SPELL_TELEPORT                  = 35517,
+};
+
+struct npc_saeed_escortAI : public npc_escortAI
+{
+    npc_saeed_escortAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+
+    uint8 m_uiEvent;
+    uint32 m_uiEventTimer;
+    uint32 m_uiCleaveTimer;
+    std::list<Creature*> m_lProtectorateAllyList;
+
+    void Reset() override
+    {
+        if (!HasEscortState(STATE_ESCORT_ESCORTING))
+        {
+            m_uiEvent = 0;
+            m_uiEventTimer = 0;
+            m_lProtectorateAllyList.clear();
+        }
+
+        m_uiCleaveTimer = urand(4000, 7000);
+    }
+
+    void WaypointReached(uint32 uiPoint) override
+    {
+        switch (uiPoint)
+        {
+            case 36:
+                SetEscortPaused(true);
+                if (Player* player = GetPlayerForEscort())
+                {
+                    m_creature->SetFacingToObject(player);
+                    DoScriptText(SAY_SAEED_PREPARE, m_creature, player);
+                }
+                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                m_creature->HandleEmoteState(EMOTE_STATE_READYUNARMED);
+                for (auto& ally : m_lProtectorateAllyList)
+                    ally->HandleEmoteState(EMOTE_STATE_READYUNARMED);
+
+                break;
+            case 41:
+                SetEscortPaused(true);
+                m_uiEventTimer = 4000;
+                m_uiEvent = 4;
+                break;
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        {
+            if (m_uiEventTimer)
+            {
+                if (m_uiEventTimer <= uiDiff)
+                {
+                    switch (m_uiEvent)
+                    {
+                        // shortly following escort initiation
+                        case 1:
+                            m_creature->HandleEmote(EMOTE_ONESHOT_ROAR);
+                            for (auto& ally : m_lProtectorateAllyList)
+                                ally->HandleEmote(EMOTE_ONESHOT_ROAR);
+
+                            m_uiEventTimer = 7000;
+                            m_uiEvent = 2;
+                            break;
+                        // start up waypoints
+                        case 2:
+                            SetEscortPaused(false);
+
+                            m_uiEventTimer = 0;
+                            m_uiEvent = 0;
+                            break;
+                        // after talking to Saeed again midway through the escort
+                        case 3:
+                            m_creature->HandleEmote(EMOTE_ONESHOT_ROAR);
+                            DoScriptText(SAY_SAEED_ATTACK, m_creature);
+                            for (auto& ally : m_lProtectorateAllyList)
+                            {
+                                ally->HandleEmoteState(EMOTE_STATE_NONE);
+                                ally->HandleEmote(EMOTE_ONESHOT_ROAR);
+                            }
+
+                            m_uiEventTimer = 3000;
+                            m_uiEvent = 2;
+                            break;
+                        // pre-fight event 1
+                        case 4:
+                            DoScriptText(SAY_SAEED_TAUNT, m_creature);
+                            m_creature->HandleEmoteState(EMOTE_STATE_READYUNARMED);
+                            for (auto& ally : m_lProtectorateAllyList)
+                                ally->HandleEmoteState(EMOTE_STATE_READYUNARMED);
+
+                            m_uiEventTimer = 2000;
+                            m_uiEvent = 5;
+                            break;
+                        // pre-fight event 2
+                        case 5:
+                            if (Creature* dimensius = GetClosestCreatureWithEntry(m_creature, NPC_DIMENSIUS, 40.0f))
+                            {
+                                DoScriptText(EMOTE_DIMENSIUS_LAUGH, dimensius, m_creature);
+                                dimensius->SetDisplayId(dimensius->GetNativeDisplayId());
+                                dimensius->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            }
+
+                            m_uiEventTimer = 3000;
+                            m_uiEvent = 6;
+                            break;
+                        // pre-fight event 3
+                        case 6:
+                            if (Creature* dimensius = GetClosestCreatureWithEntry(m_creature, NPC_DIMENSIUS, 40.0f))
+                            {
+                                dimensius->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                                dimensius->AI()->AttackStart(m_creature);
+                                m_creature->AI()->AttackStart(dimensius);
+                            }
+
+                            m_uiEventTimer = 0;
+                            m_uiEvent = 0;
+                            break;
+                        // post-fight event 1
+                        case 7:
+                            if (Creature* avenger = GetClosestCreatureWithEntry(m_creature, NPC_PROTECTORATE_AVENGER, 40.0f))
+                            {
+                                if (Player* player = GetPlayerForEscort())
+                                    DoScriptText(SAY_AVENGER_QUEST_COMPLETE, avenger, player);
+                            }
+                            m_uiEventTimer = 4000;
+                            m_uiEvent = 8;
+                            break;
+                        // post-fight event 2
+                        case 8:
+                            for (auto& ally : m_lProtectorateAllyList)
+                                ally->CastSpell(ally, SPELL_TELEPORT, TRIGGERED_NONE);
+
+                            DoCastSpellIfCan(m_creature, SPELL_TELEPORT);
+                            m_uiEventTimer = 0;
+                            m_uiEvent = 0;
+                            break;
+                        default:
+                            m_uiEventTimer = 0;
+                            break;
+                    }
+                }
+                else
+                    m_uiEventTimer -= uiDiff;
+            }
+        }
+        else
+        {
+            if (m_uiCleaveTimer < uiDiff)
+            {
+                DoCastSpellIfCan(m_creature->getVictim(), SPELL_SAEED_CLEAVE);
+                m_uiCleaveTimer = urand(7000, 11000);
+            }
+            else
+                m_uiCleaveTimer -= uiDiff;
+
+            DoMeleeAttackIfReady();
+        }
+    }
+};
+
+UnitAI* GetAI_npc_saeed(Creature* pCreature)
+{
+    return new npc_saeed_escortAI(pCreature);
+}
+
+bool GossipSelect_npc_saeed(Player* player, Creature* creature, uint32 /*sender*/, uint32 action)
+{
+    if (npc_saeed_escortAI* ai = dynamic_cast<npc_saeed_escortAI*>(creature->AI()))
+    {
+        // begin escort
+        if (action == 100)
+        {
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            DoScriptText(SAY_SAEED_START, creature, player);
+            creature->SetFactionTemporary(FACTION_PROTECTORATE_ESCORT, TEMPFACTION_RESTORE_RESPAWN);
+            if (Group* group = player->GetGroup())
+            {
+                for (GroupReference* ref = group->GetFirstMember(); ref != nullptr; ref = ref->next())
+                    if (Player* member = ref->getSource())
+                        if (member->GetQuestStatus(QUEST_DIMENSIUS_ALL_DEVOURING) == QUEST_STATUS_INCOMPLETE)
+                            member->KilledMonsterCredit(creature->GetEntry(), creature->GetObjectGuid());
+            }
+            else if (player->GetQuestStatus(QUEST_DIMENSIUS_ALL_DEVOURING) == QUEST_STATUS_INCOMPLETE)
+            {
+                player->KilledMonsterCredit(creature->GetEntry(), creature->GetObjectGuid());
+            }
+
+            ai->Start(true, player, GetQuestTemplateStore(QUEST_DIMENSIUS_ALL_DEVOURING));
+            ai->SetEscortPaused(true);
+
+            ai->m_uiEventTimer = 3000;
+            ai->m_uiEvent = 1;
+            ai->m_lProtectorateAllyList.clear();
+            GetCreatureListWithEntryInGrid(ai->m_lProtectorateAllyList, creature, NPC_PROTECTORATE_AVENGER, 30.0f);
+            GetCreatureListWithEntryInGrid(ai->m_lProtectorateAllyList, creature, NPC_PROTECTORATE_DEFENDER, 30.0f);
+            GetCreatureListWithEntryInGrid(ai->m_lProtectorateAllyList, creature, NPC_PROTECTORATE_REGENERATOR, 30.0f);
+            for (auto& ally : ai->m_lProtectorateAllyList)
+                ally->SetFactionTemporary(FACTION_PROTECTORATE_ESCORT, TEMPFACTION_RESTORE_RESPAWN);
+
+            player->CLOSE_GOSSIP_MENU();
+            return true;
+        }
+
+        // start sequence with Dimensius
+        else if (action == 101)
+        {
+            creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            ai->m_uiEventTimer = 2000;
+            ai->m_uiEvent = 3;
+
+            player->CLOSE_GOSSIP_MENU();
+            return true;
+        }
+    }
+    return false;
+}
+
+/*######
 ## npc_dimensius
 ######*/
 
@@ -2056,11 +2302,16 @@ struct npc_dimensiusAI : public Scripted_NoMovementAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void JustDied(Unit* /*pKiller*/) override
     {
-        // event is sent by dbscript
-        if (eventType == AI_EVENT_CUSTOM_EVENTAI_B && pSender->GetEntry() == NPC_CAPTAIN_SAEED)
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+        if (Creature* saeed = GetClosestCreatureWithEntry(m_creature, NPC_CAPTAIN_SAEED, 40.0f))
+        {
+            if (npc_saeed_escortAI* ai = dynamic_cast<npc_saeed_escortAI*>(saeed->AI()))
+            {
+                ai->m_uiEventTimer = 3000;
+                ai->m_uiEvent = 7;
+            }
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -3653,6 +3904,17 @@ void AddSC_netherstorm()
     pNewScript = new Script;
     pNewScript->Name = "npc_dimensius";
     pNewScript->GetAI = &GetAI_npc_dimensius;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_saeed";
+    pNewScript->GetAI = &GetAI_npc_saeed;
+    pNewScript->pGossipSelect = &GossipSelect_npc_saeed;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_manaforge_spawn";
+    pNewScript->GetAI = &GetAI_npc_manaforge_spawnAI;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
