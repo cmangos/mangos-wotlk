@@ -126,8 +126,8 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void GetWaypointPathInformation(std::ostringstream& oss) const;
         bool GetDestination(float& x, float& y, float& z) const;
 
-        void SetPathId(uint32 pathId) { m_defaultPathId = pathId; }
-        uint32 GetPathId() const { return m_defaultPathId; }
+        void SetDefaultPathId(uint32 pathId) { m_defaultPathId = pathId; }
+        uint32 GetPathId() const { return m_currentPathId; }
 
         void InterruptFlee();
 
@@ -145,5 +145,6 @@ class MotionMaster : private std::stack<MovementGenerator*>
         uint8       m_cleanFlag;
 
         uint32      m_defaultPathId;
+        uint32      m_currentPathId;
 };
 #endif
