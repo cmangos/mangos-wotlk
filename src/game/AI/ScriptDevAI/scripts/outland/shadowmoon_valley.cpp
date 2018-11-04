@@ -3570,6 +3570,7 @@ bool QuestAccept_npc_dragonmaw_racer(Player* player, Creature* questgiver, Quest
 ######*/
 
 enum {
+    NPC_DOOMWALKER            = 17711,
     NPC_FORMATION_MARKER      = 19179,
     NPC_ILLIDARI_RAVAGER      = 22857,
     NPC_SHADOWHOOF_ASSASSIN   = 22858,
@@ -3586,7 +3587,7 @@ enum {
     SAY_CAALEN_FORWARD        = -1015032,
     SAY_FYRA_ONWARD	          = -1015031,
 
-    ILLIDARI_ATTACK_INTERVAL  = 90000,
+    ILLIDARI_ATTACK_INTERVAL  = 150000,
     REINFORCE_INTERVAL        = 30000,
 
     // Spells
@@ -4738,7 +4739,11 @@ struct npc_bt_battle_sensor : public ScriptedAI
                         break;
                     }
                     case AI_EVENT_CUSTOM_EVENTAI_B:
-                        if (urand(0, 1))
+                    {
+                        Creature* doomwalker = GetClosestCreatureWithEntry(m_creature, NPC_DOOMWALKER, 200.0f);
+                        bool doomwalkerDead = doomwalker ? false : true;
+
+                        if (urand(0, 1) || doomwalkerDead)
                         {
                             sender->GetMotionMaster()->Clear(false, true);
                             sender->GetMotionMaster()->MoveWaypoint(0, 3, 0);
@@ -4748,6 +4753,7 @@ struct npc_bt_battle_sensor : public ScriptedAI
                                 senderAI->ForcedDespawn(90000);
                         }
                         break;
+                    }
                 }
 
                 break;
@@ -4794,7 +4800,11 @@ struct npc_bt_battle_sensor : public ScriptedAI
                         break;
                     }
                     case AI_EVENT_CUSTOM_EVENTAI_B:
-                        if (urand(0, 1))
+                    {
+                        Creature* doomwalker = GetClosestCreatureWithEntry(m_creature, NPC_DOOMWALKER, 200.0f);
+                        bool doomwalkerDead = doomwalker ? false : true;
+
+                        if (urand(0, 1) || doomwalkerDead)
                         {
                             sender->GetMotionMaster()->Clear(false, true);
                             sender->GetMotionMaster()->MoveWaypoint(0, 3, 0);
@@ -4804,6 +4814,7 @@ struct npc_bt_battle_sensor : public ScriptedAI
                                 senderAI->ForcedDespawn(90000);
                         }
                         break;
+                    }
                 }
 
                 break;
@@ -4857,15 +4868,12 @@ struct npc_bt_battle_sensor : public ScriptedAI
                         break;
                     }
                     case AI_EVENT_CUSTOM_EVENTAI_B:
-                        if (urand(0, 1))
-                        {
-                            sender->GetMotionMaster()->Clear(false, true);
-                            sender->GetMotionMaster()->MoveWaypoint(0, 3, 0);
-                            sender->GetMotionMaster()->SetNextWaypoint(0);
+                        sender->GetMotionMaster()->Clear(false, true);
+                        sender->GetMotionMaster()->MoveWaypoint(0, 3, 0);
+                        sender->GetMotionMaster()->SetNextWaypoint(0);
 
-                            if (Creature* senderAI = dynamic_cast<Creature*>(sender))
-                                senderAI->ForcedDespawn(90000);
-                        }
+                        if (Creature* senderAI = dynamic_cast<Creature*>(sender))
+                            senderAI->ForcedDespawn(90000);
                         break;
                 }
 
