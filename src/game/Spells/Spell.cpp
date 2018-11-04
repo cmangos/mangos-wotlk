@@ -2325,6 +2325,31 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
 
             if (!tempTargetUnitMap.empty())
                 CheckSpellScriptTargets(bounds, tempTargetUnitMap, targetUnitMap, effIndex);
+
+            switch (m_spellInfo->Id)
+            {
+                case 40307: // AOEs which should only be cast if a target was found
+                case 40350:
+                {
+                    if (targetUnitMap.size() <= 0)
+                    {
+                        cancel();
+                        return;
+                    }
+                    break;
+                }
+                case 45339:
+                {
+                    for (UnitList::const_iterator iter = targetUnitMap.begin(); iter != targetUnitMap.end();)
+                    {
+                        if ((*iter)->HasCharmer(m_caster->GetObjectGuid()))
+                            iter = targetUnitMap.erase(iter);
+                        else
+                            ++iter;
+                    }
+                    break;
+                }
+            }
             break;
         }
         case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DEST_LOC:
