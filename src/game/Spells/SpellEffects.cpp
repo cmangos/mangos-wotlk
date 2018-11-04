@@ -9037,15 +9037,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 43365:                                 // The Cleansing: Shrine Cast
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Script Effect Player Cast Mirror Image
-                    m_caster->CastSpell(m_caster, 50217, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 43375:                                 // Mixing Vrykul Blood
                 {
                     if (!unitTarget)
