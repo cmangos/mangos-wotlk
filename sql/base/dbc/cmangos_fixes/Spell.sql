@@ -1321,3 +1321,6 @@ UPDATE spell_template SET Attributes=Attributes|0x00010000 WHERE Id IN(12328);
 -- Seed of Corruption - Patch 2.3.0 - Seed now obeys LOS - confirmed with 2.2.3 client that this change never made it to client
 UPDATE spell_template SET AttributesEx2=AttributesEx2&~4 WHERE Id IN(27285);
 
+-- Wrangle Aether Rays: Wrangling Rope Channel - during this channel aether rays move - addition of SPELL_ATTR_EX5_CAN_CHANNEL_WHEN_MOVING
+UPDATE spell_template SET AttributesEx5=AttributesEx5|0x00000001 WHERE id IN(40926);
+
