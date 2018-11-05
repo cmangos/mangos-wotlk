@@ -471,6 +471,7 @@ UPDATE creature_template SET ScriptName='npc_supplicant' WHERE entry IN(23052,23
 INSERT INTO scripted_event_id VALUES(14739,'event_into_the_soulgrinder');
 UPDATE creature_template SET ScriptName='npc_warp_gate' WHERE entry IN(22471,22472);
 UPDATE creature_template SET ScriptName='npc_fel_cannon' WHERE entry=22443;
+UPDATE gameobject_template SET ScriptName='go_fel_cannonball_stack_trap' WHERE entry IN(185862);
 
 /* BLASTED LANDS */
 
