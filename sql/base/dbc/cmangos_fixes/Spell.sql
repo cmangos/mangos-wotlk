@@ -1324,3 +1324,4 @@ UPDATE spell_template SET AttributesEx2=AttributesEx2&~4 WHERE Id IN(27285);
 -- Wrangle Aether Rays: Wrangling Rope Channel - during this channel aether rays move - addition of SPELL_ATTR_EX5_CAN_CHANNEL_WHEN_MOVING
 UPDATE spell_template SET AttributesEx5=AttributesEx5|0x00000001 WHERE id IN(40926);
 
+
