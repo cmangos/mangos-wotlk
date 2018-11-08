@@ -1670,7 +1670,13 @@ void Aura::TriggerSpell()
 //                    // Shadow Bolt Whirl
 //                    case 39634: break;
 //                    // Shadow Inferno
-//                    case 39645: break;
+                    case 39645:
+                    {
+                        int32 damageForTick[8] = { 1000, 2000, 4000, 4000, 4000, 4000, 4000, 4000 }; // reconfirm!
+                        triggerTarget->CastCustomSpell(triggerTarget, 39646, &damageForTick[GetAuraTicks() - 1], nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
+                        return;
+                    }
+                    break;
                     case 39857:                             // Tear of Azzinoth Summon Channel - it's not really supposed to do anything,and this only prevents the console spam
                         trigger_spell_id = 39856;
                         break;
