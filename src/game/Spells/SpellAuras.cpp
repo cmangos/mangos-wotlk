@@ -1672,7 +1672,7 @@ void Aura::TriggerSpell()
 //                    // Shadow Inferno
                     case 39645:
                     {
-                        int32 damageForTick[8] = { 1000, 2000, 4000, 4000, 4000, 4000, 4000, 4000 }; // reconfirm!
+                        int32 damageForTick[8] = { 1000, 1000, 2000, 2000, 3000, 3000, 4000, 5000 };
                         triggerTarget->CastCustomSpell(triggerTarget, 39646, &damageForTick[GetAuraTicks() - 1], nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
                         return;
                     }
