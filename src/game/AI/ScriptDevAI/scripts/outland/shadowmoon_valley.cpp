@@ -3582,8 +3582,10 @@ enum {
     NPC_BT_BATTLE_SENOR       = 22934,
     NPC_SHADOWLORD            = 22988,
 
-    SAY_MAG_ON_AGGRO_1        = -10782,
-    SAY_MAG_ON_AGGRO_2        = -10783,
+    SAY_VINDICATOR_ON_AGGRO_1 = -1015062,
+    SAY_MAG_ON_AGGRO_1        = -1015063,
+    SAY_MAG_ON_AGGRO_2        = -1015064,
+    SAY_MAG_ON_AGGRO_3        = -1015065,
     SAY_CAALEN_FORWARD        = -1015032,
     SAY_FYRA_ONWARD	          = -1015031,
 
@@ -4236,12 +4238,30 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatTimerAI
 
     void Aggro(Unit* who) override
     {
-        if (m_creature->GetEntry() == NPC_SEASONED_MAGISTER)
+        switch (m_creature->GetEntry())
         {
-            if (!urand(0, 9))
-                DoScriptText(urand(0, 1) ? SAY_MAG_ON_AGGRO_1 : SAY_MAG_ON_AGGRO_2, m_creature, who);
+            case NPC_LIGHTSWORN_VINDICATOR:
+            {
+                if (!urand(0, 9))
+                {
+                    DoScriptText(SAY_VINDICATOR_ON_AGGRO_1, m_creature, who); // missing texts?
+                }
 
-            SetCombatMovement(false);
+                break;
+            }
+            case NPC_SEASONED_MAGISTER:
+            {
+                if (!urand(0, 9))
+                {
+                    if (urand(0, 2))
+                        DoScriptText(urand(0, 1) ? SAY_MAG_ON_AGGRO_1 : SAY_MAG_ON_AGGRO_2, m_creature, who);
+                    else
+                        DoScriptText(SAY_MAG_ON_AGGRO_3, m_creature, who);
+                }
+
+                SetCombatMovement(false);
+                break;
+            }
         }
     }
 

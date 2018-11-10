@@ -3246,6 +3246,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1015036,'%s laughs.',0,2,0,0,'Dimensius EMOTE_DIMENSIUS_LAUGH'),
 (-1015037,'The time for your destruction has finally come, Dimensius!',0,0,0,0,'Captain Saeed SAY_SAEED_TAUNT'),
 (-1015038,'We are victorious! Dimensius is no more! Report back to the Professor, hero.',0,0,0,0,'Protectorate Avenger SAY_AVENGER_QUEST_COMPLETE'),
+-- -1015039 to -1015061 reserved
+(-1015062,'The enemy is upon us!  Stand your ground!',0,0,0,0,'Vindicator on aggro 1'),
+(-1015063,'Illidan\'s lapdogs!  Destroy them all!',0,0,0,0,'Magister on aggro 1'),
+(-1015064,'Come closer, demon!  Death awaits!',0,0,0,0,'Magister on aggro 2'),
+(-1015065,'I\'ve a message for your master, scum!',0,0,0,0,'Magister on aggro 3'),
 
 (-1015066,'Do not return, draenei scum. Next time we won\'t spare your life, unarmed or not!',0,0,0,0,'Maghar escort SAY'),
 (-1015067,'I\'ve failed... peace is impossible.',0,0,0,0,'Vindicator Sedai SAY 1'),
