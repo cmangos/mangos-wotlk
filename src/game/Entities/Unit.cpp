@@ -5157,7 +5157,7 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
         uint32 i_spellId = (*i).second->GetId();
         if ((*i).second && i_spellId && i_spellId != spellId)
         {
-            if (sSpellMgr.IsRankSpellDueToSpell(spellInfo, i_spellId))
+            if (sSpellMgr.IsSpellAnotherRankOfSpell(spellId, i_spellId))
             {
                 RemoveAurasDueToSpell(i_spellId);
 
@@ -5227,7 +5227,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
                 continue;
 
             // passive non-stackable spells not stackable only with another rank of same spell
-            if (!sSpellMgr.IsRankSpellDueToSpell(spellProto, i_spellId))
+            if (!sSpellMgr.IsSpellAnotherRankOfSpell(spellId, i_spellId))
                 continue;
         }
 
@@ -5244,7 +5244,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
         if (is_spellSpecPerTarget || (is_spellSpecPerTargetPerCaster && holder->GetCasterGuid() == (*i).second->GetCasterGuid()))
         {
             // cannot remove higher rank
-            if (sSpellMgr.IsRankSpellDueToSpell(spellProto, i_spellId))
+            if (sSpellMgr.IsSpellAnotherRankOfSpell(spellId, i_spellId))
                 if (CompareAuraRanks(spellId, i_spellId) < 0)
                     return false;
 
@@ -5260,7 +5260,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
         // spell with spell specific that allow single ranks for spell from diff caster
         // same caster case processed or early or later
         bool is_spellPerTarget = IsSingleFromSpellSpecificSpellRanksPerTarget(spellId_spec, i_spellId_spec);
-        if (is_spellPerTarget && holder->GetCasterGuid() != (*i).second->GetCasterGuid() && sSpellMgr.IsRankSpellDueToSpell(spellProto, i_spellId))
+        if (is_spellPerTarget && holder->GetCasterGuid() != (*i).second->GetCasterGuid() && sSpellMgr.IsSpellAnotherRankOfSpell(spellId, i_spellId))
         {
             // cannot remove higher rank
             if (CompareAuraRanks(spellId, i_spellId) < 0)

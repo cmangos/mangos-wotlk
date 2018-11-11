@@ -1800,15 +1800,6 @@ void SpellMgr::LoadSpellThreats()
     sLog.outString();
 }
 
-bool SpellMgr::IsRankSpellDueToSpell(SpellEntry const* spellInfo_1, uint32 spellId_2) const
-{
-    SpellEntry const* spellInfo_2 = sSpellTemplate.LookupEntry<SpellEntry>(spellId_2);
-    if (!spellInfo_1 || !spellInfo_2) return false;
-    if (spellInfo_1->Id == spellId_2) return false;
-
-    return GetFirstSpellInChain(spellInfo_1->Id) == GetFirstSpellInChain(spellId_2);
-}
-
 bool SpellMgr::canStackSpellRanksInSpellBook(SpellEntry const* spellInfo) const
 {
     if (IsPassiveSpell(spellInfo))                          // ranked passive spell
@@ -2544,7 +2535,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
             return true;
     }
 
-    if (IsRankSpellDueToSpell(spellInfo_1, spellInfo_2->Id))
+    if (IsSpellAnotherRankOfSpell(spellInfo_1->Id, spellInfo_2->Id))
         return true;
 
     if (spellInfo_1->SpellFamilyName == 0 || spellInfo_2->SpellFamilyName == 0)
