@@ -1804,9 +1804,12 @@ class Unit : public WorldObject
         bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
         void SetInCombatState(bool PvP, Unit* enemy = nullptr);
         void SetInCombatWith(Unit* enemy);
-        void SetInCombatWithAggressor(Unit* aggressor);
-        void SetInCombatWithAssisted(Unit* assisted);
-        void SetInCombatWithVictim(Unit* victim);
+        void SetInCombatWithAggressor(Unit* aggressor, bool touchOnly = false);
+        inline void SetOutOfCombatWithAggressor(Unit* aggressor) { SetInCombatWithAggressor(aggressor, true); }
+        void SetInCombatWithAssisted(Unit* assisted, bool touchOnly = false);
+        inline void SetOutOfCombatWithAssisted(Unit* assisted) { SetInCombatWithAssisted(assisted, true); }
+        void SetInCombatWithVictim(Unit* victim, bool touchOnly = false);
+        inline void SetOutOfCombatWithVictim(Unit* victim) { SetInCombatWithVictim(victim, true); }
         void ClearInCombat();
         uint32 GetCombatTimer() const { return m_CombatTimer; }
 

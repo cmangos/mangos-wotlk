@@ -6366,15 +6366,19 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
 {
     if (realCaster->CanAttack(target))
     {
+        if (spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
+            return;
+
+        // Hostile spell hits count as attack made against target (if detected), stealth removed at Spell::cast if spell break it
+        const bool attack = (!IsPositiveSpell(spellInfo->Id, realCaster, target) && isVisibleForOrDetect(target, target, false));
+
         if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO))
         {
             // not break stealth by cast targeting
             if (!spellInfo->HasAttribute(SPELL_ATTR_EX_NOT_BREAK_STEALTH))
                 target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
-            // Hostile spell hits count as attack made against target (if detected), stealth removed at Spell::cast if spell break it
-            if (!IsPositiveSpell(spellInfo->Id, realCaster, target) &&
-                isVisibleForOrDetect(target, target, false))
+            if (attack)
             {
                 // Since patch 1.5.0 sitting characters always stand up on attack (even if stunned)
                 if (!target->IsStandState() && target->GetTypeId() == TYPEID_PLAYER)
@@ -6398,17 +6402,24 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
                 }
             }
         }
+
+        if (attack && spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
+        {
+            target->SetOutOfCombatWithAggressor(realCaster);
+            realCaster->SetOutOfCombatWithVictim(target);
+        }
     }
-    else if (realCaster->CanAssist(target))
+    else if (realCaster->CanAssist(target) && target->isInCombat())
     {
         // assisting case, healing and resurrection
-        if (target->isInCombat() &&
-            !spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) &&
-            !spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
+        if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT))
         {
             realCaster->SetInCombatWithAssisted(target);
             target->getHostileRefManager().threatAssist(realCaster, 0.0f, spellInfo, false);
         }
+
+        if (spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
+            realCaster->SetOutOfCombatWithAssisted(target);
     }
 }
 
@@ -8848,7 +8859,7 @@ void Unit::SetInCombatWith(Unit* enemy)
     SetInCombatState(enemy->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED), enemy);
 }
 
-void Unit::SetInCombatWithAggressor(Unit* aggressor)
+void Unit::SetInCombatWithAggressor(Unit* aggressor, bool touchOnly/* = false*/)
 {
     // This is a wrapper for SetInCombatWith initially created to improve PvP timers responsiveness. Can be extended in the future for broader use.
 
@@ -8868,7 +8879,7 @@ void Unit::SetInCombatWithAggressor(Unit* aggressor)
                 {
                     if (thisPlayer != aggressorPlayer && !thisPlayer->IsInDuelWith(aggressorPlayer))
                     {
-                        thisPlayer->pvpInfo.inPvPCombat = true;
+                        thisPlayer->pvpInfo.inPvPCombat = (thisPlayer->pvpInfo.inPvPCombat || !touchOnly);
                         thisPlayer->UpdatePvP(true);
                     }
                 }
@@ -8876,10 +8887,11 @@ void Unit::SetInCombatWithAggressor(Unit* aggressor)
         }
     }
 
-    SetInCombatWith(aggressor);
+    if (!touchOnly)
+        SetInCombatWith(aggressor);
 }
 
-void Unit::SetInCombatWithAssisted(Unit* assisted)
+void Unit::SetInCombatWithAssisted(Unit* assisted, bool touchOnly/* = false*/)
 {
     // This is a wrapper for SetInCombatWith initially created to improve PvP timers responsiveness. Can be extended in the future for broader use.
 
@@ -8900,7 +8912,7 @@ void Unit::SetInCombatWithAssisted(Unit* assisted)
                     if (thisPlayer != assistedPlayer)
                     {
                         if (assistedPlayer->pvpInfo.inPvPCombat)
-                            thisPlayer->pvpInfo.inPvPCombat = true;
+                            thisPlayer->pvpInfo.inPvPCombat = (thisPlayer->pvpInfo.inPvPCombat || !touchOnly);
 
                         thisPlayer->UpdatePvP(true);
 
@@ -8912,10 +8924,11 @@ void Unit::SetInCombatWithAssisted(Unit* assisted)
         }
     }
 
-    SetInCombatState(assisted->GetCombatTimer() > 0);
+    if (!touchOnly)
+        SetInCombatState(assisted->GetCombatTimer() > 0);
 }
 
-void Unit::SetInCombatWithVictim(Unit* victim)
+void Unit::SetInCombatWithVictim(Unit* victim, bool touchOnly/* = false*/)
 {
     // This is a wrapper for SetInCombatWith initially created to improve PvP timers responsiveness. Can be extended in the future for broader use.
 
@@ -8935,7 +8948,7 @@ void Unit::SetInCombatWithVictim(Unit* victim)
                 {
                     if (thisPlayer != victimPlayer && !thisPlayer->IsInDuelWith(victimPlayer))
                     {
-                        thisPlayer->pvpInfo.inPvPCombat = true;
+                        thisPlayer->pvpInfo.inPvPCombat = (thisPlayer->pvpInfo.inPvPCombat || !touchOnly);
                         thisPlayer->UpdatePvP(true);
                         thisPlayer->UpdatePvPContested(true);
                     }
@@ -8944,7 +8957,8 @@ void Unit::SetInCombatWithVictim(Unit* victim)
         }
     }
 
-    SetInCombatWith(victim);
+    if (!touchOnly)
+        SetInCombatWith(victim);
 }
 
 void Unit::SetInCombatState(bool PvP, Unit* enemy)
