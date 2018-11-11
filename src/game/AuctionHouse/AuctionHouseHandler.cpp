@@ -282,6 +282,13 @@ void WorldSession::HandleAuctionSellItem(WorldPacket& recv_data)
         default:
             return;
     }
+    
+    // client allows to send too high money amount
+    if (bid > MAX_MONEY_AMOUNT || buyout > MAX_MONEY_AMOUNT)
+    {
+        SendAuctionCommandResult(nullptr, AUCTION_STARTED, AUCTION_ERR_DATABASE);
+        return;
+    }
 
     for (uint32 i = 0; i < itemCount; ++i)
     {
