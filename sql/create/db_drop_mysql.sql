@@ -1,21 +1,7 @@
-REVOKE ALL PRIVILEGES ON * . * FROM 'mangos'@'localhost';
+/* Delete default user and its privileges (require MYSQL 5.7, MARIADB 10.1.3) */
+DROP USER IF EXISTS `mangos`;
 
-REVOKE ALL PRIVILEGES ON `wotlkmangos` . * FROM 'mangos'@'localhost';
-
-REVOKE GRANT OPTION ON `wotlkmangos` . * FROM 'mangos'@'localhost';
-
-REVOKE ALL PRIVILEGES ON `wotlkcharacters` . * FROM 'mangos'@'localhost';
-
-REVOKE GRANT OPTION ON `wotlkcharacters` . * FROM 'mangos'@'localhost';
-
-REVOKE ALL PRIVILEGES ON `wotlkrealmd` . * FROM 'mangos'@'localhost';
-
-REVOKE GRANT OPTION ON `wotlkrealmd` . * FROM 'mangos'@'localhost';
-
-DELETE FROM `user` WHERE CONVERT( User USING utf8 ) = CONVERT( 'mangos' USING utf8 ) AND CONVERT( Host USING utf8 ) = CONVERT( 'localhost' USING utf8 ) ;
-
-DROP DATABASE IF EXISTS `wotlkmangos` ;
-
-DROP DATABASE IF EXISTS `wotlkcharacters` ;
-
-DROP DATABASE IF EXISTS `wotlkrealmd` ;
+/* Delete default tables */
+DROP DATABASE IF EXISTS `wotlkmangos`;
+DROP DATABASE IF EXISTS `wotlkcharacters`;
+DROP DATABASE IF EXISTS `wotlkrealmd`;
