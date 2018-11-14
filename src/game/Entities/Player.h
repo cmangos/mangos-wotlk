@@ -1091,8 +1091,6 @@ class Player : public Unit
         void TextEmote(const std::string& text) const;
         void Whisper(const std::string& text, const uint32 language, ObjectGuid receiver);
 
-        CinematicMgr* GetCinematicMgr() const { return _cinematicMgr; }
-
         /*********************************************************/
         /***                    TAXI SYSTEM                    ***/
         /*********************************************************/
@@ -1714,6 +1712,8 @@ class Player : public Unit
 
         void UpdateClientAuras();
         void SendPetBar();
+        void StartCinematic();
+        void StopCinematic();
         bool UpdateSkill(uint32 skill_id, uint32 step);
         bool UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step);
 
@@ -2217,7 +2217,7 @@ class Player : public Unit
         void ResummonPetTemporaryUnSummonedIfAny();
         bool IsPetNeedBeTemporaryUnsummoned() const;
 
-        void SendCinematicStart(uint32 CinematicSequenceId) const;
+        void SendCinematicStart(uint32 CinematicSequenceId);
         void SendMovieStart(uint32 MovieId) const;
 
         /*********************************************************/
@@ -2621,7 +2621,7 @@ class Player : public Unit
 
         void _fillGearScoreData(Item* item, GearScoreVec* gearScore, uint32& twoHandScore);
 
-        CinematicMgr* _cinematicMgr;
+        CinematicMgrUPtr m_cinematicMgr;
 
         Unit* m_mover;
         Camera m_camera;
