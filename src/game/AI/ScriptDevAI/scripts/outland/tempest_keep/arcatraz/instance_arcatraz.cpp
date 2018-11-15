@@ -53,7 +53,7 @@ enum
     SPELL_TARGET_ALPHA              = 36856,
     SPELL_TARGET_DELTA              = 36857,
     SPELL_TARGET_GAMMA              = 36858,
-    SPELL_SIMPLE_TELEPORT           = 12980,
+    SPELL_SIMPLE_TELEPORT           = 12980, // TODO: Other mobs need to use it too
     SPELL_MIND_REND                 = 36859,
     SPELL_QUIET_SUICIDE             = 3617,
 
