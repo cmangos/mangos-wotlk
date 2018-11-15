@@ -147,16 +147,12 @@ void instance_shadow_labyrinth::OnCreatureDeath(Creature* pCreature)
     if (pCreature->GetEntry() == NPC_CABAL_RITUALIST)
     {
         m_sRitualistsAliveGUIDSet.erase(pCreature->GetObjectGuid());
+        // TODO: Make containment beam collapse when a group of ritualists dies
 
         if (m_sRitualistsAliveGUIDSet.empty())
         {
-            if (Creature* pHellmaw = GetSingleCreatureFromStorage(NPC_HELLMAW))
-            {
-                // yell intro and remove banish aura
-                DoScriptText(SAY_HELLMAW_INTRO, pHellmaw);
-                pHellmaw->GetMotionMaster()->MoveWaypoint();
-                pHellmaw->RemoveAurasDueToSpell(SPELL_BANISH);
-            }
+            if (Creature* hellmaw = GetSingleCreatureFromStorage(NPC_HELLMAW))
+                hellmaw->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, hellmaw, hellmaw);
 
             GuidVector containmentVector;
             GetCreatureGuidVectorFromStorage(NPC_CONTAINMENT_BEAM, containmentVector);
