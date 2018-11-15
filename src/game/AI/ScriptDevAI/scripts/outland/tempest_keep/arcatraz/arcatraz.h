@@ -58,6 +58,7 @@ enum
     GO_POD_OMEGA                    = 183965,               // Pod fifth boss wave
 
     SPELL_TARGET_OMEGA              = 36852,                // Visual spell used by Mellichar
+    SPELL_SIMPLE_TELEPORT           = 12980,                // Visual spell used by spawned mobs - TODO: unused
 };
 
 struct SpawnLocation
