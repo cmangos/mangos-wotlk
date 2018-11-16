@@ -93,6 +93,13 @@ enum
     TYPE_HIVE                   = 1,
     MAX_ENCOUNTER               = 2,
     NPC_HIVE_ASHI_DRONES        = 13136,
+
+    TYPE_BASHIR                 = 3,
+
+    // Bashir
+    SPELL_SPIRIT_SPAWN_IN       = 17321,
+    SPELL_ETHEREAL_TELEPORT     = 34427,
+    MOUNT_NETHER_RAY_DISPLAY_ID = 21156,
 };
 
 enum ElementalInvasionIndexes

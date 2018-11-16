@@ -1444,7 +1444,7 @@ enum
     SAY_FINISH_1                    = -1000899,
     SAY_FINISH_2                    = -1000900,
 
-    SPELL_ETHEREAL_TELEPORT         = 34427,
+    // SPELL_ETHEREAL_TELEPORT         = 34427,
     SPELL_PROTECTORATE              = 35679,                // dummy aura applied on player
 
     NPC_NEXUS_STALKER               = 20474,

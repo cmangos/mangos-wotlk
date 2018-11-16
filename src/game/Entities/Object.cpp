@@ -1530,7 +1530,7 @@ void WorldObject::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap 
     if (!atMap)
         atMap = GetMap();
 
-    float ground_z = atMap->GetHeight(x, y, z);
+    float ground_z = atMap->GetHeight(GetPhaseMask(), x, y, z);
     if (ground_z > INVALID_HEIGHT)
         z = ground_z;
 }

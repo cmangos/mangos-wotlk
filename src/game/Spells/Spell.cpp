@@ -1927,6 +1927,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             float angle = 2.0f * M_PI_F * rand_norm_f();
             float dest_x, dest_y, dest_z;
             target->GetClosePoint(dest_x, dest_y, dest_z, 0.0f, radius, angle, nullptr);
+            if (m_spellInfo->Id == 41289)
+                dest_z = 342.9485; // confirmed with sniffs
             m_targets.setDestination(dest_x, dest_y, dest_z);
 
             // This targetMode is often used as 'last' implicitTarget for positive spells, that just require coordinates

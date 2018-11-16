@@ -247,6 +247,13 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
+    static ChatCommand debugScriptCommandTable[] =
+    {
+        { "help",           SEC_GAMEMASTER,     false, &ChatHandler::HandleSD2HelpCommand,                  "", nullptr },
+        { "command",        SEC_GAMEMASTER,     false, &ChatHandler::HandleSD2ScriptCommand,                "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                             "", nullptr }
+    };
+
     static ChatCommand debugVisibilityCommandTable[] =
     {
         { "atclient",       SEC_MODERATOR,      false, &ChatHandler::HandleDebugHaveAtClientCommand,        "", nullptr },
@@ -3358,6 +3365,11 @@ uint32 ChatHandler::ExtractAccountId(char** args, std::string* accountName /*= n
         *targetIfNullArg = nullptr;
 
     return account_id;
+}
+
+Player* ChatHandler::GetPlayer()
+{
+    return m_session->GetPlayer();
 }
 
 struct RaceMaskName

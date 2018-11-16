@@ -474,6 +474,13 @@ UPDATE creature_template SET ScriptName='npc_fel_cannon' WHERE entry=22443;
 UPDATE gameobject_template SET ScriptName='go_fel_cannonball_stack_trap' WHERE entry IN(185862);
 UPDATE creature_template SET ScriptName='npc_frequency_scanner' WHERE entry=21760;
 UPDATE gameobject_template SET ScriptName='go_aura_generator_000' WHERE entry=184926;
+UPDATE creature_template SET ScriptName='npc_skyguard_aether_tech' WHERE entry IN(23241);
+UPDATE creature_template SET ScriptName='npc_skyguard_ranger' WHERE entry IN(23242);
+UPDATE creature_template SET ScriptName='npc_skyguard_lieutenant' WHERE entry IN(23430);
+UPDATE creature_template SET ScriptName='npc_aether_tech_vendor' WHERE entry IN(23243,23244,23245);
+UPDATE creature_template SET ScriptName='npc_bashir_flesh_fiend' WHERE entry IN(23249);
+UPDATE creature_template SET ScriptName='npc_disruptor_tower' WHERE entry IN(23250);
+UPDATE creature_template SET ScriptName='npc_grand_collector' WHERE entry IN(23333);
 
 /* BLASTED LANDS */
 
@@ -3249,7 +3256,29 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1015036,'%s laughs.',0,2,0,0,'Dimensius EMOTE_DIMENSIUS_LAUGH'),
 (-1015037,'The time for your destruction has finally come, Dimensius!',0,0,0,0,'Captain Saeed SAY_SAEED_TAUNT'),
 (-1015038,'We are victorious! Dimensius is no more! Report back to the Professor, hero.',0,0,0,0,'Protectorate Avenger SAY_AVENGER_QUEST_COMPLETE'),
--- -1015039 to -1015061 reserved
+(-1015039,'Rangers, listen up! We stand ready to take the pain directly to the heathen Bash''ir devils.  Our mission is simple. Hold the area long enough to get accurate readings on their new technology. ',0,0,0,5,'Bashir Intro - Lieutenant 1'),
+(-1015040,'But don''t underestimate our enemies.  We are invading them.  We are taking the fight to them.  We have them backed into a corner and they will strike back.',0,0,0,5,'Bashir Intro - Lieutenant 2'),
+(-1015041,'We are Skyguard!  This is what we are trained to do.  We do not retreat, we do not surrender.  We will see our mission through even if it means death! We will secure that information or we will die on the field of battle.',0,0,0,0,'Bashir Intro - Lieutenant 3'),
+(-1015042,'Anyone have any questions?',0,0,0,6,'Bashir Intro - Lieutenant 4'),
+(-1015043,'Look man, I only need to know one thing, where they are.',0,0,0,1,'Bashir Intro - Ranger 1'),
+(-1015044,'You are about to find out!',0,0,0,0,'Bashir Intro - Lieutenant 5'),
+(-1015045,'Skyguard Rangers, MOUNT UP!!',0,0,0,0,'Bashir Intro - Lieutenant 6'),
+(-1015046,'A discovery!  I need aid with these measurements... I''ll send a signal to my colleague!',0,0,0,0,'Bashir - Tech Phase 1 end'),
+(-1015047,'This forge can make unstable concoctions... to study them, I need Apexis Shards!',0,0,0,0,'Bashir - Assistant arrived'),
+(-1015048,'The disruptor towers over charged the crystalforge, and uncovered more secrets!  Hold them!  Hold them while we gather new data!',0,0,0,0,'Bashir - Tech Phase 2 end'),
+(-1015049,'I am growing amazing crystals from these waters.  For catalysts, I must have more Apexis shards!',0,0,0,0,'Bashir - Adept arrived'),
+(-1015050,'They called me down from K''aresh to deal with this band of misfits?  Unbelievable!  Prepare to be collected!',0,0,0,0,'Bashir - Collector spawned'),
+(-1015051,'Enough!  I will take care of these fools myself!',0,0,0,0,'Bashir - Collector attacks'),
+(-1015052,'At last!  The information we seek!  Gather quickly, skyguard.  We must soon return to headquarters with our findings!',0,0,0,0,'Bashir - Tech Phase 3 end'),
+(-1015053,'Its properties are amazing!  Provide me with Apexis crystals, and I''ll form weapons and armor within crystal geodes.',0,0,0,0,'Bashir - Master arrived'),
+(-1015054,'Our studies are complete!  Well fought!  Headquarters will pour over our gained measurements and, with luck, uncover the Bash''ir''s intentions.  Now, to the skies!',0,0,0,0,'Bashir - Tech Event end'),
+(-1015055,'LET''S ROCK!',0,0,0,0,'Bashir Ranger - On Aggro 1'),
+(-1015056,'Heads up!',0,0,0,0,'Bashir Ranger - On Aggro 2'),
+(-1015057,'Let''s go!',0,0,0,0,'Bashir Ranger - On Aggro 3'),
+(-1015058,'Who''s next?',0,0,0,0,'Bashir Ranger - On Aggro 4'),
+(-1015059,'Come on!',0,0,0,0,'Bashir Ranger - On Aggro 5'),
+(-1015060,'Oh, you want some of this?',0,0,0,0,'Bashir Ranger - On Aggro 6'),
+(-1015061,'Come on!',0,0,0,0,'Bashir Ranger - On Aggro 7'),
 (-1015062,'The enemy is upon us!  Stand your ground!',0,0,0,0,'Vindicator on aggro 1'),
 (-1015063,'Illidan\'s lapdogs!  Destroy them all!',0,0,0,0,'Magister on aggro 1'),
 (-1015064,'Come closer, demon!  Death awaits!',0,0,0,0,'Magister on aggro 2'),

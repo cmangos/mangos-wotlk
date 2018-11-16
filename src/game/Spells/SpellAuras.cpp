@@ -2554,6 +2554,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                         return;
                     }
+                    case 40952:                             // Ethereal Ring, Cannon Death Visual, start
+                        target->CastSpell(nullptr, 40868, TRIGGERED_OLD_TRIGGERED);
+                        return;
                     case 42416:                             // Apexis Mob Faction Check Aura
                     {
                         if (target->GetTypeId() != TYPEID_UNIT)
@@ -8860,7 +8863,11 @@ void Aura::PeriodicDummyTick()
 //              // Magnetic Pull
 //              case 40581: break;
 //              // Ethereal Ring: break; The Bolt Burst
-//              case 40801: break;
+                case 40801:
+                {
+                    target->CastSpell(GetCaster(), 40758, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                }
 //              // Crystal Prison
 //              case 40846: break;
 //              // Copy Weapon
