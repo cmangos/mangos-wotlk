@@ -474,6 +474,7 @@ enum
 
     // other
     NPC_SIMON_GAME_BUNNY            = 22923,
+    NPC_SIMON_GAME_BUNNY_LARGE      = 23378,
 
     GO_APEXIS_RELIC                 = 185890,
     GO_APEXIS_MONUMENT              = 185944,
@@ -488,13 +489,16 @@ enum
     COLOR_IDX_YELLOW                = 3,
 
     // phases
+    PHASE_INACTIVE                  = 0,
     PHASE_LEVEL_PREPARE             = 1,
     PHASE_AI_GAME                   = 2,
     PHASE_PLAYER_PREPARE            = 3,
     PHASE_PLAYER_GAME               = 4,
     PHASE_LEVEL_FINISHED            = 5,
 
-    MAX_SIMON_LEVELS                = 8,                // counts the max levels of the game
+    SIMON_LEVEL_VIBRATIONS          = 6,
+    SIMON_LEVEL_EMANATIONS          = 8,
+    SIMON_LEVEL_ENLIGHTENMENT       = 10,               // Also end of the game
     MAX_SIMON_FAIL_TIMER            = 5,                // counts the delay in which the player is allowed to click
 };
 
@@ -530,12 +534,14 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiGamePhase  = PHASE_LEVEL_PREPARE;
+        m_uiGamePhase  = PHASE_INACTIVE;
         m_bIsEventStarted = false;
 
         m_uiLevelCount = 0;
         m_uiLevelStage = 0;
         m_uiPlayerStage = 0;
+
+        m_creature->RemoveAllAurasOnDeath(); // cleans up all auras
     }
 
     void GetAIInformation(ChatHandler& reader) override
@@ -555,23 +561,13 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
             // lock apexis
             DoCastSpellIfCan(m_creature, SPELL_SWITCHED_ON, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_PRE_EVENT_TIMER, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-
-            // Get original summoner
-            if (m_creature->IsTemporarySummon())
-                m_masterPlayerGuid = m_creature->GetSpawnerGuid();
-
-            // Get closest apexis
-            if (GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_RELIC, 5.0f))
-                m_bIsLargeEvent = false;
-            else if (GetClosestGameObjectWithEntry(m_creature, GO_APEXIS_MONUMENT, 17.0f))
-                m_bIsLargeEvent = true;
         }
 
         // prepare the buttons and summon the visual auras
-        DoCastSpellIfCan(m_creature, m_bIsLargeEvent ? SPELL_PRE_GAME_BLUE_LARGE : SPELL_PRE_GAME_BLUE_AURA, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, m_bIsLargeEvent ? SPELL_PRE_GAME_GREEN_LARGE : SPELL_PRE_GAME_GREEN_AURA, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, m_bIsLargeEvent ? SPELL_PRE_GAME_RED_LARGE : SPELL_PRE_GAME_RED_AURA, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, m_bIsLargeEvent ? SPELL_PRE_GAME_YELLOW_LARGE : SPELL_PRE_GAME_YELLOW_AURA, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, m_bIsLargeEvent ? SPELL_PRE_GAME_BLUE_LARGE : SPELL_PRE_GAME_BLUE_AURA, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, m_bIsLargeEvent ? SPELL_PRE_GAME_GREEN_LARGE : SPELL_PRE_GAME_GREEN_AURA, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, m_bIsLargeEvent ? SPELL_PRE_GAME_RED_LARGE : SPELL_PRE_GAME_RED_AURA, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, m_bIsLargeEvent ? SPELL_PRE_GAME_YELLOW_LARGE : SPELL_PRE_GAME_YELLOW_AURA, CAST_TRIGGERED);
 
         m_vColors.clear();
         ++m_uiLevelCount;
@@ -591,10 +587,10 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
     void DoSetupPlayerLevel()
     {
         // allow the buttons to be used and despawn the visual auras
-        DoCastSpellIfCan(m_creature, SPELL_GAME_START_RED, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_GAME_START_BLUE, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_GAME_START_GREEN, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_GAME_START_YELLOW, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_GAME_START_RED, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_GAME_START_BLUE, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_GAME_START_GREEN, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_GAME_START_YELLOW, CAST_TRIGGERED);
     }
 
     // Complete level - called when one level is completed succesfully
@@ -607,48 +603,60 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_GAME_END_YELLOW, CAST_TRIGGERED);
 
         // Complete game if all the levels
-        if (m_uiLevelCount == MAX_SIMON_LEVELS)
-            DoCompleteGame();
+        switch (m_uiLevelCount)
+        {
+            case SIMON_LEVEL_VIBRATIONS:
+                BuffPlayers(SPELL_APEXIS_VIBRATIONS);
+                break;
+            case SIMON_LEVEL_EMANATIONS:
+                BuffPlayers(SPELL_APEXIS_EMANATIONS);
+                break;
+            case SIMON_LEVEL_ENLIGHTENMENT:
+                BuffPlayers(SPELL_APEXIS_ENLIGHTENMENT);
+                DoCompleteGame();
+                break;
+            default: break;
+        }            
+    }
+
+    void BuffPlayers(uint32 buffId)
+    {
+        if (m_bIsLargeEvent)
+        {
+            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_masterPlayerGuid))
+            {
+                if (Group* pGroup = pPlayer->GetGroup())
+                {
+                    for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
+                    {
+                        if (Player* pMember = pRef->getSource())
+                        {
+                            // distance check - they need to be close to the Apexis
+                            if (!pMember->IsWithinDistInMap(m_creature, 20.0f))
+                                continue;
+
+                            DoCastSpellIfCan(pMember, buffId, CAST_TRIGGERED);
+                        }
+                    }
+                }
+                else
+                    DoCastSpellIfCan(pPlayer, buffId, CAST_TRIGGERED);
+            }
+        }
+        else
+        {
+            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_masterPlayerGuid))
+                DoCastSpellIfCan(pPlayer, buffId, CAST_TRIGGERED);
+        }
     }
 
     // Complete event - called when the game has been completed succesfully
     void DoCompleteGame()
     {
-        // ToDo: not sure if the quest reward spells are implemented right. They all give the same buff but with a different duration
-        if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_masterPlayerGuid))
-        {
-            if (Group* pGroup = pPlayer->GetGroup())
-            {
-                for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
-                {
-                    if (Player* pMember = pRef->getSource())
-                    {
-                        // distance check - they need to be close to the Apexis
-                        if (!pMember->IsWithinDistInMap(m_creature, 20.0f))
-                            continue;
-
-                        // on group event cast Enlightment on daily quest and Emanations on normal quest
-                        if (pMember->GetQuestStatus(QUEST_AN_APEXIS_RELIC) == QUEST_STATUS_INCOMPLETE)
-                            DoCastSpellIfCan(pMember, SPELL_APEXIS_EMANATIONS, CAST_TRIGGERED);
-                        else if (pMember->GetQuestStatus(QUEST_RELICS_EMANATION) == QUEST_STATUS_INCOMPLETE)
-                            DoCastSpellIfCan(pMember, SPELL_APEXIS_ENLIGHTENMENT, CAST_TRIGGERED);
-                    }
-                }
-            }
-            else
-            {
-                // solo event - cast Emanations on daily quest and vibrations on normal quest
-                if (pPlayer->GetQuestStatus(QUEST_AN_APEXIS_RELIC) == QUEST_STATUS_INCOMPLETE)
-                    DoCastSpellIfCan(pPlayer, SPELL_APEXIS_VIBRATIONS, CAST_TRIGGERED);
-                else if (pPlayer->GetQuestStatus(QUEST_RELICS_EMANATION) == QUEST_STATUS_INCOMPLETE)
-                    DoCastSpellIfCan(pPlayer, SPELL_APEXIS_EMANATIONS, CAST_TRIGGERED);
-            }
-        }
-
         // cleanup event after quest is finished
         DoCastSpellIfCan(m_creature, SPELL_SWITCHED_OFF, CAST_TRIGGERED);
         DoPlaySoundToSet(m_creature, SOUND_ID_DISABLE_NODE);
-        m_creature->ForcedDespawn();
+        Reset();
     }
 
     // Cleanup event - called when event fails
@@ -663,13 +671,23 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
         //  unlock apexis and despawn
         DoCastSpellIfCan(m_creature, SPELL_SWITCHED_OFF, CAST_TRIGGERED);
         DoPlaySoundToSet(m_creature, SOUND_ID_DISABLE_NODE);
-        m_creature->ForcedDespawn();
+        Reset();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 uiMiscValue) override
     {
         switch (m_uiGamePhase)
         {
+            case PHASE_INACTIVE:
+                if (eventType == AI_EVENT_CUSTOM_A && !m_bIsEventStarted)
+                {
+                    m_uiGamePhase = PHASE_LEVEL_PREPARE;
+                    m_bIsLargeEvent = m_creature->GetEntry() == NPC_SIMON_GAME_BUNNY_LARGE;
+                    m_masterPlayerGuid = pInvoker->GetObjectGuid();
+                    DoPrepareLevel();
+                    m_bIsEventStarted = true;
+                    break;
+                }
             case PHASE_LEVEL_PREPARE:
                 // delay before each level - handled by big timer aura
                 if (eventType == AI_EVENT_CUSTOM_A)
@@ -707,6 +725,7 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
                 if (eventType == AI_EVENT_CUSTOM_C)
                 {
                     // good button pressed
+                    m_uiPlayerStage = 0;
                     if (uiMiscValue == aApexisGameData[m_vColors[m_uiLevelStage]].m_uiIntrospection)
                     {
                         DoCastSpellIfCan(m_creature, SPELL_GOOD_PRESS, CAST_TRIGGERED);
@@ -716,7 +735,6 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
 
                         // increase the level stage and reset the event counter
                         ++m_uiLevelStage;
-                        m_uiPlayerStage = 0;
 
                         // if all buttons were pressed succesfully, then move to next level
                         if (m_uiLevelStage == m_vColors.size())
@@ -734,8 +752,11 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
                     else
                     {
                         DoCastSpellIfCan(pInvoker, m_bIsLargeEvent ? SPELL_SIMON_GROUP_REWARD : SPELL_BAD_PRESS, CAST_TRIGGERED);
-                        DoCastSpellIfCan(m_creature, SPELL_VISUAL_GAME_FAILED, CAST_TRIGGERED);
-                        DoCleanupGame();
+                        if (!m_bIsLargeEvent && !pInvoker->isAlive()) // if player got killed on small event
+                        {
+                            DoCastSpellIfCan(m_creature, SPELL_VISUAL_GAME_FAILED, CAST_TRIGGERED);
+                            DoCleanupGame();
+                        }
                     }
                 }
                 // AI ticks which handle the player timeout
@@ -746,6 +767,7 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
                     {
                         DoCastSpellIfCan(m_creature, SPELL_VISUAL_GAME_FAILED, CAST_TRIGGERED);
                         DoCleanupGame();
+                        return;
                     }
 
                     // Not sure if this is right, but we need to keep the buttons unlocked on every tick
@@ -769,12 +791,7 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
 
     void UpdateAI(const uint32 /*uiDiff*/) override
     {
-        // Start game on first update tick - don't wait for dummy auras
-        if (!m_bIsEventStarted)
-        {
-            DoPrepareLevel();
-            m_bIsEventStarted = true;
-        }
+
     }
 };
 
@@ -788,11 +805,6 @@ bool EffectDummyCreature_npc_simon_game_bunny(Unit* pCaster, uint32 uiSpellId, S
     if (pCreatureTarget->GetEntry() != NPC_SIMON_GAME_BUNNY)
         return false;
 
-    if (uiSpellId == SPELL_SIMON_GAME_START && uiEffIndex == EFFECT_INDEX_0)
-    {
-        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
-        return true;
-    }
     if (uiSpellId == SPELL_PRE_EVENT_TIMER && uiEffIndex == EFFECT_INDEX_0)
     {
         pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pCaster, pCreatureTarget);

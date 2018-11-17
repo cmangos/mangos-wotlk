@@ -382,6 +382,33 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                         damage = unitTarget->GetMaxHealth() / 2;
                         break;
                     }
+                    case 38977:                             // Spore Quake Effect
+                        if (roll_chance_i(33))
+                            unitTarget->CastSpell(unitTarget, 39002, TRIGGERED_OLD_TRIGGERED); // Spore Quake Knockdown
+                        break;
+                    case 39384:
+                    {
+                        if (eff_idx == 0)
+                        {
+                            if (unitTarget->getFaction() == 1690)
+                                damage = 10000;
+                            else
+                                damage = 0;
+                        }
+                        else
+                        {
+                            if (unitTarget->getFaction() == 1689)
+                                damage = 10000;
+                            else
+                                damage = 0;
+                        }
+                        break;
+                    }
+                    case 40065: // Apexis Reprisal
+                    {
+                        damage = unitTarget->GetMaxHealth() / 3;
+                        break;
+                    }
                     // Touch the Nightmare
                     case 50341:
                     {

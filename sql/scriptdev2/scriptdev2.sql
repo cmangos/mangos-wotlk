@@ -448,7 +448,7 @@ INSERT INTO scripted_event_id VALUES
 UPDATE creature_template SET ScriptName='mobs_nether_drake' WHERE entry IN (20021,21817,21820,21821,21823);
 UPDATE creature_template SET ScriptName='npc_daranelle' WHERE entry=21469;
 UPDATE creature_template SET ScriptName='npc_bloodmaul_stout_trigger' WHERE entry=21241;
-UPDATE creature_template SET ScriptName='npc_simon_game_bunny' WHERE entry=22923;
+UPDATE creature_template SET ScriptName='npc_simon_game_bunny' WHERE entry IN(22923,23378);
 UPDATE creature_template SET ScriptName='npc_light_orb_collector' WHERE entry IN (21926,22333);
 UPDATE creature_template SET ScriptName='npc_bloodmaul_dire_wolf' WHERE entry=20058;
 UPDATE creature_template SET ScriptName='npc_obelisk_trigger' WHERE entry=22422;

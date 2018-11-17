@@ -6069,8 +6069,7 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
     {
         case SPELLFAMILY_GENERIC:
         {
-            if (!target)
-                return;
+
 
             switch (spell->Id)
             {
@@ -6093,6 +6092,7 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                     {
                         ((Creature*)target)->LoadEquipment(((Creature*)target)->GetCreatureInfo()->EquipmentTemplateId, true);
                     }
+                    break;
                 }
                 case 30019:                                     // Control Piece - Chess
                 {
@@ -6108,6 +6108,12 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                         chessPiece->RemoveAurasDueToSpell(30019);
 
                     return;
+                }
+                case 39993: // Simon Game START timer, (DND)
+                {
+                    if (apply)
+                        target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, GetCaster(), target);
+                    break;
                 }
                 case 47214: // Burninate Effect
                 {
