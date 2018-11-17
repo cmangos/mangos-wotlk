@@ -682,10 +682,12 @@ void Spell::FillTargetMap()
                                 case SPELL_EFFECT_APPLY_GLYPH:
                                 case SPELL_EFFECT_BLOCK: // no packets sent ever to client - guessing its a targetless effect
                                 case SPELL_EFFECT_PARRY: // no packets sent ever to client - guessing its a targetless effect
+                                case SPELL_EFFECT_SELF_RESURRECT: // targetless effect - verified with sniffs
                                     SetTargetMap(SpellEffectIndex(i), TARGET_UNIT_CASTER, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                                     break;
                                 case SPELL_EFFECT_SUMMON: // no spell guesswork - dest only effect
                                 case SPELL_EFFECT_TRANS_DOOR:
+                                case SPELL_EFFECT_TRIGGER_SPELL_2:
                                     SetTargetMap(SpellEffectIndex(i), TARGET_LOCATION_CASTER_DEST, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                                     break;
                                 case SPELL_EFFECT_ENCHANT_ITEM:
