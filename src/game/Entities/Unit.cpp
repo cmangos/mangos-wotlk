@@ -1759,8 +1759,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
             calcDamageInfo->HitInfo |= HITINFO_CRITICALHIT;
             calcDamageInfo->TargetState  = VICTIMSTATE_NORMAL;
             calcDamageInfo->procEx |= PROC_EX_CRITICAL_HIT;
-            CalculateCritAmount(calcDamageInfo);
-
+            calcDamageInfo->totalDamage = CalculateCritAmount(calcDamageInfo);
             break;
         }
         case MELEE_HIT_PARRY:
