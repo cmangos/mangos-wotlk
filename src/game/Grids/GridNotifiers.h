@@ -1294,8 +1294,8 @@ namespace MaNGOS
             bool   i_onlyAlive;
             bool   i_onlyDead;
             bool   i_excludeSelf;
-            bool   i_foundOutOfRange;
             bool   i_is3D;
+            bool   i_foundOutOfRange;
 
             // prevent clone this object
             NearestCreatureEntryWithLiveStateInObjectRangeCheck(NearestCreatureEntryWithLiveStateInObjectRangeCheck const&);
