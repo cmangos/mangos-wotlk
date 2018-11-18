@@ -496,6 +496,7 @@ enum
     PHASE_PLAYER_GAME               = 4,
     PHASE_LEVEL_FINISHED            = 5,
 
+    SIMON_BIG_LEVEL_SUMMON          = 6,
     SIMON_LEVEL_VIBRATIONS          = 6,
     SIMON_LEVEL_EMANATIONS          = 8,
     SIMON_LEVEL_ENLIGHTENMENT       = 10,               // Also end of the game
@@ -602,21 +603,34 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_GAME_END_GREEN, CAST_TRIGGERED);
         DoCastSpellIfCan(m_creature, SPELL_GAME_END_YELLOW, CAST_TRIGGERED);
 
-        // Complete game if all the levels
-        switch (m_uiLevelCount)
+        if (m_bIsLargeEvent)
         {
-            case SIMON_LEVEL_VIBRATIONS:
+            if (m_uiLevelCount == SIMON_BIG_LEVEL_SUMMON)
+            {
                 BuffPlayers(SPELL_APEXIS_VIBRATIONS);
-                break;
-            case SIMON_LEVEL_EMANATIONS:
-                BuffPlayers(SPELL_APEXIS_EMANATIONS);
-                break;
-            case SIMON_LEVEL_ENLIGHTENMENT:
-                BuffPlayers(SPELL_APEXIS_ENLIGHTENMENT);
+                if (Player* player = m_creature->GetMap()->GetPlayer(m_masterPlayerGuid))
+                    player->CastSpell(player, SPELL_SIMON_GROUP_REWARD, TRIGGERED_OLD_TRIGGERED);
                 DoCompleteGame();
-                break;
-            default: break;
-        }            
+            }
+        }
+        else
+        {
+            // Complete game if all the levels
+            switch (m_uiLevelCount)
+            {
+                case SIMON_LEVEL_VIBRATIONS:
+                    BuffPlayers(SPELL_APEXIS_VIBRATIONS);
+                    break;
+                case SIMON_LEVEL_EMANATIONS:
+                    BuffPlayers(SPELL_APEXIS_EMANATIONS);
+                    break;
+                case SIMON_LEVEL_ENLIGHTENMENT:
+                    BuffPlayers(SPELL_APEXIS_ENLIGHTENMENT);
+                    DoCompleteGame();
+                    break;
+                default: break;
+            }
+        }
     }
 
     void BuffPlayers(uint32 buffId)
@@ -662,6 +676,10 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
     // Cleanup event - called when event fails
     void DoCleanupGame()
     {
+        if (m_bIsLargeEvent)
+            if (Player* player = m_creature->GetMap()->GetPlayer(m_masterPlayerGuid))
+                player->CastSpell(player, SPELL_SIMON_GROUP_REWARD, TRIGGERED_OLD_TRIGGERED);
+
         // lock the buttons
         DoCastSpellIfCan(m_creature, SPELL_GAME_END_RED, CAST_TRIGGERED);
         DoCastSpellIfCan(m_creature, SPELL_GAME_END_BLUE, CAST_TRIGGERED);
@@ -751,7 +769,7 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
                     // bad button pressed
                     else
                     {
-                        DoCastSpellIfCan(pInvoker, m_bIsLargeEvent ? SPELL_SIMON_GROUP_REWARD : SPELL_BAD_PRESS, CAST_TRIGGERED);
+                        DoCastSpellIfCan(pInvoker, SPELL_BAD_PRESS, CAST_TRIGGERED);
                         if (!m_bIsLargeEvent && !pInvoker->isAlive()) // if player got killed on small event
                         {
                             DoCastSpellIfCan(m_creature, SPELL_VISUAL_GAME_FAILED, CAST_TRIGGERED);
@@ -802,7 +820,7 @@ UnitAI* GetAI_npc_simon_game_bunny(Creature* pCreature)
 
 bool EffectDummyCreature_npc_simon_game_bunny(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
-    if (pCreatureTarget->GetEntry() != NPC_SIMON_GAME_BUNNY)
+    if (pCreatureTarget->GetEntry() != NPC_SIMON_GAME_BUNNY && pCreatureTarget->GetEntry() != NPC_SIMON_GAME_BUNNY_LARGE)
         return false;
 
     if (uiSpellId == SPELL_PRE_EVENT_TIMER && uiEffIndex == EFFECT_INDEX_0)
@@ -819,7 +837,8 @@ bool EffectScriptEffectCreature_npc_simon_game_bunny(Unit* pCaster, uint32 uiSpe
     if ((uiSpellId == SPELL_INTROSPECTION_BLUE || uiSpellId == SPELL_INTROSPECTION_GREEN || uiSpellId == SPELL_INTROSPECTION_RED ||
             uiSpellId == SPELL_INTROSPECTION_YELLOW) && uiEffIndex == EFFECT_INDEX_1)
     {
-        if (pCreatureTarget->GetEntry() == NPC_SIMON_GAME_BUNNY && pCaster->GetTypeId() == TYPEID_PLAYER && originalCasterGuid.IsGameObject())
+        if ((pCreatureTarget->GetEntry() == NPC_SIMON_GAME_BUNNY || pCreatureTarget->GetEntry() == NPC_SIMON_GAME_BUNNY_LARGE)
+                && pCaster->GetTypeId() == TYPEID_PLAYER && originalCasterGuid.IsGameObject())
             pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pCaster, pCreatureTarget, uiSpellId);
 
         return true;
