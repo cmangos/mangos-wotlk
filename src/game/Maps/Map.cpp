@@ -1740,11 +1740,7 @@ void BattleGroundMap::UnloadAll(bool pForce)
 bool Map::CanEnter(Player* player)
 {
     if (player->GetMapRef().getTarget() == this)
-    {
-        sLog.outError("Map::CanEnter -%s already in map!", player->GetGuidStr().c_str());
-        MANGOS_ASSERT(false);
         return false;
-    }
 
     return true;
 }
