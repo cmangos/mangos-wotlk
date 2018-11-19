@@ -2561,6 +2561,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                 if (Unit* passenger = m_caster->GetVehicleInfo()->GetPassenger(targetMode - TARGET_UNIT_CASTER_PASSENGER_0))
                     targetUnitMap.push_back(passenger);
             break;
+        case TARGET_LOCATION_CASTER_SRC:
         {
             // Check original caster is GO - set its coordinates as src cast
             if (WorldObject* caster = GetCastingObject())

@@ -933,8 +933,8 @@ namespace MaNGOS
 
                         if (!i_originalCaster->CanAttackSpell(itr->getSource(), i_spell.m_spellInfo, true))
                             continue;
+                        break;
                     }
-                    break;
                     case SPELL_TARGETS_ALL:
                         break;
                     default: continue;
@@ -957,7 +957,8 @@ namespace MaNGOS
                         break;
                     case PUSH_IN_FRONT_30:
                         if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 6))
-                            break;
+                            i_data.push_back(itr->getSource());
+                        break;
                     case PUSH_IN_FRONT_15:
                         if (i_castingObject->isInFront((Unit*)(itr->getSource()), i_radius, M_PI_F / 12))
                             i_data.push_back(itr->getSource());
