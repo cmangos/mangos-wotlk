@@ -2518,6 +2518,17 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 42721, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 43647:                                 // Cosmetic - Spear Throw
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    unitTarget->SetFlag(UNIT_FIELD_FLAGS, 33587456);
+                    unitTarget->SetDisplayId(22347);
+                    unitTarget->CastSpell(unitTarget, 23973, TRIGGERED_OLD_TRIGGERED);
+                    unitTarget->SetStandState(UNIT_STAND_STATE_DEAD);
+                    return;
+                }
                 // Demon Broiled Surprise
                 case 43723:
                 {

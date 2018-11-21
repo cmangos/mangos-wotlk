@@ -117,10 +117,22 @@ enum
     SAY_START               = -1568079,
     SAY_AT_GONG             = -1568080,
     SAY_OPEN_ENTRANCE       = -1568081,
+    SAY_OPEN_ENTRANCE_2     = -1568086,
+    SAY_SOUND_ALARM         = -1568087,
 
     GOSSIP_ITEM_ID_BEGIN    = -3568000,
 
-    SPELL_BANGING_THE_GONG  = 45225
+    SPELL_BANGING_THE_GONG  = 45225,
+    SPELL_STEALTH           = 34189,
+    SPELL_SPEAR_THROW       = 43647,
+
+    NPC_GUARDIAN            = 23597,
+
+    EQUIP_ID_HUGE_MAUL      = 5301,
+    EQUIP_ID_RED_SPEAR      = 13631,
+    EQUIP_ID_GUARDIAN       = 33979,
+
+    ENTRY_HARRISON_WITH_HAT = 24375,
 };
 
 struct npc_harrison_jones_zaAI : public npc_escortAI
@@ -132,6 +144,9 @@ struct npc_harrison_jones_zaAI : public npc_escortAI
     }
 
     ScriptedInstance* m_pInstance;
+    CreatureList lGuardiansList;
+    ObjectGuid m_guardianAttackerGuid;
+    uint32 m_uiSoundAlarmTimer;
 
     void WaypointReached(uint32 uiPointId) override
     {
@@ -145,16 +160,51 @@ struct npc_harrison_jones_zaAI : public npc_escortAI
 
                 m_pInstance->DoToggleGameObjectFlags(GO_STRANGE_GONG, GO_FLAG_NO_INTERACT, false);
 
+                if (GameObject* pGong = GetClosestGameObjectWithEntry(m_creature, GO_STRANGE_GONG, INTERACTION_DISTANCE))
+                    m_creature->SetFacingToObject(pGong);
+
+                m_creature->LoadEquipment(EQUIP_ID_HUGE_MAUL, true);
+                break;
+            case 2:
                 // Start bang gong for 2min
                 DoCastSpellIfCan(m_creature, SPELL_BANGING_THE_GONG);
                 SetEscortPaused(true);
                 break;
-            case 3:
+            case 6:
                 DoScriptText(SAY_OPEN_ENTRANCE, m_creature);
+                m_creature->UpdateEntry(ENTRY_HARRISON_WITH_HAT);
                 break;
-            case 4:
+            case 8:
+                DoScriptText(SAY_OPEN_ENTRANCE_2, m_creature);
+                m_creature->HandleEmoteState(EMOTE_STATE_USESTANDING);
+                break;
+            case 9:
+                m_creature->HandleEmoteState(EMOTE_ONESHOT_NONE);
                 m_pInstance->SetData(TYPE_EVENT_RUN, IN_PROGRESS);
-                // TODO: Spawn group of Amani'shi Savage and make them run to entrance
+                DoCastSpellIfCan(m_creature, SPELL_STEALTH);
+                m_creature->SetVisibility(VISIBILITY_ON); // even though Harrison is stealthed, players can still see him
+                break;
+            case 11:
+                if (Creature* attacker = m_creature->GetMap()->GetCreature(m_guardianAttackerGuid))
+                {
+                    attacker->SetWalk(false);
+                    attacker->GetMotionMaster()->MovePoint(1, 138.2242f, 1586.994f, 43.5488f);
+                }
+                break;
+            case 12:
+                if (Creature* attacker = m_creature->GetMap()->GetCreature(m_guardianAttackerGuid))
+                    attacker->GetMotionMaster()->MovePoint(2, 131.8407f, 1590.247f, 43.61384f);
+                break;
+            case 13:
+                if (Creature* attacker = m_creature->GetMap()->GetCreature(m_guardianAttackerGuid))
+                {
+                    attacker->SetFacingTo(2.024582f);
+                    m_creature->RemoveAurasDueToSpell(SPELL_STEALTH);
+                    attacker->CastSpell(m_creature, SPELL_SPEAR_THROW, TRIGGERED_OLD_TRIGGERED);
+                    attacker->LoadEquipment(EQUIP_ID_GUARDIAN, true);
+                    m_uiSoundAlarmTimer = 2000;
+                }
+                SetEscortPaused(true);
                 break;
         }
     }
@@ -167,13 +217,59 @@ struct npc_harrison_jones_zaAI : public npc_escortAI
         Start();
     }
 
+    void UpdateEscortAI(const uint32 uiDiff) override
+    {
+        if (!m_pInstance)
+            return;
+
+        if (m_uiSoundAlarmTimer)
+        {
+            if (m_uiSoundAlarmTimer < uiDiff)
+            {
+                if (Creature* attacker = m_creature->GetMap()->GetCreature(m_guardianAttackerGuid))
+                    DoScriptText(SAY_SOUND_ALARM, attacker);
+
+                for (auto& itr : lGuardiansList)
+                {
+                    if (itr->GetObjectGuid() != m_guardianAttackerGuid)
+                    {
+                        itr->SetWalk(false);
+                        itr->GetMotionMaster()->MovePoint(1, 107.7912f, 1586.498f, 43.61609f);
+                    }
+
+                    itr->SetImmuneToPlayer(false);
+                }
+
+                m_uiSoundAlarmTimer = 0;
+            }
+            else
+                m_uiSoundAlarmTimer -= uiDiff;
+        }
+    }
+
     void SetHoldState(bool bOnHold)
     {
         SetEscortPaused(bOnHold);
 
         // Stop banging gong if still
         if (m_pInstance && m_pInstance->GetData(TYPE_EVENT_RUN) == SPECIAL && m_creature->HasAura(SPELL_BANGING_THE_GONG))
+        {
             m_creature->RemoveAurasDueToSpell(SPELL_BANGING_THE_GONG);
+            m_creature->LoadEquipment(0, true); // remove hammer
+
+            GetCreatureListWithEntryInGrid(lGuardiansList, m_creature, NPC_GUARDIAN, 70.0f);
+            for (auto& itr : lGuardiansList)
+            {
+                // choose which one will speak and attack Harrison
+                if (itr->GetPositionX() > 130.0f)
+                {
+                    m_guardianAttackerGuid = itr->GetObjectGuid();
+                    itr->LoadEquipment(EQUIP_ID_RED_SPEAR, true);
+                }
+
+                itr->SetImmuneToPlayer(true);
+            }
+        }
     }
 };
 
@@ -184,10 +280,12 @@ bool GossipHello_npc_harrison_jones_za(Player* pPlayer, Creature* pCreature)
     if (pCreature->isQuestGiver())
         pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
 
+    pPlayer->PrepareGossipMenu(pCreature, pPlayer->GetDefaultGossipMenuForSource(pCreature));
+
     if (pInstance && pInstance->GetData(TYPE_EVENT_RUN) == NOT_STARTED)
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_BEGIN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
-    pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+    pPlayer->SendPreparedGossip(pCreature);
     return true;
 }
 
