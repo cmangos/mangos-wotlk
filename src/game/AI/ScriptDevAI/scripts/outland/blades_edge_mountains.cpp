@@ -519,7 +519,11 @@ static const SimonGame aApexisGameData[4] =
 
 struct npc_simon_game_bunnyAI : public ScriptedAI
 {
-    npc_simon_game_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_simon_game_bunnyAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_bIsLargeEvent = m_creature->GetEntry() == NPC_SIMON_GAME_BUNNY_LARGE;
+        Reset();
+    }
 
     uint8 m_uiGamePhase;
 
@@ -700,7 +704,6 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
                 if (eventType == AI_EVENT_CUSTOM_A && !m_bIsEventStarted)
                 {
                     m_uiGamePhase = PHASE_LEVEL_PREPARE;
-                    m_bIsLargeEvent = m_creature->GetEntry() == NPC_SIMON_GAME_BUNNY_LARGE;
                     m_masterPlayerGuid = pInvoker->GetObjectGuid();
                     DoPrepareLevel();
                     m_bIsEventStarted = true;
