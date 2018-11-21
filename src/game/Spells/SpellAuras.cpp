@@ -2518,6 +2518,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 switch (GetId())
                 {
+                    case 23427:								// Summon Infernals (Warlock class call in Nefarian encounter)
+                    {
+                        if (Unit* target = GetTarget())
+                            target->CastSpell(target, 23426, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                        return;
+                    }
                     case 41099:                             // Battle Stance
                     {
                         if (target->GetTypeId() != TYPEID_UNIT)
