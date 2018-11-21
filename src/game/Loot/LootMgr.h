@@ -309,6 +309,7 @@ class Loot
         void GetLootItemsListFor(Player* player, LootItemList& lootList);
         void SetGoldAmount(uint32 _gold);
         void SendGold(Player* player);
+        void SendReleaseFor(Player* plr);
         bool IsItemAlreadyIn(uint32 itemId) const;
         uint32 GetGoldAmount() const { return m_gold; }
         LootType GetLootType() const { return m_lootType; }
@@ -330,7 +331,6 @@ class Loot
         bool IsLootedFor(Player const* player) const;
         bool IsLootedForAll() const;
         void SendReleaseFor(ObjectGuid const& guid);
-        void SendReleaseFor(Player* plr);
         void SendReleaseForAll();
         void SendAllowedLooter();
         void NotifyMoneyRemoved();
