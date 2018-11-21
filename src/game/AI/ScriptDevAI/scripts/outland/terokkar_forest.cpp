@@ -1030,7 +1030,7 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
             if (m_creature->GetPositionZ() < 310.0f)
                 SetCurrentWaypoint(19);
             else if (m_creature->GetPositionZ() < 330.0f)
-                SetCurrentWaypoint(28);
+                SetCurrentWaypoint(33);
             else
                 SetCurrentWaypoint(0);
 
@@ -1064,7 +1064,7 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
         {
             case 0:
             case 19:
-            case 28:
+            case 33:
                 DoScriptText(SAY_ESCORT_START, m_creature);
                 break;
 
@@ -1072,24 +1072,24 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
                 m_creature->SummonCreature(NPC_WING_GUARD, -4179.043f, 3081.007f, 328.28f, 4.51f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 m_creature->SummonCreature(NPC_WING_GUARD, -4181.610f, 3081.289f, 328.32f, 4.52f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
-            case 23:
+            case 26:
                 m_creature->SummonCreature(NPC_WING_GUARD, -3653.75f, 3750.8f, 302.101f, 2.11185f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 m_creature->SummonCreature(NPC_WING_GUARD, -3649.91f, 3754.08f, 303.007f, 2.3911f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
-            case 31:
+            case 37:
                 m_creature->SummonCreature(NPC_WING_GUARD, -3680.32f, 3318.81f, 311.501f, 1.55334f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 m_creature->SummonCreature(NPC_WING_GUARD, -3677.91f, 3317.93f, 311.573f, 1.48353f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
 
             case 13:
-            case 24:
-            case 32:
+            case 27:
+            case 38:
                 DoScriptText(SAY_AMBUSH_END, m_creature);
                 break;
 
             case 17:
-            case 26:
-            case 35:
+            case 31:
+            case 44:
                 DoScriptText(SAY_ESCORT_COMPLETE, m_creature);
                 SetRun();
 
@@ -1099,8 +1099,8 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
                 break;
 
             case 18:
-            case 27:
-            case 36:
+            case 32:
+            case 45:
                 m_creature->ForcedDespawn();
                 break;
         }
