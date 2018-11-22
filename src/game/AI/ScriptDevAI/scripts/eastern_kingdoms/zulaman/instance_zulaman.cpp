@@ -126,7 +126,7 @@ void instance_zulaman::OnCreatureDeath(Creature* pCreature)
                     {
                         ++m_uiBearEventPhase;
                         if (m_uiBearEventPhase == MAX_BEAR_WAVES)
-                            pNalorakk->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                            pNalorakk->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
                         else
                         {
                             pNalorakk->SetWalk(false);
