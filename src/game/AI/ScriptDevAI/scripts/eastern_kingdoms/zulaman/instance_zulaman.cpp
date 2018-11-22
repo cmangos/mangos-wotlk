@@ -162,8 +162,14 @@ void instance_zulaman::OnCreatureEvade(Creature* pCreature)
             for (auto itr : m_aNalorakkEvent[m_uiBearEventPhase].sBearTrashGuidSet)
             {
                 Creature* pTemp = instance->GetCreature(itr);
-                if (pTemp && !pTemp->isAlive())
+
+                if (!pTemp)
+                    break;
+
+                if (!pTemp->isAlive())
                     pTemp->Respawn();
+                
+                pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             }
             m_aNalorakkEvent[m_uiBearEventPhase].uiTrashKilled = 0;
             m_bIsBearPhaseInProgress = false;
