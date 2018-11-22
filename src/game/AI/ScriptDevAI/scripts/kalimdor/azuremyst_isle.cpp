@@ -74,8 +74,6 @@ struct npc_draenei_survivorAI : public ScriptedAI
 
         m_creature->CastSpell(m_creature, SPELL_IRRIDATION, TRIGGERED_OLD_TRIGGERED);
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
         m_creature->SetHealth(int(m_creature->GetMaxHealth()*.1));
         m_creature->SetStandState(UNIT_STAND_STATE_SLEEP);
     }
