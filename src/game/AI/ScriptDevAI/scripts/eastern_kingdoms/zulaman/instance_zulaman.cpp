@@ -98,13 +98,25 @@ void instance_zulaman::OnCreatureCreate(Creature* pCreature)
         case NPC_WARBRINGER:
         case NPC_AXETHROWER:
             if (pCreature->GetPositionZ() > 10.0f && pCreature->GetPositionZ() < 15.0f)
+            {
                 m_aNalorakkEvent[0].sBearTrashGuidSet.insert(pCreature->GetObjectGuid());
+                pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+            }
             else if (pCreature->GetPositionZ() > 25.0f && pCreature->GetPositionZ() < 30.0f)
+            {
                 m_aNalorakkEvent[1].sBearTrashGuidSet.insert(pCreature->GetObjectGuid());
+                pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+            }
             else if (pCreature->GetPositionZ() > 40.0f && pCreature->GetPositionZ() < 41.0f)
+            {
                 m_aNalorakkEvent[2].sBearTrashGuidSet.insert(pCreature->GetObjectGuid());
+                pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+            }
             else if (pCreature->GetPositionZ() > 41.0f)
+            {
                 m_aNalorakkEvent[3].sBearTrashGuidSet.insert(pCreature->GetObjectGuid());
+                pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+            }
             break;
     }
 }
@@ -389,7 +401,7 @@ void instance_zulaman::SendNextBearWave(Unit* pTarget)
         Creature* pTemp = instance->GetCreature(itr);
         if (pTemp && pTemp->isAlive())
         {
-            pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             pTemp->AI()->AttackStart(pTarget);
 
             // For the first wave we need to make them jump to the ground before attacking
