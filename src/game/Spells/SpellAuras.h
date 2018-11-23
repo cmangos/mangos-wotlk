@@ -561,6 +561,17 @@ class SingleEnemyTargetAura : public Aura
         ObjectGuid m_castersTargetGuid;
 };
 
+// Used for GO Area Auras
+class GameObjectAura : public Aura
+{
+    public:
+        GameObjectAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, GameObject* caster);
+        ~GameObjectAura();
+
+    protected:
+        void Update(uint32 diff) override;
+};
+
 Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster = nullptr, Item* castItem = nullptr);
 SpellAuraHolder* CreateSpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem = nullptr, SpellEntry const* triggeredBy = nullptr);
 #endif

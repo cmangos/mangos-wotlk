@@ -6510,9 +6510,6 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
                     summon->CastSpell(nullptr, 19483, TRIGGERED_NONE); // Immolation - needs to be cast after level update
                     break;
                 }
-                case 37390:
-                    summon->SetOwnerGuid(m_caster->GetObjectGuid());
-                    break;
             }
         }
         else

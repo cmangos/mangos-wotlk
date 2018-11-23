@@ -1652,6 +1652,172 @@ bool AreaTrigger_at_raven_prophecy(Player* pPlayer, AreaTriggerEntry const* pAt)
 }
 
 /*######
+## npc_frequency_scanner
+######*/
+
+enum
+{
+    SPELL_OSCILLATION_FIELD             = 37408,
+    SPELL_OSCILLATING_FREQUENCY_SCANNER = 37407,
+    SPELL_SUMMON_TOP_BUNNY_CASTER       = 37392,
+    SPELL_SUMMON_WYRM_FROM_BEYOND       = 37503,
+    SPELL_SUMMON_SINGING_RIDGE_VOID_STORM = 37510,
+    SPELL_SUMMON_AURA_GENERATOR_000     = 37373,
+    SPELL_TOP_BUNNY_BEAM                = 37418,
+
+    NPC_VOID_STORM          = 21798,
+    NPC_TOP_BUNNY           = 21759,
+    // NPC_OSCILLATING_FREQUENCY_SCANNER_MASTER_BUNNY = 21760,
+    // NPC_WYRM_FROM_BEYOND    = 21796,
+
+    MODEL_WYRM_FROM_BEYOND  = 20476,
+};
+
+// This is a first attempt to implement GO type 30 behaviour
+struct go_aura_generator_000AI : public GameObjectAI
+{
+    go_aura_generator_000AI(GameObject* go) : GameObjectAI(go), m_auraSearchTimer(1000) {}
+
+    uint32 m_auraSearchTimer;
+    ObjectGuid m_player;
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (m_auraSearchTimer <= diff)
+        {
+            m_auraSearchTimer = 1000;
+            if (Player* player = m_go->GetMap()->GetPlayer(m_player))
+            {
+                float x, y, z;
+                m_go->GetPosition(x, y, z);
+                auto bounds = player->GetSpellAuraHolderBounds(37407);
+                SpellAuraHolder* myHolder = nullptr;
+                for (auto itr = bounds.first; itr != bounds.second; ++itr)
+                {
+                    SpellAuraHolder* holder = (*itr).second;
+                    if (holder->GetCasterGuid() == m_go->GetObjectGuid())
+                    {
+                        myHolder = holder;
+                        break;
+                    }
+                }
+                bool isCloseEnough = player->GetDistance(x, y, z, DIST_CALC_COMBAT_REACH) < 25.f; // value comes from spell and go template
+                if (!myHolder)
+                {
+                    if (isCloseEnough)
+                    {
+                        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_OSCILLATING_FREQUENCY_SCANNER);
+                        myHolder = CreateSpellAuraHolder(spellInfo, player, m_go);
+                        GameObjectAura* Aur = new GameObjectAura(spellInfo, EFFECT_INDEX_0, nullptr, myHolder, player, m_go);
+                        myHolder->AddAura(Aur, EFFECT_INDEX_0);
+                        if (!player->AddSpellAuraHolder(myHolder))
+                            delete myHolder;
+                    }
+                }
+                else if (!isCloseEnough)
+                    player->RemoveSpellAuraHolder(myHolder);
+            }
+        }
+        else m_auraSearchTimer -= diff;
+    }
+};
+
+struct npc_frequency_scanner : public ScriptedAI
+{
+    npc_frequency_scanner(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiOscillationFieldTimer;
+    uint32 m_uiAttackOwnerTimer;
+
+    ObjectGuid m_guidWyrm;
+
+    bool m_bAttack;
+
+    void Reset() override
+    {
+        m_uiOscillationFieldTimer = 0;
+        m_uiAttackOwnerTimer = 0;
+        m_bAttack = false;
+        SetReactState(REACT_PASSIVE);
+    }
+
+    void JustRespawned() override
+    {
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_TOP_BUNNY_CASTER, TRIGGERED_NONE);
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_AURA_GENERATOR_000, TRIGGERED_NONE);
+    }
+
+    void JustSummoned(Creature* creature) override
+    {
+        if (creature->GetEntry() == NPC_TOP_BUNNY)
+            creature->CastSpell(nullptr, SPELL_TOP_BUNNY_BEAM, TRIGGERED_NONE);
+    }
+
+    void JustSummoned(GameObject* go) override
+    {
+        static_cast<go_aura_generator_000AI*>(go->AI())->m_player = m_creature->GetSpawnerGuid();
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            m_guidWyrm = pInvoker->GetObjectGuid();
+            pInvoker->CastSpell(nullptr, SPELL_SUMMON_SINGING_RIDGE_VOID_STORM, TRIGGERED_NONE);
+            m_uiAttackOwnerTimer = 3000;
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiOscillationFieldTimer <= uiDiff)
+        {
+            m_uiOscillationFieldTimer = 2000;
+            m_creature->CastSpell(m_creature, SPELL_OSCILLATION_FIELD, TRIGGERED_NONE);
+        }
+        else
+            m_uiOscillationFieldTimer -= uiDiff;
+
+        if (m_uiAttackOwnerTimer)
+        {
+            if (m_uiAttackOwnerTimer <= uiDiff)
+            {
+                if (m_bAttack)
+                {
+                    m_uiAttackOwnerTimer = 0;
+                    if (Unit* owner = m_creature->GetSpawner())
+                        if (Creature* creature = m_creature->GetMap()->GetCreature(m_guidWyrm))
+                            creature->AI()->AttackStart(owner);
+                }
+                else
+                {
+                    m_uiAttackOwnerTimer = 1000;
+                    m_bAttack = true;
+                    if (Creature* creature = m_creature->GetMap()->GetCreature(m_guidWyrm))
+                    {
+                        creature->SetDisplayId(MODEL_WYRM_FROM_BEYOND);
+                        creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                    }
+                }                
+            }
+            else
+                m_uiAttackOwnerTimer -= uiDiff;
+        }        
+    }
+};
+
+UnitAI* GetAI_npc_frequency_scanner(Creature* creature)
+{
+    return new npc_frequency_scanner(creature);
+}
+
+GameObjectAI* GetGOAI_go_aura_generator_000(GameObject* go)
+{
+    return new go_aura_generator_000AI(go);
+}
+
+/*######
 ## npc_fel_cannon
 ######*/
 
@@ -3171,6 +3337,16 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "mobs_grishna_arrakoa";
     pNewScript->pAreaTrigger = &AreaTrigger_at_raven_prophecy;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_frequency_scanner";
+    pNewScript->GetAI = &GetAI_npc_frequency_scanner;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_aura_generator_000";
+    pNewScript->GetGameObjectAI = &GetGOAI_go_aura_generator_000;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

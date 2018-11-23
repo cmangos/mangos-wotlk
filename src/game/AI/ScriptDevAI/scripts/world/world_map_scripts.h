@@ -30,6 +30,10 @@ enum
     NPC_IRESPEAKER              = 24999,
     NPC_UNLEASHED_HELLION       = 25002,
 
+    // Quest 10594 - Gauging the Resonant Frequency
+    NPC_WYRM_FROM_BEYOND = 21796,
+    NPC_OSCILLATING_FREQUENCY_SCANNER_BUNNY = 21760,
+
     // Quest 10998
     NPC_VIMGOL_VISUAL_BUNNY     = 23040,
 

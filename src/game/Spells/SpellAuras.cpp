@@ -2519,6 +2519,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         return;
                     }
+                    case 37408:                             // Oscillating field
+                        if (Player* player = dynamic_cast<Player*>(target))
+                            if (player->GetAuraCount(37408) >= 5 && player->GetQuestStatus(10594) == QUEST_STATUS_INCOMPLETE)
+                                player->AreaExploredOrEventHappens(10594);
+                        return;
                     case 37750:                             // Clear Consuming Madness
                         if (target->HasAura(37749))
                             target->RemoveAurasDueToSpell(37749);
@@ -9962,11 +9967,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     if (!caster)
         m_casterGuid = target->GetObjectGuid();
     else
-    {
-        // remove this assert when not unit casters will be supported
-        MANGOS_ASSERT(caster->isType(TYPEMASK_UNIT))
         m_casterGuid = caster->GetObjectGuid();
-    }
 
     m_applyTime      = time(nullptr);
     m_isPassive      = IsPassiveSpell(spellproto);
@@ -10372,8 +10373,11 @@ void SpellAuraHolder::SetStackAmount(uint32 stackAmount, Unit* newCaster)
 
 Unit* SpellAuraHolder::GetCaster() const
 {
-    if (GetCasterGuid() == m_target->GetObjectGuid())
+    if (m_casterGuid == m_target->GetObjectGuid())
         return m_target;
+
+    if (m_casterGuid.IsGameObject())
+        return nullptr;
 
     return ObjectAccessor::GetUnit(*m_target, m_casterGuid);// player will search at any maps
 }
@@ -11380,4 +11384,23 @@ void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
 void SpellAuraHolder::SetCreationDelayFlag()
 {
     m_skipUpdate = true;
+}
+
+GameObjectAura::GameObjectAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32* currentBasePoints, SpellAuraHolder* holder, Unit* target, GameObject* caster)
+    : Aura(spellproto, eff, currentBasePoints, holder, target, nullptr)
+{
+    m_isAreaAura = true;
+}
+
+GameObjectAura::~GameObjectAura()
+{    
+}
+
+void GameObjectAura::Update(uint32 diff)
+{
+    Aura::Update(diff);
+    Unit* target = GetTarget();
+    GameObject* goCaster = target->GetMap()->GetGameObject(GetHolder()->GetCasterGuid());
+    if (!goCaster)
+        target->RemoveSpellAuraHolder(GetHolder());
 }
