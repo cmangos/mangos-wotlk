@@ -42,6 +42,8 @@ enum
     SPELL_BURNING_MAUL          = 30598,
     SPELL_BURNING_MAUL_H        = 36056,
 
+    SPELL_BEATDOWN              = 30618, // Unused - used for threat reset
+
     NPC_LEFT_HEAD               = 19523,
     NPC_RIGHT_HEAD              = 19524
 };

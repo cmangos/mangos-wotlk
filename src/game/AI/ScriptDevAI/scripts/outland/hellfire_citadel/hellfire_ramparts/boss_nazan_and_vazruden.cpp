@@ -41,6 +41,8 @@ enum
     // vazruden
     SPELL_REVENGE           = 19130,
     SPELL_REVENGE_H         = 40392,
+    SPELL_VAZRUDENS_MARK    = 30689,                        // Unused - seemingly non-tank targeted
+    SPELL_DEFENSIVE_STATE   = 5301,
 
     // nazan
     //SPELL_FIREBALL_H      = 32491,                        // purpose unk; not sure if they are related to this encounter
