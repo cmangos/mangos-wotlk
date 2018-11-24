@@ -28,16 +28,17 @@ enum
 {
     SAY_AGGRO               = -1542008,
 
-    SPELL_SLIME_SPRAY       = 30913,
-    SPELL_SLIME_SPRAY_H     = 38458,
-    SPELL_POISON_CLOUD      = 30916,
-    SPELL_POISON_BOLT       = 30917,
-    SPELL_POISON_BOLT_H     = 38459,
+    SPELL_SUMMON_INCOMBAT_TRIGGER   = 26837,    // TODO: probably cast on spawn not sure what c.16006 does
+    SPELL_SLIME_SPRAY               = 30913,
+    SPELL_SLIME_SPRAY_H             = 38458,
+    SPELL_POISON_CLOUD              = 30916,
+    SPELL_POISON_BOLT               = 30917,
+    SPELL_POISON_BOLT_H             = 38459,
 
-    SPELL_POISON            = 30914,
-    SPELL_POISON_H          = 38462,
+    SPELL_POISON                    = 30914,
+    SPELL_POISON_H                  = 38462,
 
-    POINT_EVENT_COMBAT      = 7,
+    POINT_EVENT_COMBAT              = 7,
 };
 
 struct boss_broggokAI : public ScriptedAI
