@@ -44,7 +44,7 @@ enum
     SPELL_SUPER_SHRINK_RAY      = 31485,
     SPELL_SAW_BLADE             = 31486,
     SPELL_ELECTRIFIED_NET       = 35107,
-    // SPELL_ENRAGE_H            = 1,                       // current enrage spell not known
+    SPELL_BERSERK               = 26662,
 
     NPC_STEAMRIGGER_MECHANIC    = 17951,
 
