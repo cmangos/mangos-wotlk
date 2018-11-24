@@ -39,6 +39,7 @@ enum
     SPELL_IMPALE                = 39061,
     SPELL_WARLORDS_RAGE         = 37081,        // triggers 36453
     SPELL_WARLORDS_RAGE_NAGA    = 31543,        // triggers 37076
+    SPELL_HEAD_CRACK            = 16172,        // TODO:
 };
 
 struct boss_warlord_kalithreshAI : public ScriptedAI
