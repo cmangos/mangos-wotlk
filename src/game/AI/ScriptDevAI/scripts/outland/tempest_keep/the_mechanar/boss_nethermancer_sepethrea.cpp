@@ -37,7 +37,7 @@ enum
 
     SPELL_SUMMON_RAGING_FLAMES      = 35275,
     SPELL_SUMMON_RAGING_FLAMES_H    = 39084,
-    SPELL_FROST_ATTACK              = 45195,
+    SPELL_FROST_ATTACK              = 45196, // serverside - triggers 45196
     SPELL_ARCANE_BLAST              = 35314,
     SPELL_DRAGONS_BREATH            = 35250,
 
@@ -65,19 +65,10 @@ struct boss_nethermancer_sepethreaAI : public ScriptedAI
         m_uiDragonsBreathTimer  = urand(20000, 26000);
     }
 
-    // TODO: This is hack, need to find if there is an aura which procs this spell on melee hit
-    void DamageDeal(Unit* pDoneTo, uint32& uiDamage, DamageEffectType damagetype) override
-    {
-        if (damagetype != DIRECT_DAMAGE)
-            return;
-
-        if (roll_chance_i(25))
-            m_creature->CastSpell(pDoneTo, SPELL_FROST_ATTACK, TRIGGERED_OLD_TRIGGERED);
-    }
-
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
+        DoCastSpellIfCan(nullptr, SPELL_FROST_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SUMMON_RAGING_FLAMES : SPELL_SUMMON_RAGING_FLAMES_H);
 
         if (m_pInstance)
