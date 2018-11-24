@@ -893,8 +893,14 @@ uint32 GetAffectedTargets(SpellEntry const* spellInfo, Unit* caster)
         }
         case SPELLFAMILY_MAGE:
         {
-            if (spellInfo->Id == 38194)                   // Blink
-                return 1;
+            switch (spellInfo->Id)
+            {
+                case 23603:								// Wild Polymorph (BWL, Nefarian)
+                case 38194:								// Blink
+                    return 1;
+                default:
+                    break;
+            }
             break;
         }
         case SPELLFAMILY_WARRIOR:
