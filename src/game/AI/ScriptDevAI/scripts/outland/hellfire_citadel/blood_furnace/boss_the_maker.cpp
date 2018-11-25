@@ -33,10 +33,8 @@ enum
     SAY_KILL_2                  = -1542013,
     SAY_DIE                     = -1542014,
 
-    SPELL_ACID_SPRAY            = 38153,                    // heroic 38973 ??? 38153
     SPELL_EXPLODING_BREAKER     = 30925,
     SPELL_EXPLODING_BREAKER_H   = 40059,
-    SPELL_KNOCKDOWN             = 20276,
     SPELL_DOMINATION            = 30923
 };
 
@@ -52,17 +50,13 @@ struct boss_the_makerAI : public ScriptedAI
     ScriptedInstance* m_pInstance;
     bool m_bIsRegularMode;
 
-    uint32 m_uiAcidSprayTimer;
     uint32 m_uiExplodingBreakerTimer;
     uint32 m_uiDominationTimer;
-    uint32 m_uiKnockdownTimer;
 
     void Reset() override
     {
-        m_uiAcidSprayTimer          = 15000;
         m_uiExplodingBreakerTimer   = 6000;
         m_uiDominationTimer         = 20000;
-        m_uiKnockdownTimer          = 10000;
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -102,14 +96,6 @@ struct boss_the_makerAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (m_uiAcidSprayTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_ACID_SPRAY) == CAST_OK)
-                m_uiAcidSprayTimer = urand(15000, 23000);
-        }
-        else
-            m_uiAcidSprayTimer -= uiDiff;
-
         if (m_uiExplodingBreakerTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
@@ -131,14 +117,6 @@ struct boss_the_makerAI : public ScriptedAI
         }
         else
             m_uiDominationTimer -= uiDiff;
-
-        if (m_uiKnockdownTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCKDOWN) == CAST_OK)
-                m_uiKnockdownTimer = urand(4000, 12000);
-        }
-        else
-            m_uiKnockdownTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
     }
