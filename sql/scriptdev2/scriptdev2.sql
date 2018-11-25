@@ -559,6 +559,7 @@ UPDATE creature_template SET ScriptName='boss_swamplord_muselek' WHERE entry=178
 UPDATE instance_template SET ScriptName='instance_underbog' WHERE map=546;
 INSERT INTO scripted_areatrigger VALUES
 (4302,'at_ghazan_surface');
+UPDATE creature_template SET ScriptName='boss_black_stalker' WHERE entry=17882;
 
 /* THE STEAMVAULT */
 UPDATE instance_template SET ScriptName='instance_steam_vault' WHERE map=545;
