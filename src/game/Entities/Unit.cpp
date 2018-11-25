@@ -6558,37 +6558,40 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
 {
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
 
-    uint32 targetHealth = calcDamageInfo->target->GetHealth();
-    uint32 overkill = (calcDamageInfo->totalDamage > targetHealth ? (calcDamageInfo->totalDamage - targetHealth) : 0);
-
-    uint32 count = m_weaponDamageCount[calcDamageInfo->attackType];
     WorldPacket data(SMSG_ATTACKERSTATEUPDATE, 16 + 45);        // we guess size
+
     data << uint32(calcDamageInfo->HitInfo);
     data << calcDamageInfo->attacker->GetPackGUID();
     data << calcDamageInfo->target->GetPackGUID();
-    data << uint32(calcDamageInfo->totalDamage);                // Total damage
-    data << uint32(overkill);                                   // overkill value
-    data << uint8(count);                                       // Sub damage count
+    data << uint32(calcDamageInfo->totalDamage);
 
-    for (uint32 i = 0; i < count; ++i)
+    // Overkill value:
+    data << uint32(std::max(int64(0), (int64(calcDamageInfo->totalDamage) - calcDamageInfo->target->GetHealth())));
+
+    // Subdamage count:
+    uint8 lines = m_weaponDamageCount[calcDamageInfo->attackType];
+    data << uint8(lines);
+
+    // Subdamage information:
+    for (uint8 i = 0; i < lines; ++i)
     {
-        SubDamageInfo *subDamage = &calcDamageInfo->subDamage[i];
+        auto &line = calcDamageInfo->subDamage[i];
 
-        data << uint32(subDamage->damageSchoolMask);                            // School of sub damage
-        data << float(subDamage->damage)/ float(calcDamageInfo->totalDamage);   // Float coefficient of sub damage
-        data << uint32(subDamage->damage);                                      // Sub Damage
+        data << uint32(line.damageSchoolMask);
+        data << float(line.damage) / float(calcDamageInfo->totalDamage);   // Float coefficient of subdamage
+        data << uint32(line.damage);
     }
 
     if (calcDamageInfo->HitInfo & (HITINFO_ABSORB | HITINFO_ABSORB2))
     {
-        for (uint32 i = 0; i < count; ++i)
-            data << uint32(calcDamageInfo->subDamage[i].absorb);             // Absorb
+        for (uint32 i = 0; i < lines; ++i)
+            data << uint32(calcDamageInfo->subDamage[i].absorb);
     }
 
     if (calcDamageInfo->HitInfo & (HITINFO_RESIST | HITINFO_RESIST2))
     {
-        for (uint32 i = 0; i < count; ++i)
-            data << uint32(calcDamageInfo->subDamage[i].resist);             // Resist
+        for (uint32 i = 0; i < lines; ++i)
+            data << uint32(calcDamageInfo->subDamage[i].resist);
     }
 
     data << uint8(calcDamageInfo->TargetState);
@@ -6596,12 +6599,14 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
     data << uint32(0);                                      // spell id, seen with heroic strike and disarm as examples.
     // HITINFO_NOACTION normally set if spell
 
+    // Blocked amount:
     if (calcDamageInfo->HitInfo & HITINFO_BLOCK)
         data << uint32(calcDamageInfo->blocked_amount);
 
     if (calcDamageInfo->HitInfo & HITINFO_UNK22)
         data << uint32(0);                                  // count of some sort?
 
+    // Debug info
     if (calcDamageInfo->HitInfo & HITINFO_UNK0)
     {
         data << uint32(0);
