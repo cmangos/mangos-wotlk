@@ -1751,6 +1751,8 @@ UPDATE creature_template SET ScriptName='npc_dragonhawk_egg' WHERE entry=23817;
 UPDATE creature_template SET ScriptName='npc_janalai_firebomb' WHERE entry=23920;
 UPDATE creature_template SET ScriptName='npc_amanishi_hatcher' WHERE entry IN (23818,24504);
 UPDATE creature_template SET ScriptName='npc_forest_frog' WHERE entry=24396;
+UPDATE creature_template SET ScriptName='npc_amanishi_lookout' WHERE entry=24175;
+UPDATE creature_template SET ScriptName='npc_amanishi_tempest' WHERE entry=24549;
 
 /* ZUL'DRAK */
 UPDATE creature_template SET ScriptName='npc_gurgthock' WHERE entry=30007;
@@ -5255,7 +5257,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568085,'%s absorbs the essence of the dragonhawk spirit!',0,2,0,0,'zuljin EMOTE_DRAGONHAWK_SPIRIT'),
 
 (-1568086,'In fact, it would be best if you just stay here. You\'d only get in my way....',0,1,0,0,'harrison SAY_OPEN_ENTRANCE_2'),
-(-1568087,'More intruders! Sound da alarm!',12104,1,0,25,'amanshi guardian SAY_SOUND_ALARM');
+(-1568087,'More intruders! Sound da alarm!',12104,1,0,25,'amanishi guardian SAY_SOUND_ALARM'),
+
+(-1568088,'Akil\'zon, the invaders approach!',0,1,0,5,'amanishi lookout SAY_START_GAUNTLET');
+
 
 -- -1 574 000 UTGARDE KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -11035,6 +11040,17 @@ INSERT INTO script_waypoint VALUES
 (23784,0,43,1604.47,-6164.39,8.379,0,0,0,''),
 (23784,0,44,1617.78,-6157.25,9.323,0,2000,0,'quest complete'),
 (23784,0,45,1644.7,-6149.58,7.357,0,0,0,''),
+(24175,0,0,216.3581,1467.675,25.9713,100,0,0,''),
+(24175,0,1,217.2123,1467.155,25.9713,100,0,0,''),
+(24175,0,2,226.0859,1461.754,25.93943,100,0,0,''),
+(24175,0,3,228.0156,1435.83,26.68943,100,0,0,''),
+(24175,0,4,228.1763,1433.847,27.18943,100,0,0,''),
+(24175,0,5,227.731,1412.553,34.4392,100,0,0,''),
+(24175,0,6,228.1711,1388.288,42.68928,100,0,0,''),
+(24175,0,7,232.5426,1374.381,47.43928,100,0,0,''),
+(24175,0,8,263.1866,1376.492,49.32307,100,0,0,''),
+(24175,0,9,265.7423,1376.84,49.34044,100,0,0,''),
+(24175,0,10,298.9646,1385.205,57.77875,100,0,0,''),
 (24358,0,0,121.194,1645.62,42.021,0,0,0,''),
 (24358,0,1,132.051,1642.18,42.021,0,4000,0,'SAY_AT_GONG'),
 (24358,0,2,132.051,1642.18,42.021,0,1000,0,'start pounding gong'),

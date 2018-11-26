@@ -23,6 +23,8 @@ EndScriptData */
 
 /* ContentData
 npc_forest_frog
+npc_harrison_jones_za
+npc_amanishi_lookout
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -336,6 +338,139 @@ bool GOUse_go_strange_gong(Player* /*pPlayer*/, GameObject* pGo)
     return false;
 }
 
+enum
+{
+    SAY_GAUNTLET_START = -1568088
+};
+
+struct npc_amanishi_lookoutAI : public ScriptedAI
+{
+    npc_amanishi_lookoutAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_zulaman*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_zulaman* m_pInstance;
+
+    void Reset() override {}
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        ScriptedAI::MoveInLineOfSight(pWho);
+
+        if (m_pInstance && m_pInstance->IsAkilzonGauntletInProgress())
+            return;
+
+        if (pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 25.0f))
+        {
+            m_pInstance->SetAkilzonGauntletProgress(true);
+            DoScriptText(SAY_GAUNTLET_START, m_creature);
+            m_creature->SetWalk(false);
+            m_creature->GetMotionMaster()->MoveWaypoint(0, 3, 1000);
+        }
+    }
+
+    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+    {
+        if (uiMotionType != EXTERNAL_WAYPOINT_MOVE)
+            return;
+
+        if (uiPointId && uiPointId == 10)
+            m_creature->ForcedDespawn();
+    }
+};
+
+UnitAI* GetAI_npc_amanishi_lookout(Creature* pCreature)
+{
+    return new npc_amanishi_lookoutAI(pCreature);
+}
+
+enum
+{
+    SPELL_THUNDERCLAP       = 44033,
+    SPELL_SUMMON_WARRIOR    = 43486,
+    SPELL_SUMMON_EAGLE      = 43487,
+};
+
+struct npc_amanishi_tempestAI : public ScriptedAI
+{
+    npc_amanishi_tempestAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_zulaman*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_zulaman* m_pInstance;
+
+    uint32 m_uiSummonEagleTimer;
+    uint32 m_uiSummonWarriorTimer;
+    uint32 m_uiThunderclapTimer;
+
+    void Reset() override
+    {
+        m_uiSummonEagleTimer = 25000;
+        m_uiSummonWarriorTimer = 40000;
+        m_uiThunderclapTimer = 9000;
+        m_creature->RemoveGuardians();
+    }
+
+    void Aggro(Unit* /*pWho*/) override
+    {
+        if (m_pInstance && m_pInstance->IsAkilzonGauntletInProgress())
+            m_pInstance->SetAkilzonGauntletProgress(false);
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        pSummoned->SetWalk(false);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_pInstance && m_pInstance->IsAkilzonGauntletInProgress())
+        {
+            if (m_uiSummonEagleTimer <= uiDiff)
+            {
+                for (int i = 0; i < 5; i++)
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_EAGLE);
+
+                m_uiSummonEagleTimer = 25000;
+            }
+            else
+                m_uiSummonEagleTimer -= uiDiff;
+
+            if (m_uiSummonWarriorTimer <= uiDiff)
+            {
+                for (int i = 0; i < 2; i++)
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_WARRIOR);
+
+                m_uiSummonWarriorTimer = 40000;
+            }
+            else
+                m_uiSummonWarriorTimer -= uiDiff;
+        }
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        if (m_uiThunderclapTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_THUNDERCLAP) == CAST_OK)
+                m_uiThunderclapTimer = urand(9000, 11000);
+        }
+        else
+            m_uiThunderclapTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+UnitAI* GetAI_npc_amanishi_tempest(Creature* pCreature)
+{
+    return new npc_amanishi_tempestAI(pCreature);
+}
+
 void AddSC_zulaman()
 {
     Script* pNewScript = new Script;
@@ -353,5 +488,15 @@ void AddSC_zulaman()
     pNewScript = new Script;
     pNewScript->Name = "go_strange_gong";
     pNewScript->pGOUse = &GOUse_go_strange_gong;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_amanishi_lookout";
+    pNewScript->GetAI = &GetAI_npc_amanishi_lookout;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_amanishi_tempest";
+    pNewScript->GetAI = &GetAI_npc_amanishi_tempest;
     pNewScript->RegisterSelf();
 }

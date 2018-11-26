@@ -58,6 +58,12 @@ enum InstanceZA
     NPC_AXETHROWER          = 23542,
     NPC_WARBRINGER          = 23580,
 
+    // Akil'zon gauntlet npcs
+    NPC_TEMPEST             = 24549,
+    NPC_LOOKOUT             = 24175,
+    NPC_PROTECTOR           = 24180,
+    NPC_WIND_WALKER         = 24179,
+
     // Malacrass companions
     NPC_ALYSON              = 24240,
     NPC_THURG               = 24241,
@@ -170,6 +176,9 @@ class instance_zulaman : public ScriptedInstance
         void SetBearEventProgress(bool bIsInProgress) { m_bIsBearPhaseInProgress = bIsInProgress; }
         void SendNextBearWave(Unit* pTarget);
 
+        bool IsAkilzonGauntletInProgress() const { return m_bIsAkilzonGauntletInProgress; }
+        void SetAkilzonGauntletProgress(bool bIsInProgress) { m_bIsAkilzonGauntletInProgress = bIsInProgress; }
+
         bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
 
         void Update(uint32 uiDiff) override;
@@ -190,6 +199,9 @@ class instance_zulaman : public ScriptedInstance
         NalorakkTrashInfo m_aNalorakkEvent[MAX_BEAR_WAVES];
         uint8 m_uiBearEventPhase;
         bool m_bIsBearPhaseInProgress;
+
+        GuidSet sAkilzonTrashGuidSet;
+        bool m_bIsAkilzonGauntletInProgress;
 };
 
 #endif

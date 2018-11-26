@@ -28,7 +28,8 @@ instance_zulaman::instance_zulaman(Map* pMap) : ScriptedInstance(pMap),
     m_uiEventTimer(MINUTE * IN_MILLISECONDS),
     m_uiGongCount(0),
     m_uiBearEventPhase(0),
-    m_bIsBearPhaseInProgress(false)
+    m_bIsBearPhaseInProgress(false),
+    m_bIsAkilzonGauntletInProgress(false)
 {
     Initialize();
 }
@@ -86,6 +87,18 @@ void instance_zulaman::OnCreatureCreate(Creature* pCreature)
         case NPC_DARKHEART:
         case NPC_KORAGG:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+        
+        // Akil'zon gauntlet 
+        case NPC_TEMPEST:
+            if (pCreature->GetPositionZ() > 50.0f) // excludes Tempest in Malacrass trash
+                sAkilzonTrashGuidSet.insert(pCreature->GetObjectGuid());
+            break;
+        case NPC_LOOKOUT:
+        case NPC_PROTECTOR:
+        case NPC_WIND_WALKER:
+            if (pCreature->GetPositionZ() > 26.0f) // excludes Wind Walker in first patrol
+                sAkilzonTrashGuidSet.insert(pCreature->GetObjectGuid());
             break;
 
         case NPC_TANZAR:      m_aEventNpcInfo[INDEX_NALORAKK].npGuid = pCreature->GetObjectGuid(); break;
@@ -173,6 +186,24 @@ void instance_zulaman::OnCreatureEvade(Creature* pCreature)
             }
             m_aNalorakkEvent[m_uiBearEventPhase].uiTrashKilled = 0;
             m_bIsBearPhaseInProgress = false;
+            break;
+        case NPC_TEMPEST:
+        case NPC_PROTECTOR:
+        case NPC_WIND_WALKER:
+            if (sAkilzonTrashGuidSet.find(pCreature->GetObjectGuid()) != sAkilzonTrashGuidSet.end())
+            {
+                m_bIsAkilzonGauntletInProgress = false;
+                for (auto itr : sAkilzonTrashGuidSet)
+                {
+                    Creature* pTemp = instance->GetCreature(itr);
+
+                    if (!pTemp)
+                        break;
+
+                    if (!pTemp->isAlive())
+                        pTemp->Respawn();
+                }
+            }
             break;
     }
 }
