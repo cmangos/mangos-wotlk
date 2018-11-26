@@ -5427,6 +5427,47 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (!m_caster->isInCombat() && m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET) && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_UNK26))
         return SPELL_FAILED_CASTER_AURASTATE;
 
+	// Nefarian class calls spell failed
+	switch (m_spellInfo->SpellFamilyName)
+	{
+		case SPELLFAMILY_DRUID:
+		{
+			if (IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_SHAPESHIFT))
+			{
+				Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+				for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
+				{
+					if ((*itr)->GetModifier()->m_miscvalue == 3655)
+					{
+						return SPELL_FAILED_TARGET_AURASTATE;
+					}
+					else
+						++itr;
+				}
+			}
+			break;
+		}
+		case SPELLFAMILY_WARRIOR:
+		{
+			if (IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_SHAPESHIFT))
+			{
+				Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+				for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
+				{
+					if ((*itr)->GetModifier()->m_miscvalue == 3654)
+					{
+						return SPELL_FAILED_TARGET_AURASTATE;
+					}
+					else
+						++itr;
+				}
+			}
+			break;
+		}
+		default:
+			break;
+	}
+
     if (Unit* target = m_targets.getUnitTarget())
     {
         // TARGET_UNIT_SCRIPT_NEAR_CASTER fills unit target per client requirement but should not be checked against common things
