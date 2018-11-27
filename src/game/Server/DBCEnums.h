@@ -500,7 +500,7 @@ enum VehicleFlags
     VEHICLE_FLAG_CUSTOM_PITCH       = 0x00000040,           // If set use pitchMin and pitchMax from DBC, otherwise pitchMin = -pi/2, pitchMax = pi/2
     VEHICLE_FLAG_UNK2               = 0x00000080,           // only one entry - 27593
     VEHICLE_FLAG_UNK3               = 0x00000100,           // only one entry - 27593
-    VEHICLE_FLAG_UNK4               = 0x00000200,           // mostly cannons and turrets
+    VEHICLE_FLAG_FIXED_POSITION     = 0x00000200,           // used for vehicles with fixed positions - cannons and turrets; except entry 31830
     VEHICLE_FLAG_ADJUST_AIM_ANGLE   = 0x00000400,           // Lua_IsVehicleAimAngleAdjustable
     VEHICLE_FLAG_ADJUST_AIM_POWER   = 0x00000800,           // Lua_IsVehicleAimPowerAdjustable
     VEHICLE_FLAG_UNK5               = 0x00001000,
@@ -512,7 +512,7 @@ enum VehicleFlags
     VEHICLE_FLAG_UNK11              = 0x00040000,
     VEHICLE_FLAG_UNK12              = 0x00080000,
     VEHICLE_FLAG_UNK13              = 0x00100000,
-    VEHICLE_FLAG_FIXED_POSITION     = 0x00200000,           // Used for vehicles that have a fixed position, such as cannons
+    VEHICLE_FLAG_UNK14              = 0x00200000,           // used for a few specific cannons and harpoons; entries: 28366, 28833, 30337, 34929, 34935 and 36838
     VEHICLE_FLAG_DISABLE_SWITCH     = 0x00400000,           // Can't change seats, VEHICLE_ID = 335 chopper
     VEHICLE_FLAG_UNK15              = 0x00800000,
     VEHICLE_FLAG_UNK16              = 0x01000000,
