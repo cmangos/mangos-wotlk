@@ -130,9 +130,9 @@ enum
 
     NPC_GUARDIAN            = 23597,
 
-    EQUIP_ID_HUGE_MAUL      = 5301,
-    EQUIP_ID_RED_SPEAR      = 13631,
-    EQUIP_ID_GUARDIAN       = 33979,
+    EQUIP_ID_HUGE_MAUL      = 354, // item id 5301
+    EQUIP_ID_RED_SPEAR      = 132, // item id 13631
+    EQUIP_ID_GUARDIAN       = 759, // item id 33979
 
     ENTRY_HARRISON_WITH_HAT = 24375,
 };
