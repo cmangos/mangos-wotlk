@@ -4329,6 +4329,9 @@ SpellAuraProcResult Unit::HandleMendingAuraProc(ProcExecutionData& data)
                 // when applied to new one)
                 if (!target->AddSpellAuraHolder(new_holder))
                     delete new_holder;
+                else
+                    new_holder->SetState(SPELLAURAHOLDER_STATE_READY);
+                CastSpell(target, 41637, TRIGGERED_OLD_TRIGGERED);
             }
         }
     }
