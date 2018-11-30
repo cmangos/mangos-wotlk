@@ -705,6 +705,7 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
                 {
                     m_uiGamePhase = PHASE_LEVEL_PREPARE;
                     m_masterPlayerGuid = pInvoker->GetObjectGuid();
+                    m_uiLevelCount = 0;
                     DoPrepareLevel();
                     m_bIsEventStarted = true;
                     break;
