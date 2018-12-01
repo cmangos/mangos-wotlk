@@ -282,8 +282,6 @@ class Pet : public Creature
 
         virtual CombatData* GetCombatData() override { return m_combatData; }
 
-        void InitTamedPetPassives(Unit* player);
-
         virtual void RegenerateHealth() override;
 
     protected:

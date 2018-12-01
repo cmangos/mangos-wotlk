@@ -7511,7 +7511,6 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     pet->LearnPetPassives();
     pet->CastPetAuras(true);
     pet->CastOwnerTalentAuras();
-    pet->InitTamedPetPassives(m_caster);
     pet->UpdateAllStats();
 
     // caster have pet now
@@ -7593,7 +7592,6 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     NewSummon->LearnPetPassives();
     NewSummon->CastPetAuras(true);
     NewSummon->CastOwnerTalentAuras();
-    NewSummon->InitTamedPetPassives(m_caster);
     NewSummon->UpdateAllStats();
 
     map->Add((Creature*)NewSummon);
