@@ -5019,6 +5019,30 @@ void Aura::HandleInvisibility(bool apply, bool Real)
 
     if (target->IsInWorld())
         target->UpdateVisibilityAndView();
+
+    if (!apply)
+    {
+        switch (GetId())
+        {
+            case 38544:
+            {
+                if (target->GetTypeId() != TYPEID_PLAYER)
+                    break;
+
+                Player* pPlayer = (Player*)target;
+
+                if (pPlayer->GetMover() != target)
+                {
+                    if (Creature* mover = (Creature*)pPlayer->GetMover()) // this spell uses DoSummonPossesed so remove this on removal
+                    {
+                        pPlayer->BreakCharmOutgoing();
+                        mover->ForcedDespawn();
+                    }
+                }
+            }
+            break;
+        }
+    }
 }
 
 void Aura::HandleInvisibilityDetect(bool apply, bool Real)
