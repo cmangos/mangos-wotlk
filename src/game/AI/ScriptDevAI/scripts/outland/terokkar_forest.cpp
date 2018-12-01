@@ -1009,6 +1009,11 @@ enum
     GO_PRISONER_CAGE            = 185952,
 
     QUEST_ID_ESCAPE_SKETTIS     = 11085,
+
+    SPELL_PORT_LOCATION_1		= 41136,
+    SPELL_PORT_LOCATION_2		= 41138,
+    SPELL_PORT_LOCATION_3		= 41141,
+    SPELL_CAGE_SUMMON			= 41147
 };
 
 struct npc_skyguard_prisonerAI : public npc_escortAI
@@ -1016,6 +1021,19 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
     npc_skyguard_prisonerAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
 
     void Reset() override { }
+
+    void JustRespawned() override
+    {
+        m_creature->SetActiveObjectState(true);
+        switch (urand(0, 2))
+        {
+            case 0: DoCastSpellIfCan(m_creature, SPELL_PORT_LOCATION_1); break;
+            case 1: DoCastSpellIfCan(m_creature, SPELL_PORT_LOCATION_2); break;
+            case 2: DoCastSpellIfCan(m_creature, SPELL_PORT_LOCATION_3); break;
+        }
+        DoCastSpellIfCan(m_creature, SPELL_CAGE_SUMMON);
+        m_creature->SetActiveObjectState(false);
+    }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
     {
