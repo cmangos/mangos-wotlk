@@ -4326,8 +4326,7 @@ void Spell::finish(bool ok)
         }
     }
 
-    /*if (IsRangedAttackResetSpell())
-        m_caster->resetAttackTimer(RANGED_ATTACK);*/
+    OnSuccessfulSpellFinish();
 
     // Clear combo at finish state
     if (m_caster->GetTypeId() == TYPEID_PLAYER && NeedsComboPoints(m_spellInfo))
