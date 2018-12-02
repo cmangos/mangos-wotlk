@@ -1268,24 +1268,24 @@ namespace MaNGOS
     class NearestCreatureEntryWithLiveStateInObjectRangeCheck
     {
         public:
-            NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject const& obj, uint32 entry, bool onlyAlive, bool onlyDead, float range, bool excludeSelf = false, WorldObject* objForPhaseMaskCheck = nullptr)
-                : i_obj(obj), i_objForPhaseMaskCheck(objForPhaseMaskCheck), i_entry(entry), i_range(range), i_onlyAlive(onlyAlive), i_onlyDead(onlyDead), i_excludeSelf(excludeSelf), i_foundOutOfRange(false) {}
+            NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject const& obj, uint32 entry, bool onlyAlive, bool onlyDead, float range, bool excludeSelf = false, bool is3D = true, WorldObject* objForPhaseMaskCheck = nullptr)
+                : i_obj(obj), i_objForPhaseMaskCheck(objForPhaseMaskCheck), i_entry(entry), i_range(range * range), i_onlyAlive(onlyAlive), i_onlyDead(onlyDead), i_excludeSelf(excludeSelf), i_is3D(is3D), i_foundOutOfRange(false) {}
             WorldObject const& GetFocusObject() const { return i_objForPhaseMaskCheck ? *i_objForPhaseMaskCheck : i_obj; }
             bool operator()(Creature* u)
             {
                 if (u->GetEntry() == i_entry && ((i_onlyAlive && u->isAlive()) || (i_onlyDead && u->IsCorpse()) || (!i_onlyAlive && !i_onlyDead)) && (!i_excludeSelf || (&i_obj != u)))
                 {
-                    float dist = sqrt(i_obj.GetDistance(u, true, DIST_CALC_NONE));
+                    float dist = i_obj.GetDistance(u, true, DIST_CALC_NONE);
                     if (dist < i_range)
                     {
-                        i_range = dist;         // use found unit range as new range limit for next check
+                        i_range = dist; // use found unit range as new range limit for next check
                         return true;
                     }
                     i_foundOutOfRange = true;
                 }
                 return false;
             }
-            float GetLastRange() const { return i_range; }
+            float GetLastRange() const { return sqrt(i_range); }
         private:
             WorldObject const& i_obj;
             WorldObject* i_objForPhaseMaskCheck;
@@ -1295,6 +1295,7 @@ namespace MaNGOS
             bool   i_onlyDead;
             bool   i_excludeSelf;
             bool   i_foundOutOfRange;
+            bool   i_is3D;
 
             // prevent clone this object
             NearestCreatureEntryWithLiveStateInObjectRangeCheck(NearestCreatureEntryWithLiveStateInObjectRangeCheck const&);
