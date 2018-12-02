@@ -110,17 +110,17 @@ struct npc_kelerun_bloodmournAI : public ScriptedAI
         }
     }
 
-    void StartEvent()
+    void StartEvent(Player* player)
     {
         m_creature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
         m_bIsEventInProgress = true;
+        m_playerGuid = player->GetObjectGuid();
     }
 
-    bool CanProgressEvent(Player* pPlayer)
+    bool CanProgressEvent()
     {
         if (m_bIsEventInProgress)
         {
-            m_playerGuid = pPlayer->GetObjectGuid();
             DoSpawnChallengers();
             m_uiEngageTimer = 15000;
 
@@ -166,16 +166,16 @@ struct npc_kelerun_bloodmournAI : public ScriptedAI
 
             if (m_uiCheckAliveStateTimer < uiDiff)
             {
+                Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
+                if (!pPlayer || !pPlayer->isAlive() || pPlayer->GetDistance(m_creature) > 100.f)
+                {
+                    Reset();
+                    return;
+                }
+
                 Creature* pChallenger = m_creature->GetMap()->GetCreature(m_aChallengerGuids[m_uiChallengerCount]);
                 if (pChallenger && !pChallenger->isAlive())
                 {
-                    Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
-                    if (!pPlayer || !pPlayer->isAlive())
-                    {
-                        Reset();
-                        return;
-                    }
-
                     ++m_uiChallengerCount;
 
                     // count starts at 0
@@ -225,12 +225,12 @@ UnitAI* GetAI_npc_kelerun_bloodmourn(Creature* pCreature)
 }
 
 // easiest way is to expect database to respawn GO at quest accept (quest_start_script)
-bool QuestAccept_npc_kelerun_bloodmourn(Player* /*pPlayer*/, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_npc_kelerun_bloodmourn(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
     if (pQuest->GetQuestId() == QUEST_SECOND_TRIAL)
     {
         if (npc_kelerun_bloodmournAI* pKelrunAI = dynamic_cast<npc_kelerun_bloodmournAI*>(pCreature->AI()))
-            pKelrunAI->StartEvent();
+            pKelrunAI->StartEvent(pPlayer);
     }
 
     return true;
@@ -243,7 +243,7 @@ bool GOUse_go_harbinger_second_trial(Player* pPlayer, GameObject* pGO)
         if (Creature* pCreature = GetClosestCreatureWithEntry(pGO, NPC_KELERUN, 30.0f))
         {
             if (npc_kelerun_bloodmournAI* pKelrunAI = dynamic_cast<npc_kelerun_bloodmournAI*>(pCreature->AI()))
-                pKelrunAI->CanProgressEvent(pPlayer);
+                pKelrunAI->CanProgressEvent();
         }
     }
 
