@@ -4574,24 +4574,6 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
         if (target->GetTypeId() == TYPEID_UNIT)
             ((Creature*)target)->LoadEquipment(((Creature*)target)->GetCreatureInfo()->EquipmentTemplateId, true);
 
-        // re-apply some from still active with preference negative cases
-        Unit::AuraList const& otherTransforms = target->GetAurasByType(SPELL_AURA_TRANSFORM);
-        if (!otherTransforms.empty())
-        {
-            // look for other transform auras
-            Aura* handledAura = *otherTransforms.begin();
-            for (auto otherTransform : otherTransforms)
-            {
-                // negative auras are preferred
-                if (!otherTransform->IsPositive())
-                {
-                    handledAura = otherTransform;
-                    break;
-                }
-            }
-            handledAura->ApplyModifier(true);
-        }
-
         // Dragonmaw Illusion (restore mount model)
         if (GetId() == 42016 && target->GetMountID() == 16314)
         {
