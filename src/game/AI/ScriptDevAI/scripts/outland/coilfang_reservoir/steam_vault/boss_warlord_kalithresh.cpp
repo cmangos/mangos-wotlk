@@ -16,12 +16,13 @@
 
 /* ScriptData
 SDName: Boss_Warlord_Kalithres
-SD%Complete: 90
+SD%Complete: 95
 SDComment: Timers may need some fine adjustments
 SDCategory: Coilfang Resevoir, The Steamvault
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 #include "steam_vault.h"
 
 enum
@@ -39,54 +40,97 @@ enum
     SPELL_IMPALE                = 39061,
     SPELL_WARLORDS_RAGE         = 37081,        // triggers 36453
     SPELL_WARLORDS_RAGE_NAGA    = 31543,        // triggers 37076
-    SPELL_HEAD_CRACK            = 16172,        // TODO:
+    SPELL_HEAD_CRACK            = 16172,
+
+    POINT_MOVE_DISTILLER = 1
 };
 
-struct boss_warlord_kalithreshAI : public ScriptedAI
+enum WarlordKalithreshActions // order based on priority
 {
-    boss_warlord_kalithreshAI(Creature* pCreature) : ScriptedAI(pCreature)
+    WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE,
+    WARLORD_KALITHRESH_ACTION_REFLECTION,
+    WARLORD_KALITHRESH_ACTION_IMPALE,
+    WARLORD_KALITHRESH_ACTION_HEAD_CRACK,
+    WARLORD_KALITHRESH_ACTION_MAX,
+};
+
+struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatTimerAI
+{
+        boss_warlord_kalithreshAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(WARLORD_KALITHRESH_ACTION_MAX)
     {
-        m_pInstance = (instance_steam_vault*)pCreature->GetInstanceData();
+        m_instance = (instance_steam_vault*)creature->GetInstanceData();
         m_bHasTaunted = false;
+
+        AddCombatAction(WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE, 0);
+        AddCombatAction(WARLORD_KALITHRESH_ACTION_REFLECTION, 0);
+        AddCombatAction(WARLORD_KALITHRESH_ACTION_IMPALE, 0);
+        AddCombatAction(WARLORD_KALITHRESH_ACTION_HEAD_CRACK, 0);
         Reset();
     }
 
-    instance_steam_vault* m_pInstance;
+    uint32 m_DistillerCastTimer;
 
-    uint32 m_uiReflectionTimer;
-    uint32 m_uiImpaleTimer;
-    uint32 m_uiRageTimer;
-    uint32 m_uiRageCastTimer;
-
+    instance_steam_vault* m_instance;
     ObjectGuid m_distillerGuid;
 
     bool m_bHasTaunted;
 
     void Reset() override
     {
-        m_uiReflectionTimer = 15000;
-        m_uiImpaleTimer     = urand(7000, 14000);
-        m_uiRageTimer       = urand(15000, 20000);
-        m_uiRageCastTimer   = 0;
+        for (uint32 i = 0; i < WARLORD_KALITHRESH_ACTION_MAX; ++i)
+            SetActionReadyStatus(i, false);
+
+        ResetTimer(WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE, GetInitialActionTimer(WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE));
+        ResetTimer(WARLORD_KALITHRESH_ACTION_REFLECTION, GetInitialActionTimer(WARLORD_KALITHRESH_ACTION_REFLECTION));
+        ResetTimer(WARLORD_KALITHRESH_ACTION_IMPALE, GetInitialActionTimer(WARLORD_KALITHRESH_ACTION_IMPALE));
+        ResetTimer(WARLORD_KALITHRESH_ACTION_HEAD_CRACK, GetInitialActionTimer(WARLORD_KALITHRESH_ACTION_HEAD_CRACK));
+        m_DistillerCastTimer = 1000;
+
+        SetCombatMovement(true);
+        SetCombatScriptStatus(false);
+    }
+
+    uint32 GetInitialActionTimer(const uint32 action) const
+    {
+        switch (action)
+        {
+        case WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE: return urand(15000, 20000);
+        case WARLORD_KALITHRESH_ACTION_REFLECTION: return urand(15000, 20000);
+        case WARLORD_KALITHRESH_ACTION_IMPALE: return urand(7000, 14000);
+        case WARLORD_KALITHRESH_ACTION_HEAD_CRACK: return urand(10000, 15000);
+        default: return 0; // never occurs but for compiler
+        }
+    }
+
+    uint32 GetSubsequentActionTimer(const uint32 action) const
+    {
+        switch (action)
+        {
+        case WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE: return urand(35000, 45000);
+        case WARLORD_KALITHRESH_ACTION_REFLECTION: return urand(24000, 35000);
+        case WARLORD_KALITHRESH_ACTION_IMPALE: return urand(7500, 12500);
+        case WARLORD_KALITHRESH_ACTION_HEAD_CRACK: return urand(45000, 58000);
+        default: return 0; // never occurs but for compiler
+        }
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_WARLORD_KALITHRESH, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_WARLORD_KALITHRESH, FAIL);
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
         switch (urand(0, 2))
         {
-            case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
+        case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
+        case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
+        case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_WARLORD_KALITHRESH, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_WARLORD_KALITHRESH, IN_PROGRESS);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -98,13 +142,13 @@ struct boss_warlord_kalithreshAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_WARLORD_KALITHRESH, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_WARLORD_KALITHRESH, DONE);
     }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (!m_bHasTaunted && m_creature->IsWithinDistInMap(pWho, 40.0f))
+        if (!m_bHasTaunted && m_creature->IsWithinDistInMap(pWho, 45.0f))
         {
             DoScriptText(SAY_INTRO, m_creature);
             m_bHasTaunted = true;
@@ -113,86 +157,105 @@ struct boss_warlord_kalithreshAI : public ScriptedAI
         ScriptedAI::MoveInLineOfSight(pWho);
     }
 
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+    void MovementInform(uint32 uiType, uint32 uiPointId)
     {
-        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
+        if (uiType != POINT_MOTION_TYPE || !uiPointId)
             return;
 
-        // There is a small delay between the point reach and the channeling start
-        m_uiRageCastTimer = 1000;
+        if (uiPointId == POINT_MOVE_DISTILLER)
+        {
+            SetCombatScriptStatus(false);
+            SetCombatMovement(true);
+            SetMeleeEnabled(true);
+            DoStartMovement(m_creature->getVictim());
+            DoCastSpellIfCan(m_creature, SPELL_WARLORDS_RAGE);
+
+            // Make Distiller cast on arrival
+            if (Creature* Distiller = m_creature->GetMap()->GetCreature(m_distillerGuid))
+            {
+                Distiller->CastSpell(Distiller, SPELL_WARLORDS_RAGE_NAGA, TRIGGERED_OLD_TRIGGERED);
+                Distiller->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            }
+        }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteActions()
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!CanExecuteCombatAction())
             return;
 
-        if (m_uiRageCastTimer)
+        for (uint32 i = 0; i < WARLORD_KALITHRESH_ACTION_MAX; ++i)
         {
-            if (m_uiRageCastTimer <= uiDiff)
+            if (GetActionReadyStatus(i))
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_WARLORDS_RAGE) == CAST_OK)
+                switch (i)
                 {
-                    DoScriptText(SAY_REGEN, m_creature);
-                    SetCombatScriptStatus(false);
-                    m_creature->SetTarget(m_creature->getVictim());
-                    SetMeleeEnabled(true);
-                    SetCombatMovement(true, true);
-                    m_uiRageCastTimer = 0;
-
-                    // Also make the distiller cast
-                    if (Creature* pDistiller = m_creature->GetMap()->GetCreature(m_distillerGuid))
+                    case WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE:
                     {
-                        pDistiller->CastSpell(pDistiller, SPELL_WARLORDS_RAGE_NAGA, TRIGGERED_OLD_TRIGGERED);
-                        pDistiller->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        DoScriptText(SAY_REGEN, m_creature);
+                        SetCombatScriptStatus(true);
+                        SetCombatMovement(false);
+                        SetMeleeEnabled(false);
+                        // Move to closest distiller
+                        if (Creature* Distiller = GetClosestCreatureWithEntry(m_creature, NPC_NAGA_DISTILLER, 100.0f))
+                        {
+                            float fX, fY, fZ;
+                            Distiller->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
+                            m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_DISTILLER, fX, fY, fZ);
+                            m_distillerGuid = Distiller->GetObjectGuid();
+
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                            return;
+                        }
+                        break;
+                    }
+                    case WARLORD_KALITHRESH_ACTION_REFLECTION:
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_SPELL_REFLECTION) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                            return;
+                        }
+                        break;
+                    }
+                    case WARLORD_KALITHRESH_ACTION_IMPALE:
+                    {
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE))
+                        {
+                            if (DoCastSpellIfCan(pTarget, SPELL_IMPALE) == CAST_OK)
+                            {
+                                ResetTimer(i, GetSubsequentActionTimer(i));
+                                SetActionReadyStatus(i, false);
+                                return;
+                            }
+                        }
+                        break;
+                    }
+                    case WARLORD_KALITHRESH_ACTION_HEAD_CRACK:
+                    {
+                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HEAD_CRACK) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                            return;
+                        }
+                        break;
                     }
                 }
             }
-            else
-                m_uiRageCastTimer -= uiDiff;
         }
+    }
 
-        // Move to closest distiller
-        if (m_uiRageTimer < uiDiff)
-        {
-            if (Creature* pDistiller = GetClosestCreatureWithEntry(m_creature, NPC_NAGA_DISTILLER, 100.0f))
-            {
-                float fX, fY, fZ;
-                pDistiller->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
-                m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
-                SetCombatMovement(false);
-                SetCombatScriptStatus(true);
-                m_creature->SetTarget(nullptr);
-                SetMeleeEnabled(false);
-                m_distillerGuid = pDistiller->GetObjectGuid();
-            }
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff, m_creature->isInCombat());
 
-            m_uiRageTimer = urand(35000, 45000);
-        }
-        else
-            m_uiRageTimer -= uiDiff;
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
 
-        // Reflection_Timer
-        if (m_uiReflectionTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SPELL_REFLECTION) == CAST_OK)
-                m_uiReflectionTimer = 30000;
-        }
-        else
-            m_uiReflectionTimer -= uiDiff;
-
-        // Impale_Timer
-        if (m_uiImpaleTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_IMPALE) == CAST_OK)
-                    m_uiImpaleTimer = urand(7500, 12500);
-            }
-        }
-        else
-            m_uiImpaleTimer -= uiDiff;
-
+        ExecuteActions();
         DoMeleeAttackIfReady();
     }
 };
