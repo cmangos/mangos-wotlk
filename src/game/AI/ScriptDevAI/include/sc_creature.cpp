@@ -404,6 +404,7 @@ enum
     NPC_NAZAN                   = 17536,
     NPC_VAZRUDEN                = 17537,
     NPC_BLACK_STALKER           = 17882,
+    NPC_LEOTHERAS               = 21215,
     NPC_ANUBARAK                = 29120,
     NPC_SINDRAGOSA              = 36853,
     NPC_ZARITHRIAN              = 39746,
@@ -481,6 +482,10 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
             break;
         case NPC_BLACK_STALKER:
             if (x > 100.0f && y > -30.0f)
+                return false;
+            break;
+        case NPC_LEOTHERAS:
+            if (x < 409.0f && y > -524.0f &&  x > 300.0f && y < -301.0f)
                 return false;
             break;
         default:
