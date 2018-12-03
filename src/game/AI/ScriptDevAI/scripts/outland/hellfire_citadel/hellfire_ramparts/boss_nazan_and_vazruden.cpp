@@ -36,32 +36,36 @@ enum
     SAY_DEATH               = -1543024,
     EMOTE_DESCEND           = -1543025,
 
-    SPELL_SUMMON_VAZRUDEN   = 30717,
-
     // vazruden
-    SPELL_REVENGE           = 19130,
-    SPELL_REVENGE_H         = 40392,
-    SPELL_VAZRUDENS_MARK    = 30689,                        // Unused - seemingly non-tank targeted
-    SPELL_DEFENSIVE_STATE   = 5301,
+    SPELL_REVENGE = 19130,
+    SPELL_REVENGE_H = 40392,
+    SPELL_VAZRUDENS_MARK = 30689,                        // Unused - seemingly non-tank targeted
+    SPELL_DEFENSIVE_STATE = 5301,
 
     // nazan
-    //SPELL_FIREBALL_H      = 32491,                        // purpose unk; not sure if they are related to this encounter
-    //SPELL_FIREBALL_B_H    = 33794,
-    SPELL_FIREBALL          = 34653,
-    SPELL_FIREBALL_H        = 36920,
-    //SPELL_FIREBALL_LAND   = 30691,                        // cast while on land?
-    //SPELL_FIREBALL_LAND_H = 33793,
-    SPELL_CONE_OF_FIRE      = 30926,
-    SPELL_CONE_OF_FIRE_H    = 36921,
+    SPELL_FACE_HIGHEST_THREAT = 30700,                    // normal+heroic flight
+    SPELL_SUMMON_VAZRUDEN = 30717,                  // normal+heroic DoSplit();
 
-    SPELL_BELLOW_ROAR_H     = 39427,
+    SPELL_FIREBALL_HIGHEST_THREAT = 30691,                  // cast 2-3 times afer 30700, normal flight
+    SPELL_FIREBALL_HIGHEST_THREAT_H = 32491,                  // cast 2-3 times afer 30700 heroic flight
+
+    SPELL_FIREBALL_RANDOM = 33793,                  // normal flight inbetween 30691
+    SPELL_FIREBALL_RANDOM_H = 33794,                  // heroic flight inbetween 32491
+
+    SPELL_FIREBALL_GROUND = 34653,                    // normal ground
+    SPELL_FIREBALL_GROUND_H = 36920,                    // heroic ground
+
+    SPELL_CONE_OF_FIRE = 30926,                    // normal ground
+    SPELL_CONE_OF_FIRE_H = 36921,                    // heroic ground
+
+    SPELL_BELLOW_ROAR_H = 39427,                    // heroic ground
 
     // misc
-    POINT_ID_CENTER         = 100,
-    POINT_ID_FLYING         = 101,
-    POINT_ID_COMBAT         = 102,
+    POINT_ID_CENTER = 100,
+    POINT_ID_FLYING = 101,
+    POINT_ID_COMBAT = 102,
 
-    NPC_NAZAN               = 17536,
+    NPC_NAZAN = 17536,
 };
 
 const float afCenterPos[3] = { -1399.401f, 1736.365f, 87.008f}; // moves here to drop off nazan
@@ -217,7 +221,7 @@ struct boss_vazruden_heraldAI : public ScriptedAI
 
     void DoMoveToCombat()
     {
-        if (m_bIsDescending || !m_pInstance || m_pInstance->GetData(TYPE_NAZAN) == IN_PROGRESS)
+        if (m_bIsDescending || !m_pInstance || m_pInstance->GetData(TYPE_NAZAN) == NOT_STARTED)
             return;
 
         m_bIsDescending = true;
@@ -281,7 +285,7 @@ struct boss_vazruden_heraldAI : public ScriptedAI
                     {
                         if (Unit* pEnemy = pVazruden->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                         {
-                            if (DoCastSpellIfCan(pEnemy, m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H, 0, pVazruden->GetObjectGuid()) == CAST_OK)
+                            if (DoCastSpellIfCan(pEnemy, m_bIsRegularMode ? SPELL_FIREBALL_GROUND : SPELL_FIREBALL_GROUND_H, 0, pVazruden->GetObjectGuid()) == CAST_OK)
                                 m_uiFireballTimer = urand(2100, 7300);
                         }
                     }
@@ -301,7 +305,7 @@ struct boss_vazruden_heraldAI : public ScriptedAI
         {
             if (Unit* pEnemy = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
-                if (DoCastSpellIfCan(pEnemy, m_bIsRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
+                if (DoCastSpellIfCan(pEnemy, m_bIsRegularMode ? SPELL_FIREBALL_GROUND : SPELL_FIREBALL_GROUND_H) == CAST_OK)
                     m_uiFireballTimer = urand(7300, 13200);
             }
         }
@@ -356,6 +360,8 @@ struct boss_vazrudenAI : public ScriptedAI
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
+
+        DoCastSpellIfCan(m_creature, SPELL_DEFENSIVE_STATE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     ScriptedInstance* m_pInstance;
