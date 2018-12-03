@@ -56,7 +56,7 @@ enum WarlordKalithreshActions // order based on priority
 
 struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatTimerAI
 {
-        boss_warlord_kalithreshAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(WARLORD_KALITHRESH_ACTION_MAX)
+    boss_warlord_kalithreshAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(WARLORD_KALITHRESH_ACTION_MAX)
     {
         m_instance = (instance_steam_vault*)creature->GetInstanceData();
         m_bHasTaunted = false;
@@ -67,8 +67,6 @@ struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatTimerAI
         AddCombatAction(WARLORD_KALITHRESH_ACTION_HEAD_CRACK, 0);
         Reset();
     }
-
-    uint32 m_DistillerCastTimer;
 
     instance_steam_vault* m_instance;
     ObjectGuid m_distillerGuid;
@@ -84,7 +82,6 @@ struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatTimerAI
         ResetTimer(WARLORD_KALITHRESH_ACTION_REFLECTION, GetInitialActionTimer(WARLORD_KALITHRESH_ACTION_REFLECTION));
         ResetTimer(WARLORD_KALITHRESH_ACTION_IMPALE, GetInitialActionTimer(WARLORD_KALITHRESH_ACTION_IMPALE));
         ResetTimer(WARLORD_KALITHRESH_ACTION_HEAD_CRACK, GetInitialActionTimer(WARLORD_KALITHRESH_ACTION_HEAD_CRACK));
-        m_DistillerCastTimer = 1000;
 
         SetCombatMovement(true);
         SetCombatScriptStatus(false);
@@ -94,11 +91,11 @@ struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatTimerAI
     {
         switch (action)
         {
-        case WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE: return urand(15000, 20000);
-        case WARLORD_KALITHRESH_ACTION_REFLECTION: return urand(15000, 20000);
-        case WARLORD_KALITHRESH_ACTION_IMPALE: return urand(7000, 14000);
-        case WARLORD_KALITHRESH_ACTION_HEAD_CRACK: return urand(10000, 15000);
-        default: return 0; // never occurs but for compiler
+            case WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE: return urand(15000, 20000);
+            case WARLORD_KALITHRESH_ACTION_REFLECTION: return urand(15000, 20000);
+            case WARLORD_KALITHRESH_ACTION_IMPALE: return urand(7000, 14000);
+            case WARLORD_KALITHRESH_ACTION_HEAD_CRACK: return urand(10000, 15000);
+            default: return 0; // never occurs but for compiler
         }
     }
 
@@ -106,11 +103,11 @@ struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatTimerAI
     {
         switch (action)
         {
-        case WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE: return urand(35000, 45000);
-        case WARLORD_KALITHRESH_ACTION_REFLECTION: return urand(24000, 35000);
-        case WARLORD_KALITHRESH_ACTION_IMPALE: return urand(7500, 12500);
-        case WARLORD_KALITHRESH_ACTION_HEAD_CRACK: return urand(45000, 58000);
-        default: return 0; // never occurs but for compiler
+            case WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE: return urand(35000, 45000);
+            case WARLORD_KALITHRESH_ACTION_REFLECTION: return urand(24000, 35000);
+            case WARLORD_KALITHRESH_ACTION_IMPALE: return urand(7500, 12500);
+            case WARLORD_KALITHRESH_ACTION_HEAD_CRACK: return urand(45000, 58000);
+            default: return 0; // never occurs but for compiler
         }
     }
 
@@ -124,9 +121,9 @@ struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatTimerAI
     {
         switch (urand(0, 2))
         {
-        case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-        case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-        case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
+            case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
+            case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
+            case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
         }
 
         if (m_instance)
