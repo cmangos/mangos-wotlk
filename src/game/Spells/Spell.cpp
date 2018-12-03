@@ -743,20 +743,6 @@ void Spell::FillTargetMap()
                             break;
                     }
                     break;
-                case TARGET_LOCATION_CASTER_DEST:
-                    switch (m_spellInfo->EffectImplicitTargetB[i])
-                    {
-                        case TARGET_NONE:
-                        case TARGET_LOCATION_CASTER_DEST:
-                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
-                            break;
-                        default:
-                            // need some target for processing
-                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
-                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
-                            break;
-                    }
-                    break;
                 case TARGET_LOCATION_CASTER_SRC:
                     switch (m_spellInfo->EffectImplicitTargetB[i])
                     {
@@ -778,24 +764,6 @@ void Spell::FillTargetMap()
                         case TARGET_NONE:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                             tmpUnitLists[i /*==effToIndex[i]*/].push_back(m_caster);
-                            break;
-                        default:
-                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
-                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
-                            break;
-                    }
-                    break;
-                case TARGET_LOCATION_DATABASE:
-                    switch (m_spellInfo->EffectImplicitTargetB[i])
-                    {
-                        case TARGET_NONE:
-                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
-
-                            // need some target for processing
-                            SetTargetMap(SpellEffectIndex(i), TARGET_LOCATION_CASTER_DEST, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
-                            break;
-                        case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_SRC_LOC:     // All 17/7 pairs used for dest teleportation, A processed in effect code
-                            SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetB[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                             break;
                         default:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
@@ -827,7 +795,6 @@ void Spell::FillTargetMap()
                     switch (m_spellInfo->EffectImplicitTargetB[i])
                     {
                         case TARGET_NONE:
-                        case TARGET_LOCATION_CASTER_DEST:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                             break;
                         default:
@@ -851,7 +818,6 @@ void Spell::FillTargetMap()
                     switch (m_spellInfo->EffectImplicitTargetB[i])
                     {
                         case TARGET_NONE:
-                        case TARGET_LOCATION_CASTER_DEST:
                             SetTargetMap(SpellEffectIndex(i), m_spellInfo->EffectImplicitTargetA[i], tmpUnitLists[i /*==effToIndex[i]*/], effException[i]);
                             break;
                         case TARGET_LOCATION_SCRIPT_NEAR_CASTER:     // B case filled in CheckCast but we need fill unit list base at A case
@@ -3029,6 +2995,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             }
             else
                 sLog.outError("SPELL: unknown target coordinates for spell ID %u", m_spellInfo->Id);
+
+            if (IsDestinationOnlyEffect(m_spellInfo, effIndex))
+                targetUnitMap.push_back(m_caster);
             break;
         }
         case TARGET_LOCATION_UNIT_FRONT:
