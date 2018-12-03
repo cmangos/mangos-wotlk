@@ -133,7 +133,7 @@ static ReputationRank GetFactionReaction(FactionTemplateEntry const* thisTemplat
 
     if (thisTemplate)
     {
-        if (const FactionTemplateEntry* unitFactionTemplate = unit->getFactionTemplateEntry())
+        if (const FactionTemplateEntry* unitFactionTemplate = unit->GetFactionTemplateEntry())
         {
             if (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
             {
@@ -205,7 +205,7 @@ ReputationRank Unit::GetReactionTo(Unit const* unit) const
 
                 // WotLK+ group check: faction to unit
                 if (thisPlayer->IsInGroup(unitPlayer))
-                    return GetFactionReaction(getFactionTemplateEntry(), unit);
+                    return GetFactionReaction(GetFactionTemplateEntry(), unit);
             }
 
             // WotLK+ FFA check
@@ -215,7 +215,7 @@ ReputationRank Unit::GetReactionTo(Unit const* unit) const
 
         if (thisPlayer)
         {
-            if (const FactionTemplateEntry* unitFactionTemplate = unit->getFactionTemplateEntry())
+            if (const FactionTemplateEntry* unitFactionTemplate = unit->GetFactionTemplateEntry())
             {
                 if (const ReputationRank* rank = thisPlayer->GetReputationMgr().GetForcedRankIfAny(unitFactionTemplate))
                     return (*rank);
@@ -234,7 +234,7 @@ ReputationRank Unit::GetReactionTo(Unit const* unit) const
         }
     }
     // Default fallback if player-specific checks didn't catch anything: facton to unit
-    return GetFactionReaction(getFactionTemplateEntry(), unit);
+    return GetFactionReaction(GetFactionTemplateEntry(), unit);
 }
 
 /////////////////////////////////////////////////
@@ -252,7 +252,7 @@ ReputationRank Unit::GetReactionTo(const Corpse* corpse) const
 
     // Original logic begins
 
-    if (const FactionTemplateEntry* thisTemplate = getFactionTemplateEntry())
+    if (const FactionTemplateEntry* thisTemplate = GetFactionTemplateEntry())
     {
         if (const uint32 corpseTemplateId = corpse->getFaction())
         {
@@ -594,9 +594,9 @@ bool Unit::CanCooperate(const Unit* unit) const
     if (GetCharmerGuid() || unit->GetCharmerGuid())
         return false;
 
-    if (const FactionTemplateEntry* thisFactionTemplate = getFactionTemplateEntry())
+    if (const FactionTemplateEntry* thisFactionTemplate = GetFactionTemplateEntry())
     {
-        if (const FactionTemplateEntry* unitFactionTemplate = unit->getFactionTemplateEntry())
+        if (const FactionTemplateEntry* unitFactionTemplate = unit->GetFactionTemplateEntry())
         {
             if (thisFactionTemplate->factionGroupMask == unitFactionTemplate->factionGroupMask)
                 return (!CanAttack(unit));
