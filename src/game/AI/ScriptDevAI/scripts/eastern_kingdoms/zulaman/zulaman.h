@@ -105,6 +105,13 @@ enum InstanceZA
     GO_KRAZS_PACKAGE        = 186667,
     GO_ASHLIS_BAG           = 186672,
     GO_HARKORS_SATCHEL      = 187021,
+
+    GO_GOLD_COINS_1         = 186633,
+    GO_GOLD_COINS_2         = 186634,
+
+    GO_HARKORS_CAGE         = 187378,
+    GO_DWARF_HAMMER         = 186623,
+    GO_DWARF_LOOT_BOX       = 186622,
 };
 
 enum BossToChestIndex

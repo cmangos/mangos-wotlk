@@ -471,6 +471,246 @@ UnitAI* GetAI_npc_amanishi_tempest(Creature* pCreature)
     return new npc_amanishi_tempestAI(pCreature);
 }
 
+enum
+{
+    GOSSIP_ITEM_ID_FREE         = -3568001,
+    GOSSIP_MENU_ID_HARKOR_DONE  = 8917,
+    GOSSIP_MENU_ID_HARKOR_DONE2 = 8875,
+
+    SAY_HARKOR_HELP             = -1568089,
+    SAY_HARKOR_EVENT_1          = -1568090,
+    SAY_HARKOR_EVENT_2          = -1568091,
+    SAY_HARKOR_EVENT_3          = -1568092,
+
+    EQUIP_ID_HARKOR             = 23999,
+
+    SPELL_CRATE_BURST           = 43255,
+
+    SOUND_ID_MONEY              = 677,
+};
+
+struct npc_harkorAI : public ScriptedAI
+{
+    npc_harkorAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_zulaman*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_zulaman* m_pInstance;
+    bool m_bCompletedChestEvent;
+    bool m_bChestEventInProgress;
+    uint8 m_uiEvent;
+    uint32 m_uiEventTimer;
+    uint32 m_uiInitialShoutTimer;
+    GameObjectList lCoinList;
+
+    void Reset() override
+    {
+        m_bChestEventInProgress = false;
+        m_bCompletedChestEvent = false;
+        m_uiEvent = 0;
+        m_uiEventTimer = 0;
+        m_uiInitialShoutTimer = 0;
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+            m_uiInitialShoutTimer = 5000;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiInitialShoutTimer && !m_bChestEventInProgress)
+        {
+            if (m_uiInitialShoutTimer <= uiDiff)
+            {
+                DoScriptText(SAY_HARKOR_HELP, m_creature);
+                m_uiInitialShoutTimer = 0;
+            }
+            else
+                m_uiInitialShoutTimer -= uiDiff;
+        }
+
+        if (m_uiEventTimer)
+        {
+            if (m_uiEventTimer <= uiDiff)
+            {
+                switch (m_uiEvent)
+                {
+                    case 1:
+                        DoScriptText(SAY_HARKOR_EVENT_1, m_creature);
+
+                        m_uiEventTimer = 3000;
+                        m_uiEvent = 2;
+                        break;
+                    case 2:
+                        DoScriptText(SAY_HARKOR_EVENT_2, m_creature);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 3:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_KNEEL);
+
+                        m_uiEventTimer = 1000;
+                        m_uiEvent = 4;
+                        break;
+                    case 4:
+                        if (GameObject* pHammer = m_pInstance->GetSingleGameObjectFromStorage(GO_DWARF_HAMMER))
+                            pHammer->Delete();
+
+                        m_uiEventTimer = 1000;
+                        m_uiEvent = 5;
+                        break;
+                    case 5:
+                        m_creature->LoadEquipment(EQUIP_ID_HARKOR, true);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 6:
+                        m_creature->SetFacingTo(0.9943876f);
+                        DoCastSpellIfCan(m_creature, SPELL_CRATE_BURST);
+
+                        m_uiEventTimer = 1000;
+                        m_uiEvent = 7;
+                        break;
+                    case 7:
+                        DoCastSpellIfCan(m_creature, SPELL_CRATE_BURST);
+
+                        m_uiEventTimer = 1000;
+                        m_uiEvent = 8;
+                        break;
+                    case 8:
+                        DoCastSpellIfCan(m_creature, SPELL_CRATE_BURST);
+                        DoPlaySoundToSet(m_creature, SOUND_ID_MONEY);
+
+                        if (GameObject* pBox = m_pInstance->GetSingleGameObjectFromStorage(GO_DWARF_LOOT_BOX))
+                            pBox->Delete();
+
+                        GetGameObjectListWithEntryInGrid(lCoinList, m_creature, GO_GOLD_COINS_1, 25.0f);
+                        GetGameObjectListWithEntryInGrid(lCoinList, m_creature, GO_GOLD_COINS_2, 25.0f);
+
+                        for (auto& itr : lCoinList)
+                        {
+                            itr->SetLootState(GO_READY);
+                            itr->SetRespawnTime(0);
+                            itr->Refresh();
+                            itr->SetRespawnTime(7 * DAY);
+                        }
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 9:
+                        m_creature->SetFacingTo(6.073746f);
+                        DoScriptText(SAY_HARKOR_EVENT_3, m_creature);
+                        m_creature->SetSheath(SHEATH_STATE_UNARMED);
+
+                        m_uiEventTimer = 1000;
+                        m_uiEvent = 10;
+                        break;
+                    case 10:
+                        m_creature->GetMotionMaster()->MoveIdle();
+                        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        m_bCompletedChestEvent = true;
+                        m_bChestEventInProgress = false;
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                }
+            }
+            else
+                m_uiEventTimer -= uiDiff;
+        }
+    }
+
+    void StartEvent()
+    {
+        m_bChestEventInProgress = true;
+
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+        if (GameObject* pCage = m_pInstance->GetSingleGameObjectFromStorage(GO_HARKORS_CAGE))
+            pCage->Use(m_creature);
+
+        m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
+        m_creature->GetMotionMaster()->MoveWaypoint(0, 3, 2000);
+    }
+
+    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+    {
+        if (uiMotionType != EXTERNAL_WAYPOINT_MOVE)
+            return;
+
+        switch (uiPointId)
+        {
+            case 0:
+                m_uiEvent = 1;
+                m_uiEventTimer = 1000;
+                break;
+            case 2:
+                m_uiEvent = 3;
+                m_uiEventTimer = 1000;
+                break;
+            case 3:
+                m_uiEvent = 6;
+                m_uiEventTimer = 1000;
+                break;
+            case 4:
+                m_uiEvent = 9;
+                m_uiEventTimer = 1000;
+                break;
+        }
+    }
+};
+
+UnitAI* GetAI_npc_harkor(Creature* pCreature)
+{
+    return new npc_harkorAI(pCreature);
+}
+
+bool GossipHello_npc_harkor(Player* pPlayer, Creature* pCreature)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+    pPlayer->PrepareGossipMenu(pCreature, pPlayer->GetDefaultGossipMenuForSource(pCreature));
+
+    if (npc_harkorAI* pHarkorAI = dynamic_cast<npc_harkorAI*>(pCreature->AI()))
+    {
+        if (pInstance && pInstance->GetData(TYPE_AKILZON) == DONE && !pHarkorAI->m_bCompletedChestEvent)
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_FREE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        else if (pInstance && pInstance->GetData(TYPE_AKILZON) == DONE)
+            pPlayer->PrepareGossipMenu(pCreature, GOSSIP_MENU_ID_HARKOR_DONE);
+    }
+
+    pPlayer->SendPreparedGossip(pCreature);
+
+    return true;
+}
+
+bool GossipSelect_npc_harkor(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+{
+    if (npc_harkorAI* pHarkorAI = dynamic_cast<npc_harkorAI*>(pCreature->AI()))
+    {
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1 && !pHarkorAI->m_bCompletedChestEvent)
+        {
+            pHarkorAI->StartEvent();
+            pPlayer->CLOSE_GOSSIP_MENU();
+        }
+        else if (uiAction == 1)
+        {
+            pPlayer->PrepareGossipMenu(pCreature, GOSSIP_MENU_ID_HARKOR_DONE2);
+            pPlayer->SendPreparedGossip(pCreature);
+        }
+    }
+    return true;
+}
+
+
 void AddSC_zulaman()
 {
     Script* pNewScript = new Script;
@@ -498,5 +738,12 @@ void AddSC_zulaman()
     pNewScript = new Script;
     pNewScript->Name = "npc_amanishi_tempest";
     pNewScript->GetAI = &GetAI_npc_amanishi_tempest;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_harkor";
+    pNewScript->GetAI = &GetAI_npc_harkor;
+    pNewScript->pGossipHello = &GossipHello_npc_harkor;
+    pNewScript->pGossipSelect = &GossipSelect_npc_harkor;
     pNewScript->RegisterSelf();
 }
