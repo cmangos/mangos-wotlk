@@ -12559,6 +12559,20 @@ void Spell::EffectKnockBack(SpellEffectIndex eff_idx)
     if (!unitTarget)
         return;
 
+    switch (m_spellInfo->Id)
+    {
+        case 36812:                                     // Soaring - Test Flight quests
+        case 37910:
+        case 37962:
+        case 37968:
+            unitTarget->RemoveAurasDueToSpell(36801); // Remove Cannon Channel to prevent root affecting knockback
+            break;
+        case 37852:                                     // Watery Grave Explosion
+            if (m_triggeredByAuraSpell)
+                unitTarget->RemoveAurasDueToSpell(m_triggeredByAuraSpell->Id); // Remove Watery Grave to prevent root affecting knockback
+            break;
+    }
+
     unitTarget->KnockBackFrom(m_caster, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10, float(damage) / 10);
 }
 
