@@ -6826,64 +6826,6 @@ SpellCastResult Spell::CheckCast(bool strict)
             return SPELL_FAILED_NOT_TRADING;
     }
 
-    switch (m_spellInfo->Id)
-    {
-        case 30077: // Carinda's Retribution
-            if (ObjectGuid target = m_caster->GetSelectionGuid())
-                if (!(target.GetEntry() == 17226))
-                    return SPELL_FAILED_BAD_TARGETS;
-            break;
-        case 31958: // Fire Bomb Halaa - Must be Taxi Flying
-            if (!m_caster->IsTaxiFlying())
-                return SPELL_FAILED_ONLY_MOUNTED;
-            break;
-        case 36867: // Creature - Summon Event Ethereal
-            if (m_caster->GetMap()->SpawnedCountForEntry(21445) >= 1 || m_caster->GetMap()->SpawnedCountForEntry(22285) >= 1)
-                return SPELL_FAILED_DONT_REPORT;
-            break;
-        case 38170: // Spin Nether-weather Vane - requires Soaring
-            if (!m_caster->HasAura(37968))
-                return SPELL_FAILED_FIZZLE;
-            break;
-        case 38915: // Mental Interference
-            if (ObjectGuid target = m_caster->GetSelectionGuid())
-                if (!(target.GetEntry() == 16943 || target.GetEntry() == 20928))  // Mental Interference can be cast only on these two targets
-                    return SPELL_FAILED_BAD_TARGETS;
-            break;
-        case 40472: // Booterang -  Must have aura Defiant And Enraged
-        {
-            Unit* target = m_targets.getUnitTarget();
-            if (!target || !target->HasAura(40735))
-                return SPELL_FAILED_BAD_TARGETS;
-            break;
-        }
-        case 27230: // Health Stone
-        case 11730:
-        case 11729:
-        case 6202:
-        case 6201:
-        case 5699:
-        {
-            static uint32 const healthstones[18] =
-            {
-                5512, 19004, 19005, // Minor Healthstone
-                5511, 19006, 19007, // Lesser Healthstone
-                5509, 19008, 19009, // Healthstone
-                5510, 19010, 19011, // Greater Healthstone
-                9421, 19012, 19013, // Major Healthstone
-                22103, 22104, 22105 // Master Healthstone
-            };
-
-            // check if we already have a healthstone
-            for (unsigned int healthstone : healthstones)
-            {
-                if (m_caster->IsPlayer() && ((Player*)m_caster)->GetItemCount(healthstone) > 0)
-                    return SPELL_FAILED_TOO_MANY_OF_ITEM;
-            }
-            break;
-        }
-    }
-
     if (m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_TAME_BEAST))
     {
         Player* player = (Player*)m_caster;
@@ -6901,7 +6843,7 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     // all ok
-    return SPELL_CAST_OK;
+    return OnCheckCast(strict);
 }
 
 SpellCastResult Spell::CheckPetCast(Unit* target)
@@ -9024,6 +8966,71 @@ void Spell::OnSuccessfulSpellFinish()
             break;
         }
     }
+}
+
+SpellCastResult Spell::OnCheckCast(bool strict)
+{
+    switch (m_spellInfo->Id)
+    {
+        case 30077:
+            if (ObjectGuid target = m_caster->GetSelectionGuid())
+                if (!(target.GetEntry() == 17226))
+                    return SPELL_FAILED_BAD_TARGETS;
+            break;
+        case 31958: // Fire Bomb Halaa - Must be Taxi Flying
+            if (!m_caster->IsTaxiFlying())
+                return SPELL_FAILED_ONLY_MOUNTED;
+            break;
+        case 36867: // Creature - Summon Event Ethereal
+            if (m_caster->GetMap()->SpawnedCountForEntry(21445) >= 1 || m_caster->GetMap()->SpawnedCountForEntry(22285) >= 1)
+                return SPELL_FAILED_DONT_REPORT;
+            break;
+        case 38170:
+            if (!m_caster->HasAura(37968))
+                return SPELL_FAILED_FIZZLE;
+            break;
+        case 38915:
+            if (ObjectGuid target = m_caster->GetSelectionGuid())
+                if (!(target.GetEntry() == 16943 || target.GetEntry() == 20928))  // Mental Interference can be cast only on these two targets
+                    return SPELL_FAILED_BAD_TARGETS;
+            break;
+        case 40472: // Booterang -  Must have aura Defiant And Enraged or Lazy and Good for Nothing
+        {
+            Unit* target = m_targets.getUnitTarget();
+            if (!target || (!target->HasAura(40732) && !target->HasAura(40735)))
+                return SPELL_FAILED_BAD_TARGETS;
+            break;
+        }
+        case 40856: // Wrangling rope - should only be usable on aether rays
+        {
+            if (ObjectGuid target = m_caster->GetSelectionGuid())
+                if (target.GetEntry() != 22181)
+                    return SPELL_FAILED_BAD_TARGETS;
+            break;
+        }
+        case 37390: // Oscillating Frequency Scanner
+        {
+            if (m_caster->HasAura(37407))
+                return SPELL_FAILED_NOT_HERE;
+        }
+        case 47871: // Health Stone
+        case 47878:
+        case 27230:
+        case 11730:
+        case 11729:
+        case 6202:
+        case 6201:
+        case 5699:
+        {
+            // check if we already have a healthstone
+            uint32 itemType = GetUsableHealthStoneItemType(m_caster);
+            if (itemType && m_caster->IsPlayer() && ((Player*)m_caster)->GetItemCount(itemType) > 0)
+                return SPELL_FAILED_TOO_MANY_OF_ITEM;
+            break;
+        }
+    }
+
+    return SPELL_CAST_OK;
 }
 
 void Spell::StopCast(SpellCastResult castResult)
