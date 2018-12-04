@@ -1206,7 +1206,10 @@ void Loot::Release(Player* player)
                 case GAMEOBJECT_TYPE_CHEST:
                 {
                     if (!IsLootedForAll())
+                    {
+                        updateClients = true;
                         break;
+                    }
 
                     uint32 go_min = go->GetGOInfo()->chest.minSuccessOpens;
                     uint32 go_max = go->GetGOInfo()->chest.maxSuccessOpens;
@@ -1365,7 +1368,7 @@ void Loot::Release(Player* player)
                             m_ownerSet.insert(player->GetObjectGuid());
                         m_lootMethod = FREE_FOR_ALL;
                         creature->SetLootStatus(CREATURE_LOOT_STATUS_SKIN_AVAILABLE);
-                        ForceLootAnimationCLientUpdate();
+                        updateClients = true;
                     }
                     break;
                 }
@@ -1387,12 +1390,6 @@ void Loot::Release(Player* player)
                         SendReleaseForAll();
                         creature->SetLootStatus(CREATURE_LOOT_STATUS_LOOTED);
                     }
-                    else if (updateClients)
-                    {
-                        // player have released the corpse and some loot still available, we need to resend loot flags for each players to provide them remaininig loot access
-                        ForceLootAnimationCLientUpdate();
-                    }
-
                     break;
                 }
                 default:
@@ -1403,6 +1400,9 @@ void Loot::Release(Player* player)
         default:
             break;
     }
+
+    if (updateClients)
+        ForceLootAnimationCLientUpdate();
 }
 
 // Popup windows with loot content
@@ -2101,10 +2101,27 @@ void Loot::Update()
     }
 }
 
+// this will force server to update all client that is showing this object
+// used to update players right to loot or sparkles animation
 void Loot::ForceLootAnimationCLientUpdate() const
 {
-    if (m_guidTarget.IsCreatureOrVehicle() && m_lootTarget)
-        m_lootTarget->ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);
+    if (!m_lootTarget)
+        return;
+
+    switch (m_lootTarget->GetTypeId())
+    {
+        case TYPEID_UNIT:
+            m_lootTarget->ForceValuesUpdateAtIndex(UNIT_DYNAMIC_FLAGS);
+            break;
+        case TYPEID_GAMEOBJECT:
+            return;
+            // we have to update sparkles/loot for this object
+            if (m_isChest)
+                m_lootTarget->ForceValuesUpdateAtIndex(GAMEOBJECT_DYNAMIC);
+            break;
+        default:
+            break;
+    }
 }
 
 // will return the pointer of item in loot slot provided without any right check
