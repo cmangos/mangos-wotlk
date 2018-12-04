@@ -1612,7 +1612,7 @@ void Loot::SetGroupLootRight(Player* player)
 }
 
 Loot::Loot(Player* player, Creature* creature, LootType type) :
-    m_lootTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
+    m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
     m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
     m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
 {
@@ -1714,7 +1714,7 @@ Loot::Loot(Player* player, Creature* creature, LootType type) :
 }
 
 Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
-    m_lootTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
+    m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
     m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
     m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
 {
@@ -1812,7 +1812,7 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
 }
 
 Loot::Loot(Player* player, Corpse* corpse, LootType type) :
-    m_lootTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
+    m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
     m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
     m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
 {
@@ -1859,7 +1859,7 @@ Loot::Loot(Player* player, Corpse* corpse, LootType type) :
 }
 
 Loot::Loot(Player* player, Item* item, LootType type) :
-    m_lootTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
+    m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
     m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
     m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
 {
@@ -1915,7 +1915,7 @@ Loot::Loot(Unit* unit, Item* item) :
 }
 
 Loot::Loot(Player* player, uint32 id, LootType type) :
-    m_lootTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
+    m_lootTarget(nullptr), m_itemTarget(nullptr), m_gold(0), m_maxSlot(0), m_lootType(type),
     m_clientLootType(CLIENT_LOOT_CORPSE), m_lootMethod(NOT_GROUP_TYPE_LOOT), m_threshold(ITEM_QUALITY_UNCOMMON), m_maxEnchantSkill(0), m_haveItemOverThreshold(false),
     m_isChecked(false), m_isChest(false), m_isChanged(false), m_isFakeLoot(false)
 {
@@ -1968,15 +1968,19 @@ InventoryResult Loot::SendItem(Player* target, uint32 itemSlot)
 
 InventoryResult Loot::SendItem(Player* target, LootItem* lootItem)
 {
+    if (!target)
+        return EQUIP_ERR_OUT_OF_RANGE;
+
     if (!lootItem)
     {
-        SendReleaseFor(target);
+        if (target->GetSession())
+            SendReleaseFor(target);
         return EQUIP_ERR_ITEM_NOT_FOUND;
     }
 
     bool playerGotItem = false;
     InventoryResult msg = EQUIP_ERR_CANT_DO_RIGHT_NOW;
-    if (target && target->GetSession())
+    if (target->GetSession())
     {
         ItemPosCountVec dest;
         msg = target->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, lootItem->itemId, lootItem->count);
