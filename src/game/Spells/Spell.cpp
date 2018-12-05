@@ -2699,6 +2699,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
             SpellTargets targetType;
             switch (targetMode)
             {
+                case TARGET_ENUM_UNITS_ENEMY_IN_CONE_104:
                 case TARGET_ENUM_UNITS_ENEMY_IN_CONE_24:
                 case TARGET_ENUM_UNITS_ENEMY_IN_CONE_54: targetType = SPELL_TARGETS_AOE_ATTACKABLE; break;
                 case TARGET_ENUM_UNITS_FRIEND_IN_CONE: targetType = SPELL_TARGETS_ASSISTABLE; break;
