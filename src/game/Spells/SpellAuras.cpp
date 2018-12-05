@@ -5643,7 +5643,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 target->CastSpell(target, 23644, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             case 29946:
-                if (GetAuraDuration() >= 1 * IN_MILLISECONDS)
+                if (m_removeMode != AURA_REMOVE_BY_EXPIRE)
                     // Cast "crossed flames debuff"
                     target->CastSpell(target, 29947, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
