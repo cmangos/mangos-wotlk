@@ -31,7 +31,6 @@ npc_bloodmaul_dire_wolf
 npc_frequency_scanner
 npc_fel_cannon
 npc_warp_gate
-npc_grimgut
 npc_obelisk_trigger
 npc_vimgol
 npc_vimgol_visual_bunny
