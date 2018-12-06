@@ -905,6 +905,157 @@ UnitAI* GetAI_npc_light_orb_collector(Creature* pCreature)
 }
 
 /*######
+## npc_obelisk_trigger
+######*/
+
+enum
+{
+    NPC_TRIGGER = 20736,
+    NPC_DOOMCRYER = 19963,
+
+    SPELL_GREEN_BEAM = 35846
+};
+
+static const uint32 aObeliskEntries[] = { 185193, 185195, 185196, 185197, 185198 };
+
+struct npc_obelisk_triggerAI : public ScriptedAI
+{
+    npc_obelisk_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    // Active count (updates every 1sec)
+    uint8 m_uiActiveObelisk;
+
+    // Timers
+    uint32 m_uiActivateTimer;
+    uint32 m_uiCheckTimer;
+    uint32 m_uiBeamTimer;
+    uint32 m_uiResetTimer;
+
+    // Bool checks to prevent spam
+    bool m_uiSpawnBoss;
+    bool m_uiMarkForReset;
+
+    void Reset() override
+    {
+        m_uiActiveObelisk = 0;
+        m_uiCheckTimer = 1000;
+
+        m_uiActivateTimer = 30 * IN_MILLISECONDS;
+        m_uiBeamTimer = 5 * IN_MILLISECONDS;
+        m_uiResetTimer= 120 * IN_MILLISECONDS;
+
+        m_uiSpawnBoss = false;
+        m_uiMarkForReset = false;
+
+        std::list<GameObject*> lObelisk;
+        for (uint8 i = 0; i < countof(aObeliskEntries); ++i)
+            GetGameObjectListWithEntryInGrid(lObelisk, m_creature, aObeliskEntries[i], 100.0f);
+
+        for (std::list<GameObject*>::iterator itr = lObelisk.begin(); itr != lObelisk.end(); ++itr)
+        {
+            if ((*itr)->GetGoState() == GO_STATE_ACTIVE && (*itr)->GetLootState() == GO_ACTIVATED)
+            {
+                (*itr)->ResetDoorOrButton();
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiCheckTimer)
+        {
+            if (m_uiCheckTimer <= uiDiff && m_uiActiveObelisk < 5)
+            {
+                m_uiActiveObelisk = 0;
+
+                std::list<GameObject*> lObelisk;
+                for (uint8 i = 0; i < countof(aObeliskEntries); ++i)
+                    GetGameObjectListWithEntryInGrid(lObelisk, m_creature, aObeliskEntries[i], 100.0f);
+
+                for (std::list<GameObject*>::iterator itr = lObelisk.begin(); itr != lObelisk.end(); ++itr)
+                {
+                    if ((*itr)->GetGoState() == GO_STATE_ACTIVE && (*itr)->GetLootState() == GO_ACTIVATED)
+                        ++m_uiActiveObelisk;
+                }
+
+                m_uiCheckTimer = 1000;
+            }
+            else
+                m_uiCheckTimer -= uiDiff;
+        }
+        
+        if (m_uiActiveObelisk == 5)
+        {
+            if (m_uiActivateTimer)
+            {
+                if (m_uiActivateTimer <= uiDiff && !m_uiSpawnBoss)
+                {
+                    Creature* m_uiDoomcryer = m_creature->SummonCreature(NPC_DOOMCRYER, m_creature->GetPositionX(), m_creature->GetPositionY(), 283.65f, 0.32f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+
+                    if (m_uiDoomcryer)
+                        m_uiDoomcryer->GetMotionMaster()->MovePoint(1, 2882.60f, 4818.73f, 282.0f);
+
+                    std::list<Creature*> lBunny;
+                    GetCreatureListWithEntryInGrid(lBunny, m_creature, NPC_TRIGGER, 100.0f);
+                    for (std::list<Creature*>::iterator itr = lBunny.begin(); itr != lBunny.end(); ++itr)
+                        (*itr)->RemoveAllAuras();
+
+                    m_uiSpawnBoss = true;
+                    m_uiMarkForReset = true;
+                }
+                else
+                {
+                    if (m_uiBeamTimer && !m_uiSpawnBoss)
+                    {
+                        if (m_uiBeamTimer <= uiDiff)
+                        {
+                            std::list<Creature*> lBunny;
+                            GetCreatureListWithEntryInGrid(lBunny, m_creature, NPC_TRIGGER, 100.0f);
+                            for (std::list<Creature*>::iterator itr = lBunny.begin(); itr != lBunny.end(); ++itr)
+                            {
+                                std::list<GameObject*> lObelisk;
+                                for (uint8 i = 0; i < countof(aObeliskEntries); ++i)
+                                    GetGameObjectListWithEntryInGrid(lObelisk, (*itr), aObeliskEntries[i], 1.0f);
+
+                                if (!(*itr)->HasAura(SPELL_GREEN_BEAM) && lObelisk.begin() != lObelisk.end())
+                                {
+                                    (*itr)->CastSpell(m_creature, SPELL_GREEN_BEAM, TRIGGERED_OLD_TRIGGERED);
+                                    break;
+                                }
+                            }
+
+                            m_uiBeamTimer = 5 * IN_MILLISECONDS;
+
+                        }
+                        else
+                            m_uiBeamTimer -= uiDiff;
+                    }
+
+                    m_uiActivateTimer -= uiDiff;
+                }
+            }
+        }
+
+        if (m_uiMarkForReset)
+        {
+            if (m_uiResetTimer <= uiDiff)
+            {
+                Reset();
+            }
+            else
+                m_uiResetTimer -= uiDiff;
+
+        }
+
+    }
+};
+
+UnitAI* GetAI_obelisk_triggerAI(Creature* pCreature)
+{
+    return new npc_obelisk_triggerAI(pCreature);
+}
+
+/*######
 ## npc_vimgol
 ######*/
 
@@ -2858,6 +3009,11 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "npc_light_orb_collector";
     pNewScript->GetAI = &GetAI_npc_light_orb_collector;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_obelisk_trigger";
+    pNewScript->GetAI = &GetAI_obelisk_triggerAI;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
