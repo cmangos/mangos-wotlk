@@ -1377,6 +1377,94 @@ UnitAI* GetAI_npc_vimgol_middle_bunny(Creature* pCreature)
 }
 
 /*######
+## npc_bird_spirit
+######*/
+
+enum
+{
+    NPC_TASKMASTER = 22160,
+};
+
+struct npc_bird_spiritAI : public ScriptedAI
+{
+    npc_bird_spiritAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint8 m_uiPhase;
+    uint32 m_uiTimer;
+    ObjectGuid m_taskmasterGuid;
+
+    void Reset() override
+    {
+        m_uiTimer = 2000;
+        m_uiPhase = 0;
+    }
+
+    void JustRespawned() override
+    {
+        Creature* taskmaster = GetClosestCreatureWithEntry(m_creature, NPC_TASKMASTER, 15.f);
+        if (taskmaster) // should always be valid - spell checks for it
+        {
+            m_creature->SetWalk(false, true);
+            m_taskmasterGuid = taskmaster->GetObjectGuid();
+        }
+    }
+
+    void MovementInform(uint32 /*uiMovementType*/, uint32 uiData) override
+    {
+        switch (uiData)
+        {
+            case 1: m_uiTimer = 2000; break;
+            case 2: m_uiTimer = 2000; break;
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiTimer)
+        {
+            if (m_uiTimer <= uiDiff)
+            {
+                switch (m_uiPhase)
+                {
+                    case 0:
+                    {
+                        if (Creature* taskM = m_creature->GetMap()->GetCreature(m_taskmasterGuid))
+                            m_creature->GetMotionMaster()->MovePoint(1, taskM->GetPositionX(), taskM->GetPositionY(), taskM->GetPositionZ());
+                        m_uiTimer = 0;
+                        m_uiPhase++;
+                        break;
+                    }
+                    case 1:
+                    {
+                        m_creature->SetSelectionGuid(m_creature->GetSpawnerGuid());
+                        if (Unit* summoner = m_creature->GetMap()->GetUnit(m_creature->GetSpawnerGuid()))
+                            m_creature->GetMotionMaster()->MovePoint(2, summoner->GetPositionX(), summoner->GetPositionY(), summoner->GetPositionZ());
+                        m_uiTimer = 0;
+                        m_uiPhase++;
+                        break;
+                    }
+                    case 2:
+                    {
+                        TemporarySpawn* summon = (TemporarySpawn*)m_creature;
+                        summon->UnSummon();
+                        m_uiTimer = 0;
+                        m_uiPhase++;
+                        break;
+                    }
+                }
+            }
+            else
+                m_uiTimer -= uiDiff;
+        }
+    }
+};
+
+UnitAI* GetAI_npc_bird_spirit(Creature* pCreature)
+{
+    return new npc_bird_spiritAI(pCreature);
+}
+
+/*######
 ## npc_bloodmaul_dire_wolf
 ######*/
 
@@ -3029,6 +3117,11 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "npc_vimgol";
     pNewScript->GetAI = &GetAI_npc_vimgol;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_bird_spirit";
+    pNewScript->GetAI = &GetAI_npc_bird_spirit;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

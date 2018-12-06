@@ -2049,30 +2049,15 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         {
                             bool checkTaskmaster = false;
                             bool checkSoothsayer = false;
-                            ObjectGuid taskmaster;
                             for (auto& target : m_UniqueTargetInfo)
                             {
                                 if (target.targetGUID.GetEntry() == 22160)
-                                {
-                                    taskmaster = target.targetGUID;
                                     checkTaskmaster = true;
-                                }
                                 else if (target.targetGUID.GetEntry() == 22384)
-                                {
                                     checkSoothsayer = true;
-                                }
                             }
-                            if (checkSoothsayer&&checkTaskmaster)
-                            {
-                                Creature* bird = m_caster->SummonCreature(22023, m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), m_caster->GetOrientation(), TEMPSPAWN_MANUAL_DESPAWN, 0);
-                                if (Player* player = dynamic_cast<Player*>(m_caster))
-                                {
-                                    player->RewardPlayerAndGroupAtEventCredit(22383, bird);
-                                }
-                                bird->SetWalk(false, true);
-                                Creature* taskM = m_caster->GetMap()->GetCreature(taskmaster);
-                                bird->SetTarget(taskM);
-                            }
+                            if (checkSoothsayer && checkTaskmaster)
+                                m_caster->CastSpell(nullptr, 39074, TRIGGERED_OLD_TRIGGERED);
                         }
                     }
                     return;
