@@ -47,6 +47,8 @@
 #include "Tools/Language.h"
 #include "Maps/MapManager.h"
 #include "Loot/LootMgr.h"
+#include "Entities/TemporarySpawn.h"
+#include "Maps/InstanceData.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 
 #define NULL_AURA_SLOT 0xFF
@@ -1535,13 +1537,14 @@ void Aura::TriggerSpell()
                         float newAngle = target->GetOrientation();
 
                         if (auraId == 37429)
-                            newAngle += 2 * M_PI_F / 100;
+                            newAngle += 2 * M_PI_F / 72;
                         else
-                            newAngle -= 2 * M_PI_F / 100;
+                            newAngle -= 2 * M_PI_F / 72;
 
                         newAngle = MapManager::NormalizeOrientation(newAngle);
 
                         target->SetFacingTo(newAngle);
+                        target->SetOrientation(newAngle);
 
                         target->CastSpell(target, 37433, TRIGGERED_OLD_TRIGGERED);
                         return;
@@ -2116,6 +2119,17 @@ void Aura::TriggerSpell()
             }
             case 32930:                                     // Blue beam
                 return; // Never seems to go off in sniffs - hides errors
+            case 37716:                                     // Demon Link
+                triggerTarget = static_cast<TemporarySpawn*>(target)->GetSpawner();
+                break;
+            case 37850:                                     // Watery Grave
+            case 38023:
+            case 38024:
+            case 38025:
+            {
+                casterGUID = target->GetObjectGuid();
+                break;
+            }
             case 38736:                                     // Rod of Purification - for quest 10839 (Veil Skith: Darkstone of Terokk)
             {
                 if (Unit* caster = GetCaster())
@@ -2436,6 +2450,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         return;
                     }
+                    case 37750:                             // Clear Consuming Madness
+                        if (target->HasAura(37749))
+                            target->RemoveAurasDueToSpell(37749);
+                        return;
                     case 39850:                             // Rocket Blast
                         if (roll_chance_i(20))              // backfire stun
                             target->CastSpell(target, 51581, TRIGGERED_OLD_TRIGGERED, nullptr, this);
@@ -3324,6 +3342,86 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     if (target->GetTypeId() == TYPEID_UNIT)
                         target->SetFeignDeath(apply, GetCasterGuid(), GetId(), false);
 
+                    return;
+                }
+                case 37025: // Coilfang Water
+                {
+                    if (apply)
+                    {
+                        if (InstanceData* pInst = target->GetInstanceData())
+                        {
+                            Player* playerTarget = (Player*)target;
+                            if (pInst->CheckConditionCriteriaMeet(playerTarget, INSTANCE_CONDITION_ID_LURKER, nullptr, CONDITION_FROM_HARDCODED))
+                            {
+                                if (pInst->CheckConditionCriteriaMeet(playerTarget, INSTANCE_CONDITION_ID_SCALDING_WATER, nullptr, CONDITION_FROM_HARDCODED))
+                                    playerTarget->CastSpell(playerTarget, 37284, TRIGGERED_OLD_TRIGGERED);
+                                else
+                                {
+                                    m_isPeriodic = true;
+                                    m_modifier.periodictime = 2 * IN_MILLISECONDS; // Summons Coilfang Frenzy
+                                    m_periodicTimer = 0;
+                                }
+                            }
+                        }
+                        return;
+                    }
+                    else
+                        target->RemoveAurasDueToSpell(37284);
+                }
+                case 37676:                             // Insidious Whisper
+                {
+                    if (target->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if (apply)
+                    {
+                        target->CastSpell(target, 37735, TRIGGERED_OLD_TRIGGERED); // Summon Inner Demon
+
+                        InstanceData* data = target->GetInstanceData();
+                        if (data)
+                        {
+                            m_modifier.m_amount = target->GetInstanceData()->GetData(6);
+                            target->GetInstanceData()->SetData(6, m_modifier.m_amount + 1);
+                            m_modifier.m_amount += 1018;
+                        }
+                        else
+                            m_modifier.m_amount = 1018;
+                    }
+
+                    ReputationRank faction_rank = ReputationRank(1); // value taken from sniff
+
+                    Player* player = (Player*)target;
+
+                    player->GetReputationMgr().ApplyForceReaction(m_modifier.m_amount, faction_rank, apply);
+                    player->GetReputationMgr().SendForceReactions();
+
+                    // stop fighting if at apply forced rank friendly or at remove real rank friendly
+                    if ((apply && faction_rank >= REP_FRIENDLY) || (!apply && player->GetReputationRank(m_modifier.m_amount) >= REP_FRIENDLY))
+                        player->StopAttackFaction(m_modifier.m_amount);
+
+                    if (!apply)
+                    {
+                        if (m_removeMode == AURA_REMOVE_BY_EXPIRE) // MC player if inner demon was not killed
+                        {
+                            if (Unit* pCaster = GetCaster())
+                            {
+                                pCaster->CastSpell(target, 37749, TRIGGERED_OLD_TRIGGERED); // Consuming Madness
+                                pCaster->getThreatManager().modifyThreatPercent(target, -100);
+                            }
+                        }
+                    }
+                    return;
+                }
+                case 37922:                                 // Clear Insidious Whisper
+                {
+                    // no clue why its a dummy aura
+                    if (apply)
+                    {
+                        if (target->HasAura(37716) && target->GetTypeId() == TYPEID_UNIT)
+                            static_cast<Creature*>(target)->ForcedDespawn();
+                        else
+                            target->RemoveAurasDueToSpell(37676);
+                    }
                     return;
                 }
                 case 40133:                                 // Summon Fire Elemental
@@ -5706,6 +5804,10 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 if ((m_removeMode != AURA_REMOVE_BY_STACK) && (!target->HasAura(35515)))
                     if (Creature* creature = (Creature*)target)
                         creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, creature, creature);
+                return;
+            case 37640:                                     // Leotheras Whirlwind
+                if (Unit* pCaster = GetCaster())
+                    pCaster->FixateTarget(nullptr);
                 return;
             case 37670:                                     // Nether Charge Timer
                 target->CastSpell(nullptr, GetSpellProto()->EffectTriggerSpell[m_effIndex], TRIGGERED_OLD_TRIGGERED);

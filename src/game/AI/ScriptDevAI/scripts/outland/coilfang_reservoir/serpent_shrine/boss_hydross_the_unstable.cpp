@@ -24,6 +24,8 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "serpent_shrine.h"
 
+// Note: As of March 21 2007 Hydross should not crush tanks
+
 enum
 {
     SAY_AGGRO                   = -1548000,
@@ -42,27 +44,22 @@ enum
     SPELL_ENRAGE                = 27680,                    // ToDo: this spell need verification
     SPELL_BLUE_BEAM             = 38015,
     SPELL_SUMMON_WATER_ELEMENT  = 36459,                    // spawn elemental on OOC timer
-    // SPELL_ELEMENTAL_SPAWNIN   = 25035,                   // already handled in eventAI
+    SPELL_ELEMENTAL_SPAWNIN     = 25035,
     SPELL_PURIFY_ELEMENTAL      = 36461,                    // purify elemental on OOC timer
+    SPELL_CLEANSING_FIELD       = 37935,                    // TODO: Implement phase transition using this
 
     NPC_PURE_SPAWN              = 22035,
     NPC_TAINTED_SPAWN           = 22036,
     NPC_PURIFIED_ELEMENTAL      = 21260,
     NPC_TAINTED_ELEMENTAL       = 21253,
 
-    POINT_ID_ELEMENTAL_CLEAN    = 1,
-    POINT_ID_ELEMENTAL_EXIT     = 2,
-
-    SWITCH_RADIUS               = 18,
+    SWITCH_RADIUS               = 20,
     MAX_HYDROSS_ADDS            = 4,
     MAX_HYDROSS_MARKS           = 6,
 };
 
 static const uint32 aMarkHydross[MAX_HYDROSS_MARKS] = {38215, 38216, 38217, 38218, 38231, 40584};
 static const uint32 aMarkCorruption[MAX_HYDROSS_MARKS] = {38219, 38220, 38221, 38222, 38230, 40583};
-
-static const float aElementalCleanPoint[3] = { -231.48f, -343.05f, -1.58f};
-static const float aElementalExitPoint[3] = { -177.41f, -395.72f, -1.60f};
 
 struct boss_hydross_the_unstableAI : public ScriptedAI
 {
@@ -88,7 +85,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
     {
         m_uiBeamInitTimer           = 5000;
         m_uiElementalTimer          = 20000;
-        m_uiPosCheckTimer           = 2000;
+        m_uiPosCheckTimer           = 1000;
         m_uiMarkTimer               = 15000;
         m_uiWaterTombTimer          = 7000;
         m_uiVileSludgeTimer         = 7000;
@@ -132,50 +129,6 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
             m_pInstance->SetData(TYPE_HYDROSS_EVENT, FAIL);
     }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
-        {
-            case NPC_PURE_SPAWN:
-                pSummoned->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, true);
-                break;
-            case NPC_TAINTED_SPAWN:
-                pSummoned->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_NATURE, true);
-                break;
-            case NPC_TAINTED_ELEMENTAL:
-                pSummoned->GetMotionMaster()->MovePoint(POINT_ID_ELEMENTAL_CLEAN, aElementalCleanPoint[0], aElementalCleanPoint[1], aElementalCleanPoint[2]);
-                break;
-        }
-
-        // Attack only in combat
-        if (m_creature->getVictim())
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
-    }
-
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiPointId) override
-    {
-        if (uiMotionType != POINT_MOTION_TYPE)
-            return;
-
-        if (uiPointId == POINT_ID_ELEMENTAL_CLEAN)
-        {
-            pSummoned->SetFacingToObject(m_creature);
-            DoCastSpellIfCan(pSummoned, SPELL_PURIFY_ELEMENTAL);
-        }
-        else if (uiPointId == POINT_ID_ELEMENTAL_EXIT)
-            pSummoned->ForcedDespawn();
-    }
-
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        // Purify elementals and make them go to exit
-        if (pSpell->Id == SPELL_PURIFY_ELEMENTAL)
-        {
-            ((Creature*)pTarget)->UpdateEntry(NPC_PURIFIED_ELEMENTAL);
-            pTarget->GetMotionMaster()->MovePoint(POINT_ID_ELEMENTAL_EXIT, aElementalExitPoint[0], aElementalExitPoint[1], aElementalExitPoint[2]);
-        }
-    }
-
     // Adds summon during phase switch
     void DoSpawnAdds()
     {
@@ -208,8 +161,26 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
         }
     }
 
+    bool CheckTransition() // checks whether hydross is within initial circle
+    {
+        float x, y, z, o;
+        m_creature->GetCombatStartPosition(x, y, z, o);
+        return m_creature->IsWithinDist2d(x, y, SWITCH_RADIUS);
+    }
+
     void UpdateAI(const uint32 uiDiff) override
     {
+        if (m_uiBeamInitTimer)
+        {
+            if (m_uiBeamInitTimer <= uiDiff)
+            {
+                DoHandleBeamHelpers(false);
+                m_uiBeamInitTimer = 0;
+            }
+            else
+                m_uiBeamInitTimer -= uiDiff;
+        }
+
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
         {
             // handle elementals on OOC timer
@@ -224,23 +195,12 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
             return;
         }
 
-        if (m_uiBeamInitTimer)
-        {
-            if (m_uiBeamInitTimer <= uiDiff)
-            {
-                DoHandleBeamHelpers(false);
-                m_uiBeamInitTimer = 0;
-            }
-            else
-                m_uiBeamInitTimer -= uiDiff;
-        }
-
         // corrupted form
         if (m_bCorruptedForm)
         {
             if (m_uiVileSludgeTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_VILE_SLUDGE) == CAST_OK)
                         m_uiVileSludgeTimer = 15000;
@@ -252,10 +212,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
             // Change to clean
             if (m_uiPosCheckTimer < uiDiff)
             {
-                float fPosX, fPosY, fPosZ, ori;
-                m_creature->GetCombatStartPosition(fPosX, fPosY, fPosZ, ori);
-
-                if (m_creature->IsWithinDist2d(fPosX, fPosY, SWITCH_RADIUS))
+                if (CheckTransition())
                 {
                     DoScriptText(SAY_SWITCH_TO_CLEAN, m_creature);
                     m_creature->RemoveAurasDueToSpell(SPELL_CORRUPTION);
@@ -273,7 +230,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
                     m_uiMarkTimer    = 15000;
                 }
 
-                m_uiPosCheckTimer = 2000;
+                m_uiPosCheckTimer = 1000;
             }
             else
                 m_uiPosCheckTimer -= uiDiff;
@@ -283,7 +240,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
         {
             if (m_uiWaterTombTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_WATER_TOMB) == CAST_OK)
                         m_uiWaterTombTimer = 7000;
@@ -295,10 +252,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
             // Change to corrupt
             if (m_uiPosCheckTimer < uiDiff)
             {
-                float fPosX, fPosY, fPosZ, ori;
-                m_creature->GetCombatStartPosition(fPosX, fPosY, fPosZ, ori);
-
-                if (!m_creature->IsWithinDist2d(fPosX, fPosY, SWITCH_RADIUS))
+                if (!CheckTransition())
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_CORRUPTION) == CAST_OK)
                     {
@@ -318,7 +272,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
                     }
                 }
 
-                m_uiPosCheckTimer = 2000;
+                m_uiPosCheckTimer = 500;
             }
             else
                 m_uiPosCheckTimer -= uiDiff;
@@ -360,10 +314,63 @@ UnitAI* GetAI_boss_hydross_the_unstable(Creature* pCreature)
     return new boss_hydross_the_unstableAI(pCreature);
 }
 
+struct npc_spawn_of_hydrossAI : public ScriptedAI
+{
+    npc_spawn_of_hydrossAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        Reset();
+        m_creature->CastSpell(m_creature, SPELL_ELEMENTAL_SPAWNIN, TRIGGERED_OLD_TRIGGERED);
+        m_uiAttackDelayTimer = 3000;
+        SetReactState(REACT_PASSIVE);
+    }
+
+    uint32 m_uiAttackDelayTimer;
+
+    void Reset() override {}
+
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (m_uiAttackDelayTimer)
+            return;
+
+        ScriptedAI::MoveInLineOfSight(pWho);
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiAttackDelayTimer)
+        {
+            if (m_uiAttackDelayTimer <= uiDiff)
+            {
+                m_uiAttackDelayTimer = 0;
+                m_creature->SetInCombatWithZone();
+                SetReactState(REACT_AGGRESSIVE);
+            }
+            else
+                m_uiAttackDelayTimer -= uiDiff;
+        }
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+UnitAI* GetAI_npc_spawn_of_hydross(Creature* pCreature)
+{
+    return new npc_spawn_of_hydrossAI(pCreature);
+}
+
 void AddSC_boss_hydross_the_unstable()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_hydross_the_unstable";
     pNewScript->GetAI = &GetAI_boss_hydross_the_unstable;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_spawn_of_hydross";
+    pNewScript->GetAI = &GetAI_npc_spawn_of_hydross;
     pNewScript->RegisterSelf();
 }

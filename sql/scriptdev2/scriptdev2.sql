@@ -542,9 +542,14 @@ UPDATE creature_template SET ScriptName='mob_steamrigger_mechanic' WHERE entry=1
 
 /* SERPENTSHRINE CAVERN */
 UPDATE instance_template SET ScriptName='instance_serpent_shrine' WHERE map=548;
+UPDATE gameobject_template SET ScriptName='go_ssc_boss_consoles' WHERE entry IN(185117,185118,185115,185114,185116);
+UPDATE creature_template SET ScriptName='npc_serpentshrine_parasite' WHERE entry=22379;
+/* Hydross the Unstable event */
 UPDATE creature_template SET ScriptName='boss_hydross_the_unstable' WHERE entry=21216;
+UPDATE creature_template SET ScriptName='npc_spawn_of_hydross' WHERE entry IN(22035,22036);
 /* Leotheras the Blind event */
 UPDATE creature_template SET ScriptName='boss_leotheras_the_blind' WHERE entry=21215;
+UPDATE creature_template SET ScriptName='npc_inner_demon' WHERE entry=21857;
 /* Fathom-lord Karathress event */
 UPDATE creature_template SET ScriptName='boss_fathomlord_karathress' WHERE entry=21214;
 UPDATE creature_template SET ScriptName='boss_fathomguard_sharkkis' WHERE entry=21966;
@@ -558,6 +563,7 @@ UPDATE creature_template SET ScriptName='boss_lady_vashj' WHERE entry=21212;
 UPDATE creature_template SET ScriptName='mob_enchanted_elemental' WHERE entry=21958;
 UPDATE gameobject_template SET ScriptName='go_shield_generator' WHERE entry IN (185051,185052,185053,185054);
 UPDATE item_template SET ScriptName='item_tainted_core' WHERE entry=31088;
+UPDATE gameobject_template SET ScriptName='go_vashj_bridge' WHERE entry IN(184568);
 /* The Lurker Below event */
 UPDATE gameobject_template SET ScriptName='go_strange_pool' WHERE entry=184956;
 UPDATE creature_template SET ScriptName='boss_the_lurker_below' WHERE entry=21217;
@@ -4466,7 +4472,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1548040,'The violent earthquake has alerted nearby Murlocs!',0,3,0,0,'morogrim EMOTE_EARTHQUAKE'),
 (-1548041,'%s summons watery globules!',0,3,0,0,'morogrim EMOTE_WATERY_GLOBULES'),
 
-(-1548042,'Water is life. It has become a rare commodity here in Outland. A commodity that we alone shall control. We are the Highborne, and the time has come at last for us to retake our rightful place in the world!',11531,1,0,0,'vashj SAY_INTRO'),
+(-1548042,'Water is life. It has become a rare commodity here in Outland. A commodity that we alone shall control. We are the Highborne, and the time has come at last for us to retake our rightful place in the world!',11531,6,0,0,'vashj SAY_INTRO'),
 (-1548043,'I\'ll split you from stem to stern!',11532,1,0,0,'vashj SAY_AGGRO1'),
 (-1548044,'Victory to Lord Illidan!',11533,1,0,0,'vashj SAY_AGGRO2'),
 (-1548045,'I spit on you, surface filth!',11534,1,0,0,'vashj SAY_AGGRO3'),

@@ -44,19 +44,20 @@ enum
 
     // Sharkkis spells
     SPELL_LEECHING_THROW            = 29436,
+    SPELL_BESTIAL_WRATH             = 38371,                // pet has this during 38373
     SPELL_THE_BEAST_WITHIN          = 38373,
     SPELL_HURL_TRIDENT              = 38374,
     SPELL_MULTI_TOSS                = 38366,
     SPELL_SUMMON_FATHOM_LURKER      = 38433,
     SPELL_SUMMON_FATHOM_SPOREBAT    = 38431,
     SPELL_POWER_OF_SHARKKIS         = 38455,                // cast on Karathress, on death
+    SPELL_SPAWN_WITH_STUN           = 39795,                // cast on lurker/sporebat on spawn
 
     // Tidalvess spells
     SPELL_FROST_SHOCK               = 38234,
     SPELL_SPITFIRE_TOTEM            = 38236,
     SPELL_POISON_CLEANSING_TOTEM    = 38306,
     SPELL_EARTHBIND_TOTEM           = 38304,
-    SPELL_WINDFURY_WEAPON           = 32911,                // triggers spell 32912 (Windfury)
     SPELL_POWER_OF_TIDALVESS        = 38452,                // cast on Karathress, on death
 
     // Caribdis Spells
@@ -66,18 +67,14 @@ enum
     SPELL_SUMMON_CYCLONE            = 38337,                // summons creature 22104 which uses spell 29538
     SPELL_POWER_OF_CARIBDIS         = 38451,                // cast on Karathress, on death
 
-    SPELL_CYCLONE                   = 29538,
-
     MAX_ADVISORS                    = 3,
+    MAX_HEAL_TARGETS                = 4,
 
-    NPC_CYCLONE                     = 22104,
-    NPC_SEER_OLUM                   = 22820
+    NPC_CYCLONE                     = 22104
 };
 
-// position for Seer Olum
-static const float afCoordsOlum[4] = {446.78f, -542.76f, -7.547f, 0.401f};
-
 static const uint32 aAdvisors[MAX_ADVISORS] = {NPC_SHARKKIS, NPC_TIDALVESS, NPC_CARIBDIS};
+static const uint32 aHealTargets[MAX_HEAL_TARGETS] = {NPC_KARATHRESS, NPC_CARIBDIS, NPC_SHARKKIS, NPC_TIDALVESS};
 
 /*######
 ## boss_fathomlord_karathress
@@ -147,9 +144,6 @@ struct boss_fathomlord_karathressAI : public ScriptedAI
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_KARATHRESS_EVENT, DONE);
-
-        // support for quest 10944
-        m_creature->SummonCreature(NPC_SEER_OLUM, afCoordsOlum[0], afCoordsOlum[1], afCoordsOlum[2], afCoordsOlum[3], TEMPSPAWN_TIMED_DESPAWN, 1 * HOUR * IN_MILLISECONDS);
     }
 
     void JustReachedHome() override
@@ -165,8 +159,8 @@ struct boss_fathomlord_karathressAI : public ScriptedAI
 
         if (m_uiCataclysmicBoltTimer < uiDiff)
         {
-            // select a random unit other than the main tank
-            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
+            // select a random unit with mana other than the main tank
+            Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, uint32(0), SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA);
 
             // if there aren't other units, cast on the tank
             if (!pTarget)
@@ -246,8 +240,9 @@ struct boss_fathomguard_sharkkisAI : public ScriptedAI
         m_uiLeechingThrowTimer  = 20000;
         m_uiTheBeastWithinTimer = 30000;
         m_uiMultiTossTimer      = urand(7000, 11000);
-        if (!m_creature->GetPet())
-            m_uiPetTimer        = 10000;
+        m_uiPetTimer            = 10000;
+
+        m_creature->RemoveGuardians(); // despawn pets
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -259,13 +254,8 @@ struct boss_fathomguard_sharkkisAI : public ScriptedAI
     {
         if (m_creature->getVictim())
             pSummoned->AI()->AttackStart(m_creature->getVictim());
-    }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
-    {
-        // resummon the pet in 10 secs
-        if (pSummoned->IsPet())
-            m_uiPetTimer = 10000;
+        pSummoned->CastSpell(pSummoned, SPELL_SPAWN_WITH_STUN, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -273,20 +263,17 @@ struct boss_fathomguard_sharkkisAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (m_uiPetTimer)
+        if (m_uiPetTimer <= uiDiff)
         {
-            if (m_uiPetTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, urand(0, 1) ? SPELL_SUMMON_FATHOM_LURKER : SPELL_SUMMON_FATHOM_SPOREBAT) == CAST_OK)
-                    m_uiPetTimer = 0;
-            }
-            else
-                m_uiPetTimer -= uiDiff;
+            if (DoCastSpellIfCan(m_creature, urand(0, 1) ? SPELL_SUMMON_FATHOM_LURKER : SPELL_SUMMON_FATHOM_SPOREBAT) == CAST_OK)
+                m_uiPetTimer = 30000;
         }
+        else
+            m_uiPetTimer -= uiDiff;
 
         if (m_uiHurlTridentTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HURL_TRIDENT, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HURL_TRIDENT, SELECT_FLAG_PLAYER))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_HURL_TRIDENT) == CAST_OK)
                     m_uiHurlTridentTimer = 5000;
@@ -297,25 +284,31 @@ struct boss_fathomguard_sharkkisAI : public ScriptedAI
 
         if (m_uiLeechingThrowTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_LEECHING_THROW) == CAST_OK)
-                m_uiLeechingThrowTimer = 20000;
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_LEECHING_THROW, SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
+            {
+                if (DoCastSpellIfCan(pTarget, SPELL_LEECHING_THROW) == CAST_OK)
+                    m_uiLeechingThrowTimer = 20000;
+            }
         }
         else
             m_uiLeechingThrowTimer -= uiDiff;
 
         if (m_uiTheBeastWithinTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_THE_BEAST_WITHIN) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature, SPELL_THE_BEAST_WITHIN) == CAST_OK) // Personal part on himself
+            {
+                m_creature->CastSpell(nullptr, SPELL_BESTIAL_WRATH, TRIGGERED_OLD_TRIGGERED); // Pet part at pet
                 m_uiTheBeastWithinTimer = 30000;
+            }
         }
         else
             m_uiTheBeastWithinTimer -= uiDiff;
 
         if (m_uiMultiTossTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_HURL_TRIDENT) == CAST_OK)
+                if (DoCastSpellIfCan(pTarget, SPELL_MULTI_TOSS) == CAST_OK)
                     m_uiMultiTossTimer = urand(7000, 12000);
             }
         }
@@ -335,13 +328,11 @@ struct boss_fathomguard_tidalvessAI : public ScriptedAI
     boss_fathomguard_tidalvessAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
     uint32 m_uiFrostShockTimer;
-    uint32 m_uiWindfuryTimer;
     uint32 m_uiTotemTimer;
 
     void Reset() override
     {
         m_uiFrostShockTimer = 25000;
-        m_uiWindfuryTimer   = 0;
         m_uiTotemTimer      = urand(2000, 5000);
     }
 
@@ -363,26 +354,15 @@ struct boss_fathomguard_tidalvessAI : public ScriptedAI
         else
             m_uiFrostShockTimer -= uiDiff;
 
-        if (m_uiWindfuryTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_WINDFURY_WEAPON) == CAST_OK)
-                m_uiWindfuryTimer = urand(90000, 100000);
-        }
-        else
-            m_uiWindfuryTimer -= uiDiff;
-
         if (m_uiTotemTimer < uiDiff)
         {
-            if (m_creature->IsNonMeleeSpellCasted(false))
+            switch (urand(0, 2))
             {
-                switch (urand(0, 2))
-                {
-                    case 0: DoCastSpellIfCan(m_creature, SPELL_SPITFIRE_TOTEM);
-                    case 1: DoCastSpellIfCan(m_creature, SPELL_POISON_CLEANSING_TOTEM);
-                    case 2: DoCastSpellIfCan(m_creature, SPELL_EARTHBIND_TOTEM);
-                }
-                m_uiTotemTimer = urand(30000, 60000);
+                case 0: DoCastSpellIfCan(m_creature, SPELL_SPITFIRE_TOTEM);
+                case 1: DoCastSpellIfCan(m_creature, SPELL_POISON_CLEANSING_TOTEM);
+                case 2: DoCastSpellIfCan(m_creature, SPELL_EARTHBIND_TOTEM);
             }
+            m_uiTotemTimer = urand(30000, 60000);
         }
         else
             m_uiTotemTimer -= uiDiff;
@@ -397,7 +377,13 @@ struct boss_fathomguard_tidalvessAI : public ScriptedAI
 
 struct boss_fathomguard_caribdisAI : public ScriptedAI
 {
-    boss_fathomguard_caribdisAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    boss_fathomguard_caribdisAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    ScriptedInstance* m_pInstance;
 
     uint32 m_uiWaterBoltVolleyTimer;
     uint32 m_uiTidalSurgeTimer;
@@ -419,9 +405,10 @@ struct boss_fathomguard_caribdisAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        // ToDo: research if this creature should follow the summoner or a random target
-        if (pSummoned->GetEntry() == NPC_CYCLONE)
-            pSummoned->CastSpell(pSummoned, SPELL_CYCLONE, TRIGGERED_OLD_TRIGGERED);
+        if (Unit* pTarget = pSummoned->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, uint32(0), SELECT_FLAG_PLAYER))
+            pSummoned->FixateTarget(pTarget);
+        pSummoned->SetWalk(false);
+        pSummoned->ForcedDespawn(60000);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -455,10 +442,19 @@ struct boss_fathomguard_caribdisAI : public ScriptedAI
 
         if (m_uiHealTimer < uiDiff)
         {
-            if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
+            for (uint8 i = 0; i < MAX_HEAL_TARGETS; ++i)
             {
-                if (DoCastSpellIfCan(pTarget, SPELL_HEALING_WAVE) == CAST_OK)
-                    m_uiHealTimer = 60000;
+                if (Creature* pHealTarget = m_pInstance->GetSingleCreatureFromStorage(aHealTargets[i]))
+                {
+                    if (pHealTarget->isAlive() && pHealTarget->GetHealthPercent() < 50.0f)
+                    {
+                        if (DoCastSpellIfCan(pHealTarget, SPELL_HEALING_WAVE) == CAST_OK)
+                        {
+                            m_uiHealTimer = 60000;
+                            break;
+                        }
+                    }
+                }
             }
         }
         else

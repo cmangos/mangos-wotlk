@@ -59,12 +59,17 @@ void instance_serpentshrine_cavern::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
+        case NPC_KARATHRESS:
         case NPC_LADYVASHJ:
         case NPC_SHARKKIS:
         case NPC_TIDALVESS:
         case NPC_CARIBDIS:
         case NPC_LEOTHERAS:
+        case NPC_WORLD_TRIGGER:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+        case NPC_SEER_OLUM:
+            pCreature->SetUInt32Value(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_NONE);
             break;
         case NPC_GREYHEART_SPELLBINDER:
             m_lSpellBindersGUIDList.push_back(pCreature->GetObjectGuid());
@@ -72,8 +77,8 @@ void instance_serpentshrine_cavern::OnCreatureCreate(Creature* pCreature)
         case NPC_HYDROSS_BEAM_HELPER:
             m_lBeamHelpersGUIDList.push_back(pCreature->GetObjectGuid());
             break;
-        case NPC_SHIELD_GENERATOR:
-            m_lShieldGeneratorGUIDList.push_back(pCreature->GetObjectGuid());
+        case NPC_TINY_TRIGGER:
+            m_tinyTriggerGUIDList.push_back(pCreature->GetObjectGuid());
             break;
         case NPC_COILFANG_PRIESTESS:
         case NPC_COILFANG_SHATTERER:
@@ -83,6 +88,10 @@ void instance_serpentshrine_cavern::OnCreatureCreate(Creature* pCreature)
             if (pCreature->GetPositionZ() > 0)
                 m_sPlatformMobsGUIDSet.insert(pCreature->GetObjectGuid());
             break;
+        case NPC_COILFANG_FRENZY_CORPSE:
+            pCreature->ForcedDespawn();
+            m_lFishCorpsesGUIDList.push_back(pCreature->GetObjectGuid());
+            break;
     }
 }
 
@@ -90,12 +99,37 @@ void instance_serpentshrine_cavern::OnObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())
     {
+        case GO_CONSOLE_HYDROSS:
+        case GO_CONSOLE_LURKER:
+        case GO_CONSOLE_LEOTHERAS:
+        case GO_CONSOLE_KARATHRESS:
+        case GO_CONSOLE_MOROGRIM:
+            m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            EngageBossConsole(100, pGo);
+            break;
         case GO_SHIELD_GENERATOR_1:
         case GO_SHIELD_GENERATOR_2:
         case GO_SHIELD_GENERATOR_3:
         case GO_SHIELD_GENERATOR_4:
+        case GO_STRANGE_POOL:
+        case GO_BRIDGE_PART_1:
+        case GO_BRIDGE_PART_2:
+        case GO_BRIDGE_PART_3:
             m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
+        case GO_CONSOLE_VASHJ:
+            m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            EngageBridgeConsole(pGo);
+            break;
+    }
+}
+
+void instance_serpentshrine_cavern::OnPlayerResurrect(Player * player)
+{
+    if (m_auiEncounter[TYPE_LEOTHERAS_EVENT] == IN_PROGRESS)
+    {
+        if (Creature* leotheras = GetSingleCreatureFromStorage(NPC_LEOTHERAS))
+            leotheras->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, player, leotheras);
     }
 }
 
@@ -103,11 +137,22 @@ void instance_serpentshrine_cavern::SetData(uint32 uiType, uint32 uiData)
 {
     switch (uiType)
     {
-        case TYPE_HYDROSS_EVENT:
-            m_auiEncounter[uiType] = uiData;
-            break;
+        case TYPE_THELURKER_EVENT:
+            switch (uiData)
+            {
+                case DONE:
+                    if (Creature* pWorldTrigger = GetSingleCreatureFromStorage(NPC_WORLD_TRIGGER))
+                        pWorldTrigger->ForcedDespawn();
+                    break;
+                case FAIL:
+                    if (GameObject* go = GetSingleGameObjectFromStorage(GO_STRANGE_POOL))
+                    {
+                        go->SetRespawnTime(2);
+                        go->Refresh();
+                    }
+                    break;
+            }
         case TYPE_LEOTHERAS_EVENT:
-            m_auiEncounter[uiType] = uiData;
             if (uiData == FAIL)
             {
                 for (GuidList::const_iterator itr = m_lSpellBindersGUIDList.begin(); itr != m_lSpellBindersGUIDList.end(); ++itr)
@@ -118,18 +163,22 @@ void instance_serpentshrine_cavern::SetData(uint32 uiType, uint32 uiData)
 
                 m_uiSpellBinderCount = 0;
             }
-            break;
-        case TYPE_THELURKER_EVENT:
+            // no break;
+        case TYPE_HYDROSS_EVENT:
         case TYPE_KARATHRESS_EVENT:
         case TYPE_MOROGRIM_EVENT:
             m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+                EngageBossConsole(uiType, 0);
+            if (uiData == SPECIAL)
+                EngageBridgeConsole();
             break;
         case TYPE_LADYVASHJ_EVENT:
             m_auiEncounter[uiType] = uiData;
             if (uiData == FAIL)
             {
                 // interrupt the shield
-                for (GuidList::const_iterator itr = m_lShieldGeneratorGUIDList.begin(); itr != m_lShieldGeneratorGUIDList.end(); ++itr)
+                for (GuidList::const_iterator itr = m_tinyTriggerGUIDList.begin(); itr != m_tinyTriggerGUIDList.end(); ++itr)
                 {
                     if (Creature* pGenerator = instance->GetCreature(*itr))
                         pGenerator->InterruptNonMeleeSpells(false);
@@ -142,9 +191,12 @@ void instance_serpentshrine_cavern::SetData(uint32 uiType, uint32 uiData)
                 DoToggleGameObjectFlags(GO_SHIELD_GENERATOR_4, GO_FLAG_NO_INTERACT, false);
             }
             break;
+        case TYPE_LEOTHERAS_EVENT_DEMONS:
+            m_auiEncounter[uiType] = uiData;
+            break;
     }
 
-    if (uiData == DONE)
+    if (uiData == DONE || uiData == SPECIAL)
     {
         OUT_SAVE_INST_DATA;
 
@@ -170,14 +222,17 @@ void instance_serpentshrine_cavern::Load(const char* chrIn)
     OUT_LOAD_INST_DATA(chrIn);
 
     std::istringstream loadStream(chrIn);
-    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
-               >> m_auiEncounter[4] >> m_auiEncounter[5];
+    loadStream >> m_auiEncounter[TYPE_HYDROSS_EVENT] >> m_auiEncounter[TYPE_KARATHRESS_EVENT] >> m_auiEncounter[TYPE_LADYVASHJ_EVENT] >> m_auiEncounter[TYPE_LEOTHERAS_EVENT]
+               >> m_auiEncounter[TYPE_MOROGRIM_EVENT] >> m_auiEncounter[TYPE_THELURKER_EVENT];
 
     for (uint32& i : m_auiEncounter)
     {
         if (i == IN_PROGRESS)
             i = NOT_STARTED;
     }
+
+    if (m_auiEncounter[TYPE_THELURKER_EVENT] >= DONE)
+        SpawnFishCorpses();
 
     OUT_LOAD_INST_DATA_COMPLETE;
 }
@@ -206,7 +261,7 @@ bool instance_serpentshrine_cavern::CheckConditionCriteriaMeet(Player const* pPl
     switch (uiInstanceConditionId)
     {
         case INSTANCE_CONDITION_ID_LURKER:
-            return GetData(TYPE_THELURKER_EVENT) != DONE;
+            return GetData(TYPE_THELURKER_EVENT) < DONE;
         case INSTANCE_CONDITION_ID_SCALDING_WATER:
             return m_sPlatformMobsAliveGUIDSet.empty();
     }
@@ -231,13 +286,8 @@ void instance_serpentshrine_cavern::OnCreatureDeath(Creature* pCreature)
             ++m_uiSpellBinderCount;
 
             if (m_uiSpellBinderCount == MAX_SPELLBINDERS)
-            {
                 if (Creature* pLeotheras = GetSingleCreatureFromStorage(NPC_LEOTHERAS))
-                {
-                    pLeotheras->RemoveAurasDueToSpell(SPELL_LEOTHERAS_BANISH);
-                    pLeotheras->SetInCombatWithZone();
-                }
-            }
+                    pLeotheras->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pLeotheras, pLeotheras);
             break;
         case NPC_COILFANG_PRIESTESS:
         case NPC_COILFANG_SHATTERER:
@@ -245,8 +295,100 @@ void instance_serpentshrine_cavern::OnCreatureDeath(Creature* pCreature)
         case NPC_GREYHEART_TECHNICIAN:
             if (m_sPlatformMobsGUIDSet.find(pCreature->GetObjectGuid()) != m_sPlatformMobsGUIDSet.end())
                 m_sPlatformMobsAliveGUIDSet.erase(pCreature->GetObjectGuid());
+            if (m_sPlatformMobsAliveGUIDSet.empty())
+                SpawnFishCorpses();
             break;
     }
+}
+
+void instance_serpentshrine_cavern::SpawnFishCorpses()
+{
+    for (GuidList::const_iterator itr = m_lFishCorpsesGUIDList.begin(); itr != m_lFishCorpsesGUIDList.end(); ++itr)
+    {
+        if (Creature* pFish = instance->GetCreature(*itr))
+            pFish->Respawn();
+    }
+}
+
+void instance_serpentshrine_cavern::EngageBridgeConsole(GameObject* _console)
+{
+    if(m_auiEncounter[TYPE_HYDROSS_EVENT] == SPECIAL && m_auiEncounter[TYPE_THELURKER_EVENT] == SPECIAL && m_auiEncounter[TYPE_LEOTHERAS_EVENT] == SPECIAL
+        && m_auiEncounter[TYPE_KARATHRESS_EVENT] == SPECIAL && m_auiEncounter[TYPE_MOROGRIM_EVENT] == SPECIAL)
+        if(GameObject* console = _console ? _console : instance->GetGameObject(m_goEntryGuidStore[GO_CONSOLE_VASHJ]))
+            console->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+}
+
+uint32 EncounterTypeFromGOEntry(uint32 goEntry)
+{
+    switch (goEntry)
+    {
+        case GO_CONSOLE_HYDROSS:
+            return TYPE_HYDROSS_EVENT;
+        case GO_CONSOLE_LURKER:
+            return TYPE_THELURKER_EVENT;
+        case GO_CONSOLE_LEOTHERAS:
+            return TYPE_LEOTHERAS_EVENT;
+        case GO_CONSOLE_KARATHRESS:
+            return TYPE_KARATHRESS_EVENT;
+        case GO_CONSOLE_MOROGRIM:
+            return TYPE_MOROGRIM_EVENT;
+        default:
+            return 0;
+    }
+}
+
+void instance_serpentshrine_cavern::EngageBossConsole(uint32 uiType, GameObject* console)
+{
+    if (uiType == 100)
+        uiType = EncounterTypeFromGOEntry(console->GetEntry());
+    else if (console == nullptr) // 0 is taken
+    {
+        uint32 goEntry;
+        switch (uiType)
+        {
+            case TYPE_HYDROSS_EVENT:
+                goEntry = GO_CONSOLE_HYDROSS;
+                break;
+            case TYPE_THELURKER_EVENT:
+                goEntry = GO_CONSOLE_LURKER;
+                break;
+            case TYPE_LEOTHERAS_EVENT:
+                goEntry = GO_CONSOLE_LEOTHERAS;
+                break;
+            case TYPE_KARATHRESS_EVENT:
+                goEntry = GO_CONSOLE_KARATHRESS;
+                break;
+            case TYPE_MOROGRIM_EVENT:
+                goEntry = GO_CONSOLE_MOROGRIM;
+                break;
+        }
+        console = instance->GetGameObject(m_goEntryGuidStore[goEntry]);
+    }
+    if (m_auiEncounter[uiType] == DONE)
+        console->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+    else if(m_auiEncounter[uiType] == SPECIAL)
+        console->SetGoState(GO_STATE_ACTIVE);
+}
+
+bool GOUse_go_ssc_boss_consoles(Player* /*pPlayer*/, GameObject* pGo)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+
+    if (!pInstance)
+        return true;
+
+    if (pGo->GetEntry() == GO_CONSOLE_HYDROSS)
+        pInstance->SetData(TYPE_HYDROSS_EVENT, SPECIAL);
+    else if (pGo->GetEntry() == GO_CONSOLE_LURKER)
+        pInstance->SetData(TYPE_THELURKER_EVENT, SPECIAL);
+    else if (pGo->GetEntry() == GO_CONSOLE_LEOTHERAS)
+        pInstance->SetData(TYPE_LEOTHERAS_EVENT, SPECIAL);
+    else if (pGo->GetEntry() == GO_CONSOLE_KARATHRESS)
+        pInstance->SetData(TYPE_KARATHRESS_EVENT, SPECIAL);
+    else if (pGo->GetEntry() == GO_CONSOLE_MOROGRIM)
+        pInstance->SetData(TYPE_MOROGRIM_EVENT, SPECIAL);
+
+    return false;
 }
 
 InstanceData* GetInstanceData_instance_serpentshrine_cavern(Map* pMap)
@@ -254,9 +396,43 @@ InstanceData* GetInstanceData_instance_serpentshrine_cavern(Map* pMap)
     return new instance_serpentshrine_cavern(pMap);
 }
 
+struct npc_serpentshrine_parasiteAI : public ScriptedAI
+{
+    npc_serpentshrine_parasiteAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    void Reset() override {}
+
+    void DamageDeal(Unit* pDoneTo, uint32& uiDamage, DamageEffectType damagetype) override
+    {
+        m_creature->ForcedDespawn(1000);
+    }
+
+    void JustRespawned() override
+    {
+        m_creature->SetInCombatWithZone();
+        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER))
+            m_creature->FixateTarget(pTarget);
+    }
+};
+
+UnitAI* GetAI_npc_serpentshrine_parasite(Creature* pCreature)
+{
+    return new npc_serpentshrine_parasiteAI(pCreature);
+}
+
 void AddSC_instance_serpentshrine_cavern()
 {
     Script* pNewScript = new Script;
+    pNewScript->Name = "npc_serpentshrine_parasite";
+    pNewScript->GetAI = &GetAI_npc_serpentshrine_parasite;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_ssc_boss_consoles";
+    pNewScript->pGOUse = &GOUse_go_ssc_boss_consoles;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
     pNewScript->Name = "instance_serpent_shrine";
     pNewScript->GetInstanceData = &GetInstanceData_instance_serpentshrine_cavern;
     pNewScript->RegisterSelf();

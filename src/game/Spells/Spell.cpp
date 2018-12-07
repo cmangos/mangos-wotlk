@@ -2275,18 +2275,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, UnitList&
                         targetUnitMap.remove(pVictim);
                     break;
                 }
-                // Other special cases
-                case 42005:                                 // Bloodboil (spell hits only the 5 furthest away targets)
-                {
-                    if (targetUnitMap.size() > unMaxTargets)
-                    {
-                        targetUnitMap.sort(TargetDistanceOrderFarAway(m_caster));
-                        targetUnitMap.resize(unMaxTargets);
-                    }
-                    break;
-                }
-                default:
-                    break;
             }
             break;
         case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_SRC_LOC:
