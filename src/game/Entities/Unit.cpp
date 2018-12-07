@@ -2267,49 +2267,64 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
         {
             case SPELLFAMILY_GENERIC:
             {
-                // Astral Shift
-                if (spellProto->SpellIconID == 3066)
+                switch (spellProto->Id)
                 {
-                    // reduces all damage taken while stun, fear or silence
-                    if (unitflag & (UNIT_FLAG_STUNNED | UNIT_FLAG_FLEEING | UNIT_FLAG_SILENCED))
-                        RemainingDamage -= RemainingDamage * currentAbsorb / 100;
-                    continue;
-                }
-                // Nerves of Steel
-                if (spellProto->SpellIconID == 2115)
-                {
-                    // while affected by Stun and Fear
-                    if (unitflag & (UNIT_FLAG_STUNNED | UNIT_FLAG_FLEEING))
-                        RemainingDamage -= RemainingDamage * currentAbsorb / 100;
-                    continue;
-                }
-                // Spell Deflection
-                if (spellProto->SpellIconID == 3006)
-                {
-                    // You have a chance equal to your Parry chance
-                    if (damagetype == SPELL_DIRECT_DAMAGE && roll_chance_f(GetParryChance()))
-                        RemainingDamage -= RemainingDamage * currentAbsorb / 100;
-                    continue;
-                }
-                // Reflective Shield (Lady Malande boss)
-                if (spellProto->Id == 41475 && canReflect)
-                {
-                    if (RemainingDamage < currentAbsorb)
-                        reflectDamage = RemainingDamage / 2;
-                    else
-                        reflectDamage = currentAbsorb / 2;
-                    reflectSpell = 33619;
-                    reflectTriggeredBy = *i;
-                    break;
-                }
-                if (spellProto->Id == 39228 ||              // Argussian Compass
-                        spellProto->Id == 60218)            // Essence of Gossamer
-                {
-                    // Max absorb stored in 1 dummy effect
-                    int32 max_absorb = spellProto->CalculateSimpleValue(EFFECT_INDEX_1);
-                    if (max_absorb < currentAbsorb)
-                        currentAbsorb = max_absorb;
-                    break;
+                    case 31130: // Nerves of Steel
+                    case 31131:
+                    {
+                        // while affected by Stun and Fear
+                        if (unitflag & (UNIT_FLAG_STUNNED | UNIT_FLAG_FLEEING))
+                            RemainingDamage -= RemainingDamage * currentAbsorb / 100;
+                        continue;
+                    }
+                    case 36815: // Shock Barrier - Kael'Thas
+                    {
+                        reflectSpell = 36822;
+                        if (RemainingDamage < currentAbsorb)
+                            reflectDamage = RemainingDamage / 100;
+                        else
+                            reflectDamage = currentAbsorb / 100;
+                        break;
+                    }
+                    case 39228: // Argussian Compass
+                    case 60218: // Essence of Gossamer
+                    {
+                        // Max absorb stored in 1 dummy effect
+                        int32 max_absorb = spellProto->CalculateSimpleValue(EFFECT_INDEX_1);
+                        if (max_absorb < currentAbsorb)
+                            currentAbsorb = max_absorb;
+                        break;
+                    }
+                    case 41475: // Reflective Shield (Lady Malande boss)
+                    {
+                        if (RemainingDamage < currentAbsorb)
+                            reflectDamage = RemainingDamage / 2;
+                        else
+                            reflectDamage = currentAbsorb / 2;
+                        reflectSpell = 33619;
+                        reflectTriggeredBy = *i;
+                        break;
+                    }
+                    case 49145: // Spell Deflection
+                    case 49495:
+                    case 49497:
+                    {
+                        // You have a chance equal to your Parry chance
+                        if (damagetype == SPELL_DIRECT_DAMAGE && roll_chance_f(GetParryChance()))
+                            RemainingDamage -= RemainingDamage * currentAbsorb / 100;
+                        continue;
+                    }
+                    case 51474: // Astral Shift
+                    case 51478:
+                    case 51479:
+                    {
+                        // reduces all damage taken while stun, fear or silence
+                        if (unitflag & (UNIT_FLAG_STUNNED | UNIT_FLAG_FLEEING | UNIT_FLAG_SILENCED))
+                            RemainingDamage -= RemainingDamage * currentAbsorb / 100;
+                        continue;
+                    }
+                    default:
+                        break;
                 }
                 break;
             }

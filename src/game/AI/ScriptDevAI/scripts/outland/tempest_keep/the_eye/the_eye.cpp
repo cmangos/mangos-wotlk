@@ -57,6 +57,9 @@ void instance_the_eye::OnCreatureCreate(Creature* pCreature)
         case NPC_KAELTHAS:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
+        case NPC_WORLD_TRIGGER_LARGE:
+            m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
+            break;
     }
 }
 
@@ -71,6 +74,14 @@ void instance_the_eye::OnObjectCreate(GameObject* pGo)
         case GO_BRIDGE_WINDOW:
             m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
             break;
+        case GO_RAID_DOOR_3:
+        case GO_RAID_DOOR_4:
+        case GO_ARCANE_DOOR_VERT_3:
+        case GO_ARCANE_DOOR_VERT_4:
+            m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            if (CheckDoorOpening())
+                pGo->SetGoState(GO_STATE_ACTIVE);
+            break;
     }
 }
 
@@ -82,6 +93,8 @@ void instance_the_eye::SetData(uint32 uiType, uint32 uiData)
         case TYPE_SOLARIAN:
         case TYPE_VOIDREAVER:
             m_auiEncounter[uiType] = uiData;
+            if (CheckDoorOpening())
+                OpenDoors();
             break;
         case TYPE_KAELTHAS:
             // Don't set the same data twice
@@ -113,6 +126,42 @@ void instance_the_eye::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             break;
     }
+
+    if (uiData == DONE || uiData == SPECIAL)
+    {
+        OUT_SAVE_INST_DATA;
+
+        std::ostringstream saveStream;
+        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
+            << m_auiEncounter[3];
+
+        m_strInstData = saveStream.str();
+
+        SaveToDB();
+        OUT_SAVE_INST_DATA_COMPLETE;
+    }
+}
+
+void instance_the_eye::Load(const char* chrIn)
+{
+    if (!chrIn)
+    {
+        OUT_LOAD_INST_DATA_FAIL;
+        return;
+    }
+
+    OUT_LOAD_INST_DATA(chrIn);
+
+    std::istringstream loadStream(chrIn);
+    loadStream >> m_auiEncounter[TYPE_ALAR] >> m_auiEncounter[TYPE_SOLARIAN] >> m_auiEncounter[TYPE_VOIDREAVER] >> m_auiEncounter[TYPE_KAELTHAS];
+
+    for (uint8 i = 0; i < MAX_ENCOUNTER; ++i)
+    {
+        if (m_auiEncounter[i] == IN_PROGRESS)
+            m_auiEncounter[i] = NOT_STARTED;
+    }
+
+    OUT_LOAD_INST_DATA_COMPLETE;
 }
 
 uint32 instance_the_eye::GetData(uint32 uiType) const
@@ -121,6 +170,19 @@ uint32 instance_the_eye::GetData(uint32 uiType) const
         return m_auiEncounter[uiType];
 
     return 0;
+}
+
+bool instance_the_eye::CheckDoorOpening() const
+{
+    return m_auiEncounter[TYPE_ALAR] == DONE && m_auiEncounter[TYPE_SOLARIAN] == DONE && m_auiEncounter[TYPE_VOIDREAVER] == DONE;
+}
+
+void instance_the_eye::OpenDoors()
+{
+    DoUseDoorOrButton(GO_RAID_DOOR_3);
+    DoUseDoorOrButton(GO_RAID_DOOR_4);
+    DoUseDoorOrButton(GO_ARCANE_DOOR_VERT_3);
+    DoUseDoorOrButton(GO_ARCANE_DOOR_VERT_4);
 }
 
 InstanceData* GetInstanceData_instance_the_eye(Map* pMap)

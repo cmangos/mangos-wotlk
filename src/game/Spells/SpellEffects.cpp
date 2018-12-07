@@ -1912,6 +1912,17 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 35769, TRIGGERED_NONE); // Cast Felfire upon itself on hit
                     return;
                 }
+                case 36196:                                 // Pure Nether Beam
+                case 36197:
+                case 36198:
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->PlaySpellVisual(7234);
+                    unitTarget->PlaySpellVisual(7235);
+                    return;
+                }
                 case 36677:                                 // Chaos Breath
                 {
                     if (!unitTarget)
@@ -8907,12 +8918,68 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (!unitTarget)
                         return;
 
-                    float x, y, z;
-                    for (uint8 i = 0; i < 4; ++i)
+                    m_caster->CastSpell(nullptr, 35861, TRIGGERED_NONE);
+                    m_caster->CastSpell(nullptr, 35862, TRIGGERED_NONE);
+                    m_caster->CastSpell(nullptr, 35863, TRIGGERED_NONE);
+                    m_caster->CastSpell(nullptr, 35864, TRIGGERED_NONE);
+                    return;
+                }
+                case 35869:                                 // Nether Beam
+                {
+                    if (m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    ThreatList const& threatlist = m_caster->getThreatManager().getThreatList();
+                    if (threatlist.empty())
+                        return;
+
+                    std::vector<Unit*> suitableUnits;
+                    suitableUnits.reserve(threatlist.size());
+
+                    for (ThreatList::const_iterator itr = threatlist.begin(); itr != threatlist.end(); ++itr)
+                        if (Unit* pTarget = m_caster->GetMap()->GetUnit((*itr)->getUnitGuid()))
+                            if (pTarget->GetTypeId() == TYPEID_PLAYER)
+                                suitableUnits.push_back(pTarget);
+
+                    if (!suitableUnits.empty())
                     {
-                        m_caster->GetNearPoint(m_caster, x, y, z, 0.0f, INTERACTION_DISTANCE, M_PI_F * .5f * i + M_PI_F * .25f);
-                        m_caster->SummonCreature(21002, x, y, z, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
+                        while (suitableUnits.size() > 5)
+                            suitableUnits.erase(suitableUnits.begin() + urand(0, suitableUnits.size() - 1));
+
+                        for (Unit* beamTarget : suitableUnits)
+                            m_caster->CastSpell(beamTarget, 35873, TRIGGERED_NONE);
                     }
+
+                    return;
+                }
+                case 36092:                                 // Kael Explodes
+                {
+                    m_caster->CastSpell(nullptr, 36185, TRIGGERED_NONE);
+                    m_caster->CastSpell(nullptr, 36550, TRIGGERED_NONE);
+                    m_caster->PlayDirectSound(3320);
+                    m_caster->PlayDirectSound(10845);
+                    m_caster->PlayDirectSound(6539);
+                    return;
+                }
+                case 36201:                                 // Pure Nether Beam
+                case 36290:
+                case 36291:
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint32 spellId;
+                    switch (urand(0, 2))
+                    {
+                        case 0: spellId = 36196; break;
+                        case 1: spellId = 36197; break;
+                        case 2: spellId = 36198; break;
+                    }
+
+                    m_caster->PlayDirectSound(6477);
+                    m_caster->PlayDirectSound(44);
+
+                    unitTarget->CastSpell(nullptr, spellId, TRIGGERED_NONE); // also triggered in sniff, only SMSG_SPELL_GO
                     return;
                 }
                 case 36208:                                 // Steal Weapon

@@ -8166,7 +8166,9 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
         // no break
         case 30769:                             // Pick Red Riding Hood
         case 30843:                             // Enfeeble
+        case 31298:                             // Sleep
         case 31347:                             // Doom
+        case 36797:                             // Mind Control (Kael'thas)
         case 40618:                             // Insignificance
         case 41376:                             // Spite
             if (m_caster->getVictim() == target)

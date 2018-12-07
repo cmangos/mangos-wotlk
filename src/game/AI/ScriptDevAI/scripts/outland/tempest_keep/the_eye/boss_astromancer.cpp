@@ -38,12 +38,13 @@ enum
 
     SPELL_ARCANE_MISSILES               = 33031,
     SPELL_WRATH_OF_THE_ASTROMANCER      = 42783,
+    SPELL_WRATH_OF_THE_ASTROMANCER_DOT  = 42784,            // AoE damage on bomb application.
     SPELL_BLINDING_LIGHT                = 33009,
     SPELL_PSYHIC_SCREAM                 = 34322,
     SPELL_SOLARIAN_TRANSFORM            = 39117,
     SPELL_VOID_BOLT                     = 39329,
     SPELL_MARK_OF_SOLARIAN              = 33023,            // acts as an enrage spell
-    // SPELL_ROTATE_ASTROMANCER          = 33283,           // purpose unk
+    // SPELL_ROTATE_ASTROMANCER         = 33283,            // purpose unk
 
     // summoned creatures
     NPC_SOLARIUM_AGENT                  = 18925,
@@ -57,6 +58,9 @@ enum
     SPELL_SOLARIUM_GREAT_HEAL           = 33387,
     SPELL_SOLARIUM_HOLY_SMITE           = 25054,
     SPELL_SOLARIUM_ARCANE_TORRENT       = 33390,
+
+    // TODO: Unused solarian adds summon spells - 33362,33367
+    // TODO: Unused spell 33365 at start of split
 
     WV_ARMOR                            = 31000,            // ToDo: this value need to be checked
 
@@ -109,7 +113,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
     {
         m_uiArcaneMissilesTimer        = 0;
         m_uiWrathOfTheAstromancerTimer = urand(15000, 25000);
-        m_uiBlindingLightTimer         = 35000;
+        m_uiBlindingLightTimer         = 20000;
         m_uiFearTimer                  = 20000;
         m_uiVoidBoltTimer              = 10000;
         m_uiSplitTimer                 = 50000;
@@ -175,8 +179,11 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
                 break;
             case NPC_SOLARIUM_AGENT:
             case NPC_SOLARIUM_PRIEST:
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                {
                     pSummoned->AI()->AttackStart(pTarget);
+                    pSummoned->AddThreat(pTarget, 100000.f); // explicitly used in script without spell
+                }
                 break;
         }
     }
@@ -233,7 +240,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
                     m_creature->SetVisibility(VISIBILITY_OFF);
 
                     DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
-                    m_uiSummonAgentsTimer = 6000;
+                    m_uiSummonAgentsTimer = 5000;
                 }
                 else if (m_Phase == PHASE_VOID)
                 {
@@ -256,54 +263,9 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
         switch (m_Phase)
         {
             case PHASE_NORMAL:
-                // Wrath of the Astromancer targets a random player which will explode after 6 secondes
-                if (m_uiWrathOfTheAstromancerTimer < uiDiff)
-                {
-                    // Target the tank ?
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_WRATH_OF_THE_ASTROMANCER, SELECT_FLAG_PLAYER))
-                    {
-                        if (DoCastSpellIfCan(pTarget, SPELL_WRATH_OF_THE_ASTROMANCER) == CAST_OK)
-                            m_uiWrathOfTheAstromancerTimer = urand(15000, 25000);
-                    }
-                    else
-                        m_uiWrathOfTheAstromancerTimer = 10000;
-                }
-                else
-                    m_uiWrathOfTheAstromancerTimer -= uiDiff;
-
-                // Blinding Light Timer
-                if (m_uiBlindingLightTimer < uiDiff)
-                {
-                    // She casts this spell every 45 seconds. It is a kind of Moonfire spell, which she strikes down on the whole raid simultaneously. It hits everyone in the raid for 2280 to 2520 arcane damage.
-                    if (DoCastSpellIfCan(m_creature, SPELL_BLINDING_LIGHT) == CAST_OK)
-                        m_uiBlindingLightTimer = 45000;
-                }
-                else
-                    m_uiBlindingLightTimer -= uiDiff;
-
-                // Arcane Missiles Timer
-                if (m_uiArcaneMissilesTimer < uiDiff)
-                {
-                    // Solarian casts Arcane Missiles on on random targets in the raid.
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    {
-                        if (!m_creature->HasInArc(pTarget, 2.5f))
-                            pTarget = m_creature->getVictim();
-
-                        if (pTarget)
-                            DoCastSpellIfCan(pTarget, SPELL_ARCANE_MISSILES);
-                    }
-
-                    m_uiArcaneMissilesTimer = urand(3000, 4000);
-                }
-                else
-                    m_uiArcaneMissilesTimer -= uiDiff;
-
                 // Phase 1 Timer
-                if (m_uiSplitTimer < uiDiff)
+                if (m_uiSplitTimer <= uiDiff)
                 {
-                    // ToDo: the timer of this ability is around 45-50 seconds. Please check if this is correct!
-                    DoCastSpellIfCan(m_creature, SPELL_MARK_OF_SOLARIAN, CAST_INTERRUPT_PREVIOUS);
                     m_Phase = PHASE_SPLIT;
 
                     // After these 50 seconds she portals to the middle of the room and disappears, leaving 3 light portals behind.
@@ -313,17 +275,56 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
                     m_creature->NearTeleportTo(fRoomCenter[0], fRoomCenter[1], fRoomCenter[2], fRoomCenter[3], true);
 
                     m_uiDelayTimer = 1000;
-                    m_uiSplitTimer = 50000;
+                    m_uiSplitTimer = 75000;
                     // Do nothing more, if phase switched
                     return;
                 }
-                m_uiSplitTimer -= uiDiff;
+                else
+                    m_uiSplitTimer -= uiDiff;
+
+                // Wrath of the Astromancer targets a random player which will explode after 6 secondes
+                if (m_uiWrathOfTheAstromancerTimer <= uiDiff)
+                {
+                    // Target the tank ?
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_WRATH_OF_THE_ASTROMANCER, SELECT_FLAG_PLAYER))
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_WRATH_OF_THE_ASTROMANCER) == CAST_OK)
+                            m_uiWrathOfTheAstromancerTimer = urand(12000, 18000);
+                    }
+                    else
+                        m_uiWrathOfTheAstromancerTimer = 10000;
+                }
+                else
+                    m_uiWrathOfTheAstromancerTimer -= uiDiff;
+
+                // Blinding Light Timer
+                if (m_uiBlindingLightTimer <= uiDiff)
+                {
+                    // She casts this spell every 45 seconds. It is a kind of Moonfire spell, which she strikes down on the whole raid simultaneously. It hits everyone in the raid for 2280 to 2520 arcane damage.
+                    if (DoCastSpellIfCan(m_creature, SPELL_BLINDING_LIGHT) == CAST_OK && DoCastSpellIfCan(m_creature, SPELL_MARK_OF_SOLARIAN) == CAST_OK)
+                        m_uiBlindingLightTimer = 20000;
+                }
+                else
+                    m_uiBlindingLightTimer -= uiDiff;
+
+                // Arcane Missiles Timer
+                if (m_uiArcaneMissilesTimer <= uiDiff)
+                {
+                    // Solarian casts Arcane Missiles on on random targets in the raid.
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_ARCANE_MISSILES, SELECT_FLAG_PLAYER))
+                    {
+                        DoCastSpellIfCan(pTarget, SPELL_ARCANE_MISSILES);
+                        m_uiArcaneMissilesTimer = urand(3000, 3500);
+                        return;
+                    }
+                }
+                else
+                    m_uiArcaneMissilesTimer -= uiDiff;
 
                 DoMeleeAttackIfReady();
                 break;
 
             case PHASE_SPLIT:
-
                 // Summon 4 Agents on each portal
                 if (m_uiSummonAgentsTimer)
                 {
@@ -338,7 +339,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
                             }
                         }
                         m_uiSummonAgentsTimer  = 0;
-                        m_uiSummonPriestsTimer = 15000;
+                        m_uiSummonPriestsTimer = 16000;
                     }
                     else
                         m_uiSummonAgentsTimer -= uiDiff;
@@ -346,7 +347,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
 
                 if (m_uiSummonPriestsTimer)
                 {
-                    if (m_uiSummonPriestsTimer < uiDiff)
+                    if (m_uiSummonPriestsTimer <= uiDiff)
                     {
                         m_Phase = PHASE_NORMAL;
                         // Randomize the portals
@@ -369,8 +370,8 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
                         m_creature->SetVisibility(VISIBILITY_ON);
                         m_uiArcaneMissilesTimer        = 0;
                         m_uiSummonPriestsTimer         = 0;
-                        m_uiBlindingLightTimer         = 35000;
-                        m_uiWrathOfTheAstromancerTimer = urand(15000, 25000);
+                        m_uiBlindingLightTimer         = 20000;
+                        m_uiWrathOfTheAstromancerTimer = urand(20000, 25000);
                     }
                     else
                         m_uiSummonPriestsTimer -= uiDiff;
@@ -380,7 +381,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
 
             case PHASE_VOID:
                 // Fear Timer
-                if (m_uiFearTimer < uiDiff)
+                if (m_uiFearTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_PSYHIC_SCREAM) == CAST_OK)
                         m_uiFearTimer = 20000;
@@ -389,7 +390,7 @@ struct boss_high_astromancer_solarianAI : public ScriptedAI
                     m_uiFearTimer -= uiDiff;
 
                 // Void Bolt Timer
-                if (m_uiVoidBoltTimer < uiDiff)
+                if (m_uiVoidBoltTimer <= uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VOID_BOLT) == CAST_OK)
                         m_uiVoidBoltTimer = 10000;
@@ -416,8 +417,17 @@ struct mob_solarium_priestAI : public ScriptedAI
         m_uiHealTimer = 9000;
         m_uiHolySmiteTimer = 1;
         m_uiAoESilenceTimer = 15000;
+    }
 
-        m_attackDistance = 25.0f;
+    void AttackStart(Unit* pWho) override
+    {
+        if (m_creature->Attack(pWho, true))
+        {
+            m_creature->AddThreat(pWho);
+            m_creature->SetInCombatWith(pWho);
+            pWho->SetInCombatWith(m_creature);
+            m_creature->GetMotionMaster()->MoveChase(pWho, 25.0f, 0.0f);
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -425,7 +435,7 @@ struct mob_solarium_priestAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (m_uiHealTimer < uiDiff)
+        if (m_uiHealTimer <= uiDiff)
         {
             if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
             {
@@ -436,7 +446,7 @@ struct mob_solarium_priestAI : public ScriptedAI
         else
             m_uiHealTimer -= uiDiff;
 
-        if (m_uiHolySmiteTimer < uiDiff)
+        if (m_uiHolySmiteTimer <= uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
             {
@@ -447,7 +457,7 @@ struct mob_solarium_priestAI : public ScriptedAI
         else
             m_uiHolySmiteTimer -= uiDiff;
 
-        if (m_uiAoESilenceTimer < uiDiff)
+        if (m_uiAoESilenceTimer <= uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SOLARIUM_ARCANE_TORRENT) == CAST_OK)
                 m_uiAoESilenceTimer = 13000;

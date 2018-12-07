@@ -23,12 +23,14 @@ enum
     NPC_TELONICUS               = 20063,
     NPC_THALADRED               = 20064,
 
+    NPC_WORLD_TRIGGER_LARGE     = 22517,
+
     GO_ARCANE_DOOR_HORIZ_3      = 184325,               // combat doors for Kael
     GO_ARCANE_DOOR_HORIZ_4      = 184324,
-    // GO_RAID_DOOR_4            = 184329,               // encounter doors - no longer used since 2.4.0
-    // GO_RAID_DOOR_3            = 184327,
-    // GO_ARCANE_DOOR_VERT_3     = 184326,
-    // GO_ARCANE_DOOR_VERT_4     = 184328,
+    GO_RAID_DOOR_3              = 184327,
+    GO_RAID_DOOR_4              = 184329,               // encounter doors - no longer used since 2.4.0
+    GO_ARCANE_DOOR_VERT_3       = 184326,
+    GO_ARCANE_DOOR_VERT_4       = 184328,
     GO_KAEL_STATUE_LEFT         = 184597,               // cosmetic objects for Kael encounter
     GO_KAEL_STATUE_RIGHT        = 184596,
     GO_BRIDGE_WINDOW            = 184069,
@@ -50,10 +52,17 @@ class instance_the_eye : public ScriptedInstance
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
 
-        // No Save or Load needed to current knowledge
+        // checks whether to open the doors preventing Kael access
+        bool CheckDoorOpening() const;
+        void OpenDoors();
+
+        // Save needed for doors
+        const char* Save() const override { return m_strInstData.c_str(); }
+        void Load(const char* chrIn) override;
 
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
+        std::string m_strInstData;
 
         uint32 m_uiKaelthasEventPhase;
 };

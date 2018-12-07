@@ -4509,14 +4509,14 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1550014,'Enough of this!  Now I call upon the fury of the cosmos itself.',0,1,0,0,'solarian SAY_VOIDA'),
 (-1550015,'I become ONE... with the VOID!',0,1,0,0,'solarian SAY_VOIDB'),
 
-(-1550016,'Energy. Power. My people are addicted to it... a dependence made manifest after the Sunwell was destroyed. Welcome... to the future. A pity you are too late to stop it. No one can stop me now! Selama ashal\'anore!',11256,1,0,0,'kaelthas SAY_INTRO'),
+(-1550016,'Energy. Power. My people are addicted to it... a dependence made manifest after the Sunwell was destroyed. Welcome... to the future. A pity you are too late to stop it. No one can stop me now! Selama ashal''anore!',11256,1,0,0,'kaelthas SAY_INTRO note: was changed sometime after TBC'),
 (-1550017,'Capernian will see to it that your stay here is a short one.',11257,1,0,0,'kaelthas SAY_INTRO_CAPERNIAN'),
 (-1550018,'Well done, you have proven worthy to test your skills against my master engineer, Telonicus.',11258,1,0,0,'kaelthas SAY_INTRO_TELONICUS'),
-(-1550019,'Let us see how your nerves hold up against the Darkener, Thaladred.',11259,1,0,0,'kaelthas SAY_INTRO_THALADRED'),
+(-1550019,'Let us see how your nerves hold up against the Darkener, Thaladred!',11259,1,0,0,'kaelthas SAY_INTRO_THALADRED'),
 (-1550020,'You have persevered against some of my best advisors... but none can withstand the might of the Blood Hammer. Behold, Lord Sanguinar!',11260,1,0,0,'kaelthas SAY_INTRO_SANGUINAR'),
-(-1550021,'As you see, I have many weapons in my arsenal...',11261,1,0,0,'kaelthas SAY_PHASE2_WEAPON'),
-(-1550022,'Perhaps I underestimated you. It would be unfair to make you fight all four advisors at once, but... fair treatment was never shown to my people. I\'m just returning the favor.',11262,1,0,0,'kaelthas SAY_PHASE3_ADVANCE'),
-(-1550023,'Alas, sometimes one must take matters into one\'s own hands. Balamore shanal!',11263,1,0,0,'kaelthas SAY_PHASE4_INTRO2'),
+(-1550021,'As you see, I have many weapons in my arsenal....',11261,1,0,0,'kaelthas SAY_PHASE2_WEAPON'),
+(-1550022,'Perhaps I underestimated you. It would be unfair to make you fight all four advisors at once, but... fair treatment was never shown to my people. I''m just returning the favor.',11262,1,0,0,'kaelthas SAY_PHASE3_ADVANCE'),
+(-1550023,'Alas, sometimes one must take matters into one''s own hands. Balamore shanal!',11263,1,0,0,'kaelthas SAY_PHASE4_INTRO2'),
 (-1550024,'I have not come this far to be stopped! The future I have planned will not be jeopardized! Now you will taste true power!!',11273,1,0,0,'kaelthas SAY_PHASE5_NUTS'),
 (-1550025,'You will not prevail.',11270,1,0,0,'kaelthas SAY_SLAY1'),
 (-1550026,'You gambled...and lost.',11271,1,0,0,'kaelthas SAY_SLAY2'),
@@ -4525,22 +4525,22 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1550029,'Bow to my will.',11269,1,0,0,'kaelthas SAY_MINDCONTROL2'),
 (-1550030,'Let us see how you fare when your world is turned upside down.',11264,1,0,0,'kaelthas SAY_GRAVITYLAPSE1'),
 (-1550031,'Having trouble staying grounded?',11265,1,0,0,'kaelthas SAY_GRAVITYLAPSE2'),
-(-1550032,'Anara\'nel belore!',11267,1,0,0,'kaelthas SAY_SUMMON_PHOENIX1'),
+(-1550032,'Anar''anel belore!',11267,1,0,0,'kaelthas SAY_SUMMON_PHOENIX1'),
 (-1550033,'By the power of the sun!',11266,1,0,0,'kaelthas SAY_SUMMON_PHOENIX2'),
-(-1550034,'For...Quel...thalas!',11274,1,0,0,'kaelthas SAY_DEATH'),
+(-1550034,'For... Quel''...Thalas!',11274,1,0,0,'kaelthas SAY_DEATH'),
 
 (-1550035,'Prepare yourselves!',11203,1,0,0,'thaladred SAY_THALADRED_AGGRO'),
 (-1550036,'Forgive me, my prince! I have... failed.',11204,1,0,0,'thaladred SAY_THALADRED_DEATH'),
-(-1550037,'%s sets his gaze on $N!',0,2,0,0,'thaladred EMOTE_THALADRED_GAZE'),
+(-1550037,'%s sets eyes on $n!',0,2,0,0,'thaladred EMOTE_THALADRED_GAZE'),
 
 (-1550038,'Blood for blood!',11152,1,0,0,'sanguinar SAY_SANGUINAR_AGGRO'),
-(-1550039,'NO! I ...will... not...',11153,1,0,0,'sanguinar SAY_SANGUINAR_DEATH'),
+(-1550039,'NO! I... will... not...',11153,1,0,0,'sanguinar SAY_SANGUINAR_DEATH'),
 
-(-1550040,'The sin\'dore reign supreme!',11117,1,0,0,'capernian SAY_CAPERNIAN_AGGRO'),
+(-1550040,'The sin''dorei reign supreme!',11117,1,0,0,'capernian SAY_CAPERNIAN_AGGRO'),
 (-1550041,'This is not over!',11118,1,0,0,'capernian SAY_CAPERNIAN_DEATH'),
 
-(-1550042,'Anar\'alah belore!',11157,1,0,0,'telonicus SAY_TELONICUS_AGGRO'),
-(-1550043,'More perils... await',11158,1,0,0,'telonicus SAY_TELONICUS_DEATH'),
+(-1550042,'Anar''alah belore!',11157,1,0,0,'telonicus SAY_TELONICUS_AGGRO'),
+(-1550043,'More perils... await...',11158,1,0,0,'telonicus SAY_TELONICUS_DEATH'),
 
 (-1550044,'%s begins to cast Pyroblast!',0,3,0,0,'kaelthas EMOTE_PYROBLAST');
 
