@@ -1069,6 +1069,7 @@ INSERT INTO scripted_areatrigger VALUES
 (4497,'at_commander_dawnforge');
 UPDATE gameobject_template SET ScriptName='go_manaforge_control_console' WHERE entry IN (183770,183956,184311,184312);
 UPDATE creature_template SET ScriptName='npc_manaforge_control_console' WHERE entry IN (20209,20417,20418,20440);
+UPDATE `creature_template` SET `ScriptName`='npc_manaforge_spawn' WHERE `Entry` IN(20218,20438,20439,20460);
 UPDATE creature_template SET ScriptName='npc_commander_dawnforge' WHERE entry=19831;
 UPDATE creature_template SET ScriptName='npc_bessy' WHERE entry=20415;
 UPDATE creature_template SET ScriptName='npc_maxx_a_million' WHERE entry=19589;
@@ -2210,9 +2211,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1000472,'The %s, having fought the good fight, falls to pieces.',0,2,0,0,'Scrap Reaver X6000 - on death anim emote'),
 (-1000473,'The %s''s mechanical heart begins to beat softly.',0,2,0,0,'Scrapped Fel Reaver - on event start emote'),
-(-1000474,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000475,'REUSE_ME',0,0,0,0,'REUSE_ME'),
-(-1000476,'REUSE_ME',0,0,0,0,'REUSE_ME'),
+(-1000474,'The naaru''s emergency shutdown will disable the manaforge permanently! It must be aborted!',0,0,0,0,'manaforge shutdown'),
+(-1000475,'Stop this immediately!',0,0,0,0,'manaforge shutdown say 2'),
+(-1000476,'You will not shut my manaforge down, scum!',0,1,0,0,'manaforge ara elite yell'),
 
 (-1000477,'Let us leave this place. I\'ve had enough of these madmen!',0,0,0,0,'akuno SAY_AKU_START'),
 (-1000478,'You\'ll go nowhere, fool!',0,0,0,0,'akuno SAY_AKU_AMBUSH_A'),

@@ -2925,6 +2925,18 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 return;
             }
+            case 35016:										// Interrupt shutdown
+            case 35176:										// Interrupt shutdown (ara)
+            {
+                if (m_removeMode == AURA_REMOVE_BY_DEFAULT)
+                {
+                    Unit* caster = GetCaster();
+                    if (caster && GetAuraDuration() <= 100) // only fail if finished cast (seems to finish with .1 seconds left)  
+                        if (Creature* summoner = caster->GetMap()->GetCreature(caster->GetSpawnerGuid()))
+                            caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, caster, summoner);
+                }
+                return;
+            }
             case 35079:                                     // Misdirection, triggered buff
             case 59628:                                     // Tricks of the Trade, triggered buff
             {
