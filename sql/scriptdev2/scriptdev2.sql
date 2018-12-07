@@ -5261,7 +5261,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568087,'More intruders! Sound da alarm!',12104,1,0,25,'amanishi guardian SAY_SOUND_ALARM'),
 
 (-1568088,'Akil\'zon, the invaders approach!',0,1,0,5,'amanishi lookout SAY_START_GAUNTLET'),
-(-1568089,'Hallooo.... You just gunna sit down there an\' pat yerselves on the back? What kinda rescuers are ya?',0,1,0,1,'harkor SAY_HARKOR_HELP'),
+(-1568089,'Hallooo.... You just gunna sit down there an\' pat yerselves on the back? What kinda rescuers are ya?',2716,1,0,1,'harkor SAY_HARKOR_HELP'),
 (-1568090,"Ahh, freedom!",2725,0,0,4,'harkor SAY_HARKOR_EVENT_1'),
 (-1568091,"A'course it only be fair that I reward yeh fer me rescue. Now where'd them savages put me satchel?",0,0,0,1,'harkor SAY_HARKOR_EVENT_2'),
 (-1568092,"Don't be shy, now. Help yerselves. If it weren't fer yer help, them basterds'd be shrinkin' me head right about now.",0,0,0,1,'harkor SAY_HARKOR_EVENT_3');

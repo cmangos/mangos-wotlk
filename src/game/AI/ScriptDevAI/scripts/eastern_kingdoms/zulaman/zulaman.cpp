@@ -517,7 +517,7 @@ struct npc_harkorAI : public ScriptedAI
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
-            m_uiInitialShoutTimer = 5000;
+            m_uiInitialShoutTimer = 15000;
     }
 
     void UpdateAI(const uint32 uiDiff) override
