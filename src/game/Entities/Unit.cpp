@@ -12176,7 +12176,7 @@ void Unit::RestoreOriginalFaction()
                 setFaction(owner->getFaction());
         }
         else
-            setFaction(creature->GetCreatureInfo()->FactionAlliance);
+            setFaction(creature->GetCreatureInfo()->Faction);
     }
 }
 

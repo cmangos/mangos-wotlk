@@ -1842,10 +1842,6 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
     TemporarySpawn* pCreature = new TemporarySpawn(GetObjectGuid());
 
-    Team team = TEAM_NONE;
-    if (GetTypeId() == TYPEID_PLAYER)
-        team = ((Player*)this)->GetTeam();
-
     CreatureCreatePos pos(GetMap(), x, y, z, ang, GetPhaseMask());
 
     if (x == 0.0f && y == 0.0f && z == 0.0f)
@@ -1854,7 +1850,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
         pos = CreatureCreatePos(this, GetOrientation(), dist, ang);
     }
 
-    if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo, team))
+    if (!pCreature->Create(GetMap()->GenerateLocalLowGuid(cinfo->GetHighGuid()), pos, cinfo))
     {
         delete pCreature;
         return nullptr;

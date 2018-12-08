@@ -558,13 +558,9 @@ void ObjectMgr::LoadCreatureTemplates()
         if (!ok)
             continue;
 
-        FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->FactionAlliance);
+        FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->Faction);
         if (!factionTemplate)
-            sLog.outErrorDb("Creature (Entry: %u) has nonexistent `FactionAlliance` template (%u)", cInfo->Entry, cInfo->FactionAlliance);
-
-        factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->FactionHorde);
-        if (!factionTemplate)
-            sLog.outErrorDb("Creature (Entry: %u) has nonexistent `FactionHorde` template (%u)", cInfo->Entry, cInfo->FactionHorde);
+            sLog.outErrorDb("Creature (Entry: %u) has nonexistent Faction template (%u)", cInfo->Entry, cInfo->Faction);
 
         for (int k = 0; k < MAX_KILL_CREDIT; ++k)
         {

@@ -285,7 +285,7 @@ bool EffectAuraDummy_npc_oil_stained_wolf(const Aura* pAura, bool bApply)
         else
         {
             Creature* pCreature = (Creature*)pAura->GetTarget();
-            pCreature->setFaction(pCreature->GetCreatureInfo()->FactionAlliance);
+            pCreature->setFaction(pCreature->GetCreatureInfo()->Faction);
         }
 
         return true;

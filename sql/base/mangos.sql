@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_13983_01_mangos_cones` bit(1) DEFAULT NULL
+  `required_13984_01_mangos_creature_template_faction_removal` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1319,8 +1319,7 @@ CREATE TABLE `creature_template` (
   `ModelId2` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ModelId3` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `ModelId4` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `FactionAlliance` smallint(5) unsigned NOT NULL DEFAULT '0',
-  `FactionHorde` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `Faction` smallint(5) unsigned NOT NULL DEFAULT '0',
   `Scale` float NOT NULL DEFAULT '1',
   `Family` tinyint(4) NOT NULL DEFAULT '0',
   `CreatureType` tinyint(3) unsigned NOT NULL DEFAULT '0',

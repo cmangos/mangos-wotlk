@@ -36,9 +36,7 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
     SetMap(cPos.GetMap());
     SetPhaseMask(cPos.GetPhaseMask(), false);
 
-    Team team = owner->GetTypeId() == TYPEID_PLAYER ? ((Player*)owner)->GetTeam() : TEAM_NONE;
-
-    if (!CreateFromProto(guidlow, cinfo, team))
+    if (!CreateFromProto(guidlow, cinfo))
         return false;
 
     // special model selection case for totems
