@@ -22,6 +22,7 @@ SDCategory: Auchindoun, Sethekk Halls
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 #include "sethekk_halls.h"
 
 enum
@@ -50,50 +51,87 @@ enum
     SPELL_ARCANE_EXPLOSION_H    = 40425,
 };
 
-struct boss_talon_king_ikissAI : public ScriptedAI
+enum TalonKingIkissActions // order based on priority
 {
-    boss_talon_king_ikissAI(Creature* pCreature) : ScriptedAI(pCreature)
+    TALON_KING_IKISS_ACTION_SLOW,
+    TALON_KING_IKISS_ACTION_POLYMOPRH,
+    TALON_KING_IKISS_ACTION_ARCANE_VOLLEY,
+    TALON_KING_IKISS_ACTION_MAX,
+};
+
+struct boss_talon_king_ikissAI : public ScriptedAI, public CombatTimerAI
+{
+    boss_talon_king_ikissAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(TALON_KING_IKISS_ACTION_MAX)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_bIntro = false;
+        m_instance = (ScriptedInstance*)creature->GetInstanceData();
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
+        m_Intro = false;
+
+        AddCombatAction(TALON_KING_IKISS_ACTION_SLOW, 0);
+        AddCombatAction(TALON_KING_IKISS_ACTION_POLYMOPRH, 0);
+        AddCombatAction(TALON_KING_IKISS_ACTION_ARCANE_VOLLEY, 0);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
-    uint32 m_uiArcaneVolleyTimer;
-    uint32 m_uiSheepTimer;
-    uint32 m_uiSlowTimer;
-    uint8 m_uiBlinkPhase;
-    float m_fHealthCheck;
-
-    bool m_bManaShield;
-    bool m_bBlink;
-    bool m_bIntro;
+    bool m_ManaShield;
+    bool m_Blink;
+    bool m_Intro;
     bool m_reinitCombatMovement;
+    uint8 m_uiBlinkPhase;
+    float m_HealthPercent;
 
     void Reset() override
     {
-        m_uiArcaneVolleyTimer = urand(5000, 12000);
-        m_uiSheepTimer = 8000;
-        m_uiSlowTimer = urand(9000, 13000);
-        m_uiBlinkPhase = 0;
-        m_fHealthCheck = 80.0f;
+        for (uint32 i = 0; i < TALON_KING_IKISS_ACTION_MAX; ++i)
+            SetActionReadyStatus(i, false);
 
-        m_bBlink = false;
-        m_bManaShield = false;
+        ResetTimer(TALON_KING_IKISS_ACTION_SLOW, GetInitialActionTimer(TALON_KING_IKISS_ACTION_SLOW));
+        ResetTimer(TALON_KING_IKISS_ACTION_POLYMOPRH, GetInitialActionTimer(TALON_KING_IKISS_ACTION_POLYMOPRH));
+        ResetTimer(TALON_KING_IKISS_ACTION_ARCANE_VOLLEY, GetInitialActionTimer(TALON_KING_IKISS_ACTION_ARCANE_VOLLEY));
+
+        SetCombatMovement(true);
+        SetCombatScriptStatus(false);
+
+        m_uiBlinkPhase = 0;
+        m_HealthPercent = 80.0f;
+
+        m_Blink = false;
+        m_ManaShield = false;
         m_reinitCombatMovement = false;
+    }
+
+    uint32 GetInitialActionTimer(const uint32 action) const
+    {
+        switch (action)
+        {
+            case TALON_KING_IKISS_ACTION_SLOW: return urand(9000, 13000);
+            case TALON_KING_IKISS_ACTION_POLYMOPRH: return urand(6000, 10000);
+            case TALON_KING_IKISS_ACTION_ARCANE_VOLLEY: return urand(5000, 12000);
+            default: return 0; // never occurs but for compiler
+        }
+    }
+
+    uint32 GetSubsequentActionTimer(const uint32 action) const
+    {
+        switch (action)
+        {
+            case TALON_KING_IKISS_ACTION_SLOW: return urand(15000, 20000);
+            case TALON_KING_IKISS_ACTION_POLYMOPRH: return urand(10000, 15000);
+            case TALON_KING_IKISS_ACTION_ARCANE_VOLLEY: return urand(8000, 12000);
+            default: return 0; // never occurs but for compiler
+        }
     }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
         if (!m_creature->getVictim() && m_creature->CanAttackOnSight(pWho) && pWho->isInAccessablePlaceFor(m_creature))
         {
-            if (!m_bIntro && m_creature->IsWithinDistInMap(pWho, 100.0f))
+            if (!m_Intro && m_creature->IsWithinDistInMap(pWho, 100.0f))
             {
-                m_bIntro = true;
+                m_Intro = true;
                 DoScriptText(SAY_INTRO, m_creature);
             }
         }
@@ -110,22 +148,22 @@ struct boss_talon_king_ikissAI : public ScriptedAI
             case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_IKISS, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_IKISS, IN_PROGRESS);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_IKISS, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_IKISS, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_IKISS, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_IKISS, FAIL);
     }
 
     void KilledUnit(Unit* /*pVctim*/) override
@@ -133,71 +171,93 @@ struct boss_talon_king_ikissAI : public ScriptedAI
         DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteActions()
     {
+        if (!CanExecuteCombatAction())
+            return;
+
+        for (uint32 i = 0; i < TALON_KING_IKISS_ACTION_MAX; ++i)
+        {
+            if (GetActionReadyStatus(i))
+            {
+                switch (i)
+                {
+                    case TALON_KING_IKISS_ACTION_SLOW:
+                    {
+                        if (!m_isRegularMode)
+                            if (DoCastSpellIfCan(m_creature, SPELL_SLOW_H) == CAST_OK)
+                            {
+                                ResetTimer(i, GetSubsequentActionTimer(i));
+                                SetActionReadyStatus(i, false);
+                                return;
+                            }
+                        break;
+                    }
+                    case TALON_KING_IKISS_ACTION_POLYMOPRH:
+                    {
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER| SELECT_FLAG_NOT_AURA | SELECT_FLAG_SKIP_TANK))
+                        {
+                            DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_POLYMORPH : SPELL_POLYMORPH_H);
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                            return;
+                        }
+                        break;
+                    }
+                    case TALON_KING_IKISS_ACTION_ARCANE_VOLLEY:
+                    {
+                        if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_ARCANE_VOLLEY : SPELL_ARCANE_VOLLEY_H) == CAST_OK)
+                        {
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
+                            return;
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff, m_creature->isInCombat());
+
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (EnterEvadeIfOutOfCombatArea(uiDiff))
+        if (EnterEvadeIfOutOfCombatArea(diff))
             return;
 
-        if (m_bBlink)
+        if (m_Blink)
         {
-            DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARCANE_EXPLOSION : SPELL_ARCANE_EXPLOSION_H);
+            DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_ARCANE_EXPLOSION : SPELL_ARCANE_EXPLOSION_H);
             DoCastSpellIfCan(m_creature, SPELL_ARCANE_BUBBLE, CAST_TRIGGERED);
             DoResetThreat();
-            m_bBlink = false;
+            m_Blink = false;
             m_reinitCombatMovement = true;
             SetCombatMovement(false);
         }
 
-        if (m_uiArcaneVolleyTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARCANE_VOLLEY : SPELL_ARCANE_VOLLEY_H) == CAST_OK)
-                m_uiArcaneVolleyTimer = urand(8000, 12000);
-        }
-        else
-            m_uiArcaneVolleyTimer -= uiDiff;
-
-        if (m_uiSheepTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
-                DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_POLYMORPH : SPELL_POLYMORPH_H);
-            m_uiSheepTimer = urand(15000, 17500);
-        }
-        else
-            m_uiSheepTimer -= uiDiff;
-
-        if (!m_bManaShield && m_creature->GetHealthPercent() < 15.0f)
+        if (!m_ManaShield && m_creature->GetHealthPercent() < 15.0f)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_MANA_SHIELD) == CAST_OK)
-                m_bManaShield = true;
+                m_ManaShield = true;
         }
 
-        if (!m_bIsRegularMode)
-        {
-            if (m_uiSlowTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SLOW_H) == CAST_OK)
-                    m_uiSlowTimer = urand(15000, 24000);
-            }
-            else
-                m_uiSlowTimer -= uiDiff;
-        }
-
-        if (m_creature->GetHealthPercent() < m_fHealthCheck)
+        if (m_creature->GetHealthPercent() < m_HealthPercent)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_BLINK, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
             {
-                m_bBlink = true;
+                m_Blink = true;
                 DoScriptText(EMOTE_ARCANE_EXP, m_creature);
 
                 // There is no relationship between the health percentages
                 switch (m_uiBlinkPhase)
                 {
-                    case 0: m_fHealthCheck = 50.0f; break;
-                    case 1: m_fHealthCheck = 25.0f; break;
-                    case 2: m_fHealthCheck = 0.0f; break;
+                    case 0: m_HealthPercent = 50.0f; break;
+                    case 1: m_HealthPercent = 25.0f; break;
+                    case 2: m_HealthPercent = 0.0f; break;
                 }
 
                 ++m_uiBlinkPhase;
@@ -206,14 +266,17 @@ struct boss_talon_king_ikissAI : public ScriptedAI
 
         if (m_creature->HasAura(SPELL_ARCANE_BUBBLE))
             return;
+
         if (m_reinitCombatMovement)
         {
             m_reinitCombatMovement = false;
             SetCombatMovement(true);
         }
 
-        if (!m_bBlink)
+        if (!m_Blink)
             DoMeleeAttackIfReady();
+
+        ExecuteActions();
     }
 };
 
