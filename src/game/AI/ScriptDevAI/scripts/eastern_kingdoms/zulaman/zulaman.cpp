@@ -710,6 +710,192 @@ bool GossipSelect_npc_harkor(Player* pPlayer, Creature* pCreature, uint32 /*uiSe
     return true;
 }
 
+enum
+{
+    GOSSIP_ITEM_ID_FREE_TANZAR  = -3568002,
+    GOSSIP_MENU_ID_TANZAR_DONE  = 8916,
+
+    SAY_TANZAR_HELP             = -1568093,
+    SAY_TANZAR_EVENT_1          = -1568094,
+    SAY_TANZAR_EVENT_2          = -1568095,
+    SAY_TANZAR_EVENT_3          = -1568096,
+    SAY_TANZAR_EVENT_3_ALT      = -1568097,
+    SAY_TANZAR_EVENT_4          = -1568098,
+};
+
+struct npc_tanzarAI : public ScriptedAI
+{
+    npc_tanzarAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_zulaman*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_zulaman* m_pInstance;
+    bool m_bCompletedChestEvent;
+    bool m_bChestEventInProgress;
+    uint8 m_uiEvent;
+    uint32 m_uiEventTimer;
+    uint32 m_uiInitialShoutTimer;
+
+    void Reset() override
+    {
+        m_bChestEventInProgress = false;
+        m_bCompletedChestEvent = false;
+        m_uiEvent = 0;
+        m_uiEventTimer = 0;
+        m_uiInitialShoutTimer = 0;
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+            m_uiInitialShoutTimer = 15000;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiInitialShoutTimer && !m_bChestEventInProgress)
+        {
+            if (m_uiInitialShoutTimer <= uiDiff)
+            {
+                DoScriptText(SAY_TANZAR_HELP, m_creature);
+                m_uiInitialShoutTimer = 0;
+            }
+            else
+                m_uiInitialShoutTimer -= uiDiff;
+        }
+
+        if (m_uiEventTimer)
+        {
+            if (m_uiEventTimer <= uiDiff)
+            {
+                switch (m_uiEvent)
+                {
+                    case 1:
+                        DoScriptText(SAY_TANZAR_EVENT_1, m_creature);
+
+                        m_uiEventTimer = 6000;
+                        m_uiEvent = 2;
+                        break;
+                    case 2:
+                        DoScriptText(SAY_TANZAR_EVENT_2, m_creature);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 3:
+                        m_creature->HandleEmoteState(EMOTE_STATE_USESTANDING);
+
+                        m_uiEventTimer = 7000;
+                        m_uiEvent = 4;
+                        break;
+                    case 4:
+                        DoScriptText(urand(0, 1) ? SAY_TANZAR_EVENT_3 : SAY_TANZAR_EVENT_3_ALT, m_creature);
+
+                        m_uiEventTimer = 6000;
+                        m_uiEvent = 5;
+                        break;
+                    case 5:
+                        m_creature->HandleEmoteState(EMOTE_ONESHOT_NONE);
+                        DoScriptText(SAY_TANZAR_EVENT_4, m_creature);
+
+                        if (GameObject* pTrunk = m_pInstance->GetSingleGameObjectFromStorage(GO_TANZARS_TRUNK))
+                            pTrunk->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 6:
+                        m_creature->SetFacingTo(1.500983f);
+                        m_creature->GetMotionMaster()->MoveIdle();
+                        m_creature->HandleEmote(EMOTE_ONESHOT_CHEER);
+                        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        m_bCompletedChestEvent = true;
+                        m_bChestEventInProgress = false;
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                }
+            }
+            else
+                m_uiEventTimer -= uiDiff;
+        }
+    }
+
+    void StartEvent()
+    {
+        m_bChestEventInProgress = true;
+
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+        if (GameObject* pCage = m_pInstance->GetSingleGameObjectFromStorage(GO_TANZARS_CAGE))
+            pCage->Use(m_creature);
+
+        m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
+        m_creature->GetMotionMaster()->MoveWaypoint(0, 3, 1000);
+    }
+
+    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+    {
+        if (uiMotionType != EXTERNAL_WAYPOINT_MOVE)
+            return;
+
+        switch (uiPointId)
+        {
+            case 1:
+                m_uiEvent = 1;
+                m_uiEventTimer = 2000;
+                break;
+            case 3:
+                m_uiEvent = 3;
+                m_uiEventTimer = 1000;
+                break;
+            case 5:
+                m_uiEvent = 6;
+                m_uiEventTimer = 1000;
+                break;
+        }
+    }
+};
+
+UnitAI* GetAI_npc_tanzar(Creature* pCreature)
+{
+    return new npc_tanzarAI(pCreature);
+}
+
+bool GossipHello_npc_tanzar(Player* pPlayer, Creature* pCreature)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+    pPlayer->PrepareGossipMenu(pCreature, pPlayer->GetDefaultGossipMenuForSource(pCreature));
+
+    if (npc_tanzarAI* pTanzarAI = dynamic_cast<npc_tanzarAI*>(pCreature->AI()))
+    {
+        if (pInstance && pInstance->GetData(TYPE_NALORAKK) == DONE && !pTanzarAI->m_bCompletedChestEvent)
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_FREE_TANZAR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        else if (pInstance && pInstance->GetData(TYPE_NALORAKK) == DONE)
+            pPlayer->PrepareGossipMenu(pCreature, GOSSIP_MENU_ID_TANZAR_DONE);
+    }
+
+    pPlayer->SendPreparedGossip(pCreature);
+
+    return true;
+}
+
+bool GossipSelect_npc_tanzar(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+{
+    if (npc_tanzarAI* pTanzarAI = dynamic_cast<npc_tanzarAI*>(pCreature->AI()))
+    {
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1 && !pTanzarAI->m_bCompletedChestEvent)
+        {
+            pTanzarAI->StartEvent();
+            pPlayer->CLOSE_GOSSIP_MENU();
+        }
+    }
+    return true;
+}
 
 void AddSC_zulaman()
 {
@@ -745,5 +931,12 @@ void AddSC_zulaman()
     pNewScript->GetAI = &GetAI_npc_harkor;
     pNewScript->pGossipHello = &GossipHello_npc_harkor;
     pNewScript->pGossipSelect = &GossipSelect_npc_harkor;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_tanzar";
+    pNewScript->GetAI = &GetAI_npc_tanzar;
+    pNewScript->pGossipHello = &GossipHello_npc_tanzar;
+    pNewScript->pGossipSelect = &GossipSelect_npc_tanzar;
     pNewScript->RegisterSelf();
 }

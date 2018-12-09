@@ -112,6 +112,8 @@ enum InstanceZA
     GO_HARKORS_CAGE         = 187378,
     GO_DWARF_HAMMER         = 186623,
     GO_DWARF_LOOT_BOX       = 186622,
+
+    GO_TANZARS_CAGE         = 187377,
 };
 
 enum BossToChestIndex

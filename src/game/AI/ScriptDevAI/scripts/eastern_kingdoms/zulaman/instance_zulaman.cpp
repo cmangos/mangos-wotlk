@@ -245,7 +245,10 @@ void instance_zulaman::OnObjectCreate(GameObject* pGo)
             break;
         case GO_HARKORS_SATCHEL:
             break;
-
+        case GO_TANZARS_CAGE:
+            break;
+        case GO_TANZARS_TRUNK:
+            break;
         default:
             return;
     }
@@ -550,6 +553,8 @@ void instance_zulaman::DoChestEvent(BossToChestIndex uiIndex)
 
     if (Creature* pCreature = instance->GetCreature(m_aEventNpcInfo[uiIndex].npGuid))
     {
+        pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCreature, pCreature); // yell for help
+
         switch (pCreature->GetEntry())
         {
             case NPC_TANZAR:
@@ -559,8 +564,6 @@ void instance_zulaman::DoChestEvent(BossToChestIndex uiIndex)
             case NPC_ASHLI:
                 break;
             case NPC_HARKOR:
-                pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCreature, pCreature); // yell for help
-
                 if (GameObject* pSatchel = GetSingleGameObjectFromStorage(GO_HARKORS_SATCHEL))
                     pSatchel->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
 
