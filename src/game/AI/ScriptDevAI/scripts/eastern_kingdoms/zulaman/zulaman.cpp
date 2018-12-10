@@ -713,7 +713,11 @@ bool GossipSelect_npc_harkor(Player* pPlayer, Creature* pCreature, uint32 /*uiSe
 enum
 {
     GOSSIP_ITEM_ID_FREE_TANZAR  = -3568002,
+    GOSSIP_ITEM_ID_TANZAR_DONE  = -3568003,
+    GOSSIP_ITEM_ID_TANZAR_DONE2 = -3568004,
     GOSSIP_MENU_ID_TANZAR_DONE  = 8916,
+    GOSSIP_MENU_ID_TANZAR_DONE2 = 8804,
+    GOSSIP_MENU_ID_TANZAR_DONE3 = 8807,
 
     SAY_TANZAR_HELP             = -1568093,
     SAY_TANZAR_EVENT_1          = -1568094,
@@ -876,7 +880,10 @@ bool GossipHello_npc_tanzar(Player* pPlayer, Creature* pCreature)
         if (pInstance && pInstance->GetData(TYPE_NALORAKK) == DONE && !pTanzarAI->m_bCompletedChestEvent)
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_FREE_TANZAR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
         else if (pInstance && pInstance->GetData(TYPE_NALORAKK) == DONE)
+        {
             pPlayer->PrepareGossipMenu(pCreature, GOSSIP_MENU_ID_TANZAR_DONE);
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_TANZAR_DONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        }
     }
 
     pPlayer->SendPreparedGossip(pCreature);
@@ -892,6 +899,17 @@ bool GossipSelect_npc_tanzar(Player* pPlayer, Creature* pCreature, uint32 /*uiSe
         {
             pTanzarAI->StartEvent();
             pPlayer->CLOSE_GOSSIP_MENU();
+        }
+        else if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
+        {
+            pPlayer->PrepareGossipMenu(pCreature, GOSSIP_MENU_ID_TANZAR_DONE2);
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_TANZAR_DONE2, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+            pPlayer->SendPreparedGossip(pCreature);
+        }
+        else if (uiAction == GOSSIP_ACTION_INFO_DEF + 3)
+        {
+            pPlayer->PrepareGossipMenu(pCreature, GOSSIP_MENU_ID_TANZAR_DONE3);
+            pPlayer->SendPreparedGossip(pCreature);
         }
     }
     return true;

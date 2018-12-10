@@ -7287,7 +7287,9 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3568000,'Thanks for the concern, but we intend to explore Zul\'Aman.','harrison jones GOSSIP_ITEM_BEGIN'),
 (-3568001,'The coast is clear. You\'re free!','harkor GOSSIP_ITEM_FREE'),
-(-3568002,'Nalorakk is dead, you\'re free to go.','tanzar GOSSIP_ITEM_ID_FREE_TANZAR');
+(-3568002,'Nalorakk is dead, you\'re free to go.','tanzar GOSSIP_ITEM_ID_FREE_TANZAR'),
+(-3568003,'You\'re welcome... Now tell us what\'s going on here!','tanzar GOSSIP_ITEM_ID_TANZAR_DONE'),
+(-3568004,'What can you tell us about Budd?','tanzar GOSSIP_ITEM_ID_TANZAR_DONE2');
 
 -- -3 595 000 CULLING OF STRATHOLME
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
