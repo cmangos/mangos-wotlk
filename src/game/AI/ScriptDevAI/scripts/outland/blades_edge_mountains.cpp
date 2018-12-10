@@ -1691,7 +1691,7 @@ struct npc_fel_cannon : public Scripted_NoMovementAI
     {
         if (!m_bMCed)
         {
-            ScriptedAI::EnterEvadeMode();
+            Scripted_NoMovementAI::EnterEvadeMode();
             m_creature->FixateTarget(nullptr);
         }
     }
@@ -1700,7 +1700,7 @@ struct npc_fel_cannon : public Scripted_NoMovementAI
     {
         if (m_bMCed && !m_creature->HasCharmer())
         {            
-            ScriptedAI::EnterEvadeMode();
+            Scripted_NoMovementAI::EnterEvadeMode();
             m_creature->FixateTarget(nullptr);
             return;
         }
