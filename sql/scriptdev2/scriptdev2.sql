@@ -4713,7 +4713,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1554021,'I\'m looking for a team player...',11197,1,0,0,'pathaleon SAY_DOMINATION_1'),
 (-1554022,'You work for me now!',11198,1,0,0,'pathaleon SAY_DOMINATION_2'),
 (-1554023,'Time to supplement my work force.',11196,1,0,0,'pathaleon SAY_SUMMON'),
-(-1554024,'I prefeer to be hands-on...',11199,1,0,0,'pathaleon SAY_ENRAGE'),
+(-1554024,'I prefer to be hands-on...',11199,1,0,0,'pathaleon SAY_ENRAGE'),
 (-1554025,'A minor inconvenience.',11194,1,0,0,'pathaleon SAY_SLAY_1'),
 (-1554026,'Looks like you lose.',11195,1,0,0,'pathaleon SAY_SLAY_2'),
 (-1554027,'The project will... continue.',11200,1,0,0,'pathaleon SAY_DEATH'),
