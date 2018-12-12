@@ -7718,9 +7718,11 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
 
         NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT, _player);
         _player->PetSpellInitialize();
+        NewSummon->SetLoading(false);
     }
     else
     {
+        NewSummon->SetLoading(false);
         // Notify Summoner
         if (m_originalCaster && (m_originalCaster != m_caster) && (m_originalCaster->AI()))
             m_originalCaster->AI()->JustSummoned(NewSummon);
