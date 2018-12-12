@@ -5663,8 +5663,8 @@ void Unit::RemoveAuraHolderDueToSpellByDispel(uint32 spellId, uint32 stackAmount
 void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, Unit* stealer)
 {
     SpellAuraHolder* holder = GetSpellAuraHolder(spellId, casterGuid);
-    SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-    SpellAuraHolder* new_holder = CreateSpellAuraHolder(spellProto, stealer, this);
+    SpellEntry const* spellProto = holder->GetSpellProto();
+    SpellAuraHolder* new_holder = CreateSpellAuraHolder(spellProto, stealer, stealer);
 
     // set its duration and maximum duration
     // max duration 2 minutes (in msecs)
@@ -5684,7 +5684,7 @@ void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, ObjectGuid casterGuid, U
         int32 basePoints = aur->GetBasePoints();
         // construct the new aura for the attacker - will never return nullptr, it's just a wrapper for
         // some different constructors
-        Aura* new_aur = CreateAura(spellProto, aur->GetEffIndex(), &basePoints, new_holder, stealer, this);
+        Aura* new_aur = CreateAura(aur->GetSpellProto(), aur->GetEffIndex(), &basePoints, new_holder, stealer, stealer);
 
         // set periodic to do at least one tick (for case when original aura has been at last tick preparing)
         int32 periodic = aur->GetModifier()->periodictime;
