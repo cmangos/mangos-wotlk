@@ -1407,6 +1407,14 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         procEx |= createProcExtendMask(&damageInfo, missInfo);
         procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
+        // Shadow Word: Death - deals damage equal to damage done to caster
+        // TODO: fix effect damage calculation so that this can be moved to a script hook - must be before DealSpellDamage
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellInfo->SpellFamilyFlags & 0x0000000200000000LL)
+        {
+            int32 swdDamage = damageInfo.damage;
+            m_caster->CastCustomSpell(m_caster, 32409, &swdDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+
         caster->DealSpellDamage(&damageInfo, true);
 
         // Scourge Strike, here because needs to use final damage in second part of the spell
