@@ -41,10 +41,8 @@ bool Totem::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo const* 
 
     // special model selection case for totems
     if (owner->GetTypeId() == TYPEID_PLAYER)
-    {
         if (uint32 modelid_race = sObjectMgr.GetModelForRace(GetNativeDisplayId(), owner->getRaceMask()))
             SetDisplayId(modelid_race);
-    }
 
     cPos.SelectFinalPoint(this);
 
