@@ -941,10 +941,10 @@ SpellCastResult GetErrorAtShapeshiftedCast(SpellEntry const* spellInfo, uint32 f
 
     uint32 stanceMask = (form ? 1 << (form - 1) : 0);
 
-    if (stanceMask & spellInfo->StancesNot)                 // can explicitly not be casted in this stance
+    if (stanceMask & spellInfo->StancesNot[0])                 // can explicitly not be casted in this stance
         return SPELL_FAILED_NOT_SHAPESHIFT;
 
-    if (stanceMask & spellInfo->Stances)                    // can explicitly be casted in this stance
+    if (stanceMask & spellInfo->Stances[0])                    // can explicitly be casted in this stance
         return SPELL_CAST_OK;
 
     bool actAsShifted = false;

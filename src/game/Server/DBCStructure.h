@@ -1677,10 +1677,8 @@ struct SpellEntry
         uint32    AttributesEx5;                            // 9        m_attributesExE
         uint32    AttributesEx6;                            // 10       m_attributesExF
         uint32    AttributesEx7;                            // 11       m_attributesExG (0x20 - totems, 0x4 - paladin auras, etc...)
-        uint32    Stances;                                  // 12       m_shapeshiftMask
-        // uint32 unk_320_1;                                // 13       3.2.0
-        uint32    StancesNot;                               // 14       m_shapeshiftExclude
-        // uint32 unk_320_2;                                // 15       3.2.0
+        uint32    Stances[2];                               // 12       m_shapeshiftMask
+        uint32    StancesNot[2];                            // 14       m_shapeshiftExclude
         uint32    Targets;                                  // 16       m_targets
         uint32    TargetCreatureType;                       // 17       m_targetCreatureType
         uint32    RequiresSpellFocus;                       // 18       m_requiresSpellFocus
@@ -1713,7 +1711,7 @@ struct SpellEntry
         uint32    manaPerSecondPerLevel;                    // 45       m_manaPerSecondPerLevel
         uint32    rangeIndex;                               // 46       m_rangeIndex
         float     speed;                                    // 47       m_speed
-        // uint32    modalNextSpell;                        // 48       m_modalNextSpell not used
+        uint32    modalNextSpell;                           // 48       m_modalNextSpell not used
         uint32    StackAmount;                              // 49       m_cumulativeAura
         uint32    Totem[MAX_SPELL_TOTEMS];                  // 50-51    m_totem
         int32     Reagent[MAX_SPELL_REAGENTS];              // 52-59    m_reagent
@@ -1760,20 +1758,20 @@ struct SpellEntry
         uint32    MaxAffectedTargets;                       // 212      m_maxTargets
         uint32    DmgClass;                                 // 213      m_defenseType
         uint32    PreventionType;                           // 214      m_preventionType
-        // uint32    StanceBarOrder;                        // 215      m_stanceBarOrder not used
+        int32     StanceBarOrder;                           // 215      m_stanceBarOrder not used
         float     DmgMultiplier[MAX_EFFECT_INDEX];          // 216-218  m_effectChainAmplitude
-        // uint32    MinFactionId;                          // 219      m_minFactionID not used
-        // uint32    MinReputation;                         // 220      m_minReputation not used
-        // uint32    RequiredAuraVision;                    // 221      m_requiredAuraVision not used
+        uint32    MinFactionId;                             // 219      m_minFactionID not used
+        uint32    MinReputation;                            // 220      m_minReputation not used
+        uint32    RequiredAuraVision;                       // 221      m_requiredAuraVision not used
         uint32    TotemCategory[MAX_SPELL_TOTEM_CATEGORIES];// 222-223  m_requiredTotemCategoryID
         int32     AreaGroupId;                              // 224      m_requiredAreasId
         uint32    SchoolMask;                               // 225      m_schoolMask
         uint32    runeCostID;                               // 226      m_runeCostID
-        // uint32    spellMissileID;                        // 227      m_spellMissileID
-        // uint32  PowerDisplayId;                          // 228      m_powerDisplayID (PowerDisplay.dbc)
-        // float   effectBonusCoefficient[3];               // 229-231  m_effectBonusCoefficient
-        // uint32  spellDescriptionVariableID;              // 232      m_descriptionVariablesID
-        uint32  SpellDifficultyId;                          // 233      m_difficulty (SpellDifficulty.dbc)
+        uint32    spellMissileID;                           // 227      m_spellMissileID
+        uint32    PowerDisplayId;                           // 228      m_powerDisplayID (PowerDisplay.dbc)
+        float     effectBonusCoefficient[3];                // 229-231  m_effectBonusCoefficient
+        uint32    spellDescriptionVariableID;               // 232      m_descriptionVariablesID
+        uint32    SpellDifficultyId;                        // 233      m_difficulty (SpellDifficulty.dbc)
 
         // custom
         uint32    IsServerSide;                             // 234
