@@ -7562,7 +7562,7 @@ void Unit::SendHealSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, uint32
 
 void Unit::SendEnergizeSpellLog(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype) const
 {
-    WorldPacket data(SMSG_SPELLENERGIZELOG, (8 + 8 + 4 + 4 + 4 + 1));
+    WorldPacket data(SMSG_SPELLENERGIZELOG, (8 + 8 + 4 + 4 + 4));
     data << pVictim->GetPackGUID();
     data << GetPackGUID();
     data << uint32(SpellID);
