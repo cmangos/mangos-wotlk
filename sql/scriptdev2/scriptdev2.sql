@@ -5272,8 +5272,15 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568095,'What luck! Here be one of Tanzar\'s things....',0,0,0,0,'tanzar SAY_TANZAR_EVENT_2'),
 (-1568096,'Hrmm... left, right, wiggle, press....',0,0,0,0,'tanzar SAY_TANZAR_EVENT_3'),
 (-1568097,'A little deeper now - almost got it....',0,0,0,0,'tanzar SAY_TANZAR_EVENT_3_ALT'),
-(-1568098,'There now. It be a gift to you, to celebrate Tanzar\'s great escape!',0,0,0,1,'tanzar SAY_TANZAR_EVENT_4');
+(-1568098,'There now. It be a gift to you, to celebrate Tanzar\'s great escape!',0,0,0,1,'tanzar SAY_TANZAR_EVENT_4'),
 
+(-1568099,'My liberators! Come down and speak with Kraz.',2692,1,0,1,'kraz SAY_KRAZ_HELP'),
+(-1568100,'Come to Kraz. Accept my thanks.',2692,1,0,1,'kraz SAY_KRAZ_HELP_ALT1'),
+(-1568101,'Kraz must meet the slayers of the great troll-beast!',2692,1,0,1,'kraz SAY_KRAZ_HELP_ALT2'),
+(-1568102,'Kraz lives!',2701,0,0,4,'kraz SAY_KRAZ_EVENT_1'),
+(-1568103,'Now, where have they put Kraz\'s things?',0,0,0,6,'kraz SAY_KRAZ_EVENT_2'),
+(-1568104,'Stand clear....',0,0,0,0,'kraz SAY_KRAZ_EVENT_3'),
+(-1568105,'Please, friends, accept this offering with Kraz\'s thanks.',6364,0,0,66,'kraz SAY_KRAZ_EVENT_4');
 
 -- -1 574 000 UTGARDE KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -7286,10 +7293,13 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 -- -3 568 000 ZUL'AMAN
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3568000,'Thanks for the concern, but we intend to explore Zul\'Aman.','harrison jones GOSSIP_ITEM_BEGIN'),
-(-3568001,'The coast is clear. You\'re free!','harkor GOSSIP_ITEM_FREE'),
-(-3568002,'Nalorakk is dead, you\'re free to go.','tanzar GOSSIP_ITEM_ID_FREE_TANZAR'),
-(-3568003,'You\'re welcome... Now tell us what\'s going on here!','tanzar GOSSIP_ITEM_ID_TANZAR_DONE'),
-(-3568004,'What can you tell us about Budd?','tanzar GOSSIP_ITEM_ID_TANZAR_DONE2');
+(-3568001,'The coast is clear. You\'re free!','harkor GOSSIP_ITEM_ID_HARKOR_FREE'),
+(-3568002,'So, how does a dwarf like you end up in a place like this?','harkor GOSSIP_ITEM_ID_HARKOR_DONE'),
+(-3568003,'Nalorakk is dead, you\'re free to go.','tanzar GOSSIP_ITEM_ID_TANZAR_FREE'),
+(-3568004,'You\'re welcome... Now tell us what\'s going on here!','tanzar GOSSIP_ITEM_ID_TANZAR_DONE'),
+(-3568005,'What can you tell us about Budd?','tanzar GOSSIP_ITEM_ID_TANZAR_DONE2'),
+(-3568006,'I am glad to help you.','kraz GOSSIP_ITEM_ID_KRAZ_FREE [GUESSED/UNKNOWN BLIZZLIKE TEXT]'),
+(-3568007,'What happened to you, orc?','kraz GOSSIP_ITEM_ID_KRAZ_DONE');
 
 -- -3 595 000 CULLING OF STRATHOLME
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES

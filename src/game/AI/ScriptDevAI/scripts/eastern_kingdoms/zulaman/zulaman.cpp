@@ -25,6 +25,9 @@ EndScriptData */
 npc_forest_frog
 npc_harrison_jones_za
 npc_amanishi_lookout
+npc_amanishi_tempest
+npc_harkor
+npc_tanzar
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -338,6 +341,10 @@ bool GOUse_go_strange_gong(Player* /*pPlayer*/, GameObject* pGo)
     return false;
 }
 
+/*######
+## npc_amanishi_lookout
+######*/
+
 enum
 {
     SAY_GAUNTLET_START = -1568088
@@ -385,6 +392,10 @@ UnitAI* GetAI_npc_amanishi_lookout(Creature* pCreature)
 {
     return new npc_amanishi_lookoutAI(pCreature);
 }
+
+/*######
+## npc_amanishi_tempest
+######*/
 
 enum
 {
@@ -471,9 +482,14 @@ UnitAI* GetAI_npc_amanishi_tempest(Creature* pCreature)
     return new npc_amanishi_tempestAI(pCreature);
 }
 
+/*######
+## npc_harkor
+######*/
+
 enum
 {
-    GOSSIP_ITEM_ID_FREE         = -3568001,
+    GOSSIP_ITEM_ID_HARKOR_FREE  = -3568001,
+    GOSSIP_ITEM_ID_HARKOR_DONE  = -3568002,
     GOSSIP_MENU_ID_HARKOR_DONE  = 8917,
     GOSSIP_MENU_ID_HARKOR_DONE2 = 8875,
 
@@ -682,9 +698,12 @@ bool GossipHello_npc_harkor(Player* pPlayer, Creature* pCreature)
     if (npc_harkorAI* pHarkorAI = dynamic_cast<npc_harkorAI*>(pCreature->AI()))
     {
         if (pInstance && pInstance->GetData(TYPE_AKILZON) == DONE && !pHarkorAI->m_bCompletedChestEvent)
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_FREE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_HARKOR_FREE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
         else if (pInstance && pInstance->GetData(TYPE_AKILZON) == DONE)
+        {
             pPlayer->PrepareGossipMenu(pCreature, GOSSIP_MENU_ID_HARKOR_DONE);
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_HARKOR_DONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        }
     }
 
     pPlayer->SendPreparedGossip(pCreature);
@@ -701,7 +720,7 @@ bool GossipSelect_npc_harkor(Player* pPlayer, Creature* pCreature, uint32 /*uiSe
             pHarkorAI->StartEvent();
             pPlayer->CLOSE_GOSSIP_MENU();
         }
-        else if (uiAction == 1)
+        else if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
         {
             pPlayer->PrepareGossipMenu(pCreature, GOSSIP_MENU_ID_HARKOR_DONE2);
             pPlayer->SendPreparedGossip(pCreature);
@@ -710,11 +729,15 @@ bool GossipSelect_npc_harkor(Player* pPlayer, Creature* pCreature, uint32 /*uiSe
     return true;
 }
 
+/*######
+## npc_tanzar
+######*/
+
 enum
 {
-    GOSSIP_ITEM_ID_FREE_TANZAR  = -3568002,
-    GOSSIP_ITEM_ID_TANZAR_DONE  = -3568003,
-    GOSSIP_ITEM_ID_TANZAR_DONE2 = -3568004,
+    GOSSIP_ITEM_ID_TANZAR_FREE  = -3568003,
+    GOSSIP_ITEM_ID_TANZAR_DONE  = -3568004,
+    GOSSIP_ITEM_ID_TANZAR_DONE2 = -3568005,
     GOSSIP_MENU_ID_TANZAR_DONE  = 8916,
     GOSSIP_MENU_ID_TANZAR_DONE2 = 8804,
     GOSSIP_MENU_ID_TANZAR_DONE3 = 8807,
@@ -878,7 +901,7 @@ bool GossipHello_npc_tanzar(Player* pPlayer, Creature* pCreature)
     if (npc_tanzarAI* pTanzarAI = dynamic_cast<npc_tanzarAI*>(pCreature->AI()))
     {
         if (pInstance && pInstance->GetData(TYPE_NALORAKK) == DONE && !pTanzarAI->m_bCompletedChestEvent)
-            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_FREE_TANZAR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_TANZAR_FREE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
         else if (pInstance && pInstance->GetData(TYPE_NALORAKK) == DONE)
         {
             pPlayer->PrepareGossipMenu(pCreature, GOSSIP_MENU_ID_TANZAR_DONE);
@@ -914,6 +937,26 @@ bool GossipSelect_npc_tanzar(Player* pPlayer, Creature* pCreature, uint32 /*uiSe
     }
     return true;
 }
+
+/*######
+## npc_kraz
+######*/
+
+enum
+{
+    GOSSIP_ITEM_ID_KRAZ_FREE    = -3568006,
+    GOSSIP_ITEM_ID_KRAZ_DONE    = -3568007,
+    NPC_TEXT_ID_KRAZ_DONE       = 11602, // unknown gossip menu entry
+    NPC_TEXT_ID_KRAZ_DONE2      = 11604, // unknown gossip menu entry
+
+    SAY_KRAZ_HELP               = -1568099,
+    SAY_KRAZ_HELP_ALT1          = -1568100,
+    SAY_KRAZ_HELP_ALT2          = -1568101,
+    SAY_KRAZ_EVENT_1            = -1568102,
+    SAY_KRAZ_EVENT_2            = -1568103,
+    SAY_KRAZ_EVENT_3            = -1568104,
+    SAY_KRAZ_EVENT_4            = -1568105,
+};
 
 void AddSC_zulaman()
 {
