@@ -3012,7 +3012,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 if (m_removeMode == AURA_REMOVE_BY_DEFAULT)
                 {
                     Unit* caster = GetCaster();
-                    if (caster && GetAuraDuration() <= 100) // only fail if finished cast (seems to finish with .1 seconds left)  
+                    if (caster && GetAuraDuration() <= 100) // only fail if finished cast (seems to finish with .1 seconds left)
                         if (Creature* summoner = caster->GetMap()->GetCreature(caster->GetSpawnerGuid()))
                             caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, caster, summoner);
                 }
@@ -10234,7 +10234,7 @@ void SpellAuraHolder::SetStackAmount(uint32 stackAmount, Unit* newCaster)
             int32 baseAmount = aur->GetModifier()->m_baseAmount;
             int32 amount = m_stackAmount * baseAmount;
             // Reapply if amount change
-            if (amount != aur->GetModifier()->m_amount)
+            if (!baseAmount || amount != aur->GetModifier()->m_amount)
             {
                 aur->SetRemoveMode(AURA_REMOVE_BY_GAINED_STACK);
                 if (IsAuraRemoveOnStacking(this->GetSpellProto(), aur->GetEffIndex()))
