@@ -1836,8 +1836,8 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
         }
         case MELEE_HIT_BLOCK:
         {
+            calcDamageInfo->HitInfo |= HITINFO_BLOCK;
             calcDamageInfo->TargetState = VICTIMSTATE_NORMAL;
-            calcDamageInfo->HitInfo    |= HITINFO_BLOCK;
             calcDamageInfo->procEx |= PROC_EX_BLOCK;
             calcDamageInfo->blocked_amount = calcDamageInfo->target->GetShieldBlockValue();
 
@@ -1845,18 +1845,40 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
             if (roll_chance_i(pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE)))
                 calcDamageInfo->blocked_amount *= 2;
 
-            if (calcDamageInfo->blocked_amount >= calcDamageInfo->subDamage[0].damage)
+            if (calcDamageInfo->blocked_amount >= calcDamageInfo->totalDamage) 
             {
+                // Full block
                 calcDamageInfo->TargetState = VICTIMSTATE_BLOCKS;
-                calcDamageInfo->blocked_amount = calcDamageInfo->subDamage[0].damage;
-                calcDamageInfo->procEx |= PROC_EX_FULL_BLOCK;
+                calcDamageInfo->blocked_amount = calcDamageInfo->totalDamage;
+
+                for (uint8 i = 0; i < m_weaponDamageCount[calcDamageInfo->attackType]; i++)
+                    calcDamageInfo->subDamage[i].damage = 0;
             }
-            else
-                calcDamageInfo->procEx |= PROC_EX_NORMAL_HIT;   // Partial blocks can still cause attacker procs
+            else if (calcDamageInfo->blocked_amount)
+            {
+                // Partial block
+                calcDamageInfo->procEx |= PROC_EX_NORMAL_HIT;
+
+                auto amount = calcDamageInfo->blocked_amount;
+
+                for (uint8 i = 0; i < m_weaponDamageCount[calcDamageInfo->attackType]; i++)
+                {
+                    if (calcDamageInfo->subDamage[i].damage >= amount)
+                    {
+                        calcDamageInfo->subDamage[i].damage -= amount;
+                        break;
+                    }
+                    else
+                    {
+                        amount -= calcDamageInfo->subDamage[i].damage;
+                        calcDamageInfo->subDamage[i].damage = 0;
+                    }
+                }
+            }
 
             calcDamageInfo->totalDamage -= calcDamageInfo->blocked_amount;
-            calcDamageInfo->subDamage[0].damage -= calcDamageInfo->blocked_amount;
             calcDamageInfo->cleanDamage += calcDamageInfo->blocked_amount;
+
             break;
         }
         case MELEE_HIT_GLANCING:
