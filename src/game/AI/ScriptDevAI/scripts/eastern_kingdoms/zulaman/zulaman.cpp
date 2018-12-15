@@ -493,10 +493,13 @@ enum
     GOSSIP_MENU_ID_HARKOR_DONE  = 8917,
     GOSSIP_MENU_ID_HARKOR_DONE2 = 8875,
 
-    SAY_HARKOR_HELP             = -1568089,
-    SAY_HARKOR_EVENT_1          = -1568090,
-    SAY_HARKOR_EVENT_2          = -1568091,
-    SAY_HARKOR_EVENT_3          = -1568092,
+    SAY_HARKOR_HELP_1           = -1568089,
+    SAY_HARKOR_HELP_2           = -1568090,
+    SAY_HARKOR_HELP_3           = -1568091,
+    SAY_HARKOR_HELP_4           = -1568092,
+    SAY_HARKOR_EVENT_1          = -1568093,
+    SAY_HARKOR_EVENT_2          = -1568094,
+    SAY_HARKOR_EVENT_3          = -1568095,
 
     EQUIP_ID_HARKOR             = 23999,
 
@@ -518,7 +521,8 @@ struct npc_harkorAI : public ScriptedAI
     bool m_bChestEventInProgress;
     uint8 m_uiEvent;
     uint32 m_uiEventTimer;
-    uint32 m_uiInitialShoutTimer;
+    uint32 m_uiHelpShoutTimer;
+    uint8 m_uiHelpShoutCounter;
     GameObjectList lCoinList;
 
     void Reset() override
@@ -527,26 +531,45 @@ struct npc_harkorAI : public ScriptedAI
         m_bCompletedChestEvent = false;
         m_uiEvent = 0;
         m_uiEventTimer = 0;
-        m_uiInitialShoutTimer = 0;
+        m_uiHelpShoutTimer = 0;
+        m_uiHelpShoutCounter = 0;
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
-            m_uiInitialShoutTimer = 15000;
+            m_uiHelpShoutTimer = 15000;
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiInitialShoutTimer && !m_bChestEventInProgress)
+        if (m_uiHelpShoutTimer && !m_bChestEventInProgress && !m_bCompletedChestEvent)
         {
-            if (m_uiInitialShoutTimer <= uiDiff)
+            if (m_uiHelpShoutTimer <= uiDiff)
             {
-                DoScriptText(SAY_HARKOR_HELP, m_creature);
-                m_uiInitialShoutTimer = 0;
+                m_uiHelpShoutTimer = urand(30000, 60000);
+
+                switch (m_uiHelpShoutCounter)
+                {
+                    case 0:
+                        DoScriptText(SAY_HARKOR_HELP_1, m_creature);
+                        break;
+                    case 1:
+                        DoScriptText(SAY_HARKOR_HELP_2, m_creature);
+                        break;
+                    case 2:
+                        DoScriptText(SAY_HARKOR_HELP_3, m_creature);
+                        break;
+                    case 3:
+                        DoScriptText(SAY_HARKOR_HELP_4, m_creature);
+                        m_uiHelpShoutTimer = 0;
+                        break;
+                }
+
+                m_uiHelpShoutCounter++;
             }
             else
-                m_uiInitialShoutTimer -= uiDiff;
+                m_uiHelpShoutTimer -= uiDiff;
         }
 
         if (m_uiEventTimer)
@@ -742,12 +765,15 @@ enum
     GOSSIP_MENU_ID_TANZAR_DONE2 = 8804,
     GOSSIP_MENU_ID_TANZAR_DONE3 = 8807,
 
-    SAY_TANZAR_HELP             = -1568093,
-    SAY_TANZAR_EVENT_1          = -1568094,
-    SAY_TANZAR_EVENT_2          = -1568095,
-    SAY_TANZAR_EVENT_3          = -1568096,
-    SAY_TANZAR_EVENT_3_ALT      = -1568097,
-    SAY_TANZAR_EVENT_4          = -1568098,
+    SAY_TANZAR_HELP_1           = -1568096,
+    SAY_TANZAR_HELP_2           = -1568097,
+    SAY_TANZAR_HELP_3           = -1568098,
+    SAY_TANZAR_HELP_4           = -1568099,
+    SAY_TANZAR_EVENT_1          = -1568100,
+    SAY_TANZAR_EVENT_2          = -1568101,
+    SAY_TANZAR_EVENT_3          = -1568102,
+    SAY_TANZAR_EVENT_3_ALT      = -1568103,
+    SAY_TANZAR_EVENT_4          = -1568104,
 };
 
 struct npc_tanzarAI : public ScriptedAI
@@ -763,7 +789,8 @@ struct npc_tanzarAI : public ScriptedAI
     bool m_bChestEventInProgress;
     uint8 m_uiEvent;
     uint32 m_uiEventTimer;
-    uint32 m_uiInitialShoutTimer;
+    uint32 m_uiHelpShoutTimer;
+    uint8 m_uiHelpShoutCounter;
 
     void Reset() override
     {
@@ -771,26 +798,45 @@ struct npc_tanzarAI : public ScriptedAI
         m_bCompletedChestEvent = false;
         m_uiEvent = 0;
         m_uiEventTimer = 0;
-        m_uiInitialShoutTimer = 0;
+        m_uiHelpShoutTimer = 0;
+        m_uiHelpShoutCounter = 0;
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
-            m_uiInitialShoutTimer = 15000;
+            m_uiHelpShoutTimer = 15000;
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiInitialShoutTimer && !m_bChestEventInProgress)
+        if (m_uiHelpShoutTimer && !m_bChestEventInProgress && !m_bCompletedChestEvent)
         {
-            if (m_uiInitialShoutTimer <= uiDiff)
+            if (m_uiHelpShoutTimer <= uiDiff)
             {
-                DoScriptText(SAY_TANZAR_HELP, m_creature);
-                m_uiInitialShoutTimer = 0;
+                m_uiHelpShoutTimer = urand(30000, 60000);
+
+                switch (m_uiHelpShoutCounter)
+                {
+                    case 0:
+                        DoScriptText(SAY_TANZAR_HELP_1, m_creature);
+                        break;
+                    case 1:
+                        DoScriptText(SAY_TANZAR_HELP_2, m_creature);
+                        break;
+                    case 2:
+                        DoScriptText(SAY_TANZAR_HELP_3, m_creature);
+                        break;
+                    case 3:
+                        DoScriptText(SAY_TANZAR_HELP_4, m_creature);
+                        m_uiHelpShoutTimer = 0;
+                        break;
+                }
+
+                m_uiHelpShoutCounter++;
             }
             else
-                m_uiInitialShoutTimer -= uiDiff;
+                m_uiHelpShoutTimer -= uiDiff;
         }
 
         if (m_uiEventTimer)
@@ -949,14 +995,253 @@ enum
     NPC_TEXT_ID_KRAZ_DONE       = 11602, // unknown gossip menu entry
     NPC_TEXT_ID_KRAZ_DONE2      = 11604, // unknown gossip menu entry
 
-    SAY_KRAZ_HELP               = -1568099,
-    SAY_KRAZ_HELP_ALT1          = -1568100,
-    SAY_KRAZ_HELP_ALT2          = -1568101,
-    SAY_KRAZ_EVENT_1            = -1568102,
-    SAY_KRAZ_EVENT_2            = -1568103,
-    SAY_KRAZ_EVENT_3            = -1568104,
-    SAY_KRAZ_EVENT_4            = -1568105,
+    SPELL_EXPLOSIVE_CHARGE      = 43418,
+
+    SAY_KRAZ_HELP_1             = -1568105,
+    SAY_KRAZ_HELP_2             = -1568106,
+    SAY_KRAZ_HELP_3             = -1568107,
+    SAY_KRAZ_EVENT_1            = -1568108,
+    SAY_KRAZ_EVENT_2            = -1568109,
+    SAY_KRAZ_EVENT_3            = -1568110,
+    SAY_KRAZ_EVENT_4            = -1568111,
 };
+
+struct npc_krazAI : public ScriptedAI
+{
+    npc_krazAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_zulaman*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_zulaman* m_pInstance;
+    bool m_bCompletedChestEvent;
+    bool m_bChestEventInProgress;
+    uint8 m_uiEvent;
+    uint32 m_uiEventTimer;
+    uint32 m_uiHelpShoutTimer;
+    uint8 m_uiHelpShoutCounter;
+    GameObjectList lCoinList;
+
+    void Reset() override
+    {
+        m_bChestEventInProgress = false;
+        m_bCompletedChestEvent = false;
+        m_uiEvent = 0;
+        m_uiEventTimer = 0;
+        m_uiHelpShoutTimer = 0;
+        m_uiHelpShoutCounter = 0;
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+            m_uiHelpShoutTimer = 15000;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiHelpShoutTimer && !m_bChestEventInProgress && !m_bCompletedChestEvent)
+        {
+            if (m_uiHelpShoutTimer <= uiDiff)
+            {
+                m_uiHelpShoutTimer = urand(30000, 60000);
+
+                switch (m_uiHelpShoutCounter)
+                {
+                    case 0:
+                        DoScriptText(SAY_KRAZ_HELP_1, m_creature);
+                        break;
+                    case 1:
+                        DoScriptText(SAY_KRAZ_HELP_2, m_creature);
+                        break;
+                    case 2:
+                        DoScriptText(SAY_KRAZ_HELP_3, m_creature);
+                        m_uiHelpShoutTimer = 0;
+                        break;
+                }
+
+                m_uiHelpShoutCounter++;
+            }
+            else
+                m_uiHelpShoutTimer -= uiDiff;
+        }
+
+        if (m_uiEventTimer)
+        {
+            if (m_uiEventTimer <= uiDiff)
+            {
+                switch (m_uiEvent)
+                {
+                    case 1:
+                        m_creature->SetFacingTo(3.822271);
+                        DoScriptText(SAY_KRAZ_EVENT_1, m_creature);
+
+                        m_uiEventTimer = 5000;
+                        m_uiEvent = 2;
+                        break;
+                    case 2:
+                        DoScriptText(SAY_KRAZ_EVENT_2, m_creature);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 3:
+                        m_creature->HandleEmoteState(EMOTE_STATE_USESTANDING);
+
+                        m_uiEventTimer = 7000;
+                        m_uiEvent = 4;
+                        break;
+                    case 4:
+                        DoScriptText(SAY_KRAZ_EVENT_3, m_creature);
+
+                        m_uiEventTimer = 1000;
+                        m_uiEvent = 5;
+                        break;
+                    case 5:
+                        m_creature->HandleEmoteState(EMOTE_ONESHOT_NONE);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 6:
+                        m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
+
+                        m_uiEventTimer = 6000;
+                        m_uiEvent = 7;
+                        break;
+                    case 7:
+
+                        if (GameObject* pChest = m_pInstance->GetSingleGameObjectFromStorage(GO_KRAZS_CHEST))
+                        {
+                            if (Creature* pInvisMan = GetClosestCreatureWithEntry(pChest, NPC_EXTERIOR_INVISMAN, 15.0f))
+                                pInvisMan->CastSpell(pInvisMan, SPELL_EXPLOSIVE_CHARGE, TRIGGERED_OLD_TRIGGERED);
+
+                            pChest->Delete();
+                        }
+
+                        GetGameObjectListWithEntryInGrid(lCoinList, m_creature, GO_GOLD_COINS_1, 25.0f);
+                        GetGameObjectListWithEntryInGrid(lCoinList, m_creature, GO_GOLD_COINS_2, 25.0f);
+
+                        for (auto& itr : lCoinList)
+                        {
+                            itr->SetLootState(GO_READY);
+                            itr->SetRespawnTime(0);
+                            itr->Refresh();
+                            itr->SetRespawnTime(7 * DAY);
+                        }
+
+                        m_uiEventTimer = 1000;
+                        m_uiEvent = 8;
+                        break;
+                    case 8:
+                        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 9:
+                        m_creature->SetFacingTo(3.857178);
+                        DoScriptText(SAY_KRAZ_EVENT_4, m_creature);
+                        m_creature->GetMotionMaster()->MoveIdle();
+                        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        m_bCompletedChestEvent = true;
+                        m_bChestEventInProgress = false;
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                }
+            }
+            else
+                m_uiEventTimer -= uiDiff;
+        }
+    }
+
+    void StartEvent()
+    {
+        m_bChestEventInProgress = true;
+
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+        if (GameObject* pCage = m_pInstance->GetSingleGameObjectFromStorage(GO_KRAZS_CAGE))
+            pCage->Use(m_creature);
+
+        m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
+        m_creature->GetMotionMaster()->MoveWaypoint(0, 3, 2000);
+    }
+
+    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+    {
+        if (uiMotionType != EXTERNAL_WAYPOINT_MOVE)
+            return;
+
+        switch (uiPointId)
+        {
+            case 1:
+                m_uiEvent = 1;
+                m_uiEventTimer = 2000;
+                break;
+            case 5:
+                m_uiEvent = 3;
+                m_uiEventTimer = 1000;
+                break;
+            case 7:
+                m_uiEvent = 6;
+                m_uiEventTimer = 1000;
+                break;
+            case 11:
+                m_uiEvent = 9;
+                m_uiEventTimer = 1000;
+                break;
+        }
+    }
+};
+
+UnitAI* GetAI_npc_kraz(Creature* pCreature)
+{
+    return new npc_krazAI(pCreature);
+}
+
+bool GossipHello_npc_kraz(Player* pPlayer, Creature* pCreature)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+    pPlayer->PrepareGossipMenu(pCreature, pPlayer->GetDefaultGossipMenuForSource(pCreature));
+
+    if (npc_krazAI* pKrazAI = dynamic_cast<npc_krazAI*>(pCreature->AI()))
+    {
+        if (pInstance && pInstance->GetData(TYPE_JANALAI) == DONE && !pKrazAI->m_bCompletedChestEvent)
+        {
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_KRAZ_FREE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+            pPlayer->SendPreparedGossip(pCreature);
+        }
+        else if (pInstance && pInstance->GetData(TYPE_JANALAI) == DONE)
+        {
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_KRAZ_DONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+            pPlayer->SEND_GOSSIP_MENU(NPC_TEXT_ID_KRAZ_DONE, pCreature->GetObjectGuid());
+        }
+        else
+            pPlayer->SendPreparedGossip(pCreature);
+    }
+
+    return true;
+}
+
+bool GossipSelect_npc_kraz(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+{
+    if (npc_krazAI* pKrazAI = dynamic_cast<npc_krazAI*>(pCreature->AI()))
+    {
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1 && !pKrazAI->m_bCompletedChestEvent)
+        {
+            pKrazAI->StartEvent();
+            pPlayer->CLOSE_GOSSIP_MENU();
+        }
+        else if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
+            pPlayer->SEND_GOSSIP_MENU(NPC_TEXT_ID_KRAZ_DONE2, pCreature->GetObjectGuid());
+    }
+    return true;
+}
 
 void AddSC_zulaman()
 {
@@ -999,5 +1284,12 @@ void AddSC_zulaman()
     pNewScript->GetAI = &GetAI_npc_tanzar;
     pNewScript->pGossipHello = &GossipHello_npc_tanzar;
     pNewScript->pGossipSelect = &GossipSelect_npc_tanzar;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_kraz";
+    pNewScript->GetAI = &GetAI_npc_kraz;
+    pNewScript->pGossipHello = &GossipHello_npc_kraz;
+    pNewScript->pGossipSelect = &GossipSelect_npc_kraz;
     pNewScript->RegisterSelf();
 }

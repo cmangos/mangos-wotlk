@@ -1755,6 +1755,7 @@ UPDATE creature_template SET ScriptName='npc_amanishi_lookout' WHERE entry=24175
 UPDATE creature_template SET ScriptName='npc_amanishi_tempest' WHERE entry=24549;
 UPDATE creature_template SET ScriptName='npc_harkor' WHERE entry=23999;
 UPDATE creature_template SET ScriptName='npc_tanzar' WHERE entry=23790;
+UPDATE creature_template SET ScriptName='npc_kraz' WHERE entry=24024;
 
 /* ZUL'DRAK */
 UPDATE creature_template SET ScriptName='npc_gurgthock' WHERE entry=30007;
@@ -5259,28 +5260,36 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568085,'%s absorbs the essence of the dragonhawk spirit!',0,2,0,0,'zuljin EMOTE_DRAGONHAWK_SPIRIT'),
 
 (-1568086,'In fact, it would be best if you just stay here. You\'d only get in my way....',0,1,0,0,'harrison SAY_OPEN_ENTRANCE_2'),
+
 (-1568087,'More intruders! Sound da alarm!',12104,1,0,25,'amanishi guardian SAY_SOUND_ALARM'),
 
 (-1568088,'Akil\'zon, the invaders approach!',0,1,0,5,'amanishi lookout SAY_START_GAUNTLET'),
-(-1568089,'Hallooo.... You just gunna sit down there an\' pat yerselves on the back? What kinda rescuers are ya?',2716,1,0,1,'harkor SAY_HARKOR_HELP'),
-(-1568090,"Ahh, freedom!",2725,0,0,4,'harkor SAY_HARKOR_EVENT_1'),
-(-1568091,"A'course it only be fair that I reward yeh fer me rescue. Now where'd them savages put me satchel?",0,0,0,1,'harkor SAY_HARKOR_EVENT_2'),
-(-1568092,"Don't be shy, now. Help yerselves. If it weren't fer yer help, them basterds'd be shrinkin' me head right about now.",0,0,0,1,'harkor SAY_HARKOR_EVENT_3'),
 
-(-1568093,'You kill the trollbear, mon? It be safe for Tanzar to come out now?',2850,1,0,1,'tanzar SAY_TANZAR_HELP'),
-(-1568094,'Wahoo! Tanzar be free!',2859,0,0,4,'tanzar SAY_TANZAR_EVENT_1'),
-(-1568095,'What luck! Here be one of Tanzar\'s things....',0,0,0,0,'tanzar SAY_TANZAR_EVENT_2'),
-(-1568096,'Hrmm... left, right, wiggle, press....',0,0,0,0,'tanzar SAY_TANZAR_EVENT_3'),
-(-1568097,'A little deeper now - almost got it....',0,0,0,0,'tanzar SAY_TANZAR_EVENT_3_ALT'),
-(-1568098,'There now. It be a gift to you, to celebrate Tanzar\'s great escape!',0,0,0,1,'tanzar SAY_TANZAR_EVENT_4'),
+(-1568089,'Hallooo.... You just gunna sit down there an\' pat yerselves on the back? What kinda rescuers are ya?',2716,1,0,1,'harkor SAY_HARKOR_HELP_1'),
+(-1568090,'Pssst! Up \'ere, in the cage. Come and lemme get a look at yeh.',2716,1,0,1,'harkor SAY_HARKOR_HELP_2'),
+(-1568091,'So.... How\'s about one \'a ya stroll on up \'ere an\' help me out, eh?',2716,1,0,1,'harkor SAY_HARKOR_HELP_3'),
+(-1568092,'Yoohoo. Over here... the trapped dwarf. Come on, lemme have a word with yeh.',2716,1,0,1,'harkor SAY_HARKOR_HELP_4'),
+(-1568093,"Ahh, freedom!",2725,0,0,4,'harkor SAY_HARKOR_EVENT_1'),
+(-1568094,"A'course it only be fair that I reward yeh fer me rescue. Now where'd them savages put me satchel?",0,0,0,1,'harkor SAY_HARKOR_EVENT_2'),
+(-1568095,"Don't be shy, now. Help yerselves. If it weren't fer yer help, them basterds'd be shrinkin' me head right about now.",0,0,0,1,'harkor SAY_HARKOR_EVENT_3'),
 
-(-1568099,'My liberators! Come down and speak with Kraz.',2692,1,0,1,'kraz SAY_KRAZ_HELP'),
-(-1568100,'Come to Kraz. Accept my thanks.',2692,1,0,1,'kraz SAY_KRAZ_HELP_ALT1'),
-(-1568101,'Kraz must meet the slayers of the great troll-beast!',2692,1,0,1,'kraz SAY_KRAZ_HELP_ALT2'),
-(-1568102,'Kraz lives!',2701,0,0,4,'kraz SAY_KRAZ_EVENT_1'),
-(-1568103,'Now, where have they put Kraz\'s things?',0,0,0,6,'kraz SAY_KRAZ_EVENT_2'),
-(-1568104,'Stand clear....',0,0,0,0,'kraz SAY_KRAZ_EVENT_3'),
-(-1568105,'Please, friends, accept this offering with Kraz\'s thanks.',6364,0,0,66,'kraz SAY_KRAZ_EVENT_4');
+(-1568096,'You kill the trollbear, mon? It be safe for Tanzar to come out now?',2850,1,0,1,'tanzar SAY_TANZAR_HELP_1'),
+(-1568097,'Hey mon! Don\'t ya be forgettin\' about Tanzar over here.',2850,1,0,1,'tanzar SAY_TANZAR_HELP_2'),
+(-1568098,'Hello out there. Anybody be hearin\' Tanzar?',2850,1,0,1,'tanzar SAY_TANZAR_HELP_3'),
+(-1568099,'Pleaase! Someone save poor ol\' Tanzar.',2850,1,0,1,'tanzar SAY_TANZAR_HELP_4'),
+(-1568100,'Wahoo! Tanzar be free!',2859,0,0,4,'tanzar SAY_TANZAR_EVENT_1'),
+(-1568101,'What luck! Here be one of Tanzar\'s things....',0,0,0,0,'tanzar SAY_TANZAR_EVENT_2'),
+(-1568102,'Hrmm... left, right, wiggle, press....',0,0,0,0,'tanzar SAY_TANZAR_EVENT_3'),
+(-1568103,'A little deeper now - almost got it....',0,0,0,0,'tanzar SAY_TANZAR_EVENT_3_ALT'),
+(-1568104,'There now. It be a gift to you, to celebrate Tanzar\'s great escape!',0,0,0,1,'tanzar SAY_TANZAR_EVENT_4'),
+
+(-1568105,'My liberators! Come down and speak with Kraz.',2692,1,0,1,'kraz SAY_KRAZ_HELP_1'),
+(-1568106,'Kraz must meet the slayers of the great troll-beast!',2692,1,0,1,'kraz SAY_KRAZ_HELP_2'),
+(-1568107,'Come to Kraz. Accept my thanks.',2692,1,0,1,'kraz SAY_KRAZ_HELP_3'),
+(-1568108,'Kraz lives!',2701,0,0,4,'kraz SAY_KRAZ_EVENT_1'),
+(-1568109,'Now, where have they put Kraz\'s things?',0,0,0,6,'kraz SAY_KRAZ_EVENT_2'),
+(-1568110,'Stand clear....',0,0,0,0,'kraz SAY_KRAZ_EVENT_3'),
+(-1568111,'Please, friends, accept this offering with Kraz\'s thanks.',6364,0,0,66,'kraz SAY_KRAZ_EVENT_4');
 
 -- -1 574 000 UTGARDE KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -11073,11 +11082,23 @@ INSERT INTO script_waypoint VALUES
 (23790,0,3,-136.364,1333.894,48.17387,100,17000,0,''),
 (23790,0,4,-138.0992,1332.832,48.17387,100,0,0,''),
 (23790,0,5,-139.3139,1331.377,48.17387,100,60000,0,''),
-(23999,0,0,297.9303,1465.843,81.57809,100,7000,0,'SAY_HARKOR_EVENT_1, SAY_HARKOR_EVENT_2'),
+(23999,0,0,297.9303,1465.843,81.57809,100,7000,0,''),
 (23999,0,1,302.2797,1462.846,81.57086,100,0,0,''),
 (23999,0,2,306.3771,1463.949,81.58128,100,6000,0,''),
 (23999,0,3,304.3857,1465.72,81.58634,100,6000,0,''),
-(23999,0,4,298.7304,1464.985,81.57541,100,60000,0,'SAY_HARKOR_EVENT_3'),
+(23999,0,4,298.7304,1464.985,81.57541,100,60000,0,''),
+(24024,0,0,-73.60417,1161.902,5.189967,100,0,0,''),
+(24024,0,1,-75.65417,1157.752,5.364081,100,7000,0,''),
+(24024,0,2,-76.48643,1156.667,5.299397,100,0,0,''),
+(24024,0,3,-89.46484,1142.276,5.594042,100,0,0,''),
+(24024,0,4,-84.86057,1127.99,5.594042,100,0,0,''),
+(24024,0,5,-81.4426,1125.975,5.593996,100,10000,0,''),
+(24024,0,6,-86.68555,1133.053,5.594041,100,0,0,''),
+(24024,0,7,-79.09592,1138.717,5.458687,100,8000,0,''),
+(24024,0,8,-82.01552,1138.562,5.594041,100,0,0,''),
+(24024,0,9,-84.77876,1135.255,5.594041,100,0,0,''),
+(24024,0,10,-84.96288,1132.281,5.594057,100,0,0,''),
+(24024,0,11,-82.6097,1128.821,5.594056,100,60000,0,''),
 (24175,0,0,216.3581,1467.675,25.9713,100,0,0,''),
 (24175,0,1,217.2123,1467.155,25.9713,100,0,0,''),
 (24175,0,2,226.0859,1461.754,25.93943,100,0,0,''),

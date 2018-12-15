@@ -86,6 +86,8 @@ enum InstanceZA
     NPC_ASHIL_CORPSE        = 24441,
     NPC_HARKOR_CORPSE       = 24443,
 
+    NPC_EXTERIOR_INVISMAN   = 23746,
+
     // Zul'jin event spirits
     NPC_BEAR_SPIRIT         = 23878,                        // They should all have aura 42466
     NPC_EAGLE_SPIRIT        = 23880,
@@ -114,6 +116,9 @@ enum InstanceZA
     GO_DWARF_LOOT_BOX       = 186622,
 
     GO_TANZARS_CAGE         = 187377,
+
+    GO_KRAZS_CHEST          = 186658,
+    GO_KRAZS_CAGE           = 187379,
 };
 
 enum BossToChestIndex
