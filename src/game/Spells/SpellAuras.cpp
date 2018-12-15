@@ -9801,7 +9801,7 @@ inline bool IsRemovedOnShapeshiftLost(SpellEntry const* spellproto, ObjectGuid c
 {
     if (casterGuid == targetGuid)
     {
-        if (spellproto->Stances)
+        if (spellproto->Stances[0])
         {
             switch (spellproto->Id)
             {
