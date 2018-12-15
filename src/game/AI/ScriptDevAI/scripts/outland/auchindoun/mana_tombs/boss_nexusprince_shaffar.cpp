@@ -254,27 +254,24 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
     {
         if (Unit* victim = m_creature->getVictim()) // make sure target didnt die
         {
-            float x, y, z;
-            SetCombatScriptStatus(true);
-            SetCombatMovement(false);
-            SetMeleeEnabled(false);
-            m_creature->getVictim()->GetNearPoint(m_creature, x, y, z, m_creature->GetObjectBoundingRadius(), DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim), victim->GetAngle(m_creature));
-            m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_DISTANCE, x, y, z);
+            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim);
+            m_creature->GetMotionMaster()->DistanceYourself(distance);
         }
     }
 
-    void MovementInform(uint32 uiType, uint32 uiPointId) override
+    void DistancingStarted()
     {
-        if (uiType != POINT_MOTION_TYPE)
-            return;
+        SetCombatScriptStatus(true);
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
+    }
 
-        if (uiPointId == POINT_MOVE_DISTANCE)
-        {
-            SetCombatScriptStatus(false);
-            SetCombatMovement(true);
-            SetMeleeEnabled(true);
-            DoStartMovement(m_creature->getVictim());
-        }
+    void DistancingEnded()
+    {
+        SetCombatScriptStatus(false);
+        SetCombatMovement(true);
+        SetMeleeEnabled(true);
+        DoStartMovement(m_creature->getVictim());
     }
 
     void UpdateAI(const uint32 uiDiff) override

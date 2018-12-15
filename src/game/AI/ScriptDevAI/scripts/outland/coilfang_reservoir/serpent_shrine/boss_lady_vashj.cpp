@@ -113,7 +113,6 @@ enum
 
     // other
     POINT_MOVE_CENTER           = 1,
-    POINT_MOVE_DISTANCE         = 2,
 
     PHASE_1                     = 1,
     PHASE_2                     = 2,
@@ -417,12 +416,27 @@ struct boss_lady_vashjAI : public ScriptedAI
         SetMeleeEnabled(false);
         if (Unit* victim = m_creature->getVictim()) // make sure target didnt die
         {
-            float x, y, z;
-            SetCombatScriptStatus(true);
-            SetCombatMovement(false);
-            m_creature->getVictim()->GetNearPoint(m_creature, x, y, z, m_creature->GetObjectBoundingRadius(), DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim) * 2, victim->GetAngle(m_creature));
-            m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_DISTANCE, x, y, z);
+            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim) * 2;
+            m_creature->GetMotionMaster()->DistanceYourself(distance);
         }
+    }
+
+    void DistancingStarted()
+    {
+        SetCombatScriptStatus(true);
+        SetCombatMovement(false);
+    }
+
+    void DistancingEnded()
+    {
+        SetCombatScriptStatus(false);
+        SetCombatMovement(true);
+        if (m_creature->getVictim())
+            DoStartMovement(m_creature->getVictim());
+
+        m_shootTimer = 2000;
+        m_actionReadyStatus[VASHJ_ACTION_SHOOT] = false;
+        DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -509,17 +523,6 @@ struct boss_lady_vashjAI : public ScriptedAI
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
 
             SetCombatScriptStatus(false);
-        }
-        else if (uiPointId == POINT_MOVE_DISTANCE)
-        {
-            SetCombatScriptStatus(false);
-            SetCombatMovement(true);
-            if (m_creature->getVictim())
-                DoStartMovement(m_creature->getVictim());
-
-            m_shootTimer = 2000;
-            m_actionReadyStatus[VASHJ_ACTION_SHOOT] = false;
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT);       
         }
     }
 
