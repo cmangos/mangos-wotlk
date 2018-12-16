@@ -119,6 +119,9 @@ enum InstanceZA
 
     GO_KRAZS_CHEST          = 186658,
     GO_KRAZS_CAGE           = 187379,
+
+    GO_ASHLIS_CAGE          = 187380,
+    GO_ASHLIS_VASE          = 186671,
 };
 
 enum BossToChestIndex

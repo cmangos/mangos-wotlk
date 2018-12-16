@@ -1756,6 +1756,7 @@ UPDATE creature_template SET ScriptName='npc_amanishi_tempest' WHERE entry=24549
 UPDATE creature_template SET ScriptName='npc_harkor' WHERE entry=23999;
 UPDATE creature_template SET ScriptName='npc_tanzar' WHERE entry=23790;
 UPDATE creature_template SET ScriptName='npc_kraz' WHERE entry=24024;
+UPDATE creature_template SET ScriptName='npc_ashli' WHERE entry=24001;
 
 /* ZUL'DRAK */
 UPDATE creature_template SET ScriptName='npc_gurgthock' WHERE entry=30007;
@@ -5247,7 +5248,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568074,'Time be running low, strangers. Soon you gonna join da souls of dem ya failed to save.',12059,6,0,0,'zulaman SAY_INST_WARN_3'),
 (-1568075,'Make haste, ma priests! Da rituals must not be interrupted!',12060,6,0,0,'zulaman SAY_INST_WARN_4'),
 (-1568076,'Ya make a good try... but now you gonna join da ones who already fall.',12061,6,0,0,'zulaman SAY_INST_SACRIF1'),
-(-1568077,'Ya not do too bad. Ya efforts [...] for a small time. Come to me now. Ya prove yourself worthy offerings.',12062,6,0,0,'zulaman SAY_INST_SACRIF2'),
+(-1568077,'Ya not do too bad.... Your efforts delay da inevitable for a small time. Come to me now. Ya prove yourselves worthy offerings.',12062,6,0,0,'zulaman SAY_INST_SACRIF2'),
 (-1568078,'Watch now. Every offering gonna strengthen our ties to da spirit world. Soon, we gonna be unstoppable!',12065,6,0,0,'zulaman SAY_INST_COMPLETE'),
 
 (-1568079,'Suit yourself. At least five of you must assist me if we\'re to get inside. Follow me....',0,1,0,0,'harrison SAY_START'),
@@ -5289,7 +5290,16 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568108,'Kraz lives!',2701,0,0,4,'kraz SAY_KRAZ_EVENT_1'),
 (-1568109,'Now, where have they put Kraz\'s things?',0,0,0,6,'kraz SAY_KRAZ_EVENT_2'),
 (-1568110,'Stand clear....',0,0,0,0,'kraz SAY_KRAZ_EVENT_3'),
-(-1568111,'Please, friends, accept this offering with Kraz\'s thanks.',6364,0,0,66,'kraz SAY_KRAZ_EVENT_4');
+(-1568111,'Please, friends, accept this offering with Kraz\'s thanks.',6364,0,0,66,'kraz SAY_KRAZ_EVENT_4'),
+
+(-1568112,'Wowee! It was amazing how you beat that big bad troll into the ground like that and it\'s too bad I can\'t reach the handle of this cage or I would have jumped in and blown him to bits to get him back for killing all of the other poor prisoners and scaring me so badly and I feel bad for asking you for any more help but could you maybe come over and let me out of here?',0,1,0,21,'ashli SAY_ASHLI_HELP_1'),
+(-1568113,'Ahem... so, I most certainly don\'t blame you for taking your time and catching your breath and congratulating yourselves for such heroism after such a long and hard-fought battle with that horrible monster just so long as when you\'re finished you don\'t forget about me over here because even though I\'m small I think I can still find some way to repay you for your amazing bravery....',0,1,0,1,'ashli SAY_ASHLI_HELP_2'),
+(-1568114,'So... as much as I hate to complain after being saved from a horrible death I just thought you should know that I\'m still over here stuck in one of these messy cages and it would really be great if you could come on over and let me out so I could help you celebrate your amazing victory over that big crazy scary troll-cat... thing.',0,1,0,1,'ashli SAY_ASHLI_HELP_3'),
+(-1568115,'I\'m sure you all must be in a big hurry and probably have some more big dangerous monsters to kill but if you would just take a moment and come help me out of this cage before rushing off it would make me so happy and excited that I would barely be able to contain myself so if you get a moment I\'ll just be over here... waiting... patiently....',0,1,0,1,'ashli SAY_ASHLI_HELP_4'),
+(-1568116,'Weeee! I\'m alive, I\'m alive, I\'m alive! Oh, I hope it\'s not too forward of me to tell you that I think I love you all and I hope I can find my bag because you certainly deserve a little something extra, you know, for the effort and all that you must have went through to save me...',0,0,0,4,'ashli SAY_ASHLI_EVENT_1'),
+(-1568117,'Hmm, maybe it\'s this one - oh by the way, did I ever tell you about the time Fudgerick Two-toots snuck up on me while I was casting a fireball? We call him two-toots because, well, nevermind that, it was just terrible timing, and momma was soo mad - my eyebrows are just now growing back....',0,0,0,0,'ashli SAY_ASHLI_EVENT_2'),
+(-1568118,'Nope, not in that one either - well, it must be around here somewhere, by the way, did I mention how wonderful it is to be out of that stinky cage? It was almost impossible to run around in there but I did anyway but sometimes I got going so fast that I ended up walking on the walls of the  cage so finally I stopped trying and just turned around in circles....',2691,0,0,0,'ashli SAY_ASHLI_EVENT_3'),
+(-1568119,'There\'s my bag! At last I\'ve found it and now it\'s my gift to you and I truly hope you like it because I want you to all remember this wonderful moment for as long as you live and I hope that when you think of it you\'ll smile inside because I know I\'ll never forget it in a million years and I can\'t wait to tell momma all about it when I get back home.... Do you like my earrings?',0,0,0,0,'ashli SAY_ASHLI_EVENT_4');
 
 -- -1 574 000 UTGARDE KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
@@ -7307,8 +7317,10 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3568003,'Nalorakk is dead, you\'re free to go.','tanzar GOSSIP_ITEM_ID_TANZAR_FREE'),
 (-3568004,'You\'re welcome... Now tell us what\'s going on here!','tanzar GOSSIP_ITEM_ID_TANZAR_DONE'),
 (-3568005,'What can you tell us about Budd?','tanzar GOSSIP_ITEM_ID_TANZAR_DONE2'),
-(-3568006,'I am glad to help you.','kraz GOSSIP_ITEM_ID_KRAZ_FREE [GUESSED/UNKNOWN BLIZZLIKE TEXT]'),
-(-3568007,'What happened to you, orc?','kraz GOSSIP_ITEM_ID_KRAZ_DONE');
+(-3568006,'We\'ve killed your captors. You\'re free to go.','kraz GOSSIP_ITEM_ID_KRAZ_FREE'),
+(-3568007,'What happened to you, orc?','kraz GOSSIP_ITEM_ID_KRAZ_DONE'),
+(-3568008,'It\'s safe, little gnome. You can come out now.','ashli GOSSIP_ITEM_ID_ASHLI_FREE'),
+(-3568009,'How\'d a perky little gnome like you get caught up in a mess like this?','ashli GOSSIP_ITEM_ID_ASHLI_DONE');
 
 -- -3 595 000 CULLING OF STRATHOLME
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
@@ -11087,6 +11099,29 @@ INSERT INTO script_waypoint VALUES
 (23999,0,2,306.3771,1463.949,81.58128,100,6000,0,''),
 (23999,0,3,304.3857,1465.72,81.58634,100,6000,0,''),
 (23999,0,4,298.7304,1464.985,81.57541,100,60000,0,''),
+(24001,0,0,383.5332,1086.308,5.974173,100,1000,0,''),
+(24001,0,1,383.3186,1088.672,5.989234,100,0,0,''),
+(24001,0,2,383.3262,1090.004,6.320981,100,0,0,''),
+(24001,0,3,398.1089,1126.298,6.303194,100,0,0,''),
+(24001,0,4,392.3712,1146.572,6.222425,100,0,0,''),
+(24001,0,5,355.8842,1129.587,6.525888,100,0,0,''),
+(24001,0,6,344.3732,1100.115,6.457113,100,12000,0,''),
+(24001,0,7,364.8193,1103.98,6.138184,100,0,0,''),
+(24001,0,8,389.1712,1086.583,5.902591,100,0,0,''),
+(24001,0,9,406.2733,1113.202,6.390222,100,0,0,''),
+(24001,0,10,389.5124,1148.138,6.220311,100,0,0,''),
+(24001,0,11,352.5295,1118.125,6.44824,100,0,0,''),
+(24001,0,12,338.2169,1126.372,6.455091,100,12000,0,''),
+(24001,0,13,345.4488,1088.852,7.004283,100,0,0,''),
+(24001,0,14,373.4771,1097.548,6.308249,100,0,0,''),
+(24001,0,15,399.9229,1132.639,6.309431,100,0,0,''),
+(24001,0,16,392.4269,1143.645,6.147355,100,0,0,''),
+(24001,0,17,347.0435,1142.894,6.186779,100,0,0,''),
+(24001,0,18,338.6937,1126,6.452535,100,0,0,''),
+(24001,0,19,369.6844,1117.15,5.95745,100,0,0,''),
+(24001,0,20,401.7724,1098.962,6.580225,100,12000,0,''),
+(24001,0,21,334.3144,1117.262,6.0273,100,0,0,''),
+(24001,0,22,313.4415,1123.747,9.704546,100,60000,0,''),
 (24024,0,0,-73.60417,1161.902,5.189967,100,0,0,''),
 (24024,0,1,-75.65417,1157.752,5.364081,100,7000,0,''),
 (24024,0,2,-76.48643,1156.667,5.299397,100,0,0,''),

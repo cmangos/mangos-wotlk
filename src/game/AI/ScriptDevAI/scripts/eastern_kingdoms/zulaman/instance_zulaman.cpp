@@ -255,6 +255,10 @@ void instance_zulaman::OnObjectCreate(GameObject* pGo)
             break;
         case GO_KRAZS_PACKAGE:
             break;
+        case GO_ASHLIS_CAGE:
+            break;
+        case GO_ASHLIS_BAG:
+            break;
         default:
             return;
     }
@@ -570,6 +574,8 @@ void instance_zulaman::DoChestEvent(BossToChestIndex uiIndex)
                     pPackage->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                 break;
             case NPC_ASHLI:
+                if (GameObject* pBag = GetSingleGameObjectFromStorage(GO_ASHLIS_BAG))
+                    pBag->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
                 break;
             case NPC_HARKOR:
                 if (GameObject* pSatchel = GetSingleGameObjectFromStorage(GO_HARKORS_SATCHEL))

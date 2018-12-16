@@ -28,6 +28,8 @@ npc_amanishi_lookout
 npc_amanishi_tempest
 npc_harkor
 npc_tanzar
+npc_kraz
+npc_ashli
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -1243,6 +1245,276 @@ bool GossipSelect_npc_kraz(Player* pPlayer, Creature* pCreature, uint32 /*uiSend
     return true;
 }
 
+/*######
+## npc_ashli
+######*/
+
+enum
+{
+    GOSSIP_ITEM_ID_ASHLI_FREE   = -3568008,
+    GOSSIP_ITEM_ID_ASHLI_DONE   = -3568009,
+    GOSSIP_MENU_ID_ASHLI_DONE   = 8876,
+    GOSSIP_MENU_ID_ASHLI_DONE2  = 8877,
+
+    SAY_ASHLI_HELP_1            = -1568112,
+    SAY_ASHLI_HELP_2            = -1568113,
+    SAY_ASHLI_HELP_3            = -1568114,
+    SAY_ASHLI_HELP_4            = -1568115,
+    SAY_ASHLI_EVENT_1           = -1568116,
+    SAY_ASHLI_EVENT_2           = -1568117,
+    SAY_ASHLI_EVENT_3           = -1568118,
+    SAY_ASHLI_EVENT_4           = -1568119,
+
+    SPELL_ASHLIS_FIREBALL       = 43515,
+    SPELL_ASHLIS_FIREBALL_01    = 43520,
+    SPELL_ASHLIS_FIREBALL_02    = 43525,
+};
+
+struct npc_ashliAI : public ScriptedAI
+{
+    npc_ashliAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_zulaman*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_zulaman* m_pInstance;
+    bool m_bCompletedChestEvent;
+    bool m_bChestEventInProgress;
+    uint8 m_uiEvent;
+    uint32 m_uiEventTimer;
+    uint32 m_uiHelpShoutTimer;
+    uint8 m_uiHelpShoutCounter;
+    GameObjectList lCoinList;
+
+    void Reset() override
+    {
+        m_bChestEventInProgress = false;
+        m_bCompletedChestEvent = false;
+        m_uiEvent = 0;
+        m_uiEventTimer = 0;
+        m_uiHelpShoutTimer = 0;
+        m_uiHelpShoutCounter = 0;
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+            m_uiHelpShoutTimer = 10000;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiHelpShoutTimer && !m_bChestEventInProgress && !m_bCompletedChestEvent)
+        {
+            if (m_uiHelpShoutTimer <= uiDiff)
+            {
+                m_uiHelpShoutTimer = urand(30000, 60000);
+
+                switch (m_uiHelpShoutCounter)
+                {
+                    case 0:
+                        DoScriptText(SAY_ASHLI_HELP_1, m_creature);
+                        break;
+                    case 1:
+                        DoScriptText(SAY_ASHLI_HELP_2, m_creature);
+                        break;
+                    case 2:
+                        DoScriptText(SAY_ASHLI_HELP_3, m_creature);
+                        break;
+                    case 3:
+                        DoScriptText(SAY_ASHLI_HELP_4, m_creature);
+                        m_uiHelpShoutTimer = 0;
+                        break;
+                }
+
+                m_uiHelpShoutCounter++;
+            }
+            else
+                m_uiHelpShoutTimer -= uiDiff;
+        }
+
+        if (m_uiEventTimer)
+        {
+            if (m_uiEventTimer <= uiDiff)
+            {
+                switch (m_uiEvent)
+                {
+                    case 1:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_LAUGH);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 2:
+                        DoScriptText(SAY_ASHLI_EVENT_1, m_creature);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 3:
+                        DoScriptText(SAY_ASHLI_EVENT_2, m_creature);
+
+                        m_uiEventTimer = 2000;
+                        m_uiEvent = 4;
+                        break;
+                    case 4:
+                        DoCastSpellIfCan(m_creature, SPELL_ASHLIS_FIREBALL);
+
+                        m_uiEventTimer = 7000;
+                        m_uiEvent = 1;
+                        break;
+                    case 5:
+                        m_creature->SetFacingTo(0.9773844f);
+                        DoCastSpellIfCan(m_creature, SPELL_ASHLIS_FIREBALL_01);
+
+                        m_uiEventTimer = 7000;
+                        m_uiEvent = 6;
+                        break;
+                    case 6:
+                        DoScriptText(SAY_ASHLI_EVENT_3, m_creature);
+
+                        m_uiEventTimer = 4000;
+                        m_uiEvent = 1;
+                        break;
+                    case 7:
+                        DoCastSpellIfCan(m_creature, SPELL_ASHLIS_FIREBALL_02);
+
+                        m_uiEventTimer = 7000;
+                        m_uiEvent = 8;
+                        break;
+                    case 8:
+                        DoScriptText(SAY_ASHLI_EVENT_4, m_creature);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 9:
+                        m_creature->GetMotionMaster()->MoveIdle();
+                        m_creature->SetFacingTo(6.230825f);
+                        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                        m_bCompletedChestEvent = true;
+                        m_bChestEventInProgress = false;
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                }
+            }
+            else
+                m_uiEventTimer -= uiDiff;
+        }
+    }
+
+    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    {
+        GetGameObjectListWithEntryInGrid(lCoinList, pTarget, GO_GOLD_COINS_1, 15.0f);
+        GetGameObjectListWithEntryInGrid(lCoinList, pTarget, GO_GOLD_COINS_2, 15.0f);
+
+        for (auto& itr : lCoinList)
+        {
+            itr->SetLootState(GO_READY);
+            itr->SetRespawnTime(0);
+            itr->Refresh();
+            itr->SetRespawnTime(7 * DAY);
+        }
+
+        if (GameObject* pVase = GetClosestGameObjectWithEntry(pTarget, GO_ASHLIS_VASE, 10.0f))
+            pVase->Delete();
+    }
+
+    void StartEvent()
+    {
+        m_bChestEventInProgress = true;
+
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+
+        if (GameObject* pCage = m_pInstance->GetSingleGameObjectFromStorage(GO_ASHLIS_CAGE))
+            pCage->Use(m_creature);
+
+        m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
+        m_creature->GetMotionMaster()->MoveWaypoint(0, 3, 2000);
+
+        m_uiEvent = 1;
+        m_uiEventTimer = 3000;
+    }
+
+    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+    {
+        if (uiMotionType != EXTERNAL_WAYPOINT_MOVE)
+            return;
+
+        switch (uiPointId)
+        {
+            case 1:
+                m_uiEvent = 2;
+                m_uiEventTimer = 1000;
+                break;
+            case 6:
+                m_uiEvent = 3;
+                m_uiEventTimer = 3000;
+                break;
+            case 12:
+                m_uiEvent = 5;
+                m_uiEventTimer = 1000;
+                break;
+            case 20:
+                m_uiEvent = 7;
+                m_uiEventTimer = 2000;
+                break;
+            case 22:
+                m_uiEvent = 9;
+                m_uiEventTimer = 1000;
+                break;
+        }
+    }
+};
+
+UnitAI* GetAI_npc_ashli(Creature* pCreature)
+{
+    return new npc_ashliAI(pCreature);
+}
+
+bool GossipHello_npc_ashli(Player* pPlayer, Creature* pCreature)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+
+    pPlayer->PrepareGossipMenu(pCreature, pPlayer->GetDefaultGossipMenuForSource(pCreature));
+
+    if (npc_ashliAI* pAshliAI = dynamic_cast<npc_ashliAI*>(pCreature->AI()))
+    {
+        if (pInstance && pInstance->GetData(TYPE_HALAZZI) == DONE && !pAshliAI->m_bCompletedChestEvent)
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_ASHLI_FREE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
+        else if (pInstance && pInstance->GetData(TYPE_HALAZZI) == DONE)
+        {
+            pPlayer->PrepareGossipMenu(pCreature, GOSSIP_MENU_ID_ASHLI_DONE);
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_ASHLI_DONE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
+        }
+    }
+
+    pPlayer->SendPreparedGossip(pCreature);
+
+    return true;
+}
+
+bool GossipSelect_npc_ashli(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
+{
+    if (npc_ashliAI* pAshliAI = dynamic_cast<npc_ashliAI*>(pCreature->AI()))
+    {
+        if (uiAction == GOSSIP_ACTION_INFO_DEF + 1 && !pAshliAI->m_bCompletedChestEvent)
+        {
+            pAshliAI->StartEvent();
+            pPlayer->CLOSE_GOSSIP_MENU();
+        }
+        else if (uiAction == GOSSIP_ACTION_INFO_DEF + 2)
+        {
+            pPlayer->PrepareGossipMenu(pCreature, GOSSIP_MENU_ID_ASHLI_DONE2);
+            pPlayer->SendPreparedGossip(pCreature);
+        }
+    }
+    return true;
+}
+
 void AddSC_zulaman()
 {
     Script* pNewScript = new Script;
@@ -1291,5 +1563,12 @@ void AddSC_zulaman()
     pNewScript->GetAI = &GetAI_npc_kraz;
     pNewScript->pGossipHello = &GossipHello_npc_kraz;
     pNewScript->pGossipSelect = &GossipSelect_npc_kraz;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_ashli";
+    pNewScript->GetAI = &GetAI_npc_ashli;
+    pNewScript->pGossipHello = &GossipHello_npc_ashli;
+    pNewScript->pGossipSelect = &GossipSelect_npc_ashli;
     pNewScript->RegisterSelf();
 }
