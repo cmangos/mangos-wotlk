@@ -1076,7 +1076,7 @@ struct npc_krazAI : public ScriptedAI
                 switch (m_uiEvent)
                 {
                     case 1:
-                        m_creature->SetFacingTo(3.822271);
+                        m_creature->SetFacingTo(3.822271f);
                         DoScriptText(SAY_KRAZ_EVENT_1, m_creature);
 
                         m_uiEventTimer = 5000;
@@ -1133,6 +1133,8 @@ struct npc_krazAI : public ScriptedAI
                             itr->SetRespawnTime(7 * DAY);
                         }
 
+                        lCoinList.clear();
+
                         m_uiEventTimer = 1000;
                         m_uiEvent = 8;
                         break;
@@ -1143,7 +1145,7 @@ struct npc_krazAI : public ScriptedAI
                         m_uiEvent = 0;
                         break;
                     case 9:
-                        m_creature->SetFacingTo(3.857178);
+                        m_creature->SetFacingTo(3.857178f);
                         DoScriptText(SAY_KRAZ_EVENT_4, m_creature);
                         m_creature->GetMotionMaster()->MoveIdle();
                         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
