@@ -8328,7 +8328,7 @@ void Aura::PeriodicTick()
             if (target != pCaster && spellProto->SpellVisual[0] == 163 && !pCaster->isAlive())
                 return;
 
-            if (target->IsImmuneToSchool(spellProto))
+            if (target->IsImmuneToSchool(spellProto, (1 << GetEffIndex())))
             {
                 pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
                 return;
@@ -8545,7 +8545,7 @@ void Aura::PeriodicTick()
 
             if (pCaster)
             {
-                if (target->IsImmuneToSchool(spellProto))
+                if (target->IsImmuneToSchool(spellProto, (1 << GetEffIndex())))
                 {
                     pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
                     return;
@@ -8585,7 +8585,7 @@ void Aura::PeriodicTick()
 
             if (pCaster)
             {
-                if (target->IsImmuneToSchool(spellProto))
+                if (target->IsImmuneToSchool(spellProto, (1 << GetEffIndex())))
                 {
                     pCaster->SendSpellOrDamageImmune(target, spellProto->Id);
                     return;

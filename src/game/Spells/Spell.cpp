@@ -1503,15 +1503,27 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
     const bool traveling = (GetSpellSpeed() > 0.0f);
 
     // Recheck immune (only for delayed spells)
-    if (traveling && (
-                unit->IsImmuneToDamage(GetSpellSchoolMask(m_spellInfo)) ||
-                unit->IsImmuneToSpell(m_spellInfo, unit == realCaster, effectMask)))
+    if (traveling)
     {
-        if (realCaster)
-            realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
+        switch (m_spellInfo->Id)
+        {
+            case 39948: // Hurl Spine - Najentus - shouldnt immune out
+                break;
+            default:
+            {
+                if (unit->IsImmuneToDamage(GetSpellSchoolMask(m_spellInfo)) ||
+                    unit->IsImmuneToSpell(m_spellInfo, unit == realCaster, effectMask))
+                {
+                    if (realCaster)
+                        realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
 
-        ResetEffectDamageAndHeal();
-        return;
+                    ResetEffectDamageAndHeal();
+                    return;
+                }
+                break;
+            }
+        }
+
     }
 
     if (unit->GetTypeId() == TYPEID_PLAYER)
