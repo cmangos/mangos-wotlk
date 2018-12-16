@@ -6631,7 +6631,10 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
 {
     DEBUG_FILTER_LOG(LOG_FILTER_COMBAT, "WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
 
-    WorldPacket data(SMSG_ATTACKERSTATEUPDATE, 16 + 45);        // we guess size
+    // Subdamage count:
+    uint8 lines = m_weaponDamageCount[calcDamageInfo->attackType];
+
+    WorldPacket data(SMSG_ATTACKERSTATEUPDATE, (4 + 8 + 8 + 4 + 4) + 1 + (lines * (4 + 4 + 4)) + (4 + 4 + 4));
 
     data << uint32(calcDamageInfo->HitInfo);
     data << calcDamageInfo->attacker->GetPackGUID();
@@ -6641,8 +6644,6 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
     // Overkill value:
     data << uint32(std::max(int64(0), (int64(calcDamageInfo->totalDamage) - calcDamageInfo->target->GetHealth())));
 
-    // Subdamage count:
-    uint8 lines = m_weaponDamageCount[calcDamageInfo->attackType];
     data << uint8(lines);
 
     // Subdamage information:
@@ -6667,7 +6668,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
             data << uint32(calcDamageInfo->subDamage[i].resist);
     }
 
-    data << uint8(calcDamageInfo->TargetState);
+    data << uint32(calcDamageInfo->TargetState);
     data << uint32(0);                                      // unknown, usually seen with -1, 0 and 1000
     data << uint32(0);                                      // spell id, seen with heroic strike and disarm as examples.
     // HITINFO_NOACTION normally set if spell
