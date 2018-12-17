@@ -3889,6 +3889,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatTimerAI
                 }
             }
         }
+        return 0;
     }
 
     uint32 GetSubsequentActionTimer(const uint32 action) const
@@ -3962,6 +3963,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatTimerAI
                 }
             }
         }
+        return 0;
     }
 
     void ExecuteActions()

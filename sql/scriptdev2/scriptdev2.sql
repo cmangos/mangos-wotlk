@@ -814,8 +814,8 @@ UPDATE creature_template SET ScriptName='npc_anchorite_barada' WHERE entry=22431
 UPDATE creature_template SET ScriptName='npc_colonel_jules' WHERE entry=22432;
 UPDATE creature_template SET ScriptName='npc_magister_aledis' WHERE entry=20159;
 UPDATE creature_template SET ScriptName='npc_living_flare' WHERE entry=24916;
-UPDATE creature_template SET ScriptName='npc_danath_trollbane' WHERE `Entry`='16819';
-UPDATE creature_template SET ScriptName='npc_nazgrel' WHERE `Entry`='3230';
+UPDATE creature_template SET ScriptName='npc_danath_trollbane' WHERE entry='16819';
+UPDATE creature_template SET ScriptName='npc_nazgrel' WHERE entry='3230';
 
 /* HILLSBRAD FOOTHILLS */
 
@@ -1075,7 +1075,7 @@ INSERT INTO scripted_areatrigger VALUES
 (4497,'at_commander_dawnforge');
 UPDATE gameobject_template SET ScriptName='go_manaforge_control_console' WHERE entry IN (183770,183956,184311,184312);
 UPDATE creature_template SET ScriptName='npc_manaforge_control_console' WHERE entry IN (20209,20417,20418,20440);
-UPDATE `creature_template` SET `ScriptName`='npc_manaforge_spawn' WHERE `Entry` IN(20218,20438,20439,20460);
+UPDATE creature_template SET ScriptName='npc_manaforge_spawn' WHERE entry IN(20218,20438,20439,20460);
 UPDATE creature_template SET ScriptName='npc_commander_dawnforge' WHERE entry=19831;
 UPDATE creature_template SET ScriptName='npc_bessy' WHERE entry=20415;
 UPDATE creature_template SET ScriptName='npc_maxx_a_million' WHERE entry=19589;
