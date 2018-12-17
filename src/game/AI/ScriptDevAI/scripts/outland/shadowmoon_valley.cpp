@@ -3826,65 +3826,66 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatTimerAI
             {
                 switch (action)
                 {
-                case ILLIDARI_CLEAVE: return urand(4000, 7000);
-                case ILLIDARI_CUTDOWN: return 6000;
-                case ILLIDARI_DEMORALIZING_SHOUT: return 8000;
+                    case ILLIDARI_CLEAVE: return urand(4000, 7000);
+                    case ILLIDARI_CUTDOWN: return 6000;
+                    case ILLIDARI_DEMORALIZING_SHOUT: return 8000;
+                    default: return 0;
                 }
             }
             case NPC_SHADOWHOOF_ASSASSIN:
             {
                 switch (action)
                 {
-                case ASSASSIN_DEBILITATING_STRIKE: return urand(3500, 4000);
-                case ASSASSIN_SINISTER_STRIKE: return urand(6000, 8000);
-                default: return 0;
+                    case ASSASSIN_DEBILITATING_STRIKE: return urand(3500, 4000);
+                    case ASSASSIN_SINISTER_STRIKE: return urand(6000, 8000);
+                    default: return 0;
                 }
             }
             case NPC_ILLIDARI_SUCCUBUS:
             {
                 switch (action)
                 {
-                case SUCCUBUS_LASH_OF_PAIN: return urand(2000, 4000);
-                case SUCCUBUS_SEDUCTION: return urand(5000, 14000);
-                default: return 0;
+                    case SUCCUBUS_LASH_OF_PAIN: return urand(2000, 4000);
+                    case SUCCUBUS_SEDUCTION: return urand(5000, 14000);
+                    default: return 0;
                 }
             }
             case NPC_LIGHTSWORN_VINDICATOR:
             {
                 switch (action)
                 {
-                case VINDICATOR_EXORCISM: return urand(3000, 12000);
-                case VINDICATOR_HAMMER: return urand(5000, 15000);
-                case VINDICATOR_HOLY_LIGHT: return urand(2500, 4000);
-                case VINDICATOR_SEAL_OF_SAC: return urand(1000, 4000);
-                default: return 0;
+                    case VINDICATOR_EXORCISM: return urand(3000, 12000);
+                    case VINDICATOR_HAMMER: return urand(5000, 15000);
+                    case VINDICATOR_HOLY_LIGHT: return urand(2500, 4000);
+                    case VINDICATOR_SEAL_OF_SAC: return urand(1000, 4000);
+                    default: return 0;
                 }
             }
             case NPC_ANCHORITE_CAALEN:
             {
                 switch (action)
                 {
-                case CAALEN_HOLY_SMITE: return urand(3000, 9000);
-                case CAALEN_PRAYER_OF_HEALING: return urand(9000, 12000);
-                default: return 0;
+                    case CAALEN_HOLY_SMITE: return urand(3000, 9000);
+                    case CAALEN_PRAYER_OF_HEALING: return urand(9000, 12000);
+                    default: return 0;
                 }
             }
             case NPC_SEASONED_MAGISTER:
             {
                 switch (action)
                 {
-                case MAGISTER_FIREBALL: return urand(0, 1000);
-                default: return 0;
+                    case MAGISTER_FIREBALL: return urand(0, 1000);
+                    default: return 0;
                 }
             }
             case NPC_SHADOWLORD:
             {
                 switch (action)
                 {
-                case SHADOWLORD_INFERNO: return urand(5000, 10000);
-                case SHADOWLORD_CARRION_SWARM: return urand(0, 2000);
-                case SHADOWLORD_SLEEP: return urand(1500, 5000);
-                default: return 0;
+                    case SHADOWLORD_INFERNO: return urand(5000, 10000);
+                    case SHADOWLORD_CARRION_SWARM: return urand(0, 2000);
+                    case SHADOWLORD_SLEEP: return urand(1500, 5000);
+                    default: return 0;
                 }
             }
         }
@@ -3899,66 +3900,66 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatTimerAI
             {
                 switch (action)
                 {
-                case ILLIDARI_CLEAVE: return urand(9500, 12000);
-                case ILLIDARI_CUTDOWN: return urand(14000, 16000);
-                case ILLIDARI_DEMORALIZING_SHOUT: return urand(15000, 18000);
-                default: return 0;
+                    case ILLIDARI_CLEAVE: return urand(9500, 12000);
+                    case ILLIDARI_CUTDOWN: return urand(14000, 16000);
+                    case ILLIDARI_DEMORALIZING_SHOUT: return urand(15000, 18000);
+                    default: return 0;
                 }
             }
             case NPC_SHADOWHOOF_ASSASSIN:
             {
                 switch (action)
                 {
-                case ASSASSIN_DEBILITATING_STRIKE: return urand(10000, 12000);
-                case ASSASSIN_SINISTER_STRIKE: return urand(11000, 18000);
-                default: return 0;
+                    case ASSASSIN_DEBILITATING_STRIKE: return urand(10000, 12000);
+                    case ASSASSIN_SINISTER_STRIKE: return urand(11000, 18000);
+                    default: return 0;
                 }
             }
             case NPC_ILLIDARI_SUCCUBUS:
             {
                 switch (action)
                 {
-                case SUCCUBUS_LASH_OF_PAIN: return urand(4000, 7000);
-                case SUCCUBUS_SEDUCTION: return urand(12000, 18000);
-                default: return 0;
+                    case SUCCUBUS_LASH_OF_PAIN: return urand(4000, 7000);
+                    case SUCCUBUS_SEDUCTION: return urand(12000, 18000);
+                    default: return 0;
                 }
             }
             case NPC_LIGHTSWORN_VINDICATOR:
             {
                 switch (action)
                 {
-                case VINDICATOR_EXORCISM: return urand(15000, 28000);
-                case VINDICATOR_HAMMER: return urand(18000, 24000);
-                case VINDICATOR_HOLY_LIGHT: return urand(12000, 18000);
-                case VINDICATOR_SEAL_OF_SAC: return urand(30000, 45000);
-                default: return 0;
+                    case VINDICATOR_EXORCISM: return urand(15000, 28000);
+                    case VINDICATOR_HAMMER: return urand(18000, 24000);
+                    case VINDICATOR_HOLY_LIGHT: return urand(12000, 18000);
+                    case VINDICATOR_SEAL_OF_SAC: return urand(30000, 45000);
+                    default: return 0;
                 }
             }
             case NPC_ANCHORITE_CAALEN:
             {
                 switch (action)
                 {
-                case CAALEN_HOLY_SMITE: return urand(8000, 13000);
-                case CAALEN_PRAYER_OF_HEALING: return urand(12000, 15000);
-                default: return 0;
+                    case CAALEN_HOLY_SMITE: return urand(8000, 13000);
+                    case CAALEN_PRAYER_OF_HEALING: return urand(12000, 15000);
+                    default: return 0;
                 }
             }
             case NPC_SEASONED_MAGISTER:
             {
                 switch (action)
                 {
-                case MAGISTER_FIREBALL: return urand(3400, 4800);
-                default: return 0;
+                    case MAGISTER_FIREBALL: return urand(3400, 4800);
+                    default: return 0;
                 }
             }
             case NPC_SHADOWLORD:
             {
                 switch (action)
                 {
-                case SHADOWLORD_INFERNO: return urand(15000, 25000);
-                case SHADOWLORD_CARRION_SWARM: return urand(10000, 12000);
-                case SHADOWLORD_SLEEP: return urand(10000, 16000);
-                default: return 0;
+                    case SHADOWLORD_INFERNO: return urand(15000, 25000);
+                    case SHADOWLORD_CARRION_SWARM: return urand(10000, 12000);
+                    case SHADOWLORD_SLEEP: return urand(10000, 16000);
+                    default: return 0;
                 }
             }
         }
