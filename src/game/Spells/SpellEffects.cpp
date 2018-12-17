@@ -6167,7 +6167,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         return;
     }
 
-    // Pet's are atm handled differently
+    // Pet's are atm handled differently - TODO: Unify with rest
     if (summon_prop->Group == SUMMON_PROP_GROUP_PETS && prop_id != 1562)
     {
         DoSummonPet(eff_idx);
@@ -6879,6 +6879,10 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
             spawnCreature->SavePetToDB(PET_SAVE_AS_CURRENT, _player);
     }
     spawnCreature->SetLoading(false);
+
+    // Notify original caster if not done already
+    if (m_caster->AI())
+        m_caster->AI()->JustSummoned(spawnCreature);
 
     m_spellLog.AddLog(uint32(SPELL_EFFECT_SUMMON), spawnCreature->GetPackGUID());
     return true;
