@@ -267,6 +267,7 @@ struct npc_kiljaeden_controllerAI : public Scripted_NoMovementAI, private Dialog
                     pRiftwalker->GetMotionMaster()->MovePoint(1, 1738.84f, 627.32f, 28.26f);
                     m_secondRiftwalkerGuid = pRiftwalker->GetObjectGuid();
                 }
+                break;
             case NPC_INERT_PORTAL:
                 // ToDo: summon soldiers to the right
                 m_creature->SummonCreature(NPC_INERT_PORTAL, aOutroLocations[0].m_fX, aOutroLocations[0].m_fY, aOutroLocations[0].m_fZ, aOutroLocations[0].m_fO, TEMPSPAWN_CORPSE_DESPAWN, 0);
