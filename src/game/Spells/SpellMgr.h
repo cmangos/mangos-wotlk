@@ -975,6 +975,15 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
         case 34700: // Allergic Reaction - Neutral target type - needs to be a debuff
         case 36717: // Neutral spells with SPELL_ATTR_EX3_TARGET_ONLY_PLAYER as a filter
         case 38829:
+        case 40055: // Introspection - Apexis Relic
+        case 40165:
+        case 40166:
+        case 40167:
+        case 36812: // Soaring
+        case 37910: // overriding because immunity is preventing the spellcast - maybe neutral spells should be judged like negatives?
+        case 37940:
+        case 37962:
+        case 37968:
             return false;
     }
 
