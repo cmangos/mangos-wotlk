@@ -23,42 +23,54 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "karazhan.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 enum
 {
-    SAY_MIDNIGHT_KILL           = -1532000,
-    SAY_APPEAR1                 = -1532001,
-    SAY_APPEAR2                 = -1532002,
-    SAY_APPEAR3                 = -1532003,
-    SAY_MOUNT                   = -1532004,
-    SAY_KILL1                   = -1532005,
-    SAY_KILL2                   = -1532006,
-    SAY_DISARMED                = -1532007,
-    SAY_DEATH                   = -1532008,
-    SAY_RANDOM1                 = -1532009,
-    SAY_RANDOM2                 = -1532010,
-    SAY_MIDNIGHT_CALL           = -1532137,
+    SAY_MIDNIGHT_KILL            = -1532000,
+    SAY_APPEAR_1                 = -1532001,
+    SAY_APPEAR_2                 = -1532002,
+    SAY_APPEAR_3                 = -1532003,
+    SAY_MOUNT                    = -1532004,
+    SAY_KILL_1                   = -1532005,
+    SAY_KILL_2                   = -1532006,
+    SAY_DISARMED                 = -1532007,
+    SAY_DEATH                    = -1532008,
+    SAY_RANDOM_1                 = -1532009,
+    SAY_RANDOM_2                 = -1532010,
+    SAY_MIDNIGHT_CALL            = -1532137,
 
-    // Midnight
-    SPELL_MOUNT                 = 29770,
-    SPELL_KNOCKDOWN             = 29711,
-    SPELL_SUMMON_ATTUMEN        = 29714,
+    // Midnight					 
+    SPELL_MOUNT                  = 29770,
+    SPELL_KNOCKDOWN              = 29711,
+    SPELL_SUMMON_ATTUMEN         = 29714,
     SPELL_SUMMON_ATTUMEN_MOUNTED = 29799,
 
     // Attumen
     SPELL_SHADOWCLEAVE          = 29832,
     SPELL_INTANGIBLE_PRESENCE   = 29833,
     SPELL_UPPERCUT              = 29850,
-    SPELL_BERSERKER_CHARGE      = 26561,                    // Only when mounted
+    SPELL_CHARGE                = 29847,                    // Only when mounted
 
+    // Extra
+    SPELL_SPAWN_SMOKE_1         = 10389,
+    SPELL_SPAWN_SMOKE_2         = 29802,
+    
     NPC_ATTUMEN_MOUNTED         = 16152,
 };
 
-struct boss_midnightAI : public ScriptedAI
+enum MidnightActions
 {
-    boss_midnightAI(Creature* pCreature) : ScriptedAI(pCreature)
+    MIDNIGHT_ACTION_KNOCKDOWN,
+    MIDNIGHT_ACTION_MAX,
+};
+
+struct boss_midnightAI : public ScriptedAI, public CombatTimerAI
+{
+    boss_midnightAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(MIDNIGHT_ACTION_MAX)
     {
         m_pInstance = (instance_karazhan*)pCreature->GetInstanceData();
+        AddCombatAction(MIDNIGHT_ACTION_KNOCKDOWN, 0);
         Reset();
     }
 
@@ -69,10 +81,53 @@ struct boss_midnightAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiPhase     = 0;
-        m_uiKnockDown = urand(6000, 9000);
+        m_uiPhase = 0;
+
+        for (uint32 i = 0; i < MIDNIGHT_ACTION_MAX; ++i)
+            SetActionReadyStatus(i, false);
+
+        ResetTimer(MIDNIGHT_ACTION_KNOCKDOWN, GetInitialActionTimer(MIDNIGHT_ACTION_KNOCKDOWN));
 
         SetCombatMovement(true);
+    }
+
+    uint32 GetInitialActionTimer(uint32 id)
+    {
+        switch (id)
+        {
+            case MIDNIGHT_ACTION_KNOCKDOWN: return urand(6000, 9000);
+            default: return 0; // never occurs but for compiler
+        }
+    }
+
+    uint32 GetSubsequentActionTimer(uint32 id)
+    {
+        switch (id)
+        {
+            case MIDNIGHT_ACTION_KNOCKDOWN: return urand(25000, 35000);
+            default: return 0; // never occurs but for compiler
+        }
+    }
+
+    void ExecuteActions() override
+    {
+        if (!CanExecuteCombatAction())
+            return;
+
+        for (uint32 i = 0; i < MIDNIGHT_ACTION_MAX; ++i)
+        {
+            if (GetActionReadyStatus(i))
+            {
+                switch (i)
+                {
+                    case MIDNIGHT_ACTION_KNOCKDOWN:
+                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCKDOWN);
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        continue;
+                }
+            }
+        }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -104,20 +159,23 @@ struct boss_midnightAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_ATTUMEN)
         {
             DoScriptText(SAY_MIDNIGHT_CALL, m_creature);
+            // Smoke effect
+            pSummoned->CastSpell(pSummoned, SPELL_SPAWN_SMOKE_2, TRIGGERED_NONE);
             // Attumen yells when spawned
             switch (urand(0, 2))
             {
-                case 0: DoScriptText(SAY_APPEAR1, pSummoned); break;
-                case 1: DoScriptText(SAY_APPEAR2, pSummoned); break;
-                case 2: DoScriptText(SAY_APPEAR3, pSummoned); break;
+                case 0: DoScriptText(SAY_APPEAR_1, pSummoned); break;
+                case 1: DoScriptText(SAY_APPEAR_2, pSummoned); break;
+                case 2: DoScriptText(SAY_APPEAR_3, pSummoned); break;
             }
         }
         else if (pSummoned->GetEntry() == NPC_ATTUMEN_MOUNTED)
         {
-            DoScriptText(SAY_MOUNT, pSummoned);
-
             if (!m_pInstance)
                 return;
+
+            // Smoke effect
+            pSummoned->CastSpell(pSummoned, SPELL_SPAWN_SMOKE_1, TRIGGERED_NONE);
 
             // The summoned has the health equal to the one which has the higher HP percentage of both
             if (Creature* pAttumen = m_pInstance->GetSingleCreatureFromStorage(NPC_ATTUMEN))
@@ -131,12 +189,13 @@ struct boss_midnightAI : public ScriptedAI
             return;
 
         // Spawn the mounted Attumen and despawn
-        if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ATTUMEN_MOUNTED, CAST_TRIGGERED) == CAST_OK)
+        if (Creature* pAttumen = m_pInstance->GetSingleCreatureFromStorage(NPC_ATTUMEN))
         {
-            if (Creature* pAttumen = m_pInstance->GetSingleCreatureFromStorage(NPC_ATTUMEN))
+            if (pAttumen->AI()->DoCastSpellIfCan(m_creature, SPELL_SUMMON_ATTUMEN_MOUNTED, CAST_TRIGGERED) == CAST_OK)
+            {
+                m_creature->ForcedDespawn();
                 pAttumen->ForcedDespawn();
-
-            m_creature->ForcedDespawn();
+            }
         }
     }
 
@@ -149,6 +208,8 @@ struct boss_midnightAI : public ScriptedAI
 
             SetCombatMovement(false);
             m_creature->GetMotionMaster()->MovePoint(1, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ());
+
+            DoScriptText(SAY_MOUNT, pTarget, m_creature);
         }
     }
 
@@ -160,6 +221,9 @@ struct boss_midnightAI : public ScriptedAI
         // Stop attacking during the mount phase
         if (m_uiPhase == 2)
             return;
+        
+        UpdateTimers(uiDiff, m_creature->isInCombat());
+        ExecuteActions();
 
         // Spawn Attumen on 95% hp
         if (m_uiPhase == 0 && m_creature->GetHealthPercent() < 95.0f)
@@ -175,14 +239,6 @@ struct boss_midnightAI : public ScriptedAI
                 m_uiPhase = 2;
         }
 
-        if (m_uiKnockDown < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCKDOWN) == CAST_OK)
-                m_uiKnockDown = urand(6000, 9000);
-        }
-        else
-            m_uiKnockDown -= uiDiff;
-
         DoMeleeAttackIfReady();
     }
 };
@@ -192,38 +248,132 @@ UnitAI* GetAI_boss_midnight(Creature* pCreature)
     return new boss_midnightAI(pCreature);
 }
 
-struct boss_attumenAI : public ScriptedAI
+enum AttumenActions
 {
-    boss_attumenAI(Creature* pCreature) : ScriptedAI(pCreature)
+    ATTUMEN_ACTION_CLEAVE,
+    ATTUMEN_ACTION_CURSE,
+    ATTUMEN_ACTION_YELL,
+    ATTUMEN_ACTION_KNOCKDOWN,
+    ATTUMEN_ACTION_CHARGE, // only when mounted
+    ATTUMEN_ACTION_MAX,
+};
+
+struct boss_attumenAI : public ScriptedAI, public CombatTimerAI
+{
+    boss_attumenAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(ATTUMEN_ACTION_MAX)
     {
         m_pInstance = (instance_karazhan*)pCreature->GetInstanceData();
+        AddCombatAction(ATTUMEN_ACTION_CLEAVE, 0);
+        AddCombatAction(ATTUMEN_ACTION_CURSE, 0);
+        AddCombatAction(ATTUMEN_ACTION_YELL, 0);
+        AddCombatAction(ATTUMEN_ACTION_KNOCKDOWN, 0);
+        AddCombatAction(ATTUMEN_ACTION_CHARGE, 0);
         Reset();
     }
 
-    instance_karazhan* m_pInstance;
-
-    uint32 m_uiCleaveTimer;
-    uint32 m_uiCurseTimer;
-    uint32 m_uiRandomYellTimer;
-    uint32 m_uiKnockDown;
-    uint32 m_uiChargeTimer;                                 // only when mounted
+    instance_karazhan* m_pInstance;                             
 
     bool m_bHasSummonRider;
 
     void Reset() override
     {
-        m_uiCleaveTimer     = urand(10000, 16000);
-        m_uiCurseTimer      = 30000;
-        m_uiRandomYellTimer = urand(30000, 60000);          // Occasionally yell
-        m_uiChargeTimer     = 20000;
-        m_uiKnockDown       = urand(6000, 9000);
+        for (uint32 i = 0; i < ATTUMEN_ACTION_MAX; ++i)
+            SetActionReadyStatus(i, false);
+
+        ResetTimer(ATTUMEN_ACTION_CLEAVE, GetInitialActionTimer(ATTUMEN_ACTION_CLEAVE));
+        ResetTimer(ATTUMEN_ACTION_CURSE, GetInitialActionTimer(ATTUMEN_ACTION_CURSE));
+        ResetTimer(ATTUMEN_ACTION_YELL, GetInitialActionTimer(ATTUMEN_ACTION_YELL));
+        ResetTimer(ATTUMEN_ACTION_KNOCKDOWN, GetInitialActionTimer(ATTUMEN_ACTION_KNOCKDOWN));
+        ResetTimer(ATTUMEN_ACTION_CHARGE, GetInitialActionTimer(ATTUMEN_ACTION_CHARGE));
 
         m_bHasSummonRider   = false;
     }
 
+    uint32 GetInitialActionTimer(uint32 id)
+    {
+        switch (id)
+        {
+            case ATTUMEN_ACTION_CLEAVE: return urand(10000, 16000);
+            case ATTUMEN_ACTION_CURSE: return 30000;
+            case ATTUMEN_ACTION_YELL: return urand(30000, 60000);
+            case ATTUMEN_ACTION_KNOCKDOWN: return urand(6000, 9000);
+            case ATTUMEN_ACTION_CHARGE: return 20000;
+            default: return 0; // never occurs but for compiler
+        }
+    }
+
+    uint32 GetSubsequentActionTimer(uint32 id)
+    {
+        switch (id)
+        {
+            case ATTUMEN_ACTION_CLEAVE: return urand(22000, 30000);
+            case ATTUMEN_ACTION_CURSE: return 30000;
+            case ATTUMEN_ACTION_YELL: return urand(30000, 60000);
+            case ATTUMEN_ACTION_KNOCKDOWN: return urand(22000, 30000);
+            case ATTUMEN_ACTION_CHARGE: return urand(12000, 20000);
+            default: return 0; // never occurs but for compiler
+        }
+    }
+
+    void ExecuteActions() override
+    {
+        if (!CanExecuteCombatAction())
+            return;
+
+        for (uint32 i = 0; i < ATTUMEN_ACTION_MAX; ++i)
+        {
+            if (GetActionReadyStatus(i))
+            {
+                switch (i)
+                {
+                    case ATTUMEN_ACTION_CLEAVE:
+                    {
+                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWCLEAVE);
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        continue;
+                    }
+                    case ATTUMEN_ACTION_CURSE:
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_INTANGIBLE_PRESENCE);
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        continue;
+                    }
+                    case ATTUMEN_ACTION_YELL:
+                    {
+                        DoScriptText(urand(0, 1) ? SAY_RANDOM_1 : SAY_RANDOM_2, m_creature);
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        continue;
+                    }
+                    case ATTUMEN_ACTION_KNOCKDOWN:
+                    {
+                        // Cast knockdown when mounted, otherwise uppercut
+                        DoCastSpellIfCan(m_creature->getVictim(), m_creature->GetEntry() == NPC_ATTUMEN_MOUNTED ? SPELL_KNOCKDOWN : SPELL_UPPERCUT);
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        continue;
+                    }
+                    case ATTUMEN_ACTION_CHARGE:
+                    {
+                        // Sanity check - If creature is mounted then cast charge
+                        if (m_creature->GetEntry() == NPC_ATTUMEN_MOUNTED)
+                            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_CHARGE, SELECT_FLAG_IN_LOS | SELECT_FLAG_PLAYER))
+                                DoCastSpellIfCan(pTarget, SPELL_CHARGE);
+
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        continue;
+                    }
+                }
+            }
+        }
+    }
+
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
+        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
     }
 
     void SpellHit(Unit* /*pSource*/, const SpellEntry* pSpell) override
@@ -254,62 +404,17 @@ struct boss_attumenAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (m_uiCleaveTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWCLEAVE) == CAST_OK)
-                m_uiCleaveTimer = urand(10000, 16000);
-        }
-        else
-            m_uiCleaveTimer -= uiDiff;
+        UpdateTimers(uiDiff, m_creature->isInCombat());
+        ExecuteActions();
 
-        if (m_uiCurseTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_INTANGIBLE_PRESENCE) == CAST_OK)
-                m_uiCurseTimer = 30000;
-        }
-        else
-            m_uiCurseTimer -= uiDiff;
-
-        if (m_uiRandomYellTimer < uiDiff)
-        {
-            DoScriptText(urand(0, 1) ? SAY_RANDOM1 : SAY_RANDOM2, m_creature);
-            m_uiRandomYellTimer = urand(30000, 60000);
-        }
-        else
-            m_uiRandomYellTimer -= uiDiff;
-
-        if (m_uiKnockDown < uiDiff)
-        {
-            // Cast knockdown when mounted, otherwise uppercut
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_creature->GetEntry() == NPC_ATTUMEN_MOUNTED ? SPELL_KNOCKDOWN : SPELL_UPPERCUT) == CAST_OK)
-                m_uiKnockDown = urand(6000, 9000);
-        }
-        else
-            m_uiKnockDown -= uiDiff;
-
-        // If creature is mounted then cast charge
-        if (m_creature->GetEntry() == NPC_ATTUMEN_MOUNTED)
-        {
-            if (m_uiChargeTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_BERSERKER_CHARGE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_IN_LOS))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_BERSERKER_CHARGE) == CAST_OK)
-                        m_uiChargeTimer = 20000;
-                }
-                else
-                    m_uiChargeTimer = 2000;
-            }
-            else
-                m_uiChargeTimer -= uiDiff;
-        }
-        // Else, mount if below 25%
-        else if (!m_bHasSummonRider && m_creature->GetHealthPercent() < 25.0f)
+        // If creature is not mounted and mount if below 25%
+        if (m_creature->GetEntry() != NPC_ATTUMEN_MOUNTED && !m_bHasSummonRider && m_creature->GetHealthPercent() < 25.0f)
         {
             if (Creature* pMidnight = m_pInstance->GetSingleCreatureFromStorage(NPC_MIDNIGHT))
             {
                 pMidnight->CastSpell(m_creature, SPELL_MOUNT, TRIGGERED_OLD_TRIGGERED);
                 m_bHasSummonRider = true;
+                ResetTimer(ATTUMEN_ACTION_CHARGE, GetSubsequentActionTimer(ATTUMEN_ACTION_CHARGE));
             }
         }
 
