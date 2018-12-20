@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "karazhan.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 enum
 {
@@ -61,44 +62,136 @@ enum
     NPC_KILREK                  = 17229
 };
 
-struct boss_terestianAI : public ScriptedAI
+enum IllhoofActions
 {
-    boss_terestianAI(Creature* pCreature) : ScriptedAI(pCreature)
+    ILLHOOF_ACTION_SUMMON_KILREK,
+    ILLHOOF_ACTION_SACRIFICE,
+    ILLHOOF_ACTION_SHADOWBOLT,
+    ILLHOOF_ACTION_SUMMON,
+    ILLHOOF_ACTION_BERSERK,
+    ILLHOOF_ACTION_MAX,
+};
+
+struct boss_terestianAI : public ScriptedAI, public CombatTimerAI
+{
+    boss_terestianAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(ILLHOOF_ACTION_MAX)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        AddCombatAction(ILLHOOF_ACTION_SUMMON_KILREK, 0);
+        AddCombatAction(ILLHOOF_ACTION_SACRIFICE, 0);
+        AddCombatAction(ILLHOOF_ACTION_SHADOWBOLT, 0);
+        AddCombatAction(ILLHOOF_ACTION_SUMMON, 0);
+        AddCombatAction(ILLHOOF_ACTION_BERSERK, 0);
         Reset();
     }
 
     ScriptedInstance* m_pInstance;
 
+    ObjectGuid m_kilrekGuid;
     ObjectGuid m_sacrificeGuid;
-    ObjectGuid m_kilrek;
-
-    uint32 m_uiSummonKilrekTimer;
-    uint32 m_uiSacrificeTimer;
-    uint32 m_uiShadowboltTimer;
-    uint32 m_uiSummonTimer;
-    uint32 m_uiBerserkTimer;
-
+    
     bool m_bSummonedPortals;
 
     void Reset() override
     {
-        m_uiSummonKilrekTimer   = 0;
-        m_uiSacrificeTimer      = 30000;
-        m_uiShadowboltTimer     = 5000;
-        m_uiSummonTimer         = 10000;
-        m_uiBerserkTimer        = 10 * MINUTE * IN_MILLISECONDS;
+        for (uint32 i = 0; i < ILLHOOF_ACTION_MAX; ++i)
+            SetActionReadyStatus(i, false);
 
-        m_bSummonedPortals      = false;
+        ResetTimer(ILLHOOF_ACTION_SUMMON_KILREK, GetInitialActionTimer(ILLHOOF_ACTION_SUMMON_KILREK));
+        ResetTimer(ILLHOOF_ACTION_SACRIFICE, GetInitialActionTimer(ILLHOOF_ACTION_SACRIFICE));
+        ResetTimer(ILLHOOF_ACTION_SHADOWBOLT, GetInitialActionTimer(ILLHOOF_ACTION_SHADOWBOLT));
+        ResetTimer(ILLHOOF_ACTION_SUMMON, GetInitialActionTimer(ILLHOOF_ACTION_SUMMON));
+        ResetTimer(ILLHOOF_ACTION_BERSERK, GetInitialActionTimer(ILLHOOF_ACTION_BERSERK));
+
+        DisableCombatAction(ILLHOOF_ACTION_SUMMON_KILREK);
+
+        m_bSummonedPortals = false;
+    }
+
+    uint32 GetInitialActionTimer(uint32 id)
+    {
+        switch (id)
+        {
+            case ILLHOOF_ACTION_SUMMON_KILREK: return 0;
+            case ILLHOOF_ACTION_SACRIFICE: return urand(30000, 35000);
+            case ILLHOOF_ACTION_SHADOWBOLT: return urand(5000, 7000);
+            case ILLHOOF_ACTION_SUMMON: return 10000;
+            case ILLHOOF_ACTION_BERSERK: return 10 * MINUTE * IN_MILLISECONDS;
+            default: return 0; // never occurs but for compiler
+        }
+    }
+
+    uint32 GetSubsequentActionTimer(uint32 id)
+    {
+        switch (id)
+        {
+            case ILLHOOF_ACTION_SUMMON_KILREK: return 30000;
+            case ILLHOOF_ACTION_SACRIFICE: return urand(40000, 50000);
+            case ILLHOOF_ACTION_SHADOWBOLT: return urand(6000, 16000);
+            default: return 0; // never occurs but for compiler
+        }
+    }
+
+    void ExecuteActions() override
+    {
+        if (!CanExecuteCombatAction())
+            return;
+
+        for (uint32 i = 0; i < ILLHOOF_ACTION_MAX; ++i)
+        {
+            if (GetActionReadyStatus(i))
+            {
+                switch (i)
+                {
+                    case ILLHOOF_ACTION_SUMMON_KILREK:
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP);
+                        SetActionReadyStatus(i, false); // Reset when imp dies
+                        continue;
+                    }
+                    case ILLHOOF_ACTION_SACRIFICE:
+                    {
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SACRIFICE, SELECT_FLAG_PLAYER))
+                        {
+                            if (DoCastSpellIfCan(pTarget, SPELL_SACRIFICE) == CAST_OK)
+                            {
+                                DoCastSpellIfCan(m_creature, SPELL_SUMMON_DEMONCHAINS, CAST_TRIGGERED);
+                                DoScriptText(urand(0, 1) ? SAY_SACRIFICE1 : SAY_SACRIFICE2, m_creature);
+                                m_sacrificeGuid = pTarget->GetObjectGuid();
+                            }
+                        }
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        continue;
+                    }
+                    case ILLHOOF_ACTION_SHADOWBOLT:
+                    {
+                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT);
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        continue;
+                    }
+                    case ILLHOOF_ACTION_SUMMON:
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_FIENDISH_PORTAL) == CAST_OK)
+                            DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
+                        SetActionReadyStatus(i, false); // once per fight
+                        continue;
+                    }
+                    case ILLHOOF_ACTION_BERSERK:
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_BERSERK);
+                        SetActionReadyStatus(i, false); // once per fight
+                        continue;
+                    }
+                }
+            }
+        }
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
-
-        if (!m_creature->GetPet())
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_TERESTIAN, IN_PROGRESS);
@@ -111,13 +204,20 @@ struct boss_terestianAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        if (Creature* kilrek = m_creature->GetMap()->GetCreature(m_kilrek))
-            kilrek->ForcedDespawn();
+        Creature* kilrek = m_creature->GetMap()->GetAnyTypeCreature(m_kilrekGuid);
+        if (!kilrek || !kilrek->isAlive())
+            DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_TERESTIAN, FAIL);
     }
 
+    void JustRespawned() override
+    {
+        DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP);
+        Reset();
+    }
+    
     void JustSummoned(Creature* pSummoned) override
     {
         switch (pSummoned->GetEntry())
@@ -130,8 +230,9 @@ struct boss_terestianAI : public ScriptedAI
                 }
                 break;
             case NPC_KILREK:
-                m_kilrek = pSummoned->GetObjectGuid();
-                pSummoned->SetInCombatWithZone();
+                m_kilrekGuid = pSummoned->GetObjectGuid();
+                if (m_creature->isInCombat())
+                    pSummoned->SetInCombatWithZone();
                 break;
             case NPC_DEMONCHAINS:
                 pSummoned->CastSpell(pSummoned, SPELL_DEMON_CHAINS, TRIGGERED_NONE);
@@ -146,7 +247,7 @@ struct boss_terestianAI : public ScriptedAI
             case NPC_KILREK:
                 DoScriptText(SAY_KILREK_DEATH, pSummoned, pSummoned);
                 pSummoned->CastSpell(m_creature, SPELL_BROKEN_PACT, TRIGGERED_OLD_TRIGGERED);
-                m_uiSummonKilrekTimer = 30000;
+                ResetTimer(ILLHOOF_ACTION_SUMMON_KILREK, GetSubsequentActionTimer(ILLHOOF_ACTION_SUMMON_KILREK));
                 break;
             case NPC_DEMONCHAINS:
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_sacrificeGuid))
@@ -165,69 +266,11 @@ struct boss_terestianAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        // Respawn Kilrek if killed
-        if (m_uiSummonKilrekTimer)
-        {
-            if (m_uiSummonKilrekTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP) == CAST_OK)
-                    m_uiSummonKilrekTimer = 0;
-            }
-            else
-                m_uiSummonKilrekTimer -= uiDiff;
-        }
-
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (m_uiSacrificeTimer <= uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SACRIFICE, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_SACRIFICE) == CAST_OK)
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_DEMONCHAINS, CAST_TRIGGERED);
-                    DoScriptText(urand(0, 1) ? SAY_SACRIFICE1 : SAY_SACRIFICE2, m_creature);
-                    m_sacrificeGuid = pTarget->GetObjectGuid();
-                    m_uiSacrificeTimer = 43000;
-                }
-            }
-        }
-        else
-            m_uiSacrificeTimer -= uiDiff;
-
-        if (m_uiShadowboltTimer <= uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
-                m_uiShadowboltTimer = 10000;
-        }
-        else
-            m_uiShadowboltTimer -= uiDiff;
-
-        if (m_uiSummonTimer)
-        {
-            if (m_uiSummonTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_FIENDISH_PORTAL) == CAST_OK)
-                {
-                    DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
-                    m_uiSummonTimer = 0;
-                }
-            }
-            else
-                m_uiSummonTimer -= uiDiff;
-        }
-
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                    m_uiBerserkTimer = 0;
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
+        UpdateTimers(uiDiff, m_creature->isInCombat());
+        ExecuteActions();
 
         DoMeleeAttackIfReady();
     }
