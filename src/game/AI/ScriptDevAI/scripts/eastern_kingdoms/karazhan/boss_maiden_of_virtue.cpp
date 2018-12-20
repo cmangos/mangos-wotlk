@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "karazhan.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 enum
 {
@@ -40,32 +41,113 @@ enum
     SPELL_HOLYGROUND        = 29512
 };
 
-struct boss_maiden_of_virtueAI : public ScriptedAI
+enum CuratorActions
 {
-    boss_maiden_of_virtueAI(Creature* pCreature) : ScriptedAI(pCreature)
+    MAIDEN_ACTION_REPENTANCE,
+    MAIDEN_ACTION_HOLY_FIRE,
+    MAIDEN_ACTION_HOLY_WRATH,
+    MAIDEN_ACTION_HOLY_GROUND,
+    MAIDEN_ACTION_MAX,
+};
+
+struct boss_maiden_of_virtueAI : public ScriptedAI, public CombatTimerAI
+{
+    boss_maiden_of_virtueAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(MAIDEN_ACTION_MAX)
     {
         m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
+        AddCombatAction(MAIDEN_ACTION_REPENTANCE, 0);
+        AddCombatAction(MAIDEN_ACTION_HOLY_FIRE, 0);
+        AddCombatAction(MAIDEN_ACTION_HOLY_WRATH, 0);
+        AddCombatAction(MAIDEN_ACTION_HOLY_GROUND, 0);
         Reset();
     }
 
     ScriptedInstance* m_pInstance;
 
-    uint32 m_uiRepentanceTimer;
-    uint32 m_uiHolyfireTimer;
-    uint32 m_uiHolywrathTimer;
-    uint32 m_uiHolygroundTimer;
-
     void Reset() override
     {
-        m_uiRepentanceTimer    = urand(42000, 44000);
-        m_uiHolyfireTimer      = urand(8000, 25000);
-        m_uiHolywrathTimer     = urand(15000, 25000);
-        m_uiHolygroundTimer    = 3000;
+        for (uint32 i = 0; i < MAIDEN_ACTION_MAX; ++i)
+            SetActionReadyStatus(i, false);
+
+        ResetTimer(MAIDEN_ACTION_REPENTANCE, GetInitialActionTimer(MAIDEN_ACTION_REPENTANCE));
+        ResetTimer(MAIDEN_ACTION_HOLY_FIRE, GetInitialActionTimer(MAIDEN_ACTION_HOLY_FIRE));
+        ResetTimer(MAIDEN_ACTION_HOLY_WRATH, GetInitialActionTimer(MAIDEN_ACTION_HOLY_WRATH));
+        ResetTimer(MAIDEN_ACTION_HOLY_GROUND, GetInitialActionTimer(MAIDEN_ACTION_HOLY_GROUND));
+    }
+
+    uint32 GetInitialActionTimer(uint32 id)
+    {
+        switch (id)
+        {
+            case MAIDEN_ACTION_REPENTANCE: return urand(28000, 32000);
+            case MAIDEN_ACTION_HOLY_FIRE: return urand(8000, 14000);
+            case MAIDEN_ACTION_HOLY_WRATH: return urand(15000, 25000);
+            case MAIDEN_ACTION_HOLY_GROUND: return 2000;
+            default: return 0; // never occurs but for compiler
+        }
+    }
+
+    uint32 GetSubsequentActionTimer(uint32 id)
+    {
+        switch (id)
+        {
+            case MAIDEN_ACTION_REPENTANCE: return urand(28000, 32000);
+            case MAIDEN_ACTION_HOLY_FIRE: return urand(12000, 20000);
+            case MAIDEN_ACTION_HOLY_WRATH: return urand(25000, 35000);
+            case MAIDEN_ACTION_HOLY_GROUND: return 2000;
+            default: return 0; // never occurs but for compiler
+        }
+    }
+
+    void ExecuteActions() override
+    {
+        if (!CanExecuteCombatAction())
+            return;
+
+        for (uint32 i = 0; i < MAIDEN_ACTION_MAX; ++i)
+        {
+            if (GetActionReadyStatus(i))
+            {
+                switch (i)
+                {
+                    case MAIDEN_ACTION_REPENTANCE:
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_REPENTANCE);
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        continue;
+                    }
+                    case MAIDEN_ACTION_HOLY_FIRE:
+                    {
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_PLAYER))
+                            DoCastSpellIfCan(pTarget, SPELL_HOLYFIRE);
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        continue;
+                    }
+                    case MAIDEN_ACTION_HOLY_WRATH:
+                    {
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                            DoCastSpellIfCan(pTarget, SPELL_HOLYWRATH);
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        continue;
+                    }
+                    case MAIDEN_ACTION_HOLY_GROUND:
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_HOLYGROUND, CAST_TRIGGERED);
+                        ResetTimer(i, GetSubsequentActionTimer(i));
+                        SetActionReadyStatus(i, false);
+                        continue;
+                    }
+                }
+            }
+        }
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        switch (urand(0, 5))                                // 50% chance to say something out of 3 texts
+        switch (urand(0, 5)) // 50% chance to say something out of 3 texts
         {
             case 0: DoScriptText(SAY_SLAY1, m_creature); break;
             case 1: DoScriptText(SAY_SLAY2, m_creature); break;
@@ -100,45 +182,8 @@ struct boss_maiden_of_virtueAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        if (m_uiHolygroundTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_HOLYGROUND, CAST_TRIGGERED) == CAST_OK)
-                m_uiHolygroundTimer = 3000;
-        }
-        else
-            m_uiHolygroundTimer -= uiDiff;
-
-        if (m_uiRepentanceTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_REPENTANCE) == CAST_OK)
-            {
-                DoScriptText(urand(0, 1) ? SAY_REPENTANCE1 : SAY_REPENTANCE2, m_creature);
-                m_uiRepentanceTimer = urand(28000, 36000);
-            }
-        }
-        else
-            m_uiRepentanceTimer -= uiDiff;
-
-        if (m_uiHolyfireTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_HOLYFIRE) == CAST_OK)
-                    m_uiHolyfireTimer = urand(8000, 23000);
-            }
-        }
-        else
-            m_uiHolyfireTimer -= uiDiff;
-
-        if (m_uiHolywrathTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                DoCastSpellIfCan(pTarget, SPELL_HOLYWRATH);
-
-            m_uiHolywrathTimer = urand(20000, 25000);
-        }
-        else
-            m_uiHolywrathTimer -= uiDiff;
+        UpdateTimers(uiDiff, m_creature->isInCombat());
+        ExecuteActions();
 
         DoMeleeAttackIfReady();
     }
