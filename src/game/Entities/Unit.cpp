@@ -4864,17 +4864,16 @@ bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skip
     // channeled spells may be delayed, but they are still considered casted
     if (!skipChanneled)
     {
-        Spell const* channeledSpell = m_currentSpells[CURRENT_CHANNELED_SPELL];
-        if (channeledSpell)
+        if (Spell const* channeledSpell = m_currentSpells[CURRENT_CHANNELED_SPELL])
         {
             bool attributeResult;
             if (forMovement)
-                attributeResult = m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->HasAttribute(SPELL_ATTR_EX5_CAN_CHANNEL_WHEN_MOVING);
+                attributeResult = channeledSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX5_CAN_CHANNEL_WHEN_MOVING);
             else
-                attributeResult = m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING);
+                attributeResult = channeledSpell->m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING);
 
-            if (!attributeResult && !m_currentSpells[CURRENT_CHANNELED_SPELL]->m_IsTriggeredSpell &&
-                (m_currentSpells[CURRENT_CHANNELED_SPELL]->getState() != SPELL_STATE_FINISHED))
+            if (!attributeResult && !channeledSpell->m_IsTriggeredSpell &&
+                    (channeledSpell->getState() != SPELL_STATE_FINISHED))
                 return true;
         }
     }
