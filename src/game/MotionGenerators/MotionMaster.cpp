@@ -492,7 +492,7 @@ void MotionMaster::propagateSpeedChange()
     Impl::container_type::iterator it = Impl::c.begin();
     for (; it != end(); ++it)
     {
-        (*it)->unitSpeedChanged();
+        (*it)->UnitSpeedChanged();
     }
 }
 
