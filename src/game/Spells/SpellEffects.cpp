@@ -9433,6 +9433,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 42179:                                 // Summon Amani'shi Sentries
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint32 spells[4] = { 42180, 42181, 42182, 42183 };
+                    unitTarget->CastSpell(unitTarget, spells[urand(0, 3)], TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 42281:                                 // Sprouting
                 {
                     if (!unitTarget)

@@ -30,6 +30,7 @@ npc_harkor
 npc_tanzar
 npc_kraz
 npc_ashli
+npc_amanishi_scout
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -1517,6 +1518,144 @@ bool GossipSelect_npc_ashli(Player* pPlayer, Creature* pCreature, uint32 /*uiSen
     return true;
 }
 
+
+/*######
+## npc_amanishi_scout
+######*/
+
+enum
+{
+    SPELL_ALERT_DRUMS               = 42177,
+    SPELL_SHOOT                     = 16496,
+    SPELL_MULTI_SHOT                = 43205,
+    SPELL_SUMMON_AMANISHI_SENTRIES  = 42179,
+
+    SAY_ALARM                       = -1568120,
+};
+
+struct npc_amanishi_scoutAI : public ScriptedAI
+{
+    npc_amanishi_scoutAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_zulaman*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_zulaman* m_pInstance;
+
+    uint32 m_uiShootTimer;
+    uint32 m_uiMultiShotTimer;
+    ObjectGuid m_targetDrumGuid;
+    ObjectGuid m_targetHutGuid;
+
+    void Reset() override
+    {
+        m_uiShootTimer = 2000;
+        m_uiMultiShotTimer = 6000;
+        m_creature->SetWalk(true);
+    }
+
+    void Aggro(Unit* /*pWho*/) override
+    {
+        m_creature->SetInCombatWithZone();
+        SetCombatScriptStatus(true);
+        SetCombatMovement(false);
+        m_creature->SetWalk(false);
+        DoScriptText(SAY_ALARM, m_creature);
+
+        if (m_pInstance)
+        {
+            float minDist = 99999.9f;
+            for (auto itr : m_pInstance->sDrumTriggerGuidSet)
+            {
+                if (Creature* pDrum = m_pInstance->instance->GetCreature(itr))
+                {
+                    if (pDrum->GetDistance(m_creature) < minDist)
+                    {
+                        minDist = pDrum->GetDistance(m_creature);
+                        m_targetDrumGuid = pDrum->GetObjectGuid();
+                    }
+                }
+            }
+
+            if (Creature* pCloseDrum = m_pInstance->instance->GetCreature(m_targetDrumGuid))
+            {
+                m_creature->GetMotionMaster()->MoveIdle();
+                m_creature->GetMotionMaster()->MovePoint(1, pCloseDrum->GetPositionX(), pCloseDrum->GetPositionY(), pCloseDrum->GetPositionZ());
+            }
+        }
+    }
+
+    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+    {
+        if (uiMotionType != POINT_MOTION_TYPE || uiPointId != 1)
+            return;
+
+        DoCastSpellIfCan(m_creature, SPELL_ALERT_DRUMS);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    {
+        if (m_pInstance)
+        {
+            if (eventType == AI_EVENT_CUSTOM_A)
+            {
+                float minDist = 99999.9f;
+                for (auto itr : m_pInstance->sHutTriggerGuidSet)
+                {
+                    if (Creature* pHut = m_pInstance->instance->GetCreature(itr))
+                    {
+                        if (pHut->GetDistance(m_creature) < minDist)
+                        {
+                            minDist = pHut->GetDistance(m_creature);
+                            m_targetHutGuid = pHut->GetObjectGuid();
+                        }
+                    }
+                }
+
+                if (Creature* pCloseHut = m_pInstance->instance->GetCreature(m_targetHutGuid))
+                    pCloseHut->CastSpell(pCloseHut, SPELL_SUMMON_AMANISHI_SENTRIES, TRIGGERED_OLD_TRIGGERED);
+            }
+            else if (eventType == AI_EVENT_CUSTOM_B)
+            {
+                SetCombatScriptStatus(false);
+                SetCombatMovement(true);
+                if (m_creature->getVictim())
+                    DoStartMovement(m_creature->getVictim());
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || GetCombatScriptStatus())
+            return;
+
+        if (m_uiShootTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT) == CAST_OK)
+                m_uiShootTimer = urand(4000, 5000);
+        }
+        else
+            m_uiShootTimer -= uiDiff;
+
+        if (m_uiMultiShotTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MULTI_SHOT) == CAST_OK)
+                m_uiMultiShotTimer = urand(20000, 24000);
+        }
+        else
+            m_uiMultiShotTimer -= uiDiff;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+UnitAI* GetAI_npc_amanishi_scout(Creature* pCreature)
+{
+    return new npc_amanishi_scoutAI(pCreature);
+}
+
 void AddSC_zulaman()
 {
     Script* pNewScript = new Script;
@@ -1572,5 +1711,10 @@ void AddSC_zulaman()
     pNewScript->GetAI = &GetAI_npc_ashli;
     pNewScript->pGossipHello = &GossipHello_npc_ashli;
     pNewScript->pGossipSelect = &GossipSelect_npc_ashli;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_amanishi_scout";
+    pNewScript->GetAI = &GetAI_npc_amanishi_scout;
     pNewScript->RegisterSelf();
 }

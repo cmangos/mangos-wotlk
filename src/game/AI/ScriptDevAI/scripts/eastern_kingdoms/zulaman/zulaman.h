@@ -122,6 +122,9 @@ enum InstanceZA
 
     GO_ASHLIS_CAGE          = 187380,
     GO_ASHLIS_VASE          = 186671,
+
+    NPC_WORLD_TRIGGER       = 22515,                        // used to mark location of drums for Amani'shi Scouts and Amani'shi Reinforcement spawns
+    NPC_REINFORCEMENT       = 23587,
 };
 
 enum BossToChestIndex
@@ -199,6 +202,9 @@ class instance_zulaman : public ScriptedInstance
         bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
 
         void Update(uint32 uiDiff) override;
+
+        GuidSet sDrumTriggerGuidSet;
+        GuidSet sHutTriggerGuidSet;
 
     private:
         uint8 GetKilledPreBosses();
