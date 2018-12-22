@@ -2376,7 +2376,6 @@ class Player : public Unit
         bool HasTitle(CharTitlesEntry const* title) const { return HasTitle(title->bit_index); }
         void SetTitle(uint32 titleId, bool lost = false);
         void SetTitle(CharTitlesEntry const* title, bool lost = false);
-        void SaveTitles(); // optimization for arena rewards
 
         virtual UnitAI* AI() override { if (m_charmInfo) return m_charmInfo->GetAI(); return nullptr; }
         virtual CombatData* GetCombatData() override { if (m_charmInfo && m_charmInfo->GetCombatData()) return m_charmInfo->GetCombatData(); return m_combatData; }
@@ -2434,6 +2433,11 @@ class Player : public Unit
         }
 
         void UpdateEverything();
+
+        // Public Save system functions
+        void SaveItemToInventory(Item* item); // optimization for gift wrapping
+        void SaveTitles(); // optimization for arena rewards
+
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
