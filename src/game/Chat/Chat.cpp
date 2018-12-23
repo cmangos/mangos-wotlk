@@ -679,6 +679,14 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,             0,                  false, nullptr,                                           "", nullptr }
     };
 
+    static ChatCommand movementCommandTable[] =
+    {
+        { "movegens",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMovegensCommand,            "", nullptr },
+        { "cometome",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleComeToMeCommand,            "", nullptr },
+        { "movespeed",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMovespeedShowCommand,       "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                        "", nullptr }
+    };
+
     static ChatCommand arenaCommandTable[] =
     {
         { "flushpoints",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleArenaFlushPointsCommand,      "", nullptr },
@@ -874,8 +882,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "loadscripts",    SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleLoadScriptsCommand,         "", nullptr },
         { "mute",           SEC_MODERATOR,      true,  &ChatHandler::HandleMuteCommand,                "", nullptr },
         { "unmute",         SEC_MODERATOR,      true,  &ChatHandler::HandleUnmuteCommand,              "", nullptr },
-        { "movegens",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMovegensCommand,            "", nullptr },
-        { "cometome",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleComeToMeCommand,            "", nullptr },
+        { "movement",       SEC_PLAYER,         true,  nullptr,                                        "", movementCommandTable },
         { "damage",         SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDamageCommand,              "", nullptr },
         { "combatstop",     SEC_GAMEMASTER,     false, &ChatHandler::HandleCombatStopCommand,          "", nullptr },
         { "arena",          SEC_ADMINISTRATOR,  false, nullptr,                                        "", arenaCommandTable },
