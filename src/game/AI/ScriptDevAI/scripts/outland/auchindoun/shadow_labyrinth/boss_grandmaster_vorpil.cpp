@@ -41,6 +41,7 @@ enum
     SPELL_RAIN_OF_FIRE              = 33617,
     SPELL_RAIN_OF_FIRE_H            = 39363,
     SPELL_BANISH_H                  = 38791,
+    SPELL_SUMMON_VOID_SUMMONER      = 33927,                // serverside unused currently, summoned trigger 19427 probably handles add spawning
     SPELL_SUMMON_VOIDWALKER_A       = 33582,                // the void travelers are summond at portal locations according to DB coords
     SPELL_SUMMON_VOIDWALKER_B       = 33583,
     SPELL_SUMMON_VOIDWALKER_C       = 33584,
