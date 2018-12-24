@@ -424,13 +424,11 @@ struct boss_lady_vashjAI : public ScriptedAI
     void DistancingStarted()
     {
         SetCombatScriptStatus(true);
-        SetCombatMovement(false);
     }
 
     void DistancingEnded()
     {
         SetCombatScriptStatus(false);
-        SetCombatMovement(true);
         if (m_creature->getVictim())
             DoStartMovement(m_creature->getVictim());
 

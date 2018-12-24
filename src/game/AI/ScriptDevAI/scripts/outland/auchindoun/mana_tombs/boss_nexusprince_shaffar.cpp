@@ -262,14 +262,12 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
     void DistancingStarted()
     {
         SetCombatScriptStatus(true);
-        SetCombatMovement(false);
         SetMeleeEnabled(false);
     }
 
     void DistancingEnded()
     {
         SetCombatScriptStatus(false);
-        SetCombatMovement(true);
         SetMeleeEnabled(true);
         DoStartMovement(m_creature->getVictim());
     }
