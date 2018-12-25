@@ -20819,8 +20819,7 @@ void Player::ApplyEquipCooldown(Item* pItem)
         if (!spellentry)
             continue;
 
-        //AddSpellCooldown(spellData.SpellId, pItem->GetEntry(), time(nullptr) + 30);
-        AddCooldown(*spellentry, pItem->GetProto(), false, 30 * IN_MILLISECONDS);
+        AddCooldown(*spellentry, nullptr, false, 30 * IN_MILLISECONDS);
 
         WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
         data << ObjectGuid(pItem->GetObjectGuid());
