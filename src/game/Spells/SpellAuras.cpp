@@ -8804,8 +8804,13 @@ void Aura::PeriodicDummyTick()
 //              case 33209: break;
 //              // Steal Weapon
 //              case 36207: break;
-//              // Simon Game START timer, (DND)
-//              case 39993: break;
+                case 37025: // Coilfang Water
+                    if (target->IsInSwimmableWater())
+                        target->CastSpell(target, 37026, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                    return;
+                case 39993: // Simon Game START timer, (DND)
+                    target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, target);
+                    return;
 //              // Knockdown Fel Cannon: break; The Aggro Burst
 //              case 40119: break;
 //              // Old Mount Spell
