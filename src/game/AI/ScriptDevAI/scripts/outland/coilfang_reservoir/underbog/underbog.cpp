@@ -52,6 +52,8 @@ void instance_underbog::OnCreatureCreate(Creature* creature)
 {
     switch (creature->GetEntry())
     {
+    case NPC_SWAMPLORD_MUSELEK:
+    case NPC_CLAW:
     case NPC_GHAZAN:
         m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
         break;

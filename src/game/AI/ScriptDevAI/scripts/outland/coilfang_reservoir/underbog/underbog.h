@@ -7,9 +7,12 @@
 
 enum
 {
-    NPC_GHAZAN = 18105,
+    NPC_SWAMPLORD_MUSELEK = 17826,
+    NPC_CLAW              = 17827,
+    NPC_CLAW_DRUID_FORM   = 17894,
+    NPC_GHAZAN            = 18105,
 
-    DATA_GHAZAN_SURFACE = 0,
+    DATA_GHAZAN_SURFACE   = 0,
 };
 
 class instance_underbog : public ScriptedInstance

@@ -551,6 +551,7 @@ UPDATE creature_template SET ScriptName='npc_naturalist_bite' WHERE entry IN(178
 /* THE UNDERBOG */
 UPDATE creature_template SET ScriptName='mob_underbog_mushroom' WHERE entry=17990;
 UPDATE creature_template SET ScriptName='boss_hungarfen' WHERE entry=17770;
+UPDATE creature_template SET ScriptName='boss_swamplord_muselek' WHERE entry=17826;
 UPDATE instance_template SET ScriptName='instance_underbog' WHERE map=546;
 INSERT INTO scripted_areatrigger VALUES
 (4302,'at_ghazan_surface');
@@ -4470,6 +4471,14 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1545024,'Enjoy the storm, warm bloods!',0,1,0,0,'thespia SAY_CLOUD');
 
 -- -1 546 000 THE UNDERBOG
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1546000, 'I will end this quickly...', 10385, 1, 0, 0, 'MUSELEK AGGRO_1'),
+(-1546001, 'We fight to the death!', 10384, 1, 0, 0, 'MUSELEK AGGRO_2'),
+(-1546002, 'Acalah pek ecta!', 10386, 1, 0, 0, 'MUSELEK AGGRO_3'),
+(-1546003, 'Beast! Obey me! Kill them at once!', 10383, 1, 0, 0, 'MUSELEK COMMAND'),
+(-1546004, 'Krypta!', 10387, 1, 0, 0, 'MUSELEK SLAY_1'),
+(-1546005, 'It is finished.', 10388, 1, 0, 0, 'MUSELEK SLAY_2'),
+(-1546006, 'Well... done...', 10389, 1, 0, 0, 'MUSELEK DEATH');
 
 -- -1 547 000 THE SLAVE PENS
 INSERT INTO script_texts(entry, content_default, sound, type, language, emote, comment) VALUES
