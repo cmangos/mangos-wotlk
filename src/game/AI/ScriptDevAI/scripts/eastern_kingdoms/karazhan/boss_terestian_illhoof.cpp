@@ -18,6 +18,8 @@
 SDName: Boss_Terestian_Illhoof
 SD%Complete: 100
 SDComment:
+ILLHOOF_ACTION_SUMMON_KILREK 45sec post 2.1, else 30
+ILLHOOF_ACTION_SACRIFICE random topaggro + 1 post 2.1. else 0
 SDCategory: Karazhan
 EndScriptData */
 
