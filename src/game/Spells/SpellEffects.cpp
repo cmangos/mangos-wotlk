@@ -8911,8 +8911,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 33684, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 34653:                                 // Fireball
-                case 36920:                                 // Fireball (h)
+                case 34653:                                 // SPELL_FIREBALL_GROUND
+                case 36920:                                 // SPELL_FIREBALL_GROUND_H
+                case 33793:                                 // SPELL_FIREBALL_RANDOM
+                case 33794:                                 // SPELL_FIREBALL_RANDOM_H
+                case 30926:                                 // SPELL_CONE_OF_FIRE
+                case 36921:                                 // SPELL_CONE_OF_FIRE_H
                 {
                     if (!unitTarget)
                         return;
