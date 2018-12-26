@@ -151,7 +151,7 @@ struct boss_terestianAI : public ScriptedAI, public CombatTimerAI
                     }
                     case ILLHOOF_ACTION_SACRIFICE:
                     {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SACRIFICE, SELECT_FLAG_PLAYER))
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SACRIFICE, SELECT_FLAG_PLAYER))
                         {
                             if (DoCastSpellIfCan(pTarget, SPELL_SACRIFICE) == CAST_OK)
                             {
