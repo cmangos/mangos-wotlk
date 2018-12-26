@@ -67,7 +67,6 @@ const float afCombatPos[3] = { -1413.848f, 1754.019f, 83.146f}; // moves here wh
 
 // This is the flying mob ("mounted" on dragon) spawned initially
 // This npc will morph into the "unmounted" dragon (nazan) after vazruden is summoned and continue flying
-// Descent after Vazruden reach 30% HP
 struct boss_vazruden_heraldAI : public ScriptedAI
 {
     boss_vazruden_heraldAI(Creature* pCreature) : ScriptedAI(pCreature)
