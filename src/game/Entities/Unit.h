@@ -1881,7 +1881,7 @@ class Unit : public WorldObject
 
         virtual bool IsInWater() const;
         bool IsInSwimmableWater() const;
-        virtual bool IsUnderWater() const;
+        virtual bool IsUnderwater() const;
         bool isInAccessablePlaceFor(Unit const* unit) const;
 
         void EnergizeBySpell(Unit* pVictim, uint32 SpellID, uint32 Damage, Powers powertype);

@@ -695,7 +695,7 @@ void Spell::FillTargetMap()
                                 case SPELL_EFFECT_TELEPORT_UNITS:
                                     sLog.outError("Reached invalid default target for spell: %d.", m_spellInfo->Id); // should never occur
                                     break;
-                                case SPELL_EFFECT_SUMMON_CHANGE_ITEM: // no targeting needed, all data is in m_castItem - only works when item cast
+                                case SPELL_EFFECT_SUMMON_CHANGE_ITEM: // targets unit, caster item
                                 case SPELL_EFFECT_SUMMON_ALL_TOTEMS:
                                 case SPELL_EFFECT_DESTROY_ALL_TOTEMS: // no targeting needed, no data is needed - iteration through totem slots
                                     SetTargetMap(SpellEffectIndex(i), TARGET_UNIT_CASTER, tmpUnitLists[i /*==effToIndex[i]*/], effException[i]); // workaround for item only effects
