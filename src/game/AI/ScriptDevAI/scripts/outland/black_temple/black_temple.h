@@ -33,6 +33,8 @@ enum
     NPC_AKAMA                       = 23089,
     NPC_MAIEV_SHADOWSONG            = 23197,
     NPC_ILLIDAN_STORMRAGE           = 22917,
+    NPC_SKY_STALKER                 = 23030,
+    NPC_WIND_REAVER                 = 23330,
 
     NPC_ASH_CHANNELER               = 23421,
     NPC_CREATURE_GENERATOR          = 23210,

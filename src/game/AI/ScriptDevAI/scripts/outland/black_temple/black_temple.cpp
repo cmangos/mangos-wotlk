@@ -95,6 +95,11 @@ void instance_black_temple::OnCreatureCreate(Creature* pCreature)
         case NPC_GLAIVE_TARGET:
             m_vGlaiveTargetGuidVector.push_back(pCreature->GetObjectGuid());
             break;
+        case NPC_SKY_STALKER:
+        case NPC_WIND_REAVER:
+            if (pCreature->GetPositionZ() > 160.0f)
+                pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            break;
     }
 }
 
