@@ -1863,7 +1863,7 @@ struct SpellRangeEntry
     float     minRangeFriendly;                             // 2
     float     maxRange;                                     // 3        m_rangeMax[2]
     float     maxRangeFriendly;                             // 4
-    // uint32  Flags;                                       // 5        m_flags
+    uint32  Flags;                                          // 5        m_flags
     // char*   Name[16];                                    // 6-21     m_displayName_lang
     // uint32  NameFlags;                                   // 22 string flags
     // char*   ShortName[16];                               // 23-38    m_displayNameShort_lang

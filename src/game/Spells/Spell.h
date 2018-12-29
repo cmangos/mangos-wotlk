@@ -171,6 +171,7 @@ class SpellCastTargets
 
         void setCorpseTarget(Corpse* corpse);
         ObjectGuid getCorpseTargetGuid() const { return m_CorpseTargetGUID; }
+        Corpse* getCorpseTarget() const { return m_CorpseTarget; }
 
         void setItemTarget(Item* item);
         ObjectGuid getItemTargetGuid() const { return m_itemTargetGUID; }
@@ -203,6 +204,7 @@ class SpellCastTargets
         Unit* m_unitTarget;
         GameObject* m_GOTarget;
         Item* m_itemTarget;
+        Corpse* m_CorpseTarget;
 
         // object GUID/etc, can be used always
         ObjectGuid m_unitTargetGUID;
@@ -604,6 +606,9 @@ class Spell
 
         SpellCastResult PreCastCheck(Aura* triggeredByAura = nullptr);
         void Prepare();
+
+        // Spell_C_GetMinMaxRange client equivalent - do not change
+        std::pair<float, float> GetMinMaxRange(bool strict);
 
         Unit* m_caster;
 
