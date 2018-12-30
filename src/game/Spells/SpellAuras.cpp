@@ -6204,8 +6204,8 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     // $0.2*(($MWB+$mwb)/2+$AP/14*$MWS) bonus per tick
                     float ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     int32 mws = caster->GetAttackTime(BASE_ATTACK);
-                    float mwb_min = caster->GetWeaponDamageRange(BASE_ATTACK, MINDAMAGE);
-                    float mwb_max = caster->GetWeaponDamageRange(BASE_ATTACK, MAXDAMAGE);
+                    float mwb_min = caster->GetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE);
+                    float mwb_max = caster->GetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE);
                     m_modifier.m_amount += int32(((mwb_min + mwb_max) / 2 + ap * mws / 14000) * 0.2f);
                     // If used while target is above 75% health, Rend does 35% more damage
                     if (spellProto->CalculateSimpleValue(EFFECT_INDEX_1) != 0 &&
