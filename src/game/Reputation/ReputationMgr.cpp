@@ -371,8 +371,8 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
         else if (standing < Reputation_Bottom)
             standing = Reputation_Bottom;
 
-        ReputationRank old_rank = ReputationToRank(faction.Standing + BaseRep);
-        ReputationRank new_rank = ReputationToRank(standing);
+        ReputationRank rankOld = ReputationToRank(faction.Standing + BaseRep);
+        ReputationRank rankNew = ReputationToRank(standing);
 
         faction.Standing = standing - BaseRep;
         faction.needSend = true;
@@ -380,10 +380,15 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
 
         SetVisible(&faction);
 
-        if (new_rank <= REP_HOSTILE)
-            SetAtWar(&faction, true);
+        if (rankNew != rankOld)                 // Server alters "At war" flag on two occasions:
+        {
+            if (rankNew < REP_UNFRIENDLY && rankNew < rankOld && rankOld > REP_HOSTILE)
+                SetAtWar(&itr->second, true);   // * When reputation dips to "Hostile": tick and now locked for manual changes
+            else if (rankNew > REP_UNFRIENDLY && rankNew > rankOld && rankOld < REP_NEUTRAL)
+                SetAtWar(&itr->second, false);  // * When reputation improves to "Neutral": untick, can be manually overriden for eligible factions
+        }
 
-        UpdateRankCounters(old_rank, new_rank);
+        UpdateRankCounters(rankOld, rankNew);
 
         m_player->ReputationChanged(factionEntry);
 
@@ -394,7 +399,7 @@ bool ReputationMgr::SetOneFactionReputation(FactionEntry const* factionEntry, in
         achievementManager.UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_REVERED_REPUTATION, factionEntry->ID);
         achievementManager.UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GAIN_HONORED_REPUTATION, factionEntry->ID);
 
-        if (new_rank > old_rank)
+        if (rankNew > rankOld)
             return true;
     }
     return false;
