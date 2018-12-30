@@ -818,7 +818,7 @@ struct boss_bigbadwolfAI : public ScriptedAI
 
         if (m_uiRedRidingHoodTimer < uiDiff)
         {
-            if (!m_isFixating || m_isFixating && !m_startFixate)
+            if (!m_isFixating || (m_isFixating && !m_startFixate))
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_PICK_RED_RIDING_HOOD) == CAST_OK)
                 {
