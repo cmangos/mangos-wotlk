@@ -11483,6 +11483,19 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
             }
             break;
         }
+        case SPELLFAMILY_PRIEST:
+        {
+            switch (m_spellInfo->Id)
+            {
+                case 39649:                                 // Summon Shadowfiends
+                {
+                    for (uint8 i = 0; i < 10; ++i)
+                        m_caster->CastSpell(m_caster, 41159, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_PALADIN:
         {
             // Judgement (seal trigger)
