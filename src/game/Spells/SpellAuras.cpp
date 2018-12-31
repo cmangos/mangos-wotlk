@@ -2205,6 +2205,15 @@ void Aura::TriggerSpell()
                     return;
                 break;
             }
+            case 39575:                                     // Charge Frenzy
+            {
+                Unit* caster = GetCaster();
+                triggerTarget = ((Creature*)caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, triggeredSpellInfo);
+                if (!triggerTarget)
+                    return;
+                caster->FixateTarget(triggerTarget);
+                break;
+            }
             case 43149:                                     // Claw Rage
             {
                 // Need to provide explicit target for trigger spell target combination
@@ -5923,6 +5932,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                         creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, creature, creature);
                 return;
             case 37640:                                     // Leotheras Whirlwind
+            case 39575:                                     // Charge Frenzy
                 if (Unit* pCaster = GetCaster())
                     pCaster->FixateTarget(nullptr);
                 return;
