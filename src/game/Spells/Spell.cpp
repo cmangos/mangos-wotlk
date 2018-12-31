@@ -4503,7 +4503,7 @@ void Spell::SendSpellStart() const
     if ((m_IsTriggeredSpell && !IsAutoRepeatRangedSpell(m_spellInfo)) || m_triggeredByAuraSpell)
         castFlags |= CAST_FLAG_HIDDEN_COMBATLOG;
 
-    if (IsRangedSpell())
+    if (IsSpellRequiringAmmo())
         castFlags |= CAST_FLAG_AMMO;
 
     if (HasPersistentAuraEffect(m_spellInfo))
@@ -4568,7 +4568,7 @@ void Spell::SendSpellGo()
     if ((m_IsTriggeredSpell && !IsAutoRepeatRangedSpell(m_spellInfo)) || m_triggeredByAuraSpell)
         castFlags |= CAST_FLAG_HIDDEN_COMBATLOG;
 
-    if (IsRangedSpell())
+    if (IsSpellRequiringAmmo())
         castFlags |= CAST_FLAG_AMMO;                        // arrows/bullets visual
 
     if (m_CastItem)
@@ -4691,6 +4691,8 @@ void Spell::WriteAmmoToPacket(WorldPacket& data) const
     }
     else
     {
+        uint32 nonRangedAmmoDisplayID = 0;
+        uint32 nonRangedAmmoInventoryType = 0;
         for (uint8 i = 0; i < MAX_VIRTUAL_ITEM_SLOT; ++i)
         {
             if (uint32 item_id = m_caster->GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + i))
@@ -4714,6 +4716,10 @@ void Spell::WriteAmmoToPacket(WorldPacket& data) const
                                 ammoDisplayID = 5998;       // is this need fixing?
                                 ammoInventoryType = INVTYPE_AMMO;
                                 break;
+                            default:
+                                nonRangedAmmoDisplayID = itemEntry->DisplayId;
+                                nonRangedAmmoInventoryType = itemEntry->InventoryType;
+                                break;
                         }
 
                         if (ammoDisplayID)
@@ -4721,6 +4727,12 @@ void Spell::WriteAmmoToPacket(WorldPacket& data) const
                     }
                 }
             }
+        }
+
+        if (!ammoDisplayID && !ammoInventoryType)
+        {
+            ammoDisplayID = nonRangedAmmoDisplayID;
+            ammoInventoryType = nonRangedAmmoInventoryType;
         }
     }
 

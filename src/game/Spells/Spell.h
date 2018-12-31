@@ -539,6 +539,19 @@ class Spell
         {
             return  m_spellInfo->HasAttribute(SPELL_ATTR_RANGED);
         }
+        bool IsSpellRequiringAmmo() const
+        {
+            if (IsRangedSpell())
+                return true;
+
+            if (m_spellInfo->speed > 0.0f)
+                if (SpellVisualEntry const* spellVisual = sSpellVisualStore.LookupEntry(m_spellInfo->SpellVisual[0]))
+                    if (spellVisual->HasMissile)
+                        if (spellVisual->MissileModel == -4 || spellVisual->MissileModel == -5)
+                            return true;
+
+            return false;
+        }
         bool IsChannelActive() const { return m_caster->GetUInt32Value(UNIT_FIELD_CHANNEL_SPELL) != 0; }
         bool IsMeleeAttackResetSpell() const { return !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK);  }
         bool IsRangedAttackResetSpell() const { return !m_IsTriggeredSpell && IsRangedSpell() && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK); }
