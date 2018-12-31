@@ -3133,7 +3133,7 @@ uint32 Unit::GetDefenseSkillValue(Unit const* target) const
     {
         // in PvP always use full skill (and bonuses on top of it if present)
         uint32 value = (target && target->GetTypeId() == TYPEID_PLAYER)
-                       ? std::max(((Player*)this)->GetMaxSkillValue(SKILL_DEFENSE), ((Player*)this)->GetSkillValue(SKILL_DEFENSE))
+                       ? std::max(((Player*)this)->GetSkillMax(SKILL_DEFENSE), ((Player*)this)->GetSkillValue(SKILL_DEFENSE))
                        : ((Player*)this)->GetSkillValue(SKILL_DEFENSE);
         value += uint32(((Player*)this)->GetRatingBonusValue(CR_DEFENSE_SKILL));
         return value;
@@ -3443,7 +3443,7 @@ float Unit::CalculateEffectiveDodgeChance(const Unit* attacker, WeaponAttackType
     // a) Attacker's level is higher
     // b) Attacker has +skill bonuses
     const bool isPlayerOrPet = (GetTypeId() == TYPEID_PLAYER || GetOwnerGuid().IsPlayer());
-    const uint32 skill = (weapon ? attacker->GetWeaponSkillValue(attType, this) : attacker->GetMaxSkillValueForLevel(this));
+    const uint32 skill = (weapon ? attacker->GetWeaponSkillValue(attType, this) : attacker->GetSkillMaxForLevel(this));
     int32 difference = int32(GetDefenseSkillValue(attacker) - skill);
     // Defense/weapon skill factor: for players and NPCs
     float factor = 0.04f;
@@ -3521,7 +3521,7 @@ float Unit::CalculateEffectiveParryChance(const Unit* attacker, WeaponAttackType
     // a) Attacker's level is higher
     // b) Attacker has +skill bonuses
     const bool isPlayerOrPet = (GetTypeId() == TYPEID_PLAYER || GetOwnerGuid().IsPlayer());
-    const uint32 skill = (weapon ? attacker->GetWeaponSkillValue(attType, this) : attacker->GetMaxSkillValueForLevel(this));
+    const uint32 skill = (weapon ? attacker->GetWeaponSkillValue(attType, this) : attacker->GetSkillMaxForLevel(this));
     int32 difference = int32(GetDefenseSkillValue(attacker) - skill);
     // Defense/weapon skill factor: for players and NPCs
     float factor = 0.04f;
@@ -3590,7 +3590,7 @@ float Unit::CalculateEffectiveBlockChance(const Unit* attacker, WeaponAttackType
     // a) Attacker's level is higher
     // b) Attacker has +skill bonuses
     const bool isPlayerOrPet = (GetTypeId() == TYPEID_PLAYER || GetOwnerGuid().IsPlayer());
-    const uint32 skill = (weapon ? attacker->GetWeaponSkillValue(attType, this) : attacker->GetMaxSkillValueForLevel(this));
+    const uint32 skill = (weapon ? attacker->GetWeaponSkillValue(attType, this) : attacker->GetSkillMaxForLevel(this));
     const int32 difference = int32(GetDefenseSkillValue(attacker) - skill);
     // Defense/weapon skill factor: for players and NPCs
     float factor = 0.04f;
@@ -3609,7 +3609,7 @@ float Unit::CalculateEffectiveCrushChance(const Unit* victim, WeaponAttackType a
 
     // Crushing blow chance is present when attacker's weapon skill is >= 20 over victim's own capped defense skill
     // The chance starts at 15% and increased by 2% per each additional skill point of defense deficit
-    const uint32 cap = victim->GetMaxSkillValueForLevel();
+    const uint32 cap = victim->GetSkillMaxForLevel();
     const uint32 defense = std::min(victim->GetDefenseSkillValue(this), cap);
     const int32 deficit = (int32(GetWeaponSkillValue(attType, victim)) - int32(defense));
     if (deficit >= 20)
@@ -3623,7 +3623,7 @@ float Unit::CalculateEffectiveGlanceChance(const Unit* victim, WeaponAttackType 
 
     // Glancing blow chance starts at 1% when victim's defense skill is > 10 lower than attacker's own capped weapon skill
     // The chance is increased for each point of skill diffrernce
-    const uint32 cap = GetMaxSkillValueForLevel();
+    const uint32 cap = GetSkillMaxForLevel();
     const uint32 skill = std::min(GetWeaponSkillValue(attType, victim), cap);
     const uint32 defense = victim->GetDefenseSkillValue(this);
     chance += (10 + int32(defense - skill));
@@ -3652,7 +3652,7 @@ uint32 Unit::CalculateGlanceAmount(CalcDamageInfo* meleeInfo) const
     if (!meleeInfo)
         return 0;
     // Post-2.0.1: capped skill value
-    const uint32 cap = GetMaxSkillValueForLevel();
+    const uint32 cap = GetSkillMaxForLevel();
     const uint32 skill = std::min(GetWeaponSkillValue(meleeInfo->attackType, meleeInfo->target), cap);
     const uint32 defense = meleeInfo->target->GetDefenseSkillValue(this);
     const int32 difference = int32(defense - skill);
@@ -4101,7 +4101,7 @@ float Unit::CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType at
     // a) Positive means that attacker's level is higher or additional weapon +skill bonuses
     // b) Negative means that victim's level is higher or additional +defense bonuses
     const bool ranged = (attType == RANGED_ATTACK);
-    const uint32 skill = (weapon ? GetWeaponSkillValue(attType, victim) : GetMaxSkillValueForLevel(victim));
+    const uint32 skill = (weapon ? GetWeaponSkillValue(attType, victim) : GetSkillMaxForLevel(victim));
     const int32 difference = int32(skill - victim->GetDefenseSkillValue(this));
     // Weapon skill factor: for players and NPCs
     float factor = 0.04f;
@@ -4145,7 +4145,7 @@ float Unit::CalculateEffectiveMissChance(const Unit* victim, WeaponAttackType at
     // a) Victim's level is higher
     // b) Victim has additional defense skill bonuses
     const bool vsPlayerOrPet = (victim->GetTypeId() == TYPEID_PLAYER || victim->GetOwnerGuid().IsPlayer());
-    const uint32 skill = (weapon ? GetWeaponSkillValue(attType, victim) : GetMaxSkillValueForLevel(victim));
+    const uint32 skill = (weapon ? GetWeaponSkillValue(attType, victim) : GetSkillMaxForLevel(victim));
     int32 difference = int32(victim->GetDefenseSkillValue(this) - skill);
     // Defense/weapon skill factor: for players and NPCs
     float factor = 0.04f;
@@ -4445,11 +4445,11 @@ float Unit::CalculateEffectiveMagicResistancePercent(const Unit* attacker, Spell
         schools >>= 1;
     }
     // Attacker's level based skill, penalize when calculating for low levels (< 20):
-    const uint32 skill = std::max(attacker->GetMaxSkillValueForLevel(this), uint16(100));
+    const uint32 skill = std::max(attacker->GetSkillMaxForLevel(this), uint16(100));
     float percent = float(float(resistance) / (float(skill) + resistance)) * 100;
     // Bonus resistance by level difference when calculating damage hit for NPCs only
     if (!binary && GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-        percent += (0.4f * std::max(int32(GetMaxSkillValueForLevel(attacker) - skill), 0));
+        percent += (0.4f * std::max(int32(GetSkillMaxForLevel(attacker) - skill), 0));
     // Magic resistance percentage cap (same as armor cap)
     return std::max(0.0f, std::min(percent, 75.0f));
 }
@@ -4528,14 +4528,14 @@ uint32 Unit::GetWeaponSkillValue(WeaponAttackType attType, Unit const* target) c
             return 0;
 
         if (IsInFeralForm())
-            return GetMaxSkillValueForLevel();              // always maximized SKILL_FERAL_COMBAT in fact
+            return GetSkillMaxForLevel();              // always maximized SKILL_FERAL_COMBAT in fact
 
         // weapon skill or (unarmed for base attack)
         uint32 skill = item ? item->GetSkill() : uint32(SKILL_UNARMED);
 
         // in PvP always use full skill (and bonuses on top of it if present)
         value = (target && target->GetTypeId() == TYPEID_PLAYER)
-                ? std::max(((Player*)this)->GetMaxSkillValue(skill), ((Player*)this)->GetSkillValue(skill))
+                ? std::max(((Player*)this)->GetSkillMax(skill), ((Player*)this)->GetSkillValue(skill))
                 : ((Player*)this)->GetSkillValue(skill);
         // Modify value from ratings
         value += uint32(((Player*)this)->GetRatingBonusValue(CR_WEAPON_SKILL));

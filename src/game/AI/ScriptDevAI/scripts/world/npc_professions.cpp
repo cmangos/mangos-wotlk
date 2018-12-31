@@ -303,7 +303,7 @@ bool GossipHello_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature)
 
     uint32 eCreature = pCreature->GetEntry();
     // WEAPONSMITH & ARMORSMITH
-    if (pPlayer->GetBaseSkillValue(SKILL_BLACKSMITHING) >= 225)
+    if (pPlayer->GetSkillValueBase(SKILL_BLACKSMITHING) >= 225)
     {
         switch (eCreature)
         {
@@ -327,7 +327,7 @@ bool GossipHello_npc_prof_blacksmith(Player* pPlayer, Creature* pCreature)
         }
     }
     // WEAPONSMITH SPEC
-    if (pPlayer->HasSpell(S_WEAPON) && pPlayer->getLevel() > 49 && pPlayer->GetBaseSkillValue(SKILL_BLACKSMITHING) >= 250)
+    if (pPlayer->HasSpell(S_WEAPON) && pPlayer->getLevel() > 49 && pPlayer->GetSkillValueBase(SKILL_BLACKSMITHING) >= 250)
     {
         switch (eCreature)
         {
@@ -590,7 +590,7 @@ bool GossipHello_npc_prof_leather(Player* pPlayer, Creature* pCreature)
 
     uint32 eCreature = pCreature->GetEntry();
 
-    if (pPlayer->HasSkill(SKILL_LEATHERWORKING) && pPlayer->GetBaseSkillValue(SKILL_LEATHERWORKING) >= 250 && pPlayer->getLevel() > 49)
+    if (pPlayer->HasSkill(SKILL_LEATHERWORKING) && pPlayer->GetSkillValueBase(SKILL_LEATHERWORKING) >= 250 && pPlayer->getLevel() > 49)
     {
         switch (eCreature)
         {

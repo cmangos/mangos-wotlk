@@ -6769,7 +6769,7 @@ void PlayerbotAI::MakeQuestLink(Quest const* quest, std::ostringstream& out)
 void PlayerbotAI::MakeWeaponSkillLink(const SpellEntry* sInfo, std::ostringstream& out, uint32 skillid)
 {
     int loc = GetMaster()->GetSession()->GetSessionDbcLocale();
-    out << "|cff00ffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[loc] << " : " << m_bot->GetSkillValue(skillid) << " /" << m_bot->GetMaxSkillValue(skillid) << "]|h|r";
+    out << "|cff00ffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[loc] << " : " << m_bot->GetSkillValue(skillid) << " /" << m_bot->GetSkillMax(skillid) << "]|h|r";
 }
 
 // Build an hlink for spells in White
@@ -10189,7 +10189,7 @@ void PlayerbotAI::_HandleCommandProcess(std::string& text, Player& fromPlayer)
     }
     else if (ExtractCommand("prospect", text, true)) // true -> "process prospect" OR "process p"
     {
-        if (m_bot->HasSkill(SKILL_JEWELCRAFTING) && m_bot->GetPureSkillValue(SKILL_JEWELCRAFTING) >= 20)
+        if (m_bot->HasSkill(SKILL_JEWELCRAFTING) && m_bot->GetSkillValuePure(SKILL_JEWELCRAFTING) >= 20)
             spellId = PROSPECTING_1;
         else
         {

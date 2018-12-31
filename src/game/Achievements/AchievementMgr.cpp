@@ -978,7 +978,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 // update at loading or specific skill update
                 if (miscvalue1 && miscvalue1 != achievementCriteria->reach_skill_level.skillID)
                     continue;
-                change = GetPlayer()->GetBaseSkillValue(achievementCriteria->reach_skill_level.skillID);
+                change = GetPlayer()->GetSkillValueBase(achievementCriteria->reach_skill_level.skillID);
                 progressType = PROGRESS_HIGHEST;
                 break;
             }
@@ -987,7 +987,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 // update at loading or specific skill update
                 if (miscvalue1 && miscvalue1 != achievementCriteria->learn_skill_level.skillID)
                     continue;
-                change = GetPlayer()->GetPureMaxSkillValue(achievementCriteria->learn_skill_level.skillID);
+                change = GetPlayer()->GetSkillMaxPure(achievementCriteria->learn_skill_level.skillID);
                 progressType = PROGRESS_HIGHEST;
                 break;
             }
