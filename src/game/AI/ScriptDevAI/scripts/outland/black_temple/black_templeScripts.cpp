@@ -22,11 +22,44 @@ SDCategory: Black Temple
 EndScriptData */
 
 /* ContentData
+npc_greater_shadowfiend
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "black_temple.h"
 
+/*######
+## npc_greater_shadowfiend
+######*/
+
+#define SPELL_SHADOWFORM    34429
+
+struct npc_greater_shadowfiend : public ScriptedAI
+{
+    npc_greater_shadowfiend(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    void Reset() override
+    {
+        DoCastSpellIfCan(m_creature, SPELL_SHADOWFORM);
+    }
+
+    void Aggro(Unit* /*pWho*/) override
+    {
+        m_creature->SetInCombatWithZone();
+        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+            m_creature->AddThreat(pTarget, 100000.f);
+    }
+};
+
+UnitAI* GetAI_npc_greater_shadowfiend(Creature* pCreature)
+{
+    return new npc_greater_shadowfiend(pCreature);
+}
+
 void AddSC_black_temple()
 {
+    Script* pNewScript = new Script;
+    pNewScript->Name = "npc_greater_shadowfiend";
+    pNewScript->GetAI = &GetAI_npc_greater_shadowfiend;
+    pNewScript->RegisterSelf();
 }

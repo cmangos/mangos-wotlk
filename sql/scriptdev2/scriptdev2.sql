@@ -362,6 +362,7 @@ UPDATE creature_template SET ScriptName='molten_flame' WHERE entry=23095; -- Mol
 UPDATE creature_template SET ScriptName='mob_ashtongue_channeler' WHERE entry=23421; -- Ashtongue CHanneler in Shade of AKama
 UPDATE creature_template SET ScriptName='mob_ashtongue_sorcerer' WHERE entry=23215; -- Ashtongue Sorcerer in Shade of Akama
 UPDATE creature_template SET ScriptName='npc_enslaved_soul' WHERE entry=23469;
+UPDATE creature_template SET ScriptName='npc_greater_shadowfiend' WHERE entry=22929;
 
 /* BLACKFATHOM DEPTHS */
 UPDATE instance_template SET ScriptName='instance_blackfathom_deeps' WHERE map=48;
