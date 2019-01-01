@@ -13242,7 +13242,13 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
             player->UpdateClientControl(charmed, false);
             player->SetMover(player);
         }
+    }
 
+    // be sure all those change will be made for clients
+    SendForcedObjectUpdate();
+
+    if (player)
+    {
         // Player pet can be re-summoned here
         if (advertised)
         {
@@ -13258,9 +13264,6 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
                 player->SetGroupUpdateFlag(GROUP_UPDATE_PET);
         }
     }
-
-    // be sure all those change will be made for clients
-    SendForcedObjectUpdate();
 }
 
 float Unit::GetAttackDistance(Unit const* pl) const
