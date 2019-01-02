@@ -4655,7 +4655,13 @@ void Unit::_UpdateAutoRepeatSpell()
         return;
     }
 
-    m_AutoRepeatFirstCast = false;
+    // apply delay
+    if (m_AutoRepeatFirstCast)
+    {
+        AddCooldown(*m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo, nullptr, false, 500);
+        m_AutoRepeatFirstCast = false;
+        return;
+    }
 
     // check spell casts
     if (IsNonMeleeSpellCasted(false, false, true))
@@ -4672,8 +4678,7 @@ void Unit::_UpdateAutoRepeatSpell()
     }
 
     // cast routine
-    // TODO: in the future remove RANGED_ATTACK and fully utilize cooldown
-    if (isAttackReady(RANGED_ATTACK) && IsSpellReady(*m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo))
+    if (IsSpellReady(*m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo))
     {
         // be sure the unit is stand up
         if (getStandState() != UNIT_STAND_STATE_STAND)
@@ -4712,9 +4717,6 @@ void Unit::_UpdateAutoRepeatSpell()
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             return;
         }
-
-        // all went good, reset attack
-        resetAttackTimer(RANGED_ATTACK);
     }
 }
 
