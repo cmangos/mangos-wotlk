@@ -3275,6 +3275,24 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                     break;
                 // case 38363: break;                   // Gushing Wound
                 // case 39215: break;                   // Gushing Wound
+                case 39832:                             // Light of the Naaru - proc only hits demons near Black Temple entrance
+                    switch (pVictim->GetEntry())
+                    {
+                        case 21166:
+                        case 21768:
+                        case 22857:
+                        case 22858:
+                        case 22859:
+                        case 22860:
+                        case 22904:
+                        case 22988:
+                        case 23044:
+                        case 23152:
+                            break;
+                        default:
+                            return SPELL_AURA_PROC_FAILED;
+                    }
+                    break;
                 // case 40329: break;                   // Demo Shout Sensor
                 // case 40364: break;                   // Entangling Roots Sensor
                 // case 41054: break;                   // Copy Weapon
