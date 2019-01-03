@@ -147,12 +147,15 @@ enum
     BG_SA_SPELL_TELEPORT_ATTACKERS              = 60178,
     BG_SA_SPELL_END_OF_ROUND                    = 52459,                // stun the players at the end of the round; after 5 seconds, teleport and reset for round 2
     BG_SA_SPELL_REMOVE_SEAFORIUM                = 59077,
-    BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT    = 60027,                // phase 65 - alliance is defender
-    BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT       = 60028,                // phase 129 - horde is defender
+
+    // phasing auras implemented in DB in spell area
+    // BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT = 60027,                // phase 65 - alliance is defender
+    // BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT    = 60028,                // phase 129 - horde is defender
 
     BG_SA_EVENT_ID_RELIC                        = 20572,                // event used to end the round
     BG_SA_EVENT_ID_SHIP_PAUSE_1                 = 22095,                // events used to pause the ships
     BG_SA_EVENT_ID_SHIP_PAUSE_2                 = 18829,
+    BG_SA_EVENT_SHRINE_DOOR_DESTROY             = 19837,
 
     // sounds
     BG_SA_SOUND_GRAVEYARD_TAKEN_HORDE           = 8174,
@@ -176,6 +179,10 @@ enum
     BG_SA_STAGE_SECOND_ROUND_1                  = 2,
     BG_SA_STAGE_SECOND_ROUND_2                  = 3,
     BG_SA_STAGE_ROUND_2                         = 4,
+
+    // conditions
+    BG_SA_COND_DEFENDER_ALLIANCE                = 0,
+    BG_SA_COND_DEFENDER_HORDE                   = 1,
 };
 
 static const uint32 strandGates[BG_SA_MAX_GATES] = { BG_SA_STATE_PURPLE_GATE, BG_SA_STATE_RED_GATE, BG_SA_STATE_BLUE_GATE, BG_SA_STATE_GREEN_GATE, BG_SA_STATE_YELLOW_GATE, BG_SA_STATE_ANCIENT_GATE };
@@ -184,9 +191,6 @@ static const uint32 strandGraveyardHorde[BG_SA_MAX_GRAVEYARDS] = { BG_SA_STATE_G
 
 // *** Battleground factions *** //
 const uint32 sotaTeamFactions[PVP_TEAM_COUNT] = { BG_SA_FACTION_ID_ALLIANCE, BG_SA_FACTION_ID_HORDE };
-
-// *** Battleground phasing auras *** //
-const uint32 sotaTeamControlAuras[PVP_TEAM_COUNT] = { BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT, BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT };
 
 struct StrandGoData
 {
@@ -237,6 +241,8 @@ class BattleGroundSA : public BattleGround
 
         bool HandleEvent(uint32 eventId, GameObject* go) override;
 
+        bool IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType) override;
+
         /* Scorekeeping */
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
 
@@ -260,6 +266,8 @@ class BattleGroundSA : public BattleGround
 
         ObjectGuid m_battlegroundMasterGuid;
         ObjectGuid m_defenderTeleportStalkerGuid;
+
+        ObjectGuid m_relicGuid[PVP_TEAM_COUNT];
 
         GuidList m_cannonsGuids;
         GuidList m_gatesGuids;

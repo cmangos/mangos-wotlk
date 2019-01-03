@@ -89,7 +89,6 @@ void BattleGroundSA::Update(uint32 diff)
                             {
                                 // remove auras
                                 player->RemoveAurasDueToSpell(BG_SA_SPELL_END_OF_ROUND);
-                                player->RemoveSpellsCausingAura(SPELL_AURA_PHASE);
 
                                 // teleport to the right spot and set phase
                                 TeleportPlayerToStartArea(player);
@@ -170,9 +169,6 @@ void BattleGroundSA::TeleportPlayerToStartArea(Player* player)
         if (Creature* stalker = GetBgMap()->GetCreature(m_defenderTeleportStalkerGuid))
             player->CastSpell(stalker, BG_SA_SPELL_TELEPORT_DEFENDER, TRIGGERED_OLD_TRIGGERED);
     }
-
-    // add phase aura
-    player->CastSpell(player, sotaTeamControlAuras[m_defendingTeamIdx], TRIGGERED_OLD_TRIGGERED);
 }
 
 void BattleGroundSA::StartingEventOpenDoors()
@@ -232,6 +228,12 @@ void BattleGroundSA::HandleGameObjectCreate(GameObject* go)
         case BG_SA_GO_GATE_ANCIENT_SHRINE:
             m_gatesGuids.push_back(go->GetObjectGuid());
             break;
+        case BG_SA_GO_TITAN_RELIC_ALLIANCE:
+            m_relicGuid[TEAM_INDEX_ALLIANCE] = go->GetObjectGuid();
+            return;
+        case BG_SA_GO_TITAN_RELIC_HORDE:
+            m_relicGuid[TEAM_INDEX_HORDE] = go->GetObjectGuid();
+            return;
     }
 }
 
@@ -244,6 +246,7 @@ void BattleGroundSA::UpdateTimerWorldState()
     UpdateWorldState(BG_SA_STATE_TIMER_SEC_FIRST_DIGIT, ((secondsLeft % 60000) % 10000) / 1000);
     UpdateWorldState(BG_SA_STATE_TIMER_SEC_SECOND_DIGIT, (secondsLeft % 60000) / 10000);
     UpdateWorldState(BG_SA_STATE_TIMER_MINUTES, secondsLeft / 60000);
+    UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, 1);
 }
 
 void BattleGroundSA::FillInitialWorldStates(WorldPacket& data, uint32& count)
@@ -288,6 +291,15 @@ void BattleGroundSA::FillInitialWorldStates(WorldPacket& data, uint32& count)
 // process the gate events
 bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go)
 {
+    // special event for the ancient shrine door
+    if (go->GetEntry() == BG_SA_GO_GATE_ANCIENT_SHRINE && eventId == BG_SA_EVENT_SHRINE_DOOR_DESTROY)
+    {
+        // Remove the no interact flag when door is destroyed
+        if (GameObject* relic = go->GetMap()->GetGameObject(m_relicGuid[GetAttacker()]))
+            relic->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+    }
+
+    // handle world state updates and warnings
     for (const auto& i : sotaObjectData)
     {
         if (go->GetEntry() == i.goEntry)
@@ -372,3 +384,16 @@ void BattleGroundSA::SetupBattleground()
         team = m_defendingTeamIdx;
 }
 
+// Check condition for ZM flag NPCs
+bool BattleGroundSA::IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType)
+{
+    switch (conditionId)
+    {
+        case BG_SA_COND_DEFENDER_ALLIANCE:
+            return m_defendingTeamIdx == TEAM_INDEX_ALLIANCE;
+        case BG_SA_COND_DEFENDER_HORDE:
+            return m_defendingTeamIdx == TEAM_INDEX_HORDE;
+    }
+
+    return false;
+}
