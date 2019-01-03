@@ -8515,6 +8515,11 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
         {
             if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(m_value1))
                 return outdoorPvP->IsConditionFulfilled(player, m_value2, source, conditionSourceType);
+            else if (player->InBattleGround() && player->GetZoneId() == m_value1)
+            {
+                if (BattleGround* bg = player->GetBattleGround())
+                    return bg->IsConditionFulfilled(player, m_value2, source, conditionSourceType);
+            }
 
             return false;
         }
