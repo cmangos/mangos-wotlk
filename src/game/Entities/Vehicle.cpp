@@ -153,7 +153,7 @@ void VehicleInfo::Initialize()
         pVehicle->m_movementInfo.AddMovementFlags2(MOVEFLAG2_FULLSPEEDPITCHING);
 
     // NOTE: this is the best possible combination to root a vehicle; However, there are still exceptions, such as creature 27292
-    if (vehicleFlags & VEHICLE_FLAG_FIXED_POSITION || (!vehicleFlags & VEHICLE_FLAG_UNK7 && vehicleFlags & VEHICLE_FLAG_UNK15))
+    if (vehicleFlags & VEHICLE_FLAG_FIXED_POSITION || (!(vehicleFlags & VEHICLE_FLAG_UNK7) && vehicleFlags & VEHICLE_FLAG_UNK15))
         pVehicle->SetRoot(true);
 
     // TODO: Guesswork, but it looks correct
