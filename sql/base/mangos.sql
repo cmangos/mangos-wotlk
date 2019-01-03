@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_13986_01_mangos_seal_of_righteousness_cleanup` bit(1) DEFAULT NULL
+  `required_13987_01_mangos_seal_of_righteousness_wrath` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -17971,7 +17971,6 @@ INSERT INTO `spell_learn_spell` VALUES
 (5784,33388,1),
 (13819,33388,1),
 (17002,24867,0),
-(20271,21084,1),
 (23161,33391,1),
 (23214,33391,1),
 (24866,24864,0),
@@ -17980,8 +17979,6 @@ INSERT INTO `spell_learn_spell` VALUES
 (33943,34090,1),
 (34767,33391,1),
 (34769,33388,1),
-(53407,21084,1),
-(53408,21084,1),
 (53428,53341,1),
 (53428,53343,1),
 (56815,56816,0),
