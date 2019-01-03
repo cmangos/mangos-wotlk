@@ -757,12 +757,6 @@ UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `Id`=38054;
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`DurationIndex`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
 (37246,384,268435456,21,6,6,6,1,1,1,249,249,249,1,1,1,206,32,31,1,'Oronok Speed Increase',1,1,1);
 
--- add cooldown and forcible sending for Teron Gorefiend possess spells - verified values against sniffs
-UPDATE `spell_template` SET `RecoveryTime`=10000, `AttributesServerside`=0x00000002 WHERE `Id`=37729;
-UPDATE `spell_template` SET `RecoveryTime`=25000, `AttributesServerside`=0x00000002 WHERE `Id`=37727;
-UPDATE `spell_template` SET `RecoveryTime`=10000, `AttributesServerside`=0x00000002 WHERE `Id`=37788;
-UPDATE `spell_template` SET `RecoveryTime`=180000, `AttributesServerside`=0x00000002 WHERE `Id`=37728;
-
 -- should only hit one player per Coilfang Sporebat spell tick
 UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `Id`=38573;
 
@@ -782,12 +776,6 @@ UPDATE `spell_template` SET `AttributesEx3`=0x00000100 WHERE `Id`=39495;
 
 -- confirmed through guides and retail that free action potion influences it
 UPDATE `spell_template` SET `EffectMechanic2`=12 WHERE `Id`=38509;
-
--- Fel and the Furious cooldowns
-UPDATE `spell_template` SET `RecoveryTime`=10000, `AttributesServerside`=0x00000002 WHERE `Id`=38055;
-UPDATE `spell_template` SET `RecoveryTime`=15000, `AttributesServerside`=0x00000002 WHERE `Id`=38052;
-UPDATE `spell_template` SET `RecoveryTime`=10000, `AttributesServerside`=0x00000002 WHERE `Id`=38006;
-UPDATE `spell_template` SET `RecoveryTime`=30000, `AttributesServerside`=0x00000002 WHERE `Id`=37920;
 
 -- blackheart the inciter mechanics
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx2`,`AttributesEx3`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
@@ -1078,9 +1066,6 @@ INSERT INTO `spell_template` (`id`,`Attributes`,`AttributesEx3`,`AttributesEx4`,
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`CastingTimeIndex`,`rangeIndex`,`Effect1`,`EffectImplicitTargetA1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
 (32116,536871296,136,262144,1,1,1,1,122,'Denouement',1,1);
-
--- Add cooldown for Unholy Frenzy - Controlled ability Shadowy Necromancer c.17899
-UPDATE `spell_template` SET `RecoveryTime`=4000, `AttributesServerside`=0x00000002 WHERE `Id`=31626;
 
 -- Shoot Arcane Explosion Arrow
 UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id`=36327;

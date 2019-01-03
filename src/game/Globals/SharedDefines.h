@@ -562,8 +562,7 @@ enum SpellAttributesEx7
 
 enum SpellAttributesServerside
 {
-    SPELL_ATTR_SS_PREVENT_INVIS = 0x00000001,
-    SPELL_ATTR_SS_SEND_COOLDOWN = 0x00000002,
+    SPELL_ATTR_SS_PREVENT_INVIS                = 0x00000001,
 };
 
 #define MAX_TALENT_SPEC_COUNT   2

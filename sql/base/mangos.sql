@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_13995_01_mangos_creature_spawn_entry` bit(1) DEFAULT NULL
+  `required_13996_01_mangos_creature_cooldown` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1482,6 +1482,15 @@ LOCK TABLES `creature_template_spells` WRITE;
 /*!40000 ALTER TABLE `creature_template_spells` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_template_spells` ENABLE KEYS */;
 UNLOCK TABLES;
+
+DROP TABLE IF EXISTS creature_cooldowns;
+CREATE TABLE creature_cooldowns (
+  `Entry` mediumint(8) unsigned NOT NULL,
+  `SpellId` int(11) unsigned NOT NULL,
+  `CooldownMin` int(10) unsigned NOT NULL,
+  `CooldownMax` int(10) unsigned NOT NULL,
+  PRIMARY KEY (`entry`, `SpellId`)
+);
 
 --
 -- Table structure for table `custom_texts`
