@@ -334,9 +334,9 @@ struct boss_illidari_councilAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* pDoneBy, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        int32 uiDamageTaken = (int32)uiDamage;
+        int32 uiDamageTaken = (int32)damage;
         m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_DAM, &uiDamageTaken, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
     }
 

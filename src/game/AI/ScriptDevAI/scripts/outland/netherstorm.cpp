@@ -3632,19 +3632,18 @@ struct npc_kaylaan_the_lostAI : public ScriptedAI
             target->RemoveAurasDueToSpell(SPELL_PERMANENT_FEIGN_DEATH);
     }
 
-    void DamageTaken(Unit* /*killer*/, uint32& damage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*killer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (damage < m_creature->GetHealth())
             return;
 
-        damage = 0;
+        damage = std::min(damage, m_creature->GetHealth() - 1);
 
         if (m_deathPrevented)
             return;
 
         m_deathPrevented = true;
 
-        m_creature->SetHealth(1);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         m_creature->CastSpell(nullptr, SPELL_KAYLAN_WRATH, TRIGGERED_NONE);

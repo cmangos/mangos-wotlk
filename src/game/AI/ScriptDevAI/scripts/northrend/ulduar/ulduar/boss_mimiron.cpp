@@ -318,7 +318,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
         }
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         // start encounter on first damage
         if (m_uiPhase == PHASE_INTRO && uiDamage)
@@ -830,7 +830,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
             m_pInstance->SetData(TYPE_MIMIRON, DONE);
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         if (pDoneBy->GetEntry() == NPC_MIMIRON && m_uiPhase == PHASE_DAMAGED)
             return;
@@ -1120,7 +1120,7 @@ struct boss_vx001AI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         if (pDoneBy->GetEntry() == NPC_MIMIRON && m_uiPhase == PHASE_DAMAGED)
             return;
@@ -1413,7 +1413,7 @@ struct boss_aerial_unitAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         if (pDoneBy->GetEntry() == NPC_MIMIRON && m_uiPhase == PHASE_DAMAGED)
             return;

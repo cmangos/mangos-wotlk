@@ -209,12 +209,12 @@ struct npc_dirty_larryAI : public ScriptedAI
         AttackStart(pAttacker);
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDoneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (uiDamage < m_creature->GetHealth())
+        if (damage < m_creature->GetHealth())
             return;
 
-        uiDamage = 0;
+        damage = std::min(damage, m_creature->GetHealth() - 1);
 
         // damage will kill, this is pretty much the same as 1%HP left
         if (bEvent)
@@ -606,14 +606,14 @@ struct npc_salsalabimAI : public ScriptedAI
         m_uiMagneticPullTimer = 15000;
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* pDoneBy, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (pDoneBy->GetTypeId() == TYPEID_PLAYER)
         {
             if (m_creature->GetHealthPercent() < 20.0f)
             {
                 ((Player*)pDoneBy)->RewardPlayerAndGroupAtEventExplored(QUEST_10004, m_creature);
-                uiDamage = 0;
+                damage = std::min(damage, m_creature->GetHealth() - 1);
                 EnterEvadeMode();
             }
         }

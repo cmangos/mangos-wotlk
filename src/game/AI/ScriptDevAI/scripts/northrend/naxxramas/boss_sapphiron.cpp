@@ -147,7 +147,7 @@ struct boss_sapphironAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         if (m_Phase != PHASE_GROUND && uiDamage >= m_creature->GetHealth())
             uiDamage = 0;

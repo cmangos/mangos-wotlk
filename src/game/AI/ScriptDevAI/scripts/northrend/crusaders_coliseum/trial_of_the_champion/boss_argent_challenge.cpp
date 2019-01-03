@@ -62,7 +62,7 @@ struct argent_champion_commonAI : public ScriptedAI
             m_pInstance->SetData(TYPE_ARGENT_CHAMPION, FAIL);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         if (uiDamage >= m_creature->GetHealth())
         {

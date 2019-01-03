@@ -427,21 +427,20 @@ struct boss_illidan_stormrageAI : public ScriptedAI, private DialogueHelper
         DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (uiDamage < m_creature->GetHealth())
+        if (damage < m_creature->GetHealth())
             return;
 
         // Make sure it won't die by accident
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
         {
-            uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
             return;
         }
 
-        uiDamage = 0;
+        damage = std::min(damage, m_creature->GetHealth() - 1);
         m_creature->InterruptNonMeleeSpells(true);
-        m_creature->SetHealth(1);
         m_creature->StopMoving();
         m_creature->RemoveAllAurasOnDeath();
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);

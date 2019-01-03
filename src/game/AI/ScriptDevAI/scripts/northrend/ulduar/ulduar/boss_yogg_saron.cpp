@@ -383,7 +383,7 @@ struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
         DoScriptText(urand(0, 1) ? SAY_SARA_SLAY_1 : SAY_SARA_SLAY_2, m_creature);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         if (uiDamage >= m_creature->GetHealth())
         {
@@ -1333,7 +1333,7 @@ struct npc_immortal_guardianAI : public ScriptedAI
         m_bWeakened = false;
     }
 
-    void DamageTaken(Unit* pDealer, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* pDealer, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         if (pDealer->GetEntry() == NPC_THORIM_HELPER)
             return;

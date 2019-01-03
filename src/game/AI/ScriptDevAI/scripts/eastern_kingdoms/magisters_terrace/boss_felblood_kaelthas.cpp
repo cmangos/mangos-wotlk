@@ -162,25 +162,24 @@ struct boss_felblood_kaelthasAI : public ScriptedAI, private DialogueHelper
     }
 
     // Boss has an interesting speech before killed, so we need to fake death (without stand state) and allow him to finish his theatre
-    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pKiller*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (uiDamage < m_creature->GetHealth())
+        if (damage < m_creature->GetHealth())
             return;
 
         // Make sure it won't die by accident
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
         {
-            uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
             return;
         }
 
-        uiDamage = 0;
+        damage = std::min(damage, m_creature->GetHealth() - 1);
         RemoveGravityLapse();
         StartNextDialogueText(SAY_DEATH);
         m_creature->HandleEmote(EMOTE_STATE_TALK);
 
         m_creature->InterruptNonMeleeSpells(true);
-        m_creature->SetHealth(1);
         m_creature->StopMoving();
         m_creature->ClearComboPointHolders();
         m_creature->RemoveAllAurasOnDeath();
@@ -458,20 +457,20 @@ struct mob_felkael_phoenixAI : public ScriptedAI
         ScriptedAI::EnterEvadeMode();
     }
 
-    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pKiller*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (uiDamage < m_creature->GetHealth())
+        if (damage < m_creature->GetHealth())
             return;
 
         // Prevent glitch if in fake death
         if (m_bFakeDeath)
         {
-            uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
             return;
         }
 
         // prevent death
-        uiDamage = 0;
+        damage = std::min(damage, m_creature->GetHealth() - 1);
         DoSetFakeDeath();
     }
 
@@ -480,7 +479,6 @@ struct mob_felkael_phoenixAI : public ScriptedAI
         m_bFakeDeath = true;
 
         m_creature->InterruptNonMeleeSpells(false);
-        m_creature->SetHealth(1);
         m_creature->StopMoving();
         m_creature->ClearComboPointHolders();
         m_creature->RemoveAllAurasOnDeath();

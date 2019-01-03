@@ -76,11 +76,11 @@ struct mob_lumpAI : public ScriptedAI
         AttackStart(pAttacker);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (m_creature->GetHealth() < uiDamage || (m_creature->GetHealth() - uiDamage) * 100 / m_creature->GetMaxHealth() < 30)
+        if (m_creature->GetHealth() < damage || (m_creature->GetHealth() - damage) * 100 / m_creature->GetMaxHealth() < 30)
         {
-            uiDamage = 0;                               // Take 0 damage
+            damage = std::min(damage, m_creature->GetHealth() - 1);
 
             m_creature->RemoveAllAuras();
             m_creature->CombatStop(true);
@@ -508,12 +508,12 @@ struct npc_rethhedronAI : public ScriptedAI
         ScriptedAI::JustRespawned();
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        uiDamage = std::min(m_creature->GetHealth() - 1, uiDamage);
+        damage = std::min(m_creature->GetHealth() - 1, damage);
 
         // go to epilog at 10% health
-        if (!m_bEventFinished && m_creature->GetHealth() - uiDamage < m_creature->GetMaxHealth() * 0.1f)
+        if (!m_bEventFinished && m_creature->GetHealth() - damage < m_creature->GetMaxHealth() * 0.1f)
         {
             SetReactState(REACT_PASSIVE);
             SetCombatMovement(false);

@@ -270,7 +270,7 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
         ScriptedAI::AttackStart(pWho);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         if (uiDamage >= m_creature->GetHealth())
         {

@@ -193,7 +193,7 @@ struct npc_brann_hosAI : public npc_escortAI
         npc_escortAI::AttackStart(pWho);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         // If Brann takes damage, mark the achiev as failed
         if (uiDamage && m_pInstance)

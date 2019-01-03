@@ -7773,14 +7773,13 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
         case 31298:                             // Sleep
         case 31347:                             // Doom
         case 36797:                             // Mind Control (Kael'thas)
-        case 40618:                             // Insignificance
         case 41376:                             // Spite
-        case 62166:                                 // Stone Grip
-        case 63981:                                 // Stone Grip (h)
-        case 69674:                                 // Mutated Infection (10n)
-        case 71224:                                 // Mutated Infection (25n)
-        case 73022:                                 // Mutated Infection (10h)
-        case 73023:                                 // Mutated Infection (25h)
+        case 62166:                             // Stone Grip
+        case 63981:                             // Stone Grip (h)
+        case 69674:                             // Mutated Infection (10n)
+        case 71224:                             // Mutated Infection (25n)
+        case 73022:                             // Mutated Infection (10h)
+        case 73023:                             // Mutated Infection (25h)
             if (m_caster->getVictim() == target)
                 return false;
             break;

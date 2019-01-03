@@ -304,11 +304,11 @@ struct boss_alarAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pKiller*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (m_bInvulnerability)
         {
-            uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
             return;
         }
 
@@ -316,14 +316,14 @@ struct boss_alarAI : public ScriptedAI
         if (m_uiPhase != PHASE_ONE)
             return;
 
-        if (uiDamage < m_creature->GetHealth())
+        if (damage < m_creature->GetHealth())
             return;
 
+        damage = std::min(damage, m_creature->GetHealth() - 1);
         m_creature->AttackStop();
         m_creature->InterruptNonMeleeSpells(true);
         m_creature->RemoveAurasDueToSpell(SPELL_FLAME_QUILLS);
         // We set the health to 1 in order to avoid the forced death stand flag - this way we can have the ressurrect animation
-        m_creature->SetHealth(1);
         m_creature->StopMoving();
         m_creature->ClearComboPointHolders();
         m_creature->RemoveAllAurasOnDeath();
@@ -339,7 +339,7 @@ struct boss_alarAI : public ScriptedAI
         m_creature->SetIgnoreRangedTargets(false);
 
         // Stop damage and stop checking for flame buffet.
-        uiDamage = 0;
+        damage = 0;
 
         if (DoCastSpellIfCan(m_creature, SPELL_EMBER_BLAST) == CAST_OK)
         {

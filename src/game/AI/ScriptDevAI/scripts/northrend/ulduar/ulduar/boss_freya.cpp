@@ -338,7 +338,7 @@ struct boss_freyaAI : public ScriptedAI
         Reset();
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         if (uiDamage >= m_creature->GetHealth())
         {
@@ -805,7 +805,7 @@ struct three_nature_alliesAI : public ScriptedAI
         m_bIsFakeDeath = false;
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         if (pDoneBy->GetEntry() == NPC_FREYA)
             return;

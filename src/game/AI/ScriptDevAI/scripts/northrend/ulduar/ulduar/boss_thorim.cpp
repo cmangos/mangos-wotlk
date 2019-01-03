@@ -225,7 +225,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
         Reset();
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
         // switch to phase 2 as soon as it's hit by any damage
         if (m_uiPhase == PHASE_ARENA && uiDamage > 0)

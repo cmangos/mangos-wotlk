@@ -1415,27 +1415,26 @@ struct advisor_base_ai : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* /*pDoneby*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDoneby*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         // Allow fake death only in the first phase
         if (!m_bCanFakeDeath)
             return;
 
-        if (uiDamage < m_creature->GetHealth())
+        if (damage < m_creature->GetHealth())
             return;
 
         // Make sure it won't die by accident
         if (m_bFakeDeath)
         {
-            uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
             return;
         }
 
-        uiDamage = 0;
+        damage = std::min(damage, m_creature->GetHealth() - 1);
         m_bFakeDeath = true;
 
         m_creature->InterruptNonMeleeSpells(true);
-        m_creature->SetHealth(1);
         m_creature->StopMoving();
         m_creature->ClearComboPointHolders();
         m_creature->RemoveAllAurasOnDeath();
@@ -1879,20 +1878,20 @@ struct mob_phoenix_tkAI : public ScriptedAI
         ScriptedAI::EnterEvadeMode();
     }
 
-    void DamageTaken(Unit* /*pKiller*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pKiller*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (uiDamage < m_creature->GetHealth())
+        if (damage < m_creature->GetHealth())
             return;
 
         // Prevent glitch if in fake death
         if (m_bFakeDeath)
         {
-            uiDamage = 0;
+            damage = std::min(damage, m_creature->GetHealth() - 1);
             return;
         }
 
         // prevent death
-        uiDamage = 0;
+        damage = std::min(damage, m_creature->GetHealth() - 1);
         DoSetFakeDeath();
     }
 
@@ -1901,7 +1900,6 @@ struct mob_phoenix_tkAI : public ScriptedAI
         m_bFakeDeath = true;
 
         m_creature->InterruptNonMeleeSpells(false);
-        m_creature->SetHealth(1);
         m_creature->StopMoving();
         m_creature->ClearComboPointHolders();
         m_creature->RemoveAllAurasOnDeath();

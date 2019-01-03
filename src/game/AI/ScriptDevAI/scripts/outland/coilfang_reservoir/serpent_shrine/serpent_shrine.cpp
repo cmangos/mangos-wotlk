@@ -402,7 +402,7 @@ struct npc_serpentshrine_parasiteAI : public ScriptedAI
 
     void Reset() override {}
 
-    void DamageDeal(Unit* pDoneTo, uint32& uiDamage, DamageEffectType damagetype) override
+    void DamageDeal(Unit* pDoneTo, uint32& damage, DamageEffectType damagetype, SpellEntry const* /*spellInfo*/) override
     {
         m_creature->ForcedDespawn(1000);
     }

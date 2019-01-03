@@ -324,9 +324,9 @@ struct npc_blade_dance_targetAI : public ScriptedAI
 {
     npc_blade_dance_targetAI(Creature* creature) : ScriptedAI(creature) {}
     void Reset() override {}
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
+    void DamageTaken(Unit* /*pDealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        uiDamage = std::min(m_creature->GetHealth() - 1, uiDamage);
+        damage = std::min(m_creature->GetHealth() - 1, damage);
     }
 };
 
