@@ -1955,7 +1955,7 @@ bool ChatHandler::isValidChatMessage(const char* message) const
                         if (linkedSpell->HasAttribute(SPELL_ATTR_TRADESPELL))
                         {
                             // lookup skillid
-                            SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBounds(linkedSpell->Id);
+                            SkillLineAbilityMapBounds bounds = sSpellMgr.GetSkillLineAbilityMapBoundsBySpellId(linkedSpell->Id);
                             if (bounds.first == bounds.second)
                             {
                                 return false;

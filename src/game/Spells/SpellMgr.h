@@ -2057,7 +2057,7 @@ class SpellMgr
 
         uint32 GetSpellBookSuccessorSpellId(uint32 spellId)
         {
-            SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBounds(spellId);
+            SkillLineAbilityMapBounds bounds = GetSkillLineAbilityMapBoundsBySpellId(spellId);
             for (SkillLineAbilityMap::const_iterator itr = bounds.first; itr != bounds.second; ++itr)
             {
                 if (SkillLineAbilityEntry const* pAbility = itr->second)
@@ -2113,9 +2113,14 @@ class SpellMgr
         // Spell correctness for client using
         static bool IsSpellValid(SpellEntry const* spellInfo, Player* pl = nullptr, bool msg = true);
 
-        SkillLineAbilityMapBounds GetSkillLineAbilityMapBounds(uint32 spell_id) const
+        SkillLineAbilityMapBounds GetSkillLineAbilityMapBoundsBySpellId(uint32 spellId) const
         {
-            return mSkillLineAbilityMap.equal_range(spell_id);
+            return mSkillLineAbilityMapBySpellId.equal_range(spellId);
+        }
+
+        SkillLineAbilityMapBounds GetSkillLineAbilityMapBoundsBySkillId(uint32 skillId) const
+        {
+            return mSkillLineAbilityMapBySkillId.equal_range(skillId);
         }
 
         SkillRaceClassInfoMapBounds GetSkillRaceClassInfoMapBounds(uint32 skill_id) const
@@ -2182,7 +2187,7 @@ class SpellMgr
         void LoadSpellBonuses();
         void LoadSpellTargetPositions();
         void LoadSpellThreats();
-        void LoadSkillLineAbilityMap();
+        void LoadSkillLineAbilityMaps();
         void LoadSkillRaceClassInfoMap();
         void LoadSpellPetAuras();
         void LoadPetLevelupSpellMap();
@@ -2202,7 +2207,8 @@ class SpellMgr
         SpellProcEventMap  mSpellProcEventMap;
         SpellProcItemEnchantMap mSpellProcItemEnchantMap;
         SpellBonusMap      mSpellBonusMap;
-        SkillLineAbilityMap mSkillLineAbilityMap;
+        SkillLineAbilityMap mSkillLineAbilityMapBySpellId;
+        SkillLineAbilityMap mSkillLineAbilityMapBySkillId;
         SkillRaceClassInfoMap mSkillRaceClassInfoMap;
         SpellPetAuraMap     mSpellPetAuraMap;
         PetLevelupSpellMap  mPetLevelupSpellMap;
