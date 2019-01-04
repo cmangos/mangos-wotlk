@@ -100,6 +100,38 @@ namespace MaNGOS
             va_list* i_args;
     };
 
+    class BattleGroundMessageBuilder
+    {
+        public:
+            BattleGroundMessageBuilder(ChatMsg msgtype, Language language, int32 textId, Creature const* source, va_list* args = nullptr)
+                : i_msgtype(msgtype), i_language(language), i_textId(textId), i_source(source), i_args(args) {}
+            void operator()(WorldPacket& data, int32 loc_idx)
+            {
+                char const* text = sObjectMgr.GetMangosString(i_textId, loc_idx);
+
+                if (i_args)
+                {
+                    // we need copy va_list before use or original va_list will corrupted
+                    va_list ap;
+                    va_copy(ap, *i_args);
+
+                    char str [2048];
+                    vsnprintf(str, 2048, text, ap);
+                    va_end(ap);
+
+                    ChatHandler::BuildChatPacket(data, i_msgtype, &str[0], i_language, CHAT_TAG_NONE, i_source->GetObjectGuid(), i_source->GetName());
+                }
+                else
+                    ChatHandler::BuildChatPacket(data, i_msgtype, text, i_language, CHAT_TAG_NONE, i_source->GetObjectGuid(), i_source->GetName());
+            }
+        private:
+            ChatMsg i_msgtype;
+            Language i_language;
+            int32 i_textId;
+            Creature const* i_source;
+            va_list* i_args;
+    };
+
     class BattleGround2ChatBuilder
     {
         public:
@@ -1626,6 +1658,16 @@ void BattleGround::SendYellToAll(int32 entry, uint32 language, ObjectGuid guid)
         return;
     MaNGOS::BattleGroundYellBuilder bg_builder(Language(language), entry, source);
     MaNGOS::LocalizedPacketDo<MaNGOS::BattleGroundYellBuilder> bg_do(bg_builder);
+    BroadcastWorker(bg_do);
+}
+
+void BattleGround::SendMessageToAll(int32 entry, ChatMsg type, uint32 language, ObjectGuid guid)
+{
+    Creature* source = GetBgMap()->GetCreature(guid);
+    if (!source)
+        return;
+    MaNGOS::BattleGroundMessageBuilder bg_builder(type, Language(language), entry, source);
+    MaNGOS::LocalizedPacketDo<MaNGOS::BattleGroundMessageBuilder> bg_do(bg_builder);
     BroadcastWorker(bg_do);
 }
 
