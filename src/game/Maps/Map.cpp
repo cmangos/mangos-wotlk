@@ -94,7 +94,8 @@ Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
       m_VisibleDistance(DEFAULT_VISIBILITY_DISTANCE), m_persistentState(nullptr),
       m_activeNonPlayersIter(m_activeNonPlayers.end()), m_onEventNotifiedIter(m_onEventNotifiedObjects.end()),
       i_gridExpiry(expiry), m_TerrainData(sTerrainMgr.LoadTerrain(id)),
-      i_data(nullptr), i_script_id(0), i_defaultLight(GetDefaultMapLight(id))
+      i_data(nullptr), i_script_id(0), i_defaultLight(GetDefaultMapLight(id)),
+      m_cycleCounter(0), m_updateTimeMin(INT_MAX), m_updateTimeMax(0), m_updateTimeTotal(0)
 {
     m_weatherSystem = new WeatherSystem(this);
 }
@@ -228,8 +229,7 @@ void Map::DeleteFromWorld(Player* pl)
     delete pl;
 }
 
-void
-Map::EnsureGridCreated(const GridPair& p)
+void Map::EnsureGridCreated(const GridPair& p)
 {
     if (!getNGrid(p.x_coord, p.y_coord))
     {
@@ -250,8 +250,7 @@ Map::EnsureGridCreated(const GridPair& p)
     }
 }
 
-void
-Map::EnsureGridLoadedAtEnter(const Cell& cell, Player* player)
+void Map::EnsureGridLoadedAtEnter(const Cell& cell, Player* player)
 {
     NGridType* grid;
 
@@ -301,6 +300,16 @@ bool Map::EnsureGridLoaded(const Cell& cell)
     }
 
     return false;
+}
+
+uint32 Map::GetLoadedGridsCount()
+{
+    uint32 count = 0;
+    for (uint32 i = 0; i < MAX_NUMBER_OF_GRIDS; ++i)
+        for (uint32 k = 0; k < MAX_NUMBER_OF_GRIDS; ++k)
+            if (i_grids[i][k] && i_grids[i][k]->GetGridState() == GRID_STATE_ACTIVE)
+                ++count;
+    return count;
 }
 
 void Map::ForceLoadGrid(float x, float y)
@@ -576,6 +585,8 @@ void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<MaNGOS::Obje
 
 void Map::Update(const uint32& t_diff)
 {
+    std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
+
     m_dyn_tree.update(t_diff);
 
     /// update worldsessions for existing players
@@ -696,6 +707,18 @@ void Map::Update(const uint32& t_diff)
 
     if (i_data)
         i_data->Update(t_diff);
+
+    std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
+    long long duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+
+    if (duration < m_updateTimeMin)
+        m_updateTimeMin = duration;
+
+    if (duration > m_updateTimeMax)
+        m_updateTimeMax = duration;
+
+    m_updateTimeTotal += duration;
+    ++m_cycleCounter;
 
     m_weatherSystem->UpdateWeathers(t_diff);
 }
