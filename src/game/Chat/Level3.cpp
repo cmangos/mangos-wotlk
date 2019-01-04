@@ -2406,19 +2406,45 @@ bool ChatHandler::HandleLearnAllGMCommand(char* /*args*/)
 {
     static uint32 gmSpellList[] =
     {
-        24347,                                            // Become A Fish, No Breath Bar
-        35132,                                            // Visual Boom
-        38488,                                            // Attack 4000-8000 AOE
-        38795,                                            // Attack 2000 AOE + Slow Down 90%
-        15712,                                            // Attack 200
-        1852,                                             // GM Spell Silence
-        31899,                                            // Kill
-        31924,                                            // Kill
-        29878,                                            // Kill My Self
-        26644,                                            // More Kill
-
-        28550,                                            // Invisible 24
-        23452                                             // Invisible + Target
+        11,     // Frostbolt of Ages                1000 damage, no cooldown
+        13,     // Swim Speed (TEST)
+        26,     // Bind Self (TEST)                 sets hearthstone to current location
+        47,     // Sprint (TEST)
+        260,    // Charm (TEST)
+        265,    // Area Death (TEST)
+        530,    // Charm (Possess)
+        1908,   // Uber Heal Over Time
+        2583,   // Debug Spell Reflection (Debug)
+        2650,   // Tame Pet (TEST)
+        2653,   // Damage 100 (TEST)
+        2654,   // Summon Tamed (TEST)
+        5259,   // Disarm (TEST)
+        5696,   // Charge (TEST)
+        9454,   // Freeze                           permanent stun, useful for holding misbehaving players
+        10032,  // Uber Stealth
+        18800,  // Light Test
+        18209,  // Test Grow
+        18210,  // Test Shrink
+        23452,  // Invisibility
+        23775,  // Stun Forever
+        24199,  // Knockback 35
+        31304,  // Immolation                       ~3k damage to all targets around every 2 seconds
+        31750,  // QATest +1000 Spell Dmg (QASpell)
+        34311,  // Damage Immunity: Physical
+        35182,  // Banish
+        35874,  // Master Buff (Physical)           525 AP, +14 all stats, 10% to all stats
+        35912,  // Master Buff (Magical)            54 Int, 49 mp/5, 10% to all stats
+        38505,  // Shackle
+        38734,  // Master Ranged Buff               220 Ranged AP, +18 all stats, 10% to all stats
+        39804,  // Damage Immunity: Magic
+        39258,  // Automation Root Spell (QAE)      AoE permanent root
+        40678,  // Super Jump
+        40733,  // Divine Shield                    infinite duration bubble
+        43097,  // Summon All Players
+        45590,  // QA DoT Debug 1000                1000 damage per tick for 30 seconds, stackable
+        45813,  // QA Debug Instant Cast Buff
+        46876,  // QAE Drunk Effect
+        0
     };
 
     for (uint32 spell : gmSpellList)
