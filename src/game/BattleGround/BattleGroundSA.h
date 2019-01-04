@@ -19,17 +19,18 @@
 #ifndef __BATTLEGROUNDSA_H
 #define __BATTLEGROUNDSA_H
 
+#include "Common.h"
+#include "BattleGround.h"
 #include "Tools/Language.h"
 
 class BattleGround;
-
-#define BG_SA_EVENT_START_BATTLE_1      23748       // Ally / Horde likely
-#define BG_SA_EVENT_START_BATTLE_2      21702
 
 enum
 {
     BG_SA_MAX_GATES                             = 6,
     BG_SA_MAX_GRAVEYARDS                        = 3,                // max capturable graveyards
+
+    BG_SA_ZONE_ID_STRAND                        = 4384,
 
     // world state values
     BG_SA_STATE_VALUE_GATE_INTACT               = 1,
@@ -140,7 +141,7 @@ enum
     BG_SA_GRAVEYARD_ID_SOUTH                    = 1348,
     BG_SA_GRAVEYARD_ID_SHRINE                   = 1349,                 // defender graveyard
     BG_SA_GRAVEYARD_ID_BEACH                    = 1350,                 // attacker graveyards
-    BG_SA_GRAVEYARD_ID_SHIP                     = 1341,
+    BG_SA_GRAVEYARD_ID_SHIP                     = 1351,
 
     // spells
     BG_SA_SPELL_TELEPORT_DEFENDER               = 52364,                // teleport defender team to the south graveyard platform
@@ -178,7 +179,8 @@ enum
     BG_SA_STAGE_RESET                           = 1,
     BG_SA_STAGE_SECOND_ROUND_1                  = 2,
     BG_SA_STAGE_SECOND_ROUND_2                  = 3,
-    BG_SA_STAGE_ROUND_2                         = 4,
+    BG_SA_STAGE_SECOND_ROUND_3                  = 4,
+    BG_SA_STAGE_ROUND_2                         = 5,
 
     // conditions
     BG_SA_COND_DEFENDER_ALLIANCE                = 0,
@@ -186,8 +188,6 @@ enum
 };
 
 static const uint32 strandGates[BG_SA_MAX_GATES] = { BG_SA_STATE_PURPLE_GATE, BG_SA_STATE_RED_GATE, BG_SA_STATE_BLUE_GATE, BG_SA_STATE_GREEN_GATE, BG_SA_STATE_YELLOW_GATE, BG_SA_STATE_ANCIENT_GATE };
-static const uint32 strandGraveyardAlly[BG_SA_MAX_GRAVEYARDS] = { BG_SA_STATE_GY_LEFT_ALLIANCE, BG_SA_STATE_GY_RIGHT_ALLIANCE, BG_SA_STATE_GY_CENTER_ALLIANCE };
-static const uint32 strandGraveyardHorde[BG_SA_MAX_GRAVEYARDS] = { BG_SA_STATE_GY_LEFT_HORDE, BG_SA_STATE_GY_RIGHT_HORDE, BG_SA_STATE_GY_CENTER_HORDE };
 
 // *** Battleground factions *** //
 const uint32 sotaTeamFactions[PVP_TEAM_COUNT] = { BG_SA_FACTION_ID_ALLIANCE, BG_SA_FACTION_ID_HORDE };
@@ -206,6 +206,19 @@ static const StrandGoData sotaObjectData[] =
     {BG_SA_GO_GATE_RED_SUN,         BG_SA_STATE_RED_GATE,       19042,  19047,  21630,  LANG_BG_SA_GATE_RED_ATTACK,     LANG_BG_SA_GATE_RED_DESTROY},
     {BG_SA_GO_GATE_YELLOW_MOON,     BG_SA_STATE_YELLOW_GATE,    19044,  19049,  21630,  LANG_BG_SA_GATE_YELLOW_ATTACK,  LANG_BG_SA_GATE_YELLOW_DESTROY},
     {BG_SA_GO_GATE_ANCIENT_SHRINE,  BG_SA_STATE_ANCIENT_GATE,   19836,  19837,  21630,  LANG_BG_SA_CHAMBER_ATTACK,      LANG_BG_SA_CHAMBER_BREACH},
+};
+
+struct StrandGraveyardData
+{
+    uint32 graveyardId, worldStateAlliance, worldStateHorde, goEntryAlliance, goEntryHorde, textCaptureAlliance, textCaptureHorde;
+};
+
+// *** Battleground graveyard data *** //
+static const StrandGraveyardData sotaGraveyardData[] =
+{
+    {BG_SA_GRAVEYARD_ID_EAST,   BG_SA_STATE_GY_RIGHT_ALLIANCE,  BG_SA_STATE_GY_RIGHT_HORDE,   BG_SA_GO_GY_FLAG_ALLIANCE_EAST,   BG_SA_GO_GY_FLAG_HORDE_EAST,   LANG_BG_SA_GRAVE_EAST_ALLIANCE,  LANG_BG_SA_GRAVE_EAST_HORDE},
+    {BG_SA_GRAVEYARD_ID_WEST,   BG_SA_STATE_GY_LEFT_ALLIANCE,   BG_SA_STATE_GY_LEFT_HORDE,    BG_SA_GO_GY_FLAG_ALLIANCE_WEST,   BG_SA_GO_GY_FLAG_HORDE_WEST,   LANG_BG_SA_GRAVE_WEST_ALLIANCE,  LANG_BG_SA_GRAVE_WEST_HORDE},
+    {BG_SA_GRAVEYARD_ID_SOUTH,  BG_SA_STATE_GY_CENTER_ALLIANCE, BG_SA_STATE_GY_CENTER_HORDE,  BG_SA_GO_GY_FLAG_ALLIANCE_SOUTH,  BG_SA_GO_GY_FLAG_HORDE_SOUTH,  LANG_BG_SA_GRAVE_SOUTH_ALLIANCE, LANG_BG_SA_GRAVE_SOUTH_HORDE},
 };
 
 static const float strandTeleportLoc[3][4] =
@@ -241,6 +254,8 @@ class BattleGroundSA : public BattleGround
 
         bool HandleEvent(uint32 eventId, GameObject* go) override;
 
+        void EventPlayerClickedOnFlag(Player* player, GameObject* go) override;
+
         bool IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType) override;
 
         /* Scorekeeping */
@@ -251,6 +266,8 @@ class BattleGroundSA : public BattleGround
     private:
         void UpdateTimerWorldState();
         void SetupBattleground();
+        void ProcessBattlegroundWinner();
+        void SendBattlegroundWarning(int32 messageId);
 
         void TeleportPlayerToStartArea(Player* player);
 
@@ -260,8 +277,10 @@ class BattleGroundSA : public BattleGround
         PvpTeamIndex m_defendingTeamIdx;
 
         uint32 m_gateStateValue[BG_SA_MAX_GATES];
+        uint32 m_winTime[PVP_TEAM_COUNT];
         uint32 m_battleRoundTimer;
         uint32 m_boatStartTimer;
+        uint8 m_scoreCount[PVP_TEAM_COUNT];
         uint8 m_battleStage;
 
         ObjectGuid m_battlegroundMasterGuid;
@@ -270,9 +289,12 @@ class BattleGroundSA : public BattleGround
         ObjectGuid m_relicGuid[PVP_TEAM_COUNT];
 
         GuidList m_cannonsGuids;
+        GuidList m_demolishersGuids;
         GuidList m_gatesGuids;
         GuidList m_attackerTeleportStalkersGuids;
+        GuidVector m_triggerGuids;
 
         GuidList m_transportShipGuids[PVP_TEAM_COUNT];
+        GuidList m_graveyardBannersGuids[PVP_TEAM_COUNT];
 };
 #endif
