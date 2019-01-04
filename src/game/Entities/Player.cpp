@@ -20740,11 +20740,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
     data << uint32(0);                                      // added in 3.1.2
     GetSession()->SendPacket(data);
 
-    // SMSG_TALENTS_INFO x 2 for pet (unspent points and talents in separate packets...)
-    // SMSG_PET_GUIDS
-    // SMSG_POWER_UPDATE
-
-    if(!GetSession()->PlayerLoading())
+    if (!GetSession()->PlayerLoading())
         SetMover(this);
 }
 
