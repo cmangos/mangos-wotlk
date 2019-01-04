@@ -1422,7 +1422,13 @@ void GameObject::Use(Unit* user)
                 if (info->goober.eventId)
                 {
                     DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Goober ScriptStart id %u for %s (Used by %s).", info->goober.eventId, GetGuidStr().c_str(), player->GetGuidStr().c_str());
-                    StartEvents_Event(GetMap(), info->goober.eventId, player, this);
+
+                    // for battleground events we need to allow the event id to be forwarded
+                    // Note: this exception is required in order not to change the legacy even handling in DB scripts
+                    if (GetMap()->IsBattleGround())
+                        StartEvents_Event(GetMap(), info->goober.eventId, this, player, true, player);
+                    else
+                        StartEvents_Event(GetMap(), info->goober.eventId, player, this);
                 }
 
                 // possible quest objective for active quests
