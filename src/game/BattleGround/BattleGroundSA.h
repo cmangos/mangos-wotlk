@@ -242,11 +242,12 @@ static const StrandGraveyardData sotaGraveyardData[] =
     {BG_SA_GRAVEYARD_ID_SOUTH,  BG_SA_STATE_GY_CENTER_ALLIANCE, BG_SA_STATE_GY_CENTER_HORDE,  BG_SA_GO_GY_FLAG_ALLIANCE_SOUTH,  BG_SA_GO_GY_FLAG_HORDE_SOUTH,  LANG_BG_SA_GRAVE_SOUTH_ALLIANCE, LANG_BG_SA_GRAVE_SOUTH_HORDE},
 };
 
-static const float strandTeleportLoc[3][4] =
+static const float strandTeleportLoc[4][4] =
 {
     {2682.936f, -830.368f, 19.0f, 2.895f},      // left side boat
-    {2577.003f, 980.261f, 19.0f, 0.807f},       // right side boat
-    {1209.7f, -65.16f, 70.1f, 0.0f}             // defender position (not used; player teleported by spell)
+    {2577.003f, 980.261f,  19.0f, 0.807f},      // right side boat
+    {1608.677f, 47.832f,   7.57f, 2.309f},      // left dock - used after the match started
+    {1599.188f, -103.563f, 8.87f, 4.037f}       // right dock
 };
 
 class BattleGroundSAScore : public BattleGroundScore

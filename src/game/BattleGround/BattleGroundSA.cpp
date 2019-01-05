@@ -189,18 +189,15 @@ void BattleGroundSA::TeleportPlayerToStartArea(Player* player)
 
         // Note: the following code is temporary until spell effect 60178 is implemented
         uint8 randLoc = (urand(0, 1));
+
+        // in case the battle is already in progress use the dock locations
+        if (GetStatus() == STATUS_IN_PROGRESS && (m_battleStage == BG_SA_STAGE_ROUND_2 || m_battleStage == BG_SA_STAGE_ROUND_1))
+            randLoc = (urand(2, 3));
+
         player->TeleportTo(player->GetMapId(), strandTeleportLoc[randLoc][0], strandTeleportLoc[randLoc][1], strandTeleportLoc[randLoc][2], strandTeleportLoc[randLoc][3]);
     }
     else
-    {
-        // use stalker as a target; note: the Z position is a little higher to prevent falling through the map
-        if (Creature* stalker = GetBgMap()->GetCreature(m_defenderTeleportStalkerGuid))
-        {
-            float fX, fY, fZ;
-            stalker->GetRandomPoint(stalker->GetPositionX(), stalker->GetPositionY(), stalker->GetPositionZ(), 10.0f, fX, fY, fZ);
-            player->CastSpell(fX, fY, 73.00f, BG_SA_SPELL_TELEPORT_DEFENDER, TRIGGERED_OLD_TRIGGERED);
-        }
-    }
+        player->CastSpell(player, BG_SA_SPELL_TELEPORT_DEFENDER, TRIGGERED_OLD_TRIGGERED);
 }
 
 void BattleGroundSA::StartingEventOpenDoors()
