@@ -134,6 +134,7 @@ void BattleGroundSA::Update(uint32 diff)
                         break;
                     case BG_SA_STAGE_SECOND_ROUND_3:
                         SendMessageToAll(LANG_BG_SA_BEGIN, CHAT_MSG_BG_SYSTEM_NEUTRAL);
+                        EnableDemolishers();
                         m_battleRoundTimer = BG_SA_TIMER_ROUND_LENGTH;
                         break;
                     case BG_SA_STAGE_ROUND_2:
@@ -203,7 +204,19 @@ void BattleGroundSA::TeleportPlayerToStartArea(Player* player)
 
 void BattleGroundSA::StartingEventOpenDoors()
 {
+    EnableDemolishers();
+
     UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, 1);
+}
+
+// function to allow demolishers to be used by players
+void BattleGroundSA::EnableDemolishers()
+{
+    for (const auto& guid : m_demolishersGuids)
+    {
+        if (Creature* demolisher = GetBgMap()->GetCreature(guid))
+            demolisher->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    }
 }
 
 void BattleGroundSA::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
@@ -225,7 +238,10 @@ void BattleGroundSA::HandleCreatureCreate(Creature* creature)
             break;
         case BG_SA_VEHICLE_DEMOLISHER:
             creature->setFaction(sotaTeamFactions[GetAttacker()]);
-            m_demolishersGuids.push_back(creature->GetObjectGuid());
+            if (creature->IsTemporarySummon())
+                m_tempDemolishersGuids.push_back(creature->GetObjectGuid());
+            else
+                m_demolishersGuids.push_back(creature->GetObjectGuid());
             break;
         case BG_SA_NPC_KANRETHAD:
             m_battlegroundMasterGuid = creature->GetObjectGuid();
@@ -238,6 +254,12 @@ void BattleGroundSA::HandleCreatureCreate(Creature* creature)
             break;
         case BG_SA_NPC_WORLD_TRIGGER:
             m_triggerGuids.push_back(creature->GetObjectGuid());
+            break;
+        case BG_SA_NPC_RIGGER_SPARKLIGHT:
+            m_riggerGuid = creature->GetObjectGuid();
+            break;
+        case BG_SA_NPC_GORGRIL_RIGSPARK:
+            m_gorgrilGuid = creature->GetObjectGuid();
             break;
     }
 }
@@ -414,10 +436,28 @@ void BattleGroundSA::EventPlayerClickedOnFlag(Player* player, GameObject* go)
         {
             DEBUG_LOG("BattleGroundSA: Graveyard banner with id %u was clicked.", go->GetEntry());
 
+            m_graveyardOwner[i] = GetAttacker();
+
             go->SetLootState(GO_JUST_DEACTIVATED);
             sObjectMgr.SetGraveYardLinkTeam(sotaGraveyardData[i].graveyardId, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(GetAttacker()));
 
-            // ToDo: spawn more demolishers
+            // spawn demolishers
+            if (sotaGraveyardData[i].graveyardId == BG_SA_GRAVEYARD_ID_EAST)
+            {
+                for (uint8 i = 0; i < 3; ++i)
+                {
+                    if (Creature* summon = go->SummonCreature(sotaEastSpawns[i].entry, sotaEastSpawns[i].x, sotaEastSpawns[i].y, sotaEastSpawns[i].z, sotaEastSpawns[i].o, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 10 * MINUTE * IN_MILLISECONDS))
+                        summon->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
+            }
+            else if (sotaGraveyardData[i].graveyardId == BG_SA_GRAVEYARD_ID_WEST)
+            {
+                for (uint8 i = 0; i < 3; ++i)
+                {
+                    if (Creature* summon = go->SummonCreature(sotaWestSpawns[i].entry, sotaWestSpawns[i].x, sotaWestSpawns[i].y, sotaWestSpawns[i].z, sotaWestSpawns[i].o, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 10 * MINUTE * IN_MILLISECONDS))
+                        summon->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
+            }
 
             // respawn the closest banner to the one that was clicked
             for (const auto& guid : m_graveyardBannersGuids[GetAttacker()])
@@ -528,11 +568,26 @@ void BattleGroundSA::SetupBattleground()
         }
     }
 
+    // despawn goblins
+    if (Creature* goblin = GetBgMap()->GetCreature(m_riggerGuid))
+        goblin->ForcedDespawn();
+    if (Creature* goblin = GetBgMap()->GetCreature(m_gorgrilGuid))
+        goblin->ForcedDespawn();
+
     // despawn demolishers - will be manually summoned by boat event
-    for (const auto& guid : m_demolishersGuids)
+    for (const auto& guid : m_tempDemolishersGuids)
     {
         if (Creature* demolisher = GetBgMap()->GetCreature(guid))
             demolisher->ForcedDespawn();
+    }
+
+    for (const auto& guid : m_demolishersGuids)
+    {
+        if (Creature* demolisher = GetBgMap()->GetCreature(guid))
+        {
+            demolisher->Respawn();
+            demolisher->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        }
     }
 
     // reset Gates

@@ -192,6 +192,27 @@ static const uint32 strandGates[BG_SA_MAX_GATES] = { BG_SA_STATE_PURPLE_GATE, BG
 // *** Battleground factions *** //
 const uint32 sotaTeamFactions[PVP_TEAM_COUNT] = { BG_SA_FACTION_ID_ALLIANCE, BG_SA_FACTION_ID_HORDE };
 
+struct StrandSummonData
+{
+    uint32 entry;
+    float x, y, z, o;
+};
+
+// *** Battleground spawn data *** //
+static const StrandSummonData sotaEastSpawns[] =
+{
+    {BG_SA_NPC_RIGGER_SPARKLIGHT, 1348.644f, -298.7865f, 31.0801f, 1.7104f},
+    {BG_SA_VEHICLE_DEMOLISHER, 1370.013f, -313.8679f, 34.8538f, 1.9547f},
+    {BG_SA_VEHICLE_DEMOLISHER, 1361.173f, -290.2466f, 30.8998f, 1.8684f}
+};
+
+static const StrandSummonData sotaWestSpawns[] =
+{
+    {BG_SA_NPC_GORGRIL_RIGSPARK, 1358.191f, 195.5278f, 31.0181f, 4.1713f},
+    {BG_SA_VEHICLE_DEMOLISHER, 1353.148f, 223.7602f, 35.2643f, 4.4029f},
+    {BG_SA_VEHICLE_DEMOLISHER, 1343.434f, 196.6284f, 30.9863f, 4.2935f}
+};
+
 struct StrandGoData
 {
     uint32 goEntry, worldState, eventDamaged, eventDestroyed, eventRebuild, messageDamaged, messagedDestroyed;
@@ -268,6 +289,7 @@ class BattleGroundSA : public BattleGround
         void SetupBattleground();
         void ProcessBattlegroundWinner();
         void SendBattlegroundWarning(int32 messageId);
+        void EnableDemolishers();
 
         void TeleportPlayerToStartArea(Player* player);
 
@@ -285,11 +307,14 @@ class BattleGroundSA : public BattleGround
 
         ObjectGuid m_battlegroundMasterGuid;
         ObjectGuid m_defenderTeleportStalkerGuid;
+        ObjectGuid m_riggerGuid;
+        ObjectGuid m_gorgrilGuid;
 
         ObjectGuid m_relicGuid[PVP_TEAM_COUNT];
 
         GuidList m_cannonsGuids;
         GuidList m_demolishersGuids;
+        GuidList m_tempDemolishersGuids;
         GuidList m_gatesGuids;
         GuidList m_attackerTeleportStalkersGuids;
         GuidVector m_triggerGuids;
