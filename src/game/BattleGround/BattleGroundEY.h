@@ -256,7 +256,7 @@ class BattleGroundEY : public BattleGround
         void RespawnDroppedFlag();
 
         void RemovePlayer(Player* plr, ObjectGuid guid) override;
-        bool HandleEvent(uint32 eventId, GameObject* go) override;
+        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
         void HandleGameObjectCreate(GameObject* go) override;
         bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         void HandleKillPlayer(Player* player, Player* killer) override;

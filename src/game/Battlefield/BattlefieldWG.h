@@ -666,7 +666,7 @@ class BattlefieldWG : public Battlefield
         void SendRemoveWorldStates(Player* player) override;
 
         // handle gameobject events
-        bool HandleEvent(uint32 eventId, GameObject* go) override;
+        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
 
         // handle creature create or death
         void HandleCreatureCreate(Creature* creature) override;

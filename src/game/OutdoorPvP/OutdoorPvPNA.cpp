@@ -292,7 +292,7 @@ void OutdoorPvPNA::UpdateWyvernsWorldState(uint32 value)
 }
 
 // process the capture events
-bool OutdoorPvPNA::HandleEvent(uint32 eventId, GameObject* go)
+bool OutdoorPvPNA::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 {
     // If we are not using the Halaa banner return
     if (go->GetEntry() != GO_HALAA_BANNER)

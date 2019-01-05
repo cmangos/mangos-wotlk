@@ -129,7 +129,7 @@ class OutdoorPvPTF : public OutdoorPvP
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         void SendRemoveWorldStates(Player* player) override;
 
-        bool HandleEvent(uint32 eventId, GameObject* go) override;
+        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
         void HandleObjectiveComplete(uint32 eventId, const PlayerList& players, Team team) override;
 
         void HandleGameObjectCreate(GameObject* go) override;

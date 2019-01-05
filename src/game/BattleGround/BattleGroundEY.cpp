@@ -210,7 +210,7 @@ void BattleGroundEY::HandleGameObjectCreate(GameObject* go)
 }
 
 // process the capture events
-bool BattleGroundEY::HandleEvent(uint32 eventId, GameObject* go)
+bool BattleGroundEY::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 {
     for (uint8 i = 0; i < EY_NODES_MAX; ++i)
     {

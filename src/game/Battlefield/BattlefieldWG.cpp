@@ -507,7 +507,7 @@ void BattlefieldWG::HandleGameObjectCreate(GameObject* go)
     }
 }
 
-bool BattlefieldWG::HandleEvent(uint32 eventId, GameObject* go)
+bool BattlefieldWG::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 {
     if (GetDefender() == TEAM_NONE)
     {

@@ -60,7 +60,7 @@ class OutdoorPvPGH : public OutdoorPvP
     public:
         OutdoorPvPGH();
 
-        bool HandleEvent(uint32 eventId, GameObject* go) override;
+        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
 
         void HandleCreatureCreate(Creature* creature) override;
         void HandleCreatureDeath(Creature* creature) override;
