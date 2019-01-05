@@ -30,6 +30,17 @@ BattleGroundIC::BattleGroundIC()
     m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_WS_HAS_BEGUN;
 }
 
+void BattleGroundIC::Reset()
+{
+    // call parent's class reset
+    BattleGround::Reset();
+
+    for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
+    {
+        m_reinforcements[i] = BG_IC_MAX_REINFORCEMENTS;
+    }
+}
+
 void BattleGroundIC::AddPlayer(Player* plr)
 {
     BattleGround::AddPlayer(plr);
@@ -37,6 +48,11 @@ void BattleGroundIC::AddPlayer(Player* plr)
     BattleGroundICScore* sc = new BattleGroundICScore;
 
     m_PlayerScores[plr->GetObjectGuid()] = sc;
+}
+
+void BattleGroundIC::StartingEventOpenDoors()
+{
+    // ToDo
 }
 
 void BattleGroundIC::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
@@ -47,4 +63,62 @@ void BattleGroundIC::UpdatePlayerScore(Player* source, uint32 type, uint32 value
         return;
 
     BattleGround::UpdatePlayerScore(source, type, value);
+}
+
+void BattleGroundIC::FillInitialWorldStates(WorldPacket& data, uint32& count)
+{
+    // show the reinforcements
+    FillInitialWorldState(data, count, BG_IC_STATE_ALLY_REINFORCE_SHOW, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_HORDE_REINFORCE_SHOW, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_ALLY_REINFORCE_COUNT, m_reinforcements[TEAM_INDEX_ALLIANCE]);
+    FillInitialWorldState(data, count, BG_IC_STATE_HORDE_REINFORCE_COUNT, m_reinforcements[TEAM_INDEX_ALLIANCE]);
+
+    // show the capturable bases
+    // ToDo: update with real time owner
+    FillInitialWorldState(data, count, BG_IC_STATE_DOCKS_UNCONTROLLED, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_HANGAR_UNCONTROLLED, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_WORKSHOP_UNCONTROLLED, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_QUARRY_UNCONTROLLED, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_REFINERY_UNCONTROLLED, 1);
+
+    // show the keeps
+    FillInitialWorldState(data, count, BG_IC_STATE_ALLY_KEEP_CONTROLLED_A, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_HORDE_KEEP_CONTROLLED_H, 1);
+
+    // show the walls
+    FillInitialWorldState(data, count, BG_IC_STATE_GATE_FRONT_H_CLOSED, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_GATE_WEST_H_CLOSED, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_GATE_EAST_H_CLOSED, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_GATE_FRONT_A_CLOSED, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_GATE_WEST_A_CLOSED, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_GATE_EAST_A_CLOSED, 1);
+}
+
+// process the gate events
+bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
+{
+    // ToDo: handle gate destroy events
+
+    return false;
+}
+
+// Called when a player clicks a capturable banner
+void BattleGroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* go)
+{
+    // ToDo: handle objective capture
+}
+
+void BattleGroundIC::EndBattleGround(Team winner)
+{
+    // win reward
+    if (winner == ALLIANCE)
+        RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
+    if (winner == HORDE)
+        RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
+
+    // complete map_end rewards (even if no team wins)
+    RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
+    RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
+
+    BattleGround::EndBattleGround(winner);
 }
