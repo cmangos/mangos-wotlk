@@ -153,6 +153,20 @@ enum
     // BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT = 60027,                // phase 65 - alliance is defender
     // BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT    = 60028,                // phase 129 - horde is defender
 
+    // achiev criterias
+    BG_SA_CRIT_NOT_A_SCRATCH_ALLY               = 7626,                 // achiev id 1762
+    BG_SA_CRIT_NOT_A_SCRATCH_HORDE              = 7634,                 // achiev id 2192
+    BG_SA_CRIT_DROP_IT                          = 6446,                 // achiev id 1764
+    BG_SA_CRIT_DROP_IT_NOW                      = 7629,                 // achiev id 2190
+    BG_SA_CRIT_ANCIENT_PROTECTOR                = 7630,                 // achiev id 1766
+    BG_SA_CRIT_COURTYARD_PROTECTOR              = 7631,                 // achiev id 2191
+
+    // missing achiev criteria spells
+    BG_SA_SPELL_ACHIEV_STORM_BEACH              = 65246,                // achiev id 1310
+    BG_SA_SPELL_ACHIEV_SEAFORIUM_DAMAGE         = 60937,                // achiev ids 1761, 2193
+    BG_SA_SPELL_ACHIEV_DEFENSE_ANCIENTS         = 52459,                // achiev ids 1757, 2200
+
+    // events
     BG_SA_EVENT_ID_RELIC                        = 20572,                // event used to end the round
     BG_SA_EVENT_ID_SHIP_PAUSE_1                 = 22095,                // events used to pause the ships
     BG_SA_EVENT_ID_SHIP_PAUSE_2                 = 18829,

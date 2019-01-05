@@ -68,7 +68,6 @@ void BattleGroundSA::Update(uint32 diff)
                     pShip->Refresh();
                     pShip->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
                     pShip->SetGoState(GO_STATE_READY);
-                    // ToDo: validate this flag
                     pShip->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
                 }
             }

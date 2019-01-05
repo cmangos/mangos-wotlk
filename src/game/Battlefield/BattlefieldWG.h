@@ -419,6 +419,13 @@ enum
     // FACTION_ID_HORDE_GENERIC_2               = 1734,             // ToDo: to be confirmed
     FACTION_ID_HORDE_GENERIC                    = 1735,             // used by GOs and creatures
 
+    // ***** Achiev criterias and achiev spells *****
+    ACHIEV_CRIT_WG_NO_CHANCE                    = 7703,             // achiev id 1751
+    ACHIEV_CRIT_WG_VEHICULER_SLAUGHTER          = 7704,             // achiev id 1723
+    ACHEIV_CRIT_WG_RANGER                       = 7709,             // achiev id 2199
+    ACHIEV_CRIT_WG_WITHIN_GRASP                 = 7666,             // achiev id 1755
+
+    SPELL_ACHIEV_LEAN_TOWER                     = 20723,            // achiev id 1727
 
     // ***** Condition entries *****
     // used to check the gossip options in DB for various npcs
