@@ -69,6 +69,7 @@ enum AchievementCriteriaRequirementType
     ACHIEVEMENT_CRITERIA_REQUIRE_S_EQUIPPED_ITEM_LVL = 19,  // item_level     item_quality  fir equipped item in slot `misc1` to item level and quality
     ACHIEVEMENT_CRITERIA_REQUIRE_NTH_BIRTHDAY        = 20,  // N                            login on day of N-th Birthday
     ACHIEVEMENT_CRITERIA_REQUIRE_KNOWN_TITLE         = 21,  // title_id                     known (pvp) title, values from dbc
+    ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT          = 22,  // 0              0             maker battleground or outdoor pvp script call for check current criteria requirements fit
 };
 
 class Player;
@@ -177,6 +178,7 @@ struct AchievementCriteriaRequirement
         {
             uint32 title_id;
         } known_title;
+        // ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT        = 22 (no data)
         // ...
         struct
         {

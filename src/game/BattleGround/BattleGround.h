@@ -537,6 +537,9 @@ class BattleGround
         // Handle script condition fulfillment
         virtual bool IsConditionFulfilled(Player const* /*source*/, uint32 /*conditionId*/, WorldObject const* /*conditionSource*/, uint32 /*conditionSourceType*/) { return false; }
 
+        // Handle achievement criteria requirements
+        virtual bool CheckAchievementCriteriaMeet(uint32 /*criteria_id*/, Player const* /*source*/, Unit const* /*target*/, uint32 /*miscvalue1*/) { return false; }
+
         /* virtual score-array - get's used in bg-subclasses */
         int32 m_TeamScores[PVP_TEAM_COUNT];
 

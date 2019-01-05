@@ -104,6 +104,7 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
         case ACHIEVEMENT_CRITERIA_REQUIRE_BG_LOSS_TEAM_SCORE:
         case ACHIEVEMENT_CRITERIA_REQUIRE_INSTANCE_SCRIPT:
         case ACHIEVEMENT_CRITERIA_REQUIRE_NTH_BIRTHDAY:
+        case ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT:
             return true;
         case ACHIEVEMENT_CRITERIA_REQUIRE_T_CREATURE:
             if (!creature.id || !ObjectMgr::GetCreatureTemplate(creature.id))
@@ -371,6 +372,25 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
                 return source && source->HasTitle(titleInfo->bit_index);
 
             return false;
+        }
+        case ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT:
+        {
+            if (!source->IsInWorld())
+                return false;
+
+            if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(source->GetCachedZoneId()))
+                return outdoorPvP->CheckAchievementCriteriaMeet(criteria_id, source, target, miscvalue1);
+            else if (source->InBattleGround())
+            {
+                if (BattleGround* bg = source->GetBattleGround())
+                    return bg->CheckAchievementCriteriaMeet(criteria_id, source, target, miscvalue1);
+            }
+            else
+            {
+                sLog.outErrorDb("Achievement system call ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT (%u) for achievement criteria %u for zone %u but zone does not have pvp script",
+                                ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT, criteria_id, source->GetZoneId());
+                return false;
+            }
         }
     }
     return false;
