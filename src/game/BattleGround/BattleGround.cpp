@@ -913,6 +913,8 @@ uint32 BattleGround::GetBattlemasterEntry() const
         case BATTLEGROUND_AB: return 14879;
         case BATTLEGROUND_EY: return 22516;
         case BATTLEGROUND_NA: return 20200;
+        case BATTLEGROUND_SA: return 29234;
+        case BATTLEGROUND_IC: return 34437;
         default:              return 0;
     }
 }
@@ -939,7 +941,14 @@ void BattleGround::RewardMark(Player* plr, uint32 count)
             else
                 RewardSpellCast(plr, SPELL_AB_MARK_LOSER);
             break;
+        case BATTLEGROUND_SA:
+            if (count == ITEM_WINNER_COUNT)
+                RewardSpellCast(plr, SPELL_SA_MARK_WINNER);
+            else
+                RewardSpellCast(plr, SPELL_SA_MARK_LOSER);
+            break;
         case BATTLEGROUND_EY:                               // no rewards
+        case BATTLEGROUND_IC:
         default:
             break;
     }
@@ -1036,6 +1045,12 @@ void BattleGround::RewardQuestComplete(Player* plr)
             break;
         case BATTLEGROUND_EY:
             quest = SPELL_EY_QUEST_REWARD;
+            break;
+        case BATTLEGROUND_SA:
+            quest = SPELL_SA_QUEST_REWARD;
+            break;
+        case BATTLEGROUND_IC:
+            quest = SPELL_IC_QUEST_REWARD;
             break;
         default:
             return;
