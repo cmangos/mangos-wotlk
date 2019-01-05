@@ -53,7 +53,7 @@ void instance_sethekk_halls::OnObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())
     {
-        case GO_IKISS_DOOR:
+        case GO_IKISS_SWING_DOOR:
             if (m_auiEncounter[TYPE_IKISS] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
@@ -91,7 +91,7 @@ void instance_sethekk_halls::SetData(uint32 uiType, uint32 uiData)
         case TYPE_IKISS:
             if (uiData == DONE)
             {
-                DoUseDoorOrButton(GO_IKISS_DOOR, DAY);
+                DoUseDoorOrButton(GO_IKISS_SWING_DOOR, DAY);
                 DoToggleGameObjectFlags(GO_IKISS_CHEST, GO_FLAG_NO_INTERACT | GO_FLAG_INTERACT_COND, false);
             }
             m_auiEncounter[uiType] = uiData;

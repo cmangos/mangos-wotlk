@@ -21,7 +21,7 @@ enum
     NPC_INVIS_RAVEN_GOD_TARGET  = 23057,
     NPC_INVIS_RAVEN_GOD_CASTER  = 23058,
 
-    GO_IKISS_DOOR               = 177203,
+    GO_IKISS_SWING_DOOR         = 183398,
     GO_IKISS_CHEST              = 187372,
     GO_RAVENS_CLAW              = 185554,
     GO_MOONSTONE                = 185590,
