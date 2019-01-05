@@ -639,7 +639,7 @@ MapPersistentStateManager::~MapPersistentStateManager()
 - adding instance into manager
 - called from DungeonMap::Add, _LoadBoundInstances, LoadGroups
 */
-MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, Difficulty difficulty, time_t resetTime, bool canReset, bool load /*=false*/, bool initPools /*= true*/, uint32 completedEncountersMask /*= 0*/)
+MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, Difficulty difficulty, time_t resetTime, bool canReset, bool load /*=false*/, uint32 completedEncountersMask /*= 0*/)
 {
     if (MapPersistentState* old_save = GetPersistentState(mapEntry->MapID, instanceId))
         return old_save;
@@ -680,9 +680,6 @@ MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const
         m_instanceSaveByInstanceId[instanceId] = state;
     else
         m_instanceSaveByMapId[mapEntry->MapID] = state;
-
-    if (initPools)
-        state->InitPools();
 
     return state;
 }
@@ -990,10 +987,7 @@ void MapPersistentStateManager::InitWorldMaps()
     for (uint32 mapid = 0; mapid < sMapStore.GetNumRows(); ++mapid)
         if (MapEntry const* entry = sMapStore.LookupEntry(mapid))
             if (!entry->Instanceable())
-                state = AddPersistentState(entry, 0, REGULAR_DIFFICULTY, 0, false, true, false);
-
-    if (state)
-        state->InitPools();
+                state = AddPersistentState(entry, 0, REGULAR_DIFFICULTY, 0, false, false);
 }
 
 void MapPersistentStateManager::LoadCreatureRespawnTimes()
@@ -1051,7 +1045,7 @@ void MapPersistentStateManager::LoadCreatureRespawnTimes()
         if (difficulty >= (!mapEntry->Instanceable() ? REGULAR_DIFFICULTY + 1 : (mapEntry->IsRaid() ? MAX_RAID_DIFFICULTY : MAX_DUNGEON_DIFFICULTY)))
             continue;
 
-        MapPersistentState* state = AddPersistentState(mapEntry, instanceId, Difficulty(difficulty), resetTime, mapEntry->IsDungeon(), true, true, completedEncounters);
+        MapPersistentState* state = AddPersistentState(mapEntry, instanceId, Difficulty(difficulty), resetTime, mapEntry->IsDungeon(), true, completedEncounters);
         if (!state)
             continue;
 
@@ -1123,7 +1117,7 @@ void MapPersistentStateManager::LoadGameobjectRespawnTimes()
         if (difficulty >= (!mapEntry->Instanceable() ? REGULAR_DIFFICULTY + 1 : (mapEntry->IsRaid() ? MAX_RAID_DIFFICULTY : MAX_DUNGEON_DIFFICULTY)))
             continue;
 
-        MapPersistentState* state = AddPersistentState(mapEntry, instanceId, Difficulty(difficulty), resetTime, mapEntry->IsDungeon(), true, true, completedEncounters);
+        MapPersistentState* state = AddPersistentState(mapEntry, instanceId, Difficulty(difficulty), resetTime, mapEntry->IsDungeon(), true, completedEncounters);
         if (!state)
             continue;
 
