@@ -28,13 +28,7 @@ BattleGroundSA::BattleGroundSA(): m_defendingTeamIdx(TEAM_INDEX_NEUTRAL), m_batt
     m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_SA_START_TWO_MINUTES;
     m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_SA_START_ONE_MINUTE;
     m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_SA_START_HALF_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_SA_BEGIN;
-
-    for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
-    {
-        m_scoreCount[i] = 0;
-        m_winTime[i] = 0;
-    }
+    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = 0;
 }
 
 void BattleGroundSA::Reset()
@@ -46,6 +40,12 @@ void BattleGroundSA::Reset()
 
     m_boatStartTimer = BG_SA_TIMER_BOAT_START;
     m_battleRoundTimer = BG_SA_TIMER_ROUND_LENGTH;
+
+    for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
+    {
+        m_scoreCount[i] = 0;
+        m_winTime[i] = 0;
+    }
 
     // setup the battleground
     SetupBattleground();
@@ -90,6 +90,7 @@ void BattleGroundSA::Update(uint32 diff)
                 switch (m_battleStage)
                 {
                     case BG_SA_STAGE_ROUND_1:
+                        SendBattlegroundWarning(LANG_BG_SA_ROUND_FINISHED);
                         // cast end of round spell
                         CastSpellOnTeam(BG_SA_SPELL_END_OF_ROUND, ALLIANCE);
                         CastSpellOnTeam(BG_SA_SPELL_END_OF_ROUND, HORDE);
@@ -133,7 +134,7 @@ void BattleGroundSA::Update(uint32 diff)
                         m_battleRoundTimer = 30000;
                         break;
                     case BG_SA_STAGE_SECOND_ROUND_3:
-                        SendMessageToAll(LANG_BG_SA_BEGIN, CHAT_MSG_BG_SYSTEM_NEUTRAL);
+                        SendBattlegroundWarning(LANG_BG_SA_BEGIN);
                         EnableDemolishers();
                         m_battleRoundTimer = BG_SA_TIMER_ROUND_LENGTH;
                         break;
@@ -205,7 +206,7 @@ void BattleGroundSA::TeleportPlayerToStartArea(Player* player)
 void BattleGroundSA::StartingEventOpenDoors()
 {
     EnableDemolishers();
-
+    SendBattlegroundWarning(LANG_BG_SA_BEGIN);
     UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, 1);
 }
 
@@ -215,7 +216,10 @@ void BattleGroundSA::EnableDemolishers()
     for (const auto& guid : m_demolishersGuids)
     {
         if (Creature* demolisher = GetBgMap()->GetCreature(guid))
+        {
+            demolisher->setFaction(sotaTeamFactions[GetAttacker()]);
             demolisher->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        }
     }
 }
 
@@ -225,7 +229,18 @@ void BattleGroundSA::UpdatePlayerScore(Player* source, uint32 type, uint32 value
     if (itr == m_PlayerScores.end())
         return;
 
-    BattleGround::UpdatePlayerScore(source, type, value);
+    switch (type)
+    {
+        case SCORE_DEMOLISHERS_DESTROYED:
+            ((BattleGroundSAScore*)itr->second)->DemolishersDestroyed += value;
+            break;
+        case SCORE_GATES_DESTROYED:
+            ((BattleGroundSAScore*)itr->second)->GatesDestroyed += value;
+            break;
+        default:
+            BattleGround::UpdatePlayerScore(source, type, value);
+            break;
+    }
 }
 
 void BattleGroundSA::HandleCreatureCreate(Creature* creature)
@@ -356,7 +371,7 @@ void BattleGroundSA::FillInitialWorldStates(WorldPacket& data, uint32& count)
 }
 
 // process the gate and relic events
-bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go)
+bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 {
     // handle round end by relic click
     if (eventId == BG_SA_EVENT_ID_RELIC)
@@ -411,6 +426,9 @@ bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go)
                 UpdateWorldState(i.worldState, BG_SA_STATE_VALUE_GATE_DESTROYED);
                 SendBattlegroundWarning(i.messagedDestroyed);
                 PlaySoundToAll(GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_SOUND_WALL_DESTROYED_ALLIANCE : BG_SA_SOUND_WALL_DESTROYED_HORDE);
+
+                if (invoker->GetTypeId() == TYPEID_PLAYER)
+                    UpdatePlayerScore((Player*)invoker, SCORE_GATES_DESTROYED, 1);
 
                 // ToDo: despawn sigil
             }
@@ -495,6 +513,19 @@ void BattleGroundSA::EventPlayerClickedOnFlag(Player* player, GameObject* go)
 
             break;
         }
+    }
+}
+
+void BattleGroundSA::HandleKillUnit(Creature* unit, Player* killer)
+{
+    if (!unit)
+        return;
+
+    if (unit->GetEntry() == BG_SA_VEHICLE_DEMOLISHER)
+    {
+        UpdatePlayerScore(killer, SCORE_DEMOLISHERS_DESTROYED, 1);
+
+        // ToDo: update achiev criteria for 1762 / 2192
     }
 }
 

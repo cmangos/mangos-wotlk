@@ -252,8 +252,14 @@ static const float strandTeleportLoc[3][4] =
 class BattleGroundSAScore : public BattleGroundScore
 {
     public:
-        BattleGroundSAScore() {};
+        BattleGroundSAScore(): DemolishersDestroyed(0), GatesDestroyed(0) {};
         virtual ~BattleGroundSAScore() {};
+
+        uint32 GetAttr1() const { return DemolishersDestroyed; }
+        uint32 GetAttr2() const { return GatesDestroyed; }
+
+        uint32 DemolishersDestroyed;
+        uint32 GatesDestroyed;
 };
 
 class BattleGroundSA : public BattleGround
@@ -273,7 +279,9 @@ class BattleGroundSA : public BattleGround
         void HandleCreatureCreate(Creature* creature) override;
         void HandleGameObjectCreate(GameObject* go) override;
 
-        bool HandleEvent(uint32 eventId, GameObject* go) override;
+        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
+
+        void HandleKillUnit(Creature* unit, Player* killer) override;
 
         void EventPlayerClickedOnFlag(Player* player, GameObject* go) override;
 
