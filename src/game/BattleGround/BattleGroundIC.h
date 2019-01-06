@@ -19,6 +19,10 @@
 #ifndef __BATTLEGROUNDIC_H
 #define __BATTLEGROUNDIC_H
 
+#include "Common.h"
+#include "BattleGround.h"
+#include "Tools/Language.h"
+
 class BattleGround;
 
 enum
@@ -133,13 +137,13 @@ enum
     BG_IC_SPELL_QUARRY                  = 68720,
 
     // graveyard links
-    BG_IC_GRAVEYARD_ID_1                = 1480,
-    BG_IC_GRAVEYARD_ID_2                = 1481,
-    BG_IC_GRAVEYARD_ID_3                = 1482,
-    BG_IC_GRAVEYARD_ID_4                = 1483,
-    BG_IC_GRAVEYARD_ID_5                = 1484,
-    BG_IC_GRAVEYARD_ID_6                = 1485,
-    BG_IC_GRAVEYARD_ID_7                = 1486,
+    BG_IC_GRAVEYARD_ID_DOCKS            = 1480,
+    BG_IC_GRAVEYARD_ID_HANGAR           = 1481,
+    BG_IC_GRAVEYARD_ID_WORKSHOP         = 1482,
+    BG_IC_GRAVEYARD_ID_ALLIANCE         = 1483,         // last option for alliance; not capturable
+    BG_IC_GRAVEYARD_ID_HORDE            = 1484,         // last option for horde; not capturable
+    BG_IC_GRAVEYARD_ID_KEEP_ALLY        = 1485,
+    BG_IC_GRAVEYARD_ID_KEEP_HORDE       = 1486,
 
     // sounds
     BG_IC_SOUND_NODE_CLAIMED            = 8192,
@@ -153,8 +157,14 @@ enum
 class BattleGroundICScore : public BattleGroundScore
 {
     public:
-        BattleGroundICScore() {};
+        BattleGroundICScore(): BasesAssaulted(0), BasesDefended(0) {};
         virtual ~BattleGroundICScore() {};
+
+        uint32 GetAttr1() const { return BasesAssaulted; }
+        uint32 GetAttr2() const { return BasesDefended; }
+
+        uint32 BasesAssaulted;
+        uint32 BasesDefended;
 };
 
 class BattleGroundIC : public BattleGround
@@ -175,8 +185,11 @@ class BattleGroundIC : public BattleGround
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
 
         bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
+        void HandleKillUnit(Creature* creature, Player* killer) override;
 
         void EventPlayerClickedOnFlag(Player* player, GameObject* go) override;
+
+        void Update(uint32 diff) override;
 
     private:
 

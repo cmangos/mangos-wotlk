@@ -23,11 +23,12 @@
 
 BattleGroundIC::BattleGroundIC()
 {
-    // TODO FIX ME!
-    m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
-    m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_WS_START_ONE_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_WS_START_HALF_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_WS_HAS_BEGUN;
+
+    m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_IC_START_TWO_MINUTES;
+    m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_IC_START_ONE_MINUTE;
+    m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_IC_START_HALF_MINUTE;
+    // ToDo: use the text LANG_BG_IC_START_15_SECONDS
+    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_IC_BEGIN;
 }
 
 void BattleGroundIC::Reset()
@@ -62,7 +63,18 @@ void BattleGroundIC::UpdatePlayerScore(Player* source, uint32 type, uint32 value
     if (itr == m_PlayerScores.end())                        // player not found...
         return;
 
-    BattleGround::UpdatePlayerScore(source, type, value);
+    switch (type)
+    {
+        case SCORE_BASES_ASSAULTED:
+            ((BattleGroundICScore*)itr->second)->BasesAssaulted += value;
+            break;
+        case SCORE_BASES_DEFENDED:
+            ((BattleGroundICScore*)itr->second)->BasesDefended += value;
+            break;
+        default:
+            BattleGround::UpdatePlayerScore(source, type, value);
+            break;
+    }
 }
 
 void BattleGroundIC::FillInitialWorldStates(WorldPacket& data, uint32& count)
@@ -108,6 +120,27 @@ void BattleGroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* go)
     // ToDo: handle objective capture
 }
 
+void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
+{
+    DEBUG_LOG("BattleGroundIC: Handle unit kill for craeture entry %u.", creature->GetEntry());
+
+    if (GetStatus() != STATUS_IN_PROGRESS)
+        return;
+
+    // ToDo: add extra validations
+
+    // end battle if boss was killed
+    switch (creature->GetEntry())
+    {
+        case BG_IC_NPC_COMMANDER_WYRMBANE:
+            EndBattleGround(HORDE);
+            break;
+        case BG_IC_NPC_OVERLORD_AGMAR:
+            EndBattleGround(ALLIANCE);
+            break;
+    }
+}
+
 void BattleGroundIC::EndBattleGround(Team winner)
 {
     // win reward
@@ -121,4 +154,9 @@ void BattleGroundIC::EndBattleGround(Team winner)
     RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
 
     BattleGround::EndBattleGround(winner);
+}
+
+void BattleGroundIC::Update(uint32 diff)
+{
+    BattleGround::Update(diff);
 }
