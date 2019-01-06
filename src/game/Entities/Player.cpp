@@ -14369,7 +14369,8 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         ModifyMoney(pQuest->GetRewOrReqMoney());
 
     // honor reward
-    if (uint32 honor = pQuest->CalculateRewardHonor(getLevel()))
+    uint32 honor = 0;
+    if (honor = pQuest->CalculateRewardHonor(getLevel()))
         RewardHonor(nullptr, 0, honor);
 
     // title reward
@@ -14411,7 +14412,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
         q_status.uState = QUEST_CHANGED;
 
     if (announce)
-        SendQuestReward(pQuest, xp);
+        SendQuestReward(pQuest, xp, honor);
 
     bool handled = false;
 
@@ -15591,7 +15592,7 @@ void Player::SendQuestCompleteEvent(uint32 quest_id) const
     }
 }
 
-void Player::SendQuestReward(Quest const* pQuest, uint32 XP) const
+void Player::SendQuestReward(Quest const* pQuest, uint32 XP, uint32 honor) const
 {
     uint32 questid = pQuest->GetQuestId();
     DEBUG_LOG("WORLD: Sent SMSG_QUESTGIVER_QUEST_COMPLETE quest = %u", questid);
@@ -15609,7 +15610,7 @@ void Player::SendQuestReward(Quest const* pQuest, uint32 XP) const
         data << uint32(pQuest->GetRewOrReqMoney() + int32(pQuest->GetRewMoneyMaxLevel() * sWorld.getConfig(CONFIG_FLOAT_RATE_DROP_MONEY)));
     }
 
-    data << uint32(10 * MaNGOS::Honor::hk_honor_at_level(getLevel(), pQuest->GetRewHonorAddition()));
+    data << uint32(honor);                                  // new 2.3.0, HonorPoints
     data << uint32(pQuest->GetBonusTalents());              // bonus talents
     data << uint32(0);                                      // arena points
     GetSession()->SendPacket(data);
