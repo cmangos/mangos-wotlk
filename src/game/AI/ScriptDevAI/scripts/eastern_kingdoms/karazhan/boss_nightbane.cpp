@@ -106,6 +106,7 @@ struct boss_nightbaneAI : public npc_escortAI
         m_creature->SetCanFly(false);
         m_creature->SetHover(false);
         m_creature->SetLevitate(true);
+        SetDeathPrevention(false);
 
         m_skeletons.clear();
     }
@@ -233,6 +234,7 @@ struct boss_nightbaneAI : public npc_escortAI
                     m_creature->SetHover(false);
                     m_uiPhase = PHASE_GROUND;
                     SetCombatMovement(true);
+                    SetDeathPrevention(false);
                     DoResetThreat();
                     DoStartMovement(m_creature->getVictim());
                     break;
@@ -336,6 +338,7 @@ struct boss_nightbaneAI : public npc_escortAI
 
                     DoScriptText(SAY_AIR_PHASE, m_creature);
                     m_uiPhase = PHASE_TRANSITION;
+                    SetDeathPrevention(true);
                     DoResetAirTimers();
                     ++m_uiFlightPhase;
                 }
