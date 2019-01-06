@@ -679,7 +679,10 @@ enum MangosStrings
     LANG_BG_SA_GRAVE_WEST_ALLIANCE      = 645,
     LANG_BG_SA_GRAVE_SOUTH_ALLIANCE     = 646,
 
-    // 647 - 649 not used
+    LANG_BG_IC_START_TWO_MINUTES        = 647,
+    LANG_BG_IC_START_ONE_MINUTE         = 648,
+    LANG_BG_IC_START_HALF_MINUTE        = 649,
+
     LANG_BG_ALLY                        = 650,
     LANG_BG_HORDE                       = 651,
 
@@ -721,7 +724,20 @@ enum MangosStrings
     LANG_BG_EY_CAPTURED_FLAG_H          = 685,
     LANG_BG_EY_DROPPED_FLAG             = 686,
     LANG_BG_EY_RESETED_FLAG             = 687,
-    // 688 - 699 not used
+
+    LANG_BG_IC_START_15_SECONDS         = 688,
+    LANG_BG_IC_BEGIN                    = 689,
+    LANG_BG_IC_WEST_GATE_ALLIANCE       = 690,
+    LANG_BG_IC_EAST_GATE_ALLIANCE       = 691,
+    LANG_BG_IC_FRONT_GATE_ALLIANCE      = 692,
+    LANG_BG_IC_WEST_GATE_HORDE          = 693,
+    LANG_BG_IC_EAST_GATE_HORDE          = 694,
+    LANG_BG_IC_FRONT_GATE_HORDE         = 695,
+    LANG_BG_IC_NODE_KEEP_ALLIANCE       = 696,
+    LANG_BG_IC_NODE_KEEP_HORDE          = 697,
+    LANG_BG_IC_NODE_WORKSHOP            = 698,
+    LANG_BG_IC_NODE_DOCKS               = 699,
+
     LANG_ARENA_ONE_TOOLOW               = 700,
     LANG_ARENA_ONE_MINUTE               = 701,
     LANG_ARENA_THIRTY_SECONDS           = 702,
@@ -780,11 +796,13 @@ enum MangosStrings
     LANG_BATTLEGROUND_PREMATURE_FINISH_WARNING_SECS = 751,  // "Not enough players. This game will close in %u seconds."
     LANG_BATTLEGROUND_ONLY_ALLIANCE_USE = 752,              // "Only The Alliance can use that portal"
     LANG_BATTLEGROUND_ONLY_HORDE_USE    = 753,              // "Only The Horde can use that portal"
-//                                      = 754, not used
-//                                      = 755, not used
-//                                      = 756, not used
-//                                      = 757, not used
-//                                      = 758, not used
+
+    LANG_BG_IC_NODE_REFINERY            = 754,
+    LANG_BG_IC_NODE_QUARRY              = 756,
+    LANG_BG_IC_NODE_HANGAR              = 757,
+    LANG_BG_IC_NODE_ASSAULTED           = 758,
+    LANG_BG_IC_NODE_DEFENDED            = 759,
+
     LANG_BG_AV_TOWER_TAKEN              = 759,
     LANG_BG_AV_TOWER_ASSAULTED          = 760,
     LANG_BG_AV_TOWER_DEFENDED           = 761,
@@ -811,7 +829,8 @@ enum MangosStrings
     LANG_BG_AV_NODE_TOWER_FROST_W       = 781,
     LANG_BG_AV_NODE_GRAVE_FROST_HUT     = 782,
 
-//                                      = 783, not used
+    LANG_BG_IC_NODE_TAKEN               = 783,
+
     LANG_BG_AV_START_ONE_MINUTE         = 784,
     LANG_BG_AV_START_HALF_MINUTE        = 785,
     LANG_BG_AV_HAS_BEGUN                = 786,
