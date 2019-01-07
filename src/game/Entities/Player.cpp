@@ -21868,7 +21868,7 @@ Player* Player::GetNextRaidMemberWithLowestLifePercentage(float radius, AuraType
             float x, y, z;
             GetPosition(x, y, z);
             // CanAssist check duel and controlled by enemy
-            if (target->IsWithinDist3d(x, y, z, radius) &&
+            if (IsInMap(target) && target->IsWithinDist3d(x, y, z, radius) &&
                     !target->HasInvisibilityAura() && CanAssist(target) && !target->HasAuraType(noAuraType))
             {
                 // First not picked
