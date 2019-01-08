@@ -85,7 +85,11 @@ bool GridMap::loadData(char const* filename)
     // Not return error if file not found
     FILE* in = fopen(filename, "rb");
     if (!in)
-        return false;
+    {
+        DEBUG_FILTER_LOG(LOG_FILTER_MAP_LOADING, "Failled to found %s", filename);
+        // its a valid error only in case of no vmap files are available too
+        return true;
+    }
 
     if (fread(&header, sizeof(header), 1, in) != 1)
     {
