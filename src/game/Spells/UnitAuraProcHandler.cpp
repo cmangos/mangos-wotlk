@@ -4639,7 +4639,6 @@ SpellAuraProcResult Unit::HandlePeriodicAuraProc(ProcExecutionData& data)
     switch (auraInfo->Id)
     {
         case 32065: // Fungal Decay - all three consume one stack on proc
-        case 35244: // Choking Vines
         case 36659: // Tail Sting
             if (triggeredByAura->GetHolder()->ModStackAmount(-1, nullptr)) // Remove aura on return true
                 RemoveSpellAuraHolder(triggeredByAura->GetHolder(), AURA_REMOVE_BY_DEFAULT);
