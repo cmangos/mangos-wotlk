@@ -1245,6 +1245,8 @@ void Spell::AddGOTarget(GameObject* pVictim, SpellEffectIndex effIndex)
         else
             dist = affectiveObject->GetDistance(pVictim->GetPositionX(), pVictim->GetPositionY(), pVictim->GetPositionZ(), DIST_CALC_NONE);
 
+        dist = sqrt(dist); // default distance calculation is raw, apply sqrt before the next step
+
         float speed;
         if (m_targets.getSpeed() > 0.0f)
             speed = m_targets.getSpeed() * cos(m_targets.getElevation());
