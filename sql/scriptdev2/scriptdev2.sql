@@ -5558,7 +5558,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1585027,'Master... grant me strength.',12419,1,0,0,'kaelthas MT SAY_TIRED'),
 (-1585028,'Do not... get too comfortable.',12420,1,0,0,'kaelthas MT SAY_RECAST_GRAVITY'),
 (-1585029,'My demise accomplishes nothing! The Master will have you! You will drown in your own blood! This world shall burn! Aaaghh!',12421,1,0,0,'kaelthas MT SAY_DEATH'),
-(-1585030,'Oh no, he was merely an instrument, a stepping stone to a much larger plan! It has all led to this, and this time, you will not interfere!',0,1,0,0,'kaelthas MT SAY_INTRO_2');
+(-1585030,'Oh no, he was merely an instrument, a stepping stone to a much larger plan! It has all led to this, and this time, you will not interfere!',0,1,0,0,'kaelthas MT SAY_INTRO_2'),
+
+(-1585031,'%s overloads!',0,3,0,0,'vexallus EMOTE_OVERLOAD');
 
 -- -1 595 000 CULLING OF STRATHOLME
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
