@@ -1343,6 +1343,14 @@ UPDATE spell_template SET `MaxAffectedTargets`=1 WHERE id=41071;
 -- Inhibit Magic 32264 - boss_shirrak 18371 - should not put into combat
 UPDATE spell_template SET AttributesEx=AttributesEx|0x00000400 WHERE id IN(32264);
 
+-- Rain of Chaos 40946 - Add SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING - they should melee during the channel
+UPDATE `spell_template` SET `AttributesEx4`=`AttributesEx4`|0x00000080  WHERE `Id` IN(40946);
+-- Rain of Chaos 40948 - Remove SPELL_ATTR_EX_CHANNELED_1 - they should not interrupt parent spell
+UPDATE `spell_template` SET `AttributesEx`=`AttributesEx`&~0x00000004  WHERE `Id` IN(40948);
+
+-- Illidari Flames 40939 - Remove SPELL_ATTR_EX_CHANNELED_2 - they should not interrupt parent spell
+UPDATE `spell_template` SET `AttributesEx`=`AttributesEx`&~0x00000040  WHERE `Id` IN(40939);
+
 -- Cyclone, used by Cyclone Totem (22894)
 UPDATE spell_template SET `MaxAffectedTargets`=5 WHERE id=39594;
 
