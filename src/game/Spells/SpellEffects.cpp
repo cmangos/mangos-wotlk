@@ -6288,9 +6288,20 @@ void Spell::EffectApplyAreaAura(SpellEffectIndex eff_idx)
 
 void Spell::EffectSummonType(SpellEffectIndex eff_idx)
 {
-    // if this spell already have an aura applied cancel the summon
-    if (m_caster->HasAura(m_spellInfo->Id))
-        return;
+    switch (m_spellInfo->Id)
+    {
+        case 44322: // Hacky fix for summon spell in Vexallus fight (MGT) 
+        case 46154: // need more info on how to handle this
+        case 46159:
+            break;
+        default:
+        {
+            // if this spell already have an aura applied cancel the summon
+            if (m_caster->HasAura(m_spellInfo->Id))
+                return;
+            break;
+        }
+    }
 
     uint32 prop_id = m_spellInfo->EffectMiscValueB[eff_idx];
     SummonPropertiesEntry const* summon_prop = sSummonPropertiesStore.LookupEntry(prop_id);
