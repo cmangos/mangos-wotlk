@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: boss_eredar_twins
 SD%Complete: 75
-SDComment: A few spells are not working proper yet; Shadow image script needs improvement
+SDComment: A few spells are not working proper yet; Shadow image script needs improvement; Add invulnerability in phase transition
 SDCategory: Sunwell Plateau
 EndScriptData */
 

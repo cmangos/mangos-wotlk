@@ -82,6 +82,7 @@ struct boss_kalecgosAI : public ScriptedAI
     boss_kalecgosAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (instance_sunwell_plateau*)pCreature->GetInstanceData();
+        SetDeathPrevention(true);
         Reset();
     }
 
@@ -147,21 +148,16 @@ struct boss_kalecgosAI : public ScriptedAI
             m_pInstance->SetData(TYPE_KALECGOS, IN_PROGRESS);
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void JustPreventedDeath(Unit* attacker) override
     {
-        if (damage > m_creature->GetHealth())
+        // If Sathrovarr is not banished yet, then banish the boss
+        if (!m_bIsUncorrupted)
         {
-            damage = std::min(damage, m_creature->GetHealth() - 1);
-
-            // If Sathrovarr is not banished yet, then banish the boss
-            if (!m_bIsUncorrupted)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BANISH, CAST_TRIGGERED) == CAST_OK)
-                    m_bIsBanished = true;
-            }
-            else
-                DoStartOutro();
+            if (DoCastSpellIfCan(m_creature, SPELL_BANISH, CAST_TRIGGERED) == CAST_OK)
+                m_bIsBanished = true;
         }
+        else
+            DoStartOutro();
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -323,6 +319,7 @@ struct boss_sathrovarrAI : public ScriptedAI
     boss_sathrovarrAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (instance_sunwell_plateau*)pCreature->GetInstanceData();
+        SetDeathPrevention(true);
         Reset();
     }
 
@@ -358,30 +355,25 @@ struct boss_sathrovarrAI : public ScriptedAI
         m_creature->SummonCreature(NPC_KALECGOS_HUMAN, aKalecHumanLoc[0], aKalecHumanLoc[1], aKalecHumanLoc[2], aKalecHumanLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void JustPreventedDeath(Unit* attacker) override
     {
-        if (damage > m_creature->GetHealth())
+        if (m_bIsBanished)
+            return;
+
+        // banish Sathrovarr and eject the players
+        if (DoCastSpellIfCan(m_creature, SPELL_BANISH, CAST_TRIGGERED) == CAST_OK)
+            m_bIsBanished = true;
+
+        if (!m_pInstance)
+            return;
+
+        if (Creature* pKalecgos = m_pInstance->GetSingleCreatureFromStorage(NPC_KALECGOS_DRAGON))
         {
-            damage = std::min(damage, m_creature->GetHealth() - 1);
-
-            if (m_bIsBanished)
-                return;
-
-            // banish Sathrovarr and eject the players
-            if (DoCastSpellIfCan(m_creature, SPELL_BANISH, CAST_TRIGGERED) == CAST_OK)
-                m_bIsBanished = true;
-
-            if (!m_pInstance)
-                return;
-
-            if (Creature* pKalecgos = m_pInstance->GetSingleCreatureFromStorage(NPC_KALECGOS_DRAGON))
-            {
-                if (boss_kalecgosAI* pKalecgosAI = dynamic_cast<boss_kalecgosAI*>(pKalecgos->AI()))
-                    pKalecgosAI->m_bIsUncorrupted = true;
-            }
-
-            m_pInstance->DoEjectSpectralPlayers();
+            if (boss_kalecgosAI* pKalecgosAI = dynamic_cast<boss_kalecgosAI*>(pKalecgos->AI()))
+                pKalecgosAI->m_bIsUncorrupted = true;
         }
+
+        m_pInstance->DoEjectSpectralPlayers();
     }
 
     void KilledUnit(Unit* pVictim) override

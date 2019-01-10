@@ -71,6 +71,7 @@ struct boss_midnightAI : public ScriptedAI, public CombatTimerAI
     {
         m_pInstance = (instance_karazhan*)pCreature->GetInstanceData();
         AddCombatAction(MIDNIGHT_ACTION_KNOCKDOWN, 0);
+        SetDeathPrevention(true);
         Reset();
     }
 
@@ -268,6 +269,8 @@ struct boss_attumenAI : public ScriptedAI, public CombatTimerAI
         AddCombatAction(ATTUMEN_ACTION_YELL, 0);
         AddCombatAction(ATTUMEN_ACTION_KNOCKDOWN, 0);
         AddCombatAction(ATTUMEN_ACTION_CHARGE, 0);
+        if (m_creature->GetEntry() != NPC_ATTUMEN_MOUNTED)
+            SetDeathPrevention(true);
         Reset();
     }
 
