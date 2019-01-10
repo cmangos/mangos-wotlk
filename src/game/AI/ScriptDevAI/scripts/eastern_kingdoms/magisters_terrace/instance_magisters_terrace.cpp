@@ -142,7 +142,17 @@ void instance_magisters_terrace::SetData(uint32 uiType, uint32 uiData)
                             pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
                         if (pTemp->isAlive())
-                            pTemp->AI()->EnterEvadeMode();
+                        {
+                            if (pTemp->isInCombat())
+                            {
+                                pTemp->ForcedDespawn();
+                                pTemp->Respawn();
+                            }
+                            else
+                                pTemp->CastSpell(nullptr, SPELL_FEL_CRYSTAL_VISUAL, TRIGGERED_NONE);
+                        }
+                        else
+                            pTemp->Respawn();
                     }
                 }
             }
@@ -189,6 +199,16 @@ void instance_magisters_terrace::SetData(uint32 uiType, uint32 uiData)
 
         SaveToDB();
         OUT_SAVE_INST_DATA_COMPLETE;
+    }
+}
+
+void instance_magisters_terrace::StartCrystalVisual()
+{
+    for (GuidList::const_iterator itr = m_lFelCrystalGuid.begin(); itr != m_lFelCrystalGuid.end(); ++itr)
+    {
+        if (Creature* pTemp = instance->GetCreature(*itr))
+            if (pTemp->isAlive())
+                pTemp->CastSpell(nullptr, SPELL_FEL_CRYSTAL_VISUAL, TRIGGERED_NONE);
     }
 }
 

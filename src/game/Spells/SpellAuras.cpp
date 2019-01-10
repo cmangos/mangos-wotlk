@@ -8954,8 +8954,12 @@ void Aura::PeriodicDummyTick()
 //              case 43963: break;
 //              // Headless Horseman - Maniacal Laugh, Maniacal, other, Delayed 17
 //              case 44000: break;
-//              // Energy Feedback
-//              case 44328: break;
+                case 44328:                             // Energy Feedback
+                {
+                    if (Unit* caster = GetCaster())
+                        caster->CastSpell(nullptr, 44339, TRIGGERED_NONE);
+                    break;
+                }
 //              // Romantic Picnic
 //              case 45102: break;
 //              // Romantic Picnic

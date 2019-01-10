@@ -40,6 +40,8 @@ enum
     // GO_KAEL_STATUE_LEFT       = 188165,                  // animation statues - they do not reset on fail
     // GO_KAEL_STATUE_RIGHT      = 188166,
     GO_ESCAPE_QUEL_DANAS        = 188173,
+
+    SPELL_FEL_CRYSTAL_VISUAL    = 44355,
 };
 
 static const int32 aDelrissaAddDeath[MAX_DELRISSA_ADDS] = { -1585013, -1585014, -1585015, -1585016};
@@ -58,6 +60,8 @@ class instance_magisters_terrace : public ScriptedInstance
 
         uint32 GetData(uint32 uiType) const override;
         void SetData(uint32 uiType, uint32 uiData) override;
+
+        void StartCrystalVisual();
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
