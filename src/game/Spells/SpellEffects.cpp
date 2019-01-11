@@ -10204,6 +10204,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 47108:                                 // Clear Energy Feedback
+                {
+                    if (unitTarget && unitTarget->IsPlayer())
+                    {
+                        unitTarget->RemoveAurasDueToSpell(44335);
+                    }
+                    return;
+                }
                 case 47977:                                 // Use Broom
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
