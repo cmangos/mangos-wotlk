@@ -471,7 +471,9 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 35596:         // Power of the Legion
         case 35841:         // Draenei Spirit Visual
         case 35850:         // Draenei Spirit Visual 2
+        case 37266:         // Disease Cloud
         case 37497:         // Shadowmoon Ghost Invisibility (Ghostrider of Karabor in SMV) 
+        case 37863:         // Disease Cloud
         case 39311:         // Scrapped Fel Reaver transform aura that is never removed even on evade
         case 39918:         // Soulgrinder Ritual Visual ( in progress)
         case 39920:         // Soulgrinder Ritual Visual ( beam)
