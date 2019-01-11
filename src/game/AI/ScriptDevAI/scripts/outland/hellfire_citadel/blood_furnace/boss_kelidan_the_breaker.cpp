@@ -185,13 +185,13 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
         uint8 s = m_vAddGuids.size();
         for (uint8 i = 0; i < s; ++i)
         {
-            Creature* pCaster = m_pInstance->instance->GetCreature(m_vAddGuids[i]);
-            Creature* pTarget = m_pInstance->instance->GetCreature(m_vAddGuids[(i + 2) % s]);
-            if (pCaster && pTarget)
-                pCaster->CastSpell(pTarget, SPELL_CHANNELING, TRIGGERED_NONE);
+            Creature* caster = m_pInstance->instance->GetCreature(m_vAddGuids[i]);
+            Creature* target = m_pInstance->instance->GetCreature(m_vAddGuids[(i + 2) % s]);
+            if (caster && target)
+                caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, caster);
         }
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
     }
 
@@ -216,7 +216,7 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
         ++m_uiKilledAdds;
         if (m_uiKilledAdds == MAX_ADDS)
         {
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             m_creature->InterruptNonMeleeSpells(true);
             AttackStart(pKiller);
@@ -317,6 +317,9 @@ struct mob_shadowmoon_channelerAI : public ScriptedAI
 
     uint32 m_uiShadowBoltTimer;
     uint32 m_uiMarkOfShadowTimer;
+    uint32 m_setupTimer;
+
+    ObjectGuid m_target;
 
     void Reset() override
     {
@@ -369,8 +372,27 @@ struct mob_shadowmoon_channelerAI : public ScriptedAI
                 pKelidanAI->AddJustReachedHome();
     }
 
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            m_setupTimer = 2000;
+            m_target = invoker->GetObjectGuid();
+        }
+    }
+
     void UpdateAI(const uint32 uiDiff) override
     {
+        if (m_setupTimer && !m_creature->IsInEvadeMode())
+        {
+            if (m_setupTimer <= uiDiff)
+            {
+                if (Creature* target = m_creature->GetMap()->GetCreature(m_target))
+                    m_creature->CastSpell(target, SPELL_CHANNELING, TRIGGERED_NONE);
+            }
+            else m_setupTimer -= uiDiff;
+        }
+
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
