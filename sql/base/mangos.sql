@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_13996_01_mangos_creature_cooldown` bit(1) DEFAULT NULL
+  `required_13997_01_mangos_quest_template_emote_delays` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -15390,7 +15390,9 @@ CREATE TABLE `quest_template` (
   `DetailsEmoteDelay3` int(11) unsigned NOT NULL DEFAULT '0',
   `DetailsEmoteDelay4` int(11) unsigned NOT NULL DEFAULT '0',
   `IncompleteEmote` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `IncompleteEmoteDelay` INT(11) UNSIGNED NOT NULL DEFAULT '0',
   `CompleteEmote` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `CompleteEmoteDelay` INT(11) UNSIGNED NOT NULL DEFAULT '0',
   `OfferRewardEmote1` smallint(5) unsigned NOT NULL DEFAULT '0',
   `OfferRewardEmote2` smallint(5) unsigned NOT NULL DEFAULT '0',
   `OfferRewardEmote3` smallint(5) unsigned NOT NULL DEFAULT '0',
