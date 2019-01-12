@@ -220,7 +220,7 @@ struct boss_vexallusAI : public ScriptedAI, public CombatActions
 
         if (!m_bOverloading)
         {
-            if (m_creature->GetHealthPercent() > 10.0f)
+            if (m_creature->GetHealthPercent() > 20.0f) // overload at 20%
             {
                 // used for check, when Vexallus cast adds 85%, 70%, 55%, 40%, 25%
                 if (m_creature->GetHealthPercent() <= m_uiIntervalHealthAmount)
@@ -262,7 +262,7 @@ struct boss_vexallusAI : public ScriptedAI, public CombatActions
 
                 DoMeleeAttackIfReady();
             }
-            else // overload at 10%
+            else // overload at 20%
             {
                 DisableCombatAction(VEXALLUS_ACTION_CHAIN_LIGHTNING);
                 DisableCombatAction(VEXALLUS_ACTION_SHOCK);
