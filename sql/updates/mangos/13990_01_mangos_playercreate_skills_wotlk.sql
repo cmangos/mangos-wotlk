@@ -45,7 +45,6 @@ INSERT INTO `playercreateinfo_skills` VALUES
 (0,    32, 771, 0,  'Death Knight: Frost'),
 (0,    32, 772, 0,  'Death Knight: Unholy'),
 (0,    32, 229, 0,  'Weapon: Polearms'),
-(0,    32, 293, 0,  'Armor: Plate'),
 (0,    32, 762, 1,  'Secondary: Riding'),
 (0,    32, 129, 4,  'Secondary: First Aid'),
 -- SHAMAN CLASS:
@@ -72,6 +71,7 @@ INSERT INTO `playercreateinfo_skills` VALUES
 (0,  1107,  54, 0,  'Weapon: Maces'),
 (0,  1488, 136, 0,  'Weapon: Staves'),
 (0,   400, 228, 0,  'Weapon: Wands'),
+(0,    32, 293, 0,  'Armor: Plate'),
 (0,    35, 413, 0,  'Armor: Mail'),
 (0,  1135, 414, 0,  'Armor: Leather'),
 (0,    67, 433, 0,  'Armor: Shield'),
