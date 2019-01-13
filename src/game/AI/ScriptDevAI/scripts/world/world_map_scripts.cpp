@@ -665,7 +665,7 @@ bool ProcessEventTransports(uint32 uiEventId, Object* pSource, Object* pTarget, 
             text_entry = SAY_UC_FROM_VL_ARRIVAL;
             break;
         case EVENT_OG_FROM_BT_ARRIVAL:              // OG arrival from BT
-            entry = NPC_ZELLI_HOTNOZZLE;
+            entry = NPC_GREEB_RAMROCKET;
             text_entry = SAY_OG_FROM_BT_ARRIVAL;
             break;
         case EVENT_BT_FROM_OG_ARRIVAL:              // BT arrival from OG
