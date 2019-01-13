@@ -50,6 +50,13 @@ enum
     NPC_ZAPETTA                 = 9566,
     NPC_SNURK_BUCKSQUICK        = 12136,
     NPC_SQUIBBY_OVERSPECK       = 12137,
+    NPC_HARROWMEISER            = 23823,
+    NPC_GREEB_RAMROCKET         = 26537,
+    NPC_NARGO_SCREWBORE         = 26538,
+    NPC_MEEFI_FARTHROTTLE       = 26539,
+    NPC_DRENK_SPANNERSPARK      = 26540,
+    NPC_ZELLI_HOTNOZZLE         = 34765,
+    NPC_KRENDLE_BIGPOCKETS      = 34766,
 
     // Quest 8868
     TYPE_OMEN                   = 0,

@@ -207,6 +207,24 @@ INSERT INTO scripted_event_id VALUES
 (15323,'event_transports'),
 (15324,'event_transports'),
 (15325,'event_transports');
+-- WK
+INSERT INTO scripted_event_id VALUES
+(15430,'event_transports'),
+(15431,'event_transports');
+-- UC VL
+INSERT INTO scripted_event_id VALUES
+(19126,'event_transports'),
+(19127,'event_transports');
+-- OG BT
+INSERT INTO scripted_event_id VALUES
+(19137,'event_transports'),
+(19139,'event_transports');
+-- OG TB
+INSERT INTO scripted_event_id VALUES
+(21868,'event_transports'),
+(21869,'event_transports'),
+(21870,'event_transports'),
+(21871,'event_transports');
 
 /*  */
 /* ZONE */
@@ -3200,7 +3218,17 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1015030,'Only flesh and blood...',0,0,0,0,'Trelopades on aggro 2'),
 (-1015031, 'Onward, Scryers!  Show Illidan\'s lackeys the temper of our steel!', 0, 1, 0, 0, 'Onward Scryers'),
 (-1015032, 'Forward, vindicators!  Drive these demons from our sacred temple!', 0, 1, 0, 0, 'Forward vindicators');
+
 -- -1 020 000 WOTLK texts
+INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
+(-1020001,'The zeppelin to Orgrimmar has just arrived! All aboard for Durotar!',0,1,0,0,'zeppelinMaster - SAY_DUROTAR_FROM_OG_ARRIVAL'),
+(-1020002,'The zeppelin to Undercity has just arrived! All aboard for Tirisfal Glades!',0,1,0,0,'zeppelinMaster - SAY_TIRISFAL_FROM_UC_ARRIVAL'),
+(-1020003,'The zeppelin to Grom\'gol has just arrived! All aboard for Stranglethorn!',0,1,0,0,'zeppelinMaster - SAY_ST_FROM_GROMGOL_ARRIVAL'),
+(-1020004,'The zeppelin\'s leaving for a tour around the bay in less than one minute!  Oh, and if anyone feels like setting me free, I\'m on the dock.',0,1,0,0,'zeppelinMaster - SAY_WK_DEPARTURE'),
+(-1020005,'My zeppelin has docked. Despite my being held captive, and the sorry state that she\'s in, she\'ll be departing the dock again in two minutes.',0,1,0,0,'zeppelinMaster - SAY_WK_ARRIVAL'),
+(-1020006,'The zeppelin to Vengeance Landing has just arrived! All aboard for Howling Fjord!',0,1,0,0,'zeppelinMaster - SAY_UC_FROM_VL_ARRIVAL'),
+(-1020007,'The zeppelin to Warsong Hold has just arrived! All aboard for Borean Tundra!',0,1,0,0,'zeppelinMaster - SAY_OG_FROM_BT_ARRIVAL'),
+(-1020008,'The zeppelin to Thunder Bluff has arrived! All aboard for a smooth ride across the Barrens!',0,1,0,0,'zeppelinMaster - SAY_OG_FROM_TB_ARRIVAL');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
