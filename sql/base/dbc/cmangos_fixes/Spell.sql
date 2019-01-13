@@ -1351,3 +1351,7 @@ INSERT INTO `spell_template` (`Id`, `Category`, `Dispel`, `Mechanic`, `Attribute
 UPDATE spell_template SET `MaxAffectedTargets`=1 WHERE id=41071;
 
 
+-- Cyclone, used by Cyclone Totem (22894)
+UPDATE spell_template SET `MaxAffectedTargets`=5 WHERE id=39594;
+
+
