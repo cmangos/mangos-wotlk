@@ -1357,4 +1357,7 @@ UPDATE spell_template SET `MaxAffectedTargets`=5 WHERE id=39594;
 -- Whirlwind, used by Shadowmoon Weapon Master (23049) - Add SPELL_ATTR_EX5_CAN_CHANNEL_WHEN_MOVING
 UPDATE spell_template SET `AttributesEx5`=`AttributesEx5`|0x00000001 WHERE `Id`=41097;
 
+-- Disgruntled, used by Bonechewer Taskmaster (23028) - only hits one Bonechewer Worker (22963)
+UPDATE spell_template SET `MaxAffectedTargets`=1 WHERE id=40851;
+
 
