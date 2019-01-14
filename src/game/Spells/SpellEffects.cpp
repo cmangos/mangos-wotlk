@@ -9433,6 +9433,24 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 41131, TRIGGERED_OLD_TRIGGERED);
                     break;
                 }
+                case 41195:                                 // Whirlwind
+                {
+                    if (m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    Unit* target = ((Creature *)m_caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER);
+                    if (target)
+                    {
+                        ThreatList const& threatList = m_caster->getThreatManager().getThreatList();
+                        for (auto i : threatList)
+                            if (Unit* Temp = m_caster->GetMap()->GetUnit(i->getUnitGuid()))
+                                m_caster->getThreatManager().modifyThreatPercent(Temp, -100);
+
+                        m_caster->AddThreat(target, 100000.f);
+                    }
+
+                    return;
+                }
                 case 41213:                                 // Throw Shield
                 case 43416:                                 // Throw Shield
                 case 69222:                                 // Throw Shield

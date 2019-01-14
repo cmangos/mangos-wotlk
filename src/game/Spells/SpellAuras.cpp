@@ -5977,6 +5977,15 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 target->CastSpell(nullptr, 39831, TRIGGERED_NONE);
                 target->CastSpell(nullptr, 39832, TRIGGERED_NONE);
                 break;
+            case 41194:                                     // Whirlwind
+                if (Unit* caster = GetCaster())
+                {
+                    ThreatList const& threatList = caster->getThreatManager().getThreatList();
+                    for (auto i : threatList)
+                        if (Unit* Temp = caster->GetMap()->GetUnit(i->getUnitGuid()))
+                            caster->getThreatManager().modifyThreatPercent(Temp, -100);
+                }
+                return;
             case 42177:                                     // Alert Drums
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                 {
