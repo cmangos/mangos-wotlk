@@ -2313,17 +2313,32 @@ void Aura::TriggerSpell()
 
 void Aura::TriggerSpellWithValue()
 {
-    ObjectGuid casterGuid = GetCasterGuid();
+    Unit* caster = GetCaster();
     Unit* target = GetTriggerTarget();
 
-    if (!casterGuid || !target)
+    if (!caster || !target)
         return;
 
     // generic casting code with custom spells and target/caster customs
     uint32 trigger_spell_id = GetSpellProto()->EffectTriggerSpell[m_effIndex];
-    int32  basepoints0 = GetModifier()->m_amount;
+    int32 basepoints = GetModifier()->m_amount;
 
-    target->CastCustomSpell(target, trigger_spell_id, &basepoints0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this, casterGuid);
+    SpellEntry const *triggeredSpellEntry = sSpellTemplate.LookupEntry<SpellEntry>(trigger_spell_id);
+    int32 bp[3];
+    // damage triggered from spell might not only be processed by first effect (but always EffectDieSides equal 1)
+    if (triggeredSpellEntry)
+    {
+        uint8 j = 0;
+        for (uint8 i = 0; i < 3; ++i)
+        {
+            bp[i] = 0;
+            if (triggeredSpellEntry->EffectDieSides[i] == 1)
+                j = i;
+        }
+        bp[j] = basepoints;
+    }
+
+    target->CastCustomSpell(target, trigger_spell_id, &bp[0], &bp[1], &bp[2], TRIGGERED_OLD_TRIGGERED, nullptr, this, caster->GetObjectGuid());
 }
 
 /*********************************************************/
