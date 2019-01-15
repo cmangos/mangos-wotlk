@@ -1035,6 +1035,14 @@ enum Mechanics
     (1<<(MECHANIC_SHACKLE -1))|(1<<(MECHANIC_TURN       -1))|(1<<(MECHANIC_HORROR-1))| \
     (1<<(MECHANIC_DAZE    -1))|(1<<(MECHANIC_SAPPED     -1)))
 
+// Used for spell 40081 Free Friend (? verify the list!!)
+#define IMMUNE_TO_INCAPACITATE_MASK ( \
+    (1<<(MECHANIC_CHARM   -1))|(1<<(MECHANIC_DISORIENTED-1))|(1<<(MECHANIC_FEAR  -1))| \
+    (1<<(MECHANIC_ROOT    -1))|(1<<(MECHANIC_PACIFY     -1))|(1<<(MECHANIC_SLEEP -1))| \
+    (1<<(MECHANIC_SNARE   -1))|(1<<(MECHANIC_STUN       -1))|(1<<(MECHANIC_FREEZE-1))| \
+    (1<<(MECHANIC_KNOCKOUT-1))|(1<<(MECHANIC_POLYMORPH  -1))|(1<<(MECHANIC_BANISH-1))| \
+    (1<<(MECHANIC_HORROR  -1)))
+
 #define IMMUNE_TO_ROOT_AND_SNARE_MASK ( \
     (1<<(MECHANIC_ROOT-1))|(1<<(MECHANIC_SNARE-1)))
 

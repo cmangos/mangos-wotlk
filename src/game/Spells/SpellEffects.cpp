@@ -11567,6 +11567,11 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         m_caster->CastSpell(m_caster, 41159, TRIGGERED_OLD_TRIGGERED);
                     break;
                 }
+                case 40081:                                 // Free Friend
+                {
+                    unitTarget->RemoveAurasAtMechanicImmunity(IMMUNE_TO_INCAPACITATE_MASK, m_spellInfo->Id);
+                    return;
+                }
                 case 47948:                                 // Pain and Suffering
                 {
                     if (!unitTarget)
