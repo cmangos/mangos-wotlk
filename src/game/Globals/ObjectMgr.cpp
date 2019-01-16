@@ -3155,7 +3155,7 @@ void ObjectMgr::LoadPlayerInfo()
                                         const uint32 stepIndex = (skill.Step - 1);
                                         SkillTiersEntry const* steps = sSkillTiersStore.LookupEntry(entry->skillTierId);
 
-                                        if (!steps || !steps->maxSkillValue[stepIndex] || !steps->skillValue[stepIndex])
+                                        if (!steps || !steps->maxSkillValue[stepIndex])
                                             continue;
                                     }
 
