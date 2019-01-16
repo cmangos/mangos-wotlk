@@ -278,6 +278,12 @@ struct boss_anzuAI : public ScriptedAI, public CombatActions
         }
     }
 
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A) // end of banish
+            SetMeleeEnabled(true);
+    }
+
     void ExecuteActions() override
     {
         if (!CanExecuteCombatAction())
