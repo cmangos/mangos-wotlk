@@ -7035,6 +7035,13 @@ void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool /*Real*/)
     // spell special cases when current health set to max value at apply
     switch (GetId())
     {
+        case 40851:                                         // Disgruntled
+            if (apply)
+            {
+                float currPercent = target->GetHealthPercent();
+                target->SetHealthPercent(currPercent);
+            }
+            break;
         case 60430:                                         // Molten Fury
         case 64193:                                         // Heartbreak
         case 65737:                                         // Heartbreak
