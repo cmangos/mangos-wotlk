@@ -250,7 +250,7 @@ struct boss_lady_vashjAI : public ScriptedAI
 
     void ExecuteActions()
     {
-        if (m_creature->IsNonMeleeSpellCasted(false) || !CanExecuteCombatAction())
+        if (!CanExecuteCombatAction())
             return;
 
         for (uint32 i = 0; i < VASHJ_ACTION_MAX; ++i)
@@ -416,7 +416,7 @@ struct boss_lady_vashjAI : public ScriptedAI
         SetMeleeEnabled(false);
         if (Unit* victim = m_creature->getVictim()) // make sure target didnt die
         {
-            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim) * 2;
+            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim, true) * 2;
             m_creature->GetMotionMaster()->DistanceYourself(distance);
         }
     }
@@ -431,7 +431,6 @@ struct boss_lady_vashjAI : public ScriptedAI
         SetCombatScriptStatus(false);
         if (m_creature->getVictim())
             DoStartMovement(m_creature->getVictim());
-
         m_shootTimer = 2000;
         m_actionReadyStatus[VASHJ_ACTION_SHOOT] = false;
         DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT);

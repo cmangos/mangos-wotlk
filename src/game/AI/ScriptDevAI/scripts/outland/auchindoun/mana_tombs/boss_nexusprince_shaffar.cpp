@@ -254,7 +254,7 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
     {
         if (Unit* victim = m_creature->getVictim()) // make sure target didnt die
         {
-            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim);
+            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim, true);
             m_creature->GetMotionMaster()->DistanceYourself(distance);
         }
     }
@@ -269,7 +269,6 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
     {
         SetCombatScriptStatus(false);
         SetMeleeEnabled(true);
-        DoStartMovement(m_creature->getVictim());
     }
 
     void UpdateAI(const uint32 uiDiff) override

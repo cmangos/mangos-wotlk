@@ -249,7 +249,7 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
         {
             m_AimedShotTarget = pTarget->GetObjectGuid();
             DoCastSpellIfCan(pTarget, SPELL_HUNTERS_MARK); // this casts on everyone?
-            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(m_creature->getVictim()) * 3;
+            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(m_creature->getVictim(), true) * 3;
             m_creature->GetMotionMaster()->DistanceYourself(distance);
         }
     }
