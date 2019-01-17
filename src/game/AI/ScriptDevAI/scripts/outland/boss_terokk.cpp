@@ -78,7 +78,6 @@ enum TerokkActions
     TEROKK_COMBAT_ACTION_PHASE_2,
     TEROKK_COMBAT_ACTION_DIVINE_SHIELD,
     TEROKK_COMBAT_ACTION_SHADOW_BOLT_VOLLEY,
-    TEROKK_COMBAT_ACTION_WILL_OF_THE_ARAKKOA_GOD,
     TEROKK_COMBAT_ACTION_CHOSEN_ONE,
     TEROKK_COMBAT_ACTION_CLEAVE,
     TEROKK_COMBAT_ACTION_MAX,
@@ -111,7 +110,6 @@ struct boss_terokkAI : public ScriptedAI, public CombatTimerAI
         }, true);
         AddCombatAction(TEROKK_COMBAT_ACTION_DIVINE_SHIELD, 0);
         AddCombatAction(TEROKK_COMBAT_ACTION_SHADOW_BOLT_VOLLEY, 0);
-        AddCombatAction(TEROKK_COMBAT_ACTION_WILL_OF_THE_ARAKKOA_GOD, 0);
         AddCombatAction(TEROKK_COMBAT_ACTION_CHOSEN_ONE, 0);
         AddCombatAction(TEROKK_COMBAT_ACTION_CLEAVE, 0);
     }
@@ -125,7 +123,6 @@ struct boss_terokkAI : public ScriptedAI, public CombatTimerAI
         {
             case TEROKK_COMBAT_ACTION_DIVINE_SHIELD: return 0;
             case TEROKK_COMBAT_ACTION_SHADOW_BOLT_VOLLEY: return 4000;
-            case TEROKK_COMBAT_ACTION_WILL_OF_THE_ARAKKOA_GOD: return 30000;
             case TEROKK_COMBAT_ACTION_CHOSEN_ONE: return 30000;
             case TEROKK_COMBAT_ACTION_CLEAVE: return urand(6000, 9000);
             default: return 0;
@@ -138,7 +135,6 @@ struct boss_terokkAI : public ScriptedAI, public CombatTimerAI
         {
             case TEROKK_COMBAT_ACTION_DIVINE_SHIELD: return 22000;
             case TEROKK_COMBAT_ACTION_SHADOW_BOLT_VOLLEY: return urand(4000, 15000);
-            case TEROKK_COMBAT_ACTION_WILL_OF_THE_ARAKKOA_GOD: return 30000;
             case TEROKK_COMBAT_ACTION_CHOSEN_ONE: return 30000;
             case TEROKK_COMBAT_ACTION_CLEAVE: return urand(7000, 15000);
             default: return 0;
@@ -155,7 +151,6 @@ struct boss_terokkAI : public ScriptedAI, public CombatTimerAI
 
         ResetTimer(TEROKK_COMBAT_ACTION_DIVINE_SHIELD,              GetInitialActionTimer(TEROKK_COMBAT_ACTION_DIVINE_SHIELD));
         ResetTimer(TEROKK_COMBAT_ACTION_SHADOW_BOLT_VOLLEY,         GetInitialActionTimer(TEROKK_COMBAT_ACTION_SHADOW_BOLT_VOLLEY));
-        ResetTimer(TEROKK_COMBAT_ACTION_WILL_OF_THE_ARAKKOA_GOD,    GetInitialActionTimer(TEROKK_COMBAT_ACTION_WILL_OF_THE_ARAKKOA_GOD));
         ResetTimer(TEROKK_COMBAT_ACTION_CHOSEN_ONE,                 GetInitialActionTimer(TEROKK_COMBAT_ACTION_CHOSEN_ONE));
         ResetTimer(TEROKK_COMBAT_ACTION_CLEAVE,                     GetInitialActionTimer(TEROKK_COMBAT_ACTION_CLEAVE));
         DisableTimer(TEROKK_ACTION_ACE_CAST);
@@ -292,21 +287,12 @@ struct boss_terokkAI : public ScriptedAI, public CombatTimerAI
                         return;
                     }
                     continue;
-                case TEROKK_COMBAT_ACTION_WILL_OF_THE_ARAKKOA_GOD:
-                    if (m_creature->getThreatManager().getThreatList().size() <= 1)
-                        continue;
-                    if (DoCastSpellIfCan(nullptr, SPELL_WILL_OF_THE_ARAKKOA_GOD) == CAST_OK)
-                    {
-                        SetActionReadyStatus(i, false);
-                        ResetTimer(i, GetSubsequentActionTimer(TerokkActions(i)));
-                        return;
-                    }
-                    continue;
                 case TEROKK_COMBAT_ACTION_CHOSEN_ONE:
                     if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     {
                         if (DoCastSpellIfCan(target, SPELL_CHOSEN_ONE) == CAST_OK)
                         {
+                            m_creature->CastSpell(nullptr, SPELL_WILL_OF_THE_ARAKKOA_GOD, TRIGGERED_NONE);
                             DoScriptText(SAY_CHOSEN_ONE, m_creature, target);
                             SetActionReadyStatus(i, false);
                             ResetTimer(i, GetSubsequentActionTimer(TerokkActions(i)));

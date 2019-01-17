@@ -7784,6 +7784,23 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
             if (m_caster->getVictim() == target)
                 return false;
             break;
+        case 40175:                             // Spirit Chains - Teron Gorefiend
+        case 40314:                             // Spirit Volley - Teron Gorefiend
+            if (target->GetEntry() != 23111) // can only hit Shadowy Constructs
+                return false;
+            break;
+        case 44659:                             // Destroy All Spirits - Teron Gorefiend
+            if (target->GetEntry() != 23109) // can only hit Vengeful Spirits
+                return false;
+            break;
+        case 40618:                             // Insignificance
+            if (target->HasAura(40603)) // Taunt Gurtogg
+                return false;
+            break;
+        case 40722:                             // Will of the Arakkoa God - Terokk
+            if (target->HasAura(40726)) // Chosen One
+                return false;
+            break;
         case 37676:                             // Insidious Whisper
             if (m_caster->getVictim() == target) // skips tank
                 return false;

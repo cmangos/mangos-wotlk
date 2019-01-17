@@ -1011,9 +1011,6 @@ INSERT INTO `spell_template` (`Id`,`DurationIndex`,`Effect1`,`EffectImplicitTarg
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Attributes`,`AttributesEx`,`AttributesEx2`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`baseLevel`,`spellLevel`,`rangeIndex`,`Effect1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`SpellIconID`,`SpellName`,`SpellFamilyFlags`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
 (32941,32,268435840,4,4,7,5131,5135,20,20,13,3,38,16,548,'Blue Beam Dummy',8388608,1,1);
 
--- Terokk should only hit one player
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `Id`=40722;
-
 -- Dissipate e.g used by 17378
 INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`procChance`,`DurationIndex`,`rangeIndex`,`EquippedItemClass`,`Effect1`,`EffectImplicitTargetA1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`AreaId`,`IsServerSide`) VALUES
 (32763, 384, 1, 101, 21, 1, -1, 6, 1, 1, 'Dissipate', 1, 3521, 1);
