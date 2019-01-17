@@ -1381,6 +1381,9 @@ UPDATE spell_template SET AttributesEx4=AttributesEx4|0x00000001 WHERE Id IN(398
 -- that leads me to believe blizzard changed target type serverside and didnt export it until legion
 UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(40334);
 
+-- Will of the arakkoa god - Terokk - is not removed on damage
+UPDATE spell_template SET procFlags=0 WHERE Id IN(40722);
+
 -- Power of Arrazius - should only hit one player
 UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id` IN(34094);
 
