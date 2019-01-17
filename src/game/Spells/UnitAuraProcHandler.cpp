@@ -2509,7 +2509,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         RemoveAurasDueToSpell(71432);       // Mote of Anger
 
                         // Manifest Anger (main hand/off hand)
-                        CastSpell(pVictim, !haveOffhandWeapon() || roll_chance_i(50) ? 71433 : 71434, TRIGGERED_OLD_TRIGGERED);
+                        CastSpell(pVictim, !hasOffhandWeaponForAttack() || roll_chance_i(50) ? 71433 : 71434, TRIGGERED_OLD_TRIGGERED);
                         return SPELL_AURA_PROC_OK;
                     }
                     triggered_spell_id = 71432;
@@ -3034,7 +3034,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
             if (dummySpell->SpellIconID == 2023)
             {
                 // Must Dual Wield
-                if (!procSpell || !haveOffhandWeapon())
+                if (!procSpell || !hasOffhandWeaponForAttack())
                     return SPELL_AURA_PROC_FAILED;
                 // Chance as basepoints for dummy aura
                 if (!roll_chance_i(triggerAmount))
@@ -3498,7 +3498,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
             {
                 float weaponDamage;
                 // DW should benefit of attack power, damage percent mods etc.
-                if (haveOffhandWeapon() && getAttackTimer(BASE_ATTACK) > getAttackTimer(OFF_ATTACK))
+                if (hasOffhandWeaponForAttack() && getAttackTimer(BASE_ATTACK) > getAttackTimer(OFF_ATTACK))
                     weaponDamage = (GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) + GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE)) / 2;
                 else
                     weaponDamage = (GetFloatValue(UNIT_FIELD_MINDAMAGE) + GetFloatValue(UNIT_FIELD_MAXDAMAGE)) / 2;

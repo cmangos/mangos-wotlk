@@ -2727,6 +2727,14 @@ bool Creature::HasStaticDBSpawnData() const
     return sObjectMgr.GetCreatureData(GetGUIDLow()) != nullptr;
 }
 
+bool Creature::hasWeapon(WeaponAttackType type) const
+{
+    const uint8 slot = uint8(type);
+    ItemEntry const* item = sItemStore.LookupEntry(GetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_ID + slot));
+
+    return (item && item->Class == ITEM_CLASS_WEAPON);
+}
+
 void Creature::SetWalk(bool enable, bool asDefault)
 {
     if (asDefault)

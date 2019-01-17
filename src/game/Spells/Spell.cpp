@@ -3739,8 +3739,7 @@ void Spell::cast(bool skipCheck)
         }
         case SPELLFAMILY_ROGUE:
             // Fan of Knives (main hand)
-            if (m_spellInfo->Id == 51723 && m_caster->GetTypeId() == TYPEID_PLAYER &&
-                    ((Player*)m_caster)->haveOffhandWeapon())
+            if (m_spellInfo->Id == 51723 && m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->hasOffhandWeaponForAttack())
             {
                 AddTriggeredSpell(52874);                   // Fan of Knives (offhand)
             }
@@ -4004,7 +4003,7 @@ void Spell::_handle_immediate_phase()
         if (!m_spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_RESET_AUTO_ACTIONS))
         {
             m_caster->resetAttackTimer(BASE_ATTACK);
-            if (m_caster->haveOffhandWeapon())
+            if (m_caster->hasOffhandWeaponForAttack())
                 m_caster->resetAttackTimer(OFF_ATTACK);
         }
     }
