@@ -1384,6 +1384,9 @@ UPDATE spell_template SET EffectImplicitTargetA1=1 WHERE Id IN(40334);
 -- Will of the arakkoa god - Terokk - is not removed on damage
 UPDATE spell_template SET procFlags=0 WHERE Id IN(40722);
 
+-- Opening Termite Barrel - target flags for GO/ITEM, effect targets GO/ITEM yet target targets units - fixes apparent typo
+UPDATE spell_template SET EffectImplicitTargetA1=26 WHERE Id IN(18952);
+
 -- Power of Arrazius - should only hit one player
 UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id` IN(34094);
 
