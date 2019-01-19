@@ -472,6 +472,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 35596:         // Power of the Legion
         case 35841:         // Draenei Spirit Visual
         case 35850:         // Draenei Spirit Visual 2
+        case 36006:         // Fel Fire Aura
         case 37266:         // Disease Cloud
         case 37497:         // Shadowmoon Ghost Invisibility (Ghostrider of Karabor in SMV) 
         case 37863:         // Disease Cloud
