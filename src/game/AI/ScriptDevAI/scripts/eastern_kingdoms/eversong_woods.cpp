@@ -440,7 +440,14 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
     void StartEvent(Player* pPlayer)
     {
         if (m_uiMobCount != 0)
-            sLog.outCustomLog("Apprentice Mirveda invalid state, investigate further.");
+        {
+            sLog.outCustomLog("Apprentice Mirveda invalid state, Mob count: %u", m_uiMobCount);
+            sLog.outCustomLog("Questgiver flag: %s",  m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER) ? "true" : "false");
+            for (ObjectGuid& guid : m_summons)
+                if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
+                    if (creature->isAlive())
+                        sLog.outCustomLog("%s Entry: %u is alive", creature->GetName(), creature->GetEntry());
+        }
 
         m_creature->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
