@@ -262,6 +262,8 @@ struct boss_moroesAI : public ScriptedAI, public CombatActions
                         Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_GARROTE, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA);
                         if (!target) // if no target without garrote found - select any random
                             target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER);
+                        if (!target)
+                            break;
                         target->CastSpell(nullptr, SPELL_TAUNT, TRIGGERED_OLD_TRIGGERED); // TODO: Needs to send both packets
                         m_creature->SelectHostileTarget(); // apply taunt before vanish
                         DoCastSpellIfCan(nullptr, SPELL_VANISH);
