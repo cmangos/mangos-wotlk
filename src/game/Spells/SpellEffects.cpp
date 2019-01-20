@@ -8662,8 +8662,12 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 25652:
                 case 29128:
                 case 29129:
+                case 34448:
+                case 34452:
                 case 35376:
                 case 35727:
+                case 45367:
+                case 45370:
                 {
                     if (!unitTarget)
                         return;
@@ -8671,19 +8675,23 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     uint32 spellid;
                     switch (m_spellInfo->Id)
                     {
-                        case 25140: spellid =  32568; break;
-                        case 25143: spellid =  32572; break;
-                        case 25650: spellid =  30140; break;
-                        case 25652: spellid =  30141; break;
-                        case 29128: spellid =  32571; break;
-                        case 29129: spellid =  32569; break;
-                        case 35376: spellid =  25649; break;
-                        case 35727: spellid =  35730; break;
+                        case 25140: spellid = 32568; break;
+                        case 25143: spellid = 32572; break;
+                        case 25650: spellid = 30140; break;
+                        case 25652: spellid = 30141; break;
+                        case 29128: spellid = 32571; break;
+                        case 29129: spellid = 32569; break;
+                        case 34448: spellid = 26566; break;
+                        case 34452: spellid = 26572; break;
+                        case 35376: spellid = 25649; break;
+                        case 35727: spellid = 35730; break;
+                        case 45367: spellid = 45368; break;
+                        case 45370: spellid = 45371; break;
                         default:
                             return;
                     }
 
-                    unitTarget->CastSpell(unitTarget, spellid, TRIGGERED_NONE);
+                    unitTarget->CastSpell(nullptr, spellid, TRIGGERED_NONE);
                     return;
                 }
                 case 25671:                                 // Drain Mana
