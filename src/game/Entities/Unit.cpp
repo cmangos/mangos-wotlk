@@ -6637,6 +6637,13 @@ void Unit::SendSpellOrDamageImmune(Unit* target, uint32 spellID) const
 
 void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo, bool success/* = true*/)
 {
+    switch (spellInfo->Id)
+    {
+        case 32785: // infernal rain - neutral targets
+        case 33814:
+            return;
+    }
+
     if (realCaster->CanAttack(target))
     {
         if (spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
