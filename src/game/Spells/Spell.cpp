@@ -908,6 +908,16 @@ void Spell::FillTargetMap()
         for (UnitList::const_iterator iunit = tmpUnitLists[effToIndex[i]].begin(); iunit != tmpUnitLists[effToIndex[i]].end(); ++iunit)
             AddUnitTarget((*iunit), SpellEffectIndex(i));
     }
+
+    // TODO: Sort out script targeting in CheckCast and remove this
+    m_UniqueTargetInfo.sort([](TargetInfo const& left, TargetInfo const& right)->bool
+    {
+        if ((left.effectMask & 1) || (right.effectMask & 1))
+            return (left.effectMask & 1) > (right.effectMask & 1);
+        if ((left.effectMask & 2) || (right.effectMask & 2))
+            return (left.effectMask & 2) > (right.effectMask & 2);
+        return true;
+    });
 }
 
 void Spell::prepareDataForTriggerSystem()
