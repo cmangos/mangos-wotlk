@@ -3407,6 +3407,14 @@ SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* trigger
     SpellEvent* Event = new SpellEvent(this);
     m_caster->m_events.AddEvent(Event, m_caster->m_events.CalculateTime(1));
 
+    // Prevent casting at cast another spell (ServerSide check)
+    if (m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count && !m_spellInfo->HasAttribute(SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING))
+    {
+        SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+        finish(false);
+        return SPELL_FAILED_SPELL_IN_PROGRESS;
+    }
+
     // Fill cost data
     m_powerCost = m_IsTriggeredSpell ? 0 : CalculatePowerCost(m_spellInfo, m_caster, this, m_CastItem);
 
