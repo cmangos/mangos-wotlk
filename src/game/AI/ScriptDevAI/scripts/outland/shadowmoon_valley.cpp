@@ -4473,6 +4473,7 @@ struct npc_bt_battle_sensor : public ScriptedAI
     float m_fAldorScryerReinforceTimer;
     float m_fMidPoint = -3558.0f;
 
+    uint8 m_uiMinAttackGroupsReady = 5; // do not send an attack, if fewer than this many groups are ready
     uint8 m_uiMaxNumTroopsForward = 8;
     uint8 m_uiNumLightswornForward;
     uint8 m_uiNumMagisterForward;
@@ -4613,13 +4614,9 @@ struct npc_bt_battle_sensor : public ScriptedAI
                     case AI_EVENT_CUSTOM_B:
                     {
                         if (Creature* senderCreature = dynamic_cast<Creature*>(sender))
-                        {
-                            senderCreature->ForcedDespawn(30000);
                             senderCreature->GetMotionMaster()->MoveRandomAroundPoint(sender->GetPositionX(), sender->GetPositionY(), sender->GetPositionZ(), 15.0f);
-                        }
                         if (mob_bt_battle_fighterAI* senderAI = dynamic_cast<mob_bt_battle_fighterAI*>(sender->AI()))
                             senderAI->m_bIsWaypointing = false;
-
                         break;
                     }
                 }
@@ -4702,13 +4699,9 @@ struct npc_bt_battle_sensor : public ScriptedAI
                     case AI_EVENT_CUSTOM_B:
                     {
                         if (Creature* senderCreature = dynamic_cast<Creature*>(sender))
-                        {
-                            senderCreature->ForcedDespawn(30000);
                             senderCreature->GetMotionMaster()->MoveRandomAroundPoint(sender->GetPositionX(), sender->GetPositionY(), sender->GetPositionZ(), 15.0f);
-                        }
                         if (mob_bt_battle_fighterAI* senderAI = dynamic_cast<mob_bt_battle_fighterAI*>(sender->AI()))
                             senderAI->m_bIsWaypointing = false;
-
                         break;
                     }
                 }
@@ -5128,18 +5121,30 @@ struct npc_bt_battle_sensor : public ScriptedAI
             leader->GetMotionMaster()->Clear(false, true);
             leader->GetMotionMaster()->MoveWaypoint(0, 1);
             leader->GetMotionMaster()->SetNextWaypoint(waypoint);
+            leader->ForcedDespawn(600000);
             m_attackReadyMask -= attackGroup;
             
             if (mob_bt_battle_fighterAI* leaderAI = dynamic_cast<mob_bt_battle_fighterAI*>(leader->AI()))
                 leaderAI->m_bIsWaypointing = true;
         }
     }
+    
+    // Determine how many waves are ready
+    int countSetBits(uint8 n)
+    {
+        // base case 
+        if (n == 0)
+            return 0;
+        else
+            // if last bit set add 1 else add 0 
+            return (n & 1) + countSetBits(n >> 1);
+    }
 
     /* Most of the time send ravager group 3 or 4
     *  rest of the time send one of the others randomly */
     IllidariAttackGroup ChooseIllidariAttack()
     {
-        if (m_attackReadyMask == 0)
+        if (countSetBits(m_attackReadyMask) < m_uiMinAttackGroupsReady)
             return NONE;
         else
         {
