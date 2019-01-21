@@ -1047,17 +1047,6 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket& recv_data)
         GetPlayer()->SetAmmo(item);
 }
 
-void WorldSession::SendEnchantmentLog(ObjectGuid targetGuid, ObjectGuid casterGuid, uint32 itemId, uint32 spellId) const
-{
-    WorldPacket data(SMSG_ENCHANTMENTLOG, (8 + 8 + 4 + 4 + 1)); // last check 2.0.10
-    data << ObjectGuid(targetGuid);
-    data << ObjectGuid(casterGuid);
-    data << uint32(itemId);
-    data << uint32(spellId);
-    data << uint8(0);
-    SendPacket(data);
-}
-
 void WorldSession::SendItemEnchantTimeUpdate(ObjectGuid playerGuid, ObjectGuid itemGuid, uint32 slot, uint32 duration) const
 {
     // last check 2.0.10
@@ -1395,7 +1384,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     {
         if (GemEnchants[i])
         {
-            itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + i), GemEnchants[i], 0, 0);
+            itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT + i), GemEnchants[i], 0, 0, _player->GetObjectGuid());
             if (Item* guidItem = gemGuids[i] ? _player->GetItemByGuid(gemGuids[i]) : nullptr)
                 _player->DestroyItem(guidItem->GetBagSlot(), guidItem->GetSlot(), true);
         }
@@ -1408,7 +1397,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     if (SocketBonusActivated != SocketBonusToBeActivated)   // if there was a change...
     {
         _player->ApplyEnchantment(itemTarget, BONUS_ENCHANTMENT_SLOT, false);
-        itemTarget->SetEnchantment(BONUS_ENCHANTMENT_SLOT, (SocketBonusToBeActivated ? itemTarget->GetProto()->socketBonus : 0), 0, 0);
+        itemTarget->SetEnchantment(BONUS_ENCHANTMENT_SLOT, (SocketBonusToBeActivated ? itemTarget->GetProto()->socketBonus : 0), 0, 0, _player->GetObjectGuid());
         _player->ApplyEnchantment(itemTarget, BONUS_ENCHANTMENT_SLOT, true);
         // it is not displayed, client has an inbuilt system to determine if the bonus is activated
     }

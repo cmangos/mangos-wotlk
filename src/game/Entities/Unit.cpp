@@ -6645,6 +6645,16 @@ void Unit::SendSpellOrDamageImmune(Unit* target, uint32 spellID) const
     SendMessageToSet(data, true);
 }
 
+void Unit::SendEnchantmentLog(ObjectGuid targetGuid, uint32 itemEntry, uint32 enchantId) const
+{
+    WorldPacket data(SMSG_ENCHANTMENTLOG, (8 + 8 + 4 + 4));
+    data << GetPackGUID();
+    data << targetGuid.WriteAsPacked();
+    data << uint32(itemEntry);
+    data << uint32(enchantId);
+    SendMessageToSet(data, true);
+}
+
 void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo, bool success/* = true*/)
 {
     switch (spellInfo->Id)
