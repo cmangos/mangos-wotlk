@@ -165,6 +165,9 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI, public CombatActions
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
+        DoCastSpellIfCan(nullptr, SPELL_HIT_CHANCE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_ACIDIC_WOUND, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+
         if (m_instance)
             m_instance->SetData(TYPE_BLOODBOIL, IN_PROGRESS);
     }
@@ -219,6 +222,7 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI, public CombatActions
                 m_phase1 = false;
                 DisableCombatAction(GURTOGG_ACTION_BLOODBOIL);
                 DisableCombatAction(GURTOGG_ACTION_BEWILDERING_STRIKE);
+                ResetTimer(GURTOGG_ACTION_ARCING_SMASH, 10000);
             }
         }
         else
