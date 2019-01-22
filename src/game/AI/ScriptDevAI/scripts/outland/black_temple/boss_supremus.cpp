@@ -289,7 +289,6 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
                     case SUPREMUS_ACTION_BERSERK:
                         if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
                         {
-                            ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
                             SetActionReadyStatus(i, false);
                             return;
                         }
