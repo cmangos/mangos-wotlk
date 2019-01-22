@@ -3321,6 +3321,14 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                 // case 46146: break:                   // [PH] Ahune  Spanky Hands
                 // case 45205: break;                   // Copy Offhand Weapon
                 // case 45343: break;                   // Dark Flame Aura
+                case 45396:                         // Blessed Weapon Coating
+                case 45398:                         // Righteous Weapon Coating
+                {
+                    uint32 zoneId = GetZoneId();
+                    if (zoneId != 4075 && zoneId != 4080 && zoneId != 4131)
+                        return SPELL_AURA_PROC_FAILED;
+                    break;
+                }
                 // case 47300: break;                   // Dark Flame Aura
                 case 45343:                          // Dark Flame Aura proc from scarolash
                 {
