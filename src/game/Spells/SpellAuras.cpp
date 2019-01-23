@@ -3653,6 +3653,19 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     }
                     return;
                 }
+                case 41951:                             // Random Target - Supremus
+                {
+                    Unit* caster = GetCaster();
+                    if (!caster)
+                        return;
+                    if (apply)
+                    {
+                        caster->FixateTarget(target);
+                        caster->CastSpell(target, 41581, TRIGGERED_OLD_TRIGGERED);
+                    }
+                    else
+                        caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, caster);
+                }
                 case 41999:                             // Shadow of Death Remove - Teron Gorefiend
                 {
                     target->RemoveAurasDueToSpell(40251); // Remove Shadow of Death

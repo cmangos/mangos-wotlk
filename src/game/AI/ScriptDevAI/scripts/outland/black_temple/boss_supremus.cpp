@@ -126,6 +126,7 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
 
         DisableTimer(SUPREMUS_ACTION_DELAY);
 
+        m_creature->FixateTarget(nullptr);
         m_bTankPhase = true;
     }
 
@@ -163,13 +164,13 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
             m_instance->SetData(TYPE_SUPREMUS, NOT_STARTED);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         if (m_instance)
             m_instance->SetData(TYPE_SUPREMUS, IN_PROGRESS);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         if (m_instance)
             m_instance->SetData(TYPE_SUPREMUS, DONE);
@@ -230,11 +231,10 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
         }
     }
 
-    void KilledUnit(Unit* pKilled) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
-        // The current target is the fixated target - repick a new one
-        if (!m_bTankPhase && pKilled == m_creature->getVictim())
-            ResetTimer(SUPREMUS_ACTION_SWITCH_TARGET, 1000); //TODO - Find a better way to do this
+        if (eventType == AI_EVENT_CUSTOM_A && !m_bTankPhase)
+            ResetTimer(SUPREMUS_ACTION_SWITCH_TARGET, 1000);
     }
 
     void ExecuteActions()
@@ -255,6 +255,7 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
                             m_creature->CastSpell(nullptr, SPELL_SLOW_SELF, TRIGGERED_OLD_TRIGGERED);
                             DoScriptText(EMOTE_GROUND_CRACK, m_creature);
                             m_bTankPhase = false;
+                            DoResetThreat();
                             DisableTimer(SUPREMUS_ACTION_HATEFUL_STRIKE);
                             SetActionReadyStatus(SUPREMUS_ACTION_HATEFUL_STRIKE, false);
                             ResetTimer(SUPREMUS_ACTION_SWITCH_TARGET, GetInitialActionTimer(SUPREMUS_ACTION_SWITCH_TARGET));
@@ -269,7 +270,7 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
                             if (m_creature->HasAura(SPELL_SLOW_SELF))
                                 m_creature->RemoveAurasDueToSpell(SPELL_SLOW_SELF);
 
-                            m_creature->FixateTarget(nullptr);
+                            m_creature->FixateTarget(nullptr); // fixate aura runs a tad longer
                             m_bTankPhase = true;
                             DoResetThreat();
                             DoScriptText(EMOTE_PUNCH_GROUND, m_creature);
@@ -315,13 +316,9 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
                         return;
                     }
                     case SUPREMUS_ACTION_SWITCH_TARGET:
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER)) // TODO - Check if it only targets players, or can target pets
+                        if (DoCastSpellIfCan(nullptr, SPELL_RANDOM_TARGET) == CAST_OK)
                         {
-                            m_creature->FixateTarget(target);
-                            DoStartMovement(target);
                             DoScriptText(EMOTE_NEW_TARGET, m_creature);
-                            DoCastSpellIfCan(target, SPELL_CHARGE);
-                            ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
                             SetActionReadyStatus(i, false);
                             return;
                         }
