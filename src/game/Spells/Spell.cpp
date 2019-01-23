@@ -8655,6 +8655,13 @@ SpellCastResult Spell::OnCheckCast(bool strict)
             if (!m_caster->IsTaxiFlying())
                 return SPELL_FAILED_ONLY_MOUNTED;
             break;
+        case 35244: // Choking Vines - should not go through on target with Choking Wound
+        {
+            Unit* target = m_targets.getUnitTarget();
+            if (!target || target->HasAura(35247))
+                return SPELL_FAILED_BAD_TARGETS;
+            break;
+        }
         case 36867: // Creature - Summon Event Ethereal
             if (m_caster->GetMap()->SpawnedCountForEntry(21445) >= 1 || m_caster->GetMap()->SpawnedCountForEntry(22285) >= 1)
                 return SPELL_FAILED_DONT_REPORT;

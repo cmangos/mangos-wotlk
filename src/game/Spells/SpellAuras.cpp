@@ -5712,12 +5712,6 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
                     target->CastSpell(target, 33652, TRIGGERED_OLD_TRIGGERED);
                 break;
             }
-            case 35244: // Choking Vines - applies Choking Wound on 5 stacks
-            {
-                if (GetStackAmount() >= 5 && !target->HasAura(35247))
-                    target->CastSpell(target, 35247, TRIGGERED_OLD_TRIGGERED);
-                break;
-            }
         }
     }
 

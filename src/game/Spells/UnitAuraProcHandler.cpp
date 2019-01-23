@@ -4650,6 +4650,12 @@ SpellAuraProcResult Unit::HandlePeriodicAuraProc(ProcExecutionData& data)
         case 36659: // Tail Sting
             if (triggeredByAura->GetHolder()->ModStackAmount(-1, nullptr)) // Remove aura on return true
                 RemoveSpellAuraHolder(triggeredByAura->GetHolder(), AURA_REMOVE_BY_DEFAULT);
+        case 35244: // Choking Vines
+            if (triggeredByAura->GetHolder()->GetStackAmount() == triggeredByAura->GetHolder()->GetSpellProto()->StackAmount)
+            {
+                RemoveSpellAuraHolder(triggeredByAura->GetHolder(), AURA_REMOVE_BY_DEFAULT);
+                CastSpell(nullptr, 35247, TRIGGERED_OLD_TRIGGERED); // constricting wound
+            }
             break;
     }
 
