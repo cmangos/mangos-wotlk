@@ -86,9 +86,9 @@ struct boss_curatorAI : public ScriptedAI, public CombatTimerAI
     boss_curatorAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(CURATOR_ACTION_MAX)
     {
         m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
-        AddCombatAction(CURATOR_ACTION_BERSERK, 0);
-        AddCombatAction(CURATOR_ACTION_FLARE, 0);
-        AddCombatAction(CURATOR_ACTION_HATEFUL_BOLT, 0);
+        AddCombatAction(CURATOR_ACTION_BERSERK, 0u);
+        AddCombatAction(CURATOR_ACTION_FLARE, 0u);
+        AddCombatAction(CURATOR_ACTION_HATEFUL_BOLT, 0u);
         Reset();
     }
 

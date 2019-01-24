@@ -61,10 +61,10 @@ struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatTimerAI
         m_instance = (instance_steam_vault*)creature->GetInstanceData();
         m_bHasTaunted = false;
 
-        AddCombatAction(WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE, 0);
-        AddCombatAction(WARLORD_KALITHRESH_ACTION_REFLECTION, 0);
-        AddCombatAction(WARLORD_KALITHRESH_ACTION_IMPALE, 0);
-        AddCombatAction(WARLORD_KALITHRESH_ACTION_HEAD_CRACK, 0);
+        AddCombatAction(WARLORD_KALITHRESH_ACTION_WARLORDS_RAGE, 0u);
+        AddCombatAction(WARLORD_KALITHRESH_ACTION_REFLECTION, 0u);
+        AddCombatAction(WARLORD_KALITHRESH_ACTION_IMPALE, 0u);
+        AddCombatAction(WARLORD_KALITHRESH_ACTION_HEAD_CRACK, 0u);
         Reset();
     }
 

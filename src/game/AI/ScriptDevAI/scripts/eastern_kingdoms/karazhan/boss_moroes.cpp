@@ -80,15 +80,15 @@ struct boss_moroesAI : public ScriptedAI, public CombatTimerAI
     boss_moroesAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(MOROES_ACTION_MAX)
     {
         m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
-        AddCombatAction(MOROES_ACTION_VANISH, 0);
-        AddCombatAction(MOROES_ACTION_BLIND, 0);
-        AddCombatAction(MOROES_ACTION_GOUGE, 0);
-        AddCombatAction(MOROES_ACTION_ENRAGE, 0);
-        AddCustomAction(MOROES_ACTION_GAROTTE, 0, [&]()
+        AddCombatAction(MOROES_ACTION_VANISH, 0u);
+        AddCombatAction(MOROES_ACTION_BLIND, 0u);
+        AddCombatAction(MOROES_ACTION_GOUGE, 0u);
+        AddCombatAction(MOROES_ACTION_ENRAGE, 0u);
+        AddCustomAction(MOROES_ACTION_GAROTTE, true, [&]()
         {
             if (m_creature->getVictim())
                 m_creature->getVictim()->CastSpell(nullptr, SPELL_GARROTE, TRIGGERED_OLD_TRIGGERED);
-        }, true);
+        });
         Reset();
     }
 

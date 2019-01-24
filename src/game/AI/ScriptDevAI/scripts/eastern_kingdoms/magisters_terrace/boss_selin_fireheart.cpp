@@ -64,10 +64,10 @@ struct boss_selin_fireheartAI : public ScriptedAI, public CombatTimerAI
         m_pInstance = (instance_magisters_terrace*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
 
-        AddCombatAction(SELIN_ACTION_FEL_EXPLOSION, 0);
-        AddCombatAction(SELIN_ACTION_DRAIN_LIFE, 0);
-        AddCombatAction(SELIN_ACTION_DRAIN_MANA, 0);
-        AddCombatAction(SELIN_ACTION_DRAIN_CRYSTAL, 0);
+        AddCombatAction(SELIN_ACTION_FEL_EXPLOSION, 0u);
+        AddCombatAction(SELIN_ACTION_DRAIN_LIFE, 0u);
+        AddCombatAction(SELIN_ACTION_DRAIN_MANA, 0u);
+        AddCombatAction(SELIN_ACTION_DRAIN_CRYSTAL, 0u);
         Reset();
     }
 

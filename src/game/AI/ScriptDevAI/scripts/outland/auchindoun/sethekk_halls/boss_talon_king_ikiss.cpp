@@ -67,9 +67,9 @@ struct boss_talon_king_ikissAI : public ScriptedAI, public CombatTimerAI
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
         m_Intro = false;
 
-        AddCombatAction(TALON_KING_IKISS_ACTION_SLOW, 0);
-        AddCombatAction(TALON_KING_IKISS_ACTION_POLYMOPRH, 0);
-        AddCombatAction(TALON_KING_IKISS_ACTION_ARCANE_VOLLEY, 0);
+        AddCombatAction(TALON_KING_IKISS_ACTION_SLOW, 0u);
+        AddCombatAction(TALON_KING_IKISS_ACTION_POLYMOPRH, 0u);
+        AddCombatAction(TALON_KING_IKISS_ACTION_ARCANE_VOLLEY, 0u);
         Reset();
     }
 

@@ -46,10 +46,10 @@ struct boss_black_stalkerAI : public ScriptedAI, public CombatTimerAI
     boss_black_stalkerAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(BLACK_STALKER_ACTION_MAX)
     {
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
-        AddCombatAction(BLACK_STALKER_ACTION_LEVITATE, 0);
-        AddCombatAction(BLACK_STALKER_ACTION_STATIC_CHARGE, 0);
-        AddCombatAction(BLACK_STALKER_ACTION_CHAIN_LIGHTNING, 0);
-        AddCombatAction(BLACK_STALKER_ACTION_SUMMON_SPORE_STRIDER, 0);
+        AddCombatAction(BLACK_STALKER_ACTION_LEVITATE, 0u);
+        AddCombatAction(BLACK_STALKER_ACTION_STATIC_CHARGE, 0u);
+        AddCombatAction(BLACK_STALKER_ACTION_CHAIN_LIGHTNING, 0u);
+        AddCombatAction(BLACK_STALKER_ACTION_SUMMON_SPORE_STRIDER, 0u);
         Reset();
     }
 

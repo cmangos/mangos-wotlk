@@ -91,27 +91,27 @@ struct boss_terokkAI : public ScriptedAI, public CombatTimerAI
 {
     boss_terokkAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(TEROKK_COMBAT_ACTION_MAX)
     {
-        AddCustomAction(TEROKK_ACTION_SPAWN, 0, [&] { m_creature->CastSpell(nullptr, SPELL_RED_BEAM, TRIGGERED_OLD_TRIGGERED); });
-        AddCustomAction(TEROKK_ACTION_SAY, 2000, [&]
+        AddCustomAction(TEROKK_ACTION_SPAWN, 0u, [&] { m_creature->CastSpell(nullptr, SPELL_RED_BEAM, TRIGGERED_OLD_TRIGGERED); });
+        AddCustomAction(TEROKK_ACTION_SAY, 2000u, [&]
         {
             m_creature->CastSpell(nullptr, SPELL_SHADOWFORM, TRIGGERED_OLD_TRIGGERED);
             DoScriptText(SAY_SPAWN, m_creature);
         });
-        AddCustomAction(TEROKK_ACTION_ATTACK, 9000, [&]
+        AddCustomAction(TEROKK_ACTION_ATTACK, 9000u, [&]
         {
             m_creature->SetImmuneToPlayer(false);
             if (Unit* spawner = m_creature->GetSpawner()) AttackStart(spawner);
         });
-        AddCustomAction(TEROKK_ACTION_ACE_CAST, 0, [&]
+        AddCustomAction(TEROKK_ACTION_ACE_CAST, true, [&]
         {
             Creature* target = GetClosestCreatureWithEntry(m_creature, NPC_SKYGUARD_TARGET, 70.f);
             if (Creature* ace = m_creature->GetMap()->GetCreature(m_aces[1]))
                 ace->AI()->DoCastSpellIfCan(target, SPELL_ANCIENT_FLAMES);
-        }, true);
-        AddCombatAction(TEROKK_COMBAT_ACTION_DIVINE_SHIELD, 0);
-        AddCombatAction(TEROKK_COMBAT_ACTION_SHADOW_BOLT_VOLLEY, 0);
-        AddCombatAction(TEROKK_COMBAT_ACTION_CHOSEN_ONE, 0);
-        AddCombatAction(TEROKK_COMBAT_ACTION_CLEAVE, 0);
+        });
+        AddCombatAction(TEROKK_COMBAT_ACTION_DIVINE_SHIELD, 0u);
+        AddCombatAction(TEROKK_COMBAT_ACTION_SHADOW_BOLT_VOLLEY, 0u);
+        AddCombatAction(TEROKK_COMBAT_ACTION_CHOSEN_ONE, 0u);
+        AddCombatAction(TEROKK_COMBAT_ACTION_CLEAVE, 0u);
     }
 
     bool m_phase;

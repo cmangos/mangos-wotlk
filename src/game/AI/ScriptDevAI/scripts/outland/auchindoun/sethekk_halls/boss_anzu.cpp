@@ -104,26 +104,26 @@ struct boss_anzuAI : public ScriptedAI, public CombatTimerAI
     boss_anzuAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(ANZU_COMBAT_ACTION_MAX)
     {
         m_instance = (instance_sethekk_halls*)pCreature->GetInstanceData();
-        AddCustomAction(ANZU_INTRO_TALK, 0, [&]
+        AddCustomAction(ANZU_INTRO_TALK, true, [&]
         {
             DoScriptText(SAY_ANZU_INTRO_2, m_creature); // is sent to despawned NPC_INVIS_RAVEN_GOD_TARGET in sniff
-        }, true);
-        AddCustomAction(ANZU_INTRO_FLAGS, 0, [&]
+        });
+        AddCustomAction(ANZU_INTRO_FLAGS, true, [&]
         {
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER | UNIT_FLAG_IMMUNE_TO_NPC);
             m_creature->RemoveAurasDueToSpell(SPELL_SHADOWFORM);
-        }, true);
-        AddCustomAction(ANZU_BROOD_ATTACK, 0, [&]
+        });
+        AddCustomAction(ANZU_BROOD_ATTACK, true, [&]
         {
             for (ObjectGuid guid : m_broodGuidList)
                 if (Creature* brood = m_creature->GetMap()->GetCreature(guid))
                     brood->AI()->SetReactState(REACT_AGGRESSIVE);
-        }, true);
-        AddCombatAction(ANZU_ACTION_FLESH_RIP, 0);
-        AddCombatAction(ANZU_ACTION_SCREECH, 0);
-        AddCombatAction(ANZU_ACTION_SPELL_BOMB, 0);
-        AddCombatAction(ANZU_ACTION_CYCLONE, 0);
-        AddCombatAction(ANZU_ACTION_DIVE, 0);
+        });
+        AddCombatAction(ANZU_ACTION_FLESH_RIP, 0u);
+        AddCombatAction(ANZU_ACTION_SCREECH, 0u);
+        AddCombatAction(ANZU_ACTION_SPELL_BOMB, 0u);
+        AddCombatAction(ANZU_ACTION_CYCLONE, 0u);
+        AddCombatAction(ANZU_ACTION_DIVE, 0u);
         Reset();
     }
 

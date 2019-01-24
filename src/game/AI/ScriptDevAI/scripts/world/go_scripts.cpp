@@ -115,7 +115,7 @@ struct npc_ethereum_prisonerAI : public ScriptedAI, public CombatTimerAI
 {
     npc_ethereum_prisonerAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(0)
     {
-        AddCustomAction(PRISONER_ATTACK, 0, [&]
+        AddCustomAction(PRISONER_ATTACK, true, [&]
         {
             m_creature->SetImmuneToNPC(false);
             m_creature->SetImmuneToPlayer(false);
@@ -128,19 +128,19 @@ struct npc_ethereum_prisonerAI : public ScriptedAI, public CombatTimerAI
             }
             if (player)
                 AttackStart(player);
-        }, true);
-        AddCustomAction(PRISONER_TALK, 0, [&]
+        });
+        AddCustomAction(PRISONER_TALK, true, [&]
         {
             if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
                 DoScriptText(GetTextId(), m_creature, player);
             ResetTimer(PRISONER_CAST, 6000);
-        }, true);
-        AddCustomAction(PRISONER_CAST, 0, [&]
+        });
+        AddCustomAction(PRISONER_CAST, true, [&]
         {
             if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
                 DoCastSpellIfCan(player, GetSpellId());
             m_creature->ForcedDespawn(2000);
-        }, true);
+        });
         JustRespawned();
     }
 

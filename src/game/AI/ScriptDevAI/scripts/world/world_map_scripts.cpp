@@ -759,14 +759,14 @@ struct world_map_outland : public ScriptedMap, public TimerManager
         m_bashirTime = *std::gmtime(&now);
         m_bashirTimer = (60 - m_bashirTime.tm_sec) * IN_MILLISECONDS;
         m_bashirPhase = BASHIR_PHASE_NOT_ACTIVE;
-        AddCustomAction(BASHIR_ACTION_INTRO, 0, [&] { ScriptAction(m_bashirIntroStage); }, true);
-        AddCustomAction(BASHIR_ACTION_SPAWN_ENEMY, 0, [&]
+        AddCustomAction(BASHIR_ACTION_INTRO, true, [&] { ScriptAction(m_bashirIntroStage); });
+        AddCustomAction(BASHIR_ACTION_SPAWN_ENEMY, true, [&]
         {
             if (m_bashirPhaseSpawnData.size() > 0) // only when max is not spawned
                 SpawnRandomBashirMob();
             ResetTimer(BASHIR_ACTION_SPAWN_ENEMY, GetActionTimer(BASHIR_ACTION_SPAWN_ENEMY));
-        }, true);
-        AddCustomAction(BASHIR_ACTION_ENEMY_ATTACK, 0, [&]
+        });
+        AddCustomAction(BASHIR_ACTION_ENEMY_ATTACK, true, [&]
         {
             if (m_bashirEnemyWaveSpawns.size() > 0)
             {
@@ -825,8 +825,8 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 }
             }
             ResetTimer(BASHIR_ACTION_ENEMY_ATTACK, GetActionTimer(BASHIR_ACTION_ENEMY_ATTACK));
-        }, true);
-        AddCustomAction(BASHIR_ACTION_OUTRO, 0, [&]
+        });
+        AddCustomAction(BASHIR_ACTION_OUTRO, true, [&]
         {
             if (Creature* tech = GetSingleCreatureFromStorage(NPC_SKYGUARD_AETHER_TECH))
             {
@@ -834,7 +834,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 tech->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, tech, tech);
             }
             DespawnBashir(false);
-        }, true);
+        });
     }
 
     uint32 GetActionTimer(BashirActions action)

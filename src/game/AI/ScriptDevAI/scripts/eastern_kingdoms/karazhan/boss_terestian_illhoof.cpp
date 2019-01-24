@@ -79,11 +79,11 @@ struct boss_terestianAI : public ScriptedAI, public CombatTimerAI
     boss_terestianAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(ILLHOOF_ACTION_MAX)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        AddCombatAction(ILLHOOF_ACTION_SUMMON_KILREK, 0);
-        AddCombatAction(ILLHOOF_ACTION_SACRIFICE, 0);
-        AddCombatAction(ILLHOOF_ACTION_SHADOWBOLT, 0);
-        AddCombatAction(ILLHOOF_ACTION_SUMMON, 0);
-        AddCombatAction(ILLHOOF_ACTION_BERSERK, 0);
+        AddCombatAction(ILLHOOF_ACTION_SUMMON_KILREK, 0u);
+        AddCombatAction(ILLHOOF_ACTION_SACRIFICE, 0u);
+        AddCombatAction(ILLHOOF_ACTION_SHADOWBOLT, 0u);
+        AddCombatAction(ILLHOOF_ACTION_SUMMON, 0u);
+        AddCombatAction(ILLHOOF_ACTION_BERSERK, 0u);
         Reset();
     }
 

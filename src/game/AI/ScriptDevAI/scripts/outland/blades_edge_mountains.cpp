@@ -3087,8 +3087,8 @@ struct npc_apexis_flayerAI : public ScriptedAI, public CombatTimerAI
 {
     npc_apexis_flayerAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(FLAYER_ACTION_MAX)
     {
-        AddCombatAction(FLAYER_ACTION_REND, 0);
-        AddCombatAction(FLAYER_ACTION_SHRED_ARMOR, 0);
+        AddCombatAction(FLAYER_ACTION_REND, 0u);
+        AddCombatAction(FLAYER_ACTION_SHRED_ARMOR, 0u);
         Reset();
     }
 
@@ -3394,7 +3394,7 @@ struct npc_skyguard_rangerAI : public ScriptedAI, public CombatTimerAI
 {
     npc_skyguard_rangerAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(RANGER_COMBAT_ACTION_MAX), m_spawnId(PATH_ID_DISMOUNT) // implicit default for lieutenant
     {
-        AddCombatAction(RANGER_COMBAT_ACTION_WHIRLWIND, 0);
+        AddCombatAction(RANGER_COMBAT_ACTION_WHIRLWIND, 0u);
         Reset();
     }
 
@@ -3543,7 +3543,7 @@ struct npc_aether_tech_vendorAI : public ScriptedAI, public TimerManager
     npc_aether_tech_vendorAI(Creature* creature) : ScriptedAI(creature)
     {
         SetReactState(REACT_PASSIVE);
-        AddCustomAction(0, 0, [&] {m_creature->GetMap()->GetInstanceData()->SetData(TYPE_BASHIR, 2); }, true);
+        AddCustomAction(0, true, [&] {m_creature->GetMap()->GetInstanceData()->SetData(TYPE_BASHIR, 2); });
         Reset();
     }
 
@@ -3622,10 +3622,10 @@ struct npc_bashir_flesh_fiendAI : public ScriptedAI, public CombatTimerAI
 {
     npc_bashir_flesh_fiendAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(FIEND_ACTION_MAX)
     {
-        AddCombatAction(FIEND_ACTION_EAT_FRIEND, 0);
-        AddCombatAction(FIEND_ACTION_INFECTIOUS_POISON, 0);
-        AddCombatAction(FIEND_ACTION_GAPING_MAW, 0);
-        AddCustomAction(FIEND_ACTION_EAT_FRIEND_END, 0, [&]
+        AddCombatAction(FIEND_ACTION_EAT_FRIEND, 0u);
+        AddCombatAction(FIEND_ACTION_INFECTIOUS_POISON, 0u);
+        AddCombatAction(FIEND_ACTION_GAPING_MAW, 0u);
+        AddCustomAction(FIEND_ACTION_EAT_FRIEND_END, 0u, [&]
         {
             SetCombatScriptStatus(false);
             SetCombatMovement(true, true);
@@ -3772,7 +3772,7 @@ struct npc_disruptor_towerAI : public ScriptedAI, public TimerManager
         SetCombatMovement(false);
         SetMeleeEnabled(false);
         SetReactState(REACT_PASSIVE);
-        AddCustomAction(0, 0, [&]
+        AddCustomAction(0, 0u, [&]
         {
             DoCastSpellIfCan(nullptr, SPELL_BOLT_BUNNY);
             ResetTimer(0, urand(6000, 12000));
@@ -3847,10 +3847,10 @@ struct npc_grand_collectorAI : public ScriptedAI, public CombatTimerAI
         m_instance(static_cast<ScriptedInstance*>(m_creature->GetMap()->GetInstanceData()))
     {
         SetReactState(REACT_PASSIVE);
-        AddCombatAction(COLLECTOR_ACTION_MIRROR_IMAGE, 0);
-        AddCombatAction(COLLECTOR_ACTION_RESONANT_FEEDBACK, 0);
-        AddCombatAction(COLLECTOR_ACTION_ARCANE_VOLLEY, 0);
-        AddCustomAction(COLLECTOR_ACTION_HANDLE_EVENT, 0, [&] { HandleEvent(); });
+        AddCombatAction(COLLECTOR_ACTION_MIRROR_IMAGE, 0u);
+        AddCombatAction(COLLECTOR_ACTION_RESONANT_FEEDBACK, 0u);
+        AddCombatAction(COLLECTOR_ACTION_ARCANE_VOLLEY, 0u);
+        AddCustomAction(COLLECTOR_ACTION_HANDLE_EVENT, 0u, [&] { HandleEvent(); });
         Reset();
     }
 

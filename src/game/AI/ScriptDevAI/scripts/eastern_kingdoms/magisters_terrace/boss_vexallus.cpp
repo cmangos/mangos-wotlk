@@ -76,9 +76,9 @@ struct boss_vexallusAI : public ScriptedAI, public CombatTimerAI
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
 
-        AddCombatAction(VEXALLUS_ACTION_CHAIN_LIGHTNING, 0);
-        AddCombatAction(VEXALLUS_ACTION_SHOCK, 0);
-        AddCombatAction(VEXALLUS_ACTION_OVERLOAD, 0);
+        AddCombatAction(VEXALLUS_ACTION_CHAIN_LIGHTNING, 0u);
+        AddCombatAction(VEXALLUS_ACTION_SHOCK, 0u);
+        AddCombatAction(VEXALLUS_ACTION_OVERLOAD, 0u);
         Reset();
     }
 

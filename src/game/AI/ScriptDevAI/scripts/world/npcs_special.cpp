@@ -2006,9 +2006,9 @@ struct npc_nether_rayAI : public ScriptedAI, public CombatTimerAI
 {
     npc_nether_rayAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(RAY_ACTION_MAX)
     {
-        AddCombatAction(RAY_ACTION_DRAIN_MANA, 0);
-        AddCombatAction(RAY_ACTION_TAIL_STING, 0);
-        AddCombatAction(RAY_ACTION_NETHER_SHOCK, 0);
+        AddCombatAction(RAY_ACTION_DRAIN_MANA, 0u);
+        AddCombatAction(RAY_ACTION_TAIL_STING, 0u);
+        AddCombatAction(RAY_ACTION_NETHER_SHOCK, 0u);
     }
 
     uint32 GetInitialActionTimer(RayActions id)

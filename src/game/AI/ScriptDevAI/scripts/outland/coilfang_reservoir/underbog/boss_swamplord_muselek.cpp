@@ -70,11 +70,11 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatTimerAI
     {
         m_pInstance = (ScriptedInstance*)creature->GetInstanceData();
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
-        AddCombatAction(MUSELEK_ACTION_KNOCK_AWAY, 0);
-        AddCombatAction(MUSELEK_ACTION_RAPTOR_STRIKE, 0);
-        AddCombatAction(MUSELEK_ACTION_BEAR_COMMAND, 0);
-        AddCombatAction(MUSELEK_ACTION_RANGED_ATTACK, 0);
-        AddCombatAction(MUSELEK_ACTION_DETERRENCE, 0);
+        AddCombatAction(MUSELEK_ACTION_KNOCK_AWAY, 0u);
+        AddCombatAction(MUSELEK_ACTION_RAPTOR_STRIKE, 0u);
+        AddCombatAction(MUSELEK_ACTION_BEAR_COMMAND, 0u);
+        AddCombatAction(MUSELEK_ACTION_RANGED_ATTACK, 0u);
+        AddCombatAction(MUSELEK_ACTION_DETERRENCE, 0u);
         Reset();
     }
 
