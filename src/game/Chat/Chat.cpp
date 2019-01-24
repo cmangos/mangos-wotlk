@@ -278,6 +278,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "waypoint",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugWaypoint,                   "", nullptr },
         { "byte",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugByteFields,                 "", nullptr },
         { "moveflag",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugMoveflags,                  "", nullptr },
+        { "lootdropstats",  SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugLootDropStats,              "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
