@@ -27,6 +27,7 @@
 #include "Timer.h"
 #include "Globals/SharedDefines.h"
 #include "Entities/Object.h"
+#include "Multithreading/Messager.h"
 
 #include <set>
 #include <list>
@@ -642,6 +643,8 @@ class World
 
         void UpdateSessionExpansion(uint8 expansion);
 
+        auto& GetMessager() { return m_messager; }
+
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters
@@ -748,6 +751,8 @@ class World
         static uint32 m_currentMSTime;
         static TimePoint m_currentTime;
         static uint32 m_currentDiff;
+
+        Messager<World> m_messager;
 };
 
 extern uint32 realmID;
