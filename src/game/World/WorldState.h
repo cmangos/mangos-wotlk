@@ -46,6 +46,7 @@ enum AreaIds
     AREAID_SKYGUARD_OUTPOST     = 3964,
     AREAID_SHARTUUL_TRANSPORTER = 4008,
     AREAID_DEATHS_DOOR          = 3831,
+    AREAID_THERAMORE_ISLE       = 513,
 };
 
 enum SpellId

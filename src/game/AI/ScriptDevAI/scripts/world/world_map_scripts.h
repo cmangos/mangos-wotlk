@@ -63,7 +63,6 @@ enum
     NPC_KRENDLE_BIGPOCKETS      = 34766,
 
     // Quest 8868
-    TYPE_OMEN                   = 0,
     NPC_MINION_OMEN             = 15466,
     NPC_OMEN                    = 15467,
     GO_ROCKET_CLUSTER           = 180875,
@@ -90,16 +89,21 @@ enum
     TYPE_SHARTUUL               = 2,
 
     // Quest 1126
-    TYPE_HIVE                   = 1,
-    MAX_ENCOUNTER               = 2,
     NPC_HIVE_ASHI_DRONES        = 13136,
-
-    TYPE_BASHIR                 = 3,
 
     // Bashir
     SPELL_SPIRIT_SPAWN_IN       = 17321,
     SPELL_ETHEREAL_TELEPORT     = 34427,
     MOUNT_NETHER_RAY_DISPLAY_ID = 21156,
+};
+
+enum Encounters
+{
+    TYPE_OMEN   = 0, // Quest 8868
+    TYPE_HIVE   = 1,
+    TYPE_TETHYR = 2, // Quest 11198
+    TYPE_BASHIR = 3,
+    MAX_ENCOUNTER
 };
 
 enum ElementalInvasionIndexes

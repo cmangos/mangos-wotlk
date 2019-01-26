@@ -724,6 +724,8 @@ UPDATE creature_template SET ScriptName='npc_restless_apparition' WHERE entry=23
 UPDATE creature_template SET ScriptName='npc_private_hendel' WHERE entry=4966;
 UPDATE creature_template SET ScriptName='npc_stinky_ignatz' WHERE entry=4880;
 UPDATE creature_template SET ScriptName='boss_tethyr' WHERE entry=23899;
+UPDATE creature_template SET ScriptName='npc_major_mills' WHERE entry=23905;
+UPDATE creature_template SET ScriptName='mob_invis_firework_helper' WHERE entry=24025;
 INSERT INTO scripted_areatrigger VALUES
 (302,'at_sentry_point');
 INSERT INTO scripted_areatrigger VALUES
