@@ -50,9 +50,9 @@ enum CuratorActions
     MAIDEN_ACTION_MAX,
 };
 
-struct boss_maiden_of_virtueAI : public ScriptedAI, public CombatTimerAI
+struct boss_maiden_of_virtueAI : public ScriptedAI, public CombatActions
 {
-    boss_maiden_of_virtueAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(MAIDEN_ACTION_MAX)
+    boss_maiden_of_virtueAI(Creature* pCreature) : ScriptedAI(pCreature), CombatActions(MAIDEN_ACTION_MAX)
     {
         m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
         AddCombatAction(MAIDEN_ACTION_REPENTANCE, 0u);

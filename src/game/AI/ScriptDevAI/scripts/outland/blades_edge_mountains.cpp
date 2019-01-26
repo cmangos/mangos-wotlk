@@ -3083,9 +3083,9 @@ enum FlayerActions
     FLAYER_ACTION_MAX,
 };
 
-struct npc_apexis_flayerAI : public ScriptedAI, public CombatTimerAI
+struct npc_apexis_flayerAI : public ScriptedAI, public CombatActions
 {
-    npc_apexis_flayerAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(FLAYER_ACTION_MAX)
+    npc_apexis_flayerAI(Creature* creature) : ScriptedAI(creature), CombatActions(FLAYER_ACTION_MAX)
     {
         AddCombatAction(FLAYER_ACTION_REND, 0u);
         AddCombatAction(FLAYER_ACTION_SHRED_ARMOR, 0u);
@@ -3390,9 +3390,9 @@ enum RangerActions
     RANGER_COMBAT_ACTION_MAX,
 };
 
-struct npc_skyguard_rangerAI : public ScriptedAI, public CombatTimerAI
+struct npc_skyguard_rangerAI : public ScriptedAI, public CombatActions
 {
-    npc_skyguard_rangerAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(RANGER_COMBAT_ACTION_MAX), m_spawnId(PATH_ID_DISMOUNT) // implicit default for lieutenant
+    npc_skyguard_rangerAI(Creature* creature) : ScriptedAI(creature), CombatActions(RANGER_COMBAT_ACTION_MAX), m_spawnId(PATH_ID_DISMOUNT) // implicit default for lieutenant
     {
         AddCombatAction(RANGER_COMBAT_ACTION_WHIRLWIND, 0u);
         Reset();
@@ -3618,9 +3618,9 @@ enum FleshFiendActions
     FIEND_ACTION_EAT_FRIEND_END,
 };
 
-struct npc_bashir_flesh_fiendAI : public ScriptedAI, public CombatTimerAI
+struct npc_bashir_flesh_fiendAI : public ScriptedAI, public CombatActions
 {
-    npc_bashir_flesh_fiendAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(FIEND_ACTION_MAX)
+    npc_bashir_flesh_fiendAI(Creature* creature) : ScriptedAI(creature), CombatActions(FIEND_ACTION_MAX)
     {
         AddCombatAction(FIEND_ACTION_EAT_FRIEND, 0u);
         AddCombatAction(FIEND_ACTION_INFECTIOUS_POISON, 0u);
@@ -3841,9 +3841,9 @@ enum GrandCollectorActions
     COLLECTOR_ACTION_HANDLE_EVENT,
 };
 
-struct npc_grand_collectorAI : public ScriptedAI, public CombatTimerAI
+struct npc_grand_collectorAI : public ScriptedAI, public CombatActions
 {
-    npc_grand_collectorAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(COLLECTOR_COMBAT_ACTION_MAX), m_introEventId(0),
+    npc_grand_collectorAI(Creature* creature) : ScriptedAI(creature), CombatActions(COLLECTOR_COMBAT_ACTION_MAX), m_introEventId(0),
         m_instance(static_cast<ScriptedInstance*>(m_creature->GetMap()->GetInstanceData()))
     {
         SetReactState(REACT_PASSIVE);

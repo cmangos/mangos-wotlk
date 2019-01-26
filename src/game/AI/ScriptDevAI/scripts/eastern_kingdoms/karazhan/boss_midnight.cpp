@@ -65,9 +65,9 @@ enum MidnightActions
     MIDNIGHT_ACTION_MAX,
 };
 
-struct boss_midnightAI : public ScriptedAI, public CombatTimerAI
+struct boss_midnightAI : public ScriptedAI, public CombatActions
 {
-    boss_midnightAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(MIDNIGHT_ACTION_MAX)
+    boss_midnightAI(Creature* pCreature) : ScriptedAI(pCreature), CombatActions(MIDNIGHT_ACTION_MAX)
     {
         m_pInstance = (instance_karazhan*)pCreature->GetInstanceData();
         AddCombatAction(MIDNIGHT_ACTION_KNOCKDOWN, 0u);
@@ -259,9 +259,9 @@ enum AttumenActions
     ATTUMEN_ACTION_MAX,
 };
 
-struct boss_attumenAI : public ScriptedAI, public CombatTimerAI
+struct boss_attumenAI : public ScriptedAI, public CombatActions
 {
-    boss_attumenAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(ATTUMEN_ACTION_MAX)
+    boss_attumenAI(Creature* pCreature) : ScriptedAI(pCreature), CombatActions(ATTUMEN_ACTION_MAX)
     {
         m_pInstance = (instance_karazhan*)pCreature->GetInstanceData();
         AddCombatAction(ATTUMEN_ACTION_CLEAVE, 0u);

@@ -41,9 +41,9 @@ enum BlackStalkerActions
     BLACK_STALKER_ACTION_MAX,
 };
 
-struct boss_black_stalkerAI : public ScriptedAI, public CombatTimerAI
+struct boss_black_stalkerAI : public ScriptedAI, public CombatActions
 {
-    boss_black_stalkerAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(BLACK_STALKER_ACTION_MAX)
+    boss_black_stalkerAI(Creature* creature) : ScriptedAI(creature), CombatActions(BLACK_STALKER_ACTION_MAX)
     {
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
         AddCombatAction(BLACK_STALKER_ACTION_LEVITATE, 0u);

@@ -2002,9 +2002,9 @@ enum RayActions
     RAY_ACTION_MAX,
 };
 
-struct npc_nether_rayAI : public ScriptedAI, public CombatTimerAI
+struct npc_nether_rayAI : public ScriptedAI, public CombatActions
 {
-    npc_nether_rayAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(RAY_ACTION_MAX)
+    npc_nether_rayAI(Creature* creature) : ScriptedAI(creature), CombatActions(RAY_ACTION_MAX)
     {
         AddCombatAction(RAY_ACTION_DRAIN_MANA, 0u);
         AddCombatAction(RAY_ACTION_TAIL_STING, 0u);

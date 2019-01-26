@@ -69,9 +69,9 @@ enum VexallusActions
     VEXALLUS_ACTION_MAX,
 };
 
-struct boss_vexallusAI : public ScriptedAI, public CombatTimerAI
+struct boss_vexallusAI : public ScriptedAI, public CombatActions
 {
-    boss_vexallusAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(VEXALLUS_ACTION_MAX)
+    boss_vexallusAI(Creature* pCreature) : ScriptedAI(pCreature), CombatActions(VEXALLUS_ACTION_MAX)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();

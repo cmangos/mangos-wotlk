@@ -54,9 +54,9 @@ enum WarlordKalithreshActions // order based on priority
     WARLORD_KALITHRESH_ACTION_MAX,
 };
 
-struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatTimerAI
+struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatActions
 {
-    boss_warlord_kalithreshAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(WARLORD_KALITHRESH_ACTION_MAX)
+    boss_warlord_kalithreshAI(Creature* creature) : ScriptedAI(creature), CombatActions(WARLORD_KALITHRESH_ACTION_MAX)
     {
         m_instance = (instance_steam_vault*)creature->GetInstanceData();
         m_bHasTaunted = false;

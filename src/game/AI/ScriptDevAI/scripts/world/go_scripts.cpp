@@ -111,9 +111,9 @@ const uint32 npcStasisEntry[] =
     22825, 20888, 22827, 22826, 22828
 };
 
-struct npc_ethereum_prisonerAI : public ScriptedAI, public CombatTimerAI
+struct npc_ethereum_prisonerAI : public ScriptedAI, public CombatActions
 {
-    npc_ethereum_prisonerAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(0)
+    npc_ethereum_prisonerAI(Creature* creature) : ScriptedAI(creature), CombatActions(0)
     {
         AddCustomAction(PRISONER_ATTACK, true, [&]
         {

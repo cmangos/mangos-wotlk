@@ -59,9 +59,9 @@ enum TalonKingIkissActions // order based on priority
     TALON_KING_IKISS_ACTION_MAX,
 };
 
-struct boss_talon_king_ikissAI : public ScriptedAI, public CombatTimerAI
+struct boss_talon_king_ikissAI : public ScriptedAI, public CombatActions
 {
-    boss_talon_king_ikissAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(TALON_KING_IKISS_ACTION_MAX)
+    boss_talon_king_ikissAI(Creature* creature) : ScriptedAI(creature), CombatActions(TALON_KING_IKISS_ACTION_MAX)
     {
         m_instance = (ScriptedInstance*)creature->GetInstanceData();
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();

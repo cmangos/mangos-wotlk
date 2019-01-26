@@ -81,9 +81,9 @@ enum CuratorActions
     CURATOR_ACTION_MAX,
 };
 
-struct boss_curatorAI : public ScriptedAI, public CombatTimerAI
+struct boss_curatorAI : public ScriptedAI, public CombatActions
 {
-    boss_curatorAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(CURATOR_ACTION_MAX)
+    boss_curatorAI(Creature* pCreature) : ScriptedAI(pCreature), CombatActions(CURATOR_ACTION_MAX)
     {
         m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
         AddCombatAction(CURATOR_ACTION_BERSERK, 0u);

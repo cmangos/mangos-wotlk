@@ -57,9 +57,9 @@ enum SelinActions
     SELIN_ACTION_MAX,
 };
 
-struct boss_selin_fireheartAI : public ScriptedAI, public CombatTimerAI
+struct boss_selin_fireheartAI : public ScriptedAI, public CombatActions
 {
-    boss_selin_fireheartAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(SELIN_ACTION_MAX)
+    boss_selin_fireheartAI(Creature* pCreature) : ScriptedAI(pCreature), CombatActions(SELIN_ACTION_MAX)
     {
         m_pInstance = (instance_magisters_terrace*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();

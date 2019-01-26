@@ -74,9 +74,9 @@ enum IllhoofActions
     ILLHOOF_ACTION_MAX,
 };
 
-struct boss_terestianAI : public ScriptedAI, public CombatTimerAI
+struct boss_terestianAI : public ScriptedAI, public CombatActions
 {
-    boss_terestianAI(Creature* pCreature) : ScriptedAI(pCreature), CombatTimerAI(ILLHOOF_ACTION_MAX)
+    boss_terestianAI(Creature* pCreature) : ScriptedAI(pCreature), CombatActions(ILLHOOF_ACTION_MAX)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         AddCombatAction(ILLHOOF_ACTION_SUMMON_KILREK, 0u);

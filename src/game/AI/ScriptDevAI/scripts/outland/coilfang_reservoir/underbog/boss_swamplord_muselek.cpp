@@ -64,9 +64,9 @@ enum MuselekActions
     MUSELEK_ACTION_MAX,
 };
 
-struct boss_swamplord_muselekAI : public ScriptedAI, public CombatTimerAI
+struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
 {
-    boss_swamplord_muselekAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(MUSELEK_ACTION_MAX)
+    boss_swamplord_muselekAI(Creature* creature) : ScriptedAI(creature), CombatActions(MUSELEK_ACTION_MAX)
     {
         m_pInstance = (ScriptedInstance*)creature->GetInstanceData();
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
