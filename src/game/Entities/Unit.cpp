@@ -6487,7 +6487,7 @@ void Unit::SendPeriodicAuraLog(SpellPeriodicAuraLogInfo* pInfo) const
             data << uint32(pInfo->overDamage);              // overkill?
             data << uint32(GetSpellSchoolMask(aura->GetSpellProto()));
             data << uint32(pInfo->absorb);                  // absorb
-            data << uint32(pInfo->resist);                  // resist
+            data << int32(pInfo->resist);                   // resist
             data << uint8(pInfo->critical ? 1 : 0);         // new 3.1.2 critical flag
             break;
         case SPELL_AURA_PERIODIC_HEAL:
