@@ -1041,6 +1041,8 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
 
     bool m_bSpoutDirection;
 
+    float m_fGridSearchRange = 150.f;
+
     void Reset() override
     {
         m_uiWaterBoltTimer  = urand(1000, 2000);
@@ -1055,7 +1057,7 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
 
         // fireworks! 
         std::list<Creature*> lFirworkHelpers;
-        GetCreatureListWithEntryInGrid(lFirworkHelpers, m_creature, NPC_FIREWORK_HELPER, 150.0f);
+        GetCreatureListWithEntryInGrid(lFirworkHelpers, m_creature, NPC_FIREWORK_HELPER, m_fGridSearchRange);
 
         uint32 timer1 = 2000; uint32 timer2 = 2000;
         for (std::list<Creature*>::const_iterator itr = lFirworkHelpers.begin(); itr != lFirworkHelpers.end(); ++itr)
@@ -1096,7 +1098,7 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
                     m_creature->SetCanEnterCombat(true);
 
                     std::list<Creature*> lMarksmen;
-                    GetCreatureListWithEntryInGrid(lMarksmen, m_creature, NPC_THERAMORE_MARKSMAN, 150.0f);
+                    GetCreatureListWithEntryInGrid(lMarksmen, m_creature, NPC_THERAMORE_MARKSMAN, m_fGridSearchRange);
 
                     for (std::list<Creature*>::const_iterator itr = lMarksmen.begin(); itr != lMarksmen.end(); ++itr)
                     {
@@ -1116,7 +1118,7 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
 
                     // make cannons usable
                     std::list<GameObject*> lCannonsInRange;
-                    GetGameObjectListWithEntryInGrid(lCannonsInRange, m_creature, GO_COVE_CANNON, 150.0f);
+                    GetGameObjectListWithEntryInGrid(lCannonsInRange, m_creature, GO_COVE_CANNON, m_fGridSearchRange);
 
                     for (std::list<GameObject*>::const_iterator itr = lCannonsInRange.begin(); itr != lCannonsInRange.end(); ++itr)
                     {
@@ -1206,7 +1208,7 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
 
         // reset all cannons
         std::list<GameObject*> lCannonsInRange;
-        GetGameObjectListWithEntryInGrid(lCannonsInRange, m_creature, GO_COVE_CANNON, 150.0f);
+        GetGameObjectListWithEntryInGrid(lCannonsInRange, m_creature, GO_COVE_CANNON, m_fGridSearchRange);
 
         for (std::list<GameObject*>::const_iterator itr = lCannonsInRange.begin(); itr != lCannonsInRange.end(); ++itr)
         {
@@ -1215,8 +1217,8 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
         }
 
         // despawn all marksmen
-        CreatureList lMarksmenInRange;
-        GetCreatureListWithEntryInGrid(lMarksmenInRange, m_creature, NPC_THERAMORE_MARKSMAN, 100.0f);
+        std::list<Creature*> lMarksmenInRange;
+        GetCreatureListWithEntryInGrid(lMarksmenInRange, m_creature, NPC_THERAMORE_MARKSMAN, m_fGridSearchRange);
 
         for (std::list<Creature*>::const_iterator itr = lMarksmenInRange.begin(); itr != lMarksmenInRange.end(); ++itr)
             (*itr)->ForcedDespawn(10000);
