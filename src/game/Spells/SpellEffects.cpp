@@ -11196,7 +11196,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
                 case 68084:                                 // Clear Val'kyr Touch of Light/Dark
                 {
-                    if (!unitTarget)
+                    if (!unitTarget || !unitTarget->isInCombat())
                         return;
 
                     unitTarget->RemoveAurasDueToSpell(66001);
