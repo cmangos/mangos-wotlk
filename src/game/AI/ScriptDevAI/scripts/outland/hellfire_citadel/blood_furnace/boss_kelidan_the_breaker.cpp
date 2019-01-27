@@ -283,6 +283,7 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
             m_uiBurningNovaTimer -= uiDiff;
 
         DoMeleeAttackIfReady();
+        EnterEvadeIfOutOfCombatArea(uiDiff);
     }
 };
 
