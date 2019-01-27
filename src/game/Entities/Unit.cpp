@@ -6663,7 +6663,7 @@ void Unit::SendAttackStateUpdate(CalcDamageInfo* calcDamageInfo) const
     if (calcDamageInfo->HitInfo & (HITINFO_RESIST | HITINFO_RESIST2))
     {
         for (uint32 i = 0; i < lines; ++i)
-            data << uint32(calcDamageInfo->subDamage[i].resist);
+            data << int32(calcDamageInfo->subDamage[i].resist);
     }
 
     data << uint32(calcDamageInfo->TargetState);
