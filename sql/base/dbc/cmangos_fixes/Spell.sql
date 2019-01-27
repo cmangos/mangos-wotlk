@@ -1293,6 +1293,7 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- Introspection
 UPDATE spell_template SET Attributes=Attributes|0x04000000 WHERE Id IN(40055,40165,40166,40167);
 UPDATE spell_template SET Attributes=Attributes|0x04000000 WHERE Id = 41070; -- Death Coil used by Shadowmoon Deathshaper 22882
+UPDATE spell_template SET Attributes=Attributes|0x04000000 WHERE Id = 37675; -- Chaos Blast - Leotheras
 
 -- NPCs Faerie Fire not preventing players stealth
 UPDATE `spell_template` SET `AttributesServerside`=1 WHERE `id`=6950 OR `id`=16498 OR `id`=20656 OR `id`=21670 OR `id`=25602 OR `id`=32129;
