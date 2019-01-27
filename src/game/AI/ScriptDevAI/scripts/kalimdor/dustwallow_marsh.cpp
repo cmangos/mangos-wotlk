@@ -1085,14 +1085,14 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
             // start attacking
             switch (uiPointId)
             {
-                case 15:
+                case 12:
                 {
                     // remove flags
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                     break;
                 }
-                case 18:
+                case 15:
                 {
                     // attack all marksmen
                     m_creature->SetCanEnterCombat(true);
@@ -1129,7 +1129,7 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
                     m_uiPhase = PHASE_TETHYR_NORMAL;
                     break;
                 }
-                case 26:
+                case 22:
                 {
                     m_creature->ForcedDespawn(10000);
                     DoEncounterCleanup();
@@ -1174,6 +1174,7 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
         if (m_lMarksmenGUIDs.size() == 0)
         {
             //pSummoner->FailQuest(QUEST_ID_TETHYR); Needed?
+            m_creature->ForcedDespawn(10000);
             DoEncounterCleanup();
             EnterEvadeMode();
         }
