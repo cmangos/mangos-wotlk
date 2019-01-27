@@ -1011,11 +1011,8 @@ enum
     NPC_FIREWORK_HELPER         = 24025,
 
     GO_COVE_CANNON              = 186432,               // cast 42578
-    QUEST_ID_TETHYR             = 11198,
+    QUEST_TAKE_DOWN_TETHYR      = 11198,
 
-    CANNON_COOLDOWN             = 18000,
-
-    MAX_MARKSMEN                = 12,
     PHASE_TETHYR_INTRO          = 0,
     PHASE_TETHYR_NORMAL         = 1,
     PHASE_TETHYR_SPOUT          = 2,
@@ -1286,7 +1283,6 @@ UnitAI* GetAI_boss_tethyr(Creature* pCreature)
 
 enum
 {
-    QUEST_TAKE_DOWN_TETHYR = 11198,
     DBSCRIPT_RELAY_TAKE_DOWN_TETHYR = 10161
 };
 
