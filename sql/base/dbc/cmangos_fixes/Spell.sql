@@ -1411,8 +1411,8 @@ INSERT INTO spell_template(Id,Attributes,CastingTimeIndex,ProcFlags,ProcChance,R
 
 -- supremus fully custom fixate spell
 -- name taken from xml, rest taken from 7.2.5 dbc where the spell exists, aura type guesswork
-INSERT INTO spell_template(Id,AttributesEx,AttributesEx2,AttributesEx3,RangeIndex,CastingTimeIndex,Effect1,EffectImplicitTargetA1,EffectImplicitTargetB1,EffectApplyAuraName1,EffectRadiusIndex1,SpellName,MaxAffectedTargets,DmgMultiplier1,IsServerSide) VALUES
-(41951,0x00000088,0x00000004,0x00000100,13,1,6,22,15,4,22,'Random Target',1,1,2);
+INSERT INTO spell_template(Id,AttributesEx,AttributesEx2,AttributesEx3,RangeIndex,CastingTimeIndex,DurationIndex,Effect1,EffectImplicitTargetA1,EffectImplicitTargetB1,EffectApplyAuraName1,EffectRadiusIndex1,SpellName,MaxAffectedTargets,DmgMultiplier1,IsServerSide) VALUES
+(41951,0x00000088,0x00000004,0x00000100,13,1,1,6,22,15,4,22,'Random Target',1,1,2);
 
 -- Power of Arrazius - should only hit one player
 UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id` IN(34094);
