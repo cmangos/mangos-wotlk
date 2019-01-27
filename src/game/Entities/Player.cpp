@@ -729,6 +729,7 @@ void Player::CleanupsBeforeDelete()
     // notify zone scripts for player logout
     sOutdoorPvPMgr.HandlePlayerLeaveZone(this, m_zoneUpdateId);
     sWorldState.HandlePlayerLeaveZone(this, m_zoneUpdateId);
+    sWorldState.HandlePlayerLeaveArea(this, m_areaUpdateId);
 
     Unit::CleanupsBeforeDelete();
 }
