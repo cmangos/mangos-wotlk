@@ -8128,7 +8128,7 @@ void Aura::PeriodicTick()
             }
 
             uint32 absorb = 0;
-            uint32 resist = 0;
+            int32 resist = 0;
             CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
 
             // SpellDamageBonus for magic spells
@@ -8177,10 +8177,13 @@ void Aura::PeriodicTick()
             uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;// | PROC_FLAG_TAKEN_HARMFUL_SPELL_HIT;
             uint32 procEx = isCrit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT;
 
-            pdamage = (pdamage <= absorb + resist) ? 0 : (pdamage - absorb - resist);
+            const uint32 bonus = (resist < 0 ? uint32(std::abs(resist)) : 0);
+            pdamage += bonus;
+            const uint32 malus = (resist > 0 ? (absorb + uint32(resist)) : absorb);
+            pdamage = (pdamage <= malus ? 0 : (pdamage - malus));
 
             uint32 overkill = pdamage > target->GetHealth() ? pdamage - target->GetHealth() : 0;
-            SpellPeriodicAuraLogInfo pInfo(this, pdamage, overkill, absorb, int32(resist), 0.0f, isCrit);
+            SpellPeriodicAuraLogInfo pInfo(this, pdamage, overkill, absorb, resist, 0.0f, isCrit);
             target->SendPeriodicAuraLog(&pInfo);
 
             if (pdamage)
@@ -8229,10 +8232,10 @@ void Aura::PeriodicTick()
             }
 
             uint32 absorb = 0;
-            uint32 resist = 0;
+            int32 resist = 0;
             CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
 
-            uint32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
+            uint32 pdamage = (m_modifier.m_amount > 0 ? uint32(m_modifier.m_amount) : 0);
 
             pdamage = target->SpellDamageBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
 
@@ -8246,8 +8249,6 @@ void Aura::PeriodicTick()
             // FIXME: need use SpellDamageBonus instead?
             if (GetCasterGuid().IsPlayer())
                 pdamage -= target->GetResilienceRatingDamageReduction(pdamage, SpellDmgClass(spellProto->DmgClass), true);
-
-            target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto));
 
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s health leech of %s for %u dmg inflicted by %u abs is %u",
                               GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId(), absorb);
@@ -8263,7 +8264,13 @@ void Aura::PeriodicTick()
             uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;// | PROC_FLAG_TAKEN_HARMFUL_SPELL_HIT;
             uint32 procEx = isCrit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT;
 
-            pdamage = (pdamage <= absorb + resist) ? 0 : (pdamage - absorb - resist);
+            const uint32 bonus = (resist < 0 ? uint32(std::abs(resist)) : 0);
+            pdamage += bonus;
+            const uint32 malus = (resist > 0 ? (absorb + uint32(resist)) : absorb);
+            pdamage = (pdamage <= malus ? 0 : (pdamage - malus));
+
+            pdamage = std::min(pdamage, target->GetHealth());
+
             if (pdamage)
                 procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
