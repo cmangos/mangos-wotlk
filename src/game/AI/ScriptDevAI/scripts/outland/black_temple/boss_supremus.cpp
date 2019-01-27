@@ -77,9 +77,9 @@ enum SupremusActions // order based on priority
 {
     SUPREMUS_ACTION_PHASE_SWITCH,
     SUPREMUS_ACTION_BERSERK,
+    SUPREMUS_ACTION_SWITCH_TARGET,
     SUPREMUS_ACTION_MOLTEN_PUNCH,
     SUPREMUS_ACTION_VOLCANIC_ERUPTION,
-    SUPREMUS_ACTION_SWITCH_TARGET,
     SUPREMUS_ACTION_HATEFUL_STRIKE,
     SUPREMUS_ACTION_MAX,
     SUPREMUS_ACTION_DELAY,
@@ -138,7 +138,7 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
             case SUPREMUS_ACTION_BERSERK: return 900000;
             case SUPREMUS_ACTION_MOLTEN_PUNCH: return urand(11000, 14700);
             case SUPREMUS_ACTION_VOLCANIC_ERUPTION: return 6000;
-            case SUPREMUS_ACTION_SWITCH_TARGET: return 9000;
+            case SUPREMUS_ACTION_SWITCH_TARGET: return 0;
             case SUPREMUS_ACTION_HATEFUL_STRIKE: return 5000;
             default: return 0;
         }
@@ -258,7 +258,6 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
                             DoResetThreat();
                             DisableTimer(SUPREMUS_ACTION_HATEFUL_STRIKE);
                             SetActionReadyStatus(SUPREMUS_ACTION_HATEFUL_STRIKE, false);
-                            ResetTimer(SUPREMUS_ACTION_SWITCH_TARGET, GetInitialActionTimer(SUPREMUS_ACTION_SWITCH_TARGET));
                             ResetTimer(SUPREMUS_ACTION_VOLCANIC_ERUPTION, GetInitialActionTimer(SUPREMUS_ACTION_VOLCANIC_ERUPTION));
                             SetCombatScriptStatus(true);
                             SetCombatMovement(false, true);
@@ -313,7 +312,7 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
                                 return;
                             }
                         }
-                        return;
+                        break;
                     }
                     case SUPREMUS_ACTION_SWITCH_TARGET:
                         if (DoCastSpellIfCan(nullptr, SPELL_RANDOM_TARGET) == CAST_OK)
