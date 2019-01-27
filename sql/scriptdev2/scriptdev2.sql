@@ -4131,7 +4131,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1532130,'%s takes a deep breath.',0,3,0,0,'nightbane EMOTE_DEEP_BREATH'),
 
 (-1532131,'The halls of Karazhan shake, as the curse binding the doors of the Gamesman''s Hall is lifted.',0,2,0,0,'echo_of_medivh EMOTE_LIFT_CURSE'),
-(-1532132,'%s cheats!',0,3,0,0,'echo_of_medivh EMOTE_CHEAT'),
+(-1532132,'Echo of Medivh cheats!',0,3,0,0,'echo_of_medivh EMOTE_CHEAT'),
 
 (-1532133,'%s flaps down from the ceiling...',0,7,0,0,'shadikith_the_glider EMOTE_BAT_SPAWN'),
 (-1532134,'%s howls through the halls...',0,7,0,0,'rokad_the_ravager EMOTE_DOG_SPAWN'),
