@@ -266,7 +266,7 @@ Unit::Unit() :
 
     m_detectInvisibilityMask = 0;
     m_invisibilityMask = 0;
-    
+
     memset(m_invisibilityValues, 0, sizeof(m_invisibilityValues));
     memset(m_invisibilityDetectValues, 0, sizeof(m_invisibilityDetectValues));
 
@@ -348,7 +348,6 @@ Unit::~Unit()
             m_currentSpell = nullptr;
         }
     }
-
     CleanupDeletedAuras();
 
     delete m_combatData;
@@ -1838,7 +1837,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
             if (roll_chance_i(pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_CRIT_CHANCE)))
                 calcDamageInfo->blocked_amount *= 2;
 
-            if (calcDamageInfo->blocked_amount >= calcDamageInfo->totalDamage) 
+            if (calcDamageInfo->blocked_amount >= calcDamageInfo->totalDamage)
             {
                 // Full block
                 calcDamageInfo->TargetState = VICTIMSTATE_BLOCKS;
@@ -5500,7 +5499,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
     return true;
 }
 
-void Unit::RemoveAurasByCasterSpell(uint32 spellId, ObjectGuid casterGuid)
+void Unit::RemoveAurasByCasterSpell(uint32 spellId, ObjectGuid const& casterGuid)
 {
     SpellAuraHolderBounds spair = GetSpellAuraHolderBounds(spellId);
     for (SpellAuraHolderMap::iterator iter = spair.first; iter != spair.second;)
@@ -11093,7 +11092,7 @@ void CharmInfo::InitCharmCreateSpells()
             m_charmspells[x].SetActionAndType(spellId, ACT_DISABLED);
 
             ActiveStates newstate;
-            bool onlyselfcast = true;            
+            bool onlyselfcast = true;
 
             for (uint32 i = 0; i < 3 && onlyselfcast; ++i)  // nonexistent spell will not make any problems as onlyselfcast would be false -> break right away
             {

@@ -3871,6 +3871,22 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         return;
     }
 
+    if (target->IsBoarded() && target->GetTransportInfo()->IsOnVehicle())
+    {
+        if (IsSpellHaveAura(GetSpellProto(), SPELL_AURA_CONTROL_VEHICLE))
+        {
+            // TODO maybe move GetVehicleInfo() to WorldObject class
+            auto vehicle = static_cast<Unit*>(target->GetTransportInfo()->GetTransport());
+            auto vehicleInfo = vehicle->GetVehicleInfo();
+
+            if (!apply)
+            {
+                //sLog.outString("Unboarding %s %s from %s %s", target->GetName(), target->GetGuidStr().c_str(), vehicle->GetName(), vehicle->GetGuidStr().c_str());
+                vehicleInfo->UnBoard(target, false);
+            }
+        }
+    }
+
     if (target->GetTypeId() == TYPEID_PLAYER)
     {
         SpellAreaForAreaMapBounds saBounds = sSpellMgr.GetSpellAreaForAuraMapBounds(GetId());
@@ -9467,10 +9483,14 @@ void Aura::HandleAuraControlVehicle(bool apply, bool Real)
 
     if (apply)
     {
+        //sLog.outString("Boarding %s %s on %s %s", caster->GetName(), caster->GetGuidStr().c_str(), target->GetName(), target->GetGuidStr().c_str());
         target->GetVehicleInfo()->Board(caster, GetBasePoints() - 1);
     }
     else
+    {
+        //sLog.outString("Unboarding %s %s from %s %s", caster->GetName(), caster->GetGuidStr().c_str(), target->GetName(), target->GetGuidStr().c_str());
         target->GetVehicleInfo()->UnBoard(caster, m_removeMode == AURA_REMOVE_BY_TRACKING);
+    }
 }
 
 void Aura::HandleAuraAddMechanicAbilities(bool apply, bool Real)
@@ -11220,7 +11240,6 @@ void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
         if (caster && IsSpellHaveAura(GetSpellProto(), SPELL_AURA_CONTROL_VEHICLE, GetAuraFlags()))
         {
             caster->GetTrackedAuraTargets(trackedType).erase(GetSpellProto());
-            caster->RemoveAurasDueToSpell(GetSpellProto()->Id);
         }
         else if (caster)
         {
@@ -11231,7 +11250,7 @@ void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
                 ObjectGuid vehicleGuid = find->second;
                 scTarget.erase(find);
                 if (Unit* vehicle = caster->GetMap()->GetUnit(vehicleGuid))
-                    vehicle->RemoveAurasDueToSpell(GetSpellProto()->Id, nullptr, AURA_REMOVE_BY_DEFAULT);
+                    vehicle->RemoveAurasByCasterSpell(GetSpellProto()->Id, caster->GetObjectGuid());
             }
         }
     }
