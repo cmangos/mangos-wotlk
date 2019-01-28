@@ -8124,7 +8124,7 @@ void Aura::PeriodicTick()
             // only from players
             // FIXME: need use SpellDamageBonus instead?
             if (pCaster->GetTypeId() == TYPEID_PLAYER)
-                pdamage -= target->GetSpellDamageReduction(pdamage);
+                pdamage -= target->GetResilienceRatingDamageReduction(pdamage, SpellDmgClass(spellProto->DmgClass), true);
 
             target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto));
 
@@ -8206,7 +8206,7 @@ void Aura::PeriodicTick()
             // only from players
             // FIXME: need use SpellDamageBonus instead?
             if (GetCasterGuid().IsPlayer())
-                pdamage -= target->GetSpellDamageReduction(pdamage);
+                pdamage -= target->GetResilienceRatingDamageReduction(pdamage, SpellDmgClass(spellProto->DmgClass), true);
 
             target->CalculateDamageAbsorbAndResist(pCaster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto));
 
@@ -8411,9 +8411,7 @@ void Aura::PeriodicTick()
 
             int32 drain_amount = target->GetPower(power) > pdamage ? pdamage : target->GetPower(power);
 
-            // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
-            if (power == POWER_MANA)
-                drain_amount -= target->GetManaDrainReduction(drain_amount);
+            drain_amount -= target->GetResilienceRatingDamageReduction(uint32(drain_amount), SpellDmgClass(spellProto->DmgClass), false, power);
 
             target->ModifyPower(power, -drain_amount);
 
@@ -8580,9 +8578,7 @@ void Aura::PeriodicTick()
             if (!target->isAlive() || target->GetPowerType() != powerType)
                 return;
 
-            // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
-            if (powerType == POWER_MANA)
-                pdamage -= target->GetManaDrainReduction(pdamage);
+            pdamage -= target->GetResilienceRatingDamageReduction(uint32(pdamage), SpellDmgClass(spellProto->DmgClass), false, powerType);
 
             uint32 gain = uint32(-target->ModifyPower(powerType, -pdamage));
 
