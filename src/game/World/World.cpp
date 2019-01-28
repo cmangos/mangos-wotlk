@@ -1384,6 +1384,10 @@ void World::SetInitialWorldSettings()
     AIRegistry::Initialize();
     Player::InitVisibleBits();
 
+    ///- Initialize Outdoor PvP
+    sLog.outString("Starting Outdoor PvP System");          // should be before loading maps
+    sOutdoorPvPMgr.InitOutdoorPvP();
+
     ///- Initialize MapManager
     sLog.outString("Starting Map System");
     sMapMgr.Initialize();
@@ -1393,10 +1397,6 @@ void World::SetInitialWorldSettings()
     sLog.outString("Starting BattleGround System");
     sBattleGroundMgr.CreateInitialBattleGrounds();
     sBattleGroundMgr.InitAutomaticArenaPointDistribution();
-
-    ///- Initialize Outdoor PvP
-    sLog.outString("Starting Outdoor PvP System");
-    sOutdoorPvPMgr.InitOutdoorPvP();
 
     // Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
     sLog.outString("Loading Transports...");
