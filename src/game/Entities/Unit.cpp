@@ -9875,7 +9875,6 @@ void Unit::SetDeathState(DeathState s)
         RemoveAllAurasOnDeath();
         BreakCharmOutgoing();
         BreakCharmIncoming();
-        RemoveGuardians();
         RemoveMiniPet();
         UnsummonAllTotems();
 
