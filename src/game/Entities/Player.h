@@ -1658,7 +1658,9 @@ class Player : public Unit
         PvPInfo pvpInfo;
         void UpdatePvP(bool state, bool overriding = false);
         void UpdatePvPContested(bool state, bool overriding = false);
-        void UpdateZone(uint32 newZone, uint32 newArea);
+
+        // forced update needed for on-resurrection event
+        void UpdateZone(uint32 newZone, uint32 newArea, bool force = false);
         void UpdateArea(uint32 newArea);
         uint32 GetCachedZoneId() const { return m_zoneUpdateId; }
 
