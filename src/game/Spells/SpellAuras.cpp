@@ -2872,6 +2872,18 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
                 break;
             }
+            case SPELLFAMILY_PRIEST:
+            {
+                switch (GetId())
+                {
+                    case 30238:             // Lordaeron's Blessing
+                    {
+                        target->CastSpell(target, 31906, TRIGGERED_OLD_TRIGGERED);
+                        return;
+                    }
+                }
+                break;
+            }
         }
     }
     // AT REMOVE
@@ -2984,6 +2996,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 if (target->HasAura(30168))
                     target->RemoveAurasDueToSpell(30168); // remove Shadow cage if stacks are 5
+            }
+            case 30238:                                     // Lordaeron's Bleesing
+            {
+                target->RemoveAurasDueToSpell(31906);
+                return;
             }
             case 32045:                                     // Soul Charge
             {
