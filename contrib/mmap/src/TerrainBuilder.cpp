@@ -340,7 +340,7 @@ namespace MMAP
                 else
                 {
                     liquidType = getLiquidType(i, liquid_flags);
-                    if (liquidType & MAP_LIQUID_TYPE_DARK_WATER)
+                    if (liquidType & MAP_LIQUID_TYPE_DEEP_WATER)
                     {
                         // players should not be here, so logically neither should creatures
                         useTerrain = false;
