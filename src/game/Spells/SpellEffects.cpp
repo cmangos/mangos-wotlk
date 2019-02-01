@@ -2950,37 +2950,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
-                case 49634:                                 // Sergeant's Flare
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    // Towers of Certain Doom: Tower Bunny Smoke Flare Effect
-                    // TODO: MaNGOS::DynamicObjectUpdater::VisitHelper prevent aura to be applied to dummy creature (see HandleAuraDummy for effect of aura)
-                    m_caster->CastSpell(unitTarget, 56511, TRIGGERED_OLD_TRIGGERED);
-
-                    static uint32 const spellCredit[4] =
-                    {
-                        43077,                              // E Kill Credit
-                        43067,                              // NW Kill Credit
-                        43087,                              // SE Kill Credit
-                        43086,                              // SW Kill Credit
-                    };
-
-                    // for sizeof(spellCredit)
-                    for (unsigned int i : spellCredit)
-                    {
-                        const SpellEntry* pSpell = sSpellTemplate.LookupEntry<SpellEntry>(i);
-
-                        if (pSpell->EffectMiscValue[EFFECT_INDEX_0] == static_cast<int32>(unitTarget->GetEntry()))
-                        {
-                            m_caster->CastSpell(m_caster, i, TRIGGERED_OLD_TRIGGERED);
-                            break;
-                        }
-                    }
-
-                    return;
-                }
                 case 49761:                                 // Rocket-Propelled Goblin Grenade
                 {
                     if (unitTarget)
