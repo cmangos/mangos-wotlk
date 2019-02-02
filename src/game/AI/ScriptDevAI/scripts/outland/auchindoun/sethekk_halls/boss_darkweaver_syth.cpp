@@ -72,7 +72,9 @@ struct boss_darkweaver_sythAI : public ScriptedAI
     uint32 m_uiShadowshockTimer;
     uint32 m_uiChainlightningTimer;
 
-    float m_fHpCheck;
+    bool FirstSummon;
+    bool SecondSummon;
+    bool ThirdSummon;
 
     void Reset() override
     {
@@ -82,7 +84,9 @@ struct boss_darkweaver_sythAI : public ScriptedAI
         m_uiShadowshockTimer    = 17000;
         m_uiChainlightningTimer = urand(6000, 9000);
 
-        m_fHpCheck              = 90.0f;
+        FirstSummon = false;
+        SecondSummon = false;
+        ThirdSummon = false;
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -110,24 +114,8 @@ struct boss_darkweaver_sythAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        switch (pSummoned->GetEntry())
-        {
-            case NPC_FIRE_ELEMENTAL:
-                pSummoned->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
-                break;
-            case NPC_FROST_ELEMENTAL:
-                pSummoned->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FROST, true);
-                break;
-            case NPC_ARCANE_ELEMENTAL:
-                pSummoned->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_ARCANE, true);
-                break;
-            case NPC_SHADOW_ELEMENTAL:
-                pSummoned->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_SHADOW, true);
-                break;
-        }
-
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
+        if (Unit* Target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            pSummoned->AI()->AttackStart(Target);
     }
 
     // Wrapper to handle the elementals summon
@@ -149,11 +137,21 @@ struct boss_darkweaver_sythAI : public ScriptedAI
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        // Summon elementals at 90%, 50% and 10% health
-        if (m_creature->GetHealthPercent() < m_fHpCheck)
+        // Summon elementals at 90%, 55% and 15% health
+        if (m_creature->GetHealthPercent() < 90.0f && !FirstSummon)
         {
             SythSummoning();
-            m_fHpCheck -= 40.0f;
+            FirstSummon = true;
+        }
+        if (m_creature->GetHealthPercent() < 55.0f && !SecondSummon)
+        {
+            SythSummoning();
+            SecondSummon = true;
+        }
+        if (m_creature->GetHealthPercent() < 15.0f && !ThirdSummon)
+        {
+            SythSummoning();
+            ThirdSummon = true;
         }
 
         if (m_uiFlameshockTimer < uiDiff)
