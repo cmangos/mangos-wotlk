@@ -1352,6 +1352,130 @@ bool AreaTrigger_at_sentry_point(Player* pPlayer, const AreaTriggerEntry* /*pAt*
     return true;
 };
 
+/*######
+## npc_smolderwing
+######*/
+
+enum
+{
+    DO_NOTHING = 111111, // some unlikely to be needed number
+
+    SAY_1 = -1000343,
+    SAY_2 = -1000344,
+
+    NPC_SMOLDERWING = 23789,
+
+    SPELL_SMOLDERWING_FIRE_BREATH = 42433,
+
+    GO_STONEMAUL_BANNER = 186335,
+
+    MAP_ID_KALIMDOR = 1,
+    ZONE_ID_ONY_LAIR = 2159,
+};
+
+static const DialogueEntry SmolderDialogue[] =
+{
+    {DO_NOTHING,                    0,               2000},
+    {SAY_1,                         NPC_SMOLDERWING, 6500},
+    {SAY_2,                         NPC_SMOLDERWING, 5000},
+    {SPELL_SMOLDERWING_FIRE_BREATH, 0,               4000},
+    {GO_STONEMAUL_BANNER,           0,               0},
+    {0, 0, 0 },
+};
+
+struct npc_smolderwing : public ScriptedAI, private DialogueHelper
+{
+    npc_smolderwing(Creature* pCreature) : ScriptedAI(pCreature),
+        DialogueHelper(SmolderDialogue)
+    {
+        Reset();
+    }
+
+    void Reset() override {}
+    
+    void JustDidDialogueStep(int32 iEntry) override
+    {
+        switch (iEntry)
+        {
+            case SPELL_SMOLDERWING_FIRE_BREATH:
+            {
+                if (GameObject* banner = GetClosestGameObjectWithEntry(m_creature, GO_STONEMAUL_BANNER, 50.f))
+                {
+                    if (m_creature->GetDistance(banner) >= 10.f)
+                    {
+                        float fX, fY, fZ;
+                        banner->GetContactPoint(m_creature, fX, fY, fZ, ATTACK_DISTANCE / 2.f);
+                        m_creature->SetWalk(false);
+                        m_creature->GetMotionMaster()->MovePoint(1, fX, fY, m_creature->GetPositionZ());
+                    }
+                    else
+                    {
+                        m_creature->SetFacingToObject(banner);
+                        m_creature->CastSpell(m_creature, SPELL_SMOLDERWING_FIRE_BREATH, TRIGGERED_NONE);
+                    }
+                }
+                break;
+            }
+            case GO_STONEMAUL_BANNER:
+            {
+                // remove flags
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                break;
+            }
+            case DO_NOTHING:
+                break;
+        }
+    }
+
+    Creature* GetSpeakerByEntry(uint32 uiEntry) override
+    {
+        switch (uiEntry)
+        {
+            case NPC_SMOLDERWING: return m_creature;
+            default:
+                return nullptr;
+        }
+    }
+
+    void MovementInform(uint32 movementType, uint32 uiPointId) override
+    {
+        if (movementType == POINT_MOTION_TYPE)
+        {
+            if (uiPointId == 1)
+            {
+                m_creature->CastSpell(m_creature, SPELL_SMOLDERWING_FIRE_BREATH, TRIGGERED_NONE);
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_creature->GetMapId() != MAP_ID_KALIMDOR || m_creature->GetZoneId() != ZONE_ID_ONY_LAIR)
+            return; // sanity check
+
+        DialogueUpdate(uiDiff);
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+
+    void JustRespawned() override
+    {
+        if (m_creature->GetMapId() != MAP_ID_KALIMDOR || m_creature->GetZoneId() != ZONE_ID_ONY_LAIR)
+            return; // sanity check
+
+        StartNextDialogueText(DO_NOTHING);
+    }
+};
+
+UnitAI* GetAI_npc_smolderwing(Creature* pCreature)
+{
+    return new npc_smolderwing(pCreature);
+}
+
 void AddSC_dustwallow_marsh()
 {
     Script* pNewScript = new Script;
@@ -1407,10 +1531,15 @@ void AddSC_dustwallow_marsh()
     pNewScript->Name = "boss_tethyr";
     pNewScript->GetAI = &GetAI_boss_tethyr;
     pNewScript->RegisterSelf();
-
+    
     pNewScript = new Script;
     pNewScript->Name = "npc_major_mills";
     pNewScript->GetAI = &GetAI_npc_major_mills;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_major_mills;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_smolderwing";
+    pNewScript->GetAI = &GetAI_npc_smolderwing;
     pNewScript->RegisterSelf();
 }

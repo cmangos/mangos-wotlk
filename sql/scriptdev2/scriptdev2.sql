@@ -726,6 +726,8 @@ UPDATE creature_template SET ScriptName='npc_stinky_ignatz' WHERE entry=4880;
 UPDATE creature_template SET ScriptName='boss_tethyr' WHERE entry=23899;
 UPDATE creature_template SET ScriptName='npc_major_mills' WHERE entry=23905;
 UPDATE creature_template SET ScriptName='mob_invis_firework_helper' WHERE entry=24025;
+UPDATE creature_template SET ScriptName='npc_smolderwing' WHERE entry=23789;
+
 INSERT INTO scripted_areatrigger VALUES
 (302,'at_sentry_point');
 INSERT INTO scripted_areatrigger VALUES
@@ -2133,7 +2135,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000341,'%s eats his lunch.',0,2,0,0,'kyle EMOTE_EAT_LUNCH'),
 (-1000342,'%s thanks you with a special dance.',0,2,0,0,'kyle EMOTE_DANCE'),
 
--- REUSE 343-347
+(-1000343,'Pitiful mortal, Onyxia answers to no one!',0,1,0,0,'smolderwing SAY_1'),
+(-1000344,'Your pathetic challenge has not gone unnoticed. I shall enjoy toying with you before you die.',0,1,0,0,'smolderwing SAY_2'),
+
+-- REUSE 345-347
 
 (-1000348,'Ah...the wondrous sound of kodos. I love the way they make the ground shake... inspect the beast for me.',0,0,0,0,'kodo round SAY_SMEED_HOME_1'),
 (-1000349,'Hey, look out with that kodo! You had better inspect that beast before i give you credit!',0,0,0,0,'kodo round SAY_SMEED_HOME_2'),
