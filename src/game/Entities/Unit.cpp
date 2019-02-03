@@ -10136,7 +10136,8 @@ bool Unit::SelectHostileTarget()
     if (!AI()->CanExecuteCombatAction())
     {
         if (Unit* target = GetMap()->GetUnit(GetTargetGuid()))
-            SetInFront(target);
+            if (target != this)
+                SetInFront(target);
 
         return !(AI()->GetCombatScriptStatus() && getThreatManager().isThreatListEmpty());
     }
