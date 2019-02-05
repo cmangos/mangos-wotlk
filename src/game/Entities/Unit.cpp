@@ -190,7 +190,7 @@ void MovementInfo::Write(ByteBuffer& data) const
         data << t_pos.x;
         data << t_pos.y;
         data << t_pos.z;
-        data << t_pos.o;
+        data << float(t_guid.IsVehicle() ? 0 : t_pos.o); // its probably not right but its not worst that what we had
         data << t_time;
         data << t_seat;
 
