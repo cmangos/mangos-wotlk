@@ -313,10 +313,11 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 {
     MANGOS_ASSERT(passenger);
 
-    DEBUG_LOG("VehicleInfo::Unboard: passenger: %s", passenger->GetGuidStr().c_str());
-
     PassengerMap::const_iterator itr = m_passengers.find(passenger);
-    MANGOS_ASSERT(itr != m_passengers.end());
+    if (itr == m_passengers.end())
+        return;
+
+    DEBUG_LOG("VehicleInfo::Unboard: passenger: %s", passenger->GetGuidStr().c_str());
 
     VehicleSeatEntry const* seatEntry = GetSeatEntry(itr->second->GetTransportSeat());
     MANGOS_ASSERT(seatEntry);

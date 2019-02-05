@@ -11243,7 +11243,7 @@ bool SpellAuraHolder::IsEmptyHolder() const
 void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
 {
     TrackedAuraType trackedType = GetTrackedAuraType();
-    if (!trackedType)
+    if (trackedType == TRACK_AURA_TYPE_NOT_TRACKED)
         return;
 
     if (trackedType == TRACK_AURA_TYPE_SINGLE_TARGET)
@@ -11257,6 +11257,13 @@ void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
         if (caster && IsSpellHaveAura(GetSpellProto(), SPELL_AURA_CONTROL_VEHICLE, GetAuraFlags()))
         {
             caster->GetTrackedAuraTargets(trackedType).erase(GetSpellProto());
+
+            if (SpellAuraHolder* holder = caster->GetSpellAuraHolder(GetSpellProto()->Id))
+            {
+                // remove the tracked aura type(TRACK_AURA_TYPE_CONTROL_VEHICLE) to avoid getting back here
+                holder->SetTrackedAuraType(TRACK_AURA_TYPE_NOT_TRACKED);
+                caster->RemoveSpellAuraHolder(holder);
+            }
         }
         else if (caster)
         {
@@ -11267,7 +11274,23 @@ void SpellAuraHolder::UnregisterAndCleanupTrackedAuras()
                 ObjectGuid vehicleGuid = find->second;
                 scTarget.erase(find);
                 if (Unit* vehicle = caster->GetMap()->GetUnit(vehicleGuid))
+                {
                     vehicle->RemoveAurasByCasterSpell(GetSpellProto()->Id, caster->GetObjectGuid());
+                    ObjectGuid const& casterGuid = caster->GetObjectGuid();
+                    Unit::SpellAuraHolderBounds spair = vehicle->GetSpellAuraHolderBounds(GetSpellProto()->Id);
+                    for (Unit::SpellAuraHolderMap::iterator iter = spair.first; iter != spair.second;)
+                    {
+                        if (iter->second->GetCasterGuid() == casterGuid)
+                        {
+                            // remove the tracked aura type(TRACK_AURA_TYPE_CONTROL_VEHICLE) to avoid getting back here
+                            iter->second->SetTrackedAuraType(TRACK_AURA_TYPE_NOT_TRACKED);
+                            vehicle->RemoveSpellAuraHolder(iter->second);
+                            break;
+                        }
+                        else
+                            ++iter;
+                    }
+                }
             }
         }
     }
