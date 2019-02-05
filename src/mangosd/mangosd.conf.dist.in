@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2018092101
+ConfVersion=2019020501
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -783,13 +783,18 @@ LogColors = ""
 #                 1 - recheck offhand slot weapon at talent reset also
 #
 #    PetUnsummonAtMount
-#        Persmanent pet will unsummoned at player mount
+#        Permanent pet will unsummoned at player mount
 #        Default: 0 - unsummon only when appropriate (don't unsummon temp summons on ground mounting)
 #                 1 - always unsummon controlled pets on mounting
 #
 #    ClientCacheVersion
 #        Client cache version for client cache data reset. Use any different from DB value and not recently used for triggering reset.
 #        Default: 0 (use DB value from world DB db_version.cache_id field)
+#
+#    PetAttackFromBehind
+#        Player controlled pet will attack from behind
+#                 0 - Engage from any angle
+#        Default: 1 - Engage from behind
 #
 #    Event.Announce
 #        Default: 0 (false)
@@ -894,6 +899,7 @@ SkillChance.Milling = 0
 OffhandCheckAtTalentsReset = 0
 PetUnsummonAtMount = 0
 ClientCacheVersion = 0
+PetAttackFromBehind = 1
 Event.Announce = 0
 BeepAtStart = 1
 ShowProgressBars = 0
