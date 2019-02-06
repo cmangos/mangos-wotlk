@@ -61,7 +61,7 @@ UPDATE `spell_template` SET `EffectImplicitTargetA1`=48, `EffectImplicitTargetA2
 INSERT INTO `spell_template` (`Id`,`procChance`,`DurationIndex`,`Effect1`,`EffectImplicitTargetA1`,`EffectImplicitTargetB1`,`EffectRadiusIndex1`,`EffectApplyAuraName1`,`EffectMiscValue1`,`EffectMiscValueB1`,`EffectTriggerSpell1`,`SpellName`) VALUES
 ('33242','101','21','28','18','0','7','0','19259','64','0','summon Infernal Invader');
 
-INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`procFlags`,`procChance`,`DurationIndex`,`RangeIndex`,`Effect1`,`EffectImplicitTargetA1`,`EffectImplicitTargetB1`,`EffectRadiusIndex1`,`EffectApplyAuraName1`,`EffectMiscValue1`,`EffectMiscValueB1`,`EffectTriggerSpell1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
+INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`ProcFlags`,`procChance`,`DurationIndex`,`RangeIndex`,`Effect1`,`EffectImplicitTargetA1`,`EffectImplicitTargetB1`,`EffectRadiusIndex1`,`EffectApplyAuraName1`,`EffectMiscValue1`,`EffectMiscValueB1`,`EffectTriggerSpell1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
 (38096, 384, 0, 9, 0, 0, 101, 21, 96, 6, 38, 0, 0, 4, 0, 0, 0, 1, '[DND]Destroy Sun Gate Portal Controller', 1);
 
 -- missing spells for quest Gauging the Resonant Frequency
