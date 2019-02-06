@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2019020501
+ConfVersion=2019020502
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -1385,11 +1385,11 @@ Visibility.AIRelocationNotifyDelay = 1000
 #         Default: 1
 #
 #    Rate.Reputation.LowLevel.Kill
-#         Reputation Gain form low level kill (grey creture)
+#         Lowest Reputation Gain rate from low level kill
 #         Default: 1
 #
 #    Rate.Reputation.LowLevel.Quest
-#         Reputation Gain rate
+#         Lowest Reputation Gain rate from low level quest
 #         Default: 1
 #
 #    Rate.InstanceResetTime
