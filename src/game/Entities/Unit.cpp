@@ -8297,6 +8297,7 @@ uint32 Unit::SpellHealingBonusDone(Unit* pVictim, SpellEntry const* spellProto, 
     // done scripted mod (take it from owner)
     Unit* owner = GetOwner();
     if (!owner) owner = this;
+
     AuraList const& mOverrideClassScript = owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
     for (auto i : mOverrideClassScript)
     {
@@ -8747,20 +8748,56 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
             DonePercent *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
     }
 
-    // ..done (class scripts)
     if (spellProto)
     {
-        AuraList const& mOverrideClassScript = owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-        for (auto i : mOverrideClassScript)
+        // dummies
+        AuraList const& auraDummy = owner->GetAurasByType(SPELL_AURA_DUMMY);
+        for (auto i : auraDummy)
         {
             if (!i->isAffectedOnSpell(spellProto))
                 continue;
-
-            switch (i->GetModifier()->m_miscvalue)
+            switch (i->GetSpellProto()->Id)
             {
+                case 20162: // Seal of the Crusader - all ranks
+                case 20305:
+                case 20306:
+                case 20307:
+                case 20308:
+                case 21082:
+                case 27158:
+                {
+                    DonePercent *= 1.4f;
+                    break;
+                }
+            }
+        }
+
+        // .. done (class scripts)
+        AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+        for (auto i : mOverrideClassScript)
+        {
+            if (!(i->isAffectedOnSpell(spellProto)))
+                continue;
+            switch (i->GetMiscValue())
+            {
+                // Dirty Deeds
+                case 6427:
+                case 6428:
+                    if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
+                    {
+                        Aura* eff0 = i->GetHolder()->m_auras[EFFECT_INDEX_0];
+                        if (!eff0)
+                        {
+                            sLog.outError("Spell structure of DD (%u) changed.", i->GetId());
+                            continue;
+                        }
+
+                        // effect 0 have expected value but in negative state
+                        DonePercent *= (-eff0->GetModifier()->m_amount + 100.0f) / 100.0f;
+                    }
+                    break;
                 // Tundra Stalker
-                // Merciless Combat
-                case 7277:
+                case 7277: // Merciless Combat
                 {
                     // Merciless Combat
                     if (i->GetSpellProto()->SpellIconID == 2656)
@@ -8795,31 +8832,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
                     break;
                 }
             }
-        }
-    }
-
-    // .. done (class scripts)
-    AuraList const& mclassScritAuras = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-    for (auto mclassScritAura : mclassScritAuras)
-    {
-        switch (mclassScritAura->GetMiscValue())
-        {
-            // Dirty Deeds
-            case 6427:
-            case 6428:
-                if (pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
-                {
-                    Aura* eff0 = GetAura(mclassScritAura->GetId(), EFFECT_INDEX_0);
-                    if (!eff0 || mclassScritAura->GetEffIndex() != EFFECT_INDEX_1)
-                    {
-                        sLog.outError("Spell structure of DD (%u) changed.", mclassScritAura->GetId());
-                        continue;
-                    }
-
-                    // effect 0 have expected value but in negative state
-                    DonePercent *= (-eff0->GetModifier()->m_amount + 100.0f) / 100.0f;
-                }
-                break;
         }
     }
 
