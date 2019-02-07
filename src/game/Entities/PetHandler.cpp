@@ -307,12 +307,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     if (unit_target->GetTypeId() == TYPEID_PLAYER)
                         petUnit->SendCreateUpdateToPlayer((Player*)unit_target);
                 }
-                else if (Unit* unit_target2 = spell->m_targets.getUnitTarget())
-                {
-                    petUnit->SetInFront(unit_target2);
-                    if (unit_target2->GetTypeId() == TYPEID_PLAYER)
-                        petUnit->SendCreateUpdateToPlayer((Player*)unit_target2);
-                }
+
                 if (Unit* powner = petUnit->GetMaster())
                     if (powner->GetTypeId() == TYPEID_PLAYER)
                         petUnit->SendCreateUpdateToPlayer((Player*)powner);
@@ -321,8 +316,11 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
 
             if (result == SPELL_CAST_OK)
             {
+                SpellCastTargets targets;
+                targets.setUnitTarget(unit_target);
+
                 charmInfo->SetSpellOpener();
-                spell->SpellStart(&(spell->m_targets));
+                spell->SpellStart(&targets);
             }
             else
             {
