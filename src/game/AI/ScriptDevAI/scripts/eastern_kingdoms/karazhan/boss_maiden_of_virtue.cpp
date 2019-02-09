@@ -79,7 +79,7 @@ struct boss_maiden_of_virtueAI : public ScriptedAI, public CombatActions
     {
         switch (id)
         {
-            case MAIDEN_ACTION_REPENTANCE: return urand(28000, 32000);
+            case MAIDEN_ACTION_REPENTANCE: return urand(42000, 44000);
             case MAIDEN_ACTION_HOLY_FIRE: return urand(8000, 14000);
             case MAIDEN_ACTION_HOLY_WRATH: return urand(15000, 25000);
             case MAIDEN_ACTION_HOLY_GROUND: return 2000;
@@ -91,7 +91,7 @@ struct boss_maiden_of_virtueAI : public ScriptedAI, public CombatActions
     {
         switch (id)
         {
-            case MAIDEN_ACTION_REPENTANCE: return urand(28000, 32000);
+            case MAIDEN_ACTION_REPENTANCE: return urand(28000, 36000);
             case MAIDEN_ACTION_HOLY_FIRE: return urand(12000, 20000);
             case MAIDEN_ACTION_HOLY_WRATH: return urand(25000, 35000);
             case MAIDEN_ACTION_HOLY_GROUND: return 2000;
@@ -112,30 +112,31 @@ struct boss_maiden_of_virtueAI : public ScriptedAI, public CombatActions
                 {
                     case MAIDEN_ACTION_REPENTANCE:
                     {
-                        DoCastSpellIfCan(m_creature, SPELL_REPENTANCE);
+                        DoCastSpellIfCan(nullptr, SPELL_REPENTANCE);
+                        DoScriptText(urand(0, 1) ? SAY_REPENTANCE1 : SAY_REPENTANCE2, m_creature);
                         ResetTimer(i, GetSubsequentActionTimer(i));
                         SetActionReadyStatus(i, false);
                         continue;
                     }
                     case MAIDEN_ACTION_HOLY_FIRE:
                     {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_PLAYER))
-                            DoCastSpellIfCan(pTarget, SPELL_HOLYFIRE);
+                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_PLAYER))
+                            DoCastSpellIfCan(target, SPELL_HOLYFIRE);
                         ResetTimer(i, GetSubsequentActionTimer(i));
                         SetActionReadyStatus(i, false);
                         continue;
                     }
                     case MAIDEN_ACTION_HOLY_WRATH:
                     {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                            DoCastSpellIfCan(pTarget, SPELL_HOLYWRATH);
+                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYWRATH, SELECT_FLAG_PLAYER))
+                            DoCastSpellIfCan(target, SPELL_HOLYWRATH);
                         ResetTimer(i, GetSubsequentActionTimer(i));
                         SetActionReadyStatus(i, false);
                         continue;
                     }
                     case MAIDEN_ACTION_HOLY_GROUND:
                     {
-                        DoCastSpellIfCan(m_creature, SPELL_HOLYGROUND, CAST_TRIGGERED);
+                        DoCastSpellIfCan(nullptr, SPELL_HOLYGROUND);
                         ResetTimer(i, GetSubsequentActionTimer(i));
                         SetActionReadyStatus(i, false);
                         continue;
