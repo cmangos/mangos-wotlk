@@ -295,11 +295,8 @@ struct boss_nightbaneAI : public npc_escortAI
 
                 if (m_uiCharredEarthTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
-                    {
-                        if (DoCastSpellIfCan(pTarget, SPELL_CHARRED_EARTH_TARGETING) == CAST_OK) // shouldnt be sent to client
-                            m_uiCharredEarthTimer = urand(25000, 35000);
-                    }
+                    if (DoCastSpellIfCan(nullptr, SPELL_CHARRED_EARTH_TARGETING) == CAST_OK) // shouldnt be sent to client
+                        m_uiCharredEarthTimer = urand(25000, 35000);
                 }
                 else
                     m_uiCharredEarthTimer -= uiDiff;
