@@ -69,6 +69,7 @@ struct boss_temporusAI : public CombatAI
 
     void Reset() override
     {
+        CombatAI::Reset();
         ResetTimer(TEMPORUS_ACTION_SPELL_REFLECTION, GetInitialActionTimer(TEMPORUS_ACTION_SPELL_REFLECTION));
         ResetTimer(TEMPORUS_ACTION_WING_BUFFET, GetInitialActionTimer(TEMPORUS_ACTION_WING_BUFFET));
         ResetTimer(TEMPORUS_ACTION_HASTEN, GetInitialActionTimer(TEMPORUS_ACTION_HASTEN));
