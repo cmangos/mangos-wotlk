@@ -17,12 +17,14 @@
 /* ScriptData
 SDName: Boss_Temporus
 SD%Complete: 90
-SDComment: Small adjustments; Timers
+SDComment:
+Patch_2.2.0: Increased recast time for Temporus' Hasten spell on Heroic. GetSubsequentActionTimer(TEMPORUS_ACTION_HASTEN) -> 12-18 from 16-24
 SDCategory: Caverns of Time, The Dark Portal
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "dark_portal.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -32,36 +34,115 @@ enum
     SAY_SLAY2               = -1269004,
     SAY_DEATH               = -1269005,
 
-    SPELL_HASTE             = 31458,
+    SPELL_HASTEN            = 31458,
     SPELL_MORTAL_WOUND      = 31464,
     SPELL_WING_BUFFET       = 31475,
     SPELL_WING_BUFFET_H     = 38593,
-    SPELL_REFLECT           = 38592
+    SPELL_REFLECTION        = 38592
 };
 
-struct boss_temporusAI : public ScriptedAI
+enum TemporusActions // order based on priority
 {
-    boss_temporusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    TEMPORUS_ACTION_SPELL_REFLECTION,
+    TEMPORUS_ACTION_WING_BUFFET,
+    TEMPORUS_ACTION_HASTEN,
+    TEMPORUS_ACTION_MORTAL_WOUND,
+    TEMPORUS_ACTION_MAX
+};
+
+struct boss_temporusAI : public CombatAI
+{
+    boss_temporusAI(Creature* creature) : CombatAI(creature, TEMPORUS_ACTION_MAX)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        m_instance = (ScriptedInstance*)creature->GetInstanceData();
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
+
+        AddCombatAction(TEMPORUS_ACTION_SPELL_REFLECTION, 0u);
+        AddCombatAction(TEMPORUS_ACTION_WING_BUFFET, 0u);
+        AddCombatAction(TEMPORUS_ACTION_HASTEN, 0u);
+        AddCombatAction(TEMPORUS_ACTION_MORTAL_WOUND, 0u);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiHasteTimer;
-    uint32 m_uiSpellReflectionTimer;
-    uint32 m_uiMortalWoundTimer;
-    uint32 m_uiWingBuffetTimer;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
     void Reset() override
     {
-        m_uiHasteTimer           = urand(15000, 23000);
-        m_uiSpellReflectionTimer = 30000;
-        m_uiMortalWoundTimer     = 8000;
-        m_uiWingBuffetTimer      = urand(25000, 35000);
+        ResetTimer(TEMPORUS_ACTION_SPELL_REFLECTION, GetInitialActionTimer(TEMPORUS_ACTION_SPELL_REFLECTION));
+        ResetTimer(TEMPORUS_ACTION_WING_BUFFET, GetInitialActionTimer(TEMPORUS_ACTION_WING_BUFFET));
+        ResetTimer(TEMPORUS_ACTION_HASTEN, GetInitialActionTimer(TEMPORUS_ACTION_HASTEN));
+        ResetTimer(TEMPORUS_ACTION_MORTAL_WOUND, GetInitialActionTimer(TEMPORUS_ACTION_MORTAL_WOUND));
+    }
+
+    uint32 GetInitialActionTimer(TemporusActions id)
+    {
+        if (m_isRegularMode)
+        {
+            switch (id)
+            {
+                case TEMPORUS_ACTION_WING_BUFFET: return urand(18000, 22000);
+                case TEMPORUS_ACTION_HASTEN: return urand(13000, 18000);
+                case TEMPORUS_ACTION_MORTAL_WOUND: return urand(3500, 7000);
+                default: return 0;
+            }
+        }
+        else
+        {
+            switch (id)
+            {
+                case TEMPORUS_ACTION_SPELL_REFLECTION: return urand(17000, 22000);
+                case TEMPORUS_ACTION_WING_BUFFET: return urand(14000, 18000);
+                case TEMPORUS_ACTION_HASTEN: return urand(10000, 15000);
+                case TEMPORUS_ACTION_MORTAL_WOUND: return urand(3500, 7000);
+                default: return 0;
+            }
+        }
+    }
+
+    uint32 GetSubsequentActionTimer(TemporusActions id)
+    {
+        if (m_isRegularMode)
+        {
+            switch (id)
+            {
+                case TEMPORUS_ACTION_WING_BUFFET: return urand(20000, 28000);
+                case TEMPORUS_ACTION_HASTEN: return urand(17000, 21000);
+                case TEMPORUS_ACTION_MORTAL_WOUND: return urand(4500, 7000);
+                default: return 0;
+            }
+        }
+        else
+        {
+            switch (id)
+            {
+                case TEMPORUS_ACTION_SPELL_REFLECTION: return urand(25000, 35000);
+                case TEMPORUS_ACTION_WING_BUFFET: return urand(14000, 28000);
+                case TEMPORUS_ACTION_HASTEN: return urand(12000, 21000);
+                case TEMPORUS_ACTION_MORTAL_WOUND: return urand(4500, 7000);
+                default: return 0;
+            }
+        }
+    }
+
+    void OnSpellCooldownAdded(SpellEntry const* spellInfo) // spells should only reset their action timer on success
+    {
+        switch (spellInfo->Id)
+        {
+        case SPELL_REFLECTION:
+            ResetCombatAction(TEMPORUS_ACTION_SPELL_REFLECTION, GetSubsequentActionTimer(TemporusActions(TEMPORUS_ACTION_SPELL_REFLECTION)));
+            break;
+        case SPELL_WING_BUFFET:
+        case SPELL_WING_BUFFET_H:
+            ResetCombatAction(TEMPORUS_ACTION_WING_BUFFET, GetSubsequentActionTimer(TemporusActions(TEMPORUS_ACTION_WING_BUFFET)));
+            break;
+        case SPELL_HASTEN:
+            ResetCombatAction(TEMPORUS_ACTION_HASTEN, GetSubsequentActionTimer(TemporusActions(TEMPORUS_ACTION_HASTEN)));
+            break;
+        case SPELL_MORTAL_WOUND:
+            ResetCombatAction(TEMPORUS_ACTION_MORTAL_WOUND, GetSubsequentActionTimer(TemporusActions(TEMPORUS_ACTION_MORTAL_WOUND)));
+            break;
+        }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -94,58 +175,39 @@ struct boss_temporusAI : public ScriptedAI
         ScriptedAI::MoveInLineOfSight(pWho);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        // Return since we have no target
+        switch (action)
+        {
+            case TEMPORUS_ACTION_SPELL_REFLECTION:
+                if (m_isRegularMode)
+                    return;
+                DoCastSpellIfCan(m_creature, SPELL_REFLECTION);
+            case TEMPORUS_ACTION_WING_BUFFET:
+                DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_WING_BUFFET : SPELL_WING_BUFFET_H);
+            case TEMPORUS_ACTION_HASTEN:
+                DoCastSpellIfCan(m_creature, SPELL_HASTEN);
+            case TEMPORUS_ACTION_MORTAL_WOUND:
+                DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_WOUND);
+        }
+    }
+
+    void UpdateAI(const uint32 diff)
+    {
+        UpdateTimers(diff, m_creature->isInCombat());
+
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        // Attack Haste
-        if (m_uiHasteTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_HASTE) == CAST_OK)
-                m_uiHasteTimer = urand(20000, 25000);
-        }
-        else
-            m_uiHasteTimer -= uiDiff;
-
-        // MortalWound_Timer
-        if (m_uiMortalWoundTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_WOUND) == CAST_OK)
-                m_uiMortalWoundTimer = urand(10000, 20000);
-        }
-        else
-            m_uiMortalWoundTimer -= uiDiff;
-
-        // Wing ruffet
-        if (m_uiWingBuffetTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_WING_BUFFET : SPELL_WING_BUFFET_H) == CAST_OK)
-                m_uiWingBuffetTimer = urand(20000, 30000);
-        }
-        else
-            m_uiWingBuffetTimer -= uiDiff;
-
-        // Spell reflection
-        if (!m_bIsRegularMode)
-        {
-            if (m_uiSpellReflectionTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_REFLECT) == CAST_OK)
-                    m_uiSpellReflectionTimer = urand(25000, 35000);
-            }
-            else
-                m_uiSpellReflectionTimer -= uiDiff;
-        }
+        ExecuteActions();
 
         DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_temporus(Creature* pCreature)
+UnitAI* GetAI_boss_temporus(Creature* creature)
 {
-    return new boss_temporusAI(pCreature);
+    return new boss_temporusAI(creature);
 }
 
 void AddSC_boss_temporus()
