@@ -31,6 +31,7 @@ npc_tanzar
 npc_kraz
 npc_ashli
 npc_amanishi_scout
+go_wooden_door
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -1656,6 +1657,29 @@ UnitAI* GetAI_npc_amanishi_scout(Creature* pCreature)
     return new npc_amanishi_scoutAI(pCreature);
 }
 
+/*######
+## go_wooden_door
+######*/
+
+bool GOUse_go_wooden_door(Player* pPlayer, GameObject* pGo)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+
+    CreatureList lSavagesList;
+
+    if (!pInstance)
+        return false;
+
+    if (pInstance->GetData(TYPE_MALACRASS) == DONE)
+    {
+        GetCreatureListWithEntryInGrid(lSavagesList, pGo, NPC_SAVAGE, 200.0f);
+        for (auto& itr : lSavagesList)
+            itr->Attack(pPlayer, true);
+    }
+
+    return false;
+}
+
 void AddSC_zulaman()
 {
     Script* pNewScript = new Script;
@@ -1716,5 +1740,10 @@ void AddSC_zulaman()
     pNewScript = new Script;
     pNewScript->Name = "npc_amanishi_scout";
     pNewScript->GetAI = &GetAI_npc_amanishi_scout;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_wooden_door";
+    pNewScript->pGOUse = &GOUse_go_wooden_door;
     pNewScript->RegisterSelf();
 }

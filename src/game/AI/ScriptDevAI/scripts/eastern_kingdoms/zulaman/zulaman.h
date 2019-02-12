@@ -125,6 +125,7 @@ enum InstanceZA
 
     NPC_WORLD_TRIGGER       = 22515,                        // used to mark location of drums for Amani'shi Scouts and Amani'shi Reinforcement spawns
     NPC_REINFORCEMENT       = 23587,
+    NPC_SAVAGE              = 23889,
 };
 
 enum BossToChestIndex

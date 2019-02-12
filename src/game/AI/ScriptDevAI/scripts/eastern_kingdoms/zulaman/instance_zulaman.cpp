@@ -369,7 +369,8 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
         case TYPE_MALACRASS:
             DoUseDoorOrButton(GO_HEXLORD_ENTRANCE);
             if (uiData == DONE)
-                DoUseDoorOrButton(GO_WOODEN_DOOR);
+                if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_WOODEN_DOOR))
+                    pDoor->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_ZULJIN:
