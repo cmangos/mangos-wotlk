@@ -465,12 +465,12 @@ void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, fl
         {
             weapon_mindamage += GetAmmoDPS() * att_speed;
             weapon_maxdamage += GetAmmoDPS() * att_speed;
-    }
+        }
 
-    if (index != 0)
-    {
-        base_value = 0.0f;
-        total_value = 0.0f;
+        if (index != 0)
+        {
+            base_value = 0.0f;
+            total_value = 0.0f;
         }
     }
 
