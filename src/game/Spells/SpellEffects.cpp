@@ -1494,6 +1494,29 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 25145:                                 // Merithra's Wake
+                {
+                    unitTarget->CastSpell(unitTarget, 25172, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 25149:                                 // Arygos's Vengeance
+                {
+                    unitTarget->CastSpell(unitTarget, 25168, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 25150:                                 // Molten Rain
+                {
+                    unitTarget->CastSpell(unitTarget, 25169, TRIGGERED_OLD_TRIGGERED);
+                    unitTarget->CastSpell(unitTarget, 25170, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 25158:                                 // Time Stop
+                {
+                    unitTarget->SetImmuneToNPC(true);
+                    unitTarget->RemoveAllAuras();
+                    unitTarget->CastSpell(unitTarget, 25171, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 26080:                                 // Stinger Charge Primer
                 {
                     if (unitTarget->HasAura(26078))
