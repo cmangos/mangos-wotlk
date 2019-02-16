@@ -157,7 +157,9 @@ ChatCommand* ChatHandler::getCommandTable()
         { "account",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleBanAccountCommand,          "", nullptr },
         { "character",      SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleBanCharacterCommand,        "", nullptr },
         { "ip",             SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleBanIPCommand,               "", nullptr },
-        { nullptr,             0,                  false, nullptr,                                           "", nullptr }
+        { "note",           SEC_GAMEMASTER,     true,  &ChatHandler::HandleAddCharacterNoteCommand,    "", nullptr },
+        { "warn",           SEC_GAMEMASTER,     true,  &ChatHandler::HandleWarnCharacterCommand,       "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
     static ChatCommand baninfoCommandTable[] =

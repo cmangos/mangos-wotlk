@@ -226,6 +226,8 @@ class ChatHandler
         bool HandleAchievementCriteriaAddCommand(char* args);
         bool HandleAchievementCriteriaRemoveCommand(char* args);
 
+        bool HandleWarnCharacterCommand(char* args);
+        bool HandleAddCharacterNoteCommand(char* args);
         bool HandleBanAccountCommand(char* args);
         bool HandleBanCharacterCommand(char* args);
         bool HandleBanIPCommand(char* args);
