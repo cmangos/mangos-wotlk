@@ -4901,7 +4901,10 @@ void Aura::HandleModPossess(bool apply, bool Real)
                 break;
             case 37748: // Teron Gorefiend - remove aura from caster when posses is removed
                 if (!apply)
+                {
+                    static_cast<Creature*>(target)->ForcedDespawn();
                     caster->RemoveAurasDueToSpell(37748);
+                }
                 break;
             case 40268: // Spiritual Vengeance - Teron Gorefiend - kill player and despawn spirit
                 if (!apply)
