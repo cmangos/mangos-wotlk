@@ -510,6 +510,8 @@ enum
     SPELL_CRATE_BURST           = 43255,
 
     SOUND_ID_MONEY              = 677,
+    SOUND_ID_CHEER              = 2725,
+    SOUND_ID_APPLAUD            = 6113,
 };
 
 struct npc_harkorAI : public ScriptedAI
@@ -523,9 +525,12 @@ struct npc_harkorAI : public ScriptedAI
     instance_zulaman* m_pInstance;
     bool m_bCompletedChestEvent;
     bool m_bChestEventInProgress;
+    bool m_bReachedEntrance;
+    bool m_bCanCelebrate;
     uint8 m_uiEvent;
     uint32 m_uiEventTimer;
     uint32 m_uiHelpShoutTimer;
+    uint32 m_uiCelebrateTimer;
     uint8 m_uiHelpShoutCounter;
     GameObjectList lCoinList;
 
@@ -533,10 +538,13 @@ struct npc_harkorAI : public ScriptedAI
     {
         m_bChestEventInProgress = false;
         m_bCompletedChestEvent = false;
+        m_bReachedEntrance = false;
+        m_bCanCelebrate = false;
         m_uiEvent = 0;
         m_uiEventTimer = 0;
         m_uiHelpShoutTimer = 0;
         m_uiHelpShoutCounter = 0;
+        m_uiCelebrateTimer = 0;
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
@@ -545,8 +553,42 @@ struct npc_harkorAI : public ScriptedAI
             m_uiHelpShoutTimer = 15000;
     }
 
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        ScriptedAI::MoveInLineOfSight(pWho);
+
+        if (m_bCanCelebrate && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 30.0f))
+        {
+            m_creature->SetFacingToObject(pWho);
+
+            if (urand(0, 1))
+            {
+                m_creature->HandleEmote(EMOTE_ONESHOT_CHEER);
+                DoPlaySoundToSet(m_creature, SOUND_ID_CHEER);
+            }
+            else
+            {
+                m_creature->HandleEmote(EMOTE_ONESHOT_APPLAUD);
+                DoPlaySoundToSet(m_creature, SOUND_ID_APPLAUD);
+            }
+
+            m_bCanCelebrate = false;
+            m_uiCelebrateTimer = urand(30000, 60000);
+        }
+    }
+
     void UpdateAI(const uint32 uiDiff) override
     {
+        if (m_bReachedEntrance)
+        {
+            if (m_uiCelebrateTimer < uiDiff)
+            {
+                m_bCanCelebrate = true;
+            }
+            else
+                m_uiCelebrateTimer -= uiDiff;
+        }
+
         if (m_uiHelpShoutTimer && !m_bChestEventInProgress && !m_bCompletedChestEvent)
         {
             if (m_uiHelpShoutTimer <= uiDiff)
@@ -656,7 +698,6 @@ struct npc_harkorAI : public ScriptedAI
                         m_uiEvent = 10;
                         break;
                     case 10:
-                        m_creature->GetMotionMaster()->MoveIdle();
                         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         m_bCompletedChestEvent = true;
                         m_bChestEventInProgress = false;
@@ -706,6 +747,10 @@ struct npc_harkorAI : public ScriptedAI
             case 4:
                 m_uiEvent = 9;
                 m_uiEventTimer = 1000;
+                break;
+            case 41:
+                m_creature->GetMotionMaster()->MoveIdle();
+                m_bReachedEntrance = true;
                 break;
         }
     }
