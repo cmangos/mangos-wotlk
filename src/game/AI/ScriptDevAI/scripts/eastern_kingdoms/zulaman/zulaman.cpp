@@ -66,9 +66,8 @@ struct npc_forest_frogAI : public ScriptedAI
         if (m_pInstance)
         {
             uint32 cEntry = 0;
-            switch (urand(0, 10))
+            switch (urand(1, 10))
             {
-                case 0: cEntry = 24024; break;              // Kraz      // wrong here?
                 case 1: cEntry = 24397; break;              // Mannuth
                 case 2: cEntry = 24403; break;              // Deez
                 case 3: cEntry = 24404; break;              // Galathryn
