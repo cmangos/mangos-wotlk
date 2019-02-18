@@ -704,6 +704,47 @@ struct npc_harkorAI : public ScriptedAI
                         m_uiEventTimer = 0;
                         m_uiEvent = 0;
                         break;
+                    case 11:
+                        m_creature->SetWalk(true);
+                        m_creature->HandleEmote(EMOTE_ONESHOT_CHEER);
+                        DoPlaySoundToSet(m_creature, SOUND_ID_CHEER);
+
+                        m_uiEventTimer = 4000;
+                        m_uiEvent = 12;
+                        break;
+                    case 12:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_CHEER);
+                        DoPlaySoundToSet(m_creature, SOUND_ID_CHEER);
+
+                        m_uiEventTimer = 3000;
+                        m_uiEvent = 13;
+                        break;
+                    case 13:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_APPLAUD);
+                        DoPlaySoundToSet(m_creature, SOUND_ID_APPLAUD);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;  
+                    case 14:
+                        m_creature->HandleEmoteState(EMOTE_STATE_USESTANDING);
+
+                        m_uiEventTimer = 4000;
+                        m_uiEvent = 15;
+                        break;
+                    case 15:
+                        m_creature->HandleEmoteState(EMOTE_ONESHOT_NONE);
+                        if (GameObject* pKeg = m_pInstance->GetSingleGameObjectFromStorage(GO_HARKORS_BREW_KEG))
+                        {
+                            pKeg->SetLootState(GO_READY);
+                            pKeg->SetRespawnTime(0);
+                            pKeg->Refresh();
+                            pKeg->SetRespawnTime(7 * DAY);
+                        }
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
                 }
             }
             else
@@ -729,28 +770,55 @@ struct npc_harkorAI : public ScriptedAI
         if (uiMotionType != EXTERNAL_WAYPOINT_MOVE)
             return;
 
-        switch (uiPointId)
+        uint32 path = m_creature->GetMotionMaster()->GetPathId();
+
+        if (path == 0)
         {
-            case 0:
-                m_uiEvent = 1;
-                m_uiEventTimer = 1000;
-                break;
-            case 2:
-                m_uiEvent = 3;
-                m_uiEventTimer = 1000;
-                break;
-            case 3:
-                m_uiEvent = 6;
-                m_uiEventTimer = 1000;
-                break;
-            case 4:
-                m_uiEvent = 9;
-                m_uiEventTimer = 1000;
-                break;
-            case 41:
-                m_creature->GetMotionMaster()->MoveIdle();
-                m_bReachedEntrance = true;
-                break;
+            switch (uiPointId)
+            {
+                case 0:
+                    m_uiEvent = 1;
+                    m_uiEventTimer = 1000;
+                    break;
+                case 2:
+                    m_uiEvent = 3;
+                    m_uiEventTimer = 1000;
+                    break;
+                case 3:
+                    m_uiEvent = 6;
+                    m_uiEventTimer = 1000;
+                    break;
+                case 4:
+                    m_uiEvent = 9;
+                    m_uiEventTimer = 1000;
+                    break;
+                case 41:
+                    m_creature->GetMotionMaster()->MoveIdle();
+                    m_bReachedEntrance = true;
+                    break;
+            }
+        }
+        else if (path == 1)
+        {
+            switch (uiPointId)
+            {
+                case 0:
+                    m_creature->SetWalk(false);
+                    m_bReachedEntrance = false;
+                    break;
+                case 11:
+                    m_uiEvent = 11;
+                    m_uiEventTimer = 1000;
+                    break;
+                case 15:
+                    m_uiEvent = 14;
+                    m_uiEventTimer = 1000;
+                    break;
+                case 18:
+                    m_creature->GetMotionMaster()->MoveIdle();
+                    m_bReachedEntrance = true;
+                    break;
+            }
         }
     }
 };

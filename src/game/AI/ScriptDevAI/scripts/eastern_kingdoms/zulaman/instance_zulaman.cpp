@@ -271,6 +271,8 @@ void instance_zulaman::OnObjectCreate(GameObject* pGo)
             break;
         case GO_ASHLIS_BAG:
             break;
+        case GO_HARKORS_BREW_KEG:
+            break;
         default:
             return;
     }
@@ -376,6 +378,19 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
         case TYPE_ZULJIN:
             DoUseDoorOrButton(GO_FIRE_DOOR);
             m_auiEncounter[uiType] = uiData;
+
+            if (uiData == DONE)
+            {
+                if (Creature* pHarkor = instance->GetCreature(m_aEventNpcInfo[INDEX_AKILZON].npGuid))
+                {
+                    if (pHarkor->isAlive())
+                    {
+                        pHarkor->NearTeleportTo(130.8155f, 809.079f, 33.37591f, 4.7f);
+                        pHarkor->GetMotionMaster()->MoveWaypoint(1, 3, 1000);
+                    }
+                }
+            }
+            
             break;
         case TYPE_RUN_EVENT_TIME:
             m_auiEncounter[uiType] = uiData;
