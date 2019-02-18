@@ -327,6 +327,7 @@ struct boss_alarAI : public ScriptedAI
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
 
         m_creature->SetIgnoreRangedTargets(false);
+        SetCombatScriptStatus(true);
 
         if (DoCastSpellIfCan(m_creature, SPELL_EMBER_BLAST) == CAST_OK)
         {
@@ -411,6 +412,7 @@ struct boss_alarAI : public ScriptedAI
                 if (m_uiPhaseTransitionTimer <= uiDiff)
                 {
                     m_uiPhaseTransitionTimer = 0;
+                    SetCombatScriptStatus(false);
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     m_creature->SetStandState(UNIT_STAND_STATE_STAND);
 
