@@ -1934,9 +1934,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1000202,'HOORAY! I AM SAVED!',0,0,0,0,'injured_patient SAY_DOC2'),
 (-1000203,'Sweet, sweet embrace... take me...',0,0,0,0,'injured_patient SAY_DOC3'),
 
-(-1000204,'%s looks up at you quizzically. Maybe you should inspect it?',0,2,0,0,'cluck EMOTE_A_HELLO'),
-(-1000205,'%s looks at you unexpectedly.',0,2,0,0,'cluck EMOTE_H_HELLO'),
-(-1000206,'%s starts pecking at the feed.',0,2,0,0,'cluck EMOTE_CLUCK_TEXT2'),
+(-1000204,'%s looks up at you quizzically. Maybe you should inspect it?',0,2,0,0,'cluck EMOTE_CLUCK_TEXT1'),
+(-1000205,'%s looks at you unexpectedly.',0,2,0,0,'cluck EMOTE_CLUCK_TEXT2'),
+
+(-1000206,'REUSE ME',0,0,0,0,'REUSE ME'),
 
 (-1000207,'Mmm. Me thirsty!',0,0,0,0,'bladespire ogre SAY_BREW_2'),
 (-1000208,'Ohh, look! Bloodmaul Brew! Mmmm...',0,0,0,0,'bladespire ogre SAY_BREW_3'),
