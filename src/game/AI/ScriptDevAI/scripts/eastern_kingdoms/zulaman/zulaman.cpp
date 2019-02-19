@@ -1384,6 +1384,10 @@ enum
     SPELL_ASHLIS_FIREBALL       = 43515,
     SPELL_ASHLIS_FIREBALL_01    = 43520,
     SPELL_ASHLIS_FIREBALL_02    = 43525,
+
+    SOUND_ID_EXCLAMATION        = 6120,
+    SOUND_ID_APPLAUD_ASHLI      = 2847,
+    SOUND_ID_APPLAUD_ASHLI2     = 6122,
 };
 
 struct npc_ashliAI : public ScriptedAI
@@ -1397,9 +1401,12 @@ struct npc_ashliAI : public ScriptedAI
     instance_zulaman* m_pInstance;
     bool m_bCompletedChestEvent;
     bool m_bChestEventInProgress;
+    bool m_bReachedEntrance;
+    bool m_bCanCelebrate;
     uint8 m_uiEvent;
     uint32 m_uiEventTimer;
     uint32 m_uiHelpShoutTimer;
+    uint32 m_uiCelebrateTimer;
     uint8 m_uiHelpShoutCounter;
     GameObjectList lCoinList;
 
@@ -1407,10 +1414,13 @@ struct npc_ashliAI : public ScriptedAI
     {
         m_bChestEventInProgress = false;
         m_bCompletedChestEvent = false;
+        m_bReachedEntrance = false;
+        m_bCanCelebrate = false;
         m_uiEvent = 0;
         m_uiEventTimer = 0;
         m_uiHelpShoutTimer = 0;
         m_uiHelpShoutCounter = 0;
+        m_uiCelebrateTimer = 0;
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
@@ -1419,8 +1429,47 @@ struct npc_ashliAI : public ScriptedAI
             m_uiHelpShoutTimer = 10000;
     }
 
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        ScriptedAI::MoveInLineOfSight(pWho);
+
+        if (m_bCanCelebrate && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 30.0f))
+        {
+            m_creature->SetFacingToObject(pWho);
+
+            switch (urand(0, 2))
+            {
+                case 0:
+                    m_creature->HandleEmote(EMOTE_ONESHOT_EXCLAMATION);
+                    DoPlaySoundToSet(m_creature, SOUND_ID_EXCLAMATION);
+                    break;
+                case 1:
+                    m_creature->HandleEmote(EMOTE_ONESHOT_APPLAUD);
+                    DoPlaySoundToSet(m_creature, SOUND_ID_APPLAUD_ASHLI);
+                    break;
+                case 2:
+                    m_creature->HandleEmote(EMOTE_ONESHOT_APPLAUD);
+                    DoPlaySoundToSet(m_creature, SOUND_ID_APPLAUD_ASHLI2);
+                    break;
+            }
+
+            m_bCanCelebrate = false;
+            m_uiCelebrateTimer = urand(30000, 60000);
+        }
+    }
+
     void UpdateAI(const uint32 uiDiff) override
     {
+        if (m_bReachedEntrance)
+        {
+            if (m_uiCelebrateTimer < uiDiff)
+            {
+                m_bCanCelebrate = true;
+            }
+            else
+                m_uiCelebrateTimer -= uiDiff;
+        }
+
         if (m_uiHelpShoutTimer && !m_bChestEventInProgress && !m_bCompletedChestEvent)
         {
             if (m_uiHelpShoutTimer <= uiDiff)
@@ -1506,11 +1555,25 @@ struct npc_ashliAI : public ScriptedAI
                         m_uiEvent = 0;
                         break;
                     case 9:
-                        m_creature->GetMotionMaster()->MoveIdle();
                         m_creature->SetFacingTo(6.230825f);
                         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         m_bCompletedChestEvent = true;
                         m_bChestEventInProgress = false;
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 10:
+                        m_creature->SetWalk(true);
+                        m_creature->HandleEmote(EMOTE_ONESHOT_EXCLAMATION);
+                        DoPlaySoundToSet(m_creature, SOUND_ID_EXCLAMATION);
+
+                        m_uiEventTimer = 8000;
+                        m_uiEvent = 11;
+                        break;
+                    case 11:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_APPLAUD);
+                        DoPlaySoundToSet(m_creature, SOUND_ID_APPLAUD_ASHLI);
 
                         m_uiEventTimer = 0;
                         m_uiEvent = 0;
@@ -1560,28 +1623,55 @@ struct npc_ashliAI : public ScriptedAI
         if (uiMotionType != EXTERNAL_WAYPOINT_MOVE)
             return;
 
-        switch (uiPointId)
+        uint32 path = m_creature->GetMotionMaster()->GetPathId();
+
+        if (path == 0)
         {
-            case 1:
-                m_uiEvent = 2;
-                m_uiEventTimer = 1000;
-                break;
-            case 6:
-                m_uiEvent = 3;
-                m_uiEventTimer = 3000;
-                break;
-            case 12:
-                m_uiEvent = 5;
-                m_uiEventTimer = 1000;
-                break;
-            case 20:
-                m_uiEvent = 7;
-                m_uiEventTimer = 2000;
-                break;
-            case 22:
-                m_uiEvent = 9;
-                m_uiEventTimer = 1000;
-                break;
+            switch (uiPointId)
+            {
+                case 1:
+                    m_uiEvent = 2;
+                    m_uiEventTimer = 1000;
+                    break;
+                case 6:
+                    m_uiEvent = 3;
+                    m_uiEventTimer = 3000;
+                    break;
+                case 12:
+                    m_uiEvent = 5;
+                    m_uiEventTimer = 1000;
+                    break;
+                case 20:
+                    m_uiEvent = 7;
+                    m_uiEventTimer = 2000;
+                    break;
+                case 22:
+                    m_uiEvent = 9;
+                    m_uiEventTimer = 1000;
+                    break;
+                case 83:
+                    m_creature->GetMotionMaster()->MoveIdle();
+                    m_bReachedEntrance = true;
+                    break;
+            }
+        }
+        else if (path == 1)
+        {
+            switch (uiPointId)
+            {
+                case 0:
+                    m_creature->SetWalk(false);
+                    m_bReachedEntrance = false;
+                    break;
+                case 13:
+                    m_uiEvent = 10;
+                    m_uiEventTimer = 2000;
+                    break;
+                case 29:
+                    m_creature->GetMotionMaster()->MoveIdle();
+                    m_bReachedEntrance = true;
+                    break;
+            }
         }
     }
 };

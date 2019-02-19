@@ -389,6 +389,14 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
                         pHarkor->GetMotionMaster()->MoveWaypoint(1, 3, 1000);
                     }
                 }
+                if (Creature* pAshli = instance->GetCreature(m_aEventNpcInfo[INDEX_HALAZZI].npGuid))
+                {
+                    if (pAshli->isAlive())
+                    {
+                        pAshli->NearTeleportTo(137.0035f, 814.2776f, 33.37591f, 4.7f);
+                        pAshli->GetMotionMaster()->MoveWaypoint(1, 3, 1000);
+                    }
+                }
             }
             
             break;
