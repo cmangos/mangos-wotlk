@@ -35,7 +35,7 @@ enum
     EMOTE_DEEP_BREATH           = -1532130,
 
     // ground phase spells
-    SPELL_BELLOWING_ROAR        = 39427,
+    SPELL_BELLOWING_ROAR        = 36922,
     SPELL_CHARRED_EARTH         = 30129,                    // Also 30209 (Target Charred Earth) triggers this
     SPELL_CHARRED_EARTH_TARGETING = 30209,
     SPELL_SMOLDERING_BREATH     = 30210,
