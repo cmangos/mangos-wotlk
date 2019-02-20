@@ -794,8 +794,9 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx2`,`rangeIndex`,`Ef
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx3`,`DurationIndex`,`Effect1`,`Effect2`,`EffectDieSides1`,`EffectDieSides2`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectMiscValue1`,`EffectMiscValue2`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
 (38713,384,268435456,21,6,6,1,1,1,1,1,1,139,139,1010,965,1,'Spellbind Broken',1,1);
 
--- Focused Bursts 36414, npc should not melee while casting, REMOVE SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING
+-- Focused Bursts 36414/38985, npc should not melee while casting, REMOVE SPELL_ATTR_EX4_CAN_CAST_WHILE_CASTING
 UPDATE `spell_template` SET `AttributesEx4`=AttributesEx4&~0x00000080 WHERE `Id`=36414;
+UPDATE `spell_template` SET `AttributesEx4`=AttributesEx4&~0x00000080 WHERE `Id`=38985;
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`Targets`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
 (32151,256,524288,4,64,21,13,28,27,17908,64,2034,'Infernal',1,1); -- Stunned.

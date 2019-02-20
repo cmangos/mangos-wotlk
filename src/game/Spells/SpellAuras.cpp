@@ -3987,6 +3987,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             switch (GetId())
             {
                 case 36414: // Focused Bursts
+                case 38985:
                 {
                     if (apply)
                         target->clearUnitState(UNIT_STAT_MELEE_ATTACKING);
