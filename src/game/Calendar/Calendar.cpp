@@ -615,7 +615,7 @@ void CalendarMgr::LoadCalendarsFromDB()
 
     sLog.outString("Loading Calendar invites...");
     //                                                           0         1        2            3           4       5               6
-    QueryResult* invitesQuery = CharacterDatabase.Query("SELECT inviteId, eventId, inviteeGuid, senderGuid, status, lastUpdateTime, rank FROM calendar_invites ORDER BY inviteId");
+    QueryResult* invitesQuery = CharacterDatabase.Query("SELECT inviteId, eventId, inviteeGuid, senderGuid, status, lastUpdateTime, `rank` FROM calendar_invites ORDER BY inviteId");
     if (!invitesQuery)
     {
         BarGoLink bar(1);

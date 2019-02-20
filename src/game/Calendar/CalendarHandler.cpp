@@ -682,7 +682,7 @@ void WorldSession::HandleCalendarEventModeratorStatus(WorldPacket& recv_data)
                 return;
             }
 
-            CharacterDatabase.PExecute("UPDATE calendar_invites SET rank = %u WHERE inviteId=" UI64FMTD, rank, invite->InviteId);
+            CharacterDatabase.PExecute("UPDATE calendar_invites SET `rank` = %u WHERE inviteId=" UI64FMTD, rank, invite->InviteId);
             invite->Rank = CalendarModerationRank(rank);
             sCalendarMgr.SendCalendarEventModeratorStatusAlert(invite);
         }
