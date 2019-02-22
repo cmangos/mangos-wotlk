@@ -890,6 +890,12 @@ enum
     SAY_TANZAR_EVENT_3          = -1568102,
     SAY_TANZAR_EVENT_3_ALT      = -1568103,
     SAY_TANZAR_EVENT_4          = -1568104,
+
+    SOUND_ID_APPLAUD_TANZAR     = 6402,
+    SOUND_ID_CHEER_TANZAR       = 6400,
+    SOUND_ID_EVENT_CELEBRATION  = 12135,
+
+    EQUIP_ID_BONE_HAMMERS       = 1117,
 };
 
 struct npc_tanzarAI : public ScriptedAI
@@ -997,7 +1003,6 @@ struct npc_tanzarAI : public ScriptedAI
                         break;
                     case 6:
                         m_creature->SetFacingTo(1.500983f);
-                        m_creature->GetMotionMaster()->MoveIdle();
                         m_creature->HandleEmote(EMOTE_ONESHOT_CHEER);
                         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                         m_bCompletedChestEvent = true;
@@ -1005,6 +1010,73 @@ struct npc_tanzarAI : public ScriptedAI
 
                         m_uiEventTimer = 0;
                         m_uiEvent = 0;
+                        break;
+                    case 7:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_APPLAUD);
+                        DoPlaySoundToSet(m_creature, SOUND_ID_APPLAUD_TANZAR);
+
+                        m_uiEventTimer = 6000;
+                        m_uiEvent = 8;
+                        break;
+                    case 8:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_LAUGH);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 9:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_APPLAUD);
+                        DoPlaySoundToSet(m_creature, SOUND_ID_APPLAUD_TANZAR);
+
+                        m_uiEventTimer = 6000;
+                        m_uiEvent = 10;
+                        break;
+                    case 10:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_CHEER);
+                        DoPlaySoundToSet(m_creature, SOUND_ID_CHEER_TANZAR);
+
+                        m_uiEventTimer = 0;
+                        m_uiEvent = 0;
+                        break;
+                    case 11:
+                        m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
+
+                        m_uiEventTimer = 6000;
+                        m_uiEvent = 12;
+                        break;
+                    case 12:
+                        m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                        m_creature->LoadEquipment(EQUIP_ID_BONE_HAMMERS, true);
+
+                        if (GameObject* pDrum = m_pInstance->GetSingleGameObjectFromStorage(GO_AMANI_DRUM))
+                        {
+                            pDrum->SetLootState(GO_READY);
+                            pDrum->SetRespawnTime(0);
+                            pDrum->Refresh();
+                            pDrum->SetRespawnTime(7 * DAY);
+                            pDrum->GetMap()->PlayDirectSoundToMap(SOUND_ID_EVENT_CELEBRATION);
+                        }
+
+                        m_uiEventTimer = 2000;
+                        m_uiEvent = 13;
+                        break;
+                    case 13:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_ATTACK1H);
+
+                        m_uiEventTimer = 1000;
+                        m_uiEvent = 14;
+                        break;
+                    case 14:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_ATTACKOFF);
+
+                        m_uiEventTimer = 1000;
+                        m_uiEvent = 15;
+                        break;
+                    case 15:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_ATTACKUNARMED);
+
+                        m_uiEventTimer = 1000;
+                        m_uiEvent = 13;
                         break;
                 }
             }
@@ -1031,20 +1103,52 @@ struct npc_tanzarAI : public ScriptedAI
         if (uiMotionType != EXTERNAL_WAYPOINT_MOVE)
             return;
 
-        switch (uiPointId)
+        uint32 path = m_creature->GetMotionMaster()->GetPathId();
+
+        if (path == 0)
         {
-            case 1:
-                m_uiEvent = 1;
-                m_uiEventTimer = 2000;
-                break;
-            case 3:
-                m_uiEvent = 3;
-                m_uiEventTimer = 1000;
-                break;
-            case 5:
-                m_uiEvent = 6;
-                m_uiEventTimer = 1000;
-                break;
+            switch (uiPointId)
+            {
+                case 1:
+                    m_uiEvent = 1;
+                    m_uiEventTimer = 2000;
+                    break;
+                case 3:
+                    m_uiEvent = 3;
+                    m_uiEventTimer = 1000;
+                    break;
+                case 5:
+                    m_uiEvent = 6;
+                    m_uiEventTimer = 1000;
+                    break;
+                case 52:
+                    m_uiEvent = 7;
+                    m_uiEventTimer = 5000;
+                    break;
+                case 54:
+                    m_creature->GetMotionMaster()->MoveIdle();
+                    m_creature->HandleEmoteState(EMOTE_STATE_DANCE);
+                    break;
+            }
+        }
+        else if (path == 1)
+        {
+            switch (uiPointId)
+            {
+                case 0:
+                    m_creature->SetWalk(false);
+                    break;
+                case 12:
+                    m_creature->SetWalk(true);
+                    m_uiEvent = 9;
+                    m_uiEventTimer = 2000;
+                    break;
+                case 14:
+                    m_creature->GetMotionMaster()->MoveIdle();
+                    m_uiEvent = 11;
+                    m_uiEventTimer = 1000;
+                    break;
+            }
         }
     }
 };

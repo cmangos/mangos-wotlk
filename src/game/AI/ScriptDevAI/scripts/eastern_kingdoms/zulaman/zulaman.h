@@ -117,6 +117,7 @@ enum InstanceZA
     GO_HARKORS_BREW_KEG     = 186748,
 
     GO_TANZARS_CAGE         = 187377,
+    GO_AMANI_DRUM           = 186865,
 
     GO_KRAZS_CHEST          = 186658,
     GO_KRAZS_CAGE           = 187379,

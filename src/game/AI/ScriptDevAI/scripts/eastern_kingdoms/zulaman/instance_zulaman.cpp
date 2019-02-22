@@ -273,6 +273,8 @@ void instance_zulaman::OnObjectCreate(GameObject* pGo)
             break;
         case GO_HARKORS_BREW_KEG:
             break;
+        case GO_AMANI_DRUM:
+            break;
         default:
             return;
     }
@@ -381,6 +383,15 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
 
             if (uiData == DONE)
             {
+                if (Creature* pTanzar = instance->GetCreature(m_aEventNpcInfo[INDEX_NALORAKK].npGuid))
+                {
+                    if (pTanzar->isAlive())
+                    {
+                        pTanzar->HandleEmoteState(EMOTE_ONESHOT_NONE);
+                        pTanzar->NearTeleportTo(129.8052f, 807.7782f, 33.37591f, 4.7f);
+                        pTanzar->GetMotionMaster()->MoveWaypoint(1, 3, 1000);
+                    }
+                }
                 if (Creature* pHarkor = instance->GetCreature(m_aEventNpcInfo[INDEX_AKILZON].npGuid))
                 {
                     if (pHarkor->isAlive())
