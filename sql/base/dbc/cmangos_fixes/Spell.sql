@@ -90,8 +90,6 @@ INSERT INTO `spell_template` (`Id`,`SpellName`,`Attributes`,`DurationIndex`,`Spe
 INSERT INTO spell_template(Id,SpellName,Effect1,DurationIndex,EffectMiscValue1,EffectImplicitTargetA1) VALUES
 (37900,'Summon Multi-Spectrum Light Trap GO',76,9,185011,18);
 
-UPDATE spell_template SET InterruptFlags= InterruptFlags|4 WHERE Id=12747; -- spell is not kickable for some reason, generic entangling roots spell
-
 UPDATE spell_template SET speed=0 WHERE id = 17607; -- Portal Effect Ironforge had speed 1, which meant it was delayed, whereas other portal effects werent
 
 UPDATE spell_template SET EffectRadiusIndex1=14 WHERE id IN(30632); -- Warning spell radius adjusted to child damage spell radius (mismatch of radiuses)
