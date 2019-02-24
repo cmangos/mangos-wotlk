@@ -4362,7 +4362,8 @@ SpellAuraProcResult Unit::HandleMendingAuraProc(ProcExecutionData& data)
                         continue;
 
                     int32 basePoints = aur->GetBasePoints();
-                    Aura* new_aur = CreateAura(spellProto, aur->GetEffIndex(), &basePoints, new_holder, target, caster);
+                    int32 damage = aur->GetModifier()->m_baseAmount;
+                    Aura* new_aur = CreateAura(spellProto, aur->GetEffIndex(), &damage, &basePoints, new_holder, target, caster);
                     new_holder->AddAura(new_aur, new_aur->GetEffIndex());
                 }
                 new_holder->SetAuraCharges(jumps, false);
