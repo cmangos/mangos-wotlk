@@ -472,6 +472,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 22735:         // Spirit of Runn Tum
         case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
         case 25592:         // Hate to Zero (Hate to Zero)
+        case 27987:         // Unholy Aura
         case 28126:         // Spirit Particles (purple)
         case 29406:         // Shadowform
         case 29526:         // Hate to Zero (Hate to Zero)
@@ -484,9 +485,13 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 35841:         // Draenei Spirit Visual
         case 35850:         // Draenei Spirit Visual 2
         case 36006:         // Fel Fire Aura
+        case 36784:         // Entropic Aura
+        case 36788:         // Diminish Soul
         case 37266:         // Disease Cloud
         case 37497:         // Shadowmoon Ghost Invisibility (Ghostrider of Karabor in SMV) 
         case 37863:         // Disease Cloud
+        case 38844:         // Unholy Aura
+        case 38847:         // Diminish Soul
         case 39102:         // Glowy (Black)
         case 39311:         // Scrapped Fel Reaver transform aura that is never removed even on evade
         case 39918:         // Soulgrinder Ritual Visual ( in progress)
