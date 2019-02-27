@@ -1750,8 +1750,9 @@ void Aura::TriggerSpell()
                         target->CastSpell(target, auraSpellInfo->CalculateSimpleValue(m_effIndex), TRIGGERED_OLD_TRIGGERED);
                         return;
                     }
-//                    // Return to the Spirit Realm
-//                    case 44035: break;
+                    case 44035:                             // Return to the Spirit Realm
+                        trigger_spell_id = 44036;
+                        break;
 //                    // Curse of Boundless Agony
 //                    case 45050: break;
 //                    // Earthquake

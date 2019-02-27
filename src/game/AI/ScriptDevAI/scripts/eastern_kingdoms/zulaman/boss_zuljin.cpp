@@ -42,6 +42,7 @@ enum
     EMOTE_EAGLE_SPIRIT              = -1568083,
     EMOTE_LYNX_SPIRIT               = -1568084,
     EMOTE_DRAGONHAWK_SPIRIT         = -1568085,
+    EMOTE_FADE_AWAY                 = -1568121,
 
     // Troll Form
     SPELL_WHIRLWIND                 = 17207,
@@ -83,6 +84,9 @@ enum
     SPELL_SHAPE_OF_THE_DRAGONHAWK   = 42608,
 
     SPELL_BERSERK                   = 45078,                // Berserk timer or existance is unk
+
+    SPELL_COSMETIC_INCINERATE_BLUE  = 42567,
+    SPELL_RETURN_TO_SPIRIT_REALM    = 44035,
 
     MAX_VORTEXES                    = 4,
     MAX_LYNX_RUSH                   = 10,
@@ -210,6 +214,8 @@ struct boss_zuljinAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
+        DoCastSpellIfCan(m_creature, SPELL_COSMETIC_INCINERATE_BLUE, CAST_TRIGGERED);
+
         DoScriptText(SAY_DEATH, m_creature);
 
         if (!m_pInstance)
@@ -311,6 +317,11 @@ struct boss_zuljinAI : public ScriptedAI
         {
             DoCastSpellIfCan(m_creature, SPELL_CLAW_RAGE_TRIGGER, CAST_TRIGGERED);
             m_uiLynxRushTimer += 8000;
+        }
+        else if (pSpellEntry->Id == SPELL_COSMETIC_INCINERATE_BLUE && pTarget->GetTypeId() == TYPEID_UNIT)
+        {
+            DoScriptText(EMOTE_FADE_AWAY, pTarget);
+            pTarget->CastSpell(pTarget, SPELL_RETURN_TO_SPIRIT_REALM, TRIGGERED_OLD_TRIGGERED);
         }
     }
 

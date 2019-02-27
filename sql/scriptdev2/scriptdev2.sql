@@ -5303,7 +5303,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568118,'Nope, not in that one either - well, it must be around here somewhere, by the way, did I mention how wonderful it is to be out of that stinky cage? It was almost impossible to run around in there but I did anyway but sometimes I got going so fast that I ended up walking on the walls of the  cage so finally I stopped trying and just turned around in circles....',2691,0,0,0,'ashli SAY_ASHLI_EVENT_3'),
 (-1568119,'There\'s my bag! At last I\'ve found it and now it\'s my gift to you and I truly hope you like it because I want you to all remember this wonderful moment for as long as you live and I hope that when you think of it you\'ll smile inside because I know I\'ll never forget it in a million years and I can\'t wait to tell momma all about it when I get back home.... Do you like my earrings?',0,0,0,0,'ashli SAY_ASHLI_EVENT_4'),
 
-(-1568120,'Invaders! Sound the alarm!',0,1,0,0,'amanishi scout SAY_ALARM');
+(-1568120,'Invaders! Sound the alarm!',0,1,0,0,'amanishi scout SAY_ALARM'),
+
+(-1568121,'%s shimmers and begins to fade away...',0,2,0,0,'zuljin EMOTE_FADE_AWAY'); -- broadcast text id 23604
 
 -- -1 574 000 UTGARDE KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
