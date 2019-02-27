@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Areatrigger_Scripts
 SD%Complete: 100
-SDComment: Quest support: 4291, 6681, 7632, 273, 10280, 10589/10604, 11686, 12548, 12575, 12741, 13315/13351, 24849/24851.
+SDComment: Quest support: 4291, 6681, 7632, 273, 10280, 10589/10604, 11686, 12548, 12575, 12741, 13315/13351, 24849/24851, 8735
 SDCategory: Areatrigger
 EndScriptData */
 
@@ -37,6 +37,7 @@ at_ancient_leaf                 3587
 at_haramad_teleport             4479
 at_huldar_miran                 171
 at_area_52                      4422, 4466, 4471, 4472
+at_twilight_grove               4017
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -527,6 +528,47 @@ bool AreaTrigger_at_area_52(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
     return false;
 }
 
+/*######
+## at_twilight_grove
+######*/
+
+enum
+{
+    NPC_TWILIGHT_CORRUPTER          = 15625,
+    ITEM_FRAGMENT_NIGHTMARE         = 21149,
+    QUEST_NIGHTMARE_CORRUPTION      = 8735,
+    SAY_TWILIGHT_CORRUPTER_SPAWN    = -1000411
+};
+
+static const Location m_twilightCorrupterSpawn = { -10326.3f, -487.423f, 50.1127f, 5.73692f };
+
+bool AreaTrigger_at_twilight_grove(Player* player, AreaTriggerEntry const* /*pAt*/)
+{
+    // Player is deaed, a GM, quest complete, no quest or already got item: do nothing
+    if (!player->isAlive() || player->isGameMaster() ||
+            player->GetQuestStatus(QUEST_NIGHTMARE_CORRUPTION) == QUEST_STATUS_COMPLETE ||
+            player->GetQuestStatus(QUEST_NIGHTMARE_CORRUPTION) == QUEST_STATUS_NONE ||
+            player->HasItemCount(ITEM_FRAGMENT_NIGHTMARE, 1))
+        return false;
+
+    ScriptedMap* scriptedMap = (ScriptedMap*)player->GetInstanceData();
+    if (!scriptedMap)
+        return false;
+
+    // Return if Twilight Corrupter is already spawned
+    if (Creature* twilightCorrupter = GetClosestCreatureWithEntry(player, NPC_TWILIGHT_CORRUPTER, 500.0f))
+        return true;
+
+    // Spawn the Twilight Corrupter and send whisper to player
+    if (Creature* twilightCorrupter = player->SummonCreature(NPC_TWILIGHT_CORRUPTER, m_twilightCorrupterSpawn.m_fX, m_twilightCorrupterSpawn.m_fY, m_twilightCorrupterSpawn.m_fZ, m_twilightCorrupterSpawn.m_fO, TEMPSPAWN_TIMED_OOC_DESPAWN, 30 * MINUTE * IN_MILLISECONDS))
+    {
+        DoScriptText(SAY_TWILIGHT_CORRUPTER_SPAWN, twilightCorrupter, player);
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_areatrigger_scripts()
 {
     Script* pNewScript = new Script;
@@ -607,5 +649,10 @@ void AddSC_areatrigger_scripts()
     pNewScript = new Script;
     pNewScript->Name = "at_area_52";
     pNewScript->pAreaTrigger = &AreaTrigger_at_area_52;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_twilight_grove";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_twilight_grove;
     pNewScript->RegisterSelf();
 }
