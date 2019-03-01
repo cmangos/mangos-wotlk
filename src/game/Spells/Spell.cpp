@@ -8270,6 +8270,11 @@ WorldObject* Spell::GetCastingObject() const
     return m_caster;
 }
 
+float Spell::GetSpellSpeed() const
+{
+    if (IsChanneledSpell(m_spellInfo)) return 0.f; return m_spellInfo->speed;
+}
+
 void Spell::ResetEffectDamageAndHeal()
 {
     m_damage = 0;
