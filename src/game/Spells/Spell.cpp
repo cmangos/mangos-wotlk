@@ -6030,7 +6030,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 }
                 else if (m_spellInfo->Id == 51582)          // Rocket Boots Engaged
                 {
-                    if (m_caster->IsInWater() && (m_caster->GetTypeId() != TYPEID_PLAYER || !static_cast<Player*>(m_caster)->IsInShallowWater()))
+                    if (m_caster->IsInWater() && (m_caster->GetTypeId() != TYPEID_PLAYER || static_cast<Player*>(m_caster)->IsInHighLiquid()))
                         return SPELL_FAILED_ONLY_ABOVEWATER;
                 }
                 else if (m_spellInfo->Id == 51690)          // Killing Spree
@@ -6665,7 +6665,7 @@ SpellCastResult Spell::CheckCast(bool strict)
             }
             case SPELL_AURA_MOUNTED:
             {
-                if (m_caster->IsInWater() && (m_caster->GetTypeId() != TYPEID_PLAYER || !static_cast<Player*>(m_caster)->IsInShallowWater()))
+                if (m_caster->IsInWater() && (m_caster->GetTypeId() != TYPEID_PLAYER || static_cast<Player*>(m_caster)->IsInHighLiquid()))
                     return SPELL_FAILED_ONLY_ABOVEWATER;
 
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->GetTransport())
@@ -8057,7 +8057,7 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
                 return false;
             break;
         case 37433:                                         // Spout (The Lurker Below), only players affected if its not in water
-            if (m_caster->IsInWater() && (m_caster->GetTypeId() != TYPEID_PLAYER || !static_cast<Player*>(m_caster)->IsInShallowWater()))
+            if (m_caster->IsInWater() && (m_caster->GetTypeId() != TYPEID_PLAYER || static_cast<Player*>(m_caster)->IsInHighLiquid()))
                 return false;
             break;
         case 37851:                                         // Tag Greater Felfire Diemetradon
