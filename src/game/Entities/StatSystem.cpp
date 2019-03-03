@@ -157,8 +157,8 @@ void Player::UpdateResistances(uint32 school)
 {
     if (school > SPELL_SCHOOL_NORMAL)
     {
-        float value  = GetTotalAuraModValue(UnitMods(UNIT_MOD_RESISTANCE_START + school));
-        SetResistance(SpellSchools(school), int32(value));
+        int32 value = GetTotalResistanceValue(SpellSchools(school));
+        SetResistance(SpellSchools(school), value);
 
         Pet* pet = GetPet();
         if (pet)
@@ -170,28 +170,24 @@ void Player::UpdateResistances(uint32 school)
 
 void Player::UpdateArmor()
 {
-    UnitMods unitMod = UNIT_MOD_ARMOR;
+    float dynamic = (GetStat(STAT_AGILITY) * 2.0f);
 
-    float value = GetModifierValue(unitMod, BASE_VALUE);         // base armor (from items)
-    value *= GetModifierValue(unitMod, BASE_PCT);           // armor percent from items
-    value += GetStat(STAT_AGILITY) * 2.0f;                  // armor bonus from stats
-    value += GetModifierValue(unitMod, TOTAL_VALUE);
-
-    // add dynamic flat mods
-    AuraList const& mResbyIntellect = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT);
-    for (auto i : mResbyIntellect)
+    // Add dynamic flat mods
+    for (auto& i : GetAurasByType(SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT))
     {
-        Modifier* mod = i->GetModifier();
-        if (mod->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
-            value += int32(GetStat(Stats(i->GetMiscBValue())) * mod->m_amount / 100.0f);
+        if (Modifier* mod = i->GetModifier())
+        {
+            if (mod->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
+                dynamic += (GetStat(Stats(i->GetMiscBValue())) * (mod->m_amount * 0.01f));
+        }
     }
 
-    value *= GetModifierValue(unitMod, TOTAL_PCT);
+    m_auraModifiersGroup[UNIT_MOD_ARMOR][TOTAL_VALUE] += dynamic;
+    int32 value = GetTotalResistanceValue(SPELL_SCHOOL_NORMAL);
+    SetArmor(value);
+    m_auraModifiersGroup[UNIT_MOD_ARMOR][TOTAL_VALUE] -= dynamic;
 
-    SetArmor(int32(value));
-
-    Pet* pet = GetPet();
-    if (pet)
+    if (Pet* pet = GetPet())
         pet->UpdateArmor();
 
     UpdateAttackPowerAndDamage();                           // armor dependent auras update for SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR
@@ -828,8 +824,8 @@ void Creature::UpdateResistances(uint32 school)
 {
     if (school > SPELL_SCHOOL_NORMAL)
     {
-        float value  = GetTotalAuraModValue(UnitMods(UNIT_MOD_RESISTANCE_START + school));
-        SetResistance(SpellSchools(school), int32(value));
+        int32 value = GetTotalResistanceValue(SpellSchools(school));
+        SetResistance(SpellSchools(school), value);
     }
     else
         UpdateArmor();
@@ -837,8 +833,8 @@ void Creature::UpdateResistances(uint32 school)
 
 void Creature::UpdateArmor()
 {
-    float value = GetTotalAuraModValue(UNIT_MOD_ARMOR);
-    SetArmor(int32(value));
+    int32 value = GetTotalResistanceValue(SPELL_SCHOOL_NORMAL);
+    SetArmor(value);
 }
 
 void Creature::UpdateMaxHealth()
@@ -995,16 +991,28 @@ bool Pet::UpdateAllStats()
 
 void Pet::UpdateResistances(uint32 school)
 {
+    // This override contains current hardcoded implementation for pet scaling (spells since 2.x):
+    // 34903 - Hunter Pet Scaling 02
+    // 34904 - Hunter Pet Scaling 03
+    // 34956 - Warlock Pet Scaling 02
+    // 34957 - Warlock Pet Scaling 03
+    // 34958 - Warlock Pet Scaling 04
+
     if (school > SPELL_SCHOOL_NORMAL)
     {
-        float value  = GetTotalAuraModValue(UnitMods(UNIT_MOD_RESISTANCE_START + school));
-
         Unit* owner = GetOwner();
-        // hunter and warlock pets gain 40% of owner's resistance
-        if (owner && (getPetType() == HUNTER_PET || (getPetType() == SUMMON_PET && owner->getClass() == CLASS_WARLOCK)))
-            value += float(owner->GetResistance(SpellSchools(school))) * 0.4f;
 
-        SetResistance(SpellSchools(school), int32(value));
+        // Hunter and warlock pets gain 40% of owner's resistance
+        if (owner && (getPetType() == HUNTER_PET || (getPetType() == SUMMON_PET && owner->getClass() == CLASS_WARLOCK)))
+        {
+            const UnitMods unitMod = UnitMods(UNIT_MOD_RESISTANCE_START + school);
+            float amount = (owner->GetResistance(SpellSchools(school)) * 0.4f);
+            m_auraModifiersGroup[unitMod][TOTAL_VALUE] += amount;
+            Creature::UpdateResistances(school);
+            m_auraModifiersGroup[unitMod][TOTAL_VALUE] -= amount;
+        }
+        else
+            return Creature::UpdateResistances(school);
     }
     else
         UpdateArmor();
@@ -1012,21 +1020,21 @@ void Pet::UpdateResistances(uint32 school)
 
 void Pet::UpdateArmor()
 {
-    float bonus_armor = 0.0f;
-    UnitMods unitMod = UNIT_MOD_ARMOR;
+    float amount = (GetStat(STAT_AGILITY) * 2.0f);
+
+    // This override contains current hardcoded implementation for pet scaling (spells since 2.x):
+    // 34903 - Hunter Pet Scaling 02
+    // 34956 - Warlock Pet Scaling 02
 
     Unit* owner = GetOwner();
-    // hunter and warlock pets gain 35% of owner's armor value
+
+    // Hunter and warlock pets gain 35% of owner's armor value
     if (owner && (getPetType() == HUNTER_PET || (getPetType() == SUMMON_PET && owner->getClass() == CLASS_WARLOCK)))
-        bonus_armor = 0.35f * float(owner->GetArmor());
+        amount += (owner->GetArmor() * 0.35f);
 
-    float value = GetModifierValue(unitMod, BASE_VALUE);
-    value *= GetModifierValue(unitMod, BASE_PCT);
-    value += GetStat(STAT_AGILITY) * 2.0f;
-    value += GetModifierValue(unitMod, TOTAL_VALUE) + bonus_armor;
-    value *= GetModifierValue(unitMod, TOTAL_PCT);
-
-    SetArmor(int32(value));
+    m_auraModifiersGroup[UNIT_MOD_ARMOR][TOTAL_VALUE] += amount;
+    Creature::UpdateArmor();
+    m_auraModifiersGroup[UNIT_MOD_ARMOR][TOTAL_VALUE] -= amount;
 }
 
 void Pet::UpdateMaxHealth()
