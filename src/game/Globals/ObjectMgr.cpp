@@ -3723,7 +3723,7 @@ void ObjectMgr::LoadArenaTeams()
     //                                                     0                      1    2           3    4               5
     QueryResult* result = CharacterDatabase.Query("SELECT arena_team.arenateamid,name,captainguid,type,BackgroundColor,EmblemStyle,"
                           //   6           7           8            9      10         11        12           13          14
-                          "EmblemColor,BorderStyle,BorderColor, rating,games_week,wins_week,games_season,wins_season,rank "
+                          "EmblemColor,BorderStyle,BorderColor, rating,games_week,wins_week,games_season,wins_season,arena_team.rank "
                           "FROM arena_team LEFT JOIN arena_team_stats ON arena_team.arenateamid = arena_team_stats.arenateamid ORDER BY arena_team.arenateamid ASC");
 
     if (!result)
@@ -3772,7 +3772,7 @@ void ObjectMgr::LoadGroups()
     // -- loading groups --
     uint32 count = 0;
     //                                                    0         1              2           3           4              5      6      7      8      9      10     11     12     13         14          15              16          17
-    QueryResult* result = CharacterDatabase.Query("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, groupType, difficulty, raiddifficulty, leaderGuid, groupId FROM groups");
+    QueryResult* result = CharacterDatabase.Query("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, groupType, difficulty, raiddifficulty, leaderGuid, groupId FROM wotlkcharacters.groups");
 
     if (!result)
     {
@@ -3877,7 +3877,7 @@ void ObjectMgr::LoadGroups()
                  "(SELECT COUNT(*) FROM character_instance WHERE guid = group_instance.leaderGuid AND instance = group_instance.instance AND permanent = 1 LIMIT 1), "
                  // 7              8
                  " groups.groupId, instance.encountersMask "
-                 "FROM group_instance LEFT JOIN instance ON instance = id LEFT JOIN groups ON groups.leaderGUID = group_instance.leaderGUID ORDER BY leaderGuid"
+                 "FROM group_instance LEFT JOIN instance ON instance = id LEFT JOIN wotlkcharacters.groups ON groups.leaderGUID = group_instance.leaderGUID ORDER BY leaderGuid"
              );
 
     if (!result)
@@ -6348,7 +6348,7 @@ void ObjectMgr::PackGroupIds()
     // all valid ids are in the instance table
     // any associations to ids not in this table are assumed to be
     // cleaned already in CleanupInstances
-    QueryResult* result = CharacterDatabase.Query("SELECT groupId FROM groups");
+    QueryResult* result = CharacterDatabase.Query("SELECT groupId FROM wotlkcharacters.groups");
     if (result)
     {
         do
@@ -6360,7 +6360,7 @@ void ObjectMgr::PackGroupIds()
             if (id == 0)
             {
                 CharacterDatabase.BeginTransaction();
-                CharacterDatabase.PExecute("DELETE FROM groups WHERE groupId = '%u'", id);
+                CharacterDatabase.PExecute("DELETE FROM wotlkcharacters.groups WHERE groupId = '%u'", id);
                 CharacterDatabase.PExecute("DELETE FROM group_member WHERE groupId = '%u'", id);
                 CharacterDatabase.CommitTransaction();
                 continue;
@@ -6383,7 +6383,7 @@ void ObjectMgr::PackGroupIds()
         {
             // remap group id
             CharacterDatabase.BeginTransaction();
-            CharacterDatabase.PExecute("UPDATE groups SET groupId = '%u' WHERE groupId = '%u'", groupId, i);
+            CharacterDatabase.PExecute("UPDATE wotlkcharacters.groups SET groupId = '%u' WHERE groupId = '%u'", groupId, i);
             CharacterDatabase.PExecute("UPDATE group_member SET groupId = '%u' WHERE groupId = '%u'", groupId, i);
             CharacterDatabase.CommitTransaction();
         }
@@ -6483,7 +6483,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = CharacterDatabase.Query("SELECT MAX(groupId) FROM groups");
+    result = CharacterDatabase.Query("SELECT MAX(groupId) FROM wotlkcharacters.groups");
     if (result)
     {
         m_GroupGuids.Set((*result)[0].GetUInt32() + 1);
