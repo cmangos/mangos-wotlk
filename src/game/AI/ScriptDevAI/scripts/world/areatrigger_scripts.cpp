@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Areatrigger_Scripts
 SD%Complete: 100
-SDComment: Quest support: 4291, 6681, 7632, 273, 10280, 10589/10604, 11686, 12548, 12575, 12741, 13315/13351, 24849/24851, 8735
+SDComment: Quest support: 1126, 4291, 6681, 7632, 273, 10280, 10589/10604, 11686, 12548, 12575, 12741, 13315/13351, 24849/24851, 8735
 SDCategory: Areatrigger
 EndScriptData */
 
@@ -38,6 +38,7 @@ at_haramad_teleport             4479
 at_huldar_miran                 171
 at_area_52                      4422, 4466, 4471, 4472
 at_twilight_grove               4017
+at_hive_tower                   3146
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
@@ -569,6 +570,31 @@ bool AreaTrigger_at_twilight_grove(Player* player, AreaTriggerEntry const* /*pAt
     return false;
 }
 
+/*######
+## at_hive_tower
+######*/
+
+bool AreaTrigger_at_hive_tower(Player* player, AreaTriggerEntry const* /*pAt*/)
+{
+    ScriptedMap* scriptedMap = (ScriptedMap*)player->GetInstanceData();
+    if (!scriptedMap)
+        return false;
+
+    if (scriptedMap->GetData(TYPE_HIVE) != NOT_STARTED) // Only summon more Hive'Ashi Drones if the 5 minutes timer is elapsed
+        return false;
+
+    if (player->isAlive() && !player->isGameMaster())
+    {
+        // spawn three Hive'Ashi Drones for 5 minutes (timer is guesswork)
+        for (uint8 i = POS_IDX_HIVE_DRONES_START; i <= POS_IDX_HIVE_DRONES_STOP; ++i)
+            player->SummonCreature(NPC_HIVE_ASHI_DRONES, aSpawnLocations[i][0], aSpawnLocations[i][1], aSpawnLocations[i][2], aSpawnLocations[i][3], TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+        scriptedMap->SetData(TYPE_HIVE, IN_PROGRESS);   // Notify the map script to start the timer
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_areatrigger_scripts()
 {
     Script* pNewScript = new Script;
@@ -654,5 +680,10 @@ void AddSC_areatrigger_scripts()
     pNewScript = new Script;
     pNewScript->Name = "at_twilight_grove";
     pNewScript->pAreaTrigger = &AreaTrigger_at_twilight_grove;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_hive_tower";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_hive_tower;
     pNewScript->RegisterSelf();
 }
