@@ -347,9 +347,9 @@ CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVE(Unit* pTarget)
 
 CombatManeuverReturns PlayerbotWarlockAI::DoNextCombatManeuverPVP(Unit* pTarget)
 {
-    if (FEAR && m_ai->In_Reach(pTarget, FEAR) && m_ai->CastSpell(FEAR, *pTarget))
+    if (FEAR && m_ai->In_Reach(pTarget, FEAR) && m_ai->CastSpell(FEAR, *pTarget) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
-    if (SHADOW_BOLT && m_ai->In_Reach(pTarget, SHADOW_BOLT) && m_ai->CastSpell(SHADOW_BOLT))
+    if (SHADOW_BOLT && m_ai->In_Reach(pTarget, SHADOW_BOLT) && m_ai->CastSpell(SHADOW_BOLT) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     return DoNextCombatManeuverPVE(pTarget); // TODO: bad idea perhaps, but better than the alternative
@@ -397,14 +397,14 @@ void PlayerbotWarlockAI::CheckDemon()
                     summonSpellId = 0;
             }
 
-            if (m_ai->CastSpell(summonSpellId))
+            if (m_ai->CastSpell(summonSpellId) == SPELL_CAST_OK)
             {
                 //m_ai->TellMaster("Summoning favorite demon...");
                 m_isTempImp = false;
                 return;
             }
         }
-        else if (!pet && SUMMON_IMP && m_ai->CastSpell(SUMMON_IMP))
+        else if (!pet && SUMMON_IMP && m_ai->CastSpell(SUMMON_IMP) == SPELL_CAST_OK)
         {
             if (m_demonOfChoice != DEMON_IMP)
                 m_isTempImp = true;
@@ -476,23 +476,23 @@ void PlayerbotWarlockAI::DoNonCombatActions()
     // buff myself DEMON_SKIN, DEMON_ARMOR, FEL_ARMOR - Strongest one available is chosen
     if (FEL_ARMOR)
     {
-        if (m_ai->SelfBuff(FEL_ARMOR))
+        if (m_ai->SelfBuff(FEL_ARMOR) == SPELL_CAST_OK)
             return;
     }
     else if (DEMON_ARMOR)
     {
-        if (m_ai->SelfBuff(DEMON_ARMOR))
+        if (m_ai->SelfBuff(DEMON_ARMOR) == SPELL_CAST_OK)
             return;
     }
     else if (DEMON_SKIN)
-        if (m_ai->SelfBuff(DEMON_SKIN))
+        if (m_ai->SelfBuff(DEMON_SKIN) == SPELL_CAST_OK)
             return;
 
     // healthstone creation
     if (CREATE_HEALTHSTONE && shardCount > 0)
     {
         Item* const healthStone = m_ai->FindConsumable(HEALTHSTONE_DISPLAYID);
-        if (!healthStone && m_ai->CastSpell(CREATE_HEALTHSTONE))
+        if (!healthStone && m_ai->CastSpell(CREATE_HEALTHSTONE) == SPELL_CAST_OK)
             return;
     }
 
@@ -502,7 +502,7 @@ void PlayerbotWarlockAI::DoNonCombatActions()
         Item* soulStone = m_ai->FindConsumable(SOULSTONE_DISPLAYID);
         if (!soulStone)
         {
-            if (shardCount > 0 && m_bot->IsSpellReady(CREATE_SOULSTONE) && m_ai->CastSpell(CREATE_SOULSTONE))
+            if (shardCount > 0 && m_bot->IsSpellReady(CREATE_SOULSTONE) && m_ai->CastSpell(CREATE_SOULSTONE) == SPELL_CAST_OK)
                 return;
         }
         else
@@ -538,9 +538,9 @@ void PlayerbotWarlockAI::DoNonCombatActions()
             firestone_count = m_bot->GetItemCount(MAJOR_FIRESTONE, false, nullptr);
         if (spellstone_count == 0 && firestone_count == 0)
         {
-            if (CREATE_SPELLSTONE && shardCount > 0 && m_ai->CastSpell(CREATE_SPELLSTONE))
+            if (CREATE_SPELLSTONE && shardCount > 0 && m_ai->CastSpell(CREATE_SPELLSTONE) == SPELL_CAST_OK)
                 return;
-            else if (CREATE_SPELLSTONE == 0 && CREATE_FIRESTONE > 0 && shardCount > 0 && m_ai->CastSpell(CREATE_FIRESTONE))
+            else if (CREATE_SPELLSTONE == 0 && CREATE_FIRESTONE > 0 && shardCount > 0 && m_ai->CastSpell(CREATE_FIRESTONE) == SPELL_CAST_OK)
                 return;
         }
         else if (stone)
@@ -557,11 +557,11 @@ void PlayerbotWarlockAI::DoNonCombatActions()
 
     // hp/mana check
     if (pet && DARK_PACT && (pet->GetPower(POWER_MANA) / pet->GetMaxPower(POWER_MANA)) > 40 && m_ai->GetManaPercent() <= 50)
-        if (m_ai->CastSpell(DARK_PACT, *m_bot))
+        if (m_ai->CastSpell(DARK_PACT, *m_bot) == SPELL_CAST_OK)
             return;
 
     if (LIFE_TAP && m_ai->GetManaPercent() <= 60 && m_ai->GetHealthPercent() > 60)
-        if (m_ai->CastSpell(LIFE_TAP, *m_bot))
+        if (m_ai->CastSpell(LIFE_TAP, *m_bot) == SPELL_CAST_OK)
             return;
 
     if (EatDrinkBandage())
@@ -574,11 +574,11 @@ void PlayerbotWarlockAI::DoNonCombatActions()
     CheckDemon();
 
     // Soul link demon
-    if (pet && SOUL_LINK && !m_bot->HasAura(SOUL_LINK_AURA) && m_ai->CastSpell(SOUL_LINK, *m_bot))
+    if (pet && SOUL_LINK && !m_bot->HasAura(SOUL_LINK_AURA) && m_ai->CastSpell(SOUL_LINK, *m_bot) == SPELL_CAST_OK)
         return;
 
     // Check demon buffs
-    if (pet && pet->GetEntry() == DEMON_IMP && BLOOD_PACT && !m_bot->HasAura(BLOOD_PACT) && m_ai->CastPetSpell(BLOOD_PACT))
+    if (pet && pet->GetEntry() == DEMON_IMP && BLOOD_PACT && !m_bot->HasAura(BLOOD_PACT) && m_ai->CastPetSpell(BLOOD_PACT) == SPELL_CAST_OK)
         return;
 
     if (pet && pet->GetEntry() == DEMON_FELHUNTER && FEL_INTELLIGENCE && !m_bot->HasAura(FEL_INTELLIGENCE) && m_ai->CastPetSpell(FEL_INTELLIGENCE))

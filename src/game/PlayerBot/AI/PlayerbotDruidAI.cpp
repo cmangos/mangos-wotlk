@@ -287,7 +287,7 @@ CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuverPVE(Unit* pTarget)
 
 CombatManeuverReturns PlayerbotDruidAI::DoNextCombatManeuverPVP(Unit* pTarget)
 {
-    if (m_ai->CastSpell(MOONFIRE))
+    if (m_ai->CastSpell(MOONFIRE) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     return DoNextCombatManeuverPVE(pTarget); // TODO: bad idea perhaps, but better than the alternative
@@ -500,7 +500,7 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
         if (m_bot->isInCombat())
         {
             // TODO: Add check for cooldown
-            if (REBIRTH && m_ai->In_Reach(target, REBIRTH) && m_ai->CastSpell(REBIRTH, *target))
+            if (REBIRTH && m_ai->In_Reach(target, REBIRTH) && m_ai->CastSpell(REBIRTH, *target) == SPELL_CAST_OK)
             {
                 std::string msg = "Resurrecting ";
                 msg += target->GetName();
@@ -510,7 +510,7 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
         }
         else
         {
-            if (REVIVE && m_ai->In_Reach(target, REVIVE) && m_ai->CastSpell(REVIVE, *target))
+            if (REVIVE && m_ai->In_Reach(target, REVIVE) && m_ai->CastSpell(REVIVE, *target) == SPELL_CAST_OK)
             {
                 std::string msg = "Resurrecting ";
                 msg += target->GetName();
@@ -743,7 +743,7 @@ bool PlayerbotDruidAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target)
     if (!target)      return false;
     //DEBUG_LOG("..Sanity checks passed");
 
-    if (ai->Buff(spellId, target, &(PlayerbotDruidAI::GoBuffForm)))
+    if (ai->Buff(spellId, target, &(PlayerbotDruidAI::GoBuffForm)) == SPELL_CAST_OK)
     {
         //DEBUG_LOG("..Buffed");
         return true;

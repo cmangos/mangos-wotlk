@@ -168,25 +168,25 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVE(Unit* pTarget
 
     if (DEFENSIVE_STANCE && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK))
     {
-        if (!m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DEFENSIVE_STANCE))
+        if (!m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DEFENSIVE_STANCE) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
-        else if (TAUNT > 0 && m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(TAUNT, *pTarget))
+        else if (TAUNT > 0 && m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(TAUNT, *pTarget) == SPELL_CAST_OK)
             return RETURN_FINISHED_FIRST_MOVES;
     }
 
     if (BERSERKER_STANCE)
     {
-        if (!m_bot->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(BERSERKER_STANCE))
+        if (!m_bot->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(BERSERKER_STANCE) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
         if (BLOODRAGE > 0 && m_bot->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0) && m_ai->GetRageAmount() <= 10)
-            return m_ai->CastSpell(BLOODRAGE) ? RETURN_FINISHED_FIRST_MOVES : RETURN_NO_ACTION_ERROR;
+            return m_ai->CastSpell(BLOODRAGE) == SPELL_CAST_OK ? RETURN_FINISHED_FIRST_MOVES : RETURN_NO_ACTION_ERROR;
         if (INTERCEPT > 0 && m_bot->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0))
         {
             if (fTargetDist < 8.0f)
                 return RETURN_NO_ACTION_OK;
             else if (fTargetDist > 25.0f)
                 return RETURN_CONTINUE; // wait to come into range
-            else if (INTERCEPT > 0 && m_ai->CastSpell(INTERCEPT, *pTarget))
+            else if (INTERCEPT > 0 && m_ai->CastSpell(INTERCEPT, *pTarget) == SPELL_CAST_OK)
             {
                 float x, y, z;
                 pTarget->GetContactPoint(m_bot, x, y, z, 3.666666f);
@@ -198,7 +198,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVE(Unit* pTarget
 
     if (BATTLE_STANCE)
     {
-        if (!m_bot->HasAura(BATTLE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(BATTLE_STANCE))
+        if (!m_bot->HasAura(BATTLE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(BATTLE_STANCE) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
         if (CHARGE > 0 && m_bot->HasAura(BATTLE_STANCE, EFFECT_INDEX_0))
         {
@@ -206,7 +206,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVE(Unit* pTarget
                 return RETURN_NO_ACTION_OK;
             if (fTargetDist > 25.0f)
                 return RETURN_CONTINUE; // wait to come into range
-            else if (CHARGE > 0 && m_ai->CastSpell(CHARGE, *pTarget))
+            else if (CHARGE > 0 && m_ai->CastSpell(CHARGE, *pTarget) == SPELL_CAST_OK)
             {
                 float x, y, z;
                 pTarget->GetContactPoint(m_bot, x, y, z, 3.666666f);
@@ -229,25 +229,25 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVP(Unit* pTarget
 
     if (DEFENSIVE_STANCE && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK))
     {
-        if (!m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DEFENSIVE_STANCE))
+        if (!m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DEFENSIVE_STANCE) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
-        else if (TAUNT > 0 && m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(TAUNT, *pTarget))
+        else if (TAUNT > 0 && m_bot->HasAura(DEFENSIVE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(TAUNT, *pTarget) == SPELL_CAST_OK)
             return RETURN_FINISHED_FIRST_MOVES;
     }
 
     if (BERSERKER_STANCE)
     {
-        if (!m_bot->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(BERSERKER_STANCE))
+        if (!m_bot->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(BERSERKER_STANCE) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
         if (BLOODRAGE > 0 && m_bot->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0) && m_ai->GetRageAmount() <= 10)
-            return m_ai->CastSpell(BLOODRAGE) ? RETURN_FINISHED_FIRST_MOVES : RETURN_NO_ACTION_ERROR;
+            return m_ai->CastSpell(BLOODRAGE) == SPELL_CAST_OK ? RETURN_FINISHED_FIRST_MOVES : RETURN_NO_ACTION_ERROR;
         if (INTERCEPT > 0 && m_bot->HasAura(BERSERKER_STANCE, EFFECT_INDEX_0))
         {
             if (fTargetDist < 8.0f)
                 return RETURN_NO_ACTION_OK;
             else if (fTargetDist > 25.0f)
                 return RETURN_CONTINUE; // wait to come into range
-            else if (INTERCEPT > 0 && m_ai->CastSpell(INTERCEPT, *pTarget))
+            else if (INTERCEPT > 0 && m_ai->CastSpell(INTERCEPT, *pTarget) == SPELL_CAST_OK)
             {
                 float x, y, z;
                 pTarget->GetContactPoint(m_bot, x, y, z, 3.666666f);
@@ -259,7 +259,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVP(Unit* pTarget
 
     if (BATTLE_STANCE)
     {
-        if (!m_bot->HasAura(BATTLE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(BATTLE_STANCE))
+        if (!m_bot->HasAura(BATTLE_STANCE, EFFECT_INDEX_0) && m_ai->CastSpell(BATTLE_STANCE) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
         if (CHARGE > 0 && m_bot->HasAura(BATTLE_STANCE, EFFECT_INDEX_0))
         {
@@ -267,7 +267,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVP(Unit* pTarget
                 return RETURN_NO_ACTION_OK;
             if (fTargetDist > 25.0f)
                 return RETURN_CONTINUE; // wait to come into range
-            else if (CHARGE > 0 && m_ai->CastSpell(CHARGE, *pTarget))
+            else if (CHARGE > 0 && m_ai->CastSpell(CHARGE, *pTarget) == SPELL_CAST_OK)
             {
                 float x, y, z;
                 pTarget->GetContactPoint(m_bot, x, y, z, 3.666666f);
@@ -328,122 +328,122 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit* pTarget)
         case WARRIOR_SPEC_ARMS:
             // Execute doesn't scale too well with extra rage and uses up *all* rage preventing use of other skills
             //Haven't found a way to make sudden death work yet, either wrong spell or it needs an effect index(probably)
-            if (EXECUTE > 0 && (pTarget->GetHealthPercent() < 20 || m_bot->HasAura(SUDDEN_DEATH)) && m_ai->GetRageAmount() < 30 && m_ai->CastSpell(EXECUTE, *pTarget))
+            if (EXECUTE > 0 && (pTarget->GetHealthPercent() < 20 || m_bot->HasAura(SUDDEN_DEATH)) && m_ai->GetRageAmount() < 30 && m_ai->CastSpell(EXECUTE, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (REND > 0 && !pTarget->HasAura(REND, EFFECT_INDEX_0) && m_ai->CastSpell(REND, *pTarget))
+            if (REND > 0 && !pTarget->HasAura(REND, EFFECT_INDEX_0) && m_ai->CastSpell(REND, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (MORTAL_STRIKE > 0 && m_bot->IsSpellReady(MORTAL_STRIKE) && m_ai->CastSpell(MORTAL_STRIKE, *pTarget))
+            if (MORTAL_STRIKE > 0 && m_bot->IsSpellReady(MORTAL_STRIKE) && m_ai->CastSpell(MORTAL_STRIKE, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (SHATTERING_THROW > 0 && !pTarget->HasAura(SHATTERING_THROW, EFFECT_INDEX_0) && m_bot->IsSpellReady(SHATTERING_THROW) && m_ai->CastSpell(SHATTERING_THROW, *pTarget))
+            if (SHATTERING_THROW > 0 && !pTarget->HasAura(SHATTERING_THROW, EFFECT_INDEX_0) && m_bot->IsSpellReady(SHATTERING_THROW) && m_ai->CastSpell(SHATTERING_THROW, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (BLADESTORM > 0 && m_bot->IsSpellReady(BLADESTORM) /*&& m_ai->GetAttackerCount() >= 3*/ && m_ai->CastSpell(BLADESTORM, *pTarget))
+            if (BLADESTORM > 0 && m_bot->IsSpellReady(BLADESTORM) /*&& m_ai->GetAttackerCount() >= 3*/ && m_ai->CastSpell(BLADESTORM, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
             // No way to tell if overpower is active (yet), however taste for blood works
-            if (OVERPOWER > 0 && m_bot->HasAura(TASTE_FOR_BLOOD) && m_ai->CastSpell(OVERPOWER, *pTarget))
+            if (OVERPOWER > 0 && m_bot->HasAura(TASTE_FOR_BLOOD) && m_ai->CastSpell(OVERPOWER, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (HEROIC_STRIKE > 0 && m_ai->CastSpell(HEROIC_STRIKE, *pTarget))
+            if (HEROIC_STRIKE > 0 && m_ai->CastSpell(HEROIC_STRIKE, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (SLAM > 0 && m_ai->CastSpell(SLAM, *pTarget))
+            if (SLAM > 0 && m_ai->CastSpell(SLAM, *pTarget) == SPELL_CAST_OK)
             {
                 m_ai->SetIgnoreUpdateTime(1);
                 return RETURN_CONTINUE;
             }
 
         case WARRIOR_SPEC_FURY:
-            if (EXECUTE > 0 && pTarget->GetHealthPercent() < 20 && m_ai->CastSpell(EXECUTE, *pTarget))
+            if (EXECUTE > 0 && pTarget->GetHealthPercent() < 20 && m_ai->CastSpell(EXECUTE, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (BLOODTHIRST > 0 && m_bot->IsSpellReady(BLOODTHIRST) && m_ai->CastSpell(BLOODTHIRST, *pTarget))
+            if (BLOODTHIRST > 0 && m_bot->IsSpellReady(BLOODTHIRST) && m_ai->CastSpell(BLOODTHIRST, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (WHIRLWIND > 0 && m_bot->IsSpellReady(WHIRLWIND) && m_ai->CastSpell(WHIRLWIND, *pTarget))
+            if (WHIRLWIND > 0 && m_bot->IsSpellReady(WHIRLWIND) && m_ai->CastSpell(WHIRLWIND, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (SLAM > 0 && m_bot->HasAura(BLOODSURGE, EFFECT_INDEX_0) && m_ai->CastSpell(SLAM, *pTarget))
+            if (SLAM > 0 && m_bot->HasAura(BLOODSURGE, EFFECT_INDEX_0) && m_ai->CastSpell(SLAM, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (HEROIC_STRIKE > 0 && m_ai->CastSpell(HEROIC_STRIKE, *pTarget))
+            if (HEROIC_STRIKE > 0 && m_ai->CastSpell(HEROIC_STRIKE, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
 
         case WARRIOR_SPEC_PROTECTION:
-            if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK && !newTarget && TAUNT > 0 && m_bot->IsSpellReady(TAUNT) && m_ai->CastSpell(TAUNT, *pTarget))
+            if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK && !newTarget && TAUNT > 0 && m_bot->IsSpellReady(TAUNT) && m_ai->CastSpell(TAUNT, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
             // No way to tell if revenge is active (yet)
-            /*if (REVENGE > 0 && m_ai->CastSpell(REVENGE, *pTarget))
+            /*if (REVENGE > 0 && m_ai->CastSpell(REVENGE, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;*/
-            if (REND > 0 && !pTarget->HasAura(REND, EFFECT_INDEX_0) && m_ai->CastSpell(REND, *pTarget))
+            if (REND > 0 && !pTarget->HasAura(REND, EFFECT_INDEX_0) && m_ai->CastSpell(REND, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (THUNDER_CLAP > 0 && !pTarget->HasAura(THUNDER_CLAP) && m_ai->CastSpell(THUNDER_CLAP, *pTarget))
+            if (THUNDER_CLAP > 0 && !pTarget->HasAura(THUNDER_CLAP) && m_ai->CastSpell(THUNDER_CLAP, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (DEMORALIZING_SHOUT > 0 && !pTarget->HasAura(DEMORALIZING_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(DEMORALIZING_SHOUT, *pTarget))
+            if (DEMORALIZING_SHOUT > 0 && !pTarget->HasAura(DEMORALIZING_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(DEMORALIZING_SHOUT, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (CONCUSSION_BLOW > 0 && m_bot->IsSpellReady(CONCUSSION_BLOW) && m_ai->CastSpell(CONCUSSION_BLOW, *pTarget))
+            if (CONCUSSION_BLOW > 0 && m_bot->IsSpellReady(CONCUSSION_BLOW) && m_ai->CastSpell(CONCUSSION_BLOW, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (SHOCKWAVE > 0 && m_bot->IsSpellReady(SHOCKWAVE) && m_ai->CastSpell(SHOCKWAVE, *pTarget))
+            if (SHOCKWAVE > 0 && m_bot->IsSpellReady(SHOCKWAVE) && m_ai->CastSpell(SHOCKWAVE, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            if (SHIELD_SLAM > 0 && m_bot->IsSpellReady(SHIELD_SLAM) && m_ai->CastSpell(SHIELD_SLAM, *pTarget))
+            if (SHIELD_SLAM > 0 && m_bot->IsSpellReady(SHIELD_SLAM) && m_ai->CastSpell(SHIELD_SLAM, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            /*if (SUNDER > 0 && !pTarget->HasAura(SUNDER_ARMOR) && m_ai->CastSpell(SUNDER, *pTarget))
+            /*if (SUNDER > 0 && !pTarget->HasAura(SUNDER_ARMOR) && m_ai->CastSpell(SUNDER, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;*/
-            if (HEROIC_STRIKE > 0 && m_ai->CastSpell(HEROIC_STRIKE, *pTarget))
+            if (HEROIC_STRIKE > 0 && m_ai->CastSpell(HEROIC_STRIKE, *pTarget) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
 
             /*case WarriorSpellPreventing:
-                if (SHIELD_BASH > 0 && m_ai->CastSpell(SHIELD_BASH, *pTarget))
+                if (SHIELD_BASH > 0 && m_ai->CastSpell(SHIELD_BASH, *pTarget) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (PUMMEL > 0 && m_ai->CastSpell(PUMMEL, *pTarget))
+                if (PUMMEL > 0 && m_ai->CastSpell(PUMMEL, *pTarget) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (SPELL_REFLECTION > 0 && !m_bot->HasAura(SPELL_REFLECTION, EFFECT_INDEX_0) && m_ai->CastSpell(SPELL_REFLECTION, *m_bot))
+                if (SPELL_REFLECTION > 0 && !m_bot->HasAura(SPELL_REFLECTION, EFFECT_INDEX_0) && m_ai->CastSpell(SPELL_REFLECTION, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
                 break;
 
             case WarriorBattle:
-                if (LAST_STAND > 0 && !m_bot->HasAura(LAST_STAND, EFFECT_INDEX_0) && m_bot->GetHealthPercent() < 50 && m_ai->CastSpell(LAST_STAND, *m_bot))
+                if (LAST_STAND > 0 && !m_bot->HasAura(LAST_STAND, EFFECT_INDEX_0) && m_bot->GetHealthPercent() < 50 && m_ai->CastSpell(LAST_STAND, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (DEATH_WISH > 0 && !m_bot->HasAura(DEATH_WISH, EFFECT_INDEX_0) && m_ai->CastSpell(DEATH_WISH, *m_bot))
+                if (DEATH_WISH > 0 && !m_bot->HasAura(DEATH_WISH, EFFECT_INDEX_0) && m_ai->CastSpell(DEATH_WISH, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (RETALIATION > 0 && pVictim == m_bot && m_ai->GetAttackerCount() >= 2 && !m_bot->HasAura(RETALIATION, EFFECT_INDEX_0) && m_ai->CastSpell(RETALIATION, *m_bot))
+                if (RETALIATION > 0 && pVictim == m_bot && m_ai->GetAttackerCount() >= 2 && !m_bot->HasAura(RETALIATION, EFFECT_INDEX_0) && m_ai->CastSpell(RETALIATION, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (SWEEPING_STRIKES > 0 && m_ai->GetAttackerCount() >= 2 && !m_bot->HasAura(SWEEPING_STRIKES, EFFECT_INDEX_0) && m_ai->CastSpell(SWEEPING_STRIKES, *m_bot))
+                if (SWEEPING_STRIKES > 0 && m_ai->GetAttackerCount() >= 2 && !m_bot->HasAura(SWEEPING_STRIKES, EFFECT_INDEX_0) && m_ai->CastSpell(SWEEPING_STRIKES, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (INTIMIDATING_SHOUT > 0 && m_ai->GetAttackerCount() > 5 && m_ai->CastSpell(INTIMIDATING_SHOUT, *pTarget))
+                if (INTIMIDATING_SHOUT > 0 && m_ai->GetAttackerCount() > 5 && m_ai->CastSpell(INTIMIDATING_SHOUT, *pTarget) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (ENRAGED_REGENERATION > 0 && !m_bot->HasAura(BERSERKER_RAGE, EFFECT_INDEX_0) && !m_bot->HasAura(ENRAGED_REGENERATION, EFFECT_INDEX_0) && m_bot->GetHealth() < m_bot->GetMaxHealth() * 0.5 && m_ai->CastSpell(ENRAGED_REGENERATION, *m_bot))
+                if (ENRAGED_REGENERATION > 0 && !m_bot->HasAura(BERSERKER_RAGE, EFFECT_INDEX_0) && !m_bot->HasAura(ENRAGED_REGENERATION, EFFECT_INDEX_0) && m_bot->GetHealth() < m_bot->GetMaxHealth() * 0.5 && m_ai->CastSpell(ENRAGED_REGENERATION, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (HAMSTRING > 0 && !pTarget->HasAura(HAMSTRING, EFFECT_INDEX_0) && m_ai->CastSpell(HAMSTRING, *pTarget))
+                if (HAMSTRING > 0 && !pTarget->HasAura(HAMSTRING, EFFECT_INDEX_0) && m_ai->CastSpell(HAMSTRING, *pTarget) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (CHALLENGING_SHOUT > 0 && pVictim != m_bot && m_ai->GetHealthPercent() > 25 && !pTarget->HasAura(MOCKING_BLOW, EFFECT_INDEX_0) && !pTarget->HasAura(CHALLENGING_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(CHALLENGING_SHOUT, *pTarget))
+                if (CHALLENGING_SHOUT > 0 && pVictim != m_bot && m_ai->GetHealthPercent() > 25 && !pTarget->HasAura(MOCKING_BLOW, EFFECT_INDEX_0) && !pTarget->HasAura(CHALLENGING_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(CHALLENGING_SHOUT, *pTarget) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (CLEAVE > 0 && m_ai->CastSpell(CLEAVE, *pTarget))
+                if (CLEAVE > 0 && m_ai->CastSpell(CLEAVE, *pTarget) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (PIERCING_HOWL > 0 && && m_ai->GetAttackerCount() >= 3 && !pTarget->HasAura(WAR_STOMP, EFFECT_INDEX_0) && !pTarget->HasAura(PIERCING_HOWL, EFFECT_INDEX_0) && !pTarget->HasAura(SHOCKWAVE, EFFECT_INDEX_0) && !pTarget->HasAura(CONCUSSION_BLOW, EFFECT_INDEX_0) && m_ai->CastSpell(PIERCING_HOWL, *pTarget))
+                if (PIERCING_HOWL > 0 && && m_ai->GetAttackerCount() >= 3 && !pTarget->HasAura(WAR_STOMP, EFFECT_INDEX_0) && !pTarget->HasAura(PIERCING_HOWL, EFFECT_INDEX_0) && !pTarget->HasAura(SHOCKWAVE, EFFECT_INDEX_0) && !pTarget->HasAura(CONCUSSION_BLOW, EFFECT_INDEX_0) && m_ai->CastSpell(PIERCING_HOWL, *pTarget) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (MOCKING_BLOW > 0 && pVictim != m_bot && m_ai->GetHealthPercent() > 25 && !pTarget->HasAura(MOCKING_BLOW, EFFECT_INDEX_0) && !pTarget->HasAura(CHALLENGING_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(MOCKING_BLOW, *pTarget))
+                if (MOCKING_BLOW > 0 && pVictim != m_bot && m_ai->GetHealthPercent() > 25 && !pTarget->HasAura(MOCKING_BLOW, EFFECT_INDEX_0) && !pTarget->HasAura(CHALLENGING_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(MOCKING_BLOW, *pTarget) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (HEROIC_THROW > 0 && m_ai->CastSpell(HEROIC_THROW, *pTarget))
+                if (HEROIC_THROW > 0 && m_ai->CastSpell(HEROIC_THROW, *pTarget) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (m_bot->getRace() == RACE_TAUREN && !pTarget->HasAura(WAR_STOMP, EFFECT_INDEX_0) && !pTarget->HasAura(PIERCING_HOWL, EFFECT_INDEX_0) && !pTarget->HasAura(SHOCKWAVE, EFFECT_INDEX_0) && !pTarget->HasAura(CONCUSSION_BLOW, EFFECT_INDEX_0) && m_ai->CastSpell(WAR_STOMP, *pTarget))
+                if (m_bot->getRace() == RACE_TAUREN && !pTarget->HasAura(WAR_STOMP, EFFECT_INDEX_0) && !pTarget->HasAura(PIERCING_HOWL, EFFECT_INDEX_0) && !pTarget->HasAura(SHOCKWAVE, EFFECT_INDEX_0) && !pTarget->HasAura(CONCUSSION_BLOW, EFFECT_INDEX_0) && m_ai->CastSpell(WAR_STOMP, *pTarget) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (m_bot->getRace() == RACE_HUMAN && m_bot->hasUnitState(UNIT_STAT_STUNNED) || m_bot->HasAuraType(SPELL_AURA_MOD_FEAR) || m_bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) || m_bot->HasAuraType(SPELL_AURA_MOD_CHARM) && m_ai->CastSpell(EVERY_MAN_FOR_HIMSELF, *m_bot))
+                if (m_bot->getRace() == RACE_HUMAN && m_bot->hasUnitState(UNIT_STAT_STUNNED) || m_bot->HasAuraType(SPELL_AURA_MOD_FEAR) || m_bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) || m_bot->HasAuraType(SPELL_AURA_MOD_CHARM) && m_ai->CastSpell(EVERY_MAN_FOR_HIMSELF, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (m_bot->getRace() == RACE_UNDEAD && m_bot->HasAuraType(SPELL_AURA_MOD_FEAR) || m_bot->HasAuraType(SPELL_AURA_MOD_CHARM) && m_ai->CastSpell(WILL_OF_THE_FORSAKEN, *m_bot))
+                if (m_bot->getRace() == RACE_UNDEAD && m_bot->HasAuraType(SPELL_AURA_MOD_FEAR) || m_bot->HasAuraType(SPELL_AURA_MOD_CHARM) && m_ai->CastSpell(WILL_OF_THE_FORSAKEN, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (m_bot->getRace() == RACE_DWARF && m_bot->HasAuraState(AURA_STATE_DEADLY_POISON) && m_ai->CastSpell(STONEFORM, *m_bot))
+                if (m_bot->getRace() == RACE_DWARF && m_bot->HasAuraState(AURA_STATE_DEADLY_POISON) && m_ai->CastSpell(STONEFORM, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (m_bot->getRace() == RACE_GNOME && m_bot->hasUnitState(UNIT_STAT_STUNNED) || m_bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) && m_ai->CastSpell(ESCAPE_ARTIST, *m_bot))
+                if (m_bot->getRace() == RACE_GNOME && m_bot->hasUnitState(UNIT_STAT_STUNNED) || m_bot->HasAuraType(SPELL_AURA_MOD_DECREASE_SPEED) && m_ai->CastSpell(ESCAPE_ARTIST, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (m_bot->getRace() == RACE_NIGHTELF && pVictim == m_bot && m_ai->GetHealthPercent() < 25 && !m_bot->HasAura(SHADOWMELD, EFFECT_INDEX_0) && m_ai->CastSpell(SHADOWMELD, *m_bot))
+                if (m_bot->getRace() == RACE_NIGHTELF && pVictim == m_bot && m_ai->GetHealthPercent() < 25 && !m_bot->HasAura(SHADOWMELD, EFFECT_INDEX_0) && m_ai->CastSpell(SHADOWMELD, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (m_bot->getRace() == RACE_ORC && !m_bot->HasAura(BLOOD_FURY, EFFECT_INDEX_0) && m_ai->CastSpell(BLOOD_FURY, *m_bot))
+                if (m_bot->getRace() == RACE_ORC && !m_bot->HasAura(BLOOD_FURY, EFFECT_INDEX_0) && m_ai->CastSpell(BLOOD_FURY, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (m_bot->getRace() == RACE_TROLL && !m_bot->HasAura(BERSERKING, EFFECT_INDEX_0) && m_ai->CastSpell(BERSERKING, *m_bot))
+                if (m_bot->getRace() == RACE_TROLL && !m_bot->HasAura(BERSERKING, EFFECT_INDEX_0) && m_ai->CastSpell(BERSERKING, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (m_bot->getRace() == RACE_DRAENEI && m_ai->GetHealthPercent() < 25 && !m_bot->HasAura(GIFT_OF_THE_NAARU, EFFECT_INDEX_0) && m_ai->CastSpell(GIFT_OF_THE_NAARU, *m_bot))
+                if (m_bot->getRace() == RACE_DRAENEI && m_ai->GetHealthPercent() < 25 && !m_bot->HasAura(GIFT_OF_THE_NAARU, EFFECT_INDEX_0) && m_ai->CastSpell(GIFT_OF_THE_NAARU, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
                 break;
 
             case WarriorDefensive:
-                if (DISARM > 0 && !pTarget->HasAura(DISARM, EFFECT_INDEX_0) && m_ai->CastSpell(DISARM, *pTarget))
+                if (DISARM > 0 && !pTarget->HasAura(DISARM, EFFECT_INDEX_0) && m_ai->CastSpell(DISARM, *pTarget) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (SHIELD_BLOCK > 0 && !m_bot->HasAura(SHIELD_BLOCK, EFFECT_INDEX_0) && m_ai->CastSpell(SHIELD_BLOCK, *m_bot))
+                if (SHIELD_BLOCK > 0 && !m_bot->HasAura(SHIELD_BLOCK, EFFECT_INDEX_0) && m_ai->CastSpell(SHIELD_BLOCK, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
-                if (SHIELD_WALL > 0 && !m_bot->HasAura(SHIELD_WALL, EFFECT_INDEX_0) && m_ai->CastSpell(SHIELD_WALL, *m_bot))
+                if (SHIELD_WALL > 0 && !m_bot->HasAura(SHIELD_WALL, EFFECT_INDEX_0) && m_ai->CastSpell(SHIELD_WALL, *m_bot) == SPELL_CAST_OK)
                     return RETURN_CONTINUE;
                 break;*/
     }
@@ -453,7 +453,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit* pTarget)
 
 CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVP(Unit* pTarget)
 {
-    if (m_ai->CastSpell(HEROIC_STRIKE))
+    if (m_ai->CastSpell(HEROIC_STRIKE) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     return DoNextCombatManeuverPVE(pTarget); // TODO: bad idea perhaps, but better than the alternative
@@ -467,12 +467,12 @@ void PlayerbotWarriorAI::CheckShouts()
 
     if (m_bot->GetSpec() == WARRIOR_SPEC_PROTECTION && COMMANDING_SHOUT > 0)
     {
-        if (!m_bot->HasAura(COMMANDING_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(COMMANDING_SHOUT))
+        if (!m_bot->HasAura(COMMANDING_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(COMMANDING_SHOUT) == SPELL_CAST_OK)
             return;
     }
     else // Not prot, or prot but no Commanding Shout yet
     {
-        if (!m_bot->HasAura(BATTLE_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(BATTLE_SHOUT))
+        if (!m_bot->HasAura(BATTLE_SHOUT, EFFECT_INDEX_0) && m_ai->CastSpell(BATTLE_SHOUT) == SPELL_CAST_OK)
             return;
     }
 }
@@ -494,7 +494,7 @@ void PlayerbotWarriorAI::DoNonCombatActions()
 
     // buff master with VIGILANCE
     if (VIGILANCE > 0)
-        (!GetMaster()->HasAura(VIGILANCE, EFFECT_INDEX_0) && m_ai->CastSpell(VIGILANCE, *GetMaster()));
+        (!GetMaster()->HasAura(VIGILANCE, EFFECT_INDEX_0) && m_ai->CastSpell(VIGILANCE, *GetMaster()) == SPELL_CAST_OK);
 
     // hp check
     if (EatDrinkBandage(false))

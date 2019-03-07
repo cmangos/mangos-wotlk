@@ -276,7 +276,7 @@ CombatManeuverReturns PlayerbotPriestAI::DoNextCombatManeuverPVE(Unit* pTarget)
                 return RETURN_CONTINUE;
             if (SMITE > 0 && m_ai->In_Reach(pTarget, SMITE) && CastSpell(SMITE, pTarget))
                 return RETURN_CONTINUE;
-            //if (HOLY_NOVA > 0 && m_ai->In_Reach(pTarget,HOLY_NOVA) && meleeReach && m_ai->CastSpell(HOLY_NOVA))
+            //if (HOLY_NOVA > 0 && m_ai->In_Reach(pTarget,HOLY_NOVA) && meleeReach && m_ai->CastSpell(HOLY_NOVA) == SPELL_CAST_OK)
             //    return RETURN_CONTINUE;
             break;
 
@@ -376,7 +376,7 @@ CombatManeuverReturns PlayerbotPriestAI::HealPlayer(Player* target)
 
     if (!target->isAlive())
     {
-        if (RESURRECTION && m_ai->In_Reach(target, RESURRECTION) && m_ai->CastSpell(RESURRECTION, *target))
+        if (RESURRECTION && m_ai->In_Reach(target, RESURRECTION) && m_ai->CastSpell(RESURRECTION, *target) == SPELL_CAST_OK)
         {
             std::string msg = "Resurrecting ";
             msg += target->GetName();
@@ -411,18 +411,18 @@ CombatManeuverReturns PlayerbotPriestAI::HealPlayer(Player* target)
         return RETURN_NO_ACTION_OK;
 
     // TODO: Integrate shield here
-    if (hp < 35 && FLASH_HEAL > 0 && m_ai->In_Reach(target, FLASH_HEAL) && m_ai->CastSpell(FLASH_HEAL, *target))
+    if (hp < 35 && FLASH_HEAL > 0 && m_ai->In_Reach(target, FLASH_HEAL) && m_ai->CastSpell(FLASH_HEAL, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
-    if (hp < 45 && GREATER_HEAL > 0 && m_ai->In_Reach(target, GREATER_HEAL) && m_ai->CastSpell(GREATER_HEAL, *target))
+    if (hp < 45 && GREATER_HEAL > 0 && m_ai->In_Reach(target, GREATER_HEAL) && m_ai->CastSpell(GREATER_HEAL, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
     // Heals target AND self for equal amount
-    if (hp < 60 && hpSelf < 80 && BINDING_HEAL > 0 && m_ai->In_Reach(target, BINDING_HEAL) && m_ai->CastSpell(BINDING_HEAL, *target))
+    if (hp < 60 && hpSelf < 80 && BINDING_HEAL > 0 && m_ai->In_Reach(target, BINDING_HEAL) && m_ai->CastSpell(BINDING_HEAL, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
     if (hp < 60 && PRAYER_OF_MENDING > 0 && m_ai->In_Reach(target, PRAYER_OF_MENDING) && !target->HasAura(PRAYER_OF_MENDING, EFFECT_INDEX_0) && CastSpell(PRAYER_OF_MENDING, target))
         return RETURN_FINISHED_FIRST_MOVES;
-    if (hp < 60 && HEAL > 0 && m_ai->In_Reach(target, HEAL) && m_ai->CastSpell(HEAL, *target))
+    if (hp < 60 && HEAL > 0 && m_ai->In_Reach(target, HEAL) && m_ai->CastSpell(HEAL, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
-    if (hp < 90 && RENEW > 0 && m_ai->In_Reach(target, RENEW) && !target->HasAura(RENEW) && m_ai->CastSpell(RENEW, *target))
+    if (hp < 90 && RENEW > 0 && m_ai->In_Reach(target, RENEW) && !target->HasAura(RENEW) && m_ai->CastSpell(RENEW, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     // Group heal. Not really useful until a group check is available?
@@ -445,7 +445,7 @@ void PlayerbotPriestAI::DoNonCombatActions()
     uint32 spec = m_bot->GetSpec();
 
     // selfbuff goes first
-    if (m_ai->SelfBuff(INNER_FIRE))
+    if (m_ai->SelfBuff(INNER_FIRE) == SPELL_CAST_OK)
         return;
 
     // Revive
@@ -511,10 +511,10 @@ bool PlayerbotPriestAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target
     if (!target)      return false;
 
     Pet* pet = target->GetPet();
-    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(spellId, pet))
+    if (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(spellId, pet) == SPELL_CAST_OK)
         return true;
 
-    if (ai->Buff(spellId, target))
+    if (ai->Buff(spellId, target) == SPELL_CAST_OK)
     {
         //DEBUG_LOG("..Buffed");
         return true;

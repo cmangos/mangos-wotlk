@@ -303,7 +303,7 @@ CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVE(Unit* pTarget)
 
 CombatManeuverReturns PlayerbotMageAI::DoNextCombatManeuverPVP(Unit* pTarget)
 {
-    if (FIREBALL && m_ai->In_Reach(pTarget, FIREBALL) && m_ai->CastSpell(FIREBALL))
+    if (FIREBALL && m_ai->In_Reach(pTarget, FIREBALL) && m_ai->CastSpell(FIREBALL) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     return DoNextCombatManeuverPVE(pTarget); // TODO: bad idea perhaps, but better than the alternative
@@ -326,21 +326,21 @@ void PlayerbotMageAI::DoNonCombatActions()
     // Buff armor
     if (MOLTEN_ARMOR)
     {
-        if (m_ai->SelfBuff(MOLTEN_ARMOR))
+        if (m_ai->SelfBuff(MOLTEN_ARMOR) == SPELL_CAST_OK)
             return;
     }
     else if (MAGE_ARMOR)
     {
-        if (m_ai->SelfBuff(MAGE_ARMOR))
+        if (m_ai->SelfBuff(MAGE_ARMOR) == SPELL_CAST_OK)
             return;
     }
     else if (ICE_ARMOR)
     {
-        if (m_ai->SelfBuff(ICE_ARMOR))
+        if (m_ai->SelfBuff(ICE_ARMOR) == SPELL_CAST_OK)
             return;
     }
     else if (FROST_ARMOR)
-        if (m_ai->SelfBuff(FROST_ARMOR))
+        if (m_ai->SelfBuff(FROST_ARMOR) == SPELL_CAST_OK)
             return;
 
     // buff group
@@ -356,13 +356,13 @@ void PlayerbotMageAI::DoNonCombatActions()
 
     // TODO: The beauty of a mage is not only its ability to supply itself with water, but to share its water
     // So, conjure at *least* 1.25 stacks, ready to trade a stack and still have some left for self
-    if (m_ai->FindDrink() == nullptr && CONJURE_WATER && m_ai->CastSpell(CONJURE_WATER, *m_bot))
+    if (m_ai->FindDrink() == nullptr && CONJURE_WATER && m_ai->CastSpell(CONJURE_WATER, *m_bot) == SPELL_CAST_OK)
     {
         m_ai->TellMaster("I'm conjuring some water.");
         m_ai->SetIgnoreUpdateTime(3);
         return;
     }
-    if (m_ai->FindFood() == nullptr && CONJURE_FOOD && m_ai->CastSpell(CONJURE_FOOD, *m_bot))
+    if (m_ai->FindFood() == nullptr && CONJURE_FOOD && m_ai->CastSpell(CONJURE_FOOD, *m_bot) == SPELL_CAST_OK)
     {
         m_ai->TellMaster("I'm conjuring some food.");
         m_ai->SetIgnoreUpdateTime(3);
@@ -382,7 +382,7 @@ bool PlayerbotMageAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target)
     if (!target)      return false;
     //DEBUG_LOG("..Sanity checks passed");
 
-    if (ai->Buff(spellId, target))
+    if (ai->Buff(spellId, target) == SPELL_CAST_OK)
     {
         //DEBUG_LOG("..Buffed");
         return true;
