@@ -70,6 +70,7 @@ struct boss_gortokAI : public ScriptedAI
 
         // This needs to be reset in case the event fails
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -143,6 +144,7 @@ bool EffectDummyCreature_spell_awaken_gortok(Unit* /*pCaster*/, uint32 uiSpellId
     if (uiSpellId == SPELL_AWAKEN_GORTOK && uiEffIndex == EFFECT_INDEX_0)
     {
         pCreatureTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        pCreatureTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         pCreatureTarget->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
 
         // Start attacking the players
@@ -167,6 +169,7 @@ bool EffectAuraDummy_spell_aura_dummy_awaken_subboss(const Aura* pAura, bool bAp
         if (Creature* pTarget = (Creature*)pAura->GetTarget())
         {
             pTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            pTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             pTarget->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
 
             // Start attacking the players

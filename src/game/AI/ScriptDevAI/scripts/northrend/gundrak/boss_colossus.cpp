@@ -207,6 +207,7 @@ struct boss_drakkari_colossusAI : public ScriptedAI
         {
             // re-activate colossus here
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             m_creature->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
 
             SetCombatMovement(true);
@@ -255,6 +256,7 @@ struct boss_drakkari_colossusAI : public ScriptedAI
             SetCombatMovement(false);
             m_creature->GetMotionMaster()->MoveIdle();
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             DoCastSpellIfCan(m_creature, SPELL_FREEZE_ANIM, CAST_TRIGGERED);
         }
     }
@@ -276,6 +278,7 @@ struct boss_drakkari_colossusAI : public ScriptedAI
             {
                 m_creature->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 m_uiColossusStartTimer = 0;
             }
             else
