@@ -2076,6 +2076,7 @@ void Aura::TriggerSpell()
                 triggerTarget = triggerCaster->GetTarget(); // This will default to channel target for channels
                 break;
             case TARGET_UNIT_CASTER:
+            case TARGET_UNIT_FRIEND:
                 triggerCaster = target;
                 triggerTarget = target;
                 break;
