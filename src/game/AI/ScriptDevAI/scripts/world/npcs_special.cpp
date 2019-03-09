@@ -2088,18 +2088,6 @@ struct npc_nether_rayAI : public ScriptedAI, public CombatActions
             }
         }
     }
-
-    void UpdateAI(const uint32 diff)
-    {
-        UpdateTimers(diff, m_creature->isInCombat());
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        ExecuteActions();
-
-        DoMeleeAttackIfReady();
-    }
 };
 
 UnitAI* GetAI_npc_nether_ray(Creature* creature)
