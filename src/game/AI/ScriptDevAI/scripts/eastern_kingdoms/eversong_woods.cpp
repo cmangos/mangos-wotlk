@@ -289,12 +289,13 @@ struct npc_prospector_anvilwardAI : public npc_escortAI
             case 0:
                 DoScriptText(SAY_ANVIL1, m_creature, pPlayer);
                 break;
-            case 5:
-                DoScriptText(SAY_ANVIL2, m_creature, pPlayer);
-                break;
             case 6:
+                DoScriptText(SAY_ANVIL2, m_creature, pPlayer);
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveIdle();
                 m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-                AttackStart(pPlayer);
+                m_creature->AI()->SetReactState(REACT_DEFENSIVE);
+                m_creature->ForcedDespawn(60000);
                 break;
         }
     }
