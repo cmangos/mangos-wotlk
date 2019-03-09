@@ -540,9 +540,7 @@ struct npc_infused_crystalAI : public Scripted_NoMovementAI
 
     void SummonedCreatureJustDied(Creature* /*pSummoned*/) override
     {
-        ++m_uiKilledCount;
-
-        if (m_uiKilledCount == 3)
+        if (++m_uiKilledCount == 3)
             m_uiWaveTimer = std::min(m_uiWaveTimer, (uint32)10000);
     }
 
@@ -555,14 +553,14 @@ struct npc_infused_crystalAI : public Scripted_NoMovementAI
                 if (m_bFirstWave)
                 {
                     for (uint8 i = 0; i < 3; ++i)
-                        m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE);
+                        m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
                     m_uiWaveTimer = 29000;
                     m_bFirstWave = false;
                 }
                 else
                 {
                     for (uint8 i = 3; i < 6; ++i)
-                        m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE);
+                        m_creature->SummonCreature(NPC_ENRAGED_WRAITH, aSummonPos[i][0], aSummonPos[i][1], aSummonPos[i][2], aSummonPos[i][3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
                     m_uiWaveTimer = 0;
                 }
             }
