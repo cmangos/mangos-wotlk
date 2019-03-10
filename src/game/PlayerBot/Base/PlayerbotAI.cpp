@@ -8700,8 +8700,8 @@ void PlayerbotAI::SellGarbage(Player& /*player*/, bool /*bListNonTrash*/, bool b
 {
     uint32 SoldCost = 0;
     uint32 SoldQuantity = 0;
+    bool sellableItems = false;
     std::ostringstream report, goods;
-    ChatHandler ch(GetMaster());
 
     // list out items in main backpack
     for (uint8 slot = INVENTORY_SLOT_ITEM_START; slot < INVENTORY_SLOT_ITEM_END; ++slot)
@@ -8710,62 +8710,38 @@ void PlayerbotAI::SellGarbage(Player& /*player*/, bool /*bListNonTrash*/, bool b
         if (item)
             _doSellItem(item, report, goods, SoldCost, SoldQuantity);
     }
+    if (goods.str().size() > 0)
+        sellableItems = true;
+    if (bVerbose && bListNonTrash && goods.str().size() > 0)    // Tell master of unsold items
+        TellMaster("Unsold items in my main backpack: %s", goods.str().c_str());
 
-    uint8 notempty = 0;
-    if (goods.str().size() != 0)
-    {
-        notempty = 1;
-        TellMaster("Heres a list of items I can sell:");
-    }
     // and each of our other packs
     for (uint8 bag = INVENTORY_SLOT_BAG_START; bag < INVENTORY_SLOT_BAG_END; ++bag) // check for extra bags
     {
-        // we want to output the item list to links one bag at a time and clear it, to prevent the list from overloading
-        if (goods.str().size() != 0) // This will be one bag behind in the check. if the previous bag listed anything, llist that now and clear the list
-        {
-            if (notempty == 0)
-            {
-                TellMaster("Heres a list of items I can sell:");
-                notempty = 1; // at least one bag must have had something in it, used at end of this function
-            }
-            else
-            {
-                ch.SendSysMessage(goods.str().c_str()); // previous bags list contents, including main backpack first.
-                goods.str(""); // clear the list for next bag
-            }
-        }
-
+        std::ostringstream subBagGoods;
         const Bag* const pBag = static_cast<Bag*>(m_bot->GetItemByPos(INVENTORY_SLOT_BAG_0, bag));
         if (pBag)
         {
-            // Very nice, but who cares what bag it's in?
-            //const ItemPrototype* const pBagProto = pBag->GetProto();
-            //std::string bagName = pBagProto->Name1;
-            //ItemLocalization(bagName, pBagProto->ItemId);
-            //goods << "\nIn my " << bagName << ":";
-
             for (uint8 slot = 0; slot < pBag->GetBagSize(); ++slot)
             {
                 Item* const item = m_bot->GetItemByPos(bag, slot);
                 if (item)
-                    _doSellItem(item, report, goods, SoldCost, SoldQuantity);
+                    _doSellItem(item, report, subBagGoods, SoldCost, SoldQuantity);
+            }
+            if (subBagGoods.str().size() > 0)
+                sellableItems = true;
+            if (bVerbose && bListNonTrash && subBagGoods.str().size() > 0)  // Tell master of unsold items
+            {
+                const ItemPrototype* const bagProto = pBag->GetProto();     // Get bag name to help master retrieve it
+                std::string bagName = bagProto->Name1;
+                ItemLocalization(bagName, bagProto->ItemId);
+                TellMaster("Unsold items in my %s: %s", bagName.c_str(), subBagGoods.str().c_str());
             }
         }
     }
 
-    if (goods.str().size() != 0) // This will make sure items in the last bag were output to links
-    {
-        ch.SendSysMessage(goods.str().c_str());
-        goods.str(""); // clear the list
-        notempty = 1; // at least one bag must have had something in it, used at end of this function
-    }
-    if (notempty == 1)
-        TellMaster("All of the above items could be sold"); // links are complete, notify master
-
     if (!bDetailTrashSold) // no trash got sold
         report.str(""); // clear ostringstream
-
-    report << "Auto sell is set " << (SellWhite ? "|h|cff1eff00TO|h|r" : "to |h|cffff0000NOT|h|r") << " sell white items. ";
 
     if (SoldCost > 0)
     {
@@ -8782,7 +8758,7 @@ void PlayerbotAI::SellGarbage(Player& /*player*/, bool /*bListNonTrash*/, bool b
     // For all bags, non-gray sellable items
     if (bVerbose)
     {
-        if (SoldQuantity == 0 && notempty == 0)
+        if (SoldQuantity == 0 && !sellableItems)
             TellMaster("No items to sell, trash or otherwise.");
     }
 }
