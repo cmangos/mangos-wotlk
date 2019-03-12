@@ -493,8 +493,8 @@ void PlayerbotWarriorAI::DoNonCombatActions()
         m_ai->CastSpell(DEFENSIVE_STANCE);
 
     // buff master with VIGILANCE
-    if (VIGILANCE > 0)
-        (!GetMaster()->HasAura(VIGILANCE, EFFECT_INDEX_0) && m_ai->CastSpell(VIGILANCE, *GetMaster()) == SPELL_CAST_OK);
+    if (VIGILANCE > 0 && !GetMaster()->HasAura(VIGILANCE, EFFECT_INDEX_0) && m_ai->CastSpell(VIGILANCE, *GetMaster()) == SPELL_CAST_OK)
+        return;
 
     // hp check
     if (EatDrinkBandage(false))

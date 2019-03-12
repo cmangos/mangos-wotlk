@@ -535,8 +535,8 @@ void PlayerbotDeathKnightAI::DoNonCombatActions()
     SpellSequence = SPELL_DK_UNHOLY;
 
     // buff master with HORN_OF_WINTER
-    if (HORN_OF_WINTER > 0)
-        (!GetMaster()->HasAura(HORN_OF_WINTER, EFFECT_INDEX_0) && m_ai->CastSpell(HORN_OF_WINTER, *GetMaster()) == SPELL_CAST_OK);
+    if (HORN_OF_WINTER > 0 && !GetMaster()->HasAura(HORN_OF_WINTER, EFFECT_INDEX_0) && m_ai->CastSpell(HORN_OF_WINTER, *GetMaster()) == SPELL_CAST_OK)
+        return;
 
     // hp check
     if (m_bot->getStandState() != UNIT_STAND_STATE_STAND)
