@@ -549,7 +549,7 @@ void PlayerbotDeathKnightAI::DoNonCombatActions()
 // Match up with "Pull()" below
 bool PlayerbotDeathKnightAI::CanPull()
 {
-    if (DEATH_GRIP && m_bot->IsSpellReady(DEATH_GRIP) == SPELL_CAST_OK)
+    if (DEATH_GRIP && m_bot->IsSpellReady(DEATH_GRIP))
         return true;
 
     return false;
