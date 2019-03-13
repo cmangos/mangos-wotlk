@@ -7321,6 +7321,13 @@ void PlayerbotAI::findNearbyCorpse()
 
 void PlayerbotAI::findNearbyCreature()
 {
+    // Do not waste time finding a creature if bot has nothing to do
+    // and clear list (sanity check)
+    if (m_tasks.empty())
+    {
+        m_findNPC.clear();
+        return;
+    }
     CreatureList creatureList;
     float radius = INTERACTION_DISTANCE;
 
@@ -7368,6 +7375,9 @@ void PlayerbotAI::findNearbyCreature()
             if (m_bot->GetDistance(wo) < INTERACTION_DISTANCE)
             {
                 // DEBUG_LOG("%s is interacting with (%s)",m_bot->GetName(),currCreature->GetCreatureInfo()->Name);
+                // Stop moving as soon as bot is in range
+                m_bot->GetMotionMaster()->Clear(false);
+                m_bot->GetMotionMaster()->MoveIdle();
                 GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(currCreature->GetCreatureInfo()->GossipMenuId);
 
                 // prepares quest menu when true
@@ -7388,6 +7398,7 @@ void PlayerbotAI::findNearbyCreature()
                         {
                             // Manage banking actions
                             if (!m_tasks.empty())
+                            {
                                 for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
                                     switch (ait->first)
@@ -7412,6 +7423,9 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                     }
                                 }
+                            }
+                            else
+                                return;
                             BankBalance();
                             break;
                         }
@@ -7426,6 +7440,7 @@ void PlayerbotAI::findNearbyCreature()
                         {
                             // Manage questgiver, trainer, innkeeper & vendor actions
                             if (!m_tasks.empty())
+                            {
                                 for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
                                     switch (ait->first)
@@ -7485,12 +7500,16 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                     }
                                 }
+                            }
+                            else
+                                return;
                             break;
                         }
                         case GOSSIP_OPTION_AUCTIONEER:
                         {
                             // Manage auctioneer actions
                             if (!m_tasks.empty())
+                            {
                                 for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
                                     switch (ait->first)
@@ -7514,6 +7533,9 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                     }
                                 }
+                            }
+                            else
+                                return;
                             ListAuctions();
                             break;
                         }
@@ -7524,8 +7546,6 @@ void PlayerbotAI::findNearbyCreature()
                     m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
                 }
             }
-            m_bot->GetMotionMaster()->Clear(false);
-            m_bot->GetMotionMaster()->MoveIdle();
         }
     }
 }
