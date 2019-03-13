@@ -97,7 +97,7 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     m_bDebugCommandChat(false)
 {
     // set bot state
-    m_botState = BOTSTATE_NORMAL;
+    m_botState = BOTSTATE_LOADING;
 
     // reset some pointers
     m_targetChanged = false;
@@ -2353,6 +2353,10 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
             uint32 msTime;
             p >> msTime;
 
+            // use this spell, 836 login effect, as a signal from server that we're in world
+            if (spellId == 836 && m_botState == BOTSTATE_LOADING)
+                SetState(BOTSTATE_NORMAL);
+
             return;
         }
 
@@ -2587,6 +2591,77 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     m_needItemList.erase(itemid);
             }
 
+            return;
+        }
+
+        case MSG_MOVE_TELEPORT_ACK:
+        {
+            WorldPacket rp(packet);
+            ObjectGuid guid;
+            rp >> guid.ReadAsPacked();
+
+            if (guid != m_bot->GetObjectGuid())
+                return;
+
+            uint32 counter;
+            rp >> counter;
+            // movement location to teleport to
+            MovementInfo mi;
+            rp >> mi;
+
+            if (GetManager()->m_confDebugWhisper)
+                TellMaster("Preparing to teleport");
+
+            if (m_bot->IsBeingTeleportedNear())
+            {
+                // simulate same packets that are sent for client
+                WorldPacket* const p = new WorldPacket(MSG_MOVE_TELEPORT_ACK, 8 + 4 + 4);
+                p->appendPackGUID(m_bot->GetObjectGuid());
+                *p << counter;
+                *p << (uint32) time(0); // time - not currently used
+                m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(p)));
+
+                // send movement info using received movement packet, pops in location
+                WorldPacket* const p2 = new WorldPacket(MSG_MOVE_HEARTBEAT, 64);
+                p2->appendPackGUID(m_bot->GetObjectGuid());
+                *p2 << mi;
+                m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(p2)));
+
+                WorldPacket* const p3 = new WorldPacket(MSG_MOVE_FALL_LAND, 64);
+                p3->appendPackGUID(m_bot->GetObjectGuid());
+                *p3 << mi;
+                m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(p3)));
+
+                // resume normal state if was loading
+                if (m_botState == BOTSTATE_LOADING)
+                    SetState(BOTSTATE_NORMAL);
+            }
+            return;
+        }
+        case SMSG_TRANSFER_PENDING:
+        {
+            if (GetManager()->m_confDebugWhisper)
+                TellMaster("World transfer is pending");
+            SetState(BOTSTATE_LOADING);
+            SetIgnoreUpdateTime(1);
+            m_bot->GetMotionMaster()->Clear(true);
+            return;
+        }
+        case SMSG_NEW_WORLD:
+        {
+            if (GetManager()->m_confDebugWhisper)
+                TellMaster("Preparing to teleport far");
+
+            if (m_bot->IsBeingTeleportedFar())
+            {
+                // simulate client canceling trade before worldport
+                WorldPacket* const pt1 = new WorldPacket(CMSG_CANCEL_TRADE);
+                m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(pt1)));
+
+                WorldPacket* const p = new WorldPacket(MSG_MOVE_WORLDPORT_ACK);
+                m_bot->GetSession()->QueuePacket(std::move(std::unique_ptr<WorldPacket>(p)));
+                SetState(BOTSTATE_NORMAL);
+            }
             return;
         }
 
@@ -4713,7 +4788,8 @@ void PlayerbotAI::SetMovementOrder(MovementOrderType mo, Unit* followTarget)
 {
     m_movementOrder = mo;
     m_followTarget = followTarget;
-    MovementReset();
+    if (m_botState != BOTSTATE_LOADING)
+        MovementReset();
 }
 
 void PlayerbotAI::MovementReset()
@@ -4970,14 +5046,33 @@ bool PlayerbotAI::IsMoving()
 
 void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
 {
-    if (m_bot->IsBeingTeleported() || m_bot->GetTrader())
-        return;
-
     if (CurrentTime() < m_ignoreAIUpdatesUntilTime)
         return;
 
     // default updates occur every two seconds
     SetIgnoreUpdateTime(2);
+    
+    if (m_botState == BOTSTATE_LOADING)
+    {
+        if (m_bot->IsBeingTeleported())
+            return;
+        else
+        {
+            // is bot too far from the follow target
+            if (!m_bot->IsWithinDistInMap(m_followTarget, 50))
+            {
+                DoTeleport(*m_followTarget);
+                return;
+            }
+            else
+                SetState(BOTSTATE_NORMAL);
+
+            return;
+        }
+    }
+
+    if (m_bot->IsBeingTeleported() || m_bot->GetTrader())
+        return;
 
     if (m_FollowAutoGo == FOLLOWAUTOGO_INIT)
     {
@@ -7998,22 +8093,6 @@ bool PlayerbotAI::DoTeleport(WorldObject& /*obj*/)
         return false;
     }
     return true;
-}
-
-void PlayerbotAI::HandleTeleportAck()
-{
-    SetIgnoreUpdateTime(6);
-    m_bot->GetMotionMaster()->Clear(true);
-    if (m_bot->IsBeingTeleportedNear())
-    {
-        WorldPacket p = WorldPacket(MSG_MOVE_TELEPORT_ACK, 8 + 4 + 4);
-        p.appendPackGUID(m_bot->GetObjectGuid());
-        p << (uint32) 0; // supposed to be flags? not used currently
-        p << (uint32) CurrentTime(); // time - not currently used
-        m_bot->GetSession()->HandleMoveTeleportAckOpcode(p);
-    }
-    else if (m_bot->IsBeingTeleportedFar())
-        m_bot->GetSession()->HandleMoveWorldportAckOpcode();
 }
 
 // Localization support
