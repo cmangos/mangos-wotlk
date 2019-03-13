@@ -1945,7 +1945,7 @@ class PlayerbotAI
         void GetTaxi(ObjectGuid guid, BotTaxiNode& nodes);
         void BeingRolledOn(ObjectGuid target) { m_being_rolled_on.push_back(target); };
 
-        bool HasCollectFlag(uint8 flag) { return m_collectionFlags & flag; }
+        bool HasCollectFlag(uint8 flag) { return (m_collectionFlags & flag) ? true : false; }
         void SetCollectFlag(uint8 flag)
         {
             if (HasCollectFlag(flag)) m_collectionFlags &= ~flag;
