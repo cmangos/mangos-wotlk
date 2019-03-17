@@ -4215,6 +4215,26 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             //no break here
             break;
         }
+        case FORM_DEFENSIVESTANCE:
+        {
+            // disable threat aura of Defiance talent when not in defensive stance
+            SpellAuraHolder* defianceHolder = target->GetSpellAuraHolder(12303);
+            if (!defianceHolder)
+                defianceHolder = target->GetSpellAuraHolder(12788);
+            if (!defianceHolder)
+                defianceHolder = target->GetSpellAuraHolder(12789);
+            if (defianceHolder)
+            {
+                if (Aura* threatAura = defianceHolder->m_auras[0])
+                {
+                    threatAura->GetModifier()->m_amount = apply ? threatAura->GetModifier()->m_baseAmount : 0;
+                    for (int8 x = 0; x < MAX_SPELL_SCHOOL; ++x)
+                        if (threatAura->GetModifier()->m_miscvalue & int32(1 << x))
+                            ApplyPercentModFloatVar(target->m_threatModifier[x], float(threatAura->GetModifier()->m_baseAmount), apply);
+                }
+            }
+            break;
+        }
         default:
             break;
     }
@@ -5548,6 +5568,13 @@ void Aura::HandleModThreat(bool apply, bool Real)
         case 28862:
             level_diff = target->getLevel() - 60;
             multiplier = 1;
+            break;
+        // Defiance talents
+        case 12303:
+        case 12788:
+        case 12789:
+            if (target->GetShapeshiftForm() != FORM_DEFENSIVESTANCE)
+                m_modifier.m_amount = 0;
             break;
     }
 
