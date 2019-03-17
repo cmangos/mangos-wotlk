@@ -16341,21 +16341,14 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
     _LoadGlyphs(holder->GetResult(PLAYER_LOGIN_QUERY_LOADGLYPHS));
 
+    _LoadSpells(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLS));
+
     _LoadAuras(holder->GetResult(PLAYER_LOGIN_QUERY_LOADAURAS), time_diff);
     ApplyGlyphs(true);
 
     // add ghost flag (must be after aura load: PLAYER_FLAGS_GHOST set in aura)
     if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         m_deathState = DEAD;
-
-    // train spells by loaded skills
-    for (auto itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
-    {
-        if (itr->second.uState != SKILL_DELETED)
-            UpdateSkillTrainedSpells(uint16(itr->first), SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(itr->second.pos))));
-    }
-
-    _LoadSpells(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLS));
 
     LearnDefaultSkills();
     // after spell load, learn rewarded spell if need also
@@ -17254,6 +17247,7 @@ void Player::_LoadSpells(QueryResult* result)
 {
     // QueryResult *result = CharacterDatabase.PQuery("SELECT spell,active,disabled FROM character_spell WHERE guid = '%u'",GetGUIDLow());
 
+    std::vector<std::tuple<uint32, bool, bool>> spells;
     if (result)
     {
         do
