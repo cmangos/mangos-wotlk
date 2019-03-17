@@ -38,6 +38,7 @@ class Player;
 class WorldSession;
 
 struct GameEventCreatureData;
+enum class VisibilityDistanceType : uint32;
 
 enum CreatureFlagsExtra
 {
@@ -157,6 +158,7 @@ struct CreatureInfo
     uint32  EquipmentTemplateId;
     uint32  VehicleTemplateId;
     uint32  GossipMenuId;
+    VisibilityDistanceType visibilityDistanceType;
     char const* AIName;
     uint32  ScriptID;
 
