@@ -7477,7 +7477,7 @@ void PlayerbotAI::findNearbyCreature()
     {
         Creature* currCreature = *iter;
 
-        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end();)
+        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end(); itr = m_findNPC.erase(itr))
         {
             uint32 npcflags = currCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
@@ -7527,7 +7527,6 @@ void PlayerbotAI::findNearbyCreature()
                         {
                             // Manage banking actions
                             if (!m_tasks.empty())
-                            {
                                 for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
                                     switch (ait->first)
@@ -7552,9 +7551,6 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                     }
                                 }
-                            }
-                            else
-                                return;
                             BankBalance();
                             break;
                         }
@@ -7569,7 +7565,6 @@ void PlayerbotAI::findNearbyCreature()
                         {
                             // Manage questgiver, trainer, innkeeper & vendor actions
                             if (!m_tasks.empty())
-                            {
                                 for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
                                     switch (ait->first)
@@ -7629,16 +7624,12 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                     }
                                 }
-                            }
-                            else
-                                return;
                             break;
                         }
                         case GOSSIP_OPTION_AUCTIONEER:
                         {
                             // Manage auctioneer actions
                             if (!m_tasks.empty())
-                            {
                                 for (std::list<taskPair>::iterator ait = m_tasks.begin(); ait != m_tasks.end(); ait = m_tasks.erase(ait))
                                 {
                                     switch (ait->first)
@@ -7662,9 +7653,6 @@ void PlayerbotAI::findNearbyCreature()
                                             break;
                                     }
                                 }
-                            }
-                            else
-                                return;
                             ListAuctions();
                             break;
                         }
