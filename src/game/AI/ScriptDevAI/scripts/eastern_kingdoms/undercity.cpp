@@ -26,6 +26,7 @@ npc_lady_sylvanas_windrunner
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 /*######
 ## npc_lady_sylvanas_windrunner
@@ -53,28 +54,81 @@ enum
 
 static const float aHighborneLoc[MAX_LAMENTERS][5] =
 {
-    {1286.178f, 312.7989f, -56.15427f - 5.0f, 1.133142f, 1.0f},
-    {1287.959f, 311.534f, -56.26538f - 5.0f, 0.760652f, 2.0f},
-    {1290.516f, 311.1839f, -56.20983f - 5.0f, 1.628063f, 3.0f},
-    {1292.552f, 311.8947f, -56.07092f - 5.0f, 1.960982f, 4.0f},
+    {1286.178f, 312.7989f, -61.15427f, 0.594699f, 1.0f},
+    {1287.959f, 311.5340f, -61.26538f, 1.140551f, 2.0f},
+    {1290.516f, 311.1839f, -61.20983f, 1.521469f, 3.0f},
+    {1292.552f, 311.8947f, -61.07092f, 1.953438f, 4.0f},
 };
 
-struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
+enum SylvanasActions
 {
-    npc_lady_sylvanas_windrunnerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    SYLV_AMBASSADOR_WHISPER,
+    SYLV_SUMMON_HIGHBORNE,
+    SYLV_HIGHBORNE_BUNNY,
+    SYLV_LAMENT_END,
+    SYLV_KNEEL,
+    SYLV_STAND,
+};
 
-    uint32 m_uiLamentEventTimer;
-    uint32 m_uiSummonTimer;
+struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI, public TimerManager
+{
+    npc_lady_sylvanas_windrunnerAI(Creature* pCreature) : ScriptedAI(pCreature) 
+    {
+        AddCustomAction(SYLV_AMBASSADOR_WHISPER, true, [&]
+        { 
+            if (Creature* ambassador = GetClosestCreatureWithEntry(m_creature, NPC_AMBASSADOR, 50.f))
+                if (Player* player = m_creature->GetMap()->GetPlayer(m_guidCurrentPlayer))
+                    DoScriptText(SAY_AMBASSADOR, ambassador, player);
+        });
+        AddCustomAction(SYLV_SUMMON_HIGHBORNE, true, [&]
+        {
+            for (auto& i : aHighborneLoc)
+            {
+                if (Creature* summon = m_creature->SummonCreature(NPC_HIGHBORNE_LAMENTER, i[0], i[1], i[2], i[3], TEMPSPAWN_TIMED_DESPAWN, 155000, false, false))
+                {
+                    float fX, fY, fZ;
+                    summon->GetContactPoint(m_creature, fX, fY, fZ, 0.01f);
+                    summon->GetMotionMaster()->MovePoint(0, fX, fY, fZ + 5.0f);
+                }
+            }
 
-    bool m_uiAmbassador;
+            ResetTimer(SYLV_HIGHBORNE_BUNNY, 2000);
+        });
+        AddCustomAction(SYLV_HIGHBORNE_BUNNY, true, [&]
+        {
+            float fX, fY, fZ;
+            m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
+            m_creature->SummonCreature(NPC_HIGHBORNE_BUNNY, fX, fY, fZ + 15.0f, 0, TEMPSPAWN_TIMED_DESPAWN, 3000);
+
+            if (m_bLamentInProgress)
+                ResetTimer(SYLV_HIGHBORNE_BUNNY, 2000);
+        });
+        AddCustomAction(SYLV_LAMENT_END, true, [&]
+        {
+            ResetTimer(SYLV_KNEEL, 3000);
+            DoScriptText(SAY_LAMENT_END, m_creature);
+        });
+        AddCustomAction(SYLV_KNEEL, true, [&]
+        {
+            ResetTimer(SYLV_STAND, 4000);
+            m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
+            DoScriptText(EMOTE_LAMENT_END, m_creature);
+        });
+        AddCustomAction(SYLV_STAND, true, [&]
+        {
+            m_bLamentInProgress = false;
+            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+        });
+        Reset(); 
+    }
+
+    bool m_bLamentInProgress;
 
     ObjectGuid m_guidCurrentPlayer;
 
     void Reset() override
     {
-        m_uiLamentEventTimer = 0;
-        m_uiSummonTimer = 0;
-        m_uiAmbassador = false;
+        m_bLamentInProgress = false;
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -89,57 +143,21 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
 
     void DoStartLamentEvent(ObjectGuid playerGuid)
     {
-        DoScriptText(EMOTE_LAMENT_START, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_SYLVANAS_CAST);
-        m_uiLamentEventTimer = 5000;
-        m_uiSummonTimer = 13000;
-        m_uiAmbassador = false;
-        m_guidCurrentPlayer = playerGuid;
+        if (!m_bLamentInProgress)
+        {
+            m_bLamentInProgress = true;
+            DoScriptText(EMOTE_LAMENT_START, m_creature);
+            DoCastSpellIfCan(m_creature, SPELL_SYLVANAS_CAST);
+            ResetTimer(SYLV_AMBASSADOR_WHISPER, 3000);
+            ResetTimer(SYLV_SUMMON_HIGHBORNE, 10000);
+            ResetTimer(SYLV_LAMENT_END, 172500);
+            m_guidCurrentPlayer = playerGuid;
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiLamentEventTimer)
-        {
-            if (m_uiLamentEventTimer <= uiDiff)
-            {
-                if (!m_uiAmbassador) // On first ribbon, whisper to player
-                {
-                    m_uiAmbassador = true;
-                    if (Creature* ambassador = GetClosestCreatureWithEntry(m_creature, NPC_AMBASSADOR, 50.f))
-                        if (Player* player = m_creature->GetMap()->GetPlayer(m_guidCurrentPlayer))
-                            DoScriptText(SAY_AMBASSADOR, ambassador, player);
-                }
-
-                float fX, fY, fZ;
-                m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-                m_creature->SummonCreature(NPC_HIGHBORNE_BUNNY, fX, fY, fZ + 15.0f, 0, TEMPSPAWN_TIMED_DESPAWN, 3000);
-
-                m_uiLamentEventTimer = 2000;
-
-                if (!m_creature->HasAura(SPELL_SYLVANAS_CAST))
-                {
-                    DoScriptText(SAY_LAMENT_END, m_creature);
-                    DoScriptText(EMOTE_LAMENT_END, m_creature);
-                    m_uiLamentEventTimer = 0;
-                }
-            }
-            else
-                m_uiLamentEventTimer -= uiDiff;
-        }
-
-        if (m_uiSummonTimer)
-        {
-            if (m_uiSummonTimer <= uiDiff)
-            {
-                for (auto& i : aHighborneLoc)
-                    m_creature->SummonCreature(NPC_HIGHBORNE_LAMENTER, i[0], i[1], i[2], i[3], TEMPSPAWN_TIMED_DESPAWN, 160000, false, false, i[4]);
-
-                m_uiSummonTimer = 0;
-            }
-            else
-                m_uiSummonTimer -= uiDiff;
-        }
+        UpdateTimers(uiDiff);
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
