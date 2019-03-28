@@ -2135,6 +2135,8 @@ class PlayerbotAI
 
         AttackerInfoList m_attackerInfo;
 
+        // Force bot to pick a neutralised unit as combat target when told so
+        bool m_ignoreNeutralizeEffect;
         bool m_targetChanged;
         CombatTargetType m_targetType;
 
