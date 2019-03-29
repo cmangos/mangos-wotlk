@@ -273,12 +273,6 @@ void PlayerbotMgr::HandleMasterIncomingPacket(const WorldPacket& packet)
                 }
                 {
                 std::ostringstream out;
-                out << "m_TimeDoneEating: " << pBot->m_TimeDoneEating
-                << " m_TimeDoneDrinking: " << pBot->m_TimeDoneDrinking;
-                ch.SendSysMessage(out.str().c_str());
-                }
-                {
-                std::ostringstream out;
                 out << "m_CurrentlyCastingSpellId: " << pBot->m_CurrentlyCastingSpellId;
                 ch.SendSysMessage(out.str().c_str());
                 }

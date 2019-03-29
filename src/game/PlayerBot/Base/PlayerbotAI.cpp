@@ -90,7 +90,6 @@ class PlayerbotChatHandler : protected ChatHandler
 PlayerbotAI::PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot) :
     m_mgr(mgr), m_bot(bot), m_classAI(0), m_ignoreAIUpdatesUntilTime(CurrentTime()),
     m_combatOrder(ORDERS_NONE), m_ScenarioType(SCENARIO_PVE),
-    m_TimeDoneEating(0), m_TimeDoneDrinking(0),
     m_CurrentlyCastingSpellId(0), m_CraftSpellId(0), m_spellIdCommand(0),
     m_targetGuidCommand(ObjectGuid()),
     m_taxiMaster(ObjectGuid()),
@@ -2738,19 +2737,6 @@ uint8 PlayerbotAI::GetManaPercent() const
     return GetManaPercent(*m_bot);
 }
 
-uint8 PlayerbotAI::GetBaseManaPercent(const Unit& target) const
-{
-    if (target.GetPower(POWER_MANA) >= target.GetCreateMana())
-        return (100);
-    else
-        return (static_cast<float>(target.GetPower(POWER_MANA)) / target.GetCreateMana()) * 100;
-}
-
-uint8 PlayerbotAI::GetBaseManaPercent() const
-{
-    return GetBaseManaPercent(*m_bot);
-}
-
 uint8 PlayerbotAI::GetRageAmount(const Unit& target) const
 {
     return (static_cast<float>(target.GetPower(POWER_RAGE)));
@@ -5080,11 +5066,6 @@ void PlayerbotAI::Announce(AnnounceFlags msg)
     }
 }
 
-bool PlayerbotAI::IsMoving()
-{
-    return (m_bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE ? false : true);
-}
-
 // some possible things to use in AI
 // GetRandomContactPoint
 // GetPower, GetMaxPower
@@ -5380,7 +5361,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
     }
 
     // if commanded to follow master and not already following master then follow master
-    if (!m_bot->isInCombat() && !IsMoving())
+    if (!m_bot->isInCombat() && !m_bot->IsMoving())
         return MovementReset();
 
     // do class specific non combat actions
