@@ -5745,6 +5745,8 @@ void Spell::EffectCreateItem2(SpellEffectIndex eff_idx)
         loot.GetLootItemsListFor(player, lootList);
         for (auto lootItr : lootList)
             m_spellLog.AddLog(uint32(SPELL_EFFECT_CREATE_ITEM_2), lootItr->itemId);
+
+        player->UpdateCraftSkill(m_spellInfo->Id);
     }
 }
 
