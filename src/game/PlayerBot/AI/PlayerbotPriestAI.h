@@ -87,7 +87,8 @@ enum PriestSpells
     SILENCE_1                       = 15487,
     SMITE_1                         = 585,
     VAMPIRIC_EMBRACE_1              = 15286,
-    VAMPIRIC_TOUCH_1                = 34914
+    VAMPIRIC_TOUCH_1                = 34914,
+    WEAKNED_SOUL                    = 6788
 };
 //class Player;
 
@@ -100,6 +101,7 @@ class PlayerbotPriestAI : PlayerbotClassAI
         // all combat actions go here
         CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
         CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
+        uint32 Neutralize(uint8 creatureType);
 
         // all non combat actions go here, ex buffs, heals, rezzes
         void DoNonCombatActions();
@@ -136,8 +138,11 @@ class PlayerbotPriestAI : PlayerbotClassAI
                PRAYER_OF_MENDING,
                RENEW,
                RESURRECTION,
+               SHACKLE_UNDEAD,
                SMITE,
-               CURE_DISEASE;
+               CURE_DISEASE,
+               ABOLISH_DISEASE,
+               PRIEST_DISPEL_MAGIC;
         // ranged
         uint32 SHOOT;
 

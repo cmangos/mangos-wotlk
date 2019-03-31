@@ -69,6 +69,7 @@ enum DruidSpells
     NATURES_GRASP_1                 = 16689,
     NATURES_SWIFTNESS_DRUID_1       = 17116,
     NOURISH_1                       = 50464,
+    OMEN_OF_CLARITY_1               = 16864,
     POUNCE_1                        = 9005,
     PROWL_1                         = 5215,
     RAKE_1                          = 1822,
@@ -116,6 +117,7 @@ class PlayerbotDruidAI : PlayerbotClassAI
         CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
         CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
         bool Pull();
+        uint32 Neutralize(uint8 creatureType);
 
         // all non combat actions go here, ex buffs, heals, rezzes
         void DoNonCombatActions();
@@ -140,7 +142,6 @@ class PlayerbotDruidAI : PlayerbotClassAI
 
         // Heals the target based off its hps
         CombatManeuverReturns HealPlayer(Player* target);
-        Player* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
 
         static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target);
         // Callback method to reset shapeshift forms blocking buffs and heals
@@ -193,10 +194,12 @@ class PlayerbotDruidAI : PlayerbotClassAI
         uint32 MOONFIRE,
                ROOTS,
                WRATH,
+               OMEN_OF_CLARITY,
                STARFALL,
                STARFIRE,
                INSECT_SWARM,
                FAERIE_FIRE,
+               HIBERNATE,
                FORCE_OF_NATURE,
                HURRICANE,
                ECLIPSE_SOLAR,

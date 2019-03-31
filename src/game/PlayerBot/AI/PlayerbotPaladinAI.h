@@ -106,7 +106,6 @@ class PlayerbotPaladinAI : PlayerbotClassAI
 
         // Heals the target based off its hps
         CombatManeuverReturns HealPlayer(Player* target);
-        Player* GetHealTarget() { return PlayerbotClassAI::GetHealTarget(); }
 
         //Changes aura according to spec/orders
         void CheckAuras();

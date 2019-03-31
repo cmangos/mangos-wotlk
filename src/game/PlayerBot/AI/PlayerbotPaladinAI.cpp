@@ -217,7 +217,20 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // Heal
     if (m_ai->IsHealer())
     {
-        if (HealPlayer(GetHealTarget()) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
+        // Heal other players/bots first
+        // Select a target based on orders and some context (pets are ignored because GetHealTarget() only works on players)
+        Player* targetToHeal;
+        // 1. bot has orders to focus on main tank
+        if (m_ai->IsMainHealer())
+            targetToHeal = GetHealTarget(JOB_MAIN_TANK);
+        // 2. Look at its own group (this implies raid leader creates balanced groups, except for the MT group)
+        else
+            targetToHeal = GetHealTarget(JOB_ALL, true);
+        // 3. still no target to heal, search amongst everyone
+        if (!targetToHeal)
+            targetToHeal = GetHealTarget();
+
+        if (HealPlayer(targetToHeal) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
             return RETURN_CONTINUE;
     }
     else if (m_ai->GetGroupHealer() && m_ai->GetGroupHealer()->isAlive())
@@ -330,44 +343,40 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
         return RETURN_NO_ACTION_ERROR; // not error per se - possibly just OOM
     }
 
-    if (PURIFY > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0)
+    uint32 dispel = CLEANSE > 0 ? CLEANSE : PURIFY;
+    // Remove negative magic on group members if orders allow bot to do so
+    if (Player* pCursedTarget = GetDispelTarget(DISPEL_MAGIC))
     {
-        uint32 DISPEL = CLEANSE > 0 ? CLEANSE : PURIFY;
-        uint32 dispelMask  = GetDispellMask(DISPEL_DISEASE);
-        uint32 dispelMask2 = GetDispellMask(DISPEL_POISON);
-        uint32 dispelMask3 = GetDispellMask(DISPEL_MAGIC);
-        Unit::SpellAuraHolderMap const& auras = target->GetSpellAuraHolderMap();
-        for (Unit::SpellAuraHolderMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-        {
-            SpellAuraHolder* holder = itr->second;
-            if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
-            {
-                if (holder->GetSpellProto()->Dispel == DISPEL_DISEASE)
-                {
-                    if (m_ai->CastSpell(DISPEL, *target) == SPELL_CAST_OK)
-                        return RETURN_CONTINUE;
-                    return RETURN_NO_ACTION_ERROR;
-                }
-            }
-            else if ((1 << holder->GetSpellProto()->Dispel) & dispelMask2)
-            {
-                if (holder->GetSpellProto()->Dispel == DISPEL_POISON)
-                {
-                    if (m_ai->CastSpell(DISPEL, *target) == SPELL_CAST_OK)
-                        return RETURN_CONTINUE;
-                    return RETURN_NO_ACTION_ERROR;
-                }
-            }
-            else if ((1 << holder->GetSpellProto()->Dispel) & dispelMask3 & (DISPEL == CLEANSE))
-            {
-                if (holder->GetSpellProto()->Dispel == DISPEL_MAGIC)
-                {
-                    if (m_ai->CastSpell(DISPEL, *target) == SPELL_CAST_OK)
-                        return RETURN_CONTINUE;
-                    return RETURN_NO_ACTION_ERROR;
-                }
-            }
-        }
+        if (dispel > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && m_ai->CastSpell(dispel, *pCursedTarget) == SPELL_CAST_OK)
+            return RETURN_CONTINUE;
+    }
+
+    // Remove poison on group members if orders allow bot to do so
+    if (Player* pPoisonedTarget = GetDispelTarget(DISPEL_POISON))
+    {
+        m_ai->TellMaster("Has poison %s :", pPoisonedTarget->GetName());
+        if (dispel > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && m_ai->CastSpell(dispel, *pPoisonedTarget) == SPELL_CAST_OK)
+            return RETURN_CONTINUE;
+    }
+
+    // Remove disease on group members if orders allow bot to do so
+    if (Player* pDiseasedTarget = GetDispelTarget(DISPEL_DISEASE))
+    {
+        if (dispel > 0 && (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_NODISPEL) == 0 && m_ai->CastSpell(dispel, *pDiseasedTarget) == SPELL_CAST_OK)
+            return RETURN_CONTINUE;
+    }
+
+    // If target is out of range (40 yards) and is a tank: move towards it
+    // if bot is not asked to stay
+    // Other classes have to adjust their position to the healers
+    // TODO: This code should be common to all healers and will probably
+    // move to a more suitable place like PlayerbotAI::DoCombatMovement()
+    if ((GetTargetJob(target) == JOB_TANK || GetTargetJob(target) == JOB_MAIN_TANK)
+            && m_bot->GetPlayerbotAI()->GetMovementOrder() != PlayerbotAI::MOVEMENT_STAY
+            && !m_ai->In_Reach(target, FLASH_OF_LIGHT))
+    {
+        m_bot->GetMotionMaster()->MoveFollow(target, 39.0f, m_bot->GetOrientation());
+        return RETURN_CONTINUE;
     }
 
     uint8 hp = target->GetHealthPercent();
@@ -390,10 +399,13 @@ CombatManeuverReturns PlayerbotPaladinAI::HealPlayer(Player* target)
     if (hp < 40 && m_ai->CastSpell(FLASH_OF_LIGHT, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
-    if (hp < 60 && m_ai->CastSpell(HOLY_SHOCK, *target) == SPELL_CAST_OK)
+    if (hp < 40 && FLASH_OF_LIGHT > 0 && m_ai->In_Reach(target, FLASH_OF_LIGHT) && m_ai->CastSpell(FLASH_OF_LIGHT, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
-    if (hp < 90 && m_ai->CastSpell(HOLY_LIGHT, *target) == SPELL_CAST_OK)
+    if (hp < 60 && HOLY_SHOCK > 0 && m_ai->In_Reach(target, HOLY_SHOCK) && m_ai->CastSpell(HOLY_SHOCK, *target) == SPELL_CAST_OK)
+        return RETURN_CONTINUE;
+
+    if (hp < 90 && HOLY_LIGHT > 0 && m_ai->In_Reach(target, HOLY_LIGHT) && m_ai->CastSpell(HOLY_LIGHT, *target) == SPELL_CAST_OK)
         return RETURN_CONTINUE;
 
     return RETURN_NO_ACTION_UNKNOWN;
@@ -456,6 +468,11 @@ bool PlayerbotPaladinAI::CheckSeals()
 
     uint32 spec = m_bot->GetSpec();
 
+    // Bypass spec if combat orders were given
+    if (m_ai->IsHealer()) spec = PALADIN_SPEC_HOLY;
+    if (m_ai->IsTank()) spec = PALADIN_SPEC_PROTECTION;
+    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_ASSIST) spec = PALADIN_SPEC_RETRIBUTION;
+
     switch (spec)
     {
         case PALADIN_SPEC_HOLY:
@@ -488,7 +505,7 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     CheckAuras();
 
     //Put up RF if tank
-    if (m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK)
+    if (m_ai->IsTank())
         m_ai->SelfBuff(RIGHTEOUS_FURY);
     //Disable RF if not tank
     else if (m_bot->HasAura(RIGHTEOUS_FURY))
@@ -677,7 +694,7 @@ bool PlayerbotPaladinAI::CastHoTOnTank()
 {
     if (!m_ai) return false;
 
-    if ((PlayerbotAI::ORDERS_HEAL & m_ai->GetCombatOrder()) == 0) return false;
+    if (!m_ai->IsHealer()) return false;
 
     // Paladin: Sheath of Light (with talents), Flash of Light (with Infusion of Light talent and only on a target with the Sacred Shield buff),
     //          Holy Shock (with Tier 8 set bonus)
