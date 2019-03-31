@@ -270,6 +270,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit* pTarget)
         default:
             if (m_bot->GetComboPoints() >= 5)
             {
+            	Creature* pCreature = (Creature*) pTarget;
                 // wait for energy
                 if (m_ai->GetEnergyAmount() < 25 && (KIDNEY_SHOT || SLICE_DICE || EXPOSE_ARMOR))
                     return RETURN_NO_ACTION_OK;
@@ -290,8 +291,15 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit* pTarget)
                     case CLASS_WARRIOR:
                     case CLASS_PALADIN:
                     case CLASS_DEATH_KNIGHT:
-                        if (EXPOSE_ARMOR > 0 && !pTarget->HasAura(EXPOSE_ARMOR, EFFECT_INDEX_0) && m_ai->CastSpell(EXPOSE_ARMOR, *pTarget) == SPELL_CAST_OK) // 25 energy (checked above)
-                            return RETURN_CONTINUE;
+						// If target is a warrior or paladin type (high armor): expose its armor unless already tanked by a warrior (Sunder Armor > Expose Armor)
+						if (m_ai->IsElite(pTarget) && pCreature && pCreature->GetCreatureInfo()->UnitClass != 8)
+						{
+							if  (!m_ai->GetGroupTank() || (m_ai->GetGroupTank() && m_ai->GetGroupTank()->getVictim() != pTarget))
+							{
+								if (EXPOSE_ARMOR > 0 && !pTarget->HasAura(EXPOSE_ARMOR, EFFECT_INDEX_0) && m_ai->CastSpell(EXPOSE_ARMOR, *pTarget) == SPELL_CAST_OK) // 25 energy (checked above)
+									return RETURN_CONTINUE;
+							}
+						}
                         break;
 
 
