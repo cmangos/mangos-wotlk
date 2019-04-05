@@ -152,6 +152,11 @@ class PlayerbotShamanAI : PlayerbotClassAI
 
         // Heals the target based off its hps
         CombatManeuverReturns HealPlayer(Player* target);
+        // Resurrects the target
+        CombatManeuverReturns ResurrectPlayer(Player* target);
+        // Dispel disease or negative magic effects from an internally selected target
+        CombatManeuverReturns DispelPlayer(Player* target = nullptr);
+
         void DropTotems();
         void CheckShields();
         void UseCooldowns();

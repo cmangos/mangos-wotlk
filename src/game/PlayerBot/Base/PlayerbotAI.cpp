@@ -1471,21 +1471,19 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
 
     if (m_combatOrder == ORDERS_NONE)
         out << "Got no combat orders!";
+    else if (m_combatOrder & ORDERS_MAIN_TANK)
+        out << "I'm a MAIN TANK";
     else if (m_combatOrder & ORDERS_TANK)
         out << "I TANK";
-    else if (m_combatOrder & ORDERS_MAIN_TANK)
-        out << "I MAIN TANK";
     else if (m_combatOrder & ORDERS_ASSIST)
         out << "I ASSIST " << (m_targetAssist ? m_targetAssist->GetName() : "unknown");
-    else if (m_combatOrder & ORDERS_HEAL)
-        out << "I HEAL and DISPEL";
     else if (m_combatOrder & ORDERS_MAIN_HEAL)
-        out << "I MAIN HEAL and DISPEL";
-    else if (m_combatOrder & ORDERS_NODISPEL)
-        out << "I HEAL and won't DISPEL";
+        out << "I'm MAIN HEALER";
+    else if (m_combatOrder & ORDERS_HEAL)
+        out << "I HEAL";
     else if (m_combatOrder & ORDERS_PASSIVE)
-        out << "I'M PASSIVE";
-    if ((m_combatOrder & ORDERS_PRIMARY) && (m_combatOrder & (ORDERS_PROTECT | ORDERS_RESIST)))
+        out << "I'm PASSIVE";
+    if ((m_combatOrder & ORDERS_PRIMARY) && (m_combatOrder & (ORDERS_PROTECT | ORDERS_RESIST | ORDERS_NODISPEL)))
     {
         out << " and ";
         if (m_combatOrder & ORDERS_PROTECT)
@@ -1501,6 +1499,8 @@ void PlayerbotAI::SendOrders(Player& /*player*/)
             if (m_combatOrder & ORDERS_RESIST_SHADOW)
                 out << "I RESIST SHADOW";
         }
+        if (m_combatOrder & ORDERS_NODISPEL)
+            out << "I WON'T DISPEL";
     }
     out << ".";
 

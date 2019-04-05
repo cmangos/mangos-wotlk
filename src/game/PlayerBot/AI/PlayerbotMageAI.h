@@ -110,7 +110,12 @@ class PlayerbotMageAI : PlayerbotClassAI
 
         CombatManeuverReturns CastSpell(uint32 nextAction, Unit* pTarget = nullptr) { return CastSpellWand(nextAction, pTarget, SHOOT); }
 
+        // Dispel disease or negative magic effects from the target
+        CombatManeuverReturns DispelPlayer(Player* target);
+
         static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target);
+
+        uint8 CheckFrostCooldowns();
 
         // ARCANE
         uint32 ARCANE_MISSILES,
