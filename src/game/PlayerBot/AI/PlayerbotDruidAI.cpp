@@ -525,11 +525,11 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
     if (((GetTargetJob(target) == JOB_TANK || GetTargetJob(target) == JOB_MAIN_TANK) && hp < 10)
             || (GetTargetJob(target) != JOB_TANK && GetTargetJob(target) != JOB_MAIN_TANK && hp < 15))
     {
-        // TODO: Use in conjunction with Nature's Swiftness
-        if (HEALING_TOUCH > 0 && m_ai->In_Reach(target, HEALING_TOUCH) && (NOURISH == 0 /*|| CastSpell(NATURES_SWIFTNESS)*/) && CastSpell(HEALING_TOUCH, target))
-            return RETURN_CONTINUE;
+        // first try Nature's Swiftness + Healing Touch: instant heal
+        if (NATURES_SWIFTNESS > 0 && m_bot->IsSpellReady(NATURES_SWIFTNESS))
+            CastSpell(NATURES_SWIFTNESS, m_bot);
 
-        if (NOURISH > 0 && m_ai->In_Reach(target, NOURISH) && CastSpell(NOURISH, target))
+        if (HEALING_TOUCH > 0 && m_ai->In_Reach(target, HEALING_TOUCH) && (NOURISH == 0 /*|| CastSpell(NATURES_SWIFTNESS)*/) && CastSpell(HEALING_TOUCH, target))
             return RETURN_CONTINUE;
     }
 
@@ -540,6 +540,8 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
         if (REGROWTH > 0 && m_ai->In_Reach(target, REGROWTH) && !target->HasAura(REGROWTH) && CastSpell(REGROWTH, target))
             return RETURN_CONTINUE;
         if (REJUVENATION > 0 && m_ai->In_Reach(target, REJUVENATION) && target->HasAura(REGROWTH) && !target->HasAura(REJUVENATION) && CastSpell(REJUVENATION, target))
+            return RETURN_CONTINUE;
+        if (NOURISH > 0 && m_ai->In_Reach(target, NOURISH) && CastSpell(NOURISH, target))
             return RETURN_CONTINUE;
         if (SWIFTMEND > 0 && m_bot->IsSpellReady(SWIFTMEND) && m_ai->In_Reach(target, SWIFTMEND) && (target->HasAura(REJUVENATION) || target->HasAura(REGROWTH)) && CastSpell(SWIFTMEND, target))
             return RETURN_CONTINUE;
