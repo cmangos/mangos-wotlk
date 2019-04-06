@@ -291,7 +291,6 @@ struct npc_fiendish_portalAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->ApplySpellImmune(nullptr, IMMUNITY_SCHOOL, SPELL_SCHOOL_MASK_FIRE, true);
         pSummoned->SetInCombatWithZone();
     }
 
