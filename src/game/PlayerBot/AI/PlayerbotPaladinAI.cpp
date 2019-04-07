@@ -230,43 +230,37 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
     if (m_ai->HasDispelOrder() && DispelPlayer() & RETURN_CONTINUE)
         return RETURN_CONTINUE;
 
-    // Heal
-    if (m_ai->IsHealer())
-    {
-        // Heal other players/bots first
-        // Select a target based on orders and some context (pets are ignored because GetHealTarget() only works on players)
-        Player* targetToHeal;
-        // 1. bot has orders to focus on main tank
-        if (m_ai->IsMainHealer())
-            targetToHeal = GetHealTarget(JOB_MAIN_TANK);
-        // 2. Look at its own group (this implies raid leader creates balanced groups, except for the MT group)
-        else
-            targetToHeal = GetHealTarget(JOB_ALL, true);
-        // 3. still no target to heal, search amongst everyone
-        if (!targetToHeal)
-            targetToHeal = GetHealTarget();
-
-        if (HealPlayer(targetToHeal) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
-            return RETURN_CONTINUE;
-    }
-    else if (m_ai->GetGroupHealer() && m_ai->GetGroupHealer()->isAlive())
-    {
-        // Desirable? Debatable. We should have faith in the healer. On the other hand this low HP could be considered a crisis,
-        // and DPS is not crucial so probably a good thing (which is why I put it in)
-        // Of course, keep in mind we're not healing specced so it's unlikely to do much later on...
-        if (!m_ai->IsTank() && m_ai->GetHealthPercent() < 35 && HealPlayer(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
-            return RETURN_CONTINUE;
-    }
-    else
-    {
-        // Is this desirable? Debatable.
-        // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
-        if (m_ai->GetHealthPercent() < 50 && HealPlayer(m_bot) & (RETURN_NO_ACTION_OK | RETURN_CONTINUE))
-            return RETURN_CONTINUE;
-    }
+    // Heal (try to pick a target by on common rules, than heal using each PlayerbotClassAI HealPlayer() method)
+    if (FindTargetAndHeal())
+        return RETURN_CONTINUE;
 
     //Used to determine if this bot has highest threat
     Unit* newTarget = m_ai->FindAttacker((PlayerbotAI::ATTACKERINFOTYPE)(PlayerbotAI::AIT_VICTIMSELF | PlayerbotAI::AIT_HIGHESTTHREAT), m_bot);
+    if (newTarget && !(m_ai->GetCombatOrder() & PlayerbotAI::ORDERS_TANK) && !m_ai->IsNeutralized(newTarget)) // TODO: && party has a tank
+    {
+        // Aggroed by an elite
+        if (m_ai->IsElite(newTarget))
+        {
+            // Try to stun the mob
+            if (HAMMER_OF_JUSTICE > 0 && m_ai->In_Reach(newTarget, HAMMER_OF_JUSTICE) && m_bot->IsSpellReady(HAMMER_OF_JUSTICE) && !newTarget->HasAura(HAMMER_OF_JUSTICE) && m_ai->CastSpell(HAMMER_OF_JUSTICE, *newTarget) == SPELL_CAST_OK)
+                return RETURN_CONTINUE;
+
+            // Bot has low life: use divine powers to protect him/herself
+            if (m_ai->GetHealthPercent() < 15)
+            {
+                if (DIVINE_SHIELD > 0 && m_bot->IsSpellReady(DIVINE_SHIELD) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DIVINE_SHIELD, *m_bot) == SPELL_CAST_OK)
+                    return RETURN_CONTINUE;
+
+                if (DIVINE_PROTECTION > 0 && m_bot->IsSpellReady(DIVINE_PROTECTION) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_PROTECTION, EFFECT_INDEX_0) && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->CastSpell(DIVINE_PROTECTION, *m_bot) == SPELL_CAST_OK)
+                    return RETURN_CONTINUE;
+            }
+
+            // Else: do nothing and pray for tank to pick aggro from mob
+            return RETURN_NO_ACTION_OK;
+        }
+    }
+
+    // Damage rotation
     switch (spec)
     {
         case PALADIN_SPEC_HOLY:
