@@ -41,6 +41,8 @@ PlayerbotPriestAI::PlayerbotPriestAI(Player* const master, Player* const bot, Pl
     BINDING_HEAL                  = m_ai->initSpell(BINDING_HEAL_1);
     PRAYER_OF_MENDING             = m_ai->initSpell(PRAYER_OF_MENDING_1);
     CURE_DISEASE                  = m_ai->initSpell(CURE_DISEASE_1);
+    ABOLISH_DISEASE               = m_ai->initSpell(ABOLISH_DISEASE_1);
+    SHACKLE_UNDEAD                = m_ai->initSpell(SHACKLE_UNDEAD_1);
 
     // SHADOW
     FADE                          = m_ai->initSpell(FADE_1);

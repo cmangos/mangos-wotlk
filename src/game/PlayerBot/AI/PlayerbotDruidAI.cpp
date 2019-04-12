@@ -34,6 +34,7 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
     GIFT_OF_THE_WILD              = m_ai->initSpell(GIFT_OF_THE_WILD_1);
     THORNS                        = m_ai->initSpell(THORNS_1);
     BARKSKIN                      = m_ai->initSpell(BARKSKIN_1);
+    HIBERNATE                     = m_ai->initSpell(HIBERNATE_1);
     INNERVATE                     = m_ai->initSpell(INNERVATE_1);
     FAERIE_FIRE                   = m_ai->initSpell(FAERIE_FIRE_1); // debuffs
     FAERIE_FIRE_FERAL             = m_ai->initSpell(FAERIE_FIRE_FERAL_1);
@@ -42,12 +43,15 @@ PlayerbotDruidAI::PlayerbotDruidAI(Player* const master, Player* const bot, Play
     WILD_GROWTH                   = m_ai->initSpell(WILD_GROWTH_1);
     LIFEBLOOM                     = m_ai->initSpell(LIFEBLOOM_1);
     NOURISH                       = m_ai->initSpell(NOURISH_1);
+    OMEN_OF_CLARITY               = m_ai->initSpell(OMEN_OF_CLARITY_1);
+    NATURES_SWIFTNESS             = m_ai->initSpell(NATURES_SWIFTNESS_DRUID_1);
     HEALING_TOUCH                 = m_ai->initSpell(HEALING_TOUCH_1);
     SWIFTMEND                     = m_ai->initSpell(SWIFTMEND_1);
     TRANQUILITY                   = m_ai->initSpell(TRANQUILITY_1);
     REVIVE                        = m_ai->initSpell(REVIVE_1);
     REBIRTH                       = m_ai->initSpell(REBIRTH_1);
     REMOVE_CURSE                  = m_ai->initSpell(REMOVE_CURSE_DRUID_1);
+    CURE_POISON                   = m_ai->initSpell(CURE_POISON_1);
     ABOLISH_POISON                = m_ai->initSpell(ABOLISH_POISON_1);
     // Druid Forms
     MOONKIN_FORM                  = m_ai->initSpell(MOONKIN_FORM_1);

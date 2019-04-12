@@ -223,6 +223,7 @@ class PlayerbotDruidAI : PlayerbotClassAI
                REGROWTH,
                NOURISH,
                HEALING_TOUCH,
+               NATURES_SWIFTNESS,
                WILD_GROWTH,
                SWIFTMEND,
                TRANQUILITY,
