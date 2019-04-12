@@ -7545,7 +7545,7 @@ void PlayerbotAI::findNearbyCreature()
     {
         Creature* currCreature = *iter;
 
-        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end(); itr = m_findNPC.erase(itr))
+        for (std::list<enum NPCFlags>::iterator itr = m_findNPC.begin(); itr != m_findNPC.end();)
         {
             uint32 npcflags = currCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
@@ -7730,6 +7730,7 @@ void PlayerbotAI::findNearbyCreature()
                     AutoUpgradeEquipment();
                     m_bot->HandleEmoteCommand(EMOTE_ONESHOT_TALK);
                 }
+                itr = m_findNPC.erase(itr); // all done lets go home
             }
         }
     }
