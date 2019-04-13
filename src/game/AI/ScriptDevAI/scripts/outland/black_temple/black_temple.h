@@ -25,6 +25,7 @@ enum
     NPC_AKAMA_SHADE                 = 23191,
     NPC_TERON_GOREFIEND             = 22871,
     NPC_RELIQUARY_OF_SOULS          = 22856,
+    NPC_RELIQUARY_COMBAT_TRIGGER    = 23417,
     NPC_ILLIDARI_COUNCIL            = 23426,
     NPC_COUNCIL_VOICE               = 23499,
     NPC_LADY_MALANDE                = 22951,
@@ -46,6 +47,7 @@ enum
     NPC_BLACK_TEMPLE_TRIGGER        = 22984,
     NPC_SHADOWY_CONSTRUCT           = 23111,
     NPC_VENGEFUL_SPIRIT             = 23109,
+    NPC_WORLD_TRIGGER               = 22515,
 
     // Ashtongue
     NPC_ASHTONGUE_BATTLELORD        = 22844,
@@ -55,6 +57,26 @@ enum
     NPC_STORM_FURY                  = 22848,
     NPC_ASHTONGUE_FERAL_SPIRIT      = 22849,
     NPC_ASHTONGUE_STALKER           = 23374,
+
+    // RoS Spirits
+    NPC_ANGERED_SOUL_FRAGMENT       = 23398,
+    NPC_SUFFERING_SOUL_FRAGMENT     = 23399,
+    NPC_HUNGERING_SOUL_FRAGMENT     = 23401,
+
+    // RoS Adds
+    NPC_ENSLAVED_SOUL               = 23469,
+
+    // Illidan spawns
+    NPC_ILLIDARI_ELITE              = 23226,
+    NPC_FLAME_CRASH                 = 23336,
+    NPC_PARASITIC_SHADOWFIEND       = 23498,
+    NPC_BLADE_OF_AZZINOTH           = 22996,
+    NPC_FLAME_OF_AZZINOTH           = 22997,
+    NPC_ILLIDAN_TARGET              = 23070,
+    NPC_DEMON_FIRE                  = 23069,
+    NPC_BLAZE                       = 23259,
+    NPC_SHADOW_DEMON                = 23375,
+    NPC_CAGE_TRAP_DISTURB_TRIGGER   = 23304,
 
     GO_NAJENTUS_GATE                = 185483,
     GO_SUPREMUS_DOORS               = 185882,
@@ -72,6 +94,7 @@ enum
     GO_IMPALING_SPINE               = 185584,
 
     EMOTE_OPEN_NAJENTUS_DOOR        = -1564137,
+    EMOTE_OPEN_MOTHER_DOOR          = -1564139,
 
     FACTION_ASHTONGUE_FRIENDLY      = 1820,
 };
@@ -87,7 +110,10 @@ class instance_black_temple : public ScriptedInstance
 
         void OnPlayerEnter(Player* player) override;
         void OnCreatureCreate(Creature* creature) override;
+        void OnCreatureRespawn(Creature* creature) override;
         void OnObjectCreate(GameObject* go) override;
+        void OnCreatureEvade(Creature* creature) override;
+        void OnCreatureDeath(Creature* creature) override;
 
         void SetData(uint32 type, uint32 data) override;
         uint32 GetData(uint32 type) const override;
@@ -96,6 +122,10 @@ class instance_black_temple : public ScriptedInstance
         GuidVector const& GetGeneratorGuidVector() const { return m_creatureGeneratorGuidVector; }
         GuidVector& GetShadowyConstructGuidVector() { return m_shadowyConstructs; } // alterable
         void GetGlaiveTargetGuidVector(GuidVector& vector) const { vector = m_vGlaiveTargetGuidVector; }
+        GuidVector& GetIllidanSpawns() { return m_illidanSpawns; }
+        GuidVector& GetIllidanTriggersLower() { return m_illidanTriggersLower; }
+        GuidVector& GetIllidanTriggersUpper() { return m_illidanTriggersUpper; }
+        GuidVector& GetEnslavedSouls() { return m_enslavedSouls; }
 
         void DespawnImpalingSpines();
         void RespawnChannelers();
@@ -103,9 +133,9 @@ class instance_black_temple : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
+        void DoTeleportAkamaIfCan();
     private:
         void DoOpenPreMotherDoor();
-        void DoSpawnAkamaIfCan();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
@@ -116,6 +146,13 @@ class instance_black_temple : public ScriptedInstance
         GuidVector m_ashtongue;
         GuidVector m_impalingSpines;
         GuidVector m_shadowyConstructs;
+        GuidVector m_soulFragments;
+        GuidVector m_enslavedSouls;
+        bool m_akamaIllidanSequence;
+
+        GuidVector m_illidanSpawns;
+        GuidVector m_illidanTriggersLower;
+        GuidVector m_illidanTriggersUpper;
 };
 
 #endif

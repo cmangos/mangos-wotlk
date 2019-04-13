@@ -338,6 +338,7 @@ class Aura
         void HandleModRegen(bool apply, bool Real);
         void HandleModPowerRegen(bool apply, bool Real);
         void HandleModPowerRegenPCT(bool Apply, bool Real);
+        void HandleModHealingPCT(bool apply, bool real);
         void HandleChannelDeathItem(bool apply, bool Real);
         void HandleDamagePercentTaken(bool apply, bool Real);
         void HandlePeriodicDamagePCT(bool apply, bool Real);

@@ -2456,12 +2456,24 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 40932, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 40869:                                 // Fatal Attraction
+                case 40869:                                 // Fatal Attraction - Mother Shahraz
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                         return;
 
                     m_caster->CastSpell(unitTarget, 41001, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 40870:                                 // Fatal Attraction - tick - Mother Shahraz
+                {
+                    if (!unitTarget || m_scriptValue != 0) // only execute once
+                        return;
+                    m_scriptValue = 1;
+                    Aura* aura = m_caster->GetAura(41001, EFFECT_INDEX_1);
+                    if (!aura)
+                        return;
+                    int32 dmgValue = std::min(aura->GetAuraTicks(), 4u) * 750;
+                    m_caster->CastCustomSpell(nullptr, 40871, &dmgValue, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 40962:                                 // Blade's Edge Terrace Demon Boss Summon Branch
@@ -2494,8 +2506,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
 
                     // Equilize the health of all targets based on the corresponding health percent
-                    float health_diff = (float)unitTarget->GetMaxHealth() / (float)m_caster->GetMaxHealth();
-                    unitTarget->SetHealth(m_caster->GetHealth() * health_diff);
+                    unitTarget->SetHealth(m_caster->GetHealth() / 4);
+                    return;
+                }
+                case 41499:                                 // Empyreal Balance
+                {
+                    unitTarget->SetMaxHealth(m_caster->GetMaxHealth() / 4);
                     return;
                 }
                 case 42287:                                 // Salvage Wreckage
@@ -9608,6 +9624,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, damage, TRIGGERED_NONE);
                     return;
                 }
+                case 40761:                                 // Cage Trap - Illidan
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(nullptr, 40760, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 40762:                                 // Clear Peon All
                 {
                     m_caster->CombatStop(true);
@@ -9642,6 +9666,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     m_caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, unitTarget, m_caster);
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 40904:                                 // Draw Soul - Illidan
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, 40903, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 41055:                                 // Copy Weapon
@@ -9704,6 +9736,13 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 41914:                                 // Parasitic Shadowfiend
+                {
+                    if (!unitTarget || !m_caster->AI())
+                        return;
+                    m_caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, unitTarget, m_caster);
                     return;
                 }
                 case 42179:                                 // Summon Amani'shi Sentries
@@ -12169,10 +12208,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
 
                 if (spellId1)
-                    m_caster->CastSpell(unitTarget, spellId1, TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_HIT_CALCULATION);
+                    m_caster->CastSpell(unitTarget, spellId1, TRIGGERED_OLD_TRIGGERED);
 
                 if (spellId2)
-                    m_caster->CastSpell(unitTarget, spellId2, TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_HIT_CALCULATION);
+                    m_caster->CastSpell(unitTarget, spellId2, TRIGGERED_OLD_TRIGGERED);
 
                 return;
             }

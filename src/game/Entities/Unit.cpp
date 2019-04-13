@@ -2354,6 +2354,10 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
                             currentAbsorb = max_absorb;
                         break;
                     }
+                    case 41341: // Balance of Power
+                    {
+                        continue; // unused atm
+                    }
                     case 41475: // Reflective Shield (Lady Malande boss)
                     {
                         if (RemainingDamage < currentAbsorb)

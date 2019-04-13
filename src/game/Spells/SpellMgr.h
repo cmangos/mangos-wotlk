@@ -529,6 +529,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 39311:         // Scrapped Fel Reaver transform aura that is never removed even on evade
         case 39918:         // Soulgrinder Ritual Visual ( in progress)
         case 39920:         // Soulgrinder Ritual Visual ( beam)
+        case 40816:         // Saber Lash - Mother Shahraz
         case 41634:         // Invisibility and Stealth Detection
         case 44537:         // Fel Lightning
         case 44604:         // Enchantment of Spell Haste
@@ -1311,7 +1312,7 @@ inline void GetChainJumpRange(SpellEntry const* spellInfo, SpellEffectIndex effI
         case 40861:
             minSearchRangeCaster = 0.f;
             maxSearchRangeTarget = 150.f;
-            jumpRadius = 100.f;
+            jumpRadius = 25.f;
             break;
         default:   // default jump radius
             break;

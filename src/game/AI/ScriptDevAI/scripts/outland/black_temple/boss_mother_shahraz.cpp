@@ -16,24 +16,25 @@
 
 /* ScriptData
 SDName: Boss_Mother_Shahraz
-SD%Complete: 80
-SDComment: Saber Lash and Fatal Attraction need core support. Timers may need some tunning.
+SD%Complete: 99
+SDComment: TODO: Implement prenerf beams
 SDCategory: Black Temple
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "black_temple.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
     // Speech'n'Sounds
-    SAY_TAUNT_1                 = -1564018,
-    SAY_TAUNT_2                 = -1564019,
-    SAY_TAUNT_3                 = -1564020,
+    SAY_ATTRACTION_1            = -1564018,
+    SAY_ATTRACTION_2            = -1564019,
+    SAY_ATTRACTION_3            = -1564020,
     SAY_AGGRO                   = -1564021,
-    SAY_SPELL_1                 = -1564022,
-    SAY_SPELL_2                 = -1564023,
-    SAY_SPELL_3                 = -1564024,
+    SAY_BEAM_1                  = -1564022,
+    SAY_BEAM_2                  = -1564023,
+    SAY_BEAM_3                  = -1564024,
     SAY_SLAY_1                  = -1564025,
     SAY_SLAY_2                  = -1564026,
     SAY_ENRAGE                  = -1564027,
@@ -44,6 +45,7 @@ enum
     SPELL_SINISTER_PERIODIC     = 40863,        // periodic triggers 40859
     SPELL_VILE_PERIODIC         = 40865,        // periodic triggers 40860
     SPELL_WICKED_PERIODIC       = 40866,        // periodic triggers 40861
+    SPELL_RANDOM_PERIODIC       = 40867,
     SPELL_FATAL_ATTRACTION      = 40869,        // dummy, triggers 41001
     SPELL_SILENCING_SHRIEK      = 40823,
     SPELL_SABER_LASH_PROC       = 40816,        // procs 40810 and 43690 on melee damage
@@ -63,164 +65,171 @@ static const uint32 aPrismaticAuras[] =
 
 static const uint32 aPeriodicBeams[] = {SPELL_SINFUL_PERIODIC, SPELL_SINISTER_PERIODIC, SPELL_VILE_PERIODIC, SPELL_WICKED_PERIODIC};
 
-struct boss_shahrazAI : public ScriptedAI
+enum ShahrazActions
 {
-    boss_shahrazAI(Creature* pCreature) : ScriptedAI(pCreature)
+    SHAHRAZ_ACTION_BERSERK,
+    SHAHRAZ_ACTION_FRENZY,
+    SHAHRAZ_ACTION_FATAL_ATTRACTION,
+    SHAHRAZ_ACTION_BEAM,
+    SHAHRAZ_ACTION_SHRIEK,
+    SHAHRAZ_ACTION_PRISMATIC_SHIELD,
+    SHAHRAZ_ACTION_MAX,
+};
+
+struct boss_shahrazAI : public CombatAI
+{
+    boss_shahrazAI(Creature* creature) : CombatAI(creature, SHAHRAZ_ACTION_MAX), m_instance(static_cast<instance_black_temple*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_black_temple*)pCreature->GetInstanceData();
-        Reset();
+        AddCombatAction(SHAHRAZ_ACTION_BERSERK, GetInitialActionTimer(SHAHRAZ_ACTION_BERSERK));
+        AddTimerlessCombatAction(SHAHRAZ_ACTION_FRENZY, true);
+        AddCombatAction(SHAHRAZ_ACTION_FATAL_ATTRACTION, GetInitialActionTimer(SHAHRAZ_ACTION_FATAL_ATTRACTION));
+        AddCombatAction(SHAHRAZ_ACTION_BEAM, GetInitialActionTimer(SHAHRAZ_ACTION_BEAM));
+        AddCombatAction(SHAHRAZ_ACTION_SHRIEK, GetInitialActionTimer(SHAHRAZ_ACTION_SHRIEK));
+        AddCombatAction(SHAHRAZ_ACTION_PRISMATIC_SHIELD, GetInitialActionTimer(SHAHRAZ_ACTION_PRISMATIC_SHIELD));
     }
 
-    instance_black_temple* m_pInstance;
+    instance_black_temple* m_instance;
 
-    uint32 m_uiBeamTimer;
-    uint32 m_uiPrismaticShieldTimer;
-    uint32 m_uiFatalAttractionTimer;
-    uint32 m_uiShriekTimer;
-    uint32 m_uiRandomYellTimer;
-    uint32 m_uiBerserkTimer;
-    uint8 m_uiCurrentBeam;
-
-    bool m_bIsEnraged;
+    uint8 m_currentBeam;
 
     void Reset() override
     {
-        m_uiBeamTimer               = urand(5000, 10000);
-        m_uiCurrentBeam             = urand(0, 3);
-        m_uiPrismaticShieldTimer    = 0;
-        m_uiFatalAttractionTimer    = 25000;
-        m_uiShriekTimer             = 30000;
-        m_uiRandomYellTimer         = urand(70000, 110000);
-        m_uiBerserkTimer            = 10 * MINUTE * IN_MILLISECONDS;
+        CombatAI::Reset();
 
-        m_bIsEnraged                = false;
+        m_currentBeam               = urand(0, 3);
 
-        DoCastSpellIfCan(m_creature, SPELL_SABER_LASH_PROC);
+        m_creature->RemoveAurasDueToSpell(SPELL_RANDOM_PERIODIC);
+        DoCastSpellIfCan(nullptr, SPELL_SABER_LASH_PROC, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    uint32 GetInitialActionTimer(ShahrazActions id)
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SHAHRAZ, IN_PROGRESS);
+        switch (id)
+        {
+            case SHAHRAZ_ACTION_BERSERK: return 10 * MINUTE * IN_MILLISECONDS;
+            case SHAHRAZ_ACTION_FATAL_ATTRACTION: return urand(22000, 29000);
+            case SHAHRAZ_ACTION_BEAM: return 15000;
+            case SHAHRAZ_ACTION_SHRIEK: return 30000;
+            case SHAHRAZ_ACTION_PRISMATIC_SHIELD: return 15000;
+            default: return 0;
+        }
+    }
+
+    uint32 GetSubsequentActionTimer(ShahrazActions id)
+    {
+        switch (id)
+        {
+            case SHAHRAZ_ACTION_FATAL_ATTRACTION: return urand(22000, 40000);
+            case SHAHRAZ_ACTION_BEAM: return 20000;
+            case SHAHRAZ_ACTION_SHRIEK: return 30000;
+            case SHAHRAZ_ACTION_PRISMATIC_SHIELD: return 15000;
+            default: return 0;
+        }
+    }
+
+    void Aggro(Unit* /*who*/) override
+    {
+        if (m_instance)
+            m_instance->SetData(TYPE_SHAHRAZ, IN_PROGRESS);
 
         DoScriptText(SAY_AGGRO, m_creature);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SHAHRAZ, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_SHAHRAZ, FAIL);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SHAHRAZ, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_SHAHRAZ, DONE);
 
         DoScriptText(SAY_DEATH, m_creature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_creature->GetHealthPercent() < 10.0f && !m_bIsEnraged)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+            case SHAHRAZ_ACTION_FRENZY:
             {
-                DoScriptText(SAY_ENRAGE, m_creature);
-                m_bIsEnraged = true;
-            }
-        }
-
-        // Randomly cast one beam.
-        if (m_uiBeamTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, aPeriodicBeams[m_uiCurrentBeam]) == CAST_OK)
-            {
-                uint8 uiNextBeam = (m_uiCurrentBeam + urand(1, 3)) % 4;
-                m_uiCurrentBeam = uiNextBeam;
-                m_uiBeamTimer = urand(10000, 13000);
-            }
-        }
-        else
-            m_uiBeamTimer -= uiDiff;
-
-        // Random Prismatic Shield every 15 seconds.
-        if (m_uiPrismaticShieldTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, aPrismaticAuras[urand(0, 5)]) == CAST_OK)
-                m_uiPrismaticShieldTimer = 15000;
-        }
-        else
-            m_uiPrismaticShieldTimer -= uiDiff;
-
-        if (m_uiFatalAttractionTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_FATAL_ATTRACTION) == CAST_OK)
-            {
-                switch (urand(0, 2))
+                if (m_creature->GetHealthPercent() < 10.0f)
                 {
-                    case 0: DoScriptText(SAY_SPELL_1, m_creature); break;
-                    case 1: DoScriptText(SAY_SPELL_2, m_creature); break;
-                    case 2: DoScriptText(SAY_SPELL_3, m_creature); break;
+                    if (DoCastSpellIfCan(nullptr, SPELL_RANDOM_PERIODIC) == CAST_OK)
+                    {
+                        DoScriptText(SAY_ENRAGE, m_creature);
+                        DisableCombatAction(SHAHRAZ_ACTION_BEAM);
+                        SetActionReadyStatus(action, false); // timerless
+                    }
                 }
-                m_uiFatalAttractionTimer = urand(30000, 40000);
+                return;
             }
-        }
-        else
-            m_uiFatalAttractionTimer -= uiDiff;
-
-        if (m_uiShriekTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SILENCING_SHRIEK) == CAST_OK)
-                m_uiShriekTimer = 30000;
-        }
-        else
-            m_uiShriekTimer -= uiDiff;
-
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
+            case SHAHRAZ_ACTION_BERSERK:
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
                 {
                     DoScriptText(SAY_ENRAGE, m_creature);
-                    m_uiBerserkTimer = 0;
+                    DisableCombatAction(action);
                 }
+                return;
             }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
-
-        // Random taunts
-        if (m_uiRandomYellTimer < uiDiff)
-        {
-            switch (urand(0, 2))
+            case SHAHRAZ_ACTION_BEAM:
             {
-                case 0: DoScriptText(SAY_TAUNT_1, m_creature); break;
-                case 1: DoScriptText(SAY_TAUNT_2, m_creature); break;
-                case 2: DoScriptText(SAY_TAUNT_3, m_creature); break;
+                m_currentBeam = (m_currentBeam + urand(1, 3)) % 4;
+                if (DoCastSpellIfCan(nullptr, aPeriodicBeams[m_currentBeam]) == CAST_OK)
+                {
+                    switch (urand(0, 2))
+                    {
+                        case 0: DoScriptText(SAY_BEAM_1, m_creature); break;
+                        case 1: DoScriptText(SAY_BEAM_2, m_creature); break;
+                        case 2: DoScriptText(SAY_BEAM_3, m_creature); break;
+                    }
+                    ResetCombatAction(action, GetSubsequentActionTimer(ShahrazActions(action)));
+                }
+                return;
             }
-
-            m_uiRandomYellTimer = urand(60000, 150000);
+            case SHAHRAZ_ACTION_PRISMATIC_SHIELD:
+            {
+                if (DoCastSpellIfCan(nullptr, aPrismaticAuras[urand(0, 5)]) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(ShahrazActions(action)));
+                return;
+            }
+            case SHAHRAZ_ACTION_FATAL_ATTRACTION:
+            {
+                if (m_creature->getThreatManager().getThreatList().size() < 3)
+                    return;
+                if (DoCastSpellIfCan(nullptr, SPELL_FATAL_ATTRACTION) == CAST_OK)
+                {
+                    switch (urand(0, 2))
+                    {
+                        case 0: DoScriptText(SAY_ATTRACTION_1, m_creature); break;
+                        case 1: DoScriptText(SAY_ATTRACTION_3, m_creature); break;
+                        case 2: DoScriptText(SAY_ATTRACTION_3, m_creature); break;
+                    }
+                    ResetCombatAction(action, GetSubsequentActionTimer(ShahrazActions(action)));
+                }
+                return;
+            }
+            case SHAHRAZ_ACTION_SHRIEK:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_SILENCING_SHRIEK) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(ShahrazActions(action)));
+                return;
+            }
         }
-        else
-            m_uiRandomYellTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_shahraz(Creature* pCreature)
+UnitAI* GetAI_boss_shahraz(Creature* creature)
 {
-    return new boss_shahrazAI(pCreature);
+    return new boss_shahrazAI(creature);
 }
 
 void AddSC_boss_mother_shahraz()

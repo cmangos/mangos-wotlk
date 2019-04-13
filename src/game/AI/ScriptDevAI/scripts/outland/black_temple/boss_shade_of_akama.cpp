@@ -293,8 +293,8 @@ struct npc_akamaAI : public ScriptedAI, public CombatActions, private DialogueHe
             if (m_instance)
             {
                 // Reset the shade
-                if (Creature* pShade = m_instance->GetSingleCreatureFromStorage(NPC_SHADE_OF_AKAMA))
-                    pShade->ForcedDespawn();
+                if (Creature* shade = m_instance->GetSingleCreatureFromStorage(NPC_SHADE_OF_AKAMA))
+                    shade->ForcedDespawn();
             }
         }
     }
@@ -548,7 +548,7 @@ struct boss_shade_of_akamaAI : public ScriptedAI
 
     void CorpseRemoved(uint32& respawnDelay) override
     {
-        // Resapwn after 5 min
+        // Respawn after 5 min
         if (m_instance->GetData(TYPE_SHADE) == FAIL)
             respawnDelay = 5 * MINUTE;
     }

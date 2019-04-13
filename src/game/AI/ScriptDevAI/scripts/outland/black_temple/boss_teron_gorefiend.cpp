@@ -405,7 +405,8 @@ bool AreaTrigger_at_teron_gorefiend(Player* player, AreaTriggerEntry const* /*at
 {
     instance_black_temple* temple = static_cast<instance_black_temple*>(player->GetMap()->GetInstanceData());
     if (Creature* teron = temple->GetSingleCreatureFromStorage(NPC_TERON_GOREFIEND))
-        teron->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, player, teron);
+        if (teron->isAlive())
+            teron->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, player, teron);
 
     return false;
 }

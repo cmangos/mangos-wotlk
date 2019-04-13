@@ -7809,8 +7809,24 @@ bool Spell::CheckTargetScript(Unit* target, SpellEffectIndex eff) const
             if (target->HasAura(40603)) // Taunt Gurtogg
                 return false;
             break;
+        case 40693:                             // Illidan - Cage Trap
+            if (target->HasAura(40409)) // Maiev is down - trap should fail
+                return false;
+            break;
         case 40722:                             // Will of the Arakkoa God - Terokk
             if (target->HasAura(40726)) // Chosen One
+                return false;
+            break;
+        case 40834:                             // Agonizing Flames
+            if (m_caster->CanReachWithMeleeAttack(target))
+                return false;
+            break;
+        case 40869:                             // Fatal Attraction - Mother Shahraz - ignore tanks - those which have Saber Lash
+            if (target->HasAura(43690)) // Saber Lash
+                return false;
+            break;
+        case 40870:                             // Fatal Attraction - tick - Mother Shahraz
+            if (!target->HasAura(41001)) // Fatal Attraction Aura
                 return false;
             break;
         case 37676:                             // Insidious Whisper
@@ -8583,16 +8599,16 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex)
         case 37152:
         case 37153:
         case 30469: // Nether Beam - Netherspite - Picks closest target
+        case 41294: // Fixate - Reliquary of Souls - Picks closest target
         {
             auto itr = filterUnitList.begin();
             if (itr == filterUnitList.end())
                 return;
             float x, y, z;
-            switch (m_spellInfo->EffectImplicitTargetA[effIndex])
-            {
-                case TARGET_ENUM_UNITS_SCRIPT_IN_CONE_60: m_caster->GetPosition(x, y, z); break;
-                case TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DEST_LOC: m_targets.getDestination(x, y, z); break;
-            }
+            if (m_spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+                m_targets.getDestination(x, y, z);
+            else
+                m_caster->GetPosition(x, y, z);
             float closestDistance = (*itr)->GetDistance(x, y, z, DIST_CALC_NONE);
             Unit* closestUnit = *itr;
             ++itr;
@@ -8722,6 +8738,12 @@ void Spell::OnSuccessfulSpellFinish()
                 case 32057: parentSpell = 32051; break;
             }
             m_caster->RemoveAuraStack(parentSpell);
+            break;
+        }
+        case 40870: // Fatal Attraction - Mother Shahraz
+        {
+            if (m_scriptValue == 0) // noone was hit
+                m_caster->RemoveAurasDueToSpell(41001);
             break;
         }
     }

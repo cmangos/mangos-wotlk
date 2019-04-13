@@ -177,7 +177,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleNoImmediateEffect,                         //115 SPELL_AURA_MOD_HEALING                 implemented in Unit::SpellBaseHealingBonusTaken
     &Aura::HandleNoImmediateEffect,                         //116 SPELL_AURA_MOD_REGEN_DURING_COMBAT     imppemented in Player::RegenerateAll and Player::RegenerateHealth
     &Aura::HandleNoImmediateEffect,                         //117 SPELL_AURA_MOD_MECHANIC_RESISTANCE     implemented in Unit::MagicSpellHitResult
-    &Aura::HandleNoImmediateEffect,                         //118 SPELL_AURA_MOD_HEALING_PCT             implemented in Unit::SpellHealingBonusTaken
+    &Aura::HandleModHealingPCT,                             //118 SPELL_AURA_MOD_HEALING_PCT             implemented in Unit::SpellHealingBonusTaken
     &Aura::HandleUnused,                                    //119 unused (3.0.8a-3.2.2a) old SPELL_AURA_SHARE_PET_TRACKING
     &Aura::HandleAuraUntrackable,                           //120 SPELL_AURA_UNTRACKABLE
     &Aura::HandleAuraEmpathy,                               //121 SPELL_AURA_EMPATHY
@@ -1681,21 +1681,12 @@ void Aura::TriggerSpell()
                         target->RemoveAuraStack(40157);
                         return;
                     case 40398:                             // Demon Transform 2
-                        switch (GetAuraTicks())
-                        {
-                            case 1:
-                                if (target->HasAura(40506))
-                                    target->RemoveAurasDueToSpell(40506);
-                                else
-                                    trigger_spell_id = 40506;
-                                break;
-                            case 2:
-                                trigger_spell_id = 40510;
-                                break;
-                        }
+                        if (UnitAI* ai = target->AI())
+                            ai->SendAIEvent(AI_EVENT_CUSTOM_C, target, target, GetAuraTicks());
                         break;
                     case 40511:                             // Demon Transform 1
-                        trigger_spell_id = 40398;
+                        if (UnitAI* ai = target->AI())
+                            ai->SendAIEvent(AI_EVENT_CUSTOM_B, target, target, GetAuraTicks());
                         break;
                     case 40657:                             // Ancient Flames
                     {
@@ -1706,14 +1697,21 @@ void Aura::TriggerSpell()
                     }
 //                    // Ethereal Ring Cannon: Cannon Aura
 //                    case 40734: break;
-//                    // Cage Trap
-//                    case 40760: break;
-//                    // Random Periodic
-//                    case 40867: break;
+                    case 40760:                             // Cage Trap
+                        if (GetAuraTicks() == 1)
+                            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_F, target, (Creature*)target);
+                        break;
+                    case 40867: // Random Periodic
+                    {
+                        // casts random beam
+                        static const uint32 beams[] = { 40827, 40859, 40860, 40861 };
+                        trigger_spell_id = beams[urand(0, 3)];
+                        if (target->GetTypeId() == TYPEID_UNIT)
+                            triggerTarget = static_cast<Creature*>(target)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, trigger_spell_id, SELECT_FLAG_PLAYER);
+                        return;
+                    }
 //                    // Prismatic Shield
 //                    case 40879: break;
-//                    // Aura of Desire
-//                    case 41350: break;
                     case 41404:                             // Dementia
                         switch (urand(0, 1))
                         {
@@ -1725,6 +1723,20 @@ void Aura::TriggerSpell()
                                 break;
                         }
                         break;
+                    case 41350:                             // Aura of Desire
+                    {
+                        if (Aura* aura = GetHolder()->m_auras[EFFECT_INDEX_1])
+                        {
+                            if (aura->m_modifier.m_amount > -100)
+                            {
+                                UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + m_modifier.m_miscvalue);
+                                GetTarget()->HandleStatModifier(unitMod, TOTAL_PCT, float(aura->m_modifier.m_amount), false);
+                                aura->m_modifier.m_amount -= 5;
+                                GetTarget()->HandleStatModifier(unitMod, TOTAL_PCT, float(aura->m_modifier.m_amount), true);
+                            }
+                        }
+                        return;
+                    }
 //                    // Chaos Form
 //                    case 41629: break;
                     case 42177:                             // Alert Drums
@@ -2267,6 +2279,21 @@ void Aura::TriggerSpell()
                 if (!triggerTarget)
                     return;
                 caster->FixateTarget(triggerTarget);
+                break;
+            }
+            case 40862: // Sinful Periodic
+            case 40863: // Sinister Periodic
+            case 40865: // Vile Periodic
+            case 40866: // Wicked Periodic
+            {
+                if (target->GetTypeId() == TYPEID_UNIT)
+                    triggerTarget = static_cast<Creature*>(target)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, trigger_spell_id, SELECT_FLAG_PLAYER);
+                break;
+            }
+            case 41480:                                     // Deadly Strike
+            {
+                if (target->GetTypeId() == TYPEID_UNIT) // each tick has to target a random target
+                    triggerTarget = static_cast<Creature*>(target)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, 41485, SELECT_FLAG_PLAYER);
                 break;
             }
             case 43149:                                     // Claw Rage
@@ -3210,6 +3237,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 39091:                                     // Negative Charge
                 target->RemoveAurasDueToSpell(39092);
                 return;
+            case 39908:                                     // Eye Blast - Illidan
+                if (UnitAI* ai = target->AI())
+                    if (Unit* caster = GetCaster())
+                        ai->SendAIEvent(AI_EVENT_CUSTOM_E, caster, caster);
+                return;
             case 40401:                                     // Shade Soul Channel
                 target->RemoveAuraStack(40520);
                 return;
@@ -3514,7 +3546,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->RemoveAurasDueToSpell(24662);
                     return;
                 }
-                case 28819:                             // Submerge Visual
+                case 28819:                                 // Submerge Visual
                 {
                     if (apply)
                         target->SetStandState(UNIT_STAND_STATE_CUSTOM);
@@ -5293,17 +5325,17 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             target->getHostileRefManager().HandleSuppressed(apply);
 
         // Real remove called after current aura remove from lists, check if other similar auras active
-        if (target->HasAuraType(SPELL_AURA_MOD_STUN))
-            return;
+        if (!target->HasAuraType(SPELL_AURA_MOD_STUN))
+            target->SetStunned(false);
 
-        target->SetStunned(false);
-
-        // Wyvern Sting
-        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER)
+        switch (GetId())
         {
-            Unit* caster = GetCaster();
-            if (GetSpellProto()->SpellFamilyFlags & uint64(0x00010000))
+            case 19386: // Wyvern Sting - Hunter
+            case 24132:
+            case 24133:
+            case 27068:
             {
+                Unit* caster = GetCaster();
                 if (!caster || caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
@@ -5316,9 +5348,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                     case 27068: spell_id = 27069; break;
                     case 49011: spell_id = 49009; break;
                     case 49012: spell_id = 49010; break;
-                    default:
-                        sLog.outError("Spell selection called for unexpected original spell %u, new spell for this spell family?", GetId());
-                        return;
+                    default: sLog.outError("Spell selection called for unexpected original spell %u, new spell for this spell family?", GetId()); return;
                 }
 
                 SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell_id);
@@ -5327,24 +5357,23 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                     return;
 
                 caster->CastSpell(target, spellInfo, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                return;
             }
-            else    // Wyvern Sting for bosses
+            case 40510: // Demon Transform 3 - Illidan
+                if (UnitAI * ai = target->AI())
+                    ai->SendAIEvent(AI_EVENT_CUSTOM_D, target, target);
+                break;
+            case 41083: // Paralyze
+                if (Unit * caster = GetCaster())
+                    if (UnitAI * ai = caster->AI())
+                        ai->SendAIEvent(AI_EVENT_CUSTOM_A, caster, caster);
+                break;
+            case 44320: // Mana Rage - Selin Fireheart
             {
-                if (!caster)
-                    return;
-
-                switch (GetId())
-                {
-                    case 26180:     // Wyvern Sting (Princess Huhuran)
-                    {
-                        int32 natureDamage = (m_removeMode == AURA_REMOVE_BY_DISPEL) ? 3000 : 500;  // Deal 500 nature damage on spell expire but 3000 if dispelled
-                        GetCaster()->CastCustomSpell(target, 26233, &natureDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-                        return;
-                    }
-                    default:
-                        sLog.outError("Spell selection called for unexpected original spell %u, new spell for this spell family?", GetId());
-                        return;
-                }
+                Unit* caster = GetCaster();
+                if (UnitAI * ai = target->AI())
+                    ai->SendAIEvent(AI_EVENT_CUSTOM_A, caster, target, m_removeMode == AURA_REMOVE_BY_EXPIRE);
+                break;
             }
         }
     }
@@ -5588,6 +5617,10 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
     }
 
     target->SetImmobilizedState(apply);
+
+    if (!apply)
+        if (GetSpellProto()->Id == 41476) // Vanish - Veras Darkshadow
+            target->CastSpell(nullptr, 41479, TRIGGERED_NONE);
 }
 
 void Aura::HandleAuraModSilence(bool apply, bool Real)
@@ -6027,9 +6060,14 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
 
 void Aura::HandleAuraModDmgImmunity(bool apply, bool /*Real*/)
 {
-    GetTarget()->ApplySpellImmune(this, IMMUNITY_DAMAGE, m_modifier.m_miscvalue, apply);
+    Unit* target = GetTarget();
+    target->ApplySpellImmune(this, IMMUNITY_DAMAGE, m_modifier.m_miscvalue, apply);
 
-    GetTarget()->getHostileRefManager().HandleSuppressed(apply, true);
+    target->getHostileRefManager().HandleSuppressed(apply, true);
+
+    if (!apply && GetId() == 41376) // Spite - Essence of Anger
+        if (Unit* caster = GetCaster())
+            caster->CastSpell(target, 41377, TRIGGERED_OLD_TRIGGERED);
 }
 
 void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
@@ -6635,8 +6673,19 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 if (m_removeMode == AURA_REMOVE_BY_DEFAULT)
                     target->CastSpell(target, 35202, TRIGGERED_OLD_TRIGGERED); // Paralysis
                 break;
-            case 41917: // Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
-                target->CastSpell(target, 41915, TRIGGERED_OLD_TRIGGERED);
+            case 41914: // Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
+            case 41917:
+                target->CastSpell(nullptr, 41915, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case 39044: // Serpentshrine Parasite
+            case 39053:
+                if (m_removeMode == AURA_REMOVE_BY_DEATH && target->GetTypeId() == TYPEID_PLAYER)
+                    target->CastSpell(target, 39045, TRIGGERED_OLD_TRIGGERED); // Summon Serpentshrine Parasite
+                break;
+            case 41485: // Deadly Poison - Veras Shadowstrike - cast envenom
+                if (Unit* caster = GetCaster())
+                    caster->CastSpell(target, 41487, TRIGGERED_OLD_TRIGGERED);
+                target->CastSpell(nullptr, 41509, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -7014,6 +7063,13 @@ void Aura::HandleAuraModResistenceOfStatPercent(bool /*apply*/, bool /*Real*/)
 void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
+    if (GetId() == 40409)
+    {
+        if (apply)
+            GetTarget()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        else
+            GetTarget()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+    }
 }
 
 void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool /*Real*/)
@@ -7077,6 +7133,21 @@ void Aura::HandleModPowerRegenPCT(bool /*apply*/, bool Real)
     // Update manaregen value
     if (m_modifier.m_miscvalue == POWER_MANA)
         ((Player*)GetTarget())->UpdateManaRegen();
+}
+
+void Aura::HandleModHealingPCT(bool apply, bool real)
+{
+    switch (GetId())
+    {
+        case 41292: // Aura of Suffering - Reliquary of Souls
+        {
+            if (apply)
+                GetTarget()->CastSpell(nullptr, 42017, TRIGGERED_OLD_TRIGGERED);
+            else
+                GetTarget()->RemoveAurasDueToSpell(42017);
+            break;
+        }
+    }
 }
 
 void Aura::HandleModManaRegen(bool /*apply*/, bool Real)
@@ -8294,7 +8365,6 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                 target->DeleteThreatList();
                 caster->AddThreat(target);
                 target->getHostileRefManager().setOnlineOfflineState(false);
-                target->RemoveAllAurasOnDeath(); // removes all effects that could prevent success of the spells after this
                 target->CastSpell(nullptr, 40266, TRIGGERED_NONE); // Summon Spirit
                 target->CastSpell(nullptr, 40270, TRIGGERED_NONE); // Summon Skeleton
                 target->CastSpell(nullptr, 41948, TRIGGERED_NONE); // Summon Skeleton
@@ -8390,20 +8460,6 @@ void Aura::PeriodicTick()
 
             Unit* caster = GetCaster();
 
-            if (spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA && // safe case - caster always will exist
-                    caster->SpellHitResult(target, spellProto, (1 << GetEffIndex()), false) != SPELL_MISS_NONE)
-                return;
-
-            // Check for immune (not use charges)
-            if (!spellProto->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)) // confirmed Impaling spine goes through immunity
-            {
-                if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
-                {
-                    Unit::SendSpellOrDamageImmune(GetCasterGuid(), target, spellProto->Id);
-                    return;
-                }
-            }
-
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 amount = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
 
@@ -8412,6 +8468,8 @@ void Aura::PeriodicTick()
                 pdamage = amount;
             else
                 pdamage = uint32(target->GetMaxHealth() * amount / 100);
+
+            bool immunityRespect = !spellProto->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY);
 
             // some auras remove at specific health level or more or have damage interactions
             switch (GetId())
@@ -8449,8 +8507,40 @@ void Aura::PeriodicTick()
                     if (target->GetEntry() == 17772) // Only Jaina receives less damage
                         pdamage = uint32(target->GetMaxHealth() * 0.5f / 100);
                     break;
+                case 40932: // Agonizing Flames - Illidan
+                {
+                    if (GetAuraTicks() % 3 == 0) // increased damage after every 3rd tick
+                        m_modifier.m_amount += m_modifier.m_baseAmount;
+                    break;
+                }
+                case 41337: // Aura of Anger
+                {
+                    m_modifier.m_amount += m_modifier.m_baseAmount;
+                    if (Aura* aura = GetHolder()->m_auras[EFFECT_INDEX_1])
+                    {
+                        aura->ApplyModifier(false, true);
+                        aura->m_modifier.m_amount += aura->m_modifier.m_baseAmount;
+                        aura->ApplyModifier(true, true);
+                    }
+                    immunityRespect = true; // should respect immunity
+                    break;
+                }
                 default:
                     break;
+            }
+
+            if (spellProto->Effect[GetEffIndex()] == SPELL_EFFECT_PERSISTENT_AREA_AURA && // safe case - caster always will exist
+                caster->SpellHitResult(target, spellProto, (1 << GetEffIndex()), false) != SPELL_MISS_NONE)
+                return;
+
+            // Check for immune (not use charges)
+            if (!spellProto->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)) // confirmed Impaling spine goes through immunity
+            {
+                if (target->IsImmuneToDamage(GetSpellSchoolMask(spellProto)))
+                {
+                    Unit::SendSpellOrDamageImmune(GetCasterGuid(), target, spellProto->Id);
+                    return;
+                }
             }
 
             uint32 absorb = 0;
