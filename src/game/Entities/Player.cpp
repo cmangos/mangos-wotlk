@@ -1041,8 +1041,6 @@ uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
     damage = (damage <= malus ? 0 : (damage - malus));
 
     DamageEffectType damageType = SELF_DAMAGE;
-    if (type == DAMAGE_FALL && getClass() == CLASS_ROGUE)
-        damageType = SELF_DAMAGE_ROGUE_FALL;
 
     DealDamageMods(this, damage, &absorb, damageType);
 
