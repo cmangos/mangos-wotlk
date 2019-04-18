@@ -1292,3 +1292,6 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 
 -- NPCs Faerie Fire not preventing players stealth
 UPDATE `spell_template` SET `AttributesServerside`=1 WHERE `id`=6950 OR `id`=16498 OR `id`=20656 OR `id`=21670 OR `id`=25602 OR `id`=32129;
+
+-- Hurricane Spell From Druid And NPC must be interruptable
+UPDATE `spell_template` SET `InterruptFlags`=15 WHERE `id`=16914 OR `id`=17401 OR `id`=17402 OR `id`=27012 OR `id`=27530 OR `id`=32717 OR `id`=40090;
