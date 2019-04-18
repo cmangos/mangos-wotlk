@@ -22,7 +22,7 @@ enum
     // NPC_WARLORD_NAJENTUS         = 22887,
     // NPC_SUPREMUS                 = 22898,
     NPC_SHADE_OF_AKAMA              = 22841,
-    NPC_AKAMA_SHADE                 = 22990,
+    NPC_AKAMA_SHADE                 = 23191,
     NPC_RELIQUARY_OF_SOULS          = 22856,
     NPC_ILLIDARI_COUNCIL            = 23426,
     NPC_COUNCIL_VOICE               = 23499,
