@@ -493,6 +493,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 36788:         // Diminish Soul
         case 37266:         // Disease Cloud
         case 37497:         // Shadowmoon Ghost Invisibility (Ghostrider of Karabor in SMV) 
+        case 37509:         // Ghostly Facade
         case 37863:         // Disease Cloud
         case 38844:         // Unholy Aura
         case 38847:         // Diminish Soul
