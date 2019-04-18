@@ -492,6 +492,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 36006:         // Fel Fire Aura
         case 36784:         // Entropic Aura
         case 36788:         // Diminish Soul
+        case 37119:         // Spirit Particles (Spawn)
         case 37266:         // Disease Cloud
         case 37411:         // Skettis Corrupted Ghosts
         case 37497:         // Shadowmoon Ghost Invisibility (Ghostrider of Karabor in SMV) 
