@@ -484,6 +484,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 31690:         // Putrid Mushroom
         case 32007:         // Mo'arg Engineer Transform Visual
         case 33460:         // Inhibit Magic
+        case 33900:         // Shroud of Death
         case 33908:         // Burning Spikes
         case 35596:         // Power of the Legion
         case 35841:         // Draenei Spirit Visual
@@ -492,6 +493,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 36784:         // Entropic Aura
         case 36788:         // Diminish Soul
         case 37266:         // Disease Cloud
+        case 37411:         // Skettis Corrupted Ghosts
         case 37497:         // Shadowmoon Ghost Invisibility (Ghostrider of Karabor in SMV) 
         case 37509:         // Ghostly Facade
         case 37863:         // Disease Cloud
