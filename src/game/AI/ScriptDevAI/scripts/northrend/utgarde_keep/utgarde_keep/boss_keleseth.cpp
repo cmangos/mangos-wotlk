@@ -39,6 +39,7 @@ enum
 
     SPELL_SUMMON_FROST_TOMB = 42714,
     SPELL_FROST_TOMB        = 48400,                        // stun and deal damage
+    SPELL_CUSTOM_WALK       = 55059,
 
     // Skeleton Spells
     SPELL_DECREPIFY         = 42702,
@@ -218,6 +219,7 @@ struct boss_kelesethAI : public ScriptedAI
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
+        m_creature->RemoveAurasDueToSpell(SPELL_CUSTOM_WALK);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_KELESETH, IN_PROGRESS);

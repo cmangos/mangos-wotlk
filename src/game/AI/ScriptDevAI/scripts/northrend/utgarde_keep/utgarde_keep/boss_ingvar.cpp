@@ -158,6 +158,7 @@ struct boss_ingvarAI : public ScriptedAI
             DoScriptText(SAY_AGGRO_SECOND, m_creature);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
             m_creature->UpdateEntry(pSpell->EffectMiscValue[EFFECT_INDEX_0]);
+            m_creature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
             m_bIsResurrected = true;
             m_bIsFakingDeath = false;
         }
@@ -319,6 +320,8 @@ struct npc_annhyldeAI : public ScriptedAI
     {
         m_uiResurrectTimer = 0;
         m_uiResurrectPhase = 0;
+
+        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
     }
 
     // No attacking
