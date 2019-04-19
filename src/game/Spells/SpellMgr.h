@@ -439,6 +439,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 3235:          // Rancid Blood
         case 3417:          // Thrash
         case 6752:          // Weak Poison Proc
+        case 7090:          // Bear Form (Shapeshift)
         case 7276:          // Poison Proc
         case 8247:          // Wandering Plague
         case 8279:          // Stealth Detection
@@ -483,6 +484,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 29526:         // Hate to Zero (Hate to Zero)
         case 31332:         // Dire Wolf Visual
         case 31690:         // Putrid Mushroom
+        case 31792:         // Bear Form (Shapeshift)
         case 32007:         // Mo'arg Engineer Transform Visual
         case 33460:         // Inhibit Magic
         case 33900:         // Shroud of Death
