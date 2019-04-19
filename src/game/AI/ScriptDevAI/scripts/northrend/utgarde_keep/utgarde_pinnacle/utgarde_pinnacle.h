@@ -25,6 +25,11 @@ enum
 
     NPC_WORLD_TRIGGER               = 22515,
 
+    NPC_ARTHAS_IMAGE                = 29280,
+    NPC_SVALA                       = 29281,
+    NPC_SVALA_SORROWGRAVE           = 26668,
+    NPC_FLAME_BRAZIER               = 27273,
+
     NPC_GRAUF                       = 26893,
     NPC_SKADI                       = 26693,
     NPC_YMIRJAR_WARRIOR             = 26690,
@@ -61,6 +66,9 @@ enum
     // SPELL_GAUNTLET_RESET_CHECK   = 49308,            // for the moment we don't use this because of the lack of core support
 };
 
+static const float aArthasSpawnPos[4] = { 296.2659f, -364.3349f, 92.9248f, 1.588f};
+static const float aSvalaSpawnPos[4] = { 296.703f, -346.099f, 97.6311f, 4.694f};
+
 static const float aOrbPositions[2][3] =
 {
     {238.6077f, -460.7103f, 112.5671f},                 // Orb lift up
@@ -69,13 +77,14 @@ static const float aOrbPositions[2][3] =
 
 static const uint32 aGortokMiniBosses[MAX_ENCOUNTER] = {NPC_WORGEN, NPC_FURBOLG, NPC_JORMUNGAR, NPC_RHINO};
 
-class instance_pinnacle : public ScriptedInstance
+class instance_pinnacle : public ScriptedInstance, private DialogueHelper
 {
     public:
         instance_pinnacle(Map* pMap);
 
         void Initialize() override;
 
+        void OnPlayerEnter(Player* pPlayer) override;
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
@@ -88,6 +97,8 @@ class instance_pinnacle : public ScriptedInstance
         void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
 
+        ObjectGuid GetRandomBrazier() const { return m_vbrazierVector[urand(0, 1)]; }
+
         void SetGortokEventStarter(ObjectGuid playerGuid) { m_gortokEventStarterGuid = playerGuid; }
         ObjectGuid GetGortokEventStarter() const { return m_gortokEventStarterGuid; }
         ObjectGuid GetSkadiMobsTrigger() const { return m_skadiMobsTriggerGuid; }
@@ -98,6 +109,8 @@ class instance_pinnacle : public ScriptedInstance
         void Update(uint32 uiDiff) override;
 
     private:
+        void JustDidDialogueStep(int32 iEntry) override;
+
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         bool m_abAchievCriteria[MAX_SPECIAL_ACHIEV_CRITS];
         std::string m_strInstData;
@@ -110,6 +123,7 @@ class instance_pinnacle : public ScriptedInstance
         ObjectGuid m_skadiMobsTriggerGuid;
 
         GuidList m_lskadiGauntletMobsList;
+        GuidVector m_vbrazierVector;
 };
 
 #endif

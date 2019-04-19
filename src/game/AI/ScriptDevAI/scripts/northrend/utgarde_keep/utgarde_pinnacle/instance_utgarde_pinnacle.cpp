@@ -24,7 +24,40 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "utgarde_pinnacle.h"
 
-instance_pinnacle::instance_pinnacle(Map* pMap) : ScriptedInstance(pMap),
+enum
+{
+    // Svala intro dialogue
+    SAY_INTRO_1                 = -1575000,
+    SAY_INTRO_2_ARTHAS          = -1575001,
+    SAY_INTRO_3                 = -1575002,
+    SAY_INTRO_4_ARTHAS          = -1575003,
+    SAY_INTRO_5                 = -1575004,
+
+    SPELL_TRANSFORMING          = 54205,        // should also remove aura 54140 (script effect)
+    SPELL_TRANSFORMING_FLOATING = 54140,        // followed by 54142
+    SPELL_TRANSFORMING_CHANNEL  = 54142,
+};
+
+static const DialogueEntry aPinnacleDialogue[] =
+{
+    // Intro dialogue
+    {NPC_ARTHAS_IMAGE,              0,                      1000},
+    {SAY_INTRO_1,                   NPC_SVALA,              9000},
+    {SAY_INTRO_2_ARTHAS,            NPC_ARTHAS_IMAGE,       10000},
+    {SPELL_TRANSFORMING_CHANNEL,    0,                      1000},
+    {NPC_SVALA,                     0,                      6000},
+    {SPELL_TRANSFORMING_FLOATING,   0,                      4000},
+
+    // Spawn undead Svala
+    {SPELL_TRANSFORMING,            0,                      2000},
+    {SAY_INTRO_3,                   NPC_SVALA_SORROWGRAVE,  11000},
+    {SAY_INTRO_4_ARTHAS,            NPC_ARTHAS_IMAGE,       10000},
+    {SAY_INTRO_5,                   NPC_SVALA_SORROWGRAVE,  13000},
+    {NPC_SVALA_SORROWGRAVE,         0,                  0},
+    {0, 0, 0},
+};
+
+instance_pinnacle::instance_pinnacle(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aPinnacleDialogue),
     m_uiGortokOrbTimer(0),
     m_uiGortokOrbPhase(0)
 {
@@ -37,6 +70,28 @@ void instance_pinnacle::Initialize()
 
     for (bool& i : m_abAchievCriteria)
         i = false;
+
+    InitializeDialogueHelper(this);
+}
+
+void instance_pinnacle::OnPlayerEnter(Player* pPlayer)
+{
+    // summon undead Svala if intro is complete and the creature doesn't exist already
+    if (GetSingleCreatureFromStorage(NPC_SVALA_SORROWGRAVE))
+        return;
+
+    if (GetData(TYPE_SVALA) == SPECIAL)
+    {
+        if (Creature* pSvala = pPlayer->SummonCreature(NPC_SVALA_SORROWGRAVE, aSvalaSpawnPos[0], aSvalaSpawnPos[1], aSvalaSpawnPos[2], aSvalaSpawnPos[3], TEMPSPAWN_DEAD_DESPAWN, 0))
+        {
+            pSvala->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            pSvala->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        }
+
+        // despawn the original Svala, in case it's still here
+        if (Creature* pSvala = GetSingleCreatureFromStorage(NPC_SVALA))
+            pSvala->ForcedDespawn();
+    }
 }
 
 void instance_pinnacle::OnCreatureCreate(Creature* pCreature)
@@ -53,6 +108,9 @@ void instance_pinnacle::OnCreatureCreate(Creature* pCreature)
         case NPC_TORGYN:
         case NPC_SKADI:
         case NPC_GRAUF:
+        case NPC_ARTHAS_IMAGE:
+        case NPC_SVALA:
+        case NPC_SVALA_SORROWGRAVE:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_WORLD_TRIGGER:
@@ -65,6 +123,9 @@ void instance_pinnacle::OnCreatureCreate(Creature* pCreature)
         case NPC_YMIRJAR_WARRIOR:
         case NPC_YMIRJAR_WITCH_DOCTOR:
             m_lskadiGauntletMobsList.push_back(pCreature->GetObjectGuid());
+            break;
+        case NPC_FLAME_BRAZIER:
+            m_vbrazierVector.push_back(pCreature->GetObjectGuid());
             break;
     }
 }
@@ -94,6 +155,8 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
         case TYPE_SVALA:
             if (uiData == IN_PROGRESS || uiData == FAIL)
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_INCREDIBLE_HULK, false);
+            else if (uiData == SPECIAL)
+                StartNextDialogueText(NPC_ARTHAS_IMAGE);
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_GORTOK:
@@ -262,6 +325,62 @@ bool instance_pinnacle::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player
     }
 }
 
+void instance_pinnacle::JustDidDialogueStep(int32 iEntry)
+{
+    switch (iEntry)
+    {
+        case NPC_ARTHAS_IMAGE:
+            if (Creature* pSvala = GetSingleCreatureFromStorage(NPC_SVALA))
+                pSvala->SummonCreature(NPC_ARTHAS_IMAGE, aArthasSpawnPos[0], aArthasSpawnPos[1], aArthasSpawnPos[2], aArthasSpawnPos[3], TEMPSPAWN_TIMED_DESPAWN, 55000);
+            break;
+        case SPELL_TRANSFORMING_CHANNEL:
+            if (Creature* pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS_IMAGE))
+                pArthas->CastSpell(pArthas, SPELL_TRANSFORMING_CHANNEL, TRIGGERED_NONE);
+            break;
+        case NPC_SVALA:
+            if (Creature* pSvala = GetSingleCreatureFromStorage(NPC_SVALA))
+            {
+                float fX, fZ, fY;
+                pSvala->GetRespawnCoord(fX, fY, fZ);
+
+                pSvala->SetLevitate(true);
+                pSvala->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+                pSvala->GetMotionMaster()->MovePoint(0, fX, fY, fZ + 5.0f);
+            }
+            break;
+        case SPELL_TRANSFORMING_FLOATING:
+            if (Creature* pSvala = GetSingleCreatureFromStorage(NPC_SVALA))
+                pSvala->CastSpell(pSvala, SPELL_TRANSFORMING_FLOATING, TRIGGERED_NONE);
+            break;
+        case SPELL_TRANSFORMING:
+            if (Creature* pSvala = GetSingleCreatureFromStorage(NPC_SVALA))
+            {
+                pSvala->CastSpell(pSvala, SPELL_TRANSFORMING, TRIGGERED_NONE);
+                pSvala->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                pSvala->ForcedDespawn(2000);
+
+                if (Creature* pBoss = pSvala->SummonCreature(NPC_SVALA_SORROWGRAVE, aSvalaSpawnPos[0], aSvalaSpawnPos[1], aSvalaSpawnPos[2], aSvalaSpawnPos[3], TEMPSPAWN_DEAD_DESPAWN, 0))
+                    pBoss->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            }
+            break;
+        case SAY_INTRO_5:
+            if (Creature* pSvala = GetSingleCreatureFromStorage(NPC_SVALA_SORROWGRAVE))
+                pSvala->SetFacingTo(1.8325f);
+            break;
+        case NPC_SVALA_SORROWGRAVE:
+            // Note: removal of the flight animation is handled by boss script
+            if (Creature* pSvala = GetSingleCreatureFromStorage(NPC_SVALA_SORROWGRAVE))
+            {
+                // Remove immunity flag and attack random player
+                pSvala->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+
+                if (Player* pPlayer = GetPlayerInMap(true, false))
+                    pSvala->AI()->AttackStart(pPlayer);
+            }
+            break;
+    }
+}
+
 void instance_pinnacle::OnCreatureEvade(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
@@ -296,6 +415,8 @@ void instance_pinnacle::OnCreatureDeath(Creature* pCreature)
 
 void instance_pinnacle::Update(uint32 const uiDiff)
 {
+    DialogueUpdate(uiDiff);
+
     if (m_uiGortokOrbTimer)
     {
         if (m_uiGortokOrbTimer <= uiDiff)
@@ -335,10 +456,29 @@ InstanceData* GetInstanceData_instance_pinnacle(Map* pMap)
     return new instance_pinnacle(pMap);
 }
 
+bool AreaTrigger_at_svala_intro(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
+{
+    if (pPlayer->isGameMaster())
+        return false;
+
+    if (instance_pinnacle* pInstance = (instance_pinnacle*)pPlayer->GetInstanceData())
+    {
+        if (pInstance->GetData(TYPE_SVALA) == NOT_STARTED)
+            pInstance->SetData(TYPE_SVALA, SPECIAL);
+    }
+
+    return false;
+}
+
 void AddSC_instance_pinnacle()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_pinnacle";
     pNewScript->GetInstanceData = &GetInstanceData_instance_pinnacle;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_svala_intro";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_svala_intro;
     pNewScript->RegisterSelf();
 }

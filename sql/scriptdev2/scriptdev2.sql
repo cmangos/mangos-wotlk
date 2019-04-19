@@ -1642,7 +1642,8 @@ UPDATE creature_template SET ScriptName='npc_gortok_subboss' WHERE entry IN (266
 UPDATE creature_template SET ScriptName='boss_skadi' WHERE entry=26693;
 UPDATE creature_template SET ScriptName='npc_grauf' WHERE entry=26893;
 UPDATE creature_template SET ScriptName='npc_flame_breath_trigger' WHERE entry=28351;
-UPDATE creature_template SET ScriptName='boss_svala' WHERE entry=29281;
+UPDATE creature_template SET ScriptName='boss_svala' WHERE entry=26668;
+UPDATE creature_template SET ScriptName='npc_ritual_target' WHERE entry=27327;
 UPDATE creature_template SET ScriptName='boss_ymiron' WHERE entry=26861;
 UPDATE instance_template SET ScriptName='instance_pinnacle' WHERE map=575;
 INSERT INTO scripted_areatrigger VALUES
@@ -1650,6 +1651,7 @@ INSERT INTO scripted_areatrigger VALUES
 (5140,'at_svala_intro');
 INSERT INTO scripted_event_id VALUES
 (17728,'event_spell_gortok_event'),
+(17841,'event_spell_call_flames'),
 (20651,'event_achiev_kings_bane');
 
 /* VAULT OF ARCHAVON */
@@ -5214,10 +5216,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 -- -1 575 000 UTGARDE PINNACLE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
-(-1575000,'My liege! I have done as you asked, and now beseech you for your blessing!',13856,1,0,0,'svala SAY_INTRO_1'),
-(-1575001,'Your sacrifice is a testament to your obedience. Indeed you are worthy of this charge. Arise, and forever be known as Svala Sorrowgrave!',14732,1,0,0,'svala SAY_INTRO_2_ARTHAS'),
-(-1575002,'The sensation is... beyond my imagining. I am yours to command, my king.',13857,1,0,0,'svala SAY_INTRO_3'),
-(-1575003,'Your first test awaits you. Destroy our uninvited guests.',14733,1,0,0,'svala SAY_INTRO_4_ARTHAS'),
+(-1575000,'My liege! I have done as you asked, and now beseech you for your blessing!',13856,1,0,1,'svala SAY_INTRO_1'),
+(-1575001,'Your sacrifice is a testament to your obedience. Indeed you are worthy of this charge. Arise, and forever be known as Svala Sorrowgrave!',14732,1,0,1,'svala SAY_INTRO_2_ARTHAS'),
+(-1575002,'The sensation is... beyond my imagining. I am yours to command, my king.',13857,1,0,1,'svala SAY_INTRO_3'),
+(-1575003,'Your first test awaits you. Destroy our uninvited guests.',14733,1,0,25,'svala SAY_INTRO_4_ARTHAS'),
 (-1575004,'I will be happy to slaughter them in your name! Come, enemies of the Scourge! I will show you the might of the Lich King!',13858,1,0,0,'svala SAY_INTRO_5'),
 (-1575005,'I will vanquish your soul!',13842,1,0,0,'svala SAY_AGGRO'),
 (-1575006,'You were a fool to challenge the power of the Lich King!',13845,1,0,0,'svala SAY_SLAY_1'),
