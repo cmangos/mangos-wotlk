@@ -1438,3 +1438,5 @@ UPDATE spell_template SET Stances=0 WHERE Id IN(12303,12788,12789);
 -- Arcatraz Sentinel - Energy Discharge - should only hit one player
 UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(36717,38829);
 
+-- Mangletooth - These spells need to ignore LOS
+UPDATE spell_template SET AttributesEx2 = AttributesEx2|4 WHERE id IN (7764, 16618, 10767, 16610, 16612, 17013);
