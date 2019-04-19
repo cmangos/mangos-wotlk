@@ -222,6 +222,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         m_uiSurgeOfPowerTimer   = 30000;
 
         // reset flags
+        m_creature->SetImmuneToPlayer(true);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
 
@@ -231,6 +232,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
+        m_creature->SetImmuneToPlayer(false);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MALYGOS, IN_PROGRESS);

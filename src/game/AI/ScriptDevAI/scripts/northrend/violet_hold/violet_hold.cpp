@@ -341,7 +341,7 @@ struct npc_prison_event_controllerAI : public ScriptedAI
                     DoScriptText(pData->iSayEntry, pBoss);
 
                 pBoss->GetMotionMaster()->MovePoint(1, pData->fX, pData->fY, pData->fZ);
-                pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
 
                 // Handle Erekem guards
                 if (pData->uiType == TYPE_EREKEM)
@@ -356,7 +356,7 @@ struct npc_prison_event_controllerAI : public ScriptedAI
                         {
                             float fMoveX = (pData->fX - pAdd->GetPositionX()) * .25;
                             pAdd->GetMotionMaster()->MovePoint(0, pData->fX - fMoveX, pData->fY, pData->fZ);
-                            pAdd->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                            pAdd->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
                         }
                     }
                 }
@@ -567,7 +567,10 @@ struct npc_teleportation_portalAI : public ScriptedAI
             if (m_uiCyanigosaMoveTimer <= uiDiff)
             {
                 if (Creature* pCyanigosa = m_creature->GetMap()->GetCreature(m_cyanigosaGuid))
+                {
                     pCyanigosa->GetMotionMaster()->MoveJump(afPortalLocation[8].fX, afPortalLocation[8].fY, afPortalLocation[8].fZ, pCyanigosa->GetSpeed(MOVE_RUN) * 2, 10.0f);
+                    pCyanigosa->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                }
 
                 m_uiCyanigosaMoveTimer = 0;
             }

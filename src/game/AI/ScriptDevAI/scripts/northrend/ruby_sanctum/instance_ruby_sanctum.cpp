@@ -128,7 +128,7 @@ void instance_ruby_sanctum::DoHandleZarithrianDoor()
 
         // Also remove not_selectable unit flag
         if (Creature* pZarithrian = GetSingleCreatureFromStorage(NPC_ZARITHRIAN))
-            pZarithrian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            pZarithrian->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 }
 
