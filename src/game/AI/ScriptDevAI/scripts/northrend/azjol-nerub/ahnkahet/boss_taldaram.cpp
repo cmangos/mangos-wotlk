@@ -156,6 +156,7 @@ struct boss_taldaramAI : public ScriptedAI
         if (uiPointId)
         {
             m_creature->SetLevitate(false);
+            m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
             m_creature->SetFacingTo(aTaldaramLandingLoc[3]);
         }
     }

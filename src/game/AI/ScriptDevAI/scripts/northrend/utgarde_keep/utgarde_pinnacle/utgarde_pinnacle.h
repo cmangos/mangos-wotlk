@@ -97,7 +97,13 @@ class instance_pinnacle : public ScriptedInstance, private DialogueHelper
         void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
 
-        ObjectGuid GetRandomBrazier() const { return m_vbrazierVector[urand(0, 1)]; }
+        ObjectGuid GetRandomBrazier() const
+        {
+            if (m_vbrazierVector.empty())
+                return ObjectGuid();
+
+            return m_vbrazierVector[urand(0, m_vbrazierVector.size() - 1)];
+        }
 
         void SetGortokEventStarter(ObjectGuid playerGuid) { m_gortokEventStarterGuid = playerGuid; }
         ObjectGuid GetGortokEventStarter() const { return m_gortokEventStarterGuid; }

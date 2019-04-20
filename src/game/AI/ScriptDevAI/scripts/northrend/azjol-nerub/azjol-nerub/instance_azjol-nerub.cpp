@@ -222,9 +222,9 @@ void instance_azjol_nerub::DoSortWorldTriggers()
         float fZ = pAnub->GetPositionZ();
         float fTriggZ = 0;
 
-        for (GuidList::const_iterator itr = m_lTriggerGuids.begin(); itr != m_lTriggerGuids.end(); ++itr)
+        for (ObjectGuid& guid : m_lTriggerGuids)
         {
-            if (Creature* pTrigg = instance->GetCreature(*itr))
+            if (Creature* pTrigg = instance->GetCreature(guid))
             {
                 // Sort only triggers in a range of 100
                 if (pTrigg->GetPositionY() < pAnub->GetPositionY() + 110)

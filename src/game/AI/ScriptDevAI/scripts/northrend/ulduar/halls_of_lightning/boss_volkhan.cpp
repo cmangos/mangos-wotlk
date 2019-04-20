@@ -56,6 +56,7 @@ enum
     SPELL_IMMOLATION_STRIKE_H               = 59530,
     SPELL_SHATTER                           = 52429,
     SPELL_SHATTER_H                         = 59527,
+    SPELL_COOL_DOWN                         = 52441,
 
     NPC_MOLTEN_GOLEM                        = 28695,
     NPC_BRITTLE_GOLEM                       = 28681,
@@ -180,6 +181,7 @@ struct boss_volkhanAI : public ScriptedAI
         if (pSummoned->GetEntry() == NPC_MOLTEN_GOLEM)
         {
             m_lGolemGUIDList.push_back(pSummoned->GetObjectGuid());
+            pSummoned->CastSpell(pSummoned, SPELL_COOL_DOWN, TRIGGERED_OLD_TRIGGERED);
 
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 pSummoned->AI()->AttackStart(pTarget);
@@ -256,6 +258,8 @@ struct boss_volkhanAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_HEAT : SPELL_HEAT_H) == CAST_OK)
                 m_uiHeatTimer = urand(10000, 15000);
+            else
+                m_uiHeatTimer = urand(3000, 5000);
         }
         else
             m_uiHeatTimer -= uiDiff;

@@ -42,6 +42,8 @@ enum
     NPC_RHINO_SPIRIT           = 29791,
     SPELL_STAMPEDE_RHINO       = 55220,
     SPELL_STAMPEDE_RHINO_H     = 59823,
+    SPELL_STAMPEDE_EFFECT      = 55219,                 // spell cast on boss; possibly used to lock a target
+    SPELL_STAMPEDE_PROC        = 55221,                 // proc creature despawn
 
     // troll form spells
     SPELL_STAMPEDE             = 55218,
@@ -133,8 +135,10 @@ struct boss_galdarahAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_RHINO_SPIRIT)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, m_bIsRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, SELECT_FLAG_PLAYER))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_bIsRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, SELECT_FLAG_PLAYER))
             {
+                pSummoned->CastSpell(m_creature, SPELL_STAMPEDE_EFFECT, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_STAMPEDE_PROC, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->CastSpell(pTarget, m_bIsRegularMode ? SPELL_STAMPEDE_RHINO : SPELL_STAMPEDE_RHINO_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
 
                 // Store the player guid in order to count it for the achievement

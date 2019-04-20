@@ -213,7 +213,7 @@ UnitAI* GetAI_boss_svala(Creature* pCreature)
 }
 
 /*######
-## npc_computer
+## npc_ritual_target
 ######*/
 
 // TODO Remove this 'script' when combat can be proper prevented from core-side

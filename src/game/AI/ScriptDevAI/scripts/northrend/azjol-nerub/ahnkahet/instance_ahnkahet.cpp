@@ -167,6 +167,8 @@ void instance_ahnkahet::SetData(uint32 uiType, uint32 uiData)
             {
                 m_uiTwistedVisageCount = 0;
                 m_lInsanityPlayersGuidList.clear();
+
+                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_VOLAZJ_ID);
             }
             break;
 
