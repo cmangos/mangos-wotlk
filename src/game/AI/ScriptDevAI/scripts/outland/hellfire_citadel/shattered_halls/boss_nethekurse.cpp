@@ -288,7 +288,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
 
             if (m_uiDeathCoilTimer < uiDiff)
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, nullptr))
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     DoCastSpellIfCan(pTarget, SPELL_DEATH_COIL);
                 m_uiDeathCoilTimer = urand(15000, 20000);
             }
