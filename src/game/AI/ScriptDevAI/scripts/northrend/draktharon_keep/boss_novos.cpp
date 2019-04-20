@@ -54,12 +54,6 @@ enum
     SPELL_SUMMON_RISON_SHADOWCASTER = 49105,
 
     // Spells 'Crystal Handler Death' 47336, 55801, 55803, 55805 (defined in instance script)
-
-    NPC_CRYSTAL_HANDLER             = 26627,
-    NPC_HULKING_CORPSE              = 27597,
-    NPC_FETID_TROLL_CORPSE          = 27598,
-    NPC_RISON_SHADOWCASTER          = 27600,
-    NPC_ROTTED_TROLL_CORPSE         = 32786,                // On heroic as effect of SPELL_SUMMON_MINIONS_H
 };
 
 // The Crystal Handlers are summoned around the two entrances of the room
@@ -75,9 +69,10 @@ static const float aHandlerSummonPos[2][3] =
 
 enum Phases
 {
-    PHASE_SHIELDED  = 0,
-    PHASE_WAITING   = 1,
-    PHASE_NORMAL    = 2,
+    PHASE_IDLE      = 0,
+    PHASE_SHIELDED  = 1,
+    PHASE_WAITING   = 2,
+    PHASE_NORMAL    = 3,
 };
 
 struct boss_novosAI : public Scripted_NoMovementAI
@@ -118,8 +113,7 @@ struct boss_novosAI : public Scripted_NoMovementAI
 
         m_uiSummonedHandlers = 0;
         m_uiLostCrystals = 0;
-        // This ensures that in the shield phase m_pInstance is valid
-        m_uiPhase = m_pInstance ? PHASE_SHIELDED : PHASE_NORMAL;
+        m_uiPhase = PHASE_IDLE;
 
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
@@ -158,6 +152,7 @@ struct boss_novosAI : public Scripted_NoMovementAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
         DoCastSpellIfCan(m_creature, SPELL_ARCANE_FIELD);
+        m_uiPhase = PHASE_SHIELDED;
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_NOVOS, IN_PROGRESS);
@@ -209,11 +204,11 @@ struct boss_novosAI : public Scripted_NoMovementAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
         switch (m_uiPhase)
         {
+            case PHASE_IDLE:
+                // no actions during this phase
+                return;
             case PHASE_SHIELDED:                            // Event Phase, only summoning of mobs
                 if (m_uiSummonHandlerTimer < uiDiff)
                 {
@@ -232,8 +227,9 @@ struct boss_novosAI : public Scripted_NoMovementAI
 
                 if (m_uiSummonShadowcasterTimer < uiDiff)
                 {
-                    if (Creature* pSummoner = m_pInstance->GetSummonDummy())
-                        pSummoner->CastSpell(pSummoner, SPELL_SUMMON_RISON_SHADOWCASTER, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
+                    if (m_pInstance)
+                        if (Creature* pSummoner = m_pInstance->GetSummonDummy())
+                            pSummoner->CastSpell(pSummoner, SPELL_SUMMON_RISON_SHADOWCASTER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                     m_uiSummonShadowcasterTimer = 25000;
                 }
                 else
@@ -241,8 +237,9 @@ struct boss_novosAI : public Scripted_NoMovementAI
 
                 if (m_uiSummonFetidTrollTimer < uiDiff)
                 {
-                    if (Creature* pSummoner = m_pInstance->GetSummonDummy())
-                        pSummoner->CastSpell(pSummoner, SPELL_SUMMON_FETID_TROLL_CORPSE, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
+                    if (m_pInstance)
+                        if (Creature* pSummoner = m_pInstance->GetSummonDummy())
+                            pSummoner->CastSpell(pSummoner, SPELL_SUMMON_FETID_TROLL_CORPSE, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                     m_uiSummonFetidTrollTimer = 5000;
                 }
                 else
@@ -250,8 +247,9 @@ struct boss_novosAI : public Scripted_NoMovementAI
 
                 if (m_uiSummonHulkingCorpseTimer < uiDiff)
                 {
-                    if (Creature* pSummoner = m_pInstance->GetSummonDummy())
-                        pSummoner->CastSpell(pSummoner, SPELL_SUMMON_HULKING_CORPSE, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
+                    if (m_pInstance)
+                        if (Creature* pSummoner = m_pInstance->GetSummonDummy())
+                            pSummoner->CastSpell(pSummoner, SPELL_SUMMON_HULKING_CORPSE, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                     m_uiSummonHulkingCorpseTimer = 30000;
                 }
                 else
@@ -278,6 +276,9 @@ struct boss_novosAI : public Scripted_NoMovementAI
                 break;
 
             case PHASE_NORMAL:                              // Normal Phase, attack enemies
+                if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                    return;
+
                 if (m_uiArcaneBlastTimer < uiDiff)
                 {
                     // TODO - might be possible that this spell is only casted, when there is an enemy in range

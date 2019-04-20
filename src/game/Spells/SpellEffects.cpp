@@ -10439,6 +10439,18 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
+                case 59910:                                 // Summon Minions
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 59935, TRIGGERED_OLD_TRIGGERED);
+                    unitTarget->CastSpell(unitTarget, 59938, TRIGGERED_OLD_TRIGGERED);
+                    unitTarget->CastSpell(unitTarget, 59939, TRIGGERED_OLD_TRIGGERED);
+                    unitTarget->CastSpell(unitTarget, 59940, TRIGGERED_OLD_TRIGGERED);
+                    unitTarget->CastSpell(unitTarget, 59943, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 60893:                                 // Northrend Alchemy Research
                 case 61177:                                 // Northrend Inscription Research
                 case 61288:                                 // Minor Inscription Research

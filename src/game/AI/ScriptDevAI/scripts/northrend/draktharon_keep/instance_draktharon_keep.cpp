@@ -45,8 +45,19 @@ void instance_draktharon_keep::OnCreatureEnterCombat(Creature* pCreature)
 
 void instance_draktharon_keep::OnCreatureEvade(Creature* pCreature)
 {
-    if (pCreature->GetEntry() == NPC_KING_DRED)
-        SetData(TYPE_KING_DRED, FAIL);
+    switch (pCreature->GetEntry())
+    {
+        case NPC_KING_DRED:
+            SetData(TYPE_KING_DRED, FAIL);
+            break;
+        case NPC_CRYSTAL_HANDLER:
+        case NPC_HULKING_CORPSE:
+        case NPC_FETID_TROLL_CORPSE:
+        case NPC_RISON_SHADOWCASTER:
+            if (Creature* pBoss = GetSingleCreatureFromStorage(NPC_NOVOS))
+                pBoss->AI()->EnterEvadeMode();
+            break;
+    }
 }
 
 void instance_draktharon_keep::OnCreatureDeath(Creature* pCreature)

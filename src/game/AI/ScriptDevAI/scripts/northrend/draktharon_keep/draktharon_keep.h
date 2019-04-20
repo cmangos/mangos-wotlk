@@ -23,6 +23,12 @@ enum
     NPC_WORLD_TRIGGER               = 22515,
 
     // Novos Encounter
+    NPC_CRYSTAL_HANDLER             = 26627,
+    NPC_HULKING_CORPSE              = 27597,
+    NPC_FETID_TROLL_CORPSE          = 27598,
+    NPC_RISON_SHADOWCASTER          = 27600,
+    NPC_ROTTED_TROLL_CORPSE         = 32786,                // On heroic as effect of 59910
+
     SPELL_BEAM_CHANNEL              = 52106,
     SPELL_CRYSTAL_HANDLER_DEATH_1   = 47336,
     SPELL_CRYSTAL_HANDLER_DEATH_2   = 55801,
