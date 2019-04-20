@@ -184,6 +184,9 @@ struct boss_volazjAI : public ScriptedAI
                 pSummoned->CastSpell(pPlayer, m_bIsRegularMode ? SPELL_TWISTED_VISAGE_SPAWN : SPELL_TWISTED_VISAGE_SPAWN_H, TRIGGERED_OLD_TRIGGERED);
 
                 pSummoned->AI()->AttackStart(pPlayer);
+
+                // Note: this flag change has to be confirmed
+                pSummoned->SetImmuneToPlayer(false);
             }
         }
     }

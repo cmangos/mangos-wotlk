@@ -588,7 +588,10 @@ void instance_culling_of_stratholme::DoSpawnArthasIfNeeded(Unit* pSummoner)
     {
         pArthas = GetSingleCreatureFromStorage(NPC_ARTHAS);
         if (pArthas)
+        {
             pArthas->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            pArthas->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+        }
     }
 
     // summon the other intro actors

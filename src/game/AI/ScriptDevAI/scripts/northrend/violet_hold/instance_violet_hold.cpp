@@ -604,35 +604,35 @@ void instance_violet_hold::OnCreatureEvade(Creature* pCreature)
         case NPC_ZURAMAT:
         case NPC_VOID_LORD:
             SetData(TYPE_ZURAMAT, FAIL);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_XEVOZZ:
         case NPC_ETHERAL:
             SetData(TYPE_XEVOZZ, FAIL);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_LAVANTHOR:
         case NPC_LAVA_HOUND:
             SetData(TYPE_LAVANTHOR, FAIL);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_MORAGG:
         case NPC_WATCHER:
             SetData(TYPE_MORAGG, FAIL);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_EREKEM:
         case NPC_ARAKKOA:
             SetData(TYPE_EREKEM, FAIL);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_EREKEM_GUARD:
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_ICHORON:
         case NPC_SWIRLING:
             SetData(TYPE_ICHORON, FAIL);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_CYANIGOSA:
             SetData(TYPE_CYANIGOSA, FAIL);
