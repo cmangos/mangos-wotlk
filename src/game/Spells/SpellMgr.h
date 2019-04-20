@@ -447,6 +447,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 8601:          // Slowing Poison
         case 8876:          // Thrash
         case 9205:          // Hate to Zero (Hate to Zero)
+        case 9347:          // Mortal Strike
         case 9460:          // Corrosive Ooze
         case 9941:          // Spell Reflection
         case 10022:         // Deadly Poison
