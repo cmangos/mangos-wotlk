@@ -1651,7 +1651,7 @@ class Unit : public WorldObject
         bool IsSitState() const;
         bool IsStandState() const;
         bool IsSeatedState() const;
-        void SetStandState(uint8 state);
+        void SetStandState(uint8 state, bool acknowledge = false);
 
         void  SetStandFlags(uint8 flags) { SetByteFlag(UNIT_FIELD_BYTES_1, 2, flags); }
         void  RemoveStandFlags(uint8 flags) { RemoveByteFlag(UNIT_FIELD_BYTES_1, 2, flags); }

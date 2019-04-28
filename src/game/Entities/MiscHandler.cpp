@@ -415,7 +415,7 @@ void WorldSession::HandleStandStateChangeOpcode(WorldPacket& recv_data)
     uint32 animstate;
     recv_data >> animstate;
 
-    _player->SetStandState(animstate);
+    _player->SetStandState(uint8(animstate), true);
 }
 
 void WorldSession::HandleContactListOpcode(WorldPacket& recv_data)
