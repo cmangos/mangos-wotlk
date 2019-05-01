@@ -7145,30 +7145,6 @@ Player* Unit::GetBeneficiaryPlayer() const
     return (GetTypeId() == TYPEID_PLAYER ? const_cast<Player*>(static_cast<Player const*>(this)) : nullptr);
 }
 
-Player const* Unit::GetControllingPlayer() const
-{
-    // TBC+ clientside logic counterpart
-    if (ObjectGuid const& masterGuid = GetMasterGuid())
-    {
-        if (Unit const* master = ObjectAccessor::GetUnit(*this, masterGuid))
-        {
-            if (master->GetTypeId() == TYPEID_PLAYER)
-                return static_cast<Player const*>(master);
-            if (ObjectGuid const& masterMasterGuid = master->GetMasterGuid())
-            {
-                if (Unit const* masterMaster = ObjectAccessor::GetUnit(*this, masterMasterGuid))
-                {
-                    if (masterMaster->GetTypeId() == TYPEID_PLAYER)
-                        return static_cast<Player const*>(masterMaster);
-                }
-            }
-        }
-    }
-    else if (GetTypeId() == TYPEID_PLAYER)
-        return static_cast<Player const*>(this);
-    return nullptr;
-}
-
 bool Unit::IsClientControlled(Player const* exactClient /*= nullptr*/) const
 {
     // Severvide method to check if unit is client controlled (optionally check for specific client in control)
