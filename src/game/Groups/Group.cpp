@@ -313,6 +313,8 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
 
     if (Player* player = sObjectMgr.GetPlayer(guid))
     {
+        _updateMembersOnRosterChanged(player);
+
         if (!IsLeader(player->GetObjectGuid()) && !isBattleGroup())
         {
             // reset the new member's instances, unless he is currently in one of them
@@ -347,17 +349,18 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
 
 uint32 Group::RemoveMember(ObjectGuid guid, uint8 method)
 {
+    Player* player = sObjectMgr.GetPlayer(guid);
 #ifdef BUILD_PLAYERBOT
     // if master leaves group, all bots leave group
     if (!botConfig.GetBoolDefault("PlayerbotAI.DisableBots", false))
     {
-        Player* const player = sObjectMgr.GetPlayer(guid);
         if (player && player->GetPlayerbotMgr())
             player->GetPlayerbotMgr()->RemoveAllBotsFromGroup();
     }
 #endif
 
-    Player* player = sObjectMgr.GetPlayer(guid);
+    _updateMembersOnRosterChanged(player);
+
     for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
     {
         if (Player* groupMember = itr->getSource())
@@ -972,6 +975,38 @@ void Group::_updateLeaderFlag(bool remove /*= false*/) const
 {
     if (Player* player = sObjectMgr.GetPlayer(m_leaderGuid))
         player->UpdateGroupLeaderFlag(remove);
+}
+
+void Group::_updateMembersOnRosterChanged(Player* changed)
+{
+    if (!changed || !changed->IsInWorld())
+        return;
+
+    // [XFACTION]: Prepare to alter fields if detected crossfaction group interaction:
+    if (const bool xfaction = sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP))
+    {
+        // [XFACTION]: Prepare to alter faction:
+        auto xfactionUpdate = [] (Unit* a, Unit* b)
+        {
+            if (!a->HasCharmer() && !a->CanCooperate(b))
+                b->ForceValuesUpdateAtIndex(UNIT_FIELD_FACTIONTEMPLATE);
+        };
+
+        for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
+        {
+            if (Player* member = itr->getSource())
+            {
+                if (member != changed && member->IsInWorld())
+                {
+                    if (member->HaveAtClient(changed))
+                        xfactionUpdate(member, changed);
+
+                    if (changed->HaveAtClient(member))
+                        xfactionUpdate(changed, member);
+                }
+            }
+        }
+    }
 }
 
 bool Group::_setMembersGroup(ObjectGuid guid, uint8 group)

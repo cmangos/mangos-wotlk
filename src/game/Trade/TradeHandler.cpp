@@ -633,7 +633,8 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if (pOther->GetTeam() != _player->GetTeam())
+    // [XFACTION]: Reserve possibility to trade with each other for crossfaction group members (when no charms involved)
+    if (!_player->CanCooperate(pOther) && (pOther->HasCharmer() || _player->HasCharmer() || !pOther->IsInGroup(_player)))
     {
         info.Status = TRADE_STATUS_WRONG_FACTION;
         SendTradeStatus(info);

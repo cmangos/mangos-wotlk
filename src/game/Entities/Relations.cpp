@@ -203,6 +203,13 @@ ReputationRank Unit::GetReactionTo(Unit const* unit) const
                         return REP_HOSTILE;
                 }
 
+                // [XFACTION]: Swap WotLK+ group check with "Alliance Generic" and 'Horde Generic" for crossfaction functionality
+                if (sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_GROUP) && thisPlayer->GetTeam() != unitPlayer->GetTeam())
+                {
+                    if (!unitPlayer->HasCharmer() && thisPlayer->IsInGroup(unitPlayer))
+                        return GetFactionReaction(GetFactionTemplateEntry(), sFactionTemplateStore.LookupEntry((thisPlayer->GetTeam() == ALLIANCE ? 1054 : 1495)));
+                }
+
                 // WotLK+ group check: faction to unit
                 if (thisPlayer->IsInGroup(unitPlayer))
                     return GetFactionReaction(GetFactionTemplateEntry(), unit);
