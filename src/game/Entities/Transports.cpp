@@ -552,8 +552,7 @@ void Transport::UpdateForMap(Map const* targetMap)
             {
                 UpdateData updateData;
                 BuildCreateUpdateBlockForPlayer(&updateData, itr.getSource());
-                WorldPacket packet;
-                updateData.BuildPacket(packet, 0); // always only one packet
+                WorldPacket packet = updateData.BuildPacket(0); // always only one packet
                 itr.getSource()->SendDirectMessage(packet);
             }
         }
@@ -562,12 +561,10 @@ void Transport::UpdateForMap(Map const* targetMap)
     {
         UpdateData updateData;
         BuildOutOfRangeUpdateBlock(&updateData);
-        WorldPacket out_packet;
-        updateData.BuildPacket(out_packet, 0); // always only one packet
-
+        WorldPacket packet = updateData.BuildPacket(0); // always only one packet
         for (const auto& itr : pl)
             if (this != itr.getSource()->GetTransport())
-                itr.getSource()->SendDirectMessage(out_packet);
+                itr.getSource()->SendDirectMessage(packet);
     }
 }
 
