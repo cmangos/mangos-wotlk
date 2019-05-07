@@ -123,13 +123,12 @@ static const uint32 auiPortals[MAX_PORTALS] =
 // TODO: Should propably have 25yd aggro range?
 struct boss_netherspiteAI : public ScriptedAI
 {
-    boss_netherspiteAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_netherspiteAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
     NetherspitePhases m_uiActivePhase;
 
@@ -164,19 +163,19 @@ struct boss_netherspiteAI : public ScriptedAI
         m_creature->FixateTarget(nullptr);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NETHERSPITE, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_NETHERSPITE, IN_PROGRESS);
 
         DoSummonPortals();
         DoCastSpellIfCan(m_creature, SPELL_NETHERBURN);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NETHERSPITE, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_NETHERSPITE, DONE);
 
         DespawnPortals();
     }
@@ -194,8 +193,8 @@ struct boss_netherspiteAI : public ScriptedAI
     {
         ScriptedAI::EnterEvadeMode();
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NETHERSPITE, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_NETHERSPITE, FAIL);
         
         DespawnPortals();
     }
@@ -260,20 +259,20 @@ struct boss_netherspiteAI : public ScriptedAI
         std::random_shuffle(m_vPortalEntryList.begin(), m_vPortalEntryList.end());
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        m_vPortalGuidList.push_back(pSummoned->GetObjectGuid());
+        m_vPortalGuidList.push_back(summoned->GetObjectGuid());
 
-        switch (pSummoned->GetEntry())
+        switch (summoned->GetEntry())
         {
             case NPC_PORTAL_RED:
-                pSummoned->CastSpell(pSummoned, SPELL_RED_PORTAL, TRIGGERED_NONE);
+                summoned->CastSpell(summoned, SPELL_RED_PORTAL, TRIGGERED_NONE);
                 break;
             case NPC_PORTAL_GREEN:
-                pSummoned->CastSpell(pSummoned, SPELL_GREEN_PORTAL, TRIGGERED_NONE);
+                summoned->CastSpell(summoned, SPELL_GREEN_PORTAL, TRIGGERED_NONE);
                 break;
             case NPC_PORTAL_BLUE:
-                pSummoned->CastSpell(pSummoned, SPELL_BLUE_PORTAL, TRIGGERED_NONE);
+                summoned->CastSpell(summoned, SPELL_BLUE_PORTAL, TRIGGERED_NONE);
                 break;
         }
     }
@@ -282,6 +281,12 @@ struct boss_netherspiteAI : public ScriptedAI
     {
         if (!m_creature->SelectHostileTarget())
             return;
+
+        if (GetCombatScriptStatus() && m_instance && m_instance->GetPlayerInMap(true, false) == nullptr)
+        {
+            EnterEvadeMode();
+            return;
+        }
 
         if (m_uiPhaseSwitchTimer <= uiDiff)
             SwitchPhases();
