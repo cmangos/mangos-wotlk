@@ -1962,6 +1962,50 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->DealDamage(unitTarget, unitTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                     return;
                 }
+                case 34094:                                 // Power of Arrazius
+                {
+                    if (!unitTarget)
+                        return;
+
+                    uint32 triggered_spell_id = 0;
+                    AIEventType triggered_event = AI_EVENT_CUSTOM_A;
+
+                    // Feeble Weapons: Warrior, Rogue, Hunter
+                    // Doubting Mind: Paladin, Shaman, Druid
+                    // Chilling Words: Mage, Warlock, Priest
+                    switch (unitTarget->getClass())
+                    {
+                        case CLASS_WARRIOR:
+                        case CLASS_ROGUE:
+                        case CLASS_HUNTER:
+                            triggered_spell_id = 34088;
+                            triggered_event = AI_EVENT_CUSTOM_EVENTAI_A;
+                            break;
+                        case CLASS_PALADIN:
+                        case CLASS_SHAMAN:
+                        case CLASS_DRUID:
+                            triggered_spell_id = 34089;
+                            triggered_event = AI_EVENT_CUSTOM_EVENTAI_B;
+                            break;
+                        case CLASS_MAGE:
+                        case CLASS_WARLOCK:
+                        case CLASS_PRIEST:
+                            triggered_spell_id = 34087;
+                            triggered_event = AI_EVENT_CUSTOM_EVENTAI_C;
+                            break;
+                        default:
+                            return;
+                    }
+
+                    // This spell has lower range than the main spell,
+                    // and the spell might fail because of that; this is working as
+                    // intended
+                    m_caster->CastSpell(unitTarget, triggered_spell_id, TRIGGERED_OLD_TRIGGERED);
+                    if (m_caster->IsCreature())
+                        m_caster->AI()->SendAIEvent(triggered_event, unitTarget, m_caster);
+
+                    return;
+                }
                 case 34803:                                 // Summon Reinforcements
                 {
                     m_caster->CastSpell(m_caster, 34810, TRIGGERED_OLD_TRIGGERED); // Summon 20083 behind of the caster

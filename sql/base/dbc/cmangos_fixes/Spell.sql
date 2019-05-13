@@ -1360,4 +1360,7 @@ UPDATE spell_template SET `AttributesEx5`=`AttributesEx5`|0x00000001 WHERE `Id`=
 -- Disgruntled, used by Bonechewer Taskmaster (23028) - only hits one Bonechewer Worker (22963)
 UPDATE spell_template SET `MaxAffectedTargets`=1 WHERE id=40851;
 
+-- Power of Arrazius - should only hit one player
+UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id` IN(34094);
+
 
