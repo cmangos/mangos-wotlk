@@ -9150,6 +9150,18 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(unitTarget, 33684, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 34098:                                 // ClearAllDebuffs
+                {
+                    auto holderMap = m_caster->GetSpellAuraHolderMap();
+                    for (auto holderPair : holderMap)
+                    {
+                        if (!holderPair.second->IsPositive() && !holderPair.second->IsPassive())
+                        {
+                            m_caster->RemoveAurasDueToSpell(holderPair.second->GetId());
+                        }
+                    }
+                    return;
+                }
                 case 34653:                                 // SPELL_FIREBALL_GROUND
                 case 36920:                                 // SPELL_FIREBALL_GROUND_H
                 case 33793:                                 // SPELL_FIREBALL_RANDOM
