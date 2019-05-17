@@ -13439,3 +13439,21 @@ float Unit::OCTRegenHPPerSpirit() const
     float regen = baseSpirit * baseRatio->ratio + moreSpirit * moreRatio->ratio;
     return regen;
 }
+
+float Unit::OCTRegenMPPerSpirit() const
+{
+    uint32 level = getLevel();
+    uint32 pclass = getClass();
+
+    if (level > GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+
+    //    GtOCTRegenMPEntry     const *baseRatio = sGtOCTRegenMPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+    GtRegenMPPerSptEntry  const* moreRatio = sGtRegenMPPerSptStore.LookupEntry((pclass - 1) * GT_MAX_LEVEL + level - 1);
+    if (moreRatio == nullptr)
+        return 0.0f;
+
+    // Formula get from PaperDollFrame script
+    float spirit = GetStat(STAT_SPIRIT);
+    float regen = spirit * moreRatio->ratio;
+    return regen;
+}
