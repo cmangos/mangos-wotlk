@@ -311,6 +311,10 @@ UPDATE gameobject_template SET ScriptName='go_southfury_moonstone' WHERE entry=1
 UPDATE creature_template SET ScriptName='mobs_spitelashes' WHERE entry IN (6190,6193,6194,6195,6196);
 UPDATE creature_template SET ScriptName='npc_loramus_thalipedes' WHERE entry=7783;
 UPDATE creature_template SET ScriptName='npc_felhound_tracker' WHERE entry=8668;
+UPDATE creature_template SET ScriptName='boss_maws' WHERE entry=15571;
+UPDATE gameobject_template SET ScriptName='go_lightning' WHERE entry=183356;
+INSERT INTO scripted_event_id VALUES
+(9542,'event_arcanite_buoy');
 
 /* AZUREMYST ISLE */
 UPDATE creature_template SET ScriptName='npc_draenei_survivor' WHERE entry=16483;
@@ -3190,6 +3194,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001318,'You fought well. Now go north to your orc outpost and inform Overlord Bor\'gorok of our success!',0,0,0,113,'proudhoof SAY_QUEST_END');
 
 -- -1 010 000 Classic texts
+(-1010000,'The beast returns from whence it came. The wrath of Neptulon has subsided.',0,3,0,0,'Maws EMOTE_MAWS_KILL'),
 
 -- -1 015 000 TBC texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
