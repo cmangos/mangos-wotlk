@@ -681,7 +681,7 @@ void Pet::RegenerateAll(uint32 update_diff)
         if (!isInCombat())
             RegenerateHealth();
 
-        RegeneratePower();
+        RegeneratePower(4.f);
 
         m_regenTimer = 4000;
     }

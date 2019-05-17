@@ -713,12 +713,12 @@ void Creature::RegenerateAll(uint32 update_diff)
     if (!isInCombat() || IsEvadeRegen())
         RegenerateHealth();
 
-    RegeneratePower();
+    RegeneratePower(2.f);
 
     m_regenTimer = REGEN_TIME_FULL;
 }
 
-void Creature::RegeneratePower()
+void Creature::RegeneratePower(float timerMultiplier)
 {
     if (!IsRegeneratingPower())
         return;
@@ -742,7 +742,7 @@ void Creature::RegeneratePower()
                 {
                     float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
                     float intellect = GetStat(STAT_INTELLECT);
-                    addValue = sqrt(intellect) * OCTRegenMPPerSpirit() * ManaIncreaseRate;
+                    addValue = sqrt(intellect) * OCTRegenMPPerSpirit() * ManaIncreaseRate / 5.f * timerMultiplier;
                 }
             }
             else
