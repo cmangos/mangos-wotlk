@@ -13418,3 +13418,24 @@ uint32 Unit::GetSpellRank(SpellEntry const* spellInfo)
         spellRank = spellInfo->maxLevel * 5;
     return spellRank;
 }
+
+float Unit::OCTRegenHPPerSpirit() const
+{
+    uint32 level = getLevel();
+    uint32 pclass = getClass();
+
+    if (level > GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+
+    GtOCTRegenHPEntry     const* baseRatio = sGtOCTRegenHPStore.LookupEntry((pclass - 1) * GT_MAX_LEVEL + level - 1);
+    GtRegenHPPerSptEntry  const* moreRatio = sGtRegenHPPerSptStore.LookupEntry((pclass - 1) * GT_MAX_LEVEL + level - 1);
+    if (baseRatio == nullptr || moreRatio == nullptr)
+        return 0.0f;
+
+    // Formula from PaperDollFrame script
+    float spirit = GetStat(STAT_SPIRIT);
+    float baseSpirit = spirit;
+    if (baseSpirit > 50) baseSpirit = 50;
+    float moreSpirit = spirit - baseSpirit;
+    float regen = baseSpirit * baseRatio->ratio + moreSpirit * moreRatio->ratio;
+    return regen;
+}
