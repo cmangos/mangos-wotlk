@@ -8256,7 +8256,6 @@ void Aura::PeriodicTick()
 
             uint32 absorb = 0;
             int32 resist = 0;
-            CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
 
             // SpellDamageBonus for magic spells
             if (spellProto->DmgClass == SPELL_DAMAGE_CLASS_NONE || spellProto->DmgClass == SPELL_DAMAGE_CLASS_MAGIC)
@@ -8282,10 +8281,6 @@ void Aura::PeriodicTick()
 
             // This method can modify pdamage
             bool isCrit = IsCritFromAbilityAura(pCaster, pdamage);
-
-            // send critical in hit info for threat calculation
-            if (isCrit)
-                cleanDamage.hitOutCome = MELEE_HIT_CRIT;
 
             // only from players
             // FIXME: need use SpellDamageBonus instead?
@@ -8316,6 +8311,10 @@ void Aura::PeriodicTick()
             if (pdamage)
                 procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
+            CleanDamage cleanDamage = CleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL);
+            // send critical in hit info for threat calculation
+            if (isCrit)
+                cleanDamage.hitOutCome = MELEE_HIT_CRIT;
             pCaster->DealDamage(target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, true);
 
             pCaster->ProcDamageAndSpell(ProcSystemArguments(target, procAttacker, procVictim, procEx, pdamage, BASE_ATTACK, spellProto));
@@ -8363,17 +8362,12 @@ void Aura::PeriodicTick()
 
             uint32 absorb = 0;
             int32 resist = 0;
-            CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
 
             uint32 pdamage = (m_modifier.m_amount > 0 ? uint32(m_modifier.m_amount) : 0);
 
             pdamage = target->SpellDamageBonusTaken(pCaster, spellProto, pdamage, DOT, GetStackAmount());
 
             bool isCrit = IsCritFromAbilityAura(pCaster, pdamage);
-
-            // send critical in hit info for threat calculation
-            if (isCrit)
-                cleanDamage.hitOutCome = MELEE_HIT_CRIT;
 
             // only from players
             // FIXME: need use SpellDamageBonus instead?
@@ -8404,6 +8398,10 @@ void Aura::PeriodicTick()
             if (pdamage)
                 procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
+            CleanDamage cleanDamage = CleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL);
+            // send critical in hit info for threat calculation
+            if (isCrit)
+                cleanDamage.hitOutCome = MELEE_HIT_CRIT;
             int32 new_damage = pCaster->DealDamage(target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, false);
             pCaster->ProcDamageAndSpell(ProcSystemArguments(target, procAttacker, procVictim, procEx, pdamage, BASE_ATTACK, spellProto));
 
@@ -8520,7 +8518,7 @@ void Aura::PeriodicTick()
                 if (pCaster->GetHealth() > damage)
                 {
                     pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), damage, GetSpellSchoolMask(spellProto), absorb, 0, true, 0, false);
-                    CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
+                    CleanDamage cleanDamage = CleanDamage(damage, BASE_ATTACK, MELEE_HIT_NORMAL);
                     pCaster->DealDamage(pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
                 }
                 else
