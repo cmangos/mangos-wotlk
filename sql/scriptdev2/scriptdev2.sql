@@ -3191,10 +3191,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001315,'I will not stop until this place is once again at peace.',0,0,0,0,'proudhoof SAY_AGGRO'),
 (-1001316,'Regain your strength. The place where Steeljaw was felled is just ahead.',0,0,0,396,'proudhoof SAY_AMBUSH_COMPLETE'),
 (-1001317,'There\'s the dog\'s banner and there\'s his corpse. What\'s that? He\'s upon us!',0,0,0,25,'proudhoof SAY_FINAL_BATTLE'),
-(-1001318,'You fought well. Now go north to your orc outpost and inform Overlord Bor\'gorok of our success!',0,0,0,113,'proudhoof SAY_QUEST_END');
+(-1001318,'You fought well. Now go north to your orc outpost and inform Overlord Bor\'gorok of our success!',0,0,0,113,'proudhoof SAY_QUEST_END'),
 
 -- -1 010 000 Classic texts
-(-1010000,'The beast returns from whence it came. The wrath of Neptulon has subsided.',0,3,0,0,'Maws EMOTE_MAWS_KILL'),
+(-1010000,'The beast returns from whence it came. The wrath of Neptulon has subsided.',0,3,0,0,'Maws EMOTE_MAWS_KILL');
 
 -- -1 015 000 TBC texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
