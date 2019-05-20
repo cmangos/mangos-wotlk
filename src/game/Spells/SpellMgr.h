@@ -507,6 +507,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 33900:         // Shroud of Death
         case 33908:         // Burning Spikes
         case 34343:         // Thorns
+        case 35408:         // Fear Proc
         case 35596:         // Power of the Legion
         case 35841:         // Draenei Spirit Visual
         case 35850:         // Draenei Spirit Visual 2
