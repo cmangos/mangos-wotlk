@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulaman.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -32,6 +33,7 @@ enum
     SAY_AGGRO               = -1568016,
     SAY_SURGE               = -1568017,
     SAY_TOBEAR              = -1568018,
+    SAY_TOBEAR_EMOTE        = -1568172,
     SAY_TOTROLL             = -1568019,
     SAY_BERSERK             = -1568020,
     SAY_SLAY1               = -1568021,
@@ -49,252 +51,214 @@ enum
     // Defines for Bear form
     SPELL_LACERATING_SLASH  = 42395,
     SPELL_REND_FLESH        = 42397,
-    SPELL_DEAFENING_ROAR    = 42398
+    SPELL_DEAFENING_ROAR    = 42398,
 };
 
-struct boss_nalorakkAI : public ScriptedAI
+enum NalorakkActions
 {
-    boss_nalorakkAI(Creature* pCreature) : ScriptedAI(pCreature)
+    NALORAKK_ACTION_BERSERK,
+    NALORAKK_ACTION_BEAR_SHAPE,
+    NALORAKK_ACTION_SWIPE,
+    NALORAKK_ACTION_MANGLE,
+    NALORAKK_ACTION_SURGE,
+    NALORAKK_ACTION_SLASH,
+    NALORAKK_ACTION_REND,
+    NALORAKK_ACTION_ROAR,
+    NALORAKK_ACTION_MAX,
+};
+
+struct boss_nalorakkAI : public CombatAI
+{
+    boss_nalorakkAI(Creature* creature) : CombatAI(creature, NALORAKK_ACTION_MAX), m_instance(static_cast<instance_zulaman*>(creature->GetInstanceData())), m_uiCurrentWave(0)
     {
-        m_pInstance = (instance_zulaman*)pCreature->GetInstanceData();
-        m_uiCurrentWave = 0;
+        AddCombatAction(NALORAKK_ACTION_BERSERK, uint32(10 * MINUTE * IN_MILLISECONDS));
+        AddCombatAction(NALORAKK_ACTION_BEAR_SHAPE, 45000u);
+        AddCombatAction(NALORAKK_ACTION_SWIPE, 12000u);
+        AddCombatAction(NALORAKK_ACTION_MANGLE, 15000u);
+        AddCombatAction(NALORAKK_ACTION_SURGE, 20000u);
+        AddCombatAction(NALORAKK_ACTION_SLASH, true);
+        AddCombatAction(NALORAKK_ACTION_REND, true);
+        AddCombatAction(NALORAKK_ACTION_ROAR, true);
         Reset();
     }
 
-    instance_zulaman* m_pInstance;
+    instance_zulaman* m_instance;
 
-    uint32 m_uiChangeFormTimer;
-    uint32 m_uiBrutalSwipeTimer;
-    uint32 m_uiMangleTimer;
-    uint32 m_uiSurgeTimer;
-    uint32 m_uiLaceratingSlashTimer;
-    uint32 m_uiRendFleshTimer;
-    uint32 m_uiDeafeningRoarTimer;
-    uint32 m_uiBerserkTimer;
     uint8 m_uiCurrentWave;
     bool m_bIsInBearForm;
 
     void Reset() override
     {
-        m_uiChangeFormTimer         = 45000;
-        m_uiBrutalSwipeTimer        = 12000;
-        m_uiMangleTimer             = 15000;
-        m_uiSurgeTimer              = 20000;
-        m_uiLaceratingSlashTimer    = 6000;
-        m_uiRendFleshTimer          = 6000;
-        m_uiDeafeningRoarTimer      = 20000;
-        m_uiBerserkTimer            = 10 * MINUTE * IN_MILLISECONDS;
+        CombatAI::Reset();
         m_bIsInBearForm             = false;
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        ScriptedAI::MoveInLineOfSight(pWho);
+        ScriptedAI::MoveInLineOfSight(who);
 
-        if (m_pInstance && m_pInstance->IsBearPhaseInProgress())
+        if (m_instance && m_instance->IsBearPhaseInProgress())
             return;
 
-        if (pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, aBearEventInfo[m_uiCurrentWave].fAggroDist))
+        if (who->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(who)->isGameMaster() && m_creature->IsWithinDistInMap(who, aBearEventInfo[m_uiCurrentWave].aggroDist))
         {
-            DoScriptText(aBearEventInfo[m_uiCurrentWave].iYellId, m_creature);
-            if (m_pInstance)
-                m_pInstance->SendNextBearWave(pWho);
+            DoScriptText(aBearEventInfo[m_uiCurrentWave].yellId, m_creature);
+            if (m_instance)
+                m_instance->SendNextBearWave(who);
         }
     }
 
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+    void JustReachedHome() override
     {
-        if (uiMotionType != POINT_MOTION_TYPE)
+        if (m_instance)
+            m_instance->SetData(TYPE_NALORAKK, FAIL);
+    }
+
+    void MovementInform(uint32 motionType, uint32 pointId) override
+    {
+        if (motionType != POINT_MOTION_TYPE)
             return;
 
-        if (uiPointId)
+        if (pointId)
         {
-            m_creature->SetFacingTo(aBearEventInfo[m_uiCurrentWave].fO);
+            m_creature->GetMotionMaster()->Clear(false, true);
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_creature->SetFacingTo(aBearEventInfo[m_uiCurrentWave].ori);
 
             if (m_uiCurrentWave < MAX_BEAR_WAVES - 1)
             {
-                if (m_pInstance)
-                    m_pInstance->SetBearEventProgress(false);
+                if (m_instance)
+                    m_instance->SetBearEventProgress(false);
                 ++m_uiCurrentWave;
-            }
-            else
-            {
-                // Set the instance data to fail on movement inform because we are not moving the boss to home position
-                if (m_pInstance)
-                    m_pInstance->SetData(TYPE_NALORAKK, FAIL);
             }
         }
     }
 
-    // Nalorakk evades only after the trash waves are finished
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-
-        // Boss should evade on the top of the platform
-        if (m_creature->isAlive())
-            m_creature->GetMotionMaster()->MovePoint(1, aBearEventInfo[m_uiCurrentWave].fX, aBearEventInfo[m_uiCurrentWave].fY, aBearEventInfo[m_uiCurrentWave].fZ);
-
-        m_creature->SetLootRecipient(nullptr);
-
-        Reset();
-    }
-
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NALORAKK, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_NALORAKK, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
-        m_pInstance->SetData(TYPE_NALORAKK, DONE);
+        m_instance->SetData(TYPE_NALORAKK, DONE);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Berserking
-        if (m_uiBerserkTimer)
+        switch (action)
         {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
+            case NALORAKK_ACTION_BERSERK:
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
                     DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
+                    DisableCombatAction(action);
                 }
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
-
-        // Spells for Troll Form (only to be casted if we NOT have bear phase aura)
-        if (!m_bIsInBearForm)
-        {
-            // Brutal Swipe (some sources may say otherwise, but I've never seen this in Bear form)
-            if (m_uiBrutalSwipeTimer < uiDiff)
-            {
+                return;
+            case NALORAKK_ACTION_BEAR_SHAPE:
+                if (m_bIsInBearForm)
+                {
+                    DoScriptText(SAY_TOTROLL, m_creature);
+                    ResetCombatAction(action, 45000);
+                    m_bIsInBearForm = false;
+                    // Reset troll form timers
+                    DisableCombatAction(NALORAKK_ACTION_SLASH);
+                    DisableCombatAction(NALORAKK_ACTION_REND);
+                    DisableCombatAction(NALORAKK_ACTION_ROAR);
+                    ResetCombatAction(NALORAKK_ACTION_SURGE, urand(15000, 32000));
+                    ResetCombatAction(NALORAKK_ACTION_SWIPE, urand(7000, 20000));
+                    ResetCombatAction(NALORAKK_ACTION_MANGLE, urand(3000, 20000));
+                    SetEquipmentSlots(true);
+                }
+                else
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_BEAR_SHAPE, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        DoScriptText(SAY_TOBEAR_EMOTE, m_creature);
+                        DoScriptText(SAY_TOBEAR, m_creature);
+                        ResetCombatAction(action, 30000);
+                        m_bIsInBearForm = true;
+                        // Reset bear form timers
+                        DisableCombatAction(NALORAKK_ACTION_SWIPE);
+                        DisableCombatAction(NALORAKK_ACTION_MANGLE);
+                        DisableCombatAction(NALORAKK_ACTION_SURGE);
+                        ResetCombatAction(NALORAKK_ACTION_SLASH, urand(5000, 8000));
+                        ResetCombatAction(NALORAKK_ACTION_REND, urand(6000, 10000));
+                        ResetCombatAction(NALORAKK_ACTION_ROAR, urand(15000, 25000));
+                        SetEquipmentSlots(false, 0, 0, 0);
+                        m_creature->resetAttackTimer(BASE_ATTACK);
+                    }
+                }
+                return;
+            case NALORAKK_ACTION_SWIPE:
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BRUTAL_SWIPE) == CAST_OK)
-                    m_uiBrutalSwipeTimer = urand(7000, 15000);
-            }
-            else
-                m_uiBrutalSwipeTimer -= uiDiff;
-
-            // Mangle
-            if (m_uiMangleTimer < uiDiff)
-            {
+                    ResetCombatAction(action, urand(7000, 15000));
+                return;
+            case NALORAKK_ACTION_MANGLE:
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MANGLE) == CAST_OK)
-                    m_uiMangleTimer = urand(3000, 15000);
-            }
-            else
-                m_uiMangleTimer -= uiDiff;
-
-            // Surge
-            if (m_uiSurgeTimer < uiDiff)
+                    ResetCombatAction(action, urand(3000, 15000));
+                return;
+            case NALORAKK_ACTION_SURGE:
             {
                 // select a random unit other than the main tank
-                Unit* pTtarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
+                Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE);
 
-                // if there aren't other units, cast on the tank
-                if (!pTtarget)
-                    pTtarget = m_creature->getVictim();
+                // if there aren't other units, cast on random
+                if (!target)
+                    target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER);
 
-                if (DoCastSpellIfCan(pTtarget, SPELL_SURGE) == CAST_OK)
+                if (DoCastSpellIfCan(target, SPELL_SURGE) == CAST_OK)
                 {
                     DoScriptText(SAY_SURGE, m_creature);
-                    m_uiSurgeTimer = urand(15000, 32500);
+                    ResetCombatAction(action, urand(15000, 32500));
                 }
+                return;
             }
-            else
-                m_uiSurgeTimer -= uiDiff;
-
-            // Change to Bear Form if we're in Troll Form for 45sec
-            if (m_uiChangeFormTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BEAR_SHAPE, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                {
-                    DoScriptText(SAY_TOBEAR, m_creature);
-                    m_uiChangeFormTimer         = 30000;
-                    m_bIsInBearForm             = true;
-                    // Reset bear form timers
-                    m_uiLaceratingSlashTimer    = urand(6000, 25000);
-                    m_uiRendFleshTimer          = urand(6000, 25000);
-                    m_uiDeafeningRoarTimer      = urand(15000, 25000);
-                }
-            }
-            else
-                m_uiChangeFormTimer -= uiDiff;
-        }
-        // Spells for Bear Form (only to be casted if we have bear phase aura)
-        else
-        {
-            // Timer to yell and reset spell timers when bear aura expires
-            if (m_uiChangeFormTimer < uiDiff)
-            {
-                DoScriptText(SAY_TOTROLL, m_creature);
-                m_uiChangeFormTimer     = 45000;
-                m_bIsInBearForm         = false;
-                // Reset troll form timers
-                m_uiSurgeTimer          = urand(15000, 32000);
-                m_uiBrutalSwipeTimer    = urand(7000, 20000);
-                m_uiMangleTimer         = urand(3000, 20000);
-            }
-            else
-                m_uiChangeFormTimer -= uiDiff;
-
-            // Lacerating Slash
-            if (m_uiLaceratingSlashTimer < uiDiff)
+            case NALORAKK_ACTION_SLASH:
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_LACERATING_SLASH) == CAST_OK)
-                    m_uiLaceratingSlashTimer = urand(6000, 20000);
+                    ResetCombatAction(action, 20000);
+                return;
             }
-            else
-                m_uiLaceratingSlashTimer -= uiDiff;
-
-            // Rend Flesh
-            if (m_uiRendFleshTimer < uiDiff)
+            case NALORAKK_ACTION_REND:
             {
                 if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_REND_FLESH) == CAST_OK)
-                    m_uiRendFleshTimer = urand(6000, 20000);
+                    ResetCombatAction(action, urand(6000, 10000));
+                return;
             }
-            else
-                m_uiRendFleshTimer -= uiDiff;
-
-            // Deafening Roar
-            if (m_uiDeafeningRoarTimer < uiDiff)
+            case NALORAKK_ACTION_ROAR:
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_DEAFENING_ROAR) == CAST_OK)
-                    m_uiDeafeningRoarTimer = urand(15000, 25000);
+                    ResetCombatAction(action, urand(15000, 20000));
+                return;
             }
-            else
-                m_uiDeafeningRoarTimer -= uiDiff;
         }
+    }
 
-        DoMeleeAttackIfReady();
+    void UpdateAI(const uint32 diff) override
+    {
+        CombatAI::UpdateAI(diff);
+        if (m_creature->isInCombat())
+            EnterEvadeIfOutOfCombatArea(diff);
     }
 };
 
-UnitAI* GetAI_boss_nalorakk(Creature* pCreature)
+UnitAI* GetAI_boss_nalorakk(Creature* creature)
 {
-    return new boss_nalorakkAI(pCreature);
+    return new boss_nalorakkAI(creature);
 }
 
 void AddSC_boss_nalorakk()

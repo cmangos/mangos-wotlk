@@ -1755,18 +1755,17 @@ UPDATE creature_template SET ScriptName='npc_frostbite' WHERE entry=20061;
 /* ZUL'AMAN */
 UPDATE instance_template SET ScriptName='instance_zulaman' WHERE map=568;
 UPDATE creature_template SET ScriptName='npc_harrison_jones_za' WHERE entry=24358;
-UPDATE gameobject_template SET ScriptName='go_strange_gong' WHERE entry=187359;
+INSERT INTO scripted_event_id VALUES (15897,'event_ritual_of_power');
 UPDATE creature_template SET ScriptName='boss_akilzon' WHERE entry=23574;
 UPDATE creature_template SET ScriptName='mob_soaring_eagle' WHERE entry=24858;
 UPDATE creature_template SET ScriptName='boss_halazzi' WHERE entry=23577;
 UPDATE creature_template SET ScriptName='boss_spirit_lynx' WHERE entry=24143;
+UPDATE creature_template SET ScriptName='npc_corrupted_lightning_totem' WHERE entry IN(24224);
 UPDATE creature_template SET ScriptName='boss_janalai' WHERE entry=23578;
 UPDATE creature_template SET ScriptName='boss_malacrass' WHERE entry=24239;
 UPDATE creature_template SET ScriptName='boss_nalorakk' WHERE entry=23576;
 UPDATE creature_template SET ScriptName='boss_zuljin' WHERE entry=23863;
 UPDATE creature_template SET ScriptName='npc_feather_vortex' WHERE entry=24136;
-UPDATE creature_template SET ScriptName='npc_dragonhawk_egg' WHERE entry=23817;
-UPDATE creature_template SET ScriptName='npc_janalai_firebomb' WHERE entry=23920;
 UPDATE creature_template SET ScriptName='npc_amanishi_hatcher' WHERE entry IN (23818,24504);
 UPDATE creature_template SET ScriptName='npc_forest_frog' WHERE entry=24396;
 UPDATE creature_template SET ScriptName='npc_amanishi_lookout' WHERE entry=24175;
@@ -5254,14 +5253,14 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568004,'You done run outta time!',12035,1,0,0,'janalai SAY_BERSERK'),
 (-1568005,'It all be over now, mon!',12036,1,0,0,'janalai SAY_SLAY_1'),
 (-1568006,'Tazaga-choo!',12037,1,0,0,'janalai SAY_SLAY_2'),
-(-1568007,'Zul\'jin... got a surprise for you...',12038,1,0,0,'janalai SAY_DEATH'),
+(-1568007,'Zul''jin... got a surprise for you....',12038,1,0,0,'janalai SAY_DEATH'),
 (-1568008,'Come, strangers. The spirit of the dragonhawk hot be hungry for worthy souls.',12039,1,0,0,'janalai SAY_EVENT_STRANGERS'),
 (-1568009,'Come, friends. Your bodies gonna feed ma hatchlings, and your souls are going to feed me with power!',12040,1,0,0,'janalai SAY_EVENT_FRIENDS'),
 
-(-1568010,'Get da move on, guards! It be killin\' time!',12066,1,0,51,'nalorakk SAY_WAVE1_AGGRO'),
+(-1568010,'Get da move on, guards! It be killin'' time!',12066,1,0,51,'nalorakk SAY_WAVE1_AGGRO'),
 (-1568011,'Guards, go already! Who you more afraid of, dem... or me?',12067,1,0,51,'nalorakk SAY_WAVE2_STAIR1'),
 (-1568012,'Ride now! Ride out dere and bring me back some heads!',12068,1,0,51,'nalorakk SAY_WAVE3_STAIR2'),
-(-1568013,'I be losin\' me patience! Go on: make dem wish dey was never born!',12069,1,0,51,'nalorakk SAY_WAVE4_PLATFORM'),
+(-1568013,'I be losin'' me patience! Go on: make dem wish dey was never born!',12069,1,0,51,'nalorakk SAY_WAVE4_PLATFORM'),
 (-1568014,'What could be better than servin\' da bear spirit for eternity? Come closer now. Bring your souls to me!',12078,1,0,0,'nalorakk SAY_EVENT1_SACRIFICE'),
 (-1568015,'Don\'t be delayin\' your fate. Come to me now. I make your sacrifice quick.',12079,1,0,0,'nalorakk SAY_EVENT2_SACRIFICE'),
 (-1568016,'You be dead soon enough!',12070,1,0,0,'nalorakk SAY_AGGRO'),
@@ -5271,59 +5270,59 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568020,'You had your chance, now it be too late!',12074,1,0,0,'nalorakk SAY_BERSERK'),
 (-1568021,'Mua-ha-ha! Now whatchoo got to say?',12075,1,0,0,'nalorakk SAY_SLAY1'),
 (-1568022,'Da Amani gonna rule again!',12076,1,0,0,'nalorakk SAY_SLAY2'),
-(-1568023,'I... be waitin\' on da udda side....',12077,1,0,0,'nalorakk SAY_DEATH'),
+(-1568023,'I... be waitin'' on da udda side....',12077,1,0,0,'nalorakk SAY_DEATH'),
 
-(-1568024,'Da eagles gonna bear your spirits to me. Your sacrifice is not gonna be in vein!',12122,1,0,0,'akilzon SAY_EVENT1'),
-(-1568025,'Your death gonna be quick, strangers. You shoulda never have come to this place...',12123,1,0,0,'akilzon SAY_EVENT2'),
+(-1568024,'My eagles gonna bear your spirits to me. Your sacrifices not gonna be in vain....',12122,1,0,0,'akilzon SAY_EVENT1'),
+(-1568025,'Your death gonna be quick, strangers. You shoulda never come to this place....',12123,1,0,0,'akilzon SAY_EVENT2'),
 (-1568026,'I be da predator! You da prey...',12013,1,0,0,'akilzon SAY_AGGRO'),
 (-1568027,'Feed, me bruddahs!',12014,1,0,0,'akilzon SAY_SUMMON'),
 (-1568028,'Come, and join me bruddahs!',12015,1,0,0,'akilzon SAY_SUMMON_ALT'),
 (-1568029,'All you be doing is wasting my time!',12016,1,0,0,'akilzon SAY_ENRAGE'),
 (-1568030,'Ya got nothin\'!',12017,1,0,0,'akilzon SAY_SLAY1'),
 (-1568031,'Stop your cryin\'!',12018,1,0,0,'akilzon SAY_SLAY2'),
-(-1568032,'You can\'t... kill... me spirit!',12019,1,0,0,'akilzon SAY_DEATH'),
+(-1568032,'You can''t... kill... me spirit!',12019,1,0,0,'akilzon SAY_DEATH'),
 (-1568033,'An Electrical Storm Appears!',0,2,0,0,'akilzon EMOTE_STORM'),
 
 (-1568034,'Get on ya knees and bow.... to da fang and claw!',12020,1,0,0,'halazzi SAY_AGGRO'),
-(-1568035,'I fight wit\' untamed spirit....',12021,1,0,0,'halazzi SAY_SPLIT'),
+(-1568035,'I fight wit'' untamed spirit....',12021,1,0,0,'halazzi SAY_SPLIT'),
 (-1568036,'Spirit, come back to me!',12022,1,0,0,'halazzi SAY_MERGE'),
 (-1568037,'Me gonna carve ya now!',12023,1,0,0,'halazzi SAY_SABERLASH1'),
 (-1568038,'You gonna leave in pieces!',12024,1,0,0,'halazzi SAY_SABERLASH2'),
 (-1568039,'Whatch you be doing? Pissin\' yourselves...',12025,1,0,0,'halazzi SAY_BERSERK'),
-(-1568040,'You cant fight the power!',12026,1,0,0,'halazzi SAY_KILL1'),
+(-1568040,'You can''t fight da power!',12026,1,0,0,'halazzi SAY_KILL1'),
 (-1568041,'You gonna fail!',12027,1,0,0,'halazzi SAY_KILL2'),
-(-1568042,'Chaga... choka\'jinn.',12028,1,0,0,'halazzi SAY_DEATH'),
+(-1568042,'Chaga... choka''jinn.',12028,1,0,0,'halazzi SAY_DEATH'),
 (-1568043,'Come, fools. Fill ma empty cages...',12029,1,0,0,'halazzi SAY_EVENT1'),
 (-1568044,'I be waitin, strangers. Your deaths gonna make me stronger!',12030,1,0,0,'halazzi SAY_EVENT2'),
 
-(-1568045,'Da shadow gonna fall on you...',12041,1,0,0,'malacrass SAY_AGGRO'),
+(-1568045,'Da shadow gonna fall on you....',12041,1,0,0,'malacrass SAY_AGGRO'),
 (-1568046,'Ya don\'t kill me yet, ya don\'t get another chance!',12042,1,0,0,'malacrass SAY_ENRAGE'),
 (-1568047,'Dis a nightmare ya don\' wake up from!',12043,1,0,0,'malacrass SAY_KILL1'),
 (-1568048,'Azzaga choogo zinn!',12044,1,0,0,'malacrass SAY_KILL2'),
 (-1568049,'Your will belong ta me now!',12045,1,0,0,'malacrass SAY_SOUL_SIPHON'),
-(-1568050,'Darkness comin\' for you...',12046,1,0,0,'malacrass SAY_DRAIN_POWER'),
+(-1568050,'Darkness comin'' for you....',12046,1,0,0,'malacrass SAY_DRAIN_POWER'),
 (-1568051,'Your soul gonna bleed!',12047,1,0,0,'malacrass SAY_SPIRIT_BOLTS'),
 (-1568052,'It not gonna make no difference.',12048,1,0,0,'malacrass SAY_ADD_DIED1'),
 (-1568053,'You gonna die worse dan him.',12049,1,0,0,'malacrass SAY_ADD_DIED2'),
 (-1568054,'Dat no bodda me.',12050,1,0,0,'malacrass SAY_ADD_DIED3'),
-(-1568055,'Dis not... da end of me...',12051,1,0,0,'malacrass SAY_DEATH'),
+(-1568055,'Dis not... da end for me!',12051,1,0,0,'malacrass SAY_DEATH'),
 
-(-1568056,'Everybody always wanna take from us. Now we gonna start takin\' back. Anybody who get in our way...gonna drown in dey own blood! Da Amani empire be back now...seekin\' vengeance. And we gonna start wit\' you.',12090,1,0,0,'zuljin SAY_INTRO'),
+(-1568056,'Everybody always wanna take from us. Now we gonna start takin\' back. Anybody who get in our way...gonna drown in dey own blood! Da Amani empire be back now...seekin\' vengeance. And we gonna start wit\' you.',12090,6,0,0,'zuljin SAY_INTRO'),
 (-1568057,'Nobody badduh dan me!',12091,1,0,0,'zuljin SAY_AGGRO'),
 (-1568058,'Got me some new tricks... like me brudda bear....',12092,1,0,0,'zuljin SAY_BEAR_TRANSFORM'),
-(-1568059,'Dere be no hidin\' from da eagle!',12093,1,0,0,'zuljin SAY_EAGLE_TRANSFORM'),
+(-1568059,'Dere be no hidin'' from da eagle!',12093,1,0,0,'zuljin SAY_EAGLE_TRANSFORM'),
 (-1568060,'Let me introduce you to me new bruddas: fang and claw!',12094,1,0,0,'zuljin SAY_LYNX_TRANSFORM'),
-(-1568061,'Ya don\' have to look to da sky to see da dragonhawk!',12095,1,0,0,'zuljin SAY_DRAGONHAWK_TRANSFORM'),
+(-1568061,'Ya don'' have to look to da sky to see da dragonhawk!',12095,1,0,0,'zuljin SAY_DRAGONHAWK_TRANSFORM'),
 (-1568062,'Fire kill you just as quick!',12096,1,0,0,'zuljin SAY_FIRE_BREATH'),
 (-1568063,'You too slow! Me too strong!',12097,1,0,0,'zuljin SAY_BERSERK'),
 (-1568064,'Da Amani de chuka!',12098,1,0,0,'zuljin SAY_KILL1'),
 (-1568065,'Lot more gonna fall like you!',12099,1,0,0,'zuljin SAY_KILL2'),
-(-1568066,'Mebbe me fall...but da Amani empire...never gonna die...',12100,1,0,0,'zuljin SAY_DEATH'),
+(-1568066,'Mebbe me fall... but da Amani empire... never gonna die.',12100,1,0,0,'zuljin SAY_DEATH'),
 
 (-1568067,'Zul\'jin got a surprise for ya...',12052,6,0,0,'zulaman SAY_INST_RELEASE'),
 (-1568068,'Da spirits gonna feast today! Begin da ceremonies, sacrifice da prisoners... make room for our new guests!',12053,6,0,0,'zulaman SAY_INST_BEGIN'),
 (-1568069,'Take your pick, trespassers! Any of ma priests be happy to accommodate ya.',12054,6,0,0,'zulaman SAY_INST_PROGRESS_1'),
-(-1568070,'Don\'t be shy. Thousands have come before you. Ya not be alone in your service.',12055,6,0,0,'zulaman SAY_INST_PROGRESS_2'),
+(-1568070,'Don''t be shy. Thousands have come before you. Ya not be alone in your service.',12055,6,0,0,'zulaman SAY_INST_PROGRESS_2'),
 (-1568071,'Ya gonna fail, strangers. Many try before you, but dey only make us stronger!',12056,6,0,0,'zulaman SAY_INST_PROGRESS_3'),
 (-1568072,'Your efforts was in vain, trespassers. The rituals nearly be complete.',12057,6,0,0,'zulaman SAY_INST_WARN_1'),
 (-1568073,'Soon da cages gonna be empty, da sacrifices be complete, and you gonna take dere places.',12058,6,0,0,'zulaman SAY_INST_WARN_2'),
@@ -5333,28 +5332,28 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568077,'Ya not do too bad.... Your efforts delay da inevitable for a small time. Come to me now. Ya prove yourselves worthy offerings.',12062,6,0,0,'zulaman SAY_INST_SACRIF2'),
 (-1568078,'Watch now. Every offering gonna strengthen our ties to da spirit world. Soon, we gonna be unstoppable!',12065,6,0,0,'zulaman SAY_INST_COMPLETE'),
 
-(-1568079,'Suit yourself. At least five of you must assist me if we\'re to get inside. Follow me....',0,1,0,0,'harrison SAY_START'),
+(-1568079,'Suit yourself. At least five of you must assist me if we''re to get inside. Follow me....',0,1,0,0,'harrison SAY_START'),
 (-1568080,'According to my calculations, if enough of us bang the gong at once the seal on these doors will break and we can enter.',0,1,0,0,'harrison SAY_AT_GONG'),
-(-1568081,'I\'ve researched this site extensively and I won\'t allow any dim-witted treasure hunters to swoop in and steal what belongs to in a museum. I\'ll lead this charge.',0,1,0,0,'harrison SAY_OPEN_ENTRANCE'),
+(-1568081,'I''ve researched this site extensively and I won''t allow any dim-witted treasure hunters to swoop in and steal what belongs in a museum. I''ll lead this charge.',0,1,0,0,'harrison SAY_OPEN_ENTRANCE'),
 
 (-1568082,'%s absorbs the essence of the bear spirit!',0,2,0,0,'zuljin EMOTE_BEAR_SPIRIT'),
 (-1568083,'%s absorbs the essence of the eagle spirit!',0,2,0,0,'zuljin EMOTE_EAGLE_SPIRIT'),
 (-1568084,'%s absorbs the essence of the lynx spirit!',0,2,0,0,'zuljin EMOTE_LYNX_SPIRIT'),
 (-1568085,'%s absorbs the essence of the dragonhawk spirit!',0,2,0,0,'zuljin EMOTE_DRAGONHAWK_SPIRIT'),
 
-(-1568086,'In fact, it would be best if you just stay here. You\'d only get in my way....',0,1,0,0,'harrison SAY_OPEN_ENTRANCE_2'),
+(-1568086,'In fact, it would be best if you just stay here. You''d only get in my way....',0,1,0,0,'harrison SAY_OPEN_ENTRANCE_2'),
 
 (-1568087,'More intruders! Sound da alarm!',12104,1,0,25,'amanishi guardian SAY_SOUND_ALARM'),
 
 (-1568088,'Akil\'zon, the invaders approach!',0,1,0,5,'amanishi lookout SAY_START_GAUNTLET'),
 
-(-1568089,'Hallooo.... You just gunna sit down there an\' pat yerselves on the back? What kinda rescuers are ya?',2716,1,0,1,'harkor SAY_HARKOR_HELP_1'),
+(-1568089,'Hallooo.... You just gunna sit down there an'' pat yerselves on the back? What kinda rescuers are ya?',2716,1,0,1,'harkor SAY_HARKOR_HELP_1'),
 (-1568090,'Pssst! Up \'ere, in the cage. Come and lemme get a look at yeh.',2716,1,0,1,'harkor SAY_HARKOR_HELP_2'),
 (-1568091,'So.... How\'s about one \'a ya stroll on up \'ere an\' help me out, eh?',2716,1,0,1,'harkor SAY_HARKOR_HELP_3'),
 (-1568092,'Yoohoo. Over here... the trapped dwarf. Come on, lemme have a word with yeh.',2716,1,0,1,'harkor SAY_HARKOR_HELP_4'),
-(-1568093,"Ahh, freedom!",2725,0,0,4,'harkor SAY_HARKOR_EVENT_1'),
-(-1568094,"A'course it only be fair that I reward yeh fer me rescue. Now where'd them savages put me satchel?",0,0,0,1,'harkor SAY_HARKOR_EVENT_2'),
-(-1568095,"Don't be shy, now. Help yerselves. If it weren't fer yer help, them basterds'd be shrinkin' me head right about now.",0,0,0,1,'harkor SAY_HARKOR_EVENT_3'),
+(-1568093,'Ahh, freedom!',2725,0,0,4,'harkor SAY_HARKOR_EVENT_1'),
+(-1568094,'A''course it only be fair that I reward yeh fer me rescue. Now where''d them savages put me satchel?',0,0,0,1,'harkor SAY_HARKOR_EVENT_2'),
+(-1568095,'Don''t be shy, now. Help yerselves. If it weren''t fer yer help, them basterds''d be shrinkin'' me head right about now.',0,0,0,1,'harkor SAY_HARKOR_EVENT_3'),
 
 (-1568096,'You kill the trollbear, mon? It be safe for Tanzar to come out now?',2850,1,0,1,'tanzar SAY_TANZAR_HELP_1'),
 (-1568097,'Hey mon! Don\'t ya be forgettin\' about Tanzar over here.',2850,1,0,1,'tanzar SAY_TANZAR_HELP_2'),
@@ -5374,11 +5373,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568110,'Stand clear....',0,0,0,0,'kraz SAY_KRAZ_EVENT_3'),
 (-1568111,'Please, friends, accept this offering with Kraz\'s thanks.',6364,0,0,66,'kraz SAY_KRAZ_EVENT_4'),
 
-(-1568112,'Wowee! It was amazing how you beat that big bad troll into the ground like that and it\'s too bad I can\'t reach the handle of this cage or I would have jumped in and blown him to bits to get him back for killing all of the other poor prisoners and scaring me so badly and I feel bad for asking you for any more help but could you maybe come over and let me out of here?',0,1,0,21,'ashli SAY_ASHLI_HELP_1'),
+(-1568112,'Wowee! It was amazing how you beat that big bad troll into the ground like that and it''s too bad I can''t reach the handle of this cage or I would have jumped in and blown him to bits to get him back for killing all of the other poor prisoners and scaring me so badly and I feel bad for asking you for any more help but could you maybe come over and let me out of here?',0,1,0,21,'ashli SAY_ASHLI_HELP_1'),
 (-1568113,'Ahem... so, I most certainly don\'t blame you for taking your time and catching your breath and congratulating yourselves for such heroism after such a long and hard-fought battle with that horrible monster just so long as when you\'re finished you don\'t forget about me over here because even though I\'m small I think I can still find some way to repay you for your amazing bravery....',0,1,0,1,'ashli SAY_ASHLI_HELP_2'),
 (-1568114,'So... as much as I hate to complain after being saved from a horrible death I just thought you should know that I\'m still over here stuck in one of these messy cages and it would really be great if you could come on over and let me out so I could help you celebrate your amazing victory over that big crazy scary troll-cat... thing.',0,1,0,1,'ashli SAY_ASHLI_HELP_3'),
 (-1568115,'I\'m sure you all must be in a big hurry and probably have some more big dangerous monsters to kill but if you would just take a moment and come help me out of this cage before rushing off it would make me so happy and excited that I would barely be able to contain myself so if you get a moment I\'ll just be over here... waiting... patiently....',0,1,0,1,'ashli SAY_ASHLI_HELP_4'),
-(-1568116,'Weeee! I\'m alive, I\'m alive, I\'m alive! Oh, I hope it\'s not too forward of me to tell you that I think I love you all and I hope I can find my bag because you certainly deserve a little something extra, you know, for the effort and all that you must have went through to save me...',0,0,0,4,'ashli SAY_ASHLI_EVENT_1'),
+(-1568116,'Weeee! I''m alive, I''m alive, I''m alive! Oh, I hope it''s not too forward of me to tell you that I think I love you all and I hope I can find my bag because you certainly deserve a little something extra, you know, for the effort and all that you must have went through to save me...',0,0,0,4,'ashli SAY_ASHLI_EVENT_1'),
 (-1568117,'Hmm, maybe it\'s this one - oh by the way, did I ever tell you about the time Fudgerick Two-toots snuck up on me while I was casting a fireball? We call him two-toots because, well, nevermind that, it was just terrible timing, and momma was soo mad - my eyebrows are just now growing back....',0,0,0,0,'ashli SAY_ASHLI_EVENT_2'),
 (-1568118,'Nope, not in that one either - well, it must be around here somewhere, by the way, did I mention how wonderful it is to be out of that stinky cage? It was almost impossible to run around in there but I did anyway but sometimes I got going so fast that I ended up walking on the walls of the  cage so finally I stopped trying and just turned around in circles....',2691,0,0,0,'ashli SAY_ASHLI_EVENT_3'),
 (-1568119,'There\'s my bag! At last I\'ve found it and now it\'s my gift to you and I truly hope you like it because I want you to all remember this wonderful moment for as long as you live and I hope that when you think of it you\'ll smile inside because I know I\'ll never forget it in a million years and I can\'t wait to tell momma all about it when I get back home.... Do you like my earrings?',0,0,0,0,'ashli SAY_ASHLI_EVENT_4'),
@@ -5447,7 +5446,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1568168,'Thank goodness you came along when you did. Please, take one of these troll boxes to remember me by.',0,0,0,0,'hollee SAY_HOLLEE_1'), -- broadcast text id 23427
 (-1568169,'I never want to see this nasty pond again. Thank you, $n. I\'ll never forget you!',0,0,0,0,'hollee SAY_HOLLEE_1'), -- broadcast text id 23428
 
-(-1568170,'Mojo leaps into $n\'s pocket!',0,2,0,0,'forest frog SAY_MOJO'); -- broadcast text id 23485
+(-1568170,'Mojo leaps into $n\'s pocket!',0,2,0,0,'forest frog SAY_MOJO'), -- broadcast text id 23485
+
+(-1568171,'Mua-ha-ha!',0,0,0,0,'Nalorakk - Say Run to next wave'),
+(-1568172,'%s transforms into a bear!',0,0,0,0,'Nalorakk - To Bear emote');
 
 -- -1 574 000 UTGARDE KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

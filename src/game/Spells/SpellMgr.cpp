@@ -821,8 +821,12 @@ uint32 GetAffectedTargets(SpellEntry const* spellInfo, Unit* caster)
                     }
                     break;
                 }
-                default:
-                    break;
+                case 42471:                                 // Hatch Eggs
+                    if (UnitAI* ai = static_cast<Unit*>(caster)->AI())
+                        return ai->GetScriptData();
+                    else
+                        return 1; // for testing purposes
+                default: break;
             }
             break;
         }

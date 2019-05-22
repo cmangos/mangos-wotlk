@@ -32,6 +32,10 @@ enum InstanceZA
     SAY_WAVE2_STAIR1        = -1568011,
     SAY_WAVE3_STAIR2        = -1568012,
     SAY_WAVE4_PLATFORM      = -1568013,
+    SAY_RUN_BACK            = -1568171,
+
+    // Zul'jin intro yell
+    SAY_INTRO               = -1568056,
 
     TYPE_EVENT_RUN          = 0,
     TYPE_AKILZON            = 1,
@@ -63,6 +67,11 @@ enum InstanceZA
     NPC_LOOKOUT             = 24175,
     NPC_PROTECTOR           = 24180,
     NPC_WIND_WALKER         = 24179,
+
+	// Janalai npcs
+	NPC_HATCHLING           = 23598,
+    NPC_DRAGONHAWK_EGG      = 23817,
+    NPC_WORLD_TRIGGER_NOT_IMMUNE_PC = 21252,
 
     // Malacrass companions
     NPC_ALYSON              = 24240,
@@ -133,6 +142,9 @@ enum InstanceZA
     NPC_WORLD_TRIGGER       = 22515,                        // used to mark location of drums for Amani'shi Scouts and Amani'shi Reinforcement spawns
     NPC_REINFORCEMENT       = 23587,
     NPC_SAVAGE              = 23889,
+
+    SPELL_ZULAMAN_OBJECT_VISUAL     = 45222,
+    SPELL_RETURN_TO_SPIRIT_REALM    = 44035,
 };
 
 enum BossToChestIndex
@@ -162,37 +174,38 @@ struct TimeEventNpcInfo
 
 struct NalorakkBearEventInfo
 {
-    int iYellId;
-    float fX, fY, fZ, fO, fAggroDist;
+    int yellId;
+    float x, y, z, ori, aggroDist;
 };
 
 static const NalorakkBearEventInfo aBearEventInfo[MAX_BEAR_WAVES] =
 {
     {SAY_WAVE1_AGGRO,    0, 0, 0, 0, 45.0f},
-    {SAY_WAVE2_STAIR1,   -54.948f, 1419.772f, 27.303f, 0.03f, 37.0f},
-    {SAY_WAVE3_STAIR2,   -80.303f, 1372.622f, 40.764f, 1.67f, 35.0f},
-    {SAY_WAVE4_PLATFORM, -77.495f, 1294.760f, 48.487f, 1.66f, 60.0f}
+    {SAY_WAVE2_STAIR1,   -52.46344f, 1419.698f, 27.29911f, 0.f, 37.0f},
+    {SAY_WAVE3_STAIR2,   -80.22266f, 1375.835f, 40.75975f, 1.570796f, 35.0f},
+    {SAY_WAVE4_PLATFORM, -79.59927f, 1300.431f, 48.5325f, 1.570796f, 60.0f}
 };
 
 struct NalorakkTrashInfo
 {
-    GuidSet sBearTrashGuidSet;
-    uint8 uiTrashKilled;
+    GuidSet nalorakkTrashSet;
+    uint8 trashKilledCount;
 };
 
 class instance_zulaman : public ScriptedInstance
 {
     public:
-        instance_zulaman(Map* pMap);
+        instance_zulaman(Map* map);
 
         void Initialize() override;
         bool IsEncounterInProgress() const override;
 
-        void OnPlayerEnter(Player* pPlayer) override;
-        void OnCreatureCreate(Creature* pCreature) override;
+        void OnPlayerEnter(Player* player) override;
+        void OnCreatureCreate(Creature* creature) override;
         void OnObjectCreate(GameObject* pGo) override;
-        void OnCreatureDeath(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
+        void OnCreatureDeath(Creature* creature) override;
+        void OnCreatureEvade(Creature* creature) override;
+		void OnCreatureRespawn(Creature* creature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
@@ -200,39 +213,50 @@ class instance_zulaman : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
-        bool IsBearPhaseInProgress() const { return m_bIsBearPhaseInProgress; }
-        void SetBearEventProgress(bool bIsInProgress) { m_bIsBearPhaseInProgress = bIsInProgress; }
+        bool IsBearPhaseInProgress() const { return m_isBearPhaseInProgress; }
+        void SetBearEventProgress(bool bIsInProgress) { m_isBearPhaseInProgress = bIsInProgress; }
         void SendNextBearWave(Unit* pTarget);
 
         bool IsAkilzonGauntletInProgress() const { return m_bIsAkilzonGauntletInProgress; }
         void SetAkilzonGauntletProgress(bool bIsInProgress) { m_bIsAkilzonGauntletInProgress = bIsInProgress; }
 
-        bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
+        bool CheckConditionCriteriaMeet(Player const* player, uint32 instanceConditionId, WorldObject const* conditionSource, uint32 conditionSourceType) const override;
 
         void Update(const uint32 diff) override;
 
         GuidSet sDrumTriggerGuidSet;
         GuidSet sHutTriggerGuidSet;
 
+        void ChangeWeather(bool rain);
+
+        void ShowChatCommands(ChatHandler* handler) override;
+        void ExecuteChatCommand(ChatHandler* handler, char* args) override;
+
+        void FillInitialWorldStates(ByteBuffer& /*data*/, uint32& /*count*/, uint32 /*zoneId*/, uint32 /*areaId*/) override;
+
+        void StartSpiritTimer();
     private:
         uint8 GetKilledPreBosses();
         void DoTimeRunSay(RunEventSteps uiData);
         void DoChestEvent(BossToChestIndex uiIndex);
+        void SpawnMalacrass();
 
         std::string m_strInstData;
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         uint32 m_auiRandVendor[MAX_VENDOR];
         TimeEventNpcInfo m_aEventNpcInfo[MAX_CHESTS];
 
+        bool m_startCheck;
         uint32 m_uiEventTimer;
-        uint32 m_uiGongCount;
 
-        NalorakkTrashInfo m_aNalorakkEvent[MAX_BEAR_WAVES];
+        NalorakkTrashInfo m_nalorakkEvent[MAX_BEAR_WAVES];
         uint8 m_uiBearEventPhase;
-        bool m_bIsBearPhaseInProgress;
+        bool m_isBearPhaseInProgress;
 
         GuidSet sAkilzonTrashGuidSet;
         bool m_bIsAkilzonGauntletInProgress;
+
+        uint32 m_spiritFadeTimer;
 };
 
 #endif

@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulaman.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -66,7 +67,6 @@ enum
     SPELL_HU_SNAKE_TRAP         = 43449,
 
     // Mage
-    SPELL_MG_FIREBALL           = 41383,
     SPELL_MG_FROST_NOVA         = 43426,
     SPELL_MG_ICE_LANCE          = 43427,
     SPELL_MG_FROSTBOLT          = 43428,
@@ -78,11 +78,10 @@ enum
 
     // Priest
     SPELL_PR_HEAL               = 41372,
-    SPELL_PR_MIND_BLAST         = 41374,
-    SPELL_PR_SW_DEATH           = 41375,
+    // SPELL_PR_MIND_BLAST         = 41374, - unconfirmed
+    // SPELL_PR_SW_DEATH           = 41375, - unconfirmed
     SPELL_PR_PSYCHIC_SCREAM     = 43432,
     SPELL_PR_MIND_CONTROL       = 43550,
-    SPELL_PR_PAIN_SUPP          = 44416,
 
     // Rogue
     SPELL_RO_WOUND_POISON       = 39665,
@@ -109,6 +108,7 @@ enum
     TARGET_TYPE_VICTIM          = 1,
     TARGET_TYPE_SELF            = 2,
     TARGET_TYPE_FRIENDLY        = 3,
+    TARGET_TYPE_RANDOM_NOT_MAIN = 4,
 
     MAX_ACTIVE_ADDS             = 4
 };
@@ -116,10 +116,10 @@ enum
 // Adds positions
 static const float m_aAddPositions[MAX_ACTIVE_ADDS][4] =
 {
-    {128.279f, 921.279f, 33.889f, 1.527f},
-    {123.261f, 921.279f, 33.889f, 1.527f},
-    {112.084f, 921.279f, 33.889f, 1.527f},
-    {106.473f, 921.279f, 33.889f, 1.527f},
+    {128.4845f, 923.0428f, 33.97255f, 1.58825f},
+    {122.6053f, 923.2454f, 33.97256f, 1.570796f},
+    {111.6928f, 923.1531f, 33.97258f, 1.570796f},
+    {105.403f,  923.3421f, 33.97259f, 1.553343f},
 };
 
 // Each position is a random of two spawns
@@ -139,25 +139,20 @@ struct PlayerAbilityStruct
 };
 
 // Classes are in the same order as they are in DBC
-static PlayerAbilityStruct m_aMalacrassStolenAbility[][4] =
+static PlayerAbilityStruct aMalacrassStolenAbility[][4] =
 {
-    {
-        // 0* shadow priest - exception: it seems that the priest has two specs. We use this slot for the shadow priest
-        {SPELL_PR_MIND_CONTROL,     TARGET_TYPE_RANDOM,   15000, 30000},
-        {SPELL_PR_MIND_BLAST,       TARGET_TYPE_RANDOM,   23000, 30000},
-        {SPELL_PR_SW_DEATH,         TARGET_TYPE_RANDOM,   5000,  16000}
-    },
+    {},
     {
         // 1 warrior
-        {SPELL_WR_SPELL_REFLECT,    TARGET_TYPE_SELF,     2000,  30000},
-        {SPELL_WR_WHIRLWIND,        TARGET_TYPE_SELF,     10000, 30000},
+        {SPELL_WR_SPELL_REFLECT,    TARGET_TYPE_SELF,     7000,  15000},
+        {SPELL_WR_WHIRLWIND,        TARGET_TYPE_SELF,     7000,  15000},
         {SPELL_WR_MORTAL_STRIKE,    TARGET_TYPE_VICTIM,   6000,  15000}
     },
     {
         // 2 paladin
-        {SPELL_PA_CONSECRATION,     TARGET_TYPE_SELF,     10000, 30000},
-        {SPELL_PA_HOLY_LIGHT,       TARGET_TYPE_FRIENDLY, 17000, 30000},
-        {SPELL_PA_AVENGING_WRATH,   TARGET_TYPE_SELF,     0,     30000}
+        {SPELL_PA_CONSECRATION,     TARGET_TYPE_SELF,     13000, 30000},
+        {SPELL_PA_HOLY_LIGHT,       TARGET_TYPE_FRIENDLY, 10000, 12000},
+        {SPELL_PA_AVENGING_WRATH,   TARGET_TYPE_SELF,     13000, 30000}
     },
     {
         // 3 hunter
@@ -167,15 +162,15 @@ static PlayerAbilityStruct m_aMalacrassStolenAbility[][4] =
     },
     {
         // 4 rogue
-        {SPELL_RO_WOUND_POISON,     TARGET_TYPE_VICTIM,   3000,  17000},
-        {SPELL_RO_SLICE_DICE,       TARGET_TYPE_SELF,     17000, 30000},
-        {SPELL_RO_BLIND,            TARGET_TYPE_RANDOM,   12000, 30000}
+        {SPELL_RO_WOUND_POISON,     TARGET_TYPE_VICTIM,   6000,  15000},
+        {SPELL_RO_SLICE_DICE,       TARGET_TYPE_SELF,     0,     30000},
+        {SPELL_RO_BLIND,            TARGET_TYPE_RANDOM_NOT_MAIN,   7000, 15000}
     },
     {
         // 5 priest
-        {SPELL_PR_PAIN_SUPP,        TARGET_TYPE_FRIENDLY, 24000, 30000},
-        {SPELL_PR_HEAL,             TARGET_TYPE_FRIENDLY, 16000, 30000},
-        {SPELL_PR_PSYCHIC_SCREAM,   TARGET_TYPE_RANDOM,   8000,  30000}
+        {SPELL_PR_MIND_CONTROL,     TARGET_TYPE_SELF,     11000, 12000},
+        {SPELL_PR_HEAL,             TARGET_TYPE_FRIENDLY, 10000, 12000},
+        {SPELL_PR_PSYCHIC_SCREAM,   TARGET_TYPE_RANDOM,   12000, 12000}
     },
     {
         // 6 death knight
@@ -185,72 +180,99 @@ static PlayerAbilityStruct m_aMalacrassStolenAbility[][4] =
     },
     {
         // 7 shaman
-        {SPELL_SH_FIRE_NOVA,        TARGET_TYPE_SELF,     25000, 30000},
-        {SPELL_SH_HEALING_WAVE,     TARGET_TYPE_FRIENDLY, 15000, 30000},
-        {SPELL_SH_CHAIN_LIGHT,      TARGET_TYPE_RANDOM,   4000,  16000}
+        {SPELL_SH_FIRE_NOVA,        TARGET_TYPE_SELF,     12000, 30000},
+        {SPELL_SH_CHAIN_LIGHT,      TARGET_TYPE_RANDOM,   11000, 12000},
+        {SPELL_SH_HEALING_WAVE,     TARGET_TYPE_FRIENDLY, 10000, 12000},
     },
     {
         // 8 mage
-        {SPELL_MG_FIREBALL,         TARGET_TYPE_RANDOM,   8000,  30000},
-        {SPELL_MG_FROSTBOLT,        TARGET_TYPE_RANDOM,   25000, 30000},
-        {SPELL_MG_ICE_LANCE,        TARGET_TYPE_RANDOM,   2000,  18000},
-        {SPELL_MG_FROST_NOVA,       TARGET_TYPE_SELF,     17000, 30000}
+        {SPELL_MG_FROST_NOVA,       TARGET_TYPE_SELF,     2000,  10000},
+        {SPELL_MG_ICE_LANCE,        TARGET_TYPE_RANDOM,   2000,  10000},
+        {SPELL_MG_FROSTBOLT,        TARGET_TYPE_RANDOM,   2000,  4000},
     },
     {
         // 9 warlock
-        {SPELL_WL_CURSE_OF_DOOM,    TARGET_TYPE_RANDOM,   0,     30000},
-        {SPELL_WL_RAIN_OF_FIRE,     TARGET_TYPE_RANDOM,   16000, 30000},
-        {SPELL_WL_UNSTABLE_AFFL,    TARGET_TYPE_RANDOM,   8000,  13000}
+        {SPELL_WL_CURSE_OF_DOOM,    TARGET_TYPE_RANDOM,   11000, 11000},
+        {SPELL_WL_RAIN_OF_FIRE,     TARGET_TYPE_RANDOM,   6000,  5000},
+        {SPELL_WL_UNSTABLE_AFFL,    TARGET_TYPE_RANDOM,   10000, 11000}
     },
     {
         // 10 unused - no class in DBC here
     },
     {
         // 11 druid
-        {SPELL_DR_LIFEBLOOM,        TARGET_TYPE_FRIENDLY, 15000, 30000},
-        {SPELL_DR_THORNS,           TARGET_TYPE_SELF,     0,     30000},
-        {SPELL_DR_MOONFIRE,         TARGET_TYPE_RANDOM,   8000,  13000}
+        {SPELL_DR_LIFEBLOOM,        TARGET_TYPE_FRIENDLY, 10000, 12000},
+        {SPELL_DR_THORNS,           TARGET_TYPE_SELF,     0,     40000},
+        {SPELL_DR_MOONFIRE,         TARGET_TYPE_RANDOM,   4000,  4000}
     }
 };
 
-struct boss_malacrassAI : public ScriptedAI
+enum MalacrassActions
 {
-    boss_malacrassAI(Creature* pCreature) : ScriptedAI(pCreature)
+    MALACRASS_SPIRIT_BOLTS,
+    MALACRASS_SIPHON_SOUL,
+    MALACRASS_DRAIN_POWER_ENABLE,
+    MALACRASS_DRAIN_POWER,
+    MALACRASS_PLAYER_ABILITY_1,
+    MALACRASS_PLAYER_ABILITY_2,
+    MALACRASS_PLAYER_ABILITY_3,
+    MALACRASS_PLAYER_ABILITY_4,
+    MALACRASS_ACTION_MAX,
+};
+
+struct boss_malacrassAI : public CombatAI
+{
+    boss_malacrassAI(Creature* creature) : CombatAI(creature, MALACRASS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        AddCombatAction(MALACRASS_SPIRIT_BOLTS, 30000u);
+        AddTimerlessCombatAction(MALACRASS_DRAIN_POWER_ENABLE, true);
+        AddCombatAction(MALACRASS_DRAIN_POWER, true);
+        AddCombatAction(MALACRASS_SIPHON_SOUL, true);
+        AddCombatAction(MALACRASS_PLAYER_ABILITY_1, true);
+        AddCombatAction(MALACRASS_PLAYER_ABILITY_2, true);
+        AddCombatAction(MALACRASS_PLAYER_ABILITY_3, true);
+        AddCombatAction(MALACRASS_PLAYER_ABILITY_4, true);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_uiSpiritBoltsTimer;
-    uint32 m_uiDrainPowerTimer;
-    uint32 m_uiSiphonSoulTimer;
-    uint32 m_uiPlayerAbilityTimer;
-    uint8 m_uiPlayerClass;
+    uint8 m_playerClass;
 
-    bool m_bCanUsePlayerSpell;
-
-    std::vector<uint32> m_vAddsEntryList;
-    std::vector<uint32> m_vPlayerSpellTimer;
+    std::vector<uint32> m_addsEntryList;
 
     void Reset() override
     {
-        m_uiSpiritBoltsTimer    = 30000;
-        m_uiDrainPowerTimer     = 0;
-        m_uiSiphonSoulTimer     = 40000;
-        m_uiPlayerAbilityTimer  = 10000;
-        m_uiPlayerClass         = 0;
-
-        m_bCanUsePlayerSpell    = false;
+        CombatAI::Reset();
+        m_playerClass         = 0;
 
         DoInitializeAdds();
+
+        m_creature->ApplySpellImmune(nullptr, IMMUNITY_MECHANIC, MECHANIC_DISARM, true);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MALACRASS, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_MALACRASS, FAIL);
+    }
+
+    void CorpseRemoved(uint32& respawnDelay) override
+    {
+        // Respawn after 30 seconds
+        if (m_instance->GetData(TYPE_MALACRASS) == FAIL)
+            respawnDelay = 30;
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 miscValue) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A) // encounter wipe
+        {
+            m_creature->ForcedDespawn();
+            for (uint8 i = 0; i < MAX_ACTIVE_ADDS; ++i)
+                if (Creature* add = m_instance->GetSingleCreatureFromStorage(m_addsEntryList[i], true))
+                    add->ForcedDespawn();
+        }
     }
 
     void DoInitializeAdds()
@@ -260,40 +282,41 @@ struct boss_malacrassAI : public ScriptedAI
             return;
 
         // it's empty, so first time
-        if (m_vAddsEntryList.empty())
+        if (m_addsEntryList.empty())
         {
-            m_vAddsEntryList.resize(MAX_ACTIVE_ADDS);
+            m_addsEntryList.resize(MAX_ACTIVE_ADDS);
 
             for (uint8 i = 0; i < MAX_ACTIVE_ADDS; ++i)
             {
-                uint8 uiAddVersion = urand(0, 1);
-                m_vAddsEntryList[i] = aSpawnEntries[i][uiAddVersion];
-                m_creature->SummonCreature(aSpawnEntries[i][uiAddVersion], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
+                uint8 addVersion = urand(0, 1);
+                m_addsEntryList[i] = aSpawnEntries[i][addVersion];
+                Creature* creature = m_creature->SummonCreature(aSpawnEntries[i][addVersion], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
+                creature->SetCorpseDelay(5);
             }
         }
         // Resummon the killed adds
         else
         {
-            if (!m_pInstance)
+            if (!m_instance)
                 return;
 
             for (uint8 i = 0; i < MAX_ACTIVE_ADDS; ++i)
             {
                 // If we already have the creature on the map, then don't summon it
-                if (m_pInstance->GetSingleCreatureFromStorage(m_vAddsEntryList[i], true))
+                if (m_instance->GetSingleCreatureFromStorage(m_addsEntryList[i], true))
                     continue;
 
-                m_creature->SummonCreature(m_vAddsEntryList[i], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(m_addsEntryList[i], m_aAddPositions[i][0], m_aAddPositions[i][1], m_aAddPositions[i][2], m_aAddPositions[i][3], TEMPSPAWN_DEAD_DESPAWN, 0);
             }
         }
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MALACRASS, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_MALACRASS, IN_PROGRESS);
     }
 
     void KilledUnit(Unit* pVictim) override
@@ -304,15 +327,15 @@ struct boss_malacrassAI : public ScriptedAI
         DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MALACRASS, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_MALACRASS, DONE);
     }
 
-    void SummonedCreatureJustDied(Creature* /*pSummoned*/) override
+    void SummonedCreatureJustDied(Creature* /*summoned*/) override
     {
         switch (urand(0, 2))
         {
@@ -322,123 +345,131 @@ struct boss_malacrassAI : public ScriptedAI
         }
     }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    void SpellHitTarget(Unit* target, const SpellEntry* spellInfo) override
     {
         // Set the player's class when hit with soul siphon
-        if (pTarget->GetTypeId() == TYPEID_PLAYER && pSpell->Id == SPELL_SIPHON_SOUL)
+        if (target->GetTypeId() == TYPEID_PLAYER && spellInfo->Id == SPELL_SIPHON_SOUL)
         {
-            m_uiPlayerClass = ((Player*)pTarget)->getClass();
-            m_bCanUsePlayerSpell = true;
+            m_playerClass = target->getClass();
 
-            // In case the player it's priest we can choose either a holy priest or a shadow priest
-            if (m_uiPlayerClass == CLASS_PRIEST)
-                m_uiPlayerClass = urand(0, 1) ? CLASS_PRIEST : 0;
+            if (m_playerClass == CLASS_WARRIOR || m_playerClass == CLASS_ROGUE)
+                m_creature->ApplySpellImmune(nullptr, IMMUNITY_MECHANIC, MECHANIC_DISARM, false);
 
-            // Init the spell timers
-            uint8 m_uiMaxSpells = m_uiPlayerClass == CLASS_MAGE ? 4 : 3;
-
-            m_vPlayerSpellTimer.clear();
-            m_vPlayerSpellTimer.reserve(m_uiMaxSpells);
-            for (uint8 i = 0; i < m_uiMaxSpells; ++i)
-                m_vPlayerSpellTimer.push_back(m_aMalacrassStolenAbility[m_uiPlayerClass][i].m_uiInitialTimer);
+            for (uint8 i = 0; i < 3; ++i)
+            {
+                switch (aMalacrassStolenAbility[m_playerClass][i].m_uiSpellId)
+                {
+                    case SPELL_HU_EXPLOSIVE_TRAP:
+                    case SPELL_HU_FREEZING_TRAP:
+                    case SPELL_HU_SNAKE_TRAP:
+                        ResetCombatAction(MALACRASS_PLAYER_ABILITY_1 + i, urand(1000, 25000));
+                        break;
+                    default:
+                        ResetCombatAction(MALACRASS_PLAYER_ABILITY_1 + i, aMalacrassStolenAbility[m_playerClass][i].m_uiInitialTimer);
+                        break;
+                }
+            }
         }
     }
 
-    bool CanUseSpecialAbility(uint32 uiSpellIndex)
+    bool CanUseSpecialAbility(uint32 spellIndex)
     {
-        Unit* pTarget = nullptr;
+        Unit* target = nullptr;
+        bool requireTarget = true;
 
-        switch (m_aMalacrassStolenAbility[m_uiPlayerClass][uiSpellIndex].m_uiTargetType)
+        switch (aMalacrassStolenAbility[m_playerClass][spellIndex].m_uiTargetType)
         {
             case TARGET_TYPE_SELF:
-                pTarget = m_creature;
+                target = nullptr;
+                requireTarget = false;
                 break;
             case TARGET_TYPE_VICTIM:
-                pTarget = m_creature->getVictim();
+                target = m_creature->getVictim();
                 break;
             case TARGET_TYPE_RANDOM:
-                pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER);
+                target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER);
                 break;
             case TARGET_TYPE_FRIENDLY:
-                pTarget = DoSelectLowestHpFriendly(50.0f);
+                target = DoSelectLowestHpFriendly(50.0f);
+                break;
+            case TARGET_TYPE_RANDOM_NOT_MAIN:
+                target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK);
                 break;
         }
 
-        if (pTarget)
+        if (!requireTarget || target)
         {
-            if (DoCastSpellIfCan(pTarget, m_aMalacrassStolenAbility[m_uiPlayerClass][uiSpellIndex].m_uiSpellId, CAST_TRIGGERED) == CAST_OK)
+            if (DoCastSpellIfCan(target, aMalacrassStolenAbility[m_playerClass][spellIndex].m_uiSpellId) == CAST_OK)
                 return true;
         }
 
         return false;
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Acts as an enrage timer
-        if (m_creature->GetHealthPercent() < 80.0f)
+        switch (action)
         {
-            if (m_uiDrainPowerTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_DRAIN_POWER) == CAST_OK)
+            case MALACRASS_SPIRIT_BOLTS:
+                if (DoCastSpellIfCan(nullptr, SPELL_SPIRIT_BOLTS) == CAST_OK)
+                {
+                    DoScriptText(SAY_SPIRIT_BOLTS, m_creature);
+                    DisableCombatAction(MALACRASS_PLAYER_ABILITY_1);
+                    DisableCombatAction(MALACRASS_PLAYER_ABILITY_2);
+                    DisableCombatAction(MALACRASS_PLAYER_ABILITY_3);
+                    DisableCombatAction(MALACRASS_PLAYER_ABILITY_4);
+                    DisableCombatAction(action);
+                    ResetCombatAction(MALACRASS_SIPHON_SOUL, 0);
+                    if (m_playerClass == CLASS_WARRIOR || m_playerClass == CLASS_ROGUE)
+                        m_creature->ApplySpellImmune(nullptr, IMMUNITY_MECHANIC, MECHANIC_DISARM, true);
+                }
+                break;
+            case MALACRASS_DRAIN_POWER_ENABLE:
+                if (m_creature->GetHealthPercent() < 80.0f && DoCastSpellIfCan(nullptr, SPELL_DRAIN_POWER) == CAST_OK)
+                {
+                    SetActionReadyStatus(action, false);
+                    DoScriptText(SAY_DRAIN_POWER, m_creature);
+                    ResetCombatAction(MALACRASS_DRAIN_POWER, 30000);
+                }
+                break;
+            case MALACRASS_DRAIN_POWER:
+                if (DoCastSpellIfCan(nullptr, SPELL_DRAIN_POWER) == CAST_OK)
                 {
                     DoScriptText(SAY_DRAIN_POWER, m_creature);
-                    m_uiDrainPowerTimer = 30000;
+                    ResetCombatAction(action, 30000);
                 }
-            }
-            else
-                m_uiDrainPowerTimer -= uiDiff;
-        }
-
-        if (m_uiSpiritBoltsTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SPIRIT_BOLTS) == CAST_OK)
-            {
-                DoScriptText(SAY_SPIRIT_BOLTS, m_creature);
-                m_bCanUsePlayerSpell = false;
-                m_uiSpiritBoltsTimer = 40000;
-            }
-        }
-        else
-            m_uiSpiritBoltsTimer -= uiDiff;
-
-        if (m_uiSiphonSoulTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SIPHON_SOUL_DUMMY) == CAST_OK)
-            {
-                DoScriptText(SAY_SOUL_SIPHON, m_creature);
-                m_uiSiphonSoulTimer = 40000;
-            }
-        }
-        else
-            m_uiSiphonSoulTimer -= uiDiff;
-
-        // Use abilities only during the siphon soul phases
-        if (m_bCanUsePlayerSpell)
-        {
-            // Loop through all abilities
-            for (uint8 i = 0; i < m_vPlayerSpellTimer.size(); ++i)
-            {
-                if (m_vPlayerSpellTimer[i] < uiDiff)
+                break;
+            case MALACRASS_SIPHON_SOUL:
+                if (DoCastSpellIfCan(nullptr, SPELL_SIPHON_SOUL_DUMMY) == CAST_OK)
                 {
-                    if (CanUseSpecialAbility(i))
-                        m_vPlayerSpellTimer[i] = m_aMalacrassStolenAbility[m_uiPlayerClass][i].m_uiCooldown;
+                    DoScriptText(SAY_SOUL_SIPHON, m_creature);
+                    DisableCombatAction(action);
+                    ResetCombatAction(MALACRASS_SPIRIT_BOLTS, 30000);
                 }
-                else
-                    m_vPlayerSpellTimer[i] -= uiDiff;
-            }
+                break;
+            case MALACRASS_PLAYER_ABILITY_1:
+            case MALACRASS_PLAYER_ABILITY_2:
+            case MALACRASS_PLAYER_ABILITY_3:
+            case MALACRASS_PLAYER_ABILITY_4:
+                if (CanUseSpecialAbility(action - MALACRASS_PLAYER_ABILITY_1))
+                    ResetCombatAction(action, aMalacrassStolenAbility[m_playerClass][action - MALACRASS_PLAYER_ABILITY_1].m_uiCooldown);
+                break;
         }
+    }
 
-        DoMeleeAttackIfReady();
+    void UpdateAI(const uint32 diff) override
+    {
+        CombatAI::UpdateAI(diff);
+        if (m_creature->isInCombat())
+            EnterEvadeIfOutOfCombatArea(diff);
     }
 };
 
-UnitAI* GetAI_boss_malacrass(Creature* pCreature)
+
+
+UnitAI* GetAI_boss_malacrass(Creature* creature)
 {
-    return new boss_malacrassAI(pCreature);
+    return new boss_malacrassAI(creature);
 }
 
 void AddSC_boss_malacrass()
