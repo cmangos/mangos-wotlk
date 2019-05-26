@@ -613,8 +613,7 @@ struct npc_wildaAI : public npc_escortAI
         {
             spirit->RemoveAurasDueToSpell(SPELL_WATER_BUBBLE);
             spirit->StopMoving();
-            spirit->GetMotionMaster()->Clear(false, true);
-            spirit->GetMotionMaster()->MoveFollow(m_creature, m_creature->GetDistance(spirit) * 0.25f, M_PI_F / 2 + m_creature->GetAngle(spirit));
+            spirit->GetMotionMaster()->MoveFollow(m_creature, m_creature->GetDistance(spirit) * 0.25f, M_PI_F / 2 + m_creature->GetAngle(spirit), true);
             spirit->SetFactionTemporary(FACTION_ESCORT_N_FRIEND_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
             spirit->SetLevitate(false);
         }
