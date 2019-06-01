@@ -433,6 +433,7 @@ enum ConditionType
     CONDITION_PVP_SCRIPT            = 38,                   // value1: zoneId; value2: conditionId (usually hardcoded in the script);
     CONDITION_SPAWN_COUNT           = 39,                   // value1: creatureId; value2: count;
     CONDITION_WORLD_SCRIPT          = 40,
+    CONDITION_GENDER_NPC            = 41,                   // value1: creature model gender: 0=male, 1=female, 2=none (see enum Gender)
 };
 
 enum ConditionSource                                        // From where was the condition called?

@@ -8639,6 +8639,8 @@ bool PlayerCondition::Meets(Player const* player, Map const* map, WorldObject co
             return source->GetMap()->SpawnedCountForEntry(m_value1) >= m_value2;
         case CONDITION_WORLD_SCRIPT:
             return sWorldState.IsConditionFulfilled(m_value1, m_value2);
+        case CONDITION_GENDER_NPC:
+            return ((Creature*)source)->getGender() == m_value1;
         default:
             return false;
     }
@@ -9120,6 +9122,16 @@ bool PlayerCondition::IsValid(uint16 entry, ConditionType condition, uint32 valu
             break;
         }
         case CONDITION_WORLD_SCRIPT:
+            break;
+        case CONDITION_GENDER_NPC:
+        {
+            if (value1 >= MAX_GENDER)
+            {
+                sLog.outErrorDb("Gender condition (entry %u, type %u) has an invalid value in value1. (Has %u, must be smaller than %u), skipping.", entry, condition, value1, MAX_GENDER);
+                return false;
+            }
+            break;
+        }
         case CONDITION_NONE:
             break;
         default:
