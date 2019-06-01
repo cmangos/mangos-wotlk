@@ -44,9 +44,83 @@ EndContentData */
 
 enum
 {
-    SPELL_REMOVE_AMANI_CURSE = 43732,
-    SPELL_PUSH_MOJO          = 43923,
-    NPC_FOREST_FROG          = 24396
+    SPELL_REMOVE_AMANI_CURSE    = 43732,
+    SPELL_PUSH_MOJO             = 43923,
+    SPELL_SUMMON_AMANI_CHARM_1  = 43756, // Amani Charm Box (186734)
+    SPELL_SUMMON_AMANI_CHARM_2  = 43824, // Amani Charm Box (186740)
+    SPELL_SUMMON_AMANI_CHARM_3  = 43825, // Amani Charm Box (186741)
+    SPELL_SUMMON_AMANI_CHARM_4  = 43826, // Amani Charm Box (186739)
+    SPELL_SUMMON_AMANI_CHARM_5  = 43835, // Amani Treasure Box (186744)
+    SPELL_SUMMON_MONEY_BAG      = 43774, // Money Bag (186736)
+    SPELL_STEALTH               = 34189,
+    
+    NPC_FOREST_FROG             = 24396,
+    NPC_MANNUTH                 = 24397,
+    NPC_DEEZ                    = 24403,
+    NPC_GALATHRYN               = 24404,
+    NPC_ADARRAH                 = 24405,
+    NPC_FUDGERICK               = 24406,
+    NPC_DARWEN                  = 24407,
+    NPC_GUNTER                  = 24408,
+    NPC_KYREN                   = 24409,
+    NPC_MITZI                   = 24445,
+    NPC_CHRISTIAN               = 24448,
+    NPC_BRENNAN                 = 24453,
+    NPC_HOLLEE                  = 24455,
+
+    SAY_MANNUTH_1               = -1568122,
+    SAY_MANNUTH_2               = -1568123,
+    SAY_MANNUTH_3               = -1568124,
+    SAY_MANNUTH_4               = -1568125,
+    SAY_DEEZ_1                  = -1568126,
+    SAY_DEEZ_2                  = -1568127,
+    SAY_DEEZ_3                  = -1568128,
+    SAY_DEEZ_4                  = -1568129,
+    SAY_GALATHRYN_1             = -1568130,
+    SAY_GALATHRYN_2             = -1568131,
+    SAY_GALATHRYN_3             = -1568132,
+    SAY_GALATHRYN_4             = -1568133,
+    SAY_ADARRAH_1               = -1568134,
+    SAY_ADARRAH_2               = -1568135,
+    SAY_ADARRAH_3               = -1568136,
+    SAY_ADARRAH_4               = -1568137,
+    SAY_DARWEN_1                = -1568138,
+    SAY_DARWEN_2                = -1568139,
+    SAY_DARWEN_3                = -1568140,
+    SAY_DARWEN_4                = -1568141,
+    SAY_FUDGERICK_1             = -1568142,
+    SAY_FUDGERICK_2             = -1568143,
+    SAY_FUDGERICK_3             = -1568144,
+    SAY_FUDGERICK_4             = -1568145,
+    SAY_GUNTER_1                = -1568146,
+    SAY_GUNTER_2                = -1568147,
+    SAY_GUNTER_3                = -1568148,
+    SAY_GUNTER_4                = -1568149,
+    SAY_KYREN_1                 = -1568150,
+    SAY_KYREN_2                 = -1568151,
+    SAY_KYREN_3                 = -1568152,
+    SAY_KYREN_4                 = -1568153,
+    SAY_MITZI_1                 = -1568154,
+    SAY_MITZI_2                 = -1568155,
+    SAY_MITZI_3                 = -1568156,
+    SAY_MITZI_4                 = -1568157,
+    SAY_CHRISTIAN_1             = -1568158,
+    SAY_CHRISTIAN_2             = -1568159,
+    SAY_CHRISTIAN_3             = -1568160,
+    SAY_CHRISTIAN_4             = -1568161,
+    SAY_BRENNAN_1               = -1568162,
+    SAY_BRENNAN_2               = -1568163,
+    SAY_BRENNAN_3               = -1568164,
+    SAY_BRENNAN_4               = -1568165,
+    SAY_HOLLEE_1                = -1568166,
+    SAY_HOLLEE_2                = -1568167,
+    SAY_HOLLEE_3                = -1568168,
+    SAY_HOLLEE_4                = -1568169,
+    SAY_MOJO                    = -1568170,
+
+    POINT_DESPAWN               = 1,
+
+    SOUND_ID_FROG               = 8353,
 };
 
 struct npc_forest_frogAI : public ScriptedAI
@@ -58,8 +132,170 @@ struct npc_forest_frogAI : public ScriptedAI
     }
 
     ScriptedInstance* m_pInstance;
+    uint8 m_uiEvent;
+    uint32 m_uiEventTimer;
+    ObjectGuid m_rescuePlayerGuid;
 
     void Reset() override { }
+
+    void MovementInform(uint32 movementType, uint32 data) override
+    {
+        if (movementType == POINT_MOTION_TYPE)
+        {
+            if (data == POINT_DESPAWN)
+            {
+                m_creature->ForcedDespawn();
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiEventTimer)
+        {
+            if (m_uiEventTimer <= uiDiff)
+            {
+                Player* player = m_creature->GetMap()->GetPlayer(m_rescuePlayerGuid);
+                switch (m_uiEvent)
+                {
+                    case 1:
+                        switch (m_creature->GetEntry())
+                        {
+                            case NPC_MANNUTH:   DoScriptText(SAY_MANNUTH_1, m_creature, player); break;
+                            case NPC_DEEZ:      DoScriptText(SAY_DEEZ_1, m_creature, player); break;
+                            case NPC_GALATHRYN: DoScriptText(SAY_GALATHRYN_1, m_creature, player); break;
+                            case NPC_ADARRAH:   DoScriptText(SAY_ADARRAH_1, m_creature, player); break;
+                            case NPC_DARWEN:    DoScriptText(SAY_DARWEN_1, m_creature, player); break;
+                            case NPC_FUDGERICK: DoScriptText(SAY_FUDGERICK_1, m_creature, player); break;
+                            case NPC_GUNTER:    DoScriptText(SAY_GUNTER_1, m_creature, player); break;
+                            case NPC_KYREN:     DoScriptText(SAY_KYREN_1, m_creature, player); break;
+                            case NPC_MITZI:     DoScriptText(SAY_MITZI_1, m_creature, player); break;
+                            case NPC_CHRISTIAN: DoScriptText(SAY_CHRISTIAN_1, m_creature, player); break;
+                            case NPC_BRENNAN:   DoScriptText(SAY_BRENNAN_1, m_creature, player); break;
+                            case NPC_HOLLEE:    DoScriptText(SAY_HOLLEE_1, m_creature, player); break;
+                        }
+                        m_uiEvent = 2;
+                        m_uiEventTimer = urand(4000, 5000);
+                        break;
+                    case 2:
+                        if (m_creature->GetEntry() != NPC_GUNTER && m_creature->GetEntry() != NPC_KYREN) // vendors don't kneel?
+                            m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
+
+                        switch (m_creature->GetEntry())
+                        {
+                            case NPC_MANNUTH:
+                                DoCastSpellIfCan(m_creature, SPELL_SUMMON_AMANI_CHARM_1, TRIGGERED_NONE);
+                                DoScriptText(SAY_MANNUTH_2, m_creature, player);
+                                break;
+                            case NPC_DEEZ:
+                                DoCastSpellIfCan(m_creature, SPELL_SUMMON_AMANI_CHARM_3, TRIGGERED_NONE);
+                                DoScriptText(SAY_DEEZ_2, m_creature, player);
+                                break;
+                            case NPC_GALATHRYN:
+                                DoCastSpellIfCan(m_creature, SPELL_SUMMON_AMANI_CHARM_2, TRIGGERED_NONE);
+                                DoScriptText(SAY_GALATHRYN_2, m_creature, player);
+                                break;
+                            case NPC_ADARRAH:
+                                DoCastSpellIfCan(m_creature, SPELL_SUMMON_AMANI_CHARM_4, TRIGGERED_NONE);
+                                DoScriptText(SAY_ADARRAH_2, m_creature, player);
+                                break;
+                            case NPC_DARWEN:
+                                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MONEY_BAG, TRIGGERED_NONE);
+                                m_creature->LoadEquipment(0, true);
+                                DoScriptText(SAY_DARWEN_2, m_creature, player);
+                                break;
+                            case NPC_FUDGERICK:
+                                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MONEY_BAG, TRIGGERED_NONE);
+                                m_creature->LoadEquipment(0, true);
+                                DoScriptText(SAY_FUDGERICK_2, m_creature, player);
+                                break;
+                            case NPC_GUNTER:
+                                DoScriptText(SAY_GUNTER_2, m_creature, player);
+                                break;
+                            case NPC_KYREN:
+                                DoScriptText(SAY_KYREN_2, m_creature, player);
+                                break;
+                            case NPC_MITZI:
+                                DoCastSpellIfCan(m_creature, SPELL_SUMMON_AMANI_CHARM_5, TRIGGERED_NONE);
+                                DoScriptText(SAY_MITZI_2, m_creature, player);
+                                break;
+                            case NPC_CHRISTIAN:
+                                DoCastSpellIfCan(m_creature, SPELL_SUMMON_AMANI_CHARM_5, TRIGGERED_NONE);
+                                DoScriptText(SAY_CHRISTIAN_2, m_creature, player);
+                                break;
+                            case NPC_BRENNAN:
+                                DoCastSpellIfCan(m_creature, SPELL_SUMMON_AMANI_CHARM_5, TRIGGERED_NONE);
+                                DoScriptText(SAY_BRENNAN_2, m_creature, player);
+                                break;
+                            case NPC_HOLLEE:
+                                DoCastSpellIfCan(m_creature, SPELL_SUMMON_AMANI_CHARM_5, TRIGGERED_NONE);
+                                DoScriptText(SAY_HOLLEE_2, m_creature, player);
+                                break;
+                        }
+                        m_uiEvent = 3;
+                        m_uiEventTimer = urand(6000, 7000);
+                        break;
+                    case 3:
+                        m_creature->SetStandState(EMOTE_ONESHOT_NONE);
+                        switch (m_creature->GetEntry())
+                        {
+                            case NPC_MANNUTH:   DoScriptText(SAY_MANNUTH_3, m_creature, player); break;
+                            case NPC_DEEZ:      DoScriptText(SAY_DEEZ_3, m_creature, player); break;
+                            case NPC_GALATHRYN: DoScriptText(SAY_GALATHRYN_3, m_creature, player); break;
+                            case NPC_ADARRAH:   DoScriptText(SAY_ADARRAH_3, m_creature, player); break;
+                            case NPC_DARWEN:    DoScriptText(SAY_DARWEN_3, m_creature, player); break;
+                            case NPC_FUDGERICK: DoScriptText(SAY_FUDGERICK_3, m_creature, player); break;
+                            case NPC_GUNTER:    DoScriptText(SAY_GUNTER_3, m_creature, player); break;
+                            case NPC_KYREN:     DoScriptText(SAY_KYREN_3, m_creature, player); break;
+                            case NPC_MITZI:     DoScriptText(SAY_MITZI_3, m_creature, player); break;
+                            case NPC_CHRISTIAN: DoScriptText(SAY_CHRISTIAN_3, m_creature, player); break;
+                            case NPC_BRENNAN:   DoScriptText(SAY_BRENNAN_3, m_creature, player); break;
+                            case NPC_HOLLEE:    DoScriptText(SAY_HOLLEE_3, m_creature, player); break;
+                        }
+                        m_uiEvent = 4;
+                        if (m_creature->GetEntry() == NPC_GUNTER || m_creature->GetEntry() == NPC_KYREN)
+                            m_uiEventTimer = 5 * MINUTE * IN_MILLISECONDS; // vendors wait for 5 minutes before running away and despawning
+                        else
+                            m_uiEventTimer = 6000;
+                        break;
+                    case 4:
+                        m_creature->HandleEmote(EMOTE_ONESHOT_WAVE);
+                        switch (m_creature->GetEntry())
+                        {
+                            case NPC_MANNUTH:   DoScriptText(SAY_MANNUTH_4, m_creature, player); break;
+                            case NPC_DEEZ:      DoScriptText(SAY_DEEZ_4, m_creature, player); break;
+                            case NPC_GALATHRYN: DoScriptText(SAY_GALATHRYN_4, m_creature, player); break;
+                            case NPC_ADARRAH:   DoScriptText(SAY_ADARRAH_4, m_creature, player); break;
+                            case NPC_DARWEN:    DoScriptText(SAY_DARWEN_4, m_creature, player); break;
+                            case NPC_FUDGERICK: DoScriptText(SAY_FUDGERICK_4, m_creature, player); break;
+                            case NPC_GUNTER:    DoScriptText(SAY_GUNTER_4, m_creature, player); break;
+                            case NPC_KYREN:     DoScriptText(SAY_KYREN_4, m_creature, player); break;
+                            case NPC_MITZI:     DoScriptText(SAY_MITZI_4, m_creature, player); break;
+                            case NPC_CHRISTIAN: DoScriptText(SAY_CHRISTIAN_4, m_creature, player); break;
+                            case NPC_BRENNAN:   DoScriptText(SAY_BRENNAN_4, m_creature, player); break;
+                            case NPC_HOLLEE:    DoScriptText(SAY_HOLLEE_4, m_creature, player); break;
+                        }
+                        m_uiEvent = 5;
+                        m_uiEventTimer = 2000;
+                        break;
+                    case 5:
+                        switch (m_creature->GetEntry())
+                        {
+                            case NPC_ADARRAH:
+                                DoCastSpellIfCan(m_creature, SPELL_STEALTH, TRIGGERED_NONE);
+                                break;
+                        }
+                        if (m_creature->GetPositionY() > 1290.0f)
+                            m_creature->GetMotionMaster()->MovePoint(POINT_DESPAWN, 118.2742f, 1400.657f, -9.118711f);
+                        else
+                            m_creature->GetMotionMaster()->MovePoint(POINT_DESPAWN, 114.3155f, 1244.244f, -20.97606f);
+                        break;
+                }
+            }
+            else
+                m_uiEventTimer -= uiDiff;
+        }
+    }
 
     void DoSpawnRandom()
     {
@@ -68,33 +304,37 @@ struct npc_forest_frogAI : public ScriptedAI
             uint32 cEntry = 0;
             switch (urand(1, 10))
             {
-                case 1: cEntry = 24397; break;              // Mannuth
-                case 2: cEntry = 24403; break;              // Deez
-                case 3: cEntry = 24404; break;              // Galathryn
-                case 4: cEntry = 24405; break;              // Adarrah
-                case 5: cEntry = 24406; break;              // Fudgerick
-                case 6: cEntry = 24407; break;              // Darwen
-                case 7: cEntry = 24445; break;              // Mitzi
-                case 8: cEntry = 24448; break;              // Christian
-                case 9: cEntry = 24453; break;              // Brennan
-                case 10: cEntry = 24455; break;             // Hollee
+                case 1: cEntry = NPC_MANNUTH; break;
+                case 2: cEntry = NPC_DEEZ; break;
+                case 3: cEntry = NPC_GALATHRYN; break;
+                case 4: cEntry = NPC_ADARRAH; break;
+                case 5: cEntry = NPC_FUDGERICK; break;
+                case 6: cEntry = NPC_DARWEN; break;
+                case 7: cEntry = NPC_MITZI; break;
+                case 8: cEntry = NPC_CHRISTIAN; break;
+                case 9: cEntry = NPC_BRENNAN; break;
+                case 10: cEntry = NPC_HOLLEE; break;
             }
 
             if (!m_pInstance->GetData(TYPE_RAND_VENDOR_1))
                 if (!urand(0, 9))
-                    cEntry = 24408;                         // Gunter
+                    cEntry = NPC_GUNTER;
 
             if (!m_pInstance->GetData(TYPE_RAND_VENDOR_2))
                 if (!urand(0, 9))
-                    cEntry = 24409;                         // Kyren
+                    cEntry = NPC_KYREN;
+
+            // start generic rp
+            m_uiEvent = 1;
+            m_uiEventTimer = 3000;
 
             if (cEntry)
                 m_creature->UpdateEntry(cEntry);
 
-            if (cEntry == 24408)
+            if (cEntry == NPC_GUNTER)
                 m_pInstance->SetData(TYPE_RAND_VENDOR_1, DONE);
 
-            if (cEntry == 24409)
+            if (cEntry == NPC_KYREN)
                 m_pInstance->SetData(TYPE_RAND_VENDOR_2, DONE);
         }
     }
@@ -103,14 +343,24 @@ struct npc_forest_frogAI : public ScriptedAI
     {
         if (spell->Id == SPELL_REMOVE_AMANI_CURSE && caster->GetTypeId() == TYPEID_PLAYER && m_creature->GetEntry() == NPC_FOREST_FROG)
         {
+            m_creature->GetMotionMaster()->MoveIdle();
+            DoPlaySoundToSet(m_creature, SOUND_ID_FROG);
+            m_creature->SetFacingToObject(caster);
+            m_rescuePlayerGuid = caster->GetObjectGuid();
+
             // increase or decrease chance of mojo?
             if (!urand(0, 49))
+            {
+                DoScriptText(SAY_MOJO, m_creature, caster);
                 DoCastSpellIfCan(caster, SPELL_PUSH_MOJO, CAST_TRIGGERED);
+                m_creature->GetMotionMaster()->MovePoint(POINT_DESPAWN, caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
+            }
             else
                 DoSpawnRandom();
         }
     }
 };
+
 UnitAI* GetAI_npc_forest_frog(Creature* pCreature)
 {
     return new npc_forest_frogAI(pCreature);
@@ -131,7 +381,6 @@ enum
     GOSSIP_ITEM_ID_BEGIN    = -3568000,
 
     SPELL_BANGING_THE_GONG  = 45225,
-    SPELL_STEALTH           = 34189,
     SPELL_SPEAR_THROW       = 43647,
 
     NPC_GUARDIAN            = 23597,

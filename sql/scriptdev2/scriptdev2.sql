@@ -165,6 +165,7 @@ UPDATE creature_template SET ScriptName='npc_shaman_fire_elemental' WHERE entry 
 UPDATE creature_template SET ScriptName='npc_snakes' WHERE entry IN(19921,19833);
 UPDATE creature_template SET ScriptName='npc_nether_ray' WHERE entry IN(18880,21901,23501);
 UPDATE creature_template SET ScriptName='npc_mage_mirror_image' WHERE entry=31216;
+UPDATE creature_template SET ScriptName='npc_mojo' WHERE entry=24480;
 
 /*Quest (quest scripts which are not in one zone)*/
 UPDATE creature_template SET ScriptName='npc_quest_attunement' WHERE entry IN(22421,18528,19935);
@@ -5305,7 +5306,69 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1568120,'Invaders! Sound the alarm!',0,1,0,0,'amanishi scout SAY_ALARM'),
 
-(-1568121,'%s shimmers and begins to fade away...',0,2,0,0,'zuljin EMOTE_FADE_AWAY'); -- broadcast text id 23604
+(-1568121,'%s shimmers and begins to fade away...',0,2,0,0,'zuljin EMOTE_FADE_AWAY'), -- broadcast text id 23604
+
+(-1568122,'Greetings, kind stranger, and thank you for your selfless act.',6378,0,0,0,'mannuth SAY_MANNUTH_1'), -- broadcast text id 23346
+(-1568123,'These heathens have robbed me of my belongings, but I can offer you this charm I took from my captors.',0,0,0,0,'mannuth SAY_MANNUTH_2'), -- broadcast text id 23347
+(-1568124,'May it serve you well, $n.',0,0,0,0,'mannuth SAY_MANNUTH_3'), -- broadcast text id 23369
+(-1568125,'Farewell.',6379,0,0,0,'mannuth SAY_MANNUTH_4'), -- broadcast text id 23348
+
+(-1568126,'Hmm, thank you stranger.',6414,0,0,0,'deez SAY_DEEZ_1'), -- broadcast text id 23373
+(-1568127,'I fear I have nothing but this old chest I discovered here. You\'re welcome to it.',0,0,0,0,'deez SAY_DEEZ_2'), -- broadcast text id 23374
+(-1568128,'I hope you find its contents... useful.',0,0,0,0,'deez SAY_DEEZ_3'), -- broadcast text id 23375
+(-1568129,'Until we next meet....',6415,0,0,0,'deez SAY_DEEZ_4'), -- broadcast text id 23376
+
+(-1568130,'Oooh! It\'s about time someone rescued me....',9635,0,0,0,'galathryn SAY_GALATHRYN_1'), -- broadcast text id 23379
+(-1568131,'I suppose I should be grateful. Please, take this. I want nothing to remind me of this place.',0,0,0,0,'galathryn SAY_GALATHRYN_2'), -- broadcast text id 23380
+(-1568132,'I took it from one of these trolls as I was captured. Maybe you can find a way to use it against them.',0,0,0,0,'galathryn SAY_GALATHRYN_3'), -- broadcast text id 23381
+(-1568133,'I\'ve had quite enough of this place. Goodbye.',9636,0,0,0,'galathryn SAY_GALATHRYN_4'), -- broadcast text id 23382
+
+(-1568134,'Ahhh, finally!',6134,0,0,0,'adarrah SAY_ADARRAH_1'), -- broadcast text id 23383
+(-1568135,'Say, I found this charm just before they caught me. Maybe it\'ll do you some good here....',0,0,0,0,'adarrah SAY_ADARRAH_2'), -- broadcast text id 23384
+(-1568136,'I hope it helps. These vile beasts simply must be stopped!',0,0,0,0,'adarrah SAY_ADARRAH_3'), -- broadcast text id 23385
+(-1568137,'Good luck to you!',6135,0,0,0,'adarrah SAY_ADARRAH_4'), -- broadcast text id 23386
+
+(-1568138,'Well, now. What a pleasant turn of events.',0,0,0,0,'darwen SAY_DARWEN_1'), -- broadcast text id 23387
+(-1568139,'It\'s most fortunate for you that you rescued me, and not one of these other poor sots.',0,0,0,0,'darwen SAY_DARWEN_2'), -- broadcast text id 23388
+(-1568140,'Please accept this payment, as well as my gratitude, for your trouble.',0,0,0,0,'darwen SAY_DARWEN_3'), -- broadcast text id 23389
+(-1568141,'Be well, $n.',0,0,0,0,'darwen SAY_DARWEN_4'), -- broadcast text id 23390
+
+(-1568142,'Woohoo! I\'m saved! I thank you, $n.',6129,0,0,0,'fudgerick SAY_FUDGERICK_1'), -- broadcast text id 23391
+(-1568143,'Oh, my. What IS that smell - oh wait, heh, whoops! Guess my senses will take a little time to get readjusted.',0,0,0,0,'fudgerick SAY_FUDGERICK_2'), -- broadcast text id 23392
+(-1568144,'My apologies, friends. Here, now. This should help to cover the expenses involved in my rescue.',0,0,0,0,'fudgerick SAY_FUDGERICK_3'), -- broadcast text id 23393
+(-1568145,'See ya later!',6126,0,0,113,'fudgerick SAY_FUDGERICK_4'), -- broadcast text id 23394
+
+(-1568146,'Oh, can it be? I... I\'m free of that hideous curse?',0,0,0,0,'gunter SAY_GUNTER_1'), -- broadcast text id 23401
+(-1568147,'Words cannot express my gratitude, $n. Thank you for your kindness',0,0,0,0,'gunter SAY_GUNTER_2'), -- broadcast text id 23402
+(-1568148,'As you can see, I have but little after these savages got hold of me, but you\'re welcome to what I have. Come, have a look.',0,0,0,0,'gunter SAY_GUNTER_3'), -- broadcast text id 23403
+(-1568149,'I must go now, before I get myself caught again. If you need anything, I won\'t be far.',0,0,0,0,'gunter SAY_GUNTER_4'), -- broadcast text id 23404
+
+(-1568150,'Mmmm, flies! Even better now that I can taste them.',0,0,0,0,'kyren SAY_KYREN_1'), -- broadcast text id 23405
+(-1568151,'Nice to be back among the unliving, thanks to you.',0,0,0,0,'kyren SAY_KYREN_2'), -- broadcast text id 23406
+(-1568152,'Perhaps I am able to offer something of interest to you? Come, see if there\'s anything you like.',0,0,0,0,'kyren SAY_KYREN_3'), -- broadcast text id 23407
+(-1568153,'I must be off now, $n. See you around.',0,0,0,0,'kyren SAY_KYREN_4'), -- broadcast text id 23408
+
+(-1568154,'Weee! I\'m a girl again!',0,0,0,0,'mitzi SAY_MITZI_1'), -- broadcast text id 23411
+(-1568155,'Thank you for rescuing me. I simply hate being a yucky frog!',0,0,0,0,'mitzi SAY_MITZI_2'), -- broadcast text id 23412
+(-1568156,'I\'m really not supposed to talk to strangers, but you\'ve been so nice to me. Here\'s a special something I found just before I was kidnapped.',0,0,0,0,'mitzi SAY_MITZI_3'), -- broadcast text id 23413
+(-1568157,'I should go now. Be careful!',0,0,0,0,'mitzi SAY_MITZI_4'), -- broadcast text id 23414
+
+(-1568158,'Aww, nuts! You\'ve ruined everything!',0,0,0,0,'christian SAY_CHRISTIAN_1'), -- broadcast text id 23417
+(-1568159,'Do you have any idea how neat it is to hop that far?',0,0,0,0,'christian SAY_CHRISTIAN_2'), -- broadcast text id 23418
+(-1568160,'Oh well, I was starting to miss my pals anyway - they\'re not gunna believe this! Oh, here - you can have this, I found it playin\' hide and seek.',0,0,0,0,'christian SAY_CHRISTIAN_3'), -- broadcast text id 23419
+(-1568161,'Let\'s see if I can still make that sound....',0,0,0,0,'christian SAY_CHRISTIAN_4'), -- broadcast text id 23420
+
+(-1568162,'Hrmmph. Thanks all the same, but I didn\'t need any help.',0,0,0,0,'brennan SAY_BRENNAN_1'), -- broadcast text id 23421
+(-1568163,'I was working on a cantrip that would counteract my predicament and I was very close to finding a <CROOAAK>... Oh my!',8353,0,0,0,'brennan SAY_BRENNAN_2'), -- broadcast text id 23422
+(-1568164,'Well, I suppose I do owe you a little something - here, take one of these. I\'ve got lots.',0,0,0,0,'brennan SAY_BRENNAN_3'), -- broadcast text id 23423
+(-1568165,'You may want to consider leaving this place. I think being transformed into a frog is one of the better things that can happen to one here.',0,0,0,0,'brennan SAY_BRENNAN_4'), -- broadcast text id 23424
+
+(-1568166,'Oh! Back to my beautiful self? How lovely! I thought I would be a frog forever.',0,0,0,0,'hollee SAY_HOLLEE_1'), -- broadcast text id 23425
+(-1568167,'It was just terrible. I was all slimy, and I kept licking my eyes!',0,0,0,0,'hollee SAY_HOLLEE_1'), -- broadcast text id 23426
+(-1568168,'Thank goodness you came along when you did. Please, take one of these troll boxes to remember me by.',0,0,0,0,'hollee SAY_HOLLEE_1'), -- broadcast text id 23427
+(-1568169,'I never want to see this nasty pond again. Thank you, $n. I\'ll never forget you!',0,0,0,0,'hollee SAY_HOLLEE_1'), -- broadcast text id 23428
+
+(-1568170,'Mojo leaps into $n\'s pocket!',0,2,0,0,'forest frog SAY_MOJO'); -- broadcast text id 23485
 
 -- -1 574 000 UTGARDE KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES

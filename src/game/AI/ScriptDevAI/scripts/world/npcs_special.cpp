@@ -44,6 +44,7 @@ npc_redemption_target   100%    Used for the paladin quests: 1779,1781,9600,9685
 npc_burster_worm        100%    Used for the crust burster worms in Outland. Npc entries: 16844, 16857, 16968, 17075, 18678, 21380, 21849, 22038, 22466, 22482, 23285
 npc_aoe_damage_trigger   75%    Used for passive aoe damage triggers in various encounters with overlapping usage of entries: 16697, 17471, 20570, 18370, 20598
 npc_mage_mirror_image    90%    mage mirror image pet
+npc_mojo
 EndContentData */
 
 /*########
@@ -2171,6 +2172,113 @@ UnitAI* GetAI_npc_mage_mirror_image(Creature* pCreature)
     return new npc_mage_mirror_imageAI(pCreature);
 }
 
+/*########
+# npc_mojo
+#########*/
+
+enum
+{
+    SPELL_FEELING_FROGGY    = 43906,
+    SPELL_HEARTS            = 20372,   // wrong?
+    MOJO_WHISPS_COUNT       = 8
+};
+
+struct npc_mojoAI : public ScriptedAI
+{
+    npc_mojoAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
+
+    uint32 heartsResetTimer;
+    bool hearts;
+
+    void Reset() override
+    {
+        heartsResetTimer = 15000;
+        hearts = false;
+        m_creature->GetMotionMaster()->MoveFollow(m_creature->GetOwner(), 2.0f, M_PI / 2.0f);
+    }
+
+    void SpellHit(Unit* caster, const SpellEntry* spell) override
+    {
+        if (spell->Id == SPELL_HEARTS)
+        {
+            hearts = true;
+            heartsResetTimer = 15000;
+        }
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (hearts)
+        {
+            if (heartsResetTimer <= diff)
+            {
+                m_creature->RemoveAurasDueToSpell(SPELL_HEARTS);
+                hearts = false;
+                m_creature->GetMotionMaster()->MoveFollow(m_creature->GetOwner(), 2.0f, M_PI / 2.0f);
+                m_creature->SetTarget(nullptr);
+            }
+            else
+                heartsResetTimer -= diff;
+        }
+    }
+
+    void ReceiveEmote(Player* player, uint32 uiEmote) override
+    {
+        if (uiEmote == TEXTEMOTE_KISS)
+        {
+            if (!m_creature->HasAura(SPELL_HEARTS))
+            {
+                // affect only the same faction
+                if (player->GetTeam() == ((Player*)m_creature->GetOwner())->GetTeam())
+                {
+                    player->CastSpell(player, SPELL_FEELING_FROGGY, TRIGGERED_NONE);
+                    m_creature->CastSpell(m_creature, SPELL_HEARTS, TRIGGERED_NONE);
+                    m_creature->SetSelectionGuid(player->GetObjectGuid());
+
+                    m_creature->GetMotionMaster()->MoveFollow(player, 1.0f, 0.0f);
+
+                    const char* text;
+
+                    switch (urand(0, MOJO_WHISPS_COUNT))
+                    {
+                        case 0:
+                            text = "Now that's what I call froggy-style!"; // 23478
+                            break;
+                        case 1:
+                            text = "Your lily pad or mine?"; // 23483
+                            break;
+                        case 2:
+                            text = "This won't take long, did it?"; // 23479
+                            break;
+                        case 3:
+                            text = "I thought you'd never ask!"; // 23477
+                            break;
+                        case 4:
+                            text = "I promise not to give you warts..."; // 23480
+                            break;
+                        case 5:
+                            text = "Feelin' a little froggy, are ya?"; // 23484
+                            break;
+                        case 6:
+                            text = "Listen, $n, I know of a little swamp not too far from here...."; // 23482
+                            break;
+                        default:
+                            text = "There's just never enough Mojo to go around..."; // 23481
+                            break;
+                    }
+
+                    m_creature->MonsterWhisper(text, player, false);
+                }
+            }
+        }
+    }
+};
+    
+UnitAI* GetAI_npc_mojo(Creature *pCreature)
+{
+    return new npc_mojoAI(pCreature);
+}
+
 void AddSC_npcs_special()
 {
     Script* pNewScript = new Script;
@@ -2264,5 +2372,10 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_mage_mirror_image";
     pNewScript->GetAI = &GetAI_npc_mage_mirror_image;
+    pNewScript->RegisterSelf();
+    
+    pNewScript = new Script;
+    pNewScript->Name = "npc_mojo";
+    pNewScript->GetAI = &GetAI_npc_mojo;
     pNewScript->RegisterSelf();
 }
