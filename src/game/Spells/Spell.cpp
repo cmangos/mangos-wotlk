@@ -8696,6 +8696,11 @@ SpellCastResult Spell::OnCheckCast(bool strict)
                 return SPELL_FAILED_TOO_MANY_OF_ITEM;
             break;
         }
+        case 43732: // Remove Amani Curse - should only be usable on Forest Frog
+            if (ObjectGuid target = m_targets.getUnitTargetGuid())
+                if (target.GetEntry() != 24396)
+                    return SPELL_FAILED_BAD_TARGETS;
+            break;
     }
 
     return SPELL_CAST_OK;
