@@ -2260,7 +2260,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 41466, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
                     return;
                 }
-                case 39992:                                 // Needle Spine Targeting
+                case 39992:                                 // Needle Spine Targeting - Najentus
                 {
                     if (!unitTarget)
                         return;
@@ -9446,7 +9446,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 39504, TRIGGERED_NONE);
                     return;
                 }
-                case 39835:                                 // Needle Spine
+                case 39835:                                 // Needle Spine - Najentus
                 {
                     unitTarget->CastSpell(nullptr, 39968, TRIGGERED_NONE);
                     return;
