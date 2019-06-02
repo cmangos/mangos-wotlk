@@ -1120,6 +1120,28 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                                 unitTarget->RemoveAurasDueToSpell(28820);
                                 break;
                             }
+                            case 28820:                             // Lightning Shield (The Earthshatterer set trigger after cast Lighting Shield)
+                            {
+                                // Need remove self if Lightning Shield not active
+                                Unit::SpellAuraHolderMap const& auras = unitTarget->GetSpellAuraHolderMap();
+                                for (const auto& aura : auras)
+                                {
+                                    SpellEntry const* spell = aura.second->GetSpellProto();
+                                    if (spell->SpellFamilyName == SPELLFAMILY_SHAMAN &&
+                                        (spell->SpellFamilyFlags & uint64(0x0000000000000400)))
+                                        return;
+                                }
+                                unitTarget->RemoveAurasDueToSpell(28820);
+                                return;
+                            }
+                            case 38443:                             // Totemic Mastery (Skyshatter Regalia (Shaman Tier 6) - bonus)
+                            {
+                                if (unitTarget->IsAllTotemSlotsUsed())
+                                    unitTarget->CastSpell(nullptr, 38437, TRIGGERED_OLD_TRIGGERED, nullptr);
+                                else
+                                    unitTarget->RemoveAurasDueToSpell(38437);
+                                return;
+                            }
                             case 37594: // Greater Heal Refund
                             {
                                 // If your Greater Heal brings the target to full health, you gain $37595s1 mana.
@@ -1129,9 +1151,8 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             }
                             case 37705: // Healing Discount
                             {
-                                Player* playerTarget = (Player*) unitTarget;
                                 uint32 spellId = 0;
-                                switch (playerTarget->getClass())
+                                switch (m_caster->getClass())
                                 {
                                     case CLASS_PALADIN:
                                         spellId = 37723;
@@ -1146,7 +1167,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                                         spellId = 37721;
                                         break;
                                 }
-                                playerTarget->CastSpell(playerTarget, spellId, TRIGGERED_OLD_TRIGGERED);
+                                m_caster->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED);
                                 break;
                             }
                         }
