@@ -27,6 +27,13 @@
 #define BG_WS_TIME_LIMIT          (25*MINUTE*IN_MILLISECONDS)
 #define BG_WS_EVENT_START_BATTLE  8563
 
+#define WS_NORMAL_FLAG_CAPTURE_REPUTATION           35
+#define WS_WEEKEND_FLAG_CAPTURE_REPUTATION          45
+#define WS_NORMAL_WIN_KILLS                         1
+#define WS_WEEKEND_WIN_KILLS                        3
+#define WS_NORMAL_MAP_COMPLETE_KILLS                2
+#define WS_WEEKEND_MAP_COMPLETE_KILLS               4
+
 enum BG_WS_Sound
 {
     BG_WS_SOUND_FLAG_CAPTURED_ALLIANCE  = 8173,
@@ -50,7 +57,7 @@ enum BG_WS_WorldStates
 {
     BG_WS_FLAG_UNK_ALLIANCE       = 1545,
     BG_WS_FLAG_UNK_HORDE          = 1546,
-//    FLAG_UNK                      = 1547,
+//  FLAG_UNK                      = 1547,
     BG_WS_FLAG_CAPTURES_ALLIANCE  = 1581,
     BG_WS_FLAG_CAPTURES_HORDE     = 1582,
     BG_WS_FLAG_CAPTURES_MAX       = 1601,
@@ -60,12 +67,16 @@ enum BG_WS_WorldStates
     BG_WS_TIME_REMAINING          = 4248
 };
 
-#define WS_NORMAL_FLAG_CAPTURE_REPUTATION           35
-#define WS_WEEKEND_FLAG_CAPTURE_REPUTATION          45
-#define WS_NORMAL_WIN_KILLS                         1
-#define WS_WEEKEND_WIN_KILLS                        3
-#define WS_NORMAL_MAP_COMPLETE_KILLS                2
-#define WS_WEEKEND_MAP_COMPLETE_KILLS               4
+enum BG_WS_FlagActions
+{
+    BG_WS_FLAG_ACTION_NONE     = -1,
+    BG_WS_FLAG_ACTION_PICKEDUP = 0,
+    BG_WS_FLAG_ACTION_RETURNED = 1,
+    BG_WS_FLAG_ACTION_DROPPED  = 2,
+    BG_WS_FLAG_ACTION_CAPTURED = 3,
+    BG_WS_FLAG_ACTION_RESPAWN  = 4
+};
+#define WS_FLAG_ACTIONS_TOTAL 5
 
 enum BG_WS_FlagState
 {
@@ -106,7 +117,7 @@ enum BG_WS_Events
 
 class BattleGroundWS : public BattleGround
 {
-        friend class BattleGroundMgr;
+    friend class BattleGroundMgr;
 
     public:
         /* Construction */
@@ -118,17 +129,10 @@ class BattleGroundWS : public BattleGround
         virtual void StartingEventOpenDoors() override;
 
         /* BG Flags */
-        ObjectGuid GetAllianceFlagCarrierGuid() const { return m_flagCarrierAlliance; }
-        ObjectGuid GetHordeFlagCarrierGuid() const { return m_flagCarrierHorde; }
-
-        void SetAllianceFlagCarrier(ObjectGuid guid) { m_flagCarrierAlliance = guid; }
-        void SetHordeFlagCarrier(ObjectGuid guid) { m_flagCarrierHorde = guid; }
-
-        void ClearAllianceFlagCarrier() { m_flagCarrierAlliance.Clear(); }
-        void ClearHordeFlagCarrier() { m_flagCarrierHorde.Clear(); }
-
-        bool IsAllianceFlagPickedUp() const { return !m_flagCarrierAlliance.IsEmpty(); }
-        bool IsHordeFlagPickedUp() const { return !m_flagCarrierHorde.IsEmpty(); }
+        ObjectGuid GetFlagCarrierGuid(uint8 teamIdx) const { return m_FlagCarrier[teamIdx]; }
+        void SetFlagCarrier(uint8 teamIdx, ObjectGuid guid) { m_FlagCarrier[teamIdx] = guid; }
+        void ClearFlagCarrier(uint8 teamIdx) { m_FlagCarrier[teamIdx].Clear(); }
+        bool IsFlagPickedUp(uint8 teamIdx) const { return !m_FlagCarrier[teamIdx].IsEmpty(); }
 
         void RespawnFlag(Team team, bool captured);
         void RespawnDroppedFlag(Team team);
@@ -147,6 +151,10 @@ class BattleGroundWS : public BattleGround
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
         uint32 GetRemainingTimeInMinutes() const { return m_EndTimer ? (m_EndTimer - 1) / (MINUTE * IN_MILLISECONDS) + 1 : 0; }
 
+        // Flag interactions
+        void PickUpFlagFromBase(Player* source);
+        uint32 GroundFlagInteraction(Player* source, GameObject* target);
+
         void UpdateFlagState(Team team, uint32 value);
         void UpdateTeamScore(Team team);
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
@@ -157,10 +165,9 @@ class BattleGroundWS : public BattleGround
         virtual Team GetPrematureWinner() override;
 
     private:
-        ObjectGuid m_flagCarrierAlliance;
-        ObjectGuid m_flagCarrierHorde;
-
         ObjectGuid m_DroppedFlagGuid[PVP_TEAM_COUNT];
+        ObjectGuid m_FlagCarrier[PVP_TEAM_COUNT];
+
         uint8 m_FlagState[PVP_TEAM_COUNT];
         int32 m_FlagsTimer[PVP_TEAM_COUNT];
         int32 m_FlagsDropTimer[PVP_TEAM_COUNT];
