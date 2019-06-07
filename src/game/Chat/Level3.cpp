@@ -2428,15 +2428,11 @@ bool ChatHandler::HandleLearnAllGMCommand(char* /*args*/)
         23452,  // Invisibility
         23775,  // Stun Forever
         24199,  // Knockback 35
-        31304,  // Immolation                       ~3k damage to all targets around every 2 seconds
-        31750,  // QATest +1000 Spell Dmg (QASpell)
-        34311,  // Damage Immunity: Physical
         35182,  // Banish
         35874,  // Master Buff (Physical)           525 AP, +14 all stats, 10% to all stats
         35912,  // Master Buff (Magical)            54 Int, 49 mp/5, 10% to all stats
         38505,  // Shackle
         38734,  // Master Ranged Buff               220 Ranged AP, +18 all stats, 10% to all stats
-        39804,  // Damage Immunity: Magic
         39258,  // Automation Root Spell (QAE)      AoE permanent root
         40678,  // Super Jump
         40733,  // Divine Shield                    infinite duration bubble
