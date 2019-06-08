@@ -13458,6 +13458,8 @@ void Spell::EffectCreateTamedPet(SpellEffectIndex eff_idx)
     m_caster->SetPet(newTamedPet);
 
     Player* _player = static_cast<Player*>(unitTarget);
+    // This check is theoretically redundant as only players can be the hunter class
+    // yet I kind of want to keep it in just in case the typecast fails (?)
     if (_player)
     {
         newTamedPet->SavePetToDB(PET_SAVE_AS_CURRENT, _player);
