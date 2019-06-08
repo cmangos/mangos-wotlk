@@ -4652,6 +4652,8 @@ void Unit::_UpdateAutoRepeatSpell()
         // cancel wand shoot
         if (!isAutoShot)
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+        // set 0.5 second wind-up time.
+        m_AutoRepeatFirstCast = true;
         return;
     }
 
