@@ -5668,16 +5668,24 @@ bool Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype)
         // convert to possible store amount
         if (msg == EQUIP_ERR_INVENTORY_FULL || msg == EQUIP_ERR_CANT_CARRY_MORE_OF_THIS)
             num_to_add -= no_space;
-        else
-        {
-            // ignore mana gem case (next effect will recharge existing example)
-            if (eff_idx == EFFECT_INDEX_0 && m_spellInfo->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_DUMMY)
-                return false;
 
-            // if not created by another reason from full inventory or unique items amount limitation
-            player->SendEquipError(msg, nullptr, nullptr, newitemid);
+        // TODO:: ported code from tbc/classic need to confirm if its no needed here
+        // for battleground marks send by mail if not add all expected
+        /*if (no_space > 0 && bgType)
+        {
+            if (BattleGround * bg = sBattleGroundMgr.GetBattleGroundTemplate(BattleGroundTypeId(bgType)))
+            {
+                bg->SendRewardMarkByMail(player, newitemid, no_space);
+                return true;
+            }
+        }*/
+        // ignore mana gem case (next effect will recharge existing example)
+        if (eff_idx == EFFECT_INDEX_0 && m_spellInfo->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_DUMMY)
             return false;
-        }
+
+        // if not created by another reason from full inventory or unique items amount limitation
+        player->SendEquipError(msg, nullptr, nullptr, newitemid);
+        return false;
     }
 
     if (num_to_add)
