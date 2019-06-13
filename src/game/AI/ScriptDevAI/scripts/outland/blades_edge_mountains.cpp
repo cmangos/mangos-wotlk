@@ -73,6 +73,8 @@ enum
     SPELL_ARCANE_BLAST          = 38881,
     SPELL_MANA_BURN             = 38884,
     SPELL_INTANGIBLE_PRESENCE   = 36513,
+
+    SPELL_RESISTANCES           = 36630,
 };
 
 static const uint32 aNetherDrakeEntries[MAX_ENTRIES] = {NPC_PROTO, NPC_ADOLESCENT, NPC_MATURE, NPC_NIHIL};
@@ -98,6 +100,8 @@ struct mobs_nether_drakeAI : public ScriptedAI
         m_uiArcaneBlastTimer        = 7500;
         m_uiManaBurnTimer           = 10000;
         m_uiIntangiblePresenceTimer = 15000;
+
+        DoCastSpellIfCan(nullptr, SPELL_RESISTANCES, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void MoveInLineOfSight(Unit* pWho) override

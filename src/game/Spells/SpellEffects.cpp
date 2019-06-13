@@ -2008,36 +2008,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->SummonCreature(21290, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), unitTarget->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5000);
                     return;
                 }
-                case 37573:                                 // Temporal Phase Modulator
-                {
-                    if (!unitTarget)
-                        return;
-
-                    TemporarySpawn* tempSummon = dynamic_cast<TemporarySpawn*>(unitTarget);
-                    if (!tempSummon)
-                        return;
-
-                    uint32 health = tempSummon->GetHealth();
-                    const uint32 entry_list[6] = {21821, 21820, 21817};
-
-                    float x = tempSummon->GetPositionX();
-                    float y = tempSummon->GetPositionY();
-                    float z = tempSummon->GetPositionZ();
-                    float o = tempSummon->GetOrientation();
-
-                    tempSummon->UnSummon();
-
-                    Creature* pCreature = m_caster->SummonCreature(entry_list[urand(0, 2)], x, y, z, o, TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 180000);
-                    if (!pCreature)
-                        return;
-
-                    pCreature->SetHealth(health);
-
-                    if (pCreature->AI())
-                        pCreature->AI()->AttackStart(m_caster);
-
-                    return;
-                }
                 case 37674:                                 // Chaos Blast
                 {
                     if (!unitTarget)
