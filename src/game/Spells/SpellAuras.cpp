@@ -2312,6 +2312,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             {
                 switch (GetId())
                 {
+                    case 11403:                             // Dream Vision
+                    {
+                        if (target->IsPlayer())
+                        {
+                            Unit* pet = static_cast<Player*>(target)->GetCharm();
+                            if (pet && pet->GetEntry() == 7863)
+                                pet->SetVisibility(VISIBILITY_OFF);
+                        }
+                        break;
+                    }
                     case 1515:                              // Tame beast
                         // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
                         if (target->CanHaveThreatList())
@@ -2864,6 +2874,24 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     }
                 }
                 break;
+            }
+            case SPELLFAMILY_WARLOCK:
+            {
+                switch (GetId())
+                {
+                    case 126:                               // Eye of Kilrogg
+                    {
+                        if (target->IsPlayer())
+                        {
+                            Unit* pet = static_cast<Player*>(target)->GetCharm();
+                            if (pet && pet->GetEntry() == 4277)
+                            {
+                                pet->CastSpell(pet, 2585, TRIGGERED_OLD_TRIGGERED);
+                            }
+                        }
+                        break;
+                    }
+                }
             }
         }
     }
