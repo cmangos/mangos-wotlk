@@ -141,6 +141,7 @@ struct mobs_nether_drakeAI : public ScriptedAI
             while (aNetherDrakeEntries[uiIndex] == m_creature->GetEntry())
                 uiIndex = urand(0, MAX_ENTRIES - 1);
 
+            m_creature->CastSpell(nullptr, 35426, TRIGGERED_OLD_TRIGGERED); // arcane explosion visual
             if (m_creature->UpdateEntry(aNetherDrakeEntries[uiIndex]))
             {
                 // Nihil does only dialogue
