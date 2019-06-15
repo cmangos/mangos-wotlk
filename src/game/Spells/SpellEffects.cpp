@@ -8738,6 +8738,43 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spellId, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 27549:                                 // Valentine - Horde Civilian
+                case 27550:                                 // Valentine - Alliance Civilian
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    uint32 PledgeGiftOrHeartbroken;
+                    // Civilian spellIds map [Gift of Friendship , Gift of Adoration]
+                    std::map<uint32, std::vector<uint32>> loveAirSpellsMapForFaction = {
+                            {12, {27525, 27509}},   // Stormwind
+                            {29, {27523, 27505}},   // Orgrimmar orcs
+                            {55, {27520, 27503}},   // Ironforge dwarves
+                            {68, {27529, 27512}},   // Undercity
+                            {80, {27519, 26901}},   // Darnassus
+                            {104, {27524, 27511}},  // Thunderbluff
+                            {126, {27523, 27505}},  // Orgrimmar trolls
+                            {875, {27520, 27503}}   // Ironforge gnomes
+                        };
+
+                    if (loveAirSpellsMapForFaction.count(m_caster->getFaction()))
+                    {
+                        if (!urand(0, 5))                       // Sets 1 in 6 chance to cast Heartbroken
+                            PledgeGiftOrHeartbroken = 26898;    // Heartbroken
+                        else if (!unitTarget->HasAura(26680))
+                        {
+                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->getFaction()][1];    // Gift of Adoration for related faction
+                            unitTarget->CastSpell(unitTarget, 26680, TRIGGERED_OLD_TRIGGERED);                  // Cast Adored
+                        }
+                        else
+                            PledgeGiftOrHeartbroken = loveAirSpellsMapForFaction[m_caster->getFaction()][0];    // Gift of Friendship for related faction
+
+                        unitTarget->CastSpell(unitTarget, PledgeGiftOrHeartbroken, TRIGGERED_OLD_TRIGGERED);
+                        m_caster->RemoveAurasDueToSpell(27741);                             // Remove Love is in the Air from civilian
+                        ((Player*)unitTarget)->DestroyItemCount(21815, 1, true, false);     // remove 1 love token on cast from inventory
+                    }
+                    return;
+                }
                 case 27654:                                 // Love is in the Air Test
                 {
                     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
