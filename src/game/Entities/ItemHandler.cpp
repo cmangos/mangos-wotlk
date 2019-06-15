@@ -168,7 +168,7 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
     {
         _player->RemoveItem(srcbag, srcslot, true);
         _player->EquipItem(dest, pSrcItem, true);
-        _player->AutoUnequipOffhandIfNeed();
+        _player->AutoUnequipOffhandIfNeed(srcbag);
     }
     else                                                    // have currently equipped item, not simple case
     {
@@ -229,7 +229,7 @@ void WorldSession::HandleAutoEquipItemOpcode(WorldPacket& recv_data)
         else if (Player::IsEquipmentPos(src))
             _player->EquipItem(eSrc, pDstItem, true);
 
-        _player->AutoUnequipOffhandIfNeed();
+        _player->AutoUnequipOffhandIfNeed(srcbag);
     }
 }
 
