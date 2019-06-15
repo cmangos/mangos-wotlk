@@ -1295,3 +1295,6 @@ UPDATE `spell_template` SET `AttributesServerside`=1 WHERE `id`=6950 OR `id`=164
 
 -- Hurricane Spell From Druid And NPC must be interruptable
 UPDATE `spell_template` SET `InterruptFlags`=15 WHERE `id`=16914 OR `id`=17401 OR `id`=17402 OR `id`=27012 OR `id`=27530 OR `id`=32717 OR `id`=40090;
+
+-- sweeping strikes should not be lost on stance change to defensive
+UPDATE spell_template SET Attributes=Attributes|0x00010000 WHERE Id IN(12328);
