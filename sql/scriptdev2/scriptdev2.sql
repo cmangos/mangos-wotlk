@@ -838,8 +838,14 @@ UPDATE creature_template SET ScriptName='npc_anchorite_barada' WHERE entry=22431
 UPDATE creature_template SET ScriptName='npc_colonel_jules' WHERE entry=22432;
 UPDATE creature_template SET ScriptName='npc_magister_aledis' WHERE entry=20159;
 UPDATE creature_template SET ScriptName='npc_living_flare' WHERE entry=24916;
-UPDATE creature_template SET ScriptName='npc_danath_trollbane' WHERE entry='16819';
-UPDATE creature_template SET ScriptName='npc_nazgrel' WHERE entry='3230';
+UPDATE creature_template SET ScriptName='npc_danath_trollbane' WHERE `entry`='16819';
+UPDATE creature_template SET ScriptName='npc_nazgrel' WHERE `entry`='3230';
+UPDATE creature_template SET ScriptName='npc_vindicator_sedai' WHERE entry=17404;
+UPDATE creature_template SET ScriptName='npc_krun' WHERE entry=17405;
+UPDATE creature_template SET ScriptName='npc_laughing_skull' WHERE entry=17418;
+UPDATE creature_template SET ScriptName='npc_maghar_escort' WHERE entry=17417;
+DELETE FROM scripted_event_id WHERE id=10745;
+INSERT INTO scripted_event_id VALUES(10745,'npc_vindicator_sedai');
 
 /* HILLSBRAD FOOTHILLS */
 
@@ -3229,8 +3235,14 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1015029,'For the Deceiver! For Kil''jaeden!',0,0,0,0,'Trelopades on aggro 1'),
 (-1015030,'Only flesh and blood...',0,0,0,0,'Trelopades on aggro 2'),
 (-1015031, 'Onward, Scryers!  Show Illidan\'s lackeys the temper of our steel!', 0, 1, 0, 0, 'Onward Scryers'),
-(-1015032, 'Forward, vindicators!  Drive these demons from our sacred temple!', 0, 1, 0, 0, 'Forward vindicators');
+(-1015032, 'Forward, vindicators!  Drive these demons from our sacred temple!', 0, 1, 0, 0, 'Forward vindicators'),
 
+(-1015066,'Do not return, draenei scum. Next time we won\'t spare your life, unarmed or not!',0,0,0,0,'Maghar escort SAY'),
+(-1015067,'I\'ve failed... peace is impossible.',0,0,0,0,'Vindicator Sedai SAY 1'),
+(-1015068,'What in the Light\'s name...?',0,0,0,0,'Vindicator Sedai SAY 2'),
+(-1015069,'Fel orcs!',0,0,0,0,'Vindicator Sedai SAY 3'),
+(-1015070,'The cycle of bloodshed is unending... Is there nothing I can do?',0,0,0,0,'Vindicator Sedai SAY 4'),
+(-1015071,'You can die!',0,0,0,0,'Krun Spinebreaker SAY 1');
 -- -1 020 000 WOTLK texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
 (-1020001,'The zeppelin to Orgrimmar has just arrived! All aboard for Durotar!',0,1,0,0,'zeppelinMaster - SAY_DUROTAR_FROM_OG_ARRIVAL'),
