@@ -1606,7 +1606,6 @@ UPDATE creature_template SET ScriptName='npc_guardian_of_yogg' WHERE entry=33136
 UPDATE creature_template SET ScriptName='npc_immortal_guardian' WHERE entry=33988;
 UPDATE creature_template SET ScriptName='npc_constrictor_tentacle' WHERE entry=33983;
 UPDATE creature_template SET ScriptName='npc_descent_madness' WHERE entry=34072;
-UPDATE creature_template SET ScriptName='npc_laughing_skull' WHERE entry=33990;
 UPDATE creature_template SET ScriptName='npc_keeper_mimiron' WHERE entry=33412;
 UPDATE creature_template SET ScriptName='npc_keeper_thorim' WHERE entry=33413;
 INSERT INTO scripted_event_id VALUES
