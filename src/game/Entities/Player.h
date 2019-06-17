@@ -1694,6 +1694,8 @@ class Player : public Unit
 
         void AddSpellMod(Aura* aura, bool apply);
         template <class T> void ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue);
+        void SetSpellClass(uint8 playerClass);
+        SpellFamily GetSpellClass() const { return m_spellClassName; } // client function equivalent - says what player can cast
 
         void SetResurrectRequestData(Unit* caster, uint32 health, uint32 mana);
         void SetResurrectRequestDataToGhoul(Unit* caster);
@@ -2604,6 +2606,7 @@ class Player : public Unit
         uint32 m_enchantmentFlatMod[MAX_ATTACK]; // TODO: Stat system - incorporate generically, exposes a required hidden weapon stat that does not apply when unarmed
 
         AuraList m_spellMods[MAX_SPELLMOD];
+        SpellFamily m_spellClassName; // s_spellClassSet
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;
 

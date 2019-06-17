@@ -19110,7 +19110,7 @@ void Player::AddSpellMod(Aura* aura, bool apply)
 template <class T> void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue)
 {
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-    if (!spellInfo) return;
+    if (!spellInfo || spellInfo->SpellFamilyName != GetSpellClass() || spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS)) return; // client condition
     int32 totalpct = 100;
     int32 totalflat = 0;
     for (auto aura : m_spellMods[op])
@@ -19144,6 +19144,26 @@ template <class T> void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& 
 template void Player::ApplySpellMod<int32>(uint32 spellId, SpellModOp op, int32& basevalue);
 template void Player::ApplySpellMod<uint32>(uint32 spellId, SpellModOp op, uint32& basevalue);
 template void Player::ApplySpellMod<float>(uint32 spellId, SpellModOp op, float& basevalue);
+
+void Player::SetSpellClass(uint8 playerClass)
+{
+    SpellFamily name;
+    switch (playerClass)
+    {
+        default: // compiler
+        case CLASS_WARRIOR: name = SPELLFAMILY_WARRIOR; break;
+        case CLASS_PALADIN: name = SPELLFAMILY_PALADIN; break;
+        case CLASS_HUNTER: name = SPELLFAMILY_HUNTER; break;
+        case CLASS_ROGUE: name = SPELLFAMILY_ROGUE; break;
+        case CLASS_PRIEST: name = SPELLFAMILY_PRIEST; break;
+        case CLASS_DEATH_KNIGHT: name = SPELLFAMILY_DEATHKNIGHT; break;
+        case CLASS_SHAMAN: name = SPELLFAMILY_SHAMAN; break;
+        case CLASS_MAGE: name = SPELLFAMILY_MAGE; break;
+        case CLASS_WARLOCK: name = SPELLFAMILY_WARLOCK; break;
+        case CLASS_DRUID: name = SPELLFAMILY_DRUID; break;
+    }
+    m_spellClassName = name;
+}
 
 // send Proficiency
 void Player::SendProficiency(ItemClass itemClass, uint32 itemSubclassMask) const
