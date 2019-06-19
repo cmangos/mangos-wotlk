@@ -537,7 +537,7 @@ void ChaseMovementGenerator::CutPath(Unit& owner, PointsArray& path)
             G3D::Vector3 data = (*iter);
             if (this->i_target->GetDistance(data.x, data.y, data.z, DIST_CALC_NONE) > distSquared)
                 continue;
-            if (!owner.GetMap()->IsInLineOfSight(tarX, tarY, tarZ + 2.0f, data.x, data.y, data.z + 2.0f, IGNORE_M2))
+            if (!owner.GetMap()->IsInLineOfSight(tarX, tarY, tarZ + 2.0f, data.x, data.y, data.z + 2.0f, owner.GetPhaseMask(), IGNORE_M2))
                 continue;
             // both in LOS and in range - advance to next and stop
             ++iter;
