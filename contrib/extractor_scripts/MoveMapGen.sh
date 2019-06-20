@@ -59,18 +59,34 @@ badParam()
  echo "For further fine-tuning edit this helper script"
  echo
 }
-
-if [ "$#" = "3" ]
+if [ "$#" = "4" ]
 then
- LOG_FILE=$2
- DETAIL_LOG_FILE=$3
+ OUTPUT_PATH="$2"
+ LOG_FILE=$3
+ DETAIL_LOG_FILE=$4
+elif [ "$#" = "3" ]
+then
+ if [ -d "$2" ]
+ then
+  OUTPUT_PATH="$2"
+  LOG_FILE=$3
+ else
+  LOG_FILE=$2
+  DETAIL_LOG_FILE=$3
+ fi
 elif [ "$#" = "2" ]
 then
- LOG_FILE=$2
+ if [ -d "$2" ]
+ then
+  OUTPUT_PATH="$2"
+ else
+  LOG_FILE=$2
+ fi
 fi
 
 # Offmesh file provided?
 OFFMESH=""
+MMG_RES="--workdir ${OUTPUT_PATH:-.}/"
 if [ "$OFFMESH_FILE" != "" ]
 then
  if [ ! -f "$OFFMESH_FILE" ]
@@ -95,7 +111,7 @@ createMMaps()
        continue 2
      fi
    done
-   ./MoveMapGen $PARAMS $OFFMESH $i | tee -a $DETAIL_LOG_FILE
+   ./MoveMapGen $PARAMS $OFFMESH $MMG_RES $i | tee -a $DETAIL_LOG_FILE
    echo "`date`: (Re)created map $i" | tee -a $LOG_FILE
  done
 }
@@ -114,7 +130,7 @@ createHeader()
 # Create mmaps directory if not exist
 if [ ! -d mmaps ]
 then
- mkdir mmaps
+ mkdir ${OUTPUT_PATH:-.}/mmaps
 fi
 
 # Param control
@@ -151,7 +167,7 @@ case "$1" in
    echo "Recreate offmeshs from file $OFFMESH_FILE" | tee -a $DETAIL_LOG_FILE
    while read map tile line
    do
-     ./MoveMapGen $PARAMS $OFFMESH $map --tile $tile | tee -a $DETAIL_LOG_FILE
+     ./MoveMapGen $PARAMS $OFFMESH $MMG_RES $map --tile $tile | tee -a $DETAIL_LOG_FILE
      echo "`date`: Recreated $map $tile from $OFFMESH_FILE" | tee -a $LOG_FILE
    done < $OFFMESH_FILE &
    ;;
