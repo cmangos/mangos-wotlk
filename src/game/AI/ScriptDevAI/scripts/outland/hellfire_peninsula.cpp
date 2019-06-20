@@ -1529,25 +1529,25 @@ enum SedaiActions : uint32
     SEDAI_ACTION_SEDAI_START_ATTACK,
 };
 
-struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatTimerAI
+struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatActions
 {
-    npc_vindicator_sedaiAI(Creature* creature) : ScriptedAI(creature), CombatTimerAI(SEDAI_COMBAT_ACTION_MAX)
+    npc_vindicator_sedaiAI(Creature* creature) : ScriptedAI(creature), CombatActions(SEDAI_COMBAT_ACTION_MAX)
     {
         m_creature->SetActiveObjectState(true);
         SetReactState(REACT_DEFENSIVE);
 
-        AddCombatAction(SEDAI_COMBAT_ACTION_HOLYFIRE, 0);
-        AddCombatAction(SEDAI_COMBAT_ACTION_HAMMER, 0);
+        AddCombatAction(SEDAI_COMBAT_ACTION_HOLYFIRE, 0u);
+        AddCombatAction(SEDAI_COMBAT_ACTION_HAMMER, 0u);
 
-        AddCustomAction(SEDAI_ACTION_FACE_ESCORT, 1000, [&]()
+        AddCustomAction(SEDAI_ACTION_FACE_ESCORT, true, [&]()
         {
             if (Creature* maghar = m_creature->GetMap()->GetCreature(m_maghar))
                 m_creature->SetFacingToObject(maghar);
 
-            ResetTimer(SEDAI_ACTION_ESCORT_KICK, 2000);
-        }, true);
-        
-        AddCustomAction(SEDAI_ACTION_ESCORT_KICK, 2000, [&]()
+            ResetTimer(SEDAI_ACTION_ESCORT_KICK, 2000u);
+        });
+
+        AddCustomAction(SEDAI_ACTION_ESCORT_KICK, true, [&]()
         {
             if (Creature* corpse = GetClosestCreatureWithEntry(m_creature, NPC_SEDAI_CORPSE, 10.0f, false))
             {
@@ -1557,25 +1557,25 @@ struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatTimerAI
 
             if (Creature* maghar = m_creature->GetMap()->GetCreature(m_maghar))
                 maghar->AI()->DoCastSpellIfCan(m_creature, SPELL_KICK);
-            
+
             ResetTimer(SEDAI_ACTION_ESCORT_SAY, 2000);
-        }, true);
-        
-        AddCustomAction(SEDAI_ACTION_ESCORT_SAY, 2000, [&]()
+        });
+
+        AddCustomAction(SEDAI_ACTION_ESCORT_SAY, true, [&]()
         {
             if (Creature* maghar = m_creature->GetMap()->GetCreature(m_magharTwo))
                 DoScriptText(SAY_EVENT_MAGHAR_ESCORT, maghar);
             ResetTimer(SEDAI_ACTION_SEDAI_KNEEL, 1000);
-        }, true);
-        
-        AddCustomAction(SEDAI_ACTION_SEDAI_KNEEL, 1000, [&]()
+        });
+
+        AddCustomAction(SEDAI_ACTION_SEDAI_KNEEL, true, [&]()
         {
             m_creature->SetSheath(SHEATH_STATE_UNARMED);
             m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
             ResetTimer(SEDAI_ACTION_ESCORTS_MOVE_1, 1000);
-        }, true);
-        
-        AddCustomAction(SEDAI_ACTION_ESCORTS_MOVE_1, 1000, [&]()
+        });
+
+        AddCustomAction(SEDAI_ACTION_ESCORTS_MOVE_1, true, [&]()
         {
             Map* map = m_creature->GetMap();
             if (Creature* maghar = map->GetCreature(m_maghar))
@@ -1583,9 +1583,9 @@ struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatTimerAI
             if (Creature* maghar = map->GetCreature(m_magharTwo))
                 maghar->GetMotionMaster()->MovePoint(2, 219.5054f, 4125.231f, 81.05459f);
             ResetTimer(SEDAI_ACTION_FELORC_SPAWN_ATTACK, 3000);
-        }, true);
-        
-        AddCustomAction(SEDAI_ACTION_FELORC_SPAWN_ATTACK, 3000, [&]()
+        });
+
+        AddCustomAction(SEDAI_ACTION_FELORC_SPAWN_ATTACK, true, [&]()
         {
             if (Creature* orc = m_creature->SummonCreature(NPC_FEL_ORC, 258.168854f, 4109.307617f, 91.639290f, 2.644194f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 4000, true))
             {
@@ -1606,9 +1606,9 @@ struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatTimerAI
                 }
             }
             ResetTimer(SEDAI_ACTION_QUEST_COMPLETE, 1000);
-        }, true);
-        
-        AddCustomAction(SEDAI_ACTION_QUEST_COMPLETE, 1000, [&]()
+        });
+
+        AddCustomAction(SEDAI_ACTION_QUEST_COMPLETE, true, [&]()
         {
             if (Player* player = (Player*)m_creature->GetMap()->GetUnit(m_creature->GetSpawnerGuid()))
             {
@@ -1620,16 +1620,16 @@ struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatTimerAI
                 DoScriptText(SAY_EVENT_SEDAI_1, m_creature);
                 ResetTimer(SEDAI_ACTION_SEDAI_MOVE_2, 6000);
             }
-        }, true);
-        
-        AddCustomAction(SEDAI_ACTION_SEDAI_MOVE_2, 6000, [&]()
+        });
+
+        AddCustomAction(SEDAI_ACTION_SEDAI_MOVE_2, true, [&]()
         {
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
             DoScriptText(SAY_EVENT_SEDAI_2, m_creature);
             m_creature->GetMotionMaster()->MovePoint(2, 202.1543f, 4138.074f, 76.15149f);
-        }, true);
-        
-        AddCustomAction(SEDAI_ACTION_SEDAI_START_ATTACK, 1000, [&]()
+        });
+
+        AddCustomAction(SEDAI_ACTION_SEDAI_START_ATTACK, true, [&]()
         {
             ResetTimer(SEDAI_COMBAT_ACTION_HOLYFIRE, 25000);
             ResetTimer(SEDAI_COMBAT_ACTION_HAMMER, 15000);
@@ -1792,24 +1792,24 @@ struct npc_krunAI : public ScriptedAI, public TimerManager
 {
     npc_krunAI(Creature* creature) : ScriptedAI(creature)
     {
-        AddCustomAction(KRUN_ACTION_EXECUTE_SEDAI, 1000, [&]()
+        AddCustomAction(KRUN_ACTION_EXECUTE_SEDAI, true, [&]()
         {
             DoScriptText(SAY_EVENT_KRUN, m_creature);
             DoCastSpellIfCan(m_creature, SPELL_EXECUTE_SEDAI);
             ResetTimer(KRUN_ACTION_LAUGH, 2000);
-        }, true);
+        });
 
-        AddCustomAction(KRUN_ACTION_LAUGH, 2000, [&]()
+        AddCustomAction(KRUN_ACTION_LAUGH, true, [&]()
         {
             m_creature->HandleEmote(EMOTE_ONESHOT_LAUGH);
             ResetTimer(KRUN_ACTION_DESPAWN, 2000);
-        }, true);
+        });
 
-        AddCustomAction(KRUN_ACTION_DESPAWN, 2000, [&]()
+        AddCustomAction(KRUN_ACTION_DESPAWN, true, [&]()
         {
             if (TemporarySpawn* summon = (TemporarySpawn*)m_creature)
                 summon->UnSummon();
-        }, true);
+        });
     }
 
     void Reset() override
