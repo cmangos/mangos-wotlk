@@ -3307,7 +3307,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1015068,'What in the Light\'s name...?',0,0,0,0,'Vindicator Sedai SAY 2'),
 (-1015069,'Fel orcs!',0,0,0,0,'Vindicator Sedai SAY 3'),
 (-1015070,'The cycle of bloodshed is unending... Is there nothing I can do?',0,0,0,0,'Vindicator Sedai SAY 4'),
-(-1015071,'You can die!',0,0,0,0,'Krun Spinebreaker SAY 1');
+(-1015071,'You can die!',0,0,0,0,'Krun Spinebreaker SAY 1'),
+(-1015072,'%s plants the Flag of Ownership in the corpse of $N.',0,0,0,0,'Item - Flag of Ownership');
 -- -1 020 000 WOTLK texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
 (-1020001,'The zeppelin to Orgrimmar has just arrived! All aboard for Durotar!',0,1,0,0,'zeppelinMaster - SAY_DUROTAR_FROM_OG_ARRIVAL'),

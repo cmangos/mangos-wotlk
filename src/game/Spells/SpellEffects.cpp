@@ -4556,6 +4556,21 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spell_id, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 51640:                                 // Taunt Flag Targeting
+                {
+                    if (!unitTarget || !unitTarget->IsPlayer())
+                        return;
+
+                    float x, y, z;
+                    if (Corpse* corpse = static_cast<Player*>(unitTarget)->GetCorpse())
+                        corpse->GetPosition(x, y, z);
+                    else
+                        unitTarget->GetPosition(x, y, z);
+
+                    DoScriptText(-1015072, m_caster, unitTarget);
+                    m_caster->CastSpell(x, y, z, 52605, TRIGGERED_OLD_TRIGGERED); // should also send start
+                    return;
+                }
             }
             break;
         }
