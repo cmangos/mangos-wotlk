@@ -123,7 +123,7 @@ SpellTargetInfo SpellTargetInfoTable[MAX_SPELL_TARGETS] =
     /*[90]*/    { "TARGET_UNIT_CASTER_COMPANION",                         TARGET_TYPE_UNIT,             TARGET_NEUTRAL,    TARGET_ENUMERATOR_SINGLE },
     /*[91]*/    { "TARGET_LOCATION_RANDOM_CIRCUMFERENCE",                 TARGET_TYPE_LOCATION_DEST                                                 },
     /*[92]*/    { "TARGET_UNIT_CASTER_SUMMONER",                          TARGET_TYPE_UNIT,             TARGET_NEUTRAL,    TARGET_ENUMERATOR_SINGLE },
-    /*[93]*/    { "TARGET_CORPSE_ENEMY_NEAR_CASTER_NYI",                  TARGET_TYPE_CORPSE,           TARGET_HARMFUL,    TARGET_ENUMERATOR_CHAIN  },
+    /*[93]*/    { "TARGET_CORPSE_ENEMY_NEAR_CASTER",                      TARGET_TYPE_CORPSE,           TARGET_HARMFUL,    TARGET_ENUMERATOR_CHAIN  },
     /*[94]*/    { "TARGET_UNIT_CASTER_VEHICLE",                           TARGET_TYPE_UNIT,             TARGET_NEUTRAL,    TARGET_ENUMERATOR_SINGLE },
     /*[95]*/    { "TARGET_UNIT_CASTER_DRIVER",                            TARGET_TYPE_UNIT,             TARGET_NEUTRAL,    TARGET_ENUMERATOR_SINGLE },
     /*[96]*/    { "TARGET_UNIT_CASTER_PASSENGER_0",                       TARGET_TYPE_UNIT,             TARGET_NEUTRAL,    TARGET_ENUMERATOR_SINGLE },

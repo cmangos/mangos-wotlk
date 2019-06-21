@@ -209,6 +209,20 @@ bool CannibalizeObjectCheck::operator()(Corpse* u)
     return i_fobj->IsWithinDistInMap(u, i_range);
 }
 
+bool TauntFlagObjectCheck::operator()(Corpse* u)
+{
+    // ignore bones
+    if (u->GetType() == CORPSE_BONES)
+        return false;
+
+    Player* owner = ObjectAccessor::FindPlayer(u->GetOwnerGuid());
+
+    if (!owner || i_fobj->CanAssist(owner))
+        return false;
+
+    return i_fobj->IsWithinDistInMap(u, i_range);
+}
+
 void MaNGOS::RespawnDo::operator()(Creature* u) const
 {
     // prevent respawn creatures for not active BG event

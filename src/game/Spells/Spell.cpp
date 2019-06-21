@@ -2987,6 +2987,25 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 tempUnitList.push_back(m_targets.getUnitTarget());
             break;
         }
+        case TARGET_CORPSE_ENEMY_NEAR_CASTER:
+        {
+            WorldObject* result = FindCorpseUsing<MaNGOS::TauntFlagObjectCheck>();
+            if (result)
+            {
+                switch (result->GetTypeId())
+                {
+                    case TYPEID_UNIT:
+                    case TYPEID_PLAYER:
+                        tempUnitList.push_back(static_cast<Unit*>(result));
+                        break;
+                    case TYPEID_CORPSE:
+                        if (Player* owner = ObjectAccessor::FindPlayer(static_cast<Corpse*>(result)->GetOwnerGuid()))
+                            tempUnitList.push_back(owner);
+                        break;
+                }
+            }
+            break;
+        }
         case TARGET_UNIT_SCRIPT_NEAR_CASTER:
         case TARGET_GAMEOBJECT_SCRIPT_NEAR_CASTER:
         case TARGET_LOCATION_SCRIPT_NEAR_CASTER:

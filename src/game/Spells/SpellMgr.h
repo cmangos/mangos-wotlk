@@ -1893,7 +1893,7 @@ class SpellMgr
                 case TARGET_ENUM_UNITS_ENEMY_AOE_AT_DYNOBJ_LOC:
                 case TARGET_LOCATION_CASTER_TARGET_POSITION:
                 case TARGET_ENUM_UNITS_ENEMY_IN_CONE_54:
-                case TARGET_CORPSE_ENEMY_NEAR_CASTER_NYI:
+                case TARGET_CORPSE_ENEMY_NEAR_CASTER:
                     return true;
                 default:
                     return false;

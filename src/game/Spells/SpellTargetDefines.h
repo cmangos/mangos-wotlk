@@ -114,7 +114,7 @@ enum SpellTarget
     TARGET_UNIT_CASTER_COMPANION                       = 90,
     TARGET_LOCATION_RANDOM_CIRCUMFERENCE               = 91,
     TARGET_UNIT_CASTER_SUMMONER                        = 92,
-    TARGET_CORPSE_ENEMY_NEAR_CASTER_NYI                = 93, // TODO: Implement
+    TARGET_CORPSE_ENEMY_NEAR_CASTER                    = 93,
     TARGET_UNIT_CASTER_VEHICLE                         = 94,
     TARGET_UNIT_CASTER_DRIVER                          = 95,
     TARGET_UNIT_CASTER_PASSENGER_0                     = 96,

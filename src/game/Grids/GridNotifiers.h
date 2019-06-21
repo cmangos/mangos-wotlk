@@ -645,6 +645,25 @@ namespace MaNGOS
             float i_range;
     };
 
+    class TauntFlagObjectCheck
+    {
+        public:
+            TauntFlagObjectCheck(Unit const* fobj, float range) : i_fobj(fobj), i_range(range) {}
+            WorldObject const& GetFocusObject() const { return *i_fobj; }
+            bool operator()(Player* u)
+            {
+                if (i_fobj->CanAssist(u) || u->isAlive() || u->IsTaxiFlying())
+                    return false;
+
+                return i_fobj->IsWithinDistInMap(u, i_range);
+            }
+            bool operator()(Corpse* u);
+            template<class NOT_INTERESTED> bool operator()(NOT_INTERESTED*) { return false; }
+        private:
+            Unit const* i_fobj;
+            float i_range;
+    };
+
     // WorldObject do classes
 
     class RespawnDo
