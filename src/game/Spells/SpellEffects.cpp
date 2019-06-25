@@ -4031,6 +4031,13 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 30610:                                 // Wrath of the Titans Stacker
+                {
+                    uint32 count = m_caster->GetAuraCount(30554);
+                    for (uint32 i = count; count < 5; ++i)
+                        m_caster->CastSpell(nullptr, 30554, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 38194:                                 // Blink
                 {
                     // Blink

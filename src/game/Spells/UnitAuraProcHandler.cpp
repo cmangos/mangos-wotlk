@@ -1542,6 +1542,20 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     RemoveAuraHolderFromStack(74396);
                     return SPELL_AURA_PROC_OK;
                 }
+                case 30554: // Wrath of the Titans - Karazhan
+                {
+                    switch (GetFirstSchoolInMask(GetSpellSchoolMask(procSpell)))
+                    {
+                        case SPELL_SCHOOL_NORMAL: return SPELL_AURA_PROC_FAILED;  // ignore
+                        case SPELL_SCHOOL_FIRE:   triggered_spell_id = 30607; break; // Flame of Khaz'goroth
+                        case SPELL_SCHOOL_NATURE: triggered_spell_id = 30606; break; // Bolt of Eonar
+                        case SPELL_SCHOOL_FROST:  triggered_spell_id = 30609; break; // Chill of Norgannon
+                        case SPELL_SCHOOL_SHADOW: triggered_spell_id = 30608; break; // Spite of Sargeras
+                        case SPELL_SCHOOL_ARCANE: triggered_spell_id = 30605; break; // Blast of Amanthul
+                        default: return SPELL_AURA_PROC_FAILED;
+                    }
+                    break;
+                }
             }
             break;
         }
