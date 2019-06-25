@@ -192,12 +192,6 @@ struct boss_nightbaneAI : public npc_escortAI
         }
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/) override
-    {
-        if (m_uiPhase != PHASE_GROUND && uiDamage >= m_creature->GetHealth())
-            uiDamage = 0;
-    }
-
     void PhaseTransitionTimersReset()
     {
         if (m_uiPhase == PHASE_GROUND)
