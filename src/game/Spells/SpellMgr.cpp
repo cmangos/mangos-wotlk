@@ -19,6 +19,8 @@
 #include "Spells/SpellMgr.h"
 #include "Globals/ObjectMgr.h"
 #include "Spells/SpellAuraDefines.h"
+#include "Spells/SpellTargets.h"
+#include "Spells/SpellEffectDefines.h"
 #include "ProgressBar.h"
 #include "Server/DBCStores.h"
 #include "Server/SQLStorages.h"
@@ -4227,7 +4229,7 @@ void SpellMgr::CheckUsedSpells(char const* table) const
             continue;
         }
 
-        if (effectType < -1 || effectType >= TOTAL_SPELL_EFFECTS)
+        if (effectType < -1 || effectType >= MAX_SPELL_EFFECTS)
         {
             sLog.outError("Table '%s' for spell %u have wrong SpellEffect type value(%u), skipped.", table, spell, effectType);
             continue;

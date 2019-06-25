@@ -435,37 +435,11 @@ enum SummonPropFlags
     SUMMON_PROP_FLAG_UNK14              = 0x2000,           // 2 spells in 3.0.3, escort?
 };
 
-// SpellEntry::Targets
-enum SpellCastTargetFlags
-{
-    TARGET_FLAG_SELF            = 0x00000000,
-    TARGET_FLAG_UNUSED1         = 0x00000001,               // not used in any spells as of 3.0.3 (can be set dynamically)
-    TARGET_FLAG_UNIT            = 0x00000002,               // pguid
-    TARGET_FLAG_UNUSED2         = 0x00000004,               // not used in any spells as of 3.0.3 (can be set dynamically)
-    TARGET_FLAG_UNUSED3         = 0x00000008,               // not used in any spells as of 3.0.3 (can be set dynamically)
-    TARGET_FLAG_ITEM            = 0x00000010,               // pguid
-    TARGET_FLAG_SOURCE_LOCATION = 0x00000020,               // pguid + 3 float
-    TARGET_FLAG_DEST_LOCATION   = 0x00000040,               // pguid + 3 float
-    TARGET_FLAG_OBJECT_UNK      = 0x00000080,               // used in 7 spells only
-    TARGET_FLAG_UNIT_TARGET     = 0x00000100,               // seems to mean "Use supplied target", used in conjuncture with NO_TARGET and script targets
-    TARGET_FLAG_PVP_CORPSE      = 0x00000200,               // pguid
-    TARGET_FLAG_UNIT_CORPSE     = 0x00000400,               // 10 spells (gathering professions)
-    TARGET_FLAG_OBJECT          = 0x00000800,               // pguid, 2 spells
-    TARGET_FLAG_TRADE_ITEM      = 0x00001000,               // pguid, 0 spells
-    TARGET_FLAG_STRING          = 0x00002000,               // string, 0 spells
-    TARGET_FLAG_GAMEOBJECT_ITEM = 0x00004000,               // 199 spells, opening object/lock
-    TARGET_FLAG_CORPSE_ALLY     = 0x00008000,               // pguid, resurrection spells
-    TARGET_FLAG_UNK2            = 0x00010000,               // pguid, not used in any spells as of 3.0.3 (can be set dynamically)
-    TARGET_FLAG_GLYPH           = 0x00020000,               // used in glyph spells
-    TARGET_FLAG_UNK3            = 0x00040000,               //
-    TARGET_FLAG_VISUAL_CHAIN    = 0x00080000                // uint32, loop { vec3, guid -> if guid == 0 break }
-};
-
 enum SpellEffectIndex
 {
-    EFFECT_INDEX_0     = 0,
-    EFFECT_INDEX_1     = 1,
-    EFFECT_INDEX_2     = 2
+    EFFECT_INDEX_0 = 0,
+    EFFECT_INDEX_1 = 1,
+    EFFECT_INDEX_2 = 2
 };
 
 #define MAX_EFFECT_INDEX 3

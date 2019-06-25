@@ -184,7 +184,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if (!sScriptDevAIMgr.OnItemUse(pUser, pItem, targets))
     {
         // no script or script not process request by self
-        pUser->CastItemUseSpell(pItem, targets, cast_count, glyphIndex);
+        pUser->CastItemUseSpell(pItem, targets, cast_count, glyphIndex, spellid);
     }
 }
 
@@ -417,6 +417,9 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         if (SpellEntry const* actualSpellInfo = sSpellMgr.SelectAuraRankForLevel(spellInfo, target->getLevel()))
             spellInfo = actualSpellInfo;
     }
+
+    if (HasMissingTargetFromClient(spellInfo))
+        targets.setUnitTarget(mover->GetTarget());
 
     Spell* spell = new Spell(mover, spellInfo, triggeredByAura ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE, mover->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : nullptr);
     spell->m_cast_count = cast_count;                       // set count of casts

@@ -751,29 +751,17 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     recvPacket >> targets.ReadForCaster(petUnit);
 
-    // some spell cast packet including more data (for projectiles)
-    targets.ReadAdditionalSpellData(recvPacket, cast_flags);
-
     petUnit->clearUnitState(UNIT_STAT_MOVING);
 
+    if (HasMissingTargetFromClient(spellInfo))
+        targets.setUnitTarget(petUnit->GetTarget());
     Spell* spell = new Spell(petUnit, spellInfo, (triggeredByAura ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE) + TRIGGERED_PET_CAST, petUnit->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : nullptr);
-    spell->m_cast_count = cast_count;                       // probably pending spell cast
-    spell->m_targets = targets;
-
-    SpellCastResult result = triggeredByAura ? SPELL_CAST_OK : spell->CheckPetCast(nullptr);
-    if (result == SPELL_CAST_OK)
-        spell->SpellStart(&(spell->m_targets), triggeredByAura);
-    else
+    if (spell->SpellStart(&targets) == SPELL_CAST_OK)
     {
-        Unit* owner = petUnit->GetMaster();
-        if (owner && owner->GetTypeId() == TYPEID_PLAYER && !triggeredByAura)
-            Spell::SendCastResult((Player*)owner, spellInfo, 0, result, true);
-
-        if (pet && pet->IsSpellReady(*spellInfo) && !triggeredByAura)
-            GetPlayer()->SendClearCooldown(spellid, pet);
-
-        spell->finish(false);
-        delete spell;
+        petUnit->SendPetAIReaction();
+        if (petUnit->GetTypeId() == TYPEID_UNIT)
+            if (static_cast<Creature*>(petUnit)->IsPet() && (static_cast<Pet*>(petUnit)->getPetType() == SUMMON_PET) && (petUnit != targets.getUnitTarget()) && (urand(0, 100) < 10))
+                petUnit->SendPetTalk((uint32)PET_TALK_SPECIAL_SPELL);
     }
 }
 

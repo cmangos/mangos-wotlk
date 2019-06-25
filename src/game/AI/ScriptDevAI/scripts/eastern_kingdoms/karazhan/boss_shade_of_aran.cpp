@@ -65,7 +65,7 @@ enum
     // low mana spells
     SPELL_MASS_POLYMORPH        = 29963,
     SPELL_CONJURE_WATER         = 29975,
-    SPELL_DRINK                 = 30024,
+    SD_SPELL_DRINK              = 30024,
     SPELL_MANA_POTION           = 32453,
     SPELL_PYROBLAST             = 29978,
     SPELL_DISPEL_BLIZZARD       = 29970,
@@ -248,7 +248,7 @@ struct boss_aranAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_MANA_POTION) == CAST_OK)
             {
-                m_creature->RemoveAurasDueToSpell(SPELL_DRINK);
+                m_creature->RemoveAurasDueToSpell(SD_SPELL_DRINK);
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                 m_uiManaRecoveryTimer = 1000;
                 m_uiManaRecoveryStage = 2;
@@ -479,7 +479,7 @@ struct boss_aranAI : public ScriptedAI
                         }
                         break;
                     case 1:
-                        if (DoCastSpellIfCan(m_creature, SPELL_DRINK) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature, SD_SPELL_DRINK) == CAST_OK)
                         {
                             m_creature->SetStandState(UNIT_STAND_STATE_SIT);
                             m_uiManaRecoveryTimer = 5000;

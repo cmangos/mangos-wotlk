@@ -25,7 +25,7 @@
 #include "Common.h"
 #include "Globals/SharedDefines.h"
 #include "Spells/SpellAuraDefines.h"
-#include "Spells/SpellTargetDefines.h"
+#include "Spells/SpellTargets.h"
 #include "Server/DBCStructure.h"
 #include "Server/DBCStores.h"
 #include "Entities/DynamicObject.h"
@@ -33,6 +33,7 @@
 #include "Entities/Corpse.h"
 #include "Entities/Unit.h"
 #include "Server/SQLStorages.h"
+#include "Spells/SpellEffectDefines.h"
 
 #include <map>
 
@@ -151,36 +152,6 @@ inline bool IsAuraApplyEffects(SpellEntry const* entry, SpellEffectIndexMask mas
     return !empty;
 }
 
-inline bool IsDestinationOnlyEffect(SpellEntry const* spellInfo, SpellEffectIndex effIdx)
-{
-    switch (spellInfo->Effect[effIdx])
-    {
-        case SPELL_EFFECT_TRIGGER_SPELL:
-        case SPELL_EFFECT_DUMMY: // special - can be either
-        case SPELL_EFFECT_TRIGGER_MISSILE:
-        {
-            auto& targetA = SpellTargetInfoTable[spellInfo->EffectImplicitTargetA[effIdx]];
-            if (spellInfo->EffectImplicitTargetB[effIdx] == 0)
-                if (targetA.type == TARGET_TYPE_LOCATION)
-                    return true;
-
-            return false;
-        }
-        case SPELL_EFFECT_TRIGGER_SPELL_2: // only one in wotlk and tbc - possibly investigate further
-        case SPELL_EFFECT_PERSISTENT_AREA_AURA:
-        case SPELL_EFFECT_TRANS_DOOR:
-        case SPELL_EFFECT_SUMMON:
-        case SPELL_EFFECT_SUMMON_DEAD_PET:
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
-        case SPELL_EFFECT_SUMMON_OBJECT_SLOT4:
-            return true;
-        default:
-            return false;
-    }
-}
-
 inline bool IsSpellAppliesAura(SpellEntry const* spellInfo, uint32 effectMask = ((1 << EFFECT_INDEX_0) | (1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_2)))
 {
     for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
@@ -264,7 +235,7 @@ inline bool IsAuraRemoveOnStacking(SpellEntry const* spellInfo, int32 effIdx) //
 
 inline bool IsAllowingDeadTarget(SpellEntry const* spellInfo)
 {
-    return spellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD) || spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) || spellInfo->Targets & (TARGET_FLAG_PVP_CORPSE | TARGET_FLAG_UNIT_CORPSE | TARGET_FLAG_CORPSE_ALLY);
+    return spellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD) || spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) || spellInfo->Targets & (TARGET_FLAG_CORPSE_ENEMY | TARGET_FLAG_UNIT_DEAD | TARGET_FLAG_CORPSE_ALLY);
 }
 
 inline bool IsElementalShield(SpellEntry const* spellInfo)
@@ -507,6 +478,20 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
             return false;
         default:
             return true;
+    }
+}
+
+inline bool IsChanneledDelayedSpell(SpellEntry const* spellInfo)
+{
+    if (!spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNELED_1) && !spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNELED_2))
+        return false;
+
+    switch (spellInfo->Id)
+    {
+        case 39238: // Fumping
+        case 39246:
+            return true;
+        default: return false;
     }
 }
 
@@ -855,9 +840,23 @@ inline bool IsUnitTargetTarget(uint32 target)
     switch (target)
     {
         case TARGET_UNIT_ENEMY:
-        case TARGET_UNIT: return true;
+        case TARGET_UNIT:
+        case TARGET_UNIT_FRIEND:
+        case TARGET_UNIT_FRIEND_CHAIN_HEAL:
+            return true;
         default: return false;
     }
+}
+
+inline bool HasMissingTargetFromClient(SpellEntry const* spellInfo)
+{
+    if (IsUnitTargetTarget(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_0]))
+        return false;
+
+    if (IsUnitTargetTarget(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_1]) || IsUnitTargetTarget(spellInfo->EffectImplicitTargetA[EFFECT_INDEX_2]))
+        return true;
+
+    return false;
 }
 
 inline bool IsScriptTarget(uint32 target)
@@ -1911,10 +1910,10 @@ class SpellMgr
         // Reverse engineered from binary: do not alter
         static inline SpellFaction GetSpellFactionAtClient(const SpellEntry &entry, SpellEffectIndexMask mask = EFFECT_MASK_ALL)
         {
-            if (entry.Targets & TARGET_FLAG_UNIT_TARGET)
+            if (entry.Targets & TARGET_FLAG_UNIT_ALLY)
                 return SPELL_HELPFUL;
 
-            if (entry.Targets & TARGET_FLAG_OBJECT_UNK)
+            if (entry.Targets & TARGET_FLAG_UNIT_ENEMY)
                 return SPELL_HARMFUL;
 
             for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)

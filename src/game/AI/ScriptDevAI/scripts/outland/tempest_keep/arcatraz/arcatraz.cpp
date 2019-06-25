@@ -52,7 +52,7 @@ enum
     SPELL_CONJURE_WATER             = 36879,
     SPELL_ARCANE_INTELLECT          = 36880,
     SPELL_ICE_ARMOR                 = 36881,
-    SPELL_DRINK                     = 30024,
+    SD_SPELL_DRINK                  = 30024,
 
     SPELL_ARCANE_MISSILES           = 33833,
     SPELL_CONE_OF_COLD              = 12611,
@@ -162,7 +162,7 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
                 DoCastSpellIfCan(m_creature, SPELL_ICE_ARMOR);
                 break;
             case SAY_DRINK:
-                DoCastSpellIfCan(m_creature, SPELL_DRINK);
+                DoCastSpellIfCan(m_creature, SD_SPELL_DRINK);
                 break;
             case POINT_ID_CENTER:
                 m_creature->SetWalk(false);

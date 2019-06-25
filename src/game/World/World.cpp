@@ -1091,6 +1091,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading SpellsScriptTarget...");
     sSpellMgr.LoadSpellScriptTarget();                      // must be after LoadCreatureTemplates, LoadCreatures and LoadGameobjectInfo
 
+    sLog.outString("Generating SpellTargetMgr data...\n");
+    SpellTargetMgr::Initialize(); // must be after LoadSpellScriptTarget
+
     sLog.outString("Loading pet levelup spells...");
     sSpellMgr.LoadPetLevelupSpellMap();
 
