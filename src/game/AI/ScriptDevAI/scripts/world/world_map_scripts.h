@@ -95,6 +95,12 @@ enum
     SPELL_SPIRIT_SPAWN_IN       = 17321,
     SPELL_ETHEREAL_TELEPORT     = 34427,
     MOUNT_NETHER_RAY_DISPLAY_ID = 21156,
+
+    // Ogri'la Four Dragons
+    NPC_OBSIDIA = 23282,
+    NPC_RIVENDARK = 23061,
+    NPC_FURYWING = 23261,
+    NPC_INSIDION = 23281,
 };
 
 enum Encounters

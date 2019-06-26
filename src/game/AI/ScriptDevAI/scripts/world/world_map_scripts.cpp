@@ -931,6 +931,13 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 m_apprentice = creature;
                 creature->SetActiveObjectState(true);
                 break;
+            case NPC_OBSIDIA:
+            case NPC_RIVENDARK:
+            case NPC_FURYWING:
+            case NPC_INSIDION:
+                if (creature->IsTemporarySummon()) // Only dragons summoned by the player (by using the respective egg gameobjects) should have UNIT_FLAG_IMMUNE_TO_PLAYER
+                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                break;
         }
     }
 
