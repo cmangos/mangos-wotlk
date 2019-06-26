@@ -25,6 +25,7 @@
 #include "Server/SQLStorages.h"
 #include "Loot/LootMgr.h"
 #include "Spells/SpellTargetDefines.h"
+#include "Spells/SpellEffectDefines.h"
 
 void AddItemsSetItem(Player* player, Item* item)
 {
