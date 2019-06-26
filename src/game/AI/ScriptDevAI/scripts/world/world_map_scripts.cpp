@@ -1118,6 +1118,8 @@ struct world_map_outland : public ScriptedMap, public TimerManager
 
     void StartBashirLandingEvent()
     {
+        if (!m_apprentice) // his grid wasnt loaded yet and autoload isnt on for performance reasons
+            return;
         m_bashirIntroStage = 0;
         m_apprentice->SummonCreature(NPC_SKYGUARD_AETHER_TECH,  bashirSpawnPositions[0][0], bashirSpawnPositions[0][1], bashirSpawnPositions[0][2], bashirSpawnPositions[0][3], TEMPSPAWN_CORPSE_TIMED_DESPAWN, 1000, true);
         Creature* ranger = m_apprentice->SummonCreature(NPC_SKYGUARD_RANGER,      bashirSpawnPositions[1][0], bashirSpawnPositions[1][1], bashirSpawnPositions[1][2], bashirSpawnPositions[1][3], TEMPSPAWN_CORPSE_TIMED_DESPAWN, 1000, true);
