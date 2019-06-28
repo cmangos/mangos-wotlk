@@ -7,22 +7,16 @@
 
 #include "hyjal.h"
 
-enum eBaseArea
-{
-    BASE_ALLY       = 0,
-    BASE_HORDE      = 1
-};
-
-enum eMisc
+enum Misc
 {
     MAX_SPELL               = 3,
-    MAX_WAVES               = 9,
-    MAX_WAVE_MOB            = 18,
 
-    ITEM_TEAR_OF_GODDESS    = 24494
+    ITEM_TEAR_OF_GODDESS    = 24494,
+
+    SAY_CALL_FOR_HELP_EMOTE = -1000007,
 };
 
-enum eSpell
+enum HyjalSpells
 {
     SPELL_MASS_TELEPORT     = 16807,
 
@@ -34,7 +28,11 @@ enum eSpell
 
     // Thrall spells
     SPELL_CHAIN_LIGHTNING   = 31330,
-    SPELL_FERAL_SPIRIT      = 31331
+    SPELL_FERAL_SPIRIT      = 31331,
+
+    // Tyrande spells
+    SPELL_STARFALL          = 20687,
+    SPELL_TRUESHOT_AURA     = 31519,
 };
 
 enum TargetType                                             // Used in the spell cast system for the AI
@@ -46,13 +44,12 @@ enum TargetType                                             // Used in the spell
 
 enum YellType
 {
-    ATTACKED     = 0,                                       // Used when attacked and set in combat
-    BEGIN        = 1,                                       // Used when the event is begun
-    INCOMING     = 2,                                       // Used to warn the raid that another wave phase is coming
-    RALLY        = 3,                                       // Used to rally the raid and warn that the next wave has been summoned
-    FAILURE      = 4,                                       // Used when raid has failed (unsure where to place)
-    SUCCESS      = 5,                                       // Used when the raid has sucessfully defeated a wave phase
-    DEATH        = 6,                                       // Used on death
+    ATTACKED     = 0,                                       // Used when attacked and below 90% HP
+    INCOMING     = 1,                                       // Used to warn the raid that another wave phase is coming
+    RALLY        = 2,                                       // Used to rally the raid randomly while a wave event is in progress
+    RETREAT      = 3,                                       // Used when the scourge mob count reaches 30 (which fails the event)
+    WIN          = 4,                                       // Used when both bosses are done and a player asks the NPC to teleport away
+    DEATH        = 5,                                       // Used on death
 };
 
 struct hyjalAI : public ScriptedAI
@@ -60,7 +57,7 @@ struct hyjalAI : public ScriptedAI
         hyjalAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             memset(m_aSpells, 0, sizeof(m_aSpells));
-            m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+            m_pInstance = (instance_mount_hyjal*)pCreature->GetInstanceData();
             Reset();
         }
 
@@ -74,58 +71,26 @@ struct hyjalAI : public ScriptedAI
         void JustReachedHome() override;
 
         // Used to reset cooldowns for our spells and to inform the raid that we're under attack
-        void Aggro(Unit* pWho) override;
+        void Aggro(Unit* who) override;
 
         // Called to summon waves, check for boss deaths and to cast our spells.
-        void UpdateAI(const uint32 uiDiff) override;
-
-        // Called on death, informs the raid that they have failed.
-        void JustDied(Unit* /*pKiller*/) override;
+        void UpdateAI(const uint32 diff) override;
 
         void JustRespawned() override;
 
-        // "Teleport" all friendly creatures away from the base.
+        void JustDied(Unit* /*killer*/) override;
+
+        void ReceiveAIEvent(AIEventType /*eventType*/, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override;
+
+        // Instance response handlers
+        void EventStarted();
         void Retreat();
-
-        // Summons a creature for that wave in that base
-        void SpawnCreatureForWave(uint32 uiMobEntry);
-
-        void JustSummoned(Creature*) override;
-
-        void SummonedCreatureJustDied(Creature* pSummoned) override;
-
-        // Summons the next wave, calls SummonCreature
-        void SummonNextWave();
-
-        // Begins the event by gossip click
-        void StartEvent();
+        void Win();
 
         // Searches for the appropriate yell and sound and uses it to inform the raid of various things
-        void DoTalk(YellType pYellType);
+        void DoTalk(YellType yellType);
 
-        // Used to filter who to despawn after mass teleport
-        void SpellHitTarget(Unit*, const SpellEntry*) override;
-
-        bool IsEventInProgress() const;
-
-    public:
-        ScriptedInstance* m_pInstance;
-
-        ObjectGuid m_aBossGuid[2];
-
-        uint32 m_uiNextWaveTimer;
-        uint32 m_uiWaveCount;
-        uint32 m_uiWaveMoveTimer;
-        uint32 m_uiEnemyCount;
-        uint32 m_uiRetreatTimer;
-        uint32 m_uiBase;
-
-        bool m_bIsEventInProgress;
-        bool m_bIsFirstBossDead;
-        bool m_bIsSecondBossDead;
-        bool m_bIsSummoningWaves;
-        bool m_bIsRetreating;
-        bool m_bDebugMode;
+        instance_mount_hyjal* m_pInstance;
 
         struct sSpells
         {
@@ -134,9 +99,11 @@ struct hyjalAI : public ScriptedAI
             TargetType m_pType;
         } m_aSpells[MAX_SPELL];
 
-    private:
         uint32 m_uiSpellTimer[MAX_SPELL];
-        GuidList lWaveMobGUIDList;
+        uint32 m_uiAttackedYellTimer;
+        uint32 m_uiRallyYellTimer = 0;
+
+        bool m_calledForHelp;
 };
 
 #endif

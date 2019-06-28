@@ -1037,6 +1037,21 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     }
                     return SPELL_AURA_PROC_OK;
                 }
+                // Soul Charge - Archimonde
+                case 32045: // Yellow
+                case 32051: // Green
+                case 32052: // Red
+                {
+                    switch (dummySpell->Id)
+                    {
+                        case 32045: triggered_spell_id = 32054; break;
+                        case 32051: triggered_spell_id = 32057; break;
+                        case 32052: triggered_spell_id = 32053; break;
+                    }
+
+                    AI()->SendAIEvent(AI_EVENT_CUSTOM_A, this, this, triggered_spell_id);
+                    return SPELL_AURA_PROC_CANT_TRIGGER; // Strangely, stacks and charges are removed on cast finish
+                }
                 // Mark of Malice
                 case 33493:
                 {

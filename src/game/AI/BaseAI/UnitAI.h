@@ -439,7 +439,7 @@ class UnitAI
 
         void DoFlee();
         void DoDistance(); // TODO
-        void DoCallForHelp(); // TODO
+        void DoCallForHelp() {} // TODO
         void DoSeekAssistance(); // TODO
 
         void SetMeleeEnabled(bool state);

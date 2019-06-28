@@ -1399,12 +1399,6 @@ void Aura::TriggerSpell()
 //                    case 31320: break;
 //                    // Corrupt Medivh
 //                    case 31326: break;
-                    case 31347:                             // Doom
-                    {
-                        target->CastSpell(target, 31350, TRIGGERED_OLD_TRIGGERED);
-                        target->DealDamage(target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
-                        return;
-                    }
                     case 31373:                             // Spellcloth
                     {
                         // Summon Elemental after create item
@@ -2514,14 +2508,40 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                         return;
                     }
+                    case 32044:                             // Soul Charge - Archimonde - Battle For Mount Hyjal
+                    {
+                        if (target->isAlive())
+                            return;
+
+
+                        Unit* pCaster = GetCaster();
+                        uint8 targetClass = target->getClass();
+                        switch (targetClass)
+                        {
+                            case 1:
+                            case 2:
+                            case 4:
+                                target->CastSpell(pCaster, 32045, TRIGGERED_NONE);
+                                break;
+                            case 3:
+                            case 7:
+                            case 11:
+                                target->CastSpell(pCaster, 32051, TRIGGERED_NONE);
+                                break;
+                            case 5:
+                            case 8:
+                            case 9:
+                                target->CastSpell(pCaster, 32052, TRIGGERED_NONE);
+                                break;
+                        }
+
+                        return;
+                    }
                     case 32045:                             // Soul Charge
                     case 32051:
                     case 32052:
                     {
-                        // max duration is 2 minutes, but expected to be random duration
-                        // real time randomness is unclear, using max 30 seconds here
-                        // see further down for expire of this aura
-                        GetHolder()->SetAuraDuration(urand(1, 30)*IN_MILLISECONDS);
+                        // TODO: Controls the random timer for the spell to be cast based on aura, they need to be split up.
                         return;
                     }
                     case 32441:                             // Brittle Bones
