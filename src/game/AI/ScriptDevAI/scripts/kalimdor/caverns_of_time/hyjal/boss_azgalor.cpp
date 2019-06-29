@@ -209,6 +209,7 @@ struct boss_azgalorAI : public ScriptedAI
                             m_actionReadyStatus[i] = false;
                             return;
                         }
+                        break;
                     }
                     case AZGALOR_ENRAGE:
                     {
