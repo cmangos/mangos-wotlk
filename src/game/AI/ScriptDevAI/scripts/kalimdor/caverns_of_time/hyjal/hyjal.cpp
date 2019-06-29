@@ -1721,7 +1721,7 @@ void instance_mount_hyjal::ExecuteChatCommand(ChatHandler* handler, char* args)
     {
         SpawnArchimonde();
     }
-    else if (val == "spawnoverrun")
+    else if (val == "retreatbase")
     {
         uint32 baseId;
         handler->ExtractUInt32(&args, baseId);
