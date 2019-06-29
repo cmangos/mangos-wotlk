@@ -1067,7 +1067,10 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* creature)
             if (creature->IsTemporarySummon()) // only for non-static spawns
             {
                 if (m_hyjalEnemyCount)
+                {
+                    m_waveSpawns.erase(std::remove(m_waveSpawns.begin(), m_waveSpawns.end(), creature->GetObjectGuid()), m_waveSpawns.end());
                     DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, m_hyjalEnemyCount - 1);
+                }
                 if (m_nextWaveTimer && m_hyjalEnemyCount == 0)
                     SpawnNextWave();
             }
@@ -1457,6 +1460,7 @@ void instance_mount_hyjal::DespawnWaveSpawns()
     for (ObjectGuid& guid : m_waveSpawns)
         if (Creature* spawn = instance->GetCreature(guid))
             spawn->ForcedDespawn();
+    m_waveSpawns.clear();
 }
 
 void instance_mount_hyjal::DespawnBase(BaseArea index)
