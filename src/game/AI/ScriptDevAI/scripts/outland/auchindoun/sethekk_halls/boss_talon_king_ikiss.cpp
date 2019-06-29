@@ -54,7 +54,7 @@ enum
 enum TalonKingIkissActions // order based on priority
 {
     TALON_KING_IKISS_ACTION_SLOW,
-    TALON_KING_IKISS_ACTION_POLYMOPRH,
+    TALON_KING_IKISS_ACTION_POLYMORPH,
     TALON_KING_IKISS_ACTION_ARCANE_VOLLEY,
     TALON_KING_IKISS_ACTION_MAX,
 };
@@ -68,7 +68,7 @@ struct boss_talon_king_ikissAI : public ScriptedAI, public CombatActions
         m_Intro = false;
 
         AddCombatAction(TALON_KING_IKISS_ACTION_SLOW, 0u);
-        AddCombatAction(TALON_KING_IKISS_ACTION_POLYMOPRH, 0u);
+        AddCombatAction(TALON_KING_IKISS_ACTION_POLYMORPH, 0u);
         AddCombatAction(TALON_KING_IKISS_ACTION_ARCANE_VOLLEY, 0u);
         Reset();
     }
@@ -89,7 +89,7 @@ struct boss_talon_king_ikissAI : public ScriptedAI, public CombatActions
             SetActionReadyStatus(i, false);
 
         ResetTimer(TALON_KING_IKISS_ACTION_SLOW, GetInitialActionTimer(TALON_KING_IKISS_ACTION_SLOW));
-        ResetTimer(TALON_KING_IKISS_ACTION_POLYMOPRH, GetInitialActionTimer(TALON_KING_IKISS_ACTION_POLYMOPRH));
+        ResetTimer(TALON_KING_IKISS_ACTION_POLYMORPH, GetInitialActionTimer(TALON_KING_IKISS_ACTION_POLYMORPH));
         ResetTimer(TALON_KING_IKISS_ACTION_ARCANE_VOLLEY, GetInitialActionTimer(TALON_KING_IKISS_ACTION_ARCANE_VOLLEY));
 
         SetCombatMovement(true);
@@ -108,7 +108,7 @@ struct boss_talon_king_ikissAI : public ScriptedAI, public CombatActions
         switch (action)
         {
             case TALON_KING_IKISS_ACTION_SLOW: return urand(9000, 13000);
-            case TALON_KING_IKISS_ACTION_POLYMOPRH: return urand(6000, 10000);
+            case TALON_KING_IKISS_ACTION_POLYMORPH: return urand(6000, 10000);
             case TALON_KING_IKISS_ACTION_ARCANE_VOLLEY: return urand(5000, 12000);
             default: return 0; // never occurs but for compiler
         }
@@ -119,7 +119,7 @@ struct boss_talon_king_ikissAI : public ScriptedAI, public CombatActions
         switch (action)
         {
             case TALON_KING_IKISS_ACTION_SLOW: return urand(15000, 20000);
-            case TALON_KING_IKISS_ACTION_POLYMOPRH: return urand(10000, 15000);
+            case TALON_KING_IKISS_ACTION_POLYMORPH: return urand(10000, 15000);
             case TALON_KING_IKISS_ACTION_ARCANE_VOLLEY: return urand(8000, 12000);
             default: return 0; // never occurs but for compiler
         }
@@ -193,7 +193,7 @@ struct boss_talon_king_ikissAI : public ScriptedAI, public CombatActions
                             }
                         break;
                     }
-                    case TALON_KING_IKISS_ACTION_POLYMOPRH:
+                    case TALON_KING_IKISS_ACTION_POLYMORPH:
                     {
                         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER| SELECT_FLAG_NOT_AURA | SELECT_FLAG_SKIP_TANK))
                         {
