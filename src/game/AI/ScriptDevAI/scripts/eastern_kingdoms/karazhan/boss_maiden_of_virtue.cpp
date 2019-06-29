@@ -41,7 +41,7 @@ enum
     SPELL_HOLYGROUND        = 29512
 };
 
-enum CuratorActions
+enum MaidenOfVirtueActions
 {
     MAIDEN_ACTION_REPENTANCE,
     MAIDEN_ACTION_HOLY_FIRE,
