@@ -5277,46 +5277,46 @@ SpellCastResult Spell::CheckCast(bool strict)
     if (!m_caster->isInCombat() && m_spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET) && m_spellInfo->HasAttribute(SPELL_ATTR_EX2_UNK26))
         return SPELL_FAILED_CASTER_AURASTATE;
 
-	// Nefarian class calls spell failed
-	switch (m_spellInfo->SpellFamilyName)
-	{
-		case SPELLFAMILY_DRUID:
-		{
-			if (IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_SHAPESHIFT))
-			{
-				Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-				for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
-				{
-					if ((*itr)->GetModifier()->m_miscvalue == 3655)
-					{
-						return SPELL_FAILED_TARGET_AURASTATE;
-					}
-					else
-						++itr;
-				}
-			}
-			break;
-		}
-		case SPELLFAMILY_WARRIOR:
-		{
-			if (IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_SHAPESHIFT))
-			{
-				Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-				for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
-				{
-					if ((*itr)->GetModifier()->m_miscvalue == 3654)
-					{
-						return SPELL_FAILED_TARGET_AURASTATE;
-					}
-					else
-						++itr;
-				}
-			}
-			break;
-		}
-		default:
-			break;
-	}
+    // Nefarian class calls spell failed
+    switch (m_spellInfo->SpellFamilyName)
+    {
+        case SPELLFAMILY_DRUID:
+        {
+            if (IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_SHAPESHIFT))
+            {
+                Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
+                {
+                    if ((*itr)->GetModifier()->m_miscvalue == 3655)
+                    {
+                        return SPELL_FAILED_TARGET_AURASTATE;
+                    }
+                    else
+                        ++itr;
+                }
+            }
+            break;
+        }
+        case SPELLFAMILY_WARRIOR:
+        {
+            if (IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_SHAPESHIFT))
+            {
+                Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
+                {
+                    if ((*itr)->GetModifier()->m_miscvalue == 3654)
+                    {
+                        return SPELL_FAILED_TARGET_AURASTATE;
+                    }
+                    else
+                        ++itr;
+                }
+            }
+            break;
+        }
+        default:
+            break;
+    }
 
     Unit* target = m_targets.getUnitTarget();
     if (target)
@@ -5580,18 +5580,13 @@ SpellCastResult Spell::CheckCast(bool strict)
         SpellCastResult castResult = CheckRange(strict);
         if (castResult != SPELL_CAST_OK)
             return castResult;
-    }
 
-    if (!m_IsTriggeredSpell)
-    {
-        SpellCastResult castResult = CheckPower();
+        castResult = CheckPower();
         if (castResult != SPELL_CAST_OK)
             return castResult;
-    }
 
-    if (!m_IsTriggeredSpell)                                // triggered spell not affected by stun/etc
-    {
-        SpellCastResult castResult = CheckCasterAuras();
+        // triggered spell not affected by stun/etc
+        castResult = CheckCasterAuras();
         if (castResult != SPELL_CAST_OK)
             return castResult;
     }
