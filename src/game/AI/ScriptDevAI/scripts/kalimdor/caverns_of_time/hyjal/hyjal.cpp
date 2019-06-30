@@ -1782,15 +1782,15 @@ bool instance_mount_hyjal::CheckConditionCriteriaMeet(Player const* player, uint
     switch (instanceConditionId)
     {
         case INSTANCE_CONDITION_ID_WINTERCHILL_STARTABLE:
-            return GetData(TYPE_WINTERCHILL) == NOT_STARTED || GetData(TYPE_WINTERCHILL) == FAIL;
+            return (GetData(TYPE_WINTERCHILL) == NOT_STARTED || GetData(TYPE_WINTERCHILL) == FAIL) && m_waveSpawns.size() <= 0;
         case INSTANCE_CONDITION_ID_ANETHERON_STARTABLE:
-            return (GetData(TYPE_WINTERCHILL) == DONE && (GetData(TYPE_ANETHERON) == NOT_STARTED || GetData(TYPE_ANETHERON) == FAIL));
+            return GetData(TYPE_WINTERCHILL) == DONE && (GetData(TYPE_ANETHERON) == NOT_STARTED || GetData(TYPE_ANETHERON) == FAIL) && m_waveSpawns.size() <= 0;
         case INSTANCE_CONDITION_ID_ANETHERON_DONE:
             return GetData(TYPE_ANETHERON) == DONE;
         case INSTANCE_CONDITION_ID_KAZROGAL_STARTABLE:
-            return (GetData(TYPE_ANETHERON) == DONE && (GetData(TYPE_KAZROGAL) == NOT_STARTED || GetData(TYPE_KAZROGAL) == FAIL));
+            return GetData(TYPE_ANETHERON) == DONE && (GetData(TYPE_KAZROGAL) == NOT_STARTED || GetData(TYPE_KAZROGAL) == FAIL) && m_waveSpawns.size() <= 0;
         case INSTANCE_CONDITION_ID_AZGALOR_STARTABLE:
-            return (GetData(TYPE_KAZROGAL) == DONE && (GetData(TYPE_AZGALOR) == NOT_STARTED || GetData(TYPE_AZGALOR) == FAIL));
+            return GetData(TYPE_KAZROGAL) == DONE && (GetData(TYPE_AZGALOR) == NOT_STARTED || GetData(TYPE_AZGALOR) == FAIL) && m_waveSpawns.size() <= 0;
         case INSTANCE_CONDITION_ID_AZGALOR_DONE:
             return GetData(TYPE_AZGALOR) == DONE;
         case INSTANCE_CONDITION_ID_ARCHIMONDE_STARTABLE:
