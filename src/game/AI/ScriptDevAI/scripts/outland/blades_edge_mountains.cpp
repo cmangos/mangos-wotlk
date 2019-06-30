@@ -48,6 +48,7 @@ EndContentData */
 #include "Reputation/ReputationMgr.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 #include "Spells/Spell.h"
+#include "Spells/Scripts/SpellScript.h"
 
 /*######
 ## mobs_nether_drake
@@ -3991,6 +3992,14 @@ UnitAI* GetAI_npc_grand_collector(Creature* creature)
     return new npc_grand_collectorAI(creature);
 }
 
+struct EtherealRingSignalFlare : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destZ = 342.9485f; // confirmed with sniffs
+    }
+};
+
 void AddSC_blades_edge_mountains()
 {
     Script* pNewScript = new Script;
@@ -4151,4 +4160,6 @@ void AddSC_blades_edge_mountains()
     pNewScript->Name = "npc_grand_collector";
     pNewScript->GetAI = &GetAI_npc_grand_collector;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<EtherealRingSignalFlare>("spell_ethereal_ring_signal_flare");
 }

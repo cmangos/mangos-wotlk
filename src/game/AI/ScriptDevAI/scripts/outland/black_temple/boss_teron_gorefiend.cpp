@@ -16,14 +16,15 @@
 
 /* ScriptData
 SDName: Boss_Teron_Gorefiend
-SD%Complete: 60
-SDComment: Requires Mind Control support for Ghosts.
+SD%Complete: 100
+SDComment:
 SDCategory: Black Temple
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "black_temple.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -57,6 +58,7 @@ enum
     SPELL_DESTROY_SPIRIT        = 41626,                    // purpose unk
     SPELL_DESTROY_ALL_SPIRITS   = 44659,                    // purpose unk
     SPELL_SHADOW_OF_DEATH_REMOVE= 41999,
+    SPELL_POSSESS_SPIRIT_IMMUNE = 40282,
 
     // Shadowy Construct
     SPELL_SHADOWY_CONSTRUCT     = 40326,
@@ -411,40 +413,82 @@ bool AreaTrigger_at_teron_gorefiend(Player* player, AreaTriggerEntry const* /*at
     return false;
 }
 
-UnitAI* GetAI_boss_teron_gorefiend(Creature* pCreature)
+struct ShadowOfDeath : public AuraScript
 {
-    return new boss_teron_gorefiendAI(pCreature);
-}
+    void OnAbsorb(Aura* aura, int32& currentAbsorb, uint32& reflectedSpellId, int32& reflectDamage, bool& preventedDeath) const override
+    {
+        preventedDeath = true;
+        currentAbsorb = 0;
+    }
 
-UnitAI* GetAI_npc_doom_blossom(Creature* pCreature)
-{
-    return new npc_doom_blossomAI(pCreature);
-}
+    void OnAuraDeathPrevention(Aura* aura, int32& remainingDamage) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (remainingDamage >= int32(target->GetHealth()))
+        {
+            remainingDamage = target->GetHealth() - 1;
+            target->RemoveAurasDueToSpell(SPELL_SHADOW_OF_DEATH, nullptr, AURA_REMOVE_BY_SHIELD_BREAK);
+        }
+    }
 
-UnitAI* GetAI_npc_shadow_construct(Creature* pCreature)
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+        {
+            Unit* target = aura->GetTarget();
+            target->DeleteThreatList();
+            aura->GetCaster()->AddThreat(target);
+            target->getHostileRefManager().setOnlineOfflineState(false);
+            target->CastSpell(nullptr, SPELL_SUMMON_SPIRIT, TRIGGERED_NONE); // Summon Spirit
+            target->CastSpell(nullptr, SPELL_SUMMON_SKELETON_1, TRIGGERED_NONE); // Summon Skeleton
+            target->CastSpell(nullptr, SPELL_SUMMON_SKELETON_2, TRIGGERED_NONE); // Summon Skeleton
+            target->CastSpell(nullptr, SPELL_SUMMON_SKELETON_3, TRIGGERED_NONE); // Summon Skeleton
+            target->CastSpell(nullptr, SPELL_SUMMON_SKELETON_4, TRIGGERED_NONE); // Summon Skeleton
+            target->CastSpell(nullptr, SPELL_POSSESS_SPIRIT_IMMUNE, TRIGGERED_NONE); // Possess Spirit Immune
+            target->CastSpell(nullptr, SPELL_SPIRITUAL_VENGEANCE, TRIGGERED_NONE); // Spiritual Vengeance
+        }
+    }
+};
+
+struct ShadowOfDeathRemove : public AuraScript
 {
-    return new npc_shadow_constructAI(pCreature);
-}
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->RemoveAurasDueToSpell(SPELL_SHADOW_OF_DEATH); // Remove Shadow of Death
+    }
+};
+
+struct SummonBlossomMoveTarget : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destZ += 12.f;
+    }
+};
 
 void AddSC_boss_teron_gorefiend()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_teron_gorefiend";
-    pNewScript->GetAI = &GetAI_boss_teron_gorefiend;
+    pNewScript->GetAI = &GetNewAIInstance<boss_teron_gorefiendAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_doom_blossom";
-    pNewScript->GetAI = &GetAI_npc_doom_blossom;
+    pNewScript->GetAI = &GetNewAIInstance<npc_doom_blossomAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_shadow_construct";
-    pNewScript->GetAI = &GetAI_npc_shadow_construct;
+    pNewScript->GetAI = &GetNewAIInstance<npc_shadow_constructAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "at_teron_gorefiend";
     pNewScript->pAreaTrigger = &AreaTrigger_at_teron_gorefiend;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<ShadowOfDeath>("spell_shadow_of_death");
+    RegisterAuraScript<ShadowOfDeathRemove>("spell_shadow_of_death_remove");
+    RegisterSpellScript<SummonBlossomMoveTarget>("spell_summon_blossom_move_target");
 }

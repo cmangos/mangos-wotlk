@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "magtheridons_lair.h"
+#include "Spells/Scripts/SpellScript.h"
 
 instance_magtheridons_lair::instance_magtheridons_lair(Map* pMap) : ScriptedInstance(pMap),
     m_uiRandYellTimer(90000),
@@ -239,6 +240,18 @@ void instance_magtheridons_lair::Update(uint32 uiDiff)
         m_uiRandYellTimer -= uiDiff;
 }
 
+struct MentalInterferenceSpellScript : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
+    {
+        if (ObjectGuid target = spell->m_targets.getUnitTargetGuid())
+            if (target.GetEntry() != 16943 && target.GetEntry() != 20928)  // Mental Interference can be cast only on these two targets
+                return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 InstanceData* GetInstanceData_instance_magtheridons_lair(Map* pMap)
 {
     return new instance_magtheridons_lair(pMap);
@@ -250,4 +263,6 @@ void AddSC_instance_magtheridons_lair()
     pNewScript->Name = "instance_magtheridons_lair";
     pNewScript->GetInstanceData = &GetInstanceData_instance_magtheridons_lair;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<MentalInterferenceSpellScript>("spell_mental_interference");
 }

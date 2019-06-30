@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "zulaman.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -360,6 +361,14 @@ UnitAI* GetAI_mob_soaring_eagle(Creature* creature)
     return new mob_soaring_eagleAI(creature);
 }
 
+struct TeleportSelf : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destZ += 10.f;
+    }
+};
+
 void AddSC_boss_akilzon()
 {
     Script* pNewScript = new Script;
@@ -371,4 +380,6 @@ void AddSC_boss_akilzon()
     pNewScript->Name = "mob_soaring_eagle";
     pNewScript->GetAI = &GetAI_mob_soaring_eagle;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<TeleportSelf>("spell_teleport_self_akilzon");
 }
