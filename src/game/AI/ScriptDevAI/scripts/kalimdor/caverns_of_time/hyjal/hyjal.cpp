@@ -1031,7 +1031,10 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* creature)
 {
     switch (creature->GetEntry())
     {
-        case NPC_WINTERCHILL: SetData(TYPE_WINTERCHILL, DONE); break;
+        case NPC_WINTERCHILL:
+            SetData(TYPE_WINTERCHILL, DONE);
+            m_waveSpawns.erase(std::remove(m_waveSpawns.begin(), m_waveSpawns.end(), creature->GetObjectGuid()), m_waveSpawns.end());
+            break;
         case NPC_ANETHERON:
         {
             SetData(TYPE_ANETHERON, DONE);
@@ -1045,7 +1048,10 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* creature)
             m_waveSpawns.erase(std::remove(m_waveSpawns.begin(), m_waveSpawns.end(), creature->GetObjectGuid()), m_waveSpawns.end());
             break;
         }
-        case NPC_KAZROGAL:    SetData(TYPE_KAZROGAL, DONE);    break;
+        case NPC_KAZROGAL:
+            SetData(TYPE_KAZROGAL, DONE);
+            m_waveSpawns.erase(std::remove(m_waveSpawns.begin(), m_waveSpawns.end(), creature->GetObjectGuid()), m_waveSpawns.end());
+            break;
         case NPC_AZGALOR:
         {
             SetData(TYPE_AZGALOR, DONE);
