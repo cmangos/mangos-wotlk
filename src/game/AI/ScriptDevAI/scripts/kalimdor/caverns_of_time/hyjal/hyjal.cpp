@@ -1038,7 +1038,10 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* creature)
             if (GameObject* orcGate = GetSingleGameObjectFromStorage(GO_HORDE_ENCAMPMENT_PORTAL))
                 orcGate->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
             if (Creature* jaina = GetSingleCreatureFromStorage(NPC_JAINA))
+            {
+                jaina->AI()->SendAIEvent(AI_EVENT_CUSTOM_D, jaina, jaina);
                 jaina->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            }
             break;
         }
         case NPC_KAZROGAL:    SetData(TYPE_KAZROGAL, DONE);    break;
@@ -1048,7 +1051,10 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* creature)
             if (GameObject* nelfGate = GetSingleGameObjectFromStorage(GO_NIGHT_ELF_VILLAGE_PORTAL))
                 nelfGate->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
             if (Creature* thrall = GetSingleCreatureFromStorage(NPC_THRALL))
+            {
+                thrall->AI()->SendAIEvent(AI_EVENT_CUSTOM_D, thrall, thrall);
                 thrall->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            }
             break;
         }
         case NPC_ARCHIMONDE:  SetData(TYPE_ARCHIMONDE, DONE);  break;

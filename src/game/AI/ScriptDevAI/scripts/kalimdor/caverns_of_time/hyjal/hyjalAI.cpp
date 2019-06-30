@@ -63,7 +63,7 @@ void hyjalAI::Reset()
     switch (m_creature->GetEntry())
     {
         case NPC_JAINA:
-            DoCastSpellIfCan(m_creature, SPELL_BRILLIANCE_AURA, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_BRILLIANCE_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
             break;
         case NPC_THRALL:
             break;
@@ -160,6 +160,9 @@ void hyjalAI::ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoke
         }
         case AI_EVENT_CUSTOM_C: // Event failed due to exceeding max number of wave mobs
             Retreat();
+            break;
+        case AI_EVENT_CUSTOM_D: // Boss was killed - stop yelling
+            m_uiRallyYellTimer = 0;
             break;
         case AI_EVENT_CUSTOM_EVENTAI_B:
         {
@@ -265,6 +268,7 @@ void hyjalAI::UpdateAI(const uint32 uiDiff)
 void hyjalAI::JustRespawned()
 {
     Reset();
+    m_uiRallyYellTimer = 0;
 }
 
 void hyjalAI::JustDied(Unit* /*killer*/)
