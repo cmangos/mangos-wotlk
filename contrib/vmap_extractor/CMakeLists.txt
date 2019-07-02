@@ -22,8 +22,11 @@ ADD_DEFINITIONS("-DIOMAP_DEBUG")
 # build setup currently only supports libmpq 0.4.x
 ADD_DEFINITIONS("-DUSE_LIBMPQ04")
 
-if(UNIX)
+if (UNIX)
   ADD_DEFINITIONS("-ggdb")
+endif()
+
+if (UNIX AND NOT LINUX)
   add_definitions("-Dfopen64=fopen")
   add_definitions("-Dfseeko64=fseeko")
   add_definitions("-Dfseek64=fseek")
