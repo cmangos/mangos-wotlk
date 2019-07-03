@@ -2637,7 +2637,7 @@ struct npc_void_conduitAI : public Scripted_NoMovementAI
     }
 };
 
-CreatureAI* GetAI_npc_void_conduit(Creature* pCreature)
+UnitAI* GetAI_npc_void_conduit(Creature* pCreature)
 {
     return new npc_void_conduitAI(pCreature);
 }
