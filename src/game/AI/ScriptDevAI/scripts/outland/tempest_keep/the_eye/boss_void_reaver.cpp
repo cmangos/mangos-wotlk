@@ -104,12 +104,6 @@ struct boss_void_reaverAI : public ScriptedAI
             m_pInstance->SetData(TYPE_VOIDREAVER, NOT_STARTED);
     }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // Cast the Arcane Orb missile on the npc, not on player
-        DoCastSpellIfCan(pSummoned, SPELL_ARCANE_ORB_MISSILE, CAST_TRIGGERED);
-    }
-
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
@@ -136,27 +130,27 @@ struct boss_void_reaverAI : public ScriptedAI
 
             for (auto itr : threatList)
             {
-                if (Unit* pTarget = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
+                if (Unit* target = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
                 {
-                    if (pTarget->GetTypeId() == TYPEID_PLAYER && !pTarget->IsWithinDist3d(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 18.0f))
-                        suitableTargets.push_back(pTarget);
+                    if (target->GetTypeId() == TYPEID_PLAYER && !target->IsWithinDist3d(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 18.0f))
+                        suitableTargets.push_back(target);
                 }
             }
 
             if (suitableTargets.empty())
             {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                 {
-                    m_creature->SummonCreature(NPC_ARCANE_ORB_TARGET, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 15000);
+                    DoCastSpellIfCan(target, SPELL_ARCANE_ORB_MISSILE, CAST_TRIGGERED);
                     m_uiArcaneOrbTimer = 3000;
                 }
             }
             else
             {
-                Unit* pTarget = suitableTargets[urand(0, suitableTargets.size() - 1)];
+                Unit* target = suitableTargets[urand(0, suitableTargets.size() - 1)];
 
-                if (pTarget)
-                    m_creature->SummonCreature(NPC_ARCANE_ORB_TARGET, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 15000);
+                if (target)
+                    DoCastSpellIfCan(target, SPELL_ARCANE_ORB_MISSILE, CAST_TRIGGERED);
 
                 m_uiArcaneOrbTimer = 3000;
             }
