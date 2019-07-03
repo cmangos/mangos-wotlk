@@ -124,7 +124,7 @@ class instance_sunwell_plateau : public ScriptedInstance, private DialogueHelper
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
         ObjectGuid SelectFelmystFlightTrigger(bool bLeftSide, uint8 uiIndex);
 

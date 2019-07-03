@@ -230,7 +230,7 @@ class instance_karazhan : public ScriptedInstance
         void Load(const char* chrIn) override;
         const char* Save() const override { return m_strInstData.c_str(); }
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
         GuidVector m_vInfernalRelays;
 

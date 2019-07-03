@@ -311,7 +311,7 @@ class instance_trial_of_the_champion : public ScriptedInstance, private Dialogue
         uint32 GetMountEntryForChampion() const { return m_uiTeam == ALLIANCE ? NPC_BATTLEWORG_ALLIANCE : NPC_WARHORSE_HORDE; }
         bool IsArenaChallengeComplete(uint32 uiType);
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
     private:
         void JustDidDialogueStep(int32 iEntry) override;

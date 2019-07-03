@@ -204,7 +204,7 @@ class instance_zulaman : public ScriptedInstance
 
         bool CheckConditionCriteriaMeet(Player const* pPlayer, uint32 uiInstanceConditionId, WorldObject const* pConditionSource, uint32 conditionSourceType) const override;
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
         GuidSet sDrumTriggerGuidSet;
         GuidSet sHutTriggerGuidSet;

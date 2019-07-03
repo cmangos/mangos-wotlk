@@ -87,7 +87,7 @@ class instance_halls_of_stone : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
 

@@ -58,7 +58,7 @@ class instance_sethekk_halls : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
-        void Update(uint32 diff) override;
+        void Update(const uint32 diff) override;
         void StartAnzuIntro(Player* player);
         void FinishAnzuIntro();
     private:

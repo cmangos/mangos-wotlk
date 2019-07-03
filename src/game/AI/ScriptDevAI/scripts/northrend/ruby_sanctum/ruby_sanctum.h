@@ -72,7 +72,7 @@ class instance_ruby_sanctum : public ScriptedInstance
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
         void GetSpawnStalkersGuidList(GuidList& lList) const { lList = m_lSpawnStalkersGuidList; }
 

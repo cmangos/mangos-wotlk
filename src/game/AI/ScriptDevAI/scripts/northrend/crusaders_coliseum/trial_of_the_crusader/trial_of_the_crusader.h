@@ -309,7 +309,7 @@ class instance_trial_of_the_crusader : public ScriptedInstance, private Dialogue
         void DoSetCrusadersInCombat(Unit* pTarget);
         void DoOpenMainGate(uint32 uiResetTimer);
 
-        void Update(uint32 uiDiff) override;
+        void Update(const uint32 diff) override;
 
     private:
         void DoSummonRamsey(uint32 uiEntry);
