@@ -5052,7 +5052,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1564138,'My patience has ran out! Die! Die!',11458,1,0,0,'SAY_UNK'),
 
 (-1564010,'Supremus acquires a new target!',0,3,0,0,'supremus EMOTE_NEW_TARGET'), -- note: intentionally literal
-(-1564011,'Supremus punches the ground in anger!',0,3,53,0,'supremus EMOTE_PUNCH_GROUND'), -- note: intentionally literal
+(-1564011,'Supremus punches the ground in anger!',0,3,0,53,'supremus EMOTE_PUNCH_GROUND'), -- note: intentionally literal
 (-1564012,'The ground begins to crack open!',0,3,0,0,'supremus EMOTE_GROUND_CRACK'),
 
 (-1564013,'No! Not yet...',11386,1,0,0,'akama shade SAY_LOW_HEALTH'),
