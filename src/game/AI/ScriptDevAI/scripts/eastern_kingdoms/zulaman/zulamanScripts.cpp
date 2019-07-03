@@ -414,17 +414,14 @@ struct npc_harrison_jones_zaAI : public npc_escortAI
         {
             case 1:
                 DoScriptText(SAY_AT_GONG, m_creature);
-
-                m_pInstance->DoToggleGameObjectFlags(GO_STRANGE_GONG, GO_FLAG_NO_INTERACT, false);
-
                 if (GameObject* pGong = GetClosestGameObjectWithEntry(m_creature, GO_STRANGE_GONG, INTERACTION_DISTANCE))
                     m_creature->SetFacingToObject(pGong);
-
-                m_creature->LoadEquipment(EQUIP_ID_HUGE_MAUL, true);
                 break;
             case 2:
                 // Start bang gong for 2min
                 DoCastSpellIfCan(m_creature, SPELL_BANGING_THE_GONG);
+                m_creature->LoadEquipment(EQUIP_ID_HUGE_MAUL, true);
+                m_pInstance->DoToggleGameObjectFlags(GO_STRANGE_GONG, GO_FLAG_NO_INTERACT, false);
                 SetEscortPaused(true);
                 break;
             case 6:
