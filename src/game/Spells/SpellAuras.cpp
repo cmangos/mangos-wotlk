@@ -5777,6 +5777,7 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
     }
 
     target->UpdateSpeed(MOVE_RUN, true);
+    target->UpdateSpeed(MOVE_RUN_BACK, true);
     target->UpdateSpeed(MOVE_SWIM, true);
     target->UpdateSpeed(MOVE_FLIGHT, true);
 }
