@@ -8511,6 +8511,12 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
                 case 72830:                                 // Achievement Check
                     radius = DEFAULT_VISIBILITY_INSTANCE;
                     break;
+                case 43486:                                 // Summon Amani'shi Warriors
+                case 43487:                                 // Summon Amani Eagle
+                {
+                    radius = 250.f;
+                    break;
+                }
                 default:
                     break;
             }
