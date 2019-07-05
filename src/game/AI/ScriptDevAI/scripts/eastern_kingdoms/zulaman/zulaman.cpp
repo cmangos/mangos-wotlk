@@ -519,6 +519,7 @@ void instance_zulaman::SendNextBearWave(Unit* pTarget)
         }
     }
 
+    m_aNalorakkEvent[m_uiBearEventPhase].uiTrashKilled = 0;
     m_bIsBearPhaseInProgress = true;
 }
 
