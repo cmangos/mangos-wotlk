@@ -703,7 +703,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     SendExpectedSpamRecords();
     SendMotd();
 
-    // QueryResult *result = CharacterDatabase.PQuery("SELECT guildid,rank FROM guild_member WHERE guid = '%u'",pCurrChar->GetGUIDLow());
+    // QueryResult *result = CharacterDatabase.PQuery("SELECT guildid,`rank` FROM guild_member WHERE guid = '%u'",pCurrChar->GetGUIDLow());
     QueryResult* resultGuild = holder->GetResult(PLAYER_LOGIN_QUERY_LOADGUILD);
 
     if (resultGuild)
