@@ -25,6 +25,7 @@
 #include "Entities/Player.h"
 #include "Globals/SharedDefines.h"
 #include <atomic>
+#include <string>
 
 enum ZoneIds
 {
@@ -71,7 +72,29 @@ enum Conditions
 
 enum Events
 {
+    CUSTOM_EVENT_YSONDRE_DIED,
+    CUSTOM_EVENT_LETHON_DIED,
+    CUSTOM_EVENT_EMERISS_DIED,
+    CUSTOM_EVENT_TAERAR_DIED,
     CUSTOM_EVENT_ADALS_SONG_OF_BATTLE,
+};
+
+enum SaveIds
+{
+    SAVE_ID_EMERALD_DRAGONS,
+    SAVE_ID_AHN_QIRAJ,
+    SAVE_ID_QUEL_DANAS,
+};
+
+// To be used
+struct AhnQirajData
+{
+    std::string GetData() { return ""; }
+};
+
+struct QuelDanasData
+{
+    std::string GetData() { return ""; }
 };
 
 // Intended for implementing server wide scripts, note: all behaviour must be safeguarded towards multithreading
@@ -81,9 +104,12 @@ class WorldState
         WorldState();
         virtual ~WorldState();
 
+        void Load();
+        void Save(SaveIds saveId);
+
         // Called when a gameobject is created or removed
-        virtual void HandleGameObjectUse(GameObject* go, Unit* user);
-        virtual void HandleGameObjectRevertState(GameObject* go);
+        void HandleGameObjectUse(GameObject* go, Unit* user);
+        void HandleGameObjectRevertState(GameObject* go);
 
         void HandlePlayerEnterZone(Player* player, uint32 zoneId);
         void HandlePlayerLeaveZone(Player* player, uint32 zoneId);
@@ -105,20 +131,32 @@ class WorldState
 
         void Update(const uint32 diff);
     private:
+        std::map<uint32, GuidVector> m_areaPlayers;
+        std::map<uint32, std::atomic<uint32>> m_transportStates; // atomic to avoid having to lock
+
+        std::mutex m_mutex; // all World State operations are thread unsafe
+        uint32 m_saveTimer;
+
+        // vanilla section
+        bool IsDragonSpawned(uint32 entry);
+        void RespawnEmeraldDragons();
+
+        uint8 m_emeraldDragonsState;
+        uint32 m_emeraldDragonsTimer;
+        std::vector<uint32> m_emeraldDragonsChosenPositions;
+        AhnQirajData m_aqData;
+
+        // tbc section
         bool m_isMagtheridonHeadSpawnedHorde;
         bool m_isMagtheridonHeadSpawnedAlliance;
         ObjectGuid m_guidMagtheridonHeadHorde;
         ObjectGuid m_guidMagtheridonHeadAlliance;
         GuidVector m_magtheridonHeadPlayers;
 
-        std::map<uint32, std::atomic<uint32>> m_transportStates; // atomic to avoid having to lock
-
         GuidVector m_adalSongOfBattlePlayers;
         uint32 m_adalSongOfBattleTimer;
 
-        std::map<uint32, GuidVector> m_areaPlayers;
-
-        std::mutex m_mutex; // all World State operations are thread unsafe
+        QuelDanasData m_quelDanasData;
 };
 
 #define sWorldState MaNGOS::Singleton<WorldState>::Instance()
