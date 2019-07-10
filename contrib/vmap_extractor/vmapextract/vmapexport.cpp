@@ -292,7 +292,11 @@ bool scan_patches(char* scanmatch, std::vector<std::string>& pArchiveNames)
             sprintf(path, "%s.MPQ", scanmatch);
         }
 #ifndef _WIN32
+#ifdef __FreeBSD__
+        if (FILE* h = fopen(path, "rb"))
+#else
         if (FILE* h = fopen64(path, "rb"))
+#endif
 #else
         if (FILE* h = fopen(path, "rb"))
 #endif
