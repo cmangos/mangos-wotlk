@@ -46,6 +46,7 @@ enum
 
     // Crystal spells
     //SPELL_FEL_CRYSTAL_VISUAL       = 44355,                // cosmetic - defined in instance header
+    SPELL_INSTAKILL_SELF            = 29878,
 };
 
 enum SelinActions
@@ -360,7 +361,7 @@ struct mob_fel_crystalAI : public ScriptedAI
                 }
 
                 if (m_creature->isAlive()) // Kill self
-                    m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    m_creature->CastSpell(nullptr, SPELL_INSTAKILL_SELF, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiChannelTime = 0; // Just in case something goes wrong
             }

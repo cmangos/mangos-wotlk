@@ -498,6 +498,7 @@ struct npc_shadow_imageAI : public ScriptedAI
         {
             if (m_uiSuicideTimer <= uiDiff)
             {
+                // confirmed suicide like this
                 m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
             }
             else

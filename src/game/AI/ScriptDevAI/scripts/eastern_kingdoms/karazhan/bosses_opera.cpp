@@ -906,6 +906,7 @@ enum
     /**** Other Misc. Spells ****/
     SPELL_FULL_HEALTH               = 43979,                // res effect on Julianne
     SPELL_UNDYING_LOVE              = 30951,                // res effect on Romulo
+    SPELL_SUICIDE_WHILE_DEAD        = 30966,                // suicide spell for Julianne and Romulo
 };
 
 enum OperaPhase
@@ -1080,8 +1081,8 @@ struct boss_julianneAI : public ScriptedAI
                         // if Romulos is dead, then self kill
                         if (pRomulo->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
                         {
-                            m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-                            pRomulo->DealDamage(pRomulo, pRomulo->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                            m_creature->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
+                            pRomulo->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
                         }
                         else
                         {
@@ -1324,8 +1325,8 @@ struct boss_romuloAI : public ScriptedAI
                         // if Julianne is dead, then self kill
                         if (pJulianne->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
                         {
-                            m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-                            pJulianne->DealDamage(pJulianne, pJulianne->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                            m_creature->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
+                            pJulianne->CastSpell(nullptr, SPELL_SUICIDE_WHILE_DEAD, TRIGGERED_OLD_TRIGGERED);
                         }
                         else
                         {

@@ -700,10 +700,7 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
                 break;
             case 9:
                 DoScriptText(SAY_TH_KILL_ARMORER, m_creature);
-                DoCastSpellIfCan(m_creature, SPELL_KNOCKOUT_ARMORER);
-                // also kill the armorer
-                if (Creature* pArmorer = m_pInstance->GetSingleCreatureFromStorage(NPC_ARMORER))
-                    pArmorer->DealDamage(pArmorer, pArmorer->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                DoCastSpellIfCan(nullptr, SPELL_KNOCKOUT_ARMORER);
                 break;
             case 10:
                 DoScriptText(SAY_TH_ARMORY_1, m_creature);

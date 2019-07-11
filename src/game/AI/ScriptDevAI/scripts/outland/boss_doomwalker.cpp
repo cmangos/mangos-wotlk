@@ -149,8 +149,8 @@ struct boss_doomwalkerAI : public ScriptedAI
         GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_SHADOWHOOF_SUMMONER, 200.0f);
         GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_ILLIDARI_SUCCUBUS, 200.0f);
 
-        for (std::list<Creature*>::iterator itr = npcList.begin(); itr != npcList.end(); ++itr)
-            (*itr)->DealDamage((*itr), (*itr)->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+        for (Creature* creature : npcList)
+            creature->DealDamage(creature, creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
     }
 
     void JustDied(Unit* /*pKiller*/) override

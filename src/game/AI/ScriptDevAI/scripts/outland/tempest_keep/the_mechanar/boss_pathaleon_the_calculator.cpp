@@ -214,12 +214,15 @@ struct mob_nether_wraithAI : public ScriptedAI
     mob_nether_wraithAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
 
     uint32 m_uiArcaneMissilesTimer;
-    bool m_bHasDetonated;
 
     void Reset() override
     {
         m_uiArcaneMissilesTimer = urand(1000, 4000);
-        m_bHasDetonated         = false;
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        m_creature->CastSpell(nullptr, SPELL_DETONATION, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -241,17 +244,6 @@ struct mob_nether_wraithAI : public ScriptedAI
         }
         else
             m_uiArcaneMissilesTimer -= uiDiff;
-
-        if (!m_bHasDetonated && m_creature->GetHealthPercent() < 10.0f)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_DETONATION, CAST_TRIGGERED) == CAST_OK)
-            {
-                // Selfkill after the detonation
-                m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-                m_bHasDetonated = true;
-                return;
-            }
-        }
 
         DoMeleeAttackIfReady();
     }

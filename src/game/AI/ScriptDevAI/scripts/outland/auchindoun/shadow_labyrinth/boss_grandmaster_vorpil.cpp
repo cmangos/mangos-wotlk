@@ -54,6 +54,8 @@ enum
     SPELL_EMPOWERING_SHADOWS_H      = 39364,
     SPELL_SHADOW_NOVA               = 33846,
 
+    SPELL_INSTAKILL_SELF            = 29878,
+
     NPC_VOID_PORTAL                 = 19224,
     NPC_VOID_TRAVELER               = 19226,
 
@@ -286,10 +288,11 @@ struct npc_void_travelerAI : public ScriptedAI
     {
         if (!m_bHasExploded && pWho->GetEntry() == NPC_VORPIL && pWho->IsWithinDistInMap(m_creature, 3.0f))
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_NOVA) == CAST_OK)
+            if (DoCastSpellIfCan(nullptr, SPELL_SHADOW_NOVA) == CAST_OK)
             {
+                DoCastSpellIfCan(nullptr, m_bIsRegularMode ? SPELL_EMPOWERING_SHADOWS : SPELL_EMPOWERING_SHADOWS_H, CAST_TRIGGERED);
                 m_bHasExploded = true;
-                m_uiDeathTimer = 1000;
+                m_uiDeathTimer = 1; // on next update
             }
         }
     }
@@ -302,11 +305,8 @@ struct npc_void_travelerAI : public ScriptedAI
         {
             if (m_uiDeathTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_EMPOWERING_SHADOWS : SPELL_EMPOWERING_SHADOWS_H, CAST_TRIGGERED) == CAST_OK)
-                {
-                    m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
-                    m_uiDeathTimer = 0;
-                }
+                m_creature->CastSpell(nullptr, SPELL_INSTAKILL_SELF, TRIGGERED_OLD_TRIGGERED);
+                m_uiDeathTimer = 0;
             }
             else
                 m_uiDeathTimer -= uiDiff;

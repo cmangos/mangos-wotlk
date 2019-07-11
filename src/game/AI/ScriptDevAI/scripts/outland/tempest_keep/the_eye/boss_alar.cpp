@@ -213,7 +213,7 @@ struct boss_alarAI : public ScriptedAI
         }
     }
     
-    // UNCOMMENT THIS AREA WHEN PATCH 2.1 HITS
+    // UNCOMMENT THIS AREA WHEN PATCH 2.1 HITS - should be done through serverside 41910
     /* void SummonedCreatureJustDied(Creature* pSummoned) override
     {
         // drain 2% of boss health when the ember dies
