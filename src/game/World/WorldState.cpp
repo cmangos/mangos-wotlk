@@ -463,7 +463,7 @@ static float emeraldDragonSpawns[4][4] =
 
 static uint32 pathIds[4] =
 {
-    {1},{0},{0},{0}
+    1,0,0,0
 };
 
 bool WorldState::IsDragonSpawned(uint32 entry)
