@@ -9383,6 +9383,20 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(nullptr, urand(0, 1) ? 37429 : 37430, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 37641:                                 // Whirlwind
+                {
+                    UnitAI* ai = m_caster->AI();
+                    if (!ai || m_caster->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    if (urand(0, 2) == 0 && m_caster->HasAura(37640))
+                    {
+                        ai->DoResetThreat();
+                        if (Unit* target = static_cast<Creature*>(m_caster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                            m_caster->AddThreat(target, 100000.f);
+                    }
+                    return;
+                }
                 case 37751:                                 // Submerged
                 case 37752:                                 // Stand
                 {

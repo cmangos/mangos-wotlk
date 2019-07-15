@@ -6087,6 +6087,9 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                         creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, creature, creature);
                 return;
             case 37640:                                     // Leotheras Whirlwind
+                if (UnitAI* ai = target->AI())
+                    ai->DoResetThreat();
+                return;
             case 39575:                                     // Charge Frenzy
                 if (Unit* pCaster = GetCaster())
                     pCaster->FixateTarget(nullptr);

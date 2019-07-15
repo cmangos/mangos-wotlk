@@ -87,7 +87,6 @@ struct boss_leotheras_the_blindAI : public ScriptedAI
     uint32 m_uiChaosBlastTimer;
     uint32 m_uiFinalFormTimer;
     uint32 m_uiEnrageTimer;
-    uint8  m_WhirlwindCount;
     uint32 m_finalFormPhase;
 
     GuidSet m_charmTargets;
@@ -105,7 +104,6 @@ struct boss_leotheras_the_blindAI : public ScriptedAI
         m_uiChaosBlastTimer = 0;
         m_uiFinalFormTimer  = 0;
         m_uiEnrageTimer     = 10 * MINUTE * IN_MILLISECONDS;
-        m_WhirlwindCount    = 0;
         m_finalFormPhase    = 0;
 
         m_bDemonForm        = false;
@@ -125,22 +123,6 @@ struct boss_leotheras_the_blindAI : public ScriptedAI
     {
         if (pSpell->Id == SPELL_CONS_MADNESS)
             m_charmTargets.insert(pTarget->GetObjectGuid());
-    }
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_WHIRLWIND_PROC)
-        {
-            if (urand(0, 2) == 0 && m_creature->HasAura(37640))
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                    m_creature->FixateTarget(pTarget);
-                m_WhirlwindCount = 0;
-            }
-
-            ++m_WhirlwindCount;
-            DoResetThreat();
-        }
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -281,10 +263,9 @@ struct boss_leotheras_the_blindAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_WHIRLWIND) == CAST_OK)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                        m_creature->FixateTarget(pTarget);
+                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                        m_creature->AddThreat(target, 100000.f);
 
-                    m_WhirlwindCount = 0;
                     m_uiWhirlwindTimer = urand(25000, 35000);
                 }
             }
@@ -435,7 +416,7 @@ struct npc_inner_demonAI : public ScriptedAI
         if (Unit* spawner = m_creature->GetSpawner())
         {
             AttackStart(spawner);
-            m_creature->FixateTarget(spawner);
+            m_creature->AddThreat(spawner, 50000.f);
         }
     }
 
