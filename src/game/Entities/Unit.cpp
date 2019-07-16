@@ -2188,7 +2188,7 @@ uint32 Unit::CalcNotIgnoreDamageReduction(uint32 damage, SpellSchoolMask damageS
     return absorb_affected_rate <= 0.0f ? 0 : (absorb_affected_rate < 1.0f  ? uint32(damage * absorb_affected_rate) : damage);
 }
 
-uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
+float Unit::CalcArmorReducedDamage(Unit* pVictim, const float damage)
 {
     float armor = (float)pVictim->GetArmor();
 
@@ -2224,14 +2224,14 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
     if (tmpvalue > 0.75f)
         tmpvalue = 0.75f;
 
-    uint32 newdamage = uint32(damage - (damage * tmpvalue));
+    float newdamage = damage - (damage * tmpvalue);
 
-    return (newdamage > 1) ? newdamage : 1;
+    return (newdamage > 1) ? newdamage : 1.0f;
 }
 
-void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, int32* resist, bool canReflect, bool canResist, bool binary)
+void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, int32* resist, bool canReflect, bool canResist, bool binary)
 {
-    if (!pCaster || !isAlive() || !damage)
+    if (!isAlive() || !damage)
         return;
 
     int32 RemainingDamage = int32(damage);
@@ -2239,7 +2239,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
     // Magic damage, check for resists
     if (canResist && (schoolMask & SPELL_SCHOOL_MASK_MAGIC) && (!binary || damagetype == DOT))
     {
-        const float multiplier = pCaster->RollMagicResistanceMultiplierOutcomeAgainst(this, schoolMask, damagetype, binary);
+        const float multiplier = Unit::RollMagicResistanceMultiplierOutcomeAgainst(caster, this, schoolMask, damagetype, binary);
         *resist = int32(int64(damage) * multiplier);
         RemainingDamage -= *resist;
     }
@@ -2449,7 +2449,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                 // Reflective Shield
                 if (spellProto->IsFitToFamilyMask(uint64(0x0000000000000001)) && canReflect)
                 {
-                    if (pCaster == this)
+                    if (caster == this)
                         break;
                     Unit* caster = (*i)->GetCaster();
                     if (!caster)
@@ -2516,7 +2516,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                 // Anti-Magic Zone
                 if (spellProto->Id == 50461)
                 {
-                    Unit* caster = (*i)->GetCaster();
+                    Unit* auraCaster = (*i)->GetCaster();
                     if (!caster)
                         continue;
                     int32 absorbed = RemainingDamage * currentAbsorb / 100;
@@ -2527,8 +2527,8 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                     RemainingDamage -= absorbed;
 
                     uint32 ab_damage = absorbed;
-                    Unit::DealDamageMods(pCaster, caster, ab_damage, nullptr, damagetype);
-                    pCaster->DealDamage(caster, ab_damage, nullptr, damagetype, schoolMask, nullptr, false);
+                    Unit::DealDamageMods(caster, auraCaster, ab_damage, nullptr, damagetype);
+                    caster->DealDamage(auraCaster, ab_damage, nullptr, damagetype, schoolMask, nullptr, false);
                     continue;
                 }
                 break;
@@ -2573,10 +2573,10 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
         }
     }
 
-    // Cast back reflect damage spell
-    if (canReflect && reflectSpell)
+    // Cast back reflect damage spell if caster exists
+    if (canReflect && reflectSpell && caster)
     {
-        CastCustomSpell(pCaster, reflectSpell, &reflectDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, reflectTriggeredBy);
+        CastCustomSpell(caster, reflectSpell, &reflectDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, reflectTriggeredBy);
     }
 
     // absorb by mana cost
@@ -2650,7 +2650,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
     }
 
     // only split damage if not damaging yourself
-    if (pCaster != this)
+    if (caster && caster != this)
     {
         AuraList const& vSplitDamageFlat = GetAurasByType(SPELL_AURA_SPLIT_DAMAGE_FLAT);
         for (AuraList::const_iterator i = vSplitDamageFlat.begin(), next; i != vSplitDamageFlat.end() && RemainingDamage >= 0; i = next)
@@ -2682,12 +2682,12 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 
             uint32 splitted = currentAbsorb;
             uint32 splitted_absorb = 0;
-            Unit::DealDamageMods(pCaster, caster, splitted, &splitted_absorb, DIRECT_DAMAGE, (*i)->GetSpellProto());
+            Unit::DealDamageMods(caster, caster, splitted, &splitted_absorb, DIRECT_DAMAGE, (*i)->GetSpellProto());
 
-            pCaster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, splitted_absorb, 0, (damagetype == DOT), 0, false, true);
+            caster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, splitted_absorb, 0, (damagetype == DOT), 0, false, true);
 
             CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
-            pCaster->DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
+            caster->DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
         }
 
         AuraList const& vSplitDamagePct = GetAurasByType(SPELL_AURA_SPLIT_DAMAGE_PCT);
@@ -2715,12 +2715,12 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
             }
 
             uint32 split_absorb = 0;
-            Unit::DealDamageMods(pCaster, caster, splitted, &split_absorb, DIRECT_DAMAGE, (*i)->GetSpellProto());
+            Unit::DealDamageMods(caster, caster, splitted, &split_absorb, DIRECT_DAMAGE, (*i)->GetSpellProto());
 
-            pCaster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, split_absorb, 0, (damagetype == DOT), 0, false, true);
+            caster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, split_absorb, 0, (damagetype == DOT), 0, false, true);
 
             CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
-            pCaster->DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
+            caster->DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, schoolMask, (*i)->GetSpellProto(), false);
         }
     }
 
@@ -4517,7 +4517,7 @@ float Unit::CalculateEffectiveMagicResistancePercent(const Unit* attacker, Spell
         if (schools & 1)
         {
             int32 amount = GetResistance(SpellSchools(school));
-            int32 penetration = attacker->GetResistancePenetration(SpellSchools(school));
+            int32 penetration = attacker ? attacker->GetResistancePenetration(SpellSchools(school)) : 0;
 
             // Modify by penetration, but can't go negative with it
             int32 result = (amount - penetration);
@@ -4532,10 +4532,10 @@ float Unit::CalculateEffectiveMagicResistancePercent(const Unit* attacker, Spell
 
     float percent = 0;
 
-    if (resistance >= 0)    // Magic resistance calculation
+    if (resistance >= 0) // Magic resistance calculation
     {
         // Attacker's level based skill, penalize when calculating for low levels (< 20):
-        const float skill = std::max(attacker->GetSkillMaxForLevel(this), uint16(100));
+        const float skill = std::max(attacker ? attacker->GetSkillMaxForLevel(this) : GetSkillMaxForLevel(), uint16(100));
         // Convert resistance value to resistance percentage through comparision with skill
         percent += (float(resistance) / skill) * 100;
         // Bonus resistance percent by positive level difference when calculating damage hit for NPCs only
@@ -4554,9 +4554,9 @@ float Unit::CalculateEffectiveMagicResistancePercent(const Unit* attacker, Spell
     return percent;
 }
 
-float Unit::RollMagicResistanceMultiplierOutcomeAgainst(const Unit *victim, SpellSchoolMask schoolMask, DamageEffectType /*dmgType*/, bool /*binary*/) const
+float Unit::RollMagicResistanceMultiplierOutcomeAgainst(const Unit* attacker, const Unit *victim, SpellSchoolMask schoolMask, DamageEffectType /*dmgType*/, bool /*binary*/)
 {
-    float percentage = victim->CalculateEffectiveMagicResistancePercent(this, schoolMask);
+    float percentage = victim->CalculateEffectiveMagicResistancePercent(attacker, schoolMask);
 
     // Magic vulnerability instead of magic resistance:
     if (percentage < 0)
@@ -8176,9 +8176,9 @@ uint32 Unit::SpellDamageBonusDone(Unit* pVictim, SpellEntry const* spellProto, u
  * Calculates target part of spell damage bonuses,
  * will be called on each tick for periodic damage over time auras
  */
-uint32 Unit::SpellDamageBonusTaken(Unit* pCaster, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
+uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, uint32 pdamage, DamageEffectType damagetype, uint32 stack)
 {
-    if (!spellProto || !pCaster || damagetype == DIRECT_DAMAGE)
+    if (!spellProto || damagetype == DIRECT_DAMAGE)
         return pdamage;
 
     // Some spells don't benefit from taken mods
@@ -8231,7 +8231,7 @@ uint32 Unit::SpellDamageBonusTaken(Unit* pCaster, SpellEntry const* spellProto, 
     AuraList const& mOwnerTaken = GetAurasByType(SPELL_AURA_MOD_DAMAGE_FROM_CASTER);
     for (auto i : mOwnerTaken)
     {
-        if (i->GetCasterGuid() == pCaster->GetObjectGuid() && i->isAffectedOnSpell(spellProto))
+        if (i->GetCasterGuid() == caster->GetObjectGuid() && i->isAffectedOnSpell(spellProto))
             TakenTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
     }
 
@@ -8250,7 +8250,8 @@ uint32 Unit::SpellDamageBonusTaken(Unit* pCaster, SpellEntry const* spellProto, 
     int32 TakenAdvertisedBenefit = SpellBaseDamageBonusTaken(GetSpellSchoolMask(spellProto));
 
     // apply benefit affected by spell power implicit coeffs and spell level penalties
-    TakenTotal = pCaster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
+    if (caster)
+        TakenTotal = caster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
 
     float tmpDamage = (int32(pdamage) + TakenTotal * int32(stack)) * TakenTotalMod;
 
@@ -8963,9 +8964,9 @@ uint32 Unit::MeleeDamageBonusDone(Unit* pVictim, uint32 pdamage, WeaponAttackTyp
  * Calculates target part of melee damage bonuses,
  * will be called on each tick for periodic damage over time auras
  */
-uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto, DamageEffectType damagetype, uint32 stack, bool flat)
+uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackType attType, SpellSchoolMask schoolMask, SpellEntry const* spellProto, DamageEffectType damagetype, uint32 stack, bool flat)
 {
-    if (!pCaster || pdamage == 0)
+    if (pdamage == 0)
         return pdamage;
 
     // Some spells don't benefit from taken mods
@@ -9054,7 +9055,8 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* pCaster, uint32 pdamage, WeaponAttackTy
     if (!isWeaponDamageBasedSpell || (spellProto && (schoolMask &~ SPELL_SCHOOL_MASK_NORMAL) != 0))
     {
         // apply benefit affected by spell power implicit coeffs and spell level penalties
-        TakenAdvertisedBenefit = pCaster->SpellBonusWithCoeffs(spellProto, 0, TakenAdvertisedBenefit, 0, damagetype, false);
+        if (caster)
+            TakenAdvertisedBenefit = caster->SpellBonusWithCoeffs(spellProto, 0, TakenAdvertisedBenefit, 0, damagetype, false);
     }
 
     if (!flat)
