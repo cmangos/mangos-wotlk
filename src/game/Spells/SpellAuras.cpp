@@ -2169,7 +2169,7 @@ void Aura::TriggerSpell()
             {
                 uint32 dmg = target->GetMaxHealth() * 0.05f; // 5% dmg every tick
                 uint32 absorb = 0;
-                target->DealDamageMods(target, dmg, &absorb, SELF_DAMAGE);
+                Unit::DealDamageMods(target, target, dmg, &absorb, SELF_DAMAGE);
                 target->DealDamage(target, dmg, nullptr, SELF_DAMAGE, SPELL_SCHOOL_MASK_FIRE, nullptr, false);
                 break; // continue executing rest
             }
@@ -8489,7 +8489,7 @@ void Aura::PeriodicTick()
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s attacked %s for %u dmg inflicted by %u abs is %u",
                               GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId(), absorb);
 
-            pCaster->DealDamageMods(target, pdamage, &absorb, DOT, spellProto);
+            Unit::DealDamageMods(pCaster, target, pdamage, &absorb, DOT, spellProto);
 
             // Set trigger flag
             uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC; //  | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
@@ -8574,7 +8574,7 @@ void Aura::PeriodicTick()
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s health leech of %s for %u dmg inflicted by %u abs is %u",
                               GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId(), absorb);
 
-            pCaster->DealDamageMods(target, pdamage, &absorb, DOT, spellProto);
+            Unit::DealDamageMods(pCaster, target, pdamage, &absorb, DOT, spellProto);
 
             pCaster->SendSpellNonMeleeDamageLog(target, GetId(), pdamage, GetSpellSchoolMask(spellProto), absorb, resist, true, 0, isCrit);
 
@@ -8711,7 +8711,7 @@ void Aura::PeriodicTick()
                 uint32 damage = spellProto->manaPerSecond;
                 uint32 absorb = 0;
 
-                pCaster->DealDamageMods(pCaster, damage, &absorb, NODAMAGE, spellProto);
+                Unit::DealDamageMods(pCaster, pCaster, damage, &absorb, NODAMAGE, spellProto);
                 if (pCaster->GetHealth() > damage)
                 {
                     pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), damage, GetSpellSchoolMask(spellProto), absorb, 0, true, 0, false);
@@ -8969,7 +8969,7 @@ void Aura::PeriodicTick()
 
             spellDamageInfo.target->CalculateAbsorbResistBlock(pCaster, &spellDamageInfo, spellProto);
 
-            pCaster->DealDamageMods(spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE, spellProto);
+            Unit::DealDamageMods(pCaster, spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE, spellProto);
 
             pCaster->SendSpellNonMeleeDamageLog(&spellDamageInfo);
 

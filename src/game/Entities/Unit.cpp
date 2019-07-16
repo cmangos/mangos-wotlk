@@ -721,9 +721,9 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType, ObjectGuid casterGuid)
     }
 }
 
-void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb, DamageEffectType damagetype, SpellEntry const* spellProto)
+void Unit::DealDamageMods(Unit* dealer, Unit* victim, uint32& damage, uint32* absorb, DamageEffectType damagetype, SpellEntry const* spellProto)
 {
-    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || pVictim->IsInEvadeMode())
+    if (!victim->isAlive() || victim->IsTaxiFlying() || victim->IsInEvadeMode())
     {
         if (absorb)
             *absorb += damage;
@@ -731,23 +731,24 @@ void Unit::DealDamageMods(Unit* pVictim, uint32& damage, uint32* absorb, DamageE
         return;
     }
 
-    // You don't lose health from damage taken from another player while in a sanctuary
-    // You still see it in the combat log though
-    if (!IsAllowedDamageInArea(pVictim))
-    {
-        if (absorb)
-            *absorb += damage;
-        damage = 0;
-    }
-
     uint32 originalDamage = damage;
 
-    // Script Event damage Deal
-    if (AI())
-        AI()->DamageDeal(pVictim, damage, damagetype, spellProto);
+    if (dealer) // dealer is optional
+    {
+        // You don't lose health from damage taken from another player while in a sanctuary
+        // You still see it in the combat log though
+        if (!dealer->IsAllowedDamageInArea(victim))
+        {
+            if (absorb)
+                *absorb += damage;
+            damage = 0;
+        }
+        if (UnitAI* ai = dealer->AI()) // Script Event damage Deal
+            ai->DamageDeal(victim, damage, damagetype, spellProto);
+    }
     // Script Event damage taken
-    if (pVictim->AI())
-        pVictim->AI()->DamageTaken(this, damage, damagetype, spellProto);
+    if (victim->AI())
+        victim->AI()->DamageTaken(dealer, damage, damagetype, spellProto);
 
     if (absorb && originalDamage > damage)
         *absorb += (originalDamage - damage);
@@ -848,7 +849,7 @@ uint32 Unit::DealDamage(Unit* pVictim, uint32 damage, CleanDamage const* cleanDa
             {
                 SpellEntry const* shareSpell = vShareDamageAura->GetSpellProto();
                 uint32 shareDamage = uint32(damage * vShareDamageAura->GetModifier()->m_amount / 100.0f);
-                DealDamageMods(shareTarget, shareDamage, nullptr, damagetype);
+                Unit::DealDamageMods(this, shareTarget, shareDamage, nullptr, damagetype);
                 DealDamage(shareTarget, shareDamage, nullptr, damagetype, GetSpellSchoolMask(shareSpell), shareSpell, false);
             }
         }
@@ -1555,13 +1556,13 @@ SpellCastResult Unit::CastSpell(SpellCastTargets& targets, SpellEntry const* spe
 uint32 Unit::SpellNonMeleeDamageLog(Unit* pVictim, uint32 spellID, uint32 damage)
 {
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellID);
-    SpellNonMeleeDamage damageInfo(this, pVictim, spellInfo->Id, SpellSchoolMask(spellInfo->SchoolMask));
-    CalculateSpellDamage(&damageInfo, damage, spellInfo);
-    damageInfo.target->CalculateAbsorbResistBlock(this, &damageInfo, spellInfo);
-    DealDamageMods(damageInfo.target, damageInfo.damage, &damageInfo.absorb, SPELL_DIRECT_DAMAGE, spellInfo);
-    SendSpellNonMeleeDamageLog(&damageInfo);
-    DealSpellDamage(&damageInfo, true);
-    return damageInfo.damage;
+    SpellNonMeleeDamage spellDamageInfo(this, pVictim, spellInfo->Id, SpellSchoolMask(spellInfo->SchoolMask));
+    CalculateSpellDamage(&spellDamageInfo, damage, spellInfo);
+    spellDamageInfo.target->CalculateAbsorbResistBlock(this, &spellDamageInfo, spellInfo);
+    Unit::DealDamageMods(this, spellDamageInfo.target, spellDamageInfo.damage, &spellDamageInfo.absorb, SPELL_DIRECT_DAMAGE);
+    SendSpellNonMeleeDamageLog(&spellDamageInfo);
+    DealSpellDamage(&spellDamageInfo, true);
+    return spellDamageInfo.damage;
 }
 
 void Unit::CalculateSpellDamage(SpellNonMeleeDamage* spellDamageInfo, int32 damage, SpellEntry const* spellInfo, WeaponAttackType attackType)
@@ -2106,7 +2107,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
                     // CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
                     // damage-=absorb + resist;
 
-                    pVictim->DealDamageMods(this, damage, nullptr, SPELL_DIRECT_DAMAGE, i_spellProto);
+                    Unit::DealDamageMods(pVictim, this, damage, nullptr, SPELL_DIRECT_DAMAGE, i_spellProto);
 
                     uint32 targetHealth = GetHealth();
                     uint32 overkill = damage > targetHealth ? damage - targetHealth : 0;
@@ -2526,7 +2527,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
                     RemainingDamage -= absorbed;
 
                     uint32 ab_damage = absorbed;
-                    pCaster->DealDamageMods(caster, ab_damage, nullptr, damagetype);
+                    Unit::DealDamageMods(pCaster, caster, ab_damage, nullptr, damagetype);
                     pCaster->DealDamage(caster, ab_damage, nullptr, damagetype, schoolMask, nullptr, false);
                     continue;
                 }
@@ -2681,7 +2682,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
 
             uint32 splitted = currentAbsorb;
             uint32 splitted_absorb = 0;
-            pCaster->DealDamageMods(caster, splitted, &splitted_absorb, DIRECT_DAMAGE, (*i)->GetSpellProto());
+            Unit::DealDamageMods(pCaster, caster, splitted, &splitted_absorb, DIRECT_DAMAGE, (*i)->GetSpellProto());
 
             pCaster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, splitted_absorb, 0, (damagetype == DOT), 0, false, true);
 
@@ -2714,7 +2715,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* pCaster, SpellSchoolMask schoolM
             }
 
             uint32 split_absorb = 0;
-            pCaster->DealDamageMods(caster, splitted, &split_absorb, DIRECT_DAMAGE, (*i)->GetSpellProto());
+            Unit::DealDamageMods(pCaster, caster, splitted, &split_absorb, DIRECT_DAMAGE, (*i)->GetSpellProto());
 
             pCaster->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, schoolMask, split_absorb, 0, (damagetype == DOT), 0, false, true);
 
@@ -2886,7 +2887,7 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     for (uint8 i = 0; i < m_weaponDamageInfo.weapon[attType].lines; i++)
     {
         meleeDamageInfo.totalDamage -= meleeDamageInfo.subDamage[i].damage;
-        DealDamageMods(pVictim, meleeDamageInfo.subDamage[i].damage, &meleeDamageInfo.subDamage[i].absorb, DIRECT_DAMAGE);
+        Unit::DealDamageMods(this, pVictim, meleeDamageInfo.subDamage[i].damage, &meleeDamageInfo.subDamage[i].absorb, DIRECT_DAMAGE);
         meleeDamageInfo.totalDamage += meleeDamageInfo.subDamage[i].damage;
     }
 
