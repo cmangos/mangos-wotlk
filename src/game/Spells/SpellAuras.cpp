@@ -1714,8 +1714,17 @@ void Aura::TriggerSpell()
 //                    case 40879: break;
 //                    // Aura of Desire
 //                    case 41350: break;
-//                    // Dementia
-//                    case 41404: break;
+                    case 41404:                             // Dementia
+                        switch (urand(0, 1))
+                        {
+                            case 0:
+                                trigger_spell_id = 41406;
+                                break;
+                            case 1:
+                                trigger_spell_id = 41409;
+                                break;
+                        }
+                        break;
 //                    // Chaos Form
 //                    case 41629: break;
                     case 42177:                             // Alert Drums
