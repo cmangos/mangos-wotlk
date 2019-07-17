@@ -281,7 +281,7 @@ void Spell::EffectInstaKill(SpellEffectIndex /*eff_idx*/)
     data << uint32(m_spellInfo->Id);
     m_caster->SendMessageToSet(data, true);
 
-    m_caster->DealDamage(unitTarget, unitTarget->GetHealth(), nullptr, INSTAKILL, SPELL_SCHOOL_MASK_NORMAL, m_spellInfo, false);
+    Unit::DealDamage(m_caster, unitTarget, unitTarget->GetHealth(), nullptr, INSTAKILL, SPELL_SCHOOL_MASK_NORMAL, m_spellInfo, false);
 }
 
 void Spell::EffectEnvironmentalDMG(SpellEffectIndex eff_idx)
@@ -2522,7 +2522,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, 42486, TRIGGERED_OLD_TRIGGERED);
 
                     // There is no known spell to kill the target
-                    unitTarget->DealDamage(unitTarget, unitTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    unitTarget->Suicide();
                     return;
                 }
                 case 42489:                                 // Cast Ooze Zap When Energized
@@ -3807,7 +3807,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
 
                     // There is no known spell to kill the target
-                    m_caster->DealDamage(unitTarget, unitTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    Unit::DealDamage(m_caster, unitTarget, unitTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                     return;
                 }
                 case 64385:                                 // Spinning (from Unusual Compass)
@@ -11692,7 +11692,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // combine two small oozes, spawn a large ooze and despawn the caster (the target is killed by spell)
                     m_caster->CastSpell(unitTarget, 69889, TRIGGERED_OLD_TRIGGERED);
-                    m_caster->DealDamage(m_caster, m_caster->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                    m_caster->Suicide();
                     return;
                 }
                 case 69553:                                 // Large Ooze Combine
@@ -11702,7 +11702,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // increase the unstable ooze stack on the big ooze and kill the target
                     unitTarget->CastSpell(m_caster, 69644, TRIGGERED_OLD_TRIGGERED);
-                    unitTarget->DealDamage(unitTarget, unitTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                    unitTarget->Suicide();
                     return;
                 }
                 case 69610:                                 // Large Ooze Buff Combine
@@ -11726,7 +11726,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // increase the unstable ooze stack on the big ooze and kill the target
                     resultingCaster->CastSpell(resultingTarget, 69644, TRIGGERED_OLD_TRIGGERED);
-                    resultingCaster->DealDamage(resultingCaster, resultingCaster->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                    resultingCaster->Suicide();
                     return;
                 }
                 case 69674:                                 // Mutated Infection

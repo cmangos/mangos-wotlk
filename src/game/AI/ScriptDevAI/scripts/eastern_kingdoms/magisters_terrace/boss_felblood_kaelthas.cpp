@@ -463,7 +463,7 @@ struct mob_arcane_sphereAI : public ScriptedAI
         // Should despawn when aura 44251 expires
         if (m_uiDespawnTimer < diff)
         {
-            m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+            m_creature->Suicide();
             m_uiDespawnTimer = 0;
         }
         else

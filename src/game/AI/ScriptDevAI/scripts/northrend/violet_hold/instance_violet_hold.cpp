@@ -264,7 +264,7 @@ void instance_violet_hold::SetData(uint32 uiType, uint32 uiData)
                     break;
                 case FAIL:
                     if (Creature* pSinclari = GetSingleCreatureFromStorage(NPC_SINCLARI))
-                        pSinclari->DealDamage(pSinclari, pSinclari->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                        pSinclari->Suicide();
                     if (Creature* pController = GetSingleCreatureFromStorage(NPC_EVENT_CONTROLLER))
                         pController->AI()->EnterEvadeMode();
                     // Reset the event (creature cleanup is handled in creature_linking)

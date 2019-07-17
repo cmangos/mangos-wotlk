@@ -1880,7 +1880,7 @@ void Aura::TriggerSpell()
 //                    // Aura of Darkness
 //                    case 71111: break;
                     case 71441:                             // Unstable Ooze Explosion Suicide Trigger
-                        target->DealDamage(target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                        target->Suicide();
                         return;
 //                    // Ball of Flames Visual
 //                    case 71706: break;
@@ -2170,7 +2170,7 @@ void Aura::TriggerSpell()
                 uint32 dmg = target->GetMaxHealth() * 0.05f; // 5% dmg every tick
                 uint32 absorb = 0;
                 Unit::DealDamageMods(target, target, dmg, &absorb, SELF_DAMAGE);
-                target->DealDamage(target, dmg, nullptr, SELF_DAMAGE, SPELL_SCHOOL_MASK_FIRE, nullptr, false);
+                Unit::DealDamage(target, target, dmg, nullptr, SELF_DAMAGE, SPELL_SCHOOL_MASK_FIRE, nullptr, false);
                 break; // continue executing rest
             }
             case 37716:                                     // Demon Link
@@ -3269,9 +3269,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             case 45934:                                     // Dark Fiend
             {
-                // Kill target if dispelled
+                // Kill target if dispelled - TODO: recheck suicide spell existence
                 if (m_removeMode == AURA_REMOVE_BY_DISPEL)
-                    target->DealDamage(target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    Unit::DealDamage(target, target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                 return;
             }
             case 45963:                                     // Call Alliance Deserter
@@ -8512,7 +8512,7 @@ void Aura::PeriodicTick()
             // send critical in hit info for threat calculation
             if (isCrit)
                 cleanDamage.hitOutCome = MELEE_HIT_CRIT;
-            pCaster->DealDamage(target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, true);
+            Unit::DealDamage(pCaster, target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, true);
 
             Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto));
 
@@ -8599,7 +8599,7 @@ void Aura::PeriodicTick()
             // send critical in hit info for threat calculation
             if (isCrit)
                 cleanDamage.hitOutCome = MELEE_HIT_CRIT;
-            int32 new_damage = pCaster->DealDamage(target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, false);
+            int32 new_damage = Unit::DealDamage(pCaster, target, pdamage, &cleanDamage, DOT, GetSpellSchoolMask(spellProto), spellProto, false);
             Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto));
 
             if (!target->isAlive() && pCaster->IsNonMeleeSpellCasted(false))
@@ -8716,7 +8716,7 @@ void Aura::PeriodicTick()
                 {
                     pCaster->SendSpellNonMeleeDamageLog(pCaster, GetId(), damage, GetSpellSchoolMask(spellProto), absorb, 0, true, 0, false);
                     CleanDamage cleanDamage = CleanDamage(damage, BASE_ATTACK, MELEE_HIT_NORMAL);
-                    pCaster->DealDamage(pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
+                    Unit::DealDamage(pCaster, pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
                 }
                 else
                 {
@@ -9388,7 +9388,7 @@ void Aura::PeriodicDummyTick()
                 case 62018:                                 // Collapse
                 {
                     // lose 1% of health every second
-                    target->DealDamage(target, target->GetMaxHealth() * .01, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                    Unit::DealDamage(target, target, target->GetMaxHealth() * .01, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
                     return;
                 }
                 case 62019:                                 // Rune of Summoning
@@ -9458,7 +9458,7 @@ void Aura::PeriodicDummyTick()
                     if (GetHolder()->GetStackAmount() >= 10)
                     {
                         target->CastSpell(target, 64219, TRIGGERED_OLD_TRIGGERED);
-                        target->DealDamage(target, target->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                        target->Suicide();
                     }
                     return;
                 }
@@ -9764,7 +9764,7 @@ void Aura::PeriodicDummyTick()
             {
                 // damage not expected to be show in logs, not any damage spell related to damage apply
                 uint32 deal = m_modifier.m_amount * target->GetMaxHealth() / 100;
-                target->DealDamage(target, deal, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                Unit::DealDamage(target, target, deal, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
                 return;
             }
             break;

@@ -1368,7 +1368,7 @@ struct boss_maievAI : public ScriptedAI, private DialogueHelper
                 if (m_pInstance)
                 {
                     if (Creature* pIllidan = m_pInstance->GetSingleCreatureFromStorage(NPC_ILLIDAN_STORMRAGE))
-                        pIllidan->DealDamage(pIllidan, pIllidan->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                        pIllidan->Suicide();
                 }
                 break;
             case SPELL_TELEPORT_VISUAL:

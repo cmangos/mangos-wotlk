@@ -1245,7 +1245,7 @@ struct npc_scarlet_ghoulAI : public ScriptedPetAI
         {
             if (m_uiUnsummonTimer <= uiDiff)
             {
-                m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                m_creature->Suicide();
                 if (m_creature->IsPet())
                     ((Pet*)m_creature)->Unsummon(PET_SAVE_AS_DELETED);
                 return;
@@ -1625,7 +1625,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                 for (GuidList::const_iterator itr = m_lAttackersGUIDs.begin(); itr != m_lAttackersGUIDs.end(); ++itr)
                 {
                     if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                        pTemp->DealDamage(pTemp, pTemp->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                        pTemp->Suicide();
                 }
 
                 // light fighters despawn
@@ -2236,7 +2236,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                                 for (GuidList::const_iterator itr = m_lDefendersGUIDs.begin(); itr != m_lDefendersGUIDs.end(); ++itr)
                                 {
                                     if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
-                                        pTemp->DealDamage(pTemp, pTemp->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, TRIGGERED_NONE);
+                                        pTemp->Suicide();
                                 }
                                 // workaround for the light champions - spell doesn't work right
                                 for (auto& i : aLightArmySpawnLoc)

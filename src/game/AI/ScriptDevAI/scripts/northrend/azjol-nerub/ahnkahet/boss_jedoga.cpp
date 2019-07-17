@@ -448,7 +448,7 @@ bool EffectAuraDummy_spell_aura_dummy_sacrifice_beam(const Aura* pAura, bool bAp
             if (ScriptedInstance* pInstance = (ScriptedInstance*)pTarget->GetInstanceData())
             {
                 if (Creature* pJedoga = pInstance->GetSingleCreatureFromStorage(NPC_JEDOGA_SHADOWSEEKER))
-                    pJedoga->DealDamage(pTarget, pTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    pJedoga->Suicide();
             }
         }
     }

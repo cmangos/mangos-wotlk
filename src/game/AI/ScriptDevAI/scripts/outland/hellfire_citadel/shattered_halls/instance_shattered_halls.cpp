@@ -245,7 +245,7 @@ void instance_shattered_halls::Update(uint32 uiDiff)
             case 0:
                 // Kill the officer
                 if (Creature* pSoldier = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_OFFICER_ALLIANCE : NPC_OFFICER_HORDE))
-                    pSoldier->DealDamage(pSoldier, pSoldier->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    pSoldier->Suicide();
 
                 // Make Kargath yell
                 DoOrSimulateScriptTextForThisInstance(m_uiTeam == ALLIANCE ? SAY_KARGATH_EXECUTE_ALLY : SAY_KARGATH_EXECUTE_HORDE, NPC_KARGATH_BLADEFIST);
@@ -256,14 +256,14 @@ void instance_shattered_halls::Update(uint32 uiDiff)
                 break;
             case 1:
                 if (Creature* pSoldier = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_SOLDIER_ALLIANCE_2 : NPC_SOLDIER_HORDE_2))
-                    pSoldier->DealDamage(pSoldier, pSoldier->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    pSoldier->Suicide();
 
                 DoCastGroupDebuff(SPELL_KARGATH_EXECUTIONER_3);
                 m_uiExecutionTimer = 15 * MINUTE * IN_MILLISECONDS;
                 break;
             case 2:
                 if (Creature* pSoldier = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_SOLDIER_ALLIANCE_3 : NPC_SOLDIER_HORDE_3))
-                    pSoldier->DealDamage(pSoldier, pSoldier->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                    pSoldier->Suicide();
 
                 SetData(TYPE_EXECUTION, FAIL);
                 m_uiExecutionTimer = 0;

@@ -881,15 +881,7 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                         pCreatureTarget->SummonCreature(NPC_MINION_OF_GUROK, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 5000);
                 }
 
-                if (pCreatureTarget->getVictim())
-                {
-                    pCaster->DealDamage(pCreatureTarget, pCreatureTarget->GetMaxHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
-                    return true;
-                }
-
-                // If not in combat, no xp or loot
-                pCreatureTarget->SetDeathState(JUST_DIED);
-                pCreatureTarget->SetHealth(0);
+                pCreatureTarget->CastSpell(nullptr, 3617, TRIGGERED_OLD_TRIGGERED); // suicide spell
                 return true;
             }
             return true;
@@ -931,7 +923,7 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                 if (Creature* pDrostan = GetClosestCreatureWithEntry(pCreatureTarget, NPC_DROSTAN, 5 * INTERACTION_DISTANCE))
                     DoScriptText(urand(0, 1) ? SAY_DROSTAN_HIT_BIRD_1 : SAY_DROSTAN_HIT_BIRD_2, pDrostan);
 
-                pCreatureTarget->DealDamage(pCreatureTarget, pCreatureTarget->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                pCreatureTarget->Suicide();
             }
             return true;
         }

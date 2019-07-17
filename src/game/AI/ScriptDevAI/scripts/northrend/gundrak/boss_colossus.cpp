@@ -111,7 +111,7 @@ struct boss_drakkari_elementalAI : public ScriptedAI
         {
             // kill colossus on death - this will finish the encounter
             if (Creature* pColossus = m_pInstance->GetSingleCreatureFromStorage(NPC_COLOSSUS))
-                pColossus->DealDamage(pColossus, pColossus->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                pColossus->Suicide();
         }
     }
 

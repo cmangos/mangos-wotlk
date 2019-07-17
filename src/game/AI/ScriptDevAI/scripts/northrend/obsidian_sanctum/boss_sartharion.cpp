@@ -1174,7 +1174,7 @@ struct mob_twilight_eggsAI : public Scripted_NoMovementAI
             m_creature->SetPhaseMask(PHASEMASK_NORMAL, true);
             DoCastSpellIfCan(m_creature, uiSpellEntry, CAST_TRIGGERED);
 
-            m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+            m_creature->Suicide();
             m_uiHatchTimer = 0;
         }
         else

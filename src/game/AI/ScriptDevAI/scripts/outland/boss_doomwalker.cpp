@@ -150,7 +150,7 @@ struct boss_doomwalkerAI : public ScriptedAI
         GetCreatureListWithEntryInGrid(npcList, m_creature, NPC_ILLIDARI_SUCCUBUS, 200.0f);
 
         for (Creature* creature : npcList)
-            creature->DealDamage(creature, creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+            creature->Suicide();
     }
 
     void JustDied(Unit* /*pKiller*/) override

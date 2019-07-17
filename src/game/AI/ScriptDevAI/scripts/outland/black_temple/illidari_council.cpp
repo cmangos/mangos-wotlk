@@ -249,14 +249,14 @@ struct mob_illidari_councilAI : public ScriptedAI
         {
             Creature* pMember = m_pInstance->GetSingleCreatureFromStorage(i);
             if (pMember && pMember->isAlive())
-                pMember->DealDamage(pMember, pMember->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                pMember->Suicide();
         }
 
         // Self kill the voice trigger and the controller
         if (Creature* pVoiceTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_COUNCIL_VOICE))
-            pVoiceTrigger->DealDamage(pVoiceTrigger, pVoiceTrigger->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+            pVoiceTrigger->Suicide();
 
-        m_creature->DealDamage(m_creature, m_creature->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+        m_creature->Suicide();
     }
 
     void UpdateAI(const uint32 uiDiff) override

@@ -249,7 +249,7 @@ void world_map_ebon_hold::DoDespawnArmy()
         if (Creature* pTemp = instance->GetCreature(*itr))
         {
             if (pTemp->isAlive())
-                pTemp->DealDamage(pTemp, pTemp->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+                pTemp->Suicide();
         }
     }
 }

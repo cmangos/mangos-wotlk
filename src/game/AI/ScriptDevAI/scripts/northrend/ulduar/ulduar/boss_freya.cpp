@@ -664,9 +664,10 @@ struct boss_freyaAI : public ScriptedAI
 
                 if (pSpirit->HasAura(SPELL_FEIGN_DEATH) && pStormLasher->HasAura(SPELL_FEIGN_DEATH) && pSnapLasher->HasAura(SPELL_FEIGN_DEATH))
                 {
-                    m_creature->DealDamage(pSpirit, pSpirit->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-                    m_creature->DealDamage(pStormLasher, pStormLasher->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-                    m_creature->DealDamage(pSnapLasher, pSnapLasher->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                    // TODO: Check if this shouldnt be a suicide
+                    Unit::DealDamage(m_creature, pSpirit, pSpirit->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                    Unit::DealDamage(m_creature, pStormLasher, pStormLasher->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                    Unit::DealDamage(m_creature, pSnapLasher, pSnapLasher->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
                 }
                 else
                 {
