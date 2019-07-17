@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "the_eye.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -38,39 +39,36 @@ enum
     SPELL_ARCANE_ORB_MISSILE    = 34172,
     SPELL_KNOCK_AWAY            = 25778,
     SPELL_BERSERK               = 26662,
-
-    NPC_ARCANE_ORB_TARGET       = 19577,
 };
 
-struct boss_void_reaverAI : public ScriptedAI
+enum VoidReaverActions
 {
-    boss_void_reaverAI(Creature* pCreature) : ScriptedAI(pCreature)
+    VOID_REAVER_BERSERK,
+    VOID_REAVER_POUNDING,
+    VOID_REAVER_ARCANE_ORB,
+    VOID_REAVER_KNOCK_AWAY,
+    VOID_REAVER_ACTION_MAX,
+};
+
+struct boss_void_reaverAI : public CombatAI
+{
+    boss_void_reaverAI(Creature* creature) : CombatAI(creature, VOID_REAVER_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_PERIODIC_LEECH, true);
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_PERIODIC_MANA_LEECH, true);
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_HEALTH_LEECH, true);
+        AddCombatAction(VOID_REAVER_BERSERK, uint32(10 * MINUTE * IN_MILLISECONDS));
+        AddCombatAction(VOID_REAVER_POUNDING, 12000u);
+        AddCombatAction(VOID_REAVER_ARCANE_ORB, 3000u);
+        AddCombatAction(VOID_REAVER_KNOCK_AWAY, 30000u);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_uiPoundingTimer;
-    uint32 m_uiArcaneOrbTimer;
-    uint32 m_uiKnockAwayTimer;
-    uint32 m_uiBerserkTimer;
-
-    void Reset() override
+    void KilledUnit(Unit* victim) override
     {
-        m_uiPoundingTimer   = 12000;
-        m_uiArcaneOrbTimer  = 3000;
-        m_uiKnockAwayTimer  = 30000;
-        m_uiBerserkTimer    = 10 * MINUTE * IN_MILLISECONDS;
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
+        if (victim->GetTypeId() != TYPEID_PLAYER)
             return;
 
         switch (urand(0, 2))
@@ -81,112 +79,101 @@ struct boss_void_reaverAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VOIDREAVER, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_VOIDREAVER, DONE);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VOIDREAVER, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_VOIDREAVER, IN_PROGRESS);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VOIDREAVER, NOT_STARTED);
+        if (m_instance)
+            m_instance->SetData(TYPE_VOIDREAVER, NOT_STARTED);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        // Pounding
-        if (m_uiPoundingTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_POUNDING) == CAST_OK)
-            {
-                DoScriptText(urand(0, 1) ? SAY_POUNDING1 : SAY_POUNDING2, m_creature);
-                m_uiPoundingTimer = 14000;
-            }
-        }
-        else
-            m_uiPoundingTimer -= uiDiff;
-
-        // Arcane Orb
-        if (m_uiArcaneOrbTimer < uiDiff)
-        {
-            // Search only for players which are not within 18 yards of the boss
-            std::vector<Unit*> suitableTargets;
-            ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-
-            for (auto itr : threatList)
-            {
-                if (Unit* target = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
-                {
-                    if (target->GetTypeId() == TYPEID_PLAYER && !target->IsWithinDist3d(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 18.0f))
-                        suitableTargets.push_back(target);
-                }
-            }
-
-            if (suitableTargets.empty())
-            {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                {
-                    DoCastSpellIfCan(target, SPELL_ARCANE_ORB_MISSILE, CAST_TRIGGERED);
-                    m_uiArcaneOrbTimer = 3000;
-                }
-            }
-            else
-            {
-                Unit* target = suitableTargets[urand(0, suitableTargets.size() - 1)];
-
-                if (target)
-                    DoCastSpellIfCan(target, SPELL_ARCANE_ORB_MISSILE, CAST_TRIGGERED);
-
-                m_uiArcaneOrbTimer = 3000;
-            }
-        }
-        else
-            m_uiArcaneOrbTimer -= uiDiff;
-
-        // Single Target knock back, reduces aggro
-        if (m_uiKnockAwayTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
-                m_uiKnockAwayTimer = 30000;
-        }
-        else
-            m_uiKnockAwayTimer -= uiDiff;
-
-        // Berserk
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
+            case VOID_REAVER_BERSERK:
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                    m_uiBerserkTimer = 0;
+                    DisableCombatAction(action);
+                break;
             }
-            else
-                m_uiBerserkTimer -= uiDiff;
+            case VOID_REAVER_POUNDING:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_POUNDING) == CAST_OK)
+                {
+                    DoScriptText(urand(0, 1) ? SAY_POUNDING1 : SAY_POUNDING2, m_creature);
+                    ResetCombatAction(action, 14000);
+                }
+                break;
+            }
+            case VOID_REAVER_ARCANE_ORB:
+            {
+                // Search only for players which are not within 18 yards of the boss
+                std::vector<Unit*> suitableTargets;
+                ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+
+                for (auto itr : threatList)
+                {
+                    if (Unit* target = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
+                    {
+                        if (target->GetTypeId() == TYPEID_PLAYER && !target->IsWithinDist3d(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 18.0f))
+                            suitableTargets.push_back(target);
+                    }
+                }
+
+                if (suitableTargets.empty())
+                {
+                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                    {
+                        DoCastSpellIfCan(target, SPELL_ARCANE_ORB_MISSILE, CAST_TRIGGERED);
+                        ResetCombatAction(action, 3000);
+                    }
+                }
+                else
+                {
+                    Unit* target = suitableTargets[urand(0, suitableTargets.size() - 1)];
+
+                    if (target)
+                        DoCastSpellIfCan(target, SPELL_ARCANE_ORB_MISSILE, CAST_TRIGGERED);
+
+                    ResetCombatAction(action, 3000);
+                }
+                break;
+            }
+            case VOID_REAVER_KNOCK_AWAY:
+            {
+                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+                    ResetCombatAction(action, 30000);
+                break;
+            }
         }
+    }
 
-        DoMeleeAttackIfReady();
-
-        EnterEvadeIfOutOfCombatArea(uiDiff);
+    void UpdateAI(const uint32 diff) override
+    {
+        CombatAI::UpdateAI(diff);
+        if (m_creature->isInCombat())
+            EnterEvadeIfOutOfCombatArea(diff);
     }
 };
 
-UnitAI* GetAI_boss_void_reaver(Creature* pCreature)
+UnitAI* GetAI_boss_void_reaver(Creature* creature)
 {
-    return new boss_void_reaverAI(pCreature);
+    return new boss_void_reaverAI(creature);
 }
 
 void AddSC_boss_void_reaver()
