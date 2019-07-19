@@ -15,6 +15,7 @@ enum
     TYPE_VOIDREAVER             = 2,
     TYPE_KAELTHAS               = 3,
 
+    NPC_ALAR                    = 19514,
     // NPC_ASTROMANCER           = 18805,
     NPC_KAELTHAS                = 19622,
 
@@ -24,6 +25,8 @@ enum
     NPC_THALADRED               = 20064,
 
     NPC_WORLD_TRIGGER_LARGE     = 22517,
+
+    NPC_EMBER_OF_ALAR           = 19551,
 
     GO_ARCANE_DOOR_HORIZ_3      = 184325,               // combat doors for Kael
     GO_ARCANE_DOOR_HORIZ_4      = 184324,
@@ -47,6 +50,7 @@ class instance_the_eye : public ScriptedInstance
         bool IsEncounterInProgress() const override;
 
         void OnCreatureCreate(Creature* pCreature) override;
+        void OnCreatureRespawn(Creature* creature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;

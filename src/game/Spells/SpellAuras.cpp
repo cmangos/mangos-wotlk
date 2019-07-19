@@ -6130,6 +6130,10 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 if (Unit* caster = GetCaster())
                     caster->CastSpell(target, 32830, TRIGGERED_NONE);
                 return;
+            case 34229:                                     // Flame Quills
+                if (UnitAI* ai = target->AI())
+                    ai->SendAIEvent(AI_EVENT_CUSTOM_A, target, target);
+                return;
             case 33711:                                     // Murmur's Touch normal and heroic
             case 38794:
                 target->CastSpell(nullptr, 33686, TRIGGERED_OLD_TRIGGERED, nullptr, this); // cast Shockwave

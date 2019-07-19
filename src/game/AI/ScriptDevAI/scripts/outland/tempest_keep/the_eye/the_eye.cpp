@@ -50,6 +50,7 @@ void instance_the_eye::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
+        case NPC_ALAR:
         case NPC_THALADRED:
         case NPC_TELONICUS:
         case NPC_CAPERNIAN:
@@ -59,6 +60,17 @@ void instance_the_eye::OnCreatureCreate(Creature* pCreature)
             break;
         case NPC_WORLD_TRIGGER_LARGE:
             m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
+            break;
+    }
+}
+
+void instance_the_eye::OnCreatureRespawn(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_EMBER_OF_ALAR:
+            if (Creature* alar = GetSingleCreatureFromStorage(NPC_ALAR))
+                alar->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, creature, alar);
             break;
     }
 }
