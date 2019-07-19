@@ -364,7 +364,7 @@ struct boss_kaelthasAI : public ScriptedAI
         m_attackAngle = 0.0f;
 
         SetCombatMovement(true);
-        DoDespawnSummons(true);
+        DoDespawnSummons();
 
         m_rangeMode = true;
         m_meleeEnabled = false;
@@ -402,7 +402,7 @@ struct boss_kaelthasAI : public ScriptedAI
         }
     }
 
-    void DoDespawnSummons(bool /*bIsEventEnd*/ = false)
+    void DoDespawnSummons()
     {
         for (GuidList::const_iterator itr = m_lSummonedGuidList.begin(); itr != m_lSummonedGuidList.end(); ++itr)
         {
@@ -457,7 +457,7 @@ struct boss_kaelthasAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_KAELTHAS, DONE);
 
-        DoDespawnSummons(true);
+        DoDespawnSummons();
         ResetSize();
     }
 
