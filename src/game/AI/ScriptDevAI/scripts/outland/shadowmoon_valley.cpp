@@ -514,7 +514,7 @@ struct npc_wildaAI : public npc_escortAI
         m_attackDistance = 10.0f;
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* /*pWho*/) override
     {
         if (roll_chance_i(30))
             DoCastSpellIfCan(m_creature, SPELL_EARTHBING_TOTEM);
@@ -1253,7 +1253,7 @@ struct npc_totem_of_spiritsAI : public ScriptedPetAI
 
     void AttackedBy(Unit* /*pAttacker*/) override {}
 
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiMotionType, uint32 uiData) override
+    void SummonedMovementInform(Creature* pSummoned, uint32 /*uiMotionType*/, uint32 /*uiData*/) override
     {
         switch (pSummoned->GetEntry())
         {
@@ -1584,7 +1584,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
 
     // true = event started normally
     // false = something's wrong, ignore
-    bool SoulstealerEnteredCombat(Creature* unit, Unit* attacker)
+    bool SoulstealerEnteredCombat(Creature* /*unit*/, Unit* attacker)
     {
         if (!m_bEventInProgress)
         {
@@ -1875,7 +1875,7 @@ struct mob_shadowmoon_soulstealerAI : public ScriptedAI
                 DeathwailAI->SoulstealerDied(m_creature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 /*uiDiff*/) override
     {
         if (!m_bSixtyTriggered)
         {
@@ -2230,7 +2230,7 @@ struct npc_spawned_oronok_tornheartAI : public ScriptedAI, private DialogueHelpe
         }
     }
 
-    void WaypointMotionType(uint32 motionType, uint32 pointId)
+    void WaypointMotionType(uint32 /*motionType*/, uint32 pointId)
     {
         switch (pointId)
         {
@@ -2286,7 +2286,7 @@ struct npc_spawned_oronok_tornheartAI : public ScriptedAI, private DialogueHelpe
         }
     }
 
-    void PointMovementInform(uint32 motionType, uint32 pointId)
+    void PointMovementInform(uint32 /*motionType*/, uint32 pointId)
     {
         switch (pointId)
         {
@@ -2554,7 +2554,7 @@ struct npc_veneratus_spawn_nodeAI : public Scripted_NoMovementAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override { }
+    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
 UnitAI* GetAI_npc_veneratus_spawn_node(Creature* pCreature)
@@ -4514,7 +4514,7 @@ struct npc_bt_battle_sensor : public ScriptedAI
         }
     }*/
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* invoker, uint32 miscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
         const ObjectGuid senderGuid = sender->GetObjectGuid();
 

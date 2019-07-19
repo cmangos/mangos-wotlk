@@ -331,7 +331,7 @@ CombatManeuverReturns PlayerbotShamanAI::ResurrectPlayer(Player* target)
     return RETURN_NO_ACTION_ERROR; // not error per se - possibly just OOM
 }
 
-CombatManeuverReturns PlayerbotShamanAI::DispelPlayer(Player* target)
+CombatManeuverReturns PlayerbotShamanAI::DispelPlayer(Player* /*target*/)
 {
 	uint32 DISPEL = CLEANSE_SPIRIT > 0 ? CLEANSE_SPIRIT : CURE_TOXINS;
 

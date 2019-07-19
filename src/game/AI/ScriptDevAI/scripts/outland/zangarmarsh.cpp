@@ -413,7 +413,7 @@ struct npc_frostbiteAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 diff) override
+    void UpdateAI(const uint32 /*diff*/) override
     {
     }
 };

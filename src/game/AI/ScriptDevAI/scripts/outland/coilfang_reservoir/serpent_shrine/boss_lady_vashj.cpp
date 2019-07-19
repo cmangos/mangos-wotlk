@@ -880,7 +880,7 @@ UnitAI* GetAI_mob_enchanted_elemental(Creature* pCreature)
     return new mob_enchanted_elementalAI(pCreature);
 }
 
-bool OnLootItemTaintedCore(Player* player, Item* item, bool apply)
+bool OnLootItemTaintedCore(Player* player, Item* /*item*/, bool apply)
 {
     if (apply)
         player->CastSpell(player, SPELL_PARALYZE, TRIGGERED_OLD_TRIGGERED);

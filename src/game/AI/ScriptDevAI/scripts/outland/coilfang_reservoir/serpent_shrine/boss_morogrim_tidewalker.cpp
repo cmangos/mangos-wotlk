@@ -287,7 +287,7 @@ struct mob_water_globuleAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 /*uiDiff*/) override
     {
         if (!m_creature->getVictim())
         {

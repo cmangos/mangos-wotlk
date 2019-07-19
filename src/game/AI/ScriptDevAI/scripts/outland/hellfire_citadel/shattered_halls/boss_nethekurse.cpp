@@ -111,7 +111,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         m_uiCleaveTimer = 5000;
     }
 
-    void DoYellForPeonAggro(Unit* pWho)
+    void DoYellForPeonAggro(Unit* /*pWho*/)
     {
         switch (urand(0, 3))
         {
@@ -206,7 +206,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
         ScriptedAI::MoveInLineOfSight(pWho);
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* /*pWho*/) override
     {
         m_bIsIntroEvent = false;
         m_bIsMainEvent = true;

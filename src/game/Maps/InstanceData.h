@@ -181,8 +181,8 @@ class InstanceData
             ++count;
         }
 
-        virtual void ShowChatCommands(ChatHandler* handler) {}
-        virtual void ExecuteChatCommand(ChatHandler* handler, char* args) {}
+        virtual void ShowChatCommands(ChatHandler* /*handler*/) {}
+        virtual void ExecuteChatCommand(ChatHandler* /*handler*/, char* /*args*/) {}
 
         // Wotlk only
         // Special UI unit frame - sent mostly for raid bosses

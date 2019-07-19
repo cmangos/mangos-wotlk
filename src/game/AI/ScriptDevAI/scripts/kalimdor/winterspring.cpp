@@ -186,7 +186,7 @@ struct npc_ranshallaAI : public npc_escortAI, private DialogueHelper
         m_uiDelayTimer = 2000;
     }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
         // If Ranshalla cast the torch lightening spell for too long she will trigger SPELL_RANSHALLA_DESPAWN (quest failed and despawn)
         if (pSpell->Id == SPELL_RANSHALLA_DESPAWN)
@@ -631,7 +631,7 @@ struct npc_artoriusAI : public ScriptedAI
         m_creature->ForcedDespawn();
     }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
         if (pSpell->Id == 13555 || pSpell->Id == 25295)             // Serpent Sting (Rank 8 or Rank 9)
         {
@@ -715,7 +715,7 @@ bool GossipHello_npc_artorius(Player* pPlayer, Creature* pCreature)
     return true;
 }
 
-bool GossipSelect_npc_artorius(Player* pPlayer, Creature* pCreature, uint32 uiSender, uint32 uiAction)
+bool GossipSelect_npc_artorius(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 /*uiAction*/)
 {
     pPlayer->CLOSE_GOSSIP_MENU();
     ((npc_artoriusAI*)pCreature->AI())->BeginEvent(pPlayer->GetObjectGuid());

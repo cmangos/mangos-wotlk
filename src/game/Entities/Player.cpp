@@ -24094,7 +24094,7 @@ void Player::ResetDeathTimer()
     m_deathTimer = 6 * MINUTE * IN_MILLISECONDS;
 }
 
-void Player::AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration /*= 0*/, bool updateClient /*= false*/)
+void Player::AddGCD(SpellEntry const& spellEntry, uint32 /*forcedDuration = 0*/, bool updateClient /*= false*/)
 {
     int32 gcdDuration = spellEntry.StartRecoveryTime;
     if (!spellEntry.StartRecoveryCategory && !gcdDuration)

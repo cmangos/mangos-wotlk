@@ -5626,7 +5626,7 @@ void Aura::HandleAuraModTotalThreat(bool apply, bool Real)
     target->getHostileRefManager().threatTemporaryFade(caster, m_modifier.m_amount, apply);
 }
 
-void Aura::HandleModTaunt(bool apply, bool Real)
+void Aura::HandleModTaunt(bool /*apply*/, bool Real)
 {
     // only at real add/remove aura
     if (!Real)
@@ -9966,7 +9966,7 @@ void Aura::HandlePhase(bool apply, bool Real)
     }
 }
 
-void Aura::HandleAuraDetaunt(bool Apply, bool Real)
+void Aura::HandleAuraDetaunt(bool /*Apply*/, bool Real)
 {
     // only at real add/remove aura
     if (!Real)
@@ -11576,7 +11576,7 @@ void SpellAuraHolder::SetCreationDelayFlag()
     m_skipUpdate = true;
 }
 
-GameObjectAura::GameObjectAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, GameObject* caster)
+GameObjectAura::GameObjectAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, GameObject* /*caster*/)
     : Aura(spellproto, eff, currentDamage, currentBasePoints, holder, target, nullptr)
 {
     m_isAreaAura = true;

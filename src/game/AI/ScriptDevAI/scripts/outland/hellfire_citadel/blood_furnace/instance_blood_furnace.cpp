@@ -207,7 +207,7 @@ void instance_blood_furnace::SetData(uint32 uiType, uint32 uiData)
     }
 }
 
-void instance_blood_furnace::OnPlayerEnter(Player* player)
+void instance_blood_furnace::OnPlayerEnter(Player* /*player*/)
 {
     if (!m_firstPlayer)
     {

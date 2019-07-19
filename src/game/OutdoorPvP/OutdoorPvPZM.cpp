@@ -164,7 +164,7 @@ void OutdoorPvPZM::HandlePlayerKillInsideArea(Player* player, Unit* victim)
 }
 
 // process the capture events
-bool OutdoorPvPZM::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
+bool OutdoorPvPZM::HandleEvent(uint32 eventId, GameObject* go, Unit* /*invoker*/)
 {
     for (uint8 i = 0; i < MAX_ZM_TOWERS; ++i)
     {
@@ -397,7 +397,7 @@ void OutdoorPvPZM::SetBeaconArtKit(const WorldObject* objRef, ObjectGuid creatur
 }
 
 // Check condition for ZM flag NPCs
-bool OutdoorPvPZM::IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType)
+bool OutdoorPvPZM::IsConditionFulfilled(Player const* /*source*/, uint32 conditionId, WorldObject const* /*conditionSource*/, uint32 /*conditionSourceType*/)
 {
     switch (conditionId)
     {

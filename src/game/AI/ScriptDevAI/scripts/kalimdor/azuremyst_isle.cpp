@@ -203,7 +203,7 @@ struct npc_magwinAI : public npc_escortAI
             m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* /*pWho*/) override
     {
         if (urand(0, 1))
             DoScriptText(SAY_AGGRO, m_creature);

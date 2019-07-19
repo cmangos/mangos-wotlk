@@ -63,7 +63,7 @@ struct boss_thorngrinAI : ScriptedAI
         m_below50 = m_below20 = false;
     }
 
-    void Aggro(Unit* who) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
     }

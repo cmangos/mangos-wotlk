@@ -432,7 +432,7 @@ struct boss_head_of_horsemanAI : public ScriptedAI
             DoCastSpellIfCan(m_creature, SPELL_HEAL_BODY, CAST_TRIGGERED);
     }
 
-    void UpdateAI(const uint32 uiDiff) override { }
+    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
 UnitAI* GetAI_boss_head_of_horseman(Creature* pCreature)

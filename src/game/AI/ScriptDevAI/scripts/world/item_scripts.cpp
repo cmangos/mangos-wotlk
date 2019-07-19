@@ -41,7 +41,7 @@ enum
     NPC_EMBERSTRIFE         = 10321
 };
 
-bool ItemUse_item_orb_of_draconic_energy(Player* pPlayer, Item* pItem, const SpellCastTargets& pTargets)
+bool ItemUse_item_orb_of_draconic_energy(Player* pPlayer, Item* pItem, const SpellCastTargets& /*pTargets*/)
 {
     Creature* pEmberstrife = GetClosestCreatureWithEntry(pPlayer, NPC_EMBERSTRIFE, 20.0f);
     if (!pEmberstrife)

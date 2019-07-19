@@ -6964,7 +6964,7 @@ bool Spell::DoSummonTotem(CreatureSummonPositions& list, SpellEffectIndex eff_id
     return false;
 }
 
-bool Spell::DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectIndex effIdx, uint32 level)
+bool Spell::DoSummonPossessed(CreatureSummonPositions& list, SummonPropertiesEntry const* prop, SpellEffectIndex effIdx, uint32 /*level*/)
 {
     MANGOS_ASSERT(!list.empty() && prop);
 
@@ -7402,7 +7402,7 @@ void Spell::EffectAddFarsight(SpellEffectIndex eff_idx)
     ((Player*)m_caster)->GetCamera().SetView(dynObj);
 }
 
-void Spell::EffectTeleUnitsFaceCaster(SpellEffectIndex eff_idx)
+void Spell::EffectTeleUnitsFaceCaster(SpellEffectIndex /*eff_idx*/)
 {
     if (!unitTarget)
         return;
@@ -12703,7 +12703,7 @@ void Spell::EffectBlock(SpellEffectIndex /*eff_idx*/)
     m_caster->SetCanBlock(true);
 }
 
-void Spell::EffectLeapForward(SpellEffectIndex eff_idx)
+void Spell::EffectLeapForward(SpellEffectIndex /*eff_idx*/)
 {
     if (!unitTarget)
         return;

@@ -110,7 +110,7 @@ enum
 };
 
 // Two NPCs spawn when AT-1786 is triggered
-bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* pAt)
+bool AreaTrigger_at_shadowforge_bridge(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
     if (instance_blackrock_depths* pInstance = (instance_blackrock_depths*)pPlayer->GetInstanceData())
     {
@@ -830,7 +830,7 @@ bool GossipSelect_npc_mistress_nagmara(Player* pPlayer, Creature* pCreature, uin
     return true;
 }
 
-bool QuestRewarded_npc_mistress_nagmara(Player* pPlayer, Creature* pCreature, Quest const* pQuest)
+bool QuestRewarded_npc_mistress_nagmara(Player* /*pPlayer*/, Creature* pCreature, Quest const* pQuest)
 {
     ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
 
@@ -1671,7 +1671,7 @@ struct boss_plugger_spazzringAI : public ScriptedAI
         m_uiCurseOfTonguesTimer  = 17000;
     }
 
-    void JustDied(Unit* pKiller) override
+    void JustDied(Unit* /*pKiller*/) override
     {
         if (!m_pInstance)
             return;

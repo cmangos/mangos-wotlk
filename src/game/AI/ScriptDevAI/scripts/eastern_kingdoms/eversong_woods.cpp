@@ -236,7 +236,7 @@ bool QuestAccept_npc_kelerun_bloodmourn(Player* pPlayer, Creature* pCreature, co
     return true;
 }
 
-bool GOUse_go_harbinger_second_trial(Player* pPlayer, GameObject* pGO)
+bool GOUse_go_harbinger_second_trial(Player* /*pPlayer*/, GameObject* pGO)
 {
     if (pGO->GetGoType() == GAMEOBJECT_TYPE_GOOBER)
     {

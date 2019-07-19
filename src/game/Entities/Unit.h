@@ -2407,12 +2407,12 @@ class Unit : public WorldObject
         SpellAuraProcResult HandleRemoveByDamageChanceProc(ProcExecutionData& data);
         SpellAuraProcResult HandleInvisibilityAuraProc(ProcExecutionData& data);
         SpellAuraProcResult HandlePeriodicAuraProc(ProcExecutionData& data);
-        SpellAuraProcResult HandleNULLProc(ProcExecutionData& data)
+        SpellAuraProcResult HandleNULLProc(ProcExecutionData& /*data*/)
         {
             // no proc handler for this aura type
             return SPELL_AURA_PROC_OK;
         }
-        SpellAuraProcResult HandleCantTrigger(ProcExecutionData& data)
+        SpellAuraProcResult HandleCantTrigger(ProcExecutionData& /*data*/)
         {
             // this aura type can't proc
             return SPELL_AURA_PROC_CANT_TRIGGER;

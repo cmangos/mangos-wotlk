@@ -305,7 +305,7 @@ struct boss_alarAI : public ScriptedAI
         }
     }
 
-    void JustPreventedDeath(Unit* attacker) override
+    void JustPreventedDeath(Unit* /*attacker*/) override
     {
         // Only init fake in phase one
         if (m_uiPhase != PHASE_ONE || !m_canMelee)

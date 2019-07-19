@@ -127,7 +127,7 @@ struct boss_leotheras_the_blindAI : public ScriptedAI
             m_charmTargets.insert(pTarget->GetObjectGuid());
     }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
         if (pSpell->Id == SPELL_WHIRLWIND_PROC)
         {

@@ -143,7 +143,7 @@ struct npc_ancestral_wolfAI : public npc_escortAI
 
     void AttackStart(Unit* /*pWho*/) override { }
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateEscortAI(const uint32 uiDiff) override { };
+    void UpdateEscortAI(const uint32 /*uiDiff*/) override { };
 
     void WaypointReached(uint32 uiPointId) override
     {
@@ -897,7 +897,7 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
         }
     }
 
-    void JustDied(Unit* pKiller) override
+    void JustDied(Unit* /*pKiller*/) override
     {
         if (m_bEventInProgress)
         {
@@ -1342,7 +1342,7 @@ struct npc_living_flareAI : public ScriptedPetAI
         }
     }
 
-    void MovementInform(uint32 uiMovementType, uint32 uiPointId) override
+    void MovementInform(uint32 /*uiMovementType*/, uint32 uiPointId) override
     {
         if (!uiPointId)
             return;
@@ -1847,7 +1847,7 @@ struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatActions
         }
     }
 
-    void MovementInform(uint32 movementType, uint32 data) override
+    void MovementInform(uint32 /*movementType*/, uint32 data) override
     {
         switch (data)
         {
@@ -1959,7 +1959,7 @@ struct npc_krunAI : public ScriptedAI, public TimerManager
         
     }
 
-    void MovementInform(uint32 movementType, uint32 data) override
+    void MovementInform(uint32 /*movementType*/, uint32 data) override
     {
         switch (data)
         {
@@ -2047,7 +2047,7 @@ UnitAI* GetAI_npc_maghar_escort(Creature* creature)
     return new npc_maghar_escortAI(creature);
 }
 
-bool ProcessEventId_sedai_vision(uint32 eventId, Object* source, Object* target, bool isStart)
+bool ProcessEventId_sedai_vision(uint32 /*eventId*/, Object* source, Object* /*target*/, bool /*isStart*/)
 {
     if (Creature* sedai = GetClosestCreatureWithEntry((WorldObject*)source, NPC_SEDAI, 100.0f))
         return false;

@@ -1498,7 +1498,7 @@ enum
     SOUND_ZEPPELIN_HORN           = 11804,
 };
 
-bool ProcessEventTransports(uint32 uiEventId, Object* pSource, Object* pTarget, bool bIsStart)
+bool ProcessEventTransports(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
 {
     sWorldState.HandleConditionStateChange(pSource->GetEntry(), uiEventId);
 

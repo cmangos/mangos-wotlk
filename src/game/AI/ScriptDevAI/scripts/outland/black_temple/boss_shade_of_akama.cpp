@@ -228,7 +228,7 @@ struct npc_akamaAI : public ScriptedAI, public CombatActions, private DialogueHe
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* invoker, uint32 /*miscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
@@ -280,7 +280,7 @@ struct npc_akamaAI : public ScriptedAI, public CombatActions, private DialogueHe
             respawnDelay = 5 * MINUTE - 30;
     }
 
-    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType damagetype, SpellEntry const* spellInfo) override
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (damage >= m_creature->GetHealth())
         {
@@ -528,7 +528,7 @@ struct boss_shade_of_akamaAI : public ScriptedAI
         m_creature->HandleEmote(EMOTE_STATE_STUN);
     }
 
-    void Aggro(Unit* enemy) override
+    void Aggro(Unit* /*enemy*/) override
     {
         m_creature->HandleEmote(0);
     }
@@ -576,7 +576,7 @@ struct boss_shade_of_akamaAI : public ScriptedAI
         }
     }
 
-    void SpellHit(Unit* caster, const SpellEntry* spell) override
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spell) override
     {
         if (spell->Id == SPELL_AKAMA_SOUL_CHANNEL)
             m_creature->GetMotionMaster()->MovePoint(1, akamaWaypoints[1].x, akamaWaypoints[1].y, akamaWaypoints[1].z);

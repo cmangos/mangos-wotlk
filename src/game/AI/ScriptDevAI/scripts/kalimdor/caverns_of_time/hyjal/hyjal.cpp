@@ -1209,7 +1209,7 @@ void instance_mount_hyjal::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
-void instance_mount_hyjal::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId, uint32 areaId)
+void instance_mount_hyjal::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 /*zoneId*/, uint32 /*areaId*/)
 {
     FillInitialWorldStateData(data, count, WORLD_STATE_MOUNT_HYJAL_ENABLE, m_hyjalOverheadEnable);
     FillInitialWorldStateData(data, count, WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, m_hyjalEnemyCount);

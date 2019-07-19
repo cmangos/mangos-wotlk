@@ -334,13 +334,13 @@ struct boss_illidari_councilAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* /*pDoneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         int32 uiDamageTaken = (int32)damage;
         m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_DAM, &uiDamageTaken, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
     }
 
-    void HealedBy(Unit* pHealer, uint32& uiHealedAmount) override
+    void HealedBy(Unit* /*pHealer*/, uint32& uiHealedAmount) override
     {
         int32 uHealTaken = (int32)uiHealedAmount;
         m_creature->CastCustomSpell(m_creature, SPELL_SHARED_RULE_HEAL, &uHealTaken, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);

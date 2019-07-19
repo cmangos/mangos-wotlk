@@ -319,7 +319,7 @@ enum
     GOSSIP_TEXT_AURIUS_3  = 3757,
 };
 
-bool QuestRewarded_npc_aurius(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestRewarded_npc_aurius(Player* /*pPlayer*/, Creature* pCreature, const Quest* pQuest)
 {
     ScriptedInstance* pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
 

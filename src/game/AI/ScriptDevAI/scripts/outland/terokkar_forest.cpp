@@ -1179,7 +1179,7 @@ struct npc_avatar_of_terokkAI : public ScriptedAI
         m_uiAbilityTimer = 4000;
     }
 
-    void JustDied(Unit* pKiller) override
+    void JustDied(Unit* /*pKiller*/) override
     {
         if (Creature* grashna = GetClosestCreatureWithEntry(m_creature, NPC_DEFENDER_GRASHNA, 100.0f))
         {

@@ -1740,7 +1740,7 @@ struct npc_aoe_damage_triggerAI : public Scripted_NoMovementAI
 
     void AttackStart(Unit* /*pWho*/) override { }
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 uiDiff) override {}
+    void UpdateAI(const uint32 /*uiDiff*/) override {}
 };
 
 UnitAI* GetAI_npc_aoe_damage_trigger(Creature* pCreature)
@@ -1769,7 +1769,7 @@ struct npc_the_cleanerAI : public ScriptedAI
         m_uiDespawnTimer = 3000;
     }
 
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_CLEANER_AGGRO, m_creature);
     }
@@ -2168,7 +2168,7 @@ struct npc_mojoAI : public ScriptedAI
         m_creature->GetMotionMaster()->MoveFollow(m_creature->GetOwner(), 2.0f, M_PI_F / 2.0f);
     }
 
-    void SpellHit(Unit* caster, const SpellEntry* spell) override
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spell) override
     {
         if (spell->Id == SPELL_HEARTS)
         {

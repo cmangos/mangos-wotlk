@@ -230,7 +230,7 @@ struct npc_manaforge_spawnAI : public ScriptedAI
             }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 /*uiDiff*/) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
@@ -1760,7 +1760,7 @@ struct npc_drijyaAI : public npc_escortAI
         }
     }
 
-    void AttackedBy(Unit* pWho) override
+    void AttackedBy(Unit* /*pWho*/) override
     {
         if (!m_uiSayCount)
         {
@@ -2435,7 +2435,7 @@ struct npc_salhadaarAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* killer) override
+    void JustDied(Unit* /*killer*/) override
     {
         for (const auto& summonedCreature : m_uiSummoned)    // despawn all summoned creatures
             if (Creature* summon = m_creature->GetMap()->GetCreature(summonedCreature))
@@ -2554,7 +2554,7 @@ struct npc_energy_ballAI : public ScriptedAI
             m_creature->CastSpell(nullptr, SPELL_SALAADIN_TESLA, TRIGGERED_NONE);
     }
 
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
+    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
         if (pSpell->Id == SPELL_PROTECTORATE_DISRUPTOR) // recast beam after one minute if player doesnt engage mob
         {
@@ -2914,7 +2914,7 @@ struct npc_scrapped_fel_reaverAI : ScriptedAI
         ScriptedAI::JustRespawned();
     }
 
-    void JustDied(Unit* killer) override
+    void JustDied(Unit* /*killer*/) override
     {
         for (uint32 i = 0; i < COUNT_SPAWNING_LOCATIONS; i++)
         {

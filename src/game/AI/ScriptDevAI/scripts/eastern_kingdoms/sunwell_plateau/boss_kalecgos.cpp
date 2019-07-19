@@ -148,7 +148,7 @@ struct boss_kalecgosAI : public ScriptedAI
             m_pInstance->SetData(TYPE_KALECGOS, IN_PROGRESS);
     }
 
-    void JustPreventedDeath(Unit* attacker) override
+    void JustPreventedDeath(Unit* /*attacker*/) override
     {
         // If Sathrovarr is not banished yet, then banish the boss
         if (!m_bIsUncorrupted)
@@ -355,7 +355,7 @@ struct boss_sathrovarrAI : public ScriptedAI
         m_creature->SummonCreature(NPC_KALECGOS_HUMAN, aKalecHumanLoc[0], aKalecHumanLoc[1], aKalecHumanLoc[2], aKalecHumanLoc[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
     }
 
-    void JustPreventedDeath(Unit* attacker) override
+    void JustPreventedDeath(Unit* /*attacker*/) override
     {
         if (m_bIsBanished)
             return;

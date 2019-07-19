@@ -328,7 +328,7 @@ struct npc_doom_blossomAI : public ScriptedAI, public TimerManager
         m_creature->GetMotionMaster()->MovePoint(1, summoned->GetPositionX(), summoned->GetPositionY(), summoned->GetPositionZ());
     }
 
-    void MovementInform(uint32 motionType, uint32 data) override
+    void MovementInform(uint32 motionType, uint32 /*data*/) override
     {
         if (motionType != POINT_MOTION_TYPE)
             return;

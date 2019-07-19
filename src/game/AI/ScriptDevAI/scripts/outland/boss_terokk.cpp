@@ -329,7 +329,7 @@ UnitAI* GetAI_boss_terokk(Creature* pCreature)
     return new boss_terokkAI(pCreature);
 }
 
-bool ProcessEventId_event_summon_terokk(uint32 eventId, Object* source, Object* /*pTarget*/, bool isStart)
+bool ProcessEventId_event_summon_terokk(uint32 /*eventId*/, Object* source, Object* /*pTarget*/, bool /*isStart*/)
 {
     Player* player = (Player*)source;
     if (player->GetMap()->SpawnedCountForEntry(NPC_TEROKK) == 0)

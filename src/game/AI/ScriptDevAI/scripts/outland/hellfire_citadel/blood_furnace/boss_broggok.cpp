@@ -85,7 +85,7 @@ struct boss_broggokAI : public ScriptedAI
     }
 
     // Reset Orientation
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+    void MovementInform(uint32 /*uiMotionType*/, uint32 uiPointId) override
     {
         if (uiPointId != POINT_EVENT_COMBAT)
             return;

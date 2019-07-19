@@ -71,7 +71,7 @@ void HostileRefManager::addThreatPercent(int32 threatPercent)
     }
 }
 
-void HostileRefManager::threatTemporaryFade(Unit* victim, float threat, bool apply)
+void HostileRefManager::threatTemporaryFade(Unit* /*victim*/, float threat, bool apply)
 {
     HostileReference* ref = getFirst();
 
