@@ -8877,6 +8877,19 @@ void Aura::PeriodicTick()
             DETAIL_FILTER_LOG(LOG_FILTER_PERIODIC_AFFECTS, "PeriodicTick: %s power leech of %s for %u dmg inflicted by %u",
                               GetCasterGuid().GetString().c_str(), target->GetGuidStr().c_str(), pdamage, GetId());
 
+            switch (GetId())
+            {
+                case 32960:                                 // Mark of Kazzak
+                {
+                    if (target->GetTypeId() == TYPEID_PLAYER && target->GetPowerType() == POWER_MANA)
+                    {
+                        // Drain 5% of target's mana
+                        pdamage = target->GetMaxPower(POWER_MANA) * 5 / 100;
+                    }
+                    break;
+                }
+            }
+
             int32 drain_amount = target->GetPower(power) > pdamage ? pdamage : target->GetPower(power);
 
             drain_amount -= target->GetResilienceRatingDamageReduction(uint32(drain_amount), SpellDmgClass(spellProto->DmgClass), false, power);
@@ -8896,13 +8909,15 @@ void Aura::PeriodicTick()
             SpellPeriodicAuraLogInfo pInfo(this, drain_amount, 0, 0, 0, gain_multiplier);
             target->SendPeriodicAuraLog(&pInfo);
 
-            if (int32 gain_amount = int32(drain_amount * gain_multiplier))
+            int32 gainCalculated = int32(drain_amount * gain_multiplier);
+            int32 gain = gainCalculated;
+            if (gainCalculated)
             {
-                int32 gain = pCaster->ModifyPower(power, gain_amount);
+                gain = pCaster->ModifyPower(power, gainCalculated);
 
                 if (GetSpellProto()->IsFitToFamily(SPELLFAMILY_WARLOCK, 0x0000000000000010)) // Drain Mana
                     if (Aura* petPart = GetHolder()->GetAuraByEffectIndex(EFFECT_INDEX_1))
-                        if (int pet_gain = gain_amount * petPart->GetModifier()->m_amount / 100)
+                        if (int32 pet_gain = gainCalculated * petPart->GetModifier()->m_amount / 100)
                             pCaster->CastCustomSpell(pCaster, 32554, &pet_gain, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
 
                 target->AddThreat(pCaster, float(gain) * 0.5f, pInfo.critical, GetSpellSchoolMask(spellProto), spellProto);
@@ -8911,22 +8926,9 @@ void Aura::PeriodicTick()
             // Some special cases
             switch (GetId())
             {
-                case 32960:                                 // Mark of Kazzak
-                {
-                    if (target->GetTypeId() == TYPEID_PLAYER && target->GetPowerType() == POWER_MANA)
-                    {
-                        // Drain 5% of target's mana
-                        pdamage = target->GetMaxPower(POWER_MANA) * 5 / 100;
-                        drain_amount = target->GetPower(POWER_MANA) > pdamage ? pdamage : target->GetPower(POWER_MANA);
-                        target->ModifyPower(POWER_MANA, -drain_amount);
-
-                        SpellPeriodicAuraLogInfo info(this, drain_amount, 0, 0, 0, 0.0f);
-                        target->SendPeriodicAuraLog(&info);
-                    }
-                    // no break here
-                }
                 case 21056:                                 // Mark of Kazzak
                 case 31447:                                 // Mark of Kaz'rogal
+                case 32960:                                 // Mark of Kazzak
                 {
                     uint32 triggerSpell = 0;
                     switch (GetId())
