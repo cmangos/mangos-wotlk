@@ -91,7 +91,7 @@ struct boss_kazrogalAI : public ScriptedAI
             case KAZROGAL_ACTION_WAR_STOMP: return urand(15000, 30000);
             case KAZROGAL_ACTION_CRIPPLE: return urand(12000, 20000);
             case KAZROGAL_ACTION_MARK_OF_KAZROGAL: 
-                return 45000 - std::min(m_markOfKazrogalCounter, uint32(7)) * 5000; // reduce each use by 5000 until 10000
+                return 45000 - std::min(m_markOfKazrogalCounter, uint32(8)) * 5000; // reduce each use by 5000 until 5000
             default: return 0; // never occurs but for compiler
         }
     }
