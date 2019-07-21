@@ -218,7 +218,10 @@ struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI, public TimerMan
     {
         // Self kill when the Essence of Anger is killed
         if (summoned->GetEntry() == NPC_ESSENCE_ANGER)
+        {
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+            m_creature->CombatStop();
+        }
     }
 
     void SummonedMovementInform(Creature* summoned, uint32 moveType, uint32 pointId) override
