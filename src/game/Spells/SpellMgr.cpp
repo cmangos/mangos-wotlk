@@ -899,8 +899,8 @@ uint32 GetAffectedTargets(SpellEntry const* spellInfo, Unit* caster)
         {
             switch (spellInfo->Id)
             {
-                case 23603:								// Wild Polymorph (BWL, Nefarian)
-                case 38194:								// Blink
+                case 23603:                             // Wild Polymorph (BWL, Nefarian)
+                case 38194:                             // Blink
                     return 1;
                 default:
                     break;
@@ -926,6 +926,17 @@ uint32 GetAffectedTargets(SpellEntry const* spellInfo, Unit* caster)
         {
             if (spellInfo->SpellIconID == 1737)           // Corpse Explosion // TODO - spell 50445?
                 return 1;
+            break;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            switch (spellInfo->Id)
+            {
+                case 26180:                                 // Wyvern Sting (AQ40, Princess Huhuran)
+                    return 10;
+                default:
+                    break;
+            }
             break;
         }
         default:
