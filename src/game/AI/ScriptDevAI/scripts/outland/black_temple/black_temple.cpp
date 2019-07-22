@@ -210,9 +210,12 @@ void instance_black_temple::OnObjectCreate(GameObject* go)
             if (m_auiEncounter[TYPE_SHAHRAZ] == DONE)
                 go->SetGoState(GO_STATE_ACTIVE);
             break;
+        case GO_ILLIDAN_GATE:                               // Gate leading to Temple Summit
+            if (m_auiEncounter[TYPE_ILLIDAN] == DONE)
+                go->SetGoState(GO_STATE_ACTIVE);
+            break;
         case GO_PRE_COUNCIL_DOOR:                           // Door leading to the Council (grand promenade)
         case GO_COUNCIL_DOOR:                               // Door leading to the Council (inside)
-        case GO_ILLIDAN_GATE:                               // Gate leading to Temple Summit
         case GO_ILLIDAN_DOOR_R:                             // Right door at Temple Summit
         case GO_ILLIDAN_DOOR_L:                             // Left door at Temple Summit
             break;
@@ -412,7 +415,7 @@ void instance_black_temple::DoOpenPreMotherDoor()
 
 void instance_black_temple::DoTeleportAkamaIfCan()
 {
-    if (GetData(TYPE_COUNCIL) != DONE || m_akamaIllidanSequence)
+    if (GetData(TYPE_COUNCIL) != DONE || m_akamaIllidanSequence || GetData(TYPE_ILLIDAN) == DONE)
         return;
 
     Creature* akama = GetSingleCreatureFromStorage(NPC_AKAMA, true);

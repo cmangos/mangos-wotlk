@@ -1437,6 +1437,8 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
         // Respawn after 10 seconds
         if (m_instance->GetData(TYPE_ILLIDAN) == FAIL)
             respawnDelay = 10;
+        else if (m_instance->GetData(TYPE_ILLIDAN) == DONE)
+            respawnDelay = 720000;
     }
 
     void MovementInform(uint32 moveType, uint32 pointId) override
@@ -1673,14 +1675,7 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
     {
         DialogueUpdate(diff);
 
-        UpdateTimers(diff, m_creature->isInCombat());
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        ExecuteActions();
-
-        DoMeleeAttackIfReady();
+        CombatAI::UpdateAI(diff);
     }
 };
 
