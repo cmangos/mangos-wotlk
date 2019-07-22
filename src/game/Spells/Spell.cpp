@@ -8552,6 +8552,15 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex)
 {
     switch (m_spellInfo->Id)
     {
+        case 26052: // Poison Bolt Volley (spell hits only the 15 closest targets)
+        {
+            if (filterUnitList.size() > m_affectedTargetCount)
+            {
+                filterUnitList.sort(TargetDistanceOrderNear(m_caster));
+                filterUnitList.resize(m_affectedTargetCount);
+            }
+            return;
+        }
         case 30284: // Change Facing - Chess event - QOL to pick deterministically closest target
         case 37144: // Move - Chess event - same QOL change
         case 37146:
