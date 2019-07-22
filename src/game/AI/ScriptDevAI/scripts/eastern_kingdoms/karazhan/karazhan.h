@@ -134,6 +134,7 @@ enum
     GO_RAJ_BACKDROP                 = 183443,
     GO_RAJ_MOON                     = 183494,
     GO_RAJ_BALCONY                  = 183495,
+    GO_CHESSBOARD                   = 185324,
 
     // Chess event spells
     SPELL_CLEAR_BOARD               = 37366,                    // spell cast to clear the board at the end of the event

@@ -189,6 +189,7 @@ void instance_karazhan::OnObjectCreate(GameObject* pGo)
         case GO_MASTERS_TERRACE_DOOR_1:
         case GO_MASTERS_TERRACE_DOOR_2:
         case GO_BLACKENED_URN:
+        case GO_CHESSBOARD:
             break;
 
         // Opera event backgrounds
@@ -478,13 +479,9 @@ void instance_karazhan::DoPrepareChessEvent()
         }
     }
 
-    // add silence debuff
-    Map::PlayerList const& players = instance->GetPlayers();
-    for (const auto& player : players)
-    {
-        if (Player* pPlayer = player.getSource())
-            pPlayer->CastSpell(pPlayer, SPELL_GAME_IN_SESSION, TRIGGERED_OLD_TRIGGERED);
-    }
+    if (GameObject* chessboard = GetSingleGameObjectFromStorage(GO_CHESSBOARD))
+        if (GameObjectAI* ai = chessboard->AI())
+            ai->ReceiveAIEvent(AI_EVENT_CUSTOM_A, uint32(true));
 
     m_uiAllianceStalkerCount = 0;
     m_uiHordeStalkerCount = 0;
@@ -583,13 +580,9 @@ void instance_karazhan::DoFailChessEvent()
         pMedivh->CastSpell(pMedivh, SPELL_CLEAR_BOARD, TRIGGERED_OLD_TRIGGERED);
     }
 
-    // remove silence debuff
-    Map::PlayerList const& players = instance->GetPlayers();
-    for (const auto& player : players)
-    {
-        if (Player* pPlayer = player.getSource())
-            pPlayer->RemoveAurasDueToSpell(SPELL_GAME_IN_SESSION);
-    }
+    if (GameObject* chessboard = GetSingleGameObjectFromStorage(GO_CHESSBOARD))
+        if (GameObjectAI* ai = chessboard->AI())
+            ai->ReceiveAIEvent(AI_EVENT_CUSTOM_A, uint32(false));
 
     // chess figures stop attacking
     for (ObjectGuid guid : m_lChessPiecesAlliance)
@@ -645,13 +638,9 @@ void instance_karazhan::DoFinishChessEvent()
         pMedivh->CastSpell(pMedivh, SPELL_CLEAR_BOARD, TRIGGERED_OLD_TRIGGERED);
     }    
 
-    // remove silence debuff
-    Map::PlayerList const& players = instance->GetPlayers();
-    for (const auto& player : players)
-    {
-        if (Player* pPlayer = player.getSource())
-            pPlayer->RemoveAurasDueToSpell(SPELL_GAME_IN_SESSION);
-    }
+    if (GameObject* chessboard = GetSingleGameObjectFromStorage(GO_CHESSBOARD))
+        if (GameObjectAI* ai = chessboard->AI())
+            ai->ReceiveAIEvent(AI_EVENT_CUSTOM_A, uint32(false));
 
     // chess figures stop attacking
     for (ObjectGuid guid : m_lChessPiecesAlliance)

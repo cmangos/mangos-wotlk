@@ -1678,10 +1678,11 @@ enum
 // This is a first attempt to implement GO type 30 behaviour
 struct go_aura_generator_000AI : public GameObjectAI
 {
-    go_aura_generator_000AI(GameObject* go) : GameObjectAI(go), m_auraSearchTimer(1000) {}
+    go_aura_generator_000AI(GameObject* go) : GameObjectAI(go), m_auraSearchTimer(1000), m_spellInfo(sSpellTemplate.LookupEntry<SpellEntry>(SPELL_OSCILLATING_FREQUENCY_SCANNER)) {}
 
     uint32 m_auraSearchTimer;
     ObjectGuid m_player;
+    SpellEntry const* m_spellInfo;
 
     void UpdateAI(const uint32 diff) override
     {
@@ -1692,7 +1693,7 @@ struct go_aura_generator_000AI : public GameObjectAI
             {
                 float x, y, z;
                 m_go->GetPosition(x, y, z);
-                auto bounds = player->GetSpellAuraHolderBounds(37407);
+                auto bounds = player->GetSpellAuraHolderBounds(m_spellInfo->Id);
                 SpellAuraHolder* myHolder = nullptr;
                 for (auto itr = bounds.first; itr != bounds.second; ++itr)
                 {
@@ -1703,14 +1704,13 @@ struct go_aura_generator_000AI : public GameObjectAI
                         break;
                     }
                 }
-                bool isCloseEnough = player->GetDistance(x, y, z, DIST_CALC_COMBAT_REACH) < 25.f; // value comes from spell and go template
+                bool isCloseEnough = player->GetDistance(x, y, z, DIST_CALC_COMBAT_REACH) < GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[EFFECT_INDEX_0]));
                 if (!myHolder)
                 {
                     if (isCloseEnough)
                     {
-                        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_OSCILLATING_FREQUENCY_SCANNER);
-                        myHolder = CreateSpellAuraHolder(spellInfo, player, m_go);
-                        GameObjectAura* Aur = new GameObjectAura(spellInfo, EFFECT_INDEX_0, nullptr, nullptr, myHolder, player, m_go);
+                        myHolder = CreateSpellAuraHolder(m_spellInfo, player, m_go);
+                        GameObjectAura* Aur = new GameObjectAura(m_spellInfo, EFFECT_INDEX_0, nullptr, nullptr, myHolder, player, m_go);
                         myHolder->AddAura(Aur, EFFECT_INDEX_0);
                         if (!player->AddSpellAuraHolder(myHolder))
                             delete myHolder;
