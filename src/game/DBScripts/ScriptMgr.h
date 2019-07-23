@@ -374,6 +374,7 @@ struct ScriptInfo
         {
             uint32 maxDist;                                 // datalong
             uint32 minDist;                                 // datalong2
+            uint32 fixedDist;                               // datalong3
         } moveDynamic;
 
         struct                                              // SCRIPT_COMMAND_SEND_MAIL (38)
