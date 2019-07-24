@@ -1745,7 +1745,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             float dest_x, dest_y, dest_z;
             target->GetNearPoint(nullptr, dest_x, dest_y, dest_z, target->GetObjectBoundingRadius(), radius, angle, target->IsInWater());
             if (m_spellInfo->Id == 41289)
-                dest_z = 342.9485; // confirmed with sniffs
+                dest_z = 342.9485f; // confirmed with sniffs
             m_targets.setDestination(dest_x, dest_y, dest_z);
             break;
         }
