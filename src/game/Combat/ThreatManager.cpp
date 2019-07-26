@@ -484,6 +484,7 @@ void ThreatManager::addThreatDirectly(Unit* victim, float threat)
         iThreatContainer.addReference(hostileReference);
         hostileReference->addThreat(threat);                // now we add the real threat
         iUpdateNeed = true;
+        getOwner()->TriggerAggroLinkingEvent(victim);
         if (victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->isGameMaster())
             hostileReference->setOnlineOfflineState(false); // GM is always offline
     }
