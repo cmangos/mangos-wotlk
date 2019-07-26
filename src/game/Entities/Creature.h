@@ -498,7 +498,8 @@ struct TrainerSpellData
 };
 
 // max different by z coordinate for creature aggro reaction
-#define CREATURE_Z_ATTACK_RANGE 3
+#define CREATURE_Z_ATTACK_RANGE_MELEE  3
+#define CREATURE_Z_ATTACK_RANGE_RANGED 15
 
 #define MAX_VENDOR_ITEMS 150                                // Limitation in 3.x.x item count in SMSG_LIST_INVENTORY
 
