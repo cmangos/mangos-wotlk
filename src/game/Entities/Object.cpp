@@ -1819,7 +1819,7 @@ void WorldObject::AddObjectToRemoveList()
     GetMap()->AddObjectToRemoveList(this);
 }
 
-Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
+Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map, uint32 phaseMask)
 {
     CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(settings.entry);
     if (!cinfo)
@@ -1830,7 +1830,7 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
 
     TemporarySpawn* creature = new TemporarySpawn(settings.spawner ? settings.spawner->GetObjectGuid() : ObjectGuid());
 
-    CreatureCreatePos pos(map, settings.x, settings.y, settings.z, settings.ori, GetPhaseMask());
+    CreatureCreatePos pos(map, settings.x, settings.y, settings.z, settings.ori, phaseMask);
 
     if (settings.x == 0.0f && settings.y == 0.0f && settings.z == 0.0f && settings.spawner)
     {
@@ -1881,7 +1881,7 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map)
 
 Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang, TempSpawnType spwtype, uint32 despwtime, bool asActiveObject, bool setRun, uint32 pathId, uint32 faction, uint32 modelId, bool spawnCounting, bool forcedOnTop)
 {
-    return WorldObject::SummonCreature(TempSpawnSettings(this, id, x, y, z, ang, spwtype, despwtime, asActiveObject, setRun, pathId, faction, modelId, spawnCounting, forcedOnTop), GetMap());
+    return WorldObject::SummonCreature(TempSpawnSettings(this, id, x, y, z, ang, spwtype, despwtime, asActiveObject, setRun, pathId, faction, modelId, spawnCounting, forcedOnTop), GetMap(), GetPhaseMask());
 }
 
 // how much space should be left in front of/ behind a mob that already uses a space
