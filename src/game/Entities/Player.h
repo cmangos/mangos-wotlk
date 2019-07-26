@@ -1510,9 +1510,6 @@ class Player : public Unit
         uint32 GetSpec();
 #endif
 
-        //! Return collision height sent to client
-        float GetCollisionHeight(bool mounted) const;
-
         /*********************************************************/
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/

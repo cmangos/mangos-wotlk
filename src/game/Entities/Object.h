@@ -52,6 +52,7 @@
 
 #define DEFAULT_WORLD_OBJECT_SIZE       0.388999998569489f      // currently used (correctly?) for any non Unit world objects. This is actually the bounding_radius, like player/creature from creature_model_data
 #define DEFAULT_OBJECT_SCALE            1.0f                    // player/item scale as default, npc/go from database, pets from dbc
+float const DEFAULT_COLLISION_HEIGHT = 2.03128f; // Most common value in dbc
 
 #define MAX_STEALTH_DETECT_RANGE        45.0f
 #define GRID_ACTIVATION_RANGE           45.0f
@@ -747,6 +748,9 @@ class WorldObject : public Object
             GetNearPoint(obj, x, y, z, obj->GetObjectBoundingRadius(), distance2d + GetObjectBoundingRadius() + obj->GetObjectBoundingRadius(), GetAngle(obj));
         }
 
+        bool GetFanningPoint(const Unit* mover, float& x, float& y, float& z, float dist, float angle) const;
+
+        virtual float GetCollisionHeight() const { return 0.f; }
         virtual float GetObjectBoundingRadius() const { return DEFAULT_WORLD_OBJECT_SIZE; }
         virtual float GetCombatReach() const { return 0.f; }
         float GetCombinedCombatReach(WorldObject const* pVictim, bool forMeleeRange = true, float flat_mod = 0.0f) const;
