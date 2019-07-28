@@ -185,12 +185,6 @@ struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI, public TimerMan
         }
     }
 
-    void JustDied(Unit* /*killer*/) override
-    {
-        if (m_instance)
-            m_instance->SetData(TYPE_RELIQUIARY, DONE);
-    }
-
     void AttackStart(Unit* /*who*/) override { }
 
     // TODO: use LOS triggers
@@ -220,7 +214,8 @@ struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI, public TimerMan
         if (summoned->GetEntry() == NPC_ESSENCE_ANGER)
         {
             m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-            m_creature->CombatStop();
+            if (m_instance)
+                m_instance->SetData(TYPE_RELIQUIARY, DONE);
         }
     }
 
@@ -494,7 +489,7 @@ struct boss_essence_of_desireAI : public essence_base_AI
         {
             case DESIRE_ACTION_RUNE_SHIELD: return 15000;
             case DESIRE_ACTION_DEADEN: return 30000;
-            case DESIRE_ACTION_SPIRIT_SHOCK: return urand(5000, 10000);
+            case DESIRE_ACTION_SPIRIT_SHOCK: return 5000; // chain cast during tbc
             default: return 0;
         }
     }
