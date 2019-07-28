@@ -163,12 +163,6 @@ enum
     SPELL_PERMANENT_FEIGN_DEATH         = 29266,        // placed upon advisors on fake death
     SPELL_BANISH                        = 40370,        // not used, should despawn phoenixes when gravity lapse executes
 
-    // Phoenix spell
-    SPELL_BURN                          = 36720,
-    SPELL_EMBER_BLAST                   = 34341,
-    SPELL_REBIRTH                       = 35369,
-    SPELL_PHOENIX_EGG                   = 36724,        // summons phoenix egg
-
     // ***** Creature Entries ********
     NPC_FLAME_STRIKE_TRIGGER            = 21369,
     NPC_PHOENIX                         = 21362,
@@ -1839,206 +1833,6 @@ struct boss_master_engineer_telonicusAI : public advisor_base_ai
     }
 };
 
-/*######
-## mob_phoenix_tk
-######*/
-
-struct mob_phoenix_tkAI : public ScriptedAI
-{
-    mob_phoenix_tkAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
-
-    uint32 m_uiCycleTimer;
-    uint32 m_emberDelayTimer;
-    uint32 m_phoenixRebirthTimer;
-    ObjectGuid m_eggGuid;
-
-    bool m_bFakeDeath;
-    bool m_bBanished;
-
-    void Reset() override
-    {
-        m_uiCycleTimer = 2000;
-        m_bFakeDeath = false;
-        m_bBanished = false;
-        m_emberDelayTimer = 0;
-        m_phoenixRebirthTimer = 0;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_BURN);
-    }
-
-    void EnterEvadeMode() override
-    {
-        // Don't evade during ember blast
-        if (m_bFakeDeath)
-            return;
-
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    void DamageTaken(Unit* /*pKiller*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
-    {
-        if (damage < m_creature->GetHealth())
-            return;
-
-        // Prevent glitch if in fake death
-        if (m_bFakeDeath)
-        {
-            damage = std::min(damage, m_creature->GetHealth() - 1);
-            return;
-        }
-
-        // prevent death
-        damage = std::min(damage, m_creature->GetHealth() - 1);
-        DoSetFakeDeath();
-    }
-
-    void DoSetFakeDeath()
-    {
-        m_bFakeDeath = true;
-
-        m_creature->InterruptNonMeleeSpells(false);
-        m_creature->StopMoving();
-        m_creature->ClearComboPointHolders();
-        m_creature->RemoveAllAurasOnDeath();
-        m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
-        m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        m_creature->ClearAllReactives();
-        m_creature->SetTarget(nullptr);
-        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
-        SetCombatMovement(false);
-
-        m_emberDelayTimer = 1000;
-    }
-
-    void JustSummoned(Creature* summoned) override
-    {
-        m_eggGuid = summoned->GetObjectGuid();
-        summoned->SetCorpseDelay(5); // egg should despawn after 5 seconds when killed
-        summoned->SetImmobilizedState(true); // rooted by default
-    }
-
-    void DoRebirth()
-    {
-        if (m_creature->isAlive())
-        {
-            // Remove fake death if the egg despawns after 15 secs
-            m_creature->RemoveAurasDueToSpell(SPELL_EMBER_BLAST);
-            m_creature->RemoveAurasDueToSpell(SPELL_PHOENIX_EGG);
-            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-
-            if (DoCastSpellIfCan(m_creature, SPELL_REBIRTH) == CAST_OK)
-            {
-                m_creature->SetHealth(m_creature->GetMaxHealth());
-                SetCombatMovement(true);
-                DoStartMovement(m_creature->getVictim());
-                m_bFakeDeath = false;
-
-                DoCastSpellIfCan(m_creature, SPELL_BURN, CAST_TRIGGERED);
-            }
-        }
-    }
-
-    void SummonedCreatureJustDied(Creature* /*pSummoned*/) override
-    {
-        // Self kill if the egg is killed
-        if (m_bFakeDeath)
-            m_creature->ForcedDespawn();
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
-    {
-        if (eventType == AI_EVENT_CUSTOM_A)
-            if (Creature* egg = m_creature->GetMap()->GetCreature(m_eggGuid))
-                egg->ForcedDespawn();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_emberDelayTimer)
-        {
-            if (m_emberDelayTimer <= uiDiff)
-            {
-                m_emberDelayTimer = 0;
-                // Spawn egg and make invisible
-                DoCastSpellIfCan(m_creature, SPELL_EMBER_BLAST, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_PHOENIX_EGG, CAST_TRIGGERED); // infinite duration
-                m_phoenixRebirthTimer = 15000;
-            }
-            else
-                m_emberDelayTimer -= uiDiff;
-        }
-
-        if (m_phoenixRebirthTimer)
-        {
-            if (m_phoenixRebirthTimer <= uiDiff)
-            {
-                m_phoenixRebirthTimer = 0;
-                if (Creature* egg = m_creature->GetMap()->GetCreature(m_eggGuid))
-                    egg->ForcedDespawn();
-
-                DoRebirth();
-            }
-            else
-                m_phoenixRebirthTimer -= uiDiff;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
-            return;
-
-        if (m_bFakeDeath)
-            return;
-
-        if (m_creature->HasAura(SPELL_BANISH))
-            m_bBanished = true;
-
-        else if (!m_creature->HasAura(SPELL_BANISH))
-            m_bBanished = false;
-
-        if (m_bBanished)
-            return;
-
-        // ToDo: research if this is correct and how can this be done by spell
-        if (m_uiCycleTimer <= uiDiff)
-        {
-            // spell Burn should possible do this, but it doesn't, so do this for now.
-            uint32 uiDmg = urand(4500, 5500);
-            if (uiDmg > m_creature->GetHealth())
-                DoSetFakeDeath();
-            else
-                m_creature->DealDamage(m_creature, uiDmg, nullptr, DOT, SPELL_SCHOOL_MASK_FIRE, nullptr, false);
-
-            m_uiCycleTimer = 2000;
-        }
-        else
-            m_uiCycleTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-    }
-};
-
-/*######
-## mob_phoenix_egg_tk
-######*/
-
-// TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct mob_phoenix_egg_tkAI : public Scripted_NoMovementAI
-{
-    mob_phoenix_egg_tkAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
-    {
-        Reset();
-    }
-
-    void Reset() override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
-};
-
 UnitAI* GetAI_boss_kaelthas(Creature* pCreature)
 {
     return new boss_kaelthasAI(pCreature);
@@ -2062,16 +1856,6 @@ UnitAI* GetAI_boss_grand_astromancer_capernian(Creature* pCreature)
 UnitAI* GetAI_boss_master_engineer_telonicus(Creature* pCreature)
 {
     return new boss_master_engineer_telonicusAI(pCreature);
-}
-
-UnitAI* GetAI_mob_phoenix_tk(Creature* pCreature)
-{
-    return new mob_phoenix_tkAI(pCreature);
-}
-
-UnitAI* GetAI_mob_phoenix_egg_tk(Creature* pCreature)
-{
-    return new mob_phoenix_egg_tkAI(pCreature);
 }
 
 void AddSC_boss_kaelthas()
@@ -2100,15 +1884,5 @@ void AddSC_boss_kaelthas()
     pNewScript = new Script;
     pNewScript->Name = "boss_master_engineer_telonicus";
     pNewScript->GetAI = &GetAI_boss_master_engineer_telonicus;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "mob_phoenix_tk";
-    pNewScript->GetAI = &GetAI_mob_phoenix_tk;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "mob_phoenix_egg_tk";
-    pNewScript->GetAI = &GetAI_mob_phoenix_egg_tk;
     pNewScript->RegisterSelf();
 }

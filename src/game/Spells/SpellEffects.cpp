@@ -9737,6 +9737,164 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastCustomSpell(unitTarget, 42576, &basePoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 42577:                                 // Zap
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(m_caster, 43137, TRIGGERED_NONE);
+                    return;
+                }
+                case 43783:                                 // Spawn Guard
+                {
+                    float pointX = 0;
+                    float pointY = 0;
+                    float pointZ = 0;
+
+                    uint32 guardEntry = 0;
+                    uint32 counter = 0;
+
+                    bool foundPosition = false;
+
+                    switch (m_caster->GetAreaId())
+                    {
+                        case 9:
+                        case 24: guardEntry = 1642;     break;      // Northshire
+                        case 42: guardEntry = 10038;    break;      // Darkshire
+                        case 69: guardEntry = 10037;    break;      // Lakeshire
+                        case 87: guardEntry = 1423;     break;      // Goldshire
+                        case 108: guardEntry = 8096;    break;      // Sentinel Hill
+                        case 131: guardEntry = 727;     break;      // Kharanos
+                        case 132: guardEntry = 853;     break;      // Coldridge Valley
+                        case 144: guardEntry = 8055;    break;      // Thelsamar
+                        case 152:                                   // The Bulwark
+                        case 154:                                   // Deathknell
+                        case 159: guardEntry = 7980;    break;      // Brill
+                        case 188: guardEntry = 4844;    break;      // Shadowglen
+                        case 186: guardEntry = 3571;    break;      // Dolanaar
+                        case 221:                                   // Camp Narache
+                        case 222:                                   // Bloodhoof Village
+                        {
+                            switch (rand() % 4)
+                            {
+                                case 0: guardEntry = 3210; break;
+                                case 1: guardEntry = 3211; break;
+                                case 2: guardEntry = 3213; break;
+                                case 3: guardEntry = 3214; break;
+                            }
+                            break;
+                        }
+                        case 228: guardEntry = 7489;    break;      // Sulpcher
+                        case 271: guardEntry = 2386;    break;      // Southshore
+                        case 272: guardEntry = 2405;    break;      // Tarren Mill
+                        case 320: guardEntry = 10696;   break;      // Refuge Pointe
+                        case 321: guardEntry = 2621;    break;      // Hammerfall
+                        case 340: guardEntry = 8155;    break;      // Kargath
+                        case 362: guardEntry = 5953;    break;      // Razor Hill
+                        case 363: guardEntry = 5952;    break;      // Valley of Trials
+                        case 380: guardEntry = 3501;    break;      // Crossroads
+                        case 415: guardEntry = 6087;    break;      // Astranaar
+                        case 431: guardEntry = 12903;   break;      // Splintertree Post
+                        case 442: guardEntry = 6086;    break;      // Auberdine
+                        case 460: guardEntry = 7730;    break;      // Sun Rock Retreat
+                        case 484: guardEntry = 9525;    break;      // Freewind Post
+                        case 513: guardEntry = 4979;    break;      // Threamore
+                        case 597: guardEntry = 8154;    break;      // Ghost Walker Post
+                        case 608: guardEntry = 8151;    break;      // Nijel's Point
+                        case 1099: guardEntry = 8147;   break;      // Camp Mojache
+                        case 1116: guardEntry = 7939;   break;      // Feathermoon Stronghold
+                        case 1497: guardEntry = 5624;   break;      // Undercity
+                        case 1519: guardEntry = 68;     break;      // Stormwind City 
+                        case 1537: guardEntry = 5595;   break;      // Ironforge
+                        case 1637: guardEntry = 3296;   break;      // Orgrimmar
+                        case 1638: guardEntry = 3084;   break;      // Thunder Bluff
+                        case 1657: guardEntry = 4262;   break;      // Darnassus
+                        case 2408: guardEntry = 12338;  break;      // Shadowprey Village
+                        case 2897: guardEntry = 12903;  break;      // Zoram'gar Outpost
+                        case 3462:                                  // Fairbreeze Village
+                        case 3487:                                  // Silvermoon City
+                        case 3488: guardEntry = 16222;  break;      // Tranquillien
+                        case 3527: guardEntry = 16921;  break;      // Crash Site
+                        case 3557: guardEntry = 16733;  break;      // Exodar
+                        case 3576: guardEntry = 18038;  break;      // Azure Watch
+                        case 3584: guardEntry = 17549;  break;      // Blood Watch
+                        case 3665: guardEntry = 16222;  break;      // Falconwing Square
+                    }
+
+
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->GetRandomPoint(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), 30.0f, pointX, pointY, pointZ, 20.0f);
+
+
+                    while (counter < 100)
+                    {
+                        foundPosition = m_caster->GetMap()->GetReachableRandomPosition(m_caster, pointX, pointY, pointZ, 20.0f);
+
+                        if (foundPosition)
+                            break;
+
+                        counter++;
+                    }
+
+                    // Spawn Guards only if we have random position.
+                    if (foundPosition && guardEntry != 0)
+                    {
+                        Creature* pGuard = m_caster->SummonCreature(guardEntry, pointX, pointY, pointZ, m_caster->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30 * IN_MILLISECONDS);
+
+                        if (pGuard)
+                            pGuard->AI()->AttackStart(m_caster->getAttackerForHelper());
+                    }
+
+                    return;
+                }
+                case 43648:                                 // Akilzon - Electrical Storm
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(nullptr, 44007, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 43658:                                 // Akilzon - Electrical Overload Graphic Pulse
+                {
+                    m_caster->CastSpell(nullptr, 43653, TRIGGERED_OLD_TRIGGERED);
+                    m_caster->CastSpell(nullptr, 43654, TRIGGERED_OLD_TRIGGERED);
+                    m_caster->CastSpell(nullptr, 43655, TRIGGERED_OLD_TRIGGERED);
+                    m_caster->CastSpell(nullptr, 43656, TRIGGERED_OLD_TRIGGERED);
+                    m_caster->CastSpell(nullptr, 43659, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 44008:                                 // Akilzon - Static Disruption
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(nullptr, 45265, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 44224:                                 // Gravity Lapse
+                {
+                    if (!unitTarget)
+                        return;
+
+                    static const uint32 aGravityLapseSpells[] = { 44219, 44220, 44221, 44222, 44223 };
+                    m_caster->CastSpell(unitTarget, aGravityLapseSpells[m_scriptValue], TRIGGERED_OLD_TRIGGERED);
+                    unitTarget->CastSpell(nullptr, 44227, TRIGGERED_OLD_TRIGGERED);
+                    unitTarget->CastSpell(nullptr, 44226, TRIGGERED_OLD_TRIGGERED);
+                    ++m_scriptValue;
+                    return;
+                }
+                case 44232:                                 // Clear Flight
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->RemoveAurasDueToSpell(44227);
+                    unitTarget->RemoveAurasDueToSpell(44226);
+                    return;
+                }
                 case 42399:                                 // Headless Horseman Climax - Send Head
                 {
                     if (unitTarget->GetTypeId() != TYPEID_UNIT)
@@ -10368,10 +10526,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
                 case 47108:                                 // Clear Energy Feedback
                 {
-                    if (unitTarget && unitTarget->IsPlayer())
-                    {
+                    if (unitTarget)
                         unitTarget->RemoveAurasDueToSpell(44335);
-                    }
                     return;
                 }
                 case 47977:                                 // Use Broom

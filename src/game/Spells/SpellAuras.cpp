@@ -2157,6 +2157,22 @@ void Aura::TriggerSpell()
 
                 break;
             }
+            case 36716:                                     // Energy Discharge
+            case 38828:
+            {
+                if (urand(0, 1) == 0) // 50% chance to proc
+                    break;
+                return;
+            }
+            case 36720:                                     // Kael'Thas - Phoenix - Burn
+            case 44197:                                     // MgT Kael'Thas - Phoenix - Burn
+            {
+                uint32 dmg = target->GetMaxHealth() * 0.05f; // 5% dmg every tick
+                uint32 absorb = 0;
+                target->DealDamageMods(target, dmg, &absorb, SELF_DAMAGE);
+                target->DealDamage(target, dmg, nullptr, SELF_DAMAGE, SPELL_SCHOOL_MASK_FIRE, nullptr, false);
+                break; // continue executing rest
+            }
             case 37716:                                     // Demon Link
                 triggerTarget = static_cast<TemporarySpawn*>(target)->GetSpawner();
                 break;
@@ -3242,12 +3258,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             case 44191:                                     // Flame Strike
             {
-                if (target->GetMap()->IsDungeon())
-                {
-                    uint32 spellId = target->GetMap()->IsRegularDifficulty() ? 44190 : 46163;
-
-                    target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                }
+                target->CastSpell(nullptr, target->GetUInt32Value(UNIT_CREATED_BY_SPELL) == 44192 ? 44190 : 46163, TRIGGERED_OLD_TRIGGERED);
                 return;
             }
             case 45934:                                     // Dark Fiend
@@ -6129,8 +6140,8 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 return;
             case 35515:                                     // Salaadin's Tesla
                 if ((m_removeMode != AURA_REMOVE_BY_STACK) && (!target->HasAura(35515)))
-                    if (Creature* creature = (Creature*)target)
-                        creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, creature, creature);
+                    if (UnitAI* ai = target->AI())
+                        ai->SendAIEvent(AI_EVENT_CUSTOM_A, target, target);
                 return;
             case 37640:                                     // Leotheras Whirlwind
                 if (UnitAI* ai = target->AI())
@@ -6159,13 +6170,23 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
             case 42177:                                     // Alert Drums
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                 {
-                    if (Creature* creature = (Creature*)target)
-                        creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, creature, creature);
+                    if (UnitAI * ai = target->AI())
+                        ai->SendAIEvent(AI_EVENT_CUSTOM_B, target, target);
                 }
                 return;
             case 42783:                                     // Wrath of the Astrom...
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE && GetEffIndex() + 1 < MAX_EFFECT_INDEX)
                     target->CastSpell(target, GetSpellProto()->CalculateSimpleValue(SpellEffectIndex(GetEffIndex() + 1)), TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCasterGuid());
+                return;
+            case 43648: // Electrical Storm - Akil'zon - send event
+                if (Unit * caster = GetCaster())
+                    if (UnitAI * ai = caster->AI())
+                        ai->SendAIEvent(AI_EVENT_CUSTOM_A, caster, caster);
+                break;
+            case 44251:                                     // Gravity Lapse Beam Visual Periodic
+                target->CastSpell(nullptr, 44232, TRIGGERED_OLD_TRIGGERED);
+                if (UnitAI * ai = target->AI())
+                    ai->SendAIEvent(AI_EVENT_CUSTOM_A, target, target, m_removeMode == AURA_REMOVE_BY_EXPIRE);
                 return;
             case 46221:                                     // Animal Blood
                 if (target->GetTypeId() == TYPEID_PLAYER && m_removeMode == AURA_REMOVE_BY_DEFAULT && target->IsInWater())
@@ -6182,7 +6203,6 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                     if (Unit* pCaster = GetCaster())
                         pCaster->CastSpell(target, GetSpellProto()->EffectTriggerSpell[GetEffIndex()], TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 }
-
                 return;
             case 70405:                                     // Mutated Transformation (10n)
             case 72508:                                     // Mutated Transformation (25n)
@@ -6327,6 +6347,13 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
                 {
                     if (apply)
                         target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, GetCaster(), target);
+                    break;
+                }
+                case 44328: // Energy Feedback - Vexallus
+                {
+                    if (!apply)
+                        if (Unit * caster = GetCaster())
+                            caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, caster, caster);
                     break;
                 }
                 case 47214: // Burninate Effect

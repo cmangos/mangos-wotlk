@@ -2250,6 +2250,252 @@ UnitAI* GetAI_npc_mojo(Creature *pCreature)
     return new npc_mojoAI(pCreature);
 }
 
+enum
+{
+    SPELL_FIRE_NOVA_TOTEM_1 = 32062,
+    SPELL_FIRE_NOVA_1       = 32167,
+    SPELL_FIRE_NOVA_TOTEM_2 = 43436,
+    SPELL_FIRE_NOVA_2       = 43464,
+    SPELL_FIRE_NOVA_TOTEM_3 = 44257,
+    SPELL_FIRE_NOVA_3       = 46551,
+};
+
+struct npc_fire_nova_totemAI : public ScriptedAI, public TimerManager
+{
+    npc_fire_nova_totemAI(Creature* creature) : ScriptedAI(creature), m_fireNovaSpell(0), m_fireNovaTimer(0)
+    {
+        AddCustomAction(1, true, [&]()
+        {
+            m_creature->CastSpell(nullptr, m_fireNovaSpell, TRIGGERED_NONE);
+            m_creature->ForcedDespawn(1000); // TODO: possibly instakill spell
+        });
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
+    }
+
+    uint32 m_fireNovaSpell;
+    uint32 m_fireNovaTimer;
+
+    void Reset() override
+    {
+
+    }
+
+    void JustRespawned() override
+    {
+        switch (m_creature->GetUInt32Value(UNIT_CREATED_BY_SPELL))
+        {
+            case SPELL_FIRE_NOVA_TOTEM_1: m_fireNovaSpell = SPELL_FIRE_NOVA_1; m_fireNovaTimer = 4000; break;
+            case SPELL_FIRE_NOVA_TOTEM_2: m_fireNovaSpell = SPELL_FIRE_NOVA_2; m_fireNovaTimer = 6000; break;
+            case SPELL_FIRE_NOVA_TOTEM_3: m_fireNovaSpell = SPELL_FIRE_NOVA_3; m_fireNovaTimer = 4000; break;
+        }
+        ResetTimer(1, m_fireNovaTimer);
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff);
+    }
+};
+
+UnitAI* GetAI_npc_fire_nova_totem(Creature* pCreature)
+{
+    return new npc_fire_nova_totemAI(pCreature);
+}
+
+/*######
+## mob_phoenix
+######*/
+
+enum
+{
+    // Common
+    SPELL_FULL_HEAL                     = 17683,
+
+    // Phoenix spell - TK
+    SPELL_BURN_TK                       = 36720,
+    SPELL_EMBER_BLAST_TK                = 34341,
+    SPELL_REBIRTH_SPAWN_TK              = 35369,
+    SPELL_REBIRTH_RESPAWN_TK            = 41587,
+    SPELL_PHOENIX_EGG_TK                = 36724,
+
+    // Mgt
+    SPELL_BURN_MGT                      = 44197,
+    SPELL_EMBER_BLAST_MGT               = 44199,                    // On Phoenix death
+    SPELL_REBIRTH_SPAWN_MGT             = 44196,                    // Used on spawn
+    SPELL_REBIRTH_RESPAWN_MGT           = 44200,                    // Used on respawn
+    SPELL_PHOENIX_EGG_MGT               = 44195,
+
+    NPC_PHOENIX_TK                      = 21362,
+    NPC_PHOENIX_MGT                     = 24674,
+};
+
+struct mob_phoenix_tkAI : public ScriptedAI
+{
+    mob_phoenix_tkAI(Creature* creature) : ScriptedAI(creature)
+    {
+        bool tk = m_creature->GetEntry() == NPC_PHOENIX_TK;
+        if (tk)
+        {
+            m_burnSpellId = SPELL_BURN_TK;
+            m_emberBlastSpellId = SPELL_EMBER_BLAST_TK;
+            m_rebirthSpawnSpellId = SPELL_REBIRTH_SPAWN_TK;
+            m_rebirthRespawnSpellId = SPELL_REBIRTH_RESPAWN_TK;
+            m_phoenixEggSpellId = SPELL_PHOENIX_EGG_TK;
+        }
+        else
+        {
+            m_burnSpellId = SPELL_BURN_MGT;
+            m_emberBlastSpellId = SPELL_EMBER_BLAST_MGT;
+            m_rebirthSpawnSpellId = SPELL_REBIRTH_SPAWN_MGT;
+            m_rebirthRespawnSpellId = SPELL_REBIRTH_RESPAWN_MGT;
+            m_phoenixEggSpellId = SPELL_PHOENIX_EGG_MGT;
+        }
+        SetDeathPrevention(true);
+        Reset();
+    }
+
+    uint32 m_burnSpellId;
+    uint32 m_emberBlastSpellId;
+    uint32 m_rebirthSpawnSpellId;
+    uint32 m_rebirthRespawnSpellId;
+    uint32 m_phoenixEggSpellId;
+
+    uint32 m_emberDelayTimer;
+    uint32 m_phoenixRebirthTimer;
+    ObjectGuid m_eggGuid;
+
+    void Reset() override
+    {
+        m_emberDelayTimer = 0;
+        m_phoenixRebirthTimer = 0;
+    }
+
+    void Aggro(Unit* /*pWho*/) override
+    {
+        DoCastSpellIfCan(nullptr, m_burnSpellId);
+    }
+
+    void JustPreventedDeath(Unit* /*attacker*/) override
+    {
+        DoSetFakeDeath();
+    }
+
+    void DoSetFakeDeath()
+    {
+        m_creature->InterruptNonMeleeSpells(false);
+        m_creature->StopMoving();
+        m_creature->ClearComboPointHolders();
+        m_creature->RemoveAllAurasOnDeath();
+        m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
+        m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        m_creature->ClearAllReactives();
+        m_creature->SetTarget(nullptr);
+        m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
+        SetCombatScriptStatus(true);
+
+        m_emberDelayTimer = 1000;
+    }
+
+    void JustRespawned() override
+    {
+        DoCastSpellIfCan(nullptr, m_rebirthSpawnSpellId);
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        m_eggGuid = summoned->GetObjectGuid();
+        summoned->SetCorpseDelay(5); // egg should despawn after 5 seconds when killed
+        summoned->SetImmobilizedState(true); // rooted by default
+        summoned->AI()->SetReactState(REACT_PASSIVE);
+    }
+
+    void DoRebirth()
+    {
+        if (m_creature->isAlive())
+        {
+            // Remove fake death if the egg despawns after 15 secs
+            m_creature->RemoveAurasDueToSpell(m_emberBlastSpellId);
+            m_creature->RemoveAurasDueToSpell(m_phoenixEggSpellId);
+            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+
+            DoCastSpellIfCan(nullptr, m_rebirthRespawnSpellId);
+        }
+    }
+
+    void SpellHit(Unit* /*caster*/, const SpellEntry* spellInfo) override
+    {
+        if (spellInfo->Id == m_rebirthRespawnSpellId)
+        {
+            m_creature->CastSpell(nullptr, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
+            SetCombatMovement(true);
+            SetMeleeEnabled(true);
+            DoStartMovement(m_creature->getVictim());
+            SetCombatScriptStatus(false);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+            DoCastSpellIfCan(nullptr, m_burnSpellId, CAST_TRIGGERED);
+        }
+    }
+
+    void SummonedCreatureJustDied(Creature* /*summoned*/) override
+    {
+        // Self kill if the egg is killed
+        m_creature->ForcedDespawn();
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+            if (Creature* egg = m_creature->GetMap()->GetCreature(m_eggGuid))
+                egg->ForcedDespawn();
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (m_emberDelayTimer)
+        {
+            if (m_emberDelayTimer <= diff)
+            {
+                m_emberDelayTimer = 0;
+                // Spawn egg and make invisible
+                DoCastSpellIfCan(nullptr, m_emberBlastSpellId, CAST_TRIGGERED);
+                DoCastSpellIfCan(nullptr, m_phoenixEggSpellId, CAST_TRIGGERED);
+                m_phoenixRebirthTimer = m_creature->GetEntry() == NPC_PHOENIX_TK ? 15000 : 10000;
+            }
+            else
+                m_emberDelayTimer -= diff;
+        }
+
+        if (m_phoenixRebirthTimer)
+        {
+            if (m_phoenixRebirthTimer <= diff)
+            {
+                m_phoenixRebirthTimer = 0;
+                if (Creature* egg = m_creature->GetMap()->GetCreature(m_eggGuid))
+                    egg->ForcedDespawn();
+
+                DoRebirth();
+            }
+            else
+                m_phoenixRebirthTimer -= diff;
+        }
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
+};
+
+UnitAI* GetAI_mob_phoenix_tk(Creature* pCreature)
+{
+    return new mob_phoenix_tkAI(pCreature);
+}
+
 void AddSC_npcs_special()
 {
     Script* pNewScript = new Script;
@@ -2348,5 +2594,15 @@ void AddSC_npcs_special()
     pNewScript = new Script;
     pNewScript->Name = "npc_mojo";
     pNewScript->GetAI = &GetAI_npc_mojo;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_fire_nova_totem";
+    pNewScript->GetAI = &GetAI_npc_fire_nova_totem;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "mob_phoenix";
+    pNewScript->GetAI = &GetAI_mob_phoenix_tk;
     pNewScript->RegisterSelf();
 }

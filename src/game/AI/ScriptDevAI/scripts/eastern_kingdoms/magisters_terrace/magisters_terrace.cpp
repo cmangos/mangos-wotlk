@@ -39,6 +39,8 @@ enum
     NPC_KALECGOS                = 24848,                    // human form entry
 
     MAP_ID_MAGISTER             = 585,
+
+    SAY_SPAWN                   = -1585032,
 };
 
 static const float afKaelLandPoint[4] = {200.36f, -270.77f, -8.73f, 0.01f};
@@ -61,6 +63,12 @@ struct npc_kalecgosAI : public ScriptedAI
 
         // Move the dragon to landing point
         m_creature->GetMotionMaster()->MovePoint(1, afKaelLandPoint[0], afKaelLandPoint[1], afKaelLandPoint[2]);
+    }
+
+    void JustRespawned() override
+    {
+        ScriptedAI::JustRespawned();
+        DoScriptText(SAY_SPAWN, m_creature);
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
