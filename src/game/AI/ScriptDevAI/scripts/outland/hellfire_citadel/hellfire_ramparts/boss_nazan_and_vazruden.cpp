@@ -285,7 +285,7 @@ struct boss_vazruden_heraldAI : public ScriptedAI
                     {
                         if (Unit* pEnemy = pVazruden->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                         {
-                            if (DoCastSpellIfCan(pEnemy, m_bIsRegularMode ? SPELL_FIREBALL_GROUND : SPELL_FIREBALL_GROUND_H, 0, pVazruden->GetObjectGuid()) == CAST_OK)
+                            if (DoCastSpellIfCan(pEnemy, m_bIsRegularMode ? SPELL_FIREBALL_GROUND : SPELL_FIREBALL_GROUND_H) == CAST_OK)
                                 m_uiFireballTimer = urand(2100, 7300);
                         }
                     }
