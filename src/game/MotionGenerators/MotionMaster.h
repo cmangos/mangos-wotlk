@@ -88,7 +88,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
 
 
     public:
-        explicit MotionMaster(Unit* unit) : m_owner(unit), m_expList(nullptr), m_cleanFlag(MMCF_NONE), m_defaultPathId(0) {}
+        explicit MotionMaster(Unit* unit) : m_owner(unit), m_expList(nullptr), m_cleanFlag(MMCF_NONE), m_defaultPathId(0), m_currentPathId(0) {}
         ~MotionMaster();
 
         void Initialize();
