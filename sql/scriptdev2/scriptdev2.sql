@@ -3238,7 +3238,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 (-1001318,'You fought well. Now go north to your orc outpost and inform Overlord Bor\'gorok of our success!',0,0,0,113,'proudhoof SAY_QUEST_END'),
 
 -- -1 010 000 Classic texts
-(-1010000,'The beast returns from whence it came. The wrath of Neptulon has subsided.',0,3,0,0,'Maws EMOTE_MAWS_KILL');
+(-1010000,'The beast returns from whence it came. The wrath of Neptulon has subsided.',0,3,0,0,'Maws EMOTE_MAWS_KILL'),
+
+(-1010001,'Beware, $N! Look to the west!',0,0,0,0,'regthar SAY_START_REGTHAR'),
+(-1010002,'A defender has fallen!',0,0,0,0,'regthar SAY_DEFENDER'),
+(-1010003,'The Kolkar invaders are retreating!',0,1,0,0,'regthar YELL_RETREAT');
 
 -- -1 015 000 TBC texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
