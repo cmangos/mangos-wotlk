@@ -8603,10 +8603,10 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex)
         }
         case 42005: // Bloodboil (spell hits only the 5 furthest away targets)
         {
-            if (filterUnitList.size() > 5)
+            if (filterUnitList.size() > m_affectedTargetCount)
             {
                 filterUnitList.sort(TargetDistanceOrderFarAway(m_caster));
-                filterUnitList.resize(5);
+                filterUnitList.resize(m_affectedTargetCount);
             }
             return;
         }
