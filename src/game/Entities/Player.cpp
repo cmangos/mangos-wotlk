@@ -2029,11 +2029,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         SetSemaphoreTeleportNear(true);
         // near teleport, triggering send MSG_MOVE_TELEPORT_ACK from client at landing
         if (!GetSession()->PlayerLogout())
-        {
-            WorldPacket data;
-            BuildTeleportAckMsg(data, x, y, z, orientation);
-            GetSession()->SendPacket(data);
-        }
+            SendTeleportPacket(x, y, z, orientation);
     }
     else
     {
@@ -23005,6 +23001,11 @@ void Player::BuildPlayerTalentsInfoData(WorldPacket& data)
     }
 }
 
+bool Player::HasMovementFlag(MovementFlags f) const
+{
+    return m_movementInfo.HasMovementFlag(f);
+}
+
 void Player::BuildPetTalentsInfoData(WorldPacket& data) const
 {
     uint32 unspentTalentPoints = 0;
@@ -23507,22 +23508,6 @@ void Player::SendClearCooldown(uint32 spell_id, Unit* target) const
     data << uint32(spell_id);
     data << target->GetObjectGuid();
     SendDirectMessage(data);
-}
-
-void Player::BuildTeleportAckMsg(WorldPacket& data, float x, float y, float z, float ang) const
-{
-    MovementInfo mi = m_movementInfo;
-    mi.ChangePosition(x, y, z, ang);
-
-    data.Initialize(MSG_MOVE_TELEPORT_ACK, 64);
-    data << GetPackGUID();
-    data << uint32(0);                                      // this value increments every time
-    data << mi;
-}
-
-bool Player::HasMovementFlag(MovementFlags f) const
-{
-    return m_movementInfo.HasMovementFlag(f);
 }
 
 void Player::ResetTimeSync()
