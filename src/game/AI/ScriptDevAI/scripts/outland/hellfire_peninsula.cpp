@@ -769,7 +769,7 @@ static const DialogueEntry aExorcismDialogue[] =
     {SAY_EXORCISM_5,		    NPC_ANCHORITE_BARADA, 10000},
     {SAY_EXORCISM_6,		    NPC_COLONEL_JULES,	  10000},
     {NPC_ANCHORITE_BARADA,      0,                    10000},
-    {NPC_BUBBLING_SLIMER_BUNNY, 0,					  5000},	// jules moves back 
+    {NPC_BUBBLING_SLIMER_BUNNY, 0,					  5000},	// jules moves back
     {SAY_EXORCISM_7,            NPC_ANCHORITE_BARADA, 3000},	// bara stands, bows
     {NPC_FOUL_PURGE,			0,					  11500},	// bara walks back
     {0, 0, 0}
@@ -794,7 +794,7 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
 
     ObjectGuid m_colonelGuid;
     ObjectGuid m_playerGuid;
- 
+
     void Reset() override
     {
         m_bEventComplete = false;
@@ -990,7 +990,7 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
             bool m_reset = false;
             if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
                 m_reset = !player->IsActiveQuest(QUEST_ID_EXORCISM);
-            else 
+            else
                 m_reset = true;
 
             if (m_reset)
@@ -1285,6 +1285,7 @@ struct npc_living_flareAI : public ScriptedPetAI
     void JustRespawned() override
     {
         m_creature->CastSpell(nullptr, SPELL_LIVING_COSMETIC, TRIGGERED_OLD_TRIGGERED);
+        SetReactState(REACT_PASSIVE);
     }
 
     void SpellHit(Unit* /*caster*/, const SpellEntry* spellInfo) override
@@ -1601,7 +1602,7 @@ struct npc_nazgrelAI : public ScriptedAI
 // 16819/force-commander-danath-trollbane
 bool QuestComplete_npc_nazgrel(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
 {
-    if (pQuest->GetQuestId() == QUEST_FALL_OF_MAGETHERIDON_H) // And trigger yelling        
+    if (pQuest->GetQuestId() == QUEST_FALL_OF_MAGETHERIDON_H) // And trigger yelling
         pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
 
     return true;
@@ -1779,7 +1780,7 @@ struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatActions
 
     void Reset() override
     {
-        
+
     }
 
     void JustRespawned() override
@@ -1944,7 +1945,7 @@ struct npc_krunAI : public ScriptedAI, public TimerManager
 
     void Reset() override
     {
-        
+
     }
 
     void MovementInform(uint32 /*movementType*/, uint32 data) override
