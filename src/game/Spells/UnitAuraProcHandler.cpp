@@ -253,9 +253,9 @@ pAuraProcHandler AuraProcHandler[TOTAL_AURAS] =
     &Unit::HandleNULLProc,                                  //220 SPELL_AURA_MOD_RATING_FROM_STAT
     &Unit::HandleNULLProc,                                  //221 ignored
     &Unit::HandleNULLProc,                                  //222 unused (3.0.8a-3.2.2a) only for spell 44586 that not used in real spell cast
-    &Unit::HandleNULLProc,                                  //223 dummy code (cast damage spell to attacker) and another dymmy (jump to another nearby raid member)
+    &Unit::HandleRaidProcFromChargeAuraProc,                //223 SPELL_AURA_RAID_PROC_FROM_CHARGE
     &Unit::HandleNULLProc,                                  //224 unused (3.0.8a-3.2.2a)
-    &Unit::HandleMendingAuraProc,                           //225 SPELL_AURA_PRAYER_OF_MENDING
+    &Unit::HandleRaidProcFromChargeWithValueAuraProc,       //225 SPELL_AURA_RAID_PROC_FROM_CHARGE_WITH_VALUE
     &Unit::HandleNULLProc,                                  //226 SPELL_AURA_PERIODIC_DUMMY
     &Unit::HandleNULLProc,                                  //227 SPELL_AURA_PERIODIC_TRIGGER_SPELL_WITH_VALUE
     &Unit::HandleNULLProc,                                  //228 SPELL_AURA_DETECT_STEALTH
@@ -4357,7 +4357,71 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(ProcExecutionData& d
     return SPELL_AURA_PROC_OK;
 }
 
-SpellAuraProcResult Unit::HandleMendingAuraProc(ProcExecutionData& data)
+SpellAuraProcResult Unit::HandleRaidProcFromChargeAuraProc(ProcExecutionData& data)
+{
+    uint32 damage = data.damage; Aura* triggeredByAura = data.triggeredByAura;
+    //if no damage then mending proc has failed, we dont need to do unecessary steps
+    if (!damage)
+        return SPELL_AURA_PROC_FAILED;
+
+    // aura can be deleted at casts
+    SpellEntry const* spellProto = triggeredByAura->GetSpellProto();
+    SpellEffectIndex effIdx = triggeredByAura->GetEffIndex();
+    ObjectGuid caster_guid = triggeredByAura->GetCasterGuid();
+
+    // triggered spell - only one in TBC
+    uint32 triggeredSpellId = 43594;
+    uint32 animationSpellId = 43613;
+
+    int32 jumps = triggeredByAura->GetHolder()->GetAuraCharges() - 1; // jumps
+    triggeredByAura->GetHolder()->SetAuraCharges(1); // current aura expire - will be removed at next charges decrease
+
+    // next target selection
+    if (jumps > 0 && GetTypeId() == TYPEID_PLAYER && caster_guid.IsPlayer())
+    {
+        float radius;
+        if (spellProto->EffectRadiusIndex[effIdx])
+            radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(spellProto->EffectRadiusIndex[effIdx]));
+        else
+            radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spellProto->rangeIndex));
+
+        if (Unit* caster = triggeredByAura->GetCaster())
+        {
+            if (Player* target = GetNextRandomRaidMember(radius, SPELL_AURA_RAID_PROC_FROM_CHARGE_WITH_VALUE))
+            {
+                // This custom nonsense was kept throughout wotlk
+                SpellAuraHolder* holder = GetSpellAuraHolder(spellProto->Id, caster->GetObjectGuid());
+                SpellAuraHolder* new_holder = CreateSpellAuraHolder(spellProto, target, caster);
+
+                for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+                {
+                    Aura* aur = holder->GetAuraByEffectIndex(SpellEffectIndex(i));
+                    if (!aur)
+                        continue;
+
+                    int32 basePoints = aur->GetBasePoints();
+                    int32 damage = aur->GetModifier()->m_baseAmount;
+                    Aura* new_aur = CreateAura(spellProto, aur->GetEffIndex(), &damage, &basePoints, new_holder, target, caster);
+                    new_holder->AddAura(new_aur, new_aur->GetEffIndex());
+                }
+                new_holder->SetAuraCharges(jumps, false);
+
+                // lock aura holder (currently SPELL_AURA_RAID_PROC_FROM_CHARGE is single target spell, so will attempt removing from old target
+                // when applied to new one)
+                if (!target->AddSpellAuraHolder(new_holder))
+                    delete new_holder;
+                else
+                    new_holder->SetState(SPELLAURAHOLDER_STATE_READY);
+                CastSpell(target, animationSpellId, TRIGGERED_NONE);
+            }
+        }
+    }
+
+    CastSpell(nullptr, triggeredSpellId, TRIGGERED_NONE);
+    return SPELL_AURA_PROC_OK;
+}
+
+SpellAuraProcResult Unit::HandleRaidProcFromChargeWithValueAuraProc(ProcExecutionData& data)
 {
     uint32 damage = data.damage; Aura* triggeredByAura = data.triggeredByAura;
     //if no damage then mending proc has failed, we dont need to do unecessary steps
@@ -4382,12 +4446,13 @@ SpellAuraProcResult Unit::HandleMendingAuraProc(ProcExecutionData& data)
         else
             radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spellProto->rangeIndex));
 
-        if (Player* caster = ((Player*)triggeredByAura->GetCaster()))
+        if (Player* caster = static_cast<Player*>(triggeredByAura->GetCaster()))
         {
             caster->ApplySpellMod(spellProto->Id, SPELLMOD_RADIUS, radius);
 
-            if (Player* target = ((Player*)this)->GetNextRaidMemberWithLowestLifePercentage(radius, SPELL_AURA_PRAYER_OF_MENDING))
+            if (Player* target = static_cast<Player*>(this)->GetNextRaidMemberWithLowestLifePercentage(radius, SPELL_AURA_RAID_PROC_FROM_CHARGE_WITH_VALUE))
             {
+                // This custom nonsense was later removed in 3.0.2 for this proc effect only and replaced by casting the original spell
                 SpellAuraHolder* holder = GetSpellAuraHolder(spellProto->Id, caster->GetObjectGuid());
                 SpellAuraHolder* new_holder = CreateSpellAuraHolder(spellProto, target, caster);
 
@@ -4404,19 +4469,19 @@ SpellAuraProcResult Unit::HandleMendingAuraProc(ProcExecutionData& data)
                 }
                 new_holder->SetAuraCharges(jumps, false);
 
-                // lock aura holder (currently SPELL_AURA_PRAYER_OF_MENDING is single target spell, so will attempt removing from old target
+                // lock aura holder (currently SPELL_AURA_RAID_PROC_FROM_CHARGE_WITH_VALUE is single target spell, so will attempt removing from old target
                 // when applied to new one)
                 if (!target->AddSpellAuraHolder(new_holder))
                     delete new_holder;
                 else
                     new_holder->SetState(SPELLAURAHOLDER_STATE_READY);
-                CastSpell(target, 41637, TRIGGERED_OLD_TRIGGERED);
+                CastSpell(target, 41637, TRIGGERED_NONE);
             }
         }
     }
 
     // heal
-    CastCustomSpell(this, 33110, &heal, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, caster_guid, spellProto);
+    CastCustomSpell(nullptr, 33110, &heal, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, caster_guid, spellProto);
     return SPELL_AURA_PROC_OK;
 }
 

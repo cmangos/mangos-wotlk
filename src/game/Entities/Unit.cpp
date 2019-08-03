@@ -13574,3 +13574,32 @@ float Unit::GetCollisionHeight() const
     float const collisionHeight = scaleMod * modelData->CollisionHeight * modelData->Scale * displayInfo->scale;
     return collisionHeight == 0.0f ? DEFAULT_COLLISION_HEIGHT : collisionHeight;
 }
+
+Player* Unit::GetNextRandomRaidMember(float radius, AuraType noAuraType)
+{
+    if (GetTypeId() != TYPEID_PLAYER)
+        return nullptr;
+
+    Player* player = static_cast<Player*>(this);
+    Group* group = player->GetGroup();
+    if (!group)
+        return nullptr;
+
+    std::vector<Player*> nearMembers;
+    // reserve place for players because resizing vector every unit push is unefficient (vector is reallocated then)
+    nearMembers.reserve(group->GetMembersCount());
+
+    for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+        if (Player* target = itr->getSource())
+        {
+            // IsHostileTo check duel and controlled by enemy
+            if (target != this && IsWithinDistInMap(target, radius) && target->isAlive() && CanAssist(target))
+                nearMembers.push_back(target);
+        }
+
+    if (nearMembers.empty())
+        return nullptr;
+
+    uint32 randTarget = urand(0, nearMembers.size()-1);
+    return nearMembers[randTarget];
+}
