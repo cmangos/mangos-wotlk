@@ -492,6 +492,10 @@ void Unit::ProcDamageAndSpell(ProcSystemArguments&& data)
 
     if (data.attacker)
     {
+		// trigger weapon enchants for weapon based spells; exclude spells that stop attack, because may break CC
+		if (data.attacker->GetTypeId() == TYPEID_PLAYER && (data.procExtra & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)) != 0)
+			if (!data.procSpell || (data.procSpell->EquippedItemClass == ITEM_CLASS_WEAPON && !data.procSpell->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET)))
+				static_cast<Player*>(data.attacker)->CastItemCombatSpell(data.victim, data.attType, data.procSpell ? !IsNextMeleeSwingSpell(data.procSpell) : false);
         data.attacker->m_spellProcsHappening = false;
 
         // Mark auras created during proccing as ready
@@ -2631,7 +2635,6 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 // Windfury Weapon (Passive) 1-5 Ranks
                 case 33757:
                 {
-                    // TODO: unify handling of all enchantments - some are in procs some are in Player::CastItemCombatSpell
                     if (GetTypeId() != TYPEID_PLAYER)
                         return SPELL_AURA_PROC_FAILED;
 

@@ -2072,10 +2072,6 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
         // If not immune
         if (calcDamageInfo->TargetState != VICTIMSTATE_IS_IMMUNE)
         {
-            // on weapon hit casts
-            if (GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
-                ((Player*)this)->CastItemCombatSpell(pVictim, calcDamageInfo->attackType);
-
             SetInCombatWithVictim(pVictim);
             pVictim->SetInCombatWithAggressor(this);
 
