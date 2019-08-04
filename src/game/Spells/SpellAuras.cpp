@@ -6623,6 +6623,10 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
     {
         switch (spellProto->Id)
         {
+            case 43364: // Tranquilizing Poison
+                if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                    target->CastSpell(nullptr, 24004, TRIGGERED_OLD_TRIGGERED); // Sleep
+                break;
             case 30410: // Shadow Grasp cast Mind Exhaustion on removal
                 target->CastSpell(target, 44032, TRIGGERED_OLD_TRIGGERED);
                 break;
@@ -6666,6 +6670,18 @@ void Aura::HandlePeriodicLeech(bool apply, bool /*Real*/)
 void Aura::HandlePeriodicManaLeech(bool apply, bool /*Real*/)
 {
     m_isPeriodic = apply;
+
+    if (!apply)
+    {
+        switch (GetId())
+        {
+            case 24002: // Tranquilizing Poison
+            case 24003: // Tranquilizing Poison
+                if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
+                    GetTarget()->CastSpell(nullptr, 24004, TRIGGERED_OLD_TRIGGERED); // Sleep
+                break;
+        }
+    }
 }
 
 void Aura::HandlePeriodicHealthFunnel(bool apply, bool /*Real*/)
