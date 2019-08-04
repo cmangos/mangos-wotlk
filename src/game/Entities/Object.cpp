@@ -1904,6 +1904,9 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map, uint
     if (settings.corpseDespawnTime)
         creature->SetCorpseDelay(settings.corpseDespawnTime);
 
+    if (settings.spellId)
+        creature->SetUInt32Value(UNIT_CREATED_BY_SPELL, settings.spellId);
+
     if (settings.spawner && settings.spawner->GetTypeId() == TYPEID_UNIT)
         if (Creature* spawnerCreature = static_cast<Creature*>(settings.spawner))
             if (UnitAI* ai = spawnerCreature->AI())
