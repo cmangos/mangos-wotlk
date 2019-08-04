@@ -536,6 +536,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 39920:         // Soulgrinder Ritual Visual ( beam)
         case 40816:         // Saber Lash - Mother Shahraz
         case 41634:         // Invisibility and Stealth Detection
+        case 42459:         // Dual Wield (Passive)
         case 44537:         // Fel Lightning
         case 44604:         // Enchantment of Spell Haste
         case 44855:         // Out of Phase
