@@ -169,19 +169,7 @@ struct boss_midnightAI : public ScriptedAI, public CombatActions
                 case 1: DoScriptText(SAY_APPEAR_2, pSummoned); break;
                 case 2: DoScriptText(SAY_APPEAR_3, pSummoned); break;
             }
-        }
-        else if (pSummoned->GetEntry() == NPC_ATTUMEN_MOUNTED)
-        {
-            if (!m_pInstance)
-                return;
-
-            // Smoke effect
-            pSummoned->CastSpell(pSummoned, SPELL_SPAWN_SMOKE_1, TRIGGERED_NONE);
-
-            // The summoned has the health equal to the one which has the higher HP percentage of both
-            if (Creature* pAttumen = m_pInstance->GetSingleCreatureFromStorage(NPC_ATTUMEN))
-                pSummoned->SetHealth(pAttumen->GetHealth() > m_creature->GetHealth() ? pAttumen->GetHealth() : m_creature->GetHealth());
-        }
+        }  
     }
 
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
@@ -401,7 +389,23 @@ struct boss_attumenAI : public ScriptedAI, public CombatActions
         // Despawn Attumen on fail
         m_creature->ForcedDespawn();
     }
+    
+    void JustSummoned(Creature* summoned) override
+    {
+        if (summoned->GetEntry() == NPC_ATTUMEN_MOUNTED)
+        {
+            if (!m_pInstance)
+                return;
 
+            // Smoke effect
+            summoned->CastSpell(nullptr, SPELL_SPAWN_SMOKE_1, TRIGGERED_NONE);
+
+            // The summoned has the health equal to the one which has the higher HP percentage of both
+            if (Creature* pMidnight = m_pInstance->GetSingleCreatureFromStorage(NPC_MIDNIGHT))
+                summoned->SetHealth(pMidnight->GetHealth() > m_creature->GetHealth() ? pMidnight->GetHealth() : m_creature->GetHealth());
+        }
+    }
+    
     void UpdateAI(const uint32 uiDiff) override
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
