@@ -474,7 +474,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                 // Shockwave ${$m3/100*$AP}
                 else if (m_spellInfo->SpellFamilyFlags & uint64(0x0000800000000000))
                 {
-                    int32 pct = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, EFFECT_INDEX_2);
+                    int32 pct = m_caster->CalculateSpellEffectValue(unitTarget, m_spellInfo, EFFECT_INDEX_2);
                     if (pct > 0)
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * pct / 100);
                     break;
@@ -562,7 +562,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                             ++counter;
 
                     if (counter)
-                        damage += (counter * owner->CalculateSpellDamage(unitTarget, m_spellInfo, EFFECT_INDEX_2) * damage) / 100.0f;
+                        damage += (counter * owner->CalculateSpellEffectValue(unitTarget, m_spellInfo, EFFECT_INDEX_2) * damage) / 100.0f;
                 }
                 // Conflagrate - consumes Immolate or Shadowflame
                 else if (m_spellInfo->TargetAuraState == AURA_STATE_CONFLAGRATE)
@@ -799,7 +799,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                 {
                     // Add main hand dps * effect[2] amount
                     float average = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE)) / 2;
-                    int32 count = m_caster->CalculateSpellDamage(unitTarget, m_spellInfo, EFFECT_INDEX_2);
+                    int32 count = m_caster->CalculateSpellEffectValue(unitTarget, m_spellInfo, EFFECT_INDEX_2);
                     damage += count * int32(average * IN_MILLISECONDS) / m_caster->GetAttackTime(BASE_ATTACK);
                 }
                 // Shield of Righteousness
@@ -3392,7 +3392,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster, 28523, true, false, fRange * 2);
                     MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pTargetDummy, u_check);
-
                     Cell::VisitGridObjects(m_caster, searcher, fRange * 2);
 
                     if (pTargetDummy)

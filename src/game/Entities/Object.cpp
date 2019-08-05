@@ -2601,3 +2601,124 @@ void WorldObject::PrintCooldownList(ChatHandler& chat) const
     chat.PSendSysMessage("Found %u cooldown%s.", cdCount, (cdCount > 1) ? "s" : "");
     chat.PSendSysMessage("Found %u permanent cooldown%s.", permCDCount, (permCDCount > 1) ? "s" : "");
 }
+
+int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* effBasePoints) const
+{
+    Unit const* unitCaster = dynamic_cast<Unit const*>(this);
+    Player const* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? static_cast<Player const*>(this) : nullptr;
+
+    float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
+    int32 basePoints = effBasePoints ? *effBasePoints - 1 : spellProto->EffectBasePoints[effect_index];
+
+    if (unitCaster && basePointsPerLevel != 0.0f)
+    {
+        int32 level = int32(unitCaster->getLevel());
+        if (level > int32(spellProto->maxLevel) && spellProto->maxLevel > 0)
+            level = int32(spellProto->maxLevel);
+        else if (level < int32(spellProto->baseLevel))
+            level = int32(spellProto->baseLevel);
+
+        // if base level is greater than spell level, reduce by base level
+        level -= int32(std::max(spellProto->baseLevel, spellProto->spellLevel));
+        basePoints += int32(float(level) * basePointsPerLevel);
+    }
+
+    int32 randomPoints = int32(spellProto->EffectDieSides[effect_index]);
+    switch (randomPoints)
+    {
+        case 0:                                             // not used
+        case 1:
+            basePoints += 1;                                // range 1..1
+            break;
+        default:
+        {
+            // range can have positive (1..rand) and negative (rand..1) values, so order its for irand
+            int32 randvalue = (randomPoints >= 1)
+                ? irand(1, randomPoints)
+                : irand(randomPoints, 1);
+
+            basePoints += randvalue;
+            break;
+        }
+    }
+
+    float value = float(basePoints);
+    float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
+
+    // random damage
+    if (comboDamage != 0.0f && unitPlayer && target &&
+        (target->GetObjectGuid() == unitPlayer->GetComboTargetGuid() || IsOnlySelfTargeting(spellProto)))
+    {
+        value += (comboDamage * float(unitPlayer->GetComboPoints()));
+    }
+
+    if (unitCaster)
+    {
+        if (Player * modOwner = unitCaster->GetSpellModOwner())
+        {
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_ALL_EFFECTS, value);
+
+            switch (effect_index)
+            {
+                case EFFECT_INDEX_0:
+                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_EFFECT1, value);
+                    break;
+                case EFFECT_INDEX_1:
+                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_EFFECT2, value);
+                    break;
+                case EFFECT_INDEX_2:
+                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_EFFECT3, value);
+                    break;
+            }
+        }
+    }
+
+    if (unitCaster && spellProto->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION) && spellProto->spellLevel)
+    {
+        // TODO: Drastically beter than before, but still needs some additional aura scaling research
+        bool damage = false;
+        if (uint32 aura = spellProto->EffectApplyAuraName[effect_index])
+        {
+            // TODO: to be incorporated into the main per level calculation after research
+            value += int32(std::max(0, int32(unitCaster->getLevel() - spellProto->maxLevel)) * basePointsPerLevel);
+
+            switch (aura)
+            {
+                case SPELL_AURA_PERIODIC_DAMAGE:
+                case SPELL_AURA_PERIODIC_LEECH:
+                    //   SPELL_AURA_PERIODIC_DAMAGE_PERCENT: excluded, abs values only
+                case SPELL_AURA_POWER_BURN_MANA:
+                    damage = true;
+            }
+        }
+        else if (uint32 effect = spellProto->Effect[effect_index])
+        {
+            switch (effect)
+            {
+                case SPELL_EFFECT_SCHOOL_DAMAGE:
+                case SPELL_EFFECT_POWER_DRAIN:
+                case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+                case SPELL_EFFECT_HEALTH_LEECH:
+                case SPELL_EFFECT_HEAL:
+                case SPELL_EFFECT_SUMMON:
+                case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+                    //   SPELL_EFFECT_WEAPON_PERCENT_DAMAGE: excluded, abs values only
+                case SPELL_EFFECT_WEAPON_DAMAGE:
+                case SPELL_EFFECT_POWER_BURN:
+                case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                case SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE:
+                    damage = true;
+            }
+        }
+
+        if (damage)
+        {
+            GtNPCManaCostScalerEntry const* spellScaler = sGtNPCManaCostScalerStore.LookupEntry(spellProto->spellLevel - 1);
+            GtNPCManaCostScalerEntry const* casterScaler = sGtNPCManaCostScalerStore.LookupEntry(unitCaster->getLevel() - 1);
+            if (spellScaler && casterScaler)
+                value *= casterScaler->ratio / spellScaler->ratio;
+        }
+    }
+
+    return value;
+}

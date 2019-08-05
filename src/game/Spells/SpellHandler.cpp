@@ -298,7 +298,7 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
     if (!obj)
         return;
 
-    if (!obj->IsWithinDistInMap(_player, obj->GetInteractionDistance()))
+    if (!obj->IsAtInteractDistance(_player))
         return;
 
     // Additional check preventing exploits (ie loot despawned chests)

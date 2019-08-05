@@ -577,10 +577,12 @@ struct QuaternionData
 {
     float x, y, z, w;
 
-    QuaternionData() : x(0.f), y(0.f), z(0.f), w(0.f) {}
-    QuaternionData(float X, float Y, float Z, float W) : x(X), y(Y), z(Z), w(W) {}
+    QuaternionData() : x(0.0f), y(0.0f), z(0.0f), w(1.0f) { }
+    QuaternionData(float X, float Y, float Z, float W) : x(X), y(Y), z(Z), w(W) { }
 
-    bool isUnit() const { return fabs(x * x + y * y + z * z + w * w - 1.f) < 1e-5;}
+    bool isUnit() const;
+    void toEulerAnglesZYX(float& Z, float& Y, float& X) const;
+    static QuaternionData fromEulerAnglesZYX(float Z, float Y, float X);
 };
 
 // from `gameobject`
@@ -685,6 +687,8 @@ class GameObject : public WorldObject
         void SetWorldRotation(float qx, float qy, float qz, float qw);
         void SetTransportPathRotation(const QuaternionData& rotation);      // transforms(rotates) transport's path
         int64 GetPackedWorldRotation() const { return m_packedRotation; }
+        QuaternionData GetWorldRotation() const; // compatibility with wotlk
+        QuaternionData const GetLocalRotation() const;
 
         // overwrite WorldObject function for proper name localization
         const char* GetNameForLocaleIdx(int32 loc_idx) const override;
@@ -749,8 +753,6 @@ class GameObject : public WorldObject
         void SetPhaseMask(uint32 newPhaseMask, bool update);
         uint32 GetFaction() const { return GetUInt32Value(GAMEOBJECT_FACTION); }
         void SetFaction(uint32 faction) { SetUInt32Value(GAMEOBJECT_FACTION, faction); }
-
-        float GetObjectBoundingRadius() const override;     // overwrite WorldObject version
 
         void Use(Unit* user);
 
@@ -835,6 +837,11 @@ class GameObject : public WorldObject
         GameObjectAI* AI() const { return m_AI.get(); }
 
         GameObjectModel* m_model;
+
+        bool IsAtInteractDistance(Position const& pos, float radius) const;
+        bool IsAtInteractDistance(Player const* player, uint32 maxRange = 0) const;
+
+        SpellEntry const* GetSpellForLock(Player const* player) const;
 
     protected:
         uint32      m_spellId;

@@ -28,6 +28,7 @@
 #include "Globals/SharedDefines.h"
 #include "Camera.h"
 #include "Server/DBCStructure.h"
+#include "PlayerDefines.h"
 
 #include <set>
 
@@ -149,6 +150,7 @@ class Loot;
 struct ItemPrototype;
 class ChatHandler;
 struct SpellEntry;
+class Spell;
 
 typedef std::unordered_map<Player*, UpdateData> UpdateDataMapType;
 
@@ -319,6 +321,10 @@ struct Position
     Position() : x(0.0f), y(0.0f), z(0.0f), o(0.0f) {}
     Position(float _x, float _y, float _z, float _o) : x(_x), y(_y), z(_z), o(_o) {}
     float x, y, z, o;
+    float GetPositionX() const { return x; }
+    float GetPositionY() const { return y; }
+    float GetPositionZ() const { return z; }
+    float GetPositionO() const { return o; }
 };
 
 struct WorldLocation
@@ -706,6 +712,7 @@ class WorldObject : public Object
         { x = m_position.x; y = m_position.y; z = m_position.z; }
         void GetPosition(WorldLocation& loc) const
         { loc.mapid = m_mapId; GetPosition(loc.coord_x, loc.coord_y, loc.coord_z); loc.orientation = GetOrientation(); }
+        Position const& GetPosition() const { return m_position; }
         float GetOrientation() const { return m_position.o; }
 
         /// Gives a 2d-point in distance distance2d in direction absAngle around the current position (point-to-point)
@@ -939,6 +946,8 @@ class WorldObject : public Object
 
         virtual bool CanAttackSpell(Unit const* /*target*/, SpellEntry const* /*spellInfo*/ = nullptr, bool /*isAOE*/ = false) const { return true; }
         virtual bool CanAssistSpell(Unit const* /*target*/, SpellEntry const* /*spellInfo*/ = nullptr) const { return true; }
+
+        int32 CalculateSpellEffectValue(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* basePoints = nullptr) const;
 
     protected:
         explicit WorldObject();

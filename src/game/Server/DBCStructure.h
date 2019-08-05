@@ -983,12 +983,12 @@ struct GameObjectDisplayInfoEntry
     uint32 Displayid;                                       // 0 m_ID
     char* filename;                                         // 1 m_modelName
     // uint32 unknown2[10];                                 // 2-11 m_Sound
-    float geoBoxMinX;                                       // 12 m_geoBoxMinX (use first value as interact dist, mostly in hacks way)
-    float geoBoxMinY;                                       // 13 m_geoBoxMinY
-    float geoBoxMinZ;                                       // 14 m_geoBoxMinZ
-    float geoBoxMaxX;                                       // 15 m_geoBoxMaxX
-    float geoBoxMaxY;                                       // 16 m_geoBoxMaxY
-    float geoBoxMaxZ;                                       // 17 m_geoBoxMaxZ
+    float minX;                                             // 12 m_geoBoxMinX
+    float minY;                                             // 13 m_geoBoxMinY
+    float minZ;                                             // 14 m_geoBoxMinZ
+    float maxX;                                             // 15 m_geoBoxMaxX
+    float maxY;                                             // 16 m_geoBoxMaxY
+    float maxZ;                                             // 17 m_geoBoxMaxZ
     // uint32 unknown18; // 18 m_objectEffectPackageID
 };
 
