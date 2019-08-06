@@ -37,6 +37,7 @@ enum
     SPELL_SHADOW_FROST_REFLECT      = 19595,
     SPELL_PERIODIC_KNOCK_AWAY       = 21737,
     SPELL_THORNS                    = 25777,
+    SPELL_TRANSFER_POWER            = 2400,
 
     SPELL_ENRAGE                    = 8599,
 
@@ -154,7 +155,7 @@ struct npc_anubisath_sentinelAI : public ScriptedAI
                     DoScriptText(EMOTE_SHARE_POWERS, m_creature);
                     hasDoneEmote = true;
                 }
-                buddy->SetHealth(buddy->GetMaxHealth());
+                m_creature->CastSpell(buddy, SPELL_TRANSFER_POWER, TRIGGERED_OLD_TRIGGERED);
                 DoCastSpellIfCan(buddy, m_myAbility, CAST_TRIGGERED);
             }
         }
