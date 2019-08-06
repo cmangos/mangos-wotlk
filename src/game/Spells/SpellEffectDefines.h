@@ -172,7 +172,7 @@ enum SpellEffects
     SPELL_EFFECT_ACTIVATE_RUNE             = 146,
     SPELL_EFFECT_QUEST_FAIL                = 147,
     SPELL_EFFECT_148                       = 148,
-    SPELL_EFFECT_CHARGE2                   = 149,
+    SPELL_EFFECT_CHARGE_DEST               = 149,
     SPELL_EFFECT_QUEST_OFFER               = 150,
     SPELL_EFFECT_TRIGGER_SPELL_2           = 151,
     SPELL_EFFECT_SUMMON_RAF_FRIEND         = 152, // TODO: Implement

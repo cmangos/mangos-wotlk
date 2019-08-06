@@ -208,7 +208,7 @@ pEffect SpellEffects[MAX_SPELL_EFFECTS] =
     &Spell::EffectActivateRune,                             //146 SPELL_EFFECT_ACTIVATE_RUNE
     &Spell::EffectQuestFail,                                //147 SPELL_EFFECT_QUEST_FAIL               quest fail
     &Spell::EffectNULL,                                     //148 SPELL_EFFECT_148                      single spell: Inflicts Fire damage to an enemy.
-    &Spell::EffectCharge2,                                  //149 SPELL_EFFECT_CHARGE2                  swoop
+    &Spell::EffectChargeDest,                               //149 SPELL_EFFECT_CHARGE_DEST              swoop
     &Spell::EffectQuestOffer,                               //150 SPELL_EFFECT_QUEST_OFFER
     &Spell::EffectTriggerRitualOfSummoning,                 //151 SPELL_EFFECT_TRIGGER_SPELL_2
     &Spell::EffectNULL,                                     //152 SPELL_EFFECT_SUMMON_RAF_FRIEND        summon Refer-a-Friend
@@ -13095,32 +13095,22 @@ void Spell::EffectCharge(SpellEffectIndex /*eff_idx*/)
 
     float speed = m_spellInfo->speed ? m_spellInfo->speed : BASE_CHARGE_SPEED;
 
-    // Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
-    if (m_caster->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR)) && (pos.coord_z < m_caster->GetPositionZ()) && (fabs(pos.coord_z - m_caster->GetPositionZ()) > 3.0f))
-        m_caster->MonsterMoveWithSpeed(pos.coord_x, pos.coord_y, (pos.coord_z + unitTarget->GetObjectScale()), speed, false, false);
-    else
-        m_caster->MonsterMoveWithSpeed(pos.coord_x, pos.coord_y, (pos.coord_z + unitTarget->GetObjectScale()), speed, true, true);
+    m_caster->GetMotionMaster()->MoveCharge(pos.coord_x, pos.coord_y, pos.coord_z, speed);
 }
 
-void Spell::EffectCharge2(SpellEffectIndex /*eff_idx*/)
+void Spell::EffectChargeDest(SpellEffectIndex /*eff_idx*/)
 {
-    WorldLocation loc;
-
     if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) == 0)
         return;
 
-    m_targets.getDestination(loc.coord_x, loc.coord_y, loc.coord_z);
-    m_caster->GetFirstCollisionPosition(loc, 0.f, m_caster->GetAngle(loc.coord_x, loc.coord_y));
+    float x, y, z;
+    m_targets.getDestination(x, y, z);
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         ((Creature*)m_caster)->StopMoving();
 
     float speed = m_spellInfo->speed ? m_spellInfo->speed : BASE_CHARGE_SPEED;
 
-    // Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
-    if (m_caster->m_movementInfo.HasMovementFlag(MovementFlags(MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR)) && (loc.coord_z < m_caster->GetPositionZ()) && (fabs(loc.coord_z - m_caster->GetPositionZ()) > 3.0f))
-        m_caster->MonsterMoveWithSpeed(loc.coord_x, loc.coord_y, loc.coord_z, speed, false, false);
-    else
-        m_caster->MonsterMoveWithSpeed(loc.coord_x, loc.coord_y, loc.coord_z, speed, true, true);
+    m_caster->GetMotionMaster()->MoveCharge(x, y, z, speed, m_spellInfo->Id);
 }
 
 void Spell::EffectKnockBack(SpellEffectIndex eff_idx)

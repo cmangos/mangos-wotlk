@@ -294,7 +294,7 @@ SpellEffectInfo SpellEffectInfoTable[MAX_SPELL_EFFECTS] =
     /*[146]*/    { "SPELL_EFFECT_146",                          TARGET_TYPE_UNKNOWN,        TARGET_NONE },
     /*[147]*/    { "SPELL_EFFECT_QUEST_FAIL",                   TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[148]*/    { "SPELL_EFFECT_148",                          TARGET_TYPE_UNKNOWN,        TARGET_NONE },
-    /*[149]*/    { "SPELL_EFFECT_CHARGE2",                      TARGET_TYPE_LOCATION_DEST,  TARGET_NONE },
+    /*[149]*/    { "SPELL_EFFECT_CHARGE_DEST",                      TARGET_TYPE_LOCATION_DEST,  TARGET_NONE },
     /*[150]*/    { "SPELL_EFFECT_150",                          TARGET_TYPE_UNKNOWN,        TARGET_NONE },
     /*[151]*/    { "SPELL_EFFECT_TRIGGER_SPELL_2",              TARGET_TYPE_LOCATION_DEST,  TARGET_NONE },
     /*[152]*/    { "SPELL_EFFECT_SUMMON_RAF_FRIEND",            TARGET_TYPE_NONE,           TARGET_NONE }, // TODO: Investigate when implementing RAF

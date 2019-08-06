@@ -123,6 +123,7 @@ class MotionMaster : private std::stack<MovementGenerator*>
         void MoveDestination(float x, float y, float z, float o, float horizontalSpeed, float max_height, Unit* target = nullptr);
         void MoveFall();
         void MoveFlyOrLand(uint32 id, float x, float y, float z, bool liftOff);
+        void MoveCharge(float x, float y, float z, float speed, uint32 id = EVENT_CHARGE);
 
         MovementGeneratorType GetCurrentMovementGeneratorType() const;
 
