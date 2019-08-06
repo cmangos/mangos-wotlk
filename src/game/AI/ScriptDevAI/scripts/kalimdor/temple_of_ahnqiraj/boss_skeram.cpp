@@ -26,14 +26,9 @@ EndScriptData */
 
 enum
 {
-    SAY_AGGRO1                  = -1531000,
-    SAY_AGGRO2                  = -1531001,
-    SAY_AGGRO3                  = -1531002,
-    SAY_SLAY1                   = -1531003,
-    SAY_SLAY2                   = -1531004,
-    SAY_SLAY3                   = -1531005,
-    SAY_SPLIT                   = -1531006,
-    SAY_DEATH                   = -1531007,
+    SAY_AGGRO                   = -1531000,
+    SAY_SLAY                    = -1531001,
+    SAY_DEATH                   = -1531002,
 
     SPELL_ARCANE_EXPLOSION      = 26192,
     SPELL_EARTH_SHOCK           = 26194,
@@ -85,12 +80,7 @@ struct boss_skeramAI : public ScriptedAI
 
     void KilledUnit(Unit* /*pVictim*/) override
     {
-        switch (urand(0, 2))
-        {
-            case 0: DoScriptText(SAY_SLAY1, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY2, m_creature); break;
-            case 2: DoScriptText(SAY_SLAY3, m_creature); break;
-        }
+        DoScriptText(SAY_SLAY, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -112,12 +102,7 @@ struct boss_skeramAI : public ScriptedAI
         if (m_bIsImage)
             return;
 
-        switch (urand(0, 2))
-        {
-            case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
-            case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
-        }
+        DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_SKERAM, IN_PROGRESS);
@@ -229,7 +214,6 @@ struct boss_skeramAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMAGES) == CAST_OK)
             {
-                DoScriptText(SAY_SPLIT, m_creature);
                 m_fHpCheck -= 25.0f;
                 // Teleport shortly after the images are summoned and set invisible to clear the selection (Workaround alert!!!)
                 m_creature->SetVisibility(VISIBILITY_OFF);
