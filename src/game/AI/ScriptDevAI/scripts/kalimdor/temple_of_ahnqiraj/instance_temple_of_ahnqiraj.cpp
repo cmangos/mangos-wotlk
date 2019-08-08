@@ -40,7 +40,7 @@ static const DialogueEntry aIntroDialogue[] =
 instance_temple_of_ahnqiraj::instance_temple_of_ahnqiraj(Map* pMap) : ScriptedInstance(pMap),
     m_uiBugTrioDeathCount(0),
     m_uiCthunWhisperTimer(90000),
-    DialogueHelper(aIntroDialogue)
+    DialogueHelper(aIntroDialogue),
     m_uiSkeramProphecyTimer(5 * MINUTE * IN_MILLISECONDS)
 {
     Initialize();
