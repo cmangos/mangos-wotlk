@@ -2377,7 +2377,7 @@ class Player : public Unit
 
         bool canSeeSpellClickOn(Creature const* c) const;
 
-        void SendMessageToPlayer(std::string const& const message) const; // debugging purposes
+        void SendMessageToPlayer(std::string const& message) const; // debugging purposes
 
 #ifdef BUILD_PLAYERBOT
         // A Player can either have a playerbotMgr (to manage its bots), or have playerbotAI (if it is a bot), or
