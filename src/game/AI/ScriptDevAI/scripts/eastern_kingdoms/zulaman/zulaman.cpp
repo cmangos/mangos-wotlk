@@ -275,6 +275,14 @@ void instance_zulaman::OnObjectCreate(GameObject* pGo)
             break;
         case GO_AMANI_DRUM:
             break;
+        case GO_ALTAR_TORCH_EAGLE_GOD:
+            break;
+        case GO_ALTAR_TORCH_DRAGONHAWK_GOD:
+            break;
+        case GO_ALTAR_TORCH_LYNX_GOD:
+            break;
+        case GO_ALTAR_TORCH_BEAR_GOD:
+            break;
         default:
             return;
     }
@@ -331,6 +339,7 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
             DoUseDoorOrButton(GO_WIND_DOOR);
             if (uiData == DONE)
             {
+                DoUseDoorOrButton(GO_ALTAR_TORCH_EAGLE_GOD);
                 if (m_auiEncounter[TYPE_EVENT_RUN] == IN_PROGRESS)
                 {
                     m_auiEncounter[TYPE_RUN_EVENT_TIME] += 10; // Add 10 minutes
@@ -343,6 +352,7 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
         case TYPE_NALORAKK:
             if (uiData == DONE)
             {
+                DoUseDoorOrButton(GO_ALTAR_TORCH_BEAR_GOD);
                 if (m_auiEncounter[TYPE_EVENT_RUN] == IN_PROGRESS)
                 {
                     m_auiEncounter[TYPE_RUN_EVENT_TIME] += 15; // Add 15 minutes
@@ -355,6 +365,7 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
         case TYPE_JANALAI:
             if (uiData == DONE)
             {
+                DoUseDoorOrButton(GO_ALTAR_TORCH_DRAGONHAWK_GOD);
                 if (m_auiEncounter[TYPE_EVENT_RUN] == IN_PROGRESS)
                     DoChestEvent(INDEX_JANALAI);
             }
@@ -364,6 +375,7 @@ void instance_zulaman::SetData(uint32 uiType, uint32 uiData)
             DoUseDoorOrButton(GO_LYNX_TEMPLE_ENTRANCE);
             if (uiData == DONE)
             {
+                DoUseDoorOrButton(GO_ALTAR_TORCH_LYNX_GOD);
                 DoUseDoorOrButton(GO_LYNX_TEMPLE_EXIT);
                 if (m_auiEncounter[TYPE_EVENT_RUN] == IN_PROGRESS)
                     DoChestEvent(INDEX_HALAZZI);

@@ -125,6 +125,11 @@ enum InstanceZA
     GO_ASHLIS_CAGE          = 187380,
     GO_ASHLIS_VASE          = 186671,
 
+    GO_ALTAR_TORCH_EAGLE_GOD = 187035,
+    GO_ALTAR_TORCH_DRAGONHAWK_GOD = 187036,
+    GO_ALTAR_TORCH_LYNX_GOD = 187037,
+    GO_ALTAR_TORCH_BEAR_GOD = 186860,
+
     NPC_WORLD_TRIGGER       = 22515,                        // used to mark location of drums for Amani'shi Scouts and Amani'shi Reinforcement spawns
     NPC_REINFORCEMENT       = 23587,
     NPC_SAVAGE              = 23889,
