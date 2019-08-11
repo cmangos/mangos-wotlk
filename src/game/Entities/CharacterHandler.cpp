@@ -680,7 +680,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
         return;
     }
 
-    pCurrChar->SendDungeonDifficulty(false);
+    pCurrChar->SendDungeonDifficulty(pCurrChar->GetGroup() != nullptr);
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << pCurrChar->GetMapId();
@@ -907,7 +907,8 @@ void WorldSession::HandlePlayerReconnect()
     // reset all visible objects to be able to resend them
     _player->m_clientGUIDs.clear();
 
-    _player->SendDungeonDifficulty(false);
+    _player->SendDungeonDifficulty(_player->GetGroup() != nullptr);
+
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << _player->GetMapId();
     data << _player->GetPositionX();
