@@ -258,6 +258,7 @@ class Group
         void ResetInstances(InstanceResetMethod method, bool isRaid, Player* SendMsgTo);
 
         void SendTargetIconList(WorldSession* session) const;
+        void SendUpdateTo(Player* player);
         void SendUpdate();
         void UpdatePlayerOutOfRange(Player* pPlayer);
         void UpdatePlayerOnlineStatus(Player* player, bool online = true);

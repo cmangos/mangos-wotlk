@@ -38,7 +38,7 @@ extern Config botConfig;
 
 GroupMemberStatus GetGroupMemberStatus(const Player* member = nullptr)
 {
-    if (!member || !member->GetSession() || (!member->IsInWorld() && !member->IsBeingTeleportedFar()))
+    if (!member || (!member->IsInWorld() && !member->IsBeingTeleportedFar()))
         return MEMBER_STATUS_OFFLINE;
 
     uint8 flags = MEMBER_STATUS_ONLINE;
@@ -590,13 +590,20 @@ void Group::SendTargetIconList(WorldSession* session) const
     session->SendPacket(data);
 }
 
-void Group::SendUpdate()
+void Group::SendUpdateTo(Player* player)
 {
-    for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+    if (player && player->GetGroup() == this)
     {
-        Player* player = sObjectMgr.GetPlayer(citr->guid);
-        if (!player || !player->GetSession() || player->GetGroup() != this)
-            continue;
+        WorldSession* session = player->GetSession();
+
+        if (!session)
+            return;
+
+        member_citerator citr = _getMemberCSlot(player->GetObjectGuid());
+
+        if (citr == m_memberSlots.end())
+            return;
+
         // guess size
         WorldPacket data(SMSG_GROUP_LIST, (1 + 1 + 1 + 1 + 8 + 4 + GetMembersCount() * 20));
         data << uint8(m_groupType);                         // group type (flags in 3.3)
@@ -634,8 +641,15 @@ void Group::SendUpdate()
             data << uint8(m_raidDifficulty);                // Raid Difficulty
             data << uint8(0);                               // 3.3, dynamic difficulty?
         }
-        player->GetSession()->SendPacket(data);
+
+        session->SendPacket(data);
     }
+}
+
+void Group::SendUpdate()
+{
+    for (member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+        SendUpdateTo(sObjectMgr.GetPlayer(citr->guid));
 }
 
 void Group::UpdatePlayerOutOfRange(Player* pPlayer)
@@ -663,7 +677,6 @@ void Group::UpdatePlayerOnlineStatus(Player* player, bool online /*= true*/)
     if (!IsMember(guid))
         return;
 
-    SendUpdate();
     if (online)
     {
         player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
