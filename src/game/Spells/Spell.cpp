@@ -3397,9 +3397,6 @@ void Spell::cast(bool skipCheck)
 {
     SetExecutedCurrently(true);
 
-    if (m_notifyAI && m_caster->AI())
-        m_caster->AI()->OnSpellCastStateChange(this, false);
-
     if (!m_caster->CheckAndIncreaseCastCounter())
     {
         if (m_triggeredByAuraSpell)
@@ -4079,6 +4076,9 @@ void Spell::finish(bool ok)
 
     bool channeledChannel = m_spellState == SPELL_STATE_CHANNELING;
     m_spellState = SPELL_STATE_FINISHED;
+
+    if (m_notifyAI && m_caster->AI())
+        m_caster->AI()->OnSpellCastStateChange(this, false);
 
     // other code related only to successfully finished spells
     if (!ok)
