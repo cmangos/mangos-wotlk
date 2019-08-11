@@ -1840,6 +1840,7 @@ class Player : public Unit
         void UpdateArmorPenetration();
         void ApplyManaRegenBonus(int32 amount, bool apply);
         void UpdateManaRegen();
+        void UpdateEnergyRegen();
 
         ObjectGuid const& GetLootGuid() const { return m_lootGuid; }
         void SetLootGuid(ObjectGuid const& guid) { m_lootGuid = guid; }
@@ -2771,6 +2772,8 @@ class Player : public Unit
         uint32 m_cachedGS;
 
         bool m_isGhouled;
+
+        float m_energyRegenRate;
 
         std::unordered_map<uint32, TimePoint> m_enteredInstances;
         uint32 m_createdInstanceClearTimer;

@@ -7116,7 +7116,7 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
     m_periodicTimer = 5000;
 
     if (GetTarget()->GetTypeId() == TYPEID_PLAYER && m_modifier.m_miscvalue == POWER_MANA)
-        ((Player*)GetTarget())->UpdateManaRegen();
+        static_cast<Player*>(GetTarget())->UpdateManaRegen();
 
     m_isPeriodic = apply;
 }
@@ -7132,7 +7132,9 @@ void Aura::HandleModPowerRegenPCT(bool /*apply*/, bool Real)
 
     // Update manaregen value
     if (m_modifier.m_miscvalue == POWER_MANA)
-        ((Player*)GetTarget())->UpdateManaRegen();
+        static_cast<Player*>(GetTarget())->UpdateManaRegen();
+    else if (m_modifier.m_miscvalue == POWER_ENERGY)
+        static_cast<Player*>(GetTarget())->UpdateEnergyRegen();
 }
 
 void Aura::HandleModHealingPCT(bool apply, bool real)

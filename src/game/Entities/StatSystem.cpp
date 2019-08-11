@@ -745,6 +745,9 @@ void Player::ApplyManaRegenBonus(int32 amount, bool apply)
 
 void Player::UpdateManaRegen()
 {
+    // need to award mana based on previous rate
+    RegenerateAll();
+
     float Intellect = GetStat(STAT_INTELLECT);
     // Mana regen from spirit and intellect
     float power_regen = sqrt(Intellect) * OCTRegenMPPerSpirit();
@@ -769,6 +772,14 @@ void Player::UpdateManaRegen()
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, power_regen_mp5 + power_regen * modManaRegenInterrupt / 100.0f);
 
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, power_regen_mp5 + power_regen);
+}
+
+void Player::UpdateEnergyRegen()
+{
+    // need to award energy based on previous rate
+    RegenerateAll();
+
+    m_energyRegenRate = GetTotalAuraMultiplierByMiscValue(SPELL_AURA_MOD_POWER_REGEN_PERCENT, POWER_ENERGY);
 }
 
 void Player::_ApplyAllStatBonuses()
