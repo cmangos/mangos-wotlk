@@ -4376,6 +4376,9 @@ SpellAuraProcResult Unit::HandleRaidProcFromChargeAuraProc(ProcExecutionData& da
     uint32 triggeredSpellId = 43594;
     uint32 animationSpellId = 43613;
 
+    if (data.procSpell->Id == triggeredSpellId)
+        return SPELL_AURA_PROC_FAILED;
+
     int32 jumps = triggeredByAura->GetHolder()->GetAuraCharges() - 1; // jumps
     triggeredByAura->GetHolder()->SetAuraCharges(1); // current aura expire - will be removed at next charges decrease
 
