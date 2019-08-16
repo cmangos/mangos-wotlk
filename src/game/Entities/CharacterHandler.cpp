@@ -682,7 +682,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     Group* group = pCurrChar->GetGroup();
 
-    pCurrChar->SendDungeonDifficulty(group != nullptr);
+    pCurrChar->SendDungeonDifficulty(false);
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << pCurrChar->GetMapId();
@@ -915,7 +915,7 @@ void WorldSession::HandlePlayerReconnect()
 
     Group* group = _player->GetGroup();
 
-    _player->SendDungeonDifficulty(group != nullptr);
+    _player->SendDungeonDifficulty(false);
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << _player->GetMapId();
