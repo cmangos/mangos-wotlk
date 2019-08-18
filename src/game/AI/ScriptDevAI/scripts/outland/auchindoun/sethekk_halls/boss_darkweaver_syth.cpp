@@ -98,10 +98,16 @@ struct boss_darkweaver_sythAI : public ScriptedAI
             case 2: DoScriptText(SAY_AGGRO_3, m_creature); break;
         }
     }
+    
+    void JustReachedHome() override
+    {
+        m_creature->RemoveGuardians();
+    }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
+        m_creature->RemoveGuardians();
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
