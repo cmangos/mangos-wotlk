@@ -603,8 +603,6 @@ class Spell
         void CleanupTargetList();
         void ClearCastItem();
 
-        void ProcSpellAuraTriggers();
-
         static void SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpell, uint32 spellId75, uint32 spellId150, uint32 spellId225, uint32 spellId300, uint32 spellIdSpecial);
 
         bool CanBeInterrupted() const { return m_spellState <= SPELL_STATE_DELAYED || m_spellState == SPELL_STATE_CHANNELING; }
@@ -791,7 +789,9 @@ class Spell
         void DoAllEffectOnTarget(ItemTargetInfo* target);
         bool IsAliveUnitPresentInTargetList();
         bool IsValidDeadOrAliveTarget(Unit const* unit) const;
-        SpellCastResult CanOpenLock(SpellEffectIndex effIndex, uint32 lockid, SkillType& skillid, int32& reqSkillValue, int32& skillValue);
+        SpellCastResult CanOpenLock(SpellEffectIndex effIndex, uint32 lockid, SkillType& skillId, int32& reqSkillValue, int32& skillValue);
+        void ProcSpellAuraTriggers();
+        bool CanExecuteTriggersOnHit(uint8 effMask, SpellEntry const* triggeredByAura) const;
         // -------------------------------------------
 
         // List For Triggered Spells
