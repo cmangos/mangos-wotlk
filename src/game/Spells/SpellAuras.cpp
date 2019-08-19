@@ -4697,16 +4697,15 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 16314);
 
         // polymorph case
-        if (Real && target->GetTypeId() == TYPEID_PLAYER && target->IsPolymorphed())
+        if (Real && GetSpellProto()->Mechanic == MECHANIC_POLYMORPH)
         {
-            // for players, start regeneration after 1s (in polymorph fast regeneration case)
-            // only if caster is Player (after patch 2.4.2)
-            if (GetCasterGuid().IsPlayer())
-                ((Player*)target)->setRegenTimer(1 * IN_MILLISECONDS);
-
-            // dismount polymorphed target (after patch 2.4.2)
             if (target->IsMounted())
-                target->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED, GetHolder());
+            {
+                if (target->GetTypeId() == TYPEID_PLAYER)
+                    target->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED, GetHolder());
+                else // dismount polymorphed creature target (after patch 2.4.2)
+                    target->Unmount();
+            }
         }
     }
     else                                                    // !apply
