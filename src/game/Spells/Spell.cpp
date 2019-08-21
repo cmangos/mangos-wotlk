@@ -1084,42 +1084,6 @@ void Spell::AddDestExecution(SpellEffectIndex effIndex)
     }
 }
 
-void Spell::DoAllTargetlessEffects(bool dest)
-{
-    uint32 procAttacker;
-    uint32 procVictim;
-    uint32 procEx = PROC_EX_NONE;
-    WorldObject* caster = m_caster; // preparation for GO casting
-    Unit* unitCaster = caster->GetTypeId() == TYPEID_UNIT ? static_cast<Unit*>(caster) : nullptr;
-
-    uint32 effectMask;
-    if (dest) // can have delay
-    {
-        effectMask = m_destTargetInfo.effectMask;
-        m_destTargetInfo.processed = true;
-        for (uint32 j = 0; j < MAX_EFFECT_INDEX; ++j)
-        {
-            if ((effectMask & (1 << j)) != 0)
-                HandleEffects(nullptr, nullptr, nullptr, SpellEffectIndex(j));
-        }
-    }
-    else // always immediate
-    {
-        effectMask = m_targetlessMask;
-        for (uint32 j = 0; j < MAX_EFFECT_INDEX; ++j)
-        {
-            if ((effectMask & (1 << j)) != 0)
-                HandleEffects(nullptr, nullptr, nullptr, SpellEffectIndex(j));
-        }
-    }
-
-    if (effectMask && unitCaster)
-    {
-        PrepareMasksForProcSystem(effectMask, procAttacker, procVictim, caster, unitTarget);
-        unitCaster->ProcDamageAndSpell(ProcSystemArguments(procAttacker & PROC_FLAG_ON_TRAP_ACTIVATION ? m_targets.getUnitTarget() : nullptr, unitCaster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
-    }
-}
-
 void Spell::DoAllEffectOnTarget(TargetInfo* target)
 {
     if (target->processed)                                  // Check target
@@ -1485,6 +1449,42 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
             delete m_spellAuraHolder;
             m_spellAuraHolder = nullptr;
         }
+    }
+}
+
+void Spell::DoAllTargetlessEffects(bool dest)
+{
+    uint32 procAttacker;
+    uint32 procVictim;
+    uint32 procEx = PROC_EX_NONE;
+    WorldObject* caster = m_caster; // preparation for GO casting
+    Unit* unitCaster = caster->isType(TYPEMASK_UNIT) ? static_cast<Unit*>(caster) : nullptr;
+
+    uint32 effectMask;
+    if (dest) // can have delay
+    {
+        effectMask = m_destTargetInfo.effectMask;
+        m_destTargetInfo.processed = true;
+        for (uint32 j = 0; j < MAX_EFFECT_INDEX; ++j)
+        {
+            if ((effectMask & (1 << j)) != 0)
+                HandleEffects(nullptr, nullptr, nullptr, SpellEffectIndex(j));
+        }
+    }
+    else // always immediate
+    {
+        effectMask = m_targetlessMask;
+        for (uint32 j = 0; j < MAX_EFFECT_INDEX; ++j)
+        {
+            if ((effectMask & (1 << j)) != 0)
+                HandleEffects(nullptr, nullptr, nullptr, SpellEffectIndex(j));
+        }
+    }
+
+    if (effectMask && unitCaster)
+    {
+        PrepareMasksForProcSystem(effectMask, procAttacker, procVictim, caster, unitTarget);
+        unitCaster->ProcDamageAndSpell(ProcSystemArguments(procAttacker & PROC_FLAG_ON_TRAP_ACTIVATION ? m_targets.getUnitTarget() : nullptr, unitCaster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
     }
 }
 
