@@ -36,6 +36,8 @@ EndContentData */
 #include "GameEvents/GameEventMgr.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 #include "Entities/TemporarySpawn.h"
+#include "Grids/GridNotifiers.h"
+#include "Grids/GridNotifiersImpl.h"
 
 /*######
 ## go_ethereum_prison
@@ -1029,13 +1031,13 @@ struct go_fel_cannonball_stack_trap : public GameObjectAI
 
     ObjectGuid m_bunny;
 
-    void JustSpawned()
+    void JustSpawned() override
     {
         Creature* bunny = m_go->SummonCreature(NPC_BOMBING_RUN_TARGET_BUNNY, m_go->GetPositionX(), m_go->GetPositionY(), m_go->GetPositionZ(), m_go->GetOrientation(), TEMPSPAWN_MANUAL_DESPAWN, 0);
         m_bunny = bunny->GetObjectGuid();
     }
 
-    void JustDespawned()
+    void JustDespawned() override
     {
         if (Creature* bunny = m_go->GetMap()->GetCreature(m_bunny))
             static_cast<TemporarySpawn*>(bunny)->UnSummon();
@@ -1045,6 +1047,47 @@ struct go_fel_cannonball_stack_trap : public GameObjectAI
 GameObjectAI* GetAI_go_fel_cannonball_stack_trap(GameObject* go)
 {
     return new go_fel_cannonball_stack_trap(go);
+}
+
+enum
+{
+    SPELL_RALLYING_CRY_OF_THE_DRAGONSLAYER = 22888,
+    
+    NPC_OVERLORD_RUNTHAK            = 14392,
+    NPC_MAJOR_MATTINGLY             = 14394,
+    NPC_HIGH_OVERLORD_SAURFANG      = 14720,
+    NPC_FIELD_MARSHAL_AFRASIABI     = 14721,
+
+    GO_ONYXIA_H                     = 179556,
+    GO_ONYXIA_A                     = 179558,
+    GO_NEFARIAN_H                   = 179881,
+    GO_NEFARIAN_A                   = 179882,
+};
+
+struct go_dragon_head : public GameObjectAI
+{
+    go_dragon_head(GameObject* go) : GameObjectAI(go) {}
+
+    void JustSpawned() override
+    {
+        uint32 npcEntry = 0;
+        switch (m_go->GetEntry())
+        {
+            case GO_ONYXIA_H: npcEntry = NPC_OVERLORD_RUNTHAK; break;
+            case GO_ONYXIA_A: npcEntry = NPC_MAJOR_MATTINGLY; break;
+            case GO_NEFARIAN_H: npcEntry = NPC_HIGH_OVERLORD_SAURFANG; break;
+            case GO_NEFARIAN_A: npcEntry = NPC_FIELD_MARSHAL_AFRASIABI; break;
+        }
+
+        Unit* caster = GetClosestCreatureWithEntry(m_go, npcEntry, 30.f);
+        if (caster)
+            caster->CastSpell(nullptr, SPELL_RALLYING_CRY_OF_THE_DRAGONSLAYER, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+GameObjectAI* GetAI_go_dragon_head(GameObject* go)
+{
+    return new go_dragon_head(go);
 }
 
 void AddSC_go_scripts()
@@ -1142,5 +1185,10 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_fel_cannonball_stack_trap";
     pNewScript->GetGameObjectAI = &GetAI_go_fel_cannonball_stack_trap;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_dragon_head";
+    pNewScript->GetGameObjectAI = &GetAI_go_dragon_head;
     pNewScript->RegisterSelf();
 }
