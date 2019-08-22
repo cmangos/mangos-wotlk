@@ -1090,6 +1090,32 @@ GameObjectAI* GetAI_go_dragon_head(GameObject* go)
     return new go_dragon_head(go);
 }
 
+enum
+{
+    SPELL_WARCHIEFS_BLESSING = 16609,
+
+    NPC_THRALL = 4949,
+};
+
+struct go_unadorned_spike : public GameObjectAI
+{
+    go_unadorned_spike(GameObject* go) : GameObjectAI(go) {}
+
+    void OnLootStateChange() override
+    {
+        if (m_go->GetLootState() != GO_ACTIVATED)
+            return;
+
+        if (Creature* thrall = GetClosestCreatureWithEntry(m_go, NPC_THRALL, 30.f))
+            thrall->CastSpell(nullptr, SPELL_WARCHIEFS_BLESSING, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+GameObjectAI* GetAI_go_unadorned_spike(GameObject* go)
+{
+    return new go_unadorned_spike(go);
+}
+
 void AddSC_go_scripts()
 {
     Script* pNewScript = new Script;
@@ -1190,5 +1216,10 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_dragon_head";
     pNewScript->GetGameObjectAI = &GetAI_go_dragon_head;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_unadorned_spike";
+    pNewScript->GetGameObjectAI = &GetAI_go_unadorned_spike;
     pNewScript->RegisterSelf();
 }
