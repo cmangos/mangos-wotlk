@@ -7967,6 +7967,9 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
         && targetType != TARGET_UNIT_CASTER)
         return false;
 
+    if (m_spellInfo->MaxTargetLevel && target->getLevel() > m_spellInfo->MaxTargetLevel)
+        return false;
+
     return CheckTargetScript(target, eff);
 }
 
