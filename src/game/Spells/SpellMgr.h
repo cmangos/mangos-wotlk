@@ -483,6 +483,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 13299:         // Poison Proc
         case 13767:         // Hate to Zero (Hate to Zero)
         case 16140:         // Exploding Cadaver (Exploding Cadaver)
+        case 16592:         // Shadowform
         case 17327:         // Spirit Particles
         case 17467:         // Unholy Aura
         case 18943:         // Double Attack
@@ -514,6 +515,8 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 33900:         // Shroud of Death
         case 33908:         // Burning Spikes
         case 34343:         // Thorns
+        case 35194:         // Shadowform
+        case 35319:         // Electric Skin
         case 35408:         // Fear Proc
         case 35596:         // Power of the Legion
         case 35841:         // Draenei Spirit Visual
