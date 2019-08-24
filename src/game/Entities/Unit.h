@@ -1067,6 +1067,13 @@ enum CurrentSpellTypes
 #define CURRENT_MAX_SPELL             4
 #define INVISIBILITY_MAX              32
 
+enum StealthType : uint32
+{
+    STEALTH_UNIT = 0,
+    STEALTH_TRAP = 1,
+    STEALTH_TYPE_MAX,
+};
+
 enum ActiveStates
 {
     ACT_PASSIVE  = 0x01,                                    // 0x01 - passive
@@ -2241,6 +2248,11 @@ class Unit : public WorldObject
         int32 GetInvisibilityValue(uint32 index) const;
         int32 GetInvisibilityDetectValue(uint32 index) const;
         void SetPhaseMask(uint32 newPhaseMask, bool update) override; // overwrite WorldObject::SetPhaseMask
+        // stealth
+        uint32 GetStealthStrength(StealthType type) const { return m_stealthStrength[type]; }
+        uint32 GetStealthDetectionStrength(StealthType type) const { return m_stealthDetectStrength[type]; }
+        void AddStealthStrength(StealthType type, uint32 value) { m_stealthStrength[type] += value; }
+        void AddStealthDetectionStrength(StealthType type, uint32 value) { m_stealthDetectStrength[type] += value; }
 
         // virtual functions for all world objects types
         bool isVisibleForInState(Player const* u, WorldObject const* viewPoint, bool inVisibleList) const override;
@@ -2765,6 +2777,8 @@ class Unit : public WorldObject
         uint32 m_detectInvisibilityMask; // is inherited from controller in PC case
         int32 m_invisibilityValues[INVISIBILITY_MAX];
         int32 m_invisibilityDetectValues[INVISIBILITY_MAX];
+        uint32 m_stealthStrength[STEALTH_TYPE_MAX];
+        uint32 m_stealthDetectStrength[STEALTH_TYPE_MAX];
 
         uint64 m_auraUpdateMask;
 
