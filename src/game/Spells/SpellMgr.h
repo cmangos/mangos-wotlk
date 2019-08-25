@@ -542,6 +542,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 39311:         // Scrapped Fel Reaver transform aura that is never removed even on evade
         case 39918:         // Soulgrinder Ritual Visual ( in progress)
         case 39920:         // Soulgrinder Ritual Visual ( beam)
+        case 40453:         // Aura of Fear
         case 40816:         // Saber Lash - Mother Shahraz
         case 41634:         // Invisibility and Stealth Detection
         case 42459:         // Dual Wield (Passive)
