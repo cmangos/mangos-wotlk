@@ -3787,7 +3787,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         caster->FixateTarget(nullptr);
 
                     if (GetId() == 42583)
-                        caster->CastSpell(nullptr, 43149, TRIGGERED_OLD_TRIGGERED);
+                    {
+                        if (apply)
+                            caster->CastSpell(nullptr, 43149, TRIGGERED_OLD_TRIGGERED);
+                        else
+                            caster->RemoveAurasDueToSpell(43149);
+                    }
                     return;
                 }
                 case 43874:                                 // Scourge Mur'gul Camp: Force Shield Arcane Purple x3
