@@ -1109,11 +1109,11 @@ void Player::SetDrunkValue(uint8 newDrunkValue, uint32 itemId /*= 0*/)
 
     // special drunk invisibility detection
     if (newDrunkenState >= DRUNKEN_DRUNK)
-        SetInvisibilityDetectMask(6, true);
+        GetVisibilityData().SetInvisibilityDetectMask(INVISIBILITY_DRUNK, true);
     else
-        SetInvisibilityDetectMask(6, false);
+        GetVisibilityData().SetInvisibilityDetectMask(INVISIBILITY_DRUNK, false);
 
-    SetInvisibilityValue(6, m_drunk);
+    GetVisibilityData().SetInvisibilityValue(6, GetDrunkValue());
 
     if (newDrunkenState == oldDrunkenState)
         return;

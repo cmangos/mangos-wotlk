@@ -799,8 +799,8 @@ struct go_brewfest_music : public GameObjectAI
             switch (m_zoneTeam)
             {
                 case TEAM_NONE:
-                    m_go->GetMap()->ExecuteDistWorker(m_go, m_go->GetMap()->GetVisibilityDistance(),
-                                                      [&](Player * player)
+                    m_go->GetMap()->ExecuteDistWorker(m_go, m_go->GetVisibilityData().GetVisibilityDistance(),
+                    [&](Player * player)
                     {
                         if (player->GetTeam() == ALLIANCE)
                             PlayAllianceMusic();
@@ -858,8 +858,8 @@ struct go_midsummer_music : public GameObjectAI
 
         if (m_musicTimer <= diff)
         {
-            m_go->GetMap()->ExecuteDistWorker(m_go, m_go->GetMap()->GetVisibilityDistance(),
-                                              [&](Player * player)
+            m_go->GetMap()->ExecuteDistWorker(m_go, m_go->GetVisibilityData().GetVisibilityDistance(),
+            [&](Player * player)
             {
                 if (player->GetTeam() == ALLIANCE)
                     m_go->PlayMusic(EVENTMIDSUMMERFIREFESTIVAL_A, PlayPacketParameters(PLAY_TARGET, player));
