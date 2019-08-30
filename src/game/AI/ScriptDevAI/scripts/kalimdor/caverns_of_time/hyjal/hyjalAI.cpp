@@ -256,7 +256,7 @@ void hyjalAI::UpdateAI(const uint32 uiDiff)
     {
         m_calledForHelp = true;
         DoScriptText(SAY_CALL_FOR_HELP_EMOTE, m_creature);
-        DoCallForHelp();
+        DoCallForHelp(30.f);
     }
 
     DoMeleeAttackIfReady();
