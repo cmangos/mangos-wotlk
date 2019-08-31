@@ -108,7 +108,6 @@ struct boss_curatorAI : public ScriptedAI, public CombatActions
 
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_POWER_DRAIN, true);
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_POWER_BURN, true);
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DISPEL, DISPEL_POISON, true);
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ARCANE, true);
 
         m_phase = CURATOR_PHASE_1;

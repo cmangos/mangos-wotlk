@@ -49,7 +49,6 @@ struct boss_void_reaverAI : public ScriptedAI
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_PERIODIC_LEECH, true);
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_STATE, SPELL_AURA_PERIODIC_MANA_LEECH, true);
-        m_creature->ApplySpellImmune(nullptr, IMMUNITY_DISPEL, DISPEL_POISON, true);
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_HEALTH_LEECH, true);
         Reset();
     }
