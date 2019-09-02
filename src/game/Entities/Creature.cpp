@@ -2952,6 +2952,9 @@ void Creature::SetLootStatus(CreatureLootStatus status)
             SetFlag(UNIT_FIELD_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
             break;
+        case CREATURE_LOOT_STATUS_PICKPOCKETED:
+            StartPickpocketRestockTimer();
+            break;
         default:
             break;
     }
@@ -3065,4 +3068,14 @@ void Creature::SetCanDualWield(bool state)
 {
     Unit::SetCanDualWield(state);
     UpdateDamagePhysical(OFF_ATTACK);
+}
+
+bool Creature::CanRestockPickpocketLoot() const
+{
+    return GetMap()->GetCurrentClockTime() >= m_pickpocketRestockTime;
+}
+
+void Creature::StartPickpocketRestockTimer()
+{
+    m_pickpocketRestockTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(sWorld.getConfig(CONFIG_UINT32_CREATURE_PICKPOCKET_RESTOCK_DELAY) * IN_MILLISECONDS);
 }
