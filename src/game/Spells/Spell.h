@@ -398,7 +398,7 @@ class Spell
         void EffectRenamePet(SpellEffectIndex eff_idx);
         void EffectSendTaxi(SpellEffectIndex eff_idx);
         void EffectKnockBack(SpellEffectIndex eff_idx);
-        void EffectPlayerPull(SpellEffectIndex eff_idx);
+        void EffectPullTowards(SpellEffectIndex eff_idx);
         void EffectDispelMechanic(SpellEffectIndex eff_idx);
         void EffectSummonDeadPet(SpellEffectIndex eff_idx);
         void EffectSummonAllTotems(SpellEffectIndex eff_idx);

@@ -183,7 +183,7 @@ pEffect SpellEffects[MAX_SPELL_EFFECTS] =
     &Spell::EffectWeaponDmg,                                //121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG
     &Spell::EffectUnused,                                   //122 SPELL_EFFECT_122                      unused
     &Spell::EffectSendTaxi,                                 //123 SPELL_EFFECT_SEND_TAXI                taxi/flight related (misc value is taxi path id)
-    &Spell::EffectPlayerPull,                               //124 SPELL_EFFECT_PLAYER_PULL              opposite of knockback effect (pulls player twoard caster)
+    &Spell::EffectPullTowards,                              //124 SPELL_EFFECT_PULL_TOWARDS
     &Spell::EffectModifyThreatPercent,                      //125 SPELL_EFFECT_MODIFY_THREAT_PERCENT
     &Spell::EffectStealBeneficialBuff,                      //126 SPELL_EFFECT_STEAL_BENEFICIAL_BUFF    spell steal effect?
     &Spell::EffectProspecting,                              //127 SPELL_EFFECT_PROSPECTING              Prospecting spell
@@ -204,7 +204,7 @@ pEffect SpellEffects[MAX_SPELL_EFFECTS] =
     &Spell::EffectTriggerSpellWithValue,                    //142 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE
     &Spell::EffectApplyAreaAura,                            //143 SPELL_EFFECT_APPLY_AREA_AURA_OWNER
     &Spell::EffectKnockBackFromPosition,                    //144 SPELL_EFFECT_KNOCKBACK_FROM_POSITION
-    &Spell::EffectGravityPull,                              //145 SPELL_EFFECT_GRAVITY_PULL
+    &Spell::EffectPullTowards,                              //145 SPELL_EFFECT_PULL_TOWARDS_DEST
     &Spell::EffectActivateRune,                             //146 SPELL_EFFECT_ACTIVATE_RUNE
     &Spell::EffectQuestFail,                                //147 SPELL_EFFECT_QUEST_FAIL               quest fail
     &Spell::EffectNULL,                                     //148 SPELL_EFFECT_148                      single spell: Inflicts Fire damage to an enemy.
@@ -13162,14 +13162,26 @@ void Spell::EffectSendTaxi(SpellEffectIndex eff_idx)
     ((Player*)unitTarget)->ActivateTaxiPathTo(m_spellInfo->EffectMiscValue[eff_idx], m_spellInfo->Id);
 }
 
-void Spell::EffectPlayerPull(SpellEffectIndex eff_idx)
+void Spell::EffectPullTowards(SpellEffectIndex eff_idx)
 {
     if (!unitTarget)
         return;
 
-    float x, y, z;
-    m_caster->GetPosition(x, y, z);
-    float dist = unitTarget->GetDistance(m_caster, false);
+    float x, y, z, dist;
+
+    if (m_spellInfo->Effect[eff_idx] == SPELL_EFFECT_PULL_TOWARDS)
+    {
+        z = m_caster->GetPositionZ();
+        dist = unitTarget->GetDistance(m_caster, false);
+    }
+    else // SPELL_EFFECT_PULL_TOWARDS_DEST
+    {
+        m_targets.getDestination(x, y, z);
+        dist = sqrt(unitTarget->GetDistance2d(x, y, DIST_CALC_NONE));
+    }
+
+    if (damage && dist > damage)
+        dist = float(damage);
 
     if (dist < 0.1f)
         return;
@@ -13177,7 +13189,7 @@ void Spell::EffectPlayerPull(SpellEffectIndex eff_idx)
     // Projectile motion
     float speedXY = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.1f;
     float time = dist / speedXY;
-    float speedZ = ((m_caster->GetPositionZ() - unitTarget->GetPositionZ()) + 0.5f * time * time * Movement::gravity) / time;
+    float speedZ = ((z - unitTarget->GetPositionZ()) + 0.5f * time * time * Movement::gravity) / time;
     float moveTimeHalf = speedZ / Movement::gravity;
     float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -speedZ);
     unitTarget->GetMotionMaster()->MoveJump(x, y, z, speedXY, max_height, 2);
