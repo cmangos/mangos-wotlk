@@ -9073,8 +9073,7 @@ void Aura::PeriodicDummyTick()
                 {
                     if (roll_chance_i(5))
                     {
-                        DamageInfo damageInfo;
-                        int32 damageValue = target->CalculateSpellEffectValue(target, spell, EFFECT_INDEX_1, damageInfo);
+                        int32 damageValue = target->CalculateSpellDamage(target, spell, EFFECT_INDEX_1);
                         target->CastCustomSpell(nullptr, spell->Id == 6946 ? 6945 : 41356, nullptr, &damageValue, nullptr, TRIGGERED_OLD_TRIGGERED);
                     }
                     return;
