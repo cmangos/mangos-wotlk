@@ -235,8 +235,6 @@ struct boss_leotheras_the_blindAI : public ScriptedAI
                         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED);
 
-                        m_creature->SetTurningOff(false); // clears target
-
                         SetCombatMovement(true);
 
                         m_attackDistance = 0.f;

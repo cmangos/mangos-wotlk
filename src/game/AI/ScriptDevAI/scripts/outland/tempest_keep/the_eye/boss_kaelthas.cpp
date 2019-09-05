@@ -624,7 +624,7 @@ struct boss_kaelthasAI : public ScriptedAI
     void ExecuteActions()
     {
         // cant use generic condition - TODO: Rewrite gravity lapse into own phase
-        if (!m_unit->CanReactInCombat() || m_unit->hasUnitState(UNIT_STAT_DONT_TURN | UNIT_STAT_SEEKING_ASSISTANCE | UNIT_STAT_CHANNELING) || m_unit->IsNonMeleeSpellCasted(false))
+        if (!m_unit->CanReactInCombat() || m_unit->hasUnitState(UNIT_STAT_CHARGING | UNIT_STAT_SEEKING_ASSISTANCE | UNIT_STAT_CHANNELING) || m_unit->IsNonMeleeSpellCasted(false))
             return;
 
         for (uint32 i = 0; i < KAEL_ACTION_MAX; ++i)
