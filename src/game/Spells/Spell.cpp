@@ -8727,6 +8727,14 @@ SpellCastResult Spell::OnCheckCast(bool /*strict*/)
                 return SPELL_FAILED_BAD_TARGETS;
             break;
         }
+        case 7914: // Capture Spirit
+        {
+            if (ObjectGuid target = m_targets.getUnitTargetGuid()) // can be cast only on these targets
+                if (target.GetEntry() != 4663 && target.GetEntry() != 4664 && target.GetEntry() != 4665 && target.GetEntry() != 4666 && target.GetEntry() != 4667
+                    && target.GetEntry() != 4668 && target.GetEntry() != 4705 && target.GetEntry() != 13019)
+                    return SPELL_FAILED_BAD_TARGETS;
+            break;
+        }
         case 30077: // Carinda's Retribution
             if (ObjectGuid target = m_targets.getUnitTargetGuid())
                 if (target.GetEntry() != 17226)
