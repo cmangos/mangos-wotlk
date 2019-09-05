@@ -6410,7 +6410,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
 {
     switch (m_spellInfo->Id)
     {
-        case 44322: // Hacky fix for summon spell in Vexallus fight (MGT) 
+        case 44322: // Hacky fix for summon spell in Vexallus fight (MGT)
         case 46154: // need more info on how to handle this
         case 46159:
             break;
@@ -9092,6 +9092,10 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (!unitTarget)
                         return;
 
+                    // Return if not player, pet nor Zombie Chow NPC
+                    if (unitTarget->GetTypeId() == TYPEID_UNIT && !unitTarget->IsControlledByPlayer() && unitTarget->GetEntry() != 16360)
+                        return;
+
                     float downToHealthPercent = (m_spellInfo->Id != 71123 ? 5 : m_spellInfo->CalculateSimpleValue(eff_idx)) * 0.01f;
 
                     int32 health = unitTarget->GetHealth() - unitTarget->GetMaxHealth() * downToHealthPercent;
@@ -9830,7 +9834,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 1099: guardEntry = 8147;   break;      // Camp Mojache
                         case 1116: guardEntry = 7939;   break;      // Feathermoon Stronghold
                         case 1497: guardEntry = 5624;   break;      // Undercity
-                        case 1519: guardEntry = 68;     break;      // Stormwind City 
+                        case 1519: guardEntry = 68;     break;      // Stormwind City
                         case 1537: guardEntry = 5595;   break;      // Ironforge
                         case 1637: guardEntry = 3296;   break;      // Orgrimmar
                         case 1638: guardEntry = 3084;   break;      // Thunder Bluff
