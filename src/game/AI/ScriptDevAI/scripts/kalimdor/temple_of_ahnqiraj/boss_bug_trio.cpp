@@ -338,9 +338,9 @@ struct boss_yaujAI : public boss_silithidRoyaltyAI
         // Heal self
         if (m_healTimer < diff)
         {
-            if (m_creature->GetHealthPercent() < 100.0f)
+            if (Unit* target = DoSelectLowestHpFriendly(100.0f))
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_HEAL) == CAST_OK)
+                if (DoCastSpellIfCan(target, SPELL_HEAL) == CAST_OK)
                     m_healTimer = urand(10, 30) * IN_MILLISECONDS;
             }
         }
