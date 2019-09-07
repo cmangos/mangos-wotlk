@@ -673,15 +673,12 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 m_creature->SetInCombatWithZone();
+                AttackClosestEnemy();
                 PreparePhaseTimers(); // Phase 1 start
                 if (m_instance)
                 {
                     if (Creature* akama = m_instance->GetSingleCreatureFromStorage(NPC_AKAMA))
                     {
-                        if (Unit* closest = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, nullptr, SELECT_FLAG_PLAYER))
-                            AttackStart(closest);
-                        else
-                            AttackStart(akama);
                         akama->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         akama->AI()->AttackStart(m_creature);
                     }

@@ -189,6 +189,7 @@ struct boss_nightbaneAI : public npc_escortAI
 
             m_bCombatStarted = true;
             m_creature->SetInCombatWithZone();
+            AttackClosestEnemy();
         }
     }
 
