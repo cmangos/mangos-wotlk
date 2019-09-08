@@ -3271,7 +3271,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             case 42385:                                     // Alcaz Survey Aura
             {
-                target->CastSpell(target, 42316, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                target->CastSpell(nullptr, 42316, TRIGGERED_OLD_TRIGGERED);
                 return;
             }
             case 42517:                                     // Beam to Zelfrax
