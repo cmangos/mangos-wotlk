@@ -418,6 +418,19 @@ struct world_map_kalimdor : public ScriptedMap
         m_encounter[uiType] = uiData;
     }
 
+    void FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 /*zoneId*/, uint32 areaId) override
+    {
+        switch (areaId)
+        {
+            case AREAID_THERAMORE_ISLE:
+            {
+                FillInitialWorldStateData(data, count, WORLD_STATE_TETHYR_SHOW, uint32(GetData(TYPE_TETHYR) != NOT_STARTED));
+                FillInitialWorldStateData(data, count, WORLD_STATE_TETHYR_COUNT, m_uiTheramoreMarksmenAlive);
+                break;
+            }
+        }
+    }
+
     uint32 GetData(uint32 uiType) const override { return m_encounter[uiType]; }
 };
 
