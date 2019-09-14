@@ -3247,7 +3247,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,commen
 
 (-1010001,'Beware, $N! Look to the west!',0,0,0,0,'regthar SAY_START_REGTHAR'),
 (-1010002,'A defender has fallen!',0,0,0,0,'regthar SAY_DEFENDER'),
-(-1010003,'The Kolkar invaders are retreating!',0,1,0,0,'regthar YELL_RETREAT');
+(-1010003,'The Kolkar invaders are retreating!',0,1,0,0,'regthar YELL_RETREAT'),
+(-1010004,'%s is ripped apart as it is banished from this world.',0,3,0,0,'Cresting Exile - on Spell 4131');
 
 -- -1 015 000 TBC texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,comment) VALUES
