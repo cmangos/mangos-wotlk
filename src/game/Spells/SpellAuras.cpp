@@ -3277,7 +3277,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             case 42517:                                     // Beam to Zelfrax
             {
                 // expecting target to be a dummy creature
-                target->SummonCreature(23864, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 5.45f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                target->SummonCreature(23864, -2985.01f, -3853.649f, 44.23183f, 5.51524f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 return;
             }
             case 43681:                                     // Inactive
