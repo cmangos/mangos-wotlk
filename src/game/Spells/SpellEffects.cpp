@@ -10142,6 +10142,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 44852, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 45071:                                 // Quest - Sunwell Daily - Dead Scar Bombing Run
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->PlayMusic(12318, PlayPacketParameters(PLAY_TARGET, static_cast<Player*>(unitTarget)));
+                    return;
+                }
                 case 45141:                                 // Burn
                 {
                     if (!unitTarget)
