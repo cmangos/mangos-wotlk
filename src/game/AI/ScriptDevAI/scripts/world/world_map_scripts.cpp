@@ -239,9 +239,16 @@ struct world_map_kalimdor : public ScriptedMap
         if (eventData.despawnTimer > 3 * MINUTE * IN_MILLISECONDS)
         {
             for (auto guid : eventData.summonedMagrami)
-                if (Creature* pMagrami = instance->GetCreature(guid))
-                    if (pMagrami->isAlive()) // dont despawn corpses with loot
-                        pMagrami->ForcedDespawn();
+            {
+                if (Creature * magrami = instance->GetCreature(guid))
+                {
+                    if (magrami->isAlive()) // dont despawn corpses with loot
+                    {
+                        magrami->CastSpell(nullptr, SPELL_SPIRIT_SPAWN_OUT, TRIGGERED_OLD_TRIGGERED);
+                        magrami->ForcedDespawn(1000);
+                    }
+                }
+            }
 
             // remove gameobject from map
             if (GameObject* pGo = instance->GetGameObject(eventData.guid))
