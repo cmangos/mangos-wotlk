@@ -852,9 +852,6 @@ class Creature : public Unit
         void SetForceAttackingCapability(bool state) { m_forceAttackingCapability = state; }
         bool GetForceAttackingCapability() const { return m_forceAttackingCapability; }
 
-        void SetIgnoreRangedTargets(bool state) { m_ignoreRangedTargets = state; }
-        bool IsIgnoringRangedTargets() override { return m_ignoreRangedTargets; }
-
         void SetSpawnCounting(bool state) { m_countSpawns = state; }
 
         uint32 GetDetectionRange() const override { return m_creatureInfo->Detection; }
@@ -932,7 +929,6 @@ class Creature : public Unit
         bool m_noReputation;
 
         // Script logic
-        bool m_ignoreRangedTargets;                         // Ignores ranged targets when picking someone to attack
         bool m_countSpawns;
 
     private:

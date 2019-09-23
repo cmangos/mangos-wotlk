@@ -334,7 +334,7 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
     bool found = false;
     bool onlySecondChoiceTargetsFound = false;
     bool checkedCurrentVictim = false;
-    bool suppressRanged = attacker->hasUnitState(UNIT_STAT_ROOT) && !attacker->AI()->IsRangedUnit();
+    bool suppressRanged = attacker->IsIgnoringRangedTargets();
     bool currentVictimInMelee = true;
     if (suppressRanged && currentVictim)
         currentVictimInMelee = attacker->CanReachWithMeleeAttack(currentVictim->getTarget());
@@ -349,21 +349,9 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
         Unit* target = currentRef->getTarget();
         MANGOS_ASSERT(target);                             // if the ref has status online the target must be there!
 
-        bool isInMelee = attacker->CanReachWithMeleeAttack(target);
-        // Some bosses keep ranged targets in threat list but do not pick them with generic threat choice
-        if (!isInMelee)
-        {
-            if (attacker->IsIgnoringRangedTargets())
-            {
-                ++iter;
-                continue;
-            }
-        }
-
         if (currentVictim) // select 1.3/1.1 better target in comparison current target
         {
-
-
+            bool isInMelee = attacker->CanReachWithMeleeAttack(target);
             // normal case: pCurrentRef is still valid and most hated
             if (currentVictim == currentRef)
             {
@@ -521,7 +509,7 @@ void ThreatManager::modifyAllThreatPercent(int32 threatPercent)
 
 void ThreatManager::UpdateContainers()
 {
-    iThreatContainer.update(getOwner()->hasUnitState(UNIT_STAT_ROOT) && !getOwner()->AI()->IsRangedUnit());
+    iThreatContainer.update(getOwner()->IsIgnoringRangedTargets());
 }
 
 Unit* ThreatManager::getHostileTarget()
