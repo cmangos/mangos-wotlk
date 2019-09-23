@@ -207,15 +207,6 @@ enum SpawnedEventMode
     SPAWNED_EVENT_ZONE  = 2
 };
 
-enum RangeModeType : uint32 // maybe can be substituted for class checks
-{
-    TYPE_NONE           = 0,
-    TYPE_FULL_CASTER    = 1,
-    TYPE_PROXIMITY      = 2,
-    TYPE_NO_MELEE_MODE  = 3,
-    TYPE_MAX,
-};
-
 enum WalkSetting : uint32
 {
     RUN_DEFAULT  = 0, // Default for OOC
@@ -851,6 +842,7 @@ class CreatureEventAI : public CreatureAI
 
         void JustStoppedMovementOfTarget(SpellEntry const* spell, Unit* victim) override;
         void OnSpellInterrupt(SpellEntry const* spellInfo) override;
+        void OnSpellCooldownAdded(SpellEntry const* spellInfo) override;
 
         void DistancingStarted() override;
         void DistancingEnded() override;
@@ -858,6 +850,8 @@ class CreatureEventAI : public CreatureAI
         MovementGeneratorType GetDefaultMovement() { return m_defaultMovement; }
 
         bool IsRangedUnit() override { return m_currentRangedMode; }
+
+        virtual CanCastResult DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 castFlags = 0) override;
     protected:
         std::string GetAIName() override { return "EventAI"; }
         // Event rules specifiers
