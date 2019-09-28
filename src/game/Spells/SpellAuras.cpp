@@ -1147,12 +1147,6 @@ void Aura::TriggerSpell()
 //                    case 18347: break;
 //                    // Ranshalla Waiting
 //                    case 18953: break;
-                    case 19695:                             // Inferno
-                    {
-                        int32 damageForTick[8] = { 500, 500, 1000, 1000, 2000, 2000, 3000, 5000 };
-                        triggerTarget->CastCustomSpell(triggerTarget, 19698, &damageForTick[GetAuraTicks() - 1], nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
-                        return;
-                    }
 //                    // Frostwolf Muzzle DND
 //                    case 21794: break;
 //                    // Alterac Ram Collar DND
@@ -2140,12 +2134,6 @@ void Aura::TriggerSpell()
             case 16191:                                     // Mana Tide
             {
                 triggerCaster->CastCustomSpell(nullptr, trigger_spell_id, &m_modifier.m_amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                return;
-            }
-            case 19695:                                     // Inferno
-            {
-                int32 damageForTick[8] = { 500, 500, 1000, 1000, 2000, 2000, 3000, 5000 };
-                triggerCaster->CastCustomSpell(nullptr, 19698, &damageForTick[GetAuraTicks() - 1], nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
                 return;
             }
             case 29768:                                     // Overload
