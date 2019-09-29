@@ -56,6 +56,7 @@
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #include "Server/SQLStorages.h"
 #include "Loot/LootMgr.h"
+#include "World/WorldState.h"
 
 static uint32 ahbotQualityIds[MAX_AUCTION_QUALITY] =
 {
@@ -7741,3 +7742,28 @@ bool ChatHandler::HandleLinkCheckCommand(char* args)
 
     return true;
 }
+
+bool ChatHandler::HandleExpansionRelease(char* args)
+{
+    uint32 curExpansion = sWorldState.GetExpansion();
+
+    uint32 param;
+    if (!ExtractUInt32(&args, param))
+    {
+        PSendSysMessage("Current Expansion: %u", curExpansion);
+        return true;
+    }
+
+    if (param == curExpansion)
+    {
+        SendSysMessage("Current Expansion is same as given expansion.");
+        return true;
+    }
+
+    if (sWorldState.SetExpansion(param))
+        PSendSysMessage("New Expansion set to %u", param);
+    else
+        PSendSysMessage("Setting expansion failed. Consult manual.");
+    return true;
+}
+

@@ -722,6 +722,8 @@ class ChatHandler
         bool HandleLinkToggleCommand(char* args);
         bool HandleLinkCheckCommand(char* args);
 
+        bool HandleExpansionRelease(char* args);
+
         //! Development Commands
         bool HandleSaveAllCommand(char* args);
 

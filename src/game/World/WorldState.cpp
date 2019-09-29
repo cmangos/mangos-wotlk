@@ -20,6 +20,7 @@
 #include "World/World.h"
 #include "Maps/MapManager.h"
 #include "Entities/Object.h"
+#include "GameEvents/GameEventMgr.h"
 #include <algorithm>
 #include <map>
 
@@ -41,7 +42,7 @@ enum
     GROMGOLOG_EVENT_4   = 15325,
 };
 
-WorldState::WorldState() : m_isMagtheridonHeadSpawnedHorde(false), m_isMagtheridonHeadSpawnedAlliance(false), m_adalSongOfBattleTimer(0), m_emeraldDragonsState(0xF), m_emeraldDragonsTimer(0), m_emeraldDragonsChosenPositions(4, 0)
+WorldState::WorldState() : m_emeraldDragonsState(0xF), m_emeraldDragonsTimer(0), m_emeraldDragonsChosenPositions(4, 0), m_isMagtheridonHeadSpawnedHorde(false), m_isMagtheridonHeadSpawnedAlliance(false), m_adalSongOfBattleTimer(0), m_expansion(EXPANSION_WOTLK)
 {
     m_transportStates[GROMGOL_UNDERCITY]    = GROMGOLUC_EVENT_1;
     m_transportStates[GROMGOL_ORGRIMMAR]    = OGUC_EVENT_1;
@@ -95,11 +96,22 @@ void WorldState::Load()
                     break;
                 case SAVE_ID_QUEL_DANAS: // TODO:
                     break;
+                case SAVE_ID_EXPANSION_RELEASE:
+                    if (data.size())
+                    {
+                        uint8 expansion;
+                        loadStream >> expansion;
+                        m_expansion = expansion;
+                    }
+                    else
+                        m_expansion = sWorld.getConfig(CONFIG_UINT32_EXPANSION);
+                    break;
             }
         }
         while (result->NextRow());
     }
     RespawnEmeraldDragons();
+    StartExpansionEvent();
 }
 
 void WorldState::Save(SaveIds saveId)
@@ -123,6 +135,11 @@ void WorldState::Save(SaveIds saveId)
             CharacterDatabase.PExecute("INSERT INTO world_state(Id,Data) VALUES('%u','%s')", SAVE_ID_EMERALD_DRAGONS, dragonsData.data());
             break;
         }
+        case SAVE_ID_EXPANSION_RELEASE:
+            std::string expansionData = std::to_string(m_expansion);
+            CharacterDatabase.PExecute("DELETE FROM world_state WHERE Id='%u'", SAVE_ID_EXPANSION_RELEASE);
+            CharacterDatabase.PExecute("INSERT INTO world_state(Id,Data) VALUES('%u','%s')", SAVE_ID_EXPANSION_RELEASE, expansionData.data());
+            break;
     }
     // TODO: Add saving for AQ and QD
 }
@@ -500,4 +517,31 @@ void WorldState::RespawnEmeraldDragons()
         if (IsDragonSpawned(m_emeraldDragonsChosenPositions[3]))
             WorldObject::SummonCreature(TempSpawnSettings(nullptr, m_emeraldDragonsChosenPositions[3], emeraldDragonSpawns[3][0], emeraldDragonSpawns[3][1], emeraldDragonSpawns[3][2], emeraldDragonSpawns[3][3], TEMPSPAWN_DEAD_DESPAWN, 0, false, false, pathIds[3]), map, 1);
     });
+}
+
+bool WorldState::SetExpansion(uint8 expansion)
+{
+    if (expansion > EXPANSION_WOTLK)
+        return false;
+
+    m_expansion = expansion;
+    if (expansion == EXPANSION_NONE)
+        sGameEventMgr.StartEvent(GAME_EVENT_BEFORE_THE_STORM);
+    else
+        sGameEventMgr.StopEvent(GAME_EVENT_BEFORE_THE_STORM);
+    if (m_expansion == EXPANSION_TBC)
+        sGameEventMgr.StartEvent(GAME_EVENT_ECHOES_OF_DOOM);
+    else
+        sGameEventMgr.StopEvent(GAME_EVENT_ECHOES_OF_DOOM);
+    sWorld.UpdateSessionExpansion(expansion);
+    Save(SAVE_ID_EXPANSION_RELEASE); // save to DB right away
+    return true;
+}
+
+void WorldState::StartExpansionEvent()
+{
+    if (m_expansion == EXPANSION_NONE)
+        sGameEventMgr.StartEvent(GAME_EVENT_BEFORE_THE_STORM);
+    if (m_expansion == EXPANSION_TBC)
+        sGameEventMgr.StartEvent(GAME_EVENT_ECHOES_OF_DOOM);
 }

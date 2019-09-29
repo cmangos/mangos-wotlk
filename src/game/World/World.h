@@ -625,6 +625,8 @@ class World
         static TimePoint GetCurrentClockTime() { return m_currentTime; }
         static uint32 GetCurrentDiff() { return m_currentDiff; }
 
+        void UpdateSessionExpansion(uint8 expansion);
+
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters
