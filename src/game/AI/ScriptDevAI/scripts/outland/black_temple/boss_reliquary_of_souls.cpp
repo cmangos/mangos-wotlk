@@ -255,8 +255,8 @@ struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI, public TimerMan
         ++m_soulDeathCount;
 
         // Prepare to summon the essence
-        if (m_soulDeathCount == MAX_ENSLAVED_SOULS && !m_submerged)
-            ResetTimer(RELIQUARY_ACTION_SUBMERGE, 4000);
+        if (m_soulDeathCount == MAX_ENSLAVED_SOULS)
+            ReduceTimer(RELIQUARY_ACTION_SUBMERGE, 4000);
     }
 
     void UpdateAI(const uint32 diff) override
