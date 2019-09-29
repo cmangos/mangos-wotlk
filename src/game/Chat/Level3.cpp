@@ -6433,11 +6433,7 @@ bool ChatHandler::HandleMovegensCommand(char* /*args*/)
             }
             case FOLLOW_MOTION_TYPE:
             {
-                Unit* target;
-                if (unit->GetTypeId() == TYPEID_PLAYER)
-                    target = static_cast<FollowMovementGenerator<Player> const*>(*itr)->GetCurrentTarget();
-                else
-                    target = static_cast<FollowMovementGenerator<Creature> const*>(*itr)->GetCurrentTarget();
+                Unit* target = static_cast<FollowMovementGenerator const*>(*itr)->GetCurrentTarget();
 
                 if (!target)
                     SendSysMessage(LANG_MOVEGENS_FOLLOW_NULL);
