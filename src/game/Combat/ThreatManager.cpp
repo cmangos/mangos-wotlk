@@ -355,6 +355,11 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
             // normal case: pCurrentRef is still valid and most hated
             if (currentVictim == currentRef)
             {
+                if (suppressRanged && !currentVictimInMelee)
+                {
+                    ++iter;
+                    continue;
+                }
                 found = true;
                 break;
             }
