@@ -1144,7 +1144,9 @@ enum
 
     NPC_REGINALD_WINDSOR        = 9682,
 
-    QUEST_JAIL_BREAK            = 4322
+    QUEST_JAIL_BREAK            = 4322,
+
+    SPELL_WINDSORS_FRENZY       = 15167,
 };
 
 struct npc_marshal_windsorAI : public npc_escortAI
@@ -1230,6 +1232,7 @@ struct npc_marshal_windsorAI : public npc_escortAI
             case 22:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
+                    DoCastSpellIfCan(nullptr, SPELL_WINDSORS_FRENZY, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                     DoScriptText(SAY_WINDSOR_EQUIPMENT_3, m_creature, pPlayer);
                     m_creature->SetFacingToObject(pPlayer);
                 }
