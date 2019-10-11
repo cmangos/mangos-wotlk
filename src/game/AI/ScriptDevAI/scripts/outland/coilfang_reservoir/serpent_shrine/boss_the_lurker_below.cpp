@@ -287,7 +287,7 @@ struct boss_the_lurker_belowAI : public Scripted_NoMovementAI
                     m_uiGeyserTimer -= uiDiff;
 
                 // If victim exists we have a target in melee range
-                if (m_creature->getVictim())
+                if (m_creature->getVictim() && m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
                 {
                     m_iWaterbolt = -1;
                     DoMeleeAttackIfReady();
