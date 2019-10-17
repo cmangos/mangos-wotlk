@@ -8769,7 +8769,7 @@ void Spell::OnSuccessfulSpellFinish()
     }
 }
 
-SpellCastResult Spell::OnCheckCast(bool /*strict*/)
+SpellCastResult Spell::OnCheckCast(bool strict)
 {
     switch (m_spellInfo->Id)
     {
@@ -8796,6 +8796,20 @@ SpellCastResult Spell::OnCheckCast(bool /*strict*/)
                 if (target.GetEntry() != 4663 && target.GetEntry() != 4664 && target.GetEntry() != 4665 && target.GetEntry() != 4666 && target.GetEntry() != 4667
                     && target.GetEntry() != 4668 && target.GetEntry() != 4705 && target.GetEntry() != 13019)
                     return SPELL_FAILED_BAD_TARGETS;
+            break;
+        }
+        case 12699: // Summon Screecher Spirit
+        {
+            Unit* target = m_targets.getUnitTarget();
+            if (!target || !target->IsCreature())
+                return SPELL_FAILED_BAD_TARGETS;
+            if (strict)
+                return static_cast<Creature*>(target)->HasBeenHitBySpell(m_spellInfo->Id) ? SPELL_FAILED_BAD_TARGETS : SPELL_CAST_OK;
+            else
+            {
+                static_cast<Creature*>(target)->RegisterHitBySpell(m_spellInfo->Id);
+                return SPELL_CAST_OK;
+            }
             break;
         }
         case 30077: // Carinda's Retribution
