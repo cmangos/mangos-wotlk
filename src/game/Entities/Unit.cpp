@@ -6982,6 +6982,9 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
     {
         if (m_attacking == victim)
         {
+            // need to regenerate target guid after certain scenarios
+            if (AI() && AI()->CanExecuteCombatAction())
+                SetTargetGuid(victim->GetObjectGuid());
             // switch to melee attack from ranged/magic
             if (meleeAttack)
             {
@@ -10135,7 +10138,7 @@ bool Unit::SelectHostileTarget()
         // needs a much better check, seems to cause quite a bit of trouble
         SetInFront(target);
 
-        if (oldTarget != target)
+        if (oldTarget != target || GetTarget() != target)
             AI()->AttackStart(target);
 
         // check if currently selected target is reachable
@@ -11521,12 +11524,6 @@ void Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID)
                 // Broadcast orientation change on stun start for creatures
                 // FIXME: TODO
                 SetFacingTo(GetOrientation());
-            }
-            // Non-client controlled unit with an AI should have target restored (if exists)
-            else if (isAlive())
-            {
-                if (Unit* victim = getVictim())
-                    SetTargetGuid(victim->GetObjectGuid());  // Restore target
             }
         }
     }
