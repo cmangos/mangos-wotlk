@@ -1971,14 +1971,14 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1000191','You taste good with maybe a little salt and pepper.','0','0','0','0','0',' SAY_LUMP_1'),
 ('-1000192','OK, OK! Lump give up!','0','0','0','0','0',' SAY_LUMP_DEFEAT'),
 
-('-1000193','%s looks down at the discarded necklace. In her sadness, the lady incants a glamour, which beckons forth Highborne spirits. The chamber resonates with their ancient song about the Sin''dorei...','10896','2','1','0','0','lady_sylvanas EMOTE_LAMENT_START'),
+('-1000193','%s looks down at the discarded necklace.  In her sadness, the lady incants a glamour, which beckons forth Highborne spirits.  The chamber resonates with their ancient song about the Sin''dorei...','10896','2','1','0','0','lady_sylvanas EMOTE_LAMENT_START'),
 
 ('-1000194','I give up! Please don''t kill me!','0','0','0','0','0','unkor SAY_SUBMIT'),
 
 ('-1000195','Thank you again, $N. I''ll make my way to the road now. When you can, find Terenthis and let him know we escaped.','0','0','0','1','0','volcor SAY_ESCAPE'),
 
 ('-1000196','Belore...','0','0','1','0','0','lady_sylvanas SAY_LAMENT_END'),
-('-1000197','%s kneels down and pick up the amulet.','0','2','1','16','0','lady_sylvanas EMOTE_LAMENT_END'),
+('-1000197','Sighing, %s kneels down and picks up the amulet.','0','2','1','16','0','lady_sylvanas EMOTE_LAMENT_END'),
 
 ('-1000198','Taste blade, mongrel!','0','0','0','0','0','SAY_GUARD_SIL_AGGRO1'),
 ('-1000199','Please tell me that you didn''t just do what I think you just did. Please tell me that I''m not going to have to hurt you...','0','0','0','0','0','SAY_GUARD_SIL_AGGRO2'),
@@ -3200,7 +3200,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1001274','Now you''re gonna get it good, $n!','0','0','0','0','0','dashel stonefist SAY_STONEFIST_1'),
 ('-1001275','Okay, okay! Enough fighting. No one else needs to get hurt.','0','0','0','0','0','dashel stonefist SAY_STONEFIST_2'),
 ('-1001276','It''s okay, boys. Back off. You''ve done enough. I''ll meet up with you later.','0','0','0','0','0','dashel stonefist SAY_STONEFIST_3'),
-('-1001277','That could have gone better. $n, come here, please. I have something I need you to take care of for me.','0','4','0','0','0','Ambassador Sunsorrow - During Lament of the Highborne script'),
+('-1001277','That could have gone better, $n.  Come, I have something for you.','0','4','0','0','0','Ambassador Sunsorrow - During Lament of the Highborne script'),
 ('-1001278','Who calls me to this world?  The stars are not yet aligned... my powers fail me!  You will pay for this!','0','0','0','1','0','Terokk SAY_SPAWN'),
 ('-1001279','Show me what you''re made of, $n!','0','6','0','1','0','Terokk SAY_CHOSEN_ONE'),
 ('-1001280','Kwa! You cannot kill me, I am immortal!','0','6','0','1','0','Terokk SAY_DIVINE_SHIELD'),
