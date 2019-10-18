@@ -154,7 +154,7 @@ void VehicleInfo::Initialize()
 
     // NOTE: this is the best possible combination to root a vehicle; However, there are still exceptions, such as creature 27292
     if (vehicleFlags & VEHICLE_FLAG_FIXED_POSITION || (!(vehicleFlags & VEHICLE_FLAG_UNK7) && vehicleFlags & VEHICLE_FLAG_UNK15))
-        pVehicle->SetRoot(true);
+        pVehicle->SetImmobilizedState(true);
 
     // TODO: Guesswork, but it looks correct
     if (vehicleFlags & VEHICLE_FLAG_PASSIVE)
@@ -229,12 +229,12 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
         data << m_owner->GetPackGUID();
         pPlayer->GetSession()->SendPacket(data);
 
-        pPlayer->SetRoot(true);
+        pPlayer->SetImmobilizedState(true);
     }
     else if (passenger->GetTypeId() == TYPEID_UNIT)
     {
         if (!passenger->IsRooted())
-            ((Creature*)passenger)->SetRoot(true);
+            ((Creature*)passenger)->SetImmobilizedState(true);
     }
 
     Movement::MoveSplineInit init(*passenger);
@@ -343,7 +343,7 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         }
 
         if (passenger->IsRooted())
-            passenger->SetRoot(false);
+            passenger->SetImmobilizedState(false);
 
         Movement::MoveSplineInit init(*passenger);
         // ToDo: Set proper unboard coordinates

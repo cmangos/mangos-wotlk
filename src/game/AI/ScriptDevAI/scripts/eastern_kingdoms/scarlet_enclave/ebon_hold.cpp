@@ -1103,7 +1103,7 @@ struct npc_eye_of_acherusAI : public ScriptedAI
                     m_creature->SetDisplayId(26320);                // HACK remove when correct modelid will be taken by core
 
                     DoCastSpellIfCan(m_creature, SPELL_EYE_VISUAL, CAST_TRIGGERED);
-                    m_creature->SetRoot(true);
+                    m_creature->SetImmobilizedState(true);
                     m_creature->GetMotionMaster()->MovePoint(POINT_EYE_DESTINATION, aEyeStartPos[0], aEyeStartPos[1], aEyeStartPos[2]);
                 }
                 else
@@ -1127,7 +1127,7 @@ struct npc_eye_of_acherusAI : public ScriptedAI
                     // Update Speed for Eye
                     DoScriptText(EMOTE_DESTIANTION, m_creature, player);
                     DoCastSpellIfCan(m_creature, SPELL_EYE_FLIGHT_BOOST, CAST_FORCE_TARGET_SELF);
-                    m_creature->SetRoot(false);
+                    m_creature->SetImmobilizedState(false);
                     ++m_phase;
                 }
                 else
