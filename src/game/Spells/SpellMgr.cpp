@@ -611,7 +611,7 @@ uint32 GetAffectedTargets(SpellEntry const* spellInfo, Unit* caster)
                 case 802:                                   // Mutate Bug (AQ40, Emperor Vek'nilash)
                 case 804:                                   // Explode Bug (AQ40, Emperor Vek'lor)
                 case 23138:                                 // Gate of Shazzrah (MC, Shazzrah)
-                case 23173:                                 // Brood Affliction (BWL, Chromaggus)
+                case 23173:                                 // Brood Affliction (BWL, Chromaggus) - TODO: Remove along with rework
                 case 24019:                                 // Axe Flurry (ZG - Gurubashi Axe Thrower)
                 case 24150:                                 // Stinger Charge Primer (AQ20, Hive'Zara Stinger)
                 case 24781:                                 // Dream Fog (Emerald Dragons)

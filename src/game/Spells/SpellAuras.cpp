@@ -6698,6 +6698,10 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
     {
         switch (spellProto->Id)
         {
+            case 23155: // Chromaggus - Brood Affliction: Red
+                if (m_removeMode == AURA_REMOVE_BY_DEATH)
+                    target->CastSpell(nullptr, 23168, TRIGGERED_OLD_TRIGGERED); // Heal Chromaggus
+                break;
             case 43364: // Tranquilizing Poison
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     target->CastSpell(nullptr, 24004, TRIGGERED_OLD_TRIGGERED); // Sleep
