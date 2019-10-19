@@ -7972,6 +7972,8 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
                 // Load pet from db; if any to load
                 if (NewSummon->LoadPetFromDB(_player, petentry))
                 {
+                    NewSummon->SetHealth(NewSummon->GetMaxHealth());
+                    NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
                     m_spellLog.AddLog(uint32(SPELL_EFFECT_SUMMON_PET), NewSummon->GetPackGUID());
                     return;
                 }
