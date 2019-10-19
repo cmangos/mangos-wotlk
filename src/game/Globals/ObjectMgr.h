@@ -862,6 +862,7 @@ class ObjectMgr
         uint32 GetBaseXP(uint32 level) const;
         uint32 GetXPForLevel(uint32 level) const;
         uint32 GetXPForPetLevel(uint32 level) const { return GetXPForLevel(level) / 20; }
+        uint32 GetMaxLevelForExpansion(uint32 expansion) const;
 
         int32 GetFishingBaseSkillLevel(uint32 entry) const
         {

@@ -7011,6 +7011,16 @@ uint32 ObjectMgr::GetXPForLevel(uint32 level) const
     return 0;
 }
 
+uint32 ObjectMgr::GetMaxLevelForExpansion(uint32 expansion) const
+{
+    uint32 maxLevel = 60;
+    switch (expansion)
+    {
+        case EXPANSION_TBC: maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL); break; // limit latest expansion by config
+    }
+    return maxLevel;
+}
+
 void ObjectMgr::LoadPetNames()
 {
     uint32 count = 0;

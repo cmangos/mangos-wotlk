@@ -319,7 +319,7 @@ class WorldSession
 #endif
         void SetPlayer(Player* plr, uint32 playerGuid);
         uint8 GetExpansion() const { return m_expansion; }
-        void SetExpansion(uint8 expansion) { m_expansion = expansion; }
+        void SetExpansion(uint8 expansion);
 
         /// Session in auth.queue currently
         void SetInQueue(bool state) { m_inQueue = state; }

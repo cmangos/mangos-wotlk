@@ -99,7 +99,7 @@ void WorldState::Load()
                 case SAVE_ID_EXPANSION_RELEASE:
                     if (data.size())
                     {
-                        uint8 expansion;
+                        uint32 expansion; // need to read as number not as character
                         loadStream >> expansion;
                         m_expansion = expansion;
                     }

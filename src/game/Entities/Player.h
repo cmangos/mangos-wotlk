@@ -1105,6 +1105,8 @@ class Player : public Unit
         void GiveLevel(uint32 level);
 
         void InitStatsForLevel(bool reapplyMods = false);
+        uint32 GetMaxAttainableLevel() const { return GetUInt32Value(PLAYER_FIELD_MAX_LEVEL); }
+        void OnExpansionChange(uint32 expansion);
 
         // Played Time Stuff
         time_t m_logintime;
