@@ -304,6 +304,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "perf",           SEC_ADMINISTRATOR,  false, nullptr,                                             "", debugPerformanceCommandTable },
         { "lootdropstats",  SEC_ADMINISTRATOR,  false, &ChatHandler::HandleDebugLootDropStats,              "", nullptr },
         { "utf8overflow",   SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugOverflowCommand,            "", nullptr },
+        { "chatfreeze",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugChatFreezeCommand,          "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 
@@ -1640,7 +1641,7 @@ bool ChatHandler::isValidChatMessage(const char* message) const
             break;
 
         char commandChar;
-        reader >> commandChar;
+        reader >> std::noskipws >> commandChar;
 
         // | in normal messages is escaped by ||
         if (commandChar != '|')

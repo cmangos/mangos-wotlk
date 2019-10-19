@@ -1550,3 +1550,13 @@ bool ChatHandler::HandleDebugOverflowCommand(char* /*args*/)
     normalizePlayerName(name);
     return true;
 }
+
+bool ChatHandler::HandleDebugChatFreezeCommand(char* /*args*/)
+{
+    std::string message("| |01");
+
+    Player* player = m_session->GetPlayer();
+    player->Whisper(message, LANG_UNIVERSAL, player->GetObjectGuid());
+
+    return true;
+}
