@@ -514,7 +514,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
 
     ObjectGuid guid;
     uint32 timeSkipped;
-    recv_data >> guid;
+    recv_data >> guid.ReadAsPacked();
     recv_data >> timeSkipped;
 
     Unit* mover = _player->GetMover();
