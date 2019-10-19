@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "serpent_shrine.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 enum
 {
@@ -260,38 +261,60 @@ struct boss_morogrim_tidewalkerAI : public ScriptedAI
     }
 };
 
-struct mob_water_globuleAI : public ScriptedAI
+struct mob_water_globuleAI : public ScriptedAI, public TimerManager
 {
-    mob_water_globuleAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    void Reset() override {}
-
-    void EnterCombat(Unit* /*who*/) override { }
-
-    void MoveInLineOfSight(Unit* pWho) override
+    mob_water_globuleAI(Creature* pCreature) : ScriptedAI(pCreature), m_initialAggro(false)
     {
-        if (m_creature->CanAttack(pWho) && m_creature->IsWithinDist(pWho, 5.f))
+        SetReactState(REACT_DEFENSIVE);
+        AddCustomAction(1, 2000u, [&]() { AcquireNewTarget(); });
+    }
+
+    bool m_initialAggro;
+
+    void Reset() override
+    {
+        ResetAllTimers();
+    }
+
+    void JustRespawned() override
+    {
+        ScriptedAI::JustRespawned();
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (m_creature->CanAttack(who) && m_creature->IsWithinDist(who, 5.f))
         {
-            DoCastSpellIfCan(pWho, SPELL_WATER_GLOBULE_EXPLODE, TRIGGERED_OLD_TRIGGERED);
+            DoCastSpellIfCan(who, SPELL_WATER_GLOBULE_EXPLODE, TRIGGERED_OLD_TRIGGERED);
             m_creature->ForcedDespawn();
         }
     }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    void SpellHitTarget(Unit* target, const SpellEntry* spellInfo) override
     {
-        if (pSpell->Id == SPELL_WATER_GLOBULE_NEW_TARGET)
+        if (spellInfo->Id == SPELL_WATER_GLOBULE_NEW_TARGET)
         {
-            m_creature->AddThreat(pTarget, 20000.0f);
-            m_creature->GetMotionMaster()->MoveChase(pTarget);
-            m_creature->SelectHostileTarget(); // properly sets getVictim
+            m_creature->AddThreat(target, 3000000.0f);
+            DoStartMovement(target);
         }
     }
 
-    void UpdateAI(const uint32 /*uiDiff*/) override
+    void AcquireNewTarget()
     {
-        if (!m_creature->getVictim())
+        DoResetThreat();
+        m_creature->CastSpell(nullptr, SPELL_WATER_GLOBULE_NEW_TARGET, TRIGGERED_NONE);
+        ResetTimer(1, urand(7000, 10000));
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff);
+        m_creature->SelectHostileTarget();
+        if (!m_creature->getVictim() && m_initialAggro)
         {
-            m_creature->CastSpell(nullptr, SPELL_WATER_GLOBULE_NEW_TARGET, TRIGGERED_NONE);
+            AcquireNewTarget();
             return;
         }
     }
