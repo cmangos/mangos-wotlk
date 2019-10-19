@@ -7079,6 +7079,8 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
         return false;
 
     m_attacking = victim;
+    if (CanHaveThreatList())
+        getThreatManager().setCurrentVictimByTarget(victim);
 
     // delay offhand weapon attack to next attack time
     if (hasOffhandWeaponForAttack())
