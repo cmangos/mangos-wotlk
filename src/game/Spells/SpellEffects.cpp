@@ -4882,7 +4882,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                 uint32 spellId = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
                 float dest_x, dest_y;
-                m_caster->GetNearPoint2D(dest_x, dest_y, m_caster->GetObjectBoundingRadius() + unitTarget->GetObjectBoundingRadius(), m_caster->GetOrientation());
+                m_caster->GetNearPoint2d(dest_x, dest_y, m_caster->GetObjectBoundingRadius() + unitTarget->GetObjectBoundingRadius(), m_caster->GetOrientation());
                 unitTarget->CastSpell(dest_x, dest_y, m_caster->GetPositionZ() + 0.5f, spellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid(), m_spellInfo);
                 return;
             }
@@ -13418,7 +13418,7 @@ void Spell::EffectTransmitted(SpellEffectIndex eff_idx)
             // calculate angle variation for roughly equal dimensions of target area
             float max_angle = (max_dis - min_dis) / (max_dis + m_caster->GetObjectBoundingRadius());
             float angle_offset = max_angle * (rand_norm_f() - 0.5f);
-            m_caster->GetNearPoint2D(fx, fy, dis + m_caster->GetObjectBoundingRadius(), m_caster->GetOrientation() + angle_offset);
+            m_caster->GetNearPoint2d(fx, fy, dis + m_caster->GetObjectBoundingRadius(), m_caster->GetOrientation() + angle_offset);
 
             SpellCastResult err = SPELL_FAILED_SUCCESS;
             float waistHeight = GetModelMidpoint(m_caster->GetDisplayId()) * m_caster->GetObjectScale();

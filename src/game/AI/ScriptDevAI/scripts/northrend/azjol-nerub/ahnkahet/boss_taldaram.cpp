@@ -185,7 +185,7 @@ struct boss_taldaramAI : public ScriptedAI
             {
                 pOrb->CastSpell(pOrb, m_bIsRegularMode ? SPELL_FLAME_SPHERE_PERIODIC : SPELL_FLAME_SPHERE_PERIODIC_H, TRIGGERED_OLD_TRIGGERED);
 
-                pOrb->GetNearPoint2D(fX, fY, 70.0f, (2 * M_PI_F / 3)*uiIndex);
+                pOrb->GetNearPoint2d(fX, fY, 70.0f, (2 * M_PI_F / 3)*uiIndex);
                 pOrb->GetMotionMaster()->MovePoint(0, fX, fY, pOrb->GetPositionZ());
             }
             ++uiIndex;
