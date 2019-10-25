@@ -2174,9 +2174,7 @@ void Creature::SetInCombatWithZone(bool checkAttackability)
                 if (checkAttackability && !CanAttack(pPlayer))
                     continue;
 
-                AddThreat(pPlayer);
-                SetInCombatWith(pPlayer);
-                pPlayer->SetInCombatWith(this);
+                EngageInCombatWith(pPlayer);
             }
         }
     }

@@ -2417,7 +2417,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         break;
                     }
                     case 1515:                              // Tame beast
-                        if (Unit * caster = GetCaster()) // Wotlk - sniff - adds 1000 threat
+                        if (Unit* caster = GetCaster()) // Wotlk - sniff - adds 1000 threat
                             target->AddThreat(caster, 1000.0f, false, GetSpellSchoolMask(GetSpellProto()), GetSpellProto());
                         return;
                     case 6946:                              // Curse of the Bleakheart

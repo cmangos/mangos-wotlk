@@ -1814,6 +1814,7 @@ class Unit : public WorldObject
         bool IsTaxiFlying()  const { return hasUnitState(UNIT_STAT_TAXI_FLIGHT); }
 
         bool isInCombat() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
+        // unidirectional API - only use when absolutely necessary
         void SetInCombatState(bool PvP, Unit* enemy = nullptr);
         void SetInCombatWith(Unit* enemy);
         void SetInCombatWithAggressor(Unit* aggressor, bool touchOnly = false);
@@ -1822,6 +1823,9 @@ class Unit : public WorldObject
         inline void SetOutOfCombatWithAssisted(Unit* assisted) { SetInCombatWithAssisted(assisted, true); }
         void SetInCombatWithVictim(Unit* victim, bool touchOnly = false);
         inline void SetOutOfCombatWithVictim(Unit* victim) { SetInCombatWithVictim(victim, true); }
+        // bidirectional api - we need info about who is the attacker - handles leashing
+        void EngageInCombatWith(Unit* enemy);
+        void EngageInCombatWithAggressor(Unit* aggressor);
         void ClearInCombat();
         void HandleExitCombat();
 

@@ -1063,6 +1063,7 @@ void Unit::HandleDamageDealt(Unit* dealer, Unit* victim, uint32& damage, CleanDa
             {
                 dealer->SetInCombatWith(victim);
                 victim->SetInCombatWith(dealer);
+                dealer->GetCombatManager().TriggerCombatTimer(victim);
             }
         }
 
@@ -2026,8 +2027,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
         // If not immune
         if (calcDamageInfo->TargetState != VICTIMSTATE_IS_IMMUNE)
         {
-            SetInCombatWithVictim(victim);
-            victim->SetInCombatWithAggressor(this);
+            EngageInCombatWithAggressor(victim);
         }
     }
 
@@ -2899,19 +2899,11 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
 
         if (Unit* owner = GetOwner())
             if (owner->GetTypeId() == TYPEID_UNIT)
-            {
-                owner->AddThreat(pVictim);
-                owner->SetInCombatWith(pVictim);
-                pVictim->SetInCombatWith(owner);
-            }
+                owner->EngageInCombatWith(pVictim);
 
         for (auto m_guardianPet : m_guardianPets)
             if (Unit* pet = (Unit*)GetMap()->GetPet(m_guardianPet))
-            {
-                pet->AddThreat(pVictim);
-                pet->SetInCombatWith(pVictim);
-                pVictim->SetInCombatWith(pet);
-            }
+                pet->EngageInCombatWith(pVictim);
     }
 }
 
@@ -6733,6 +6725,7 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
             realCaster->AddThreat(target);
             target->SetInCombatWithAggressor(realCaster);
             realCaster->SetInCombatWithVictim(target);
+            realCaster->GetCombatManager().TriggerCombatTimer(target);
         }
 
         if (attack && spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
@@ -9223,10 +9216,7 @@ void Unit::Unmount(bool from_aura)
 
 void Unit::SetInCombatWith(Unit* enemy)
 {
-    bool PvP = enemy && enemy->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
-    SetInCombatState(PvP, enemy);
-    if (enemy && enemy->CanHaveThreatList()) // From attackers PoV if we have victim and victim can have a threat list then set his timer
-        enemy->GetCombatManager().TriggerCombatTimer(PvP);
+    SetInCombatState(enemy && enemy->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED), enemy);
 }
 
 void Unit::SetInCombatWithAggressor(Unit* aggressor, bool touchOnly/* = false*/)
@@ -9352,16 +9342,21 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
         if (enemy)
         {
+            // TODO: Unify this combat propagation with linking combat propagation in threat system
             Unit* controller = HasCharmer() ? GetCharmer() : GetOwner();
             if (controller && enemy->CanAttack(controller) && !hasUnitState(UNIT_STAT_FEIGN_DEATH))
             {
                 if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                {
                     controller->SetInCombatWith(enemy); // player only enters combat
+                    enemy->AddThreat(controller);
+                }
                 else if (controller->isInCombat())
                 {
                     controller->AddThreat(enemy);
                     enemy->AddThreat(controller);
                     enemy->SetInCombatWith(controller);
+                    enemy->GetCombatManager().TriggerCombatTimer(controller);
                 }
                 else
                     controller->AI()->AttackStart(enemy);
@@ -9403,6 +9398,23 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
         TriggerAggroLinkingEvent(enemy);
     }
+}
+
+void Unit::EngageInCombatWith(Unit* enemy)
+{
+    MANGOS_ASSERT(enemy);
+    AddThreat(enemy);
+    SetInCombatWith(enemy);
+    enemy->SetInCombatWith(this);
+    GetCombatManager().TriggerCombatTimer(enemy);
+}
+
+void Unit::EngageInCombatWithAggressor(Unit* aggressor)
+{
+    MANGOS_ASSERT(aggressor);
+    SetInCombatWithAggressor(aggressor);
+    aggressor->SetInCombatWithAggressor(this);
+    GetCombatManager().TriggerCombatTimer(aggressor);
 }
 
 void Unit::ClearInCombat()
@@ -13109,10 +13121,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         if (charmed->CanAttack(this))
         {
             if (!charmed->isInCombat())
-            {
-                SetInCombatWithAggressor(charmed);
-                charmed->SetInCombatWithAggressor(this);
-            }
+                EngageInCombatWithAggressor(charmed);
             else
             {
                 if (charmed->GetTypeId() == TYPEID_UNIT)
