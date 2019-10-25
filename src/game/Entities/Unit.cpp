@@ -13166,7 +13166,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         {
             if (!charmed->isInCombat())
             {
-                SetInCombatWithVictim(charmed);
+                SetInCombatWithAggressor(charmed);
                 charmed->SetInCombatWithAggressor(this);
             }
             else

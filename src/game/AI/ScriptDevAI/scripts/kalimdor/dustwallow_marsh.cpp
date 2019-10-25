@@ -1109,8 +1109,6 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
                     {
                         m_lMarksmenGUIDs.push_back((*itr)->GetObjectGuid());
 
-                        //(*itr)->SetInCombatWith(m_creature);
-                        //(*itr)->AddThreat(m_creature);
                         (*itr)->AI()->AttackStart(m_creature);
                         AttackStart(*itr);
                     }

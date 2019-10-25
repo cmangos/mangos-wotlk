@@ -777,11 +777,7 @@ struct npc_creature_generatorAI : public ScriptedAI, public TimerManager
             default:
                 summoned->SetInCombatWithZone();
                 if (Creature* akama = m_instance->GetSingleCreatureFromStorage(NPC_AKAMA_SHADE))
-                {
-                    m_creature->AddThreat(akama);
-                    m_creature->SetInCombatWith(akama);
-                    akama->SetInCombatWith(m_creature);
-                }
+                    summoned->AI()->AttackStart(akama);
                 break;
         }
     }
@@ -798,11 +794,7 @@ struct npc_creature_generatorAI : public ScriptedAI, public TimerManager
                 summoned->AI()->SetReactState(REACT_AGGRESSIVE);
                 summoned->SetInCombatWithZone();
                 if (Creature* akama = m_instance->GetSingleCreatureFromStorage(NPC_AKAMA_SHADE))
-                {
-                    m_creature->AddThreat(akama);
-                    m_creature->SetInCombatWith(akama);
-                    akama->SetInCombatWith(m_creature);
-                }
+                    summoned->AI()->AttackStart(akama);
                 break;
             }
         }

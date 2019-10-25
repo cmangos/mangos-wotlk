@@ -423,8 +423,9 @@ struct boss_kaelthasAI : public ScriptedAI
             m_uiPhase = PHASE_1_ADVISOR;
 
             // Set the player in combat with the boss
-            pWho->SetInCombatWith(m_creature);
-            m_creature->AddThreat(pWho);
+            SetCombatMovement(false);
+            SetCombatScriptStatus(true);
+            m_creature->SetInCombatWithZone();
 
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
@@ -591,7 +592,7 @@ struct boss_kaelthasAI : public ScriptedAI
             {
                 m_creature->SetLevitate(false);
                 m_creature->SetHover(false);
-                m_combatScriptHappening = false;
+                SetCombatScriptStatus(false);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_creature->RemoveAurasDueToSpell(SPELL_KAEL_FULL_POWER);
                 m_uiPhase = PHASE_5_GRAVITY;
@@ -629,7 +630,7 @@ struct boss_kaelthasAI : public ScriptedAI
         {
             if (m_actionReadyStatus[i])
             {
-                if (m_combatScriptHappening)
+                if (GetCombatScriptStatus())
                 {
                     switch (i)
                     {
@@ -986,7 +987,7 @@ struct boss_kaelthasAI : public ScriptedAI
                             DoScriptText(SAY_PHASE4_INTRO2, m_creature);
                             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             DoResetThreat();
-                            m_creature->SetInCombatWithZone();
+                            SetCombatScriptStatus(false);
                             m_uiPhase = PHASE_4_SOLO;
                             m_uiPhaseTimer = 30000;
                             m_uiPhaseSubphase = 0;

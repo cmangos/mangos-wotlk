@@ -556,7 +556,7 @@ enum
     SAY_EXORCISM_5					= -1000988,
     SAY_EXORCISM_6					= -1000992,
     SAY_EXORCISM_7					= -1000986,
-    
+
     BARADA_SAY_EXORCISM_RANDOM_1	= -1000987,
     BARADA_SAY_EXORCISM_RANDOM_2	= -1015009,
     BARADA_SAY_EXORCISM_RANDOM_3	= -1000989,
@@ -607,15 +607,29 @@ struct npc_colonel_julesAI : public ScriptedAI
     npc_colonel_julesAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
     bool m_bReturnHome;
+    uint32 darknessReleasedCount;
+    uint32 darknessReleasedSpawnTimer;
     std::vector<ObjectGuid> m_vSummonVector;
+    CreatureList lSlimeList;
 
     void Reset() override
     {
-        for (ObjectGuid& guid : m_vSummonVector)
-            if (Creature* summon = m_creature->GetMap()->GetCreature(guid))
-                summon->ForcedDespawn();
-
+        DespawnSummons();
         m_vSummonVector.clear();
+        darknessReleasedCount = 0;
+        darknessReleasedSpawnTimer = 40000;
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (darknessReleasedSpawnTimer <= uiDiff)
+        {
+            darknessReleasedSpawnTimer = 40000;
+            if (darknessReleasedCount > 0)
+                darknessReleasedCount--;
+        }
+        else
+            darknessReleasedSpawnTimer -= uiDiff;
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
@@ -648,19 +662,57 @@ struct npc_colonel_julesAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
+        if (pSummoned->GetEntry() == NPC_DARKNESS_RELEASED)
+        {
+            if (darknessReleasedCount < 3 && m_creature->HasAura(SPELL_JULES_THREATENS_AURA))
+            {
+                darknessReleasedCount++;
+                pSummoned->AI()->SetCombatMovement(false);
+                if (Creature* pBarada = GetClosestCreatureWithEntry(m_creature, NPC_ANCHORITE_BARADA, 15.0f))
+                {
+                    pSummoned->AI()->AttackStart(pBarada);
+                    pSummoned->GetMotionMaster()->MoveRandomAroundPoint(pBarada->GetPositionX(), pBarada->GetPositionY(), pBarada->GetPositionZ(), 5.0f);
+                }
+            }
+            else
+            {
+                pSummoned->ForcedDespawn();
+                return;
+            }
+        }
+
         m_vSummonVector.push_back(pSummoned->GetObjectGuid());
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_DARKNESS_RELEASED)
+        {
             pSummoned->CastSpell(pSummoned, SPELL_FLYING_SKULL_DESPAWN, TRIGGERED_OLD_TRIGGERED);
+            darknessReleasedCount--;
+        }
 
         m_vSummonVector.erase(std::remove(m_vSummonVector.begin(), m_vSummonVector.end(), pSummoned->GetObjectGuid()), m_vSummonVector.end());
     }
 
+    void DespawnSummons()
+    {
+        for (ObjectGuid& guid : m_vSummonVector)
+            if (Creature* summon = m_creature->GetMap()->GetCreature(guid))
+                summon->ForcedDespawn();
+
+        lSlimeList.clear();
+        GetCreatureListWithEntryInGrid(lSlimeList, m_creature, NPC_FOUL_PURGE, 40.0f);
+        for (auto& itr : lSlimeList)
+        {
+            if (itr->isAlive())
+                itr->ForcedDespawn();
+        }
+    }
+
     void GoHome()
     {
+        DespawnSummons();
         m_bReturnHome = true;
         m_creature->GetMotionMaster()->SetNextWaypoint(5);
         m_creature->RemoveAurasDueToSpell(SPELL_JULES_VOMITS);
