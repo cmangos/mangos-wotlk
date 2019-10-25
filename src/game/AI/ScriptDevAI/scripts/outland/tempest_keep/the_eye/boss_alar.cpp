@@ -339,7 +339,7 @@ struct boss_alarAI : public CombatAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
 
-        m_creature->SetIgnoreRangedTargets(false);
+        m_creature->SetIgnoreRangedTargets(false); // TODO: Use root for this
         SetCombatScriptStatus(true);
 
         m_creature->CastSpell(nullptr, SPELL_CLEAR_ALL_DEBUFFS, TRIGGERED_OLD_TRIGGERED);

@@ -78,7 +78,6 @@ struct boss_the_lurker_belowAI : public Scripted_NoMovementAI
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_creature->SetSwim(true);
-        m_creature->SetImmobilizedState(true);
         Reset();
     }
 
@@ -109,6 +108,8 @@ struct boss_the_lurker_belowAI : public Scripted_NoMovementAI
         m_uiEmergingTimer   = 0;
         m_iWaterbolt        = -1;
         m_uiStartTimer      = 2000;
+
+        m_creature->SetImmobilizedState(true);
     }
 
     void JustReachedHome() override
