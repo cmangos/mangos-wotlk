@@ -8897,6 +8897,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     uint32 spellid;
+                    Unit* spellTarget = nullptr;
                     switch (m_spellInfo->Id)
                     {
                         case 25140: spellid = 32568; break;
@@ -8906,7 +8907,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 29128: spellid = 32571; break;
                         case 29129: spellid = 32569; break;
                         case 34448: spellid = 26566; break;
-                        case 34452: spellid = 26572; break;
+                        case 34452: spellid = 26572; spellTarget = unitTarget; break;
                         case 35376: spellid = 25649; break;
                         case 35727: spellid = 35730; break;
                         case 45367: spellid = 45368; break;
@@ -8915,7 +8916,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                             return;
                     }
 
-                    unitTarget->CastSpell(nullptr, spellid, TRIGGERED_NONE);
+                    unitTarget->CastSpell(spellTarget, spellid, TRIGGERED_NONE);
                     return;
                 }
                 case 25671:                                 // Drain Mana
