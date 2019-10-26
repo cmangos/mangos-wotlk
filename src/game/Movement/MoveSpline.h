@@ -69,7 +69,7 @@ namespace Movement
 
             MoveSplineFlag  splineflags;
 
-            float           velocity;
+            float           speed;
 
             uint32          time_passed;
             // currently duration mods are unused, but its _currently_
@@ -134,7 +134,7 @@ namespace Movement
 
             uint32 Duration() const { return spline.length();}
 
-            float Velocity() const { return velocity; }
+            float Speed() const { return speed; }
 
             std::string ToString() const;
     };
