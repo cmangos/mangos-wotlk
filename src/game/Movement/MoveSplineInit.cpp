@@ -24,31 +24,6 @@
 
 namespace Movement
 {
-    UnitMoveType SelectSpeedType(uint32 moveFlags)
-    {
-        if (moveFlags & MOVEFLAG_FLYING)
-        {
-            if (moveFlags & MOVEFLAG_BACKWARD /*&& speed_obj.flight >= speed_obj.flight_back*/)
-                return MOVE_FLIGHT_BACK;
-            return MOVE_FLIGHT;
-        }
-        if (moveFlags & MOVEFLAG_SWIMMING)
-        {
-            if (moveFlags & MOVEFLAG_BACKWARD /*&& speed_obj.swim >= speed_obj.swim_back*/)
-                return MOVE_SWIM_BACK;
-            return MOVE_SWIM;
-        }
-        if (moveFlags & MOVEFLAG_WALK_MODE)
-        {
-            // if ( speed_obj.run > speed_obj.walk )
-            return MOVE_WALK;
-        }
-        if (moveFlags & MOVEFLAG_BACKWARD /*&& speed_obj.run >= speed_obj.run_back*/)
-            return MOVE_RUN_BACK;
-
-        return MOVE_RUN;
-    }
-
     int32 MoveSplineInit::Launch()
     {
         MoveSpline& move_spline = *unit.movespline;
@@ -84,12 +59,12 @@ namespace Movement
         moveFlags |= (MOVEFLAG_SPLINE_ENABLED | MOVEFLAG_FORWARD);
 
         if (args.velocity == 0.f)
-            args.velocity = unit.GetSpeed(SelectSpeedType(moveFlags));
+            args.velocity = unit.GetSpeed(MovementInfo::GetSpeedType(MovementFlags(moveFlags)));
 
         if (!args.Validate(&unit))
             return 0;
 
-        unit.m_movementInfo.SetMovementFlags((MovementFlags)moveFlags);
+        unit.m_movementInfo.SetMovementFlags(MovementFlags(moveFlags));
         move_spline.Initialize(args);
 
         WorldPacket data(SMSG_MONSTER_MOVE, 64);

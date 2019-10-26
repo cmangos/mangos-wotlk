@@ -748,6 +748,21 @@ class MovementInfo
         MovementFlags2 GetMovementFlags2() const { return MovementFlags2(moveFlags2); }
         void AddMovementFlags2(MovementFlags2 f) { moveFlags2 |= f; }
 
+        // Deduce speed type by current movement flags:
+        inline UnitMoveType GetSpeedType() { return GetSpeedType(MovementFlags(moveFlags)); }
+        static inline UnitMoveType GetSpeedType(MovementFlags f)
+        {
+            if (f & MOVEFLAG_FLYING)
+                return (f & MOVEFLAG_BACKWARD ? MOVE_FLIGHT_BACK : MOVE_FLIGHT);
+            else if (f & MOVEFLAG_SWIMMING)
+                return (f & MOVEFLAG_BACKWARD ? MOVE_SWIM_BACK : MOVE_SWIM);
+            else if (f & MOVEFLAG_WALK_MODE)
+                return MOVE_WALK;
+            else if (f & MOVEFLAG_BACKWARD)
+                return MOVE_RUN_BACK;
+            return MOVE_RUN;
+        }
+
         // Position manipulations
         Position const* GetPos() const { return &pos; }
         void SetTransportData(ObjectGuid guid, float x, float y, float z, float o, uint32 newTime, int8 seat)
