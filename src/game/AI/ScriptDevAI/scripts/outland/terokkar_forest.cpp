@@ -1153,19 +1153,18 @@ enum
     QUEST_SKETTIS_OFFENSIVE     = 10879,
 };
 
-bool AttackPlayerWithQuest(Creature* creature)
+void AttackPlayerWithQuest(Creature* creature)
 {
     PlayerList playerList;
     GetPlayerListWithEntryInWorld(playerList, creature, 50.0f);
     for (auto& player : playerList)
     {
-        if (player->IsActiveQuest(10879))
+        if (player->IsActiveQuest(QUEST_SKETTIS_OFFENSIVE))
         {
             creature->AI()->AttackStart(player);
-            return true;
+            return;
         }
     }
-    return false;
 }
 
 struct npc_avatar_of_terokkAI : public ScriptedAI
@@ -1177,6 +1176,11 @@ struct npc_avatar_of_terokkAI : public ScriptedAI
     void Reset() override
     {
         m_uiAbilityTimer = 4000;
+    }
+
+    void JustRespawned() override
+    {
+        AttackPlayerWithQuest(m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -1195,7 +1199,7 @@ struct npc_avatar_of_terokkAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || !AttackPlayerWithQuest(m_creature))
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         if (m_uiAbilityTimer <= uiDiff)
@@ -1225,9 +1229,14 @@ struct npc_minion_of_terokkAI : public ScriptedAI
         m_uiAbilityTimer = 4000;
     }
 
+    void JustRespawned() override
+    {
+        AttackPlayerWithQuest(m_creature);
+    }
+
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || !AttackPlayerWithQuest(m_creature))
+        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
         if (m_uiAbilityTimer <= uiDiff)
