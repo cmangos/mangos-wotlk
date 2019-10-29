@@ -1171,38 +1171,29 @@ bool Unit::CanAttackSpell(Unit const* target, SpellEntry const* spellInfo, bool 
 
     if (CanAttack(target))
     {
-        if (isAOE)
+        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         {
             if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
             {
-                if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                // PVP-flagged PC units cant *unintentionally* attack PVP-unflagged PC units with AOE (unless in FFA action) and vice versa
+                // WotLK+: Using reverse Unit::CanAttack() checks:
+                if (isAOE)
                 {
-                    const Player* thisPlayer = GetControllingPlayer();
-                    if (!thisPlayer)
-                        return (!IsPvPSanctuary() && !target->IsPvPSanctuary());
-
-                    const Player* unitPlayer = target->GetControllingPlayer();
-                    if (!unitPlayer)
-                        return (!IsPvPSanctuary() && !target->IsPvPSanctuary());
-
-                    if (thisPlayer->IsInDuelWith(unitPlayer))
-                        return true;
-
-                    if (target->IsPvP() && (!isAOE || thisPlayer->IsPvP()))
-                        return (!IsPvPSanctuary() && !target->IsPvPSanctuary());
-
-                    if (IsPvPFreeForAll() && target->IsPvPFreeForAll())
-                        return true;
-
-                    // WotLK+ TODO: Find out the meaning of this flag and rename
-                    if (HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK1) || target->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK1))
-                        return (!IsPvPSanctuary() && !target->IsPvPSanctuary());
-
-                    return false;
+                    if (const Player* thisPlayer = GetControllingPlayer())
+                    {
+                        if (const Player* unitPlayer = target->GetControllingPlayer())
+                        {
+                            if (!thisPlayer->IsInDuelWith(unitPlayer) && thisPlayer->IsPvP() != unitPlayer->IsPvP())
+                            {
+                                // WotLK+ TODO: Find out the meaning of this flag and rename
+                                if (!HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK1) && !target->HasByteFlag(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK1))
+                                    return (IsPvPFreeForAll() && target->IsPvPFreeForAll());
+                            }
+                        }
+                    }
                 }
             }
         }
-
         return true;
     }
     return false;
@@ -1218,7 +1209,7 @@ bool Unit::CanAttackSpell(Unit const* target, SpellEntry const* spellInfo, bool 
 /////////////////////////////////////////////////
 bool Unit::CanAssistSpell(Unit const* target, SpellEntry const* spellInfo) const
 {
-    return CanAssist(target, spellInfo && spellInfo->HasAttribute(SPELL_ATTR_EX6_ASSIST_IGNORE_IMMUNE_FLAG));
+    return CanAssist(target, (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_EX6_ASSIST_IGNORE_IMMUNE_FLAG)));
 }
 
 /////////////////////////////////////////////////
