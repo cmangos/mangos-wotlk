@@ -1060,7 +1060,6 @@ void Spell::AddItemTarget(Item* item, uint8 effectMask)
 
 void Spell::AddDestExecution(SpellEffectIndex effIndex)
 {
-    m_destTargetInfo.effectMask |= (1 << effIndex);
     if (m_destTargetInfo.effectMask == 0)
     {
         // spell fly from visual cast object
@@ -1082,6 +1081,7 @@ void Spell::AddDestExecution(SpellEffectIndex effIndex)
         else
             m_destTargetInfo.timeDelay = uint64(0);
     }
+    m_destTargetInfo.effectMask |= (1 << effIndex);
 }
 
 void Spell::DoAllEffectOnTarget(TargetInfo* target)
