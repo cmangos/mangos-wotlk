@@ -1755,7 +1755,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             // Get a random point AT the circumference
             float angle = 2.0f * M_PI_F * rand_norm_f();
             float dest_x, dest_y, dest_z;
-            target->GetNearPoint(nullptr, dest_x, dest_y, dest_z, target->GetObjectBoundingRadius(), radius, angle, target->IsInWater());
+            target->GetNearPoint(target, dest_x, dest_y, dest_z, target->GetObjectBoundingRadius(), radius, angle, target->IsInWater());
             if (m_spellInfo->Id == 41289)
                 dest_z = 342.9485f; // confirmed with sniffs
             m_targets.setDestination(dest_x, dest_y, dest_z);
@@ -1805,7 +1805,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             if (radius == 0.f) // All shaman totems have 0 radius - need to override with proper value
                 radius = 2.f;
 
-            m_caster->GetNearPoint(nullptr, x, y, z, m_caster->GetObjectBoundingRadius(), radius, angle, m_caster->IsInWater());
+            m_caster->GetNearPoint(m_caster, x, y, z, m_caster->GetObjectBoundingRadius(), radius, angle, m_caster->IsInWater());
             m_targets.setDestination(x, y, z);
             break;
         }
@@ -1920,7 +1920,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 }
 
                 float x, y, z;
-                target->GetNearPoint(nullptr, x, y, z, target->GetObjectBoundingRadius(), radius, angle, target->IsInWater());
+                target->GetNearPoint(target, x, y, z, target->GetObjectBoundingRadius(), radius, angle, target->IsInWater());
                 m_targets.setDestination(x, y, z);
             }
             break;
