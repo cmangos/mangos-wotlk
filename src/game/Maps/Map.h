@@ -333,10 +333,10 @@ class Map : public GridRefManager<NGridType>
         void SetWeather(uint32 zoneId, WeatherType type, float grade, bool permanently);
 
         // Random on map generation
-        bool GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius) const;
-        bool GetReachableRandomPointOnGround(uint32 phaseMask, float& x, float& y, float& z, float radius) const;
-        bool GetRandomPointInTheAir(uint32 phaseMask, float& x, float& y, float& z, float radius) const;
-        bool GetRandomPointUnderWater(uint32 phaseMask, float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status) const;
+        bool GetReachableRandomPosition(Unit* unit, float& x, float& y, float& z, float radius, bool randomRange = true) const;
+        bool GetReachableRandomPointOnGround(uint32 phaseMask, float& x, float& y, float& z, float radius, bool randomRange = true) const;
+        bool GetRandomPointInTheAir(uint32 phaseMask, float& x, float& y, float& z, float radius, bool randomRange = true) const;
+        bool GetRandomPointUnderWater(uint32 phaseMask, float& x, float& y, float& z, float radius, GridMapLiquidData& liquid_status, bool randomRange = true) const;
 
         void AddMessage(const std::function<void(Map*)>& message);
 
