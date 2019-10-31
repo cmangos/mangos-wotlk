@@ -186,19 +186,14 @@ struct boss_alarAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         if (m_pInstance)
+        {
             m_pInstance->SetData(TYPE_ALAR, DONE);
 
-        // Handle quest completion
-        ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-
-        for (auto itr : threatList)
-        {
-            if (Unit* pPlayer = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
-            {
-                if (pPlayer->GetTypeId() == TYPEID_PLAYER && pPlayer->IsWithinDist(m_creature, DEFAULT_VISIBILITY_INSTANCE))
-                    if (pPlayer->HasAura(SPELL_ASHTONGUE_RUSE) && ((Player*)pPlayer)->GetQuestStatus(QUEST_RUSE_ASHTONGUE) == QUEST_STATUS_INCOMPLETE)
-                        ((Player*)pPlayer)->KilledMonsterCredit(NPC_ASHTONGUE_CREDIT);
-            }
+            Map::PlayerList const& players = m_pInstance->instance->GetPlayers();
+            for (const auto& playerRef : players)
+                if (Player* player = playerRef.getSource())
+                    if (player->GetQuestStatus(QUEST_RUSE_ASHTONGUE) == QUEST_STATUS_INCOMPLETE && player->HasAura(SPELL_ASHTONGUE_RUSE))
+                        player->AreaExploredOrEventHappens(QUEST_RUSE_ASHTONGUE);
         }
     }
 
