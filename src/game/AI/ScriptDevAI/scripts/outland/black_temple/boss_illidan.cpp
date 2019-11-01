@@ -1326,10 +1326,10 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
 
         UpdateTimers(diff, m_creature->isInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget())
             return;
 
-        if (m_instance->GetPlayerInMap(true, false) == nullptr)
+        if (m_instance->GetPlayerInMap(true, false) == nullptr) // when illidan is fighting akama, if all players die, he needs to evade
         {
             EnterEvadeMode();
             return;
