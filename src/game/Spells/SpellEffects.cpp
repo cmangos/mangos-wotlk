@@ -5264,7 +5264,7 @@ void Spell::EffectJump(SpellEffectIndex eff_idx)
     m_caster->UpdateAllowedPositionZ(x, y, z);
 
     float speed = m_spellInfo->speed ? m_spellInfo->speed : 27.0f;
-    m_caster->GetMotionMaster()->MoveDestination(x, y, z, o, speed, 2.5f);
+    m_caster->GetMotionMaster()->MoveJumpFacing(x, y, z, o, speed, 2.5f);
 }
 
 void Spell::EffectTeleportUnits(SpellEffectIndex eff_idx)   // TODO - Use target settings for this effect!

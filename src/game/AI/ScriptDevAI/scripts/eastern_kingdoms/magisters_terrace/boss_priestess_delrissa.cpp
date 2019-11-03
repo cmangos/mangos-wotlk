@@ -211,7 +211,7 @@ struct boss_priestess_delrissaAI : public CombatAI
     virtual void ExecuteActions() override
     {
         if (!m_creature->isAlive() || m_creature->IsEvadingHome() || (m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) ||
-            m_unit->hasUnitState(UNIT_STAT_CHARGING | UNIT_STAT_SEEKING_ASSISTANCE) || m_unit->IsNonMeleeSpellCasted(false))
+            m_unit->hasUnitState(UNIT_STAT_PROPELLED | UNIT_STAT_SEEKING_ASSISTANCE) || m_unit->IsNonMeleeSpellCasted(false))
             return; // custom condition due to her medallion - TODO: resolve globally
 
         for (uint32 i = 0; i < GetCombatActionCount(); ++i)
@@ -336,7 +336,7 @@ struct priestess_companion_commonAI : public CombatAI
     virtual void ExecuteActions() override
     {
         if (!m_creature->isAlive() || m_creature->IsEvadingHome() || (m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) ||
-            m_unit->hasUnitState(UNIT_STAT_CHARGING | UNIT_STAT_SEEKING_ASSISTANCE) || m_unit->IsNonMeleeSpellCasted(false))
+            m_unit->hasUnitState(UNIT_STAT_PROPELLED | UNIT_STAT_SEEKING_ASSISTANCE) || m_unit->IsNonMeleeSpellCasted(false))
             return; // custom condition due to medallion - TODO: resolve globally
 
         for (uint32 i = 0; i < GetCombatActionCount(); ++i)
