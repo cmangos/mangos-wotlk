@@ -211,7 +211,7 @@ struct boss_priestess_delrissaAI : public CombatAI
     virtual void ExecuteActions() override
     {
         if (!m_creature->isAlive() || m_creature->IsEvadingHome() || (m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) ||
-            m_unit->hasUnitState(UNIT_STAT_PROPELLED | UNIT_STAT_SEEKING_ASSISTANCE) || m_unit->IsNonMeleeSpellCasted(false))
+            m_unit->hasUnitState(UNIT_STAT_PROPELLED | UNIT_STAT_RETREATING) || m_unit->IsNonMeleeSpellCasted(false))
             return; // custom condition due to her medallion - TODO: resolve globally
 
         for (uint32 i = 0; i < GetCombatActionCount(); ++i)
@@ -260,7 +260,7 @@ struct boss_priestess_delrissaAI : public CombatAI
                 break;
             }
             case DELRISSA_MEDALLION:
-                if (m_creature->isFrozen() || m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
+                if (m_creature->isFrozen() || m_creature->IsCrowdControlled())
                     if (DoCastSpellIfCan(nullptr, SPELL_MEDALLION) == CAST_OK)
                         DisableCombatAction(action);
                 break;
@@ -336,7 +336,7 @@ struct priestess_companion_commonAI : public CombatAI
     virtual void ExecuteActions() override
     {
         if (!m_creature->isAlive() || m_creature->IsEvadingHome() || (m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) ||
-            m_unit->hasUnitState(UNIT_STAT_PROPELLED | UNIT_STAT_SEEKING_ASSISTANCE) || m_unit->IsNonMeleeSpellCasted(false))
+            m_unit->hasUnitState(UNIT_STAT_PROPELLED | UNIT_STAT_RETREATING) || m_unit->IsNonMeleeSpellCasted(false))
             return; // custom condition due to medallion - TODO: resolve globally
 
         for (uint32 i = 0; i < GetCombatActionCount(); ++i)
@@ -369,7 +369,7 @@ struct priestess_companion_commonAI : public CombatAI
                 }
                 break;
             case COMPANION_MEDALLION:
-                if (m_creature->isFrozen() || m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
+                if (m_creature->isFrozen() || m_creature->IsCrowdControlled())
                     if (DoCastSpellIfCan(nullptr, SPELL_MEDALLION) == CAST_OK)
                         DisableCombatAction(action);
                 break;

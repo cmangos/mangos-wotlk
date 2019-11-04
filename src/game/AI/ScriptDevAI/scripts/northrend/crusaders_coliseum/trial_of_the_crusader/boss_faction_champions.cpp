@@ -493,7 +493,7 @@ struct trial_crusader_commonAI : public ScriptedAI
         // CC check for PVP trinket
         if (m_uiIsCCTimer < uiDiff)
         {
-            if (m_creature->isFrozen() || m_creature->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
+            if (m_creature->isFrozen() || m_creature->IsCrowdControlled())
             {
                 // Pvp trinket only in heroic mode
                 if (m_pInstance && m_pInstance->IsHeroicDifficulty() && !m_uiTrinketCooldownTimer)

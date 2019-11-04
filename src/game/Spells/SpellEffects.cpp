@@ -3686,7 +3686,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     {
                         if (Unit* target = m_caster->GetMap()->GetUnit(itr->getUnitGuid()))
                         {
-                            if (!target->isFrozen() && !target->hasUnitState(UNIT_STAT_CAN_NOT_REACT))
+                            if (!target->isFrozen() && !target->IsCrowdControlled())
                                 m_caster->getThreatManager().addThreatDirectly(target, unitTarget->getThreatManager().getThreat(target));
                         }
                     }
