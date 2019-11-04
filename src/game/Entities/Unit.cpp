@@ -9699,6 +9699,14 @@ void Unit::UpdateVisibilityAndView()
     GetViewPoint().Event_ViewPointVisibilityChanged();
 }
 
+SpellSchoolMask Unit::GetMainAttackSchoolMask()
+{
+    if (UnitAI* ai = AI())
+        return ai->GetMainAttackSchoolMask();
+    else
+        return GetMeleeDamageSchoolMask();
+}
+
 void Unit::SetVisibility(UnitVisibility x)
 {
     m_Visibility = x;

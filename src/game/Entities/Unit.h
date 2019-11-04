@@ -2219,6 +2219,8 @@ class Unit : public WorldObject
         inline void SetMeleeDamageSchool(bool main, SpellSchools school) { SetAttackDamageSchool((main ? BASE_ATTACK : OFF_ATTACK), school); }
         inline void SetMeleeDamageSchool(SpellSchools school) { SetMeleeDamageSchool(true, school); SetMeleeDamageSchool(false, school); }
 
+        SpellSchoolMask GetMainAttackSchoolMask();
+
         // Visibility system
         UnitVisibility GetVisibility() const { return m_Visibility; }
         void SetVisibility(UnitVisibility x);
