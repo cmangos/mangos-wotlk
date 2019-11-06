@@ -41,7 +41,7 @@ class CreatureAI : public UnitAI
         /// Helper function which handles the combat reaction for vehicle passengers
         void AttackPassengersIfCan(Unit* who);
 
-        void DoRetreat() override;
+        bool DoRetreat() override;
         void DoCallForHelp(float radius) override;
 
         void RetreatingArrived() override;
