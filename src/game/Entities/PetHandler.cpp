@@ -132,11 +132,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
             {
                 case COMMAND_STAY:                          // flat=1792  // STAY
                 {
-                    if (!petUnit->hasUnitState(UNIT_STAT_POSSESSED))
-                    {
-                        petUnit->StopMoving();
-                        petUnit->GetMotionMaster()->Clear();
-                    }
                     petUnit->AttackStop(true, true);
                     charmInfo->SetCommandState(COMMAND_STAY);
                     break;
@@ -144,11 +139,8 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                 case COMMAND_FOLLOW:                        // spellid=1792  // FOLLOW
                 {
                     if (!petUnit->hasUnitState(UNIT_STAT_POSSESSED))
-                    {
-                        petUnit->StopMoving();
-                        petUnit->GetMotionMaster()->Clear();
                         charmInfo->SetIsRetreating(true);
-                    }
+
                     petUnit->AttackStop(true, true);
                     charmInfo->SetCommandState(COMMAND_FOLLOW);
                     break;
@@ -216,7 +208,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                             _player->BreakCharmOutgoing(petUnit);
                     }
 
-                    charmInfo->SetStayPosition();
+                    charmInfo->ResetStayPosition();
                     break;
                 }
                 default:
