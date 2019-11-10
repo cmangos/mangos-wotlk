@@ -34,6 +34,8 @@ enum
     SPELL_POSSESS_VISUAL        = 23014,                    // visual effect and increase the damage taken
     SPELL_DESTROY_EGG           = 19873,
     SPELL_POSSESS               = 19832,                    // actual possess spell
+    SPELL_DRAGON_ORB            = 23021,                    // shrink - not in sniff
+    SPELL_MIND_EXHAUSTION       = 23958,
 
     SPELL_CLEAVE                = 19632,
     SPELL_WARSTOMP              = 24375,
@@ -72,6 +74,11 @@ struct boss_razorgoreAI : public CombatAI
         SetDeathPrevention(true);
 
         DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
+    }
+
+    void Aggro(Unit* attacker) override
+    {
+        m_creature->RemoveAurasDueToSpell(SPELL_POSSESS_VISUAL);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
@@ -201,6 +208,18 @@ struct npc_blackwing_orbAI : public ScriptedAI
     }
 };
 
+bool ProcessEventIdRazorgorePossess(uint32 eventId, Object* source, Object* target, bool isStart)
+{
+    if (!source->IsPlayer())
+        return true;
+
+    Player* player = static_cast<Player*>(source);
+    if (Creature* trigger = static_cast<ScriptedInstance*>(player->GetMap()->GetInstanceData())->GetSingleCreatureFromStorage(NPC_BLACKWING_ORB_TRIGGER))
+        trigger->CastSpell(nullptr, SPELL_POSSESS_VISUAL, TRIGGERED_OLD_TRIGGERED);
+    
+    return true;
+}
+
 struct DestroyEgg : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
@@ -240,6 +259,28 @@ struct ExplosionRazorgore : public SpellScript
     }
 };
 
+struct PossessRazorgore : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0)
+        {
+            if (apply)
+            {
+                if (Unit* caster = aura->GetCaster())
+                    caster->CastSpell(caster, SPELL_MIND_EXHAUSTION, TRIGGERED_OLD_TRIGGERED);
+                aura->GetTarget()->CastSpell(nullptr, SPELL_DRAGON_ORB, TRIGGERED_OLD_TRIGGERED);
+            }
+            else
+            {
+                Unit* target = aura->GetTarget();
+                target->RemoveAurasDueToSpell(SPELL_POSSESS_VISUAL);
+                target->RemoveAurasDueToSpell(SPELL_DRAGON_ORB);
+            }
+        }
+    }
+};
+
 void AddSC_boss_razorgore()
 {
     Script* pNewScript = new Script;
@@ -252,6 +293,12 @@ void AddSC_boss_razorgore()
     pNewScript->GetAI = &GetNewAIInstance<npc_blackwing_orbAI>;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
+    pNewScript->Name = "event_razorgore_possess";
+    pNewScript->pProcessEventId = &ProcessEventIdRazorgorePossess;
+    pNewScript->RegisterSelf();
+
     RegisterSpellScript<DestroyEgg>("spell_destroy_egg");
     RegisterSpellScript<ExplosionRazorgore>("spell_explosion_razorgore");
+    RegisterAuraScript<PossessRazorgore>("spell_possess_razorgore");
 }
