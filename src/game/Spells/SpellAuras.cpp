@@ -2396,7 +2396,7 @@ void Aura::TriggerSpellWithValue()
         }
         basepoints[j] = calculatedAmount;
     }
-    Unit* triggerCaster = nullptr;
+    Unit* triggerCaster = triggerTarget;
     WorldObject* triggerTargetObject = nullptr;
     PickTargetsForSpellTrigger(triggerCaster, triggerTarget, triggerTargetObject, triggeredSpellInfo);
 
