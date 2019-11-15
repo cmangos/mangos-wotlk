@@ -264,7 +264,7 @@ struct boss_nightbaneAI : public npc_escortAI
         if (pChosenTrigger)
         {
             pChosenTrigger->GetPosition(fX, fY, fZ);
-            m_creature->GetMotionMaster()->MoveFlyOrLand(bGround ? POINT_ID_GROUND : POINT_ID_AIR, fX, fY, fZ, !bGround);
+            m_creature->GetMotionMaster()->MovePointTOL(bGround ? POINT_ID_GROUND : POINT_ID_AIR, fX, fY, fZ, !bGround);
         }
     }
 
