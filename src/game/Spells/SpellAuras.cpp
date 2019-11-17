@@ -6957,13 +6957,13 @@ void Aura::HandleAuraModStat(bool apply, bool /*Real*/)
         if (GetCaster()->GetTypeId() == TYPEID_PLAYER && GetCaster()->getLevel() > 60)
             m_modifier.m_amount = int32(m_modifier.m_amount * (1 - (((float(GetCaster()->getLevel()) - 60) * 4) / 100)));
 
-    if (GetSpellProto()->IsFitToFamilyMask(0x0000000000008000))
+    if (GetSpellProto()->IsFitToFamilyMask(0x0000000000008000)) // improved scorpid sting
     {
         if (apply)
         {
             int32 staminaToRemove = 0;
             Unit::AuraList const& auraClassScripts = target->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-            for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
+            for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end(); ++itr)
             {
                 switch ((*itr)->GetModifier()->m_miscvalue)
                 {
