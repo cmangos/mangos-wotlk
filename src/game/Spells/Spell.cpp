@@ -960,22 +960,32 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     // If target reflect spell back to caster
     if (targetInfo.missCondition == SPELL_MISS_REFLECT)
     {
-        // Victim reflects, apply reflect procs
-        m_caster->ProcDamageAndSpell(ProcSystemArguments(target, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
-        // Calculate reflected spell result on caster
-        targetInfo.reflectResult = m_caster->SpellHitResult(m_caster, m_spellInfo, targetInfo.effectMask, m_reflectable);
-        // Caster reflects back spell which was already reflected by victim
-        if (targetInfo.reflectResult == SPELL_MISS_REFLECT)
+        // Objects vs units case: traps and similar
+        // TBC+: Reflect simply negates the spell
+        if (!m_originalCasterGUID.IsUnit())
         {
-            // Apply reflect procs on self
-            m_caster->ProcDamageAndSpell(ProcSystemArguments(m_caster, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
-            // Full circle: it's impossible to reflect further, "Immune" shows up
-            targetInfo.reflectResult = SPELL_MISS_IMMUNE;
+            target->ProcDamageAndSpell(ProcSystemArguments(nullptr, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_FLAG_NONE , PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
+            targetInfo.reflectResult = SPELL_MISS_REFLECT;
         }
+        else
+        {
+            // Victim reflects, apply reflect procs
+            m_caster->ProcDamageAndSpell(ProcSystemArguments(target, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
+            // Calculate reflected spell result on caster
+            targetInfo.reflectResult = m_caster->SpellHitResult(m_caster, m_spellInfo, targetInfo.effectMask, m_reflectable);
+            // Caster reflects back spell which was already reflected by victim
+            if (targetInfo.reflectResult == SPELL_MISS_REFLECT)
+            {
+                // Apply reflect procs on self
+                m_caster->ProcDamageAndSpell(ProcSystemArguments(m_caster, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
+                // Full circle: it's impossible to reflect further, "Immune" shows up
+                targetInfo.reflectResult = SPELL_MISS_IMMUNE;
+            }
 
         m_spellFlags |= SPELL_FLAG_REFLECTED;
-        // Increase time interval for reflected spells by 1.5
-        targetInfo.timeDelay += targetInfo.timeDelay >> 1;
+            // Increase time interval for reflected spells by 1.5
+            targetInfo.timeDelay += targetInfo.timeDelay >> 1;
+        }
     }
     else
         targetInfo.reflectResult = SPELL_MISS_NONE;
