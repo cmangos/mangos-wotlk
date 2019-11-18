@@ -7438,6 +7438,11 @@ Unit* Unit::GetOwner(WorldObject const* pov /*= nullptr*/, bool recursive /*= fa
     return owner;
 }
 
+bool Unit::HasMaster() const
+{
+    return HasCharmer() || GetOwnerGuid().IsUnit();
+}
+
 Unit* Unit::GetMaster(WorldObject const* pov /*= nullptr*/) const
 {
     Unit* charmer = GetCharmer(pov);
@@ -9422,6 +9427,8 @@ void Unit::HandleExitCombat()
         AI()->EnterEvadeMode();
     else
         CombatStop();
+
+    CallForAllControlledUnits([](Unit* unit) { unit->HandleExitCombat(); }, CONTROLLED_PET | CONTROLLED_GUARDIANS | CONTROLLED_CHARM | CONTROLLED_TOTEMS);
 }
 
 int32 Unit::ModifyHealth(int32 dVal)

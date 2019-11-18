@@ -1975,6 +1975,7 @@ class Unit : public WorldObject
         bool HasCharm(ObjectGuid const& exactGuid = ObjectGuid()) const { return (exactGuid.IsEmpty() ? GetCharmGuid().IsUnit() : (GetCharmGuid() == exactGuid)); }
         bool HasCharmer(ObjectGuid const& exactGuid) const { return exactGuid.IsUnit() && GetCharmerGuid().IsUnit() && GetCharmerGuid() == exactGuid; }
         bool HasCharmer() const { return GetCharmerGuid().IsUnit(); }
+        bool HasMaster() const;
         bool HasTarget(ObjectGuid const& exactGuid = ObjectGuid()) const { return (exactGuid.IsEmpty() ? GetTargetGuid().IsUnit() : (GetTargetGuid() == exactGuid)); }
         bool HasChannelObject(ObjectGuid const& exactGuid = ObjectGuid()) const { return (exactGuid.IsEmpty() ? !(GetChannelObjectGuid().IsEmpty()) : (GetChannelObjectGuid() == exactGuid)); }
 

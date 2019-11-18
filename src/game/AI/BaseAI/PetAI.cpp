@@ -118,6 +118,7 @@ void PetAI::AttackStart(Unit* who)
 
 void PetAI::EnterEvadeMode()
 {
+    m_unit->CombatStop();
 }
 
 void PetAI::UpdateAI(const uint32 diff)
