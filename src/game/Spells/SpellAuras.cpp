@@ -3766,6 +3766,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     }
                     else
                         caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, caster);
+                    return;
                 }
                 case 42515:                                 // Jarl Beam
                 {
