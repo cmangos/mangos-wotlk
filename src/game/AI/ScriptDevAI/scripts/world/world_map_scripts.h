@@ -26,28 +26,6 @@ enum
     NPC_PRESTOR                 = 1749,
     NPC_WINDSOR                 = 12580,
 
-    // Quest 11538
-    NPC_EMISSARY_OF_HATE        = 25003,
-    NPC_IRESPEAKER              = 24999,
-    NPC_UNLEASHED_HELLION       = 25002,
-
-    // Quest 10594 - Gauging the Resonant Frequency
-    NPC_WYRM_FROM_BEYOND = 21796,
-    NPC_OSCILLATING_FREQUENCY_SCANNER_BUNNY = 21760,
-
-    // Quest 10998
-    NPC_VIMGOL_VISUAL_BUNNY     = 23040,
-
-    // Quest 10607
-    NPC_WHISPER_RAVEN_GOD_TEMPLATE = 21851,
-
-    // Quest 10310
-    GO_ROCKET_FIRE              = 183987,
-    GO_ROCKET_SMOKE             = 183988,
-
-    // Quest 10409
-    NPC_SOCRETHAR = 20132,
-
     // Transports
     NPC_NEZRAZ                  = 3149,
     NPC_HINDENBURG              = 3150,
@@ -81,27 +59,8 @@ enum
     GO_FIRE_RIFT                = 179666,
     GO_AIR_RIFT                 = 179667,
 
-    // Deaths Door gates
-    NPC_DEATHS_DOOR_NORTH_WARP_GATE = 22471,
-    NPC_DEATHS_DOOR_SOUTH_WARP_GATE = 22472,
-
-    TYPE_DEATHS_DOOR_NORTH      = 0,
-    TYPE_DEATHS_DOOR_SOUTH      = 1,
-    TYPE_SHARTUUL               = 2,
-
     // Quest 1126
     NPC_HIVE_ASHI_DRONES        = 13136,
-
-    // Bashir
-    SPELL_SPIRIT_SPAWN_IN       = 17321,
-    SPELL_ETHEREAL_TELEPORT     = 34427,
-    MOUNT_NETHER_RAY_DISPLAY_ID = 21156,
-
-    // Ogri'la Four Dragons
-    NPC_OBSIDIA = 23282,
-    NPC_RIVENDARK = 23061,
-    NPC_FURYWING = 23261,
-    NPC_INSIDION = 23281,
 };
 
 enum Encounters
@@ -124,7 +83,7 @@ enum ElementalInvasionIndexes
 
 enum SpawnIndexes
 {
-    POS_IDX_EMISSARY_SPAWN      = 0,
+    POS_IDX_REUSE               = 0, // reuse
     POS_IDX_MURKDEEP_SPAWN      = 1,
     POS_IDX_MURKDEEP_MOVE       = 2,
     POS_IDX_OMEN_SPAWN          = 3,
@@ -138,7 +97,7 @@ enum SpawnIndexes
 
 static const float aSpawnLocations[POS_IDX_MAX][4] =
 {
-    {12583.019f, -6916.194f,    4.601f, 6.18f},         // Emissary of Hate, guesswork
+    {},                                                 // Reuse
     {4981.031f,    597.955f,   -1.361f, 4.82f},         // Murkdeep spawn, guesswork
     {4988.970f,    547.002f,    5.379f,  0.0f},         // Murkdeep move, guesswork
     {7564.098f,  -2835.687f,  447.374f, 3.98f},         // Omen spawn, guesswork

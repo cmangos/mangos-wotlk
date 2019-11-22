@@ -43,7 +43,7 @@ npc_evergrove_druid
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
-#include "AI/ScriptDevAI/scripts/world/world_map_scripts.h"
+#include "AI/ScriptDevAI/scripts/outland/world_outland.h"
 #include "Entities/TemporarySpawn.h"
 #include "Reputation/ReputationMgr.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
