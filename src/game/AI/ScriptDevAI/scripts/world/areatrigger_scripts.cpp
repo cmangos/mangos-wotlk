@@ -42,6 +42,7 @@ at_hive_tower                   3146
 EndContentData */
 
 #include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/scripts/kalimdor/world_kalimdor.h"
 #include "world_map_scripts.h"
 
 static uint32 TriggerOrphanSpell[6][3] =

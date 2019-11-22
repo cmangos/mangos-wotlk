@@ -243,6 +243,7 @@ extern void AddSC_thousand_needles();
 extern void AddSC_thunder_bluff();
 extern void AddSC_ungoro_crater();
 extern void AddSC_winterspring();
+extern void AddSC_world_kalimdor();
 
 // northrend
 extern void AddSC_boss_amanitar();                          // azjol-nerub, ahnkahet
@@ -729,6 +730,7 @@ void AddScripts()
     AddSC_thunder_bluff();
     AddSC_ungoro_crater();
     AddSC_winterspring();
+    AddSC_world_kalimdor();
 
     // northrend
     AddSC_boss_amanitar();                                  // azjol-nerub, ahnkahet
