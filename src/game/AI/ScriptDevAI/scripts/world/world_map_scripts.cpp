@@ -30,40 +30,6 @@ EndScriptData */
 #include <ctime>
 
 /* *********************************************************
- *                  EASTERN KINGDOMS
- */
-struct world_map_eastern_kingdoms : public ScriptedMap
-{
-    world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap) {}
-
-    void OnCreatureCreate(Creature* pCreature)
-    {
-        switch (pCreature->GetEntry())
-        {
-            case NPC_NEZRAZ:
-            case NPC_HINDENBURG:
-            case NPC_ZAPETTA:
-            case NPC_MEEFI_FARTHROTTLE:
-            case NPC_SQUIBBY_OVERSPECK:
-            case NPC_JONATHAN:
-            case NPC_WRYNN:
-            case NPC_BOLVAR:
-            case NPC_PRESTOR:
-            case NPC_WINDSOR:
-                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-                break;
-        }
-    }
-
-    void SetData(uint32 /*uiType*/, uint32 /*uiData*/) {}
-};
-
-InstanceData* GetInstanceData_world_map_eastern_kingdoms(Map* pMap)
-{
-    return new world_map_eastern_kingdoms(pMap);
-}
-
-/* *********************************************************
  *                     NORTHREND
  */
 struct world_map_northrend : public ScriptedMap
@@ -197,11 +163,6 @@ bool ProcessEventTransports(uint32 uiEventId, Object* pSource, Object* /*pTarget
 void AddSC_world_map_scripts()
 {
     Script* pNewScript = new Script;
-    pNewScript->Name = "world_map_eastern_kingdoms";
-    pNewScript->GetInstanceData = &GetInstanceData_world_map_eastern_kingdoms;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "world_map_northrend";
     pNewScript->GetInstanceData = &GetInstanceData_world_map_northrend;
     pNewScript->RegisterSelf();
