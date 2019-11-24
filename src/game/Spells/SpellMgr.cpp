@@ -796,8 +796,6 @@ uint32 GetAffectedTargets(SpellEntry const* spellInfo, Unit* caster)
                 case 26457:                                 // Drain Mana (correct number has to be researched)
                 case 26559:
                     return 12;
-                case 26052:                                 // Poison Bolt Volley (AQ40, Princess Huhuran)
-                    return 15;
                 case 61916:                                 // Lightning Whirl (Ulduar, Stormcaller Brundir)
                     return urand(2, 3);
                 case 46771:                                 // Flame Sear (SWP, Grand Warlock Alythess)
@@ -860,17 +858,6 @@ uint32 GetAffectedTargets(SpellEntry const* spellInfo, Unit* caster)
         {
             if (spellInfo->SpellIconID == 1737)           // Corpse Explosion // TODO - spell 50445?
                 return 1;
-            break;
-        }
-        case SPELLFAMILY_HUNTER:
-        {
-            switch (spellInfo->Id)
-            {
-                case 26180:                                 // Wyvern Sting (AQ40, Princess Huhuran)
-                    return 10;
-                default:
-                    break;
-            }
             break;
         }
         default:
