@@ -17208,7 +17208,6 @@ void Player::_LoadSpells(QueryResult* result)
 {
     // QueryResult *result = CharacterDatabase.PQuery("SELECT spell,active,disabled FROM character_spell WHERE guid = '%u'",GetGUIDLow());
 
-    std::vector<std::tuple<uint32, bool, bool>> spells;
     if (result)
     {
         do
