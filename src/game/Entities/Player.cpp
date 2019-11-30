@@ -16280,6 +16280,13 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     // load skills after InitStatsForLevel because it triggering aura apply also
     _LoadSkills(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSKILLS));
 
+    // train spells by loaded skills
+    for (auto itr = mSkillStatus.begin(); itr != mSkillStatus.end(); ++itr)
+    {
+        if (itr->second.uState != SKILL_DELETED)
+            UpdateSkillTrainedSpells(uint16(itr->first), SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(itr->second.pos))));
+    }
+
     // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
 
     // Mail
