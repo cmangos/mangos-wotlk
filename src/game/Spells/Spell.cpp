@@ -5813,7 +5813,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (!learn_spellproto)
                     return SPELL_FAILED_NOT_KNOWN;
 
-                if (m_spellInfo->spellLevel > pet->getLevel())
+                if (learn_spellproto->spellLevel > pet->getLevel())
                     return SPELL_FAILED_LOWLEVEL;
 
                 break;
@@ -5830,7 +5830,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (!learn_spellproto)
                     return SPELL_FAILED_NOT_KNOWN;
 
-                if (m_spellInfo->spellLevel > pet->getLevel())
+                if (learn_spellproto->spellLevel > pet->getLevel())
                     return SPELL_FAILED_LOWLEVEL;
 
                 break;
