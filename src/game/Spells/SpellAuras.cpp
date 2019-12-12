@@ -1057,7 +1057,7 @@ void Aura::PickTargetsForSpellTrigger(Unit *& triggerCaster, Unit *& triggerTarg
         case TARGET_UNIT:
         case TARGET_UNIT_CHANNEL_TARGET: // Electrified net
             triggerCaster = GetCaster();
-            triggerTarget = GetTarget()->GetTarget(); // This will default to channel target for channels
+            triggerTarget = triggerCaster->GetTarget(); // This will default to channel target for channels
             break;
         case TARGET_UNIT_FRIEND: // Abolish Disease / Poison confirms this
         case TARGET_UNIT_CASTER:
