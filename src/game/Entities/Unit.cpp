@@ -327,6 +327,7 @@ Unit::Unit() :
 
     m_alwaysHit = false;
     m_noThreat = false;
+    m_supportThreatOnly = false;
     m_extraAttacksExecuting = false;
 
     m_baseSpeedWalk = 1.f;
@@ -10030,7 +10031,7 @@ void Unit::AddThreat(Unit* pVictim, float threat /*= 0.0f*/, bool crit /*= false
 {
     // Only mobs can manage threat lists
     if (CanHaveThreatList())
-        getThreatManager().addThreat(pVictim, threat, crit, schoolMask, threatSpell);
+        getThreatManager().addThreat(pVictim, threat, crit, schoolMask, threatSpell, false);
 }
 
 //======================================================================

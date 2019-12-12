@@ -31,7 +31,7 @@
 //==============================================================
 
 // The pHatingUnit is not used yet
-float ThreatCalcHelper::CalcThreat(Unit* hatedUnit, Unit* hatingUnit, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell)
+float ThreatCalcHelper::CalcThreat(Unit* hatedUnit, Unit* hatingUnit, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell, bool assist)
 {
     // all flat mods applied early
     if (!threat)
@@ -41,6 +41,9 @@ float ThreatCalcHelper::CalcThreat(Unit* hatedUnit, Unit* hatingUnit, float thre
         return 0.f;
 
     if (hatingUnit->GetTypeId() == TYPEID_PLAYER) // players have entries with 0 threat during charm
+        return 0.f;
+
+    if (!assist && hatedUnit->IsSupportThreatOnly())
         return 0.f;
 
     if (threatSpell)
@@ -441,7 +444,7 @@ void ThreatManager::clearReferences()
 
 //============================================================
 
-void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell)
+void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell, bool assist)
 {
     // function deals with adding threat and adding players and pets into ThreatList
     // mobs, NPCs, guards have ThreatList and HateOfflineList
@@ -459,8 +462,8 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
     // not to dead and not for dead
     if (!victim->isAlive() || !getOwner()->isAlive())
         return;
- 
-    float calculatedThreat = ThreatCalcHelper::CalcThreat(victim, iOwner, threat, crit, schoolMask, threatSpell);
+
+    float calculatedThreat = ThreatCalcHelper::CalcThreat(victim, iOwner, threat, crit, schoolMask, threatSpell, assist);
 
     if (calculatedThreat > 0.0f)
     {

@@ -2555,6 +2555,9 @@ class Unit : public WorldObject
         void SetIgnoreRangedTargets(bool state) { m_ignoreRangedTargets = state; }
         bool IsIgnoringRangedTargets() { return m_ignoreRangedTargets; }
 
+        void SetSupportThreatOnly(bool state) { m_supportThreatOnly = state; }
+        bool IsSupportThreatOnly() { return m_supportThreatOnly; }
+
         float GetAttackDistance(Unit const* pl) const;
         virtual uint32 GetDetectionRange() const { return 20.f; }
 
@@ -2744,6 +2747,7 @@ class Unit : public WorldObject
 
         bool m_alwaysHit;
         bool m_noThreat;
+        bool m_supportThreatOnly;
         bool m_ignoreRangedTargets;                         // Ignores ranged targets when picking someone to attack
 
         // guard to prevent chaining extra attacks

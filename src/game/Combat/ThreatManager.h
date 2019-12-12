@@ -41,7 +41,7 @@ struct SpellEntry;
 class ThreatCalcHelper
 {
     public:
-        static float CalcThreat(Unit* hatedUnit, Unit* hatingUnit, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell);
+        static float CalcThreat(Unit* hatedUnit, Unit* hatingUnit, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell, bool assist);
 };
 
 enum HostileState : uint32
@@ -200,8 +200,8 @@ class ThreatManager
 
         void clearReferences();
 
-        void addThreat(Unit* victim, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell);
-        void addThreat(Unit* victim, float threat) { addThreat(victim, threat, false, SPELL_SCHOOL_MASK_NONE, nullptr); }
+        void addThreat(Unit* victim, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell, bool assist);
+        void addThreat(Unit* victim, float threat) { addThreat(victim, threat, false, SPELL_SCHOOL_MASK_NONE, nullptr, false); }
 
         // add threat as raw value (ignore redirections and expection all mods applied already to it
         void addThreatDirectly(Unit* victim, float threat);

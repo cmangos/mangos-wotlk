@@ -57,7 +57,7 @@ void HostileRefManager::threatAssist(Unit* victim, float threat, SpellEntry cons
     float threatPerTarget = threat / size;
     for (HostileReference* validReference : validRefs)
     {
-        validReference->getSource()->addThreat(victim, threatPerTarget, false, (threatSpell ? GetSpellSchoolMask(threatSpell) : SPELL_SCHOOL_MASK_NORMAL), threatSpell);
+        validReference->getSource()->addThreat(victim, threatPerTarget, false, (threatSpell ? GetSpellSchoolMask(threatSpell) : SPELL_SCHOOL_MASK_NORMAL), threatSpell, true);
         victim->GetCombatManager().TriggerCombatTimer(validReference->getSource()->getOwner());
     }
 }
