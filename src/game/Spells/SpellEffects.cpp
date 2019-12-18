@@ -6482,7 +6482,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
     if (summon_prop->Title == UNITNAME_SUMMON_TITLE_GUARDIAN || summon_prop->Title == UNITNAME_SUMMON_TITLE_COMPANION)
     {
         if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(m_spellInfo->EffectMiscValue[eff_idx]))
-            level = urand(0, 1) ? cInfo->MinLevel : cInfo->MaxLevel;
+            level = urand(cInfo->MinLevel, cInfo->MaxLevel);
         else
         {
             sLog.outError("Spell Effect EFFECT_SUMMON (%u) - no creature template found for summoned NPC %u (spell id %u, effIndex %u)", m_spellInfo->Effect[eff_idx], m_spellInfo->EffectMiscValue[eff_idx], m_spellInfo->Id, eff_idx);
