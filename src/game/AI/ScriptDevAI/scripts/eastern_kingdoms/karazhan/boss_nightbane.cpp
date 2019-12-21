@@ -43,6 +43,7 @@ enum
     SPELL_SMOLDERING_BREATH     = 30210,
     SPELL_TAIL_SWEEP            = 25653,
     SPELL_CLEAVE                = 30131,
+    SPELL_DISTRACTING_ASH_GROUND= 30280, // prenerf 2.1.0
 
     // air phase spells
     SPELL_DISTRACTING_ASH       = 30130,
@@ -365,7 +366,7 @@ struct boss_nightbaneAI : public CombatAI
             case NIGHTBANE_DISTRACTING_ASH:
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                    if (DoCastSpellIfCan(target, SPELL_DISTRACTING_ASH) == CAST_OK) // should be used in both phases
+                    if (DoCastSpellIfCan(target, m_phase == PHASE_GROUND ? SPELL_DISTRACTING_ASH_GROUND : SPELL_DISTRACTING_ASH) == CAST_OK) // should be used in both phases
                         ResetCombatAction(action, urand(7000, 13000));
                 break;
             }
