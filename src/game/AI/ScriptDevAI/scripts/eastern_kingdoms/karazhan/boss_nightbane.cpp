@@ -90,7 +90,6 @@ struct boss_nightbaneAI : public CombatAI
         AddCombatAction(NIGHTBANE_RAIN_OF_BONES, true);
         AddCombatAction(NIGHTBANE_SMOKING_BLAST, true);
         AddCombatAction(NIGHTBANE_FIREBALL_BARRAGE, true);
-        AddCombatAction(NIGHTBANE_PHASE_RESET, true);
     }
 
     instance_karazhan* m_instance;
@@ -104,6 +103,7 @@ struct boss_nightbaneAI : public CombatAI
 
     void Reset() override
     {
+        CombatAI::Reset();
         m_phase                   = PHASE_GROUND;
         m_uiFlightPhase             = 1;
         m_bCombatStarted            = false;
@@ -249,7 +249,7 @@ struct boss_nightbaneAI : public CombatAI
         {
             if (Creature* pTrigger = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (!chosenTrigger || ground ? !m_creature->GetDistanceOrder(pTrigger, chosenTrigger, false, DIST_CALC_NONE) : m_creature->GetDistanceOrder(pTrigger, chosenTrigger, false, DIST_CALC_NONE))
+                if (!chosenTrigger || (ground ? !m_creature->GetDistanceOrder(pTrigger, chosenTrigger, false, DIST_CALC_NONE) : m_creature->GetDistanceOrder(pTrigger, chosenTrigger, false, DIST_CALC_NONE)))
                     chosenTrigger = pTrigger;
             }
         }
@@ -258,7 +258,7 @@ struct boss_nightbaneAI : public CombatAI
         if (chosenTrigger)
         {
             chosenTrigger->GetPosition(fX, fY, fZ);
-            m_creature->GetMotionMaster()->MovePointTOL(ground ? POINT_ID_GROUND : POINT_ID_AIR, fX, fY, fZ, !ground);
+            m_creature->GetMotionMaster()->MovePointTOL(ground ? POINT_ID_GROUND : POINT_ID_AIR, fX, fY, fZ, !ground, FORCED_MOVEMENT_WALK);
         }
     }
 
