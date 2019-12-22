@@ -150,6 +150,9 @@ class SpellCastTargets
             m_elevation = target.m_elevation;
             m_speed = target.m_speed;
 
+            m_destOri = 0.f;
+            m_mapId = target.m_mapId;
+
             return *this;
         }
 
@@ -202,6 +205,9 @@ class SpellCastTargets
         std::string m_strTarget;
 
         uint32 m_targetMask;
+
+        float m_destOri;
+        uint32 m_mapId; // not to be written to packet in vanilla/tbc
 
     private:
         // objects (can be used at spell creating and after Update at casting
@@ -713,6 +719,7 @@ class Spell
         bool CheckAndAddMagnetTarget(Unit* unitTarget, SpellEffectIndex effIndex, bool targetB, TempTargetingData& data);
         static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry>& bounds, UnitList& tempTargetUnitMap, UnitList& targetUnitMap, SpellEffectIndex effIndex);
         void FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex);
+        void FillFromTargetFlags(TempTargetingData& targetingData, SpellEffectIndex effIndex);
 
         void FillAreaTargets(UnitList& targetUnitMap, float radius, float cone, SpellNotifyPushType pushType, SpellTargets spellTargets, WorldObject* originalCaster = nullptr);
         void FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* center, float radius, bool raid, bool withPets, bool withcaster) const;
