@@ -535,7 +535,7 @@ class Aura
         void ReapplyAffectedPassiveAuras();
 
         void PickTargetsForSpellTrigger(Unit *& triggerCaster, Unit *& triggerTarget, WorldObject *& triggerTargetObject, SpellEntry const* spellInfo);
-        void CastTriggeredSpell(Unit* triggerCaster, Unit* triggerTarget, WorldObject* triggerTargetObject, SpellEntry const* triggeredSpellInfo, int32* basePoints);
+        void CastTriggeredSpell(PeriodicTriggerData& data);
 
         Modifier m_modifier;
 
