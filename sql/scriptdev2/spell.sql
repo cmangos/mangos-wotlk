@@ -54,3 +54,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (30404,'spell_unstable_affliction'),
 (30405,'spell_unstable_affliction');
 
+-- Alterac Valley
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(24677,'spell_gy_mid_trigger');
+
