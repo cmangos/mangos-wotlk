@@ -852,7 +852,13 @@ void Creature::UpdateArmor()
 
 void Creature::UpdateMaxHealth()
 {
-    float value = GetTotalAuraModValue(UNIT_MOD_HEALTH);
+    UnitMods unitMod = UNIT_MOD_HEALTH;
+
+    float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
+    value *= GetModifierValue(unitMod, BASE_PCT);
+    value += GetModifierValue(unitMod, TOTAL_VALUE);
+    value *= GetModifierValue(unitMod, TOTAL_PCT);
+
     SetMaxHealth((uint32)value);
 }
 
@@ -860,7 +866,11 @@ void Creature::UpdateMaxPower(Powers power)
 {
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
 
-    float value  = GetTotalAuraModValue(unitMod);
+    float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
+    value *= GetModifierValue(unitMod, BASE_PCT);
+    value += GetModifierValue(unitMod, TOTAL_VALUE);
+    value *= GetModifierValue(unitMod, TOTAL_PCT);
+
     SetMaxPower(power, uint32(value));
 }
 
@@ -960,16 +970,19 @@ bool Pet::UpdateStats(Stats stat)
     float value  = GetTotalStatValue(stat);
 
     Unit* owner = GetOwner();
-    if (stat == STAT_STAMINA)
+    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
-        if (owner)
-            value += float(owner->GetStat(stat)) * 0.3f;
-    }
-    // warlock's and mage's pets gain 30% of owner's intellect
-    else if (stat == STAT_INTELLECT && getPetType() == SUMMON_PET)
-    {
-        if (owner && (owner->getClass() == CLASS_WARLOCK || owner->getClass() == CLASS_MAGE))
-            value += float(owner->GetStat(stat)) * 0.3f;
+        if (stat == STAT_STAMINA)
+        {
+            if (owner)
+                value += float(owner->GetStat(stat)) * 0.3f;
+        }
+        // warlock's and mage's pets gain 30% of owner's intellect
+        else if (stat == STAT_INTELLECT && getPetType() == SUMMON_PET)
+        {
+            if (owner && (owner->getClass() == CLASS_WARLOCK || owner->getClass() == CLASS_MAGE))
+                value += float(owner->GetStat(stat)) * 0.3f;
+        }
     }
 
     SetStat(stat, int32(value));
