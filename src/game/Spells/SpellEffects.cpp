@@ -6957,6 +6957,7 @@ bool Spell::DoSummonGuardian(CreatureSummonPositions& list, SummonPropertiesEntr
         spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
         spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
+        spawnCreature->SetCanModifyStats(true);
         spawnCreature->InitStatsForLevel(level);
 
         if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
@@ -7160,6 +7161,7 @@ bool Spell::DoSummonPet(SpellEffectIndex eff_idx)
     spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, 0);
     spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
+    spawnCreature->SetCanModifyStats(true);
     spawnCreature->InitStatsForLevel(level);
 
     if (CharmInfo* charmInfo = spawnCreature->GetCharmInfo())
@@ -7898,6 +7900,7 @@ void Spell::EffectTameCreature(SpellEffectIndex /*eff_idx*/)
     uint32 cLevel = creatureTarget->getLevel();
     uint32 plLevel = plr->getLevel();
     uint32 level = (cLevel + 5) < plLevel ? (plLevel - 5) : cLevel;
+    pet->SetCanModifyStats(true);
     pet->InitStatsForLevel(level);
     pet->InitLevelupSpellsForLevel();
     pet->InitTalentForLevel();
@@ -8005,6 +8008,7 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
     NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, uint32(time(nullptr)));
     NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
+    NewSummon->SetCanModifyStats(true);
     NewSummon->InitStatsForLevel(level);
     NewSummon->InitPetCreateSpells();
     NewSummon->InitLevelupSpellsForLevel();
@@ -14235,6 +14239,7 @@ void Spell::EffectCreateTamedPet(SpellEffectIndex eff_idx)
     if (unitTarget->IsPvPSanctuary())
         newTamedPet->SetPvPSanctuary(true);
 
+    newTamedPet->SetCanModifyStats(true);
     newTamedPet->InitStatsForLevel(unitTarget->getLevel());
     newTamedPet->InitPetCreateSpells();
     newTamedPet->InitLevelupSpellsForLevel();
