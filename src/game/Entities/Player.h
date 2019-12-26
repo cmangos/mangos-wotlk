@@ -1068,6 +1068,7 @@ class Player : public Unit
 
         ReputationRank GetReactionTo(Unit const* unit) const override;
         ReputationRank GetReactionTo(Corpse const* corpse) const override;
+        bool IsInGroup(Unit const* other, bool party = false, bool ignoreCharms = false) const override;
 
         void ToggleAFK();
         void ToggleDND();
