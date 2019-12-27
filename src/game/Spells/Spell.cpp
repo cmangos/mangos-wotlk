@@ -8541,7 +8541,11 @@ SpellCastResult Spell::OnCheckCast(bool strict)
             if (m_caster->GetMap()->SpawnedCountForEntry(21445) >= 1 || m_caster->GetMap()->SpawnedCountForEntry(22285) >= 1)
                 return SPELL_FAILED_DONT_REPORT;
             break;
-        case 38170:
+        case 37390: // Oscillating Frequency Scanner
+            if (m_caster->HasAura(37407))
+                return SPELL_FAILED_NOT_HERE;
+            break;
+        case 38170: // Spin Nether-weather Vane
             if (!m_caster->HasAura(37968))
                 return SPELL_FAILED_FIZZLE;
             break;
