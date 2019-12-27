@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14002_01_mangos_broadcast_text` bit(1) DEFAULT NULL
+  `required_14003_01_mangos_world_safe_locs_facing` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -383,9 +383,7 @@ CREATE TABLE `battleground_template` (
   `MinPlayersPerTeam` smallint(5) unsigned NOT NULL DEFAULT '0',
   `MaxPlayersPerTeam` smallint(5) unsigned NOT NULL DEFAULT '0',
   `AllianceStartLoc` mediumint(8) unsigned NOT NULL,
-  `AllianceStartO` float NOT NULL,
   `HordeStartLoc` mediumint(8) unsigned NOT NULL,
-  `HordeStartO` float NOT NULL,
   `StartMaxDist` float NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -397,19 +395,19 @@ CREATE TABLE `battleground_template` (
 LOCK TABLES `battleground_template` WRITE;
 /*!40000 ALTER TABLE `battleground_template` DISABLE KEYS */;
 INSERT INTO `battleground_template` VALUES
-(1,40,40,611,2.72532,610,2.27452,100),
-(2,10,10,769,3.14159,770,3.14159,75),
-(3,15,15,890,3.40156,889,0.263892,75),
-(4,5,5,929,0,936,3.14159,0),
-(5,5,5,939,0,940,3.14159,0),
-(6,5,5,0,0,0,0,0),
-(7,15,15,1103,3.40156,1104,0.263892,75),
-(8,5,5,1258,0,1259,3.14159,0),
-(9,15,15,1367,0,1368,0,0),
-(10,5,5,1362,0,1363,0,0),
-(11,5,5,1364,0,1365,0,0),
-(30,40,40,1485,0,1486,0,200),
-(32,5,40,0,0,0,0,0);
+(1,40,40,611,610,100),
+(2,10,10,769,770,75),
+(3,15,15,890,889,75),
+(4,5,5,929,936,0),
+(5,5,5,939,940,0),
+(6,5,5,0,0,0),
+(7,15,15,1103,1104,75),
+(8,5,5,1258,1259,0),
+(9,15,15,1367,1368,0),
+(10,5,5,1362,1363,0),
+(11,5,5,1364,1365,0),
+(30,40,40,1485,1486,200),
+(32,5,40,0,0,0);
 /*!40000 ALTER TABLE `battleground_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -19366,6 +19364,21 @@ LOCK TABLES `vehicle_accessory` WRITE;
 /*!40000 ALTER TABLE `vehicle_accessory` DISABLE KEYS */;
 /*!40000 ALTER TABLE `vehicle_accessory` ENABLE KEYS */;
 UNLOCK TABLES;
+
+-- Table structure for table `world_safe_locs`
+--
+
+DROP TABLE IF EXISTS `world_safe_locs`;
+CREATE TABLE `world_safe_locs` (
+   `id` int(11) unsigned NOT NULL,
+   `map` int(10) unsigned NOT NULL DEFAULT '0',
+   `x` float NOT NULL DEFAULT '0',
+   `y` float NOT NULL DEFAULT '0',
+   `z` float NOT NULL DEFAULT '0',
+   `o` float NOT NULL DEFAULT '0',
+   `name` varchar(50) NOT NULL DEFAULT '',
+   PRIMARY KEY (`id`)
+ ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `world_template`
