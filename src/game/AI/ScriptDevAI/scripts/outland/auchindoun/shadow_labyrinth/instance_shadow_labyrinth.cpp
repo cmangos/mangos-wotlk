@@ -90,8 +90,6 @@ void instance_shadow_labyrinth::SetData(uint32 uiType, uint32 uiData)
             break;
 
         case TYPE_VORPIL:
-            if (uiData == DONE)
-                // DoUseDoorOrButton(GO_SCREAMING_HALL_DOOR); should be handled when players move close to -166.0127, -270.3628, 17.0875, SMSG_UPDATE_WORLD_STATE VariableID: 13437 - Value: 247303520
             m_auiEncounter[2] = uiData;
             break;
 
@@ -192,10 +190,50 @@ InstanceData* GetInstanceData_instance_shadow_labyrinth(Map* pMap)
     return new instance_shadow_labyrinth(pMap);
 }
 
+struct go_screaming_hall_door : public GameObjectAI
+{
+    go_screaming_hall_door(GameObject* go) : GameObjectAI(go), m_doorCheckNearbyPlayersTimer(1000), m_doorOpen(false) {}
+
+    uint32 m_doorCheckNearbyPlayersTimer;
+    bool m_doorOpen;
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (m_doorOpen)
+            return;
+
+        if (m_doorCheckNearbyPlayersTimer <= diff)
+        {
+            // If player is in 35y range of door, open it if Vorpil boss is done
+            if (m_go->GetInstanceData()->GetData(TYPE_VORPIL) == DONE)
+            {
+                m_go->GetMap()->ExecuteDistWorker(m_go, 35.0f, [&](Player * player)
+                {
+                    m_go->Use(player);
+                    m_doorOpen = true;
+                });
+            }
+            m_doorCheckNearbyPlayersTimer = 1000;
+        }
+        else
+            m_doorCheckNearbyPlayersTimer -= diff;
+    }
+};
+
+GameObjectAI* GetAIgo_screaming_hall_door(GameObject* go)
+{
+    return new go_screaming_hall_door(go);
+}
+
 void AddSC_instance_shadow_labyrinth()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_shadow_labyrinth";
     pNewScript->GetInstanceData = &GetInstanceData_instance_shadow_labyrinth;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_screaming_hall_door";
+    pNewScript->GetGameObjectAI = &GetAIgo_screaming_hall_door;
     pNewScript->RegisterSelf();
 }
