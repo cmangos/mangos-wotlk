@@ -933,6 +933,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Loading broadcast_text...");
     sObjectMgr.LoadBroadcastText();
 
+    sLog.outString("Loading world safe locs ...");
+    sObjectMgr.LoadWorldSafeLocs();
+    
     ///- Load the DBC files
     sLog.outString("Initialize DBC data stores...");
     LoadDBCStores(m_dataPath);
@@ -1156,9 +1159,6 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading Graveyard-zone links...");
     sObjectMgr.LoadGraveyardZones();
-
-    sLog.outString("Loading world safe locs facing values ...");
-    sObjectMgr.LoadWorldSafeLocsFacing();
 
     sLog.outString("Loading taxi flight shortcuts...");
     sObjectMgr.LoadTaxiShortcuts();

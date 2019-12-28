@@ -36,6 +36,8 @@ extern SQLStorage sSpellCones;
 extern SQLStorage sDungeonEncounterStore;
 extern SQLStorage sAreaGroupStore;
 extern SQLStorage sCreatureConditionalSpawnStore;
+extern SQLStorage sWorldSafeLocsStore;
+
 
 extern SQLHashStorage sGOStorage;
 extern SQLHashStorage sGameObjectDataAddonStorage;

@@ -4259,7 +4259,7 @@ bool ChatHandler::HandleLinkGraveCommand(char* args)
     else
         return false;
 
-    WorldSafeLocsEntry const* graveyard = sWorldSafeLocsStore.LookupEntry(g_id);
+    WorldSafeLocsEntry const* graveyard = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(g_id);
     if (!graveyard)
     {
         PSendSysMessage(LANG_COMMAND_GRAVEYARDNOEXIST, g_id);
