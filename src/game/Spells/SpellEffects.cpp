@@ -7981,7 +7981,7 @@ void Spell::EffectLearnPetSpell(SpellEffectIndex eff_idx)
         DEBUG_LOG("Spell: %s has learned spell %u from %s", pet->GetGuidStr().c_str(), learn_spellproto->Id, caster->GetGuidStr().c_str());
 }
 
-void Spell::EffectTaunt(SpellEffectIndex /*eff_idx*/)
+void Spell::EffectTaunt(SpellEffectIndex eff_idx)
 {
     if (!unitTarget)
         return;
@@ -8003,6 +8003,24 @@ void Spell::EffectTaunt(SpellEffectIndex /*eff_idx*/)
         float addedThreat = unitTarget->getThreatManager().getCurrentVictim()->getThreat() - unitTarget->getThreatManager().getThreat(m_caster);
         unitTarget->getThreatManager().addThreatDirectly(m_caster, addedThreat);
         unitTarget->getThreatManager().setCurrentVictimByTarget(m_caster); // force changes the target to caster of taunt
+    }
+    // Units without threat lists but with AI are susceptible to attack target interference by taunt effect:
+    else if (!unitTarget->CanHaveThreatList() && !unitTarget->hasUnitState(UNIT_STAT_CAN_NOT_REACT_OR_LOST_CONTROL))
+    {
+        if (UnitAI* ai = unitTarget->AI())
+        {
+            // 2.4.3+: "Passive pets will no longer attack due to AoE taunt spells."
+            if (ai->HasReactState(REACT_PASSIVE) && !unitTarget->getVictim())
+            {
+                if (SpellTargetInfoTable[m_spellInfo->EffectImplicitTargetA[eff_idx]].enumerator != TARGET_ENUMERATOR_SINGLE)
+                    return;
+
+                if (SpellTargetInfoTable[m_spellInfo->EffectImplicitTargetB[eff_idx]].enumerator != TARGET_ENUMERATOR_SINGLE)
+                    return;
+            }
+
+            ai->AttackStart(m_caster);
+        }
     }
 }
 
