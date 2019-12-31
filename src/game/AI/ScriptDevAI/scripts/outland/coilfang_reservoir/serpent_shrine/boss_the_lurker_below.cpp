@@ -158,6 +158,7 @@ struct boss_the_lurker_belowAI : public Scripted_NoMovementAI
     void JustRespawned() override
     {
         m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
     }
 
     void UpdateAI(const uint32 uiDiff) override
