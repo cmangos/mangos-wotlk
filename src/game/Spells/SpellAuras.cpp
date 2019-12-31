@@ -7369,7 +7369,8 @@ void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool /*Real*/)
     // spell special cases when current health set to max value at apply
     switch (GetId())
     {
-        case 40851:                                         // Disgruntled
+        case 802:                           // Mutate Bug
+        case 40851:                         // Disgruntled
             if (apply)
                 target->ModifyHealth(target->GetMaxHealth() - oldMaxHealth);
             break;
