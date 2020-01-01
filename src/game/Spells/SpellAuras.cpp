@@ -4887,9 +4887,6 @@ void Aura::HandleAuraTrackCreatures(bool apply, bool /*Real*/)
         return;
 
     if (apply)
-        GetTarget()->RemoveNoStackAurasDueToAuraHolder(GetHolder());
-
-    if (apply)
         GetTarget()->SetFlag(PLAYER_TRACK_CREATURES, uint32(1) << (m_modifier.m_miscvalue - 1));
     else
         GetTarget()->RemoveFlag(PLAYER_TRACK_CREATURES, uint32(1) << (m_modifier.m_miscvalue - 1));
@@ -4901,9 +4898,6 @@ void Aura::HandleAuraTrackResources(bool apply, bool /*Real*/)
         return;
 
     if (apply)
-        GetTarget()->RemoveNoStackAurasDueToAuraHolder(GetHolder());
-
-    if (apply)
         GetTarget()->SetFlag(PLAYER_TRACK_RESOURCES, uint32(1) << (m_modifier.m_miscvalue - 1));
     else
         GetTarget()->RemoveFlag(PLAYER_TRACK_RESOURCES, uint32(1) << (m_modifier.m_miscvalue - 1));
@@ -4913,9 +4907,6 @@ void Aura::HandleAuraTrackStealthed(bool apply, bool /*Real*/)
 {
     if (GetTarget()->GetTypeId() != TYPEID_PLAYER)
         return;
-
-    if (apply)
-        GetTarget()->RemoveNoStackAurasDueToAuraHolder(GetHolder());
 
     GetTarget()->ApplyModByteFlag(PLAYER_FIELD_BYTES, 0, PLAYER_FIELD_BYTE_TRACK_STEALTHED, apply);
 }
