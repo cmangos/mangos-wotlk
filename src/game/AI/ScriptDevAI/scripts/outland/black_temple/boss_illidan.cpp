@@ -1180,7 +1180,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             {
                 if (m_creature->GetHealthPercent() > 90.0f)
                     return;
-                m_creature->PlayMusic(SOUND_KIT_ILLIDAN_AGGRO);
+                m_creature->PlayMusic(SOUND_KIT_ILLIDAN_90);
                 StartNextDialogueText(SAY_ILLIDAN_MINION);
                 SetActionReadyStatus(action, false);
                 return;
