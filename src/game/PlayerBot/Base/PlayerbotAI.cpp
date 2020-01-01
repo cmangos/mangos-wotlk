@@ -5817,7 +5817,7 @@ SpellCastResult PlayerbotAI::SelfBuff(uint32 spellId)
 // Checks if spell is single per target per caster and will make any effect on target
 bool PlayerbotAI::CanReceiveSpecificSpell(uint8 spec, Unit* target) const
 {
-    if (IsSingleFromSpellSpecificPerTargetPerCaster(SpellSpecific(spec), SpellSpecific(spec)))
+    if (IsSpellSpecificUniquePerCaster(SpellSpecific(spec)))
     {
         Unit::SpellAuraHolderMap holders = target->GetSpellAuraHolderMap();
         Unit::SpellAuraHolderMap::iterator it;

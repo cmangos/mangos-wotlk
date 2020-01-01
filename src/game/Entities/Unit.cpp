@@ -5502,13 +5502,14 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
     if (!spellProto)
         return false;
 
-    uint32 spellId = holder->GetId();
-
     // passive spell special case (only non stackable with ranks)
     if (IsPassiveSpell(spellProto) && IsPassiveSpellStackableWithRanks(spellProto))
         return true;
 
-    SpellSpecific spellId_spec = GetSpellSpecific(spellId);
+    const uint32 spellId = holder->GetId();
+    const SpellSpecific specific = GetSpellSpecific(spellId);
+    auto drGroup = holder->getDiminishGroup();
+    SpellEntry const* triggeredBy = holder->GetTriggeredBy();
 
     SpellAuraHolderMap::iterator next;
     for (SpellAuraHolderMap::iterator i = m_spellAuraHolders.begin(); i != m_spellAuraHolders.end(); i = next)
@@ -5517,96 +5518,104 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
         ++next;
         if (!(*i).second) continue;
 
-        SpellEntry const* i_spellProto = (*i).second->GetSpellProto();
+        SpellAuraHolder* existing = (*i).second;
+        SpellEntry const* existingSpellProto = existing->GetSpellProto();
 
-        if (!i_spellProto)
+        if (!existingSpellProto)
             continue;
 
-        uint32 i_spellId = i_spellProto->Id;
+        const uint32 existingSpellId = existingSpellProto->Id;
+        const SpellSpecific existingSpecific = GetSpellSpecific(existingSpellId);
+        auto existingDrGroup = existing->getDiminishGroup();
+        const bool own = (holder->GetCasterGuid() == existing->GetCasterGuid());
 
         // early checks that spellId is passive non stackable spell
-        if (IsPassiveSpell(i_spellProto))
+        if (IsPassiveSpell(existingSpellProto) && (spellId != existingSpellId))
         {
             // passive non-stackable spells not stackable only for same caster
-            if (holder->GetCasterGuid() != i->second->GetCasterGuid())
+            if (!own)
                 continue;
 
             // passive non-stackable spells not stackable only with another rank of same spell
-            if (!sSpellMgr.IsSpellAnotherRankOfSpell(spellId, i_spellId))
+            if (!sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId))
                 continue;
         }
 
         // prevent triggering aura of removing aura that triggered it
         if (((*i).second->GetTriggeredBy() && (*i).second->GetTriggeredBy()->Id == spellId)
-                || (holder->GetTriggeredBy() && holder->GetTriggeredBy()->Id == i_spellId))
+                || (holder->GetTriggeredBy() && holder->GetTriggeredBy()->Id == existingSpellId))
             continue;
 
-        SpellSpecific i_spellId_spec = GetSpellSpecific(i_spellId);
-
-        // single allowed spell specific from same caster or from any caster at target
-        bool is_spellSpecPerTargetPerCaster = IsSingleFromSpellSpecificPerTargetPerCaster(spellId_spec, i_spellId_spec);
-        bool is_spellSpecPerTarget = IsSingleFromSpellSpecificPerTarget(spellId_spec, i_spellId_spec);
-        if (is_spellSpecPerTarget || (is_spellSpecPerTargetPerCaster && holder->GetCasterGuid() == (*i).second->GetCasterGuid()))
+        bool unique = false;
+        bool personal = false;
+        if (specific && existingSpecific && IsSpellSpecificIdentical(specific, existingSpecific))
         {
-            // cannot remove higher rank
-            if (sSpellMgr.IsSpellAnotherRankOfSpell(spellId, i_spellId))
-                if (CompareAuraRanks(spellId, i_spellId) < 0)
-                    return false;
-
-            RemoveAurasDueToSpell(i_spellId);
-
-            if (m_spellAuraHolders.empty())
-                break;
-            next =  m_spellAuraHolders.begin();
-
-            continue;
+            personal = IsSpellSpecificUniquePerCaster(specific);
+            unique = (personal || IsSpellSpecificUniquePerTarget(specific));
         }
 
-        // spell with spell specific that allow single ranks for spell from diff caster
-        // same caster case processed or early or later
-        bool is_spellPerTarget = IsSingleFromSpellSpecificSpellRanksPerTarget(spellId_spec, i_spellId_spec);
-        if (is_spellPerTarget && holder->GetCasterGuid() != (*i).second->GetCasterGuid() && sSpellMgr.IsSpellAnotherRankOfSpell(spellId, i_spellId))
+        bool diminished = false;
+        // Remove any existing holders from the same diminishing returns group by treating as unique
+        if (!unique && drGroup)
         {
-            // cannot remove higher rank
-            if (CompareAuraRanks(spellId, i_spellId) < 0)
-                return false;
-
-            RemoveAurasDueToSpell(i_spellId);
-
-            if (m_spellAuraHolders.empty())
-                break;
-            next =  m_spellAuraHolders.begin();
-
-            continue;
+            diminished = (drGroup == existingDrGroup);
+            unique = diminished;
         }
 
-        // non single (per caster) per target spell specific (possible single spell per target at caster)
-        if (!is_spellSpecPerTargetPerCaster && !is_spellSpecPerTarget)
+        const bool stackable = !sSpellMgr.IsNoStackSpellDueToSpell(spellProto, existingSpellProto);
+        // Remove only own auras when multiranking
+        if (!unique && own && stackable && sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId))
         {
-            SpellEntry const* triggeredBy = holder->GetTriggeredBy();
-            if (triggeredBy && sSpellMgr.IsSpellCanAffectSpell(triggeredBy, i_spellProto)) // check if this spell can be triggered by any talent aura
+            // Check for same item source (allow two weapon enchants)
+            if (const ObjectGuid &itemGuid = holder->GetCastItemGuid())
+            {
+                if (itemGuid != existing->GetCastItemGuid())
+                    continue;
+            }
+
+            unique = true;
+            personal = true;
+        }
+
+        if (unique || !stackable)
+        {
+            // check if this spell can be triggered by any talent aura
+            if (!unique && triggeredBy && sSpellMgr.IsSpellCanAffectSpell(triggeredBy, existingSpellProto))
                 continue;
 
-            if (sSpellMgr.IsNoStackSpellDueToSpell(spellProto, i_spellProto))
+            if (!own)
             {
-                RemoveAurasDueToSpell(i_spellId);
+                if (personal && stackable)
+                    continue;
 
-                if (m_spellAuraHolders.empty())
-                    break;
-                next = m_spellAuraHolders.begin();
+                // holder cannot remove higher/stronger rank if it isn't from the same caster
+                if (CompareAuraRanks(spellId, existingSpellId) < 0)
+                    return false;
+
+                if (!diminished && sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId) && sSpellMgr.IsSpellHigherRankOfSpell(existingSpellId, spellId))
+                    return false;
             }
-            continue;
+
+            if (personal && stackable)
+                RemoveAurasByCasterSpell(existingSpellId, holder->GetCasterGuid());
+            else
+                RemoveAurasDueToSpell(existingSpellId);
+
+            if (m_spellAuraHolders.empty())
+                break;
+
+            next = m_spellAuraHolders.begin();
         }
 
         // Potions stack aura by aura (elixirs/flask already checked)
-        if (spellProto->SpellFamilyName == SPELLFAMILY_POTION && i_spellProto->SpellFamilyName == SPELLFAMILY_POTION)
+        if (spellProto->SpellFamilyName == SPELLFAMILY_POTION && existingSpellProto->SpellFamilyName == SPELLFAMILY_POTION)
         {
-            if (IsNoStackAuraDueToAura(spellId, i_spellId))
+            if (IsNoStackAuraDueToAura(spellId, existingSpellId))
             {
-                if (CompareAuraRanks(spellId, i_spellId) < 0)
+                if (CompareAuraRanks(spellId, existingSpellId) < 0)
                     return false;                       // cannot remove higher rank
 
-                RemoveAurasDueToSpell(i_spellId);
+                RemoveAurasDueToSpell(existingSpellId);
 
                 if (m_spellAuraHolders.empty())
                     break;
