@@ -4387,43 +4387,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
             switch (form)
             {
-                case FORM_CAT: // need to cast Track Humanoids if no other tracking is on
-                    if (target->HasSpell(5225) && !target->HasAura(2383) && !target->HasAura(2580))
-                        target->CastSpell(nullptr, 5225, TRIGGERED_OLD_TRIGGERED);
-                    // no break
-                case FORM_BEAR:
-                case FORM_DIREBEAR:
-                {
-                    // get furor proc chance
-                    int32 furorChance = 0;
-                    Unit::AuraList const& mDummy = target->GetAurasByType(SPELL_AURA_DUMMY);
-                    for (auto i : mDummy)
-                    {
-                        if (i->GetSpellProto()->SpellIconID == 238)
-                        {
-                            furorChance = i->GetModifier()->m_amount;
-                            break;
-                        }
-                    }
-
-                    if (m_modifier.m_miscvalue == FORM_CAT)
-                    {
-                        // Furor chance is now amount allowed to save energy for cat form
-                        // without talent it reset to 0
-                        if ((int32)target->GetPower(POWER_ENERGY) > furorChance)
-                        {
-                            target->SetPower(POWER_ENERGY, 0);
-                            target->CastCustomSpell(target, 17099, &furorChance, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                        }
-                    }
-                    else if (furorChance)                   // only if talent known
-                    {
-                        target->SetPower(POWER_RAGE, 0);
-                        if (irand(1, 100) <= furorChance)
-                            target->CastSpell(target, 17057, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                    }
-                    break;
-                }
                 case FORM_BATTLESTANCE:
                 case FORM_DEFENSIVESTANCE:
                 case FORM_BERSERKERSTANCE:
@@ -4522,6 +4485,50 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     if (target->GetTypeId() == TYPEID_PLAYER)
         ((Player*)target)->InitDataForForm();
+
+    if (apply)
+    {
+        switch (form)
+        {
+            case FORM_CAT: // need to cast Track Humanoids if no other tracking is on
+                if (target->HasSpell(5225) && !target->HasAura(2383) && !target->HasAura(2580))
+                    target->CastSpell(nullptr, 5225, TRIGGERED_OLD_TRIGGERED);
+                // no break
+            case FORM_BEAR:
+            case FORM_DIREBEAR:
+            {
+                // get furor proc chance
+                int32 furorChance = 0;
+                Unit::AuraList const& mDummy = target->GetAurasByType(SPELL_AURA_DUMMY);
+                for (auto i : mDummy)
+                {
+                    if (i->GetSpellProto()->SpellIconID == 238)
+                    {
+                        furorChance = i->GetModifier()->m_amount;
+                        break;
+                    }
+                }
+
+                if (m_modifier.m_miscvalue == FORM_CAT)
+                {
+                    // Furor chance is now amount allowed to save energy for cat form
+                    // without talent it reset to 0
+                    if ((int32)target->GetPower(POWER_ENERGY) > furorChance)
+                    {
+                        target->SetPower(POWER_ENERGY, 0);
+                        target->CastCustomSpell(target, 17099, &furorChance, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                    }
+                }
+                else if (furorChance)                   // only if talent known
+                {
+                    target->SetPower(POWER_RAGE, 0);
+                    if (irand(1, 100) <= furorChance)
+                        target->CastSpell(target, 17057, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                }
+                break;
+            }
+        }
+    }
 }
 
 void Aura::HandleAuraTransform(bool apply, bool Real)
