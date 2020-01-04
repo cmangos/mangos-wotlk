@@ -733,6 +733,22 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                 // Steady Shot
                 else if (m_spellInfo->SpellFamilyFlags & uint64(0x100000000))
                 {
+                    bool found = false;
+
+                    // check dazed affect
+                    Unit::AuraList const& decSpeedList = unitTarget->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+                    for (Unit::AuraList::const_iterator iter = decSpeedList.begin(); iter != decSpeedList.end(); ++iter)
+                    {
+                        if ((*iter)->GetSpellProto()->SpellIconID == 15 && (*iter)->GetSpellProto()->Dispel == 0)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if (found)
+                        damage += CalculateSpellEffectValue(eff_idx, unitTarget);
+
                     int32 base = irand((int32)m_caster->GetBaseWeaponDamage(RANGED_ATTACK, MINDAMAGE), (int32)m_caster->GetBaseWeaponDamage(RANGED_ATTACK, MAXDAMAGE));
                     damage += int32(float(base) / m_caster->GetAttackTime(RANGED_ATTACK) * 2800);
                 }
@@ -822,7 +838,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
         }
 
         if (damage >= 0)
-            m_damagePerEffect[eff_idx] = damage;
+            m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, damage);
     }
 }
 
@@ -4555,30 +4571,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
         }
         case SPELLFAMILY_HUNTER:
         {
-            // Steady Shot
-            if (m_spellInfo->SpellFamilyFlags & uint64(0x100000000))
-            {
-                if (!unitTarget || !unitTarget->IsAlive())
-                    return;
-
-                bool found = false;
-
-                // check dazed affect
-                Unit::AuraList const& decSpeedList = unitTarget->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
-                for (auto iter : decSpeedList)
-                {
-                    if (iter->GetSpellProto()->SpellIconID == 15 && iter->GetSpellProto()->Dispel == 0)
-                    {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (found)
-                    m_damage += damage;
-                return;
-            }
-
             // Disengage
             if (m_spellInfo->SpellFamilyFlags & uint64(0x0000400000000000))
             {
@@ -5642,7 +5634,8 @@ void Spell::EffectPowerBurn(SpellEffectIndex eff_idx)
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
     new_damage = int32(new_damage * multiplier);
-    m_damage += new_damage;
+
+    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, damage);
     m_spellLog.AddLog(uint32(SPELL_EFFECT_POWER_BURN), unitTarget->GetPackGUID(), new_damage, uint32(powertype), multiplier);
 }
 
@@ -5773,7 +5766,7 @@ void Spell::EffectHeal(SpellEffectIndex eff_idx)
     }
 }
 
-void Spell::EffectHealPct(SpellEffectIndex /*eff_idx*/)
+void Spell::EffectHealPct(SpellEffectIndex eff_idx)
 {
     if (unitTarget && unitTarget->IsAlive() && damage >= 0)
     {
@@ -5790,12 +5783,11 @@ void Spell::EffectHealPct(SpellEffectIndex /*eff_idx*/)
         uint32 absorb = 0;
         unitTarget->CalculateHealAbsorb(addhealth, &absorb);
 
-        int32 gain = caster->DealHeal(unitTarget, addhealth - absorb, m_spellInfo, false, absorb);
-        unitTarget->getHostileRefManager().threatAssist(caster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(m_spellInfo), m_spellInfo);
+        m_healingPerEffect[eff_idx] = addhealth;
     }
 }
 
-void Spell::EffectHealMechanical(SpellEffectIndex /*eff_idx*/)
+void Spell::EffectHealMechanical(SpellEffectIndex eff_idx)
 {
     // Mechanic creature type should be correctly checked by targetCreatureType field
     if (unitTarget && unitTarget->IsAlive() && damage >= 0)
@@ -5811,7 +5803,7 @@ void Spell::EffectHealMechanical(SpellEffectIndex /*eff_idx*/)
         uint32 absorb = 0;
         unitTarget->CalculateHealAbsorb(addhealth, &absorb);
 
-        caster->DealHeal(unitTarget, addhealth - absorb, m_spellInfo, false, absorb);
+        m_healingPerEffect[eff_idx] = addhealth;
     }
 }
 
@@ -8131,7 +8123,7 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
                 if (sunder)
                 {
                     sunder->GetHolder()->RefreshHolder();
-                    spell_bonus += sunder->GetStackAmount() * CalculateDamage(EFFECT_INDEX_2, unitTarget);
+                    spell_bonus += sunder->GetStackAmount() * CalculateSpellEffectValue(EFFECT_INDEX_2, unitTarget);
                 }
 
                 // Devastate causing Sunder Armor Effect
@@ -8244,7 +8236,7 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
                 if (count)
                 {
                     // Effect 1(for Blood-Caked Strike)/3(other) damage is bonus
-                    float bonus = count * CalculateDamage(m_spellInfo->SpellIconID == 1736 ? EFFECT_INDEX_0 : EFFECT_INDEX_2, unitTarget) / 100.0f;
+                    float bonus = count * CalculateSpellEffectValue(m_spellInfo->SpellIconID == 1736 ? EFFECT_INDEX_0 : EFFECT_INDEX_2, unitTarget) / 100.0f;
                     // Blood Strike, Blood-Caked Strike and Obliterate store bonus*2
                     if (m_spellInfo->SpellFamilyFlags & uint64(0x0002000000400000) ||
                             m_spellInfo->SpellIconID == 1736)
@@ -8291,14 +8283,14 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
         {
             case SPELL_EFFECT_WEAPON_DAMAGE:
             case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
-                fixed_bonus += CalculateDamage(SpellEffectIndex(j), unitTarget);
+                fixed_bonus += CalculateSpellEffectValue(SpellEffectIndex(j), unitTarget);
                 break;
             case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
-                fixed_bonus += CalculateDamage(SpellEffectIndex(j), unitTarget);
+                fixed_bonus += CalculateSpellEffectValue(SpellEffectIndex(j), unitTarget);
                 normalized = true;
                 break;
             case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
-                weaponDamagePercentMod *= float(CalculateDamage(SpellEffectIndex(j), unitTarget)) / 100.0f;
+                weaponDamagePercentMod *= float(CalculateSpellEffectValue(SpellEffectIndex(j), unitTarget)) / 100.0f;
 
                 // applied only to prev.effects fixed damage
                 fixed_bonus = int32(fixed_bonus * weaponDamagePercentMod);
@@ -8353,7 +8345,7 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
     bonus = int32(bonus * totalDamagePercentMod);
 
     // prevent negative damage
-    m_damage += uint32(bonus > 0 ? bonus : 0);
+    m_damagePerEffect[eff_idx] = CalculateSpellEffectDamage(unitTarget, bonus);
 
     // Hemorrhage
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && (m_spellInfo->SpellFamilyFlags & uint64(0x2000000)))

@@ -1326,7 +1326,7 @@ bool IsCastEndProcModifierAura(SpellEntry const* spellInfo, SpellEffectIndex eff
         case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE:
         {
             for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
-                if (IsEffectHandledOnDelayedSpellLaunch(procSpell, SpellEffectIndex(i)))
+                if (IsEffectHandledImmediatelySpellLaunch(procSpell, SpellEffectIndex(i)))
                     return true;
 
             return false;
