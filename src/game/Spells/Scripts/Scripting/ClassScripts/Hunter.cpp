@@ -18,7 +18,16 @@
 
 #include "Spells/Scripts/SpellScript.h"
 
+struct KillCommand : public SpellScript
+{
+    void OnHit(Spell* spell) const override
+    {
+        if (spell->GetCaster()->HasAura(37483)) // Improved Kill Command - Item set bonus
+            spell->GetCaster()->CastSpell(nullptr, 37482, TRIGGERED_OLD_TRIGGERED);// Exploited Weakness
+    }
+};
+
 void LoadHunterScripts()
 {
-
+    RegisterSpellScript<KillCommand>("spell_kill_command")
 }

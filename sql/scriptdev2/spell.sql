@@ -39,6 +39,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Wotlk
 
+-- Hunter
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(34026,'spell_kill_command');
 
 -- Priest
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
