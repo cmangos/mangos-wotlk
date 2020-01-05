@@ -320,7 +320,6 @@ enum
     SPELL_SPIRIT_PARTICLES              = 17327,
     NPC_FRANCLORN_FORGEWRIGHT           = 8888,
     NPC_GAERIYAN                        = 9299,
-    NPC_GANJO                           = 26924,
 
     // quest 11521
     SPELL_EXPOSE_RAZORTHORN_ROOT        = 44935,
@@ -496,7 +495,7 @@ bool EffectAuraDummy_spell_aura_dummy_npc(const Aura* pAura, bool bApply)
         {
             Creature* pCreature = (Creature*)pAura->GetTarget();
 
-            if (!pCreature || (pCreature->GetEntry() != NPC_FRANCLORN_FORGEWRIGHT && pCreature->GetEntry() != NPC_GAERIYAN && pCreature->GetEntry() != NPC_GANJO))
+            if (!pCreature || (pCreature->GetEntry() != NPC_FRANCLORN_FORGEWRIGHT && pCreature->GetEntry() != NPC_GAERIYAN && pCreature->GetEntry()))
                 return false;
 
             if (bApply)
