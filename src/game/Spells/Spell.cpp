@@ -2518,7 +2518,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         {
             if (Unit* target = m_targets.getUnitTarget())
             {
-                if (m_caster->CanAssistSpell(target, m_spellInfo))
+                if (m_caster->CanAssistSpell(target, m_spellInfo) && (targetMode != TARGET_UNIT_RAID || target->IsInGroup(m_caster)))
                     tempUnitList.push_back(target);
                 else
                 {
@@ -2526,23 +2526,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                     {
                         if (Unit* targetOfUnitTarget = target->GetTarget(m_caster))
                         {
-                            if (m_caster->CanAssistSpell(targetOfUnitTarget, m_spellInfo))
-                            {
-                                switch (m_spellInfo->Id)
-                                {
-                                    case 3411: // Intervene target must be in group with caster
-                                        if (targetOfUnitTarget->IsInGroup(m_caster))
-                                            tempUnitList.push_back(targetOfUnitTarget);
-                                        break;
-                                    case 31789: // Righteous defense needs player target
-                                        if (targetOfUnitTarget->GetTypeId() == TYPEID_PLAYER)
-                                            tempUnitList.push_back(targetOfUnitTarget);
-                                        break;
-                                    default:
-                                        tempUnitList.push_back(targetOfUnitTarget);
-                                        break;
-                                }
-                            }
+                            if (m_caster->CanAssistSpell(targetOfUnitTarget, m_spellInfo) && (targetMode != TARGET_UNIT_RAID || targetOfUnitTarget->IsInGroup(m_caster)))
+                                tempUnitList.push_back(targetOfUnitTarget);
                         }
                     }
                 }
@@ -8728,6 +8713,10 @@ bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
                     return false;
             break;
         }
+        case 31789: // Righteous defense needs player target
+            if (target->GetTypeId() != TYPEID_PLAYER)
+                return false;
+            break;
         case 32124:                                         // Cant hit players
             if (target->GetTypeId() == TYPEID_PLAYER)
                 return false;
