@@ -29,5 +29,5 @@ struct KillCommand : public SpellScript
 
 void LoadHunterScripts()
 {
-    RegisterSpellScript<KillCommand>("spell_kill_command")
+    RegisterSpellScript<KillCommand>("spell_kill_command");
 }

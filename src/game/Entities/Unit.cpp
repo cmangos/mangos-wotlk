@@ -7896,6 +7896,13 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
     // Done fixed damage bonus auras
     int32 DoneAdvertisedBenefit = SpellBaseDamageBonusDone(GetSpellSchoolMask(spellProto));
 
+    for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_SPELL_DAMAGE_DONE))
+    {
+        if (!i->isAffectedOnSpell(spellProto))
+            continue;
+        i->OnDamageCalculate(DoneAdvertisedBenefit, DoneTotalMod);
+    }
+
     AuraList const& mOverrideClassScript = owner->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
     for (auto i : mOverrideClassScript)
     {
@@ -8239,6 +8246,13 @@ uint32 Unit::SpellDamageBonusTaken(Unit* caster, SpellEntry const* spellProto, u
     // Taken fixed damage bonus auras
     int32 TakenAdvertisedBenefit = SpellBaseDamageBonusTaken(GetSpellSchoolMask(spellProto));
 
+    for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_SPELL_DAMAGE_TAKEN))
+    {
+        if (!i->isAffectedOnSpell(spellProto))
+            continue;
+        i->OnDamageCalculate(TakenAdvertisedBenefit, TakenTotalMod);
+    }
+
     // apply benefit affected by spell power implicit coeffs and spell level penalties
     if (caster)
         TakenTotal = caster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false);
@@ -8435,6 +8449,13 @@ uint32 Unit::SpellHealingBonusDone(Unit* victim, SpellEntry const* spellProto, i
         }
     }
 
+    for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_SPELL_HEALING_DONE))
+    {
+        if (!i->isAffectedOnSpell(spellProto))
+            continue;
+        i->OnDamageCalculate(DoneAdvertisedBenefit, DoneTotalMod);
+    }
+
     // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
     DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true, SCALE_SPELLPOWER_HEALING);
 
@@ -8510,13 +8531,20 @@ uint32 Unit::SpellHealingBonusTaken(Unit* pCaster, SpellEntry const* spellProto,
         }
     }
 
-    // apply benefit affected by spell power implicit coeffs and spell level penalties
-    TakenTotal = pCaster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false, SCALE_SPELLPOWER_HEALING);
-
     AuraList const& mHealingGet = GetAurasByType(SPELL_AURA_MOD_HEALING_RECEIVED);
     for (auto i : mHealingGet)
         if (i->isAffectedOnSpell(spellProto))
             TakenTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
+
+    for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_SPELL_HEALING_TAKEN))
+    {
+        if (!i->isAffectedOnSpell(spellProto))
+            continue;
+        i->OnDamageCalculate(TakenAdvertisedBenefit, TakenTotalMod);
+    }
+
+    // apply benefit affected by spell power implicit coeffs and spell level penalties
+    TakenTotal = pCaster->SpellBonusWithCoeffs(spellProto, TakenTotal, TakenAdvertisedBenefit, 0, damagetype, false, SCALE_SPELLPOWER_HEALING);
 
     // use float as more appropriate for negative values and percent applying
     float heal = (healamount + TakenTotal * int32(stack)) * TakenTotalMod;
@@ -8755,7 +8783,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
 
     // PERCENT damage auras
     // ====================
-    float DonePercent   = 1.0f;
+    float DoneTotalMod   = 1.0f;
 
     // ..done pct, already included in weapon damage based spells
     if (!isWeaponDamageBasedSpell)
@@ -8768,16 +8796,16 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                     ((i->GetSpellProto()->EquippedItemClass == -1) ||                     // general, weapon independent
                      (pWeapon && pWeapon->IsFitToSpellRequirements(i->GetSpellProto()))))  // OR used weapon fits aura requirements
             {
-                DonePercent *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
+                DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
             }
         }
 
         if (attType == OFF_ATTACK)
-            DonePercent *= GetModifierValue(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT);                    // no school check required
+            DoneTotalMod *= GetModifierValue(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT);                    // no school check required
     }
 
     // ..done pct (by creature type mask)
-    DonePercent *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS, creatureTypeMask);
+    DoneTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS, creatureTypeMask);
 
     // special dummys/class scripts and other effects
     // =============================================
@@ -8790,7 +8818,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
     for (auto i : mDamageDoneVersusAuraState)
     {
         if (victim->HasAuraState(AuraState(i->GetModifier()->m_miscvalue)))
-            DonePercent *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
+            DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
     }
 
     if (spellProto)
@@ -8811,7 +8839,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 case 21082:
                 case 27158:
                 {
-                    DonePercent *= 1.4f;
+                    DoneTotalMod *= 1.4f;
                     break;
                 }
             }
@@ -8838,7 +8866,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                         }
 
                         // effect 0 have expected value but in negative state
-                        DonePercent *= (-eff0->GetModifier()->m_amount + 100.0f) / 100.0f;
+                        DoneTotalMod *= (-eff0->GetModifier()->m_amount + 100.0f) / 100.0f;
                     }
                     break;
                 // Tundra Stalker
@@ -8848,13 +8876,13 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                     if (i->GetSpellProto()->SpellIconID == 2656)
                     {
                         if (victim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
-                            DonePercent *= (100.0f + i->GetModifier()->m_amount) / 100.0f;
+                            DoneTotalMod *= (100.0f + i->GetModifier()->m_amount) / 100.0f;
                     }
                     else // Tundra Stalker
                     {
                         // Frost Fever (target debuff)
                         if (victim->GetAura(SPELL_AURA_MOD_MELEE_HASTE, SPELLFAMILY_DEATHKNIGHT, uint64(0x0000000000000000), 0x00000002))
-                            DonePercent *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
+                            DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
                         break;
                     }
                     break;
@@ -8862,7 +8890,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 case 7293: // Rage of Rivendare
                 {
                     if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_DEATHKNIGHT, uint64(0x0200000000000000)))
-                        DonePercent *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
+                        DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
                     break;
                 }
                 // Marked for Death
@@ -8873,7 +8901,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 case 7602:
                 {
                     if (victim->GetAura(SPELL_AURA_MOD_STALKED, SPELLFAMILY_HUNTER, uint64(0x0000000000000400)))
-                        DonePercent *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
+                        DoneTotalMod *= (i->GetModifier()->m_amount + 100.0f) / 100.0f;
                     break;
                 }
             }
@@ -8905,7 +8933,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 {
                     if (dummyAura->GetSpellProto()->EffectMiscValue[dummyAura->GetEffIndex()] == 7244)
                     {
-                        DonePercent *= (dummyAura->GetModifier()->m_amount + 100.0f) / 100.0f;
+                        DoneTotalMod *= (dummyAura->GetModifier()->m_amount + 100.0f) / 100.0f;
                         break;
                     }
                 }
@@ -8918,7 +8946,14 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
             if (Aura* aur = GetDummyAura(56826))
                 // check for Serpent Sting at target
                 if (victim->GetAura(SPELL_AURA_PERIODIC_DAMAGE, SPELLFAMILY_HUNTER, uint64(0x0000000000004000)))
-                    DonePercent *= (aur->GetModifier()->m_amount + 100.0f) / 100.0f;
+                    DoneTotalMod *= (aur->GetModifier()->m_amount + 100.0f) / 100.0f;
+        }
+
+        for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_MELEE_DAMAGE_DONE))
+        {
+            if (!i->isAffectedOnSpell(spellProto))
+                continue;
+            i->OnDamageCalculate(DoneFlat, DoneTotalMod);
         }
     }
 
@@ -8959,7 +8994,7 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
     if (!flat)
         DoneTotal = 0.0f;
 
-    float tmpDamage = (int32(pdamage) + DoneTotal * int32(stack)) * DonePercent;
+    float tmpDamage = (int32(pdamage) + DoneTotal * int32(stack)) * DoneTotalMod;
 
     // apply spellmod to Done damage
     if (spellProto)
@@ -9009,26 +9044,26 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackTyp
 
     // PERCENT damage auras
     // ====================
-    float TakenPercent  = 1.0f;
+    float TakenTotalMod  = 1.0f;
 
     // ..taken pct (by school mask)
-    TakenPercent *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, schoolMask);
+    TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN, schoolMask);
 
     // ..taken pct (by mechanic mask)
-    TakenPercent *= GetTotalAuraMultiplierByMiscValueForMask(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT, mechanicMask);
+    TakenTotalMod *= GetTotalAuraMultiplierByMiscValueForMask(SPELL_AURA_MOD_MECHANIC_DAMAGE_TAKEN_PERCENT, mechanicMask);
 
     // ..taken pct (melee/ranged)
     if (attType == RANGED_ATTACK)
-        TakenPercent *= GetTotalAuraMultiplier(SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT);
+        TakenTotalMod *= GetTotalAuraMultiplier(SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT);
     else
-        TakenPercent *= GetTotalAuraMultiplier(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT);
+        TakenTotalMod *= GetTotalAuraMultiplier(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT);
 
     // ..taken pct (aoe avoidance)
     if (spellProto && IsAreaOfEffectSpell(spellProto))
     {
-        TakenPercent *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE, schoolMask);
+        TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE, schoolMask);
         if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet())
-            TakenPercent *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_PET_AOE_DAMAGE_AVOIDANCE, schoolMask);
+            TakenTotalMod *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_PET_AOE_DAMAGE_AVOIDANCE, schoolMask);
     }
 
     // special dummys/class scripts and other effects
@@ -9050,13 +9085,23 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackTyp
                     if (mod < float(mDummyAura->GetModifier()->m_amount))
                         mod = float(mDummyAura->GetModifier()->m_amount);
 
-                    TakenPercent *= (mod + 100.0f) / 100.0f;
+                    TakenTotalMod *= (mod + 100.0f) / 100.0f;
                 }
                 break;
             case 20911:                                     // Blessing of Sanctuary
             case 25899:                                     // Greater Blessing of Sanctuary
-                TakenPercent *= (mDummyAura->GetModifier()->m_amount + 100.0f) / 100.0f;
+                TakenTotalMod *= (mDummyAura->GetModifier()->m_amount + 100.0f) / 100.0f;
                 break;
+        }
+    }
+
+    if (spellProto)
+    {
+        for (auto i : GetScriptedLocationAuras(SCRIPT_LOCATION_MELEE_DAMAGE_TAKEN))
+        {
+            if (!i->isAffectedOnSpell(spellProto))
+                continue;
+            i->OnDamageCalculate(TakenAdvertisedBenefit, TakenTotalMod);
         }
     }
 
@@ -9074,7 +9119,7 @@ uint32 Unit::MeleeDamageBonusTaken(Unit* caster, uint32 pdamage, WeaponAttackTyp
     if (!flat)
         TakenFlat = 0.0f;
 
-    float tmpDamage = (int32(pdamage) + (TakenFlat + TakenAdvertisedBenefit) * int32(stack)) * TakenPercent;
+    float tmpDamage = (int32(pdamage) + (TakenFlat + TakenAdvertisedBenefit) * int32(stack)) * TakenTotalMod;
 
     // bonus result can be negative
     return tmpDamage > 0 ? uint32(tmpDamage) : 0;
@@ -13379,4 +13424,31 @@ Player* Unit::GetNextRandomRaidMember(float radius, AuraType noAuraType)
 
     uint32 randTarget = urand(0, nearMembers.size()-1);
     return nearMembers[randTarget];
+}
+
+bool Unit::HasOverrideScript(uint32 id) const
+{
+    return m_classScripts.find(id) != m_classScripts.end();
+}
+
+Aura* Unit::GetOverrideScript(uint32 id) const
+{
+    auto itr = m_classScripts.find(id);
+    return itr == m_classScripts.end() ? nullptr : (*itr).second;
+}
+
+void Unit::RegisterOverrideScriptAura(Aura* aura, uint32 id, bool apply)
+{
+    if (apply)
+        m_classScripts.insert({ id, aura });
+    else
+        m_classScripts.erase(id);
+}
+
+void Unit::RegisterScriptedLocationAura(Aura* aura, AuraScriptLocation location, bool apply)
+{
+    if (apply)
+        m_scriptedLocations[location].push_back(aura);
+    else
+        m_scriptedLocations[location].erase(std::remove(m_scriptedLocations[location].begin(), m_scriptedLocations[location].end(), aura), m_scriptedLocations[location].end());
 }

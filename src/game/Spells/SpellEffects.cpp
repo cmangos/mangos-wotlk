@@ -8286,16 +8286,8 @@ void Spell::EffectWeaponDmg(SpellEffectIndex eff_idx)
             // Stormstrike
             if (m_spellInfo->SpellFamilyFlags & uint64(0x001000000000))
             {
-                Unit::AuraList const& m_OverrideClassScript = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                for (auto citr : m_OverrideClassScript)
-                {
-                    // Stormstrike AP Buff
-                    if (citr->GetModifier()->m_miscvalue == 5634)
-                    {
-                        m_caster->CastSpell(m_caster, 38430, TRIGGERED_OLD_TRIGGERED, nullptr, citr);
-                        break;
-                    }
-                }
+                if (Aura* aura = m_caster->GetOverrideScript(5634))
+                    m_caster->CastSpell(nullptr, 38430, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
             }
             break;
         }

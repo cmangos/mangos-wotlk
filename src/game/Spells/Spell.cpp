@@ -5240,35 +5240,15 @@ SpellCastResult Spell::CheckCast(bool strict)
         case SPELLFAMILY_DRUID:
         {
             if (IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_SHAPESHIFT))
-            {
-                Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
-                {
-                    if ((*itr)->GetModifier()->m_miscvalue == 3655)
-                    {
-                        return SPELL_FAILED_TARGET_AURASTATE;
-                    }
-                    else
-                        ++itr;
-                }
-            }
+                if (m_caster->HasOverrideScript(3655))
+                    return SPELL_FAILED_TARGET_AURASTATE;
             break;
         }
         case SPELLFAMILY_WARRIOR:
         {
             if (IsSpellHaveAura(m_spellInfo, SPELL_AURA_MOD_SHAPESHIFT))
-            {
-                Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                for (Unit::AuraList::const_iterator itr = auraClassScripts.begin(); itr != auraClassScripts.end();)
-                {
-                    if ((*itr)->GetModifier()->m_miscvalue == 3654)
-                    {
-                        return SPELL_FAILED_TARGET_AURASTATE;
-                    }
-                    else
-                        ++itr;
-                }
-            }
+                if (m_caster->HasOverrideScript(3654))
+                    return SPELL_FAILED_TARGET_AURASTATE;
             break;
         }
         default:
