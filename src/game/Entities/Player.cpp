@@ -504,8 +504,6 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     if (GetSession()->GetSecurity() == SEC_PLAYER)
         SetAcceptWhispers(true);
 
-    m_comboPoints = 0;
-
     m_usedTalentCount = 0;
     m_questRewardTalentCount = 0;
 
@@ -20683,12 +20681,12 @@ void Player::InitPrimaryProfessions()
 
 void Player::SendComboPoints() const
 {
-    Unit* combotarget = ObjectAccessor::GetUnit(*this, m_comboTargetGuid);
+    Unit* combotarget = ObjectAccessor::GetUnit(*this, GetComboTargetGuid());
     if (combotarget)
     {
         WorldPacket data(SMSG_UPDATE_COMBO_POINTS, combotarget->GetPackGUID().size() + 1);
         data << combotarget->GetPackGUID();
-        data << uint8(m_comboPoints);
+        data << uint8(GetComboPoints());
         GetSession()->SendPacket(data);
     }
     /*else
@@ -20698,61 +20696,6 @@ void Player::SendComboPoints() const
         data << uint8(0);
         GetSession()->SendPacket(data);
     }*/
-}
-
-bool Player::AttackStop(bool targetSwitch, bool includingCast, bool includingCombo)
-{
-    if (includingCombo)
-        ClearComboPoints();
-    return Unit::AttackStop(targetSwitch, includingCast, includingCombo);
-}
-
-void Player::AddComboPoints(Unit* target, int8 count)
-{
-    if (!count)
-        return;
-
-    // without combo points lost (duration checked in aura)
-    RemoveSpellsCausingAura(SPELL_AURA_RETAIN_COMBO_POINTS);
-
-    if (target->GetObjectGuid() == m_comboTargetGuid)
-    {
-        m_comboPoints += count;
-    }
-    else
-    {
-        if (m_comboTargetGuid)
-            if (Unit* target2 = ObjectAccessor::GetUnit(*this, m_comboTargetGuid))
-                target2->RemoveComboPointHolder(GetGUIDLow());
-
-        m_comboTargetGuid = target->GetObjectGuid();
-        m_comboPoints = count;
-
-        target->AddComboPointHolder(GetGUIDLow());
-    }
-
-    if (m_comboPoints > 5) m_comboPoints = 5;
-    if (m_comboPoints < 0) m_comboPoints = 0;
-
-    SendComboPoints();
-}
-
-void Player::ClearComboPoints()
-{
-    if (!m_comboTargetGuid)
-        return;
-
-    // without combopoints lost (duration checked in aura)
-    RemoveSpellsCausingAura(SPELL_AURA_RETAIN_COMBO_POINTS);
-
-    m_comboPoints = 0;
-
-    SendComboPoints();
-
-    if (Unit* target = ObjectAccessor::GetUnit(*this, m_comboTargetGuid))
-        target->RemoveComboPointHolder(GetGUIDLow());
-
-    m_comboTargetGuid.Clear();
 }
 
 void Player::SetGroup(Group* group, int8 subgroup)

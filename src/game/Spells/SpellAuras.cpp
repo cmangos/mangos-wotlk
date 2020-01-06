@@ -6689,7 +6689,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                         break;
 
                     // 0.01*$AP*cp
-                    uint8 cp = ((Player*)caster)->GetComboPoints();
+                    uint8 cp = caster->GetComboPoints();
 
                     // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
                     Unit::AuraList const& dummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
@@ -6718,7 +6718,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     // 4 points: ${($m1+$b1*4+0.03428571*$AP)*7} damage over 14 secs
                     // 5 points: ${($m1+$b1*5+0.0375*$AP)*8} damage over 16 secs
                     float AP_per_combo[6] = {0.0f, 0.015f, 0.024f, 0.03f, 0.03428571f, 0.0375f};
-                    uint8 cp = ((Player*)caster)->GetComboPoints();
+                    uint8 cp = caster->GetComboPoints();
                     if (cp > 5) cp = 5;
                     m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * AP_per_combo[cp]);
                 }

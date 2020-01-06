@@ -638,7 +638,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                     // converts up to 30 points of energy into ($f1+$AP/410) additional damage
                     float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                     float multiple = ap / 410 + m_spellInfo->DmgMultiplier[eff_idx];
-                    damage += int32(((Player*)m_caster)->GetComboPoints() * ap * 7 / 100);
+                    damage += int32(m_caster->GetComboPoints() * ap * 7 / 100);
                     uint32 energy = m_caster->GetPower(POWER_ENERGY);
                     uint32 used_energy = energy > 30 ? 30 : energy;
                     damage += int32(used_energy * multiple);
@@ -660,7 +660,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags & uint64(0x800000000)))
                 {
                     // consume from stack dozes not more that have combo-points
-                    if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
+                    if (uint32 combo = m_caster->GetComboPoints())
                     {
                         Aura* poison = nullptr;
                         // Lookup for Deadly poison (only attacker applied)
@@ -706,13 +706,13 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                         }
                         // Eviscerate and Envenom Bonus Damage (item set effect)
                         if (m_caster->GetDummyAura(37169))
-                            damage += ((Player*)m_caster)->GetComboPoints() * 40;
+                            damage += m_caster->GetComboPoints() * 40;
                     }
                 }
                 // Eviscerate
                 else if ((m_spellInfo->SpellFamilyFlags & uint64(0x00020000)) && m_caster->GetTypeId() == TYPEID_PLAYER)
                 {
-                    if (uint32 combo = ((Player*)m_caster)->GetComboPoints())
+                    if (uint32 combo = m_caster->GetComboPoints())
                     {
                         float ap = m_caster->GetTotalAttackPowerValue(BASE_ATTACK);
                         damage += irand(int32(ap * combo * 0.03f), int32(ap * combo * 0.07f));
