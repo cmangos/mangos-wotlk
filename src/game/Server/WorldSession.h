@@ -38,6 +38,7 @@ struct ItemPrototype;
 struct AuctionEntry;
 struct AuctionHouseEntry;
 struct DeclinedName;
+struct CharacterNameQueryResponse;
 struct TradeStatusInfo;
 
 class ObjectGuid;
@@ -334,9 +335,9 @@ class WorldSession
         /// Handle the authentication waiting queue (to be completed)
         void SendAuthWaitQue(uint32 position) const;
 
-        void SendNameQueryOpcode(Player* p) const;
-        void SendNameQueryOpcodeFromDB(ObjectGuid guid) const;
-        static void SendNameQueryOpcodeFromDBCallBack(QueryResult* result, uint32 accountId);
+        void SendNameQueryResponse(CharacterNameQueryResponse& response) const;
+        void SendNameQueryResponseFromDB(ObjectGuid guid) const;
+        static void SendNameQueryResponseFromDBCallBack(QueryResult* result, uint32 accountId);
 
         void SendTrainerList(ObjectGuid guid) const;
 
