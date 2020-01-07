@@ -36,8 +36,18 @@ void WorldSession::SendNameQueryResponse(CharacterNameQueryResponse& response) c
     // guess size
     WorldPacket data(SMSG_NAME_QUERY_RESPONSE, (8 + 1 + 1 + 1 + 1 + 1 + 10));
     data << response.guid.WriteAsPacked();
-    data << uint8(0); // added in 3.1; if > 1, then end of packet
-    data << (!response.name.empty() ? response.name : GetMangosString(LANG_NON_EXIST_CHARACTER));
+
+    // Added in 3.1: non-existent character short packet response
+    if (response.name.empty())
+    {
+        data << uint8(1);
+        SendPacket(data);
+        return;
+    }
+    else
+        data << uint8(0);
+
+    data << response.name;
 
     if (response.realm.empty())
         data << uint8(0);
