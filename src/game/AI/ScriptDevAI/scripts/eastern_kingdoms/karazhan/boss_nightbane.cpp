@@ -74,6 +74,7 @@ enum NightbaneActions
     NIGHTBANE_SMOKING_BLAST,
     NIGHTBANE_FIREBALL_BARRAGE,
     NIGHTBANE_ACTION_MAX,
+    NIGHTBANE_ATTACK_DELAY,
 };
 
 struct boss_nightbaneAI : public CombatAI
@@ -91,6 +92,7 @@ struct boss_nightbaneAI : public CombatAI
         AddCombatAction(NIGHTBANE_RAIN_OF_BONES, true);
         AddCombatAction(NIGHTBANE_SMOKING_BLAST, true);
         AddCombatAction(NIGHTBANE_FIREBALL_BARRAGE, true);
+        AddCustomAction(NIGHTBANE_ATTACK_DELAY, true, [&]() { HandleAttackDelay(); });
     }
 
     instance_karazhan* m_instance;
@@ -193,15 +195,13 @@ struct boss_nightbaneAI : public CombatAI
                 m_creature->GetMotionMaster()->MoveIdle();
                 m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
                 m_creature->SetCanFly(false);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
                 m_creature->SetLevitate(false);
                 m_creature->SetHover(false);
                 m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
 
                 m_bCombatStarted = true;
-                m_creature->SetInCombatWithZone();
-                AttackClosestEnemy();
+                ResetTimer(NIGHTBANE_ATTACK_DELAY, 2000);
             }
         }
         // avoid overlapping of escort and combat movement
@@ -224,12 +224,19 @@ struct boss_nightbaneAI : public CombatAI
                     SetMeleeEnabled(true);
                     DoResetThreat();
                     m_creature->SetSupportThreatOnly(false);
-                    AttackClosestEnemy();
+                    ResetTimer(NIGHTBANE_ATTACK_DELAY, 2000);
                     break;
             }
             SetCombatScriptStatus(false);
             HandlePhaseTransition();
         }
+    }
+
+    void HandleAttackDelay()
+    {
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
     }
 
     // Wrapper to handle movement to the closest trigger
