@@ -1554,3 +1554,7 @@ INSERT INTO spell_template (Id, Category, Dispel, Mechanic, Attributes, Attribut
 -- Fix bad mask for spells - always needs to have at least 1, if disproven, fix EAI functions which check SchoolMask
 UPDATE spell_template SET SchoolMask=1 WHERE SchoolMask=0;
 
+-- Missing spell for aggro
+INSERT INTO spell_template (Id,Attributes,AttributesEx2,CastingTimeIndex,DurationIndex,RangeIndex,EquippedItemClass,Effect1,EffectImplicitTargetA1,EffectTriggerSpell1,DmgMultiplier1,SchoolMask,IsServerSide,SpellName) VALUES
+('47680','384','4','1','1','1','-1','64','1','47681','0','1','1','Force Cast Aggro');
+
