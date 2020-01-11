@@ -1749,6 +1749,22 @@ UPDATE spell_template SET SchoolMask=1 WHERE SchoolMask=0;
 INSERT INTO spell_template (Id,Attributes,AttributesEx2,CastingTimeIndex,DurationIndex,RangeIndex,EquippedItemClass,Effect1,EffectImplicitTargetA1,EffectTriggerSpell1,DmgMultiplier1,SchoolMask,IsServerSide,SpellName) VALUES
 ('47680','384','4','1','1','1','-1','64','1','47681','0','1','1','Force Cast Aggro');
 
+-- Remove SPELL_INTERRUPT_FLAG_ABORT_ON_DMG from Spells falsly interrupted by damage
+UPDATE `spell_template` SET `InterruptFlags` = `InterruptFlags`&~0x00000010 WHERE `Id` IN (
+33968, -- Corrosive Mist
+35394 -- Spore Cloud
+);
+
+UPDATE spell_template SET Attributes=320 WHERE id=28282; -- This makes Ashbringer passive aura icon invisible
+UPDATE spell_template SET AttributesEx=32, AttributesEx3=131072 WHERE id=28441; -- AB Effect 000, critters/neutral no longer attack
+
+-- Osmosis - child spell should not be categorized as channel
+UPDATE `spell_template` SET `AttributesEx`=AttributesEx&~0x00004004 WHERE `Id` IN(35342);
+
+-- fully custom - summons GO 185520 - spellid and name from official data
+INSERT INTO spell_template(Id,SpellName,Effect1,EffectDieSides1,EffectBaseDice1,EffectImplicitTargetA1,EffectMiscValue1,IsServerSide) VALUES
+(39663,'Summon Cosmetic Fel Fire',76,1,1,18,185520,2);
+
 -- Custom spells to be used with .modify commands. These spell ids are free in all expansions.
 INSERT INTO `spell_template` (`Id`, `Attributes`, `CastingTimeIndex`, `ProcChance`, `SpellLevel`, `DurationIndex`, `EquippedItemClass`, `Effect1`, `EffectApplyAuraName1`, `EffectMiscValue1`, `SpellName`) VALUES
 (15170, 64, 1, 101, 1, 21, -1, 6, 22, 1, 'Custom QA Mod Armor'),

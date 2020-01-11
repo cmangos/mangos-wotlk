@@ -32,7 +32,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26584,'spell_summon_toxic_slime'),
 (26591,'spell_teleport_image'),
 (26619,'spell_periodic_scarab_trigger'),
-(26686,'spell_aq_whirlwind');
+(26686,'spell_aq_whirlwind'),
+(28282,'spell_ashbringer_item');
 
 -- TBC
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

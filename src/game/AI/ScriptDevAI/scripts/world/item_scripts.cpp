@@ -29,6 +29,8 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Spells/Spell.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 
 /*#####
@@ -129,6 +131,26 @@ bool ItemUse_item_gor_dreks_ointment(Player* pPlayer, Item* pItem, const SpellCa
     return false;
 }
 
+enum
+{
+    SPELL_ASHBRINGER_EFFECT_001 = 28442,
+};
+
+struct AshbringerItemAura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const
+    {
+        if (apply)
+        {
+            Unit* target = aura->GetTarget();
+            int32 basepoints = ReputationRank(REP_FRIENDLY);
+            target->CastCustomSpell(nullptr, SPELL_ASHBRINGER_EFFECT_001, &basepoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+        else
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_ASHBRINGER_EFFECT_001);
+    }
+};
+
 /*#####
 # item_petrov_cluster_bombs
 #####*/
@@ -184,4 +206,6 @@ void AddSC_item_scripts()
     pNewScript->Name = "item_petrov_cluster_bombs";
     pNewScript->pItemUse = &ItemUse_item_petrov_cluster_bombs;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<AshbringerItemAura>("spell_ashbringer_item");
 }
