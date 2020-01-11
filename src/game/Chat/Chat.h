@@ -716,8 +716,21 @@ class ChatHandler
         bool HandleKickPlayerCommand(char* args);
         bool HandleMailBoxCommand(char* args);
 
+        bool HandleTicketDiscardCommand(char* args);
+        bool HandleTicketEscalateCommand(char* args);
+        bool HandleTicketGoCommand(char* args);
+        bool HandleTicketGoNameCommand(char* args);
+        bool HandleTicketNoteCommand(char* args);
+        bool HandleTicketReadCommand(char* args);
+        bool HandleTicketResolveCommand(char* args);
+        bool HandleTicketSortCommand(char* args);
+        bool HandleTicketWhisperCommand(char* args);
         bool HandleTicketCommand(char* args);
-        bool HandleDelTicketCommand(char* args);
+
+        bool HandleTicketsListCommand(char* args);
+        bool HandleTicketsQueueCommand(char* args);
+        bool HandleTicketsCommand(char* args);
+
         bool HandleMaxSkillCommand(char* args);
         bool HandleSetSkillCommand(char* args);
         bool HandleRespawnCommand(char* args);
@@ -774,7 +787,6 @@ class ChatHandler
         bool ShowPlayerListHelper(QueryResult* result, uint32* limit = nullptr, bool title = true, bool error = true);
         void ShowSpellListHelper(Player* target, SpellEntry const* spellInfo, LocaleConstant loc);
         void ShowPoolListHelper(uint16 pool_id);
-        void ShowTicket(GMTicket const* ticket);
         void ShowTriggerListHelper(AreaTriggerEntry const* atEntry);
         void ShowTriggerTargetListHelper(uint32 id, AreaTrigger const* at, bool subpart = false);
         bool LookupPlayerSearchCommand(QueryResult* result, uint32* limit = nullptr);
