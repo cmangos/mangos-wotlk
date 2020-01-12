@@ -2579,6 +2579,8 @@ enum
     SPELL_LAZY_AND_GOOD_FOR_NOTHING = 40732,
     SPELL_DEFIANT_AND_ENRAGED       = 40735,
     SPELL_PEON_CLEAR_ALL            = 40762,
+    SPELL_KICK                      = 34802,
+    SPELL_SUNDER_ARMOR              = 15572,
 
     NPC_PEON                = 22252,
     NPC_PEON_WORK_NODE      = 23308,
@@ -2601,6 +2603,8 @@ struct npc_disobedient_dragonmaw_peonAI : public ScriptedAI
 
     uint32 m_angryTimer;
     uint32 m_booterangTimer;
+    uint32 m_kickTimer;
+    uint32 m_sunderarmorTimer;
     ObjectGuid m_lastPlayerGuid;
 
     void Reset() override
@@ -2612,6 +2616,8 @@ struct npc_disobedient_dragonmaw_peonAI : public ScriptedAI
             else
                 m_angryTimer = urand(6000, 10000);
             m_booterangTimer = 0;
+            m_kickTimer = urand(5000, 10000);
+            m_sunderarmorTimer = (3000, 9000);
         }
     }
 
@@ -2715,6 +2721,32 @@ struct npc_disobedient_dragonmaw_peonAI : public ScriptedAI
                 }
                 else m_booterangTimer -= diff;
             }
+        }
+        else
+        {
+            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                return;
+
+            if (m_kickTimer)
+            {
+                if (m_kickTimer <= diff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KICK) == CAST_OK)
+                        m_kickTimer = urand(12000, 24000);
+                }
+                else m_kickTimer -= diff;
+            }
+            if (m_sunderarmorTimer)
+            {
+                if (m_sunderarmorTimer <= diff)
+                {
+                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUNDER_ARMOR) == CAST_OK)
+                        m_sunderarmorTimer = urand(12000, 18000);
+                }
+                else m_sunderarmorTimer -= diff;
+            }
+
+            DoMeleeAttackIfReady();
         }
 
         ScriptedAI::UpdateAI(diff);
