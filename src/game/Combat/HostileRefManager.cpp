@@ -38,7 +38,7 @@ HostileRefManager::~HostileRefManager()
 // The pVictim is hated than by them as well
 // use for buffs and healing threat functionality
 
-void HostileRefManager::threatAssist(Unit* victim, float threat, SpellEntry const* threatSpell, bool singleTarget)
+void HostileRefManager::threatAssist(Unit* victim, float threat, SpellEntry const* threatSpell, bool singleTarget, bool ignoreTimer)
 {
     HostileReference* ref = getFirst();
     if (!ref)
@@ -58,7 +58,8 @@ void HostileRefManager::threatAssist(Unit* victim, float threat, SpellEntry cons
     for (HostileReference* validReference : validRefs)
     {
         validReference->getSource()->addThreat(victim, threatPerTarget, false, (threatSpell ? GetSpellSchoolMask(threatSpell) : SPELL_SCHOOL_MASK_NORMAL), threatSpell, true);
-        victim->GetCombatManager().TriggerCombatTimer(validReference->getSource()->getOwner());
+        if (!ignoreTimer)
+            victim->GetCombatManager().TriggerCombatTimer(validReference->getSource()->getOwner());
     }
 }
 

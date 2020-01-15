@@ -2724,14 +2724,14 @@ struct npc_disobedient_dragonmaw_peonAI : public ScriptedAI
         }
         else
         {
-            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
                 return;
 
             if (m_kickTimer)
             {
                 if (m_kickTimer <= diff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KICK) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KICK) == CAST_OK)
                         m_kickTimer = urand(12000, 24000);
                 }
                 else m_kickTimer -= diff;
@@ -2740,7 +2740,7 @@ struct npc_disobedient_dragonmaw_peonAI : public ScriptedAI
             {
                 if (m_sunderarmorTimer <= diff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUNDER_ARMOR) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SUNDER_ARMOR) == CAST_OK)
                         m_sunderarmorTimer = urand(12000, 18000);
                 }
                 else m_sunderarmorTimer -= diff;
