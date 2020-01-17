@@ -953,6 +953,7 @@ class WorldSession
         void HandleQueryQuestsCompletedOpcode(WorldPacket& recv_data);
         void HandleQuestPOIQueryOpcode(WorldPacket& recv_data);
 
+        std::deque<uint32> GetOpcodeHistory();
     private:
         // Additional private opcode handlers
         void HandleComplainMail(WorldPacket& recv_data);
