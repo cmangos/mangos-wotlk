@@ -1737,7 +1737,7 @@ INSERT INTO spell_template (Id, Category, Dispel, Mechanic, Attributes, Attribut
 ('26592','0','0','0','536936848','268468224','0','0','0','0','0','0','0','0','1','0','0','0','0','0','0','1','0','0','0','0','0','0','101','0','0','40','40','85','0','0','0','0','0','6','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','-1','0','0','6','6','6','1','0','0','1','0','0','0','0','0','0','0','0','1','1','1','0','0','0','0','0','0','77','77','77','0','0','0','0','0','0','0','0','0','0','0','0','2' ,'18','30','0','0','0','0','0','0','0','0','0','0','1680','0','0','Bestial Wrath','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','0','133','0','0','9','0','0','0','0','1','1','1','0','0','0','1','0','0');
 
 -- Fix Felguard Destroyer 18977 Sweeping Charge Id: 96 (SPELL_EFFECT_CHARGE) not working correctly changing to Id: 149 (SPELL_EFFECT_CHARGE_DEST)
-UPDATE `spell_template` SET `Effect1` = 149 WHERE `Id` IN (33971);
+UPDATE `spell_template` SET `EffectImplicitTargetA1` = 6 WHERE `Id` IN (25744,25787,33971);
 
 -- Nether Beam - Netherspite - restricted to one target
 UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(30469);
