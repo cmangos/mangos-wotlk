@@ -1818,6 +1818,7 @@ LOCK TABLES `game_event` WRITE;
 /*!40000 ALTER TABLE `game_event` ENABLE KEYS */;
 UNLOCK TABLES;
 
+DROP TABLE IF EXISTS game_event_time;
 CREATE TABLE `game_event_time` (
   `entry` mediumint(8) unsigned NOT NULL COMMENT 'Entry of the game event',
   `start_time` DATETIME NOT NULL DEFAULT '1970-01-01 00:00:00' COMMENT 'Absolute start date, the event will never start before',
@@ -2252,7 +2253,7 @@ CREATE TABLE `gossip_menu_option` (
   `id` smallint(6) unsigned NOT NULL DEFAULT '0',
   `option_icon` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `option_text` text,
-  `option_broadcast_text` INT(11) NOT NULL DEFAULT '0'
+  `option_broadcast_text` INT(11) NOT NULL DEFAULT '0',
   `option_id` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `npc_option_npcflag` int(10) unsigned NOT NULL DEFAULT '0',
   `action_menu_id` mediumint(8) NOT NULL DEFAULT '0',
@@ -2261,7 +2262,7 @@ CREATE TABLE `gossip_menu_option` (
   `box_coded` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `box_money` int(11) unsigned NOT NULL DEFAULT '0',
   `box_text` text,
-  `box_broadcast_text` INT(11) NOT NULL
+  `box_broadcast_text` INT(11) NOT NULL,
   `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`menu_id`,`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -2272,7 +2273,7 @@ CREATE TABLE `gossip_menu_option` (
 
 LOCK TABLES `gossip_menu_option` WRITE;
 /*!40000 ALTER TABLE `gossip_menu_option` DISABLE KEYS */;
-INSERT INTO `gossip_menu_option` VALUES
+INSERT INTO `gossip_menu_option`(menu_id, id, option_icon, option_text, option_id, npc_option_npcflag, action_menu_id, action_poi_id, action_script_id, box_coded, box_money, box_text, condition_id) VALUES
 (0,0,0,'GOSSIP_OPTION_QUESTGIVER',2,2,0,0,0,0,0,NULL,0),
 (0,1,1,'GOSSIP_OPTION_VENDOR',3,128,0,0,0,0,0,NULL,0),
 (0,2,2,'GOSSIP_OPTION_TAXIVENDOR',4,8192,0,0,0,0,0,NULL,0),
