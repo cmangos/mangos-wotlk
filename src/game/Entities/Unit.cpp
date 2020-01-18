@@ -11480,6 +11480,18 @@ void Unit::InterruptMoving(bool forceSendStop /*=false*/)
     if (!movespline->Finalized())
     {
         Movement::Location loc = movespline->ComputePosition();
+
+        if (movespline->isFacing() && movespline->isFacingTarget())
+        {
+            if (Unit const* target = ObjectAccessor::GetUnit(*this, ObjectGuid(movespline->GetFacing().target)))
+                loc.orientation = GetAngle(target);
+            else
+            {
+                float angle = atan2((loc.y - GetPositionY()), (loc.x - GetPositionX()));
+                loc.orientation = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
+            }
+        }
+
         movespline->_Interrupt();
         Relocate(loc.x, loc.y, loc.z, loc.orientation);
         isMoving = true;
@@ -12732,6 +12744,17 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     {
         m_movesplineTimer.Reset(POSITION_UPDATE_DELAY);
         Movement::Location loc = movespline->ComputePosition();
+
+        if (movespline->isFacing() && movespline->isFacingTarget())
+        {
+            if (Unit const* target = ObjectAccessor::GetUnit(*this, ObjectGuid(movespline->GetFacing().target)))
+                loc.orientation = GetAngle(target);
+            else
+            {
+                float angle = atan2((loc.y - GetPositionY()), (loc.x - GetPositionX()));
+                loc.orientation = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
+            }
+        }
 
         if (IsBoarded())
             GetTransportInfo()->SetLocalPosition(loc.x, loc.y, loc.z, loc.orientation);
