@@ -1707,7 +1707,7 @@ struct npc_bot_triggerAI : public Scripted_NoMovementAI
                 {
                     if (Creature* pAerial = m_pInstance->GetSingleCreatureFromStorage(NPC_AERIAL_UNIT))
                     {
-                        if (DoCastSpellIfCan(m_creature, m_uiSummonSpell, CAST_TRIGGERED, pAerial->GetObjectGuid()) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature, m_uiSummonSpell, CAST_TRIGGERED) == CAST_OK)
                             m_uiSummonTimer = 0;
                     }
                 }

@@ -48,7 +48,7 @@ struct npc_dalaran_guardian_mageAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* who) override
     {
-        if (m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE)
+        if (m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE_MELEE)
             return;
 
         if (m_creature->CanAttackOnSight(who))

@@ -929,7 +929,7 @@ struct npc_champion_mountAI : public ScriptedAI
     {
         if (eventType == AI_EVENT_CUSTOM_A)
         {
-            DoCastSpellIfCan(pInvoker, SPELL_CHARGE_VEHICLE, CAST_TRIGGERED, pSender->GetObjectGuid());
+            DoCastSpellIfCan(pInvoker, SPELL_CHARGE_VEHICLE, CAST_TRIGGERED);
             DoStartMovement(pInvoker);
             m_ownerGuid = pSender->GetObjectGuid();
             m_uiChargeResetTimer = urand(5000, 10000);
