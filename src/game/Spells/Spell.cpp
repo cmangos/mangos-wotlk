@@ -6186,8 +6186,6 @@ SpellCastResult Spell::CheckCast(bool strict)
 
         // Possible Unit-target for the spell
         Unit* expectedTarget = GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex(i));
-        if (!expectedTarget)
-            expectedTarget = m_caster;
 
         switch (m_spellInfo->EffectApplyAuraName[i])
         {
@@ -6342,25 +6340,27 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->HasAuraType(SPELL_AURA_MOUNTED))
                     return SPELL_FAILED_NOT_MOUNTED;
 
-                if (!expectedTarget || !expectedTarget->IsVehicle())
-                    return SPELL_FAILED_BAD_TARGETS;
-
-                // It is possible to change between vehicles that are boarded on each other
-                if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
+                if (expectedTarget)
                 {
-                    // Check if trying to board a vehicle that is boarded on current transport
-                    bool boardedOnEachOther = m_caster->GetTransportInfo()->HasOnBoard(expectedTarget);
-                    // Check if trying to board a vehicle that has the current transport on board
-                    if (!boardedOnEachOther)
-                        boardedOnEachOther = expectedTarget->GetVehicleInfo()->HasOnBoard(m_caster);
+                    if (!expectedTarget->IsVehicle())
+                        return SPELL_FAILED_BAD_TARGETS;
 
-                    if (!boardedOnEachOther)
-                        return SPELL_FAILED_NOT_ON_TRANSPORT;
+                    // It is possible to change between vehicles that are boarded on each other
+                    if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
+                    {
+                        // Check if trying to board a vehicle that is boarded on current transport
+                        bool boardedOnEachOther = m_caster->GetTransportInfo()->HasOnBoard(expectedTarget);
+                        // Check if trying to board a vehicle that has the current transport on board
+                        if (!boardedOnEachOther)
+                            boardedOnEachOther = expectedTarget->GetVehicleInfo()->HasOnBoard(m_caster);
+
+                        if (!boardedOnEachOther)
+                            return SPELL_FAILED_NOT_ON_TRANSPORT;
+                    }
+
+                    if (!expectedTarget->GetVehicleInfo()->CanBoard(m_caster))
+                        return SPELL_FAILED_BAD_TARGETS;
                 }
-
-                if (!expectedTarget->GetVehicleInfo()->CanBoard(m_caster))
-                    return SPELL_FAILED_BAD_TARGETS;
-
                 break;
             }
             case SPELL_AURA_MIRROR_IMAGE:
