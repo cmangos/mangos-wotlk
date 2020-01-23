@@ -45,6 +45,14 @@ enum
     NPC_RIVENDARK = 23061,
     NPC_FURYWING  = 23261,
     NPC_INSIDION  = 23281,
+
+    // Ring of Blood
+    NPC_BROKENTOE           = 18398,
+    NPC_MURKBLOOD_TWIN      = 18399,
+    NPC_ROKDAR              = 18400,
+    NPC_SKRAGATH            = 18401,
+    NPC_WARMAUL_CHAMPION    = 18402,
+    NPC_MOGOR               = 18069,
 };
 
 enum SpawnIndexes

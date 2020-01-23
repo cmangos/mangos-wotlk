@@ -540,6 +540,24 @@ struct world_map_outland : public ScriptedMap, public TimerManager
         }
     }
 
+    void OnCreatureRespawn(Creature* creature) override
+    {
+        switch (creature->GetEntry())
+        {
+            case NPC_BROKENTOE:
+            case NPC_MURKBLOOD_TWIN:
+            case NPC_ROKDAR:
+            case NPC_SKRAGATH:
+            case NPC_WARMAUL_CHAMPION:
+            case NPC_MOGOR:
+                creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float x, float y, float z)
+                {
+                    return unit->GetDistance(-707.214f, 7877.495f, 45.191f, DIST_CALC_NONE) > 2500.f; // squared
+                });
+                break;
+        }
+    }
+
     void OnCreatureDeath(Creature* creature) override
     {
         switch (creature->GetEntry())
