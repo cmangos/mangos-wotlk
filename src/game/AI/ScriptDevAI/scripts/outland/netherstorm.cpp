@@ -1444,13 +1444,15 @@ enum
     SAY_FINISH_1                    = -1000899,
     SAY_FINISH_2                    = -1000900,
 
+    SPELL_SPAWN                     = 12980,
+
     // SPELL_ETHEREAL_TELEPORT         = 34427,
     SPELL_PROTECTORATE              = 35679,                // dummy aura applied on player
 
     NPC_NEXUS_STALKER               = 20474,
     NPC_ARCHON                      = 20458,
 
-    FACTION_FRIENDLY                = 35,
+    FACTION_ESCORT                  = 1795,
 
     QUEST_ID_DELIVERING_MESSAGE     = 10406,
 };
@@ -1462,12 +1464,15 @@ struct npc_protectorate_demolitionistAI : public npc_escortAI
     uint32 m_uiEventTimer;
     uint8 m_uiEventStage;
 
+    bool m_spawnAnim;
+
     void Reset() override
     {
         if (!HasEscortState(STATE_ESCORT_ESCORTING))
         {
             m_uiEventTimer = 0;
             m_uiEventStage = 0;
+            m_spawnAnim = false;
         }
     }
 
@@ -1491,7 +1496,7 @@ struct npc_protectorate_demolitionistAI : public npc_escortAI
             {
                 if (m_creature->IsWithinDistInMap(pWho, 10.0f))
                 {
-                    m_creature->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
+                    m_creature->SetFactionTemporary(FACTION_ESCORT, TEMPFACTION_RESTORE_RESPAWN);
                     Start(false, (Player*)pWho);
                 }
             }
@@ -1544,6 +1549,12 @@ struct npc_protectorate_demolitionistAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
+        if (!m_spawnAnim)
+        {
+            DoCastSpellIfCan(nullptr, SPELL_SPAWN);
+            m_spawnAnim = true;
+        }
+
         if (m_uiEventTimer)
         {
             if (m_uiEventTimer <= uiDiff)
@@ -1602,6 +1613,8 @@ enum
 
     NPC_COMMANDER_AMEER             = 20448,
 
+    NPC_ETHEREUM_GLADIATOR          = 20854,
+
     QUEST_ID_ESCAPE_STAGING_GROUNDS = 10425,
 };
 
@@ -1616,6 +1629,23 @@ struct npc_captured_vanguardAI : public npc_escortAI
     {
         m_uiGlaiveTimer = urand(4000, 8000);
         m_uiHamstringTimer = urand(8000, 13000);
+    }
+
+    void JustRespawned() override
+    {
+        if (Creature* gladiator = GetClosestCreatureWithEntry(m_creature, NPC_ETHEREUM_GLADIATOR, 50.f, true))
+        {
+            gladiator->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            gladiator->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+            AttackStart(gladiator);
+        }
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        npc_escortAI::JustDied(killer);
+        if (Creature* gladiator = GetClosestCreatureWithEntry(m_creature, NPC_ETHEREUM_GLADIATOR, 50.f, true))
+            gladiator->ForcedDespawn();
     }
 
     void JustReachedHome() override
