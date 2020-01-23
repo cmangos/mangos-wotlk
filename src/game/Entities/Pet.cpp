@@ -30,7 +30,7 @@ Pet::Pet(PetType type) :
     Creature(CREATURE_SUBTYPE_PET),
     m_resetTalentsCost(0), m_resetTalentsTime(0), m_usedTalentCount(0),
     m_removed(false), m_happinessTimer(7500), m_petType(type), m_duration(0),
-    m_bonusdamage(0), m_loading(false),
+    m_loading(false),
     m_declinedname(nullptr), m_petModeFlags(PET_MODE_DEFAULT), m_originalCharminfo(nullptr), m_inStatsUpdate(false)
 {
     m_name = "Pet";
@@ -1048,37 +1048,6 @@ void Pet::InitStatsForLevel(uint32 petlevel)
         }
         case SUMMON_PET:
         {
-            if (owner)
-            {
-                switch (owner->getClass())
-                {
-                    case CLASS_WARLOCK:
-                    {
-                        // the damage bonus used for pets is either fire or shadow damage, whatever is higher
-                        uint32 fire = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE);
-                        uint32 shadow = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW);
-                        uint32 val = (fire > shadow) ? fire : shadow;
-
-                        SetBonusDamage(int32(val * 0.15f));
-                        // bonusAP += val * 0.57;
-                        break;
-                    }
-                    case CLASS_MAGE:
-                    {
-                        // 40% damage bonus of mage's frost damage
-                        float val = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FROST) * 0.4f;
-                        if (val < 0)
-                            val = 0;
-                        SetBonusDamage(int32(val));
-                        break;
-                    }
-                    default:
-                        break;
-                }
-            }
-            else
-                sLog.outError("Pet::InitStatsForLevel> No owner for creature pet %s !", GetGuidStr().c_str());
-
             SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, 0);
             SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, 1000);
 
@@ -1138,6 +1107,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
         case GUARDIAN_PET:
         {
             SelectLevel(petlevel);  // guardians reuse CLS function SelectLevel, so we stop here
+            InitPetScalingAuras();
             return;
         }
         default:

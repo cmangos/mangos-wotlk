@@ -59,6 +59,7 @@ extern void LoadRogueScripts();
 extern void LoadShamanScripts();
 extern void LoadWarlockScripts();
 extern void LoadWarriorScripts();
+extern void LoadScalingScripts();
 
 void SpellScriptMgr::LoadScripts()
 {
@@ -72,6 +73,7 @@ void SpellScriptMgr::LoadScripts()
     LoadShamanScripts();
     LoadWarlockScripts();
     LoadWarriorScripts();
+    LoadScalingScripts();
 
     // load names from DB and pair names to Ids
     std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Id, ScriptName FROM spell_scripts"));

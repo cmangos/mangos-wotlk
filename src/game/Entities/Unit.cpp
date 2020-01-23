@@ -8164,11 +8164,6 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
             break;
     }
 
-    // Pets just add their bonus damage to their spell damage
-    // note that their spell damage is just gain of their own auras
-    if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet())
-        DoneAdvertisedBenefit += ((Pet*)this)->GetBonusDamage();
-
     // apply ap bonus and benefit affected by spell power implicit coeffs and spell level penalties
     DoneTotal = SpellBonusWithCoeffs(spellProto, DoneTotal, DoneAdvertisedBenefit, 0, damagetype, true);
 
@@ -8771,10 +8766,6 @@ uint32 Unit::MeleeDamageBonusDone(Unit* victim, uint32 pdamage, WeaponAttackType
                 DoneFlat += i->GetModifier()->m_amount;
             }
         }
-
-        // Pets just add their bonus damage to their melee damage
-        if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->IsPet())
-            DoneFlat += ((Pet*)this)->GetBonusDamage();
     }
 
     // ..done flat (by creature type mask)
@@ -13452,4 +13443,18 @@ void Unit::RegisterScriptedLocationAura(Aura* aura, AuraScriptLocation location,
         m_scriptedLocations[location].push_back(aura);
     else
         m_scriptedLocations[location].erase(std::remove(m_scriptedLocations[location].begin(), m_scriptedLocations[location].end(), aura), m_scriptedLocations[location].end());
+}
+
+void Unit::RegisterScalingAura(Aura* aura, bool apply)
+{
+    if (apply)
+        m_scalingAuras.push_back(aura);
+    else
+        m_scalingAuras.erase(std::remove(m_scalingAuras.begin(), m_scalingAuras.end(), aura), m_scalingAuras.end());
+}
+
+void Unit::UpdateScalingAuras()
+{
+    for (Aura* aura : m_scalingAuras)
+        aura->UpdateAuraScaling();
 }

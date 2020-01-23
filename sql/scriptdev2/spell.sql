@@ -76,6 +76,46 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (32379,'spell_shadow_word_death'),
 (32996,'spell_shadow_word_death');
 
+-- Pet Scaling
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(34902,'spell_hunter_pet_scaling_1'),
+(34903,'spell_hunter_pet_scaling_2'),
+(34904,'spell_hunter_pet_scaling_3'),
+
+(34947,'spell_warlock_pet_scaling_1'),
+(34956,'spell_warlock_pet_scaling_2'),
+(34957,'spell_warlock_pet_scaling_3'),
+(34958,'spell_warlock_pet_scaling_4'),
+
+(35657,'spell_mage_pet_scaling_1'),
+(35658,'spell_mage_pet_scaling_2'),
+(35659,'spell_mage_pet_scaling_3'),
+(35660,'spell_mage_pet_scaling_4'),
+
+(35661,'spell_priest_pet_scaling_1'),
+(35662,'spell_priest_pet_scaling_2'),
+(35663,'spell_priest_pet_scaling_3'),
+(35664,'spell_priest_pet_scaling_4'),
+
+(35665,'spell_elemental_pet_scaling_1'),
+(35666,'spell_elemental_pet_scaling_2'),
+(35667,'spell_elemental_pet_scaling_3'),
+(35668,'spell_elemental_pet_scaling_4'),
+
+(35669,'spell_druid_pet_scaling_1'),
+(35670,'spell_druid_pet_scaling_2'),
+(35671,'spell_druid_pet_scaling_3'),
+(35672,'spell_druid_pet_scaling_4'),
+
+(35674,'spell_enhancement_pet_scaling_1'),
+(35675,'spell_enhancement_pet_scaling_2'),
+(35676,'spell_enhancement_pet_scaling_3'),
+
+(36186,'spell_infernal_pet_scaling_1'),
+(36188,'spell_infernal_pet_scaling_2'),
+(36189,'spell_infernal_pet_scaling_3'),
+(36190,'spell_infernal_pet_scaling_4');
+
 -- Alterac Valley
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (24677,'spell_gy_mid_trigger');

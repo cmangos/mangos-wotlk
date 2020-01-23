@@ -775,7 +775,7 @@ void Creature::RegeneratePower(float timerMultiplier)
     {
         Modifier const* modifier = ModPowerRegenAura->GetModifier();
         if (modifier->m_miscvalue == int32(powerType))
-            addValue += modifier->m_amount;
+            addValue += modifier->m_amount / 5.f * timerMultiplier;
     }
 
     AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);

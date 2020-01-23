@@ -912,6 +912,28 @@ void Aura::ApplyModifier(bool apply, bool Real)
         (*this.*AuraHandler [aura])(apply, Real);
     if (!apply)
         OnApply(apply);
+
+    if (GetSpellProto()->HasAttribute(SPELL_ATTR_EX4_IS_PET_SCALING))
+        GetTarget()->RegisterScalingAura(this, apply);
+}
+
+void Aura::UpdateAuraScaling()
+{
+    if (Unit* caster = GetCaster())
+    {
+        int32 amount = 0;
+        amount = OnAuraValueCalculate(caster, amount);
+        // Reapply if amount change
+        if (amount != GetModifier()->m_amount)
+        {
+            SetRemoveMode(AURA_REMOVE_BY_GAINED_STACK);
+            if (IsAuraRemoveOnStacking(this->GetSpellProto(), GetEffIndex()))
+                ApplyModifier(false, true);
+            GetModifier()->m_recentAmount = amount - GetModifier()->m_amount;
+            GetModifier()->m_amount = amount;
+            ApplyModifier(true, true);
+        }
+    }
 }
 
 bool Aura::isAffectedOnSpell(SpellEntry const* spell) const

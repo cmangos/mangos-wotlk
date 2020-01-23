@@ -2626,6 +2626,9 @@ class Unit : public WorldObject
         void RegisterScriptedLocationAura(Aura* aura, AuraScriptLocation location, bool apply); // Spell scripting - requires correctly set spell_affect
         std::vector<Aura*>& GetScriptedLocationAuras(AuraScriptLocation location) { return m_scriptedLocations[location]; }
 
+        void RegisterScalingAura(Aura* aura, bool apply);
+        void UpdateScalingAuras();
+
     protected:
 
         struct WeaponDamageInfo
@@ -2666,6 +2669,7 @@ class Unit : public WorldObject
         SpellAuraHolderList m_deletedHolders;
         std::map<uint32, Aura*> m_classScripts;
         std::vector<Aura*> m_scriptedLocations[SCRIPT_LOCATION_MAX];
+        std::vector<Aura*> m_scalingAuras;
 
         // Store Auras for which the target must be tracked
         TrackedAuraTargetMap m_trackedAuraTargets[MAX_TRACKED_AURA_TYPES];

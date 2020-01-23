@@ -37,14 +37,13 @@ bool Player::UpdateStats(Stats stat)
     // value = ((base_value * base_pct) + total_value) * total_pct
     float value  = GetTotalStatValue(stat);
 
+    int32 oldValue = GetStat(stat);
     SetStat(stat, int32(value));
 
-    if (stat == STAT_STAMINA || stat == STAT_INTELLECT)
-    {
-        Pet* pet = GetPet();
-        if (pet)
-            pet->UpdateStats(stat);
-    }
+    if (oldValue != value)
+        if (stat == STAT_STAMINA || stat == STAT_INTELLECT)
+            if (Pet* pet = GetPet())
+                pet->UpdateScalingAuras();
 
     switch (stat)
     {
@@ -108,7 +107,6 @@ void Player::UpdateSpellHealingBonus()
     // This information for client side use only
     // Get healing bonus for all schools
     SetStatInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, SpellBaseHealingBonusDone(SPELL_SCHOOL_MASK_ALL));
-
 }
 
 void Player::UpdateSpellDamageBonus()
@@ -118,6 +116,9 @@ void Player::UpdateSpellDamageBonus()
     // Get damage bonus for all schools
     for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
         SetStatInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + i, SpellBaseDamageBonusDone(SpellSchoolMask(1 << i)));
+
+    if (Pet* pet = GetPet())
+        pet->UpdateScalingAuras();
 }
 
 bool Player::UpdateAllStats()
@@ -158,11 +159,12 @@ void Player::UpdateResistances(uint32 school)
     if (school > SPELL_SCHOOL_NORMAL)
     {
         int32 value = GetTotalResistanceValue(SpellSchools(school));
+        int32 oldValue = GetResistance(SpellSchools(school));
         SetResistance(SpellSchools(school), value);
 
-        Pet* pet = GetPet();
-        if (pet)
-            pet->UpdateResistances(school);
+        if (value != oldValue)
+            if (Pet* pet = GetPet())
+                pet->UpdateScalingAuras();
     }
     else
         UpdateArmor();
@@ -184,12 +186,14 @@ void Player::UpdateArmor()
 
     m_auraModifiersGroup[UNIT_MOD_ARMOR][TOTAL_VALUE] += dynamic;
     int32 value = GetTotalResistanceValue(SPELL_SCHOOL_NORMAL);
+    int32 oldValue = GetArmor();
     SetArmor(value);
     m_auraModifiersGroup[UNIT_MOD_ARMOR][TOTAL_VALUE] -= dynamic;
 
-    if (Pet* pet = GetPet())
-        pet->UpdateArmor();
-
+    if (value != oldValue)
+        if (Pet* pet = GetPet())
+            pet->UpdateScalingAuras();
+    
     UpdateAttackPowerAndDamage();                           // armor dependent auras update for SPELL_AURA_MOD_ATTACK_POWER_OF_ARMOR
 }
 
@@ -386,9 +390,8 @@ void Player::UpdateAttackPowerAndDamage(bool ranged)
     {
         UpdateDamagePhysical(RANGED_ATTACK);
 
-        Pet* pet = GetPet();                                // update pet's AP
-        if (pet)
-            pet->UpdateAttackPowerAndDamage();
+        if (Pet* pet = GetPet()) // update pet's AP
+            pet->UpdateScalingAuras();
     }
     else
     {
@@ -772,7 +775,13 @@ void Player::UpdateManaRegen()
         modManaRegenInterrupt = 100;
     SetStatFloatValue(UNIT_FIELD_POWER_REGEN_INTERRUPTED_FLAT_MODIFIER, power_regen_mp5 + power_regen * modManaRegenInterrupt / 100.0f);
 
-    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, power_regen_mp5 + power_regen);
+    float value = power_regen_mp5 + power_regen;
+    float oldValue = GetFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER);
+    SetStatFloatValue(UNIT_FIELD_POWER_REGEN_FLAT_MODIFIER, value);
+
+    if (value != oldValue)
+        if (Pet* pet = GetPet())
+            pet->UpdateScalingAuras();
 }
 
 void Player::UpdateEnergyRegen()
@@ -968,22 +977,6 @@ bool Pet::UpdateStats(Stats stat)
 
     // value = ((base_value * base_pct) + total_value) * total_pct
     float value  = GetTotalStatValue(stat);
-
-    Unit* owner = GetOwner();
-    if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
-    {
-        if (stat == STAT_STAMINA)
-        {
-            if (owner)
-                value += float(owner->GetStat(stat)) * 0.3f;
-        }
-        // warlock's and mage's pets gain 30% of owner's intellect
-        else if (stat == STAT_INTELLECT && getPetType() == SUMMON_PET)
-        {
-            if (owner && (owner->getClass() == CLASS_WARLOCK || owner->getClass() == CLASS_MAGE))
-                value += float(owner->GetStat(stat)) * 0.3f;
-        }
-    }
     
     float oldValue = GetStat(stat);
     SetStat(stat, int32(value));
@@ -1038,21 +1031,7 @@ void Pet::UpdateResistances(uint32 school)
     // 34958 - Warlock Pet Scaling 04
 
     if (school > SPELL_SCHOOL_NORMAL)
-    {
-        Unit* owner = GetOwner();
-
-        // Hunter and warlock pets gain 40% of owner's resistance
-        if (owner && (getPetType() == HUNTER_PET || (getPetType() == SUMMON_PET && owner->getClass() == CLASS_WARLOCK)))
-        {
-            const UnitMods unitMod = UnitMods(UNIT_MOD_RESISTANCE_START + school);
-            float amount = (owner->GetResistance(SpellSchools(school)) * 0.4f);
-            m_auraModifiersGroup[unitMod][TOTAL_VALUE] += amount;
-            Creature::UpdateResistances(school);
-            m_auraModifiersGroup[unitMod][TOTAL_VALUE] -= amount;
-        }
-        else
-            return Creature::UpdateResistances(school);
-    }
+        return Creature::UpdateResistances(school);
     else
         UpdateArmor();
 }
@@ -1064,12 +1043,6 @@ void Pet::UpdateArmor()
     // This override contains current hardcoded implementation for pet scaling (spells since 2.x):
     // 34903 - Hunter Pet Scaling 02
     // 34956 - Warlock Pet Scaling 02
-
-    Unit* owner = GetOwner();
-
-    // Hunter and warlock pets gain 35% of owner's armor value
-    if (owner && (getPetType() == HUNTER_PET || (getPetType() == SUMMON_PET && owner->getClass() == CLASS_WARLOCK)))
-        amount += (owner->GetArmor() * 0.35f);
 
     m_auraModifiersGroup[UNIT_MOD_ARMOR][TOTAL_VALUE] += amount;
     Creature::UpdateArmor();
@@ -1112,39 +1085,7 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
     float bonusAP = 0.0f;
     UnitMods unitMod = UNIT_MOD_ATTACK_POWER;
 
-    if (GetEntry() == 416)                                  // imp's attack power
-        val = GetStat(STAT_STRENGTH) - 10.0f;
-    else
-        val = 2 * GetStat(STAT_STRENGTH) - 20.0f;
-
-    Unit* owner = GetOwner();
-    if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-    {
-        if (getPetType() == HUNTER_PET)                     // hunter pets benefit from owner's attack power
-        {
-            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f;
-            SetBonusDamage(int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.1287f));
-        }
-        // demons benefit from warlocks shadow or fire damage
-        else if (getPetType() == SUMMON_PET && owner->getClass() == CLASS_WARLOCK)
-        {
-            int32 fire  = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
-            int32 shadow = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
-            int32 maximum  = (fire > shadow) ? fire : shadow;
-            if (maximum < 0)
-                maximum = 0;
-            SetBonusDamage(int32(maximum * 0.15f));
-            bonusAP = maximum * 0.57f;
-        }
-        // water elementals benefit from mage's frost damage
-        else if (getPetType() == SUMMON_PET && owner->getClass() == CLASS_MAGE)
-        {
-            int32 frost = int32(owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FROST)) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FROST);
-            if (frost < 0)
-                frost = 0;
-            SetBonusDamage(int32(frost * 0.4f));
-        }
-    }
+    val = 2 * GetStat(STAT_STRENGTH) - 20.0f;
 
     SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, val + bonusAP);
 
