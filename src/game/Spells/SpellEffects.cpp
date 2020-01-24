@@ -9512,6 +9512,22 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 38353, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
                     return;
                 }
+                case 38573:                                 // Spore Drop Effect
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(unitTarget, 38574, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 38650:                                 // Rancid Mushroom Primer
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(nullptr, 38651, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
                 case 38629:                                 // Poison Keg
                 {
                     if (!unitTarget)
