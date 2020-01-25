@@ -965,7 +965,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         {
             case GAMEOBJECT_TYPE_TRAP:
             {
-                if (GetGOInfo()->trap.stealthed == 0 || GetGOInfo()->trap.invisible == 0)
+                if (GetGOInfo()->trap.stealthed == 0 && GetGOInfo()->trap.invisible == 0)
                     break;
 
                 bool trapNotVisible = false;
