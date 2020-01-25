@@ -417,7 +417,7 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
 
     if (me->CanInitiateAttack() && me->CanAttackOnSight(victim) && victim->isInAccessablePlaceFor(me))
     {
-        if (me->IsWithinDistInMap(who, distance) && me->IsWithinLOSInMap(who))
+        if (me->IsWithinDistInMap(who, distance) && me->IsWithinLOSInMap(who, true))
         {
             if (me->CanAssistInCombatAgainst(who, victim))
             {
@@ -435,7 +435,7 @@ void UnitAI::DetectOrAttack(Unit* who)
     if (m_unit->GetDistance(who, true, DIST_CALC_NONE) > attackRadius * attackRadius)
         return;
 
-    if (!m_unit->IsWithinLOSInMap(who))
+    if (!m_unit->IsWithinLOSInMap(who, true))
         return;
 
     if (!m_unit->GetVictim() && !m_unit->IsInCombat())
