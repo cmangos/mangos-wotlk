@@ -5274,7 +5274,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                 {
                     if (!pet->IsAlive())
                         return SPELL_FAILED_TARGETS_DEAD;
-                    if (!IsIgnoreLosSpellEffect(m_spellInfo, SpellEffectIndex(i)) && !m_caster->IsWithinLOSInMap(pet))
+                    if (!IsIgnoreLosSpellEffect(m_spellInfo, SpellEffectIndex(i)) && !m_caster->IsWithinLOSInMap(pet, true))
                         return SPELL_FAILED_LINE_OF_SIGHT;
                 }
                 break;
@@ -7430,7 +7430,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
                     if (target->GetObjectGuid() != corpse->GetOwnerGuid())
                         return false;
 
-                    if (!corpse->IsWithinLOSInMap(m_caster))
+                    if (!corpse->IsWithinLOSInMap(m_caster, true))
                         return false;
                 }
 
