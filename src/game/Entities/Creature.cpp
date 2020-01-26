@@ -758,6 +758,8 @@ void Creature::RegeneratePower(float timerMultiplier)
                     float ManaIncreaseRate = sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_MANA);
                     float intellect = GetStat(STAT_INTELLECT);
                     addValue = sqrt(intellect) * OCTRegenMPPerSpirit() * ManaIncreaseRate / 5.f * timerMultiplier;
+                    if (!IsPet() && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && addValue == 0.f)
+                        addValue = 17.f * ManaIncreaseRate / 5.f * timerMultiplier;
                 }
             }
             else
