@@ -1764,5 +1764,5 @@ INSERT INTO spell_template (Id,Attributes,AttributesEx2,CastingTimeIndex,Duratio
 ('47680','384','4','1','1','1','-1','64','1','47681','0','1','1','Force Cast Aggro');
 
 -- Removes aura interrupt flag 0x00001000-AURA_INTERRUPT_FLAG_MELEE_ATTACK - Player should be able to use male during fight with 3 mobs
-UPDATE `spell_template` SET `AuraInterruptFlags`=AuraInterruptFlags&~0x00001000 WHERE `Id` = 48763;
+UPDATE `spell_template` SET `AuraInterruptFlags`=AuraInterruptFlags&~0x00001000 WHERE `Id` IN (48761,48763);
 
