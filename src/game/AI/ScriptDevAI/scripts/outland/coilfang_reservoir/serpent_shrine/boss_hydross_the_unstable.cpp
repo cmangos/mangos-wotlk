@@ -163,9 +163,9 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
 
     bool CheckTransition() // checks whether hydross is within initial circle
     {
-        float x, y, z, o;
-        m_creature->GetCombatStartPosition(x, y, z, o);
-        return m_creature->IsWithinDist2d(x, y, SWITCH_RADIUS);
+        Position pos;
+        m_creature->GetCombatStartPosition(pos);
+        return m_creature->IsWithinDist2d(pos.GetPositionX(), pos.GetPositionY(), SWITCH_RADIUS);
     }
 
     void UpdateAI(const uint32 uiDiff) override
