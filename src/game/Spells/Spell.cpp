@@ -8660,6 +8660,7 @@ bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
                 return false;
             break;
         case 32124:                                         // Cant hit players
+        case 33512:                                         // Kazzak's Assault - likely should not hit players
             if (target->GetTypeId() == TYPEID_PLAYER)
                 return false;
             break;

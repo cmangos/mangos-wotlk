@@ -101,6 +101,7 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
         });
 
         Reset();
+        m_creature->SetActiveObjectState(true);
         SummonFormation();
         DoCastSpellIfCan(m_creature, SPELL_CREATE_INFERNALING_SUMMONER);
     }
@@ -114,6 +115,14 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
         if (Creature* hand2 = m_creature->SummonCreature(NPC_HAND_OF_THE_HIGHLORD, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f, TEMPSPAWN_DEAD_DESPAWN, 1800000))
         {
             hand2->GetMotionMaster()->MoveFollow(m_creature, 25.f, 140.f * float(M_PI) / 180.0f, true);
+        }
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        if (pSummoned->GetEntry() == NPC_INFERNAL_HOUND)
+        {
+            pSummoned->GetMotionMaster()->MoveRandomAroundPoint(pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 25.f);
         }
     }
 
