@@ -8614,12 +8614,15 @@ void Aura::PeriodicTick()
             }
 
             // This method can modify pdamage
-            bool isCrit = IsCritFromAbilityAura(caster, pdamage);
-
-            // only from players
-            // FIXME: need use SpellDamageBonus instead?
-            if (caster->GetTypeId() == TYPEID_PLAYER)
-                pdamage -= target->GetResilienceRatingDamageReduction(pdamage, SpellDmgClass(spellProto->DmgClass), true);
+            bool isCrit = false;
+            if (caster)
+            {
+                isCrit = IsCritFromAbilityAura(caster, pdamage);
+                // only from players
+                // FIXME: need use SpellDamageBonus instead?
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                    pdamage -= target->GetResilienceRatingDamageReduction(pdamage, SpellDmgClass(spellProto->DmgClass), true);
+            }
 
             target->CalculateDamageAbsorbAndResist(caster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto));
 
