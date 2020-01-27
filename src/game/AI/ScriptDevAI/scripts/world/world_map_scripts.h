@@ -35,6 +35,8 @@ enum
 
     // Quest 1126
     NPC_HIVE_ASHI_DRONES        = 13136,
+
+    NPC_HIGHLORD_KRUUL          = 18338,
 };
 
 enum ElementalInvasionIndexes

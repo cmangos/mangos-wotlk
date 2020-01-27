@@ -90,6 +90,9 @@ UPDATE creature_template SET ScriptName='boss_taerar' WHERE entry=14890;
 UPDATE creature_template SET ScriptName='boss_azuregos' WHERE entry=6109;
 UPDATE creature_template SET ScriptName='boss_lethon' WHERE entry=14888;
 UPDATE creature_template SET ScriptName='npc_spirit_shade' WHERE entry=15261;
+UPDATE creature_template SET ScriptName='boss_highlord_kruul' WHERE entry=18338;
+UPDATE creature_template SET ScriptName='npc_infernal_hound' WHERE entry=19207;
+UPDATE gameobject_template SET ScriptName='go_infernaling_summoner' WHERE entry=183278;
 
 /* GO */
 UPDATE gameobject_template SET ScriptName='go_ethereum_prison' WHERE entry BETWEEN 184418 AND 184431;
@@ -3370,7 +3373,16 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1015069','Fel orcs!','0','0','0','0','0','Vindicator Sedai SAY 3'),
 ('-1015070','The cycle of bloodshed is unending... Is there nothing I can do?','0','0','0','0','0','Vindicator Sedai SAY 4'),
 ('-1015071','You can die!','0','0','0','0','0','Krun Spinebreaker SAY 1'),
-('-1015072','%s plants the Flag of Ownership in the corpse of $N.','0','0','0','0','0','Item - Flag of Ownership');
+('-1015072','%s plants the Flag of Ownership in the corpse of $N.','0','0','0','0','0','Item - Flag of Ownership'),
+
+('-1015073','Azeroth has cowered too long under our shadow!  Now, feel the power of the Burning Crusade and despair!','0','1','0','0','16046','kruul SAY_INTRO1'), -- broadcast text id does not exist in TBC?
+('-1015074','Your fate is sealed, Azeroth!  I will find the Aspect Shards, and then you will not stand against our might!','0','1','0','0','16047','kruul SAY_INTRO2'), -- broadcast text id does not exist in TBC?
+('-1015075','Cower, little worms!  Your feeble heroes are nothing!  Your saviors will be our first feast!','0','1','0','0','16045','kruul SAY_AGGRO1'), -- broadcast text id does not exist in TBC?
+('-1015076','Where?  Where are the Shards!  You cannot hide them from us!','0','1','0','0','17097','kruul SAY_AGGRO2'), -- broadcast text id does not exist in TBC?
+('-1015077','Your world will die, mortals!  Your doom is now at hand!','0','1','0','0','16044','kruul SAY_AGGRO3'), -- broadcast text id does not exist in TBC?
+('-1015078','Your own strength feeds me, $n!','0','1','0','0','8461','kruul SAY_KILL'),
+('-1015079','Hah!  This place is not yet worthy of my infliction!','0','1','0','0','16048','kruul SAY_DESPAWN'); -- broadcast text id does not exist in TBC?
+
 -- -1 020 000 WOTLK texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
 ('-1020001','The zeppelin to Orgrimmar has just arrived! All aboard for Durotar!','0','1','0','0','0','zeppelinMaster - SAY_DUROTAR_FROM_OG_ARRIVAL'),

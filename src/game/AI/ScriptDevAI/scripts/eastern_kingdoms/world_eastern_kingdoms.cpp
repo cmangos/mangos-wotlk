@@ -39,6 +39,7 @@ struct world_map_eastern_kingdoms : public ScriptedMap
             case NPC_BOLVAR:
             case NPC_PRESTOR:
             case NPC_WINDSOR:
+            case NPC_HIGHLORD_KRUUL:
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
         }

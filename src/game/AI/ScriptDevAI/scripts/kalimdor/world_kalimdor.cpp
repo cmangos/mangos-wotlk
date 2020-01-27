@@ -79,6 +79,7 @@ struct world_map_kalimdor : public ScriptedMap
             case NPC_PRINCESS_TEMPESTRIA:
             case NPC_THE_WINDREAVER:
             case NPC_BARON_CHARR:
+            case NPC_HIGHLORD_KRUUL:
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
         }
