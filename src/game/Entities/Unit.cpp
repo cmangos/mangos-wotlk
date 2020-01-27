@@ -11339,7 +11339,11 @@ bool Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
             if (apply)
                 GetMotionMaster()->MoveConfused();
             else if (IsFleeing() && !panic)
-                GetMotionMaster()->MoveFleeing((IsInWorld() ? GetMap()->GetUnit(casterGuid) : nullptr));
+            {
+                AuraList const& fears = GetAurasByType(SPELL_AURA_MOD_FEAR);
+                Unit* source = (fears.empty() ? nullptr : fears.back()->GetCaster());
+                GetMotionMaster()->MoveFleeing(source ? source : this);
+            }
         }
 
         if (apply)
@@ -11379,7 +11383,10 @@ bool Unit::SetFleeing(bool apply, ObjectGuid casterGuid/* = ObjectGuid()*/, uint
             if (IsConfused())
                 GetMotionMaster()->MoveConfused();
             else if (apply)
-                GetMotionMaster()->MoveFleeing((IsInWorld() ? GetMap()->GetUnit(casterGuid) : nullptr), duration);
+            {
+                Unit* source = (IsInWorld() ? GetMap()->GetUnit(casterGuid) : nullptr);
+                GetMotionMaster()->MoveFleeing((source ? source : this), duration);
+            }
         }
 
         if (apply)
