@@ -593,7 +593,7 @@ class Object
         virtual bool HasInvolvedQuest(uint32 /* quest_id */) const { return false; }
         void SetItsNewObject(bool enable) { m_itsNewObject = enable; }
 
-        Loot* loot;
+        Loot* m_loot;
 
         inline bool IsPlayer() const { return GetTypeId() == TYPEID_PLAYER; }
         inline bool IsCreature() const { return GetTypeId() == TYPEID_UNIT; }

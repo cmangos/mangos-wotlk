@@ -6183,7 +6183,7 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
                 if (m_caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                Loot*& loot = gameObjTarget->loot;
+                Loot*& loot = gameObjTarget->m_loot;
                 if (!loot)
                 {
                     loot = new Loot((Player*)m_caster, gameObjTarget, loottype);
@@ -6198,7 +6198,7 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
         {
             if (itemTarget)
             {
-                Loot*& loot = itemTarget->loot;
+                Loot*& loot = itemTarget->m_loot;
                 if (!loot)
                 {
                     loot = new Loot((Player*)m_caster, itemTarget, loottype);
@@ -6285,14 +6285,14 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
         // update skill if really known
         if (uint32 pureSkillValue = player->GetSkillValuePure(skillId))
         {
-            if (gameObjTarget && !gameObjTarget->loot)
+            if (gameObjTarget && !gameObjTarget->m_loot)
             {
                 // Allow one skill-up until respawned
                 if (!gameObjTarget->IsInSkillupList(player) &&
                         player->UpdateGatherSkill(skillId, pureSkillValue, reqSkillValue))
                     gameObjTarget->AddToSkillupList(player);
             }
-            else if (itemTarget && !itemTarget->loot)
+            else if (itemTarget && !itemTarget->m_loot)
             {
                 // Do one skill-up
                 player->UpdateGatherSkill(skillId, pureSkillValue, reqSkillValue);
@@ -7388,7 +7388,7 @@ void Spell::EffectPickPocket(SpellEffectIndex /*eff_idx*/)
         // Stealing successful
         //BASIC_LOG("Successfull pickpocket result %i for chance %i", result, chance);
 
-        Loot*& loot = unitTarget->loot;
+        Loot*& loot = unitTarget->m_loot;
         if (!loot)
             loot = new Loot(playerCaster, creatureTarget, LOOT_PICKPOCKETING);
         else
@@ -12787,7 +12787,7 @@ void Spell::EffectDisEnchant(SpellEffectIndex /*eff_idx*/)
 
     p_caster->UpdateCraftSkill(m_spellInfo->Id);
 
-    Loot*& loot = itemTarget->loot;
+    Loot*& loot = itemTarget->m_loot;
     if (!loot)
         loot = new Loot(p_caster, itemTarget, LOOT_DISENCHANTING);
     else
@@ -13120,7 +13120,7 @@ void Spell::EffectSkinning(SpellEffectIndex /*eff_idx*/)
 
     uint32 skill = creature->GetCreatureInfo()->GetRequiredLootSkill();
 
-    Loot*& loot = unitTarget->loot;
+    Loot*& loot = unitTarget->m_loot;
 
     if (loot)
     {
@@ -13591,7 +13591,7 @@ void Spell::EffectProspecting(SpellEffectIndex /*eff_idx*/)
         p_caster->UpdateGatherSkill(SKILL_JEWELCRAFTING, SkillValue, reqSkillValue);
     }
 
-    Loot*& loot = itemTarget->loot;
+    Loot*& loot = itemTarget->m_loot;
     delete loot;
 
     loot = new Loot(p_caster, itemTarget, LOOT_PROSPECTING);
@@ -13613,7 +13613,7 @@ void Spell::EffectMilling(SpellEffectIndex /*eff_idx*/)
         p_caster->UpdateGatherSkill(SKILL_INSCRIPTION, SkillValue, reqSkillValue);
     }
 
-    Loot*& loot = itemTarget->loot;
+    Loot*& loot = itemTarget->m_loot;
     delete loot;
 
     loot = new Loot(p_caster, itemTarget, LOOT_MILLING);
