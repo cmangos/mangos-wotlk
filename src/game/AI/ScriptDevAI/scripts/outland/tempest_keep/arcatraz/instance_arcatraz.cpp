@@ -21,7 +21,7 @@ SDComment: Mainly Harbringer Skyriss event
 SDCategory: Tempest Keep, The Arcatraz
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "arcatraz.h"
 
 /* Arcatraz encounters:

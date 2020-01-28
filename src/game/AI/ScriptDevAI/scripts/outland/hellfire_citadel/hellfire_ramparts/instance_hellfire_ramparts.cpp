@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Hellfire Ramparts
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "hellfire_ramparts.h"
 
 instance_ramparts::instance_ramparts(Map* pMap) : ScriptedInstance(pMap),

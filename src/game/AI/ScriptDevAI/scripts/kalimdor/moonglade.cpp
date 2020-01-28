@@ -27,7 +27,7 @@ npc_keeper_remulos
 boss_eranikus
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Globals/ObjectMgr.h"
 #include "AI/ScriptDevAI/scripts/kalimdor/world_kalimdor.h"

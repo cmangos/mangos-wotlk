@@ -21,7 +21,7 @@ SDComment: Boss apparently only takes assist threat in P2
 SDCategory: Karazhan
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "karazhan.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "MotionGenerators/WaypointManager.h"

@@ -21,7 +21,7 @@ SDComment: Elevator needs core support
 SDCategory: Mechanar
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "mechanar.h"
 
 instance_mechanar::instance_mechanar(Map* pMap) : ScriptedInstance(pMap),

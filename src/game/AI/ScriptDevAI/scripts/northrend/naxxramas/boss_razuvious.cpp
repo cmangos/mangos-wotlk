@@ -21,7 +21,7 @@ SDComment: TODO: Timers and sounds need confirmation - orb handling for normal-m
 SDCategory: Naxxramas
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
 enum

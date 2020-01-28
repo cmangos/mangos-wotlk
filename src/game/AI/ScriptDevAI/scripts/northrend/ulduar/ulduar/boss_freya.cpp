@@ -21,7 +21,7 @@ SDComment: Elders and some of the Nature Allies handled in ACID. Script might re
 SDCategory: Ulduar
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
 
 enum

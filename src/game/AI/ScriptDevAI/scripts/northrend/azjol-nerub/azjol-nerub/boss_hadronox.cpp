@@ -21,7 +21,7 @@ SDComment: Some details and timers can be improved.
 SDCategory: Azjol'Nerub
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "azjol-nerub.h"
 
 enum

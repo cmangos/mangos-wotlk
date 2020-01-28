@@ -21,7 +21,7 @@ SDComment: Reload case for bridge support is missing, achievement support is mis
 SDCategory: Gundrak
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "gundrak.h"
 
 bool GOUse_go_gundrak_altar(Player* /*pPlayer*/, GameObject* pGo)

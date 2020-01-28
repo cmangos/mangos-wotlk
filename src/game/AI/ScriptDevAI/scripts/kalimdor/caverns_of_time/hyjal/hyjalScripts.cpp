@@ -28,7 +28,7 @@ npc_tyrande_whisperwind
 npc_building_trigger
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "hyjalAI.h"
 
 UnitAI* GetAI_npc_jaina_proudmoore(Creature* creature)

@@ -21,7 +21,7 @@ SDComment: Timers;
 SDCategory: Sunwell Plateau
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "sunwell_plateau.h"
 
 enum

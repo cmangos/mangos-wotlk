@@ -22,7 +22,7 @@ Players should be ~6 seconds airborne, shadow whip should be casted ~3 maybe 4 t
 SDCategory: Hellfire Citadel, Hellfire Ramparts
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 enum
 {

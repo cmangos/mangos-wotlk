@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Obsidian Sanctum
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "obsidian_sanctum.h"
 
 /* Obsidian Sanctum encounters:

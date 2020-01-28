@@ -21,7 +21,7 @@ SDComment: Timers need more love, NPC_UNLEASHED_SOUL are not handled proper
 SDCategory: The Forge of Souls
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "forge_of_souls.h"
 
 enum

@@ -44,7 +44,7 @@ guard_tirisfal
 guard_undercity
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/guard_ai.h"
 
 UnitAI* GetAI_guard_azuremyst(Creature* pCreature)

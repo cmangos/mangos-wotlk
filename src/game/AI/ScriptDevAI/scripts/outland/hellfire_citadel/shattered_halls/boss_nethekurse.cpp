@@ -27,7 +27,7 @@ mob_fel_orc_convert
 mob_lesser_shadow_fissure
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "shattered_halls.h"
 
 enum

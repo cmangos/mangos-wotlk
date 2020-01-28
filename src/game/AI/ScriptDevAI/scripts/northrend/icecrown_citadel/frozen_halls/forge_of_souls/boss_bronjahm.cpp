@@ -21,7 +21,7 @@ SDComment: Small unknown behaviour for his Shadow Bold use in phase 1; Soulstorm
 SDCategory: The Forge of Souls
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "forge_of_souls.h"
 
 enum

@@ -21,7 +21,7 @@ SDComment: Just base mechanics in script, timers and stuff is very uncertain, ev
 SDCategory: Halls of Stone
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "halls_of_stone.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 

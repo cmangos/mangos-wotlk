@@ -21,7 +21,7 @@ SDComment: Placeholder
 SDCategory: Oculus
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "oculus.h"
 
 void AddSC_oculus()

@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Azjol-Nerub
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "azjol-nerub.h"
 
 instance_azjol_nerub::instance_azjol_nerub(Map* pMap) : ScriptedInstance(pMap),

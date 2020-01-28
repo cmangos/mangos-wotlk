@@ -27,7 +27,7 @@ npc_warden_mellichar
 mob_zerekethvoidzone
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "arcatraz.h"
 
 /*#####

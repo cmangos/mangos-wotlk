@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Utgarde Keep
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "utgarde_keep.h"
 
 instance_utgarde_keep::instance_utgarde_keep(Map* pMap) : ScriptedInstance(pMap),

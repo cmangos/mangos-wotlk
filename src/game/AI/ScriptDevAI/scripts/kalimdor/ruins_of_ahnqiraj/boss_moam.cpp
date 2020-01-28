@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Ruins of Ahn'Qiraj
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Scripts/SpellScript.h"
 

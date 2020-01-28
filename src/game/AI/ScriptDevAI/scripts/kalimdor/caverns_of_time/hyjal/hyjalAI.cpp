@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Caverns of Time, Mount Hyjal
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "hyjalAI.h"
 
 struct HyjalYells

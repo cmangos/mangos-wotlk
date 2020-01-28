@@ -21,7 +21,7 @@ SDComment: script depend on database spell support and eventAi for clones.
 SDCategory: Nexus
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "nexus.h"
 
 enum

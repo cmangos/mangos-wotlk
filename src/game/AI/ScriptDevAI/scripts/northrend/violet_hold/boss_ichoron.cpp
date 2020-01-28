@@ -21,7 +21,7 @@ SDComment: Water Globule event NYI
 SDCategory: Violet Hold
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "violet_hold.h"
 
 enum

@@ -21,7 +21,7 @@ SDComment: Heroic spells require more research and probably core fix
 SDCategory: Icecrown Citadel
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
 
 enum

@@ -26,7 +26,7 @@ boss_nexusprince_shaffar
 mob_ethereal_beacon
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 
 enum

@@ -21,7 +21,7 @@ SDComment: Some details are not very clear: the usage of Shoot and Multishot spe
 SDCategory: Coilfang Resevoir, Serpent Shrine Cavern
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "serpent_shrine.h"
 #include "Entities/TemporarySpawn.h"
 

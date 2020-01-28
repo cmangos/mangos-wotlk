@@ -21,7 +21,7 @@ SDComment: Placeholder
 SDCategory: Deadmines
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "deadmines.h"
 
 instance_deadmines::instance_deadmines(Map* pMap) : ScriptedInstance(pMap),

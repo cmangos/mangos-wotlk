@@ -21,7 +21,7 @@ SDComment: Timers may need adjustments.
 SDCategory: Black Temple
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 

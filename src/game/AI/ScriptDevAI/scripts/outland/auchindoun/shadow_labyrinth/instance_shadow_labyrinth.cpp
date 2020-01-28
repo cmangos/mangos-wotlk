@@ -21,7 +21,7 @@ SDComment: Some cleanup left along with save
 SDCategory: Auchindoun, Shadow Labyrinth
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "shadow_labyrinth.h"
 
 /* Shadow Labyrinth encounters:

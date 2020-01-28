@@ -24,7 +24,7 @@ EndScriptData */
 /* ContentData
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "pit_of_saron.h"
 
 enum

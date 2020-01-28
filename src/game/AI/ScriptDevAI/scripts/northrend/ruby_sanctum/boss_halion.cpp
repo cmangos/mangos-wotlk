@@ -21,7 +21,7 @@ SDComment: Phase 3 and related transition NYI; Twilight portals NYI; Shadow Orbs
 SDCategory: Ruby Sanctum
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ruby_sanctum.h"
 
 enum

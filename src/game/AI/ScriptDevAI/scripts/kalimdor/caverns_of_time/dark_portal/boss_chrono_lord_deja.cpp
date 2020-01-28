@@ -21,7 +21,7 @@ SDComment: Small adjustments; Timers
 SDCategory: Caverns of Time, The Dark Portal
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "dark_portal.h"
 
 enum

@@ -25,7 +25,7 @@ EndScriptData */
 npc_dalaran_guardian_mage
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 enum
 {

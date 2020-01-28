@@ -21,7 +21,7 @@ SDComment: Timers; Not sure if we need to respawn dead npcs on evade; May need a
 SDCategory: Stratholme
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "stratholme.h"
 
 /*#####

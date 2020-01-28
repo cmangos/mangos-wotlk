@@ -23,7 +23,7 @@ ILLHOOF_ACTION_SACRIFICE random topaggro + 1 post 2.1. else 0
 SDCategory: Karazhan
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "karazhan.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 

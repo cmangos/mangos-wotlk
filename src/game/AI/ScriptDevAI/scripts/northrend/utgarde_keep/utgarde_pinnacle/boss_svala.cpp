@@ -21,7 +21,7 @@ SDComment: The way spells for intro work could use more research.
 SDCategory: Utgarde Pinnacle
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "utgarde_pinnacle.h"
 
 enum

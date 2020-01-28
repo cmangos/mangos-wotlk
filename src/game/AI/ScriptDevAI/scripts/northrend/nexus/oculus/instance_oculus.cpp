@@ -21,7 +21,7 @@ SDComment: Spawn instance bosses and handle Varos pre event; Dialogue handled by
 SDCategory: Oculus
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "oculus.h"
 
 instance_oculus::instance_oculus(Map* pMap) : ScriptedInstance(pMap)

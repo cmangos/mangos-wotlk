@@ -21,7 +21,7 @@ SDComment: Quest support: 9836, 10297. Some visuals for the event are missing;
 SDCategory: Caverns of Time, The Dark Portal
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "dark_portal.h"
 
 instance_dark_portal::instance_dark_portal(Map* pMap) : ScriptedInstance(pMap),

@@ -21,7 +21,7 @@ SDComment: Spirit guides in battlegrounds will revive all players every 30 sec
 SDCategory: Battlegrounds
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "Spells/Scripts/SpellScript.h"
 
 // **** Script Info ****

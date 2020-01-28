@@ -25,7 +25,7 @@ EndScriptData */
 boss_warchief_kargath_bladefist
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "shattered_halls.h"
 
 enum

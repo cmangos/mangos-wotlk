@@ -21,7 +21,7 @@ SDComment: Intro and Outro event NYI.
 SDCategory: Icecrown Citadel
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
 
 enum

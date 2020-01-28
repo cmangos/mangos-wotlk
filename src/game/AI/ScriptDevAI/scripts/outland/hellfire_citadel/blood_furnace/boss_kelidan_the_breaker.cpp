@@ -26,7 +26,7 @@ boss_kelidan_the_breaker
 mob_shadowmoon_channeler
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "blood_furnace.h"
 
 enum

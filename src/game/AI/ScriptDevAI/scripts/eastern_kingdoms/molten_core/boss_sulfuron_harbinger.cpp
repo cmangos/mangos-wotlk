@@ -21,7 +21,7 @@ SDComment: Spells Dark strike and Flamespear need confirmation
 SDCategory: Molten Core
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "molten_core.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 

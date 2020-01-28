@@ -21,7 +21,7 @@ SDComment: Need confirmation if spell data are same in both modes; The Underbog 
 SDCategory: Coilfang Resevoir, Underbog
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 enum
 {

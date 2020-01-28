@@ -21,7 +21,7 @@ SDComment: Support for Quests and Mini-Events still TODO
 SDCategory: Zul'Aman
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "zulaman.h"
 #include "MotionGenerators/WaypointManager.h"
 

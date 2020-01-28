@@ -21,7 +21,7 @@ SDComment: Portal event may be incomplete - additional reseach required.
 SDCategory: Obsidian Sanctum
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "obsidian_sanctum.h"
 
 enum

@@ -27,7 +27,7 @@ npc_thrall_old_hillsbrad
 npc_taretha
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "old_hillsbrad.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 

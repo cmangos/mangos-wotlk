@@ -21,7 +21,7 @@ SDComment: Some parts are not complete - requires additional research. Brewmaide
 SDCategory: Blackrock Depths
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 enum
 {

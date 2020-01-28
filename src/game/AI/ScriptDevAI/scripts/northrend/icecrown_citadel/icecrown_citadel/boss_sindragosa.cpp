@@ -21,7 +21,7 @@ SDComment: requires core support for ice blocks (spells and GO in LoS checking)
 SDCategory: Icecrown Citadel
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
 
 enum

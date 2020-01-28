@@ -21,7 +21,7 @@ SDComment: Visual improvement needed in phase 2: flying animation while hovering
 SDCategory: Onyxia's Lair
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "onyxias_lair.h"
 
 enum

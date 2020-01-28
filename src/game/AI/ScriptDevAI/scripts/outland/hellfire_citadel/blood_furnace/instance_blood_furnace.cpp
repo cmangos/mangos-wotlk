@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Blood Furnace
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "blood_furnace.h"
 
 instance_blood_furnace::instance_blood_furnace(Map* pMap) : ScriptedInstance(pMap),

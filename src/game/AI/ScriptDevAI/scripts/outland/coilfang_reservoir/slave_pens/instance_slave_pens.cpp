@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Coilfang Resevoir, Slave Pens
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "slave_pens.h"
 
 instance_slave_pens::instance_slave_pens(Map* map) : ScriptedInstance(map), m_naturalistYelled(false)

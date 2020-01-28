@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Tempest Keep, The Eye
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "the_eye.h"
 
 instance_the_eye::instance_the_eye(Map* pMap) : ScriptedInstance(pMap),

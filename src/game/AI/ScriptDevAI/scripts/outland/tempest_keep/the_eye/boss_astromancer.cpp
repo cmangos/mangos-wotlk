@@ -21,7 +21,7 @@ SDComment: Check if the split phase has some spells involved
 SDCategory: Tempest Keep, The Eye
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "the_eye.h"
 
 enum

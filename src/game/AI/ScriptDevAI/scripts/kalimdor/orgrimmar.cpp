@@ -25,7 +25,7 @@ EndScriptData */
 npc_shenthul
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 /*######
 ## npc_shenthul

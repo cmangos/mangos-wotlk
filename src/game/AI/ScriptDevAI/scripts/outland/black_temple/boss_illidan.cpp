@@ -21,7 +21,7 @@ SDComment: Movement during flight phase NYI. Some other fine details may need ad
 SDCategory: Black Temple
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"

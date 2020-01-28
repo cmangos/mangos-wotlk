@@ -29,7 +29,7 @@ Patches
 2.1.0 - Al'ar movement was updated to the current state (platform 1, 2, 3, 4), and embers were given the %hp burn element.
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "the_eye.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 

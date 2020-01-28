@@ -21,7 +21,7 @@ SDComment: Brann Event missing, no proper source for timers
 SDCategory: Halls of Stone
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "halls_of_stone.h"
 
 enum

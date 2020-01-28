@@ -25,7 +25,7 @@ EndScriptData */
 // - will intro mobs, not sent to center, despawn when phase 2 start?
 // - what happens if raid fail, can they start the event as soon after as they want?
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "naxxramas.h"
 
 enum

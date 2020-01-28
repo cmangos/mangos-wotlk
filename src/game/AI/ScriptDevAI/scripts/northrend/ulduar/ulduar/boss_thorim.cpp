@@ -21,7 +21,7 @@ SDComment: Platform lightning NYI. Script might need minor improvements.
 SDCategory: Ulduar
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
 
 enum

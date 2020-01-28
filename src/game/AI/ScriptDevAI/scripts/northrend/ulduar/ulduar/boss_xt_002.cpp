@@ -21,7 +21,7 @@ SDComment: Timers may need adjustments; Achievements and hard mode abilities NYI
 SDCategory: Ulduar
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
 
 enum

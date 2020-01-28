@@ -25,7 +25,7 @@ EndScriptData */
 mob_dragonflayer_forge_master
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "utgarde_keep.h"
 
 /*######

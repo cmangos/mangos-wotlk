@@ -21,7 +21,7 @@ SDComment: The gauntlet movement needs to be random choosed for left and right. 
 SDCategory: Utgarde Pinnacle
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "utgarde_pinnacle.h"
 
 enum

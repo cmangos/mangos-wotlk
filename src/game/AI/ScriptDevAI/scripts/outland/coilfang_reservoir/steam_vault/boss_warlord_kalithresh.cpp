@@ -21,7 +21,7 @@ SDComment: Timers may need some fine adjustments
 SDCategory: Coilfang Resevoir, The Steamvault
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 #include "steam_vault.h"
 

@@ -26,7 +26,7 @@ boss_mekgineer_steamrigger
 mob_steamrigger_mechanic
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "steam_vault.h"
 
 enum

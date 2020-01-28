@@ -26,7 +26,7 @@ npc_medivh_bm
 npc_time_rift
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "dark_portal.h"
 
 /*######

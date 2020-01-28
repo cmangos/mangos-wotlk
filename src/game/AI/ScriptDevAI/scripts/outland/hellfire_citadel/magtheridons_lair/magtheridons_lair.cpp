@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Hellfire Citadel, Magtheridon's lair
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "magtheridons_lair.h"
 #include "Spells/Scripts/SpellScript.h"
 

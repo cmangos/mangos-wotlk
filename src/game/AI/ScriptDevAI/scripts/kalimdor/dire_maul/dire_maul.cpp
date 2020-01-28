@@ -25,7 +25,7 @@ EndScriptData */
 event_spell_release_jeevee
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "dire_maul.h"
 
 /*######

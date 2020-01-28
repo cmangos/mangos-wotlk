@@ -21,7 +21,7 @@ SDComment: Submerged phase visual spells NYI; they require additional research.
 SDCategory: Slave Pens
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "Entities/TemporarySpawn.h"
 
 enum

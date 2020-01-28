@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Coilfang Resevoir, Serpent Shrine Cavern
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "serpent_shrine.h"
 
 /* Serpentshrine cavern encounters:

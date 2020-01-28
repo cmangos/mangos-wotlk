@@ -21,7 +21,7 @@ SDComment: Some details related to the summoned creatures need more adjustments
 SDCategory: Drak'Tharon Keep
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "draktharon_keep.h"
 
 enum

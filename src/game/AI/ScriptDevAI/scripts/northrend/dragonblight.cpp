@@ -26,7 +26,7 @@ npc_destructive_ward
 npc_crystalline_ice_giant
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 /*######
 # npc_destructive_ward

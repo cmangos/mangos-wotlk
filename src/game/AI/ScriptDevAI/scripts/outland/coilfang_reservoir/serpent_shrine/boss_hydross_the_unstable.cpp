@@ -21,7 +21,7 @@ SDComment: Timers may need improvemets.
 SDCategory: Coilfang Resevoir, Serpent Shrine Cavern
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "serpent_shrine.h"
 
 // Note: As of March 21 2007 Hydross should not crush tanks

@@ -21,7 +21,7 @@ SDComment: Possible some D2 or other exotic missing
 SDCategory: Scholomance
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "scholomance.h"
 #include "GameEvents/GameEventMgr.h"
 

@@ -28,7 +28,7 @@ Patches
 Removed sometime prior to 2.1.
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "karazhan.h"
 #include "Spells/Spell.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"

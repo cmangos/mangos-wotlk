@@ -30,7 +30,7 @@ npc_wants_fruit_credit
 go_quest_still_at_it_credit
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

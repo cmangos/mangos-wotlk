@@ -21,7 +21,7 @@ SDComment: Needs to be paired with DBscripts. Gunship transports NYI. Some spell
 SDCategory: Halls of Reflection
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "halls_of_reflection.h"
 
 /*######

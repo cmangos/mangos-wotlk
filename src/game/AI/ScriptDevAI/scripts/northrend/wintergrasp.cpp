@@ -27,7 +27,7 @@ go_vehicle_teleporter
 event_go_tower_destroy
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "Battlefield/BattlefieldWG.h"
 
 enum

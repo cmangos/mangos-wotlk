@@ -21,7 +21,7 @@ SDComment: Basic instance script
 SDCategory: Ruby Sanctum
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ruby_sanctum.h"
 
 instance_ruby_sanctum::instance_ruby_sanctum(Map* pMap) : ScriptedInstance(pMap),

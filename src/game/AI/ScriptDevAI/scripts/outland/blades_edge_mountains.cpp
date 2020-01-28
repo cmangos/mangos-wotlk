@@ -42,7 +42,7 @@ npc_spirit_prisoner_of_bladespire
 npc_evergrove_druid
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/scripts/outland/world_outland.h"
 #include "Entities/TemporarySpawn.h"
 #include "Reputation/ReputationMgr.h"

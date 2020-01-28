@@ -21,7 +21,7 @@ SDComment: Timers; Transition phase is incomplete, some spells are unk.
 SDCategory: Tempest Keep, The Eye
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "the_eye.h"
 
 // #define FAST_TIMERS

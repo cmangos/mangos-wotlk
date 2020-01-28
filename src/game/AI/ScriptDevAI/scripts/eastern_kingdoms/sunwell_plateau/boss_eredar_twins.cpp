@@ -21,7 +21,7 @@ SDComment: A few spells are not working proper yet; Shadow image script needs im
 SDCategory: Sunwell Plateau
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "sunwell_plateau.h"
 
 enum

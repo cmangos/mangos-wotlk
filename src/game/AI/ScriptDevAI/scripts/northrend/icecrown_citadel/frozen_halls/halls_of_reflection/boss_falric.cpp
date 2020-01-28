@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Halls of Reflection
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 void AddSC_boss_falric()
 {

@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Crusader Coliseum
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "trial_of_the_crusader.h"
 
 /* Trial Of The Crusader encounters:

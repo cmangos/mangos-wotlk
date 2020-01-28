@@ -34,7 +34,7 @@ npc_fellow_death_knight
 npc_scarlet_courier
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "world_map_ebon_hold.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"

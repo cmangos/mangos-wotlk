@@ -21,7 +21,7 @@ SDComment: Intro movement NYI; Event cleanup (despawn & resummon) NYI; Breath ph
 SDCategory: Sunwell Plateau
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "sunwell_plateau.h"
 #include "Entities/TemporarySpawn.h"
 

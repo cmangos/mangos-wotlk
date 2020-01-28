@@ -28,7 +28,7 @@ Patches
 2.1.0 - Shade of Aran will no longer cast Dragon's Breath.
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "karazhan.h"
 
 enum

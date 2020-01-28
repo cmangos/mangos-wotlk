@@ -21,7 +21,7 @@ SDComment: Spore Strider should have Delayed Despawn on The Black Stalker Death
 SDCategory: Coilfang Resevoir, Underbog
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 
 enum // order based on priority

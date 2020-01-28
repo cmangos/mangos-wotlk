@@ -21,7 +21,7 @@ SDComment: Unknown if other speed-changes happen, remove AI for trigger mobs in 
 SDCategory: Black Temple
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 

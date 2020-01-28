@@ -36,7 +36,7 @@ npc_domesticated_felboar
 npc_veneratus_spawn_node
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"
 #include "Entities/TemporarySpawn.h"

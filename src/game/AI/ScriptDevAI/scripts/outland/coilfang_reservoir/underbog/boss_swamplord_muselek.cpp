@@ -21,7 +21,7 @@ SDComment: Implementing in SD2 due to some complex behavior
 SDCategory: Coilfang Resevoir, Underbog
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "underbog.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 

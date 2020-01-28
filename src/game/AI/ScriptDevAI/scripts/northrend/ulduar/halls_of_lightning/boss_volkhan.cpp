@@ -21,7 +21,7 @@ SDComment: The dummy spells need more research and should be handled in core
 SDCategory: Halls of Lightning
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "halls_of_lightning.h"
 
 enum

@@ -25,7 +25,7 @@ EndScriptData */
 npc_greater_shadowfiend
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
 
 /*######

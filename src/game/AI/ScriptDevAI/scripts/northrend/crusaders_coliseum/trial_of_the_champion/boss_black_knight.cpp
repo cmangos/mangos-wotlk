@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Crusader Coliseum, Trial of the Champion
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "trial_of_the_champion.h"
 
 enum

@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Molten Core
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "molten_core.h"
 
 static sSpawnLocation m_aBosspawnLocs[MAX_MAJORDOMO_ADDS] =

@@ -21,7 +21,7 @@ SDComment: Show a codebox in gossip option
 SDCategory: Script Examples
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include <cstring>
 
 enum

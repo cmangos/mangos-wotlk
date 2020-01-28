@@ -21,7 +21,7 @@ SDComment: Timers; Most spells are dummy targeting spells and need core support;
 SDCategory: Icecrown Citadel
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
 
 enum

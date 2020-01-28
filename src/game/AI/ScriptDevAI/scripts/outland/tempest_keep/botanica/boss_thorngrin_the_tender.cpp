@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Tempest Keep, The Botanica
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 enum
 {

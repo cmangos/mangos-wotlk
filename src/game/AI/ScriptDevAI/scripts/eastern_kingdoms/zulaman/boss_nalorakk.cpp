@@ -21,7 +21,7 @@ SDComment: Small adjustments may be required
 SDCategory: Zul'Aman
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "zulaman.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 

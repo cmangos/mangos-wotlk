@@ -28,7 +28,7 @@ npc_image_arcanagos
 event_spell_medivh_journal
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "karazhan.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 

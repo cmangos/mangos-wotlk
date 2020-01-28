@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Culling of Stratholme
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "culling_of_stratholme.h"
 
 enum

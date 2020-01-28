@@ -32,7 +32,7 @@ go_scourge_enclosure
 go_lab_work_reagents
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "GameEvents/GameEventMgr.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 #include "Entities/TemporarySpawn.h"

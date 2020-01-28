@@ -21,7 +21,7 @@ SDComment: TODO: 2.2 patch - grip of the legion cant hit someone with air burst
 SDCategory: Caverns of Time, Mount Hyjal
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "hyjal.h"
 #include "Maps/MapManager.h"
 

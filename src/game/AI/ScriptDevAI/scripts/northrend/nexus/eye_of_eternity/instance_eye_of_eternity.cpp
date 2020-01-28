@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Eye of Eternity
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "eye_of_eternity.h"
 
 static const DialogueEntry aEpilogueDialogue[] =

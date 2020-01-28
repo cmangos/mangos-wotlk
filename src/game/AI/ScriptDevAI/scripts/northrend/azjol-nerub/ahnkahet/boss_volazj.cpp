@@ -21,7 +21,7 @@ SDComment: Insanity NYI; Timers need adjustments
 SDCategory: Ahn'kahet
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ahnkahet.h"
 #include "Entities/TemporarySpawn.h"
 

@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Drak'Tharon Keep
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "draktharon_keep.h"
 
 instance_draktharon_keep::instance_draktharon_keep(Map* pMap) : ScriptedInstance(pMap),

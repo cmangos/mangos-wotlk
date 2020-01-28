@@ -21,7 +21,7 @@ SDComment: Timers may need update.
 SDCategory: Tempest Keep, The Mechanar
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "mechanar.h"
 
 enum

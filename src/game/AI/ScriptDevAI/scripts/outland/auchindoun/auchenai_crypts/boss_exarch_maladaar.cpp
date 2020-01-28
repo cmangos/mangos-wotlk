@@ -26,7 +26,7 @@ mob_stolen_soul
 boss_exarch_maladaar
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 enum
 {

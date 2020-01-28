@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Ebon Hold
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "world_map_ebon_hold.h"
 
 world_map_ebon_hold::world_map_ebon_hold(Map* pMap) : ScriptedInstance(pMap),

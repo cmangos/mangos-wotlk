@@ -21,7 +21,7 @@ SDComment: Summon Player spell NYI (when current target is unreachable); Consume
 SDCategory: Temple of Ahn'Qiraj
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "temple_of_ahnqiraj.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 

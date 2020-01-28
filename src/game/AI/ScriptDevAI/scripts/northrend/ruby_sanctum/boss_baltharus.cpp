@@ -21,7 +21,7 @@ SDComment: intro channeled spell NYI.
 SDCategory: Ruby Sanctum
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ruby_sanctum.h"
 
 enum

@@ -21,7 +21,7 @@ SDComment: The bosses are handled in eventAI; The event needs more research; onl
 SDCategory: Shadowfang Keep
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "shadowfang_keep.h"
 
 enum

@@ -21,7 +21,7 @@ SDComment: currently missing info about door. instance not complete
 SDCategory: Hellfire Citadel, Shattered Halls
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "shattered_halls.h"
 
 instance_shattered_halls::instance_shattered_halls(Map* pMap) : ScriptedInstance(pMap),

@@ -21,7 +21,7 @@ SDComment: Energize Cores spells requires additional research.
 SDCategory: Oculus
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "oculus.h"
 #include "Entities/TemporarySpawn.h"
 

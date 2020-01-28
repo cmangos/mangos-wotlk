@@ -21,7 +21,7 @@ SDComment: Script support for most of the events.
 SDCategory: Halls of Reflection
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "halls_of_reflection.h"
 
 enum

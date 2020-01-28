@@ -21,7 +21,7 @@ SDComment: Spell Felfire Line Up and Wrath-Scryer's Felfire npc are summoning ar
 SDCategory: Tempest Keep, The Arcatraz
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "arcatraz.h"
 
 enum

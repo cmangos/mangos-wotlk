@@ -21,7 +21,7 @@ SDComment: Timers need adjustments; Vortex event NYI; Npc movement in Phase 2 NY
 SDCategory: Eye of Eternity
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "eye_of_eternity.h"
 #include "Entities/TemporarySpawn.h"
 

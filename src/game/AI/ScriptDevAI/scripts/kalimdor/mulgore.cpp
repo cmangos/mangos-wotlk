@@ -25,7 +25,7 @@ EndScriptData */
 npc_kyle_the_frenzied
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 /*######
 # npc_kyle_the_frenzied

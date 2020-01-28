@@ -21,7 +21,7 @@ SDComment:
 SDCategory: The Nexus
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "nexus.h"
 
 bool GOUse_go_containment_sphere(Player* /*pPlayer*/, GameObject* pGo)

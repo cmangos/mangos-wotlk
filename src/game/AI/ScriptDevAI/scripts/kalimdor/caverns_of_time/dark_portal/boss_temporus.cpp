@@ -22,7 +22,7 @@ Patch_2.2.0: Increased recast time for Temporus' Hasten spell on Heroic. GetSubs
 SDCategory: Caverns of Time, The Dark Portal
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "dark_portal.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 

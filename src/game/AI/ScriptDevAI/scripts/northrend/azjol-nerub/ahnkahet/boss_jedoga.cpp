@@ -21,7 +21,7 @@ SDComment: The movement points for the volunteers are not 100% blizzlike. On ret
 SDCategory: Ahn'kahet
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "ahnkahet.h"
 
 enum

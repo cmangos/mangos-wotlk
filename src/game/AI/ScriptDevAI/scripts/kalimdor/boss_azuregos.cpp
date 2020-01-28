@@ -21,7 +21,7 @@ SDComment: Enrage is to be checked
 SDCategory: Azshara
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 enum
 {

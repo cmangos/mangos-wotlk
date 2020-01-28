@@ -21,7 +21,7 @@ SDComment: Encounter mechanic is not verified, spell CLEAR_GIFT_OF_THARONJA need
 SDCategory: Drak'Tharon Keep
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "Globals/ObjectMgr.h"
 #include "draktharon_keep.h"
 

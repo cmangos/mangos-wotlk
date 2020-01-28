@@ -37,7 +37,7 @@ npc_proudhoof
 npc_orphaned_mammoth_calf
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Entities/TemporarySpawn.h"
 #include "AI/ScriptDevAI/base/follower_ai.h"

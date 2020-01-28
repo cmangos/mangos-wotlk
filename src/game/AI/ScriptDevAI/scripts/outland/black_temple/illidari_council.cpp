@@ -21,7 +21,7 @@ SDComment: Lady Malandes Reflective Shield should make her immune to physical in
 SDCategory: Black Temple
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 

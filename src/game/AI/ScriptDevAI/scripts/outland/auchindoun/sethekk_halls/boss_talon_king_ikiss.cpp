@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Auchindoun, Sethekk Halls
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 #include "sethekk_halls.h"
 

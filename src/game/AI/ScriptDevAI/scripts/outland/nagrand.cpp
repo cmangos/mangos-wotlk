@@ -28,7 +28,7 @@ npc_creditmarker_visit_with_ancestors
 npc_rethhedron
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 /*######

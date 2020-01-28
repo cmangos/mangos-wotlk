@@ -21,7 +21,7 @@ SDComment: Prison defense system requires more research
 SDCategory: Violet Hold
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "violet_hold.h"
 
 instance_violet_hold::instance_violet_hold(Map* pMap) : ScriptedInstance(pMap),

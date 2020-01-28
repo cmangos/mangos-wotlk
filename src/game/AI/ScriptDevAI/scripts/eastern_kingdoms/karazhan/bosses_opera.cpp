@@ -21,7 +21,7 @@ SDComment: Oz, Hood, and RAJ event implemented. Spell timers may need adjustment
 SDCategory: Karazhan
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "karazhan.h"
 
 /***********************************/

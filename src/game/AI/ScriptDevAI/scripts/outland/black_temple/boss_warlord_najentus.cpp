@@ -21,7 +21,7 @@ SDComment: Core spell support for Needle Spine (spells 39992, 39835) missing, no
 SDCategory: Black Temple
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 

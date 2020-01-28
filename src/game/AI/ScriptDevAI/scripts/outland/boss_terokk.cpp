@@ -22,7 +22,7 @@ SDCategory: Terokkar Forest
 EndScriptData */
 
 #include <utility>
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 
 enum

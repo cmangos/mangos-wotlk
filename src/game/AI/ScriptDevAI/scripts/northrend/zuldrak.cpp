@@ -27,7 +27,7 @@ npc_ghoul_feeding_bunny
 npc_decaying_ghoul
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "Entities/TemporarySpawn.h"
 
 /*######

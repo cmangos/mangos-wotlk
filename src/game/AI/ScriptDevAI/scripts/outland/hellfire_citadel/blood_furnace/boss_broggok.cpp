@@ -21,7 +21,7 @@ SDComment: pre-event not made
 SDCategory: Hellfire Citadel, Blood Furnace
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "blood_furnace.h"
 
 enum

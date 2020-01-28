@@ -27,7 +27,7 @@ go_mausoleum_trigger
 npc_calvin_montague
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 /*######
 ## go_mausoleum_door

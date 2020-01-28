@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Coilfang Resevoir, The Underbog
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "underbog.h"
 
 instance_underbog::instance_underbog(Map* map) : ScriptedInstance(map), m_bGhazanSurfaced(false)

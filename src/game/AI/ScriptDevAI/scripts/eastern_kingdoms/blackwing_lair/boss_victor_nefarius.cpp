@@ -21,7 +21,7 @@ SDComment:
 SDCategory: Blackwing Lair
 EndScriptData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "blackwing_lair.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 
