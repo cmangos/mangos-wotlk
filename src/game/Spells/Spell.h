@@ -957,6 +957,7 @@ namespace MaNGOS
                     {
                         i_centerX = i_castingObject->GetPositionX();
                         i_centerY = i_castingObject->GetPositionY();
+                        i_centerZ = i_castingObject->GetPositionZ();
                     }
                     break;
                 case PUSH_SRC_CENTER:
