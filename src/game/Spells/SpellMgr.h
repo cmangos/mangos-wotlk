@@ -532,6 +532,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 31792:         // Bear Form (Shapeshift)
         case 32007:         // Mo'arg Engineer Transform Visual
         case 32900:         // Bone Shards Proc
+        case 32939:         // Phase Burst
         case 32942:         // Phasing Invisibility
         case 33460:         // Inhibit Magic
         case 33900:         // Shroud of Death
