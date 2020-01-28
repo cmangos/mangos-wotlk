@@ -38,6 +38,7 @@ EndContentData */
 #include "AI/ScriptDevAI/base/pet_ai.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 #include "Entities/TemporarySpawn.h"
+#include "Spells/SpellAuras.h"
 
 /*######
 ## npc_aeranas

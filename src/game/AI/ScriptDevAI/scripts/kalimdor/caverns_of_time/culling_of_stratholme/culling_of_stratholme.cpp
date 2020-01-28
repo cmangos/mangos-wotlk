@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "culling_of_stratholme.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "Spells/SpellAuras.h"
 
 /* *************
 ** npc_chromie (gossip, quest-accept)

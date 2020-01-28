@@ -47,6 +47,7 @@ spell 56099
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Spells/SpellAuras.h"
 
 /* When you make a spell effect:
 - always check spell id and effect index

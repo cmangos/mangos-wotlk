@@ -42,6 +42,7 @@ EndContentData */
 #include "Entities/TemporarySpawn.h"
 #include "AI/ScriptDevAI/base/follower_ai.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"
+#include "Spells/SpellAuras.h"
 
 /*######
 ## npc_nesingwary_trapper

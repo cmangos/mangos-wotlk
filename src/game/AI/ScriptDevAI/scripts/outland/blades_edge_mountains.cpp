@@ -49,6 +49,7 @@ EndContentData */
 #include "AI/ScriptDevAI/base/TimerAI.h"
 #include "Spells/Spell.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 /*######
 ## mobs_nether_drake

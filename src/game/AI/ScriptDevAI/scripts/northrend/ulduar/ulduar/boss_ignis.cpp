@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {

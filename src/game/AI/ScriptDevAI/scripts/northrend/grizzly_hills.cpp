@@ -29,6 +29,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"
+#include "Spells/SpellAuras.h"
 
 /*######
 ## npc_depleted_war_golem

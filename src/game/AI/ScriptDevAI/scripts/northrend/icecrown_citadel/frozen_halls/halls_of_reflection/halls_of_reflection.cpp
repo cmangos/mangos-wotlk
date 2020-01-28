@@ -32,6 +32,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "halls_of_reflection.h"
 #include "Entities/TemporarySpawn.h"
+#include "Spells/SpellAuras.h"
 
 /*######
 ## at_frostmourne_chamber

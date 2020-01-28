@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "draktharon_keep.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {

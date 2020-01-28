@@ -15,6 +15,7 @@
 #ifdef BUILD_SCRIPTDEV
 #include "system/ScriptLoader.h"
 #endif
+#include "Spells/SpellAuras.h"
 
 INSTANTIATE_SINGLETON_1(ScriptDevAIMgr);
 
