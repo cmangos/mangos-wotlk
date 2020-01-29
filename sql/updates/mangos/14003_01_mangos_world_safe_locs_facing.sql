@@ -1,4 +1,4 @@
-ALTER TABLE db_version CHANGE COLUMN required_s2397_01_mangos_broadcast_text bit required_s2398_01_mangos_world_safe_locs_facing bit;
+ALTER TABLE db_version CHANGE COLUMN required_14002_01_mangos_broadcast_text bit required_14003_01_mangos_world_safe_locs_facing bit;
 
 CREATE TABLE IF NOT EXISTS `world_safe_locs` (
   `id` int(11) unsigned NOT NULL,
