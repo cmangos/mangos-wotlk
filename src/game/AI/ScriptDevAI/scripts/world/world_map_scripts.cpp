@@ -29,32 +29,7 @@ EndScriptData */
 #include <array>
 #include <ctime>
 
-/* *********************************************************
- *                     NORTHREND
- */
-struct world_map_northrend : public ScriptedMap
-{
-    world_map_northrend(Map* pMap) : ScriptedMap(pMap) {}
 
-    void OnCreatureCreate(Creature* pCreature)
-    {
-        switch (pCreature->GetEntry())
-        {
-            case NPC_NARGO_SCREWBORE:
-            case NPC_HARROWMEISER:
-            case NPC_DRENK_SPANNERSPARK:
-                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
-                break;
-        }
-    }
-
-    void SetData(uint32 /*uiType*/, uint32 /*uiData*/) {}
-};
-
-InstanceData* GetInstanceData_world_map_northrend(Map* pMap)
-{
-    return new world_map_northrend(pMap);
-}
 
 enum
 {
@@ -161,13 +136,8 @@ bool ProcessEventTransports(uint32 uiEventId, Object* pSource, Object* /*pTarget
 }
 
 void AddSC_world_map_scripts()
-{
+{    
     Script* pNewScript = new Script;
-    pNewScript->Name = "world_map_northrend";
-    pNewScript->GetInstanceData = &GetInstanceData_world_map_northrend;
-    pNewScript->RegisterSelf();
-    
-    pNewScript = new Script;
     pNewScript->Name = "event_transports";
     pNewScript->pProcessEventId = &ProcessEventTransports;
     pNewScript->RegisterSelf();
