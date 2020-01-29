@@ -2670,7 +2670,7 @@ void Player::GiveXP(uint32 xp, Creature* victim, float groupRate)
     uint32 level = getLevel();
 
     // XP to money conversion processed in Player::RewardQuest
-    if (level >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    if (level >= GetMaxAttainableLevel())
         return;
 
     if (victim)
@@ -2697,11 +2697,11 @@ void Player::GiveXP(uint32 xp, Creature* victim, float groupRate)
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
     uint32 newXP = curXP + xp + rested_bonus_xp;
 
-    while (newXP >= nextLvlXP && level < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    while (newXP >= nextLvlXP && level < GetMaxAttainableLevel())
     {
         newXP -= nextLvlXP;
 
-        if (level < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+        if (level < GetMaxAttainableLevel())
             GiveLevel(level + 1);
 
         level = getLevel();
@@ -2744,7 +2744,7 @@ void Player::GiveLevel(uint32 level)
 
     GetSession()->SendPacket(data);
 
-    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(level));
+    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, GetMaxAttainableLevel() <= level ? 0 : sObjectMgr.GetXPForLevel(level));
 
     // update level, max level of skills
     m_Played_time[PLAYED_TIME_LEVEL] = 0;                   // Level Played Time reset
@@ -2848,8 +2848,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
     PlayerLevelInfo info;
     sObjectMgr.GetPlayerLevelInfo(getRace(), plClass, level, &info);
 
-    SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL));
-    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, sObjectMgr.GetXPForLevel(level));
+    SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sObjectMgr.GetMaxLevelForExpansion(GetSession()->GetExpansion()));
+    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, GetMaxAttainableLevel() <= level ? 0 : sObjectMgr.GetXPForLevel(level));
 
     // reset before any aura state sources (health set/aura apply)
     SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
@@ -2992,6 +2992,12 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // update level to hunter/summon pet
     if (Pet* pet = GetPet())
         pet->SynchronizeLevelWithOwner();
+}
+
+void Player::OnExpansionChange(uint32 expansion)
+{
+    SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sObjectMgr.GetMaxLevelForExpansion(GetSession()->GetExpansion()));
+    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, GetMaxAttainableLevel() <= getLevel() ? 0 : sObjectMgr.GetXPForLevel(getLevel()));
 }
 
 void Player::SendInitialSpells() const
@@ -5156,7 +5162,7 @@ void Player::RepopAtGraveyard()
     if (ClosestGrave)
     {
         bool updateVisibility = IsInWorld() && GetMapId() == ClosestGrave->map_id;
-        TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, GetOrientation());
+        TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, ClosestGrave->o);
         if (isDead())                                       // not send if alive, because it used in TeleportTo()
         {
             WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);// show spirit healer position on minimap
@@ -6720,7 +6726,7 @@ void Player::CheckAreaExploreAndOutdoor()
         else if (p->area_level > 0)
         {
             uint32 area = p->ID;
-            if (getLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+            if (getLevel() >= GetMaxAttainableLevel())
             {
                 SendExplorationExperience(area, 0);
             }
@@ -8631,7 +8637,7 @@ void Player::RemovedInsignia(Player* looterPlr)
     // We store the level of our player in the gold field
     // We retrieve this information at Player::SendLoot()
     bones->lootRecipient = looterPlr;
-    Loot*& bonesLoot = bones->loot;
+    Loot*& bonesLoot = bones->m_loot;
     if (!bonesLoot)
         bonesLoot = new Loot(looterPlr, bones, LOOT_INSIGNIA);
     else
@@ -13298,17 +13304,33 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
 
             int loc_idx = GetSession()->GetSessionDbLocaleIndex();
 
-            if (loc_idx >= 0)
+            if (gossipMenu.option_broadcast_text || gossipMenu.box_broadcast_text)
             {
-                uint32 idxEntry = MAKE_PAIR32(menuId, gossipMenu.id);
-
-                if (GossipMenuItemsLocale const* no = sObjectMgr.GetGossipMenuItemsLocale(idxEntry))
+                if (gossipMenu.option_broadcast_text)
                 {
-                    if (no->OptionText.size() > (size_t)loc_idx && !no->OptionText[loc_idx].empty())
-                        strOptionText = no->OptionText[loc_idx];
+                    BroadcastText const* bct = sObjectMgr.GetBroadcastText(gossipMenu.option_broadcast_text);
+                    strOptionText = bct->GetText(loc_idx);
+                }
+                if (gossipMenu.box_broadcast_text)
+                {
+                    BroadcastText const* bct = sObjectMgr.GetBroadcastText(gossipMenu.box_broadcast_text);
+                    strBoxText = bct->GetText(loc_idx);
+                }
+            }
+            else
+            {
+                if (loc_idx >= 0)
+                {
+                    uint32 idxEntry = MAKE_PAIR32(menuId, gossipMenu.id);
 
-                    if (no->BoxText.size() > (size_t)loc_idx && !no->BoxText[loc_idx].empty())
-                        strBoxText = no->BoxText[loc_idx];
+                    if (GossipMenuItemsLocale const* no = sObjectMgr.GetGossipMenuItemsLocale(idxEntry))
+                    {
+                        if (no->OptionText.size() > (size_t)loc_idx && !no->OptionText[loc_idx].empty())
+                            strOptionText = no->OptionText[loc_idx];
+
+                        if (no->BoxText.size() > (size_t)loc_idx && !no->BoxText[loc_idx].empty())
+                            strBoxText = no->BoxText[loc_idx];
+                    }
                 }
             }
 
@@ -13787,11 +13809,18 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
 
                     int loc_idx = GetSession()->GetSessionDbLocaleIndex();
 
-                    std::string title0 = gossiptext->Options[0].Text_0;
-                    std::string title1 = gossiptext->Options[0].Text_1;
-                    sObjectMgr.GetNpcTextLocaleStrings0(textid, loc_idx, &title0, &title1);
-
-                    title = !title0.empty() ? title0 : title1;
+                    if (gossiptext->Options[0].broadcastTextId)
+                    {
+                        BroadcastText const* bct = sObjectMgr.GetBroadcastText(gossiptext->Options[0].broadcastTextId);
+                        title = bct->GetText(loc_idx, pCreature->getGender());
+                    }
+                    else
+                    {
+                        std::string title0 = gossiptext->Options[0].Text_0;
+                        std::string title1 = gossiptext->Options[0].Text_1;
+                        sObjectMgr.GetNpcTextLocaleStrings0(textid, loc_idx, &title0, &title1);
+                        title = !title0.empty() ? title0 : title1;
+                    }
                 }
             }
             PlayerTalkClass->SendQuestGiverQuestList(qe, title, guid);
@@ -14290,7 +14319,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     // Used for client inform but rewarded only in case not max level
     uint32 xp = uint32(pQuest->XPValue(this) * sWorld.getConfig(CONFIG_FLOAT_RATE_XP_QUEST));
 
-    if (getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    if (getLevel() < GetMaxAttainableLevel())
     {
         GiveXP(xp, nullptr);
 
@@ -15549,7 +15578,7 @@ void Player::SendQuestReward(Quest const* pQuest, uint32 XP, uint32 honor) const
     WorldPacket data(SMSG_QUESTGIVER_QUEST_COMPLETE, (4 + 4 + 4 + 4 + 4));
     data << uint32(questid);
 
-    if (getLevel() < sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    if (getLevel() < GetMaxAttainableLevel())
     {
         data << uint32(XP);
         data << uint32(pQuest->GetRewOrReqMoney());
@@ -16133,7 +16162,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             {
                 MapEntry const* transMapEntry = sMapStore.LookupEntry((*iter)->GetMapId());
                 // client without expansion support
-                if (GetSession()->Expansion() < transMapEntry->Expansion())
+                if (GetSession()->GetExpansion() < transMapEntry->Expansion())
                 {
                     DEBUG_LOG("Player %s using client without required expansion tried login at transport at non accessible map %u", GetName(), (*iter)->GetMapId());
                     break;
@@ -16160,7 +16189,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     {
         MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
         // client without expansion support
-        if (GetSession()->Expansion() < mapEntry->Expansion())
+        if (GetSession()->GetExpansion() < mapEntry->Expansion())
         {
             DEBUG_LOG("Player %s using client without required expansion tried login at non accessible map %u", GetName(), GetMapId());
             RelocateToHomebind();
@@ -16872,8 +16901,8 @@ void Player::_LoadItemLoot(QueryResult* result)
                 continue;
             }
 
-            if (!item->loot)
-                item->loot = new Loot(this, item);
+            if (!item->m_loot)
+                item->m_loot = new Loot(this, item);
 
             item->LoadLootFromDB(fields);
         }
@@ -17644,7 +17673,7 @@ bool Player::_LoadHomeBind(QueryResult* result)
 
         // accept saved data only for valid position (and non instanceable), and accessable
         if (MapManager::IsValidMapCoord(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ) &&
-                !bindMapEntry->Instanceable() && GetSession()->Expansion() >= bindMapEntry->Expansion())
+                !bindMapEntry->Instanceable() && GetSession()->GetExpansion() >= bindMapEntry->Expansion())
         {
             ok = true;
         }
@@ -19209,7 +19238,7 @@ void Player::LeaveAllArenaTeams(ObjectGuid guid)
 void Player::SetRestBonus(float rest_bonus_new)
 {
     // Prevent resting on max level
-    if (getLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    if (getLevel() >= GetMaxAttainableLevel())
         rest_bonus_new = 0;
 
     if (rest_bonus_new < 0)
@@ -20314,7 +20343,7 @@ void Player::SetBattleGroundEntryPoint()
     {
         if (const WorldSafeLocsEntry* entry = sObjectMgr.GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam()))
         {
-            m_bgData.joinPos = WorldLocation(entry->map_id, entry->x, entry->y, entry->z, 0.0f);
+            m_bgData.joinPos = WorldLocation(entry->map_id, entry->x, entry->y, entry->z, entry->o);
             m_bgData.m_needSave = true;
             return;
         }
@@ -23848,7 +23877,7 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
         return AREA_LOCKSTATUS_MISSING_DIFFICULTY;
 
     // Expansion requirement
-    if (GetSession()->Expansion() < mapEntry->Expansion())
+    if (GetSession()->GetExpansion() < mapEntry->Expansion())
     {
         miscRequirement = mapEntry->Expansion();
         return AREA_LOCKSTATUS_INSUFFICIENT_EXPANSION;

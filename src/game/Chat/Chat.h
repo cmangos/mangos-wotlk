@@ -421,6 +421,30 @@ class ChatHandler
         bool HandleModifyArenaCommand(char* args);
         bool HandleModifyPhaseCommand(char* args);
         bool HandleModifyGenderCommand(char* args);
+        bool HandleModifyStrengthCommand(char* args);
+        bool HandleModifyAgilityCommand(char* args);
+        bool HandleModifyStaminaCommand(char* args);
+        bool HandleModifyIntellectCommand(char* args);
+        bool HandleModifySpiritCommand(char* args);
+        bool HandleModifyArmorCommand(char* args);
+        bool HandleModifyHolyCommand(char* args);
+        bool HandleModifyFireCommand(char* args);
+        bool HandleModifyNatureCommand(char* args);
+        bool HandleModifyFrostCommand(char* args);
+        bool HandleModifyShadowCommand(char* args);
+        bool HandleModifyArcaneCommand(char* args);
+        bool HandleModifyMeleeApCommand(char* args);
+        bool HandleModifyRangedApCommand(char* args);
+        bool HandleModifySpellPowerCommand(char* args);
+        bool HandleModifyMeleeCritCommand(char* args);
+        bool HandleModifySpellCritCommand(char* args);
+        bool HandleModifyMeleeHasteCommand(char* args);
+        bool HandleModifyRangedHasteCommand(char* args);
+        bool HandleModifySpellHasteCommand(char* args);
+        bool HandleModifyBlockCommand(char* args);
+        bool HandleModifyDodgeCommand(char* args);
+        bool HandleModifyParryCommand(char* args);
+        bool ModifyStatCommandHelper(char* args, char const* statName, uint32 spellId);
 
         //-----------------------Npc Commands-----------------------
         bool HandleNpcAddCommand(char* args);
@@ -581,6 +605,7 @@ class ChatHandler
         bool HandleResetStatsCommand(char* args);
         bool HandleResetTalentsCommand(char* args);
         bool HandleResetTaxiNodesCommand(char* args);
+        bool HandleResetModsCommand(char* args);
 
         bool HandleSendItemsCommand(char* args);
         bool HandleSendMailCommand(char* args);
@@ -721,6 +746,8 @@ class ChatHandler
         bool HandleLinkEditCommand(char* args);
         bool HandleLinkToggleCommand(char* args);
         bool HandleLinkCheckCommand(char* args);
+
+        bool HandleExpansionRelease(char* args);
 
         //! Development Commands
         bool HandleSaveAllCommand(char* args);

@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14001_01_mangos_game_event_split` bit(1) DEFAULT NULL
+  `required_14003_01_mangos_world_safe_locs_facing` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -383,9 +383,7 @@ CREATE TABLE `battleground_template` (
   `MinPlayersPerTeam` smallint(5) unsigned NOT NULL DEFAULT '0',
   `MaxPlayersPerTeam` smallint(5) unsigned NOT NULL DEFAULT '0',
   `AllianceStartLoc` mediumint(8) unsigned NOT NULL,
-  `AllianceStartO` float NOT NULL,
   `HordeStartLoc` mediumint(8) unsigned NOT NULL,
-  `HordeStartO` float NOT NULL,
   `StartMaxDist` float NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -397,19 +395,19 @@ CREATE TABLE `battleground_template` (
 LOCK TABLES `battleground_template` WRITE;
 /*!40000 ALTER TABLE `battleground_template` DISABLE KEYS */;
 INSERT INTO `battleground_template` VALUES
-(1,40,40,611,2.72532,610,2.27452,100),
-(2,10,10,769,3.14159,770,3.14159,75),
-(3,15,15,890,3.40156,889,0.263892,75),
-(4,5,5,929,0,936,3.14159,0),
-(5,5,5,939,0,940,3.14159,0),
-(6,5,5,0,0,0,0,0),
-(7,15,15,1103,3.40156,1104,0.263892,75),
-(8,5,5,1258,0,1259,3.14159,0),
-(9,15,15,1367,0,1368,0,0),
-(10,5,5,1362,0,1363,0,0),
-(11,5,5,1364,0,1365,0,0),
-(30,40,40,1485,0,1486,0,200),
-(32,5,40,0,0,0,0,0);
+(1,40,40,611,610,100),
+(2,10,10,769,770,75),
+(3,15,15,890,889,75),
+(4,5,5,929,936,0),
+(5,5,5,939,940,0),
+(6,5,5,0,0,0),
+(7,15,15,1103,1104,75),
+(8,5,5,1258,1259,0),
+(9,15,15,1367,1368,0),
+(10,5,5,1362,1363,0),
+(11,5,5,1364,1365,0),
+(30,40,40,1485,1486,200),
+(32,5,40,0,0,0);
 /*!40000 ALTER TABLE `battleground_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -959,6 +957,7 @@ CREATE TABLE `creature_ai_texts` (
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `language` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `emote` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `broadcast_text_id` INT(11) NOT NULL DEFAULT '0',
   `comment` text,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Script Texts';
@@ -1530,8 +1529,8 @@ UNLOCK TABLES;
 -- Table structure for table `db_script_string`
 --
 
-DROP TABLE IF EXISTS `db_script_string`;
-CREATE TABLE `db_script_string` (
+DROP TABLE IF EXISTS `dbscript_string`;
+CREATE TABLE `dbscript_string` (
   `entry` int(11) unsigned NOT NULL DEFAULT '0',
   `content_default` text NOT NULL,
   `content_loc1` text,
@@ -1546,6 +1545,7 @@ CREATE TABLE `db_script_string` (
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `language` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `emote` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `broadcast_text_id` INT(11) NOT NULL DEFAULT '0',
   `comment` text,
   PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -2252,6 +2252,7 @@ CREATE TABLE `gossip_menu_option` (
   `id` smallint(6) unsigned NOT NULL DEFAULT '0',
   `option_icon` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `option_text` text,
+  `option_broadcast_text` INT(11) NOT NULL DEFAULT '0'
   `option_id` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `npc_option_npcflag` int(10) unsigned NOT NULL DEFAULT '0',
   `action_menu_id` mediumint(8) NOT NULL DEFAULT '0',
@@ -2260,6 +2261,7 @@ CREATE TABLE `gossip_menu_option` (
   `box_coded` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `box_money` int(11) unsigned NOT NULL DEFAULT '0',
   `box_text` text,
+  `box_broadcast_text` INT(11) NOT NULL
   `condition_id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   PRIMARY KEY (`menu_id`,`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -5147,6 +5149,27 @@ LOCK TABLES `npc_text` WRITE;
 /*!40000 ALTER TABLE `npc_text` DISABLE KEYS */;
 /*!40000 ALTER TABLE `npc_text` ENABLE KEYS */;
 UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `npc_text_broadcast_text`;
+CREATE TABLE `npc_text_broadcast_text` (
+`Id` MEDIUMINT(8) UNSIGNED NOT NULL COMMENT 'Identifier',
+`Prob0` float NOT NULL,
+`Prob1` float NOT NULL,
+`Prob2` float NOT NULL,
+`Prob3` float NOT NULL,
+`Prob4` float NOT NULL,
+`Prob5` float NOT NULL,
+`Prob6` float NOT NULL,
+`Prob7` float NOT NULL,
+`BroadcastTextId1` INT(11) NOT NULL,
+`BroadcastTextId2` INT(11) NOT NULL,
+`BroadcastTextId3` INT(11) NOT NULL,
+`BroadcastTextId4` INT(11) NOT NULL,
+`BroadcastTextId5` INT(11) NOT NULL,
+`BroadcastTextId6` INT(11) NOT NULL,
+`BroadcastTextId7` INT(11) NOT NULL,
+PRIMARY KEY(`ID`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT 'Broadcast Text npc_text equivalent';
 
 --
 -- Table structure for table `npc_trainer`
@@ -15553,6 +15576,7 @@ CREATE TABLE `script_texts` (
   `type` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `language` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `emote` smallint(5) unsigned NOT NULL DEFAULT '0',
+  `broadcast_text_id` INT(11) NOT NULL DEFAULT '0',
   `comment` text,
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Script Texts';
@@ -19340,6 +19364,21 @@ LOCK TABLES `vehicle_accessory` WRITE;
 /*!40000 ALTER TABLE `vehicle_accessory` DISABLE KEYS */;
 /*!40000 ALTER TABLE `vehicle_accessory` ENABLE KEYS */;
 UNLOCK TABLES;
+
+-- Table structure for table `world_safe_locs`
+--
+
+DROP TABLE IF EXISTS `world_safe_locs`;
+CREATE TABLE `world_safe_locs` (
+   `id` int(11) unsigned NOT NULL,
+   `map` int(10) unsigned NOT NULL DEFAULT '0',
+   `x` float NOT NULL DEFAULT '0',
+   `y` float NOT NULL DEFAULT '0',
+   `z` float NOT NULL DEFAULT '0',
+   `o` float NOT NULL DEFAULT '0',
+   `name` varchar(50) NOT NULL DEFAULT '',
+   PRIMARY KEY (`id`)
+ ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Table structure for table `world_template`

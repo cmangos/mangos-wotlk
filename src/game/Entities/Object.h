@@ -328,6 +328,7 @@ struct WorldLocation
     WorldLocation(WorldLocation const& loc)
         : mapid(loc.mapid), coord_x(loc.coord_x), coord_y(loc.coord_y), coord_z(loc.coord_z), orientation(loc.orientation) {}
     WorldLocation(uint32 mapId, Position const& pos) : mapid(mapId), coord_x(pos.x), coord_y(pos.y), coord_z(pos.z), orientation(pos.o) {}
+    void GetPosition(float& x, float& y, float& z) { x = coord_x; y = coord_y; z = coord_z; }
 };
 
 // use this class to measure time between world update ticks
@@ -593,7 +594,7 @@ class Object
         virtual bool HasInvolvedQuest(uint32 /* quest_id */) const { return false; }
         void SetItsNewObject(bool enable) { m_itsNewObject = enable; }
 
-        Loot* loot;
+        Loot* m_loot;
 
         inline bool IsPlayer() const { return GetTypeId() == TYPEID_PLAYER; }
         inline bool IsCreature() const { return GetTypeId() == TYPEID_UNIT; }

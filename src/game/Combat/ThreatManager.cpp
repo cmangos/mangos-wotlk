@@ -31,14 +31,17 @@
 //==============================================================
 
 // The pHatingUnit is not used yet
-float ThreatCalcHelper::CalcThreat(Unit* hatedUnit, Unit* /*pHatingUnit*/, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell)
+float ThreatCalcHelper::CalcThreat(Unit* hatedUnit, Unit* hatingUnit, float threat, bool crit, SpellSchoolMask schoolMask, SpellEntry const* threatSpell)
 {
     // all flat mods applied early
     if (!threat)
-        return 0.0f;
+        return 0.f;
 
     if (hatedUnit->GetNoThreatState()) // some NPCs cause no threat
-        return 0.0f;
+        return 0.f;
+
+    if (hatingUnit->GetTypeId() == TYPEID_PLAYER) // players have entries with 0 threat during charm
+        return 0.f;
 
     if (threatSpell)
     {
@@ -331,7 +334,7 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
     bool found = false;
     bool onlySecondChoiceTargetsFound = false;
     bool checkedCurrentVictim = false;
-    bool suppressRanged = attacker->hasUnitState(UNIT_STAT_ROOT) && !attacker->AI()->IsRangedUnit();
+    bool suppressRanged = attacker->IsIgnoringRangedTargets();
     bool currentVictimInMelee = true;
     if (suppressRanged && currentVictim)
         currentVictimInMelee = attacker->CanReachWithMeleeAttack(currentVictim->getTarget());
@@ -347,37 +350,38 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
         MANGOS_ASSERT(target);                             // if the ref has status online the target must be there!
 
         bool isInMelee = attacker->CanReachWithMeleeAttack(target);
-        // Some bosses keep ranged targets in threat list but do not pick them with generic threat choice
-        if (!isInMelee)
-        {
-            if (attacker->IsIgnoringRangedTargets())
-            {
-                ++iter;
-                continue;
-            }
-        }
-
         if (currentVictim) // select 1.3/1.1 better target in comparison current target
         {
-
-
             // normal case: pCurrentRef is still valid and most hated
             if (currentVictim == currentRef)
             {
+                if (suppressRanged && !currentVictimInMelee)
+                {
+                    ++iter;
+                    continue;
+                }
                 found = true;
                 break;
             }
 
-            if (currentRef->GetTauntState() > currentVictim->GetTauntState())
+            if (currentRef->GetTauntState() > currentVictim->GetTauntState()) // taunt overrides root skipping
             {
                 found = true;
                 break;
             }
 
-            if (suppressRanged && isInMelee && !currentVictimInMelee) // suppress ranged when rooted
+            if (suppressRanged) // suppress ranged when rooted
             {
-                found = true;
-                break;
+                if (!isInMelee) // if current ref is not in melee - skip it
+                {
+                    ++iter;
+                    continue;
+                }
+                else if (!currentVictimInMelee)
+                {
+                    found = true;
+                    break;
+                }
             }
 
             if (currentRef->GetHostileState() > currentVictim->GetHostileState())
@@ -402,7 +406,7 @@ HostileReference* ThreatContainer::selectNextVictim(Unit* attacker, HostileRefer
                 break;                                  // for selecting alive targets
             }
         }
-        else                                            // select any
+        else if (!suppressRanged || isInMelee) // select any
         {
             found = true;
             break;
@@ -518,7 +522,7 @@ void ThreatManager::modifyAllThreatPercent(int32 threatPercent)
 
 void ThreatManager::UpdateContainers()
 {
-    iThreatContainer.update(getOwner()->hasUnitState(UNIT_STAT_ROOT) && !getOwner()->AI()->IsRangedUnit());
+    iThreatContainer.update(getOwner()->IsIgnoringRangedTargets());
 }
 
 Unit* ThreatManager::getHostileTarget()
@@ -606,6 +610,8 @@ void ThreatManager::setCurrentVictim(HostileReference* hostileReference)
 
 void ThreatManager::setCurrentVictimByTarget(Unit* target)
 {
+    if (iCurrentVictim && target == iCurrentVictim->getTarget())
+        return;
     if (HostileReference* ref = iThreatContainer.getReferenceByTarget(target))
         setCurrentVictim(ref);
 }

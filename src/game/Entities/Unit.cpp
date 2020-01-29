@@ -231,7 +231,8 @@ Unit::Unit() :
     m_combatData(new CombatData(this)),
     m_spellUpdateHappening(false),
     m_spellProcsHappening(false),
-    m_auraUpdateMask(0)
+    m_auraUpdateMask(0),
+    m_ignoreRangedTargets(false)
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -7078,6 +7079,8 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
         return false;
 
     m_attacking = victim;
+    if (CanHaveThreatList())
+        getThreatManager().setCurrentVictimByTarget(victim);
 
     // delay offhand weapon attack to next attack time
     if (hasOffhandWeaponForAttack())
@@ -9976,13 +9979,12 @@ bool Unit::IsTargetUnderControl(Unit const& target) const
 
 bool Unit::CanHaveThreatList(bool ignoreAliveState/*=false*/) const
 {
-    // only creatures can have threat list
-    if (GetTypeId() != TYPEID_UNIT)
-        return false;
-
     // only alive units can have threat list
     if (!isAlive() && !ignoreAliveState)
         return false;
+
+    if (GetTypeId() == TYPEID_PLAYER) // only charmed players have a threat list
+        return !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
     Creature const* creature = static_cast<Creature const*>(this);
 
@@ -9991,7 +9993,7 @@ bool Unit::CanHaveThreatList(bool ignoreAliveState/*=false*/) const
         return false;
 
     // pets can not have a threat list, unless they are controlled by a creature
-    if (creature->IsPet() && creature->GetOwnerGuid().IsPlayer())
+    if (creature->IsPet() && HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
     {
         Pet const* pet = static_cast<Pet const*>(creature);
         return pet->getPetType() == GUARDIAN_PET || pet->getPetType() == PROTECTOR_PET;
@@ -11339,7 +11341,11 @@ bool Unit::SetConfused(bool apply, ObjectGuid casterGuid, uint32 spellID)
             if (apply)
                 GetMotionMaster()->MoveConfused();
             else if (IsFleeing() && !panic)
-                GetMotionMaster()->MoveFleeing((IsInWorld() ? GetMap()->GetUnit(casterGuid) : nullptr));
+            {
+                AuraList const& fears = GetAurasByType(SPELL_AURA_MOD_FEAR);
+                Unit* source = (fears.empty() ? nullptr : fears.back()->GetCaster());
+                GetMotionMaster()->MoveFleeing(source ? source : this);
+            }
         }
 
         if (apply)
@@ -11379,7 +11385,10 @@ bool Unit::SetFleeing(bool apply, ObjectGuid casterGuid/* = ObjectGuid()*/, uint
             if (IsConfused())
                 GetMotionMaster()->MoveConfused();
             else if (apply)
-                GetMotionMaster()->MoveFleeing((IsInWorld() ? GetMap()->GetUnit(casterGuid) : nullptr), duration);
+            {
+                Unit* source = (IsInWorld() ? GetMap()->GetUnit(casterGuid) : nullptr);
+                GetMotionMaster()->MoveFleeing((source ? source : this), duration);
+            }
         }
 
         if (apply)
@@ -12954,6 +12963,24 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
             charmerPlayer->SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
 
+    // put charmed in combat with all charmers enemies - must be done after flags
+    ThreatList const& list = getThreatManager().getThreatList();
+    for (auto& data : list)
+    {
+        Unit* enemy = data->getTarget();
+        if (charmed->CanAttack(enemy))
+            charmed->AddThreat(enemy, 0.f);
+    }
+
+    //if (!isInCombat())
+    //{
+    //    charmed->GetCombatManager().StopCombatTimer();
+    //    charmed->ClearInCombat();
+    //}
+
+    if (UnitAI* ai = charmed->AI())
+        ai->JustGotCharmed(this);
+
     return true;
 }
 
@@ -13121,10 +13148,10 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         charmInfo->ResetCharmState();
         charmedPlayer->DeleteCharmInfo();
 
-        while (charmedPlayer->GetMotionMaster()->GetCurrentMovementGeneratorType() == FOLLOW_MOTION_TYPE)
-            charmedPlayer->GetMotionMaster()->MovementExpired(true);
+        charmed->GetMotionMaster()->Clear(false, true);
+        charmed->GetMotionMaster()->MoveIdle();
 
-        charmedPlayer->DeleteThreatList(); // TODO: Add threat management for player during charm, only entries with 0 threat
+        charmed->DeleteThreatList();
 
         charmed->SetTarget(nullptr);
     }
@@ -13139,7 +13166,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         {
             if (!charmed->isInCombat())
             {
-                SetInCombatWithVictim(charmed);
+                SetInCombatWithAggressor(charmed);
                 charmed->SetInCombatWithAggressor(this);
             }
             else

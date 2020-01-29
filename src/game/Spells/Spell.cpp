@@ -681,6 +681,13 @@ void Spell::FillTargetMap()
                     uint8 effectMask = targetMask[rightTarget];
                     if (!goTargetList.empty()) // GO case
                     {
+                        for (auto iter = goTargetList.begin(); iter != goTargetList.end();)
+                        {
+                            if (CheckTargetGOScript(*iter, SpellEffectIndex(i)))
+                                ++iter;
+                            else
+                                iter = goTargetList.erase(iter);
+                        }
                         if (m_affectedTargetCount && goTargetList.size() > m_affectedTargetCount)
                         {
                             // remove random units from the map
@@ -699,16 +706,6 @@ void Spell::FillTargetMap()
                                 }
                             }
                         }
-
-                        for (auto iter = goTargetList.begin(); iter != goTargetList.end();)
-                        {
-                            if (CheckTargetGOScript(*iter, SpellEffectIndex(i)))
-                                ++iter;
-                            else
-                                iter = goTargetList.erase(iter);
-                        }
-
-                        // Add resulting GOs as GOTargets
                         for (GameObject* go : goTargetList)
                             AddGOTarget(go, effectMask);
                     }
@@ -3944,6 +3941,16 @@ void Spell::update(uint32 difftime)
                             cancel();
                     }
 
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_TAME_BEAST)) // these fail on lost target attention (aggro)
+                    {
+                        if (Unit* target = m_caster->GetChannelObject())
+                        {
+                            Unit* targetsTarget = target->GetTarget();
+                            if (targetsTarget && targetsTarget != m_caster)
+                                cancel();
+                        }
+                    }
+
                     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_CHANNEL_TRACK_TARGET) && m_UniqueTargetInfo.begin() != m_UniqueTargetInfo.end())
                     {
                         if (Unit* target = m_caster->GetChannelObject())
@@ -5477,14 +5484,15 @@ SpellCastResult Spell::CheckCast(bool strict)
             default: // needs target
             {
                 auto& data = SpellTargetInfoTable[targetType];
+                WorldObject* originalCaster = GetCastingObject();
                 if (data.type == TARGET_TYPE_UNIT && data.filter != TARGET_SCRIPT && (data.enumerator == TARGET_ENUMERATOR_SINGLE || data.enumerator == TARGET_ENUMERATOR_CHAIN))
                 {
                     if (!target)
                         return SPELL_FAILED_BAD_TARGETS;
                     switch (data.filter)
                     {
-                        case TARGET_HARMFUL: if (!m_caster->CanAttackSpell(target, m_spellInfo)) return SPELL_FAILED_BAD_TARGETS; break;
-                        case TARGET_HELPFUL: if (!m_caster->CanAssistSpell(target, m_spellInfo)) return SPELL_FAILED_BAD_TARGETS; break;
+                        case TARGET_HARMFUL: if (!originalCaster->CanAttackSpell(target, m_spellInfo)) return SPELL_FAILED_BAD_TARGETS; break;
+                        case TARGET_HELPFUL: if (!originalCaster->CanAssistSpell(target, m_spellInfo)) return SPELL_FAILED_BAD_TARGETS; break;
                         case TARGET_PARTY:
                         case TARGET_GROUP: if (!m_caster->CanAssistSpell(target, m_spellInfo) || !m_caster->IsInGroup(target, targetType == TARGET_UNIT_PARTY)) return SPELL_FAILED_BAD_TARGETS; break;
                         default: break;
@@ -5926,6 +5934,10 @@ SpellCastResult Spell::CheckCast(bool strict)
                     // check if its in use only when cast is finished (called from spell::cast() with strict = false)
                     if (!strict && go->IsInUse())
                         return SPELL_FAILED_CHEST_IN_USE;
+
+                    // done in client but we need to recheck anyway
+                    if (go->GetGOInfo()->CannotBeUsedUnderImmunity() && m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE))
+                        return SPELL_FAILED_DAMAGE_IMMUNE;
                 }
                 else if (Item* item = m_targets.getItemTarget())
                 {
@@ -8755,7 +8767,7 @@ void Spell::OnSuccessfulSpellFinish()
     }
 }
 
-SpellCastResult Spell::OnCheckCast(bool /*strict*/)
+SpellCastResult Spell::OnCheckCast(bool strict)
 {
     switch (m_spellInfo->Id)
     {
@@ -8769,12 +8781,33 @@ SpellCastResult Spell::OnCheckCast(bool /*strict*/)
                 return SPELL_FAILED_BAD_TARGETS;
             break;
         }
+        case 4131: // Banish Cresting Exile
+        {
+            if (ObjectGuid target = m_targets.getUnitTargetGuid()) // can be cast only on this target
+                if (target.GetEntry() != 2761)
+                    return SPELL_FAILED_BAD_TARGETS;
+            break;
+        }
         case 7914: // Capture Spirit
         {
             if (ObjectGuid target = m_targets.getUnitTargetGuid()) // can be cast only on these targets
                 if (target.GetEntry() != 4663 && target.GetEntry() != 4664 && target.GetEntry() != 4665 && target.GetEntry() != 4666 && target.GetEntry() != 4667
                     && target.GetEntry() != 4668 && target.GetEntry() != 4705 && target.GetEntry() != 13019)
                     return SPELL_FAILED_BAD_TARGETS;
+            break;
+        }
+        case 12699: // Summon Screecher Spirit
+        {
+            Unit* target = m_targets.getUnitTarget();
+            if (!target || !target->IsCreature())
+                return SPELL_FAILED_BAD_TARGETS;
+            if (strict)
+                return static_cast<Creature*>(target)->HasBeenHitBySpell(m_spellInfo->Id) ? SPELL_FAILED_BAD_TARGETS : SPELL_CAST_OK;
+            else
+            {
+                static_cast<Creature*>(target)->RegisterHitBySpell(m_spellInfo->Id);
+                return SPELL_CAST_OK;
+            }
             break;
         }
         case 30077: // Carinda's Retribution

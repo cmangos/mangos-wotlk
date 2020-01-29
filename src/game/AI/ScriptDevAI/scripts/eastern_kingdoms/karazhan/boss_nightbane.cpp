@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Nightbane
 SD%Complete: 80
-SDComment: Intro movement is a little choppy because of the lack of waypoint movement support. Air phase movement requires improvement. Timers need adjustment.
+SDComment: Boss apparently only takes assist threat in P2
 SDCategory: Karazhan
 EndScriptData */
 
@@ -189,6 +189,7 @@ struct boss_nightbaneAI : public npc_escortAI
 
             m_bCombatStarted = true;
             m_creature->SetInCombatWithZone();
+            AttackClosestEnemy();
         }
     }
 
@@ -230,7 +231,7 @@ struct boss_nightbaneAI : public npc_escortAI
                     SetCombatMovement(true);
                     SetDeathPrevention(false);
                     DoResetThreat();
-                    DoStartMovement(m_creature->getVictim());
+                    AttackClosestEnemy();
                     break;
             }
             PhaseTransitionTimersReset();
@@ -360,7 +361,7 @@ struct boss_nightbaneAI : public npc_escortAI
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     {
-                        if (DoCastSpellIfCan(pTarget, SPELL_SMOKING_BLAST) == CAST_OK)
+                        if (DoCastSpellIfCan(pTarget, SPELL_SMOKING_BLAST) == CAST_OK) // should hit highest aggro target
                             m_uiSmokingBlastTimer = urand(1000, 3000);
                     }
                 }
@@ -371,7 +372,7 @@ struct boss_nightbaneAI : public npc_escortAI
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     {
-                        if (DoCastSpellIfCan(pTarget, SPELL_DISTRACTING_ASH) == CAST_OK)
+                        if (DoCastSpellIfCan(pTarget, SPELL_DISTRACTING_ASH) == CAST_OK) // should be used in both phases
                             m_uiDistractingAshTimer = urand(7000, 13000);
                     }
                 }

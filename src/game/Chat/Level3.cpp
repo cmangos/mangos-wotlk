@@ -56,6 +56,7 @@
 #include "AuctionHouseBot/AuctionHouseBot.h"
 #include "Server/SQLStorages.h"
 #include "Loot/LootMgr.h"
+#include "World/WorldState.h"
 
 static uint32 ahbotQualityIds[MAX_AUCTION_QUALITY] =
 {
@@ -1779,622 +1780,53 @@ bool ChatHandler::HandleCooldownClearArenaCommand(char*)
 
 bool ChatHandler::HandleLearnAllCommand(char* /*args*/)
 {
-    static uint32 allSpellList[] =
+    Player* player = getSelectedPlayer();
+    if (!player)
     {
-        3365,
-        6233,
-        6247,
-        6246,
-        6477,
-        6478,
-        22810,
-        8386,
-        21651,
-        21652,
-        522,
-        7266,
-        8597,
-        2479,
-        22027,
-        6603,
-        5019,
-        133,
-        168,
-        227,
-        5009,
-        9078,
-        668,
-        203,
-        20599,
-        20600,
-        81,
-        20597,
-        20598,
-        20864,
-        1459,
-        5504,
-        587,
-        5143,
-        118,
-        5505,
-        597,
-        604,
-        1449,
-        1460,
-        2855,
-        1008,
-        475,
-        5506,
-        1463,
-        12824,
-        8437,
-        990,
-        5145,
-        8450,
-        1461,
-        759,
-        8494,
-        8455,
-        8438,
-        6127,
-        8416,
-        6129,
-        8451,
-        8495,
-        8439,
-        3552,
-        8417,
-        10138,
-        12825,
-        10169,
-        10156,
-        10144,
-        10191,
-        10201,
-        10211,
-        10053,
-        10173,
-        10139,
-        10145,
-        10192,
-        10170,
-        10202,
-        10054,
-        10174,
-        10193,
-        12826,
-        2136,
-        143,
-        145,
-        2137,
-        2120,
-        3140,
-        543,
-        2138,
-        2948,
-        8400,
-        2121,
-        8444,
-        8412,
-        8457,
-        8401,
-        8422,
-        8445,
-        8402,
-        8413,
-        8458,
-        8423,
-        8446,
-        10148,
-        10197,
-        10205,
-        10149,
-        10215,
-        10223,
-        10206,
-        10199,
-        10150,
-        10216,
-        10207,
-        10225,
-        10151,
-        116,
-        205,
-        7300,
-        122,
-        837,
-        10,
-        7301,
-        7322,
-        6143,
-        120,
-        865,
-        8406,
-        6141,
-        7302,
-        8461,
-        8407,
-        8492,
-        8427,
-        8408,
-        6131,
-        7320,
-        10159,
-        8462,
-        10185,
-        10179,
-        10160,
-        10180,
-        10219,
-        10186,
-        10177,
-        10230,
-        10181,
-        10161,
-        10187,
-        10220,
-        2018,
-        2663,
-        12260,
-        2660,
-        3115,
-        3326,
-        2665,
-        3116,
-        2738,
-        3293,
-        2661,
-        3319,
-        2662,
-        9983,
-        8880,
-        2737,
-        2739,
-        7408,
-        3320,
-        2666,
-        3323,
-        3324,
-        3294,
-        22723,
-        23219,
-        23220,
-        23221,
-        23228,
-        23338,
-        10788,
-        10790,
-        5611,
-        5016,
-        5609,
-        2060,
-        10963,
-        10964,
-        10965,
-        22593,
-        22594,
-        596,
-        996,
-        499,
-        768,
-        17002,
-        1448,
-        1082,
-        16979,
-        1079,
-        5215,
-        20484,
-        5221,
-        15590,
-        17007,
-        6795,
-        6807,
-        5487,
-        1446,
-        1066,
-        5421,
-        3139,
-        779,
-        6811,
-        6808,
-        1445,
-        5216,
-        1737,
-        5222,
-        5217,
-        1432,
-        6812,
-        9492,
-        5210,
-        3030,
-        1441,
-        783,
-        6801,
-        20739,
-        8944,
-        9491,
-        22569,
-        5226,
-        6786,
-        1433,
-        8973,
-        1828,
-        9495,
-        9006,
-        6794,
-        8993,
-        5203,
-        16914,
-        6784,
-        9635,
-        22830,
-        20722,
-        9748,
-        6790,
-        9753,
-        9493,
-        9752,
-        9831,
-        9825,
-        9822,
-        5204,
-        5401,
-        22831,
-        6793,
-        9845,
-        17401,
-        9882,
-        9868,
-        20749,
-        9893,
-        9899,
-        9895,
-        9832,
-        9902,
-        9909,
-        22832,
-        9828,
-        9851,
-        9883,
-        9869,
-        17406,
-        17402,
-        9914,
-        20750,
-        9897,
-        9848,
-        3127,
-        107,
-        204,
-        9116,
-        2457,
-        78,
-        18848,
-        331,
-        403,
-        2098,
-        1752,
-        11278,
-        11288,
-        11284,
-        6461,
-        2344,
-        2345,
-        6463,
-        2346,
-        2352,
-        775,
-        1434,
-        1612,
-        71,
-        2468,
-        2458,
-        2467,
-        7164,
-        7178,
-        7367,
-        7376,
-        7381,
-        21156,
-        5209,
-        3029,
-        5201,
-        9849,
-        9850,
-        20719,
-        22568,
-        22827,
-        22828,
-        22829,
-        6809,
-        8972,
-        9005,
-        9823,
-        9827,
-        6783,
-        9913,
-        6785,
-        6787,
-        9866,
-        9867,
-        9894,
-        9896,
-        6800,
-        8992,
-        9829,
-        9830,
-        780,
-        769,
-        6749,
-        6750,
-        9755,
-        9754,
-        9908,
-        20745,
-        20742,
-        20747,
-        20748,
-        9746,
-        9745,
-        9880,
-        9881,
-        5391,
-        842,
-        3025,
-        3031,
-        3287,
-        3329,
-        1945,
-        3559,
-        4933,
-        4934,
-        4935,
-        4936,
-        5142,
-        5390,
-        5392,
-        5404,
-        5420,
-        6405,
-        7293,
-        7965,
-        8041,
-        8153,
-        9033,
-        9034,
-        //9036, problems with ghost state
-        16421,
-        21653,
-        22660,
-        5225,
-        9846,
-        2426,
-        5916,
-        6634,
-        //6718, phasing stealth, annoying for learn all case.
-        6719,
-        8822,
-        9591,
-        9590,
-        10032,
-        17746,
-        17747,
-        8203,
-        11392,
-        12495,
-        16380,
-        23452,
-        4079,
-        4996,
-        4997,
-        4998,
-        4999,
-        5000,
-        6348,
-        6349,
-        6481,
-        6482,
-        6483,
-        6484,
-        11362,
-        11410,
-        11409,
-        12510,
-        12509,
-        12885,
-        13142,
-        21463,
-        23460,
-        11421,
-        11416,
-        11418,
-        1851,
-        10059,
-        11423,
-        11417,
-        11422,
-        11419,
-        11424,
-        11420,
-        27,
-        31,
-        33,
-        34,
-        35,
-        15125,
-        21127,
-        22950,
-        1180,
-        201,
-        12593,
-        12842,
-        16770,
-        6057,
-        12051,
-        18468,
-        12606,
-        12605,
-        18466,
-        12502,
-        12043,
-        15060,
-        12042,
-        12341,
-        12848,
-        12344,
-        12353,
-        18460,
-        11366,
-        12350,
-        12352,
-        13043,
-        11368,
-        11113,
-        12400,
-        11129,
-        16766,
-        12573,
-        15053,
-        12580,
-        12475,
-        12472,
-        12953,
-        12488,
-        11189,
-        12985,
-        12519,
-        16758,
-        11958,
-        12490,
-        11426,
-        3565,
-        3562,
-        18960,
-        3567,
-        3561,
-        3566,
-        3563,
-        1953,
-        2139,
-        12505,
-        13018,
-        12522,
-        12523,
-        5146,
-        5144,
-        5148,
-        8419,
-        8418,
-        10213,
-        10212,
-        10157,
-        12524,
-        13019,
-        12525,
-        13020,
-        12526,
-        13021,
-        18809,
-        13031,
-        13032,
-        13033,
-        4036,
-        3920,
-        3919,
-        3918,
-        7430,
-        3922,
-        3923,
-        7411,
-        7418,
-        7421,
-        13262,
-        7412,
-        7415,
-        7413,
-        7416,
-        13920,
-        13921,
-        7745,
-        7779,
-        7428,
-        7457,
-        7857,
-        7748,
-        7426,
-        13421,
-        7454,
-        13378,
-        7788,
-        14807,
-        14293,
-        7795,
-        6296,
-        20608,
-        755,
-        444,
-        427,
-        428,
-        442,
-        447,
-        3578,
-        3581,
-        19027,
-        3580,
-        665,
-        3579,
-        3577,
-        6755,
-        3576,
-        2575,
-        2577,
-        2578,
-        2579,
-        2580,
-        2656,
-        2657,
-        2576,
-        3564,
-        10248,
-        8388,
-        2659,
-        14891,
-        3308,
-        3307,
-        10097,
-        2658,
-        3569,
-        16153,
-        3304,
-        10098,
-        4037,
-        3929,
-        3931,
-        3926,
-        3924,
-        3930,
-        3977,
-        3925,
-        136,
-        228,
-        5487,
-        43,
-        202
-    };
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
-    for (uint32 spell : allSpellList)
+    for (uint32 i = 0; i < sSpellTemplate.GetMaxEntry(); i++)
     {
-        if (m_session->GetPlayer()->HasSpell(spell))
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(i);
+        if (!spellInfo)
             continue;
 
-        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spell);
-        if (!spellInfo || !SpellMgr::IsSpellValid(spellInfo, m_session->GetPlayer()))
+        for (uint32 j = 0; j < MAX_EFFECT_INDEX; j++)
         {
-            PSendSysMessage(LANG_COMMAND_SPELL_BROKEN, spell);
-            continue;
-        }
+            if ((spellInfo->Effect[j] == SPELL_EFFECT_LEARN_SPELL) &&
+                (spellInfo->EffectImplicitTargetA[j] == TARGET_NONE))
+            {
+                uint32 spellId = spellInfo->EffectTriggerSpell[j];
+                SpellEntry const* newSpell = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
 
-        m_session->GetPlayer()->learnSpell(spell, false);
+                // skip broken spells
+                if (!SpellMgr::IsSpellValid(newSpell, player, false))
+                    continue;
+
+                // skip spells with first rank learned as talent (and all talents then also)
+                uint32 firstRankId = sSpellMgr.GetFirstSpellInChain(spellId);
+                if (GetTalentSpellCost(firstRankId) > 0)
+                    continue;
+                
+                if (!IsSpellHaveEffect(newSpell, SPELL_EFFECT_PROFICIENCY))
+                {
+                    // only class spells
+                    if (!newSpell->SpellFamilyName)
+                        continue;
+
+                    // skip passives
+                    if (newSpell->HasAttribute(SPELL_ATTR_PASSIVE) ||
+                        newSpell->HasAttribute(SPELL_ATTR_HIDDEN_CLIENTSIDE) ||
+                        newSpell->HasAttribute(SPELL_ATTR_EX2_DISPLAY_IN_STANCE_BAR))
+                        continue;
+                }
+
+                player->learnSpell(spellId, false);
+            }
+        }
     }
 
     SendSysMessage(LANG_COMMAND_LEARN_MANY_SPELLS);
@@ -4258,7 +3690,7 @@ bool ChatHandler::HandleLinkGraveCommand(char* args)
     else
         return false;
 
-    WorldSafeLocsEntry const* graveyard = sWorldSafeLocsStore.LookupEntry(g_id);
+    WorldSafeLocsEntry const* graveyard = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(g_id);
     if (!graveyard)
     {
         PSendSysMessage(LANG_COMMAND_GRAVEYARDNOEXIST, g_id);
@@ -4470,11 +3902,11 @@ bool ChatHandler::HandleNpcThreatCommand(char* /*args*/)
     ThreatList const& tList = target->getThreatManager().getThreatList();
     for (auto itr : tList)
     {
-        Unit* pUnit = itr->getTarget();
+        Unit* unit = itr->getTarget();
 
-        if (pUnit)
+        if (unit)
             // Player |cffff0000%s|r [GUID: %u] has |cffff0000%f|r threat, taunt state %u and hostile state %u
-            PSendSysMessage(LANG_NPC_THREAT_PLAYER, pUnit->GetName(), pUnit->GetGUIDLow(), target->getThreatManager().getThreat(pUnit), itr->GetTauntState(), itr->GetHostileState());
+            PSendSysMessage(LANG_NPC_THREAT_PLAYER, unit->GetName(), unit->GetGUIDLow(), target->getThreatManager().getThreat(unit), itr->GetTauntState(), itr->GetHostileState());
     }
     
     return true;
@@ -7740,4 +7172,251 @@ bool ChatHandler::HandleLinkCheckCommand(char* args)
         PSendSysMessage("Link for guids = %u , %u not found", masterCounter, player->GetSelectionGuid().GetCounter());
 
     return true;
+}
+
+bool ChatHandler::HandleExpansionRelease(char* args)
+{
+    uint32 curExpansion = sWorldState.GetExpansion();
+
+    uint32 param;
+    if (!ExtractUInt32(&args, param))
+    {
+        PSendSysMessage("Current Expansion: %u", curExpansion);
+        return true;
+    }
+
+    if (param == curExpansion)
+    {
+        SendSysMessage("Current Expansion is same as given expansion.");
+        return true;
+    }
+
+    if (sWorldState.SetExpansion(param))
+        PSendSysMessage("New Expansion set to %u", param);
+    else
+        PSendSysMessage("Setting expansion failed. Consult manual.");
+    return true;
+}
+
+enum ModSpells
+{
+    // client spells
+    SPELL_MOD_STRENGTH     = 13372,
+    SPELL_MOD_AGILITY      = 13365,
+    SPELL_MOD_STAMINA      = 13370,
+    SPELL_MOD_INTELLECT    = 13366,
+    SPELL_MOD_SPIRIT       = 13368,
+    SPELL_MOD_SPELL_POWER  = 22747,
+
+    // custom spells
+    SPELL_MOD_ARMOR        = 15170,
+    SPELL_MOD_RES_HOLY     = 15171,
+    SPELL_MOD_RES_FIRE     = 15172,
+    SPELL_MOD_RES_NATURE   = 15173,
+    SPELL_MOD_RES_FROST    = 15174,
+    SPELL_MOD_RES_SHADOW   = 15175,
+    SPELL_MOD_RES_ARCANE   = 15176,
+    SPELL_MOD_MELEE_AP     = 15177,
+    SPELL_MOD_RANGE_AP     = 15178,
+    SPELL_MOD_MELEE_CRIT   = 15179,
+    SPELL_MOD_SPELL_CRIT   = 15180,
+    SPELL_MOD_MELEE_HASTE  = 15181,
+    SPELL_MOD_RANGE_HASTE  = 15182,
+    SPELL_MOD_SPELL_HASTE  = 15183,
+    SPELL_MOD_PARRY_CHANCE = 15184,
+    SPELL_MOD_DODGE_CHANCE = 15185,
+    SPELL_MOD_BLOCK_CHANCE = 15186,
+};
+
+bool ChatHandler::HandleResetModsCommand(char *args)
+{
+    Unit* target = getSelectedUnit();
+
+    if (!target)
+    {
+        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    target->RemoveAurasDueToSpell(SPELL_MOD_STRENGTH);
+    target->RemoveAurasDueToSpell(SPELL_MOD_AGILITY);
+    target->RemoveAurasDueToSpell(SPELL_MOD_STAMINA);
+    target->RemoveAurasDueToSpell(SPELL_MOD_INTELLECT);
+    target->RemoveAurasDueToSpell(SPELL_MOD_SPIRIT);
+    target->RemoveAurasDueToSpell(SPELL_MOD_ARMOR);
+    target->RemoveAurasDueToSpell(SPELL_MOD_RES_HOLY);
+    target->RemoveAurasDueToSpell(SPELL_MOD_RES_FIRE);
+    target->RemoveAurasDueToSpell(SPELL_MOD_RES_NATURE);
+    target->RemoveAurasDueToSpell(SPELL_MOD_RES_FROST);
+    target->RemoveAurasDueToSpell(SPELL_MOD_RES_SHADOW);
+    target->RemoveAurasDueToSpell(SPELL_MOD_RES_ARCANE);
+    target->RemoveAurasDueToSpell(SPELL_MOD_MELEE_AP);
+    target->RemoveAurasDueToSpell(SPELL_MOD_RANGE_AP);
+    target->RemoveAurasDueToSpell(SPELL_MOD_SPELL_POWER);
+    target->RemoveAurasDueToSpell(SPELL_MOD_MELEE_CRIT);
+    target->RemoveAurasDueToSpell(SPELL_MOD_SPELL_CRIT);
+    target->RemoveAurasDueToSpell(SPELL_MOD_MELEE_HASTE);
+    target->RemoveAurasDueToSpell(SPELL_MOD_RANGE_HASTE);
+    target->RemoveAurasDueToSpell(SPELL_MOD_SPELL_HASTE);
+    target->RemoveAurasDueToSpell(SPELL_MOD_PARRY_CHANCE);
+    target->RemoveAurasDueToSpell(SPELL_MOD_DODGE_CHANCE);
+    target->RemoveAurasDueToSpell(SPELL_MOD_BLOCK_CHANCE);
+
+    PSendSysMessage("You removed all stat mods from %s.", target->GetName());
+
+    return true;
+}
+
+bool ChatHandler::ModifyStatCommandHelper(char* args, char const* statName, uint32 spellId)
+{
+    if (!*args)
+        return false;
+    
+    Unit* target = getSelectedUnit();
+
+    if (!target)
+    {
+        PSendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    int32 amount;
+    if (!ExtractInt32(&args, amount))
+        return false;
+
+    if (!amount)
+    {
+        target->RemoveAurasDueToSpell(spellId);
+        return true;
+    }
+
+    target->RemoveAurasDueToSpell(spellId);
+    target->CastCustomSpell(target, spellId, &amount, &amount, nullptr, TRIGGERED_OLD_TRIGGERED);
+
+    if (spellId == SPELL_MOD_STAMINA)
+        target->SetHealthPercent(100);
+    else if (spellId = SPELL_MOD_INTELLECT)
+        target->SetPower(POWER_MANA, target->GetMaxPower(POWER_MANA));
+
+    PSendSysMessage("You changed %s of %s to %i.", statName, target->GetName(), amount);
+
+    return true;
+}
+
+bool ChatHandler::HandleModifyStrengthCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Strength", SPELL_MOD_STRENGTH);
+}
+
+bool ChatHandler::HandleModifyAgilityCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Agility", SPELL_MOD_AGILITY);
+}
+
+bool ChatHandler::HandleModifyStaminaCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Stamina", SPELL_MOD_STAMINA);
+}
+
+bool ChatHandler::HandleModifyIntellectCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Intellect", SPELL_MOD_INTELLECT);
+}
+
+bool ChatHandler::HandleModifySpiritCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Spirit", SPELL_MOD_SPIRIT);
+}
+
+bool ChatHandler::HandleModifyArmorCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Armor", SPELL_MOD_ARMOR);
+}
+
+bool ChatHandler::HandleModifyHolyCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Holy Resistance", SPELL_MOD_RES_HOLY);
+}
+
+bool ChatHandler::HandleModifyFireCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Fire Resistance", SPELL_MOD_RES_FIRE);
+}
+
+bool ChatHandler::HandleModifyNatureCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Nature Resistance", SPELL_MOD_RES_NATURE);
+}
+
+bool ChatHandler::HandleModifyFrostCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Frost Resistance", SPELL_MOD_RES_FROST);
+}
+
+bool ChatHandler::HandleModifyShadowCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Shadow Resistance", SPELL_MOD_RES_SHADOW);
+}
+
+bool ChatHandler::HandleModifyArcaneCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Arcane Resistance", SPELL_MOD_RES_ARCANE);
+}
+
+bool ChatHandler::HandleModifyMeleeApCommand(char *args)
+{
+   
+    return ModifyStatCommandHelper(args, "Melee Attack Power", SPELL_MOD_MELEE_AP);
+}
+
+bool ChatHandler::HandleModifyRangedApCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Ranged Attack Power", SPELL_MOD_RANGE_AP);
+}
+
+bool ChatHandler::HandleModifySpellPowerCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Spell Power", SPELL_MOD_SPELL_POWER);
+}
+
+bool ChatHandler::HandleModifyMeleeCritCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Melee Crit", SPELL_MOD_MELEE_CRIT);
+}
+
+bool ChatHandler::HandleModifySpellCritCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Spell Crit", SPELL_MOD_SPELL_CRIT);
+}
+
+bool ChatHandler::HandleModifyMeleeHasteCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Melee Haste", SPELL_MOD_MELEE_HASTE);
+}
+
+bool ChatHandler::HandleModifyRangedHasteCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Ranged Haste", SPELL_MOD_RANGE_HASTE);
+}
+
+bool ChatHandler::HandleModifySpellHasteCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Spell Haste", SPELL_MOD_SPELL_HASTE);
+}
+
+bool ChatHandler::HandleModifyBlockCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Block Chance", SPELL_MOD_BLOCK_CHANCE);
+}
+
+bool ChatHandler::HandleModifyDodgeCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Dodge Chance", SPELL_MOD_DODGE_CHANCE);
+}
+
+bool ChatHandler::HandleModifyParryCommand(char *args)
+{
+    return ModifyStatCommandHelper(args, "Parry Chance", SPELL_MOD_PARRY_CHANCE);
 }

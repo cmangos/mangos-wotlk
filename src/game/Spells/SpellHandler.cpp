@@ -274,7 +274,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
     }
     else
     {
-        Loot*& loot = pItem->loot;
+        Loot*& loot = pItem->m_loot;
         if (!loot)
             loot = new Loot(pUser, pItem, LOOT_PICKPOCKETING);
 
@@ -321,6 +321,10 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
         sLog.outError("HandleGameObjectUseOpcode: CMSG_GAMEOBJ_USE for GameObject (Entry %u) with non intractable flag (Flags %u), didn't expect this to happen.", obj->GetEntry(), obj->GetUInt32Value(GAMEOBJECT_FLAGS));
         return;
     }
+
+    // client checks this but needs recheck
+    if (obj->GetGOInfo()->CannotBeUsedUnderImmunity() && _player->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE))
+        return;
 
     obj->Use(_player);
 }

@@ -141,7 +141,7 @@ Creature::Creature(CreatureSubtype subtype) : Unit(),
     m_isDeadByDefault(false),
     m_temporaryFactionFlags(TEMPFACTION_NONE),
     m_originalEntry(0), m_ai(nullptr),
-    m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false), m_ignoreRangedTargets(false), m_countSpawns(false),
+    m_isInvisible(false), m_ignoreMMAP(false), m_forceAttackingCapability(false), m_countSpawns(false),
     m_creatureInfo(nullptr),
     m_noXP(false), m_noLoot(false), m_noReputation(false)
 {
@@ -252,8 +252,8 @@ void Creature::RemoveCorpse(bool inPlace)
     SetDeathState(DEAD);
     UpdateObjectVisibility();
 
-    delete loot;
-    loot = nullptr;
+    delete m_loot;
+    m_loot = nullptr;
     m_lootStatus = CREATURE_LOOT_STATUS_NONE;
     uint32 respawnDelay = 0;
 
@@ -640,8 +640,8 @@ void Creature::Update(const uint32 diff)
                 DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "Respawning...");
                 m_respawnTime = 0;
                 SetCanAggro(false);
-                delete loot;
-                loot = nullptr;
+                delete m_loot;
+                m_loot = nullptr;
 
                 // Clear possible auras having IsDeathPersistent() attribute
                 RemoveAllAuras();
@@ -680,8 +680,8 @@ void Creature::Update(const uint32 diff)
         {
             Unit::Update(diff);
 
-            if (loot)
-                loot->Update();
+            if (m_loot)
+                m_loot->Update();
 
             if (!m_isDeadByDefault)
                 if (IsCorpseExpired())
@@ -1044,8 +1044,8 @@ bool Creature::CanTrainAndResetTalentsOf(Player* pPlayer) const
 void Creature::PrepareBodyLootState()
 {
     // loot may already exist (pickpocket case)
-    delete loot;
-    loot = nullptr;
+    delete m_loot;
+    m_loot = nullptr;
 
     if (IsNoLoot())
         SetLootStatus(CREATURE_LOOT_STATUS_LOOTED);
@@ -1054,7 +1054,7 @@ void Creature::PrepareBodyLootState()
         Player* killer = GetLootRecipient();
 
         if (killer)
-            loot = new Loot(killer, this, LOOT_CORPSE);
+            m_loot = new Loot(killer, this, LOOT_CORPSE);
     }
 
     if (m_lootStatus == CREATURE_LOOT_STATUS_LOOTED && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
@@ -1726,6 +1726,8 @@ void Creature::SetDeathState(DeathState s)
         Unit::SetDeathState(ALIVE);
 
         ResetEntry(true);
+
+        ResetSpellHitCounter();
 
         SetLootRecipient(nullptr);
         if (GetTemporaryFactionFlags() & TEMPFACTION_RESTORE_RESPAWN)
@@ -3040,4 +3042,19 @@ bool Creature::CanRestockPickpocketLoot() const
 void Creature::StartPickpocketRestockTimer()
 {
     m_pickpocketRestockTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(sWorld.getConfig(CONFIG_UINT32_CREATURE_PICKPOCKET_RESTOCK_DELAY) * IN_MILLISECONDS);
+}
+
+bool Creature::HasBeenHitBySpell(uint32 spellId)
+{
+    return m_hitBySpells.find(spellId) != m_hitBySpells.end();
+}
+
+void Creature::RegisterHitBySpell(uint32 spellId)
+{
+    m_hitBySpells.insert(spellId);
+}
+
+void Creature::ResetSpellHitCounter()
+{
+    m_hitBySpells.clear();
 }

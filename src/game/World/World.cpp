@@ -246,7 +246,7 @@ World::AddSession_(WorldSession* s)
     packet << uint32(0);                                    // BillingTimeRemaining
     packet << uint8(0);                                     // BillingPlanFlags
     packet << uint32(0);                                    // BillingTimeRested
-    packet << uint8(s->Expansion());                        // 0 - normal, 1 - TBC, 2 - WotLK. Must be set in database manually for each account.
+    packet << uint8(s->GetExpansion());                        // 0 - normal, 1 - TBC, 2 - WotLK. Must be set in database manually for each account.
     s->SendPacket(packet);
 
     s->SendAddonsInfo();
@@ -297,7 +297,7 @@ void World::AddQueuedSession(WorldSession* sess)
     packet << uint32(0);                                    // BillingTimeRemaining
     packet << uint8(0);                                     // BillingPlanFlags
     packet << uint32(0);                                    // BillingTimeRested
-    packet << uint8(sess->Expansion());                     // 0 - normal, 1 - TBC, must be set in database manually for each account
+    packet << uint8(sess->GetExpansion());                     // 0 - normal, 1 - TBC, must be set in database manually for each account
     packet << uint32(GetQueuedSessionPos(sess));            // position in queue
     packet << uint8(0);                                     // unk 3.3.0
     sess->SendPacket(packet);
@@ -929,6 +929,13 @@ void World::SetInitialWorldSettings()
     // load SQL dbcs first, other DBCs need them
     sObjectMgr.LoadSQLDBCs();
 
+    // Load before npc_text, gossip_menu_option, script_texts, creature_ai_texts, dbscript_string
+    sLog.outString("Loading broadcast_text...");
+    sObjectMgr.LoadBroadcastText();
+
+    sLog.outString("Loading world safe locs ...");
+    sObjectMgr.LoadWorldSafeLocs();
+    
     ///- Load the DBC files
     sLog.outString("Initialize DBC data stores...");
     LoadDBCStores(m_dataPath);
@@ -1287,6 +1294,7 @@ void World::SetInitialWorldSettings()
     sObjectMgr.LoadPointOfInterestLocales();                // must be after POI loading
     sObjectMgr.LoadQuestgiverGreetingLocales();
     sObjectMgr.LoadTrainerGreetingLocales();                // must be after CreatureInfo loading
+    sObjectMgr.LoadBroadcastTextLocales();
     sLog.outString(">>> Localization strings loaded");
     sLog.outString();
 
@@ -1760,6 +1768,29 @@ void World::SendDefenseMessage(uint32 zoneId, int32 textId)
             {
                 char const* message = session->GetMangosString(textId);
                 uint32 messageLength = strlen(message) + 1;
+
+                WorldPacket data(SMSG_DEFENSE_MESSAGE, 4 + 4 + messageLength);
+                data << uint32(zoneId);
+                data << uint32(messageLength);
+                data << message;
+                session->SendPacket(data);
+            }
+        }
+    }
+}
+
+void World::SendDefenseMessageBroadcastText(uint32 zoneId, uint32 textId)
+{
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+    {
+        if (WorldSession* session = itr->second)
+        {
+            Player* player = session->GetPlayer();
+            if (player && player->IsInWorld() && !player->GetMap()->Instanceable())
+            {
+                BroadcastText const* bct = sObjectMgr.GetBroadcastText(textId);
+                std::string const& message = bct->GetText(session->GetSessionDbLocaleIndex());
+                uint32 messageLength = message.size() + 1;
 
                 WorldPacket data(SMSG_DEFENSE_MESSAGE, 4 + 4 + messageLength);
                 data << uint32(zoneId);
@@ -2493,4 +2524,11 @@ void World::InvalidatePlayerDataToAllClient(ObjectGuid guid) const
     WorldPacket data(SMSG_INVALIDATE_PLAYER, 8);
     data << guid;
     SendGlobalMessage(data);
+}
+
+void World::UpdateSessionExpansion(uint8 expansion)
+{
+    for (auto& data : m_sessions)
+        if (data.second->GetSecurity() < SEC_GAMEMASTER)
+            data.second->SetExpansion(expansion);
 }

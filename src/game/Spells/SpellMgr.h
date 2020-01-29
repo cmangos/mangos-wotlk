@@ -454,10 +454,12 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 6752:          // Weak Poison Proc
         case 6947:          // Curse of the Bleakheart Proc
         case 7090:          // Bear Form (Shapeshift)
+        case 7165:          // Battle Stance (Rank 1)
         case 7276:          // Poison Proc
         case 8247:          // Wandering Plague
         case 8279:          // Stealth Detection
         case 8393:          // Barbs
+        case 8599:          // Enrage
         case 8601:          // Slowing Poison
         case 8876:          // Thrash
         case 9205:          // Hate to Zero (Hate to Zero)
@@ -470,6 +472,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 10095:         // Hate to Zero (Hate to Zero)
         case 11838:         // Hate to Zero (Hate to Zero)
         case 11919:         // Poison Proc
+        case 11966:         // Fire Shield
         case 11984:         // Immolate
         case 12099:         // Shield Spike
         case 12246:         // Infected Spine
@@ -481,6 +484,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 12787:         // Thrash
         case 12898:         // Smoke Aura Visual
         case 13299:         // Poison Proc
+        case 13616:         // Wracking Pains Proc
         case 13767:         // Hate to Zero (Hate to Zero)
         case 14178:         // Sticky Tar
         case 15088:         // Flurry
@@ -493,7 +497,9 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 17327:         // Spirit Particles
         case 17467:         // Unholy Aura
         case 18148:         // Static Field
+        case 18268:         // Fire Shield
         case 18943:         // Double Attack
+        case 18968:         // Fire Shield
         case 19030:         // Bear Form (Shapeshift)
         case 18950:         // Invisibility and Stealth Detection
         case 19194:         // Double Attack

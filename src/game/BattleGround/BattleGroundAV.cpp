@@ -24,7 +24,7 @@
 #include "Entities/GameObject.h"
 #include "Tools/Language.h"
 #include "WorldPacket.h"
-#include "Server/DBCStores.h"                                   // TODO REMOVE this when graveyard handling for pvp is updated
+#include "Globals/ObjectMgr.h"
 
 BattleGroundAV::BattleGroundAV(): m_HonorMapComplete(0), m_RepTowerDestruction(0), m_RepCaptain(0), m_RepBoss(0), m_RepOwnedGrave(0), m_RepOwnedMine(0), m_RepSurviveCaptain(0), m_RepSurviveTower(0)
 {
@@ -661,7 +661,7 @@ WorldSafeLocsEntry const* BattleGroundAV::GetClosestGraveYard(Player* plr)
         {
             if (m_Nodes[i].Owner != teamIdx || m_Nodes[i].State != POINT_CONTROLLED)
                 continue;
-            WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(BG_AV_GraveyardIds[i]);
+            WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(BG_AV_GraveyardIds[i]);
             if (!entry)
                 continue;
             float dist = (entry->x - x) * (entry->x - x) + (entry->y - y) * (entry->y - y);
@@ -674,7 +674,7 @@ WorldSafeLocsEntry const* BattleGroundAV::GetClosestGraveYard(Player* plr)
     }
     // If not, place ghost in the starting-cave
     if (!good_entry)
-        good_entry = sWorldSafeLocsStore.LookupEntry(BG_AV_GraveyardIds[teamIdx + 7]);
+        good_entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(BG_AV_GraveyardIds[teamIdx + 7]);
 
     return good_entry;
 }

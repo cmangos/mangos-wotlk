@@ -24,7 +24,7 @@
 #include "BattleGroundMgr.h"
 #include "Tools/Language.h"
 #include "WorldPacket.h"
-#include "Server/DBCStores.h"                                   // TODO REMOVE this when graveyard handling for pvp is updated
+#include "Globals/ObjectMgr.h"
 
 BattleGroundAB::BattleGroundAB(): m_IsInformedNearVictory(false), m_honorTicks(0), m_ReputationTics(0)
 {
@@ -477,7 +477,7 @@ WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
         float mindist = 999999.0f;
         for (unsigned char node : nodes)
         {
-            WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(BG_AB_GraveyardIds[node]);
+            WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(BG_AB_GraveyardIds[node]);
             if (!entry)
                 continue;
             float dist = (entry->x - plr_x) * (entry->x - plr_x) + (entry->y - plr_y) * (entry->y - plr_y);
@@ -491,7 +491,7 @@ WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
     }
     // If not, place ghost on starting location
     if (!good_entry)
-        good_entry = sWorldSafeLocsStore.LookupEntry(BG_AB_GraveyardIds[teamIndex + 5]);
+        good_entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(BG_AB_GraveyardIds[teamIndex + 5]);
 
     return good_entry;
 }

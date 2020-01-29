@@ -40,7 +40,7 @@ void instance_ruins_of_ahnqiraj::OnPlayerEnter(Player* /*pPlayer*/)
 {
     // Spawn andorov if necessary
     if (m_auiEncounter[TYPE_KURINNAXX] == DONE)
-        DoSapwnAndorovIfCan();
+        DoSpawnAndorovIfCan();
 }
 
 void instance_ruins_of_ahnqiraj::OnCreatureCreate(Creature* pCreature)
@@ -151,10 +151,10 @@ void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
         case TYPE_KURINNAXX:
             if (uiData == DONE)
             {
-                DoSapwnAndorovIfCan();
-
+                DoSpawnAndorovIfCan();
                 // Yell after kurinnaxx
-                DoOrSimulateScriptTextForThisInstance(SAY_OSSIRIAN_INTRO, NPC_OSSIRIAN);
+                if (Creature* ossirian = GetSingleCreatureFromStorage(NPC_OSSIRIAN))
+                    DoScriptText(SAY_OSSIRIAN_INTRO, ossirian); // targets kurinnaxx in sniff
             }
             m_auiEncounter[uiType] = uiData;
             break;
@@ -164,11 +164,9 @@ void instance_ruins_of_ahnqiraj::SetData(uint32 uiType, uint32 uiData)
                 DoSortArmyWaves();
             if (uiData == DONE)
             {
-                if (Creature* pAndorov = GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
-                {
-                    if (pAndorov->isAlive())
-                        pAndorov->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                }
+                if (Creature* andorov = GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
+                    if (andorov->isAlive())
+                        andorov->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_VENDOR);
             }
             break;
         case TYPE_MOAM:
@@ -202,7 +200,7 @@ uint32 instance_ruins_of_ahnqiraj::GetData(uint32 uiType) const
     return 0;
 }
 
-void instance_ruins_of_ahnqiraj::DoSapwnAndorovIfCan()
+void instance_ruins_of_ahnqiraj::DoSpawnAndorovIfCan()
 {
     if (GetSingleCreatureFromStorage(NPC_GENERAL_ANDOROV))
         return;

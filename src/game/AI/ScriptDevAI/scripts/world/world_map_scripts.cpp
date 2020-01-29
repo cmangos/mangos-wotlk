@@ -239,9 +239,16 @@ struct world_map_kalimdor : public ScriptedMap
         if (eventData.despawnTimer > 3 * MINUTE * IN_MILLISECONDS)
         {
             for (auto guid : eventData.summonedMagrami)
-                if (Creature* pMagrami = instance->GetCreature(guid))
-                    if (pMagrami->isAlive()) // dont despawn corpses with loot
-                        pMagrami->ForcedDespawn();
+            {
+                if (Creature * magrami = instance->GetCreature(guid))
+                {
+                    if (magrami->isAlive()) // dont despawn corpses with loot
+                    {
+                        magrami->CastSpell(nullptr, SPELL_SPIRIT_SPAWN_OUT, TRIGGERED_OLD_TRIGGERED);
+                        magrami->ForcedDespawn(1000);
+                    }
+                }
+            }
 
             // remove gameobject from map
             if (GameObject* pGo = instance->GetGameObject(eventData.guid))
@@ -416,6 +423,19 @@ struct world_map_kalimdor : public ScriptedMap
             }
         }
         m_encounter[uiType] = uiData;
+    }
+
+    void FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 /*zoneId*/, uint32 areaId) override
+    {
+        switch (areaId)
+        {
+            case AREAID_THERAMORE_ISLE:
+            {
+                FillInitialWorldStateData(data, count, WORLD_STATE_TETHYR_SHOW, uint32(GetData(TYPE_TETHYR) != NOT_STARTED));
+                FillInitialWorldStateData(data, count, WORLD_STATE_TETHYR_COUNT, m_uiTheramoreMarksmenAlive);
+                break;
+            }
+        }
     }
 
     uint32 GetData(uint32 uiType) const override { return m_encounter[uiType]; }

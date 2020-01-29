@@ -33,6 +33,8 @@
 
 #include <chrono>
 #include <functional>
+#include <memory>
+#include "World/WorldState.h"
 
 #include <boost/asio.hpp>
 #include <utility>
@@ -331,8 +333,6 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     Field* fields = result->Fetch();
 
-    uint8 expansion = ((sWorld.getConfig(CONFIG_UINT32_EXPANSION) > fields[7].GetUInt8()) ? fields[7].GetUInt8() : sWorld.getConfig(CONFIG_UINT32_EXPANSION));
-
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
 
@@ -369,6 +369,15 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     uint32 security = fields[1].GetUInt16();
     if (security > SEC_ADMINISTRATOR)                       // prevent invalid security settings in DB
         security = SEC_ADMINISTRATOR;
+
+    uint8 maxServerExpansion = sWorld.getConfig(CONFIG_UINT32_EXPANSION);
+    uint8 currentServerExpansion = sWorldState.GetExpansion();
+    uint8 playerAddonLevel = fields[7].GetUInt8();
+    uint8 expansion;
+    if (security >= SEC_GAMEMASTER)
+        expansion = std::min(playerAddonLevel, maxServerExpansion);
+    else
+        expansion = std::min(playerAddonLevel, currentServerExpansion);
 
     K.SetHexStr(fields[2].GetString());
 

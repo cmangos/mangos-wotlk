@@ -84,6 +84,15 @@ enum SaveIds
     SAVE_ID_EMERALD_DRAGONS,
     SAVE_ID_AHN_QIRAJ,
     SAVE_ID_QUEL_DANAS,
+    SAVE_ID_EXPANSION_RELEASE,
+};
+
+enum GameEvents
+{
+    GAME_EVENT_BEFORE_THE_STORM = 100,
+    GAME_EVENT_QUEL_DANAS_PHASE_1 = 101,
+    // next 10 are reserved for quel danas - 110
+    GAME_EVENT_ECHOES_OF_DOOM = 111,
 };
 
 // To be used
@@ -123,13 +132,18 @@ class WorldState
         void HandleExternalEvent(uint32 eventId);
         void ExecuteOnAreaPlayers(uint32 areaId, std::function<void(Player*)> executor);
 
+        void Update(const uint32 diff);
+
+        // tbc section
         void BuffMagtheridonTeam(Team team);
         void DispelMagtheridonTeam(Team team);
 
         void BuffAdalsSongOfBattle();
         void DispelAdalsSongOfBattle();
 
-        void Update(const uint32 diff);
+        // Release events
+        uint8 GetExpansion() const { return m_expansion; }
+        bool SetExpansion(uint8 expansion);
     private:
         std::map<uint32, GuidVector> m_areaPlayers;
         std::map<uint32, std::atomic<uint32>> m_transportStates; // atomic to avoid having to lock
@@ -157,6 +171,11 @@ class WorldState
         uint32 m_adalSongOfBattleTimer;
 
         QuelDanasData m_quelDanasData;
+
+        // Release Events
+        void StartExpansionEvent();
+
+        std::atomic<uint8> m_expansion;
 };
 
 #define sWorldState MaNGOS::Singleton<WorldState>::Instance()

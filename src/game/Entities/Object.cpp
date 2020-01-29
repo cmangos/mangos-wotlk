@@ -52,7 +52,7 @@ Object::Object(): m_updateFlag(0), m_itsNewObject(false)
 
     m_inWorld           = false;
     m_objectUpdated     = false;
-    loot              = nullptr;
+    m_loot              = nullptr;
 }
 
 Object::~Object()
@@ -72,7 +72,7 @@ Object::~Object()
 
     delete[] m_uint32Values;
 
-    delete loot;
+    delete m_loot;
 }
 
 void Object::_InitValues()
@@ -629,7 +629,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     else
                     {
                         // check loot flag
-                        if (creature->loot && creature->loot->CanLoot(target))
+                        if (creature->m_loot && creature->m_loot->CanLoot(target))
                         {
                             // creature is dead and this player can loot it
                             dynflagsValue = dynflagsValue | UNIT_DYNFLAG_LOOTABLE;
@@ -1693,11 +1693,16 @@ namespace MaNGOS
                 : i_object(obj), i_msgtype(msgtype), i_textData(textData), i_language(language), i_target(target) {}
             void operator()(WorldPacket& data, int32 loc_idx)
             {
-                char const* text;
-                if ((int32)i_textData->Content.size() > loc_idx + 1 && !i_textData->Content[loc_idx + 1].empty())
-                    text = i_textData->Content[loc_idx + 1].c_str();
+                char const* text = nullptr;
+                if (BroadcastText const* bct = i_textData->broadcastText)
+                    text = bct->GetText(loc_idx).data();
                 else
-                    text = i_textData->Content[0].c_str();
+                {
+                    if ((int32)i_textData->Content.size() > loc_idx + 1 && !i_textData->Content[loc_idx + 1].empty())
+                        text = i_textData->Content[loc_idx + 1].c_str();
+                    else
+                        text = i_textData->Content[0].c_str();
+                }
 
                 ChatHandler::BuildChatPacket(data, i_msgtype, text, i_language, CHAT_TAG_NONE, i_object.GetObjectGuid(), i_object.GetNameForLocaleIdx(loc_idx),
                                              i_target ? i_target->GetObjectGuid() : ObjectGuid(), i_target ? i_target->GetNameForLocaleIdx(loc_idx) : "");
@@ -1726,13 +1731,15 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
 {
     MANGOS_ASSERT(textData);
 
+    Language languageId = textData->broadcastText ? textData->broadcastText->languageId : textData->LanguageId;
+
     switch (textData->Type)
     {
         case CHAT_TYPE_SAY:
-            _DoLocalizedTextAround(this, textData, CHAT_MSG_MONSTER_SAY, textData->LanguageId, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY));
+            _DoLocalizedTextAround(this, textData, CHAT_MSG_MONSTER_SAY, languageId, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_SAY));
             break;
         case CHAT_TYPE_YELL:
-            _DoLocalizedTextAround(this, textData, CHAT_MSG_MONSTER_YELL, textData->LanguageId, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL));
+            _DoLocalizedTextAround(this, textData, CHAT_MSG_MONSTER_YELL, languageId, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_YELL));
             break;
         case CHAT_TYPE_TEXT_EMOTE:
             _DoLocalizedTextAround(this, textData, CHAT_MSG_MONSTER_EMOTE, LANG_UNIVERSAL, target, sWorld.getConfig(CONFIG_FLOAT_LISTEN_RANGE_TEXTEMOTE));
@@ -1760,7 +1767,7 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
         }
         case CHAT_TYPE_ZONE_YELL:
         {
-            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, textData, textData->LanguageId, target);
+            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_YELL, textData, languageId, target);
             MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
             uint32 zoneId = GetZoneId();
             GetMap()->ExecuteMapWorkerZone(zoneId, std::bind(&MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder>::operator(), &say_do, std::placeholders::_1));
@@ -1768,7 +1775,7 @@ void WorldObject::MonsterText(MangosStringLocale const* textData, Unit const* ta
         }
         case CHAT_TYPE_ZONE_EMOTE:
         {
-            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_EMOTE, textData, textData->LanguageId, target);
+            MaNGOS::MonsterChatBuilder say_build(*this, CHAT_MSG_MONSTER_EMOTE, textData, languageId, target);
             MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder> say_do(say_build);
             uint32 zoneId = GetZoneId();
             GetMap()->ExecuteMapWorkerZone(zoneId, std::bind(&MaNGOS::LocalizedPacketDo<MaNGOS::MonsterChatBuilder>::operator(), &say_do, std::placeholders::_1));

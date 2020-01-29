@@ -163,6 +163,14 @@ char const* WorldSession::GetPlayerName() const
     return GetPlayer() ? GetPlayer()->GetName() : "<none>";
 }
 
+void WorldSession::SetExpansion(uint8 expansion)
+{
+    m_expansion = expansion;
+    if (_player)
+        _player->OnExpansionChange(expansion);
+    SendAuthOk(); // this is a hack but does what we need - resets expansion setting in client
+}
+
 /// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket const& packet) const
 {

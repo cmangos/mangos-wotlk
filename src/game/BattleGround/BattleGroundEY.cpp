@@ -566,7 +566,7 @@ WorldSafeLocsEntry const* BattleGroundEY::GetClosestGraveYard(Player* player)
         default:       return nullptr;
     }
 
-    WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(g_id);
+    WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(g_id);
     WorldSafeLocsEntry const* nearestEntry = entry;
 
     if (!entry)
@@ -586,7 +586,7 @@ WorldSafeLocsEntry const* BattleGroundEY::GetClosestGraveYard(Player* player)
     {
         if (m_towerOwner[i] == player->GetTeam())
         {
-            entry = sWorldSafeLocsStore.LookupEntry(eyGraveyards[i]);
+            entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(eyGraveyards[i]);
             if (!entry)
                 sLog.outError("BattleGroundEY: Not found graveyard: %u", eyGraveyards[i]);
             else

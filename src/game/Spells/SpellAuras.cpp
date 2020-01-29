@@ -1147,12 +1147,6 @@ void Aura::TriggerSpell()
 //                    case 18347: break;
 //                    // Ranshalla Waiting
 //                    case 18953: break;
-                    case 19695:                             // Inferno
-                    {
-                        int32 damageForTick[8] = { 500, 500, 1000, 1000, 2000, 2000, 3000, 5000 };
-                        triggerTarget->CastCustomSpell(triggerTarget, 19698, &damageForTick[GetAuraTicks() - 1], nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
-                        return;
-                    }
 //                    // Frostwolf Muzzle DND
 //                    case 21794: break;
 //                    // Alterac Ram Collar DND
@@ -2142,12 +2136,6 @@ void Aura::TriggerSpell()
                 triggerCaster->CastCustomSpell(nullptr, trigger_spell_id, &m_modifier.m_amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
-            case 19695:                                     // Inferno
-            {
-                int32 damageForTick[8] = { 500, 500, 1000, 1000, 2000, 2000, 3000, 5000 };
-                triggerCaster->CastCustomSpell(nullptr, 19698, &damageForTick[GetAuraTicks() - 1], nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
-                return;
-            }
             case 29768:                                     // Overload
             {
                 int32 damage = m_modifier.m_amount * (pow(2.0f, GetAuraTicks()));
@@ -2485,6 +2473,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     {
                         if (target->HasAura(25040))
                             target->CastSpell(target, 25043, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetCaster()->GetObjectGuid());
+                        return;
+                    }
+                    case 25471:                             // Attack Order
+                    {
+                        target->CastSpell(nullptr, 25473, TRIGGERED_OLD_TRIGGERED);
                         return;
                     }
                     case 37127:                             // Mark of Death
@@ -3271,13 +3264,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             case 42385:                                     // Alcaz Survey Aura
             {
-                target->CastSpell(target, 42316, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                target->CastSpell(nullptr, 42316, TRIGGERED_OLD_TRIGGERED);
                 return;
             }
             case 42517:                                     // Beam to Zelfrax
             {
                 // expecting target to be a dummy creature
-                target->SummonCreature(23864, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), 5.45f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
+                target->SummonCreature(23864, -2985.01f, -3853.649f, 44.23183f, 5.51524f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 return;
             }
             case 43681:                                     // Inactive
@@ -6087,6 +6080,16 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
     }
 
     GetTarget()->getHostileRefManager().HandleSuppressed(apply, true);
+
+    if (apply)
+        target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE);
+    else
+    {
+        // do not remove unit flag if there are more than this auraEffect of that kind on unit
+        if (target->HasAuraType(SPELL_AURA_SCHOOL_IMMUNITY))
+            return;
+        target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE);
+    }
 }
 
 void Aura::HandleAuraModDmgImmunity(bool apply, bool /*Real*/)
@@ -6700,6 +6703,10 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
     {
         switch (spellProto->Id)
         {
+            case 23155: // Chromaggus - Brood Affliction: Red
+                if (m_removeMode == AURA_REMOVE_BY_DEATH)
+                    target->CastSpell(nullptr, 23168, TRIGGERED_OLD_TRIGGERED); // Heal Chromaggus
+                break;
             case 43364: // Tranquilizing Poison
                 if (m_removeMode == AURA_REMOVE_BY_EXPIRE)
                     target->CastSpell(nullptr, 24004, TRIGGERED_OLD_TRIGGERED); // Sleep
@@ -8614,12 +8621,15 @@ void Aura::PeriodicTick()
             }
 
             // This method can modify pdamage
-            bool isCrit = IsCritFromAbilityAura(caster, pdamage);
-
-            // only from players
-            // FIXME: need use SpellDamageBonus instead?
-            if (caster->GetTypeId() == TYPEID_PLAYER)
-                pdamage -= target->GetResilienceRatingDamageReduction(pdamage, SpellDmgClass(spellProto->DmgClass), true);
+            bool isCrit = false;
+            if (caster)
+            {
+                isCrit = IsCritFromAbilityAura(caster, pdamage);
+                // only from players
+                // FIXME: need use SpellDamageBonus instead?
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                    pdamage -= target->GetResilienceRatingDamageReduction(pdamage, SpellDmgClass(spellProto->DmgClass), true);
+            }
 
             target->CalculateDamageAbsorbAndResist(caster, GetSpellSchoolMask(spellProto), DOT, pdamage, &absorb, &resist, IsReflectableSpell(spellProto), IsResistableSpell(spellProto));
 
@@ -8654,7 +8664,7 @@ void Aura::PeriodicTick()
             Unit::ProcDamageAndSpell(ProcSystemArguments(caster, target, procAttacker, procVictim, PROC_EX_NORMAL_HIT, pdamage, BASE_ATTACK, spellProto));
 
             // Drain Soul (chance soul shard)
-            if (caster->GetTypeId() == TYPEID_PLAYER && spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && spellProto->SpellFamilyFlags & uint64(0x0000000000004000))
+            if (caster && caster->GetTypeId() == TYPEID_PLAYER && spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && spellProto->SpellFamilyFlags & uint64(0x0000000000004000))
             {
                 // Only from non-grey units
                 if (roll_chance_i(10) &&                                                                        // 1-2 from drain with final and without glyph, 0-1 from damage
@@ -9028,6 +9038,10 @@ void Aura::PeriodicTick()
 
             if (pCaster)
                 target->getHostileRefManager().threatAssist(pCaster, float(gain) * 0.5f * sSpellMgr.GetSpellThreatMultiplier(spellProto), spellProto);
+
+            if (GetId() == 25685) // Moam - Energize
+                if (target->GetPower(POWER_MANA) > 24000)
+                    target->RemoveAurasDueToSpell(GetId());
             break;
         }
         case SPELL_AURA_OBS_MOD_MANA:

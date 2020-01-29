@@ -239,6 +239,13 @@ enum
     PATH_ID_AKAMA_ILLIDAN           = 4,
     PATH_ID_AKAMA_FIGHT_ILLIDARI    = 5,
     PATH_ID_AKAMA_BACK_UP           = 6,
+
+    SOUND_KIT_AKAMA_CHANNEL_DOOR    = 11717,
+    SOUND_KIT_ILLIDAN_AGGRO         = 11725,
+    SOUND_KIT_ILLIDAN_90            = 11726,
+    SOUND_KIT_ILLIDAN_TAKEOFF       = 11727,
+    SOUND_KIT_ILLIDAN_P3            = 11728,
+    SOUND_KIT_ILLIDAN_P5            = 11729,
 };
 
 static const uint32 aCagedSummonSpells[MAX_CAGE_SPELLS] = { 40696, 40697, 40698, 40699, 40700, 40701, 40702, 40703 };
@@ -506,6 +513,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
     {
         if (m_instance)
             m_instance->SetData(TYPE_ILLIDAN, IN_PROGRESS);
+        m_creature->PlayMusic(SOUND_KIT_ILLIDAN_AGGRO);
     }
 
     void JustReachedHome() override
@@ -673,15 +681,12 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 m_creature->SetInCombatWithZone();
+                AttackClosestEnemy();
                 PreparePhaseTimers(); // Phase 1 start
                 if (m_instance)
                 {
                     if (Creature* akama = m_instance->GetSingleCreatureFromStorage(NPC_AKAMA))
                     {
-                        if (Unit* closest = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, nullptr, SELECT_FLAG_PLAYER))
-                            AttackStart(closest);
-                        else
-                            AttackStart(akama);
                         akama->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
                         akama->AI()->AttackStart(m_creature);
                     }
@@ -1168,6 +1173,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             {
                 if (m_creature->GetHealthPercent() > 90.0f)
                     return;
+                m_creature->PlayMusic(SOUND_KIT_ILLIDAN_AGGRO);
                 StartNextDialogueText(SAY_ILLIDAN_MINION);
                 SetActionReadyStatus(action, false);
                 return;
@@ -1176,12 +1182,14 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             {
                 if (m_creature->GetHealthPercent() > 65.0f)
                     return;
+                m_creature->PlayMusic(SOUND_KIT_ILLIDAN_TAKEOFF);
                 HandlePhaseBehaviour(); // Phase 2 transition start
                 SetActionReadyStatus(action, false);
                 return;
             }
             case ILLIDAN_ACTION_PHASE_3:
             {
+                m_creature->PlayMusic(SOUND_KIT_ILLIDAN_P3);
                 HandlePhaseBehaviour(); // Phase 3 transition start
                 SetActionReadyStatus(action, false);
                 return;
@@ -1197,6 +1205,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                 }
                 if (DoCastSpellIfCan(nullptr, SPELL_SHADOW_PRISON) == CAST_OK) // Phase 5 transition start
                 {
+                    m_creature->PlayMusic(SOUND_KIT_ILLIDAN_P5);
                     StartNextDialogueText(DUMMY_EMOTE_ID_4);
                     SetCombatScriptStatus(true);
                     m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -1317,10 +1326,10 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
 
         UpdateTimers(diff, m_creature->isInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget())
             return;
 
-        if (m_instance->GetPlayerInMap(true, false) == nullptr)
+        if (m_instance->GetPlayerInMap(true, false) == nullptr) // when illidan is fighting akama, if all players die, he needs to evade
         {
             EnterEvadeMode();
             return;
@@ -1566,6 +1575,7 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
                     if (Creature* udalo = m_instance->GetSingleCreatureFromStorage(NPC_SPIRIT_OF_UDALO))
                         udalo->CastSpell(nullptr, SPELL_DEATHSWORN_DOOR_CHANNEL, TRIGGERED_OLD_TRIGGERED);
                 }
+                m_creature->PlayMusic(SOUND_KIT_AKAMA_CHANNEL_DOOR);
                 break;
             case GO_ILLIDAN_GATE:
                 if (m_instance)

@@ -801,7 +801,11 @@ enum
 
 struct npc_stinky_ignatzAI : public npc_escortAI
 {
-    npc_stinky_ignatzAI(Creature* pCreature) : npc_escortAI(pCreature) { Reset(); }
+    npc_stinky_ignatzAI(Creature* pCreature) : npc_escortAI(pCreature)
+    {
+        SetReactState(REACT_DEFENSIVE);
+        Reset();
+    }
 
     ObjectGuid m_bogbeanPlantGuid;
 
@@ -1052,8 +1056,9 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
 
     void JustDied(Unit* /*pVictim*/) override
     {
-        // TODO: reward credit?
-        //pPlayer->RewardPlayerAndGroupAtEventCredit(pCreature->GetEntry(), pCreature); // Needed?
+        if (Unit* spawner = m_creature->GetSpawner())
+            if (UnitAI* ai = spawner->AI())
+                ai->SendAIEvent(AI_EVENT_CUSTOM_A, spawner, spawner);
 
         // fireworks! 
         std::list<Creature*> lFirworkHelpers;
@@ -1104,8 +1109,6 @@ struct boss_tethyrAI : public Scripted_NoMovementAI
                     {
                         m_lMarksmenGUIDs.push_back((*itr)->GetObjectGuid());
 
-                        //(*itr)->SetInCombatWith(m_creature);
-                        //(*itr)->AddThreat(m_creature);
                         (*itr)->AI()->AttackStart(m_creature);
                         AttackStart(*itr);
                     }
@@ -1296,11 +1299,17 @@ struct npc_major_mills : public ScriptedAI
         Reset();
     }
 
+    ObjectGuid m_playerGuid;
+
     void Reset() override {}
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
-        ScriptedAI::UpdateAI(uiDiff);
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                player->RewardPlayerAndGroupAtEventExplored(QUEST_TAKE_DOWN_TETHYR, m_creature);
+        }
     }
 };
 
@@ -1309,13 +1318,15 @@ UnitAI* GetAI_npc_major_mills(Creature* pCreature)
     return new npc_major_mills(pCreature);
 }
 
-bool QuestAccept_npc_major_mills(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestAccept_npc_major_mills(Player* player, Creature* creature, const Quest* quest)
 {
-    if (pQuest->GetQuestId() == QUEST_TAKE_DOWN_TETHYR)
+    if (quest->GetQuestId() == QUEST_TAKE_DOWN_TETHYR)
     {
-        if (pCreature->GetMap()->GetInstanceData()->GetData(TYPE_TETHYR) == NOT_STARTED)
+        if (creature->GetMap()->GetInstanceData()->GetData(TYPE_TETHYR) == NOT_STARTED)
         {
-            pCreature->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_RELAY_TAKE_DOWN_TETHYR, pCreature, pPlayer);
+            if (npc_major_mills* ai = static_cast<npc_major_mills*>(creature->AI()))
+                ai->m_playerGuid = player->GetObjectGuid();
+            creature->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_RELAY_TAKE_DOWN_TETHYR, creature, player);
         }
     }
 

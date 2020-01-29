@@ -79,7 +79,6 @@ struct boss_murmurAI : public Scripted_NoMovementAI
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_creature->SetIgnoreRangedTargets(true);
         m_thunderingParams.range.minRange = SPELL_THUNDERING_STORM_MINRANGE;
         m_thunderingParams.range.maxRange = SPELL_THUNDERING_STORM_MAXRANGE;
         Reset();
@@ -99,6 +98,8 @@ struct boss_murmurAI : public Scripted_NoMovementAI
 
     void Reset() override
     {
+        m_creature->SetImmobilizedState(true);
+
         m_uiSonicBoomTimer       = urand(SPELL_SONIC_BOOM_MIN_TIMER, SPELL_SONIC_BOOM_MAX_TIMER);
         m_uiMurmursTouchTimer    = m_bIsRegularMode ? SPELL_MURMURS_TOUCH_TIMER_N : urand(SPELL_MURMURS_TOUCH_MIN_TIMER_H, SPELL_MURMURS_TOUCH_MAX_TIMER_H);
         m_uiResonanceTimer       = urand(SPELL_RESONANCE_MIN_TIMER, SPELL_RESONANCE_MAX_TIMER);
@@ -180,7 +181,7 @@ struct boss_murmurAI : public Scripted_NoMovementAI
         }
 
         // Resonance_Timer - cast if no target is in range
-        if (m_creature->getVictim())
+        if (m_creature->getVictim() && m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
             DoMeleeAttackIfReady();
         else
         {
