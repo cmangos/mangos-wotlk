@@ -33,6 +33,7 @@ EndContentData */
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "shadowfang_keep.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 /*######
 ## npc_shadowfang_prisoner

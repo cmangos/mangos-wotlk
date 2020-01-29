@@ -25,7 +25,7 @@ EndScriptData */
 mob_anubisath_guardian
 EndContentData */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 
 /*######
 ## mob_anubisath_guardian

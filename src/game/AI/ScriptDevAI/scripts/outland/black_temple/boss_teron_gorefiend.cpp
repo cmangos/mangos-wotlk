@@ -25,6 +25,7 @@ EndScriptData */
 #include "black_temple.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
