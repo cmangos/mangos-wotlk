@@ -2437,6 +2437,7 @@ class Player : public Unit
         // Public Save system functions
         void SaveItemToInventory(Item* item); // optimization for gift wrapping
         void SaveTitles(); // optimization for arena rewards
+
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
