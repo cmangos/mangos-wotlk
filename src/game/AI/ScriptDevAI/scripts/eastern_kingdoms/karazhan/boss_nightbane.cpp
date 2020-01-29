@@ -166,9 +166,9 @@ struct boss_nightbaneAI : public CombatAI
 
     void JustRespawned() override
     {
-        npc_escortAI::JustRespawned();
-        if (GameObject* pUrn = m_pInstance->GetSingleGameObjectFromStorage(GO_BLACKENED_URN))
-            pUrn->ResetDoorOrButton();
+        CombatAI::JustRespawned();
+        if (GameObject* urn = m_instance->GetSingleGameObjectFromStorage(GO_BLACKENED_URN))
+            urn->ResetDoorOrButton();
     }
 
     void JustSummoned(Creature* summoned) override

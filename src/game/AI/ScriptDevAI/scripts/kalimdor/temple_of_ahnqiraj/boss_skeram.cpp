@@ -228,7 +228,7 @@ struct boss_skeramAI : public CombatAI
             {
                 if (Group* group = player->GetGroup())
                 {
-                    group->SetTargetIcon(7, m_creature->GetObjectGuid()); // set to none
+                    group->SetTargetIcon(7, ObjectGuid(), m_creature->GetObjectGuid()); // set to none
                 }
             }
         }
