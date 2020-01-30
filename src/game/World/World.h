@@ -82,7 +82,9 @@ enum WorldTimers
     WUPDATE_DELETECHARS = 4,
     WUPDATE_AHBOT       = 5,
     WUPDATE_GROUPS      = 6,
-    WUPDATE_COUNT       = 7
+    WUPDATE_WARDEN      = 7, // This is here for headache merge error issues
+    WUPDATE_METRICS     = 8,
+    WUPDATE_COUNT       = 9
 };
 
 /// Configuration elements
@@ -489,6 +491,7 @@ class World
         /// Get the maximum number of parallel sessions on the server since last reboot
         uint32 GetMaxQueuedSessionCount() const { return m_maxQueuedSessionCount; }
         uint32 GetMaxActiveSessionCount() const { return m_maxActiveSessionCount; }
+        uint32 GetUniqueSessionCount() const { return m_uniqueSessionCount.size(); }
 
         /// Get the active session server limit (or security level limitations)
         uint32 GetPlayerAmountLimit() const { return m_playerLimit >= 0 ? m_playerLimit : 0; }
@@ -645,6 +648,7 @@ class World
 
         auto& GetMessager() { return m_messager; }
 
+        void IncrementOpcodeCounter(uint32 opcodeId); // thread safe due to atomics
     protected:
         void _UpdateGameTime();
         // callback for UpdateRealmCharacters
@@ -662,6 +666,8 @@ class World
         void ResetWeeklyQuests();
         void ResetMonthlyQuests();
         void ResetRandomBattleground();
+
+        void GeneratePacketMetrics(); // thread safe due to atomics
 
     private:
         void setConfig(eConfigUInt32Values index, char const* fieldname, uint32 defvalue);
@@ -692,7 +698,9 @@ class World
         uint32 mail_timer_expires;
 
         typedef std::unordered_map<uint32, WorldSession*> SessionMap;
+        typedef std::unordered_set<uint32> UniqueSessions;
         SessionMap m_sessions;
+        UniqueSessions m_uniqueSessionCount;
         uint32 m_maxActiveSessionCount;
         uint32 m_maxQueuedSessionCount;
 
@@ -753,6 +761,9 @@ class World
         static uint32 m_currentDiff;
 
         Messager<World> m_messager;
+
+        // Opcode logging
+        std::vector<std::atomic<uint32>> m_opcodeCounters;
 };
 
 extern uint32 realmID;
