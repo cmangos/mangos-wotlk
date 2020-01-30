@@ -32,6 +32,7 @@ struct world_map_eastern_kingdoms : public ScriptedMap
             case NPC_NEZRAZ:
             case NPC_HINDENBURG:
             case NPC_ZAPETTA:
+            case NPC_MEEFI_FARTHROTTLE:
             case NPC_SQUIBBY_OVERSPECK:
             case NPC_JONATHAN:
             case NPC_WRYNN:
