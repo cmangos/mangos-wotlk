@@ -3269,7 +3269,7 @@ bool Unit::CanDodgeInCombat() const
 
 bool Unit::CanDodgeInCombat(const Unit* attacker) const
 {
-    if (!attacker || !CanDodgeInCombat())
+    if (!attacker || !CanDodgeInCombat() || IsNonMeleeSpellCasted(false))
         return false;
     // Players can't dodge attacks from behind
     if (GetTypeId() == TYPEID_PLAYER)
