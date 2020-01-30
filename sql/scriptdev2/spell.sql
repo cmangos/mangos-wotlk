@@ -44,8 +44,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34026,'spell_kill_command');
 
 -- Priest
-INSERT INTO spell_scripts(Id, ScriptName) VALUES
-(32676,'spell_consume_magic');
 
 
 -- Warlock
