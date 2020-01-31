@@ -402,7 +402,8 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        pSummoned->AI()->AttackStart(m_creature);
+        pSummoned->SetWalk(false);
+        pSummoned->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
         m_summons.push_back(pSummoned->GetObjectGuid());
         ++m_uiMobCount;
     }
@@ -454,11 +455,9 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         m_playerGuid = pPlayer->GetObjectGuid();
 
-        m_creature->SummonCreature(NPC_GHARSUL,    8778.208f, -7109.625f, 35.42597f, 3.816502f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
-        m_creature->SummonCreature(NPC_ANGERSHADE, 8756.398f, -7122.784f, 35.32643f, 3.925692f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
-        m_creature->SummonCreature(NPC_ANGERSHADE, 8788.446f, -7112.482f, 35.42597f, 3.664015f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
-        // third is not sniffed due to no longer spawning on retail - guesswork
-        m_creature->SummonCreature(NPC_ANGERSHADE, 8789.f,    -7115.f, 36.46296f, 3.8f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
+        m_creature->SummonCreature(NPC_ANGERSHADE, 8756.952f, -7124.688f, 35.227f, 3.925692f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
+        m_creature->SummonCreature(NPC_GHARSUL,	   8756.182f, -7130.453f, 35.227f, 3.816502f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
+        m_creature->SummonCreature(NPC_ANGERSHADE, 8761.380f, -7132.638f, 35.696f, 3.664015f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 60000, true);
 
         m_creature->SetActiveObjectState(true);
     }
