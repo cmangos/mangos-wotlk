@@ -903,6 +903,7 @@ UPDATE creature_template SET ScriptName='npc_laughing_skull' WHERE entry=17418;
 UPDATE creature_template SET ScriptName='npc_maghar_escort' WHERE entry=17417;
 DELETE FROM scripted_event_id WHERE id=10745;
 INSERT INTO scripted_event_id VALUES(10745,'npc_vindicator_sedai');
+UPDATE gameobject_template SET ScriptName='go_kaliri_nest' WHERE entry IN(181582);
 
 /* HILLSBRAD FOOTHILLS */
 

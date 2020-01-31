@@ -2099,6 +2099,20 @@ bool ProcessEventId_sedai_vision(uint32 /*eventId*/, Object* source, Object* /*t
     }
 }
 
+struct KaliriNest : public GameObjectAI
+{
+    using GameObjectAI::GameObjectAI;
+    void OnLootStateChange() override
+    {
+        if (m_go->GetLootState() == GO_JUST_DEACTIVATED)
+        {
+            m_go->SetForcedDespawn();
+            if (GameObjectData const* data = sObjectMgr.GetGOData(m_go->GetObjectGuid().GetCounter()))
+                m_go->SetRespawnDelay(data->GetRandomRespawnTime());
+        }
+    }
+};
+
 void AddSC_hellfire_peninsula()
 {
     Script* pNewScript = new Script;
@@ -2185,5 +2199,10 @@ void AddSC_hellfire_peninsula()
     pNewScript = new Script;
     pNewScript->Name = "npc_maghar_escort";
     pNewScript->GetAI = &GetAI_npc_maghar_escort;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_kaliri_nest";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<KaliriNest>;
     pNewScript->RegisterSelf();
 }
