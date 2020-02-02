@@ -1722,7 +1722,8 @@ struct go_chessboard : public GameObjectAI
                         break;
                     }
                 }
-                player->RemoveSpellAuraHolder(myHolder);
+                if (myHolder)
+                    player->RemoveSpellAuraHolder(myHolder);
             }
         }
     }
