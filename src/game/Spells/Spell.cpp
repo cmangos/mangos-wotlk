@@ -1865,14 +1865,14 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             Unit* target = m_targets.getUnitTarget();
             if (target)
             {
-                float angle = 0.0f;
+                float angle = target->GetOrientation();
 
                 switch (targetMode)
                 {
                     case TARGET_LOCATION_UNIT_FRONT:                                 break;
-                    case TARGET_LOCATION_UNIT_BACK:         angle = M_PI_F;          break;
-                    case TARGET_LOCATION_UNIT_RIGHT:        angle = -M_PI_F / 2;     break;
-                    case TARGET_LOCATION_UNIT_LEFT:         angle = M_PI_F / 2;      break;
+                    case TARGET_LOCATION_UNIT_BACK:         angle += M_PI_F;          break;
+                    case TARGET_LOCATION_UNIT_RIGHT:        angle += -M_PI_F / 2;     break;
+                    case TARGET_LOCATION_UNIT_LEFT:         angle += M_PI_F / 2;      break;
                     case TARGET_LOCATION_UNIT_FRONT_RIGHT:  angle += M_PI_F * 1.75f; break;
                     case TARGET_LOCATION_UNIT_BACK_RIGHT:   angle += M_PI_F * 1.25f; break;
                     case TARGET_LOCATION_UNIT_BACK_LEFT:    angle += M_PI_F * 0.75f; break;
