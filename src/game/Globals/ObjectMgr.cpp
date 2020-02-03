@@ -7017,7 +7017,8 @@ uint32 ObjectMgr::GetMaxLevelForExpansion(uint32 expansion) const
     uint32 maxLevel = 60;
     switch (expansion)
     {
-        case EXPANSION_TBC: maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL); break; // limit latest expansion by config
+        case EXPANSION_TBC: maxLevel = 70; break;
+        case EXPANSION_WOTLK: maxLevel = sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL); break; // limit latest expansion by config
     }
     return maxLevel;
 }
