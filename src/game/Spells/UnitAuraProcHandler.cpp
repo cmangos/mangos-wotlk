@@ -529,6 +529,7 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
     ProcExecutionData execData(argData, isVictim);
 
     ProcTriggeredList procTriggered;
+    std::vector<SpellAuraHolder*> removedHolders;
     // Fill procTriggered list
     for (SpellAuraHolderMap::const_iterator itr = GetSpellAuraHolderMap().begin(); itr != GetSpellAuraHolderMap().end(); ++itr)
     {
@@ -551,13 +552,17 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
             if (se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE && (!execData.procSpell || execData.procSpell->Id != se->Id))
             {
                 DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "ProcDamageAndSpell: Added Spell %u to 'remove aura due to spell' list! Reason: Damage received.", se->Id);
-                removedSpells.push_back(se->Id);
+                removedHolders.push_back(itr->second);
             }
             continue;
         }
 
         procTriggered.push_back(ProcTriggeredData(spellProcEvent, itr->second));
     }
+
+    for (auto holder : removedHolders)
+        if (!holder->IsDeleted())
+            RemoveSpellAuraHolder(holder);
 
     // Nothing found
     if (procTriggered.empty())
