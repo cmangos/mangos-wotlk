@@ -515,11 +515,12 @@ struct boss_essence_of_desireAI : public essence_base_AI
         DoScriptText(DESI_SAY_RECAP, m_creature);
     }
 
-    void DamageTaken(Unit* doneBy, uint32& damage, DamageEffectType damagetype, SpellEntry const* spellInfo) override
+    void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType damagetype, SpellEntry const* spellInfo) override
     {
         int32 damageTaken = ((int32)damage) / 2;
-        doneBy->CastCustomSpell(doneBy, SPELL_AURA_OF_DESIRE_SELF_DMG, &damageTaken, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
-        ScriptedAI::DamageTaken(doneBy, damage, damagetype, spellInfo);
+        if (dealer)
+            dealer->CastCustomSpell(dealer, SPELL_AURA_OF_DESIRE_SELF_DMG, &damageTaken, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        ScriptedAI::DamageTaken(dealer, damage, damagetype, spellInfo);
     }
 
     void ExecuteActions() override

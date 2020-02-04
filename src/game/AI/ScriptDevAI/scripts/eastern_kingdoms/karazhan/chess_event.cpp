@@ -689,9 +689,9 @@ struct npc_king_llaneAI : public npc_chess_piece_genericAI
 
     bool m_bIsAttacked;
 
-    void DamageTaken(Unit* doneBy, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (!damage || !m_bIsAttacked || !m_pInstance || doneBy->GetTypeId() != TYPEID_UNIT)
+        if (!damage || !m_bIsAttacked || !m_pInstance || !dealer || dealer->GetTypeId() != TYPEID_UNIT)
             return;
 
         if (Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH))
@@ -800,9 +800,9 @@ struct npc_warchief_blackhandAI : public npc_chess_piece_genericAI
 
     bool m_bIsAttacked;
 
-    void DamageTaken(Unit* doneBy, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (!damage || !m_bIsAttacked || !m_pInstance || doneBy->GetTypeId() != TYPEID_UNIT)
+        if (!damage || !m_bIsAttacked || !m_pInstance || !dealer || dealer->GetTypeId() != TYPEID_UNIT)
             return;
 
         if (Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_ECHO_MEDIVH))

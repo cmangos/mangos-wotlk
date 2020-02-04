@@ -1405,7 +1405,7 @@ struct advisor_base_ai : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* /*pDoneby*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         // Allow fake death only in the first phase
         if (!m_bCanFakeDeath)

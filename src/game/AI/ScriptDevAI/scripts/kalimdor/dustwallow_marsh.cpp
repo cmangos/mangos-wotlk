@@ -75,17 +75,17 @@ struct mobs_risen_husk_spiritAI : public ScriptedAI
             m_pCreditPlayer->RewardPlayerAndGroupAtEventCredit(pSummoned->GetEntry(), pSummoned);
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (damage < m_creature->GetHealth())
+        if (damage < m_creature->GetHealth() || !dealer)
             return;
 
-        if (Player* pPlayer = pDoneBy->GetBeneficiaryPlayer())
+        if (Player* pPlayer = dealer->GetBeneficiaryPlayer())
         {
             if (pPlayer->GetQuestStatus(QUEST_WHATS_HAUNTING_WITCH_HILL) == QUEST_STATUS_INCOMPLETE)
             {
                 m_pCreditPlayer = pPlayer;
-                m_creature->CastSpell(pDoneBy, SPELL_SUMMON_RESTLESS_APPARITION, TRIGGERED_OLD_TRIGGERED);
+                m_creature->CastSpell(dealer, SPELL_SUMMON_RESTLESS_APPARITION, TRIGGERED_OLD_TRIGGERED);
             }
         }
     }
@@ -688,11 +688,14 @@ struct npc_private_hendelAI : public ScriptedAI
         }
     }
 
-    void DamageTaken(Unit* pDoneBy, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
+        if (!dealer)
+            return;
+
         if (damage > m_creature->GetHealth() || m_creature->GetHealthPercent() < 20.0f)
         {
-            if (Player* pPlayer = pDoneBy->GetBeneficiaryPlayer())
+            if (Player* pPlayer = dealer->GetBeneficiaryPlayer())
             {
                 if (pPlayer->GetQuestStatus(QUEST_MISSING_DIPLO_PT16) == QUEST_STATUS_INCOMPLETE)
                     guidPlayer = pPlayer->GetObjectGuid();  // Store the player to give quest credit later

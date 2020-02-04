@@ -3703,7 +3703,7 @@ struct npc_kaylaan_the_lostAI : public ScriptedAI
             target->RemoveAurasDueToSpell(SPELL_PERMANENT_FEIGN_DEATH);
     }
 
-    void DamageTaken(Unit* /*killer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (damage < m_creature->GetHealth())
             return;

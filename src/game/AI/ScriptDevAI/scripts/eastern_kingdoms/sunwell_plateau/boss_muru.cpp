@@ -119,7 +119,7 @@ struct boss_muruAI : public Scripted_NoMovementAI
             m_pInstance->SetData(TYPE_MURU, FAIL);
     }
 
-    void DamageTaken(Unit* /*pDoneBy*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (damage > m_creature->GetHealth())
         {

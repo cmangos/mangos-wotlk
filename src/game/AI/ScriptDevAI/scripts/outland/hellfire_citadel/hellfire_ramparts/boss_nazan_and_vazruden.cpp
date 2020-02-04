@@ -405,7 +405,7 @@ struct boss_vazrudenAI : public ScriptedAI
         DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
         if (!m_bHealthBelow && m_pInstance && (float(m_creature->GetHealth() - damage) / m_creature->GetMaxHealth()) < 0.40f)
         {
