@@ -60,7 +60,7 @@ class GameObjectModel
         void disable() { phasemask = 0;}
         void enable(uint32 ph_mask) { phasemask = ph_mask;}
 
-        bool intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 ph_mask) const;
+        bool intersectRay(const G3D::Ray& ray, float& MaxDist, bool StopAtFirstHit, uint32 phaseMask, bool ignoreM2Model) const;
 
         static GameObjectModel* construct(const GameObject* const pGo);
 };
