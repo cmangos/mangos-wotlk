@@ -17,13 +17,131 @@
 #include "world_eastern_kingdoms.h"
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/scripts/world/world_map_scripts.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 /* *********************************************************
  *                  EASTERN KINGDOMS
  */
-struct world_map_eastern_kingdoms : public ScriptedMap
+struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
 {
-    world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap) {}
+    world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap)
+    {
+        AddCustomAction(EVENT_SPAWN, true, [&]
+        {
+            if (_spawn.size() < 16)
+            {
+                switch (urand(0, 4))
+                {
+                    case 0: DoSpawn(NPC_INVADING_FELGUARD); break;
+                    case 1: DoSpawn(NPC_INVADING_VOIDWALKER); break;
+                    case 2: DoSpawn(NPC_INVADING_INFERNAL); break;
+                    case 3: DoSpawn(NPC_INVADING_FEL_STALKER); break;
+                    case 4: DoSpawn(NPC_INVADING_ANGUISHER); break;
+                }
+            }
+            ResetTimer(EVENT_SPAWN, urand(1000, 5000));
+        });
+        AddCustomAction(EVENT_SPAWN_BOSS, true, [&]
+        {
+            if (_spawnBoss.size() < 1)
+            {
+                urand(0, 1) ? ResetTimer(EVENT_SPAWN_DREADKNIGHT, urand(5000, 10000)) : ResetTimer(EVENT_SPAWN_FELGUARD_LIEUTENANT, urand(5000, 10000));
+            }
+            ResetTimer(EVENT_SPAWN_BOSS, urand(20000, 30000));
+        });
+        AddCustomAction(EVENT_SPAWN_DREADKNIGHT, true, [&]
+        {
+            DoSpawn(NPC_DREADKNIGHT);
+            DoSpawn(NPC_INVADING_INFERNAL);
+            DoSpawn(NPC_INVADING_INFERNAL);
+        });
+        AddCustomAction(EVENT_SPAWN_FELGUARD_LIEUTENANT, true, [&]
+        {
+            DoSpawn(NPC_FELGUARD_LIEUTENANT);
+            DoSpawn(NPC_INVADING_FEL_STALKER);
+            DoSpawn(NPC_INVADING_ANGUISHER);
+        });
+        AddCustomAction(EVENT_REINFORCEMENTS_NEEDED, true, [&]
+        {
+            if (_spawnSupport.size() < 1)
+            {
+                if (_spawnProtector.size() < 4 || _spawnGuardian.size() < 4)
+                {
+                    ResetTimer(EVENT_SPAWN_REINFORCEMENTS, 1000);
+                    ResetTimer(EVENT_REINFORCEMENTS_LEADER_SPEAK, urand(45000, 90000));
+                }
+            }
+            ResetTimer(EVENT_REINFORCEMENTS_NEEDED, urand(5000, 10000));
+        });
+        AddCustomAction(EVENT_SPAWN_REINFORCEMENTS, true, [&]
+        {
+            switch (urand(0, 2))
+            {
+                case 0: DoSpawn(NPC_LORD_MARSHAL_RAYNOR); break;
+                case 1: DoSpawn(NPC_JUSTINIUS_THE_HARBINGER); break;
+                case 2: DoSpawn(NPC_MELGROMM_HIGHMOUNTAIN); break;
+            }
+        });
+        AddCustomAction(EVENT_REINFORCEMENTS_LEADER_SPEAK, true, [&]
+        {
+            if (_spawnSupport.size() > 0)
+            {
+                uint32 randomScriptTextId = 0;
+
+                for (std::set<ObjectGuid>::iterator it = _spawnSupport.begin(); it != _spawnSupport.end(); ++it)
+                {
+                    if (Creature* add = instance->GetCreature(*it))
+                    {
+                        switch (add->GetEntry())
+                        {
+                            case NPC_LORD_MARSHAL_RAYNOR:
+                                switch (urand(0, 4))
+                                {
+                                    case 0: randomScriptTextId = LMR_RANDOM_TEXT_1; break;
+                                    case 1: randomScriptTextId = LMR_RANDOM_TEXT_2; break;
+                                    case 2: randomScriptTextId = LMR_RANDOM_TEXT_3; break;
+                                    case 3: randomScriptTextId = LMR_RANDOM_TEXT_4; break;
+                                    case 4: randomScriptTextId = LMR_RANDOM_TEXT_5; break;
+                                }
+                                break;
+                            case NPC_JUSTINIUS_THE_HARBINGER:
+                                switch (urand(0, 3))
+                                {
+                                    case 0: randomScriptTextId = JTH_RANDOM_TEXT_1; break;
+                                    case 1: randomScriptTextId = JTH_RANDOM_TEXT_2; break;
+                                    case 2: randomScriptTextId = JTH_RANDOM_TEXT_3; break;
+                                }
+                                break;
+                            case NPC_MELGROMM_HIGHMOUNTAIN:
+                                switch (urand(0, 5))
+                                {
+                                    case 0: randomScriptTextId = MH_RANDOM_TEXT_1; break;
+                                    case 1: randomScriptTextId = MH_RANDOM_TEXT_2; break;
+                                    case 2: randomScriptTextId = MH_RANDOM_TEXT_3; break;
+                                    case 3: randomScriptTextId = MH_RANDOM_TEXT_4; break;
+                                    case 4: randomScriptTextId = MH_RANDOM_TEXT_5; break;
+                                    case 5: randomScriptTextId = MH_RANDOM_TEXT_6; break;
+                                }
+                                break;
+                        }
+                        DoScriptText(randomScriptTextId, add);
+                    }
+                }
+            }
+            ResetTimer(EVENT_REINFORCEMENTS_LEADER_SPEAK, urand(60000, 90000));
+        });
+    }
+
+    std::set<ObjectGuid> _spawn;
+    std::set<ObjectGuid> _spawnBoss;
+    std::set<ObjectGuid> _spawnSupport;
+    std::set<ObjectGuid> _spawnProtector;
+    std::set<ObjectGuid> _spawnGuardian;
+
+    Position const spawnPortalPos = { -11900.3f, -3207.62f, -14.7534f, 0.146405f };
+    Position const spawnPortalPos1 = { -11901.25f, -3202.272f, -14.7534f, 0.146405f };
+    Position const spawnBossPortalPos = { -11891.500f, -3207.010f, -14.798f, 0.146405f };
+    Position const spawnReinforcementPos = { -11815.1f, -3190.39f, -30.7338f, 3.32447f };
 
     void OnCreatureCreate(Creature* pCreature) override
     {
@@ -40,13 +158,242 @@ struct world_map_eastern_kingdoms : public ScriptedMap
             case NPC_PRESTOR:
             case NPC_WINDSOR:
             case NPC_HIGHLORD_KRUUL:
+            case NPC_AGENT_PROUDWELL:
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+                break;
+            case NPC_DREADKNIGHT:
+            case NPC_FELGUARD_LIEUTENANT:
+                _spawnBoss.insert(pCreature->GetObjectGuid());
+                break;
+            case NPC_LORD_MARSHAL_RAYNOR:
+            case NPC_JUSTINIUS_THE_HARBINGER:
+            case NPC_MELGROMM_HIGHMOUNTAIN:
+                _spawnSupport.insert(pCreature->GetObjectGuid());
+                break;
+            case NPC_INVADING_INFERNAL:
+            case NPC_INVADING_FELGUARD:
+            case NPC_INVADING_FEL_STALKER:
+            case NPC_INVADING_VOIDWALKER:
+            case NPC_INVADING_ANGUISHER:
+            case NPC_PORTAL_HOUND:
+                _spawn.insert(pCreature->GetObjectGuid());
+                break;
+            case NPC_ARGENT_GUARDIAN:
+                _spawnGuardian.insert(pCreature->GetObjectGuid());
+                break;
+            case NPC_ARGENT_PROTECTOR:
+                _spawnProtector.insert(pCreature->GetObjectGuid());
                 break;
         }
     }
 
+    void OnCreatureDeath(Creature* pCreature) override
+    {
+        switch (pCreature->GetEntry())
+        {
+            case NPC_DREADKNIGHT:
+            case NPC_FELGUARD_LIEUTENANT:
+                _spawnBoss.erase(pCreature->GetObjectGuid());
+                break;
+            case NPC_LORD_MARSHAL_RAYNOR:
+            case NPC_JUSTINIUS_THE_HARBINGER:
+            case NPC_MELGROMM_HIGHMOUNTAIN:
+                _spawnSupport.erase(pCreature->GetObjectGuid());
+                break;
+            case NPC_ARGENT_GUARDIAN:
+                _spawnGuardian.erase(pCreature->GetObjectGuid());
+                break;
+            case NPC_ARGENT_PROTECTOR:
+                _spawnProtector.erase(pCreature->GetObjectGuid());
+                break;
+            default:
+                _spawn.erase(pCreature->GetObjectGuid());
+                break;
+        }
+    }
+
+    void DespawnAdds()
+    {
+        for (std::set<ObjectGuid>::iterator it = _spawn.begin(); it != _spawn.end(); ++it)
+            if (Creature* add = instance->GetCreature(*it))
+                add->AddObjectToRemoveList();
+        _spawn.clear();
+
+        for (std::set<ObjectGuid>::iterator it = _spawnSupport.begin(); it != _spawnSupport.end(); ++it)
+            if (Creature* add = instance->GetCreature(*it))
+                add->AddObjectToRemoveList();
+        _spawnSupport.clear();
+
+        for (std::set<ObjectGuid>::iterator it = _spawnBoss.begin(); it != _spawnBoss.end(); ++it)
+            if (Creature* add = instance->GetCreature(*it))
+                add->AddObjectToRemoveList();
+        _spawnBoss.clear();
+    }
+
+    void DoSpawn(uint32 spawnId)
+    {
+        Position spawnPos;
+        uint32 spawnScriptTextId = 0;
+        uint32 formationCreatureEntry = 0;
+        uint32 despawnTimer = 0;
+        TempSpawnType spawnType = TEMPSPAWN_DEAD_DESPAWN;
+
+        switch (spawnId)
+        {
+            case NPC_DREADKNIGHT:
+            case NPC_FELGUARD_LIEUTENANT:
+                spawnPos = spawnBossPortalPos;
+                break;
+            case NPC_LORD_MARSHAL_RAYNOR:
+                spawnPos = spawnReinforcementPos;
+                despawnTimer = 3 * MINUTE * IN_MILLISECONDS;
+                spawnType = TEMPSPAWN_TIMED_OR_DEAD_DESPAWN;
+                formationCreatureEntry = NPC_STORMWIND_MARSHAL;
+                spawnScriptTextId = LMR_SPAWN;
+                break;
+            case NPC_JUSTINIUS_THE_HARBINGER:
+                spawnPos = spawnReinforcementPos;
+                despawnTimer = 3 * MINUTE * IN_MILLISECONDS;
+                spawnType = TEMPSPAWN_TIMED_OR_DEAD_DESPAWN;
+                formationCreatureEntry = NPC_AZUREMYST_VINDICATOR;
+                spawnScriptTextId = JTH_SPAWN;
+                break;
+            case NPC_MELGROMM_HIGHMOUNTAIN:
+                spawnPos = spawnReinforcementPos;
+                despawnTimer = 3 * MINUTE * IN_MILLISECONDS;
+                spawnType = TEMPSPAWN_TIMED_OR_DEAD_DESPAWN;
+                formationCreatureEntry = NPC_THUNDER_BLUFF_HUNTSMAN;
+                spawnScriptTextId = MH_SPAWN;
+                break;
+            default:
+                spawnPos = urand(0, 1) ? spawnPortalPos : spawnPortalPos1;
+                break;
+        }
+
+        if (Creature* pProudwell = GetSingleCreatureFromStorage(NPC_AGENT_PROUDWELL))
+        {
+            if (Creature* summon = pProudwell->SummonCreature(spawnId, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.o, spawnType, despawnTimer))
+            {
+                if (spawnScriptTextId)
+                    DoScriptText(spawnScriptTextId, summon);
+
+                if (formationCreatureEntry)
+                {
+                    if (Creature* add = summon->SummonCreature(formationCreatureEntry, summon->GetPositionX(), summon->GetPositionY(), summon->GetPositionZ(), 0.0f, spawnType, despawnTimer))
+                        add->GetMotionMaster()->MoveFollow(summon, 5.f, 220.f * float(M_PI) / 180.0f, true);
+
+                    if (Creature* add = summon->SummonCreature(formationCreatureEntry, summon->GetPositionX(), summon->GetPositionY(), summon->GetPositionZ(), 0.0f, spawnType, despawnTimer))
+                        add->GetMotionMaster()->MoveFollow(summon, 5.f, 140.f * float(M_PI) / 180.0f, true);
+                }
+            }
+        }
+    }
+
+    void OnEventHappened(uint16 event_id, bool activate, bool resume) override
+    {
+        if (event_id != EVENT_ID_BATTLE_FOR_DARK_PORTAL)
+            return;
+
+        DespawnAdds();
+
+        if (activate && !resume)
+        {
+            ResetTimer(EVENT_SPAWN, 1000);
+            ResetTimer(EVENT_SPAWN_BOSS, 30000);
+            ResetTimer(EVENT_REINFORCEMENTS_NEEDED, 30000);
+        }
+        else
+        {
+            ResetAllTimers();
+        }
+    }
+
+    void Update(uint32 uiDiff) override
+    {
+        UpdateTimers(uiDiff);
+    }
+
     void SetData(uint32 /*uiType*/, uint32 /*uiData*/) override {}
 };
+
+struct go_infernaling_summoner_portal_hound : public GameObjectAI
+{
+    go_infernaling_summoner_portal_hound(GameObject* go) : GameObjectAI(go)
+    {
+        m_uiSummonTimer = 15000;
+    }
+
+    uint32 m_uiSummonTimer;
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (!m_go->IsSpawned())
+            return;
+
+        if (m_uiSummonTimer <= uiDiff)
+        {
+            if (Creature* pProudwell = ((ScriptedInstance*)m_go->GetMap()->GetInstanceData())->GetSingleCreatureFromStorage(NPC_AGENT_PROUDWELL))
+            {
+                pProudwell->CastSpell(pProudwell, SPELL_SUMMON_INFERNALING_PORTAL_HOUND, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_go->GetObjectGuid());
+            }
+            m_uiSummonTimer = urand(60000, 120000);
+        }
+        else
+            m_uiSummonTimer -= uiDiff;
+    }
+};
+
+GameObjectAI* GetAI_go_infernaling_summoner_portal_hound(GameObject* go)
+{
+    return new go_infernaling_summoner_portal_hound(go);
+}
+
+// does not work currently - need to handle spell 33710 somehow when it hits/activates either object 183358 or 183357?
+bool GOUse_go_infernaling_summoner_portal_hound(Player* /*pPlayer*/, GameObject* pGo)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+
+    if (!pInstance)
+        return false;
+
+    if (Creature* pProudwell = pInstance->GetSingleCreatureFromStorage(NPC_AGENT_PROUDWELL))
+    {
+        pProudwell->CastSpell(pProudwell, SPELL_SUMMON_INFERNALING_PORTAL_HOUND, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pGo->GetObjectGuid());
+    }
+
+    return false;
+}
+
+struct npc_agent_proudwell : public ScriptedAI
+{
+    npc_agent_proudwell(Creature* pCreature) : ScriptedAI(pCreature) { }
+
+    void Reset() override {}
+
+    void SummonedCreatureDespawn(Creature* pSummoned) override
+    {
+        uint32 despawnScriptTextId = 0;
+        switch (pSummoned->GetEntry())
+        {
+            case NPC_LORD_MARSHAL_RAYNOR: despawnScriptTextId = LMR_DESPAWN; break;
+            case NPC_JUSTINIUS_THE_HARBINGER: despawnScriptTextId = JTH_DESPAWN; break;
+            case NPC_MELGROMM_HIGHMOUNTAIN: despawnScriptTextId = MH_DESPAWN; break;
+        }
+
+        world_map_eastern_kingdoms* pInstance = (world_map_eastern_kingdoms*)pSummoned->GetInstanceData();
+
+        if (pInstance)
+            pInstance->_spawnSupport.erase(pSummoned->GetObjectGuid());
+
+        if (despawnScriptTextId && pSummoned->isAlive())
+            DoScriptText(despawnScriptTextId, pSummoned);
+    }
+};
+
+UnitAI* GetAI_npc_agent_proudwell(Creature* pCreature)
+{
+    return new npc_agent_proudwell(pCreature);
+}
 
 InstanceData* GetInstanceData_world_map_eastern_kingdoms(Map* pMap)
 {
@@ -58,5 +405,16 @@ void AddSC_world_eastern_kingdoms()
     Script* pNewScript = new Script;
     pNewScript->Name = "world_map_eastern_kingdoms";
     pNewScript->GetInstanceData = &GetInstanceData_world_map_eastern_kingdoms;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_infernaling_summoner_portal_hound";
+    pNewScript->GetGameObjectAI = &GetAI_go_infernaling_summoner_portal_hound;
+    pNewScript->pGOUse = &GOUse_go_infernaling_summoner_portal_hound;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_agent_proudwell";
+    pNewScript->GetAI = &GetAI_npc_agent_proudwell;
     pNewScript->RegisterSelf();
 }

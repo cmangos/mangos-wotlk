@@ -501,6 +501,9 @@ UPDATE creature_template SET ScriptName='npc_disruptor_tower' WHERE entry IN(232
 UPDATE creature_template SET ScriptName='npc_grand_collector' WHERE entry IN(23333);
 
 /* BLASTED LANDS */
+UPDATE creature_template SET ScriptName='boss_kazzak' WHERE entry=12397;
+UPDATE creature_template SET ScriptName='npc_agent_proudwell' WHERE entry=19942;
+UPDATE gameobject_template SET ScriptName='go_infernaling_summoner_portal_hound' WHERE entry=183357;
 
 /* BLOODMYST ISLE */
 UPDATE creature_template SET ScriptName='mob_webbed_creature' WHERE entry=17680;
@@ -3375,13 +3378,36 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1015071','You can die!','0','0','0','0','0','Krun Spinebreaker SAY 1'),
 ('-1015072','%s plants the Flag of Ownership in the corpse of $N.','0','0','0','0','0','Item - Flag of Ownership'),
 
-('-1015073','Azeroth has cowered too long under our shadow!  Now, feel the power of the Burning Crusade and despair!','0','1','0','0','16046','kruul SAY_INTRO1'), -- broadcast text id does not exist in TBC?
-('-1015074','Your fate is sealed, Azeroth!  I will find the Aspect Shards, and then you will not stand against our might!','0','1','0','0','16047','kruul SAY_INTRO2'), -- broadcast text id does not exist in TBC?
-('-1015075','Cower, little worms!  Your feeble heroes are nothing!  Your saviors will be our first feast!','0','1','0','0','16045','kruul SAY_AGGRO1'), -- broadcast text id does not exist in TBC?
-('-1015076','Where?  Where are the Shards!  You cannot hide them from us!','0','1','0','0','17097','kruul SAY_AGGRO2'), -- broadcast text id does not exist in TBC?
-('-1015077','Your world will die, mortals!  Your doom is now at hand!','0','1','0','0','16044','kruul SAY_AGGRO3'), -- broadcast text id does not exist in TBC?
+('-1015073','Azeroth has cowered too long under our shadow!  Now, feel the power of the Burning Crusade and despair!','0','1','0','0','16046','kruul SAY_INTRO1'),
+('-1015074','Your fate is sealed, Azeroth!  I will find the Aspect Shards, and then you will not stand against our might!','0','1','0','0','16047','kruul SAY_INTRO2'),
+('-1015075','Cower, little worms!  Your feeble heroes are nothing!  Your saviors will be our first feast!','0','1','0','0','16045','kruul SAY_AGGRO1'),
+('-1015076','Where?  Where are the Shards!  You cannot hide them from us!','0','1','0','0','17097','kruul SAY_AGGRO2'),
+('-1015077','Your world will die, mortals!  Your doom is now at hand!','0','1','0','0','16044','kruul SAY_AGGRO3'),
 ('-1015078','Your own strength feeds me, $n!','0','1','0','0','8461','kruul SAY_KILL'),
-('-1015079','Hah!  This place is not yet worthy of my infliction!','0','1','0','0','16048','kruul SAY_DESPAWN'); -- broadcast text id does not exist in TBC?
+('-1015079','Hah!  This place is not yet worthy of my infliction!','0','1','0','0','16048','kruul SAY_DESPAWN'),
+
+('-1015080','Marshals... brothers and sisters of the sword.  I''d rather fight alongside you than any army of thousands.  We are lions!  You know what''s waiting through these demons and beyond that Dark Portal?  Immortality!  Take it!','0','1','0','0','16545','lord marshal raynor LMR_SPAWN'),
+('-1015081','Yes. Fight and you may die. Run and you will live, but for how long?  The devils are upon us!  And those not here, dying in their villages weeks from now, would they be willing to trade all the days from this day to that, for one chance to come here and stop these horrors from invading our world?','0','0','0','0','16548','lord marshal raynor LMR_RANDOM_TEXT_1'),
+('-1015082','Everyone fights.  No one quits.','0','0','0','0','16549','lord marshal raynor LMR_RANDOM_TEXT_2'),
+('-1015083','Hold your ground! Hold your ground! Sons of the Alliance!  Of the Horde! My brothers and sisters!  I see in your eyes the same fear that would wither my own heart. A day may come when our courage fails, when we forsake our friends and break our fellowships... but it is not this day.','0','0','0','0','16550','lord marshal raynor LMR_RANDOM_TEXT_3'),
+('-1015084','This day we fight!! By all that you hold dear in these good lands, I bid you stand, heroes of Azeroth!','0','0','0','0','16551','lord marshal raynor LMR_RANDOM_TEXT_4'),
+('-1015085','We few, we happy few, we band of brothers and sisters.  For those today that shed their blood with me, Shall be my kin; be they never so vile, This day shall gentle their conditions.','0','0','0','0','16552','lord marshal raynor LMR_RANDOM_TEXT_5'),
+('-1015086','Argent Dawn! We go to gather more aid!  Fight on, brothers and sisters.  And know that you will not long fight alone!','0','1','0','0','16934','lord marshal raynor LMR_DESPAWN'),
+
+('-1015087','Soldiers of Azeroth, you now fight against the vile Burning Crusade.  And the hopes and prayers of all Light-loving people march with you.  In the company of our brave allies and brothers-in-arms you will hold your ground and break this demonic charge.  You will stem the destructive tyranny that rages across so many worlds.','0','1','0','0','16625','justinius the harbinger JTH_SPAWN'),
+('-1015088','With each passing moment, I see the people of Azeroth prove again the reasons we have come.  It is with solemn pride that I fight with you, and if I die this day, then I die among friends.','0','0','0','0','16633','justinius the harbinger JTH_RANDOM_TEXT_1'),
+('-1015089','The demons should be in no doubt that we are their nemesis and, though they wish our destruction, it is we who will bring about their ruin.  Kazzak and his forces will be diminished and defeated by this coalition.  And to do this, we must throw at them our bodies and hearts, for they seek no less than the obliteration of this world.','0','0','0','0','16627','justinius the harbinger JTH_RANDOM_TEXT_2'),
+('-1015090','Yes!  Hold your feet firm!  Lend aid to your cohorts and together our banded strength will overcome these demons!  Cling fiercely to hope and grip tightly your weapons, and trust that the Light will pierce this darkness and shine through to morrow''s dawn!','0','0','0','0','16631','justinius the harbinger JTH_RANDOM_TEXT_4'),
+('-1015091','Fight on, good people of Azeroth.  And take heart!  Your brethren rush to this hellish portal and will soon throw themselves at these demons as you have so bravely done.  May the Light keep you!','0','1','0','0','16933','justinius the harbinger JTH_DESPAWN_1'),
+
+('-1015092','Hunters, to me! Let us show these demons what it is to fight and die in Azeroth!','0','1','0','0','16616','melgromm highmountain MH_SPAWN'),
+('-1015093','The spirits sing to us!  They sing the song of battle!','0','0','0','0','16617','melgromm highmountain MH_RANDOM_1'),
+('-1015094','Strike true, brothers and sisters!  Today our quarry is demons!','0','0','0','0','16618','melgromm highmountain MH_RANDOM_2'),
+('-1015095','Once again, we will show this Burning Legion that our world is not for the taking!','0','0','0','0','16620','melgromm highmountain MH_RANDOM_3'),
+('-1015096','These fiends will fail!  For Azeroth!','0','0','0','0','16621','melgromm highmountain MH_RANDOM_4'),
+('-1015097','If it is our fate to die this day, then we will not go easy!  Mark me, these demons will fall like wheat!','0','0','0','0','16622','melgromm highmountain MH_RANDOM_5'),
+('-1015098','Though your sinews tire and your blood flows from cuts and wounds to this sodden ground, you fight for the spirits of your world.  No evil force can stand against us!','0','0','0','0','16624','melgromm highmountain MH_RANDOM_6'),
+('-1015099','My brethren, my comrades-in-arms!  I must go to seek the forces of the Horde and direct them here!  Keep your spirits strong, brave hunters!  Do not fall to the portal-spawned fiends!','0','0','0','0','16935','melgromm highmountain MH_DESPAWN');
 
 -- -1 020 000 WOTLK texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
