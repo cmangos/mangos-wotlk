@@ -9422,7 +9422,8 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                     controller->AddThreat(enemy);
                     enemy->AddThreat(controller);
                     enemy->SetInCombatWith(controller);
-                    enemy->GetCombatManager().TriggerCombatTimer(controller);
+                    if (PvP || creatureNotInCombat)
+                        enemy->GetCombatManager().TriggerCombatTimer(controller);
                 }
                 else
                     controller->AI()->AttackStart(enemy);
@@ -9438,10 +9439,10 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
 
     if (creatureNotInCombat)
     {
-        Creature* pCreature = (Creature*)this;
+        Creature* creature = static_cast<Creature*>(this);
 
         // clear stand state if set in addon - else script has to do it on its own
-        CreatureDataAddon const* cainfo = pCreature->GetCreatureAddon();
+        CreatureDataAddon const* cainfo = creature->GetCreatureAddon();
         if (cainfo)
         {
             if (getStandState() == cainfo->bytes1)
@@ -9450,23 +9451,24 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                 HandleEmoteState(0);
         }
 
-        pCreature->SetCombatStartPosition(GetPosition());
+        if (creature->GetCombatStartPosition().IsEmpty())
+            creature->SetCombatStartPosition(GetPosition());
 
-        if (!pCreature->CanAggro()) // if creature aggroed during initial ignoration period, clear the state
+        if (!creature->CanAggro()) // if creature aggroed during initial ignoration period, clear the state
         {
-            pCreature->SetCanAggro(true);
+            creature->SetCanAggro(true);
             AbortAINotifyEvent();
         }
 
-        if (pCreature->AI())
-            pCreature->AI()->EnterCombat(enemy);
+        if (creature->AI())
+            creature->AI()->EnterCombat(enemy);
 
         // Some bosses are set into combat with zone
-        if (GetMap()->IsDungeon() && (pCreature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_AGGRO_ZONE) && enemy && enemy->IsControlledByPlayer())
-            pCreature->SetInCombatWithZone();
+        if (GetMap()->IsDungeon() && (creature->GetCreatureInfo()->ExtraFlags & CREATURE_EXTRA_FLAG_AGGRO_ZONE) && enemy && enemy->IsControlledByPlayer())
+            creature->SetInCombatWithZone();
 
         if (InstanceData* mapInstance = GetInstanceData())
-            mapInstance->OnCreatureEnterCombat(pCreature);
+            mapInstance->OnCreatureEnterCombat(creature);
 
         TriggerAggroLinkingEvent(enemy);
     }
