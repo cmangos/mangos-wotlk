@@ -622,6 +622,7 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
             }
 
             execData.triggeredSpellId = 0;
+            execData.basepoints = { 0, 0, 0 };
             SpellAuraProcResult procResult = execData.triggeredByAura->OnProc(execData);
             if (procResult == SPELL_AURA_PROC_OK)
                 procResult = (*this.*AuraProcHandler[auraModifier->m_auraname])(execData);
@@ -749,7 +750,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder*
     return roll_chance_f(chance);
 }
 
-SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, int32* basepoints, uint32 triggeredSpellId, Item* castItem, Aura* triggeredByAura, uint32 cooldown)
+SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, std::array<int32, MAX_EFFECT_INDEX>& basepoints, uint32 triggeredSpellId, Item* castItem, Aura* triggeredByAura, uint32 cooldown)
 {
     SpellEntry const* triggerEntry = sSpellTemplate.LookupEntry<SpellEntry>(triggeredSpellId);
 
@@ -762,7 +763,7 @@ SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, int32* basepoints, u
     return TriggerProccedSpell(target, basepoints, triggerEntry, castItem, triggeredByAura, cooldown);
 }
 
-SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, int32* basepoints, SpellEntry const* spellInfo, Item* castItem, Aura* triggeredByAura, uint32 cooldown)
+SpellAuraProcResult Unit::TriggerProccedSpell(Unit* target, std::array<int32, MAX_EFFECT_INDEX>& basepoints, SpellEntry const* spellInfo, Item* castItem, Aura* triggeredByAura, uint32 cooldown)
 {
     // default case
     if (!target || (target != this && !target->IsAlive()))
@@ -796,7 +797,7 @@ SpellAuraProcResult Unit::HandleHasteAuraProc(ProcExecutionData& data)
 
     uint32 triggered_spell_id = data.triggeredSpellId;
     Unit* target = pVictim;
-    int32* basepoints = data.basepoints;
+    std::array<int32, MAX_EFFECT_INDEX>& basepoints = data.basepoints;
 
     switch (hasteSpell->Id)
     {
@@ -847,7 +848,7 @@ SpellAuraProcResult Unit::HandleSpellCritChanceAuraProc(ProcExecutionData& data)
 
     uint32 triggered_spell_id = 0;
     Unit* target = pVictim;
-    int32* basepoints = data.basepoints;
+    std::array<int32, MAX_EFFECT_INDEX>& basepoints = data.basepoints;
 
     switch (triggeredByAuraSpell->SpellFamilyName)
     {
@@ -890,7 +891,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
     // some dummy spells have trigger spell in spell data already (from 3.0.3)
     uint32 triggered_spell_id = dummySpell->EffectApplyAuraName[effIndex] == SPELL_AURA_DUMMY ? dummySpell->EffectTriggerSpell[effIndex] : data.triggeredSpellId;
     Unit* target = pVictim;
-    int32* basepoints = data.basepoints;
+    std::array<int32, MAX_EFFECT_INDEX>& basepoints = data.basepoints;
 
     switch (dummySpell->SpellFamilyName)
     {
@@ -3198,7 +3199,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
     // Set trigger spell id, target, custom basepoints
     uint32 trigger_spell_id = auraSpellInfo->EffectTriggerSpell[triggeredByAura->GetEffIndex()];
     Unit*  target = nullptr;
-    int32* basepoints = data.basepoints;
+    std::array<int32, MAX_EFFECT_INDEX>& basepoints = data.basepoints;
 
     if (triggeredByAura->GetModifier()->m_auraname == SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE)
         basepoints[0] = triggerAmount;
@@ -4199,7 +4200,7 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(ProcExecutionData& d
     int32 triggerAmount = triggeredByAura->GetModifier()->m_amount;
 
     uint32 triggered_spell_id = data.triggeredSpellId;
-    int32* basepoints = data.basepoints;
+    std::array<int32, MAX_EFFECT_INDEX>& basepoints = data.basepoints;
 
     switch (scriptId)
     {
@@ -4596,7 +4597,7 @@ SpellAuraProcResult Unit::HandleManaShieldAuraProc(ProcExecutionData& data)
 
     uint32 triggered_spell_id = 0;
     Unit* target = pVictim;
-    int32* basepoints = data.basepoints;
+    std::array<int32, MAX_EFFECT_INDEX>& basepoints = data.basepoints;
 
     switch (dummySpell->SpellFamilyName)
     {
