@@ -4721,16 +4721,17 @@ void Unit::_UpdateSpells(uint32 time)
 
 void Unit::_UpdateAutoRepeatSpell()
 {
-    bool isAutoShot = m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id == SPELL_ID_AUTOSHOT;
-
     // check movement
     if (IsMoving())
     {
         if (!IsNonMeleeSpellCasted(false, false, true, false, true)) // stricter check to see if we should introduce cooldown or just return
             return;
         // cancel wand shoot
-        if (!isAutoShot)
+        if ((m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT) != 0)
+        {
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+            return;
+        }
         // set 0.5 second wind-up time.
         m_AutoRepeatFirstCast = true;
         return;
@@ -4829,7 +4830,11 @@ void Unit::SetCurrentCastedSpell(Spell* newSpell)
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
             {
                 // break autorepeat if not Auto Shot
+<<<<<<< HEAD
                 if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != SPELL_ID_AUTOSHOT)
+=======
+                if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Category == 351) // TODO: figure out what channel interrupt flag corresponds to this
+>>>>>>> 783d667786... Fix wanding not being interrupted on moving
                     InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             }
         } break;
