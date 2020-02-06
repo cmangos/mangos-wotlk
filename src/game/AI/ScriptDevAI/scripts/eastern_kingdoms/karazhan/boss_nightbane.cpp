@@ -200,7 +200,7 @@ struct boss_nightbaneAI : public CombatAI
                     m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
                     m_creature->SetCanFly(false);
                     m_creature->SetHover(false);
-                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_GROUND, -11162.23, -1900.329, 91.47265); // noted as falling in sniff
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_GROUND, -11162.23f, -1900.329f, 91.47265f); // noted as falling in sniff
                 }
             }
             else // intro movement
