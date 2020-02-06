@@ -60,7 +60,7 @@ enum
     POINT_ID_GROUND             = 2,
 
     POINT_INTRO_END             = 10,
-    POINT_LANDING_END           = 6,
+    POINT_LANDING_END           = 5,
 };
 
 enum NightbaneActions
