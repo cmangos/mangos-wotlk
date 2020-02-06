@@ -31,6 +31,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "World/WorldState.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 enum
 {
@@ -346,15 +347,12 @@ enum
     QUEST_CITY_LIGHT        = 10211
 };
 
-struct npc_khadgars_servantAI : public npc_escortAI
+struct npc_khadgars_servantAI : public npc_escortAI, public TimerManager
 {
-    npc_khadgars_servantAI(Creature* pCreature) : npc_escortAI(pCreature)
+    npc_khadgars_servantAI(Creature* creature) : npc_escortAI(creature), m_startPhase(0)
     {
-        if (pCreature->GetOwner() && pCreature->GetOwner()->GetTypeId() == TYPEID_PLAYER)
-            Start(false, (Player*)pCreature->GetOwner());
-        else
-            script_error_log("npc_khadgars_servant can not obtain owner or owner is not a player.");
-
+        AddCustomAction(0, 2000u, [=]() { HandleStart(); });
+        SetReactState(REACT_PASSIVE);
         Reset();
     }
 
@@ -362,6 +360,8 @@ struct npc_khadgars_servantAI : public npc_escortAI
     uint32 m_uiTalkTimer;
     uint32 m_uiTalkCount;
     uint32 m_uiRandomTalkCooldown;
+
+    uint32 m_startPhase;
 
     void Reset() override
     {
@@ -396,10 +396,30 @@ struct npc_khadgars_servantAI : public npc_escortAI
         }
     }
 
-    void WaypointStart(uint32 uiPointId) override
+    void HandleStart()
     {
-        if (uiPointId == 2)
-            DoScriptText(SAY_KHAD_SERV_0, m_creature);
+        uint32 timer = 0;
+        switch (m_startPhase)
+        {
+            case 0: // khadgar talks
+                if (Creature* pKhadgar = GetClosestCreatureWithEntry(m_creature, NPC_KHADGAR, 10.0f))
+                    DoScriptText(SAY_KHAD_START, pKhadgar);
+                timer = 3000;
+                break;
+            case 1: // servant talks
+                DoScriptText(SAY_KHAD_SERV_0, m_creature);
+                timer = 4000;
+                break;
+            case 2: // wps start
+                if (m_creature->GetOwner() && m_creature->GetOwner()->GetTypeId() == TYPEID_PLAYER)
+                    Start(false, static_cast<Player*>(m_creature->GetOwner()));
+                else
+                    script_error_log("npc_khadgars_servant can not obtain owner or owner is not a player.");
+                break;
+        }
+        ++m_startPhase;
+        if (timer)
+            ResetTimer(0, timer);
     }
 
     void WaypointReached(uint32 uiPointId) override
@@ -409,41 +429,41 @@ struct npc_khadgars_servantAI : public npc_escortAI
         switch (uiPointId)
         {
             case 1:
-                if (Creature* pKhadgar = GetClosestCreatureWithEntry(m_creature, NPC_KHADGAR, 10.0f))
-                    DoScriptText(SAY_KHAD_START, pKhadgar);
                 break;
-            case 6:
-            case 25:
-            case 51:
-            case 64:
-            case 75:
+            case 7:
+            case 26:
+            case 52:
+            case 65:
             case 76:
+            case 77:
                 SetEscortPaused(true);
                 break;
-            case 35:
+            case 36:
                 if (Creature* pIzzard = GetClosestCreatureWithEntry(m_creature, NPC_IZZARD, 10.0f))
                     DoScriptText(SAY_KHAD_MIND_YOU, pIzzard);
                 break;
-            case 36:
+            case 37:
                 if (Creature* pAdyria = GetClosestCreatureWithEntry(m_creature, NPC_ADYRIA, 10.0f))
                     DoScriptText(SAY_KHAD_MIND_ALWAYS, pAdyria);
                 break;
         }
     }
 
-    void UpdateEscortAI(const uint32 uiDiff) override
+    void UpdateEscortAI(const uint32 diff) override
     {
+        UpdateTimers(diff);
+
         if (m_uiRandomTalkCooldown)
         {
-            if (m_uiRandomTalkCooldown <= uiDiff)
+            if (m_uiRandomTalkCooldown <= diff)
                 m_uiRandomTalkCooldown = 0;
             else
-                m_uiRandomTalkCooldown -= uiDiff;
+                m_uiRandomTalkCooldown -= diff;
         }
 
         if (HasEscortState(STATE_ESCORT_PAUSED))
         {
-            if (m_uiTalkTimer <= uiDiff)
+            if (m_uiTalkTimer <= diff)
             {
                 ++m_uiTalkCount;
                 m_uiTalkTimer = 7500;
@@ -455,7 +475,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
 
                 switch (m_uiPointId)
                 {
-                    case 6:                                 // to lower city
+                    case 7:                                 // to lower city
                     {
                         switch (m_uiTalkCount)
                         {
@@ -475,7 +495,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
                         }
                         break;
                     }
-                    case 25:                                // in lower city
+                    case 26:                                // in lower city
                     {
                         switch (m_uiTalkCount)
                         {
@@ -495,7 +515,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
                         }
                         break;
                     }
-                    case 51:                                // outside
+                    case 52:                                // outside
                     {
                         switch (m_uiTalkCount)
                         {
@@ -515,7 +535,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
                         }
                         break;
                     }
-                    case 64:                                // scryer
+                    case 65:                                // scryer
                     {
                         switch (m_uiTalkCount)
                         {
@@ -529,7 +549,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
                         }
                         break;
                     }
-                    case 75:                                // aldor
+                    case 76:                                // aldor
                     {
                         switch (m_uiTalkCount)
                         {
@@ -549,7 +569,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
                         }
                         break;
                     }
-                    case 76:                                // a'dal
+                    case 77:                                // a'dal
                     {
                         switch (m_uiTalkCount)
                         {
@@ -573,15 +593,10 @@ struct npc_khadgars_servantAI : public npc_escortAI
                 }
             }
             else
-                m_uiTalkTimer -= uiDiff;
+                m_uiTalkTimer -= diff;
         }
     }
 };
-
-UnitAI* GetAI_npc_khadgars_servant(Creature* pCreature)
-{
-    return new npc_khadgars_servantAI(pCreature);
-}
 
 /*######
 # npc_salsalabim
@@ -697,7 +712,7 @@ void AddSC_shattrath_city()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_khadgars_servant";
-    pNewScript->GetAI = &GetAI_npc_khadgars_servant;
+    pNewScript->GetAI = &GetNewAIInstance<npc_khadgars_servantAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
