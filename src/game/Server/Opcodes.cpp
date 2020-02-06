@@ -975,7 +975,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x3B2*/ { "CMSG_GM_WHISPER",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x3B3*/ { "SMSG_GM_MESSAGECHAT",                          STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x3B4*/ { "MSG_GM_GEARRATING",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
-    /*0x3B5*/ { "CMSG_COMMENTATOR_ENABLE",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x3B5*/ { "CMSG_COMMENTATOR_ENABLE",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleCommentatorModeOpcode     },
     /*0x3B6*/ { "SMSG_COMMENTATOR_STATE_CHANGED",               STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x3B7*/ { "CMSG_COMMENTATOR_GET_MAP_INFO",                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x3B8*/ { "SMSG_COMMENTATOR_MAP_INFO",                    STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
