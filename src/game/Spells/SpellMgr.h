@@ -531,6 +531,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 28902:         // Bloodlust
         case 29406:         // Shadowform
         case 29526:         // Hate to Zero (Hate to Zero)
+        case 30982:         // Crippling Poison
         case 31332:         // Dire Wolf Visual
         case 31690:         // Putrid Mushroom
         case 31792:         // Bear Form (Shapeshift)
