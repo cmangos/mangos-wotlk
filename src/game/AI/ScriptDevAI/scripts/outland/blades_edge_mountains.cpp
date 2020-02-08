@@ -4001,6 +4001,39 @@ struct EtherealRingSignalFlare : public SpellScript
     }
 };
 
+enum
+{
+    NPC_LEAFBEARD = 21326,
+};
+
+struct ExorcismFeather : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (ObjectGuid target = spell->m_targets.getUnitTargetGuid()) // can be cast only on this target
+            if (target.GetEntry() != NPC_LEAFBEARD)
+                return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+};
+
+struct KoiKoiDeath : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        Creature* leafbeard = static_cast<Creature*>(target);
+        leafbeard->SetFactionTemporary(FACTION_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
+        leafbeard->RemoveGuardians();
+        leafbeard->CombatStopWithPets(true);
+        leafbeard->GetMotionMaster()->MoveIdle();
+        leafbeard->ForcedDespawn(12000);
+    }
+};
+
 void AddSC_blades_edge_mountains()
 {
     Script* pNewScript = new Script;
@@ -4163,4 +4196,5 @@ void AddSC_blades_edge_mountains()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<EtherealRingSignalFlare>("spell_ethereal_ring_signal_flare");
+    RegisterSpellScript<ExorcismFeather>("spell_exorcism_feather");
 }

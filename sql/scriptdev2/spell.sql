@@ -37,6 +37,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- TBC
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(38606,'spell_exorcism_feather'),
 (38915,'spell_mental_interference'),
 (40186,'spell_summon_blossom_move_target'),
 (40251,'spell_shadow_of_death'),
