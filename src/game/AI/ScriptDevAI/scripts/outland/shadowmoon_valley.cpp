@@ -209,14 +209,14 @@ enum
 
 struct mob_enslaved_netherwing_drakeAI : public ScriptedAI
 {
-    mob_enslaved_netherwing_drakeAI(Creature* pCreature) : ScriptedAI(pCreature)
+    mob_enslaved_netherwing_drakeAI(Creature* creature) : ScriptedAI(creature), m_uiFlyTimer(0), m_disabled(false)
     {
-        m_uiFlyTimer = 0;
         Reset();
     }
 
     ObjectGuid m_playerGuid;
     uint32 m_uiFlyTimer;
+    bool m_disabled;
 
     void Reset() override
     {
@@ -224,13 +224,20 @@ struct mob_enslaved_netherwing_drakeAI : public ScriptedAI
         m_creature->SetHover(false);
     }
 
+    void JustRespawned() override
+    {
+        ScriptedAI::JustRespawned();
+        m_disabled = false;
+    }
+
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
     {
-        if (pSpell->Id == SPELL_HIT_FORCE_OF_NELTHARAKU && !m_uiFlyTimer)
+        if (pSpell->Id == SPELL_HIT_FORCE_OF_NELTHARAKU && !m_disabled)
         {
             if (Player* pPlayer = pCaster->GetBeneficiaryPlayer())
             {
                 m_uiFlyTimer = 2500;
+                m_disabled = true;
                 m_playerGuid = pPlayer->GetObjectGuid();
 
                 DoScriptText(EMOTE_ON_HIT_FORCE, m_creature);
