@@ -41,6 +41,7 @@ EndContentData */
 #include "AI/ScriptDevAI/base/pet_ai.h"
 #include "Entities/TemporarySpawn.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 /*#####
 # mob_mature_netherwing_drake
@@ -5301,6 +5302,24 @@ UnitAI* GetAI_npc_bt_battle_sensor(Creature* pCreature)
     return new npc_bt_battle_sensor(pCreature);
 }
 
+struct TagGreaterFelfireDiemetradon : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || !target->IsCreature() || static_cast<Creature*>(target)->HasBeenHitBySpell(spell->m_spellInfo->Id))
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnHit(Spell* spell) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget(); // no need to check for creature, done above
+        if (target)
+            static_cast<Creature*>(target)->RegisterHitBySpell(spell->m_spellInfo->Id);
+    }
+};
+
 void AddSC_shadowmoon_valley()
 {
     Script* pNewScript = new Script;
@@ -5445,4 +5464,6 @@ void AddSC_shadowmoon_valley()
     pNewScript->Name = "npc_bt_battle_sensor";
     pNewScript->GetAI = &GetAI_npc_bt_battle_sensor;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<TagGreaterFelfireDiemetradon>("spell_tag_greater_felfire_diemetradon");
 }
