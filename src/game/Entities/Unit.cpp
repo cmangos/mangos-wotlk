@@ -4721,8 +4721,8 @@ void Unit::_UpdateSpells(uint32 time)
 
 void Unit::_UpdateAutoRepeatSpell()
 {
-    // check movement
-    if (IsMoving())
+    // check "real time" interrupts
+    if (IsMoving() || IsNonMeleeSpellCasted(false, false, true))
     {
         if (!IsNonMeleeSpellCasted(false, false, true, false, true)) // stricter check to see if we should introduce cooldown or just return
             return;
@@ -4743,20 +4743,6 @@ void Unit::_UpdateAutoRepeatSpell()
         AddCooldown(*m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo, nullptr, false, 500);
         m_AutoRepeatFirstCast = false;
         return;
-    }
-
-    // check spell casts
-    if (IsNonMeleeSpellCasted(false, false, true))
-    {
-        // cancel wand shoot
-        if (!isAutoShot)
-        {
-            InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-            return;
-        }
-        // auto shot is delayed by everything, except ranged(!) CURRENT_GENERIC_SPELL's -> recheck that
-        if (!(m_currentSpells[CURRENT_GENERIC_SPELL] && m_currentSpells[CURRENT_GENERIC_SPELL]->IsRangedSpell()))
-            return;
     }
 
     // cast routine
@@ -4830,11 +4816,7 @@ void Unit::SetCurrentCastedSpell(Spell* newSpell)
             if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
             {
                 // break autorepeat if not Auto Shot
-<<<<<<< HEAD
-                if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Id != SPELL_ID_AUTOSHOT)
-=======
                 if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Category == 351) // TODO: figure out what channel interrupt flag corresponds to this
->>>>>>> 783d667786... Fix wanding not being interrupted on moving
                     InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             }
         } break;
