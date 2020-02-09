@@ -124,6 +124,7 @@ struct boss_nightbaneAI : public CombatAI
         m_creature->SetLevitate(true);
         SetDeathPrevention(false);
         m_creature->SetSupportThreatOnly(false);
+        SetCombatScriptStatus(false);
 
         m_skeletons.clear();
     }
@@ -329,6 +330,7 @@ struct boss_nightbaneAI : public CombatAI
                 auto wpPath = sWaypointMgr.GetPathFromOrigin(m_creature->GetEntry(), m_creature->GetGUIDLow(), 1, PATH_FROM_ENTRY);
                 m_creature->GetMotionMaster()->MovePath(*wpPath);
                 m_phase = PHASE_TRANSITION;
+                SetCombatScriptStatus(true);
                 DisableCombatAction(action);
                 break;
             }
