@@ -39,6 +39,7 @@ EndContentData */
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"
 #include "AI/ScriptDevAI/scripts/outland/world_outland.h"
+#include "Spells/Scripts/SpellScript.h"
 
 /*######
 ## npc_manaforge_control_console
@@ -3909,6 +3910,19 @@ bool GossipSelect_npc_adyen_the_lightwarden(Player* player, Creature* creature, 
     return false;
 }
 
+struct Soulbind : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        caster->CastSpell(target, 36141, TRIGGERED_OLD_TRIGGERED); // spell id is in spell effect value
+    }
+};
+
 void AddSC_netherstorm()
 {
     Script* pNewScript = new Script;
@@ -4028,4 +4042,6 @@ void AddSC_netherstorm()
     pNewScript->Name = "npc_kaylaan_the_lost";
     pNewScript->GetAI = &Getnpc_kaylaan_the_lostAI;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<Soulbind>("spell_soulbind");
 }

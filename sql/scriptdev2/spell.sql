@@ -38,6 +38,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- TBC
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(36153,'spell_soulbind'),
 (37851,'spell_tag_greater_felfire_diemetradon'),
 (38606,'spell_exorcism_feather'),
 (38915,'spell_mental_interference'),
