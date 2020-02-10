@@ -1112,6 +1112,28 @@ struct GreaterInvisibilityMob : public AuraScript
     }
 };
 
+struct InebriateRemoval : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target->IsPlayer())
+            return;
+
+        SpellEffectIndex effIdx;
+        SpellEffectIndex effIdxInebriate;
+        switch (aura->GetSpellProto()->Id)
+        {
+            case 29690: effIdx = EFFECT_INDEX_1; effIdxInebriate = EFFECT_INDEX_2; break;
+            case 37591: effIdx = EFFECT_INDEX_0; effIdxInebriate = EFFECT_INDEX_1; break;
+            default: return;
+        }
+        Player* player = static_cast<Player*>(target);
+        if (!apply && aura->GetEffIndex() == effIdx)
+            player->SetDrunkValue(uint16(std::max(int32(player->GetDrunkValue()) - player->CalculateSpellEffectValue(player, aura->GetSpellProto(), effIdxInebriate), 0)));
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1127,6 +1149,7 @@ void AddSC_spell_scripts()
 
     RegisterSpellScript<SpellStackingRulesOverride>("spell_stacking_rules_override");
     RegisterAuraScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
+    RegisterAuraScript<InebriateRemoval>("spell_inebriate_removal");
     RegisterSpellScript<spell_battleground_banner_trigger>("spell_battleground_banner_trigger");
     RegisterSpellScript<spell_outdoor_pvp_banner_trigger>("spell_outdoor_pvp_banner_trigger");
 }
