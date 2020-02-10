@@ -47,6 +47,7 @@
 #include "PlayerDefines.h"
 
 #include <list>
+#include <array>
 
 enum SpellInterruptFlags
 {
