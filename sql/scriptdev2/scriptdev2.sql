@@ -4625,15 +4625,15 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1543015','It is... not over.','10284','1','0','0','0','omor SAY_DIE'),
 ('-1543016','I am victorious!','10283','1','0','0','0','omor SAY_WIPE'),
 
-('-1543017','You have faced many challenges, pity they were all in vain. Soon your people will kneel to my lord!','10292','1','0','0','0','vazruden SAY_INTRO'),
+('-1543017','You have faced many challenges.... Pity they were all in vain! Soon your people will kneel to MY lord!','10292','1','0','0','0','vazruden SAY_INTRO'),
 ('-1543018','Your time is running out!','10294','1','0','0','0','vazruden SAY_AGGRO1'),
-('-1543019','You are nothing, I answer a higher call!','10295','1','0','0','0','vazruden SAY_AGGRO2'),
+('-1543019','You are nothing! I answer a higher call....','10295','1','0','0','0','vazruden SAY_AGGRO2'),
 ('-1543020','The Dark Lord laughs at you!','10296','1','0','0','0','vazruden SAY_AGGRO3'),
 ('-1543021','Is there no one left to test me?','10293','1','0','0','0','vazruden SAY_TAUNT'),
 ('-1543022','It is over. Finished!','10297','1','0','0','0','vazruden SAY_KILL1'),
 ('-1543023','Your days are done!','10298','1','0','0','0','vazruden SAY_KILL2'),
-('-1543024','My lord will be the end you all...','10299','1','0','0','0','vazruden SAY_DEATH'),
-('-1543025','%s descends from the sky.','0','3','0','0','0','vazruden EMOTE_DESCEND');
+('-1543024','My lord will be... the end of you all!','10299','1','0','0','0','vazruden SAY_DEATH'),
+('-1543025','Nazan descends from the sky.','0','3','0','0','0','vazruden EMOTE_DESCEND');
 
 -- -1 544 000 MAGTHERIDON'S LAIR
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

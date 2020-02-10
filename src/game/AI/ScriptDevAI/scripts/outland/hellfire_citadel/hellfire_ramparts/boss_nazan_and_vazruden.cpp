@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "hellfire_ramparts.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -63,127 +65,150 @@ enum
     // misc
     POINT_ID_CENTER = 100,
     POINT_ID_FLYING = 101,
-    POINT_ID_COMBAT = 102,
+    POINT_ID_FLIGHT_MOVE = 102,
+    POINT_ID_LANDING = 103,
+    POINT_ID_LANDED = 104,
 
     NPC_NAZAN = 17536,
 };
 
-const float afCenterPos[3] = { -1399.401f, 1736.365f, 87.008f}; // moves here to drop off nazan
-const float afCombatPos[3] = { -1413.848f, 1754.019f, 83.146f}; // moves here when decending
+const Position landingPosition = { -1410.52f, 1740.585f, 89.05998f, 100.f}; // moves here to drop off nazan
+const Position flyingPositions[] =
+{
+    { -1423.491f, 1710.401f, 103.7056f, 100.f},
+    {-1375.356f, 1744.604f, 99.14612f, 100.f},
+    {-1444.99f, 1752.96f, 98.20342f, 100.f},
+}; // moves here to land and fight
+const Position landingPhasePos = { -1429.172f, 1749.129f, 84.3476f, 100.f };
+const Position landedPhasePos = { -1429.172f, 1749.129f, 81.26282f, 100.f };
+
+enum NazanActions
+{
+    NAZAN_LAND,
+    NAZAN_FLIGHT_MOVE,
+    NAZAN_FIREBALL_FLIGHT,
+    NAZAN_FIREBALL_LAND,
+    NAZAN_CONE_OF_FIRE,
+    NAZAN_BELLOWING_ROAR,
+    NAZAN_ACTION_MAX,
+    NAZAN_ATTACK_DELAY,
+};
 
 // This is the flying mob ("mounted" on dragon) spawned initially
 // This npc will morph into the "unmounted" dragon (nazan) after vazruden is summoned and continue flying
-struct boss_vazruden_heraldAI : public ScriptedAI
+struct boss_vazruden_heraldAI : public CombatAI
 {
-    boss_vazruden_heraldAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_vazruden_heraldAI(Creature* creature) : CombatAI(creature, NAZAN_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+        m_inRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        pCreature->SetActiveObjectState(true);
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        AddTimerlessCombatAction(NAZAN_LAND, true);
+        AddCombatAction(NAZAN_FLIGHT_MOVE, true);
+        AddCombatAction(NAZAN_FIREBALL_FLIGHT, true);
+        AddCombatAction(NAZAN_FIREBALL_LAND, true);
+        AddCombatAction(NAZAN_CONE_OF_FIRE, true);
+        if (!m_inRegularMode)
+            AddCombatAction(NAZAN_BELLOWING_ROAR, true);
+        AddCustomAction(NAZAN_ATTACK_DELAY, true, [&](){ HandleAttackDelay(); });
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float, float)
+        {
+            return x >= -1336.0f;
+        });
+        SetReactState(REACT_DEFENSIVE);
+        creature->SetActiveObjectState(true);
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
+    ScriptedInstance* m_instance;
+    bool m_inRegularMode;
+    uint32 m_lastFlightPoint;
 
     bool m_bIsEventInProgress;
-    bool m_bIsDescending;
-    uint32 m_uiMovementTimer;
-    uint32 m_uiFireballTimer;
-    uint32 m_uiConeOfFireTimer;
-    uint32 m_uiBellowingRoarTimer;
 
     ObjectGuid m_lastSeenPlayerGuid;
     ObjectGuid m_vazrudenGuid;
 
     void Reset() override
     {
+        CombatAI::Reset();
         if (m_creature->GetEntry() != NPC_VAZRUDEN_HERALD)
             m_creature->UpdateEntry(NPC_VAZRUDEN_HERALD);
 
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-        m_uiMovementTimer = 0;
         m_bIsEventInProgress = false;
-        m_bIsDescending = false;
         m_lastSeenPlayerGuid.Clear();
         m_vazrudenGuid.Clear();
-        m_uiFireballTimer = 0;
-        m_uiConeOfFireTimer = urand(8100, 19700);
-        m_uiBellowingRoarTimer = 100;                       // TODO Guesswork, though such an AoE fear soon after landing seems fitting
 
-        // see boss_onyxia
-        // sort of a hack, it is unclear how this really work but the values appear to be valid
         m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
         m_creature->SetLevitate(true);
+        m_creature->SetHover(true);
+        m_creature->SetImmobilizedState(false);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
-        if (m_bIsEventInProgress && !m_lastSeenPlayerGuid && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*)pWho)->isGameMaster())
-        {
-            if (m_creature->IsWithinDistInMap(pWho, 40.0f))
-                m_lastSeenPlayerGuid = pWho->GetObjectGuid();
-        }
-
-        if (m_pInstance && m_pInstance->GetData(TYPE_NAZAN) != IN_PROGRESS)
-            return;
-
-        ScriptedAI::MoveInLineOfSight(pWho);
+        if (eventType == AI_EVENT_CUSTOM_A)
+            DoMoveToCenter();
     }
 
     void AttackStart(Unit* pWho) override
     {
-        if (m_pInstance && m_pInstance->GetData(TYPE_NAZAN) != IN_PROGRESS)
+        if (m_instance && m_instance->GetData(TYPE_NAZAN) != IN_PROGRESS)
             return;
 
         ScriptedAI::AttackStart(pWho);
     }
 
-    void MovementInform(uint32 uiType, uint32 uiPointId) override
+    void EnterEvadeMode() override
     {
-        if (!m_pInstance)
-            return;
-
-        if (uiType == WAYPOINT_MOTION_TYPE)
+        CombatAI::EnterEvadeMode();
+        if (m_vazrudenGuid)
         {
-            if (m_uiMovementTimer || m_bIsEventInProgress)
-                return;
-
-            if (m_pInstance->GetData(TYPE_NAZAN) == SPECIAL)
+            if (Creature* vazruden = m_creature->GetMap()->GetCreature(m_vazrudenGuid))
             {
-                m_creature->SetCombatStartPosition(m_creature->GetPosition());
-                m_uiMovementTimer = 1000;
-                m_bIsEventInProgress = true;
+                if (vazruden->IsInCombat())
+                {
+                    DoScriptText(SAY_TAUNT, vazruden);
+                    vazruden->AI()->EnterEvadeMode();
+                }
             }
         }
+    }
 
-        if (uiType == POINT_MOTION_TYPE)
+    void MovementInform(uint32 motionType, uint32 pointId) override
+    {
+        if (!m_instance)
+            return;
+
+        if (motionType == POINT_MOTION_TYPE)
         {
-            switch (uiPointId)
+            switch (pointId)
             {
                 case POINT_ID_CENTER:
                     DoSplit();
                     break;
-                case POINT_ID_COMBAT:
+                case POINT_ID_LANDING:
                 {
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-                    m_pInstance->SetData(TYPE_NAZAN, IN_PROGRESS);
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_LANDED, landingPhasePos.x, landingPhasePos.y, landingPhasePos.z);
+                    break;
+                }
+                case POINT_ID_LANDED:
+                {
+                    m_instance->SetData(TYPE_NAZAN, IN_PROGRESS);
 
                     // Landing
                     // undo flying
                     m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
                     m_creature->SetLevitate(false);
-                    m_creature->SetInCombatWithZone();
-
-                    // Initialize for combat
-                    m_uiFireballTimer = urand(5200, 16500);
-
+                    m_creature->SetHover(false);
                     break;
                 }
                 case POINT_ID_FLYING:
-                    if (m_bIsEventInProgress)               // Additional check for wipe case, while nazan is flying to this point
-                        m_uiFireballTimer = 1;
+                    SetCombatScriptStatus(false);
+                    m_creature->SetImmobilizedState(true);
+                    HandlePhaseChange(false);
+                    break;
+                case POINT_ID_FLIGHT_MOVE:
+                    SetCombatScriptStatus(false);
+                    m_creature->SetImmobilizedState(true);
                     break;
             }
         }
@@ -192,191 +217,172 @@ struct boss_vazruden_heraldAI : public ScriptedAI
     void DoMoveToCenter()
     {
         DoScriptText(SAY_INTRO, m_creature);
-        m_creature->GetMotionMaster()->MovePoint(POINT_ID_CENTER, afCenterPos[0], afCenterPos[1], afCenterPos[2], false);
+        SetCombatMovement(false);
+        SetCombatScriptStatus(true);
+        SetMeleeEnabled(false);
+        m_creature->SetInCombatWithZone();
+        // catmulrom in sniff
+        m_creature->GetMotionMaster()->MovePoint(POINT_ID_CENTER, landingPosition.x, landingPosition.y, landingPosition.z);
     }
 
     void DoSplit()
     {
         m_creature->UpdateEntry(NPC_NAZAN);
 
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_VAZRUDEN);
+        DoCastSpellIfCan(nullptr, SPELL_SUMMON_VAZRUDEN);
 
-        m_uiMovementTimer = 3000;
-
-        // Let him idle for now
-        m_creature->GetMotionMaster()->MoveIdle();
-    }
-
-    void DoMoveToAir()
-    {
-        Position pos;
-        m_creature->GetCombatStartPosition(pos);
-
-        // Remove Idle MMGen
-        if (m_creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
-            m_creature->GetMotionMaster()->MovementExpired(false);
-
-        m_creature->GetMotionMaster()->MovePoint(POINT_ID_FLYING, pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), false);
+        m_lastFlightPoint = 0;
+        m_creature->GetMotionMaster()->MovePoint(POINT_ID_FLYING, flyingPositions[0].x, flyingPositions[0].y, flyingPositions[0].z);
     }
 
     void DoMoveToCombat()
     {
-        if (m_bIsDescending || !m_pInstance || m_pInstance->GetData(TYPE_NAZAN) == NOT_STARTED)
+        if (!GetActionReadyStatus(NAZAN_LAND) || !m_instance || m_instance->GetData(TYPE_NAZAN) == NOT_STARTED)
             return;
 
-        m_bIsDescending = true;
+        m_creature->SetImmobilizedState(false);
+        SetActionReadyStatus(NAZAN_LAND, false);
 
         m_creature->SetWalk(false);
-        m_creature->GetMotionMaster()->MovePoint(POINT_ID_COMBAT, afCombatPos[0], afCombatPos[1], afCombatPos[2], false);
+        m_creature->GetMotionMaster()->MovePoint(POINT_ID_LANDING, landingPhasePos.x, landingPhasePos.y, landingPhasePos.z);
+        SetCombatScriptStatus(true);
         DoScriptText(EMOTE_DESCEND, m_creature);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void HandleAttackDelay()
     {
-        if (pSummoned->GetEntry() != NPC_VAZRUDEN)
-            return;
-
-        pSummoned->SetInCombatWithZone();
-
-        m_vazrudenGuid = pSummoned->GetObjectGuid();
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VAZRUDEN, IN_PROGRESS);
+        SetCombatMovement(true);
+        SetMeleeEnabled(true);
+        SetCombatScriptStatus(false);
+        m_creature->SetInCombatWithZone();
+        HandlePhaseChange(true);
+        AttackClosestEnemy();
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void HandlePhaseChange(bool phase)
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NAZAN, DONE);
+        if (!phase)
+        {
+            // flying
+            ResetCombatAction(NAZAN_FIREBALL_FLIGHT, 0);
+            ResetCombatAction(NAZAN_FLIGHT_MOVE, urand(25000, 35000));
+        }
+        else
+        {
+            // landing
+            DisableCombatAction(NAZAN_FIREBALL_FLIGHT);
+            ResetCombatAction(NAZAN_FIREBALL_LAND, urand(5200, 16500));
+            ResetCombatAction(NAZAN_CONE_OF_FIRE, urand(8100, 19700));
+            if (!m_inRegularMode)
+                ResetCombatAction(NAZAN_BELLOWING_ROAR, 2000);
+        }
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        if (summoned->GetEntry() != NPC_VAZRUDEN)
+            return;
+
+        summoned->SetInCombatWithZone();
+
+        m_vazrudenGuid = summoned->GetObjectGuid();
+
+        if (m_instance)
+            m_instance->SetData(TYPE_VAZRUDEN, IN_PROGRESS);
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        if (m_instance)
+            m_instance->SetData(TYPE_NAZAN, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_NAZAN, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_NAZAN, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+        switch (action)
         {
-            if (m_uiMovementTimer)
+            case NAZAN_LAND:
             {
-                if (m_uiMovementTimer <= uiDiff)
-                {
-                    if (m_pInstance)
-                    {
-                        if (m_pInstance->GetData(TYPE_VAZRUDEN) == IN_PROGRESS)
-                            DoMoveToAir();
-                        else
-                            DoMoveToCenter();
-                    }
-                    m_uiMovementTimer = 0;
-                }
-                else
-                    m_uiMovementTimer -= uiDiff;
-            }
+                if (!CanExecuteCombatAction() || m_creature->GetHealthPercent() > 20.0f)
+                    return;
 
-            if (m_vazrudenGuid && m_uiFireballTimer)
-            {
-                if (m_uiFireballTimer <= uiDiff)
-                {
-                    if (Creature* pVazruden = m_creature->GetMap()->GetCreature(m_vazrudenGuid))
-                    {
-                        if (Unit* pEnemy = pVazruden->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                        {
-                            if (DoCastSpellIfCan(pEnemy, m_bIsRegularMode ? SPELL_FIREBALL_GROUND : SPELL_FIREBALL_GROUND_H) == CAST_OK)
-                                m_uiFireballTimer = urand(2100, 7300);
-                        }
-                    }
-                }
-                else
-                    m_uiFireballTimer -= uiDiff;
-            }
-
-            if (m_creature->GetHealthPercent() < 20.0f)
                 DoMoveToCombat();
-
-            return;
-        }
-
-        // In Combat
-        if (m_uiFireballTimer < uiDiff)
-        {
-            if (Unit* pEnemy = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pEnemy, m_bIsRegularMode ? SPELL_FIREBALL_GROUND : SPELL_FIREBALL_GROUND_H) == CAST_OK)
-                    m_uiFireballTimer = urand(7300, 13200);
+                break;
             }
-        }
-        else
-            m_uiFireballTimer -= uiDiff;
+            case NAZAN_FLIGHT_MOVE:
+            {
+                if (!CanExecuteCombatAction())
+                    return;
 
-        if (m_uiConeOfFireTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_CONE_OF_FIRE : SPELL_CONE_OF_FIRE_H) == CAST_OK)
-                m_uiConeOfFireTimer = urand(7300, 13200);
-        }
-        else
-            m_uiConeOfFireTimer -= uiDiff;
-
-        if (!m_bIsRegularMode)
-        {
-            if (m_uiBellowingRoarTimer < uiDiff)
+                m_lastFlightPoint = (m_lastFlightPoint + urand(0, 1)) % 3;
+                m_creature->SetImmobilizedState(false);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_FLIGHT_MOVE, flyingPositions[m_lastFlightPoint].x, flyingPositions[m_lastFlightPoint].y, flyingPositions[m_lastFlightPoint].z);
+                SetCombatScriptStatus(true);
+                ResetCombatAction(action, urand(25000, 35000));
+                break;
+            }
+            case NAZAN_FIREBALL_FLIGHT:
+            case NAZAN_FIREBALL_LAND:
+            {
+                if (Creature* vazruden = m_creature->GetMap()->GetCreature(m_vazrudenGuid))
+                {
+                    if (Unit* target = vazruden->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                    {
+                        if (DoCastSpellIfCan(target, m_inRegularMode ? SPELL_FIREBALL_GROUND : SPELL_FIREBALL_GROUND_H) == CAST_OK)
+                            ResetCombatAction(action, action == NAZAN_FIREBALL_FLIGHT ? urand(2100, 7300) : urand(7300, 13200));
+                    }
+                }
+                break;
+            }
+            case NAZAN_CONE_OF_FIRE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_inRegularMode ? SPELL_CONE_OF_FIRE : SPELL_CONE_OF_FIRE_H) == CAST_OK)
+                    ResetCombatAction(action, urand(7300, 13200));
+                break;
+            }
+            case NAZAN_BELLOWING_ROAR:
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_BELLOW_ROAR_H) == CAST_OK)
-                    m_uiBellowingRoarTimer = urand(8000, 12000); // TODO Guesswork, 8s cooldown
-            }
-            else
-                m_uiBellowingRoarTimer -= uiDiff;
-        }
-
-        DoMeleeAttackIfReady();
-
-        if (EnterEvadeIfOutOfCombatArea(uiDiff))
-        {
-            if (m_vazrudenGuid)
-            {
-                if (Creature* pVazruden = m_creature->GetMap()->GetCreature(m_vazrudenGuid))
-                {
-                    DoScriptText(SAY_TAUNT, pVazruden);
-                    pVazruden->AI()->EnterEvadeMode();
-                }
+                    ResetCombatAction(action, urand(40000, 50000));
+                break;
             }
         }
     }
 };
 
-UnitAI* GetAI_boss_vazruden_herald(Creature* pCreature)
+enum VazrudenActions
 {
-    return new boss_vazruden_heraldAI(pCreature);
-}
+    VAZRUDEN_PHASE_2,
+    VAZRUDEN_REVENGE,
+    VAZRUDEN_ACTION_MAX,
+};
 
 // This is the summoned boss ("dismounted") that starts attacking the players
-struct boss_vazrudenAI : public ScriptedAI
+struct boss_vazrudenAI : public CombatAI
 {
-    boss_vazrudenAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_vazrudenAI(Creature* creature) : CombatAI(creature, VAZRUDEN_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+        m_inRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddTimerlessCombatAction(VAZRUDEN_PHASE_2, true);
+        AddCombatAction(VAZRUDEN_REVENGE, 5500, 8400);
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float, float)
+        {
+            return x >= -1336.0f;
+        });
 
-        DoCastSpellIfCan(m_creature, SPELL_DEFENSIVE_STATE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_DEFENSIVE_STATE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
+    ScriptedInstance* m_instance;
+    bool m_inRegularMode;
 
-    uint32 m_uiRevengeTimer;
-    bool m_bHealthBelow;
-
-    void Reset() override
-    {
-        m_bHealthBelow = false;
-        m_uiRevengeTimer = urand(5500, 8400);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
@@ -386,75 +392,87 @@ struct boss_vazrudenAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void EnterEvadeMode() override
+    {
+        DoScriptText(SAY_TAUNT, m_creature);
+        CombatAI::EnterEvadeMode();
+        if (Creature* nazan = m_instance->GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
+            if (nazan->IsInCombat())
+                nazan->AI()->EnterEvadeMode();
+    }
+
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VAZRUDEN, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_VAZRUDEN, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_VAZRUDEN, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_VAZRUDEN, FAIL);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
 
-    void DamageTaken(Unit* /*dealer*/, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_bHealthBelow && m_pInstance && (float(m_creature->GetHealth() - damage) / m_creature->GetMaxHealth()) < 0.40f)
+        switch (action)
         {
-            if (Creature* pNazan = m_pInstance->GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
-                if (boss_vazruden_heraldAI* pNazanAI = dynamic_cast<boss_vazruden_heraldAI*>(pNazan->AI()))
-                    pNazanAI->DoMoveToCombat();
+            case VAZRUDEN_PHASE_2:
+            {
+                if (m_creature->GetHealthPercent() > 40.f)
+                    return;
 
-            m_bHealthBelow = true;
-        }
-    }
+                if (m_instance)
+                    if (Creature* nazan = m_instance->GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
+                        if (boss_vazruden_heraldAI* nazanAI = static_cast<boss_vazruden_heraldAI*>(nazan->AI()))
+                            nazanAI->DoMoveToCombat();
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiRevengeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_REVENGE : SPELL_REVENGE_H) == CAST_OK)
-                m_uiRevengeTimer = urand(11400, 14300);
-        }
-        else
-            m_uiRevengeTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-
-        if (EnterEvadeIfOutOfCombatArea(uiDiff))
-        {
-            DoScriptText(SAY_TAUNT, m_creature);
-            if (Creature* pNazan = m_pInstance->GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
-                pNazan->AI()->EnterEvadeMode();
+                SetActionReadyStatus(action, false);
+                break;
+            }
+            case VAZRUDEN_REVENGE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_inRegularMode ? SPELL_REVENGE : SPELL_REVENGE_H) == CAST_OK)
+                    ResetCombatAction(action, urand(11400, 14300));
+                break;
+            }
         }
     }
 };
 
-UnitAI* GetAI_boss_vazruden(Creature* pCreature)
+struct VazrudenLiquidFire : public SpellScript
 {
-    return new boss_vazrudenAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        target->CastSpell(nullptr, target->GetMap()->IsRegularDifficulty() ? 23971 : 30928, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_nazan_and_vazruden()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_vazruden";
-    pNewScript->GetAI = &GetAI_boss_vazruden;
+    pNewScript->GetAI = &GetNewAIInstance<boss_vazrudenAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_vazruden_herald";
-    pNewScript->GetAI = &GetAI_boss_vazruden_herald;
+    pNewScript->GetAI = &GetNewAIInstance<boss_vazruden_heraldAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<VazrudenLiquidFire>("spell_vazruden_liquid_fire_script");
 }

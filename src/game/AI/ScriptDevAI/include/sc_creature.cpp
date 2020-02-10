@@ -392,8 +392,6 @@ enum
     NPC_MOROES                  = 15687,
     NPC_MOROGRIM_TIDEWALKER     = 21213,
     NPC_KELIDAN_THE_BREAKER     = 17377,
-    NPC_NAZAN                   = 17536,
-    NPC_VAZRUDEN                = 17537,
     NPC_LEOTHERAS               = 21215,
 
     // Black Temple
@@ -467,11 +465,6 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
             break;
         case NPC_KELIDAN_THE_BREAKER:   // out of his room
             if (y > -158.23)
-                return false;
-            break;
-        case NPC_VAZRUDEN:
-        case NPC_NAZAN:
-            if (x < -1336.0f)
                 return false;
             break;
         case NPC_LEOTHERAS:

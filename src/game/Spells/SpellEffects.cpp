@@ -9277,21 +9277,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
-                case 34653:                                 // SPELL_FIREBALL_GROUND
-                case 36920:                                 // SPELL_FIREBALL_GROUND_H
-                case 33793:                                 // SPELL_FIREBALL_RANDOM
-                case 33794:                                 // SPELL_FIREBALL_RANDOM_H
-                case 30926:                                 // SPELL_CONE_OF_FIRE
-                case 36921:                                 // SPELL_CONE_OF_FIRE_H
-                {
-                    if (!unitTarget)
-                        return;
-
-                    float x, y, z;
-                    unitTarget->GetPosition(x, y, z);
-                    unitTarget->CastSpell(x, y, z, unitTarget->GetMap()->IsRegularDifficulty() ? 23971 : 30928, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
-                    return;
-                }
                 case 35597:                                 // Cancel Power of the Legion
                 {
                     unitTarget->RemoveAurasDueToSpell(35596); // remove aura Power of the Legion

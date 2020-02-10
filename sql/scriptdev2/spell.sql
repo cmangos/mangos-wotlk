@@ -38,6 +38,12 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- TBC
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(30926,'spell_vazruden_liquid_fire_script'),
+(33793,'spell_vazruden_liquid_fire_script'),
+(33794,'spell_vazruden_liquid_fire_script'),
+(34653,'spell_vazruden_liquid_fire_script'),
+(36920,'spell_vazruden_liquid_fire_script'),
+(36921,'spell_vazruden_liquid_fire_script'),
 (36153,'spell_soulbind'),
 (37851,'spell_tag_greater_felfire_diemetradon'),
 (38606,'spell_exorcism_feather'),
