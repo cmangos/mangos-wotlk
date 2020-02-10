@@ -23,6 +23,7 @@ SDCategory: Hellfire Citadel, Hellfire Ramparts
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -45,39 +46,44 @@ enum
     SPELL_SUMMON_FIENDISH_HOUND = 30707,
 };
 
-struct boss_omor_the_unscarredAI : public ScriptedAI
+enum OmorActions
 {
-    boss_omor_the_unscarredAI(Creature* pCreature) : ScriptedAI(pCreature)
+    OMOR_ENABLE_SHIELD,
+    OMOR_DEMONIC_SHIELD,
+    OMOR_FIENDISH_HOUND,
+    OMOR_TREACHERY,
+    OMOR_ORBITAL_STRIKE,
+    OMOR_SHADOW_BOLT,
+    OMOR_ACTION_MAX,
+    OMOR_PULL_BACK,
+};
+
+struct boss_omor_the_unscarredAI : public CombatAI
+{
+    boss_omor_the_unscarredAI(Creature* creature) : CombatAI(creature, OMOR_ACTION_MAX), m_inRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
+        AddTimerlessCombatAction(OMOR_DEMONIC_SHIELD, true);
+        AddCombatAction(OMOR_DEMONIC_SHIELD, true);
+        AddCombatAction(OMOR_FIENDISH_HOUND, 19600, 23100);
+        AddCombatAction(OMOR_TREACHERY, 12300, 23300);
+        AddCombatAction(OMOR_ORBITAL_STRIKE, 25000u);
+        AddCombatAction(OMOR_SHADOW_BOLT, 0u);
+        AddCustomAction(OMOR_PULL_BACK, true, [&]() {HandlePullBack(); });
         SetCombatMovement(false);
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    bool m_bIsRegularMode;
+    bool m_inRegularMode;
 
-    uint32 m_uiOrbitalStrikeTimer;
-    uint32 m_uiShadowWhipTimer;
-    uint32 m_uiAuraTimer;
-    uint32 m_uiDemonicShieldTimer;
-    uint32 m_uiShadowboltTimer;
-    uint32 m_uiSummonTimer;
     ObjectGuid m_playerGuid;
-    bool m_bCanPullBack;
 
     void Reset() override
     {
-        m_uiOrbitalStrikeTimer = 25000;
-        m_uiShadowWhipTimer = 3500;
-        m_uiAuraTimer = urand(12300, 23300);
-        m_uiDemonicShieldTimer = 1000;
-        m_uiShadowboltTimer = urand(0, 2000);
-        m_uiSummonTimer = urand(19600, 23100);
+        CombatAI::Reset();
         m_playerGuid.Clear();
-        m_bCanPullBack = false;
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
@@ -87,7 +93,7 @@ struct boss_omor_the_unscarredAI : public ScriptedAI
         }
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         if (urand(0, 1))
             return;
@@ -95,15 +101,15 @@ struct boss_omor_the_unscarredAI : public ScriptedAI
         DoScriptText(SAY_KILL_1, m_creature);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
         DoScriptText(SAY_SUMMON, m_creature);
 
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
+            summoned->AI()->AttackStart(pTarget);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DIE, m_creature);
     }
@@ -115,112 +121,99 @@ struct boss_omor_the_unscarredAI : public ScriptedAI
         ScriptedAI::EnterEvadeMode();
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandlePullBack()
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiSummonTimer < uiDiff)
+        if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_FIENDISH_HOUND) == CAST_OK)
-                m_uiSummonTimer = urand(24100, 26900);
+            // if unit dosen't have this flag, then no pulling back (script will attempt cast, even if orbital strike was resisted)
+            if (player->HasMovementFlag(MOVEFLAG_FALLING))
+                DoCastSpellIfCan(player, SPELL_SHADOW_WHIP, CAST_INTERRUPT_PREVIOUS);
         }
-        else
-            m_uiSummonTimer -= uiDiff;
+        m_playerGuid.Clear();
+    }
 
-        if (m_bCanPullBack)
+    void OnSpellCooldownAdded(SpellEntry const* spellInfo)
+    {
+        if (spellInfo->Id == SPELL_ORBITAL_STRIKE)
+            ResetTimer(OMOR_PULL_BACK, 2500);
+        CombatAI::OnSpellCooldownAdded(spellInfo);
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (m_uiShadowWhipTimer < uiDiff)
+            case OMOR_ENABLE_SHIELD:
             {
-                if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                if (m_creature->GetHealthPercent() < 20.0f)
                 {
-                    // if unit dosen't have this flag, then no pulling back (script will attempt cast, even if orbital strike was resisted)
-                    if (pPlayer->HasMovementFlag(MOVEFLAG_FALLING))
-                        DoCastSpellIfCan(pPlayer, SPELL_SHADOW_WHIP, CAST_INTERRUPT_PREVIOUS);
+                    SetActionReadyStatus(action, false);
+                    ResetCombatAction(OMOR_DEMONIC_SHIELD, 1000);
                 }
-                m_playerGuid.Clear();
-                m_uiShadowWhipTimer = 1000;
-                m_bCanPullBack = false;
+                break;
             }
-            else
-                m_uiShadowWhipTimer -= uiDiff;
-        }
-        else if (m_uiOrbitalStrikeTimer < uiDiff)
-        {
-            Unit* pTemp = nullptr;
-            if (m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
-                pTemp = m_creature->GetVictim();
-            else
-                pTemp = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_IN_MELEE_RANGE);
-
-            if (pTemp)
+            case OMOR_DEMONIC_SHIELD:
             {
-                if (DoCastSpellIfCan(pTemp, SPELL_ORBITAL_STRIKE) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, SPELL_DEMONIC_SHIELD) == CAST_OK)
+                    ResetCombatAction(action, 15000);
+                break;
+            }
+            case OMOR_FIENDISH_HOUND:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_FIENDISH_HOUND) == CAST_OK)
+                    ResetCombatAction(action, urand(24100, 26900));
+                break;
+            }
+            case OMOR_TREACHERY:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_TREACHEROUS_AURA, SELECT_FLAG_PLAYER))
                 {
-                    m_uiOrbitalStrikeTimer = urand(14000, 16000);
-                    m_playerGuid = pTemp->GetObjectGuid();
-                    m_uiShadowWhipTimer = 3500;
-                    m_bCanPullBack = true;
+                    if (DoCastSpellIfCan(target, m_inRegularMode ? SPELL_TREACHEROUS_AURA : SPELL_BANE_OF_TREACHERY_H) == CAST_OK)
+                    {
+                        ResetCombatAction(action, urand(8000, 16000));
+                        DoScriptText(SAY_CURSE, m_creature);
+                    }
                 }
+                break;
             }
-        }
-        else
-            m_uiOrbitalStrikeTimer -= uiDiff;
-
-        if (m_creature->GetHealthPercent() < 20.0f)
-        {
-            if (m_uiDemonicShieldTimer < uiDiff)
+            case OMOR_ORBITAL_STRIKE:
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_DEMONIC_SHIELD) == CAST_OK)
-                    m_uiDemonicShieldTimer = 15000;
-            }
-            else
-                m_uiDemonicShieldTimer -= uiDiff;
-        }
+                Unit* target = nullptr;
+                if (m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
+                    target = m_creature->GetVictim();
+                else
+                    target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_IN_MELEE_RANGE);
 
-        if (m_uiAuraTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_TREACHEROUS_AURA, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_TREACHEROUS_AURA : SPELL_BANE_OF_TREACHERY_H) == CAST_OK)
+                if (target)
                 {
-                    m_uiAuraTimer = urand(8000, 16000);
-                    DoScriptText(SAY_CURSE, m_creature);
+                    if (DoCastSpellIfCan(target, SPELL_ORBITAL_STRIKE) == CAST_OK)
+                    {
+                        ResetCombatAction(action, urand(14000, 16000));
+                        m_playerGuid = target->GetObjectGuid();
+                    }
                 }
+                break;
             }
-        }
-        else
-            m_uiAuraTimer -= uiDiff;
-
-        if (m_uiShadowboltTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_SHADOW_BOLT, SELECT_FLAG_PLAYER))
+            case OMOR_SHADOW_BOLT:
             {
-                if (!m_creature->CanReachWithMeleeAttack(pTarget))
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_SHADOW_BOLT, SELECT_FLAG_PLAYER))
                 {
-                    if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
-                        m_uiShadowboltTimer = urand(3000, 4000);
+                    if (!m_creature->CanReachWithMeleeAttack(target))
+                    {
+                        if (DoCastSpellIfCan(target, m_inRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
+                            ResetCombatAction(action, urand(3000, 4000));
+                    }
                 }
+                break;
             }
-            else
-                m_uiShadowboltTimer = 2000;
         }
-        else
-            m_uiShadowboltTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_omor_the_unscarredAI(Creature* pCreature)
-{
-    return new boss_omor_the_unscarredAI(pCreature);
-}
 
 void AddSC_boss_omor_the_unscarred()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_omor_the_unscarred";
-    pNewScript->GetAI = &GetAI_boss_omor_the_unscarredAI;
+    pNewScript->GetAI = &GetNewAIInstance<boss_omor_the_unscarredAI>;
     pNewScript->RegisterSelf();
 }
