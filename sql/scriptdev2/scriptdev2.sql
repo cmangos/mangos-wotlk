@@ -4593,16 +4593,16 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1542008','Come intruders....','0','1','0','0','0','broggok SAY_AGGRO'),
 
-('-1542009','My work must not be interrupted.','10286','1','0','0','0','the_maker SAY_AGGRO_1'),
-('-1542010','Perhaps I can find a use for you.','10287','1','0','0','0','the_maker SAY_AGGRO_2'),
-('-1542011','Anger... Hate... These are tools I can use.','10288','1','0','0','0','the_maker SAY_AGGRO_3'),
-('-1542012','Let''s see what I can make of you.','10289','1','0','0','0','the_maker SAY_KILL_1'),
-('-1542013','It is pointless to resist.','10290','1','0','0','0','the_maker SAY_KILL_2'),
-('-1542014','Stay away from... me.','10291','1','0','0','0','the_maker SAY_DIE'),
+('-1542009','My work must not be interrupted!','10286','1','0','0','17679','the_maker SAY_AGGRO_1'),
+('-1542010','Perhaps I can find a use for you...','10287','1','0','0','17680','the_maker SAY_AGGRO_2'),
+('-1542011','Anger...hate... These are tools I can use.','10288','1','0','0','17681','the_maker SAY_AGGRO_3'),
+('-1542012','Let''s see what I can make of you!','10289','1','0','0','17683','the_maker SAY_KILL_1'),
+('-1542013','It is pointless to resist.','10290','1','0','0','17684','the_maker SAY_KILL_2'),
+('-1542014','Stay away from... Me!','10291','1','0','0','17685','the_maker SAY_DIE'),
 
 ('-1542015','Kill them!','0','1','0','0','0','broggok SAY_BROGGOK_INTRO'),
 
-('-1542016','How long do you beleive your pathetic sorcery can hold me?','0','6','0','0','0','magtheridon SAY_MAGTHERIDON_WARN');
+('-1542016','How long do you believe your pathetic sorcery can hold me?','0','6','0','0','17343','magtheridon SAY_MAGTHERIDON_WARN');
 
 -- -1 543 000 HELLFIRE RAMPARTS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
