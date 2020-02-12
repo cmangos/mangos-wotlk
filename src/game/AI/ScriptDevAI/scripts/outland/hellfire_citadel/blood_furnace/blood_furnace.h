@@ -66,14 +66,14 @@ class instance_blood_furnace : public ScriptedInstance
 
         void OnPlayerEnter(Player* player) override;
 
-        void OnCreatureCreate(Creature* pCreature) override;
-        void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureCreate(Creature* creature) override;
+        void OnObjectCreate(GameObject* go) override;
 
-        void OnCreatureDeath(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature) override;
+        void OnCreatureDeath(Creature* creature) override;
+        void OnCreatureEvade(Creature* creature) override;
 
-        void SetData(uint32 uiType, uint32 uiData) override;
-        uint32 GetData(uint32 uiType) const override;
+        void SetData(uint32 type, uint32 data) override;
+        uint32 GetData(uint32 type) const override;
 
         void Update(const uint32 diff) override;
 
