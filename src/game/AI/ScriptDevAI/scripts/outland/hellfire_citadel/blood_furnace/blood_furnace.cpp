@@ -429,6 +429,6 @@ void AddSC_instance_blood_furnace()
 
     pNewScript = new Script;
     pNewScript->Name = "go_prison_cell_lever";
-    pNewScript->goUse = &GOUse_go_prison_cell_lever;
+    pNewScript->pGOUse = &GOUse_go_prison_cell_lever;
     pNewScript->RegisterSelf();
 }
