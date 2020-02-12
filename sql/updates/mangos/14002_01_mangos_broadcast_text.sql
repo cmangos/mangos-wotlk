@@ -11,6 +11,7 @@ CREATE TABLE `npc_text_broadcast_text` (
 `Prob5` float NOT NULL,
 `Prob6` float NOT NULL,
 `Prob7` float NOT NULL,
+`BroadcastTextId0` INT(11) NOT NULL,
 `BroadcastTextId1` INT(11) NOT NULL,
 `BroadcastTextId2` INT(11) NOT NULL,
 `BroadcastTextId3` INT(11) NOT NULL,
