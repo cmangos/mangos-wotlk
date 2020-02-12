@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "blood_furnace.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -38,123 +39,94 @@ enum
     SPELL_POISON                    = 30914,
     SPELL_POISON_H                  = 38462,
 
+    SPELL_STUN_SELF                 = 25900,
+    SPELL_PACIFY_SELF               = 19951,
+
+    POINT_EVENT_YELL                = 4,
     POINT_EVENT_COMBAT              = 7,
 };
 
-struct boss_broggokAI : public ScriptedAI
+enum BroggokActions
 {
-    boss_broggokAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (instance_blood_furnace*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+    BROGGOK_SLIME_SPRAY,
+    BROGGOK_POISON_BOLT,
+    BROGGOK_POISON_CLOUD,
+    BROGGOK_ACTION_MAX,
+};
 
-        Reset();
+struct boss_broggokAI : public CombatAI
+{
+    boss_broggokAI(Creature* creature) : CombatAI(creature, BROGGOK_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    {
+        AddCombatAction(BROGGOK_SLIME_SPRAY, 10000u);
+        AddCombatAction(BROGGOK_POISON_BOLT, 12000u);
+        AddCombatAction(BROGGOK_POISON_CLOUD, 5000u);
     }
 
-    instance_blood_furnace* m_pInstance;
-    bool m_bIsRegularMode;
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
 
-    uint32 m_uiAcidSprayTimer;
-    uint32 m_uiPoisonSpawnTimer;
-    uint32 m_uiPoisonBoltTimer;
-
-    void Reset() override
+    void Aggro(Unit* /*who*/) override
     {
-        m_uiAcidSprayTimer = 10000;
-        m_uiPoisonSpawnTimer = 5000;
-        m_uiPoisonBoltTimer = 12000;
+        if (m_instance)
+            m_instance->SetData(TYPE_BROGGOK_EVENT, IN_PROGRESS);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void JustSummoned(Creature* summoned) override
     {
-        DoScriptText(SAY_AGGRO, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BROGGOK_EVENT, IN_PROGRESS);
+        summoned->AI()->DoCastSpellIfCan(nullptr, SPELL_STUN_SELF, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        summoned->AI()->DoCastSpellIfCan(nullptr, SPELL_PACIFY_SELF, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        summoned->AI()->DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_POISON : SPELL_POISON_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustDied(Unit* /*who*/) override
     {
-        pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_POISON : SPELL_POISON_H, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-    }
-
-    void JustDied(Unit* /*pWho*/) override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BROGGOK_EVENT, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_BROGGOK_EVENT, DONE);
     }
 
     // Reset Orientation
-    void MovementInform(uint32 /*uiMotionType*/, uint32 uiPointId) override
+    void MovementInform(uint32 motionType, uint32 pointId) override
     {
-        if (uiPointId != POINT_EVENT_COMBAT)
+        if (motionType != WAYPOINT_MOTION_TYPE)
             return;
 
-        m_creature->GetMotionMaster()->MoveIdle();
-        m_creature->SetInCombatWithZone();
+        if (pointId == POINT_EVENT_YELL) // verified its not actual aggro
+            DoScriptText(SAY_AGGRO, m_creature);
+        else if (pointId == POINT_EVENT_COMBAT)
+        {
+            m_creature->GetMotionMaster()->Clear(false, true);
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_creature->SetInCombatWithZone();
+            AttackClosestEnemy();
+        }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiAcidSprayTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SLIME_SPRAY : SPELL_SLIME_SPRAY_H) == CAST_OK)
-                m_uiAcidSprayTimer = urand(4000, 12000);
+            case BROGGOK_SLIME_SPRAY:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_SLIME_SPRAY : SPELL_SLIME_SPRAY_H) == CAST_OK)
+                    ResetCombatAction(action, urand(4000, 12000));
+                break;
+            case BROGGOK_POISON_BOLT:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_POISON_BOLT : SPELL_POISON_BOLT_H) == CAST_OK)
+                    ResetCombatAction(action, urand(4000, 12000));
+                break;
+            case BROGGOK_POISON_CLOUD:
+                if (DoCastSpellIfCan(m_creature, SPELL_POISON_CLOUD) == CAST_OK)
+                    ResetCombatAction(action, 20000);
+                break;
         }
-        else
-            m_uiAcidSprayTimer -= uiDiff;
-
-        if (m_uiPoisonBoltTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_POISON_BOLT : SPELL_POISON_BOLT_H) == CAST_OK)
-                m_uiPoisonBoltTimer = urand(4000, 12000);
-        }
-        else
-            m_uiPoisonBoltTimer -= uiDiff;
-
-        if (m_uiPoisonSpawnTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_POISON_CLOUD) == CAST_OK)
-                m_uiPoisonSpawnTimer = 20000;
-        }
-        else
-            m_uiPoisonSpawnTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
-
-struct mob_broggok_poisoncloudAI : public ScriptedAI
-{
-    mob_broggok_poisoncloudAI(Creature* pCreature) : ScriptedAI(pCreature) {Reset();}
-
-    void Reset() override { }
-    void MoveInLineOfSight(Unit* /*who*/) override { }
-    void AttackStart(Unit* /*who*/) override { }
-};
-
-UnitAI* GetAI_boss_broggok(Creature* pCreature)
-{
-    return new boss_broggokAI(pCreature);
-}
-
-UnitAI* GetAI_mob_broggok_poisoncloud(Creature* pCreature)
-{
-    return new mob_broggok_poisoncloudAI(pCreature);
-}
 
 void AddSC_boss_broggok()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_broggok";
-    pNewScript->GetAI = &GetAI_boss_broggok;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "mob_broggok_poisoncloud";
-    pNewScript->GetAI = &GetAI_mob_broggok_poisoncloud;
+    pNewScript->GetAI = &GetNewAIInstance<boss_broggokAI>;
     pNewScript->RegisterSelf();
 }
