@@ -1343,10 +1343,28 @@ void Aura::TriggerSpell()
 //                    case 27601: break;
 //                    // Five Fat Finger Exploding Heart Technique
 //                    case 27673: break;
-//                    // Nitrous Boost
-//                    case 27746: break;
-//                    // Steam Tank Passive
-//                    case 27747: break;
+                    case 27746:                             // Nitrous Boost
+                    {
+                        if (triggerTarget->GetPower(POWER_MANA) >= 10)
+                        {
+                            triggerTarget->ModifyPower(POWER_MANA, -10);
+                            triggerTarget->SendEnergizeSpellLog(triggerTarget, 27746, -10, POWER_MANA);
+                        }
+                        else
+                        {
+                            triggerTarget->RemoveAurasDueToSpell(27746);
+                        }
+                        return;
+                    }
+                    case 27747:                             // Steam Tank Passive
+                    {
+                        if (triggerTarget->GetPower(POWER_MANA) <= 90)
+                        {
+                            triggerTarget->ModifyPower(POWER_MANA, 10);
+                            triggerTarget->SendEnergizeSpellLog(triggerTarget, 27747, 10, POWER_MANA);
+                        }
+                        return;
+                    }
                     case 27808:                             // Frost Blast
                     {
                         int32 bpDamage = triggerTarget->GetMaxHealth() * 26 / 100;
