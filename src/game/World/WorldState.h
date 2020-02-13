@@ -153,7 +153,7 @@ class WorldState
         bool IsConditionFulfilled(uint32 conditionId, uint32 state) const;
         void HandleConditionStateChange(uint32 conditionId, uint32 state);
 
-        void HandleExternalEvent(uint32 eventId);
+        void HandleExternalEvent(uint32 eventId, uint32 param);
         void ExecuteOnAreaPlayers(uint32 areaId, std::function<void(Player*)> executor);
 
         void Update(const uint32 diff);

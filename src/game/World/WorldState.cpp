@@ -424,7 +424,7 @@ void WorldState::DispelMagtheridonTeam(Team team)
     }
 }
 
-void WorldState::HandleExternalEvent(uint32 eventId)
+void WorldState::HandleExternalEvent(uint32 eventId, uint32 param)
 {
     std::lock_guard<std::mutex> guard(m_mutex);
 

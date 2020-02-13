@@ -678,7 +678,7 @@ bool QuestRewarded_npc_adal(Player* player, Creature* creature, Quest const* que
                 player->SetTitle(TITLE_CHAMPION_OF_THE_NAARU);
             break;
         case QUEST_KAELTHAS_AND_THE_VERDANT_SPHERE:
-            sWorldState.HandleExternalEvent(CUSTOM_EVENT_ADALS_SONG_OF_BATTLE);
+            sWorldState.HandleExternalEvent(CUSTOM_EVENT_ADALS_SONG_OF_BATTLE, 0);
             player->GetMap()->ScriptsStart(sRelayScripts, SCRIPT_RELAY_ID, creature, player, Map::SCRIPT_EXEC_PARAM_UNIQUE_BY_SOURCE); // only once active per adal
             return true; // handled
     }
