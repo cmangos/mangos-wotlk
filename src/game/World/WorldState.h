@@ -29,6 +29,8 @@
 
 enum ZoneIds
 {
+    ZONEID_STORMWIND_CITY       = 1519,
+
     ZONEID_HELLFIRE_PENINSULA   = 3483,
     ZONEID_HELLFIRE_RAMPARTS    = 3562,
     ZONEID_HELLFIRE_CITADEL     = 3563,
@@ -72,19 +74,24 @@ enum Conditions
 
 enum Events
 {
+    // vanilla
     CUSTOM_EVENT_YSONDRE_DIED,
     CUSTOM_EVENT_LETHON_DIED,
     CUSTOM_EVENT_EMERISS_DIED,
     CUSTOM_EVENT_TAERAR_DIED,
+    CUSTOM_EVENT_LOVE_IS_IN_THE_AIR_LEADER,
+    // TBC
     CUSTOM_EVENT_ADALS_SONG_OF_BATTLE,
 };
 
 enum SaveIds
 {
-    SAVE_ID_EMERALD_DRAGONS,
-    SAVE_ID_AHN_QIRAJ,
-    SAVE_ID_QUEL_DANAS,
-    SAVE_ID_EXPANSION_RELEASE,
+    SAVE_ID_EMERALD_DRAGONS = 0,
+    SAVE_ID_AHN_QIRAJ = 1,
+    SAVE_ID_LOVE_IS_IN_THE_AIR = 2,
+
+    SAVE_ID_QUEL_DANAS = 20,
+    SAVE_ID_EXPANSION_RELEASE = 21,
 };
 
 enum GameEvents
@@ -92,7 +99,7 @@ enum GameEvents
     GAME_EVENT_BEFORE_THE_STORM = 100,
     GAME_EVENT_QUEL_DANAS_PHASE_1 = 101,
     // next 10 are reserved for quel danas - 110
-    GAME_EVENT_ECHOES_OF_DOOM = 111,
+    GAME_EVENT_ECHOES_OF_DOOM = 401,
 };
 
 // To be used
@@ -106,6 +113,22 @@ struct QuelDanasData
     std::string GetData() { return ""; }
 };
 
+enum LoveIsInTheAirLeaders
+{
+    LOVE_LEADER_THRALL,
+    LOVE_LEADER_CAIRNE,
+    LOVE_LEADER_SYLVANAS,
+    LOVE_LEADER_BOLVAR,
+    LOVE_LEADER_MAGNI,
+    LOVE_LEADER_TYRANDE,
+    LOVE_LEADER_MAX,
+};
+
+struct LoveIsInTheAir
+{
+    uint32 counters[LOVE_LEADER_MAX]; // potential race condition which wont cause anything critical
+};
+
 // Intended for implementing server wide scripts, note: all behaviour must be safeguarded towards multithreading
 class WorldState
 {
@@ -115,6 +138,7 @@ class WorldState
 
         void Load();
         void Save(SaveIds saveId);
+        void SaveHelper(std::string& stringToSave, SaveIds saveId);
 
         // Called when a gameobject is created or removed
         void HandleGameObjectUse(GameObject* go, Unit* user);
@@ -134,6 +158,9 @@ class WorldState
 
         void Update(const uint32 diff);
 
+        // vanilla section
+        void SendLoveIsInTheAirWorldstateUpdate(uint32 param, uint32 worldStateId);
+
         // tbc section
         void BuffMagtheridonTeam(Team team);
         void DispelMagtheridonTeam(Team team);
@@ -144,6 +171,23 @@ class WorldState
         // Release events
         uint8 GetExpansion() const { return m_expansion; }
         bool SetExpansion(uint8 expansion);
+
+        void FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId, uint32 areaId);
+
+        // helper functions for world state list fill
+        inline void FillInitialWorldStateData(ByteBuffer& data, uint32& count, uint32 state, uint32 value)
+        {
+            data << uint32(state);
+            data << uint32(value);
+            ++count;
+        }
+
+        inline void FillInitialWorldStateData(ByteBuffer& data, uint32& count, uint32 state, int32 value)
+        {
+            data << uint32(state);
+            data << int32(value);
+            ++count;
+        }
     private:
         std::map<uint32, GuidVector> m_areaPlayers;
         std::map<uint32, std::atomic<uint32>> m_transportStates; // atomic to avoid having to lock
@@ -159,6 +203,11 @@ class WorldState
         uint32 m_emeraldDragonsTimer;
         std::vector<uint32> m_emeraldDragonsChosenPositions;
         AhnQirajData m_aqData;
+
+        LoveIsInTheAir m_loveIsInTheAirData;
+        GuidVector m_loveIsInTheAirCapitalsPlayers;
+
+        std::mutex m_loveIsInTheAirMutex; // capital cities optimization
 
         // tbc section
         bool m_isMagtheridonHeadSpawnedHorde;
