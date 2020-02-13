@@ -5048,6 +5048,20 @@ void Aura::HandleModPossess(bool apply, bool Real)
 
     if (apply)
     {
+        if (const SpellEntry* spellInfo = GetSpellProto())
+        {
+            switch (spellInfo->Id)
+            {
+                case 24937: // Using Control Console
+                {
+                    static const uint32 spells[] = { 25026, 25024, 27759, 25027 };
+                    if (target->GetTypeId() == TYPEID_UNIT)
+                        static_cast<Creature*>(target)->UpdateSpell(5, spells[urand(0, 3)]);
+                }
+                break;
+            }
+        }
+
         // Possess: advertised type of charm (unique) - remove existing advertised charm
         caster->BreakCharmOutgoing(true);
 
@@ -5065,6 +5079,18 @@ void Aura::HandleModPossess(bool apply, bool Real)
     {
         switch (spellInfo->Id)
         {
+            case 24937: // Using Control Console
+                if (!apply)
+                {
+                    caster->CastSpell(caster, 24938, TRIGGERED_OLD_TRIGGERED);      // Close Control Console
+                    caster->CastSpell(caster, 27880, TRIGGERED_OLD_TRIGGERED);      // Stun
+                    if (target->GetTypeId() == TYPEID_UNIT)
+                    {
+                        target->CastSpell(target, 3617, TRIGGERED_OLD_TRIGGERED);   // Quiet Suicide
+                        static_cast<Creature*>(target)->ForcedDespawn(5000);
+                    }
+                }
+                break;
             // Need to teleport to spawn position on possess end
             case 37868: // Arcano-Scorp Control
             case 37893:
