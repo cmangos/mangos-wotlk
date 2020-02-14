@@ -62,7 +62,7 @@ struct boss_omor_the_unscarredAI : public CombatAI
 {
     boss_omor_the_unscarredAI(Creature* creature) : CombatAI(creature, OMOR_ACTION_MAX), m_inRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        AddTimerlessCombatAction(OMOR_DEMONIC_SHIELD, true);
+        AddTimerlessCombatAction(OMOR_ENABLE_SHIELD, true);
         AddCombatAction(OMOR_DEMONIC_SHIELD, true);
         AddCombatAction(OMOR_FIENDISH_HOUND, 19600, 23100);
         AddCombatAction(OMOR_TREACHERY, 12300, 23300);
