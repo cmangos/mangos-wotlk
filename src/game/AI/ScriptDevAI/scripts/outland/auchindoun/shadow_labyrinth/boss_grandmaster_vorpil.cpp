@@ -154,7 +154,7 @@ struct boss_grandmaster_vorpilAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_VOID_TRAVELER)
-            pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0.0f, 0.0f);
+            pSummoned->GetMotionMaster()->MoveChase(m_creature, 0.0f, 0.0f);
 
         if (pSummoned->GetEntry() == NPC_VOID_PORTAL)
             pSummoned->CastSpell(pSummoned, SPELL_VOID_PORTAL_VISUAL, TRIGGERED_OLD_TRIGGERED);
