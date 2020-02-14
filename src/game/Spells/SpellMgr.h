@@ -554,6 +554,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 35917:         // Firey Intellect
         case 36006:         // Fel Fire Aura
         case 36118:         // Phasing Invisibility
+        case 36635:         // Fiery Weapon Proc
         case 36640:         // Arcane Shield
         case 36784:         // Entropic Aura
         case 36788:         // Diminish Soul
