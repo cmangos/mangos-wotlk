@@ -226,7 +226,7 @@ struct boss_kelidan_the_breakerAI : public CombatAI
                     if (!m_isRegularMode)
                         DoCastSpellIfCan(nullptr, SPELL_VORTEX, CAST_TRIGGERED);
 
-                    SetActionReadyStatus(KELIDAN_FIRE_NOVA, false);
+                    SetActionReadyStatus(KELIDAN_FIRE_NOVA, true);
                     ResetCombatAction(action, urand(20000, 28000));
                 }
                 break;
