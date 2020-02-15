@@ -75,9 +75,20 @@ struct boss_broggokAI : public CombatAI
 
     void JustSummoned(Creature* summoned) override
     {
-        summoned->AI()->DoCastSpellIfCan(nullptr, SPELL_STUN_SELF, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        summoned->AI()->DoCastSpellIfCan(nullptr, SPELL_PACIFY_SELF, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        summoned->AI()->DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_POISON : SPELL_POISON_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        if (summoned->GetEntry() == NPC_IN_COMBAT_TRIGGER)
+        {
+            summoned->GetCombatManager().SetLeashingDisable(true);
+            summoned->AI()->SetReactState(REACT_DEFENSIVE);
+            summoned->AI()->SetCombatMovement(false);
+            summoned->AI()->SetMeleeEnabled(false);
+            summoned->SetInCombatWithZone();
+        }
+        else
+        {
+            summoned->AI()->DoCastSpellIfCan(nullptr, SPELL_STUN_SELF, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            summoned->AI()->DoCastSpellIfCan(nullptr, SPELL_PACIFY_SELF, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+            summoned->AI()->DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_POISON : SPELL_POISON_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        }
     }
 
     void JustDied(Unit* /*who*/) override

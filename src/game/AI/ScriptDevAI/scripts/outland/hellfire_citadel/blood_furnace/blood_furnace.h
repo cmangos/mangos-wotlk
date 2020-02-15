@@ -41,6 +41,10 @@ enum
 
     GO_PRISON_CELL_DOOR_LEVER       = 181982,
 
+    SPELL_COMBAT_TRIGGER            = 26837,
+
+    NPC_IN_COMBAT_TRIGGER           = 16006,
+
     SAY_BROGGOK_INTRO               = -1542015,
 };
 

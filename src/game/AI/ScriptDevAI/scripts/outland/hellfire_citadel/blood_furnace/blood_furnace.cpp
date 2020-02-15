@@ -46,6 +46,7 @@ void instance_blood_furnace::OnCreatureCreate(Creature* creature)
             creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         case NPC_KELIDAN_THE_BREAKER:
         case NPC_MAGTHERIDON:
+        case NPC_IN_COMBAT_TRIGGER:
             m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
         case NPC_NASCENT_FEL_ORC:
@@ -130,6 +131,12 @@ void instance_blood_furnace::SetData(uint32 type, uint32 data)
             DoUseDoorOrButton(GO_DOOR_BROGGOK_FRONT);
             if (data == IN_PROGRESS)
             {
+                if (Creature* broggok = GetSingleCreatureFromStorage(NPC_BROGGOK))
+                {
+                    broggok->CastSpell(nullptr, SPELL_COMBAT_TRIGGER, TRIGGERED_OLD_TRIGGERED); // cast doesnt show in sniff
+                    DoScriptText(SAY_BROGGOK_INTRO, broggok);
+                }
+
                 if (m_uiBroggokEventPhase <= MAX_ORC_WAVES)
                 {
                     m_uiBroggokEventPhase = 0;
@@ -178,6 +185,9 @@ void instance_blood_furnace::SetData(uint32 type, uint32 data)
                     }
                 }
             }
+            if (data == FAIL || data == DONE)
+                if (Creature* trigger = GetSingleCreatureFromStorage(NPC_IN_COMBAT_TRIGGER))
+                    trigger->ForcedDespawn();
             m_auiEncounter[type] = data;
             break;
         case TYPE_KELIDAN_EVENT:
@@ -245,6 +255,7 @@ void instance_blood_furnace::DoNextBroggokEventPhase()
         {
             pBroggok->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             pBroggok->SetWalk(false);
+            pBroggok->GetMotionMaster()->Clear(false, true);
             pBroggok->GetMotionMaster()->MoveWaypoint();
         }
     }
@@ -409,13 +420,7 @@ bool GOUse_go_prison_cell_lever(Player* /*player*/, GameObject* go)
 
     // Set broggok event in progress
     if (pInstance->GetData(TYPE_BROGGOK_EVENT) != DONE && pInstance->GetData(TYPE_BROGGOK_EVENT) != IN_PROGRESS)
-    {
         pInstance->SetData(TYPE_BROGGOK_EVENT, IN_PROGRESS);
-
-        // Yell intro
-        if (Creature* pBroggok = pInstance->GetSingleCreatureFromStorage(NPC_BROGGOK))
-            DoScriptText(SAY_BROGGOK_INTRO, pBroggok);
-    }
 
     return false;
 }
