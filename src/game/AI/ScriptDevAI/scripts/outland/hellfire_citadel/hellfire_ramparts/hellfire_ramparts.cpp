@@ -83,7 +83,14 @@ void instance_ramparts::SetData(uint32 uiType, uint32 uiData)
                 ++m_uiSentryCounter;
 
                 if (m_uiSentryCounter == 2)
+                {
                     m_auiEncounter[1] = uiData;
+                    if (Creature* pVazruden = GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
+                    {
+                        if (ScriptedAI* pVazrudenAI = dynamic_cast<ScriptedAI*>(pVazruden->AI()))
+                            pVazrudenAI->SendAIEvent(AI_EVENT_CUSTOM_A, pVazruden, pVazruden);
+                    }
+                }
 
                 return;
             }
