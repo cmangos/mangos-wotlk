@@ -8095,6 +8095,13 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
                         radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
                     break;
                 }
+                case 30915:                                 // Poison - Broggok
+                case 38463:
+                {
+                    if (SpellAuraHolder* auraHolder = m_caster->GetSpellAuraHolder(GetTriggeredByAuraSpellInfo()->Id))
+                        radius = (60000 - auraHolder->GetAuraDuration()) * 0.0002f;
+                    break;
+                }
                 case 54643:                                 // Teleport (Strand of the Ancients)
                 case 66550:                                 // Teleport (Isle of Conquest)
                 case 66630:                                 // Alliance Gunship Portal (Isle of Conquest)
