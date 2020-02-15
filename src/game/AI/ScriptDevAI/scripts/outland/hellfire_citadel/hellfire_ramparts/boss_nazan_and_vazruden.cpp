@@ -202,13 +202,12 @@ struct boss_vazruden_heraldAI : public CombatAI
                     break;
                 }
                 case POINT_ID_FLYING:
-                    SetCombatScriptStatus(false);
-                    m_creature->SetImmobilizedState(true);
                     HandlePhaseChange(false);
-                    break;
+                // [[fallthrough]]
                 case POINT_ID_FLIGHT_MOVE:
                     SetCombatScriptStatus(false);
                     m_creature->SetImmobilizedState(true);
+                    m_creature->CastSpell(nullptr, SPELL_FACE_HIGHEST_THREAT, TRIGGERED_OLD_TRIGGERED);
                     break;
             }
         }
@@ -462,6 +461,16 @@ struct VazrudenLiquidFire : public SpellScript
     }
 };
 
+struct FaceHighestThreat : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (HostileReference* ref = caster->getThreatManager().getThreatList().front())
+            caster->SetFacingTo(caster->GetAngle(ref->getTarget()));
+    }
+};
+
 void AddSC_boss_nazan_and_vazruden()
 {
     Script* pNewScript = new Script;
@@ -475,4 +484,5 @@ void AddSC_boss_nazan_and_vazruden()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<VazrudenLiquidFire>("spell_vazruden_liquid_fire_script");
+    RegisterSpellScript<FaceHighestThreat>("spell_face_highest_threat");
 }

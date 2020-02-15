@@ -46,6 +46,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34653,'spell_vazruden_liquid_fire_script'),
 (36920,'spell_vazruden_liquid_fire_script'),
 (36921,'spell_vazruden_liquid_fire_script'),
+(30700,'spell_face_highest_threat'),
 (36153,'spell_soulbind'),
 (37851,'spell_tag_greater_felfire_diemetradon'),
 (38606,'spell_exorcism_feather'),
