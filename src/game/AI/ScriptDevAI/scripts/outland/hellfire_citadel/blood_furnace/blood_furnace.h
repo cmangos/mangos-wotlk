@@ -39,6 +39,14 @@ enum
     GO_PRISON_CELL_BROGGOK_3        = 181820,               // Broggok cell front left  (NW)
     GO_PRISON_CELL_BROGGOK_4        = 181821,               // Broggok cell front right (SW)
 
+    GO_CRACK_1                      = 181921,
+    GO_CRACK_2                      = 181922,
+    GO_CRACK_3                      = 181923,
+    GO_CRACK_4                      = 181924,
+    GO_CRACK_5                      = 181925,
+    GO_CRACK_6                      = 181926,
+    GO_CRACK_7                      = 181927,
+
     GO_PRISON_CELL_DOOR_LEVER       = 181982,
 
     SPELL_COMBAT_TRIGGER            = 26837,
@@ -98,9 +106,11 @@ class instance_blood_furnace : public ScriptedInstance
         uint32 m_uiBroggokEventTimer;                       // Timer for opening the event cages; 90s on normal, 30s on heroic difficulty
         uint32 m_uiBroggokEventPhase;
         uint32 m_uiRandYellTimer;                           // Random yell for Magtheridon
+        uint32 m_crackTimer;
 
         GameObject* m_lLeverGO;
 
+        GuidList m_cracks;
         GuidList m_luiNascentOrcGuids;
         GuidList m_lChannelersGuids;
 

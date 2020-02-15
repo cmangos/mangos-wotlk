@@ -28,6 +28,7 @@ instance_blood_furnace::instance_blood_furnace(Map* map) : ScriptedInstance(map)
     m_uiBroggokEventTimer(90 * IN_MILLISECONDS),
     m_uiBroggokEventPhase(0),
     m_uiRandYellTimer(90000),
+    m_crackTimer(30000),
     m_firstPlayer(false)
 {
     Initialize();
@@ -101,6 +102,15 @@ void instance_blood_furnace::OnObjectCreate(GameObject* go)
                 }
             }
             break;
+        case GO_CRACK_1:
+        case GO_CRACK_2:
+        case GO_CRACK_3:
+        case GO_CRACK_4:
+        case GO_CRACK_5:
+        case GO_CRACK_6:
+        case GO_CRACK_7:
+            m_cracks.push_back(go->GetObjectGuid());
+            return;
         default:
             return;
     }
@@ -357,6 +367,26 @@ void instance_blood_furnace::Update(uint32 uiDiff)
     }
     else
         m_uiRandYellTimer -= uiDiff;
+
+    if (m_crackTimer <= uiDiff)
+    {
+        m_crackTimer = 30000;
+        for (ObjectGuid guid : m_cracks)
+        {
+            if (GameObject* crack = instance->GetGameObject(guid))
+            {
+                if (crack->GetGoState() != GO_STATE_READY)
+                    if (urand(0, 5))
+                        crack->SetGoState(GO_STATE_READY);
+
+                if (crack->GetGoState() == GO_STATE_READY)
+                    if (urand(0, 2))
+                        crack->SendGameObjectCustomAnim(crack->GetObjectGuid(), 2);
+            }
+        }
+    }
+    else
+        m_crackTimer -= uiDiff;
 }
 
 uint32 instance_blood_furnace::GetData(uint32 type) const
