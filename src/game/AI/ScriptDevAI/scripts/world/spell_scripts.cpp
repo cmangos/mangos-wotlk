@@ -1130,7 +1130,7 @@ struct InebriateRemoval : public AuraScript
         }
         Player* player = static_cast<Player*>(target);
         if (!apply && aura->GetEffIndex() == effIdx)
-            player->SetDrunkValue(uint16(std::max(int32(player->GetDrunkValue()) - player->CalculateSpellEffectValue(player, aura->GetSpellProto(), effIdxInebriate), 0)));
+            player->SetDrunkValue(uint16(std::max(int32(player->GetDrunkValue()) - player->CalculateSpellEffectValue(player, aura->GetSpellProto(), effIdxInebriate) * 256, 0)));
     }
 };
 
