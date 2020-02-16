@@ -23,13 +23,19 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum // order based on priority
 {
-    SPELL_LEVITATE              = 31704,
-    SPELL_STATIC_CHARGE             = 31715,
-    SPELL_CHAIN_LIGHTNING               = 31717,
-    SPELL_SUMMON_SPORE_STRIDER = 38755,
+    SPELL_SOMEONE_GRAB_ME       = 31702,
+    SPELL_MAGNETIC_PULL         = 31703,
+    SPELL_LEVITATE              = 31704, // triggers 31701 Levitation Pulse
+    SPELL_STATIC_CHARGE         = 31715,
+    SPELL_CHAIN_LIGHTNING       = 31717,
+    SPELL_SUSPENSION            = 31719,
+    SPELL_SUMMON_SPORE_STRIDER  = 38755,
+
+    NPC_BLACK_STALKER           = 17882,
 };
 
 enum BlackStalkerActions
@@ -39,6 +45,7 @@ enum BlackStalkerActions
     BLACK_STALKER_ACTION_CHAIN_LIGHTNING,
     BLACK_STALKER_ACTION_SUMMON_SPORE_STRIDER,
     BLACK_STALKER_ACTION_MAX,
+    BLACK_STALKER_ACTION_SUSPENSION,
 };
 
 struct boss_black_stalkerAI : public ScriptedAI, public CombatActions
@@ -50,12 +57,21 @@ struct boss_black_stalkerAI : public ScriptedAI, public CombatActions
         AddCombatAction(BLACK_STALKER_ACTION_STATIC_CHARGE, 0u);
         AddCombatAction(BLACK_STALKER_ACTION_CHAIN_LIGHTNING, 0u);
         AddCombatAction(BLACK_STALKER_ACTION_SUMMON_SPORE_STRIDER, 0u);
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit* unit, float x, float y, float z)->bool
+        AddCustomAction(BLACK_STALKER_ACTION_SUSPENSION, true, [&]()
+        {
+            if (Player* player = m_creature->GetMap()->GetPlayer(m_suspensionGuid))
+            {
+                player->CastSpell(nullptr, SPELL_SUSPENSION, TRIGGERED_OLD_TRIGGERED);
+            }
+        });
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit* /*unit*/, float x, float y, float /*z*/)->bool
         {
             return x < 100.0f || y < -30.0f;
         });
         Reset();
     }
+
+    ObjectGuid m_suspensionGuid;
 
     bool m_isRegularMode;
 
@@ -110,13 +126,10 @@ struct boss_black_stalkerAI : public ScriptedAI, public CombatActions
                 {
                     case BLACK_STALKER_ACTION_LEVITATE:
                     {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_LEVITATE, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
+                        if (DoCastSpellIfCan(nullptr, SPELL_LEVITATE) == CAST_OK)
                         {
-                            if (DoCastSpellIfCan(target, SPELL_LEVITATE) == CAST_OK)
-                            {
-                                ResetTimer(i, GetSubsequentActionTimer(i));
-                                SetActionReadyStatus(i, false);
-                            }
+                            ResetTimer(i, GetSubsequentActionTimer(i));
+                            SetActionReadyStatus(i, false);
                         }
                         break;
                     }
@@ -179,10 +192,68 @@ UnitAI* GetAI_boss_black_stalker(Creature* pCreature)
     return new boss_black_stalkerAI(pCreature);
 }
 
+struct Levitate : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        if (Unit* unitTarget = spell->GetUnitTarget())
+        {
+            unitTarget->CastSpell(nullptr, SPELL_SOMEONE_GRAB_ME, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+struct SomeoneGrabMe : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (Unit* unitTarget = spell->GetUnitTarget())
+        {
+            unitTarget->CastSpell(spell->GetCaster(), SPELL_MAGNETIC_PULL, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+struct MagneticPull : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        if (Unit* unitTarget = spell->GetUnitTarget())
+        {
+            if (unitTarget->GetTypeId() == TYPEID_PLAYER)
+            {
+                //((Player*)unitTarget)->KnockBackFrom(spell->GetCaster(), 30.f, frand(28.58f, 30.65f));
+
+                if (ScriptedInstance* pInstance = static_cast<ScriptedInstance*>(unitTarget->GetInstanceData()))
+                {
+                    if (Creature* boss = pInstance->GetSingleCreatureFromStorage(NPC_BLACK_STALKER))
+                    {
+                        if (boss_black_stalkerAI* stalkerAI = dynamic_cast<boss_black_stalkerAI*>(boss->AI()))
+                        {
+                            stalkerAI->m_suspensionGuid = unitTarget->GetObjectGuid();
+                            stalkerAI->ResetTimer(BLACK_STALKER_ACTION_SUSPENSION, 1000);
+                        }
+                    }
+                }
+            }
+        }
+    }
+};
+
 void AddSC_boss_black_stalker()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_black_stalker";
     pNewScript->GetAI = &GetAI_boss_black_stalker;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<Levitate>("spell_levitate");
+    RegisterSpellScript<SomeoneGrabMe>("spell_someone_grab_me");
+    RegisterSpellScript<MagneticPull>("spell_magnetic_pull");
 }
