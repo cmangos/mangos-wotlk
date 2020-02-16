@@ -337,7 +337,7 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
             {
                 if (m_creature->GetHealthPercent() < 70.f)
                 {
-                    DoCastSpellIfCan(m_creature, SPELL_THROW_FREEZING_TRAP, TRIGGERED_NONE);
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_THROW_FREEZING_TRAP, TRIGGERED_NONE);
                     ResetTimer(MUSELEK_ACTION_DETERRENCE, GetInitialActionTimer(MUSELEK_ACTION_DETERRENCE));
                     m_firstTrapThrown = true;
                 }
@@ -346,7 +346,7 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
             {
                 if (m_creature->GetHealthPercent() < 30.f)
                 {
-                    DoCastSpellIfCan(m_creature, SPELL_THROW_FREEZING_TRAP, TRIGGERED_NONE);
+                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_THROW_FREEZING_TRAP, TRIGGERED_NONE);
                     m_secondTrapThrown = true;
                 }
             }
