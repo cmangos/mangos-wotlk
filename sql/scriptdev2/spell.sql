@@ -38,6 +38,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- TBC
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(29883,'spell_blink_arcane_anomaly'),
 (29907,'spell_astral_bite'),
 (29690,'spell_inebriate_removal'),
 (37591,'spell_inebriate_removal'),

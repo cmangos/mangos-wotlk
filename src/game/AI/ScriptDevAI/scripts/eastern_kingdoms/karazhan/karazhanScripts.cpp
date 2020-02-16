@@ -31,6 +31,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "karazhan.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "Spells/Scripts/SpellScript.h"
 
 /*######
 # npc_barnesAI
@@ -504,6 +505,32 @@ bool ProcessEventId_event_spell_medivh_journal(uint32 /*uiEventId*/, Object* pSo
     return true;
 }
 
+enum
+{
+    SPELL_BLINK = 29884,
+};
+
+struct BlinkArcaneAnomaly : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetMaxAffectedTargets(1);
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* target = spell->GetUnitTarget())
+            {
+                spell->GetCaster()->CastSpell(target, SPELL_BLINK, TRIGGERED_OLD_TRIGGERED);
+                spell->GetCaster()->getThreatManager().modifyAllThreatPercent(-100);
+                spell->GetCaster()->AddThreat(target, 1000.f);
+            }
+        }
+    }
+};
+
 void AddSC_karazhan()
 {
     Script* pNewScript = new Script;
@@ -527,4 +554,6 @@ void AddSC_karazhan()
     pNewScript->Name = "event_spell_medivh_journal";
     pNewScript->pProcessEventId = &ProcessEventId_event_spell_medivh_journal;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<BlinkArcaneAnomaly>("spell_blink_arcane_anomaly");
 }
