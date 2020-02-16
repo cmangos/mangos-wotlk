@@ -1134,6 +1134,15 @@ struct InebriateRemoval : public AuraScript
     }
 };
 
+struct AstralBite : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (Unit* caster = spell->GetCaster())
+            caster->getThreatManager().modifyAllThreatPercent(-100);
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1150,6 +1159,7 @@ void AddSC_spell_scripts()
     RegisterSpellScript<SpellStackingRulesOverride>("spell_stacking_rules_override");
     RegisterAuraScript<GreaterInvisibilityMob>("spell_greater_invisibility_mob");
     RegisterAuraScript<InebriateRemoval>("spell_inebriate_removal");
+    RegisterSpellScript<AstralBite>("spell_astral_bite");
     RegisterSpellScript<spell_battleground_banner_trigger>("spell_battleground_banner_trigger");
     RegisterSpellScript<spell_outdoor_pvp_banner_trigger>("spell_outdoor_pvp_banner_trigger");
 }

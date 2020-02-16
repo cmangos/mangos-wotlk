@@ -38,6 +38,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- TBC
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(29907,'spell_astral_bite'),
 (29690,'spell_inebriate_removal'),
 (37591,'spell_inebriate_removal'),
 (30926,'spell_vazruden_liquid_fire_script'),
