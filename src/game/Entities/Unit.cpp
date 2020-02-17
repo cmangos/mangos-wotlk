@@ -602,7 +602,7 @@ bool Unit::UpdateMeleeAttackingState()
 
 void Unit::SendHeartBeat()
 {
-    m_movementInfo.UpdateTime(WorldTimer::getMSTime());
+    m_movementInfo.UpdateTime(GetMap()->GetCurrentMSTime());
     WorldPacket data(MSG_MOVE_HEARTBEAT, 64);
     data << GetPackGUID();
     data << m_movementInfo;
