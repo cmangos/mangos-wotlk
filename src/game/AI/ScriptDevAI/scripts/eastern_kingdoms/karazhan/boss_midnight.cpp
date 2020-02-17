@@ -397,6 +397,8 @@ struct boss_attumenAI : public ScriptedAI, public CombatActions
             if (!m_pInstance)
                 return;
 
+            summoned->SetInCombatWithZone();
+
             // Smoke effect
             summoned->CastSpell(nullptr, SPELL_SPAWN_SMOKE_1, TRIGGERED_NONE);
 
