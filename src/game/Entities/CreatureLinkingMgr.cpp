@@ -678,6 +678,8 @@ bool CreatureLinkingHolder::CanSpawn(uint32 lowGuid, Map* _map, CreatureLinkingI
         CreatureData const* data = sObjectMgr.GetCreatureData(lowGuid);
         if (!data)
             return true;
+        if ((data->spawnMask & (1 << _map->GetDifficulty())) == 0)
+            return false;
         pInfo = sCreatureLinkingMgr.GetLinkedTriggerInformation(data->id, lowGuid, data->mapid);
         if (!pInfo)
             return true;
