@@ -1429,6 +1429,7 @@ enum npc_burster_worm
     SPELL_SANDWORM_SUBMERGE_VISUAL      = 33928,
     SPELL_SUBMERGED                     = 37751,
     SPELL_STAND                         = 37752,
+    SPELL_CRUST_BURST                   = 33922,
 
     // combat spells
     SPELL_POISON                        = 31747,
@@ -1560,6 +1561,7 @@ struct npc_burster_wormAI : public CombatAI
         m_chaseStage = 0;
         m_rangeCheckState = -1;
 
+        SetCombatMovement(false);
         SetMeleeEnabled(false);
 
         Submerge(true);
@@ -1569,7 +1571,7 @@ struct npc_burster_wormAI : public CombatAI
     {
         m_creature->CastSpell(nullptr, SPELL_SUBMERGED, TRIGGERED_NONE);
         if (passive)
-            m_creature->CastSpell(m_creature, m_uiBorePassive, TRIGGERED_NONE);
+            DoCastSpellIfCan(nullptr, m_uiBorePassive, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
@@ -1579,10 +1581,9 @@ struct npc_burster_wormAI : public CombatAI
             AttackStart(target);
     }
 
-    void JustRespawned() override
+    void JustReachedHome() override
     {
-        CombatAI::JustRespawned();
-        Reset();
+        DoCastSpellIfCan(nullptr, m_uiBorePassive, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -1594,7 +1595,10 @@ struct npc_burster_wormAI : public CombatAI
         SetRootSelf(true, true);
 
         if (DoCastSpellIfCan(nullptr, SPELL_STAND) == CAST_OK)
+        {
+            m_creature->CastSpell(nullptr, SPELL_CRUST_BURST, TRIGGERED_OLD_TRIGGERED);
             ResetTimer(BURSTER_BIRTH_DELAY, 2000);
+        }
     }
 
     // function to check for bone worms
