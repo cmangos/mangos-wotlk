@@ -2362,6 +2362,7 @@ void AddSC_hellfire_peninsula()
     pNewScript->GetGameObjectAI = &GetAI_go_smoke_beacon;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
     pNewScript->Name = "npc_credit_marker_they_must_burn";
     pNewScript->GetAI = &GetAI_npc_credit_marker_they_must_burn;
     pNewScript->RegisterSelf();
