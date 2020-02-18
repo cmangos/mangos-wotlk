@@ -5465,5 +5465,5 @@ void AddSC_shadowmoon_valley()
     pNewScript->GetAI = &GetAI_npc_bt_battle_sensor;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<TagGreaterFelfireDiemetradon>("spell_tag_greater_felfire_diemetradon");
+    RegisterSpellScript<TagGreaterFelfireDiemetradon>("spell_tag_for_single_use");
 }
