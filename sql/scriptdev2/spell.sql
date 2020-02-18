@@ -44,6 +44,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (31702,'spell_someone_grab_me'),
 (31703,'spell_magnetic_pull'),
 (31704,'spell_levitate'),
+(36374,'spell_summon_smoke_beacon'),
 (37591,'spell_inebriate_removal'),
 (30926,'spell_vazruden_liquid_fire_script'),
 (33793,'spell_vazruden_liquid_fire_script'),
