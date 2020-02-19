@@ -72,6 +72,10 @@ struct boss_midnightAI : public ScriptedAI, public CombatActions
         m_pInstance = (instance_karazhan*)pCreature->GetInstanceData();
         AddCombatAction(MIDNIGHT_ACTION_KNOCKDOWN, 0u);
         SetDeathPrevention(true);
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        {
+            return (y < -1945.f && x > -11096.f) || z > 73.5f;
+        });
         Reset();
     }
 
@@ -127,6 +131,18 @@ struct boss_midnightAI : public ScriptedAI, public CombatActions
                         SetActionReadyStatus(i, false);
                         continue;
                 }
+            }
+        }
+    }
+
+    void EnterEvadeMode() override
+    {
+        ScriptedAI::EnterEvadeMode();
+        if (Creature* pAttumen = m_pInstance->GetSingleCreatureFromStorage(NPC_ATTUMEN))
+        {
+            if (pAttumen->IsInCombat())
+            {
+                pAttumen->AI()->EnterEvadeMode();
             }
         }
     }
@@ -259,6 +275,10 @@ struct boss_attumenAI : public ScriptedAI, public CombatActions
         AddCombatAction(ATTUMEN_ACTION_CHARGE, 0u);
         if (m_creature->GetEntry() != NPC_ATTUMEN_MOUNTED)
             SetDeathPrevention(true);
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        {
+            return (y < -1945.f && x > -11096.f) || z > 73.5f;
+        });
         Reset();
     }
 
@@ -358,6 +378,18 @@ struct boss_attumenAI : public ScriptedAI, public CombatActions
                         continue;
                     }
                 }
+            }
+        }
+    }
+
+    void EnterEvadeMode() override
+    {
+        ScriptedAI::EnterEvadeMode();
+        if (Creature* pMidnight = m_pInstance->GetSingleCreatureFromStorage(NPC_MIDNIGHT))
+        {
+            if (pMidnight->IsInCombat())
+            {
+                pMidnight->AI()->EnterEvadeMode();
             }
         }
     }

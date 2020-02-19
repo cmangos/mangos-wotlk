@@ -89,6 +89,10 @@ struct boss_curatorAI : public ScriptedAI, public CombatActions
         AddCombatAction(CURATOR_ACTION_BERSERK, 0u);
         AddCombatAction(CURATOR_ACTION_FLARE, 0u);
         AddCombatAction(CURATOR_ACTION_HATEFUL_BOLT, 0u);
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        {
+            return y < -1926.f && z < 164.f && x > -11045.f;
+        });
         Reset();
     }
 
