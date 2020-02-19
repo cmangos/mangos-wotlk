@@ -110,6 +110,7 @@ set(SRC_GRP_UTIL
     Util.h
     WorldPacket.h
     ProducerConsumerQueue.h
+    CommonDefines.h
 )
 
 set(SRC_GRP_SRP
