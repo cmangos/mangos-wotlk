@@ -17,16 +17,18 @@
 /* ScriptData
 SDName: Dragonblight
 SD%Complete: 100
-SDComment: Quest support: 12075, 12166, 12261.
+SDComment: Quest support: 11983, 12075, 12166, 12261.
 SDCategory: Dragonblight
 EndScriptData */
 
 /* ContentData
 npc_destructive_ward
 npc_crystalline_ice_giant
+spell_Taunka_Face_Me
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Spells/Scripts/SpellScript.h"
 
 /*######
 # npc_destructive_ward
@@ -193,6 +195,26 @@ bool NpcSpellClick_npc_crystalline_ice_giant(Player* pPlayer, Creature* pClicked
     return true;
 }
 
+/*######
+## spell_taunka_face_me
+######*/
+
+struct TaunkaFaceMeSpellScript : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        Player* player = static_cast<Player*>(target);
+        spell->GetCaster()->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        player->PrepareGossipMenu(spell->GetCaster(), 9302);
+        player->SendPreparedGossip(spell->GetCaster());
+    }
+};
+
 void AddSC_dragonblight()
 {
     Script* pNewScript = new Script;
@@ -204,4 +226,6 @@ void AddSC_dragonblight()
     pNewScript->Name = "npc_crystalline_ice_giant";
     pNewScript->pNpcSpellClick = &NpcSpellClick_npc_crystalline_ice_giant;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<TaunkaFaceMeSpellScript>("spell_taunka_face_me");
 }
