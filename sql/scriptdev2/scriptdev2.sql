@@ -2353,7 +2353,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1000495','Khadgar himself is showing you around? You must have made a good impression, $n.','0','0','0','0','0','SAY_KHAD_HAGGARD'),
 
 ('-1000496','%s lifts its head into the air, as if listening for something.','0','2','0','0','0','ancestral wolf EMOTE_WOLF_LIFT_HEAD'),
-('-1000497','%s lets out a howl that rings across the mountains to the north and motions for you to follow.','0','2','0','0','0','ancestral wolf EMOTE_WOLF_HOWL'),
+('-1000497','%s lets out a howl that rings across the mountains to the north and motions for you to follow.','9036','2','0','0','0','ancestral wolf EMOTE_WOLF_HOWL'),
 ('-1000498','Welcome, kind spirit. What has brought you to us?','0','0','0','0','0','ancestral wolf SAY_WOLF_WELCOME'),
 
 ('-1000499','Puny $r wanna fight %s? Me beat you! Me boss here!','0','0','1','0','0','morokk SAY_MOR_CHALLENGE'),
