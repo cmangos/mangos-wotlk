@@ -168,7 +168,10 @@ uint8* BigNumber::AsByteArray(int minSize, bool reverse)
     if (length > GetNumBytes())
         memset((void*)_array, 0, length);
 
-    BN_bn2bin(_bn, (unsigned char*)_array);
+    // Padding should add leading zeroes, not trailing
+    int paddingOffset = length - GetNumBytes();
+
+    BN_bn2bin(_bn, (unsigned char*)_array + paddingOffset);
 
     if (reverse)
         std::reverse(_array, _array + length);
