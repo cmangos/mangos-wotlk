@@ -125,6 +125,8 @@ namespace Movement
 
             Location ComputePosition() const;
 
+            uint32 GetSplineFlags() const { return splineflags.raw(); }
+
             uint32 GetId() const { return m_Id;}
             bool Finalized() const { return splineflags.done; }
             bool isCyclic() const { return splineflags.cyclic; }
