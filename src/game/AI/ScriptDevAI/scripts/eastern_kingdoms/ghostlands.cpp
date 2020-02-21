@@ -55,6 +55,13 @@ struct npc_ranger_lilathaAI : public npc_escortAI
     ObjectGuid m_goCageGuid;
     ObjectGuid m_heliosGuid;
 
+    void JustRespawned() override
+    {
+        npc_escortAI::JustRespawned();
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+    }
+
     void MoveInLineOfSight(Unit* pUnit) override
     {
         if (HasEscortState(STATE_ESCORT_ESCORTING))
@@ -86,7 +93,7 @@ struct npc_ranger_lilathaAI : public npc_escortAI
                 }
 
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-
+                m_creature->SetFactionTemporary(FACTION_SMOON_E, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER | TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
                 DoScriptText(SAY_START, m_creature, pPlayer);
                 break;
             case 2:
@@ -145,8 +152,8 @@ bool QuestAccept_npc_ranger_lilatha(Player* pPlayer, Creature* pCreature, const 
 {
     if (pQuest->GetQuestId() == QUEST_CATACOMBS)
     {
-        pCreature->SetFactionTemporary(FACTION_SMOON_E, TEMPFACTION_RESTORE_RESPAWN);
-
+        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+        pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         if (npc_ranger_lilathaAI* pEscortAI = dynamic_cast<npc_ranger_lilathaAI*>(pCreature->AI()))
             pEscortAI->Start(false, pPlayer, pQuest);
     }
