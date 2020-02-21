@@ -52,18 +52,34 @@ void instance_underbog::OnCreatureCreate(Creature* creature)
 {
     switch (creature->GetEntry())
     {
-    case NPC_SWAMPLORD_MUSELEK:
-    case NPC_CLAW:
-    case NPC_GHAZAN:
-    case NPC_BLACK_STALKER:
-        m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
-        break;
+        case NPC_UNDERBOG_FRENZY:
+            m_npcEntryGuidCollection[creature->GetEntry()].push_back(creature->GetObjectGuid());
+            break;
+        case NPC_SWAMPLORD_MUSELEK:
+        case NPC_CLAW:
+        case NPC_GHAZAN:
+        case NPC_BLACK_STALKER:
+            m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
+            break;
     }
 }
 
-InstanceData* GetInstanceData_instance_underbog(Map* map)
+void instance_underbog::OnCreatureDeath(Creature* creature)
 {
-    return new instance_underbog(map);
+    switch (creature->GetEntry())
+    {
+        case NPC_GHAZAN:
+            for (ObjectGuid guid : m_npcEntryGuidCollection[NPC_UNDERBOG_FRENZY])
+            {
+                if (Creature* creature = instance->GetCreature(guid))
+                {
+                    creature->CastSpell(nullptr, SPELL_PERMANENT_FEIGH_DEATH, TRIGGERED_OLD_TRIGGERED);
+                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                    creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                }
+            }
+            break;
+    }
 }
 
 /*######
@@ -89,7 +105,7 @@ void AddSC_instance_underbog()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_underbog";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_underbog;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_underbog>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
