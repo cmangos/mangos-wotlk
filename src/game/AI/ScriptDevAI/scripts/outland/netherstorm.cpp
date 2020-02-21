@@ -1414,7 +1414,10 @@ struct npc_zeppitAI : public ScriptedPetAI
 {
     npc_zeppitAI(Creature* pCreature) : ScriptedPetAI(pCreature) { Reset(); }
 
-    void Reset() override { }
+    void Reset() override
+    {
+        SetReactState(REACT_PASSIVE);
+    }
 
     void OwnerKilledUnit(Unit* pVictim) override
     {
