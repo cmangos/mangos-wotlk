@@ -37,7 +37,7 @@ enum
 {
     SAY_DEATH               = -1269025,
 
-    SPELL_CORRUPT           = 31326,
+    SPELL_CORRUPT           = 31326, // casting handled by dbscript
 };
 
 struct npc_medivh_black_morassAI : public ScriptedAI
@@ -296,9 +296,18 @@ struct npc_time_riftAI : public ScriptedAI
                     if (Creature* pMedivh = m_pInstance->GetSingleCreatureFromStorage(NPC_MEDIVH))
                     {
                         pSummoned->AI()->SetReactState(REACT_DEFENSIVE);
-                        float fX, fY, fZ;
-                        pMedivh->GetNearPoint(pMedivh, fX, fY, fZ, 0, 20.0f, pMedivh->GetAngle(pSummoned));
-                        pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
+
+                        float riftX = m_creature->GetPosition().x;
+                        float riftY = m_creature->GetPosition().y;
+                        float riftZ = m_creature->GetPosition().z;
+
+                        for (int i = 0; i < 4; i++)
+                        {
+                            if (afPortalLocation[i].fX == riftX && afPortalLocation[i].fY == riftY && afPortalLocation[i].fZ == riftZ)
+                            {
+                                pSummoned->GetMotionMaster()->MoveWaypoint(i);
+                            }
+                        }
                     }
                 }
                 break;
@@ -358,8 +367,6 @@ struct npc_time_riftAI : public ScriptedAI
 
         if (pSummoned->GetEntry() == NPC_AEONUS)
             pSummoned->CastSpell(pMedivh, SPELL_CORRUPT_AEONUS, TRIGGERED_NONE);
-        else
-            pSummoned->CastSpell(pMedivh, SPELL_CORRUPT, TRIGGERED_NONE);
     }
 
     void UpdateAI(const uint32 /*uiDiff*/) override { }
