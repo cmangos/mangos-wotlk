@@ -34,7 +34,7 @@ enum
     SPELL_ATTRACT_MAGIC             = 32265,
 
     SPELL_FOCUS_TARGET_VISUAL       = 32286,
-    SPELL_BIRTH                     = 26262, // supposed to remove unit flag 2, which now it doesnt
+    SPELL_BIRTH                     = 26262,
     SPELL_FOCUS_FIRE_SUMMON         = 32283,
     NPC_FOCUS_FIRE                  = 18374  // summoned by 32283 
 };
