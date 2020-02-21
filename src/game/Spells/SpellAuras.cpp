@@ -5028,13 +5028,6 @@ void Aura::HandleAuraModScale(bool apply, bool /*Real*/)
 {
     int32 value = GetTarget()->GetTotalAuraModifier(SPELL_AURA_MOD_SCALE);
     int32 otherValue = GetTarget()->GetTotalAuraModifier(SPELL_AURA_MOD_SCALE_2);
-    if (!apply)
-    {
-        if (GetSpellProto()->EffectApplyAuraName[GetEffIndex()] == SPELL_AURA_MOD_SCALE)
-            value -= m_modifier.m_amount;
-        else
-            otherValue -= m_modifier.m_amount;
-    }
     float scale = std::max(0.1f, float(100 + value) / 100.f * float(100 + otherValue) / 100.f);
     GetTarget()->SetObjectScale(scale);
     GetTarget()->UpdateModelData();
