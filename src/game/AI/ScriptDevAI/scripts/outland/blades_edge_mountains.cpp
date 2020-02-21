@@ -1531,7 +1531,7 @@ struct npc_bloodmaul_dire_wolfAI : public ScriptedAI
     void Reset() override
     {
         m_uiUnfriendlyTimer = 0;
-        m_uiRendTimer       = urand(3000, 6000);
+        m_uiRendTimer = urand(8000, 10000);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
@@ -1557,7 +1557,7 @@ struct npc_bloodmaul_dire_wolfAI : public ScriptedAI
         if (m_uiRendTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_REND) == CAST_OK)
-                m_uiRendTimer = urand(8000, 13000);
+                m_uiRendTimer = urand(34000, 36000);
         }
         else
             m_uiRendTimer -= uiDiff;
