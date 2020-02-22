@@ -1248,10 +1248,11 @@ enum
     EVENT_AIR                           = 13516,
 };
 
-struct npc_totem_of_spiritsAI : public ScriptedPetAI
+struct npc_totem_of_spiritsAI : public ScriptedAI
 {
-    npc_totem_of_spiritsAI(Creature* pCreature) : ScriptedPetAI(pCreature)
+    npc_totem_of_spiritsAI(Creature* creature) : ScriptedAI(creature)
     {
+        SetReactState(REACT_PASSIVE);
         Reset();
         m_uiElementalSieveTimer = 2500; // needs to be cast non-stop without interference from evade and some such
     }
@@ -1260,52 +1261,45 @@ struct npc_totem_of_spiritsAI : public ScriptedPetAI
 
     void Reset() override {}
 
-    void AttackedBy(Unit* /*pAttacker*/) override {}
-
-    void SummonedMovementInform(Creature* pSummoned, uint32 /*uiMotionType*/, uint32 /*uiData*/) override
+    void SummonedMovementInform(Creature* summoned, uint32 /*motionType*/, uint32 /*data*/) override
     {
-        switch (pSummoned->GetEntry())
+        switch (summoned->GetEntry())
         {
             case NPC_EARTHEN_SOUL:
-                pSummoned->CastSpell(m_creature, SPELL_EARTH_CAPTURED, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(m_creature, SPELL_EARTH_CAPTURED, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_FIERY_SOUL:
-                pSummoned->CastSpell(m_creature, SPELL_FIERY_CAPTURED, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(m_creature, SPELL_FIERY_CAPTURED, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_WATERY_SOUL:
-                pSummoned->CastSpell(m_creature, SPELL_WATER_CAPTURED, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(m_creature, SPELL_WATER_CAPTURED, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_AIRY_SOUL:
-                pSummoned->CastSpell(m_creature, SPELL_AIR_CAPTURED, TRIGGERED_OLD_TRIGGERED);
+                summoned->CastSpell(m_creature, SPELL_AIR_CAPTURED, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
 
         // Despawn the spirit soul after it's captured
-        ((Creature*)pSummoned)->ForcedDespawn(1000);
+        summoned->ForcedDespawn(1000);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
         // After summoning the spirit soul, make it move towards the totem
-        pSummoned->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 4);
+        summoned->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 4);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 diff) override
     {
-        if (m_uiElementalSieveTimer <= uiDiff)
+        if (m_uiElementalSieveTimer <= diff)
         {
-            m_creature->CastSpell(m_creature, SPELL_ELEMENTAL_SIEVE, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(nullptr, SPELL_ELEMENTAL_SIEVE, TRIGGERED_OLD_TRIGGERED);
             m_uiElementalSieveTimer = 2500;
         }
         else
-            m_uiElementalSieveTimer -= uiDiff;
+            m_uiElementalSieveTimer -= diff;
     }
 };
-
-UnitAI* GetAI_npc_totem_of_spirits(Creature* pCreature)
-{
-    return new npc_totem_of_spiritsAI(pCreature);
-}
 
 bool EffectDummyCreature_npc_totem_of_spirits(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
@@ -5356,7 +5350,7 @@ void AddSC_shadowmoon_valley()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_totem_of_spirits";
-    pNewScript->GetAI = &GetAI_npc_totem_of_spirits;
+    pNewScript->GetAI = &GetNewAIInstance<npc_totem_of_spiritsAI>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_totem_of_spirits;
     pNewScript->RegisterSelf();
 
