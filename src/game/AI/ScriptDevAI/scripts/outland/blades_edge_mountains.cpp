@@ -1834,6 +1834,8 @@ enum
     SPELL_UNSTABLE_FEL_IMP_TRANSFORM = 39227, // cast in acid
     SPELL_UNSTABLE_EXPLOSION = 39266, // cast in acid
 
+    SPELL_VOID_HOUND_TRANSFORM      = 39275, // TODO: Script should also spawn void hounds
+
     SPELL_GO_SMALL_FIRE = 49910, // serverside spells for spawning GOs - TODO: Remove and substitute with pre-spawned gos
     SPELL_GO_SMOKE = 49911,
     SPELL_GO_BIG_FIRE = 49912,
