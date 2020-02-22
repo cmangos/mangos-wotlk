@@ -10933,7 +10933,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
-                case 52479:                                 // Gift of the Harvester
+                case 52481:                                 // Gift of the Harvester
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER || !unitTarget)
                         return;
