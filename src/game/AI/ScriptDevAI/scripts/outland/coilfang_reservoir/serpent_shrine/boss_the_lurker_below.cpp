@@ -28,7 +28,6 @@ enum
 {
     EMOTE_DEEP_BREATH               = -1548056,
 
-    SPELL_LURKER_SPAWN_TRIGGER      = 54587,
     SPELL_WHIRL                     = 37660,
     SPELL_GEYSER                    = 37478,
     SPELL_SPOUT                     = 37431,                // trigger spells 37429, 37430
@@ -353,8 +352,7 @@ bool GOUse_go_strange_pool(Player* player, GameObject* go)
         {
             if (pInstance->GetData(TYPE_THELURKER_EVENT) == NOT_STARTED || pInstance->GetData(TYPE_THELURKER_EVENT) == FAIL)
             {
-                player->CastSpell(player, SPELL_LURKER_SPAWN_TRIGGER, TRIGGERED_OLD_TRIGGERED);
-                pInstance->SetData(TYPE_THELURKER_EVENT, IN_PROGRESS);
+                pInstance->SetData(TYPE_THELURKER_EVENT, IN_PROGRESS);          
                 go->SetRespawnTime(7 * DAY); // dont respawn until reset
                 return true;
             }

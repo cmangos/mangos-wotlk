@@ -140,6 +140,10 @@ void instance_serpentshrine_cavern::SetData(uint32 uiType, uint32 uiData)
         case TYPE_THELURKER_EVENT:
             switch (uiData)
             {
+                case IN_PROGRESS:
+                    if (Player* player = GetPlayerInMap())
+                        player->CastSpell(player, SPELL_LURKER_SPAWN_TRIGGER, TRIGGERED_OLD_TRIGGERED); // TODO: wotlk spell should be casted by special someone
+                    break;
                 case DONE:
                     if (Creature* pWorldTrigger = GetSingleCreatureFromStorage(NPC_WORLD_TRIGGER))
                         pWorldTrigger->ForcedDespawn();
@@ -414,6 +418,21 @@ struct npc_serpentshrine_parasiteAI : public ScriptedAI
             m_creature->FixateTarget(pTarget);
     }
 };
+
+void instance_serpentshrine_cavern::ShowChatCommands(ChatHandler* handler)
+{
+    handler->SendSysMessage("This instance supports the following commands: spawnlurker");
+}
+
+void instance_serpentshrine_cavern::ExecuteChatCommand(ChatHandler* handler, char* args)
+{
+    char* result = handler->ExtractLiteralArg(&args);
+    if (!result)
+        return;
+    std::string val = result;
+    if (val == "spawnlurker")
+        SetData(TYPE_THELURKER_EVENT, IN_PROGRESS);
+}
 
 UnitAI* GetAI_npc_serpentshrine_parasite(Creature* pCreature)
 {
