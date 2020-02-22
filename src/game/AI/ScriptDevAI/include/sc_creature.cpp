@@ -391,7 +391,6 @@ enum
     NPC_KARGATH_BLADEFIST       = 16808,
     NPC_MOROES                  = 15687,
     NPC_MOROGRIM_TIDEWALKER     = 21213,
-    NPC_LEOTHERAS               = 21215,
 
     // Black Temple
     NPC_HIGH_WARLORD_NAJENTUS   = 22887,
@@ -460,10 +459,6 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
             break;
         case NPC_ZARITHRIAN:
             if (z > 87.0f)
-                return false;
-            break;
-        case NPC_LEOTHERAS:
-            if (x < 409.0f && y > -524.0f &&  x > 300.0f && y < -301.0f)
                 return false;
             break;
         case NPC_HIGH_WARLORD_NAJENTUS:
