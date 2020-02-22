@@ -26,6 +26,7 @@ boss_nexusprince_shaffar
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -58,65 +59,33 @@ enum ShaffarActions // order based on priority
     SHAFFAR_ACTION_MAX
 };
 
-struct boss_nexusprince_shaffarAI : public ScriptedAI
+struct boss_nexusprince_shaffarAI : public RangedCombatAI
 {
-    boss_nexusprince_shaffarAI(Creature* creature) : ScriptedAI(creature)
+    boss_nexusprince_shaffarAI(Creature* creature) : RangedCombatAI(creature, SHAFFAR_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_hasTaunted(false),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_hasTaunted = false;
-        m_instance = (ScriptedInstance*)creature->GetInstanceData();
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
-        Reset();
+        if (m_isRegularMode)
+        {
+            AddCombatAction(SHAFFAR_ACTION_BEACON, 16000, 20000);
+            AddCombatAction(SHAFFAR_ACTION_FROSTNOVA, 16000, 25000);
+            AddCombatAction(SHAFFAR_ACTION_BLINK, 45000, 60000);
+            AddCombatAction(SHAFFAR_ACTION_PRIMARY_SPELL, 3000, 5000);
+        }
+        else
+        {
+            AddCombatAction(SHAFFAR_ACTION_BEACON, 15000u);
+            AddCombatAction(SHAFFAR_ACTION_FROSTNOVA, 10000, 25000);
+            AddCombatAction(SHAFFAR_ACTION_BLINK, 20000, 25000);
+            AddCombatAction(SHAFFAR_ACTION_PRIMARY_SPELL, 1200, 2400);
+        }
+        AddDistanceSpell(SPELL_FROSTNOVA);
+        SetRangedMode(true, 30.f, TYPE_PROXIMITY);
     }
 
     ScriptedInstance* m_instance;
     bool m_isRegularMode;
 
-    uint32 m_actionTimers[SHAFFAR_ACTION_MAX];
-
-    bool m_actionReadyStatus[SHAFFAR_ACTION_MAX];
     bool m_hasTaunted;
-
-    void Reset() override
-    {
-        m_actionTimers[SHAFFAR_ACTION_BEACON] = GetInitialActionTimer(SHAFFAR_ACTION_BEACON);
-        m_actionTimers[SHAFFAR_ACTION_FROSTNOVA] = GetInitialActionTimer(SHAFFAR_ACTION_FROSTNOVA);
-        m_actionTimers[SHAFFAR_ACTION_BLINK] = GetInitialActionTimer(SHAFFAR_ACTION_BLINK);
-        m_actionReadyStatus[SHAFFAR_ACTION_PRIMARY_SPELL] = true;
-
-        for (uint32 i = 0; i < SHAFFAR_ACTION_MAX; ++i)
-            m_actionReadyStatus[i] = false;
-
-        m_attackDistance = 20.f;
-
-        SetCombatMovement(true);
-        SetCombatScriptStatus(false);
-    }
-
-    uint32 GetInitialActionTimer(ShaffarActions id)
-    {
-        if (m_isRegularMode)
-        {
-            switch (id)
-            {
-                case SHAFFAR_ACTION_BEACON: return urand(16000,20000);
-                case SHAFFAR_ACTION_FROSTNOVA: return urand(16000, 25000);
-                case SHAFFAR_ACTION_BLINK: return urand(45000,60000);
-                case SHAFFAR_ACTION_PRIMARY_SPELL: return urand(3000, 5000);
-                default: return 0;
-            }
-        }
-        else
-        {
-            switch (id)
-            {
-                case SHAFFAR_ACTION_BEACON: return 15000;
-                case SHAFFAR_ACTION_FROSTNOVA: return urand(10000, 25000);
-                case SHAFFAR_ACTION_BLINK: return urand(20000, 25000);
-                case SHAFFAR_ACTION_PRIMARY_SPELL: return urand(1200, 2400);
-                default: return 0;
-            }
-        }
-    }
 
     uint32 GetSubsequentActionTimer(ShaffarActions id)
     {
@@ -138,24 +107,24 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
                 case SHAFFAR_ACTION_BEACON: return 15000;
                 case SHAFFAR_ACTION_FROSTNOVA: return urand(12000, 20000);
                 case SHAFFAR_ACTION_BLINK: return urand(20000, 25000);
-                case SHAFFAR_ACTION_PRIMARY_SPELL: return urand(1200, 2400);
+                case SHAFFAR_ACTION_PRIMARY_SPELL: return urand(1000, 2000);
                 default: return 0;
             }
         }
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_hasTaunted && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 100.0f) && m_creature->IsWithinLOSInMap(pWho))
+        if (!m_hasTaunted && who->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(who, 100.0f) && m_creature->IsWithinLOSInMap(who))
         {
             DoScriptText(SAY_INTRO, m_creature);
             m_hasTaunted = true;
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
+        ScriptedAI::MoveInLineOfSight(who);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
@@ -165,145 +134,69 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
         }
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-            pSummoned->AI()->AttackStart(pTarget);
+            summoned->AI()->AttackStart(pTarget);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEAD, m_creature);
     }
 
-    void ExecuteActions()
+    void ExecuteAction(uint32 action) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < SHAFFAR_ACTION_MAX; ++i)
+        switch (action)
         {
-            if (m_actionReadyStatus[i])
-            {
-                switch (i)
+            case SHAFFAR_ACTION_BEACON:
+                if (DoCastSpellIfCan(nullptr, SPELL_ETHEREAL_BEACON) == CAST_OK)
                 {
-                    case SHAFFAR_ACTION_BEACON:
-                        if (DoCastSpellIfCan(nullptr, SPELL_ETHEREAL_BEACON) == CAST_OK)
-                        {
-                            if (!urand(0, 3))
-                                DoScriptText(SAY_SUMMON, m_creature);
+                    if (!urand(0, 3))
+                        DoScriptText(SAY_SUMMON, m_creature);
 
-                            m_actionTimers[i] = GetSubsequentActionTimer(ShaffarActions(i));
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    case SHAFFAR_ACTION_FROSTNOVA:
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, SPELL_FROSTNOVA, SELECT_FLAG_PLAYER | SELECT_FLAG_USE_EFFECT_RADIUS))
-                        {
-                            if (DoCastSpellIfCan(nullptr, SPELL_FROSTNOVA) == CAST_OK)
-                            {
-                                m_actionTimers[i] = GetSubsequentActionTimer(ShaffarActions(i));
-                                m_actionReadyStatus[i] = false;
-                                return;
-                            }
-                        }
-                        break;
-                    case SHAFFAR_ACTION_BLINK:
-                        if (m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()) && DoCastSpellIfCan(nullptr, SPELL_BLINK) == CAST_OK)
-                        {
-                            m_actionTimers[i] = GetSubsequentActionTimer(ShaffarActions(i));
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    case SHAFFAR_ACTION_PRIMARY_SPELL:
+                    ResetCombatAction(action, GetSubsequentActionTimer(ShaffarActions(action)));
+                    return;
+                }
+                break;
+            case SHAFFAR_ACTION_FROSTNOVA:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, SPELL_FROSTNOVA, SELECT_FLAG_PLAYER | SELECT_FLAG_USE_EFFECT_RADIUS))
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_FROSTNOVA) == CAST_OK)
                     {
-                        uint32 spell = urand(0,1) ? SPELL_FIREBALL : SPELL_FROSTBOLT;
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), spell) == CAST_OK)
-                        {
-                            m_actionTimers[i] = GetSubsequentActionTimer(ShaffarActions(i));
-                            m_actionReadyStatus[i] = false;
-                        }
+                        ResetCombatAction(action, GetSubsequentActionTimer(ShaffarActions(action)));
                         return;
                     }
-                    break;
                 }
-            }
-        }
-    }
-
-    void JustStoppedMovementOfTarget(SpellEntry const* spell, Unit* victim) override
-    {
-        switch (spell->Id)
-        {
-            case SPELL_FROSTNOVA:
-                if (m_creature->GetVictim() != victim) // frostnova hit others, resist case
-                    break;
-                DistanceYourself();
                 break;
-        }
-    }
-
-    void DistanceYourself()
-    {
-        if (Unit* victim = m_creature->GetVictim()) // make sure target didnt die
-        {
-            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim, true);
-            m_creature->GetMotionMaster()->DistanceYourself(distance);
-        }
-    }
-
-    void DistancingStarted()
-    {
-        SetCombatScriptStatus(true);
-        SetMeleeEnabled(false);
-    }
-
-    void DistancingEnded()
-    {
-        SetCombatScriptStatus(false);
-        SetMeleeEnabled(true);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        for (uint32 i = 0; i < SHAFFAR_ACTION_MAX; ++i)
-        {
-            if (!m_actionReadyStatus[i])
-            {
-                if (m_actionTimers[i] <= uiDiff)
+            case SHAFFAR_ACTION_BLINK:
+                if (m_creature->GetVictim() && m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()) && DoCastSpellIfCan(nullptr, SPELL_BLINK) == CAST_OK)
                 {
-                    m_actionTimers[i] = 0;
-                    m_actionReadyStatus[i] = true;
+                    ResetCombatAction(action, GetSubsequentActionTimer(ShaffarActions(action)));
+                    return;
                 }
-                else
-                    m_actionTimers[i] -= uiDiff;
+                break;
+            case SHAFFAR_ACTION_PRIMARY_SPELL:
+            {
+                uint32 spell = urand(0, 1) ? SPELL_FIREBALL : SPELL_FROSTBOLT;
+                if (DoCastSpellIfCan(m_creature->GetVictim(), spell) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(ShaffarActions(action)));
+                return;
             }
+            break;
         }
-
-        ExecuteActions();
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_nexusprince_shaffar(Creature* pCreature)
-{
-    return new boss_nexusprince_shaffarAI(pCreature);
-}
 
 void AddSC_boss_nexusprince_shaffar()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_nexusprince_shaffar";
-    pNewScript->GetAI = &GetAI_boss_nexusprince_shaffar;
+    pNewScript->GetAI = &GetNewAIInstance<boss_nexusprince_shaffarAI>;
     pNewScript->RegisterSelf();
 }
