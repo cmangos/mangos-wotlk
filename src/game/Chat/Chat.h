@@ -722,6 +722,8 @@ class ChatHandler
         bool HandleKickPlayerCommand(char* args);
         bool HandleMailBoxCommand(char* args);
 
+        bool HandleBagsCommand(char* args);
+
         bool HandleTicketDiscardCommand(char* args);
         bool HandleTicketEscalateCommand(char* args);
         bool HandleTicketGoCommand(char* args);

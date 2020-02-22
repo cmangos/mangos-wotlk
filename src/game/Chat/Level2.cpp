@@ -5120,3 +5120,23 @@ bool ChatHandler::HandleMmapStatsCommand(char* /*args*/)
 
     return true;
 }
+
+bool ChatHandler::HandleBagsCommand(char* args)
+{
+    Player* player = GetPlayer();
+
+    uint32 bagEntries[] = { 34845,27680,21876,14156 };
+    for (uint32 entry : bagEntries)
+    {
+        ItemPosCountVec dest;
+        uint32 noSpaceForCount = 0;
+        uint8 msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, entry, 1, &noSpaceForCount);
+        if (msg == EQUIP_ERR_OK)
+        {
+            Item* item = player->StoreNewItem(dest, entry, true, Item::GenerateItemRandomPropertyId(entry));
+            if (item)
+                player->SendNewItem(item, 1, false, true);
+        }
+    }
+    return true;
+}

@@ -837,6 +837,12 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 
+    static ChatCommand testingCommandTable[] =
+    {
+        { "bags",           SEC_GAMEMASTER,     false, &ChatHandler::HandleBagsCommand,                "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                        "", nullptr }
+    };
+
     static ChatCommand ticketCommandTable[] =
     {
         { "discard",        SEC_GAMEMASTER,     false, &ChatHandler::HandleTicketDiscardCommand,       "", nullptr },
@@ -937,6 +943,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "bank",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleBankCommand,                "", nullptr },
         { "mailbox",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMailBoxCommand,             "", nullptr },
         { "wchange",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleChangeWeatherCommand,       "", nullptr },
+        { "testing",        SEC_GAMEMASTER,     false, nullptr,                                        "", testingCommandTable },
         { "ticket",         SEC_GAMEMASTER,     false, nullptr,                                        "", ticketCommandTable   },
         { "tickets",        SEC_GAMEMASTER,     false, nullptr,                                        "", ticketsCommandTable  },
         { "maxskill",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleMaxSkillCommand,            "", nullptr },
