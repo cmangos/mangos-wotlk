@@ -678,7 +678,7 @@ struct boss_lady_vashjAI : public ScriptedAI
                 m_introDelayTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+        if (!m_creature->SelectHostileTarget())
             return;
 
         if (m_uiPhase == PHASE_1 || m_uiPhase == PHASE_3)
