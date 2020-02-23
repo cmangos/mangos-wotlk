@@ -199,6 +199,7 @@ struct boss_vazruden_heraldAI : public CombatAI
                     m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
                     m_creature->SetLevitate(false);
                     m_creature->SetHover(false);
+                    HandleAttackDelay();
                     break;
                 }
                 case POINT_ID_FLYING:
@@ -270,6 +271,7 @@ struct boss_vazruden_heraldAI : public CombatAI
         {
             // landing
             DisableCombatAction(NAZAN_FIREBALL_FLIGHT);
+            DisableCombatAction(NAZAN_FLIGHT_MOVE);
             ResetCombatAction(NAZAN_FIREBALL_LAND, urand(5200, 16500));
             ResetCombatAction(NAZAN_CONE_OF_FIRE, urand(8100, 19700));
             if (!m_inRegularMode)
@@ -438,6 +440,9 @@ struct boss_vazrudenAI : public CombatAI
             }
             case VAZRUDEN_REVENGE:
             {
+                if (!m_creature->HasAuraState(AURA_STATE_DEFENSE))
+                    break;
+
                 if (DoCastSpellIfCan(m_creature->GetVictim(), m_inRegularMode ? SPELL_REVENGE : SPELL_REVENGE_H) == CAST_OK)
                     ResetCombatAction(action, urand(11400, 14300));
                 break;
