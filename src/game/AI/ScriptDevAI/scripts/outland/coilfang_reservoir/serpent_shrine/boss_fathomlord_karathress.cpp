@@ -85,6 +85,10 @@ struct boss_fathomlord_karathressAI : public ScriptedAI
     boss_fathomlord_karathressAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        {
+            return y > -425.f || y < -624.f;
+        });
         Reset();
     }
 
@@ -226,7 +230,17 @@ struct boss_fathomlord_karathressAI : public ScriptedAI
 
 struct boss_fathomguard_sharkkisAI : public ScriptedAI
 {
-    boss_fathomguard_sharkkisAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    boss_fathomguard_sharkkisAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        {
+            return y > -425.f || y < -624.f;
+        });
+        Reset();
+    }
+
+    ScriptedInstance* m_pInstance;
 
     uint32 m_uiHurlTridentTimer;
     uint32 m_uiLeechingThrowTimer;
@@ -243,6 +257,12 @@ struct boss_fathomguard_sharkkisAI : public ScriptedAI
         m_uiPetTimer            = 10000;
 
         m_creature->RemoveGuardians(); // despawn pets
+    }
+
+    void EnterEvadeMode() override
+    {
+        if (Creature* karathress = m_pInstance->GetSingleCreatureFromStorage(NPC_KARATHRESS))
+            karathress->AI()->EnterEvadeMode();
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -325,7 +345,17 @@ struct boss_fathomguard_sharkkisAI : public ScriptedAI
 
 struct boss_fathomguard_tidalvessAI : public ScriptedAI
 {
-    boss_fathomguard_tidalvessAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    boss_fathomguard_tidalvessAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        {
+            return y > -425.f || y < -624.f;
+        });
+        Reset();
+    }
+
+    ScriptedInstance* m_pInstance;
 
     uint32 m_uiFrostShockTimer;
     uint32 m_uiTotemTimer;
@@ -334,6 +364,12 @@ struct boss_fathomguard_tidalvessAI : public ScriptedAI
     {
         m_uiFrostShockTimer = 25000;
         m_uiTotemTimer      = urand(2000, 5000);
+    }
+
+    void EnterEvadeMode() override
+    {
+        if (Creature* karathress = m_pInstance->GetSingleCreatureFromStorage(NPC_KARATHRESS))
+            karathress->AI()->EnterEvadeMode();
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -380,6 +416,10 @@ struct boss_fathomguard_caribdisAI : public ScriptedAI
     boss_fathomguard_caribdisAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        {
+            return y > -425.f || y < -624.f;
+        });
         Reset();
     }
 
@@ -396,6 +436,12 @@ struct boss_fathomguard_caribdisAI : public ScriptedAI
         m_uiTidalSurgeTimer      = urand(15000, 20000);
         m_uiHealTimer            = 55000;
         m_uiCycloneTimer         = urand(10000, 15000);
+    }
+
+    void EnterEvadeMode() override
+    {
+        if (Creature* karathress = m_pInstance->GetSingleCreatureFromStorage(NPC_KARATHRESS))
+            karathress->AI()->EnterEvadeMode();
     }
 
     void JustDied(Unit* /*pKiller*/) override
