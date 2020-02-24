@@ -365,7 +365,7 @@ struct TeleportSelf : public SpellScript
 {
     void OnDestTarget(Spell* spell) const override
     {
-        spell->m_targets.m_destZ += 10.f;
+        spell->m_targets.m_destPos.z += 10.f;
     }
 };
 

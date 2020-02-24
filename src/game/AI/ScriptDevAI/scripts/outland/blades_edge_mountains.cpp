@@ -3999,7 +3999,7 @@ struct EtherealRingSignalFlare : public SpellScript
 {
     void OnDestTarget(Spell* spell) const override
     {
-        spell->m_targets.m_destZ = 342.9485f; // confirmed with sniffs
+        spell->m_targets.m_destPos.z = 342.9485f; // confirmed with sniffs
     }
 };
 

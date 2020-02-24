@@ -463,7 +463,7 @@ struct SummonBlossomMoveTarget : public SpellScript
 {
     void OnDestTarget(Spell* spell) const override
     {
-        spell->m_targets.m_destZ += 12.f;
+        spell->m_targets.m_destPos.z += 12.f;
     }
 };
 
