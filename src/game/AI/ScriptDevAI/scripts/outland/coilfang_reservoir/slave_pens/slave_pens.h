@@ -9,6 +9,8 @@ enum
 {
     NPC_NATURALIST_BITE     = 17893,
 
+    NPC_QUAGMIRRAN = 17942,
+
     DATA_NATURALIST = 0,
 };
 
@@ -23,8 +25,12 @@ class instance_slave_pens : public ScriptedInstance
 
         void OnCreatureCreate(Creature* creature) override;
 
+        void Update(const uint32 diff) override;
+
     private:
         bool m_naturalistYelled;
+
+        uint32 m_quagmirranTimer;
 };
 
 #endif

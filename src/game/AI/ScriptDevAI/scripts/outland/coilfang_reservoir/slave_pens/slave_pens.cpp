@@ -24,7 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "slave_pens.h"
 
-instance_slave_pens::instance_slave_pens(Map* map) : ScriptedInstance(map), m_naturalistYelled(false)
+instance_slave_pens::instance_slave_pens(Map* map) : ScriptedInstance(map), m_naturalistYelled(false), m_quagmirranTimer(0)
 {
     Initialize();
 }
@@ -52,9 +52,41 @@ void instance_slave_pens::OnCreatureCreate(Creature* creature)
 {
     switch (creature->GetEntry())
     {
+        case NPC_QUAGMIRRAN:
+            m_quagmirranTimer = 1000;
         case NPC_NATURALIST_BITE:
             m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
+    }
+}
+
+void instance_slave_pens::Update(const uint32 diff)
+{
+    if (m_quagmirranTimer)
+    {
+        if (m_quagmirranTimer <= diff)
+        {
+            m_quagmirranTimer = 3000;
+            if (Creature* quagmirran = GetSingleCreatureFromStorage(NPC_QUAGMIRRAN))
+            {
+                if (quagmirran->IsAlive() && !quagmirran->IsInCombat())
+                {
+                    for (auto data : instance->GetPlayers())
+                    {
+                        if (data.getSource()->GetDistance(quagmirran, true, DIST_CALC_NONE) < 140.f * 140.f)
+                        {
+                            m_quagmirranTimer = 0;
+                            quagmirran->GetMotionMaster()->MoveWaypoint();
+                        }
+                    }                            
+                }
+                else
+                    m_quagmirranTimer = 0;
+            }
+            else
+                m_quagmirranTimer = 0;
+        }
+        else m_quagmirranTimer -= diff;
     }
 }
 
