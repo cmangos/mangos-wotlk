@@ -2393,13 +2393,13 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1000532','At your command, my liege...','0','0','0','0','0','torloth TORLOTH_DIALOGUE1'),
 ('-1000533','As you desire, Lord Illidan.','0','0','0','0','0','torloth TORLOTH_DIALOGUE2'),
-('-1000534','Yes, Lord Illidan, I would sacrifice to you this magnificent physique. On this day you will fall - another victim of Torloth...','0','0','0','0','0','torloth TORLOTH_DIALOGUE3'),
+('-1000534','For Lord Illidan, I would sacrifice even this magnificent physique. On this day, you will fall - another victim of Torloth...','0','0','0','25','0','torloth TORLOTH_DIALOGUE3'),
 ('-1000535','Destroy them, Torloth. Let loose their blood like a river upon this hallowed ground.','0','0','0','0','0','lordillidan ILLIDAN_DIALOGUE'),
 ('-1000536','What manner of fool dares stand before Illidan Stormrage? Soldiers, destroy these insects!','0','1','0','0','0','lordillidan ILLIDAN_SUMMON1'),
 ('-1000537','You are no challenge for the Crimson Sigil. Mind breakers, end this nonsense.','0','1','0','0','0','lordillidan ILLIDAN_SUMMON2'),
 ('-1000538','Run while you still can. The highlords come soon...','0','1','0','0','0','lordillidan ILLIDAN_SUMMON3'),
-('-1000539','Torloth your master calls!','0','1','0','0','0','lordillidan ILLIDAN_SUMMON4'),
-('-1000540','So you have defeated the Crimson Sigil. You now seek to challenge my rule? Not even Arthas could defeat me, yet you dare to even harbor such thoughts? Then I say to you, come! Come $N! The Black Temple awaits...','0','1','0','0','0','lordillidan EVENT_COMPLETED'),
+('-1000539','Torloth, your master calls!','0','1','0','0','0','lordillidan ILLIDAN_SUMMON4'),
+('-1000540','So you have defeated the Crimson Sigil. You now seek to challenge my rule? Not even Arthas could defeat me, yet you dare to even harbor such thoughts? Then I say to you, come! Come $n! The Black Temple awaits...','0','1','0','0','0','lordillidan EVENT_COMPLETED'),
 
 ('-1000541','%s jumps into the moonwell and goes underwater...','0','2','0','0','0','kitten EMOTE_SAB_JUMP'),
 ('-1000542','%s follows $n obediently.','0','2','0','0','0','kitten EMOTE_SAB_FOLLOW'),
@@ -3417,7 +3417,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1015100','Mooooo...','0','0','0','0','18179','bessy SAY_ESCORT_1'),
 ('-1015101','Moooooooooo!','0','0','0','0','18180','bessy SAY_ESCORT_2'),
-('-1015102','Bessy, you''re home. Thank the Light!','0','0','0','0','18181','bessy SAY_THADELL');
+('-1015102','Bessy, you''re home. Thank the Light!','0','0','0','0','18181','bessy SAY_THADELL'),
+('-1015103','Quickly, get to the middle of the platform! Illidan''s fury is soon to be unleashed!','0','4','0','0','0','Marcus Auralion - On Accept');
 
 -- -1 020 000 WOTLK texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
