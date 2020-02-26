@@ -4808,6 +4808,19 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             // creature case, need to update equipment if additional provided
             if (cInfo && target->GetTypeId() == TYPEID_UNIT)
                 ((Creature*)target)->LoadEquipment(cInfo->EquipmentTemplateId, false);
+
+            // Earth/Fire Totem Transform
+            if (GetId() == 32184 || GetId() == 32186)
+            {
+                Unit* owner = target->GetOwner();
+                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if (((Player*)owner)->GetTeam() == HORDE)
+                    {
+                        m_modifier.m_amount = cInfo->ModelId[1];
+                    }
+                }
+            }
         }
 
         target->SetDisplayId(m_modifier.m_amount);
