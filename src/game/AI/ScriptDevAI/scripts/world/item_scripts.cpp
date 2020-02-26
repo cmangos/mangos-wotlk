@@ -180,6 +180,23 @@ bool ItemUse_item_petrov_cluster_bombs(Player* pPlayer, Item* pItem, const Spell
     return false;
 }
 
+enum
+{
+    SPELL_PARACHUTE = 37897,
+};
+
+struct X52RocketHelmetAura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const
+    {
+        if (!apply)
+        {
+            Unit* target = aura->GetTarget();
+            target->CastSpell(target, SPELL_PARACHUTE, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_item_scripts()
 {
     Script* pNewScript = new Script;
@@ -208,4 +225,5 @@ void AddSC_item_scripts()
     pNewScript->RegisterSelf();
 
     RegisterAuraScript<AshbringerItemAura>("spell_ashbringer_item");
+    RegisterAuraScript<X52RocketHelmetAura>("spell_to_infinity_and_above");
 }
