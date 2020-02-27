@@ -1157,13 +1157,16 @@ void Pet::InitStatsForLevel(uint32 petlevel)
 
 void Pet::InitPetScalingAuras()
 {
+    if (getPetType() == HUNTER_PET)
+    {
+        CastSpell(nullptr, 34902, TRIGGERED_NONE);
+        CastSpell(nullptr, 34903, TRIGGERED_NONE);
+        CastSpell(nullptr, 34904, TRIGGERED_NONE);
+        return;
+    }
+
     switch (GetUInt32Value(UNIT_CREATED_BY_SPELL))
     {
-        case 13481: // Tame Beast - Hunter
-            CastSpell(nullptr, 34902, TRIGGERED_NONE);
-            CastSpell(nullptr, 34903, TRIGGERED_NONE);
-            CastSpell(nullptr, 34904, TRIGGERED_NONE);
-            break;
         case 688: // Imp - Warlock
         case 691: // Felhunter
         case 697: // Voidwalker
