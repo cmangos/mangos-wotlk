@@ -1,10 +1,6 @@
 
 cmake_minimum_required(VERSION 2.8)
 
-include(../../cmake/common.cmake)
-include(CheckPlatform)
-
-
 add_executable(git_id git_id.cpp)
 
 if(MSVC)
