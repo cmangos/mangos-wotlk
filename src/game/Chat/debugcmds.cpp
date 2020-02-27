@@ -34,7 +34,6 @@
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Maps/InstanceData.h"
 #include "Cinematics/M2Stores.h"
-#include "Movement/MoveSpline.h"
 
 bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
 {
@@ -1380,124 +1379,7 @@ bool ChatHandler::HandleDebugMoveflags(char* /*args*/)
     if (!target)
         return false;
 
-    const char* moveFlagsStr[32] =
-    {
-        "MOVEFLAG_FORWARD",         // 0x00000001 (0)
-        "MOVEFLAG_BACKWARD",        // 0x00000002 (1)
-        "MOVEFLAG_STRAFE_LEFT",     // 0x00000004 (2)
-        "MOVEFLAG_STRAFE_RIGHT",    // 0x00000008 (3)
-        "MOVEFLAG_TURN_LEFT",       // 0x00000010 (4)
-        "MOVEFLAG_TURN_RIGHT",      // 0x00000020 (5)
-        "MOVEFLAG_PITCH_UP",        // 0x00000040 (6)
-        "MOVEFLAG_PITCH_DOWN",      // 0x00000080 (7)
-        "MOVEFLAG_WALK_MODE",       // 0x00000100 (8)
-        "MOVEFLAG_ONTRANSPORT",     // 0x00000200 (9)
-        "MOVEFLAG_LEVITATING",      // 0x00000400 (10)
-        "MOVEFLAG_ROOT",            // 0x00000800 (11)
-        "MOVEFLAG_FALLING",         // 0x00001000 (12)
-        "UNKNOWN_0x2000",           // 0x00002000 (13)
-        "MOVEFLAG_FALLINGFAR",      // 0x00004000 (14)
-        "UNKNOWN_0x8000",           // 0x00008000 (15)
-        "UNKNOWN_0x10000",          // 0x00010000 (16)
-        "UNKNOWN_0x20000",          // 0x00020000 (17)
-        "UNKNOWN_0x40000",          // 0x00040000 (18)
-        "UNKNOWN_0x80000",          // 0x00080000 (19)
-        "UNKNOWN_0x100000",         // 0x00100000 (20)
-        "MOVEFLAG_SWIMMING",        // 0x00200000 (21)
-        "MOVEFLAG_ASCENDING",       // 0x00400000 (22)
-        "MOVEFLAG_CAN_FLY",         // 0x00800000 (23)
-        "MOVEFLAG_FLYING",          // 0x01000000 (24)
-        "MOVEFLAG_FLYING2",         // 0x02000000 (25)
-        "MOVEFLAG_SPLINE_ELEVATION",// 0x04000000 (26)
-        "MOVEFLAG_SPLINE_ENABLED",  // 0x08000000 (27)
-        "MOVEFLAG_WATERWALKING",    // 0x10000000 (28)
-        "MOVEFLAG_SAFE_FALL",       // 0x20000000 (29)
-        "MOVEFLAG_HOVER",           // 0x40000000 (30)
-        "UNKNOWN_0x10000000"        // 0x80000000 (31)
-    };
-
-    std::stringstream ss;
-    uint32 mFlags = uint32(target->m_movementInfo.GetMovementFlags());
-    for (uint32 i = 0; i < 32; ++i)
-    {
-        uint32 mask = 1 << i;
-        if ((mask & mFlags) != 0)
-        {
-            if (i > 0 && !ss.str().empty())
-                ss << ", ";
-
-            ss << moveFlagsStr[i];
-        }
-    }
-
-
-    if (ss.str().empty())
-        ss << "NONE";
-
-    PSendSysMessage("Moveflags on target %s", ss.str().c_str());
-    return true;
-}
-
-bool ChatHandler::HandleDebugSplineFlags(char* /*args*/)
-{
-    Unit* target = getSelectedUnit();
-    if (!target)
-        return false;
-
-    const char* splineFlagsStr[32] =
-    {
-        "Done",                  // 0x00000001 (0)
-        "Falling",               // 0x00000002 (1)
-        "Unknown3",              // 0x00000004 (2)
-        "Unknown4",              // 0x00000008 (3)
-        "Unknown5",              // 0x00000010 (4)
-        "Unknown6",              // 0x00000020 (5)
-        "Unknown7",              // 0x00000040 (6)
-        "Unknown8",              // 0x00000080 (7)
-        "Runmode",               // 0x00000100 (8)
-        "Flying",                // 0x00000200 (9)
-        "No_Spline",             // 0x00000400 (10)
-        "Unknown12",             // 0x00000800 (11)
-        "Unknown13",             // 0x00001000 (12)
-        "Unknown14",             // 0x00002000 (13)
-        "Unknown15",             // 0x00004000 (14)
-        "Unknown16",             // 0x00008000 (15)
-        "Final_Point",           // 0x00010000 (16)
-        "Final_Target",          // 0x00020000 (17)
-        "Final_Angle",           // 0x00040000 (18)
-        "Unknown19",             // 0x00080000 (19)
-        "Cyclic",                // 0x00100000 (20)
-        "Enter_Cycle",           // 0x00200000 (21)
-        "Frozen",                // 0x00400000 (22)
-        "Unknown23",             // 0x00800000 (23)
-        "Unknown24",             // 0x01000000 (24)
-        "Unknown25",             // 0x02000000 (25)
-        "Unknown26",             // 0x04000000 (26)
-        "Unknown27",             // 0x08000000 (27)
-        "Unknown28",             // 0x10000000 (28)
-        "Unknown29",             // 0x20000000 (29)
-        "Unknown30",             // 0x40000000 (30)
-        "Unknown31"              // 0x80000000 (31)
-    };
-
-    std::stringstream ss;
-    uint32 mFlags = uint32(target->movespline->GetSplineFlags());
-    for (uint32 i = 0; i < 32; ++i)
-    {
-        uint32 mask = 1 << i;
-        if ((mask & mFlags) != 0)
-        {
-            if (i > 0 && !ss.str().empty())
-                ss << ", ";
-
-            ss << splineFlagsStr[i];
-        }
-    }
-
-    if (ss.str().empty())
-        ss << "NONE";
-
-    PSendSysMessage("SplineFlags on target %s", ss.str().c_str());
+    PSendSysMessage("Moveflags on target %u", target->m_movementInfo.GetMovementFlags());
     return true;
 }
 
