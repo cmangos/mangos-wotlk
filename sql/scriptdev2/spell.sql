@@ -54,6 +54,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (36921,'spell_vazruden_liquid_fire_script'),
 (30700,'spell_face_highest_threat'),
 (36153,'spell_soulbind'),
+(36460,'spell_ultra_deconsolodation_zapper'),
 (37851,'spell_tag_for_single_use'),
 (33985,'spell_tag_for_single_use'),
 (37896,'spell_to_infinity_and_above'),
