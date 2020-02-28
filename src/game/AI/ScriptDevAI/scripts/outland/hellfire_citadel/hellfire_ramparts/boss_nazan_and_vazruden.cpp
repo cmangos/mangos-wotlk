@@ -137,9 +137,11 @@ struct boss_vazruden_heraldAI : public CombatAI
         m_lastSeenPlayerGuid.Clear();
         m_vazrudenGuid.Clear();
 
-        m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
         m_creature->SetLevitate(true);
         m_creature->SetHover(true);
+        m_creature->SetCanFly(true);
         m_creature->SetImmobilizedState(false);
     }
 
@@ -196,9 +198,12 @@ struct boss_vazruden_heraldAI : public CombatAI
 
                     // Landing
                     // undo flying
-                    m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, 0);
+                    m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+                    m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_ALWAYS_STAND);
                     m_creature->SetLevitate(false);
                     m_creature->SetHover(false);
+                    m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
+                    m_creature->SetCanFly(false);
                     HandleAttackDelay();
                     break;
                 }
@@ -408,6 +413,19 @@ struct boss_vazrudenAI : public CombatAI
 
         if (m_instance)
             m_instance->SetData(TYPE_VAZRUDEN, DONE);
+
+        if (GetActionReadyStatus(VAZRUDEN_PHASE_2))
+            MakeNazanLand();
+    }
+
+    void MakeNazanLand()
+    {
+        if (m_instance)
+            if (Creature* nazan = m_instance->GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
+                if (boss_vazruden_heraldAI* nazanAI = static_cast<boss_vazruden_heraldAI*>(nazan->AI()))
+                    nazanAI->DoMoveToCombat();
+
+        SetActionReadyStatus(VAZRUDEN_PHASE_2, false);
     }
 
     void JustReachedHome() override
@@ -430,12 +448,7 @@ struct boss_vazrudenAI : public CombatAI
                 if (m_creature->GetHealthPercent() > 40.f)
                     return;
 
-                if (m_instance)
-                    if (Creature* nazan = m_instance->GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
-                        if (boss_vazruden_heraldAI* nazanAI = static_cast<boss_vazruden_heraldAI*>(nazan->AI()))
-                            nazanAI->DoMoveToCombat();
-
-                SetActionReadyStatus(action, false);
+                MakeNazanLand();
                 break;
             }
             case VAZRUDEN_REVENGE:
