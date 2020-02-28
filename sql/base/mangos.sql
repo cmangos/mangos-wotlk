@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14005_01_mangos_dbscript_priority_miliseconds` bit(1) DEFAULT NULL
+  `required_14006_01_mangos_graveyard_map_links` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1942,10 +1942,11 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `game_graveyard_zone`;
 CREATE TABLE `game_graveyard_zone` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `ghost_zone` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `ghost_loc` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `link_kind` tinyint unsigned NOT NULL DEFAULT '0',
   `faction` smallint(5) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`,`ghost_zone`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Trigger System';
+  PRIMARY KEY (`id`,`ghost_loc`, `link_kind`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Graveyard link definitions';
 
 --
 -- Dumping data for table `game_graveyard_zone`
