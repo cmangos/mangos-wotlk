@@ -2479,12 +2479,11 @@ GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameo
     {
         if (uint32(go->GetGoType()) == gameobject_type || gameobject_type == MAX_GAMEOBJECT_TYPE)
         {
-            float maxdist = go->GetInteractionDistance();
-            if (go->IsWithinDistInMap(this, maxdist) && go->IsSpawned())
+            if (go->IsAtInteractDistance(this) && go->IsSpawned())
                 return go;
 
-            sLog.outError("GetGameObjectIfCanInteractWith: GameObject '%s' [GUID: %u] is too far away from player %s [GUID: %u] to be used by him (distance=%f, maximal %f is allowed)",
-                          go->GetGOInfo()->name,  go->GetGUIDLow(), GetName(), GetGUIDLow(), go->GetDistance(this), maxdist);
+            sLog.outError("GetGameObjectIfCanInteractWith: GameObject '%s' [GUID: %u] is too far away from player %s [GUID: %u] to be used by him",
+                go->GetGOInfo()->name, go->GetGUIDLow(), GetName(), GetGUIDLow());
         }
     }
     return nullptr;
