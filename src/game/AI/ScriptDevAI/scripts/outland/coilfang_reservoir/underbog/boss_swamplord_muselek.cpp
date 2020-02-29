@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "underbog.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -56,6 +56,9 @@ enum
 
 enum MuselekActions
 {
+    MUSELEK_TRAP_ONE,
+    MUSELEK_TRAP_TWO,
+    MUSELEK_AIMED_SHOT,
     MUSELEK_ACTION_KNOCK_AWAY,
     MUSELEK_ACTION_RAPTOR_STRIKE,
     MUSELEK_ACTION_BEAR_COMMAND,
@@ -64,65 +67,33 @@ enum MuselekActions
     MUSELEK_ACTION_MAX,
 };
 
-struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
+struct boss_swamplord_muselekAI : public RangedCombatAI
 {
-    boss_swamplord_muselekAI(Creature* creature) : ScriptedAI(creature), CombatActions(MUSELEK_ACTION_MAX)
+    boss_swamplord_muselekAI(Creature* creature) : RangedCombatAI(creature, MUSELEK_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (ScriptedInstance*)creature->GetInstanceData();
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
-        AddCombatAction(MUSELEK_ACTION_KNOCK_AWAY, 0u);
-        AddCombatAction(MUSELEK_ACTION_RAPTOR_STRIKE, 0u);
-        AddCombatAction(MUSELEK_ACTION_BEAR_COMMAND, 0u);
-        AddCombatAction(MUSELEK_ACTION_RANGED_ATTACK, 0u);
-        AddCombatAction(MUSELEK_ACTION_DETERRENCE, 0u);
-        Reset();
+        AddTimerlessCombatAction(MUSELEK_TRAP_ONE, true);
+        AddTimerlessCombatAction(MUSELEK_TRAP_TWO, true);
+        AddTimerlessCombatAction(MUSELEK_AIMED_SHOT, true);
+        AddCombatAction(MUSELEK_ACTION_KNOCK_AWAY, 25000, 30000);
+        AddCombatAction(MUSELEK_ACTION_RAPTOR_STRIKE, 1500, 4000);
+        AddCombatAction(MUSELEK_ACTION_BEAR_COMMAND, 8000, 12000);
+        AddCombatAction(MUSELEK_ACTION_RANGED_ATTACK, 500, 1250);
+        AddCombatAction(MUSELEK_ACTION_DETERRENCE, true);
+        SetRangedMode(true, 30.f, TYPE_PROXIMITY);
+        AddMainSpell(SPELL_SHOOT);
+        AddMainSpell(SPELL_MULTI_SHOT);
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
     bool m_isRegularMode;
-    bool m_isInAimShotSequence;
-    bool m_firstTrapThrown;
-    bool m_secondTrapThrown;
-
-    float m_fMinRange = 8.f;
-    float m_fMaxRange = 30.f;
-
-    ObjectGuid m_AimedShotTarget;
 
     void Reset() override
     {
-        for (uint32 i = 0; i < MUSELEK_ACTION_MAX; ++i)
-            SetActionReadyStatus(i, false);
-
-        ResetTimer(MUSELEK_ACTION_KNOCK_AWAY, GetInitialActionTimer(MUSELEK_ACTION_KNOCK_AWAY));
-        ResetTimer(MUSELEK_ACTION_RAPTOR_STRIKE, GetInitialActionTimer(MUSELEK_ACTION_RAPTOR_STRIKE));
-        ResetTimer(MUSELEK_ACTION_BEAR_COMMAND, GetInitialActionTimer(MUSELEK_ACTION_BEAR_COMMAND));
-        ResetTimer(MUSELEK_ACTION_RANGED_ATTACK, GetInitialActionTimer(MUSELEK_ACTION_RANGED_ATTACK));
-        ResetTimer(MUSELEK_ACTION_DETERRENCE, GetInitialActionTimer(MUSELEK_ACTION_DETERRENCE));
-
-        DisableCombatAction(MUSELEK_ACTION_DETERRENCE);
-
-        m_isInAimShotSequence = false;
-        m_firstTrapThrown  = false;
-        m_secondTrapThrown = false;
-
-        m_AimedShotTarget.Clear();
+        CombatAI::Reset();
 
         SetCombatScriptStatus(false);
         SetCombatMovement(true);
-    }
-
-    uint32 GetInitialActionTimer(const uint32 action) const
-    {
-        switch (action)
-        {
-            case MUSELEK_ACTION_KNOCK_AWAY: return urand(25000, 30000);
-            case MUSELEK_ACTION_RAPTOR_STRIKE: return urand(1500, 4000);
-            case MUSELEK_ACTION_BEAR_COMMAND: return urand(8000, 12000);
-            case MUSELEK_ACTION_RANGED_ATTACK: return urand(500, 1250);
-            case MUSELEK_ACTION_DETERRENCE: return urand(15000, 20000);
-            default: return 0; // never occurs but for compiler
-        }
     }
 
     uint32 GetSubsequentActionTimer(const uint32 action) const
@@ -138,119 +109,93 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
         }
     }
 
-    void ExecuteActions()
+    void ExecuteAction(uint32 action) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < MUSELEK_ACTION_MAX; ++i)
+        switch (action)
         {
-            if (GetActionReadyStatus(i))
+            case MUSELEK_TRAP_ONE:
             {
-                switch (i)
+                if (m_creature->GetHealthPercent() < 70.f)
                 {
-                    case MUSELEK_ACTION_KNOCK_AWAY:
-                    {
-                        //DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KNOCK_AWAY, TRIGGERED_NONE);
-                        ResetTimer(i, GetSubsequentActionTimer(i));
-                        SetActionReadyStatus(i, false);
-                        continue;
-                    }
-                    case MUSELEK_ACTION_RAPTOR_STRIKE:
-                    {
-                        DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RAPTOR_STRIKE, TRIGGERED_NONE);
-                        ResetTimer(i, GetSubsequentActionTimer(i));
-                        SetActionReadyStatus(i, false);
-                        continue;
-                    }
-                    case MUSELEK_ACTION_BEAR_COMMAND:
-                    {
-                        if (Creature *claw = m_pInstance->GetSingleCreatureFromStorage(NPC_CLAW))
-                            if (claw->IsAlive() && claw->GetEntry() != NPC_CLAW_DRUID_FORM)
-                            {
-                                uint8 claw_spell = urand(0, 2);
-
-                                switch (claw_spell)
-                                {
-                                    case 0:
-                                        claw->AI()->DoCastSpellIfCan(claw, SPELL_MAUL, TRIGGERED_NONE);
-                                        break;
-                                    case 1:
-                                        claw->AI()->DoCastSpellIfCan(claw, SPELL_ROAR, TRIGGERED_NONE);
-                                        break;
-                                    default:
-                                        break;
-                                }
-
-                                claw->AI()->DoCastSpellIfCan(claw, SPELL_FRENZY, TRIGGERED_NONE);
-                                DoScriptText(SAY_COMMAND, m_creature);
-                            }
-
-                        ResetTimer(i, GetSubsequentActionTimer(i));
-                        SetActionReadyStatus(i, false);
-                        continue;
-                    }
-                    case MUSELEK_ACTION_RANGED_ATTACK:
-                    {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, SPELL_SHOOT, SELECT_FLAG_IN_LOS))
-                        {
-                            bool shoot = false;
-
-                            if (m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT)) // Has No Movement Flag
-                            {
-                                if (m_creature->GetDistance(pTarget) < m_fMinRange
-                                    || m_creature->GetDistance(pTarget) > m_fMaxRange)
-                                    SetCombatMovement(true);
-                                else
-                                    shoot = true;
-                            }
-                            else if (m_creature->GetDistance(pTarget) >= m_fMinRange) // Is Chasing
-                                shoot = true;
-
-                            if (shoot)
-                            {
-                                uint32 RangedSpell = urand(0, 2) ? SPELL_SHOOT : SPELL_MULTI_SHOT; // 66% shoot, 33% multishot
-
-                                SetCombatMovement(false);
-                                DoCastSpellIfCan(pTarget, RangedSpell, TRIGGERED_NONE);
-                            }
-                        }
-                        else if(m_creature->hasUnitState(UNIT_STAT_NO_COMBAT_MOVEMENT)) // Has No Movement Flag but no valid target
-                            SetCombatMovement(true);
-
-                        ResetTimer(i, GetSubsequentActionTimer(i));
-                        SetActionReadyStatus(i, false);
-                        continue;
-                    }
-                    case MUSELEK_ACTION_DETERRENCE:
-                    {
-                        DoCastSpellIfCan(m_creature, SPELL_DETERRENCE, TRIGGERED_NONE);
-                        ResetTimer(i, GetSubsequentActionTimer(i));
-                        SetActionReadyStatus(i, false);
-                        continue;
-                    }
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THROW_FREEZING_TRAP, TRIGGERED_NONE);
+                    DoCastSpellIfCan(nullptr, SPELL_HUNTERS_MARK);
+                    DistanceYourself();
+                    ResetTimer(MUSELEK_ACTION_DETERRENCE, urand(15000, 20000));
+                    SetActionReadyStatus(action, false);
                 }
+                break;
             }
-        }
-    }
-    
-    void DoBeginAimedShotSequence()
-    {
-        m_isInAimShotSequence = true;
-        DistanceYourself();
-    }
+            case MUSELEK_TRAP_TWO:
+            {
+                if (m_creature->GetHealthPercent() < 30.f)
+                {
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THROW_FREEZING_TRAP, TRIGGERED_NONE);
+                    DoCastSpellIfCan(nullptr, SPELL_HUNTERS_MARK);
+                    DistanceYourself();
+                    SetActionReadyStatus(action, false);
+                }
+                break;
+            }
+            case MUSELEK_AIMED_SHOT:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_AIMED_SHOT) == CAST_OK)
+                    SetActionReadyStatus(action, false);
+                break;
+            }
+            case MUSELEK_ACTION_KNOCK_AWAY:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case MUSELEK_ACTION_RAPTOR_STRIKE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RAPTOR_STRIKE) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case MUSELEK_ACTION_BEAR_COMMAND:
+            {
+                if (Creature* claw = m_instance->GetSingleCreatureFromStorage(NPC_CLAW))
+                    if (claw->IsAlive() && claw->GetEntry() != NPC_CLAW_DRUID_FORM)
+                    {
+                        uint8 claw_spell = urand(0, 2);
 
-    void DistanceYourself()
-    {
-        if (!m_isInAimShotSequence)
-            return;
+                        switch (claw_spell)
+                        {
+                            case 0:
+                                claw->AI()->DoCastSpellIfCan(claw, SPELL_MAUL);
+                                break;
+                            case 1:
+                                claw->AI()->DoCastSpellIfCan(claw, SPELL_ROAR);
+                                break;
+                            default:
+                                break;
+                        }
 
-        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_AIMED_SHOT, SELECT_FLAG_PLAYER))
-        {
-            m_AimedShotTarget = pTarget->GetObjectGuid();
-            DoCastSpellIfCan(pTarget, SPELL_HUNTERS_MARK); // this casts on everyone?
-            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(m_creature->GetVictim(), true) * 3;
-            m_creature->GetMotionMaster()->DistanceYourself(distance);
+                        claw->AI()->DoCastSpellIfCan(claw, SPELL_FRENZY);
+                        DoScriptText(SAY_COMMAND, m_creature);
+                    }
+
+                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case MUSELEK_ACTION_RANGED_ATTACK:
+            {
+                if (!GetCurrentRangedMode())
+                    return;
+
+                uint32 RangedSpell = urand(0, 2) ? SPELL_SHOOT : SPELL_MULTI_SHOT; // 66% shoot, 33% multishot
+                if (DoCastSpellIfCan(m_creature->GetVictim(), RangedSpell) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case MUSELEK_ACTION_DETERRENCE:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_DETERRENCE) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
         }
     }
 
@@ -259,29 +204,19 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
         SetCombatScriptStatus(true);
     }
     
-    void DistancingEnded()
+    void DistancingEnded() override
     {
-        m_isInAimShotSequence = false;
-        SetCombatScriptStatus(false);
-
-        ResetTimer(MUSELEK_ACTION_RANGED_ATTACK, GetSubsequentActionTimer(MUSELEK_ACTION_RANGED_ATTACK));
-        SetActionReadyStatus(MUSELEK_ACTION_RANGED_ATTACK, false);
-
-        if (Unit* pTarget = m_creature->GetMap()->GetPlayer(m_AimedShotTarget))
-            if (pTarget->IsAlive())
-                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_AIMED_SHOT, TRIGGERED_NONE);
+        RangedCombatAI::DistancingEnded();
+        ResetCombatAction(MUSELEK_ACTION_RANGED_ATTACK, GetSubsequentActionTimer(MUSELEK_ACTION_RANGED_ATTACK));
+        SetActionReadyStatus(MUSELEK_AIMED_SHOT, false);
     }
 
     void SpellHitTarget(Unit* target, const SpellEntry* spell) override 
     {
         if (spell->Id == SPELL_FREEZING_TRAP_EFFECT)
-        {
-            if (!m_isInAimShotSequence)
-                DoBeginAimedShotSequence();
-            if (Creature *claw = m_pInstance->GetSingleCreatureFromStorage(NPC_CLAW))
+            if (Creature *claw = m_instance->GetSingleCreatureFromStorage(NPC_CLAW))
                 if (claw->IsAlive() && claw->GetEntry() != NPC_CLAW_DRUID_FORM)
                     claw->getThreatManager().modifyThreatPercent(target, (0 - urand(30, 99))); // Freezing trap messes with bear aggro
-        }
     }
 
     void Aggro(Unit* /*who*/)
@@ -303,14 +238,14 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
 
     void JustDied(Unit* /*killer*/) override
     {
-        if (Creature *claw = m_pInstance->GetSingleCreatureFromStorage(NPC_CLAW))
+        if (Creature* claw = m_instance->GetSingleCreatureFromStorage(NPC_CLAW))
             m_creature->CastSpell(claw, SPELL_NOTIFY_OF_DEATH, TRIGGERED_NONE); // TODO: what does this do?
         DoScriptText(SAY_DEATH, m_creature);
     }
 
     void JustReachedHome() override 
     {
-        if (Creature *claw = m_pInstance->GetSingleCreatureFromStorage(NPC_CLAW))
+        if (Creature *claw = m_instance->GetSingleCreatureFromStorage(NPC_CLAW))
             if (claw->GetEntry() == NPC_CLAW_DRUID_FORM)
             {
                 claw->ForcedDespawn();
@@ -325,49 +260,12 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
         else
             DoScriptText(SAY_SLAY_2, m_creature);
     }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (!m_isInAimShotSequence)
-        {
-            if (!m_firstTrapThrown)
-            {
-                if (m_creature->GetHealthPercent() < 70.f)
-                {
-                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THROW_FREEZING_TRAP, TRIGGERED_NONE);
-                    ResetTimer(MUSELEK_ACTION_DETERRENCE, GetInitialActionTimer(MUSELEK_ACTION_DETERRENCE));
-                    m_firstTrapThrown = true;
-                }
-            }
-            else if (!m_secondTrapThrown)
-            {
-                if (m_creature->GetHealthPercent() < 30.f)
-                {
-                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THROW_FREEZING_TRAP, TRIGGERED_NONE);
-                    m_secondTrapThrown = true;
-                }
-            }
-
-            UpdateTimers(diff, m_creature->IsInCombat());
-            ExecuteActions();
-        }
-
-        DoMeleeAttackIfReady();
-    }
 };
-
-UnitAI* GetAI_boss_swamplord_muselek(Creature* pCreature)
-{
-    return new boss_swamplord_muselekAI(pCreature);
-}
 
 void AddSC_boss_swamplord_muselek()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_swamplord_muselek";
-    pNewScript->GetAI = &GetAI_boss_swamplord_muselek;
+    pNewScript->GetAI = &GetNewAIInstance<boss_swamplord_muselekAI>;
     pNewScript->RegisterSelf();
 }
