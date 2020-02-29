@@ -56,7 +56,7 @@ struct boss_black_stalkerAI : public CombatAI
         AddCombatAction(BLACK_STALKER_ACTION_STATIC_CHARGE, 33200, 39200);
         AddCombatAction(BLACK_STALKER_ACTION_CHAIN_LIGHTNING, 0, 3000);
         if (!m_isRegularMode)
-            AddCombatAction(BLACK_STALKER_ACTION_SUMMON_SPORE_STRIDER, 10000, 15000);
+            AddCombatAction(BLACK_STALKER_ACTION_SUMMON_SPORE_STRIDER, 20000, 40000);
         AddCustomAction(BLACK_STALKER_ACTION_SUSPENSION, true, [&]()
         {
             if (Player* player = m_creature->GetMap()->GetPlayer(m_suspensionGuid))
@@ -89,7 +89,7 @@ struct boss_black_stalkerAI : public CombatAI
             case BLACK_STALKER_ACTION_LEVITATE: return 20500;
             case BLACK_STALKER_ACTION_STATIC_CHARGE: return urand(14000, 16000);
             case BLACK_STALKER_ACTION_CHAIN_LIGHTNING: return urand(12000, 29500);
-            case BLACK_STALKER_ACTION_SUMMON_SPORE_STRIDER: return urand(10000, 15000);
+            case BLACK_STALKER_ACTION_SUMMON_SPORE_STRIDER: return urand(20000, 30000);
             default: return 0; // never occurs but for compiler
         }
     }
