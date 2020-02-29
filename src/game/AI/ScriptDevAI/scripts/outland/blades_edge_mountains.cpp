@@ -1443,8 +1443,8 @@ struct npc_bird_spiritAI : public ScriptedAI
 
     void JustRespawned() override
     {
-        Creature* taskmaster = GetClosestCreatureWithEntry(m_creature, NPC_TASKMASTER, 15.f);
-        if (taskmaster) // should always be valid - spell checks for it
+        Creature* taskmaster = GetClosestCreatureWithEntry(m_creature, NPC_TASKMASTER, 45.f);
+        if (taskmaster)
         {
             m_creature->SetWalk(false, true);
             m_taskmasterGuid = taskmaster->GetObjectGuid();
