@@ -59,6 +59,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (33985,'spell_tag_for_single_use'),
 (37896,'spell_to_infinity_and_above'),
 (38606,'spell_exorcism_feather'),
+(38640,'spell_koi_koi_death'),
 (38915,'spell_mental_interference'),
 (40186,'spell_summon_blossom_move_target'),
 (40251,'spell_shadow_of_death'),
