@@ -33,7 +33,6 @@
 #include "Spells/SpellMgr.h"
 #include "Pools/PoolManager.h"
 #include "GameEvents/GameEventMgr.h"
-#include "AuctionHouseBot/AuctionHouseBot.h"
 
 // Supported shift-links (client generated and server side)
 // |color|Hachievement:achievement_id:player_guid_hex:completed_0_1:mm:dd:yy_from_2000:criteriaMask1:criteriaMask2:criteriaMask3:criteriaMask4|h[name]|h|r
@@ -104,6 +103,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,             0,                  true,  nullptr,                                           "", nullptr }
     };
 
+#ifdef BUILD_AHBOT
     static ChatCommand ahbotCommandTable[] =
     {
         { "rebuild",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotRebuildCommand,        "", nullptr },
@@ -111,6 +111,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "status",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleAHBotStatusCommand,         "", nullptr },
         { nullptr,             0,                  true,  nullptr,                                           "", nullptr }
     };
+#endif
 
     static ChatCommand auctionCommandTable[] =
     {
@@ -862,7 +863,9 @@ ChatCommand* ChatHandler::getCommandTable()
         { "account",        SEC_PLAYER,         true,  nullptr,                                           "", accountCommandTable  },
         { "achievement",    SEC_ADMINISTRATOR,  true,  nullptr,                                           "", achievementCommandTable },
         { "auction",        SEC_ADMINISTRATOR,  false, nullptr,                                           "", auctionCommandTable  },
+#ifdef BUILD_AHBOT
         { "ahbot",          SEC_ADMINISTRATOR,  true,  nullptr,                                           "", ahbotCommandTable    },
+#endif
         { "cast",           SEC_ADMINISTRATOR,  false, nullptr,                                           "", castCommandTable     },
         { "character",      SEC_GAMEMASTER,     true,  nullptr,                                           "", characterCommandTable},
         { "channel",        SEC_MODERATOR,      false, nullptr,                                        "", channelCommandTable  },
