@@ -675,6 +675,8 @@ class ObjectMgr
             return nullptr;
         }
 
+        CreatureTemplateSpells const* GetCreatureTemplateSpellSet(uint32 entry, uint32 setId) const;
+
         // Static wrappers for various accessors
         static GameObjectInfo const* GetGameObjectInfo(uint32 id);                  ///< Wrapper for sGOStorage.LookupEntry
         static Player* GetPlayer(const char* name);         ///< Wrapper for ObjectAccessor::FindPlayerByName
@@ -1348,6 +1350,9 @@ class ObjectMgr
         std::map<int32 /*minEntryOfBracket*/, uint32 /*count*/> m_loadedStringCount;
         GossipMenuItemsLocaleMap mGossipMenuItemsLocaleMap;
         PointOfInterestLocaleMap mPointOfInterestLocaleMap;
+
+        std::unordered_map<uint32, std::unordered_map<uint32, CreatureTemplateSpells>> m_creatureTemplateSpells;
+
         DungeonEncounterMap m_DungeonEncounters;
 
         QuestgiverGreetingMap m_questgiverGreetingMap[QUESTGIVER_TYPE_MAX];

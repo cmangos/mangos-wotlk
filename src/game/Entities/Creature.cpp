@@ -521,13 +521,7 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
         }
     }
 
-    // Try difficulty dependent version before falling back to base entry
-    CreatureTemplateSpells const* templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(GetCreatureInfo()->Entry);
-    if (!templateSpells)
-        templateSpells = sCreatureTemplateSpellsStorage.LookupEntry<CreatureTemplateSpells>(GetEntry());
-    if (templateSpells)
-        for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
-            m_spells[i] = templateSpells->spells[i];
+    UpdateSpellSet(0); // by default always 0
 
     SetVehicleId(GetCreatureInfo()->VehicleTemplateId, 0);
 
@@ -2456,6 +2450,17 @@ bool Creature::HasSpell(uint32 spellID) const
         if (spellID == m_spells[i])
             break;
     return i < CREATURE_MAX_SPELLS;                         // break before end of iteration of known spells
+}
+
+void Creature::UpdateSpellSet(uint32 spellSet)
+{
+    // Try difficulty dependent version before falling back to base entry
+    CreatureTemplateSpells const* templateSpells = sObjectMgr.GetCreatureTemplateSpellSet(GetCreatureInfo()->Entry, spellSet);
+    if (!templateSpells)
+        templateSpells = sObjectMgr.GetCreatureTemplateSpellSet(GetEntry(), spellSet);
+    if (templateSpells)
+        for (int i = 0; i < CREATURE_MAX_SPELLS; ++i)
+            m_spells[i] = templateSpells->spells[i];
 }
 
 time_t Creature::GetRespawnTimeEx() const

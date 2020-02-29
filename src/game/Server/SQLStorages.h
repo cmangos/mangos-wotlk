@@ -41,7 +41,6 @@ extern SQLStorage sWorldSafeLocsStore;
 
 extern SQLHashStorage sGOStorage;
 extern SQLHashStorage sGameObjectDataAddonStorage;
-extern SQLHashStorage sCreatureTemplateSpellsStorage;
 
 extern SQLMultiStorage sVehicleAccessoryStorage;
 extern SQLMultiStorage sSpellScriptTargetStorage;
