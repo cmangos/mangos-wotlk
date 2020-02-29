@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -165,6 +166,18 @@ struct mob_underbog_mushroomAI : public ScriptedAI
     }
 };
 
+struct DespawnMushrooms : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        static_cast<Creature*>(target)->ForcedDespawn();
+    }
+};
+
 void AddSC_boss_hungarfen()
 {
     Script* pNewScript = new Script;
@@ -176,4 +189,6 @@ void AddSC_boss_hungarfen()
     pNewScript->Name = "mob_underbog_mushroom";
     pNewScript->GetAI = &GetNewAIInstance<mob_underbog_mushroomAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<DespawnMushrooms>("spell_despawn_underbog_mushrooms");
 }
