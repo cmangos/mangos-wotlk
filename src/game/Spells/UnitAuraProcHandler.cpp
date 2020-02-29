@@ -1062,7 +1062,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 {
                     // Cast finish spell at last charge
                     if (triggeredByAura->GetHolder()->GetAuraCharges() > 1)
-                        return SPELL_AURA_PROC_FAILED;
+                        return SPELL_AURA_PROC_OK;
 
                     target = this;
                     triggered_spell_id = 33494;
