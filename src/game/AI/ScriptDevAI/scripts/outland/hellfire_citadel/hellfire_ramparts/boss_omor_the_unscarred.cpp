@@ -58,9 +58,9 @@ enum OmorActions
     OMOR_PULL_BACK,
 };
 
-struct boss_omor_the_unscarredAI : public CombatAI
+struct boss_omor_the_unscarredAI : public RangedCombatAI
 {
-    boss_omor_the_unscarredAI(Creature* creature) : CombatAI(creature, OMOR_ACTION_MAX), m_inRegularMode(creature->GetMap()->IsRegularDifficulty())
+    boss_omor_the_unscarredAI(Creature* creature) : RangedCombatAI(creature, OMOR_ACTION_MAX), m_inRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         AddTimerlessCombatAction(OMOR_ENABLE_SHIELD, true);
         AddCombatAction(OMOR_DEMONIC_SHIELD, true);
@@ -70,7 +70,7 @@ struct boss_omor_the_unscarredAI : public CombatAI
         AddCombatAction(OMOR_SHADOW_BOLT, 0u);
         AddCustomAction(OMOR_PULL_BACK, true, [&]() {HandlePullBack(); });
         SetCombatMovement(false);
-        Reset();
+        SetRangedMode(true, 100.f, TYPE_PROXIMITY);
     }
 
     bool m_inRegularMode;
@@ -201,7 +201,7 @@ struct boss_omor_the_unscarredAI : public CombatAI
                     if (!m_creature->CanReachWithMeleeAttack(target))
                     {
                         if (DoCastSpellIfCan(target, m_inRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
-                            ResetCombatAction(action, urand(3000, 4000));
+                            ResetCombatAction(action, GetCurrentRangedMode() ? urand(3000, 4000) : urand(6000, 10000));
                     }
                 }
                 break;
