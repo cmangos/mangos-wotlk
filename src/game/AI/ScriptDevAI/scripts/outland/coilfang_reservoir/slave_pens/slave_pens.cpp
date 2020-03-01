@@ -71,7 +71,7 @@ void instance_slave_pens::Update(const uint32 diff)
             {
                 if (quagmirran->IsAlive() && !quagmirran->IsInCombat())
                 {
-                    for (auto data : instance->GetPlayers())
+                    for (const auto& data : instance->GetPlayers())
                     {
                         if (data.getSource()->GetDistance(quagmirran, true, DIST_CALC_NONE) < 140.f * 140.f)
                         {
