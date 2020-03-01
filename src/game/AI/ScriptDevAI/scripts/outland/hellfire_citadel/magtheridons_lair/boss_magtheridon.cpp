@@ -130,6 +130,8 @@ struct boss_magtheridonAI : public ScriptedAI
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
         m_creature->GetCombatManager().SetLeashingDisable(true);
+
+        SetReactState(REACT_PASSIVE);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
@@ -138,12 +140,13 @@ struct boss_magtheridonAI : public ScriptedAI
         {
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            m_creature->GetCombatManager().SetLeashingDisable(false);
 
             DoScriptText(EMOTE_FREED, m_creature);
             DoScriptText(SAY_AGGRO, m_creature);
 
             m_creature->RemoveAurasDueToSpell(SPELL_SHADOW_CAGE_DUMMY);
+
+            SetReactState(REACT_AGGRESSIVE);
 
             DoResetThreat(); // clear threat at start
         }
@@ -178,11 +181,18 @@ struct boss_magtheridonAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        // IsStunned already handled in SelectHostileTarget
-        if (m_creature->HasAura(SPELL_SHADOW_CAGE_DUMMY) /*|| m_creature->IsStunned()*/ || m_creature->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
-            return;
+        if (m_quakeStunTimer)
+        {
+            if (m_quakeStunTimer <= uiDiff)
+            {
+                m_creature->SetImmobilizedState(false, true);
+                m_quakeStunTimer = 0;
+            }
+            else
+                m_quakeStunTimer -= uiDiff;
+        }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+        if (!m_creature->SelectHostileTarget())
             return;
 
         if (m_uiBerserkTimer)
@@ -197,17 +207,6 @@ struct boss_magtheridonAI : public ScriptedAI
             }
             else
                 m_uiBerserkTimer -= uiDiff;
-        }
-
-        if (m_quakeStunTimer)
-        {
-            if (m_quakeStunTimer <= uiDiff)
-            {
-                m_creature->SetImmobilizedState(false, true);
-                m_quakeStunTimer = 0;
-            }
-            else
-                m_quakeStunTimer -= uiDiff;
         }
 
         // Transition to phase 3
