@@ -1739,7 +1739,7 @@ Loot::Loot(Player* player, GameObject* gameObject, LootType type) :
     // And permit out of range GO with no owner in case fishing hole
     if ((type != LOOT_FISHINGHOLE &&
             ((type != LOOT_FISHING && type != LOOT_FISHING_FAIL) || gameObject->GetOwnerGuid() != player->GetObjectGuid()) &&
-            !gameObject->IsWithinDistInMap(player, INTERACTION_DISTANCE)))
+            !gameObject->IsAtInteractDistance(player)))
     {
         sLog.outError("Loot::CreateLoot> cannot create game object loot, basic check failed for gameobject %u!", gameObject->GetEntry());
         return;
