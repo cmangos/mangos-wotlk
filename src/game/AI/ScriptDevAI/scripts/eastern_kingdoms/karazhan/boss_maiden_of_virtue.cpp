@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "karazhan.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -50,42 +50,17 @@ enum MaidenOfVirtueActions
     MAIDEN_ACTION_MAX,
 };
 
-struct boss_maiden_of_virtueAI : public ScriptedAI, public CombatActions
+struct boss_maiden_of_virtueAI : public CombatAI
 {
-    boss_maiden_of_virtueAI(Creature* pCreature) : ScriptedAI(pCreature), CombatActions(MAIDEN_ACTION_MAX)
+    boss_maiden_of_virtueAI(Creature* creature) : CombatAI(creature, MAIDEN_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
-        AddCombatAction(MAIDEN_ACTION_REPENTANCE, 0u);
-        AddCombatAction(MAIDEN_ACTION_HOLY_FIRE, 0u);
-        AddCombatAction(MAIDEN_ACTION_HOLY_WRATH, 0u);
-        AddCombatAction(MAIDEN_ACTION_HOLY_GROUND, 0u);
-        Reset();
+        AddCombatAction(MAIDEN_ACTION_REPENTANCE, 42000, 44000);
+        AddCombatAction(MAIDEN_ACTION_HOLY_FIRE, 8000, 14000);
+        AddCombatAction(MAIDEN_ACTION_HOLY_WRATH, 15000, 25000);
+        AddCombatAction(MAIDEN_ACTION_HOLY_GROUND, 2000u);
     }
 
-    ScriptedInstance* m_pInstance;
-
-    void Reset() override
-    {
-        for (uint32 i = 0; i < MAIDEN_ACTION_MAX; ++i)
-            SetActionReadyStatus(i, false);
-
-        ResetTimer(MAIDEN_ACTION_REPENTANCE, GetInitialActionTimer(MAIDEN_ACTION_REPENTANCE));
-        ResetTimer(MAIDEN_ACTION_HOLY_FIRE, GetInitialActionTimer(MAIDEN_ACTION_HOLY_FIRE));
-        ResetTimer(MAIDEN_ACTION_HOLY_WRATH, GetInitialActionTimer(MAIDEN_ACTION_HOLY_WRATH));
-        ResetTimer(MAIDEN_ACTION_HOLY_GROUND, GetInitialActionTimer(MAIDEN_ACTION_HOLY_GROUND));
-    }
-
-    uint32 GetInitialActionTimer(uint32 id)
-    {
-        switch (id)
-        {
-            case MAIDEN_ACTION_REPENTANCE: return urand(42000, 44000);
-            case MAIDEN_ACTION_HOLY_FIRE: return urand(8000, 14000);
-            case MAIDEN_ACTION_HOLY_WRATH: return urand(15000, 25000);
-            case MAIDEN_ACTION_HOLY_GROUND: return 2000;
-            default: return 0; // never occurs but for compiler
-        }
-    }
+    ScriptedInstance* m_instance;
 
     uint32 GetSubsequentActionTimer(uint32 id)
     {
@@ -99,54 +74,41 @@ struct boss_maiden_of_virtueAI : public ScriptedAI, public CombatActions
         }
     }
 
-    void ExecuteActions() override
+    void ExecuteAction(uint32 action) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < MAIDEN_ACTION_MAX; ++i)
+        switch (action)
         {
-            if (GetActionReadyStatus(i))
+            case MAIDEN_ACTION_REPENTANCE:
             {
-                switch (i)
-                {
-                    case MAIDEN_ACTION_REPENTANCE:
-                    {
-                        DoCastSpellIfCan(nullptr, SPELL_REPENTANCE);
-                        DoScriptText(urand(0, 1) ? SAY_REPENTANCE1 : SAY_REPENTANCE2, m_creature);
-                        ResetTimer(i, GetSubsequentActionTimer(i));
-                        SetActionReadyStatus(i, false);
-                        continue;
-                    }
-                    case MAIDEN_ACTION_HOLY_FIRE:
-                    {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_PLAYER))
-                            DoCastSpellIfCan(target, SPELL_HOLYFIRE);
-                        ResetTimer(i, GetSubsequentActionTimer(i));
-                        SetActionReadyStatus(i, false);
-                        continue;
-                    }
-                    case MAIDEN_ACTION_HOLY_WRATH:
-                    {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYWRATH, SELECT_FLAG_PLAYER))
-                            DoCastSpellIfCan(target, SPELL_HOLYWRATH);
-                        ResetTimer(i, GetSubsequentActionTimer(i));
-                        SetActionReadyStatus(i, false);
-                        continue;
-                    }
-                    case MAIDEN_ACTION_HOLY_GROUND:
-                    {
-                        DoCastSpellIfCan(nullptr, SPELL_HOLYGROUND);
-                        ResetTimer(i, GetSubsequentActionTimer(i));
-                        SetActionReadyStatus(i, false);
-                        continue;
-                    }
-                }
+                DoCastSpellIfCan(nullptr, SPELL_REPENTANCE);
+                DoScriptText(urand(0, 1) ? SAY_REPENTANCE1 : SAY_REPENTANCE2, m_creature);
+                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case MAIDEN_ACTION_HOLY_FIRE:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_PLAYER))
+                    DoCastSpellIfCan(target, SPELL_HOLYFIRE);
+                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case MAIDEN_ACTION_HOLY_WRATH:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYWRATH, SELECT_FLAG_PLAYER))
+                    DoCastSpellIfCan(target, SPELL_HOLYWRATH);
+                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
+            }
+            case MAIDEN_ACTION_HOLY_GROUND:
+            {
+                DoCastSpellIfCan(nullptr, SPELL_HOLYGROUND);
+                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
             }
         }
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         switch (urand(0, 5)) // 50% chance to say something out of 3 texts
         {
@@ -156,49 +118,33 @@ struct boss_maiden_of_virtueAI : public ScriptedAI, public CombatActions
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAIDEN, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_MAIDEN, DONE);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAIDEN, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_MAIDEN, IN_PROGRESS);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAIDEN, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        UpdateTimers(uiDiff, m_creature->IsInCombat());
-        ExecuteActions();
-
-        DoMeleeAttackIfReady();
+        if (m_instance)
+            m_instance->SetData(TYPE_MAIDEN, FAIL);
     }
 };
-
-UnitAI* GetAI_boss_maiden_of_virtue(Creature* pCreature)
-{
-    return new boss_maiden_of_virtueAI(pCreature);
-}
 
 void AddSC_boss_maiden_of_virtue()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_maiden_of_virtue";
-    pNewScript->GetAI = &GetAI_boss_maiden_of_virtue;
+    pNewScript->GetAI = &GetNewAIInstance<boss_maiden_of_virtueAI>;
     pNewScript->RegisterSelf();
 }
