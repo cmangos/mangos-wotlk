@@ -389,7 +389,6 @@ enum
     NPC_BROODLORD               = 12017,
     NPC_TALON_KING_IKISS        = 18473,
     NPC_KARGATH_BLADEFIST       = 16808,
-    NPC_MOROES                  = 15687,
     NPC_MOROGRIM_TIDEWALKER     = 21213,
 
     // Black Temple
@@ -440,10 +439,6 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
         }
         case NPC_KARGATH_BLADEFIST:
             if (x < 270.0f && x > 185.0f)
-                return false;
-            break;
-        case NPC_MOROES:                                    // Moroes - Generate bounding box - TODO: Despawn Remaining Adds upon Evade after Death
-            if (x > -11030.f && x < -10943.f && y > -1955.f && y < -1860.f)
                 return false;
             break;
         case NPC_MOROGRIM_TIDEWALKER:                       // Morogrim - Natural Box made by room
