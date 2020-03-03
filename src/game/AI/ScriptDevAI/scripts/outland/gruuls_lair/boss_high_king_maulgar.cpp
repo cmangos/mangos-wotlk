@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "gruuls_lair.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -67,44 +68,47 @@ enum
     SPELL_BLAST_WAVE            = 33061,
 };
 
-// High King Maulgar AI
-struct boss_high_king_maulgarAI : public ScriptedAI
+enum MaulgarActions
 {
-    boss_high_king_maulgarAI(Creature* pCreature) : ScriptedAI(pCreature)
+    MAULGAR_PHASE_2,
+    MAULGAR_ARCING_SMASH,
+    MAULGAR_MIGHTY_BLOW,
+    MAULGAR_WHIRLWIND,
+    MAULGAR_CHARGE,
+    MAULGAR_FEAR,
+    MAULGAR_ACTION_MAX,
+};
+
+// High King Maulgar AI
+struct boss_high_king_maulgarAI : public CombatAI
+{
+    boss_high_king_maulgarAI(Creature* creature) : CombatAI(creature, MAULGAR_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+        AddTimerlessCombatAction(MAULGAR_PHASE_2, true);
+        AddCombatAction(MAULGAR_ARCING_SMASH, 8000, 14000);
+        AddCombatAction(MAULGAR_MIGHTY_BLOW, 15000, 25000);
+        AddCombatAction(MAULGAR_WHIRLWIND, 30000u);
+        AddCombatAction(MAULGAR_CHARGE, true);
+        AddCombatAction(MAULGAR_FEAR, true);
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
-    uint32 m_uiArcingSmashTimer;
-    uint32 m_uiMightyBlowTimer;
-    uint32 m_uiWhirlwindTimer;
-    uint32 m_uiChargeTimer;
-    uint32 m_uiFearTimer;
     uint32 m_uiCouncilDeathCount;
-
-    bool m_bPhase2;
 
     void Reset() override
     {
-        m_uiArcingSmashTimer    = urand(8000, 14000);
-        m_uiMightyBlowTimer     = urand(15000, 25000);
-        m_uiWhirlwindTimer      = 30000;
-        m_uiChargeTimer         = 2000;
-        m_uiFearTimer           = urand(10000, 25000);
-        m_uiCouncilDeathCount   = 0;
-        m_bPhase2               = false;
+        CombatAI::Reset();
+        m_uiCouncilDeathCount = 0;
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAULGAR_EVENT, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_MAULGAR_EVENT, FAIL);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         switch (urand(0, 2))
         {
@@ -114,21 +118,21 @@ struct boss_high_king_maulgarAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
         // Set data to Special on Death
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAULGAR_EVENT, SPECIAL);
+        if (m_instance)
+            m_instance->SetData(TYPE_MAULGAR_EVENT, SPECIAL);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MAULGAR_EVENT, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_MAULGAR_EVENT, IN_PROGRESS);
     }
 
     void EventCouncilDeath()
@@ -142,89 +146,60 @@ struct boss_high_king_maulgarAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (!m_bPhase2 && m_creature->GetHealthPercent() < 50.0f)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_FLURRY) == CAST_OK)
-            {
-                DoScriptText(SAY_ENRAGE, m_creature);
-                m_bPhase2 = true;
-            }
-        }
-
-        if (!m_creature->HasAura(SPELL_WHIRLWIND))
-        {
-            if (m_uiMightyBlowTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MIGHTY_BLOW) == CAST_OK)
-                    m_uiMightyBlowTimer = urand(20000, 35000);
-            }
-            else
-                m_uiMightyBlowTimer -= uiDiff;
-
-            if (m_uiArcingSmashTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_ARCING_SMASH) == CAST_OK)
-                    m_uiArcingSmashTimer = urand(8000, 12000);
-            }
-            else
-                m_uiArcingSmashTimer -= uiDiff;
-
-            if (m_bPhase2)
-            {
-                if (m_uiChargeTimer <= uiDiff)
+            case MAULGAR_PHASE_2:
+                if (m_creature->GetHealthPercent() < 50.0f)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(nullptr, SPELL_FLURRY) == CAST_OK)
                     {
-                        if (DoCastSpellIfCan(pTarget, SPELL_CHARGE) == CAST_OK)
-                            m_uiChargeTimer = urand(14000, 20000);
+                        DoScriptText(SAY_ENRAGE, m_creature);
+                        SetActionReadyStatus(action, false);
+                        ResetCombatAction(MAULGAR_FEAR, urand(10000, 25000));
+                        ResetCombatAction(MAULGAR_CHARGE, 2000);
                     }
                 }
-                else
-                    m_uiChargeTimer -= uiDiff;
-
-                if (m_uiFearTimer <= uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FEAR) == CAST_OK)
-                        m_uiFearTimer = urand(20000, 35000);
-                }
-                else
-                    m_uiFearTimer -= uiDiff;
-            }
+                break;
+            case MAULGAR_ARCING_SMASH:
+                if (DoCastSpellIfCan(nullptr, SPELL_ARCING_SMASH) == CAST_OK)
+                    ResetCombatAction(action, urand(8000, 12000));
+                break;
+            case MAULGAR_MIGHTY_BLOW:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MIGHTY_BLOW) == CAST_OK)
+                    ResetCombatAction(action, urand(20000, 35000));
+                break;
+            case MAULGAR_WHIRLWIND:
+                if (DoCastSpellIfCan(nullptr, SPELL_WHIRLWIND) == CAST_OK)
+                    ResetCombatAction(action, urand(30000, 40000));
+                break;
+            case MAULGAR_CHARGE:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_CHARGE, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_CHARGE) == CAST_OK)
+                        ResetCombatAction(action, urand(14000, 20000));
+                break;
+            case MAULGAR_FEAR:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FEAR) == CAST_OK)
+                    ResetCombatAction(action, urand(20000, 35000));
+                break;
         }
-
-        if (m_uiWhirlwindTimer <= uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_WHIRLWIND) == CAST_OK)
-                m_uiWhirlwindTimer = urand(30000, 40000);
-        }
-        else
-            m_uiWhirlwindTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
 // Base AI for every council member
-struct Council_Base_AI : public ScriptedAI
+struct Council_Base_AI : public RangedCombatAI
 {
-    Council_Base_AI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-    }
+    Council_Base_AI(Creature* creature, uint32 actions) : RangedCombatAI(creature, actions), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())) { }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
     void JustDied(Unit* /*pVictim*/) override
     {
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
-        Creature* pMaulgar = m_pInstance->GetSingleCreatureFromStorage(NPC_MAULGAR);
+        Creature* pMaulgar = m_instance->GetSingleCreatureFromStorage(NPC_MAULGAR);
         if (pMaulgar && pMaulgar->IsAlive())
         {
             if (boss_high_king_maulgarAI* pMaulgarAI = dynamic_cast<boss_high_king_maulgarAI*>(pMaulgar->AI()))
@@ -232,56 +207,45 @@ struct Council_Base_AI : public ScriptedAI
         }
 
         // Set data to Special on Death
-        m_pInstance->SetData(TYPE_MAULGAR_EVENT, SPECIAL);
+        m_instance->SetData(TYPE_MAULGAR_EVENT, SPECIAL);
     }
+};
+
+enum OlmActions
+{
+    OLM_DARK_DECAY,
+    OLM_DEATH_COIL,
+    OLM_SUMMON,
+    OLM_ACTION_MAX,
 };
 
 // Olm The Summoner AI
 struct boss_olm_the_summonerAI : public Council_Base_AI
 {
-    boss_olm_the_summonerAI(Creature* pCreature) : Council_Base_AI(pCreature) {Reset();}
-
-    uint32 m_uiDarkDecayTimer;
-    uint32 m_uiDeathCoilTimer;
-    uint32 m_uiSummonTimer;
-
-    void Reset() override
+    boss_olm_the_summonerAI(Creature* creature) : Council_Base_AI(creature, OLM_ACTION_MAX)
     {
-        m_uiDarkDecayTimer = 18000;
-        m_uiDeathCoilTimer = 14000;
-        m_uiSummonTimer    = 10000;
+        AddCombatAction(OLM_DARK_DECAY, 18000u);
+        AddCombatAction(OLM_DEATH_COIL, 14000u);
+        AddCombatAction(OLM_SUMMON, 10000u);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiDarkDecayTimer <= uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DARK_DECAY) == CAST_OK)
-                m_uiDarkDecayTimer = 5000;
+            case OLM_DARK_DECAY:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DARK_DECAY) == CAST_OK)
+                    ResetCombatAction(action, 5000);
+                break;
+            case OLM_DEATH_COIL:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DEATH_COIL) == CAST_OK)
+                    ResetCombatAction(action, urand(8000, 13000));
+                break;
+            case OLM_SUMMON:
+                if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_WILD_FELHUNTER) == CAST_OK)
+                    ResetCombatAction(action, urand(25000, 35000));
+                break;
         }
-        else
-            m_uiDarkDecayTimer -= uiDiff;
-
-        if (m_uiDeathCoilTimer <= uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DEATH_COIL) == CAST_OK)
-                m_uiDeathCoilTimer = urand(8000, 13000);
-        }
-        else
-            m_uiDeathCoilTimer -= uiDiff;
-
-        if (m_uiSummonTimer <= uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_WILD_FELHUNTER) == CAST_OK)
-                m_uiSummonTimer = urand(25000, 35000);
-        }
-        else
-            m_uiSummonTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
@@ -297,32 +261,14 @@ enum KigglerActions
 // Kiggler The Crazed AI
 struct boss_kiggler_the_crazedAI : public Council_Base_AI
 {
-    boss_kiggler_the_crazedAI(Creature* pCreature) : Council_Base_AI(pCreature)
+    boss_kiggler_the_crazedAI(Creature* creature) : Council_Base_AI(creature, KIGGLER_ACTION_MAX)
     {
-        m_paramsArcaneExplosion.range.minRange = 0;
-        m_paramsArcaneExplosion.range.maxRange = 15;
-        Reset();
-    }
-
-    SelectAttackingTargetParams m_paramsArcaneExplosion;
-
-    uint32 m_actionTimers[KIGGLER_ACTION_MAX];
-    bool m_actionReadyStatus[KIGGLER_ACTION_MAX];
-
-    void Reset() override
-    {
-        m_actionTimers[KIGGLER_ACTION_GREATER_POLYMORPH] = 5000;
-        m_actionTimers[KIGGLER_ACTION_LIGHTNING_BOLT] = 0;
-        m_actionTimers[KIGGLER_ACTION_ARCANE_SHOCK] = 20000;
-        m_actionTimers[KIGGLER_ACTION_ARCANE_EXPLOSION] = 30000;
-
-        m_attackDistance = 35.0f;
-        m_meleeEnabled = false;
-
-        for (bool& m_actionReadyStatu : m_actionReadyStatus)
-            m_actionReadyStatu = false;
-
-        m_actionReadyStatus[KIGGLER_ACTION_LIGHTNING_BOLT] = true;
+        AddCombatAction(KIGGLER_ACTION_GREATER_POLYMORPH, 5000u);
+        AddCombatAction(KIGGLER_ACTION_ARCANE_EXPLOSION, 30000u);
+        AddCombatAction(KIGGLER_ACTION_ARCANE_SHOCK, 20000u);
+        AddCombatAction(KIGGLER_ACTION_LIGHTNING_BOLT, 0u);
+        AddMainSpell(SPELL_LIGHTNING_BOLT);
+        SetRangedMode(true, 35.f, TYPE_PROXIMITY);
     }
 
     void SpellHitTarget(Unit* pVictim, const SpellEntry* pSpell) override
@@ -339,245 +285,131 @@ struct boss_kiggler_the_crazedAI : public Council_Base_AI
         }
     }
 
-    void ExecuteActions()
+    void ExecuteAction(uint32 action) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < KIGGLER_ACTION_MAX; ++i)
+        switch (action)
         {
-            if (m_actionReadyStatus[i])
-            {
-                switch (i)
-                {
-                    case KIGGLER_ACTION_GREATER_POLYMORPH:
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_GREATER_POLYMORPH) == CAST_OK)
-                        {
-                            m_actionTimers[KIGGLER_ACTION_GREATER_POLYMORPH] = 11000;
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    case KIGGLER_ACTION_ARCANE_EXPLOSION:
-                        if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_RANGE_AOE_RANGE, m_paramsArcaneExplosion))
-                        {
-                            if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_EXPLOSION, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                            {
-                                m_actionTimers[KIGGLER_ACTION_ARCANE_EXPLOSION] = 30000;
-                                m_actionReadyStatus[i] = false;
-                                return;
-                            }
-                        }
-                        break;
-                    case KIGGLER_ACTION_ARCANE_SHOCK:
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ARCANE_SHOCK) == CAST_OK)
-                        {
-                            m_actionTimers[KIGGLER_ACTION_ARCANE_SHOCK] = urand(15000, 20000);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    case KIGGLER_ACTION_LIGHTNING_BOLT:
-                    {
-                        if (!m_creature->IsSpellReady(SPELL_LIGHTNING_BOLT))
-                        {
-                            m_attackDistance = 0.f;
-                            SetMeleeEnabled(true);
-                            return;
-                        }
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_LIGHTNING_BOLT) == CAST_OK)
-                        {
-                            if (m_attackDistance == 0.f)
-                            {
-                                m_attackDistance = 35.f;
-                                SetMeleeEnabled(false);
-                            }
-                            return;
-                        }
-                    }
-                    break;
-                }
-            }
+            case KIGGLER_ACTION_GREATER_POLYMORPH:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_GREATER_POLYMORPH) == CAST_OK)
+                    ResetCombatAction(action, 11000);
+                return;
+            case KIGGLER_ACTION_ARCANE_EXPLOSION:
+                if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, SPELL_ARCANE_EXPLOSION, SELECT_FLAG_PLAYER | SELECT_FLAG_USE_EFFECT_RADIUS))
+                    if (DoCastSpellIfCan(nullptr, SPELL_ARCANE_EXPLOSION) == CAST_OK)
+                        ResetCombatAction(action, 30000);
+                return;
+            case KIGGLER_ACTION_ARCANE_SHOCK:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ARCANE_SHOCK) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 20000));
+                return;
+            case KIGGLER_ACTION_LIGHTNING_BOLT:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_LIGHTNING_BOLT) == CAST_OK)
+                    ResetCombatAction(action, GetCurrentRangedMode() ? urand(2000, 3000) : urand(5000, 8000));
+            break;
         }
     }
+};
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        for (uint32 i = 0; i < KIGGLER_ACTION_MAX; ++i)
-        {
-            if (!m_actionReadyStatus[i])
-            {
-                if (m_actionTimers[i] <= uiDiff)
-                {
-                    m_actionTimers[i] = 0;
-                    m_actionReadyStatus[i] = true;
-                }
-                else
-                    m_actionTimers[i] -= uiDiff;
-            }
-        }
-
-        ExecuteActions();
-
-        DoMeleeAttackIfReady();
-    }
+enum BlindeyeActions
+{
+    BLINDEYE_GREATER_POWER_WORD_SHIELD,
+    BLINDEYE_HEAL,
+    BLINDEYE_ACTION_MAX,
 };
 
 // Blindeye The Seer AI
 struct boss_blindeye_the_seerAI : public Council_Base_AI
 {
-    boss_blindeye_the_seerAI(Creature* pCreature) : Council_Base_AI(pCreature) {Reset();}
-
-    uint32 m_uiGreaterPowerWordShieldTimer;
-    uint32 m_uiHealTimer;
-
-    void Reset() override
+    boss_blindeye_the_seerAI(Creature* creature) : Council_Base_AI(creature, BLINDEYE_ACTION_MAX)
     {
-        m_uiGreaterPowerWordShieldTimer    = 30000;
-        m_uiHealTimer                      = urand(25000, 40000);
+        AddCombatAction(BLINDEYE_GREATER_POWER_WORD_SHIELD, 30000u);
+        AddCombatAction(BLINDEYE_HEAL, 25000, 40000);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiGreaterPowerWordShieldTimer <= uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_GREATER_PW_SHIELD) == CAST_OK)
-            {
-                DoCastSpellIfCan(m_creature, SPELL_PRAYEROFHEALING);
-                m_uiGreaterPowerWordShieldTimer = urand(30000, 40000);
-            }
+            case BLINDEYE_GREATER_POWER_WORD_SHIELD:
+                if (DoCastSpellIfCan(nullptr, SPELL_GREATER_PW_SHIELD) == CAST_OK)
+                {
+                    DoCastSpellIfCan(nullptr, SPELL_PRAYEROFHEALING);
+                    ResetCombatAction(action, urand(30000, 40000));
+                }
+                break;
+            case BLINDEYE_HEAL:
+                if (Unit* target = DoSelectLowestHpFriendly(50.0f))
+                    if (DoCastSpellIfCan(target, SPELL_HEAL) == CAST_OK)
+                        ResetCombatAction(action, urand(15000, 40000));
+                break;
         }
-        else
-            m_uiGreaterPowerWordShieldTimer -= uiDiff;
-
-        if (m_uiHealTimer <= uiDiff)
-        {
-            if (Unit* pTarget = DoSelectLowestHpFriendly(50.0f))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_HEAL) == CAST_OK)
-                    m_uiHealTimer = urand(15000, 40000);
-            }
-        }
-        else
-            m_uiHealTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
+};
+
+enum KroshActions
+{
+    KROSH_BLAST_WAVE,
+    KROSH_SPELL_SHIELD,
+    KROSH_GREATER_FIREBALL,
+    KROSH_ACTION_MAX,
 };
 
 // Krosh Firehand AI
 struct boss_krosh_firehandAI : public Council_Base_AI
 {
-    boss_krosh_firehandAI(Creature* pCreature) : Council_Base_AI(pCreature) 
+    boss_krosh_firehandAI(Creature* creature) : Council_Base_AI(creature, KROSH_ACTION_MAX)
     {
-        m_paramsBlastWave.range.minRange = 0;
-        m_paramsBlastWave.range.maxRange = 15;
-        m_attackDistance = 30.f;
-        m_meleeEnabled = false;
-        Reset();
+        AddCombatAction(KROSH_BLAST_WAVE, 4000u);
+        AddCombatAction(KROSH_SPELL_SHIELD, 1000u);
+        AddCombatAction(KROSH_GREATER_FIREBALL, 12000u);
+        SetRangedMode(true, 30.f, TYPE_FULL_CASTER);
     }
 
-    uint32 m_uiGreaterFireballTimer;
-    uint32 m_uiSpellShieldTimer;
-    uint32 m_uiBlastWaveTimer;
-    SelectAttackingTargetParams m_paramsBlastWave;
-
-    void Reset() override
+    void ExecuteAction(uint32 action) override
     {
-        m_uiGreaterFireballTimer = 4000;
-        m_uiSpellShieldTimer     = 1000;
-        m_uiBlastWaveTimer       = 12000;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiGreaterFireballTimer <= uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_GREATER_FIREBALL) == CAST_OK)
-                m_uiGreaterFireballTimer = 3200;
+            case KROSH_BLAST_WAVE:
+                if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_USE_EFFECT_RADIUS))
+                    if (DoCastSpellIfCan(nullptr, SPELL_BLAST_WAVE) == CAST_OK)
+                        ResetCombatAction(action, 6000);
+                break;
+            case KROSH_SPELL_SHIELD:
+                if (DoCastSpellIfCan(nullptr, SPELL_SPELLSHIELD) == CAST_OK)
+                    ResetCombatAction(action, 30000);
+                break;
+            case KROSH_GREATER_FIREBALL:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_GREATER_FIREBALL) == CAST_OK)
+                    ResetCombatAction(action, 3200);
+                break;
         }
-        else
-            m_uiGreaterFireballTimer -= uiDiff;
-
-        if (m_uiSpellShieldTimer <= uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SPELLSHIELD) == CAST_OK)
-                m_uiSpellShieldTimer = 30000;
-        }
-        else
-            m_uiSpellShieldTimer -= uiDiff;
-
-        if (m_uiBlastWaveTimer <= uiDiff)
-        {
-            if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_RANGE_AOE_RANGE, m_paramsBlastWave))
-            {
-                DoCastSpellIfCan(m_creature, SPELL_BLAST_WAVE, CAST_INTERRUPT_PREVIOUS);
-                m_uiBlastWaveTimer = 6000;
-            }
-        }
-        else
-            m_uiBlastWaveTimer -= uiDiff;
     }
 };
-
-UnitAI* GetAI_boss_high_king_maulgar(Creature* pCreature)
-{
-    return new boss_high_king_maulgarAI(pCreature);
-}
-
-UnitAI* GetAI_boss_olm_the_summoner(Creature* pCreature)
-{
-    return new boss_olm_the_summonerAI(pCreature);
-}
-
-UnitAI* GetAI_boss_kiggler_the_crazed(Creature* pCreature)
-{
-    return new boss_kiggler_the_crazedAI(pCreature);
-}
-
-UnitAI* GetAI_boss_blindeye_the_seer(Creature* pCreature)
-{
-    return new boss_blindeye_the_seerAI(pCreature);
-}
-
-UnitAI* GetAI_boss_krosh_firehand(Creature* pCreature)
-{
-    return new boss_krosh_firehandAI(pCreature);
-}
 
 void AddSC_boss_high_king_maulgar()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_high_king_maulgar";
-    pNewScript->GetAI = &GetAI_boss_high_king_maulgar;
+    pNewScript->GetAI = &GetNewAIInstance<boss_high_king_maulgarAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_kiggler_the_crazed";
-    pNewScript->GetAI = &GetAI_boss_kiggler_the_crazed;
+    pNewScript->GetAI = &GetNewAIInstance<boss_kiggler_the_crazedAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_blindeye_the_seer";
-    pNewScript->GetAI = &GetAI_boss_blindeye_the_seer;
+    pNewScript->GetAI = &GetNewAIInstance<boss_blindeye_the_seerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_olm_the_summoner";
-    pNewScript->GetAI = &GetAI_boss_olm_the_summoner;
+    pNewScript->GetAI = &GetNewAIInstance<boss_olm_the_summonerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_krosh_firehand";
-    pNewScript->GetAI = &GetAI_boss_krosh_firehand;
+    pNewScript->GetAI = &GetNewAIInstance<boss_krosh_firehandAI>;
     pNewScript->RegisterSelf();
 }
