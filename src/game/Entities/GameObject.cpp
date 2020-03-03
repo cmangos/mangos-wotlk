@@ -2644,6 +2644,11 @@ bool GameObject::IsAtInteractDistance(Player const* player, uint32 maxRange) con
     return IsAtInteractDistance(player->GetPosition(), GetInteractionDistance());
 }
 
+bool GameObject::_IsWithinDist(WorldObject const* obj, float dist2compare, bool /*is3D*/) const
+{
+    return IsAtInteractDistance(obj->GetPosition(), obj->GetCombatReach() + dist2compare);
+}
+
 bool GameObject::IsAtInteractDistance(Position const& pos, float radius) const
 {
     if (GameObjectDisplayInfoEntry const* displayInfo = m_displayInfo)

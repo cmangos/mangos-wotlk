@@ -884,6 +884,8 @@ class GameObject : public WorldObject
 
         GameObjectModel* m_model;
 
+        bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const override;
+
         bool IsAtInteractDistance(Position const& pos, float radius) const;
         bool IsAtInteractDistance(Player const* player, uint32 maxRange = 0) const;
 

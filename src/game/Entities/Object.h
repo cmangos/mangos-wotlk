@@ -785,7 +785,7 @@ class WorldObject : public Object
         }
         bool IsWithinDist3d(float x, float y, float z, float dist2compare) const;
         bool IsWithinDist2d(float x, float y, float dist2compare) const;
-        bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const;
+        virtual bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const;
         bool _IsWithinCombatDist(WorldObject const* obj, float dist2compare, bool is3D) const;
 
         // use only if you will sure about placing both object at same map
