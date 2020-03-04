@@ -5217,6 +5217,9 @@ void Aura::HandleModCharm(bool apply, bool Real)
     {
         switch (GetId())
         {
+            case 30019: // Control Piece
+                caster->RemoveAurasDueToSpell(30019);
+                break;
             case 32830: // Possess
                 target->CastSpell(target, 13360, TRIGGERED_OLD_TRIGGERED);
                 if (caster->GetTypeId() == TYPEID_UNIT)
