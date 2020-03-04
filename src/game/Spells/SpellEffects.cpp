@@ -1956,6 +1956,11 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                             unitTarget->CastSpell(unitTarget, 29949, TRIGGERED_NONE);
                             return;
                         }
+                        case 37589: // Shriveling gaze
+                        {
+                            unitTarget->RemoveAuraStack(m_triggeredByAuraSpell->Id);
+                            return;
+                        }
                         case 40250: // Improved Duration - Anzu spirits
                         {
                             auto periodicAuraList = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);

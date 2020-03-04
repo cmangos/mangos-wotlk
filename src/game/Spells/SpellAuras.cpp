@@ -10524,6 +10524,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
         case 32065:                                         // Fungal Decay
         case 34027:                                         // Kill Command
         case 36659:                                         // Tail Sting
+        case 37589:                                         // Shriveling Gaze
         case 40157:                                         // Spirit Lance
         case 55166:                                         // Tidal Force
         case 58914:                                         // Kill Command (pet part)
