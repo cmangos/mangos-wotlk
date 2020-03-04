@@ -6714,11 +6714,9 @@ bool Spell::DoSummonWild(CreatureSummonPositions& list, SummonPropertiesEntry co
                 {
                     summon->SelectLevel(level); // needs to have casters level
                     // Enslave demon effect, without mana cost and cooldown
-                    summon->CastSpell(summon, 22707, TRIGGERED_OLD_TRIGGERED);  // short root spell on infernal from sniffs
+                    summon->CastSpell(nullptr, 22707, TRIGGERED_OLD_TRIGGERED);  // short root spell on infernal from sniffs
                     m_caster->CastSpell(summon, 20882, TRIGGERED_OLD_TRIGGERED);
-                    summon->CastSpell(nullptr, 22699, TRIGGERED_NONE);  // Inferno effect
-                    summon->CastSpell(itr.x, itr.y, itr.z, 20310, TRIGGERED_NONE);  // Stun
-                    summon->CastSpell(nullptr, 19483, TRIGGERED_NONE); // Immolation - needs to be cast after level update
+                    summon->AI()->DoCastSpellIfCan(nullptr, 19483, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                     break;
                 }
             }
