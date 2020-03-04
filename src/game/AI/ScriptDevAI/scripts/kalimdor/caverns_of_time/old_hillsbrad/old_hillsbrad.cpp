@@ -467,7 +467,9 @@ struct npc_thrall_old_hillsbradAI : public npc_escortAI, private DialogueHelper
             case NPC_INFINITE_SABOTEOR:
             case NPC_INFINITE_SLAYER:
                 m_lTarrenMillSoldiersGuids.push_back(pSummoned->GetObjectGuid());
+                // TODO: need to make them attack after thrall evades home
                 pSummoned->AI()->AttackStart(m_creature);
+                pSummoned->SetInCombatWithZone();
                 if (!m_bHasEpochYelled)
                 {
                     switch (urand(0, 3))
