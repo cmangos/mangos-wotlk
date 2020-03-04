@@ -45,6 +45,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (31702,'spell_someone_grab_me'),
 (31703,'spell_magnetic_pull'),
 (31704,'spell_levitate'),
+(30659,'spell_fel_infusion'),
 (35150,'spell_nether_charge_passive'),
 (37670,'spell_nether_charge_timer'),
 (34874,'spell_despawn_underbog_mushrooms'),
