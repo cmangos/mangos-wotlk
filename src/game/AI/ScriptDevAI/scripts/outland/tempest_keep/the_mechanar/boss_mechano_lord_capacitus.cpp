@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "mechanar.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -43,13 +45,16 @@ enum
     SPELL_BERSERK                   = 26662,
     SPELL_REFLECTIVE_MAGIC_SHIELD   = 35158,
     SPELL_REFLECTIVE_DAMAGE_SHIELD  = 35159,
+
+    SPELL_NETHER_CHARGE_PASSIVE     = 35150,
+    SPELL_NETHER_CHARGE_PULSE       = 35151,
+    SPELL_NETHER_CHARGE_TIMER       = 37670,
 };
 
 struct boss_mechano_lord_capacitusAI : public ScriptedAI
 {
-    boss_mechano_lord_capacitusAI(Creature* creature) : ScriptedAI(creature)
+    boss_mechano_lord_capacitusAI(Creature* creature) : ScriptedAI(creature), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
@@ -98,27 +103,6 @@ struct boss_mechano_lord_capacitusAI : public ScriptedAI
                 charge->ForcedDespawn();
 
         m_summons.clear();
-    }
-
-    void MoveToRandomPoint(Creature* creature)
-    {
-        float x, y, z;
-        m_creature->GetPosition(x, y, z); // do some urand radius shenanigans to spawn it further and make it walk to go using doing X and Y yourself and using function in MAP to get proper Z
-        float xR = x + urand(0, 35), yR = y + urand(0, 35), zR = z;
-        // m_creature->GetMap()->GetReachableRandomPointOnGround(x, y, z, 10.0f); // get position to which spectre will walk
-        m_creature->GetMap()->GetHeightInRange(m_creature->GetPhaseMask(), xR, yR, zR);
-        creature->GetMotionMaster()->MovePoint(1, xR, yR, zR);
-    }
-
-    void JustSummoned(Creature* summoned) override
-    {
-        m_summons.push_back(summoned->GetObjectGuid());
-        MoveToRandomPoint(summoned);
-    }
-
-    void SummonedMovementInform(Creature* summoned, uint32 /*uiMotionType*/, uint32 /*uiData*/) override
-    {
-        MoveToRandomPoint(summoned);
     }
 
     void UpdateAI(const uint32 diff) override
@@ -217,15 +201,98 @@ struct boss_mechano_lord_capacitusAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_mechano_lord_capacitus(Creature* creature)
+struct NetherCharge : public ScriptedAI, public TimerManager
 {
-    return new boss_mechano_lord_capacitusAI(creature);
-}
+    NetherCharge(Creature* creature) : ScriptedAI(creature), m_stopMoving(false)
+    {
+        AddCustomAction(1, true, [&]()
+        {
+            MoveToRandomPoint();
+        });
+        AddCustomAction(2, 10000u, [&]()
+        {
+            m_stopMoving = true;
+            m_creature->GetMotionMaster()->Clear(false, true);
+            m_creature->GetMotionMaster()->MoveIdle();
+        });
+    }
+
+    void Reset() override { }
+
+    bool m_stopMoving;
+
+    void MoveToRandomPoint()
+    {
+        if (m_stopMoving)
+            return;
+        float x, y, z;
+        m_creature->GetPosition(x, y, z); // do some urand radius shenanigans to spawn it further and make it walk to go using doing X and Y yourself and using function in MAP to get proper Z
+        float xR = x + urand(10, 20), yR = y + urand(10, 20), zR = z;
+        m_creature->UpdateAllowedPositionZ(xR, yR, zR);
+        m_creature->GetMotionMaster()->MovePoint(1, xR, yR, zR);
+    }
+
+    void MovementInform(uint32 motionType, uint32 data) override
+    {
+        if (motionType == POINT_MOTION_TYPE && !m_stopMoving)
+            ResetTimer(1, urand(0, 2000));
+    }
+
+    void JustRespawned() override
+    {
+        DoCastSpellIfCan(nullptr, SPELL_NETHER_CHARGE_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_NETHER_CHARGE_TIMER, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        MoveToRandomPoint();
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff);
+    }
+};
+
+struct NetherChargePassive : public AuraScript
+{
+    void OnApply(Aura* aura, bool /*apply*/) const
+    {
+        aura->ForcePeriodicity(2000);
+    }
+
+    void OnPeriodicTickEnd(Aura* aura) const
+    {
+        switch (aura->GetAuraTicks())
+        {
+            case 5:
+            case 6:
+            case 7:
+                aura->GetTarget()->CastSpell(nullptr, SPELL_NETHER_CHARGE_PULSE, TRIGGERED_OLD_TRIGGERED);
+                break;
+            default: break;
+        }
+    }
+};
+
+struct NetherChargeTimer : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const
+    {
+        if (!apply)
+            aura->GetTarget()->CastSpell(nullptr, aura->GetSpellProto()->EffectTriggerSpell[aura->GetEffIndex()], TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_mechano_lord_capacitus()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_mechano_lord_capacitus";
-    pNewScript->GetAI = &GetAI_boss_mechano_lord_capacitus;
+    pNewScript->GetAI = &GetNewAIInstance<boss_mechano_lord_capacitusAI>;
     pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "mob_nether_charge";
+    pNewScript->GetAI = &GetNewAIInstance<NetherCharge>;
+    pNewScript->RegisterSelf();
+
+    RegisterAuraScript<NetherChargePassive>("spell_nether_charge_passive");
+    RegisterAuraScript<NetherChargeTimer>("spell_nether_charge_timer");
 }

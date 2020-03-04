@@ -1467,6 +1467,7 @@ UPDATE creature_template SET ScriptName='npc_mist' WHERE entry=3568;
 
 /* THE MECHANAR */
 UPDATE creature_template SET ScriptName='boss_mechano_lord_capacitus' WHERE entry = 19219;
+UPDATE creature_template SET ScriptName='mob_nether_charge' WHERE entry IN(20405);
 UPDATE creature_template SET ScriptName='boss_nethermancer_sepethrea' WHERE entry=19221;
 UPDATE creature_template SET ScriptName='boss_pathaleon_the_calculator' WHERE entry=19220;
 UPDATE creature_template SET ScriptName='mob_nether_wraith' WHERE entry=21062;

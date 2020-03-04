@@ -6340,9 +6340,6 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 if (Unit* pCaster = GetCaster())
                     pCaster->FixateTarget(nullptr);
                 return;
-            case 37670:                                     // Nether Charge Timer
-                target->CastSpell(nullptr, GetSpellProto()->EffectTriggerSpell[m_effIndex], TRIGGERED_OLD_TRIGGERED);
-                break;
             case 39828:                                     // Light of the Naaru
                 target->CastSpell(nullptr, 39831, TRIGGERED_NONE);
                 target->CastSpell(nullptr, 39832, TRIGGERED_NONE);
