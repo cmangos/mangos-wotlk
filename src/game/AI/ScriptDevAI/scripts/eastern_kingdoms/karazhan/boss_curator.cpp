@@ -31,7 +31,7 @@ Removed sometime prior to 2.1.
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "karazhan.h"
 #include "Spells/Spell.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -81,14 +81,14 @@ enum CuratorActions
     CURATOR_ACTION_MAX,
 };
 
-struct boss_curatorAI : public ScriptedAI, public CombatActions
+struct boss_curatorAI : public CombatAI
 {
-    boss_curatorAI(Creature* pCreature) : ScriptedAI(pCreature), CombatActions(CURATOR_ACTION_MAX)
+    boss_curatorAI(Creature* creature) : CombatAI(creature, CURATOR_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance  = (ScriptedInstance*)pCreature->GetInstanceData();
-        AddCombatAction(CURATOR_ACTION_BERSERK, 0u);
-        AddCombatAction(CURATOR_ACTION_FLARE, 0u);
-        AddCombatAction(CURATOR_ACTION_HATEFUL_BOLT, 0u);
+        AddTimerlessCombatAction(CURATOR_ACTION_ARCANE_INFUSION, true);
+        AddCombatAction(CURATOR_ACTION_BERSERK, uint32(10 * MINUTE * IN_MILLISECONDS));
+        AddCombatAction(CURATOR_ACTION_FLARE, 10000u);
+        AddCombatAction(CURATOR_ACTION_HATEFUL_BOLT, 15000u);
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
         {
             return y < -1926.f && z < 164.f && x > -11045.f;
@@ -96,36 +96,22 @@ struct boss_curatorAI : public ScriptedAI, public CombatActions
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
     GuidVector m_sparkGuids;
     uint8 m_phase;
 
     void Reset() override
     {
-        for (uint32 i = 0; i < CURATOR_ACTION_MAX; ++i)
-            SetActionReadyStatus(i, false);
-
-        ResetTimer(CURATOR_ACTION_BERSERK, GetInitialActionTimer(CURATOR_ACTION_BERSERK));
-        ResetTimer(CURATOR_ACTION_FLARE, GetInitialActionTimer(CURATOR_ACTION_FLARE));
-        ResetTimer(CURATOR_ACTION_HATEFUL_BOLT, GetInitialActionTimer(CURATOR_ACTION_HATEFUL_BOLT));
-        SetActionReadyStatus(CURATOR_ACTION_ARCANE_INFUSION, true);
+        CombatAI::Reset();
 
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_POWER_DRAIN, true);
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_EFFECT, SPELL_EFFECT_POWER_BURN, true);
         m_creature->ApplySpellImmune(nullptr, IMMUNITY_DAMAGE, SPELL_SCHOOL_MASK_ARCANE, true);
 
         m_phase = CURATOR_PHASE_1;
-    }
 
-    uint32 GetInitialActionTimer(uint32 id)
-    {
-        switch (id)
-        {
-            case CURATOR_ACTION_BERSERK: return 10 * MINUTE * IN_MILLISECONDS;
-            case CURATOR_ACTION_FLARE: return 10000;
-            case CURATOR_ACTION_HATEFUL_BOLT: return 15000;
-            default: return 0; // never occurs but for compiler
-        }
+        // if (!m_creature->HasAura(SPELL_ASTRAL_ARMOR))
+        //     m_creature->CastSpell(m_creature, SPELL_ASTRAL_ARMOR, TRIGGERED_NONE);
     }
 
     uint32 GetSubsequentActionTimer(uint32 id)
@@ -138,33 +124,33 @@ struct boss_curatorAI : public ScriptedAI, public CombatActions
         }
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_CURATOR, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_CURATOR, DONE);
 
         m_sparkGuids.clear();
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_CURATOR, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_CURATOR, IN_PROGRESS);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_CURATOR, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_CURATOR, FAIL);
 
         for (ObjectGuid guid : m_sparkGuids)
             if (Creature* spark = m_creature->GetMap()->GetCreature(guid))
@@ -173,9 +159,9 @@ struct boss_curatorAI : public ScriptedAI, public CombatActions
         m_sparkGuids.clear();
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        switch (pSummoned->GetEntry())
+        switch (summoned->GetEntry())
         {
             case NPC_ASTRAL_FLARE_1:
             case NPC_ASTRAL_FLARE_2:
@@ -189,117 +175,82 @@ struct boss_curatorAI : public ScriptedAI, public CombatActions
                 }
 
                 // Flare start with aggro on it's target, should be immune to arcane
-                pSummoned->AI()->DoCastSpellIfCan(pSummoned, SPELL_ASTRAL_FLARE_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-                pSummoned->AI()->DoCastSpellIfCan(pSummoned, SPELL_ASTRAL_FLARE_VISUAL, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-                pSummoned->AI()->SetMeleeEnabled(false);
+                summoned->AI()->DoCastSpellIfCan(summoned, SPELL_ASTRAL_FLARE_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                summoned->AI()->DoCastSpellIfCan(summoned, SPELL_ASTRAL_FLARE_VISUAL, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                summoned->AI()->SetMeleeEnabled(false);
 
-                pSummoned->SetInCombatWithZone();
+                summoned->SetInCombatWithZone();
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                    pSummoned->AddThreat(pTarget, 100000.f);
-                m_sparkGuids.push_back(pSummoned->GetObjectGuid());
+                    summoned->AddThreat(pTarget, 100000.f);
+                m_sparkGuids.push_back(summoned->GetObjectGuid());
                 break;
             }
         }
     }
 
-    void ExecuteActions() override
+    void ExecuteAction(uint32 action) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < CURATOR_ACTION_MAX; ++i)
+        switch (action)
         {
-            if (GetActionReadyStatus(i))
+            case CURATOR_ACTION_BERSERK:
             {
-                switch (i)
+                if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
                 {
-                    case CURATOR_ACTION_BERSERK:
+                    // ScriptText needs confirmation
+                    DoScriptText(SAY_ENRAGE, m_creature);
+                    DisableCombatAction(action); // once per fight
+                }
+                return;
+            }
+            case CURATOR_ACTION_ARCANE_INFUSION:
+            {
+                if (m_creature->GetHealthPercent() < 15.0f)
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_ARCANE_INFUSION) == CAST_OK)
                     {
-                        if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                        {
-                            // ScriptText needs confirmation
-                            DoScriptText(SAY_ENRAGE, m_creature);
-                            SetActionReadyStatus(i, false); // once per fight
-                        }
-                        continue;
-                    }
-                    case CURATOR_ACTION_ARCANE_INFUSION:
-                    {
-                        if (m_creature->GetHealthPercent() < 15.0f)
-                        {
-                            if (DoCastSpellIfCan(m_creature, SPELL_ARCANE_INFUSION) == CAST_OK)
-                            {
-                                DoScriptText(SAY_ENRAGE, m_creature);
-                                SetActionReadyStatus(i, false); // once per fight
-                                m_phase = CURATOR_PHASE_2;
-                            }
-                        }
-                        continue;
-                    }
-                    case CURATOR_ACTION_FLARE:
-                    {
-                        if (m_phase != CURATOR_PHASE_1)
-                            continue;
-
-                        // summon Astral Flare
-                        uint32 randomSpell = astralFlareSpells[urand(0, 3)];
-                        DoCastSpellIfCan(nullptr, randomSpell);
-                        ResetTimer(i, GetSubsequentActionTimer(i));
-                        SetActionReadyStatus(i, false);
-                        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(randomSpell);
-                        // supposed to happen right away not on next oom
-                        if (m_creature->GetPower((Powers)spellInfo->powerType) < Spell::CalculatePowerCost(spellInfo, m_creature))
-                        {
-                            if (DoCastSpellIfCan(m_creature, SPELL_EVOCATION) == CAST_OK)
-                            {
-                                DoScriptText(SAY_EVOCATE, m_creature);
-                                // m_creature->RemoveAurasDueToSpell(SPELL_ASTRAL_ARMOR);
-                            }
-                        }
-                        continue;
-                    }
-                    case CURATOR_ACTION_HATEFUL_BOLT:
-                    {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 1, nullptr, SELECT_FLAG_PLAYER))
-                        {
-                            if (DoCastSpellIfCan(pTarget, SPELL_HATEFUL_BOLT) == CAST_OK)
-                            {
-                                ResetTimer(i, GetSubsequentActionTimer(i));
-                                SetActionReadyStatus(i, false);
-                                return;
-                            }
-                        }
-                        continue;
+                        DoScriptText(SAY_ENRAGE, m_creature);
+                        DisableCombatAction(action); // once per fight
+                        m_phase = CURATOR_PHASE_2;
                     }
                 }
+                return;
+            }
+            case CURATOR_ACTION_FLARE:
+            {
+                if (m_phase != CURATOR_PHASE_1)
+                    return;
+
+                // summon Astral Flare
+                uint32 randomSpell = astralFlareSpells[urand(0, 3)];
+                DoCastSpellIfCan(nullptr, randomSpell);
+                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(randomSpell);
+                // supposed to happen right away not on next oom
+                if (m_creature->GetPower((Powers)spellInfo->powerType) < Spell::CalculatePowerCost(spellInfo, m_creature))
+                {
+                    if (DoCastSpellIfCan(nullptr, SPELL_EVOCATION) == CAST_OK)
+                    {
+                        DoScriptText(SAY_EVOCATE, m_creature);
+                        // m_creature->RemoveAurasDueToSpell(SPELL_ASTRAL_ARMOR);
+                    }
+                }
+                return;
+            }
+            case CURATOR_ACTION_HATEFUL_BOLT:
+            {
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 1, nullptr, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(pTarget, SPELL_HATEFUL_BOLT) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
+                return;
             }
         }
     }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        UpdateTimers(diff, m_creature->IsInCombat());
-        ExecuteActions();
-
-        // if (!m_creature->HasAura(SPELL_ASTRAL_ARMOR))
-        //     m_creature->CastSpell(m_creature, SPELL_ASTRAL_ARMOR, TRIGGERED_NONE);
-
-	    DoMeleeAttackIfReady();
-    }
 };
-
-UnitAI* GetAI_boss_curator(Creature* pCreature)
-{
-    return new boss_curatorAI(pCreature);
-}
 
 void AddSC_boss_curator()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_curator";
-    pNewScript->GetAI = &GetAI_boss_curator;
+    pNewScript->GetAI = &GetNewAIInstance<boss_curatorAI>;
     pNewScript->RegisterSelf();
 }
