@@ -212,6 +212,12 @@ void instance_karazhan::OnObjectCreate(GameObject* pGo)
     m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
+void instance_karazhan::OnCreatureRespawn(Creature* creature)
+{
+    if (creature->GetEntry() == NPC_BLIZZARD)
+        creature->AI()->SetReactState(REACT_PASSIVE);
+}
+
 void instance_karazhan::SetData(uint32 uiType, uint32 uiData)
 {
     switch (uiType)

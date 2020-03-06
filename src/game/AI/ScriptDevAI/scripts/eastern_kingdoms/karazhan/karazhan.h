@@ -79,6 +79,8 @@ enum
     NPC_TELEPORT_SW                 = 17174,
     NPC_TELEPORT_NW                 = 17175,
 
+    NPC_BLIZZARD                    = 17161,
+
     // Chess event
     NPC_ORC_GRUNT                   = 17469,                    // pawn
     NPC_ORC_WOLF                    = 21748,                    // knight
@@ -206,6 +208,7 @@ class instance_karazhan : public ScriptedInstance
         void OnPlayerEnter(Player* pPlayer) override;
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureRespawn(Creature* creature) override;
 
         void OnCreatureEvade(Creature* creature) override;
         void OnCreatureDeath(Creature* pCreature) override;
