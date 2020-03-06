@@ -4518,6 +4518,20 @@ bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group)
     }
 }
 
+bool IsDiminishingReturnsGroupDurationDiminished(DiminishingGroup group, bool pvp)
+{
+    switch (group)
+    {
+        default:
+            return true;
+    }
+}
+
+uint32 GetDiminishingReturnsGroupResetTime(DiminishingGroup group, uint32 duration, bool pvp)
+{
+    return (IsDiminishingReturnsGroupDurationDiminished(group, pvp) ? (15 * IN_MILLISECONDS) : duration);
+}
+
 DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
 {
     switch (group)

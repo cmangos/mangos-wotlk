@@ -842,8 +842,8 @@ enum DiminishingLevels
  */
 struct DiminishingReturn
 {
-    DiminishingReturn(DiminishingGroup group, uint32 t, uint32 count)
-        : DRGroup(group), stack(0), hitTime(t), hitCount(count)
+    DiminishingReturn(DiminishingGroup group, uint32 t, uint32 count, uint32 duration)
+        : DRGroup(group), stack(0), hitTime(t), hitCount(count), lastDuration(duration)
     {}
 
     /**
@@ -867,6 +867,10 @@ struct DiminishingReturn
      * decides how how long the duration of the stun etc is.
      */
     uint32                  hitCount;
+    /**
+     * Records nominal duration of the last applied spell entry of this DiminishingGroup
+     */
+    uint32                  lastDuration;
 };
 
 // At least some values expected fixed and used in auras field, other custom
@@ -1321,7 +1325,7 @@ class Unit : public WorldObject
          * that DiminishingGroup
          * @param group The group to increase the level for by one
          */
-        void IncrDiminishing(DiminishingGroup group);
+        void IncrDiminishing(DiminishingGroup group, uint32 duration, bool pvp);
         /**
          * Calculates how long the duration of a spell should be considering
          * diminishing returns, ie, if the Level passed in is DIMINISHING_LEVEL_IMMUNE
