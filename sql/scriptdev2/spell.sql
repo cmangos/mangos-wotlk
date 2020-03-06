@@ -160,7 +160,20 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (36189,'spell_infernal_pet_scaling_3'),
 (36190,'spell_infernal_pet_scaling_4');
 
+-- Warrior
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(5308,'spell_warrior_execute'),
+(20658,'spell_warrior_execute'),
+(20660,'spell_warrior_execute'),
+(20661,'spell_warrior_execute'),
+(20662,'spell_warrior_execute'),
+(25234,'spell_warrior_execute'),
+(25236,'spell_warrior_execute'),
+(47470,'spell_warrior_execute'),
+(47471,'spell_warrior_execute');
+
 -- Battleground and Outdoor PvP
+-- Alterac Valley
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 -- Arathi basin
 (23936,'spell_battleground_banner_trigger'),
