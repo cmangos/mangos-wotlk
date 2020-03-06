@@ -1723,11 +1723,20 @@ enum npc_aoe_damage_trigger
     SPELL_CONSUMPTION_NPC_20570 = 35952,
 };
 
-struct npc_aoe_damage_triggerAI : public Scripted_NoMovementAI
+struct npc_aoe_damage_triggerAI : public ScriptedAI, public TimerManager
 {
-    npc_aoe_damage_triggerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature), m_uiAuraPassive(SetAuraPassive()) { }
+    npc_aoe_damage_triggerAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiAuraPassive(SetAuraPassive())
+    {
+        AddCustomAction(1, GetTimer(), [&]() {CastConsumption(); });
+        SetReactState(REACT_PASSIVE);
+    }
 
     uint32 m_uiAuraPassive;
+
+    inline uint32 GetTimer()
+    {
+        return 2500; // adjust in future if other void zones are different this is for NPC_VOID_ZONE
+    }
 
     inline uint32 SetAuraPassive()
     {
@@ -1744,14 +1753,17 @@ struct npc_aoe_damage_triggerAI : public Scripted_NoMovementAI
         }
     }
 
-    void Reset() override
+    void CastConsumption()
     {
         DoCastSpellIfCan(m_creature, m_uiAuraPassive, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override {}
+    void Reset() override {}
+
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff);
+    }
 };
 
 UnitAI* GetAI_npc_aoe_damage_trigger(Creature* pCreature)
