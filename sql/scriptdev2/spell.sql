@@ -38,6 +38,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- TBC
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(29969,'spell_summon_blizzard'),
+(29970,'spell_dispel_blizzard'),
+(29979,'spell_massive_magnetic_pull'),
+(30004,'spell_flame_wreath'),
 (29770,'spell_midnight_mount'),
 (29883,'spell_blink_arcane_anomaly'),
 (29907,'spell_astral_bite'),
