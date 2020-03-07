@@ -55,6 +55,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (30659,'spell_fel_infusion'),
 (35150,'spell_nether_charge_passive'),
 (37670,'spell_nether_charge_timer'),
+(30843,'spell_enfeeble'),
+(41624,'spell_enfeeble_removal'),
 (34874,'spell_despawn_underbog_mushrooms'),
 (36374,'spell_summon_smoke_beacon'),
 (37591,'spell_inebriate_removal'),

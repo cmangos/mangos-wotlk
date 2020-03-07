@@ -214,8 +214,18 @@ void instance_karazhan::OnObjectCreate(GameObject* pGo)
 
 void instance_karazhan::OnCreatureRespawn(Creature* creature)
 {
-    if (creature->GetEntry() == NPC_BLIZZARD)
+    if (creature->GetEntry() == NPC_BLIZZARD || creature->GetEntry() == NPC_INFERNAL_TARGET)
         creature->AI()->SetReactState(REACT_PASSIVE);
+    else if (creature->GetEntry() == NPC_INFERNAL)
+    {
+        if (GetData(TYPE_MALCHEZZAR) == IN_PROGRESS)
+        {
+            creature->CastSpell(nullptr, SPELL_HELLFIRE, TRIGGERED_OLD_TRIGGERED);
+            creature->AI()->SetReactState(REACT_PASSIVE);
+        }
+        else
+            creature->ForcedDespawn(1);
+    }
 }
 
 void instance_karazhan::SetData(uint32 uiType, uint32 uiData)

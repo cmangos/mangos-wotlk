@@ -110,7 +110,11 @@ enum
     NPC_COLDMIST_WIDOW              = 16171,
 
     //prince malchezaar
-    NPC_INFERNAL_RELAY = 17645,
+    NPC_INFERNAL_RELAY              = 17645,
+    NPC_INFERNAL_TARGET             = 17644,
+    NPC_INFERNAL                    = 17646,
+
+    SPELL_HELLFIRE                  = 30859, // Infernal damage aura
 
     GO_STAGE_CURTAIN                = 183932,
     GO_STAGE_DOOR_LEFT              = 184278,

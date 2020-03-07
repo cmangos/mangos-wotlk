@@ -142,7 +142,7 @@ enum
     SPELL_SHADOW_SPEAR              = 37461,
     SPELL_GEYSER                    = 37427,                    // human rook
     SPELL_WATER_SHIELD              = 37432,
-    SPELL_HELLFIRE                  = 37428,                    // orc rook
+    SPELL_HELLFIRE_CHESS            = 37428,                    // orc rook
     SPELL_FIRE_SHIELD               = 37434,
 
     // spells used to transform side trigger when npc dies
@@ -1338,10 +1338,10 @@ struct npc_summoned_daemonAI : public npc_chess_piece_genericAI
     {
         if (GetTargetByType(TARGET_TYPE_RANDOM, 9.0f))
         {
-            DoCastSpellIfCan(nullptr, SPELL_HELLFIRE);
+            DoCastSpellIfCan(nullptr, SPELL_HELLFIRE_CHESS);
 
             // reset timer based on spell values
-            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_HELLFIRE);
+            const SpellEntry* pSpell = GetSpellStore()->LookupEntry<SpellEntry>(SPELL_HELLFIRE_CHESS);
             return pSpell->RecoveryTime ? pSpell->RecoveryTime : pSpell->CategoryRecoveryTime;
         }
 
