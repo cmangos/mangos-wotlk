@@ -589,7 +589,6 @@ SpellTargetFilterScheme SpellTargetMgr::GetSpellTargetingFilterScheme(SpellTarge
         case 37151:
         case 37152:
         case 37153:
-        case 30469: // Nether Beam - Netherspite - Picks closest target
         case 41294: // Fixate - Reliquary of Souls - Picks closest target
             return SCHEME_CLOSEST;
         case 28307:

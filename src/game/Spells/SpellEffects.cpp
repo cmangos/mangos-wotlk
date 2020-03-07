@@ -9113,66 +9113,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 30542, TRIGGERED_OLD_TRIGGERED);
                     break;
                 }
-                case 30469:                                 // Nether Beam - Netherspite
-                {
-                    if (!unitTarget)
-                        return;
-
-                    // The player and boss spells are different
-                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        switch (m_caster->GetEntry())
-                        {
-                            case 17367:
-                                if (unitTarget->HasAura(38638))
-                                    return;
-
-                                unitTarget->CastSpell(unitTarget, 30422, TRIGGERED_OLD_TRIGGERED);
-                                if (!unitTarget->HasAura(30401))
-                                    m_caster->CastSpell(unitTarget, 30401, TRIGGERED_NONE);
-                                break;
-                            case 17368:
-                                if (unitTarget->HasAura(38639))
-                                    return;
-
-                                unitTarget->CastSpell(unitTarget, 30423, TRIGGERED_OLD_TRIGGERED);
-                                if (!unitTarget->HasAura(30402))
-                                    m_caster->CastSpell(unitTarget, 30402, TRIGGERED_NONE);
-                                break;
-                            case 17369:
-                                if (unitTarget->HasAura(38637))
-                                    return;
-
-                                unitTarget->CastSpell(unitTarget, 30421, TRIGGERED_OLD_TRIGGERED);
-                                if (!unitTarget->HasAura(30400))
-                                    m_caster->CastSpell(unitTarget, 30400, TRIGGERED_NONE);
-                                break;
-                        }
-                    }
-                    // target boss
-                    else if (unitTarget->GetEntry() == 15689)
-                    {
-                        switch (m_caster->GetEntry())
-                        {
-                            case 17367:
-                                unitTarget->CastSpell(unitTarget, 30467, TRIGGERED_OLD_TRIGGERED);
-                                if (!unitTarget->HasAura(30464))
-                                    m_caster->CastSpell(unitTarget, 30464, TRIGGERED_NONE);
-                                break;
-                            case 17368:
-                                unitTarget->CastSpell(unitTarget, 30468, TRIGGERED_OLD_TRIGGERED);
-                                if (!unitTarget->HasAura(30463))
-                                    m_caster->CastSpell(unitTarget, 30463, TRIGGERED_NONE);
-                                break;
-                            case 17369:
-                                unitTarget->CastSpell(unitTarget, 30466, TRIGGERED_OLD_TRIGGERED);
-                                if (!unitTarget->HasAura(30465))
-                                    m_caster->CastSpell(unitTarget, 30465, TRIGGERED_NONE);
-                                break;
-                        }
-                    }
-                    return;
-                }
                 case 30572:                                 // Quake - Magtheridon
                 {
                     unitTarget->RemoveAurasDueToSpell(30657);   // Remove quake from all triggers

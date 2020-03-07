@@ -8651,27 +8651,6 @@ bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
             if (target->GetTypeId() == TYPEID_PLAYER && target == m_caster->GetVictim())
                 return false;
             break;
-        case 30469:                                         // Nether Beam - Netherspite - special include only players and boss
-            if (target->GetTypeId() == TYPEID_UNIT && target->GetEntry() != 15689)
-                return false;
-            switch (m_triggeredByAuraSpell->Id)
-            {
-                case 30396: // Perseverance passive
-                    if (target->HasAura(38637))
-                        return false;
-                    break;
-                case 30397: // Serenity passive
-                    if (target->HasAura(38638))
-                        return false;
-                    break;
-                case 30398: // Dominance passive
-                    if (target->HasAura(38639))
-                        return false;
-                    break;
-            }
-            if (!target->IsAlive())
-                return false;
-            break;
         case 30835:                                         // Infernal Relay - Malchezaar - must only hit unused infernals
         {
             Creature* creature = nullptr;
