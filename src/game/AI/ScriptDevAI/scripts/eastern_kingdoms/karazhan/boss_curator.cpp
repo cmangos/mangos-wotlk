@@ -62,7 +62,7 @@ enum
     SPELL_HATEFUL_BOLT          = 30383,
     SPELL_EVOCATION             = 30254,
     SPELL_ARCANE_INFUSION       = 30403,
-    SPELL_BERSERK               = 26662,
+    SPELL_ARCANE_DECONSTRUCTION = 30407,
 
     SPELL_ASTRAL_ARMOR          = 29476,
 
@@ -195,12 +195,8 @@ struct boss_curatorAI : public CombatAI
         {
             case CURATOR_ACTION_BERSERK:
             {
-                if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
-                {
-                    // ScriptText needs confirmation
-                    DoScriptText(SAY_ENRAGE, m_creature);
+                if (DoCastSpellIfCan(nullptr, SPELL_ARCANE_DECONSTRUCTION) == CAST_OK)
                     DisableCombatAction(action); // once per fight
-                }
                 return;
             }
             case CURATOR_ACTION_ARCANE_INFUSION:
