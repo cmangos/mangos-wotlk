@@ -80,8 +80,14 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (40251,'spell_shadow_of_death'),
 (41289,'spell_ethereal_ring_signal_flare'),
 (41999,'spell_shadow_of_death_remove'),
-(44006,'spell_teleport_self_akilzon'),
-(43681,'spell_inactive');
+(33040,'spell_wota_main_cast_and_jump'),
+(33049,'spell_wota_main_cast_and_jump'),
+(33045,'spell_wota_dot'),
+(33048,'spell_wota_search'),
+(33229,'spell_wota_remove'),
+(42783,'spell_wrath_of_the_astromancer'),
+(43681,'spell_inactive'),
+(44006,'spell_teleport_self_akilzon');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
