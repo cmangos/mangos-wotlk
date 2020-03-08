@@ -38,6 +38,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- TBC
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(32811,'spell_greater_invisibility_mob'),
 (29969,'spell_summon_blizzard'),
 (29970,'spell_dispel_blizzard'),
 (29979,'spell_massive_magnetic_pull'),
