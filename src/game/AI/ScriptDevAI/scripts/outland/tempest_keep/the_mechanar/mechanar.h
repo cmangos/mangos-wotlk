@@ -7,7 +7,7 @@
 
 enum
 {
-    MAX_ENCOUNTER           = 5,
+    MAX_ENCOUNTER           = 6,
     MAX_BRIDGE_LOCATIONS    = 7,
     MAX_BRIDGE_TRASH        = 4,
 
@@ -15,7 +15,8 @@ enum
     TYPE_IRON_HAND          = 1,
     TYPE_CAPACITUS          = 2,
     TYPE_SEPETHREA          = 3,
-    TYPE_PATHALEON          = 4,
+    TYPE_BRIDGEEVENT        = 4,
+    TYPE_PATHALEON          = 5,
 
     NPC_GYRO_KILL           = 19218,
     NPC_IRON_HAND           = 19710,
@@ -108,6 +109,9 @@ class instance_mechanar : public ScriptedInstance
 
         void Update(const uint32 diff) override;
 
+        void ShowChatCommands(ChatHandler* handler) override;
+        void ExecuteChatCommand(ChatHandler* handler, char* args) override;
+
     private:
         void DoSpawnBridgeWave();
 
@@ -116,6 +120,7 @@ class instance_mechanar : public ScriptedInstance
 
         uint32 m_uiBridgeEventTimer;
         uint8 m_uiBridgeEventPhase;
+        uint32 m_uiPathaleonEngageTimer;
 
         GuidSet m_sBridgeTrashGuidSet;
 };

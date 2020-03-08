@@ -25,7 +25,8 @@ EndScriptData */
 #include "mechanar.h"
 
 instance_mechanar::instance_mechanar(Map* pMap) : ScriptedInstance(pMap),
-    m_uiBridgeEventTimer(0),
+    m_uiBridgeEventTimer(2000),
+    m_uiPathaleonEngageTimer(0),
     m_uiBridgeEventPhase(0)
 {
     Initialize();
@@ -39,7 +40,7 @@ void instance_mechanar::Initialize()
 void instance_mechanar::OnPlayerEnter(Player* pPlayer)
 {
     // Check encounter states
-    if (GetData(TYPE_SEPETHREA) != DONE || GetData(TYPE_PATHALEON) == DONE)
+    if (GetData(TYPE_SEPETHREA) != DONE || GetData(TYPE_BRIDGEEVENT) != DONE || GetData(TYPE_PATHALEON) == DONE)
         return;
 
     // Check if already summoned
@@ -63,7 +64,10 @@ void instance_mechanar::OnCreatureCreate(Creature* pCreature)
         case NPC_NETHERBINDER:
         case NPC_FORGE_DESTROYER:
             if (pCreature->IsTemporarySummon())
+            {
+                pCreature->GetCombatManager().SetLeashingDisable(true);
                 m_sBridgeTrashGuidSet.insert(pCreature->GetObjectGuid());
+            }
             break;
     }
 }
@@ -108,9 +112,10 @@ void instance_mechanar::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_SEPETHREA:
             m_auiEncounter[uiType] = uiData;
-            if (uiData == DONE)
-                m_uiBridgeEventTimer = 10000;
             DoUseDoorOrButton(GO_NETHERMANCER_DOOR);
+            break;
+        case TYPE_BRIDGEEVENT:
+            m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_PATHALEON:
             m_auiEncounter[uiType] = uiData;
@@ -184,9 +189,8 @@ void instance_mechanar::OnCreatureDeath(Creature* pCreature)
 
                 if (m_sBridgeTrashGuidSet.empty())
                 {
-                    // After the 3rd wave wait 10 seconds
                     if (m_uiBridgeEventPhase == 3)
-                        m_uiBridgeEventTimer = 10000;
+                        m_uiBridgeEventTimer = 2000;
                     else
                         DoSpawnBridgeWave();
                 }
@@ -211,14 +215,19 @@ void instance_mechanar::DoSpawnBridgeWave()
 
                 switch (m_uiBridgeEventPhase)
                 {
-                    case 1:                                 // These waves should attack the player directly
+                    case 0:
+                        SetData(TYPE_BRIDGEEVENT, IN_PROGRESS);
+                    case 1:
                     case 2:
+                    case 3:
                     case 4:
                     case 5:
-                        pTemp->AI()->AttackStart(pPlayer);
+                        pTemp->SetInCombatWithZone();
                         break;
                     case 6:                                 // Pathaleon
+                        SetData(TYPE_BRIDGEEVENT, DONE);
                         DoScriptText(SAY_PATHALEON_INTRO, pTemp);
+                        m_uiPathaleonEngageTimer = 30000;
                         break;
                 }
             }
@@ -233,17 +242,65 @@ void instance_mechanar::Update(uint32 uiDiff)
     {
         if (m_uiBridgeEventTimer <= uiDiff)
         {
-            DoSpawnBridgeWave();
-            m_uiBridgeEventTimer = 0;
+            m_uiBridgeEventTimer = 2000;
+            for (const auto& data : instance->GetPlayers())
+            {
+                if (m_uiBridgeEventPhase == 0)
+                {
+                    if (data.getSource()->GetPositionZ() > 26.3f && data.getSource()->GetPositionY() < -12.f && data.getSource()->GetPositionX() < 270.f)
+                    {
+                        DoSpawnBridgeWave();
+                    }
+                }
+                else if (m_uiBridgeEventPhase == 3)
+                {
+                    if (data.getSource()->GetPositionZ() > 24.5f && data.getSource()->GetPositionY() > 2.5f && data.getSource()->GetPositionX() < 155.f)
+                    {
+                        DoSpawnBridgeWave();
+                    }
+                }
+            }
         }
         else
             m_uiBridgeEventTimer -= uiDiff;
+    }
+
+    if (m_uiPathaleonEngageTimer)
+    {
+        if (m_uiPathaleonEngageTimer <= uiDiff)
+        {
+            m_uiPathaleonEngageTimer = 0;
+            if (Creature* Pathaleon = GetSingleCreatureFromStorage(NPC_PATHALEON))
+                Pathaleon->SetInCombatWithZone();
+        }
+        else
+            m_uiPathaleonEngageTimer -= uiDiff;
     }
 }
 
 InstanceData* GetInstanceData_instance_mechanar(Map* pMap)
 {
     return new instance_mechanar(pMap);
+}
+
+void instance_mechanar::ShowChatCommands(ChatHandler* handler)
+{
+    handler->SendSysMessage("This instance supports the following commands: resetgauntlet");
+}
+
+void instance_mechanar::ExecuteChatCommand(ChatHandler* handler, char* args)
+{
+    char* result = handler->ExtractLiteralArg(&args);
+    if (!result)
+        return;
+    std::string val = result;
+    if (val == "resetgauntlet")
+    {
+        m_uiBridgeEventPhase = 0;
+        m_sBridgeTrashGuidSet.clear();
+        m_uiBridgeEventTimer = 2000;
+        SetData(TYPE_BRIDGEEVENT, NOT_STARTED);
+    }
 }
 
 void AddSC_instance_mechanar()
