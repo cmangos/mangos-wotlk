@@ -156,6 +156,8 @@ class SpellAuraHolder
         int32 GetAuraDuration() const { return m_duration; }
         void SetAuraDuration(int32 duration) { m_duration = duration; }
 
+        void SetHeartbeatResist(uint32 chance, int32 originalDuration, uint32 drLevel);
+
         uint8 GetAuraSlot() const { return m_auraSlot; }
         void SetAuraSlot(uint8 slot) { m_auraSlot = slot; }
         uint8 GetAuraFlags() const { return m_auraFlags; }
@@ -200,6 +202,7 @@ class SpellAuraHolder
         void OnHolderInit();
         void OnDispel(Unit* dispeller, uint32 dispellingSpellId, uint32 originalStacks);
     private:
+        void UpdateHeartbeatResist(uint32 diff);
         SpellEntry const* m_spellProto;
 
         Unit* m_target;
@@ -218,6 +221,10 @@ class SpellAuraHolder
         int32 m_duration;                                   // Current time
         int32 m_timeCla;                                    // Timer for power per sec calculation
 
+        uint32 m_heartbeatResistChance;                     // Chance to break this spell due to heartbeat resistance (converted to 1-10000 range for roll)
+        int32 m_heartbeatResistInterval;                    // Heartbeat resistance periodic interval
+        int32 m_heartbeatResistTimer;                       // Timer for heartbeat resistance
+
         AuraRemoveMode m_removeMode: 8;                     // Store info for know remove aura reason
         DiminishingGroup m_AuraDRGroup: 8;                  // Diminishing
         TrackedAuraType m_trackedAuraType: 8;               // store if the caster tracks the aura - can change at spell steal for example
@@ -228,8 +235,6 @@ class SpellAuraHolder
         bool m_isRemovedOnShapeLost: 1;
         bool m_deleted: 1;
         bool m_skipUpdate: 1;
-
-        uint32 m_heartBeatTimer;                            // HeartbeatResist
 
         // Scripting System
         AuraScript* m_auraScript;

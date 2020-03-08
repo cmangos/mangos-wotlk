@@ -890,9 +890,10 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     targetInfo.processed = false;                              // Effects not applied on target
     targetInfo.magnet = (exception == EXCEPTION_MAGNET);
     targetInfo.procReflect = false;
+    targetInfo.heartbeatResistChance = 0;
 
     // Calculate hit result
-    targetInfo.missCondition = m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(target, m_spellInfo, targetInfo.effectMask, m_reflectable);
+    targetInfo.missCondition = (m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(target, m_spellInfo, targetInfo.effectMask, m_reflectable, &targetInfo.heartbeatResistChance));
 
     // spell fly from visual cast object
     WorldObject* affectiveObject = GetAffectiveCasterObject();
@@ -937,7 +938,7 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
         else
         {
             // Calculate reflected spell result on caster
-            targetInfo.reflectResult =  m_caster->SpellHitResult(m_caster, m_spellInfo, targetInfo.effectMask, m_reflectable);
+            targetInfo.reflectResult = m_caster->SpellHitResult(m_caster, m_spellInfo, targetInfo.effectMask, m_reflectable, &targetInfo.heartbeatResistChance);
             // Caster reflects back spell which was already reflected by victim
             if (targetInfo.reflectResult == SPELL_MISS_REFLECT)
                 // Full circle: it's impossible to reflect further, "Immune" shows up
@@ -1116,14 +1117,14 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     }
 
     if (missInfo == SPELL_MISS_NONE)                        // In case spell hit target, do all effect on that target
-        DoSpellHitOnUnit(unit, effectMask);
+        DoSpellHitOnUnit(unit, effectMask, target);
     else if (missInfo != SPELL_MISS_EVADE)
     {
         if (missInfo == SPELL_MISS_REFLECT)                // In case spell reflect from target, do all effect on caster (if hit)
         {
             if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
             {
-                DoSpellHitOnUnit(m_caster, effectMask);
+                DoSpellHitOnUnit(m_caster, effectMask, target);
                 reflectTarget = unit;
                 unitTarget = m_caster;
             }
@@ -1275,7 +1276,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     }
 }
 
-void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
+void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target)
 {
     if (!unit)
         return;
@@ -1415,6 +1416,13 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask)
             {
                 m_spellAuraHolder->SetAuraMaxDuration(duration);
                 m_spellAuraHolder->SetAuraDuration(duration);
+            }
+
+            if (originalDuration > 0 && target && target->heartbeatResistChance && !m_spellAuraHolder->IsPositive())
+            {
+                // TBC+: do not set heartbeat in pvp
+                if (bool heartbeat = !(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED)))
+                    m_spellAuraHolder->SetHeartbeatResist(target->heartbeatResistChance, originalDuration, uint32(m_diminishLevel));
             }
 
             if (!unit->AddSpellAuraHolder(m_spellAuraHolder))
