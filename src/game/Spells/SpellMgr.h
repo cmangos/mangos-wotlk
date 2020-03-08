@@ -546,6 +546,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 33908:         // Burning Spikes
         case 34343:         // Thorns
         case 35194:         // Shadowform
+        case 35281:         // Raging Flames
         case 35319:         // Electric Skin
         case 35408:         // Fear Proc
         case 35596:         // Power of the Legion
