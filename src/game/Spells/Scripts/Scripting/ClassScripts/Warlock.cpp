@@ -29,7 +29,7 @@ struct UnstableAffliction : public AuraScript
     void OnDispel(SpellAuraHolder* holder, Unit* dispeller, uint32 dispellingSpellId, uint32 originalStacks) const override
     {
         // use clean value for initial damage
-        int32 damage = holder->m_auras[EFFECT_INDEX_0]->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_0);
+        int32 damage = holder->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_0);
         damage *= 9;
 
         // backfire damage and silence - confirmed to have original caster
