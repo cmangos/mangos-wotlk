@@ -67,9 +67,13 @@ void instance_shadow_labyrinth::OnCreatureCreate(Creature* pCreature)
     {
         case NPC_VORPIL:
         case NPC_HELLMAW:
+        case NPC_BLACKHEART_THE_INCITER:
+        case NPC_MURMUR:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_CONTAINMENT_BEAM:
+        case NPC_CABAL_SPELLBINDER:
+        case NPC_CABAL_SUMMONER:
             m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
             break;
     }
@@ -192,8 +196,12 @@ InstanceData* GetInstanceData_instance_shadow_labyrinth(Map* pMap)
 
 struct go_screaming_hall_door : public GameObjectAI
 {
-    go_screaming_hall_door(GameObject* go) : GameObjectAI(go), m_doorCheckNearbyPlayersTimer(1000), m_doorOpen(false) {}
+    go_screaming_hall_door(GameObject* go) : GameObjectAI(go), m_doorCheckNearbyPlayersTimer(1000), m_doorOpen(false)
+    {
+        m_pInstance = (ScriptedInstance*)go->GetInstanceData();
+    }
 
+    ScriptedInstance* m_pInstance;
     uint32 m_doorCheckNearbyPlayersTimer;
     bool m_doorOpen;
 
@@ -211,6 +219,9 @@ struct go_screaming_hall_door : public GameObjectAI
                 {
                     m_go->Use(player);
                     m_doorOpen = true;
+
+                    if (Creature* pMurmur = m_pInstance->GetSingleCreatureFromStorage(NPC_MURMUR))
+                        pMurmur->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pMurmur, pMurmur);
                 });
             }
             m_doorCheckNearbyPlayersTimer = 1000;

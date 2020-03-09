@@ -81,11 +81,20 @@ struct boss_murmurAI : public Scripted_NoMovementAI
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         m_thunderingParams.range.minRange = SPELL_THUNDERING_STORM_MINRANGE;
         m_thunderingParams.range.maxRange = SPELL_THUNDERING_STORM_MAXRANGE;
+        m_uiCastersAttackMurmurTimer = 0;
+        m_uiAttackTimer = 0;
+
         Reset();
     }
 
     ScriptedInstance* m_pInstance;
     bool m_bIsRegularMode;
+
+    uint32 m_uiAttackTimer;
+    uint32 m_uiCastersAttackMurmurTimer;
+
+    GuidVector spellbindersVector;
+    GuidVector summonersVector;
 
     uint32 m_uiSonicBoomTimer;
     uint32 m_uiMurmursTouchTimer;
@@ -111,8 +120,96 @@ struct boss_murmurAI : public Scripted_NoMovementAI
         m_creature->SetHealth(uint32(m_creature->GetMaxHealth()*.4));
     }
 
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            m_uiCastersAttackMurmurTimer = urand(8000, 10000);
+            m_uiAttackTimer = urand(8000, 10000);
+            m_pInstance->GetCreatureGuidVectorFromStorage(NPC_CABAL_SPELLBINDER, spellbindersVector);
+            m_pInstance->GetCreatureGuidVectorFromStorage(NPC_CABAL_SUMMONER, summonersVector);
+        }
+    }
+
     void UpdateAI(const uint32 uiDiff) override
     {
+        if (!m_creature->isInCombat())
+        {
+            if (m_uiAttackTimer)
+            {
+                if (m_uiAttackTimer < uiDiff)
+                {
+                    // kill one that's moving
+                    if (urand(0, 1))
+                    {
+                        GuidVector moversVector;
+                        for (ObjectGuid& guid : spellbindersVector)
+                        {
+                            if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
+                            {
+                                if (creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                                {
+                                    moversVector.push_back(guid);
+                                }
+                            }
+                        }
+                        for (ObjectGuid& guid : summonersVector)
+                        {
+                            if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
+                            {
+                                if (creature->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
+                                {
+                                    moversVector.push_back(guid);
+                                }
+                            }
+                        }
+                        if (moversVector.size() > 0)
+                        {
+                            if (ObjectGuid& guid = moversVector[urand(0, moversVector.size() - 1)])
+                            {
+                                if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
+                                {
+                                    DoCastSpellIfCan(creature, SPELL_MURMURS_WRATH);
+                                }
+                            }
+                        }
+                    }
+                    // stun 5 targets
+                    else
+                        DoCastSpellIfCan(m_creature, SPELL_SUPPRESSION_BLAST);
+
+                    m_uiAttackTimer = 3000;
+                }
+                else
+                    m_uiAttackTimer -= uiDiff;
+            }
+
+            if (m_uiCastersAttackMurmurTimer)
+            {
+                if (m_uiCastersAttackMurmurTimer < uiDiff)
+                {
+                    for (ObjectGuid& guid : spellbindersVector)
+                    {
+                        if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
+                        {
+                            m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, m_creature, creature);
+                        }
+                    }
+                    for (ObjectGuid& guid : summonersVector)
+                    {
+                        if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
+                        {
+                            m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_A, m_creature, creature);
+                        }
+                    }
+                    m_uiCastersAttackMurmurTimer = urand(3000, 8000);
+                }
+                else
+                    m_uiCastersAttackMurmurTimer -= uiDiff;
+            }
+        }
+
         // Return since we have no target
         if (!m_creature->SelectHostileTarget())
             return;
