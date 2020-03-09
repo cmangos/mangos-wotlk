@@ -46,14 +46,9 @@ void instance_shadow_labyrinth::OnObjectCreate(GameObject* pGo)
     switch (pGo->GetEntry())
     {
         case GO_REFECTORY_DOOR:
-            if (m_auiEncounter[2] == DONE)
+            if (m_auiEncounter[TYPE_HELLMAW] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
-        case GO_SCREAMING_HALL_DOOR:
-            if (m_auiEncounter[3] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
-
         default:
             return;
     }
@@ -217,6 +212,8 @@ struct go_screaming_hall_door : public GameObjectAI
             {
                 m_go->GetMap()->ExecuteDistWorker(m_go, 35.0f, [&](Player * player)
                 {
+                    if (m_doorOpen)
+                        return;
                     m_go->Use(player);
                     m_doorOpen = true;
 

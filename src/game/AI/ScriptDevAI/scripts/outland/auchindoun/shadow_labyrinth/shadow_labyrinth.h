@@ -10,7 +10,7 @@ enum
     MAX_ENCOUNTER           = 4,
 
     TYPE_HELLMAW            = 1,
-    // TYPE_OVERSEER        = 2,                            // obsolete id used by acid
+    // TYPE_OVERSEER           = 2,                            // obsolete id used by acid
     TYPE_INCITER            = 3,
     TYPE_VORPIL             = 4,
     TYPE_MURMUR             = 5,
