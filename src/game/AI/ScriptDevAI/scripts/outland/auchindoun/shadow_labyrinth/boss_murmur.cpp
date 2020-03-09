@@ -138,7 +138,7 @@ struct boss_murmurAI : public Scripted_NoMovementAI
         {
             if (m_uiAttackTimer)
             {
-                if (m_uiAttackTimer < uiDiff)
+                if (m_uiAttackTimer <= uiDiff)
                 {
                     // kill one that's moving
                     if (urand(0, 1))
@@ -187,7 +187,7 @@ struct boss_murmurAI : public Scripted_NoMovementAI
 
             if (m_uiCastersAttackMurmurTimer)
             {
-                if (m_uiCastersAttackMurmurTimer < uiDiff)
+                if (m_uiCastersAttackMurmurTimer <= uiDiff)
                 {
                     for (ObjectGuid& guid : spellbindersVector)
                     {
