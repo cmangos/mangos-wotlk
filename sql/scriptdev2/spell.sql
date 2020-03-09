@@ -86,8 +86,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (33048,'spell_wota_search'),
 (33229,'spell_wota_remove'),
 (42783,'spell_wrath_of_the_astromancer'),
-(43681,'spell_inactive'),
-(44006,'spell_teleport_self_akilzon');
+(45043,'spell_power_circle'),
+(44006,'spell_teleport_self_akilzon'),
+(43681,'spell_inactive');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
