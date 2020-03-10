@@ -75,6 +75,7 @@ struct boss_warp_splinterAI : public ScriptedAI
         m_uiSummonTreantsTimer  = urand(25000, 35000);
         m_uiArcaneVolleyTimer   = urand(12000, 14500);
         m_saplings.clear();
+        m_creature->RemoveGuardians();
     }
 
     void Aggro(Unit* /*pWho*/) override
