@@ -95,14 +95,13 @@ struct boss_the_makerAI : public CombatAI
         switch (action)
         {
             case MAKER_EXPLODING_BEAKER:
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                    if (DoCastSpellIfCan(target, m_isRegularMode ? SPELL_EXPLODING_BREAKER : SPELL_EXPLODING_BREAKER_H) == CAST_OK)
-                        ResetCombatAction(action, urand(4000, 12000));
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_EXPLODING_BREAKER : SPELL_EXPLODING_BREAKER_H) == CAST_OK)
+                    ResetCombatAction(action, urand(4000, 12000));
                 break;
             case MAKER_DOMINATION:
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(target, SPELL_DOMINATION) == CAST_OK)
-                        ResetCombatAction(action, urand(15000, 25000));
+                        ResetCombatAction(action, urand(20000, 25000));
                 break;
         }
     }

@@ -277,6 +277,7 @@ void instance_blood_furnace::DoNextBroggokEventPhase()
 
         m_aBroggokEvent[m_uiBroggokEventPhase].m_bIsCellOpened = true;
 
+        // TODO: add small delay - after gate opened
         for (auto m_sSortedOrcGuid : m_aBroggokEvent[m_uiBroggokEventPhase].m_sSortedOrcGuids)
         {
             if (Creature* pOrc = instance->GetCreature(m_sSortedOrcGuid))

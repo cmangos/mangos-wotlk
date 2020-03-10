@@ -131,12 +131,12 @@ struct boss_kelidan_the_breakerAI : public CombatAI
         if (m_instance)
             m_instance->SetData(TYPE_KELIDAN_EVENT, FAIL);
 
-        DoCastSpellIfCan(m_creature, SPELL_EVOCATION);
         ResetTimer(KELIDAN_SETUP_ADDS, 2000);
     }
 
     void DoSetupAdds()
     {
+        DoCastSpellIfCan(nullptr, SPELL_EVOCATION);
         if (!m_instance)
             return;
 

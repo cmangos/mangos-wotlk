@@ -61,7 +61,7 @@ struct boss_broggokAI : public CombatAI
     {
         AddCombatAction(BROGGOK_SLIME_SPRAY, 10000u);
         AddCombatAction(BROGGOK_POISON_BOLT, 12000u);
-        AddCombatAction(BROGGOK_POISON_CLOUD, 5000u);
+        AddCombatAction(BROGGOK_POISON_CLOUD, 10000u);
     }
 
     ScriptedInstance* m_instance;
