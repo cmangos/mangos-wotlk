@@ -13209,6 +13209,8 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
 
     GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(menuId);
 
+    Gender gender = GENDER_MALE;
+
     // prepares quest menu when true
     bool canSeeQuests = menuId == GetDefaultGossipMenuForSource(pSource);
 
@@ -13237,6 +13239,8 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
         if (pSource->GetTypeId() == TYPEID_UNIT)
         {
             Creature* pCreature = (Creature*)pSource;
+
+            gender = Gender(pCreature->getGender());
 
             uint32 npcflags = pCreature->GetUInt32Value(UNIT_NPC_FLAGS);
 
@@ -13376,12 +13380,12 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                 if (gossipMenu.option_broadcast_text)
                 {
                     BroadcastText const* bct = sObjectMgr.GetBroadcastText(gossipMenu.option_broadcast_text);
-                    strOptionText = bct->GetText(loc_idx);
+                    strOptionText = bct->GetText(loc_idx, gender);
                 }
                 if (gossipMenu.box_broadcast_text)
                 {
                     BroadcastText const* bct = sObjectMgr.GetBroadcastText(gossipMenu.box_broadcast_text);
-                    strBoxText = bct->GetText(loc_idx);
+                    strBoxText = bct->GetText(loc_idx, gender);
                 }
             }
             else
