@@ -488,33 +488,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 12 / 100);
                 }
-
-                if (m_spellInfo->Id == 20647)
-                {
-                    uint32 rage = m_caster->GetPower(POWER_RAGE);
-
-                    // up to max 30 rage cost
-                    if (rage > 300)
-                        rage = 300;
-                    // Sudden Death
-                    if (m_caster->HasAura(52437))
-                    {
-                        Unit::AuraList const& auras = m_caster->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
-                        for (auto aura : auras)
-                        {
-                            // Only Sudden Death have this SpellIconID with SPELL_AURA_PROC_TRIGGER_SPELL
-                            if (aura->GetSpellProto()->SpellIconID == 1989)
-                            {
-                                // saved rage top stored in next affect
-                                uint32 lastrage = aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_1) * 10;
-                                if (lastrage < rage)
-                                    rage -= lastrage;
-                                break;
-                            }
-                        }
-                    }
-                    m_caster->SetPower(POWER_RAGE, rage);
-                }
                 break;
             }
             case SPELLFAMILY_WARLOCK:
