@@ -175,7 +175,6 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
             case NPC_INVADING_FEL_STALKER:
             case NPC_INVADING_VOIDWALKER:
             case NPC_INVADING_ANGUISHER:
-            case NPC_PORTAL_HOUND:
                 _spawn.insert(pCreature->GetObjectGuid());
                 break;
             case NPC_ARGENT_GUARDIAN:
