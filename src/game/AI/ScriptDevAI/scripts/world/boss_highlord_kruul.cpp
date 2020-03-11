@@ -104,11 +104,11 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
 
     void SummonFormation()
     {
-        if (Creature* hand1 = m_creature->SummonCreature(NPC_HAND_OF_THE_HIGHLORD, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f, TEMPSPAWN_DEAD_DESPAWN, 1800000))
+        if (Creature* hand1 = m_creature->SummonCreature(NPC_HAND_OF_THE_HIGHLORD, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f, TEMPSPAWN_DEAD_DESPAWN, 1800000, true))
         {
             hand1->GetMotionMaster()->MoveFollow(m_creature, 15.f, 220.f * float(M_PI) / 180.0f, true);
         }
-        if (Creature* hand2 = m_creature->SummonCreature(NPC_HAND_OF_THE_HIGHLORD, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f, TEMPSPAWN_DEAD_DESPAWN, 1800000))
+        if (Creature* hand2 = m_creature->SummonCreature(NPC_HAND_OF_THE_HIGHLORD, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f, TEMPSPAWN_DEAD_DESPAWN, 1800000, true))
         {
             hand2->GetMotionMaster()->MoveFollow(m_creature, 15.f, 140.f * float(M_PI) / 180.0f, true);
         }
