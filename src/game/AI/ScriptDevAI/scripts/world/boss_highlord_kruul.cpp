@@ -71,7 +71,6 @@ enum KruulActions // order based on priority
     KRUUL_ACTION_THUNDERCLAP,
     KRUUL_ACTION_CLEAVE,
     KRUUL_ACTION_KAZZAKS_ASSAULT,
-    KRUUL_ACTION_INFERNALING_SUMMONER,
     KRUUL_ACTION_DESPAWN,
 
     KRUUL_ACTION_MAX,
@@ -90,7 +89,6 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
         AddCombatAction(KRUUL_ACTION_THUNDERCLAP, 0u);
         AddCombatAction(KRUUL_ACTION_CLEAVE, 0u);
         AddCombatAction(KRUUL_ACTION_KAZZAKS_ASSAULT, 0u);
-        AddCombatAction(KRUUL_ACTION_INFERNALING_SUMMONER, 0u);
         AddCustomAction(KRUUL_ACTION_DESPAWN, false, [&]()
         {
             if (m_creature->isAlive())
@@ -99,12 +97,15 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
                 m_creature->ForcedDespawn(5000);
             }
         });
+        m_uiCreateInfernalingSummonerTimer = 6 * MINUTE * IN_MILLISECONDS;
 
         Reset();
         m_creature->SetActiveObjectState(true);
         SummonFormation();
         DoCastSpellIfCan(m_creature, SPELL_CREATE_INFERNALING_SUMMONER);
     }
+
+    uint32 m_uiCreateInfernalingSummonerTimer;
 
     void SummonFormation()
     {
@@ -139,7 +140,6 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
         ResetTimer(KRUUL_ACTION_THUNDERCLAP, GetInitialActionTimer(KRUUL_ACTION_THUNDERCLAP));
         ResetTimer(KRUUL_ACTION_CLEAVE, GetInitialActionTimer(KRUUL_ACTION_CLEAVE));
         ResetTimer(KRUUL_ACTION_KAZZAKS_ASSAULT, GetInitialActionTimer(KRUUL_ACTION_KAZZAKS_ASSAULT));
-        ResetTimer(KRUUL_ACTION_INFERNALING_SUMMONER, GetInitialActionTimer(KRUUL_ACTION_INFERNALING_SUMMONER));
         ResetTimer(KRUUL_ACTION_DESPAWN, GetInitialActionTimer(KRUUL_ACTION_DESPAWN));
 
         SetCombatMovement(true);
@@ -158,7 +158,6 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
             case KRUUL_ACTION_THUNDERCLAP: return urand(16000, 20000);
             case KRUUL_ACTION_CLEAVE: return 7000;
             case KRUUL_ACTION_KAZZAKS_ASSAULT: return urand(10000, 18000);
-            case KRUUL_ACTION_INFERNALING_SUMMONER: return 50000;
             case KRUUL_ACTION_DESPAWN: return urand(4 * HOUR * IN_MILLISECONDS, 6 * HOUR * IN_MILLISECONDS);
             default: return 0; // never occurs but for compiler
         }
@@ -176,7 +175,6 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
             case KRUUL_ACTION_THUNDERCLAP: return urand(10000, 14000);
             case KRUUL_ACTION_CLEAVE: return urand(8000, 12000);
             case KRUUL_ACTION_KAZZAKS_ASSAULT: return urand(20000, 30000);
-            case KRUUL_ACTION_INFERNALING_SUMMONER: return 60000;
             default: return 0; // never occurs but for compiler
         }
     }
@@ -308,16 +306,6 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
                         }
                         break;
                     }
-                    case KRUUL_ACTION_INFERNALING_SUMMONER:
-                    {
-                        if (DoCastSpellIfCan(m_creature, SPELL_CREATE_INFERNALING_SUMMONER) == CAST_OK)
-                        {
-                            ResetTimer(i, GetSubsequentActionTimer(i));
-                            SetActionReadyStatus(i, false);
-                            return;
-                        }
-                        break;
-                    }
                 }
             }
         }
@@ -326,6 +314,17 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
     void UpdateAI(const uint32 diff) override
     {
         UpdateTimers(diff, m_creature->isInCombat());
+
+        if (m_uiCreateInfernalingSummonerTimer)
+        {
+            if (m_uiCreateInfernalingSummonerTimer <= diff)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_CREATE_INFERNALING_SUMMONER);
+                m_uiCreateInfernalingSummonerTimer = 6 * MINUTE * IN_MILLISECONDS;
+            }
+            else
+                m_uiCreateInfernalingSummonerTimer -= diff;
+        }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
