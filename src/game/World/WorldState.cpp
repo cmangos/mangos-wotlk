@@ -945,7 +945,11 @@ bool WorldState::SetExpansion(uint8 expansion)
         sGameEventMgr.StartEvent(GAME_EVENT_ECHOES_OF_DOOM);
     else
         sGameEventMgr.StopEvent(GAME_EVENT_ECHOES_OF_DOOM);
-    sWorld.UpdateSessionExpansion(expansion);
+    sWorld.ExecuteForAllSessions([expansion](auto& data)
+    {
+        if (data.second->GetSecurity() < SEC_GAMEMASTER)
+            data.second->SetExpansion(expansion);
+    });
     Save(SAVE_ID_EXPANSION_RELEASE); // save to DB right away
     return true;
 }

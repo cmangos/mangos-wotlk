@@ -2749,10 +2749,3 @@ void World::GeneratePacketMetrics()
     meas_players.add_field("druid", std::to_string(GetOnlineClassPlayers(CLASS_DRUID)));
     meas_players.add_field("deathknight", std::to_string(GetOnlineClassPlayers(CLASS_DEATH_KNIGHT)));
 }
-
-void World::UpdateSessionExpansion(uint8 expansion)
-{
-    for (auto& data : m_sessions)
-        if (data.second->GetSecurity() < SEC_GAMEMASTER)
-            data.second->SetExpansion(expansion);
-}

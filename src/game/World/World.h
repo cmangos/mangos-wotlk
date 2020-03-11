@@ -650,7 +650,12 @@ class World
         static TimePoint GetCurrentClockTime() { return m_currentTime; }
         static uint32 GetCurrentDiff() { return m_currentDiff; }
 
-        void UpdateSessionExpansion(uint8 expansion);
+        template<typename T>
+        void ExecuteForAllSessions(T executor)
+        {
+            for (auto& data : m_sessions)
+                executor(data);
+        }
 
         Messager<World>& GetMessager() { return m_messager; }
 
