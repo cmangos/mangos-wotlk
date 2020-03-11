@@ -94,7 +94,7 @@ DBCStorage <GemPropertiesEntry> sGemPropertiesStore(GemPropertiesEntryfmt);
 DBCStorage <GlyphPropertiesEntry> sGlyphPropertiesStore(GlyphPropertiesfmt);
 DBCStorage <GlyphSlotEntry> sGlyphSlotStore(GlyphSlotfmt);
 
-DBCStorage <GMSurveyAnswersEntry> sGMSurveyAnswersStore(GMSurveyCurrentSurveyfmt);
+DBCStorage <GMSurveyAnswersEntry> sGMSurveyAnswersStore(GMSurveyAnswersfmt);
 DBCStorage <GMSurveyCurrentSurveyEntry> sGMSurveyCurrentSurveyStore(GMSurveyCurrentSurveyfmt);
 DBCStorage <GMSurveyQuestionsEntry> sGMSurveyQuestionsStore(GMSurveyQuestionsfmt);
 DBCStorage <GMSurveyEntry> sGMSurveySurveysStore(GMSurveySurveysfmt);
