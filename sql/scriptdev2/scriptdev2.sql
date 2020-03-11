@@ -3415,7 +3415,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1015100','Mooooo...','0','0','0','0','18179','bessy SAY_ESCORT_1'),
 ('-1015101','Moooooooooo!','0','0','0','0','18180','bessy SAY_ESCORT_2'),
 ('-1015102','Bessy, you''re home. Thank the Light!','0','0','0','0','18181','bessy SAY_THADELL'),
-('-1015103','Quickly, get to the middle of the platform! Illidan''s fury is soon to be unleashed!','0','4','0','0','0','Marcus Auralion - On Accept');
+('-1015103','Quickly, get to the middle of the platform! Illidan''s fury is soon to be unleashed!','0','4','0','0','0','Marcus Auralion - On Accept'),
+('-1015104','[Demonic] Ka kalix!','0','0','0','0','15551','Sal''salabim - On Gossip Select');
 
 -- -1 020 000 WOTLK texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

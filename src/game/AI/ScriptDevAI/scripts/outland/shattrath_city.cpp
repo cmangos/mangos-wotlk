@@ -608,6 +608,8 @@ enum
     QUEST_10004                     = 10004,
 
     SPELL_MAGNETIC_PULL             = 31705,
+
+    SAY_SAL_AGGRO                   = -1015104
 };
 
 struct npc_salsalabimAI : public ScriptedAI
@@ -656,19 +658,14 @@ UnitAI* GetAI_npc_salsalabim(Creature* pCreature)
     return new npc_salsalabimAI(pCreature);
 }
 
-bool GossipHello_npc_salsalabim(Player* pPlayer, Creature* pCreature)
+bool GossipSelect_npc_salsalabim(Player* pPlayer, Creature* pCreature, uint32 /*uiSender*/, uint32 uiAction)
 {
-    if (pPlayer->GetQuestStatus(QUEST_10004) == QUEST_STATUS_INCOMPLETE)
+    if (uiAction == 1)
     {
-        pCreature->SetFactionTemporary(FACTION_HOSTILE_SA, TEMPFACTION_RESTORE_REACH_HOME);
-        pCreature->AI()->AttackStart(pPlayer);
-    }
-    else
-    {
-        if (pCreature->isQuestGiver())
-            pPlayer->PrepareQuestMenu(pCreature->GetObjectGuid());
-
-        pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
+       pCreature->SetFactionTemporary(FACTION_HOSTILE_SA, TEMPFACTION_RESTORE_REACH_HOME);
+       pCreature->AI()->AttackStart(pPlayer);
+       DoScriptText(SAY_SAL_AGGRO, pCreature, pPlayer);
+       pPlayer->CLOSE_GOSSIP_MENU();
     }
 
     return true;
@@ -718,7 +715,7 @@ void AddSC_shattrath_city()
     pNewScript = new Script;
     pNewScript->Name = "npc_salsalabim";
     pNewScript->GetAI = &GetAI_npc_salsalabim;
-    pNewScript->pGossipHello = &GossipHello_npc_salsalabim;
+    pNewScript->pGossipSelect = &GossipSelect_npc_salsalabim;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
