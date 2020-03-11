@@ -73,11 +73,6 @@ enum BFTDP_Texts
     MH_DESPAWN          = -1015099,
 };
 
-enum BFTDP_Misc
-{
-    EVENT_ID_BATTLE_FOR_DARK_PORTAL = 212,
-};
-
 enum BFTDP_Events
 {
     EVENT_SPAWN_DREADKNIGHT = 1,

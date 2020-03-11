@@ -18,6 +18,7 @@
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/scripts/world/world_map_scripts.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
+#include "World/WorldState.h"
 
 /* *********************************************************
  *                  EASTERN KINGDOMS
@@ -290,7 +291,7 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
 
     void OnEventHappened(uint16 event_id, bool activate, bool resume) override
     {
-        if (event_id != EVENT_ID_BATTLE_FOR_DARK_PORTAL)
+        if (event_id != GAME_EVENT_BEFORE_THE_STORM)
             return;
 
         DespawnAdds();
