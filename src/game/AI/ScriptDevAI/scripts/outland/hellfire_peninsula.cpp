@@ -482,6 +482,7 @@ struct npc_fel_guard_houndAI : public ScriptedPetAI
     {
         m_uiPoodadTimer = 0;
         m_bIsPooActive  = false;
+        SetReactState(REACT_PASSIVE);
     }
 
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
