@@ -15967,6 +15967,35 @@ void Player::_LoadIntoDataField(const char* data, uint32 startOffset, uint32 cou
     {
         m_uint32Values[startOffset + index] = std::stoul(*iter);
     }
+
+    // repair titles
+    uint32 foundTitle = 0;
+    for (uint32 i = 1; i <= 28; ++i)
+    {
+        if (HasTitle(i))
+        {
+            foundTitle = i;
+            break;
+        }
+    }
+
+    if (!foundTitle)
+        return;
+
+    uint32 raceMask = getRaceMask();
+    if (foundTitle <= 14 && (raceMask & RACEMASK_ALLIANCE) != 0)
+        return;
+    if (foundTitle > 14 && (raceMask & RACEMASK_HORDE) != 0)
+        return;
+
+    if (CharTitlesEntry const* tEntry = sCharTitlesStore.LookupEntry(foundTitle))
+        SetTitle(tEntry, true, false);
+    if (foundTitle > 14)
+        foundTitle -= 14;
+    else
+        foundTitle += 14;
+    if (CharTitlesEntry const* tEntry = sCharTitlesStore.LookupEntry(foundTitle))
+        SetTitle(tEntry, false, false);
 }
 
 bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
@@ -22170,7 +22199,7 @@ void Player::SetTitle(uint32 titleId, bool lost)
         SetTitle(titleEntry, lost);
 }
 
-void Player::SetTitle(CharTitlesEntry const* title, bool lost)
+void Player::SetTitle(CharTitlesEntry const* title, bool lost, bool send)
 {
     uint32 fieldIndexOffset = title->bit_index / 32;
     uint32 flag = 1 << (title->bit_index % 32);
@@ -22189,6 +22218,9 @@ void Player::SetTitle(CharTitlesEntry const* title, bool lost)
 
         SetFlag(PLAYER__FIELD_KNOWN_TITLES + fieldIndexOffset, flag);
     }
+
+    if (!send)
+        return;
 
     WorldPacket data(SMSG_TITLE_EARNED, 4 + 4);
     data << uint32(title->bit_index);

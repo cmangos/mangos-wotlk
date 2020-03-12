@@ -649,6 +649,7 @@ class ChatHandler
         bool HandleTitlesCurrentCommand(char* args);
         bool HandleTitlesRemoveCommand(char* args);
         bool HandleTitlesSetMaskCommand(char* args);
+        bool HandleTitlesSwapCommand(char* args);
 
         bool HandleTriggerActiveCommand(char* args);
         bool HandleTriggerNearCommand(char* args);

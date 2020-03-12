@@ -4815,6 +4815,37 @@ bool ChatHandler::HandleTitlesSetMaskCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleTitlesSwapCommand(char* args)
+{
+    Player* target = getSelectedPlayer();
+    if (!target)
+        return false;
+
+    uint32 foundTitle = 0;
+    for (uint32 i = 1; i <= 28; ++i)
+    {
+        if (target->HasTitle(i))
+        {
+            foundTitle = i;
+            break;
+        }
+    }
+
+    if (!foundTitle)
+        return false;
+
+    if (CharTitlesEntry const* tEntry = sCharTitlesStore.LookupEntry(foundTitle))
+        target->SetTitle(tEntry, true);
+    if (foundTitle > 14)
+        foundTitle -= 14;
+    else
+        foundTitle += 14;
+    if (CharTitlesEntry const* tEntry = sCharTitlesStore.LookupEntry(foundTitle))
+        target->SetTitle(tEntry, false);
+
+    return true;
+}
+
 bool ChatHandler::HandleCharacterTitlesCommand(char* args)
 {
     Player* target;
