@@ -3663,7 +3663,7 @@ void ChatHandler::BuildChatPacket(WorldPacket& data, ChatMsg msgtype, char const
     const bool isGM = (chatTag & CHAT_TAG_GM) != 0;
     bool isAchievement = false;
 
-    data.Initialize(isGM ? SMSG_GM_MESSAGECHAT : SMSG_MESSAGECHAT);
+    data.Initialize((isGM && language != LANG_ADDON) ? SMSG_GM_MESSAGECHAT : SMSG_MESSAGECHAT);
     data << uint8(msgtype);
     data << uint32(language);
     data << ObjectGuid(senderGuid);
