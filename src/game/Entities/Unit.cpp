@@ -11546,6 +11546,8 @@ void Unit::SetImmobilizedState(bool apply, bool stun, bool logout)
         // Prevent giving ability to move if more immobilizers are active
         if (!IsImmobilizedState())
             SendMoveRoot(false);
+
+        SetIgnoreRangedTargets(false);
     }
 }
 
