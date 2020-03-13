@@ -112,8 +112,8 @@ void Channel::Join(Player* player, const char* password)
     // if no owner first logged will become
     if (!IsConstant() && !m_ownerGuid)
     {
-        SetOwner(guid, (m_players.size() > 1));
         m_players[guid].SetModerator(true);
+        SetOwner(guid, (m_players.size() > 1));
     }
 }
 
@@ -156,8 +156,14 @@ void Channel::Leave(Player* player, bool send)
 
     if (changeowner)
     {
-        ObjectGuid newowner = !m_players.empty() ? m_players.begin()->second.player : ObjectGuid();
-        SetOwner(newowner);
+        if (m_players.empty())
+            SetOwner(ObjectGuid());
+        else
+        {
+            auto& newowner = (m_players.begin()->second);
+            newowner.SetModerator(true);
+            SetOwner(newowner.player);
+        }
     }
 }
 
@@ -226,8 +232,14 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
 
     if (changeowner)
     {
-        ObjectGuid newowner = !m_players.empty() ? guid : ObjectGuid();
-        SetOwner(newowner);
+        if (m_players.empty())
+            SetOwner(ObjectGuid());
+        else
+        {
+            auto& newowner = (m_players.begin()->second);
+            newowner.SetModerator(true);
+            SetOwner(newowner.player);
+        }
     }
 }
 
