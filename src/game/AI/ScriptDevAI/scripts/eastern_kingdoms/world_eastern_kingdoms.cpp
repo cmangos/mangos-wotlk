@@ -270,7 +270,7 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
                 break;
         }
 
-        if (Creature* pProudwell = GetSingleCreatureFromStorage(NPC_AGENT_PROUDWELL))
+        if (Creature* pProudwell = GetSingleCreatureFromStorage(NPC_AGENT_PROUDWELL, true))
         {
             if (Creature* summon = pProudwell->SummonCreature(spawnId, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.o, spawnType, despawnTimer))
             {

@@ -42,7 +42,8 @@ enum
     GROMGOLOG_EVENT_4   = 15325,
 };
 
-WorldState::WorldState() : m_emeraldDragonsState(0xF), m_emeraldDragonsTimer(0), m_emeraldDragonsChosenPositions(4, 0), m_isMagtheridonHeadSpawnedHorde(false), m_isMagtheridonHeadSpawnedAlliance(false), m_adalSongOfBattleTimer(0), m_expansion(EXPANSION_WOTLK)
+WorldState::WorldState() : m_emeraldDragonsState(0xF), m_emeraldDragonsTimer(0), m_emeraldDragonsChosenPositions(4, 0), m_isMagtheridonHeadSpawnedHorde(false), m_isMagtheridonHeadSpawnedAlliance(false),
+    m_adalSongOfBattleTimer(0), m_expansion(EXPANSION_WOTLK), m_highlordKruulSpawned(false), m_highlordKruulTimer(0), m_highlordKruulChosenPosition(0)
 {
     m_transportStates[GROMGOL_UNDERCITY]    = GROMGOLUC_EVENT_1;
     m_transportStates[GROMGOL_ORGRIMMAR]    = OGUC_EVENT_1;
@@ -97,6 +98,28 @@ void WorldState::Load()
                     break;
                 case SAVE_ID_QUEL_DANAS: // TODO:
                     break;
+                case SAVE_ID_HIGHLORD_KRUUL:
+                {
+                    auto curTime = World::GetCurrentClockTime();
+                    uint64 respawnTime;
+                    if (data.size())
+                    {
+                        loadStream >> m_highlordKruulTimer >> respawnTime;
+                        if (respawnTime)
+                        {
+                            TimePoint respawnTimePoint = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::from_time_t(respawnTime));
+                            m_highlordKruulTimer = std::chrono::duration_cast<std::chrono::milliseconds>(respawnTimePoint - curTime).count();
+                            m_highlordKruulSpawned = true;
+                        }
+                        else m_highlordKruulTimer = 0;
+                    }
+                    else
+                    {
+                        m_highlordKruulSpawned = false;
+                        m_highlordKruulTimer = 0;
+                    }
+                    break;
+                }
                 case SAVE_ID_EXPANSION_RELEASE:
                     if (data.size())
                     {
@@ -449,6 +472,13 @@ void WorldState::HandleExternalEvent(uint32 eventId, uint32 param)
             Save(SAVE_ID_EMERALD_DRAGONS); // save to DB right away
             break;
         }
+        case CUSTOM_EVENT_HIGHLORD_KRUUL_DIED:
+        {
+            m_highlordKruulSpawned = false;
+            m_highlordKruulTimer = urand(4 * HOUR * IN_MILLISECONDS, 6 * HOUR * IN_MILLISECONDS);
+            Save(SAVE_ID_HIGHLORD_KRUUL); // save to DB right away
+            break;
+        }
         case CUSTOM_EVENT_LOVE_IS_IN_THE_AIR_LEADER:
         {
             MANGOS_ASSERT(param < LOVE_LEADER_MAX);
@@ -596,6 +626,42 @@ void WorldState::RespawnEmeraldDragons()
     });
 }
 
+// Highlord Kruul
+enum HighlordKruul : uint32
+{
+    NPC_HIGHLORD_KRUUL = 18338
+};
+
+static float highlordKruulSpawns[10][4] =
+{
+    { 1975.47f, -137.368f, 32.5316f, 1.20898f },            // Undercity
+    { -9550.13f, -126.712f, 57.4972f, 1.34809f },           // Stormwind
+    { -5319.087f, -482.139f, 388.332f, 5.831f },            // Ironforge
+    { -14737.6f, 499.647f, 3.48665f, 5.45968f },            // Booty Bay / Stranglethorn Vale
+    { -234.531f, -2585.4f, 119.897f, 4.77144f },            // Hinterlands
+    { 2197.334961f, -4684.198242f, 76.044106f, 0.937313f },  // Eastern Plaguelands
+    { -6668.74f, -1533.09f, 243.164f, 2.00132f },           // Searing Gorge
+    { 912.479f, -4502.01f, 7.34687f, 0.256955f },           // Orgrimmar
+    { 2785.4f, -3823.48f, 84.2639f, 4.5062f },               // Azshara
+    { 6443.186f, -3904.882f, 668.369f, 0.937313f },         // Winterpsring
+};
+
+void WorldState::RespawnHighlordKruul()
+{
+    if (!m_highlordKruulSpawned)
+    {
+        m_highlordKruulChosenPosition = urand(0, 9);
+        m_highlordKruulSpawned = true;
+        Save(SAVE_ID_HIGHLORD_KRUUL);
+    }
+
+    uint8 mapId = m_highlordKruulChosenPosition <= 6 ? 0 : 1;
+    sMapMgr.DoForAllMapsWithMapId(mapId, [&](Map* map)
+    {
+        WorldObject::SummonCreature(TempSpawnSettings(nullptr, NPC_HIGHLORD_KRUUL, highlordKruulSpawns[m_highlordKruulChosenPosition][0], highlordKruulSpawns[m_highlordKruulChosenPosition][1], highlordKruulSpawns[m_highlordKruulChosenPosition][2], highlordKruulSpawns[m_highlordKruulChosenPosition][3], TEMPSPAWN_DEAD_DESPAWN, 0, true, false, m_highlordKruulChosenPosition), map, 1);
+    });
+}
+
 bool WorldState::SetExpansion(uint8 expansion)
 {
     if (expansion > EXPANSION_WOTLK)
@@ -618,7 +684,10 @@ bool WorldState::SetExpansion(uint8 expansion)
 void WorldState::StartExpansionEvent()
 {
     if (m_expansion == EXPANSION_NONE)
+    {
         sGameEventMgr.StartEvent(GAME_EVENT_BEFORE_THE_STORM);
+        RespawnHighlordKruul();
+    }
     if (m_expansion == EXPANSION_TBC)
         sGameEventMgr.StartEvent(GAME_EVENT_ECHOES_OF_DOOM);
 }
@@ -629,10 +698,26 @@ void WorldState::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 
     {
         switch (zoneId)
         {
-            case ZONEID_STORMWIND_CITY: // TODO: Add rest
+            case ZONEID_STORMWIND_CITY:
+            case ZONEID_DARNASSUS:
+            case ZONEID_IRONFORGE:
+            case ZONEID_ORGRIMMAR:
+            case ZONEID_THUNDER_BLUFF:
+            case ZONEID_UNDERCITY:
             {
-                // TODO: add worldstate sending
-                // FillInitialWorldStateData(data, count, WORLD_STATE_DEATHS_DOOR_NORTH_WARP_GATE_HEALTH, m_deathsDoorNorthHP);
+                if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LOVE_IS_IN_THE_AIR))
+                {
+                    uint32 allianceSum = GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR) + GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE) + GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI);
+                    uint32 hordeSum = GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE) + GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL) + GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS);
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_BOLVAR, GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR));
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TYRANDE, GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE));
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_MAGNI, GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI));
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_ALLIANCE, allianceSum);
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_CAIRNE, GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE));
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_THRALL, GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL));
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_SYLVANAS, GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS));
+                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_HORDE, hordeSum);
+                }
                 break;
             }
         }

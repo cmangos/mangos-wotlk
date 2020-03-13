@@ -82,6 +82,7 @@ enum Events
     CUSTOM_EVENT_LOVE_IS_IN_THE_AIR_LEADER,
     // TBC
     CUSTOM_EVENT_ADALS_SONG_OF_BATTLE,
+    CUSTOM_EVENT_HIGHLORD_KRUUL_DIED,
 };
 
 enum SaveIds
@@ -92,6 +93,7 @@ enum SaveIds
 
     SAVE_ID_QUEL_DANAS = 20,
     SAVE_ID_EXPANSION_RELEASE = 21,
+    SAVE_ID_HIGHLORD_KRUUL = 22,
 };
 
 enum GameEvents
@@ -225,6 +227,12 @@ class WorldState
         void StartExpansionEvent();
 
         std::atomic<uint8> m_expansion;
+
+        void RespawnHighlordKruul();
+
+        bool m_highlordKruulSpawned;
+        uint32 m_highlordKruulTimer;
+        uint8 m_highlordKruulChosenPosition;
 };
 
 #define sWorldState MaNGOS::Singleton<WorldState>::Instance()

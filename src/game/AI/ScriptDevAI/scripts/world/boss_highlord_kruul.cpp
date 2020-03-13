@@ -24,6 +24,7 @@ EndScriptData
 
 #include "AI/ScriptDevAI/include/precompiled.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
+#include "World/WorldState.h"
 
 enum
 {
@@ -71,7 +72,6 @@ enum KruulActions // order based on priority
     KRUUL_ACTION_THUNDERCLAP,
     KRUUL_ACTION_CLEAVE,
     KRUUL_ACTION_KAZZAKS_ASSAULT,
-    KRUUL_ACTION_DESPAWN,
 
     KRUUL_ACTION_MAX,
 };
@@ -89,15 +89,9 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
         AddCombatAction(KRUUL_ACTION_THUNDERCLAP, 0u);
         AddCombatAction(KRUUL_ACTION_CLEAVE, 0u);
         AddCombatAction(KRUUL_ACTION_KAZZAKS_ASSAULT, 0u);
-        AddCustomAction(KRUUL_ACTION_DESPAWN, false, [&]()
-        {
-            if (m_creature->isAlive())
-            {
-                DoScriptText(SAY_DESPAWN, m_creature);
-                m_creature->ForcedDespawn(5000);
-            }
-        });
+
         m_uiCreateInfernalingSummonerTimer = 6 * MINUTE * IN_MILLISECONDS;
+        m_uiDespawnTimer = urand(4 * HOUR * IN_MILLISECONDS, 6 * HOUR * IN_MILLISECONDS);
 
         Reset();
         m_creature->SetActiveObjectState(true);
@@ -106,16 +100,17 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
     }
 
     uint32 m_uiCreateInfernalingSummonerTimer;
+    uint32 m_uiDespawnTimer;
 
     void SummonFormation()
     {
         if (Creature* hand1 = m_creature->SummonCreature(NPC_HAND_OF_THE_HIGHLORD, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f, TEMPSPAWN_DEAD_DESPAWN, 1800000))
         {
-            hand1->GetMotionMaster()->MoveFollow(m_creature, 25.f, 220.f * float(M_PI) / 180.0f, true);
+            hand1->GetMotionMaster()->MoveFollow(m_creature, 15.f, 220.f * float(M_PI) / 180.0f, true);
         }
         if (Creature* hand2 = m_creature->SummonCreature(NPC_HAND_OF_THE_HIGHLORD, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 0.0f, TEMPSPAWN_DEAD_DESPAWN, 1800000))
         {
-            hand2->GetMotionMaster()->MoveFollow(m_creature, 25.f, 140.f * float(M_PI) / 180.0f, true);
+            hand2->GetMotionMaster()->MoveFollow(m_creature, 15.f, 140.f * float(M_PI) / 180.0f, true);
         }
     }
 
@@ -140,7 +135,6 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
         ResetTimer(KRUUL_ACTION_THUNDERCLAP, GetInitialActionTimer(KRUUL_ACTION_THUNDERCLAP));
         ResetTimer(KRUUL_ACTION_CLEAVE, GetInitialActionTimer(KRUUL_ACTION_CLEAVE));
         ResetTimer(KRUUL_ACTION_KAZZAKS_ASSAULT, GetInitialActionTimer(KRUUL_ACTION_KAZZAKS_ASSAULT));
-        ResetTimer(KRUUL_ACTION_DESPAWN, GetInitialActionTimer(KRUUL_ACTION_DESPAWN));
 
         SetCombatMovement(true);
         SetCombatScriptStatus(false);
@@ -158,7 +152,6 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
             case KRUUL_ACTION_THUNDERCLAP: return urand(16000, 20000);
             case KRUUL_ACTION_CLEAVE: return 7000;
             case KRUUL_ACTION_KAZZAKS_ASSAULT: return urand(10000, 18000);
-            case KRUUL_ACTION_DESPAWN: return urand(4 * HOUR * IN_MILLISECONDS, 6 * HOUR * IN_MILLISECONDS);
             default: return 0; // never occurs but for compiler
         }
     }
@@ -177,6 +170,11 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
             case KRUUL_ACTION_KAZZAKS_ASSAULT: return urand(20000, 30000);
             default: return 0; // never occurs but for compiler
         }
+    }
+
+    void JustDied(Unit* /*killer*/) override
+    {
+        sWorldState.HandleExternalEvent(CUSTOM_EVENT_HIGHLORD_KRUUL_DIED, 0);
     }
 
     void JustRespawned() override
@@ -324,6 +322,21 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
             }
             else
                 m_uiCreateInfernalingSummonerTimer -= diff;
+        }
+
+        if (m_uiDespawnTimer)
+        {
+            if (m_uiDespawnTimer <= diff)
+            {
+                if (m_creature->isAlive())
+                {
+                    DoScriptText(SAY_DESPAWN, m_creature);
+                    sWorldState.HandleExternalEvent(CUSTOM_EVENT_HIGHLORD_KRUUL_DIED, 0);
+                    m_creature->ForcedDespawn(5000);
+                }
+            }
+            else
+                m_uiDespawnTimer -= diff;
         }
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
