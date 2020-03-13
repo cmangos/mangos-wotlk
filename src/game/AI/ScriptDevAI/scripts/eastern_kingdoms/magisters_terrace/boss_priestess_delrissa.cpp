@@ -151,7 +151,7 @@ struct boss_priestess_delrissaAI : public CombatAI
             for (uint8 i = 0; i < MAX_COMPANIONS; ++i)
                 m_vuiLackeyEnties[i] = aDelrissaLackeys[i];
 
-            std::random_shuffle(m_vuiLackeyEnties.begin(), m_vuiLackeyEnties.end());
+            std::shuffle(m_vuiLackeyEnties.begin(), m_vuiLackeyEnties.end(), *GetRandomGenerator());
 
             // Summon the 4 entries
             for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)

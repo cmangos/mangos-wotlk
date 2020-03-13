@@ -279,7 +279,7 @@ struct boss_netherspiteAI : public CombatAI
             m_creature->SummonCreature(m_vPortalEntryList[i], aPortalCoordinates[i].fX, aPortalCoordinates[i].fY, aPortalCoordinates[i].fZ, aPortalCoordinates[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0);
 
         // randomize the portals after the first summon
-        std::random_shuffle(m_vPortalEntryList.begin(), m_vPortalEntryList.end());
+        std::shuffle(m_vPortalEntryList.begin(), m_vPortalEntryList.end(), *GetRandomGenerator());
     }
 
     void JustSummoned(Creature* summoned) override
