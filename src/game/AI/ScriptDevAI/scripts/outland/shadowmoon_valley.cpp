@@ -5270,7 +5270,7 @@ struct TagGreaterFelfireDiemetradon : public SpellScript
         return SPELL_CAST_OK;
     }
 
-    void OnHit(Spell* spell) const override
+    void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
     {
         Unit* target = spell->m_targets.getUnitTarget(); // no need to check for creature, done above
         if (target)

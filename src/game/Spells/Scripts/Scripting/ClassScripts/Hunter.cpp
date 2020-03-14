@@ -20,7 +20,7 @@
 
 struct KillCommand : public SpellScript
 {
-    void OnHit(Spell* spell) const override
+    void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
     {
         if (spell->GetCaster()->HasAura(37483)) // Improved Kill Command - Item set bonus
             spell->GetCaster()->CastSpell(nullptr, 37482, TRIGGERED_OLD_TRIGGERED);// Exploited Weakness

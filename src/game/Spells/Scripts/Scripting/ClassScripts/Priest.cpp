@@ -60,7 +60,7 @@ struct ConsumeMagicSpellScript : public SpellScript
 
 struct ShadowWordDeath : public SpellScript
 {
-    void OnHit(Spell* spell) const override
+    void OnHit(Spell* spell, SpellMissInfo missInfo) const override
     {
         int32 swdDamage = spell->GetTotalTargetDamage();
         spell->GetCaster()->CastCustomSpell(nullptr, 32409, &swdDamage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
