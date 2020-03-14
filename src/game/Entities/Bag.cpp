@@ -198,22 +198,22 @@ Item* Bag::GetItemByLimitedCategory(uint32 limitedCategory) const
     return nullptr;
 }
 
-uint32 Bag::GetItemCount(uint32 item, Item* eItem) const
+uint32 Bag::GetItemCount(uint32 item, Item* skipItem) const
 {
     uint32 count = 0;
 
-    if (GetEntry() == item)
+    if (this != skipItem && GetEntry() == item)
         ++count;
 
     for (uint32 i = 0; i < GetBagSize(); ++i)
         if (m_bagslot[i])
-            if (m_bagslot[i] != eItem && m_bagslot[i]->GetEntry() == item)
+            if (m_bagslot[i] != skipItem && m_bagslot[i]->GetEntry() == item)
                 count += m_bagslot[i]->GetCount();
 
-    if (eItem && eItem->GetProto()->GemProperties)
+    if (skipItem && skipItem->GetProto()->GemProperties)
         for (uint32 i = 0; i < GetBagSize(); ++i)
             if (m_bagslot[i])
-                if (m_bagslot[i] != eItem && m_bagslot[i]->GetProto()->Socket[0].Color)
+                if (m_bagslot[i] != skipItem && m_bagslot[i]->GetProto()->Socket[0].Color)
                     count += m_bagslot[i]->GetGemCountWithID(item);
 
     return count;
