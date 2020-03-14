@@ -453,7 +453,7 @@ void Channel::SendWhoOwner(Player* player) const
     SendToOne(data, guid);
 }
 
-void Channel::List(Player* player)
+void Channel::List(Player* player, bool display/*= false*/)
 {
     ObjectGuid guid = player->GetObjectGuid();
 
@@ -467,32 +467,33 @@ void Channel::List(Player* player)
 
     // list players in channel
     WorldPacket data(SMSG_CHANNEL_LIST, 1 + (GetName().size() + 1) + 1 + 4 + m_players.size() * (8 + 1));
-    data << uint8(1);                                       // channel type?
+    data << uint8(display);                                 // response type: 0 - /chatinfo query, 1 - display list query
     data << GetName();                                      // channel name
     data << uint8(GetFlags());                              // channel flags?
 
-    size_t pos = data.wpos();
+    size_t countpos = data.wpos();
     data << uint32(0);                                      // size of list, placeholder
 
-    AccountTypes gmLevelInWhoList = (AccountTypes)sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_WHO_LIST);
+    // PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
+    // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
+    const bool visibilityCheck = (player->GetSession()->GetSecurity() == SEC_PLAYER);
+    AccountTypes visibilityThreshold = AccountTypes(sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_IN_WHO_LIST));
 
-    uint32 count  = 0;
+    uint32 count = 0;
     for (PlayerList::const_iterator i = m_players.begin(); i != m_players.end(); ++i)
     {
-        Player* plr = sObjectMgr.GetPlayer(i->first);
-
-        // PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
-        // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
-        if (plr && (player->GetSession()->GetSecurity() > SEC_PLAYER || plr->GetSession()->GetSecurity() <= gmLevelInWhoList) &&
-                plr->IsVisibleGloballyFor(player))
+        if (Player* member = sObjectMgr.GetPlayer(i->first))
         {
+            if (visibilityCheck && (member->GetSession()->GetSecurity() > visibilityThreshold || !member->IsVisibleGloballyFor(player)))
+                continue;
+
             data << ObjectGuid(i->first);
             data << uint8(i->second.flags);                 // flags seems to be changed...
             ++count;
         }
     }
 
-    data.put<uint32>(pos, count);
+    data.put<uint32>(countpos, count);
 
     SendToOne(data, guid);
 }
