@@ -7998,6 +7998,16 @@ void Spell::SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpel
         target->CastSpell(target, spellId75, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
 }
 
+void Spell::RegisterAuraProc(Aura* aura)
+{
+    m_procOnceHolder.insert(aura);
+}
+
+bool Spell::IsAuraProcced(Aura* aura)
+{
+    return m_procOnceHolder.find(aura) != m_procOnceHolder.end();
+}
+
 void Spell::ClearCastItem()
 {
     if (m_CastItem == m_targets.getItemTarget())
