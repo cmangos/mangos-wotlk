@@ -30,6 +30,7 @@
 #include "Entities/GameObject.h"
 #include "Server/Opcodes.h"
 #include "Chat/Chat.h"
+#include "Chat/ChannelMgr.h"
 #include "Globals/ObjectAccessor.h"
 #include "Maps/MapManager.h"
 #include "Tools/Language.h"
@@ -4849,6 +4850,45 @@ bool ChatHandler::HandleCharacterTitlesCommand(char* args)
                 PSendSysMessage(LANG_TITLE_LIST_CONSOLE, id, titleInfo->bit_index, name.c_str(), localeNames[loc], knownStr, activeStr);
         }
     }
+    return true;
+}
+
+bool ChatHandler::HandleChatStaticCommand(char* args)
+{
+    char* name = ExtractLiteralArg(&args);
+
+    if (!name)
+        return false;
+
+    bool state;
+
+    if (!ExtractOnOff(&args, state))
+        return false;
+
+    Player* player = GetPlayer();
+    ChannelMgr* manager = (player ? channelMgr(player->GetTeam()) : nullptr);
+    Channel* channel = (name && manager ? manager->GetChannel(name, player) : nullptr);
+
+    if (!channel)
+    {
+        // Error sent via packet by ChannelMgr::GetChannel()
+        SetSentErrorMessage(true);
+        return false;
+    }
+    else if (channel->IsStatic() != state)
+    {
+        if (!channel->SetStatic(state, true))
+        {
+            if (!channel->GetPassword().empty())
+                PSendSysMessage(LANG_COMMAND_CHAT_STATIC_PASSWORD, channel->GetName().c_str());
+            else
+                PSendSysMessage(LANG_COMMAND_CHAT_STATIC_NOT_CUSTOM, channel->GetName().c_str());
+            SetSentErrorMessage(true);
+            return false;
+        }
+        PSendSysMessage(LANG_COMMAND_CHAT_STATIC_SUCCESS, channel->GetName().c_str(), GetMangosString((state ? LANG_ON : LANG_OFF)));
+    }
+
     return true;
 }
 
