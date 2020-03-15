@@ -112,6 +112,11 @@ enum
     YELL_BASTION_HALL_LIGHTS    = -1329026,
     YELL_BASTION_INNER_1        = -1329027,
     YELL_BASTION_INNER_2        = -1329028,
+
+    // Jarien and Sothos
+    SPELL_SUMMON_WINNER_BOX     = 27645,
+    NPC_JARIEN                  = 16101,
+    NPC_SOTHOS                  = 16102,
 };
 
 static const uint32 aGates[] =
@@ -277,6 +282,9 @@ class instance_stratholme : public ScriptedInstance
         uint32 m_uiMindlessCount;
         uint8 m_uiPostboxesUsed;
         uint8 m_uiSilverHandKilled;
+
+        bool m_jarienKilled;
+        bool m_sothosKilled;
 
         ZigguratStore m_zigguratStorage[MAX_ZIGGURATS];
 
