@@ -524,7 +524,7 @@ void WorldSession::HandleAuctionListBidderItems(WorldPacket& recv_data)
     uint32 outbiddedCount;                                  // count of outbidded auctions
 
     recv_data >> auctioneerGuid;
-    recv_data >> listfrom;                                  // not used in fact (this list not have page control in client)
+    recv_data >> listfrom;                                  // start, used for page control listing by 50 elements
     recv_data >> outbiddedCount;
     if (recv_data.size() != (16 + outbiddedCount * 4))
     {
@@ -557,7 +557,7 @@ void WorldSession::HandleAuctionListBidderItems(WorldPacket& recv_data)
         }
     }
 
-    auctionHouse->BuildListBidderItems(data, pl, count, totalcount);
+    auctionHouse->BuildListBidderItems(data, pl, listfrom, count, totalcount);
     data.put<uint32>(0, count);                             // add count to placeholder
     data << uint32(totalcount);
     data << uint32(300);                                    // unk 2.3.0 delay for next isFull request?
@@ -573,7 +573,7 @@ void WorldSession::HandleAuctionListOwnerItems(WorldPacket& recv_data)
     uint32 listfrom;
 
     recv_data >> auctioneerGuid;
-    recv_data >> listfrom;                                  // not used in fact (this list not have page control in client)
+    recv_data >> listfrom;                                  // start, used for page control listing by 50 elements
 
     AuctionHouseEntry const* auctionHouseEntry = GetCheckedAuctionHouseForAuctioneer(auctioneerGuid);
     if (!auctionHouseEntry)
@@ -588,7 +588,7 @@ void WorldSession::HandleAuctionListOwnerItems(WorldPacket& recv_data)
     uint32 count = 0;
     uint32 totalcount = 0;
 
-    auctionHouse->BuildListOwnerItems(data, _player, count, totalcount);
+    auctionHouse->BuildListOwnerItems(data, _player, listfrom, count, totalcount);
     data.put<uint32>(0, count);
     data << uint32(totalcount);
     data << uint32(300);                                    // 2.3.0 delay for next isFull request?
