@@ -204,7 +204,7 @@ SpellEffectInfo SpellEffectInfoTable[MAX_SPELL_EFFECTS] =
     /*[56]*/     { "SPELL_EFFECT_SUMMON_PET",                   TARGET_TYPE_LOCATION_DEST,  TARGET_NONE },
     /*[57]*/     { "SPELL_EFFECT_LEARN_PET_SPELL",              TARGET_TYPE_UNIT,           TARGET_UNIT_CASTER_PET },
     /*[58]*/     { "SPELL_EFFECT_WEAPON_DAMAGE",                TARGET_TYPE_UNIT,           TARGET_NONE },
-    /*[59]*/     { "SPELL_EFFECT_OPEN_LOCK_ITEM",               TARGET_TYPE_LOCK,           TARGET_NONE },
+    /*[59]*/     { "SPELL_EFFECT_CREATE_RANDOM_ITEM",           TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[60]*/     { "SPELL_EFFECT_PROFICIENCY",                  TARGET_TYPE_NONE,           TARGET_NONE }, // confirmed none
     /*[61]*/     { "SPELL_EFFECT_SEND_EVENT",                   TARGET_TYPE_UNIT,           TARGET_UNIT_CASTER },
     /*[62]*/     { "SPELL_EFFECT_POWER_BURN",                   TARGET_TYPE_UNIT,           TARGET_NONE },
