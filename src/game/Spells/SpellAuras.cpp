@@ -8766,6 +8766,9 @@ void Aura::PeriodicTick()
                     caster->CastSpell(nullptr, 43836, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 }
             }
+
+            if (GetId() == 13493)
+                m_scriptValue += pdamage;
             break;
         }
         case SPELL_AURA_PERIODIC_LEECH:
