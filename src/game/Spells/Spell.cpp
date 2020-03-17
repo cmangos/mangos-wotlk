@@ -3519,6 +3519,9 @@ void Spell::handle_immediate()
     if (m_spellState != SPELL_STATE_CHANNELING)
         m_spellState = SPELL_STATE_LANDING;
 
+    // Remove used for cast item if need (it can be already nullptr after TakeReagents call
+    TakeCastItem();
+
     DoAllTargetlessEffects(true);
 
     for (auto& ihit : m_UniqueTargetInfo)
@@ -3529,9 +3532,6 @@ void Spell::handle_immediate()
 
     // spell is finished, perform some last features of the spell here
     _handle_finish_phase();
-
-    // Remove used for cast item if need (it can be already nullptr after TakeReagents call
-    TakeCastItem();
 
     if (m_spellState != SPELL_STATE_CHANNELING)
         finish();                                       // successfully finish spell cast (not last in case autorepeat or channel spell)
