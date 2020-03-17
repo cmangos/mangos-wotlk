@@ -4728,7 +4728,7 @@ void Player::BuildPlayerRepop()
     // convert player body to ghost
     SetHealth(1);
 
-    if (!IsImmobilizedState() && !GetSession()->isLogingOut())
+    if (!IsImmobilizedState())
         SendMoveRoot(false);
 
     // BG - remove insignia related
@@ -10684,7 +10684,7 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16& dest, Item* pItem, bool
             {
                 // May be here should be more stronger checks; STUNNED checked
                 // ROOT, CONFUSED, DISTRACTED, FLEEING this needs to be checked.
-                if (hasUnitState(UNIT_STAT_STUNNED))
+                if (IsStunned())
                     return EQUIP_ERR_YOU_ARE_STUNNED;
 
                 // do not allow equipping gear except weapons, offhands, projectiles, relics in
