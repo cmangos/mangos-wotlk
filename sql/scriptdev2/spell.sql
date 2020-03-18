@@ -63,6 +63,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34874,'spell_despawn_underbog_mushrooms'),
 (36374,'spell_summon_smoke_beacon'),
 (37591,'spell_inebriate_removal'),
+(34231,'spell_increased_holy_light_healing'),
 (30926,'spell_vazruden_liquid_fire_script'),
 (33793,'spell_vazruden_liquid_fire_script'),
 (33794,'spell_vazruden_liquid_fire_script'),
