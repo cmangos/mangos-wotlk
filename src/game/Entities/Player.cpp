@@ -17128,7 +17128,12 @@ void Player::LoadPet()
     {
         Pet* pet = new Pet;
         if (!pet->LoadPetFromDB(this, 0, 0, true, 0, true))
+        {
             delete pet;
+            return;
+        }
+        if (IsMounted())
+            pet->SetModeFlags(PET_MODE_DISABLE_ACTIONS);
     }
 }
 
@@ -22981,18 +22986,32 @@ void Player::UnsummonPetIfAny()
     pet->Unsummon(PET_SAVE_NOT_IN_SLOT, this);
 }
 
-bool Player::IsPetNeedBeTemporaryUnsummoned() const
+bool Player::IsPetNeedBeTemporaryUnsummoned(Pet* pet) const
 {
     if (!IsInWorld() || !IsAlive())
         return true;
 
-    if (sWorld.getConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT) && IsMounted())
+    if (IsMounted())
+    {
+        if (pet)
+        {
+            if (!pet->IsAlive())
+                return false;
+
+            if (pet->isControlled() && (!(pet->isTemporarySummoned() || InArena()) || sWorld.getConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT)))
+                return true;
+        }
+        else if (!InArena())
+            return true;
+
+        if (HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED))
+            return true;
+    }
+
+    if (HasAuraType(SPELL_AURA_FLY)) // if not IsMounted and has aura, means we are removing flying mount
         return true;
 
-    if (HasAuraType(SPELL_AURA_FLY) || (IsMounted() && HasAuraType(SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED))) // if not IsMounted and has aura, means we are removing flying mount
-        return true;
-
-    if (hasUnitState(UNIT_STAT_TAXI_FLIGHT))
+    if (IsTaxiFlying())
         return true;
 
     return false;
@@ -23004,7 +23023,7 @@ void Player::ResummonPetTemporaryUnSummonedIfAny()
         return;
 
     // not resummon in not appropriate state
-    if (IsPetNeedBeTemporaryUnsummoned())
+    if (IsPetNeedBeTemporaryUnsummoned(nullptr))
         return;
 
     if (GetPetGuid())
