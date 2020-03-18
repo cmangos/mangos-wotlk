@@ -4458,12 +4458,12 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 29284:                                 // Brittle Armor - dummy exists so that max stacks are added
                 {
-                    m_caster->CastSpell(unitTarget, 24575, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID);
+                    m_caster->CastSpell(unitTarget, 24575, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 29286:                                 // Mercurial Shield - dummy exists so that max stacks are added
                 {
-                    m_caster->CastSpell(unitTarget, 26464, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID);
+                    m_caster->CastSpell(unitTarget, 26464, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
             }
