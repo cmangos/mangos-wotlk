@@ -13288,7 +13288,7 @@ void Spell::EffectPullTowards(SpellEffectIndex eff_idx)
 
     if (m_spellInfo->Effect[eff_idx] == SPELL_EFFECT_PULL_TOWARDS)
     {
-        z = m_caster->GetPositionZ();
+        m_caster->GetPosition(x, y, z);
         dist = unitTarget->GetDistance(m_caster, false);
     }
     else // SPELL_EFFECT_PULL_TOWARDS_DEST
