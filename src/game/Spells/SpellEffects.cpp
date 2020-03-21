@@ -7379,6 +7379,7 @@ void Spell::EffectPickPocket(SpellEffectIndex /*eff_idx*/)
                         // refill pickpocket
                         delete loot;
                         loot = new Loot(playerCaster, creatureTarget, LOOT_PICKPOCKETING);
+                        creatureTarget->SetLootStatus(CREATURE_LOOT_STATUS_NONE, true);
                     }
                     else
                     {
