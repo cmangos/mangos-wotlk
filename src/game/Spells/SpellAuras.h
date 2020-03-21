@@ -140,6 +140,7 @@ class SpellAuraHolder
         bool IsRemovedOnShapeLost() const { return m_isRemovedOnShapeLost; }
         bool IsDeleted() const { return m_deleted;}
         bool IsEmptyHolder() const;
+        bool IsSaveToDbHolder() const;
 
         void SetDeleted() { m_deleted = true; m_spellAuraHolderState = SPELLAURAHOLDER_STATE_REMOVING; }
 
@@ -483,6 +484,7 @@ class Aura
         bool IsPersistent() const { return m_isPersistent; }
         bool IsAreaAura() const { return m_isAreaAura; }
         bool IsPeriodic() const { return m_isPeriodic; }
+        bool IsSaveToDbAura() const;
 
         void ApplyModifier(bool apply, bool Real = false);
         void UpdateAuraScaling();
