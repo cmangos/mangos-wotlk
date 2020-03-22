@@ -1904,6 +1904,26 @@ ChatTagFlags Player::GetChatTag() const
     return tag;
 }
 
+bool Player::isAcceptTickets() const
+{
+    AccountTypes level = GetSession()->GetSecurity();
+
+    if (level > SEC_PLAYER && level >= sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_ACCEPT_TICKETS))
+        return (m_ExtraFlags & PLAYER_EXTRA_GM_ACCEPT_TICKETS);
+
+    return false;
+}
+
+bool Player::isGMChat() const
+{
+    AccountTypes level = GetSession()->GetSecurity();
+
+    if (level > SEC_PLAYER && level >= sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_CHAT))
+        return (m_ExtraFlags & PLAYER_EXTRA_GM_CHAT);
+
+    return false;
+}
+
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options /*=0*/, AreaTrigger const* at /*=nullptr*/)
 {
     // do not let charmed players/creatures teleport
