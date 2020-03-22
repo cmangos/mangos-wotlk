@@ -218,7 +218,11 @@ int main(int argc, char* argv[])
     LoginDatabase.CommitTransaction();
 
     // FIXME - more intelligent selection of thread count is needed here.  config option?
-    MaNGOS::Listener<AuthSocket> listener(sConfig.GetStringDefault("BindIP", "0.0.0.0"), sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT), 1);
+    MaNGOS::Listener<AuthSocket> listener(
+            sConfig.GetStringDefault("BindIP", "0.0.0.0"),
+            sConfig.GetIntDefault("RealmServerPort", DEFAULT_REALMSERVER_PORT),
+            sConfig.GetIntDefault("ListenerThreads", 1)
+    );
 
     ///- Catch termination signals
     HookSignals();
