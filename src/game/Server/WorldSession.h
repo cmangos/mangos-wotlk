@@ -370,7 +370,7 @@ class WorldSession
         void SendBindPoint(Creature* npc) const;
 
         void SendGMTicketResult(uint32 opcode, uint32 result) const;
-        void SendGMTicket(GMTicket& ticket, time_t now = time(nullptr)) const;
+        void SendGMTicket(const GMTicket& ticket, time_t now = time(nullptr)) const;
 
         void SendGMTicketResponseError() const;
         void SendGMTicketResponseResolve(bool survey) const;
