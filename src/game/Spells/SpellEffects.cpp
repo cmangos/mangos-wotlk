@@ -9201,14 +9201,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAurasDueToSpell(33652);
                     return;
                 }
-                case 33676:                                 // Incite Chaos
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    m_caster->CastSpell(unitTarget, 33684, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 34098:                                 // ClearAllDebuffs
                 {
                     auto holderMap = m_caster->GetSpellAuraHolderMap();

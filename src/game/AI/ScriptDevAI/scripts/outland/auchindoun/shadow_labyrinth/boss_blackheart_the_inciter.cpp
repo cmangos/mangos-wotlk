@@ -23,19 +23,38 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "shadow_labyrinth.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
-    SPELL_INCITE_CHAOS      = 33676,                        // triggers 33684 on party members
-    SPELL_CHARGE            = 33709,
-    SPELL_WAR_STOMP         = 33707,
+    SPELL_CHARGE                = 33709,
+    SPELL_WAR_STOMP             = 33707,
+    
+    // incite chaos mechanic spells
+    SPELL_INCITE_CHAOS          = 33676,                       // spawns triggers and roots/stuns blackheart
+    SPELL_INCITE_CHAOS_CHARM    = 33684,                       // cast by triggers into players
+    SPELL_INCITE_CHAOS_UNK      = 33687,
+    SPELL_THREAT                = 34915,                       // Unk purpose, threat is removed right after
+    SPELL_INCITER_THREAT_TRIGGER= 45339,
+    SPELL_LAUGH                 = 33716,                       // used during incite chaos onto one player every 2-4 seconds TODO: add usage
+    SPELL_LAUGH_PERIODIC        = 33722,
+    SPELL_LAUGH_UNK             = 33797,
+
+    SPELL_DUMMY_NUKE            = 21912,
+
+    SPELL_INCITE_CHAOS_SPAWN_1  = 33677,
+    SPELL_INCITE_CHAOS_SPAWN_2  = 33680,
+    SPELL_INCITE_CHAOS_SPAWN_3  = 33681,
+    SPELL_INCITE_CHAOS_SPAWN_4  = 33682,
+    SPELL_INCITE_CHAOS_SPAWN_5  = 33683,
 
     SAY_INTRO1              = -1555008,
     SAY_INTRO2              = -1555009,
     SAY_INTRO3              = -1555010,
     SAY_AGGRO1              = -1555011,
-    SAY_AGGRO2              = -1555012,
-    SAY_AGGRO3              = -1555013,
+    SAY_INCITE_CHAOS        = -1555012,
+    SAY_AGGRO2              = -1555013,
     SAY_SLAY1               = -1555014,
     SAY_SLAY2               = -1555015,
     SAY_HELP                = -1555016,
@@ -51,154 +70,247 @@ enum
     SAY2_SLAY2              = -1555025,
     SAY2_HELP               = -1555026,
     SAY2_DEATH              = -1555027,
+
+    // faction IDs used during incite chaos - each trigger has one
+    FACTION_INCITER_1       = 1761,
+    FACTION_INCITER_2       = 1762,
+    FACTION_INCITER_3       = 1763,
+    FACTION_INCITER_4       = 1764,
+    FACTION_INCITER_5       = 1765,
+
+    // npcs summoned during incite chaos, each one charms a different player - propagates factions above to them
+    NPC_INCITER_TRIGGER_1   = 19300, // summoned by spellid 33677
+    NPC_INCITER_TRIGGER_2   = 19301, // summoned by spellid 33680
+    NPC_INCITER_TRIGGER_3   = 19302, // summoned by spellid 33681
+    NPC_INCITER_TRIGGER_4   = 19303, // summoned by spellid 33682
+    NPC_INCITER_TRIGGER_5   = 19304, // summoned by spellid 33683
 };
 
-struct boss_blackheart_the_inciterAI : public ScriptedAI
+enum BlackheartActions
 {
-    boss_blackheart_the_inciterAI(Creature* pCreature) : ScriptedAI(pCreature)
+    BLACKHEART_INCITE_CHAOS,
+    BLACKHEART_CHARGE,
+    BLACKHEART_KNOCKBACK,
+    BLACKHEART_ACTION_MAX,
+    BLACKHEART_INCITE_TIMER,
+};
+
+struct boss_blackheart_the_inciterAI : public CombatAI
+{
+    boss_blackheart_the_inciterAI(Creature* creature) : CombatAI(creature, BLACKHEART_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        if (m_isRegularMode)
+            AddCombatAction(BLACKHEART_INCITE_CHAOS, 18000, 24000);
+        else
+            AddCombatAction(BLACKHEART_INCITE_CHAOS, 12000, 17000);
+        AddCombatAction(BLACKHEART_CHARGE, 30000, 50000);
+        AddCombatAction(BLACKHEART_KNOCKBACK, 10000, 14000);
+        AddCustomAction(BLACKHEART_INCITE_TIMER, true, [&]() { HandleInciteEnd(); });
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiInciteChaosTimer;
-    uint32 m_uiInciteChaosWaitTimer;
-    uint32 m_uiChargeTimer;
-    uint32 m_uiKnockbackTimer;
-
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
     GuidVector m_vTargetsGuids;
 
-    void Reset() override
+    uint32 GetSubsequentActionTimer(BlackheartActions id)
     {
-        m_uiInciteChaosWaitTimer = 0;
-        m_uiInciteChaosTimer = 15000;
-        m_uiChargeTimer      = urand(30000, 37000);
-        m_uiKnockbackTimer   = urand(10000, 14000);
+        switch (id)
+        {
+            case BLACKHEART_INCITE_CHAOS: return urand(52000, 60000);
+            case BLACKHEART_CHARGE: return urand(26000, 44000);
+            case BLACKHEART_KNOCKBACK: return urand(15000, 30000);
+            default: return 0;
+        }
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_INCITER, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_INCITER, DONE);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        switch (urand(0, 2))
+        switch (urand(0, 1))
         {
             case 0: DoScriptText(SAY_AGGRO1, m_creature); break;
             case 1: DoScriptText(SAY_AGGRO2, m_creature); break;
-            case 2: DoScriptText(SAY_AGGRO3, m_creature); break;
         }
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_INCITER, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_INCITER, IN_PROGRESS);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_INCITER, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_INCITER, FAIL);
     }
 
-    void EnterEvadeMode() override
+    void HandleInciteEnd()
     {
-        // if we are waiting for Incite chaos to expire don't evade
-        if (m_uiInciteChaosWaitTimer)
-            return;
-
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiInciteChaosWaitTimer)
+        SetCombatScriptStatus(false);
+        SetCombatMovement(true);
+        m_meleeEnabled = true;
+        if (m_creature->GetVictim())
         {
-            if (m_uiInciteChaosWaitTimer <= uiDiff)
+            m_creature->MeleeAttackStart(m_creature->GetVictim());
+            m_creature->SetTarget(m_creature->GetVictim());
+        }
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case BLACKHEART_INCITE_CHAOS:
             {
-                // Restart attack on all targets
-                for (GuidVector::const_iterator itr = m_vTargetsGuids.begin(); itr != m_vTargetsGuids.end(); ++itr)
+                if (m_creature->getThreatManager().getThreatList().size() > 1)
                 {
-                    if (Unit* pTarget = m_creature->GetMap()->GetUnit(*itr))
-                        AttackStart(pTarget);
+                    if (DoCastSpellIfCan(m_creature, SPELL_INCITE_CHAOS) == CAST_OK)
+                    {
+                        DoScriptText(SAY_INCITE_CHAOS, m_creature);
+                        SetCombatScriptStatus(true);
+                        SetCombatMovement(false);
+                        m_meleeEnabled = false;
+                        DoResetThreat();
+                        m_creature->MeleeAttackStop(m_creature->GetVictim());
+                        m_creature->SetTarget(nullptr);
+                        m_creature->CastSpell(nullptr, SPELL_LAUGH_PERIODIC, TRIGGERED_NONE);
+                        ResetCombatAction(action, GetSubsequentActionTimer(BlackheartActions(action)));
+                        ResetTimer(BLACKHEART_INCITE_TIMER, 19000);
+                        return;
+                    }
                 }
-
-                m_creature->HandleEmote(EMOTE_STATE_NONE);
-                m_uiInciteChaosWaitTimer = 0;
+                break;
             }
-            else
-                m_uiInciteChaosWaitTimer -= uiDiff;
-        }
-
-        // Return since we have no pTarget
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiInciteChaosTimer < uiDiff)
-        {
-            // Store the threat list
-            m_vTargetsGuids.clear();
-            m_creature->FillGuidsListFromThreatList(m_vTargetsGuids);
-
-            if (DoCastSpellIfCan(m_creature, SPELL_INCITE_CHAOS) == CAST_OK)
+            case BLACKHEART_CHARGE:
             {
-                m_creature->HandleEmote(EMOTE_STATE_LAUGH);
-                m_uiInciteChaosTimer = 55000;
-                m_uiInciteChaosWaitTimer = 16000;
-                return;
-            }
-        }
-        else
-            m_uiInciteChaosTimer -= uiDiff;
-
-        // Charge Timer
-        if (m_uiChargeTimer < uiDiff)
-        {
-            m_uiChargeTimer = 0;
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_CHARGE, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_CHARGE) == CAST_OK)
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_CHARGE, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE))
                 {
-                    m_uiChargeTimer = urand(30000, 43000);
+                    if (DoCastSpellIfCan(target, SPELL_CHARGE) == CAST_OK)
+                    {
+                        ResetCombatAction(action, GetSubsequentActionTimer(BlackheartActions(action)));
+                        DoResetThreat();
+                    }
+                }
+                break;
+            }
+            case BLACKHEART_KNOCKBACK:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_WAR_STOMP) == CAST_OK)
+                {
+                    ResetCombatAction(action, GetSubsequentActionTimer(BlackheartActions(action)));
                     DoResetThreat();
-                    return;
                 }
+                break;
             }
         }
-        else
-            m_uiChargeTimer -= uiDiff;
-
-        // Knockback Timer
-        if (m_uiKnockbackTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_WAR_STOMP) == CAST_OK)
-                m_uiKnockbackTimer = urand(15000, 30000);
-        }
-        else
-            m_uiKnockbackTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_blackheart_the_inciter(Creature* pCreature)
+struct dummy_blackheart_the_inciterAI : public ScriptedAI
 {
-    return new boss_blackheart_the_inciterAI(pCreature);
-}
+    dummy_blackheart_the_inciterAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_threat(false),
+        m_attack(false)
+    {
+        SetCombatMovement(false);
+    }
+
+    bool m_threat;
+    bool m_attack;
+
+    void Reset() override
+    {
+
+    }
+
+    ScriptedInstance* m_instance;
+
+    void JustRespawned() override
+    {
+        if (m_instance)
+            if (Creature* blackheartBoss = m_instance->GetSingleCreatureFromStorage(NPC_BLACKHEART_THE_INCITER))
+                m_creature->CastSpell(blackheartBoss, SPELL_THREAT, TRIGGERED_NONE);
+        m_creature->CastSpell(m_creature->GetSpawner(), SPELL_INCITE_CHAOS_CHARM, TRIGGERED_NONE);
+
+        DoResetThreat();
+    }
+
+    void SpellHitTarget(Unit* target, const SpellEntry* spellInfo) override
+    {
+        if (spellInfo->Id == SPELL_INCITER_THREAT_TRIGGER)
+        {
+            Unit* myCharm = m_creature->GetCharm();
+            Unit* hisCharm = target->GetCharm();
+            if (myCharm && hisCharm)
+                myCharm->AddThreat(hisCharm);
+        }
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!m_threat)
+        {
+            m_threat = true;
+            m_creature->CastSpell(nullptr, SPELL_INCITER_THREAT_TRIGGER, TRIGGERED_NONE);
+        }
+        else if (!m_attack)
+        {
+            m_attack = true;
+            if (Unit* charmed = m_creature->GetCharm())
+                charmed->AI()->AttackClosestEnemy();
+        }
+
+        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DUMMY_NUKE, SELECT_FLAG_PLAYER))
+            m_creature->CastSpell(target, SPELL_DUMMY_NUKE, TRIGGERED_NONE);
+    }
+};
+
+struct InciteChaos : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        uint32 spellId;
+
+        switch (spell->GetScriptValue())
+        {
+            case 0: spellId = SPELL_INCITE_CHAOS_SPAWN_1; break;
+            case 1: spellId = SPELL_INCITE_CHAOS_SPAWN_2; break;
+            case 2: spellId = SPELL_INCITE_CHAOS_SPAWN_3; break;
+            case 3: spellId = SPELL_INCITE_CHAOS_SPAWN_4; break;
+            case 4: spellId = SPELL_INCITE_CHAOS_SPAWN_5; break;
+        }
+
+        spell->SetScriptValue(spell->GetScriptValue() + 1);
+
+        unitTarget->CastSpell(nullptr, spellId, TRIGGERED_OLD_TRIGGERED); // shouldnt be sent to client
+    }
+};
 
 void AddSC_boss_blackheart_the_inciter()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_blackheart_the_inciter";
-    pNewScript->GetAI = &GetAI_boss_blackheart_the_inciter;
+    pNewScript->GetAI = &GetNewAIInstance<boss_blackheart_the_inciterAI>;
     pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "dummy_blackheart_the_inciter";
+    pNewScript->GetAI = &GetNewAIInstance<dummy_blackheart_the_inciterAI>;
+    pNewScript->RegisterSelf();
+
+    RegisterSpellScript<InciteChaos>("spell_incite_chaos");
 }
