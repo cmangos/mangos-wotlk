@@ -59,6 +59,9 @@ void instance_magtheridons_lair::OnCreatureCreate(Creature* pCreature)
         case NPC_CHANNELER:
             m_lChannelerGuidList.push_back(pCreature->GetObjectGuid());
             break;
+        case NPC_BURNING_ABYSSAL:
+            m_npcEntryGuidCollection[pCreature->GetEntry()].push_back(pCreature->GetObjectGuid());
+            break;
     }
 }
 
@@ -107,6 +110,12 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                     {
                         if (GameObject* pColumn = instance->GetGameObject(*itr))
                             pColumn->ResetDoorOrButton();
+                    }
+
+                    {
+                        GuidVector abyssals;
+                        GetCreatureGuidVectorFromStorage(NPC_BURNING_ABYSSAL, abyssals);
+                        DespawnGuids(abyssals);
                     }
 
                     // Reset cubes
@@ -172,8 +181,7 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (pMagtheridon->IsAlive())
                     {
-                        pMagtheridon->SetInCombatWithZone();
-                        DoScriptText(EMOTE_EVENT_BEGIN, pMagtheridon);
+                        pMagtheridon->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pMagtheridon, pMagtheridon);
                         m_uiCageBreakTimer = MINUTE * IN_MILLISECONDS;
                     }
                 }

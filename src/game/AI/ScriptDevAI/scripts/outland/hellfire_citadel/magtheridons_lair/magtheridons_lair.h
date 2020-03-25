@@ -14,6 +14,7 @@ enum
 
     NPC_MAGTHERIDON             = 17257,
     NPC_CHANNELER               = 17256,
+    NPC_BURNING_ABYSSAL         = 17454,
 
     GO_MANTICRON_CUBE           = 181713,
     GO_DOODAD_HF_MAG_DOOR01     = 183847,

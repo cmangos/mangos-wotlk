@@ -1955,12 +1955,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 30658:                                 // Quake - magtheridon
-                {
-                    if (urand(0, 2))
-                        m_caster->CastSpell(m_caster, 30571, TRIGGERED_OLD_TRIGGERED);
-                    break;
-                }
                 case 31617:                                 // Raise Dead
                 case 31624:
                 case 31625:
