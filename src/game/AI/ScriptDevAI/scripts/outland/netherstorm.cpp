@@ -3199,6 +3199,7 @@ struct npc_adyen_the_lightwardenAI : public ScriptedAI
 {
     npc_adyen_the_lightwardenAI(Creature* creature) : ScriptedAI(creature), m_crusaderStrikeTimer(0), m_hammerOfJusticeTimer(0), m_eventStarted(false)
     {
+        m_creature->GetCombatManager().SetLeashingDisable(true);
     }
 
     ObjectGuid m_playerGuid;
@@ -3684,6 +3685,7 @@ struct npc_kaylaan_the_lostAI : public ScriptedAI
 {
     npc_kaylaan_the_lostAI(Creature* creature) : ScriptedAI(creature), m_deathPrevented(false), m_avengersShieldTimer(0), m_burningLightTimer(0), m_healTimer(0), m_holySlamTimer(0)
     {
+        m_creature->GetCombatManager().SetLeashingDisable(true);
     }
 
     bool m_deathPrevented;
@@ -3858,16 +3860,6 @@ struct npc_kaylaan_the_lostAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* Getnpc_adyen_the_lightwardenAI(Creature* creature)
-{
-    return new npc_adyen_the_lightwardenAI(creature);
-}
-
-UnitAI* Getnpc_kaylaan_the_lostAI(Creature* creature)
-{
-    return new npc_kaylaan_the_lostAI(creature);
-}
 
 bool AreaTrigger_at_socrethar_seat(Player* player, AreaTriggerEntry const* /*at*/)
 {
@@ -4058,14 +4050,14 @@ void AddSC_netherstorm()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_adyen_the_lightwarden";
-    pNewScript->GetAI = &Getnpc_adyen_the_lightwardenAI;
+    pNewScript->GetAI = &GetNewAIInstance<npc_adyen_the_lightwardenAI>;
     pNewScript->pGossipHello = &GossipHello_npc_adyen_the_lightwarden;
     pNewScript->pGossipSelect = &GossipSelect_npc_adyen_the_lightwarden;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_kaylaan_the_lost";
-    pNewScript->GetAI = &Getnpc_kaylaan_the_lostAI;
+    pNewScript->GetAI = &GetNewAIInstance<npc_kaylaan_the_lostAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<Soulbind>("spell_soulbind");
