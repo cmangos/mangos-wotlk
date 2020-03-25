@@ -7205,6 +7205,9 @@ SpellCastResult Spell::CheckItems()
                 // prevent prospecting in trade slot
                 if (m_targets.getItemTarget()->GetOwnerGuid() != m_caster->GetObjectGuid())
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
+                // already looting it
+                if (m_targets.getItemTarget()->m_loot && m_targets.getItemTarget()->m_loot->GetLootType() == LOOT_PROSPECTING)
+                    return SPELL_FAILED_PROSPECT_WHILE_LOOTING;
                 // Check for enough skill in jewelcrafting
                 uint32 item_prospectingskilllevel = m_targets.getItemTarget()->GetProto()->RequiredSkillRank;
                 if (item_prospectingskilllevel > p_caster->GetSkillValue(SKILL_JEWELCRAFTING))
