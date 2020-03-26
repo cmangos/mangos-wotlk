@@ -1148,6 +1148,13 @@ struct FelInfusion : public SpellScript
         spell->SetMaxAffectedTargets(1);
         spell->SetFilteringScheme(EFFECT_INDEX_0, true, SCHEME_CLOSEST);
     }
+
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (!target->IsInCombat())
+            return false;
+        return true;
+    }
 };
 
 void AddSC_spell_scripts()
