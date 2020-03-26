@@ -1652,7 +1652,6 @@ inline bool IsSpellSpecificIdentical(SpellSpecific specific, SpellSpecific speci
 DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto, bool triggered);
 bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group);
 bool IsDiminishingReturnsGroupDurationDiminished(DiminishingGroup group, bool pvp);
-uint32 GetDiminishingReturnsGroupResetTime(DiminishingGroup group, uint32 duration, bool pvp);
 DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group);
 int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry const* spellproto);
 bool IsCreatureDRSpell(SpellEntry const* spellInfo);
