@@ -7199,21 +7199,22 @@ SpellCastResult Spell::CheckItems()
             {
                 if (!m_targets.getItemTarget())
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
+                Item* itemTarget = m_targets.getItemTarget();
                 // ensure item is a prospectable ore
-                if (!(m_targets.getItemTarget()->GetProto()->Flags & ITEM_FLAG_IS_PROSPECTABLE))
+                if (!(itemTarget->GetProto()->Flags & ITEM_FLAG_IS_PROSPECTABLE))
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
                 // prevent prospecting in trade slot
-                if (m_targets.getItemTarget()->GetOwnerGuid() != m_caster->GetObjectGuid())
+                if (itemTarget->GetOwnerGuid() != m_caster->GetObjectGuid())
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
                 // already looting it
-                if (m_targets.getItemTarget()->m_loot && m_targets.getItemTarget()->m_loot->GetLootType() == LOOT_PROSPECTING)
-                    return SPELL_FAILED_PROSPECT_WHILE_LOOTING;
+                if (itemTarget->m_loot && itemTarget->HasTemporaryLoot())
+                    return SPELL_FAILED_NOT_WHILE_LOOTING;
                 // Check for enough skill in jewelcrafting
-                uint32 item_prospectingskilllevel = m_targets.getItemTarget()->GetProto()->RequiredSkillRank;
+                uint32 item_prospectingskilllevel = itemTarget->GetProto()->RequiredSkillRank;
                 if (item_prospectingskilllevel > p_caster->GetSkillValue(SKILL_JEWELCRAFTING))
                     return SPELL_FAILED_LOW_CASTLEVEL;
                 // make sure the player has the required ores in inventory
-                if (int32(m_targets.getItemTarget()->GetCount()) < CalculateSpellEffectValue(SpellEffectIndex(i), m_caster))
+                if (int32(itemTarget->GetCount()) < CalculateSpellEffectValue(SpellEffectIndex(i), m_caster))
                     return SPELL_FAILED_NEED_MORE_ITEMS;
 
                 if (!LootTemplates_Prospecting.HaveLootFor(m_targets.getItemTargetEntry()))
