@@ -94,6 +94,9 @@ class instance_blood_furnace : public ScriptedInstance
 
         void GetKelidanAddList(GuidList& lList) { lList = m_lChannelersGuids; m_lChannelersGuids.clear(); }
 
+        void ShowChatCommands(ChatHandler* handler) override;
+        void ExecuteChatCommand(ChatHandler* handler, char* args) override;
+
     private:
         void DoSortBroggokOrcs();
         void DoNextBroggokEventPhase();
