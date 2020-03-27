@@ -1603,7 +1603,7 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand* table, const char* cmd)
     return command || childCommands;
 }
 
-bool ChatHandler::isValidChatMessage(const char* message) const
+bool ChatHandler::CheckChatMessageEscapeSequences(const char* message) const
 {
     /*
 
@@ -1619,9 +1619,6 @@ bool ChatHandler::isValidChatMessage(const char* message) const
 
     | will be escaped to ||
     */
-
-    if (strlen(message) > 255)
-        return false;
 
     const char validSequence[6] = "cHhhr";
     const char* validSequenceIterator = validSequence;

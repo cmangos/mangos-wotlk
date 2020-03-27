@@ -98,7 +98,7 @@ class ChatHandler
         bool ParseCommands(const char* text);
         ChatCommand const* FindCommand(char const* text);
 
-        bool isValidChatMessage(const char* message) const;
+        bool CheckChatMessageEscapeSequences(const char* message) const;
         bool HasSentErrorMessage() const { return sentErrorMessage;}
 
         /**
