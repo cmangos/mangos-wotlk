@@ -22,6 +22,10 @@
 			"walkableClimb": 4.0
 		}
 	},
+        "542": {
+                "walkableSlopeAngle":50,
+                "walkableClimb": 7.0
+        },
 	"545": {
 		"maxSimplificationError": 2.1,
 		"detailSampleDist": 0.7,
