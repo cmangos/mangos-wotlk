@@ -5196,12 +5196,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
     if (apply)
     {
-        switch (GetId())
-        {
-            case 32830: // Possess - invisible
-                caster->CastSpell(caster, 32832, TRIGGERED_OLD_TRIGGERED);
-                break;
-        }
+
     }
     else
     {
@@ -5209,11 +5204,6 @@ void Aura::HandleModCharm(bool apply, bool Real)
         {
             case 30019: // Control Piece
                 caster->RemoveAurasDueToSpell(30019);
-                break;
-            case 32830: // Possess
-                target->CastSpell(target, 13360, TRIGGERED_OLD_TRIGGERED);
-                if (caster->GetTypeId() == TYPEID_UNIT)
-                    static_cast<Creature*>(caster)->ForcedDespawn();
                 break;
             case 34630: // Scrap Reaver X6000
                 if (target->GetTypeId() == TYPEID_UNIT && target->AI())
@@ -11016,9 +11006,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                         return;
                     break;
                 }
-                case 32830: // Possess
-                    boostSpells.push_back(32831);
-                    break;
                 case 33896: // Desperate Defense
                     boostSpells.push_back(33897);
                     break;

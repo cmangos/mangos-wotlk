@@ -1157,6 +1157,43 @@ struct FelInfusion : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_POSSESS       = 32830,
+    SPELL_POSSESS_BUFF  = 32831,
+    SPELL_POSSESS_INVIS = 32832,
+    SPELL_KNOCKDOWN     = 13360,
+};
+
+struct AuchenaiPossess : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+        {
+            Unit* caster = aura->GetCaster();
+            if (caster)
+                caster->CastSpell(nullptr, SPELL_POSSESS_INVIS, TRIGGERED_OLD_TRIGGERED);
+            aura->GetTarget()->CastSpell(nullptr, SPELL_POSSESS_BUFF, TRIGGERED_OLD_TRIGGERED);
+            aura->ForcePeriodicity(1000);
+        }
+        else
+        {
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_POSSESS_BUFF);
+            aura->GetTarget()->CastSpell(aura->GetTarget(), SPELL_KNOCKDOWN, TRIGGERED_OLD_TRIGGERED);
+            if (Unit* caster = aura->GetCaster())
+                if (caster->IsCreature())
+                    static_cast<Creature*>(caster)->ForcedDespawn();
+        }
+    }
+
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        if (aura->GetTarget()->GetHealthPercent() < 50.f)
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_POSSESS);
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1175,6 +1212,7 @@ void AddSC_spell_scripts()
     RegisterAuraScript<InebriateRemoval>("spell_inebriate_removal");
     RegisterSpellScript<AstralBite>("spell_astral_bite");
     RegisterSpellScript<FelInfusion>("spell_fel_infusion");
+    RegisterAuraScript<AuchenaiPossess>("spell_auchenai_possess");
     RegisterSpellScript<spell_battleground_banner_trigger>("spell_battleground_banner_trigger");
     RegisterSpellScript<spell_outdoor_pvp_banner_trigger>("spell_outdoor_pvp_banner_trigger");
 }
