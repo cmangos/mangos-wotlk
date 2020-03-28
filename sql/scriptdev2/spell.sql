@@ -65,6 +65,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (33676,'spell_incite_chaos'),
 (30843,'spell_enfeeble'),
 (41624,'spell_enfeeble_removal'),
+(36557,'spell_cursed_scarab_periodic'),
+(36560,'spell_cursed_scarab_despawn_periodic'),
 (34874,'spell_despawn_underbog_mushrooms'),
 (36374,'spell_summon_smoke_beacon'),
 (37591,'spell_inebriate_removal'),

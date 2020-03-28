@@ -2270,6 +2270,31 @@ struct SummonSmokeBeacon : public SpellScript
     }
 };
 
+enum
+{
+    FACTION_SCARAB_HOSTILE = 14,
+};
+
+struct CursedScarabPeriodicTrigger : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (target && target->getFaction() != FACTION_SCARAB_HOSTILE && urand(0, 10) == 0)
+            target->setFaction(FACTION_SCARAB_HOSTILE);
+    }
+};
+
+struct CursedScarabDespawnPeriodicTrigger : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (target && target->IsCreature())
+            static_cast<Creature*>(target)->ForcedDespawn();
+    }
+};
+
 void AddSC_hellfire_peninsula()
 {
     Script* pNewScript = new Script;
@@ -2374,4 +2399,6 @@ void AddSC_hellfire_peninsula()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<SummonSmokeBeacon>("spell_summon_smoke_beacon");
+    RegisterSpellScript<CursedScarabPeriodicTrigger>("spell_cursed_scarab_periodic");
+    RegisterSpellScript<CursedScarabDespawnPeriodicTrigger>("spell_cursed_scarab_despawn_periodic");
 }

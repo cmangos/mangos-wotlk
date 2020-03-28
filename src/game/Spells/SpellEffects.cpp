@@ -12476,6 +12476,7 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
                 case 42868:
                     gameObjTarget->SendGameObjectCustomAnim(gameObjTarget->GetObjectGuid());
                     break;
+                case 36546:         // no delay meant to happen - activate trap immediately
                 case 38054:
                     gameObjTarget->Use(m_caster);
                     break;
