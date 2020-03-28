@@ -503,6 +503,7 @@ UPDATE creature_template SET ScriptName='npc_aether_tech_vendor' WHERE entry IN(
 UPDATE creature_template SET ScriptName='npc_bashir_flesh_fiend' WHERE entry IN(23249);
 UPDATE creature_template SET ScriptName='npc_disruptor_tower' WHERE entry IN(23250);
 UPDATE creature_template SET ScriptName='npc_grand_collector' WHERE entry IN(23333);
+UPDATE gameobject_template SET ScriptName='go_nether_drake_egg_trap' WHERE entry=184958;
 
 /* BLASTED LANDS */
 UPDATE creature_template SET ScriptName='npc_agent_proudwell' WHERE entry=19942;

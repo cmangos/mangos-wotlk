@@ -4036,6 +4036,22 @@ struct KoiKoiDeath : public SpellScript
     }
 };
 
+enum
+{
+    NPC_NETHER_DRAKE_EGG_BUNNY = 21814,
+};
+
+struct go_nether_drake_egg_trapAI : public GameObjectAI
+{
+    go_nether_drake_egg_trapAI(GameObject* go) : GameObjectAI(go) { }
+
+    void JustDespawned() override
+    {
+        if (Creature* bunny = GetClosestCreatureWithEntry(m_go, NPC_NETHER_DRAKE_EGG_BUNNY, 5.f))
+            bunny->ForcedDespawn();
+    }
+};
+
 void AddSC_blades_edge_mountains()
 {
     Script* pNewScript = new Script;
@@ -4195,6 +4211,11 @@ void AddSC_blades_edge_mountains()
     pNewScript = new Script;
     pNewScript->Name = "npc_grand_collector";
     pNewScript->GetAI = &GetAI_npc_grand_collector;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_nether_drake_egg_trap";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_nether_drake_egg_trapAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<EtherealRingSignalFlare>("spell_ethereal_ring_signal_flare");
