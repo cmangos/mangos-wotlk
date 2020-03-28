@@ -725,6 +725,9 @@ class ChatHandler
 
         bool HandleBagsCommand(char* args);
 
+        bool HandleCombatListCommand(char* args);
+        bool HandleCombatStopCommand(char* args);
+
         bool HandleTicketDiscardCommand(char* args);
         bool HandleTicketEscalateCommand(char* args);
         bool HandleTicketGoCommand(char* args);
@@ -743,7 +746,6 @@ class ChatHandler
         bool HandleMaxSkillCommand(char* args);
         bool HandleSetSkillCommand(char* args);
         bool HandleRespawnCommand(char* args);
-        bool HandleCombatStopCommand(char* args);
         bool HandleRepairitemsCommand(char* args);
         bool HandleStableCommand(char* args);
         bool HandleWaterwalkCommand(char* args);
