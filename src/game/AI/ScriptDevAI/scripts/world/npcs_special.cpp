@@ -1453,22 +1453,53 @@ enum npc_burster_worm
     PHASE_CHASE                         = 2,
 };
 
-// TODO: Add random repositioning logic
-struct npc_burster_wormAI : public ScriptedAI
+enum BursterActions
 {
-    npc_burster_wormAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiPhase(0), m_uiChaseTimer(0), m_uiBirthDelayTimer(0), m_uiBoreTimer(0), m_uiEnrageTimer(0), m_uiBorePassive(SetBorePassive()), m_boreDamageSpell(SetBoreDamageSpell())
+    BURSTER_CHASE_DISTANCE,
+    BURSTER_RANGED_ATTACK,
+    BURSTER_ENABLE_ENRAGE,
+    BURSTER_ENRAGE,
+    BURSTER_BORE,
+    BURSTER_SWEEP,
+    BURSTER_ACTION_MAX,
+    BURSTER_BIRTH_DELAY,
+    BURSTER_CHASE_SEQUENCE,
+};
+
+struct npc_burster_wormAI : public CombatAI
+{
+    npc_burster_wormAI(Creature* creature) : CombatAI(creature, BURSTER_ACTION_MAX),
+        m_uiBorePassive(SetBorePassive()), m_boreDamageSpell(SetBoreDamageSpell()), m_rangedSpell(GetRangedSpell())
     {
+        // generic abilities
+        AddCombatAction(BURSTER_CHASE_DISTANCE, 10000u);
+        AddCombatAction(BURSTER_RANGED_ATTACK, 2000u);
+        // per entry abilities
+        if (m_creature->GetEntry() == NPC_TUNNELER || m_creature->GetEntry() == NPC_NETHERMINE_BURSTER)
+        {
+            AddTimerlessCombatAction(BURSTER_ENABLE_ENRAGE, true);
+            AddCombatAction(BURSTER_ENRAGE, true);
+        }
+        if (m_creature->GetEntry() != NPC_MARAUDING_BURSTER && m_creature->GetEntry() != NPC_SAND_WORM && m_creature->GetEntry() != NPC_FULGORGE && m_creature->GetEntry() != NPC_GREATER_CRUST_BURSTER)
+            AddCombatAction(BURSTER_BORE, 5000u);
+        if (m_creature->GetEntry() == NPC_SAND_WORM)
+            AddCombatAction(BURSTER_SWEEP, 5000, 15000);
+        // sequences
+        AddCustomAction(BURSTER_BIRTH_DELAY, true, [&]()
+        {
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            SetMeleeEnabled(true);
+            SetCombatScriptStatus(false);
+        });
+        AddCustomAction(BURSTER_CHASE_SEQUENCE, true, [&]() { HandleChaseSequence(); });
     }
 
-    uint8 m_uiPhase;
-
-    uint32 m_uiChaseTimer;
-    uint32 m_uiBirthDelayTimer;
-    uint32 m_uiBoreTimer;
-    uint32 m_uiEnrageTimer;
+    uint32 m_chaseStage;
+    uint32 m_rangedSpell;
+    int32 m_rangeCheckState;
     uint32 m_uiBorePassive;
     uint32 m_boreDamageSpell;
-    uint32 m_uiWormSweepTimer;
+    Position m_teleport;
 
     inline uint32 SetBorePassive()
     {
@@ -1504,63 +1535,60 @@ struct npc_burster_wormAI : public ScriptedAI
         }
     }
 
-    void Reset() override
+    inline uint32 GetRangedSpell()
     {
-        m_uiPhase           = PHASE_COMBAT;
-        m_uiChaseTimer      = 0;
-        m_uiBoreTimer       = 0;
-        m_uiBirthDelayTimer = 0;
-        m_uiEnrageTimer     = 0;
-        m_uiWormSweepTimer  = urand(5000, 15000);
-
-        SetCombatMovement(false);
-
-        Submerge();
-
-        // only spawned creatures have the submerge visual - TODO: Reconfirm which should actually use it
-        //if (!m_creature->IsTemporarySummon() && !)
-        //    DoCastSpellIfCan(m_creature, SPELL_SANDWORM_SUBMERGE_VISUAL, CAST_AURA_NOT_PRESENT);
+        switch (m_creature->GetEntry())
+        {
+            case NPC_FULGORGE:
+                return SPELL_POISON_SPIT;
+            case NPC_SAND_WORM:
+                return SPELL_WORM_BLAST;
+            default:
+                return SPELL_POISON;
+        }
     }
 
-    void Submerge()
+    void Reset() override
     {
-        m_creature->CastSpell(m_creature, SPELL_SUBMERGED, TRIGGERED_NONE);
-        m_creature->CastSpell(m_creature, m_uiBorePassive, TRIGGERED_NONE);
+        CombatAI::Reset();
+        m_chaseStage = 0;
+        m_rangeCheckState = -1;
+
+        SetMeleeEnabled(false);
+
+        Submerge(true);
+    }
+
+    void Submerge(bool passive)
+    {
+        m_creature->CastSpell(nullptr, SPELL_SUBMERGED, TRIGGERED_NONE);
+        if (passive)
+            m_creature->CastSpell(m_creature, m_uiBorePassive, TRIGGERED_NONE);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    void SpellHitTarget(Unit* target, const SpellEntry* spellInfo) override
     {
-        if (pSpell->Id == m_boreDamageSpell && pTarget->GetTypeId() == TYPEID_PLAYER)
-            AttackStart(pTarget);
+        if (spellInfo->Id == m_boreDamageSpell && target->GetTypeId() == TYPEID_PLAYER)
+            AttackStart(target);
     }
 
     void JustRespawned() override
     {
+        CombatAI::JustRespawned();
         Reset();
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         // remove the bore bone aura again, for summoned creatures
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->RemoveAurasDueToSpell(SPELL_SANDWORM_SUBMERGE_VISUAL);
         m_creature->RemoveAurasDueToSpell(m_uiBorePassive);
+        SetCombatScriptStatus(true);
+        SetRootSelf(true, true);
 
-        if (DoCastSpellIfCan(m_creature, SPELL_STAND) == CAST_OK)
-            m_uiBirthDelayTimer = 2000;
-    }
-
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-        m_creature->SetLootRecipient(nullptr);
-
-        Reset();
-
-        m_creature->GetMotionMaster()->MoveTargetedHome();
+        if (DoCastSpellIfCan(nullptr, SPELL_STAND) == CAST_OK)
+            ResetTimer(BURSTER_BIRTH_DELAY, 2000);
     }
 
     // function to check for bone worms
@@ -1569,130 +1597,102 @@ struct npc_burster_wormAI : public ScriptedAI
         return m_creature->GetEntry() == NPC_BONE_CRAWLER || m_creature->GetEntry() == NPC_HAISHULUD || m_creature->GetEntry() == NPC_BONE_SIFTER || m_creature->GetEntry() == NPC_MATURE_BONE_SIFTER;
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleChaseSequence()
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // animation delay
-        if (m_uiBirthDelayTimer)
+        uint32 timer = 0;
+        switch (m_chaseStage)
         {
-            if (m_uiBirthDelayTimer <= uiDiff)
-                m_uiBirthDelayTimer = 0;
-            else
-                m_uiBirthDelayTimer -= uiDiff;
-
-            // no action during birth animaiton
-            return;
-        }
-
-        // combat phase
-        if (m_uiPhase == PHASE_COMBAT)
-        {
-            if (m_uiChaseTimer)
+            case 0: // right after submerge
             {
-                if (m_uiChaseTimer <= uiDiff)
-                {
-                    // sone creatures have bone bore spell
-                    Submerge();
-                    m_uiPhase = PHASE_CHASE;
-                    SetCombatMovement(true);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-                    m_uiChaseTimer = 0;
-                }
-                else
-                    m_uiChaseTimer -= uiDiff;
-
-                // return when doing phase change
-                return;
+                // teleport
+                timer = 1000;
+                m_creature->NearTeleportTo(m_teleport.x, m_teleport.y, m_teleport.z, 0.f);
+                break;
             }
-
-            // If we are within range melee the target
-            if (m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
-                DoMeleeAttackIfReady();
-            else if (!m_creature->IsNonMeleeSpellCasted(false))
+            case 1: // after teleport
             {
-                switch (m_creature->GetEntry())
-                {
-                    case NPC_FULGORGE:
-                        DoCastSpellIfCan(m_creature->GetVictim(), SPELL_POISON_SPIT);
-                    case NPC_SAND_WORM:
-                        DoCastSpellIfCan(m_creature->GetVictim(), SPELL_WORM_BLAST);
-                    default:
-                        DoCastSpellIfCan(m_creature->GetVictim(), SPELL_POISON);
-                }
-
-                // if target not in range, submerge and chase
-                if (!m_creature->IsInRange(m_creature->GetVictim(), 0, 50.0f))
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SANDWORM_SUBMERGE_VISUAL, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                        m_uiChaseTimer = 1500;
-                }
-            }
-
-            // bore spell
-            if (m_creature->GetEntry() != NPC_MARAUDING_BURSTER && m_creature->GetEntry() != NPC_SAND_WORM && m_creature->GetEntry() != NPC_FULGORGE && m_creature->GetEntry() != NPC_GREATER_CRUST_BURSTER)
-            {
-                if (m_uiBoreTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BORE) == CAST_OK)
-                        m_uiBoreTimer = 45000;
-                }
-                else
-                    m_uiBoreTimer -= uiDiff;
-            }
-
-            // enrage spell
-            if ((m_creature->GetEntry() == NPC_TUNNELER || m_creature->GetEntry() == NPC_NETHERMINE_BURSTER) && m_creature->GetHealthPercent() < 30.0f)
-            {
-                if (m_uiEnrageTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
-                        m_uiEnrageTimer = urand(12000, 17000);
-                }
-                else
-                    m_uiEnrageTimer -= uiDiff;
-            }
-
-            // worm sweep spell
-            if (m_creature->GetEntry() == NPC_SAND_WORM)
-            {
-                if (m_uiWormSweepTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_WORM_SWEEP) == CAST_OK)
-                        m_uiWormSweepTimer = urand(15000, 25000);
-                }
-                else
-                    m_uiWormSweepTimer -= uiDiff;
-            }
-        }
-        // chase target
-        else if (m_uiPhase == PHASE_CHASE)
-        {
-            if (m_creature->IsInRange(m_creature->GetVictim(), 0, 5.0f))
-            {
-                //m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+                // come up
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                m_creature->RemoveAurasDueToSpell(SPELL_TUNNEL_BORE_PASSIVE);
-                m_creature->RemoveAurasDueToSpell(SPELL_TUNNEL_BORE_BONE_PASSIVE);
                 m_creature->RemoveAurasDueToSpell(SPELL_SANDWORM_SUBMERGE_VISUAL);
+                DoCastSpellIfCan(nullptr, SPELL_STAND);
+                timer = 1000;
+                break;
+            }
+            case 2: // after coming up
+            {
+                // start attacking
+                SetMeleeEnabled(true);
+                m_creature->SetTarget(m_creature->GetVictim());
+                SetCombatScriptStatus(false);
+                break;
+            }
+        }
+        ++m_chaseStage;
+        if (timer)
+            ResetTimer(BURSTER_CHASE_SEQUENCE, timer);
+    }
 
-                if (DoCastSpellIfCan(m_creature, SPELL_STAND) == CAST_OK)
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case BURSTER_CHASE_DISTANCE:
+            {
+                // sone creatures have bone bore spell
+                if (!m_creature->GetVictim() || !m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()) || m_creature->GetDistance(m_creature->GetVictim(), true, DIST_CALC_COMBAT_REACH) > 30.f)
                 {
-                    m_creature->GetMotionMaster()->MoveIdle();
-                    SetCombatMovement(false);
-                    m_uiPhase = PHASE_COMBAT;
-                    m_uiBirthDelayTimer = 2000;
+                    ResetCombatAction(action, 10000);
+                    return;
                 }
+                Submerge(false);
+                SetMeleeEnabled(false);
+                SetCombatScriptStatus(true); // TODO: remove on next step
+                m_creature->SetTarget(nullptr);
+                m_creature->GetVictim()->GetClosePoint(m_teleport.x, m_teleport.y, m_teleport.z, 0.f, 12.f, M_PI_F);
+                ResetTimer(BURSTER_CHASE_SEQUENCE, 2000);
+                ResetCombatAction(action, 20000);
+                m_chaseStage = 0;
+                break;
+            }
+            case BURSTER_RANGED_ATTACK:
+            {
+                uint32 timer = 500;
+                // If victim exists we have a target in melee range
+                if (m_creature->GetVictim() && m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
+                    m_rangeCheckState = -1;
+                // Spam Waterbolt spell when not tanked
+                else
+                {
+                    ++m_rangeCheckState;
+                    if (m_rangeCheckState > 1)
+                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_rangedSpell, SELECT_FLAG_PLAYER))
+                            if (DoCastSpellIfCan(target, m_rangedSpell) == CAST_OK)
+                                timer = 2500;
+                }
+                ResetCombatAction(action, timer);
+                break;
+            }
+            case BURSTER_BORE:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BORE) == CAST_OK)
+                    ResetCombatAction(action, 45000);
+                break;
+            }
+            case BURSTER_ENRAGE:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
+                    ResetCombatAction(action, urand(12000, 17000));
+                break;
+            }
+            case BURSTER_SWEEP:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_WORM_SWEEP) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 25000));
+                break;
             }
         }
     }
 };
-
-UnitAI* GetAI_npc_burster_worm(Creature* pCreature)
-{
-    return new npc_burster_wormAI(pCreature);
-}
 
 /*######
 ## npc_aoe_damage_trigger
@@ -2554,7 +2554,7 @@ void AddSC_npcs_special()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_burster_worm";
-    pNewScript->GetAI = &GetAI_npc_burster_worm;
+    pNewScript->GetAI = &GetNewAIInstance<npc_burster_wormAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
