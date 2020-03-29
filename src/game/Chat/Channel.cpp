@@ -79,11 +79,14 @@ void Channel::Join(Player* player, const char* password)
         return;
     }
 
-    if (HasFlag(CHANNEL_FLAG_LFG) && sWorld.getConfig(CONFIG_BOOL_RESTRICTED_LFG_CHANNEL) && player->GetSession()->GetSecurity() == SEC_PLAYER)
+    if (HasFlag(CHANNEL_FLAG_LFG) && sWorld.getConfig(CONFIG_BOOL_RESTRICTED_LFG_CHANNEL))
     {
-        MakeNotInLfg(data);
-        SendToOne(data, guid);
-        return;
+        if (player->GetSession()->GetSecurity() == SEC_PLAYER)
+        {
+            MakeNotInLfg(data);
+            SendToOne(data, guid);
+            return;
+        }
     }
 
     if (player->GetGuildId() && (GetFlags() == 0x38))
