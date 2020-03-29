@@ -10525,7 +10525,7 @@ SpellAuraHolder::SpellAuraHolder(SpellEntry const* spellproto, Unit* target, Wor
     for (auto& m_aura : m_auras)
         m_aura = nullptr;
 
-    OnHolderInit();
+    OnHolderInit(caster);
 }
 
 void SpellAuraHolder::AddAura(Aura* aura, SpellEffectIndex index)
@@ -11960,10 +11960,10 @@ void GameObjectAura::Update(uint32 diff)
         target->RemoveSpellAuraHolder(GetHolder());
 }
 
-void SpellAuraHolder::OnHolderInit()
+void SpellAuraHolder::OnHolderInit(WorldObject* caster)
 {
     if (AuraScript* script = GetAuraScript())
-        script->OnHolderInit(this);
+        script->OnHolderInit(this, caster);
 }
 
 void SpellAuraHolder::OnDispel(Unit* dispeller, uint32 dispellingSpellId, uint32 originalStacks)
