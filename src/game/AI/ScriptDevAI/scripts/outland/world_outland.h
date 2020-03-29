@@ -34,6 +34,7 @@ enum
     TYPE_DEATHS_DOOR_SOUTH  = 1,
     TYPE_SHARTUUL           = 2,
     TYPE_BASHIR             = 3,
+    TYPE_MOGOR              = 4,
 
     // Bashir
     SPELL_SPIRIT_SPAWN_IN       = 17321,
@@ -47,6 +48,8 @@ enum
     NPC_INSIDION  = 23281,
 
     // Ring of Blood
+    NPC_GURTHOCK            = 18471,
+
     NPC_BROKENTOE           = 18398,
     NPC_MURKBLOOD_TWIN      = 18399,
     NPC_ROKDAR              = 18400,

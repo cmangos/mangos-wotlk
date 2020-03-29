@@ -30,6 +30,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "AI/ScriptDevAI/scripts/outland/world_outland.h"
 
 /*######
 ## mob_lump
@@ -601,6 +602,34 @@ UnitAI* GetAI_npc_rethhedron(Creature* pCreature)
     return new npc_rethhedronAI(pCreature);
 }
 
+enum
+{
+    GOSSIP_IN_BATTLE = 7700,
+
+    QUEST_RING_OF_BLOOD_FINAL_CHALLENGE = 9977,
+};
+
+bool QuestAccept_npc_gurthock(Player* /*player*/, Creature* creature, const Quest* quest)
+{
+    if (quest->GetQuestId() == QUEST_RING_OF_BLOOD_FINAL_CHALLENGE)
+    {
+        if (InstanceData* data = creature->GetInstanceData())
+            data->SetData(TYPE_MOGOR, 1);
+    }
+    else
+        creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+    return true;
+}
+
+bool GossipHello_npc_gurthock(Player* player, Creature* creature)
+{
+    if (creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
+        return false;
+    player->PrepareGossipMenu(creature, GOSSIP_IN_BATTLE);
+    player->SendPreparedGossip(creature);
+    return true;
+}
+
 void AddSC_nagrand()
 {
     Script* pNewScript = new Script;
@@ -622,5 +651,11 @@ void AddSC_nagrand()
     pNewScript = new Script;
     pNewScript->Name = "npc_rethhedron";
     pNewScript->GetAI = &GetAI_npc_rethhedron;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_gurthock";
+    pNewScript->pQuestAcceptNPC = &QuestAccept_npc_gurthock;
+    pNewScript->pGossipHello = &GossipHello_npc_gurthock;
     pNewScript->RegisterSelf();
 }

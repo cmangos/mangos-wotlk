@@ -1130,6 +1130,7 @@ UPDATE creature_template SET ScriptName='mob_lump' WHERE entry=18351;
 UPDATE creature_template SET ScriptName='npc_nagrand_captive' WHERE entry IN (18209,18210);
 UPDATE creature_template SET ScriptName='npc_creditmarker_visit_with_ancestors' WHERE entry IN (18840,18841,18842,18843);
 UPDATE creature_template SET ScriptName='npc_rethhedron' WHERE entry=22357;
+UPDATE creature_template SET ScriptName='npc_gurthock' WHERE entry=18471;
 
 /* NAXXRAMAS */
 UPDATE instance_template SET ScriptName='instance_naxxramas' WHERE map=533;

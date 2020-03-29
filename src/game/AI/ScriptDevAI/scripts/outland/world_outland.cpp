@@ -217,6 +217,8 @@ struct world_map_outland : public ScriptedMap, public TimerManager
     uint32 m_uiBellTolls;
     std::vector<std::pair<ObjectGuid, uint32>> m_vBellGuids;
 
+    ObjectGuid m_lastRingOfBlood;
+
     // Worldstate variables
     uint32 m_deathsDoorEventActive;
     int32 m_deathsDoorNorthHP;
@@ -497,6 +499,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
             case NPC_SOCRETHAR:
             case NPC_DEATHS_DOOR_NORTH_WARP_GATE:
             case NPC_DEATHS_DOOR_SOUTH_WARP_GATE:
+            case NPC_GURTHOCK:
                 m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
                 break;
             case NPC_SKYGUARD_AETHER_TECH:
@@ -550,10 +553,43 @@ struct world_map_outland : public ScriptedMap, public TimerManager
             case NPC_SKRAGATH:
             case NPC_WARMAUL_CHAMPION:
             case NPC_MOGOR:
+                creature->SetCorpseDelay(20);
                 creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float x, float y, float z)
-                {
-                    return unit->GetDistance(-707.214f, 7877.495f, 45.191f, DIST_CALC_NONE) > 2500.f; // squared
-                });
+                    {
+                        return unit->GetDistance(-707.214f, 7877.495f, 45.191f, DIST_CALC_NONE) > 2500.f; // squared
+                    });
+                if (creature->GetEntry() != NPC_MOGOR)
+                    m_lastRingOfBlood = creature->GetObjectGuid();
+                break;
+        }
+    }
+
+    void OnCreatureEvade(Creature* creature) override
+    {
+        switch (creature->GetEntry())
+        {
+            case NPC_BROKENTOE:
+            case NPC_MURKBLOOD_TWIN:
+            case NPC_ROKDAR:
+            case NPC_SKRAGATH:
+            case NPC_WARMAUL_CHAMPION:
+                creature->ForcedDespawn(1);
+                break;
+        }
+    }
+
+    void OnCreatureDespawn(Creature* creature) override
+    {
+        switch (creature->GetEntry())
+        {
+            case NPC_BROKENTOE:
+            case NPC_MURKBLOOD_TWIN:
+            case NPC_ROKDAR:
+            case NPC_SKRAGATH:
+            case NPC_WARMAUL_CHAMPION:
+                if (creature->GetObjectGuid() == m_lastRingOfBlood)
+                    if (Creature* gurthock = GetSingleCreatureFromStorage(NPC_GURTHOCK))
+                        gurthock->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                 break;
         }
     }
@@ -592,6 +628,15 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 break;
             case NPC_GRAND_COLLECTOR:
                 FinishPhase(BASHIR_PHASE_3);
+                break;
+            case NPC_BROKENTOE:
+            case NPC_MURKBLOOD_TWIN:
+            case NPC_ROKDAR:
+            case NPC_SKRAGATH:
+            case NPC_WARMAUL_CHAMPION:
+                if (creature->GetObjectGuid() == m_lastRingOfBlood)
+                    if (Creature* gurthock = GetSingleCreatureFromStorage(NPC_GURTHOCK))
+                        gurthock->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
                 break;
         }
     }
@@ -707,6 +752,17 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                     case 3:
                         m_bashirPhase = BASHIR_PHASE_NOT_ACTIVE;
                         break;
+                }
+                break;
+            case TYPE_MOGOR:
+                if (Creature* mogor = GetSingleCreatureFromStorage(NPC_MOGOR))
+                {
+                    if (mogor->IsAlive())
+                    {
+                        m_lastRingOfBlood = mogor->GetObjectGuid();
+                        if (Creature* gurthock = GetSingleCreatureFromStorage(NPC_GURTHOCK))
+                            gurthock->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                    }
                 }
                 break;
         }
