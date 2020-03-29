@@ -1774,7 +1774,7 @@ struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatActions
 
         AddCustomAction(SEDAI_ACTION_FELORC_SPAWN_ATTACK, true, [&]()
         {
-            if (Creature* orc = m_creature->SummonCreature(NPC_FEL_ORC, 258.168854f, 4109.307617f, 91.639290f, 2.644194f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 4000, true))
+            if (Creature* orc = m_creature->SummonCreature(NPC_FEL_ORC, 258.168854f, 4109.307617f, 91.639290f, 2.644194f, TEMPSPAWN_TIMED_DESPAWN, 60000, true))
             {
                 m_felOrc = orc->GetObjectGuid();
                 if (Creature* maghar = m_creature->GetMap()->GetCreature(m_maghar))
@@ -1783,7 +1783,7 @@ struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatActions
                     maghar->AI()->AttackStart(orc);
                 }
             }
-            if (Creature* orc = m_creature->SummonCreature(NPC_FEL_ORC, 256.429932f, 4105.590820f, 90.982086f, 2.734515f, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 4000, true))
+            if (Creature* orc = m_creature->SummonCreature(NPC_FEL_ORC, 256.429932f, 4105.590820f, 90.982086f, 2.734515f, TEMPSPAWN_TIMED_DESPAWN, 60000, true))
             {
                 m_felOrcTwo = orc->GetObjectGuid();
                 if (Creature* maghar = m_creature->GetMap()->GetCreature(m_magharTwo))
@@ -2041,6 +2041,7 @@ struct npc_laughing_skullAI : public ScriptedAI
     npc_laughing_skullAI(Creature* creature) : ScriptedAI(creature)
     {
         SetReactState(REACT_DEFENSIVE);
+        creature->GetCombatManager().SetLeashingDisable(true);
         Reset();
     }
 
