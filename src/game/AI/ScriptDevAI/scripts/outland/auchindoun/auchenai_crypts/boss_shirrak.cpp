@@ -22,6 +22,8 @@ SDCategory: Auchindoun, Auchenai Crypts
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Spells/SpellAuras.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -137,15 +139,33 @@ struct boss_shirrakAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_shirrak(Creature* pCreature)
+struct InhibitMagic : public AuraScript
 {
-    return new boss_shirrakAI(pCreature);
-}
+    void OnHolderInit(SpellAuraHolder* holder, WorldObject* caster) const override
+    {
+        uint32 stacks = 1;
+        if (caster)
+        {
+            float dist = holder->GetTarget()->GetDistance(caster, DIST_CALC_COMBAT_REACH);
+            if (dist > 45.f)
+                stacks = 1;
+            else if (dist > 30.f)
+                stacks = 2;
+            else if (dist > 15.f)
+                stacks = 3;
+            else
+                stacks = 4;
+        }
+        holder->PresetAuraStacks(stacks);
+    }
+};
 
 void AddSC_boss_shirrak()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_shirrak";
-    pNewScript->GetAI = &GetAI_boss_shirrak;
+    pNewScript->GetAI = &GetNewAIInstance<boss_shirrakAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<InhibitMagic>("spell_shirrak_inhibit_magic");
 }

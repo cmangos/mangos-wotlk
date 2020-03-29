@@ -10858,6 +10858,12 @@ void SpellAuraHolder::SetStackAmount(uint32 stackAmount, Unit* newCaster)
         SendAuraUpdate(false);
 
     int32 oldStackAmount = m_stackAmount;
+    if (m_spellProto->Id == 32264) // temporary hack for Inhibit Magic
+    {
+        OnHolderInit(newCaster);
+        stackAmount = m_stackAmount;
+        m_stackAmount = oldStackAmount;
+    }
     m_stackAmount = stackAmount;
 
     for (auto aur : m_auras)
