@@ -84,7 +84,7 @@ struct boss_murmurAI : public Scripted_NoMovementAI
         m_thunderingParams.range.maxRange = SPELL_THUNDERING_STORM_MAXRANGE;
         m_uiCastersAttackMurmurTimer = 0;
         m_uiAttackTimer = 0;
-
+        SetRootSelf(true);
         Reset();
     }
 
@@ -108,8 +108,6 @@ struct boss_murmurAI : public Scripted_NoMovementAI
 
     void Reset() override
     {
-        m_creature->SetImmobilizedState(true);
-
         m_uiSonicBoomTimer       = urand(SPELL_SONIC_BOOM_MIN_TIMER, SPELL_SONIC_BOOM_MAX_TIMER);
         m_uiMurmursTouchTimer    = m_bIsRegularMode ? SPELL_MURMURS_TOUCH_TIMER_N : urand(SPELL_MURMURS_TOUCH_MIN_TIMER_H, SPELL_MURMURS_TOUCH_MAX_TIMER_H);
         m_uiResonanceTimer       = urand(SPELL_RESONANCE_MIN_TIMER, SPELL_RESONANCE_MAX_TIMER);
