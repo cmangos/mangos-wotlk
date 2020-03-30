@@ -89,6 +89,7 @@ struct boss_terestianAI : public CombatAI
 
     ObjectGuid m_kilrekGuid;
     ObjectGuid m_sacrificeGuid;
+    ObjectGuid m_chainsGuid;
     
     bool m_bSummonedPortals;
 
@@ -202,6 +203,7 @@ struct boss_terestianAI : public CombatAI
                     summoned->SetInCombatWithZone();
                 break;
             case NPC_DEMONCHAINS:
+                m_chainsGuid = summoned->GetObjectGuid();
                 summoned->AI()->SetReactState(REACT_PASSIVE);
                 summoned->CastSpell(summoned, SPELL_DEMON_CHAINS, TRIGGERED_NONE);
                 break;
@@ -272,6 +274,26 @@ struct npc_fiendish_portalAI : public ScriptedAI
     }
 };
 
+struct Sacrifice : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+        {
+            if (Unit* caster = aura->GetCaster())
+            {
+                if (boss_terestianAI* ai = dynamic_cast<boss_terestianAI*>(caster->AI()))
+                {
+                    if (Creature* chains = caster->GetMap()->GetCreature(ai->m_chainsGuid))
+                    {
+                        chains->ForcedDespawn();
+                    }
+                }
+            }
+        }
+    }
+};
+
 void AddSC_boss_terestian_illhoof()
 {
     Script* pNewScript = new Script;
@@ -283,4 +305,6 @@ void AddSC_boss_terestian_illhoof()
     pNewScript->Name = "npc_fiendish_portal";
     pNewScript->GetAI = &GetNewAIInstance<npc_fiendish_portalAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<Sacrifice>("spell_sacrifice");
 }
