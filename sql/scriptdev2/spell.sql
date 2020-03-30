@@ -69,6 +69,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (30843,'spell_enfeeble'),
 (41624,'spell_enfeeble_removal'),
 (32264,'spell_shirrak_inhibit_magic'),
+(33332,'spell_suppression_blast'),
 (32830,'spell_auchenai_possess'),
 (36557,'spell_cursed_scarab_periodic'),
 (36560,'spell_cursed_scarab_despawn_periodic'),
