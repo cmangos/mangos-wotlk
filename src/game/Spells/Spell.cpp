@@ -4576,6 +4576,10 @@ void Spell::TakeCastItem()
         return;
     }
 
+    // these effects change the item
+    if (IsSpellHaveEffect(m_spellInfo, SPELL_EFFECT_SUMMON_CHANGE_ITEM))
+        return;
+
     bool expendable = false;
     bool withoutCharges = false;
 
