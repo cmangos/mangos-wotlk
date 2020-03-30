@@ -206,7 +206,7 @@ struct boss_curatorAI : public CombatAI
                     if (DoCastSpellIfCan(nullptr, SPELL_ARCANE_INFUSION) == CAST_OK)
                     {
                         DoScriptText(SAY_ENRAGE, m_creature);
-                        DisableCombatAction(action); // once per fight
+                        SetActionReadyStatus(action, false); // once per fight
                         m_phase = CURATOR_PHASE_2;
                     }
                 }
