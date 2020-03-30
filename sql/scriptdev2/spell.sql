@@ -61,6 +61,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (30469,'spell_nether_beam'),
 (38546,'spell_face_random_target'),
 (30659,'spell_fel_infusion'),
+(35139,'spell_throw_booms_doom'),
 (35150,'spell_nether_charge_passive'),
 (37670,'spell_nether_charge_timer'),
 (33676,'spell_incite_chaos'),

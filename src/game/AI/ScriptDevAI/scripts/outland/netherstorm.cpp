@@ -3940,6 +3940,23 @@ struct UltraDeconsolodationZapper : public SpellScript
     }
 };
 
+enum
+{
+    NPC_BOOM = 20284,
+    NPC_BOOM_BOT = 19692,
+};
+
+struct ThrowBoomsDoom : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, GameObject* target, SpellEffectIndex /*eff*/) const
+    {
+        // prevent exploit of killing anything else
+        if (target->GetEntry() != NPC_BOOM && target->GetEntry() != NPC_BOOM_BOT)
+            return false;
+        return true;
+    }
+};
+
 void AddSC_netherstorm()
 {
     Script* pNewScript = new Script;
@@ -4062,4 +4079,5 @@ void AddSC_netherstorm()
 
     RegisterSpellScript<Soulbind>("spell_soulbind");
     RegisterSpellScript<UltraDeconsolodationZapper>("spell_ultra_deconsolodation_zapper");
+    RegisterSpellScript<ThrowBoomsDoom>("spell_throw_booms_doom");
 }
