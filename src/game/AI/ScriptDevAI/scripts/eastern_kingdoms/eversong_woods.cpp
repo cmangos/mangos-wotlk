@@ -351,9 +351,8 @@ enum
 // TODO: add monitoring to script
 struct npc_apprentice_mirvedaAI : public ScriptedAI
 {
-    npc_apprentice_mirvedaAI(Creature* pCreature) : ScriptedAI(pCreature), m_uiMobCount(0) { Reset(); }
+    npc_apprentice_mirvedaAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
 
-    uint32 m_uiMobCount;
     uint32 m_uiFireballTimer;
     ObjectGuid m_playerGuid;
     std::vector<ObjectGuid> m_summons;
@@ -366,12 +365,6 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         m_creature->SetActiveObjectState(false);
         m_summons.clear();
-    }
-
-    void GetAIInformation(ChatHandler& reader) override
-    {
-        ScriptedAI::GetAIInformation(reader);
-        reader.PSendSysMessage("Apprentice Mirveda: mob count: %u, player guid: %" PRIu64 ", summons size: %zu", m_uiMobCount, m_playerGuid.GetRawValue(), m_summons.size());
     }
 
     void FailEvent()
@@ -395,7 +388,6 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
 
     void JustRespawned() override // moved from JustDied to prevent getting stuck in a crash scenario
     {
-        m_uiMobCount = 0;
         m_creature->SetActiveObjectState(false);
         ScriptedAI::JustRespawned();
     }
@@ -405,24 +397,21 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
         pSummoned->SetWalk(false);
         pSummoned->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
         m_summons.push_back(pSummoned->GetObjectGuid());
-        ++m_uiMobCount;
     }
 
     void SummonedCreatureJustDied(Creature* pKilled) override
     {
         m_summons.erase(std::remove(m_summons.begin(), m_summons.end(), pKilled->GetObjectGuid()), m_summons.end());
 
-        --m_uiMobCount;
+        if (m_summons.size() == 0)
+        {
+            Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
 
-        if (m_uiMobCount)
-            return;
+            if (pPlayer && pPlayer->GetQuestStatus(QUEST_UNEXPECTED_RESULT) == QUEST_STATUS_INCOMPLETE)
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_UNEXPECTED_RESULT, m_creature);
 
-        Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
-
-        if (pPlayer && pPlayer->GetQuestStatus(QUEST_UNEXPECTED_RESULT) == QUEST_STATUS_INCOMPLETE)
-            pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_UNEXPECTED_RESULT, m_creature);
-
-        Reset();
+            Reset();
+        }
     }
 
     void SummonedCreatureDespawn(Creature* summoned) override
@@ -431,26 +420,11 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
         if (itr != m_summons.end())
         {
             m_summons.erase(itr, m_summons.end());
-
-            --m_uiMobCount;
-
-            if (!m_uiMobCount)
-                FailEvent();
         }
     }
 
     void StartEvent(Player* pPlayer)
     {
-        if (m_uiMobCount != 0)
-        {
-            sLog.outCustomLog("Apprentice Mirveda invalid state, Mob count: %u", m_uiMobCount);
-            sLog.outCustomLog("Questgiver flag: %s",  m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER) ? "true" : "false");
-            for (ObjectGuid& guid : m_summons)
-                if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
-                    if (creature->IsAlive())
-                        sLog.outCustomLog("%s Entry: %u is alive", creature->GetName(), creature->GetEntry());
-        }
-
         m_creature->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_TOGGLE_IMMUNE_TO_NPC);
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
         m_playerGuid = pPlayer->GetObjectGuid();
