@@ -243,6 +243,7 @@ struct boss_moroesAI : public CombatAI
                     break;
                 target->CastSpell(nullptr, SPELL_TAUNT, TRIGGERED_OLD_TRIGGERED); // TODO: Needs to send both packets
                 m_creature->SelectHostileTarget(); // apply taunt before vanish
+                m_creature->RemoveSpellsCausingAura(SPELL_AURA_MOD_STALKED); // hunters mark
                 DoCastSpellIfCan(nullptr, SPELL_VANISH);
                 SetCombatScriptStatus(true);
                 SetMeleeEnabled(false);
