@@ -2454,6 +2454,11 @@ class Player : public Unit
         // Public Save system functions
         void SaveItemToInventory(Item* item); // optimization for gift wrapping
         void SaveTitles(); // optimization for arena rewards
+
+        void SetQueuedSpell(Spell* spell);
+        bool HasQueuedSpell();
+        void ClearQueuedSpell();
+        void CastQueuedSpell(SpellCastTargets& targets);
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
@@ -2793,6 +2798,8 @@ class Player : public Unit
         bool m_isGhouled;
 
         float m_energyRegenRate;
+
+        std::unique_ptr<Spell> m_queuedSpell;
 
         std::unordered_map<uint32, TimePoint> m_enteredInstances;
         uint32 m_createdInstanceClearTimer;

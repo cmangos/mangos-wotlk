@@ -22242,6 +22242,28 @@ void Player::SaveTitles()
     CharacterDatabase.PExecute("UPDATE characters SET KnownTitles='%s' WHERE guid = '%u'", playerTitles.data(), GetGUIDLow());
 }
 
+void Player::SetQueuedSpell(Spell* spell)
+{
+    m_queuedSpell.reset(spell);
+}
+
+bool Player::HasQueuedSpell()
+{
+    return bool(m_queuedSpell);
+}
+
+void Player::ClearQueuedSpell()
+{
+    m_queuedSpell.reset();
+}
+
+void Player::CastQueuedSpell(SpellCastTargets& targets)
+{
+    Spell* spell = m_queuedSpell.release();
+    targets.Update(this);
+    spell->SpellStart(&targets);
+}
+
 void Player::ConvertRune(uint8 index, RuneType newType)
 {
     SetCurrentRune(index, newType);

@@ -968,6 +968,18 @@ inline bool IsUnitTargetTarget(uint32 target)
         case TARGET_UNIT:
         case TARGET_UNIT_FRIEND:
         case TARGET_UNIT_FRIEND_CHAIN_HEAL:
+        case TARGET_UNIT_PARTY:
+        case TARGET_UNIT_RAID:
+        case TARGET_UNIT_FRIEND_AND_PARTY:
+        case TARGET_LOCATION_CASTER_TARGET_POSITION:
+        case TARGET_LOCATION_UNIT_FRONT:
+        case TARGET_LOCATION_UNIT_BACK:
+        case TARGET_LOCATION_UNIT_RIGHT:
+        case TARGET_LOCATION_UNIT_LEFT:
+        case TARGET_LOCATION_UNIT_FRONT_RIGHT:
+        case TARGET_LOCATION_UNIT_BACK_RIGHT:
+        case TARGET_LOCATION_UNIT_BACK_LEFT:
+        case TARGET_LOCATION_UNIT_FRONT_LEFT:
             return true;
         default: return false;
     }

@@ -2363,10 +2363,21 @@ bool WorldObject::HasGCD(SpellEntry const* spellEntry) const
     if (spellEntry)
     {
         auto gcdItr = m_GCDCatMap.find(spellEntry->StartRecoveryCategory);
-        return gcdItr != m_GCDCatMap.end();
+        return gcdItr != m_GCDCatMap.end() && (*gcdItr).second > GetMap()->GetCurrentClockTime();
+    }
+    return !m_GCDCatMap.empty();
+}
+
+TimePoint WorldObject::GetGCD(SpellEntry const* spellEntry) const
+{
+    if (spellEntry)
+    {
+        auto gcdItr = m_GCDCatMap.find(spellEntry->StartRecoveryCategory);
+        if (gcdItr != m_GCDCatMap.end())
+        return (*gcdItr).second;
     }
 
-    return !m_GCDCatMap.empty();
+    return GetMap()->GetCurrentClockTime();
 }
 
 void WorldObject::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* /*itemProto = nullptr*/, bool /*permanent = false*/, uint32 forcedDuration /*= 0*/)
@@ -2403,12 +2414,12 @@ void WorldObject::UpdateCooldowns(TimePoint const& now)
     }
 }
 
-bool WorldObject::CheckLockout(SpellSchoolMask schoolMask) const
+bool WorldObject::CheckLockout(SpellSchoolMask schoolMask, TimePoint const& now) const
 {
     for (auto& lockoutItr : m_lockoutMap)
     {
         SpellSchoolMask lockoutSchoolMask = SpellSchoolMask(1 << lockoutItr.first);
-        if (lockoutSchoolMask & schoolMask)
+        if ((lockoutSchoolMask & schoolMask) && lockoutItr.second > now)
             return true;
     }
 
@@ -2444,6 +2455,12 @@ bool WorldObject::IsSpellReady(SpellEntry const& spellEntry, ItemPrototype const
 {
     uint32 spellCategory = spellEntry.Category;
 
+    TimePoint now;
+    if (IsInWorld())
+        now = GetMap()->GetCurrentClockTime();
+    else
+        now = World::GetCurrentClockTime();
+
     // overwrite category by provided category in item prototype during item cast if need
     if (itemProto)
     {
@@ -2457,15 +2474,21 @@ bool WorldObject::IsSpellReady(SpellEntry const& spellEntry, ItemPrototype const
         }
     }
 
-    auto itr = m_cooldownMap.FindBySpellId(spellEntry.Id);
-    if (itr != m_cooldownMap.end())
-        if (!itemProto || itemProto->ItemId == (*itr).second.get()->GetItemId())
+    {
+        auto itr = m_cooldownMap.FindBySpellId(spellEntry.Id);
+        if (itr != m_cooldownMap.end() && !(*itr).second->IsSpellCDExpired(now))
+            if (!itemProto || itemProto->ItemId == (*itr).second.get()->GetItemId())
+                return false;
+    }
+
+    if (spellCategory)
+    {
+        auto itr = m_cooldownMap.FindByCategory(spellCategory);
+        if (itr != m_cooldownMap.end() && !(*itr).second->IsCatCDExpired(now))
             return false;
+    }
 
-    if (spellCategory && m_cooldownMap.FindByCategory(spellCategory) != m_cooldownMap.end())
-        return false;
-
-    if (spellEntry.PreventionType == SPELL_PREVENTION_TYPE_SILENCE && CheckLockout(GetSpellSchoolMask(&spellEntry)))
+    if (spellEntry.PreventionType == SPELL_PREVENTION_TYPE_SILENCE && CheckLockout(GetSpellSchoolMask(&spellEntry), now))
         return false;
 
     return true;
@@ -2478,6 +2501,65 @@ bool WorldObject::IsSpellReady(uint32 spellId, ItemPrototype const* itemProto /*
         return false;
 
     return IsSpellReady(*spellEntry, itemProto);
+}
+
+bool WorldObject::HasGCDOrCooldownWithinMargin(SpellEntry const& spellEntry, ItemPrototype const* itemProto /*= nullptr*/)
+{
+    uint64 diff = 0;
+    auto gcdItr = m_GCDCatMap.find(spellEntry.StartRecoveryCategory);
+    if (gcdItr != m_GCDCatMap.end())
+        diff = std::max(diff, uint64(((*gcdItr).second - GetMap()->GetCurrentClockTime()).count()));
+
+    uint32 spellCategory = spellEntry.Category;
+    if (itemProto)
+    {
+        for (const auto& Spell : itemProto->Spells)
+        {
+            if (Spell.SpellId == spellEntry.Id)
+            {
+                spellCategory = Spell.SpellCategory;
+                break;
+            }
+        }
+    }
+
+    auto itr = m_cooldownMap.FindBySpellId(spellEntry.Id);
+    if (itr != m_cooldownMap.end() && !(*itr).second->IsSpellCDExpired(GetMap()->GetCurrentClockTime()))
+    {
+        if (!itemProto || itemProto->ItemId == (*itr).second.get()->GetItemId())
+        {
+            TimePoint timePoint;
+            if ((*itr).second->GetSpellCDExpireTime(timePoint))
+                diff = std::max(diff, uint64((timePoint - GetMap()->GetCurrentClockTime()).count()));
+        }
+    }
+
+    if (spellCategory)
+    {
+        auto itr = m_cooldownMap.FindByCategory(spellCategory);
+        if (itr != m_cooldownMap.end() && !(*itr).second->IsCatCDExpired(GetMap()->GetCurrentClockTime()))
+        {
+            TimePoint timePoint;
+            if ((*itr).second->GetCatCDExpireTime(timePoint))
+                diff = std::max(diff, uint64((timePoint - GetMap()->GetCurrentClockTime()).count()));
+        }
+    }
+
+    if (spellEntry.PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
+    {
+        SpellSchoolMask spellSchoolMask = GetSpellSchoolMask(&spellEntry);
+        for (auto& lockoutItr : m_lockoutMap)
+        {
+            SpellSchoolMask lockoutSchoolMask = SpellSchoolMask(1 << lockoutItr.first);
+            if ((lockoutSchoolMask & spellSchoolMask) && lockoutItr.second > GetMap()->GetCurrentClockTime())
+                diff = std::max(diff, uint64((lockoutItr.second - GetMap()->GetCurrentClockTime()).count()));
+        }
+    }
+
+    if (diff < 50)
+        return true;
+
+    return false;
 }
 
 void WorldObject::LockOutSpells(SpellSchoolMask schoolMask, uint32 duration)

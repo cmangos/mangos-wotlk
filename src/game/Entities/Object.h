@@ -126,7 +126,7 @@ class CooldownData
             m_spellId(spellId),
             m_category(spellCategory),
             m_expireTime(duration ? std::chrono::milliseconds(duration) + clockNow : TimePoint()),
-            m_catExpireTime(spellCategory && categoryDuration ? std::chrono::milliseconds(categoryDuration) + clockNow : TimePoint()),
+            m_catExpireTime((spellCategory && categoryDuration) ? (std::chrono::milliseconds(categoryDuration) + clockNow) : TimePoint()),
             m_typePermanent(isPermanent),
             m_itemId(itemId)
         {}
@@ -896,6 +896,7 @@ class WorldObject : public Object
         // cooldown system
         virtual void AddGCD(SpellEntry const& spellEntry, uint32 forcedDuration = 0, bool updateClient = false);
         virtual bool HasGCD(SpellEntry const* spellEntry) const;
+        TimePoint GetGCD(SpellEntry const* spellEntry) const;
         void ResetGCD(SpellEntry const* spellEntry = nullptr);
         virtual void AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr, bool permanent = false, uint32 forcedDuration = 0);
         virtual void RemoveSpellCooldown(SpellEntry const& spellEntry, bool updateClient = true);
@@ -904,6 +905,7 @@ class WorldObject : public Object
         virtual void RemoveAllCooldowns(bool /*sendOnly*/ = false) { m_GCDCatMap.clear(); m_cooldownMap.clear(); m_lockoutMap.clear(); }
         bool IsSpellReady(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr) const;
         bool IsSpellReady(uint32 spellId, ItemPrototype const* itemProto = nullptr) const;
+        bool HasGCDOrCooldownWithinMargin(SpellEntry const& spellEntry, ItemPrototype const* itemProto = nullptr);
         virtual void LockOutSpells(SpellSchoolMask schoolMask, uint32 duration);
         void PrintCooldownList(ChatHandler& chat) const;
 
@@ -932,7 +934,7 @@ class WorldObject : public Object
 
         // cooldown system
         void UpdateCooldowns(TimePoint const& now);
-        bool CheckLockout(SpellSchoolMask schoolMask) const;
+        bool CheckLockout(SpellSchoolMask schoolMask, TimePoint const& now) const;
         bool GetExpireTime(SpellEntry const& spellEntry, TimePoint& expireTime, bool& isPermanent) const;
 
         GCDMap            m_GCDCatMap;
