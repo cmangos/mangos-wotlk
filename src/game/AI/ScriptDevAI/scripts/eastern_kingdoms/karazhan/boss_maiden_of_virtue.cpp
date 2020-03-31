@@ -58,6 +58,10 @@ struct boss_maiden_of_virtueAI : public CombatAI
         AddCombatAction(MAIDEN_ACTION_HOLY_FIRE, 8000, 14000);
         AddCombatAction(MAIDEN_ACTION_HOLY_WRATH, 15000, 25000);
         AddCombatAction(MAIDEN_ACTION_HOLY_GROUND, 2000u);
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        {
+            return y > -2071.f && x > -10924.f;
+        });
     }
 
     ScriptedInstance* m_instance;
