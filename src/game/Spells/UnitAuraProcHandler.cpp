@@ -4575,6 +4575,8 @@ SpellAuraProcResult Unit::HandleModDamagePercentDoneAuraProc(ProcExecutionData& 
         uint32 maxmana = GetMaxPower(POWER_MANA);
         int32 bp = int32(maxmana * GetAttackTime(RANGED_ATTACK) / 1000.0f / 100.0f);
 
+        if (GetPowerPercent() == 100.f)
+            return; 
         if (cooldown && !IsSpellReady(34075))
             return SPELL_AURA_PROC_FAILED;
 
