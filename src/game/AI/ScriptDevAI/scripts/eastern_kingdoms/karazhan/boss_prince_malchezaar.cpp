@@ -236,6 +236,7 @@ struct boss_malchezaarAI : public CombatAI
                         ResetCombatAction(MALCHEZAAR_INFERNAL, 15000);
                         ResetCombatAction(MALCHEZAAR_SHADOW_WORD_PAIN, 5000);
                         m_creature->SetCanParry(false);
+                        SetActionReadyStatus(action, false);
                     }
                 }
                 return;
