@@ -12989,6 +12989,8 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
             charmInfo->SetIsRetreating(true);
         }
 
+        charmedPlayer->ClearSelectionGuid();
+
         charmedPlayer->SendForcedObjectUpdate();
     }
     else if (charmed->GetTypeId() == TYPEID_UNIT)
