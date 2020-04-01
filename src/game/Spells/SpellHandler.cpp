@@ -466,6 +466,9 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
     if (mover != _player && mover->GetTypeId() == TYPEID_PLAYER)
         return;
 
+    if (!_player->IsClientControlled(_player))
+        return;
+
     // FIXME: hack, ignore unexpected client cancel Deadly Throw cast
     if (spellId == 26679)
         return;
