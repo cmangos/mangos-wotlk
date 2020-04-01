@@ -2606,6 +2606,7 @@ void Player::SetGameMaster(bool on)
         SetPvPFreeForAll(false);
         UpdatePvPContested(false, true);
 
+        AttackStop();
         CombatStopWithPets();
 
         SetPhaseMask(static_cast<uint32>(PHASEMASK_ANYWHERE), false);            // see and visible in all phases
