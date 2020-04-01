@@ -2947,11 +2947,11 @@ enum
 
 struct npc_evergrove_druidAI : public ScriptedAI
 {
-    npc_evergrove_druidAI(Creature* pCreature) : ScriptedAI(pCreature), m_summoner(nullptr), returnTimer(0), landingDone(false), alreadySummoned(false)
+    npc_evergrove_druidAI(Creature* pCreature) : ScriptedAI(pCreature), returnTimer(0), landingDone(false), alreadySummoned(false)
     {
     }
 
-    Player* m_summoner;
+    ObjectGuid m_summonerGuid;
     uint32 returnTimer;
     bool landingDone;
     bool alreadySummoned;
@@ -2976,7 +2976,7 @@ struct npc_evergrove_druidAI : public ScriptedAI
         if (spell->Id == SPELL_DRUID_SIGNAL)
         {
             alreadySummoned = true;
-            m_summoner = (Player*)caster;
+            m_summonerGuid = caster->GetObjectGuid();
             m_creature->CastSpell(m_creature, SPELL_EVERGROVE_DRUID_TRANSFORM_CROW, TRIGGERED_NONE);
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->GetMotionMaster()->MoveFollow(caster, 1.f, 0.f);
@@ -2991,7 +2991,7 @@ struct npc_evergrove_druidAI : public ScriptedAI
         if (who->GetTypeId() != TYPEID_PLAYER)
             return;
 
-        if (who != m_summoner)
+        if (who->GetObjectGuid() != m_summonerGuid)
             return;
 
         if (m_creature->IsWithinDistInMap(who, 5.0f))
@@ -3009,15 +3009,16 @@ struct npc_evergrove_druidAI : public ScriptedAI
 
     void ReturnToSpawn(Player* questAccepter = nullptr)
     {
-        if (!m_summoner)
+        if (!m_summonerGuid)
             return;
 
         if (questAccepter) // Only return to spawn if it's the original player accepting a quest
-            if (questAccepter != m_summoner)
+            if (questAccepter->GetObjectGuid() != m_summonerGuid)
                 return;
 
         returnTimer = 0;
-        m_creature->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_FLY_OFF_SCRIPT, m_creature, m_summoner);
+        Unit* summoned = m_creature->GetMap()->GetUnit(m_summonerGuid);
+        m_creature->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_FLY_OFF_SCRIPT, m_creature, summoned);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
