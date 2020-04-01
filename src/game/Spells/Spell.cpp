@@ -3801,7 +3801,7 @@ void Spell::_handle_finish_phase()
 
 void Spell::ProcessAOECaps()
 {
-    if (!m_spellInfo->HasAttribute(SPELL_ATTR_AOE_CAP))
+    if (!m_spellInfo->HasAttribute(SPELL_ATTR_SS_AOE_CAP))
         return;
 
     uint32 i;
