@@ -224,7 +224,8 @@ struct boss_netherspiteAI : public CombatAI
             {
                 m_creature->FixateTarget(nullptr);
                 m_creature->RemoveAurasDueToSpell(SPELL_EMPOWERMENT);
-                m_creature->RemoveAurasDueToSpell(SPELL_NETHERBURN);
+                // prenerf 2.1 - only has netherburn during P1
+                // m_creature->RemoveAurasDueToSpell(SPELL_NETHERBURN);
                 DoCastSpellIfCan(m_creature, SPELL_NETHERSPITE_ROAR);
 
                 SetCombatMovement(false);
@@ -245,7 +246,8 @@ struct boss_netherspiteAI : public CombatAI
         }
         else
         {
-            DoCastSpellIfCan(m_creature, SPELL_NETHERBURN, CAST_TRIGGERED);
+            // prenerf 2.1 - only has netherburn during P1
+            // DoCastSpellIfCan(m_creature, SPELL_NETHERBURN, CAST_TRIGGERED);
             m_creature->RemoveAurasDueToSpell(SPELL_SHADOWFORM);
             DoCastSpellIfCan(m_creature, SPELL_NETHERSPITE_ROAR);
             SetCombatMovement(true);
