@@ -928,6 +928,7 @@ void BattleGround::EndBattleGround(Team winner)
         else
         {
             // needed cause else in av some creatures will kill the players at the end
+            plr->AttackStop(false, true);
             plr->CombatStop();
         }
 

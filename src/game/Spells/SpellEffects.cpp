@@ -12262,11 +12262,12 @@ void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)
         return;
 
     unitTarget->InterruptSpellsCastedOnMe(true);
+    unitTarget->AttackStop();
     unitTarget->CombatStop(false, false);
 
     // Vanish allows to remove all threat and cast regular stealth so other spells can be used
     if (m_spellInfo->IsFitToFamily(SPELLFAMILY_ROGUE, uint64(0x0000000000000800)))
-        ((Player*)m_caster)->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
+        ((Player*)unitTarget)->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
 }
 
 void Spell::EffectAddComboPoints(SpellEffectIndex /*eff_idx*/)
