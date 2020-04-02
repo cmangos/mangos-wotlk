@@ -255,6 +255,7 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
     uint32 m_uiEventTimer;
     uint32 m_uiWaveTimer;
     uint32 m_uiPhase;
+    uint32 m_uiHardResetTimer;
     bool   m_bWave;
     bool   m_bShutdownSaid;
     std::vector<ObjectGuid> m_vSummonGuids;
@@ -268,6 +269,7 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
         m_uiPhase = 1;
         m_bWave = false;
         m_bShutdownSaid = false;
+        m_uiHardResetTimer = 3 * MINUTE * IN_MILLISECONDS;
 
         for (ObjectGuid &guid : m_vSummonGuids)
         {
@@ -659,6 +661,15 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        if (m_uiHardResetTimer <= uiDiff)
+        {
+            // why are we here? event should have failed or completed...
+            Reset();
+            m_creature->ForcedDespawn();
+        }
+        else
+            m_uiHardResetTimer -= uiDiff;
+
         if (m_uiEventTimer < uiDiff)
         {
             Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
