@@ -442,10 +442,20 @@ void instance_arcatraz::JustDidDialogueStep(int32 iEntry)
 
 void instance_arcatraz::OnCreatureDeath(Creature* pCreature)
 {
-    if (pCreature->GetEntry() == NPC_ARCATRAZ_WARDER)
-        ++m_uiKilledWarders;
-    else if (pCreature->GetEntry() == NPC_ARCATRAZ_DEFENDER)
-        ++m_uiKilledDefenders;
+    switch (pCreature->GetEntry())
+    {
+        case NPC_ARCATRAZ_WARDER:
+            ++m_uiKilledWarders;
+            break;
+        case NPC_ARCATRAZ_DEFENDER:
+            ++m_uiKilledDefenders;
+            break;
+        case NPC_PROTEAN_NIGHTMARE:
+        case NPC_PROTEAN_HORROR:
+            // intro Protean spawn corpses should despawn after about 5 seconds
+            pCreature->ForcedDespawn(5000);
+            break;
+    }
 
     // Stop the intro spawns when the wardens are killed
     if (m_uiKilledDefenders == MAX_DEFENDERS && m_uiKilledWarders == MAX_WARDERS)
