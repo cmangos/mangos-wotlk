@@ -86,7 +86,7 @@ struct boss_nightbaneAI : public CombatAI
     {
         AddCombatAction(NIGHTBANE_PHASE_RESET, true);
         AddTimerlessCombatAction(NIGHTBANE_PHASE_2, true);
-        AddCombatAction(NIGHTBANE_BELLOWING_ROAR, 30000, 45000);
+        AddCombatAction(NIGHTBANE_BELLOWING_ROAR, 55000, 60000);
         AddCombatAction(NIGHTBANE_CHARRED_EARTH, 10000, 15000);
         AddCombatAction(NIGHTBANE_SMOLDERING_BREATH, 9000, 13000);
         AddCombatAction(NIGHTBANE_TAIL_SWEEP, 12000, 15000);
@@ -361,7 +361,7 @@ struct boss_nightbaneAI : public CombatAI
             case NIGHTBANE_BELLOWING_ROAR:
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_BELLOWING_ROAR) == CAST_OK)
-                    ResetCombatAction(action, urand(30000, 45000));
+                    ResetCombatAction(action, urand(38000, 48000));
                 break;
             }
             case NIGHTBANE_CHARRED_EARTH:
