@@ -57,7 +57,8 @@ enum
     SAY_MANFORGE_SHUTDOWN_2 = -1000475,
     YEL_MANFORGE_SHUTDOWN = -1000476,
 
-    GOSSIP_TEXT_CONSOLE = 10340,
+    GOSSIP_TEXT_CONSOLE = 10045,
+    GOSSIP_TEXT_CONSOLE_NOQUEST = 9922,
 
     GO_BANAAR_C_CONSOLE = 183770,
     GO_CORUU_C_CONSOLE = 183956,
@@ -98,7 +99,7 @@ enum
     SPELL_INTERRUPT_2 = 35176,
 };
 
-#define GOSSIP_ITEM_SHUTDOWN "<Begin emergency shutdown>"
+#define GOSSIP_ITEM_SHUTDOWN "<Begin emergency shutdown.>"
 
 static float m_afBanaarTechCoords[7][3] =
 {
@@ -245,7 +246,6 @@ UnitAI* GetAI_npc_manaforge_spawnAI(Creature* pCreature)
     return new npc_manaforge_spawnAI(pCreature);
 }
 
-
 struct npc_manaforge_control_consoleAI : public ScriptedAI
 {
     npc_manaforge_control_consoleAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
@@ -270,15 +270,17 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
         m_bWave = false;
         m_bShutdownSaid = false;
         m_uiHardResetTimer = 3 * MINUTE * IN_MILLISECONDS;
+    }
 
-        for (ObjectGuid &guid : m_vSummonGuids)
+    void ResetControlConsoleAndDespawn()
+    {
+        for (ObjectGuid& guid : m_vSummonGuids)
         {
             if (Creature* summon = m_creature->GetMap()->GetCreature(guid))
                 summon->ForcedDespawn(100); // requires delay, to prevent calling spell::cancel, as the call can originate from channeled spell finish
         }
         m_vSummonGuids.clear();
 
-        // Be sure to reset Gobject
         switch (m_creature->GetEntry())
         {
             case NPC_BNAAR_C_CONSOLE:
@@ -298,18 +300,22 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                     pGo->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
                 break;
         }
+        m_creature->ForcedDespawn();
     }
 
     void DoFailEvent()
     {
         DoScriptText(EMOTE_ABORT, m_creature);
+
         // Fail players quests
         // Handle all players in group (if they took quest)
 
         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+        {
             if (Group* pGroup = pPlayer->GetGroup())
             {
                 for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
+                {
                     if (Player* pMember = pRef->getSource())
                     {
                         switch (m_creature->GetEntry())
@@ -340,8 +346,10 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                                 break;
                         }
                     }
+                }
             }
             else
+            {
                 switch (m_creature->GetEntry())
                 {
                     case NPC_BNAAR_C_CONSOLE:
@@ -369,9 +377,10 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                             pPlayer->FailQuest(QUEST_SHUTDOWN_ARA_SCRYERS);
                         break;
                 }
+            }
+        }
 
-        Reset();
-        m_creature->ForcedDespawn();
+        ResetControlConsoleAndDespawn();
     }
 
     void DoWaveSpawnForCreature(Creature* pCreature)
@@ -663,9 +672,16 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
     {
         if (m_uiHardResetTimer <= uiDiff)
         {
-            // why are we here? event should have failed or completed...
-            Reset();
-            m_creature->ForcedDespawn();
+            m_uiWaveTimer = 0;
+            m_uiPhase = 1;
+            m_bWave = false;
+            m_bShutdownSaid = false;
+            // why are we here? event should have failed or completed by now...
+            sLog.outCustomLog("Manaforge invalid state, helper creature: %s (%u)", m_creature->GetName(), m_creature->GetEntry());
+            sLog.outCustomLog("uiWaveTimer: %u", m_uiWaveTimer);
+            sLog.outCustomLog("uiPhase: %u", m_uiPhase);
+            sLog.outCustomLog("bWave: %s", (m_bWave ? "true" : "false"));
+            ResetControlConsoleAndDespawn();
         }
         else
             m_uiHardResetTimer -= uiDiff;
@@ -676,10 +692,7 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
 
             if (!pPlayer)
             {
-                // Reset Event
-                Reset();
-                m_creature->ForcedDespawn();
-
+                ResetControlConsoleAndDespawn();
                 return;
             }
 
@@ -717,7 +730,9 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                     if (Group* pGroup = pPlayer->GetGroup())
                     {
                         for (GroupReference* pRef = pGroup->GetFirstMember(); pRef != nullptr; pRef = pRef->next())
+                        {
                             if (Player* pMember = pRef->getSource())
+                            {
                                 switch (m_creature->GetEntry())
                                 {
                                     case NPC_BNAAR_C_CONSOLE:
@@ -741,8 +756,11 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                                             pMember->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
                                         break;
                                 }
+                            }
+                        }
                     }
                     else
+                    {
                         switch (m_creature->GetEntry())
                         {
                             case NPC_BNAAR_C_CONSOLE:
@@ -764,8 +782,9 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                                     pPlayer->KilledMonsterCredit(m_creature->GetEntry(), m_creature->GetObjectGuid());
                                 break;
                         }
+                    }
 
-                    Reset();
+                    ResetControlConsoleAndDespawn();
                     break;
             }
         }
@@ -811,6 +830,10 @@ bool GossipHello_go_manaforge(Player* pPlayer, GameObject* pGo)
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SHUTDOWN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
                 pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_CONSOLE, pGo->GetObjectGuid());
             }
+            else
+            {
+                pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_CONSOLE_NOQUEST, pGo->GetObjectGuid());
+            }
             break;
         case 3730:                                          // coruu
             if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_CORUU_ALDOR) == QUEST_STATUS_INCOMPLETE
@@ -819,6 +842,10 @@ bool GossipHello_go_manaforge(Player* pPlayer, GameObject* pGo)
             {
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SHUTDOWN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
                 pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_CONSOLE, pGo->GetObjectGuid());
+            }
+            else
+            {
+                pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_CONSOLE_NOQUEST, pGo->GetObjectGuid());
             }
             break;
         case 3734:                                          // duro
@@ -829,6 +856,10 @@ bool GossipHello_go_manaforge(Player* pPlayer, GameObject* pGo)
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SHUTDOWN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
                 pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_CONSOLE, pGo->GetObjectGuid());
             }
+            else
+            {
+                pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_CONSOLE_NOQUEST, pGo->GetObjectGuid());
+            }
             break;
         case 3722:                                          // ara
             if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_ARA_ALDOR) == QUEST_STATUS_INCOMPLETE
@@ -837,6 +868,10 @@ bool GossipHello_go_manaforge(Player* pPlayer, GameObject* pGo)
             {
                 pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_CHAT, GOSSIP_ITEM_SHUTDOWN, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
                 pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_CONSOLE, pGo->GetObjectGuid());
+            }
+            else
+            {
+                pPlayer->SEND_GOSSIP_MENU(GOSSIP_TEXT_CONSOLE_NOQUEST, pGo->GetObjectGuid());
             }
             break;
     }
@@ -857,25 +892,25 @@ bool GossipSelect_go_manaforge(Player* pPlayer, GameObject* pGo, uint32 /*uiSend
                 if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_BNAAR_ALDOR) == QUEST_STATUS_INCOMPLETE
                     || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_BNAAR_SCRYERS) == QUEST_STATUS_INCOMPLETE)
                     && pPlayer->HasItemCount(ITEM_BNAAR_ACESS_CRYSTAL, 1))
-                    pManaforge = pPlayer->SummonCreature(NPC_BNAAR_C_CONSOLE, 2918.95f, 4189.98f, 164.5f, 0.34f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 125000, true);
+                    pManaforge = pPlayer->SummonCreature(NPC_BNAAR_C_CONSOLE, 2918.95f, 4189.98f, 164.5f, 0.34f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 5 * MINUTE * IN_MILLISECONDS, true);
                 break;
             case 3730:                                          // coruu
                 if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_CORUU_ALDOR) == QUEST_STATUS_INCOMPLETE
                     || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_CORUU_SCRYERS) == QUEST_STATUS_INCOMPLETE)
                     && pPlayer->HasItemCount(ITEM_CORUU_ACESS_CRYSTAL, 1))
-                    pManaforge = pPlayer->SummonCreature(NPC_CORUU_C_CONSOLE, 2423.36f, 2755.72f, 135.5f, 2.14f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 125000, true);
+                    pManaforge = pPlayer->SummonCreature(NPC_CORUU_C_CONSOLE, 2423.36f, 2755.72f, 135.5f, 2.14f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 5 * MINUTE * IN_MILLISECONDS, true);
                 break;
             case 3734:                                          // duro
                 if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_DURO_ALDOR) == QUEST_STATUS_INCOMPLETE
                     || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_DURO_SCRYERS) == QUEST_STATUS_INCOMPLETE)
                     && pPlayer->HasItemCount(ITEM_DURO_ACESS_CRYSTAL, 1))
-                    pManaforge = pPlayer->SummonCreature(NPC_DURO_C_CONSOLE, 2976.48f, 2183.29f, 166.00f, 1.85f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 125000, true);
+                    pManaforge = pPlayer->SummonCreature(NPC_DURO_C_CONSOLE, 2976.48f, 2183.29f, 166.00f, 1.85f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 5 * MINUTE * IN_MILLISECONDS, true);
                 break;
             case 3722:                                          // ara
                 if ((pPlayer->GetQuestStatus(QUEST_SHUTDOWN_ARA_ALDOR) == QUEST_STATUS_INCOMPLETE
                     || pPlayer->GetQuestStatus(QUEST_SHUTDOWN_ARA_SCRYERS) == QUEST_STATUS_INCOMPLETE)
                     && pPlayer->HasItemCount(ITEM_ARA_ACESS_CRYSTAL, 1))
-                    pManaforge = pPlayer->SummonCreature(NPC_ARA_C_CONSOLE, 4013.71f, 4028.76f, 195.00f, 1.25f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 125000, true);
+                    pManaforge = pPlayer->SummonCreature(NPC_ARA_C_CONSOLE, 4013.71f, 4028.76f, 195.00f, 1.25f, TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, 5 * MINUTE * IN_MILLISECONDS, true);
                 break;
         }
 
