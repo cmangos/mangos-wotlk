@@ -105,6 +105,7 @@ enum SuperSpells
 enum AranActions // order based on priority
 {
     ARAN_ACTION_DRINK,
+    ARAN_ACTION_POTION,
     ARAN_ACTION_ELEMENTALS,
     ARAN_ACTION_BERSERK,
     ARAN_ACTION_DRAGONS_BREATH,
@@ -120,6 +121,7 @@ struct boss_aranAI : public RangedCombatAI
     boss_aranAI(Creature* creature) : RangedCombatAI(creature, ARAN_ACTION_MAX), m_instance(static_cast<instance_karazhan*>(creature->GetInstanceData()))
     {
         AddTimerlessCombatAction(ARAN_ACTION_DRINK, true);
+        AddTimerlessCombatAction(ARAN_ACTION_POTION, true);
         AddTimerlessCombatAction(ARAN_ACTION_ELEMENTALS, true);
         AddCombatAction(ARAN_ACTION_BERSERK, uint32(12 * MINUTE * IN_MILLISECONDS));
         AddCombatAction(ARAN_ACTION_DRAGONS_BREATH, true);
@@ -304,9 +306,16 @@ struct boss_aranAI : public RangedCombatAI
                         m_uiManaRecoveryStage = 0;
                         ResetTimer(ARAN_DRINKING_STAGES, 2000);
                         m_bDrinkInterrupted = false;
+                        SetActionReadyStatus(action, false);
                     }
                 }
                 return;
+            case ARAN_ACTION_POTION:
+            {
+                if (m_creature->GetPowerPercent() < 3.f) // always drink when low
+                    DoCastSpellIfCan(m_creature, SPELL_MANA_POTION);
+                break;
+            }
             case ARAN_ACTION_ELEMENTALS:
             {
                 if (m_creature->GetHealthPercent() > 40.0f)
