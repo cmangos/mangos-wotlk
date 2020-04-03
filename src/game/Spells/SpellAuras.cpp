@@ -7815,9 +7815,8 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
                     target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + i, m_modifier.m_amount, apply);
             }
         }
-        Pet* pet = target->GetPet();
-        if (pet)
-            pet->UpdateAttackPowerAndDamage();
+        if (Pet* pet = target->GetPet())
+            pet->UpdateScalingAuras();
     }
 }
 
