@@ -319,6 +319,9 @@ struct Enfeeble : public SpellScript, public AuraScript
 
     void OnApply(Aura* aura, bool apply) const override
     {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0)
+            return;
+
         if (apply)
         {
             if (Unit* caster = aura->GetCaster())
