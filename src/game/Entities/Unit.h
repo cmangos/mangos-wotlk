@@ -1635,6 +1635,7 @@ class Unit : public WorldObject
 
         bool CanAttackOnSight(Unit const* target) const; // Used in MoveInLineOfSight checks
         bool CanAssistInCombatAgainst(Unit const* who, Unit const* enemy) const;
+        bool CanJoinInAttacking(Unit const* enemy) const;
 
         bool IsImmuneToNPC() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC); }
         void SetImmuneToNPC(bool state);
@@ -2580,7 +2581,7 @@ class Unit : public WorldObject
         void Uncharm(Unit* charmed, uint32 spellId = 0);
 
         // Combat prevention
-        bool CanEnterCombat() { return m_canEnterCombat && !GetCombatManager().IsEvadingHome(); }
+        bool CanEnterCombat() const { return m_canEnterCombat && !GetCombatManager().IsEvadingHome(); }
         void SetCanEnterCombat(bool can) { m_canEnterCombat = can; }
 
         void SetIgnoreRangedTargets(bool state) { m_ignoreRangedTargets = state; }
