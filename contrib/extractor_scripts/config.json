@@ -39,6 +39,12 @@
 		"mergeRegionArea": 10,
 		"borderSize": 5
 	},
+        "554": {
+                "walkableSlopeAngle":60,
+                "walkableClimb": 3.0,
+                "minRegionArea": 30,
+                "walkableRadius": 1
+        },
 	"562": {
 		"walkableRadius": 0.99
 	},
