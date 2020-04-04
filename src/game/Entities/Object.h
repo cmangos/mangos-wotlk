@@ -210,7 +210,10 @@ class CooldownContainer
                 else
                 {
                     if (cd->m_category && cd->IsCatCDExpired(now))
+                    {
                         m_categoryMap.erase(cd->m_category);
+                        cd->m_category = 0;
+                    }
                     ++spellCDItr;
                 }
             }
@@ -221,7 +224,10 @@ class CooldownContainer
             RemoveBySpellId(spellId);
             auto resultItr = m_spellIdMap.emplace(spellId, std::move(std::unique_ptr<CooldownData>(new CooldownData(clockNow, spellId, duration, spellCategory, categoryDuration, itemId, onHold))));
             if (resultItr.second && spellCategory && categoryDuration)
+            {
+                RemoveByCategory(spellCategory);
                 m_categoryMap.emplace(spellCategory, resultItr.first);
+            }
 
             return resultItr.second;
         }
@@ -246,7 +252,10 @@ class CooldownContainer
         {
             auto spellCDItr = m_categoryMap.find(category);
             if (spellCDItr != m_categoryMap.end())
+            {
+                spellCDItr->second->second->m_category = 0;
                 m_categoryMap.erase(spellCDItr);
+            }
         }
 
         Iterator erase(ConstIterator spellCDItr)
