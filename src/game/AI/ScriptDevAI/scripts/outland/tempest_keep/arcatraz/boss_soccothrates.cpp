@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "arcatraz.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -45,12 +46,13 @@ enum
     SPELL_IMMOLATION_H              = 39007,
     SPELL_KNOCK_AWAY                = 36512,
     SPELL_FELFIRE_LINE_UP           = 35770,                // dummy spell - moves prespawned NPCs into a line
+    SPELL_FELFIRE                   = 35769,
     SPELL_CHARGE_TARGETING          = 36038,                // summons 21030 on target
     SPELL_CHARGE                    = 35754,                // script target on 21030; also dummy effect area effect target on 20978 - makes the target cast 35769
     SPELL_FELFIRE_SHOCK             = 35759,
     SPELL_FELFIRE_SHOCK_H           = 39006,
 
-    NPC_CHARGE_TARGET               = 21030,
+    NPC_WRATH_SCRYER_CHARGE_TARGET  = 21030,
 };
 
 static const DialogueEntry aIntroDialogue[] =
@@ -174,7 +176,7 @@ struct boss_soccothratesAI : public ScriptedAI, private DialogueHelper
 
     void JustSummoned(Creature* summoned) override
     {
-        if (summoned->GetEntry() == NPC_CHARGE_TARGET)
+        if (summoned->GetEntry() == NPC_WRATH_SCRYER_CHARGE_TARGET)
         {
             summoned->GetPosition(m_x, m_y, m_z);
             m_lineUpCounter = 1;
@@ -193,7 +195,7 @@ struct boss_soccothratesAI : public ScriptedAI, private DialogueHelper
             target->NearTeleportTo(fX, fY, m_creature->GetPositionZ(), m_creature->GetOrientation());
             m_lineUpCounter++;
         }
-        else if (spell->Id == SPELL_CHARGE && target->GetEntry() == NPC_CHARGE_TARGET)
+        else if (spell->Id == SPELL_CHARGE && target->GetEntry() == NPC_WRATH_SCRYER_CHARGE_TARGET)
             SetCombatMovement(true);
     }
 
@@ -279,15 +281,24 @@ struct boss_soccothratesAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-UnitAI* GetAI_boss_soccothrates(Creature* pCreature)
+struct SoccothratesCharge : public SpellScript
 {
-    return new boss_soccothratesAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_2)
+            return;
+
+        if (Unit* target = spell->GetUnitTarget())
+            target->CastSpell(nullptr, SPELL_FELFIRE, TRIGGERED_NONE);
+    }
+};
 
 void AddSC_boss_soccothrates()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_soccothrates";
-    pNewScript->GetAI = &GetAI_boss_soccothrates;
+    pNewScript->GetAI = &GetNewAIInstance<boss_soccothratesAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SoccothratesCharge>("spell_soccothrates_charge");
 }

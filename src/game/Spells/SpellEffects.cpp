@@ -2134,11 +2134,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->InterruptSpell(CURRENT_CHANNELED_SPELL, false);
                     return;
                 }
-                case 35754:                                 // Charge
-                {
-                    unitTarget->CastSpell(unitTarget, 35769, TRIGGERED_NONE); // Cast Felfire upon itself on hit
-                    return;
-                }
                 case 36196:                                 // Pure Nether Beam
                 case 36197:
                 case 36198:
