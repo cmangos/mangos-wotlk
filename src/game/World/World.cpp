@@ -2114,7 +2114,7 @@ void World::ShutdownCancel()
     DEBUG_LOG("Server %s cancelled.", (m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shutdown"));
 }
 
-void World::UpdateSessions(uint32 /*diff*/)
+void World::UpdateSessions(uint32 diff)
 {
     ///- Add new sessions
     {
@@ -2133,10 +2133,8 @@ void World::UpdateSessions(uint32 /*diff*/)
     {
         ///- and remove not active sessions from the list
         WorldSession* pSession = itr->second;
-        WorldSessionFilter updater(pSession);
 
-        // if WorldSession::Update fails, it means that the session should be destroyed
-        if (!pSession->Update(updater))
+        if (!pSession->Update(diff))
         {
             RemoveQueuedSession(pSession);
             itr = m_sessions.erase(itr);
