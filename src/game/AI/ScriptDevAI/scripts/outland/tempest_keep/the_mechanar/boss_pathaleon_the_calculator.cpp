@@ -62,6 +62,7 @@ struct boss_pathaleon_the_calculatorAI : public ScriptedAI
     {
         m_pInstance = static_cast<ScriptedInstance*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        m_creature->GetCombatManager().SetLeashingDisable(true);
         Reset();
     }
 
