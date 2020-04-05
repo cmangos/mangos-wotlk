@@ -1681,6 +1681,7 @@ struct npc_captured_vanguardAI : public npc_escortAI
 
     uint32 m_uiGlaiveTimer;
     uint32 m_uiHamstringTimer;
+    bool m_bOfferQuest;
 
     void Reset() override
     {
@@ -1690,12 +1691,8 @@ struct npc_captured_vanguardAI : public npc_escortAI
 
     void JustRespawned() override
     {
-        if (Creature* gladiator = GetClosestCreatureWithEntry(m_creature, NPC_ETHEREUM_GLADIATOR, 50.f, true))
-        {
-            gladiator->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
-            gladiator->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-            AttackStart(gladiator);
-        }
+        m_bOfferQuest = true;
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
     }
 
     void JustDied(Unit* killer) override
@@ -1708,7 +1705,12 @@ struct npc_captured_vanguardAI : public npc_escortAI
     void JustReachedHome() override
     {
         // Happens only if the player helps the npc in the fight - otherwise he dies
-        DoScriptText(SAY_VANGUARD_INTRO, m_creature);
+        if (m_bOfferQuest)
+        {
+            DoScriptText(SAY_VANGUARD_INTRO, m_creature);
+            m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+            m_bOfferQuest = false;
+        }
     }
 
     void WaypointReached(uint32 uiPointId) override
