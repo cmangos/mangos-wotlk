@@ -84,29 +84,31 @@ struct boss_maiden_of_virtueAI : public CombatAI
         {
             case MAIDEN_ACTION_REPENTANCE:
             {
-                DoCastSpellIfCan(nullptr, SPELL_REPENTANCE);
-                DoScriptText(urand(0, 1) ? SAY_REPENTANCE1 : SAY_REPENTANCE2, m_creature);
-                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                if (DoCastSpellIfCan(nullptr, SPELL_REPENTANCE) == CAST_OK)
+                {
+                    DoScriptText(urand(0, 1) ? SAY_REPENTANCE1 : SAY_REPENTANCE2, m_creature);
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                }
                 return;
             }
             case MAIDEN_ACTION_HOLY_FIRE:
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYFIRE, SELECT_FLAG_NOT_IN_MELEE_RANGE | SELECT_FLAG_PLAYER))
-                    DoCastSpellIfCan(target, SPELL_HOLYFIRE);
-                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                    if (DoCastSpellIfCan(target, SPELL_HOLYFIRE) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
                 return;
             }
             case MAIDEN_ACTION_HOLY_WRATH:
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_HOLYWRATH, SELECT_FLAG_PLAYER))
-                    DoCastSpellIfCan(target, SPELL_HOLYWRATH);
-                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                    if (DoCastSpellIfCan(target, SPELL_HOLYWRATH) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
                 return;
             }
             case MAIDEN_ACTION_HOLY_GROUND:
             {
-                DoCastSpellIfCan(nullptr, SPELL_HOLYGROUND);
-                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                if (DoCastSpellIfCan(nullptr, SPELL_HOLYGROUND) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
                 return;
             }
         }
