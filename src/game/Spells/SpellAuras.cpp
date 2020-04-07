@@ -5967,20 +5967,6 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
 
     Unit* target = GetTarget();
 
-    if (apply)
-    {
-        // Gronn Lord's Grasp, becomes stoned
-        switch (GetId())
-        {
-            case 33572: // Gronn Lord's Grasp, becomes stoned
-            {
-                if (GetStackAmount() >= 5 && !target->HasAura(33652))
-                    target->CastSpell(target, 33652, TRIGGERED_OLD_TRIGGERED);
-                break;
-            }
-        }
-    }
-
     target->UpdateSpeed(MOVE_RUN, true);
     target->UpdateSpeed(MOVE_RUN_BACK, true);
     target->UpdateSpeed(MOVE_SWIM, true);

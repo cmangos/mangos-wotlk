@@ -97,6 +97,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (40251,'spell_shadow_of_death'),
 (41289,'spell_ethereal_ring_signal_flare'),
 (41999,'spell_shadow_of_death_remove'),
+(33572,'spell_gronn_lords_grasp'),
 (33040,'spell_wota_main_cast_and_jump'),
 (33049,'spell_wota_main_cast_and_jump'),
 (33045,'spell_wota_dot'),
