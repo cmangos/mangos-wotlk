@@ -12265,7 +12265,6 @@ void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)
         return;
 
     unitTarget->InterruptSpellsCastedOnMe(true);
-    unitTarget->AttackStop();
     unitTarget->CombatStop(false, false);
 
     // Vanish allows to remove all threat and cast regular stealth so other spells can be used
