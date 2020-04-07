@@ -1806,7 +1806,7 @@ class PlayerbotAI
         void ClearActiveTalentSpec() { m_activeTalentSpec.specName = ""; m_activeTalentSpec.specClass = 0; m_activeTalentSpec.specPurpose = TSP_NONE; for (int i = 0; i < 71; i++) m_activeTalentSpec.talentId[i] = 0; for (int i = 0; i < 3; i++) { m_activeTalentSpec.glyphIdMajor[i] = 0; m_activeTalentSpec.glyphIdMinor[i] = 0; } }
         void SetActiveTalentSpec(TalentSpec ts) { m_activeTalentSpec = ts; }
         bool ApplyActiveTalentSpec();
-        bool IsElite(Unit* pTarget, bool isWorldBoss = false) const;
+        bool IsElite(Unit* target, bool isWorldBoss = false) const;
         // Used by bots to check if their target is neutralized (polymorph, shackle or the like). Useful to avoid breaking crowd control
         bool IsNeutralized(Unit* pTarget);
         // Make the bots face their target
