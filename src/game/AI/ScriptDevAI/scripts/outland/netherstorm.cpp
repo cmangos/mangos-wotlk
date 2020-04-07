@@ -2850,7 +2850,7 @@ struct npc_scrap_reaverAI : ScriptedPetAI
                 m_scriptTimer -= diff;
         }
 
-        if (m_areaCheckTimer)
+        if (m_areaCheckTimer && !m_despawnTimer) // Area check should not run if despawnTimer is already set
         {
             if (m_areaCheckTimer <= diff)
             {
