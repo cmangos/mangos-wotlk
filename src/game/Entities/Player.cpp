@@ -538,8 +538,8 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
 
     m_atLoginFlags = AT_LOGIN_NONE;
 
-    mSemaphoreTeleport_Near = false;
-    mSemaphoreTeleport_Far = false;
+    m_semaphoreTeleport_Near = false;
+    m_semaphoreTeleport_Far = false;
 
     m_DelayedOperations = 0;
     m_bCanDelayTeleport = false;
@@ -2241,6 +2241,20 @@ bool Player::TeleportToBGEntryPoint()
     ScheduleDelayedOperation(DELAYED_BG_MOUNT_RESTORE);
     ScheduleDelayedOperation(DELAYED_BG_TAXI_RESTORE);
     return TeleportTo(m_bgData.joinPos);
+}
+
+void Player::SetSemaphoreTeleportNear(bool semphsetting)
+{
+    m_semaphoreTeleport_Near = semphsetting;
+    if (!semphsetting)
+        GetSession()->DeleteMovementPackets();
+}
+
+void Player::SetSemaphoreTeleportFar(bool semphsetting)
+{
+    m_semaphoreTeleport_Far = semphsetting;
+    if (!semphsetting)
+        GetSession()->DeleteMovementPackets();
 }
 
 void Player::ProcessDelayedOperations()
