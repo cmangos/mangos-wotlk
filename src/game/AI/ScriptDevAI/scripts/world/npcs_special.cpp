@@ -2031,7 +2031,7 @@ struct npc_nether_rayAI : public CombatAI
     npc_nether_rayAI(Creature* creature) : CombatAI(creature, RAY_ACTION_MAX)
     {
         AddCombatAction(RAY_ACTION_DRAIN_MANA, 2000u);
-        AddCombatAction(RAY_ACTION_TAIL_STING, 2000u);
+        AddCombatAction(RAY_ACTION_TAIL_STING, 9000, 11000);
         AddCombatAction(RAY_ACTION_NETHER_SHOCK, 0u);
     }
 
@@ -2040,7 +2040,7 @@ struct npc_nether_rayAI : public CombatAI
         switch (id)
         {
             case RAY_ACTION_DRAIN_MANA: return urand(10000, 15000);
-            case RAY_ACTION_TAIL_STING: return 23000;
+            case RAY_ACTION_TAIL_STING: return urand(16000, 17000);
             case RAY_ACTION_NETHER_SHOCK: return 5000;
             default: return 0;
         }
