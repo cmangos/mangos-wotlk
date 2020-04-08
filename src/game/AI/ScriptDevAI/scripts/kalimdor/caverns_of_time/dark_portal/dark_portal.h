@@ -145,6 +145,9 @@ class instance_dark_portal : public ScriptedInstance
 
         void Update(const uint32 diff) override;
 
+        void ShowChatCommands(ChatHandler* handler) override;
+        void ExecuteChatCommand(ChatHandler* handler, char* args) override;
+
     private:
         bool IsBossTimeRift() const { return m_uiWorldStateRiftCount == 6 || m_uiWorldStateRiftCount == 12; }
         void UpdateWorldState(bool bEnable = true);

@@ -596,6 +596,34 @@ bool AreaTrigger_at_dark_portal(Player* pPlayer, AreaTriggerEntry const* pAt)
     return false;
 }
 
+void instance_dark_portal::ShowChatCommands(ChatHandler* handler)
+{
+    handler->SendSysMessage("This instance supports the following commands: setrift");
+}
+
+void instance_dark_portal::ExecuteChatCommand(ChatHandler* handler, char* args)
+{
+    char* result = handler->ExtractLiteralArg(&args);
+    if (!result)
+        return;
+    std::string val = result;
+    if (val == "setrift")
+    {
+        uint32 riftId;
+        handler->ExtractUInt32(&args, riftId);
+
+        if (riftId > 18 || riftId < 1)
+        {
+            handler->PSendSysMessage("Could not spawn rift %u because it doesn't exist. Please specify a value 1-18", riftId);
+            return;
+        }
+
+        m_uiWorldStateRiftCount = riftId;
+        DoUpdateWorldState(WORLD_STATE_OPENING_THE_DARK_PORTAL_RIFT_STATE, riftId);
+        DoSpawnNextPortal();
+    }
+}
+
 void AddSC_instance_dark_portal()
 {
     Script* pNewScript = new Script;
