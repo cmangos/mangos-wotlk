@@ -4005,6 +4005,17 @@ struct ThrowBoomsDoom : public SpellScript
     }
 };
 
+struct ScrapReaverSpell : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const
+    {
+        // Only one player can control the scrap reaver
+        if (target->HasAura(SPELL_SCRAP_REAVER))
+            return false;
+        return true;
+    }
+};
+
 void AddSC_netherstorm()
 {
     Script* pNewScript = new Script;
@@ -4128,4 +4139,5 @@ void AddSC_netherstorm()
     RegisterSpellScript<Soulbind>("spell_soulbind");
     RegisterSpellScript<UltraDeconsolodationZapper>("spell_ultra_deconsolodation_zapper");
     RegisterSpellScript<ThrowBoomsDoom>("spell_throw_booms_doom");
+    RegisterSpellScript<ScrapReaverSpell>("spell_scrap_reaver_spell");
 }
