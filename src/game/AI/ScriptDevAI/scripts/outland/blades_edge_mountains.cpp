@@ -210,7 +210,7 @@ struct mobs_nether_drakeAI : public ScriptedAI
 
         if (m_uiManaBurnTimer < uiDiff)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MANA_BURN, SELECT_FLAG_POWER_MANA))
+            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_MANA_BURN, (SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA)))
             {
                 if (DoCastSpellIfCan(pTarget, SPELL_MANA_BURN) == CAST_OK)
                     m_uiManaBurnTimer = urand(8000, 16000);
