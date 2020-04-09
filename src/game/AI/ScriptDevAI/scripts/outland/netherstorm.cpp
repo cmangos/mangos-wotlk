@@ -2776,6 +2776,8 @@ struct npc_scrap_reaverAI : ScriptedPetAI
     {
         if (eventType == AI_EVENT_CUSTOM_A && !m_dontDoAnything)
             Die();
+        else if (eventType == AI_EVENT_CUSTOM_B)
+            m_creature->ForcedDespawn();
     }
 
     void Die()
@@ -2921,10 +2923,29 @@ struct npc_scrap_reaverAI : ScriptedPetAI
     }
 };
 
-UnitAI* GetAI_npc_scrap_reaver(Creature* creature)
+struct ScrapReaverSpell : public SpellScript, public AuraScript
 {
-    return new npc_scrap_reaverAI(creature);
-}
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const
+    {
+        // Only one player can control the scrap reaver
+        if (target->HasAura(SPELL_SCRAP_REAVER))
+            return false;
+        return true;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() == EFFECT_INDEX_0 && !apply)
+        {
+            AIEventType eventId = AI_EVENT_CUSTOM_B;
+            Unit* caster = aura->GetCaster();
+            if (caster && caster->IsAlive())
+                eventId = AI_EVENT_CUSTOM_A;
+            if (aura->GetTarget()->AI())
+                aura->GetTarget()->AI()->SendAIEvent(eventId, aura->GetTarget(), aura->GetTarget());
+        }
+    }
+};
 
 enum
 {
@@ -4005,17 +4026,6 @@ struct ThrowBoomsDoom : public SpellScript
     }
 };
 
-struct ScrapReaverSpell : public SpellScript
-{
-    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const
-    {
-        // Only one player can control the scrap reaver
-        if (target->HasAura(SPELL_SCRAP_REAVER))
-            return false;
-        return true;
-    }
-};
-
 void AddSC_netherstorm()
 {
     Script* pNewScript = new Script;
@@ -4111,7 +4121,7 @@ void AddSC_netherstorm()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_scrap_reaver";
-    pNewScript->GetAI = &GetAI_npc_scrap_reaver;
+    pNewScript->GetAI = &GetNewAIInstance<npc_scrap_reaverAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -4139,5 +4149,5 @@ void AddSC_netherstorm()
     RegisterSpellScript<Soulbind>("spell_soulbind");
     RegisterSpellScript<UltraDeconsolodationZapper>("spell_ultra_deconsolodation_zapper");
     RegisterSpellScript<ThrowBoomsDoom>("spell_throw_booms_doom");
-    RegisterSpellScript<ScrapReaverSpell>("spell_scrap_reaver_spell");
+    RegisterScript<ScrapReaverSpell>("spell_scrap_reaver_spell");
 }
