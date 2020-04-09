@@ -1788,8 +1788,8 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket& p_data)
     // Pets info
     {
         uint32 petDisplayId = 0;
-        uint32 petLevel   = 0;
-        uint32 petFamily  = 0;
+        uint32 petLevel = 0;
+        uint32 petFamily = 0;
 
         // show pet at selection character in character list only for non-ghost character
         if (result && !(playerFlags & PLAYER_FLAGS_GHOST) && (pClass == CLASS_WARLOCK || pClass == CLASS_HUNTER || pClass == CLASS_DEATH_KNIGHT))
@@ -1799,8 +1799,8 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket& p_data)
             if (cInfo)
             {
                 petDisplayId = fields[17].GetUInt32();
-                petLevel     = fields[18].GetUInt32();
-                petFamily    = cInfo->Family;
+                petLevel = fields[18].GetUInt32();
+                petFamily = cInfo->Family;
             }
         }
 
@@ -1810,7 +1810,7 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket& p_data)
     }
 
     Tokens data = StrSplit(fields[19].GetCppString(), " ");
-    for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; ++slot)
+    for (uint8 slot = 0; slot < INVENTORY_SLOT_BAG_END; ++slot)
     {
         uint32 visualbase = slot * 2;
         uint32 item_id = GetUInt32ValueFromArray(data, visualbase);
@@ -1842,19 +1842,6 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket& p_data)
         p_data << uint8(proto->InventoryType);
         p_data << uint32(enchant ? enchant->aura_id : 0);
     }
-
-    p_data << uint32(0);                                   // bag 1 display id
-    p_data << uint8(0);                                    // bag 1 inventory type
-    p_data << uint32(0);                                   // enchant?
-    p_data << uint32(0);                                   // bag 2 display id
-    p_data << uint8(0);                                    // bag 2 inventory type
-    p_data << uint32(0);                                   // enchant?
-    p_data << uint32(0);                                   // bag 3 display id
-    p_data << uint8(0);                                    // bag 3 inventory type
-    p_data << uint32(0);                                   // enchant?
-    p_data << uint32(0);                                   // bag 4 display id
-    p_data << uint8(0);                                    // bag 4 inventory type
-    p_data << uint32(0);                                   // enchant?
 
     return true;
 }
@@ -17999,6 +17986,12 @@ void Player::SaveToDB()
     for (uint32 i = 0; i < EQUIPMENT_SLOT_END * 2; ++i)     // string
     {
         ss << GetUInt32Value(PLAYER_VISIBLE_ITEM_1_ENTRYID + i) << " ";
+    }
+    // 1 in tbc - 4 in wotlk
+    for (uint32 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_START + 1; ++i) // string: item id, ench (perm/temp)
+    {
+        ss << (m_items[i] ? m_items[i]->GetEntry() : 0) << " ";
+        ss << uint32(MAKE_PAIR32(0, 0)) << " ";
     }
     uberInsert.addString(ss);
 
