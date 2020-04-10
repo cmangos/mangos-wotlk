@@ -3268,6 +3268,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     pCaster->getHostileRefManager().ResetThreatRedirection();
                 return;
             }
+            case 36301:                                     // On Fire
+            {
+                target->GetMotionMaster()->MoveTargetedHome(false);
+                return;
+            }
             case 36730:                                     // Flame Strike
             {
                 target->CastSpell(target, 36731, TRIGGERED_OLD_TRIGGERED, nullptr, this);
