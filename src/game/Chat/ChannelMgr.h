@@ -30,6 +30,8 @@ class ChannelMgr
         ChannelMgr() {}
         ~ChannelMgr();
 
+        const ChannelMap& GetChannels() const { return channels; }
+
         Channel* GetJoinChannel(const std::string& name, uint32 channel_id);
         Channel* GetChannel(const std::string& name, Player* p, bool pkt = true);
         void LeftChannel(const std::string& name);

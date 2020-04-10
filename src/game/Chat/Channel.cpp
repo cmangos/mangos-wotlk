@@ -82,7 +82,7 @@ void Channel::Join(Player* player, const char* password)
         return;
     }
 
-    if (HasFlag(CHANNEL_FLAG_LFG) && sWorld.getConfig(CONFIG_BOOL_RESTRICTED_LFG_CHANNEL))
+    if (HasFlag(CHANNEL_FLAG_LFG) && sWorld.getConfig(CONFIG_BOOL_CHANNEL_RESTRICTED_LFG))
     {
         if (player->GetSession()->GetSecurity() == SEC_PLAYER)
         {
@@ -98,7 +98,7 @@ void Channel::Join(Player* player, const char* password)
     // join channel
     player->JoinedChannel(this);
 
-    if (m_announce && (player->GetSession()->GetSecurity() < SEC_GAMEMASTER || !sWorld.getConfig(CONFIG_BOOL_SILENTLY_GM_JOIN_TO_CHANNEL)))
+    if (m_announce && (player->GetSession()->GetSecurity() < SEC_GAMEMASTER || !sWorld.getConfig(CONFIG_BOOL_CHANNEL_GM_JOIN_SILENTLY)))
     {
         MakeJoined(data, guid);
         SendToAll(data);
@@ -151,7 +151,7 @@ void Channel::Leave(Player* player, bool send)
     bool changeowner = m_players[guid].IsOwner();
 
     m_players.erase(guid);
-    if (m_announce && (player->GetSession()->GetSecurity() < SEC_GAMEMASTER || !sWorld.getConfig(CONFIG_BOOL_SILENTLY_GM_JOIN_TO_CHANNEL)))
+    if (m_announce && (player->GetSession()->GetSecurity() < SEC_GAMEMASTER || !sWorld.getConfig(CONFIG_BOOL_CHANNEL_GM_JOIN_SILENTLY)))
     {
         WorldPacket data;
         MakeLeft(data, guid);
@@ -1029,7 +1029,7 @@ bool Channel::SetStatic(bool state, bool command/* = false*/)
         return false;
 
     // Treshold for auto-conversion
-    const uint32 treshold = sWorld.getConfig(CONFIG_UINT32_CHAT_STATIC_AUTO_TRESHOLD);
+    const uint32 treshold = sWorld.getConfig(CONFIG_UINT32_CHANNEL_STATIC_AUTO_TRESHOLD);
 
     // Detect auto-converion and reaching treshold
     if (!command && (!treshold || state != (GetNumPlayers() >= treshold)))

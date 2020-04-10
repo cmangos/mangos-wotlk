@@ -177,7 +177,17 @@ enum MangosStrings
     LANG_YOU_CHANGE_RUNIC_POWER         = 173,
     LANG_YOURS_RUNIC_POWER_CHANGED      = 174,
     LANG_LIQUID_STATUS                  = 175,
-    // Room for more level 1              176-199 not used
+
+    LANG_COMMAND_CHANNEL_STATIC_PASSWORD= 176,              // "Conversion failed: channel '%s' has password set"
+    LANG_COMMAND_CHANNEL_STATIC_GLOBAL  = 177,              // "Conversion failed: channel '%s' is not eligible"
+    LANG_COMMAND_CHANNEL_STATIC_SUCCESS = 178,              // "Conversion succeeded: channel '%s' static status is now %s"
+
+    LANG_CHANNEL_CUSTOM_DETAILS_STATIC  = 179,              // "(Static)"
+    LANG_CHANNEL_CUSTOM_DETAILS_PASSWORD= 180,              // "(Password)"
+
+    LANG_COMMAND_CHANNELS_NO_CHANNELS   = 181,              // "There are no matching custom channels at the moment"
+    LANG_COMMAND_CHANNELS_LIST_HEADER   = 182,              // "Listing up to %u custom channels matching criterea:"
+    // Room for more level 1              183-199 not used
 
     // level 2 chat
     LANG_NO_SELECTION                   = 200,
@@ -363,9 +373,9 @@ enum MangosStrings
     LANG_TRIGGER_REQ_KEYS_HEROIC        = 370,
     LANG_TRIGGER_REQ_QUEST_HEROIC       = 371,
     LANG_COMMAND_ACHIEVEMENT_NOTFOUND   = 372,
-    LANG_COMMAND_CHAT_STATIC_PASSWORD   = 373,              // "Static custom chat: channel \'%s\' has password set."
-    LANG_COMMAND_CHAT_STATIC_NOT_CUSTOM = 374,              // "Static custom chat: channel \'%s\' is not eligible for conversion."
-    LANG_COMMAND_CHAT_STATIC_SUCCESS    = 375,              // "Static custom chat: channel \'%s\', new status: %s"
+    //                                    373, not used
+    //                                    374, not used
+    //                                    375, not used
     LANG_POOL_ENTRY_LIST_CHAT           = 376,
     LANG_NO_POOL_FOR_MAP                = 377,
     LANG_POOL_LIST_NON_INSTANCE         = 378,
