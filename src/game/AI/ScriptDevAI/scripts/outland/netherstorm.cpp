@@ -2746,10 +2746,7 @@ struct npc_scrap_reaverAI : ScriptedPetAI
 {
     npc_scrap_reaverAI(Creature* creature) : ScriptedPetAI(creature)
     {
-        m_dontDoAnything = false;
-        m_despawnTimer = 0;
-        m_scriptTimer = 0;
-        m_areaCheckTimer = 1000;
+
     }
 
     ObjectGuid m_negatron;
@@ -2770,6 +2767,10 @@ struct npc_scrap_reaverAI : ScriptedPetAI
     void JustRespawned() override
     {
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
+        m_dontDoAnything = false;
+        m_despawnTimer = 0;
+        m_scriptTimer = 0;
+        m_areaCheckTimer = 1000;
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
