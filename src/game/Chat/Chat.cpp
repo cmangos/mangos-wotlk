@@ -333,6 +333,8 @@ ChatCommand* ChatHandler::getCommandTable()
         { "turn",           SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectTurnCommand,      "", nullptr },
         { "activate",       SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectActivateCommand,  "", nullptr },
         { "setphase",       SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectPhaseCommand,     "", nullptr },
+        { "despawn",        SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectForcedDespawnCommand, "", nullptr },
+        { "respawn",        SEC_GAMEMASTER,     false, &ChatHandler::HandleGameObjectRespawnCommand,   "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
 

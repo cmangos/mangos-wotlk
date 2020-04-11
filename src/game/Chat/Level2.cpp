@@ -1286,7 +1286,8 @@ bool ChatHandler::HandleGameObjectRespawnCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleGameObjectActivateCommand(char* args) {
+bool ChatHandler::HandleGameObjectActivateCommand(char* args)
+{
     // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
     uint32 lowguid;
     if (!ExtractUint32KeyFromLink(&args, "Hgameobject", lowguid))
@@ -1314,6 +1315,35 @@ bool ChatHandler::HandleGameObjectActivateCommand(char* args) {
     obj->UseDoorOrButton(autoCloseTime, false);
 
     PSendSysMessage("GameObject entry: %u guid: %u activated!", obj->GetEntry(), lowguid);
+    return true;
+}
+
+bool ChatHandler::HandleGameObjectForcedDespawnCommand(char* args)
+{
+    uint32 lowguid;
+    if (!ExtractUint32KeyFromLink(&args, "Hgameobject", lowguid))
+        return false;
+
+    if (!lowguid)
+        return false;
+
+    GameObject* obj = nullptr;
+
+    // by DB guid
+    if (GameObjectData const* go_data = sObjectMgr.GetGOData(lowguid))
+        obj = GetGameObjectWithGuid(lowguid, go_data->id);
+
+    if (!obj)
+    {
+        PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, lowguid);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    obj->SetLootState(GO_JUST_DEACTIVATED);
+    obj->SetRespawnDelay(10000);
+    obj->SetForcedDespawn();
+
     return true;
 }
 
