@@ -14,12 +14,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
- /* ScriptData
- SDName: Boss_Magtheridon
- SD%Complete: 80
- SDComment: Phase 3 transition requires additional research. The Manticron cubes require additional core support. Timers need to be revised.
- SDCategory: Hellfire Citadel, Magtheridon's lair
- EndScriptData */
+/* ScriptData
+SDName: Boss_Magtheridon
+SD%Complete: 80
+SDComment: Phase 3 transition requires additional research. The Manticron cubes require additional core support. Timers need to be revised.
+SDCategory: Hellfire Citadel, Magtheridon's lair
+EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "magtheridons_lair.h"
@@ -30,60 +30,60 @@
 enum
 {
     // yells
-    SAY_AGGRO = -1544006,
-    SAY_UNUSED = -1544007,
-    SAY_BANISH = -1544008,
-    SAY_CHAMBER_DESTROY = -1544009,
-    SAY_PLAYER_KILLED = -1544010,
-    SAY_DEATH = -1544011,
+    SAY_AGGRO                   = -1544006,
+    SAY_UNUSED                  = -1544007,
+    SAY_BANISH                  = -1544008,
+    SAY_CHAMBER_DESTROY         = -1544009,
+    SAY_PLAYER_KILLED           = -1544010,
+    SAY_DEATH                   = -1544011,
 
-    EMOTE_GENERIC_ENRAGED = -1000003,
-    EMOTE_BLASTNOVA = -1544013,
-    EMOTE_FREED = -1544015,
+    EMOTE_GENERIC_ENRAGED       = -1000003,
+    EMOTE_BLASTNOVA             = -1544013,
+    EMOTE_FREED                 = -1544015,
 
     // Maghteridon spells
-    SPELL_SHADOW_CAGE_DUMMY = 30205,                    // dummy aura - in creature_template_addon
-    SPELL_BLASTNOVA = 30616,
-    SPELL_CLEAVE = 30619,
-    SPELL_QUAKE = 30657,                    // spell may be related but probably used in the recent versions of the script
-    SPELL_QUAKE_REMOVAL = 30572,                    // removes quake from all triggers if blastnova starts during
+    SPELL_SHADOW_CAGE_DUMMY     = 30205,                    // dummy aura - in creature_template_addon
+    SPELL_BLASTNOVA             = 30616,
+    SPELL_CLEAVE                = 30619,
+    SPELL_QUAKE                 = 30657,                    // spell may be related but probably used in the recent versions of the script
+    SPELL_QUAKE_REMOVAL         = 30572,                    // removes quake from all triggers if blastnova starts during
     // SPELL_QUAKE_TRIGGER      = 30576,                    // spell removed from DBC - triggers 30571
-    SPELL_QUAKE_KNOCKBACK = 30571,
-    SPELL_BLAZE = 30541,                    // triggers 30542
-    SPELL_BERSERK = 27680,
-    SPELL_CONFLAGRATION = 30757,                    // Used by Blaze GO
+    SPELL_QUAKE_KNOCKBACK       = 30571,
+    SPELL_BLAZE                 = 30541,                    // triggers 30542
+    SPELL_BERSERK               = 27680,
+    SPELL_CONFLAGRATION         = 30757,                    // Used by Blaze GO
 
     // phase 3 spells
-    SPELL_CAMERA_SHAKE = 36455,
-    SPELL_DEBRIS_KNOCKDOWN = 36449,
-    SPELL_DEBRIS_1 = 30629,                    // selects target
-    SPELL_DEBRIS_2 = 30630,                    // spawns trigger NPC which casts debris spell
-    SPELL_DEBRIS_DAMAGE = 30631,
-    SPELL_DEBRIS_VISUAL = 30632,
+    SPELL_CAMERA_SHAKE          = 36455,
+    SPELL_DEBRIS_KNOCKDOWN      = 36449,
+    SPELL_DEBRIS_1              = 30629,                    // selects target
+    SPELL_DEBRIS_2              = 30630,                    // spawns trigger NPC which casts debris spell
+    SPELL_DEBRIS_DAMAGE         = 30631,
+    SPELL_DEBRIS_VISUAL         = 30632,
 
     // Cube spells
-    SPELL_SHADOW_CAGE = 30168,
-    SPELL_SHADOW_GRASP_VISUAL = 30166,
-    SPELL_SHADOW_GRASP = 30410,
-    SPELL_MIND_EXHAUSTION = 44032,
+    SPELL_SHADOW_CAGE           = 30168,
+    SPELL_SHADOW_GRASP_VISUAL   = 30166,
+    SPELL_SHADOW_GRASP          = 30410,
+    SPELL_MIND_EXHAUSTION       = 44032,
 
     // Hellfire channeler spells
-    SPELL_SHADOW_GRASP_DUMMY = 30207,                    // dummy spell - cast on OOC timer
-    SPELL_SHADOW_BOLT_VOLLEY = 30510,
-    SPELL_DARK_MENDING = 30528,
-    SPELL_FEAR = 30530,                    // 39176
-    SPELL_BURNING_ABYSSAL = 30511,
-    SPELL_SOUL_TRANSFER = 30531,
+    SPELL_SHADOW_GRASP_DUMMY    = 30207,                    // dummy spell - cast on OOC timer
+    SPELL_SHADOW_BOLT_VOLLEY    = 30510,
+    SPELL_DARK_MENDING          = 30528,
+    SPELL_FEAR                  = 30530,                    // 39176
+    SPELL_BURNING_ABYSSAL       = 30511,
+    SPELL_SOUL_TRANSFER         = 30531,
 
     // Abyss spells
-    SPELL_FIRE_BLAST = 37110,
+    SPELL_FIRE_BLAST            = 37110,
 
     // summons
     // NPC_MAGS_ROOM             = 17516,
-    NPC_BURNING_ABYSS = 17454,
-    NPC_RAID_TRIGGER = 17376,
+    NPC_BURNING_ABYSS           = 17454,
+    NPC_RAID_TRIGGER            = 17376,
 
-    MAX_QUAKE_COUNT = 7,
+    MAX_QUAKE_COUNT             = 7,
 };
 
 /*######
@@ -116,11 +116,11 @@ struct boss_magtheridonAI : public CombatAI
         AddCombatAction(MAGTHERIDON_BLAST_NOVA, true);
         AddCombatAction(MAGTHERIDON_CLEAVE, true);
         AddCustomAction(MAGTHERIDON_QUAKE_TIMER, true, [&]()
-            {
-                m_creature->SetStunned(false);
-                m_creature->SetTarget(m_creature->GetVictim());
-                DoStartMovement(m_creature->GetVictim());
-            });
+        {
+            m_creature->SetStunned(false);
+            m_creature->SetTarget(m_creature->GetVictim());
+            DoStartMovement(m_creature->GetVictim());
+        });
         AddCustomAction(MAGTHERIDON_TRANSITION_TIMER, true, [&]() { HandlePhaseTransition(); });
         Reset();
     }
@@ -453,7 +453,7 @@ struct mob_abyssalAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiDespawnTimer = 60000;
+        m_uiDespawnTimer   = 60000;
         m_uiFireBlastTimer = 6000;
     }
 
