@@ -2235,7 +2235,7 @@ void Aura::TriggerSpell()
             }
             case 32930:                                     // Blue beam
                 return; // Never seems to go off in sniffs - hides errors
-            case 30502:                                     // Dark Spin
+            /*case 30502:                                   // Dark Spin - Only Effect0 s.30505 should be affect, else s.30508 doesnt work anymore
             {
                 if (GetCaster()->GetTypeId() != TYPEID_UNIT)
                     return;
@@ -2245,7 +2245,7 @@ void Aura::TriggerSpell()
                     return;
 
                 break;
-            }
+            }*/
             case 36716:                                     // Energy Discharge
             case 38828:
             {
