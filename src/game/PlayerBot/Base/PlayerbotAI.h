@@ -1808,11 +1808,11 @@ class PlayerbotAI
         bool ApplyActiveTalentSpec();
         bool IsElite(Unit* target, bool isWorldBoss = false) const;
         // Used by bots to check if their target is neutralized (polymorph, shackle or the like). Useful to avoid breaking crowd control
-        bool IsNeutralized(Unit* pTarget);
+        static bool IsNeutralized(Unit* target);
         // Make the bots face their target
-        void FaceTarget(Unit* pTarget);
+        void FaceTarget(Unit* target);
         // Used by bot to check if target is immune to a specific damage school before using an ability
-        bool IsImmuneToSchool(Unit* pTarget, SpellSchoolMask SchoolMask);
+        static bool IsImmuneToSchool(Unit* pTarget, SpellSchoolMask SchoolMask);
 
         void MakeSpellLink(const SpellEntry* sInfo, std::ostringstream& out);
         void MakeWeaponSkillLink(const SpellEntry* sInfo, std::ostringstream& out, uint32 skillid);
@@ -1830,8 +1830,8 @@ class PlayerbotAI
 
         bool CanReceiveSpecificSpell(uint8 spec, Unit* target) const;
 
-        bool HasTool(uint32 TC);
         bool PickPocket(Unit* pTarget);
+        bool HasTool(uint32 TC);        // TODO implement this for opening lock
         bool HasSpellReagents(uint32 spellId);
         void ItemCountInInv(uint32 itemid, uint32& count);
         uint32 GetSpellCharges(uint32 spellId);
