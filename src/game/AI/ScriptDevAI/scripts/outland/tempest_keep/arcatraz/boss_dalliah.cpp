@@ -146,7 +146,7 @@ struct boss_dalliahAI : public ScriptedAI
             {
                 DoScriptText(urand(0, 1) ? SAY_WHIRLWIND_1 : SAY_WHIRLWIND_2, m_creature);
                 m_uiWhirlwindTimer = urand(25000, 30000);
-                m_uiHealTimer      = urand(6000, 10000);
+                m_uiHealTimer      = 6000;
             }
         }
         else
