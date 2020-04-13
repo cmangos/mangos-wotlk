@@ -159,10 +159,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuver(Unit* pTarget)
         case PlayerbotAI::SCENARIO_PVE_RAID:
         default:
             return DoFirstCombatManeuverPVE(pTarget);
-            break;
     }
-
-    return RETURN_NO_ACTION_ERROR;
 }
 
 CombatManeuverReturns PlayerbotPaladinAI::DoFirstCombatManeuverPVE(Unit* /*pTarget*/)
@@ -192,10 +189,7 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuver(Unit* pTarget)
         case PlayerbotAI::SCENARIO_PVE_RAID:
         default:
             return DoNextCombatManeuverPVE(pTarget);
-            break;
     }
-
-    return RETURN_NO_ACTION_ERROR;
 }
 
 CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
@@ -281,23 +275,6 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
                 return RETURN_CONTINUE;
             if (AVENGING_WRATH > 0 && m_ai->CastSpell(AVENGING_WRATH, *m_bot) == SPELL_CAST_OK)
                 return RETURN_CONTINUE;
-            /*if (HAMMER_OF_JUSTICE > 0 && !pTarget->HasAura(HAMMER_OF_JUSTICE, EFFECT_INDEX_0) && m_ai->CastSpell (HAMMER_OF_JUSTICE, *pTarget) == SPELL_CAST_OK)
-                return RETURN_CONTINUE;*/
-            /*if (SACRED_SHIELD > 0 && pVictim == m_bot && m_ai->GetHealthPercent() < 70 && !m_bot->HasAura(SACRED_SHIELD, EFFECT_INDEX_0) && m_ai->CastSpell (SACRED_SHIELD, *m_bot) == SPELL_CAST_OK)
-                return RETURN_CONTINUE;*/
-            /*if (HOLY_WRATH > 0 && m_ai->GetAttackerCount() >= 3 && meleeReach && m_ai->CastSpell (HOLY_WRATH, *pTarget) == SPELL_CAST_OK)
-                return RETURN_CONTINUE;*/
-            /*if (HAND_OF_SACRIFICE > 0 && pVictim == GetMaster() && !GetMaster()->HasAura(HAND_OF_SACRIFICE, EFFECT_INDEX_0) && m_ai->CastSpell (HAND_OF_SACRIFICE, *GetMaster()) == SPELL_CAST_OK)
-                return RETURN_CONTINUE;*/
-            /*if (DIVINE_PROTECTION > 0 && pVictim == m_bot && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && m_ai->GetHealthPercent() < 30 && m_ai->CastSpell (DIVINE_PROTECTION, *m_bot) == SPELL_CAST_OK)
-                return RETURN_CONTINUE;*/
-            /*if (RIGHTEOUS_DEFENSE > 0 && pVictim != m_bot && m_ai->GetHealthPercent() > 70 && m_ai->CastSpell (RIGHTEOUS_DEFENSE, *pTarget) == SPELL_CAST_OK)
-                return RETURN_CONTINUE;*/
-            /*if (DIVINE_PLEA > 0 && !m_bot->HasAura(DIVINE_PLEA, EFFECT_INDEX_0) && m_ai->CastSpell (DIVINE_PLEA, *m_bot) == SPELL_CAST_OK)
-                return RETURN_CONTINUE;*/
-            /*if (DIVINE_FAVOR > 0 && !m_bot->HasAura(DIVINE_FAVOR, EFFECT_INDEX_0) && m_ai->CastSpell (DIVINE_FAVOR, *m_bot) == SPELL_CAST_OK)
-                return RETURN_CONTINUE;*/
-            return RETURN_NO_ACTION_OK;
 
         case PALADIN_SPEC_PROTECTION:
             //Taunt if orders specify
@@ -317,12 +294,6 @@ CombatManeuverReturns PlayerbotPaladinAI::DoNextCombatManeuverPVE(Unit* pTarget)
                 return RETURN_CONTINUE;
             return RETURN_NO_ACTION_OK;
     }
-
-    //if (DIVINE_SHIELD > 0 && m_ai->GetHealthPercent() < 30 && pVictim == m_bot && !m_bot->HasAura(FORBEARANCE, EFFECT_INDEX_0) && !m_bot->HasAura(DIVINE_SHIELD, EFFECT_INDEX_0))
-    //    m_ai->CastSpell(DIVINE_SHIELD, *m_bot);
-
-    //if (DIVINE_SACRIFICE > 0 && m_ai->GetHealthPercent() > 50 && pVictim != m_bot && !m_bot->HasAura(DIVINE_SACRIFICE, EFFECT_INDEX_0))
-    //    m_ai->CastSpell(DIVINE_SACRIFICE, *m_bot);
 
     return RETURN_NO_ACTION_OK;
 }
@@ -471,17 +442,36 @@ void PlayerbotPaladinAI::CheckAuras()
         return;
     }
 
-    // If we have no resist orders, adjust aura based on spec
-    if (spec == PALADIN_SPEC_HOLY)
+    // if there is a tank in the group, use concentration aura
+    bool tankInGroup = false;
+    if (m_bot->GetGroup())
     {
-        if (CONCENTRATION_AURA > 0 && !m_bot->HasAura(CONCENTRATION_AURA))
-            m_ai->CastSpell(CONCENTRATION_AURA);
-        return;
+        Group::MemberSlotList const& groupSlot = m_bot->GetGroup()->GetMemberSlots();
+        for (auto itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
+        {
+            Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
+            if (!groupMember)
+                continue;
+
+            if (GetTargetJob(groupMember) & JOB_TANK || GetTargetJob(groupMember) & JOB_MAIN_TANK)
+            {
+                tankInGroup = true;
+                break;
+            }
+        }
     }
-    else if (spec == PALADIN_SPEC_PROTECTION)
+
+    // If we have no resist orders, adjust aura based on spec or tank
+    if (spec == PALADIN_SPEC_PROTECTION || tankInGroup)
     {
         if (DEVOTION_AURA > 0 && !m_bot->HasAura(DEVOTION_AURA))
             m_ai->CastSpell(DEVOTION_AURA);
+        return;
+    }
+    else if (spec == PALADIN_SPEC_HOLY)
+    {
+        if (CONCENTRATION_AURA > 0 && !m_bot->HasAura(CONCENTRATION_AURA))
+            m_ai->CastSpell(CONCENTRATION_AURA);
         return;
     }
     else if (spec == PALADIN_SPEC_RETRIBUTION)
@@ -490,7 +480,6 @@ void PlayerbotPaladinAI::CheckAuras()
             m_ai->CastSpell(RETRIBUTION_AURA);
         return;
     }
-
 }
 
 bool PlayerbotPaladinAI::CheckSeals()
@@ -555,14 +544,14 @@ void PlayerbotPaladinAI::DoNonCombatActions()
     if (m_ai->IsHealer())
     {
         if (HealPlayer(GetHealTarget()) & RETURN_CONTINUE)
-            return;// RETURN_CONTINUE;
+            return; // RETURN_CONTINUE;
     }
     else
     {
         // Is this desirable? Debatable.
         // TODO: In a group/raid with a healer you'd want this bot to focus on DPS (it's not specced/geared for healing either)
         if (HealPlayer(m_bot) & RETURN_CONTINUE)
-            return;// RETURN_CONTINUE;
+            return; // RETURN_CONTINUE;
     }
 
     // buff group
@@ -588,7 +577,7 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* targe
     if (spellId == 0) return false;
     if (!target)      return false;
 
-    PlayerbotPaladinAI* c = (PlayerbotPaladinAI*) ai->GetClassAI();
+    auto* c = (PlayerbotPaladinAI*) ai->GetClassAI();
     uint32 bigSpellId = 0;
 
     Pet* pet = target->GetPet();
@@ -699,9 +688,7 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* targe
         return true;
     if (ai->HasSpellReagents(bigSpellId) && ai->Buff(bigSpellId, target) == SPELL_CAST_OK)
         return true;
-    if ((pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(petSpellId, pet) == SPELL_CAST_OK) || ai->Buff(spellId, target) == SPELL_CAST_OK)
-        return true;
-    return false;
+    return (pet && !pet->HasAuraType(SPELL_AURA_MOD_UNATTACKABLE) && ai->Buff(petSpellId, pet) == SPELL_CAST_OK) || ai->Buff(spellId, target) == SPELL_CAST_OK;
 }
 
 // Match up with "Pull()" below
@@ -709,10 +696,8 @@ bool PlayerbotPaladinAI::CanPull()
 {
     if (HAND_OF_RECKONING && m_bot->IsSpellReady(HAND_OF_RECKONING))
         return true;
-    if (EXORCISM && m_bot->IsSpellReady(EXORCISM))
-        return true;
 
-    return false;
+    return EXORCISM && m_bot->IsSpellReady(EXORCISM);
 }
 
 // Match up with "CanPull()" above
@@ -720,10 +705,8 @@ bool PlayerbotPaladinAI::Pull()
 {
     if (HAND_OF_RECKONING && m_ai->CastSpell(HAND_OF_RECKONING) == SPELL_CAST_OK)
         return true;
-    if (EXORCISM && m_ai->CastSpell(EXORCISM) == SPELL_CAST_OK)
-        return true;
 
-    return false;
+    return EXORCISM && m_ai->CastSpell(EXORCISM) == SPELL_CAST_OK;
 }
 
 bool PlayerbotPaladinAI::CastHoTOnTank()
