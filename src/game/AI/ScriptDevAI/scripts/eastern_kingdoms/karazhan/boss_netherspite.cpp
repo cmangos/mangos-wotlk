@@ -345,7 +345,7 @@ struct boss_netherspiteAI : public CombatAI
                 {
                     m_creature->SetInFront(target);
                     if (DoCastSpellIfCan(target, SPELL_NETHERBREATH) == CAST_OK)
-                        ResetCombatAction(action, 4000);
+                        ResetCombatAction(action, 4500);
                 }
                 break;
             }
@@ -353,7 +353,7 @@ struct boss_netherspiteAI : public CombatAI
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DUMMY_NUKE, SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(target, SPELL_DUMMY_NUKE) == CAST_OK)
-                        ResetCombatAction(action, 4000);
+                        ResetCombatAction(action, 2000);
                 break;
             }
         }
