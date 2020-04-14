@@ -149,13 +149,13 @@ struct boss_faerlinaAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Poison Bolt Volley
         if (m_uiPoisonBoltVolleyTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_POISONBOLT_VOLLEY : SPELL_POISONBOLT_VOLLEY_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_POISONBOLT_VOLLEY : SPELL_POISONBOLT_VOLLEY_H) == CAST_OK)
                 m_uiPoisonBoltVolleyTimer = 11000;
         }
         else

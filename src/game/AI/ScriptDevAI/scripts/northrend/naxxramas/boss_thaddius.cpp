@@ -185,7 +185,7 @@ struct boss_thaddiusAI : public Scripted_NoMovementAI
         if (!m_pInstance)
             return;
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Berserk
@@ -222,11 +222,11 @@ struct boss_thaddiusAI : public Scripted_NoMovementAI
 
         // Ball Lightning if target not in melee range
         // TODO: Verify, likely that the boss should attack any enemy in melee range before starting to cast
-        if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+        if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
         {
             if (m_uiBallLightningTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BALL_LIGHTNING) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BALL_LIGHTNING) == CAST_OK)
                     m_uiBallLightningTimer = 1 * IN_MILLISECONDS;
             }
             else
@@ -569,7 +569,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
             return;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiHoldTimer)                                  // A short timer preventing combat movement after revive
@@ -577,7 +577,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
             if (m_uiHoldTimer <= uiDiff)
             {
                 SetCombatMovement(true);
-                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                 m_uiHoldTimer = 0;
             }
             else

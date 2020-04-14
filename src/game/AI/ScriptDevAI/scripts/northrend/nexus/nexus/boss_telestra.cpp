@@ -205,7 +205,7 @@ struct boss_telestraAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_bCanCheckAchiev)
@@ -221,7 +221,7 @@ struct boss_telestraAI : public ScriptedAI
                 {
                     if (m_uiFirebombTimer < uiDiff)
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FIREBOMB : SPELL_FIREBOMB_H) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_FIREBOMB : SPELL_FIREBOMB_H) == CAST_OK)
                             m_uiFirebombTimer = urand(4000, 6000);
                     }
                     else

@@ -151,14 +151,14 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
                 {
                     case MUSELEK_ACTION_KNOCK_AWAY:
                     {
-                        //DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY, TRIGGERED_NONE);
+                        //DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KNOCK_AWAY, TRIGGERED_NONE);
                         ResetTimer(i, GetSubsequentActionTimer(i));
                         SetActionReadyStatus(i, false);
                         continue;
                     }
                     case MUSELEK_ACTION_RAPTOR_STRIKE:
                     {
-                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAPTOR_STRIKE, TRIGGERED_NONE);
+                        DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RAPTOR_STRIKE, TRIGGERED_NONE);
                         ResetTimer(i, GetSubsequentActionTimer(i));
                         SetActionReadyStatus(i, false);
                         continue;
@@ -249,7 +249,7 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
         {
             m_AimedShotTarget = pTarget->GetObjectGuid();
             DoCastSpellIfCan(pTarget, SPELL_HUNTERS_MARK); // this casts on everyone?
-            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(m_creature->getVictim(), true) * 3;
+            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(m_creature->GetVictim(), true) * 3;
             m_creature->GetMotionMaster()->DistanceYourself(distance);
         }
     }
@@ -269,7 +269,7 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
 
         if (Unit* pTarget = m_creature->GetMap()->GetPlayer(m_AimedShotTarget))
             if (pTarget->IsAlive())
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_AIMED_SHOT, TRIGGERED_NONE);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_AIMED_SHOT, TRIGGERED_NONE);
     }
 
     void SpellHitTarget(Unit* target, const SpellEntry* spell) override 
@@ -328,7 +328,7 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_isInAimShotSequence)

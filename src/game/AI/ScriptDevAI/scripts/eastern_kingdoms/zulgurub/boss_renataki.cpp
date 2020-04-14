@@ -59,7 +59,7 @@ struct boss_renatakiAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Note: because the Vanish spell adds invisibility effect on the target, the timers won't be decreased during the vanish phase
@@ -67,7 +67,7 @@ struct boss_renatakiAI : public ScriptedAI
         {
             if (m_uiAmbushTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TRASH) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_TRASH) == CAST_OK)
                     m_uiAmbushTimer = 0;
             }
             else
@@ -94,7 +94,7 @@ struct boss_renatakiAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_GOUGE) == CAST_OK)
             {
-                if (Unit* pTarget = m_creature->getVictim())
+                if (Unit* pTarget = m_creature->GetVictim())
                 {
                     if (m_creature->getThreatManager().getThreat(pTarget))
                         m_creature->getThreatManager().modifyThreatPercent(pTarget, -50);
@@ -109,7 +109,7 @@ struct boss_renatakiAI : public ScriptedAI
         // Thausand Blades
         if (m_uiThousandBladesTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_THOUSAND_BLADES) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_THOUSAND_BLADES) == CAST_OK)
                 m_uiThousandBladesTimer = urand(7000, 12000);
         }
         else

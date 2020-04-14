@@ -218,7 +218,7 @@ struct boss_akilzonAI : public CombatAI
             }
             case AKILZON_ACTION_CALL_LIGHTNING:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CALL_LIGHTNING) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CALL_LIGHTNING) == CAST_OK)
                     ResetCombatAction(action, urand(15000, 25000));
                 break;
             }

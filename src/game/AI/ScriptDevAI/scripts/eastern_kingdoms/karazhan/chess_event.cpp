@@ -591,7 +591,7 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
                 m_uiMoveTimer -= uiDiff;
         }
 
-        /*if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        /*if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;*/
     }
 };

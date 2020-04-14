@@ -198,8 +198,8 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
                 pSummoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &uiSeat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->CastSpell(pSummoned, SPELL_ARM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
-                if (m_creature->getVictim())
-                    pSummoned->AI()->AttackStart(m_creature->getVictim());
+                if (m_creature->GetVictim())
+                    pSummoned->AI()->AttackStart(m_creature->GetVictim());
                 break;
             }
             case NPC_LEFT_ARM:
@@ -208,8 +208,8 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
                 pSummoned->CastCustomSpell(m_creature, SPELL_RIDE_KOLOGARN_ARMS, &uiSeat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->CastSpell(pSummoned, SPELL_ARM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
-                if (m_creature->getVictim())
-                    pSummoned->AI()->AttackStart(m_creature->getVictim());
+                if (m_creature->GetVictim())
+                    pSummoned->AI()->AttackStart(m_creature->GetVictim());
                 break;
             }
             case NPC_FOCUSED_EYEBEAM_RIGHT:
@@ -233,7 +233,7 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
     {
-        if (!m_creature->IsAlive() || !m_creature->getVictim())
+        if (!m_creature->IsAlive() || !m_creature->GetVictim())
             return;
 
         if (pSummoned->GetEntry() == NPC_LEFT_ARM)
@@ -321,7 +321,7 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
                 m_uiMountArmsTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiRespawnLeftTimer && m_uiRespawnRightTimer)
@@ -340,9 +340,9 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
             {
                 CanCastResult castResult;
                 if (!m_uiRespawnLeftTimer && !m_uiRespawnRightTimer)
-                    castResult = DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_OVERHEAD_SMASH : SPELL_OVERHEAD_SMASH_H);
+                    castResult = DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_OVERHEAD_SMASH : SPELL_OVERHEAD_SMASH_H);
                 else
-                    castResult = DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_ONE_ARMED_SMASH : SPELL_ONE_ARMED_SMASH_H);
+                    castResult = DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_ONE_ARMED_SMASH : SPELL_ONE_ARMED_SMASH_H);
 
                 if (castResult == CAST_OK)
                     m_uiOverheadSmashTimer = 15000;
@@ -449,11 +449,11 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
         }
 
         // melee range check
-        if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+        if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
         {
             if (m_uiPetrifyingBreathTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PETRIFYING_BREATH : SPELL_PETRIFYING_BREATH_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_PETRIFYING_BREATH : SPELL_PETRIFYING_BREATH_H) == CAST_OK)
                     m_uiPetrifyingBreathTimer = 4000;
             }
             else

@@ -269,8 +269,8 @@ struct boss_brundirAI : public ScriptedAI
             case POINT_ID_LAND:
                 m_creature->SetLevitate(false);
                 SetCombatMovement(true);
-                if (m_creature->getVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                if (m_creature->GetVictim())
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
 
                 m_creature->RemoveAurasDueToSpell(SPELL_TENDRILS_VISUAL);
                 m_creature->RemoveAurasDueToSpell(m_bIsRegularMode ? SPELL_LIGHTNING_TENDRILS : SPELL_LIGHTNING_TENDRILS_H);
@@ -302,7 +302,7 @@ struct boss_brundirAI : public ScriptedAI
                 m_uiVisualTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_uiPhase)
@@ -541,7 +541,7 @@ struct boss_molgeimAI : public ScriptedAI
                 m_uiVisualTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_uiPhase)
@@ -698,7 +698,7 @@ struct boss_steelbreakerAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_uiPhase)
@@ -707,7 +707,7 @@ struct boss_steelbreakerAI : public ScriptedAI
 
                 if (m_uiPowerTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_OVERWHELMING_POWER : SPELL_OVERWHELMING_POWER_H) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_OVERWHELMING_POWER : SPELL_OVERWHELMING_POWER_H) == CAST_OK)
                     {
                         DoScriptText(SAY_STEEL_OVERWHELM, m_creature);
                         m_uiPowerTimer = m_bIsRegularMode ? 60000 : 35000;
@@ -739,7 +739,7 @@ struct boss_steelbreakerAI : public ScriptedAI
 
                 if (m_uiFusionPunchTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FUSION_PUNCH : SPELL_FUSION_PUNCH_H) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_FUSION_PUNCH : SPELL_FUSION_PUNCH_H) == CAST_OK)
                         m_uiFusionPunchTimer = 15000;
                 }
                 else

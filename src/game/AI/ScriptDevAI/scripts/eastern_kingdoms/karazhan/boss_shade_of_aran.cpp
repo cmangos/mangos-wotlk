@@ -444,7 +444,7 @@ struct boss_aranAI : public ScriptedAI
                         if (m_choiceVector.size() == 0)
                         {
                             m_attackDistance = 0; // go into melee range
-                            DoStartMovement(m_creature->getVictim());
+                            DoStartMovement(m_creature->GetVictim());
                             return;
                         }
                         else
@@ -454,7 +454,7 @@ struct boss_aranAI : public ScriptedAI
                             DoCastSpellIfCan(pTarget, currentSpellId);
                             m_normalSpellCooldown[currentSpellIndex] = GetNormalSpellCooldown(currentSpellId);
                             m_attackDistance = 100.f;
-                            DoStartMovement(m_creature->getVictim());
+                            DoStartMovement(m_creature->GetVictim());
                             return;
                         }
                     }
@@ -504,10 +504,10 @@ struct boss_aranAI : public ScriptedAI
 
                             SetCombatMovement(true);
                             SetCombatScriptStatus(false);
-                            if (m_creature->getVictim())
+                            if (m_creature->GetVictim())
                             {
-                                m_creature->MeleeAttackStart(m_creature->getVictim());
-                                m_creature->SetTarget(m_creature->getVictim());
+                                m_creature->MeleeAttackStart(m_creature->GetVictim());
+                                m_creature->SetTarget(m_creature->GetVictim());
                             }
                         }
                         break;
@@ -520,7 +520,7 @@ struct boss_aranAI : public ScriptedAI
             return;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiSuperCastTimer < uiDiff)

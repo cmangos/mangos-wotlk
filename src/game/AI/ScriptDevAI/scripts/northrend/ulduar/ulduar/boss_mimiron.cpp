@@ -629,7 +629,7 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
         {
             // Select targets based on Leviathan threat list; if the Leviathan is not in combat select them using instance
             Unit* pTarget;
-            if (pLeviathan->getVictim())
+            if (pLeviathan->GetVictim())
                 pTarget = pLeviathan->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SUMMON_FLAMES_INITIAL, SELECT_FLAG_PLAYER);
             else
                 pTarget = m_pInstance->GetPlayerInMap(true, false);
@@ -884,7 +884,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
             m_creature->RemoveAurasDueToSpell(SPELL_FREEZE_ANIM);
             SetCombatMovement(true);
             m_creature->GetMotionMaster()->Clear();
-            DoStartMovement(m_creature->getVictim());
+            DoStartMovement(m_creature->GetVictim());
             m_uiPhase = PHASE_FULL_ROBOT;
         }
     }
@@ -950,7 +950,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
         if (eventType == AI_EVENT_CUSTOM_A)
         {
             SetCombatMovement(true);
-            DoStartMovement(m_creature->getVictim());
+            DoStartMovement(m_creature->GetVictim());
             m_uiPhase = PHASE_FULL_ROBOT;
         }
     }
@@ -991,7 +991,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
                 m_uiMountTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // no combat during transition or when damaged
@@ -1228,7 +1228,7 @@ struct boss_vx001AI : public ScriptedAI
     bool SelectCustomHostileTarget()
     {
         Unit* pTarget = nullptr;
-        Unit* pOldTarget = m_creature->getVictim();
+        Unit* pOldTarget = m_creature->GetVictim();
 
         if (!m_creature->getThreatManager().isThreatListEmpty())
             pTarget = m_creature->getThreatManager().getHostileTarget();
@@ -1249,7 +1249,7 @@ struct boss_vx001AI : public ScriptedAI
         }
 
         // Will call EnterEvadeMode if fit
-        return m_creature->SelectHostileTarget() && m_creature->getVictim();
+        return m_creature->SelectHostileTarget() && m_creature->GetVictim();
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -1503,12 +1503,12 @@ struct boss_aerial_unitAI : public ScriptedAI
         if (m_pInstance && m_pInstance->GetData(TYPE_MIMIRON_HARD) == DONE)
             pSummoned->CastSpell(pSummoned, SPELL_EMERGENCY_MODE, TRIGGERED_OLD_TRIGGERED);
 
-        pSummoned->AI()->AttackStart(m_creature->getVictim());
+        pSummoned->AI()->AttackStart(m_creature->GetVictim());
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiMagneticTimer)
@@ -1538,10 +1538,10 @@ struct boss_aerial_unitAI : public ScriptedAI
             // move to a closer point to target
             if (m_uiCombatMoveTimer < uiDiff)
             {
-                if (m_creature->GetDistance(m_creature->getVictim()) > 30.0f)
+                if (m_creature->GetDistance(m_creature->GetVictim()) > 30.0f)
                 {
                     float fX, fY, fZ;
-                    m_creature->getVictim()->GetContactPoint(m_creature, fX, fY, fZ, 3 * ATTACK_DISTANCE);
+                    m_creature->GetVictim()->GetContactPoint(m_creature, fX, fY, fZ, 3 * ATTACK_DISTANCE);
 
                     m_creature->GetMotionMaster()->Clear();
                     m_creature->GetMotionMaster()->MovePoint(0, fX, fY, m_creature->GetPositionZ());
@@ -1553,7 +1553,7 @@ struct boss_aerial_unitAI : public ScriptedAI
 
             if (m_uiPlasmaBallTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PLASMA_BALL_FLY : SPELL_PLASMA_BALL_FLY_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_PLASMA_BALL_FLY : SPELL_PLASMA_BALL_FLY_H) == CAST_OK)
                     m_uiPlasmaBallTimer = urand(2000, 3000);
             }
             else
@@ -1599,7 +1599,7 @@ struct boss_aerial_unitAI : public ScriptedAI
         {
             if (m_uiPlasmaBallTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PLASMA_BALL : SPELL_PLASMA_BALL_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_PLASMA_BALL : SPELL_PLASMA_BALL_H) == CAST_OK)
                     m_uiPlasmaBallTimer = 2000;
             }
             else

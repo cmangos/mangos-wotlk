@@ -152,7 +152,7 @@ struct boss_lajAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiSummonTimer)
@@ -163,8 +163,8 @@ struct boss_lajAI : public ScriptedAI
                 DoSummons();
                 DoScriptText(EMOTE_SUMMON, m_creature);
 
-                if (m_creature->getVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                if (m_creature->GetVictim())
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                 m_uiSummonTimer = 0;
             }
             else
@@ -173,7 +173,7 @@ struct boss_lajAI : public ScriptedAI
 
         if (m_uiAllergicTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ALLERGIC_REACTION) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ALLERGIC_REACTION) == CAST_OK)
                 m_uiAllergicTimer = urand(21000, 32000);
         }
         else
@@ -201,7 +201,7 @@ struct boss_lajAI : public ScriptedAI
 
         if (m_uiTrashTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TRASH) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_TRASH) == CAST_OK)
                 m_uiTrashTimer = urand(10000, 24000);
         }
         else

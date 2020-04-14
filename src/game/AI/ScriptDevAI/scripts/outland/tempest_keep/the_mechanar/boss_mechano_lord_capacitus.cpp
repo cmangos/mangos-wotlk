@@ -123,7 +123,7 @@ struct boss_mechano_lord_capacitusAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_isRegularMode)
@@ -198,7 +198,7 @@ struct boss_mechano_lord_capacitusAI : public ScriptedAI
         // Head Crack
         if (m_headCrackTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HEAD_CRACK) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HEAD_CRACK) == CAST_OK)
                 m_headCrackTimer = urand(19500, 33500);
         }
         else

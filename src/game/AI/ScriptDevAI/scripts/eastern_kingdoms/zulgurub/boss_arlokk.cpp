@@ -146,7 +146,7 @@ struct boss_arlokkAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiVisibleTimer)
@@ -200,7 +200,7 @@ struct boss_arlokkAI : public ScriptedAI
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_GOUGE) == CAST_OK)
                 {
-                    if (Unit* pTarget = m_creature->getVictim())
+                    if (Unit* pTarget = m_creature->GetVictim())
                     {
                         if (m_creature->getThreatManager().getThreat(pTarget))
                             m_creature->getThreatManager().modifyThreatPercent(pTarget, -80);
@@ -229,7 +229,7 @@ struct boss_arlokkAI : public ScriptedAI
         {
             if (m_uiRavageTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAVAGE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RAVAGE) == CAST_OK)
                     m_uiRavageTimer = urand(10000, 15000);
             }
             else
@@ -237,7 +237,7 @@ struct boss_arlokkAI : public ScriptedAI
 
             if (m_uiTrashTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TRASH) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_TRASH) == CAST_OK)
                     m_uiTrashTimer = urand(13000, 15000);
             }
             else

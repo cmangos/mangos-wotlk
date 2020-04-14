@@ -73,7 +73,7 @@ struct npc_aeranasAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_creature->GetHealthPercent() < 30.0f)
@@ -87,7 +87,7 @@ struct npc_aeranasAI : public ScriptedAI
 
         if (m_uiShockTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOCK);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOCK);
             m_uiShockTimer = 10000;
         }
         else
@@ -95,7 +95,7 @@ struct npc_aeranasAI : public ScriptedAI
 
         if (m_uiEnvelopingWindsTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_ENVELOPING_WINDS);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ENVELOPING_WINDS);
             m_uiEnvelopingWindsTimer = 25000;
         }
         else
@@ -1016,7 +1016,7 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
                 m_uiResetTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -1211,7 +1211,7 @@ struct npc_magister_aledisAI : public ScriptedAI
                 {
                     case ALEDIS_ACTION_PYROBLAST:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PYROBLAST) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PYROBLAST) == CAST_OK)
                         {
                             m_actionTimers[i] = GetSubsequentActionTimer(AledisActions(i));
                             m_actionReadyStatus[i] = false;
@@ -1232,7 +1232,7 @@ struct npc_magister_aledisAI : public ScriptedAI
                     }
                     case ALEDIS_ACTION_FIREBALL:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIREBALL) == CAST_OK)
                         {
                             m_actionTimers[i] = GetSubsequentActionTimer(AledisActions(i));
                             m_actionReadyStatus[i] = false;
@@ -1249,7 +1249,7 @@ struct npc_magister_aledisAI : public ScriptedAI
         switch (spell->Id)
         {
         case SPELL_FROST_NOVA:
-            if (m_creature->getVictim() != victim) // frostnova hit others, resist case
+            if (m_creature->GetVictim() != victim) // frostnova hit others, resist case
                 break;
             DistanceYourself();
             break;
@@ -1258,7 +1258,7 @@ struct npc_magister_aledisAI : public ScriptedAI
 
     void DistanceYourself()
     {
-        if (Unit* victim = m_creature->getVictim()) // make sure target didnt die
+        if (Unit* victim = m_creature->GetVictim()) // make sure target didnt die
         {
             float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim, true);
             m_creature->GetMotionMaster()->DistanceYourself(distance);
@@ -1279,7 +1279,7 @@ struct npc_magister_aledisAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         for (uint32 i = 0; i < ALEDIS_ACTION_MAX; ++i)
@@ -1867,7 +1867,7 @@ struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatActions
             switch (i)
             {
                 case SEDAI_COMBAT_ACTION_HAMMER:
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HAMMER_OF_JUSTICE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HAMMER_OF_JUSTICE) == CAST_OK)
                     {
                         SetActionReadyStatus(i, false);
                         ResetTimer(i, 15000);
@@ -1875,7 +1875,7 @@ struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatActions
                     }
                     continue;
                 case SEDAI_COMBAT_ACTION_HOLYFIRE:
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HOLY_FIRE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HOLY_FIRE) == CAST_OK)
                     {
                         SetActionReadyStatus(i, false);
                         ResetTimer(i, 25000);
@@ -1942,7 +1942,7 @@ struct npc_vindicator_sedaiAI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

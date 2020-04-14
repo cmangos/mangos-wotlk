@@ -132,7 +132,7 @@ struct boss_anomalusAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || m_creature->HasAura(SPELL_RIFT_SHIELD))
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim() || m_creature->HasAura(SPELL_RIFT_SHIELD))
             return;
 
         // Create additional Chaotic Rift at 50% HP

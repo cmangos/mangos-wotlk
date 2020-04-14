@@ -99,8 +99,8 @@ void instance_azjol_nerub::OnCreatureEnterCombat(Creature* pCreature)
     if (uiEntry == NPC_GASHRA || uiEntry == NPC_NARJIL || uiEntry == NPC_SILTHIK)
     {
         // Creature enter combat is not equal to having a victim yet.
-        if (!m_playerGuid && pCreature->getVictim())
-            m_playerGuid = pCreature->getVictim()->GetBeneficiaryPlayer()->GetObjectGuid();
+        if (!m_playerGuid && pCreature->GetVictim())
+            m_playerGuid = pCreature->GetVictim()->GetBeneficiaryPlayer()->GetObjectGuid();
     }
     else if (uiEntry == NPC_ANUBAR_CRUSHER)
     {

@@ -171,7 +171,7 @@ struct boss_ickAI : public ScriptedAI
                 m_uiMountTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Cooldown timer - we need to block all Krick spell during some events
@@ -225,7 +225,7 @@ struct boss_ickAI : public ScriptedAI
 
         if (m_uiMightKickTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MIGHTY_KICK) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MIGHTY_KICK) == CAST_OK)
                 m_uiMightKickTimer = 10000;
         }
         else
@@ -345,7 +345,7 @@ struct boss_krickAI : public ScriptedAI
 
     void UpdateAI(const uint32 /*uiDiff*/) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
     }
 };

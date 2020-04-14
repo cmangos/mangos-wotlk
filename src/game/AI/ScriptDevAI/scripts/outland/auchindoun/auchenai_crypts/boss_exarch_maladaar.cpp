@@ -73,7 +73,7 @@ struct mob_stolen_soulAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiSpellTimer < uiDiff)
@@ -81,43 +81,43 @@ struct mob_stolen_soulAI : public ScriptedAI
             switch (m_uiStolenClass)
             {
                 case CLASS_WARRIOR:
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_STRIKE);
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTAL_STRIKE);
                     m_uiSpellTimer = 6000;
                     break;
                 case CLASS_PALADIN:
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_HAMMER_OF_JUSTICE);
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HAMMER_OF_JUSTICE);
                     m_uiSpellTimer = 6000;
                     break;
                 case CLASS_HUNTER:
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_FREEZING_TRAP);
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FREEZING_TRAP);
                     m_uiSpellTimer = 20000;
                     break;
                 case CLASS_ROGUE:
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_HEMORRHAGE);
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HEMORRHAGE);
                     m_uiSpellTimer = 10000;
                     break;
                 case CLASS_PRIEST:
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_MIND_FLAY);
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MIND_FLAY);
                     m_uiSpellTimer = 5000;
                     break;
                 case CLASS_SHAMAN:
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROSTSHOCK);
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROSTSHOCK);
                     m_uiSpellTimer = 8000;
                     break;
                 case CLASS_MAGE:
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL);
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIREBALL);
                     m_uiSpellTimer = 5000;
                     break;
                 case CLASS_WARLOCK:
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_CURSE_OF_AGONY);
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CURSE_OF_AGONY);
                     m_uiSpellTimer = 20000;
                     break;
                 case CLASS_DRUID:
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_MOONFIRE);
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MOONFIRE);
                     m_uiSpellTimer = 10000;
                     break;
                 case CLASS_DEATH_KNIGHT:
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_PLAGUE_STRIKE);
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PLAGUE_STRIKE);
                     m_uiSpellTimer = 10000;
                     break;
             }
@@ -260,7 +260,7 @@ struct boss_exarch_maladaarAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_bHasSummonedAvatar && m_creature->GetHealthPercent() < 25.0f)

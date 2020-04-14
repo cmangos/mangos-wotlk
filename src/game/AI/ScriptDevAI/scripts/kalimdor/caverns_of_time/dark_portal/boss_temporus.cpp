@@ -189,7 +189,7 @@ struct boss_temporusAI : public CombatAI
             case TEMPORUS_ACTION_HASTEN:
                 DoCastSpellIfCan(m_creature, SPELL_HASTEN);
             case TEMPORUS_ACTION_MORTAL_WOUND:
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_WOUND);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTAL_WOUND);
         }
     }
 
@@ -197,7 +197,7 @@ struct boss_temporusAI : public CombatAI
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         ExecuteActions();

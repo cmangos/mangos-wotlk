@@ -137,12 +137,12 @@ struct boss_tyrannusAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiForcefulSmashTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FORCEFUL_SMASH) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FORCEFUL_SMASH) == CAST_OK)
                 m_uiForcefulSmashTimer = 50000;
         }
         else
@@ -292,7 +292,7 @@ struct boss_rimefang_posAI : public ScriptedAI
                 m_uiMountTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiIcyBlastTimer < uiDiff)

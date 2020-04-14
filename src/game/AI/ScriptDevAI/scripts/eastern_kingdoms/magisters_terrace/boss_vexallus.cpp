@@ -214,7 +214,7 @@ struct mob_pure_energyAI : public ScriptedAI
 
     void JustPreventedDeath(Unit* attacker) override
     {
-        Unit* victim = m_creature->getVictim() ? m_creature->getVictim() : attacker;
+        Unit* victim = m_creature->GetVictim() ? m_creature->GetVictim() : attacker;
         DoFakeDeath();
         m_creature->CastSpell(victim, SPELL_ENERGY_FEEDBACK_CHANNELED, TRIGGERED_NONE);
         victim->CastSpell(nullptr, SPELL_ENERGY_FEEDBACK_DEBUFF, TRIGGERED_OLD_TRIGGERED);

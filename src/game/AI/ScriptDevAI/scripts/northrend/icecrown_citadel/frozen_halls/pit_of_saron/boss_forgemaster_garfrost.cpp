@@ -158,16 +158,16 @@ struct boss_forgemaster_garfrostAI : public ScriptedAI
         m_uiPhase = uiPointId;
         SetCombatMovement(true);
 
-        if (m_creature->getVictim())
+        if (m_creature->GetVictim())
         {
             m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
         }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // This needs to be checked only on heroic
@@ -254,7 +254,7 @@ struct boss_forgemaster_garfrostAI : public ScriptedAI
 
                 if (m_uiChillingWaveTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHILLING_WAVE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHILLING_WAVE) == CAST_OK)
                         m_uiChillingWaveTimer = 14000;
                 }
                 else

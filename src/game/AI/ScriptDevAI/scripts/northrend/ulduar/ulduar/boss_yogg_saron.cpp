@@ -547,7 +547,7 @@ struct boss_saraAI : public Scripted_NoMovementAI, private DialogueHelper
                 m_uiSarasSpellTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiPhase == PHASE_VISIONS)
@@ -687,7 +687,7 @@ struct boss_yogg_saronAI : public Scripted_NoMovementAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // last phase spells
@@ -1283,7 +1283,7 @@ struct npc_guardian_of_yoggAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiDarkVolleyTimer < uiDiff)
@@ -1354,7 +1354,7 @@ struct npc_immortal_guardianAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiDrainLifeTimer < uiDiff)

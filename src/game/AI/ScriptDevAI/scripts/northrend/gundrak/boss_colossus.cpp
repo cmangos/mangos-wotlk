@@ -124,7 +124,7 @@ struct boss_drakkari_elementalAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiSurgeTimer < uiDiff)
@@ -212,7 +212,7 @@ struct boss_drakkari_colossusAI : public ScriptedAI
 
             SetCombatMovement(true);
             m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
             ((Creature*)pCaster)->ForcedDespawn();
         }
     }
@@ -229,8 +229,8 @@ struct boss_drakkari_colossusAI : public ScriptedAI
             }
 
             m_bFirstEmerge = false;
-            if (m_creature->getVictim())
-                pSummoned->AI()->AttackStart(m_creature->getVictim());
+            if (m_creature->GetVictim())
+                pSummoned->AI()->AttackStart(m_creature->GetVictim());
         }
     }
 
@@ -285,12 +285,12 @@ struct boss_drakkari_colossusAI : public ScriptedAI
                 m_uiColossusStartTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiMightyBlowTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_MIGHTY_BLOW);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MIGHTY_BLOW);
             m_uiMightyBlowTimer = 10000;
         }
         else
@@ -388,7 +388,7 @@ struct npc_living_mojoAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiMojoWaveTimer < uiDiff)

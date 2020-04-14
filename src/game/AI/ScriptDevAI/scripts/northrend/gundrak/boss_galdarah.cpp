@@ -173,7 +173,7 @@ struct boss_galdarahAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiAbilityCount == 2)
@@ -188,7 +188,7 @@ struct boss_galdarahAI : public ScriptedAI
         {
             if (m_uiPunctureTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PUNCTURE : SPELL_PUNCTURE_H);
+                DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_PUNCTURE : SPELL_PUNCTURE_H);
                 m_uiPunctureTimer = 25000;
             }
             else
@@ -203,7 +203,7 @@ struct boss_galdarahAI : public ScriptedAI
                     case 2: DoScriptText(SAY_SUMMON_3, m_creature); break;
                 }
 
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_STAMPEDE);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_STAMPEDE);
                 m_uiStampedeTimer = 15000;
             }
             else
@@ -211,7 +211,7 @@ struct boss_galdarahAI : public ScriptedAI
 
             if (m_uiSpecialAbilityTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WHIRLING_SLASH : SPELL_WHIRLING_SLASH_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_WHIRLING_SLASH : SPELL_WHIRLING_SLASH_H) == CAST_OK)
                     m_uiSpecialAbilityTimer = 12000;
 
                 ++m_uiAbilityCount;
@@ -241,7 +241,7 @@ struct boss_galdarahAI : public ScriptedAI
             {
                 Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
                 if (!pTarget)
-                    pTarget = m_creature->getVictim();
+                    pTarget = m_creature->GetVictim();
 
                 if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_IMPALING_CHARGE : SPELL_IMPALING_CHARGE_H) == CAST_OK)
                 {

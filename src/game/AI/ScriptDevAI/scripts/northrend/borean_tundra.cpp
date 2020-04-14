@@ -118,7 +118,7 @@ struct npc_nesingwary_trapperAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->getVictim() && m_uiPhaseTimer)
+        if (!m_creature->GetVictim() && m_uiPhaseTimer)
         {
             if (m_uiPhaseTimer <= uiDiff)
             {
@@ -216,7 +216,7 @@ struct npc_oil_stained_wolfAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (m_uiPooTimer)
             {
@@ -472,7 +472,7 @@ struct npc_lurgglbrAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (m_uiSayTimer)
             {
@@ -660,7 +660,7 @@ struct npc_nexus_drake_hatchlingAI : public FollowerAI
     {
         FollowerAI::MoveInLineOfSight(pWho);
 
-        if (!m_creature->HasAura(SPELL_SUBDUED) || m_creature->getVictim())
+        if (!m_creature->HasAura(SPELL_SUBDUED) || m_creature->GetVictim())
             return;
 
         if (pWho->GetEntry() == NPC_COLDARRA_DRAKE_HUNT_INVISMAN && m_creature->IsWithinDistInMap(pWho, 20.0f))
@@ -717,7 +717,7 @@ struct npc_nexus_drake_hatchlingAI : public FollowerAI
                 m_uiSubduedTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiNetherbreathTimer < uiDiff)
@@ -895,7 +895,7 @@ struct npc_scourged_flamespitterAI : public ScriptedAI
             if (m_uiNetExpireTimer <= uiDiff)
             {
                 // evade when the net root has expired
-                if (!m_creature->getVictim())
+                if (!m_creature->GetVictim())
                     EnterEvadeMode();
 
                 m_uiNetExpireTimer = 0;
@@ -904,7 +904,7 @@ struct npc_scourged_flamespitterAI : public ScriptedAI
                 m_uiNetExpireTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             // incinerate visual on OOC timer, unless creature is rooted
             if (!m_uiNetExpireTimer)
@@ -923,7 +923,7 @@ struct npc_scourged_flamespitterAI : public ScriptedAI
 
         if (m_uiIncinerateTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_INCINERATE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_INCINERATE) == CAST_OK)
                 m_uiIncinerateTimer = urand(3000, 5000);
         }
         else
@@ -1445,12 +1445,12 @@ struct npc_proudhoofAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiCleaveTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FORCEFUL_CLEAVE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FORCEFUL_CLEAVE) == CAST_OK)
                 m_uiCleaveTimer = urand(4000, 8000);
         }
         else

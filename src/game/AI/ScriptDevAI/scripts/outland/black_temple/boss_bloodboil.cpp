@@ -297,7 +297,7 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI, public CombatActions
                             flags |= SELECT_FLAG_SKIP_TANK;
                             exclusionCount = 2;
                         }
-                        Unit* target = m_phase1 ? m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, exclusionCount, SPELL_FEL_ACID_1, flags) : m_creature->getVictim();
+                        Unit* target = m_phase1 ? m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, exclusionCount, SPELL_FEL_ACID_1, flags) : m_creature->GetVictim();
                         if (target)
                         {
                             if (DoCastSpellIfCan(target, m_phase1 ? SPELL_FEL_ACID_1 : SPELL_FEL_ACID_2) == CAST_OK)
@@ -311,7 +311,7 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI, public CombatActions
                     }
                     case GURTOGG_ACTION_BEWILDERING_STRIKE:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BEWILDERING_STRIKE) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BEWILDERING_STRIKE) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(GurtoggActions(i)));
                             SetActionReadyStatus(i, false);
@@ -321,7 +321,7 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI, public CombatActions
                     }
                     case GURTOGG_ACTION_EJECT:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_phase1 ? SPELL_EJECT_1 : SPELL_EJECT_2) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), m_phase1 ? SPELL_EJECT_1 : SPELL_EJECT_2) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(GurtoggActions(i)));
                             SetActionReadyStatus(i, false);
@@ -338,7 +338,7 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         EnterEvadeIfOutOfCombatArea(diff);

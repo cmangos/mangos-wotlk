@@ -305,7 +305,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit* pTarget)
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
-    //Unit* pVictim = pTarget->getVictim();
+    //Unit* pVictim = pTarget->GetVictim();
     //float fTargetDist = m_bot->GetCombatDistance(pTarget, true);
     uint32 spec = m_bot->GetSpec();
 

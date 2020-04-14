@@ -384,7 +384,7 @@ struct boss_malacrassAI : public CombatAI
                 requireTarget = false;
                 break;
             case TARGET_TYPE_VICTIM:
-                target = m_creature->getVictim();
+                target = m_creature->GetVictim();
                 break;
             case TARGET_TYPE_RANDOM:
                 target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER);

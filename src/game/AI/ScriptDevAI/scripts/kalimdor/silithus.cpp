@@ -892,8 +892,8 @@ struct npc_solenorAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        if (m_creature->getVictim())
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
+        if (m_creature->GetVictim())
+            pSummoned->AI()->AttackStart(m_creature->GetVictim());
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -991,7 +991,7 @@ struct npc_solenorAI : public ScriptedAI
                 m_uiCastSoulFlame_Timer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_creature->HasAura(SPELL_SOUL_FLAME) && m_creature->HasAura(SPELL_FROST_TRAP))
@@ -1010,7 +1010,7 @@ struct npc_solenorAI : public ScriptedAI
 
         if (m_uiDreadfulFright_Timer < uiDiff)
         {
-            if (Unit* pUnit = m_creature->getVictim())
+            if (Unit* pUnit = m_creature->GetVictim())
             {
                 if (m_creature->GetDistance(pUnit, false) > 5.0f)
                 {

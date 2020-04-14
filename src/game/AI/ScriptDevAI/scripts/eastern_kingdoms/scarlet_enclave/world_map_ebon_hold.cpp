@@ -80,8 +80,8 @@ void world_map_ebon_hold::OnCreatureDeath(Creature* pCreature)
             {
                 // the new summoned mob should attack
                 Creature* pDarion = GetSingleCreatureFromStorage(NPC_HIGHLORD_DARION_MOGRAINE);
-                if (pDarion && pDarion->getVictim())
-                    pTemp->AI()->AttackStart(pDarion->getVictim());
+                if (pDarion && pDarion->GetVictim())
+                    pTemp->AI()->AttackStart(pDarion->GetVictim());
             }
             pCreature->ForcedDespawn(1000);
             break;

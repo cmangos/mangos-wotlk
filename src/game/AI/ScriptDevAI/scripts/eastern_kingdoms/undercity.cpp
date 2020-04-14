@@ -159,7 +159,7 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI, public TimerManager
     {
         UpdateTimers(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

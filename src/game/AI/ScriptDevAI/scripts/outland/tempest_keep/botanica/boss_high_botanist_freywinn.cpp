@@ -75,8 +75,8 @@ struct boss_high_botanist_freywinnAI : public ScriptedAI
             ++m_uiFrayerAddsCount;
 
         // Attack players
-        if (m_creature->getVictim())
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
+        if (m_creature->GetVictim())
+            pSummoned->AI()->AttackStart(m_creature->GetVictim());
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -90,8 +90,8 @@ struct boss_high_botanist_freywinnAI : public ScriptedAI
             {
                 m_uiTreeFormEndTimer = 0;
 
-                if (m_creature->getVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                if (m_creature->GetVictim())
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
 
                 // Interrupt all spells and remove auras
                 m_creature->InterruptNonMeleeSpells(true);
@@ -125,7 +125,7 @@ struct boss_high_botanist_freywinnAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiTreeFormTimer < uiDiff)

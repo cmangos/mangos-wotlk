@@ -86,8 +86,8 @@ struct boss_moroesAI : public ScriptedAI, public CombatActions
         AddCombatAction(MOROES_ACTION_ENRAGE, 0u);
         AddCustomAction(MOROES_ACTION_GAROTTE, true, [&]()
         {
-            if (m_creature->getVictim())
-                m_creature->getVictim()->CastSpell(nullptr, SPELL_GARROTE, TRIGGERED_OLD_TRIGGERED);
+            if (m_creature->GetVictim())
+                m_creature->GetVictim()->CastSpell(nullptr, SPELL_GARROTE, TRIGGERED_OLD_TRIGGERED);
         });
         Reset();
     }
@@ -146,7 +146,7 @@ struct boss_moroesAI : public ScriptedAI, public CombatActions
             SetCombatScriptStatus(false);
             m_attackAngle = 0.f;
             if (m_creature->IsInCombat()) // can happen on evade
-                DoStartMovement(m_creature->getVictim());
+                DoStartMovement(m_creature->GetVictim());
         }
     }
 
@@ -270,7 +270,7 @@ struct boss_moroesAI : public ScriptedAI, public CombatActions
                         SetCombatScriptStatus(true);
                         SetMeleeEnabled(false);
                         m_attackAngle = M_PI_F;
-                        DoStartMovement(m_creature->getVictim());
+                        DoStartMovement(m_creature->GetVictim());
                         ResetTimer(i, GetSubsequentActionTimer(i));
                         SetActionReadyStatus(i, false);
                         ResetTimer(MOROES_ACTION_GAROTTE, 9500);
@@ -290,7 +290,7 @@ struct boss_moroesAI : public ScriptedAI, public CombatActions
                     }
                     case MOROES_ACTION_GOUGE:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GOUGE) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_GOUGE) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -318,7 +318,7 @@ struct boss_moroesAI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         ExecuteActions();

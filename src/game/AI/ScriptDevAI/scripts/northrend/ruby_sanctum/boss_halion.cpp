@@ -279,7 +279,7 @@ struct boss_halion_realAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiBerserkTimer)
@@ -320,7 +320,7 @@ struct boss_halion_realAI : public ScriptedAI
 
                 if (m_uiCleaveTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                         m_uiCleaveTimer = urand(10000, 15000);
                 }
                 else
@@ -485,7 +485,7 @@ struct boss_halion_twilightAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_uiPhase)
@@ -508,7 +508,7 @@ struct boss_halion_twilightAI : public ScriptedAI
 
                 if (m_uiCleaveTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                         m_uiCleaveTimer = urand(10000, 15000);
                 }
                 else
@@ -516,7 +516,7 @@ struct boss_halion_twilightAI : public ScriptedAI
 
                 if (m_uiDarkBreathTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_BREATH) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DARK_BREATH) == CAST_OK)
                         m_uiDarkBreathTimer = urand(15000, 20000);
                 }
                 else

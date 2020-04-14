@@ -175,7 +175,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit* pTarget)
     if (!m_ai)    return RETURN_NO_ACTION_ERROR;
     if (!m_bot)   return RETURN_NO_ACTION_ERROR;
 
-    Unit* pVictim = pTarget->getVictim();
+    Unit* pVictim = pTarget->GetVictim();
     bool meleeReach = m_bot->CanReachWithMeleeAttack(pTarget);
 
     // TODO: make this work better...
@@ -294,7 +294,7 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit* pTarget)
 						// If target is a warrior or paladin type (high armor): expose its armor unless already tanked by a warrior (Sunder Armor > Expose Armor)
 						if (m_ai->IsElite(pTarget) && pCreature && pCreature->GetCreatureInfo()->UnitClass != 8)
 						{
-							if  (!m_ai->GetGroupTank() || (m_ai->GetGroupTank() && m_ai->GetGroupTank()->getVictim() != pTarget))
+							if  (!m_ai->GetGroupTank() || (m_ai->GetGroupTank() && m_ai->GetGroupTank()->GetVictim() != pTarget))
 							{
 								if (EXPOSE_ARMOR > 0 && !pTarget->HasAura(EXPOSE_ARMOR, EFFECT_INDEX_0) && m_ai->CastSpell(EXPOSE_ARMOR, *pTarget) == SPELL_CAST_OK) // 25 energy (checked above)
 									return RETURN_CONTINUE;

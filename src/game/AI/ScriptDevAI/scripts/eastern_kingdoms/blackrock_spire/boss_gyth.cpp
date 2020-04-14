@@ -76,7 +76,7 @@ struct boss_gythAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Chromatic Chaos at 50%
@@ -122,7 +122,7 @@ struct boss_gythAI : public ScriptedAI
 
         if (uiKnockAwayTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
                 uiKnockAwayTimer = 23000;
         }
         else

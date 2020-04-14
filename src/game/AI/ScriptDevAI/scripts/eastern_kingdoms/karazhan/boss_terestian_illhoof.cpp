@@ -168,7 +168,7 @@ struct boss_terestianAI : public ScriptedAI, public CombatActions
                     }
                     case ILLHOOF_ACTION_SHADOWBOLT:
                     {
-                        DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT);
+                        DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOW_BOLT);
                         ResetTimer(i, GetSubsequentActionTimer(i));
                         SetActionReadyStatus(i, false);
                         continue;
@@ -268,7 +268,7 @@ struct boss_terestianAI : public ScriptedAI, public CombatActions
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         UpdateTimers(uiDiff, m_creature->IsInCombat());

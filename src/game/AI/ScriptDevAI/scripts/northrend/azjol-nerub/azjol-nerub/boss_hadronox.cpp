@@ -107,7 +107,7 @@ struct boss_hadronoxAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         // Force the spiders to attack him
-        if (pWho->GetTypeId() == TYPEID_UNIT && m_creature->IsWithinDistInMap(pWho, 2 * ATTACK_DISTANCE) && !pWho->getVictim())
+        if (pWho->GetTypeId() == TYPEID_UNIT && m_creature->IsWithinDistInMap(pWho, 2 * ATTACK_DISTANCE) && !pWho->GetVictim())
         {
             for (unsigned int aSpiderEntrie : aSpiderEntries)
             {
@@ -226,12 +226,12 @@ struct boss_hadronoxAI : public ScriptedAI
                 m_uiGauntletStartTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiPierceTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PIERCE_ARMOR) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PIERCE_ARMOR) == CAST_OK)
                 m_uiPierceTimer = urand(8000, 15000);
         }
         else

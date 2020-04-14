@@ -301,7 +301,7 @@ struct boss_terokkAI : public ScriptedAI, public CombatActions
                     }
                     continue;
                 case TEROKK_COMBAT_ACTION_CLEAVE:
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                     {
                         SetActionReadyStatus(i, false);
                         ResetTimer(i, GetSubsequentActionTimer(TerokkActions(i)));
@@ -315,7 +315,7 @@ struct boss_terokkAI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         ExecuteActions();

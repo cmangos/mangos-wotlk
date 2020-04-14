@@ -215,7 +215,7 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
                         }
                         break;
                     case SHAFFAR_ACTION_BLINK:
-                        if (m_creature->CanReachWithMeleeAttack(m_creature->getVictim()) && DoCastSpellIfCan(nullptr, SPELL_BLINK) == CAST_OK)
+                        if (m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()) && DoCastSpellIfCan(nullptr, SPELL_BLINK) == CAST_OK)
                         {
                             m_actionTimers[i] = GetSubsequentActionTimer(ShaffarActions(i));
                             m_actionReadyStatus[i] = false;
@@ -225,7 +225,7 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
                     case SHAFFAR_ACTION_PRIMARY_SPELL:
                     {
                         uint32 spell = urand(0,1) ? SPELL_FIREBALL : SPELL_FROSTBOLT;
-                        if (DoCastSpellIfCan(m_creature->getVictim(), spell) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), spell) == CAST_OK)
                         {
                             m_actionTimers[i] = GetSubsequentActionTimer(ShaffarActions(i));
                             m_actionReadyStatus[i] = false;
@@ -243,7 +243,7 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
         switch (spell->Id)
         {
             case SPELL_FROSTNOVA:
-                if (m_creature->getVictim() != victim) // frostnova hit others, resist case
+                if (m_creature->GetVictim() != victim) // frostnova hit others, resist case
                     break;
                 DistanceYourself();
                 break;
@@ -252,7 +252,7 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
 
     void DistanceYourself()
     {
-        if (Unit* victim = m_creature->getVictim()) // make sure target didnt die
+        if (Unit* victim = m_creature->GetVictim()) // make sure target didnt die
         {
             float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim, true);
             m_creature->GetMotionMaster()->DistanceYourself(distance);
@@ -273,7 +273,7 @@ struct boss_nexusprince_shaffarAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         for (uint32 i = 0; i < SHAFFAR_ACTION_MAX; ++i)

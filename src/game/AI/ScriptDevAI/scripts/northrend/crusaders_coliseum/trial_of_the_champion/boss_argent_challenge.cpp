@@ -150,7 +150,7 @@ struct boss_eadricAI : public argent_champion_commonAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiHammerTimer < uiDiff)
@@ -276,7 +276,7 @@ struct boss_paletressAI : public argent_champion_commonAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_bSummonedMemory && m_creature->GetHealthPercent() <= 25.0f)

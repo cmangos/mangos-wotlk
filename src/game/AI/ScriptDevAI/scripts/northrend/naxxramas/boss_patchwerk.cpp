@@ -131,14 +131,14 @@ struct boss_patchwerkAI : public ScriptedAI
         }
 
         if (!pTarget)
-            pTarget = m_creature->getVictim();
+            pTarget = m_creature->GetVictim();
 
         DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_HATEFULSTRIKE : SPELL_HATEFULSTRIKE_H);
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Hateful Strike
@@ -182,7 +182,7 @@ struct boss_patchwerkAI : public ScriptedAI
             // Slimebolt - casted only while Berserking to prevent kiting
             if (m_uiSlimeboltTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_SLIMEBOLT);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SLIMEBOLT);
                 m_uiSlimeboltTimer = 5000;
             }
             else

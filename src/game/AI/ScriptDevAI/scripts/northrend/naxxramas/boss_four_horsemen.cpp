@@ -182,7 +182,7 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Don't attack while moving
@@ -217,8 +217,8 @@ struct boss_lady_blaumeuxAI : public ScriptedAI
         if (m_uiShadowBoltTimer < uiDiff)
         {
             // If we can find a target in range of 45.0f, then cast Shadowbolt
-            if (m_creature->IsWithinDist(m_creature->getVictim(), 45.0f))
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H);
+            if (m_creature->IsWithinDist(m_creature->GetVictim(), 45.0f))
+                DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H);
             else
             {
                 DoCastSpellIfCan(m_creature, SPELL_UNYILDING_PAIN);
@@ -314,13 +314,13 @@ struct boss_rivendare_naxxAI : public ScriptedAI
         SetCombatMovement(true);
         m_bIsCornerMovement = false;
         m_creature->GetMotionMaster()->Clear();
-        if (m_creature->getVictim())
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+        if (m_creature->GetVictim())
+            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Don't attack while moving
@@ -342,7 +342,7 @@ struct boss_rivendare_naxxAI : public ScriptedAI
 
         if (m_uiUnholyShadowTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_UNHOLY_SHADOW : SPELL_UNHOLY_SHADOW_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_UNHOLY_SHADOW : SPELL_UNHOLY_SHADOW_H) == CAST_OK)
                 m_uiUnholyShadowTimer = 15000;
         }
         else
@@ -428,13 +428,13 @@ struct boss_thane_korthazzAI : public ScriptedAI
         SetCombatMovement(true);
         m_bIsCornerMovement = false;
         m_creature->GetMotionMaster()->Clear();
-        if (m_creature->getVictim())
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+        if (m_creature->GetVictim())
+            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Don't attack while moving
@@ -456,7 +456,7 @@ struct boss_thane_korthazzAI : public ScriptedAI
 
         if (m_uiMeteorTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_METEOR : SPELL_METEOR_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_METEOR : SPELL_METEOR_H) == CAST_OK)
                 m_uiMeteorTimer = 20000;
         }
         else
@@ -548,7 +548,7 @@ struct boss_sir_zeliekAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Don't attack while moving
@@ -582,8 +582,8 @@ struct boss_sir_zeliekAI : public ScriptedAI
         if (m_uiHolyBoltTimer < uiDiff)
         {
             // If we can find a target in range of 45.0f, then cast Holy Bolt
-            if (m_creature->IsWithinDist(m_creature->getVictim(), 45.0f))
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_HOLY_BOLT : SPELL_HOLY_BOLT_H);
+            if (m_creature->IsWithinDist(m_creature->GetVictim(), 45.0f))
+                DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_HOLY_BOLT : SPELL_HOLY_BOLT_H);
             else
             {
                 DoCastSpellIfCan(m_creature, SPELL_CONDEMNATION);

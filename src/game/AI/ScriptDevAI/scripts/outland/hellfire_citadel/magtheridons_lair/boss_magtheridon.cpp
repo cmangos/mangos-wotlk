@@ -182,7 +182,7 @@ struct boss_magtheridonAI : public ScriptedAI
         if (m_creature->HasAura(SPELL_SHADOW_CAGE_DUMMY) /*|| m_creature->IsStunned()*/ || m_creature->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
             return;
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiBerserkTimer)
@@ -252,7 +252,7 @@ struct boss_magtheridonAI : public ScriptedAI
             {
                 if (m_uiQuakeTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_QUAKE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_QUAKE) == CAST_OK)
                     {
                         m_creature->SetImmobilizedState(true, true);
                         m_quakeStunTimer = 7000;
@@ -264,7 +264,7 @@ struct boss_magtheridonAI : public ScriptedAI
 
                 if (m_uiCleaveTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                         m_uiCleaveTimer = 10000;
                 }
                 else
@@ -366,8 +366,8 @@ struct mob_hellfire_channelerAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        if (m_creature->getVictim())
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
+        if (m_creature->GetVictim())
+            pSummoned->AI()->AttackStart(m_creature->GetVictim());
     }
 
     void SummonedCreatureDespawn(Creature* pSummoned) override
@@ -390,7 +390,7 @@ struct mob_hellfire_channelerAI : public ScriptedAI
                 m_uiShadowGraspTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiShadowBoltVolleyTimer < uiDiff)
@@ -504,7 +504,7 @@ struct mob_abyssalAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiDespawnTimer < uiDiff)
@@ -517,7 +517,7 @@ struct mob_abyssalAI : public ScriptedAI
 
         if (m_uiFireBlastTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIRE_BLAST) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIRE_BLAST) == CAST_OK)
                 m_uiFireBlastTimer = urand(5000, 15000);
         }
         else

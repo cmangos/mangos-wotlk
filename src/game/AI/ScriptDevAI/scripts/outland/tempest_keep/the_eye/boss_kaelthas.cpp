@@ -598,7 +598,7 @@ struct boss_kaelthasAI : public ScriptedAI
                 m_uiPhase = PHASE_5_GRAVITY;
                 SetCombatMovement(true);
                 m_uiArcaneDisruptionTimer = 70000;
-                if (Unit* victim = m_creature->getVictim())
+                if (Unit* victim = m_creature->GetVictim())
                 {
                     m_creature->SetTarget(victim);
                     DoStartMovement(victim);
@@ -799,13 +799,13 @@ struct boss_kaelthasAI : public ScriptedAI
                     }
                     case KAEL_ACTION_MELEE_MODE:
                     {
-                        if (m_rangeMode && m_creature->IsWithinCombatDist(m_creature->getVictim(), 8.f))
+                        if (m_rangeMode && m_creature->IsWithinCombatDist(m_creature->GetVictim(), 8.f))
                         {
                             m_rangeMode = false;
                             m_attackDistance = 0.0f;
                             //m_creature->SetSheath(SHEATH_STATE_MELEE);
-                            m_creature->MeleeAttackStart(m_creature->getVictim());
-                            DoStartMovement(m_creature->getVictim());
+                            m_creature->MeleeAttackStart(m_creature->GetVictim());
+                            DoStartMovement(m_creature->GetVictim());
                         }
                         break;
                     }
@@ -815,10 +815,10 @@ struct boss_kaelthasAI : public ScriptedAI
                         {
                             m_attackDistance = 0.0f;                            
                             m_rangeMode = false;
-                            DoStartMovement(m_creature->getVictim());
+                            DoStartMovement(m_creature->GetVictim());
                             return;
                         }
-                        else if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
+                        else if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIREBALL) == CAST_OK)
                         {
                             m_uiFireballTimer = m_rangeMode ? 0 : urand(3000, 10000);
                             if (m_uiFireballTimer > 0)
@@ -1432,7 +1432,7 @@ struct advisor_base_ai : public ScriptedAI
         m_creature->ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->ClearAllReactives();
-        m_creature->MeleeAttackStop(m_creature->getVictim());
+        m_creature->MeleeAttackStop(m_creature->GetVictim());
         SetCombatMovement(false);
         SetCombatScriptStatus(true);
 
@@ -1468,13 +1468,13 @@ struct advisor_base_ai : public ScriptedAI
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_bFakeDeath = false;
                 SetCombatScriptStatus(false);
-                m_creature->MeleeAttackStart(m_creature->getVictim());
+                m_creature->MeleeAttackStart(m_creature->GetVictim());
                 SetCombatMovement(true);
                 SetCombatScriptStatus(false);
                 SetReactState(REACT_AGGRESSIVE);
                 ResetTimers();
                 DoResetThreat();
-                DoStartMovement(m_creature->getVictim());
+                DoStartMovement(m_creature->GetVictim());
             }
             else
                 m_attackTimer -= uiDiff;
@@ -1521,7 +1521,7 @@ struct boss_thaladred_the_darkenerAI : public advisor_base_ai
     {
         advisor_base_ai::UpdateAI(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Don't use abilities during fake death
@@ -1543,7 +1543,7 @@ struct boss_thaladred_the_darkenerAI : public advisor_base_ai
 
         if (m_uiRendTimer <= uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_REND) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_REND) == CAST_OK)
                 m_uiRendTimer = urand(7000, 12000);
         }
         else
@@ -1562,7 +1562,7 @@ struct boss_thaladred_the_darkenerAI : public advisor_base_ai
 
         if (m_uiPsychicBlowTimer <= uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PSYCHIC_BLOW) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PSYCHIC_BLOW) == CAST_OK)
                 m_uiPsychicBlowTimer = urand(20000, 25000);
         }
         else
@@ -1613,7 +1613,7 @@ struct boss_lord_sanguinarAI : public advisor_base_ai
     {
         advisor_base_ai::UpdateAI(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Don't use abilities during fake death
@@ -1690,7 +1690,7 @@ struct boss_grand_astromancer_capernianAI : public advisor_base_ai
     {
         advisor_base_ai::UpdateAI(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Don't use abilities during fake death
@@ -1733,15 +1733,15 @@ struct boss_grand_astromancer_capernianAI : public advisor_base_ai
             if (!m_creature->IsSpellReady(SPELL_CAPERNIAN_FIREBALL))
             {
                 m_attackDistance = 0.0f;
-                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle, m_moveFurther);
+                m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim(), m_attackDistance, m_attackAngle, m_moveFurther);
             }
-            else if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CAPERNIAN_FIREBALL) == CAST_OK)
+            else if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CAPERNIAN_FIREBALL) == CAST_OK)
             {
                 m_uiFireballTimer = 2000;
                 if (m_attackDistance == 0.0f)
                 {
                     m_attackDistance = 30.0f;
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim(), m_attackDistance, m_attackAngle, m_moveFurther);
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim(), m_attackDistance, m_attackAngle, m_moveFurther);
                 }
                 return;
             }
@@ -1797,7 +1797,7 @@ struct boss_master_engineer_telonicusAI : public advisor_base_ai
     {
         advisor_base_ai::UpdateAI(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Don't use abilities during fake death
@@ -1807,7 +1807,7 @@ struct boss_master_engineer_telonicusAI : public advisor_base_ai
         if (m_uiBombTimer <= uiDiff)
         {
             m_uiBombTimer = 0;
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BOMB) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BOMB) == CAST_OK)
                 m_uiBombTimer = urand(4000, 5000);
         }
         else

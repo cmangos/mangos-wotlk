@@ -55,7 +55,7 @@ struct boss_noxxionAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiToxicVolleyTimer < diff)
@@ -68,7 +68,7 @@ struct boss_noxxionAI : public ScriptedAI
 
         if (m_uiUppercutTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UPPERCUT) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_UPPERCUT) == CAST_OK)
                 m_uiUppercutTimer = 12000;
         }
         else

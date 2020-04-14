@@ -237,7 +237,7 @@ struct boss_devourer_of_soulsAI : public ScriptedAI
         }
 
         // Update Target and do Combat Spells
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // No additional abilities while unleashing

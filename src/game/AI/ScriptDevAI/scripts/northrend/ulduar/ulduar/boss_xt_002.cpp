@@ -205,7 +205,7 @@ struct boss_xt_002AI : public ScriptedAI
         m_creature->SetStandState(UNIT_STAND_STATE_STAND);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-        DoStartMovement(m_creature->getVictim());
+        DoStartMovement(m_creature->GetVictim());
 
         // reset timers as well
         m_uiLightBombTimer = 10000;
@@ -244,7 +244,7 @@ struct boss_xt_002AI : public ScriptedAI
                 m_uiMountTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiBerserkTimer)

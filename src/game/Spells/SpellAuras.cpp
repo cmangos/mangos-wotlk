@@ -1276,7 +1276,7 @@ void Aura::TriggerSpell()
                                 target->getThreatManager().modifyThreatPercent(pUnit, -100);
                         }
 
-                        if (Unit* pEnemy = target->SelectRandomUnfriendlyTarget(target->getVictim(), 100.0f))
+                        if (Unit* pEnemy = target->SelectRandomUnfriendlyTarget(target->GetVictim(), 100.0f))
                             ((Creature*)target)->AI()->AttackStart(pEnemy);
 
                         return;
@@ -1382,7 +1382,7 @@ void Aura::TriggerSpell()
                         Unit* pCaster = GetCaster();
                         if (pCaster && pCaster->GetTypeId() == TYPEID_UNIT)
                         {
-                            if (pCaster->getVictim() && !pCaster->IsWithinDistInMap(target, 60.0f))
+                            if (pCaster->GetVictim() && !pCaster->IsWithinDistInMap(target, 60.0f))
                             {
                                 if (Unit* pTarget = ((Creature*)pCaster)->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                                     target->CastSpell(pTarget, 28099, TRIGGERED_NONE);// Shock
@@ -2338,7 +2338,7 @@ void Aura::TriggerSpell()
             case 43149:                                     // Claw Rage
             {
                 // Need to provide explicit target for trigger spell target combination
-                target->CastSpell(target->getVictim(), trigger_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                target->CastSpell(target->GetVictim(), trigger_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
             case 53563:                                     // Beacon of Light
@@ -9711,7 +9711,7 @@ void Aura::PeriodicDummyTick()
             // Prey on the Weak
             if (spell->SpellIconID == 2983)
             {
-                Unit* victim = target->getVictim();
+                Unit* victim = target->GetVictim();
                 if (victim && (target->GetHealth() * 100 / target->GetMaxHealth() > victim->GetHealth() * 100 / victim->GetMaxHealth()))
                 {
                     if (!target->HasAura(58670))
@@ -9825,7 +9825,7 @@ void Aura::PeriodicDummyTick()
                 case 53511:
                 case 53512:
                 {
-                    Unit* victim = target->getVictim();
+                    Unit* victim = target->GetVictim();
                     if (victim && victim->GetHealth() * 100 < victim->GetMaxHealth() * 35)
                         target->CastSpell(target, spell->Id == 53511 ? 60096 : 60097, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                     return;

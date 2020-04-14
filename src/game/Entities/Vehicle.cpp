@@ -661,7 +661,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
         // Reinitialize movement
         if (((Creature*)passenger)->AI())
             ((Creature*)passenger)->AI()->SetCombatMovement(true, true);
-        if (!passenger->getVictim())
+        if (!passenger->GetVictim())
             passenger->GetMotionMaster()->Initialize();
     }
 }

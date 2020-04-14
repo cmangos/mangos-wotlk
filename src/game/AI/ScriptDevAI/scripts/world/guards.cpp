@@ -135,7 +135,7 @@ struct guard_shattrath_aldorAI : public guardAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_bCanTeleport)
@@ -157,7 +157,7 @@ struct guard_shattrath_aldorAI : public guardAI
         }
         else if (m_uiBanish_Timer < uiDiff)
         {
-            Unit* pVictim = m_creature->getVictim();
+            Unit* pVictim = m_creature->GetVictim();
 
             if (pVictim && pVictim->GetTypeId() == TYPEID_PLAYER)
             {
@@ -202,7 +202,7 @@ struct guard_shattrath_scryerAI : public guardAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_bCanTeleport)
@@ -224,7 +224,7 @@ struct guard_shattrath_scryerAI : public guardAI
         }
         else if (m_uiBanish_Timer < uiDiff)
         {
-            Unit* pVictim = m_creature->getVictim();
+            Unit* pVictim = m_creature->GetVictim();
 
             if (pVictim && pVictim->GetTypeId() == TYPEID_PLAYER)
             {

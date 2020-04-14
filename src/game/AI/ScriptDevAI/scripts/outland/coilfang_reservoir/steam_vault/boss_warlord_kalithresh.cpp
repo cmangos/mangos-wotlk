@@ -164,7 +164,7 @@ struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatActions
             SetCombatScriptStatus(false);
             SetCombatMovement(true);
             SetMeleeEnabled(true);
-            DoStartMovement(m_creature->getVictim());
+            DoStartMovement(m_creature->GetVictim());
             DoCastSpellIfCan(m_creature, SPELL_WARLORDS_RAGE);
 
             // Make Distiller cast on arrival
@@ -232,7 +232,7 @@ struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatActions
                     }
                     case WARLORD_KALITHRESH_ACTION_HEAD_CRACK:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HEAD_CRACK) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HEAD_CRACK) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -249,7 +249,7 @@ struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         ExecuteActions();

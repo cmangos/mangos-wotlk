@@ -335,8 +335,8 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
                 break;
             case YELL_INTRO_CHARGE:
                 m_bCanDoMeleeAttack = true;
-                if (m_creature->getVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                if (m_creature->GetVictim())
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                 DoCastSpellIfCan(m_creature, SPELL_CHARGE);
                 break;
             case YELL_INTRO_KILL_MADRIGOSA:
@@ -363,7 +363,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
         // Dialogue updates outside of combat too
         DialogueUpdate(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiMadrigosaSpellTimer)
@@ -392,7 +392,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
             return;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiLoveTimer < uiDiff)
@@ -410,7 +410,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
 
         if (m_uiSlashTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_METEOR_SLASH) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_METEOR_SLASH) == CAST_OK)
                 m_uiSlashTimer = 11000;
         }
         else
@@ -418,7 +418,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
 
         if (m_uiStompTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_STOMP) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_STOMP) == CAST_OK)
                 m_uiStompTimer = 30000;
         }
         else

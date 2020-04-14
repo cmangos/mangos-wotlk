@@ -268,7 +268,7 @@ struct boss_sindragosaAI : public ScriptedAI
                 SetFlying(false);
                 SetCombatMovement(true);
 
-                if (Unit* pVictim = m_creature->getVictim())
+                if (Unit* pVictim = m_creature->GetVictim())
                     m_creature->GetMotionMaster()->MoveChase(pVictim);
             }
         }
@@ -305,7 +305,7 @@ struct boss_sindragosaAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Berserk
@@ -371,7 +371,7 @@ struct boss_sindragosaAI : public ScriptedAI
                 // Cleave
                 if (m_uiCleaveTimer <= uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                         m_uiCleaveTimer = urand(5000, 15000);
                 }
                 else
@@ -389,7 +389,7 @@ struct boss_sindragosaAI : public ScriptedAI
                 // Frost Breath
                 if (m_uiFrostBreathTimer <= uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_BREATH) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROST_BREATH) == CAST_OK)
                         m_uiFrostBreathTimer = urand(15000, 20000);
                 }
                 else
@@ -580,7 +580,7 @@ struct npc_rimefang_iccAI : public ScriptedAI
             SetFlying(false);
             SetCombatMovement(true);
 
-            if (Unit* pVictim = m_creature->getVictim())
+            if (Unit* pVictim = m_creature->GetVictim())
                 m_creature->GetMotionMaster()->MoveChase(pVictim);
         }
         else if (uiPointId == RIMEFANG_POINT_AIR)
@@ -591,7 +591,7 @@ struct npc_rimefang_iccAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiPhase == RIMEFANG_PHASE_GROUND)
@@ -599,7 +599,7 @@ struct npc_rimefang_iccAI : public ScriptedAI
             // Frost Breath
             if (m_uiFrostBreathTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RIMEFANG_FROST_BREATH) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RIMEFANG_FROST_BREATH) == CAST_OK)
                     m_uiFrostBreathTimer = urand(5000, 8000);
             }
             else
@@ -752,13 +752,13 @@ struct npc_spinestalker_iccAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Cleave
         if (m_uiCleaveTimer <= uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SPINESTALKER_CLEAVE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SPINESTALKER_CLEAVE) == CAST_OK)
                 m_uiCleaveTimer = urand(5000, 8000);
         }
         else

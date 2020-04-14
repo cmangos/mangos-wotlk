@@ -292,10 +292,10 @@ struct boss_zuljinAI : public CombatAI
             {
                 SetCombatMovement(true);
                 SetMeleeEnabled(true);
-                if (m_creature->getVictim())
+                if (m_creature->GetVictim())
                 {
                     m_creature->GetMotionMaster()->Clear();
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                 }
             }
             // In Eagle phase we just cast Energy storm and summon 4 Feather cyclones; Boss doesn't move in this phase
@@ -458,7 +458,7 @@ struct boss_zuljinAI : public CombatAI
                     ResetCombatAction(action, 27000);
                 return;
             case ZULJIN_ACTION_OVERPOWER:
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_OVERPOWER) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_OVERPOWER) == CAST_OK)
                     ResetCombatAction(action, urand(12000, 16000));
                 return;
             case ZULJIN_ACTION_CLAW_RAGE:
@@ -531,8 +531,8 @@ struct npc_feather_vortexAI : public ScriptedAI, public TimerManager
         if (Creature* zuljin = m_instance->GetSingleCreatureFromStorage(NPC_ZULJIN))
         {
             // Change target on player hit
-            if (m_creature->getVictim())
-                m_params.skip.guid = m_creature->getVictim()->GetObjectGuid();
+            if (m_creature->GetVictim())
+                m_params.skip.guid = m_creature->GetVictim()->GetObjectGuid();
             if (Unit* target = zuljin->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_CUSTOM))
             {
                 DoResetThreat();
@@ -558,7 +558,7 @@ struct npc_feather_vortexAI : public ScriptedAI, public TimerManager
 
     void SpellHitTarget(Unit* target, SpellEntry const* spellEntry) override
     {
-        if (spellEntry->Id == SPELL_CYCLONE && target == m_creature->getVictim())
+        if (spellEntry->Id == SPELL_CYCLONE && target == m_creature->GetVictim())
             PickNewTarget();
     }
 

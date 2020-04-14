@@ -273,7 +273,7 @@ struct boss_uromAI : public ScriptedAI
                 m_uiArcaneShieldTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Don't use any combat abilities during the platform transition
@@ -304,7 +304,7 @@ struct boss_uromAI : public ScriptedAI
                 // Resume combat movement
                 SetCombatMovement(true);
                 m_creature->GetMotionMaster()->Clear();
-                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                 m_uiExplosionExpireTimer = 0;
             }
             else
@@ -336,7 +336,7 @@ struct boss_uromAI : public ScriptedAI
 
         if (m_uiFrostBombTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROSTBOMB) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROSTBOMB) == CAST_OK)
                 m_uiFrostBombTimer = urand(4000, 6000);
         }
         else

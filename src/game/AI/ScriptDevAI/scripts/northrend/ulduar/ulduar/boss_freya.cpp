@@ -397,19 +397,19 @@ struct boss_freyaAI : public ScriptedAI
                 break;
             case NPC_DETONATING_LASHER:
             case NPC_ANCIENT_CONSERVATOR:
-                pSummoned->AI()->AttackStart(m_creature->getVictim());
+                pSummoned->AI()->AttackStart(m_creature->GetVictim());
                 break;
             case NPC_WATER_SPIRIT:
                 m_waterSpiritGuid = pSummoned->GetObjectGuid();
-                pSummoned->AI()->AttackStart(m_creature->getVictim());
+                pSummoned->AI()->AttackStart(m_creature->GetVictim());
                 break;
             case NPC_STORM_LASHER:
                 m_stormLasherGuid = pSummoned->GetObjectGuid();
-                pSummoned->AI()->AttackStart(m_creature->getVictim());
+                pSummoned->AI()->AttackStart(m_creature->GetVictim());
                 break;
             case NPC_SNAPLASHER:
                 m_snaplasherGuid = pSummoned->GetObjectGuid();
-                pSummoned->AI()->AttackStart(m_creature->getVictim());
+                pSummoned->AI()->AttackStart(m_creature->GetVictim());
                 break;
             case NPC_NATURE_BOMB:
                 pSummoned->CastSpell(pSummoned, SPELL_NATURE_BOMB_GO, TRIGGERED_OLD_TRIGGERED);
@@ -615,7 +615,7 @@ struct boss_freyaAI : public ScriptedAI
                 m_uiEpilogueTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiBerserkTimer)
@@ -874,7 +874,7 @@ struct npc_water_spiritAI : public three_nature_alliesAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiTidalWaveTimer < uiDiff)
@@ -941,7 +941,7 @@ struct npc_storm_lasherAI : public three_nature_alliesAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiLightningLashTimer < uiDiff)

@@ -327,7 +327,7 @@ struct essence_base_AI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         ExecuteActions();
@@ -544,7 +544,7 @@ struct boss_essence_of_desireAI : public essence_base_AI
                     }
                     case DESIRE_ACTION_DEADEN:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DEADEN) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DEADEN) == CAST_OK)
                         {
                             DoScriptText(DESI_SAY_SPEC, m_creature);
                             ResetTimer(i, GetSubsequentActionTimer(DesireActions(i)));
@@ -554,7 +554,7 @@ struct boss_essence_of_desireAI : public essence_base_AI
                     }
                     case DESIRE_ACTION_SPIRIT_SHOCK:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SPIRIT_SHOCK) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SPIRIT_SHOCK) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(DesireActions(i)));
                             SetActionReadyStatus(i, false);
@@ -701,7 +701,7 @@ struct boss_essence_of_angerAI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         ExecuteActions();
@@ -772,7 +772,7 @@ struct npc_enslaved_soulAI : public ScriptedAI, TimerManager
     {
         UpdateTimers(diff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

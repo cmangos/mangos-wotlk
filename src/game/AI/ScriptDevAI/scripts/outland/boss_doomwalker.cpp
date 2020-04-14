@@ -115,7 +115,7 @@ struct boss_doomwalkerAI : public ScriptedAI
     {
         if (movementType == POINT_MOTION_TYPE && data == POINT_OVERRUN)
         {
-            if (Unit* victim = m_creature->getVictim())
+            if (Unit* victim = m_creature->GetVictim())
             {
                 m_creature->MeleeAttackStart(victim);
                 m_creature->SetTarget(victim);
@@ -129,7 +129,7 @@ struct boss_doomwalkerAI : public ScriptedAI
 
     void JustSummoned(Creature* summoned) override
     {
-        m_creature->MeleeAttackStop(m_creature->getVictim());
+        m_creature->MeleeAttackStop(m_creature->GetVictim());
         m_creature->SetTarget(nullptr);
         SetCombatScriptStatus(true);
         float x, y, z;
@@ -167,7 +167,7 @@ struct boss_doomwalkerAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (GetCombatScriptStatus())
@@ -231,7 +231,7 @@ struct boss_doomwalkerAI : public ScriptedAI
         {
             Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
             if (!pTarget)
-                pTarget = m_creature->getVictim();
+                pTarget = m_creature->GetVictim();
 
             if (pTarget)
             {
@@ -245,7 +245,7 @@ struct boss_doomwalkerAI : public ScriptedAI
         // Spell Sunder Armor
         if (m_uiArmorTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CRUSH_ARMOR) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CRUSH_ARMOR) == CAST_OK)
                 m_uiArmorTimer = urand(10000, 25000);
         }
         else

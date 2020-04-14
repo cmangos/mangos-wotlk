@@ -101,16 +101,16 @@ struct boss_nethermancer_sepethreaAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Arcane Blast
         if (m_uiArcaneBlastTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BLAST) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ARCANE_BLAST) == CAST_OK)
             {
                 m_uiArcaneBlastTimer = urand(15000, 30000);
-                m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -50.0f);
+                m_creature->getThreatManager().modifyThreatPercent(m_creature->GetVictim(), -50.0f);
             }
         }
         else
@@ -189,7 +189,7 @@ struct npc_raging_flamesAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Raging Flames

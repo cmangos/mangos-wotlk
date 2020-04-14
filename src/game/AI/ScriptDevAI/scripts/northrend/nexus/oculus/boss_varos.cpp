@@ -159,7 +159,7 @@ struct boss_varosAI : public ScriptedAI
                 m_uiShieldTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiAmplifyMagicTimer < uiDiff)

@@ -549,7 +549,7 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
         }
 
         // Combat spells
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiHealTimer < uiDiff)
@@ -865,7 +865,7 @@ struct boss_eranikusAI : public ScriptedAI
         }
 
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Move Tyrande after she is summoned

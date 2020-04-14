@@ -161,12 +161,12 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
             return;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiNetherbreathTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_NETHER_BREATH);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_NETHER_BREATH);
             m_uiNetherbreathTimer = urand(9000, 13000);
         }
         else
@@ -174,7 +174,7 @@ struct mob_mature_netherwing_drakeAI : public ScriptedAI
 
         if (m_uiIntangiblePresenceTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_INTANGIBLE_PRESENCE);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_INTANGIBLE_PRESENCE);
             m_uiIntangiblePresenceTimer = urand(12000, 16000);
         }
         else
@@ -254,7 +254,7 @@ struct mob_enslaved_netherwing_drakeAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (m_uiFlyTimer)
             {
@@ -637,12 +637,12 @@ struct npc_wildaAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiLightningTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAIN_LIGHTNING) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHAIN_LIGHTNING) == CAST_OK)
                 m_uiLightningTimer = 4000;
         }
         else
@@ -650,7 +650,7 @@ struct npc_wildaAI : public npc_escortAI
 
         if (m_uiShockTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_SHOCK) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROST_SHOCK) == CAST_OK)
                 m_uiShockTimer = 10000;
         }
         else
@@ -920,12 +920,12 @@ struct mob_torlothAI : public ScriptedAI
         }
         else
         {
-            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
                 return;
 
             if (m_uiCleaveTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE);
                 m_uiCleaveTimer = 15000;
             }
             else
@@ -933,7 +933,7 @@ struct mob_torlothAI : public ScriptedAI
 
             if (m_uiShadowfuryTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWFURY);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOWFURY);
                 m_uiShadowfuryTimer = 20000;
             }
             else
@@ -1694,7 +1694,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
 
         if (m_bDeathwailGrounded)
         {
-            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             {
                 if (m_uiDeathwailDespawnTimer < uiDiff)
                 {
@@ -1710,7 +1710,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
             if (m_uiShadowBoltTimer < uiDiff)
             {
 
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
                     m_uiShadowBoltTimer = SHADOW_BOLT_CD + urand(0, SHADOW_BOLT_CD);
             }
             else
@@ -1718,7 +1718,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
 
             if (m_uiShadowBoltVolleyTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT_VOLLEY) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOW_BOLT_VOLLEY) == CAST_OK)
                     m_uiShadowBoltVolleyTimer = SHADOW_BOLT_VOLLEY_CD + urand(0, SHADOW_BOLT_VOLLEY_CD);
             }
             else
@@ -1726,7 +1726,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
 
             if (m_uiFearTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FEAR) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FEAR) == CAST_OK)
                     m_uiFearTimer = FEAR_CD + urand(0, FEAR_CD);
             }
             else
@@ -2321,7 +2321,7 @@ struct npc_spawned_oronok_tornheartAI : public ScriptedAI, private DialogueHelpe
     {
         DialogueUpdate(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiLightningTimer < uiDiff)
@@ -2345,7 +2345,7 @@ struct npc_spawned_oronok_tornheartAI : public ScriptedAI, private DialogueHelpe
 
         if (m_uiFrostTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_SHOCK) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROST_SHOCK) == CAST_OK)
                 m_uiFrostTimer = urand(14000, 18000);
         }
         else
@@ -2487,7 +2487,7 @@ struct npc_domesticated_felboarAI : public ScriptedAI
                 m_uiTuberTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -2952,7 +2952,7 @@ struct npc_commanderAI : public ScriptedAI, public CombatActions
             switch (i)
             {
                 case COMMANDER_COMBAT_ACTION_AIMED_SHOT:
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_AIMED_SHOT) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_AIMED_SHOT) == CAST_OK)
                     {
                         SetActionReadyStatus(i, false);
                         ResetTimer(i, GetRepeatingCombatActionTimer(i));
@@ -2960,7 +2960,7 @@ struct npc_commanderAI : public ScriptedAI, public CombatActions
                     }
                     continue;
                 case COMMANDER_COMBAT_ACTION_MULTI_SHOT:
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MULTI_SHOT) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MULTI_SHOT) == CAST_OK)
                     {
                         SetActionReadyStatus(i, false);
                         ResetTimer(i, GetRepeatingCombatActionTimer(i));
@@ -2968,7 +2968,7 @@ struct npc_commanderAI : public ScriptedAI, public CombatActions
                     }
                     continue;
                 case COMMANDER_COMBAT_ACTION_SHOOT:
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOOT) == CAST_OK)
                     {
                         SetActionReadyStatus(i, false);
                         ResetTimer(i, GetRepeatingCombatActionTimer(i));
@@ -3111,7 +3111,7 @@ struct npc_commanderAI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         ExecuteActions();
@@ -3992,7 +3992,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                 {
                     case ILLIDARI_CLEAVE:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAVAGER_CLEAVE) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RAVAGER_CLEAVE) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4001,7 +4001,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                     }
                     case ILLIDARI_CUTDOWN:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAVAGER_CUTDOWN) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RAVAGER_CUTDOWN) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4010,7 +4010,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                     }
                     case ILLIDARI_DEMORALIZING_SHOUT:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RAVAGER_DEMORALIZING_SHOUT) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RAVAGER_DEMORALIZING_SHOUT) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4028,7 +4028,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                 {
                     case ASSASSIN_DEBILITATING_STRIKE:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ASSASSIN_DEBILITATING_STRIKE) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ASSASSIN_DEBILITATING_STRIKE) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4037,7 +4037,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                     }
                     case ASSASSIN_SINISTER_STRIKE:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ASSASSIN_SINISTER_STRIKE) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ASSASSIN_SINISTER_STRIKE) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4055,7 +4055,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                 {
                     case SUCCUBUS_LASH_OF_PAIN:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUCCUBUS_LASH_OF_PAIN) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SUCCUBUS_LASH_OF_PAIN) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4064,7 +4064,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                     }
                     case SUCCUBUS_SEDUCTION:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUCCUBUS_SEDUCTION) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SUCCUBUS_SEDUCTION) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4082,7 +4082,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                 {
                     case VINDICATOR_EXORCISM:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VINDICATOR_EXORCISM) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_VINDICATOR_EXORCISM) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4091,7 +4091,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                     }
                     case VINDICATOR_HAMMER:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VINDICATOR_HAMMER) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_VINDICATOR_HAMMER) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4129,7 +4129,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                 {
                     case CAALEN_HOLY_SMITE:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CAALEN_HOLY_SMITE) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CAALEN_HOLY_SMITE) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4138,7 +4138,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                     }
                     case CAALEN_PRAYER_OF_HEALING:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CAALEN_PRAYER_OF_HEALING) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CAALEN_PRAYER_OF_HEALING) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4156,7 +4156,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                 {
                     case MAGISTER_FIREBALL:
                     {
-                        CanCastResult canCast = DoCastSpellIfCan(m_creature->getVictim(), SPELL_MAGISTER_FIREBALL);
+                        CanCastResult canCast = DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MAGISTER_FIREBALL);
 
                         switch (canCast)
                         {
@@ -4191,7 +4191,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                 {
                     case SHADOWLORD_INFERNO:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWLORD_INFERNO) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOWLORD_INFERNO) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4200,7 +4200,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                     }
                     case SHADOWLORD_CARRION_SWARM:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWLORD_CARRION_SWARM) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOWLORD_CARRION_SWARM) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4210,9 +4210,9 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
                     case SHADOWLORD_SLEEP:
                     {
                         // Pretty much guessing how this spell should be used
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOWLORD_SLEEP) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOWLORD_SLEEP) == CAST_OK)
                         {
-                            m_creature->getThreatManager().modifyThreatPercent(m_creature->getVictim(), -90);
+                            m_creature->getThreatManager().modifyThreatPercent(m_creature->GetVictim(), -90);
 
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -4226,7 +4226,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(uiDiff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         ExecuteActions();

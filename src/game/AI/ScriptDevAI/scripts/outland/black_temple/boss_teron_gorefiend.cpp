@@ -294,7 +294,7 @@ struct boss_teron_gorefiendAI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         ExecuteActions();
@@ -389,13 +389,13 @@ struct npc_shadow_constructAI : public ScriptedAI, public TimerManager
     {
         UpdateTimers(diff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_atrophyTimer <= diff)
         {
             m_atrophyTimer = 0;
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ATROPHY) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ATROPHY) == CAST_OK)
                 m_atrophyTimer = 2500;
         }
         else m_atrophyTimer -= diff;

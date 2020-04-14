@@ -159,7 +159,7 @@ struct boss_anubrekhanAI : public ScriptedAI
     void SummonedCreatureDespawn(Creature* pSummoned) override
     {
         // If creature despawns on out of combat, skip this
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (pSummoned->GetEntry() == NPC_CRYPT_GUARD)
@@ -173,7 +173,7 @@ struct boss_anubrekhanAI : public ScriptedAI
     {
         m_introDialogue.DialogueUpdate(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Impale

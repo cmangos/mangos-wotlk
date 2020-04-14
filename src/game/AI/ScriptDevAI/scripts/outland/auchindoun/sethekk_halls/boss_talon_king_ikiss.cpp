@@ -127,7 +127,7 @@ struct boss_talon_king_ikissAI : public ScriptedAI, public CombatActions
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (!m_creature->getVictim() && m_creature->CanAttackOnSight(pWho) && pWho->isInAccessablePlaceFor(m_creature))
+        if (!m_creature->GetVictim() && m_creature->CanAttackOnSight(pWho) && pWho->isInAccessablePlaceFor(m_creature))
         {
             if (!m_Intro && m_creature->IsWithinDistInMap(pWho, 100.0f))
             {
@@ -223,7 +223,7 @@ struct boss_talon_king_ikissAI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (EnterEvadeIfOutOfCombatArea(diff))

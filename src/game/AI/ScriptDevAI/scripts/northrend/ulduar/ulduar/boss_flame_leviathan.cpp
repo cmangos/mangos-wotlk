@@ -416,7 +416,7 @@ struct boss_flame_leviathanAI : public ScriptedAI
             m_bInitTowers = true;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiPursueTimer < uiDiff)
@@ -449,7 +449,7 @@ struct boss_flame_leviathanAI : public ScriptedAI
 
         if (m_uiBatteringRamTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BATTERING_RAM) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BATTERING_RAM) == CAST_OK)
                 m_uiBatteringRamTimer = urand(10000, 15000);
         }
         else

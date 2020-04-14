@@ -204,11 +204,11 @@ struct boss_nalorakkAI : public CombatAI
                 }
                 return;
             case NALORAKK_ACTION_SWIPE:
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BRUTAL_SWIPE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BRUTAL_SWIPE) == CAST_OK)
                     ResetCombatAction(action, urand(7000, 15000));
                 return;
             case NALORAKK_ACTION_MANGLE:
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MANGLE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MANGLE) == CAST_OK)
                     ResetCombatAction(action, urand(3000, 15000));
                 return;
             case NALORAKK_ACTION_SURGE:
@@ -229,13 +229,13 @@ struct boss_nalorakkAI : public CombatAI
             }
             case NALORAKK_ACTION_SLASH:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_LACERATING_SLASH) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_LACERATING_SLASH) == CAST_OK)
                     ResetCombatAction(action, 20000);
                 return;
             }
             case NALORAKK_ACTION_REND:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_REND_FLESH) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_REND_FLESH) == CAST_OK)
                     ResetCombatAction(action, urand(6000, 10000));
                 return;
             }

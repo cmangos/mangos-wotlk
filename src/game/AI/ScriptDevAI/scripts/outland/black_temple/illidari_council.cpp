@@ -424,7 +424,7 @@ struct boss_gathios_the_shattererAI : public boss_illidari_councilAI
         {
             case GATHIOS_ACTION_JUDGEMENT:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_JUDGMENT) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_JUDGMENT) == CAST_OK)
                 {
                     DisableCombatAction(action);
                     ResetCombatAction(GATHIOS_ACTION_SEAL, urand(2000, 7000));
@@ -531,7 +531,7 @@ struct boss_high_nethermancer_zerevorAI : public boss_illidari_councilAI
             }
             case ZEREVOR_ACTION_ARCANE_BOLT:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BOLT) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ARCANE_BOLT) == CAST_OK)
                     ResetCombatAction(action, 3000);
                 return;
             }
@@ -591,13 +591,13 @@ struct boss_lady_malandeAI : public boss_illidari_councilAI
     void OnSpellInterrupt(SpellEntry const* spellInfo) override
     {
         m_attackDistance = 0.f;
-        DoStartMovement(m_creature->getVictim());
+        DoStartMovement(m_creature->GetVictim());
     }
 
     void OnSpellCooldownAdded(SpellEntry const* spellInfo) override
     {
         m_attackDistance = 20.0f;
-        DoStartMovement(m_creature->getVictim());
+        DoStartMovement(m_creature->GetVictim());
     }
 
     void ExecuteAction(uint32 action) override
@@ -625,7 +625,7 @@ struct boss_lady_malandeAI : public boss_illidari_councilAI
             }
             case MALANDE_ACTION_EMPOWERED_SMITE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EMPOWERED_SMITE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_EMPOWERED_SMITE) == CAST_OK)
                     ResetCombatAction(action, urand(2000, 3000));
                 return;
             }
@@ -679,7 +679,7 @@ struct boss_veras_darkshadowAI : public boss_illidari_councilAI
             DoScriptText(SAY_VERA_VANISH, m_creature);
             if (DoCastSpellIfCan(nullptr, SPELL_VANISH) == CAST_OK)
                 ResetCombatAction(action, 55000);
-            if (Unit* victim = m_creature->getVictim())
+            if (Unit* victim = m_creature->GetVictim())
                 m_creature->getThreatManager().SetTargetSuppressed(victim);
         }
     }

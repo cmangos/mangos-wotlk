@@ -120,7 +120,7 @@ struct boss_keristraszaAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // This needs to be checked only on heroic
@@ -177,7 +177,7 @@ struct boss_keristraszaAI : public ScriptedAI
                 }
                 else
                 {
-                    if (Unit* pSource = m_creature->getVictim())
+                    if (Unit* pSource = m_creature->GetVictim())
                     {
                         uiCrystalChainTimer = 15000;
 

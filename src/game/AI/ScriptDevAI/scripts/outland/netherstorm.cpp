@@ -232,7 +232,7 @@ struct npc_manaforge_spawnAI : public ScriptedAI
 
     void UpdateAI(const uint32 /*uiDiff*/) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -1325,7 +1325,7 @@ struct npc_maxx_a_million_escortAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() ||  !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() ||  !m_creature->GetVictim())
         {
             if (m_uiSubEventTimer)
             {
@@ -1649,12 +1649,12 @@ struct npc_captured_vanguardAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiGlaiveTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GLAIVE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_GLAIVE) == CAST_OK)
                 m_uiGlaiveTimer = urand(5000, 9000);
         }
         else
@@ -1662,7 +1662,7 @@ struct npc_captured_vanguardAI : public npc_escortAI
 
         if (m_uiHamstringTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HAMSTRING) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HAMSTRING) == CAST_OK)
                 m_uiHamstringTimer = urand(10000, 16000);
         }
         else
@@ -1964,7 +1964,7 @@ struct npc_drijyaAI : public npc_escortAI
                 m_uiDestroyingTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
     }
 };
@@ -2059,7 +2059,7 @@ struct npc_saeed_escortAI : public npc_escortAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (m_uiEventTimer)
             {
@@ -2162,7 +2162,7 @@ struct npc_saeed_escortAI : public npc_escortAI
         {
             if (m_uiCleaveTimer < uiDiff)
             {
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_SAEED_CLEAVE);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SAEED_CLEAVE);
                 m_uiCleaveTimer = urand(7000, 11000);
             }
             else
@@ -2316,7 +2316,7 @@ struct npc_dimensiusAI : public Scripted_NoMovementAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_bSpawnsFeeding && m_creature->GetHealthPercent() < 75.0f)
@@ -2456,7 +2456,7 @@ struct npc_salhadaarAI : public ScriptedAI
     {
         m_uiSummoned.push_back(pSummoned->GetObjectGuid());
         pSummoned->CastSpell(pSummoned, SPELL_SALAADIN_OVERSPARK, TRIGGERED_OLD_TRIGGERED);
-        pSummoned->AI()->AttackStart(m_creature->getVictim());
+        pSummoned->AI()->AttackStart(m_creature->GetVictim());
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -2494,7 +2494,7 @@ struct npc_salhadaarAI : public ScriptedAI
         }
         if (m_creature->IsInCombat())
         {
-            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
                 return;
 
             if (!m_uiUsedMirrorImage && m_creature->GetHealthPercent() < 25) // at 25% hp cast mirror image, its two spells
@@ -2791,9 +2791,9 @@ struct npc_scrap_reaverAI : ScriptedPetAI
         // UpdateAllies() is done in the generic PetAI in Mangos, but we can't do this from script side.
         // Unclear what side effects this has, but is something to be resolved from Mangos.
 
-        if (m_creature->getVictim())                            // in combat
+        if (m_creature->GetVictim())                            // in combat
         {
-            if (!m_creature->CanAttack(m_creature->getVictim()))
+            if (!m_creature->CanAttack(m_creature->GetVictim()))
             {
                 // target no longer valid for pet, so either attack stops or new target are selected
                 // doesn't normally reach this, because of how petAi is designed in Mangos. CombatStop
@@ -2963,8 +2963,8 @@ struct npc_scrapped_fel_reaverAI : ScriptedAI
 
     void SummonedMovementInform(Creature* summoned, uint32 motionType, uint32 data) override
     {
-        if (motionType == WAYPOINT_MOTION_TYPE && data == 2 && m_creature->getVictim())
-            summoned->AI()->AttackStart(m_creature->getVictim());
+        if (motionType == WAYPOINT_MOTION_TYPE && data == 2 && m_creature->GetVictim())
+            summoned->AI()->AttackStart(m_creature->GetVictim());
     }
 
     void JustSummoned(Creature* summoned) override
@@ -3601,12 +3601,12 @@ struct npc_adyen_the_lightwardenAI : public ScriptedAI
     {
         UpdateTimers(diff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_hammerOfJusticeTimer <= diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HAMMER_OF_JUSTICE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HAMMER_OF_JUSTICE) == CAST_OK)
             {
                 m_hammerOfJusticeTimer = 30000;
                 return;
@@ -3617,7 +3617,7 @@ struct npc_adyen_the_lightwardenAI : public ScriptedAI
 
         if (m_crusaderStrikeTimer <= diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CRUSADER_STRIKE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CRUSADER_STRIKE) == CAST_OK)
             {
                 m_crusaderStrikeTimer = 15000;
                 return;
@@ -3728,9 +3728,9 @@ struct npc_kaylaan_the_lostAI : public ScriptedAI
                     }
                     case KAYLAAN_ACTION_AVENGERS:
                     {
-                        if (m_creature->IsInRange(m_creature->getVictim(), 8.f, 30.f))
+                        if (m_creature->IsInRange(m_creature->GetVictim(), 8.f, 30.f))
                         {
-                            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_AVENGERS_SHEILD) == CAST_OK)
+                            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_AVENGERS_SHEILD) == CAST_OK)
                             {
                                 m_avengersShieldTimer = 15000;
                                 m_actionReadyStatus[i] = false;
@@ -3741,7 +3741,7 @@ struct npc_kaylaan_the_lostAI : public ScriptedAI
                     }
                     case KAYLAAN_ACTION_HOLY_SLAM:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HOLY_SLAM) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HOLY_SLAM) == CAST_OK)
                         {
                             m_holySlamTimer = 30000;
                             m_actionReadyStatus[i] = false;
@@ -3751,7 +3751,7 @@ struct npc_kaylaan_the_lostAI : public ScriptedAI
                     }
                     case KAYLAAN_ACTION_BURNING_LIGHT:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BURNING_LIGHT) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BURNING_LIGHT) == CAST_OK)
                         {
                             m_burningLightTimer = 15000;
                             m_actionReadyStatus[i] = false;
@@ -3767,7 +3767,7 @@ struct npc_kaylaan_the_lostAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_actionReadyStatus[KAYLAAN_ACTION_AVENGERS])

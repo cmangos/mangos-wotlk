@@ -274,7 +274,7 @@ struct boss_halazziAI : public CombatAI
                     ResetCombatAction(action, 16000);
                 return;
             case HALAZZI_ACTION_SABER_LASH:
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SABER_LASH) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SABER_LASH) == CAST_OK)
                 {
                     DoScriptText(urand(0, 1) ? SAY_SABERLASH1 : SAY_SABERLASH2, m_creature);
                     ResetCombatAction(action, 20000);
@@ -356,7 +356,7 @@ struct boss_spirit_lynxAI : public CombatAI
                 ResetCombatAction(action, urand(20000, 30000));
                 return;
             case LYNX_ACTION_SHRED_ARMOR:
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHRED_ARMOR);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHRED_ARMOR);
                 ResetCombatAction(action, 4000);
                 return;
         }

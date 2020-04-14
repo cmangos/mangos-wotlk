@@ -202,7 +202,7 @@ struct boss_sjonnirAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_creature->GetHealthPercent() <= (float)m_uiHpCheck)
@@ -246,7 +246,7 @@ struct boss_sjonnirAI : public ScriptedAI
 
         if (m_uiStaticChargeTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_STATIC_CHARGE : SPELL_STATIC_CHARGE_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_STATIC_CHARGE : SPELL_STATIC_CHARGE_H) == CAST_OK)
                 m_uiStaticChargeTimer = urand(20000, 25000);
         }
         else

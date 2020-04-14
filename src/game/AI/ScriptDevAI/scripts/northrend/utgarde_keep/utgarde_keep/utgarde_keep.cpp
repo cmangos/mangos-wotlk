@@ -128,12 +128,12 @@ struct mob_dragonflayer_forge_masterAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiBurningBrandTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_BURNING_BRAND : SPELL_BURNING_BRAND_H);
+            DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_BURNING_BRAND : SPELL_BURNING_BRAND_H);
             m_uiBurningBrandTimer = 15000;
         }
         else m_uiBurningBrandTimer -= uiDiff;

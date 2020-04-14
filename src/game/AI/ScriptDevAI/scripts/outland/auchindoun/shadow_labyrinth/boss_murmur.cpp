@@ -181,7 +181,7 @@ struct boss_murmurAI : public Scripted_NoMovementAI
         }
 
         // Resonance_Timer - cast if no target is in range
-        if (m_creature->getVictim() && m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+        if (m_creature->GetVictim() && m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
             DoMeleeAttackIfReady();
         else
         {

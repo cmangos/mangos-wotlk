@@ -119,7 +119,7 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
 
         if (Creature* pBuddy = GetBuddy())
         {
-            if (!pBuddy->getVictim())
+            if (!pBuddy->GetVictim())
                 pBuddy->AI()->AttackStart(pWho);
         }
 
@@ -134,8 +134,8 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
 
         Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 1);
 
-        if (m_creature->getVictim())
-            pSummoned->AI()->AttackStart(pTarget ? pTarget : m_creature->getVictim());
+        if (m_creature->GetVictim())
+            pSummoned->AI()->AttackStart(pTarget ? pTarget : m_creature->GetVictim());
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -196,7 +196,7 @@ struct boss_skarvaldAI : public boss_s_and_d_dummyAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiYellDelayTimer)
@@ -232,7 +232,7 @@ struct boss_skarvaldAI : public boss_s_and_d_dummyAI
 
         if (m_uiStoneStrikeTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_STONE_STRIKE);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_STONE_STRIKE);
             m_uiStoneStrikeTimer = urand(5000, 15000);
         }
         else
@@ -273,7 +273,7 @@ struct boss_dalronnAI : public boss_s_and_d_dummyAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiDebilitateTimer < uiDiff)

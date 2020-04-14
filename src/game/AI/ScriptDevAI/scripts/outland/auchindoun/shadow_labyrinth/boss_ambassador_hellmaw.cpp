@@ -135,7 +135,7 @@ struct boss_ambassador_hellmawAI : public ScriptedAI
                 m_uiBanishTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiCorrosiveAcidTimer < uiDiff)

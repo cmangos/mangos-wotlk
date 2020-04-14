@@ -1701,7 +1701,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 case 24781:                                 // Dream Fog
                 {
                     // Let the current target be and move to the new one
-                    if (m_caster->getVictim())
+                    if (m_caster->GetVictim())
                     {
                         m_caster->DeleteThreatList();
                         m_caster->AttackStop(true, false, false);
@@ -2061,10 +2061,10 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     Unit* target = unitTarget;
                     for (TargetList::const_iterator ihit = m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end(); ++ihit)
                     {
-                        if (m_caster->GetMap()->GetPlayer(ihit->targetGUID) == m_caster->getVictim())
+                        if (m_caster->GetMap()->GetPlayer(ihit->targetGUID) == m_caster->GetVictim())
                             continue;
 
-                        if (m_caster->getThreatManager().getThreat(m_caster->GetMap()->GetPlayer(ihit->targetGUID)) > m_caster->getThreatManager().getThreat(target) || target == m_caster->getVictim())
+                        if (m_caster->getThreatManager().getThreat(m_caster->GetMap()->GetPlayer(ihit->targetGUID)) > m_caster->getThreatManager().getThreat(target) || target == m_caster->GetVictim())
                             target = m_caster->GetMap()->GetPlayer(ihit->targetGUID);
                     }
 
@@ -2396,7 +2396,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     if (Unit* spawner = unitTarget->GetSpawner())
                     {
-                        if (Unit* spawnerTarget = spawner->getVictim()) // Force attacking the same target as its spawner
+                        if (Unit* spawnerTarget = spawner->GetVictim()) // Force attacking the same target as its spawner
                         {
                             if (unitTarget->CanAttackOnSight(spawnerTarget)) // Need to make sure target is attackable currently
                             {
@@ -4711,7 +4711,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     }
 
                     // 31989 -> dummy effect (step 1) + taunt (step 2) -> 31790 (hits each target) + 31980 - UNK purpose
-                    Unit* friendTarget = !unitTarget || m_caster->CanAssistSpell(unitTarget, m_spellInfo) ? unitTarget : unitTarget->getVictim();
+                    Unit* friendTarget = !unitTarget || m_caster->CanAssistSpell(unitTarget, m_spellInfo) ? unitTarget : unitTarget->GetVictim();
 
                     // non-standard cast requirement check
                     if (!friendTarget || friendTarget->getAttackers().empty())
@@ -5335,8 +5335,8 @@ void Spell::EffectJump(SpellEffectIndex eff_idx)
             Unit* pTarget = nullptr;
             if (m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
                 pTarget = m_targets.getUnitTarget();
-            else if (unitTarget->getVictim())
-                pTarget = m_caster->getVictim();
+            else if (unitTarget->GetVictim())
+                pTarget = m_caster->GetVictim();
             else if (m_caster->GetTypeId() == TYPEID_PLAYER)
                 pTarget = m_caster->GetMap()->GetUnit(((Player*)m_caster)->GetSelectionGuid());
 
@@ -8095,7 +8095,7 @@ void Spell::EffectTaunt(SpellEffectIndex eff_idx)
     // for spell as marked "non effective at already attacking target"
     if (unitTarget->GetTypeId() != TYPEID_PLAYER)
     {
-        if (unitTarget->getVictim() == m_caster)
+        if (unitTarget->GetVictim() == m_caster)
         {
             SendCastResult(SPELL_FAILED_DONT_REPORT);
             return;
@@ -8115,7 +8115,7 @@ void Spell::EffectTaunt(SpellEffectIndex eff_idx)
         if (UnitAI* ai = unitTarget->AI())
         {
             // 2.4.3+: "Passive pets will no longer attack due to AoE taunt spells."
-            if (ai->HasReactState(REACT_PASSIVE) && !unitTarget->getVictim())
+            if (ai->HasReactState(REACT_PASSIVE) && !unitTarget->GetVictim())
             {
                 if (SpellTargetInfoTable[m_spellInfo->EffectImplicitTargetA[eff_idx]].enumerator != TARGET_ENUMERATOR_SINGLE)
                     return;
@@ -11319,8 +11319,8 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     unitTarget->CastSpell(unitTarget, 64474, TRIGGERED_OLD_TRIGGERED);
 
-                    if (m_caster->getVictim())
-                        ((Creature*)unitTarget)->AI()->AttackStart(m_caster->getVictim());
+                    if (m_caster->GetVictim())
+                        ((Creature*)unitTarget)->AI()->AttackStart(m_caster->GetVictim());
                     return;
                 }
                 case 62524:                                 // Attuned to Nature 2 Dose Reduction

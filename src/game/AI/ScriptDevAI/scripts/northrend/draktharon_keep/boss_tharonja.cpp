@@ -151,7 +151,7 @@ struct boss_tharonjaAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_uiPhase)
@@ -227,7 +227,7 @@ struct boss_tharonjaAI : public ScriptedAI
 
                 if (m_uiLightningBreathTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_LIGHTNING_BREATH : SPELL_LIGHTNING_BREATH_H) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_LIGHTNING_BREATH : SPELL_LIGHTNING_BREATH_H) == CAST_OK)
                         m_uiLightningBreathTimer = urand(5000, 8000);
                 }
                 else
@@ -235,7 +235,7 @@ struct boss_tharonjaAI : public ScriptedAI
 
                 if (m_uiEyeBeamTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_EYE_BEAM : SPELL_EYE_BEAM_H) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_EYE_BEAM : SPELL_EYE_BEAM_H) == CAST_OK)
                         m_uiEyeBeamTimer = urand(12000, 15000);
                 }
                 else

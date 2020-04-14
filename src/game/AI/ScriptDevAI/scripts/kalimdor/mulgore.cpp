@@ -67,7 +67,7 @@ struct npc_kyle_the_frenziedAI : public ScriptedAI
 
     void SpellHit(Unit* pCaster, SpellEntry const* pSpell) override
     {
-        if (!m_creature->getVictim() && !m_bEvent && pSpell->Id == SPELL_LUNCH)
+        if (!m_creature->GetVictim() && !m_bEvent && pSpell->Id == SPELL_LUNCH)
         {
             if (pCaster->GetTypeId() == TYPEID_PLAYER)
                 m_playerGuid = pCaster->GetObjectGuid();

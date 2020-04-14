@@ -204,8 +204,8 @@ struct trial_companion_commonAI : public ScriptedAI
 
                 DoCastSpellIfCan(pMount, SPELL_RIDE_ARGENT_VEHICLE, CAST_TRIGGERED);
 
-                if (m_creature->getVictim())
-                    pMount->AI()->AttackStart(m_creature->getVictim());
+                if (m_creature->GetVictim())
+                    pMount->AI()->AttackStart(m_creature->GetVictim());
 
                 m_bDefeated = false;
                 break;
@@ -275,7 +275,7 @@ struct trial_companion_commonAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // timer for other champions check
@@ -302,7 +302,7 @@ struct trial_companion_commonAI : public ScriptedAI
         {
             if (m_uiShieldBreakerTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHIELD_BREAKER) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHIELD_BREAKER) == CAST_OK)
                     m_uiShieldBreakerTimer = urand(2000, 4000);
             }
             else
@@ -312,12 +312,12 @@ struct trial_companion_commonAI : public ScriptedAI
             {
                 if (m_uiChargeTimer <= uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHARGE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHARGE) == CAST_OK)
                     {
                         if (m_creature->GetTransportInfo() && m_creature->GetTransportInfo()->IsOnVehicle())
                         {
                             if (Creature* pMount = (Creature*)m_creature->GetTransportInfo()->GetTransport())
-                                SendAIEvent(AI_EVENT_CUSTOM_A, m_creature->getVictim(), pMount);
+                                SendAIEvent(AI_EVENT_CUSTOM_A, m_creature->GetVictim(), pMount);
                         }
                         m_uiChargeTimer = 0;
                     }
@@ -411,7 +411,7 @@ struct boss_champion_warriorAI : public trial_companion_commonAI
 
         if (m_uiThrowTimer < uiDiff)
         {
-            m_creature->getVictim()->CastSpell(m_creature->getVictim(), SPELL_ROLLING_THROW, TRIGGERED_OLD_TRIGGERED);
+            m_creature->GetVictim()->CastSpell(m_creature->GetVictim(), SPELL_ROLLING_THROW, TRIGGERED_OLD_TRIGGERED);
             m_uiThrowTimer = urand(20000, 30000);
         }
         else
@@ -481,7 +481,7 @@ struct boss_champion_mageAI : public trial_companion_commonAI
     {
         if (m_uiFireballTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIREBALL) == CAST_OK)
                 m_uiFireballTimer = urand(2000, 4000);
         }
         else
@@ -593,7 +593,7 @@ struct boss_champion_shamanAI : public trial_companion_commonAI
 
         if (m_uiHexTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HEX_OF_MENDING) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HEX_OF_MENDING) == CAST_OK)
                 m_uiHexTimer = urand(17000, 25000);
         }
         else
@@ -658,7 +658,7 @@ struct boss_champion_hunterAI : public trial_companion_commonAI
     {
         if (m_uiShootTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOOT) == CAST_OK)
                 m_uiShootTimer = urand(1000, 3000);
         }
         else
@@ -666,7 +666,7 @@ struct boss_champion_hunterAI : public trial_companion_commonAI
 
         if (m_uiMultiShotTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MULTI_SHOT) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MULTI_SHOT) == CAST_OK)
                 m_uiMultiShotTimer = urand(5000, 10000);
         }
         else
@@ -760,7 +760,7 @@ struct boss_champion_rogueAI : public trial_companion_commonAI
 
         if (m_uiDeadlyPoisonTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DEADLY_POISON) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DEADLY_POISON) == CAST_OK)
                 m_uiDeadlyPoisonTimer = urand(9000, 15000);
         }
         else
@@ -768,7 +768,7 @@ struct boss_champion_rogueAI : public trial_companion_commonAI
 
         if (m_uiEviscerateTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_EVISCERATE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_EVISCERATE) == CAST_OK)
                 m_uiEviscerateTimer = 8000;
         }
         else
@@ -825,7 +825,7 @@ struct npc_trial_grand_championAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiBlockTimer < uiDiff)
@@ -845,9 +845,9 @@ struct npc_trial_grand_championAI : public ScriptedAI
         {
             if (m_uiChargeTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAMPION_CHARGE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHAMPION_CHARGE) == CAST_OK)
                 {
-                    DoStartMovement(m_creature->getVictim());
+                    DoStartMovement(m_creature->GetVictim());
                     m_uiChargeResetTimer = urand(5000, 10000);
                     m_uiChargeTimer = 0;
                 }
@@ -861,7 +861,7 @@ struct npc_trial_grand_championAI : public ScriptedAI
             if (m_uiChargeResetTimer <= uiDiff)
             {
                 m_attackDistance = frand(10.0f, 20.0f);
-                DoStartMovement(m_creature->getVictim());
+                DoStartMovement(m_creature->GetVictim());
                 m_uiChargeResetTimer = 0;
                 m_uiChargeTimer = urand(2000, 4000);
             }
@@ -938,7 +938,7 @@ struct npc_champion_mountAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiChargeResetTimer)
@@ -949,7 +949,7 @@ struct npc_champion_mountAI : public ScriptedAI
                     SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pOwner);
 
                 m_attackDistance = frand(10.0f, 20.0f);
-                DoStartMovement(m_creature->getVictim());
+                DoStartMovement(m_creature->GetVictim());
                 m_uiChargeResetTimer = 0;
             }
             else

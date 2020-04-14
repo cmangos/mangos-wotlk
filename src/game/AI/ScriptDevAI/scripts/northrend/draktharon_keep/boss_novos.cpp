@@ -277,7 +277,7 @@ struct boss_novosAI : public Scripted_NoMovementAI
                 break;
 
             case PHASE_NORMAL:                              // Normal Phase, attack enemies
-                if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
                     return;
 
                 if (m_uiArcaneBlastTimer < uiDiff)

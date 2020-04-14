@@ -181,7 +181,7 @@ struct boss_hydross_the_unstableAI : public ScriptedAI
                 m_uiBeamInitTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             // handle elementals on OOC timer
             if (m_uiElementalTimer < uiDiff)
@@ -350,7 +350,7 @@ struct npc_spawn_of_hydrossAI : public ScriptedAI
                 m_uiAttackDelayTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

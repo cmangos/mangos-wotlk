@@ -179,7 +179,7 @@ struct boss_watchkeeper_gargolmarAI : public ScriptedAI
                 switch (i)
                 {
                     case GARGOLMAR_ACTION_MORTAL_WOUND:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), m_isRegularMode ? SPELL_MORTAL_WOUND : SPELL_MORTAL_WOUND_H) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_MORTAL_WOUND : SPELL_MORTAL_WOUND_H) == CAST_OK)
                         {
                             m_actionTimers[i] = GetSubsequentActionTimer(GargolmarActions(i));
                             m_actionReadyStatus[i] = false;
@@ -206,7 +206,7 @@ struct boss_watchkeeper_gargolmarAI : public ScriptedAI
                         }
                         break;
                     case GARGOLMAR_ACTION_OVERPOWER:
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_OVERPOWER) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_OVERPOWER) == CAST_OK)
                         {
                             m_actionTimers[i] = GetSubsequentActionTimer(GargolmarActions(i));
                             m_actionReadyStatus[i] = false;
@@ -220,7 +220,7 @@ struct boss_watchkeeper_gargolmarAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_bYelledForHeal)

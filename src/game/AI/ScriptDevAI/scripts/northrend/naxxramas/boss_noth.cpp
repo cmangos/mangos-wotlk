@@ -160,7 +160,7 @@ struct boss_nothAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiPhase == PHASE_GROUND)
@@ -250,7 +250,7 @@ struct boss_nothAI : public ScriptedAI
                 if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT_RETURN) == CAST_OK)
                 {
                     DoScriptText(EMOTE_TELEPORT_RETURN, m_creature);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                     switch (m_uiPhaseSub)
                     {
                         case PHASE_SKELETON_1: m_uiPhaseTimer = 110000; break;

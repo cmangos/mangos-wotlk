@@ -834,12 +834,12 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
     {
         DialogueUpdate(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiExorcismTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_EXORCISM : SPELL_EXORCISM_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_EXORCISM : SPELL_EXORCISM_H) == CAST_OK)
                 m_uiExorcismTimer = urand(9000, 13000);
         }
         else

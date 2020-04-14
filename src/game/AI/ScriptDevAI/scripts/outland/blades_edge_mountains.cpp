@@ -197,7 +197,7 @@ struct mobs_nether_drakeAI : public ScriptedAI
             return;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiIntangiblePresenceTimer < uiDiff)
@@ -221,7 +221,7 @@ struct mobs_nether_drakeAI : public ScriptedAI
 
         if (m_uiArcaneBlastTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BLAST) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ARCANE_BLAST) == CAST_OK)
                 m_uiArcaneBlastTimer = urand(2500, 7500);
         }
         else
@@ -1143,7 +1143,7 @@ struct npc_vimgol_AI : public ScriptedAI
     {
         m_creature->GetMotionMaster()->Clear();
         m_creature->CastSpell(m_creature, SPELL_UNHOLY_GROWTH, TRIGGERED_NONE);
-        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+        m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -1153,7 +1153,7 @@ struct npc_vimgol_AI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_uiEnrage)
@@ -1551,12 +1551,12 @@ struct npc_bloodmaul_dire_wolfAI : public ScriptedAI
                 m_uiUnfriendlyTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiRendTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_REND) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_REND) == CAST_OK)
                 m_uiRendTimer = urand(8000, 13000);
         }
         else
@@ -1913,13 +1913,13 @@ struct npc_fel_cannon : public Scripted_NoMovementAI
 
         if (!m_bMCed)
         {
-            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
                 return;
 
             if (m_uiCannonBlastTimer <= uiDiff)
             {
                 m_uiCannonBlastTimer = 2500;
-                m_creature->CastSpell(m_creature->getVictim(), SPELL_FEL_CANNON_BLAST, TRIGGERED_NONE);
+                m_creature->CastSpell(m_creature->GetVictim(), SPELL_FEL_CANNON_BLAST, TRIGGERED_NONE);
             }
             else
                 m_uiCannonBlastTimer -= uiDiff;
@@ -3149,7 +3149,7 @@ struct npc_apexis_flayerAI : public ScriptedAI, public CombatActions
                 {
                     case FLAYER_ACTION_REND:
                     {
-                        if (Unit* target = m_creature->getVictim())
+                        if (Unit* target = m_creature->GetVictim())
                         {
                             if (DoCastSpellIfCan(target, FLAYER_SPELL_REND) == CAST_OK)
                             {
@@ -3162,7 +3162,7 @@ struct npc_apexis_flayerAI : public ScriptedAI, public CombatActions
                     }
                     case FLAYER_ACTION_SHRED_ARMOR:
                     {
-                        if (Unit* target = m_creature->getVictim())
+                        if (Unit* target = m_creature->GetVictim())
                         {
                             if (DoCastSpellIfCan(target, FLAYER_SPELL_SHRED_ARMOR) == CAST_OK)
                             {
@@ -3181,7 +3181,7 @@ struct npc_apexis_flayerAI : public ScriptedAI, public CombatActions
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (idleTimer)
             {
@@ -3498,7 +3498,7 @@ struct npc_skyguard_rangerAI : public ScriptedAI, public CombatActions
 
     void UpdateAI(const uint32 diff)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         UpdateTimers(diff, m_creature->IsInCombat());
@@ -3705,7 +3705,7 @@ struct npc_bashir_flesh_fiendAI : public ScriptedAI, public CombatActions
                             SetCombatScriptStatus(true);
                             SetCombatMovement(false);
                             float x, y, z;
-                            m_creature->getVictim()->GetNearPoint(m_creature, x, y, z, m_creature->GetObjectBoundingRadius(), m_creature->GetCombinedCombatReach(slaveringSlave), slaveringSlave->GetAngle(m_creature));
+                            m_creature->GetVictim()->GetNearPoint(m_creature, x, y, z, m_creature->GetObjectBoundingRadius(), m_creature->GetCombinedCombatReach(slaveringSlave), slaveringSlave->GetAngle(m_creature));
                             m_creature->GetMotionMaster()->MovePoint(POINT_EAT_FRIEND, x, y, z);
                             m_slaveringSlave = slaveringSlave->GetObjectGuid();
                         }
@@ -3745,7 +3745,7 @@ struct npc_bashir_flesh_fiendAI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         ExecuteActions();

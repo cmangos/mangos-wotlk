@@ -180,7 +180,7 @@ struct boss_maiden_of_virtueAI : public ScriptedAI, public CombatActions
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         UpdateTimers(uiDiff, m_creature->IsInCombat());

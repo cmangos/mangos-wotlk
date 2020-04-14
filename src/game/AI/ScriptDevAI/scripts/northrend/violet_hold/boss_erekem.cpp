@@ -113,7 +113,7 @@ struct boss_erekemAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiEarthShieldTimer < uiDiff)
@@ -146,7 +146,7 @@ struct boss_erekemAI : public ScriptedAI
         // Cast Stormstrike only if both guards are down
         if (m_uiSpecialSpellTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_uiGuardiansDead == 2 ? SPELL_STORMSTRIKE : SPELL_LIGHTNING_BOLT) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_uiGuardiansDead == 2 ? SPELL_STORMSTRIKE : SPELL_LIGHTNING_BOLT) == CAST_OK)
                 m_uiSpecialSpellTimer = urand(2000, 3000);
         }
         else
@@ -210,12 +210,12 @@ struct npc_erekem_guardAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiGushingWoundTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_GUSHING_WOUND) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_GUSHING_WOUND) == CAST_OK)
                 m_uiGushingWoundTimer = urand(25000, 30000);
         }
         else
@@ -231,7 +231,7 @@ struct npc_erekem_guardAI : public ScriptedAI
 
         if (m_uiStrikeTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_STRIKE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_STRIKE) == CAST_OK)
                 m_uiStrikeTimer = urand(5000, 7000);
         }
         else

@@ -592,7 +592,7 @@ struct npc_brann_hosAI : public npc_escortAI
             m_bIsLowHP = false;
 
         // No Combat abilities needed here
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
     }
 

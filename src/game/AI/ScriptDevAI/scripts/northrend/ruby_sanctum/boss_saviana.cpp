@@ -129,8 +129,8 @@ struct boss_savianaAI : public ScriptedAI
                 m_creature->SetLevitate(false);
                 m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
 
-                if (m_creature->getVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                if (m_creature->GetVictim())
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
 
                 break;
         }
@@ -138,7 +138,7 @@ struct boss_savianaAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_uiPhase)

@@ -102,7 +102,7 @@ struct boss_hakkarAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiBloodSiphonTimer < uiDiff)
@@ -130,7 +130,7 @@ struct boss_hakkarAI : public ScriptedAI
         {
             if (m_creature->getThreatManager().getThreatList().size() > 1)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CAUSE_INSANITY) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CAUSE_INSANITY) == CAST_OK)
                     m_uiCauseInsanityTimer = urand(10000, 15000);
             }
             else // Solo case, check again later
@@ -190,7 +190,7 @@ struct boss_hakkarAI : public ScriptedAI
         {
             if (m_uiAspectOfMarliTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ASPECT_OF_MARLI) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ASPECT_OF_MARLI) == CAST_OK)
                     m_uiAspectOfMarliTimer = 10000;
             }
             else
@@ -214,7 +214,7 @@ struct boss_hakkarAI : public ScriptedAI
         {
             if (m_uiAspectOfArlokkTimer <= uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ASPECT_OF_ARLOKK) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ASPECT_OF_ARLOKK) == CAST_OK)
                 {
                     DoResetThreat();
                     m_uiAspectOfArlokkTimer = urand(10000, 15000);

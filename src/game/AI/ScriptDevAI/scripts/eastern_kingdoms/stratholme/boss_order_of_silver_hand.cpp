@@ -122,7 +122,7 @@ struct boss_silver_hand_bossesAI : public ScriptedAI
                 pTarget = m_creature;
                 break;
             case TARGET_TYPE_VICTIM:
-                pTarget = m_creature->getVictim();
+                pTarget = m_creature->GetVictim();
                 break;
             case TARGET_TYPE_RANDOM:
                 pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_aSilverHandAbility[uiIndex].m_uiSpellId, SELECT_FLAG_IN_LOS);
@@ -144,7 +144,7 @@ struct boss_silver_hand_bossesAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         for (auto& m_mSpellTimer : m_mSpellTimers)

@@ -498,7 +498,7 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
     {
         DialogueUpdate(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiBerserkTimer)
@@ -518,7 +518,7 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
 
         if (m_uiQuantumStrikeTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_QUANTUM_STRIKE : SPELL_QUANTUM_STRIKE_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_QUANTUM_STRIKE : SPELL_QUANTUM_STRIKE_H) == CAST_OK)
                 m_uiQuantumStrikeTimer = 4000;
         }
         else
@@ -545,7 +545,7 @@ struct boss_algalonAI : public ScriptedAI, private DialogueHelper
 
         if (m_uiPhasePunchTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PHASE_PUNCH) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PHASE_PUNCH) == CAST_OK)
                 m_uiPhasePunchTimer = 15000;
         }
         else

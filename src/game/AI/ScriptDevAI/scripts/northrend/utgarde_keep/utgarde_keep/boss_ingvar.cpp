@@ -212,14 +212,14 @@ struct boss_ingvarAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || m_bIsFakingDeath)
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim() || m_bIsFakingDeath)
             return;
 
         if (!m_bIsResurrected)                              // First phase
         {
             if (m_uiCleaveTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                     m_uiCleaveTimer = urand(2500, 7000);
             }
             else
@@ -256,7 +256,7 @@ struct boss_ingvarAI : public ScriptedAI
         {
             if (m_uiCleaveTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_WOE_STRIKE : SPELL_WOE_STRIKE_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_WOE_STRIKE : SPELL_WOE_STRIKE_H) == CAST_OK)
                     m_uiCleaveTimer = urand(2500, 7000);
             }
             else

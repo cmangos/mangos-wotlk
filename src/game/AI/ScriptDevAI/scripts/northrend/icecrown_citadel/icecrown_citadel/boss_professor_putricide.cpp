@@ -317,7 +317,7 @@ struct boss_professor_putricideAI : public ScriptedAI
         if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
             return;
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_pInstance)
@@ -439,7 +439,7 @@ struct boss_professor_putricideAI : public ScriptedAI
                 {
                     SetCombatMovement(true);
                     m_creature->GetMotionMaster()->Clear();
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
 
                     DoScriptText((m_uiPhase == PHASE_TRANSITION_ONE ? SAY_TRANSFORM_1 : SAY_TRANSFORM_2), m_creature);
 

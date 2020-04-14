@@ -297,7 +297,7 @@ struct boss_sartharionAI : public ScriptedAI
         // if at least one of the dragons are alive and are being called
         uint8 uiCountFetchableDragons = 0;
 
-        if (pTene && pTene->IsAlive() && !pTene->getVictim())
+        if (pTene && pTene->IsAlive() && !pTene->GetVictim())
         {
             ++uiCountFetchableDragons;
             pTene->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aTene[0].m_fX, m_aTene[0].m_fY, m_aTene[0].m_fZ);
@@ -306,7 +306,7 @@ struct boss_sartharionAI : public ScriptedAI
                 pTene->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
-        if (pShad && pShad->IsAlive() && !pShad->getVictim())
+        if (pShad && pShad->IsAlive() && !pShad->GetVictim())
         {
             ++uiCountFetchableDragons;
             pShad->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aShad[0].m_fX, m_aShad[0].m_fY, m_aShad[0].m_fZ);
@@ -315,7 +315,7 @@ struct boss_sartharionAI : public ScriptedAI
                 pShad->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
-        if (pVesp && pVesp->IsAlive() && !pVesp->getVictim())
+        if (pVesp && pVesp->IsAlive() && !pVesp->GetVictim())
         {
             ++uiCountFetchableDragons;
             pVesp->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aVesp[0].m_fX, m_aVesp[0].m_fY, m_aVesp[0].m_fZ);
@@ -340,7 +340,7 @@ struct boss_sartharionAI : public ScriptedAI
                 if (pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                     pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
-                if (pTemp->getVictim())
+                if (pTemp->GetVictim())
                     return;
 
                 pTemp->SetWalk(false);
@@ -387,7 +387,7 @@ struct boss_sartharionAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // spell will target dragons, if they are still alive at 35%
@@ -452,7 +452,7 @@ struct boss_sartharionAI : public ScriptedAI
         // Cleave
         if (m_uiCleaveTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                 m_uiCleaveTimer = urand(7000, 10000);
         }
         else
@@ -747,7 +747,7 @@ struct dummy_dragonAI : public ScriptedAI
         }
 
         // if no target return
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Call dragon specific virtual function

@@ -144,8 +144,8 @@ struct boss_gruulAI : public ScriptedAI
 
                         SetCombatMovement(true);
                         m_meleeEnabled = true;
-                        if (m_creature->getVictim())
-                            m_creature->MeleeAttackStart(m_creature->getVictim());
+                        if (m_creature->GetVictim())
+                            m_creature->MeleeAttackStart(m_creature->GetVictim());
                         m_actionReadyStatus[i] = false;
                         return;
                     }
@@ -170,7 +170,7 @@ struct boss_gruulAI : public ScriptedAI
                         DoScriptText(urand(0, 1) ? SAY_SLAM1 : SAY_SLAM2, m_creature);
                         SetCombatMovement(false);
                         m_meleeEnabled = false;
-                        m_creature->MeleeAttackStop(m_creature->getVictim());
+                        m_creature->MeleeAttackStop(m_creature->GetVictim());
                         m_creature->SetTarget(nullptr);
                         m_timers[GRUUL_ACTION_GROUND_SLAM] = urand(70000, 80000);
                         m_actionReadyStatus[i] = false;

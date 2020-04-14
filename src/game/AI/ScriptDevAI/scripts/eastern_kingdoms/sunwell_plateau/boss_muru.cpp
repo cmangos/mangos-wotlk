@@ -149,7 +149,7 @@ struct boss_muruAI : public Scripted_NoMovementAI
                 m_creature->ForcedDespawn(1000);
             // no break here; All other summons should behave the same way
             default:
-                pSummoned->AI()->AttackStart(m_creature->getVictim());
+                pSummoned->AI()->AttackStart(m_creature->GetVictim());
                 break;
         }
     }
@@ -183,7 +183,7 @@ struct boss_muruAI : public Scripted_NoMovementAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Return if already in transition
@@ -274,7 +274,7 @@ struct boss_entropiusAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiBlackHoleTimer < uiDiff)

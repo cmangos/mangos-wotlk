@@ -735,7 +735,7 @@ bool Unit::CanInteractNow(const Unit* unit) const
         return false;
 
     // WotLK+: We can't interact with units who are currently fighting, unless specific conditions are met
-    if (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT) ||  unit->getVictim())
+    if (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT) || unit->GetVictim())
     {
         // We can't interact with units in fight by default
         bool interactable = false;

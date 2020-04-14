@@ -200,7 +200,7 @@ void hyjalAI::UpdateAI(const uint32 uiDiff)
             m_uiRallyYellTimer -= uiDiff;
     }
 
-    if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+    if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         return;
 
     for (uint8 i = 0; i < MAX_SPELL; ++i)
@@ -218,7 +218,7 @@ void hyjalAI::UpdateAI(const uint32 uiDiff)
                 {
                     case TARGETTYPE_SELF:   pTarget = m_creature; break;
                     case TARGETTYPE_RANDOM: pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0); break;
-                    case TARGETTYPE_VICTIM: pTarget = m_creature->getVictim(); break;
+                    case TARGETTYPE_VICTIM: pTarget = m_creature->GetVictim(); break;
                 }
 
                 if (pTarget)

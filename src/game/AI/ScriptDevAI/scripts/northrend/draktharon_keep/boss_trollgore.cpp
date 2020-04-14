@@ -176,12 +176,12 @@ struct boss_trollgoreAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiCrushTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CRUSH) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CRUSH) == CAST_OK)
                 m_uiCrushTimer = 10000;
         }
         else
@@ -189,7 +189,7 @@ struct boss_trollgoreAI : public ScriptedAI
 
         if (m_uiInfectedWoundTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_INFECTED_WOUND) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_INFECTED_WOUND) == CAST_OK)
                 m_uiInfectedWoundTimer = urand(20000, 30000);
         }
         else

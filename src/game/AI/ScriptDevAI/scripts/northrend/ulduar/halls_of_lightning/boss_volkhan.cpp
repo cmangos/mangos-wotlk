@@ -200,7 +200,7 @@ struct boss_volkhanAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // he shatters only one time, at 25%
@@ -306,10 +306,10 @@ bool EffectDummyCreature_npc_volkhan_anvil(Unit* pCaster, uint32 uiSpellId, Spel
         pCreatureTarget->CastSpell(pCaster, SPELL_TEMPER_DUMMY, TRIGGERED_NONE);
         // ToDo: research how the visual spell is used
 
-        if (pCaster->getVictim())
+        if (pCaster->GetVictim())
         {
             pCaster->GetMotionMaster()->Clear();
-            pCaster->GetMotionMaster()->MoveChase(pCaster->getVictim());
+            pCaster->GetMotionMaster()->MoveChase(pCaster->GetVictim());
         }
 
         // always return true when we are handling this spell and effect
@@ -386,7 +386,7 @@ struct mob_molten_golemAI : public ScriptedAI
     void UpdateAI(const uint32 uiDiff) override
     {
         // Return since we have no target or if we are frozen
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiBlastTimer < uiDiff)
@@ -399,7 +399,7 @@ struct mob_molten_golemAI : public ScriptedAI
 
         if (m_uiImmolationTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_IMMOLATION_STRIKE : SPELL_IMMOLATION_STRIKE_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_IMMOLATION_STRIKE : SPELL_IMMOLATION_STRIKE_H) == CAST_OK)
                 m_uiImmolationTimer = 5000;
         }
         else

@@ -297,13 +297,13 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
     {
         DoScriptText(SAY_PHASE_TWO, m_creature);
         SetCombatMovement(true);
-        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+        m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
         m_bIsPhaseOne = false;
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiBerserkTimer)
@@ -424,7 +424,7 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
         {
             if (m_uiTouchOfInsignificanceTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_INSIGNIFICANCE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_INSIGNIFICANCE) == CAST_OK)
                     m_uiTouchOfInsignificanceTimer = 7000;
             }
             else

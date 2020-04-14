@@ -155,7 +155,7 @@ struct boss_kazrogalAI : public ScriptedAI
                 {
                     case KAZROGAL_ACTION_MALEVOLENT_CLEAVE:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MALEVOLENT_CLEAVE) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MALEVOLENT_CLEAVE) == CAST_OK)
                         {
                             m_actionTimers[i] = GetSubsequentActionTimer(i);
                             m_actionReadyStatus[i] = false;
@@ -205,7 +205,7 @@ struct boss_kazrogalAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff)
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         UpdateTimers(diff);

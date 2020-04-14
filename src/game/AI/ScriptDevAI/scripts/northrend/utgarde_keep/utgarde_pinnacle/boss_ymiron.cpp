@@ -223,10 +223,10 @@ struct boss_ymironAI : public ScriptedAI
             pSpirit->CastSpell(m_creature, SPELL_CHANNEL_SPIRIT_YMIRON, TRIGGERED_NONE);
 
         // Channeling is finished - resume combat
-        if (m_creature->getVictim())
+        if (m_creature->GetVictim())
         {
             m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
         }
 
         SetCombatMovement(true);
@@ -258,7 +258,7 @@ struct boss_ymironAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiSpiritTransformTimer)
@@ -302,7 +302,7 @@ struct boss_ymironAI : public ScriptedAI
 
         if (m_uiFetidRotTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FETID_ROT : SPELL_FETID_ROT_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_FETID_ROT : SPELL_FETID_ROT_H) == CAST_OK)
                 m_uiFetidRotTimer = urand(10000, 15000);
         }
         else
@@ -310,7 +310,7 @@ struct boss_ymironAI : public ScriptedAI
 
         if (m_uiDarkSlashTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DARK_SLASH) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DARK_SLASH) == CAST_OK)
                 m_uiDarkSlashTimer = urand(30000, 35000);
         }
         else
@@ -366,7 +366,7 @@ struct boss_ymironAI : public ScriptedAI
 
                 if (m_uiSpiritStrikeTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SPIRIT_STRIKE : SPELL_SPIRIT_STRIKE_H) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_SPIRIT_STRIKE : SPELL_SPIRIT_STRIKE_H) == CAST_OK)
                         m_uiSpiritStrikeTimer = 5000;
                 }
                 else

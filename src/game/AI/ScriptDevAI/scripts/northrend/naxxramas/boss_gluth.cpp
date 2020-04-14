@@ -164,7 +164,7 @@ struct boss_gluthAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiZombieSearchTimer < uiDiff)
@@ -178,7 +178,7 @@ struct boss_gluthAI : public ScriptedAI
         // Mortal Wound
         if (m_uiMortalWoundTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTALWOUND) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTALWOUND) == CAST_OK)
                 m_uiMortalWoundTimer = 10000;
         }
         else

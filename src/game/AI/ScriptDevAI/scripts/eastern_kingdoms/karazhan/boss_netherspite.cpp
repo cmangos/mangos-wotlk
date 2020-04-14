@@ -232,10 +232,10 @@ struct boss_netherspiteAI : public ScriptedAI
             SetCombatScriptStatus(false);
             SetMeleeEnabled(true);
 
-            if (m_creature->getVictim())
+            if (m_creature->GetVictim())
             {
-                m_creature->SetTarget(m_creature->getVictim());
-                DoStartMovement(m_creature->getVictim());
+                m_creature->SetTarget(m_creature->GetVictim());
+                DoStartMovement(m_creature->GetVictim());
             }
 
             m_uiActivePhase = BEAM_PHASE;

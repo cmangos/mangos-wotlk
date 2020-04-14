@@ -223,12 +223,12 @@ struct npc_silvermoon_harryAI : public ScriptedAI
             return;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiScorchTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_SCORCH);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SCORCH);
             m_uiScorchTimer = 10 * IN_MILLISECONDS;
         }
         else
@@ -685,7 +685,7 @@ struct npc_firecrackers_bunnyAI : public ScriptedAI
                 do
                 {
                     // check for alive and out of combat only
-                    if ((*batItr)->IsAlive() && !(*batItr)->getVictim())
+                    if ((*batItr)->IsAlive() && !(*batItr)->GetVictim())
                         pBat = *batItr;
 
                     ++batItr;
@@ -821,7 +821,7 @@ struct npc_apothecary_hanesAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_creature->GetHealthPercent() < 75.0f)

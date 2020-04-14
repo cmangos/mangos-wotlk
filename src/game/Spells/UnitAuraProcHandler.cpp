@@ -1192,7 +1192,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         // triggered at positive/self casts also, current attack target used then
                         if (!CanAttack(target))
                         {
-                            target = getVictim();
+                            target = GetVictim();
                             if (!target)
                             {
                                 target = ObjectAccessor::GetUnit(*this, ((Player*)this)->GetSelectionGuid());
@@ -3981,7 +3981,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
         // Combo points add triggers (need add combopoint only for main target, and after possible combopoints reset)
         case 15250: // Rogue Setup
         {
-            if (!pVictim || pVictim != getVictim())  // applied only for main target
+            if (!pVictim || pVictim != GetVictim())  // applied only for main target
                 return SPELL_AURA_PROC_FAILED;
             break;                                   // continue normal case
         }

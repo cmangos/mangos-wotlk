@@ -500,7 +500,7 @@ struct boss_archimondeAI : public ScriptedAI
                 m_drainNordrassilTimer -= diff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_phase) // Phase 1

@@ -236,12 +236,12 @@ struct npc_decaying_ghoulAI : public ScriptedAI
                 m_bSpawnAnim = true;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiFleshRotTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FLESH_ROT) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FLESH_ROT) == CAST_OK)
                 m_uiFleshRotTimer = urand(7000, 15000);
         }
         else

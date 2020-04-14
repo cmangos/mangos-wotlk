@@ -286,7 +286,7 @@ struct boss_vaelastraszAI : public CombatAI
             }
             case VAEL_BURNING_ADRENALINE_TANK:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_BURNING_ADRENALINE_TANK) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BURNING_ADRENALINE_TANK) == CAST_OK)
                     ResetCombatAction(action, 45000);
                 break;
             }
@@ -299,7 +299,7 @@ struct boss_vaelastraszAI : public CombatAI
             }
             case VAEL_FLAME_BREATH:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FLAME_BREATH) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FLAME_BREATH) == CAST_OK)
                     ResetCombatAction(action, urand(4000, 8000));
                 break;
             }
@@ -311,7 +311,7 @@ struct boss_vaelastraszAI : public CombatAI
             }
             case VAEL_CLEAVE:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                     ResetCombatAction(action, 15000);
                 break;
             }

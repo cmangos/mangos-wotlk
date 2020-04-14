@@ -200,7 +200,7 @@ struct npc_dirty_larryAI : public ScriptedAI
 
     void AttackedBy(Unit* pAttacker) override
     {
-        if (m_creature->getVictim())
+        if (m_creature->GetVictim())
             return;
 
         if (!bActiveAttack)
@@ -255,7 +255,7 @@ struct npc_dirty_larryAI : public ScriptedAI
                 m_uiSayTimer -= diff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();
@@ -621,12 +621,12 @@ struct npc_salsalabimAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiMagneticPullTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_MAGNETIC_PULL);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MAGNETIC_PULL);
             m_uiMagneticPullTimer = 15000;
         }
         else

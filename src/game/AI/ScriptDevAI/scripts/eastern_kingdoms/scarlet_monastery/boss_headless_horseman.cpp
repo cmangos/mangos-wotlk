@@ -168,7 +168,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
             pSummoned->CastSpell(pSummoned, SPELL_SPROUTING, TRIGGERED_NONE);
             pSummoned->CastSpell(pSummoned, SPELL_PUMPKIN_AURA, TRIGGERED_OLD_TRIGGERED);
             pSummoned->CastSpell(pSummoned, SPELL_PUMPKIN_LIFE_CYCLE, TRIGGERED_OLD_TRIGGERED);
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
+            pSummoned->AI()->AttackStart(m_creature->GetVictim());
         }
     }
 
@@ -280,7 +280,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_fightPhase)
@@ -322,7 +322,7 @@ struct boss_headless_horsemanAI : public ScriptedAI
                 // cleave - all phases
                 if (m_uiCleaveTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HORSEMAN_CLEAVE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HORSEMAN_CLEAVE) == CAST_OK)
                         m_uiCleaveTimer = 5000;
                 }
                 else

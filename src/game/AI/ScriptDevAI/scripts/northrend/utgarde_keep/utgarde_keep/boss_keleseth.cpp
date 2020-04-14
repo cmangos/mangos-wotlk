@@ -130,7 +130,7 @@ struct mob_vrykul_skeletonAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiReviveTimer)
@@ -146,11 +146,11 @@ struct mob_vrykul_skeletonAI : public ScriptedAI
         if (m_uiCastTimer < uiDiff)
         {
             if (m_bIsRegularMode)
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_DECREPIFY);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DECREPIFY);
             else
             {
                 if (urand(0, 3))
-                    DoCastSpellIfCan(m_creature->getVictim(), SPELL_DECREPIFY_H);
+                    DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DECREPIFY_H);
                 else if (m_pInstance && m_pInstance->GetData(TYPE_KELESETH) == IN_PROGRESS)
                 {
                     if (Creature* pKeleseth = m_pInstance->GetSingleCreatureFromStorage(NPC_KELESETH))
@@ -254,7 +254,7 @@ struct boss_kelesethAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_VRYKUL_SKELETON)
         {
-            pSummoned->AI()->AttackStart(m_creature->getVictim());
+            pSummoned->AI()->AttackStart(m_creature->GetVictim());
             m_lSummonedAddGuids.push_back(pSummoned->GetObjectGuid());
         }
 
@@ -285,7 +285,7 @@ struct boss_kelesethAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiSummonTimer)
@@ -301,7 +301,7 @@ struct boss_kelesethAI : public ScriptedAI
 
         if (m_uiShadowboltTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SHADOWBOLT : SPELL_SHADOWBOLT_H);
+            DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_SHADOWBOLT : SPELL_SHADOWBOLT_H);
             m_uiShadowboltTimer = 3000;
         }
         else

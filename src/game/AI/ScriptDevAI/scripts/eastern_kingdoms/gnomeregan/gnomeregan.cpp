@@ -341,7 +341,7 @@ struct npc_blastmaster_emi_shortfuseAI : public npc_escortAI
     void UpdateEscortAI(uint32 const uiDiff) override
     {
         // the phases are handled OOC (keeps them in sync with the waypoints)
-        if (m_uiPhaseTimer && !m_creature->getVictim())
+        if (m_uiPhaseTimer && !m_creature->GetVictim())
         {
             if (m_uiPhaseTimer <= uiDiff)
             {
@@ -584,7 +584,7 @@ struct npc_blastmaster_emi_shortfuseAI : public npc_escortAI
                 m_uiPhaseTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

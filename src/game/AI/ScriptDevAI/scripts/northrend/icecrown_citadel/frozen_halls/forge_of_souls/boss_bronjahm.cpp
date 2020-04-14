@@ -123,7 +123,7 @@ struct boss_bronjahmAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiPhase == 0)                                 // Phase 1
@@ -167,7 +167,7 @@ struct boss_bronjahmAI : public ScriptedAI
 
             // Use ShadowBolt as default attack if victim is not in range
             // TODO - not entirely clear how this works in case the tank is out of shadow-bolt range
-            if (!m_uiShadowboltTimer && !m_creature->CanReachWithMeleeAttack(m_creature->getVictim()) && m_creature->GetDistance(m_creature->getVictim(), true, DIST_CALC_COMBAT_REACH) < 20.0f)
+            if (!m_uiShadowboltTimer && !m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()) && m_creature->GetDistance(m_creature->GetVictim(), true, DIST_CALC_COMBAT_REACH) < 20.0f)
             {
                 if (IsCombatMovement())
                 {
@@ -175,14 +175,14 @@ struct boss_bronjahmAI : public ScriptedAI
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_creature->StopMoving();
                 }
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOW_BOLT);
             }
             else
             {
                 if (!IsCombatMovement())
                 {
                     SetCombatMovement(true);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                     m_uiShadowboltTimer = 2000;             // Give some time to chase
                 }
 

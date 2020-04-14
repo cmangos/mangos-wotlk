@@ -229,7 +229,7 @@ struct boss_kalecgosAI : public ScriptedAI
                 m_uiExitTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_bIsBanished)
@@ -257,7 +257,7 @@ struct boss_kalecgosAI : public ScriptedAI
 
         if (m_uiArcaneBuffetTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_BUFFET) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ARCANE_BUFFET) == CAST_OK)
             {
                 if (!urand(0, 2))
                     DoScriptText(SAY_EVIL_SPELL_1, m_creature);
@@ -270,7 +270,7 @@ struct boss_kalecgosAI : public ScriptedAI
 
         if (m_uiFrostBreathTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_BREATH) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROST_BREATH) == CAST_OK)
             {
                 if (!urand(0, 1))
                     DoScriptText(SAY_EVIL_SPELL_2, m_creature);
@@ -427,7 +427,7 @@ struct boss_sathrovarrAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_bIsBanished)
@@ -448,7 +448,7 @@ struct boss_sathrovarrAI : public ScriptedAI
 
         if (m_uiCorruptingStrikeTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CORRUPTING_STRIKE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CORRUPTING_STRIKE) == CAST_OK)
             {
                 if (!urand(0, 1))
                     DoScriptText(SAY_SATH_SPELL_2, m_creature);
@@ -472,7 +472,7 @@ struct boss_sathrovarrAI : public ScriptedAI
 
         if (m_uiShadowBoltVolleyTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHADOW_BOLT_VOLLEY) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOW_BOLT_VOLLEY) == CAST_OK)
             {
                 if (!urand(0, 1))
                     DoScriptText(SAY_SATH_SPELL_1, m_creature);
@@ -535,7 +535,7 @@ struct boss_kalecgos_humanoidAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiRevitalizeTimer < uiDiff)
@@ -549,7 +549,7 @@ struct boss_kalecgos_humanoidAI : public ScriptedAI
 
         if (m_uiHeroicStrikeTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_HEROIC_STRIKE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_HEROIC_STRIKE) == CAST_OK)
                 m_uiHeroicStrikeTimer = 30000;
         }
         else

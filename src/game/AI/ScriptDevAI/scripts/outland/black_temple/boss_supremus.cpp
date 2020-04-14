@@ -101,7 +101,7 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
             SetCombatMovement(true);
             if (!m_bTankPhase)
                 ResetTimer(SUPREMUS_ACTION_SWITCH_TARGET, 0); // switch target immediately
-            DoStartMovement(m_creature->getVictim());
+            DoStartMovement(m_creature->GetVictim());
         });
         Reset();
     }
@@ -220,7 +220,7 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
             {
                 Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER);
                 if (!target)
-                    target = m_creature->getVictim();
+                    target = m_creature->GetVictim();
 
                 summoned->CastSpell(nullptr, SPELL_MOLTEN_FLAME, TRIGGERED_NONE);
                 summoned->SetInCombatWithZone();
@@ -342,7 +342,7 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
         
         ExecuteActions();

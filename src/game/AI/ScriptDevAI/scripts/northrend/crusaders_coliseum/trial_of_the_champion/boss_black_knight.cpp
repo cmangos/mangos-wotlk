@@ -232,7 +232,7 @@ struct boss_black_knightAI : public ScriptedAI
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             m_creature->SetStandState(UNIT_STAND_STATE_STAND);
             m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+            m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
             DoResetThreat();
 
             m_uiPhase = m_uiNextPhase;
@@ -256,7 +256,7 @@ struct boss_black_knightAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_uiPhase)
@@ -287,7 +287,7 @@ struct boss_black_knightAI : public ScriptedAI
 
                 if (m_uiObliterateTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_OBLITERATE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_OBLITERATE) == CAST_OK)
                         m_uiObliterateTimer = urand(18000, 25000);
                 }
                 else
@@ -295,7 +295,7 @@ struct boss_black_knightAI : public ScriptedAI
 
                 if (m_uiPlagueStrikeTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PLAGUE_STRIKE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PLAGUE_STRIKE) == CAST_OK)
                         m_uiPlagueStrikeTimer = 10000;
                 }
                 else
@@ -306,7 +306,7 @@ struct boss_black_knightAI : public ScriptedAI
 
                 if (m_uiDesecrationTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DESECRATION) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DESECRATION) == CAST_OK)
                         m_uiDesecrationTimer = 6000;
                 }
                 else
@@ -408,7 +408,7 @@ struct npc_black_knight_ghoulAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // explode on low health
@@ -420,7 +420,7 @@ struct npc_black_knight_ghoulAI : public ScriptedAI
 
         if (m_uiClawTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLAW) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLAW) == CAST_OK)
                 m_uiClawTimer = urand(7000, 14000);
         }
         else

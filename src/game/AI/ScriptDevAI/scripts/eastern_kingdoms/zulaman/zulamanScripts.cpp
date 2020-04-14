@@ -701,7 +701,7 @@ struct npc_amanishi_tempestAI : public ScriptedAI
                 m_uiSummonWarriorTimer -= diff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiThunderclapTimer < diff)
@@ -2161,20 +2161,20 @@ struct npc_amanishi_scoutAI : public ScriptedAI
             {
                 SetCombatScriptStatus(false);
                 SetCombatMovement(true);
-                if (m_creature->getVictim())
-                    DoStartMovement(m_creature->getVictim());
+                if (m_creature->GetVictim())
+                    DoStartMovement(m_creature->GetVictim());
             }
         }
     }
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim() || GetCombatScriptStatus())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim() || GetCombatScriptStatus())
             return;
 
         if (m_uiShootTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SHOOT) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOOT) == CAST_OK)
                 m_uiShootTimer = urand(4000, 5000);
         }
         else
@@ -2182,7 +2182,7 @@ struct npc_amanishi_scoutAI : public ScriptedAI
 
         if (m_uiMultiShotTimer < diff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MULTI_SHOT) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MULTI_SHOT) == CAST_OK)
                 m_uiMultiShotTimer = urand(20000, 24000);
         }
         else

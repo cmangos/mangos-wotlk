@@ -114,7 +114,7 @@ struct boss_moorabiAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_creature->HasAura(SPELL_TRANSFORMATION) && !m_bMammothPhase)
@@ -129,7 +129,7 @@ struct boss_moorabiAI : public ScriptedAI
 
         if (m_uiRoarTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), m_bMammothPhase ? SPELL_NUMBING_ROAR : SPELL_NUMBING_SHOUT);
+            DoCastSpellIfCan(m_creature->GetVictim(), m_bMammothPhase ? SPELL_NUMBING_ROAR : SPELL_NUMBING_SHOUT);
             m_uiRoarTimer = 20000;
         }
         else
@@ -138,7 +138,7 @@ struct boss_moorabiAI : public ScriptedAI
         if (m_uiQuakeTimer < uiDiff)
         {
             DoScriptText(SAY_QUAKE, m_creature);
-            DoCastSpellIfCan(m_creature->getVictim(), m_bMammothPhase ? SPELL_QUAKE : SPELL_GROUND_TREMOR);
+            DoCastSpellIfCan(m_creature->GetVictim(), m_bMammothPhase ? SPELL_QUAKE : SPELL_GROUND_TREMOR);
             m_uiQuakeTimer = m_bMammothPhase ? 13000 : 18000;
         }
         else
@@ -147,9 +147,9 @@ struct boss_moorabiAI : public ScriptedAI
         if (m_uiStabTimer < uiDiff)
         {
             if (m_bMammothPhase)
-                DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_DETERMINED_GORE : SPELL_DETERMINED_GORE_H);
+                DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_DETERMINED_GORE : SPELL_DETERMINED_GORE_H);
             else
-                DoCastSpellIfCan(m_creature->getVictim(), SPELL_DETERMINED_STAB);
+                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DETERMINED_STAB);
 
             m_uiStabTimer = 7000;
         }

@@ -139,7 +139,7 @@ struct boss_archaedasAI : public ScriptedAI
                 m_uiAwakeningTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Phase switch
@@ -200,7 +200,7 @@ bool EffectDummyCreature_npc_vault_warder(Unit* /*pCaster*/, uint32 uiSpellId, S
                 return true;
 
             if (Creature* pArchaedas = pInstance->GetSingleCreatureFromStorage(NPC_ARCHAEDAS))
-                pCreatureTarget->AI()->AttackStart(pArchaedas->getVictim());
+                pCreatureTarget->AI()->AttackStart(pArchaedas->GetVictim());
 
             return true;
         }
@@ -225,7 +225,7 @@ bool EffectAuraDummy_spell_aura_dummy_awaken_dwarf(const Aura* pAura, bool bAppl
                 return true;
 
             if (Creature* pArchaedas = pInstance->GetSingleCreatureFromStorage(NPC_ARCHAEDAS))
-                pTarget->AI()->AttackStart(pArchaedas->getVictim());
+                pTarget->AI()->AttackStart(pArchaedas->GetVictim());
         }
     }
 

@@ -186,7 +186,7 @@ struct boss_ahuneAI : public Scripted_NoMovementAI
             m_bHasCombatStarted = true;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiPhase == PHASE_GROUND)

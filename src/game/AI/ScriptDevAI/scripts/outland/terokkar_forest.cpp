@@ -90,7 +90,7 @@ struct mob_unkor_the_ruthlessAI : public ScriptedAI
                 m_uiUnfriendlyTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Do quest kill credit at 30%
@@ -248,12 +248,12 @@ struct npc_akunoAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiChainLightningTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAIN_LIGHTNING);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHAIN_LIGHTNING);
             m_uiChainLightningTimer = urand(7000, 14000);
         }
         else
@@ -518,7 +518,7 @@ struct npc_letollAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
         {
             if (HasEscortState(STATE_ESCORT_PAUSED))
             {
@@ -725,12 +725,12 @@ struct npc_isla_starmaneAI : public npc_escortAI
                 m_uiPeriodicTalkTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiEntanglingRootsTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ENTANGLING_ROOTS) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ENTANGLING_ROOTS) == CAST_OK)
                 m_uiEntanglingRootsTimer = urand(8000, 16000);
         }
         else
@@ -738,7 +738,7 @@ struct npc_isla_starmaneAI : public npc_escortAI
 
         if (m_uiMoonfireTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MOONFIRE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MOONFIRE) == CAST_OK)
                 m_uiMoonfireTimer = urand(6000, 12000);
         }
         else
@@ -746,7 +746,7 @@ struct npc_isla_starmaneAI : public npc_escortAI
 
         if (m_uiWrathTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_WRATH) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_WRATH) == CAST_OK)
                 m_uiWrathTimer = 2000;
         }
         else
@@ -875,7 +875,7 @@ struct npc_skywingAI : public npc_escortAI
                 m_uiCycloneTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
     }
 };
@@ -1199,13 +1199,13 @@ struct npc_avatar_of_terokkAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiAbilityTimer <= uiDiff)
         {
             m_uiAbilityTimer = 12000;
-            m_creature->CastSpell(m_creature->getVictim(), SPELL_FEATHER_BURST, TRIGGERED_NONE);
+            m_creature->CastSpell(m_creature->GetVictim(), SPELL_FEATHER_BURST, TRIGGERED_NONE);
             return;
         }
         m_uiAbilityTimer -= uiDiff;
@@ -1236,13 +1236,13 @@ struct npc_minion_of_terokkAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiAbilityTimer <= uiDiff)
         {
             m_uiAbilityTimer = 15000;
-            m_creature->CastSpell(m_creature->getVictim(), SPELL_TERRIFYING_SCREECH, TRIGGERED_NONE);
+            m_creature->CastSpell(m_creature->GetVictim(), SPELL_TERRIFYING_SCREECH, TRIGGERED_NONE);
             return;
         }
         m_uiAbilityTimer -= uiDiff;

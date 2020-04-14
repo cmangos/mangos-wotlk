@@ -363,7 +363,7 @@ struct boss_kelthuzadAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_pInstance || m_pInstance->GetData(TYPE_KELTHUZAD) != IN_PROGRESS)
@@ -394,7 +394,7 @@ struct boss_kelthuzadAI : public ScriptedAI
 
                     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                     SetCombatMovement(true);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
 
                     DoScriptText(EMOTE_PHASE2, m_creature);
 
@@ -449,7 +449,7 @@ struct boss_kelthuzadAI : public ScriptedAI
         {
             if (m_uiFrostBoltTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FROST_BOLT : SPELL_FROST_BOLT_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_FROST_BOLT : SPELL_FROST_BOLT_H) == CAST_OK)
                     m_uiFrostBoltTimer = urand(1000, 60000);
             }
             else
@@ -457,7 +457,7 @@ struct boss_kelthuzadAI : public ScriptedAI
 
             if (m_uiFrostBoltNovaTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FROST_BOLT_NOVA : SPELL_FROST_BOLT_NOVA_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_FROST_BOLT_NOVA : SPELL_FROST_BOLT_NOVA_H) == CAST_OK)
                     m_uiFrostBoltNovaTimer = 15000;
             }
             else
@@ -497,7 +497,7 @@ struct boss_kelthuzadAI : public ScriptedAI
 
             if (m_uiFrostBlastTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROST_BLAST) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROST_BLAST) == CAST_OK)
                 {
                     if (urand(0, 1))
                         DoScriptText(SAY_FROST_BLAST, m_creature);
@@ -512,7 +512,7 @@ struct boss_kelthuzadAI : public ScriptedAI
             {
                 if (m_uiChainsTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAINS_OF_KELTHUZAD) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHAINS_OF_KELTHUZAD) == CAST_OK)
                     {
                         DoScriptText(urand(0, 1) ? SAY_CHAIN1 : SAY_CHAIN2, m_creature);
 

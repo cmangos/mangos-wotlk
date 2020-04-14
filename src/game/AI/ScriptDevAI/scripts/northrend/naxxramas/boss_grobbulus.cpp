@@ -131,13 +131,13 @@ struct boss_grobbulusAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Slime Stream
         if (!m_uiSlimeStreamTimer)
         {
-            if (!m_creature->CanReachWithMeleeAttack(m_creature->getVictim()))
+            if (!m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
             {
                 if (DoCastSpellIfCan(m_creature, SPELL_SLIME_STREAM) == CAST_OK)
                     // Give some time, to re-reach grobbulus
@@ -167,7 +167,7 @@ struct boss_grobbulusAI : public ScriptedAI
         // SlimeSpray
         if (m_uiSlimeSprayTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_SLIME_SPRAY : SPELL_SLIME_SPRAY_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_SLIME_SPRAY : SPELL_SLIME_SPRAY_H) == CAST_OK)
             {
                 m_uiSlimeSprayTimer = urand(30 * IN_MILLISECONDS, 60 * IN_MILLISECONDS);
                 DoScriptText(EMOTE_SPRAY_SLIME, m_creature);

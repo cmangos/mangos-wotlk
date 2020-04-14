@@ -317,7 +317,7 @@ struct boss_anzuAI : public ScriptedAI, public CombatActions
                     }
                     continue;
                 case ANZU_ACTION_FLESH_RIP:
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FLESH_RIP) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FLESH_RIP) == CAST_OK)
                     {
                         SetActionReadyStatus(i, false);
                         ResetTimer(i, GetSubsequentActionTimer(AnzuActions(i)));
@@ -379,7 +379,7 @@ struct boss_anzuAI : public ScriptedAI, public CombatActions
     {
         UpdateTimers(diff, m_creature->IsInCombat());
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         ExecuteActions();

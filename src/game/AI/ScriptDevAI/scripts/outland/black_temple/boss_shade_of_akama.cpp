@@ -435,7 +435,7 @@ struct npc_akamaAI : public ScriptedAI, public CombatActions, private DialogueHe
                     }
                     case AKAMA_ACTION_DESTRUCTIVE_POISON:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_DESTRUCTIVE_POISON) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DESTRUCTIVE_POISON) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(AkamaActions(i)));
                             SetActionReadyStatus(i, false);
@@ -445,7 +445,7 @@ struct npc_akamaAI : public ScriptedAI, public CombatActions, private DialogueHe
                     }
                     case AKAMA_ACTION_CHAIN_LIGHTNING:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CHAIN_LIGHTNING) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHAIN_LIGHTNING) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(AkamaActions(i)));
                             SetActionReadyStatus(i, false);
@@ -469,7 +469,7 @@ struct npc_akamaAI : public ScriptedAI, public CombatActions, private DialogueHe
                 break;
             case PHASE_COMBAT:
 
-                if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+                if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
                     return;
 
                 ExecuteActions();
@@ -589,7 +589,7 @@ struct boss_shade_of_akamaAI : public ScriptedAI
 
     void UpdateAI(const uint32 /*diff*/) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         DoMeleeAttackIfReady();

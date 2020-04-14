@@ -185,7 +185,7 @@ CombatManeuverReturns PlayerbotDeathKnightAI::DoNextCombatManeuverPVE(Unit* pTar
     // DK Attacks: Unholy, Frost & Blood
 
     // damage spells
-    Unit* pVictim = pTarget->getVictim();
+    Unit* pVictim = pTarget->GetVictim();
     Pet* pet = m_bot->GetPet();
     float dist = m_bot->GetDistance(pTarget, true, DIST_CALC_COMBAT_REACH_WITH_MELEE);
     std::ostringstream out;

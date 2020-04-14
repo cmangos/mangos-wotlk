@@ -176,8 +176,8 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
                 m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
 
                 m_creature->GetMotionMaster()->Clear();
-                if (m_creature->getVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                if (m_creature->GetVictim())
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
             }
         }
         else if (uiPointId == POINT_CENTER_AIR)
@@ -193,7 +193,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiEnrageTimer)

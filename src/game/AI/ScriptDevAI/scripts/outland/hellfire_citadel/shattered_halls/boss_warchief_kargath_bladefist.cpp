@@ -197,7 +197,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Check if out of range
@@ -230,7 +230,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
                         m_bInBlade = false;
                         SetCombatScriptStatus(false);
                         SetCombatMovement(true);
-                        DoStartMovement(m_creature->getVictim());
+                        DoStartMovement(m_creature->GetVictim());
                         m_uiWaitTimer = 0;
                         if (!m_bIsRegularMode)
                             m_uiChargeTimer = 500;

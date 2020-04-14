@@ -62,12 +62,12 @@ struct npc_cooshcooshAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiLightningBolt_Timer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_LIGHTNING_BOLT);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_LIGHTNING_BOLT);
             m_uiLightningBolt_Timer = 5000;
         }
         else m_uiLightningBolt_Timer -= uiDiff;
@@ -307,7 +307,7 @@ struct npc_fhwoorAI : public npc_escortAI
 
     void UpdateEscortAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiStompTimer < uiDiff)

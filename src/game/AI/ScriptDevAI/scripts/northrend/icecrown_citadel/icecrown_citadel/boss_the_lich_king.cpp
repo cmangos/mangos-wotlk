@@ -384,7 +384,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
         if (m_uiPhase != PHASE_INTRO && m_uiPhase != PHASE_DEATH_AWAITS)
         {
             // check evade
-            if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+            if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
                 return;
 
             // Berserk
@@ -548,7 +548,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
 
                     m_uiPhase = (m_uiPhase == PHASE_QUAKE_ONE ? PHASE_TWO : PHASE_THREE);
                     m_creature->GetMotionMaster()->Clear();
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                 }
                 else
                     m_uiPhaseTimer -= uiDiff;
@@ -570,7 +570,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                 // Soul Reaper
                 if (m_uiSoulReaperTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SOUL_REAPER) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SOUL_REAPER) == CAST_OK)
                         m_uiSoulReaperTimer = 30000;
                 }
                 else
@@ -633,7 +633,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                 // Soul Reaper
                 if (m_uiSoulReaperTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SOUL_REAPER) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SOUL_REAPER) == CAST_OK)
                         m_uiSoulReaperTimer = 30000;
                 }
                 else
@@ -705,8 +705,8 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
                 if (m_uiFrostmournePhaseTimer < uiDiff)
                 {
                     m_uiPhase = PHASE_THREE;
-                    if (m_creature->getVictim())
-                        m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                    if (m_creature->GetVictim())
+                        m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                 }
                 else
                     m_uiFrostmournePhaseTimer -= uiDiff;

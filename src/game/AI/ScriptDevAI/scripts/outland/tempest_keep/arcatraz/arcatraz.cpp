@@ -183,7 +183,7 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
     {
         DialogueUpdate(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (!m_bHasLowHp && m_creature->GetHealthPercent() < 20.0f)
@@ -194,7 +194,7 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
 
         if (m_uiPyroblastTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_PYROBLAST) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PYROBLAST) == CAST_OK)
             {
                 m_uiPyroblastTimer = 40000;
                 DoScriptText(SAY_PYRO, m_creature);
@@ -205,7 +205,7 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
 
         if (m_uiFireballTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIREBALL) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIREBALL) == CAST_OK)
                 m_uiFireballTimer = 4000;
         }
         else
@@ -213,7 +213,7 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
 
         if (m_uiFrostBoltTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FROSTBOLT) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROSTBOLT) == CAST_OK)
                 m_uiFrostBoltTimer = urand(4000, 6000);
         }
         else
@@ -229,7 +229,7 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
 
         if (m_uiFireBlastTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FIRE_BLAST) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIRE_BLAST) == CAST_OK)
                 m_uiFireBlastTimer = urand(5000, 16000);
         }
         else
@@ -237,7 +237,7 @@ struct npc_millhouse_manastormAI : public ScriptedAI, private DialogueHelper
 
         if (m_uiArcaneMissileTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCANE_MISSILES) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ARCANE_MISSILES) == CAST_OK)
                 m_uiArcaneMissileTimer = urand(5000, 8000);
         }
         else
@@ -378,23 +378,23 @@ struct npc_arcatraz_defenderAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiFlamingWeaponTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_FLAMING_WEAPON : SPELL_FLAMING_WEAPON_H) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_FLAMING_WEAPON : SPELL_FLAMING_WEAPON_H) == CAST_OK)
                 m_uiFlamingWeaponTimer = urand(3000, 6000);
         }
         else
             m_uiFlamingWeaponTimer -= uiDiff;
 
         // this spell should only be used against Protean Horror and Protean Nightmare, never players
-        if (m_creature->getVictim() && m_creature->getVictim()->GetTypeId() != TYPEID_PLAYER)
+        if (m_creature->GetVictim() && m_creature->GetVictim()->GetTypeId() != TYPEID_PLAYER)
         {
             if (m_uiProteanSubdualTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_PROTEAN_SUBDUAL : SPELL_PROTEAN_SUBDUAL_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_PROTEAN_SUBDUAL : SPELL_PROTEAN_SUBDUAL_H) == CAST_OK)
                     m_uiProteanSubdualTimer = urand(2000, 3000);
             }
             else

@@ -199,8 +199,8 @@ struct boss_mandokirAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_OHGAN)
         {
-            if (m_creature->getVictim())
-                pSummoned->AI()->AttackStart(m_creature->getVictim());
+            if (m_creature->GetVictim())
+                pSummoned->AI()->AttackStart(m_creature->GetVictim());
         }
     }
 
@@ -244,7 +244,7 @@ struct boss_mandokirAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiWatchTimer < uiDiff)
@@ -284,7 +284,7 @@ struct boss_mandokirAI : public ScriptedAI
             // Cleave
             if (m_uiCleaveTimer < uiDiff)
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                     m_uiCleaveTimer = 7000;
             }
             else
@@ -322,11 +322,11 @@ struct boss_mandokirAI : public ScriptedAI
                 m_uiFearTimer -= uiDiff;
 
             // Mortal Strike if target below 50% hp
-            if (m_creature->getVictim()->GetHealthPercent() < 50.0f)
+            if (m_creature->GetVictim()->GetHealthPercent() < 50.0f)
             {
                 if (m_uiMortalStrikeTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTAL_STRIKE) == CAST_OK)
                         m_uiMortalStrikeTimer = 15000;
                 }
                 else
@@ -364,13 +364,13 @@ struct mob_ohganAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // SunderArmor
         if (m_uiSunderArmorTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SUNDERARMOR) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SUNDERARMOR) == CAST_OK)
                 m_uiSunderArmorTimer = urand(10000, 15000);
         }
         else

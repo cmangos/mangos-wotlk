@@ -159,7 +159,7 @@ struct boss_void_reaverAI : public CombatAI
             }
             case VOID_REAVER_KNOCK_AWAY:
             {
-                if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_KNOCK_AWAY) == CAST_OK)
                     ResetCombatAction(action, 30000);
                 break;
             }

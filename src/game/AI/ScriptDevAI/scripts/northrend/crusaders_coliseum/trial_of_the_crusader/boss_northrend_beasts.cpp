@@ -442,7 +442,7 @@ struct boss_gormokAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // snobold related spells
@@ -501,7 +501,7 @@ struct boss_gormokAI : public ScriptedAI
 
         if (m_uiImpaleTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_IMPALE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_IMPALE) == CAST_OK)
                 m_uiImpaleTimer = 10000;
         }
         else
@@ -641,7 +641,7 @@ struct twin_jormungars_commonAI : public ScriptedAI
             {
                 SetCombatMovement(true);
                 m_creature->GetMotionMaster()->Clear();
-                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
             }
             // for stationary set visual
             else if (m_uiPhase == PHASE_STATIONARY)
@@ -660,7 +660,7 @@ struct twin_jormungars_commonAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_uiPhase)
@@ -681,7 +681,7 @@ struct twin_jormungars_commonAI : public ScriptedAI
 
                 if (m_uiSprayTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), GetSpraySpell()) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), GetSpraySpell()) == CAST_OK)
                         m_uiSprayTimer = 21000;
                 }
                 else
@@ -689,7 +689,7 @@ struct twin_jormungars_commonAI : public ScriptedAI
 
                 if (m_uiSweepTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_SWEEP) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SWEEP) == CAST_OK)
                         m_uiSweepTimer = urand(10000, 15000);
                 }
                 else
@@ -702,7 +702,7 @@ struct twin_jormungars_commonAI : public ScriptedAI
 
                 if (m_uiBiteTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), GetBiteSpell()) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), GetBiteSpell()) == CAST_OK)
                         m_uiBiteTimer = urand(5000, 7000);
                 }
                 else
@@ -980,7 +980,7 @@ struct boss_icehowlAI : public ScriptedAI
             {
                 SetCombatMovement(true);
                 m_creature->GetMotionMaster()->Clear();
-                m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
 
                 m_bIsFuriousCharge = false;
                 m_creature->SetSpeedRate(MOVE_RUN, m_fSpeedRate);
@@ -1022,7 +1022,7 @@ struct boss_icehowlAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_bIsFuriousCharge)
@@ -1105,7 +1105,7 @@ struct boss_icehowlAI : public ScriptedAI
 
         if (m_uiArticBreathTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_ARCTIC_BREATH) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ARCTIC_BREATH) == CAST_OK)
                 m_uiArticBreathTimer = urand(25000, 30000);
         }
         else
@@ -1113,7 +1113,7 @@ struct boss_icehowlAI : public ScriptedAI
 
         if (m_uiFerociousButtTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_FEROCIOUS_BUTT) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FEROCIOUS_BUTT) == CAST_OK)
                 m_uiFerociousButtTimer = 15000;
         }
         else

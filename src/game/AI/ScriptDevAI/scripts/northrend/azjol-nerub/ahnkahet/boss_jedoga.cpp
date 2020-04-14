@@ -321,8 +321,8 @@ struct boss_jedogaAI : public ScriptedAI
                 m_bIsSacrificing = false;
                 SetCombatMovement(true);
                 m_creature->SetLevitate(false);
-                if (m_creature->getVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->getVictim());
+                if (m_creature->GetVictim())
+                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                 break;
         }
     }
@@ -350,7 +350,7 @@ struct boss_jedogaAI : public ScriptedAI
                 m_uiVisualTimer -= uiDiff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Don't use abilities while sacrificing
@@ -389,7 +389,7 @@ struct boss_jedogaAI : public ScriptedAI
 
         if (m_uiCycloneStrikeTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), m_bIsRegularMode ? SPELL_CYCLONE_STRIKE : SPELL_CYCLONE_STRIKE_H);
+            DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_CYCLONE_STRIKE : SPELL_CYCLONE_STRIKE_H);
             m_uiCycloneStrikeTimer = 15000;
         }
         else

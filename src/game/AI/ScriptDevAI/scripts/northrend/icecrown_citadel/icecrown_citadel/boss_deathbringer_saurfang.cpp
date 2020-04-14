@@ -240,7 +240,7 @@ struct boss_deathbringer_saurfangAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // Mark of the Fallen Champion
@@ -294,7 +294,7 @@ struct boss_deathbringer_saurfangAI : public ScriptedAI
         // Rune of Blood
         if (m_uiRuneOfBloodTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_RUNE_OF_BLOOD) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RUNE_OF_BLOOD) == CAST_OK)
                 m_uiRuneOfBloodTimer = 25000;
         }
         else

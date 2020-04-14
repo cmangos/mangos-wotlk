@@ -202,7 +202,7 @@ struct boss_fjolaAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         // special ability spell
@@ -250,7 +250,7 @@ struct boss_fjolaAI : public ScriptedAI
 
         if (m_uiTwinSpikeTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TWIN_SPIKE_LIGHT) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_TWIN_SPIKE_LIGHT) == CAST_OK)
                 m_uiTwinSpikeTimer = 10000;
         }
         else
@@ -320,12 +320,12 @@ struct boss_eydisAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiTwinSpikeTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_TWIN_SPIKE_DARK) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_TWIN_SPIKE_DARK) == CAST_OK)
                 m_uiTwinSpikeTimer = 10000;
         }
         else

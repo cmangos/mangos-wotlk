@@ -90,7 +90,7 @@ struct boss_eckAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiSpitTimer < uiDiff)
@@ -105,7 +105,7 @@ struct boss_eckAI : public ScriptedAI
         {
             Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1);
             if (!pTarget)
-                pTarget = m_creature->getVictim();
+                pTarget = m_creature->GetVictim();
 
             if (DoCastSpellIfCan(pTarget, SPELL_ECK_SPRING) == CAST_OK)
             {
@@ -118,7 +118,7 @@ struct boss_eckAI : public ScriptedAI
 
         if (m_uiBiteTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->getVictim(), SPELL_ECK_BITE);
+            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ECK_BITE);
             m_uiBiteTimer = urand(5000, 15000);
         }
         else

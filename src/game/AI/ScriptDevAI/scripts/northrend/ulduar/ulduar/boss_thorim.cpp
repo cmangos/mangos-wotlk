@@ -332,7 +332,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
             {
                 DoScriptText(SAY_SIF_EVENT, pSif);
                 SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pSif);
-                pSif->AI()->AttackStart(m_creature->getVictim());
+                pSif->AI()->AttackStart(m_creature->GetVictim());
             }
         }
     }
@@ -538,7 +538,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
     {
         DialogueUpdate(uiDiff);
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         switch (m_uiPhase)
@@ -617,7 +617,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
                         // Add some small delay to combat movement because Jump triggers before it's actually finished
                         DoResetThreat();
                         SetCombatMovement(true);
-                        DoStartMovement(m_creature->getVictim());
+                        DoStartMovement(m_creature->GetVictim());
                         m_uiAttackTimer = 0;
                     }
                     else
@@ -654,7 +654,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
 
                 if (m_uiUnbalancingStrikeTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_UNBALANCING_STRIKE) == CAST_OK)
                         m_uiUnbalancingStrikeTimer = 25000;
                 }
                 else
@@ -762,7 +762,7 @@ struct boss_sifAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiFrostBoltTimer < uiDiff)
@@ -952,7 +952,7 @@ struct npc_runic_colossusAI : public ScriptedAI
             UpdateRunicSmash(uiDiff);
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiChargeTimer < uiDiff)
