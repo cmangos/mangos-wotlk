@@ -2427,7 +2427,7 @@ struct npc_salhadaarAI : public ScriptedAI
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
-        if (eventType == AI_EVENT_CUSTOM_A && (!m_creature->IsInCombat()) && (!m_creature->isDead()))
+        if (eventType == AI_EVENT_CUSTOM_A && (!m_creature->IsInCombat()) && (!m_creature->IsDead()))
         {
             m_creature->RemoveAurasDueToSpell(SPELL_FLOAT);
             DoScriptText(SAY_THREAT, m_creature);

@@ -481,7 +481,7 @@ bool AreaTrigger_at_sunwell_plateau(Player* pPlayer, AreaTriggerEntry const* pAt
 {
     if (pAt->id == AREATRIGGER_TWINS)
     {
-        if (pPlayer->isGameMaster() || pPlayer->isDead())
+        if (pPlayer->isGameMaster() || pPlayer->IsDead())
             return false;
 
         instance_sunwell_plateau* pInstance = (instance_sunwell_plateau*)pPlayer->GetInstanceData();

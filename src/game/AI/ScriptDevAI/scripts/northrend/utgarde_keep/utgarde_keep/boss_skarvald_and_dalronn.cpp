@@ -101,7 +101,7 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
     {
         if (Creature* pBuddy = GetBuddy())
         {
-            if (pBuddy->isDead())
+            if (pBuddy->IsDead())
                 pBuddy->Respawn();
         }
 

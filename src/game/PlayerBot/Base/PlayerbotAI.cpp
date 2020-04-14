@@ -3359,7 +3359,7 @@ void PlayerbotAI::DoNextCombatManeuver()
         Attack();
 
     // clear orders if current target for attacks doesn't make sense anymore
-    if (!m_targetCombat || m_targetCombat->isDead() || !m_targetCombat->IsInWorld() || !m_bot->CanAttack(m_targetCombat) || !m_bot->IsInMap(m_targetCombat))
+    if (!m_targetCombat || m_targetCombat->IsDead() || !m_targetCombat->IsInWorld() || !m_bot->CanAttack(m_targetCombat) || !m_bot->IsInMap(m_targetCombat))
     {
         m_bot->AttackStop();
         m_bot->SetSelectionGuid(ObjectGuid());
@@ -5302,7 +5302,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
             return;
 
         if (m_bot->GetPetGuid() || spell->CheckCast(true) != SPELL_CAST_OK || !pTarget ||
-                pTarget->isDead() || !m_bot->IsInMap(pTarget) || !(((Creature*) pTarget)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_TAMEABLE))
+                pTarget->IsDead() || !m_bot->IsInMap(pTarget) || !(((Creature*) pTarget)->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_TAMEABLE))
         {
             MovementReset();
             m_bot->SetSelectionGuid(ObjectGuid());

@@ -187,7 +187,7 @@ enum
 
 bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (pPlayer->isGameMaster() || pPlayer->isDead())
+    if (pPlayer->isGameMaster() || pPlayer->IsDead())
         return false;
 
     // search for the first set of Nerubar Broodkeepers and lower them to the ground
@@ -245,7 +245,7 @@ enum
 
 bool AreaTrigger_at_putricides_trap(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (pPlayer->isGameMaster() || pPlayer->isDead())
+    if (pPlayer->isGameMaster() || pPlayer->IsDead())
         return false;
 
     if (pAt->id != AT_PUTRICIDES_TRAP)

@@ -821,7 +821,7 @@ bool AreaTrigger_at_icecrown_citadel(Player* pPlayer, AreaTriggerEntry const* pA
     if (pAt->id == AT_MARROWGAR_INTRO || pAt->id == AT_DEATHWHISPER_INTRO ||
             pAt->id == AT_SINDRAGOSA_PLATFORM)
     {
-        if (pPlayer->isGameMaster() || pPlayer->isDead())
+        if (pPlayer->isGameMaster() || pPlayer->IsDead())
             return false;
 
         if (instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pPlayer->GetInstanceData())

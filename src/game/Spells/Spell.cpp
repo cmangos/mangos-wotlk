@@ -5385,7 +5385,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     Pet* target = m_caster->GetMap()->GetPet(((Player*)m_caster)->GetSelectionGuid());
 
                     // alive
-                    if (!target || target->isDead())
+                    if (!target || target->IsDead())
                         return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
                     // undead
                     if (target->GetCreatureType() != CREATURE_TYPE_UNDEAD)
@@ -7753,7 +7753,7 @@ void Spell::FillRaidOrPartyManaPriorityTargets(UnitList& targetUnitMap, Unit* me
 
     PrioritizeManaUnitQueue manaUsers;
     for (UnitList::const_iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr)
-        if ((*itr)->GetPowerType() == POWER_MANA && !(*itr)->isDead())
+        if ((*itr)->GetPowerType() == POWER_MANA && !(*itr)->IsDead())
             manaUsers.push(PrioritizeManaUnitWraper(*itr));
 
     targetUnitMap.clear();
@@ -7770,7 +7770,7 @@ void Spell::FillRaidOrPartyHealthPriorityTargets(UnitList& targetUnitMap, Unit* 
 
     PrioritizeHealthUnitQueue healthQueue;
     for (UnitList::const_iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr)
-        if (!(*itr)->isDead())
+        if (!(*itr)->IsDead())
             healthQueue.push(PrioritizeHealthUnitWraper(*itr));
 
     targetUnitMap.clear();

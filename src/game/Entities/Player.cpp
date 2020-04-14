@@ -5185,7 +5185,7 @@ void Player::RepopAtGraveyard()
     {
         bool updateVisibility = IsInWorld() && GetMapId() == ClosestGrave->map_id;
         TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, ClosestGrave->o);
-        if (isDead())                                       // not send if alive, because it used in TeleportTo()
+        if (IsDead())                                       // not send if alive, because it used in TeleportTo()
         {
             WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4 * 4);// show spirit healer position on minimap
             data << ClosestGrave->map_id;
@@ -13209,7 +13209,7 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                     hasMenuItem = false;                    // added in special mode
                     break;
                 case GOSSIP_OPTION_SPIRITHEALER:
-                    if (!isDead())
+                    if (!IsDead())
                         hasMenuItem = false;
                     break;
                 case GOSSIP_OPTION_VENDOR:
@@ -13498,7 +13498,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             break;
         }
         case GOSSIP_OPTION_SPIRITHEALER:
-            if (isDead())
+            if (IsDead())
                 ((Creature*)pSource)->CastSpell(((Creature*)pSource), 17251, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid());
             break;
         case GOSSIP_OPTION_QUESTGIVER:
@@ -20526,7 +20526,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
                 BeforeVisibilityDestroy<Creature>((Creature*)target, this);
 
                 // at remove from map (destroy) show kill animation (in different out of range/stealth case)
-                target->DestroyForPlayer(this, !target->IsInWorld() && ((Creature*)target)->isDead());
+                target->DestroyForPlayer(this, !target->IsInWorld() && ((Creature*)target)->IsDead());
             }
             else
                 target->DestroyForPlayer(this);
@@ -22648,7 +22648,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
 
     // Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
     // 14.57 can be calculated by resolving damageperc formula below to 0
-    if (z_diff >= 14.57f && !isDead() && !isGameMaster() && !HasMovementFlag(MOVEFLAG_ONTRANSPORT) &&
+    if (z_diff >= 14.57f && !IsDead() && !isGameMaster() && !HasMovementFlag(MOVEFLAG_ONTRANSPORT) &&
             !HasAuraType(SPELL_AURA_HOVER) && !HasAuraType(SPELL_AURA_FEATHER_FALL) &&
             !IsFreeFlying() && !IsImmuneToDamage(SPELL_SCHOOL_MASK_NORMAL))
     {

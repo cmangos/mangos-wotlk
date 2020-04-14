@@ -577,7 +577,7 @@ namespace MaNGOS
             bool operator()(Creature* u)
             {
                 if (i_fobj->isHonorOrXPTarget(u) ||
-                        u->getDeathState() != CORPSE || u->IsDeadByDefault() || u->IsTaxiFlying() ||
+                        u->GetDeathState() != CORPSE || u->IsDeadByDefault() || u->IsTaxiFlying() ||
                         (u->GetCreatureTypeMask() & (1 << (CREATURE_TYPE_HUMANOID - 1))) == 0 ||
                         (u->GetDisplayId() != u->GetNativeDisplayId()))
                     return false;
@@ -597,16 +597,16 @@ namespace MaNGOS
             WorldObject const& GetFocusObject() const { return *i_fobj; }
             bool operator()(Player* u)
             {
-                if (u->getDeathState() != CORPSE || u->IsTaxiFlying() ||
-                        u->HasAuraType(SPELL_AURA_GHOST) || (u->GetDisplayId() != u->GetNativeDisplayId()))
+                if (u->GetDeathState() != CORPSE || u->IsTaxiFlying() ||
+                    u->HasAuraType(SPELL_AURA_GHOST) || (u->GetDisplayId() != u->GetNativeDisplayId()))
                     return false;
 
                 return i_fobj->IsWithinDistInMap(u, i_range);
             }
             bool operator()(Creature* u)
             {
-                if (u->getDeathState() != CORPSE || u->IsTaxiFlying() || u->IsDeadByDefault() ||
-                        (u->GetDisplayId() != u->GetNativeDisplayId()) ||
+                if (u->GetDeathState() != CORPSE || u->IsTaxiFlying() || u->IsDeadByDefault() ||
+                    (u->GetDisplayId() != u->GetNativeDisplayId()) ||
                         (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_MECHANICAL_OR_ELEMENTAL) != 0)
                     return false;
 
@@ -1263,7 +1263,7 @@ namespace MaNGOS
             WorldObject const& GetFocusObject() const { return *i_obj; }
             bool operator()(Creature* u)
             {
-                if (u == i_obj || u->isDead() || u->IsInCombat())
+                if (u == i_obj || u->IsDead() || u->IsInCombat())
                     return false;
 
                 if (!u->CanAssist(i_obj) || !u->CanAttack(i_enemy))

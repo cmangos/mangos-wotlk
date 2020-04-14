@@ -1895,7 +1895,7 @@ void Aura::TriggerSpell()
 //                    case 59783: break;
 //                    // Z Check
 //                    case 61678: break;
-//                    // isDead Check
+//                    // IsDead Check
 //                    case 61976: break;
 //                    // Start the Engine
 //                    case 62432: break;

@@ -947,7 +947,7 @@ bool AreaTrigger_at_culling_of_stratholme(Player* pPlayer, AreaTriggerEntry cons
 {
     if (pAt->id == AREATRIGGER_INN)
     {
-        if (pPlayer->isGameMaster() || pPlayer->isDead())
+        if (pPlayer->isGameMaster() || pPlayer->IsDead())
             return false;
 
         if (instance_culling_of_stratholme* pInstance = (instance_culling_of_stratholme*)pPlayer->GetInstanceData())

@@ -519,7 +519,7 @@ struct boss_thaddiusAddsAI : public ScriptedAI
 
     bool IsCountingDead() const
     {
-        return m_bFakeDeath || m_creature->isDead();
+        return m_bFakeDeath || m_creature->IsDead();
     }
 
     void PauseCombatMovement()
