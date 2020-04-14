@@ -1824,6 +1824,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
                             (spellInfo_2->Id == 32756 && spellInfo_1->Id == 38081))
                         return false;
 
+                    // See Icemist Invisibility and Agmar Invisibility
+                    if ((spellInfo_1->Id == 47396 && spellInfo_2->Id == 47418) ||
+                            (spellInfo_2->Id == 47418 && spellInfo_1->Id == 47396))
+                        return false;
+
                     // Cool Down (See PeriodicAuraTick())
                     if ((spellInfo_1->Id == 52441 && spellInfo_2->Id == 52443) ||
                             (spellInfo_2->Id == 52441 && spellInfo_1->Id == 52443))
