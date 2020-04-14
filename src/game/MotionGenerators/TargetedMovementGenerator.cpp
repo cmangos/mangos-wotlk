@@ -46,7 +46,7 @@ bool TargetedMovementGeneratorMedium<T, D>::Update(T& owner, const uint32& time_
     if (!i_target.isValid() || !i_target->IsInWorld())
         return false;
 
-    if (!owner.isAlive())
+    if (!owner.IsAlive())
         return true;
 
     // prevent movement while casting spells with cast time or channel time
@@ -563,7 +563,7 @@ float FollowMovementGenerator::GetSpeed(Unit& owner) const
     const UnitMoveType type = i_target->m_movementInfo.GetSpeedType();
     float speed = owner.GetSpeed(type);
 
-    if (owner.isInCombat() || !i_target.isValid())
+    if (owner.IsInCombat() || !i_target.isValid())
         return speed;
 
     // Use default speed when a mix of PC and NPC units involved (escorting?)
@@ -595,7 +595,7 @@ float FollowMovementGenerator::GetSpeed(Unit& owner) const
 
 bool FollowMovementGenerator::IsBoostAllowed(Unit& owner) const
 {
-    if (owner.isInCombat() || !i_target.isValid())
+    if (owner.IsInCombat() || !i_target.isValid())
         return false;
 
     // Do not allow boosting outside of pet/master relationship:
@@ -622,7 +622,7 @@ bool FollowMovementGenerator::IsBoostAllowed(Unit& owner) const
 bool FollowMovementGenerator::IsUnstuckAllowed(Unit &owner) const
 {
     // Do not try to unstuck if in combat
-    if (owner.isInCombat() || !i_target.isValid() || i_target->isInCombat())
+    if (owner.IsInCombat() || !i_target.isValid() || i_target->IsInCombat())
         return false;
 
     // Do not try to unstuck while target has not landed or stabilized on terrain in some way

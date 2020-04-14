@@ -1535,7 +1535,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
             case NPC_WARRIOR_OF_THE_FROZEN_WASTES:
                 m_lAttackersGUIDs.push_back(pSummoned->GetObjectGuid());
                 // make the scourge attack only during the battle
-                if (m_creature->isInCombat())
+                if (m_creature->IsInCombat())
                 {
                     if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                         pSummoned->AI()->AttackStart(pTarget);

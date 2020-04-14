@@ -196,7 +196,7 @@ struct boss_leotheras_the_blindAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->isInCombat())
+        if (!m_creature->IsInCombat())
         {
             // Banish the boss before combat
             if (m_uiBanishTimer)

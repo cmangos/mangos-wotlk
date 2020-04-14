@@ -143,7 +143,7 @@ void instance_magisters_terrace::SetData(uint32 uiType, uint32 uiData)
 
                         if (pTemp->IsAlive())
                         {
-                            if (pTemp->isInCombat())
+                            if (pTemp->IsInCombat())
                             {
                                 pTemp->ForcedDespawn();
                                 pTemp->Respawn();

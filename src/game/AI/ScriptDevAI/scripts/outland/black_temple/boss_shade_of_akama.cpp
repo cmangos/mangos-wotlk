@@ -460,7 +460,7 @@ struct npc_akamaAI : public ScriptedAI, public CombatActions, private DialogueHe
 
     void UpdateAI(const uint32 diff) override
     {
-        UpdateTimers(diff, m_creature->isInCombat());
+        UpdateTimers(diff, m_creature->IsInCombat());
 
         switch (m_phase)
         {

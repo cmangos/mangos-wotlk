@@ -2427,7 +2427,7 @@ struct npc_salhadaarAI : public ScriptedAI
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
-        if (eventType == AI_EVENT_CUSTOM_A && (!m_creature->isInCombat()) && (!m_creature->isDead()))
+        if (eventType == AI_EVENT_CUSTOM_A && (!m_creature->IsInCombat()) && (!m_creature->isDead()))
         {
             m_creature->RemoveAurasDueToSpell(SPELL_FLOAT);
             DoScriptText(SAY_THREAT, m_creature);
@@ -2492,7 +2492,7 @@ struct npc_salhadaarAI : public ScriptedAI
             }
             m_uiAttackTimer -= uiDiff;
         }
-        if (m_creature->isInCombat())
+        if (m_creature->IsInCombat())
         {
             if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
                 return;
@@ -2574,7 +2574,7 @@ struct npc_energy_ballAI : public ScriptedAI
                 GetCreatureListWithEntryInGrid(creatureList, m_creature, NPC_SALHADAAR, 100.0f);
                 for (CreatureList::const_iterator itr = creatureList.begin(); itr != creatureList.end(); ++itr)
                 {
-                    if (!(*itr)->isInCombat())
+                    if (!(*itr)->IsInCombat())
                     {
                         m_creature->CastSpell(m_creature, SPELL_SALAADIN_TESLA, TRIGGERED_NONE);
                     }
@@ -2813,7 +2813,7 @@ struct npc_scrap_reaverAI : ScriptedPetAI
             if (!owner)
                 return;
 
-            if (owner->isInCombat() && !HasReactState(REACT_PASSIVE))
+            if (owner->IsInCombat() && !HasReactState(REACT_PASSIVE))
             {
                 // Not correct in all cases.
                 // When mob initiate attack by spell, pet should not start attack before spell landed.
@@ -3008,7 +3008,7 @@ struct npc_scrapped_fel_reaverAI : ScriptedAI
                     m_eventTimer = 100 * IN_MILLISECONDS;
                     break;
                 case 1: // revert to unattackable when out of combat
-                    if (!m_creature->isInCombat())
+                    if (!m_creature->IsInCombat())
                         ResetEvent();
                     break;
             }
@@ -3857,7 +3857,7 @@ bool GossipHello_npc_adyen_the_lightwarden(Player* player, Creature* creature)
         if (npc_adyen_the_lightwardenAI* ai = dynamic_cast<npc_adyen_the_lightwardenAI*>(creature->AI()))
         {
             Creature* socrethar = ((ScriptedInstance*)creature->GetMap()->GetInstanceData())->GetSingleCreatureFromStorage(NPC_SOCRETHAR);
-            if (!socrethar || !socrethar->IsAlive() || socrethar->isInCombat())
+            if (!socrethar || !socrethar->IsAlive() || socrethar->IsInCombat())
                 ai->DespawnEvent();
         }
     }

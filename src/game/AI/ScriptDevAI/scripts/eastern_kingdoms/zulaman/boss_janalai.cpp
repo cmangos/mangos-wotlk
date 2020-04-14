@@ -314,7 +314,7 @@ struct boss_janalaiAI : public CombatAI
     void UpdateAI(const uint32 diff) override
     {
         CombatAI::UpdateAI(diff);
-        if (m_creature->isInCombat())
+        if (m_creature->IsInCombat())
             EnterEvadeIfOutOfCombatArea(diff);
     }
 };

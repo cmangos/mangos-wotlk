@@ -145,7 +145,7 @@ struct boss_moroesAI : public ScriptedAI, public CombatActions
             SetMeleeEnabled(true);
             SetCombatScriptStatus(false);
             m_attackAngle = 0.f;
-            if (m_creature->isInCombat()) // can happen on evade
+            if (m_creature->IsInCombat()) // can happen on evade
                 DoStartMovement(m_creature->getVictim());
         }
     }
@@ -216,7 +216,7 @@ struct boss_moroesAI : public ScriptedAI, public CombatActions
                 // If we already have the creature on the map, then don't summon it
                 if (Creature* add = m_pInstance->GetSingleCreatureFromStorage(m_vGuestsEntryList[i], true))
                 {
-                    if (add->isInCombat())
+                    if (add->IsInCombat())
                         add->AI()->EnterEvadeMode();
                     continue;
                 }
@@ -316,7 +316,7 @@ struct boss_moroesAI : public ScriptedAI, public CombatActions
 
     void UpdateAI(const uint32 diff) override
     {
-        UpdateTimers(diff, m_creature->isInCombat());
+        UpdateTimers(diff, m_creature->IsInCombat());
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;

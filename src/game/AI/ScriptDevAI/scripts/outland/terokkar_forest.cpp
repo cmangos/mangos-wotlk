@@ -434,7 +434,7 @@ struct npc_letollAI : public npc_escortAI
         {
             float fAngle = uiCount < MAX_RESEARCHER ? M_PI / MAX_RESEARCHER - (uiCount * 2 * M_PI / MAX_RESEARCHER) : 0.0f;
 
-            if (itr->IsAlive() && !itr->isInCombat())
+            if (itr->IsAlive() && !itr->IsInCombat())
                 itr->GetMotionMaster()->MoveFollow(m_creature, 2.5f, fAngle);
 
             ++uiCount;
@@ -502,7 +502,7 @@ struct npc_letollAI : public npc_escortAI
 
     void Aggro(Unit* pWho) override
     {
-        if (pWho->isInCombat() && pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_BONE_SIFTER)
+        if (pWho->IsInCombat() && pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_BONE_SIFTER)
             DoScriptText(SAY_LE_HELP_HIM, m_creature);
     }
 

@@ -357,7 +357,7 @@ struct boss_razorscaleAI : public ScriptedAI
         // Special handling for PHASE_AIR
 
         // Not started combat or evading prevented
-        if (!m_creature->isInCombat() || m_creature->HasAuraType(SPELL_AURA_MOD_TAUNT))
+        if (!m_creature->IsInCombat() || m_creature->HasAuraType(SPELL_AURA_MOD_TAUNT))
             return false;
 
         // Check if there are still enemies (players)

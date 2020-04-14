@@ -320,7 +320,7 @@ void instance_black_temple::SetData(uint32 type, uint32 data)
                 if (Creature* trigger = GetSingleCreatureFromStorage(NPC_RELIQUARY_COMBAT_TRIGGER))
                 {
                     trigger->SetInCombatWithZone();
-                    if (!trigger->isInCombat())
+                    if (!trigger->IsInCombat())
                     {
                         SetData(TYPE_RELIQUIARY, FAIL);
                         return;

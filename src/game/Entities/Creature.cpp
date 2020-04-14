@@ -725,7 +725,7 @@ void Creature::RegenerateAll(uint32 update_diff)
     if (m_regenTimer != 0)
         return;
 
-    if (!isInCombat() || GetCombatManager().IsEvadeRegen())
+    if (!IsInCombat() || GetCombatManager().IsEvadeRegen())
         RegenerateHealth();
 
     RegeneratePower(2.f);
@@ -751,7 +751,7 @@ void Creature::RegeneratePower(float timerMultiplier)
     {
         case POWER_MANA:
             // Combat and any controlled creature
-            if (isInCombat() || GetMasterGuid())
+            if (IsInCombat() || GetMasterGuid())
             {
                 if (!IsUnderLastManaUseEffect())
                 {
@@ -1998,7 +1998,7 @@ bool Creature::CanAssistTo(const Unit* u, const Unit* enemy, bool checkfaction /
         return false;
 
     // skip fighting creature
-    if (enemy && isInCombat())
+    if (enemy && IsInCombat())
         return false;
 
     // only free creature

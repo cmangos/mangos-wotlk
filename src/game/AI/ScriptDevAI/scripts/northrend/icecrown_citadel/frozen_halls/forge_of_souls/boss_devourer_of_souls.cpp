@@ -205,7 +205,7 @@ struct boss_devourer_of_soulsAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->isInCombat())
+        if (!m_creature->IsInCombat())
             return;
 
         // Ending a phase

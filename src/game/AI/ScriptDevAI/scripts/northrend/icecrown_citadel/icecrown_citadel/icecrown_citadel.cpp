@@ -108,7 +108,7 @@ bool GossipSelect_go_icc_teleporter(Player* pPlayer, GameObject* pGo, uint32 uiS
 
     // There needs to be displayed a msg when in Combat, it is likely that this is to be handled by core and spell can-cast check
     // -- TODO -- Remove the combat check when spells are correctly working
-    if (pPlayer->isInCombat())
+    if (pPlayer->IsInCombat())
         return true;
 
     switch (uiAction)
@@ -156,7 +156,7 @@ bool AreaTrigger_at_frozen_throne_tele(Player* pPlayer, AreaTriggerEntry const* 
 
     // There needs to be displayed a msg when in Combat, it is likely that this is to be handled by core and spell can-cast check
     // -- TODO -- Remove the combat check when spells are correctly working
-    if (pPlayer->isInCombat())
+    if (pPlayer->IsInCombat())
         return false;
 
     instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pPlayer->GetInstanceData();

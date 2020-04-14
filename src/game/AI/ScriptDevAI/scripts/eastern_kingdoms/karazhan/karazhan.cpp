@@ -378,7 +378,7 @@ void instance_karazhan::OnCreatureEvade(Creature* creature)
         case NPC_LORD_ROBIN_DARIS:
         {
             if (Creature* moroes = GetSingleCreatureFromStorage(NPC_MOROES, true))
-                if (moroes->IsAlive() && moroes->isInCombat())
+                if (moroes->IsAlive() && moroes->IsInCombat())
                     moroes->AI()->EnterEvadeMode();
             break;
         }

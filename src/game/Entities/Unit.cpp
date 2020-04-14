@@ -404,7 +404,7 @@ void Unit::Update(const uint32 diff)
     if (IsVehicle())
     {
         // Initialize vehicle if not done
-        if (isAlive() && !m_vehicleInfo->IsInitialized())
+        if (IsAlive() && !m_vehicleInfo->IsInitialized())
             m_vehicleInfo->Initialize();
 
         // Update passenger positions if we are the first vehicle
@@ -418,12 +418,12 @@ void Unit::Update(const uint32 diff)
     UpdateSplineMovement(diff);
     i_motionMaster.UpdateMotion(diff);
 
-    if (AI() && isAlive())
+    if (AI() && IsAlive())
         AI()->UpdateAI(diff);   // AI not react good at real update delays (while freeze in non-active part of map)
 
     GetCombatManager().Update(diff);
 
-    if (isAlive())
+    if (IsAlive())
     {
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth() * 0.20f);
         ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, GetHealth() < GetMaxHealth() * 0.35f);
@@ -519,7 +519,7 @@ bool Unit::UpdateMeleeAttackingState()
         swingError = SWING_ERROR_NOT_IN_RANGE;
     else if (!HasInArc(victim))
         swingError = SWING_ERROR_BAD_FACING;
-    else if (!victim->isAlive())
+    else if (!victim->IsAlive())
         swingError = SWING_ERROR_TARGET_NOT_ALIVE;
     else if (!CanAttack(victim))
         swingError = SWING_ERROR_CANT_ATTACK_TARGET;
@@ -701,7 +701,7 @@ void Unit::RemoveSpellsCausingAura(AuraType auraType, ObjectGuid casterGuid)
 
 void Unit::DealDamageMods(Unit* dealer, Unit* victim, uint32& damage, uint32* absorb, DamageEffectType damagetype, SpellEntry const* spellProto)
 {
-    if (!victim->isAlive() || victim->IsTaxiFlying() || victim->GetCombatManager().IsInEvadeMode())
+    if (!victim->IsAlive() || victim->IsTaxiFlying() || victim->GetCombatManager().IsInEvadeMode())
     {
         if (absorb)
             *absorb += damage;
@@ -1625,7 +1625,7 @@ void Unit::DealSpellDamage(SpellNonMeleeDamage* spellDamageInfo, bool durability
     if (!pVictim)
         return;
 
-    if (!pVictim->isAlive() || pVictim->IsTaxiFlying() || pVictim->GetCombatManager().IsInEvadeMode())
+    if (!pVictim->IsAlive() || pVictim->IsTaxiFlying() || pVictim->GetCombatManager().IsInEvadeMode())
         return;
 
     SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(spellDamageInfo->SpellID);
@@ -1683,7 +1683,7 @@ void Unit::CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, W
     if (!pVictim)
         return;
 
-    if (!this->isAlive() || !pVictim->isAlive())
+    if (!this->IsAlive() || !pVictim->IsAlive())
         return;
 
     // Select HitInfo/procAttacker/procVictim flag based on attack type
@@ -1978,7 +1978,7 @@ void Unit::DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss)
     if (!victim)
         return;
 
-    if (!victim->isAlive() || victim->IsTaxiFlying() || victim->GetCombatManager().IsInEvadeMode())
+    if (!victim->IsAlive() || victim->IsTaxiFlying() || victim->GetCombatManager().IsInEvadeMode())
         return;
 
     // You don't lose health from damage taken from another player while in a sanctuary
@@ -2221,7 +2221,7 @@ float Unit::CalcArmorReducedDamage(Unit* pVictim, const float damage)
 
 void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, int32* resist, bool canReflect, bool canResist, bool binary)
 {
-    if (!isAlive() || !damage)
+    if (!IsAlive() || !damage)
         return;
 
     int32 RemainingDamage = int32(damage);
@@ -2656,7 +2656,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
 
             // Damage can be splitted only if aura has an alive caster
             Unit* caster = (*i)->GetCaster();
-            if (!caster || caster == this || !caster->IsInWorld() || !caster->isAlive())
+            if (!caster || caster == this || !caster->IsInWorld() || !caster->IsAlive())
                 continue;
 
             int32 currentAbsorb;
@@ -2694,7 +2694,7 @@ void Unit::CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMa
 
             // Damage can be splitted only if aura has an alive caster
             Unit* caster = (*i)->GetCaster();
-            if (!caster || caster == this || !caster->IsInWorld() || !caster->isAlive())
+            if (!caster || caster == this || !caster->IsInWorld() || !caster->IsAlive())
                 continue;
 
             uint32 splitted = uint32(RemainingDamage * (*i)->GetModifier()->m_amount / 100.0f);
@@ -2781,7 +2781,7 @@ void Unit::CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* damage
 
 void Unit::CalculateHealAbsorb(const uint32 heal, uint32* absorb)
 {
-    if (!isAlive() || !heal)
+    if (!IsAlive() || !heal)
         return;
 
     int32 RemainingHeal = heal;
@@ -2844,7 +2844,7 @@ void Unit::AttackerStateUpdate(Unit* pVictim, WeaponAttackType attType, bool ext
     if (hasUnitState(UNIT_STAT_CAN_NOT_REACT) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
         return;
 
-    if (!pVictim->isAlive())
+    if (!pVictim->IsAlive())
         return;
 
     if (!extra && IsNonMeleeSpellCasted(false))
@@ -3139,7 +3139,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit* pVictim, SpellEntry const* spell, 
 SpellMissInfo Unit::SpellHitResult(Unit* pVictim, SpellEntry const* spell, uint8 effectMask, bool reflectable, uint32* heartbeatResistChance/* = nullptr*/)
 {
     // Dead units can't be missed, can't resist, reflect, etc
-    if (!pVictim->isAlive())
+    if (!pVictim->IsAlive())
         return SPELL_MISS_NONE;
 
     // Return evade for units in evade mode
@@ -5218,7 +5218,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
     SpellEntry const* aurSpellInfo = holder->GetSpellProto();
 
     // ghost spell check, allow apply any auras at player loading in ghost mode (will be cleanup after load)
-    if (!isAlive() && !IsDeathPersistentSpell(aurSpellInfo) &&
+    if (!IsAlive() && !IsDeathPersistentSpell(aurSpellInfo) &&
             !IsDeathOnlySpell(aurSpellInfo) && !aurSpellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD) &&
             (GetTypeId() != TYPEID_PLAYER || !((Player*)this)->GetSession()->PlayerLoading()))
     {
@@ -6745,7 +6745,7 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
             realCaster->SetOutOfCombatWithVictim(target);
         }
     }
-    else if (realCaster->CanAssist(target) && target->isInCombat())
+    else if (realCaster->CanAssist(target) && target->IsInCombat())
     {
         // assisting case, healing and resurrection
         if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT) && CanEnterCombat() && target->CanEnterCombat())
@@ -6970,7 +6970,7 @@ bool Unit::IsNeutralToAll() const
 
 void Unit::AttackedBy(Unit* attacker)
 {
-    if (!isAlive())
+    if (!IsAlive())
         return;
 
     // trigger AI reaction
@@ -6992,7 +6992,7 @@ bool Unit::Attack(Unit* victim, bool meleeAttack)
         return false;
 
     // dead units can neither attack nor be attacked
-    if (!isAlive() || !victim->IsInWorld() || !victim->isAlive())
+    if (!IsAlive() || !victim->IsInWorld() || !victim->IsAlive())
         return false;
 
     // player cannot attack in mount state
@@ -7699,7 +7699,7 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell)
         {
             if (Unit* magnet = magnetAura->GetCaster())
             {
-                if (magnet->isAlive() && magnet->IsWithinLOSInMap(this) && CanAttack(magnet))
+                if (magnet->IsAlive() && magnet->IsWithinLOSInMap(this) && CanAttack(magnet))
                 {
                     magnetAura->UseMagnet();
                     return magnet;
@@ -7718,7 +7718,7 @@ Unit* Unit::SelectMagnetTarget(Unit* victim, Spell* spell)
         {
             if (Unit* magnet = hitTriggerAura->GetCaster())
             {
-                if (magnet->isAlive() && magnet->IsWithinLOSInMap(this) && CanAttack(magnet))
+                if (magnet->IsAlive() && magnet->IsWithinLOSInMap(this) && CanAttack(magnet))
                 {
                     if (roll_chance_i(hitTriggerAura->GetModifier()->m_amount))
                     {
@@ -9387,7 +9387,7 @@ void Unit::SetInCombatWithVictim(Unit* victim, bool touchOnly/* = false*/)
 void Unit::SetInCombatState(bool PvP, Unit* enemy)
 {
     // only alive units can be in combat
-    if (!isAlive())
+    if (!IsAlive())
         return;
 
     bool creatureNotInCombat = GetTypeId() == TYPEID_UNIT && !HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
@@ -9413,7 +9413,7 @@ void Unit::SetInCombatState(bool PvP, Unit* enemy)
                     controller->SetInCombatWith(enemy); // player only enters combat
                     enemy->AddThreat(controller);
                 }
-                else if (controller->isInCombat())
+                else if (controller->IsInCombat())
                 {
                     controller->AddThreat(enemy);
                     enemy->AddThreat(controller);
@@ -9605,13 +9605,13 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
             return false;
 
         // if player is dead then he can't detect anyone in any cases
-        if (!u->isAlive())
+        if (!u->IsAlive())
             detect = false;
     }
     else
     {
         // all dead creatures/players not visible for any creatures
-        if (!u->isAlive() || !isAlive())
+        if (!u->IsAlive() || !IsAlive())
             return false;
     }
 
@@ -9629,7 +9629,7 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
     // isInvisibleForAlive() those units can only be seen by dead or if other
     // unit is also invisible for alive.. if an isinvisibleforalive unit dies we
     // should be able to see it too
-    if (u->isAlive() && isAlive() && isInvisibleForAlive() != u->isInvisibleForAlive())
+    if (u->IsAlive() && IsAlive() && isInvisibleForAlive() != u->isInvisibleForAlive())
         if (u->GetTypeId() != TYPEID_PLAYER || !((Player*)u)->isGameMaster())
             return false;
 
@@ -10061,7 +10061,7 @@ bool Unit::IsTargetUnderControl(Unit const& target) const
 bool Unit::CanHaveThreatList(bool ignoreAliveState/*=false*/) const
 {
     // only alive units can have threat list
-    if (!isAlive() && !ignoreAliveState)
+    if (!IsAlive() && !ignoreAliveState)
         return false;
 
     if (GetTypeId() == TYPEID_PLAYER) // only charmed players have a threat list
@@ -10148,7 +10148,7 @@ bool Unit::SelectHostileTarget()
     // next-victim-selection algorithm and evade mode are called
     // threat list sorting etc.
 
-    if (!this->isAlive())
+    if (!this->IsAlive())
         return false;
 
     // This function only useful once AI has been initialized
@@ -10213,7 +10213,7 @@ bool Unit::SelectHostileTarget()
     // return true but no target
 
     // no target but something prevent go to evade mode
-    if (!isInCombat())
+    if (!IsInCombat())
         return false;
 
     // last case when creature don't must go to evade mode:
@@ -12531,7 +12531,7 @@ class UnitVisitObjectsInRangeNotifyEvent : public BasicEvent
             {
                 Creature& creature = static_cast<Creature&>(m_owner);
                 //since visitor was called we override can aggro with true if creature is alive
-                creature.SetCanAggro(creature.isAlive());
+                creature.SetCanAggro(creature.IsAlive());
                 MaNGOS::CreatureVisitObjectsNotifier notify(creature);
                 Cell::VisitAllObjects(&m_owner, notify, radius);
             }
@@ -12883,7 +12883,7 @@ bool Unit::TakePossessOf(Unit* possessed)
     if (possessed->IsImmuneToNPC() != immuneNPC)
         possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
-    if (!isInCombat())
+    if (!IsInCombat())
     {
         possessed->GetCombatManager().StopCombatTimer();
         possessed->ClearInCombat();
@@ -13031,7 +13031,7 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
             charmed->AddThreat(enemy, 0.f);
     }
 
-    if (!isInCombat())
+    if (!IsInCombat())
     {
         charmed->GetCombatManager().StopCombatTimer();
         charmed->ClearInCombat();
@@ -13221,11 +13221,11 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
     if (const Player* controllingClientPlayer = charmed->GetClientControlling())
         controllingClientPlayer->UpdateClientControl(charmed, true);
 
-    if (charmed->isAlive()) // must be done after flag update
+    if (charmed->IsAlive()) // must be done after flag update
     {
         if (charmed->CanAttack(this))
         {
-            if (!charmed->isInCombat())
+            if (!charmed->IsInCombat())
                 EngageInCombatWithAggressor(charmed);
             else
             {
@@ -13463,7 +13463,7 @@ Player* Unit::GetNextRandomRaidMember(float radius, AuraType noAuraType)
         if (Player* target = itr->getSource())
         {
             // IsHostileTo check duel and controlled by enemy
-            if (target != this && IsWithinDistInMap(target, radius) && target->isAlive() && CanAssist(target))
+            if (target != this && IsWithinDistInMap(target, radius) && target->IsAlive() && CanAssist(target))
                 nearMembers.push_back(target);
         }
 

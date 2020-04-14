@@ -701,7 +701,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
             case INSTANCE_CONDITION_ID_SOCRETHAR_GOSSIP:
             {
                 Creature const* socrethar = GetSingleCreatureFromStorage(NPC_SOCRETHAR);
-                if (!socrethar || !socrethar->IsAlive() || socrethar->isInCombat())
+                if (!socrethar || !socrethar->IsAlive() || socrethar->IsInCombat())
                     return true;
                 return false;
             }
@@ -954,7 +954,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
         }
         for (ObjectGuid guid : m_bashirEnemySpawns)
             if (Creature* spawn = instance->GetCreature(guid))
-                if (!spawn->isInCombat())
+                if (!spawn->IsInCombat())
                     spawn->ForcedDespawn();
         StartPhase(BashirPhases(uint32(phase) + 1));
     }

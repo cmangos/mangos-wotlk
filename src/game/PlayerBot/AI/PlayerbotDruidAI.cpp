@@ -563,7 +563,7 @@ CombatManeuverReturns PlayerbotDruidAI::ResurrectPlayer(Player* target)
     if (r != RETURN_NO_ACTION_OK)
         return r;
 
-    if (m_bot->isInCombat())
+    if (m_bot->IsInCombat())
     {
         if (REBIRTH > 0 && m_ai->In_Reach(target, REBIRTH) && m_bot->IsSpellReady(REBIRTH) && m_ai->CastSpell(REBIRTH, *target) == SPELL_CAST_OK)
         {

@@ -2688,7 +2688,7 @@ struct npc_disobedient_dragonmaw_peonAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
-        if (!m_creature->isInCombat())
+        if (!m_creature->IsInCombat())
         {
             if (m_angryTimer)
             {
@@ -3109,7 +3109,7 @@ struct npc_commanderAI : public ScriptedAI, public CombatActions
 
     void UpdateAI(const uint32 diff) override
     {
-        UpdateTimers(diff, m_creature->isInCombat());
+        UpdateTimers(diff, m_creature->IsInCombat());
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
@@ -4224,7 +4224,7 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        UpdateTimers(uiDiff, m_creature->isInCombat());
+        UpdateTimers(uiDiff, m_creature->IsInCombat());
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
@@ -4404,7 +4404,7 @@ struct FormationMap
         {
             if (Creature* occupant = map->GetCreature(itr->first))
             {
-                if (occupant->isInCombat())
+                if (occupant->IsInCombat())
                     continue;
 
                 occupant->GetMotionMaster()->Clear(false, true);
@@ -5041,7 +5041,7 @@ struct npc_bt_battle_sensor : public ScriptedAI
 
             if (!marker.IsEmpty())
                 if (Creature* fighterCreature = m_creature->GetMap()->GetCreature(fighter))
-                    if (!fighterCreature->isInCombat())
+                    if (!fighterCreature->IsInCombat())
                         if (Creature* markerCreature = m_creature->GetMap()->GetCreature(marker))
                         {
                             fighterCreature->GetMotionMaster()->Clear(false, true);

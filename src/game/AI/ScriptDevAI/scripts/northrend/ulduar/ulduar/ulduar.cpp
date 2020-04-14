@@ -131,7 +131,7 @@ bool GossipSelect_go_ulduar_teleporter(Player* pPlayer, GameObject* pGO, uint32 
 
     // There needs to be displayed a msg when in Combat, it is likely that this is to be handled by core and spell can-cast check
     // -- TODO -- Remove the combat check when spells are correctly working
-    if (pPlayer->isInCombat())
+    if (pPlayer->IsInCombat())
         return true;
 
     switch (uiAction)

@@ -3206,7 +3206,7 @@ struct npc_apexis_flayerAI : public ScriptedAI, public CombatActions
         }
         else
         {
-            UpdateTimers(diff, m_creature->isInCombat());
+            UpdateTimers(diff, m_creature->IsInCombat());
             ExecuteActions();
 
             DoMeleeAttackIfReady();
@@ -3501,7 +3501,7 @@ struct npc_skyguard_rangerAI : public ScriptedAI, public CombatActions
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        UpdateTimers(diff, m_creature->isInCombat());
+        UpdateTimers(diff, m_creature->IsInCombat());
         ExecuteActions();
 
         DoMeleeAttackIfReady();
@@ -3743,7 +3743,7 @@ struct npc_bashir_flesh_fiendAI : public ScriptedAI, public CombatActions
 
     void UpdateAI(const uint32 diff) override
     {
-        UpdateTimers(diff, m_creature->isInCombat());
+        UpdateTimers(diff, m_creature->IsInCombat());
 
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
@@ -3979,7 +3979,7 @@ struct npc_grand_collectorAI : public ScriptedAI, public CombatActions
 
     void UpdateAI(const uint32 diff) override
     {
-        UpdateTimers(diff, m_creature->isInCombat());
+        UpdateTimers(diff, m_creature->IsInCombat());
         if (!m_creature->SelectHostileTarget())
             return;
 

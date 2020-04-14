@@ -166,20 +166,20 @@ struct npc_dirty_larryAI : public ScriptedAI
 
                 if (pPlayer->IsAlive())
                 {
-                    if (!m_creature->isInCombat())
+                    if (!m_creature->IsInCombat())
                         AttackStart(pPlayer);
 
                     if (Creature* pMalone = m_creature->GetMap()->GetCreature(m_maloneGuid))
                     {
                         pMalone->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                        if (!pMalone->isInCombat())
+                        if (!pMalone->IsInCombat())
                             pMalone->AI()->AttackStart(pPlayer);
                     }
 
                     if (Creature* pCreepjack = m_creature->GetMap()->GetCreature(m_creepjackGuid))
                     {
                         pCreepjack->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                        if (!pCreepjack->isInCombat())
+                        if (!pCreepjack->IsInCombat())
                             pCreepjack->AI()->AttackStart(pPlayer);
                     }
                 }

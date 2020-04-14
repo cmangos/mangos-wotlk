@@ -211,7 +211,7 @@ struct boss_midnightAI : public ScriptedAI, public CombatActions
         if (m_uiPhase == 2)
             return;
         
-        UpdateTimers(uiDiff, m_creature->isInCombat());
+        UpdateTimers(uiDiff, m_creature->IsInCombat());
         ExecuteActions();
 
         // Spawn Attumen on 95% hp
@@ -411,7 +411,7 @@ struct boss_attumenAI : public ScriptedAI, public CombatActions
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        UpdateTimers(uiDiff, m_creature->isInCombat());
+        UpdateTimers(uiDiff, m_creature->IsInCombat());
         ExecuteActions();
 
         // If creature is not mounted and mount if below 25%

@@ -183,7 +183,7 @@ struct boss_maiden_of_virtueAI : public ScriptedAI, public CombatActions
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        UpdateTimers(uiDiff, m_creature->isInCombat());
+        UpdateTimers(uiDiff, m_creature->IsInCombat());
         ExecuteActions();
 
         DoMeleeAttackIfReady();

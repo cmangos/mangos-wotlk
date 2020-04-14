@@ -2223,7 +2223,7 @@ struct npc_parasitic_shadowfiendAI : public ScriptedAI, public TimerManager
         {
             if (Creature* illidan = m_instance->GetSingleCreatureFromStorage(NPC_ILLIDAN_STORMRAGE))
             {
-                if (!illidan->isInCombat())
+                if (!illidan->IsInCombat())
                 {
                     m_creature->ForcedDespawn();
                     return;

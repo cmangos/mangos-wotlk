@@ -74,7 +74,7 @@ bool ChatHandler::HandleStartCommand(char* /*args*/)
         return false;
     }
 
-    if (chr->isInCombat())
+    if (chr->IsInCombat())
     {
         SendSysMessage(LANG_YOU_IN_COMBAT);
         SetSentErrorMessage(true);

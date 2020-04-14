@@ -489,7 +489,7 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->BuildPlayerRepop();
             _player->RepopAtGraveyard();
         }
-        else if (_player->isInCombat())
+        else if (_player->IsInCombat())
             _player->CombatStopWithPets(true, true);
 
         // drop a flag if player is carrying it

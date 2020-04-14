@@ -65,7 +65,7 @@ void UnitAI::MoveInLineOfSight(Unit* who)
     if (m_unit->IsNeutralToAll())
         return;
 
-    if (who->GetObjectGuid().IsCreature() && who->isInCombat())
+    if (who->GetObjectGuid().IsCreature() && who->IsInCombat())
         CheckForHelp(who, m_unit, 10.0);
 
     if (!HasReactState(REACT_AGGRESSIVE)) // mobs who are aggressive can still assist
@@ -105,7 +105,7 @@ void UnitAI::EnterEvadeMode()
 
 void UnitAI::AttackedBy(Unit* attacker)
 {
-    if (!m_unit->isInCombat() && !m_unit->getVictim())
+    if (!m_unit->IsInCombat() && !m_unit->getVictim())
         AttackStart(attacker);
 }
 
@@ -405,7 +405,7 @@ void UnitAI::CheckForHelp(Unit* who, Unit* me, float distance)
     if (!victim)
         return;
 
-    if (me->isInCombat())
+    if (me->IsInCombat())
         return;
 
     // pulling happens once panic/retreating ends
@@ -438,7 +438,7 @@ void UnitAI::DetectOrAttack(Unit* who)
     if (!m_unit->IsWithinLOSInMap(who))
         return;
 
-    if (!m_unit->getVictim() && !m_unit->isInCombat())
+    if (!m_unit->getVictim() && !m_unit->IsInCombat())
     {
         if (CanTriggerStealthAlert(who, attackRadius))
         {
@@ -502,7 +502,7 @@ class AiDelayEventAround : public BasicEvent
                     // Special case for type 0 (call-assistance)
                     if (m_eventType == AI_EVENT_CALL_ASSISTANCE)
                     {
-                        if (pReceiver->isInCombat() || !pInvoker)
+                        if (pReceiver->IsInCombat() || !pInvoker)
                             continue;
                         if (pReceiver->CanAssist(&m_owner) && pReceiver->CanAttackOnSight(pInvoker))
                         {
@@ -611,7 +611,7 @@ void UnitAI::SetMeleeEnabled(bool state)
         return;
 
     m_meleeEnabled = state;
-    if (m_unit->isInCombat())
+    if (m_unit->IsInCombat())
     {
         if (m_meleeEnabled)
         {

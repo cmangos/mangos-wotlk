@@ -1298,7 +1298,7 @@ enum
 
 bool NpcSpellClick_npc_storm_totem(Player* pPlayer, Creature* pClickedCreature, uint32 /*uiSpellId*/)
 {
-    if (pPlayer->GetQuestStatus(QUEST_MASTER_THE_STORM) == QUEST_STATUS_INCOMPLETE && !pPlayer->isInCombat() && !GetClosestCreatureWithEntry(pPlayer, NPC_STORM_TEMPEST, 30.0f))
+    if (pPlayer->GetQuestStatus(QUEST_MASTER_THE_STORM) == QUEST_STATUS_INCOMPLETE && !pPlayer->IsInCombat() && !GetClosestCreatureWithEntry(pPlayer, NPC_STORM_TEMPEST, 30.0f))
         pClickedCreature->SummonCreature(NPC_STORM_TEMPEST, 3403.64f, 4133.09f, 18.04f, 5.65f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
 
     return true;

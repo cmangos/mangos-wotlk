@@ -351,7 +351,7 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
                 }
             }
 
-            UpdateTimers(diff, m_creature->isInCombat());
+            UpdateTimers(diff, m_creature->IsInCombat());
             ExecuteActions();
         }
 

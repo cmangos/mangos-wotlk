@@ -233,7 +233,7 @@ struct boss_terestianAI : public ScriptedAI, public CombatActions
                 break;
             case NPC_KILREK:
                 m_kilrekGuid = pSummoned->GetObjectGuid();
-                if (m_creature->isInCombat())
+                if (m_creature->IsInCombat())
                     pSummoned->SetInCombatWithZone();
                 break;
             case NPC_DEMONCHAINS:
@@ -271,7 +271,7 @@ struct boss_terestianAI : public ScriptedAI, public CombatActions
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        UpdateTimers(uiDiff, m_creature->isInCombat());
+        UpdateTimers(uiDiff, m_creature->IsInCombat());
         ExecuteActions();
 
         DoMeleeAttackIfReady();

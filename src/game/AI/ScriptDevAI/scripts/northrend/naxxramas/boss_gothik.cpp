@@ -432,7 +432,7 @@ struct boss_gothikAI : public ScriptedAI
                     {
                         if (Creature* pCreature = m_pInstance->instance->GetCreature(*itr))
                         {
-                            if (!pCreature->isInCombat())
+                            if (!pCreature->IsInCombat())
                                 pCreature->SetInCombatWithZone();
                         }
                     }

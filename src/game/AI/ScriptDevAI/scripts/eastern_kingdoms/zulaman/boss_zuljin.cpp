@@ -161,7 +161,7 @@ struct boss_zuljinAI : public CombatAI
         });
         AddCustomAction(ZULJIN_FIRE_WALL_DELAY, true, [&]()
         {
-            if (m_creature->isInCombat())
+            if (m_creature->IsInCombat())
                 m_instance->DoUseDoorOrButton(GO_FIRE_DOOR);
         });
         m_creature->SetWalk(true);

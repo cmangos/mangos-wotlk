@@ -150,7 +150,7 @@ struct npc_building_triggerAI : public ScriptedAI
     void MoveInLineOfSight(Unit* who) override
     {
         // Only let one ghoul attack
-        if (m_creature->isInCombat())
+        if (m_creature->IsInCombat())
             return;
 
         if (who->GetTypeId() != TYPEID_UNIT)
@@ -159,7 +159,7 @@ struct npc_building_triggerAI : public ScriptedAI
         if (who->GetEntry() != NPC_GHOUL && who->GetEntry() != NPC_GARGO)
             return;
 
-        if (who->isInCombat())
+        if (who->IsInCombat())
             return;
 
         if (m_creature->IsWithinDistInMap(who, 35.0f))

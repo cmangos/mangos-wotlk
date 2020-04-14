@@ -277,7 +277,7 @@ struct boss_curatorAI : public ScriptedAI, public CombatActions
         if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
             return;
 
-        UpdateTimers(diff, m_creature->isInCombat());
+        UpdateTimers(diff, m_creature->IsInCombat());
         ExecuteActions();
 
         // if (!m_creature->HasAura(SPELL_ASTRAL_ARMOR))

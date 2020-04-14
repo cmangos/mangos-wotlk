@@ -106,7 +106,7 @@ void instance_icecrown_citadel::DoHandleCitadelAreaTrigger(uint32 uiTriggerId, P
     {
         if (Creature* pSindragosa = GetSingleCreatureFromStorage(NPC_SINDRAGOSA))
         {
-            if (pSindragosa->IsAlive() && !pSindragosa->isInCombat())
+            if (pSindragosa->IsAlive() && !pSindragosa->IsInCombat())
                 pSindragosa->SetInCombatWithZone();
         }
         else

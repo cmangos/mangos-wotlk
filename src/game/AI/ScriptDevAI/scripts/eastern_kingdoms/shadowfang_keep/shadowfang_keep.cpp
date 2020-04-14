@@ -271,7 +271,7 @@ struct mob_arugal_voidwalkerAI : public ScriptedAI
             m_bWPDone = false;
         }
 
-        if (!m_creature->isInCombat())
+        if (!m_creature->IsInCombat())
             return;
 
         if (m_uiDarkOffering < uiDiff)
@@ -855,7 +855,7 @@ struct npc_deathstalker_vincentAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_creature->isInCombat() && m_creature->getFaction() == FACTION_FRIENDLY)
+        if (m_creature->IsInCombat() && m_creature->getFaction() == FACTION_FRIENDLY)
             EnterEvadeMode();
 
         ScriptedAI::UpdateAI(uiDiff);

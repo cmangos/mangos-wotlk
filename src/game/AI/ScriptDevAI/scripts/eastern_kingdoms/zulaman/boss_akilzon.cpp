@@ -95,7 +95,7 @@ struct boss_akilzonAI : public CombatAI
         AddCombatAction(AKILZON_ACTION_SUMMON_EAGLE, 62000u);
         AddCustomAction(AKILZON_WIND_WALL_DELAY, true, [&]()
         {
-            if (m_creature->isInCombat())
+            if (m_creature->IsInCombat())
                 m_instance->DoUseDoorOrButton(GO_WIND_DOOR);
         });
     }
@@ -265,7 +265,7 @@ struct boss_akilzonAI : public CombatAI
     void UpdateAI(const uint32 diff) override
     {
         CombatAI::UpdateAI(diff);
-        if (m_creature->isInCombat())
+        if (m_creature->IsInCombat())
             EnterEvadeIfOutOfCombatArea(diff);
     }
 };

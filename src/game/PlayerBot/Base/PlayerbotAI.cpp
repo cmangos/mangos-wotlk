@@ -2369,7 +2369,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
         // if someone tries to resurrect, then accept
         case SMSG_RESURRECT_REQUEST:
         {
-            if (!m_bot->isAlive())
+            if (!m_bot->IsAlive())
             {
                 WorldPacket p(packet);
                 ObjectGuid guid;
@@ -3455,8 +3455,8 @@ void PlayerbotAI::DoCombatMovement()
 bool PlayerbotAI::IsGroupReady()
 {
     if (!m_bot) return true;
-    if (!m_bot->isAlive() || m_bot->IsInDuel()) return false; // Let's just say you're otherwise occupied
-    if (m_bot->isInCombat()) return false;
+    if (!m_bot->IsAlive() || m_bot->IsInDuel()) return false; // Let's just say you're otherwise occupied
+    if (m_bot->IsInCombat()) return false;
 
     if (m_bot->GetGroup())
     {
@@ -3464,9 +3464,9 @@ bool PlayerbotAI::IsGroupReady()
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (groupMember && groupMember->isAlive())
+            if (groupMember && groupMember->IsAlive())
             {
-                if (groupMember->IsInDuel() || groupMember->isInCombat())            // all occupied in some way
+                if (groupMember->IsInDuel() || groupMember->IsInCombat())            // all occupied in some way
                     return false;
             }
         }
@@ -4427,20 +4427,20 @@ bool PlayerbotAI::IsInCombat()
 {
     Pet* pet;
     bool inCombat = false;
-    inCombat |= m_bot->isInCombat();
+    inCombat |= m_bot->IsInCombat();
     pet = m_bot->GetPet();
     if (pet)
-        inCombat |= pet->isInCombat();
-    inCombat |= GetMaster()->isInCombat();
+        inCombat |= pet->IsInCombat();
+    inCombat |= GetMaster()->IsInCombat();
     if (m_bot->GetGroup())
     {
         GroupReference* ref = m_bot->GetGroup()->GetFirstMember();
         while (ref)
         {
-            inCombat |= ref->getSource()->isInCombat();
+            inCombat |= ref->getSource()->IsInCombat();
             pet = ref->getSource()->GetPet();
             if (pet)
-                inCombat |= pet->isInCombat();
+                inCombat |= pet->IsInCombat();
             ref = ref->next();
         }
     }
@@ -4903,7 +4903,7 @@ void PlayerbotAI::MovementReset()
             return;
 
         // don't follow while in combat
-        if (m_bot->isInCombat())
+        if (m_bot->IsInCombat())
             return;
 
         Player* pTarget;                            // target is player
@@ -4924,7 +4924,7 @@ void PlayerbotAI::MovementReset()
             return;
         }
 
-        if (m_bot->isAlive() && !m_bot->IsBeingTeleported())
+        if (m_bot->IsAlive() && !m_bot->IsBeingTeleported())
         {
             if (DistOverRide != 0)
             {
@@ -5179,7 +5179,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
         SetMovementOrder(MOVEMENT_FOLLOW, GetMaster());
     }
 
-    if (!m_bot->isAlive())
+    if (!m_bot->IsAlive())
     {
         if (m_botState == BOTSTATE_DEAD)
         {
@@ -5429,7 +5429,7 @@ void PlayerbotAI::UpdateAI(const uint32 /*p_time*/)
     }
 
     // if commanded to follow master and not already following master then follow master
-    if (!m_bot->isInCombat() && m_bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
+    if (!m_bot->IsInCombat() && m_bot->GetMotionMaster()->GetCurrentMovementGeneratorType() == IDLE_MOTION_TYPE)
         return MovementReset();
 
     // do class specific non combat actions
