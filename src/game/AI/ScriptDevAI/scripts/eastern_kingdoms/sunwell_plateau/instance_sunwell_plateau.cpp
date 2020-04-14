@@ -267,7 +267,7 @@ void instance_sunwell_plateau::SetData(uint32 uiType, uint32 uiData)
                 {
                     if (Creature* pDeceiver = instance->GetCreature(*itr))
                     {
-                        if (!pDeceiver->isAlive())
+                        if (!pDeceiver->IsAlive())
                             pDeceiver->Respawn();
                     }
                 }

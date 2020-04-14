@@ -186,7 +186,7 @@ struct boss_moroesAI : public ScriptedAI, public CombatActions
     void DoSpawnGuests()
     {
         // not if m_creature are dead, so avoid
-        if (!m_creature->isAlive())
+        if (!m_creature->IsAlive())
             return;
 
         // it's empty, so first time
@@ -240,7 +240,7 @@ struct boss_moroesAI : public ScriptedAI, public CombatActions
 
             for (const auto& i : PlayerList)
             {
-                if (i.getSource()->isAlive() && i.getSource()->HasAura(SPELL_GARROTE))
+                if (i.getSource()->IsAlive() && i.getSource()->HasAura(SPELL_GARROTE))
                     i.getSource()->RemoveAurasDueToSpell(SPELL_GARROTE);
             }
         }

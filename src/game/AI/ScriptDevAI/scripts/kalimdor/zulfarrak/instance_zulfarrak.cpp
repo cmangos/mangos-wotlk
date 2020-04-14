@@ -213,7 +213,7 @@ void instance_zulfarrak::Update(uint32 uiDiff)
             if (Creature* pTroll = instance->GetCreature(selectedGuid))
             {
                 // Pick another one if already in combat or already killed
-                if (pTroll->getVictim() || !pTroll->isAlive())
+                if (pTroll->getVictim() || !pTroll->IsAlive())
                 {
                     m_uiPyramidEventTimer = urand(0, 2) ? urand(3000, 10000) : 1000;
                     return;
@@ -223,7 +223,7 @@ void instance_zulfarrak::Update(uint32 uiDiff)
                 if (Creature* pBly = GetSingleCreatureFromStorage(NPC_SERGEANT_BLY))
                 {
                     // ToDo: research if there is anything special if these guys die
-                    if (!pBly->isAlive())
+                    if (!pBly->IsAlive())
                     {
                         m_uiPyramidEventTimer = 0;
                         return;

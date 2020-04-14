@@ -74,7 +74,7 @@ UnitAI* GetAI_npc_floating_spirit(Creature* pCreature)
 
 bool EffectDummyCreature_npc_restless_frostborn(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
-    if (uiSpellId == SPELL_BLOW_HODIRS_HORN && uiEffIndex == EFFECT_INDEX_0 && !pCreatureTarget->isAlive() && pCaster->GetTypeId() == TYPEID_PLAYER)
+    if (uiSpellId == SPELL_BLOW_HODIRS_HORN && uiEffIndex == EFFECT_INDEX_0 && !pCreatureTarget->IsAlive() && pCaster->GetTypeId() == TYPEID_PLAYER)
     {
         uint32 uiCredit = 0;
         uint32 uiSpawnSpell = 0;

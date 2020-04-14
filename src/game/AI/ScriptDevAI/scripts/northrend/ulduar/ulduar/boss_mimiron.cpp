@@ -898,7 +898,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
             // respawn the turret if necessary
             if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
             {
-                if (!pTurret->isAlive())
+                if (!pTurret->IsAlive())
                     pTurret->Respawn();
             }
         }
@@ -1239,7 +1239,7 @@ struct boss_vx001AI : public ScriptedAI
                 AttackStart(pTarget);
 
             // Set victim to old target (if not while Burst or Laser)
-            if (pOldTarget && pOldTarget->isAlive() && !m_uiBurstEndTimer && !m_uiLaserEndTimer)
+            if (pOldTarget && pOldTarget->IsAlive() && !m_uiBurstEndTimer && !m_uiLaserEndTimer)
             {
                 m_creature->SetTarget(pOldTarget);
                 m_creature->SetInFront(pOldTarget);

@@ -552,7 +552,7 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
         switch (m_creature->GetEntry())
         {
             case NPC_BNAAR_C_CONSOLE:
-                if (pSummoned->GetEntry() == NPC_SUNFURY_TECH && uiMotionType == POINT_MOTION_TYPE && pSummoned->isAlive())
+                if (pSummoned->GetEntry() == NPC_SUNFURY_TECH && uiMotionType == POINT_MOTION_TYPE && pSummoned->IsAlive())
                     switch (uiData)
                     {
                         case 0:
@@ -577,7 +577,7 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                     }
                 break;
             case NPC_CORUU_C_CONSOLE:
-                if (pSummoned->GetEntry() == NPC_SUNFURY_TECH && uiMotionType == POINT_MOTION_TYPE && pSummoned->isAlive())
+                if (pSummoned->GetEntry() == NPC_SUNFURY_TECH && uiMotionType == POINT_MOTION_TYPE && pSummoned->IsAlive())
                     switch (uiData)
                     {
                         case 0:
@@ -595,7 +595,7 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                     }
                 break;
             case NPC_DURO_C_CONSOLE:
-                if (pSummoned->GetEntry() == NPC_SUNFURY_TECH && uiMotionType == POINT_MOTION_TYPE && pSummoned->isAlive())
+                if (pSummoned->GetEntry() == NPC_SUNFURY_TECH && uiMotionType == POINT_MOTION_TYPE && pSummoned->IsAlive())
                     switch (uiData)
                     {
                         case 0:
@@ -621,7 +621,7 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                     }
                 break;
             case NPC_ARA_C_CONSOLE:
-                if ((pSummoned->GetEntry() == NPC_ARA_TECH || pSummoned->GetEntry() == NPC_ARA_ENGI || pSummoned->GetEntry() == NPC_ARA_GORKLONN) && uiMotionType == POINT_MOTION_TYPE && pSummoned->isAlive())
+                if ((pSummoned->GetEntry() == NPC_ARA_TECH || pSummoned->GetEntry() == NPC_ARA_ENGI || pSummoned->GetEntry() == NPC_ARA_GORKLONN) && uiMotionType == POINT_MOTION_TYPE && pSummoned->IsAlive())
                     switch (uiData)
                     {
                         case 0:
@@ -1158,7 +1158,7 @@ bool AreaTrigger_at_commander_dawnforge(Player* pPlayer, AreaTriggerEntry const*
     if (!pPlayer->HasAura(SPELL_SUNFURY_DISGUISE, EFFECT_INDEX_0))
         return false;
 
-    if (pPlayer->isAlive() && pPlayer->GetQuestStatus(QUEST_INFO_GATHERING) == QUEST_STATUS_INCOMPLETE)
+    if (pPlayer->IsAlive() && pPlayer->GetQuestStatus(QUEST_INFO_GATHERING) == QUEST_STATUS_INCOMPLETE)
     {
         Creature* pDawnforge = GetClosestCreatureWithEntry(pPlayer, NPC_COMMANDER_DAWNFORGE, 30.0f);
 
@@ -2785,7 +2785,7 @@ struct npc_scrap_reaverAI : ScriptedPetAI
             return;
         }
 
-        if (!m_creature->isAlive())                             // should not be needed, isAlive is checked in mangos before calling UpdateAI
+        if (!m_creature->IsAlive())                             // should not be needed, IsAlive is checked in mangos before calling UpdateAI
             return;
 
         // UpdateAllies() is done in the generic PetAI in Mangos, but we can't do this from script side.
@@ -3368,7 +3368,7 @@ struct npc_adyen_the_lightwardenAI : public ScriptedAI
     {
         if (Creature* socrethar = ((ScriptedInstance*)m_creature->GetMap()->GetInstanceData())->GetSingleCreatureFromStorage(NPC_SOCRETHAR))
         {
-            if (!socrethar->isAlive())
+            if (!socrethar->IsAlive())
                 return;
 
             m_socretharGuid = socrethar->GetObjectGuid();
@@ -3857,7 +3857,7 @@ bool GossipHello_npc_adyen_the_lightwarden(Player* player, Creature* creature)
         if (npc_adyen_the_lightwardenAI* ai = dynamic_cast<npc_adyen_the_lightwardenAI*>(creature->AI()))
         {
             Creature* socrethar = ((ScriptedInstance*)creature->GetMap()->GetInstanceData())->GetSingleCreatureFromStorage(NPC_SOCRETHAR);
-            if (!socrethar || !socrethar->isAlive() || socrethar->isInCombat())
+            if (!socrethar || !socrethar->IsAlive() || socrethar->isInCombat())
                 ai->DespawnEvent();
         }
     }

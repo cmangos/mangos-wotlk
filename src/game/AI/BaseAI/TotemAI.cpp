@@ -62,7 +62,7 @@ void TotemAI::UpdateAI(const uint32 diff)
     if (getTotem().GetTotemType() != TOTEM_ACTIVE)
         return;
 
-    if (!m_creature->isAlive() || m_creature->IsNonMeleeSpellCasted(false))
+    if (!m_creature->IsAlive() || m_creature->IsNonMeleeSpellCasted(false))
         return;
 
     // Search spell
@@ -131,6 +131,6 @@ Totem& TotemAI::getTotem() const
 void TotemAI::SpellHit(Unit* /*unit*/, const SpellEntry* /*spellInfo*/)
 {
     // TODO: Give grounding totem SD2
-    if (m_creature->GetEntry() == 5925 && !m_creature->HasAura(8178) && m_creature->isAlive()) // Grounding Totem redirection aura
+    if (m_creature->GetEntry() == 5925 && !m_creature->HasAura(8178) && m_creature->IsAlive()) // Grounding Totem redirection aura
         m_creature->CastSpell(nullptr, 45317, TRIGGERED_NONE); // Grounding Totem - Suicide spell - verified vs sniff
 }

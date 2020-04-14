@@ -537,7 +537,7 @@ struct npc_rimefang_iccAI : public ScriptedAI
             return;
 
         Creature* pSpinestalker = m_pInstance->GetSingleCreatureFromStorage(NPC_SPINESTALKER);
-        if (!pSpinestalker || !pSpinestalker->isAlive())
+        if (!pSpinestalker || !pSpinestalker->IsAlive())
         {
             if (Creature* pSindragosa = m_creature->SummonCreature(NPC_SINDRAGOSA, SindragosaPosition[7][0], SindragosaPosition[7][1], SindragosaPosition[7][2], 0.0f, TEMPSPAWN_MANUAL_DESPAWN, 0))
                 pSindragosa->SetInCombatWithZone();
@@ -550,7 +550,7 @@ struct npc_rimefang_iccAI : public ScriptedAI
         m_creature->RemoveAllAurasOnEvade();
         m_creature->CombatStop(true);
 
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
             m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_INITIAL_LAND, SindragosaPosition[3][0], SindragosaPosition[3][1], SindragosaPosition[3][2], false);
 
         m_creature->SetLootRecipient(nullptr);
@@ -696,7 +696,7 @@ struct npc_spinestalker_iccAI : public ScriptedAI
             return;
 
         Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG);
-        if (!pRimefang || !pRimefang->isAlive())
+        if (!pRimefang || !pRimefang->IsAlive())
         {
             if (Creature* pSindragosa = m_creature->SummonCreature(NPC_SINDRAGOSA, SindragosaPosition[7][0], SindragosaPosition[7][1], SindragosaPosition[7][2], 0.0f, TEMPSPAWN_MANUAL_DESPAWN, 0))
                 pSindragosa->SetInCombatWithZone();
@@ -724,7 +724,7 @@ struct npc_spinestalker_iccAI : public ScriptedAI
         m_creature->RemoveAllAurasOnEvade();
         m_creature->CombatStop(true);
 
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
             m_creature->GetMotionMaster()->MovePoint(SPINESTALKER_POINT_INITIAL_LAND, SindragosaPosition[5][0], SindragosaPosition[5][1], SindragosaPosition[5][2]);
 
         m_creature->SetLootRecipient(nullptr);

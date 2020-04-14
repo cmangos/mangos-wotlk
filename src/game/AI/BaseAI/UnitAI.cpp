@@ -92,7 +92,7 @@ void UnitAI::EnterEvadeMode()
     m_unit->CombatStopWithPets(true);
 
     // only alive creatures that are not on transport can return to home position
-    if (GetReactState() != REACT_PASSIVE && m_unit->isAlive() && !m_unit->IsBoarded())
+    if (GetReactState() != REACT_PASSIVE && m_unit->IsAlive() && !m_unit->IsBoarded())
     {
         if (!m_unit->IsImmobilizedState()) // if still rooted after aura removal - permarooted
             m_unit->GetMotionMaster()->MoveTargetedHome();
@@ -640,7 +640,7 @@ void UnitAI::TimedFleeingEnded()
         return; // prevent stack overflow by cyclic calls - TODO: remove once Motion Master is human again
     SetAIOrder(ORDER_NONE);
     SetCombatScriptStatus(false);
-    if (!m_unit->isAlive())
+    if (!m_unit->IsAlive())
         return;
     DoStartMovement(m_unit->getVictim());
 }

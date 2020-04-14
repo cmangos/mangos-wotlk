@@ -120,7 +120,7 @@ struct boss_vazruden_heraldAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (m_bIsEventInProgress && !m_lastSeenPlayerGuid && pWho->GetTypeId() == TYPEID_PLAYER && pWho->isAlive() && !((Player*)pWho)->isGameMaster())
+        if (m_bIsEventInProgress && !m_lastSeenPlayerGuid && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*)pWho)->isGameMaster())
         {
             if (m_creature->IsWithinDistInMap(pWho, 40.0f))
                 m_lastSeenPlayerGuid = pWho->GetObjectGuid();

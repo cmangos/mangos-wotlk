@@ -251,7 +251,7 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                 for (auto i : m_aSummonedBossGuid)
                 {
                     Creature* pBoss = m_creature->GetMap()->GetCreature(i);
-                    if (pBoss && pBoss->isAlive())
+                    if (pBoss && pBoss->IsAlive())
                         pBoss->CastSpell(pBoss, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                 }
             }
@@ -275,12 +275,12 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                     case 1:
                         if (Creature* pWorm = m_pInstance->GetSingleCreatureFromStorage(NPC_ACIDMAW))
                         {
-                            if (pWorm->isAlive())
+                            if (pWorm->IsAlive())
                                 SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pWorm);
                         }
                         if (Creature* pWorm = m_pInstance->GetSingleCreatureFromStorage(NPC_DREADSCALE))
                         {
-                            if (pWorm->isAlive())
+                            if (pWorm->IsAlive())
                                 SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pWorm);
                         }
 
@@ -292,7 +292,7 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                         float fX, fY, fZ;
                         if (Creature* pWorm = m_pInstance->GetSingleCreatureFromStorage(NPC_ACIDMAW))
                         {
-                            if (pWorm->isAlive())
+                            if (pWorm->IsAlive())
                             {
                                 m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 45.0f, fX, fY, fZ);
                                 pWorm->MonsterMoveWithSpeed(fX, fY, fZ, 7.7f);
@@ -300,7 +300,7 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                         }
                         if (Creature* pWorm = m_pInstance->GetSingleCreatureFromStorage(NPC_DREADSCALE))
                         {
-                            if (pWorm->isAlive())
+                            if (pWorm->IsAlive())
                             {
                                 m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 45.0f, fX, fY, fZ);
                                 pWorm->MonsterMoveWithSpeed(fX, fY, fZ, 7.7f);
@@ -314,12 +314,12 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
                     case 3:
                         if (Creature* pWorm = m_pInstance->GetSingleCreatureFromStorage(NPC_ACIDMAW))
                         {
-                            if (pWorm->isAlive())
+                            if (pWorm->IsAlive())
                                 SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pWorm);
                         }
                         if (Creature* pWorm = m_pInstance->GetSingleCreatureFromStorage(NPC_DREADSCALE))
                         {
-                            if (pWorm->isAlive())
+                            if (pWorm->IsAlive())
                                 SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pWorm);
                         }
 
@@ -411,7 +411,7 @@ struct boss_gormokAI : public ScriptedAI
         {
             if (Creature* pSnobold = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (!pSnobold->isAlive())
+                if (!pSnobold->IsAlive())
                     continue;
 
                 // ToDo: check if there is any player vehicle mounting involved
@@ -1015,7 +1015,7 @@ struct boss_icehowlAI : public ScriptedAI
 
         for (const auto& i : PlayerList)
         {
-            if (i.getSource()->isAlive())
+            if (i.getSource()->IsAlive())
                 i.getSource()->CastSpell(i.getSource(), SPELL_SURGE_OF_ADRENALINE, TRIGGERED_OLD_TRIGGERED);
         }
     }

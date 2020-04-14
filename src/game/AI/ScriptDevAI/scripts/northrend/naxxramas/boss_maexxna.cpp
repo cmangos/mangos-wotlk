@@ -118,7 +118,7 @@ struct npc_web_wrapAI : public ScriptedAI
         {
             if (Player* pVictim = m_creature->GetMap()->GetPlayer(m_victimGuid))
             {
-                if (pVictim->isAlive())
+                if (pVictim->IsAlive())
                     pVictim->RemoveAurasDueToSpell(SPELL_WEBWRAP);
             }
         }

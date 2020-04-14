@@ -97,7 +97,7 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                     {
                         if (Creature* pChanneler = instance->GetCreature(*itr))
                         {
-                            if (!pChanneler->isAlive())
+                            if (!pChanneler->IsAlive())
                                 pChanneler->Respawn();
                         }
                     }
@@ -129,7 +129,7 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                 case IN_PROGRESS:
                     // Set boss in combat
                     if (Creature* pMagtheridon = GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
-                        if (pMagtheridon->isAlive())
+                        if (pMagtheridon->IsAlive())
                             pMagtheridon->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pMagtheridon, pMagtheridon);
                     // Enable cubes
                     for (GuidList::const_iterator itr = m_lCubeGuidList.begin(); itr != m_lCubeGuidList.end(); ++itr)
@@ -161,7 +161,7 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
                 // Reset Magtheridon
                 if (Creature* pMagtheridon = GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
                 {
-                    if (pMagtheridon->isAlive())
+                    if (pMagtheridon->IsAlive())
                         pMagtheridon->AI()->EnterEvadeMode();
                 }
             }
@@ -170,7 +170,7 @@ void instance_magtheridons_lair::SetData(uint32 uiType, uint32 uiData)
             {
                 if (Creature* pMagtheridon = GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
                 {
-                    if (pMagtheridon->isAlive())
+                    if (pMagtheridon->IsAlive())
                     {
                         pMagtheridon->SetInCombatWithZone();
                         DoScriptText(EMOTE_EVENT_BEGIN, pMagtheridon);
@@ -208,7 +208,7 @@ void instance_magtheridons_lair::Update(uint32 uiDiff)
                 case 0:
                     if (Creature* pMagtheridon = GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
                     {
-                        if (pMagtheridon->isAlive())
+                        if (pMagtheridon->IsAlive())
                         {
                             DoScriptText(EMOTE_NEARLY_FREE, pMagtheridon);
                             m_uiCageBreakTimer = MINUTE * IN_MILLISECONDS;

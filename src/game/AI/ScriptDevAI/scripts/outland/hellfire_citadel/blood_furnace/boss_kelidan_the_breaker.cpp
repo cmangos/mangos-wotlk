@@ -177,7 +177,7 @@ struct boss_kelidan_the_breakerAI : public ScriptedAI
         for (GuidVector::const_iterator itr = m_vAddGuids.begin(); itr != m_vAddGuids.end(); ++itr)
         {
             Creature* pAdd = m_pInstance->instance->GetCreature(*itr);
-            if (pAdd && !pAdd->isAlive())
+            if (pAdd && !pAdd->IsAlive())
                 pAdd->Respawn();
         }
 

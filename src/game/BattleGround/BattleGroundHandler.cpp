@@ -436,7 +436,7 @@ void WorldSession::HandleBattlefieldPortOpcode(WorldPacket& recv_data)
                 _player->SetBattleGroundEntryPoint();
 
             // resurrect the player
-            if (!_player->isAlive())
+            if (!_player->IsAlive())
             {
                 _player->ResurrectPlayer(1.0f);
                 _player->SpawnCorpseBones();

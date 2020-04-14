@@ -163,7 +163,7 @@ struct boss_ionarAI : public ScriptedAI
         {
             if (Creature* pTemp = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (pTemp->isAlive())
+                if (pTemp->IsAlive())
                     pTemp->ForcedDespawn();
             }
         }
@@ -178,7 +178,7 @@ struct boss_ionarAI : public ScriptedAI
         {
             if (Creature* pSpark = m_creature->GetMap()->GetCreature(*itr))
             {
-                if (pSpark->isAlive())
+                if (pSpark->IsAlive())
                 {
                     // Required to prevent combat movement, elsewise they might switch movement on aggro-change
                     if (ScriptedAI* pSparkAI = dynamic_cast<ScriptedAI*>(pSpark->AI()))
@@ -351,7 +351,7 @@ struct mob_spark_of_ionarAI : public ScriptedAI
         {
             if (Creature* pIonar = m_pInstance->GetSingleCreatureFromStorage(NPC_IONAR))
             {
-                if (!pIonar->isAlive())
+                if (!pIonar->IsAlive())
                 {
                     m_creature->ForcedDespawn();
                     return;

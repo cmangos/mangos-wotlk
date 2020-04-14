@@ -166,7 +166,7 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
                     case MUSELEK_ACTION_BEAR_COMMAND:
                     {
                         if (Creature *claw = m_pInstance->GetSingleCreatureFromStorage(NPC_CLAW))
-                            if (claw->isAlive() && claw->GetEntry() != NPC_CLAW_DRUID_FORM)
+                            if (claw->IsAlive() && claw->GetEntry() != NPC_CLAW_DRUID_FORM)
                             {
                                 uint8 claw_spell = urand(0, 2);
 
@@ -268,7 +268,7 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
         SetActionReadyStatus(MUSELEK_ACTION_RANGED_ATTACK, false);
 
         if (Unit* pTarget = m_creature->GetMap()->GetPlayer(m_AimedShotTarget))
-            if (pTarget->isAlive())
+            if (pTarget->IsAlive())
                 DoCastSpellIfCan(m_creature->getVictim(), SPELL_AIMED_SHOT, TRIGGERED_NONE);
     }
 
@@ -279,7 +279,7 @@ struct boss_swamplord_muselekAI : public ScriptedAI, public CombatActions
             if (!m_isInAimShotSequence)
                 DoBeginAimedShotSequence();
             if (Creature *claw = m_pInstance->GetSingleCreatureFromStorage(NPC_CLAW))
-                if (claw->isAlive() && claw->GetEntry() != NPC_CLAW_DRUID_FORM)
+                if (claw->IsAlive() && claw->GetEntry() != NPC_CLAW_DRUID_FORM)
                     claw->getThreatManager().modifyThreatPercent(target, (0 - urand(30, 99))); // Freezing trap messes with bear aggro
         }
     }

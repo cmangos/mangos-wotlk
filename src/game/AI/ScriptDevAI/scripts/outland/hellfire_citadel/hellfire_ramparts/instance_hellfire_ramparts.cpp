@@ -128,7 +128,7 @@ void instance_ramparts::DoFailVazruden()
     // Respawn or Reset Vazruden the herald
     if (Creature* pVazruden = GetSingleCreatureFromStorage(NPC_VAZRUDEN_HERALD))
     {
-        if (!pVazruden->isAlive())
+        if (!pVazruden->IsAlive())
             pVazruden->Respawn();
         else
         {

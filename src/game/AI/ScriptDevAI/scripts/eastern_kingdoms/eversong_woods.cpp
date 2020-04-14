@@ -167,14 +167,14 @@ struct npc_kelerun_bloodmournAI : public ScriptedAI
             if (m_uiCheckAliveStateTimer < uiDiff)
             {
                 Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
-                if (!pPlayer || !pPlayer->isAlive() || pPlayer->GetDistance(m_creature) > 100.f)
+                if (!pPlayer || !pPlayer->IsAlive() || pPlayer->GetDistance(m_creature) > 100.f)
                 {
                     Reset();
                     return;
                 }
 
                 Creature* pChallenger = m_creature->GetMap()->GetCreature(m_aChallengerGuids[m_uiChallengerCount]);
-                if (pChallenger && !pChallenger->isAlive())
+                if (pChallenger && !pChallenger->IsAlive())
                 {
                     ++m_uiChallengerCount;
 
@@ -197,7 +197,7 @@ struct npc_kelerun_bloodmournAI : public ScriptedAI
                 if (m_uiEngageTimer <= uiDiff)
                 {
                     Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid);
-                    if (!pPlayer || !pPlayer->isAlive())
+                    if (!pPlayer || !pPlayer->IsAlive())
                     {
                         Reset();
                         return;
@@ -446,7 +446,7 @@ struct npc_apprentice_mirvedaAI : public ScriptedAI
             sLog.outCustomLog("Questgiver flag: %s",  m_creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER) ? "true" : "false");
             for (ObjectGuid& guid : m_summons)
                 if (Creature* creature = m_creature->GetMap()->GetCreature(guid))
-                    if (creature->isAlive())
+                    if (creature->IsAlive())
                         sLog.outCustomLog("%s Entry: %u is alive", creature->GetName(), creature->GetEntry());
         }
 

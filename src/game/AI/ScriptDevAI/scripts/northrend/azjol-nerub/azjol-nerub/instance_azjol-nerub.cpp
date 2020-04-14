@@ -187,7 +187,7 @@ void instance_azjol_nerub::DoSendWatcherOrKrikthir()
     {
         if (Creature* pTemp = GetSingleCreatureFromStorage(aWatcher))
         {
-            if (pTemp->isAlive())
+            if (pTemp->IsAlive())
             {
                 if (pAttacker && urand(0, 1))
                     continue;
@@ -210,7 +210,7 @@ void instance_azjol_nerub::DoSendWatcherOrKrikthir()
 
     if (Player* pTarget = instance->GetPlayer(m_playerGuid))
     {
-        if (pTarget->isAlive())
+        if (pTarget->IsAlive())
             pAttacker->AI()->AttackStart(pTarget);
     }
 }

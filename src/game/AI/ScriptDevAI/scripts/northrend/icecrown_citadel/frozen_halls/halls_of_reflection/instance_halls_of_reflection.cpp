@@ -486,7 +486,7 @@ void instance_halls_of_reflection::DoSendNextSpiritWave()
 
         if (Creature* pCreature = instance->GetCreature(*iter))
         {
-            if (!pCreature->isAlive())
+            if (!pCreature->IsAlive())
             {
                 script_error_log("instance_halls_of_reflection: Error: couldn't find alive creature %u", pCreature->GetEntry());
                 return;
@@ -611,7 +611,7 @@ void instance_halls_of_reflection::Update(uint32 uiDiff)
                 {
                     if (Creature* pCreature = instance->GetCreature(*itr))
                     {
-                        if (!pCreature->isAlive())
+                        if (!pCreature->IsAlive())
                             pCreature->Respawn();
                     }
                 }

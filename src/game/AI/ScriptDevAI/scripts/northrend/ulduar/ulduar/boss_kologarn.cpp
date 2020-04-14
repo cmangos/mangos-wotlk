@@ -233,7 +233,7 @@ struct boss_kologarnAI : public Scripted_NoMovementAI
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
     {
-        if (!m_creature->isAlive() || !m_creature->getVictim())
+        if (!m_creature->IsAlive() || !m_creature->getVictim())
             return;
 
         if (pSummoned->GetEntry() == NPC_LEFT_ARM)

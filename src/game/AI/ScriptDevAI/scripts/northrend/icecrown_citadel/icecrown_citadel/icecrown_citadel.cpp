@@ -381,7 +381,7 @@ struct npc_putricides_trapAI : public ScriptedAI
                     {
                         if (Player* pPlayer = pAllPlayer.getSource())
                         {
-                            if (pPlayer->isAlive() && pPlayer->IsWithinLOSInMap(m_creature))
+                            if (pPlayer->IsAlive() && pPlayer->IsWithinLOSInMap(m_creature))
                                 bEventFailed = false;
                         }
                     }

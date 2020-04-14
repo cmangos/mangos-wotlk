@@ -158,7 +158,7 @@ struct npc_ancestral_wolfAI : public npc_escortAI
                 break;
             case 50:
                 Creature* pRyga = GetClosestCreatureWithEntry(m_creature, NPC_RYGA, 30.0f);
-                if (pRyga && pRyga->isAlive() && !pRyga->isInCombat())
+                if (pRyga && pRyga->IsAlive() && !pRyga->isInCombat())
                     DoScriptText(SAY_WOLF_WELCOME, pRyga);
                 break;
         }
@@ -275,7 +275,7 @@ struct npc_demoniac_scryerAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_bIsComplete || !m_creature->isAlive())
+        if (m_bIsComplete || !m_creature->IsAlive())
             return;
 
         if (m_uiSpawnButtressTimer <= uiDiff)
@@ -704,7 +704,7 @@ struct npc_colonel_julesAI : public ScriptedAI
         GetCreatureListWithEntryInGrid(lSlimeList, m_creature, NPC_FOUL_PURGE, 40.0f);
         for (auto& itr : lSlimeList)
         {
-            if (itr->isAlive())
+            if (itr->IsAlive())
                 itr->ForcedDespawn();
         }
     }
@@ -992,7 +992,7 @@ struct npc_anchorite_baradaAI : public ScriptedAI, private DialogueHelper
                     if (npc_colonel_julesAI* julesAI = dynamic_cast<npc_colonel_julesAI*>(pColonel->AI()))
                         julesAI->EndEvent();
 
-                if (m_creature->isAlive())
+                if (m_creature->IsAlive())
                     m_creature->ForcedDespawn();
                 m_creature->Respawn();
 
@@ -1181,7 +1181,7 @@ struct npc_magister_aledisAI : public ScriptedAI
         if (!m_bIsDefeated)
             m_creature->LoadCreatureAddon(true);
 
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
         {
             if (!m_bIsDefeated)
             {

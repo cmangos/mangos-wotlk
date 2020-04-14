@@ -201,7 +201,7 @@ struct npc_erekem_guardAI : public ScriptedAI
 
         if (Creature* pBoss = m_pInstance->GetSingleCreatureFromStorage(m_pInstance->GetData(TYPE_EREKEM) != DONE ? NPC_EREKEM : NPC_ARAKKOA))
         {
-            if (!pBoss->isAlive())
+            if (!pBoss->IsAlive())
                 return;
 
             ((boss_erekemAI*)pBoss->AI())->GuardianJustDied();

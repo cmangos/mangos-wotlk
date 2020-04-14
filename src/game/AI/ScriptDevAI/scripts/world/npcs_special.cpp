@@ -160,7 +160,7 @@ struct npc_air_force_botsAI : public ScriptedAI
     {
         Creature* pCreature = m_creature->GetMap()->GetCreature(m_spawnedGuid);
 
-        if (pCreature && pCreature->isAlive())
+        if (pCreature && pCreature->IsAlive())
             return pCreature;
 
         return nullptr;
@@ -529,7 +529,7 @@ struct npc_injured_patientAI : public ScriptedAI
 
     void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
     {
-        if (pCaster->GetTypeId() == TYPEID_PLAYER && m_creature->isAlive() && pSpell->Id == 20804)
+        if (pCaster->GetTypeId() == TYPEID_PLAYER && m_creature->IsAlive() && pSpell->Id == 20804)
         {
             // make not selectable
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -583,12 +583,12 @@ struct npc_injured_patientAI : public ScriptedAI
 
         // lower HP on every world tick makes it a useful counter, not officlone though
         uint32 uiHPLose = uint32(0.03f * uiDiff);
-        if (m_creature->isAlive() && m_creature->GetHealth() > 1 + uiHPLose)
+        if (m_creature->IsAlive() && m_creature->GetHealth() > 1 + uiHPLose)
         {
             m_creature->SetHealth(m_creature->GetHealth() - uiHPLose);
         }
 
-        if (m_creature->isAlive() && m_creature->GetHealth() <= 1 + uiHPLose)
+        if (m_creature->IsAlive() && m_creature->GetHealth() <= 1 + uiHPLose)
         {
             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -735,7 +735,7 @@ void npc_doctorAI::UpdateAI(const uint32 uiDiff)
 
             for (GuidList::const_iterator itr = m_lPatientGuids.begin(); itr != m_lPatientGuids.end(); ++itr)
                 if (Creature* pSummoned = m_creature->GetMap()->GetCreature(*itr))
-                    if (pSummoned->isAlive())
+                    if (pSummoned->IsAlive())
                         totalAlive++;
 
             uint32 totalToSpawn = 0;
@@ -2109,7 +2109,7 @@ struct npc_mage_mirror_imageAI : public ScriptedAI
         if (m_uiThreatUpdateTimer < uiDiff)
         {
             Player* pOwner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid());
-            if (!pOwner || !pOwner->isAlive())
+            if (!pOwner || !pOwner->IsAlive())
             {
                 m_creature->ForcedDespawn();
                 return;
@@ -2416,7 +2416,7 @@ struct mob_phoenix_tkAI : public ScriptedAI
 
     void DoRebirth()
     {
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
         {
             // Remove fake death if the egg despawns after 15 secs
             m_creature->RemoveAurasDueToSpell(m_emberBlastSpellId);

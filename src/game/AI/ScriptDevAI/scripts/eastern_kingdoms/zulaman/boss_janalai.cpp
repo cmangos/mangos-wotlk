@@ -283,10 +283,10 @@ struct boss_janalaiAI : public CombatAI
                 Creature* hatcher1 = m_creature->GetMap()->GetCreature(m_hatcherOneGuid);
                 Creature* hatcher2 = m_creature->GetMap()->GetCreature(m_hatcherTwoGuid);
 
-                if (!hatcher1 || !hatcher1->isAlive())
+                if (!hatcher1 || !hatcher1->IsAlive())
                     DoCastSpellIfCan(nullptr, SPELL_SUMMON_HATCHER_1, CAST_TRIGGERED);
 
-                if (!hatcher2 || !hatcher2->isAlive())
+                if (!hatcher2 || !hatcher2->IsAlive())
                     DoCastSpellIfCan(nullptr, SPELL_SUMMON_HATCHER_2, CAST_TRIGGERED);
 
                 ResetCombatAction(action, 90000);

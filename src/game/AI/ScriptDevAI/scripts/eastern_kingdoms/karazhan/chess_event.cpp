@@ -433,7 +433,7 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
         for (GuidList::const_iterator itr = lTempList.begin(); itr != lTempList.end(); ++itr)
         {
             Creature* pTemp = m_creature->GetMap()->GetCreature(*itr);
-            if (pTemp && pTemp->isAlive())
+            if (pTemp && pTemp->IsAlive())
             {
                 // check for specified range targets and angle; Note: to be checked if the angle is right
                 if (fRange && !m_creature->isInFrontInMap(pTemp, fRange, fArc))
@@ -500,7 +500,7 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
         for (GuidList::const_iterator itr = lTempList.begin(); itr != lTempList.end(); ++itr)
         {
             Creature* pTemp = m_creature->GetMap()->GetCreature(*itr);
-            if (pTemp && pTemp->isAlive())
+            if (pTemp && pTemp->IsAlive())
                 lEnemies.push_back(pTemp);
         }
 

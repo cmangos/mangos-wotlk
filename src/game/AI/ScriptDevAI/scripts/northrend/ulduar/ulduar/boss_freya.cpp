@@ -301,7 +301,7 @@ struct boss_freyaAI : public ScriptedAI
             // reset elders
             if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_BRIGHTLEAF))
             {
-                if (pElder->isAlive())
+                if (pElder->IsAlive())
                 {
                     pElder->AI()->EnterEvadeMode();
                     pElder->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -309,7 +309,7 @@ struct boss_freyaAI : public ScriptedAI
             }
             if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_IRONBRACH))
             {
-                if (pElder->isAlive())
+                if (pElder->IsAlive())
                 {
                     pElder->AI()->EnterEvadeMode();
                     pElder->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -317,7 +317,7 @@ struct boss_freyaAI : public ScriptedAI
             }
             if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_STONEBARK))
             {
-                if (pElder->isAlive())
+                if (pElder->IsAlive())
                 {
                     pElder->AI()->EnterEvadeMode();
                     pElder->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -331,7 +331,7 @@ struct boss_freyaAI : public ScriptedAI
         m_creature->RemoveAllAurasOnEvade();
         m_creature->CombatStop(true);
 
-        if (m_creature->isAlive() && !m_bEventFinished)
+        if (m_creature->IsAlive() && !m_bEventFinished)
             m_creature->GetMotionMaster()->MoveTargetedHome();
 
         m_creature->SetLootRecipient(nullptr);
@@ -523,7 +523,7 @@ struct boss_freyaAI : public ScriptedAI
 
         if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_BRIGHTLEAF))
         {
-            if (pElder->isAlive())
+            if (pElder->IsAlive())
             {
                 pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_BRIGHTLEAF_ESSENCE_CHANNEL : SPELL_BRIGHTLEAF_ESSENCE_CHANNEL_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
                 pElder->CastSpell(pElder, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
@@ -534,7 +534,7 @@ struct boss_freyaAI : public ScriptedAI
         }
         if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_IRONBRACH))
         {
-            if (pElder->isAlive())
+            if (pElder->IsAlive())
             {
                 pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_IRONBRANCH_ESSENCE_CHANNEL : SPELL_IRONBRANCH_ESSENCE_CHANNEL_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
                 pElder->CastSpell(pElder, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
@@ -545,7 +545,7 @@ struct boss_freyaAI : public ScriptedAI
         }
         if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_STONEBARK))
         {
-            if (pElder->isAlive())
+            if (pElder->IsAlive())
             {
                 pElder->CastSpell(pElder, m_bIsRegularMode ? SPELL_STONEBARK_ESSEMCE_CHANNEL : SPELL_STONEBARK_ESSEMCE_CHANNEL_H, TRIGGERED_NONE, nullptr, nullptr, m_creature->GetObjectGuid());
                 pElder->CastSpell(pElder, SPELL_FULL_HEAL, TRIGGERED_OLD_TRIGGERED);
@@ -575,7 +575,7 @@ struct boss_freyaAI : public ScriptedAI
 
         if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_BRIGHTLEAF))
         {
-            if (pElder->isAlive())
+            if (pElder->IsAlive())
             {
                 pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, TRIGGERED_OLD_TRIGGERED);
                 pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -583,7 +583,7 @@ struct boss_freyaAI : public ScriptedAI
         }
         if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_IRONBRACH))
         {
-            if (pElder->isAlive())
+            if (pElder->IsAlive())
             {
                 pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, TRIGGERED_OLD_TRIGGERED);
                 pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -591,7 +591,7 @@ struct boss_freyaAI : public ScriptedAI
         }
         if (Creature* pElder = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_STONEBARK))
         {
-            if (pElder->isAlive())
+            if (pElder->IsAlive())
             {
                 pElder->CastSpell(pElder, SPELL_DRAINED_OF_POWER, TRIGGERED_OLD_TRIGGERED);
                 pElder->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);

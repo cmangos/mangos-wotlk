@@ -107,7 +107,7 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
 
         if (Creature* pGhost = m_creature->GetMap()->GetCreature(m_ghostGuid))
         {
-            if (pGhost->isAlive())
+            if (pGhost->IsAlive())
                 pGhost->ForcedDespawn();
         }
     }
@@ -142,7 +142,7 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
     {
         if (Creature* pBuddy = GetBuddy())
         {
-            if (pBuddy->isAlive())
+            if (pBuddy->IsAlive())
             {
                 DoScriptText(m_creature->GetEntry() == NPC_SKARVALD ? m_aYell[1].m_iTextId : m_aYell[2].m_iTextId, m_creature);
                 DoScriptText(m_creature->GetEntry() == NPC_SKARVALD ? m_aYell[1].m_iTextReplyId : m_aYell[2].m_iTextReplyId, pBuddy);

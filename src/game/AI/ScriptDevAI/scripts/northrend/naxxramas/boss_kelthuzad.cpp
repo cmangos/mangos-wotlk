@@ -214,7 +214,7 @@ struct boss_kelthuzadAI : public ScriptedAI
             {
                 if (Creature* pCreature = m_pInstance->instance->GetCreature(itr))
                 {
-                    if (pCreature->isAlive())
+                    if (pCreature->IsAlive())
                     {
                         pCreature->AI()->EnterEvadeMode();
                         pCreature->ForcedDespawn(15000);

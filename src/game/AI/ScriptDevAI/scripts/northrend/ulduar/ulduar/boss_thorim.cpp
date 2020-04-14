@@ -217,7 +217,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
         m_creature->RemoveAllAurasOnEvade();
         m_creature->CombatStop(true);
 
-        if (m_creature->isAlive() && !m_bEventFinished)
+        if (m_creature->IsAlive() && !m_bEventFinished)
             m_creature->GetMotionMaster()->MoveTargetedHome();
 
         m_creature->SetLootRecipient(nullptr);
@@ -297,7 +297,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
     void MoveInLineOfSight(Unit* pWho) override
     {
         // spawn the arena npcs only when players are close to Thorim in order to avoid the possible bugs
-        if (!m_bArenaSpawned && pWho->GetTypeId() == TYPEID_PLAYER && pWho->isAlive() && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE))
+        if (!m_bArenaSpawned && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE))
         {
             if (m_pInstance && m_pInstance->GetData(TYPE_THORIM) != DONE)
                 m_pInstance->DoSpawnThorimNpcs((Player*)pWho);

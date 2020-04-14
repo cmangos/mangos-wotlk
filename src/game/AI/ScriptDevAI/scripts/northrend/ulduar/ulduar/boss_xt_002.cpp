@@ -229,7 +229,7 @@ struct boss_xt_002AI : public ScriptedAI
                 if (Creature* pHeart = m_pInstance->GetSingleCreatureFromStorage(NPC_HEART_DECONSTRUCTOR))
                 {
                     // safeguard in case the Heart isn't respawned
-                    if (!pHeart->isAlive())
+                    if (!pHeart->IsAlive())
                         pHeart->Respawn();
 
                     pHeart->AI()->EnterEvadeMode();
@@ -496,7 +496,7 @@ struct npc_scrapbotAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (!m_bIsHealed && pWho->GetEntry() == NPC_XT002 && pWho->isAlive() && pWho->IsWithinDistInMap(m_creature, 10.0f))
+        if (!m_bIsHealed && pWho->GetEntry() == NPC_XT002 && pWho->IsAlive() && pWho->IsWithinDistInMap(m_creature, 10.0f))
         {
             DoCastSpellIfCan(pWho, SPELL_RIDE_VEHICLE_SCRAPBOT, CAST_TRIGGERED);
             pWho->CastSpell(m_creature, SPELL_SCRAP_REPAIR, TRIGGERED_OLD_TRIGGERED);

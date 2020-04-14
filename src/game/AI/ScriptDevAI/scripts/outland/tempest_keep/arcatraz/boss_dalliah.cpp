@@ -106,7 +106,7 @@ struct boss_dalliahAI : public ScriptedAI
         m_creature->LoadCreatureAddon(true);
 
         // should evade to the attack position
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
             m_creature->GetMotionMaster()->MovePoint(1, aDalliahStartPos[0], aDalliahStartPos[1], aDalliahStartPos[2]);
 
         if (m_pInstance)

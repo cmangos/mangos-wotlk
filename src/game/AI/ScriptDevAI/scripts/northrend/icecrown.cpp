@@ -247,7 +247,7 @@ struct npc_squad_leaderAI : public npc_escortAI
                 // for each soldier alive cast the kill credit
                 for (CreatureList::const_iterator itr = lSoldiersList.begin(); itr != lSoldiersList.end(); ++itr)
                 {
-                    if ((*itr) && (*itr)->isAlive())
+                    if ((*itr) && (*itr)->IsAlive())
                     {
                         (*itr)->CastSpell(*itr, (*itr)->GetEntry() == NPC_SKYBREAKER_INFANTRY ? SPELL_ALLIANCE_TROOP_CREDIT : SPELL_HORDE_TROOP_CREDIT, TRIGGERED_OLD_TRIGGERED);
                         (*itr)->ForcedDespawn(10000);
@@ -344,7 +344,7 @@ struct npc_infantryAI : public ScriptedAI
 
         Reset();
 
-        if (!m_creature->isAlive())
+        if (!m_creature->IsAlive())
             return;
 
         if (m_bEscortActive)
@@ -755,7 +755,7 @@ struct npc_grand_admiral_westwindAI : public ScriptedAI
             m_creature->GetMotionMaster()->MoveIdle();
         else
         {
-            if (m_creature->isAlive())
+            if (m_creature->IsAlive())
                 m_creature->GetMotionMaster()->MoveTargetedHome();
 
             m_creature->SetLootRecipient(nullptr);

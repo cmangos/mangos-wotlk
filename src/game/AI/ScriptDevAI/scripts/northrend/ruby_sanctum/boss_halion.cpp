@@ -241,7 +241,7 @@ struct boss_halion_realAI : public ScriptedAI
 
             for (const auto& i : PlayerList)
             {
-                if (i.getSource()->isAlive() && i.getSource()->HasAuraType(SPELL_AURA_PHASE))
+                if (i.getSource()->IsAlive() && i.getSource()->HasAuraType(SPELL_AURA_PHASE))
                     i.getSource()->RemoveSpellsCausingAura(SPELL_AURA_PHASE);
             }
         }

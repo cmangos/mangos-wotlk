@@ -460,7 +460,7 @@ bool AreaTrigger_at_wrath_lich_king(Player* pPlayer, AreaTriggerEntry const* pAt
 {
     if (pAt->id == AREATRIGGER_LICH_KING_ROOM)
     {
-        if (pPlayer->isGameMaster() || !pPlayer->isAlive())
+        if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
             return false;
 
         instance_halls_of_reflection* pInstance = (instance_halls_of_reflection*)pPlayer->GetInstanceData();

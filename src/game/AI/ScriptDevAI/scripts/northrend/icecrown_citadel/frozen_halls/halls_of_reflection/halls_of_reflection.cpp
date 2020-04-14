@@ -50,7 +50,7 @@ bool AreaTrigger_at_frostmourne_chamber(Player* pPlayer, AreaTriggerEntry const*
 {
     if (pAt->id == AREATRIGGER_FROSTMOURNE_ALTAR)
     {
-        if (pPlayer->isGameMaster() || !pPlayer->isAlive())
+        if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
             return false;
 
         instance_halls_of_reflection* pInstance = (instance_halls_of_reflection*)pPlayer->GetInstanceData();
@@ -244,7 +244,7 @@ bool AreaTrigger_at_frostworn_general(Player* pPlayer, AreaTriggerEntry const* p
 {
     if (pAt->id == AREATRIGGER_FROSTWORN_GENERAL)
     {
-        if (pPlayer->isGameMaster() || !pPlayer->isAlive())
+        if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
             return false;
 
         instance_halls_of_reflection* pInstance = (instance_halls_of_reflection*)pPlayer->GetInstanceData();
@@ -363,7 +363,7 @@ bool AreaTrigger_at_queldelar_start(Player* pPlayer, AreaTriggerEntry const* pAt
 {
     if (pAt->id == AREATRIGGER_QUELDELAR_START)
     {
-        if (pPlayer->isGameMaster() || !pPlayer->isAlive())
+        if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
             return false;
 
         if (!pPlayer->HasAura(SPELL_QUELDELAR_COMPULSION))

@@ -75,7 +75,7 @@ void hyjalAI::EnterEvadeMode()
     m_creature->RemoveAllAurasOnEvade();
     m_creature->CombatStop(true);
 
-    if (m_creature->isAlive())
+    if (m_creature->IsAlive())
         m_creature->GetMotionMaster()->MoveTargetedHome();
 
     m_creature->SetLootRecipient(nullptr);

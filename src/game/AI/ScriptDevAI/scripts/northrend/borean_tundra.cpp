@@ -153,7 +153,7 @@ struct npc_nesingwary_trapperAI : public ScriptedAI
 
                             if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
                             {
-                                if (pPlayer->isAlive())
+                                if (pPlayer->IsAlive())
                                     pPlayer->KilledMonsterCredit(m_creature->GetEntry());
                             }
                         }
@@ -1377,7 +1377,7 @@ struct npc_proudhoofAI : public npc_escortAI
             GetCreatureListWithEntryInGrid(lGuardsList, m_creature, NPC_CARAVAN_GUARD, 20.0f);
             for (CreatureList::const_iterator itr = lGuardsList.begin(); itr != lGuardsList.end(); ++itr)
             {
-                if (!(*itr)->isAlive())
+                if (!(*itr)->IsAlive())
                     continue;
 
                 (*itr)->SetFactionTemporary(FACTION_ESCORT_H_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);

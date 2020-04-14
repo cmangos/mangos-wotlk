@@ -106,7 +106,7 @@ void instance_icecrown_citadel::DoHandleCitadelAreaTrigger(uint32 uiTriggerId, P
     {
         if (Creature* pSindragosa = GetSingleCreatureFromStorage(NPC_SINDRAGOSA))
         {
-            if (pSindragosa->isAlive() && !pSindragosa->isInCombat())
+            if (pSindragosa->IsAlive() && !pSindragosa->isInCombat())
                 pSindragosa->SetInCombatWithZone();
         }
         else
@@ -389,14 +389,14 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
         case NPC_STINKY:
             if (Creature* pFestergut = GetSingleCreatureFromStorage(NPC_FESTERGUT))
             {
-                if (pFestergut->isAlive())
+                if (pFestergut->IsAlive())
                     DoScriptText(SAY_STINKY_DIES, pFestergut);
             }
             break;
         case NPC_PRECIOUS:
             if (Creature* pRotface = GetSingleCreatureFromStorage(NPC_ROTFACE))
             {
-                if (pRotface->isAlive())
+                if (pRotface->IsAlive())
                     DoScriptText(SAY_PRECIOUS_DIES, pRotface);
             }
             break;

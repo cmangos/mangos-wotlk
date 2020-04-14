@@ -422,7 +422,7 @@ struct npc_storm_tempered_keeperAI : public ScriptedAI
                     if (DoCastSpellIfCan(m_creature, SPELL_SEPARATION_ANXIETY) == CAST_OK)
                         m_uiCheckBuddyTimer = 5000;
                 }
-                else if (!pBuddy->isAlive())
+                else if (!pBuddy->IsAlive())
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_VENGEFUL_SURGE) == CAST_OK)
                         m_uiCheckBuddyTimer = 0;
@@ -480,7 +480,7 @@ struct npc_charged_sphereAI : public ScriptedAI
     void MoveInLineOfSight(Unit* pWho) override
     {
         // cast supercharged if reached the buddy
-        if (!m_bIsCharged && pWho->GetEntry() == m_uiBuddyEntry && pWho->isAlive() && pWho->IsWithinDistInMap(m_creature, 5.0f))
+        if (!m_bIsCharged && pWho->GetEntry() == m_uiBuddyEntry && pWho->IsAlive() && pWho->IsWithinDistInMap(m_creature, 5.0f))
         {
             DoCastSpellIfCan(pWho, SPELL_SUPERCHARGED, CAST_TRIGGERED);
             m_creature->ForcedDespawn(1000);

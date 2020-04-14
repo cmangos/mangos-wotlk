@@ -966,7 +966,7 @@ void WorldSession::HandlePlayerReconnect()
         }
     }
 
-    if (!_player->isAlive())
+    if (!_player->IsAlive())
         _player->SendCorpseReclaimDelay(true);
 
     data.Initialize(SMSG_LEARNED_DANCE_MOVES, 4 + 4);

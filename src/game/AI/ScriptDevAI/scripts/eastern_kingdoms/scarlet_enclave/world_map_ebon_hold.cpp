@@ -248,7 +248,7 @@ void world_map_ebon_hold::DoDespawnArmy()
     {
         if (Creature* pTemp = instance->GetCreature(*itr))
         {
-            if (pTemp->isAlive())
+            if (pTemp->IsAlive())
                 pTemp->Suicide();
         }
     }

@@ -190,7 +190,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit* pTarget)
     // check for pet and heal if neccessary
     Pet* pet = m_bot->GetPet();
     // TODO: clarify/simplify: !pet->getDeathState() != ALIVE
-    if (pet && PET_MEND > 0 && pet->isAlive() && pet->GetHealthPercent() < 50 && pVictim != m_bot && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && m_ai->CastSpell(PET_MEND, *m_bot) == SPELL_CAST_OK)
+    if (pet && PET_MEND > 0 && pet->IsAlive() && pet->GetHealthPercent() < 50 && pVictim != m_bot && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && m_ai->CastSpell(PET_MEND, *m_bot) == SPELL_CAST_OK)
     {
         m_ai->TellMaster("healing pet.");
         return RETURN_CONTINUE;
@@ -311,7 +311,7 @@ CombatManeuverReturns PlayerbotHunterAI::DoNextCombatManeuverPVE(Unit* pTarget)
             return RETURN_CONTINUE;
         else if (m_bot->getRace() == RACE_DRAENEI && m_ai->GetHealthPercent() < 25 && !m_bot->HasAura(GIFT_OF_THE_NAARU, EFFECT_INDEX_0) && m_ai->CastSpell(GIFT_OF_THE_NAARU, *m_bot) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
-        else if (pet && pet->isAlive() && MISDIRECTION > 0 && m_ai->In_Reach(pet, MISDIRECTION) && pVictim == m_bot && !m_bot->HasAura(MISDIRECTION, EFFECT_INDEX_0) && m_ai->CastSpell(MISDIRECTION, *pet) == SPELL_CAST_OK)
+        else if (pet && pet->IsAlive() && MISDIRECTION > 0 && m_ai->In_Reach(pet, MISDIRECTION) && pVictim == m_bot && !m_bot->HasAura(MISDIRECTION, EFFECT_INDEX_0) && m_ai->CastSpell(MISDIRECTION, *pet) == SPELL_CAST_OK)
             return RETURN_CONTINUE;
         /*else if(FREEZING_TRAP > 0 && !pTarget->HasAura(FREEZING_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(ARCANE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(EXPLOSIVE_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(BEAR_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(IMMOLATION_TRAP, EFFECT_INDEX_0) && !pTarget->HasAura(FROST_TRAP, EFFECT_INDEX_0) && m_ai->CastSpell(FREEZING_TRAP,*pTarget) == SPELL_CAST_OK)
             out << " > Freezing Trap"; // this can trap your bots too
@@ -420,14 +420,14 @@ void PlayerbotHunterAI::DoNonCombatActions()
                     break;
             }
         }
-        else if (!(pet->isAlive()))
+        else if (!(pet->IsAlive()))
         {
             if (PET_REVIVE > 0 && m_ai->CastSpell(PET_REVIVE, *m_bot) == SPELL_CAST_OK)
                 m_ai->TellMaster("reviving pet.");
         }
         else if (pet->GetHealthPercent() < 50)
         {
-            if (PET_MEND > 0 && pet->isAlive() && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && m_ai->CastSpell(PET_MEND, *m_bot) == SPELL_CAST_OK)
+            if (PET_MEND > 0 && pet->IsAlive() && !pet->HasAura(PET_MEND, EFFECT_INDEX_0) && m_ai->CastSpell(PET_MEND, *m_bot) == SPELL_CAST_OK)
                 m_ai->TellMaster("healing pet.");
         }
         else if (pet->GetHappinessState() != HAPPY) // if pet is hungry

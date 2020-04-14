@@ -175,7 +175,7 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
             {
                 if (Creature* pOrb = instance->GetCreature(m_gortokEventTriggerGuid))
                 {
-                    if (!pOrb->isAlive())
+                    if (!pOrb->IsAlive())
                         pOrb->Respawn();
                     else
                         pOrb->RemoveAllAuras();
@@ -189,7 +189,7 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
                     // Reset each miniboss
                     if (Creature* pTemp = GetSingleCreatureFromStorage(aGortokMiniBosse))
                     {
-                        if (!pTemp->isAlive())
+                        if (!pTemp->IsAlive())
                             pTemp->Respawn();
 
                         pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);

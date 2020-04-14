@@ -57,7 +57,7 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
         return;
     }
 
-    if (!petUnit->isAlive())
+    if (!petUnit->IsAlive())
         return;
 
     CharmInfo* charmInfo = petUnit->GetCharmInfo();
@@ -352,7 +352,7 @@ void WorldSession::HandlePetStopAttack(WorldPacket& recv_data)
         return;
     }
 
-    if (!pet->isAlive())
+    if (!pet->IsAlive())
         return;
 
     pet->AttackStop();

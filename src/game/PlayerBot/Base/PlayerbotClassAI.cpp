@@ -107,7 +107,7 @@ CombatManeuverReturns PlayerbotClassAI::HealPlayer(Player* target)
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
-    if (target->IsInDuel() || !target->isAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
+    if (target->IsInDuel() || !target->IsAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
 
     return RETURN_NO_ACTION_OK;
 }
@@ -118,7 +118,7 @@ CombatManeuverReturns PlayerbotClassAI::ResurrectPlayer(Player* target)
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
-    if (target->isAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
+    if (target->IsAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
 
     return RETURN_NO_ACTION_OK;
 }
@@ -129,7 +129,7 @@ CombatManeuverReturns PlayerbotClassAI::DispelPlayer(Player* target)
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
 
     if (!target) return RETURN_NO_ACTION_INVALIDTARGET;
-    if (target->IsInDuel() || !target->isAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
+    if (target->IsInDuel() || !target->IsAlive()) return RETURN_NO_ACTION_INVALIDTARGET;
 
     return RETURN_NO_ACTION_OK;
 }
@@ -140,7 +140,7 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
     //DEBUG_LOG(".Buff");
     if (!m_ai)  return RETURN_NO_ACTION_ERROR;
     if (!m_bot) return RETURN_NO_ACTION_ERROR;
-    if (!m_bot->isAlive() || m_bot->IsInDuel()) return RETURN_NO_ACTION_ERROR;
+    if (!m_bot->IsAlive() || m_bot->IsInDuel()) return RETURN_NO_ACTION_ERROR;
     if (bMustBeOOC && m_bot->isInCombat()) return RETURN_NO_ACTION_ERROR;
 
     if (spellId == 0) return RETURN_NO_ACTION_OK;
@@ -154,7 +154,7 @@ CombatManeuverReturns PlayerbotClassAI::Buff(bool (*BuffHelper)(PlayerbotAI*, ui
         {
             //DEBUG_LOG(".Group_Member");
             Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel())
+            if (!groupMember || !groupMember->IsAlive() || groupMember->IsInDuel())
                 continue;
 
             Pet* pet = groupMember->GetPet();
@@ -225,7 +225,7 @@ bool PlayerbotClassAI::NeedGroupBuff(uint32 groupBuffSpellId, uint32 singleBuffS
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!groupMember || !groupMember->isAlive())
+            if (!groupMember || !groupMember->IsAlive())
                 continue;
             // Check if group member needs buff
             if (!groupMember->HasAura(groupBuffSpellId, EFFECT_INDEX_0) && !groupMember->HasAura(singleBuffSpellId, EFFECT_INDEX_0))
@@ -256,7 +256,7 @@ bool PlayerbotClassAI::FindTargetAndHeal()
 {
     if (!m_ai)  return false;
     if (!m_bot) return false;
-    if (!m_bot->isAlive() || m_bot->IsInDuel() || !m_ai->IsHealer()) return false;
+    if (!m_bot->IsAlive() || m_bot->IsInDuel() || !m_ai->IsHealer()) return false;
 
     // Heal other players/bots first
     // Select a target based on orders and some context (pets are ignored because GetHealTarget() only works on players)
@@ -294,7 +294,7 @@ Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type, bool onlyPickFromSameGrou
 {
     if (!m_ai)  return nullptr;
     if (!m_bot) return nullptr;
-    if (!m_bot->isAlive() || m_bot->IsInDuel()) return nullptr;
+    if (!m_bot->IsAlive() || m_bot->IsInDuel()) return nullptr;
 
     // define seperately for sorting purposes - DO NOT CHANGE ORDER!
     std::vector<heal_priority> targets;
@@ -307,8 +307,8 @@ Player* PlayerbotClassAI::GetHealTarget(JOB_TYPE type, bool onlyPickFromSameGrou
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!groupMember || !groupMember->isAlive() || groupMember->IsInDuel()
-                             || (!m_bot->GetGroup()->SameSubGroup(m_bot, groupMember) && onlyPickFromSameGroup))
+            if (!groupMember || !groupMember->IsAlive() || groupMember->IsInDuel()
+                || (!m_bot->GetGroup()->SameSubGroup(m_bot, groupMember) && onlyPickFromSameGroup))
                 continue;
             JOB_TYPE job = GetTargetJob(groupMember);
             if (job & type)
@@ -624,7 +624,7 @@ Player* PlayerbotClassAI::GetDispelTarget(DispelType dispelType, JOB_TYPE type, 
 {
     if (!m_ai)  return nullptr;
     if (!m_bot) return nullptr;
-    if (!m_bot->isAlive() || m_bot->IsInDuel()) return nullptr;
+    if (!m_bot->IsAlive() || m_bot->IsInDuel()) return nullptr;
     if (bMustBeOOC && m_bot->isInCombat()) return nullptr;
 
     // First, fill the list of targets
@@ -637,7 +637,7 @@ Player* PlayerbotClassAI::GetDispelTarget(DispelType dispelType, JOB_TYPE type, 
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!groupMember || !groupMember->isAlive())
+            if (!groupMember || !groupMember->IsAlive())
                 continue;
             JOB_TYPE job = GetTargetJob(groupMember);
             if (job & type)
@@ -671,7 +671,7 @@ Player* PlayerbotClassAI::GetResurrectionTarget(JOB_TYPE type, bool bMustBeOOC)
 {
     if (!m_ai)  return nullptr;
     if (!m_bot) return nullptr;
-    if (!m_bot->isAlive() || m_bot->IsInDuel()) return nullptr;
+    if (!m_bot->IsAlive() || m_bot->IsInDuel()) return nullptr;
     if (bMustBeOOC && m_bot->isInCombat()) return nullptr;
 
     // First, fill the list of targets
@@ -684,7 +684,7 @@ Player* PlayerbotClassAI::GetResurrectionTarget(JOB_TYPE type, bool bMustBeOOC)
         for (Group::member_citerator itr = groupSlot.begin(); itr != groupSlot.end(); itr++)
         {
             Player* groupMember = sObjectMgr.GetPlayer(itr->guid);
-            if (!groupMember || groupMember->isAlive())
+            if (!groupMember || groupMember->IsAlive())
                 continue;
             JOB_TYPE job = GetTargetJob(groupMember);
             if (job & type)
@@ -697,7 +697,7 @@ Player* PlayerbotClassAI::GetResurrectionTarget(JOB_TYPE type, bool bMustBeOOC)
         if (targets.size())
             return targets.at(0).p;
     }
-    else if (!m_master->isAlive())
+    else if (!m_master->IsAlive())
         return m_master;
 
     return nullptr;

@@ -112,7 +112,7 @@ void instance_magisters_terrace::OnCreatureDeath(Creature* pCreature)
             // yell on summoned death
             if (Creature* pDelrissa = GetSingleCreatureFromStorage(NPC_DELRISSA))
             {
-                if (pDelrissa->isAlive())
+                if (pDelrissa->IsAlive())
                     DoScriptText(aDelrissaAddDeath[m_uiDelrissaDeathCount - 1], pDelrissa);
                 else if (GetData(TYPE_DELRISSA) == SPECIAL)
                 {
@@ -141,7 +141,7 @@ void instance_magisters_terrace::SetData(uint32 uiType, uint32 uiData)
                         if (!pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
                             pTemp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
-                        if (pTemp->isAlive())
+                        if (pTemp->IsAlive())
                         {
                             if (pTemp->isInCombat())
                             {
@@ -207,7 +207,7 @@ void instance_magisters_terrace::StartCrystalVisual()
     for (GuidList::const_iterator itr = m_lFelCrystalGuid.begin(); itr != m_lFelCrystalGuid.end(); ++itr)
     {
         if (Creature* pTemp = instance->GetCreature(*itr))
-            if (pTemp->isAlive())
+            if (pTemp->IsAlive())
                 pTemp->CastSpell(nullptr, SPELL_FEL_CRYSTAL_VISUAL, TRIGGERED_NONE);
     }
 }

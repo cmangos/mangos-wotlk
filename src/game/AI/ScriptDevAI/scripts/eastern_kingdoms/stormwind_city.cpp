@@ -886,7 +886,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 {
                     if (Creature* pGuard = m_creature->GetMap()->GetCreature(*itr))
                     {
-                        if (!pGuard->isAlive())
+                        if (!pGuard->IsAlive())
                             continue;
 
                         pGuard->UpdateEntry(NPC_GUARD_ONYXIA);
@@ -1001,7 +1001,7 @@ struct npc_reginald_windsorAI : public npc_escortAI, private DialogueHelper
                 {
                     if (Creature* pGuard = m_creature->GetMap()->GetCreature(*itr))
                     {
-                        if (!pGuard->isAlive() && pGuard->GetEntry() == NPC_GUARD_ONYXIA)
+                        if (!pGuard->IsAlive() && pGuard->GetEntry() == NPC_GUARD_ONYXIA)
                             ++uiDeadGuardsCount;
                     }
                 }

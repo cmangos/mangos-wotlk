@@ -152,7 +152,7 @@ UnitAI* GetAI_npc_collapsing_icicle(Creature* pCreature)
 
 bool AreaTrigger_at_pit_of_saron(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (pPlayer->isGameMaster() || !pPlayer->isAlive())
+    if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
         return false;
 
     instance_pit_of_saron* pInstance = (instance_pit_of_saron*)pPlayer->GetInstanceData();

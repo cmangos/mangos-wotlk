@@ -508,7 +508,7 @@ void instance_violet_hold::CallGuards(bool bRespawn)
         {
             if (bRespawn)
                 pGuard->Respawn();
-            else if (pGuard->isAlive())
+            else if (pGuard->IsAlive())
             {
                 pGuard->SetWalk(false);
                 pGuard->GetMotionMaster()->MovePoint(0, fGuardExitLoc[0], fGuardExitLoc[1], fGuardExitLoc[2]);

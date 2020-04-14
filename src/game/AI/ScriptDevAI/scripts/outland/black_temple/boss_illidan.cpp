@@ -2122,7 +2122,7 @@ struct npc_shadow_demonAI : public ScriptedAI
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
-        if (eventType == AI_EVENT_CUSTOM_A && m_creature->isAlive()) // Channel ended for any reason
+        if (eventType == AI_EVENT_CUSTOM_A && m_creature->IsAlive()) // Channel ended for any reason
             m_targetGuid = ObjectGuid(); // find new target on next AI update
     }
 
@@ -2150,7 +2150,7 @@ struct npc_shadow_demonAI : public ScriptedAI
         if (movementType != POINT_MOTION_TYPE || !pointId)
             return;
 
-        if (!m_creature->isAlive())
+        if (!m_creature->IsAlive())
         {
             sLog.outCustomLog("Why did shadow demon movement trigger?");
             // sLog.traceLog();

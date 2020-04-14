@@ -159,7 +159,7 @@ void instance_blood_furnace::SetData(uint32 uiType, uint32 uiData)
                             {
                                 pOrc->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                                 
-                                if (pOrc->isAlive())
+                                if (pOrc->IsAlive())
                                     pOrc->ForcedDespawn();
                                  
                                 pOrc->Respawn();
@@ -390,7 +390,7 @@ void instance_blood_furnace::DoSortBroggokOrcs()
                     if (pOrc->IsWithinDistInMap(pDoor, 15.0f) && pOrc->GetPositionZ() < 15.0f)
                     {
                         i.m_sSortedOrcGuids.insert(pOrc->GetObjectGuid());
-                        if (!pOrc->isAlive())
+                        if (!pOrc->IsAlive())
                             pOrc->Respawn();
                         break;
                     }

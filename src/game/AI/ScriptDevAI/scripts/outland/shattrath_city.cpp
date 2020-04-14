@@ -115,7 +115,7 @@ struct npc_dirty_larryAI : public ScriptedAI
         {
             if (Creature* pCreepjack = m_creature->GetMap()->GetCreature(m_creepjackGuid))
             {
-                if (!pCreepjack->GetCombatManager().IsInEvadeMode() && pCreepjack->isAlive())
+                if (!pCreepjack->GetCombatManager().IsInEvadeMode() && pCreepjack->IsAlive())
                     pCreepjack->AI()->EnterEvadeMode();
 
                 pCreepjack->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
@@ -123,7 +123,7 @@ struct npc_dirty_larryAI : public ScriptedAI
 
             if (Creature* pMalone = m_creature->GetMap()->GetCreature(m_maloneGuid))
             {
-                if (!pMalone->GetCombatManager().IsInEvadeMode() && pMalone->isAlive())
+                if (!pMalone->GetCombatManager().IsInEvadeMode() && pMalone->IsAlive())
                     pMalone->AI()->EnterEvadeMode();
 
                 pMalone->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
@@ -164,7 +164,7 @@ struct npc_dirty_larryAI : public ScriptedAI
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
                 SetReactState(REACT_AGGRESSIVE);
 
-                if (pPlayer->isAlive())
+                if (pPlayer->IsAlive())
                 {
                     if (!m_creature->isInCombat())
                         AttackStart(pPlayer);
@@ -228,14 +228,14 @@ struct npc_dirty_larryAI : public ScriptedAI
 
             if (Creature* pCreepjack = m_creature->GetMap()->GetCreature(m_creepjackGuid))
             {
-                if (!pCreepjack->GetCombatManager().IsInEvadeMode() && pCreepjack->isAlive())
+                if (!pCreepjack->GetCombatManager().IsInEvadeMode() && pCreepjack->IsAlive())
                     pCreepjack->AI()->EnterEvadeMode();
 
                 pCreepjack->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             }
             if (Creature* pMalone = m_creature->GetMap()->GetCreature(m_maloneGuid))
             {
-                if (!pMalone->GetCombatManager().IsInEvadeMode() && pMalone->isAlive())
+                if (!pMalone->GetCombatManager().IsInEvadeMode() && pMalone->IsAlive())
                     pMalone->AI()->EnterEvadeMode();
 
                 pMalone->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);

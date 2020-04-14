@@ -330,7 +330,7 @@ void instance_black_temple::SetData(uint32 type, uint32 data)
                 {
                     if (Creature* soul = instance->GetCreature(guid))
                     {
-                        if (!soul->isAlive())
+                        if (!soul->IsAlive())
                         {
                             soul->SetRespawnDelay(time(nullptr) + 7 * DAY);
                             soul->SaveRespawnTime();

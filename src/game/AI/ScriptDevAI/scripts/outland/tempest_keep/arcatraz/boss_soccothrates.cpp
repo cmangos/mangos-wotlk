@@ -151,7 +151,7 @@ struct boss_soccothratesAI : public ScriptedAI, private DialogueHelper
         m_creature->LoadCreatureAddon(true);
 
         // should evade to the attack position
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
             m_creature->GetMotionMaster()->MovePoint(1, aSoccotharesStartPos[0], aSoccotharesStartPos[1], aSoccotharesStartPos[2]);
 
         if (m_pInstance)

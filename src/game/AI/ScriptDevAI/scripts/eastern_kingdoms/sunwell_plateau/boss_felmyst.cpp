@@ -164,7 +164,7 @@ struct boss_felmystAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_SOUL_SEVER, CAST_TRIGGERED);
 
         // Fly back to the home flight location
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
         {
             float fX, fY, fZ;
             m_creature->SetLevitate(true);

@@ -270,7 +270,7 @@ struct mob_illidari_councilAI : public ScriptedAI, public TimerManager
         for (uint32 i : aCouncilMember)
         {
             Creature* member = m_instance->GetSingleCreatureFromStorage(i);
-            if (member && member->isAlive())
+            if (member && member->IsAlive())
                 member->CastSpell(nullptr, SPELL_QUIET_SUICIDE, TRIGGERED_OLD_TRIGGERED);
         }
 

@@ -198,7 +198,7 @@ void instance_zulaman::OnCreatureEvade(Creature* creature)
                 if (!temp)
                     break;
 
-                if (!temp->isAlive())
+                if (!temp->IsAlive())
                     temp->Respawn();
                 
                 temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
@@ -219,7 +219,7 @@ void instance_zulaman::OnCreatureEvade(Creature* creature)
                     if (!pTemp)
                         break;
 
-                    if (!pTemp->isAlive())
+                    if (!pTemp->IsAlive())
                         pTemp->Respawn();
                 }
             }
@@ -435,7 +435,7 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
             {
                 if (Creature* pTanzar = instance->GetCreature(m_aEventNpcInfo[INDEX_NALORAKK].npGuid))
                 {
-                    if (pTanzar->isAlive())
+                    if (pTanzar->IsAlive())
                     {
                         pTanzar->HandleEmoteState(EMOTE_ONESHOT_NONE);
                         pTanzar->NearTeleportTo(129.8052f, 807.7782f, 33.37591f, 4.7f);
@@ -444,7 +444,7 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
                 }
                 if (Creature* pHarkor = instance->GetCreature(m_aEventNpcInfo[INDEX_AKILZON].npGuid))
                 {
-                    if (pHarkor->isAlive())
+                    if (pHarkor->IsAlive())
                     {
                         pHarkor->NearTeleportTo(130.8155f, 809.079f, 33.37591f, 4.7f);
                         pHarkor->GetMotionMaster()->MoveWaypoint(1, 3, 1000);
@@ -452,7 +452,7 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
                 }
                 if (Creature* pAshli = instance->GetCreature(m_aEventNpcInfo[INDEX_HALAZZI].npGuid))
                 {
-                    if (pAshli->isAlive())
+                    if (pAshli->IsAlive())
                     {
                         pAshli->NearTeleportTo(137.0035f, 814.2776f, 33.37591f, 4.7f);
                         pAshli->GetMotionMaster()->MoveWaypoint(1, 3, 1000);
@@ -557,7 +557,7 @@ void instance_zulaman::SendNextBearWave(Unit* target)
     for (auto itr : m_nalorakkEvent[m_uiBearEventPhase].nalorakkTrashSet)
     {
         Creature* temp = instance->GetCreature(itr);
-        if (temp && temp->isAlive())
+        if (temp && temp->IsAlive())
         {
             temp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             if (sWaypointMgr.GetDefaultPath(0, temp->GetGUIDLow(), nullptr)) // mob in each wave has WPs

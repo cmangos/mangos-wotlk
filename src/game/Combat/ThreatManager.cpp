@@ -460,7 +460,7 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
         return;
 
     // not to dead and not for dead
-    if (!victim->isAlive() || !getOwner()->isAlive())
+    if (!victim->IsAlive() || !getOwner()->IsAlive())
         return;
 
     float calculatedThreat = ThreatCalcHelper::CalcThreat(victim, iOwner, threat, crit, schoolMask, threatSpell, assist);
@@ -471,7 +471,7 @@ void ThreatManager::addThreat(Unit* victim, float threat, bool crit, SpellSchool
         {
             if (Unit* redirectedTarget = victim->getHostileRefManager().GetThreatRedirectionTarget())
             {
-                if (redirectedTarget != getOwner() && redirectedTarget->isAlive())
+                if (redirectedTarget != getOwner() && redirectedTarget->IsAlive())
                 {
                     float redirectedThreat = threat * redirectedMod;
                     addThreatDirectly(redirectedTarget, redirectedThreat);
@@ -501,7 +501,7 @@ void ThreatManager::addThreatDirectly(Unit* victim, float threat)
         iUpdateNeed = true;
         getOwner()->TriggerAggroLinkingEvent(victim);
         Unit* victim_owner = victim->GetOwner();
-        if (victim_owner && victim_owner->isAlive() && getOwner()->CanAttack(victim_owner) && !victim_owner->hasUnitState(UNIT_STAT_FEIGN_DEATH))
+        if (victim_owner && victim_owner->IsAlive() && getOwner()->CanAttack(victim_owner) && !victim_owner->hasUnitState(UNIT_STAT_FEIGN_DEATH))
             addThreat(victim_owner, 0.0f);     // create a threat to the owner of a pet, if the pet attacks
         if (victim->GetTypeId() == TYPEID_PLAYER && static_cast<Player*>(victim)->isGameMaster())
             hostileReference->setOnlineOfflineState(false); // GM is always offline

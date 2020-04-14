@@ -477,7 +477,7 @@ bool GOUse_go_manticron_cube(Player* player, GameObject* go)
 
         if (Creature* pMagtheridon = pInstance->GetSingleCreatureFromStorage(NPC_MAGTHERIDON))
         {
-            if (!pMagtheridon->isAlive())
+            if (!pMagtheridon->IsAlive())
                 return true;
 
             // the real spell is cast by player - casts SPELL_SHADOW_GRASP_VISUAL

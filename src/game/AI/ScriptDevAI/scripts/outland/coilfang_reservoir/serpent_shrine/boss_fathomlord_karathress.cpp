@@ -182,7 +182,7 @@ struct boss_fathomlord_karathressAI : public ScriptedAI
                 if (Creature* pAdvisor = m_pInstance->GetSingleCreatureFromStorage(aAdvisor))
                 {
                     // stack max three times (one for each alive)
-                    if (pAdvisor->isAlive())
+                    if (pAdvisor->IsAlive())
                     {
                         pAdvisor->InterruptNonMeleeSpells(false);
                         pAdvisor->CastSpell(m_creature, SPELL_BLESSING_OF_THE_TIDES, TRIGGERED_OLD_TRIGGERED);
@@ -446,7 +446,7 @@ struct boss_fathomguard_caribdisAI : public ScriptedAI
             {
                 if (Creature* pHealTarget = m_pInstance->GetSingleCreatureFromStorage(aHealTargets[i]))
                 {
-                    if (pHealTarget->isAlive() && pHealTarget->GetHealthPercent() < 50.0f)
+                    if (pHealTarget->IsAlive() && pHealTarget->GetHealthPercent() < 50.0f)
                     {
                         if (DoCastSpellIfCan(pHealTarget, SPELL_HEALING_WAVE) == CAST_OK)
                         {

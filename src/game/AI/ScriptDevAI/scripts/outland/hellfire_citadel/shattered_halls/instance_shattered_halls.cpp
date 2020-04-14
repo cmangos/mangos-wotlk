@@ -295,7 +295,7 @@ InstanceData* GetInstanceData_instance_shattered_halls(Map* pMap)
 
 bool AreaTrigger_at_shattered_halls(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
-    if (pPlayer->isGameMaster() || !pPlayer->isAlive())
+    if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
         return false;
 
     instance_shattered_halls* pInstance = (instance_shattered_halls*)pPlayer->GetInstanceData();

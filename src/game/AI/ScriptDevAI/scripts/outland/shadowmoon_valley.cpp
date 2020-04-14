@@ -1093,7 +1093,7 @@ struct npc_lord_illidan_stormrageAI : public Scripted_NoMovementAI
             {
                 if (Player* pMember = pRef->getSource())
                 {
-                    if (!pMember->isAlive())
+                    if (!pMember->IsAlive())
                         ++uiDeadMemberCount;
 
                     // if we already failed no need to check other things
@@ -1600,7 +1600,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
             GetCreatureListWithEntryInGrid(lOtherChannelers, m_creature, NPC_SHADOWMOON_SOULSTEALER, 175.0f);
 
             for (auto& lOtherChanneler : lOtherChannelers)
-                if (lOtherChanneler->isAlive())
+                if (lOtherChanneler->IsAlive())
                 {
                     lOtherChanneler->AI()->AttackStart(attacker);
                     lOtherChanneler->SetActiveObjectState(true);
@@ -1611,7 +1611,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
                             for (GroupReference* ref = group->GetFirstMember(); ref != nullptr; ref = ref->next())
                             {
                                 Player* member = ref->getSource();
-                                if (member && member->isAlive() && m_cHOFVisualTrigger && m_cHOFVisualTrigger->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
+                                if (member && member->IsAlive() && m_cHOFVisualTrigger && m_cHOFVisualTrigger->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
                                     lOtherChanneler->AI()->AttackStart(member);
                             }
 
@@ -1673,13 +1673,13 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
                 for (GroupReference* ref = group->GetFirstMember(); ref != nullptr; ref = ref->next())
                 {
                     Player* member = ref->getSource(); // any member gettable, alive & in range
-                    if (member && member->isAlive() && m_cHOFVisualTrigger && m_cHOFVisualTrigger->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
+                    if (member && member->IsAlive() && m_cHOFVisualTrigger && m_cHOFVisualTrigger->IsWithinDistInMap(member, MAX_PLAYER_DISTANCE))
                         return true;
                 }
             }
             else // player alone
             {
-                if (player->isAlive() && m_cHOFVisualTrigger && m_cHOFVisualTrigger->IsWithinDistInMap(player, MAX_PLAYER_DISTANCE))
+                if (player->IsAlive() && m_cHOFVisualTrigger && m_cHOFVisualTrigger->IsWithinDistInMap(player, MAX_PLAYER_DISTANCE))
                     return true;
             }
         }
@@ -2187,12 +2187,12 @@ struct npc_spawned_oronok_tornheartAI : public ScriptedAI, private DialogueHelpe
 
         Reset();
 
-        if (!m_creature->isAlive())
+        if (!m_creature->IsAlive())
             return;
 
         if (Creature* pCyrukh = GetSpeakerByEntry(NPC_CYRUKH_THE_FIRELORD))
         {
-            if (!pCyrukh->isAlive())
+            if (!pCyrukh->IsAlive())
             {
                 m_creature->GetMotionMaster()->MovePoint(POINT_ID_EPILOGUE, aDamnationLocations[6].m_fX, aDamnationLocations[6].m_fY, aDamnationLocations[6].m_fZ);
                 m_creature->setFaction(FACTION_ORONOK_FRIENDLY);

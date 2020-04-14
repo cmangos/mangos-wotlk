@@ -158,7 +158,7 @@ struct boss_hodirAI : public ScriptedAI
         m_creature->RemoveAllAurasOnEvade();
         m_creature->CombatStop(true);
 
-        if (m_creature->isAlive() && !m_bEventFinished)
+        if (m_creature->IsAlive() && !m_bEventFinished)
             m_creature->GetMotionMaster()->MoveTargetedHome();
 
         m_creature->SetLootRecipient(nullptr);

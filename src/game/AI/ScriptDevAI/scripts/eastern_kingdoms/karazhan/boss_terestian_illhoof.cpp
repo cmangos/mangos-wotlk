@@ -207,7 +207,7 @@ struct boss_terestianAI : public ScriptedAI, public CombatActions
     void JustReachedHome() override
     {
         Creature* kilrek = m_creature->GetMap()->GetAnyTypeCreature(m_kilrekGuid);
-        if (!kilrek || !kilrek->isAlive())
+        if (!kilrek || !kilrek->IsAlive())
             DoCastSpellIfCan(m_creature, SPELL_SUMMON_IMP);
 
         if (m_pInstance)

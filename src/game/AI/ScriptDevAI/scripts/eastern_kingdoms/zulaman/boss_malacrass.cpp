@@ -278,7 +278,7 @@ struct boss_malacrassAI : public CombatAI
     void DoInitializeAdds()
     {
         // not if m_creature are dead, so avoid
-        if (!m_creature->isAlive())
+        if (!m_creature->IsAlive())
             return;
 
         // it's empty, so first time

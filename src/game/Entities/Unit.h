@@ -1726,7 +1726,7 @@ class Unit : public WorldObject
         void SetCanParry(const bool flag);
         void SetCanBlock(const bool flag);
 
-        bool CanReactInCombat() const { return (isAlive() && !IsCrowdControlled() && !GetCombatManager().IsEvadingHome()); }
+        bool CanReactInCombat() const { return (IsAlive() && !IsCrowdControlled() && !GetCombatManager().IsEvadingHome()); }
         bool CanDodgeInCombat() const;
         bool CanDodgeInCombat(const Unit* attacker) const;
         bool CanParryInCombat() const;
@@ -1989,7 +1989,7 @@ class Unit : public WorldObject
         void SendThreatRemove(HostileReference* pHostileReference) const;
         void SendThreatUpdate();
 
-        bool isAlive() const { return (m_deathState == ALIVE); };
+        bool IsAlive() const { return (m_deathState == ALIVE); };
         bool isDead() const { return (m_deathState == DEAD || m_deathState == CORPSE); };
         DeathState getDeathState() const { return m_deathState; };
         virtual void SetDeathState(DeathState s);           // overwritten in Creature/Player/Pet

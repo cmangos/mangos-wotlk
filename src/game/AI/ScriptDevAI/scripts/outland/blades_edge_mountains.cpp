@@ -356,7 +356,7 @@ struct npc_bloodmaul_stout_triggerAI : public ScriptedAI
 
                 do
                 {
-                    if ((*ogreItr)->isAlive() && !(*ogreItr)->HasAura(SPELL_INTOXICATION))
+                    if ((*ogreItr)->IsAlive() && !(*ogreItr)->HasAura(SPELL_INTOXICATION))
                         pOgre = *ogreItr;
 
                     ++ogreItr;
@@ -777,7 +777,7 @@ struct npc_simon_game_bunnyAI : public ScriptedAI
                     else
                     {
                         DoCastSpellIfCan(pInvoker, SPELL_BAD_PRESS, CAST_TRIGGERED);
-                        if (!m_bIsLargeEvent && !pInvoker->isAlive()) // if player got killed on small event
+                        if (!m_bIsLargeEvent && !pInvoker->IsAlive()) // if player got killed on small event
                         {
                             DoCastSpellIfCan(m_creature, SPELL_VISUAL_GAME_FAILED, CAST_TRIGGERED);
                             DoCleanupGame();
@@ -1628,8 +1628,8 @@ enum
 
 bool AreaTrigger_at_raven_prophecy(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (/*pPlayer->isGameMaster() ||*/ pPlayer->isAlive() &&
-        pPlayer->HasAura(UNDERSTAND_RAVENSPEECH_AURA) &&
+    if (/*pPlayer->isGameMaster() ||*/ pPlayer->IsAlive() &&
+                                       pPlayer->HasAura(UNDERSTAND_RAVENSPEECH_AURA) &&
         pPlayer->GetQuestStatus(QUEST_WHISPERS_OF_THE_RAVEN_GOD) == QUEST_STATUS_INCOMPLETE)
     {
         auto prophecyIterator = prophecies.find(pAt->id);
@@ -1986,7 +1986,7 @@ struct npc_warp_gate : public Scripted_NoMovementAI
 
         m_guidSmoke = ObjectGuid();
 
-        if (m_creature->isAlive())
+        if (m_creature->IsAlive())
         {
             float x, y, z, ori;
             m_creature->GetRespawnCoord(x, y, z, &ori);
@@ -2270,7 +2270,7 @@ struct npc_soulgrinderAI : public ScriptedAI
                     dummy->ForcedDespawn();
 
             if (Creature* gronn = m_creature->GetMap()->GetCreature(m_skullocSoulgrinder))
-                if (gronn->isAlive())
+                if (gronn->IsAlive())
                     gronn->ForcedDespawn();
         }
     }

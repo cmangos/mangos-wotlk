@@ -297,7 +297,7 @@ struct boss_sartharionAI : public ScriptedAI
         // if at least one of the dragons are alive and are being called
         uint8 uiCountFetchableDragons = 0;
 
-        if (pTene && pTene->isAlive() && !pTene->getVictim())
+        if (pTene && pTene->IsAlive() && !pTene->getVictim())
         {
             ++uiCountFetchableDragons;
             pTene->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aTene[0].m_fX, m_aTene[0].m_fY, m_aTene[0].m_fZ);
@@ -306,7 +306,7 @@ struct boss_sartharionAI : public ScriptedAI
                 pTene->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
-        if (pShad && pShad->isAlive() && !pShad->getVictim())
+        if (pShad && pShad->IsAlive() && !pShad->getVictim())
         {
             ++uiCountFetchableDragons;
             pShad->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aShad[0].m_fX, m_aShad[0].m_fY, m_aShad[0].m_fZ);
@@ -315,7 +315,7 @@ struct boss_sartharionAI : public ScriptedAI
                 pShad->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         }
 
-        if (pVesp && pVesp->isAlive() && !pVesp->getVictim())
+        if (pVesp && pVesp->IsAlive() && !pVesp->getVictim())
         {
             ++uiCountFetchableDragons;
             pVesp->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aVesp[0].m_fX, m_aVesp[0].m_fY, m_aVesp[0].m_fZ);
@@ -335,7 +335,7 @@ struct boss_sartharionAI : public ScriptedAI
         if (m_pInstance)
         {
             Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiEntry);
-            if (pTemp && pTemp->isAlive())
+            if (pTemp && pTemp->IsAlive())
             {
                 if (pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
                     pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
@@ -703,7 +703,7 @@ struct dummy_dragonAI : public ScriptedAI
 
             for (const auto& i : PlayerList)
             {
-                if (i.getSource()->isAlive() && i.getSource()->HasAura(uiSpellId))
+                if (i.getSource()->IsAlive() && i.getSource()->HasAura(uiSpellId))
                     i.getSource()->RemoveAurasDueToSpell(uiSpellId);
             }
         }

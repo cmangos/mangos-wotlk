@@ -701,7 +701,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
             case INSTANCE_CONDITION_ID_SOCRETHAR_GOSSIP:
             {
                 Creature const* socrethar = GetSingleCreatureFromStorage(NPC_SOCRETHAR);
-                if (!socrethar || !socrethar->isAlive() || socrethar->isInCombat())
+                if (!socrethar || !socrethar->IsAlive() || socrethar->isInCombat())
                     return true;
                 return false;
             }

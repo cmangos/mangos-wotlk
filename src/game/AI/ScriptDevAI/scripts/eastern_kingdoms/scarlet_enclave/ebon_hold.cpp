@@ -179,7 +179,7 @@ struct npc_a_special_surpriseAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_playerGuid && !m_creature->getVictim() && m_creature->isAlive())
+        if (m_playerGuid && !m_creature->getVictim() && m_creature->IsAlive())
         {
             if (m_uiExecuteSpeech_Timer < uiDiff)
             {
@@ -1678,7 +1678,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                     if (Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(i.m_uiEntry))
                     {
                         // normally it shouldn't happen
-                        if (!pTemp->isAlive())
+                        if (!pTemp->IsAlive())
                             pTemp->Respawn();
                         else
                             pTemp->AI()->EnterEvadeMode();
@@ -1857,7 +1857,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
         for (const auto& itr : PlayerList)
         {
             Player* pPlayer = itr.getSource();
-            if (pPlayer && pPlayer->GetQuestStatus(QUEST_ID_LIGHT_OF_DAWN) == QUEST_STATUS_INCOMPLETE && pPlayer->isAlive() && m_creature->IsWithinDistInMap(pPlayer, 50.0f))
+            if (pPlayer && pPlayer->GetQuestStatus(QUEST_ID_LIGHT_OF_DAWN) == QUEST_STATUS_INCOMPLETE && pPlayer->IsAlive() && m_creature->IsWithinDistInMap(pPlayer, 50.0f))
                 pPlayer->CastSpell(pPlayer, SPELL_THE_LIGHT_OF_DAWN_CREDIT, TRIGGERED_OLD_TRIGGERED);
         }
     }
@@ -2674,7 +2674,7 @@ struct npc_fellow_death_knightAI : public ScriptedAI
 
     void EnterEvadeMode() override
     {
-        if (!m_creature->isAlive())
+        if (!m_creature->IsAlive())
             return;
 
         if (!m_pInstance)

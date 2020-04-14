@@ -286,7 +286,7 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
                 return false;
             return target->GetHealth() * 100 <= health.percent * target->GetMaxHealth();
         case ACHIEVEMENT_CRITERIA_REQUIRE_T_PLAYER_DEAD:
-            if (!target || target->GetTypeId() != TYPEID_PLAYER || target->isAlive() || ((Player*)target)->GetDeathTimer() == 0)
+            if (!target || target->GetTypeId() != TYPEID_PLAYER || target->IsAlive() || ((Player*)target)->GetDeathTimer() == 0)
                 return false;
             // flag set == must be same team, not set == different team
             return (((Player*)target)->GetTeam() == source->GetTeam()) == (player_dead.own_team_flag != 0);

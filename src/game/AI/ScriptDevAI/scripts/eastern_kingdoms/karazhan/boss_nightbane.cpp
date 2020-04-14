@@ -418,7 +418,7 @@ bool ProcessEventId_event_spell_summon_nightbane(uint32 /*eventId*/, Object* sou
         if (instance->GetData(TYPE_NIGHTBANE) == NOT_STARTED || instance->GetData(TYPE_NIGHTBANE) == FAIL)
         {
             Creature* nightbane = instance->GetSingleCreatureFromStorage(NPC_NIGHTBANE);
-            if (nightbane && nightbane->isAlive())
+            if (nightbane && nightbane->IsAlive())
             {
                 DoScriptText(EMOTE_AWAKEN, ((Player*)source));
                 instance->SetData(TYPE_NIGHTBANE, IN_PROGRESS);

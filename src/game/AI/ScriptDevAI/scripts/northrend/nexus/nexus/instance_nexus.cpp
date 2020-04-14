@@ -146,7 +146,7 @@ void instance_nexus::SetData(uint32 uiType, uint32 uiData)
         SetData(TYPE_KERISTRASZA, SPECIAL);
 
         Creature* pCreature = GetSingleCreatureFromStorage(NPC_KERISTRASZA);
-        if (pCreature && pCreature->isAlive())
+        if (pCreature && pCreature->IsAlive())
         {
             pCreature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             pCreature->RemoveAurasDueToSpell(SPELL_FROZEN_PRISON);
