@@ -2005,7 +2005,33 @@ void BattleGroundMgr::InitAutomaticArenaPointDistribution()
     if (sWorld.getConfig(CONFIG_BOOL_ARENA_AUTO_DISTRIBUTE_POINTS))
     {
         QueryResult* result = CharacterDatabase.Query("SELECT NextArenaPointDistributionTime FROM saved_variables");
+        bool save = false;
+        bool insert = false;
         if (!result) // if not set generate time for next wednesday
+            insert = true;
+        else
+        {
+            m_nextAutoDistributionTime = time_t((*result)[0].GetUInt64());
+            if (m_nextAutoDistributionTime == 0) // uninitialized
+                save = true;
+            else // if time already exists - check for config changes
+            {
+                tm distribTime = *localtime(&m_nextAutoDistributionTime);
+                if (distribTime.tm_hour != sWorld.getConfig(CONFIG_UINT32_QUEST_DAILY_RESET_HOUR))
+                {
+                    if (time(nullptr) >= m_nextAutoDistributionTime) // if it already expired, do not save and only adjust hour
+                    {
+                        distribTime.tm_hour = sWorld.getConfig(CONFIG_UINT32_QUEST_DAILY_RESET_HOUR);
+                        m_nextAutoDistributionTime = mktime(&distribTime);
+                    }
+                    else
+                        save = true;
+                }
+            }
+            delete result;
+        }
+
+        if (save || insert)
         {
             // generate time by config on first server launch
             time_t curTime = time(nullptr);
@@ -2017,12 +2043,10 @@ void BattleGroundMgr::InitAutomaticArenaPointDistribution()
             localTm.tm_isdst = -1;
             m_nextAutoDistributionTime = mktime(&localTm);
 
-            CharacterDatabase.PExecute("INSERT INTO saved_variables (NextArenaPointDistributionTime) VALUES ('" UI64FMTD "')", uint64(m_nextAutoDistributionTime));
-        }
-        else
-        {
-            m_nextAutoDistributionTime = time_t((*result)[0].GetUInt64());
-            delete result;
+            if (insert)
+                CharacterDatabase.PExecute("INSERT INTO saved_variables (NextArenaPointDistributionTime) VALUES ('" UI64FMTD "')", uint64(m_nextAutoDistributionTime));
+            if (save)
+                CharacterDatabase.PExecute("UPDATE saved_variables SET NextArenaPointDistributionTime = '" UI64FMTD "'", uint64(m_nextAutoDistributionTime));
         }
 
         //uint32 dayofweek = sWorld.getConfig(CONFIG_UINT32_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS);
