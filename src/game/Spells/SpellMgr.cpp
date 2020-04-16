@@ -464,6 +464,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->SpellFamilyFlags & uint64(0x12040000))
                 return SPELL_MAGE_ARMOR;
 
+            // Arcane Power (using id instead of mask):
+            if (spellInfo->Id == 12042)
+                return SPELL_BUFF_CASTER_POWER;
+
             break;
         }
         case SPELLFAMILY_WARRIOR:
@@ -498,6 +502,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         }
         case SPELLFAMILY_PRIEST:
         {
+            // Power Infusion:
+            if (spellInfo->Id == 10060)
+                return SPELL_BUFF_CASTER_POWER;
+
             // "Well Fed" buff from Blessed Sunfruit, Blessed Sunfruit Juice, Alterac Spring Water
             if (spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_SITTING) &&
                     (spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTERRUPT) &&

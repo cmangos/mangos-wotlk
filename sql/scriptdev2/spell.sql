@@ -46,7 +46,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34026,'spell_kill_command');
 
 -- Priest
-
+(10060,'spell_stacking_rules_override'),
 
 -- Warlock
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
