@@ -213,8 +213,8 @@ void WorldSession::HandleCreatureQueryOpcode(WorldPacket& recv_data)
         data << uint32(ci->KillCredit[0]);                  // new in 3.1, kill credit
         data << uint32(ci->KillCredit[1]);                  // new in 3.1, kill credit
 
-        for (unsigned int i : ci->ModelId)
-            data << uint32(i);
+        for (uint32 i : ci->ModelId)
+            data << i;
 
         data << float(ci->HealthMultiplier);                // health multiplier
         data << float(ci->PowerMultiplier);                 // power multiplier

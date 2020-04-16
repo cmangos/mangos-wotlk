@@ -29,6 +29,7 @@
 #include "Globals/ObjectAccessor.h"
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Groups/Group.h"
+#include "Tools/Formulas.h"
 
 #ifdef BUILD_PLAYERBOT
 #include "PlayerBot/Base/PlayerbotAI.h"
@@ -228,7 +229,151 @@ void WorldSession::HandleQuestQueryOpcode(WorldPacket& recv_data)
     Quest const* pQuest = sObjectMgr.GetQuestTemplate(quest);
     if (pQuest)
     {
-        _player->PlayerTalkClass->SendQuestQueryResponse(pQuest);
+        std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
+        std::string Title = pQuest->GetTitle();
+        std::string Details = pQuest->GetDetails();
+        std::string Objectives = pQuest->GetObjectives();
+        std::string EndText = pQuest->GetEndText();
+        std::string CompletedText = pQuest->GetCompletedText();
+
+        for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+            ObjectiveText[i] = pQuest->ObjectiveText[i];
+
+        int loc_idx = GetSessionDbLocaleIndex();
+        if (loc_idx >= 0)
+        {
+            if (QuestLocale const* ql = sObjectMgr.GetQuestLocale(pQuest->GetQuestId()))
+            {
+                if (ql->Title.size() > (size_t)loc_idx && !ql->Title[loc_idx].empty())
+                    Title = ql->Title[loc_idx];
+                if (ql->Details.size() > (size_t)loc_idx && !ql->Details[loc_idx].empty())
+                    Details = ql->Details[loc_idx];
+                if (ql->Objectives.size() > (size_t)loc_idx && !ql->Objectives[loc_idx].empty())
+                    Objectives = ql->Objectives[loc_idx];
+                if (ql->EndText.size() > (size_t)loc_idx && !ql->EndText[loc_idx].empty())
+                    EndText = ql->EndText[loc_idx];
+                if (ql->CompletedText.size() > (size_t)loc_idx && !ql->CompletedText[loc_idx].empty())
+                    CompletedText = ql->CompletedText[loc_idx];
+
+                for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
+                    if (ql->ObjectiveText[i].size() > (size_t)loc_idx && !ql->ObjectiveText[i][loc_idx].empty())
+                        ObjectiveText[i] = ql->ObjectiveText[i][loc_idx];
+            }
+        }
+
+        WorldPacket data(SMSG_QUEST_QUERY_RESPONSE, 100);       // guess size
+
+        data << uint32(pQuest->GetQuestId());                   // quest id
+        data << uint32(pQuest->GetQuestMethod());               // Accepted values: 0, 1 or 2. 0==IsAutoComplete() (skip objectives/details)
+        data << int32(pQuest->GetQuestLevel());                 // may be -1, static data, in other cases must be used dynamic level: Player::GetQuestLevelForPlayer (0 is not known, but assuming this is no longer valid for quest intended for client)
+        data << uint32(pQuest->GetMinLevel());                  // min required level to obtain (added for 3.3). Assumed allowed (database) range is -1 to 255 (still using uint32, since negative value would not be of any known use for client)
+        data << uint32(pQuest->GetZoneOrSort());                // zone or sort to display in quest log
+
+        data << uint32(pQuest->GetType());                      // quest type
+        data << uint32(pQuest->GetSuggestedPlayers());          // suggested players count
+
+        data << uint32(pQuest->GetRepObjectiveFaction());       // shown in quest log as part of quest objective
+        data << uint32(pQuest->GetRepObjectiveValue());         // shown in quest log as part of quest objective
+
+        data << uint32(0);                                      // RequiredOpositeRepFaction
+        data << uint32(0);                                      // RequiredOpositeRepValue, required faction value with another (oposite) faction (objective)
+
+        data << uint32(pQuest->GetNextQuestInChain());          // client will request this quest from NPC, if not 0
+        data << uint32(pQuest->GetRewXPId());                   // column index in QuestXP.dbc (row based on quest level)
+
+        if (pQuest->HasQuestFlag(QUEST_FLAGS_HIDDEN_REWARDS))
+            data << uint32(0);                                  // Hide money rewarded
+        else
+            data << uint32(pQuest->GetRewOrReqMoney());         // reward money (below max lvl)
+
+        data << uint32(pQuest->GetRewMoneyMaxLevel());          // used in XP calculation at client
+        data << uint32(pQuest->GetRewSpell());                  // reward spell, this spell will display (icon) (casted if RewSpellCast==0)
+        data << uint32(pQuest->GetRewSpellCast());              // casted spell
+
+        // rewarded honor points
+        data << uint32(pQuest->GetRewHonorAddition());
+        data << float(pQuest->GetRewHonorMultiplier());         // new reward honor (multiplied by ~62 at client side)
+
+        data << uint32(pQuest->GetSrcItemId());                 // source item id
+        data << uint32(pQuest->GetQuestFlags());                // quest flags
+        data << uint32(pQuest->GetCharTitleId());               // CharTitleId, new 2.4.0, player gets this title (id from CharTitles)
+        data << uint32(pQuest->GetPlayersSlain());              // players slain
+        data << uint32(pQuest->GetBonusTalents());              // bonus talents
+        data << uint32(0);                                      // bonus arena points
+        data << uint32(0);                                      // rew rep show mask?
+
+        int iI;
+
+        if (pQuest->HasQuestFlag(QUEST_FLAGS_HIDDEN_REWARDS))
+        {
+            for (iI = 0; iI < QUEST_REWARDS_COUNT; ++iI)
+                data << uint32(0) << uint32(0);
+            for (iI = 0; iI < QUEST_REWARD_CHOICES_COUNT; ++iI)
+                data << uint32(0) << uint32(0);
+        }
+        else
+        {
+            for (iI = 0; iI < QUEST_REWARDS_COUNT; ++iI)
+            {
+                data << uint32(pQuest->RewItemId[iI]);
+                data << uint32(pQuest->RewItemCount[iI]);
+            }
+            for (iI = 0; iI < QUEST_REWARD_CHOICES_COUNT; ++iI)
+            {
+                data << uint32(pQuest->RewChoiceItemId[iI]);
+                data << uint32(pQuest->RewChoiceItemCount[iI]);
+            }
+        }
+
+        for (unsigned int i : pQuest->RewRepFaction)       // reward factions ids
+            data << uint32(i);
+
+        for (int i : pQuest->RewRepValueId)       // columnid in QuestFactionReward.dbc (if negative, from second row)
+            data << int32(i);
+
+        for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)       // reward reputation override. No bonus is expected given
+            data << int32(0);
+        // data << int32(pQuest->RewRepValue[i]);            // current field for store of rep value, can be reused to implement "override value"
+
+        data << pQuest->GetPointMapId();
+        data << pQuest->GetPointX();
+        data << pQuest->GetPointY();
+        data << pQuest->GetPointOpt();
+
+        data << Title;
+        data << Objectives;
+        data << Details;
+        data << EndText;
+        data << CompletedText;                                  // display in quest objectives window once all objectives are completed
+
+        for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; ++iI)
+        {
+            if (pQuest->ReqCreatureOrGOId[iI] < 0)
+            {
+                // client expected gameobject template id in form (id|0x80000000)
+                data << uint32((pQuest->ReqCreatureOrGOId[iI] * (-1)) | 0x80000000);
+            }
+            else
+            {
+                data << uint32(pQuest->ReqCreatureOrGOId[iI]);
+            }
+            data << uint32(pQuest->ReqCreatureOrGOCount[iI]);
+            data << uint32(pQuest->ReqSourceId[iI]);
+            data << uint32(0);                                  // req source count?
+        }
+
+        for (iI = 0; iI < QUEST_ITEM_OBJECTIVES_COUNT; ++iI)
+        {
+            data << uint32(pQuest->ReqItemId[iI]);
+            data << uint32(pQuest->ReqItemCount[iI]);
+        }
+
+        for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; ++iI)
+            data << ObjectiveText[iI];
+
+        SendPacket(data);
+
+        DEBUG_LOG("WORLD: Sent SMSG_QUEST_QUERY_RESPONSE questid=%u", pQuest->GetQuestId());
     }
 }
 

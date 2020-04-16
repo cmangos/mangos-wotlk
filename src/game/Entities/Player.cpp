@@ -2868,6 +2868,7 @@ void Player::GiveLevel(uint32 level)
         m_playerbotAI->GiveLevel(level);
 #endif
     // resend quests status directly
+    GetSession()->SetCurrentPlayerLevel(level);
     SendQuestGiverStatusMultiple();
 }
 
