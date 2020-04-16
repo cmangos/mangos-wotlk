@@ -71,6 +71,8 @@ static const SummonLocation aSteamriggerSpawnLocs[] =
     { -331.161f, -112.212f, -7.66f, 5.259035f },
 };
 
+static const uint32 gnomeSpells[] = { SPELL_SUMMON_GNOME_1, SPELL_SUMMON_GNOME_2, SPELL_SUMMON_GNOME_3 };
+
 struct boss_mekgineer_steamriggerAI : public ScriptedAI
 {
     boss_mekgineer_steamriggerAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -87,7 +89,10 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
     uint32 m_uiSawBladeTimer;
     uint32 m_uiElectrifiedNetTimer;
     uint32 m_uiMechanicTimer;
+    uint32 m_uiBerserkTimer;
     uint8 m_uiMechanicPhaseCount;
+
+    GuidVector m_spawns;
 
     void Reset() override
     {
@@ -96,6 +101,9 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
         m_uiElectrifiedNetTimer = 10000;
         m_uiMechanicTimer       = 20000;
         m_uiMechanicPhaseCount  = 1;
+        m_uiBerserkTimer        = 300000;
+
+        DespawnGuids(m_spawns);
     }
 
     void JustReachedHome() override
@@ -104,7 +112,7 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
             m_pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, FAIL);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
@@ -112,7 +120,7 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
             m_pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, DONE);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         switch (urand(0, 2))
         {
@@ -122,7 +130,7 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
         }
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 2))
         {
@@ -135,10 +143,13 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
             m_pInstance->SetData(TYPE_MEKGINEER_STEAMRIGGER, IN_PROGRESS);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_STEAMRIGGER_MECHANIC)
-            pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0, 0);
+        if (summoned->GetEntry() == NPC_STEAMRIGGER_MECHANIC)
+        {
+            summoned->GetMotionMaster()->MoveFollow(m_creature, 0, 0);
+            m_spawns.push_back(summoned->GetObjectGuid());
+        }
     }
 
     // Wrapper to summon three Mechanics
@@ -146,9 +157,9 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
     {
         DoScriptText(SAY_MECHANICS, m_creature);
 
-        m_creature->CastSpell(m_creature, SPELL_SUMMON_GNOME_1, TRIGGERED_OLD_TRIGGERED);
-        m_creature->CastSpell(m_creature, SPELL_SUMMON_GNOME_2, TRIGGERED_OLD_TRIGGERED);
-        m_creature->CastSpell(m_creature, SPELL_SUMMON_GNOME_3, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_GNOME_1, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_GNOME_2, TRIGGERED_OLD_TRIGGERED);
+        m_creature->CastSpell(nullptr, SPELL_SUMMON_GNOME_3, TRIGGERED_OLD_TRIGGERED);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -193,9 +204,19 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
         // On Heroic mode summon a mechanic at each 20 secs
         if (!m_bIsRegularMode)
         {
+            if (m_uiBerserkTimer <= uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                {
+                    m_uiBerserkTimer = 0;
+                }
+            }
+            else
+                m_uiBerserkTimer -= uiDiff;
+		
             if (m_uiMechanicTimer < uiDiff)
             {
-                m_creature->SummonCreature(NPC_STEAMRIGGER_MECHANIC, aSteamriggerSpawnLocs[2].m_fX, aSteamriggerSpawnLocs[2].m_fY, aSteamriggerSpawnLocs[2].m_fZ, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 5000);
+                m_creature->CastSpell(nullptr, gnomeSpells[urand(0, 2)], TRIGGERED_OLD_TRIGGERED);
                 m_uiMechanicTimer = 20000;
             }
             else
@@ -211,11 +232,6 @@ struct boss_mekgineer_steamriggerAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_mekgineer_steamrigger(Creature* pCreature)
-{
-    return new boss_mekgineer_steamriggerAI(pCreature);
-}
 
 struct mob_steamrigger_mechanicAI : public ScriptedAI
 {
@@ -275,20 +291,15 @@ struct mob_steamrigger_mechanicAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_mob_steamrigger_mechanic(Creature* pCreature)
-{
-    return new mob_steamrigger_mechanicAI(pCreature);
-}
-
 void AddSC_boss_mekgineer_steamrigger()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_mekgineer_steamrigger";
-    pNewScript->GetAI = &GetAI_boss_mekgineer_steamrigger;
+    pNewScript->GetAI = &GetNewAIInstance<boss_mekgineer_steamriggerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_steamrigger_mechanic";
-    pNewScript->GetAI = &GetAI_mob_steamrigger_mechanic;
+    pNewScript->GetAI = &GetNewAIInstance<mob_steamrigger_mechanicAI>;
     pNewScript->RegisterSelf();
 }
