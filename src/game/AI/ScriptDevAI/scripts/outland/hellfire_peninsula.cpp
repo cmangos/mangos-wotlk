@@ -36,7 +36,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Entities/TemporarySpawn.h"
 #include "Spells/SpellAuras.h"
 
@@ -1111,55 +1111,43 @@ enum
 
 enum AledisActions // order based on priority
 {
+    ALEDIS_LOW_HP,
     ALEDIS_ACTION_PYROBLAST,
     ALEDIS_ACTION_FROSTNOVA,
     ALEDIS_ACTION_FIREBALL,
     ALEDIS_ACTION_MAX
 };
 
-struct npc_magister_aledisAI : public ScriptedAI
+struct npc_magister_aledisAI : public RangedCombatAI
 {
-    npc_magister_aledisAI(Creature* creature) : ScriptedAI(creature)
+    npc_magister_aledisAI(Creature* creature) : RangedCombatAI(creature, ALEDIS_ACTION_MAX)
     {
+        AddTimerlessCombatAction(ALEDIS_LOW_HP, true);
+        AddCombatAction(ALEDIS_ACTION_PYROBLAST, 10000, 14000);
+        AddCombatAction(ALEDIS_ACTION_FROSTNOVA, 3000, 9000);
+        AddCombatAction(ALEDIS_ACTION_FIREBALL, 1000u);
+        AddDistanceSpell(SPELL_FROST_NOVA);
+        SetRangedMode(true, 20.f, TYPE_PROXIMITY);
         Reset();
     }
 
     bool m_bIsDefeated;
     bool m_bAllyAttacker;
 
-    uint32 m_actionTimers[ALEDIS_ACTION_MAX];
-    bool m_actionReadyStatus[ALEDIS_ACTION_MAX];
-
     void Reset() override
     {
+        RangedCombatAI::Reset();
         m_bAllyAttacker = false;
         m_bIsDefeated = false;
 
-        m_actionTimers[ALEDIS_ACTION_PYROBLAST] = GetInitialActionTimer(ALEDIS_ACTION_PYROBLAST);
-        m_actionTimers[ALEDIS_ACTION_FROSTNOVA] = GetInitialActionTimer(ALEDIS_ACTION_FROSTNOVA);
-        m_actionTimers[ALEDIS_ACTION_FIREBALL] = GetInitialActionTimer(ALEDIS_ACTION_FIREBALL);
-
-        for (uint32 i = 0; i < ALEDIS_ACTION_MAX; ++i)
-            m_actionReadyStatus[i] = false;
-
-        m_attackDistance = 20.f;
-
         SetCombatMovement(true);
         SetCombatScriptStatus(false);
-        m_meleeEnabled = false;
+
+        SetDeathPrevention(false);
+
+        SetReactState(REACT_AGGRESSIVE);
 
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP); // TODO: check if needs to be removed somewhere
-    }
-
-    uint32 GetInitialActionTimer(AledisActions id)
-    {
-        switch (id)
-        {
-            case ALEDIS_ACTION_PYROBLAST: return urand(10000, 14000);
-            case ALEDIS_ACTION_FROSTNOVA: return urand(3000, 9000);
-            case ALEDIS_ACTION_FIREBALL: return 1000;
-            default: return 0;
-        }
     }
 
     uint32 GetSubsequentActionTimer(AledisActions id)
@@ -1171,6 +1159,12 @@ struct npc_magister_aledisAI : public ScriptedAI
             case ALEDIS_ACTION_FIREBALL: return urand(3000, 4000);
             default: return 0;
         }
+    }
+
+    void Aggro(Unit* /*who*/)
+    {
+        if (m_creature->getFaction() == FACTION_ALLEDIS_HOSTILE)
+            SetDeathPrevention(true);
     }
 
     void EvadeReset()
@@ -1204,138 +1198,48 @@ struct npc_magister_aledisAI : public ScriptedAI
         m_creature->SetLootRecipient(nullptr);
     }
 
-    void ExecuteActions()
+    void ExecuteAction(uint32 action) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < ALEDIS_ACTION_MAX; ++i)
+        switch (action)
         {
-            if (m_actionReadyStatus[i])
+            case ALEDIS_LOW_HP:
             {
-                switch (i)
-                {
-                    case ALEDIS_ACTION_PYROBLAST:
-                    {
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PYROBLAST) == CAST_OK)
-                        {
-                            m_actionTimers[i] = GetSubsequentActionTimer(AledisActions(i));
-                            m_actionReadyStatus[i] = false;
-                        }
-                        continue;
-                    }
-                    case ALEDIS_ACTION_FROSTNOVA:
-                    {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, SPELL_FROST_NOVA, SELECT_FLAG_PLAYER | SELECT_FLAG_USE_EFFECT_RADIUS))
-                        {
-                            if (DoCastSpellIfCan(m_creature, SPELL_FROST_NOVA) == CAST_OK)
-                            {
-                                m_actionTimers[i] = GetSubsequentActionTimer(AledisActions(i));
-                                m_actionReadyStatus[i] = false;
-                            }
-                            continue;
-                        }
-                    }
-                    case ALEDIS_ACTION_FIREBALL:
-                    {
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIREBALL) == CAST_OK)
-                        {
-                            m_actionTimers[i] = GetSubsequentActionTimer(AledisActions(i));
-                            m_actionReadyStatus[i] = false;
-                        }
-                        continue;
-                    }
-                }
-            }
-        }
-    }
+                if (m_creature->GetHealthPercent() > 20.0f || m_creature->getFaction() != FACTION_ALLEDIS_HOSTILE)
+                    return;
 
-    void JustStoppedMovementOfTarget(SpellEntry const* spell, Unit* victim) override
-    {
-        switch (spell->Id)
-        {
-        case SPELL_FROST_NOVA:
-            if (m_creature->GetVictim() != victim) // frostnova hit others, resist case
-                break;
-            DistanceYourself();
-            break;
-        }
-    }
-
-    void DistanceYourself()
-    {
-        if (Unit* victim = m_creature->GetVictim()) // make sure target didnt die
-        {
-            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim, true);
-            m_creature->GetMotionMaster()->DistanceYourself(distance);
-        }
-    }
-
-    void DistancingStarted()
-    {
-        SetCombatScriptStatus(true);
-        SetMeleeEnabled(false);
-    }
-
-    void DistancingEnded()
-    {
-        SetCombatScriptStatus(false);
-        SetMeleeEnabled(true);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        for (uint32 i = 0; i < ALEDIS_ACTION_MAX; ++i)
-        {
-            if (!m_actionReadyStatus[i])
-            {
-                if (m_actionTimers[i] <= uiDiff)
-                {
-                    m_actionTimers[i] = 0;
-                    m_actionReadyStatus[i] = true;
-                }
-                else
-                    m_actionTimers[i] -= uiDiff;
-            }
-        }
-
-        if (!m_bAllyAttacker && !m_bIsDefeated && m_creature->GetHealthPercent() < 20.0f)
-        {
-            if (m_creature->getFaction() == FACTION_ALLEDIS_HOSTILE)
-            {
                 // evade when defeated; faction is reset automatically
                 m_bIsDefeated = true;
                 m_creature->SetFactionTemporary(FACTION_ALLEDIS_FRIENDLY, TEMPFACTION_RESTORE_RESPAWN);
                 EnterEvadeMode();
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+                SetReactState(REACT_PASSIVE);
 
                 DoScriptText(SAY_ALEDIS_DEFEAT, m_creature);
                 m_creature->ForcedDespawn(30000);
                 return;
             }
-            else
-                m_bAllyAttacker = true;
-        }
-
-        if (!m_bIsDefeated)
-        {
-            ExecuteActions();
-            DoMeleeAttackIfReady();
+            case ALEDIS_ACTION_PYROBLAST:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PYROBLAST) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(AledisActions(action)));
+                return;
+            }
+            case ALEDIS_ACTION_FROSTNOVA:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, SPELL_FROST_NOVA, SELECT_FLAG_PLAYER | SELECT_FLAG_USE_EFFECT_RADIUS))
+                    if (DoCastSpellIfCan(m_creature, SPELL_FROST_NOVA) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(AledisActions(action)));
+                return;
+            }
+            case ALEDIS_ACTION_FIREBALL:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIREBALL) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(AledisActions(action)));
+                return;
+            }
         }
     }
 };
-
-UnitAI* GetAI_npc_magister_aledis(Creature* pCreature)
-{
-    return new npc_magister_aledisAI(pCreature);
-}
-
-/*######
-## npc_living_flare
-######*/
 
 enum
 {
@@ -2342,7 +2246,7 @@ void AddSC_hellfire_peninsula()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_magister_aledis";
-    pNewScript->GetAI = &GetAI_npc_magister_aledis;
+    pNewScript->GetAI = &GetNewAIInstance<npc_magister_aledisAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
