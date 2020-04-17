@@ -417,7 +417,7 @@ struct boss_nightbaneAI : public CombatAI
             case NIGHTBANE_FIREBALL_BARRAGE:
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_FARTHEST_AWAY, 0, SPELL_FIREBALL_BARRAGE, SELECT_FLAG_PLAYER))
-                    if (target->IsWithinDist(m_creature, 60.f) || m_creature->CastSpell(m_creature->GetVictim(), SPELL_FIREBALL_BARRAGE, TRIGGERED_NONE) == SPELL_CAST_OK)
+                    if (m_creature->GetDistance(target, false, DIST_CALC_COMBAT_REACH) < 60.f || (m_creature->CastSpell(m_creature->GetVictim(), SPELL_FIREBALL_BARRAGE, TRIGGERED_NONE) == SPELL_CAST_OK))
                         ResetCombatAction(action, urand(3000, 6000)); // if farthest target is 40+ yd away
                 break;
             }
