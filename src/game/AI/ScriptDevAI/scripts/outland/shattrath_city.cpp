@@ -625,7 +625,7 @@ struct npc_salsalabimAI : public ScriptedAI
 
     void DamageTaken(Unit* pDoneBy, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        if (pDoneBy->GetTypeId() == TYPEID_PLAYER)
+        if (pDoneBy && pDoneBy->GetTypeId() == TYPEID_PLAYER)
         {
             if (m_creature->GetHealthPercent() < 20.0f)
             {
