@@ -2341,6 +2341,15 @@ void Aura::TriggerSpell()
                 target->CastSpell(target->GetVictim(), trigger_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                 return;
             }
+            case 47702:                                     // Unholy Union
+            case 47722:                                     // Frost Draw
+            case 50251:                                     // Blood Draw
+            {
+                // TODO: Determine if we need to scan effect 1 and 2 for default prefill
+                triggerCaster = GetCaster();
+                triggerTarget = target;
+                break;
+            }
             case 53563:                                     // Beacon of Light
                 // original caster must be target (beacon)
                 target->CastSpell(target, trigger_spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this, target->GetObjectGuid());
