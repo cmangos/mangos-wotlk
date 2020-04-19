@@ -944,6 +944,36 @@ bool ConditionEntry::IsValid() const
             }
             break;
         }
+        case CONDITION_ACHIEVEMENT:
+        case CONDITION_ACHIEVEMENT_REALM:
+        {
+            if (!sAchievementStore.LookupEntry(m_value1))
+            {
+                sLog.outErrorDb("Achievement condition (entry %u, type %u) requires to have non existing achievement (Id: %d), skipped", m_entry, m_condition, m_value1);
+                return false;
+            }
+
+            if (m_value2 > 1)
+            {
+                sLog.outErrorDb("Achievement condition (entry %u, type %u) has invalid argument %u (must be 0..1), skipped", m_entry, m_condition, m_value2);
+                return false;
+            }
+
+            break;
+        }
+        case CONDITION_XP_USER:
+        {
+            if (m_value1 > 1)
+            {
+                sLog.outErrorDb("XP user condition (entry %u, type %u) has invalid argument %u (must be 0..1), skipped", m_entry, m_condition, m_value1);
+                return false;
+            }
+
+            if (m_value2)
+                sLog.outErrorDb("XP user condition (entry %u, type %u) has useless data in value2 (%u)!", m_entry, m_condition, m_value2);
+
+            break;
+        }
         case CONDITION_NONE:
         case CONDITION_INSTANCE_SCRIPT:
         case CONDITION_ACTIVE_HOLIDAY:
