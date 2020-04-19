@@ -977,6 +977,7 @@ bool ConditionEntry::IsValid() const
         case CONDITION_NONE:
         case CONDITION_INSTANCE_SCRIPT:
         case CONDITION_ACTIVE_HOLIDAY:
+        case CONDITION_PVP_SCRIPT:
         case CONDITION_WORLD_SCRIPT:
             break;
         default:
