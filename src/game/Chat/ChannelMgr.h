@@ -37,7 +37,6 @@ class ChannelMgr
         void LeftChannel(const std::string& name);
     private:
         ChannelMap channels;
-        void MakeNotOnPacket(WorldPacket& data, const std::string& name) const;
 };
 
 class AllianceChannelMgr : public ChannelMgr {};
