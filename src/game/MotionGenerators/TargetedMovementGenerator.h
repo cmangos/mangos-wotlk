@@ -22,6 +22,7 @@
 #include "Movement/MoveSplineInit.h"
 #include "MotionGenerators/MovementGenerator.h"
 #include "MotionGenerators/FollowerReference.h"
+#include "Entities/ObjectGuid.h"
 
 class PathFinder;
 
