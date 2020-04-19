@@ -965,6 +965,12 @@ void Channel::MakeVoiceOff(WorldPacket& data, const std::string& channel, const 
     data << guid;
 }
 
+void Channel::MakeVoiceTrialRestricted(WorldPacket &data, const std::string &channel, const ObjectGuid &guid)
+{
+    MakeNotifyPacket(data, channel, CHAT_VOICE_TRIAL_RESTRICTED);
+    data << guid;
+}
+
 ObjectGuid Channel::SelectNewOwner() const
 {
     // Prioritise moderators for owner appointment
