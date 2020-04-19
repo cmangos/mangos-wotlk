@@ -1081,13 +1081,12 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
     if (ranged)
         return;
 
-    float val;
-    float bonusAP = 0.0f;
+    float val = 0.0f;
     UnitMods unitMod = UNIT_MOD_ATTACK_POWER;
 
     val = 2 * GetStat(STAT_STRENGTH) - 20.0f;
 
-    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, val + bonusAP);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, val);
 
     // in BASE_VALUE of UNIT_MOD_ATTACK_POWER for creatures we store data of meleeattackpower field in DB
     float base_attPower  = GetModifierValue(unitMod, BASE_VALUE) * GetModifierValue(unitMod, BASE_PCT);
