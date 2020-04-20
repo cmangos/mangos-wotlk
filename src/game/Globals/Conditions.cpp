@@ -75,8 +75,8 @@ uint8 const ConditionTargetsInternal[] =
     CONDITION_REQ_TARGET_PLAYER,      //  17
     CONDITION_REQ_MAP_OR_WORLDOBJECT, //  18
     CONDITION_REQ_TARGET_PLAYER,      //  19
-    CONDITION_REQ_NONE,               //  20
-    CONDITION_REQ_NONE,               //  21
+    CONDITION_REQ_TARGET_PLAYER,      //  20
+    CONDITION_REQ_TARGET_PLAYER,      //  21
     CONDITION_REQ_TARGET_PLAYER,      //  22
     CONDITION_REQ_TARGET_PLAYER,      //  23
     CONDITION_REQ_NONE,               //  24
@@ -89,11 +89,11 @@ uint8 const ConditionTargetsInternal[] =
     CONDITION_REQ_MAP_OR_WORLDOBJECT, //  31
     CONDITION_REQ_NONE,               //  32
     CONDITION_REQ_SOURCE_CREATURE,    //  33
-    CONDITION_REQ_NONE,               //  34
+    CONDITION_REQ_TARGET_PLAYER,      //  34
     CONDITION_REQ_TARGET_UNIT,        //  35
     CONDITION_REQ_NONE,               //  36
     CONDITION_REQ_TARGET_WORLDOBJECT, //  37
-    CONDITION_REQ_NONE,               //  38
+    CONDITION_REQ_TARGET_PLAYER,      //  38
     CONDITION_REQ_MAP_OR_WORLDOBJECT, //  39
     CONDITION_REQ_NONE,               //  40
     CONDITION_REQ_NONE,               //  41
