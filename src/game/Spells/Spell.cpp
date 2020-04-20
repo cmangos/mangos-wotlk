@@ -6295,6 +6295,9 @@ SpellCastResult Spell::CheckPetCast(Unit* target)
         // for target dead/target not valid
         if (_target && m_targets.m_targetMask & TARGET_FLAG_UNIT)
         {
+            if (_target->IsDead() && !m_spellInfo->HasAttribute(SPELL_ATTR_EX2_CAN_TARGET_DEAD))
+                return SPELL_FAILED_BAD_TARGETS;
+
             if (IsPositiveSpell(m_spellInfo->Id, m_caster, _target))
             {
                 if (!m_caster->CanAssistSpell(_target, m_spellInfo))
