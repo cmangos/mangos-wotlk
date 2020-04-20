@@ -153,10 +153,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuver(Unit* pTarget)
         case PlayerbotAI::SCENARIO_PVE_RAID:
         default:
             return DoFirstCombatManeuverPVE(pTarget);
-            break;
     }
-
-    return RETURN_NO_ACTION_ERROR;
 }
 
 CombatManeuverReturns PlayerbotWarriorAI::DoFirstCombatManeuverPVE(Unit* pTarget)
@@ -294,10 +291,7 @@ CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuver(Unit* pTarget)
         case PlayerbotAI::SCENARIO_PVE_RAID:
         default:
             return DoNextCombatManeuverPVE(pTarget);
-            break;
     }
-
-    return RETURN_NO_ACTION_ERROR;
 }
 
 CombatManeuverReturns PlayerbotWarriorAI::DoNextCombatManeuverPVE(Unit* pTarget)
@@ -514,18 +508,7 @@ bool PlayerbotWarriorAI::CanPull()
     if (!m_bot) return false;
     if (!m_ai) return false;
 
-    if (m_bot->GetUInt32Value(PLAYER_AMMO_ID)) // Having ammo equipped means a weapon is equipped as well. Probably. [TODO: does this work with throwing knives? Can a playerbot 'cheat' ammo into the slot without a proper weapon?]
-    {
-        // Can't do this, CanPull CANNOT check for anything that requires a target
-        //if (!m_ai->IsInRange(m_ai->GetCurrentTarget(), AUTO_SHOT))
-        //{
-        //    m_ai->TellMaster("I'm out of range.");
-        //    return false;
-        //}
-        return true;
-    }
-
-    return false;
+    return m_bot->GetUInt32Value(PLAYER_AMMO_ID) != 0;
 }
 
 // Match up with "CanPull()" above
@@ -554,6 +537,4 @@ bool PlayerbotWarriorAI::Pull()
         m_ai->Attack(m_ai->GetCurrentTarget());
         return true;
     }
-
-    return false;
 }

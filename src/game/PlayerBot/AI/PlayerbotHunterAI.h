@@ -107,7 +107,7 @@ class PlayerbotHunterAI : PlayerbotClassAI
     public:
         PlayerbotHunterAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
         virtual ~PlayerbotHunterAI();
-        bool HasPet(Player* bot);
+        static bool HasPet(Player* bot);
 
         // all combat actions go here
         CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);

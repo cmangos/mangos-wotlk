@@ -260,9 +260,8 @@ CombatManeuverReturns PlayerbotRogueAI::DoNextCombatManeuver(Unit* pTarget)
             break;
 
         case RogueSpellPreventing:
-            if (KIDNEY_SHOT > 0 && m_bot->GetComboPoints() >= 2 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget) == SPELL_CAST_OK)
-                return RETURN_CONTINUE;
-            else if (KICK > 0 && m_ai->CastSpell(KICK, *pTarget) == SPELL_CAST_OK)
+            if ((KIDNEY_SHOT > 0 && m_bot->GetComboPoints() >= 2 && m_ai->CastSpell(KIDNEY_SHOT, *pTarget) == SPELL_CAST_OK) ||
+                (KICK > 0 && m_ai->CastSpell(KICK, *pTarget) == SPELL_CAST_OK))
                 return RETURN_CONTINUE;
         // break; // No action? Go combat!
 
