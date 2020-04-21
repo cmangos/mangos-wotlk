@@ -210,7 +210,7 @@ SpellEffectInfo SpellEffectInfoTable[MAX_SPELL_EFFECTS] =
     /*[62]*/     { "SPELL_EFFECT_POWER_BURN",                   TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[63]*/     { "SPELL_EFFECT_THREAT",                       TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[64]*/     { "SPELL_EFFECT_TRIGGER_SPELL",                TARGET_TYPE_DYNAMIC,        TARGET_NONE }, // confirmed none
-    /*[65]*/     { "SPELL_EFFECT_HEALTH_FUNNEL",                TARGET_TYPE_UNKNOWN,        TARGET_NONE },
+    /*[65]*/     { "SPELL_EFFECT_APPLY_AREA_AURA_RAID",         TARGET_TYPE_SPECIAL_UNIT,   TARGET_NONE },
     /*[66]*/     { "SPELL_EFFECT_POWER_FUNNEL",                 TARGET_TYPE_UNKNOWN,        TARGET_NONE },
     /*[67]*/     { "SPELL_EFFECT_HEAL_MAX_HEALTH",              TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[68]*/     { "SPELL_EFFECT_INTERRUPT_CAST",               TARGET_TYPE_UNIT,           TARGET_NONE },
