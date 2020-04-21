@@ -21704,6 +21704,85 @@ bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
     return corpse->IsInWorld() && pRewardSource->GetMap() == corpse->GetMap() && (corpse->GetMap()->IsDungeon() || pRewardSource->IsWithinDistInMap(corpse, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE)));
 }
 
+void Player::QueueOrAddResurrectRequest(Corpse* corpseTarget, Unit* caster, Player* player, SpellEntry const* spellInfo, uint32 damage, SpellEffectIndex effIdx, bool ghoul)
+{
+    auto const computator = [](Player* player, uint32& health, uint32& mana, uint32 effectId, int32 damage, int32 miscValue)
+    {
+        if (effectId == SPELL_EFFECT_RESURRECT_NEW)
+        {
+            health = damage;
+            mana = miscValue;
+        }
+        else
+        {
+            health = player->GetMaxHealth() * damage / 100;
+            mana = player->GetMaxPower(POWER_MANA) * damage / 100;
+        }
+    };
+
+    if (corpseTarget)
+    {
+        if (!corpseTarget->IsInWorld())
+            return;
+
+        player = caster->GetMap()->GetPlayer(corpseTarget->GetOwnerGuid());
+        if (!player) // thread unsafe version - corpse and player in different maps
+        {
+            std::string sentName = caster->GetTypeId() == TYPEID_PLAYER ? "" : caster->GetName();
+            sWorld.GetMessager().AddMessage([playerGuid = corpseTarget->GetOwnerGuid(), position = caster->GetPosition(), casterGuid = caster->GetObjectGuid(),
+                damage = damage, spellInfo = spellInfo, eff_idx = effIdx, mapId = caster->GetMapId(), isSpiritHealer = caster->isSpiritHealer(), sentName, computator, ghoul](World* world)
+            {
+                if (Player* player = ObjectAccessor::FindPlayer(playerGuid))
+                {
+                    if (player->isRessurectRequested()) // already have one active request
+                        return;
+                    uint32 health;
+                    uint32 mana;
+                    computator(player, health, mana, spellInfo->Effect[eff_idx], damage, spellInfo->EffectMiscValue[eff_idx]);
+                    char const* name = sentName.data();
+                    if (!casterGuid.IsPlayer())
+                        sObjectMgr.GetCreatureLocaleStrings(casterGuid.GetEntry(), player->GetSession()->GetSessionDbLocaleIndex(), &name);
+                    player->AddResurrectRequest(casterGuid, spellInfo, position, mapId, health, mana, isSpiritHealer, name, ghoul);
+                }
+            });
+        }
+    }
+
+    if (player)
+    {
+        if (player->isRessurectRequested()) // already have one active request
+            return;
+
+        uint32 health, mana;
+        computator(player, health, mana, spellInfo->Effect[effIdx], damage, spellInfo->EffectMiscValue[effIdx]);
+
+        player->AddResurrectRequest(caster->GetObjectGuid(), spellInfo, caster->GetPosition(), caster->GetMapId(), health, mana, caster->isSpiritHealer(),
+            caster->GetTypeId() == TYPEID_PLAYER ? "" : caster->GetNameForLocaleIdx(player->GetSession()->GetSessionDbLocaleIndex()), ghoul);
+    }
+}
+
+void Player::AddResurrectRequest(ObjectGuid casterGuid, SpellEntry const* spellInfo, Position position, uint32 mapId, uint32 health, uint32 mana, bool isSpiritHealer, const char* sentName, bool ghoul)
+{
+    if (isRessurectRequested()) // already have one active request
+        return;
+
+    SetResurrectRequestData(casterGuid, mapId, position.x, position.y, position.z, health, mana, ghoul);
+    SendResurrectRequest(spellInfo, isSpiritHealer, sentName);
+}
+
+void Player::SendResurrectRequest(SpellEntry const* spellInfo, bool isSpiritHealer, const char* sentName)
+{
+    WorldPacket data(SMSG_RESURRECT_REQUEST, (8 + 4 + strlen(sentName) + 1 + 1 + 1));
+    data << m_resurrectGuid;
+    data << uint32(strlen(sentName) + 1);
+
+    data << sentName;
+    data << uint8(isSpiritHealer);
+    // override delay sent with SMSG_CORPSE_RECLAIM_DELAY, set instant resurrection for spells with this attribute
+    data << uint8(!spellInfo->HasAttribute(SPELL_ATTR_EX3_IGNORE_RESURRECTION_TIMER));
+    GetSession()->SendPacket(data);
+}
+
 void Player::ResurrectUsingRequestDataInit()
 {
     if (m_resurrectToGhoul)
@@ -24109,37 +24188,6 @@ float Player::ComputeRest(time_t timePassed, bool offline /*= false*/, bool inRe
             bonus *= sWorld.getConfig(CONFIG_FLOAT_RATE_REST_OFFLINE_IN_WILDERNESS) / 4.0f; // bonus is reduced by 4 when not in rest place
     }
     return bonus;
-}
-
-// set data to accept next resurrect response and process it with required data
-void Player::SetResurrectRequestData(Unit* caster, uint32 health, uint32 mana)
-{
-    m_resurrectGuid = caster->GetObjectGuid();
-    m_resurrectMap = caster->GetMapId();
-    caster->GetPosition(m_resurrectX, m_resurrectY, m_resurrectZ);
-    m_resurrectHealth = health;
-    m_resurrectMana = mana;
-    m_resurrectToGhoul = false;
-}
-
-// we can use this to prepare data in case we have to resurrect player in ghoul form
-void Player::SetResurrectRequestDataToGhoul(Unit* caster)
-{
-    SetResurrectRequestData(caster, 0, 0);
-    m_resurrectToGhoul = true;
-}
-
-// clear resurrect data (no resurrect response will be accepted)
-void Player::ClearResurrectRequestData()
-{
-    m_resurrectGuid = ObjectGuid();
-    m_resurrectMap = 0;
-    m_resurrectX = .0f;
-    m_resurrectY = .0f;
-    m_resurrectZ = .0f;
-    m_resurrectHealth = 0;
-    m_resurrectMana = 0;
-    m_resurrectToGhoul = false;
 }
 
 // player is interacting so we have to remove non authorized aura

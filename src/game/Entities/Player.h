@@ -1691,9 +1691,21 @@ class Player : public Unit
         void SetSpellClass(uint8 playerClass);
         SpellFamily GetSpellClass() const { return m_spellClassName; } // client function equivalent - says what player can cast
 
-        void SetResurrectRequestData(Unit* caster, uint32 health, uint32 mana);
-        void SetResurrectRequestDataToGhoul(Unit* caster);
-        void ClearResurrectRequestData();
+        void SetResurrectRequestData(ObjectGuid guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana, bool ghoul)
+        {
+            m_resurrectGuid = guid;
+            m_resurrectMap = mapId;
+            m_resurrectX = X;
+            m_resurrectY = Y;
+            m_resurrectZ = Z;
+            m_resurrectHealth = health;
+            m_resurrectMana = mana;
+            m_resurrectToGhoul = ghoul;
+        }
+        static void QueueOrAddResurrectRequest(Corpse* corpseTarget, Unit* caster, Player* player, SpellEntry const* spellInfo, uint32 damage, SpellEffectIndex effIdx, bool ghoul);
+        void AddResurrectRequest(ObjectGuid casterGuid, SpellEntry const* spellInfo, Position position, uint32 mapId, uint32 health, uint32 mana, bool isSpiritHealer, const char* sentName, bool ghoul);
+        void SendResurrectRequest(SpellEntry const* spellInfo, bool isSpiritHealer, const char* sentName);
+        void ClearResurrectRequestData() { SetResurrectRequestData(ObjectGuid(), 0, 0.0f, 0.0f, 0.0f, 0, 0, false); }
         bool isRessurectRequestedBy(ObjectGuid guid) const { return m_resurrectGuid == guid; }
         bool isRessurectRequested() const { return !m_resurrectGuid.IsEmpty(); }
         void ResurrectUsingRequestDataInit(); // Initializes motion and schedules rest / executes it

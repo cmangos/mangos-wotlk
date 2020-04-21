@@ -410,7 +410,6 @@ class Spell
         void EffectTaunt(SpellEffectIndex eff_idx);
         void EffectDurabilityDamagePCT(SpellEffectIndex eff_idx);
         void EffectModifyThreatPercent(SpellEffectIndex eff_idx);
-        void EffectResurrectNew(SpellEffectIndex eff_idx);
         void EffectAddExtraAttacks(SpellEffectIndex eff_idx);
         void EffectSpiritHeal(SpellEffectIndex eff_idx);
         void EffectSkinPlayerCorpse(SpellEffectIndex eff_idx);
@@ -523,7 +522,6 @@ class Spell
         void SendInterrupted(SpellCastResult result) const;
         void SendChannelUpdate(uint32 time, uint32 lastTick = 0) const;
         void SendChannelStart(uint32 duration);
-        void SendResurrectRequest(Player* target) const;
 
         void StopCast(SpellCastResult castResult);
 
@@ -673,6 +671,12 @@ class Spell
             uint8 effectMask;
         };
 
+        struct CorpseTargetInfo
+        {
+            ObjectGuid corpseGUID;
+            uint8 effectMask;
+        };
+
         struct DestTargetInfo
         {
             uint32 effectMask;
@@ -684,6 +688,7 @@ class Spell
         typedef std::list<TargetInfo>     TargetList;
         typedef std::list<GOTargetInfo>   GOTargetList;
         typedef std::list<ItemTargetInfo> ItemTargetList;
+        typedef std::list<CorpseTargetInfo> CorpseTargetList;
 
         // Scripting system
         SpellScript* GetSpellScript() const { return m_spellScript; }
@@ -771,6 +776,7 @@ class Spell
         Unit* unitTarget;
         Item* itemTarget;
         GameObject* gameObjTarget;
+        Corpse* corpseTarget;
         SpellAuraHolder* m_spellAuraHolder;                 // spell aura holder for current target, created only if spell has aura applying effect
         int32 damage;
 
@@ -804,6 +810,7 @@ class Spell
             UnitList tmpUnitList[2];
             GameObjectList tmpGOList[2];
             std::list<Item*> tempItemList;
+            CorpseList tempCorpseList;
         };
         struct TempTargetingData
         {
@@ -836,9 +843,11 @@ class Spell
         ItemTargetList m_UniqueItemInfo;
         uint32         m_targetlessMask;
         DestTargetInfo m_destTargetInfo;
+        CorpseTargetList m_uniqueCorpseTargetInfo;
 
         void AddUnitTarget(Unit* target, uint8 effectMask, CheckException exception = EXCEPTION_NONE);
         void AddGOTarget(GameObject* target, uint8 effectMask);
+        void AddCorpseTarget(Corpse* target, uint8 effectMask);
         void AddItemTarget(Item* item, uint8 effectMask);
         void AddDestExecution(SpellEffectIndex effIndex);
         void DoAllEffectOnTarget(TargetInfo* target);
@@ -849,6 +858,7 @@ class Spell
         void DoAllTargetlessEffects(bool dest);
         void DoAllEffectOnTarget(GOTargetInfo* target);
         void DoAllEffectOnTarget(ItemTargetInfo* target);
+        void DoAllEffectOnTarget(CorpseTargetInfo* target);
         bool IsAliveUnitPresentInTargetList();
         bool IsValidDeadOrAliveTarget(Unit const* unit) const;
         SpellCastResult CanOpenLock(SpellEffectIndex effIndex, uint32 lockid, SkillType& skillId, int32& reqSkillValue, int32& skillValue);

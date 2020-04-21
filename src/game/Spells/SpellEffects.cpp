@@ -170,7 +170,7 @@ pEffect SpellEffects[MAX_SPELL_EFFECTS] =
     &Spell::EffectDestroyAllTotems,                         //110 SPELL_EFFECT_DESTROY_ALL_TOTEMS
     &Spell::EffectDurabilityDamage,                         //111 SPELL_EFFECT_DURABILITY_DAMAGE
     &Spell::EffectUnused,                                   //112 SPELL_EFFECT_112 (old SPELL_EFFECT_SUMMON_DEMON)
-    &Spell::EffectResurrectNew,                             //113 SPELL_EFFECT_RESURRECT_NEW
+    &Spell::EffectResurrect,                                //113 SPELL_EFFECT_RESURRECT_NEW
     &Spell::EffectTaunt,                                    //114 SPELL_EFFECT_ATTACK_ME
     &Spell::EffectDurabilityDamagePCT,                      //115 SPELL_EFFECT_DURABILITY_DAMAGE_PCT
     &Spell::EffectSkinPlayerCorpse,                         //116 SPELL_EFFECT_SKIN_PLAYER_CORPSE       one spell: Remove Insignia, bg usage, required special corpse flags...
@@ -237,30 +237,6 @@ void Spell::EffectNULL(SpellEffectIndex /*eff_idx*/)
 void Spell::EffectUnused(SpellEffectIndex /*eff_idx*/)
 {
     // NOT USED BY ANY SPELL OR USELESS OR IMPLEMENTED IN DIFFERENT WAY IN MANGOS
-}
-
-void Spell::EffectResurrectNew(SpellEffectIndex eff_idx)
-{
-    if (!unitTarget || unitTarget->IsAlive())
-        return;
-
-    if (unitTarget->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    if (!unitTarget->IsInWorld())
-        return;
-
-    Player* pTarget = ((Player*)unitTarget);
-
-    m_spellLog.AddLog(uint32(SPELL_EFFECT_RESURRECT_NEW), pTarget->GetPackGUID());
-
-    if (pTarget->isRessurectRequested())      // already have one active request
-        return;
-
-    uint32 health = damage;
-    uint32 mana = m_spellInfo->EffectMiscValue[eff_idx];
-    pTarget->SetResurrectRequestData(m_caster, health, mana);
-    SendResurrectRequest(pTarget);
 }
 
 void Spell::EffectInstaKill(SpellEffectIndex /*eff_idx*/)
@@ -4956,8 +4932,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 if (checkSuccess)
                 {
                     Player* pTarget = static_cast<Player*>(unitTarget);
-                    pTarget->SetResurrectRequestDataToGhoul(m_caster);
-                    SendResurrectRequest(pTarget);
+                    Player::QueueOrAddResurrectRequest(nullptr, m_caster, static_cast<Player*>(unitTarget), m_spellInfo, damage, eff_idx, true);
                 }
                 else
                     finish(true);
@@ -12854,12 +12829,9 @@ void Spell::EffectSummonObject(SpellEffectIndex eff_idx)
         m_spellLog.AddLog(m_spellInfo->Effect[eff_idx], linkedGO->GetPackGUID());
 }
 
-void Spell::EffectResurrect(SpellEffectIndex /*eff_idx*/)
+void Spell::EffectResurrect(SpellEffectIndex eff_idx)
 {
-    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    if (unitTarget->IsAlive() || !unitTarget->IsInWorld())
+    if (!unitTarget && !corpseTarget)
         return;
 
     switch (m_spellInfo->Id)
@@ -12885,22 +12857,23 @@ void Spell::EffectResurrect(SpellEffectIndex /*eff_idx*/)
             }
             break;
         }
-        default:
-            break;
+        default: break;
     }
 
-    Player* pTarget = ((Player*)unitTarget);
+    uint32 effectId = m_spellInfo->Effect[eff_idx];
+    Player* player = nullptr;
 
-    m_spellLog.AddLog(uint32(SPELL_EFFECT_RESURRECT), pTarget->GetPackGUID());
+    if (unitTarget) // thread safe version
+    {
+        if (unitTarget->IsAlive() || unitTarget->GetTypeId() != TYPEID_PLAYER || !unitTarget->IsInWorld())
+            return;
 
-    if (pTarget->isRessurectRequested())      // already have one active request
-        return;
+        player = static_cast<Player*>(unitTarget);
+    }
 
-    uint32 health = pTarget->GetMaxHealth() * damage / 100;
-    uint32 mana   = pTarget->GetMaxPower(POWER_MANA) * damage / 100;
+    m_spellLog.AddLog(uint32(m_spellInfo->Effect[eff_idx]), unitTarget->GetPackGUID());
 
-    pTarget->SetResurrectRequestData(m_caster, health, mana);
-    SendResurrectRequest(pTarget);
+    Player::QueueOrAddResurrectRequest(corpseTarget, m_caster, player, m_spellInfo, damage, eff_idx, false);
 }
 
 void Spell::EffectAddExtraAttacks(SpellEffectIndex /*eff_idx*/)
@@ -13544,10 +13517,17 @@ void Spell::EffectSpiritHeal(SpellEffectIndex /*eff_idx*/)
 void Spell::EffectSkinPlayerCorpse(SpellEffectIndex /*eff_idx*/)
 {
     DEBUG_LOG("Effect: SkinPlayerCorpse");
-    if ((m_caster->GetTypeId() != TYPEID_PLAYER) || (unitTarget->GetTypeId() != TYPEID_PLAYER) || (unitTarget->IsAlive()))
+    if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    ((Player*)unitTarget)->RemovedInsignia((Player*)m_caster);
+    if (!unitTarget && !corpseTarget)
+        return;
+
+    if (unitTarget)
+        static_cast<Player*>(unitTarget)->RemovedInsignia(static_cast<Player*>(m_caster));
+    if (corpseTarget) // thread safe because all must be in same battleground map
+        if (Player* player = m_caster->GetMap()->GetPlayer(corpseTarget->GetOwnerGuid()))
+            player->RemovedInsignia(static_cast<Player*>(m_caster));
 }
 
 void Spell::EffectStealBeneficialBuff(SpellEffectIndex eff_idx)
