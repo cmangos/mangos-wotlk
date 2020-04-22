@@ -769,7 +769,7 @@ void Pet::Unsummon(PetSaveMode mode, Unit* owner /*= nullptr*/)
         if (GetOwnerGuid() != owner->GetObjectGuid())
             return;
 
-        if (p_owner)
+        if (owner->GetTypeId() == TYPEID_PLAYER)
         {
             p_owner = static_cast<Player*>(owner);
 
