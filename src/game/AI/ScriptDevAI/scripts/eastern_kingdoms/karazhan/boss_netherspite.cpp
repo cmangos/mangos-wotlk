@@ -342,11 +342,8 @@ struct boss_netherspiteAI : public CombatAI
             case NETHERSPITE_NETHERBREATH:
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_NETHERBREATH, SELECT_FLAG_PLAYER))
-                {
-                    m_creature->SetInFront(target);
                     if (DoCastSpellIfCan(target, SPELL_NETHERBREATH) == CAST_OK)
-                        ResetCombatAction(action, 4500);
-                }
+                        ResetCombatAction(action, 6000);
                 break;
             }
             case NETHERSPITE_DUMMY_NUKE:
