@@ -14185,6 +14185,9 @@ void Spell::EffectCreateTamedPet(SpellEffectIndex eff_idx)
         newTamedPet->SetPvPSanctuary(true);
 
     newTamedPet->SetCanModifyStats(true);
+
+    map->Add((Creature*)newTamedPet);
+
     newTamedPet->InitStatsForLevel(unitTarget->getLevel());
     newTamedPet->InitPetCreateSpells();
     newTamedPet->InitLevelupSpellsForLevel();
@@ -14199,7 +14202,6 @@ void Spell::EffectCreateTamedPet(SpellEffectIndex eff_idx)
     unitTarget->GetClosePoint(x, y, z, newTamedPet->GetObjectBoundingRadius());
     newTamedPet->Relocate(x, y, z, unitTarget->GetOrientation());
 
-    map->Add((Creature*)newTamedPet);
     m_caster->SetPet(newTamedPet);
 
     Player* _player = static_cast<Player*>(unitTarget);
