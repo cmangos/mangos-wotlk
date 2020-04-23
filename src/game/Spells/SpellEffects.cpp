@@ -12895,7 +12895,7 @@ void Spell::EffectFeedPet(SpellEffectIndex eff_idx)
 
     Player* _player = (Player*)m_caster;
 
-    Item* foodItem = itemTarget;
+    Item* foodItem = m_targets.getItemTarget();
     if (!foodItem)
         return;
 
