@@ -246,7 +246,7 @@ SpellEffectInfo SpellEffectInfoTable[MAX_SPELL_EFFECTS] =
     /*[98]*/     { "SPELL_EFFECT_KNOCK_BACK",                   TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[99]*/     { "SPELL_EFFECT_DISENCHANT",                   TARGET_TYPE_ITEM,           TARGET_NONE },
     /*[100]*/    { "SPELL_EFFECT_INEBRIATE",                    TARGET_TYPE_UNIT,           TARGET_NONE },
-    /*[101]*/    { "SPELL_EFFECT_FEED_PET",                     TARGET_TYPE_ITEM,           TARGET_NONE },
+    /*[101]*/    { "SPELL_EFFECT_FEED_PET",                     TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[102]*/    { "SPELL_EFFECT_DISMISS_PET",                  TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[103]*/    { "SPELL_EFFECT_REPUTATION",                   TARGET_TYPE_UNIT,           TARGET_NONE },
     /*[104]*/    { "SPELL_EFFECT_SUMMON_OBJECT_SLOT1",          TARGET_TYPE_LOCATION_DEST,  TARGET_NONE },
