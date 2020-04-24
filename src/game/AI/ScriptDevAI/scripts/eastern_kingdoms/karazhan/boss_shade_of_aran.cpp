@@ -250,7 +250,10 @@ struct boss_aranAI : public RangedCombatAI
             case NPC_WATER_ELEMENTAL:
                 summoned->SetInCombatWithZone();
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                {
                     summoned->AddThreat(target, 100000.f);
+                    summoned->AI()->AttackStart(target);
+                }
                 break;
         }
     }
