@@ -56,6 +56,9 @@ enum
     NPC_SKRAGATH            = 18401,
     NPC_WARMAUL_CHAMPION    = 18402,
     NPC_MOGOR               = 18069,
+
+    NPC_ETHEREUM_PRISONER   = 20520,
+    GO_SALVAGED_ETHEREUM_PRISON = 184488,
 };
 
 enum SpawnIndexes

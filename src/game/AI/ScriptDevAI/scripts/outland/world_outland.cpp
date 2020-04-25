@@ -561,6 +561,12 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 if (creature->GetEntry() != NPC_MOGOR)
                     m_lastRingOfBlood = creature->GetObjectGuid();
                 break;
+            case NPC_ETHEREUM_PRISONER: // Gameobject should close when Ethereum Prisoner respawns
+                if (GameObject* go = GetClosestGameObjectWithEntry(creature, GO_SALVAGED_ETHEREUM_PRISON, 3.f))
+                {
+                    go->ResetDoorOrButton();
+                }
+                break;
         }
     }
 
