@@ -2458,7 +2458,8 @@ void ScriptMgr::CollectPossibleEventIds(std::set<uint32>& eventIds)
                 eventIds.insert(itr->goober.eventId);
                 break;
             case GAMEOBJECT_TYPE_CHEST:
-                eventIds.insert(itr->chest.eventId);
+                if (itr->chest.eventId > 0) // eventIds is unsigned but GAMEOBJECT_TYPE_CHEST event ID can be negative in database
+                    eventIds.insert(itr->chest.eventId);
                 break;
             case GAMEOBJECT_TYPE_CAMERA:
                 eventIds.insert(itr->camera.eventID);

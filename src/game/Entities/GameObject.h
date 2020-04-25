@@ -82,7 +82,7 @@ struct GameObjectInfo
             uint32 gossipID;                                //3
             uint32 customAnim;                              //4
             uint32 noDamageImmune;                          //5
-            uint32 openTextID;                              //6 can be used to replace castBarCaption?
+            int32 openTextID;                               //6 can be used to replace castBarCaption?
             uint32 losOK;                                   //7
             uint32 allowMounted;                            //8
             uint32 large;                                   //9
@@ -96,7 +96,7 @@ struct GameObjectInfo
             uint32 consumable;                              //3
             uint32 minSuccessOpens;                         //4
             uint32 maxSuccessOpens;                         //5
-            uint32 eventId;                                 //6 lootedEvent
+            int32 eventId;                                  //6 lootedEvent
             uint32 linkedTrapId;                            //7
             uint32 questId;                                 //8 not used currently but store quest required for GO activation for player
             uint32 level;                                   //9
@@ -128,7 +128,7 @@ struct GameObjectInfo
             uint32 spellId;                                 //3
             uint32 charges;                                 //4 need respawn (if > 0)
             uint32 cooldown;                                //5 time in secs
-            uint32 autoCloseTime;                           //6 secs till autoclose = autoCloseTime / IN_MILLISECONDS (previous was 0x10000)
+            int32 autoCloseTime;                            //6 secs till autoclose = autoCloseTime / IN_MILLISECONDS (previous was 0x10000)
             uint32 startDelay;                              //7
             uint32 serverOnly;                              //8
             uint32 stealthed;                               //9
@@ -155,7 +155,7 @@ struct GameObjectInfo
             uint32 serverOnly;                              //3
             uint32 questID;                                 //4
             uint32 large;                                   //5
-            uint32 floatingTooltip;                         //6
+            int32 floatingTooltip;                          //6
         } spellFocus;
         //9 GAMEOBJECT_TYPE_TEXT
         struct
@@ -169,12 +169,12 @@ struct GameObjectInfo
         struct
         {
             uint32 lockId;                                  //0 -> Lock.dbc
-            uint32 questId;                                 //1
+            int32 questId;                                  //1
             uint32 eventId;                                 //2
             uint32 autoCloseTime;                           //3 secs till autoclose = autoCloseTime / IN_MILLISECONDS (previous was 0x10000)
             uint32 customAnim;                              //4
             uint32 consumable;                              //5
-            uint32 cooldown;                                //6
+            int32 cooldown;                                 //6
             uint32 pageId;                                  //7
             uint32 language;                                //8
             uint32 pageMaterial;                            //9
@@ -258,7 +258,7 @@ struct GameObjectInfo
         struct
         {
             uint32 spellId;                                 //0
-            uint32 charges;                                 //1
+            int32 charges;                                  //1
             uint32 partyOnly;                               //2
             uint32 allowMounted;                            //3 Is usable while on mount/vehicle. (0/1)
             uint32 large;                                   //4
@@ -341,7 +341,7 @@ struct GameObjectInfo
             uint32 conditionID1;                            //3
             uint32 auraID2;                                 //4
             uint32 conditionID2;                            //5
-            uint32 serverOnly;                              //6
+            int32 serverOnly;                               //6
         } auraGenerator;
         //31 GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY
         struct
@@ -364,7 +364,7 @@ struct GameObjectInfo
             uint32 intactEvent;                             //3
             uint32 damagedDisplayId;                        //4
             uint32 damagedNumHits;                          //5
-            uint32 unk1;                                    //6
+            int32 unk1;                                     //6
             uint32 unk2;                                    //7
             uint32 unk3;                                    //8
             uint32 damagedEvent;                            //9
