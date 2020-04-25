@@ -1437,6 +1437,13 @@ bool ScriptAction::HandleScriptStep()
                 break;
             }
 
+            // Change Z cord only
+            if (m_script->x == 0.0f && m_script->y == 0.0f && m_script->z != 0.0f)
+            {
+                ((Unit*)pSource)->GetMotionMaster()->MovePoint(0, pSource->GetPositionX(), pSource->GetPositionY(), pSource->GetPositionZ() + m_script->z);
+                break;
+            }
+
             // For command additional teleport the unit
             if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL)
             {
