@@ -1014,6 +1014,7 @@ struct SpellStackingRulesOverride : public SpellScript
     {
         SPELL_POWER_INFUSION        = 10060,
         SPELL_ARCANE_POWER          = 12042,
+        SPELL_MISDIRECTION          = 34477,
     };
 
     SpellCastResult OnCheckCast(Spell* spell, bool/* strict*/) const override
@@ -1026,6 +1027,15 @@ struct SpellStackingRulesOverride : public SpellScript
                 // Power Infusion: This aura will no longer stack with Arcane Power. If you attempt to cast it on someone with Arcane Power, the spell will fail.
                 if (Unit* target = spell->m_targets.getUnitTarget())
                     if (target->GetAuraCount(SPELL_ARCANE_POWER))
+                        return SPELL_FAILED_AURA_BOUNCED;
+                break;
+            }
+            case SPELL_MISDIRECTION:
+            {
+                // Patch 2.3.0 (2007-11-13):
+                // Misdirection: If a Hunter attempts to use this ability on a target which already has an active Misdirection, the spell will fail to apply due to a more powerful spell already being in effect.
+                if (Unit* target = spell->m_targets.getUnitTarget())
+                    if (target->HasAura(SPELL_MISDIRECTION))
                         return SPELL_FAILED_AURA_BOUNCED;
                 break;
             }

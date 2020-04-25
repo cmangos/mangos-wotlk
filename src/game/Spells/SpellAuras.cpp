@@ -3033,6 +3033,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     case 34026:                             // Kill Command
                         target->CastSpell(target, 34027, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         return;
+                    case 35079:                             // Misdirection, triggered buff
+                        target->RemoveAurasDueToSpell(35079, GetHolder(), AURA_REMOVE_BY_STACK);
+                        return;
                 }
                 break;
             }
