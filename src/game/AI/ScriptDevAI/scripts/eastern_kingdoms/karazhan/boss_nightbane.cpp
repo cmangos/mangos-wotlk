@@ -125,6 +125,7 @@ struct boss_nightbaneAI : public CombatAI
         SetDeathPrevention(false);
         m_creature->SetSupportThreatOnly(false);
         SetCombatScriptStatus(false);
+        SetMeleeEnabled(true);
 
         m_skeletons.clear();
     }
