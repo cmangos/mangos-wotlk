@@ -2575,7 +2575,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 }
                 case 42489:                                 // Cast Ooze Zap When Energized
                 {
-                    if (!unitTarget || !m_caster->HasAura(42490) || (unitTarget->GetEntry() != 4393 && unitTarget->GetEntry() != 4394))
+                    if (!unitTarget || !m_caster->HasAura(42490))
                         return;
 
                     m_caster->CastSpell(unitTarget, 42483, TRIGGERED_NONE);
