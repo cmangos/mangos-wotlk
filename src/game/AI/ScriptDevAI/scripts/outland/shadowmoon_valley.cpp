@@ -1800,7 +1800,7 @@ struct mob_shadowmoon_soulstealerAI : public ScriptedAI
 
     void Aggro(Unit* who) override
     {
-        m_cDeathwail = GetClosestCreatureWithEntry(m_creature, NPC_SHADOWLORD_DEATHWAIL, 175.0f);
+        m_cDeathwail = GetClosestCreatureWithEntry(m_creature, NPC_SHADOWLORD_DEATHWAIL, 200.0f);
         bool exitCombat = false;
 
         if (m_cDeathwail)
@@ -1841,23 +1841,30 @@ struct mob_shadowmoon_soulstealerAI : public ScriptedAI
 
     void UpdateAI(const uint32 /*uiDiff*/) override
     {
+        if (!m_cDeathwail)
+            return;
+
         if (!m_bSixtyTriggered)
         {
             if (m_creature->GetHealthPercent() <= 60.0f)
+            {
                 if (npc_shadowlord_deathwailAI* DeathwailAI = dynamic_cast<npc_shadowlord_deathwailAI*>(m_cDeathwail->AI()))
                 {
                     DeathwailAI->DoSummonWave(true);
                     m_bSixtyTriggered = true;
                 }
+            }
         }
         else if (!m_bTwentyTriggered)
         {
             if (m_creature->GetHealthPercent() <= 20.0f)
+            {
                 if (npc_shadowlord_deathwailAI* DeathwailAI = dynamic_cast<npc_shadowlord_deathwailAI*>(m_cDeathwail->AI()))
                 {
                     DeathwailAI->DoSummonWave(true);
                     m_bTwentyTriggered = true;
                 }
+            }
         }
     }
 };
