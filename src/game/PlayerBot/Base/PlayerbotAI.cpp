@@ -7038,8 +7038,14 @@ void PlayerbotAI::MakeWeaponSkillLink(const SpellEntry* sInfo, std::ostringstrea
 // Build an hlink for spells in White
 void PlayerbotAI::MakeSpellLink(const SpellEntry* sInfo, std::ostringstream& out)
 {
-    int loc = GetMaster()->GetSession()->GetSessionDbcLocale();
-    out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << sInfo->SpellName[loc] << "]|h|r";
+    int    loc = GetMaster()->GetSession()->GetSessionDbcLocale();
+    const char* name = sInfo->SpellName[loc];
+
+    // fallback if nothing in current locale
+    if (sInfo->SpellName[loc][0] == '\0')
+        name = sInfo->SpellName[0];
+
+    out << "|cffffffff|Hspell:" << sInfo->Id << "|h[" << name << "]|h|r";
 }
 
 // Builds a hlink for an item, but since its
