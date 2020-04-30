@@ -87,7 +87,7 @@ struct boss_curatorAI : public CombatAI
     {
         AddTimerlessCombatAction(CURATOR_ACTION_ARCANE_INFUSION, true);
         AddCombatAction(CURATOR_ACTION_BERSERK, uint32(10 * MINUTE * IN_MILLISECONDS));
-        AddCombatAction(CURATOR_ACTION_FLARE, 10000u);
+        AddCombatAction(CURATOR_ACTION_FLARE, 11000u);
         AddCombatAction(CURATOR_ACTION_HATEFUL_BOLT, 15000u);
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
         {
@@ -119,7 +119,7 @@ struct boss_curatorAI : public CombatAI
     {
         switch (id)
         {
-            case CURATOR_ACTION_FLARE: return 10000;
+            case CURATOR_ACTION_FLARE: return 11000;
             case CURATOR_ACTION_HATEFUL_BOLT: return GetActionReadyStatus(CURATOR_ACTION_ARCANE_INFUSION) ? 15000 : 7000;
             default: return 0; // never occurs but for compiler
         }
@@ -182,7 +182,7 @@ struct boss_curatorAI : public CombatAI
 
                 summoned->SetInCombatWithZone();
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                    summoned->AddThreat(pTarget, 100000.f);
+                    summoned->AddThreat(pTarget, 100001.f);
                 m_sparkGuids.push_back(summoned->GetObjectGuid());
                 break;
             }
