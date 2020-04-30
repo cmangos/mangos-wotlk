@@ -94,7 +94,7 @@ bool WorldSessionFilter::Process(WorldPacket const& packet) const
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :
     m_muteTime(mute_time), m_GUIDLow(0), _player(nullptr), m_Socket(sock ? sock->shared<WorldSocket>() : nullptr), _security(sec), _accountId(id), m_expansion(expansion),
-    _logoutTime(0), m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(false),
+    _logoutTime(0), m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(true),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetIndexForLocale(locale)),
     m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED), m_sessionState(WORLD_SESSION_STATE_CREATED),
     m_requestSocket(nullptr) {}
@@ -104,7 +104,7 @@ WorldSession::~WorldSession()
 {
     ///- unload player if not unloaded
     if (_player)
-        LogoutPlayer(true);
+        LogoutPlayer();
 
     // marks this session as finalized in the socket which references (BUT DOES NOT OWN) it.
     // this lets the socket handling code know that the socket can be safely deleted
@@ -427,7 +427,7 @@ bool WorldSession::Update(PacketFilter& updater)
                     SetOffline();
                 }
                 else if (ShouldLogOut(time(nullptr)) && !m_playerLoading)   // check if delayed logout is fired
-                    LogoutPlayer(true);
+                    LogoutPlayer();
 
                 return true;
             }
@@ -436,7 +436,7 @@ bool WorldSession::Update(PacketFilter& updater)
             {
                 if (ShouldDisconnect(time(nullptr)))   // check if delayed logout is fired
                 {
-                    LogoutPlayer(true);
+                    LogoutPlayer();
                     if (!m_requestSocket && (!m_Socket || m_Socket->IsClosed()))
                         return false;
                 }
@@ -452,14 +452,13 @@ bool WorldSession::Update(PacketFilter& updater)
 }
 
 /// %Log the player out
-void WorldSession::LogoutPlayer(bool Save)
+void WorldSession::LogoutPlayer()
 {
     // finish pending transfers before starting the logout
     while (_player && _player->IsBeingTeleportedFar())
         HandleMoveWorldportAckOpcode();
 
     m_playerLogout = true;
-    m_playerSave = Save;
 
     if (_player)
     {
@@ -552,7 +551,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
         ///- empty buyback items and save the player in the database
         // some save parts only correctly work in case player present in map/player_lists (pets, etc)
-        if (Save)
+        if (m_playerSave)
             _player->SaveToDB();
 
         ///- Leave all channels before player delete...
@@ -624,7 +623,6 @@ void WorldSession::LogoutPlayer(bool Save)
     }
 
     m_playerLogout = false;
-    m_playerSave = false;
     m_playerRecentlyLogout = true;
     LogoutRequest(0);
 }
@@ -632,11 +630,7 @@ void WorldSession::LogoutPlayer(bool Save)
 /// Kick a player out of the World
 void WorldSession::KickPlayer()
 {
-    if (_player)
-        LogoutPlayer(false);
-
-    if (m_Socket && !m_Socket->IsClosed())
-        m_Socket->Close();
+    LogoutRequest(time(nullptr) - 20, false);
 }
 
 void WorldSession::SendExpectedSpamRecords()
