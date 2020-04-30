@@ -37,7 +37,7 @@ enum
 
     SPELL_SUMMON_RAGING_FLAMES      = 35275,
     SPELL_SUMMON_RAGING_FLAMES_H    = 39084,
-    SPELL_FROST_ATTACK              = 45196, // serverside - triggers 45196
+    SPELL_FROST_ATTACK              = 45196, // serverside - triggers 45195
     SPELL_ARCANE_BLAST              = 35314,
     SPELL_DRAGONS_BREATH            = 35250,
 
@@ -71,6 +71,7 @@ struct boss_nethermancer_sepethreaAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
+        m_creature->SetInCombatWithZone();
         DoScriptText(SAY_AGGRO, m_creature);
         DoCastSpellIfCan(nullptr, SPELL_FROST_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SUMMON_RAGING_FLAMES : SPELL_SUMMON_RAGING_FLAMES_H);
