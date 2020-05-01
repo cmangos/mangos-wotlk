@@ -198,6 +198,7 @@ struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatActions
                         {
                             float fX, fY, fZ;
                             Distiller->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
+                            m_creature->SetWalk(false, true); // Prevent him from slowing down while meleehit/casted upon while starting to move
                             m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_DISTILLER, fX, fY, fZ);
                             m_distillerGuid = Distiller->GetObjectGuid();
 
