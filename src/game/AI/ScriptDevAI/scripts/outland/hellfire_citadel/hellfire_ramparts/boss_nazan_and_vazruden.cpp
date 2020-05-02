@@ -41,26 +41,26 @@ enum
     // vazruden
     SPELL_REVENGE = 19130,
     SPELL_REVENGE_H = 40392,
-    SPELL_VAZRUDENS_MARK = 30689,                        // Unused - seemingly non-tank targeted
+    SPELL_VAZRUDENS_MARK = 30689,               // Unused - seemingly non-tank targeted
     SPELL_DEFENSIVE_STATE = 5301,
 
     // nazan
-    SPELL_FACE_HIGHEST_THREAT = 30700,                    // normal+heroic flight
-    SPELL_SUMMON_VAZRUDEN = 30717,                  // normal+heroic DoSplit();
+    SPELL_FACE_HIGHEST_THREAT = 30700,          // normal+heroic flight
+    SPELL_SUMMON_VAZRUDEN = 30717,              // normal+heroic DoSplit();
 
-    SPELL_FIREBALL_HIGHEST_THREAT = 30691,                  // cast 2-3 times afer 30700, normal flight
-    SPELL_FIREBALL_HIGHEST_THREAT_H = 32491,                  // cast 2-3 times afer 30700 heroic flight
+    SPELL_FIREBALL_HIGHEST_THREAT = 30691,      // cast 2-3 times afer 30700, normal flight
+    SPELL_FIREBALL_HIGHEST_THREAT_H = 32491,    // cast 2-3 times afer 30700 heroic flight
 
-    SPELL_FIREBALL_RANDOM = 33793,                  // normal flight inbetween 30691
-    SPELL_FIREBALL_RANDOM_H = 33794,                  // heroic flight inbetween 32491
+    SPELL_FIREBALL_FLIGHT = 33793,              // normal flight inbetween 30691
+    SPELL_FIREBALL_FLIGHT_H = 33794,            // heroic flight inbetween 32491
 
-    SPELL_FIREBALL_GROUND = 34653,                    // normal ground
-    SPELL_FIREBALL_GROUND_H = 36920,                    // heroic ground
+    SPELL_FIREBALL_GROUND = 34653,              // normal ground
+    SPELL_FIREBALL_GROUND_H = 36920,            // heroic ground
 
-    SPELL_CONE_OF_FIRE = 30926,                    // normal ground
-    SPELL_CONE_OF_FIRE_H = 36921,                    // heroic ground
+    SPELL_CONE_OF_FIRE = 30926,                 // normal ground
+    SPELL_CONE_OF_FIRE_H = 36921,               // heroic ground
 
-    SPELL_BELLOW_ROAR_H = 39427,                    // heroic ground
+    SPELL_BELLOW_ROAR_H = 39427,                // heroic ground
 
     // misc
     POINT_ID_CENTER = 100,
@@ -87,7 +87,7 @@ enum NazanActions
     NAZAN_LAND,
     NAZAN_FLIGHT_MOVE,
     NAZAN_FIREBALL_FLIGHT,
-    NAZAN_FIREBALL_LAND,
+    NAZAN_FIREBALL_GROUND,
     NAZAN_CONE_OF_FIRE,
     NAZAN_BELLOWING_ROAR,
     NAZAN_ACTION_MAX,
@@ -104,7 +104,7 @@ struct boss_vazruden_heraldAI : public CombatAI
         AddTimerlessCombatAction(NAZAN_LAND, true);
         AddCombatAction(NAZAN_FLIGHT_MOVE, true);
         AddCombatAction(NAZAN_FIREBALL_FLIGHT, true);
-        AddCombatAction(NAZAN_FIREBALL_LAND, true);
+        AddCombatAction(NAZAN_FIREBALL_GROUND, true);
         AddCombatAction(NAZAN_CONE_OF_FIRE, true);
         if (!m_inRegularMode)
             AddCombatAction(NAZAN_BELLOWING_ROAR, true);
@@ -277,7 +277,7 @@ struct boss_vazruden_heraldAI : public CombatAI
             // landing
             DisableCombatAction(NAZAN_FIREBALL_FLIGHT);
             DisableCombatAction(NAZAN_FLIGHT_MOVE);
-            ResetCombatAction(NAZAN_FIREBALL_LAND, urand(5200, 16500));
+            ResetCombatAction(NAZAN_FIREBALL_GROUND, urand(5200, 16500));
             ResetCombatAction(NAZAN_CONE_OF_FIRE, urand(8100, 19700));
             if (!m_inRegularMode)
                 ResetCombatAction(NAZAN_BELLOWING_ROAR, 2000);
@@ -334,15 +334,23 @@ struct boss_vazruden_heraldAI : public CombatAI
                 break;
             }
             case NAZAN_FIREBALL_FLIGHT:
-            case NAZAN_FIREBALL_LAND:
             {
                 if (Creature* vazruden = m_creature->GetMap()->GetCreature(m_vazrudenGuid))
                 {
                     if (Unit* target = vazruden->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     {
-                        if (DoCastSpellIfCan(target, m_inRegularMode ? SPELL_FIREBALL_GROUND : SPELL_FIREBALL_GROUND_H) == CAST_OK)
-                            ResetCombatAction(action, action == NAZAN_FIREBALL_FLIGHT ? urand(2100, 7300) : urand(7300, 13200));
+                        if (DoCastSpellIfCan(target, m_inRegularMode ? SPELL_FIREBALL_FLIGHT : SPELL_FIREBALL_FLIGHT_H) == CAST_OK)
+                            ResetCombatAction(action, urand(2100, 7300));
                     }
+                }
+                break;
+            }
+            case NAZAN_FIREBALL_GROUND:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                {
+                    if (DoCastSpellIfCan(target, m_inRegularMode ? SPELL_FIREBALL_GROUND : SPELL_FIREBALL_GROUND_H) == CAST_OK)
+                        ResetCombatAction(action, urand(7300, 13200));
                 }
                 break;
             }
