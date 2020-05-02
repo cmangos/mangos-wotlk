@@ -75,7 +75,13 @@ void Channel::Join(Player* player, const char* password)
         return;
     }
 
-    if (m_password.length() > 0 && strcmp(password, m_password.c_str()))
+    bool checkPassword = (m_password.length() > 0);
+
+    if (const uint32 level = sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_CHANNEL_MODERATION))
+        if (player->GetSession()->GetSecurity() >= level)
+            checkPassword = false;
+
+    if (checkPassword && strcmp(password, m_password.c_str()))
     {
         MakeWrongPassword(data, m_name);
         SendToOne(data, guid);
@@ -98,7 +104,10 @@ void Channel::Join(Player* player, const char* password)
     // join channel
     player->JoinedChannel(this);
 
-    if (m_announce && (player->GetSession()->GetSecurity() < SEC_GAMEMASTER || !sWorld.getConfig(CONFIG_BOOL_CHANNEL_GM_JOIN_SILENTLY)))
+    const uint32 level = sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_CHANNEL_SILENT_JOIN);
+    const bool silent = (level && player->GetSession()->GetSecurity() >= level);
+
+    if (m_announce && !silent)
     {
         MakeJoined(data, m_name, guid);
         SendToAll(data);
@@ -151,7 +160,11 @@ void Channel::Leave(Player* player, bool send)
     bool changeowner = m_players[guid].IsOwner();
 
     m_players.erase(guid);
-    if (m_announce && (player->GetSession()->GetSecurity() < SEC_GAMEMASTER || !sWorld.getConfig(CONFIG_BOOL_CHANNEL_GM_JOIN_SILENTLY)))
+
+    const uint32 level = sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_CHANNEL_SILENT_JOIN);
+    const bool silent = (level && player->GetSession()->GetSecurity() >= level);
+
+    if (m_announce && !silent)
     {
         WorldPacket data;
         MakeLeft(data, m_name, guid);
@@ -176,7 +189,10 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
         return;
     }
 
-    if (!m_players[guid].IsModerator() && player->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+    const uint32 level = sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_CHANNEL_MODERATION);
+    const bool gm = (level && player->GetSession()->GetSecurity() >= level);
+
+    if (!m_players[guid].IsModerator() && !gm)
     {
         WorldPacket data;
         MakeNotModerator(data, m_name);
@@ -204,7 +220,7 @@ void Channel::KickOrBan(Player* player, const char* targetName, bool ban)
 
     bool changeowner = m_ownerGuid == targetGuid;
 
-    if (player->GetSession()->GetSecurity() < SEC_GAMEMASTER && changeowner && guid != m_ownerGuid)
+    if (!gm && changeowner && guid != m_ownerGuid)
     {
         WorldPacket data;
         MakeNotOwner(data, m_name);
@@ -243,7 +259,10 @@ void Channel::UnBan(Player* player, const char* targetName)
         return;
     }
 
-    if (!m_players[guid].IsModerator() && player->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+    const uint32 level = sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_CHANNEL_MODERATION);
+    const bool gm = (level && player->GetSession()->GetSecurity() >= level);
+
+    if (!m_players[guid].IsModerator() && !gm)
     {
         WorldPacket data;
         MakeNotModerator(data, m_name);
@@ -289,7 +308,10 @@ void Channel::Password(Player* player, const char* password)
         return;
     }
 
-    if (!m_players[guid].IsModerator() && player->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+    const uint32 level = sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_CHANNEL_MODERATION);
+    const bool gm = (level && player->GetSession()->GetSecurity() >= level);
+
+    if (!m_players[guid].IsModerator() && !gm)
     {
         WorldPacket data;
         MakeNotModerator(data, m_name);
@@ -317,7 +339,10 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
         return;
     }
 
-    if (!m_players[guid].IsModerator() && player->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+    const uint32 level = sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_CHANNEL_MODERATION);
+    const bool gm = (level && player->GetSession()->GetSecurity() >= level);
+
+    if (!m_players[guid].IsModerator() && !gm)
     {
         WorldPacket data;
         MakeNotModerator(data, m_name);
@@ -346,10 +371,11 @@ void Channel::SetMode(Player* player, const char* targetName, bool moderator, bo
         return;
     }
 
+    const bool gmTarget = (level && target->GetSession()->GetSecurity() >= level);
+
     // allow make moderator from another team only if both is GMs
     // at this moment this only way to show channel post for GM from another team
-    if ((player->GetSession()->GetSecurity() < SEC_GAMEMASTER || target->GetSession()->GetSecurity() < SEC_GAMEMASTER) &&
-            player->GetTeam() != target->GetTeam() && !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
+    if ((!gm || !gmTarget) && player->GetTeam() != target->GetTeam() && !sWorld.getConfig(CONFIG_BOOL_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
     {
         WorldPacket data;
         MakePlayerNotFound(data, m_name, targetName);
@@ -384,7 +410,10 @@ void Channel::SetOwner(Player* player, const char* targetName)
         return;
     }
 
-    if (player->GetSession()->GetSecurity() < SEC_GAMEMASTER && guid != m_ownerGuid)
+    const uint32 level = sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_CHANNEL_MODERATION);
+    const bool gm = (level && player->GetSession()->GetSecurity() >= level);
+
+    if (!gm && guid != m_ownerGuid)
     {
         WorldPacket data;
         MakeNotOwner(data, m_name);
@@ -512,7 +541,10 @@ void Channel::Announce(Player* player)
         return;
     }
 
-    if (!m_players[guid].IsModerator() && player->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+    const uint32 level = sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_CHANNEL_MODERATION);
+    const bool gm = (level && player->GetSession()->GetSecurity() >= level);
+
+    if (!m_players[guid].IsModerator() && !gm)
     {
         WorldPacket data;
         MakeNotModerator(data, m_name);
@@ -544,7 +576,10 @@ void Channel::Moderate(Player* player)
         return;
     }
 
-    if (!m_players[guid].IsModerator() && player->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+    const uint32 level = sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_CHANNEL_MODERATION);
+    const bool gm = (level && player->GetSession()->GetSecurity() >= level);
+
+    if (!m_players[guid].IsModerator() && !gm)
     {
         WorldPacket data;
         MakeNotModerator(data, m_name);
@@ -589,7 +624,10 @@ void Channel::Say(Player* player, const char* text, uint32 lang)
 
     const bool moderator = m_players[guid].IsModerator();
 
-    if (m_moderate && !moderator && player->GetSession()->GetSecurity() < SEC_GAMEMASTER)
+    const uint32 level = sWorld.getConfig(CONFIG_UINT32_GM_LEVEL_CHANNEL_MODERATION);
+    const bool gm = (level && player->GetSession()->GetSecurity() >= level);
+
+    if (m_moderate && !moderator && !gm)
     {
         WorldPacket data;
         MakeNotModerator(data, m_name);

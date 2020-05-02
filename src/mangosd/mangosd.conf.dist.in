@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2020032801
+ConfVersion=2020050201
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -1158,11 +1158,6 @@ CreaturePickpocketRestockDelay = 600
 #        Default: 1 (allow join to channel only if active in LFG)
 #                 0 (allow join to channel in any time)
 #
-#    Channel.SilentlyGMJoin
-#        Silently join GM characters (security level > 1) to channels
-#        Default: 0 (join announcement in normal way)
-#                 1 (GM join without announcement)
-#
 #    Channel.StaticAutoTreshold
 #        Static custom channels are custom channels pre-configured with global-like properties in a "world chat" manner.
 #        By default they have no owner, no moderators, no password and no premoderation (unless overriden by a GM).
@@ -1179,7 +1174,6 @@ ChatFlood.MessageDelay = 1
 ChatFlood.MuteTime = 10
 Channel.RestrictedLanguageMode = 0
 Channel.RestrictedLfg = 1
-Channel.SilentlyGMJoin = 0
 Channel.StaticAutoTreshold = 0
 
 ###################################################################################################################
@@ -1222,6 +1216,22 @@ Channel.StaticAutoTreshold = 0
 #        Default: 1 (only moderators and above)
 #                 2 (only gamemasters and above)
 #                 3 (only administrators)
+#
+#    GM.ChannelModerationLevel
+#        Min GM account security level required for executing moderator in-game commands in the channels
+#        This also bypasses password prompts on joining channels which require password
+#                 0 (in-game channel moderator privileges only)
+#        Default: 1 (enabled for moderators and above)
+#                 2 (enabled for gamemasters and above)
+#                 3 (enabled only for administrators)
+#
+#    GM.ChannelSilentJoinLevel
+#        Min GM account security level required for silently joining and leaving channels
+#        Default: 0 (join and leave announcements enabled for everyone)
+#                 1 (disabled for moderators and above)
+#                 2 (disabled for gamemasters and above)
+#                 3 (disabled only for administrators)
+#
 #
 #    GM.WhisperingTo
 #        Is GM accepting whispers from player by default or not.
@@ -1280,6 +1290,8 @@ GM.AcceptTickets         = 2
 GM.AcceptTicketsLevel    = 2
 GM.Chat                  = 2
 GM.ChatLevel             = 1
+GM.ChannelModerationLevel= 1
+GM.ChannelSilentJoinLevel= 0
 GM.WhisperingTo          = 2
 GM.InGMList.Level        = 3
 GM.InWhoList.Level       = 3
