@@ -150,7 +150,7 @@ struct mob_netherweb_victimAI : public ScriptedAI
 {
     mob_netherweb_victimAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        SetCombatMovement(false);
+        SetReactState(REACT_PASSIVE);
         Reset();
     }
 
