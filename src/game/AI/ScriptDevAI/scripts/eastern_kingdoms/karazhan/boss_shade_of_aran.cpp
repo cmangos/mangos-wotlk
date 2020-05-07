@@ -354,6 +354,7 @@ struct boss_aranAI : public RangedCombatAI
                 {
                     DoCastSpellIfCan(target, SPELL_DRAGONS_BREATH, CAST_TRIGGERED);
                     DisableCombatAction(action);
+                    DelayCombatAction(ARAN_ACTION_SUPERSPELL, 6000); // Duration
                 }
                 return;
             }
