@@ -5557,7 +5557,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
 
         bool diminished = false;
         // Remove any existing holders from the same diminishing returns group by treating as unique
-        if (!unique && drGroup)
+        if (!unique && drGroup && drGroup != DIMINISHING_LIMITONLY)
         {
             diminished = (drGroup == existingDrGroup);
             unique = diminished;
