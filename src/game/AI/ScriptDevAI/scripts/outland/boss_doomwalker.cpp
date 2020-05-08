@@ -200,12 +200,11 @@ struct boss_doomwalkerAI : public ScriptedAI
             while (targets.size() > COUNT_OVERRUN)
                 targets.erase(targets.begin() + urand(0, targets.size() - 1));
 
-            if (!targets.empty())
+            if (!targets.empty() && DoCastSpellIfCan(nullptr, SPELL_OVERRUN) == CAST_OK)
             {
                 float angle = m_creature->GetAngle(targets[0]);
                 m_creature->SetFacingTo(angle);
                 m_creature->SetOrientation(angle);
-                m_creature->CastSpell(nullptr, SPELL_OVERRUN, TRIGGERED_NONE);
                 m_creature->CastSpell(nullptr, SPELL_OVERRUN_TRIGGER_SPAWN, TRIGGERED_OLD_TRIGGERED); // shouldnt be sent to client
                 DoScriptText(urand(0, 1) ? SAY_OVERRUN_1 : SAY_OVERRUN_2, m_creature);
                 m_uiOverrunTimer = urand(25000, 40000);
