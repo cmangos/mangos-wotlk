@@ -123,7 +123,6 @@ void WorldSession::SetOffline()
     {
         // friend status
         sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetObjectGuid(), true);
-        _player->CleanupChannels();
         LogoutRequest(time(nullptr));
     }
 
