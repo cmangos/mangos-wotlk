@@ -109,7 +109,7 @@ void WorldSession::HandleChannelListOpcode(WorldPacket& recvPacket)
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->List(_player);
+            chn->SendChannelListResponse(_player);
 }
 
 void WorldSession::HandleChannelPasswordOpcode(WorldPacket& recvPacket)
@@ -123,7 +123,7 @@ void WorldSession::HandleChannelPasswordOpcode(WorldPacket& recvPacket)
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->Password(_player, pass.c_str());
+            chn->SetPassword(_player, pass.c_str());
 }
 
 void WorldSession::HandleChannelSetOwnerOpcode(WorldPacket& recvPacket)
@@ -152,7 +152,7 @@ void WorldSession::HandleChannelOwnerOpcode(WorldPacket& recvPacket)
     recvPacket >> channelname;
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->SendWhoOwner(_player);
+            chn->SendChannelOwnerResponse(_player);
 }
 
 void WorldSession::HandleChannelModeratorOpcode(WorldPacket& recvPacket)
@@ -169,7 +169,7 @@ void WorldSession::HandleChannelModeratorOpcode(WorldPacket& recvPacket)
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->SetModerator(_player, otp.c_str());
+            chn->SetModerator(_player, otp.c_str(), true);
 }
 
 void WorldSession::HandleChannelUnmoderatorOpcode(WorldPacket& recvPacket)
@@ -186,7 +186,7 @@ void WorldSession::HandleChannelUnmoderatorOpcode(WorldPacket& recvPacket)
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->UnsetModerator(_player, otp.c_str());
+            chn->SetModerator(_player, otp.c_str(), false);
 }
 
 void WorldSession::HandleChannelMuteOpcode(WorldPacket& recvPacket)
@@ -203,7 +203,7 @@ void WorldSession::HandleChannelMuteOpcode(WorldPacket& recvPacket)
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->SetMute(_player, otp.c_str());
+            chn->SetMute(_player, otp.c_str(), true);
 }
 
 void WorldSession::HandleChannelUnmuteOpcode(WorldPacket& recvPacket)
@@ -221,7 +221,7 @@ void WorldSession::HandleChannelUnmuteOpcode(WorldPacket& recvPacket)
 
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->UnsetMute(_player, otp.c_str());
+            chn->SetMute(_player, otp.c_str(), false);
 }
 
 void WorldSession::HandleChannelInviteOpcode(WorldPacket& recvPacket)
@@ -300,7 +300,7 @@ void WorldSession::HandleChannelAnnouncementsOpcode(WorldPacket& recvPacket)
     recvPacket >> channelname;
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->Announce(_player);
+            chn->ToggleAnnouncements(_player);
 }
 
 void WorldSession::HandleChannelModerateOpcode(WorldPacket& recvPacket)
@@ -311,7 +311,7 @@ void WorldSession::HandleChannelModerateOpcode(WorldPacket& recvPacket)
     recvPacket >> channelname;
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->Moderate(_player);
+            chn->ToggleModeration(_player);
 }
 
 void WorldSession::HandleChannelDisplayListQueryOpcode(WorldPacket& recvPacket)
@@ -322,7 +322,7 @@ void WorldSession::HandleChannelDisplayListQueryOpcode(WorldPacket& recvPacket)
     recvPacket >> channelname;
     if (ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if (Channel* chn = cMgr->GetChannel(channelname, _player))
-            chn->List(_player, true);
+            chn->SendChannelListResponse(_player, true);
 }
 
 void WorldSession::HandleGetChannelMemberCountOpcode(WorldPacket& recvPacket)
