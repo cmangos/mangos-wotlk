@@ -357,7 +357,6 @@ struct npc_captured_sprite_darterAI : public npc_escortAI
     {
         m_manaBurnTimer = urand(3, 6) * IN_MILLISECONDS;
         // Randomly pick a pre-set flight path amongst 4
-        SetRun(true);
         SetEscortWaypoints(urand(0, 3));
     }
 
@@ -421,7 +420,7 @@ bool GOUse_go_cage_door(Player* player, GameObject* go)
     {
         spriteDart->SetFactionTemporary(FACTION_ESCORT_N_FRIEND_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
         if (auto* escortAI = dynamic_cast<npc_captured_sprite_darterAI*>(spriteDart->AI()))
-            escortAI->Start(false, player, nullptr);
+            escortAI->Start(true, player, nullptr);
     }
     // Spawn a Grimtotem Raider
     if (Creature* grimtotemRaider = player->SummonCreature(NPC_GRIMTOTEM_RAIDER, raiderSpawnPos[0], raiderSpawnPos[1], raiderSpawnPos[2], raiderSpawnPos[3],TEMPSPAWN_DEAD_DESPAWN, 10 * MINUTE * IN_MILLISECONDS))
