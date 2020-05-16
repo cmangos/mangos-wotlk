@@ -171,6 +171,17 @@ struct boss_leotheras_the_blindAI : public ScriptedAI
     void EnterEvadeMode() override
     {
         m_creature->CastSpell(m_creature, SPELL_WHISPER_CLEAR, TRIGGERED_NONE);
+        for (ObjectGuid guid : m_charmTargets)
+        {
+            if (Player* player = m_creature->GetMap()->GetPlayer(guid))
+            {
+                if (player->HasAura(SPELL_CONS_MADNESS))
+                {
+                    player->RemoveAurasDueToSpell(SPELL_CONS_MADNESS);
+                    player->Suicide();
+                }
+            }
+        }
         ScriptedAI::EnterEvadeMode();
     }
 
