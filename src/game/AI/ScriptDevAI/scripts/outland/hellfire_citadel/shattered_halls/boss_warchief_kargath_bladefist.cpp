@@ -96,6 +96,9 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
         m_uiSummonAssistantTimer = 20000;
         m_uiAssassinsTimer = 5000;
 
+        SetCombatScriptStatus(false);
+        SetCombatMovement(true);
+
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
