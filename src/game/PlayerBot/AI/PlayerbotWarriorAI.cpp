@@ -521,7 +521,13 @@ bool PlayerbotWarriorAI::Pull()
     {
         if (!m_ai->In_Range(m_ai->GetCurrentTarget(), AUTO_SHOT))
         {
-            m_ai->TellMaster("I'm out of range.");
+            m_ai->TellMaster("Can't pull: I'm out of range.");
+            return false;
+        }
+
+        if (!m_bot->IsWithinLOSInMap(m_ai->GetCurrentTarget()))
+        {
+            m_ai->TellMaster("Can't pull: target is out of sight.");
             return false;
         }
 
@@ -537,4 +543,7 @@ bool PlayerbotWarriorAI::Pull()
         m_ai->Attack(m_ai->GetCurrentTarget());
         return true;
     }
+
+    m_ai->TellMaster("I cannot pull my target for an unkown reason.");
+        return false;
 }
