@@ -20,6 +20,7 @@
 #include "Policies/Singleton.h"
 #include "Log.h"
 #include "ProgressBar.h"
+#include "Util.h"
 #include "Globals/SharedDefines.h"
 #include "Server/SQLStorages.h"
 
@@ -841,14 +842,52 @@ ContentLevels GetContentLevelsForMapAndZone(uint32 mapid, uint32 zoneId)
     }
 }
 
-ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
+ChatChannelsEntry const* GetChatChannelsEntryFor(const std::string& name, uint32 channel_id/* = 0*/)
 {
+    std::wstring wname;
+
+    Utf8toWStr(name, wname);
+
+    if (!channel_id && wname.empty())
+        return nullptr;
+
     // not sorted, numbering index from 0
     for (uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
     {
-        ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
-        if (ch && ch->ChannelID == channel_id)
-            return ch;
+        if (ChatChannelsEntry const* entry = sChatChannelsStore.LookupEntry(i))
+        {
+            std::wstring wpattern;
+
+            // try to match by name first, avoid creating custom channels with same name
+            if (!wname.empty())
+            {
+                for (uint32 i = 0; i < MAX_LOCALE; ++i)
+                {
+                    Utf8toWStr(entry->pattern[i], wpattern);
+
+                    if (wpattern.empty())
+                        continue;
+
+                    size_t argpos = wpattern.find(L"%s");
+
+                    // formatting arg present: strip and attempt partial match
+                    if (argpos != std::wstring::npos)
+                    {
+                        wpattern.replace(argpos, 2, L"");
+
+                        if (wname.find(wpattern) != std::wstring::npos)
+                            return entry;
+                    }
+                    // attempt full match
+                    else if (wname.compare(wpattern) == 0)
+                        return entry;
+                }
+            }
+
+            // name still not found, but channel id is provided: possibly no dbc data for client locale
+            if (channel_id && channel_id == entry->ChannelID)
+                return entry;
+        }
     }
     return nullptr;
 }
