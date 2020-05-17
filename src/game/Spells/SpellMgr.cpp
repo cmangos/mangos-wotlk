@@ -1774,6 +1774,14 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
             {
                 case SPELLFAMILY_GENERIC:                   // same family case
                 {
+                    // Felsteed (Summon) and Summon Nightmare
+                    if (spellInfo_1->SpellIconID == 115 && spellInfo_2->SpellIconID == 115)
+                        return false;
+
+                    // Dreadsteed (Summon) and Summon Nightmare
+                    if (spellInfo_1->SpellIconID == 1715 && spellInfo_2->SpellIconID == 115)
+                        return false;
+
                     // Thunderfury
                     if ((spellInfo_1->Id == 21992 && spellInfo_2->Id == 27648) ||
                             (spellInfo_2->Id == 21992 && spellInfo_1->Id == 27648))
@@ -2076,6 +2084,14 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
                 {
                     // Unstable Currents and other -> *Sanctity Aura (multi-family check)
                     if (spellInfo_2->SpellIconID == 502 && spellInfo_1->SpellIconID == 502 && spellInfo_1->SpellVisual[0] == 969)
+                        return false;
+
+                    // Warhorse (Summon) and Summon Holy Mount Visual
+                    if (spellInfo_1->SpellIconID == 1716 && spellInfo_2->SpellIconID == 115)
+                        return false;
+
+                    // Charger (Summon) and Summon Holy Mount Visual
+                    if (spellInfo_1->SpellIconID == 115 && spellInfo_2->SpellIconID == 115)
                         return false;
 
                     // *Band of Eternal Champion and Seal of Command(multi-family check)
