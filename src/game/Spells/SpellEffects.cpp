@@ -2168,7 +2168,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
 
                     int32 basepoints0 = 100;
-                    m_caster->CastCustomSpell(unitTarget, 37675, &basepoints0, nullptr, nullptr, (TRIGGERED_OLD_TRIGGERED | TRIGGERED_IGNORE_HIT_CALCULATION));
+                    m_caster->CastCustomSpell(unitTarget, 37675, &basepoints0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 37867:                                 // Arcano-Scorp Control
