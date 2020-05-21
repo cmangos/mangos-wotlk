@@ -939,6 +939,10 @@ class WorldObject : public Object
         VisibilityData const& GetVisibilityData() const { return m_visibilityData; }
         VisibilityData& GetVisibilityData() { return m_visibilityData; }
 
+        bool HaveDebugFlag(CMDebugFlags flag) const { return (uint64(m_debugFlags) & flag) != 0; }
+        void SetDebugFlag(CMDebugFlags flag) { m_debugFlags |= uint64(flag); }
+        void ClearDebugFlag(CMDebugFlags flag) { m_debugFlags &= ~(uint64(flag)); }
+
     protected:
         explicit WorldObject();
 
@@ -975,6 +979,7 @@ class WorldObject : public Object
         Position m_position;
         ViewPoint m_viewPoint;
         bool m_isActiveObject;
+        uint64 m_debugFlags;
 };
 
 #endif
