@@ -394,7 +394,7 @@ void WaypointMovementGenerator<Creature>::SendNextWayPointPath(Creature& creatur
             auto pt = genPath[ptIdx];
             TemporarySpawnWaypoint* wpCreature = new TemporarySpawnWaypoint(creature.GetObjectGuid(), i_currentNode, m_pathId, (uint32)m_PathOrigin);
 
-            CreatureCreatePos pos(creature.GetMap(), pt.x, pt.y, pt.z, 0.0f);
+            CreatureCreatePos pos(creature.GetMap(), pt.x, pt.y, pt.z, 0.0f, creature.GetPhaseMask());
             CreatureInfo const* waypointInfo = ObjectMgr::GetCreatureTemplate(VISUAL_WAYPOINT);
             if (!wpCreature->Create(creature.GetMap()->GenerateLocalLowGuid(HIGHGUID_UNIT), pos, waypointInfo))
             {
