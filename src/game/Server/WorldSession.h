@@ -306,6 +306,8 @@ class WorldSession
         void SendQueryTimeResponse() const;
         void SendRedirectClient(std::string& ip, uint16 port) const;
 
+        bool IsInitialZoneUpdated() { return m_initialZoneUpdated; }
+
         AccountTypes GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
         Player* GetPlayer() const { return _player; }
@@ -994,6 +996,8 @@ class WorldSession
 
         std::set<ObjectGuid> m_offlineNameQueries; // for name queires made when not logged in (character selection screen)
         std::deque<CharacterNameQueryResponse> m_offlineNameResponses; // for responses to name queries made when not logged in
+
+        bool m_initialZoneUpdated = false;
 
         std::mutex m_recvQueueLock;
         std::deque<std::unique_ptr<WorldPacket>> m_recvQueue;

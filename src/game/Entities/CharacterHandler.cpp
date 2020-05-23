@@ -665,6 +665,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
     SetPlayer(pCurrChar, playerGuid);
     m_playerLoading = true;
 
+    m_initialZoneUpdated = false;
+
     // "GetAccountId()==db stored account id" checked in LoadFromDB (prevent login not own character using cheating tools)
     if (!pCurrChar->LoadFromDB(playerGuid, holder))
     {
@@ -921,6 +923,8 @@ void WorldSession::HandlePlayerReconnect()
 
     // reset all visible objects to be able to resend them
     _player->m_clientGUIDs.clear();
+
+    m_initialZoneUpdated = false;
 
     Group* group = _player->GetGroup();
 

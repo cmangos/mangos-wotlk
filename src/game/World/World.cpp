@@ -563,6 +563,7 @@ void World::LoadConfigSettings(bool reload)
 
     setConfigMinMax(CONFIG_UINT32_START_ARENA_POINTS, "StartArenaPoints", 0, 0, getConfig(CONFIG_UINT32_MAX_ARENA_POINTS));
 
+    setConfig(CONFIG_BOOL_TAXI_FLIGHT_CHAT_FIX, "TaxiFlightChatFix", false);
     setConfig(CONFIG_BOOL_LONG_TAXI_PATHS_PERSISTENCE, "LongFlightPathsPersistence", false);
     setConfig(CONFIG_BOOL_ALL_TAXI_PATHS, "AllFlightPaths", false);
 
