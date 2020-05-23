@@ -77,6 +77,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (36374,'spell_summon_smoke_beacon'),
 (37591,'spell_inebriate_removal'),
 (35754,'spell_soccothrates_charge'),
+(38028,'spell_watery_grave'),
 (34231,'spell_increased_holy_light_healing'),
 (33793,'spell_vazruden_liquid_fire_script'),
 (33794,'spell_vazruden_liquid_fire_script'),

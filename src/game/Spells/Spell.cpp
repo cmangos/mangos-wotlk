@@ -8910,10 +8910,6 @@ bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
             }
             return false;
         }
-        case 38028:                             // Watery Grave
-            if (!target->IsAlive())
-                return false;
-            // no break
         case 30769:                             // Pick Red Riding Hood
         case 30843:                             // Enfeeble
         case 31298:                             // Sleep

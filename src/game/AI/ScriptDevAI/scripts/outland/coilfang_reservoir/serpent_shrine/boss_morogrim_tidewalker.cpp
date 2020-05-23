@@ -23,7 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "serpent_shrine.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -88,46 +89,49 @@ enum
 static const uint32 m_auiSpellWateryGraveTeleport[] = { SPELL_WATERY_GRAVE_TELEPORT_1, SPELL_WATERY_GRAVE_TELEPORT_2, SPELL_WATERY_GRAVE_TELEPORT_3, SPELL_WATERY_GRAVE_TELEPORT_4 };
 static const uint32 m_auiSpellSummonGlobule[] = { SPELL_SUMMON_GLOBULE_1, SPELL_SUMMON_GLOBULE_2, SPELL_SUMMON_GLOBULE_3, SPELL_SUMMON_GLOBULE_4 };
 
-struct boss_morogrim_tidewalkerAI : public ScriptedAI
+enum MorogrimActions
 {
-    boss_morogrim_tidewalkerAI(Creature* pCreature) : ScriptedAI(pCreature)
+    MOROGRIM_PHASE_2,
+    MOROGRIM_EARTHQUAKE,
+    MOROGRIM_TIDAL_WAVE,
+    MOROGRIM_WATERY_GRAVE,
+    MOROGRIM_WATER_GLOBULES,
+    MOROGRIM_ACTION_MAX,
+};
+
+struct boss_morogrim_tidewalkerAI : public CombatAI
+{
+    boss_morogrim_tidewalkerAI(Creature* creature) : CombatAI(creature, MOROGRIM_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        Reset();
+        AddTimerlessCombatAction(MOROGRIM_PHASE_2, true);
+        AddCombatAction(MOROGRIM_EARTHQUAKE, 40000u);
+        AddCombatAction(MOROGRIM_TIDAL_WAVE, 10000, 15000);
+        AddCombatAction(MOROGRIM_WATERY_GRAVE, 30000u);
+        AddCombatAction(MOROGRIM_WATER_GLOBULES, true);
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        {
+            return x < 304.12f || x > 457.35f;
+        });
     }
 
-    ScriptedInstance* m_pInstance;
-
-    uint32 m_uiTidalWaveTimer;
-    uint32 m_uiWateryGraveTimer;
-    uint32 m_uiEarthquakeTimer;
-    uint32 m_uiWateryGlobulesTimer;
-    uint8 m_uiGraveIndex;
-
-    bool m_bIsPhase2;
+    ScriptedInstance* m_instance;
 
     void Reset() override
     {
-        m_uiTidalWaveTimer      = urand(10000, 15000);
-        m_uiWateryGraveTimer    = 30000;
-        m_uiEarthquakeTimer     = 40000;
-        m_uiWateryGlobulesTimer = 0;
-        m_uiGraveIndex          = 0;
+        CombatAI::Reset();
 
-        m_bIsPhase2             = false;
-
-        DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MOROGRIM_EVENT, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_MOROGRIM_EVENT, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         switch (urand(0, 2))
         {
@@ -137,133 +141,108 @@ struct boss_morogrim_tidewalkerAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MOROGRIM_EVENT, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_MOROGRIM_EVENT, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_MOROGRIM_EVENT, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_MOROGRIM_EVENT, FAIL);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (pSummoned->GetEntry() == NPC_TIDEWALKER_LURKER)
+        if (summoned->GetEntry() == NPC_TIDEWALKER_LURKER)
         {
-            pSummoned->SetInCombatWithZone();
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                pSummoned->AI()->AttackStart(pTarget);
-        }
-        else if (pSummoned->GetEntry() == NPC_WATER_GLOBULE)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0.0f, 0.0f);
+            summoned->SetNoCallAssistance(true);
+            summoned->SetInCombatWithZone();
+            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                summoned->AI()->AttackStart(target);
+            summoned->SetCorpseDelay(2);
         }
     }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    void ExecuteAction(uint32 action) override
     {
-        // Handle watery grave teleport - each player hit has his own teleport spell
-        if (pSpell->Id == SPELL_WATERY_GRAVE && pTarget->GetTypeId() == TYPEID_PLAYER)
+        switch (action)
         {
-            DoCastSpellIfCan(pTarget, m_auiSpellWateryGraveTeleport[m_uiGraveIndex], CAST_TRIGGERED);
-            ++m_uiGraveIndex;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiEarthquakeTimer <= uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_EARTHQUAKE) == CAST_OK)
+            case MOROGRIM_PHASE_2:
             {
-                DoScriptText(EMOTE_EARTHQUAKE, m_creature);
-                DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
-
-                // summon murlocs - north
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_A1, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_A3, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_A5, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_A7, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_A9, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_A10, CAST_TRIGGERED);
-
-                // summon murlocs - south
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_B2, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_B4, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_B6, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_B8, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_B9, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_B10, CAST_TRIGGERED);
-
-                m_uiEarthquakeTimer = 50000; 
+                if (m_creature->GetHealthPercent() < 25.0f)
+                {
+                    DisableCombatAction(MOROGRIM_WATERY_GRAVE);
+                    ResetCombatAction(MOROGRIM_WATER_GLOBULES, 1);
+                    SetActionReadyStatus(action, false);
+                }
+                break;
             }
-        }
-        else
-            m_uiEarthquakeTimer -= uiDiff;
-
-        if (m_uiTidalWaveTimer <= uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_TIDAL_WAVE) == CAST_OK)
-                m_uiTidalWaveTimer = urand(20000, 25000);
-        }
-        else
-            m_uiTidalWaveTimer -= uiDiff;
-
-        // Phase one specific spells
-        if (!m_bIsPhase2)
-        {
-            if (m_uiWateryGraveTimer <= uiDiff)
+            case MOROGRIM_EARTHQUAKE:
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_WATERY_GRAVE) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, SPELL_EARTHQUAKE) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_EARTHQUAKE, m_creature);
+                    DoScriptText(urand(0, 1) ? SAY_SUMMON1 : SAY_SUMMON2, m_creature);
+
+                    // summon murlocs - north
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_A1, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_A3, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_A5, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_A7, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_A9, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_A10, CAST_TRIGGERED);
+
+                    // summon murlocs - south
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_B2, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_B4, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_B6, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_B8, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_B9, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_MURLOC_B10, CAST_TRIGGERED);
+
+                    ResetCombatAction(action, 50000);
+                }
+                break;
+            }
+            case MOROGRIM_TIDAL_WAVE:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_TIDAL_WAVE) == CAST_OK)
+                    ResetCombatAction(action, urand(20000, 25000));
+                break;
+            }
+            case MOROGRIM_WATERY_GRAVE:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_WATERY_GRAVE) == CAST_OK)
                 {
                     DoScriptText(EMOTE_WATERY_GRAVE, m_creature);
-                    m_uiWateryGraveTimer = 30000;
-                    m_uiGraveIndex = 0;
+                    ResetCombatAction(action, 30000);
                 }
+                break;
             }
-            else
-                m_uiWateryGraveTimer -= uiDiff;
-
-            // Start Phase2 below 25% hp
-            if (m_creature->GetHealthPercent() < 25.0f)
-                m_bIsPhase2 = true;
-        }
-        else
-        {
-            if (m_uiWateryGlobulesTimer <= uiDiff)
+            case MOROGRIM_WATER_GLOBULES:
             {
+                if (!CanExecuteCombatAction())
+                    return;
+
                 for (uint8 i = 0; i < 4; ++i)
-                {
-                    Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER);
-                    if (pTarget)
-                        pTarget->CastSpell(pTarget, m_auiSpellSummonGlobule[i], TRIGGERED_OLD_TRIGGERED);
-                }
+                    m_creature->CastSpell(nullptr, m_auiSpellSummonGlobule[i], TRIGGERED_OLD_TRIGGERED);
 
                 DoScriptText(urand(0, 1) ? SAY_SUMMON_BUBL1 : SAY_SUMMON_BUBL2, m_creature);
                 DoScriptText(EMOTE_WATERY_GLOBULES, m_creature);
-                m_uiWateryGlobulesTimer = 25000;
+                ResetCombatAction(action, 25000);
+                break;
             }
-            else
-                m_uiWateryGlobulesTimer -= uiDiff;
         }
-
-        DoMeleeAttackIfReady();
-        EnterEvadeIfOutOfCombatArea(uiDiff);
     }
 };
 
 struct mob_water_globuleAI : public ScriptedAI, public TimerManager
 {
-    mob_water_globuleAI(Creature* pCreature) : ScriptedAI(pCreature), m_initialAggro(false)
+    mob_water_globuleAI(Creature* creature) : ScriptedAI(creature), m_initialAggro(false)
     {
         SetReactState(REACT_DEFENSIVE);
         AddCustomAction(1, 2000u, [&]() { AcquireNewTarget(); });
@@ -320,25 +299,38 @@ struct mob_water_globuleAI : public ScriptedAI, public TimerManager
     }
 };
 
-UnitAI* GetAI_boss_morogrim_tidewalker(Creature* pCreature)
+struct WateryGrave : public SpellScript
 {
-    return new boss_morogrim_tidewalkerAI(pCreature);
-}
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (!target->IsAlive() || spell->GetCaster()->GetVictim() == target)
+            return false;
 
-UnitAI* GetAI_mob_water_globule(Creature* pCreature)
-{
-    return new mob_water_globuleAI(pCreature);
-}
+        return true;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            uint64 targetIdx = spell->GetScriptValue();
+            spell->GetCaster()->CastSpell(spell->GetUnitTarget(), m_auiSpellWateryGraveTeleport[targetIdx], TRIGGERED_OLD_TRIGGERED);
+            spell->SetScriptValue(targetIdx + 1);
+        }
+    }
+};
 
 void AddSC_boss_morogrim_tidewalker()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_morogrim_tidewalker";
-    pNewScript->GetAI = &GetAI_boss_morogrim_tidewalker;
+    pNewScript->GetAI = &GetNewAIInstance<boss_morogrim_tidewalkerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_water_globule";
-    pNewScript->GetAI = &GetAI_mob_water_globule;
+    pNewScript->GetAI = &GetNewAIInstance<mob_water_globuleAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<WateryGrave>("spell_watery_grave");
 }
