@@ -1866,6 +1866,58 @@ bool Player::BuildEnumData(QueryResult* result, WorldPacket& p_data)
     return true;
 }
 
+bool Player::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
+{
+    if (Unit::Mount(displayid, aura))
+        return false;
+
+    // Custom mount (non-aura such as taxi or command) or in flight: unsummon any pet
+    if (!aura || IsFreeFlying() || IsSpellHaveAura(aura->GetSpellProto(), SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED))
+        UnsummonPetTemporaryIfAny();
+    // Land mount aura: unsummon only permanent pet
+    else if (aura)
+    {
+        if (Pet* pet = GetPet())
+        {
+            if (pet->isControlled() && (!(pet->isTemporarySummoned() || InArena())
+                                        || sWorld.getConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT)))
+                UnsummonPetTemporaryIfAny();
+            else
+                pet->SetModeFlags(PET_MODE_DISABLE_ACTIONS);
+        }
+    }
+
+    float height = GetCollisionHeight();
+    if (height)
+        SendCollisionHeightUpdate(height);
+
+    return true;
+}
+
+bool Player::Unmount(const Aura* aura/* = nullptr*/)
+{
+    if (!Unit::Unmount(aura))
+        return false;
+
+    // only resummon old pet if the player is already added to a map
+    // this prevents adding a pet to a not created map which would otherwise cause a crash
+    // (it could probably happen when logging in after a previous crash)
+    if (Pet* pet = GetPet())
+    {
+        // Get reaction state and display appropriately
+        if (CharmInfo* charmInfo = pet->GetCharmInfo())
+            pet->SetModeFlags(PetModeFlags(pet->AI()->GetReactState() | charmInfo->GetCommandState() * 0x100));
+    }
+    else
+        ResummonPetTemporaryUnSummonedIfAny();
+
+    float height = GetCollisionHeight();
+    if (height)
+        SendCollisionHeightUpdate(height);
+
+    return true;
+}
+
 void Player::ToggleAFK()
 {
     ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK);

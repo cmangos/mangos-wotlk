@@ -9198,81 +9198,36 @@ float Unit::GetPPMProcChance(uint32 WeaponSpeed, float PPM) const
     return WeaponSpeed * PPM / 600.0f;                      // result is chance in percents (probability = Speed_in_sec * (PPM / 60))
 }
 
-void Unit::Mount(uint32 mount, uint32 spellId)
+bool Unit::Mount(uint32 displayid, const Aura* aura/* = nullptr*/)
 {
-    if (!mount)
-        return;
+    // Custom mount (non-aura such as taxi or command) overwrites aura mounts
+    if (!displayid || (IsMounted() && aura && uint32(aura->GetMiscValue()) != GetMountID()))
+        return false;
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOUNTING);
-
-    SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, mount);
-
+    SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, displayid);
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT);
-
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        // Called by Taxi system / GM command
-        if (!spellId)
-            ((Player*)this)->UnsummonPetTemporaryIfAny();
-        // Called by mount aura
-        else if (SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId))
-        {
-            // Flying case (Unsummon any pet)
-            if (IsSpellHaveAura(spellInfo, SPELL_AURA_MOD_FLIGHT_SPEED_MOUNTED))
-                ((Player*)this)->UnsummonPetTemporaryIfAny();
-            // Normal case (Unsummon only permanent pet)
-            else if (Pet* pet = GetPet())
-            {
-                if (pet->isControlled() && (!(pet->isTemporarySummoned() || ((Player*)this)->InArena())
-                                            || sWorld.getConfig(CONFIG_BOOL_PET_UNSUMMON_AT_MOUNT)))
-                    ((Player*)this)->UnsummonPetTemporaryIfAny();
-                else
-                    pet->SetModeFlags(PET_MODE_DISABLE_ACTIONS);
-            }
-        }
-
-        float height = GetCollisionHeight();
-        if (height)
-            SendCollisionHeightUpdate(height);
-    }
+    return true;
 }
 
-void Unit::Unmount(bool from_aura)
+bool Unit::Unmount(const Aura* aura/* = nullptr*/)
 {
-    if (!IsMounted())
-        return;
+    // Custom mount (non-aura such as taxi or command) overwrites aura mounts, do not dismount on aura removal
+    if (!IsMounted() || (aura && uint32(aura->GetMiscValue()) != GetMountID()))
+        return false;
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_MOUNTED);
-
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT);
 
-    // Called NOT by Taxi system / GM command
-    if (from_aura)
+    if (aura)
     {
         WorldPacket data(SMSG_DISMOUNT, 8);
         data << GetPackGUID();
         SendMessageToSet(data, true);
     }
 
-    // only resummon old pet if the player is already added to a map
-    // this prevents adding a pet to a not created map which would otherwise cause a crash
-    // (it could probably happen when logging in after a previous crash)
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        if (Pet* pet = GetPet())
-        {
-            // Get reaction state and display appropriately
-            if (CharmInfo* charmInfo = pet->GetCharmInfo())
-                pet->SetModeFlags(PetModeFlags(pet->AI()->GetReactState() | charmInfo->GetCommandState() * 0x100));
-        }
-        else
-            ((Player*)this)->ResummonPetTemporaryUnSummonedIfAny();
-
-        float height = GetCollisionHeight();
-        if (height)
-            SendCollisionHeightUpdate(height);
-    }
+    return true;
 }
 
 void Unit::SetInCombatWith(Unit* enemy)
