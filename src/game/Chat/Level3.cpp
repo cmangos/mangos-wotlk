@@ -7208,6 +7208,18 @@ bool ChatHandler::HandleLinkCheckCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleWarEffortCommand(char* args)
+{
+    uint32 param;
+    if (!ExtractUInt32(&args, param))
+    {
+        PSendSysMessage("%s", sWorldState.GetAQPrintout().data());
+        return true;
+    }
+    sWorldState.HandleWarEffortPhaseTransition(param);
+    return true;
+}
+
 bool ChatHandler::HandleExpansionRelease(char* args)
 {
     uint32 curExpansion = sWorldState.GetExpansion();

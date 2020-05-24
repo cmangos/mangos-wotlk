@@ -28,6 +28,7 @@ extern void AddSC_quests_scripts();
 extern void AddSC_spell_scripts();
 extern void AddSC_world_map_scripts();
 extern void AddSC_boss_highlord_kruul();
+extern void AddSC_war_effort();
 extern void AddSC_world_map_ebon_hold();
 
 // eastern kingdoms
@@ -518,6 +519,7 @@ void AddScripts()
     AddSC_spell_scripts();
     AddSC_world_map_scripts();
     AddSC_boss_highlord_kruul();
+    AddSC_war_effort();
     AddSC_world_map_ebon_hold();
 
     // eastern kingdoms

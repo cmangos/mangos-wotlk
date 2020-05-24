@@ -832,6 +832,7 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand worldStateTable[] =
     {
+        { "wareffort",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWarEffortCommand,           "", nullptr },
         { "expansion",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleExpansionRelease,           "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
     };
