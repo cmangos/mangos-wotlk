@@ -37,7 +37,7 @@ static float const VISIBILITY_DISTANCE_SMALL    = 50.0f;
 static float const VISIBILITY_DISTANCE_TINY     = 25.0f;
 static float const DEFAULT_VISIBILITY_DISTANCE  = VISIBILITY_DISTANCE_NORMAL;   // default visible distance, 100 yards on continents
 static float const DEFAULT_VISIBILITY_INSTANCE  = 170.0f;                       // default visible distance in instances, 170 yards
-static float const DEFAULT_VISIBILITY_BG        = 533.0f;                       // default visible distance in BG/Arenas, 533 yards
+static float const DEFAULT_VISIBILITY_BGARENAS  = 533.0f;                       // default visible distance in BG/Arenas, 533 yards
 
 static float const DEFAULT_WORLD_OBJECT_SIZE    = 0.388999998569489f;           // currently used (correctly?) for any non Unit world objects.
                                                                                 // This is actually the bounding_radius, like player/creature from
