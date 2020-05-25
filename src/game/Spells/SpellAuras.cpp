@@ -4191,6 +4191,8 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         if (minfo)
             display_id = minfo->modelid;
 
+        m_modifier.m_amount = display_id;
+
         target->Mount(display_id, this);
 
         if (ci->VehicleTemplateId)
