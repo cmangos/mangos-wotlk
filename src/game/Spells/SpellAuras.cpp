@@ -1116,7 +1116,7 @@ void Aura::PickTargetsForSpellTrigger(Unit*& triggerCaster, Unit*& triggerTarget
 
 void Aura::CastTriggeredSpell(PeriodicTriggerData& data)
 {
-    Spell* spell = new Spell(data.caster, data.spellInfo, TRIGGERED_OLD_TRIGGERED, GetCasterGuid(), GetSpellProto());
+    Spell* spell = new Spell(data.caster, data.spellInfo, TRIGGERED_OLD_TRIGGERED, data.caster->GetObjectGuid(), GetSpellProto());
     SpellCastTargets targets;
     if (data.spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
     {
