@@ -1032,7 +1032,7 @@ struct npc_lord_illidan_stormrageAI : public Scripted_NoMovementAI
             float fLocZ = SpawnLocation[uiLocIndex + i].fLocZ;
             float fOrient = SpawnLocation[uiLocIndex + i].fOrient;
 
-            if (Creature* pSpawn = m_creature->SummonCreature(WavesInfo[m_uiWaveCount].uiCreatureId, fLocX, fLocY, fLocZ, fOrient, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000))
+            if (Creature* pSpawn = m_creature->SummonCreature(WavesInfo[m_uiWaveCount].uiCreatureId, fLocX, fLocY, fLocZ, fOrient, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 10000))
             {
                 if (m_uiWaveCount)                          // only in first wave
                     continue;
