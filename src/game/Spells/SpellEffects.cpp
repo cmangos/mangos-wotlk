@@ -12241,7 +12241,14 @@ void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)
         return;
 
     unitTarget->InterruptSpellsCastedOnMe(true);
-    unitTarget->CombatStop(false, false);
+    InstanceData* instance = unitTarget->GetInstanceData();
+    if (instance && sWorld.getConfig(CONFIG_BOOL_INSTANCE_STRICT_COMBAT_LOCKDOWN) && instance->IsEncounterInProgress())
+    {
+        unitTarget->AttackStop(true, false, true);
+        unitTarget->getHostileRefManager().addThreatPercent(-100);
+    }
+    else
+        unitTarget->CombatStop(false, false);
 
     // Vanish allows to remove all threat and cast regular stealth so other spells can be used
     if (m_spellInfo->IsFitToFamily(SPELLFAMILY_ROGUE, uint64(0x0000000000000800)))
