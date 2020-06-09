@@ -988,6 +988,7 @@ struct boss_kaelthasAI : public ScriptedAI
                             m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                             DoResetThreat();
                             SetCombatScriptStatus(false);
+                            SetCombatMovement(true, true);
                             m_uiPhase = PHASE_4_SOLO;
                             m_uiPhaseTimer = 30000;
                             m_uiPhaseSubphase = 0;
@@ -1005,6 +1006,28 @@ struct boss_kaelthasAI : public ScriptedAI
             case PHASE_4_SOLO:
             case PHASE_5_GRAVITY:
             {
+                if (m_uiGravityExpireTimer)
+                {
+                    // Switch to the other spells after gravity lapse expired
+                    if (m_uiGravityExpireTimer <= uiDiff)
+                    {
+                        SetCombatScriptStatus(false);
+                        SetCombatMovement(true);
+                        SetMeleeEnabled(true);
+                        m_uiGravityExpireTimer = 0;
+                        for (ObjectGuid guid : m_netherVapor)
+                            if (Creature* vapor = m_creature->GetMap()->GetCreature(guid))
+                                vapor->ForcedDespawn();
+                        m_netherVapor.clear();
+
+                        // make sure these dont occur in the rest of the phase
+                        m_actionReadyStatus[KAEL_ACTION_SHOCK_BARRIER] = false;
+                        m_actionReadyStatus[KAEL_ACTION_NETHER_BEAM] = false;
+                    }
+                    else
+                        m_uiGravityExpireTimer -= uiDiff;
+                }
+
                 if (!m_creature->SelectHostileTarget())
                     return;
 
@@ -1042,25 +1065,6 @@ struct boss_kaelthasAI : public ScriptedAI
                                 m_uiNetherVaporTimer -= uiDiff;
                         }
                     }
-
-                    // Switch to the other spells after gravity lapse expired
-                    if (m_uiGravityExpireTimer <= uiDiff)
-                    {
-                        SetCombatScriptStatus(false);
-                        SetCombatMovement(true);
-                        SetMeleeEnabled(true);
-                        m_uiGravityExpireTimer = 0;
-                        for (ObjectGuid guid : m_netherVapor)
-                            if (Creature* vapor = m_creature->GetMap()->GetCreature(guid))
-                                vapor->ForcedDespawn();
-                        m_netherVapor.clear();
-
-                        // make sure these dont occur in the rest of the phase
-                        m_actionReadyStatus[KAEL_ACTION_SHOCK_BARRIER] = false;
-                        m_actionReadyStatus[KAEL_ACTION_NETHER_BEAM] = false;
-                    }
-                    else
-                        m_uiGravityExpireTimer -= uiDiff;
                 }
 
                 // ***** Phase 4 specific actions ********

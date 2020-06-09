@@ -2443,7 +2443,7 @@ struct mob_phoenix_tkAI : public ScriptedAI
         }
     }
 
-    void SpellHit(Unit* /*caster*/, const SpellEntry* spellInfo) override
+    void OnSpellCooldownAdded(SpellEntry const* spellInfo) override
     {
         if (spellInfo->Id == m_rebirthRespawnSpellId)
         {
