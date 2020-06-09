@@ -279,7 +279,10 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             // battleground raid is always in Player->GetGroup(), never in GetOriginalGroup()
             Group* group = _player->GetGroup();
 
-            if (group && group->isBattleGroup())
+            if (!group)
+                return;
+
+            if (group->isBattleGroup())
                 group = _player->GetOriginalGroup();
 
             if (!group)
@@ -370,7 +373,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (group->isBattleGroup())
                 group = _player->GetOriginalGroup();
 
-            if (!group->isRaidGroup())
+            if (!group || !group->isRaidGroup())
                 return;
 
             WorldPacket data;
@@ -401,7 +404,7 @@ void WorldSession::HandleMessagechatOpcode(WorldPacket& recv_data)
             if (group->isBattleGroup())
                 group = _player->GetOriginalGroup();
 
-            if (!group->isRaidGroup() || !group->IsLeader(_player->GetObjectGuid()))
+            if (!group || !group->isRaidGroup() || !group->IsLeader(_player->GetObjectGuid()))
                 return;
 
             WorldPacket data;
