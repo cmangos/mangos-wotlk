@@ -312,6 +312,8 @@ struct boss_kaelthasAI : public ScriptedAI
     GuidVector m_weapons;
     uint32 m_weaponAttackTimer;
 
+    GuidSet m_charmTargets;
+
     bool m_actionReadyStatus[KAEL_ACTION_MAX];
 
     bool m_rangeMode;
@@ -373,6 +375,8 @@ struct boss_kaelthasAI : public ScriptedAI
         ResetSize();
 
         SetCombatScriptStatus(false);
+
+        m_charmTargets.clear();
     }
 
     void ResetSize()
@@ -394,6 +398,22 @@ struct boss_kaelthasAI : public ScriptedAI
         {
 
         }
+    }
+
+    void EnterEvadeMode() override
+    {
+        for (ObjectGuid guid : m_charmTargets) // TODO: Add despawn on evade
+        {
+            if (Player* player = m_creature->GetMap()->GetPlayer(guid))
+            {
+                if (player->HasAura(SPELL_MIND_CONTROL))
+                {
+                    player->RemoveAurasDueToSpell(SPELL_MIND_CONTROL);
+                    player->Suicide();
+                }
+            }
+        }
+        ScriptedAI::EnterEvadeMode();
     }
 
     void DoDespawnSummons()
@@ -540,6 +560,9 @@ struct boss_kaelthasAI : public ScriptedAI
             DoCastSpellIfCan(pTarget, m_auiSpellRemoveItems[m_uiItemIndex], CAST_TRIGGERED);
             ++m_uiItemIndex;
         }
+
+        if (pSpell->Id == SPELL_MIND_CONTROL)
+            m_charmTargets.insert(pTarget->GetObjectGuid());
     }
 
     void OnSpellInterrupt(SpellEntry const* spellInfo) override
