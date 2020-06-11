@@ -180,6 +180,8 @@ struct boss_lady_vashjAI : public ScriptedAI
     GuidVector m_triggerGuidsAll;
     GuidVector m_spawns;
 
+    GuidSet m_charmTargets;
+
     bool m_rangeMode;
 
     bool m_actionReadyStatus[VASHJ_ACTION_MAX];
@@ -229,6 +231,7 @@ struct boss_lady_vashjAI : public ScriptedAI
                 spawn->ForcedDespawn();
 
         m_spawns.clear();
+        m_charmTargets.clear();
     }
 
     void UpdateActions()
@@ -391,6 +394,28 @@ struct boss_lady_vashjAI : public ScriptedAI
             m_introTarget = invoker->GetObjectGuid();
             m_introDelayTimer = 10000;
         }
+    }
+
+    void EnterEvadeMode() override
+    {
+        for (ObjectGuid guid : m_charmTargets) // TODO: Add despawn on evade
+        {
+            if (Player* player = m_creature->GetMap()->GetPlayer(guid))
+            {
+                if (player->HasAura(SPELL_PERSUASION))
+                {
+                    player->RemoveAurasDueToSpell(SPELL_PERSUASION);
+                    player->Suicide();
+                }
+            }
+        }
+        ScriptedAI::EnterEvadeMode();
+    }
+
+    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    {
+        if (pSpell->Id == SPELL_PERSUASION)
+            m_charmTargets.insert(pTarget->GetObjectGuid());
     }
 
     void JustStoppedMovementOfTarget(SpellEntry const* spell, Unit* victim) override
