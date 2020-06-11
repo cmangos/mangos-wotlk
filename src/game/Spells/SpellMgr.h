@@ -1131,6 +1131,7 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
                     // because of POS/NEG decision, should in fact be NEUTRAL decision TODO: Increase check fidelity
         case 33637: // Infernal spells - Neutral targets - in sniff never put into combat - Maybe neutral spells do not put into combat?
         case 33241:
+        case 33045: // Wrath of the Astromancer - stacks like positive
         case 52149: // Rain of Darkness - factions and unitflags of target/caster verified - TARGET_DUELVSPLAYER - neutral target type
         case 35424: // Soul Shadows - used by Shade of Mal'druk on Mal'druk the Soulrender
         case 42628: // Zul'Aman - Fire Bomb - Neutral spell

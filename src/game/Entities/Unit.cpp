@@ -5267,6 +5267,9 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                     return false;
                 }
 
+                if (holder->GetId() == 33045)
+                    continue;
+
                 // Check for coexisting Weapon-proced Auras
                 if (holder->IsWeaponBuffCoexistableWith(foundHolder))
                     continue;
