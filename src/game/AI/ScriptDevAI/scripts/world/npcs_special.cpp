@@ -2390,7 +2390,7 @@ struct mob_phoenix_tkAI : public ScriptedAI
 
     void Aggro(Unit* /*pWho*/) override
     {
-        DoCastSpellIfCan(nullptr, m_burnSpellId);
+        DoCastSpellIfCan(nullptr, m_burnSpellId, CAST_TRIGGERED);
     }
 
     void JustPreventedDeath(Unit* /*attacker*/) override
