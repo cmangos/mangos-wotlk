@@ -200,8 +200,12 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+        if (!m_creature->SelectHostileTarget())
+        {
+            if (GetCombatScriptStatus())
+                EnterEvadeMode();
             return;
+        }
 
         // Check if out of range
         if (EnterEvadeIfOutOfCombatArea(uiDiff))
@@ -232,8 +236,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
                         // stop bladedance
                         m_bInBlade = false;
                         SetCombatScriptStatus(false);
-                        SetCombatMovement(true);
-                        DoStartMovement(m_creature->GetVictim());
+                        SetCombatMovement(true, true);
                         m_uiWaitTimer = 0;
                         if (!m_bIsRegularMode)
                             m_uiChargeTimer = 500;
