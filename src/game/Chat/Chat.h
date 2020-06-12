@@ -698,6 +698,7 @@ class ChatHandler
         bool HandleComeToMeCommand(char* args);
         bool HandleMovespeedShowCommand(char* args);
         bool HandleDebugMovement(char* args);
+        bool HandlePrintMovement(char* args);
 
         bool HandleCooldownListCommand(char* args);
         bool HandleCooldownClearCommand(char* args);
