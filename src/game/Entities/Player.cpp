@@ -19438,6 +19438,8 @@ void Player::HandleStealthedUnitsDetection()
             if (hasAtClient)
             {
                 (*i)->DestroyForPlayer(this);
+                if ((*i)->GetTypeId() == TYPEID_UNIT)
+                    BeforeVisibilityDestroy(static_cast<Creature*>(*i));
                 m_clientGUIDs.erase((*i)->GetObjectGuid());
             }
         }
@@ -20615,18 +20617,12 @@ bool Player::IsVisibleGloballyFor(Player* u) const
     return true;
 }
 
-template<class T>
-inline void BeforeVisibilityDestroy(T* /*t*/, Player* /*p*/)
+void Player::BeforeVisibilityDestroy(Creature* creature)
 {
-}
-
-template<>
-inline void BeforeVisibilityDestroy<Creature>(Creature* t, Player* p)
-{
-    if (!t->GetMap()->IsDungeon() && t->IsInCombat() && p->IsInCombat() && t->getThreatManager().HasThreat(p, true))
-        p->getHostileRefManager().deleteReference(t);
-    if (p->GetPetGuid() == t->GetObjectGuid() && ((Creature*)t)->IsPet())
-        ((Pet*)t)->Unsummon(PET_SAVE_REAGENTS);
+    if (!creature->GetMap()->IsDungeon() && creature->IsInCombat() && IsInCombat() && creature->getThreatManager().HasThreat(this, true))
+        getHostileRefManager().deleteReference(creature);
+    if (GetPetGuid() == creature->GetObjectGuid() && static_cast<Creature*>(creature)->IsPet())
+        static_cast<Pet*>(creature)->Unsummon(PET_SAVE_REAGENTS);
 }
 
 void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* target)
@@ -20639,7 +20635,7 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, WorldObject* targe
 
             if (target->GetTypeId() == TYPEID_UNIT)
             {
-                BeforeVisibilityDestroy<Creature>((Creature*)target, this);
+                BeforeVisibilityDestroy(static_cast<Creature*>(target));
 
                 // at remove from map (destroy) show kill animation (in different out of range/stealth case)
                 target->DestroyForPlayer(this, !target->IsInWorld() && ((Creature*)target)->IsDead());
@@ -20690,9 +20686,10 @@ void Player::UpdateVisibilityOf(WorldObject const* viewPoint, T* target, UpdateD
     {
         if (!target->isVisibleForInState(this, viewPoint, true))
         {
-            BeforeVisibilityDestroy<T>(target, this);
-
             ObjectGuid t_guid = target->GetObjectGuid();
+
+            if (target->GetTypeId() == TYPEID_UNIT)
+                BeforeVisibilityDestroy(dynamic_cast<Creature*>(target));
 
             target->BuildOutOfRangeUpdateBlock(&data);
             m_clientGUIDs.erase(t_guid);
