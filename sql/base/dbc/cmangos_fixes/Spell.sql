@@ -1806,3 +1806,6 @@ UPDATE `spell_template` SET `AuraInterruptFlags`=AuraInterruptFlags&~0x00001000 
 -- Ruby Arrow - should only hit one target - verified by video and sniff
 UPDATE spell_template SET MaxAffectedTargets= 1 WHERE id = 49197;
 
+-- spells that have caster in the middle of terrain - LOS attribute
+UPDATE spell_template SET AttributesEx2 = AttributesEx2|4 WHERE id IN (54612, 54613);
+
