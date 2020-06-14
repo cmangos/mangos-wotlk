@@ -133,7 +133,7 @@ class ChaseMovementGenerator : public TargetedMovementGeneratorMedium<Unit, Chas
 
         virtual bool IsRemovedOnExpire() const override { return true; }
 
-        std::string GetPrintout() const;
+        std::pair<std::string, std::string> GetPrintout() const;
 
     protected:
         float GetDynamicTargetDistance(Unit& owner, bool forRangeCheck) const override;
