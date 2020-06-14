@@ -130,7 +130,7 @@ void instance_the_eye::SetData(uint32 uiType, uint32 uiData)
                     {
                         if (!pTemp->IsAlive())
                             pTemp->Respawn();
-                        else
+                        else if (pTemp->IsInCombat())
                             pTemp->AI()->EnterEvadeMode();
                     }
                 }
