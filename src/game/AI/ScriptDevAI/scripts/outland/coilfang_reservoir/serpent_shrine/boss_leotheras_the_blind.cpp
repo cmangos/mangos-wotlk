@@ -76,7 +76,7 @@ struct boss_leotheras_the_blindAI : public ScriptedAI
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float /*z*/)
         {
-            return !(x < 409.0f && y > -524.0f && x > 300.0f && y < -301.0f);
+            return !(x > 298.0f && x < 411.0f && y > -526.0f &&  y < -299.0f);
         });
         Reset();
     }
