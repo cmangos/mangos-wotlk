@@ -133,6 +133,8 @@ struct boss_alarAI : public CombatAI
     
     ScriptedInstance* m_instance;
 
+    GuidVector m_spawns;
+
     uint8 m_phase;
     uint8 m_uiCurrentPlatformId;
     uint8 m_uiFuturePlatformId;
@@ -163,6 +165,8 @@ struct boss_alarAI : public CombatAI
         m_creature->SetDisplayId(m_creature->GetNativeDisplayId());
 
         m_uiCurrentPlatformId   = 0;
+
+        DespawnGuids(m_spawns);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -202,7 +206,10 @@ struct boss_alarAI : public CombatAI
     void JustSummoned(Creature* summoned) override
     {
         if (summoned->GetEntry() == NPC_FLAME_PATCH)
-            summoned->CastSpell(summoned, SPELL_FLAME_PATCH, TRIGGERED_OLD_TRIGGERED);
+        {
+            summoned->CastSpell(nullptr, SPELL_FLAME_PATCH, TRIGGERED_OLD_TRIGGERED);
+            m_spawns.push_back(summoned->GetObjectGuid());
+        }
     }
     
     // UNCOMMENT THIS AREA WHEN PATCH 2.1 HITS - should be done through serverside 41910
