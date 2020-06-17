@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "serpent_shrine.h"
 #include "Entities/TemporarySpawn.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -135,39 +136,44 @@ enum VashjActions
     VASHJ_ACTION_MELEE_MODE,
     VASHJ_ACTION_SHOOT,
     VASHJ_ACTION_FORKED_LIGHTNING,
-    VASHJ_ACTION_MELEE,
     VASHJ_ACTION_MAX,
+    VASHJ_INTRO,
+    VASHJ_COILFANG_ELITE,
+    VASHJ_COILFANG_STRIDER,
+    VASHJ_SPOREBAT,
+    VASHJ_ENCHANTED_ELEMENTAL,
+    VASHJ_TAINTED_ELEMENTAL,
 };
 
-struct boss_lady_vashjAI : public ScriptedAI
+struct boss_lady_vashjAI : public RangedCombatAI
 {
-    boss_lady_vashjAI(Creature* pCreature) : ScriptedAI(pCreature), m_introDelayTimer(0)
+    boss_lady_vashjAI(Creature* creature) : RangedCombatAI(creature, VASHJ_ACTION_MAX), m_instance(static_cast<instance_serpentshrine_cavern*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_serpentshrine_cavern*)pCreature->GetInstanceData();
-        Reset();
+        AddTimerlessCombatAction(VASHJ_ACTION_PHASE_2, true);
+        AddCombatAction(VASHJ_ACTION_PERSUASION, true);
+        AddCombatAction(VASHJ_ACTION_SHOCK_BLAST, 1000, 60000);
+        AddCombatAction(VASHJ_ACTION_STATIC_CHARGE, 10000, 25000);
+        AddCombatAction(VASHJ_ACTION_ENTANGLE, 30000u);
+        AddCombatAction(VASHJ_ACTION_SHOOT, 2000u);
+        AddCombatAction(VASHJ_ACTION_FORKED_LIGHTNING, true);
+        AddTimerlessCombatAction(VASHJ_ACTION_MELEE_MODE, true);
+        AddCustomAction(VASHJ_INTRO, true, [&]() { DoScriptText(SAY_INTRO, m_creature, m_creature->GetMap()->GetPlayer(m_introTarget)); });
+        AddCustomAction(VASHJ_COILFANG_ELITE, true, [&]() { HandleCoilfangElite(); });
+        AddCustomAction(VASHJ_COILFANG_STRIDER, true, [&]() { HandleCoilfangStrider(); });
+        AddCustomAction(VASHJ_SPOREBAT, true, [&]() { HandleSporebat(); });
+        AddCustomAction(VASHJ_ENCHANTED_ELEMENTAL, true, [&]() { HandleEnchantedElemental(); });
+        AddCustomAction(VASHJ_TAINTED_ELEMENTAL, true, [&]() { HandleTaintedElemental(); });
+        SetRangedMode(true, 40.f, TYPE_PROXIMITY);
+        AddDistanceSpell(SPELL_ENTANGLE);
+        AddDistanceSpell(SPELL_SHOCK_BLAST);
     }
 
-    instance_serpentshrine_cavern* m_pInstance;
+    instance_serpentshrine_cavern* m_instance;
 
-    uint32 m_introDelayTimer;
     ObjectGuid m_introTarget;
-
-    uint32 m_uiShockBlastTimer;
-    uint32 m_uiEntangleTimer;
-    uint32 m_uiStaticChargeTimer;
-    uint32 m_uiForkedLightningTimer;
-    uint32 m_uiCoilfangEliteTimer;
-    uint32 m_uiCoilfangStriderTimer;
-    uint32 m_uiSummonSporebatTimer;
     uint32 m_uiSummonSporebatStaticTimer;
-    uint32 m_uiPersuasionTimer;
-
-    uint32 m_uiEnchantedElementalTimer;
-    uint32 m_uiTaintedElementalTimer;
 
     uint32 m_lastSporebatSpell;
-
-    uint32 m_shootTimer;
 
     uint8 m_uiPhase;
     uint8 m_uiGeneratorsUsed;
@@ -180,38 +186,18 @@ struct boss_lady_vashjAI : public ScriptedAI
     GuidVector m_triggerGuidsAll;
     GuidVector m_spawns;
 
-    GuidSet m_charmTargets;
-
-    bool m_rangeMode;
-
-    bool m_actionReadyStatus[VASHJ_ACTION_MAX];
-
     void Reset() override
     {
+        CombatAI::Reset();
         SetCombatMovement(true);
 
         m_uiPhase                     = PHASE_1;
         m_uiGeneratorsUsed            = 0;
 
-        m_uiShockBlastTimer           = urand(1000, 60000);
-        m_uiEntangleTimer             = 30000;
-        m_uiStaticChargeTimer         = urand(10000, 25000);
-        m_shootTimer                  = 2000;
-
-        m_uiForkedLightningTimer      = urand(3000, 5000);
-        m_uiEnchantedElementalTimer   = 10000;
-        m_uiTaintedElementalTimer     = 53000;
-        m_uiCoilfangEliteTimer        = 47000;
-        m_uiCoilfangStriderTimer      = 62000;
-
-        m_uiSummonSporebatTimer       = 10000;
         m_uiSummonSporebatStaticTimer = 30000;
-        m_uiPersuasionTimer           = 30000;
 
         m_lastSporebatSpell = 0;
 
-        m_rangeMode = true;
-        m_attackDistance = 40.f;
         SetMeleeEnabled(false);
         SetCombatMovement(true);
         SetCombatScriptStatus(false);
@@ -220,171 +206,11 @@ struct boss_lady_vashjAI : public ScriptedAI
         m_creature->SetImmobilizedState(false);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
 
-        for (uint32 i = 0; i < VASHJ_ACTION_MAX; ++i)
-            m_actionReadyStatus[i] = false;
-
-        m_actionReadyStatus[VASHJ_ACTION_MELEE_MODE] = true;
-        m_actionReadyStatus[VASHJ_ACTION_MELEE] = true;
-
         for (ObjectGuid& guid : m_spawns)
             if (Creature* spawn = m_creature->GetMap()->GetCreature(guid))
                 spawn->ForcedDespawn();
 
         m_spawns.clear();
-        m_charmTargets.clear();
-    }
-
-    void UpdateActions()
-    {
-        for (uint32 i = 0; i < VASHJ_ACTION_MAX; ++i)
-        {
-            if (!m_actionReadyStatus[i])
-            {
-                switch (i)
-                {
-                    case VASHJ_ACTION_PHASE_2:
-                        if (m_uiPhase == PHASE_1 && m_creature->GetHealthPercent() <= 70.0f)
-                            m_actionReadyStatus[i] = true;
-                        break;
-                }
-            }
-        }
-    }
-
-    void ExecuteActions()
-    {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < VASHJ_ACTION_MAX; ++i)
-        {
-            if (m_actionReadyStatus[i])
-            {
-                if (m_uiPhase == PHASE_2 && i != VASHJ_ACTION_FORKED_LIGHTNING)
-                    continue;
-
-                switch (i)
-                {
-                    case VASHJ_ACTION_PHASE_2:
-                    {
-                        SetCombatMovement(false);
-
-                        m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_CENTER, afMiddlePos[0], afMiddlePos[1], afMiddlePos[2]);
-
-                        m_uiPhase = PHASE_2;
-                        SetCombatScriptStatus(true);
-                        m_actionReadyStatus[i] = false;
-                        return;
-                    }
-                    case VASHJ_ACTION_PERSUASION:
-                    {
-                        if (m_uiPhase != PHASE_3)
-                            break;
-
-                        if (DoCastSpellIfCan(nullptr, SPELL_PERSUASION) == CAST_OK)
-                        {
-                            m_uiPersuasionTimer = urand(25000, 35000);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    }
-                    case VASHJ_ACTION_SHOCK_BLAST:
-                    {
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOCK_BLAST) == CAST_OK)
-                        {
-                            m_uiShockBlastTimer = urand(10000, 20000);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    }
-                    case VASHJ_ACTION_STATIC_CHARGE:
-                    {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_STATIC_CHARGE, SELECT_FLAG_PLAYER))
-                        {
-                            if (DoCastSpellIfCan(pTarget, SPELL_STATIC_CHARGE) == CAST_OK)
-                            {
-                                m_uiStaticChargeTimer = urand(10000, 30000);
-                                m_actionReadyStatus[i] = false;
-                                return;
-                            }
-                        }
-                        break;
-                    }
-                    case VASHJ_ACTION_ENTANGLE:
-                    {
-                        if (!m_rangeMode && DoCastSpellIfCan(m_creature, SPELL_ENTANGLE) == CAST_OK)
-                        {
-                            m_uiEntangleTimer = urand(20000, 30000);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    }
-                    case VASHJ_ACTION_MELEE_MODE:
-                    {
-                        if (m_rangeMode && m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()))
-                        {
-                            m_rangeMode = false;
-                            m_attackDistance = 0.0f;
-                            //m_creature->SetSheath(SHEATH_STATE_MELEE);
-                            SetMeleeEnabled(true);
-                            DoStartMovement(m_creature->GetVictim());
-                        }
-                        break;
-                    }
-                    case VASHJ_ACTION_SHOOT:
-                    {
-                        if (m_rangeMode)
-                        {
-                            bool success = false;
-                            if (urand(0, 3)) // roughly 1/4 chance for multishot
-                            {
-                                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOOT) == CAST_OK)
-                                    success = true;
-                            }
-                            else
-                            {
-                                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MULTI_SHOT) == CAST_OK)
-                                    success = true;
-                            }
-                            if (success)
-                            {
-                                if (urand(0, 5) == 0)
-                                    DoScriptText(urand(0, 1) ? SAY_BOWSHOT1 : SAY_BOWSHOT2, m_creature);
-
-                                m_shootTimer = urand(2000, 3000);
-                                m_actionReadyStatus[i] = false;
-                                return;
-                            }
-                        }
-                        break;
-                    }
-                    case VASHJ_ACTION_FORKED_LIGHTNING:
-                    {
-                        if (m_uiPhase != PHASE_2)
-                            break;
-
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                        {
-                            if (DoCastSpellIfCan(pTarget, SPELL_FORKED_LIGHTNING) == CAST_OK)
-                            {
-                                m_uiForkedLightningTimer = urand(3000, 6000);
-                                m_actionReadyStatus[i] = false;
-                                return;
-                            }
-                        }
-                        break;
-                    }
-                    case VASHJ_ACTION_MELEE:
-                    {
-                        DoMeleeAttackIfReady();
-                        break;
-                    }
-                }
-            }
-        }
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
@@ -392,76 +218,11 @@ struct boss_lady_vashjAI : public ScriptedAI
         if (eventType == AI_EVENT_CUSTOM_A)
         {
             m_introTarget = invoker->GetObjectGuid();
-            m_introDelayTimer = 10000;
+            ResetTimer(VASHJ_INTRO, 10000);
         }
     }
 
-    void EnterEvadeMode() override
-    {
-        for (ObjectGuid guid : m_charmTargets) // TODO: Add despawn on evade
-        {
-            if (Player* player = m_creature->GetMap()->GetPlayer(guid))
-            {
-                if (player->HasAura(SPELL_PERSUASION))
-                {
-                    player->RemoveAurasDueToSpell(SPELL_PERSUASION);
-                    player->Suicide();
-                }
-            }
-        }
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_PERSUASION)
-            m_charmTargets.insert(pTarget->GetObjectGuid());
-    }
-
-    void JustStoppedMovementOfTarget(SpellEntry const* spell, Unit* victim) override
-    {
-        switch (spell->Id)
-        {
-            case SPELL_ENTANGLE:
-            case SPELL_SHOCK_BLAST:
-                if (m_creature->GetVictim() != victim) // entangle hit others, shock blast grounding totem case
-                    break;
-                DistanceYourself();
-                break;
-        }
-    }
-
-    void DistanceYourself()
-    {
-        if (m_rangeMode)
-            return;
-
-        m_attackDistance = 30.f;
-        m_rangeMode = true;
-        SetMeleeEnabled(false);
-        if (Unit* victim = m_creature->GetVictim()) // make sure target didnt die
-        {
-            float distance = DISTANCING_CONSTANT + m_creature->GetCombinedCombatReach(victim, true) * 2;
-            m_creature->GetMotionMaster()->DistanceYourself(distance);
-        }
-    }
-
-    void DistancingStarted()
-    {
-        SetCombatScriptStatus(true);
-    }
-
-    void DistancingEnded()
-    {
-        SetCombatScriptStatus(false);
-        if (m_creature->GetVictim())
-            DoStartMovement(m_creature->GetVictim());
-        m_shootTimer = 2000;
-        m_actionReadyStatus[VASHJ_ACTION_SHOOT] = false;
-        DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOOT);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         switch (urand(0, 4))
         {
@@ -474,8 +235,8 @@ struct boss_lady_vashjAI : public ScriptedAI
 
         m_creature->CastSpell(nullptr, SPELL_REMOVE_TAINTED_CORES, TRIGGERED_OLD_TRIGGERED);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LADYVASHJ_EVENT, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_LADYVASHJ_EVENT, IN_PROGRESS);
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
@@ -486,16 +247,16 @@ struct boss_lady_vashjAI : public ScriptedAI
         if (uiPointId == POINT_MOVE_CENTER)
         {
             // Initialize all the shield generators
-            if (m_pInstance)
+            if (m_instance)
             {
                 DoScriptText(SAY_PHASE2, m_creature);
 
                 for (uint32 i = GO_SHIELD_GENERATOR_1; i <= GO_SHIELD_GENERATOR_4; ++i)
-                    if (GameObject* shieldGenerator = m_pInstance->GetSingleGameObjectFromStorage(i))
+                    if (GameObject* shieldGenerator = m_instance->GetSingleGameObjectFromStorage(i))
                         shieldGenerator->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
 
                 GuidList lShieldGeneratorsGuid;
-                m_pInstance->GetTinyTriggerGUIDList(lShieldGeneratorsGuid);
+                m_instance->GetTinyTriggerGUIDList(lShieldGeneratorsGuid);
 
                 for (GuidList::const_iterator itr = lShieldGeneratorsGuid.begin(); itr != lShieldGeneratorsGuid.end(); ++itr)
                 {
@@ -563,33 +324,33 @@ struct boss_lady_vashjAI : public ScriptedAI
         }
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        switch (pSummoned->GetEntry())
+        switch (summoned->GetEntry())
         {
             case NPC_TAINTED_ELEMENTAL:
-                pSummoned->SetInCombatWithZone();
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                    pSummoned->AI()->AttackStart(pTarget);
-                pSummoned->ForcedDespawn(16000, true); // only despawn after 15 seconds if still alive, different rules on death, one second more for appearing
-                pSummoned->SetCorpseDelay(3600);
+                summoned->SetInCombatWithZone();
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    summoned->AI()->AttackStart(target);
+                summoned->ForcedDespawn(16000, true); // only despawn after 15 seconds if still alive, different rules on death, one second more for appearing
+                summoned->SetCorpseDelay(3600);
                 break;
             case NPC_COILFANG_STRIDER:
-                pSummoned->AI()->DoCastSpellIfCan(pSummoned, SPELL_PANIC_PERIODIC, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                summoned->AI()->DoCastSpellIfCan(summoned, SPELL_PANIC_PERIODIC, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
             case NPC_COILFANG_ELITE:
-                pSummoned->SetInCombatWithZone();
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0))
-                    pSummoned->AI()->AttackStart(pTarget);
+                summoned->SetInCombatWithZone();
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0))
+                    summoned->AI()->AttackStart(target);
                 break;
             case NPC_ENCHANTED_ELEMENTAL:
-                //pSummoned->GetMotionMaster()->MovePoint(POINT_MOVE_CENTER, afMiddlePos[0], afMiddlePos[1], afMiddlePos[2]);
-                pSummoned->GetMotionMaster()->MoveChase(m_creature, 0.f, 0.f, false, true, false);                
-                pSummoned->AI()->SetReactState(REACT_PASSIVE);
-                pSummoned->SetCorpseDelay(3);
+                //summoned->GetMotionMaster()->MovePoint(POINT_MOVE_CENTER, afMiddlePos[0], afMiddlePos[1], afMiddlePos[2]);
+                summoned->GetMotionMaster()->MoveChase(m_creature, 0.f, 0.f, false, true, false);                
+                summoned->AI()->SetReactState(REACT_PASSIVE);
+                summoned->SetCorpseDelay(3);
                 break;
             case NPC_TOXIC_SPOREBAT:
-                pSummoned->SetWalk(false);
-                pSummoned->AI()->DoCastSpellIfCan(pSummoned, SPELL_SPORE_DROP, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+                summoned->SetWalk(false);
+                summoned->AI()->DoCastSpellIfCan(summoned, SPELL_SPORE_DROP, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
                 // TODO: Add paths based on spell used
                 uint32 pathId = 0;
                 switch (m_lastSporebatSpell)
@@ -598,12 +359,12 @@ struct boss_lady_vashjAI : public ScriptedAI
                     case 38492: pathId = PATH_ID_6; break;
                     case 38493: pathId = PATH_ID_5; break;
                 }
-                pSummoned->GetMotionMaster()->MoveWaypoint(pathId);
-                pSummoned->AI()->SetReactState(REACT_PASSIVE);
-                pSummoned->SetCorpseDelay(5);
+                summoned->GetMotionMaster()->MoveWaypoint(pathId);
+                summoned->AI()->SetReactState(REACT_PASSIVE);
+                summoned->SetCorpseDelay(5);
                 break;
         }
-        m_spawns.push_back(pSummoned->GetObjectGuid());
+        m_spawns.push_back(summoned->GetObjectGuid());
     }
 
     void SummonedCreatureJustDied(Creature* summoned) override
@@ -612,7 +373,7 @@ struct boss_lady_vashjAI : public ScriptedAI
         {
             case NPC_TAINTED_ELEMENTAL:
                 // Set the timer when summoned killed
-                m_uiTaintedElementalTimer = 50000;
+                ResetTimer(VASHJ_TAINTED_ELEMENTAL, 50000);
                 break;
             case NPC_COILFANG_STRIDER:
                 summoned->RemoveAurasDueToSpell(SPELL_PANIC_PERIODIC);
@@ -623,17 +384,14 @@ struct boss_lady_vashjAI : public ScriptedAI
         }
     }
 
-    void SummonedCreatureDespawn(Creature* pSummoned) override
+    void SummonedCreatureDespawn(Creature* summoned) override
     {
         // Set the timer when summoned despawned, if not already killed
-        if (pSummoned->GetEntry() == NPC_TAINTED_ELEMENTAL)
-        {
-            if (!m_uiTaintedElementalTimer)
-                m_uiTaintedElementalTimer = 50000;
-        }
+        if (summoned->GetEntry() == NPC_TAINTED_ELEMENTAL)
+            ResetIfNotStarted(VASHJ_TAINTED_ELEMENTAL, 50000);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* /*victim*/) override
     {
         switch (urand(0, 2))
         {
@@ -643,22 +401,28 @@ struct boss_lady_vashjAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LADYVASHJ_EVENT, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_LADYVASHJ_EVENT, DONE);
 
         for (ObjectGuid& guid : m_spawns)
             if (Creature* spawn = m_creature->GetMap()->GetCreature(guid))
                 spawn->ForcedDespawn();
+
+        DisableTimer(VASHJ_COILFANG_ELITE);
+        DisableTimer(VASHJ_COILFANG_STRIDER);
+        DisableTimer(VASHJ_SPOREBAT);
+        DisableTimer(VASHJ_ENCHANTED_ELEMENTAL);
+        DisableTimer(VASHJ_TAINTED_ELEMENTAL);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LADYVASHJ_EVENT, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_LADYVASHJ_EVENT, FAIL);
     }
 
     // Wrapper to inform the boss that a generator has been deactivated
@@ -686,178 +450,189 @@ struct boss_lady_vashjAI : public ScriptedAI
 
             m_creature->PlaySpellVisual(SPELL_VISUAL_KIT);
 
+            DisableCombatAction(VASHJ_ACTION_FORKED_LIGHTNING);
+            ResetCombatAction(VASHJ_ACTION_PERSUASION, 30000);
+            ResetCombatAction(VASHJ_ACTION_SHOCK_BLAST, urand(1000, 60000));
+            ResetCombatAction(VASHJ_ACTION_STATIC_CHARGE, urand(10000, 25000));
+            ResetCombatAction(VASHJ_ACTION_ENTANGLE, 30000);
+            ResetCombatAction(VASHJ_ACTION_SHOOT, 2000);
+            SetActionReadyStatus(VASHJ_ACTION_MELEE_MODE, true);
+            ResetTimer(VASHJ_SPOREBAT, 10000);
+            DisableTimer(VASHJ_COILFANG_ELITE);
+            DisableTimer(VASHJ_COILFANG_STRIDER);
+            DisableTimer(VASHJ_ENCHANTED_ELEMENTAL);
+            DisableTimer(VASHJ_TAINTED_ELEMENTAL);
+
             DoResetThreat();
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleCoilfangElite()
     {
-        if (m_introDelayTimer)
+        uint8 pos = urand(0, m_triggerGuidsAll.size() - 1);
+        if (Creature* creature = m_creature->GetMap()->GetCreature(m_triggerGuidsAll[pos]))
+            m_creature->CastSpell(creature, SPELL_WAVE_B, TRIGGERED_OLD_TRIGGERED);
+
+        ResetTimer(VASHJ_COILFANG_ELITE, 46000);
+    }
+
+    void HandleCoilfangStrider()
+    {
+        uint8 pos = urand(0, m_triggerGuidsAll.size() - 1);
+        if (Creature* creature = m_creature->GetMap()->GetCreature(m_triggerGuidsAll[pos]))
+            m_creature->CastSpell(creature, SPELL_WAVE_C, TRIGGERED_OLD_TRIGGERED);
+
+        ResetTimer(VASHJ_COILFANG_STRIDER, 60000);
+    }
+
+    void HandleSporebat()
+    {
+        uint32 randSpell = urand(0, COUNT_SPELLS - 1);
+        m_lastSporebatSpell = batSpells[randSpell];
+
+        m_creature->CastSpell(nullptr, batSpells[randSpell], TRIGGERED_OLD_TRIGGERED);
+
+        // summon sporebats faster and faster
+        if (m_uiSummonSporebatStaticTimer > 2000)
+            m_uiSummonSporebatStaticTimer -= 2000;
+
+        ResetTimer(VASHJ_SPOREBAT, m_uiSummonSporebatStaticTimer);
+    }
+
+    void HandleEnchantedElemental()
+    {
+        for (auto& entry : m_triggerGuids)
         {
-            if (m_introDelayTimer <= uiDiff)
-            {
-                m_introDelayTimer = 0;
-                DoScriptText(SAY_INTRO, m_creature, m_creature->GetMap()->GetPlayer(m_introTarget));
-            }
-            else
-                m_introDelayTimer -= uiDiff;
+            if (entry.empty())
+                break;
+
+            uint32 rand = urand(0, entry.size() - 1);
+            if (Creature* creature = m_creature->GetMap()->GetCreature(entry[rand]))
+                m_creature->CastSpell(creature, SPELL_WAVE_A, TRIGGERED_OLD_TRIGGERED);
         }
 
-        if (!m_creature->SelectHostileTarget())
-            return;
+        ResetTimer(VASHJ_ENCHANTED_ELEMENTAL, 10000);
+    }
 
-        if (m_uiPhase == PHASE_1 || m_uiPhase == PHASE_3)
+    void HandleTaintedElemental()
+    {
+        uint8 pos = urand(0, m_triggerGuidsAll.size() - 1);
+        if (Creature* creature = m_creature->GetMap()->GetCreature(m_triggerGuidsAll[pos]))
+            m_creature->CastSpell(creature, SPELL_WAVE_D, TRIGGERED_OLD_TRIGGERED);
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            // Phase 3 abilities
-            if (m_uiPhase == PHASE_3)
+            case VASHJ_ACTION_PHASE_2:
             {
-                if (m_uiSummonSporebatTimer < uiDiff)
+                if (m_creature->GetHealthPercent() > 70.0f)
+                    return;
+
+                SetCombatMovement(false);
+
+                m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_CENTER, afMiddlePos[0], afMiddlePos[1], afMiddlePos[2]);
+
+                m_uiPhase = PHASE_2;
+                SetCombatScriptStatus(true);
+                SetActionReadyStatus(action, false);
+                SetActionReadyStatus(VASHJ_ACTION_MELEE_MODE, false);
+                DisableCombatAction(VASHJ_ACTION_SHOCK_BLAST);
+                DisableCombatAction(VASHJ_ACTION_STATIC_CHARGE);
+                DisableCombatAction(VASHJ_ACTION_ENTANGLE);
+                DisableCombatAction(VASHJ_ACTION_SHOOT);
+                ResetCombatAction(VASHJ_ACTION_FORKED_LIGHTNING, urand(3000, 5000));
+                ResetTimer(VASHJ_ENCHANTED_ELEMENTAL, 10000);
+                ResetTimer(VASHJ_COILFANG_ELITE, 47000);
+                ResetTimer(VASHJ_COILFANG_STRIDER, 62000);
+                ResetTimer(VASHJ_TAINTED_ELEMENTAL, 53000);
+                return;
+            }
+            case VASHJ_ACTION_PERSUASION:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_PERSUASION) == CAST_OK)
                 {
-                    uint32 randSpell = urand(0, COUNT_SPELLS - 1);
-                    m_lastSporebatSpell = batSpells[randSpell];
-
-                    m_creature->CastSpell(nullptr, batSpells[randSpell], TRIGGERED_OLD_TRIGGERED);
-
-                    // summon sporebats faster and faster
-                    if (m_uiSummonSporebatStaticTimer > 2000)
-                        m_uiSummonSporebatStaticTimer -= 2000;
-
-                    m_uiSummonSporebatTimer = m_uiSummonSporebatStaticTimer;
+                    ResetCombatAction(action, urand(25000, 35000));
+                    return;
                 }
-                else
-                    m_uiSummonSporebatTimer -= uiDiff;
-
-                if (!m_actionReadyStatus[VASHJ_ACTION_PERSUASION])
+                break;
+            }
+            case VASHJ_ACTION_SHOCK_BLAST:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOCK_BLAST) == CAST_OK)
                 {
-                    if (m_uiPersuasionTimer < uiDiff)
+                    ResetCombatAction(action, urand(10000, 20000));
+                    return;
+                }
+                break;
+            }
+            case VASHJ_ACTION_STATIC_CHARGE:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_STATIC_CHARGE, SELECT_FLAG_PLAYER))
+                {
+                    if (DoCastSpellIfCan(target, SPELL_STATIC_CHARGE) == CAST_OK)
                     {
-                        m_uiPersuasionTimer = 0;
-                        m_actionReadyStatus[VASHJ_ACTION_PERSUASION] = true;
+                        ResetCombatAction(action, urand(10000, 30000));
+                        return;
+                    }
+                }
+                break;
+            }
+            case VASHJ_ACTION_ENTANGLE:
+            {
+                if (!GetCurrentRangedMode() && DoCastSpellIfCan(nullptr, SPELL_ENTANGLE) == CAST_OK)
+                {
+                    ResetCombatAction(action, urand(20000, 30000));
+                    return;
+                }
+                break;
+            }
+            case VASHJ_ACTION_SHOOT:
+            {
+                if (GetCurrentRangedMode())
+                {
+                    bool success = false;
+                    if (urand(0, 3)) // roughly 1/4 chance for multishot
+                    {
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOOT) == CAST_OK)
+                            success = true;
                     }
                     else
-                        m_uiPersuasionTimer -= uiDiff;
-                }
-            }
-
-            if (!m_actionReadyStatus[VASHJ_ACTION_SHOCK_BLAST])
-            {
-                if (m_uiShockBlastTimer < uiDiff)
-                {
-                    m_actionReadyStatus[VASHJ_ACTION_SHOCK_BLAST] = true;
-                }
-                else
-                    m_uiShockBlastTimer -= uiDiff;
-            }
-
-            if (!m_actionReadyStatus[VASHJ_ACTION_STATIC_CHARGE])
-            {
-                if (m_uiStaticChargeTimer < uiDiff)
-                {
-                    m_actionReadyStatus[VASHJ_ACTION_STATIC_CHARGE] = true;
-                }
-                else
-                    m_uiStaticChargeTimer -= uiDiff;
-            }
-
-            if (!m_actionReadyStatus[VASHJ_ACTION_ENTANGLE])
-            {
-                if (m_uiEntangleTimer < uiDiff)
-                {
-                    m_actionReadyStatus[VASHJ_ACTION_ENTANGLE] = true;
-                }
-                else
-                    m_uiEntangleTimer -= uiDiff;
-            }
-
-            // Cast Shoot or Multishot when in ranged mode
-            if (m_rangeMode)
-            {
-                if (!m_actionReadyStatus[VASHJ_ACTION_SHOOT])
-                {
-                    if (m_shootTimer < uiDiff)
                     {
-                        m_actionReadyStatus[VASHJ_ACTION_SHOOT] = true;
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MULTI_SHOT) == CAST_OK)
+                            success = true;
                     }
-                    else
-                        m_shootTimer -= uiDiff;
+                    if (success)
+                    {
+                        if (urand(0, 5) == 0)
+                            DoScriptText(urand(0, 1) ? SAY_BOWSHOT1 : SAY_BOWSHOT2, m_creature);
+
+                        ResetCombatAction(action, urand(2000, 3000));
+                        return;
+                    }
                 }
+                break;
+            }
+            case VASHJ_ACTION_FORKED_LIGHTNING:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                {
+                    if (DoCastSpellIfCan(target, SPELL_FORKED_LIGHTNING) == CAST_OK)
+                    {
+                        ResetCombatAction(action, urand(3000, 6000));
+                        return;
+                    }
+                }
+                break;
             }
         }
-        // Phase 2 only
-        else
-        {
-            if (!m_actionReadyStatus[VASHJ_ACTION_FORKED_LIGHTNING])
-            {
-                if (m_uiForkedLightningTimer < uiDiff)
-                {
-                    m_actionReadyStatus[VASHJ_ACTION_FORKED_LIGHTNING] = true;
-                }
-                else
-                    m_uiForkedLightningTimer -= uiDiff;
-            }
-
-            if (m_uiEnchantedElementalTimer < uiDiff)
-            {
-                for (auto& entry : m_triggerGuids)
-                {
-                    if (entry.empty())
-                        break;
-
-                    uint32 rand = urand(0, entry.size() - 1);
-                    if (Creature* creature = m_creature->GetMap()->GetCreature(entry[rand]))
-                        m_creature->CastSpell(creature, SPELL_WAVE_A, TRIGGERED_OLD_TRIGGERED);
-                }
-
-                m_uiEnchantedElementalTimer = 10000;
-            }
-            else
-                m_uiEnchantedElementalTimer -= uiDiff;
-
-            if (m_uiTaintedElementalTimer)
-            {
-                if (m_uiTaintedElementalTimer <= uiDiff)
-                {
-                    uint8 pos = urand(0, m_triggerGuidsAll.size() - 1);
-                    if (Creature* creature = m_creature->GetMap()->GetCreature(m_triggerGuidsAll[pos]))
-                        m_creature->CastSpell(creature, SPELL_WAVE_D, TRIGGERED_OLD_TRIGGERED);
-
-                    m_uiTaintedElementalTimer = 0;
-                }
-                else
-                    m_uiTaintedElementalTimer -= uiDiff;
-            }
-
-            if (m_uiCoilfangEliteTimer < uiDiff)
-            {
-                uint8 pos = urand(0, m_triggerGuidsAll.size() - 1);
-                if (Creature* creature = m_creature->GetMap()->GetCreature(m_triggerGuidsAll[pos]))
-                    m_creature->CastSpell(creature, SPELL_WAVE_B, TRIGGERED_OLD_TRIGGERED);
-                
-                m_uiCoilfangEliteTimer = 46000;
-            }
-            else
-                m_uiCoilfangEliteTimer -= uiDiff;
-
-            if (m_uiCoilfangStriderTimer < uiDiff)
-            {
-                uint8 pos = urand(0, m_triggerGuidsAll.size() - 1);
-                if (Creature* creature = m_creature->GetMap()->GetCreature(m_triggerGuidsAll[pos]))
-                    m_creature->CastSpell(creature, SPELL_WAVE_C, TRIGGERED_OLD_TRIGGERED);
-                
-                m_uiCoilfangStriderTimer = 60000;
-            }
-            else
-                m_uiCoilfangStriderTimer -= uiDiff;
-        }
-
-        UpdateActions();
-        ExecuteActions();
     }
 };
 
 struct mob_enchanted_elementalAI : public ScriptedAI
 {
-    mob_enchanted_elementalAI(Creature* pCreature) : ScriptedAI(pCreature)
+    mob_enchanted_elementalAI(Creature* creature) : ScriptedAI(creature)
     {
         Reset();
     }
@@ -895,16 +670,6 @@ bool GOUse_go_shield_generator(Player* /*pPlayer*/, GameObject* pGo)
     return false;
 }
 
-UnitAI* GetAI_boss_lady_vashj(Creature* pCreature)
-{
-    return new boss_lady_vashjAI(pCreature);
-}
-
-UnitAI* GetAI_mob_enchanted_elemental(Creature* pCreature)
-{
-    return new mob_enchanted_elementalAI(pCreature);
-}
-
 bool OnLootItemTaintedCore(Player* player, Item* /*item*/, bool apply)
 {
     if (apply)
@@ -931,16 +696,35 @@ bool GOUse_go_vashj_bridge(Player* player, GameObject* go)
     return true;
 }
 
+struct VashjPersuasion : public SpellScript, public AuraScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target == spell->GetCaster() || target->HasAura(SPELL_STATIC_CHARGE))
+            return false;
+
+        return true;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->CastSpell(nullptr, SPELL_PERSUASION_BONUS, TRIGGERED_OLD_TRIGGERED);
+        else
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_PERSUASION_BONUS);
+    }
+};
+
 void AddSC_boss_lady_vashj()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_lady_vashj";
-    pNewScript->GetAI = &GetAI_boss_lady_vashj;
+    pNewScript->GetAI = &GetNewAIInstance<boss_lady_vashjAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_enchanted_elemental";
-    pNewScript->GetAI = &GetAI_mob_enchanted_elemental;
+    pNewScript->GetAI = &GetNewAIInstance<mob_enchanted_elementalAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -957,4 +741,6 @@ void AddSC_boss_lady_vashj()
     pNewScript->Name = "go_vashj_bridge";
     pNewScript->pGOUse = &GOUse_go_vashj_bridge;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<VashjPersuasion>("spell_vashj_persuasion");
 }

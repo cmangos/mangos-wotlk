@@ -10951,9 +10951,6 @@ void SpellAuraHolder::HandleSpellSpecificBoosts(bool apply)
                 case 36797: // Mind Control - Kaelthas
                     boostSpells.push_back(36798);
                     break;
-                case 38511: // Persuasion - Vashj
-                    boostSpells.push_back(38514);
-                    break;
                 case 55053:                                 // Deathbloom (25 man)
                 {
                     if (!apply && m_removeMode == AURA_REMOVE_BY_EXPIRE)

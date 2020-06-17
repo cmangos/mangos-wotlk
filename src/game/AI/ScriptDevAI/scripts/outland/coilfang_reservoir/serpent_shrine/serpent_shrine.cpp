@@ -193,6 +193,12 @@ void instance_serpentshrine_cavern::SetData(uint32 uiType, uint32 uiData)
                 DoToggleGameObjectFlags(GO_SHIELD_GENERATOR_2, GO_FLAG_NO_INTERACT, false);
                 DoToggleGameObjectFlags(GO_SHIELD_GENERATOR_3, GO_FLAG_NO_INTERACT, false);
                 DoToggleGameObjectFlags(GO_SHIELD_GENERATOR_4, GO_FLAG_NO_INTERACT, false);
+
+                if (Creature* vashj = GetSingleCreatureFromStorage(NPC_LADYVASHJ))
+                {
+                    vashj->SetRespawnDelay(120, true);
+                    vashj->ForcedDespawn();
+                }
             }
             break;
         case TYPE_LEOTHERAS_EVENT_DEMONS:
