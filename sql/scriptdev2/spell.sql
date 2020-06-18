@@ -113,7 +113,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (45043,'spell_power_circle'),
 (44006,'spell_teleport_self_akilzon'),
 (34630,'spell_scrap_reaver_spell'),
-(43681,'spell_inactive');
+(43681,'spell_inactive'),
+(34800,'spell_getting_sleepy_aura'),
+(43364,'spell_getting_sleepy_aura');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

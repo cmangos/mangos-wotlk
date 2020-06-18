@@ -1194,6 +1194,15 @@ struct AuchenaiPossess : public AuraScript
     }
 };
 
+struct GettingSleepyAura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
+            aura->GetTarget()->CastSpell(nullptr, 34801, TRIGGERED_OLD_TRIGGERED); // Sleep
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1213,6 +1222,7 @@ void AddSC_spell_scripts()
     RegisterSpellScript<AstralBite>("spell_astral_bite");
     RegisterSpellScript<FelInfusion>("spell_fel_infusion");
     RegisterAuraScript<AuchenaiPossess>("spell_auchenai_possess");
+    RegisterAuraScript<GettingSleepyAura>("spell_getting_sleepy_aura");
     RegisterSpellScript<spell_battleground_banner_trigger>("spell_battleground_banner_trigger");
     RegisterSpellScript<spell_outdoor_pvp_banner_trigger>("spell_outdoor_pvp_banner_trigger");
 }
