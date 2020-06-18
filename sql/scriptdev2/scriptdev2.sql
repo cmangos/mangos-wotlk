@@ -624,6 +624,7 @@ UPDATE creature_template SET ScriptName='boss_fathomlord_karathress' WHERE entry
 UPDATE creature_template SET ScriptName='boss_fathomguard_sharkkis' WHERE entry=21966;
 UPDATE creature_template SET ScriptName='boss_fathomguard_tidalvess' WHERE entry=21965;
 UPDATE creature_template SET ScriptName='boss_fathomguard_caribdis' WHERE entry=21964;
+UPDATE creature_template SET ScriptName='npc_caribdis_cyclone' WHERE entry=22104;
 /* Morogrim Tidewalker event */
 UPDATE creature_template SET ScriptName='boss_morogrim_tidewalker' WHERE entry=21213;
 UPDATE creature_template SET ScriptName='mob_water_globule' WHERE entry=21913;

@@ -99,6 +99,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (40251,'spell_shadow_of_death'),
 (41289,'spell_ethereal_ring_signal_flare'),
 (41999,'spell_shadow_of_death_remove'),
+(38358,'spell_tidal_surge_caribdis'),
 (37676,'spell_insidious_whisper'),
 (37750,'spell_clear_consuming_madness'),
 (37640,'spell_leotheras_whirlwind_aura'),
