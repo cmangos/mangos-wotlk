@@ -408,19 +408,19 @@ struct npc_khadgars_servantAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 if (Creature* pKhadgar = GetClosestCreatureWithEntry(m_creature, NPC_KHADGAR, 10.0f))
                     DoScriptText(SAY_KHAD_START, pKhadgar);
                 break;
-            case 5:
-            case 24:
-            case 50:
-            case 63:
-            case 74:
+            case 6:
+            case 25:
+            case 51:
+            case 64:
             case 75:
+            case 76:
                 SetEscortPaused(true);
                 break;
-            case 34:
+            case 35:
                 if (Creature* pIzzard = GetClosestCreatureWithEntry(m_creature, NPC_IZZARD, 10.0f))
                     DoScriptText(SAY_KHAD_MIND_YOU, pIzzard);
                 break;
@@ -455,7 +455,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
 
                 switch (m_uiPointId)
                 {
-                    case 5:                                 // to lower city
+                    case 6:                                 // to lower city
                     {
                         switch (m_uiTalkCount)
                         {
@@ -475,7 +475,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
                         }
                         break;
                     }
-                    case 24:                                // in lower city
+                    case 25:                                // in lower city
                     {
                         switch (m_uiTalkCount)
                         {
@@ -495,7 +495,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
                         }
                         break;
                     }
-                    case 50:                                // outside
+                    case 51:                                // outside
                     {
                         switch (m_uiTalkCount)
                         {
@@ -515,7 +515,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
                         }
                         break;
                     }
-                    case 63:                                // scryer
+                    case 64:                                // scryer
                     {
                         switch (m_uiTalkCount)
                         {
@@ -529,7 +529,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
                         }
                         break;
                     }
-                    case 74:                                // aldor
+                    case 75:                                // aldor
                     {
                         switch (m_uiTalkCount)
                         {
@@ -549,7 +549,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
                         }
                         break;
                     }
-                    case 75:                                // a'dal
+                    case 76:                                // a'dal
                     {
                         switch (m_uiTalkCount)
                         {
