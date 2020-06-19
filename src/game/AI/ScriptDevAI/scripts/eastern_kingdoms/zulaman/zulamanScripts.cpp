@@ -407,44 +407,44 @@ struct npc_harrison_jones_zaAI : public npc_escortAI
 
         switch (pointId)
         {
-            case 1:
+            case 2:
                 DoScriptText(SAY_AT_GONG, m_creature);
                 if (GameObject* pGong = GetClosestGameObjectWithEntry(m_creature, GO_STRANGE_GONG, INTERACTION_DISTANCE))
                     m_creature->SetFacingToObject(pGong);
                 break;
-            case 2:
+            case 3:
                 // Start bang gong for 2min
                 DoCastSpellIfCan(m_creature, SPELL_BANGING_THE_GONG);
                 m_creature->LoadEquipment(EQUIP_ID_HUGE_MAUL, true);
                 m_instance->DoToggleGameObjectFlags(GO_STRANGE_GONG, GO_FLAG_NO_INTERACT, false);
                 SetEscortPaused(true);
                 break;
-            case 6:
+            case 7:
                 DoScriptText(SAY_OPEN_ENTRANCE, m_creature);
                 m_creature->UpdateEntry(ENTRY_HARRISON_WITH_HAT);
                 break;
-            case 8:
+            case 9:
                 DoScriptText(SAY_OPEN_ENTRANCE_2, m_creature);
                 m_creature->HandleEmoteState(EMOTE_STATE_USESTANDING);
                 break;
-            case 9:
+            case 10:
                 m_creature->HandleEmoteState(EMOTE_ONESHOT_NONE);
                 m_instance->SetData(TYPE_EVENT_RUN, IN_PROGRESS);
                 DoCastSpellIfCan(m_creature, SPELL_STEALTH);
                 m_creature->SetVisibility(VISIBILITY_ON); // even though Harrison is stealthed, players can still see him
                 break;
-            case 11:
+            case 12:
                 if (Creature* attacker = m_creature->GetMap()->GetCreature(m_guardianAttackerGuid))
                 {
                     attacker->SetWalk(false);
                     attacker->GetMotionMaster()->MovePoint(1, 138.2242f, 1586.994f, 43.5488f);
                 }
                 break;
-            case 12:
+            case 13:
                 if (Creature* attacker = m_creature->GetMap()->GetCreature(m_guardianAttackerGuid))
                     attacker->GetMotionMaster()->MovePoint(2, 131.8407f, 1590.247f, 43.61384f);
                 break;
-            case 13:
+            case 14:
                 if (Creature* attacker = m_creature->GetMap()->GetCreature(m_guardianAttackerGuid))
                 {
                     attacker->SetFacingTo(2.024582f);
