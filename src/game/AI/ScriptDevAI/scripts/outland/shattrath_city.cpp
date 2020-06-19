@@ -424,7 +424,7 @@ struct npc_khadgars_servantAI : public npc_escortAI
                 if (Creature* pIzzard = GetClosestCreatureWithEntry(m_creature, NPC_IZZARD, 10.0f))
                     DoScriptText(SAY_KHAD_MIND_YOU, pIzzard);
                 break;
-            case 35:
+            case 36:
                 if (Creature* pAdyria = GetClosestCreatureWithEntry(m_creature, NPC_ADYRIA, 10.0f))
                     DoScriptText(SAY_KHAD_MIND_ALWAYS, pAdyria);
                 break;
