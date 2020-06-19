@@ -46,9 +46,9 @@ void instance_serpentshrine_cavern::Initialize()
 
 bool instance_serpentshrine_cavern::IsEncounterInProgress() const
 {
-    for (uint32 i : m_auiEncounter)
+    for (uint32 i = 0; i < TYPE_COMBAT_MAX; ++i)
     {
-        if (i == IN_PROGRESS)
+        if (m_auiEncounter[i] == IN_PROGRESS)
             return true;
     }
 

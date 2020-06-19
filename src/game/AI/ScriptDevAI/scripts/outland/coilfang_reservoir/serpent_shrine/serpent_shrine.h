@@ -18,6 +18,7 @@ enum
     TYPE_LEOTHERAS_EVENT            = 3,
     TYPE_MOROGRIM_EVENT             = 4,
     TYPE_THELURKER_EVENT            = 5,
+    TYPE_COMBAT_MAX                 = 6,
     TYPE_LEOTHERAS_EVENT_DEMONS     = 6,
 
     DATA_WATERSTATE_EVENT           = 1,                    // DO NOT CHANGE! Used by Acid. - used to check the mobs for the water event.
