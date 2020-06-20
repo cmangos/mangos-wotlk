@@ -117,32 +117,32 @@ struct npc_kayra_longmaneAI : public npc_escortAI
 
         switch (i)
         {
-            case 0:
+            case 1:
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                 break;
-            case 4:
+            case 5:
                 DoScriptText(SAY_AMBUSH1, m_creature, pPlayer);
                 m_creature->SummonCreature(NPC_SLAVEBINDER, -916.4861f, 5355.635f, 18.25233f, 5.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 m_creature->SummonCreature(NPC_SLAVEBINDER, -918.9288f, 5358.43f, 18.05894f, 5.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 break;
-            case 5:
+            case 6:
                 DoScriptText(SAY_PROGRESS1, m_creature, pPlayer);
                 SetRun();
                 break;
-            case 16:
+            case 17:
                 DoScriptText(SAY_AMBUSH2, m_creature, pPlayer);
                 break;
-            case 17:
+            case 18:
             {
                 Creature* spawn = m_creature->SummonCreature(NPC_SLAVEBINDER, -668.2899f, 5382.913f, 22.32479f, 5.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 DoScriptText(SAY_SLAVEBINDER_AMBUSH2, spawn, pPlayer);
                 m_creature->SummonCreature(NPC_SLAVEBINDER, -669.2795f, 5386.802f, 23.01249f, 5.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 break;
             }
-            case 18:
+            case 19:
                 DoScriptText(SAY_PROGRESS2, m_creature, pPlayer);
                 break;
-            case 26:
+            case 27:
                 DoScriptText(SAY_END, m_creature, pPlayer);
                 pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ESCAPE_FROM, m_creature);
                 m_creature->ForcedDespawn(10000);
