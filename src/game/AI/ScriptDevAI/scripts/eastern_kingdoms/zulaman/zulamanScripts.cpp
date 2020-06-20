@@ -24,7 +24,7 @@ EndScriptData */
 /* ContentData
 npc_forest_frog
 npc_harrison_jones_za
-npc_amanishi_lookout
+.
 npc_amanishi_tempest
 npc_harkor
 npc_tanzar
@@ -623,7 +623,7 @@ struct npc_amanishi_lookoutAI : public ScriptedAI
         if (motionType != EXTERNAL_WAYPOINT_MOVE)
             return;
 
-        if (pointId && pointId == 10)
+        if (pointId && pointId == 11)
             m_creature->ForcedDespawn();
     }
 };
