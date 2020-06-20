@@ -162,7 +162,7 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
     {
         switch (uiPointId)
         {
-            case 7:
+            case 8:
                 SetEscortPaused(true);
                 DoScriptText(SAY_FIRST_STOP, m_creature);
                 // summon first wave
@@ -171,13 +171,13 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
                 m_creature->SummonCreature(NPC_ETHEREAL_SPELLBINDER, -371.12f, -129.07f, -0.95f, 4.82f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 m_creature->SummonCreature(NPC_ETHEREAL_SPELLBINDER, -375.18f, -199.58f, -0.95f, 1.52f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
-            case 8:
+            case 9:
                 DoScriptText(SAY_FIRST_STOP_COMPLETE, m_creature);
                 break;
-            case 13:
+            case 14:
                 StartNextDialogueText(SAY_COLLECTOR_SEARCH);
                 break;
-            case 17:
+            case 18:
                 SetEscortPaused(true);
                 DoScriptText(SAY_SECOND_STOP, m_creature);
                 // summon second wave
@@ -186,28 +186,28 @@ struct npc_shaheenAI : public npc_escortAI, private DialogueHelper
                 m_creature->SummonCreature(NPC_ETHEREAL_CRYPT_RAIDER, -282.28f, -194.44f, 0.44f, 1.22f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 m_creature->SummonCreature(NPC_ETHEREAL_CRYPT_RAIDER, -231.15f, -194.53f, -0.95f, 1.52f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
-            case 24:
+            case 25:
                 // summon third wave
                 m_creature->SummonCreature(NPC_NEXUS_TERROR, -37.30f, -222.44f, -0.33f, 3.01f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
                 m_creature->SummonCreature(NPC_NEXUS_TERROR, -15.76f, -225.36f,  0.79f, 2.93f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 240000);
                 break;
-            case 26:
+            case 27:
                 if (m_uiSummonCount)
                     SetEscortPaused(true);
                 DoScriptText(SAY_THIRD_STOP, m_creature);
                 break;
-            case 29:
+            case 30:
                 StartNextDialogueText(NPC_ETHEREAL_THEURGIST);
                 m_creature->HandleEmote(EMOTE_STATE_WORK);
                 break;
-            case 30:
+            case 31:
                 DoScriptText(SAY_BREAK_OVER, m_creature);
                 break;
-            case 40:
+            case 41:
                 SetEscortPaused(true);
                 m_creature->SummonCreature(NPC_SHADOW_LORD_XIRAXIS, -47.10f, -0.49f, -0.95f, 3.45f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
-            case 43:
+            case 42:
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_HARD_WORK_PAYS_OFF, m_creature);
                 break;
