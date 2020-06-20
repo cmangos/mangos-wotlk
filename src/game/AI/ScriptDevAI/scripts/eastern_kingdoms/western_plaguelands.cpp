@@ -859,7 +859,7 @@ struct npc_isillienAI: public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 2:
+            case 3:
                 SetEscortPaused(true);
                 break;
         }
