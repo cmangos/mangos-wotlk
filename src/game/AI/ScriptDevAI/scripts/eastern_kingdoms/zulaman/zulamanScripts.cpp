@@ -24,7 +24,7 @@ EndScriptData */
 /* ContentData
 npc_forest_frog
 npc_harrison_jones_za
-.
+npc_amanishi_lookout
 npc_amanishi_tempest
 npc_harkor
 npc_tanzar
