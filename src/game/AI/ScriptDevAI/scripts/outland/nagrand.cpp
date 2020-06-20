@@ -246,16 +246,16 @@ struct npc_nagrand_captiveAI : public npc_escortAI
         {
             switch (uiPointId)
             {
-                case 4:
+                case 5:
                     DoScriptText(SAY_MAG_MORE, m_creature);
                     break;
-                case 5:
+                case 6:
                     if (Creature *summoned = m_creature->SummonCreature(NPC_MURK_BRUTE, -1496.662f, 8508.388f, 1.015174f, 2.56f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 10000))
                         DoScriptText(SAY_MURK_BRUTE_WHERE, summoned);
                     m_creature->SummonCreature(NPC_MURK_PUTRIFIER, -1494.623f, 8505.492f, 1.173438f, 2.63f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
                     m_creature->SummonCreature(NPC_MURK_SCAVENGER, -1497.349f, 8505.020f, 1.107700f, 2.56f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
                     break;
-                case 10:
+                case 11:
                     DoScriptText(SAY_MAG_COMPLETE, m_creature);
 
                     if (Player* pPlayer = GetPlayerForEscort())
@@ -269,23 +269,23 @@ struct npc_nagrand_captiveAI : public npc_escortAI
         {
             switch (uiPointId)
             {
-                case 1:
+                case 2:
                     DoScriptText(SAY_KUR_START, m_creature);
                     break;
-                case 7:
+                case 8:
                     DoScriptText(SAY_KUR_AMBUSH_2, m_creature);
                     break;
-                case 8:
+                case 9:
                     if (Creature *summoned = m_creature->SummonCreature(NPC_MURK_BRUTE, -1417.57f, 8516.55f, 8.593721f, 3.76f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 10000))
                         DoScriptText(SAY_MURK_BRUTE_WHERE, summoned);
                     m_creature->SummonCreature(NPC_MURK_PUTRIFIER, -1411.089f, 8507.651f, 8.976571f, 3.21f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
                     m_creature->SummonCreature(NPC_MURK_SCAVENGER, -1440.539f, 8490.212f, 6.207497f, 1.03f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 10000);
                     break;
-                case 9:
+                case 10:
                     m_creature->SetFacingTo(0.61f);
                     DoScriptText(SAY_KUR_UP_AHEAD, m_creature);					
                     break;
-                case 12:
+                case 13:
                     DoScriptText(SAY_KUR_COMPLETE, m_creature);
 
                     if (Player* pPlayer = GetPlayerForEscort())
