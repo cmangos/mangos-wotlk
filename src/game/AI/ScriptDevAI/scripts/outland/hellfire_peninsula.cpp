@@ -381,33 +381,33 @@ struct npc_wounded_blood_elfAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 DoScriptText(SAY_ELF_START, m_creature, pPlayer);
                 break;
-            case 13:
+            case 14:
                 m_creature->SetFacingTo(3.7f);
                 DoScriptText(SAY_ELF_SUMMON1, m_creature, pPlayer);
                 m_creature->SummonCreature(NPC_TALONGUARD, -983.206f, 4163.884f, 38.01043f, 0.72f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
                 m_creature->SummonCreature(NPC_TALONGUARD, -985.732f, 4157.546f, 43.50933f, 0.80f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
                 break;
-            case 19:
+            case 20:
                 DoScriptText(SAY_ELF_RESTING, m_creature, pPlayer);
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 break;
-            case 20:
+            case 21:
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                 break;
-            case 21:
+            case 22:
                 DoScriptText(SAY_ELF_SUMMON2, m_creature, pPlayer);
                 m_creature->SummonCreature(NPC_WINDWALKER, -864.001f, 4253.191f, 43.89390f, 5.27f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
                 break;
-            case 38:
+            case 39:
                 DoScriptText(SAY_ELF_COMPLETE, m_creature, pPlayer);
                 break;
-            case 39:
+            case 40:
                 m_creature->SetStandState(UNIT_STAND_STATE_DEAD);
                 break;
-            case 40:
+            case 41:
                 pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ROAD_TO_FALCON_WATCH, m_creature);
                 pPlayer->GetMap()->ScriptsStart(sRelayScripts, DBSCRIPT_END_TALERIS_INT, m_creature, m_creature);
                 break;
