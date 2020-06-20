@@ -69,7 +69,7 @@ struct npc_galen_goodwardAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
             {
                 GameObject* pCage = nullptr;
                 if (m_galensCageGuid)
@@ -84,7 +84,7 @@ struct npc_galen_goodwardAI : public npc_escortAI
                 }
                 break;
             }
-            case 21:
+            case 22:
                 DoScriptText(EMOTE_DISAPPEAR, m_creature);
                 break;
         }
@@ -94,11 +94,11 @@ struct npc_galen_goodwardAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 if (GameObject* pCage = m_creature->GetMap()->GetGameObject(m_galensCageGuid))
                     pCage->ResetDoorOrButton();
                 break;
-            case 20:
+            case 21:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     m_creature->SetFacingToObject(pPlayer);
