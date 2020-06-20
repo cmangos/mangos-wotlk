@@ -1967,27 +1967,27 @@ struct npc_ashliAI : public ScriptedAI
         {
             switch (pointId)
             {
-                case 1:
+                case 2:
                     m_uiEvent = 2;
                     m_uiEventTimer = 1000;
                     break;
-                case 6:
+                case 7:
                     m_uiEvent = 3;
                     m_uiEventTimer = 3000;
                     break;
-                case 12:
+                case 13:
                     m_uiEvent = 5;
                     m_uiEventTimer = 1000;
                     break;
-                case 20:
+                case 21:
                     m_uiEvent = 7;
                     m_uiEventTimer = 2000;
                     break;
-                case 22:
+                case 23:
                     m_uiEvent = 9;
                     m_uiEventTimer = 1000;
                     break;
-                case 83:
+                case 84:
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_bReachedEntrance = true;
                     break;
@@ -1997,15 +1997,15 @@ struct npc_ashliAI : public ScriptedAI
         {
             switch (pointId)
             {
-                case 0:
+                case 1:
                     m_creature->SetWalk(false);
                     m_bReachedEntrance = false;
                     break;
-                case 13:
+                case 14:
                     m_uiEvent = 10;
                     m_uiEventTimer = 2000;
                     break;
-                case 29:
+                case 30:
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_bReachedEntrance = true;
                     break;
