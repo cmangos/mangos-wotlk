@@ -203,7 +203,7 @@ struct npc_demolitionist_legosoAI : public npc_escortAI, private DialogueHelper
     {
         switch (uiWP)
         {
-            case 23:
+            case 24:
                 DoScriptText(SAY_ESCORT_LEGOSO_2, m_creature);
                 break;
         }
@@ -213,43 +213,43 @@ struct npc_demolitionist_legosoAI : public npc_escortAI, private DialogueHelper
     {
         switch (uiWP)
         {
-            case 22:
+            case 23:
                 DoScriptText(SAY_ESCORT_LEGOSO_1, m_creature);
                 break;
-            case 23:
+            case 24:
                 // prepare first event
                 SetEscortPaused(true);
                 m_creature->SetFacingTo(1.334f);
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 StartNextDialogueText(POINT_ID_EXPLOSIVES_1);
                 break;
-            case 25:
+            case 26:
                 // countdown for first event
                 SetEscortPaused(true);
                 m_creature->SetFacingTo(1.099f);
                 StartNextDialogueText(POINT_ID_COUNT_START);
                 break;
-            case 33:
+            case 34:
                 m_creature->SetFacingTo(0.942f);
                 StartNextDialogueText(SAY_ESCORT_LEGOSO_5);
                 break;
-            case 35:
+            case 36:
                 m_creature->SetFacingTo(0.862f);
                 StartNextDialogueText(SAY_ESCORT_LEGOSO_7);
                 break;
-            case 37:
+            case 38:
                 // prepare second event
                 SetEscortPaused(true);
                 m_creature->SetFacingTo(5.961f);
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 StartNextDialogueText(POINT_ID_EXPLOSIVES_5);
                 break;
-            case 38:
+            case 39:
                 // countdown for second event
                 m_creature->SetFacingTo(5.654f);
                 StartNextDialogueText(POINT_ID_COUNT_START);
                 break;
-            case 39:
+            case 40:
                 SetEscortPaused(true);
                 StartNextDialogueText(SAY_LEGOSO_AGGRO);
                 break;
