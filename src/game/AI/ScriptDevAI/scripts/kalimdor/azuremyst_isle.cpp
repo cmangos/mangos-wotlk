@@ -213,14 +213,14 @@ struct npc_magwinAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                 DoScriptText(SAY_START, m_creature);
                 break;
-            case 20:
+            case 21:
                 DoScriptText(SAY_PROGRESS, m_creature);
                 break;
-            case 33:
+            case 34:
                 SetRun();
                 DoScriptText(SAY_END1, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
@@ -231,18 +231,18 @@ struct npc_magwinAI : public npc_escortAI
                     pFather->SetFacingToObject(m_creature);
                 }
                 break;
-            case 34:
+            case 35:
                 if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_COWLEN, 30.0f))
                     DoScriptText(SAY_DAUGHTER, pFather);
                 break;
-            case 35:
+            case 36:
                 DoScriptText(EMOTE_HUG, m_creature);
                 break;
-            case 36:
+            case 37:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_END2, m_creature, pPlayer);
                 break;
-            case 37:
+            case 38:
                 if (Creature* pFather = GetClosestCreatureWithEntry(m_creature, NPC_COWLEN, 30.0f))
                 {
                     pFather->SetStandState(UNIT_STAND_STATE_SIT);
