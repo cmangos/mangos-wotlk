@@ -1628,19 +1628,19 @@ struct npc_captured_vanguardAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 15:
+            case 16:
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_ESCAPE_STAGING_GROUNDS, m_creature);
                 break;
-            case 16:
+            case 17:
                 DoScriptText(SAY_VANGUARD_FINISH, m_creature);
                 SetRun();
                 break;
-            case 17:
+            case 18:
                 if (Creature* pAmeer = GetClosestCreatureWithEntry(m_creature, NPC_COMMANDER_AMEER, 5.0f))
                     DoScriptText(EMOTE_VANGUARD_FINISH, m_creature, pAmeer);
                 break;
-            case 18:
+            case 19:
                 if (DoCastSpellIfCan(m_creature, SPELL_ETHEREAL_TELEPORT, CAST_TRIGGERED) == CAST_OK)
                     m_creature->ForcedDespawn(1000);
                 break;
