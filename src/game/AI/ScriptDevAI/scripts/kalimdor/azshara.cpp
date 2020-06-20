@@ -109,7 +109,7 @@ struct npc_rizzle_sprysprocketAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 m_creature->CastSpell(m_creature, SPELL_PERIODIC_CHECK, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
