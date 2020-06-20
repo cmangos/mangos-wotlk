@@ -1168,7 +1168,7 @@ struct npc_tarethaAI : public npc_escortAI, private DialogueHelper
 
     void WaypointReached(uint32 uiPoint) override
     {
-        if (uiPoint == 7)
+        if (uiPoint == 8)
         {
             StartNextDialogueText(SAY_TA_FREE);
 
