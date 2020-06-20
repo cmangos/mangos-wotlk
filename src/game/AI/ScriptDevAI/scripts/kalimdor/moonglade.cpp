@@ -67,31 +67,31 @@ struct npc_clintar_dw_spiritAI : public npc_escortAI
         // visual details here probably need refinement
         switch (i)
         {
-            case 0:
+            case 1:
                 DoScriptText(SAY_START, m_creature, pPlayer);
                 break;
-            case 13:
+            case 14:
                 m_creature->HandleEmote(EMOTE_STATE_USESTANDING_NOSHEATHE);
                 break;
-            case 14:
+            case 15:
                 DoScriptText(SAY_RELIC1, m_creature, pPlayer);
                 break;
-            case 26:
+            case 27:
                 m_creature->HandleEmote(EMOTE_STATE_USESTANDING_NOSHEATHE);
                 break;
-            case 27:
+            case 28:
                 DoScriptText(SAY_RELIC2, m_creature, pPlayer);
                 break;
-            case 31:
+            case 32:
                 m_creature->SummonCreature(NPC_ASPECT_OF_RAVEN, 7465.321f, -3088.515f, 429.006f, 5.550f, TEMPSPAWN_TIMED_OOC_DESPAWN, 10000);
                 break;
-            case 35:
+            case 36:
                 m_creature->HandleEmote(EMOTE_STATE_USESTANDING_NOSHEATHE);
                 break;
-            case 36:
+            case 37:
                 DoScriptText(SAY_RELIC3, m_creature, pPlayer);
                 break;
-            case 49:
+            case 50:
                 DoScriptText(SAY_END, m_creature, pPlayer);
                 pPlayer->TalkedToCreature(m_creature->GetEntry(), m_creature->GetObjectGuid());
                 break;
