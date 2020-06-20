@@ -216,11 +216,11 @@ struct npc_akunoAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 5:
+            case 6:
                 DoScriptText(SAY_AKU_AMBUSH_A, m_creature);
                 m_creature->SummonCreature(NPC_CABAL_SKIRMISHER, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 25000);
                 break;
-            case 14:
+            case 15:
                 DoScriptText(SAY_AKU_AMBUSH_B, m_creature);
 
                 if (Creature* pTemp = m_creature->SummonCreature(NPC_CABAL_SKIRMISHER, m_afAmbushB1[0], m_afAmbushB1[1], m_afAmbushB1[2], 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 25000))
@@ -228,10 +228,10 @@ struct npc_akunoAI : public npc_escortAI
 
                 m_creature->SummonCreature(NPC_CABAL_SKIRMISHER, m_afAmbushB2[0], m_afAmbushB2[1], m_afAmbushB2[2], 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 25000);
                 break;
-            case 15:
+            case 16:
                 SetRun();
                 break;
-            case 18:
+            case 19:
                 DoScriptText(SAY_AKU_COMPLETE, m_creature);
 
                 if (Player* pPlayer = GetPlayerForEscort())
