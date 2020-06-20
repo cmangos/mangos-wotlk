@@ -1633,19 +1633,19 @@ struct npc_krazAI : public ScriptedAI
 
         switch (pointId)
         {
-            case 1:
+            case 2:
                 m_uiEvent = 1;
                 m_uiEventTimer = 2000;
                 break;
-            case 5:
+            case 6:
                 m_uiEvent = 3;
                 m_uiEventTimer = 1000;
                 break;
-            case 7:
+            case 8:
                 m_uiEvent = 6;
                 m_uiEventTimer = 1000;
                 break;
-            case 11:
+            case 12:
                 m_uiEvent = 9;
                 m_uiEventTimer = 1000;
                 break;
