@@ -150,22 +150,22 @@ struct npc_anchorite_truuenAI: public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 4:
+            case 5:
                 DoScriptText(SAY_FIRST_STOP, m_creature);
                 break;
-            case 5:
+            case 6:
                 DoScriptText(SAY_CONTINUE, m_creature);
                 break;
-            case 10:
+            case 11:
                 DoScriptText(SAY_FIRST_ATTACK, m_creature);
                 // spawn first attacker wave
                 m_creature->SummonCreature(NPC_HAUNDING_VISION, 1045.26f, -1576.50f, 62.42f, 2.82f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 m_creature->SummonCreature(NPC_HUNGERING_WRAITH, 1021.74f, -1547.49f, 63.44f, 5.24f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 break;
-            case 11:
+            case 12:
                 DoScriptText(SAY_PURITY, m_creature);
                 break;
-            case 21:
+            case 22:
                 DoScriptText(SAY_SECOND_ATTACK, m_creature);
                 // spawn second attacker wave
                 m_creature->SummonCreature(NPC_BLIGHTED_ZOMBIE, 1123.08f, -1738.70f, 61.65f, 3.63f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
@@ -173,32 +173,32 @@ struct npc_anchorite_truuenAI: public npc_escortAI
                 m_creature->SummonCreature(NPC_BLIGHTED_ZOMBIE, 1096.79f, -1719.14f, 62.69f, 4.88f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 m_creature->SummonCreature(NPC_BLIGHTED_ZOMBIE, 1068.92f, -1739.68f, 62.23f, 6.21f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 break;
-            case 22:
+            case 23:
                 DoScriptText(SAY_CLEANSE, m_creature);
                 break;
-            case 35:
+            case 36:
                 if (Creature* pPriest = GetClosestCreatureWithEntry(m_creature, NPC_PRIEST_THELDANIS, 60.0f))
                     DoScriptText(SAY_WELCOME, pPriest);
                 break;
-            case 38:
+            case 39:
                 m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 m_creature->SummonCreature(NPC_GHOST_OF_UTHER, 972.96f, -1824.82f, 82.54f, 0.27f, TEMPSPAWN_TIMED_DESPAWN, 45000);
                 // complete the quest - the event continues with the dialogue
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_TOMB_LIGHTBRINGER, m_creature);
                 break;
-            case 39:
+            case 40:
                 if (Creature* pUther = m_creature->GetMap()->GetCreature(m_utherGhostGuid))
                 {
                     pUther->SetFacingToObject(m_creature);
                     DoScriptText(SAY_EPILOGUE_1, pUther);
                 }
                 break;
-            case 40:
+            case 41:
                 if (Creature* pUther = m_creature->GetMap()->GetCreature(m_utherGhostGuid))
                     DoScriptText(SAY_EPILOGUE_2, pUther);
                 break;
-            case 41:
+            case 42:
                 m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                 break;
         }
