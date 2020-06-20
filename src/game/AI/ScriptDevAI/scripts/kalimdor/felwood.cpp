@@ -703,7 +703,7 @@ struct npc_areiAI : public npc_escortAI, private DialogueHelper
 
     void WaypointReached(uint32 uiPointId) override
     {
-        if (uiPointId == 36)
+        if (uiPointId == 37)
         {
             SetEscortPaused(true);
 
