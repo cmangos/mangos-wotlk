@@ -524,33 +524,33 @@ struct npc_wildaAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 8:
-            case 26:
-            case 30:
-            case 32:
-            case 39:
-            case 43:
-            case 51:
+            case 9:
+            case 27:
+            case 31:
+            case 33:
+            case 40:
+            case 44:
+            case 52:
                 DoSpawnAssassin();
                 break;
-            case 13:
+            case 14:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_WIL_FREE_SPIRITS, m_creature, pPlayer);
                 DoCastSpellIfCan(m_creature, SPELL_BREAK_WATER_PRISON);
                 break;
-            case 14:
+            case 15:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_WIL_FIND_EXIT, m_creature, pPlayer);
                 DoFreeSpirits();
                 break;
-            case 15:
+            case 16:
                 DoSpawnAssassin(2);
                 break;
-            case 40:
+            case 41:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_WIL_JUST_AHEAD, m_creature, pPlayer);
                 break;
-            case 52:
+            case 53:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoDespawnSpirits();
