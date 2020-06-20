@@ -1011,23 +1011,23 @@ struct npc_harkorAI : public ScriptedAI
         {
             switch (pointId)
             {
-                case 0:
+                case 1:
                     m_uiEvent = 1;
                     m_uiEventTimer = 1000;
                     break;
-                case 2:
+                case 3:
                     m_uiEvent = 3;
                     m_uiEventTimer = 1000;
                     break;
-                case 3:
+                case 4:
                     m_uiEvent = 6;
                     m_uiEventTimer = 1000;
                     break;
-                case 4:
+                case 5:
                     m_uiEvent = 9;
                     m_uiEventTimer = 1000;
                     break;
-                case 41:
+                case 42:
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_bReachedEntrance = true;
                     break;
@@ -1037,19 +1037,19 @@ struct npc_harkorAI : public ScriptedAI
         {
             switch (pointId)
             {
-                case 0:
+                case 1:
                     m_creature->SetWalk(false);
                     m_bReachedEntrance = false;
                     break;
-                case 11:
+                case 12:
                     m_uiEvent = 11;
                     m_uiEventTimer = 1000;
                     break;
-                case 15:
+                case 16:
                     m_uiEvent = 14;
                     m_uiEventTimer = 1000;
                     break;
-                case 18:
+                case 19:
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_bReachedEntrance = true;
                     break;
