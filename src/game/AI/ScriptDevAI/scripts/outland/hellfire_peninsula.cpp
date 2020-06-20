@@ -150,13 +150,13 @@ struct npc_ancestral_wolfAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 DoScriptText(EMOTE_WOLF_LIFT_HEAD, m_creature);
                 break;
-            case 2:
+            case 3:
                 DoScriptText(EMOTE_WOLF_HOWL, m_creature);
                 break;
-            case 50:
+            case 51:
                 Creature* pRyga = GetClosestCreatureWithEntry(m_creature, NPC_RYGA, 30.0f);
                 if (pRyga && pRyga->IsAlive() && !pRyga->IsInCombat())
                     DoScriptText(SAY_WOLF_WELCOME, pRyga);
