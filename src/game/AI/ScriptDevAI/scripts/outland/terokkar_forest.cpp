@@ -480,21 +480,21 @@ struct npc_letollAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_LE_KEEP_SAFE, m_creature, pPlayer);
                 break;
-            case 1:
+            case 2:
                 DoScriptText(SAY_LE_NORTH, m_creature);
                 break;
-            case 10:
+            case 11:
                 DoScriptText(SAY_LE_ARRIVE, m_creature);
                 break;
-            case 12:
+            case 13:
                 DoScriptText(SAY_LE_BURIED, m_creature);
                 SetEscortPaused(true);
                 break;
-            case 13:
+            case 14:
                 SetRun();
                 break;
         }
