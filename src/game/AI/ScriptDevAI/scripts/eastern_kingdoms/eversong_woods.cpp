@@ -286,10 +286,10 @@ struct npc_prospector_anvilwardAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 DoScriptText(SAY_ANVIL1, m_creature, pPlayer);
                 break;
-            case 6:
+            case 7:
                 DoScriptText(SAY_ANVIL2, m_creature, pPlayer);
                 m_creature->GetMotionMaster()->Clear(false, true);
                 m_creature->GetMotionMaster()->MoveIdle();
