@@ -1512,24 +1512,24 @@ struct npc_protectorate_demolitionistAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 DoScriptText(SAY_INTRO, m_creature);
                 break;
-            case 3:
+            case 4:
                 DoScriptText(SAY_STAGING_GROUNDS, m_creature);
                 break;
-            case 4:
+            case 5:
                 DoScriptText(SAY_TOXIC_HORROR, m_creature);
                 break;
-            case 9:
+            case 10:
                 DoScriptText(SAY_SALHADAAR, m_creature);
                 break;
-            case 12:
+            case 13:
                 DoScriptText(SAY_DISRUPTOR, m_creature);
                 SetEscortPaused(true);
                 m_uiEventTimer = 5000;
                 break;
-            case 13:
+            case 14:
                 DoScriptText(SAY_FINISH_2, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
