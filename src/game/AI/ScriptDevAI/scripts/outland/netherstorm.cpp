@@ -1817,17 +1817,17 @@ struct npc_drijyaAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 DoScriptText(SAY_DRIJYA_START, m_creature);
                 SetRun();
                 break;
-            case 1:
+            case 2:
                 DoScriptText(SAY_DRIJYA_1, m_creature);
                 break;
-            case 5:
+            case 6:
                 DoScriptText(SAY_DRIJYA_2, m_creature);
                 break;
-            case 7:
+            case 8:
                 SetEscortPaused(true);
                 m_uiSayCount = false;
                 m_uiDestroyingTimer = 60000;
@@ -1837,7 +1837,7 @@ struct npc_drijyaAI : public npc_escortAI
                 if (Creature* pTrigger = GetClosestCreatureWithEntry(m_creature, NPC_EXPLODE_TRIGGER, 40.0f))
                     m_explodeTriggerGuid = pTrigger->GetObjectGuid();
                 break;
-            case 8:
+            case 9:
                 if (Player* pPlayer = GetPlayerForEscort())
                     m_creature->SetFacingToObject(pPlayer);
                 // first pillar smoke
@@ -1845,7 +1845,7 @@ struct npc_drijyaAI : public npc_escortAI
                 DoScriptText(SAY_DRIJYA_4, m_creature);
                 m_creature->HandleEmote(EMOTE_ONESHOT_NONE);
                 break;
-            case 12:
+            case 13:
                 SetEscortPaused(true);
                 m_uiSayCount = false;
                 m_uiDestroyingTimer = 60000;
@@ -1853,7 +1853,7 @@ struct npc_drijyaAI : public npc_escortAI
                 m_uiSpawnCount = 0;
                 m_creature->HandleEmote(EMOTE_STATE_WORK);
                 break;
-            case 13:
+            case 14:
                 if (Player* pPlayer = GetPlayerForEscort())
                     m_creature->SetFacingToObject(pPlayer);
                 // second pillar smoke
@@ -1861,34 +1861,34 @@ struct npc_drijyaAI : public npc_escortAI
                 DoScriptText(SAY_DRIJYA_5, m_creature);
                 m_creature->HandleEmote(EMOTE_ONESHOT_NONE);
                 break;
-            case 17:
+            case 18:
                 SetEscortPaused(true);
                 m_uiSayCount = false;
                 m_uiDestroyingTimer = 60000;
                 m_uiSpawnDestroyerTimer = 15000;
                 m_creature->HandleEmote(EMOTE_STATE_WORK);
                 break;
-            case 18:
+            case 19:
                 m_creature->HandleEmote(EMOTE_ONESHOT_NONE);
                 // manifold smoke
                 RespawnGo(true, 2, 4);
                 DoScriptText(SAY_DRIJYA_6, m_creature);
                 m_creature->HandleEmote(EMOTE_ONESHOT_ROAR);
                 break;
-            case 19:
+            case 20:
                 // warp gate explosion, smoke and fire
                 if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_explodeTriggerGuid))
                     pTrigger->CastSpell(pTrigger, SPELL_EXPLOSION_VISUAL, TRIGGERED_NONE);
                 RespawnGo(false, 0, 4);
                 RespawnGo(true, 5, 10);
                 break;
-            case 20:
+            case 21:
                 DoScriptText(SAY_DRIJYA_7, m_creature);
                 break;
-            case 23:
+            case 24:
                 SetRun(false);
                 break;
-            case 27:
+            case 28:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_DRIJYA_COMPLETE, m_creature, pPlayer);
