@@ -4216,7 +4216,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                 {
                     // Blink
                     if (unitTarget)
-                        m_caster->CastSpell(unitTarget, 38643, TRIGGERED_OLD_TRIGGERED);
+                        unitTarget->CastSpell(m_caster, 38643, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 41060:                                 // Return
