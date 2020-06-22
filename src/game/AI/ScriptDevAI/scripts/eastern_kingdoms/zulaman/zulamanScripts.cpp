@@ -1343,23 +1343,23 @@ struct npc_tanzarAI : public ScriptedAI
         {
             switch (pointId)
             {
-                case 1:
+                case 2:
                     m_uiEvent = 1;
                     m_uiEventTimer = 2000;
                     break;
-                case 3:
+                case 4:
                     m_uiEvent = 3;
                     m_uiEventTimer = 1000;
                     break;
-                case 5:
+                case 6:
                     m_uiEvent = 6;
                     m_uiEventTimer = 1000;
                     break;
-                case 52:
+                case 53:
                     m_uiEvent = 7;
                     m_uiEventTimer = 5000;
                     break;
-                case 54:
+                case 55:
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_creature->HandleEmoteState(EMOTE_STATE_DANCE);
                     break;
@@ -1369,15 +1369,15 @@ struct npc_tanzarAI : public ScriptedAI
         {
             switch (pointId)
             {
-                case 0:
+                case 1:
                     m_creature->SetWalk(false);
                     break;
-                case 12:
+                case 13:
                     m_creature->SetWalk(true);
                     m_uiEvent = 9;
                     m_uiEventTimer = 2000;
                     break;
-                case 14:
+                case 15:
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_uiEvent = 11;
                     m_uiEventTimer = 1000;
