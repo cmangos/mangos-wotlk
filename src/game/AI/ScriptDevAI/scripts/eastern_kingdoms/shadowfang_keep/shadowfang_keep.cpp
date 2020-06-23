@@ -73,29 +73,29 @@ struct npc_shadowfang_prisonerAI : public npc_escortAI
     {
         switch (uiPoint)
         {
-            case 0:
+            case 1:
                 if (m_uiNpcEntry == NPC_ASH)
                     DoScriptText(SAY_FREE_AS, m_creature);
                 else
                     DoScriptText(SAY_FREE_AD, m_creature);
                 break;
-            case 10:
+            case 11:
                 if (m_uiNpcEntry == NPC_ASH)
                     DoScriptText(SAY_OPEN_DOOR_AS, m_creature);
                 else
                     DoScriptText(SAY_OPEN_DOOR_AD, m_creature);
                 break;
-            case 11:
+            case 12:
                 if (m_uiNpcEntry == NPC_ASH)
                     DoCastSpellIfCan(m_creature, SPELL_UNLOCK);
                 else
                     DoScriptText(EMOTE_UNLOCK_DOOR_AD, m_creature);
                 break;
-            case 12:
+            case 13:
                 if (m_uiNpcEntry != NPC_ASH)
                     m_creature->HandleEmote(EMOTE_ONESHOT_USESTANDING);
                 break;
-            case 13:
+            case 14:
                 if (m_uiNpcEntry == NPC_ASH)
                     DoScriptText(SAY_POST_DOOR_AS, m_creature);
                 else
@@ -104,7 +104,7 @@ struct npc_shadowfang_prisonerAI : public npc_escortAI
                 if (m_pInstance)
                     m_pInstance->SetData(TYPE_FREE_NPC, DONE);
                 break;
-            case 14:
+            case 15:
                 if (m_uiNpcEntry == NPC_ASH)
                     DoCastSpellIfCan(m_creature, SPELL_FIRE);
                 else
@@ -113,7 +113,7 @@ struct npc_shadowfang_prisonerAI : public npc_escortAI
                     SetRun();
                 }
                 break;
-            case 15:
+            case 16:
                 if (m_uiNpcEntry == NPC_ASH)
                     DoScriptText(EMOTE_VANISH_AS, m_creature);
                 break;
