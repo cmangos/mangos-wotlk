@@ -128,12 +128,12 @@ struct npc_barnesAI : public npc_escortAI, private DialogueHelper
 
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 DoCastSpellIfCan(m_creature, SPELL_TUXEDO);
                 if (m_pInstance->GetData(TYPE_OPERA) != FAIL)
                     m_pInstance->DoUseDoorOrButton(GO_STAGE_DOOR_LEFT);
                 break;
-            case 4:
+            case 5:
                 switch (m_pInstance->GetData(TYPE_OPERA_PERFORMANCE))
                 {
                     case OPERA_EVENT_WIZARD_OZ:
@@ -149,10 +149,10 @@ struct npc_barnesAI : public npc_escortAI, private DialogueHelper
                 SetEscortPaused(true);
                 m_creature->SummonCreature(NPC_SPOTLIGHT, 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
                 break;
-            case 8:
+            case 9:
                 m_pInstance->DoUseDoorOrButton(GO_STAGE_DOOR_LEFT);
                 break;
-            case 9:
+            case 10:
                 m_pInstance->DoPrepareOperaStage(m_creature);
                 break;
         }
