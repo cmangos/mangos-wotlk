@@ -164,6 +164,7 @@ struct boss_lady_vashjAI : public RangedCombatAI
         AddCustomAction(VASHJ_ENCHANTED_ELEMENTAL, true, [&]() { HandleEnchantedElemental(); });
         AddCustomAction(VASHJ_TAINTED_ELEMENTAL, true, [&]() { HandleTaintedElemental(); });
         SetRangedMode(true, 40.f, TYPE_PROXIMITY);
+        AddMainSpell(SPELL_SHOOT);
         AddDistanceSpell(SPELL_ENTANGLE);
         AddDistanceSpell(SPELL_SHOCK_BLAST);
     }
@@ -172,6 +173,7 @@ struct boss_lady_vashjAI : public RangedCombatAI
 
     ObjectGuid m_introTarget;
     uint32 m_uiSummonSporebatStaticTimer;
+    uint32 m_multishotGuard;
 
     uint32 m_lastSporebatSpell;
 
@@ -197,6 +199,7 @@ struct boss_lady_vashjAI : public RangedCombatAI
         m_uiSummonSporebatStaticTimer = 30000;
 
         m_lastSporebatSpell = 0;
+        m_multishotGuard = 0;
 
         m_creature->SetWalk(false, true);
         SetCombatMovement(true);
@@ -591,15 +594,21 @@ struct boss_lady_vashjAI : public RangedCombatAI
                 if (GetCurrentRangedMode())
                 {
                     bool success = false;
-                    if (urand(0, 3)) // roughly 1/4 chance for multishot
+                    if (m_multishotGuard < 3 || urand(0, 4)) // roughly 1/4 chance for multishot
                     {
                         if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOOT) == CAST_OK)
+                        {
                             success = true;
+                            ++m_multishotGuard;
+                        }
                     }
                     else
                     {
                         if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MULTI_SHOT) == CAST_OK)
+                        {
                             success = true;
+                            m_multishotGuard = 0;
+                        }
                     }
                     if (success)
                     {
