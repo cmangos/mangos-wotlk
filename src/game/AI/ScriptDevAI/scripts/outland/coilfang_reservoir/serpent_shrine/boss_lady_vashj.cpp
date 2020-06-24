@@ -175,7 +175,7 @@ struct boss_lady_vashjAI : public RangedCombatAI
 
     uint32 m_lastSporebatSpell;
 
-    uint8 m_uiPhase;
+    uint8 m_phase;
     uint8 m_uiGeneratorsUsed;
 
     std::vector<GuidVector> m_triggerGuids;
@@ -191,14 +191,14 @@ struct boss_lady_vashjAI : public RangedCombatAI
         CombatAI::Reset();
         SetCombatMovement(true);
 
-        m_uiPhase                     = PHASE_1;
+        m_phase                     = PHASE_1;
         m_uiGeneratorsUsed            = 0;
 
         m_uiSummonSporebatStaticTimer = 30000;
 
         m_lastSporebatSpell = 0;
 
-        SetMeleeEnabled(false);
+        m_creature->SetWalk(false, true);
         SetCombatMovement(true);
         SetCombatScriptStatus(false);
         //m_creature->SetSheath(SHEATH_STATE_MELEE);
@@ -206,11 +206,7 @@ struct boss_lady_vashjAI : public RangedCombatAI
         m_creature->SetImmobilizedState(false);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
 
-        for (ObjectGuid& guid : m_spawns)
-            if (Creature* spawn = m_creature->GetMap()->GetCreature(guid))
-                spawn->ForcedDespawn();
-
-        m_spawns.clear();
+        DespawnGuids(m_spawns);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
@@ -300,7 +296,7 @@ struct boss_lady_vashjAI : public RangedCombatAI
                 m_triggerGuids.push_back(m_triggerGuidsEast);
             }
 
-            m_uiPhase = PHASE_2;
+            m_phase = PHASE_2;
 
             m_creature->SetImmobilizedState(true);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED);
@@ -387,7 +383,7 @@ struct boss_lady_vashjAI : public RangedCombatAI
     void SummonedCreatureDespawn(Creature* summoned) override
     {
         // Set the timer when summoned despawned, if not already killed
-        if (summoned->GetEntry() == NPC_TAINTED_ELEMENTAL)
+        if (summoned->GetEntry() == NPC_TAINTED_ELEMENTAL && m_phase == PHASE_2)
             ResetIfNotStarted(VASHJ_TAINTED_ELEMENTAL, 50000);
     }
 
@@ -423,6 +419,8 @@ struct boss_lady_vashjAI : public RangedCombatAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_LADYVASHJ_EVENT, FAIL);
+
+        DespawnGuids(m_spawns);
     }
 
     // Wrapper to inform the boss that a generator has been deactivated
@@ -446,7 +444,7 @@ struct boss_lady_vashjAI : public RangedCombatAI
             if (m_creature->GetVictim())
                 m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim(), m_attackDistance, m_attackAngle, m_moveFurther);
 
-            m_uiPhase = PHASE_3;
+            m_phase = PHASE_3;
 
             m_creature->PlaySpellVisual(SPELL_VISUAL_KIT);
 
@@ -534,7 +532,7 @@ struct boss_lady_vashjAI : public RangedCombatAI
 
                 m_creature->GetMotionMaster()->MovePoint(POINT_MOVE_CENTER, afMiddlePos[0], afMiddlePos[1], afMiddlePos[2]);
 
-                m_uiPhase = PHASE_2;
+                m_phase = PHASE_2;
                 SetCombatScriptStatus(true);
                 SetActionReadyStatus(action, false);
                 SetActionReadyStatus(VASHJ_ACTION_MELEE_MODE, false);
@@ -742,5 +740,5 @@ void AddSC_boss_lady_vashj()
     pNewScript->pGOUse = &GOUse_go_vashj_bridge;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<VashjPersuasion>("spell_vashj_persuasion");
+    RegisterScript<VashjPersuasion>("spell_vashj_persuasion");
 }
