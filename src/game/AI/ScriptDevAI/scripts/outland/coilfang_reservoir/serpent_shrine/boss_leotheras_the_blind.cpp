@@ -277,6 +277,7 @@ struct boss_leotheras_the_blindAI : public CombatAI
                         m_bDemonForm = false;
                         DisableCombatAction(LEOTHERAS_INSIDIOUS_WHISPER);
                         DisableCombatAction(LEOTHERAS_CHAOS_BLAST);
+                        ResetCombatAction(LEOTHERAS_WHIRLWIND, urand(1000, 5000));
                     }
 
                     SetCombatScriptStatus(true);
@@ -292,11 +293,8 @@ struct boss_leotheras_the_blindAI : public CombatAI
                 }
                 break;
             case LEOTHERAS_METAMORPHOSIS:
-                if (m_bDemonForm)
+                if (m_bDemonForm && CanExecuteCombatAction())
                 {
-                    if (m_creature->IsNonMeleeSpellCasted(false))
-                        m_creature->InterruptNonMeleeSpells(false);
-
                     // switch to nightelf form
                     m_creature->RemoveAurasDueToSpell(SPELL_METAMORPHOSIS);
                     SetEquipmentSlots(true);
