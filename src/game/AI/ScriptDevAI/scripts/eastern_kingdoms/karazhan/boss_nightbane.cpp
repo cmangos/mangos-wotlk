@@ -231,6 +231,8 @@ struct boss_nightbaneAI : public CombatAI
             {
                 case POINT_ID_AIR:
                     m_phase = PHASE_AIR;
+                    SetCombatScriptStatus(false);
+                    HandlePhaseTransition();
                     break;
                 case POINT_ID_GROUND:
                     // TODO: remove this once MMAPs are more reliable in the area
@@ -244,8 +246,6 @@ struct boss_nightbaneAI : public CombatAI
                     ResetTimer(NIGHTBANE_ATTACK_DELAY, 2000);
                     break;
             }
-            SetCombatScriptStatus(false);
-            HandlePhaseTransition();
         }
     }
 
@@ -254,6 +254,8 @@ struct boss_nightbaneAI : public CombatAI
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->SetInCombatWithZone();
         AttackClosestEnemy();
+        SetCombatScriptStatus(false);
+        HandlePhaseTransition();
     }
 
     // Wrapper to handle movement to the closest trigger
