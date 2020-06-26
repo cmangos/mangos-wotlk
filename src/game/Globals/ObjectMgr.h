@@ -1192,6 +1192,7 @@ class ObjectMgr
                 return 0;
             return urand(itrSpell->second.first, itrSpell->second.second);
         }
+        void AddCreatureCooldown(uint32 entry, uint32 spellId, uint32 min, uint32 max);
 
         uint32 GetModelForRace(uint32 sourceModelId, uint32 racemask);
         /**

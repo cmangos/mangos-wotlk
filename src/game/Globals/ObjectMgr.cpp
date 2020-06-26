@@ -9938,6 +9938,11 @@ void ObjectMgr::LoadCreatureCooldowns()
     sLog.outString();
 }
 
+void ObjectMgr::AddCreatureCooldown(uint32 entry, uint32 spellId, uint32 min, uint32 max)
+{
+    m_creatureCooldownMap[entry].emplace(spellId, std::make_pair(min, max));
+}
+
 CreatureInfo const* GetCreatureTemplateStore(uint32 entry)
 {
     return sCreatureStorage.LookupEntry<CreatureInfo>(entry);
