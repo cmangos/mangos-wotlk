@@ -2255,6 +2255,11 @@ void Aura::TriggerSpell()
                 casterGUID = target->GetObjectGuid();
                 break;
             }
+            case 38652:                                     // Spore Cloud
+            {
+                triggerCaster = GetCaster();
+                break;
+            }
             // dummy trigger 18350 family
             case 28820:                                     // Lightning Shield
             case 38443:                                     // Totemic Mastery
