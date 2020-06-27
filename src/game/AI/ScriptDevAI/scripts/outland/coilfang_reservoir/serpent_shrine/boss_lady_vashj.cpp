@@ -707,7 +707,7 @@ struct VashjPersuasion : public SpellScript, public AuraScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
-        if (target == spell->GetCaster() || target->HasAura(SPELL_STATIC_CHARGE))
+        if (target == spell->GetCaster()->GetVictim() || target->HasAura(SPELL_STATIC_CHARGE))
             return false;
 
         return true;
