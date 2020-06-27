@@ -32,6 +32,7 @@ Patches
 #include "karazhan.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "Globals/ObjectMgr.h"
 
 enum
 {
