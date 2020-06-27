@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "the_eye.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 // #define FAST_TIMERS
 // #define FAST_TRANSITION_TIMERS
@@ -136,6 +137,7 @@ enum
     SPELL_NETHER_VAPOR_SUMMON_3         = 35863,
     SPELL_NETHER_VAPOR_SUMMON_4         = 35864,
     SPELL_NETHER_VAPOR_LIGHTNING        = 45960,
+    SPELL_ASTRAL_STORM                  = 45959,
     SPELL_REMOVE_WEAPONS                = 39497,            // spells to delete items from player
 
     // ***** Advisors spells ********
@@ -495,18 +497,6 @@ struct boss_kaelthasAI : public ScriptedAI
             }
             case NPC_NETHER_VAPOR:
             {
-                DoCastSpellIfCan(pSummoned, SPELL_NETHER_VAPOR_PERIODIC_DAMAGE, CAST_FORCE_TARGET_SELF | CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-                DoCastSpellIfCan(pSummoned, SPELL_NETHER_VAPOR_PERIODIC_SCRIPT, CAST_FORCE_TARGET_SELF | CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-                pSummoned->AI()->SetReactState(REACT_PASSIVE);
-                float angle = m_creature->GetOrientation();
-                switch (m_netherVapor.size()) // created by spell is set after justsummoned TODO: fix
-                {
-                    case 0: break;
-                    case 1: angle -= M_PI_F / 2; break;
-                    case 2: angle += M_PI_F / 2; break;
-                    case 3: angle += M_PI_F; break;
-                }
-                pSummoned->GetMotionMaster()->MoveFollow(m_creature, 10.f + m_creature->GetObjectBoundingRadius(), angle, true);
                 m_netherVapor.push_back(pSummoned->GetObjectGuid());
                 break;
             }
@@ -1856,56 +1846,109 @@ struct boss_master_engineer_telonicusAI : public advisor_base_ai
     }
 };
 
-UnitAI* GetAI_boss_kaelthas(Creature* pCreature)
+struct npc_nether_vaporAI : public ScriptedAI, public TimerManager
 {
-    return new boss_kaelthasAI(pCreature);
-}
+    npc_nether_vaporAI(Creature* creature) : ScriptedAI(creature)
+    {
+        SetReactState(REACT_PASSIVE);
+        AddCustomAction(0, urand(10000, 50000), [&]()
+        {
+            if (Unit* spawner = m_creature->GetSpawner())
+            {
+                float angle = spawner->GetAngle(m_creature);
+                float distance = sqrt(m_creature->GetDistance(spawner, true, DIST_CALC_NONE));
+                angle += frand(-1.f, 1.f);
+                MapManager::NormalizeOrientation(angle);
+                distance = frand(0, distance);
+                float x, y, z;
+                spawner->GetNearPoint(m_creature, x, y, z, 1.f, distance, angle);
+                m_creature->GetMotionMaster()->MovePoint(1, x, y, z);
+            }
+        });
+    }
 
-UnitAI* GetAI_boss_thaladred_the_darkener(Creature* pCreature)
-{
-    return new boss_thaladred_the_darkenerAI(pCreature);
-}
+    void Reset() override {}
 
-UnitAI* GetAI_boss_lord_sanguinar(Creature* pCreature)
-{
-    return new boss_lord_sanguinarAI(pCreature);
-}
+    void JustRespawned() override
+    {
+        ScriptedAI::JustRespawned();
+        DoCastSpellIfCan(nullptr, SPELL_NETHER_VAPOR_PERIODIC_DAMAGE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_NETHER_VAPOR_PERIODIC_SCRIPT, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_NETHER_VAPOR_LIGHTNING, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
 
-UnitAI* GetAI_boss_grand_astromancer_capernian(Creature* pCreature)
-{
-    return new boss_grand_astromancer_capernianAI(pCreature);
-}
+    void UpdateAI(const uint32 diff)
+    {
+        UpdateTimers(diff);
+    }
+};
 
-UnitAI* GetAI_boss_master_engineer_telonicus(Creature* pCreature)
+struct NetherVaporLightning : public AuraScript
 {
-    return new boss_master_engineer_telonicusAI(pCreature);
-}
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        Position pos = target->GetPosition();
+        pos.x += frand(-10.f, 10.f);
+        pos.y += frand(-10.f, 10.f);
+        pos.z += frand(-10.f, 10.f);
+        aura->GetTarget()->CastSpell(pos.x, pos.y, pos.z, SPELL_ASTRAL_STORM, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct NetherVaporSummon : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destPos.z += 5.f;
+    }
+};
+
+struct NetherVaporSummonParent : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        spell->GetCaster()->CastSpell(nullptr, 35861, TRIGGERED_NONE);
+        spell->GetCaster()->CastSpell(nullptr, 35862, TRIGGERED_NONE);
+        spell->GetCaster()->CastSpell(nullptr, 35863, TRIGGERED_NONE);
+        spell->GetCaster()->CastSpell(nullptr, 35864, TRIGGERED_NONE);
+    }
+};
 
 void AddSC_boss_kaelthas()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_kaelthas";
-    pNewScript->GetAI = &GetAI_boss_kaelthas;
+    pNewScript->GetAI = &GetNewAIInstance<boss_kaelthasAI>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_kael_phase_2;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_thaladred_the_darkener";
-    pNewScript->GetAI = &GetAI_boss_thaladred_the_darkener;
+    pNewScript->GetAI = &GetNewAIInstance<boss_thaladred_the_darkenerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_lord_sanguinar";
-    pNewScript->GetAI = &GetAI_boss_lord_sanguinar;
+    pNewScript->GetAI = &GetNewAIInstance<boss_lord_sanguinarAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_grand_astromancer_capernian";
-    pNewScript->GetAI = &GetAI_boss_grand_astromancer_capernian;
+    pNewScript->GetAI = &GetNewAIInstance<boss_grand_astromancer_capernianAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_master_engineer_telonicus";
-    pNewScript->GetAI = &GetAI_boss_master_engineer_telonicus;
+    pNewScript->GetAI = &GetNewAIInstance<boss_master_engineer_telonicusAI>;
     pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_nether_vapor";
+    pNewScript->GetAI = &GetNewAIInstance<npc_nether_vaporAI>;
+    pNewScript->RegisterSelf();
+
+    RegisterAuraScript<NetherVaporLightning>("spell_nether_vapor_lightning");
+    RegisterSpellScript<NetherVaporSummon>("spell_nether_vapor_summon");
+    RegisterSpellScript<NetherVaporSummonParent>("spell_nether_vapor_summon_parent");
 }

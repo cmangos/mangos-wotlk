@@ -9216,17 +9216,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAurasDueToSpell(35596); // remove aura Power of the Legion
                     return;
                 }
-                case 35865:                                 // Summon Nether Vapor
-                {
-                    if (!unitTarget)
-                        return;
-
-                    m_caster->CastSpell(nullptr, 35861, TRIGGERED_NONE);
-                    m_caster->CastSpell(nullptr, 35862, TRIGGERED_NONE);
-                    m_caster->CastSpell(nullptr, 35863, TRIGGERED_NONE);
-                    m_caster->CastSpell(nullptr, 35864, TRIGGERED_NONE);
-                    return;
-                }
                 case 35869:                                 // Nether Beam
                 {
                     if (m_caster->GetTypeId() != TYPEID_UNIT)

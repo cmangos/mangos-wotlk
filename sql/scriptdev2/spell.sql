@@ -114,8 +114,14 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (42783,'spell_wrath_of_the_astromancer'),
 (45043,'spell_power_circle'),
 (44006,'spell_teleport_self_akilzon'),
-(34630,'spell_scrap_reaver_spell'),
 (43681,'spell_inactive'),
+(35861,'spell_nether_vapor_summon'),
+(35862,'spell_nether_vapor_summon'),
+(35863,'spell_nether_vapor_summon'),
+(35864,'spell_nether_vapor_summon'),
+(35865,'spell_nether_vapor_summon_parent'),
+(45960,'spell_nether_vapor_lightning'),
+(34630,'spell_scrap_reaver_spell'),
 (34800,'spell_getting_sleepy_aura'),
 (43364,'spell_getting_sleepy_aura');
 
