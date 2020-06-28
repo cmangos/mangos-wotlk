@@ -22,7 +22,6 @@ SDCategory: Spell
 EndScriptData */
 
 /* ContentData
-spell 8913
 spell 19512
 spell 21014
 spell 21050
@@ -165,11 +164,6 @@ enum
     SAY_RAND_ATTACK1                    = -1000558,
     SAY_RAND_ATTACK2                    = -1000559,
     SAY_RAND_ATTACK3                    = -1000560,
-
-    // target morbent fel
-    SPELL_SACRED_CLEANSING              = 8913,
-    NPC_MORBENT                         = 1200,
-    NPC_WEAKENED_MORBENT                = 24782,
 
     // quest 11515
     SPELL_FEL_SIPHON_DUMMY              = 44936,
@@ -687,18 +681,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                     return true;
 
                 pCreatureTarget->UpdateEntry(NPC_EMACIATED_FELBLOOD);
-                return true;
-            }
-            return true;
-        }
-        case SPELL_SACRED_CLEANSING:
-        {
-            if (uiEffIndex == EFFECT_INDEX_1)
-            {
-                if (pCreatureTarget->GetEntry() != NPC_MORBENT)
-                    return true;
-
-                pCreatureTarget->UpdateEntry(NPC_WEAKENED_MORBENT);
                 return true;
             }
             return true;
