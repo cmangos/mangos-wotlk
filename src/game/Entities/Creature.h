@@ -884,6 +884,7 @@ class Creature : public Unit
         // spell scripting persistency
         bool HasBeenHitBySpell(uint32 spellId);
         void RegisterHitBySpell(uint32 spellId);
+        void UnregisterHitBySpell(uint32 spellId);
         void ResetSpellHitCounter();
 
     protected:
