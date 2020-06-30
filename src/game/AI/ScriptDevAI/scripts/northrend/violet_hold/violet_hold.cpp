@@ -108,26 +108,26 @@ struct npc_sinclariAI : public npc_escortAI
 
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 m_pInstance->ProcessActivationCrystal(m_creature, true);
                 break;
-            case 1:
+            case 2:
                 DoScriptText(SAY_BEGIN, m_creature);
                 m_pInstance->SetIntroPortals(true);
                 m_pInstance->CallGuards(false);
                 break;
-            case 2:
+            case 3:
                 DoScriptText(SAY_LOCK_DOOR, m_creature);
                 m_creature->SetFacingTo(0.05f);
                 break;
-            case 3:
+            case 4:
                 m_pInstance->SetData(TYPE_MAIN, IN_PROGRESS);
                 break;
-            case 4:
+            case 5:
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 SetEscortPaused(true);
                 break;
-            case 5:
+            case 6:
                 m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 DoScriptText(SAY_VICTORY, m_creature);
                 SetEscortPaused(true);

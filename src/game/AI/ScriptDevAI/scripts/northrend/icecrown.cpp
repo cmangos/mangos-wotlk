@@ -144,11 +144,11 @@ struct npc_squad_leaderAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 2:
+            case 3:
                 SetRun();
                 DoScriptText(m_creature->GetEntry() == NPC_SKYBREAKER_SQUAD_LEADER ? SAY_ALLIANCE_SQUAD_RUN : SAY_HORDE_SQUAD_RUN, m_creature);
                 break;
-            case 4:
+            case 5:
                 // first horde attack
                 if (m_creature->GetEntry() == NPC_KORKRON_SQUAD_LEADER)
                 {
@@ -157,7 +157,7 @@ struct npc_squad_leaderAI : public npc_escortAI
                     m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7451.976f, 1850.776f, 402.96f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 }
                 break;
-            case 6:
+            case 7:
                 // first alliance attack
                 if (m_creature->GetEntry() == NPC_SKYBREAKER_SQUAD_LEADER)
                 {
@@ -165,7 +165,7 @@ struct npc_squad_leaderAI : public npc_escortAI
                     m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7235.733f, 1597.831f, 381.08f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 }
                 break;
-            case 9:
+            case 10:
                 // second horde attack
                 if (m_creature->GetEntry() == NPC_KORKRON_SQUAD_LEADER)
                 {
@@ -174,21 +174,21 @@ struct npc_squad_leaderAI : public npc_escortAI
                     m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7418.514f, 1805.596f, 425.50f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 }
                 break;
-            case 13:
+            case 14:
                 if (m_creature->GetEntry() == NPC_KORKRON_SQUAD_LEADER)
                 {
                     DoScriptText(SAY_HORDE_SQUAD_BREAK, m_creature);
                     m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 }
                 break;
-            case 14:
+            case 15:
                 if (m_creature->GetEntry() == NPC_KORKRON_SQUAD_LEADER)
                 {
                     DoScriptText(SAY_HORDE_SQUAD_BREAK_DONE, m_creature);
                     m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                 }
                 break;
-            case 15:
+            case 16:
                 // second alliance attack
                 if (m_creature->GetEntry() == NPC_SKYBREAKER_SQUAD_LEADER)
                 {
@@ -197,21 +197,21 @@ struct npc_squad_leaderAI : public npc_escortAI
                     m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7341.556f, 1632.023f, 423.01f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 }
                 break;
-            case 20:
+            case 21:
                 if (m_creature->GetEntry() == NPC_SKYBREAKER_SQUAD_LEADER)
                 {
                     DoScriptText(SAY_ALLIANCE_SQUAD_BREAK, m_creature);
                     m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
                 }
                 break;
-            case 21:
+            case 22:
                 if (m_creature->GetEntry() == NPC_SKYBREAKER_SQUAD_LEADER)
                 {
                     DoScriptText(SAY_ALLIANCE_SQUAD_BREAK_DONE, m_creature);
                     m_creature->SetStandState(UNIT_STAND_STATE_STAND);
                 }
                 break;
-            case 22:
+            case 23:
                 // horde gate attack
                 if (m_creature->GetEntry() == NPC_KORKRON_SQUAD_LEADER)
                 {
@@ -222,7 +222,7 @@ struct npc_squad_leaderAI : public npc_escortAI
                     m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7371.765f, 1699.052f, 442.50f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 }
                 break;
-            case 25:
+            case 26:
                 // alliance gate attack
                 if (m_creature->GetEntry() == NPC_SKYBREAKER_SQUAD_LEADER)
                 {
@@ -233,7 +233,7 @@ struct npc_squad_leaderAI : public npc_escortAI
                     m_creature->SummonCreature(NPC_YMIRHEIM_DEFENDER, 7237.092f, 1687.461f, 459.81f, 0, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 30000);
                 }
                 break;
-            case 26:
+            case 27:
             {
                 // event complete
                 if (Player* pPlayer = GetPlayerForEscort())
@@ -485,28 +485,28 @@ struct npc_father_kamarosAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_KAMAROS_START_1, m_creature, pPlayer);
                     DoCastSpellIfCan(pPlayer, SPELL_POWER_WORD_FORTITUDE);
                 }
                 break;
-            case 1:
+            case 2:
                 DoScriptText(SAY_KAMAROS_START_2, m_creature);
                 break;
-            case 11:
-            case 13:
-            case 16:
+            case 12:
+            case 14:
+            case 17:
                 if (Creature* pGhoul = GetClosestCreatureWithEntry(m_creature, NPC_SPIKED_GHOUL, 25.0f))
                     pGhoul->AI()->AttackStart(m_creature);
                 break;
-            case 23:
+            case 24:
                 if (Player* pPlayer = GetPlayerForEscort())
                     m_creature->SetFacingToObject(pPlayer);
                 DoScriptText(SAY_KAMAROS_COMPLETE_1, m_creature);
                 break;
-            case 24:
+            case 25:
                 SetRun();
                 DoScriptText(SAY_KAMAROS_COMPLETE_2, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())

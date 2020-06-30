@@ -439,7 +439,7 @@ struct npc_lurgglbrAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 1:
+            case 2:
                 if (Player* pPlayer = GetPlayerForEscort())
                     DoScriptText(SAY_START_2, m_creature, pPlayer);
 
@@ -453,14 +453,14 @@ struct npc_lurgglbrAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     m_creature->SetFacingToObject(pPlayer);
                     DoScriptText(SAY_START_1, m_creature, pPlayer);
                 }
                 break;
-            case 25:
+            case 26:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     DoScriptText(SAY_END_1, m_creature, pPlayer);
@@ -999,21 +999,21 @@ struct npc_bonker_togglevoltAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 DoScriptText(SAY_BONKER_START, m_creature);
                 break;
-            case 1:
+            case 2:
                 DoScriptText(SAY_BONKER_GO, m_creature);
                 // WORKAROUND ALERT - temp ignore pathfinding until we pass the pool
                 // creature cannont find a proper swimming path in this area, so ignore pathfinding for the moment
                 m_creature->addUnitState(UNIT_STAT_IGNORE_PATHFINDING);
                 break;
-            case 3:
+            case 4:
                 DoScriptText(SAY_BONKER_LEFT, m_creature);
                 // WORKAROUND END - resume pathfinding
                 m_creature->clearUnitState(UNIT_STAT_IGNORE_PATHFINDING);
                 break;
-            case 32:
+            case 33:
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_GET_ME_OUTA_HERE, m_creature);

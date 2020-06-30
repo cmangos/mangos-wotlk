@@ -770,16 +770,16 @@ struct npc_apothecary_hanesAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 2:
+            case 3:
                 DoScriptText(SAY_HANES_FIRE_1, m_creature);
                 break;
-            case 3:
+            case 4:
                 DoScriptText(SAY_HANES_FIRE_2, m_creature);
                 break;
-            case 14:
-            case 20:
+            case 15:
             case 21:
-            case 29:
+            case 22:
+            case 30:
             {
                 m_creature->HandleEmote(EMOTE_ONESHOT_ATTACK1H);
 
@@ -794,25 +794,25 @@ struct npc_apothecary_hanesAI : public npc_escortAI
                 }
                 break;
             }
-            case 15:
+            case 16:
                 DoScriptText(SAY_HANES_SUPPLIES_1, m_creature);
                 break;
-            case 22:
+            case 23:
                 DoScriptText(SAY_HANES_SUPPLIES_2, m_creature);
                 break;
-            case 30:
+            case 31:
                 m_creature->HandleEmote(EMOTE_ONESHOT_LAUGH_NOSHEATHE);
                 break;
-            case 31:
+            case 32:
                 DoScriptText(SAY_HANES_SUPPLIES_COMPLETE, m_creature);
                 break;
-            case 32:
+            case 33:
                 DoScriptText(SAY_HANES_SUPPLIES_ESCAPE, m_creature);
                 break;
-            case 40:
+            case 41:
                 DoScriptText(SAY_HANES_ARRIVE_BASE, m_creature);
                 break;
-            case 44:
+            case 45:
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_TRIAL_OF_FIRE, m_creature);
                 break;

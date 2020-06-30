@@ -1741,7 +1741,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
 
         switch (uiPoint)
         {
-            case 0:
+            case 1:
                 // summon light champions
                 for (auto& i : aLightArmySpawnLoc)
                     m_creature->SummonCreature(i.m_uiEntry, i.m_fX, i.m_fY, i.m_fZ, i.m_fO, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
@@ -1754,12 +1754,12 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                     m_creature->SummonCreature(NPC_DEFENDER_OF_THE_LIGHT, fX, fY, fZ, 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 5000);
                 }
                 break;
-            case 2:
+            case 3:
                 // yell dawn 1
                 if (Creature* pKorfax = m_pInstance->GetSingleCreatureFromStorage(NPC_KORFAX_CHAMPION_OF_THE_LIGHT))
                     DoScriptText(SAY_LIGHT_OF_DAWN_STAND_1, pKorfax);
                 break;
-            case 3:
+            case 4:
                 // yell dawn 2
                 if (Creature* pMaxwell = m_pInstance->GetSingleCreatureFromStorage(NPC_LORD_MAXWELL_TYROSUS))
                     DoScriptText(SAY_LIGHT_OF_DAWN_STAND_2, pMaxwell);
@@ -1780,7 +1780,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                 // max fight timer
                 m_uiFightTimer = 5 * MINUTE * IN_MILLISECONDS;
                 break;
-            case 4:
+            case 5:
                 // start the battle
                 SetEscortPaused(true);
 
@@ -1804,7 +1804,7 @@ struct npc_highlord_darion_mograineAI : public npc_escortAI
                         pDefender->AI()->AttackStart(m_creature);
                 }
                 break;
-            case 5:
+            case 6:
                 m_creature->Unmount();
 
                 // battle finished - remove light of dawn aura

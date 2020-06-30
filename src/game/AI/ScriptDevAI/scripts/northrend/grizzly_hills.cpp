@@ -222,28 +222,28 @@ struct npc_harrison_jonesAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 7:
+            case 8:
                 DoScriptText(SAY_HARRISON_CHAMBER_1, m_creature);
                 break;
-            case 8:
+            case 9:
                 DoScriptText(SAY_HARRISON_CHAMBER_2, m_creature);
                 break;
-            case 10:
+            case 11:
                 m_creature->HandleEmote(EMOTE_ONESHOT_USESTANDING);
                 break;
-            case 11:
+            case 12:
                 DoScriptText(SAY_HARRISON_CHAMBER_RELEASE, m_creature);
                 if (GameObject* pCage = GetClosestGameObjectWithEntry(m_creature, GO_ADARRAH_CAGE, 5.0f))
                     pCage->Use(m_creature);
                 break;
-            case 12:
+            case 13:
                 if (Creature* pAdarrah = GetClosestCreatureWithEntry(m_creature, NPC_ADARRAH, 5.0f))
                 {
                     DoScriptText(SAY_ADARRAH_THANK_YOU, pAdarrah);
                     m_adarrahGuid = pAdarrah->GetObjectGuid();
                 }
                 break;
-            case 13:
+            case 14:
                 if (Creature* pAdarrah = m_creature->GetMap()->GetCreature(m_adarrahGuid))
                 {
                     pAdarrah->SetWalk(false);
@@ -251,11 +251,11 @@ struct npc_harrison_jonesAI : public npc_escortAI
                     pAdarrah->ForcedDespawn(5000);
                 }
                 break;
-            case 15:
+            case 16:
                 m_creature->SetFacingTo(0.2f);
                 m_creature->HandleEmote(EMOTE_ONESHOT_KNEEL);
                 break;
-            case 16:
+            case 17:
             {
                 // set mummies in fire
                 CreatureList lBunniesInRange;
@@ -268,37 +268,37 @@ struct npc_harrison_jonesAI : public npc_escortAI
                 DoCastSpellIfCan(m_creature, SPELL_GONG_EFFECT);
                 break;
             }
-            case 17:
+            case 18:
                 DoScriptText(SAY_HARRISON_CHAMBER_3, m_creature);
                 break;
-            case 18:
+            case 19:
                 DoScriptText(SAY_HARRISON_CHAMBER_4, m_creature);
                 break;
-            case 21:
+            case 22:
                 // close door
                 if (GameObject* pDoor = GetClosestGameObjectWithEntry(m_creature, GO_FIRE_DOOR, 10.0f))
                     pDoor->Use(m_creature);
                 break;
-            case 22:
+            case 23:
                 DoScriptText(SAY_HARRISON_CHAMBER_5, m_creature);
                 SetRun();
                 // summon snake
                 m_creature->SummonCreature(NPC_TECAHUNA, 4907.077f, -4819.035f, 32.55f, 2.32f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
-            case 23:
+            case 24:
                 DoScriptText(SAY_HARRISON_CHAMBER_6, m_creature);
                 break;
-            case 24:
+            case 25:
                 DoScriptText(SAY_HARRISON_CHAMBER_7, m_creature);
                 break;
-            case 25:
+            case 26:
                 // attack snake
                 if (Creature* pTecahuna = m_creature->GetMap()->GetCreature(m_tecahunaGuid))
                     AttackStart(pTecahuna);
                 SetEscortPaused(true);
                 m_uiActivateMummiesTimer = 10000;
                 break;
-            case 53:
+            case 54:
                 DoScriptText(SAY_HARRISON_ESCORT_COMPELTE, m_creature);
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
@@ -477,32 +477,32 @@ struct npc_emilyAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 0:
+            case 1:
                 DoScriptText(SAY_ESCORT_START, m_creature);
                 break;
-            case 10:
+            case 11:
                 DoScriptText(SAY_FIRST_WOLF, m_creature);
                 m_creature->SummonCreature(NPC_HUNGRY_WORG, 4305.514f, -3799.008f, 237.034f, 2.20f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
-            case 11:
+            case 12:
                 SetEscortPaused(true);
                 DoScriptText(SAY_FIRST_WOLF_ATTACK, m_creature);
                 break;
-            case 22:
+            case 23:
                 SetEscortPaused(true);
                 DoScriptText(SAY_SECOND_WOLF, m_creature);
                 m_creature->SummonCreature(NPC_RAVENOUS_WORG, 4339.643f, -3948.972f, 194.904f, 0.90f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 60000);
                 break;
-            case 24:
+            case 25:
                 DoScriptText(SAY_RESUME_ESCORT, m_creature);
                 SetRun();
                 if (Player* pPlayer = GetPlayerForEscort())
                     pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_ID_MR_FLOPPY_ADVENTURE, m_creature);
                 break;
-            case 25:
+            case 26:
                 DoScriptText(SAY_ESCORT_COMPLETE, m_creature);
                 break;
-            case 27:
+            case 28:
                 if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
                     pFloppy->ForcedDespawn();
                 break;

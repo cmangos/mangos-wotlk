@@ -226,16 +226,16 @@ struct npc_brann_hosAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 13:                                        // Before Tribunal Event, Continue with Gossip Interaction
+            case 14:                                        // Before Tribunal Event, Continue with Gossip Interaction
                 DoScriptText(SAY_EVENT_INTRO_1, m_creature);
                 SetEscortPaused(true);
                 m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
                 break;
-            case 17:                                        // Reach Tribunal
+            case 18:                                        // Reach Tribunal
                 SetEscortPaused(true);
                 m_uiPhaseTimer = 500;
                 break;
-            case 18:                                        // Reach Floor Event
+            case 19:                                        // Reach Floor Event
                 SetEscortPaused(true);
                 if (m_pInstance)
                 {
@@ -596,7 +596,7 @@ struct npc_brann_hosAI : public npc_escortAI
             return;
     }
 
-    // Respawn Handling: Relocate and Set Escort to WP 13
+    // Respawn Handling: Relocate and Set Escort to WP 14
     void JustRespawned() override
     {
         if (!m_pInstance)
@@ -613,10 +613,10 @@ struct npc_brann_hosAI : public npc_escortAI
 
             m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
 
-            // Relocate to position of WP 13
+            // Relocate to position of WP 14
             m_creature->GetMap()->CreatureRelocation(m_creature, 941.101563f, 377.373413f, 207.421f, 3.85f);
 
-            SetCurrentWaypoint(13);
+            SetCurrentWaypoint(14);
         }
     }
 };

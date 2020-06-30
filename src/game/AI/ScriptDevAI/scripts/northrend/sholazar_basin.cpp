@@ -240,7 +240,7 @@ struct npc_injured_rainspeakerAI : public npc_escortAI
     {
         switch (uiPointId)
         {
-            case 22:
+            case 23:
             {
                 if (Player* pPlayer = GetPlayerForEscort())
                 {
@@ -249,7 +249,7 @@ struct npc_injured_rainspeakerAI : public npc_escortAI
                 }
                 break;
             }
-            case 23:
+            case 24:
             {
                 DoScriptText(SAY_END_2, m_creature);
 
