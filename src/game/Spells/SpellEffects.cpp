@@ -9357,14 +9357,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 38573:                                 // Spore Drop Effect
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 38574, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 38650:                                 // Rancid Mushroom Primer
                 {
                     if (!unitTarget)

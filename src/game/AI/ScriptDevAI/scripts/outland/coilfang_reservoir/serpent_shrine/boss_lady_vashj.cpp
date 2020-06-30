@@ -407,9 +407,7 @@ struct boss_lady_vashjAI : public RangedCombatAI
         if (m_instance)
             m_instance->SetData(TYPE_LADYVASHJ_EVENT, DONE);
 
-        for (ObjectGuid& guid : m_spawns)
-            if (Creature* spawn = m_creature->GetMap()->GetCreature(guid))
-                spawn->ForcedDespawn();
+        DespawnGuids(m_spawns);
 
         DisableTimer(VASHJ_COILFANG_ELITE);
         DisableTimer(VASHJ_COILFANG_STRIDER);
@@ -722,6 +720,17 @@ struct VashjPersuasion : public SpellScript, public AuraScript
     }
 };
 
+struct SporeDropEffect : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (!spell->GetUnitTarget())
+            return;
+
+        spell->GetUnitTarget()->CastSpell(nullptr, 38574, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_lady_vashj()
 {
     Script* pNewScript = new Script;
@@ -750,4 +759,5 @@ void AddSC_boss_lady_vashj()
     pNewScript->RegisterSelf();
 
     RegisterScript<VashjPersuasion>("spell_vashj_persuasion");
+    RegisterSpellScript<SporeDropEffect>("spell_spore_drop_effect");
 }
