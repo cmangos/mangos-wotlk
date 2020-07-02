@@ -2256,6 +2256,8 @@ void BattleGroundMgr::RewardArenaSeason(uint32 seasonId)
         player->SetTitle(titleEntries[3], true);
         player->SetTitle(titleEntries[4], true);
         player->SaveTitles();
+        player->ModifyHonorPoints(player->GetArenaPoints() * 4);
+        player->SetArenaPoints(0);
     });
 
     /* TODO: Fix removal of old titles in wotlk due to 6x uint32 values
@@ -2269,6 +2271,8 @@ void BattleGroundMgr::RewardArenaSeason(uint32 seasonId)
         "CONCAT(SUBSTRING_INDEX(knownTitles, ' ', 1), ' ', CAST(TRIM(SUBSTR(knownTitles, LOCATE(' ', knownTitles)))  AS UNSIGNED) &~0x00000001)"
         "WHERE(CAST(TRIM(SUBSTR(knownTitles, LOCATE(' ', knownTitles)))  AS UNSIGNED) & 0x00000001) != 0");
     */
+
+    CharacterDatabase.PExecute("UPDATE characters SET totalHonorPoints=4*arenaPoints,arenaPoints=0");
 
     for (auto& data : playerRanks)
     {
