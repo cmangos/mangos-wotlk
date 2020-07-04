@@ -24,6 +24,26 @@
 #include <map>
 #include <set>
 
+struct WayPoint
+{
+    WayPoint() : mapid(0), x(0), y(0), z(0), teleport(false) {}
+    WayPoint(uint32 _mapid, float _x, float _y, float _z, bool _teleport, uint32 _arrivalEventID = 0, uint32 _departureEventID = 0)
+        : mapid(_mapid), x(_x), y(_y), z(_z), teleport(_teleport),
+        arrivalEventID(_arrivalEventID), departureEventID(_departureEventID)
+    {
+    }
+
+    uint32 mapid;
+    float x;
+    float y;
+    float z;
+    bool teleport;
+    uint32 arrivalEventID;
+    uint32 departureEventID;
+};
+
+typedef std::map<uint32, WayPoint> WayPointMap;
+
 class Transport : public GameObject
 {
     public:
@@ -35,30 +55,17 @@ class Transport : public GameObject
         bool AddPassenger(Player* passenger);
         bool RemovePassenger(Player* passenger);
 
+        void SetPeriod(uint32 period) { m_period = period; }
+        WayPointMap& GetWaypointMap() { return m_WayPoints; }
+
         typedef std::set<Player*> PlayerSet;
         PlayerSet const& GetPassengers() const { return m_passengers; }
 
     private:
-        struct WayPoint
-        {
-            WayPoint() : mapid(0), x(0), y(0), z(0), teleport(false), arrivalEventID(0), departureEventID(0)
-            {}
-            WayPoint(uint32 _mapid, float _x, float _y, float _z, bool _teleport, uint32 _arrivalEventID = 0, uint32 _departureEventID = 0)
-                : mapid(_mapid), x(_x), y(_y), z(_z), teleport(_teleport),
-                  arrivalEventID(_arrivalEventID), departureEventID(_departureEventID)
-            {
-            }
-
-            uint32 mapid;
-            float x;
-            float y;
-            float z;
-            bool teleport;
-            uint32 arrivalEventID;
-            uint32 departureEventID;
-        };
-
-        typedef std::map<uint32, WayPoint> WayPointMap;
+        void TeleportTransport(uint32 newMapid, float x, float y, float z);
+        void UpdateForMap(Map const* targetMap);
+        void DoEventIfAny(WayPointMap::value_type const& node, bool departure);
+        void MoveToNextWayPoint();                          // move m_next/m_cur to next points
 
         WayPointMap::const_iterator m_curr;
         WayPointMap::const_iterator m_next;
@@ -67,15 +74,8 @@ class Transport : public GameObject
 
         PlayerSet m_passengers;
 
-    public:
         WayPointMap m_WayPoints;
         uint32 m_nextNodeTime;
         uint32 m_period;
-
-    private:
-        void TeleportTransport(uint32 newMapid, float x, float y, float z);
-        void UpdateForMap(Map const* targetMap);
-        void DoEventIfAny(WayPointMap::value_type const& node, bool departure);
-        void MoveToNextWayPoint();                          // move m_next/m_cur to next points
 };
 #endif
