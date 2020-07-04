@@ -82,6 +82,23 @@ uint32 Map::GetCurrentDiff() const
     return World::GetCurrentDiff();
 }
 
+GenericTransport* Map::GetTransport(ObjectGuid guid)
+{
+    // elevators also cause the client to send MOVEFLAG_ONTRANSPORT - just unmount if the guid can be found in the transport list
+    for (MapManager::TransportSet::const_iterator iter = sMapMgr.m_Transports.begin(); iter != sMapMgr.m_Transports.end(); ++iter)
+    {
+        if ((*iter)->GetObjectGuid() == guid)
+        {
+            return (*iter);
+        }
+    }
+    if (guid.GetEntry())
+        if (GameObject* go = GetGameObject(guid))
+            if (go->IsTransport())
+                return static_cast<GenericTransport*>(go);
+    return nullptr;
+}
+
 void Map::LoadMapAndVMap(int gx, int gy)
 {
     if (m_bLoadedGrids[gx][gy])
@@ -1034,7 +1051,7 @@ void Map::SendInitSelf(Player* player) const
     UpdateData updateData;
 
     // attach to player data current transport data
-    if (Transport* transport = player->GetTransport())
+    if (GenericTransport* transport = player->GetTransport())
     {
         transport->BuildCreateUpdateBlockForPlayer(&updateData, player);
     }
@@ -1043,7 +1060,7 @@ void Map::SendInitSelf(Player* player) const
     player->BuildCreateUpdateBlockForPlayer(&updateData, player);
 
     // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
-    if (Transport* transport = player->GetTransport())
+    if (GenericTransport* transport = player->GetTransport())
     {
         for (auto itr : transport->GetPassengers())
         {
@@ -2016,6 +2033,7 @@ WorldObject* Map::GetWorldObject(ObjectGuid guid)
     switch (guid.GetHigh())
     {
         case HIGHGUID_PLAYER:       return GetPlayer(guid);
+        case HIGHGUID_TRANSPORT:
         case HIGHGUID_GAMEOBJECT:   return GetGameObject(guid);
         case HIGHGUID_UNIT:
         case HIGHGUID_VEHICLE:      return GetCreature(guid);
@@ -2028,7 +2046,6 @@ WorldObject* Map::GetWorldObject(ObjectGuid guid)
             return corpse && corpse->IsInWorld() ? corpse : nullptr;
         }
         case HIGHGUID_MO_TRANSPORT:
-        case HIGHGUID_TRANSPORT:
         default:                    break;
     }
 
@@ -2063,6 +2080,7 @@ uint32 Map::GenerateLocalLowGuid(HighGuid guidhigh)
     {
         case HIGHGUID_UNIT:
             return m_CreatureGuids.Generate();
+        case HIGHGUID_TRANSPORT:
         case HIGHGUID_GAMEOBJECT:
             return m_GameObjectGuids.Generate();
         case HIGHGUID_DYNAMICOBJECT:

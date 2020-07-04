@@ -713,11 +713,13 @@ class GameObject : public WorldObject
         explicit GameObject();
         ~GameObject();
 
+        static GameObject* CreateGameObject(uint32 entry);
+
         void AddToWorld() override;
         void RemoveFromWorld() override;
 
-        bool Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang,
-                    const QuaternionData& rotation = QuaternionData(), uint8 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY);
+        virtual bool Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang,
+                    const QuaternionData & rotation = QuaternionData(), uint8 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY);
         void Update(const uint32 diff) override;
         GameObjectInfo const* GetGOInfo() const;
 
@@ -952,11 +954,6 @@ class GameObject : public WorldObject
         ObjectGuid m_linkedTrap;
 
         std::unique_ptr<GameObjectAI> m_AI;
-
-        // transport only
-        uint32 m_pathProgress;
-        TransportAnimation const* m_animationInfo;
-        uint32 m_currentSeg;
 
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);

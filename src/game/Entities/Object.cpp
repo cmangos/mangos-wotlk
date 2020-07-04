@@ -160,9 +160,9 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
             case HighGuid::HIGHGUID_UNIT:
             case HighGuid::HIGHGUID_VEHICLE:
             case HighGuid::HIGHGUID_GAMEOBJECT:
+            case HighGuid::HIGHGUID_TRANSPORT:
                 updatetype = UPDATETYPE_CREATE_OBJECT2;
                 break;
-
             default:
                 break;
         }
