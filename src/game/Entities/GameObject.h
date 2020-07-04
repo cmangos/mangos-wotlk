@@ -885,6 +885,7 @@ class GameObject : public WorldObject
         GameObjectAI* AI() const { return m_AI.get(); }
 
         GameObjectModel* m_model;
+        void UpdateModelPosition();
 
         bool _IsWithinDist(WorldObject const* obj, float dist2compare, bool is3D) const override;
 
