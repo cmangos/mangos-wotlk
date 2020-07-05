@@ -29,6 +29,10 @@
 #include "Maps/MapPersistentStateMgr.h"
 #include "Globals/ObjectMgr.h"
 
+#include <boost/accumulators/statistics/variance.hpp>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics.hpp>
+
 #define MOVEMENT_PACKET_TIME_DELAY 0
 
 void WorldSession::HandleMoveWorldportAckOpcode(WorldPacket& /*recv_data*/)
@@ -107,6 +111,18 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     GetPlayer()->SetMap(map);
     GetPlayer()->Relocate(loc.coord_x, loc.coord_y, loc.coord_z, loc.orientation);
+    if (GetPlayer()->m_teleportTransport)
+    {
+        if (GenericTransport* transport = map->GetTransport(GetPlayer()->m_teleportTransport))
+        {
+            if (transport->GetMapId() == loc.mapid)
+            {
+                transport->AddPassenger(GetPlayer());
+                transport->UpdatePassengerPosition(GetPlayer());
+            }
+        }
+    }
+    GetPlayer()->m_teleportTransport = ObjectGuid();
 
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     // the CanEnter checks are done in TeleporTo but conditions may change
@@ -222,7 +238,15 @@ void WorldSession::HandleMoveTeleportAckOpcode(WorldPacket& recv_data)
     WorldLocation const& dest = plMover->GetTeleportDest();
 
     plMover->SetDelayedZoneUpdate(false, 0);
+
     plMover->SetPosition(dest.coord_x, dest.coord_y, dest.coord_z, dest.orientation, true);
+
+    GenericTransport* currentTransport = nullptr;
+    if (plMover->m_teleportTransport)
+        currentTransport = plMover->GetMap()->GetTransport(plMover->m_teleportTransport);
+    if (currentTransport)
+        currentTransport->AddPassenger(plMover);
+    plMover->m_teleportTransport = ObjectGuid();
 
     uint32 newzone, newarea;
     plMover->GetZoneAndAreaId(newzone, newarea);
@@ -454,10 +478,10 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
     WorldPacket data(MSG_MOVE_KNOCK_BACK, recv_data.size() + 15);
     data << mover->GetPackGUID();
     data << movementInfo;
-    data << movementInfo.GetJumpInfo().cosAngle;
-    data << movementInfo.GetJumpInfo().sinAngle;
-    data << movementInfo.GetJumpInfo().xyspeed;
-    data << movementInfo.GetJumpInfo().velocity;
+    data << movementInfo.jump.cosAngle;
+    data << movementInfo.jump.sinAngle;
+    data << movementInfo.jump.xyspeed;
+    data << movementInfo.jump.velocity;
     mover->SendMessageToSetExcept(data, _player);
 }
 
@@ -515,31 +539,6 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)
     _player->SummonIfPossible(agree);
 }
 
-void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
-{
-    /*  WorldSession::Update( WorldTimer::getMSTime() );*/
-    DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_TIME_SKIPPED");
-
-    ObjectGuid guid;
-    uint32 timeSkipped;
-    recv_data >> guid.ReadAsPacked();
-    recv_data >> timeSkipped;
-
-    Unit* mover = _player->GetMover();
-
-    // Ignore updates not for current player
-    if (mover == nullptr || guid != mover->GetObjectGuid())
-        return;
-
-    mover->m_movementInfo.UpdateTime(mover->m_movementInfo.GetTime() + timeSkipped);
-
-    // Send to other players
-    WorldPacket data(MSG_MOVE_TIME_SKIPPED, 16);
-    data << mover->GetPackGUID();
-    data << timeSkipped;
-    mover->SendMessageToSetExcept(data, _player);
-}
-
 bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGuid const& guid) const
 {
     // ignore wrong guid (player attempt cheating own session for not own guid possible...)
@@ -568,9 +567,7 @@ bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, ObjectGu
 
 void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
 {
-    if (m_clientTimeDelay == 0)
-        m_clientTimeDelay = WorldTimer::getMSTime() - movementInfo.GetTime();
-    movementInfo.UpdateTime(movementInfo.GetTime() + m_clientTimeDelay + MOVEMENT_PACKET_TIME_DELAY);
+    SynchronizeMovement(movementInfo);
 
     Unit* mover = _player->GetMover();
 
@@ -579,13 +576,8 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
         if (movementInfo.HasMovementFlag(MOVEFLAG_ONTRANSPORT))
         {
             if (!plMover->m_transport)
-            {
                 if (GenericTransport* transport = plMover->GetMap()->GetTransport(movementInfo.GetTransportGuid()))
-                {
-                    plMover->m_transport = transport;
                     transport->AddPassenger(plMover);
-                }
-            }
         }
         else if (plMover->m_transport)               // if we were on a transport, leave
         {
@@ -631,5 +623,104 @@ void WorldSession::HandleMoverRelocation(MovementInfo& movementInfo)
     {
         if (mover->IsInWorld())
             mover->GetMap()->CreatureRelocation((Creature*)mover, movementInfo.GetPos()->x, movementInfo.GetPos()->y, movementInfo.GetPos()->z, movementInfo.GetPos()->o);
+    }
+}
+
+void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
+{
+    /*  WorldSession::Update( WorldTimer::getMSTime() );*/
+    DEBUG_LOG("WORLD: Received opcode CMSG_MOVE_TIME_SKIPPED");
+
+    ObjectGuid guid;
+    uint32 timeSkipped;
+    recv_data >> guid.ReadAsPacked();
+    recv_data >> timeSkipped;
+
+    Unit* mover = _player->GetMover();
+
+    // Ignore updates not for current player
+    if (mover == nullptr || guid != mover->GetObjectGuid())
+        return;
+
+    mover->m_movementInfo.stime += timeSkipped;
+    mover->m_movementInfo.ctime += timeSkipped;
+
+    // Send to other players
+    WorldPacket data(MSG_MOVE_TIME_SKIPPED, 16);
+    data << mover->GetPackGUID();
+    data << timeSkipped;
+    mover->SendMessageToSetExcept(data, _player);
+}
+
+void WorldSession::HandleTimeSyncResp(WorldPacket& recvData)
+{
+    DEBUG_LOG("CMSG_TIME_SYNC_RESP");
+
+    uint32 counter, clientTimestamp;
+    recvData >> counter >> clientTimestamp;
+
+    if (m_pendingTimeSyncRequests.count(counter) == 0)
+        return;
+
+    uint32 serverTimeAtSent = m_pendingTimeSyncRequests.at(counter);
+    m_pendingTimeSyncRequests.erase(counter);
+
+    // time it took for the request to travel to the client, for the client to process it and reply and for response to travel back to the server.
+    // we are going to make 2 assumptions:
+    // 1) we assume that the request processing time equals 0.
+    // 2) we assume that the packet took as much time to travel from server to client than it took to travel from client to server.
+    uint32 roundTripDuration = WorldTimer::getMSTimeDiff(serverTimeAtSent, recvData.GetReceivedTime());
+    uint32 lagDelay = roundTripDuration / 2;
+
+    /*
+    clockDelta = serverTime - clientTime
+    where
+    serverTime: time that was displayed on the clock of the SERVER at the moment when the client processed the SMSG_TIME_SYNC_REQUEST packet.
+    clientTime:  time that was displayed on the clock of the CLIENT at the moment when the client processed the SMSG_TIME_SYNC_REQUEST packet.
+    Once clockDelta has been computed, we can compute the time of an event on server clock when we know the time of that same event on the client clock,
+    using the following relation:
+    serverTime = clockDelta + clientTime
+    */
+    int64 clockDelta = (int64)(serverTimeAtSent + lagDelay) - (int64)clientTimestamp;
+    m_timeSyncClockDeltaQueue.push_back(std::pair<int64, uint32>(clockDelta, roundTripDuration));
+    ComputeNewClockDelta();
+}
+
+void WorldSession::ComputeNewClockDelta()
+{
+    // implementation of the technique described here: https://web.archive.org/web/20180430214420/http://www.mine-control.com/zack/timesync/timesync.html
+    // to reduce the skew induced by dropped TCP packets that get resent.
+
+    using namespace boost::accumulators;
+
+    accumulator_set<uint32, features<tag::mean, tag::median, tag::variance(lazy)> > latencyAccumulator;
+
+    for (auto pair : m_timeSyncClockDeltaQueue)
+        latencyAccumulator(pair.second);
+
+    uint32 latencyMedian = static_cast<uint32>(std::round(median(latencyAccumulator)));
+    uint32 latencyStandardDeviation = static_cast<uint32>(std::round(sqrt(variance(latencyAccumulator))));
+
+    accumulator_set<int64, features<tag::mean> > clockDeltasAfterFiltering;
+    uint32 sampleSizeAfterFiltering = 0;
+    for (auto pair : m_timeSyncClockDeltaQueue)
+    {
+        if (pair.second < latencyStandardDeviation + latencyMedian)
+        {
+            clockDeltasAfterFiltering(pair.first);
+            sampleSizeAfterFiltering++;
+        }
+    }
+
+    if (sampleSizeAfterFiltering != 0)
+    {
+        int64 meanClockDelta = static_cast<int64>(std::round(mean(clockDeltasAfterFiltering)));
+        if (std::abs(meanClockDelta - m_timeSyncClockDelta) > 25)
+            m_timeSyncClockDelta = meanClockDelta;
+    }
+    else if (m_timeSyncClockDelta == 0)
+    {
+        std::pair<int64, uint32> back = m_timeSyncClockDeltaQueue.back();
+        m_timeSyncClockDelta = back.first;
     }
 }

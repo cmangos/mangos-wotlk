@@ -257,6 +257,8 @@ bool WorldSocket::ProcessIncomingData()
 
                 return true;
 
+            case CMSG_TIME_SYNC_RESP:
+                pct->SetReceivedTime(std::chrono::steady_clock::now());
             default:
             {
                 if (!m_session)

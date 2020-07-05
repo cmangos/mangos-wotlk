@@ -98,6 +98,7 @@ WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8
     _logoutTime(0), m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(true),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetStorageLocaleIndexFor(locale)),
     m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED), m_sessionState(WORLD_SESSION_STATE_CREATED),
+    m_timeSyncClockDeltaQueue(6), m_timeSyncClockDelta(0), m_pendingTimeSyncRequests(), m_timeSyncNextCounter(0), m_timeSyncTimer(0),
     m_requestSocket(nullptr) {}
 
 /// WorldSession destructor
@@ -1278,6 +1279,18 @@ void WorldSession::SendPlaySpellVisual(ObjectGuid guid, uint32 spellArtKit) cons
     data << guid;
     data << spellArtKit;                                    // index from SpellVisualKit.dbc
     SendPacket(data);
+}
+
+void WorldSession::SynchronizeMovement(MovementInfo& movementInfo)
+{
+    int64 movementTime = (int64)movementInfo.ctime + m_timeSyncClockDelta;
+    if (m_timeSyncClockDelta == 0 || movementTime < 0 || movementTime > 0xFFFFFFFF)
+    {
+        DETAIL_LOG("The computed movement time using clockDelta is erronous. Using fallback instead");
+        movementInfo.stime = World::GetCurrentMSTime();
+    }
+    else
+        movementInfo.stime = movementTime;
 }
 
 std::deque<uint32> WorldSession::GetOpcodeHistory()

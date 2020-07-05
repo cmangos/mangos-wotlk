@@ -484,21 +484,6 @@ enum UnitState
     UNIT_STAT_ALL_DYN_STATES  = UNIT_STAT_ALL_STATE & ~(UNIT_STAT_NO_COMBAT_MOVEMENT | UNIT_STAT_RUNNING | UNIT_STAT_WAYPOINT_PAUSED | UNIT_STAT_IGNORE_PATHFINDING),
 };
 
-enum UnitMoveType
-{
-    MOVE_WALK           = 0,
-    MOVE_RUN            = 1,
-    MOVE_RUN_BACK       = 2,
-    MOVE_SWIM           = 3,
-    MOVE_SWIM_BACK      = 4,
-    MOVE_TURN_RATE      = 5,
-    MOVE_FLIGHT         = 6,
-    MOVE_FLIGHT_BACK    = 7,
-    MOVE_PITCH_RATE     = 8
-};
-
-#define MAX_MOVE_TYPE     9
-
 #define BASE_CHARGE_SPEED 27.0f
 
 enum CombatRating
@@ -638,200 +623,6 @@ enum NPCFlags
     UNIT_NPC_FLAG_SPELLCLICK            = 0x01000000,       // cause client to send 1015 opcode (spell click), dynamic, set at loading and don't must be set in DB
     UNIT_NPC_FLAG_PLAYER_VEHICLE        = 0x02000000,       // players with mounts that have vehicle data should have it set
 };
-
-// used in most movement packets (send and received)
-enum MovementFlags
-{
-    MOVEFLAG_NONE               = 0x00000000,
-    MOVEFLAG_FORWARD            = 0x00000001,
-    MOVEFLAG_BACKWARD           = 0x00000002,
-    MOVEFLAG_STRAFE_LEFT        = 0x00000004,
-    MOVEFLAG_STRAFE_RIGHT       = 0x00000008,
-    MOVEFLAG_TURN_LEFT          = 0x00000010,
-    MOVEFLAG_TURN_RIGHT         = 0x00000020,
-    MOVEFLAG_PITCH_UP           = 0x00000040,
-    MOVEFLAG_PITCH_DOWN         = 0x00000080,
-    MOVEFLAG_WALK_MODE          = 0x00000100,               // Walking
-    MOVEFLAG_ONTRANSPORT        = 0x00000200,
-    MOVEFLAG_LEVITATING         = 0x00000400,
-    MOVEFLAG_ROOT               = 0x00000800,
-    MOVEFLAG_FALLING            = 0x00001000,
-    MOVEFLAG_FALLINGFAR         = 0x00002000,
-    MOVEFLAG_PENDINGSTOP        = 0x00004000,
-    MOVEFLAG_PENDINGSTRAFESTOP  = 0x00008000,
-    MOVEFLAG_PENDINGFORWARD     = 0x00010000,
-    MOVEFLAG_PENDINGBACKWARD    = 0x00020000,
-    MOVEFLAG_PENDINGSTRAFELEFT  = 0x00040000,
-    MOVEFLAG_PENDINGSTRAFERIGHT = 0x00080000,
-    MOVEFLAG_PENDINGROOT        = 0x00100000,
-    MOVEFLAG_SWIMMING           = 0x00200000,               // appears with fly flag also
-    MOVEFLAG_ASCENDING          = 0x00400000,               // swim up also
-    MOVEFLAG_DESCENDING         = 0x00800000,               // swim down also
-    MOVEFLAG_CAN_FLY            = 0x01000000,               // can fly in 3.3?
-    MOVEFLAG_FLYING             = 0x02000000,               // Actual flying mode
-    MOVEFLAG_SPLINE_ELEVATION   = 0x04000000,               // used for flight paths
-    MOVEFLAG_SPLINE_ENABLED     = 0x08000000,               // used for flight paths
-    MOVEFLAG_WATERWALKING       = 0x10000000,               // prevent unit from falling through water
-    MOVEFLAG_SAFE_FALL          = 0x20000000,               // active rogue safe fall spell (passive)
-    MOVEFLAG_HOVER              = 0x40000000,
-
-    MOVEFLAG_MASK_MOVING_FORWARD = MOVEFLAG_FORWARD | MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT | MOVEFLAG_FALLING,
-};
-
-// flags that use in movement check for example at spell casting
-MovementFlags const movementFlagsMask = MovementFlags(
-        MOVEFLAG_FORWARD | MOVEFLAG_BACKWARD  | MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT |
-        MOVEFLAG_PITCH_UP | MOVEFLAG_PITCH_DOWN |
-        MOVEFLAG_FALLING | MOVEFLAG_FALLINGFAR | MOVEFLAG_ASCENDING   |
-        MOVEFLAG_FLYING  | MOVEFLAG_SPLINE_ELEVATION
-                                        );
-
-MovementFlags const movementOrTurningFlagsMask = MovementFlags(
-            movementFlagsMask | MOVEFLAG_TURN_LEFT | MOVEFLAG_TURN_RIGHT
-        );
-
-enum MovementFlags2
-{
-    MOVEFLAG2_NONE              = 0x0000,
-    MOVEFLAG2_NO_STRAFE         = 0x0001,
-    MOVEFLAG2_NO_JUMPING        = 0x0002,
-    MOVEFLAG2_UNK3              = 0x0004,
-    MOVEFLAG2_FULLSPEEDTURNING  = 0x0008,
-    MOVEFLAG2_FULLSPEEDPITCHING = 0x0010,
-    MOVEFLAG2_ALLOW_PITCHING    = 0x0020,
-    MOVEFLAG2_UNK4              = 0x0040,
-    MOVEFLAG2_UNK5              = 0x0080,
-    MOVEFLAG2_UNK6              = 0x0100,                   // transport related
-    MOVEFLAG2_UNK7              = 0x0200,
-    MOVEFLAG2_INTERP_MOVEMENT   = 0x0400,
-    MOVEFLAG2_INTERP_TURNING    = 0x0800,
-    MOVEFLAG2_INTERP_PITCHING   = 0x1000,
-    MOVEFLAG2_UNK8              = 0x2000,
-    MOVEFLAG2_UNK9              = 0x4000,
-    MOVEFLAG2_UNK10             = 0x8000,
-    MOVEFLAG2_INTERP_MASK       = MOVEFLAG2_INTERP_MOVEMENT | MOVEFLAG2_INTERP_TURNING | MOVEFLAG2_INTERP_PITCHING
-};
-
-class MovementInfo
-{
-    public:
-        MovementInfo() : moveFlags(MOVEFLAG_NONE), moveFlags2(MOVEFLAG2_NONE), time(0),
-            t_time(0), t_seat(-1), t_time2(0), s_pitch(0.0f), fallTime(0), u_unk1(0.0f) {}
-
-        // Read/Write methods
-        void Read(ByteBuffer& data);
-        void Write(ByteBuffer& data) const;
-
-        // Movement flags manipulations
-        void AddMovementFlag(MovementFlags f) { moveFlags |= f; }
-        void RemoveMovementFlag(MovementFlags f) { moveFlags &= ~f; }
-        bool HasMovementFlag(MovementFlags f) const { return (moveFlags & f) != 0; }
-        MovementFlags GetMovementFlags() const { return MovementFlags(moveFlags); }
-        void SetMovementFlags(MovementFlags f) { moveFlags = f; }
-        MovementFlags2 GetMovementFlags2() const { return MovementFlags2(moveFlags2); }
-        void AddMovementFlags2(MovementFlags2 f) { moveFlags2 |= f; }
-
-        // Deduce speed type by current movement flags:
-        inline UnitMoveType GetSpeedType() const { return GetSpeedType(MovementFlags(moveFlags)); }
-        static inline UnitMoveType GetSpeedType(MovementFlags f)
-        {
-            if (f & MOVEFLAG_FLYING)
-                return (f & MOVEFLAG_BACKWARD ? MOVE_FLIGHT_BACK : MOVE_FLIGHT);
-            else if (f & MOVEFLAG_SWIMMING)
-                return (f & MOVEFLAG_BACKWARD ? MOVE_SWIM_BACK : MOVE_SWIM);
-            else if (f & MOVEFLAG_WALK_MODE)
-                return MOVE_WALK;
-            else if (f & MOVEFLAG_BACKWARD)
-                return MOVE_RUN_BACK;
-            return MOVE_RUN;
-        }
-
-        inline float GetOrientationInMotion(float o) const { return GetOrientationInMotion(MovementFlags(moveFlags), o); }
-        static inline float GetOrientationInMotion(MovementFlags flags, float orientation)
-        {
-            float mod = ((flags & MOVEFLAG_BACKWARD) ? M_PI_F : 0);
-
-            if (flags & (MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT))
-            {
-                float flip = (M_PI_F * ((flags & MOVEFLAG_STRAFE_LEFT) ? 0.5f : -0.5f));
-                flip = ((flags & MOVEFLAG_BACKWARD) ? -flip : flip);
-                mod += (flip * ((flags & (MOVEFLAG_FORWARD | MOVEFLAG_BACKWARD)) ? 0.5f : 1));
-            }
-            return MapManager::NormalizeOrientation(orientation + mod);
-        }
-
-        // Position manipulations
-        Position const* GetPos() const { return &pos; }
-        void SetTransportData(ObjectGuid guid, float x, float y, float z, float o, uint32 newTime, int8 seat)
-        {
-            t_guid = guid;
-            t_pos.x = x;
-            t_pos.y = y;
-            t_pos.z = z;
-            t_pos.o = o;
-            t_time = newTime;
-            t_seat = seat;
-        }
-        void ClearTransportData()
-        {
-            t_guid = ObjectGuid();
-            t_pos.x = 0.0f;
-            t_pos.y = 0.0f;
-            t_pos.z = 0.0f;
-            t_pos.o = 0.0f;
-            t_time = 0;
-            t_seat = -1;
-        }
-        ObjectGuid const& GetTransportGuid() const { return t_guid; }
-        Position const* GetTransportPos() const { return &t_pos; }
-        int8 GetTransportSeat() const { return t_seat; }
-        uint32 GetTransportTime() const { return t_time; }
-        uint32 GetFallTime() const { return fallTime; }
-        void ChangeOrientation(float o) { pos.o = o; }
-        void ChangePosition(float x, float y, float z, float o) { pos.x = x; pos.y = y; pos.z = z; pos.o = o; }
-        void UpdateTime(uint32 _time) { time = _time; }
-        uint32 GetTime() const { return time; }
-
-        struct JumpInfo
-        {
-            JumpInfo() : velocity(0.f), sinAngle(0.f), cosAngle(0.f), xyspeed(0.f) {}
-            float   velocity, sinAngle, cosAngle, xyspeed;
-        };
-
-        JumpInfo const& GetJumpInfo() const { return jump; }
-
-        // common
-        uint32   moveFlags;                                 // see enum MovementFlags
-        uint16   moveFlags2;                                // see enum MovementFlags2
-        uint32   time;
-        Position pos;
-        // transport
-        ObjectGuid t_guid;
-        Position t_pos;
-        uint32   t_time;
-        int8     t_seat;
-        uint32   t_time2;
-        // swimming and flying
-        float    s_pitch;
-        // last fall time
-        uint32   fallTime;
-        // jumping
-        JumpInfo jump;
-        // spline
-        float    u_unk1;
-};
-
-inline ByteBuffer& operator<< (ByteBuffer& buf, MovementInfo const& mi)
-{
-    mi.Write(buf);
-    return buf;
-}
-
-inline ByteBuffer& operator>> (ByteBuffer& buf, MovementInfo& mi)
-{
-    mi.Read(buf);
-    return buf;
-}
 
 namespace Movement
 {
@@ -2561,10 +2352,6 @@ class Unit : public WorldObject
         void AddPetAura(PetAura const* petSpell);
         void RemovePetAura(PetAura const* petSpell);
 
-        // Transports
-        GenericTransport* GetTransport() const { return m_transport; }
-        void SetTransport(GenericTransport* t) { m_transport = t; }
-
         float GetTransOffsetX() const { return m_movementInfo.GetTransportPos()->x; }
         float GetTransOffsetY() const { return m_movementInfo.GetTransportPos()->y; }
         float GetTransOffsetZ() const { return m_movementInfo.GetTransportPos()->z; }
@@ -2573,8 +2360,6 @@ class Unit : public WorldObject
         int8 GetTransSeat() const { return m_movementInfo.GetTransportSeat(); }
 
         // Movement info
-        MovementInfo m_movementInfo;
-        GenericTransport* m_transport;
         Movement::MoveSpline* movespline;
 
         void ScheduleAINotify(uint32 delay, bool forced = false);

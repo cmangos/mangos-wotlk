@@ -50,6 +50,7 @@
 #include "Entities/CreatureLinkingMgr.h"
 #include "Tools/Formulas.h"
 #include "Metric/Metric.h"
+#include "Entities/Transports.h"
 
 #include <math.h>
 #include <limits>
@@ -134,9 +135,10 @@ static const SpellPartialResistDistribution SPELL_PARTIAL_RESIST_DISTRIBUTION = 
 
 void MovementInfo::Read(ByteBuffer& data)
 {
+    stime = sWorld.GetCurrentMSTime();
     data >> moveFlags;
     data >> moveFlags2;
-    data >> time;
+    data >> ctime;
     data >> pos.x;
     data >> pos.y;
     data >> pos.z;
@@ -169,7 +171,14 @@ void MovementInfo::Read(ByteBuffer& data)
         data >> jump.cosAngle;
         data >> jump.sinAngle;
         data >> jump.xyspeed;
+        if (!jump.startClientTime)
+        {
+            jump.startClientTime = ctime;
+            jump.start = pos;
+        }
     }
+    else
+        jump.startClientTime = 0;
 
     if (HasMovementFlag(MOVEFLAG_SPLINE_ELEVATION))
     {
@@ -181,7 +190,7 @@ void MovementInfo::Write(ByteBuffer& data) const
 {
     data << moveFlags;
     data << moveFlags2;
-    data << time;
+    data << stime;
     data << pos.x;
     data << pos.y;
     data << pos.z;
@@ -220,6 +229,19 @@ void MovementInfo::Write(ByteBuffer& data) const
     {
         data << u_unk1;
     }
+}
+
+float MovementInfo::GetOrientationInMotion(MovementFlags flags, float orientation)
+{
+    float mod = ((flags & MOVEFLAG_BACKWARD) ? M_PI_F : 0);
+
+    if (flags & (MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT))
+    {
+        float flip = (M_PI_F * ((flags & MOVEFLAG_STRAFE_LEFT) ? 0.5f : -0.5f));
+        flip = ((flags & MOVEFLAG_BACKWARD) ? -flip : flip);
+        mod += (flip * ((flags & (MOVEFLAG_FORWARD | MOVEFLAG_BACKWARD)) ? 0.5f : 1));
+    }
+    return MapManager::NormalizeOrientation(orientation + mod);
 }
 
 ////////////////////////////////////////////////////////////
@@ -581,7 +603,6 @@ bool Unit::UpdateMeleeAttackingState()
 
 void Unit::SendHeartBeat()
 {
-    m_movementInfo.UpdateTime(GetMap()->GetCurrentMSTime());
     WorldPacket data(MSG_MOVE_HEARTBEAT, 64);
     data << GetPackGUID();
     data << m_movementInfo;
@@ -10922,6 +10943,10 @@ void Unit::RemoveFromWorld()
         RemoveAllGameObjects();
         RemoveAllDynObjects();
         GetViewPoint().Event_RemovedFromWorld();
+
+        if (!IsPlayer())
+            if (GenericTransport* transport = GetTransport())
+                transport->RemovePassenger(this);
     }
 
     Object::RemoveFromWorld();
@@ -13394,6 +13419,9 @@ void Unit::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=null
 {
     if (!atMap)
         atMap = GetMap();
+
+    if (GenericTransport* transport = GetTransport())
+        return;
 
     // non fly unit don't must be in air
     // non swim unit must be at ground (mostly speedup, because it don't must be in water and water level check less fast

@@ -49,7 +49,11 @@ class WorldPacket : public ByteBuffer
         void SetOpcode(Opcodes opcode) { m_opcode = opcode; }
         inline const char* GetOpcodeName() const { return LookupOpcodeName(m_opcode); }
 
+        std::chrono::steady_clock::time_point GetReceivedTime() const { return m_receivedTime; }
+        void SetReceivedTime(std::chrono::steady_clock::time_point receivedTime) { m_receivedTime = receivedTime; }
+
     protected:
         Opcodes m_opcode;
+        std::chrono::steady_clock::time_point m_receivedTime; // only set for a specific set of opcodes, for performance reasons.
 };
 #endif

@@ -36,6 +36,8 @@
 #include <mutex>
 #include <memory>
 
+#include <boost/circular_buffer.hpp>
+
 struct ItemPrototype;
 struct AuctionEntry;
 struct AuctionHouseEntry;
@@ -968,6 +970,9 @@ class WorldSession
         void HandleQueryQuestsCompletedOpcode(WorldPacket& recv_data);
         void HandleQuestPOIQueryOpcode(WorldPacket& recv_data);
 
+        // Movement
+        void SynchronizeMovement(MovementInfo& movementInfo);
+
         std::deque<uint32> GetOpcodeHistory();
 
         Messager<WorldSession>& GetMessager() { return m_messager; }
@@ -1019,6 +1024,14 @@ class WorldSession
         std::deque<CharacterNameQueryResponse> m_offlineNameResponses; // for responses to name queries made when not logged in
 
         bool m_initialZoneUpdated = false;
+
+        boost::circular_buffer<std::pair<int64, uint32>> m_timeSyncClockDeltaQueue; // first member: clockDelta. Second member: latency of the packet exchange that was used to compute that clockDelta.
+        int64 m_timeSyncClockDelta;
+        void ComputeNewClockDelta();
+
+        std::map<uint32, uint32> m_pendingTimeSyncRequests; // key: counter. value: server time when packet with that counter was sent.
+        uint32 m_timeSyncNextCounter;
+        uint32 m_timeSyncTimer;
 
         // Thread safety mechanisms
         std::mutex m_recvQueueLock;
