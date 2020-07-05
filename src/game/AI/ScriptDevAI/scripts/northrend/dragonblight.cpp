@@ -62,6 +62,7 @@ struct npc_destructive_wardAI : public Scripted_NoMovementAI
 {
     npc_destructive_wardAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
+        SetReactState(REACT_PASSIVE);
         m_uiPowerTimer = 30000;
         m_uiStack = 0;
         m_uiSummonTimer = 2000;
