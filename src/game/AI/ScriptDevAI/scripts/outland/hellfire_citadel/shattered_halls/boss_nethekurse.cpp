@@ -330,7 +330,11 @@ struct mob_fel_orc_convertAI : public ScriptedAI
         m_uiHemorrhageTimer = 3000;
     }
 
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* pWho) override
+    {
+        if (pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 20.0f) && m_creature->IsWithinLOSInMap(pWho))
+            m_creature->SetInCombatWithZone();
+    }
 
     void AttackedBy(Unit* pWho) override
     {
