@@ -1778,6 +1778,8 @@ struct mob_shadowmoon_soulstealerAI : public ScriptedAI
 
     void Reset() override
     {
+        SetCombatMovement(false);
+        SetMeleeEnabled(false);
         m_cDeathwail = nullptr;
         m_bSixtyTriggered = false;
         m_bTwentyTriggered = false;
@@ -1842,6 +1844,9 @@ struct mob_shadowmoon_soulstealerAI : public ScriptedAI
 
     void UpdateAI(const uint32 /*uiDiff*/) override
     {
+        if (!m_creature->SelectHostileTarget())
+            return;
+
         if (!m_cDeathwail)
             return;
 
@@ -1869,11 +1874,6 @@ struct mob_shadowmoon_soulstealerAI : public ScriptedAI
         }
     }
 };
-
-UnitAI* GetAI_mob_shadowmoon_soulstealer(Creature* pCreature)
-{
-    return new mob_shadowmoon_soulstealerAI(pCreature);
-}
 
 /*#####
 #npc_spawned_oronok_tornheart
@@ -5339,7 +5339,7 @@ void AddSC_shadowmoon_valley()
 
     pNewScript = new Script;
     pNewScript->Name = "mob_shadowmoon_soulstealer";
-    pNewScript->GetAI = &GetAI_mob_shadowmoon_soulstealer;
+    pNewScript->GetAI = &GetNewAIInstance<mob_shadowmoon_soulstealerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
