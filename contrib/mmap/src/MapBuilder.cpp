@@ -395,7 +395,24 @@ namespace MMAP
         buildGameObject("Transportship_Ne.wmo.vmo", 7087);
         // List of Transport gameobjects
         buildGameObject("Elevatorcar.m2.vmo", 360);
+        buildGameObject("Undeadelevator.m2.vmo", 455);
+        buildGameObject("Undeadelevatordoor.m2.vmo", 462);
+        buildGameObject("Ironforgeelevator.m2.vmo", 561);
+        buildGameObject("Ironforgeelevatordoor.m2.vmo", 562);
+        buildGameObject("Gnomeelevatorcar01.m2.vmo", 807);
+        buildGameObject("Gnomeelevatorcar02.m2.vmo", 808);
+        buildGameObject("Gnomeelevatorcar03.m2.vmo", 827); // missing vmap - reusing 03
+        buildGameObject("Gnomeelevatorcar03.m2.vmo", 852);
+        buildGameObject("Gnomehutelevator.m2.vmo", 1587);
+        buildGameObject("Burningsteppselevator.m2.vmo", 2454);
         buildGameObject("Subwaycar.m2.vmo", 3831);
+        // TBC+
+        buildGameObject("Ancdrae_Elevatorpiece.m2.vmo", 7026);
+        buildGameObject("Mushroombase_Elevator.m2.vmo", 7028);
+        buildGameObject("Cf_Elevatorplatform.m2.vmo", 7043);
+        buildGameObject("Cf_Elevatorplatform_Small.m2.vmo", 7060);
+        buildGameObject("Factoryelevator.m2.vmo", 7077);
+        buildGameObject("Ancdrae_Elevatorpiece_Netherstorm.m2.vmo", 7163);
     }
 
     /**************************************************************************/
