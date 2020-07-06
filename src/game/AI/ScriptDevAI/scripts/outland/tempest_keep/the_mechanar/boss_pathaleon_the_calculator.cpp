@@ -182,8 +182,9 @@ struct boss_pathaleon_the_calculatorAI : public ScriptedAI
                 m_bIsEnraged = true;
             }
         }
+
         // Summon and empower Nether Wraiths only when not enraged
-        else
+        if (!m_bIsEnraged)
         {
             if (m_uiSummonTimer < uiDiff)
             {
@@ -218,7 +219,7 @@ struct mob_nether_wraithAI : public ScriptedAI
 
     void Reset() override
     {
-        m_uiArcaneMissilesTimer = urand(1000, 4000);
+        m_uiArcaneMissilesTimer = urand(2000, 8000);
     }
 
     void JustDied(Unit* killer) override
