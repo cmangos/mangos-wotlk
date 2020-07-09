@@ -58,7 +58,7 @@ static const float afInstanceLoc[][4] =
     {2192.58f, 238.44f, 52.44f, 0},                 // left orcs outside loc
 };
 
-static const float aDrakeSummonLoc[4] = {2150.68f, 126.91f, 77.71f, 4.19f};
+static const float aDrakeSummonLoc[4] = {2170.7588f, 146.05963f, 87.63939f, 4.19093f};
 
 class instance_old_hillsbrad : public ScriptedInstance
 {
