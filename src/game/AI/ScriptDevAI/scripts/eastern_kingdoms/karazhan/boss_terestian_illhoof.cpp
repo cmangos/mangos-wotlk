@@ -202,7 +202,11 @@ struct boss_terestianAI : public CombatAI
             case NPC_KILREK:
                 m_kilrekGuid = summoned->GetObjectGuid();
                 if (m_creature->IsInCombat())
+                {
                     summoned->SetInCombatWithZone();
+                    summoned->AI()->AttackClosestEnemy();
+                }
+                m_creature->RemoveAurasDueToSpell(SPELL_BROKEN_PACT);
                 break;
             case NPC_DEMONCHAINS:
                 m_chainsGuid = summoned->GetObjectGuid();
