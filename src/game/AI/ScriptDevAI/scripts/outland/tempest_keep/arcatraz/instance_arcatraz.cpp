@@ -199,6 +199,19 @@ void instance_arcatraz::SetData(uint32 uiType, uint32 uiData)
             break;
 
         case TYPE_SOCCOTHRATES:
+            if (uiData != IN_PROGRESS)
+            {
+                GuidVector felfireVector; // at aggro felfire mobs always teleport to respawn location
+                GetCreatureGuidVectorFromStorage(NPC_WRATH_SCRYER_FELFIRE, felfireVector);
+                for (ObjectGuid& guid : felfireVector)
+                {
+                    if (Creature* creature = instance->GetCreature(guid))
+                    {
+                        creature->RemoveAllDynObjects();
+                        creature->CombatStop();
+                    }
+                }
+            }
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_CORE_SECURITY_FIELD_ALPHA);
             m_auiEncounter[uiType] = uiData;
