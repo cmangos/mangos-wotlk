@@ -205,6 +205,7 @@ enum SpellTargetFilter
 enum SpellTargetFilterScheme
 {
     SCHEME_RANDOM = 0,
+    SCHEME_RANDOM_CHAIN,
     SCHEME_CLOSEST,
     SCHEME_CLOSEST_CHAIN,
     SCHEME_FURTHEST,
