@@ -3258,7 +3258,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             case 36301:                                     // On Fire
             {
-                target->GetMotionMaster()->MoveTargetedHome(false);
+                if (!target->IsCreature())
+                    return;
+                float x, y, z;
+                static_cast<Creature*>(target)->GetRespawnCoord(x, y, z);
+                target->GetMotionMaster()->MovePoint(1, x, y, z);
                 return;
             }
             case 36730:                                     // Flame Strike
