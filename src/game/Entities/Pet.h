@@ -279,6 +279,8 @@ class Pet : public Creature
         virtual void RegenerateHealth() override;
 
         void ResetCorpseRespawn();
+
+        void ForcedDespawn(uint32 timeMSToDespawn = 0, bool onlyAlive = false) override;
     protected:
         uint32  m_happinessTimer;
         PetType m_petType;
