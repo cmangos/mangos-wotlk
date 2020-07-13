@@ -484,6 +484,8 @@ extern void AddSC_boss_pathaleon_the_calculator();
 extern void AddSC_instance_mechanar();
 
 extern void AddSC_blades_edge_mountains();
+extern void AddSC_bashir_landing();
+extern void AddSC_shartuul_transporter();
 extern void AddSC_boss_doomlordkazzak();
 extern void AddSC_boss_doomwalker();
 extern void AddSC_hellfire_peninsula();
@@ -978,6 +980,8 @@ void AddScripts()
     AddSC_instance_mechanar();
 
     AddSC_blades_edge_mountains();
+    AddSC_bashir_landing();
+    AddSC_shartuul_transporter();
     AddSC_boss_doomlordkazzak();
     AddSC_boss_doomwalker();
     AddSC_hellfire_peninsula();
