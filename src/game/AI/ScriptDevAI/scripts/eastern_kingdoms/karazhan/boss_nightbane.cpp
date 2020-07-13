@@ -252,8 +252,8 @@ struct boss_nightbaneAI : public CombatAI
     {
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
         m_creature->SetInCombatWithZone();
-        AttackClosestEnemy();
         SetCombatScriptStatus(false);
+        AttackClosestEnemy();
         HandlePhaseTransition();
     }
 
