@@ -3772,11 +3772,7 @@ bool PlayerbotAI::CastNeutralize()
             creatureType = CREATURE_TYPE_HUMANOID;
     }
 
-    /*switch (m_bot->getClass())
-    {
-        default:
-            return false;
-    }*/
+    m_spellIdCommand = ((PlayerbotClassAI*)GetClassAI())->Neutralize(creatureType);
 
     // A spellId was found
     return m_spellIdCommand != 0;
