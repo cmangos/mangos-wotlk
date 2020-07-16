@@ -692,7 +692,7 @@ bool PlayerbotPaladinAI::BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* targe
 }
 
 // Match up with "Pull()" below
-bool PlayerbotPaladinAI::CanPull()
+bool PlayerbotPaladinAI::CanPull() override
 {
     if (HAND_OF_RECKONING && m_bot->IsSpellReady(HAND_OF_RECKONING))
         return true;
@@ -701,7 +701,7 @@ bool PlayerbotPaladinAI::CanPull()
 }
 
 // Match up with "CanPull()" above
-bool PlayerbotPaladinAI::Pull()
+bool PlayerbotPaladinAI::Pull() override
 {
     if (HAND_OF_RECKONING && m_ai->CastSpell(HAND_OF_RECKONING) == SPELL_CAST_OK)
         return true;

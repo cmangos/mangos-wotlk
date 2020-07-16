@@ -503,7 +503,7 @@ void PlayerbotWarriorAI::DoNonCombatActions()
 } // end DoNonCombatActions
 
 // Match up with "Pull()" below
-bool PlayerbotWarriorAI::CanPull()
+bool PlayerbotWarriorAI::CanPull() override
 {
     if (!m_bot) return false;
     if (!m_ai) return false;
@@ -512,7 +512,7 @@ bool PlayerbotWarriorAI::CanPull()
 }
 
 // Match up with "CanPull()" above
-bool PlayerbotWarriorAI::Pull()
+bool PlayerbotWarriorAI::Pull() override
 {
     if (!m_bot) return false;
     if (!m_ai)  return false;

@@ -89,13 +89,13 @@ class PlayerbotPaladinAI : PlayerbotClassAI
         // all combat actions go here
         CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
         CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
+        bool CanPull();
         bool Pull();
 
         // all non combat actions go here, ex buffs, heals, rezzes
         void DoNonCombatActions();
 
         // Utility Functions
-        bool CanPull();
         bool CastHoTOnTank();
 
     private:
