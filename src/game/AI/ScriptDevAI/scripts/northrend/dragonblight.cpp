@@ -25,6 +25,7 @@ EndScriptData */
 npc_destructive_ward
 npc_crystalline_ice_giant
 spell_Taunka_Face_Me
+spell_container_of_rats
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
@@ -216,6 +217,25 @@ struct TaunkaFaceMeSpellScript : public SpellScript
     }
 };
 
+/*######
+## spell_container_of_rats
+######*/
+
+struct ContainerOfRatsSpellScript : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->IsAlive())
+            return SPELL_FAILED_BAD_TARGETS;
+        // Container of Rats can be cast only on these targets
+        if (target->GetEntry() != 27202 && target->GetEntry() != 27203 && target->GetEntry() != 27206 && target->GetEntry() != 27207 && target->GetEntry() != 27210)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 void AddSC_dragonblight()
 {
     Script* pNewScript = new Script;
@@ -229,4 +249,5 @@ void AddSC_dragonblight()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<TaunkaFaceMeSpellScript>("spell_taunka_face_me");
+    RegisterSpellScript<ContainerOfRatsSpellScript>("spell_container_of_rats");
 }
