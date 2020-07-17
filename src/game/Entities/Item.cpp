@@ -282,7 +282,7 @@ void Item::UpdateDuration(Player* owner, uint32 diff)
 
     // DEBUG_LOG("Item::UpdateDuration Item (Entry: %u Duration %u Diff %u)", GetEntry(), GetUInt32Value(ITEM_FIELD_DURATION), diff);
 
-    if (GetUInt32Value(ITEM_FIELD_DURATION) <= diff)
+    if (GetUInt32Value(ITEM_FIELD_DURATION) <= diff && !IsUsedInSpell())
     {
         if (uint32 newItemId = sObjectMgr.GetItemExpireConvert(GetEntry()))
             owner->ConvertItem(this, newItemId);

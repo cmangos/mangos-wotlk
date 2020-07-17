@@ -486,6 +486,8 @@ Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, Object
 
 Spell::~Spell()
 {
+    if (m_CastItem)
+        m_CastItem->SetUsedInSpell(false);
 }
 
 template<typename T>
@@ -4717,6 +4719,8 @@ void Spell::TakeCastItem()
 
     if (expendable && withoutCharges)
     {
+        if (m_CastItem)
+            m_CastItem->SetUsedInSpell(false);
         uint32 count = 1;
         ((Player*)m_caster)->DestroyItemCount(m_CastItem, count, true);
 
@@ -4929,6 +4933,7 @@ void Spell::TakeReagents()
                     }
                 }
 
+                m_CastItem->SetUsedInSpell(false);
                 m_CastItem = nullptr;
                 m_CastItemGuid.Clear();
             }
