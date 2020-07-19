@@ -91,6 +91,8 @@ struct boss_doomwalkerAI : public ScriptedAI
         m_overrunParams.range.maxRange = 30;
 
         m_creature->RemoveAurasDueToSpell(SPELL_MARK_OF_DEATH_AURA);
+
+        m_creature->SetWalk(true);
     }
 
     void KilledUnit(Unit* pVictim) override
@@ -134,7 +136,7 @@ struct boss_doomwalkerAI : public ScriptedAI
         SetCombatScriptStatus(true);
         float x, y, z;
         summoned->GetNearPoint(m_creature, x, y, z, 0.f, 0.f, summoned->GetAngle(m_creature));
-        m_creature->GetMotionMaster()->MovePoint(POINT_OVERRUN, x, y, z);
+        m_creature->GetMotionMaster()->MovePoint(POINT_OVERRUN, x, y, z, FORCED_MOVEMENT_RUN);
         m_overrunExecTimer = 250;
     }
 

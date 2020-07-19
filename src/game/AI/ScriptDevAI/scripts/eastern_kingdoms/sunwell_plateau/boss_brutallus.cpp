@@ -223,7 +223,7 @@ struct boss_brutallusAI : public ScriptedAI, private DialogueHelper
         {
             pSummoned->SetWalk(false);
             pSummoned->SetLevitate(true);
-            pSummoned->GetMotionMaster()->MovePoint(0, aMadrigosaLoc[1].m_fX, aMadrigosaLoc[1].m_fY, aMadrigosaLoc[1].m_fZ, false);
+            pSummoned->GetMotionMaster()->MovePoint(0, aMadrigosaLoc[1].m_fX, aMadrigosaLoc[1].m_fY, aMadrigosaLoc[1].m_fZ);
         }
         else if (pSummoned->GetEntry() == NPC_BRUTALLUS_DEATH_CLOUD)
             pSummoned->CastSpell(pSummoned, SPELL_BRUTALLUS_DEATH_CLOUD, TRIGGERED_OLD_TRIGGERED);

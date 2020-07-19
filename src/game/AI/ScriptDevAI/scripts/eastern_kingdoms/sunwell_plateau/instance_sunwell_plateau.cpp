@@ -446,13 +446,13 @@ void instance_sunwell_plateau::JustDidDialogueStep(int32 iEntry)
                 {
                     pKalec->SetWalk(false);
                     pKalec->SetLevitate(true);
-                    pKalec->GetMotionMaster()->MovePoint(0, aKalecLoc[1].m_fX, aKalecLoc[1].m_fY, aKalecLoc[1].m_fZ, false);
+                    pKalec->GetMotionMaster()->MovePoint(0, aKalecLoc[1].m_fX, aKalecLoc[1].m_fY, aKalecLoc[1].m_fZ);
                 }
             }
             break;
         case NPC_FELMYST:
             if (Creature* pKalec = GetSingleCreatureFromStorage(NPC_KALECGOS_MADRIGOSA))
-                pKalec->GetMotionMaster()->MovePoint(0, aKalecLoc[2].m_fX, aKalecLoc[2].m_fY, aKalecLoc[2].m_fZ, false);
+                pKalec->GetMotionMaster()->MovePoint(0, aKalecLoc[2].m_fX, aKalecLoc[2].m_fY, aKalecLoc[2].m_fZ);
             break;
         case SPELL_OPEN_BACK_DOOR:
             if (Creature* pKalec = GetSingleCreatureFromStorage(NPC_KALECGOS_MADRIGOSA))
@@ -466,7 +466,7 @@ void instance_sunwell_plateau::JustDidDialogueStep(int32 iEntry)
             if (Creature* pKalec = GetSingleCreatureFromStorage(NPC_KALECGOS_MADRIGOSA))
             {
                 pKalec->ForcedDespawn(10000);
-                pKalec->GetMotionMaster()->MovePoint(0, aKalecLoc[3].m_fX, aKalecLoc[3].m_fY, aKalecLoc[3].m_fZ, false);
+                pKalec->GetMotionMaster()->MovePoint(0, aKalecLoc[3].m_fX, aKalecLoc[3].m_fY, aKalecLoc[3].m_fZ);
             }
             break;
     }

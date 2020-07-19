@@ -1198,7 +1198,7 @@ struct boss_kaelthasAI : public ScriptedAI
                             {
                                 m_creature->SetLevitate(true);
                                 m_creature->SetHover(true);
-                                m_creature->GetMotionMaster()->MovePoint(POINT_ID_AIR, flightPos[0], flightPos[1], flightPos[2], true, FORCED_MOVEMENT_WALK);
+                                m_creature->GetMotionMaster()->MovePoint(POINT_ID_AIR, flightPos[0], flightPos[1], flightPos[2], FORCED_MOVEMENT_WALK);
                                 m_phaseTransitionTimer = 0;
                                 m_phaseTransitionStage = 2;
                                 m_phaseTransitionTimer = 16000;
@@ -1240,7 +1240,7 @@ struct boss_kaelthasAI : public ScriptedAI
                             }
                             case 4:
                             {
-                                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LAND, landPos[0], landPos[1], landPos[2], true, FORCED_MOVEMENT_WALK);
+                                m_creature->GetMotionMaster()->MovePoint(POINT_ID_LAND, landPos[0], landPos[1], landPos[2], FORCED_MOVEMENT_WALK);
                                 m_phaseTransitionTimer = 0;
                                 break;
                             }
