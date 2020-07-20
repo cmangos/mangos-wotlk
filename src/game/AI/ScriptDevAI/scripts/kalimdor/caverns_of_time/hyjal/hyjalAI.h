@@ -54,10 +54,9 @@ enum YellType
 
 struct hyjalAI : public ScriptedAI
 {
-        hyjalAI(Creature* pCreature) : ScriptedAI(pCreature)
+        hyjalAI(Creature* pCreature) : ScriptedAI(pCreature), m_pInstance(static_cast<instance_mount_hyjal*>(pCreature->GetInstanceData()))
         {
             memset(m_aSpells, 0, sizeof(m_aSpells));
-            m_pInstance = (instance_mount_hyjal*)pCreature->GetInstanceData();
             Reset();
         }
 
@@ -86,6 +85,8 @@ struct hyjalAI : public ScriptedAI
         void EventStarted();
         void Retreat();
         void Win();
+
+        bool IsEventStarted() { return m_uiRallyYellTimer; }
 
         // Searches for the appropriate yell and sound and uses it to inform the raid of various things
         void DoTalk(YellType yellType);

@@ -1024,6 +1024,13 @@ void instance_mount_hyjal::OnCreatureEnterCombat(Creature* pCreature)
     switch (pCreature->GetEntry())
     {
         case NPC_ARCHIMONDE:  SetData(TYPE_ARCHIMONDE, IN_PROGRESS);  break;
+        case NPC_INFERNAL_RELAY:
+        case NPC_INFERNAL_TARGET:
+        {
+            sLog.outCustomLog("Hyjal Infernal entered combat:");
+            sLog.traceLog();
+            break;
+        }
     }
 }
 
@@ -1093,6 +1100,13 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* creature)
         case NPC_THRALL:
             FailEvent();
             break;
+        case NPC_INFERNAL_RELAY:
+        case NPC_INFERNAL_TARGET:
+        {
+            sLog.outCustomLog("Hyjal Infernal died:");
+            sLog.traceLog();
+            break;
+        }
     }
 }
 

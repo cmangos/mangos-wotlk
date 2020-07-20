@@ -59,16 +59,22 @@ bool GossipSelect_npc_jaina_proudmoore(Player* player, Creature* creature, uint3
             switch (action)
             {
                 case 100:
-                    instance->StartEvent(JAINA_FIRST_BOSS);
-                    jainaAI->EventStarted();
-                    player->PrepareGossipMenu(creature, 7556);
-                    player->SendPreparedGossip(creature);
+                    if (!jainaAI->IsEventStarted())
+                    {
+                        instance->StartEvent(JAINA_FIRST_BOSS);
+                        jainaAI->EventStarted();
+                        player->PrepareGossipMenu(creature, 7556);
+                        player->SendPreparedGossip(creature);
+                    }
                     break;
                 case 101:
-                    instance->StartEvent(JAINA_SECOND_BOSS);
-                    jainaAI->EventStarted();
-                    player->PrepareGossipMenu(creature, 7689);
-                    player->SendPreparedGossip(creature);
+                    if (!jainaAI->IsEventStarted())
+                    {
+                        instance->StartEvent(JAINA_SECOND_BOSS);
+                        jainaAI->EventStarted();
+                        player->PrepareGossipMenu(creature, 7689);
+                        player->SendPreparedGossip(creature);
+                    }
                     break;
                 case 102:
                     if (instance->GetData(TYPE_AZGALOR) != DONE) // Jaina has the same gossip menu when spawned in orc base, but nothing should happen when selecting her gossip menu options
@@ -109,16 +115,22 @@ bool GossipSelect_npc_thrall(Player* player, Creature* creature, uint32 /*uiSend
             switch (action)
             {
             case 100:
-                instance->StartEvent(THRALL_FIRST_BOSS);
-                thrallAI->EventStarted();
-                player->PrepareGossipMenu(creature, 7584);
-                player->SendPreparedGossip(creature);
+                if (!thrallAI->IsEventStarted())
+                {
+                    instance->StartEvent(THRALL_FIRST_BOSS);
+                    thrallAI->EventStarted();
+                    player->PrepareGossipMenu(creature, 7584);
+                    player->SendPreparedGossip(creature);
+                }
                 break;
             case 101:
-                instance->StartEvent(THRALL_SECOND_BOSS);
-                thrallAI->EventStarted();
-                player->PrepareGossipMenu(creature, 7701);
-                player->SendPreparedGossip(creature);
+                if (!thrallAI->IsEventStarted())
+                {
+                    instance->StartEvent(THRALL_SECOND_BOSS);
+                    thrallAI->EventStarted();
+                    player->PrepareGossipMenu(creature, 7701);
+                    player->SendPreparedGossip(creature);
+                }
                 break;
             case 102:
                 creature->SetActiveObjectState(true); // Set active object to prevent issues if players go out of range after talking to him (could lead to ores not spawning)
