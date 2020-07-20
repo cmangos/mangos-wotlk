@@ -1129,6 +1129,7 @@ void GameEventMgr::ComputeEventStartAndEndTime(GameEventData& data)
         case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_1_3:
         case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_3:
         case GAME_EVENT_SCHEDULE_DMF_3: firstMonday.tm_mon += (3 - monthRemainder + 2) % 3; break; // 2 1 0 - x + 3 - 1
+        default: break;
     }
     mktime(&firstMonday);
     firstMonday.tm_mday = (firstMonday.tm_mday - 1 - (firstMonday.tm_wday - 1) + 7) % 7 + 1; // get this weeks monday
@@ -1140,6 +1141,7 @@ void GameEventMgr::ComputeEventStartAndEndTime(GameEventData& data)
         case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
         case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2:
         case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_3: firstMonday.tm_mday -= 1; break;
+        default: break;
     }
     data.start = mktime(&firstMonday);
     switch (data.scheduleType)
@@ -1153,6 +1155,7 @@ void GameEventMgr::ComputeEventStartAndEndTime(GameEventData& data)
         case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_1:
         case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_2:
         case GAME_EVENT_SCHEDULE_DMF_BUILDING_STAGE_2_3: firstMonday.tm_mday += 1; break;
+        default: break;
     }
     data.end = mktime(&firstMonday);
 }

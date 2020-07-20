@@ -4534,6 +4534,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 }
                 break;
             }
+            default:
+                break;
         }
     }
 }

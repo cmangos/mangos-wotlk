@@ -136,12 +136,17 @@ void WorldState::Save(SaveIds saveId)
             break;
         }
         case SAVE_ID_EXPANSION_RELEASE:
+        {
             std::string expansionData = std::to_string(m_expansion);
             CharacterDatabase.PExecute("DELETE FROM world_state WHERE Id='%u'", SAVE_ID_EXPANSION_RELEASE);
             CharacterDatabase.PExecute("INSERT INTO world_state(Id,Data) VALUES('%u','%s')", SAVE_ID_EXPANSION_RELEASE, expansionData.data());
             break;
+        }
+        // TODO: Add saving for AQ and QD
+        case SAVE_ID_AHN_QIRAJ:
+        case SAVE_ID_QUEL_DANAS:
+            break;
     }
-    // TODO: Add saving for AQ and QD
 }
 
 void WorldState::HandleGameObjectUse(GameObject* go, Unit* user)
