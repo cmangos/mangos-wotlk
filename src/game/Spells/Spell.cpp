@@ -9054,7 +9054,6 @@ bool Spell::OnCheckTarget(Unit* target, SpellEffectIndex eff) const
         }
         case 30769:                             // Pick Red Riding Hood
         case 30843:                             // Enfeeble
-        case 31298:                             // Sleep
         case 31347:                             // Doom
         case 36797:                             // Mind Control (Kael'thas)
         case 40243:                             // Crushing Shadows - Teron Gorefiend
