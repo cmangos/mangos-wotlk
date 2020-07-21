@@ -347,7 +347,7 @@ struct boss_aranAI : public RangedCombatAI
                 DisableCombatAction(action);
                 return;
             }
-#ifdef PRENERF_2_1
+
             case ARAN_ACTION_DRAGONS_BREATH:
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), (SELECT_FLAG_PLAYER | SELECT_FLAG_IN_MELEE_RANGE)))
@@ -358,7 +358,6 @@ struct boss_aranAI : public RangedCombatAI
                 }
                 return;
             }
-#endif
             case ARAN_ACTION_SUPERSPELL:
             {
                 uint8 uiAvailableSpell = urand(SUPER_FLAME_WREATH, SUPER_ARCANE_EXPL);
@@ -384,7 +383,9 @@ struct boss_aranAI : public RangedCombatAI
                         if (DoCastSpellIfCan(m_creature, SPELL_FLAME_WREATH) == CAST_OK)
                         {
                             DoScriptText(urand(0, 1) ? SAY_FLAMEWREATH1 : SAY_FLAMEWREATH2, m_creature);
+#ifdef PRENERF_2_0_3
                             ResetCombatAction(ARAN_ACTION_DRAGONS_BREATH, 27000);
+#endif
                         }
                         break;
                     case SUPER_BLIZZARD:
