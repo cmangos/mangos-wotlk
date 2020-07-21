@@ -113,6 +113,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (36921,'spell_vazruden_liquid_fire_script'),
 (30700,'spell_face_highest_threat'),
 (36153,'spell_soulbind'),
+(35181,'spell_dive_bomb'),
 (36460,'spell_ultra_deconsolodation_zapper'),
 (37431,'spell_lurker_spout_initial'),
 (37429,'spell_lurker_spout_turning'),
@@ -151,6 +152,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (35865,'spell_nether_vapor_summon_parent'),
 (45960,'spell_nether_vapor_lightning'),
 (31298,'spell_anetheron_sleep'),
+(41910,'spell_alar_phoenix_ember_blast'),
 (34630,'spell_scrap_reaver_spell'),
 (34800,'spell_getting_sleepy_aura'),
 (43364,'spell_getting_sleepy_aura');
