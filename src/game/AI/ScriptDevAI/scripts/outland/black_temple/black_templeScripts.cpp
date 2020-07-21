@@ -27,6 +27,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 /*######
 ## npc_greater_shadowfiend
@@ -51,15 +52,207 @@ struct npc_greater_shadowfiend : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_greater_shadowfiend(Creature* pCreature)
+enum
 {
-    return new npc_greater_shadowfiend(pCreature);
-}
+    SPELL_COMBAT_RAGE   = 41251,
+    SPELL_FRENZY        = 41254,
+    SPELL_ENRAGE        = 8269,
+
+    NPC_BONECHEWER_BRAWLER      = 23222,
+    NPC_BONECHEWER_COMBATANT    = 23239,
+
+
+    SAY_EMOTE_EXPIRE    = -1564143,
+    SAY_EMOTE_RISE      = -1564144,
+    SAY_KILLING_FRENZY  = -1564145,
+};
+
+enum BonechewerActions
+{
+    BONECHEWER_STOP_EVENT,
+    BONECHEWER_ENRAGE,
+    BONECHEWER_FRENZY,
+    BONECHEWER_ACTION_MAX,
+    BONECHEWER_START_EVENT,
+};
+
+struct npc_bonechewer_brawler : public CombatAI
+{
+    npc_bonechewer_brawler(Creature* creature) : CombatAI(creature, BONECHEWER_ACTION_MAX)
+    {
+        AddTimerlessCombatAction(BONECHEWER_STOP_EVENT, true);
+        AddTimerlessCombatAction(BONECHEWER_ENRAGE, true);
+        AddCombatAction(BONECHEWER_FRENZY, 7000, 14000);
+    }
+
+    void Reset() override
+    {
+        CombatAI::Reset();
+        m_eventStarted = false;
+    }
+
+    bool m_eventStarted;
+
+    void JustReachedHome() override
+    {
+        CombatAI::JustReachedHome();
+        DoScriptText(SAY_EMOTE_RISE, m_creature);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            m_creature->SetFactionTemporary(1693, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
+            AttackStart(invoker);
+            m_eventStarted = true;
+            DisableCombatAction(BONECHEWER_FRENZY);
+        }
+        else if (eventType == AI_EVENT_CUSTOM_B)
+        {
+            m_creature->getThreatManager().modifyThreatPercent(invoker, -101);
+            m_creature->ClearTemporaryFaction();
+            m_eventStarted = false;
+            ResetCombatAction(BONECHEWER_FRENZY, urand(7000, 14000));
+        }
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case BONECHEWER_STOP_EVENT:
+            {
+                if (m_eventStarted && m_creature->GetHealthPercent() <= 40.f)
+                {
+                    EnterEvadeMode();
+                }
+                break;
+            }
+            case BONECHEWER_ENRAGE:
+            {
+                if (m_creature->GetHealthPercent() > 30.f)
+                    break;
+
+                if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
+                    SetActionReadyStatus(action, false);
+                break;
+            }
+            case BONECHEWER_FRENZY:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_FRENZY) == CAST_OK)
+                {
+                    ResetCombatAction(action, urand(21000, 28000));
+                    DoScriptText(SAY_KILLING_FRENZY, m_creature);
+                }
+                break;
+            }
+        }
+    }
+};
+
+struct npc_bonechewer_combatant : public CombatAI
+{
+    npc_bonechewer_combatant(Creature* creature) : CombatAI(creature, BONECHEWER_ACTION_MAX)
+    {
+        AddTimerlessCombatAction(BONECHEWER_STOP_EVENT, true);
+        AddTimerlessCombatAction(BONECHEWER_ENRAGE, true);
+        AddCombatAction(BONECHEWER_FRENZY, 5000, 7000);
+        AddCustomAction(BONECHEWER_START_EVENT, 25000u, [&]() { HandleEventStart(); });
+    }
+
+    void Reset() override
+    {
+        CombatAI::Reset();
+        m_eventStarted = false;
+    }
+
+    bool m_eventStarted;
+
+    void JustReachedHome() override
+    {
+        CombatAI::JustReachedHome();
+        DoScriptText(SAY_EMOTE_EXPIRE, m_creature);
+    }
+
+    void HandleEventStart()
+    {
+        if (m_creature->IsInCombat())
+            return;
+
+        if (Creature* brawler = GetClosestCreatureWithEntry(m_creature, NPC_BONECHEWER_BRAWLER, 30.f))
+        {
+            m_creature->SetFactionTemporary(1692, TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_RESTORE_COMBAT_STOP);
+            SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, brawler);
+            m_eventStarted = true;
+            DisableCombatAction(BONECHEWER_FRENZY);
+        }
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case BONECHEWER_STOP_EVENT:
+            {
+                if (m_eventStarted && m_creature->GetHealthPercent() <= 40.f)
+                {
+                    EnterEvadeMode();
+                }
+                break;
+            }
+            case BONECHEWER_ENRAGE:
+            {
+                if (m_creature->GetHealthPercent() > 30.f)
+                    break;
+
+                if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
+                    SetActionReadyStatus(action, false);
+                break;
+            }
+            case BONECHEWER_FRENZY:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_COMBAT_RAGE) == CAST_OK)
+                    ResetCombatAction(action, 10000);
+                break;
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        CombatAI::UpdateAI(diff);
+        if (m_creature->IsInCombat() && m_eventStarted)
+        {
+            if (m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, nullptr, SELECT_FLAG_PLAYER))
+            {
+                if (Creature* brawler = GetClosestCreatureWithEntry(m_creature, NPC_BONECHEWER_BRAWLER, 30.f))
+                {
+                    SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, brawler);
+                    m_creature->getThreatManager().modifyThreatPercent(brawler, -101);
+                    m_creature->ClearTemporaryFaction();
+                    m_eventStarted = false;
+                    ResetCombatAction(BONECHEWER_FRENZY, urand(5000, 7000));
+                }
+            }
+        }
+    }
+};
 
 void AddSC_black_temple()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_greater_shadowfiend";
-    pNewScript->GetAI = &GetAI_npc_greater_shadowfiend;
+    pNewScript->GetAI = &GetNewAIInstance<npc_greater_shadowfiend>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_bonechewer_brawler";
+    pNewScript->GetAI = &GetNewAIInstance<npc_bonechewer_brawler>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_bonechewer_combatant";
+    pNewScript->GetAI = &GetNewAIInstance<npc_bonechewer_combatant>;
     pNewScript->RegisterSelf();
 }
