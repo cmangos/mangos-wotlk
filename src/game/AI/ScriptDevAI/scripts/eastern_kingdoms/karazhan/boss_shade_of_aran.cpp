@@ -23,9 +23,7 @@ EndScriptData */
 
 /* Pre-nerf Changes
 Add Dragon's Breath ability - used shortly after Flame Wreath dissipates (random target in melee range).
-
-Patches
-2.1.0 - Shade of Aran will no longer cast Dragon's Breath.
+Patch_2.1.0 - Shade of Aran will no longer cast Dragon's Breath.
 */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
@@ -349,9 +347,10 @@ struct boss_aranAI : public RangedCombatAI
                 DisableCombatAction(action);
                 return;
             }
+#ifdef PRENERF_2_1
             case ARAN_ACTION_DRAGONS_BREATH:
             {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER))
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), (SELECT_FLAG_PLAYER | SELECT_FLAG_IN_MELEE_RANGE)))
                 {
                     DoCastSpellIfCan(target, SPELL_DRAGONS_BREATH, CAST_TRIGGERED);
                     DisableCombatAction(action);
@@ -359,6 +358,7 @@ struct boss_aranAI : public RangedCombatAI
                 }
                 return;
             }
+#endif
             case ARAN_ACTION_SUPERSPELL:
             {
                 uint8 uiAvailableSpell = urand(SUPER_FLAME_WREATH, SUPER_ARCANE_EXPL);
