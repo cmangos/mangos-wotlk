@@ -28,6 +28,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 /*######
 ## npc_greater_shadowfiend
@@ -239,6 +240,19 @@ struct npc_bonechewer_combatant : public CombatAI
     }
 };
 
+enum
+{
+    SPELL_CHAOTIC_CHARGE = 41033,
+};
+
+struct SpellAbsorption : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        data.basePoints[0] = aura->GetAmount() * aura->GetTarget()->GetAuraCount(SPELL_CHAOTIC_CHARGE);
+    }
+};
+
 void AddSC_black_temple()
 {
     Script* pNewScript = new Script;
@@ -255,4 +269,6 @@ void AddSC_black_temple()
     pNewScript->Name = "npc_bonechewer_combatant";
     pNewScript->GetAI = &GetNewAIInstance<npc_bonechewer_combatant>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<SpellAbsorption>("spell_spell_absorption");
 }

@@ -145,6 +145,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (45043,'spell_power_circle'),
 (44006,'spell_teleport_self_akilzon'),
 (43681,'spell_inactive'),
+(41034,'spell_spell_absorption'),
 (35861,'spell_nether_vapor_summon'),
 (35862,'spell_nether_vapor_summon'),
 (35863,'spell_nether_vapor_summon'),
