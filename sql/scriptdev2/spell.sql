@@ -280,6 +280,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (10060,'spell_stacking_rules_override');
 
+-- Paladin
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(31789,'spell_righteous_defense');
+
 -- Warlock
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (980,'spell_curse_of_agony'),

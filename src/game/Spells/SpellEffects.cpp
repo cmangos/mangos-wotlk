@@ -4508,39 +4508,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
             switch (m_spellInfo->Id)
             {
-                case 31789:                                 // Righteous Defense (step 1)
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
-                    {
-                        SendCastResult(SPELL_FAILED_TARGET_AFFECTING_COMBAT);
-                        return;
-                    }
-
-                    // 31989 -> dummy effect (step 1) + taunt (step 2) -> 31790 (hits each target) + 31980 - UNK purpose
-                    Unit* friendTarget = !unitTarget || m_caster->CanAssistSpell(unitTarget, m_spellInfo) ? unitTarget : unitTarget->GetVictim();
-
-                    // non-standard cast requirement check
-                    if (!friendTarget || friendTarget->getAttackers().empty())
-                    {
-                        m_caster->RemoveSpellCooldown(*m_spellInfo, true);
-                        SendCastResult(SPELL_FAILED_TARGET_AFFECTING_COMBAT);
-                        return;
-                    }
-
-                    // not empty (checked), copy
-                    Unit::AttackerSet attackers = friendTarget->getAttackers();
-
-                    // selected from list 3
-                    size_t size = std::min(size_t(3), attackers.size());
-                    for (uint32 i = 0; i < size; ++i)
-                    {
-                        Unit::AttackerSet::iterator aItr = attackers.begin();
-                        std::advance(aItr, urand() % attackers.size());
-                        m_caster->CastSpell((*aItr), 31790, TRIGGERED_NONE); // step 2
-                        attackers.erase(aItr);
-                    }
-                    return;
-                }
                 case 37877:                                 // Blessing of Faith
                 {
                     if (!unitTarget)
