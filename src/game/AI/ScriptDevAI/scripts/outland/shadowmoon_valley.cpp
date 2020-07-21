@@ -439,14 +439,12 @@ struct npc_dragonmaw_peonAI : public ScriptedAI
                 m_uiPoisonTimer -= uiDiff;
         }
 
+        if (!m_creature->SelectHostileTarget())
+            return;
+
         DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_npc_dragonmaw_peon(Creature* pCreature)
-{
-    return new npc_dragonmaw_peonAI(pCreature);
-}
 
 bool EffectDummyCreature_npc_dragonmaw_peon(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
@@ -5306,7 +5304,7 @@ void AddSC_shadowmoon_valley()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_dragonmaw_peon";
-    pNewScript->GetAI = &GetAI_npc_dragonmaw_peon;
+    pNewScript->GetAI = &GetNewAIInstance<npc_dragonmaw_peonAI>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_dragonmaw_peon;
     pNewScript->RegisterSelf();
 
