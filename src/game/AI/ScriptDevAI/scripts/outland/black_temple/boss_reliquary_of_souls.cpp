@@ -489,7 +489,7 @@ struct boss_essence_of_desireAI : public essence_base_AI
         {
             case DESIRE_ACTION_RUNE_SHIELD: return 15000;
             case DESIRE_ACTION_DEADEN: return 30000;
-            case DESIRE_ACTION_SPIRIT_SHOCK: return 5000; // chain cast during tbc
+            case DESIRE_ACTION_SPIRIT_SHOCK: return 2000; // chain cast during tbc
             default: return 0;
         }
     }
