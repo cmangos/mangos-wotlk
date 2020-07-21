@@ -5259,6 +5259,20 @@ SpellCastResult Spell::CheckCast(bool strict)
     }
 
     Unit* target = m_targets.getUnitTarget();
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_TARGET_OF_TARGET_AS_TARGET) && target)
+    {
+        if (!(m_caster->CanAssistSpell(target, m_spellInfo)))
+        {
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_TARGET_OF_TARGET_AS_TARGET))
+            {
+                if (Unit* targetOfUnitTarget = target->GetTarget(m_caster))
+                {
+                    if (m_caster->CanAssistSpell(targetOfUnitTarget, m_spellInfo))
+                        target = targetOfUnitTarget;
+                }
+            }
+        }
+    }
     if (target)
     {
         // TARGET_UNIT_SCRIPT_NEAR_CASTER fills unit target per client requirement but should not be checked against common things
