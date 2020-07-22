@@ -31,6 +31,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/scripts/outland/world_outland.h"
+#include "Spells/Scripts/SpellScript.h"
 
 /*######
 ## mob_lump
@@ -630,6 +631,31 @@ bool GossipHello_npc_gurthock(Player* player, Creature* creature)
     return true;
 }
 
+enum
+{
+    NPC_WILD_SPARROWHAWK = 22979,
+
+    SPELL_CAPTURED_SPARROWHAWK = 39812,
+};
+
+struct SparrowhawkNet : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (spell->m_targets.getUnitTargetGuid().GetEntry() != NPC_WILD_SPARROWHAWK)
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1 || !spell->GetUnitTarget())
+            return;
+
+        spell->GetUnitTarget()->CastSpell(spell->GetCaster(), SPELL_CAPTURED_SPARROWHAWK, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_nagrand()
 {
     Script* pNewScript = new Script;
@@ -658,4 +684,6 @@ void AddSC_nagrand()
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_gurthock;
     pNewScript->pGossipHello = &GossipHello_npc_gurthock;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SparrowhawkNet>("spell_sparrowhawk_net");
 }
