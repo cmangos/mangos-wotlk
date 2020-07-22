@@ -668,7 +668,7 @@ struct boss_kaelthasAI : public ScriptedAI
                             SetCombatScriptStatus(true);
                             SetCombatMovement(false);
 
-                            m_creature->GetMotionMaster()->MovePoint(POINT_ID_CENTER, aCenterPos[0], aCenterPos[1], aCenterPos[2]);
+                            m_creature->GetMotionMaster()->MovePoint(POINT_ID_CENTER, aCenterPos[0], aCenterPos[1], aCenterPos[2], FORCED_MOVEMENT_RUN);
 
                             m_uiPhase = PHASE_TRANSITION;
                             m_actionReadyStatus[i] = false;
