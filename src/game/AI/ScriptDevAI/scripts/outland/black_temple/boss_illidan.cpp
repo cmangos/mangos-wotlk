@@ -622,7 +622,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                 randVal = -1;
             m_curEyeBlastLoc = (m_curEyeBlastLoc + randVal + 4) % 4; // make sure he only goes left or right
             SetCombatScriptStatus(true);
-            m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_FLIGHT_RANDOM, illidanFlightPos[m_curEyeBlastLoc].fX, illidanFlightPos[m_curEyeBlastLoc].fY, illidanFlightPos[m_curEyeBlastLoc].fZ);
+            m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_FLIGHT_RANDOM, illidanFlightPos[m_curEyeBlastLoc].fX, illidanFlightPos[m_curEyeBlastLoc].fY, illidanFlightPos[m_curEyeBlastLoc].fZ, FORCED_MOVEMENT_RUN);
         }
         else if (eventType == AI_EVENT_CUSTOM_F)
         {
@@ -953,7 +953,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                         }
                         float x, y, z;
                         closestTrigger->GetPosition(x, y, z);
-                        m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_FLIGHT, x, y, z);
+                        m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_FLIGHT, x, y, z, FORCED_MOVEMENT_RUN);
                         break;
                     }
                     case 3:
@@ -1008,7 +1008,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                             //}
                             // m_curEyeBlastLoc = urand(0, 1) ? firstEyeBlastPos : secondEyeBlastPos;
                             m_curEyeBlastLoc = urand(0, 3);
-                            m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_FLIGHT_RANDOM, illidanFlightPos[m_curEyeBlastLoc].fX, illidanFlightPos[m_curEyeBlastLoc].fY, illidanFlightPos[m_curEyeBlastLoc].fZ);
+                            m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_FLIGHT_RANDOM, illidanFlightPos[m_curEyeBlastLoc].fX, illidanFlightPos[m_curEyeBlastLoc].fY, illidanFlightPos[m_curEyeBlastLoc].fZ, FORCED_MOVEMENT_RUN);
                             PreparePhaseTimers();
                         }
                         break;
@@ -1025,7 +1025,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                     {
                         m_creature->SetImmobilizedState(false);
                         m_creature->SetTarget(nullptr);
-                        m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_LANDING, aCenterLoc[0].fX, aCenterLoc[0].fY, aCenterLoc[0].fZ);
+                        m_creature->GetMotionMaster()->MovePoint(POINT_ILLIDAN_LANDING, aCenterLoc[0].fX, aCenterLoc[0].fY, aCenterLoc[0].fZ, FORCED_MOVEMENT_RUN);
                         break;
                     }
                     case 1:
@@ -1536,7 +1536,7 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
                             {
                                 float fX, fY, fZ;
                                 illidan->GetContactPoint(m_creature, fX, fY, fZ);
-                                m_creature->GetMotionMaster()->MovePoint(POINT_AKAMA_ILLIDAN_CLOSE, fX, fY, fZ);
+                                m_creature->GetMotionMaster()->MovePoint(POINT_AKAMA_ILLIDAN_CLOSE, fX, fY, fZ, FORCED_MOVEMENT_RUN);
                             }
                         }
                     }
