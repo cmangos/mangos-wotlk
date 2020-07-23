@@ -2895,7 +2895,7 @@ void WorldObject::PrintCooldownList(ChatHandler& chat) const
     chat.PSendSysMessage("Found %u permanent cooldown%s.", permCDCount, (permCDCount > 1) ? "s" : "");
 }
 
-int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* effBasePoints) const
+int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry const* spellProto, SpellEffectIndex effect_index, int32 const* effBasePoints, bool maximum) const
 {
     Unit const* unitCaster = dynamic_cast<Unit const*>(this);
     Player const* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? static_cast<Player const*>(this) : nullptr;
@@ -2925,12 +2925,17 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
             break;
         default:
         {
-            // range can have positive (1..rand) and negative (rand..1) values, so order its for irand
-            int32 randvalue = (randomPoints >= 1)
-                ? irand(1, randomPoints)
-                : irand(randomPoints, 1);
+            if (maximum)
+                basePoints += randomPoints;
+            else
+            {
+                // range can have positive (1..rand) and negative (rand..1) values, so order its for irand
+                int32 randvalue = (randomPoints >= 1)
+                    ? irand(1, randomPoints)
+                    : irand(randomPoints, 1);
 
-            basePoints += randvalue;
+                basePoints += randvalue;
+            }
             break;
         }
     }

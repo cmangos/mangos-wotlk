@@ -3609,6 +3609,9 @@ void Spell::handle_immediate()
     // Remove used for cast item if need (it can be already nullptr after TakeReagents call
     TakeCastItem();
 
+    // AOE caps implementation - only works for non-travelling spells
+    ProcessAOECaps();
+
     DoAllTargetlessEffects(true);
 
     for (auto& ihit : m_UniqueTargetInfo)
@@ -3753,6 +3756,35 @@ void Spell::_handle_finish_phase()
             m_caster->DoExtraAttacks(target);
         else
             m_caster->m_extraAttacks = 0;
+    }
+}
+
+void Spell::ProcessAOECaps()
+{
+    if (!m_spellInfo->HasAttribute(SPELL_ATTR_AOE_CAP))
+        return;
+
+    uint32 i;
+    for (i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (m_spellInfo->Effect[i] == SPELL_EFFECT_SCHOOL_DAMAGE)
+            break;
+
+    uint32 aggregatedDamage = 0;
+    uint32 count = 0;
+    for (auto& ihit : m_UniqueTargetInfo)
+    {
+        if (ihit.effectMask & (1 << i))
+        {
+            aggregatedDamage += ihit.damage;
+            ++count;
+        }
+    }
+
+    int32 value = CalculateSpellEffectValue(SpellEffectIndex(i), nullptr, true) * 10;
+    if (aggregatedDamage > value)
+    {
+        for (auto& ihit : m_UniqueTargetInfo)
+            ihit.damage = (value / count);
     }
 }
 

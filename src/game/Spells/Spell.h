@@ -484,7 +484,7 @@ class Spell
         SpellCastResult CheckOrTakeRunePower(bool take);
         SpellCastResult CheckCasterAuras() const;
 
-        int32 CalculateSpellEffectValue(SpellEffectIndex i, Unit* target) { return m_caster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i]); }
+        int32 CalculateSpellEffectValue(SpellEffectIndex i, Unit* target, bool maximum = false) { return m_caster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i], maximum); }
         int32 CalculateSpellEffectDamage(Unit* unitTarget, int32 damage);
         static uint32 CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell* spell = nullptr, Item* castItem = nullptr, bool finalUse = false);
 
@@ -543,6 +543,7 @@ class Spell
         void ExecuteEffects(Unit* unitTarget, Item* itemTarget, GameObject* GOTarget, uint32 effectMask);
         void HandleEffect(Unit* unitTarget, Item* itemTarget, GameObject* GOTarget, SpellEffectIndex effIdx, float damageMultiplier = 1.0);
         void HandleThreatSpells();
+        void ProcessAOECaps();
         // void HandleAddAura(Unit* Target);
 
         SpellEntry const* m_spellInfo;
