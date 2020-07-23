@@ -5290,6 +5290,34 @@ struct TagGreaterFelfireDiemetradon : public SpellScript, public AuraScript
     }
 };
 
+struct DragonmawIllusionBase : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+        {
+            aura->GetTarget()->CastSpell(nullptr, 40216, TRIGGERED_OLD_TRIGGERED);
+            aura->GetTarget()->CastSpell(nullptr, 42016, TRIGGERED_OLD_TRIGGERED);
+        }
+        else
+        {
+            aura->GetTarget()->RemoveAurasDueToSpell(40216);
+            aura->GetTarget()->RemoveAurasDueToSpell(42016);
+        }
+    }
+};
+
+struct DragonmawIllusionTransform : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->OverrideMountDisplayId(16314);
+        else
+            aura->GetTarget()->OverrideMountDisplayId(0);
+    }
+};
+
 void AddSC_shadowmoon_valley()
 {
     Script* pNewScript = new Script;
@@ -5436,4 +5464,6 @@ void AddSC_shadowmoon_valley()
     pNewScript->RegisterSelf();
 
     RegisterScript<TagGreaterFelfireDiemetradon>("spell_tag_for_single_use");
+    RegisterAuraScript<DragonmawIllusionBase>("spell_dragonmaw_illusion_base");
+    RegisterAuraScript<DragonmawIllusionTransform>("spell_dragonmaw_illusion_transform");
 }
