@@ -805,13 +805,15 @@ uint8 GetRandomWavePath(WavePaths path)
     }
 }
 
-uint32 GetRunningPerWaveMobEntry(uint32 entry)
+uint32 GetRunningPerWaveMobEntry(uint32 entry, uint32 waveIndex)
 {
     switch (entry)
     {
+        case NPC_FROST:
+            if (waveIndex == 6) // this wave runs
+                return true;
         case NPC_KAZROGAL:
         case NPC_AZGALOR:
-        case NPC_FROST:
             return false;
         default: return true;
     }
@@ -1315,7 +1317,7 @@ void instance_mount_hyjal::SpawnWave(uint32 index, bool setTimer)
     DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, m_hyjalEnemyCount + newSpawns);
     for (HyjalWaveMob& mob : m_hyjalWavesData[index].waveMobs)
     {
-        Creature* waveSpawn = spawner->SummonCreature(mob.mobEntry, mob.x, mob.y, mob.z, mob.ori, TEMPSPAWN_DEAD_DESPAWN, 0, true, GetRunningPerWaveMobEntry(mob.mobEntry), GetRandomWavePath(mob.path));
+        Creature* waveSpawn = spawner->SummonCreature(mob.mobEntry, mob.x, mob.y, mob.z, mob.ori, TEMPSPAWN_DEAD_DESPAWN, 0, true, GetRunningPerWaveMobEntry(mob.mobEntry, index), GetRandomWavePath(mob.path));
         if (index == 0) // The very first wave should never grant XP, loot or reputation. ToDo: According to a wowhead comment there should be a cooldown period after you've killed one boss after which the first wave of the next boss also won't grant any XP, loot or reputation
         {
             waveSpawn->SetNoXP(true);
