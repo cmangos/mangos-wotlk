@@ -1170,6 +1170,34 @@ struct AllergiesAura : public AuraScript
     }
 };
 
+enum
+{
+    SPELL_USE_CORPSE = 33985,
+};
+
+struct RaiseDead : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (!target->IsCreature() || static_cast<Creature*>(target)->HasBeenHitBySpell(SPELL_USE_CORPSE))
+            return false;
+
+        return true;
+    }
+};
+
+struct UseCorpse : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        static_cast<Creature*>(target)->RegisterHitBySpell(SPELL_USE_CORPSE);
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1191,4 +1219,6 @@ void AddSC_spell_scripts()
     RegisterAuraScript<AuchenaiPossess>("spell_auchenai_possess");
     RegisterAuraScript<GettingSleepyAura>("spell_getting_sleepy_aura");
     RegisterAuraScript<AllergiesAura>("spell_allergies");
+    RegisterSpellScript<UseCorpse>("spell_use_corpse");
+    RegisterSpellScript<RaiseDead>("spell_raise_dead");
 }
