@@ -67,8 +67,22 @@ struct WarriorExecuteDamage : public SpellScript
     }
 };
 
+struct VictoryRush : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        spell->GetCaster()->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, false);
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        spell->SetDamage(uint32(spell->GetDamage() * spell->GetCaster()->GetTotalAttackPowerValue(BASE_ATTACK) / 100));
+    }
+};
+
 void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
     RegisterSpellScript<WarriorExecuteDamage>("spell_warrior_execute_damage");
+    RegisterSpellScript<VictoryRush>("spell_warrior_victory_rush");
 }

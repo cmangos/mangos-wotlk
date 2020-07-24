@@ -438,12 +438,6 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                 // Shield Slam
                 else if ((m_spellInfo->SpellFamilyFlags & uint64(0x0000020000000000)) && m_spellInfo->Category == 1209)
                     damage += int32(m_caster->GetShieldBlockValue());
-                // Victory Rush
-                else if (m_spellInfo->SpellFamilyFlags & uint64(0x10000000000))
-                {
-                    damage = uint32(damage * m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
-                    m_caster->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, false);
-                }
                 // Revenge ${$m1+$AP*0.310} to ${$M1+$AP*0.310}
                 else if (m_spellInfo->SpellFamilyFlags & uint64(0x0000000000000400))
                     damage += uint32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * 0.310f);
