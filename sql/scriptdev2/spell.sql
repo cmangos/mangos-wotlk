@@ -119,7 +119,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (37429,'spell_lurker_spout_turning'),
 (37430,'spell_lurker_spout_turning'),
 (37851,'spell_tag_for_single_use'),
-(33985,'spell_tag_for_single_use'),
 (37896,'spell_to_infinity_and_above'),
 (38606,'spell_exorcism_feather'),
 (38640,'spell_koi_koi_death'),
