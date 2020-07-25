@@ -578,15 +578,22 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
         }
         else if (eventType == AI_EVENT_CUSTOM_C) // Demon Transform 2 aura
         {
-            if (miscValue == 2)
+            if (m_phase != PHASE_4_DEMON)
             {
-                if (m_phase != PHASE_4_DEMON)
+                if (miscValue == 2)
                     m_creature->CastSpell(nullptr, SPELL_DEMON_FORM, TRIGGERED_OLD_TRIGGERED);
-                else
-                    m_creature->RemoveAurasDueToSpell(SPELL_DEMON_FORM);
+                else if (miscValue == 3)
+                    m_creature->CastSpell(nullptr, SPELL_DEMON_TRANSFORM_3, TRIGGERED_OLD_TRIGGERED);
             }
-            else if (miscValue == 3)
-                m_creature->CastSpell(nullptr, SPELL_DEMON_TRANSFORM_3, TRIGGERED_OLD_TRIGGERED);
+            else
+            {
+                if (miscValue == 1)
+                    m_creature->RemoveAurasDueToSpell(SPELL_DEMON_FORM);
+                else if (miscValue == 2)
+                    m_creature->CastSpell(nullptr, SPELL_DEMON_TRANSFORM_3, TRIGGERED_OLD_TRIGGERED);
+                else if (miscValue == 3)
+                    SetEquipmentSlots(true);
+            }
         }
         else if (eventType == AI_EVENT_CUSTOM_D) // Demon Transform 3 aura end
         {
@@ -599,7 +606,6 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             else
             {
                 m_phase = m_prevPhase;
-                SetEquipmentSlots(true);
                 m_creature->CastSpell(nullptr, SPELL_PASSIVE_HIT, TRIGGERED_OLD_TRIGGERED);
             }
             SetCombatScriptStatus(false);
