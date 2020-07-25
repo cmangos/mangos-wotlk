@@ -247,6 +247,11 @@ enum
 
 struct SpellAbsorption : public AuraScript
 {
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
+    {
+		return data.spell && !data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_ABILITY);
+    }
+
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
     {
         data.basePoints[0] = aura->GetAmount() * aura->GetTarget()->GetAuraCount(SPELL_CHAOTIC_CHARGE);
