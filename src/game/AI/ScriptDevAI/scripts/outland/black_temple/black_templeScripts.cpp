@@ -254,7 +254,9 @@ struct SpellAbsorption : public AuraScript
 
     void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
     {
-        data.basePoints[0] = aura->GetAmount() * aura->GetTarget()->GetAuraCount(SPELL_CHAOTIC_CHARGE);
+        data.basePoints[0] = data.basePoints[0] * aura->GetTarget()->GetAuraCount(SPELL_CHAOTIC_CHARGE);
+        if (!data.basePoints[0])
+            data.spellInfo = nullptr;
     }
 };
 
