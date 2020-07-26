@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Reliquary_of_Souls
-SD%Complete: 90
-SDComment: Persistent Area Auras for each Essence (Aura of Suffering, Aura of Desire, Aura of Anger) requires core support.
+SD%Complete: 100
+SDComment:
 SDCategory: Black Temple
 EndScriptData */
 

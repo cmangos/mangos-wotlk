@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Illidan_Stormrage
-SD%Complete: 90
-SDComment: Movement during flight phase NYI. Some other fine details may need adjustments.
+SD%Complete: 100
+SDComment:
 SDCategory: Black Temple
 EndScriptData */
 

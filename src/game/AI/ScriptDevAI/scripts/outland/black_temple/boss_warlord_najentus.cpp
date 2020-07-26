@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Warlord_Najentus
-SD%Complete: 90
-SDComment: Core spell support for Needle Spine (spells 39992, 39835) missing, no change from SD2 needed
+SD%Complete: 100
+SDComment:
 SDCategory: Black Temple
 EndScriptData */
 

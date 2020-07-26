@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Supremus
-SD%Complete: 90
-SDComment: Unknown if other speed-changes happen, remove AI for trigger mobs in next step
+SD%Complete: 100
+SDComment:
 SDCategory: Black Temple
 EndScriptData */
 

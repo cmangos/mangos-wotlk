@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Shade_of_Akama
-SD%Complete: 90
-SDComment: Some adjustments may be required once the Shade Soul Channel stacking is fixed in core. Epilogue positions need more work.
+SD%Complete: 100
+SDComment:
 SDCategory: Black Temple
 EndScriptData */
 

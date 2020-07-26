@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Bloodboil
-SD%Complete: 90
-SDComment: Timers may need adjustments.
+SD%Complete: 100
+SDComment:
 SDCategory: Black Temple
 EndScriptData */
 
