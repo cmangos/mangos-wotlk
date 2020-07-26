@@ -72,6 +72,10 @@ struct boss_najentusAI : public ScriptedAI, CombatActions
         AddCombatAction(NAJENTUS_ACTION_ENRAGE, 0u);
         AddCombatAction(NAJENTUS_ACTION_IMPALING_SPINE, 0u);
         AddCombatAction(NAJENTUS_ACTION_NEEDLE_SPINE, 0u);
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float, float)
+        {
+            return x < 300.f;
+        });
         Reset();
     }
 
@@ -230,8 +234,6 @@ struct boss_najentusAI : public ScriptedAI, CombatActions
 
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
-
-        EnterEvadeIfOutOfCombatArea(diff);
 
         ExecuteActions();
         DoMeleeAttackIfReady();

@@ -89,9 +89,8 @@ enum GurtoggActions
 
 struct boss_gurtogg_bloodboilAI : public ScriptedAI, public CombatActions
 {
-    boss_gurtogg_bloodboilAI(Creature* creature) : ScriptedAI(creature), CombatActions(GURTOGG_ACTION_MAX)
+    boss_gurtogg_bloodboilAI(Creature* creature) : ScriptedAI(creature), CombatActions(GURTOGG_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_instance = static_cast<ScriptedInstance*>(creature->GetInstanceData());
         AddCombatAction(GURTOGG_ACTION_CHANGE_PHASE, 0u);
         AddCombatAction(GURTOGG_ACTION_BERSERK, 0u);
         AddCombatAction(GURTOGG_ACTION_BLOODBOIL, 0u);
@@ -99,6 +98,10 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI, public CombatActions
         AddCombatAction(GURTOGG_ACTION_FEL_ACID, 0u);
         AddCombatAction(GURTOGG_ACTION_BEWILDERING_STRIKE, 0u);
         AddCombatAction(GURTOGG_ACTION_EJECT, 0u);
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float, float y, float)
+        {
+            return y < 140.f;
+        });
         Reset();
     }
 
@@ -340,8 +343,6 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI, public CombatActions
 
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
-
-        EnterEvadeIfOutOfCombatArea(diff);
 
         ExecuteActions();
 
