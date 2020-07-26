@@ -2445,7 +2445,8 @@ void Aura::TriggerSpellWithValue()
     PeriodicTriggerData data(triggerCaster, triggerTarget, triggerTargetObject, triggeredSpellInfo, basePoints);
     OnPeriodicTrigger(data);
 
-    CastTriggeredSpell(data);
+    if (data.spellInfo)
+        CastTriggeredSpell(data);
 }
 
 /*********************************************************/
