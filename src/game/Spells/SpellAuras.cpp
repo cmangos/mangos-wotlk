@@ -8516,10 +8516,6 @@ void Aura::PeriodicTick()
                     target->CastSpell(nullptr, 29965, TRIGGERED_OLD_TRIGGERED);
                     break;
                 }
-                case 31258: // Death & Decay - Rage Winterchill
-                    if (target->GetEntry() == 17772) // Only Jaina receives less damage
-                        pdamage = uint32(target->GetMaxHealth() * 0.5f / 100);
-                    break;
                 case 40932: // Agonizing Flames - Illidan
                 {
                     if (GetAuraTicks() % 3 == 0) // increased damage after every 3rd tick
@@ -8940,14 +8936,12 @@ void Aura::PeriodicTick()
             switch (GetId())
             {
                 case 21056:                                 // Mark of Kazzak
-                case 31447:                                 // Mark of Kaz'rogal
                 case 32960:                                 // Mark of Kazzak
                 {
                     uint32 triggerSpell = 0;
                     switch (GetId())
                     {
                         case 21056: triggerSpell = 21058; break;
-                        case 31447: triggerSpell = 31463; break;
                         case 32960: triggerSpell = 32961; break;
                     }
                     if (target->GetTypeId() == TYPEID_PLAYER && target->GetPower(power) == 0)

@@ -104,9 +104,9 @@ enum ArchimondeActions
 
 struct boss_archimondeAI : public ScriptedAI
 {
-    boss_archimondeAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_archimondeAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_instance = (ScriptedInstance*)creature->GetInstanceData();
         m_hasIntro = false;
         m_actionTimers.insert({ ARCHIMONDE_ACTION_GRIP_OF_THE_LEGION , 0 });
         m_actionTimers.insert({ ARCHIMONDE_ACTION_AIR_BURST , 0 });
@@ -120,7 +120,7 @@ struct boss_archimondeAI : public ScriptedAI
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    ScriptedInstance* m_instance;
 
     bool m_actionReadyStatus[ARCHIMONDE_ACTION_MAX];
     std::map<uint32, uint32> m_actionTimers;
@@ -210,8 +210,8 @@ struct boss_archimondeAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ARCHIMONDE, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_ARCHIMONDE, FAIL);
 
         m_drainNordrassilTimer = 5000;
         ScriptedAI::JustReachedHome();
@@ -523,7 +523,7 @@ static float const m_turnConstant = 0.785402f;
 /* This is the script for the Doomfire Spirit Mob. This mob controls the doomfire npc and allows it to move randomly around the map. */
 struct npc_doomfire_targetingAI : public ScriptedAI
 {
-    npc_doomfire_targetingAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_doomfire_targetingAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
 
     ObjectGuid m_doomfireGuid;
 
@@ -553,25 +553,15 @@ struct npc_doomfire_targetingAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_archimonde(Creature* pCreature)
-{
-    return new boss_archimondeAI(pCreature);
-}
-
-UnitAI* GetAI_npc_doomfire_spirit(Creature* pCreature)
-{
-    return new npc_doomfire_targetingAI(pCreature);
-}
-
 void AddSC_boss_archimonde()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_archimonde";
-    pNewScript->GetAI = &GetAI_boss_archimonde;
+    pNewScript->GetAI = &GetNewAIInstance<boss_archimondeAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_doomfire_targeting";
-    pNewScript->GetAI = &GetAI_npc_doomfire_spirit;
+    pNewScript->GetAI = &GetNewAIInstance<npc_doomfire_targetingAI>;
     pNewScript->RegisterSelf();
 }

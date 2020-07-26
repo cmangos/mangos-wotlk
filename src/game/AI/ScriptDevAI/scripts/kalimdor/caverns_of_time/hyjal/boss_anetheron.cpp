@@ -56,9 +56,8 @@ enum AnetheronActions
 
 struct boss_anetheronAI : public CombatAI
 {
-    boss_anetheronAI(Creature* creature) : CombatAI(creature, ANETHERON_ACTION_MAX)
+    boss_anetheronAI(Creature* creature) : CombatAI(creature, ANETHERON_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_instance = static_cast<ScriptedInstance*>(creature->GetInstanceData());
         AddCombatAction(ANETHERON_ACTION_CARRION_SWARM, 20000, 28000);
         AddCombatAction(ANETHERON_ACTION_SLEEP, 25000, 32000);
         AddCombatAction(ANETHERON_ACTION_INFERNO, 30000, 48000);

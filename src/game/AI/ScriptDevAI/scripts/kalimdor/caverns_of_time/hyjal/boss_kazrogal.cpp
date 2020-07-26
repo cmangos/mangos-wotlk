@@ -16,6 +16,7 @@
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "hyjal.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -43,30 +44,23 @@ enum KazrogalActions
     KAZROGAL_ACTION_MAX,
 };
 
-struct boss_kazrogalAI : public ScriptedAI
+struct boss_kazrogalAI : public CombatAI
 {
-    boss_kazrogalAI(Creature* creature) : ScriptedAI(creature)
+    boss_kazrogalAI(Creature* creature) : CombatAI(creature, KAZROGAL_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_instance = static_cast<ScriptedInstance*>(creature->GetInstanceData());
-        m_actionTimers.insert({ KAZROGAL_ACTION_MALEVOLENT_CLEAVE , 0 });
-        m_actionTimers.insert({ KAZROGAL_ACTION_WAR_STOMP , 0 });
-        m_actionTimers.insert({ KAZROGAL_ACTION_CRIPPLE , 0 });
-        m_actionTimers.insert({ KAZROGAL_ACTION_MARK_OF_KAZROGAL , 0 });
+        AddCombatAction(KAZROGAL_ACTION_MALEVOLENT_CLEAVE, GetInitialActionTimer(KAZROGAL_ACTION_MALEVOLENT_CLEAVE));
+        AddCombatAction(KAZROGAL_ACTION_WAR_STOMP, GetInitialActionTimer(KAZROGAL_ACTION_WAR_STOMP));
+        AddCombatAction(KAZROGAL_ACTION_CRIPPLE, GetInitialActionTimer(KAZROGAL_ACTION_CRIPPLE));
+        AddCombatAction(KAZROGAL_ACTION_MARK_OF_KAZROGAL, GetInitialActionTimer(KAZROGAL_ACTION_MARK_OF_KAZROGAL));
         Reset();
     }
 
     ScriptedInstance* m_instance;
-    bool m_actionReadyStatus[KAZROGAL_ACTION_MAX];
-    std::map<uint32, uint32> m_actionTimers;
     uint32 m_markOfKazrogalCounter;
 
     void Reset() override
     {
-        for (auto& data : m_actionTimers)
-            data.second = GetInitialActionTimer(data.first);
-
-        for (uint32 i = 0; i < KAZROGAL_ACTION_MAX; ++i)
-            m_actionReadyStatus[i] = false;
+        CombatAI::Reset();
 
         m_markOfKazrogalCounter = 0;
     }
@@ -124,108 +118,70 @@ struct boss_kazrogalAI : public ScriptedAI
         DoScriptText(textId, m_creature);
     }
 
-    void UpdateTimers(const uint32 diff)
+    void ExecuteAction(uint32 action) override
     {
-        for (auto& data : m_actionTimers)
+        switch (action)
         {
-            uint32 index = data.first;
-            if (!m_actionReadyStatus[index])
+            case KAZROGAL_ACTION_MALEVOLENT_CLEAVE:
             {
-                if (data.second <= diff)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MALEVOLENT_CLEAVE) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
+            }
+            case KAZROGAL_ACTION_WAR_STOMP:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_WAR_STOMP) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
+            }
+            case KAZROGAL_ACTION_CRIPPLE:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_CRIPPLE, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_CRIPPLE) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
+            }
+            case KAZROGAL_ACTION_MARK_OF_KAZROGAL:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_MARK_OF_KAZROGAL) == CAST_OK)
                 {
-                    data.second = 0;
-                    m_actionReadyStatus[index] = true;
+                    DoScriptText(urand(0, 1) ? SAY_MARK1 : SAY_MARK2, m_creature);
+                    ++m_markOfKazrogalCounter;
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
                 }
-                else
-                    data.second -= diff;
+                break;
             }
         }
-    }
-
-    void ExecuteActions()
-    {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < KAZROGAL_ACTION_MAX; ++i)
-        {
-            if (m_actionReadyStatus[i])
-            {
-                switch (i)
-                {
-                    case KAZROGAL_ACTION_MALEVOLENT_CLEAVE:
-                    {
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MALEVOLENT_CLEAVE) == CAST_OK)
-                        {
-                            m_actionTimers[i] = GetSubsequentActionTimer(i);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    }
-                    case KAZROGAL_ACTION_WAR_STOMP:
-                    {
-                        if (DoCastSpellIfCan(nullptr, SPELL_WAR_STOMP) == CAST_OK)
-                        {
-                            m_actionTimers[i] = GetSubsequentActionTimer(i);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    }
-                    case KAZROGAL_ACTION_CRIPPLE:
-                    {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_CRIPPLE, SELECT_FLAG_PLAYER))
-                        {
-                            if (DoCastSpellIfCan(target, SPELL_CRIPPLE) == CAST_OK)
-                            {
-                                m_actionTimers[i] = GetSubsequentActionTimer(i);
-                                m_actionReadyStatus[i] = false;
-                                return;
-                            }
-                        }
-                        break;
-                    }
-                    case KAZROGAL_ACTION_MARK_OF_KAZROGAL:
-                    {
-                        if (DoCastSpellIfCan(nullptr, SPELL_MARK_OF_KAZROGAL) == CAST_OK)
-                        {
-                            DoScriptText(urand(0, 1) ? SAY_MARK1 : SAY_MARK2, m_creature);
-                            ++m_markOfKazrogalCounter;
-                            m_actionTimers[i] = GetSubsequentActionTimer(i);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    void UpdateAI(const uint32 diff)
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        UpdateTimers(diff);
-        ExecuteActions();
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_kazrogal(Creature* pCreature)
+struct MarkOfKazrogal : public SpellScript, public AuraScript
 {
-    return new boss_kazrogalAI(pCreature);
-}
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->GetPowerType() != POWER_MANA)
+            return false;
+
+        return true;
+    }
+
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (aura->GetTarget()->IsPlayer() && target->GetPower(target->GetPowerType()) == 0)
+        {
+            target->CastSpell(nullptr, 31463, TRIGGERED_OLD_TRIGGERED, nullptr, aura);
+            target->RemoveAurasDueToSpell(aura->GetId());
+        }
+    }
+};
 
 void AddSC_boss_kazrogal()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_kazrogal";
-    pNewScript->GetAI = &GetAI_boss_kazrogal;
+    pNewScript->GetAI = &GetNewAIInstance<boss_kazrogalAI>;
     pNewScript->RegisterSelf();
+
+    RegisterScript<MarkOfKazrogal>("spell_mark_of_kazrogal");
 }

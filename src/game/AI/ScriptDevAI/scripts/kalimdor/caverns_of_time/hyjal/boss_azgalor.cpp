@@ -17,6 +17,7 @@
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "hyjal.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -49,35 +50,23 @@ enum AzgalorActions
 static const float SPELL_RAIN_OF_FIRE_MINRANGE = 0;             // 0 yards from boss
 static const float SPELL_RAIN_OF_FIRE_MAXRANGE = 34;            // 34 yards from boss
 
-struct boss_azgalorAI : public ScriptedAI
+struct boss_azgalorAI : public CombatAI
 {
-    boss_azgalorAI(Creature* creature) : ScriptedAI(creature)
+    boss_azgalorAI(Creature* creature) : CombatAI(creature, AZGALOR_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_instance = static_cast<ScriptedInstance*>(creature->GetInstanceData());
-        m_actionTimers.insert({ AZGALOR_ACTION_CLEAVE , 0 });
-        m_actionTimers.insert({ AZGALOR_RAIN_OF_FIRE , 0 });
-        m_actionTimers.insert({ AZGALOR_HOWL_OF_AZGALOR , 0 });
-        m_actionTimers.insert({ AZGALOR_DOOM , 0 });
-        m_actionTimers.insert({ AZGALOR_ENRAGE , 0 });
+        AddCombatAction(AZGALOR_ACTION_CLEAVE, GetInitialActionTimer(AZGALOR_ACTION_CLEAVE));
+        AddCombatAction(AZGALOR_RAIN_OF_FIRE, GetInitialActionTimer(AZGALOR_RAIN_OF_FIRE));
+        AddCombatAction(AZGALOR_HOWL_OF_AZGALOR, GetInitialActionTimer(AZGALOR_HOWL_OF_AZGALOR));
+        AddCombatAction(AZGALOR_DOOM, GetInitialActionTimer(AZGALOR_DOOM));
+        AddCombatAction(AZGALOR_ENRAGE, GetInitialActionTimer(AZGALOR_ENRAGE));
         m_rainOfFireParams.range.minRange = SPELL_RAIN_OF_FIRE_MINRANGE;
         m_rainOfFireParams.range.maxRange = SPELL_RAIN_OF_FIRE_MAXRANGE;
         Reset();
     }
 
     ScriptedInstance* m_instance;
-    bool m_actionReadyStatus[AZGALOR_ACTION_MAX];
-    std::map<uint32, uint32> m_actionTimers;
 
     SelectAttackingTargetParams m_rainOfFireParams;
-
-    void Reset() override
-    {
-        for (auto& data : m_actionTimers)
-            data.second = GetInitialActionTimer(data.first);
-
-        for (uint32 i = 0; i < AZGALOR_ACTION_MAX; ++i)
-            m_actionReadyStatus[i] = false;
-    }
 
     uint32 GetInitialActionTimer(const uint32 action) const
     {
@@ -139,116 +128,61 @@ struct boss_azgalorAI : public ScriptedAI
             DoScriptText(urand(0, 1) ? SAY_DOOM1 : SAY_DOOM2, m_creature);
     }
 
-    void UpdateTimers(const uint32 diff)
+    void ExecuteAction(uint32 action) override
     {
-        for (auto& data : m_actionTimers)
+        switch (action)
         {
-            uint32 index = data.first;
-            if (!m_actionReadyStatus[index])
+            case AZGALOR_ACTION_CLEAVE:
             {
-                if (data.second <= diff)
-                {
-                    data.second = 0;
-                    m_actionReadyStatus[index] = true;
-                }
-                else
-                    data.second -= diff;
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
+            }
+            case AZGALOR_RAIN_OF_FIRE:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_RAIN_OF_FIRE, SELECT_FLAG_PLAYER | SELECT_FLAG_RANGE_AOE_RANGE, m_rainOfFireParams))
+                    if (DoCastSpellIfCan(target, SPELL_RAIN_OF_FIRE) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
+            }
+            case AZGALOR_HOWL_OF_AZGALOR:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_HOWL_OF_AZGALOR) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
+            }
+            case AZGALOR_DOOM:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_DOOM) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
+            }
+            case AZGALOR_ENRAGE:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
             }
         }
-    }
-
-    void ExecuteActions()
-    {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < AZGALOR_ACTION_MAX; ++i)
-        {
-            if (m_actionReadyStatus[i])
-            {
-                switch (i)
-                {
-                    case AZGALOR_ACTION_CLEAVE:
-                    {
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
-                        {
-                            m_actionTimers[i] = GetSubsequentActionTimer(i);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    }
-                    case AZGALOR_RAIN_OF_FIRE:
-                    {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_RAIN_OF_FIRE, SELECT_FLAG_PLAYER | SELECT_FLAG_RANGE_AOE_RANGE, m_rainOfFireParams))
-                        {
-                            if (DoCastSpellIfCan(target, SPELL_RAIN_OF_FIRE) == CAST_OK)
-                            {
-                                m_actionTimers[i] = GetSubsequentActionTimer(i);
-                                m_actionReadyStatus[i] = false;
-                                return;
-                            }
-                        }
-                        break;
-                    }
-                    case AZGALOR_HOWL_OF_AZGALOR:
-                    {
-                        if (DoCastSpellIfCan(nullptr, SPELL_HOWL_OF_AZGALOR) == CAST_OK)
-                        {
-                            m_actionTimers[i] = GetSubsequentActionTimer(i);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    }
-                    case AZGALOR_DOOM:
-                    {
-                        if (DoCastSpellIfCan(nullptr, SPELL_DOOM) == CAST_OK)
-                        {
-                            m_actionTimers[i] = GetSubsequentActionTimer(i);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    }
-                    case AZGALOR_ENRAGE:
-                    {
-                        if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
-                        {
-                            m_actionTimers[i] = GetSubsequentActionTimer(i);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-    }
-
-    void UpdateAI(const uint32 diff)
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        UpdateTimers(diff);
-        ExecuteActions();
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_azgalor(Creature* pCreature)
+struct Doom : public SpellScript
 {
-    return new boss_azgalorAI(pCreature);
-}
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (spell->GetCaster()->GetVictim() == target)
+            return false;
+        return true;
+    }
+};
 
 void AddSC_boss_azgalor()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_azgalor";
-    pNewScript->GetAI = &GetAI_boss_azgalor;
+    pNewScript->GetAI = &GetNewAIInstance<boss_azgalorAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<Doom>("spell_azgalor_doom");
 }

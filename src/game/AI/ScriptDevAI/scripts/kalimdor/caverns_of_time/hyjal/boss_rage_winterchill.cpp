@@ -16,6 +16,7 @@
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "hyjal.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -48,31 +49,19 @@ enum WinterchillActions
     WINTERCHILL_ACTION_MAX,
 };
 
-struct boss_rage_winterchillAI : public ScriptedAI
+struct boss_rage_winterchillAI : public CombatAI
 {
-    boss_rage_winterchillAI(Creature* creature) : ScriptedAI(creature)
+    boss_rage_winterchillAI(Creature* creature) : CombatAI(creature, WINTERCHILL_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_instance = static_cast<ScriptedInstance*>(creature->GetInstanceData());
-        m_actionTimers.insert({ WINTERCHILL_ACTION_FROST_ARMOR , 0 });
-        m_actionTimers.insert({ WINTERCHILL_ACTION_ICEBOLT , 0 });
-        m_actionTimers.insert({ WINTERCHILL_ACTION_FROST_NOVA , 0 });
-        m_actionTimers.insert({ WINTERCHILL_ACTION_DEATH_AND_DECAY , 0 });
-        m_actionTimers.insert({ WINTERCHILL_ACTION_ENRAGE , 0 });
+        AddCombatAction(WINTERCHILL_ACTION_FROST_ARMOR, GetInitialActionTimer(WINTERCHILL_ACTION_FROST_ARMOR));
+        AddCombatAction(WINTERCHILL_ACTION_ICEBOLT, GetInitialActionTimer(WINTERCHILL_ACTION_ICEBOLT));
+        AddCombatAction(WINTERCHILL_ACTION_FROST_NOVA, GetInitialActionTimer(WINTERCHILL_ACTION_FROST_NOVA));
+        AddCombatAction(WINTERCHILL_ACTION_DEATH_AND_DECAY, GetInitialActionTimer(WINTERCHILL_ACTION_DEATH_AND_DECAY));
+        AddCombatAction(WINTERCHILL_ACTION_ENRAGE, GetInitialActionTimer(WINTERCHILL_ACTION_ENRAGE));
         Reset();
     }
 
     ScriptedInstance* m_instance;
-    bool m_actionReadyStatus[WINTERCHILL_ACTION_MAX];
-    std::map<uint32, uint32> m_actionTimers;
-
-    void Reset() override
-    {
-        for (auto& data : m_actionTimers)
-            data.second = GetInitialActionTimer(data.first);
-
-        for (uint32 i = 0; i < WINTERCHILL_ACTION_MAX; ++i)
-            m_actionReadyStatus[i] = false;
-    }
 
     uint32 GetInitialActionTimer(const uint32 action) const
     {
@@ -128,125 +117,75 @@ struct boss_rage_winterchillAI : public ScriptedAI
         DoScriptText(textId, m_creature);
     }
 
-    void UpdateTimers(const uint32 diff)
+    void ExecuteAction(uint32 action) override
     {
-        for (auto& data : m_actionTimers)
+        switch (action)
         {
-            uint32 index = data.first;
-            if (!m_actionReadyStatus[index])
+            case WINTERCHILL_ACTION_FROST_ARMOR:
             {
-                if (data.second <= diff)
-                {
-                    data.second = 0;
-                    m_actionReadyStatus[index] = true;
-                }
-                else
-                    data.second -= diff;
+                if (DoCastSpellIfCan(nullptr, SPELL_FROST_ARMOR) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
             }
-        }
-    }
-
-    void ExecuteActions()
-    {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < WINTERCHILL_ACTION_MAX; ++i)
-        {
-            if (m_actionReadyStatus[i])
+            case WINTERCHILL_ACTION_ICEBOLT:
             {
-                switch (i)
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_ICEBOLT, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_ICEBOLT) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
+                break;
+            }
+            case WINTERCHILL_ACTION_FROST_NOVA:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_FROST_NOVA, SELECT_FLAG_PLAYER))
                 {
-                    case WINTERCHILL_ACTION_FROST_ARMOR:
+                    if (DoCastSpellIfCan(target, SPELL_FROST_NOVA) == CAST_OK)
                     {
-                        if (DoCastSpellIfCan(nullptr, SPELL_FROST_ARMOR) == CAST_OK)
-                        {
-                            m_actionTimers[i] = GetSubsequentActionTimer(i);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
-                    }
-                    case WINTERCHILL_ACTION_ICEBOLT:
-                    {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_ICEBOLT, SELECT_FLAG_PLAYER))
-                        {
-                            if (DoCastSpellIfCan(target, SPELL_ICEBOLT) == CAST_OK)
-                            {
-                                m_actionTimers[i] = GetSubsequentActionTimer(i);
-                                m_actionReadyStatus[i] = false;
-                                return;
-                            }
-                        }
-                        break;
-                    }
-                    case WINTERCHILL_ACTION_FROST_NOVA:
-                    {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_FROST_NOVA, SELECT_FLAG_PLAYER))
-                        {
-                            if (DoCastSpellIfCan(target, SPELL_FROST_NOVA) == CAST_OK)
-                            {
-                                DoScriptText(urand(0, 1) ? SAY_FROST_NOVA1 : SAY_FROST_NOVA2, m_creature);
-                                m_actionTimers[i] = GetSubsequentActionTimer(i);
-                                m_actionReadyStatus[i] = false;
-                                return;
-                            }
-                        }
-                        break;
-                    }
-                    case WINTERCHILL_ACTION_DEATH_AND_DECAY:
-                    {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DEATH_AND_DECAY, SELECT_FLAG_PLAYER))
-                        {
-                            if (DoCastSpellIfCan(target, SPELL_DEATH_AND_DECAY) == CAST_OK)
-                            {
-                                DoScriptText(urand(0, 1) ? SAY_DND1 : SAY_DND2, m_creature);
-                                m_actionTimers[i] = GetSubsequentActionTimer(i);
-                                m_actionReadyStatus[i] = false;
-                                return;
-                            }
-                        }
-                        break;
-                    }
-                    case WINTERCHILL_ACTION_ENRAGE:
-                    {
-                        if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
-                        {
-                            DoScriptText(SAY_ENRAGE, m_creature);
-                            m_actionTimers[i] = GetSubsequentActionTimer(i);
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                        break;
+                        DoScriptText(urand(0, 1) ? SAY_FROST_NOVA1 : SAY_FROST_NOVA2, m_creature);
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
                     }
                 }
+                break;
+            }
+            case WINTERCHILL_ACTION_DEATH_AND_DECAY:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DEATH_AND_DECAY, SELECT_FLAG_PLAYER))
+                {
+                    if (DoCastSpellIfCan(target, SPELL_DEATH_AND_DECAY) == CAST_OK)
+                    {
+                        DoScriptText(urand(0, 1) ? SAY_DND1 : SAY_DND2, m_creature);
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
+                    }
+                }
+                break;
+            }
+            case WINTERCHILL_ACTION_ENRAGE:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_ENRAGE) == CAST_OK)
+                {
+                    DoScriptText(SAY_ENRAGE, m_creature);
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                }
+                break;
             }
         }
-    }
-
-    void UpdateAI(const uint32 diff)
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        UpdateTimers(diff);
-        ExecuteActions();
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_boss_rage_winterchill(Creature* pCreature)
+struct DeathAndDecay : public AuraScript
 {
-    return new boss_rage_winterchillAI(pCreature);
-}
+    void OnPeriodicCalculateAmount(Aura* aura, uint32& amount) const override
+    {
+        if (aura->GetTarget()->GetEntry() == 17772) // Only Jaina receives less damage
+            amount = uint32(aura->GetTarget()->GetMaxHealth() * 0.5f / 100);
+    }
+};
 
 void AddSC_boss_rage_winterchill()
 {
-    Script* pNewScript;
-
-    pNewScript = new Script;
+    Script* pNewScript = new Script;
     pNewScript->Name = "boss_rage_winterchill";
-    pNewScript->GetAI = &GetAI_boss_rage_winterchill;
+    pNewScript->GetAI = &GetNewAIInstance<boss_rage_winterchillAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<DeathAndDecay>("spell_winterchill_death_and_decay");
 }
