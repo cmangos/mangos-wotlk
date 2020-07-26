@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "karazhan.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 /***********************************/
 /*** OPERA WIZARD OF OZ EVENT *****/
@@ -91,45 +92,33 @@ enum DorotheeActions // order based on priority
     DOROTHEE_ACTION_SUMMONTITO,
     DOROTHEE_ACTION_FRIGHTENEDSCREAM,
     DOROTHEE_ACTION_WATERBOLT,
-    DOROTHEE_ACTION_MAX
+    DOROTHEE_ACTION_MAX,
+    DOROTHEE_INTRO,
+    DOROTHEE_AGGRO,
 };
 
-struct boss_dorotheeAI : public ScriptedAI
+struct boss_dorotheeAI : public RangedCombatAI
 {
-    boss_dorotheeAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_dorotheeAI(Creature* creature) : RangedCombatAI(creature, DOROTHEE_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         SetReactState(REACT_PASSIVE);
+        AddCombatAction(DOROTHEE_ACTION_SUMMONTITO, GetInitialActionTimer(DOROTHEE_ACTION_SUMMONTITO));
+        AddCombatAction(DOROTHEE_ACTION_FRIGHTENEDSCREAM, GetInitialActionTimer(DOROTHEE_ACTION_FRIGHTENEDSCREAM));
+        AddCombatAction(DOROTHEE_ACTION_WATERBOLT, GetInitialActionTimer(DOROTHEE_ACTION_WATERBOLT));
+        AddCustomAction(DOROTHEE_INTRO, 2000u, [&]() { HandleIntro(); });
+        AddCustomAction(DOROTHEE_AGGRO, 12000u, [&]() { HandleAggro(); });
+        SetRangedMode(true, 40.f, TYPE_FULL_CASTER);
         Reset();
     }
 
     ScriptedInstance* m_instance;
 
-    uint32 m_actionTimers[DOROTHEE_ACTION_MAX];
-
-    bool m_actionReadyStatus[DOROTHEE_ACTION_MAX];
-    bool m_summontito;
-
-    uint32 m_uiAggroTimer;
-    uint32 m_uiIntroTimer;
-
     void Reset() override
     {
-        m_actionTimers[DOROTHEE_ACTION_SUMMONTITO] = GetInitialActionTimer(DOROTHEE_ACTION_SUMMONTITO);
-        m_actionTimers[DOROTHEE_ACTION_FRIGHTENEDSCREAM] = GetInitialActionTimer(DOROTHEE_ACTION_FRIGHTENEDSCREAM);
-        m_actionTimers[DOROTHEE_ACTION_WATERBOLT] = GetInitialActionTimer(DOROTHEE_ACTION_WATERBOLT);
-
-        for (uint32 i = 0; i < DOROTHEE_ACTION_MAX; ++i)
-            m_actionReadyStatus[i] = false;
-
-        m_attackDistance = 40.f;
+        CombatAI::Reset();
 
         SetCombatMovement(true);
         SetCombatScriptStatus(false);
-
-        m_uiIntroTimer      = 2000;
-        m_uiAggroTimer      = 12000;
-
-        m_summontito = false;
     }
 
     uint32 GetInitialActionTimer(DorotheeActions id)
@@ -178,104 +167,48 @@ struct boss_dorotheeAI : public ScriptedAI
             DoScriptText(SAY_DOROTHEE_TITO_DEATH, m_creature);
     }
 
-    void ExecuteActions()
+    void ExecuteAction(uint32 action) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < DOROTHEE_ACTION_MAX; ++i)
+        switch (action)
         {
-            if (m_actionReadyStatus[i])
+            case DOROTHEE_ACTION_WATERBOLT:
             {
-                switch (i)
+                if (DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER), SPELL_WATERBOLT) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(DorotheeActions(action)));
+                break;
+            }
+            case DOROTHEE_ACTION_FRIGHTENEDSCREAM:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, SPELL_FRIGHTENEDSCREAM, SELECT_FLAG_PLAYER | SELECT_FLAG_USE_EFFECT_RADIUS))
+                    if (DoCastSpellIfCan(nullptr, SPELL_FRIGHTENEDSCREAM) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(DorotheeActions(action)));
+                break;
+            }
+            case DOROTHEE_ACTION_SUMMONTITO:
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_SUMMONTITO) == CAST_OK)
                 {
-                    case DOROTHEE_ACTION_WATERBOLT:
-                    {
-                        if (DoCastSpellIfCan(m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER), SPELL_WATERBOLT) == CAST_OK)
-                        {
-                            m_actionTimers[i] = GetSubsequentActionTimer(DorotheeActions(i));
-                            m_actionReadyStatus[i] = false;
-                            return;
-                        }
-                    }
-                    break;
-                    case DOROTHEE_ACTION_FRIGHTENEDSCREAM:
-                    {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, SPELL_FRIGHTENEDSCREAM, SELECT_FLAG_PLAYER | SELECT_FLAG_USE_EFFECT_RADIUS))
-                        {
-                            if (DoCastSpellIfCan(nullptr, SPELL_FRIGHTENEDSCREAM) == CAST_OK)
-                            {
-                                m_actionTimers[i] = GetSubsequentActionTimer(DorotheeActions(i));
-                                m_actionReadyStatus[i] = false;
-                                return;
-                            }
-                        }
-                    }
-                    break;
-                    case DOROTHEE_ACTION_SUMMONTITO:
-                    {
-                        if (!m_summontito && DoCastSpellIfCan(m_creature, SPELL_SUMMONTITO) == CAST_OK)
-                        {
-                            DoScriptText(SAY_DOROTHEE_SUMMON, m_creature);
-                            m_summontito = true;
-                            return;
-                        }
-                    }
-                    break;
+                    DoScriptText(SAY_DOROTHEE_SUMMON, m_creature);
+                    DisableCombatAction(action);
                 }
+                break;
             }
         }
     };
 
-
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleIntro()
     {
-        if (m_uiIntroTimer)
-        {
-            if (m_uiIntroTimer <= uiDiff)
-            {
-                DoScriptText(SAY_DOROTHEE_AGGRO, m_creature);
-                m_uiIntroTimer = 0;
-            }
-            else
-                m_uiIntroTimer -= uiDiff;
-        }
+        DoScriptText(SAY_DOROTHEE_AGGRO, m_creature);
+    }
 
-        if (m_uiAggroTimer)
-        {
-            if (m_uiAggroTimer <= uiDiff)
-            {
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                SetReactState(REACT_AGGRESSIVE);
-                m_creature->SetInCombatWithZone();
-                AttackClosestEnemy();
-                if (!m_creature->IsInCombat())
-                    JustReachedHome();
-                m_uiAggroTimer = 0;
-            }
-            else
-                m_uiAggroTimer -= uiDiff;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        for (uint32 i = 0; i < DOROTHEE_ACTION_MAX; ++i)
-        {
-            if (!m_actionReadyStatus[i])
-            {
-                if (m_actionTimers[i] <= uiDiff)
-                {
-                    m_actionTimers[i] = 0;
-                    m_actionReadyStatus[i] = true;
-                }
-                else
-                    m_actionTimers[i] -= uiDiff;
-            }
-        }
-
-        ExecuteActions();
-        DoMeleeAttackIfReady();
+    void HandleAggro()
+    {
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        SetReactState(REACT_AGGRESSIVE);
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
+        if (!m_creature->IsInCombat())
+            JustReachedHome();
     }
 };
 
