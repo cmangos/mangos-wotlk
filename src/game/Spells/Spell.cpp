@@ -3781,7 +3781,7 @@ void Spell::ProcessAOECaps()
     }
 
     int32 value = CalculateSpellEffectValue(SpellEffectIndex(i), nullptr, true) * 10;
-    if (aggregatedDamage > value)
+    if (int32(aggregatedDamage) > value)
     {
         for (auto& ihit : m_UniqueTargetInfo)
             ihit.damage = (value / count);
