@@ -3516,36 +3516,6 @@ struct npc_dragonmaw_racer_skyshatterAI : public npc_dragonmaw_racerAI
     }
 };
 
-UnitAI* GetAI_npc_dragonmaw_racer_muckjaw(Creature* pCreature)
-{
-    return new npc_dragonmaw_racer_muckjawAI(pCreature);
-}
-
-UnitAI* GetAI_npc_dragonmaw_racer_trope(Creature* pCreature)
-{
-    return new npc_dragonmaw_racer_tropeAI(pCreature);
-}
-
-UnitAI* GetAI_npc_dragonmaw_racer_corlok(Creature* pCreature)
-{
-    return new npc_dragonmaw_racer_corlokAI(pCreature);
-}
-
-UnitAI* GetAI_npc_dragonmaw_racer_ichman(Creature* pCreature)
-{
-    return new npc_dragonmaw_racer_ichmanAI(pCreature);
-}
-
-UnitAI* GetAI_npc_dragonmaw_racer_mulverick(Creature* pCreature)
-{
-    return new npc_dragonmaw_racer_mulverickAI(pCreature);
-}
-
-UnitAI* GetAI_npc_dragonmaw_racer_skyshatter(Creature* pCreature)
-{
-    return new npc_dragonmaw_racer_skyshatterAI(pCreature);
-}
-
 bool QuestAccept_npc_dragonmaw_racer(Player* player, Creature* questgiver, Quest const* quest)
 {
     switch (quest->GetQuestId())
@@ -5419,37 +5389,37 @@ void AddSC_shadowmoon_valley()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_dragonmaw_racer_muckjaw";
-    pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_muckjaw;
+    pNewScript->GetAI = &GetNewAIInstance<npc_dragonmaw_racer_muckjawAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_dragonmaw_racer_trope";
-    pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_trope;
+    pNewScript->GetAI = &GetNewAIInstance<npc_dragonmaw_racer_tropeAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_dragonmaw_racer_corlok";
-    pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_corlok;
+    pNewScript->GetAI = &GetNewAIInstance<npc_dragonmaw_racer_corlokAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_dragonmaw_racer_ichman";
-    pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_ichman;
+    pNewScript->GetAI = &GetNewAIInstance<npc_dragonmaw_racer_ichmanAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_dragonmaw_racer_mulverick";
-    pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_mulverick;
+    pNewScript->GetAI = &GetNewAIInstance<npc_dragonmaw_racer_mulverickAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_dragonmaw_racer_skyshatter";
-    pNewScript->GetAI = &GetAI_npc_dragonmaw_racer_skyshatter;
+    pNewScript->GetAI = &GetNewAIInstance<npc_dragonmaw_racer_skyshatterAI>;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_dragonmaw_racer;
     pNewScript->RegisterSelf();
 
