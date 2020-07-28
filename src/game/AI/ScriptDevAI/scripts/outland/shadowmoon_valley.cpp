@@ -3293,7 +3293,7 @@ struct npc_dragonmaw_racerAI : public npc_escortAI
     {
         if (m_uiAttackTimer)
         {
-            if (m_uiAttackTimer < uiDiff)
+            if (m_uiAttackTimer <= uiDiff)
             {
                 AttackPlayer();
             }
