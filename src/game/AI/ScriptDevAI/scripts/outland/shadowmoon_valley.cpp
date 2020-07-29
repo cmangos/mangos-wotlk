@@ -2791,6 +2791,7 @@ enum CommanderActions : uint32
     COMMANDER_ACTION_POST_MOVEMENT_FACE_DIRECTION, // Only for aldor
     COMMANDER_ACTION_POST_MOVEMENT_START_EVENT,
     COMMANDER_ACTION_WIN_RETURN,
+    COMMANDER_ACTION_FAIL_EVENT,
 };
 
 struct SpawnData
@@ -2871,16 +2872,19 @@ static DeadliestScriptInfo deadliestScriptInfo[COMMANDER_COUNT] =
     { NPC_ALDOR_DRAGONMAW_SKYBREAKER,   NPC_ALTAR_DEFENDER,   LAST_POINT_ARCUS, SAY_EVENT_ACCEPT_ARCUS, SAY_EVENT_START_ARCUS, SAY_EVENT_END_ARCUS, SAY_EVENT_ACCEPT_ARCUS, QUEST_DEADLIEST_TRAP_ALDOR }
 };
 
-struct npc_commanderAI : public ScriptedAI, public CombatActions
+struct npc_commanderAI : public CombatAI
 {
-    npc_commanderAI(Creature* creature, uint8 commanderId) : ScriptedAI(creature), CombatActions(COMMANDER_COMBAT_ACTION_MAX), m_commanderId(commanderId),
-            m_defenderSpawns(DEFENDER_SPAWN_COUNT), m_dragonmawSpawns(DRAGONMAW_SPAWN_COUNT), m_killCounter(0)
+    npc_commanderAI(Creature* creature, uint8 commanderId) : CombatAI(creature, COMMANDER_COMBAT_ACTION_MAX),
+        m_defenderSpawns(DEFENDER_SPAWN_COUNT),
+        m_dragonmawSpawns(DRAGONMAW_SPAWN_COUNT),
+        m_killCounter(0),
+        m_commanderId(commanderId)
     {
         m_attackDistance = 30.f;
         m_meleeEnabled = false;
-        AddCombatAction(COMMANDER_COMBAT_ACTION_AIMED_SHOT, 0u);
-        AddCombatAction(COMMANDER_COMBAT_ACTION_MULTI_SHOT, 0u);
-        AddCombatAction(COMMANDER_COMBAT_ACTION_SHOOT, 0u);
+        AddCombatAction(COMMANDER_COMBAT_ACTION_AIMED_SHOT, GetInitialCombatActionTimer(COMMANDER_COMBAT_ACTION_AIMED_SHOT));
+        AddCombatAction(COMMANDER_COMBAT_ACTION_MULTI_SHOT, GetInitialCombatActionTimer(COMMANDER_COMBAT_ACTION_MULTI_SHOT));
+        AddCombatAction(COMMANDER_COMBAT_ACTION_SHOOT, GetInitialCombatActionTimer(COMMANDER_COMBAT_ACTION_SHOOT));
 
         AddCustomAction(COMMANDER_ACTION_START_QUEST_FLAGS, true, [&]() { m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER); });
         AddCustomAction(COMMANDER_ACTION_START_QUEST_TEXT, true, [&]()
@@ -2895,6 +2899,11 @@ struct npc_commanderAI : public ScriptedAI, public CombatActions
             m_creature->GetRespawnCoord(x, y, z, &ori);
             m_creature->GetMotionMaster()->MovePoint(POINT_HOME, x, y, z);
         });
+        AddCustomAction(COMMANDER_ACTION_FAIL_EVENT, true, [&]()
+        {
+            m_creature->ForcedDespawn();
+            FailEvent();
+        });
     }
 
     GuidVector m_defenderSpawns;
@@ -2903,13 +2912,6 @@ struct npc_commanderAI : public ScriptedAI, public CombatActions
 
     uint8 m_killCounter;
     uint8 m_commanderId;
-
-    void Reset() override
-    {
-        ResetTimer(COMMANDER_COMBAT_ACTION_AIMED_SHOT, GetRepeatingCombatActionTimer(COMMANDER_COMBAT_ACTION_AIMED_SHOT));
-        ResetTimer(COMMANDER_COMBAT_ACTION_MULTI_SHOT, GetRepeatingCombatActionTimer(COMMANDER_COMBAT_ACTION_MULTI_SHOT));
-        ResetTimer(COMMANDER_COMBAT_ACTION_SHOOT,      GetRepeatingCombatActionTimer(COMMANDER_COMBAT_ACTION_SHOOT));
-    }
 
     void GetAIInformation(ChatHandler& reader) override
     {
@@ -2943,43 +2945,22 @@ struct npc_commanderAI : public ScriptedAI, public CombatActions
         return 0;
     }
 
-    void ExecuteActions() override
+    void ExecuteAction(uint32 action) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < COMMANDER_COMBAT_ACTION_MAX; ++i)
+        switch (action)
         {
-            if (!GetActionReadyStatus(i))
-                continue;
-
-            switch (i)
-            {
-                case COMMANDER_COMBAT_ACTION_AIMED_SHOT:
-                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_AIMED_SHOT) == CAST_OK)
-                    {
-                        SetActionReadyStatus(i, false);
-                        ResetTimer(i, GetRepeatingCombatActionTimer(i));
-                        return;
-                    }
-                    continue;
-                case COMMANDER_COMBAT_ACTION_MULTI_SHOT:
-                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MULTI_SHOT) == CAST_OK)
-                    {
-                        SetActionReadyStatus(i, false);
-                        ResetTimer(i, GetRepeatingCombatActionTimer(i));
-                        return;
-                    }
-                    continue;
-                case COMMANDER_COMBAT_ACTION_SHOOT:
-                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOOT) == CAST_OK)
-                    {
-                        SetActionReadyStatus(i, false);
-                        ResetTimer(i, GetRepeatingCombatActionTimer(i));
-                        return;
-                    }
-                    continue;
-            }
+            case COMMANDER_COMBAT_ACTION_AIMED_SHOT:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_AIMED_SHOT) == CAST_OK)
+                    ResetCombatAction(action, GetRepeatingCombatActionTimer(action));
+                return;
+            case COMMANDER_COMBAT_ACTION_MULTI_SHOT:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MULTI_SHOT) == CAST_OK)
+                    ResetCombatAction(action, GetRepeatingCombatActionTimer(action));
+                return;
+            case COMMANDER_COMBAT_ACTION_SHOOT:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHOOT) == CAST_OK)
+                    ResetCombatAction(action, GetRepeatingCombatActionTimer(action));
+                return;
         }
     }
 
@@ -3037,6 +3018,7 @@ struct npc_commanderAI : public ScriptedAI, public CombatActions
         m_creature->GetMotionMaster()->Clear(false, true);
         m_creature->GetMotionMaster()->MoveIdle();
         m_creature->SetSheath(SHEATH_STATE_RANGED);
+        ResetTimer(COMMANDER_ACTION_FAIL_EVENT, 900000);
     }
 
     virtual void StartAttackingEvent()
@@ -3067,6 +3049,12 @@ struct npc_commanderAI : public ScriptedAI, public CombatActions
         DespawnDragonmaw();
         m_startingPlayer = ObjectGuid();
         m_creature->SetSheath(SHEATH_STATE_MELEE);
+        DisableTimer(COMMANDER_ACTION_FAIL_EVENT);
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        FailEvent();
     }
 
     void MovementInform(uint32 movementType, uint32 data) override
