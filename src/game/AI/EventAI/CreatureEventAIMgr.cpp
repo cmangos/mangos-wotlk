@@ -767,12 +767,12 @@ void CreatureEventAIMgr::LoadCreatureEventAI_Scripts()
                         IsValidTargetType(temp.event_type, action.type, action.summon.target, i, j + 1);
                         break;
                     case ACTION_T_THREAT_SINGLE:
-                        if (std::abs(action.threat_single.value) > 100 && !action.threat_single.isDirect)
+                        if (std::abs(action.threat_single.value) > 101 && !action.threat_single.isDirect)
                             sLog.outErrorEventAI("Event %u Action %u uses invalid percent value %u.", i, j + 1, action.threat_single.value);
                         IsValidTargetType(temp.event_type, action.type, action.threat_single.target, i, j + 1);
                         break;
                     case ACTION_T_THREAT_ALL_PCT:
-                        if (std::abs(action.threat_all_pct.percent) > 100)
+                        if (std::abs(action.threat_all_pct.percent) > 101)
                             sLog.outErrorEventAI("Event %u Action %u uses invalid percent value %u.", i, j + 1, action.threat_all_pct.percent);
                         break;
                     case ACTION_T_QUEST_EVENT:

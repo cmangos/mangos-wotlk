@@ -519,6 +519,7 @@ void ThreatManager::modifyThreatPercent(Unit* victim, int32 threatPercent)
 void ThreatManager::modifyAllThreatPercent(int32 threatPercent)
 {
     iThreatContainer.modifyAllThreatPercent(threatPercent);
+    iUpdateNeed = true;
 }
 
 //============================================================

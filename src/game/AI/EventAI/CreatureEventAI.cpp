@@ -860,10 +860,7 @@ bool CreatureEventAI::ProcessAction(CreatureEventAI_Action const& action, uint32
             break;
         case ACTION_T_THREAT_ALL_PCT:
         {
-            ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-            for (auto i : threatList)
-                if (Unit* Temp = m_creature->GetMap()->GetUnit(i->getUnitGuid()))
-                    m_creature->getThreatManager().modifyThreatPercent(Temp, action.threat_all_pct.percent);
+            m_creature->getThreatManager().modifyAllThreatPercent(action.threat_all_pct.percent);
             break;
         }
         case ACTION_T_QUEST_EVENT:
