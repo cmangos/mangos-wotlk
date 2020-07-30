@@ -1450,7 +1450,7 @@ struct npc_danath_trollbaneAI : public ScriptedAI
                 m_bOnYell2 = false;
 
                 // Mount Magtheridon's Head (update object)
-                if (GameObject* goHead = GetClosestGameObjectWithEntry(m_creature, OBJECT_MAGTHERIDONS_HEAD, 100.0f))
+                if (GameObject* goHead = GetClosestGameObjectWithEntry(m_creature, OBJECT_MAGTHERIDONS_HEAD, 120.0f))
                     if (Unit* invoker = m_creature->GetMap()->GetUnit(m_guidInvoker))
                         goHead->Use(invoker);
             }
@@ -1533,7 +1533,7 @@ struct npc_nazgrelAI : public ScriptedAI
                 m_bOnYell2 = false;
 
                 // Mount Magtheridon's Head (update object)
-                if (GameObject* goHead = GetClosestGameObjectWithEntry(m_creature, OBJECT_MAGTHERIDONS_HEAD, 100.0f))
+                if (GameObject* goHead = GetClosestGameObjectWithEntry(m_creature, OBJECT_MAGTHERIDONS_HEAD, 120.0f))
                     if (Unit* invoker = m_creature->GetMap()->GetUnit(m_guidInvoker))
                         goHead->Use(invoker);
             }
