@@ -167,15 +167,22 @@ struct boss_void_reaverAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_void_reaver(Creature* creature)
+struct ArcaneOrb : public SpellScript
 {
-    return new boss_void_reaverAI(creature);
-}
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (!spell->GetCaster()->IsInCombat())
+            return SPELL_FAILED_FIZZLE;
+        return SPELL_CAST_OK;
+    }
+};
 
 void AddSC_boss_void_reaver()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_void_reaver";
-    pNewScript->GetAI = &GetAI_boss_void_reaver;
+    pNewScript->GetAI = &GetNewAIInstance<boss_void_reaverAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ArcaneOrb>("spell_void_reaver_arcane_orb");
 }

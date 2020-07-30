@@ -151,6 +151,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (40214,'spell_dragonmaw_illusion_base'),
 (42016,'spell_dragonmaw_illusion_transform'),
 (39810,'spell_sparrowhawk_net'),
+(34190,'spell_void_reaver_arcane_orb'),
 (41034,'spell_spell_absorption'),
 (35861,'spell_nether_vapor_summon'),
 (35862,'spell_nether_vapor_summon'),
