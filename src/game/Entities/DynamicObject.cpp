@@ -214,9 +214,9 @@ void DynamicObject::OnPersistentAreaAuraEnd()
             if (Unit* owner = GetCaster())
                 owner->CastSpell(nullptr, 30631, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid());
             break;
-        case 32286: // Shirakk - Focus fire
+        case 32286: // Shirrak - Focus fire
             if (Unit* owner = GetCaster())
-                owner->CastSpell(nullptr, 32301, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, GetObjectGuid());
+                owner->CastSpell(nullptr, 32301, TRIGGERED_OLD_TRIGGERED);
             break;
     }
 }
