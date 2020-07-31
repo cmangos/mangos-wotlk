@@ -1332,6 +1332,57 @@ void ObjectMgr::LoadCreatureConditionalSpawn()
     sLog.outString();
 }
 
+void ObjectMgr::LoadCreatureSpawnDataTemplates()
+{
+    m_creatureSpawnTemplateMap.clear();
+
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Entry, UnitFlags, Faction, ModelId, EquipmentId, CurHealth, CurMana, SpawnFlags FROM creature_spawn_data_template"));
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outErrorDb(">> Loaded creature_spawn_data_template, table is empty!");
+        sLog.outString();
+        return;
+    }
+    
+    BarGoLink bar(result->GetRowCount());
+
+    uint32 count = 0;
+
+    do
+    {
+        bar.step();
+
+        Field* fields = result->Fetch();
+
+        uint32 entry =      fields[0].GetUInt32();
+        int64 unitFlags =   int64(fields[1].GetUInt64());
+        uint32 faction =    fields[2].GetUInt32();
+        uint32 modelId =    fields[3].GetUInt32();
+        uint32 equipmentId = fields[4].GetUInt32();
+        uint32 curHealth =  fields[5].GetUInt32();
+        uint32 curMana =    fields[6].GetUInt32();
+        uint32 spawnFlags = fields[7].GetUInt32();
+
+        // leave room for invalidation in future
+
+        auto& data = m_creatureSpawnTemplateMap[entry];
+        data.unitFlags = unitFlags;
+        data.faction = faction;
+        data.modelId = modelId;
+        data.equipmentId = equipmentId;
+        data.curHealth = curHealth;
+        data.curMana = curMana;
+        data.spawnFlags = spawnFlags;
+
+        ++count;
+    } while (result->NextRow());
+
+    sLog.outString(">> Loaded %u creature_spawn_data_template entries", count);
+    sLog.outString();
+}
+
 void ObjectMgr::LoadCreatureSpawnEntry()
 {
     mCreatureSpawnEntryMap.clear();
@@ -1390,10 +1441,13 @@ void ObjectMgr::LoadCreatures()
                           "curhealth, curmana, DeathState, MovementType, spawnMask, phaseMask, event,"
                           //   20                        21
                           "pool_creature.pool_entry, pool_creature_template.pool_entry "
+                          //   21
+                          "creature_spawn_data.id "
                           "FROM creature "
                           "LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid "
                           "LEFT OUTER JOIN pool_creature ON creature.guid = pool_creature.guid "
-                          "LEFT OUTER JOIN pool_creature_template ON creature.id = pool_creature_template.id");
+                          "LEFT OUTER JOIN pool_creature_template ON creature.id = pool_creature_template.id "
+                          "LEFT OUTER JOIN creature_spawn_data ON creature.guid = creature_spawn_data.guid ");
 
     if (!result)
     {
@@ -1483,6 +1537,8 @@ void ObjectMgr::LoadCreatures()
         data.gameEvent          = fields[19].GetInt16();
         data.GuidPoolId         = fields[20].GetInt16();
         data.EntryPoolId        = fields[21].GetInt16();
+        data.spawnTemplate = GetCreatureSpawnTemplate(0);
+        uint32 spawnDataEntry   = fields[22].GetUInt32();
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(data.mapid);
         if (!mapEntry)
@@ -1575,6 +1631,14 @@ void ObjectMgr::LoadCreatures()
         {
             sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `phaseMask`=0 (not visible for anyone), set to 1.", guid, data.id);
             data.phaseMask = 1;
+        }
+
+        if (spawnDataEntry > 0)
+        {
+            if (CreatureSpawnTemplate const* templateData = GetCreatureSpawnTemplate(spawnDataEntry))
+                data.spawnTemplate = templateData;
+            else
+                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with spawn template %u that doesnt exist.", guid, data.id, spawnDataEntry);
         }
 
         if (mapEntry->IsContinent())

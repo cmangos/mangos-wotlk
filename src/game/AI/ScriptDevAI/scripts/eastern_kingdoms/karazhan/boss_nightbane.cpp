@@ -132,8 +132,7 @@ struct boss_nightbaneAI : public CombatAI
 
     void StartIntro()
     {
-        m_creature->SetWalk(false);
-        m_creature->GetMotionMaster()->MoveWaypoint(0);
+        m_creature->GetMotionMaster()->MovePath(0, PATH_FROM_EXTERNAL, FORCED_MOVEMENT_RUN);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -330,8 +329,7 @@ struct boss_nightbaneAI : public CombatAI
             case NIGHTBANE_PHASE_RESET:
             {
                 DoScriptText(urand(0, 1) ? SAY_LAND_PHASE_1 : SAY_LAND_PHASE_2, m_creature);
-                auto wpPath = sWaypointMgr.GetPathFromOrigin(m_creature->GetEntry(), m_creature->GetGUIDLow(), 1, PATH_FROM_ENTRY);
-                m_creature->GetMotionMaster()->MovePath(*wpPath);
+                m_creature->GetMotionMaster()->MovePath(1, PATH_FROM_ENTRY);
                 m_phase = PHASE_TRANSITION;
                 SetCombatScriptStatus(true);
                 DisableCombatAction(action);

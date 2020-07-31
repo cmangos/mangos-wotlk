@@ -52,6 +52,7 @@ namespace Movement
         args.path[0] = real_position;
         args.initialOrientation = real_position.orientation;
 
+        args.flags.enter_cycle = args.flags.cyclic;
         uint32 moveFlags = unit.m_movementInfo.GetMovementFlags();
         if (args.flags.walkmode)
             moveFlags |= MOVEFLAG_WALK_MODE;
