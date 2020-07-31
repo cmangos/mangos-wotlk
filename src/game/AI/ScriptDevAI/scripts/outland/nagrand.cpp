@@ -475,7 +475,11 @@ enum
 
 struct npc_rethhedronAI : public ScriptedAI
 {
-    npc_rethhedronAI(Creature* pCreature) : ScriptedAI(pCreature) { JustRespawned(); Reset(); }
+    npc_rethhedronAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_creature->GetCombatManager().SetLeashingDisable(true);
+        Reset();
+    }
 
     uint32 m_uiCrippleTimer;
     uint32 m_uiShadowBoltTimer;
@@ -495,7 +499,7 @@ struct npc_rethhedronAI : public ScriptedAI
 
         m_bLowHpYell        = false;
 
-        m_attackDistance = 30.0f;
+        m_attackDistance = 60.0f;
     }
 
     void JustRespawned() override
@@ -598,11 +602,6 @@ struct npc_rethhedronAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_rethhedron(Creature* pCreature)
-{
-    return new npc_rethhedronAI(pCreature);
-}
-
 enum
 {
     GOSSIP_IN_BATTLE = 7700,
@@ -676,7 +675,7 @@ void AddSC_nagrand()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_rethhedron";
-    pNewScript->GetAI = &GetAI_npc_rethhedron;
+    pNewScript->GetAI = &GetNewAIInstance<npc_rethhedronAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
