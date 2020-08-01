@@ -3034,6 +3034,8 @@ struct npc_commanderAI : public CombatAI
 
         DoScriptText(deadliestScriptInfo[m_commanderId].winText, m_creature, m_creature->GetMap()->GetPlayer(m_startingPlayer));
 
+        if (m_creature->IsInCombat())
+            EnterEvadeMode();
         ResetTimer(COMMANDER_ACTION_WIN_RETURN, 3000);
         ResetEvent();
     }
