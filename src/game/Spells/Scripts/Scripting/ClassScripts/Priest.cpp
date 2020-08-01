@@ -19,42 +19,12 @@
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
-enum
+struct SpiritOfRedemptionHeal : public SpellScript
 {
-    SPELL_PLAYER_CONSUME_MAGIC = 32676,
-};
-
-struct ConsumeMagicSpellScript : public SpellScript
-{
-    SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
-    {
-        if (strict)
-        {
-            auto holderMap = spell->GetCaster()->GetSpellAuraHolderMap();
-            for (auto holderPair : holderMap)
-            {
-                if (holderPair.second->GetSpellProto())
-                {
-                    if (holderPair.second->GetSpellProto()->SpellFamilyName == SPELLFAMILY_PRIEST)
-                    {
-                        if (holderPair.second->IsPositive() && !holderPair.second->IsPassive())
-                        {
-                            spell->SetScriptValue(holderPair.second->GetId());
-                            return SPELL_CAST_OK;
-                        }
-                    }
-                }
-            }
-
-            return SPELL_FAILED_NOTHING_TO_DISPEL;
-        }
-        else
-            return SPELL_CAST_OK;
-    }
-
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        spell->GetCaster()->RemoveAurasDueToSpell(spell->GetScriptValue());
+        if (effIdx == EFFECT_INDEX_0)
+            spell->SetDamage(spell->GetCaster()->GetMaxHealth());
     }
 };
 
@@ -69,6 +39,6 @@ struct ShadowWordDeath : public SpellScript
 
 void LoadPriestScripts()
 {
-    RegisterSpellScript<ConsumeMagicSpellScript>("spell_consume_magic");
     RegisterSpellScript<ShadowWordDeath>("spell_shadow_word_death");
+    RegisterSpellScript<SpiritOfRedemptionHeal>("spell_spirit_of_redemption_heal");
 }

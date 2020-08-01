@@ -291,7 +291,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Priest
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
-(10060,'spell_stacking_rules_override');
+(10060,'spell_stacking_rules_override'),
+(27827,'spell_spirit_of_redemption_heal');
 
 -- Paladin
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
