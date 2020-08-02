@@ -97,6 +97,22 @@ void instance_the_eye::OnObjectCreate(GameObject* pGo)
     }
 }
 
+void instance_the_eye::OnCreatureEvade(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_NETHERSTRAND_LONGBOW:
+        case NPC_DEVASTATION:
+        case NPC_COSMIC_INFUSER:
+        case NPC_INFINITY_BLADES:
+        case NPC_WARP_SLICER:
+        case NPC_PHASESHIFT_BULWARK:
+        case NPC_STAFF_OF_DISINTEGRATION:
+            SetData(TYPE_KAELTHAS, FAIL);
+            break;
+    }
+}
+
 void instance_the_eye::SetData(uint32 uiType, uint32 uiData)
 {
     switch (uiType)
@@ -130,6 +146,7 @@ void instance_the_eye::SetData(uint32 uiType, uint32 uiData)
 
                 if (Creature* kael = GetSingleCreatureFromStorage(NPC_KAELTHAS))
                 {
+                    kael->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, kael, kael);
                     kael->SetRespawnDelay(30, true);
                     kael->ForcedDespawn();
                 }

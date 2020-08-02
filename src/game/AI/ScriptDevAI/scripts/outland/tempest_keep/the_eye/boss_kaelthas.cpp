@@ -405,26 +405,10 @@ struct boss_kaelthasAI : public ScriptedAI
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
-        if (eventType == AI_EVENT_CUSTOM_A)
+        if (eventType == AI_EVENT_CUSTOM_B)
         {
-
+            DoDespawnSummons();
         }
-    }
-
-    void EnterEvadeMode() override
-    {
-        for (ObjectGuid guid : m_charmTargets) // TODO: Add despawn on evade
-        {
-            if (Player* player = m_creature->GetMap()->GetPlayer(guid))
-            {
-                if (player->HasAura(SPELL_MIND_CONTROL))
-                {
-                    player->RemoveAurasDueToSpell(SPELL_MIND_CONTROL);
-                    player->Suicide();
-                }
-            }
-        }
-        ScriptedAI::EnterEvadeMode();
     }
 
     void DoDespawnSummons()
