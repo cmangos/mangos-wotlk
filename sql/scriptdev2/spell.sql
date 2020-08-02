@@ -166,6 +166,12 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34012,'spell_raise_dead'),
 (34019,'spell_raise_dead'),
 (41071,'spell_raise_dead'),
+(40567,'spell_ogrila_flasks'),
+(40568,'spell_ogrila_flasks'),
+(40572,'spell_ogrila_flasks'),
+(40573,'spell_ogrila_flasks'),
+(40575,'spell_ogrila_flasks'),
+(40576,'spell_ogrila_flasks'),
 (34630,'spell_scrap_reaver_spell'),
 (34800,'spell_getting_sleepy_aura'),
 (43364,'spell_getting_sleepy_aura');

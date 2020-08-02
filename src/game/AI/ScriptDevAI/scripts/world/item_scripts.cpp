@@ -246,6 +246,20 @@ struct GDRPeriodicDamage : public AuraScript
     }
 };
 
+struct OgrilaFlasks : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_0 || apply)
+            return;
+
+        SpellEntry const* spellInfo = aura->GetSpellProto();
+        for (uint32 i = EFFECT_INDEX_1; i < MAX_EFFECT_INDEX; ++i)
+            if (uint32 triggerSpell = spellInfo->EffectTriggerSpell[i])
+                aura->GetTarget()->RemoveAurasDueToSpell(triggerSpell);
+    }
+};
+
 void AddSC_item_scripts()
 {
     Script* pNewScript = new Script;
@@ -279,4 +293,5 @@ void AddSC_item_scripts()
 
     RegisterSpellScript<GDRChannel>("spell_gdr_channel");
     RegisterAuraScript<GDRPeriodicDamage>("spell_gdr_periodic");
+    RegisterAuraScript<OgrilaFlasks>("spell_ogrila_flasks");
 }
