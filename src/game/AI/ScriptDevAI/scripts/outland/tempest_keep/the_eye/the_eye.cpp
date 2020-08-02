@@ -123,16 +123,15 @@ void instance_the_eye::SetData(uint32 uiType, uint32 uiData)
                 if (GameObject* pGo = GetSingleGameObjectFromStorage(GO_BRIDGE_WINDOW))
                     pGo->ResetDoorOrButton();
 
-                // Respawn or reset the advisors
+                // despawn the advisors
                 for (unsigned int aAdvisor : aAdvisors)
+                    if (Creature* add = GetSingleCreatureFromStorage(aAdvisor))
+                        add->ForcedDespawn();
+
+                if (Creature* kael = GetSingleCreatureFromStorage(NPC_KAELTHAS))
                 {
-                    if (Creature* pTemp = GetSingleCreatureFromStorage(aAdvisor))
-                    {
-                        if (!pTemp->IsAlive())
-                            pTemp->Respawn();
-                        else if (pTemp->IsInCombat())
-                            pTemp->AI()->EnterEvadeMode();
-                    }
+                    kael->SetRespawnDelay(30, true);
+                    kael->ForcedDespawn();
                 }
             }
             m_auiEncounter[uiType] = uiData;
