@@ -4436,7 +4436,7 @@ SpellAuraProcResult Unit::HandleRaidProcFromChargeWithValueAuraProc(ProcExecutio
 {
     uint32 damage = data.damage; Aura* triggeredByAura = data.triggeredByAura;
     //if no damage then mending proc has failed, we dont need to do unecessary steps
-    if (!damage)
+    if (!damage || data.isHeal)
         return SPELL_AURA_PROC_FAILED;
 
     if (data.spell)
