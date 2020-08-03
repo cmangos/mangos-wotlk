@@ -2347,9 +2347,17 @@ enum
     NPC_PHOENIX_MGT                     = 24674,
 };
 
-struct mob_phoenix_tkAI : public ScriptedAI
+enum PhoenixActions
 {
-    mob_phoenix_tkAI(Creature* creature) : ScriptedAI(creature)
+    PHOENIX_ACTION_MAX,
+    PHOENIX_EMBER_BLAST,
+    PHOENIX_REBIRTH,
+    PHOENIX_ATTACK_DELAY,
+};
+
+struct mob_phoenix_tkAI : public CombatAI
+{
+    mob_phoenix_tkAI(Creature* creature) : CombatAI(creature, PHOENIX_ACTION_MAX)
     {
         bool tk = m_creature->GetEntry() == NPC_PHOENIX_TK;
         if (tk)
@@ -2369,7 +2377,10 @@ struct mob_phoenix_tkAI : public ScriptedAI
             m_phoenixEggSpellId = SPELL_PHOENIX_EGG_MGT;
         }
         SetDeathPrevention(true);
-        Reset();
+        SetReactState(REACT_PASSIVE);
+        AddCustomAction(PHOENIX_EMBER_BLAST, true, [&]() { HandleEmberBlast(); });
+        AddCustomAction(PHOENIX_REBIRTH, true, [&]() { HandleRebirth(); });
+        AddCustomAction(PHOENIX_ATTACK_DELAY, 2000u, [&]() { HandleAttackDelay(); });
     }
 
     uint32 m_burnSpellId;
@@ -2378,15 +2389,7 @@ struct mob_phoenix_tkAI : public ScriptedAI
     uint32 m_rebirthRespawnSpellId;
     uint32 m_phoenixEggSpellId;
 
-    uint32 m_emberDelayTimer;
-    uint32 m_phoenixRebirthTimer;
     ObjectGuid m_eggGuid;
-
-    void Reset() override
-    {
-        m_emberDelayTimer = 0;
-        m_phoenixRebirthTimer = 0;
-    }
 
     void Aggro(Unit* /*pWho*/) override
     {
@@ -2414,7 +2417,7 @@ struct mob_phoenix_tkAI : public ScriptedAI
         SetMeleeEnabled(false);
         SetCombatScriptStatus(true);
 
-        m_emberDelayTimer = 1000;
+        ResetTimer(PHOENIX_EMBER_BLAST, 1000);
     }
 
     void JustRespawned() override
@@ -2471,47 +2474,31 @@ struct mob_phoenix_tkAI : public ScriptedAI
                 egg->ForcedDespawn();
     }
 
-    void UpdateAI(const uint32 diff) override
+    void HandleAttackDelay()
     {
-        if (m_emberDelayTimer)
-        {
-            if (m_emberDelayTimer <= diff)
-            {
-                m_emberDelayTimer = 0;
-                // Spawn egg and make invisible
-                DoCastSpellIfCan(nullptr, m_emberBlastSpellId, CAST_TRIGGERED);
-                DoCastSpellIfCan(nullptr, m_phoenixEggSpellId, CAST_TRIGGERED);
-                m_phoenixRebirthTimer = m_creature->GetEntry() == NPC_PHOENIX_TK ? 15000 : 10000;
-            }
-            else
-                m_emberDelayTimer -= diff;
-        }
-
-        if (m_phoenixRebirthTimer)
-        {
-            if (m_phoenixRebirthTimer <= diff)
-            {
-                m_phoenixRebirthTimer = 0;
-                if (Creature* egg = m_creature->GetMap()->GetCreature(m_eggGuid))
-                    egg->ForcedDespawn();
-
-                DoRebirth();
-            }
-            else
-                m_phoenixRebirthTimer -= diff;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        DoMeleeAttackIfReady();
+        SetReactState(REACT_AGGRESSIVE);
+        m_creature->SetInCombatWithZone();
+        AttackClosestEnemy();
     }
-};
 
-UnitAI* GetAI_mob_phoenix_tk(Creature* pCreature)
-{
-    return new mob_phoenix_tkAI(pCreature);
-}
+    void HandleEmberBlast()
+    {
+        // Spawn egg and make invisible
+        DoCastSpellIfCan(nullptr, m_emberBlastSpellId, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, m_phoenixEggSpellId, CAST_TRIGGERED);
+        ResetTimer(PHOENIX_REBIRTH, m_creature->GetEntry() == NPC_PHOENIX_TK ? 15000 : 10000);
+    }
+
+    void HandleRebirth()
+    {
+        if (Creature* egg = m_creature->GetMap()->GetCreature(m_eggGuid))
+            egg->ForcedDespawn();
+
+        DoRebirth();
+    }
+
+    void ExecuteAction(uint32 action) override { }
+};
 
 void AddSC_npcs_special()
 {
@@ -2620,6 +2607,6 @@ void AddSC_npcs_special()
 
     pNewScript = new Script;
     pNewScript->Name = "mob_phoenix";
-    pNewScript->GetAI = &GetAI_mob_phoenix_tk;
+    pNewScript->GetAI = &GetNewAIInstance<mob_phoenix_tkAI>;
     pNewScript->RegisterSelf();
 }
