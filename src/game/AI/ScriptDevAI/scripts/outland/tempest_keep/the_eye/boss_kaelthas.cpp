@@ -430,9 +430,11 @@ struct boss_kaelthasAI : public ScriptedAI
     // Custom Move in LoS function
     void MoveInLineOfSight(Unit* who) override
     {
-        if (m_uiPhase == PHASE_0_NOT_BEGUN && who->GetTypeId() == TYPEID_PLAYER && !((Player*)who)->isGameMaster() &&
+        if (m_uiPhase == PHASE_0_NOT_BEGUN && who->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) &&
                 m_creature->IsWithinDistInMap(who, m_creature->GetAttackDistance(who)) && m_creature->IsWithinLOSInMap(who) && m_creature->CanAttackOnSight(who))
         {
+            if (who->IsPlayer() && static_cast<Player*>(who)->isGameMaster())
+                return;
             DoScriptText(SAY_INTRO, m_creature);
             DoCastSpellIfCan(m_creature, SPELL_REMOVE_WEAPONS, CAST_TRIGGERED);
             m_uiPhase = PHASE_1_ADVISOR;
@@ -491,11 +493,6 @@ struct boss_kaelthasAI : public ScriptedAI
             case NPC_NETHER_VAPOR:
             {
                 m_netherVapor.push_back(summoned->GetObjectGuid());
-                break;
-            }
-            case NPC_PHOENIX:
-            {
-                summoned->SetInCombatWithZone();
                 break;
             }
             default:
@@ -864,10 +861,11 @@ struct boss_kaelthasAI : public ScriptedAI
 #endif
                             break;
                         case 1:
-                            if (Creature* pAdvisor = m_instance->GetSingleCreatureFromStorage(NPC_THALADRED))
+                            if (Creature* advisor = m_instance->GetSingleCreatureFromStorage(NPC_THALADRED))
                             {
-                                pAdvisor->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                                pAdvisor->SetInCombatWithZone();
+                                advisor->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                                advisor->SetInCombatWithZone();
+                                advisor->AI()->AttackClosestEnemy();
                             }
                             m_uiPhaseTimer = 0;
                             break;
@@ -880,10 +878,11 @@ struct boss_kaelthasAI : public ScriptedAI
 #endif
                             break;
                         case 3:
-                            if (Creature* pAdvisor = m_instance->GetSingleCreatureFromStorage(NPC_SANGUINAR))
+                            if (Creature* advisor = m_instance->GetSingleCreatureFromStorage(NPC_SANGUINAR))
                             {
-                                pAdvisor->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                                pAdvisor->SetInCombatWithZone();
+                                advisor->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                                advisor->SetInCombatWithZone();
+                                advisor->AI()->AttackClosestEnemy();
                             }
                             m_uiPhaseTimer = 0;
                             break;
@@ -896,10 +895,11 @@ struct boss_kaelthasAI : public ScriptedAI
 #endif
                             break;
                         case 5:
-                            if (Creature* pAdvisor = m_instance->GetSingleCreatureFromStorage(NPC_CAPERNIAN))
+                            if (Creature* advisor = m_instance->GetSingleCreatureFromStorage(NPC_CAPERNIAN))
                             {
-                                pAdvisor->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                                pAdvisor->SetInCombatWithZone();
+                                advisor->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                                advisor->SetInCombatWithZone();
+                                advisor->AI()->AttackClosestEnemy();
                             }
                             m_uiPhaseTimer = 0;
                             break;
@@ -912,10 +912,11 @@ struct boss_kaelthasAI : public ScriptedAI
 #endif
                             break;
                         case 7:
-                            if (Creature* pAdvisor = m_instance->GetSingleCreatureFromStorage(NPC_TELONICUS))
+                            if (Creature* advisor = m_instance->GetSingleCreatureFromStorage(NPC_TELONICUS))
                             {
-                                pAdvisor->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                                pAdvisor->SetInCombatWithZone();
+                                advisor->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+                                advisor->SetInCombatWithZone();
+                                advisor->AI()->AttackClosestEnemy();
                             }
                             m_uiPhaseTimer = 0;
                             break;
@@ -943,8 +944,13 @@ struct boss_kaelthasAI : public ScriptedAI
                     {
                         m_weaponAttackTimer = 0;
                         for (ObjectGuid& guid : m_weapons)
+                        {
                             if (Creature* weapon = m_creature->GetMap()->GetCreature(guid))
+                            {
                                 weapon->SetInCombatWithZone();
+                                weapon->AI()->AttackClosestEnemy();
+                            }
+                        }
                     }
                     else
                         m_weaponAttackTimer -= uiDiff;
