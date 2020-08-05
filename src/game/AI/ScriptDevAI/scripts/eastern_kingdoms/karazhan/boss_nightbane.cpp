@@ -128,6 +128,7 @@ struct boss_nightbaneAI : public CombatAI
         SetMeleeEnabled(true);
 
         m_skeletons.clear();
+        m_creature->SetWalk(false);
     }
 
     void StartIntro()
