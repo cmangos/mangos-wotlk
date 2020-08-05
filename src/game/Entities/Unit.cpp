@@ -6699,7 +6699,7 @@ void Unit::SendEnchantmentLog(ObjectGuid targetGuid, uint32 itemEntry, uint32 en
     SendMessageToSet(data, true);
 }
 
-void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo, bool success/* = true*/)
+void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo, bool triggered, bool success/* = true*/)
 {
     switch (spellInfo->Id)
     {
@@ -6753,7 +6753,7 @@ void Unit::CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry c
         if (!spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO) && !spellInfo->HasAttribute(SPELL_ATTR_EX_NO_THREAT) && CanEnterCombat() && target->CanEnterCombat())
         {
             realCaster->SetInCombatWithAssisted(target);
-            target->getHostileRefManager().threatAssist(realCaster, 0.0f, spellInfo, false);
+            target->getHostileRefManager().threatAssist(realCaster, 0.0f, spellInfo, false, triggered);
         }
 
         if (spellInfo->HasAttribute(SPELL_ATTR_EX3_OUT_OF_COMBAT_ATTACK))
