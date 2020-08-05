@@ -1042,6 +1042,11 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* creature)
     {
         case NPC_WINTERCHILL:
             SetData(TYPE_WINTERCHILL, DONE);
+            if (Creature* jaina = GetSingleCreatureFromStorage(NPC_JAINA))
+            {
+                jaina->AI()->SendAIEvent(AI_EVENT_CUSTOM_D, jaina, jaina);
+                jaina->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            }
             m_waveSpawns.erase(std::remove(m_waveSpawns.begin(), m_waveSpawns.end(), creature->GetObjectGuid()), m_waveSpawns.end());
             break;
         case NPC_ANETHERON:
@@ -1059,6 +1064,11 @@ void instance_mount_hyjal::OnCreatureDeath(Creature* creature)
         }
         case NPC_KAZROGAL:
             SetData(TYPE_KAZROGAL, DONE);
+            if (Creature* thrall = GetSingleCreatureFromStorage(NPC_THRALL))
+            {
+                thrall->AI()->SendAIEvent(AI_EVENT_CUSTOM_D, thrall, thrall);
+                thrall->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+            }
             m_waveSpawns.erase(std::remove(m_waveSpawns.begin(), m_waveSpawns.end(), creature->GetObjectGuid()), m_waveSpawns.end());
             break;
         case NPC_AZGALOR:

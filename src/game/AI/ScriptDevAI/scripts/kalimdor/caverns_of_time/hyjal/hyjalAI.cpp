@@ -145,6 +145,7 @@ void hyjalAI::Win()
 void hyjalAI::EventStarted()
 {
     m_uiRallyYellTimer = urand(60000, 240000);
+    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 }
 
 void hyjalAI::ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 miscValue)
