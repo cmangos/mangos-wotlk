@@ -260,6 +260,25 @@ struct SpellAbsorption : public AuraScript
     }
 };
 
+enum
+{
+    SPELL_FOCUSED = 40085,
+};
+
+struct HarpoonersMark : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->CastSpell(nullptr, SPELL_FOCUSED, TRIGGERED_OLD_TRIGGERED);
+    }
+
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        aura->GetTarget()->CastSpell(nullptr, SPELL_FOCUSED, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_black_temple()
 {
     Script* pNewScript = new Script;
@@ -278,4 +297,5 @@ void AddSC_black_temple()
     pNewScript->RegisterSelf();
 
     RegisterAuraScript<SpellAbsorption>("spell_spell_absorption");
+    RegisterAuraScript<HarpoonersMark>("spell_harpooners_mark");
 }

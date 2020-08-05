@@ -6448,9 +6448,6 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
 
             switch (spell->Id)
             {
-                case 40084: // Harpooner's Mark
-                    target->CastSpell(nullptr, 40085, TRIGGERED_OLD_TRIGGERED);
-                    break;
                 case 53301: // Explosive Shot
                 case 60051:
                 case 60052:
@@ -9220,9 +9217,7 @@ void Aura::PeriodicDummyTick()
                 case 39993: // Simon Game START timer, (DND)
                     target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, target);
                     return;
-                case 40084: // Harpooner's Mark
-                    target->CastSpell(nullptr, 40085, TRIGGERED_OLD_TRIGGERED);
-                    break;
+//              case 40084: break;
 //              // Knockdown Fel Cannon: break; The Aggro Burst
 //              case 40119: break;
 //              // Old Mount Spell
