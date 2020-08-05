@@ -12284,27 +12284,29 @@ void Unit::KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpee
 
 void Unit::KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed)
 {
-    if (GetTypeId() == TYPEID_PLAYER)
+    if (IsClientControlled())
     {
-        ((Player*)this)->GetSession()->SendKnockBack(angle, horizontalSpeed, verticalSpeed);
+        if (Player const* player = GetControllingPlayer())
+        {
+            player->GetSession()->SendKnockBack(this, angle, horizontalSpeed, verticalSpeed);
+            return;
+        }
     }
-    else
-    {
-        float vsin = sin(angle);
-        float vcos = cos(angle);
-        float moveTimeHalf = verticalSpeed / Movement::gravity;
-        float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -verticalSpeed);
 
-        float dis = 2 * moveTimeHalf * horizontalSpeed;
-        float ox, oy, oz;
-        GetPosition(ox, oy, oz);
-        float fx = ox + dis * vcos;
-        float fy = oy + dis * vsin;
-        float fz = oz + 0.5f;
-        GetMap()->GetHitPosition(ox, oy, oz + 0.5f, fx, fy, fz, GetPhaseMask(), -0.5f);
-        UpdateAllowedPositionZ(fx, fy, fz);
-        GetMotionMaster()->MoveJump(fx, fy, fz, horizontalSpeed, max_height);
-    }
+    float vsin = sin(angle);
+    float vcos = cos(angle);
+    float moveTimeHalf = verticalSpeed / Movement::gravity;
+    float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -verticalSpeed);
+
+    float dis = 2 * moveTimeHalf * horizontalSpeed;
+    float ox, oy, oz;
+    GetPosition(ox, oy, oz);
+    float fx = ox + dis * vcos;
+    float fy = oy + dis * vsin;
+    float fz = oz + 0.5f;
+    GetMap()->GetHitPosition(ox, oy, oz + 0.5f, fx, fy, fz, GetPhaseMask(), -0.5f);
+    UpdateAllowedPositionZ(fx, fy, fz);
+    GetMotionMaster()->MoveJump(fx, fy, fz, horizontalSpeed, max_height);
 }
 
 float Unit::GetCombatRatingReduction(CombatRating cr) const

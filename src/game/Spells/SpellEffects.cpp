@@ -9041,7 +9041,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (unitTarget->GetTypeId() == TYPEID_PLAYER)
                     {
                         float angle = frand(0, M_PI_F * 2);
-                        ((Player*)unitTarget)->GetSession()->SendKnockBack(angle, 15.f, urand(15, 24));
+                        ((Player*)unitTarget)->GetSession()->SendKnockBack(unitTarget, angle, 15.f, urand(15, 24));
                     }
                     return;
                 }
@@ -12711,7 +12711,7 @@ void Spell::EffectPullTowards(SpellEffectIndex eff_idx)
 
     if (m_spellInfo->Effect[eff_idx] == SPELL_EFFECT_PULL_TOWARDS)
     {
-        m_caster->GetPosition(x, y, z);
+        z = m_caster->GetPositionZ();
         dist = unitTarget->GetDistance(m_caster, false);
     }
     else // SPELL_EFFECT_PULL_TOWARDS_DEST
@@ -12730,9 +12730,8 @@ void Spell::EffectPullTowards(SpellEffectIndex eff_idx)
     float speedXY = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.1f;
     float time = dist / speedXY;
     float speedZ = ((z - unitTarget->GetPositionZ()) + 0.5f * time * time * Movement::gravity) / time;
-    float moveTimeHalf = speedZ / Movement::gravity;
-    float max_height = -Movement::computeFallElevation(moveTimeHalf, false, -speedZ);
-    unitTarget->GetMotionMaster()->MoveJump(x, y, z, speedXY, max_height, 2);
+
+    unitTarget->KnockBackFrom(m_caster, -speedXY, speedZ);
 }
 
 void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)

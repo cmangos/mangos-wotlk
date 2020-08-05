@@ -475,7 +475,7 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 
 UpdateMask Player::updateVisualBits;
 
-Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this)
+Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this), m_launched(false)
 {
 #ifdef BUILD_PLAYERBOT
     m_playerbotAI = 0;
@@ -1550,14 +1550,6 @@ void Player::Update(const uint32 diff)
         }
         else
             m_zoneUpdateTimer -= diff;
-    }
-
-    if (m_timeSyncTimer > 0)
-    {
-        if (diff >= m_timeSyncTimer)
-            SendTimeSync();
-        else
-            m_timeSyncTimer -= diff;
     }
 
     if (IsAlive())
@@ -20959,8 +20951,8 @@ void Player::SendInitialPacketsAfterAddToMap()
     GetZoneAndAreaId(newzone, newarea);
     UpdateZone(newzone, newarea);                           // also call SendInitWorldStates();
 
-    ResetTimeSync();
-    SendTimeSync();
+    GetSession()->ResetTimeSync();
+    GetSession()->SendTimeSync();
 
     CastSpell(this, 836, TRIGGERED_OLD_TRIGGERED);                             // LOGINEFFECT
 
@@ -23873,25 +23865,6 @@ void Player::SendClearCooldown(uint32 spell_id, Unit* target) const
     SendDirectMessage(data);
 }
 
-void Player::ResetTimeSync()
-{
-    m_timeSyncCounter = 0;
-    m_timeSyncTimer = 0;
-    m_timeSyncClient = 0;
-    m_timeSyncServer = WorldTimer::getMSTime();
-}
-
-void Player::SendTimeSync()
-{
-    WorldPacket data(SMSG_TIME_SYNC_REQ, 4);
-    data << uint32(m_timeSyncCounter++);
-    GetSession()->SendPacket(data);
-
-    // Schedule next sync in 10 sec
-    m_timeSyncTimer = 10000;
-    m_timeSyncServer = WorldTimer::getMSTime();
-}
-
 void Player::SendDuelCountdown(uint32 counter) const
 {
     WorldPacket data(SMSG_DUEL_COUNTDOWN, 4);
@@ -24099,7 +24072,7 @@ void Player::_fillGearScoreData(Item* item, GearScoreVec* gearScore, uint32& two
     if (CanUseItem(item->GetProto()) != EQUIP_ERR_OK)
         return;
 
-    uint8 type   = item->GetProto()->InventoryType;
+    uint8 type = item->GetProto()->InventoryType;
     uint32 level = item->GetProto()->ItemLevel;
 
     switch (type)
@@ -24152,8 +24125,8 @@ void Player::_fillGearScoreData(Item* item, GearScoreVec* gearScore, uint32& two
         case INVTYPE_HANDS:
             (*gearScore)[EQUIPMENT_SLOT_HEAD] = std::max((*gearScore)[EQUIPMENT_SLOT_HEAD], level);
             break;
-        // equipped gear score check uses both rings and trinkets for calculation, assume that for bags/banks it is the same
-        // with keeping second highest score at second slot
+            // equipped gear score check uses both rings and trinkets for calculation, assume that for bags/banks it is the same
+            // with keeping second highest score at second slot
         case INVTYPE_FINGER:
         {
             if ((*gearScore)[EQUIPMENT_SLOT_FINGER1] < level)

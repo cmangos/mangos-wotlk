@@ -94,7 +94,7 @@ bool WorldSessionFilter::Process(WorldPacket const& packet) const
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :
-    m_muteTime(mute_time), m_GUIDLow(0), _player(nullptr), m_Socket(sock ? sock->shared<WorldSocket>() : nullptr), _security(sec), _accountId(id), m_expansion(expansion),
+    m_muteTime(mute_time), m_GUIDLow(0), _player(nullptr), m_Socket(sock ? sock->shared<WorldSocket>() : nullptr), _security(sec), _accountId(id), m_expansion(expansion), m_orderCounter(0),
     _logoutTime(0), m_inQueue(false), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_playerSave(true),
     m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(sObjectMgr.GetStorageLocaleIndexFor(locale)),
     m_latency(0), m_clientTimeDelay(0), m_tutorialState(TUTORIALDATA_UNCHANGED), m_sessionState(WORLD_SESSION_STATE_CREATED),
@@ -1315,4 +1315,23 @@ void WorldSession::SendAuthQueued() const
     packet << uint32(sWorld.GetQueuedSessionPos(this));     // position in queue
     packet << uint8(0);                                     // unk 3.3.0
     SendPacket(packet);
+}
+
+void WorldSession::ResetTimeSync()
+{
+    m_timeSyncNextCounter = 0;
+    m_pendingTimeSyncRequests.clear();
+}
+
+void WorldSession::SendTimeSync()
+{
+    WorldPacket data(SMSG_TIME_SYNC_REQ, 4);
+    data << uint32(m_timeSyncNextCounter);
+    SendPacket(data);
+
+    m_pendingTimeSyncRequests[m_timeSyncNextCounter] = WorldTimer::getMSTime();
+
+    // Schedule next sync in 10 sec (except for the 2 first packets, which are spaced by only 5s)
+    m_timeSyncTimer = m_timeSyncNextCounter == 0 ? 5000 : 10000;
+    m_timeSyncNextCounter++;
 }

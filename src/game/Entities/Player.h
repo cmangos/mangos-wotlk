@@ -1122,9 +1122,6 @@ class Player : public Unit
         uint32 GetTotalPlayedTime() { return m_Played_time[PLAYED_TIME_TOTAL]; }
         uint32 GetLevelPlayedTime() { return m_Played_time[PLAYED_TIME_LEVEL]; }
 
-        void ResetTimeSync();
-        void SendTimeSync();
-
         Player* GetSpellModOwner() const override { return const_cast<Player*>(this); }
 
         void SetDeathState(DeathState s) override;          // overwrite Unit::SetDeathState
@@ -1949,6 +1946,9 @@ class Player : public Unit
         void LearnDefaultSkills();
 
         virtual uint32 GetSpellRank(SpellEntry const* spellInfo) override;
+
+        bool IsLaunched() const { return m_launched; }
+        void SetLaunched(bool apply) { m_launched = apply; }
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
         bool IsBeingTeleported() const { return m_semaphoreTeleport_Near || m_semaphoreTeleport_Far; }
@@ -2799,16 +2799,13 @@ class Player : public Unit
         AchievementMgr m_achievementMgr;
         ReputationMgr  m_reputationMgr;
 
-        uint32 m_timeSyncCounter;
-        uint32 m_timeSyncTimer;
-        uint32 m_timeSyncClient;
-        uint32 m_timeSyncServer;
-
         uint32 m_cachedGS;
 
         bool m_isGhouled;
 
         float m_energyRegenRate;
+
+        bool m_launched;
 
         std::unique_ptr<Spell> m_queuedSpell;
 
