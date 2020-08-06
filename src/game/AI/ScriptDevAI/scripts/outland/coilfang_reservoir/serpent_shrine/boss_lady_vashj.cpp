@@ -158,7 +158,7 @@ struct boss_lady_vashjAI : public RangedCombatAI
         AddCombatAction(VASHJ_ACTION_SHOOT, 2000u);
         AddCombatAction(VASHJ_ACTION_FORKED_LIGHTNING, true);
         AddTimerlessCombatAction(VASHJ_ACTION_MELEE_MODE, true);
-        AddCustomAction(VASHJ_INTRO, true, [&]() { DoScriptText(SAY_INTRO, m_creature, m_creature->GetMap()->GetPlayer(m_introTarget)); });
+        AddCustomAction(VASHJ_INTRO, true, [&]() { HandleIntroText(); });
         AddCustomAction(VASHJ_COILFANG_ELITE, true, [&]() { HandleCoilfangElite(); });
         AddCustomAction(VASHJ_COILFANG_STRIDER, true, [&]() { HandleCoilfangStrider(); });
         AddCustomAction(VASHJ_SPOREBAT, true, [&]() { HandleSporebat(); });
@@ -415,6 +415,20 @@ struct boss_lady_vashjAI : public RangedCombatAI
         DisableTimer(VASHJ_SPOREBAT);
         DisableTimer(VASHJ_ENCHANTED_ELEMENTAL);
         DisableTimer(VASHJ_TAINTED_ELEMENTAL);
+    }
+
+    void HandleIntroText()
+    {
+        if (Player* player = m_creature->GetMap()->GetPlayer(m_introTarget))
+        {
+            if (player->GetDistance(m_creature) < 60.f)
+            {
+                DoScriptText(SAY_INTRO, m_creature, player);
+                return;
+            }
+        }
+
+        ResetTimer(VASHJ_INTRO, 5000);
     }
 
     void EnterEvadeMode() override
