@@ -2057,6 +2057,8 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map, uint
         creature->SetSpawnCounting(true);
 
     creature->GetMotionMaster()->SetDefaultPathId(settings.pathId);
+    if (settings.movegen != -1)
+        creature->SetDefaultMovementType(MovementGeneratorType(settings.movegen));
 
     if (settings.spawner)
     {
