@@ -28,6 +28,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "world_eastern_kingdoms.h"
 
 /*######
 ## npc_00x09hl
@@ -355,6 +356,24 @@ UnitAI* GetAI_npc_rinji(Creature* pCreature)
     return new npc_rinjiAI(pCreature);
 }
 
+enum
+{
+    YELL_FALSTAD_INVADERS = -27,
+};
+
+bool ProcessEventId_WildhammerMessage(uint32 /*eventId*/, Object* source, Object* /*target*/, bool /*isStart*/)
+{
+    if (!source->IsPlayer())
+        return true;
+
+    Player* player = static_cast<Player*>(source);
+    player->UpdatePvP(true);
+    player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+    if (Creature* falstad = static_cast<ScriptedInstance*>(player->GetInstanceData())->GetSingleCreatureFromStorage(NPC_FALSTAD_WILDHAMMER))
+        DoScriptText(YELL_FALSTAD_INVADERS, falstad, player);
+    return true;
+}
+
 void AddSC_hinterlands()
 {
     Script* pNewScript = new Script;
@@ -367,5 +386,10 @@ void AddSC_hinterlands()
     pNewScript->Name = "npc_rinji";
     pNewScript->GetAI = &GetAI_npc_rinji;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_rinji;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "event_wildhammer_message";
+    pNewScript->pProcessEventId = &ProcessEventId_WildhammerMessage;
     pNewScript->RegisterSelf();
 }

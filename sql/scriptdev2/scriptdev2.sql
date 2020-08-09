@@ -922,6 +922,8 @@ UPDATE creature_template SET ScriptName='npc_credit_marker_they_must_burn' WHERE
 /* HINTERLANDS */
 UPDATE creature_template SET ScriptName='npc_00x09hl' WHERE entry=7806;
 UPDATE creature_template SET ScriptName='npc_rinji' WHERE entry=7780;
+INSERT INTO scripted_event_id VALUES
+(8608,'event_wildhammer_message');
 
 /* HOWLING FJORD */
 INSERT INTO scripted_areatrigger VALUES
