@@ -275,6 +275,10 @@ struct mob_shadowmoon_channelerAI : public CombatAI
     mob_shadowmoon_channelerAI(Creature* creature) : CombatAI(creature, CHANNELER_ACTION_MAX), m_instance(static_cast<instance_blood_furnace*>(creature->GetInstanceData())),
         m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float, float y, float)
+            {
+                return y < -158.23f;
+            });
         AddCombatAction(CHANNELER_MARK_OF_SHADOW, 5000, 7000);
         AddCombatAction(CHANNELER_SHADOW_BOLT, 1000, 2000);
         AddCustomAction(CHANNELER_SETUP_TIMER, true, [&]() { HandleSetup(); });
