@@ -164,8 +164,16 @@ struct boss_kelidan_the_breakerAI : public CombatAI
         for (GuidVector::const_iterator itr = m_vAddGuids.begin(); itr != m_vAddGuids.end(); ++itr)
         {
             Creature* pAdd = m_instance->instance->GetCreature(*itr);
-            if (pAdd && !pAdd->IsAlive())
-                pAdd->Respawn();
+            if (pAdd)
+            {
+                if (pAdd->GetCombatManager().IsEvadingHome())
+                {
+                    ResetTimer(KELIDAN_SETUP_ADDS, 3000);
+                    return;
+                }
+                if (!pAdd->IsAlive())
+                    pAdd->Respawn();
+            }
         }
 
         // Cast pentagram
