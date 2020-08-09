@@ -464,7 +464,7 @@ struct boss_kaelthasAI : public ScriptedAI
     void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_REMOVE_WEAPONS);
+        m_creature->CastSpell(nullptr, SPELL_REMOVE_WEAPONS, TRIGGERED_OLD_TRIGGERED);
 
         if (m_instance)
             m_instance->SetData(TYPE_KAELTHAS, DONE);
@@ -475,7 +475,7 @@ struct boss_kaelthasAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        DoCastSpellIfCan(m_creature, SPELL_REMOVE_WEAPONS);
+        m_creature->CastSpell(nullptr, SPELL_REMOVE_WEAPONS, TRIGGERED_OLD_TRIGGERED);
 
         if (m_instance)
             m_instance->SetData(TYPE_KAELTHAS, FAIL);
