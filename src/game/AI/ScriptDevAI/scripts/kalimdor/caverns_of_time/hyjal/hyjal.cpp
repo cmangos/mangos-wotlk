@@ -1431,19 +1431,22 @@ void instance_mount_hyjal::SpawnInvasionWave(uint32 index, bool setTimer)
     {
         for (HyjalWaveMob& mob : m_invasionWavesData[index].waveMobs)
         {
+            TempSpawnSettings settings(spawner, mob.mobEntry, mob.x, mob.y, mob.z, mob.ori, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, GetRandomWavePath(mob.path));
+            if (mob.path == PATH_NONE)
+                settings.movegen = IDLE_MOTION_TYPE;
             if (index < 7)
             {
-                Creature* waveSpawn = spawner->SummonCreature(mob.mobEntry, mob.x, mob.y, mob.z, mob.ori, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, GetRandomWavePath(mob.path));
+                Creature* waveSpawn = WorldObject::SummonCreature(settings, spawner->GetMap());
                 m_overrunSpawns[BASE_ALLY].push_back(waveSpawn->GetObjectGuid());
             }
             else if (index < 14)
             {
-                Creature* waveSpawn = spawner->SummonCreature(mob.mobEntry, mob.x, mob.y, mob.z, mob.ori, TEMPSPAWN_DEAD_DESPAWN, 0, true, true, GetRandomWavePath(mob.path));
+                Creature* waveSpawn = WorldObject::SummonCreature(settings, spawner->GetMap());
                 m_overrunSpawns[BASE_HORDE].push_back(waveSpawn->GetObjectGuid());
             }
             else
             {
-                Creature* waveSpawn = spawner->SummonCreature(mob.mobEntry, mob.x, mob.y, mob.z, mob.ori, TEMPSPAWN_MANUAL_DESPAWN, 0, true, true, GetRandomWavePath(mob.path));
+                Creature* waveSpawn = WorldObject::SummonCreature(settings, spawner->GetMap());
                 waveSpawn->SetRespawnDelay(350);
                 waveSpawn->SetCorpseDelay(300);
                 m_overrunSpawns[BASE_ELF].push_back(waveSpawn->GetObjectGuid());
