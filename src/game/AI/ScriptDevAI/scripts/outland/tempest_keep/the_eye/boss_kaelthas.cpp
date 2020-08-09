@@ -215,12 +215,6 @@ static const uint32 m_auiSpellGravityLapseTeleport[] =
     35981, 35982, 35983, 35984, 35985, 35986, 35987, 35988, 35989, 35990
 };
 
-// item removal spells
-static const uint32 m_auiSpellRemoveItems[] =
-{
-    39498, 39499, 39500, 39501, 39502, 39503, 39504
-};
-
 static const float aCenterPos[3] = { 796.641f, -0.588817f, 48.72847f};
 static const float flightPos[3] = { 795.007f, -0.471827f, 75.f };
 static const float landPos[3] = { 792.419f, -0.504778f, 50.0505f };
@@ -291,7 +285,6 @@ struct boss_kaelthasAI : public ScriptedAI
     uint32 m_uiNetherBeamTimer;
     uint32 m_uiNetherVaporTimer;
     uint8 m_uiGravityIndex;
-    uint8 m_uiItemIndex;
 
     uint32 m_uiPhaseTimer;
     uint8 m_uiPhase;
@@ -347,7 +340,6 @@ struct boss_kaelthasAI : public ScriptedAI
         m_uiNetherBeamTimer         = 8000;
         m_uiNetherVaporTimer        = 10000;
         m_uiGravityIndex            = 0;
-        m_uiItemIndex               = 0;
 
         m_phaseTransitionGrowthTimer = 0;
         m_phaseTransitionGrowthStage = 0;
@@ -533,12 +525,6 @@ struct boss_kaelthasAI : public ScriptedAI
             target->CastSpell(target, SPELL_GRAVITY_LAPSE_KNOCKBACK, TRIGGERED_OLD_TRIGGERED);
             target->CastSpell(target, SPELL_GRAVITY_LAPSE_AURA, TRIGGERED_OLD_TRIGGERED);
             ++m_uiGravityIndex;
-        }
-        // Handle remove items - each item has its own removal spell
-        if (spellInfo->Id == SPELL_REMOVE_WEAPONS && target->GetTypeId() == TYPEID_PLAYER)
-        {
-            DoCastSpellIfCan(target, m_auiSpellRemoveItems[m_uiItemIndex], CAST_TRIGGERED);
-            ++m_uiItemIndex;
         }
 
         if (spellInfo->Id == SPELL_MIND_CONTROL)
@@ -1913,6 +1899,24 @@ struct NetherVaporSummonParent : public SpellScript
     }
 };
 
+struct RemoveWeapons : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        target->CastSpell(nullptr, 39498, TRIGGERED_NONE);
+        target->CastSpell(nullptr, 39499, TRIGGERED_NONE);
+        target->CastSpell(nullptr, 39500, TRIGGERED_NONE);
+        target->CastSpell(nullptr, 39501, TRIGGERED_NONE);
+        target->CastSpell(nullptr, 39502, TRIGGERED_NONE);
+        target->CastSpell(nullptr, 39503, TRIGGERED_NONE);
+        target->CastSpell(nullptr, 39504, TRIGGERED_NONE);
+    }
+};
+
 void AddSC_boss_kaelthas()
 {
     Script* pNewScript = new Script;
@@ -1949,4 +1953,5 @@ void AddSC_boss_kaelthas()
     RegisterAuraScript<NetherVaporLightning>("spell_nether_vapor_lightning");
     RegisterSpellScript<NetherVaporSummon>("spell_nether_vapor_summon");
     RegisterSpellScript<NetherVaporSummonParent>("spell_nether_vapor_summon_parent");
+    RegisterSpellScript<RemoveWeapons>("spell_remove_weapons");
 }

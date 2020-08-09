@@ -9319,20 +9319,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 39496, TRIGGERED_NONE);
                     return;
                 }
-                case 39497:                                 // Kael'Thas Sunstrider - Tempest Keep - Remove Enchanted Weapons
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 39498, TRIGGERED_NONE);
-                    unitTarget->CastSpell(unitTarget, 39499, TRIGGERED_NONE);
-                    unitTarget->CastSpell(unitTarget, 39500, TRIGGERED_NONE);
-                    unitTarget->CastSpell(unitTarget, 39501, TRIGGERED_NONE);
-                    unitTarget->CastSpell(unitTarget, 39502, TRIGGERED_NONE);
-                    unitTarget->CastSpell(unitTarget, 39503, TRIGGERED_NONE);
-                    unitTarget->CastSpell(unitTarget, 39504, TRIGGERED_NONE);
-                    return;
-                }
                 case 39835:                                 // Needle Spine - Najentus
                 {
                     unitTarget->CastSpell(nullptr, 39968, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);

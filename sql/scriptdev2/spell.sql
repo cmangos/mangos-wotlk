@@ -160,6 +160,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (35864,'spell_nether_vapor_summon'),
 (35865,'spell_nether_vapor_summon_parent'),
 (45960,'spell_nether_vapor_lightning'),
+(39497,'spell_remove_weapons'),
 (31298,'spell_anetheron_sleep'),
 (41910,'spell_alar_phoenix_ember_blast'),
 (33985,'spell_use_corpse'),
