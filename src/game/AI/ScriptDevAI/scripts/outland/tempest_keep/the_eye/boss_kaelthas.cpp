@@ -1531,10 +1531,13 @@ struct boss_thaladred_the_darkenerAI : public advisor_base_ai
 
         if (m_uiGazeTimer <= uiDiff)
         {
-            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+            SelectAttackingTargetParams parameters;
+            parameters.range.minRange = 0.f;
+            parameters.range.maxRange = 200.f;
+            if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_RANGE_RANGE, parameters))
             {
                 DoResetThreat();
-                m_creature->FixateTarget(target);
+                m_creature->AddThreat(target, 1000000.f);
                 DoScriptText(EMOTE_THALADRED_GAZE, m_creature, target);
             }
             m_uiGazeTimer = 10000;
