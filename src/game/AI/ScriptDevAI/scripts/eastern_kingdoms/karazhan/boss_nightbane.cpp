@@ -186,6 +186,8 @@ struct boss_nightbaneAI : public CombatAI
     void SummonedCreatureJustDied(Creature* summoned) override
     {
         m_skeletons.erase(std::remove(m_skeletons.begin(), m_skeletons.end(), summoned->GetObjectGuid()), m_skeletons.end());
+        if (m_skeletons.empty() && m_phase == PHASE_AIR && !m_creature->HasAura(SPELL_RAIN_OF_BONES))
+            ResetCombatAction(NIGHTBANE_PHASE_RESET, 1000);
     }
 
     void MovementInform(uint32 motionType, uint32 pointId) override
