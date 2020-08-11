@@ -106,7 +106,11 @@ struct boss_terestianAI : public CombatAI
     {
         switch (id)
         {
+#ifdef PRENERF_2_0_3
             case ILLHOOF_ACTION_SUMMON_KILREK: return 30000;
+#else
+            case ILLHOOF_ACTION_SUMMON_KILREK: return 45000;
+#endif
             case ILLHOOF_ACTION_SACRIFICE: return urand(40000, 50000);
             case ILLHOOF_ACTION_SHADOWBOLT: return urand(6000, 16000);
             default: return 0; // never occurs but for compiler
@@ -125,7 +129,11 @@ struct boss_terestianAI : public CombatAI
             }
             case ILLHOOF_ACTION_SACRIFICE:
             {
+#ifdef PRENERF_2_0_3
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SACRIFICE, SELECT_FLAG_PLAYER))
+#else
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SACRIFICE, SELECT_FLAG_PLAYER))
+#endif
                 {
                     if (DoCastSpellIfCan(target, SPELL_SACRIFICE) == CAST_OK)
                     {
