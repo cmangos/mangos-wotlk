@@ -362,7 +362,11 @@ struct boss_nightbaneAI : public CombatAI
             case NIGHTBANE_BELLOWING_ROAR:
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_BELLOWING_ROAR) == CAST_OK)
+#ifdef PRENERF_2_0_3
+                    ResetCombatAction(action, urand(30000, 45000));
+#else
                     ResetCombatAction(action, urand(38000, 48000));
+#endif
                 break;
             }
             case NIGHTBANE_CHARRED_EARTH:
