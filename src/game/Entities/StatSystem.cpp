@@ -999,6 +999,10 @@ bool Pet::UpdateStats(Stats stat)
             break;
     }
 
+    if (m_inStatsUpdate)
+        return true;
+
+    m_inStatsUpdate = true;
     if (oldValue != value)
         if (GetSpellAuraHolder(35696))
             if (stat == STAT_STAMINA || stat == STAT_INTELLECT)
@@ -1006,6 +1010,7 @@ bool Pet::UpdateStats(Stats stat)
                     if (Aura* aura = owner->GetAura(35696, EFFECT_INDEX_0))
                         aura->UpdateAuraScaling();
 
+    m_inStatsUpdate = false;
     return true;
 }
 
