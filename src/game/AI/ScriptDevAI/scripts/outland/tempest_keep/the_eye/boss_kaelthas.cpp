@@ -491,6 +491,7 @@ struct boss_kaelthasAI : public ScriptedAI
             {
                 m_weapons.push_back(summoned->GetObjectGuid());
                 m_weaponAttackTimer = 2000;
+                summoned->AI()->SetReactState(REACT_DEFENSIVE);
                 summoned->SetCorpseDelay(60);
                 break;
             }
@@ -933,6 +934,7 @@ struct boss_kaelthasAI : public ScriptedAI
                         {
                             if (Creature* weapon = m_creature->GetMap()->GetCreature(guid))
                             {
+                                weapon->AI()->SetReactState(REACT_AGGRESSIVE);
                                 weapon->SetInCombatWithZone();
                                 weapon->AI()->AttackClosestEnemy();
                             }
