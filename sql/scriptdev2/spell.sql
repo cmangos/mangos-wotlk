@@ -61,6 +61,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (11712,'spell_curse_of_agony'),
 (11713,'spell_curse_of_agony'),
 (27218,'spell_curse_of_agony'),
+(35696,'spell_demonic_knowledge'),
 (30108,'spell_unstable_affliction'),
 (30404,'spell_unstable_affliction'),
 (30405,'spell_unstable_affliction'),

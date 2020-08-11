@@ -984,7 +984,8 @@ bool Pet::UpdateStats(Stats stat)
                 value += float(owner->GetStat(stat)) * 0.3f;
         }
     }
-
+    
+    float oldValue = GetStat(stat);
     SetStat(stat, int32(value));
 
     switch (stat)
@@ -997,6 +998,13 @@ bool Pet::UpdateStats(Stats stat)
         default:
             break;
     }
+
+    if (oldValue != value)
+        if (GetSpellAuraHolder(35696))
+            if (stat == STAT_STAMINA || stat == STAT_INTELLECT)
+                if (Unit* owner = GetOwner())
+                    if (Aura* aura = owner->GetAura(35696, EFFECT_INDEX_0))
+                        aura->UpdateAuraScaling();
 
     return true;
 }

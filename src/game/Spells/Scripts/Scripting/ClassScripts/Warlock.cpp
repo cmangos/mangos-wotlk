@@ -51,8 +51,26 @@ struct CurseOfAgony : public AuraScript
     }
 };
 
+struct DemonicKnowledge : public AuraScript
+{
+    int32 OnAuraValueCalculate(Aura* aura, Unit* caster, int32 value) const override
+    {
+        if (!caster)
+            caster = aura->GetCaster();
+        if (caster)
+        {
+            Unit* target = aura->GetTarget();
+            if (!aura->GetScriptValue())
+                aura->SetScriptValue((target->HasAura(35693) ? 12 : target->HasAura(35692) ? 8 : target->HasAura(35691) ? 4 : 0));
+            value = aura->GetScriptValue() * (caster->GetStat(STAT_STAMINA) + caster->GetStat(STAT_INTELLECT)) / 100;
+        }
+        return value;
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterAuraScript<UnstableAffliction>("spell_unstable_affliction");
     RegisterAuraScript<CurseOfAgony>("spell_curse_of_agony");
+    RegisterAuraScript<DemonicKnowledge>("spell_demonic_knowledge");
 }
