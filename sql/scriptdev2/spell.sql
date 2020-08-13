@@ -392,6 +392,21 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (12576,'spell_arcane_concentration'),
 (12577,'spell_arcane_concentration');
 
+-- Druid
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(8936,'spell_regrowth'),
+(8938,'spell_regrowth'),
+(8939,'spell_regrowth'),
+(8940,'spell_regrowth'),
+(8941,'spell_regrowth'),
+(9750,'spell_regrowth'),
+(9856,'spell_regrowth'),
+(9857,'spell_regrowth'),
+(9858,'spell_regrowth'),
+(26980,'spell_regrowth'),
+(48442,'spell_regrowth'),
+(48443,'spell_regrowth');
+
 -- Shaman
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (70811,'spell_item_shaman_t10_elemental_2p_bonus');
