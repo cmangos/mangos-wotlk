@@ -421,7 +421,7 @@ struct boss_lady_vashjAI : public RangedCombatAI
     {
         if (Player* player = m_creature->GetMap()->GetPlayer(m_introTarget))
         {
-            if (player->GetDistance(m_creature) < 60.f)
+            if (player->GetDistance(m_creature) < 80.f)
             {
                 DoScriptText(SAY_INTRO, m_creature, player);
                 return;
