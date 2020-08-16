@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -350,15 +351,20 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI, public CombatActions
     }
 };
 
-UnitAI* GetAI_boss_gurtogg_bloodboil(Creature* pCreature)
+struct FelRage3 : public AuraScript
 {
-    return new boss_gurtogg_bloodboilAI(pCreature);
-}
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        aura->GetTarget()->ModifyAuraState(AURA_STATE_HYPOTHERMIA, apply);
+    }
+};
 
 void AddSC_boss_gurtogg_bloodboil()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_gurtogg_bloodboil";
-    pNewScript->GetAI = &GetAI_boss_gurtogg_bloodboil;
+    pNewScript->GetAI = &GetNewAIInstance<boss_gurtogg_bloodboilAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<FelRage3>("spell_fel_rage_3");
 }
