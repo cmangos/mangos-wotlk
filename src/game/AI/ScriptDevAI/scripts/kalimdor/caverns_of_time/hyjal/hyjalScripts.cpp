@@ -30,6 +30,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "hyjalAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 UnitAI* GetAI_npc_jaina_proudmoore(Creature* creature)
 {
@@ -214,6 +215,21 @@ UnitAI* GetAI_npc_tyrande_whisperwind(Creature* creature)
     return tempAI;
 }
 
+struct RaiseDeadHyjal : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
+    {
+        if (strict)
+        {
+            float radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spell->m_spellInfo->rangeIndex));
+            UnitList tempUnitList;
+            GameObjectList tempGOList;
+            return spell->CheckScriptTargeting(EFFECT_INDEX_0, 1, radius, TARGET_LOCATION_SCRIPT_NEAR_CASTER, tempUnitList, tempGOList);
+        }
+        return SPELL_CAST_OK;
+    }
+};
+
 void AddSC_hyjal()
 {
     Script* pNewScript;
@@ -239,4 +255,6 @@ void AddSC_hyjal()
     pNewScript->Name = "npc_building_trigger";
     pNewScript->GetAI = &GetAI_npc_building_trigger;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<RaiseDeadHyjal>("spell_raise_dead_hyjal");
 }
