@@ -1912,13 +1912,13 @@ struct RemoveWeapons : public SpellScript
         if (!target || !target->IsPlayer())
             return;
 
-        target->CastSpell(nullptr, 39498, TRIGGERED_NONE);
-        target->CastSpell(nullptr, 39499, TRIGGERED_NONE);
-        target->CastSpell(nullptr, 39500, TRIGGERED_NONE);
-        target->CastSpell(nullptr, 39501, TRIGGERED_NONE);
-        target->CastSpell(nullptr, 39502, TRIGGERED_NONE);
-        target->CastSpell(nullptr, 39503, TRIGGERED_NONE);
-        target->CastSpell(nullptr, 39504, TRIGGERED_NONE);
+        target->CastSpell(nullptr, 39498, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+        target->CastSpell(nullptr, 39499, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+        target->CastSpell(nullptr, 39500, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+        target->CastSpell(nullptr, 39501, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+        target->CastSpell(nullptr, 39502, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+        target->CastSpell(nullptr, 39503, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+        target->CastSpell(nullptr, 39504, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
     }
 };
 
