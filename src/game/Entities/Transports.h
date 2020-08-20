@@ -97,6 +97,8 @@ class Transport : public GenericTransport
         void SetPeriod(uint32 period) { m_period = period; }
 
         KeyFrameVec const& GetKeyFrames() const { return m_transportTemplate.keyFrames; }
+
+        void SpawnPassengers();
     private:
         void TeleportTransport(uint32 newMapid, float x, float y, float z, float o);
         void UpdateForMap(Map const* targetMap, bool newMap);

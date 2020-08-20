@@ -981,7 +981,7 @@ CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, u
     return nullptr;
 }
 
-std::vector<uint32> const& ObjectMgr::GetDbGuidsForTransport(uint32 mapId) const
+std::vector<std::pair<TypeID, uint32>> const& ObjectMgr::GetDbGuidsForTransport(uint32 mapId) const
 {
     return (*m_guidsForMap.find(mapId)).second;
 }
@@ -1655,7 +1655,7 @@ void ObjectMgr::LoadCreatures()
             data.OriginalZoneId = 0;
 
         if (m_transportMaps.find(data.mapid) != m_transportMaps.end())
-            m_guidsForMap[data.mapid].push_back(data.id);
+            m_guidsForMap[data.mapid].emplace_back(TYPEID_UNIT, guid);
         else if (data.IsNotPartOfPoolOrEvent()) // if not this is to be managed by GameEvent System or Pool system
         {
             AddCreatureToGrid(guid, &data);
@@ -1880,7 +1880,7 @@ void ObjectMgr::LoadGameObjects()
             data.OriginalZoneId = 0;
 
         if (m_transportMaps.find(data.mapid) != m_transportMaps.end())
-            m_guidsForMap[data.mapid].push_back(data.id);
+            m_guidsForMap[data.mapid].emplace_back(TYPEID_GAMEOBJECT, guid);
         else if (data.IsNotPartOfPoolOrEvent()) // if not this is to be managed by GameEvent System or Pool system
             AddGameobjectToGrid(guid, &data);
 
@@ -7110,7 +7110,10 @@ std::vector<uint32> ObjectMgr::LoadGameobjectInfo()
                 }
                 transportDisplayIds.push_back(goInfo->displayId);
                 if (goInfo->moTransport.mapID)
+                {
+                    m_guidsForMap[goInfo->moTransport.mapID];
                     m_transportMaps.emplace(goInfo->moTransport.mapID, goInfo->id);
+                }
                 break;
             }
             case GAMEOBJECT_TYPE_SUMMONING_RITUAL:          // 18

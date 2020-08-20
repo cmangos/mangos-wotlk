@@ -1218,7 +1218,7 @@ class ObjectMgr
         CreatureClassLvlStats const* GetCreatureClassLvlStats(uint32 level, uint32 unitClass, int32 expansion) const;
 
         // Transports
-        std::vector<uint32> const& GetDbGuidsForTransport(uint32 mapId) const;
+        std::vector<std::pair<TypeID, uint32>> const& GetDbGuidsForTransport(uint32 mapId) const;
     protected:
 
         // current locale settings
@@ -1385,7 +1385,7 @@ class ObjectMgr
         BroadcastTextMap m_broadcastTextMap;
 
         std::map<uint32, uint32> m_transportMaps;
-        std::map<uint32, std::vector<uint32>> m_guidsForMap; // used for transports only atm
+        std::map<uint32, std::vector<std::pair<TypeID, uint32>>> m_guidsForMap; // used for transports only atm
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

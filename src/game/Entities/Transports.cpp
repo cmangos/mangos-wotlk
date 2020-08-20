@@ -166,6 +166,8 @@ void Transport::LoadTransport(TransportTemplate const& transportTemplate, Map* m
     }
 
     map->AddTransport(t);
+
+    t->SpawnPassengers();
 }
 
 bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint8 animprogress, uint16 dynamicHighValue)
@@ -230,6 +232,21 @@ void Transport::MoveToNextWayPoint()
         m_nextFrame = GetKeyFrames().begin();
 }
 
+void Transport::SpawnPassengers()
+{
+    uint32 mapId = GetGOInfo()->moTransport.mapID;
+    if (!mapId)
+        return;
+
+    auto& guids = sObjectMgr.GetDbGuidsForTransport(mapId);
+    for (auto& data : guids)
+    {
+        if (data.first == TYPEID_GAMEOBJECT)
+            WorldObject::SummonGameObject(data.second, GetMap(), this);
+        // TODO: TYPEID_UNIT
+    }
+}
+
 void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, float o)
 {
     Map* oldMap = GetMap();
@@ -257,6 +274,8 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
             case TYPEID_UNIT:
             {
                 RemovePassenger(passengerUnit);
+                if (obj->IsCreature() && !static_cast<Creature*>(obj)->IsPet())
+                    passengerUnit->AddObjectToRemoveList();
                 break;
             }
             case TYPEID_PLAYER:
@@ -290,6 +309,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
                 transport->Object::AddToWorld();
                 map->AddTransport(transport);
                 transport->AddModelToMap();
+                transport->SpawnPassengers();
                 transport->UpdateForMap(map, true);
             });
         });
