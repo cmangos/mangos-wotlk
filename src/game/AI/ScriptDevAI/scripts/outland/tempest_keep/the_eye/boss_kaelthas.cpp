@@ -428,7 +428,7 @@ struct boss_kaelthasAI : public ScriptedAI
             if (who->IsPlayer() && static_cast<Player*>(who)->isGameMaster())
                 return;
             DoScriptText(SAY_INTRO, m_creature);
-            DoCastSpellIfCan(m_creature, SPELL_REMOVE_WEAPONS, CAST_TRIGGERED);
+            m_creature->CastSpell(nullptr, SPELL_REMOVE_WEAPONS, TRIGGERED_OLD_TRIGGERED);
             m_uiPhase = PHASE_1_ADVISOR;
 
             // Set the player in combat with the boss
