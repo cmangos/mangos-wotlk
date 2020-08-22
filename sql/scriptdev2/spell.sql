@@ -40,7 +40,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (47028,'spell_taunka_face_me'),
-(48268,'spell_container_of_rats');
+(48268,'spell_container_of_rats'),
+(49099,'spell_army_of_the_dead');
 
 -- Hunter
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
