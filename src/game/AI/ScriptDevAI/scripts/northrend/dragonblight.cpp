@@ -236,6 +236,19 @@ struct ContainerOfRatsSpellScript : public SpellScript
     }
 };
 
+/*######
+## spell_army_of_the_dead
+######*/
+
+struct ArmyOfTheDead : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        data.caster = aura->GetCaster();
+        data.target = aura->GetTarget();
+    }
+};
+
 void AddSC_dragonblight()
 {
     Script* pNewScript = new Script;
@@ -250,4 +263,5 @@ void AddSC_dragonblight()
 
     RegisterSpellScript<TaunkaFaceMeSpellScript>("spell_taunka_face_me");
     RegisterSpellScript<ContainerOfRatsSpellScript>("spell_container_of_rats");
+    RegisterAuraScript<ArmyOfTheDead>("spell_army_of_the_dead");
 }
