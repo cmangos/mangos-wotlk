@@ -4941,6 +4941,14 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
     // special cases
     switch (triggered_spell_id)
     {
+        case 23209: // Terrordale Haunting Spirit 
+            if (urand(1, 100) > 55)
+                return;
+            break;
+        case 23253: // Terrordale Haunting Spirit 
+            if (urand(1, 100) > 35)
+                return;
+            break;
         // Flame Wreath: Explosion
         case 29950:
             m_caster->RemoveAurasDueToSpellByCancel(29947);
