@@ -91,6 +91,13 @@ struct boss_anetheronAI : public CombatAI
         m_infernals.clear();
     }
 
+    void EnterEvadeMode() override
+    {
+        ScriptedAI::EnterEvadeMode();
+
+        Reset();
+    }
+
     uint32 GetSubsequentActionTimer(const uint32 action) const
     {
         switch (action)
