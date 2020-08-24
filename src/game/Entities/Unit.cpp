@@ -11045,6 +11045,49 @@ void CharmInfo::InitVehicleCreateSpells()
     }
 }
 
+void CharmInfo::ProcessUnattackableTargets()
+{
+    // if after faction change and combat init cant attack target, remove it
+    if (!m_unit->getThreatManager().getThreatList().empty()) // threat list case
+    {
+        Unit::AttackerSet friendlyTargets;
+        for (auto itr = m_unit->getThreatManager().getThreatList().begin(); itr != m_unit->getThreatManager().getThreatList().end(); ++itr)
+        {
+            Unit* attacker = (*itr)->getTarget();
+            if (attacker->GetTypeId() != TYPEID_UNIT)
+                continue;
+
+            if (!m_unit->CanAttack(attacker))
+                friendlyTargets.insert(attacker);
+        }
+
+        for (auto attacker : friendlyTargets)
+        {
+            attacker->AttackStop(true, true);
+            attacker->getThreatManager().modifyThreatPercent(m_unit, -101);
+        }
+    }
+    else // attacker set case
+    {
+        Unit::AttackerSet friendlyTargets;
+        for (Unit::AttackerSet::const_iterator itr = m_unit->getAttackers().begin(); itr != m_unit->getAttackers().end(); ++itr)
+        {
+            Unit* attacker = (*itr);
+            if (attacker->GetTypeId() != TYPEID_UNIT)
+                continue;
+
+            if (!m_unit->CanAttack(attacker))
+                friendlyTargets.insert(attacker);
+        }
+
+        for (auto attacker : friendlyTargets)
+        {
+            attacker->AttackStop(true, true);
+            attacker->getThreatManager().modifyThreatPercent(m_unit, -101);
+        }
+    }
+}
+
 void CharmInfo::InitPossessCreateSpells()
 {
     InitEmptyActionBar();                                   // charm action bar
@@ -12850,6 +12893,8 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
     if (possessed->IsImmuneToNPC() != immuneNPC)
         possessed->SetImmuneToNPC(immuneNPC);
 
+    charmInfo->ProcessUnattackableTargets();
+
     if (player)
     {
         // Initialize pet bar
@@ -12940,6 +12985,8 @@ bool Unit::TakePossessOf(Unit* possessed)
         possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 
     charmInfo->SetCharmStartPosition(combatStartPosition.IsEmpty() ? possessed->GetPosition() : combatStartPosition);
+
+    charmInfo->ProcessUnattackableTargets();
 
     if (!IsInCombat())
     {
@@ -13063,6 +13110,8 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
             charmInfo->SetCommandState(COMMAND_FOLLOW);
             charmInfo->SetIsRetreating(true);
         }
+
+        charmInfo->ProcessUnattackableTargets();
     }
 
     // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
@@ -13087,6 +13136,8 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
         if (charmerPlayer->GetGroup())
             charmerPlayer->SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
+
+    charmInfo->ProcessUnattackableTargets();
 
     // put charmed in combat with all charmers enemies - must be done after flags
     ThreatList const& list = getThreatManager().getThreatList();
@@ -13242,13 +13293,23 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
 
             // first find friendly target (stopping combat here is not recommended because m_attackers will be modified)
             AttackerSet friendlyTargets;
-            for (Unit::AttackerSet::const_iterator itr = charmed->getAttackers().begin(); itr != charmed->getAttackers().end(); ++itr)
+            for (auto itr = charmed->getAttackers().begin(); itr != charmed->getAttackers().end(); ++itr)
             {
                 Unit* attacker = (*itr);
                 if (attacker->GetTypeId() != TYPEID_UNIT)
                     continue;
 
                 if (charmed->CanAttack(attacker))
+                    friendlyTargets.insert(attacker);
+            }
+
+            for (auto itr = charmed->getThreatManager().getThreatList().begin(); itr != charmed->getThreatManager().getThreatList().end(); ++itr)
+            {
+                Unit* attacker = (*itr)->getTarget();
+                if (attacker->GetTypeId() != TYPEID_UNIT)
+                    continue;
+
+                if (!charmed->CanAttack(attacker))
                     friendlyTargets.insert(attacker);
             }
 

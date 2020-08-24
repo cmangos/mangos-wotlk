@@ -960,6 +960,7 @@ struct CharmInfo
         void InitCharmCreateSpells();
         void InitPetActionBar();
         void InitEmptyActionBar();
+        void ProcessUnattackableTargets();
 
         // return true if successful
         bool AddSpellToActionBar(uint32 spellId, ActiveStates newstate = ACT_DECIDE, uint8 forceSlot = 255);
