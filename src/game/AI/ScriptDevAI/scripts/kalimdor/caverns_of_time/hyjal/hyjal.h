@@ -164,6 +164,7 @@ class instance_mount_hyjal : public ScriptedInstance
 
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureRespawn(Creature* creature) override;
 
         void OnCreatureEnterCombat(Creature* pCreature) override;
         // void OnCreatureEvade(Creature* pCreature) override;

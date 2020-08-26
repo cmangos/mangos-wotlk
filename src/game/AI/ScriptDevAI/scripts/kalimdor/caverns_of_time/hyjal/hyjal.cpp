@@ -958,14 +958,7 @@ void instance_mount_hyjal::OnCreatureCreate(Creature* creature)
         case NPC_STALK:
         {
             ObjectGuid spawner = creature->GetSpawnerGuid(); // not loaded in map - guid is enough
-            if (!spawner) // Static spawns in Scourge base should never grant XP, loot or reputation
-            {
-                creature->SetNoXP(true);
-                creature->SetNoLoot(true);
-                creature->SetNoReputation(true);
-                return;
-            }
-            else if (spawner.GetEntry() != NPC_HYJAL_DESPAWN_TRIGGER && m_hyjalOverheadEnable) // Overrun mobs are not counted
+            if (spawner && spawner.GetEntry() != NPC_HYJAL_DESPAWN_TRIGGER && m_hyjalOverheadEnable) // Overrun mobs are not counted
                 m_waveSpawns.push_back(creature->GetObjectGuid());
             break;
         }
@@ -1018,6 +1011,32 @@ void instance_mount_hyjal::OnObjectCreate(GameObject* go)
                 m_roaringFlames[BASE_HORDE].push_back(go->GetObjectGuid());
             break;
         }
+    }
+}
+
+void instance_mount_hyjal::OnCreatureRespawn(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case NPC_LESSER_INFERNAL: // need to despawn like wave mobs
+        case NPC_GHOUL:
+        case NPC_NECRO:
+        case NPC_ABOMI:
+        case NPC_BANSH:
+        case NPC_CRYPT:
+        case NPC_GARGO:
+        case NPC_FROST:
+        case NPC_INFERNAL:
+        case NPC_STALK:
+            ObjectGuid spawner = creature->GetSpawnerGuid(); // not loaded in map - guid is enough
+            if (!spawner) // Static spawns in Scourge base should never grant XP, loot or reputation
+            {
+                creature->SetNoXP(true);
+                creature->SetNoLoot(true);
+                creature->SetNoReputation(true);
+                return;
+            }
+            break;
     }
 }
 
