@@ -799,6 +799,7 @@ class GameObject : public WorldObject
         void SetPhaseMask(uint32 newPhaseMask, bool update);
         uint32 GetFaction() const { return GetUInt32Value(GAMEOBJECT_FACTION); }
         void SetFaction(uint32 faction) { SetUInt32Value(GAMEOBJECT_FACTION, faction); }
+        uint32 GetLevel() const { return GetUInt32Value(GAMEOBJECT_LEVEL); }
 
         void Use(Unit* user, SpellEntry const* spellInfo = nullptr);
 
