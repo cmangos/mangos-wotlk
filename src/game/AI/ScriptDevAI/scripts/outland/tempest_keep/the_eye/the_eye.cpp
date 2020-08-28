@@ -121,8 +121,10 @@ void instance_the_eye::SetData(uint32 uiType, uint32 uiData)
         case TYPE_SOLARIAN:
         case TYPE_VOIDREAVER:
             m_auiEncounter[uiType] = uiData;
+#ifdef PRENERF_2_0_3
             if (CheckDoorOpening())
                 OpenDoors();
+#endif
             break;
         case TYPE_KAELTHAS:
             // Don't set the same data twice
