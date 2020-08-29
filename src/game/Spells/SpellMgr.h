@@ -1160,9 +1160,10 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
         {
             switch (spellproto->EffectApplyAuraName[effIndex])
             {
-                case SPELL_AURA_DUMMY:
+                case SPELL_AURA_CONTROL_VEHICLE:            // Control vehicle auras have to be positive; boarding a vehicle cannot put the passenger in combat with the controlled unit
+                    return true;
+                case SPELL_AURA_DUMMY:                      // dummy aura can be positive or negative dependent from casted spell
                 {
-                    // dummy aura can be positive or negative dependent from casted spell
                     switch (spellproto->Id)
                     {
                         case 13139:                         // net-o-matic special effect
