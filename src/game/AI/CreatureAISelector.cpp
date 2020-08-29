@@ -97,7 +97,13 @@ namespace FactorySelector
         CreatureAIRegistry& ai_registry(CreatureAIRepository::Instance());
         const CreatureAICreator* ai_factory = ai_registry.GetRegistryItem(ainame);
         if (unit->GetTypeId() == TYPEID_UNIT)
-            return  ai_factory->Create(static_cast<Creature*>(unit));
+        {
+            // use the scripted AI if provided
+            if (UnitAI* scriptedAI = sScriptDevAIMgr.GetCreatureAI(static_cast<Creature*>(unit)))
+                return scriptedAI;
+
+            return ai_factory->Create(static_cast<Creature*>(unit));
+        }
         if (ainame == "PetAI")
             return GetClassAI(Classes(unit->getClass()), static_cast<Player*>(unit));
         if (ainame == "PossessedAI")
