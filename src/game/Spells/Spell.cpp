@@ -7385,8 +7385,9 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
                 return false;
 
             // unselectable targets skipped in all cases except targets with TARGET_SCRIPT
-            if (!m_ignoreUnselectableTarget && target != m_targets.getUnitTarget() &&
-                    target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            // vehicle passengers are excepted from this rule
+            if (!m_ignoreUnselectableTarget && target != m_targets.getUnitTarget() && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) &&
+                (!target->GetTransportInfo() || (target->GetTransportInfo() && !((Unit*)target->GetTransportInfo()->GetTransport())->IsVehicle())))
                 return false;
         }
 
