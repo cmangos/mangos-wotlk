@@ -355,9 +355,9 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         if (passenger->GetTypeId() == TYPEID_UNIT && m_accessoryGuids.find(passenger->GetObjectGuid()) != m_accessoryGuids.end())
         {
             Creature* cPassenger = static_cast<Creature*>(passenger);
-            // TODO Same TODO as in VehicleInfo::RemoveAccessoriesFromMap
-            cPassenger->ForcedDespawn(5000);
             m_accessoryGuids.erase(passenger->GetObjectGuid());
+
+            // Note: Most of the creature accessories have to stay on the map if unboarded; despawn events are handled by Creauture_Linking_Template if needed
         }
     }
 
@@ -434,14 +434,7 @@ void VehicleInfo::CalculateBoardingPositionOf(float gx, float gy, float gz, floa
 void VehicleInfo::RemoveAccessoriesFromMap()
 {
     // Remove all accessories
-    for (auto m_accessoryGuid : m_accessoryGuids)
-    {
-        if (Creature* pAccessory = m_owner->GetMap()->GetCreature(m_accessoryGuid))
-        {
-            // TODO - unclear how long to despawn, also maybe some flag etc depending
-            pAccessory->ForcedDespawn(5000);
-        }
-    }
+    // Note: Most of the creature accessories have to stay on the map if unboarded; despawn events are handled by Creauture_Linking_Template if needed
     m_accessoryGuids.clear();
     m_isInitialized = false;
 }
