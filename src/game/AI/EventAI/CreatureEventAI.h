@@ -535,7 +535,7 @@ struct CreatureEventAI_Action
         // ACTION_T_SET_WALK
         struct
         {
-            WalkSetting type;                               // enum RangeModeType
+            WalkSetting type;                               // enum WalkSetting
         } walkSetting;
         // ACTION_T_SET_FACING
         struct
