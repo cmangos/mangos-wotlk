@@ -36,6 +36,7 @@
 #include "Entities/Pet.h"
 #include "Server/DBCStores.h"
 #include "Log.h"
+#include "Maps/TransportSystem.h"
 
 #include <cassert>
 
@@ -260,7 +261,8 @@ void MotionMaster::MoveTargetedHome(bool runHome)
 
     if (m_owner->GetTypeId() == TYPEID_UNIT)
     {
-        if (Unit* target = m_owner->GetMaster())
+        Unit* target = m_owner->GetMaster();
+        if (target && (!target->GetTransportInfo() || target->GetTransportInfo()->GetTransport() != m_owner))
         {
             DEBUG_FILTER_LOG(LOG_FILTER_AI_AND_MOVEGENSS, "%s follow to %s", m_owner->GetGuidStr().c_str(), target->GetGuidStr().c_str());
             Mutate(new FollowMovementGenerator(*target, PET_FOLLOW_DIST, PET_FOLLOW_ANGLE, false));
