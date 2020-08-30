@@ -26,6 +26,7 @@
 #include "Grids/CellImpl.h"
 #include "Spells/SpellMgr.h"
 #include "World/World.h"
+#include "Maps/TransportSystem.h"
 #include <float.h>
 
 static_assert(MAXIMAL_AI_EVENT_EVENTAI <= 32, "Maximal 32 AI_EVENTs supported with EventAI");
@@ -438,6 +439,11 @@ void UnitAI::DetectOrAttack(Unit* who)
 
     if (!m_unit->IsWithinLOSInMap(who, true))
         return;
+
+    if (auto info = m_unit->GetTransportInfo())
+        if (info->GetTransport()->IsUnit())
+            if (static_cast<Unit*>(info->GetTransport())->GetCombatManager().IsEvadingHome())
+                return;
 
     if (!m_unit->GetVictim() && !m_unit->IsInCombat())
     {
