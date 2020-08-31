@@ -11837,7 +11837,7 @@ void Spell::EffectSanctuary(SpellEffectIndex /*eff_idx*/)
     InstanceData* instance = unitTarget->GetInstanceData();
     if (instance && sWorld.getConfig(CONFIG_BOOL_INSTANCE_STRICT_COMBAT_LOCKDOWN) && instance->IsEncounterInProgress())
     {
-        unitTarget->AttackStop(true, false, true);
+        unitTarget->AttackStop(true, false, false);
         unitTarget->getHostileRefManager().addThreatPercent(-100);
     }
     else
