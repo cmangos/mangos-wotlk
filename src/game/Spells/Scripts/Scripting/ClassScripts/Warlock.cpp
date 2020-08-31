@@ -111,7 +111,7 @@ struct LifeTap : public SpellScript
             if (itr->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && itr->GetSpellProto()->SpellIconID == 1982)
                 manaFeedVal += itr->GetModifier()->m_amount;
         }
-        if (manaFeedVal > 0)
+        if (manaFeedVal > 0 && caster->GetPet())
         {
             manaFeedVal = manaFeedVal * mana / 100;
             caster->CastCustomSpell(nullptr, 32553, &manaFeedVal, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr);
