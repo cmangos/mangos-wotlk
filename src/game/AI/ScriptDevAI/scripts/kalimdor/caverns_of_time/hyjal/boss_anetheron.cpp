@@ -163,6 +163,12 @@ struct boss_anetheronAI : public CombatAI
         summoned->RemoveAurasDueToSpell(SPELL_INFERNAL_IMMOLATION);
     }
 
+    void OnSpellCooldownAdded(SpellEntry const* spellInfo) override
+    {
+        if (spellInfo->Id == SPELL_INFERNO)
+            ResetCombatAction(ANETHERON_ACTION_INFERNO, GetSubsequentActionTimer(ANETHERON_ACTION_INFERNO));
+    }
+
     void ExecuteAction(uint32 action) override
     {
         switch (action)
@@ -190,14 +196,10 @@ struct boss_anetheronAI : public CombatAI
             }
             case ANETHERON_ACTION_INFERNO:
             {
+                // cooldown done on cooldown added
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_INFERNO, SELECT_FLAG_PLAYER))
-                {
                     if (DoCastSpellIfCan(target, SPELL_INFERNO) == CAST_OK)
-                    {
                         DoScriptText(urand(0, 1) ? SAY_INFERNO1 : SAY_INFERNO2, m_creature);
-                        ResetCombatAction(action, GetSubsequentActionTimer(action));
-                    }
-                }
                 break;
             }
             case ANETHERON_ACTION_ENRAGE:
