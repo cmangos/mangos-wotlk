@@ -6077,7 +6077,7 @@ void ObjectMgr::GetTaxiPath(uint32 source, uint32 destination, uint32& path, uin
     path = dest_i->second.ID;
 }
 
-uint32 ObjectMgr::GetTaxiMountDisplayId(uint32 id, Team team, bool allowed_alt_team /* = false */) const
+uint32 ObjectMgr::GetTaxiMountDisplayId(uint32 id, Team team) const
 {
     uint16 mount_entry = 0;
 
@@ -6088,14 +6088,13 @@ uint32 ObjectMgr::GetTaxiMountDisplayId(uint32 id, Team team, bool allowed_alt_t
         if (team == ALLIANCE)
         {
             mount_entry = node->MountCreatureID[1];
-            if (!mount_entry && allowed_alt_team)
+            if (!mount_entry)
                 mount_entry = node->MountCreatureID[0];
         }
         else if (team == HORDE)
         {
             mount_entry = node->MountCreatureID[0];
-
-            if (!mount_entry && allowed_alt_team)
+            if (!mount_entry)
                 mount_entry = node->MountCreatureID[1];
         }
     }
