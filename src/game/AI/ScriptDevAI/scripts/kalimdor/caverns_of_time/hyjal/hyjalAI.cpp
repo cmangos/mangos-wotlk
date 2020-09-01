@@ -54,10 +54,20 @@ static const HyjalYells aHyjalYell[] =
     //{NPC_THRALL, DEATH,    -1534017} // Only sound used
 };
 
+hyjalAI::hyjalAI(Creature* pCreature, uint32 maxActions) : CombatAI(pCreature, maxActions), m_instance(static_cast<instance_mount_hyjal*>(pCreature->GetInstanceData()))
+{
+    AddTimerlessCombatAction(HYJAL_AI_90, true);
+    AddCombatAction(HYJAL_AI_ATTACKED_TIMER, false);
+    AddCustomAction(HYJAL_AI_RALLY_TIMER, true, [&]()
+    {
+        DoTalk(RALLY);
+        ResetTimer(HYJAL_AI_RALLY_TIMER, urand(60000, 240000));
+    });
+}
+
 void hyjalAI::Reset()
 {
-    m_uiAttackedYellTimer = 0;
-    m_calledForHelp = m_creature->GetEntry() == NPC_JAINA ? false : true; // only jaina calls for help
+    CombatAI::Reset();
 
     // Set base area based on creature entry
     switch (m_creature->GetEntry())
@@ -87,11 +97,10 @@ void hyjalAI::JustReachedHome()
         DoCastSpellIfCan(m_creature, SPELL_BRILLIANCE_AURA, CAST_TRIGGERED);
 }
 
-void hyjalAI::Aggro(Unit* /*who*/)
+void hyjalAI::JustRespawned()
 {
-    for (uint8 i = 0; i < MAX_SPELL; ++i)
-        if (m_aSpells[i].m_uiCooldown)
-            m_uiSpellTimer[i] = m_aSpells[i].m_uiCooldown;
+    m_started = false;
+    CombatAI::JustRespawned();
 }
 
 void hyjalAI::DoTalk(YellType pYellType)
@@ -138,13 +147,14 @@ void hyjalAI::DoTalk(YellType pYellType)
 void hyjalAI::Win()
 {
     // This will despawn the won base
-    if (m_pInstance)
-        m_pInstance->SetData(TYPE_WIN, DONE);
+    if (m_instance)
+        m_instance->SetData(TYPE_WIN, DONE);
 }
 
 void hyjalAI::EventStarted()
 {
-    m_uiRallyYellTimer = urand(60000, 240000);
+    m_started = true;
+    ResetTimer(HYJAL_AI_RALLY_TIMER, urand(60000, 240000));
     m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
 }
 
@@ -154,6 +164,8 @@ void hyjalAI::ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoke
     {
         case AI_EVENT_CUSTOM_B:
         {
+            m_creature->SetCanEnterCombat(false);
+            SetReactState(REACT_PASSIVE);
             DoTalk(WIN);
             if (miscValue == 1)
                 m_creature->GetMotionMaster()->MoveWaypoint(miscValue);
@@ -163,7 +175,8 @@ void hyjalAI::ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoke
             Retreat();
             break;
         case AI_EVENT_CUSTOM_D: // Boss was killed - stop yelling
-            m_uiRallyYellTimer = 0;
+            m_started = false;
+            DisableTimer(HYJAL_AI_RALLY_TIMER);
             break;
         case AI_EVENT_CUSTOM_EVENTAI_B:
         {
@@ -179,101 +192,28 @@ void hyjalAI::ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoke
     }
 }
 
+void hyjalAI::ExecuteAction(uint32 action)
+{
+    switch (action)
+    {
+        case HYJAL_AI_90:
+            if (m_creature->GetHealthPercent() <= 90.f)
+            {
+                DoTalk(ATTACKED);
+                ResetCombatAction(HYJAL_AI_ATTACKED_TIMER, urand(60000, 180000));
+                SetActionReadyStatus(action, false);
+            }
+            break;
+        case HYJAL_AI_ATTACKED_TIMER:
+            DoTalk(ATTACKED);
+            ResetCombatAction(action, urand(60000, 180000));
+            break;
+    }
+}
+
 void hyjalAI::Retreat()
 {
     DoTalk(RETREAT);
-}
-
-void hyjalAI::UpdateAI(const uint32 uiDiff)
-{
-    if (m_uiRallyYellTimer)
-    {
-        if (m_uiRallyYellTimer <= uiDiff)
-        {
-            DoTalk(RALLY);
-            m_uiRallyYellTimer = urand(60000, 240000);
-
-            // Increase Attacked yell timer to prevent them from occuring too quickly after each other
-            if (m_uiAttackedYellTimer)
-                m_uiAttackedYellTimer += 20000;
-        }
-        else
-            m_uiRallyYellTimer -= uiDiff;
-    }
-
-    if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-        return;
-
-    for (uint8 i = 0; i < MAX_SPELL; ++i)
-    {
-        if (m_aSpells[i].m_uiSpellId)
-        {
-            if (m_uiSpellTimer[i] < uiDiff)
-            {
-                if (m_creature->IsNonMeleeSpellCasted(false))
-                    m_creature->InterruptNonMeleeSpells(false);
-
-                Unit* pTarget = nullptr;
-
-                switch (m_aSpells[i].m_pType)
-                {
-                    case TARGETTYPE_SELF:   pTarget = m_creature; break;
-                    case TARGETTYPE_RANDOM: pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0); break;
-                    case TARGETTYPE_VICTIM: pTarget = m_creature->GetVictim(); break;
-                }
-
-                if (pTarget)
-                {
-                    if (m_aSpells[i].m_uiSpellId == SPELL_FERAL_SPIRIT)
-                        if (m_creature->CountGuardiansWithEntry(NPC_FERAL_SPIRIT) > 0)
-                            continue;
-
-                    DoCastSpellIfCan(pTarget, m_aSpells[i].m_uiSpellId);
-                    m_uiSpellTimer[i] = m_aSpells[i].m_uiCooldown;
-                }
-            }
-            else
-                m_uiSpellTimer[i] -= uiDiff;
-        }
-    }
-
-    if (m_uiAttackedYellTimer)
-    {
-        if (m_uiAttackedYellTimer <= uiDiff)
-        {
-            DoTalk(ATTACKED);
-            m_uiAttackedYellTimer = urand(60000, 180000);
-
-            // Increase Rally yell timer to prevent them from occuring too quickly after each other
-            if (m_uiRallyYellTimer)
-                m_uiRallyYellTimer += 20000;
-        }
-        else
-            m_uiAttackedYellTimer -= uiDiff;
-    }
-    else if (m_creature->GetHealthPercent() <= 90.f)
-    {
-        DoTalk(ATTACKED);
-        m_uiAttackedYellTimer = urand(60000, 180000);
-
-        // Increase Rally yell timer to prevent them from occuring too quickly after each other
-        if (m_uiRallyYellTimer)
-            m_uiRallyYellTimer += 20000;
-    }
-    else if (m_creature->GetHealthPercent() <= 20.f && !m_calledForHelp)
-    {
-        m_calledForHelp = true;
-        DoScriptText(SAY_CALL_FOR_HELP_EMOTE, m_creature);
-        DoCallForHelp(30.f);
-    }
-
-    DoMeleeAttackIfReady();
-}
-
-void hyjalAI::JustRespawned()
-{
-    Reset();
-    m_uiRallyYellTimer = 0;
 }
 
 void hyjalAI::JustDied(Unit* /*killer*/)

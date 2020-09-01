@@ -6,6 +6,7 @@
 #define SC_HYJALAI_H
 
 #include "hyjal.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum Misc
 {
@@ -13,7 +14,7 @@ enum Misc
 
     ITEM_TEAR_OF_GODDESS    = 24494,
 
-    SAY_CALL_FOR_HELP_EMOTE = -1000007,
+    SAY_CALL_FOR_HELP_EMOTE = -1000008,
 };
 
 enum HyjalSpells
@@ -25,6 +26,7 @@ enum HyjalSpells
     SPELL_BLIZZARD          = 31266,
     SPELL_PYROBLAST         = 31263,
     SPELL_SUMMON_ELEMENTALS = 31264,
+    NPC_WATER_ELEMENTAL     = 18001,
 
     // Thrall spells
     SPELL_CHAIN_LIGHTNING   = 31330,
@@ -53,13 +55,17 @@ enum YellType
     DEATH        = 5,                                       // Used on death
 };
 
-struct hyjalAI : public ScriptedAI
+enum HyjalAIActions
 {
-        hyjalAI(Creature* pCreature) : ScriptedAI(pCreature), m_pInstance(static_cast<instance_mount_hyjal*>(pCreature->GetInstanceData()))
-        {
-            memset(m_aSpells, 0, sizeof(m_aSpells));
-            Reset();
-        }
+    HYJAL_AI_90,
+    HYJAL_AI_ATTACKED_TIMER,
+    HYJAL_AI_ACTION_MAX,
+    HYJAL_AI_RALLY_TIMER = 100, 
+};
+
+struct hyjalAI : public CombatAI
+{
+        hyjalAI(Creature* creature, uint32 maxActions);
 
         // Generically used to reset our variables. Do *not* call in EnterEvadeMode as this may make problems if the raid is still in combat
         void Reset() override;
@@ -70,42 +76,27 @@ struct hyjalAI : public ScriptedAI
         // Called when creature reached home location after evade.
         void JustReachedHome() override;
 
-        // Used to reset cooldowns for our spells and to inform the raid that we're under attack
-        void Aggro(Unit* who) override;
-
-        // Called to summon waves, check for boss deaths and to cast our spells.
-        void UpdateAI(const uint32 diff) override;
-
         void JustRespawned() override;
 
         void JustDied(Unit* /*killer*/) override;
 
         void ReceiveAIEvent(AIEventType /*eventType*/, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override;
 
+        void ExecuteAction(uint32 action) override;
+
         // Instance response handlers
         void EventStarted();
         void Retreat();
         void Win();
 
-        bool IsEventStarted() { return m_uiRallyYellTimer; }
+        bool IsEventStarted() { return m_started; }
 
         // Searches for the appropriate yell and sound and uses it to inform the raid of various things
         void DoTalk(YellType yellType);
 
-        instance_mount_hyjal* m_pInstance;
+        instance_mount_hyjal* m_instance;
 
-        struct sSpells
-        {
-            uint32 m_uiSpellId;
-            uint32 m_uiCooldown;
-            TargetType m_pType;
-        } m_aSpells[MAX_SPELL];
-
-        uint32 m_uiSpellTimer[MAX_SPELL];
-        uint32 m_uiAttackedYellTimer;
-        uint32 m_uiRallyYellTimer = 0;
-
-        bool m_calledForHelp;
+        bool m_started;
 };
 
 #endif

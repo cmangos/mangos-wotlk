@@ -32,24 +32,56 @@ EndContentData */
 #include "hyjalAI.h"
 #include "Spells/Scripts/SpellScript.h"
 
-UnitAI* GetAI_npc_jaina_proudmoore(Creature* creature)
+enum JainaActions
 {
-    hyjalAI* tempAI = new hyjalAI(creature);
+    JAINA_20 = HYJAL_AI_ACTION_MAX,
+    JAINA_BLIZZARD,
+    JAINA_PYROBLAST,
+    JAINA_SUMMON_ELEMENTALS,
+    JAINA_ACTION_MAX,
+};
 
-    tempAI->m_aSpells[0].m_uiSpellId = SPELL_BLIZZARD;
-    tempAI->m_aSpells[0].m_uiCooldown = urand(15000, 35000);
-    tempAI->m_aSpells[0].m_pType = TARGETTYPE_RANDOM;
+struct npc_jaina_proudmooreAI : public hyjalAI
+{
+    npc_jaina_proudmooreAI(Creature* creature) : hyjalAI(creature, JAINA_ACTION_MAX)
+    {
+        AddTimerlessCombatAction(JAINA_20, true);
+        AddCombatAction(JAINA_BLIZZARD, 15000, 35000);
+        AddCombatAction(JAINA_PYROBLAST, 2000, 9000);
+        AddCombatAction(JAINA_SUMMON_ELEMENTALS, 15000, 45000);
+    }
 
-    tempAI->m_aSpells[1].m_uiSpellId = SPELL_PYROBLAST;
-    tempAI->m_aSpells[1].m_uiCooldown = urand(2000, 9000);
-    tempAI->m_aSpells[1].m_pType = TARGETTYPE_RANDOM;
-
-    tempAI->m_aSpells[2].m_uiSpellId = SPELL_SUMMON_ELEMENTALS;
-    tempAI->m_aSpells[2].m_uiCooldown = urand(15000, 45000);
-    tempAI->m_aSpells[2].m_pType = TARGETTYPE_SELF;
-
-    return tempAI;
-}
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case JAINA_20:
+                if (m_creature->GetHealthPercent() <= 20.f)
+                {
+                    SetActionReadyStatus(action, false);
+                    DoScriptText(SAY_CALL_FOR_HELP_EMOTE, m_creature);
+                    DoCallForHelp(30.f);
+                }
+                break;
+            case JAINA_BLIZZARD:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (DoCastSpellIfCan(target, SPELL_BLIZZARD) == CAST_OK)
+                        ResetCombatAction(action, urand(15000, 35000));
+                break;
+            case JAINA_PYROBLAST:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (DoCastSpellIfCan(target, SPELL_PYROBLAST) == CAST_OK)
+                        ResetCombatAction(action, urand(2000, 9000));
+                break;
+            case JAINA_SUMMON_ELEMENTALS:
+                if (m_creature->CountGuardiansWithEntry(NPC_WATER_ELEMENTAL) == 0)
+                    if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_ELEMENTALS) == CAST_OK)
+                        ResetCombatAction(action, urand(15000, 45000));
+                break;
+            default: hyjalAI::ExecuteAction(action); break;
+        }
+    }
+};
 
 bool GossipSelect_npc_jaina_proudmoore(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 action)
 {
@@ -92,20 +124,62 @@ bool GossipSelect_npc_jaina_proudmoore(Player* player, Creature* creature, uint3
     return false;
 }
 
-UnitAI* GetAI_npc_thrall(Creature* creature)
+enum ThrallActions
 {
-    hyjalAI* tempAI = new hyjalAI(creature);
+    THRALL_FERAL_SPIRITS = HYJAL_AI_ACTION_MAX,
+    THRALL_CHAIN_LIGHTNING,
+    THRALL_ACTION_MAX,
+};
 
-    tempAI->m_aSpells[0].m_uiSpellId = SPELL_CHAIN_LIGHTNING;
-    tempAI->m_aSpells[0].m_uiCooldown = urand(2000, 7000);
-    tempAI->m_aSpells[0].m_pType = TARGETTYPE_VICTIM;
+struct npc_thrallAI : public hyjalAI
+{
+    npc_thrallAI(Creature* creature) : hyjalAI(creature, THRALL_ACTION_MAX)
+    {
+        AddCombatAction(THRALL_FERAL_SPIRITS, 60000u);
+        AddCombatAction(THRALL_CHAIN_LIGHTNING, 6000, 8000);
+    }
 
-    tempAI->m_aSpells[1].m_uiSpellId = SPELL_FERAL_SPIRIT;
-    tempAI->m_aSpells[1].m_uiCooldown = urand(6000, 41000);
-    tempAI->m_aSpells[1].m_pType = TARGETTYPE_RANDOM;
+    GuidVector m_feralSpirits;
 
-    return tempAI;
-}
+    void JustSummoned(Creature* creature)
+    {
+        if (creature->GetEntry() == NPC_FERAL_SPIRIT)
+            m_feralSpirits.push_back(creature->GetObjectGuid());
+    }
+
+    bool CanUseFeralSpiritsAgain()
+    {
+        uint32 count = 0;
+
+        for (auto spiritGuid : m_feralSpirits)
+            if (Creature* spirit = m_creature->GetMap()->GetAnyTypeCreature(spiritGuid))
+                if (spirit->IsAlive())
+                    count++;
+
+        if (count == 0)
+            m_feralSpirits.clear();
+
+        return count == 0;
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case THRALL_CHAIN_LIGHTNING:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (DoCastSpellIfCan(target, SPELL_CHAIN_LIGHTNING) == CAST_OK)
+                        ResetCombatAction(action, urand(13000, 19000));
+                break;
+            case THRALL_FERAL_SPIRITS:
+                if (CanUseFeralSpiritsAgain())
+                    if (DoCastSpellIfCan(nullptr, SPELL_FERAL_SPIRIT) == CAST_OK)
+                        ResetCombatAction(action, urand(15000, 45000));
+                break;
+            default: hyjalAI::ExecuteAction(action); break;
+        }
+    }
+};
 
 bool GossipSelect_npc_thrall(Player* player, Creature* creature, uint32 /*uiSender*/, uint32 action)
 {
@@ -195,25 +269,37 @@ struct npc_building_triggerAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_building_trigger(Creature* creature)
+enum TyrandeActions
 {
-    return new npc_building_triggerAI(creature);
-}
+    TYRANDE_STARFALL = HYJAL_AI_ACTION_MAX,
+    TYRANDE_TRUESHOT_AURA,
+    TYRANDE_ACTION_MAX,
+};
 
-UnitAI* GetAI_npc_tyrande_whisperwind(Creature* creature)
+struct npc_tyrande_whisperwindAI : public hyjalAI
 {
-    hyjalAI* tempAI = new hyjalAI(creature);
+    npc_tyrande_whisperwindAI(Creature* creature) : hyjalAI(creature, TYRANDE_ACTION_MAX)
+    {
+        AddCombatAction(TYRANDE_STARFALL, 60000, 70000);
+        AddCombatAction(TYRANDE_TRUESHOT_AURA, 4000u);
+    }
 
-    tempAI->m_aSpells[0].m_uiSpellId = SPELL_STARFALL;
-    tempAI->m_aSpells[0].m_uiCooldown = urand(60000, 70000);
-    tempAI->m_aSpells[0].m_pType = TARGETTYPE_VICTIM;
-
-    tempAI->m_aSpells[1].m_uiSpellId = SPELL_TRUESHOT_AURA;
-    tempAI->m_aSpells[1].m_uiCooldown = 4000;
-    tempAI->m_aSpells[1].m_pType = TARGETTYPE_SELF;
-
-    return tempAI;
-}
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case TYRANDE_STARFALL:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_STARFALL) == CAST_OK)
+                    ResetCombatAction(action, urand(60000, 70000));
+                break;
+            case TYRANDE_TRUESHOT_AURA:
+                if (DoCastSpellIfCan(nullptr, SPELL_TRUESHOT_AURA) == CAST_OK)
+                    ResetCombatAction(action, 4000u);
+                break;
+            default: hyjalAI::ExecuteAction(action); break;
+        }
+    }
+};
 
 struct RaiseDeadHyjal : public SpellScript
 {
@@ -236,24 +322,24 @@ void AddSC_hyjal()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_jaina_proudmoore";
-    pNewScript->GetAI = &GetAI_npc_jaina_proudmoore;
+    pNewScript->GetAI = &GetNewAIInstance<npc_jaina_proudmooreAI>;
     pNewScript->pGossipSelect = &GossipSelect_npc_jaina_proudmoore;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_thrall";
-    pNewScript->GetAI = &GetAI_npc_thrall;
+    pNewScript->GetAI = &GetNewAIInstance<npc_thrallAI>;
     pNewScript->pGossipSelect = &GossipSelect_npc_thrall;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_tyrande_whisperwind";
-    pNewScript->GetAI = &GetAI_npc_tyrande_whisperwind;
+    pNewScript->GetAI = &GetNewAIInstance<npc_tyrande_whisperwindAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_building_trigger";
-    pNewScript->GetAI = &GetAI_npc_building_trigger;
+    pNewScript->GetAI = &GetNewAIInstance<npc_building_triggerAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<RaiseDeadHyjal>("spell_raise_dead_hyjal");
