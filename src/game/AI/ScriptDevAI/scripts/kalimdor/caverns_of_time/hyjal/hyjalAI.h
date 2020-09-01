@@ -29,6 +29,7 @@ enum HyjalSpells
     // Thrall spells
     SPELL_CHAIN_LIGHTNING   = 31330,
     SPELL_FERAL_SPIRIT      = 31331,
+    NPC_FERAL_SPIRIT        = 17854,
 
     // Tyrande spells
     SPELL_STARFALL          = 20687,

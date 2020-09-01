@@ -224,6 +224,10 @@ void hyjalAI::UpdateAI(const uint32 uiDiff)
 
                 if (pTarget)
                 {
+                    if (m_aSpells[i].m_uiSpellId == SPELL_FERAL_SPIRIT)
+                        if (m_creature->CountGuardiansWithEntry(NPC_FERAL_SPIRIT) > 0)
+                            continue;
+
                     DoCastSpellIfCan(pTarget, m_aSpells[i].m_uiSpellId);
                     m_uiSpellTimer[i] = m_aSpells[i].m_uiCooldown;
                 }
