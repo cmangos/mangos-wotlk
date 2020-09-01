@@ -36,6 +36,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"
+#include "AI/BaseAI/PetAI.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Entities/TemporarySpawn.h"
 #include "Spells/SpellAuras.h"
@@ -2200,6 +2201,169 @@ struct CursedScarabDespawnPeriodicTrigger : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_EXPOSE_RAZORTHORN_ROOT = 44935,
+    SPELL_SUMMON_RAZORTHORN_ROOT = 44941,
+    NPC_RAZORTHORN_RAVAGER       = 24922,
+    GO_RAZORTHORN_DIRT_MOUND     = 187073,
+
+    SPELL_REND = 13443,
+    SPELL_RAVAGE = 33781,
+
+    POINT_MOUND = 1,
+};
+
+struct ExposeRazorthornRoot : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->AI())
+            return;
+
+        target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, target);
+    }
+};
+
+struct npc_razorthorn_ravager_pet : public PetAI, public TimerManager
+{
+    npc_razorthorn_ravager_pet(Creature* creature) : PetAI(creature)
+    {
+        AddCustomAction(1, true, [&]() { HandleAnimations(); });
+    }
+
+    uint32 m_animStage;
+    ObjectGuid m_mound;
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A && m_animStage == 0)
+            HandleAnimations();
+    }
+
+    void MovementInform(uint32 movementType, uint32 data)
+    {
+        if (movementType == POINT_MOTION_TYPE)
+            if (data == POINT_MOUND)
+                ResetTimer(1, 500);
+    }
+
+    void HandleAnimations()
+    {
+        uint32 timer = 0;
+        switch (m_animStage)
+        {
+            case 0:
+            {
+                GameObject* mound = GetClosestGameObjectWithEntry(m_creature, GO_RAZORTHORN_DIRT_MOUND, 20.0f);
+                if (!mound || mound->GetRespawnTime() != 0)
+                {
+                    m_animStage = 0;
+                    return;
+                }
+
+                m_mound = mound->GetObjectGuid();
+                float x, y, z;
+                mound->GetContactPoint(mound, x, y, z, CONTACT_DISTANCE);
+                m_creature->SendPetTalk(0);
+                m_creature->GetMotionMaster()->MovePoint(POINT_MOUND, x, y, z);
+                SetCombatScriptStatus(true);
+                break;
+            }
+            case 1:
+                m_creature->CastSpell(nullptr, SPELL_SUMMON_RAZORTHORN_ROOT, TRIGGERED_OLD_TRIGGERED);
+                if (GameObject* mound = m_creature->GetMap()->GetGameObject(m_mound))
+                    mound->SetLootState(GO_JUST_DEACTIVATED);
+                else
+                {
+                    m_animStage = 0;
+                    SetCombatScriptStatus(false);
+                    return;
+                }
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveIdle();
+                m_creature->HandleEmote(EMOTE_ONESHOT_ATTACKUNARMED);
+                timer = 2000;
+                break;
+            case 2:
+                m_animStage = 0;
+                SetCombatScriptStatus(false);
+                m_unit->GetMotionMaster()->MoveFollow(m_creature->GetCharmer(), PET_FOLLOW_ANGLE, PET_FOLLOW_DIST, true);
+                return;
+        }
+        ++m_animStage;
+        if (timer)
+            ResetTimer(1, timer);
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff);
+
+        if (GetCombatScriptStatus())
+            return;
+
+        PetAI::UpdateAI(diff);
+    }
+};
+
+enum RazorthornActions
+{
+    RAZORTHORN_REND,
+    RAZORTHORN_RAVAGE,
+    RAZORTHORN_ACTION_MAX,
+};
+
+struct npc_razorthorn_ravager : public CombatAI
+{
+    npc_razorthorn_ravager(Creature* creature) : CombatAI(creature, RAZORTHORN_ACTION_MAX)
+    {
+        AddCombatAction(RAZORTHORN_REND, 10000, 15000);
+        AddCombatAction(RAZORTHORN_RAVAGE, 5000, 9000);
+    }
+
+    bool m_charmed;
+
+    void Reset() override
+    {
+
+    }
+
+    bool CanHandleCharm() override { return true; }
+
+    void JustGotCharmed(Unit* /*charmer*/) override
+    {
+        if (CharmInfo* charmInfo = m_creature->GetCharmInfo())
+            charmInfo->SetCharmState(new npc_razorthorn_ravager_pet(m_creature));
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case RAZORTHORN_REND:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_REND) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 20000));
+                break;
+            case RAZORTHORN_RAVAGE:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RAVAGE) == CAST_OK)
+                    ResetCombatAction(action, urand(8000, 12000));
+                break;
+        }
+    }
+};
+
+struct CharmRavager : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetEffIndex() == EFFECT_INDEX_1)
+            if (aura->GetTarget()->IsCreature())
+                static_cast<Creature*>(aura->GetTarget())->ForcedDespawn();
+    }
+};
+
 void AddSC_hellfire_peninsula()
 {
     Script* pNewScript = new Script;
@@ -2303,7 +2467,14 @@ void AddSC_hellfire_peninsula()
     pNewScript->GetAI = &GetAI_npc_credit_marker_they_must_burn;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
+    pNewScript->Name = "npc_razorthorn_ravager";
+    pNewScript->GetAI = &GetNewAIInstance<npc_razorthorn_ravager>;
+    pNewScript->RegisterSelf();
+
     RegisterSpellScript<SummonSmokeBeacon>("spell_summon_smoke_beacon");
     RegisterSpellScript<CursedScarabPeriodicTrigger>("spell_cursed_scarab_periodic");
     RegisterSpellScript<CursedScarabDespawnPeriodicTrigger>("spell_cursed_scarab_despawn_periodic");
+    RegisterSpellScript<ExposeRazorthornRoot>("spell_razorthorn_root");
+    RegisterAuraScript<CharmRavager>("spell_charm_ravager");
 }

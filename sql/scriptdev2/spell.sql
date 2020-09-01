@@ -202,6 +202,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (40575,'spell_ogrila_flasks'),
 (40576,'spell_ogrila_flasks'),
 (34630,'spell_scrap_reaver_spell'),
+(44935,'spell_razorthorn_root'),
+(44881,'spell_charm_ravager'),
 (34800,'spell_getting_sleepy_aura'),
 (43364,'spell_getting_sleepy_aura');
 

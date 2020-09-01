@@ -321,12 +321,6 @@ enum
     NPC_FRANCLORN_FORGEWRIGHT           = 8888,
     NPC_GAERIYAN                        = 9299,
 
-    // quest 11521
-    SPELL_EXPOSE_RAZORTHORN_ROOT        = 44935,
-    SPELL_SUMMON_RAZORTHORN_ROOT        = 44941,
-    NPC_RAZORTHORN_RAVAGER              = 24922,
-    GO_RAZORTHORN_DIRT_MOUND            = 187073,
-
     //  for quest 10584
     SPELL_PROTOVOLTAIC_MAGNETO_COLLECTOR = 37136,
     NPC_ENCASED_ELECTROMENTAL           = 21731,
@@ -935,24 +929,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
                 pCreatureTarget->AttackStop(true);
                 pCreatureTarget->GetMotionMaster()->MoveFleeing(pCaster, 7);
                 pCreatureTarget->ForcedDespawn(7 * IN_MILLISECONDS);
-            }
-            return true;
-        }
-        case SPELL_EXPOSE_RAZORTHORN_ROOT:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCreatureTarget->GetEntry() != NPC_RAZORTHORN_RAVAGER)
-                    return true;
-
-                if (GameObject* pMound = GetClosestGameObjectWithEntry(pCreatureTarget, GO_RAZORTHORN_DIRT_MOUND, 20.0f))
-                {
-                    if (pMound->GetRespawnTime() != 0)
-                        return true;
-
-                    pCreatureTarget->CastSpell(pCreatureTarget, SPELL_SUMMON_RAZORTHORN_ROOT, TRIGGERED_OLD_TRIGGERED);
-                    pMound->SetLootState(GO_JUST_DEACTIVATED);
-                }
             }
             return true;
         }

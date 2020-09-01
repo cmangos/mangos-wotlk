@@ -916,6 +916,7 @@ INSERT INTO scripted_event_id VALUES(10745,'npc_vindicator_sedai');
 UPDATE gameobject_template SET ScriptName='go_kaliri_nest' WHERE entry IN(181582);
 UPDATE gameobject_template SET ScriptName='go_smoke_beacon' WHERE entry=184661;
 UPDATE creature_template SET ScriptName='npc_credit_marker_they_must_burn' WHERE entry=21173;
+UPDATE creature_template SET ScriptName='npc_razorthorn_ravager' WHERE entry=24922;
 
 /* HILLSBRAD FOOTHILLS */
 
