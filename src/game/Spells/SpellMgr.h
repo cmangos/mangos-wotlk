@@ -543,6 +543,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 30982:         // Crippling Poison
         case 31332:         // Dire Wolf Visual
         case 31690:         // Putrid Mushroom
+        case 31722:         // Immolation
         case 31792:         // Bear Form (Shapeshift)
         case 32007:         // Mo'arg Engineer Transform Visual
         case 32064:         // Battle Shout
@@ -559,6 +560,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 35319:         // Electric Skin
         case 35408:         // Fear Proc
         case 35596:         // Power of the Legion
+        case 35747:         // Flame Buffet
         case 35841:         // Draenei Spirit Visual
         case 35850:         // Draenei Spirit Visual 2
         case 35917:         // Firey Intellect
