@@ -1028,6 +1028,7 @@ void instance_mount_hyjal::OnCreatureRespawn(Creature* creature)
         case NPC_FROST:
         case NPC_INFERNAL:
         case NPC_STALK:
+        {
             ObjectGuid spawner = creature->GetSpawnerGuid(); // not loaded in map - guid is enough
             if (!spawner) // Static spawns in Scourge base should never grant XP, loot or reputation
             {
@@ -1037,6 +1038,7 @@ void instance_mount_hyjal::OnCreatureRespawn(Creature* creature)
                 return;
             }
             break;
+        }
         case NPC_INFERNAL_RELAY:
         case NPC_INFERNAL_TARGET:
             static_cast<CreatureAI*>(creature->AI())->SetDeathPrevention(true);
