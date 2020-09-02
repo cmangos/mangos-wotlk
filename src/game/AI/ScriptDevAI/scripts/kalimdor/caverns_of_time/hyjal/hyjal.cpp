@@ -1037,6 +1037,11 @@ void instance_mount_hyjal::OnCreatureRespawn(Creature* creature)
                 return;
             }
             break;
+        case NPC_INFERNAL_RELAY:
+        case NPC_INFERNAL_TARGET:
+            static_cast<CreatureAI*>(creature->AI())->SetDeathPrevention(true);
+            creature->SetCanEnterCombat(false); // on retail they enter combat, likely for some guardian purposes for the infernals - on our end they bug out friendlies
+            break;
     }
 }
 
