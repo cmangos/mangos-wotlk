@@ -116,7 +116,23 @@ void WorldState::Load()
                     break;
                 }
                 case SAVE_ID_QUEL_DANAS: // TODO:
+                {
+                    if (data.size())
+                    {
+                        try
+                        {
+                            loadStream >> m_sunsReachData.m_phase >> m_sunsReachData.m_subphaseMask;
+                            for (uint32 i = 0; i < COUNTERS_MAX; ++i)
+                                loadStream >> m_sunsReachData.m_sunsReachReclamationCounters[i];
+                        }
+                        catch (std::exception& e)
+                        {
+                            sLog.outError("%s", e.what());
+                            memset(m_loveIsInTheAirData.counters, 0, sizeof(LoveIsInTheAir));
+                        }
+                    }
                     break;
+                }
                 case SAVE_ID_HIGHLORD_KRUUL:
                 {
                     auto curTime = World::GetCurrentClockTime();
@@ -172,6 +188,8 @@ void WorldState::Load()
     }
     StartWarEffortEvent();
     RespawnEmeraldDragons();
+    StartSunsReachPhase(true);
+    HandleSunsReachSubPhaseTransition(m_sunsReachData.m_subphaseMask, true);
     StartExpansionEvent();
 }
 
@@ -202,15 +220,18 @@ void WorldState::Save(SaveIds saveId)
             SaveHelper(expansionData, SAVE_ID_EXPANSION_RELEASE);
             break;
         }
+        case SAVE_ID_QUEL_DANAS:
+        {
+            std::string expansionData = m_sunsReachData.GetData();
+            SaveHelper(expansionData, SAVE_ID_QUEL_DANAS);
+            break;
+        }
         case SAVE_ID_EXPANSION_RELEASE:
         {
             std::string expansionData = std::to_string(m_expansion);
             SaveHelper(expansionData, SAVE_ID_EXPANSION_RELEASE);
             break;
         }
-        // TODO: Add saving for AQ and QD
-        case SAVE_ID_QUEL_DANAS:
-            break;
         case SAVE_ID_LOVE_IS_IN_THE_AIR:
         {
             std::string loveData;
@@ -365,9 +386,9 @@ void WorldState::HandlePlayerEnterZone(Player* player, uint32 zoneId)
         {
             std::lock_guard<std::mutex> guard(m_mutex);
             if (m_isMagtheridonHeadSpawnedAlliance && player->GetTeam() == ALLIANCE)
-                player->CastSpell(player, SPELL_TROLLBANES_COMMAND, TRIGGERED_OLD_TRIGGERED);
+                player->CastSpell(nullptr, SPELL_TROLLBANES_COMMAND, TRIGGERED_OLD_TRIGGERED);
             if (m_isMagtheridonHeadSpawnedHorde && player->GetTeam() == HORDE)
-                player->CastSpell(player, SPELL_NAZGRELS_FAVOR, TRIGGERED_OLD_TRIGGERED);
+                player->CastSpell(nullptr, SPELL_NAZGRELS_FAVOR, TRIGGERED_OLD_TRIGGERED);
             m_magtheridonHeadPlayers.push_back(player->GetObjectGuid());
             break;
         }
@@ -378,8 +399,18 @@ void WorldState::HandlePlayerEnterZone(Player* player, uint32 zoneId)
         {
             std::lock_guard<std::mutex> guard(m_mutex);
             if (m_adalSongOfBattleTimer)
-                player->CastSpell(player, SPELL_ADAL_SONG_OF_BATTLE, TRIGGERED_OLD_TRIGGERED);
+                player->CastSpell(nullptr, SPELL_ADAL_SONG_OF_BATTLE, TRIGGERED_OLD_TRIGGERED);
             m_adalSongOfBattlePlayers.push_back(player->GetObjectGuid());
+            break;
+        }
+        case ZONEID_ISLE_OF_QUEL_DANAS:
+        case ZONEID_MAGISTERS_TERRACE:
+        case ZONEID_SUNWELL_PLATEAU:
+        {
+            std::lock_guard<std::mutex> guard(m_sunsReachData.m_sunsReachReclamationMutex);
+            m_sunsReachData.m_sunsReachReclamationPlayers.push_back(player->GetObjectGuid());
+            if (zoneId != ZONEID_SUNWELL_PLATEAU && m_sunsReachData.m_subphaseMask == SUBPHASE_ALL)
+                player->CastSpell(nullptr, SPELL_KIRU_SONG_OF_VICTORY, TRIGGERED_OLD_TRIGGERED);
             break;
         }
         default:
@@ -439,6 +470,17 @@ void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
             auto position = std::find(m_adalSongOfBattlePlayers.begin(), m_adalSongOfBattlePlayers.end(), player->GetObjectGuid());
             if (position != m_adalSongOfBattlePlayers.end()) // == myVector.end() means the element was not found
                 m_adalSongOfBattlePlayers.erase(position);
+            break;
+        }
+        case ZONEID_ISLE_OF_QUEL_DANAS:
+        case ZONEID_MAGISTERS_TERRACE:
+        case ZONEID_SUNWELL_PLATEAU:
+        {
+            std::lock_guard<std::mutex> guard(m_sunsReachData.m_sunsReachReclamationMutex);
+            player->RemoveAurasDueToSpell(SPELL_KIRU_SONG_OF_VICTORY);
+            auto position = std::find(m_sunsReachData.m_sunsReachReclamationPlayers.begin(), m_sunsReachData.m_sunsReachReclamationPlayers.end(), player->GetObjectGuid());
+            if (position != m_sunsReachData.m_sunsReachReclamationPlayers.end())
+                m_sunsReachData.m_sunsReachReclamationPlayers.erase(position);
             break;
         }
         default:
@@ -628,14 +670,6 @@ void WorldState::Update(const uint32 diff)
 void WorldState::SendWorldstateUpdate(std::mutex& mutex, uint32 value, uint32 worldStateId)
 {
     std::lock_guard<std::mutex> guard(mutex);
-    for (ObjectGuid& guid : m_loveIsInTheAirCapitalsPlayers)
-        if (Player* player = sObjectMgr.GetPlayer(guid))
-            player->SendUpdateWorldState(worldStateId, value);
-}
-
-void WorldState::SendLoveIsInTheAirWorldstateUpdate(uint32 value, uint32 worldStateId)
-{
-    std::lock_guard<std::mutex> guard(m_loveIsInTheAirMutex);
     for (ObjectGuid& guid : m_loveIsInTheAirCapitalsPlayers)
         if (Player* player = sObjectMgr.GetPlayer(guid))
             player->SendUpdateWorldState(worldStateId, value);
@@ -954,6 +988,364 @@ bool WorldState::SetExpansion(uint8 expansion)
     return true;
 }
 
+enum
+{
+    QUEST_ERRATIC_BEHAVIOR = 11524,
+    QUEST_SANCTUM_WARDS = 11496,
+    QUEST_BATTLE_FOR_THE_SUNS_REACH_ARMORY = 11538,
+    QUEST_DISTRACTION_AT_THE_DEAD_SCAR = 11532,
+    QUEST_INTERCEPTING_THE_MANA_CELLS = 11513,
+    QUEST_INTERCEPT_THE_REINFORCEMENTS = 11542,
+    QUEST_TAKING_THE_HARBOR = 11539,
+    QUEST_MAKING_READY = 11535,
+    QUEST_DISCOVERING_YOUR_ROOTS = 11520,
+    QUEST_A_CHARITABLE_DONATION = 11545,
+    QUEST_A_MAGNANIMOUS_BENEFACTOR = 11549,
+
+    COUNTER_MAX_VAL_REQ = 10000,
+};
+
+void WorldState::AddSunsReachProgress(uint32 questId)
+{
+    uint32 counter = 0;
+    int32 otherCounter = -1;
+    int32 worldState = 0;
+    uint32 subPhaseMask = 0;
+    uint32 addedValue = 1;
+    switch (questId)
+    {
+        case QUEST_ERRATIC_BEHAVIOR: counter = COUNTER_ERRATIC_BEHAVIOR; otherCounter = COUNTER_SANCTUM_WARDS; worldState = WORLD_STATE_QUEL_DANAS_SANCTUM; break;
+        case QUEST_SANCTUM_WARDS: counter = COUNTER_SANCTUM_WARDS; otherCounter = COUNTER_SANCTUM_WARDS; worldState = WORLD_STATE_QUEL_DANAS_SANCTUM; break;
+        case QUEST_BATTLE_FOR_THE_SUNS_REACH_ARMORY: counter = COUNTER_BATTLE_FOR_THE_SUNS_REACH_ARMORY; otherCounter = COUNTER_DISTRACTION_AT_THE_DEAD_SCAR; worldState = WORLD_STATE_QUEL_DANAS_ARMORY; break;
+        case QUEST_DISTRACTION_AT_THE_DEAD_SCAR: counter = COUNTER_DISTRACTION_AT_THE_DEAD_SCAR; otherCounter = COUNTER_BATTLE_FOR_THE_SUNS_REACH_ARMORY; worldState = WORLD_STATE_QUEL_DANAS_ARMORY; break;
+        case QUEST_INTERCEPTING_THE_MANA_CELLS: counter = COUNTER_INTERCEPTING_THE_MANA_CELLS; subPhaseMask = SUBPHASE_PORTAL; worldState = WORLD_STATE_QUEL_DANAS_PORTAL; break;
+        case QUEST_INTERCEPT_THE_REINFORCEMENTS: counter = COUNTER_INTERCEPT_THE_REINFORCEMENTS; otherCounter = COUNTER_TAKING_THE_HARBOR; worldState = WORLD_STATE_QUEL_DANAS_HARBOR; break;
+        case QUEST_TAKING_THE_HARBOR: counter = COUNTER_TAKING_THE_HARBOR; otherCounter = COUNTER_INTERCEPT_THE_REINFORCEMENTS; worldState = WORLD_STATE_QUEL_DANAS_HARBOR; break;
+        case QUEST_MAKING_READY: counter = COUNTER_MAKING_READY; subPhaseMask = SUBPHASE_ANVIL; worldState = WORLD_STATE_QUEL_DANAS_ANVIL; break;
+        case QUEST_DISCOVERING_YOUR_ROOTS: counter = COUNTER_DISCOVERING_YOUR_ROOTS; subPhaseMask = SUBPHASE_ALCHEMY_LAB; worldState = WORLD_STATE_QUEL_DANAS_ALCHEMY_LAB; break;
+        case QUEST_A_CHARITABLE_DONATION: counter = COUNTER_A_CHARITABLE_DONATION; subPhaseMask = SUBPHASE_MONUMENT; worldState = WORLD_STATE_QUEL_DANAS_MONUMENT; break;
+        case QUEST_A_MAGNANIMOUS_BENEFACTOR: counter = COUNTER_A_CHARITABLE_DONATION; subPhaseMask = SUBPHASE_MONUMENT; worldState = WORLD_STATE_QUEL_DANAS_MONUMENT; addedValue = 150; break;
+        default: return;
+    }
+
+    uint32 previousValue = 0;
+    uint32 newValue = 0;
+
+    if (!subPhaseMask)
+        previousValue = m_sunsReachData.GetPhasePercentage(m_sunsReachData.m_phase);
+    else
+        previousValue = m_sunsReachData.GetSubPhasePercentage(subPhaseMask);
+    m_sunsReachData.m_sunsReachReclamationCounters[counter] += addedValue;
+    if (!subPhaseMask)
+        newValue = m_sunsReachData.GetPhasePercentage(m_sunsReachData.m_phase);
+    else
+        newValue = m_sunsReachData.GetSubPhasePercentage(subPhaseMask);
+    if (previousValue != newValue)
+        SendWorldstateUpdate(m_sunsReachData.m_sunsReachReclamationMutex, newValue, worldState);
+
+    bool save = true;
+    if (m_sunsReachData.m_sunsReachReclamationCounters[counter] >= COUNTER_MAX_VAL_REQ)
+    {
+        if (otherCounter == -1 || m_sunsReachData.m_sunsReachReclamationCounters[otherCounter] >= COUNTER_MAX_VAL_REQ)
+        {
+            save = false;
+            switch (questId)
+            {
+                case QUEST_ERRATIC_BEHAVIOR:
+                case QUEST_SANCTUM_WARDS:
+                {
+                    if (m_sunsReachData.m_phase == SUNS_REACH_PHASE_1_STAGING_AREA)
+                        HandleSunsReachPhaseTransition(SUNS_REACH_PHASE_2_SANCTUM);
+                    break;
+                }
+                case QUEST_BATTLE_FOR_THE_SUNS_REACH_ARMORY:
+                case QUEST_DISTRACTION_AT_THE_DEAD_SCAR:
+                {
+                    if (m_sunsReachData.m_phase == SUNS_REACH_PHASE_2_SANCTUM)
+                        HandleSunsReachPhaseTransition(SUNS_REACH_PHASE_3_ARMORY);
+                    break;
+                }
+                case QUEST_INTERCEPTING_THE_MANA_CELLS:
+                {
+                    if ((m_sunsReachData.m_subphaseMask & SUBPHASE_PORTAL) == 0)
+                        HandleSunsReachSubPhaseTransition(SUBPHASE_PORTAL);
+                    break;
+                }
+                case QUEST_INTERCEPT_THE_REINFORCEMENTS:
+                case QUEST_TAKING_THE_HARBOR:
+                {
+                    if (m_sunsReachData.m_phase == SUNS_REACH_PHASE_3_ARMORY)
+                        HandleSunsReachPhaseTransition(SUNS_REACH_PHASE_4_HARBOR);
+                    break;
+                }
+                case QUEST_MAKING_READY:
+                {
+                    if ((m_sunsReachData.m_subphaseMask & SUBPHASE_ANVIL) == 0)
+                        HandleSunsReachSubPhaseTransition(SUBPHASE_ANVIL);
+                    break;
+                }
+                case QUEST_DISCOVERING_YOUR_ROOTS:
+                {
+                    if ((m_sunsReachData.m_subphaseMask & SUBPHASE_ALCHEMY_LAB) == 0)
+                        HandleSunsReachSubPhaseTransition(SUBPHASE_ALCHEMY_LAB);
+                    break;
+                }
+                case QUEST_A_CHARITABLE_DONATION:
+                case QUEST_A_MAGNANIMOUS_BENEFACTOR:
+                {
+                    if ((m_sunsReachData.m_subphaseMask & SUBPHASE_MONUMENT) == 0)
+                        HandleSunsReachSubPhaseTransition(SUBPHASE_MONUMENT);
+                    break;
+                }
+            }
+        }
+    }
+    if (save)
+        Save(SAVE_ID_QUEL_DANAS);
+}
+
+void WorldState::HandleSunsReachPhaseTransition(uint32 newPhase)
+{
+    if (newPhase < m_sunsReachData.m_phase)
+    {
+        while (newPhase != m_sunsReachData.m_phase)
+        {
+            StopSunsReachPhase(newPhase > m_sunsReachData.m_phase);
+            --m_sunsReachData.m_phase;
+        }
+        StartSunsReachPhase();
+    }
+    else
+    {
+        StopSunsReachPhase(newPhase > m_sunsReachData.m_phase);
+        bool moreThanOne = newPhase > m_sunsReachData.m_phase + 1; // custom command case
+        m_sunsReachData.m_phase = newPhase;
+        StartSunsReachPhase(moreThanOne);
+    }
+    switch (m_sunsReachData.m_phase)
+    {
+        case SUNS_REACH_PHASE_2_SANCTUM: if ((m_sunsReachData.m_subphaseMask & SUBPHASE_PORTAL) == 0) sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_NO_PORTAL); break;
+        case SUNS_REACH_PHASE_3_ARMORY: if ((m_sunsReachData.m_subphaseMask & SUBPHASE_ANVIL) == 0) sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_3_NO_ANVIL); break;
+        case SUNS_REACH_PHASE_4_HARBOR:
+            if ((m_sunsReachData.m_subphaseMask & SUBPHASE_ALCHEMY_LAB) == 0) sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_4_NO_MONUMENT);
+            if ((m_sunsReachData.m_subphaseMask & SUBPHASE_MONUMENT) == 0) sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_4_NO_ALCHEMY_LAB);
+            break;
+        default: break;
+    }
+    SendWorldstateUpdate(m_sunsReachData.m_sunsReachReclamationMutex, m_sunsReachData.m_phase, WORLD_STATE_QUEL_DANAS_MUSIC);
+}
+
+void WorldState::HandleSunsReachSubPhaseTransition(int32 subPhaseMask, bool initial)
+{
+    bool start = true;
+    if (subPhaseMask < 0)
+    {
+        start = false;
+        subPhaseMask = -subPhaseMask;
+    }
+    bool all = false;
+    if (start)
+    {
+        m_sunsReachData.m_subphaseMask |= subPhaseMask;
+        if ((m_sunsReachData.m_subphaseMask & SUBPHASE_ALL) == SUBPHASE_ALL)
+            all = true;
+    }
+    else
+    {
+        if ((m_sunsReachData.m_subphaseMask & SUBPHASE_ALL) == SUBPHASE_ALL)
+            all = true;
+        m_sunsReachData.m_subphaseMask &= ~subPhaseMask;
+    }
+    if (initial && subPhaseMask == 0)
+    {
+        switch (m_sunsReachData.m_phase)
+        {
+            case SUNS_REACH_PHASE_2_SANCTUM: sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_NO_PORTAL); break;
+            case SUNS_REACH_PHASE_3_ARMORY: sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_3_NO_ANVIL); break;
+            case SUNS_REACH_PHASE_4_HARBOR: sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_4_NO_MONUMENT); sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_4_NO_ALCHEMY_LAB); break;
+            default: break;
+        }
+    }
+    if ((subPhaseMask & SUBPHASE_PORTAL))
+    {
+        uint32 first = GAME_EVENT_QUEL_DANAS_PHASE_2_NO_PORTAL;
+        uint32 second = GAME_EVENT_QUEL_DANAS_PHASE_2_PORTAL;
+        if (start)
+        {
+            sGameEventMgr.StopEvent(first);
+            sGameEventMgr.StartEvent(second);
+        }
+        else
+        {
+            sGameEventMgr.StopEvent(second);
+            sGameEventMgr.StartEvent(first);
+        }
+    }
+    if ((subPhaseMask & SUBPHASE_ANVIL))
+    {
+        uint32 first = GAME_EVENT_QUEL_DANAS_PHASE_3_NO_ANVIL;
+        uint32 second = GAME_EVENT_QUEL_DANAS_PHASE_3_ANVIL;
+        if (start)
+        {
+            sGameEventMgr.StopEvent(first);
+            sGameEventMgr.StartEvent(second);
+        }
+        else
+        {
+            sGameEventMgr.StopEvent(second);
+            sGameEventMgr.StartEvent(first);
+        }
+    }
+    if ((subPhaseMask & SUBPHASE_ALCHEMY_LAB))
+    {
+        uint32 first = GAME_EVENT_QUEL_DANAS_PHASE_4_NO_ALCHEMY_LAB;
+        uint32 second = GAME_EVENT_QUEL_DANAS_PHASE_4_ALCHEMY_LAB;
+        if (start)
+        {
+            sGameEventMgr.StopEvent(first);
+            sGameEventMgr.StartEvent(second);
+        }
+        else
+        {
+            sGameEventMgr.StopEvent(second);
+            sGameEventMgr.StartEvent(first);
+        }
+    }
+    if ((subPhaseMask & SUBPHASE_MONUMENT))
+    {
+        uint32 first = GAME_EVENT_QUEL_DANAS_PHASE_4_NO_MONUMENT;
+        uint32 second = GAME_EVENT_QUEL_DANAS_PHASE_4_MONUMENT;
+        if (start)
+        {
+            sGameEventMgr.StopEvent(first);
+            sGameEventMgr.StartEvent(second);
+        }
+        else
+        {
+            sGameEventMgr.StopEvent(second);
+            sGameEventMgr.StartEvent(first);
+        }
+    }
+    if (all)
+    {
+        if (start)
+            sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_4_KIRU);
+        else
+            sGameEventMgr.StopEvent(GAME_EVENT_QUEL_DANAS_PHASE_4_KIRU);
+
+        if (!initial)
+        {
+            std::lock_guard<std::mutex> guard(m_sunsReachData.m_sunsReachReclamationMutex);
+            for (ObjectGuid& guid : m_sunsReachData.m_sunsReachReclamationPlayers)
+            {
+                if (Player* player = sObjectMgr.GetPlayer(guid))
+                {
+                    if (player->GetZoneId() == ZONEID_SUNWELL_PLATEAU)
+                        continue;
+
+                    if (start)
+                    {
+                        player->GetMap()->GetMessager().AddMessage([guid](Map* map) -> void
+                        {
+                            if (Player* player = map->GetPlayer(guid))
+                                player->CastSpell(nullptr, SPELL_KIRU_SONG_OF_VICTORY, TRIGGERED_OLD_TRIGGERED);
+                        });
+                    }
+                    else
+                    {
+                        player->GetMap()->GetMessager().AddMessage([guid](Map* map) -> void
+                        {
+                            if (Player* player = map->GetPlayer(guid))
+                                player->RemoveAurasDueToSpell(SPELL_KIRU_SONG_OF_VICTORY);
+                        });
+                    }
+                }
+            }
+        }
+    }
+    if (!initial)
+        Save(SAVE_ID_QUEL_DANAS);
+}
+
+void WorldState::SetSunsReachCounter(SunsReachCounters index, uint32 value)
+{
+    m_sunsReachData.m_sunsReachReclamationCounters[index] = value;
+}
+
+void WorldState::StopSunsReachPhase(bool forward)
+{
+    switch (m_sunsReachData.m_phase)
+    {
+        case SUNS_REACH_PHASE_1_STAGING_AREA: sGameEventMgr.StopEvent(GAME_EVENT_QUEL_DANAS_PHASE_1); break;
+        case SUNS_REACH_PHASE_2_SANCTUM: sGameEventMgr.StopEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_ONLY); if (!forward) sGameEventMgr.StopEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_PERMANENT); break;
+        case SUNS_REACH_PHASE_3_ARMORY: sGameEventMgr.StopEvent(GAME_EVENT_QUEL_DANAS_PHASE_3_ONLY); if (!forward) sGameEventMgr.StopEvent(GAME_EVENT_QUEL_DANAS_PHASE_3_PERMANENT); break;
+        case SUNS_REACH_PHASE_4_HARBOR: sGameEventMgr.StopEvent(GAME_EVENT_QUEL_DANAS_PHASE_4); break;
+        default: break;
+    }
+}
+
+void WorldState::StartSunsReachPhase(bool initial)
+{
+    switch (m_sunsReachData.m_phase)
+    {
+        case SUNS_REACH_PHASE_1_STAGING_AREA: sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_1); break;
+        case SUNS_REACH_PHASE_2_SANCTUM: sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_ONLY); sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_PERMANENT); break;
+        case SUNS_REACH_PHASE_3_ARMORY:
+            if (initial)
+                sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_PERMANENT);
+            sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_3_ONLY); sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_3_PERMANENT);
+            break;
+        case SUNS_REACH_PHASE_4_HARBOR:
+            if (initial)
+            {
+                sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_PERMANENT);
+                sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_3_PERMANENT);
+            }
+            sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_4);
+            break;
+        default: break;
+    }
+}
+
+std::string WorldState::GetSunsReachPrintout()
+{
+    std::string output = "Phase: " + std::to_string(m_sunsReachData.m_phase) + " Subphase mask: " + std::to_string(m_sunsReachData.m_subphaseMask) + "\nValues:";
+    for (uint32 value : m_sunsReachData.m_sunsReachReclamationCounters)
+        output += " " + std::to_string(value);
+    return output;
+}
+
+std::string SunsReachReclamationData::GetData()
+{
+    std::string output = std::to_string(m_phase) + " " + std::to_string(m_subphaseMask);
+    for (uint32 value : m_sunsReachReclamationCounters)
+        output += " " + std::to_string(value);
+    return output;
+}
+
+uint32 SunsReachReclamationData::GetPhasePercentage(uint32 phase)
+{
+    switch (phase)
+    {
+        case SUNS_REACH_PHASE_1_STAGING_AREA: return uint32((m_sunsReachReclamationCounters[COUNTER_ERRATIC_BEHAVIOR] + m_sunsReachReclamationCounters[COUNTER_SANCTUM_WARDS]) * 100 / (2 * COUNTER_MAX_VAL_REQ));
+        case SUNS_REACH_PHASE_2_SANCTUM: return uint32((m_sunsReachReclamationCounters[COUNTER_BATTLE_FOR_THE_SUNS_REACH_ARMORY] + m_sunsReachReclamationCounters[COUNTER_DISTRACTION_AT_THE_DEAD_SCAR]) * 100 / (2 * COUNTER_MAX_VAL_REQ));
+        case SUNS_REACH_PHASE_3_ARMORY: return uint32((m_sunsReachReclamationCounters[COUNTER_INTERCEPT_THE_REINFORCEMENTS] + m_sunsReachReclamationCounters[COUNTER_TAKING_THE_HARBOR]) * 100 / (2 * COUNTER_MAX_VAL_REQ));
+        default: return 0;
+    }
+}
+
+uint32 SunsReachReclamationData::GetSubPhasePercentage(uint32 subPhase)
+{
+    switch (subPhase)
+    {
+        case SUBPHASE_PORTAL: return uint32(m_sunsReachReclamationCounters[COUNTER_INTERCEPTING_THE_MANA_CELLS] * 100 / COUNTER_MAX_VAL_REQ);
+        case SUBPHASE_ANVIL: return uint32(m_sunsReachReclamationCounters[COUNTER_MAKING_READY] * 100 / COUNTER_MAX_VAL_REQ);
+        case SUBPHASE_ALCHEMY_LAB: return uint32(m_sunsReachReclamationCounters[COUNTER_DISCOVERING_YOUR_ROOTS] * 100 / COUNTER_MAX_VAL_REQ);
+        case SUBPHASE_MONUMENT: return uint32(m_sunsReachReclamationCounters[COUNTER_A_CHARITABLE_DONATION] * 100 / COUNTER_MAX_VAL_REQ);
+        default: return 0;
+    }
+}
+
 void WorldState::StartExpansionEvent()
 {
     if (m_expansion == EXPANSION_NONE)
@@ -967,43 +1359,72 @@ void WorldState::StartExpansionEvent()
 
 void WorldState::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId, uint32 areaId)
 {
-    if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LOVE_IS_IN_THE_AIR))
+    switch (zoneId)
     {
-        switch (zoneId)
+        case ZONEID_STORMWIND_CITY:
+        case ZONEID_DARNASSUS:
+        case ZONEID_IRONFORGE:
+        case ZONEID_ORGRIMMAR:
+        case ZONEID_THUNDER_BLUFF:
+        case ZONEID_UNDERCITY:
         {
-            case ZONEID_STORMWIND_CITY:
-            case ZONEID_DARNASSUS:
-            case ZONEID_IRONFORGE:
-            case ZONEID_ORGRIMMAR:
-            case ZONEID_THUNDER_BLUFF:
-            case ZONEID_UNDERCITY:
+            if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LOVE_IS_IN_THE_AIR))
             {
-                if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LOVE_IS_IN_THE_AIR))
-                {
-                    uint32 allianceSum = GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR) + GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE) + GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI);
-                    uint32 hordeSum = GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE) + GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL) + GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS);
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_BOLVAR, GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR));
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TYRANDE, GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE));
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_MAGNI, GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI));
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_ALLIANCE, allianceSum);
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_CAIRNE, GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE));
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_THRALL, GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL));
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_SYLVANAS, GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS));
-                    FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_HORDE, hordeSum);
-                }
-
-                if (m_aqData.m_phase == PHASE_1_GATHERING_RESOURCES)
-                {
-                    // totals first
-                    for (auto itr = aqWorldStateTotalsMap.begin(); itr != aqWorldStateTotalsMap.end(); ++itr)
-                        FillInitialWorldStateData(data, count, (*itr).first, (*itr).second);
-                    for (auto itr = aqWorldstateMap.begin(); itr != aqWorldstateMap.end(); ++itr)
-                        FillInitialWorldStateData(data, count, m_aqData.m_WarEffortCounters[(*itr).first], (*itr).second);
-                }
-                else if (m_aqData.m_phase == PHASE_2_TRANSPORTING_RESOURCES)
-                    FillInitialWorldStateData(data, count, WORLD_STATE_AQ_DAYS_LEFT, uint32(m_aqData.m_timer / DAY * IN_MILLISECONDS));
-                break;
+                uint32 allianceSum = GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR) + GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE) + GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI);
+                uint32 hordeSum = GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE) + GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL) + GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS);
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_BOLVAR, GetLoveIsInTheAirCounter(LOVE_LEADER_BOLVAR));
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TYRANDE, GetLoveIsInTheAirCounter(LOVE_LEADER_TYRANDE));
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_MAGNI, GetLoveIsInTheAirCounter(LOVE_LEADER_MAGNI));
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_ALLIANCE, allianceSum);
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_CAIRNE, GetLoveIsInTheAirCounter(LOVE_LEADER_CAIRNE));
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_THRALL, GetLoveIsInTheAirCounter(LOVE_LEADER_THRALL));
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_SYLVANAS, GetLoveIsInTheAirCounter(LOVE_LEADER_SYLVANAS));
+                FillInitialWorldStateData(data, count, WORLD_STATE_LOVE_IS_IN_THE_AIR_TOTAL_HORDE, hordeSum);
             }
+
+            if (m_aqData.m_phase == PHASE_1_GATHERING_RESOURCES)
+            {
+                // totals first
+                for (auto itr = aqWorldStateTotalsMap.begin(); itr != aqWorldStateTotalsMap.end(); ++itr)
+                    FillInitialWorldStateData(data, count, (*itr).first, (*itr).second);
+                for (auto itr = aqWorldstateMap.begin(); itr != aqWorldstateMap.end(); ++itr)
+                    FillInitialWorldStateData(data, count, m_aqData.m_WarEffortCounters[(*itr).first], (*itr).second);
+            }
+            else if (m_aqData.m_phase == PHASE_2_TRANSPORTING_RESOURCES)
+                FillInitialWorldStateData(data, count, WORLD_STATE_AQ_DAYS_LEFT, uint32(m_aqData.m_timer / DAY * IN_MILLISECONDS));
+            break;
+        }
+        case ZONEID_ISLE_OF_QUEL_DANAS:
+        case ZONEID_MAGISTERS_TERRACE:
+        case ZONEID_SUNWELL_PLATEAU:
+        case ZONEID_SHATTRATH:
+        {
+            switch (m_sunsReachData.m_phase)
+            {
+                case SUNS_REACH_PHASE_1_STAGING_AREA:
+                    FillInitialWorldStateData(data, count, WORLD_STATE_QUEL_DANAS_SANCTUM, m_sunsReachData.GetPhasePercentage(m_sunsReachData.m_phase));
+                    break;
+                case SUNS_REACH_PHASE_2_SANCTUM:
+                    FillInitialWorldStateData(data, count, WORLD_STATE_QUEL_DANAS_ARMORY, m_sunsReachData.GetPhasePercentage(m_sunsReachData.m_phase));
+                    break;
+                case SUNS_REACH_PHASE_3_ARMORY:
+                    FillInitialWorldStateData(data, count, WORLD_STATE_QUEL_DANAS_HARBOR, m_sunsReachData.GetPhasePercentage(m_sunsReachData.m_phase));
+                    break;
+                case SUNS_REACH_PHASE_4_HARBOR:
+                    if ((m_sunsReachData.m_subphaseMask & SUBPHASE_ALCHEMY_LAB) == 0)
+                        FillInitialWorldStateData(data, count, WORLD_STATE_QUEL_DANAS_ALCHEMY_LAB, m_sunsReachData.GetSubPhasePercentage(SUBPHASE_ALCHEMY_LAB));
+                    if ((m_sunsReachData.m_subphaseMask & SUBPHASE_MONUMENT) == 0)
+                        FillInitialWorldStateData(data, count, WORLD_STATE_QUEL_DANAS_MONUMENT, m_sunsReachData.GetSubPhasePercentage(SUBPHASE_MONUMENT));
+                    break;
+            }
+            if (m_sunsReachData.m_phase >= SUNS_REACH_PHASE_3_ARMORY && (m_sunsReachData.m_subphaseMask & SUBPHASE_ANVIL) == 0)
+                FillInitialWorldStateData(data, count, WORLD_STATE_QUEL_DANAS_ANVIL, m_sunsReachData.GetSubPhasePercentage(SUBPHASE_ANVIL));
+
+            FillInitialWorldStateData(data, count, WORLD_STATE_QUEL_DANAS_MUSIC, m_sunsReachData.m_phase);
+
+            if (m_sunsReachData.m_phase >= SUNS_REACH_PHASE_2_SANCTUM && (m_sunsReachData.m_subphaseMask & SUBPHASE_PORTAL) == 0)
+                FillInitialWorldStateData(data, count, WORLD_STATE_QUEL_DANAS_PORTAL, m_sunsReachData.GetSubPhasePercentage(SUBPHASE_PORTAL));
+            break;
         }
     }
 }

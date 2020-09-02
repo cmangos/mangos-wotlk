@@ -204,6 +204,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34630,'spell_scrap_reaver_spell'),
 (44935,'spell_razorthorn_root'),
 (44881,'spell_charm_ravager'),
+(44948,'spell_living_flare_detonator'),
+(44877,'spell_living_flare_master'),
+(44943,'spell_living_flare_unstable'),
+(45188,'spell_dawnblade_attack'),
+(38858,'spell_queldanas_shoot'),
 (34800,'spell_getting_sleepy_aura'),
 (43364,'spell_getting_sleepy_aura');
 

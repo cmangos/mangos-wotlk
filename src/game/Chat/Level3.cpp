@@ -7277,6 +7277,50 @@ bool ChatHandler::HandleWarEffortCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleSunsReachReclamationPhaseCommand(char* args)
+{
+    uint32 param;
+    if (!ExtractUInt32(&args, param))
+    {
+        PSendSysMessage("%s", sWorldState.GetSunsReachPrintout().data());
+        return true;
+    }
+    sWorldState.HandleSunsReachPhaseTransition(param);
+    return true;
+}
+
+bool ChatHandler::HandleSunsReachReclamationSubPhaseCommand(char* args)
+{
+    uint32 param;
+    if (!ExtractUInt32(&args, param))
+    {
+        PSendSysMessage("%s", sWorldState.GetSunsReachPrintout().data());
+        return true;
+    }
+    sWorldState.HandleSunsReachSubPhaseTransition(param);
+    return true;
+}
+
+bool ChatHandler::HandleSunsReachReclamationCounterCommand(char* args)
+{
+    uint32 index;
+    if (!ExtractUInt32(&args, index) || index >= COUNTERS_MAX)
+    {
+        PSendSysMessage("Enter valid index for counter.");
+        return true;
+    }
+
+    uint32 value;
+    if (!ExtractUInt32(&args, value))
+    {
+        PSendSysMessage("Enter valid value for counter.");
+        return true;
+    }
+
+    sWorldState.SetSunsReachCounter(SunsReachCounters(index), value);
+    return true;
+}
+
 bool ChatHandler::HandleExpansionRelease(char* args)
 {
     uint32 curExpansion = sWorldState.GetExpansion();

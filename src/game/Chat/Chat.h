@@ -780,6 +780,9 @@ class ChatHandler
 
         // worldstate
         bool HandleWarEffortCommand(char* args);
+        bool HandleSunsReachReclamationPhaseCommand(char* args);
+        bool HandleSunsReachReclamationSubPhaseCommand(char* args);
+        bool HandleSunsReachReclamationCounterCommand(char* args);
         bool HandleExpansionRelease(char* args);
 
         // Battleground

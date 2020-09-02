@@ -591,6 +591,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 44604:         // Enchantment of Spell Haste
         case 44855:         // Out of Phase
         case 45033:         // Abyssal Transformation
+        case 45187:         // Dawnblade Attack
         case 45822:         // Iceblood Warmaster
         case 45823:         // Tower Point Warmaster
         case 45824:         // West Frostwolf Warmaster
