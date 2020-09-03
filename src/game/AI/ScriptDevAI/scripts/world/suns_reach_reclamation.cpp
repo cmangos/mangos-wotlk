@@ -28,6 +28,8 @@ enum
 {
     SPELL_SHOOT = 38858,
     SPELL_DAWNBLADE_ATTACK_RESPONSE = 45189,
+
+    SPELL_DAWNBLADE_ATTACK = 45187,
 };
 
 struct DawnbladeAttack : public SpellScript
@@ -45,12 +47,18 @@ struct DawnbladeAttack : public SpellScript
     }
 };
 
+// spell used elsewhere as well
 struct QuelDanasShoot : public SpellScript
 {
     void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
     {
         if (Unit* target = spell->GetUnitTarget())
+        {
+            if (!target->IsCreature() || !target->HasAura(SPELL_DAWNBLADE_ATTACK))
+                return;
+
             target->AI()->DoCastSpellIfCan(spell->GetCaster(), SPELL_DAWNBLADE_ATTACK_RESPONSE);
+        }
     }
 };
 
