@@ -869,7 +869,7 @@ namespace MaNGOS
 
             bool operator()(GameObject* go)
             {
-                return go->GetGoType() == i_type && (!i_onlyHostile || go->CanAttackSpell(&i_obj)) && (!i_onlyFriendly || go->CanAssistSpell(&i_obj)) && go->IsWithinDist3d(i_x, i_y, i_z, i_range);
+                return go->GetGoType() == i_type && (!i_onlyHostile || go->CanAttackSpell(&i_obj)) && (!i_onlyFriendly || go->CanAssistSpell(&i_obj)) && go->IsAtInteractDistance(Position(i_x, i_y, i_z, 0), i_range);
             }
 
             float GetLastRange() const { return i_range; }
