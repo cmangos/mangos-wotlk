@@ -8008,6 +8008,9 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
                         radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
                     break;
                 }
+                case 54643:                                 // Teleport:
+                    radius = DEFAULT_VISIBILITY_BGARENAS;
+                    break;
                 case 66881:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale)
                 case 67638:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale) (Mode 1)
                 case 67639:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale) (Mode 2)
