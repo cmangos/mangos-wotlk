@@ -1799,6 +1799,9 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- Remove incorrect interrupt flag for Bellowing Roar spells used in various dragon encounters
 UPDATE spell_template SET InterruptFlags=0 WHERE Id IN (18431, 22686);
 
+-- AQ40 - C'Thun - Summon Hook Tentacles - restricted to one target
+UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id=26398;
+
 -- ============================================================
 -- TBC section
 -- ============================================================
