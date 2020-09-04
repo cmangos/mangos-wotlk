@@ -158,7 +158,10 @@ void VehicleInfo::Initialize()
 
     // TODO: Guesswork, but it looks correct
     if (vehicleFlags & VEHICLE_FLAG_PASSIVE)
+    {
         pVehicle->AI()->SetReactState(REACT_PASSIVE);
+        pVehicle->SetCanEnterCombat(false);
+    }
 
     // Initialize power type based on DBC values (creatures only)
     if (pVehicle->GetTypeId() == TYPEID_UNIT)
