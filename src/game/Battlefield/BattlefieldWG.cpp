@@ -218,8 +218,9 @@ void BattlefieldWG::HandlePlayerEnterZone(Player* player, bool isMainZone)
             player->CastSpell(player, SPELL_TOWER_CONTROL, TRIGGERED_OLD_TRIGGERED);
     }
 
-    // update score upon entering
-    UpdatePlayerScore(player);
+    // update score upon entering when battle is in progress
+    if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS)
+        UpdatePlayerScore(player);
 }
 
 void BattlefieldWG::HandlePlayerLeaveZone(Player* player, bool isMainZone)
@@ -1246,7 +1247,9 @@ void BattlefieldWG::OnBattlefieldPlayersUpdate()
 void BattlefieldWG::InitPlayerBattlefieldData(Player* player)
 {
     m_activePlayers[player->GetObjectGuid()] = new WintergraspPlayer();
-    UpdatePlayerScore(player);
+
+    if (GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS)
+        UpdatePlayerScore(player);
 }
 
 void BattlefieldWG::SetupPlayerPosition(Player* player)
