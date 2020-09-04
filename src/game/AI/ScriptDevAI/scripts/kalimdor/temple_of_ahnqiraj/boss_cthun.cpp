@@ -35,6 +35,8 @@ enum
     SPELL_ROTATE_360_LEFT           = 26009,
     SPELL_ROTATE_360_RIGHT          = 26136,
 
+    SPELL_SUMMON_HOOK_TENTACLE      = 26140,
+
     // ***** Phase 2 ******
     SPELL_CARAPACE_CTHUN            = 26156,                // Was removed from client dbcs
     SPELL_TRANSFORM                 = 26232,
@@ -820,6 +822,18 @@ UnitAI* GetAI_npc_giant_claw_tentacle(Creature* pCreature)
     return new npc_giant_claw_tentacleAI(pCreature);
 }
 
+struct SummonHookTentacle : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            if (Unit* target = spell->GetUnitTarget())
+                target->CastSpell(target, SPELL_SUMMON_HOOK_TENTACLE, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_boss_cthun()
 {
     Script* pNewScript = new Script;
@@ -841,4 +855,6 @@ void AddSC_boss_cthun()
     pNewScript->Name = "at_stomach_cthun";
     pNewScript->pAreaTrigger = &AreaTrigger_at_stomach_cthun;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SummonHookTentacle>("spell_cthun_hook_tentacle");
 }
