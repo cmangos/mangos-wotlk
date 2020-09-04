@@ -101,7 +101,7 @@ pEffect SpellEffects[MAX_SPELL_EFFECTS] =
     &Spell::EffectEmpty,                                    // 39 SPELL_EFFECT_LANGUAGE                 misc store lang id
     &Spell::EffectDualWield,                                // 40 SPELL_EFFECT_DUAL_WIELD
     &Spell::EffectJump,                                     // 41 SPELL_EFFECT_JUMP
-    &Spell::EffectJump,                                     // 42 SPELL_EFFECT_JUMP2
+    &Spell::EffectJump,                                     // 42 SPELL_EFFECT_JUMP_DEST
     &Spell::EffectTeleUnitsFaceCaster,                      // 43 SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER
     &Spell::EffectLearnSkill,                               // 44 SPELL_EFFECT_SKILL_STEP
     &Spell::EffectAddHonor,                                 // 45 SPELL_EFFECT_ADD_HONOR                honor/pvp related
@@ -207,7 +207,7 @@ pEffect SpellEffects[MAX_SPELL_EFFECTS] =
     &Spell::EffectPullTowards,                              //145 SPELL_EFFECT_PULL_TOWARDS_DEST
     &Spell::EffectActivateRune,                             //146 SPELL_EFFECT_ACTIVATE_RUNE
     &Spell::EffectQuestFail,                                //147 SPELL_EFFECT_QUEST_FAIL               quest fail
-    &Spell::EffectNULL,                                     //148 SPELL_EFFECT_148                      single spell: Inflicts Fire damage to an enemy.
+    &Spell::EffectNULL,                                     //148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE single spell: Inflicts Fire damage to an enemy.
     &Spell::EffectChargeDest,                               //149 SPELL_EFFECT_CHARGE_DEST              swoop
     &Spell::EffectQuestOffer,                               //150 SPELL_EFFECT_QUEST_OFFER
     &Spell::EffectTriggerRitualOfSummoning,                 //151 SPELL_EFFECT_TRIGGER_SPELL_2
@@ -219,7 +219,7 @@ pEffect SpellEffects[MAX_SPELL_EFFECTS] =
     &Spell::EffectCreateItem2,                              //157 SPELL_EFFECT_CREATE_ITEM_2            create item or create item template and replace by some randon spell loot item
     &Spell::EffectMilling,                                  //158 SPELL_EFFECT_MILLING                  milling
     &Spell::EffectRenamePet,                                //159 SPELL_EFFECT_ALLOW_RENAME_PET         allow rename pet once again
-    &Spell::EffectNULL,                                     //160 SPELL_EFFECT_160                      single spell: Nerub'ar Web Random Unit
+    &Spell::EffectNULL,                                     //160 SPELL_EFFECT_FORCE_CAST_2                      single spell: Nerub'ar Web Random Unit
     &Spell::EffectSpecCount,                                //161 SPELL_EFFECT_TALENT_SPEC_COUNT        second talent spec (learn/revert)
     &Spell::EffectActivateSpec,                             //162 SPELL_EFFECT_TALENT_SPEC_SELECT       activate primary/secondary spec
     &Spell::EffectUnused,                                   //163 unused in 3.3.5a
