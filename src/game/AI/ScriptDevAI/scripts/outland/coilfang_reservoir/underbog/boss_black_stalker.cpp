@@ -131,7 +131,7 @@ struct boss_black_stalkerAI : public CombatAI
     }
 };
 
-struct Levitate : public SpellScript
+struct StalkerLevitate : public SpellScript
 {
     void OnInit(Spell* spell) const override
     {
@@ -208,7 +208,7 @@ void AddSC_boss_black_stalker()
     pNewScript->GetAI = &GetNewAIInstance<boss_black_stalkerAI>;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<Levitate>("spell_levitate");
+    RegisterSpellScript<StalkerLevitate>("spell_levitate");
     RegisterSpellScript<SomeoneGrabMe>("spell_someone_grab_me");
     RegisterSpellScript<MagneticPull>("spell_magnetic_pull");
 }

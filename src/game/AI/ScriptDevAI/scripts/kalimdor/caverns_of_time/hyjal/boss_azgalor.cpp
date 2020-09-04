@@ -167,7 +167,7 @@ struct boss_azgalorAI : public CombatAI
     }
 };
 
-struct Doom : public SpellScript
+struct AzgalorDoom : public SpellScript
 {
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
@@ -184,5 +184,5 @@ void AddSC_boss_azgalor()
     pNewScript->GetAI = &GetNewAIInstance<boss_azgalorAI>;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<Doom>("spell_azgalor_doom");
+    RegisterSpellScript<AzgalorDoom>("spell_azgalor_doom");
 }
