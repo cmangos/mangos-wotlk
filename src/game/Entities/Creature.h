@@ -812,7 +812,7 @@ class Creature : public Unit
         bool HasInvolvedQuest(uint32 quest_id)  const override;
 
         GridReference<Creature>& GetGridRef() { return m_gridRef; }
-        bool IsRegeneratingHealth() const { return (GetCreatureInfo()->RegenerateStats & REGEN_FLAG_HEALTH) != 0; }
+        bool IsRegeneratingHealth() const { return (GetCreatureInfo()->RegenerateStats & REGEN_FLAG_HEALTH) != 0 && !(GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_SIEGE_WEAPON); }
         bool IsRegeneratingPower() const { return (GetCreatureInfo()->RegenerateStats & REGEN_FLAG_POWER) != 0; }
         virtual uint8 GetPetAutoSpellSize() const { return CREATURE_MAX_SPELLS; }
         virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
