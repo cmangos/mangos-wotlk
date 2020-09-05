@@ -1766,6 +1766,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
     if (spellInfo_1->HasAttribute(SPELL_ATTR_PASSIVE) != spellInfo_2->HasAttribute(SPELL_ATTR_PASSIVE))
         return false;
 
+    // Allow stacking for vehicle control auras
+    if (IsSpellHaveAura(spellInfo_1, SPELL_AURA_CONTROL_VEHICLE) || IsSpellHaveAura(spellInfo_2, SPELL_AURA_CONTROL_VEHICLE))
+        return false;
+
     // Specific spell family spells
     switch (spellInfo_1->SpellFamilyName)
     {
