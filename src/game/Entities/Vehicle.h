@@ -105,6 +105,7 @@ class VehicleInfo : public TransportBase
 
         uint32 m_overwriteNpcEntry;                         // Internal use to store the entry with which the vehicle-accessories are fetched
         bool m_isInitialized;                               // Internal use to store if the accessory is initialized
+        uint32 m_originalFaction;                           // Internal use to store the original unit faction before taking control of the unit
         GuidSet m_accessoryGuids;                           ///< Stores the summoned accessories of this vehicle
 };
 

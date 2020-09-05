@@ -89,7 +89,8 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
     m_creatureSeats(0),
     m_playerSeats(0),
     m_overwriteNpcEntry(overwriteNpcEntry),
-    m_isInitialized(false)
+    m_isInitialized(false),
+    m_originalFaction(owner->getFaction())
 {
     MANGOS_ASSERT(vehicleEntry);
 
@@ -560,6 +561,7 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
                 }
 
                 // set vehicle faction as per the controller faction
+                m_originalFaction = pVehicle->getFaction();
                 ((Creature*)pVehicle)->SetFactionTemporary(pPlayer->getFaction(), TEMPFACTION_NONE);
 
                 // set vehicle react state to passive; player will control the vehicle
@@ -635,7 +637,7 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             if (pVehicle->GetTypeId() == TYPEID_UNIT)
             {
                 // reset vehicle faction
-                ((Creature*)pVehicle)->ClearTemporaryFaction();
+                ((Creature*)pVehicle)->SetFactionTemporary(m_originalFaction, TEMPFACTION_NONE);
 
                 // Reset react state
                 if (!(GetVehicleEntry()->m_flags & VEHICLE_FLAG_PASSIVE))
