@@ -759,8 +759,11 @@ void Creature::RegeneratePower(float timerMultiplier)
                 addValue = maxValue / 3.0f;
             break;
         case POWER_ENERGY:
-            // ToDo: for vehicle this is different - NEEDS TO BE FIXED!
-            addValue = 20 * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_ENERGY);
+            // Note: Vehicles regenerate energy much slower than other NPCs; To be confirmed if this is fully generic or depends on specific creature or vehicle flags
+            if (IsVehicle())
+                addValue = 10 * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_ENERGY);
+            else
+                addValue = 20 * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_ENERGY);
             break;
         case POWER_FOCUS:
             addValue = 24 * sWorld.getConfig(CONFIG_FLOAT_RATE_POWER_FOCUS);
