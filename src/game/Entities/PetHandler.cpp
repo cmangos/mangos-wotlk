@@ -745,6 +745,9 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     recvPacket >> targets.ReadForCaster(petUnit);
 
+    // some spell cast packet including more data (for projectiles)
+    targets.ReadAdditionalSpellData(recvPacket, cast_flags);
+
     petUnit->clearUnitState(UNIT_STAT_MOVING);
 
     if (HasMissingTargetFromClient(spellInfo))
