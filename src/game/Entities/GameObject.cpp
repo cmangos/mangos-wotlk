@@ -284,9 +284,15 @@ void GameObject::Update(const uint32 diff)
                 case GAMEOBJECT_TYPE_TRAP:                  // Initialized delayed to be able to use GetOwner()
                 {
                     // Arming Time for GAMEOBJECT_TYPE_TRAP (6)
-                    Unit* owner = GetOwner();
-                    if (owner && owner->IsInCombat())
-                        m_cooldownTime = time(nullptr) + GetGOInfo()->trap.startDelay;
+                    // Note: wotlk+ specific types of traps have a default charge time
+                    if (GetGOInfo()->trap.charges == 2 && GetGOInfo()->trap.diameter == 0)
+                        m_cooldownTime = time(nullptr) + 10;
+                    else
+                    {
+                        Unit* owner = GetOwner();
+                        if (owner && owner->IsInCombat())
+                            m_cooldownTime = time(nullptr) + GetGOInfo()->trap.startDelay;
+                    }
                     m_lootState = GO_READY;
                     break;
                 }
@@ -411,7 +417,7 @@ void GameObject::Update(const uint32 diff)
                             {
                                 if (m_respawnTime > 0)
                                     valid = false;
-                                else // battlegrounds gameobjects has data2 == 0 && data5 == 3                                
+                                else // battlegrounds gameobjects has data2 == 0 && data5 == 3
                                     radius = float(goInfo->trap.cooldown);
                             }
                         }
@@ -457,6 +463,18 @@ void GameObject::Update(const uint32 diff)
 
                             if (target && (!goInfo->trapCustom.triggerOn || !target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))) // do not trigger on hostile traps if not selectable
                                 Use(target);
+                        }
+                        else
+                        {
+                            // Note: wotlk+ traps which work as bombs cast the spell automatically
+                            if (GetGOInfo()->trap.charges == 2 && GetGOInfo()->trap.diameter == 0)
+                            {
+                                if (Unit* owner = GetOwner())
+                                    Use(owner);
+
+                                SetLootState(GO_JUST_DEACTIVATED);
+                                break;
+                            }
                         }
                     }
                 }
