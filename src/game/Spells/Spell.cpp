@@ -1043,16 +1043,24 @@ void Spell::AddDestExecution(SpellEffectIndex effIndex)
     {
         // spell fly from visual cast object
         WorldObject* affectiveObject = GetAffectiveCasterObject();
-        float speed = GetSpellSpeed();
-        if (speed > 0.0f)
+        float baseSpeed = GetSpellSpeed();
+        if (baseSpeed > 0.0f)
         {
             // calculate spell incoming interval
             float x, y, z;
             m_targets.getDestination(x, y, z);
             float dist = affectiveObject->GetDistance(x, y, z, DIST_CALC_NONE);
             dist = sqrt(dist); // default distance calculation is raw, apply sqrt before the next step
-            if (dist < 5.0f)
-                dist = 5.0f;
+            float speed;
+            if (m_targets.getSpeed() > 0.0f)
+                speed = m_targets.getSpeed() * cos(m_targets.getElevation());
+            else
+            {
+                speed = baseSpeed;
+
+                if (dist < 5.0f)
+                    dist = 5.0f;
+            }
             m_destTargetInfo.timeDelay = (uint64)floor(dist / speed * 1000.0f);
             if (m_delayMoment == 0 || m_delayMoment > m_destTargetInfo.timeDelay)
                 m_delayMoment = m_destTargetInfo.timeDelay;
