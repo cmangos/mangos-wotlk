@@ -753,6 +753,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     if (HasMissingTargetFromClient(spellInfo))
         targets.setUnitTarget(petUnit->GetTarget());
     Spell* spell = new Spell(petUnit, spellInfo, (triggeredByAura ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE) + TRIGGERED_PET_CAST, petUnit->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : nullptr);
+    spell->m_cast_count = cast_count;
     if (spell->SpellStart(&targets) == SPELL_CAST_OK)
     {
         petUnit->SendPetAIReaction();
