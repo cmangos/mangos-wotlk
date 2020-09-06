@@ -115,7 +115,6 @@ struct boss_archimondeAI : public ScriptedAI
         m_actionTimers.insert({ ARCHIMONDE_ACTION_FINGER_OF_DEATH_COOLUP , 0 });
         m_actionTimers.insert({ ARCHIMONDE_ACTION_HAND_OF_DEATH , 0 });
         m_actionTimers.insert({ ARCHIMONDE_ACTION_SOUL_CHARGE , 0 });
-        m_drainNordrassilTimer = 5000;
         SetDeathPrevention(true);
         Reset();
     }
@@ -208,13 +207,17 @@ struct boss_archimondeAI : public ScriptedAI
         }
     }
 
-    void JustReachedHome() override
+    void JustRespawned() override
     {
+        m_drainNordrassilTimer = 5000;
+    }
+
+    void EnterEvadeMode() override
+    {
+        ScriptedAI::EnterEvadeMode();
+
         if (m_instance)
             m_instance->SetData(TYPE_ARCHIMONDE, FAIL);
-
-        m_drainNordrassilTimer = 5000;
-        ScriptedAI::JustReachedHome();
     }
 
     void MovementInform(uint32 movementType, uint32 data) override
@@ -464,7 +467,7 @@ struct boss_archimondeAI : public ScriptedAI
                 Position pos;
                 m_creature->GetCombatStartPosition(pos);
                 // Range stuff here
-                if (m_creature->GetDistance2d(pos.GetPositionX(), pos.GetPositionY()) >= 200.f || (pos.GetPositionX() < 5534.752f && pos.GetPositionX() > 5381.371f &&
+                if (m_creature->GetDistance2d(pos.GetPositionX(), pos.GetPositionY()) >= 155.f || (pos.GetPositionX() < 5534.752f && pos.GetPositionX() > 5381.371f &&
                     pos.GetPositionY() < -3507.099f && pos.GetPositionY() > -3587.244f))
                 {
                     m_actionReadyStatus[ARCHIMONDE_ACTION_HAND_OF_DEATH] = true;

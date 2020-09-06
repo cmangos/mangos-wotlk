@@ -1168,9 +1168,6 @@ void instance_mount_hyjal::SetData(uint32 type, uint32 data)
     switch (type)
     {
         case TYPE_AZGALOR:
-            if (data == DONE)
-                SpawnArchimonde();
-            // no break
         case TYPE_WINTERCHILL:
         case TYPE_ANETHERON:
         case TYPE_KAZROGAL:
@@ -1194,6 +1191,12 @@ void instance_mount_hyjal::SetData(uint32 type, uint32 data)
             {
                 DespawnOverrun(BASE_ELF);
                 m_nextInvasionWaveTimer = 0;
+
+                if (Creature* archimonde = GetSingleCreatureFromStorage(NPC_ARCHIMONDE))
+                {
+                    archimonde->SetRespawnDelay(30, true);
+                    archimonde->ForcedDespawn();
+                }
             }
             break;
         case TYPE_WIN:
@@ -1517,6 +1520,7 @@ void instance_mount_hyjal::StartEvent(HyjalEvents eventId)
             break;
         case THRALL_WIN:
             RetreatBase(BASE_HORDE);
+            SpawnArchimonde();
             break;
     }
 }
