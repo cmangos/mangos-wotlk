@@ -89,7 +89,35 @@ void BattleGroundSA::Update(uint32 diff)
                 switch (m_battleStage)
                 {
                     case BG_SA_STAGE_ROUND_1:
+                        // eject all vehicle passengers and despawn vehicles immediately
+                        for (const auto& guid : m_demolishersGuids)
+                        {
+                            if (Creature* demolisher = GetBgMap()->GetCreature(guid))
+                            {
+                                demolisher->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+                                demolisher->ForcedDespawn();
+                            }
+                        }
+                        for (const auto& guid : m_tempDemolishersGuids)
+                        {
+                            if (Creature* demolisher = GetBgMap()->GetCreature(guid))
+                            {
+                                demolisher->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+                                demolisher->ForcedDespawn();
+                            }
+                        }
+                        for (const auto& guid : m_cannonsGuids)
+                        {
+                            if (Creature* cannon = GetBgMap()->GetCreature(guid))
+                            {
+                                cannon->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+                                cannon->ForcedDespawn();
+                            }
+                        }
+                        // send warning
                         SendBattlegroundWarning(LANG_BG_SA_ROUND_FINISHED);
+                        UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, 0);
+
                         // cast end of round spell
                         CastSpellOnTeam(BG_SA_SPELL_END_OF_ROUND, ALLIANCE);
                         CastSpellOnTeam(BG_SA_SPELL_END_OF_ROUND, HORDE);
@@ -126,6 +154,18 @@ void BattleGroundSA::Update(uint32 diff)
                     }
                     case BG_SA_STAGE_SECOND_ROUND_1:
                         SendMessageToAll(LANG_BG_SA_ROUND_START_ONE_MINUTE, CHAT_MSG_BG_SYSTEM_NEUTRAL);
+
+                        // cast preparation again before the 2nd round
+                        CastSpellOnTeam(SPELL_PREPARATION, ALLIANCE);
+                        CastSpellOnTeam(SPELL_PREPARATION, HORDE);
+
+                        // make sure that the cannons have the right faction set; for some reason this isn't always correctly set
+                        for (const auto& guid : m_cannonsGuids)
+                        {
+                            if (Creature* cannon = GetBgMap()->GetCreature(guid))
+                                cannon->SetFactionTemporary(sotaTeamFactions[m_defendingTeamIdx], TEMPFACTION_NONE);
+                        }
+
                         m_battleRoundTimer = 30000;
                         break;
                     case BG_SA_STAGE_SECOND_ROUND_2:
@@ -133,7 +173,14 @@ void BattleGroundSA::Update(uint32 diff)
                         m_battleRoundTimer = 30000;
                         break;
                     case BG_SA_STAGE_SECOND_ROUND_3:
+
+                        // remove preparation aura
+                        for (auto& m_player : m_Players)
+                            if (Player* player = sObjectMgr.GetPlayer(m_player.first))
+                                player->RemoveAurasDueToSpell(SPELL_PREPARATION);
+
                         SendBattlegroundWarning(LANG_BG_SA_BEGIN);
+                        UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, 1);
                         EnableDemolishers();
                         m_battleRoundTimer = BG_SA_TIMER_ROUND_LENGTH;
                         break;
@@ -212,10 +259,7 @@ void BattleGroundSA::EnableDemolishers()
     for (const auto& guid : m_demolishersGuids)
     {
         if (Creature* demolisher = GetBgMap()->GetCreature(guid))
-        {
-            demolisher->setFaction(sotaTeamFactions[GetAttacker()]);
-            demolisher->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        }
+            demolisher->SetFactionTemporary(sotaTeamFactions[GetAttacker()], TEMPFACTION_TOGGLE_NOT_SELECTABLE);
     }
 }
 
@@ -244,13 +288,14 @@ void BattleGroundSA::HandleCreatureCreate(Creature* creature)
     switch (creature->GetEntry())
     {
         case BG_SA_VEHICLE_CANNON:
-            creature->setFaction(sotaTeamFactions[m_defendingTeamIdx]);
             m_cannonsGuids.push_back(creature->GetObjectGuid());
             break;
         case BG_SA_VEHICLE_DEMOLISHER:
-            creature->setFaction(sotaTeamFactions[GetAttacker()]);
             if (creature->IsTemporarySummon())
+            {
+                creature->SetFactionTemporary(sotaTeamFactions[GetAttacker()], TEMPFACTION_TOGGLE_NOT_SELECTABLE);
                 m_tempDemolishersGuids.push_back(creature->GetObjectGuid());
+            }
             else
                 m_demolishersGuids.push_back(creature->GetObjectGuid());
             break;
@@ -293,7 +338,6 @@ void BattleGroundSA::HandleGameObjectCreate(GameObject* go)
         case BG_SA_GO_GATE_RED_SUN:
         case BG_SA_GO_GATE_YELLOW_MOON:
         case BG_SA_GO_GATE_ANCIENT_SHRINE:
-            go->SetFaction(sotaTeamFactions[m_defendingTeamIdx]);
             m_gatesGuids.push_back(go->GetObjectGuid());
             break;
         case BG_SA_GO_TITAN_RELIC_ALLIANCE:
@@ -413,13 +457,15 @@ bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
         {
             if (eventId == i.eventDamaged)
             {
-                UpdateWorldState(i.worldState, BG_SA_STATE_VALUE_GATE_DAMAGED);
+                m_gateStateValue[i.index] = BG_SA_STATE_VALUE_GATE_DAMAGED;
+                UpdateWorldState(i.worldState, m_gateStateValue[i.index]);
                 SendBattlegroundWarning(i.messageDamaged);
                 PlaySoundToAll(GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_SOUND_WALL_ATTACKED_ALLIANCE : BG_SA_SOUND_WALL_ATTACKED_HORDE);
             }
             else if (eventId == i.eventDestroyed)
             {
-                UpdateWorldState(i.worldState, BG_SA_STATE_VALUE_GATE_DESTROYED);
+                m_gateStateValue[i.index] = BG_SA_STATE_VALUE_GATE_DESTROYED;
+                UpdateWorldState(i.worldState, m_gateStateValue[i.index]);
                 SendBattlegroundWarning(i.messagedDestroyed);
                 PlaySoundToAll(GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_SOUND_WALL_DESTROYED_ALLIANCE : BG_SA_SOUND_WALL_DESTROYED_HORDE);
 
@@ -430,8 +476,9 @@ bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
             }
             else if (eventId == i.eventRebuild)
             {
+                m_gateStateValue[i.index] = BG_SA_STATE_VALUE_GATE_INTACT;
                 go->SetFaction(sotaTeamFactions[m_defendingTeamIdx]);
-                UpdateWorldState(i.worldState, BG_SA_STATE_VALUE_GATE_INTACT);
+                UpdateWorldState(i.worldState, m_gateStateValue[i.index]);
             }
 
             break;
@@ -459,18 +506,12 @@ void BattleGroundSA::EventPlayerClickedOnFlag(Player* player, GameObject* go)
             if (sotaGraveyardData[i].graveyardId == BG_SA_GRAVEYARD_ID_EAST)
             {
                 for (uint8 i = 0; i < 3; ++i)
-                {
-                    if (Creature* summon = go->SummonCreature(sotaEastSpawns[i].entry, sotaEastSpawns[i].x, sotaEastSpawns[i].y, sotaEastSpawns[i].z, sotaEastSpawns[i].o, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 10 * MINUTE * IN_MILLISECONDS))
-                        summon->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                }
+                    go->SummonCreature(sotaEastSpawns[i].entry, sotaEastSpawns[i].x, sotaEastSpawns[i].y, sotaEastSpawns[i].z, sotaEastSpawns[i].o, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 10 * MINUTE * IN_MILLISECONDS);
             }
             else if (sotaGraveyardData[i].graveyardId == BG_SA_GRAVEYARD_ID_WEST)
             {
                 for (uint8 i = 0; i < 3; ++i)
-                {
-                    if (Creature* summon = go->SummonCreature(sotaWestSpawns[i].entry, sotaWestSpawns[i].x, sotaWestSpawns[i].y, sotaWestSpawns[i].z, sotaWestSpawns[i].o, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 10 * MINUTE * IN_MILLISECONDS))
-                        summon->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                }
+                    go->SummonCreature(sotaWestSpawns[i].entry, sotaWestSpawns[i].x, sotaWestSpawns[i].y, sotaWestSpawns[i].z, sotaWestSpawns[i].o, TEMPSPAWN_TIMED_OR_CORPSE_DESPAWN, 10 * MINUTE * IN_MILLISECONDS);
             }
 
             // respawn the closest banner to the one that was clicked
@@ -590,8 +631,10 @@ void BattleGroundSA::SetupBattleground()
     {
         if (Creature* cannon = GetBgMap()->GetCreature(guid))
         {
-            cannon->setFaction(sotaTeamFactions[m_defendingTeamIdx]);
-            cannon->Respawn();
+            cannon->SetFactionTemporary(sotaTeamFactions[m_defendingTeamIdx], TEMPFACTION_NONE);
+
+            if (!cannon->IsAlive())
+                cannon->Respawn();
         }
     }
 
@@ -601,19 +644,15 @@ void BattleGroundSA::SetupBattleground()
     if (Creature* goblin = GetBgMap()->GetCreature(m_gorgrilGuid))
         goblin->ForcedDespawn();
 
-    // despawn demolishers - will be manually summoned by boat event
-    for (const auto& guid : m_tempDemolishersGuids)
-    {
-        if (Creature* demolisher = GetBgMap()->GetCreature(guid))
-            demolisher->ForcedDespawn();
-    }
-
+    // reset demolishers; clean temp faction to re-enable the unit flag
     for (const auto& guid : m_demolishersGuids)
     {
         if (Creature* demolisher = GetBgMap()->GetCreature(guid))
         {
-            demolisher->Respawn();
-            demolisher->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            if (!demolisher->IsAlive())
+                demolisher->Respawn();
+
+            demolisher->ClearTemporaryFaction();
         }
     }
 
