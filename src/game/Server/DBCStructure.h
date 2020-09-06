@@ -2109,6 +2109,26 @@ struct TotemCategoryEntry
     uint32    categoryMask;                                 // 19       m_totemCategoryMask (compatibility mask for same type: different for totems, compatible from high to low for rods)
 };
 
+struct TransportAnimationEntry
+{
+    // uint32 id;                                           // 0        // m_id
+    uint32 transportId;                                     // 1        // m_transportId (matched with gameobjects type 11 and 15)
+    uint32 timeIndex;                                       // 2        // m_timeIndex
+    DBCPosition3D pos;                                      // 3 - 5    // m_position
+    // uint32 animationDataId;                              // 6
+};
+
+struct TransportRotationEntry
+{
+    // uint32 id;                                           // 0        // m_id
+    uint32 transportId;                                     // 1        // m_transportId (matched with gameobjects type 11 and 15)
+    uint32 timeIndex;                                       // 2        // m_timeIndex
+    float x;                                                // 3        // m_x
+    float y;                                                // 4        // m_y
+    float z;                                                // 5        // m_z
+    float o;                                                // 6        // m_o
+};
+
 #define MAX_VEHICLE_SEAT 8
 
 struct VehicleEntry
