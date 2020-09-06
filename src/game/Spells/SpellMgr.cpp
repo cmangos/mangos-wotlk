@@ -4027,6 +4027,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
         case 2584:                                          // Waiting to Resurrect
         case 42792:                                         // Recently Dropped Flag
         case 43681:                                         // Inactive
+        case 44521:                                         // Preparation
         {
             return player && player->InBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_ONLY_BATTLEGROUNDS;
         }
@@ -4039,14 +4040,6 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
             if (!mapEntry)
                 return SPELL_FAILED_INCORRECT_AREA;
             return mapEntry->IsBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_ONLY_BATTLEGROUNDS;
-        }
-        case 44521:                                         // Preparation
-        {
-            if (!player)
-                return SPELL_FAILED_REQUIRES_AREA;
-
-            BattleGround* bg = player->GetBattleGround();
-            return bg && bg->GetStatus() == STATUS_WAIT_JOIN ? SPELL_CAST_OK : SPELL_FAILED_ONLY_BATTLEGROUNDS;
         }
         case 32724:                                         // Gold Team (Alliance)
         case 32725:                                         // Green Team (Alliance)
