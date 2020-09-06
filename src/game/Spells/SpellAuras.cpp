@@ -2262,6 +2262,7 @@ void Aura::TriggerSpell()
                 break;
             }
             case 38652:                                     // Spore Cloud
+            case 40105:                                     // Infusion
             {
                 triggerCaster = GetCaster();
                 break;
