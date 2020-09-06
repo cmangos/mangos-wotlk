@@ -545,6 +545,12 @@ void VehicleInfo::ApplySeatMods(Unit* passenger, uint32 seatFlags)
 
             pVehicle->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
 
+            if (pPlayer->IsPvP())
+                pVehicle->SetPvP(true);
+
+            if (pPlayer->IsPvPFreeForAll())
+                pVehicle->SetPvPFreeForAll(true);
+
             pPlayer->UpdateClientControl(pVehicle, true);
             pPlayer->SetMover(pVehicle);
 
@@ -630,6 +636,12 @@ void VehicleInfo::RemoveSeatMods(Unit* passenger, uint32 seatFlags)
             pVehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);
 
             pVehicle->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
+
+            if (pPlayer->IsPvP())
+                pVehicle->SetPvP(false);
+
+            if (pPlayer->IsPvPFreeForAll())
+                pVehicle->SetPvPFreeForAll(false);
 
             // must be called after movement control unapplying
             pPlayer->GetCamera().ResetView();
