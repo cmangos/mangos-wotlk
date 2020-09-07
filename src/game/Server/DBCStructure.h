@@ -405,11 +405,16 @@ struct AchievementCriteriaEntry
         } use_gameobject;
 
         // ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL       = 70
-        // TODO: are those special criteria stored in the dbc or do we have to add another sql table?
+        // Note: some achiev criterias require an extra pvp script check
+        // Note2: in 3.x either both flags and maps are provided or none of them
         struct
         {
             uint32  unused;                                 // 3
             uint32  killCount;                              // 4
+            uint32  flag1;                                  // 5    0 or 3; if !0 then mapId1 is provided; Possible guess: flag1 and mapId1 are checked for normal battleground difficulty;
+            uint32  mapId1;                                 // 6
+            uint32  flag2;                                  // 7    0 or 3; if !0 then mapId2 is provided; Possible guess: flag2 and mapId2 are checked for max lvl battleground difficulty
+            uint32  mapId2;                                 // 8
         } special_pvp_kill;
 
         // ACHIEVEMENT_CRITERIA_TYPE_FISH_IN_GAMEOBJECT     = 72

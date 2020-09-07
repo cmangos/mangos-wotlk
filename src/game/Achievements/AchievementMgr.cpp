@@ -1517,6 +1517,11 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (!miscvalue1)
                     continue;
 
+                // Check map id requirement if provided; In wotlk flag1 = flag2 and map1 = map2, so we only need to check the first one
+                if (achievementCriteria->special_pvp_kill.flag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
+                    if (GetPlayer()->GetMapId() != achievementCriteria->special_pvp_kill.mapId1)
+                        continue;
+
                 // those requirements couldn't be found in the dbc
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
                 if (!data)
