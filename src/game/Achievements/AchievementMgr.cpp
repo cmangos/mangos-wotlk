@@ -950,6 +950,13 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (achievementCriteria->kill_creature.creatureID != miscvalue1)
                     continue;
 
+                // check DBC map condition (required for some pvp kills); when this is provided condVal1 = condVal2 so we only check the first one
+                if (achievementCriteria->be_spell_target.condFlag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
+                    if (GetPlayer()->GetMapId() != achievementCriteria->be_spell_target.condVal1)
+                        continue;
+
+                // ToDo: implement the additional criteria ACHIEVEMENT_CRITERIA_CONDITION_NO_SPELL_HIT and ACHIEVEMENT_CRITERIA_CONDITION_UNK3
+
                 // those requirements couldn't be found in the dbc
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
                 if (!data || !data->Meets(GetPlayer(), unit))
@@ -1188,6 +1195,11 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 break;
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_QUEST:
             {
+                // check the no group condition
+                if (achievementCriteria->complete_quest.condFlag == ACHIEVEMENT_CRITERIA_CONDITION_NO_GROUP)
+                    if (GetPlayer() && GetPlayer()->GetGroup())
+                        continue;
+
                 // if miscvalues != 0, it contains the questID.
                 if (miscvalue1)
                 {
@@ -1235,6 +1247,16 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (!miscvalue1 || miscvalue1 != achievementCriteria->be_spell_target.spellID)
                     continue;
 
+                // check map condition
+                if (achievementCriteria->be_spell_target.condFlag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
+                    if (GetPlayer()->GetMapId() != achievementCriteria->be_spell_target.condVal1)
+                        continue;
+                if (achievementCriteria->be_spell_target.condFlag2 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
+                    if (GetPlayer()->GetMapId() != achievementCriteria->be_spell_target.condVal2)
+                        continue;
+
+                // ToDo: implement the additional criteria ACHIEVEMENT_CRITERIA_CONDITION_NO_SPELL_HIT and ACHIEVEMENT_CRITERIA_CONDITION_UNK3
+
                 // those requirements couldn't be found in the dbc
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
                 if (!data)
@@ -1252,6 +1274,11 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             {
                 if (!miscvalue1 || miscvalue1 != achievementCriteria->cast_spell.spellID)
                     continue;
+
+                // check map condition; always condVal1 = condVal2 so we only need to check the first one
+                if (achievementCriteria->cast_spell.condFlag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
+                    if (GetPlayer()->GetMapId() != achievementCriteria->cast_spell.condVal1)
+                        continue;
 
                 // those requirements couldn't be found in the dbc
                 AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);

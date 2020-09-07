@@ -80,6 +80,10 @@ struct AchievementCriteriaEntry
         {
             uint32  creatureID;                             // 3
             uint32  creatureCount;                          // 4
+            uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0, 3 or 13
+            uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
+            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 3 or 9
+            uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } kill_creature;
 
         // ACHIEVEMENT_CRITERIA_TYPE_WIN_BG                 = 1
@@ -189,6 +193,9 @@ struct AchievementCriteriaEntry
         {
             uint32  questID;                                // 3
             uint32  questCount;                             // 4
+            uint32  unused1;                                // 5
+            uint32  unused2;                                // 6
+            uint32  condFlag;                               // 7 condition flag; in wotlk value can be 0 or 10
         } complete_quest;
 
         // ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET        = 28
@@ -197,6 +204,10 @@ struct AchievementCriteriaEntry
         {
             uint32  spellID;                                // 3
             uint32  spellCount;                             // 4
+            uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0, 3 or 13
+            uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
+            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 3 or 9
+            uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } be_spell_target;
 
         // ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL             = 29
@@ -205,6 +216,10 @@ struct AchievementCriteriaEntry
         {
             uint32  spellID;                                // 3
             uint32  castCount;                              // 4
+            uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0 or 3
+            uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
+            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 3
+            uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } cast_spell;
 
         // ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA = 31
