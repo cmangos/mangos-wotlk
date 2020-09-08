@@ -468,6 +468,25 @@ void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uin
                 if (achievementCriteria->win_rated_arena.flag == miscvalue1)
                     SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
                 break;
+            case ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET:
+                if (achievementCriteria->be_spell_target.condFlag1 == miscvalue1 &&
+                    achievementCriteria->be_spell_target.condVal1 == miscvalue2)
+                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL:
+                if (achievementCriteria->cast_spell.condFlag1 == miscvalue1 &&
+                    achievementCriteria->cast_spell.condVal1 == miscvalue2)
+                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL:    // reset only achievements that have a map condition; they need to be completed as part of one single pvp match
+                if (achievementCriteria->special_pvp_kill.flag1 == miscvalue1 &&
+                    achievementCriteria->special_pvp_kill.mapId1 == miscvalue2)
+                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:
+                if (achievementCriteria->honorable_kill_at_area.condFlag1 == miscvalue1 &&
+                    achievementCriteria->honorable_kill_at_area.condVal1 == miscvalue2)
+                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+                break;
             default:                                        // reset all cases
                 break;
         }
@@ -1712,6 +1731,26 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 progressType = PROGRESS_ACCUMULATE;
                 break;
             }
+            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:
+            {
+                // ToDo: count honorable kills in battlegrounds; if map id is provided requires battleground; otherwise requires pvp script condition
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:
+            {
+                // ToDo: count honorable kills in area; if map id is provided, the achiev criteria has to reset at the beginning of bg
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
+            {
+                // ToDo: count the final damage done to a player by another player
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE:
+            {
+                // ToDo: count objective counts in various battlegrounds
+                break;
+            }
             // std case: not exist in DBC, not triggered in code as result
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_HEALTH:
             case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_SPELLPOWER:
@@ -1723,13 +1762,9 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             // FIXME: not triggered in code as result, need to implement
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY:
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_RAID:
-            case ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE:
-            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:
             case ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA:
             case ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA:
-            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_RANK:
-            case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
             case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
             case ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS:
             case ACHIEVEMENT_CRITERIA_TYPE_USE_LFD_TO_GROUP_WITH_PLAYERS:

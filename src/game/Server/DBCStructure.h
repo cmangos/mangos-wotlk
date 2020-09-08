@@ -222,11 +222,26 @@ struct AchievementCriteriaEntry
             uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } cast_spell;
 
+        // ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE   = 30
+        struct
+        {
+            uint32  unk;                                    // 3 related to battleground objectives
+            uint32  count;                                  // 4
+            uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0 or 3
+            uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
+            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 3
+            uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
+        } capture_bg_objective;
+
         // ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA = 31
         struct
         {
             uint32  areaID;                                 // 3 Reference to AreaTable.dbc
             uint32  killCount;                              // 4
+            uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0 or 3
+            uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
+            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 3
+            uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } honorable_kill_at_area;
 
         // ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA              = 32
@@ -246,6 +261,17 @@ struct AchievementCriteriaEntry
         {
             uint32  spellID;                                // 3 Reference to Map.dbc
         } learn_spell;
+
+        // ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL         = 35
+        struct
+        {
+            uint32  unused;                                 // 3
+            uint32  count;                                  // 4
+            uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0 or 3
+            uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
+            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 3
+            uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
+        } honorable_kill_battleground;
 
         // ACHIEVEMENT_CRITERIA_TYPE_OWN_ITEM               = 36
         struct
