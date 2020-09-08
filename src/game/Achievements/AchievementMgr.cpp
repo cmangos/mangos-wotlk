@@ -482,6 +482,7 @@ void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uin
                 if (achievementCriteria->special_pvp_kill.flag1 == miscvalue1 &&
                     achievementCriteria->special_pvp_kill.mapId1 == miscvalue2)
                     SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+                break;
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:
                 if (achievementCriteria->honorable_kill_at_area.condFlag1 == miscvalue1 &&
                     achievementCriteria->honorable_kill_at_area.condVal1 == miscvalue2)
