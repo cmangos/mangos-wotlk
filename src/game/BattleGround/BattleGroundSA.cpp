@@ -182,6 +182,7 @@ void BattleGroundSA::Update(uint32 diff)
                         SendBattlegroundWarning(LANG_BG_SA_BEGIN);
                         UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, 1);
                         EnableDemolishers();
+                        StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_ACHIEV_START_ID_STORM_BEACH_ALLY : BG_SA_ACHIEV_START_ID_STORM_BEACH_HORDE);
                         m_battleRoundTimer = BG_SA_TIMER_ROUND_LENGTH;
                         break;
                     case BG_SA_STAGE_ROUND_2:
@@ -251,6 +252,7 @@ void BattleGroundSA::StartingEventOpenDoors()
     EnableDemolishers();
     SendBattlegroundWarning(LANG_BG_SA_BEGIN);
     UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, 1);
+    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_ACHIEV_START_ID_STORM_BEACH_ALLY : BG_SA_ACHIEV_START_ID_STORM_BEACH_HORDE);
 }
 
 // function to allow demolishers to be used by players
@@ -261,6 +263,9 @@ void BattleGroundSA::EnableDemolishers()
         if (Creature* demolisher = GetBgMap()->GetCreature(guid))
             demolisher->SetFactionTemporary(sotaTeamFactions[GetAttacker()], TEMPFACTION_TOGGLE_NOT_SELECTABLE);
     }
+
+    m_noScratchAchiev = true;
+    m_defenseAncients = true;
 }
 
 void BattleGroundSA::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
@@ -423,11 +428,13 @@ bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
         {
             ++m_scoreCount[TEAM_INDEX_ALLIANCE];
             m_winTime[TEAM_INDEX_ALLIANCE] = m_battleRoundTimer;
+            CastSpellOnTeam(BG_SA_SPELL_ACHIEV_STORM_BEACH, ALLIANCE);
         }
         else if (go->GetEntry() == BG_SA_GO_TITAN_RELIC_HORDE)
         {
             ++m_scoreCount[TEAM_INDEX_HORDE];
             m_winTime[TEAM_INDEX_HORDE] = m_battleRoundTimer;
+            CastSpellOnTeam(BG_SA_SPELL_ACHIEV_STORM_BEACH, HORDE);
         }
 
         // process winner
@@ -471,6 +478,9 @@ bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 
                 if (invoker->GetTypeId() == TYPEID_PLAYER)
                     UpdatePlayerScore((Player*)invoker, SCORE_GATES_DESTROYED, 1);
+
+                // fail the achievement
+                m_defenseAncients = false;
 
                 // ToDo: despawn sigil
             }
@@ -561,8 +571,7 @@ void BattleGroundSA::HandleKillUnit(Creature* unit, Player* killer)
     if (unit->GetEntry() == BG_SA_VEHICLE_DEMOLISHER)
     {
         UpdatePlayerScore(killer, SCORE_DEMOLISHERS_DESTROYED, 1);
-
-        // ToDo: update achiev criteria for 1762 / 2192
+        m_noScratchAchiev = false;
     }
 }
 
@@ -585,6 +594,10 @@ void BattleGroundSA::EndBattleGround(Team winner)
 void BattleGroundSA::ProcessBattlegroundWinner()
 {
     Team winner = TEAM_NONE;
+
+    // cast preparation again at the end of the rounds; required for achievement check
+    CastSpellOnTeam(SPELL_PREPARATION, ALLIANCE);
+    CastSpellOnTeam(SPELL_PREPARATION, HORDE);
 
     // in case of a tie verify the time counters
     if (m_scoreCount[TEAM_INDEX_ALLIANCE] == m_scoreCount[TEAM_INDEX_HORDE] && m_scoreCount[TEAM_INDEX_ALLIANCE] == 1)
@@ -704,6 +717,21 @@ void BattleGroundSA::SendBattlegroundWarning(int32 messageId)
     ObjectGuid guid = m_triggerGuids[urand(0, m_triggerGuids.size() - 1)];
 
     SendMessageToAll(messageId, CHAT_MSG_RAID_BOSS_EMOTE, LANG_UNIVERSAL, guid);
+}
+
+bool BattleGroundSA::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1)
+{
+    switch (criteria_id)
+    {
+        case BG_SA_CRIT_NOT_A_SCRATCH_ALLY:
+        case BG_SA_CRIT_NOT_A_SCRATCH_HORDE:
+            return m_noScratchAchiev;
+        case BG_SA_CRIT_DEFENSE_ANCIENTS_ALLY:
+        case BG_SA_CRIT_DEFENSE_ANCIENTS_HORDE:
+            return m_defenseAncients && GetTeamIndexByTeamId(source->GetTeam()) == m_defendingTeamIdx;
+    }
+
+    return false;
 }
 
 // Check condition for SotA phasing aura

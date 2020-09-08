@@ -154,17 +154,25 @@ enum
     // BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT    = 60028,                // phase 129 - horde is defender
 
     // achiev criterias
-    BG_SA_CRIT_NOT_A_SCRATCH_ALLY               = 7626,                 // achiev id 1762
-    BG_SA_CRIT_NOT_A_SCRATCH_HORDE              = 7634,                 // achiev id 2192
-    BG_SA_CRIT_DROP_IT                          = 6446,                 // achiev id 1764
-    BG_SA_CRIT_DROP_IT_NOW                      = 7629,                 // achiev id 2190
-    BG_SA_CRIT_ANCIENT_PROTECTOR                = 7630,                 // achiev id 1766
-    BG_SA_CRIT_COURTYARD_PROTECTOR              = 7631,                 // achiev id 2191
+    BG_SA_CRIT_NOT_A_SCRATCH_ALLY               = 7626,                 // achiev id 1762; criteria type 1
+    BG_SA_CRIT_NOT_A_SCRATCH_HORDE              = 7634,                 // achiev id 2192; criteria type 1
+    BG_SA_CRIT_DROP_IT                          = 6446,                 // achiev id 1764; criteria type 70
+    BG_SA_CRIT_DROP_IT_NOW                      = 7629,                 // achiev id 2190; criteria type 70; resets every battleground start if not completed
+    BG_SA_CRIT_ANCIENT_PROTECTOR                = 7630,                 // achiev id 1766; criteria type 70
+    BG_SA_CRIT_COURTYARD_PROTECTOR              = 7631,                 // achiev id 2191; criteria type 70; resets every battleground start if not completed
+    BG_SA_CRIT_DEFENSE_ANCIENTS_ALLY            = 7636,                 // achiev id 1757; criteria type 28; spell id 52459 (end of round)
+    BG_SA_CRIT_DEFENSE_ANCIENTS_HORDE           = 7740,                 // achiev id 2200; criteria type 28; spell id 52459 (end of round)
+    BG_SA_CRIT_ARTILLERY_VETERAN                = 7625,                 // achiev id 1763; criteria type 0; creature id 28781
+    BG_SA_CRIT_ARTILLERY_EXPERT                 = 7628,                 // achiev id 2189; criteria type 0; creature id 28781; resets every battleground start if not completed
+    BG_SA_CRIT_DAPPER_SAPPER                    = 7632,                 // achiev id 1761; criteria type 28; spell id 60937
+    BG_SA_CRIT_EXPLOSIVES_EXPERT                = 7635,                 // achiev id 1761; criteria type 28; spell id 60937; resets every battleground start if not completed
+
+    BG_SA_ACHIEV_START_ID_STORM_BEACH_ALLY      = 23748,                // achiev id 1310; criteria tyep 28; spell id 65246
+    BG_SA_ACHIEV_START_ID_STORM_BEACH_HORDE     = 21702,
 
     // missing achiev criteria spells
-    BG_SA_SPELL_ACHIEV_STORM_BEACH              = 65246,                // achiev id 1310
-    BG_SA_SPELL_ACHIEV_SEAFORIUM_DAMAGE         = 60937,                // achiev ids 1761, 2193
-    BG_SA_SPELL_ACHIEV_DEFENSE_ANCIENTS         = 52459,                // achiev ids 1757, 2200
+    BG_SA_SPELL_ACHIEV_STORM_BEACH              = 65246,                // achiev id 1310 | serverside spell
+    BG_SA_SPELL_ACHIEV_SEAFORIUM_DAMAGE         = 60937,                // achiev ids 1761, 2193 | serverside spell
 
     // events
     BG_SA_EVENT_ID_RELIC                        = 20572,                // event used to end the round
@@ -302,6 +310,8 @@ class BattleGroundSA : public BattleGround
 
         bool IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType) override;
 
+        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
+
         /* Scorekeeping */
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
 
@@ -320,6 +330,9 @@ class BattleGroundSA : public BattleGround
 
         PvpTeamIndex m_graveyardOwner[BG_SA_MAX_GRAVEYARDS];
         PvpTeamIndex m_defendingTeamIdx;
+
+        bool m_noScratchAchiev;                     // no demolisher is destroyed
+        bool m_defenseAncients;                     // no wall is destroyed
 
         uint32 m_gateStateValue[BG_SA_MAX_GATES];
         uint32 m_winTime[PVP_TEAM_COUNT];
