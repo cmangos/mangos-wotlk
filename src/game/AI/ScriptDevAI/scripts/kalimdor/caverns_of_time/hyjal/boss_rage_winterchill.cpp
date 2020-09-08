@@ -150,7 +150,7 @@ struct boss_rage_winterchillAI : public CombatAI
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DEATH_AND_DECAY, SELECT_FLAG_PLAYER))
                 {
-                    if (DoCastSpellIfCan(target, SPELL_DEATH_AND_DECAY) == CAST_OK)
+                    if (DoCastSpellIfCan(target, SPELL_DEATH_AND_DECAY, CAST_ONLY_XYZ) == CAST_OK)
                     {
                         DoScriptText(urand(0, 1) ? SAY_DND1 : SAY_DND2, m_creature);
                         ResetCombatAction(action, GetSubsequentActionTimer(action));
