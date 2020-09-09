@@ -217,7 +217,7 @@ void WorldState::Save(SaveIds saveId)
         case SAVE_ID_AHN_QIRAJ:
         {
             std::string expansionData = m_aqData.GetData();
-            SaveHelper(expansionData, SAVE_ID_EXPANSION_RELEASE);
+            SaveHelper(expansionData, SAVE_ID_AHN_QIRAJ);
             break;
         }
         case SAVE_ID_QUEL_DANAS:
