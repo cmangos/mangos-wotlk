@@ -82,6 +82,9 @@ enum
     // Final Archimonde event
     NPC_ANCIENT_WISP            = 17946,
 
+    // Anetheron infernal
+    NPC_TOWERING_INFERNAL       = 17818,
+
     GO_ANCIENT_GEM              = 185557,
     GO_HORDE_ENCAMPMENT_PORTAL  = 182060,
     GO_NIGHT_ELF_VILLAGE_PORTAL = 182061,
@@ -216,6 +219,8 @@ class instance_mount_hyjal : public ScriptedInstance
         GuidVector m_waveSpawns;
         GuidVector m_baseSpawns[MAX_BASE];
         GuidVector m_overrunSpawns[MAX_BASE];
+
+        GuidVector m_additionalSpawns;
 
         uint32 m_hyjalOverheadEnable;
         uint32 m_hyjalEnemyCount;

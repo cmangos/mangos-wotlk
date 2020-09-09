@@ -962,6 +962,9 @@ void instance_mount_hyjal::OnCreatureCreate(Creature* creature)
                 m_waveSpawns.push_back(creature->GetObjectGuid());
             break;
         }
+        case NPC_TOWERING_INFERNAL:
+            m_additionalSpawns.push_back(creature->GetObjectGuid());
+            break;
         case NPC_INFERNAL_RELAY:
             m_infernalRelays.push_back(creature->GetObjectGuid());
             std::sort(m_infernalRelays.begin(), m_infernalRelays.end(), [](ObjectGuid const& a, ObjectGuid const& b)->bool
@@ -1530,10 +1533,8 @@ void instance_mount_hyjal::DespawnWaveSpawns()
     DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_WAVES, 0);
     DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
     DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 0);
-    for (ObjectGuid& guid : m_waveSpawns)
-        if (Creature* spawn = instance->GetCreature(guid))
-            spawn->ForcedDespawn();
-    m_waveSpawns.clear();
+    DespawnGuids(m_waveSpawns);
+    DespawnGuids(m_additionalSpawns);
 }
 
 void instance_mount_hyjal::DespawnBase(BaseArea index)
