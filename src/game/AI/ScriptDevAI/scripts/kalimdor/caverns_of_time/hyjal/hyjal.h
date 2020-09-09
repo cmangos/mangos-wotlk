@@ -76,14 +76,13 @@ enum
     NPC_INFERNAL                = 17908,
     NPC_STALK                   = 17916,
 
-    // Boss Mobs
-    NPC_LESSER_INFERNAL         = 17864,
-
     // Final Archimonde event
     NPC_ANCIENT_WISP            = 17946,
 
     // Anetheron infernal
     NPC_TOWERING_INFERNAL       = 17818,
+    // Azgalor Doomguard
+    NPC_LESSER_DOOMGUARD        = 17864,
 
     GO_ANCIENT_GEM              = 185557,
     GO_HORDE_ENCAMPMENT_PORTAL  = 182060,

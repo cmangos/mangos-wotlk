@@ -946,7 +946,6 @@ void instance_mount_hyjal::OnCreatureCreate(Creature* creature)
             }
             // no break
         }
-        case NPC_LESSER_INFERNAL: // need to despawn like wave mobs
         case NPC_GHOUL:
         case NPC_NECRO:
         case NPC_ABOMI:
@@ -963,6 +962,7 @@ void instance_mount_hyjal::OnCreatureCreate(Creature* creature)
             break;
         }
         case NPC_TOWERING_INFERNAL:
+        case NPC_LESSER_DOOMGUARD:
             m_additionalSpawns.push_back(creature->GetObjectGuid());
             break;
         case NPC_INFERNAL_RELAY:
@@ -1021,7 +1021,7 @@ void instance_mount_hyjal::OnCreatureRespawn(Creature* creature)
 {
     switch (creature->GetEntry())
     {
-        case NPC_LESSER_INFERNAL: // need to despawn like wave mobs
+        case NPC_LESSER_DOOMGUARD: // need to despawn like wave mobs
         case NPC_GHOUL:
         case NPC_NECRO:
         case NPC_ABOMI:
