@@ -8290,22 +8290,22 @@ void Spell::SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpel
                             // speed higher than 280 replace it
                             if (mountSpeed > 280)
                             {
-                                target->CastSpell(target, spellIdSpecial, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
+                                target->CastSpell(target, spellIdSpecial, TRIGGERED_NONE, nullptr, nullptr, ObjectGuid(), parentSpell);
                                 return;
                             }
                         }
                     }
                 }
             }
-            target->CastSpell(target, pSpell, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
+            target->CastSpell(target, pSpell, TRIGGERED_NONE, nullptr, nullptr, ObjectGuid(), parentSpell);
         }
         else
-            target->CastSpell(target, pSpell, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
+            target->CastSpell(target, pSpell, TRIGGERED_NONE, nullptr, nullptr, ObjectGuid(), parentSpell);
     }
     else if (skillval >= 150 && spellId150 > 0)
-        target->CastSpell(target, spellId150, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
+        target->CastSpell(target, spellId150, TRIGGERED_NONE, nullptr, nullptr, ObjectGuid(), parentSpell);
     else if (spellId75 > 0)
-        target->CastSpell(target, spellId75, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), parentSpell);
+        target->CastSpell(target, spellId75, TRIGGERED_NONE, nullptr, nullptr, ObjectGuid(), parentSpell);
 }
 
 void Spell::RegisterAuraProc(Aura* aura)
