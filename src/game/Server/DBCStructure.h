@@ -225,7 +225,7 @@ struct AchievementCriteriaEntry
         // ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE   = 30
         struct
         {
-            uint32  unk;                                    // 3 related to battleground objectives
+            uint32  objectiveId;                            // 3 related to battleground objectives; each objective action has a defined id
             uint32  count;                                  // 4
             uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0 or 3
             uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
