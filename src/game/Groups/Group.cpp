@@ -1262,6 +1262,9 @@ GroupJoinBattlegroundResult Group::CanJoinBattleGroundQueue(BattleGround const* 
         // check if member can join any more battleground queues
         if (!member->HasFreeBattleGroundQueueId())
             return ERR_BATTLEGROUND_TOO_MANY_QUEUES;        // not blizz-like
+        // do not allow joining queue if member still in arena
+        if (member->InArena())
+            return ERR_BATTLEGROUND_JOIN_FAILED;
     }
     return GroupJoinBattlegroundResult(bgOrTemplate->GetTypeId());
 }
