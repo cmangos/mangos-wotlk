@@ -82,7 +82,7 @@ struct boss_rage_winterchillAI : public CombatAI
         {
             case WINTERCHILL_ACTION_FROST_ARMOR: return urand(30000, 45000);
             case WINTERCHILL_ACTION_ICEBOLT: return urand(9000, 15000);
-            case WINTERCHILL_ACTION_FROST_NOVA: return urand(19000, 26000);
+            case WINTERCHILL_ACTION_FROST_NOVA: return urand(25000, 30000);
             case WINTERCHILL_ACTION_DEATH_AND_DECAY: return 45000;
             case WINTERCHILL_ACTION_ENRAGE: return 300000;
             default: return 0; // never occurs but for compiler
