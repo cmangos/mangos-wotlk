@@ -37,9 +37,34 @@ void BattleGroundIC::Reset()
     BattleGround::Reset();
 
     for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
-    {
         m_reinforcements[i] = BG_IC_MAX_REINFORCEMENTS;
+
+    // setup the owner and state for all objectives
+    for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
+    {
+        if (i == BG_IC_OBJECTIVE_KEEP_ALLY)
+        {
+            m_objectiveOwner[i] = TEAM_INDEX_ALLIANCE;
+            m_objectiveState[i] = isleObjectData[i].stateAlly;
+        }
+        else if (i == BG_IC_OBJECTIVE_KEEP_HORDE)
+        {
+            m_objectiveOwner[i] = TEAM_INDEX_HORDE;
+            m_objectiveState[i] = isleObjectData[i].stateHorde;
+        }
+        else
+        {
+            m_objectiveOwner[i] = TEAM_INDEX_NEUTRAL;
+            m_objectiveState[i] = isleObjectData[i].stateNeutral;
+        }
     }
+
+    // setup the state for the keep walls
+    for (uint8 i = 0; i < BG_IC_MAX_KEEP_GATES; ++i)
+        m_gatesAllianceState[i] = isleAllianceWallsData[i].stateClosed;
+
+    for (uint8 i = 0; i < BG_IC_MAX_KEEP_GATES; ++i)
+        m_gatesHordeState[i] = isleHordeWallsData[i].stateClosed;
 }
 
 void BattleGroundIC::AddPlayer(Player* plr)
@@ -53,7 +78,7 @@ void BattleGroundIC::AddPlayer(Player* plr)
 
 void BattleGroundIC::StartingEventOpenDoors()
 {
-    // ToDo
+    // ToDo: open all gates and enable portals
 }
 
 void BattleGroundIC::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
@@ -86,30 +111,44 @@ void BattleGroundIC::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, BG_IC_STATE_HORDE_REINFORCE_COUNT, m_reinforcements[TEAM_INDEX_ALLIANCE]);
 
     // show the capturable bases
-    // ToDo: update with real time owner
-    FillInitialWorldState(data, count, BG_IC_STATE_DOCKS_UNCONTROLLED, 1);
-    FillInitialWorldState(data, count, BG_IC_STATE_HANGAR_UNCONTROLLED, 1);
-    FillInitialWorldState(data, count, BG_IC_STATE_WORKSHOP_UNCONTROLLED, 1);
-    FillInitialWorldState(data, count, BG_IC_STATE_QUARRY_UNCONTROLLED, 1);
-    FillInitialWorldState(data, count, BG_IC_STATE_REFINERY_UNCONTROLLED, 1);
-
-    // show the keeps
-    FillInitialWorldState(data, count, BG_IC_STATE_ALLY_KEEP_CONTROLLED_A, 1);
-    FillInitialWorldState(data, count, BG_IC_STATE_HORDE_KEEP_CONTROLLED_H, 1);
+    for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
+        FillInitialWorldState(data, count, m_objectiveState[i], 1);
 
     // show the walls
-    FillInitialWorldState(data, count, BG_IC_STATE_GATE_FRONT_H_CLOSED, 1);
-    FillInitialWorldState(data, count, BG_IC_STATE_GATE_WEST_H_CLOSED, 1);
-    FillInitialWorldState(data, count, BG_IC_STATE_GATE_EAST_H_CLOSED, 1);
-    FillInitialWorldState(data, count, BG_IC_STATE_GATE_FRONT_A_CLOSED, 1);
-    FillInitialWorldState(data, count, BG_IC_STATE_GATE_WEST_A_CLOSED, 1);
-    FillInitialWorldState(data, count, BG_IC_STATE_GATE_EAST_A_CLOSED, 1);
+    for (uint8 i = 0; i < BG_IC_MAX_KEEP_GATES; ++i)
+        FillInitialWorldState(data, count, m_gatesAllianceState[i], 1);
+
+    for (uint8 i = 0; i < BG_IC_MAX_KEEP_GATES; ++i)
+        FillInitialWorldState(data, count, m_gatesHordeState[i], 1);
 }
 
 // process the gate events
 bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 {
-    // ToDo: handle gate destroy events
+    for (uint8 i = 0; i < BG_IC_MAX_KEEP_GATES; ++i)
+    {
+        if (eventId == isleAllianceWallsData[i].eventId)
+        {
+            m_gatesAllianceState[i] = isleAllianceWallsData[i].stateOpened;
+            UpdateWorldState(m_gatesAllianceState[i], 1);
+
+            // todo: send language message
+            // todo: open inner gates and spawn the boss
+
+            return true;
+        }
+
+        if (eventId == isleHordeWallsData[i].eventId)
+        {
+            m_gatesHordeState[i] = isleAllianceWallsData[i].stateOpened;
+            UpdateWorldState(m_gatesHordeState[i], 1);
+
+            // todo: send language message
+            // todo: open inner gates and spawn the boss
+
+            return true;
+        }
+    }
 
     return false;
 }
@@ -137,6 +176,54 @@ void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
             break;
         case BG_IC_NPC_OVERLORD_AGMAR:
             EndBattleGround(ALLIANCE);
+            break;
+    }
+}
+
+void BattleGroundIC::HandleKillPlayer(Player* player, Player* killer)
+{
+    if (GetStatus() != STATUS_IN_PROGRESS)
+        return;
+
+    BattleGround::HandleKillPlayer(player, killer);
+
+    // remove one resource for each player killed
+    PvpTeamIndex killedPlayerIdx = GetTeamIndexByTeamId(player->GetTeam());
+    --m_reinforcements[killedPlayerIdx];
+
+    // if reached 0, the other team wins
+    if (!m_reinforcements[killedPlayerIdx])
+        EndBattleGround(killer->GetTeam());
+}
+
+void BattleGroundIC::HandleCreatureCreate(Creature* creature)
+{
+    switch (creature->GetEntry())
+    {
+        case BG_IC_VEHICLE_KEEP_CANNON:
+            creature->SetFactionTemporary(creature->GetPositionX() < 500.0f ? BG_IC_FACTION_ID_ALLIANCE : BG_IC_FACTION_ID_HORDE, TEMPFACTION_NONE);
+            break;
+        case BG_IC_VEHICLE_DEMOLISHER:
+            creature->SetFactionTemporary(iocTeamFactions[m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP]], TEMPFACTION_NONE);
+            break;
+        case BG_IC_VEHICLE_CATAPULT:
+            creature->SetFactionTemporary(iocTeamFactions[m_objectiveOwner[BG_IC_OBJECTIVE_DOCKS]], TEMPFACTION_NONE);
+            break;
+    }
+}
+
+void BattleGroundIC::HandleGameObjectCreate(GameObject* go)
+{
+    switch (go->GetEntry())
+    {
+        case BG_IC_GO_GUNSHIP_A:
+            m_gunshipGuid[TEAM_INDEX_ALLIANCE] = go->GetObjectGuid();
+            break;
+        case BG_IC_GO_GUNSHIP_H:
+            m_gunshipGuid[TEAM_INDEX_HORDE] = go->GetObjectGuid();
+            break;
+        case BG_IC_GO_SEAFORIUM_BOMBS:
+            m_bombsGuids.push_back(go->GetObjectGuid());
             break;
     }
 }
