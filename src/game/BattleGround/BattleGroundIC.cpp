@@ -65,6 +65,8 @@ void BattleGroundIC::Reset()
 
     for (uint8 i = 0; i < BG_IC_MAX_KEEP_GATES; ++i)
         m_gatesHordeState[i] = isleHordeWallsData[i].stateClosed;
+
+    m_closeDoorTimer = 0;
 }
 
 void BattleGroundIC::AddPlayer(Player* plr)
@@ -78,7 +80,37 @@ void BattleGroundIC::AddPlayer(Player* plr)
 
 void BattleGroundIC::StartingEventOpenDoors()
 {
-    // ToDo: open all gates and enable portals
+    // open alliance gates
+    for (const auto& guid : m_allianceGatesGuids)
+        if (GameObject* pGate = GetBgMap()->GetGameObject(guid))
+            pGate->UseDoorOrButton();
+
+    // open horde gates
+    for (const auto& guid : m_hordeGatesGuids)
+        if (GameObject* pGate = GetBgMap()->GetGameObject(guid))
+            pGate->UseDoorOrButton();
+
+    // open tower gates
+    for (const auto& guid : m_towerGatesGuids)
+        if (GameObject* pGate = GetBgMap()->GetGameObject(guid))
+            pGate->UseDoorOrButton();
+
+    // enable all teleporters
+    for (const auto& guid : m_teleporterGuids)
+        if (GameObject* pTele = GetBgMap()->GetGameObject(guid))
+            pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+
+    // respawn all animations
+    for (const auto& guid : m_teleporterAnimGuids)
+    {
+        if (GameObject* pTele = GetBgMap()->GetGameObject(guid))
+        {
+            pTele->SetRespawnTime(120 * MINUTE);
+            pTele->Refresh();
+        }
+    }
+
+    m_closeDoorTimer = BG_IC_CLOSE_DOORS_TIME;
 }
 
 void BattleGroundIC::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
@@ -129,18 +161,21 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
     {
         if (eventId == isleAllianceWallsData[i].eventId)
         {
+            UpdateWorldState(m_gatesAllianceState[i], 0);
             m_gatesAllianceState[i] = isleAllianceWallsData[i].stateOpened;
             UpdateWorldState(m_gatesAllianceState[i], 1);
 
             // todo: send language message
             // todo: open inner gates and spawn the boss
+            // set the broken gate to active-alternative to make it go away
 
             return true;
         }
 
         if (eventId == isleHordeWallsData[i].eventId)
         {
-            m_gatesHordeState[i] = isleAllianceWallsData[i].stateOpened;
+            UpdateWorldState(m_gatesHordeState[i], 0);
+            m_gatesHordeState[i] = isleHordeWallsData[i].stateOpened;
             UpdateWorldState(m_gatesHordeState[i], 1);
 
             // todo: send language message
@@ -225,6 +260,26 @@ void BattleGroundIC::HandleGameObjectCreate(GameObject* go)
         case BG_IC_GO_SEAFORIUM_BOMBS:
             m_bombsGuids.push_back(go->GetObjectGuid());
             break;
+        case BG_IC_GO_PORTCULLIS_GATE_A:
+            m_allianceGatesGuids.push_back(go->GetObjectGuid());
+            break;
+        case BG_IC_GO_PORTCULLIS_GATE_H:
+            m_hordeGatesGuids.push_back(go->GetObjectGuid());
+            break;
+        case BG_IC_GO_PORTCULLIS_TOWER_A:
+        case BG_IC_GO_PORTCULLIS_TOWER_H:
+            m_towerGatesGuids.push_back(go->GetObjectGuid());
+            break;
+        case BG_IC_GO_TELEPORTER_OUTSIDE_H:
+        case BG_IC_GO_TELEPORTER_INSIDE_H:
+        case BG_IC_GO_TELEPORTER_OUTSIDE_A:
+        case BG_IC_GO_TELEPORTER_INSIDE_A:
+            m_teleporterGuids.push_back(go->GetObjectGuid());
+            break;
+        case BG_IC_GO_TELEPORTER_EFFECTS_H:
+        case BG_IC_GO_TELEPORTER_EFFECTS_A:
+            m_teleporterAnimGuids.push_back(go->GetObjectGuid());
+            break;
     }
 }
 
@@ -246,4 +301,24 @@ void BattleGroundIC::EndBattleGround(Team winner)
 void BattleGroundIC::Update(uint32 diff)
 {
     BattleGround::Update(diff);
+
+    // close keep gates
+    if (m_closeDoorTimer)
+    {
+        if (m_closeDoorTimer <= diff)
+        {
+            for (const auto& guid : m_allianceGatesGuids)
+                if (GameObject* pGate = GetBgMap()->GetGameObject(guid))
+                    pGate->ResetDoorOrButton();
+
+            // open horde gates
+            for (const auto& guid : m_hordeGatesGuids)
+                if (GameObject* pGate = GetBgMap()->GetGameObject(guid))
+                    pGate->ResetDoorOrButton();
+
+            m_closeDoorTimer = 0;
+        }
+        else
+            m_closeDoorTimer -= diff;
+    }
 }

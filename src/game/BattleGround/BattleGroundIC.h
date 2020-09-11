@@ -177,8 +177,10 @@ enum
     // seaforium bombs - faction allows click from the opposite team
     BG_IC_GO_HUGE_SEAFORIUM_BOMB_A          = 195332,
     BG_IC_GO_HUGE_SEAFORIUM_BOMB_H          = 195333,
+    BG_IC_GO_HUGE_SEAFORIUM_BOMB_TRAP       = 195331,       // actual bomb; triggers spell 66672
 
-    BG_IC_GO_SEAFORIUM_BOMBS                = 195237,       // generic faction; spawned at the workshop
+    BG_IC_GO_SEAFORIUM_BOMBS                = 195237,       // spawned at the workshop; takes faction from workshop owner
+    BG_IC_GO_SEAFORIUM_BOMB_TRAP            = 195235,       // actual bomb; triggers spell 66676
 
     // teleporters
     BG_IC_GO_TELEPORTER_OUTSIDE_H           = 195314,       // teleports from outside to inside; has spell 66549
@@ -236,13 +238,13 @@ enum
 
 
     // event ids - keep gates breached (individual events for each gate)
-    BG_IC_EVENT_ID_KEEP_BREACHED_A1         = 22082,
-    BG_IC_EVENT_ID_KEEP_BREACHED_A2         = 22078,
-    BG_IC_EVENT_ID_KEEP_BREACHED_A3         = 22080,
+    BG_IC_EVENT_ID_KEEP_BREACHED_A1         = 22082,        // west gate
+    BG_IC_EVENT_ID_KEEP_BREACHED_A2         = 22078,        // east gate
+    BG_IC_EVENT_ID_KEEP_BREACHED_A3         = 22080,        // front gate
 
-    BG_IC_EVENT_ID_KEEP_BREACHED_H1         = 22081,
-    BG_IC_EVENT_ID_KEEP_BREACHED_H2         = 22083,
-    BG_IC_EVENT_ID_KEEP_BREACHED_H3         = 22079,
+    BG_IC_EVENT_ID_KEEP_BREACHED_H1         = 22081,        // west gate
+    BG_IC_EVENT_ID_KEEP_BREACHED_H2         = 22083,        // east gate
+    BG_IC_EVENT_ID_KEEP_BREACHED_H3         = 22079,        // front gate
 
 
     // spells
@@ -329,7 +331,7 @@ static const IsleDualSummonData iocWorkshopSpawns[] =
     {BG_IC_VEHICLE_DEMOLISHER,      BG_IC_VEHICLE_DEMOLISHER,     761.809f, -854.227f, 12.5263f, 1.46608f},
     {BG_IC_VEHICLE_DEMOLISHER,      BG_IC_VEHICLE_DEMOLISHER,     783.472f, -853.96f,  12.5478f, 1.71042f},
     {BG_IC_VEHICLE_DEMOLISHER,      BG_IC_VEHICLE_DEMOLISHER,     793.056f, -852.719f, 12.5671f, 1.71042f},
-    // ToDo: add the goblin / gnome mechanic
+    {BG_IC_NPC_GNOMISH_MECHANIC,    BG_IC_NPC_GOBLIN_MECHANIC,    762.6146f, -883.6736f, 18.61661f, 0.01745329f}
 };
 
 static const IsleDualSummonData iocDocksSpawns[] =
@@ -370,7 +372,6 @@ static const IsleObjectiveData isleObjectData[] =
     {BG_IC_OBJECTIVE_HANGAR,     LANG_BG_IC_NODE_HANGAR,        BG_IC_STATE_HANGAR_UNCONTROLLED,     BG_IC_STATE_HANGAR_CONTROLLED_A,     BG_IC_STATE_HANGAR_CONFLICT_A,     BG_IC_STATE_HANGAR_CONTROLLED_H,     BG_IC_STATE_HANGAR_CONFLICT_H},
     {BG_IC_OBJECTIVE_REFINERY,   LANG_BG_IC_NODE_REFINERY,      BG_IC_STATE_REFINERY_UNCONTROLLED,   BG_IC_STATE_REFINERY_CONTROLLED_A,   BG_IC_STATE_REFINERY_CONFLICT_A,   BG_IC_STATE_REFINERY_CONTROLLED_H,   BG_IC_STATE_REFINERY_CONFLICT_H},
     {BG_IC_OBJECTIVE_QUARY,      LANG_BG_IC_NODE_QUARRY,        BG_IC_STATE_QUARRY_UNCONTROLLED,     BG_IC_STATE_QUARRY_CONTROLLED_A,     BG_IC_STATE_QUARRY_CONFLICT_A,     BG_IC_STATE_QUARRY_CONTROLLED_H,     BG_IC_STATE_QUARRY_CONFLICT_H},
-    
 };
 
 struct IsleWallsData
@@ -381,16 +382,16 @@ struct IsleWallsData
 // *** Battleground walls data *** //
 static const IsleWallsData isleAllianceWallsData[] =
 {
-    {BG_IC_EVENT_ID_KEEP_BREACHED_A1, BG_IC_STATE_GATE_FRONT_A_CLOSED, BG_IC_STATE_GATE_FRONT_A_OPEN, LANG_BG_IC_FRONT_GATE_ALLIANCE},
-    {BG_IC_EVENT_ID_KEEP_BREACHED_A2, BG_IC_STATE_GATE_WEST_A_CLOSED,  BG_IC_STATE_GATE_WEST_A_OPEN,  LANG_BG_IC_WEST_GATE_ALLIANCE},
-    {BG_IC_EVENT_ID_KEEP_BREACHED_A3, BG_IC_STATE_GATE_EAST_A_CLOSED,  BG_IC_STATE_GATE_EAST_A_OPEN,  LANG_BG_IC_EAST_GATE_ALLIANCE}
+    {BG_IC_EVENT_ID_KEEP_BREACHED_A3, BG_IC_STATE_GATE_FRONT_A_CLOSED, BG_IC_STATE_GATE_FRONT_A_OPEN, LANG_BG_IC_FRONT_GATE_ALLIANCE},
+    {BG_IC_EVENT_ID_KEEP_BREACHED_A1, BG_IC_STATE_GATE_WEST_A_CLOSED,  BG_IC_STATE_GATE_WEST_A_OPEN,  LANG_BG_IC_WEST_GATE_ALLIANCE},
+    {BG_IC_EVENT_ID_KEEP_BREACHED_A2, BG_IC_STATE_GATE_EAST_A_CLOSED,  BG_IC_STATE_GATE_EAST_A_OPEN,  LANG_BG_IC_EAST_GATE_ALLIANCE}
 };
 
 static const IsleWallsData isleHordeWallsData[] =
 {
-    {BG_IC_EVENT_ID_KEEP_BREACHED_H1, BG_IC_STATE_GATE_FRONT_H_CLOSED, BG_IC_STATE_GATE_FRONT_H_OPEN, LANG_BG_IC_FRONT_GATE_HORDE},
-    {BG_IC_EVENT_ID_KEEP_BREACHED_H2, BG_IC_STATE_GATE_WEST_H_CLOSED,  BG_IC_STATE_GATE_WEST_H_OPEN,  LANG_BG_IC_WEST_GATE_HORDE},
-    {BG_IC_EVENT_ID_KEEP_BREACHED_H3, BG_IC_STATE_GATE_EAST_H_CLOSED,  BG_IC_STATE_GATE_EAST_H_OPEN,  LANG_BG_IC_EAST_GATE_HORDE}
+    {BG_IC_EVENT_ID_KEEP_BREACHED_H3, BG_IC_STATE_GATE_FRONT_H_CLOSED, BG_IC_STATE_GATE_FRONT_H_OPEN, LANG_BG_IC_FRONT_GATE_HORDE},
+    {BG_IC_EVENT_ID_KEEP_BREACHED_H1, BG_IC_STATE_GATE_WEST_H_CLOSED,  BG_IC_STATE_GATE_WEST_H_OPEN,  LANG_BG_IC_WEST_GATE_HORDE},
+    {BG_IC_EVENT_ID_KEEP_BREACHED_H2, BG_IC_STATE_GATE_EAST_H_CLOSED,  BG_IC_STATE_GATE_EAST_H_OPEN,  LANG_BG_IC_EAST_GATE_HORDE}
 };
 
 class BattleGroundICScore : public BattleGroundScore
@@ -444,7 +445,13 @@ class BattleGroundIC : public BattleGround
         ObjectGuid m_gunshipGuid[PVP_TEAM_COUNT];
 
         uint32 m_reinforcements[PVP_TEAM_COUNT];
+        uint32 m_closeDoorTimer;
 
         GuidList m_bombsGuids;
+        GuidList m_allianceGatesGuids;
+        GuidList m_hordeGatesGuids;
+        GuidList m_towerGatesGuids;
+        GuidList m_teleporterGuids;
+        GuidList m_teleporterAnimGuids;
 };
 #endif
