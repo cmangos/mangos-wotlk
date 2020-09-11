@@ -166,7 +166,7 @@ struct boss_archimondeAI : public ScriptedAI
             case ARCHIMONDE_ACTION_HAND_OF_DEATH: return 10 * MINUTE * IN_MILLISECONDS;
             case ARCHIMONDE_ACTION_GRIP_OF_THE_LEGION: return urand(5000, 25000);
             case ARCHIMONDE_ACTION_AIR_BURST: return urand(25000, 40000);
-            case ARCHIMONDE_ACTION_FEAR: return 40000;
+            case ARCHIMONDE_ACTION_FEAR: return urand(42000, 50000);
             case ARCHIMONDE_ACTION_DOOMFIRE: return 15000;
             case ARCHIMONDE_ACTION_FINGER_OF_DEATH_COOLUP: return 10000;
             case ARCHIMONDE_ACTION_SOUL_CHARGE: return 0;
