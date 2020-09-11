@@ -385,7 +385,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 {
                     // Destroy the platform
                     if (GameObject* pPlatform = m_pInstance->GetSingleGameObjectFromStorage(GO_PLATFORM))
-                        pPlatform->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_11);
+                        pPlatform->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
                 }
 
                 DoCastSpellIfCan(m_creature, SPELL_SUMMON_RED_DRAGON);

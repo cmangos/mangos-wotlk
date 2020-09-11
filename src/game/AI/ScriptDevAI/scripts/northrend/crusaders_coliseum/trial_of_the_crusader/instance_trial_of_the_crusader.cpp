@@ -223,7 +223,7 @@ void instance_trial_of_the_crusader::OnObjectCreate(GameObject* pGo)
             if (m_auiEncounter[TYPE_TWIN_VALKYR] == DONE)
             {
                 pGo->SetDisplayId(DISPLAYID_DESTROYED_FLOOR);
-                pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_10 | GO_FLAG_NODESPAWN);
+                pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_NODESPAWN);
                 pGo->SetGoState(GO_STATE_ACTIVE);
             }
             break;
@@ -854,7 +854,7 @@ void instance_trial_of_the_crusader::JustDidDialogueStep(int32 iEntry)
             if (GameObject* pColiseumFloor = GetSingleGameObjectFromStorage(GO_COLISEUM_FLOOR))
             {
                 pColiseumFloor->SetDisplayId(DISPLAYID_DESTROYED_FLOOR);
-                pColiseumFloor->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_10 | GO_FLAG_NODESPAWN);
+                pColiseumFloor->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_NODESPAWN);
                 pColiseumFloor->SetGoState(GO_STATE_ACTIVE);
             }
 

@@ -2453,7 +2453,7 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
     {
         DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s set to full health %u", GetGuidStr().c_str(), m_useTimes);
 
-        RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_9 | GO_FLAG_UNK_10 | GO_FLAG_UNK_11);
+        RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_9 | GO_FLAG_DAMAGED | GO_FLAG_DESTROYED);
         newDisplayId = m_goInfo->displayId;
 
         // Start Event if exist
@@ -2462,12 +2462,12 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
     }
     else if (m_useTimes == 0)                               // Destroyed
     {
-        if (!HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_11))     // Was not destroyed before
+        if (!HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED))     // Was not destroyed before
         {
             DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s got destroyed", GetGuidStr().c_str());
 
-            RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_9 | GO_FLAG_UNK_10);
-            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_11);
+            RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_9 | GO_FLAG_DAMAGED);
+            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
 
             // Get destroyed DisplayId
             if ((!m_goInfo->destructibleBuilding.destroyedDisplayId || m_goInfo->destructibleBuilding.destroyedDisplayId == 1) && destructibleInfo)
@@ -2490,11 +2490,11 @@ void GameObject::ForceGameObjectHealth(int32 diff, Unit* caster)
     }
     else if (m_useTimes <= m_goInfo->destructibleBuilding.damagedNumHits) // Damaged
     {
-        if (!HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_10))     // Was not damaged before
+        if (!HasFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED))     // Was not damaged before
         {
             DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DestructibleGO: %s got damaged (health now %u)", GetGuidStr().c_str(), m_useTimes);
 
-            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_10);
+            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED);
 
             // Get damaged DisplayId
             if ((!m_goInfo->destructibleBuilding.damagedDisplayId || m_goInfo->destructibleBuilding.damagedDisplayId == 1) && destructibleInfo)

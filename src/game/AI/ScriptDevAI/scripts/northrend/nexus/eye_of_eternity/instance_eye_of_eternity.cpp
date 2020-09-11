@@ -101,7 +101,7 @@ void instance_eye_of_eternity::SetData(uint32 uiType, uint32 uiData)
         // ToDo: respawn the focus iris and the portal
 
         if (GameObject* pPlatform = GetSingleGameObjectFromStorage(GO_PLATFORM))
-            pPlatform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_11);
+            pPlatform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
     }
     else if (uiData == DONE)
         StartNextDialogueText(NPC_ALEXSTRASZA);
@@ -125,7 +125,7 @@ void instance_eye_of_eternity::JustDidDialogueStep(int32 iEntry)
         case GO_PLATFORM:
             // ToDo: respawn the portal
             if (GameObject* pPlatform = GetSingleGameObjectFromStorage(GO_PLATFORM))
-                pPlatform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_UNK_11);
+                pPlatform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
             // Spawn the Heart of Malygos
             DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_HEART_OF_MAGIC : GO_HEART_OF_MAGIC_H, 30 * MINUTE);
             break;
