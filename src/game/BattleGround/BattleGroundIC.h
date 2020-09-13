@@ -28,7 +28,6 @@ class BattleGround;
 enum
 {
     // generic enums
-    BG_IC_MAX_KEEP_GATES                    = 3,
     BG_IC_MAX_REINFORCEMENTS                = 300,
     BG_IC_WORKSHOP_UPDATE_TIME              = 3 * MINUTE * IN_MILLISECONDS,
     BG_IC_TRANSPORT_PERIOD_TIME             = 2 * MINUTE * IN_MILLISECONDS,
@@ -242,8 +241,8 @@ enum
     BG_IC_EVENT_ID_KEEP_BREACHED_A2         = 22078,        // east gate
     BG_IC_EVENT_ID_KEEP_BREACHED_A3         = 22080,        // front gate
 
-    BG_IC_EVENT_ID_KEEP_BREACHED_H1         = 22081,        // west gate
-    BG_IC_EVENT_ID_KEEP_BREACHED_H2         = 22083,        // east gate
+    BG_IC_EVENT_ID_KEEP_BREACHED_H1         = 22081,        // east gate
+    BG_IC_EVENT_ID_KEEP_BREACHED_H2         = 22083,        // west gate
     BG_IC_EVENT_ID_KEEP_BREACHED_H3         = 22079,        // front gate
 
 
@@ -374,24 +373,33 @@ static const IsleObjectiveData isleObjectData[] =
     {BG_IC_OBJECTIVE_QUARY,      LANG_BG_IC_NODE_QUARRY,        BG_IC_STATE_QUARRY_UNCONTROLLED,     BG_IC_STATE_QUARRY_CONTROLLED_A,     BG_IC_STATE_QUARRY_CONFLICT_A,     BG_IC_STATE_QUARRY_CONTROLLED_H,     BG_IC_STATE_QUARRY_CONFLICT_H},
 };
 
+enum IsleGates
+{
+    BG_IC_GATE_FRONT,
+    BG_IC_GATE_WEST,
+    BG_IC_GATE_EAST,
+    BG_IC_MAX_KEEP_GATES
+};
+
 struct IsleWallsData
 {
+    uint8 gateId;
     uint32 eventId, stateClosed, stateOpened, message;
 };
 
 // *** Battleground walls data *** //
 static const IsleWallsData isleAllianceWallsData[] =
 {
-    {BG_IC_EVENT_ID_KEEP_BREACHED_A3, BG_IC_STATE_GATE_FRONT_A_CLOSED, BG_IC_STATE_GATE_FRONT_A_OPEN, LANG_BG_IC_FRONT_GATE_ALLIANCE},
-    {BG_IC_EVENT_ID_KEEP_BREACHED_A1, BG_IC_STATE_GATE_WEST_A_CLOSED,  BG_IC_STATE_GATE_WEST_A_OPEN,  LANG_BG_IC_WEST_GATE_ALLIANCE},
-    {BG_IC_EVENT_ID_KEEP_BREACHED_A2, BG_IC_STATE_GATE_EAST_A_CLOSED,  BG_IC_STATE_GATE_EAST_A_OPEN,  LANG_BG_IC_EAST_GATE_ALLIANCE}
+    {BG_IC_GATE_FRONT, BG_IC_EVENT_ID_KEEP_BREACHED_A3, BG_IC_STATE_GATE_FRONT_A_CLOSED, BG_IC_STATE_GATE_FRONT_A_OPEN, LANG_BG_IC_FRONT_GATE_ALLIANCE},
+    {BG_IC_GATE_WEST, BG_IC_EVENT_ID_KEEP_BREACHED_A1, BG_IC_STATE_GATE_WEST_A_CLOSED,  BG_IC_STATE_GATE_WEST_A_OPEN,  LANG_BG_IC_WEST_GATE_ALLIANCE},
+    {BG_IC_GATE_EAST, BG_IC_EVENT_ID_KEEP_BREACHED_A2, BG_IC_STATE_GATE_EAST_A_CLOSED,  BG_IC_STATE_GATE_EAST_A_OPEN,  LANG_BG_IC_EAST_GATE_ALLIANCE}
 };
 
 static const IsleWallsData isleHordeWallsData[] =
 {
-    {BG_IC_EVENT_ID_KEEP_BREACHED_H3, BG_IC_STATE_GATE_FRONT_H_CLOSED, BG_IC_STATE_GATE_FRONT_H_OPEN, LANG_BG_IC_FRONT_GATE_HORDE},
-    {BG_IC_EVENT_ID_KEEP_BREACHED_H1, BG_IC_STATE_GATE_WEST_H_CLOSED,  BG_IC_STATE_GATE_WEST_H_OPEN,  LANG_BG_IC_WEST_GATE_HORDE},
-    {BG_IC_EVENT_ID_KEEP_BREACHED_H2, BG_IC_STATE_GATE_EAST_H_CLOSED,  BG_IC_STATE_GATE_EAST_H_OPEN,  LANG_BG_IC_EAST_GATE_HORDE}
+    {BG_IC_GATE_FRONT, BG_IC_EVENT_ID_KEEP_BREACHED_H3, BG_IC_STATE_GATE_FRONT_H_CLOSED, BG_IC_STATE_GATE_FRONT_H_OPEN, LANG_BG_IC_FRONT_GATE_HORDE},
+    {BG_IC_GATE_WEST, BG_IC_EVENT_ID_KEEP_BREACHED_H2, BG_IC_STATE_GATE_WEST_H_CLOSED,  BG_IC_STATE_GATE_WEST_H_OPEN,  LANG_BG_IC_WEST_GATE_HORDE},
+    {BG_IC_GATE_EAST, BG_IC_EVENT_ID_KEEP_BREACHED_H1, BG_IC_STATE_GATE_EAST_H_CLOSED,  BG_IC_STATE_GATE_EAST_H_OPEN,  LANG_BG_IC_EAST_GATE_HORDE}
 };
 
 class BattleGroundICScore : public BattleGroundScore
@@ -433,6 +441,8 @@ class BattleGroundIC : public BattleGround
 
         void EventPlayerClickedOnFlag(Player* player, GameObject* go) override;
 
+        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
+
         void Update(uint32 diff) override;
 
     private:
@@ -443,13 +453,20 @@ class BattleGroundIC : public BattleGround
         uint32 m_gatesHordeState[BG_IC_MAX_KEEP_GATES];
 
         ObjectGuid m_gunshipGuid[PVP_TEAM_COUNT];
+        ObjectGuid m_graveyardFlagGuid[PVP_TEAM_COUNT];
+        ObjectGuid m_keepGatesGuid[PVP_TEAM_COUNT][BG_IC_MAX_KEEP_GATES];
+        ObjectGuid m_hordeInnerGateGuid;
+        ObjectGuid m_allianceInnerGate1Guid;
+        ObjectGuid m_allianceInnerGate2Guid;
 
         uint32 m_reinforcements[PVP_TEAM_COUNT];
         uint32 m_closeDoorTimer;
 
+        bool m_isKeepInvaded[PVP_TEAM_COUNT];
+
+        GuidList m_workshopSpawnsGuids[PVP_TEAM_COUNT];
+        GuidList m_docksSpawnsGuids[PVP_TEAM_COUNT];
         GuidList m_bombsGuids;
-        GuidList m_allianceGatesGuids;
-        GuidList m_hordeGatesGuids;
         GuidList m_towerGatesGuids;
         GuidList m_teleporterGuids;
         GuidList m_teleporterAnimGuids;

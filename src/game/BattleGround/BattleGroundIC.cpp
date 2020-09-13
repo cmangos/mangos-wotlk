@@ -67,6 +67,8 @@ void BattleGroundIC::Reset()
         m_gatesHordeState[i] = isleHordeWallsData[i].stateClosed;
 
     m_closeDoorTimer = 0;
+    m_isKeepInvaded[TEAM_INDEX_ALLIANCE] = false;
+    m_isKeepInvaded[TEAM_INDEX_HORDE] = false;
 }
 
 void BattleGroundIC::AddPlayer(Player* plr)
@@ -81,13 +83,13 @@ void BattleGroundIC::AddPlayer(Player* plr)
 void BattleGroundIC::StartingEventOpenDoors()
 {
     // open alliance gates
-    for (const auto& guid : m_allianceGatesGuids)
-        if (GameObject* pGate = GetBgMap()->GetGameObject(guid))
+    for (const auto& i : m_keepGatesGuid[TEAM_INDEX_ALLIANCE])
+        if (GameObject* pGate = GetBgMap()->GetGameObject(i))
             pGate->UseDoorOrButton();
 
     // open horde gates
-    for (const auto& guid : m_hordeGatesGuids)
-        if (GameObject* pGate = GetBgMap()->GetGameObject(guid))
+    for (const auto& i : m_keepGatesGuid[TEAM_INDEX_HORDE])
+        if (GameObject* pGate = GetBgMap()->GetGameObject(i))
             pGate->UseDoorOrButton();
 
     // open tower gates
@@ -100,15 +102,10 @@ void BattleGroundIC::StartingEventOpenDoors()
         if (GameObject* pTele = GetBgMap()->GetGameObject(guid))
             pTele->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
 
-    // respawn all animations
+    // enable all animations
     for (const auto& guid : m_teleporterAnimGuids)
-    {
         if (GameObject* pTele = GetBgMap()->GetGameObject(guid))
-        {
-            pTele->SetRespawnTime(120 * MINUTE);
-            pTele->Refresh();
-        }
-    }
+            pTele->UseDoorOrButton();
 
     m_closeDoorTimer = BG_IC_CLOSE_DOORS_TIME;
 }
@@ -165,9 +162,27 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
             m_gatesAllianceState[i] = isleAllianceWallsData[i].stateOpened;
             UpdateWorldState(m_gatesAllianceState[i], 1);
 
-            // todo: send language message
-            // todo: open inner gates and spawn the boss
-            // set the broken gate to active-alternative to make it go away
+            if (GameObject* pGate = GetBgMap()->GetGameObject(m_keepGatesGuid[TEAM_INDEX_ALLIANCE][i]))
+                pGate->UseDoorOrButton(0, true);
+
+            if (!m_isKeepInvaded[TEAM_INDEX_ALLIANCE])
+            {
+                // open the inner keep gates
+                if (GameObject* pGate = GetBgMap()->GetGameObject(m_allianceInnerGate1Guid))
+                    pGate->UseDoorOrButton();
+                if (GameObject* pGate = GetBgMap()->GetGameObject(m_allianceInnerGate2Guid))
+                    pGate->UseDoorOrButton();
+
+                // spawn the boss
+                for (const auto& i : iocAllianceKeepSpawns)
+                    go->SummonCreature(i.entry, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0);
+
+                // allow the graveyard to be captured
+                if (GameObject* pFlag = GetBgMap()->GetGameObject(m_graveyardFlagGuid[TEAM_INDEX_ALLIANCE]))
+                    pFlag->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            }
+
+            m_isKeepInvaded[TEAM_INDEX_ALLIANCE] = true;
 
             return true;
         }
@@ -178,8 +193,25 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
             m_gatesHordeState[i] = isleHordeWallsData[i].stateOpened;
             UpdateWorldState(m_gatesHordeState[i], 1);
 
-            // todo: send language message
-            // todo: open inner gates and spawn the boss
+            if (GameObject* pGate = GetBgMap()->GetGameObject(m_keepGatesGuid[TEAM_INDEX_HORDE][i]))
+                pGate->UseDoorOrButton(0, true);
+
+            if (!m_isKeepInvaded[TEAM_INDEX_HORDE])
+            {
+                // open the inner keep gates
+                if (GameObject* pGate = GetBgMap()->GetGameObject(m_hordeInnerGateGuid))
+                    pGate->UseDoorOrButton();
+
+                // spawn the boss
+                for (const auto& i : iocHordeKeepSpawns)
+                    go->SummonCreature(i.entry, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0);
+
+                // allow the graveyard to be captured
+                if (GameObject* pFlag = GetBgMap()->GetGameObject(m_graveyardFlagGuid[TEAM_INDEX_HORDE]))
+                    pFlag->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            }
+
+            m_isKeepInvaded[TEAM_INDEX_HORDE] = true;
 
             return true;
         }
@@ -201,8 +233,6 @@ void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
 
-    // ToDo: add extra validations
-
     // end battle if boss was killed
     switch (creature->GetEntry())
     {
@@ -211,6 +241,30 @@ void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
             break;
         case BG_IC_NPC_OVERLORD_AGMAR:
             EndBattleGround(ALLIANCE);
+            break;
+        case BG_IC_VEHICLE_DEMOLISHER:
+        {
+            PvpTeamIndex ownerTeam = creature->getFaction() == BG_IC_FACTION_ID_ALLIANCE ? TEAM_INDEX_ALLIANCE : TEAM_INDEX_HORDE;
+            m_workshopSpawnsGuids[ownerTeam].push_back(creature->GetObjectGuid());
+            break;
+        }
+        case BG_IC_VEHICLE_SIEGE_ENGINE_A:
+            m_workshopSpawnsGuids[TEAM_INDEX_ALLIANCE].remove(creature->GetObjectGuid());
+            break;
+        case BG_IC_VEHICLE_SIEGE_ENGINE_H:
+            m_workshopSpawnsGuids[TEAM_INDEX_HORDE].remove(creature->GetObjectGuid());
+            break;
+        case BG_IC_VEHICLE_CATAPULT:
+        {
+            PvpTeamIndex ownerTeam = creature->getFaction() == BG_IC_FACTION_ID_ALLIANCE ? TEAM_INDEX_ALLIANCE : TEAM_INDEX_HORDE;
+            m_docksSpawnsGuids[ownerTeam].push_back(creature->GetObjectGuid());
+            break;
+        }
+        case BG_IC_VEHICLE_GLAIVE_THROWER_A:
+            m_docksSpawnsGuids[TEAM_INDEX_ALLIANCE].remove(creature->GetObjectGuid());
+            break;
+        case BG_IC_VEHICLE_GLAIVE_THROWER_H:
+            m_docksSpawnsGuids[TEAM_INDEX_HORDE].remove(creature->GetObjectGuid());
             break;
     }
 }
@@ -226,6 +280,8 @@ void BattleGroundIC::HandleKillPlayer(Player* player, Player* killer)
     PvpTeamIndex killedPlayerIdx = GetTeamIndexByTeamId(player->GetTeam());
     --m_reinforcements[killedPlayerIdx];
 
+    UpdateWorldState(killedPlayerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_STATE_ALLY_REINFORCE_COUNT : BG_IC_STATE_HORDE_REINFORCE_COUNT, m_reinforcements[killedPlayerIdx]);
+
     // if reached 0, the other team wins
     if (!m_reinforcements[killedPlayerIdx])
         EndBattleGround(killer->GetTeam());
@@ -239,10 +295,32 @@ void BattleGroundIC::HandleCreatureCreate(Creature* creature)
             creature->SetFactionTemporary(creature->GetPositionX() < 500.0f ? BG_IC_FACTION_ID_ALLIANCE : BG_IC_FACTION_ID_HORDE, TEMPFACTION_NONE);
             break;
         case BG_IC_VEHICLE_DEMOLISHER:
-            creature->SetFactionTemporary(iocTeamFactions[m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP]], TEMPFACTION_NONE);
+        {
+            PvpTeamIndex ownerTeam = m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP];
+            creature->SetFactionTemporary(iocTeamFactions[ownerTeam], TEMPFACTION_NONE);
+            m_workshopSpawnsGuids[ownerTeam].push_back(creature->GetObjectGuid());
+            break;
+        }
+        case BG_IC_VEHICLE_SIEGE_ENGINE_A:
+        case BG_IC_NPC_GNOMISH_MECHANIC:
+            m_workshopSpawnsGuids[TEAM_INDEX_ALLIANCE].push_back(creature->GetObjectGuid());
+            break;
+        case BG_IC_VEHICLE_SIEGE_ENGINE_H:
+        case BG_IC_NPC_GOBLIN_MECHANIC:
+            m_workshopSpawnsGuids[TEAM_INDEX_HORDE].push_back(creature->GetObjectGuid());
             break;
         case BG_IC_VEHICLE_CATAPULT:
-            creature->SetFactionTemporary(iocTeamFactions[m_objectiveOwner[BG_IC_OBJECTIVE_DOCKS]], TEMPFACTION_NONE);
+        {
+            PvpTeamIndex ownerTeam = m_objectiveOwner[BG_IC_OBJECTIVE_DOCKS];
+            creature->SetFactionTemporary(iocTeamFactions[ownerTeam], TEMPFACTION_NONE);
+            m_docksSpawnsGuids[ownerTeam].push_back(creature->GetObjectGuid());
+            break;
+        }
+        case BG_IC_VEHICLE_GLAIVE_THROWER_A:
+            m_docksSpawnsGuids[TEAM_INDEX_ALLIANCE].push_back(creature->GetObjectGuid());
+            break;
+        case BG_IC_VEHICLE_GLAIVE_THROWER_H:
+            m_docksSpawnsGuids[TEAM_INDEX_HORDE].push_back(creature->GetObjectGuid());
             break;
     }
 }
@@ -261,10 +339,28 @@ void BattleGroundIC::HandleGameObjectCreate(GameObject* go)
             m_bombsGuids.push_back(go->GetObjectGuid());
             break;
         case BG_IC_GO_PORTCULLIS_GATE_A:
-            m_allianceGatesGuids.push_back(go->GetObjectGuid());
+            // sort each portculis gate, to use it later in script
+            if (go->GetPositionX() > 400.0f)
+                m_keepGatesGuid[TEAM_INDEX_ALLIANCE][BG_IC_GATE_FRONT] = go->GetObjectGuid();
+            else
+            {
+                if (go->GetPositionY() > -800.0f)
+                    m_keepGatesGuid[TEAM_INDEX_ALLIANCE][BG_IC_GATE_WEST] = go->GetObjectGuid();
+                else
+                    m_keepGatesGuid[TEAM_INDEX_ALLIANCE][BG_IC_GATE_EAST] = go->GetObjectGuid();
+            }
             break;
         case BG_IC_GO_PORTCULLIS_GATE_H:
-            m_hordeGatesGuids.push_back(go->GetObjectGuid());
+            // sort each portculis gate, to use it later in script
+            if (go->GetPositionX() < 1200.0f)
+                m_keepGatesGuid[TEAM_INDEX_HORDE][BG_IC_GATE_FRONT] = go->GetObjectGuid();
+            else
+            {
+                if (go->GetPositionY() > -700.0f)
+                    m_keepGatesGuid[TEAM_INDEX_HORDE][BG_IC_GATE_WEST] = go->GetObjectGuid();
+                else
+                    m_keepGatesGuid[TEAM_INDEX_HORDE][BG_IC_GATE_EAST] = go->GetObjectGuid();
+            }
             break;
         case BG_IC_GO_PORTCULLIS_TOWER_A:
         case BG_IC_GO_PORTCULLIS_TOWER_H:
@@ -279,6 +375,21 @@ void BattleGroundIC::HandleGameObjectCreate(GameObject* go)
         case BG_IC_GO_TELEPORTER_EFFECTS_H:
         case BG_IC_GO_TELEPORTER_EFFECTS_A:
             m_teleporterAnimGuids.push_back(go->GetObjectGuid());
+            break;
+        case BG_IC_GO_PORTCULLIS_KEEP_H:
+            m_hordeInnerGateGuid = go->GetObjectGuid();
+            break;
+        case BG_IC_GO_PORTCULLIS_KEEP_A1:
+            m_allianceInnerGate1Guid = go->GetObjectGuid();
+            break;
+        case BG_IC_GO_PORTCULLIS_KEEP_A2:
+            m_allianceInnerGate2Guid = go->GetObjectGuid();
+            break;
+        case BG_IC_GO_BANNER_ALLIANCE_KEEP_A:
+            m_graveyardFlagGuid[TEAM_INDEX_ALLIANCE] = go->GetObjectGuid();
+            break;
+        case BG_IC_GO_BANNER_HORDE_KEEP_H:
+            m_graveyardFlagGuid[TEAM_INDEX_HORDE] = go->GetObjectGuid();
             break;
     }
 }
@@ -298,6 +409,19 @@ void BattleGroundIC::EndBattleGround(Team winner)
     BattleGround::EndBattleGround(winner);
 }
 
+bool BattleGroundIC::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1)
+{
+    switch (criteria_id)
+    {
+        case BG_IC_CRIT_RESOURCE_GLUT_A:
+            return m_objectiveOwner[BG_IC_OBJECTIVE_QUARY] == TEAM_INDEX_ALLIANCE && m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY] == TEAM_INDEX_ALLIANCE;
+        case BG_IC_CRIT_RESOURCE_GLUT_H:
+            return m_objectiveOwner[BG_IC_OBJECTIVE_QUARY] == TEAM_INDEX_HORDE && m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY] == TEAM_INDEX_HORDE;
+    }
+
+    return false;
+}
+
 void BattleGroundIC::Update(uint32 diff)
 {
     BattleGround::Update(diff);
@@ -307,13 +431,13 @@ void BattleGroundIC::Update(uint32 diff)
     {
         if (m_closeDoorTimer <= diff)
         {
-            for (const auto& guid : m_allianceGatesGuids)
-                if (GameObject* pGate = GetBgMap()->GetGameObject(guid))
+            //  reset alliance and horde gates
+            for (const auto& i : m_keepGatesGuid[TEAM_INDEX_ALLIANCE])
+                if (GameObject* pGate = GetBgMap()->GetGameObject(i))
                     pGate->ResetDoorOrButton();
 
-            // open horde gates
-            for (const auto& guid : m_hordeGatesGuids)
-                if (GameObject* pGate = GetBgMap()->GetGameObject(guid))
+            for (const auto& i : m_keepGatesGuid[TEAM_INDEX_HORDE])
+                if (GameObject* pGate = GetBgMap()->GetGameObject(i))
                     pGate->ResetDoorOrButton();
 
             m_closeDoorTimer = 0;
