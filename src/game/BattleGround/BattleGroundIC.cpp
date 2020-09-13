@@ -17,9 +17,11 @@
  */
 
 #include "Entities/Player.h"
+#include "Entities/GameObject.h"
 #include "BattleGround.h"
 #include "BattleGroundIC.h"
 #include "Tools/Language.h"
+#include "Globals/ObjectMgr.h"
 
 BattleGroundIC::BattleGroundIC()
 {
