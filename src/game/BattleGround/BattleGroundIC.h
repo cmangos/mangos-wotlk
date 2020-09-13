@@ -355,9 +355,18 @@ enum IsleObjective
     BG_IC_MAX_OBJECTIVES
 };
 
+enum IsleObjectiveStatus
+{
+    BG_IC_OBJECTIVE_NEUTRAL,
+    BG_AB_OBJECTIVE_CONTESTED_ALLY,
+    BG_AB_OBJECTIVE_CONTESTED_HORDE,
+    BG_AB_OBJECTIVE_OCCUPIED_ALLY,
+    BG_AB_OBJECTIVE_OCCUPIED_HORDE,
+};
+
 struct IsleObjectiveData
 {
-    uint8 objectiveId;
+    uint8 objectiveId, objectiveStatus;
     uint32 message, stateNeutral, stateAlly, stateAllyGrey, stateHorde, stateHordeGrey;
 };
 
