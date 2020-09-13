@@ -1191,6 +1191,18 @@ struct SplitDamage : public SpellScript
     }
 };
 
+struct TKDive : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (spell->m_spellInfo->Effect[effIdx] != SPELL_EFFECT_SCHOOL_DAMAGE)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        spell->GetCaster()->AddThreat(target, 1000000.f);
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1215,4 +1227,5 @@ void AddSC_spell_scripts()
     RegisterSpellScript<UseCorpse>("spell_use_corpse");
     RegisterSpellScript<RaiseDead>("spell_raise_dead");
     RegisterSpellScript<SplitDamage>("spell_split_damage");
+    RegisterSpellScript<TKDive>("spell_tk_dive");
 }
