@@ -488,6 +488,16 @@ void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uin
                     achievementCriteria->honorable_kill_at_area.condVal1 == miscvalue2)
                     SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
                 break;
+            case ACHIEVEMENT_CRITERIA_TYPE_WIN_BG:
+                if (achievementCriteria->win_bg.additionalRequirement1_type == miscvalue1 &&
+                    achievementCriteria->win_bg.additionalRequirement1_value == miscvalue2)
+                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE:
+                if (achievementCriteria->capture_bg_objective.condFlag1 == miscvalue1 &&
+                    achievementCriteria->capture_bg_objective.condVal1 == miscvalue2)
+                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+                break;
             default:                                        // reset all cases
                 break;
         }
@@ -921,40 +931,36 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (achievementCriteria->win_bg.bgMapID != GetPlayer()->GetMapId())
                     continue;
 
-                if (achievementCriteria->win_bg.additionalRequirement1_type || achievementCriteria->win_bg.additionalRequirement2_type)
-                {
-                    // those requirements couldn't be found in the dbc
-                    AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
-                    if (!data || !data->Meets(GetPlayer(), unit))
-                        continue;
-                }
-                // some hardcoded requirements
-                else
-                {
-                    BattleGround* bg = GetPlayer()->GetBattleGround();
-                    if (!bg)
-                        continue;
+                // check possible pvp script requirement
+                AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
+                if (data && !data->Meets(GetPlayer(), unit))
+                    continue;
 
-                    switch (achievementCriteria->referredAchievement)
+                // ToDo: move the following achievemnts to the respective corresponding script
+                switch (achievementCriteria->referredAchievement)
+                {
+                    case 161:                           // AB, Overcome a 500 resource disadvantage
                     {
-                        case 161:                           // AB, Overcome a 500 resource disadvantage
-                        {
-                            if (bg->GetTypeID() != BATTLEGROUND_AB)
-                                continue;
-                            if (!((BattleGroundAB*)bg)->IsTeamScores500Disadvantage(GetPlayer()->GetTeam()))
-                                continue;
-                            break;
-                        }
-                        case 156:                           // AB, win while controlling all 5 flags (all nodes)
-                        case 784:                           // EY, win while holding 4 bases (all nodes)
-                        {
-                            if (!bg->IsAllNodesControlledByTeam(GetPlayer()->GetTeam()))
-                                continue;
-                            break;
-                        }
-                        case 1762:                          // SA, win without losing any siege vehicles
-                        case 2192:                          // SA, win without losing any siege vehicles
-                            continue;                       // not implemented
+                        BattleGround* bg = GetPlayer()->GetBattleGround();
+                        if (!bg)
+                            continue;
+
+                        if (bg->GetTypeID() != BATTLEGROUND_AB)
+                            continue;
+                        if (!((BattleGroundAB*)bg)->IsTeamScores500Disadvantage(GetPlayer()->GetTeam()))
+                            continue;
+                        break;
+                    }
+                    case 156:                           // AB, win while controlling all 5 flags (all nodes)
+                    case 784:                           // EY, win while holding 4 bases (all nodes)
+                    {
+                        BattleGround* bg = GetPlayer()->GetBattleGround();
+                        if (!bg)
+                            continue;
+
+                        if (!bg->IsAllNodesControlledByTeam(GetPlayer()->GetTeam()))
+                            continue;
+                        break;
                     }
                 }
 
@@ -1739,7 +1745,17 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             }
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:
             {
-                // ToDo: count honorable kills in area; if map id is provided, the achiev criteria has to reset at the beginning of bg
+                // check if area id corresponds with the provided value
+                if (!miscvalue1 || achievementCriteria->honorable_kill_at_area.areaID != miscvalue1)
+                    continue;
+
+                // check pvp script requirement
+                AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
+                if (!data || !data->Meets(GetPlayer(), unit))
+                    continue;
+
+                change = 1;
+                progressType = PROGRESS_ACCUMULATE;
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
@@ -1749,7 +1765,32 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             }
             case ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE:
             {
-                // ToDo: count objective counts in various battlegrounds
+                // check if objective id corresponds with the provided value
+                if (!miscvalue1 || achievementCriteria->capture_bg_objective.objectiveId != miscvalue1)
+                    continue;
+
+                // check possible pvp script requirement
+                AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
+                if (data && !data->Meets(GetPlayer(), unit))
+                    continue;
+
+                change = 1;
+                progressType = PROGRESS_ACCUMULATE;
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA:
+            {
+                // ToDo: check if player won a specific arena based on map id
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA:
+            {
+                // ToDo: check if player played arena based on map id
+                break;
+            }
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
+            {
+                // ToDo: check creature kill based on creature type
                 break;
             }
             // std case: not exist in DBC, not triggered in code as result
@@ -1763,10 +1804,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             // FIXME: not triggered in code as result, need to implement
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_DAILY_QUEST_DAILY:
             case ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_RAID:
-            case ACHIEVEMENT_CRITERIA_TYPE_WIN_ARENA:
-            case ACHIEVEMENT_CRITERIA_TYPE_PLAY_ARENA:
             case ACHIEVEMENT_CRITERIA_TYPE_OWN_RANK:
-            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE_TYPE:
             case ACHIEVEMENT_CRITERIA_TYPE_EARN_ACHIEVEMENT_POINTS:
             case ACHIEVEMENT_CRITERIA_TYPE_USE_LFD_TO_GROUP_WITH_PLAYERS:
                 break;                                   // Not implemented yet :(
