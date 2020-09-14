@@ -213,7 +213,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (38858,'spell_queldanas_shoot'),
 (34800,'spell_getting_sleepy_aura'),
 (43364,'spell_getting_sleepy_aura'),
-(37156,'spell_tk_dive');
+(37156,'spell_tk_dive'),
+(34438,'spell_unstable_affliction'),
+(34439,'spell_unstable_affliction'),
+(35183,'spell_unstable_affliction');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
