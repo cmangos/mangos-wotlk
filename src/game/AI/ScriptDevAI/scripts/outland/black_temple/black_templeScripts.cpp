@@ -296,7 +296,6 @@ struct AssistBT : public SpellScript
 
         if (!unitTarget->IsInWorld())
         {
-            sLog.outCustomLog("BT Fixate: Target name %s was not in world typeid %c. Data for him\n%s", unitTarget->GetName(), unitTarget->GetTypeId(), unitTarget->IsPlayer() ? static_cast<Player*>(unitTarget)->m_lastWorldLeaveDiagnostics.data() : "Nothing");
             return;
         }
 

@@ -56,6 +56,7 @@
 #include "Server/SQLStorages.h"
 #include "Loot/LootMgr.h"
 #include "World/WorldState.h"
+#include "Arena/ArenaTeam.h"
 
 #ifdef BUILD_AHBOT
 #include "AuctionHouseBot/AuctionHouseBot.h"
@@ -6855,6 +6856,29 @@ bool ChatHandler::HandleArenaDataReset(char* /*args*/)
     PSendSysMessage("Resetting all arena data.");
     sBattleGroundMgr.ResetAllArenaData();
     return true;
+}
+
+bool ChatHandler::HandleArenaTeamPointSet(char* args)
+{
+    char* teamName = ExtractQuotedArg(&args);
+    if (!teamName)
+        return false;
+
+    uint32 newRating;
+    if (!ExtractUInt32(&args, newRating))
+        return false;
+
+    std::string nameString = teamName;
+    ArenaTeam* team = sObjectMgr.GetArenaTeamByName(nameString);
+    if (!team)
+    {
+        PSendSysMessage("Could not find arena team with name %s", nameString.data());
+        SetSentErrorMessage(true);
+        return false;
+    }
+    team->SetRatingForAll(newRating);
+    team->SaveToDB();
+    return false;
 }
 
 bool ChatHandler::HandleModifyGenderCommand(char* args)

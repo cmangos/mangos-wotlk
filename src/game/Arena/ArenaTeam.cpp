@@ -796,8 +796,15 @@ void ArenaTeam::FinishSeason()
     }
 }
 
+void ArenaTeam::SetRatingForAll(uint32 rating)
+{
+    m_stats.rating = rating;
+    for (auto& memberData : m_members)
+        memberData.personal_rating = rating;
+}
+
 // add new arena event to all already connected team members
-void ArenaTeam::MassInviteToEvent(WorldSession* session)
+void ArenaTeam::MassInviteToEvent(WorldSession * session)
 {
     WorldPacket data(SMSG_CALENDAR_ARENA_TEAM);
 

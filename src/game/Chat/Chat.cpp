@@ -730,6 +730,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "flushpoints",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleArenaFlushPointsCommand,      "", nullptr },
         { "sendRewards",        SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleArenaSeasonRewardsCommand,    "", nullptr },
         { "resetData",          SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleArenaDataReset,               "", nullptr },
+        { "teampoints",         SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleArenaTeamPointSet,            "", nullptr },
         { nullptr,              0,                  false, nullptr,                                          "", nullptr }
     };
 

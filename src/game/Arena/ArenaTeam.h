@@ -205,6 +205,7 @@ class ArenaTeam
         void FinishWeek();
         void FinishGame(int32 mod);
         void FinishSeason();
+        void SetRatingForAll(uint32 rating);
 
         // Calendar
         void MassInviteToEvent(WorldSession* session);
