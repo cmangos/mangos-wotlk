@@ -117,7 +117,7 @@ struct boss_archimondeAI : public CombatAI
         AddTimerlessCombatAction(ARCHIMONDE_ACTION_FINGER_OF_DEATH, false);
         AddCombatAction(ARCHIMONDE_ACTION_FINGER_OF_DEATH_COOLUP, 10000u);
         AddCombatAction(ARCHIMONDE_ACTION_HAND_OF_DEATH, uint32(10 * MINUTE * IN_MILLISECONDS));
-        AddCombatAction(ARCHIMONDE_ACTION_SOUL_CHARGE, true);
+        AddCombatAction(ARCHIMONDE_ACTION_SOUL_CHARGE, 5000u);
         SetDeathPrevention(true);
         Reset();
     }
@@ -280,7 +280,7 @@ struct boss_archimondeAI : public CombatAI
 				{
 					DoScriptText(SAY_ENRAGE, m_creature);
                     ResetCombatAction(action, GetSubsequentActionTimer(action));
-					m_creature->ForcedDespawn();
+                    EnterEvadeMode();
 				}
                 return;
 			case ARCHIMONDE_ACTION_GRIP_OF_THE_LEGION:
