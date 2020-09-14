@@ -33,7 +33,7 @@ struct UnstableAffliction : public AuraScript
         damage *= 9;
 
         // backfire damage and silence - confirmed to have original caster
-        dispeller->CastCustomSpell(dispeller, 31117, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, holder->GetCasterGuid());
+        dispeller->CastCustomSpell(dispeller, SPELL_UNSTABLE_AFFLICTION_SILENCE, &damage, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, holder->GetCasterGuid());
     }
 };
 
