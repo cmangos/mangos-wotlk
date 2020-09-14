@@ -6851,8 +6851,15 @@ bool ChatHandler::HandleArenaSeasonRewardsCommand(char* args)
     return true;
 }
 
-bool ChatHandler::HandleArenaDataReset(char* /*args*/)
+bool ChatHandler::HandleArenaDataReset(char* args)
 {
+    uint32 bulgarianValue;
+    if (!ExtractUInt32(&args, bulgarianValue) || bulgarianValue != 42)
+    {
+        SendSysMessage("For this command to work, add 42 as a parameter. Note, this resets data for all teams on the whole realm.");
+        return false;
+    }
+
     PSendSysMessage("Resetting all arena data.");
     sBattleGroundMgr.ResetAllArenaData();
     return true;
