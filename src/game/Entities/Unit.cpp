@@ -10952,7 +10952,7 @@ CharmInfo::CharmInfo(Unit* unit) :
     m_petnumber(0), m_opener(0), m_openerMinRange(0),
     m_openerMaxRange(0), m_unitFieldFlags(0), m_unitFieldBytes2_1(0), m_retreating(false), m_stayPosSet(false),
     m_stayPosX(0), m_stayPosY(0), m_stayPosZ(0),
-    m_stayPosO(0), m_walk(true)
+    m_stayPosO(0), m_walk(true), m_deleted(false)
 {
     for (auto& m_charmspell : m_charmspells)
         m_charmspell.SetActionAndType(0, ACT_DISABLED);
@@ -10962,6 +10962,7 @@ CharmInfo::~CharmInfo()
 {
     delete m_combatData;
     delete m_ai;
+    m_deleted = true;
 }
 
 void CharmInfo::SetCharmState(std::string const& ainame, bool withNewThreatList /*= true*/)
@@ -13057,7 +13058,6 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
         m_charmedUnitsPrivate.insert(charmed->GetObjectGuid());
 
     CharmInfo* charmInfo = charmed->InitCharmInfo(charmed);
-    charmed->DeleteThreatList();
 
     bool isPossessCharm = IsPossessCharmType(spellId);
 
@@ -13116,6 +13116,9 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
         }
     }
 
+    if (charmInfo->GetUnit() != charmed)
+        sLog.outCustomLog("Unit didnt equal in Unit::TakeCharmOf after base changes.");
+
     // New flags for the duration of charm need to be set after SetCharmState, gets reset in ResetCharmState
     if (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
         charmed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED);
@@ -13139,7 +13142,13 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
             charmerPlayer->SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
 
+    if (charmInfo->GetUnit() != charmed)
+        sLog.outCustomLog("Unit didnt equal in Unit::TakeCharmOf after flag changes.");
+
     charmInfo->ProcessUnattackableTargets();
+
+    if (charmInfo->GetUnit() != charmed)
+        sLog.outCustomLog("Unit didnt equal in Unit::TakeCharmOf after attackability changes.");
 
     // put charmed in combat with all charmers enemies - must be done after flags
     ThreatList const& list = getThreatManager().getThreatList();
