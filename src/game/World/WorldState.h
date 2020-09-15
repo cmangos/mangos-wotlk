@@ -185,7 +185,6 @@ enum AQPhase
     PHASE_3_GONG_TIME,
     PHASE_4_10_HOUR_WAR,
     PHASE_5_DONE,
->>>>>>> ea0cc17d54... WarEffort: Initial AQ War Effort commit
 };
 
 // To be used

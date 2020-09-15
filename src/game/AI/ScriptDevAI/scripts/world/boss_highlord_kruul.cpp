@@ -22,7 +22,7 @@ SDCategory: Bosses
 EndScriptData
 */
 
-#include "AI/ScriptDevAI/include/precompiled.h"
+#include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 #include "World/WorldState.h"
 
@@ -226,7 +226,7 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
                     }
                     case KRUUL_ACTION_VOIDBOLT:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_VOIDBOLT) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_VOIDBOLT) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -283,7 +283,7 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
                     }
                     case KRUUL_ACTION_CLEAVE:
                     {
-                        if (DoCastSpellIfCan(m_creature->getVictim(), SPELL_CLEAVE) == CAST_OK)
+                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE) == CAST_OK)
                         {
                             ResetTimer(i, GetSubsequentActionTimer(i));
                             SetActionReadyStatus(i, false);
@@ -293,7 +293,7 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
                     }
                     case KRUUL_ACTION_KAZZAKS_ASSAULT:
                     {
-                        if (m_creature->getVictim()->GetTypeId() != TYPEID_PLAYER)
+                        if (m_creature->GetVictim()->GetTypeId() != TYPEID_PLAYER)
                         {
                             if (DoCastSpellIfCan(m_creature, SPELL_KAZZAKS_ASSAULT) == CAST_OK)
                             {
@@ -311,7 +311,7 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
 
     void UpdateAI(const uint32 diff) override
     {
-        UpdateTimers(diff, m_creature->isInCombat());
+        UpdateTimers(diff, m_creature->IsInCombat());
 
         if (m_uiCreateInfernalingSummonerTimer)
         {
@@ -328,7 +328,7 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
         {
             if (m_uiDespawnTimer <= diff)
             {
-                if (m_creature->isAlive())
+                if (m_creature->IsAlive())
                 {
                     DoScriptText(SAY_DESPAWN, m_creature);
                     sWorldState.HandleExternalEvent(CUSTOM_EVENT_HIGHLORD_KRUUL_DIED, 0);
@@ -339,7 +339,7 @@ struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
                 m_uiDespawnTimer -= diff;
         }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->getVictim())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         ExecuteActions();
