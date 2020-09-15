@@ -327,6 +327,7 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
                         {
                             if (DoCastSpellIfCan(target, SPELL_HATEFUL_STRIKE) == CAST_OK)
                             {
+                                m_creature->SetTarget(target);
                                 ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
                                 SetActionReadyStatus(i, false);
                             }
