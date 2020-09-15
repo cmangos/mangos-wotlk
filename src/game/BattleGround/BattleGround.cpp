@@ -1860,3 +1860,16 @@ void BattleGround::SetBracket(PvPDifficultyEntry const* bracketEntry)
     m_BracketId  = bracketEntry->GetBracketId();
     SetLevelRange(bracketEntry->minLevel, bracketEntry->maxLevel);
 }
+
+/// Returns a pointer to a loaded GameObject that was stored in m_goEntryGuidStore. Can return nullptr
+GameObject* BattleGround::GetSingleGameObjectFromStorage(uint32 entry) const
+{
+    auto iter = m_goEntryGuidStore.find(entry);
+    if (iter != m_goEntryGuidStore.end())
+        return GetBgMap()->GetGameObject(iter->second);
+
+    // Output log, possible reason is not added GO to map, or not yet loaded;
+    sLog.outError("BattleGround requested gameobject with entry %u, but no gameobject of this entry was created yet, or it was not stored by battleground script for map %u.", entry, GetBgMap()->GetId());
+
+    return nullptr;
+}

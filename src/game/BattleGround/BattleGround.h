@@ -384,6 +384,9 @@ class BattleGround
 
         void StartTimedAchievement(AchievementCriteriaTypes type, uint32 entry);
 
+        typedef std::map<uint32, ObjectGuid> EntryGuidMap;
+        GameObject* GetSingleGameObjectFromStorage(uint32 entry) const;
+
         /* Location */
         void SetMapId(uint32 MapID) { m_MapId = MapID; }
         uint32 GetMapId() const { return m_MapId; }
@@ -581,6 +584,9 @@ class BattleGround
         uint32 m_StartMessageIds[BG_STARTING_EVENT_COUNT];
 
         bool   m_BuffChange;
+
+        /* Storage lists */
+        EntryGuidMap m_goEntryGuidStore;                   // Store unique GO-Guids by entry
 
     private:
         /* Battleground */
