@@ -23,9 +23,8 @@
 #include "Tools/Language.h"
 #include "Globals/ObjectMgr.h"
 
-BattleGroundIC::BattleGroundIC()
+BattleGroundIC::BattleGroundIC() : m_hordeInnerGateGuid(ObjectGuid()), m_allianceInnerGate1Guid(ObjectGuid()), m_allianceInnerGate2Guid(ObjectGuid()), m_closeDoorTimer(0)
 {
-
     m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_IC_START_TWO_MINUTES;
     m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_IC_START_ONE_MINUTE;
     m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_IC_START_HALF_MINUTE;
@@ -44,21 +43,25 @@ void BattleGroundIC::Reset()
     // setup the owner and state for all objectives
     for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
     {
+        m_objectiveState[i] = iocDefaultStates[i];
+
         if (i == BG_IC_OBJECTIVE_KEEP_ALLY)
         {
             m_objectiveOwner[i] = TEAM_INDEX_ALLIANCE;
-            m_objectiveState[i] = isleObjectData[i].stateAlly;
+            m_objectiveStatus[i] = BG_IC_OBJECTIVE_OCCUPIED_A;
         }
         else if (i == BG_IC_OBJECTIVE_KEEP_HORDE)
         {
             m_objectiveOwner[i] = TEAM_INDEX_HORDE;
-            m_objectiveState[i] = isleObjectData[i].stateHorde;
+            m_objectiveStatus[i] = BG_IC_OBJECTIVE_OCCUPIED_H;
         }
         else
         {
             m_objectiveOwner[i] = TEAM_INDEX_NEUTRAL;
-            m_objectiveState[i] = isleObjectData[i].stateNeutral;
+            m_objectiveStatus[i] = BG_IC_OBJECTIVE_NEUTRAL;
         }
+
+        m_objectiveTimer[i] = 0;
     }
 
     // setup the state for the keep walls
@@ -71,6 +74,10 @@ void BattleGroundIC::Reset()
     m_closeDoorTimer = 0;
     m_isKeepInvaded[TEAM_INDEX_ALLIANCE] = false;
     m_isKeepInvaded[TEAM_INDEX_HORDE] = false;
+
+    // setup initial graveyards
+    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_ALLIANCE, BG_IC_ZONE_ID_ISLE, ALLIANCE);
+    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_KEEP_ALLY, BG_IC_ZONE_ID_ISLE, ALLIANCE);
 }
 
 void BattleGroundIC::AddPlayer(Player* plr)
@@ -156,6 +163,8 @@ void BattleGroundIC::FillInitialWorldStates(WorldPacket& data, uint32& count)
 // process the gate events
 bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 {
+    DEBUG_LOG("BattleGroundIC: Handle event for gameobject entry %u.", go->GetEntry());
+
     for (uint8 i = 0; i < BG_IC_MAX_KEEP_GATES; ++i)
     {
         if (eventId == isleAllianceWallsData[i].eventId)
@@ -180,7 +189,7 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
                     go->SummonCreature(i.entry, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                 // allow the graveyard to be captured
-                if (GameObject* pFlag = GetBgMap()->GetGameObject(m_graveyardFlagGuid[TEAM_INDEX_ALLIANCE]))
+                if (GameObject* pFlag = GetSingleGameObjectFromStorage(BG_IC_GO_BANNER_ALLIANCE_KEEP_A))
                     pFlag->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             }
 
@@ -209,7 +218,7 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
                     go->SummonCreature(i.entry, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0);
 
                 // allow the graveyard to be captured
-                if (GameObject* pFlag = GetBgMap()->GetGameObject(m_graveyardFlagGuid[TEAM_INDEX_HORDE]))
+                if (GameObject* pFlag = GetSingleGameObjectFromStorage(BG_IC_GO_BANNER_HORDE_KEEP_H))
                     pFlag->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
             }
 
@@ -225,12 +234,118 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 // Called when a player clicks a capturable banner
 void BattleGroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* go)
 {
-    // ToDo: handle objective capture
+    DEBUG_LOG("BattleGroundIC: Handle flag clicked for gameobject entry %u.", go->GetEntry());
+
+    PvpTeamIndex newOwnerIdx = GetTeamIndexByTeamId(player->GetTeam());
+    bool bProcessEvent      = false;
+    uint8 objectiveId       = 0;
+    uint32 newWorldState    = 0;
+    uint32 soundId          = 0;
+    uint32 nextFlagEntry    = 0;
+    int32 textEntry         = 0;
+    IsleObjectiveStatus status = BG_IC_OBJECTIVE_NEUTRAL;
+
+    // *** Check if status changed from neutral to contested ***
+    for (const auto& i : isleGameObjectNeutralData)
+    {
+        if (go->GetEntry() == i.objectEntry)
+        {
+            UpdatePlayerScore(player, SCORE_BASES_ASSAULTED, 1);
+
+            objectiveId = i.objectiveId;
+            newWorldState = newOwnerIdx == TEAM_INDEX_ALLIANCE ? i.nextWorldStateAlly : i.nextWorldStateHorde;
+
+            textEntry = LANG_BG_AB_NODE_ASSAULTED;
+            soundId = newOwnerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_SOUND_NODE_ASSAULTED_ALLIANCE : BG_IC_SOUND_NODE_ASSAULTED_HORDE;
+
+            nextFlagEntry = newOwnerIdx == TEAM_INDEX_ALLIANCE ? i.nextObjectAlly : i.nextObjectHorde;
+            bProcessEvent = true;
+            break;
+        }
+    }
+
+    if (!bProcessEvent)
+    {
+        // *** Check if status changed from owned to contested ***
+        for (const auto& i : isleGameObjectOwnedData)
+        {
+            if (go->GetEntry() == i.objectEntry)
+            {
+                UpdatePlayerScore(player, SCORE_BASES_ASSAULTED, 1);
+
+                objectiveId = i.objectiveId;
+                newWorldState = i.nextState;
+
+                textEntry = LANG_BG_AB_NODE_ASSAULTED;
+                soundId = newOwnerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_SOUND_NODE_ASSAULTED_ALLIANCE : BG_IC_SOUND_NODE_ASSAULTED_HORDE;
+
+                nextFlagEntry = i.objectEntry;
+                bProcessEvent = true;
+                break;
+            }
+        }
+    }
+
+    if (!bProcessEvent)
+    {
+        // *** Check if status changed from contested to owned / contested ***
+        for (const auto& i : isleGameObjectContestedData)
+        {
+            if (go->GetEntry() == i.objectEntry)
+            {
+                // ToDo:
+                /*UpdatePlayerScore(player, SCORE_BASES_DEFENDED, 1);
+
+                objectiveId = i.objectiveId;
+                newWorldState = i.nextState;
+
+                textEntry = LANG_BG_AB_NODE_DEFENDED;
+                soundId = newOwnerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_SOUND_NODE_ASSAULTED_ALLIANCE : BG_IC_SOUND_NODE_ASSAULTED_HORDE;
+
+                nextFlagEntry = i.objectEntry;
+                bProcessEvent = true;*/
+                break;
+            }
+        }
+    }
+
+    // only process the event if needed
+    if (bProcessEvent)
+    {
+        m_objectiveOwner[objectiveId] = newOwnerIdx;
+
+        // update world states
+        UpdateWorldState(m_objectiveState[objectiveId], 0);
+        m_objectiveState[objectiveId] = newWorldState;
+        UpdateWorldState(m_objectiveState[objectiveId], 1);
+
+        // start timer
+        m_objectiveTimer[objectiveId] = BG_IC_FLAG_CAPTURING_TIME;
+        m_objectiveStatus[objectiveId] = status;
+
+        // send the zone message and sound
+        ChatMsg chatSystem = newOwnerIdx == TEAM_INDEX_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE;
+        uint32 factionStrig = newOwnerIdx == TEAM_INDEX_ALLIANCE ? LANG_BG_ALLY : LANG_BG_HORDE;
+
+        SendMessage2ToAll(LANG_BG_AB_NODE_ASSAULTED, chatSystem, player, isleObjectiveData[objectiveId].message, factionStrig);
+        PlaySoundToAll(soundId);
+
+        // despawn the current flag
+        go->SetLootState(GO_JUST_DEACTIVATED);
+
+        // respawn the new flag
+        if (GameObject* pFlag = GetSingleGameObjectFromStorage(nextFlagEntry))
+        {
+            m_currentFlagGuid[objectiveId] = pFlag->GetObjectGuid();
+            pFlag->SetRespawnTime(60 * MINUTE);
+            pFlag->Refresh();
+        }
+    }
 }
 
 void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
 {
-    DEBUG_LOG("BattleGroundIC: Handle unit kill for craeture entry %u.", creature->GetEntry());
+    DEBUG_LOG("BattleGroundIC: Handle unit kill for creature entry %u.", creature->GetEntry());
 
     if (GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -387,11 +502,47 @@ void BattleGroundIC::HandleGameObjectCreate(GameObject* go)
         case BG_IC_GO_PORTCULLIS_KEEP_A2:
             m_allianceInnerGate2Guid = go->GetObjectGuid();
             break;
-        case BG_IC_GO_BANNER_ALLIANCE_KEEP_A:
-            m_graveyardFlagGuid[TEAM_INDEX_ALLIANCE] = go->GetObjectGuid();
+        case BG_IC_GO_GUNSHIP_GROUND_PORTAL_A:
+            m_hangarPortalsGuids[TEAM_INDEX_ALLIANCE].push_back(go->GetObjectGuid());
             break;
+        case BG_IC_GO_GUNSHIP_GROUND_PORTAL_H:
+            m_hangarPortalsGuids[TEAM_INDEX_HORDE].push_back(go->GetObjectGuid());
+            break;
+        case BG_IC_GO_GUNSHIP_PORTAL_EFFECTS_A:
+            m_hangarAnimGuids[TEAM_INDEX_ALLIANCE].push_back(go->GetObjectGuid());
+            break;
+        case BG_IC_GO_GUNSHIP_PORTAL_EFFECTS_H:
+            m_hangarAnimGuids[TEAM_INDEX_HORDE].push_back(go->GetObjectGuid());
+            break;
+        case BG_IC_GO_BANNER_ALLIANCE_KEEP_A:
+        case BG_IC_GO_BANNER_ALLIANCE_KEEP_A_GREY:
+        case BG_IC_GO_BANNER_ALLIANCE_KEEP_H:
+        case BG_IC_GO_BANNER_ALLIANCE_KEEP_H_GREY:
+        case BG_IC_GO_BANNER_HORDE_KEEP_A:
+        case BG_IC_GO_BANNER_HORDE_KEEP_A_GREY:
         case BG_IC_GO_BANNER_HORDE_KEEP_H:
-            m_graveyardFlagGuid[TEAM_INDEX_HORDE] = go->GetObjectGuid();
+        case BG_IC_GO_BANNER_HORDE_KEEP_H_GREY:
+        case BG_IC_GO_BANNER_WORKSHOP_A:
+        case BG_IC_GO_BANNER_WORKSHOP_A_GREY:
+        case BG_IC_GO_BANNER_WORKSHOP_H:
+        case BG_IC_GO_BANNER_WORKSHOP_H_GREY:
+        case BG_IC_GO_BANNER_DOCKS_A:
+        case BG_IC_GO_BANNER_DOCKS_A_GREY:
+        case BG_IC_GO_BANNER_DOCKS_H:
+        case BG_IC_GO_BANNER_DOCKS_H_GREY:
+        case BG_IC_GO_BANNER_HANGAR_A:
+        case BG_IC_GO_BANNER_HANGAR_A_GREY:
+        case BG_IC_GO_BANNER_HANGAR_H:
+        case BG_IC_GO_BANNER_HANGAR_H_GREY:
+        case BG_IC_GO_BANNER_REFINERY_A:
+        case BG_IC_GO_BANNER_REFINERY_A_GREY:
+        case BG_IC_GO_BANNER_REFINERY_H:
+        case BG_IC_GO_BANNER_REFINERY_H_GREY:
+        case BG_IC_GO_BANNER_QUARRY_A:
+        case BG_IC_GO_BANNER_QUARRY_A_GREY:
+        case BG_IC_GO_BANNER_QUARRY_H:
+        case BG_IC_GO_BANNER_QUARRY_H_GREY:
+            m_goEntryGuidStore[go->GetEntry()] = go->GetObjectGuid();
             break;
     }
 }
@@ -424,6 +575,123 @@ bool BattleGroundIC::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
     return false;
 }
 
+// Function that handles the completion of objective
+void BattleGroundIC::DoCaptureObjective(IsleObjective m_objective)
+{
+    GameObject* pOriginalFlag = GetBgMap()->GetGameObject(m_currentFlagGuid[m_objective]);
+    if (!pOriginalFlag)
+        return;
+
+    // Loop through the list of objects in the Conquer data list
+    for (const auto& i : isleGameObjectConquerData)
+    {
+        if (pOriginalFlag->GetEntry() == i.objectEntry)
+        {
+            PvpTeamIndex ownerIdx = m_objectiveOwner[i.objectiveId];
+
+            // update world states
+            UpdateWorldState(m_objectiveState[i.objectiveId], 0);
+            m_objectiveState[i.objectiveId] = i.nextState;
+            UpdateWorldState(m_objectiveState[i.objectiveId], 1);
+
+            ChatMsg chatSystem = ownerIdx == TEAM_INDEX_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE;
+            uint32 factionStrig = ownerIdx == TEAM_INDEX_ALLIANCE ? LANG_BG_ALLY : LANG_BG_HORDE;
+
+            // send zone message; the AB string is the same for IC
+            SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, chatSystem, nullptr, factionStrig, isleObjectiveData[i.objectiveId].message);
+
+            // play sound is
+            uint32 soundId = ownerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_SOUND_NODE_CAPTURED_ALLIANCE : BG_IC_SOUND_NODE_CAPTURED_HORDE;
+            PlaySoundToAll(soundId);
+
+            // change flag object
+            pOriginalFlag->SetLootState(GO_JUST_DEACTIVATED);
+
+            // respawn the new flag
+            if (GameObject* pFlag = GetSingleGameObjectFromStorage(i.nextObject))
+            {
+                m_currentFlagGuid[i.objectiveId] = pFlag->GetObjectGuid();
+                pFlag->SetRespawnTime(60 * MINUTE);
+                pFlag->Refresh();
+            }
+
+            // if spell is provided, apply spell
+            uint32 spellId = isleObjectiveData[i.objectiveId].spellEntry;
+            if (spellId)
+                CastSpellOnTeam(spellId, GetTeamIdByTeamIndex(ownerIdx));
+
+            // if graveyard is provided, link the graveyard
+            uint32 graveyardId = isleObjectiveData[i.objectiveId].graveyardId;
+            if (graveyardId)
+                sObjectMgr.SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, GetTeamIdByTeamIndex(ownerIdx));
+
+            // spawn the vehicles / enable the gunship
+            switch (i.objectiveId)
+            {
+                case BG_IC_OBJECTIVE_WORKSHOP:
+                {
+                    // summon the vehicles and the mechanic
+                    for (uint8 i = 0; i < 6; ++i)
+                        pOriginalFlag->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? iocWorkshopSpawns[i].entryAlly : iocWorkshopSpawns[i].entryHorde, iocWorkshopSpawns[i].x, iocWorkshopSpawns[i].y, iocWorkshopSpawns[i].z, iocWorkshopSpawns[i].o, TEMPSPAWN_DEAD_DESPAWN, 0);
+
+                    // respawn the workshop bombs and give them the right faction
+                    for (const auto& guid : m_bombsGuids)
+                    {
+                        if (GameObject* pBomb = GetBgMap()->GetGameObject(guid))
+                        {
+                            pBomb->SetFaction(iocTeamFactions[ownerIdx]);
+                            pBomb->SetRespawnTime(60 * MINUTE);
+                            pBomb->Refresh();
+                        }
+                    }
+
+                    break;
+                }
+                case BG_IC_OBJECTIVE_DOCKS:
+                {
+                    // summon the vehicles
+                    for (uint8 i = 0; i < 6; ++i)
+                        pOriginalFlag->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? iocDocksSpawns[i].entryAlly : iocDocksSpawns[i].entryHorde, iocDocksSpawns[i].x, iocDocksSpawns[i].y, iocDocksSpawns[i].z, iocDocksSpawns[i].o, TEMPSPAWN_DEAD_DESPAWN, 0);
+                    break;
+                }
+                case BG_IC_OBJECTIVE_HANGAR:
+                {
+                    // respawn portals
+                    for (const auto& guid : m_hangarPortalsGuids[ownerIdx])
+                    {
+                        if (GameObject* pPortal = GetBgMap()->GetGameObject(guid))
+                        {
+                            pPortal->SetRespawnTime(60 * MINUTE);
+                            pPortal->Refresh();
+                        }
+                    }
+
+                    // respawn and enable the animations
+                    for (const auto& guid : m_hangarAnimGuids[ownerIdx])
+                    {
+                        if (GameObject* pAnim = GetBgMap()->GetGameObject(guid))
+                        {
+                            pAnim->SetRespawnTime(60 * MINUTE);
+                            pAnim->Refresh();
+                            pAnim->UseDoorOrButton();
+                        }
+                    }
+                    break;
+                }
+            }
+        }
+    }
+
+    // despawn flag
+    pOriginalFlag->SetLootState(GO_JUST_DEACTIVATED);
+}
+
+// Function that handles the reset of objective
+void BattleGroundIC::DoResetObjective(IsleObjective m_objective)
+{
+
+}
+
 void BattleGroundIC::Update(uint32 diff)
 {
     BattleGround::Update(diff);
@@ -446,5 +714,22 @@ void BattleGroundIC::Update(uint32 diff)
         }
         else
             m_closeDoorTimer -= diff;
+    }
+
+    // objective timers
+    {
+        for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
+        {
+            if (m_objectiveTimer[i])
+            {
+                if (m_objectiveTimer[i] <= diff)
+                {
+                    DoCaptureObjective(IsleObjective(i));
+                    m_objectiveTimer[i] = 0;
+                }
+                else
+                    m_objectiveTimer[i] -= diff;
+            }
+        }
     }
 }
