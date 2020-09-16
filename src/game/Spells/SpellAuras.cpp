@@ -3696,20 +3696,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     }
                     return;
                 }
-                case 41951:                             // Random Target - Supremus
-                {
-                    Unit* caster = GetCaster();
-                    if (!caster)
-                        return;
-                    if (apply)
-                    {
-                        caster->FixateTarget(target);
-                        caster->CastSpell(target, 41581, TRIGGERED_OLD_TRIGGERED);
-                    }
-                    else
-                        caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, caster);
-                    return;
-                }
                 case 42515:                                 // Jarl Beam
                 {
                     // aura animate dead (fainted) state for the duration, but we need to animate the death itself (correct way below?)

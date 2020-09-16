@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -186,13 +187,14 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
     {
         uint32 uiHealth = 0;
         Unit* target = nullptr;
+        Unit* victim = m_creature->GetVictim();
 
         ThreatList const& tList = m_creature->getThreatManager().getThreatList();
         for (auto iter : tList)
         {
             Unit* pUnit = m_creature->GetMap()->GetUnit(iter->getUnitGuid());
 
-            if (pUnit && m_creature->CanReachWithMeleeAttack(pUnit))
+            if (pUnit && pUnit != victim && m_creature->CanReachWithMeleeAttack(pUnit))
             {
                 if (pUnit->GetHealth() > uiHealth)
                 {
@@ -201,6 +203,9 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
                 }
             }
         }
+        if (!target && victim && m_creature->CanReachWithMeleeAttack(victim))
+            target = victim;
+
         return target;
     }
 
@@ -351,15 +356,30 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
     }
 };
 
-UnitAI* GetAI_boss_supremus(Creature* pCreature)
+struct SupremusRandomTarget : public AuraScript
 {
-    return new boss_supremusAI(pCreature);
-}
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
+        if (apply)
+        {
+            caster->FixateTarget(aura->GetTarget());
+            caster->SetTarget(aura->GetTarget()); // visual change for immediate crosshair update - only safe with fixate
+            caster->CastSpell(aura->GetTarget(), SPELL_CHARGE, TRIGGERED_OLD_TRIGGERED);
+        }
+        else
+            caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, aura->GetTarget(), caster);
+    }
+};
 
 void AddSC_boss_supremus()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_supremus";
-    pNewScript->GetAI = &GetAI_boss_supremus;
+    pNewScript->GetAI = &GetNewAIInstance<boss_supremusAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<SupremusRandomTarget>("spell_supremus_random_target");
 }
