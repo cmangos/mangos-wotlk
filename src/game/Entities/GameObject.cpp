@@ -979,6 +979,8 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         if (GetGOInfo()->IsServerOnly())
             return false;
 
+        bool goNotVisible = false;
+
         // special invisibility cases
         switch (GetGOInfo()->type)
         {
@@ -986,8 +988,6 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
             {
                 if (GetGOInfo()->trap.stealthed == 0 && GetGOInfo()->trap.invisible == 0)
                     break;
-
-                bool trapNotVisible = false;
 
                 // handle summoned traps, usually by players
                 if (Unit* owner = GetOwner())
@@ -998,7 +998,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                         if ((GetMap()->IsBattleGroundOrArena() && ownerPlayer->GetBGTeam() != u->GetBGTeam()) ||
                             (ownerPlayer->IsInDuelWith(u)) ||
                             (!ownerPlayer->IsInGroup(u)))
-                            trapNotVisible = true;
+                            goNotVisible = true;
                     }
                     else
                     {
@@ -1012,14 +1012,17 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                     if (this->IsFriend(u))
                         return true;
                     else
-                        trapNotVisible = true;
+                        goNotVisible = true;
                 }
-
-                if (GetGOInfo()->trap.invisible) // invisible traps
+            }
+            //[[fallthrough]]
+            default:
+            {
+                if (GetVisibilityData().GetInvisibilityMask()) // invisible gos
                     if (u->GetVisibilityData().CanDetectInvisibilityOf(this))
                         return true;
 
-                if (GetGOInfo()->trap.stealthed) // stealthed traps
+                if (GetVisibilityData().GetStealthMask()) // stealthed gos
                 {
                     float visibleDistance = GetVisibilityData().GetStealthVisibilityDistance(u);
                     // recheck new distance
@@ -1027,7 +1030,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                         return true;
                 }
 
-                if (trapNotVisible)
+                if (goNotVisible)
                     return false;
 
                 break;
