@@ -289,7 +289,7 @@ struct boss_archimondeAI : public CombatAI
                         ResetCombatAction(action, GetSubsequentActionTimer(action));
                 return;
 			case ARCHIMONDE_ACTION_AIR_BURST:
-				if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
+				if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
 				{
 					if (DoCastSpellIfCan(target, SPELL_AIR_BURST) == CAST_OK)
 					{
