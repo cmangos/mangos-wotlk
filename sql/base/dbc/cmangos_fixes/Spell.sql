@@ -26,22 +26,7 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`
 ('45166','0','0','0','0','0','101','21','6','1','0','0','56','25127','0','0','1','Model - Shattered Sun Warrior - Draenei Female Tier 4'),
 ('45170','0','0','0','0','0','101','21','6','1','0','0','56','25131','0','0','1','Model - Shattered Sun Warrior - Draenei Male Tier 4'),
 ('50574','256','0','0','0','0','101','0','90','25','0','11','0','28042','0','0','1','Captain Brandon Kill Credit'),
-('58630','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Mal''Ganis'),
-('59046','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Tribunal of Ages'),
-('59450','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - The Four Horsemen'),
-('62388','0','0','0','0','0','101','21','6','1','0','0','4','0','0','0','1','Aura required for Demonic Circle 48020'),
-('64899','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Hodir'),
-('64985','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Thorim'),
-('65074','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Freya'),
-('65195','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Assembly of Iron'),
-('68184','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Faction Champions'),
-('68523','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Trial of the Crusader - Not One, But Two Jormungars'),
-('68572','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Grand Champions'),
-('68574','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Confessor Paletress'),
-('68575','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Eadric the Pure'),
-('68620','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Trial of the Crusader - Resilience Will Fix It'),
-('72827','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Icecrown Citadel - Full House'),
-('72845','8388992','0','5','0','0','101','37','6','22','7','28','4','0','0','0','1','Achievement check - Pit of Saron - Don''t Look Up');
+('62388','0','0','0','0','0','101','21','6','1','0','0','4','0','0','0','1','Aura required for Demonic Circle 48020');
 
 -- prince malchezaar spell fixes
 UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id` IN(30854,30898,39095);
@@ -1839,16 +1824,38 @@ INSERT INTO `spell_template` (`Id`, `SchoolMask`, `Category`, `Dispel`, `Mechani
 -- WOTLK section
 -- ============================================================
 -- Removes aura interrupt flag 0x00001000-AURA_INTERRUPT_FLAG_MELEE_ATTACK - Player should be able to use male during fight with 3 mobs
-UPDATE `spell_template` SET `AuraInterruptFlags`=AuraInterruptFlags&~0x00001000 WHERE `Id` IN (48761,48763);
+UPDATE spell_template SET AuraInterruptFlags = AuraInterruptFlags&~0x00001000 WHERE Id IN (48761,48763);
 
+-- Onslaught Deckhand: Water Bucket: should only hit one target - verified by video and sniff
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 48490;
 -- Ruby Arrow - should only hit one target - verified by video and sniff
-UPDATE spell_template SET MaxAffectedTargets= 1 WHERE id = 49197;
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 49197;
 
 -- spells that have caster in the middle of terrain - LOS attribute
 UPDATE spell_template SET AttributesEx2 = AttributesEx2|4 WHERE id IN (54612, 54613);
 
 -- missing quest spell
 INSERT INTO `spell_template` (`Id`, `Category`, `Dispel`, `Mechanic`, `Attributes`, `AttributesEx`, `AttributesEx2`, `AttributesEx3`, `AttributesEx4`, `AttributesEx5`, `AttributesEx6`, `AttributesEx7`, `Stances`, `Stances2`, `StancesNot`, `StancesNot2`, `Targets`, `TargetCreatureType`, `RequiresSpellFocus`, `FacingCasterFlags`, `CasterAuraState`, `TargetAuraState`, `CasterAuraStateNot`, `TargetAuraStateNot`, `CasterAuraSpell`, `TargetAuraSpell`, `ExcludeCasterAuraSpell`, `ExcludeTargetAuraSpell`, `CastingTimeIndex`, `RecoveryTime`, `CategoryRecoveryTime`, `InterruptFlags`, `AuraInterruptFlags`, `ChannelInterruptFlags`, `ProcFlags`, `ProcChance`, `ProcCharges`, `MaxLevel`, `BaseLevel`, `SpellLevel`, `DurationIndex`, `PowerType`, `ManaCost`, `ManaCostPerlevel`, `ManaPerSecond`, `ManaPerSecondPerLevel`, `RangeIndex`, `Speed`, `ModalNextSpell`, `StackAmount`, `Totem1`, `Totem2`, `Reagent1`, `Reagent2`, `Reagent3`, `Reagent4`, `Reagent5`, `Reagent6`, `Reagent7`, `Reagent8`, `ReagentCount1`, `ReagentCount2`, `ReagentCount3`, `ReagentCount4`, `ReagentCount5`, `ReagentCount6`, `ReagentCount7`, `ReagentCount8`, `EquippedItemClass`, `EquippedItemSubClassMask`, `EquippedItemInventoryTypeMask`, `Effect1`, `Effect2`, `Effect3`, `EffectDieSides1`, `EffectDieSides2`, `EffectDieSides3`, `EffectRealPointsPerLevel1`, `EffectRealPointsPerLevel2`, `EffectRealPointsPerLevel3`, `EffectBaseDice1`, `EffectBaseDice2`, `EffectBaseDice3`, `EffectMechanic1`, `EffectMechanic2`, `EffectMechanic3`, `EffectImplicitTargetA1`, `EffectImplicitTargetA2`, `EffectImplicitTargetA3`, `EffectImplicitTargetB1`, `EffectImplicitTargetB2`, `EffectImplicitTargetB3`, `EffectRadiusIndex1`, `EffectRadiusIndex2`, `EffectRadiusIndex3`, `EffectApplyAuraName1`, `EffectApplyAuraName2`, `EffectApplyAuraName3`, `EffectAmplitude1`, `EffectAmplitude2`, `EffectAmplitude3`, `EffectMultipleValue1`, `EffectMultipleValue2`, `EffectMultipleValue3`, `EffectChainTarget1`, `EffectChainTarget2`, `EffectChainTarget3`, `EffectItemType1`, `EffectItemType2`, `EffectItemType3`, `EffectMiscValue1`, `EffectMiscValue2`, `EffectMiscValue3`, `EffectMiscValueB1`, `EffectMiscValueB2`, `EffectMiscValueB3`, `EffectTriggerSpell1`, `EffectTriggerSpell2`, `EffectTriggerSpell3`, `EffectPointsPerComboPoint1`, `EffectPointsPerComboPoint2`, `EffectPointsPerComboPoint3`, `EffectSpellClassMask1_1`, `EffectSpellClassMask1_2`, `EffectSpellClassMask1_3`, `EffectSpellClassMask2_1`, `EffectSpellClassMask2_2`, `EffectSpellClassMask2_3`, `EffectSpellClassMask3_1`, `EffectSpellClassMask3_2`, `EffectSpellClassMask3_3`, `SpellVisual`, `SpellVisual2`, `SpellIconID`, `ActiveIconID`, `SpellPriority`, `SpellName`, `SpellName2`, `SpellName3`, `SpellName4`, `SpellName5`, `SpellName6`, `SpellName7`, `SpellName8`, `SpellName9`, `SpellName10`, `SpellName11`, `SpellName12`, `SpellName13`, `SpellName14`, `SpellName15`, `SpellName16`, `Rank1`, `Rank2`, `Rank3`, `Rank4`, `Rank5`, `Rank6`, `Rank7`, `Rank8`, `Rank9`, `Rank10`, `Rank11`, `Rank12`, `Rank13`, `Rank14`, `Rank15`, `Rank16`, `ManaCostPercentage`, `StartRecoveryCategory`, `StartRecoveryTime`, `MaxTargetLevel`, `SpellFamilyName`, `SpellFamilyFlags`, `SpellFamilyFlags2`, `MaxAffectedTargets`, `DmgClass`, `PreventionType`, `StanceBarOrder`, `DmgMultiplier1`, `DmgMultiplier2`, `DmgMultiplier3`, `MinFactionId`, `MinReputation`, `RequiredAuraVision`, `TotemCategory1`, `TotemCategory2`, `AreaId`, `SchoolMask`, `RuneCostID`, `SpellMissileID`, `PowerDisplayId`, `EffectBonusCoefficient1`, `EffectBonusCoefficient2`, `EffectBonusCoefficient3`, `SpellDescriptionVariableID`, `SpellDifficultyId`, `IsServerSide`, `AttributesServerside`) VALUES
-(41935,0,0,0,8388864,0,1,269484032,0,8,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,101,0,0,0,0,21,0,0,0,0,0,1,0,0,4,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,6,0,0,1,0,0,0,0,0,-26,0,0,0,0,0,1,0,0,0,0,0,0,0,0,61,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,'Shrink','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','',0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,1,0);
+('41935','0','0','0','8388864','0','1','269484032','0','8','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1','0','0','0','0','0','0','101','0','0','0','0','21','0','0','0','0','0','1','0','0','4','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','-1','0','0','6','0','0','1','0','0','0','0','0','-26','0','0','0','0','0','1','0','0','0','0','0','0','0','0','61','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1','0','0','Shrink','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','0','0','0','0','0','0','0','0','0','0','0','1','1','1','0','0','0','0','0','0','1','0','0','0','0','0','0','0','0','1','0'),
+('48526','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1','0','0','0','0','0','0','101','0','0','0','0','31','0','0','0','0','0','6','10','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','-1','0','0','6','0','0','0','0','0','0','0','0','0','0','0','0','0','0','38','0','0','0','0','0','0','0','0','4','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','10786','0','1','0','0','Sinner\'s Folly Fire Bunny: Fire Aura Dummy','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','','0','0','0','0','0','0','0','0','0','0','0','1','1','1','0','0','0','0','0','0','1','0','0','0','0','0','0','0','0','1','0');
 
-
+-- ============================================================
+-- Missing WotLK Achievement Spells
+-- ============================================================
+-- Instance and Raid achievement spells
+INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`AttributesEx5`,`AttributesEx6`,`DurationIndex`,`Effect1`,`EffectImplicitTargetA1`,`EffectImplicitTargetB1`,`EffectRadiusIndex1`,`EffectApplyAuraName1`,`IsServerSide`,`SpellName`) VALUES
+('58630','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Mal''Ganis'),
+('59046','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Tribunal of Ages'),
+('59450','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - The Four Horsemen'),
+('64899','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Hodir'),
+('64985','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Thorim'),
+('65074','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Freya'),
+('65195','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Assembly of Iron'),
+('68184','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Faction Champions'),
+('68523','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Trial of the Crusader - Not One, But Two Jormungars'),
+('68572','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Grand Champions'),
+('68574','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Confessor Paletress'),
+('68575','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Eadric the Pure'),
+('68620','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Trial of the Crusader - Resilience Will Fix It'),
+('72827','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Icecrown Citadel - Full House'),
+('72845','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Pit of Saron - Don''t Look Up');
