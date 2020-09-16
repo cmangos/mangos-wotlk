@@ -808,10 +808,10 @@ enum MangosStrings
     LANG_BATTLEGROUND_ONLY_HORDE_USE    = 753,              // "Only The Horde can use that portal"
 
     LANG_BG_IC_NODE_REFINERY            = 754,
-    LANG_BG_IC_NODE_QUARRY              = 756,
-    LANG_BG_IC_NODE_HANGAR              = 757,
-    LANG_BG_IC_NODE_ASSAULTED           = 758,
-    LANG_BG_IC_NODE_DEFENDED            = 759,
+    LANG_BG_IC_NODE_QUARRY              = 755,
+    LANG_BG_IC_NODE_HANGAR              = 756,
+    LANG_BG_IC_NODE_ASSAULTED           = 757,
+    LANG_BG_IC_NODE_DEFENDED            = 758,
 
     LANG_BG_AV_TOWER_TAKEN              = 759,
     LANG_BG_AV_TOWER_ASSAULTED          = 760,
