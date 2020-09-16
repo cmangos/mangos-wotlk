@@ -32,7 +32,7 @@ constexpr float VisibilityDistances[AsUnderlyingType(VisibilityDistanceType::Max
     MAX_VISIBILITY_DISTANCE
 };
 
-VisibilityData::VisibilityData(WorldObject* owner) : m_visibilityDistanceOverride(0.f), m_invisibilityMask(0), m_detectInvisibilityMask(0), m_owner(owner)
+VisibilityData::VisibilityData(WorldObject* owner) : m_visibilityDistanceOverride(0.f), m_invisibilityMask(0), m_detectInvisibilityMask(0), m_stealthMask(0), m_owner(owner)
 {
     memset(m_invisibilityValues, 0, sizeof(m_invisibilityValues));
     memset(m_invisibilityDetectValues, 0, sizeof(m_invisibilityDetectValues));
