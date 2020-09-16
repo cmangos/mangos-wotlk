@@ -5111,11 +5111,15 @@ void Spell::EffectForceCast(SpellEffectIndex eff_idx)
             m_caster->RemoveAurasDueToSpell(basePoints);
     }
 
+    Unit* target = unitTarget;
+    if (spellInfo->EffectImplicitTargetA[0] == TARGET_UNIT_CASTER_VEHICLE)
+        target = nullptr;
+
     // spell effect 141 needs to be cast as custom with basePoints
     if (m_spellInfo->Effect[eff_idx] == SPELL_EFFECT_FORCE_CAST_WITH_VALUE)
-        unitTarget->CastCustomSpell(unitTarget, spellInfo, &basePoints, &basePoints, &basePoints, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), m_spellInfo);
+        unitTarget->CastCustomSpell(target, spellInfo, &basePoints, &basePoints, &basePoints, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), m_spellInfo);
     else
-        unitTarget->CastSpell(unitTarget, spellInfo, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), m_spellInfo);
+        unitTarget->CastSpell(target, spellInfo, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), m_spellInfo);
 }
 
 void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
