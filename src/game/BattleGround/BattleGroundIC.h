@@ -360,15 +360,6 @@ enum IsleObjective
 // *** Default world states *** //
 const uint32 iocDefaultStates[BG_IC_MAX_OBJECTIVES] = { BG_IC_STATE_ALLY_KEEP_CONTROLLED_A, BG_IC_STATE_HORDE_KEEP_CONTROLLED_H, BG_IC_STATE_WORKSHOP_UNCONTROLLED, BG_IC_STATE_DOCKS_UNCONTROLLED, BG_IC_STATE_HANGAR_UNCONTROLLED, BG_IC_STATE_REFINERY_UNCONTROLLED, BG_IC_STATE_QUARRY_UNCONTROLLED};
 
-enum IsleObjectiveStatus
-{
-    BG_IC_OBJECTIVE_NEUTRAL,
-    BG_IC_OBJECTIVE_CONTESTED_A,
-    BG_IC_OBJECTIVE_CONTESTED_H,
-    BG_IC_OBJECTIVE_OCCUPIED_A,
-    BG_IC_OBJECTIVE_OCCUPIED_H
-};
-
 struct IsleGameObjectNeutralTeamData
 {
     uint32 objectEntry;
@@ -570,11 +561,11 @@ class BattleGroundIC : public BattleGround
 
     private:
 
-        void DoCaptureObjective(IsleObjective m_objective);
-        void DoResetObjective(IsleObjective m_objective);
+        void DoCaptureObjective(IsleObjective objective);
+        void DoResetObjective(IsleObjective objective);
 
         PvpTeamIndex m_objectiveOwner[BG_IC_MAX_OBJECTIVES];
-        IsleObjectiveStatus m_objectiveStatus[BG_IC_MAX_OBJECTIVES];
+        PvpTeamIndex m_objectiveConquerer[BG_IC_MAX_OBJECTIVES];
 
         uint32 m_objectiveState[BG_IC_MAX_OBJECTIVES];
         uint32 m_gatesAllianceState[BG_IC_MAX_KEEP_GATES];

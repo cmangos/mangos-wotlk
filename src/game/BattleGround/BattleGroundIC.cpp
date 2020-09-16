@@ -43,24 +43,23 @@ void BattleGroundIC::Reset()
     // setup the owner and state for all objectives
     for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
     {
+        switch (i)
+        {
+            case BG_IC_OBJECTIVE_KEEP_ALLY:
+                m_objectiveOwner[i]  = TEAM_INDEX_ALLIANCE;
+                m_objectiveConquerer[i] = TEAM_INDEX_ALLIANCE;
+                break;
+            case BG_IC_OBJECTIVE_KEEP_HORDE:
+                m_objectiveOwner[i] = TEAM_INDEX_HORDE;
+                m_objectiveConquerer[i] = TEAM_INDEX_HORDE;
+                break;
+            default:
+                m_objectiveOwner[i] = TEAM_INDEX_NEUTRAL;
+                break;
+        }
+
+        m_objectiveConquerer[i] = TEAM_INDEX_NEUTRAL;
         m_objectiveState[i] = iocDefaultStates[i];
-
-        if (i == BG_IC_OBJECTIVE_KEEP_ALLY)
-        {
-            m_objectiveOwner[i] = TEAM_INDEX_ALLIANCE;
-            m_objectiveStatus[i] = BG_IC_OBJECTIVE_OCCUPIED_A;
-        }
-        else if (i == BG_IC_OBJECTIVE_KEEP_HORDE)
-        {
-            m_objectiveOwner[i] = TEAM_INDEX_HORDE;
-            m_objectiveStatus[i] = BG_IC_OBJECTIVE_OCCUPIED_H;
-        }
-        else
-        {
-            m_objectiveOwner[i] = TEAM_INDEX_NEUTRAL;
-            m_objectiveStatus[i] = BG_IC_OBJECTIVE_NEUTRAL;
-        }
-
         m_objectiveTimer[i] = 0;
     }
 
@@ -76,8 +75,12 @@ void BattleGroundIC::Reset()
     m_isKeepInvaded[TEAM_INDEX_HORDE] = false;
 
     // setup initial graveyards
-    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_ALLIANCE, BG_IC_ZONE_ID_ISLE, ALLIANCE);
     sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_KEEP_ALLY, BG_IC_ZONE_ID_ISLE, ALLIANCE);
+    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_KEEP_HORDE, BG_IC_ZONE_ID_ISLE, HORDE);
+
+    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_DOCKS, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
+    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_HANGAR, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
+    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_WORKSHOP, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
 }
 
 void BattleGroundIC::AddPlayer(Player* plr)
@@ -237,13 +240,11 @@ void BattleGroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* go)
     DEBUG_LOG("BattleGroundIC: Handle flag clicked for gameobject entry %u.", go->GetEntry());
 
     PvpTeamIndex newOwnerIdx = GetTeamIndexByTeamId(player->GetTeam());
-    bool bProcessEvent      = false;
     uint8 objectiveId       = 0;
     uint32 newWorldState    = 0;
     uint32 soundId          = 0;
     uint32 nextFlagEntry    = 0;
     int32 textEntry         = 0;
-    IsleObjectiveStatus status = BG_IC_OBJECTIVE_NEUTRAL;
 
     // *** Check if status changed from neutral to contested ***
     for (const auto& i : isleGameObjectNeutralData)
@@ -255,16 +256,15 @@ void BattleGroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* go)
             objectiveId = i.objectiveId;
             newWorldState = newOwnerIdx == TEAM_INDEX_ALLIANCE ? i.nextWorldStateAlly : i.nextWorldStateHorde;
 
-            textEntry = LANG_BG_AB_NODE_ASSAULTED;
+            textEntry = LANG_BG_IC_NODE_ASSAULTED;
             soundId = newOwnerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_SOUND_NODE_ASSAULTED_ALLIANCE : BG_IC_SOUND_NODE_ASSAULTED_HORDE;
 
             nextFlagEntry = newOwnerIdx == TEAM_INDEX_ALLIANCE ? i.nextObjectAlly : i.nextObjectHorde;
-            bProcessEvent = true;
             break;
         }
     }
 
-    if (!bProcessEvent)
+    if (!objectiveId)
     {
         // *** Check if status changed from owned to contested ***
         for (const auto& i : isleGameObjectOwnedData)
@@ -276,41 +276,42 @@ void BattleGroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* go)
                 objectiveId = i.objectiveId;
                 newWorldState = i.nextState;
 
-                textEntry = LANG_BG_AB_NODE_ASSAULTED;
+                textEntry = LANG_BG_IC_NODE_ASSAULTED;
                 soundId = newOwnerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_SOUND_NODE_ASSAULTED_ALLIANCE : BG_IC_SOUND_NODE_ASSAULTED_HORDE;
 
-                nextFlagEntry = i.objectEntry;
-                bProcessEvent = true;
+                nextFlagEntry = i.nextObject;
+
+                // reset the objective
+                DoResetObjective(IsleObjective(objectiveId));
                 break;
             }
         }
     }
 
-    if (!bProcessEvent)
+    if (!objectiveId)
     {
         // *** Check if status changed from contested to owned / contested ***
         for (const auto& i : isleGameObjectContestedData)
         {
             if (go->GetEntry() == i.objectEntry)
             {
-                // ToDo:
-                /*UpdatePlayerScore(player, SCORE_BASES_DEFENDED, 1);
-
                 objectiveId = i.objectiveId;
-                newWorldState = i.nextState;
 
-                textEntry = LANG_BG_AB_NODE_DEFENDED;
+                UpdatePlayerScore(player, m_objectiveConquerer[objectiveId] == newOwnerIdx ? SCORE_BASES_DEFENDED : SCORE_BASES_ASSAULTED, 1);
+
+                newWorldState = m_objectiveConquerer[objectiveId] == newOwnerIdx ? i.nextStateDefend : i.nextStateAssault;
+
+                textEntry = m_objectiveConquerer[objectiveId] == newOwnerIdx ? LANG_BG_IC_NODE_DEFENDED : LANG_BG_IC_NODE_ASSAULTED;
                 soundId = newOwnerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_SOUND_NODE_ASSAULTED_ALLIANCE : BG_IC_SOUND_NODE_ASSAULTED_HORDE;
 
-                nextFlagEntry = i.objectEntry;
-                bProcessEvent = true;*/
+                nextFlagEntry = m_objectiveConquerer[objectiveId] == newOwnerIdx ? i.nextObjectDefend : i.nextObjectDefend;
                 break;
             }
         }
     }
 
     // only process the event if needed
-    if (bProcessEvent)
+    if (objectiveId)
     {
         m_objectiveOwner[objectiveId] = newOwnerIdx;
 
@@ -321,13 +322,12 @@ void BattleGroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* go)
 
         // start timer
         m_objectiveTimer[objectiveId] = BG_IC_FLAG_CAPTURING_TIME;
-        m_objectiveStatus[objectiveId] = status;
 
         // send the zone message and sound
         ChatMsg chatSystem = newOwnerIdx == TEAM_INDEX_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE;
         uint32 factionStrig = newOwnerIdx == TEAM_INDEX_ALLIANCE ? LANG_BG_ALLY : LANG_BG_HORDE;
 
-        SendMessage2ToAll(LANG_BG_AB_NODE_ASSAULTED, chatSystem, player, isleObjectiveData[objectiveId].message, factionStrig);
+        SendMessage2ToAll(textEntry, chatSystem, player, isleObjectiveData[objectiveId].message, factionStrig);
         PlaySoundToAll(soundId);
 
         // despawn the current flag
@@ -362,7 +362,7 @@ void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
         case BG_IC_VEHICLE_DEMOLISHER:
         {
             PvpTeamIndex ownerTeam = creature->getFaction() == BG_IC_FACTION_ID_ALLIANCE ? TEAM_INDEX_ALLIANCE : TEAM_INDEX_HORDE;
-            m_workshopSpawnsGuids[ownerTeam].push_back(creature->GetObjectGuid());
+            m_workshopSpawnsGuids[ownerTeam].remove(creature->GetObjectGuid());
             break;
         }
         case BG_IC_VEHICLE_SIEGE_ENGINE_A:
@@ -576,9 +576,9 @@ bool BattleGroundIC::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
 }
 
 // Function that handles the completion of objective
-void BattleGroundIC::DoCaptureObjective(IsleObjective m_objective)
+void BattleGroundIC::DoCaptureObjective(IsleObjective objective)
 {
-    GameObject* pOriginalFlag = GetBgMap()->GetGameObject(m_currentFlagGuid[m_objective]);
+    GameObject* pOriginalFlag = GetBgMap()->GetGameObject(m_currentFlagGuid[objective]);
     if (!pOriginalFlag)
         return;
 
@@ -587,18 +587,20 @@ void BattleGroundIC::DoCaptureObjective(IsleObjective m_objective)
     {
         if (pOriginalFlag->GetEntry() == i.objectEntry)
         {
-            PvpTeamIndex ownerIdx = m_objectiveOwner[i.objectiveId];
+            uint8 objId = i.objectiveId;
+            PvpTeamIndex ownerIdx = m_objectiveOwner[objId];
+            m_objectiveConquerer[objId] = ownerIdx;
 
             // update world states
-            UpdateWorldState(m_objectiveState[i.objectiveId], 0);
-            m_objectiveState[i.objectiveId] = i.nextState;
-            UpdateWorldState(m_objectiveState[i.objectiveId], 1);
+            UpdateWorldState(m_objectiveState[objId], 0);
+            m_objectiveState[objId] = i.nextState;
+            UpdateWorldState(m_objectiveState[objId], 1);
 
             ChatMsg chatSystem = ownerIdx == TEAM_INDEX_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE;
             uint32 factionStrig = ownerIdx == TEAM_INDEX_ALLIANCE ? LANG_BG_ALLY : LANG_BG_HORDE;
 
             // send zone message; the AB string is the same for IC
-            SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, chatSystem, nullptr, factionStrig, isleObjectiveData[i.objectiveId].message);
+            SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, chatSystem, nullptr, factionStrig, isleObjectiveData[objId].message);
 
             // play sound is
             uint32 soundId = ownerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_SOUND_NODE_CAPTURED_ALLIANCE : BG_IC_SOUND_NODE_CAPTURED_HORDE;
@@ -610,23 +612,24 @@ void BattleGroundIC::DoCaptureObjective(IsleObjective m_objective)
             // respawn the new flag
             if (GameObject* pFlag = GetSingleGameObjectFromStorage(i.nextObject))
             {
-                m_currentFlagGuid[i.objectiveId] = pFlag->GetObjectGuid();
+                m_currentFlagGuid[objId] = pFlag->GetObjectGuid();
                 pFlag->SetRespawnTime(60 * MINUTE);
                 pFlag->Refresh();
             }
 
             // if spell is provided, apply spell
-            uint32 spellId = isleObjectiveData[i.objectiveId].spellEntry;
+            // ToDo: apply aura on owned vehicles as well
+            uint32 spellId = isleObjectiveData[objId].spellEntry;
             if (spellId)
                 CastSpellOnTeam(spellId, GetTeamIdByTeamIndex(ownerIdx));
 
             // if graveyard is provided, link the graveyard
-            uint32 graveyardId = isleObjectiveData[i.objectiveId].graveyardId;
+            uint32 graveyardId = isleObjectiveData[objId].graveyardId;
             if (graveyardId)
                 sObjectMgr.SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, GetTeamIdByTeamIndex(ownerIdx));
 
             // spawn the vehicles / enable the gunship
-            switch (i.objectiveId)
+            switch (objId)
             {
                 case BG_IC_OBJECTIVE_WORKSHOP:
                 {
@@ -687,9 +690,84 @@ void BattleGroundIC::DoCaptureObjective(IsleObjective m_objective)
 }
 
 // Function that handles the reset of objective
-void BattleGroundIC::DoResetObjective(IsleObjective m_objective)
+void BattleGroundIC::DoResetObjective(IsleObjective objective)
 {
+    PvpTeamIndex ownerIdx = m_objectiveOwner[objective];
 
+    switch (objective)
+    {
+        case BG_IC_OBJECTIVE_WORKSHOP:
+        {
+            // despwn bombs
+            for (const auto& guid : m_bombsGuids)
+            {
+                if (GameObject* pBomb = GetBgMap()->GetGameObject(guid))
+                    pBomb->SetLootState(GO_JUST_DEACTIVATED);
+            }
+
+            // despwn the vehicles if not already in use
+            for (const auto& guid : m_workshopSpawnsGuids[ownerIdx])
+            {
+                if (Creature* pCreature = GetBgMap()->GetCreature(guid))
+                {
+                    if (!pCreature->IsVehicle() || (pCreature->IsVehicle() && !pCreature->IsBoarded()))
+                        pCreature->ForcedDespawn();
+                }
+            }
+
+            m_workshopSpawnsGuids[ownerIdx].clear();
+            break;
+        }
+        case BG_IC_OBJECTIVE_DOCKS:
+        {
+            // despwn the vehicles if not already in use
+            for (const auto& guid : m_docksSpawnsGuids[ownerIdx])
+            {
+                if (Creature* pVehicle = GetBgMap()->GetCreature(guid))
+                {
+                    if (!pVehicle->IsBoarded())
+                        pVehicle->ForcedDespawn();
+                }
+            }
+
+            m_docksSpawnsGuids[ownerIdx].clear();
+            break;
+        }
+        case BG_IC_OBJECTIVE_HANGAR:
+        {
+            // reset the animations and depswn the portals
+            for (const auto& guid : m_hangarPortalsGuids[ownerIdx])
+            {
+                if (GameObject* pPortal = GetBgMap()->GetGameObject(guid))
+                    pPortal->SetLootState(GO_JUST_DEACTIVATED);
+            }
+
+            for (const auto& guid : m_hangarAnimGuids[ownerIdx])
+            {
+                if (GameObject* pAnim = GetBgMap()->GetGameObject(guid))
+                {
+                    pAnim->ResetDoorOrButton();
+                    pAnim->SetLootState(GO_JUST_DEACTIVATED);
+                }
+            }
+            break;
+        }
+        case BG_IC_OBJECTIVE_REFINERY:
+        case BG_IC_OBJECTIVE_QUARY:
+        {
+            // remove spell aura
+            // ToDo: remove vehicle auras
+            for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+            {
+                if (Player* plr = sObjectMgr.GetPlayer(itr->first))
+                {
+                    if (plr->GetTeam() == GetTeamIdByTeamIndex(ownerIdx))
+                        plr->RemoveAurasDueToSpell(isleObjectiveData[objective].spellEntry);
+                }
+            }
+            break;
+        }
+    }
 }
 
 void BattleGroundIC::Update(uint32 diff)
