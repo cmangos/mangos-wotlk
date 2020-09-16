@@ -5274,6 +5274,14 @@ SpellCastResult Spell::CheckCast(bool strict)
         uint32 targetType = m_spellInfo->EffectImplicitTargetA[i];
         switch (targetType)
         {
+            case TARGET_UNIT_CASTER_PASSENGER_0:
+            case TARGET_UNIT_CASTER_PASSENGER_1:
+            case TARGET_UNIT_CASTER_PASSENGER_2:
+            case TARGET_UNIT_CASTER_PASSENGER_3:
+            case TARGET_UNIT_CASTER_PASSENGER_4:
+            case TARGET_UNIT_CASTER_PASSENGER_5:
+            case TARGET_UNIT_CASTER_PASSENGER_6:
+            case TARGET_UNIT_CASTER_PASSENGER_7:
             case TARGET_UNIT_CASTER_MASTER:
             case TARGET_UNIT_CASTER: break; // never check anything
             case TARGET_UNIT_CASTER_PET: // special pet checks
