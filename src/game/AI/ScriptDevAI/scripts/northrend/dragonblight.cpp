@@ -199,32 +199,6 @@ bool NpcSpellClick_npc_crystalline_ice_giant(Player* pPlayer, Creature* pClicked
 }
 
 /*######
-## go_portal_to_orgrimmar
-######*/
-
-struct go_portal_to_orgrimmar : public GameObjectAI
-{
-    go_portal_to_orgrimmar(GameObject* go) : GameObjectAI(go)
-    {
-        go->GetVisibilityData().SetInvisibilityMask(7, true);
-        go->GetVisibilityData().AddInvisibilityValue(7, 1000);
-    }
-};
-
-/*######
-## go_portal_to_undercity
-######*/
-
-struct go_portal_to_undercity : public GameObjectAI
-{
-    go_portal_to_undercity(GameObject* go) : GameObjectAI(go)
-    {
-        go->GetVisibilityData().SetInvisibilityMask(10, true);
-        go->GetVisibilityData().AddInvisibilityValue(10, 1000);
-    }
-};
-
-/*######
 ## spell_taunka_face_me
 ######*/
 
@@ -286,16 +260,6 @@ void AddSC_dragonblight()
     pNewScript = new Script;
     pNewScript->Name = "npc_crystalline_ice_giant";
     pNewScript->pNpcSpellClick = &NpcSpellClick_npc_crystalline_ice_giant;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "go_portal_to_orgrimmar";
-    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_portal_to_orgrimmar>;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "go_portal_to_undercity";
-    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_portal_to_undercity>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<TaunkaFaceMeSpellScript>("spell_taunka_face_me");

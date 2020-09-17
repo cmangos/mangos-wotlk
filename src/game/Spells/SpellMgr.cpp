@@ -1859,6 +1859,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
                             (spellInfo_2->Id == 52950 && spellInfo_1->Id == 52707))
                         return false;
 
+                    // Post-Wrath Gate Invisibility Detect and WGA Detect Invis
+                    if ((spellInfo_1->Id == 58918 && spellInfo_2->Id == 60877) ||
+                        (spellInfo_2->Id == 60877 && spellInfo_1->Id == 58918))
+                        return false;
+
                     // Regular and Night Elf Ghost
                     if ((spellInfo_1->Id == 8326 && spellInfo_2->Id == 20584) ||
                             (spellInfo_2->Id == 8326 && spellInfo_1->Id == 20584))

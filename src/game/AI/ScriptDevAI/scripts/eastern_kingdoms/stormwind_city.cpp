@@ -1068,6 +1068,32 @@ bool GossipSelect_npc_reginald_windsor(Player* player, Creature* creature, uint3
     return true;
 }
 
+/*######
+## go_portal_to_orgrimmar
+######*/
+
+struct go_portal_to_orgrimmar : public GameObjectAI
+{
+    go_portal_to_orgrimmar(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(7, true);
+        go->GetVisibilityData().AddInvisibilityValue(7, 1000);
+    }
+};
+
+/*######
+## go_portal_to_undercity
+######*/
+
+struct go_portal_to_undercity : public GameObjectAI
+{
+    go_portal_to_undercity(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(1, true);
+        go->GetVisibilityData().AddInvisibilityValue(1, 1000);
+    }
+};
+
 void AddSC_stormwind_city()
 {
     Script* pNewScript = new Script;
@@ -1101,5 +1127,15 @@ void AddSC_stormwind_city()
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_reginald_windsor;
     pNewScript->pGossipHello = &GossipHello_npc_reginald_windsor;
     pNewScript->pGossipSelect = &GossipSelect_npc_reginald_windsor;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_portal_to_orgrimmar";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_portal_to_orgrimmar>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_portal_to_undercity";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_portal_to_undercity>;
     pNewScript->RegisterSelf();
 }
