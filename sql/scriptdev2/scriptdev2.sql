@@ -725,6 +725,8 @@ INSERT INTO scripted_event_id VALUES
 /* DRAGONBLIGHT */
 UPDATE creature_template SET ScriptName='npc_destructive_ward' WHERE entry=27430;
 UPDATE creature_template SET ScriptName='npc_crystalline_ice_giant' WHERE entry=26809;
+UPDATE gameobject_template SET ScriptName='go_portal_to_orgrimmar' WHERE entry=193948;
+UPDATE gameobject_template SET ScriptName='go_portal_to_undercity' WHERE entry=193955;
 
 /* DRAK'THARON KEEP */
 UPDATE creature_template SET ScriptName='boss_novos' WHERE entry=26631;
