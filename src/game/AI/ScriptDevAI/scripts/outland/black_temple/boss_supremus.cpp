@@ -361,12 +361,12 @@ struct SupremusRandomTarget : public AuraScript
     void OnApply(Aura* aura, bool apply) const override
     {
         Unit* caster = aura->GetCaster();
-        if (!caster)
+        if (!caster || !caster->AI())
             return;
         if (apply)
         {
             caster->FixateTarget(aura->GetTarget());
-            caster->SetTarget(aura->GetTarget()); // visual change for immediate crosshair update - only safe with fixate
+            caster->AI()->AttackStart(aura->GetTarget()); // visual change for immediate crosshair update - only safe with fixate
             caster->CastSpell(aura->GetTarget(), SPELL_CHARGE, TRIGGERED_OLD_TRIGGERED);
         }
         else
