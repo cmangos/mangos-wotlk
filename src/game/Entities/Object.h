@@ -746,6 +746,13 @@ MovementFlags const movementFlagsMask = MovementFlags(
         MOVEFLAG_FLYING  | MOVEFLAG_SPLINE_ELEVATION
                                         );
 
+MovementFlags const movementFlagsIgnoreFlyingMask = MovementFlags(
+    MOVEFLAG_FORWARD | MOVEFLAG_BACKWARD | MOVEFLAG_STRAFE_LEFT | MOVEFLAG_STRAFE_RIGHT |
+    MOVEFLAG_PITCH_UP | MOVEFLAG_PITCH_DOWN | MOVEFLAG_FALLING |
+    MOVEFLAG_FALLINGFAR | MOVEFLAG_ASCENDING |
+    MOVEFLAG_SPLINE_ELEVATION
+);
+
 MovementFlags const movementOrTurningFlagsMask = MovementFlags(
             movementFlagsMask | MOVEFLAG_TURN_LEFT | MOVEFLAG_TURN_RIGHT
         );

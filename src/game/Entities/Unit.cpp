@@ -4737,7 +4737,7 @@ void Unit::_UpdateSpells(uint32 time)
 void Unit::_UpdateAutoRepeatSpell()
 {
     // check "real time" interrupts
-    if (IsMoving() || IsNonMeleeSpellCasted(false, false, true))
+    if (IsMovingIgnoreFlying() || IsNonMeleeSpellCasted(false, false, true))
     {
         if (!IsNonMeleeSpellCasted(false, false, true, false, true)) // stricter check to see if we should introduce cooldown or just return
             return;

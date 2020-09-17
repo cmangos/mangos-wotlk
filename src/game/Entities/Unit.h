@@ -1762,6 +1762,7 @@ class Unit : public WorldObject
         void SendMoveRoot(bool state, bool broadcastOnly = false);
 
         bool IsMoving() const { return m_movementInfo.HasMovementFlag(movementFlagsMask); }
+        bool IsMovingIgnoreFlying() const { return m_movementInfo.HasMovementFlag(movementFlagsIgnoreFlyingMask); }
         bool IsMovingForward() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_MASK_MOVING_FORWARD); }
         bool IsLevitating() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING); }
         bool IsWalking() const { return m_movementInfo.HasMovementFlag(MOVEFLAG_WALK_MODE); }
