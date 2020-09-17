@@ -979,7 +979,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
         if (GetGOInfo()->IsServerOnly())
             return false;
 
-        bool goNotVisible = false;
+        bool isEnemyTrap = false;
 
         // special invisibility cases
         switch (GetGOInfo()->type)
@@ -998,7 +998,7 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                         if ((GetMap()->IsBattleGroundOrArena() && ownerPlayer->GetBGTeam() != u->GetBGTeam()) ||
                             (ownerPlayer->IsInDuelWith(u)) ||
                             (!ownerPlayer->IsInGroup(u)))
-                            goNotVisible = true;
+                            isEnemyTrap = true;
                     }
                     else
                     {
@@ -1012,15 +1012,19 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                     if (this->IsFriend(u))
                         return true;
                     else
-                        goNotVisible = true;
+                        isEnemyTrap = true;
                 }
             }
             //[[fallthrough]]
             default:
             {
                 if (GetVisibilityData().GetInvisibilityMask()) // invisible gos
+                {
                     if (u->GetVisibilityData().CanDetectInvisibilityOf(this))
-                        return true;
+                        isEnemyTrap = false; // need to check general distance
+                    else if (GetGOInfo()->type != GAMEOBJECT_TYPE_TRAP)
+                        return false;
+                }
 
                 if (GetVisibilityData().GetStealthMask()) // stealthed gos
                 {
@@ -1028,9 +1032,11 @@ bool GameObject::isVisibleForInState(Player const* u, WorldObject const* viewPoi
                     // recheck new distance
                     if (GetDistance(viewPoint, true, DIST_CALC_NONE) < visibleDistance * visibleDistance && u->HasInArc(this))
                         return true;
+                    else if (GetGOInfo()->type != GAMEOBJECT_TYPE_TRAP)
+                        return false;
                 }
 
-                if (goNotVisible)
+                if (isEnemyTrap)
                     return false;
 
                 break;
