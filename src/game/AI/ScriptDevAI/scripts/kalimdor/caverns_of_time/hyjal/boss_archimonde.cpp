@@ -268,7 +268,7 @@ struct boss_archimondeAI : public CombatAI
 				m_creature->PlayDirectSound(10843);
 				// move at home position and start outro
 				SetCombatScriptStatus(true);
-				m_creature->GetMotionMaster()->MovePoint(POINT_EPILOGUE, outroPoint[0], outroPoint[1], outroPoint[2]);
+				m_creature->GetMotionMaster()->MovePoint(POINT_EPILOGUE, outroPoint[0], outroPoint[1], outroPoint[2], FORCED_MOVEMENT_RUN);
 				SetCombatMovement(false);
 				m_creature->SetActiveObjectState(true);
 				SetMeleeEnabled(false);
