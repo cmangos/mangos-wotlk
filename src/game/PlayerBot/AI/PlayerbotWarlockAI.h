@@ -157,7 +157,7 @@ enum WarlockSpells
 class PlayerbotWarlockAI : PlayerbotClassAI
 {
     public:
-        PlayerbotWarlockAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotWarlockAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotWarlockAI();
 
         // all combat actions go here

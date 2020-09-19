@@ -83,7 +83,7 @@ enum DeathKnightSpells
 class PlayerbotDeathKnightAI : PlayerbotClassAI
 {
     public:
-        PlayerbotDeathKnightAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotDeathKnightAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotDeathKnightAI();
 
         // all combat actions go here

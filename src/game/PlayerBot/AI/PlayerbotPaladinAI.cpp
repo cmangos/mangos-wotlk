@@ -20,7 +20,7 @@
 
 class PlayerbotAI;
 
-PlayerbotPaladinAI::PlayerbotPaladinAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
+PlayerbotPaladinAI::PlayerbotPaladinAI(Player& master, Player& bot, PlayerbotAI& ai) : PlayerbotClassAI(&master, &bot, &ai)
 {
     RETRIBUTION_AURA              = m_ai->initSpell(RETRIBUTION_AURA_1);
     CRUSADER_AURA                 = m_ai->initSpell(CRUSADER_AURA_1);

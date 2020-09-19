@@ -92,7 +92,7 @@ enum MageSpells
 class PlayerbotMageAI : PlayerbotClassAI
 {
     public:
-        PlayerbotMageAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotMageAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotMageAI();
 
         // all combat actions go here

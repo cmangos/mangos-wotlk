@@ -110,7 +110,7 @@ enum DruidSpells
 class PlayerbotDruidAI : PlayerbotClassAI
 {
     public:
-        PlayerbotDruidAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotDruidAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotDruidAI();
 
         // all combat actions go here

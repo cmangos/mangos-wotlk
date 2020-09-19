@@ -20,7 +20,7 @@
 #include "../Base/PlayerbotMgr.h"
 
 class PlayerbotAI;
-PlayerbotRogueAI::PlayerbotRogueAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
+PlayerbotRogueAI::PlayerbotRogueAI(Player& master, Player& bot, PlayerbotAI& ai) : PlayerbotClassAI(&master, &bot, &ai)
 {
     SINISTER_STRIKE          = m_ai->initSpell(SINISTER_STRIKE_1);
     BACKSTAB                 = m_ai->initSpell(BACKSTAB_1);

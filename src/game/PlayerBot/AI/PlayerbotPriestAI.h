@@ -95,7 +95,7 @@ enum PriestSpells
 class PlayerbotPriestAI : PlayerbotClassAI
 {
     public:
-        PlayerbotPriestAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotPriestAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotPriestAI();
 
         // all combat actions go here

@@ -131,7 +131,7 @@ enum
 class PlayerbotShamanAI : PlayerbotClassAI
 {
     public:
-        PlayerbotShamanAI(Player* const master, Player* const bot, PlayerbotAI* const ai);
+        PlayerbotShamanAI(Player& master, Player& bot, PlayerbotAI& ai);
         virtual ~PlayerbotShamanAI();
 
         // all combat actions go here

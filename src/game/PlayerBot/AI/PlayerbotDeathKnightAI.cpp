@@ -20,7 +20,7 @@
 #include "../Base/PlayerbotMgr.h"
 
 class PlayerbotAI;
-PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
+PlayerbotDeathKnightAI::PlayerbotDeathKnightAI(Player& master, Player& bot, PlayerbotAI& ai) : PlayerbotClassAI(&master, &bot, &ai)
 {
 
     PLAGUE_STRIKE     = m_ai->initSpell(PLAGUE_STRIKE_1); // Unholy

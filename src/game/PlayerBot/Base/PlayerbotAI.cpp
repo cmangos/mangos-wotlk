@@ -1406,22 +1406,22 @@ void PlayerbotAI::ReloadAI()
         case CLASS_PRIEST:
             if (m_classAI) delete m_classAI;
             m_combatStyle = COMBAT_RANGED;
-            m_classAI = (PlayerbotClassAI*) new PlayerbotPriestAI(GetMaster(), m_bot, this);
+            m_classAI = (PlayerbotClassAI*) new PlayerbotPriestAI(*GetMaster(), *m_bot, *this);
             break;
         case CLASS_MAGE:
             if (m_classAI) delete m_classAI;
             m_combatStyle = COMBAT_RANGED;
-            m_classAI = (PlayerbotClassAI*) new PlayerbotMageAI(GetMaster(), m_bot, this);
+            m_classAI = (PlayerbotClassAI*) new PlayerbotMageAI(*GetMaster(), *m_bot, *this);
             break;
         case CLASS_WARLOCK:
             if (m_classAI) delete m_classAI;
             m_combatStyle = COMBAT_RANGED;
-            m_classAI = (PlayerbotClassAI*) new PlayerbotWarlockAI(GetMaster(), m_bot, this);
+            m_classAI = (PlayerbotClassAI*) new PlayerbotWarlockAI(*GetMaster(), *m_bot, *this);
             break;
         case CLASS_WARRIOR:
             if (m_classAI) delete m_classAI;
             m_combatStyle = COMBAT_MELEE;
-            m_classAI = (PlayerbotClassAI*) new PlayerbotWarriorAI(GetMaster(), m_bot, this);
+            m_classAI = (PlayerbotClassAI*) new PlayerbotWarriorAI(*GetMaster(), *m_bot, *this);
             break;
         case CLASS_SHAMAN:
             if (m_classAI) delete m_classAI;
@@ -1429,17 +1429,17 @@ void PlayerbotAI::ReloadAI()
                 m_combatStyle = COMBAT_MELEE;
             else
                 m_combatStyle = COMBAT_RANGED;
-            m_classAI = (PlayerbotClassAI*) new PlayerbotShamanAI(GetMaster(), m_bot, this);
+            m_classAI = (PlayerbotClassAI*) new PlayerbotShamanAI(*GetMaster(), *m_bot, *this);
             break;
         case CLASS_PALADIN:
             if (m_classAI) delete m_classAI;
             m_combatStyle = COMBAT_MELEE;
-            m_classAI = (PlayerbotClassAI*) new PlayerbotPaladinAI(GetMaster(), m_bot, this);
+            m_classAI = (PlayerbotClassAI*) new PlayerbotPaladinAI(*GetMaster(), *m_bot, *this);
             break;
         case CLASS_ROGUE:
             if (m_classAI) delete m_classAI;
             m_combatStyle = COMBAT_MELEE;
-            m_classAI = (PlayerbotClassAI*) new PlayerbotRogueAI(GetMaster(), m_bot, this);
+            m_classAI = (PlayerbotClassAI*) new PlayerbotRogueAI(*GetMaster(), *m_bot, *this);
             break;
         case CLASS_DRUID:
             if (m_classAI) delete m_classAI;
@@ -1447,17 +1447,17 @@ void PlayerbotAI::ReloadAI()
                 m_combatStyle = COMBAT_MELEE;
             else
                 m_combatStyle = COMBAT_RANGED;
-            m_classAI = (PlayerbotClassAI*) new PlayerbotDruidAI(GetMaster(), m_bot, this);
+            m_classAI = (PlayerbotClassAI*) new PlayerbotDruidAI(*GetMaster(), *m_bot, *this);
             break;
         case CLASS_HUNTER:
             if (m_classAI) delete m_classAI;
             m_combatStyle = COMBAT_RANGED;
-            m_classAI = (PlayerbotClassAI*) new PlayerbotHunterAI(GetMaster(), m_bot, this);
+            m_classAI = (PlayerbotClassAI*) new PlayerbotHunterAI(*GetMaster(), *m_bot, *this);
             break;
         case CLASS_DEATH_KNIGHT:
             if (m_classAI) delete m_classAI;
             m_combatStyle = COMBAT_MELEE;
-            m_classAI = (PlayerbotClassAI*) new PlayerbotDeathKnightAI(GetMaster(), m_bot, this);
+            m_classAI = (PlayerbotClassAI*) new PlayerbotDeathKnightAI(*GetMaster(), *m_bot, *this);
             break;
     }
 

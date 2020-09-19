@@ -20,7 +20,7 @@
 #include "../Base/PlayerbotMgr.h"
 
 class PlayerbotAI;
-PlayerbotWarriorAI::PlayerbotWarriorAI(Player* const master, Player* const bot, PlayerbotAI* const ai) : PlayerbotClassAI(master, bot, ai)
+PlayerbotWarriorAI::PlayerbotWarriorAI(Player& master, Player& bot, PlayerbotAI& ai) : PlayerbotClassAI(&master, &bot, &ai)
 {
     AUTO_SHOT               = m_ai->initSpell(AUTO_SHOT_2); // GENERAL
 
