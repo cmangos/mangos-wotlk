@@ -1721,7 +1721,7 @@ class PlayerbotAI
         };
 
     public:
-        PlayerbotAI(PlayerbotMgr* const mgr, Player* const bot);
+        PlayerbotAI(PlayerbotMgr& mgr, Player* const bot);
         virtual ~PlayerbotAI();
 
         // This is called from Unit.cpp and is called every second (I think)
@@ -1743,7 +1743,7 @@ class PlayerbotAI
         void SetCombatStyle(CombatStyle cs) { m_combatStyle = cs; }
 
         PlayerbotClassAI* GetClassAI() { return m_classAI; }
-        PlayerbotMgr* GetManager() { return m_mgr; }
+        PlayerbotMgr& GetManager() { return m_mgr; }
         void ReloadAI();
 
         // finds spell ID for matching substring args
@@ -2077,7 +2077,7 @@ class PlayerbotAI
 
         // it is safe to keep these back reference pointers because m_bot
         // owns the "this" object and m_master owns m_bot. The owner always cleans up.
-        PlayerbotMgr* const m_mgr;
+        PlayerbotMgr& m_mgr;
         Player* const m_bot;
         PlayerbotClassAI* m_classAI;
 
@@ -2154,6 +2154,7 @@ class PlayerbotAI
         float m_destX, m_destY, m_destZ; // latest coordinates for chase and point movement types
 
         bool m_bDebugCommandChat;
+
 };
 
 #endif
