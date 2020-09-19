@@ -249,8 +249,8 @@ enum
 
 
     // spells
-    BG_IC_SPELL_REFINERY                    = 68719,
-    BG_IC_SPELL_QUARRY                      = 68720,
+    BG_IC_SPELL_REFINERY                    = 68719,        // triggers 68722 on vehicles
+    BG_IC_SPELL_QUARRY                      = 68720,        // triggers 68723 on vehicles
     BG_IC_SPELL_PARACHUTE                   = 66656,        // triggers 66657
 
 
@@ -561,6 +561,7 @@ class BattleGroundIC : public BattleGround
 
     private:
 
+        void DoApplyTeamBuff(PvpTeamIndex teamIdx, uint32 spellEntry, bool apply);
         void DoCaptureObjective(IsleObjective objective);
         void DoResetObjective(IsleObjective objective);
 
@@ -573,7 +574,7 @@ class BattleGroundIC : public BattleGround
 
         ObjectGuid m_gunshipGuid[PVP_TEAM_COUNT];
         ObjectGuid m_keepGatesGuid[PVP_TEAM_COUNT][BG_IC_MAX_KEEP_GATES];
-        ObjectGuid m_currentFlagGuid[BG_IC_MAX_KEEP_GATES];
+        ObjectGuid m_currentFlagGuid[BG_IC_MAX_OBJECTIVES];
         ObjectGuid m_hordeInnerGateGuid;
         ObjectGuid m_allianceInnerGate1Guid;
         ObjectGuid m_allianceInnerGate2Guid;

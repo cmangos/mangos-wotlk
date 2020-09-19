@@ -149,7 +149,7 @@ void BattleGroundIC::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, BG_IC_STATE_ALLY_REINFORCE_SHOW, 1);
     FillInitialWorldState(data, count, BG_IC_STATE_HORDE_REINFORCE_SHOW, 1);
     FillInitialWorldState(data, count, BG_IC_STATE_ALLY_REINFORCE_COUNT, m_reinforcements[TEAM_INDEX_ALLIANCE]);
-    FillInitialWorldState(data, count, BG_IC_STATE_HORDE_REINFORCE_COUNT, m_reinforcements[TEAM_INDEX_ALLIANCE]);
+    FillInitialWorldState(data, count, BG_IC_STATE_HORDE_REINFORCE_COUNT, m_reinforcements[TEAM_INDEX_HORDE]);
 
     // show the capturable bases
     for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
@@ -618,10 +618,9 @@ void BattleGroundIC::DoCaptureObjective(IsleObjective objective)
             }
 
             // if spell is provided, apply spell
-            // ToDo: apply aura on owned vehicles as well
             uint32 spellId = isleObjectiveData[objId].spellEntry;
             if (spellId)
-                CastSpellOnTeam(spellId, GetTeamIdByTeamIndex(ownerIdx));
+                DoApplyTeamBuff(ownerIdx, spellId, true);
 
             // if graveyard is provided, link the graveyard
             uint32 graveyardId = isleObjectiveData[objId].graveyardId;
@@ -756,16 +755,29 @@ void BattleGroundIC::DoResetObjective(IsleObjective objective)
         case BG_IC_OBJECTIVE_QUARY:
         {
             // remove spell aura
-            // ToDo: remove vehicle auras
-            for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
-            {
-                if (Player* plr = sObjectMgr.GetPlayer(itr->first))
-                {
-                    if (plr->GetTeam() == GetTeamIdByTeamIndex(ownerIdx))
-                        plr->RemoveAurasDueToSpell(isleObjectiveData[objective].spellEntry);
-                }
-            }
+            DoApplyTeamBuff(ownerIdx, isleObjectiveData[objective].spellEntry, false);
             break;
+        }
+    }
+}
+
+// Function that applies and removes buff aura from vehicles and players
+void BattleGroundIC::DoApplyTeamBuff(PvpTeamIndex teamIdx, uint32 spellEntry, bool apply)
+{
+    Team teamId = GetTeamIdByTeamIndex(teamIdx);
+
+    // Note: on vehicles the auras is applied by the forced trigger spell
+    if (apply)
+        CastSpellOnTeam(spellEntry, teamId);
+    else
+    {
+        for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+        {
+            if (Player* plr = sObjectMgr.GetPlayer(itr->first))
+            {
+                if (plr->GetTeam() == teamId)
+                    plr->RemoveAurasDueToSpell(spellEntry);
+            }
         }
     }
 }
