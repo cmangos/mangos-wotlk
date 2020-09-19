@@ -479,7 +479,7 @@ void GameObject::Update(const uint32 diff)
                     }
                 }
 
-                int32 max_charges = goInfo->GetCharges();   // Only check usable (positive) charges; 0 : no charge; -1 : infinite charges
+                uint32 max_charges = goInfo->GetCharges();   // Only check usable (positive) charges; 0 : no charge; -1 : infinite charges
                 if (max_charges > 0 && m_useTimes >= max_charges)
                 {
                     m_useTimes = 0;
@@ -509,6 +509,14 @@ void GameObject::Update(const uint32 diff)
                     }
                     break;
                 case GAMEOBJECT_TYPE_TRAP:
+
+                    // Note: wotlk+ traps which work as bombs can be disarmed
+                    if (GetGOInfo()->trap.charges == 2 && GetGOInfo()->trap.diameter == 0)
+                    {
+                        SetLootState(GO_JUST_DEACTIVATED);
+                        break;
+                    }
+
                     if (m_rearmTimer == 0)
                     {
                         m_rearmTimer = time(nullptr) + GetRespawnDelay();
