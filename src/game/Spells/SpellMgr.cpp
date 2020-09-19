@@ -2010,6 +2010,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
                     if (spellInfo_1->SpellIconID == 692 && spellInfo_2->SpellIconID == 692)
                         return false;
 
+                    // Oil Refinery and Quarry
+                    if (spellInfo_1->SpellIconID == 4037 && spellInfo_2->SpellIconID == 4037)
+                        return false;
+
                     // Large Ooze Combine and Large Ooze Buff Combine
                     if ((spellInfo_1->Id == 69552 && spellInfo_2->Id == 69611) ||
                             (spellInfo_2->Id == 69552 && spellInfo_1->Id == 69611))
