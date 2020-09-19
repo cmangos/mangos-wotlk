@@ -7014,7 +7014,7 @@ SpellCastResult Spell::CheckItems()
                     if (!itemProto)
                         return SPELL_FAILED_ITEM_NOT_FOUND; // custom error in case item template is missing
                     ItemPosCountVec dest;
-                    uint32 count = CalculateDamage(SpellEffectIndex(i), m_caster);
+                    int32 count = CalculateDamage(SpellEffectIndex(i), m_caster);
                     count = count > itemProto->Stackable ? itemProto->Stackable : count;
                     InventoryResult msg = playerTarget->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, m_spellInfo->EffectItemType[i], count);
                     if (msg != EQUIP_ERR_OK)
@@ -8025,7 +8025,11 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
                         radius = 0.5f * (60000 - auraHolder->GetAuraDuration()) * 0.001f;
                     break;
                 }
-                case 54643:                                 // Teleport:
+                case 54643:                                 // Teleport (Strand of the Ancients)
+                case 66550:                                 // Teleport (Isle of Conquest)
+                case 66630:                                 // Alliance Gunship Portal (Isle of Conquest)
+                case 66637:                                 // Horde Gunship Portal (Isle of Conquest)
+                case 66899:                                 // Gunship Portal Click (Isle of Conquest)
                     radius = DEFAULT_VISIBILITY_BGARENAS;
                     break;
                 case 66881:                                 // Slime Pool (ToCrusader, Acidmaw & Dreadscale)
