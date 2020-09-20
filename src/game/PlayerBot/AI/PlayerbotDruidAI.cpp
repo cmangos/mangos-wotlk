@@ -490,7 +490,7 @@ CombatManeuverReturns PlayerbotDruidAI::HealPlayer(Player* target)
 
     // Reset form if needed
     if (!m_bot.HasAura(TREE_OF_LIFE) || TREE_OF_LIFE == 0)
-        GoBuffForm(GetPlayerBot());
+        GoBuffForm(&m_bot);
 
     // Start heals. Do lowest HP checks at the top
 

@@ -329,11 +329,6 @@ CombatManeuverReturns PlayerbotMageAI::DispelPlayer(Player* cursedTarget)
 
 void PlayerbotMageAI::DoNonCombatActions()
 {
-    Player* master = GetMaster();
-
-    if (!master)
-        return;
-
     // Remove curse on group members
     if (m_ai.HasDispelOrder() && DispelPlayer(GetDispelTarget(DISPEL_CURSE)) & RETURN_CONTINUE)
         return;
