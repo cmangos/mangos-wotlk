@@ -255,9 +255,14 @@ struct boss_moroesAI : public CombatAI
             }
             case MOROES_ACTION_BLIND:
             {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, SPELL_BLIND, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
-                    if (DoCastSpellIfCan(target, SPELL_BLIND) == CAST_OK)
-                        ResetCombatAction(action, GetSubsequentActionTimer(action));
+                Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, SPELL_GARROTE, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA | SELECT_FLAG_SKIP_TANK);
+                if (!target) // if no target without garrote found - select any random
+                    target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER);
+                if (!target)
+                    break;
+
+                if (DoCastSpellIfCan(target, SPELL_BLIND) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
                 break;
             }
             case MOROES_ACTION_GOUGE:
