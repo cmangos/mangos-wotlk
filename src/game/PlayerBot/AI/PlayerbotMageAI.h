@@ -96,22 +96,22 @@ class PlayerbotMageAI : PlayerbotClassAI
         virtual ~PlayerbotMageAI();
 
         // all combat actions go here
-        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuver(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuver(Unit* pTarget) override;
 
         // all non combat actions go here, ex buffs, heals, rezzes
-        void DoNonCombatActions();
+        void DoNonCombatActions() override;
 
     private:
-        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget);
-        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget);
-        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget);
+        CombatManeuverReturns DoFirstCombatManeuverPVE(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuverPVE(Unit* pTarget) override;
+        CombatManeuverReturns DoFirstCombatManeuverPVP(Unit* pTarget) override;
+        CombatManeuverReturns DoNextCombatManeuverPVP(Unit* pTarget) override;
 
         CombatManeuverReturns CastSpell(uint32 nextAction, Unit* pTarget = nullptr) { return CastSpellWand(nextAction, pTarget, SHOOT); }
 
         // Dispel disease or negative magic effects from the target
-        CombatManeuverReturns DispelPlayer(Player* target);
+        CombatManeuverReturns DispelPlayer(Player* target) override;
 
         static bool BuffHelper(PlayerbotAI* ai, uint32 spellId, Unit* target);
 
