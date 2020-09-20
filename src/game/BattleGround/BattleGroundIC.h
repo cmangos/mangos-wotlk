@@ -104,14 +104,18 @@ enum
     BG_IC_NPC_OVERLORD_AGMAR                = 34922,        // Horde Boss
     BG_IC_NPC_KORKORN_GUARD                 = 34918,
     BG_IC_NPC_LEGION_INFANTRY               = 34919,        // has aura 66656 cast by 20213
+    BG_IC_NPC_DOOR_FIRE                     = 35377,        // summoned when a gate is destroyed (implemented in DB script by event id)
 
     BG_IC_NPC_GOBLIN_MECHANIC               = 35346,        // workshop npcs
     BG_IC_NPC_GNOMISH_MECHANIC              = 35345,
+    BG_IC_NPC_GNOME_ENGINEER                = 13000,        // has emote state 69
+    BG_IC_NPC_GOBLIN_ENGINEER               = 36162,        // this one is guesswork but most likely correct
 
     // gunship creatures
     BG_IC_NPC_HORDE_GUNSHIP_CAPTAIN         = 35003,
     BG_IC_NPC_KORKORN_REAVER                = 36164,
     BG_IC_NPC_GOBLIN_ENGINEERING_CREW       = 36162,
+    BG_IC_NPC_OGRIMS_HAMMER_ENGINEER        = 30753,
 
     BG_IC_NPC_ALLIANCE_GUNSHIP_CAPTAIN      = 34960,
     BG_IC_NPC_LEGION_MARINE                 = 36166,
@@ -125,10 +129,17 @@ enum
     BG_IC_NPC_WORLD_TRIGGER_A               = 20213,        // parachute trigger on gunship
     BG_IC_NPC_WORLD_TRIGGER_H               = 20212,        // parachute trigger on gunship
 
+    // triggers that apply extra honor to players
+    BG_IC_NPC_HON_DEFENDER_TRIGGER_A        = 35379,        // has aura 66157
+    BG_IC_NPC_HON_DEFENDER_TRIGGER_H        = 35380,
+    BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A     = 36349,        // has aura 68652
+    BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H     = 36350,
+
     // siege vehicles
     BG_IC_VEHICLE_GUNSHIP_CANNON_H          = 34935,
     BG_IC_VEHICLE_GUNSHIP_CANNON_A          = 34929,
-    BG_IC_VEHICLE_KEEP_CANNON               = 34944,
+    BG_IC_VEHICLE_KEEP_CANNON               = 34944,        // player casts 68077 to repair; this triggers 68078, which triggers 43978
+    BG_IC_VEHICLE_BROKEN_KEEP_CANNON        = 35819,        // not a real vehicle; summoned when the keep cannon is killed
     BG_IC_VEHICLE_SIEGE_ENGINE_A            = 34776,        // has accessories: 36356 and 34777; starts with aura 67323
     BG_IC_VEHICLE_SIEGE_ENGINE_H            = 35069,        // has accessories: 34778 and 36355; starts with aura 67323
     BG_IC_VEHICLE_DEMOLISHER                = 34775,
@@ -324,7 +335,7 @@ struct IsleDualSummonData
     float x, y, z, o;
 };
 
-// *** Battleground objectives spawn data *** //
+// *** Workshop spawn data *** //
 static const IsleDualSummonData iocWorkshopSpawns[] =
 {
     {BG_IC_VEHICLE_SIEGE_ENGINE_A,  BG_IC_VEHICLE_SIEGE_ENGINE_H, 773.681f, -884.092f, 16.809f,  1.58825f},
@@ -332,9 +343,13 @@ static const IsleDualSummonData iocWorkshopSpawns[] =
     {BG_IC_VEHICLE_DEMOLISHER,      BG_IC_VEHICLE_DEMOLISHER,     761.809f, -854.227f, 12.5263f, 1.46608f},
     {BG_IC_VEHICLE_DEMOLISHER,      BG_IC_VEHICLE_DEMOLISHER,     783.472f, -853.96f,  12.5478f, 1.71042f},
     {BG_IC_VEHICLE_DEMOLISHER,      BG_IC_VEHICLE_DEMOLISHER,     793.056f, -852.719f, 12.5671f, 1.71042f},
-    {BG_IC_NPC_GNOMISH_MECHANIC,    BG_IC_NPC_GOBLIN_MECHANIC,    762.6146f, -883.6736f, 18.61661f, 0.01745329f}
+    {BG_IC_NPC_GNOMISH_MECHANIC,    BG_IC_NPC_GOBLIN_MECHANIC,    762.6146f, -883.6736f, 18.61661f, 0.01745329f},
+    {BG_IC_NPC_GNOME_ENGINEER,      BG_IC_NPC_GOBLIN_ENGINEER,    777.7847f, -886.1962f, 16.59797f, 2.901592f},
+    {BG_IC_NPC_GNOME_ENGINEER,      BG_IC_NPC_GOBLIN_ENGINEER,    769.6754f, -874.2414f, 16.49906f, 5.443692f},
+    {BG_IC_NPC_GNOME_ENGINEER,      BG_IC_NPC_GOBLIN_ENGINEER,    769.7656f, -886.9271f, 16.51083f, 0.7569275f},
 };
 
+// *** Docks spawn data *** //
 static const IsleDualSummonData iocDocksSpawns[] =
 {
     {BG_IC_VEHICLE_GLAIVE_THROWER_A, BG_IC_VEHICLE_GLAIVE_THROWER_H, 779.312f, -342.972f, 12.2105f, 4.71239f},
@@ -343,6 +358,48 @@ static const IsleDualSummonData iocDocksSpawns[] =
     {BG_IC_VEHICLE_CATAPULT,         BG_IC_VEHICLE_CATAPULT,         766.948f, -342.054f, 12.201f,  4.694f},
     {BG_IC_VEHICLE_CATAPULT,         BG_IC_VEHICLE_CATAPULT,         800.378f, -342.608f, 12.167f,  4.6774f},
     {BG_IC_VEHICLE_CATAPULT,         BG_IC_VEHICLE_CATAPULT,         810.726f, -342.083f, 12.1676f, 4.66f},
+};
+
+// *** Alliance Keep extra Honor triggers spawn data *** //
+static const IsleDualSummonData iocHonorTriggerAllySpawns[] =
+{
+    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 298.8455f, -784.8785f, 48.9995f, 0},
+    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 261.5868f, -784.7656f, 48.9996f, 0},
+    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 298.0756f, -879.5717f, 48.9169f, 0},         // guesswork
+    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 260.1043f, -879.8110f, 48.9163f, 0},         // guesswork
+};
+
+// *** Horde Keep extra Honor triggers spawn data *** //
+static const IsleDualSummonData iocHonorTriggerHordeSpawns[] =
+{
+    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 1284.76f, -705.668f, 48.9163f, 0},             // all entries for horde are guesswork
+    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 1284.548f, -816.063f, 48.916f, 0},
+    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 1319.526f, -816.779f, 48.929f, 0},
+};
+
+// *** Refinery extra spawn data *** //
+static const IsleDualSummonData iocRefinerySpawns[] =
+{
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1287.289f, -416.776f, 26.4918f, 2.059488f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1308.335f, -377.229f, 42.5379f, 0.349065f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1273.545f, -383.569f, 24.3170f, 0.767944f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1328.034f, -387.795f, 26.4918f, 1.780235f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1212.652f, -449.828f, 23.5789f, 3.752457f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1228.046f, -443.116f,  0.9766f, 5.288345f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1258.456f, -379.866f, 24.2211f, 1.814243f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1217.276f, -458.545f, 26.5706f, 2.321287f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1225.166f, -464.982f,  2.8630f, 2.705260f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1285.914f, -426.515f, 26.4918f, 0.872664f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1307.829f, -379.757f, 42.2753f, 4.923260f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1331.327f, -399.490f, 26.4085f, 4.973788f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1306.779f, -357.947f,  0.3112f, 5.654866f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1284.616f, -417.835f, 26.4085f, 3.231140f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1192.187f, -425.0f,    0.9353f, 1.931931f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1299.057f, -420.019f, 26.4085f, 4.919094f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1277.057f, -394.619f, 24.2337f, 2.700056f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1306.032f, -381.064f, 42.2464f, 2.320241f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1312.183f, -371.847f,  0.6077f, 2.428996f},
+    {BG_IC_NPC_GNOME_ENGINEER, BG_IC_NPC_GOBLIN_ENGINEER, 1329.765f, -393.662f, 26.4085f, 4.974071f},
 };
 
 enum IsleObjective
@@ -473,18 +530,20 @@ struct IsleObjectiveBasicData
 {
     uint8 objectiveId;
     uint32 message, graveyardId, spellEntry;
+    // coords for Honorable Defender triggers
+    float x, y, z;
 };
 
 // *** Battleground objective data *** //
 static const IsleObjectiveBasicData isleObjectiveData[] =
 {
-    {BG_IC_OBJECTIVE_KEEP_ALLY,  LANG_BG_IC_NODE_KEEP_ALLIANCE, BG_IC_GRAVEYARD_ID_KEEP_ALLY,  0},
-    {BG_IC_OBJECTIVE_KEEP_HORDE, LANG_BG_IC_NODE_KEEP_HORDE,    BG_IC_GRAVEYARD_ID_KEEP_HORDE, 0},
-    {BG_IC_OBJECTIVE_WORKSHOP,   LANG_BG_IC_NODE_WORKSHOP,      BG_IC_GRAVEYARD_ID_WORKSHOP,   0},
-    {BG_IC_OBJECTIVE_DOCKS,      LANG_BG_IC_NODE_DOCKS,         BG_IC_GRAVEYARD_ID_DOCKS,      0},
-    {BG_IC_OBJECTIVE_HANGAR,     LANG_BG_IC_NODE_HANGAR,        BG_IC_GRAVEYARD_ID_HANGAR,     0},
-    {BG_IC_OBJECTIVE_REFINERY,   LANG_BG_IC_NODE_REFINERY,      0,                             BG_IC_SPELL_REFINERY},
-    {BG_IC_OBJECTIVE_QUARY,      LANG_BG_IC_NODE_QUARRY,        0,                             BG_IC_SPELL_QUARRY}
+    {BG_IC_OBJECTIVE_KEEP_ALLY,  LANG_BG_IC_NODE_KEEP_ALLIANCE, BG_IC_GRAVEYARD_ID_KEEP_ALLY,  0,                    349.3542f, -834.5278f, 48.999f},
+    {BG_IC_OBJECTIVE_KEEP_HORDE, LANG_BG_IC_NODE_KEEP_HORDE,    BG_IC_GRAVEYARD_ID_KEEP_HORDE, 0,                    1218.795f, -765.212f,  48.916f},           // coords are guesswork for this line
+    {BG_IC_OBJECTIVE_WORKSHOP,   LANG_BG_IC_NODE_WORKSHOP,      BG_IC_GRAVEYARD_ID_WORKSHOP,   0,                    776.229f,  -804.283f,  6.4505f},
+    {BG_IC_OBJECTIVE_DOCKS,      LANG_BG_IC_NODE_DOCKS,         BG_IC_GRAVEYARD_ID_DOCKS,      0,                    726.5035f, -360.1875f, 17.8987f},
+    {BG_IC_OBJECTIVE_HANGAR,     LANG_BG_IC_NODE_HANGAR,        BG_IC_GRAVEYARD_ID_HANGAR,     0,                    807.78f,   -1000.07f,  132.381f},
+    {BG_IC_OBJECTIVE_REFINERY,   LANG_BG_IC_NODE_REFINERY,      0,                             BG_IC_SPELL_REFINERY, 1269.552f, -400.6875f, 37.7085f},
+    {BG_IC_OBJECTIVE_QUARY,      LANG_BG_IC_NODE_QUARRY,        0,                             BG_IC_SPELL_QUARRY,   251.016f,  -1159.32f,  17.2376f}
 };
 
 enum IsleGates
@@ -563,22 +622,23 @@ class BattleGroundIC : public BattleGround
 
         void DoApplyTeamBuff(PvpTeamIndex teamIdx, uint32 spellEntry, bool apply);
         void DoCaptureObjective(IsleObjective objective);
+        void DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIndex teamIdx, GameObject* objRef);
         void DoResetObjective(IsleObjective objective);
 
         PvpTeamIndex m_objectiveOwner[BG_IC_MAX_OBJECTIVES];
         PvpTeamIndex m_objectiveConquerer[BG_IC_MAX_OBJECTIVES];
 
-        uint32 m_objectiveState[BG_IC_MAX_OBJECTIVES];
-        uint32 m_gatesAllianceState[BG_IC_MAX_KEEP_GATES];
-        uint32 m_gatesHordeState[BG_IC_MAX_KEEP_GATES];
-
-        ObjectGuid m_gunshipGuid[PVP_TEAM_COUNT];
         ObjectGuid m_keepGatesGuid[PVP_TEAM_COUNT][BG_IC_MAX_KEEP_GATES];
         ObjectGuid m_currentFlagGuid[BG_IC_MAX_OBJECTIVES];
+        ObjectGuid m_honorableDefenderGuid[BG_IC_MAX_OBJECTIVES];
+        ObjectGuid m_workshopMechanicGuids[PVP_TEAM_COUNT];
         ObjectGuid m_hordeInnerGateGuid;
         ObjectGuid m_allianceInnerGate1Guid;
         ObjectGuid m_allianceInnerGate2Guid;
 
+        uint32 m_objectiveState[BG_IC_MAX_OBJECTIVES];
+        uint32 m_gatesAllianceState[BG_IC_MAX_KEEP_GATES];
+        uint32 m_gatesHordeState[BG_IC_MAX_KEEP_GATES];
         uint32 m_reinforcements[PVP_TEAM_COUNT];
         uint32 m_objectiveTimer[BG_IC_MAX_OBJECTIVES];
         uint32 m_closeDoorTimer;
@@ -587,8 +647,10 @@ class BattleGroundIC : public BattleGround
 
         GuidList m_workshopSpawnsGuids[PVP_TEAM_COUNT];
         GuidList m_docksSpawnsGuids[PVP_TEAM_COUNT];
+        GuidList m_refinerySpawnsGuids[PVP_TEAM_COUNT];
         GuidList m_hangarPortalsGuids[PVP_TEAM_COUNT];
         GuidList m_hangarAnimGuids[PVP_TEAM_COUNT];
+        GuidList m_keepHonorTriggerGuids[PVP_TEAM_COUNT];
         GuidList m_bombsGuids;
         GuidList m_towerGatesGuids;
         GuidList m_teleporterGuids;

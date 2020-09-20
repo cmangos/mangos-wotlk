@@ -78,6 +78,7 @@ void BattleGroundIC::Reset()
     sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_KEEP_ALLY, BG_IC_ZONE_ID_ISLE, ALLIANCE);
     sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_KEEP_HORDE, BG_IC_ZONE_ID_ISLE, HORDE);
 
+    // make sure that the middle graveyards are disabled to begin with
     sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_DOCKS, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
     sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_HANGAR, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
     sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_WORKSHOP, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
@@ -90,6 +91,32 @@ void BattleGroundIC::AddPlayer(Player* plr)
     BattleGroundICScore* sc = new BattleGroundICScore;
 
     m_PlayerScores[plr->GetObjectGuid()] = sc;
+
+    // spawn starting area honorable defenders alliance
+    if (m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_ALLY].IsEmpty() && plr->GetTeam() == ALLIANCE)
+    {
+        if (Creature* pTrigger = plr->SummonCreature(BG_IC_NPC_HON_DEFENDER_TRIGGER_A, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].x, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].y, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_ALLY] = pTrigger->GetObjectGuid();
+
+        for (const auto& i : iocHonorTriggerAllySpawns)
+        {
+            if (Creature* pTrigger = plr->SummonCreature(i.entryAlly, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                m_keepHonorTriggerGuids[BG_IC_OBJECTIVE_KEEP_ALLY].push_back(pTrigger->GetObjectGuid());
+        }
+    }
+
+    // spawn starting area honorable defenders horde
+    if (m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_HORDE].IsEmpty() && plr->GetTeam() == HORDE)
+    {
+        if (Creature* pTrigger = plr->SummonCreature(BG_IC_NPC_HON_DEFENDER_TRIGGER_H, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].x, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].y, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_HORDE] = pTrigger->GetObjectGuid();
+
+        for (const auto& i : iocHonorTriggerHordeSpawns)
+        {
+            if (Creature* pTrigger = plr->SummonCreature(i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                m_keepHonorTriggerGuids[BG_IC_OBJECTIVE_KEEP_HORDE].push_back(pTrigger->GetObjectGuid());
+        }
+    }
 }
 
 void BattleGroundIC::StartingEventOpenDoors()
@@ -179,6 +206,8 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
             if (GameObject* pGate = GetBgMap()->GetGameObject(m_keepGatesGuid[TEAM_INDEX_ALLIANCE][i]))
                 pGate->UseDoorOrButton(0, true);
 
+            SendMessage2ToAll(isleAllianceWallsData[i].message, CHAT_MSG_BG_SYSTEM_HORDE, nullptr);
+
             if (!m_isKeepInvaded[TEAM_INDEX_ALLIANCE])
             {
                 // open the inner keep gates
@@ -198,7 +227,8 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 
             m_isKeepInvaded[TEAM_INDEX_ALLIANCE] = true;
 
-            return true;
+            // allow script to continue using DB scripts
+            return false;
         }
 
         if (eventId == isleHordeWallsData[i].eventId)
@@ -209,6 +239,8 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 
             if (GameObject* pGate = GetBgMap()->GetGameObject(m_keepGatesGuid[TEAM_INDEX_HORDE][i]))
                 pGate->UseDoorOrButton(0, true);
+
+            SendMessage2ToAll(isleHordeWallsData[i].message, CHAT_MSG_BG_SYSTEM_ALLIANCE, nullptr);
 
             if (!m_isKeepInvaded[TEAM_INDEX_HORDE])
             {
@@ -227,7 +259,8 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 
             m_isKeepInvaded[TEAM_INDEX_HORDE] = true;
 
-            return true;
+            // allow script to continue using DB scripts
+            return false;
         }
     }
 
@@ -305,6 +338,10 @@ void BattleGroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* go)
                 soundId = newOwnerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_SOUND_NODE_ASSAULTED_ALLIANCE : BG_IC_SOUND_NODE_ASSAULTED_HORDE;
 
                 nextFlagEntry = m_objectiveConquerer[objectiveId] == newOwnerIdx ? i.nextObjectDefend : i.nextObjectDefend;
+
+                // re-apply benefits
+                if (m_objectiveConquerer[objectiveId] == newOwnerIdx)
+                    DoApplyObjectiveBenefits(IsleObjective(objectiveId), newOwnerIdx, go);
                 break;
             }
         }
@@ -359,30 +396,44 @@ void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
         case BG_IC_NPC_OVERLORD_AGMAR:
             EndBattleGround(ALLIANCE);
             break;
+        case BG_IC_VEHICLE_KEEP_CANNON:
+            // ToDo: handle cannon repair logic
+            break;
         case BG_IC_VEHICLE_DEMOLISHER:
-        {
-            PvpTeamIndex ownerTeam = creature->getFaction() == BG_IC_FACTION_ID_ALLIANCE ? TEAM_INDEX_ALLIANCE : TEAM_INDEX_HORDE;
-            m_workshopSpawnsGuids[ownerTeam].remove(creature->GetObjectGuid());
-            break;
-        }
-        case BG_IC_VEHICLE_SIEGE_ENGINE_A:
-            m_workshopSpawnsGuids[TEAM_INDEX_ALLIANCE].remove(creature->GetObjectGuid());
-            break;
-        case BG_IC_VEHICLE_SIEGE_ENGINE_H:
-            m_workshopSpawnsGuids[TEAM_INDEX_HORDE].remove(creature->GetObjectGuid());
-            break;
         case BG_IC_VEHICLE_CATAPULT:
+        case BG_IC_VEHICLE_GLAIVE_THROWER_A:
+        case BG_IC_VEHICLE_GLAIVE_THROWER_H:
+            killer->CastSpell(killer, BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE, TRIGGERED_OLD_TRIGGERED);
+            break;
+        case BG_IC_VEHICLE_SIEGE_ENGINE_A:
         {
-            PvpTeamIndex ownerTeam = creature->getFaction() == BG_IC_FACTION_ID_ALLIANCE ? TEAM_INDEX_ALLIANCE : TEAM_INDEX_HORDE;
-            m_docksSpawnsGuids[ownerTeam].push_back(creature->GetObjectGuid());
+            // kill credit
+            killer->CastSpell(killer, BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE, TRIGGERED_OLD_TRIGGERED);
+
+            // summon a new siege engine
+            if (m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP] == TEAM_INDEX_ALLIANCE)
+            {
+                creature->SummonCreature(BG_IC_VEHICLE_SIEGE_ENGINE_A, iocWorkshopSpawns[0].x, iocWorkshopSpawns[0].y, iocWorkshopSpawns[0].z, iocWorkshopSpawns[0].o, TEMPSPAWN_DEAD_DESPAWN, 0);
+                if (Creature* pMechanic = GetBgMap()->GetCreature(m_workshopMechanicGuids[TEAM_INDEX_ALLIANCE]))
+                    creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, pMechanic, pMechanic);
+
+            }
             break;
         }
-        case BG_IC_VEHICLE_GLAIVE_THROWER_A:
-            m_docksSpawnsGuids[TEAM_INDEX_ALLIANCE].remove(creature->GetObjectGuid());
+        case BG_IC_VEHICLE_SIEGE_ENGINE_H:
+        {
+            // kill credit
+            killer->CastSpell(killer, BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE, TRIGGERED_OLD_TRIGGERED);
+
+            // summon a new siege engine
+            if (m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP] == TEAM_INDEX_HORDE)
+            {
+                creature->SummonCreature(BG_IC_VEHICLE_SIEGE_ENGINE_H, iocWorkshopSpawns[0].x, iocWorkshopSpawns[0].y, iocWorkshopSpawns[0].z, iocWorkshopSpawns[0].o, TEMPSPAWN_DEAD_DESPAWN, 0);
+                if (Creature* pMechanic = GetBgMap()->GetCreature(m_workshopMechanicGuids[TEAM_INDEX_ALLIANCE]))
+                    creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, pMechanic, pMechanic);
+            }
             break;
-        case BG_IC_VEHICLE_GLAIVE_THROWER_H:
-            m_docksSpawnsGuids[TEAM_INDEX_HORDE].remove(creature->GetObjectGuid());
-            break;
+        }
     }
 }
 
@@ -415,29 +466,20 @@ void BattleGroundIC::HandleCreatureCreate(Creature* creature)
         {
             PvpTeamIndex ownerTeam = m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP];
             creature->SetFactionTemporary(iocTeamFactions[ownerTeam], TEMPFACTION_NONE);
-            m_workshopSpawnsGuids[ownerTeam].push_back(creature->GetObjectGuid());
             break;
         }
-        case BG_IC_VEHICLE_SIEGE_ENGINE_A:
-        case BG_IC_NPC_GNOMISH_MECHANIC:
-            m_workshopSpawnsGuids[TEAM_INDEX_ALLIANCE].push_back(creature->GetObjectGuid());
-            break;
-        case BG_IC_VEHICLE_SIEGE_ENGINE_H:
-        case BG_IC_NPC_GOBLIN_MECHANIC:
-            m_workshopSpawnsGuids[TEAM_INDEX_HORDE].push_back(creature->GetObjectGuid());
-            break;
         case BG_IC_VEHICLE_CATAPULT:
         {
             PvpTeamIndex ownerTeam = m_objectiveOwner[BG_IC_OBJECTIVE_DOCKS];
             creature->SetFactionTemporary(iocTeamFactions[ownerTeam], TEMPFACTION_NONE);
-            m_docksSpawnsGuids[ownerTeam].push_back(creature->GetObjectGuid());
             break;
         }
-        case BG_IC_VEHICLE_GLAIVE_THROWER_A:
-            m_docksSpawnsGuids[TEAM_INDEX_ALLIANCE].push_back(creature->GetObjectGuid());
+        // store the mechanics for the respawn event
+        case BG_IC_NPC_GNOMISH_MECHANIC:
+            m_workshopMechanicGuids[TEAM_INDEX_ALLIANCE] = creature->GetObjectGuid();
             break;
-        case BG_IC_VEHICLE_GLAIVE_THROWER_H:
-            m_docksSpawnsGuids[TEAM_INDEX_HORDE].push_back(creature->GetObjectGuid());
+        case BG_IC_NPC_GOBLIN_MECHANIC:
+            m_workshopMechanicGuids[TEAM_INDEX_HORDE] = creature->GetObjectGuid();
             break;
     }
 }
@@ -446,12 +488,6 @@ void BattleGroundIC::HandleGameObjectCreate(GameObject* go)
 {
     switch (go->GetEntry())
     {
-        case BG_IC_GO_GUNSHIP_A:
-            m_gunshipGuid[TEAM_INDEX_ALLIANCE] = go->GetObjectGuid();
-            break;
-        case BG_IC_GO_GUNSHIP_H:
-            m_gunshipGuid[TEAM_INDEX_HORDE] = go->GetObjectGuid();
-            break;
         case BG_IC_GO_SEAFORIUM_BOMBS:
             m_bombsGuids.push_back(go->GetObjectGuid());
             break;
@@ -617,81 +653,129 @@ void BattleGroundIC::DoCaptureObjective(IsleObjective objective)
                 pFlag->Refresh();
             }
 
-            // if spell is provided, apply spell
-            uint32 spellId = isleObjectiveData[objId].spellEntry;
-            if (spellId)
-                DoApplyTeamBuff(ownerIdx, spellId, true);
-
-            // if graveyard is provided, link the graveyard
-            uint32 graveyardId = isleObjectiveData[objId].graveyardId;
-            if (graveyardId)
-                sObjectMgr.SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, GetTeamIdByTeamIndex(ownerIdx));
-
-            // spawn the vehicles / enable the gunship
-            switch (objId)
-            {
-                case BG_IC_OBJECTIVE_WORKSHOP:
-                {
-                    // summon the vehicles and the mechanic
-                    for (uint8 i = 0; i < 6; ++i)
-                        pOriginalFlag->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? iocWorkshopSpawns[i].entryAlly : iocWorkshopSpawns[i].entryHorde, iocWorkshopSpawns[i].x, iocWorkshopSpawns[i].y, iocWorkshopSpawns[i].z, iocWorkshopSpawns[i].o, TEMPSPAWN_DEAD_DESPAWN, 0);
-
-                    // respawn the workshop bombs and give them the right faction
-                    for (const auto& guid : m_bombsGuids)
-                    {
-                        if (GameObject* pBomb = GetBgMap()->GetGameObject(guid))
-                        {
-                            pBomb->SetFaction(iocTeamFactions[ownerIdx]);
-                            pBomb->SetRespawnTime(60 * MINUTE);
-                            pBomb->Refresh();
-                        }
-                    }
-
-                    break;
-                }
-                case BG_IC_OBJECTIVE_DOCKS:
-                {
-                    // summon the vehicles
-                    for (uint8 i = 0; i < 6; ++i)
-                        pOriginalFlag->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? iocDocksSpawns[i].entryAlly : iocDocksSpawns[i].entryHorde, iocDocksSpawns[i].x, iocDocksSpawns[i].y, iocDocksSpawns[i].z, iocDocksSpawns[i].o, TEMPSPAWN_DEAD_DESPAWN, 0);
-                    break;
-                }
-                case BG_IC_OBJECTIVE_HANGAR:
-                {
-                    // respawn portals
-                    for (const auto& guid : m_hangarPortalsGuids[ownerIdx])
-                    {
-                        if (GameObject* pPortal = GetBgMap()->GetGameObject(guid))
-                        {
-                            pPortal->SetRespawnTime(60 * MINUTE);
-                            pPortal->Refresh();
-                        }
-                    }
-
-                    // respawn and enable the animations
-                    for (const auto& guid : m_hangarAnimGuids[ownerIdx])
-                    {
-                        if (GameObject* pAnim = GetBgMap()->GetGameObject(guid))
-                        {
-                            pAnim->SetRespawnTime(60 * MINUTE);
-                            pAnim->Refresh();
-                            pAnim->UseDoorOrButton();
-                        }
-                    }
-                    break;
-                }
-            }
+            // apply benefits
+            DoApplyObjectiveBenefits(IsleObjective(objId), ownerIdx, pOriginalFlag);
         }
     }
+}
 
-    // despawn flag
-    pOriginalFlag->SetLootState(GO_JUST_DEACTIVATED);
+// Function that applies the objective benefits
+void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIndex teamIdx, GameObject* objRef)
+{
+    // if spell is provided, apply spell
+    uint32 spellId = isleObjectiveData[objective].spellEntry;
+    if (spellId)
+        DoApplyTeamBuff(teamIdx, spellId, true);
+
+    // if graveyard is provided, link the graveyard
+    uint32 graveyardId = isleObjectiveData[objective].graveyardId;
+    if (graveyardId)
+        sObjectMgr.SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, GetTeamIdByTeamIndex(teamIdx));
+
+    // spawn the honor defender trigger
+    if (Creature* pTrigger = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? BG_IC_NPC_HON_DEFENDER_TRIGGER_A : BG_IC_NPC_HON_DEFENDER_TRIGGER_H, isleObjectiveData[objective].x, isleObjectiveData[objective].y, isleObjectiveData[objective].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+        m_honorableDefenderGuid[objective] = pTrigger->GetObjectGuid();
+
+    // spawn the vehicles / enable the gunship
+    switch (objective)
+    {
+        case BG_IC_OBJECTIVE_WORKSHOP:
+        {
+            // summon the vehicles and the mechanic
+            for (const auto& i : iocWorkshopSpawns)
+            {
+                if (Creature* pCreature = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_workshopSpawnsGuids[teamIdx].push_back(pCreature->GetObjectGuid());
+            }
+
+            // respawn the workshop bombs and give them the right faction
+            for (const auto& guid : m_bombsGuids)
+            {
+                if (GameObject* pBomb = GetBgMap()->GetGameObject(guid))
+                {
+                    pBomb->SetFaction(iocTeamFactions[teamIdx]);
+                    pBomb->SetRespawnTime(60 * MINUTE);
+                    pBomb->Refresh();
+                }
+            }
+
+            break;
+        }
+        case BG_IC_OBJECTIVE_DOCKS:
+        {
+            // summon the docks vehicles
+            for (const auto& i : iocDocksSpawns)
+            {
+                if (Creature* pCreature = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_docksSpawnsGuids[teamIdx].push_back(pCreature->GetObjectGuid());
+            }
+            break;
+        }
+        case BG_IC_OBJECTIVE_HANGAR:
+        {
+            // respawn portals
+            for (const auto& guid : m_hangarPortalsGuids[teamIdx])
+            {
+                if (GameObject* pPortal = GetBgMap()->GetGameObject(guid))
+                {
+                    pPortal->SetRespawnTime(60 * MINUTE);
+                    pPortal->Refresh();
+                }
+            }
+
+            // respawn and enable the animations
+            for (const auto& guid : m_hangarAnimGuids[teamIdx])
+            {
+                if (GameObject* pAnim = GetBgMap()->GetGameObject(guid))
+                {
+                    pAnim->SetRespawnTime(60 * MINUTE);
+                    pAnim->Refresh();
+                    pAnim->UseDoorOrButton();
+                }
+            }
+            break;
+        }
+        case BG_IC_OBJECTIVE_REFINERY:
+        {
+            // summon the refinery npcs
+            for (const auto& i : iocRefinerySpawns)
+            {
+                if (Creature* pCreature = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_refinerySpawnsGuids[teamIdx].push_back(pCreature->GetObjectGuid());
+            }
+            break;
+        }
+        case BG_IC_OBJECTIVE_KEEP_ALLY:
+        {
+            // summon extra honor triggers
+            for (const auto& i : iocHonorTriggerAllySpawns)
+            {
+                if (Creature* pTrigger = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_keepHonorTriggerGuids[BG_IC_OBJECTIVE_KEEP_HORDE].push_back(pTrigger->GetObjectGuid());
+            }
+            break;
+        }
+        case BG_IC_OBJECTIVE_KEEP_HORDE:
+        {
+            // summon extra honor triggers
+            for (const auto& i : iocHonorTriggerHordeSpawns)
+            {
+                if (Creature* pTrigger = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_keepHonorTriggerGuids[BG_IC_OBJECTIVE_KEEP_HORDE].push_back(pTrigger->GetObjectGuid());
+            }
+            break;
+        }
+    }
 }
 
 // Function that handles the reset of objective
 void BattleGroundIC::DoResetObjective(IsleObjective objective)
 {
     PvpTeamIndex ownerIdx = m_objectiveOwner[objective];
+
+    // despawn the main honor trigger
+    if (Creature* pTrigger = GetBgMap()->GetCreature(m_honorableDefenderGuid[objective]))
+        pTrigger->ForcedDespawn();
 
     switch (objective)
     {
@@ -752,10 +836,27 @@ void BattleGroundIC::DoResetObjective(IsleObjective objective)
             break;
         }
         case BG_IC_OBJECTIVE_REFINERY:
+        {
+            for (const auto& guid : m_refinerySpawnsGuids[ownerIdx])
+                if (Creature* pCreature = GetBgMap()->GetCreature(guid))
+                    pCreature->ForcedDespawn();
+
+            // no break;
+        }
         case BG_IC_OBJECTIVE_QUARY:
         {
             // remove spell aura
             DoApplyTeamBuff(ownerIdx, isleObjectiveData[objective].spellEntry, false);
+            break;
+        }
+        case BG_IC_OBJECTIVE_KEEP_ALLY:
+        case BG_IC_OBJECTIVE_KEEP_HORDE:
+        {
+            // despawn honor triggers inside the keep
+            for (const auto& guid : m_keepHonorTriggerGuids[objective])
+                if (Creature* pTrigger = GetBgMap()->GetCreature(guid))
+                    pTrigger->ForcedDespawn();
+
             break;
         }
     }
@@ -807,19 +908,17 @@ void BattleGroundIC::Update(uint32 diff)
     }
 
     // objective timers
+    for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
     {
-        for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
+        if (m_objectiveTimer[i])
         {
-            if (m_objectiveTimer[i])
+            if (m_objectiveTimer[i] <= diff)
             {
-                if (m_objectiveTimer[i] <= diff)
-                {
-                    DoCaptureObjective(IsleObjective(i));
-                    m_objectiveTimer[i] = 0;
-                }
-                else
-                    m_objectiveTimer[i] -= diff;
+                DoCaptureObjective(IsleObjective(i));
+                m_objectiveTimer[i] = 0;
             }
+            else
+                m_objectiveTimer[i] -= diff;
         }
     }
 }
