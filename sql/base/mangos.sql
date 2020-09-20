@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14022_01_mangos_playercreateinfo_spell` bit(1) DEFAULT NULL
+  `required_14023_01_mangos_dbscripts` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1574,9 +1574,9 @@ DROP TABLE IF EXISTS `dbscripts_on_creature_movement`;
 CREATE TABLE `dbscripts_on_creature_movement` (
   `id` mediumint(8) unsigned NOT NULL DEFAULT '0',
   `delay` int(10) unsigned NOT NULL DEFAULT '0',
-  `priority` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+  `priority` int(11) unsigned NOT NULL DEFAULT '0',
   `command` mediumint(8) unsigned NOT NULL DEFAULT '0',
-  `datalong` mediumint(8) unsigned NOT NULL DEFAULT '0',
+  `datalong` int(10) unsigned NOT NULL DEFAULT '0',
   `datalong2` int(10) unsigned NOT NULL DEFAULT '0',
   `datalong3` int(11) unsigned NOT NULL DEFAULT '0',
   `buddy_entry` int(10) unsigned NOT NULL DEFAULT '0',
@@ -1606,7 +1606,9 @@ UNLOCK TABLES;
 --
 -- Table structure of `dbscripts_on_event`, `dbscripts_on_go_use`, `dbscripts_on_go_template_use`,
 --                    `dbscripts_on_gossip`, `dbscripts_on_quest_end`, `dbscripts_on_quest_start`,
---                    `dbscripts_on_spell`, `dbscripts_on_creature_death`
+--                    `dbscripts_on_relay`, `dbscripts_on_spell`, `dbscripts_on_creature_death`
+DROP TABLE IF EXISTS dbscripts_on_creature_death;
+CREATE TABLE dbscripts_on_creature_death LIKE dbscripts_on_creature_movement;
 DROP TABLE IF EXISTS dbscripts_on_event;
 CREATE TABLE dbscripts_on_event LIKE dbscripts_on_creature_movement;
 DROP TABLE IF EXISTS dbscripts_on_go_use;
@@ -1619,10 +1621,10 @@ DROP TABLE IF EXISTS dbscripts_on_quest_end;
 CREATE TABLE dbscripts_on_quest_end LIKE dbscripts_on_creature_movement;
 DROP TABLE IF EXISTS dbscripts_on_quest_start;
 CREATE TABLE dbscripts_on_quest_start LIKE dbscripts_on_creature_movement;
+DROP TABLE IF EXISTS dbscripts_on_relay;
+CREATE TABLE dbscripts_on_relay LIKE dbscripts_on_creature_movement;
 DROP TABLE IF EXISTS dbscripts_on_spell;
 CREATE TABLE dbscripts_on_spell LIKE dbscripts_on_creature_movement;
-DROP TABLE IF EXISTS dbscripts_on_creature_death;
-CREATE TABLE dbscripts_on_creature_death LIKE dbscripts_on_creature_movement;
 
 --
 -- Table structure for table `dbscript_random_templates`
