@@ -147,13 +147,13 @@ struct boss_teron_gorefiendAI : public ScriptedAI, public CombatActions
         }
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
         if (m_instance)
             m_instance->SetData(TYPE_GOREFIEND, FAIL);
-
         DespawnSummons();
         DoCastSpellIfCan(nullptr, SPELL_DESTROY_ALL_SPIRITS);
+        ScriptedAI::EnterEvadeMode();
     }
 
     void Aggro(Unit* /*pWho*/) override
