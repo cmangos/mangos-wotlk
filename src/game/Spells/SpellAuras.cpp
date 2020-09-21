@@ -3476,6 +3476,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 return;
             }
+            case 68077:                                     // Repair Cannon
+            {
+                target->CastSpell(target, 68078, TRIGGERED_OLD_TRIGGERED);
+                return;
+            }
             case 68839:                                     // Corrupt Soul
             {
                 // Knockdown Stun

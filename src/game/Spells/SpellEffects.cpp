@@ -4094,6 +4094,20 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spell_id, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 68078:                                 // Repair Cannon
+                {
+                    if (!unitTarget || !unitTarget->GetMap()->IsBattleGround() || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    // change entry back to keep cannon, remove feign death and heal
+                    ((Creature*)unitTarget)->UpdateEntry(34944);
+                    unitTarget->RemoveAurasDueToSpell(29266);
+                    unitTarget->CastSpell(unitTarget, 43978, TRIGGERED_OLD_TRIGGERED);
+
+                    // reset faction based on battleground location; unfortunately updating entry causes the faction to reset
+                    ((Creature*)unitTarget)->SetFactionTemporary(unitTarget->GetPositionX() < 500.0f ? 1732 : 1735, TEMPFACTION_NONE);
+                    return;
+                }
                 case 69922:                                 // Temper Quel'Delar
                 {
                     // Return Tempered Quel'Delar
