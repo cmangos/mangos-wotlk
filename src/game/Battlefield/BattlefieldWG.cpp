@@ -1325,12 +1325,14 @@ void BattlefieldWG::UpdateTenacities(const WorldObject* objRef)
                 player->CastSpell(player, SPELL_TENACITY, TRIGGERED_OLD_TRIGGERED);
 
             // outnumbered team also get more honor
-            if (playerDiff > 10)
-                player->CastSpell(player, SPELL_GREATEST_HONOR, TRIGGERED_OLD_TRIGGERED);
+            if (playerDiff > 15)
+                player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_GREATEST_HONOR : SPELL_LOKTAR_OGAR, TRIGGERED_OLD_TRIGGERED);
+            else if (playerDiff > 10)
+                player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_GREATER_HONOR : SPELL_LOKTAR, TRIGGERED_OLD_TRIGGERED);
             else if (playerDiff > 5)
-                player->CastSpell(player, SPELL_GREATER_HONOR, TRIGGERED_OLD_TRIGGERED);
+                player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_GREAT_HONOR : SPELL_LOKNARASH, TRIGGERED_OLD_TRIGGERED);
             else
-                player->CastSpell(player, SPELL_GREAT_HONOR, TRIGGERED_OLD_TRIGGERED);
+                player->CastSpell(player, player->GetTeam() == ALLIANCE ? SPELL_HONORABLE : SPELL_LOKREGAR, TRIGGERED_OLD_TRIGGERED);
         }
     }
 

@@ -48,9 +48,17 @@ enum
     SPELL_TENACITY_VEHICLE                      = 59911,
 
     // tenacity reward spells - the exact tenacity stack count has to be confirmed
-    SPELL_GREAT_HONOR                           = 58555,            // received when the player has at least 5 stacks of tenacity
-    SPELL_GREATER_HONOR                         = 58556,            // received when the player has more than 10 stacks of tenacity
-    SPELL_GREATEST_HONOR                        = 58557,            // received when the player has 20 stacks of tenacity
+    // alliance version of honor spells
+    SPELL_HONORABLE                             = 58553,            // +25 honor
+    SPELL_GREAT_HONOR                           = 58555,            // +50 honor; received when the player has at least 5 stacks of tenacity
+    SPELL_GREATER_HONOR                         = 58556,            // +75 honor; received when the player has more than 10 stacks of tenacity
+    SPELL_GREATEST_HONOR                        = 58557,            // +100 honor; received when the player has 20 stacks of tenacity
+
+    // horde versions of honor spells
+    SPELL_LOKREGAR                              = 58554,            // +25 honor
+    SPELL_LOKNARASH                             = 58558,            // +50 honor
+    SPELL_LOKTAR                                = 58559,            // +75 honor
+    SPELL_LOKTAR_OGAR                           = 58560,            // +100 honor
 
     SPELL_ALLIANCE_FLAG                         = 14268,            // used on vehicles
     SPELL_HORDE_FLAG                            = 14267,
