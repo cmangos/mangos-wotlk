@@ -807,7 +807,7 @@ SpellAuraProcResult Unit::HandleHasteAuraProc(ProcExecutionData& data)
                      ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGuid()) : nullptr;
 
     uint32 triggered_spell_id = data.triggeredSpellId;
-    Unit* target = pVictim;
+    Unit* target = triggered_spell_id ? data.triggerTarget : pVictim;
     std::array<int32, MAX_EFFECT_INDEX>& basepoints = data.basepoints;
 
     switch (hasteSpell->Id)
@@ -899,10 +899,11 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
     Item* castItem = triggeredByAura->GetCastItemGuid() && GetTypeId() == TYPEID_PLAYER
                      ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGuid()) : nullptr;
 
-    // some dummy spells have trigger spell in spell data already (from 3.0.3)
-    uint32 triggered_spell_id = dummySpell->EffectApplyAuraName[effIndex] == SPELL_AURA_DUMMY ? dummySpell->EffectTriggerSpell[effIndex] : data.triggeredSpellId;
-    Unit* target = pVictim;
+    uint32 triggered_spell_id = data.triggeredSpellId;
+    Unit* target = triggered_spell_id ? data.triggerTarget : pVictim;
     std::array<int32, MAX_EFFECT_INDEX>& basepoints = data.basepoints;
+    if (!triggered_spell_id && dummySpell->EffectApplyAuraName[effIndex] == SPELL_AURA_DUMMY)
+        triggered_spell_id = dummySpell->EffectTriggerSpell[triggeredByAura->GetEffIndex()];
 
     switch (dummySpell->SpellFamilyName)
     {
@@ -3226,8 +3227,10 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
     int32 triggerAmount = triggeredByAura->GetModifier()->m_amount;
 
     // Set trigger spell id, target, custom basepoints
-    uint32 trigger_spell_id = auraSpellInfo->EffectTriggerSpell[triggeredByAura->GetEffIndex()];
-    Unit*  target = nullptr;
+    uint32 trigger_spell_id = data.triggeredSpellId;
+    Unit* target = trigger_spell_id ? data.triggerTarget : nullptr;
+    if (!trigger_spell_id)
+        trigger_spell_id = auraSpellInfo->EffectTriggerSpell[triggeredByAura->GetEffIndex()];
     std::array<int32, MAX_EFFECT_INDEX>& basepoints = data.basepoints;
 
     if (triggeredByAura->GetModifier()->m_auraname == SPELL_AURA_PROC_TRIGGER_SPELL_WITH_VALUE)
@@ -4240,6 +4243,7 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(ProcExecutionData& d
     int32 triggerAmount = triggeredByAura->GetModifier()->m_amount;
 
     uint32 triggered_spell_id = data.triggeredSpellId;
+    Unit* target = triggered_spell_id ? data.triggerTarget : pVictim;
     std::array<int32, MAX_EFFECT_INDEX>& basepoints = data.basepoints;
 
     switch (scriptId)
@@ -4334,7 +4338,7 @@ SpellAuraProcResult Unit::HandleOverrideClassScriptAuraProc(ProcExecutionData& d
     if (!triggered_spell_id)
         return SPELL_AURA_PROC_FAILED;
 
-    return TriggerProccedSpell(pVictim, basepoints, triggered_spell_id, castItem, triggeredByAura, cooldown);
+    return TriggerProccedSpell(target, basepoints, triggered_spell_id, castItem, triggeredByAura, cooldown);
 }
 
 SpellAuraProcResult Unit::HandleRaidProcFromChargeAuraProc(ProcExecutionData& data)
