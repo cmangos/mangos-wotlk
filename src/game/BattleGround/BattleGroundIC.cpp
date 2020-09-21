@@ -18,6 +18,7 @@
 
 #include "Entities/Player.h"
 #include "Entities/GameObject.h"
+#include "Entities/Vehicle.h"
 #include "BattleGround.h"
 #include "BattleGroundIC.h"
 #include "Tools/Language.h"
@@ -395,9 +396,6 @@ void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
             break;
         case BG_IC_NPC_OVERLORD_AGMAR:
             EndBattleGround(ALLIANCE);
-            break;
-        case BG_IC_VEHICLE_KEEP_CANNON:
-            // ToDo: handle cannon repair logic
             break;
         case BG_IC_VEHICLE_DEMOLISHER:
         case BG_IC_VEHICLE_CATAPULT:
@@ -793,7 +791,7 @@ void BattleGroundIC::DoResetObjective(IsleObjective objective)
             {
                 if (Creature* pCreature = GetBgMap()->GetCreature(guid))
                 {
-                    if (!pCreature->IsVehicle() || (pCreature->IsVehicle() && !pCreature->IsBoarded()))
+                    if (!pCreature->IsVehicle() || (pCreature->IsVehicle() && !pCreature->GetVehicleInfo()->GetPassenger(0)))
                         pCreature->ForcedDespawn();
                 }
             }
@@ -808,7 +806,7 @@ void BattleGroundIC::DoResetObjective(IsleObjective objective)
             {
                 if (Creature* pVehicle = GetBgMap()->GetCreature(guid))
                 {
-                    if (!pVehicle->IsBoarded())
+                    if (!pVehicle->GetVehicleInfo()->GetPassenger(0))
                         pVehicle->ForcedDespawn();
                 }
             }

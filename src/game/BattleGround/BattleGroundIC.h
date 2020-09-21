@@ -138,8 +138,8 @@ enum
     // siege vehicles
     BG_IC_VEHICLE_GUNSHIP_CANNON_H          = 34935,
     BG_IC_VEHICLE_GUNSHIP_CANNON_A          = 34929,
-    BG_IC_VEHICLE_KEEP_CANNON               = 34944,        // player casts 68077 to repair; this triggers 68078, which triggers 43978
-    BG_IC_VEHICLE_BROKEN_KEEP_CANNON        = 35819,        // not a real vehicle; summoned when the keep cannon is killed
+    BG_IC_VEHICLE_KEEP_CANNON               = 34944,        // applies aura 50630 and 29266 when creature is about to be killed. Update entry to 35819; Handled in EAI
+    BG_IC_VEHICLE_BROKEN_KEEP_CANNON        = 35819,        // allows player click; player casts 68077 to repair; this triggers 68078, which triggers 43978 and resets entry to 34944
     BG_IC_VEHICLE_SIEGE_ENGINE_A            = 34776,        // has accessories: 36356 and 34777; starts with aura 67323
     BG_IC_VEHICLE_SIEGE_ENGINE_H            = 35069,        // has accessories: 34778 and 36355; starts with aura 67323
     BG_IC_VEHICLE_DEMOLISHER                = 34775,
