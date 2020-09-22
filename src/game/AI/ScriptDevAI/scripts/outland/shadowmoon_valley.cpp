@@ -1452,8 +1452,6 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
         m_uiPlayerCheckTimer		= PLAYER_CHECK_CD;
         m_uiPeriodicWaveTimer		= RETAINER_WAVE_CD;
         m_uiDeathwailDespawnTimer	= DEATHWAIL_DESPAWN_TIME;
-
-        SetDeathPrevention(true);
     }
 
     void JustRespawned() override
@@ -1463,6 +1461,7 @@ struct npc_shadowlord_deathwailAI : public ScriptedAI
         SetReactState(REACT_PASSIVE);
         m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
         m_creature->SetLevitate(true);
+        SetDeathPrevention(true);
         Reset();
     }
 
