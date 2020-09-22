@@ -90,6 +90,9 @@ bool AchievementCriteriaRequirement::IsValid(AchievementCriteriaEntry const* cri
         case ACHIEVEMENT_CRITERIA_TYPE_WIN_DUEL:
         case ACHIEVEMENT_CRITERIA_TYPE_LOOT_TYPE:
         case ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL2:
+        case ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE:
+        case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:
+        case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
             break;
         default:
             sLog.outErrorDb("Table `achievement_criteria_requirement` have not supported data for criteria %u (Not supported as of its criteria type: %u), ignore.", criteria->ID, criteria->requiredType);
@@ -1740,18 +1743,28 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
             }
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:
             {
-                // ToDo: count honorable kills in battlegrounds; if map id is provided requires battleground; otherwise requires pvp script condition
+                // Check map id requirement if provided; In wotlk flag1 = flag2 and map1 = map2, so we only need to check the first one
+                if (achievementCriteria->honorable_kill_battleground.condFlag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
+                {
+                    if (GetPlayer()->GetMapId() != achievementCriteria->honorable_kill_battleground.condVal1)
+                        continue;
+                }
+                else
+                {
+                    // if no map condition is provided the achiev needs additional conditions
+                    AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
+                    if (!data || !data->Meets(GetPlayer(), unit))
+                        continue;
+                }
+
+                change = 1;
+                progressType = PROGRESS_ACCUMULATE;
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:
             {
                 // check if area id corresponds with the provided value
                 if (!miscvalue1 || achievementCriteria->honorable_kill_at_area.areaID != miscvalue1)
-                    continue;
-
-                // check pvp script requirement
-                AchievementCriteriaRequirementSet const* data = sAchievementMgr.GetCriteriaRequirementSet(achievementCriteria);
-                if (!data || !data->Meets(GetPlayer(), unit))
                     continue;
 
                 change = 1;
@@ -1954,6 +1967,18 @@ uint32 AchievementMgr::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry co
             break;
         case ACHIEVEMENT_CRITERIA_TYPE_HIGHEST_PERSONAL_RATING:
             resultValue = achievementCriteria->highest_personal_rating.teamrating;
+            break;
+        case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:
+            resultValue = achievementCriteria->honorable_kill_battleground.count;
+            break;
+        case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:
+            resultValue = achievementCriteria->honorable_kill_at_area.killCount;
+            break;
+        case ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE:
+            resultValue = achievementCriteria->capture_bg_objective.count;
+            break;
+        case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
+            resultValue = achievementCriteria->healing_done.count;
             break;
 
         // handle all statistic-only criteria here
