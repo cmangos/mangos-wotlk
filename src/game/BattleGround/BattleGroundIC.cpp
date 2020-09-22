@@ -401,12 +401,12 @@ void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
         case BG_IC_VEHICLE_CATAPULT:
         case BG_IC_VEHICLE_GLAIVE_THROWER_A:
         case BG_IC_VEHICLE_GLAIVE_THROWER_H:
-            killer->CastSpell(killer, BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE, TRIGGERED_OLD_TRIGGERED);
+            creature->CastSpell(killer, BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE, TRIGGERED_OLD_TRIGGERED);
             break;
         case BG_IC_VEHICLE_SIEGE_ENGINE_A:
         {
             // kill credit
-            killer->CastSpell(killer, BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE, TRIGGERED_OLD_TRIGGERED);
+            creature->CastSpell(killer, BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE, TRIGGERED_OLD_TRIGGERED);
 
             // summon a new siege engine
             if (m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP] == TEAM_INDEX_ALLIANCE)
@@ -421,7 +421,7 @@ void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
         case BG_IC_VEHICLE_SIEGE_ENGINE_H:
         {
             // kill credit
-            killer->CastSpell(killer, BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE, TRIGGERED_OLD_TRIGGERED);
+            creature->CastSpell(killer, BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE, TRIGGERED_OLD_TRIGGERED);
 
             // summon a new siege engine
             if (m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP] == TEAM_INDEX_HORDE)
@@ -451,6 +451,15 @@ void BattleGroundIC::HandleKillPlayer(Player* player, Player* killer)
     // if reached 0, the other team wins
     if (!m_reinforcements[killedPlayerIdx])
         EndBattleGround(killer->GetTeam());
+}
+
+void BattleGroundIC::EventGameObjectDamaged(Player* player, GameObject* object, uint32 spellId)
+{
+    switch (spellId)
+    {
+        case BG_IC_SPELL_SEAFORIUM_BLAST:       player->CastSpell(player, BG_IC_SPELL_BOMB_CREDIT, TRIGGERED_OLD_TRIGGERED);
+        case BG_IC_SPELL_HUGE_SEAFORIUM_BLAST:  player->CastSpell(player, BG_IC_SPELL_HUGE_BOMB_CREDIT, TRIGGERED_OLD_TRIGGERED);
+    }
 }
 
 void BattleGroundIC::HandleCreatureCreate(Creature* creature)
@@ -604,6 +613,19 @@ bool BattleGroundIC::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
             return m_objectiveOwner[BG_IC_OBJECTIVE_QUARY] == TEAM_INDEX_ALLIANCE && m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY] == TEAM_INDEX_ALLIANCE;
         case BG_IC_CRIT_RESOURCE_GLUT_H:
             return m_objectiveOwner[BG_IC_OBJECTIVE_QUARY] == TEAM_INDEX_HORDE && m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY] == TEAM_INDEX_HORDE;
+        case BG_IC_CRIT_MINE_A_1:
+        case BG_IC_CRIT_MINE_A_2:
+            return m_objectiveOwner[BG_IC_OBJECTIVE_QUARY] == TEAM_INDEX_ALLIANCE && m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY] == TEAM_INDEX_ALLIANCE &&
+                m_objectiveOwner[BG_IC_OBJECTIVE_DOCKS] == TEAM_INDEX_ALLIANCE && m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP] == TEAM_INDEX_ALLIANCE &&
+                m_objectiveOwner[BG_IC_OBJECTIVE_HANGAR] == TEAM_INDEX_ALLIANCE;
+        case BG_IC_CRIT_MINE_H_1:
+        case BG_IC_CRIT_MINE_H_2:
+            return m_objectiveOwner[BG_IC_OBJECTIVE_QUARY] == TEAM_INDEX_HORDE && m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY] == TEAM_INDEX_HORDE &&
+                m_objectiveOwner[BG_IC_OBJECTIVE_DOCKS] == TEAM_INDEX_HORDE && m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP] == TEAM_INDEX_HORDE &&
+                m_objectiveOwner[BG_IC_OBJECTIVE_HANGAR] == TEAM_INDEX_HORDE;
+        case BG_IC_CRIT_MOVED_DOWN_VEHICLE:
+        case BG_IC_CRIT_MOVED_DOWN_PLAYER:
+            return source->IsBoarded() && source->GetTransportInfo()->GetTransport()->GetEntry() == BG_IC_VEHICLE_KEEP_CANNON;
     }
 
     return false;

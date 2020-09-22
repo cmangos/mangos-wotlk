@@ -139,7 +139,7 @@ enum
     BG_IC_VEHICLE_GUNSHIP_CANNON_H          = 34935,
     BG_IC_VEHICLE_GUNSHIP_CANNON_A          = 34929,
     BG_IC_VEHICLE_KEEP_CANNON               = 34944,        // applies aura 50630 and 29266 when creature is about to be killed. Update entry to 35819; Handled in EAI
-    BG_IC_VEHICLE_BROKEN_KEEP_CANNON        = 35819,        // allows player click; player casts 68077 to repair; this triggers 68078, which triggers 43978 and resets entry to 34944
+    // BG_IC_VEHICLE_BROKEN_KEEP_CANNON     = 35819,        // allows player click; player casts 68077 to repair; this triggers 68078, which triggers 43978 and resets entry to 34944
     BG_IC_VEHICLE_SIEGE_ENGINE_A            = 34776,        // has accessories: 36356 and 34777; starts with aura 67323
     BG_IC_VEHICLE_SIEGE_ENGINE_H            = 35069,        // has accessories: 34778 and 36355; starts with aura 67323
     BG_IC_VEHICLE_DEMOLISHER                = 34775,
@@ -189,10 +189,10 @@ enum
     // seaforium bombs - faction allows click from the opposite team
     BG_IC_GO_HUGE_SEAFORIUM_BOMB_A          = 195332,
     BG_IC_GO_HUGE_SEAFORIUM_BOMB_H          = 195333,
-    BG_IC_GO_HUGE_SEAFORIUM_BOMB_TRAP       = 195331,       // actual bomb; triggers spell 66672
+    // BG_IC_GO_HUGE_SEAFORIUM_BOMB_TRAP    = 195331,       // actual bomb; triggers spell 66672
 
     BG_IC_GO_SEAFORIUM_BOMBS                = 195237,       // spawned at the workshop; takes faction from workshop owner
-    BG_IC_GO_SEAFORIUM_BOMB_TRAP            = 195235,       // actual bomb; triggers spell 66676
+    // BG_IC_GO_SEAFORIUM_BOMB_TRAP         = 195235,       // actual bomb; triggers spell 66676
 
     // teleporters
     BG_IC_GO_TELEPORTER_OUTSIDE_H           = 195314,       // teleports from outside to inside; has spell 66549
@@ -263,12 +263,19 @@ enum
     BG_IC_SPELL_REFINERY                    = 68719,        // triggers 68722 on vehicles
     BG_IC_SPELL_QUARRY                      = 68720,        // triggers 68723 on vehicles
     BG_IC_SPELL_PARACHUTE                   = 66656,        // triggers 66657
-
+    BG_IC_SPELL_SEAFORIUM_BLAST             = 66676,
+    BG_IC_SPELL_HUGE_SEAFORIUM_BLAST        = 66672,
 
     // achievements
-    BG_IC_CRIT_CUT_BLUE_WIRE                = 12132,        // achiev id 3852; type 29; spell id 1843
+    // BG_IC_CRIT_CUT_BLUE_WIRE             = 12132,        // achiev id 3852; type 29; spell id 1843
     BG_IC_CRIT_RESOURCE_GLUT_A              = 12060,        // achiev id 3846
     BG_IC_CRIT_RESOURCE_GLUT_H              = 12061,        // achiev id 4176
+    BG_IC_CRIT_MINE_A_1                     = 12062,        // achiev id 3851
+    BG_IC_CRIT_MINE_A_2                     = 12063,
+    BG_IC_CRIT_MINE_H_1                     = 12064,        // achiev id 4177
+    BG_IC_CRIT_MINE_H_2                     = 12065,
+    BG_IC_CRIT_MOVED_DOWN_VEHICLE           = 12114,        // achiev id 3850
+    BG_IC_CRIT_MOVED_DOWN_PLAYER            = 12068,
 
     // achievement spells
     BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE    = 68357,        // used for achiev id 3845 and 3850
@@ -277,7 +284,8 @@ enum
     BG_IC_SPELL_DRIVING_CREDIT_GLAIVE       = 68363,        // used for achiev id 3847
     BG_IC_SPELL_DRIVING_CREDIT_SIEGE        = 68364,        // used for achiev id 3847
     BG_IC_SPELL_DRIVING_CREDIT_CATAPULT     = 68362,        // used for achiev id 3847
-    BG_IC_SPELL_BOMB_CREDIT                 = 68366,        // used for achievement 3848 and 3849
+    BG_IC_SPELL_BOMB_CREDIT                 = 68366,        // used for achiev id 3848; triggered from spell 66676
+    BG_IC_SPELL_HUGE_BOMB_CREDIT            = 68367,        // used for achiev id 3849; triggered from spell 66672
 
     // graveyard links
     BG_IC_GRAVEYARD_ID_DOCKS                = 1480,
@@ -613,6 +621,7 @@ class BattleGroundIC : public BattleGround
         void HandleKillPlayer(Player* player, Player* killer) override;
 
         void EventPlayerClickedOnFlag(Player* player, GameObject* go) override;
+        void EventGameObjectDamaged(Player* player, GameObject* object, uint32 spellId) override;
 
         bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
 
