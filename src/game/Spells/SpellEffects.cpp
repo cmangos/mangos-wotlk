@@ -13787,6 +13787,13 @@ void Spell::EffectWMODamage(SpellEffectIndex /*effIdx*/)
 
     DEBUG_LOG("Spell::EffectWMODamage, spell Id %u, go entry %u, damage %u", m_spellInfo->Id, gameObjTarget->GetEntry(), uint32(damage));
     gameObjTarget->DealGameObjectDamage(uint32(damage), m_spellInfo->Id, caster);
+
+    // inform battleground script
+    if (caster->GetTypeId() == TYPEID_PLAYER && caster->GetMap()->IsBattleGround())
+    {
+        if (BattleGround* bg = ((Player*)caster)->GetBattleGround())
+            bg->EventGameObjectDamaged((Player*)caster, gameObjTarget, m_spellInfo->Id);
+    }
 }
 
 void Spell::EffectWMORepair(SpellEffectIndex /*effIdx*/)
