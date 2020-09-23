@@ -286,6 +286,7 @@ void BattleGroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* go)
         if (go->GetEntry() == i.objectEntry)
         {
             UpdatePlayerScore(player, SCORE_BASES_ASSAULTED, 1);
+            player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 245);
 
             objectiveId = i.objectiveId;
             newWorldState = newOwnerIdx == TEAM_INDEX_ALLIANCE ? i.nextWorldStateAlly : i.nextWorldStateHorde;
@@ -306,6 +307,7 @@ void BattleGroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* go)
             if (go->GetEntry() == i.objectEntry)
             {
                 UpdatePlayerScore(player, SCORE_BASES_ASSAULTED, 1);
+                player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 245);
 
                 objectiveId = i.objectiveId;
                 newWorldState = i.nextState;
@@ -332,6 +334,7 @@ void BattleGroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* go)
                 objectiveId = i.objectiveId;
 
                 UpdatePlayerScore(player, m_objectiveConquerer[objectiveId] == newOwnerIdx ? SCORE_BASES_DEFENDED : SCORE_BASES_ASSAULTED, 1);
+                player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, m_objectiveConquerer[objectiveId] == newOwnerIdx ? 246 : 245);
 
                 newWorldState = m_objectiveConquerer[objectiveId] == newOwnerIdx ? i.nextStateDefend : i.nextStateAssault;
 
@@ -411,7 +414,9 @@ void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
             // summon a new siege engine
             if (m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP] == TEAM_INDEX_ALLIANCE)
             {
-                creature->SummonCreature(BG_IC_VEHICLE_SIEGE_ENGINE_A, iocWorkshopSpawns[0].x, iocWorkshopSpawns[0].y, iocWorkshopSpawns[0].z, iocWorkshopSpawns[0].o, TEMPSPAWN_DEAD_DESPAWN, 0);
+                if (Creature* pSiegeEngine = creature->SummonCreature(BG_IC_VEHICLE_SIEGE_ENGINE_A, iocWorkshopSpawns[0].x, iocWorkshopSpawns[0].y, iocWorkshopSpawns[0].z, iocWorkshopSpawns[0].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_workshopSpawnsGuids[TEAM_INDEX_ALLIANCE].push_back(pSiegeEngine->GetObjectGuid());
+
                 if (Creature* pMechanic = GetBgMap()->GetCreature(m_workshopMechanicGuids[TEAM_INDEX_ALLIANCE]))
                     creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, pMechanic, pMechanic);
 
@@ -426,7 +431,9 @@ void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
             // summon a new siege engine
             if (m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP] == TEAM_INDEX_HORDE)
             {
-                creature->SummonCreature(BG_IC_VEHICLE_SIEGE_ENGINE_H, iocWorkshopSpawns[0].x, iocWorkshopSpawns[0].y, iocWorkshopSpawns[0].z, iocWorkshopSpawns[0].o, TEMPSPAWN_DEAD_DESPAWN, 0);
+                if (Creature* pSiegeEngine = creature->SummonCreature(BG_IC_VEHICLE_SIEGE_ENGINE_H, iocWorkshopSpawns[0].x, iocWorkshopSpawns[0].y, iocWorkshopSpawns[0].z, iocWorkshopSpawns[0].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_workshopSpawnsGuids[TEAM_INDEX_HORDE].push_back(pSiegeEngine->GetObjectGuid());
+
                 if (Creature* pMechanic = GetBgMap()->GetCreature(m_workshopMechanicGuids[TEAM_INDEX_ALLIANCE]))
                     creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, pMechanic, pMechanic);
             }
@@ -457,8 +464,8 @@ void BattleGroundIC::EventGameObjectDamaged(Player* player, GameObject* object, 
 {
     switch (spellId)
     {
-        case BG_IC_SPELL_SEAFORIUM_BLAST:       player->CastSpell(player, BG_IC_SPELL_BOMB_CREDIT, TRIGGERED_OLD_TRIGGERED);
-        case BG_IC_SPELL_HUGE_SEAFORIUM_BLAST:  player->CastSpell(player, BG_IC_SPELL_HUGE_BOMB_CREDIT, TRIGGERED_OLD_TRIGGERED);
+        case BG_IC_SPELL_SEAFORIUM_BLAST:       player->CastSpell(player, BG_IC_SPELL_BOMB_CREDIT, TRIGGERED_OLD_TRIGGERED);        break;
+        case BG_IC_SPELL_HUGE_SEAFORIUM_BLAST:  player->CastSpell(player, BG_IC_SPELL_HUGE_BOMB_CREDIT, TRIGGERED_OLD_TRIGGERED);   break;
     }
 }
 
@@ -626,6 +633,9 @@ bool BattleGroundIC::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
         case BG_IC_CRIT_MOVED_DOWN_VEHICLE:
         case BG_IC_CRIT_MOVED_DOWN_PLAYER:
             return source->IsBoarded() && source->GetTransportInfo()->GetTransport()->GetEntry() == BG_IC_VEHICLE_KEEP_CANNON;
+        case BG_IC_CRIT_GLAIVE_GRAVE:
+            return source->IsBoarded() && (source->GetTransportInfo()->GetTransport()->GetEntry() == BG_IC_VEHICLE_GLAIVE_THROWER_A ||
+                source->GetTransportInfo()->GetTransport()->GetEntry() == BG_IC_VEHICLE_GLAIVE_THROWER_H);
     }
 
     return false;

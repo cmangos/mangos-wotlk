@@ -276,14 +276,15 @@ enum
     BG_IC_CRIT_MINE_H_2                     = 12065,
     BG_IC_CRIT_MOVED_DOWN_VEHICLE           = 12114,        // achiev id 3850
     BG_IC_CRIT_MOVED_DOWN_PLAYER            = 12068,
+    BG_IC_CRIT_GLAIVE_GRAVE                 = 12183,        // achiev id 3855
 
     // achievement spells
     BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE    = 68357,        // used for achiev id 3845 and 3850
     BG_IC_SPELL_ACHIEV_BACK_DOOR_JOB        = 68502,        // used for achiev id 3854
-    BG_IC_SPELL_DRIVING_CREDIT_DEMOLISHER   = 68365,        // used for achiev id 3847
-    BG_IC_SPELL_DRIVING_CREDIT_GLAIVE       = 68363,        // used for achiev id 3847
-    BG_IC_SPELL_DRIVING_CREDIT_SIEGE        = 68364,        // used for achiev id 3847
-    BG_IC_SPELL_DRIVING_CREDIT_CATAPULT     = 68362,        // used for achiev id 3847
+    // BG_IC_SPELL_DRIVING_CREDIT_DEMOLISHER= 68365,        // used for achiev id 3847
+    // BG_IC_SPELL_DRIVING_CREDIT_GLAIVE    = 68363,        // used for achiev id 3847
+    // BG_IC_SPELL_DRIVING_CREDIT_SIEGE     = 68364,        // used for achiev id 3847
+    // BG_IC_SPELL_DRIVING_CREDIT_CATAPULT  = 68362,        // used for achiev id 3847
     BG_IC_SPELL_BOMB_CREDIT                 = 68366,        // used for achiev id 3848; triggered from spell 66676
     BG_IC_SPELL_HUGE_BOMB_CREDIT            = 68367,        // used for achiev id 3849; triggered from spell 66672
 
@@ -306,6 +307,10 @@ enum
     // factions
     BG_IC_FACTION_ID_ALLIANCE               = 1732,
     BG_IC_FACTION_ID_HORDE                  = 1735,
+
+    // area triggers - probably checked for achiev 3854
+    BG_IC_AREATRIGGER_KEEP_ALLIANCE         = 5555,
+    BG_IC_AREATRIGGER_KEEP_HORDE            = 5535,
 };
 
 // *** Battleground factions *** //
