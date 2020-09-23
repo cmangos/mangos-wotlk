@@ -1057,6 +1057,10 @@ void Unit::Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEn
     else                                                // Killed creature
         JustKilledCreature(killer, static_cast<Creature*>(victim), responsiblePlayer);
 
+    // killing blow achievement
+    if (responsiblePlayer)
+        responsiblePlayer->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, 1, 0, victim);
+
     // stop combat
     DEBUG_FILTER_LOG(LOG_FILTER_DAMAGE, "DealDamageAttackStop");
     victim->CombatStop();

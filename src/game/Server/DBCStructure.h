@@ -229,7 +229,7 @@ struct AchievementCriteriaEntry
             uint32  count;                                  // 4
             uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0 or 3
             uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
-            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 3
+            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 1 or 3
             uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } capture_bg_objective;
 
@@ -263,13 +263,14 @@ struct AchievementCriteriaEntry
         } learn_spell;
 
         // ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL         = 35
+        // ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS      = 56
         struct
         {
             uint32  unused;                                 // 3
             uint32  count;                                  // 4
             uint32  condFlag1;                              // 5 condition flag1; in wotlk can be 0 or 3
             uint32  condVal1;                               // 6 condition value1; provided if condFlag1 is !0
-            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 3
+            uint32  condFlag2;                              // 7 condition flag2; in wotlk can be 0, 1 or 3
             uint32  condVal2;                               // 8 condition value2; provided if condFlag2 is !0
         } honorable_kill_battleground;
 
@@ -408,7 +409,6 @@ struct AchievementCriteriaEntry
         } do_emote;
         // ACHIEVEMENT_CRITERIA_TYPE_DAMAGE_DONE            = 13
         // ACHIEVEMENT_CRITERIA_TYPE_HEALING_DONE           = 55
-        // ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS      = 56
         struct
         {
             uint32  unused;                                 // 3

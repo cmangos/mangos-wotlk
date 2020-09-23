@@ -481,24 +481,35 @@ void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uin
                     achievementCriteria->cast_spell.condVal1 == miscvalue2)
                     SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
                 break;
-            case ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL:    // reset only achievements that have a map condition; they need to be completed as part of one single pvp match
+            case ACHIEVEMENT_CRITERIA_TYPE_SPECIAL_PVP_KILL:                                // reset only achievements that have a map condition; they need to be completed as part of one single pvp match
                 if (achievementCriteria->special_pvp_kill.flag1 == miscvalue1 &&
                     achievementCriteria->special_pvp_kill.mapId1 == miscvalue2)
                     SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
                 break;
-            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:
+            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL_AT_AREA:                          // reset only achievements that have a map condition; they need to be completed as part of one single pvp match
                 if (achievementCriteria->honorable_kill_at_area.condFlag1 == miscvalue1 &&
                     achievementCriteria->honorable_kill_at_area.condVal1 == miscvalue2)
                     SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
                 break;
-            case ACHIEVEMENT_CRITERIA_TYPE_WIN_BG:
+            case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:                                  // reset only achievements that have a no death condition;
+                if (achievementCriteria->honorable_kill_battleground.condFlag2 == miscvalue1)
+                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_WIN_BG:                                          // reset only achievements that have a map condition; they need to be completed as part of one single pvp match
                 if (achievementCriteria->win_bg.additionalRequirement1_type == miscvalue1 &&
                     achievementCriteria->win_bg.additionalRequirement1_value == miscvalue2)
                     SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
                 break;
-            case ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE:
-                if (achievementCriteria->capture_bg_objective.condFlag1 == miscvalue1 &&
-                    achievementCriteria->capture_bg_objective.condVal1 == miscvalue2)
+            case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:                               // reset only achievements that have a map / no death condition; they need to be completed as part of one single pvp match
+                if ((achievementCriteria->honorable_kill_battleground.condFlag1 == miscvalue1 &&
+                    achievementCriteria->honorable_kill_battleground.condVal1 == miscvalue2) ||
+                    achievementCriteria->honorable_kill_battleground.condFlag2 == miscvalue1)
+                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+                break;
+            case ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE:                            // reset only achievements that have a map / no death condition; they need to be completed as part of one single pvp match
+                if ((achievementCriteria->capture_bg_objective.condFlag1 == miscvalue1 &&
+                    achievementCriteria->capture_bg_objective.condVal1 == miscvalue2) ||
+                    achievementCriteria->capture_bg_objective.condFlag2 == miscvalue1)
                     SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
                 break;
             default:                                        // reset all cases
@@ -1742,6 +1753,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL:
+            case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
             {
                 // Check map id requirement if provided; In wotlk flag1 = flag2 and map1 = map2, so we only need to check the first one
                 if (achievementCriteria->honorable_kill_battleground.condFlag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
@@ -1769,11 +1781,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
 
                 change = 1;
                 progressType = PROGRESS_ACCUMULATE;
-                break;
-            }
-            case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
-            {
-                // ToDo: count the final damage done to a player by another player
                 break;
             }
             case ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE:
@@ -1978,7 +1985,7 @@ uint32 AchievementMgr::GetCriteriaProgressMaxCounter(AchievementCriteriaEntry co
             resultValue = achievementCriteria->capture_bg_objective.count;
             break;
         case ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS:
-            resultValue = achievementCriteria->healing_done.count;
+            resultValue = achievementCriteria->honorable_kill_battleground.count;
             break;
 
         // handle all statistic-only criteria here
