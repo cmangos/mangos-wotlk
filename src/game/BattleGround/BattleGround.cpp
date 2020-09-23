@@ -1772,6 +1772,11 @@ void BattleGround::HandleKillPlayer(Player* player, Player* killer)
     // to be able to remove insignia -- ONLY IN BattleGrounds
     if (!isArena())
         player->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+
+    // reset no death achievements
+    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
+    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
+    player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
 }
 
 // return the player's team based on battlegroundplayer info
