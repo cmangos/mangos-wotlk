@@ -21560,7 +21560,7 @@ void Player::RewardSinglePlayerAtKill(Unit* pVictim)
     RewardHonor(pVictim, 1);
 
     // xp and reputation only in !PvP case
-    if (!pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && pVictim->GetTypeId() == TYPEID_UNIT)
+    if ((!pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || (pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && pVictim->IsVehicle())) && pVictim->GetTypeId() == TYPEID_UNIT)
     {
         Creature* creatureVictim = static_cast<Creature*>(pVictim);
         RewardReputation(creatureVictim, 1);
