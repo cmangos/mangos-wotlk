@@ -110,6 +110,16 @@ enum AchievementCriteriaCompletionFlags
     ACHIEVEMENT_CRITERIA_FLAG_IS_ACHIEVEMENT_ID = 0x00000040,
 };
 
+enum AchievementCriteriaTimedTypes
+{
+    ACHIEVEMENT_TIMED_TYPE_EVENT            = 1,            // Timer is started by internal event with id in timerStartEvent
+    ACHIEVEMENT_TIMED_TYPE_QUEST            = 2,            // Timer is started by accepting quest with entry in timerStartEvent
+    ACHIEVEMENT_TIMED_TYPE_SPELL_CASTER     = 5,            // Timer is started by casting a spell with entry in timerStartEvent
+    ACHIEVEMENT_TIMED_TYPE_SPELL_TARGET     = 6,            // Timer is started by being target of spell with entry in timerStartEvent
+    ACHIEVEMENT_TIMED_TYPE_CREATURE         = 7,            // Timer is started by killing creature with entry in timerStartEvent
+    ACHIEVEMENT_TIMED_TYPE_ITEM             = 9,            // Timer is started by using item with entry in timerStartEvent
+};
+
 enum AchievementCriteriaTypes
 {
     ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE = 0,
