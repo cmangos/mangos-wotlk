@@ -991,8 +991,8 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                     continue;
 
                 // check DBC map condition (required for some pvp kills); when this is provided condVal1 = condVal2 so we only check the first one
-                if (achievementCriteria->be_spell_target.condFlag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
-                    if (GetPlayer()->GetMapId() != achievementCriteria->be_spell_target.condVal1)
+                if (achievementCriteria->kill_creature.condFlag1 == ACHIEVEMENT_CRITERIA_CONDITION_MAP)
+                    if (GetPlayer()->GetMapId() != achievementCriteria->kill_creature.condVal1)
                         continue;
 
                 // ToDo: implement the additional criteria ACHIEVEMENT_CRITERIA_CONDITION_NO_SPELL_HIT and ACHIEVEMENT_CRITERIA_CONDITION_UNK3
