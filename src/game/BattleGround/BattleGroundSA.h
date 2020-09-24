@@ -31,6 +31,7 @@ enum
     BG_SA_MAX_GRAVEYARDS                        = 3,                // max capturable graveyards
 
     BG_SA_ZONE_ID_STRAND                        = 4384,
+    BG_SA_ZONE_ID_COURTYARD_ANCIENTS            = 4609,
 
     // world state values
     BG_SA_STATE_VALUE_GATE_INTACT               = 1,
@@ -118,7 +119,7 @@ enum
 
     BG_SA_GO_SEAFORIUM_BOMB_ALLIANCE            = 190753,               // phased for attacker
     BG_SA_GO_SEAFORIUM_BOMB_HORDE               = 194086,
-    BG_SA_GO_SEAFORIUM_BOMB                     = 195235,               // actual bomb - trap triggering spell 66676
+    BG_SA_GO_SEAFORIUM_BOMB                     = 190752,               // actual bomb - trap triggering spell 52408
 
     // graveyard flags - type buttons
     BG_SA_GO_GY_FLAG_ALLIANCE_EAST              = 191306,
@@ -148,6 +149,8 @@ enum
     BG_SA_SPELL_TELEPORT_ATTACKERS              = 60178,
     BG_SA_SPELL_END_OF_ROUND                    = 52459,                // stun the players at the end of the round; after 5 seconds, teleport and reset for round 2
     BG_SA_SPELL_REMOVE_SEAFORIUM                = 59077,
+    BG_SA_SPELL_SEAFORIUM_BLAST                 = 52408,
+    BG_SA_SPELL_CARRY_SEAFORIUM                 = 52418,
 
     // phasing auras implemented in DB in spell area
     // BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT = 60027,                // phase 65 - alliance is defender
@@ -164,8 +167,8 @@ enum
     BG_SA_CRIT_DEFENSE_ANCIENTS_HORDE           = 7740,                 // achiev id 2200; criteria type 28; spell id 52459 (end of round)
     BG_SA_CRIT_ARTILLERY_VETERAN                = 7625,                 // achiev id 1763; criteria type 0; creature id 28781
     BG_SA_CRIT_ARTILLERY_EXPERT                 = 7628,                 // achiev id 2189; criteria type 0; creature id 28781; resets every battleground start if not completed
-    BG_SA_CRIT_DAPPER_SAPPER                    = 7632,                 // achiev id 1761; criteria type 28; spell id 60937
-    BG_SA_CRIT_EXPLOSIVES_EXPERT                = 7635,                 // achiev id 1761; criteria type 28; spell id 60937; resets every battleground start if not completed
+    // BG_SA_CRIT_DAPPER_SAPPER                 = 7632,                 // achiev id 1761; criteria type 28; spell id 60937
+    // BG_SA_CRIT_EXPLOSIVES_EXPERT             = 7635,                 // achiev id 1761; criteria type 28; spell id 60937; resets every battleground start if not completed
 
     BG_SA_ACHIEV_START_ID_STORM_BEACH_ALLY      = 23748,                // achiev id 1310; criteria tyep 28; spell id 65246
     BG_SA_ACHIEV_START_ID_STORM_BEACH_HORDE     = 21702,
@@ -307,6 +310,7 @@ class BattleGroundSA : public BattleGround
         void HandleKillUnit(Creature* unit, Player* killer) override;
 
         void EventPlayerClickedOnFlag(Player* player, GameObject* go) override;
+        void EventGameObjectDamaged(Player* player, GameObject* object, uint32 spellId) override;
 
         bool IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType) override;
 

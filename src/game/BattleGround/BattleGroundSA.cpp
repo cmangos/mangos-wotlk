@@ -18,6 +18,7 @@
 
 #include "Entities/Player.h"
 #include "Entities/GameObject.h"
+#include "Entities/Vehicle.h"
 #include "BattleGround.h"
 #include "BattleGroundSA.h"
 #include "Tools/Language.h"
@@ -719,6 +720,12 @@ void BattleGroundSA::SendBattlegroundWarning(int32 messageId)
     SendMessageToAll(messageId, CHAT_MSG_RAID_BOSS_EMOTE, LANG_UNIVERSAL, guid);
 }
 
+void BattleGroundSA::EventGameObjectDamaged(Player* player, GameObject* object, uint32 spellId)
+{
+    if (spellId == BG_SA_SPELL_SEAFORIUM_BLAST)
+        player->CastSpell(player, BG_SA_SPELL_ACHIEV_SEAFORIUM_DAMAGE, TRIGGERED_OLD_TRIGGERED);
+}
+
 bool BattleGroundSA::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1)
 {
     switch (criteria_id)
@@ -729,6 +736,15 @@ bool BattleGroundSA::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
         case BG_SA_CRIT_DEFENSE_ANCIENTS_ALLY:
         case BG_SA_CRIT_DEFENSE_ANCIENTS_HORDE:
             return m_defenseAncients && GetTeamIndexByTeamId(source->GetTeam()) == m_defendingTeamIdx;
+        case BG_SA_CRIT_ARTILLERY_EXPERT:
+        case BG_SA_CRIT_ARTILLERY_VETERAN:
+            return source->IsBoarded() && source->GetTransportInfo()->GetTransport()->GetEntry() == BG_SA_VEHICLE_CANNON;
+        case BG_SA_CRIT_ANCIENT_PROTECTOR:
+        case BG_SA_CRIT_COURTYARD_PROTECTOR:
+            return source->GetAreaId() == BG_SA_ZONE_ID_COURTYARD_ANCIENTS;
+        case BG_SA_CRIT_DROP_IT:
+        case BG_SA_CRIT_DROP_IT_NOW:
+            return target->HasAura(BG_SA_SPELL_CARRY_SEAFORIUM);
     }
 
     return false;
