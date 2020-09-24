@@ -219,6 +219,20 @@ struct TaunkaFaceMeSpellScript : public SpellScript
 };
 
 /*######
+## spell_scrape_corrosive_spit
+######*/
+
+struct ScrapeCorrosiveSpit : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool/* strict*/) const override
+    {
+        if (!spell->GetCaster()->HasAura(47447))
+            return SPELL_FAILED_CASTER_AURASTATE;
+        return SPELL_CAST_OK;
+    }
+};
+
+/*######
 ## spell_container_of_rats
 ######*/
 
@@ -263,6 +277,7 @@ void AddSC_dragonblight()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<TaunkaFaceMeSpellScript>("spell_taunka_face_me");
+    RegisterSpellScript<ScrapeCorrosiveSpit>("spell_scrape_corrosive_spit");
     RegisterSpellScript<ContainerOfRatsSpellScript>("spell_container_of_rats");
     RegisterAuraScript<ArmyOfTheDead>("spell_army_of_the_dead");
 }
