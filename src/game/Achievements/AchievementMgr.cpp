@@ -512,6 +512,11 @@ void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uin
                     achievementCriteria->capture_bg_objective.condFlag2 == miscvalue1)
                     SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
                 break;
+            case ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE:                                   // reset only achievements that have a map / no spell hit condition;
+                if (achievementCriteria->kill_creature.condFlag2 == miscvalue1 &&
+                    achievementCriteria->kill_creature.condVal2 == miscvalue2)
+                    SetCriteriaProgress(achievementCriteria, achievement, 0, PROGRESS_SET);
+                break;
             default:                                        // reset all cases
                 break;
         }
