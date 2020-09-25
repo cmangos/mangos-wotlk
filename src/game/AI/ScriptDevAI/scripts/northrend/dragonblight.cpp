@@ -219,6 +219,23 @@ struct TaunkaFaceMeSpellScript : public SpellScript
 };
 
 /*######
+## spell_capture_jormungar_spawn
+######*/
+
+struct CaptureJormungarSpawnSpellScript : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        // Capture Jormungar Spawn can be cast only on this target
+        if (!target || target->GetEntry() != 26359)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
+/*######
 ## spell_scrape_corrosive_spit
 ######*/
 
@@ -277,6 +294,7 @@ void AddSC_dragonblight()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<TaunkaFaceMeSpellScript>("spell_taunka_face_me");
+    RegisterSpellScript<CaptureJormungarSpawnSpellScript>("spell_capture_jormungar_spawn");
     RegisterSpellScript<ScrapeCorrosiveSpit>("spell_scrape_corrosive_spit");
     RegisterSpellScript<ContainerOfRatsSpellScript>("spell_container_of_rats");
     RegisterAuraScript<ArmyOfTheDead>("spell_army_of_the_dead");
