@@ -21,6 +21,7 @@
 #include "Entities/GameObject.h"
 #include "Entities/Player.h"
 #include "Entities/Unit.h"
+#include "Entities/Vehicle.h"
 #include "Spells/SpellAuras.h"
 #include "Globals/ObjectMgr.h"
 
@@ -527,7 +528,7 @@ bool BattlefieldWG::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
         returnValue = HandleCapturePointEvent(eventId, go);
     // handle destructible buildings
     else if (go->GetGoType() == GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING)
-        returnValue = HandleDestructibleBuildingEvent(eventId, go);
+        returnValue = HandleDestructibleBuildingEvent(eventId, go, invoker);
 
     return returnValue;
 }
@@ -600,7 +601,7 @@ bool BattlefieldWG::HandleCapturePointEvent(uint32 eventId, GameObject* go)
 }
 
 // Function that handles all destructible buildings events
-bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* go)
+bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* go, Unit* invoker)
 {
     // special event for the fortress door
     if (go->GetEntry() == GO_WG_FORTRESS_DOOR && eventId == EVENT_KEEP_DOOR_DESTROY)
@@ -634,6 +635,8 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
             {
                 tower->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_DESTROYED : BF_GO_STATE_HORDE_DESTROYED);
                 SendWintergraspWarning(wgFortressTowersData[index].messagedDestroyed, go);
+
+                invoker->CastSpell(invoker, SPELL_ACHIEV_LEAN_TOWER_DEFENSE, TRIGGERED_OLD_TRIGGERED);
 
                 ++m_destroyedTowers[GetTeamIndexByTeamId(GetDefender())];
                 // ToDo: handle possible yell
@@ -680,6 +683,8 @@ bool BattlefieldWG::HandleDestructibleBuildingEvent(uint32 eventId, GameObject* 
 
                 // award quest credit
                 QuestCreditTeam(NPC_QUEST_CREDIT_KILL_SOUTHERN_TOWER, GetDefender(), go);
+
+                invoker->CastSpell(invoker, SPELL_ACHIEV_LEAN_TOWER_OFFENSE, TRIGGERED_OLD_TRIGGERED);
 
                 ++m_destroyedTowers[GetTeamIndexByTeamId(GetAttacker())];
 
@@ -1431,6 +1436,29 @@ bool BattlefieldWG::IsConditionFulfilled(Player const* source, uint32 conditionI
                     return source->GetTeam() == workshop->GetOwner();
             }
             break;
+    }
+
+    return false;
+}
+
+bool BattlefieldWG::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1)
+{
+    switch (criteria_id)
+    {
+        case ACHIEV_CRIT_WG_NO_CHANCE:
+            return source->IsBoarded() && source->GetTransportInfo()->GetTransport()->GetEntry() == NPC_WINTERGRASP_TOWER_CANNON && target->IsMounted();
+        case ACHIEV_CRIT_WG_WITHIN_GRASP:
+            return GetTimer() <= 10 * MINUTE * IN_MILLISECONDS;
+        case ACHIEV_CRIT_VEH_SLAUGHTER_CANNON:
+            return source->IsBoarded() && source->GetTransportInfo()->GetTransport()->GetEntry() == NPC_WINTERGRASP_TOWER_CANNON;
+        case ACHIEV_CRIT_VEH_SLAUGHTER_SIEGE_A:
+            return source->IsBoarded() && source->GetTransportInfo()->GetTransport()->GetEntry() == NPC_WINTERGRASP_SIEGE_ENGINE_A;
+        case ACHIEV_CRIT_VEH_SLAUGHTER_SIEGE_H:
+            return source->IsBoarded() && source->GetTransportInfo()->GetTransport()->GetEntry() == NPC_WINTERGRASP_SIEGE_ENGINE_H;
+        case ACHIEV_CRIT_VEH_SLAUGHTER_DEMOLISHER:
+            return source->IsBoarded() && source->GetTransportInfo()->GetTransport()->GetEntry() == NPC_WINTERGRASP_DEMOLISHER;
+        case ACHIEV_CRIT_VEH_SLAUGHTER_CATAPULT:
+            return source->IsBoarded() && source->GetTransportInfo()->GetTransport()->GetEntry() == NPC_WINTERGRASP_CATAPULT;
     }
 
     return false;

@@ -81,7 +81,8 @@ enum
     // SPELL_WINTERGRASP_RESTRICTED_FLIGHT_AREA = 58730,            // no fly zone aura - Implemented in Player::UpdateArea()
     // SPELL_VICTORY_AURA_COSMETIC              = 60044,            // use unk
     SPELL_RULERS_OF_WINTERGRASP                 = 52108,            // increase damage buff
-    // SPELL_ACH_DESTROYED_TOWER                = 60676,
+    SPELL_ACHIEV_LEAN_TOWER_DEFENSE             = 20723,            // achiev id 1727; server side spells
+    SPELL_ACHIEV_LEAN_TOWER_OFFENSE             = 60676,            // achiev id 1727; server side spells
 
     // Phasing spells
     SPELL_ALLIANCE_CONTROLS_FACTORY_PHASE       = 56617,            // phase 32 - workshop phase aura
@@ -430,10 +431,13 @@ enum
     // ***** Achiev criterias and achiev spells *****
     ACHIEV_CRIT_WG_NO_CHANCE                    = 7703,             // achiev id 1751
     ACHIEV_CRIT_WG_VEHICULER_SLAUGHTER          = 7704,             // achiev id 1723
-    ACHEIV_CRIT_WG_RANGER                       = 7709,             // achiev id 2199
+    // ACHEIV_CRIT_WG_RANGER                    = 7709,             // achiev id 2199
     ACHIEV_CRIT_WG_WITHIN_GRASP                 = 7666,             // achiev id 1755
-
-    SPELL_ACHIEV_LEAN_TOWER                     = 20723,            // achiev id 1727
+    ACHIEV_CRIT_VEH_SLAUGHTER_CANNON            = 7704,             // achiev id 1723
+    ACHIEV_CRIT_VEH_SLAUGHTER_SIEGE_A           = 7705,
+    ACHIEV_CRIT_VEH_SLAUGHTER_SIEGE_H           = 7706,
+    ACHIEV_CRIT_VEH_SLAUGHTER_DEMOLISHER        = 7707,
+    ACHIEV_CRIT_VEH_SLAUGHTER_CATAPULT          = 7708,
 
     // ***** Condition entries *****
     // used to check the gossip options in DB for various npcs
@@ -713,6 +717,7 @@ class BattlefieldWG : public Battlefield
 
         // conditions
         bool IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType) override;
+        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
 
     private:
 
@@ -727,7 +732,7 @@ class BattlefieldWG : public Battlefield
 
         // functions to handle the battlefield events
         bool HandleCapturePointEvent(uint32 eventId, GameObject* go);
-        bool HandleDestructibleBuildingEvent(uint32 eventId, GameObject* go);
+        bool HandleDestructibleBuildingEvent(uint32 eventId, GameObject* go, Unit* invoker);
 
         // handle lock / unlock of the workshops
         void LockWorkshops(bool lock, const WorldObject* objRef, WintergraspFactory* workshop);
