@@ -1865,9 +1865,11 @@ INSERT INTO `spell_template` (`Id`, `Category`, `Dispel`, `Mechanic`, `Attribute
 -- Missing WotLK Achievement Spells
 -- ============================================================
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`AttributesEx5`,`AttributesEx6`,`DurationIndex`,`Effect1`,`EffectImplicitTargetA1`,`EffectImplicitTargetB1`,`EffectRadiusIndex1`,`EffectApplyAuraName1`,`IsServerSide`,`SpellName`) VALUES
+('20723','256','0','0','0','0','524288','0','0','3','1','0','0','0','1','Achievement check - Wintergrasp - Leaning Tower'),
 ('58630','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Mal''Ganis'),
 ('59046','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Tribunal of Ages'),
 ('59450','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - The Four Horsemen'),
+('60676','256','0','0','0','0','524288','0','0','3','1','0','0','0','1','Achievement check - Wintergrasp - Leaning Tower'),
 ('60937','256','0','0','0','0','524288','0','0','3','1','0','0','0','1','Achievement check - Strand of the Ancients - The Dapper Sapper / Explosives Expert'),
 ('64899','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Hodir'),
 ('64985','8388992','0','5','269484288','0','0','0','37','6','22','7','28','4','1','Achievement check - Thorim'),
