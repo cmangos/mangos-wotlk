@@ -9338,7 +9338,7 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 }
                 case 39835:                                 // Needle Spine - Najentus
                 {
-                    unitTarget->CastSpell(nullptr, 39968, TRIGGERED_IGNORE_CURRENT_CASTED_SPELL);
+                    unitTarget->CastSpell(nullptr, 39968, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 40022:                                 // Four Dragons: Aggro Check
