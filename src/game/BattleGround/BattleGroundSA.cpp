@@ -739,11 +739,9 @@ bool BattleGroundSA::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
         case BG_SA_CRIT_ARTILLERY_EXPERT:
         case BG_SA_CRIT_ARTILLERY_VETERAN:
             return source->IsBoarded() && source->GetTransportInfo()->GetTransport()->GetEntry() == BG_SA_VEHICLE_CANNON;
-        case BG_SA_CRIT_ANCIENT_PROTECTOR:
-        case BG_SA_CRIT_COURTYARD_PROTECTOR:
-            return source->GetAreaId() == BG_SA_ZONE_ID_COURTYARD_ANCIENTS;
         case BG_SA_CRIT_DROP_IT:
         case BG_SA_CRIT_DROP_IT_NOW:
+            // check aura in script because the DB condition uses a different function which returns wrong result when player is killed
             return target->HasAura(BG_SA_SPELL_CARRY_SEAFORIUM);
     }
 

@@ -31,7 +31,7 @@ enum
     BG_SA_MAX_GRAVEYARDS                        = 3,                // max capturable graveyards
 
     BG_SA_ZONE_ID_STRAND                        = 4384,
-    BG_SA_ZONE_ID_COURTYARD_ANCIENTS            = 4609,
+    // BG_SA_ZONE_ID_COURTYARD_ANCIENTS         = 4609,
 
     // world state values
     BG_SA_STATE_VALUE_GATE_INTACT               = 1,
@@ -161,8 +161,8 @@ enum
     BG_SA_CRIT_NOT_A_SCRATCH_HORDE              = 7634,                 // achiev id 2192; criteria type 1
     BG_SA_CRIT_DROP_IT                          = 6446,                 // achiev id 1764; criteria type 70
     BG_SA_CRIT_DROP_IT_NOW                      = 7629,                 // achiev id 2190; criteria type 70; resets every battleground start if not completed
-    BG_SA_CRIT_ANCIENT_PROTECTOR                = 7630,                 // achiev id 1766; criteria type 70
-    BG_SA_CRIT_COURTYARD_PROTECTOR              = 7631,                 // achiev id 2191; criteria type 70; resets every battleground start if not completed
+    // BG_SA_CRIT_ANCIENT_PROTECTOR             = 7630,                 // achiev id 1766; criteria type 70
+    // BG_SA_CRIT_COURTYARD_PROTECTOR           = 7631,                 // achiev id 2191; criteria type 70; resets every battleground start if not completed
     BG_SA_CRIT_DEFENSE_ANCIENTS_ALLY            = 7636,                 // achiev id 1757; criteria type 28; spell id 52459 (end of round)
     BG_SA_CRIT_DEFENSE_ANCIENTS_HORDE           = 7740,                 // achiev id 2200; criteria type 28; spell id 52459 (end of round)
     BG_SA_CRIT_ARTILLERY_VETERAN                = 7625,                 // achiev id 1763; criteria type 0; creature id 28781
