@@ -6934,7 +6934,9 @@ SpellCastResult Spell::CheckItems()
                         int32 charges = m_CastItem->GetSpellCharges(s);
                         if (proto->Spells[s].SpellCharges < 0 && abs(charges) < 2)
                         {
-                            ++itemcount;
+                            // NOTE: spells that proc and require a reagent shouldn't increment the counter; Example: 52418
+                            if (!itemcount)
+                                ++itemcount;
                             break;
                         }
                     }
