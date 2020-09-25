@@ -203,6 +203,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (40576,'spell_ogrila_flasks'),
 (40887,'spell_assist_bt'),
 (40892,'spell_fixate_bt'),
+(39581,'spell_storm_blink'),
 (34630,'spell_scrap_reaver_spell'),
 (44935,'spell_razorthorn_root'),
 (44881,'spell_charm_ravager'),

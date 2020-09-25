@@ -319,6 +319,16 @@ struct FixateBT : public SpellScript
     }
 };
 
+struct StormBlink : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (!spell->GetUnitTarget() || effIdx != EFFECT_INDEX_0)
+            return;
+        spell->GetCaster()->CastSpell(spell->GetUnitTarget(), 39582, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_black_temple()
 {
     Script* pNewScript = new Script;
@@ -340,4 +350,5 @@ void AddSC_black_temple()
     RegisterAuraScript<HarpoonersMark>("spell_harpooners_mark");
     RegisterSpellScript<AssistBT>("spell_assist_bt");
     RegisterSpellScript<FixateBT>("spell_fixate_bt");
+    RegisterSpellScript<StormBlink>("spell_storm_blink");
 }
