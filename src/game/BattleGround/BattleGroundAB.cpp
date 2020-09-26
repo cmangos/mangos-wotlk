@@ -559,7 +559,7 @@ bool BattleGroundAB::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
         case AB_ACHIEV_TERRITORIAL_DOMINANCE:
             return IsAllNodesControlledByTeam(source->GetTeam());
         case AB_ACHIEV_HAD_IT_ALL_ALONG:
-            return abs(m_TeamScores[TEAM_INDEX_HORDE] - m_TeamScores[TEAM_INDEX_ALLIANCE]) <= 50;
+            return abs(m_TeamScores[TEAM_INDEX_HORDE] - m_TeamScores[TEAM_INDEX_ALLIANCE]) <= 10;
         case AB_ACHIEV_RESILIET_VICTORY_1:
         case AB_ACHIEV_RESILIET_VICTORY_2:
         case AB_ACHIEV_RESILIET_VICTORY_3:
