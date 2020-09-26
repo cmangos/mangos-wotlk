@@ -155,7 +155,7 @@ enum EYNodes
     NODE_DRAENEI_RUINS              = 2
 };
 
-enum EYAchievCriterias
+enum EYAchievCriteria
 {
     EY_ACHIEV_CRIT_DOMINATION       = 1239,
     EY_ACHIEV_CRIT_STORM_GLORY      = 3693,

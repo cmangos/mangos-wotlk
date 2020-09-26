@@ -112,6 +112,22 @@ enum BG_AB_Sounds
     BG_AB_SOUND_NEAR_VICTORY            = 8456
 };
 
+enum ABAchievCriteria
+{
+    AB_ACHIEV_HAD_IT_ALL_ALONG          = 1235,
+    AB_ACHIEV_TERRITORIAL_DOMINANCE     = 1234,
+    AB_ACHIEV_RESILIET_VICTORY_1        = 3804,
+    AB_ACHIEV_RESILIET_VICTORY_2        = 3805,
+    AB_ACHIEV_RESILIET_VICTORY_3        = 3806,
+    AB_ACHIEV_RESILIET_VICTORY_4        = 3807,
+    AB_ACHIEV_RESILIET_VICTORY_5        = 3808,
+    AB_ACHIEV_RESILIET_VICTORY_6        = 3809,
+    AB_ACHIEV_RESILIET_VICTORY_7        = 3810,
+    AB_ACHIEV_RESILIET_VICTORY_8        = 3811,
+    AB_ACHIEV_RESILIET_VICTORY_9        = 3812,
+    AB_ACHIEV_RESILIET_VICTORY_10       = 3813,
+};
+
 #define AB_NORMAL_HONOR_INTERVAL        260
 #define AB_WEEKEND_HONOR_INTERVAL       160
 #define AB_NORMAL_REPUTATION_INTERVAL   160
@@ -183,6 +199,7 @@ class BattleGroundAB : public BattleGround
         /* achievement req. */
         bool IsAllNodesControlledByTeam(Team team) const override;
         bool IsTeamScores500Disadvantage(Team team) const { return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(team)]; }
+        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
 
         virtual Team GetPrematureWinner() override;
 

@@ -343,6 +343,9 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player* source, GameObject* target
             SendMessage2ToAll(LANG_BG_AB_NODE_CLAIMED, CHAT_MSG_BG_SYSTEM_HORDE, source, _GetNodeNameId(node), LANG_BG_HORDE);
 
         sound = BG_AB_SOUND_NODE_CLAIMED;
+
+        // update achievements
+        source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 122);
     }
     // If node is contested
     else if ((m_Nodes[node] == BG_AB_NODE_STATUS_ALLY_CONTESTED) || (m_Nodes[node] == BG_AB_NODE_STATUS_HORDE_CONTESTED))
@@ -362,6 +365,9 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player* source, GameObject* target
                 SendMessage2ToAll(LANG_BG_AB_NODE_ASSAULTED, CHAT_MSG_BG_SYSTEM_ALLIANCE, source, _GetNodeNameId(node));
             else
                 SendMessage2ToAll(LANG_BG_AB_NODE_ASSAULTED, CHAT_MSG_BG_SYSTEM_HORDE, source, _GetNodeNameId(node));
+
+            // update achievements
+            source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 122);
         }
         // If contested, change back to occupied
         else
@@ -379,6 +385,9 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player* source, GameObject* target
                 SendMessage2ToAll(LANG_BG_AB_NODE_DEFENDED, CHAT_MSG_BG_SYSTEM_ALLIANCE, source, _GetNodeNameId(node));
             else
                 SendMessage2ToAll(LANG_BG_AB_NODE_DEFENDED, CHAT_MSG_BG_SYSTEM_HORDE, source, _GetNodeNameId(node));
+
+            // update achievements
+            source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 123);
         }
         sound = (teamIndex == TEAM_INDEX_ALLIANCE) ? BG_AB_SOUND_NODE_ASSAULTED_ALLIANCE : BG_AB_SOUND_NODE_ASSAULTED_HORDE;
     }
@@ -399,6 +408,9 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player* source, GameObject* target
             SendMessage2ToAll(LANG_BG_AB_NODE_ASSAULTED, CHAT_MSG_BG_SYSTEM_HORDE, source, _GetNodeNameId(node));
 
         sound = (teamIndex == TEAM_INDEX_ALLIANCE) ? BG_AB_SOUND_NODE_ASSAULTED_ALLIANCE : BG_AB_SOUND_NODE_ASSAULTED_HORDE;
+
+        // update achievements
+        source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 122);
     }
 
     // If node is occupied again, send "X has taken the Y" msg.
@@ -538,4 +550,28 @@ Team BattleGroundAB::GetPrematureWinner()
 
     // If the values are equal, fall back to number of players on each team
     return BattleGround::GetPrematureWinner();
+}
+
+bool BattleGroundAB::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1)
+{
+    switch (criteria_id)
+    {
+        case AB_ACHIEV_TERRITORIAL_DOMINANCE:
+            return IsAllNodesControlledByTeam(source->GetTeam());
+        case AB_ACHIEV_HAD_IT_ALL_ALONG:
+            return abs(m_TeamScores[TEAM_INDEX_HORDE] - m_TeamScores[TEAM_INDEX_ALLIANCE]) <= 50;
+        case AB_ACHIEV_RESILIET_VICTORY_1:
+        case AB_ACHIEV_RESILIET_VICTORY_2:
+        case AB_ACHIEV_RESILIET_VICTORY_3:
+        case AB_ACHIEV_RESILIET_VICTORY_4:
+        case AB_ACHIEV_RESILIET_VICTORY_5:
+        case AB_ACHIEV_RESILIET_VICTORY_6:
+        case AB_ACHIEV_RESILIET_VICTORY_7:
+        case AB_ACHIEV_RESILIET_VICTORY_8:
+        case AB_ACHIEV_RESILIET_VICTORY_9:
+        case AB_ACHIEV_RESILIET_VICTORY_10:
+            return IsTeamScores500Disadvantage(source->GetTeam());
+    }
+
+    return false;
 }
