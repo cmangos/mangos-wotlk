@@ -8735,6 +8735,36 @@ bool Unit::IsImmuneToSchool(SpellEntry const* spellInfo, uint8 effectMask) const
     return false;
 }
 
+uint32 Unit::GetSchoolImmunityMask() const
+{
+    uint32 mask = 0;
+    SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
+    for (auto itr = schoolList.begin(); itr != schoolList.end(); ++itr)
+        mask |= itr->type;
+
+    return mask;
+}
+
+uint32 Unit::GetDamageImmunityMask() const
+{
+    uint32 mask = 0;
+    SpellImmuneList const& damageList = m_spellImmune[IMMUNITY_DAMAGE];
+    for (auto itr = damageList.begin(); itr != damageList.end(); ++itr)
+        mask |= itr->type;
+
+    return mask;
+}
+
+uint32 Unit::GetMechanicImmunityMask() const
+{
+    uint32 mask = 0;
+    SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
+    for (auto itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
+        mask |= (1 << itr->type);
+
+    return mask;
+}
+
 /**
  * Calculates caster part of melee damage bonuses,
  * also includes different bonuses dependent from target auras

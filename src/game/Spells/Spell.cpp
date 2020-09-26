@@ -4120,6 +4120,17 @@ void Spell::SendSpellStart() const
     if (m_triggeredByAuraSpell || m_hideInCombatLog)
         castFlags |= CAST_FLAG_HIDDEN_COMBATLOG;
 
+    uint32 schoolImmunityMask = 0;
+    uint32 mechanicImmunityMask = 0;
+    if (m_caster->IsUnit())
+    {
+        schoolImmunityMask = static_cast<Unit*>(m_caster)->GetSchoolImmunityMask();
+        mechanicImmunityMask = static_cast<Unit*>(m_caster)->GetMechanicImmunityMask();
+    }
+
+    if (schoolImmunityMask || mechanicImmunityMask)
+        castFlags |= CAST_FLAG_IMMUNITY;
+
     if (IsSpellRequiringAmmo())
         castFlags |= CAST_FLAG_AMMO;
 
@@ -4128,6 +4139,9 @@ void Spell::SendSpellStart() const
 
     if (m_spellInfo->runeCostID)
         castFlags |= CAST_FLAG_UNKNOWN19;
+
+    if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) && (m_targets.getSpeed() > 0.0f))
+        castFlags |= CAST_FLAG_ADJUST_MISSILE;              // spell has trajectory
 
     WorldPacket data(SMSG_SPELL_START, (8 + 8 + 4 + 4 + 2));
     if (m_CastItem)
@@ -4166,8 +4180,8 @@ void Spell::SendSpellStart() const
 
     if (castFlags & CAST_FLAG_IMMUNITY)                     // cast immunity
     {
-        data << uint32(0);                                  // used for SetCastSchoolImmunities
-        data << uint32(0);                                  // used for SetCastImmunities
+        data << uint32(schoolImmunityMask);                 // used for SetCastSchoolImmunities
+        data << uint32(mechanicImmunityMask);               // used for SetCastImmunities
     }
 
     m_caster->SendMessageToSet(data, true);
