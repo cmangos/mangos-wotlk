@@ -959,34 +959,6 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (data && !data->Meets(GetPlayer(), unit))
                     continue;
 
-                // ToDo: move the following achievemnts to the respective corresponding script
-                switch (achievementCriteria->referredAchievement)
-                {
-                    case 161:                           // AB, Overcome a 500 resource disadvantage
-                    {
-                        BattleGround* bg = GetPlayer()->GetBattleGround();
-                        if (!bg)
-                            continue;
-
-                        if (bg->GetTypeID() != BATTLEGROUND_AB)
-                            continue;
-                        if (!((BattleGroundAB*)bg)->IsTeamScores500Disadvantage(GetPlayer()->GetTeam()))
-                            continue;
-                        break;
-                    }
-                    case 156:                           // AB, win while controlling all 5 flags (all nodes)
-                    case 784:                           // EY, win while holding 4 bases (all nodes)
-                    {
-                        BattleGround* bg = GetPlayer()->GetBattleGround();
-                        if (!bg)
-                            continue;
-
-                        if (!bg->IsAllNodesControlledByTeam(GetPlayer()->GetTeam()))
-                            continue;
-                        break;
-                    }
-                }
-
                 change = miscvalue1;
                 progressType = PROGRESS_ACCUMULATE;
                 break;
