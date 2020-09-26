@@ -25,7 +25,6 @@
 #define BG_WS_FLAG_RESPAWN_TIME   (23*IN_MILLISECONDS)
 #define BG_WS_FLAG_DROP_TIME      (10*IN_MILLISECONDS)
 #define BG_WS_TIME_LIMIT          (25*MINUTE*IN_MILLISECONDS)
-#define BG_WS_EVENT_START_BATTLE  8563
 
 #define WS_NORMAL_FLAG_CAPTURE_REPUTATION           35
 #define WS_WEEKEND_FLAG_CAPTURE_REPUTATION          45
@@ -92,6 +91,25 @@ enum BG_WS_Graveyards
     WS_GRAVEYARD_FLAGROOM_HORDE    = 770,
     WS_GRAVEYARD_MAIN_ALLIANCE     = 771,
     WS_GRAVEYARD_MAIN_HORDE        = 772
+};
+
+enum WSEventIds
+{
+    WS_EVENT_ALLIANCE_FLAG_DROP     = 8506,
+    WS_EVENT_HORDE_FLAG_DROP        = 8507,
+
+    WS_EVENT_ALLIACE_FLAG_PICKUP    = 8623,
+    WS_EVENT_HORDE_FLAG_PICKUP      = 8624,
+};
+
+enum WSAchievCriteria
+{
+    WS_TIMED_ACHIEV_QUICK_CAP_A     = 61266,
+    WS_TIMED_ACHIEV_QUICK_CAP_H     = 61265,
+    WS_TIMED_ACHIEV_WARSONG_EXP     = 8563,
+
+    WS_ACHIEV_SAVE_THE_DAY_1        = 5605,
+    WS_ACHIEV_SAVE_THE_DAY_2        = 5606,
 };
 
 class BattleGroundWGScore : public BattleGroundScore
@@ -163,6 +181,8 @@ class BattleGroundWS : public BattleGround
         ObjectGuid const& GetDroppedFlagGuid(Team team) const { return m_DroppedFlagGuid[GetTeamIndexByTeamId(team)];}
         virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         virtual Team GetPrematureWinner() override;
+
+        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
 
     private:
         ObjectGuid m_DroppedFlagGuid[PVP_TEAM_COUNT];

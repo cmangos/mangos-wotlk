@@ -205,7 +205,7 @@ void BattleGroundWS::StartingEventOpenDoors()
     SpawnEvent(WS_EVENT_FLAG_H, 0, true);
 
     // Players that join battleground after start are not eligible to get achievement.
-    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, BG_WS_EVENT_START_BATTLE);
+    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, WS_TIMED_ACHIEV_WARSONG_EXP);
 }
 
 void BattleGroundWS::AddPlayer(Player* plr)
@@ -309,6 +309,9 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player* player)
     else if (m_TeamScores[TEAM_INDEX_HORDE] == BG_WS_MAX_TEAM_SCORE)
         winner = HORDE;
 
+    // update achievements
+    player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 42);
+
     if (winner == ALLIANCE || winner == HORDE)
     {
         UpdateWorldState(BG_WS_FLAG_UNK_ALLIANCE, 0);
@@ -375,6 +378,9 @@ void BattleGroundWS::PickUpFlagFromBase(Player* player)
     SendMessageToAll(wsMessageIds[otherTeamIdx][BG_WS_FLAG_ACTION_PICKEDUP],
                      wsChatMessageTypes[teamIdx][BG_WS_FLAG_ACTION_PICKEDUP], player);
     player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+
+    // start timed achiev
+    player->GetAchievementMgr().StartTimedAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, player->GetTeam() == ALLIANCE ? WS_TIMED_ACHIEV_QUICK_CAP_A : WS_TIMED_ACHIEV_QUICK_CAP_H);
 }
 
 uint32 BattleGroundWS::GroundFlagInteraction(Player* player, GameObject* target)
@@ -395,6 +401,9 @@ uint32 BattleGroundWS::GroundFlagInteraction(Player* player, GameObject* target)
         UpdatePlayerScore(player, SCORE_FLAG_RETURNS, 1);
         SendMessageToAll(wsMessageIds[teamIdx][actionId], wsChatMessageTypes[teamIdx][actionId], player);
         PlaySoundToAll(wsSounds[teamIdx][actionId]);
+
+        // update achievements
+        player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 44);
     }
     // check if we are picking up enemy flag
     else if (wsFlagIds[otherTeamIdx] == displayId)
@@ -639,4 +648,17 @@ Team BattleGroundWS::GetPrematureWinner()
 
     // If the values are equal, fall back to number of players on each team
     return BattleGround::GetPrematureWinner();
+}
+
+bool BattleGroundWS::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1)
+{
+    switch (criteria_id)
+    {
+        case WS_ACHIEV_SAVE_THE_DAY_1:
+        case WS_ACHIEV_SAVE_THE_DAY_2:
+            return (source->GetTeam() == HORDE && source->GetAreaId() == 4571 && target->HasAura(BG_WS_SPELL_WARSONG_FLAG) && m_FlagState[TEAM_INDEX_ALLIANCE] == BG_WS_FLAG_STATE_ON_BASE) ||
+                (source->GetTeam() == ALLIANCE && source->GetAreaId() == 4572 && target->HasAura(BG_WS_SPELL_SILVERWING_FLAG) && m_FlagState[TEAM_INDEX_HORDE] == BG_WS_FLAG_STATE_ON_BASE);
+    }
+
+    return false;
 }
