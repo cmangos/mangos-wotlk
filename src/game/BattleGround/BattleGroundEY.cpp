@@ -500,6 +500,9 @@ void BattleGroundEY::EventPlayerCapturedFlag(Player* source, EYNodes node)
     SpawnEvent(EY_EVENT_CAPTURE_FLAG, node, true);
 
     UpdatePlayerScore(source, SCORE_FLAG_CAPTURES, 1);
+
+    // update achievement
+    source->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 183);
 }
 
 void BattleGroundEY::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
@@ -611,6 +614,18 @@ bool BattleGroundEY::IsAllNodesControlledByTeam(Team team) const
             return false;
 
     return true;
+}
+
+bool BattleGroundEY::CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1)
+{
+    switch (criteria_id)
+    {
+        case EY_ACHIEV_CRIT_DOMINATION:
+        case EY_ACHIEV_CRIT_STORM_GLORY:
+            return IsAllNodesControlledByTeam(source->GetTeam());
+    }
+
+    return false;
 }
 
 Team BattleGroundEY::GetPrematureWinner()

@@ -155,6 +155,12 @@ enum EYNodes
     NODE_DRAENEI_RUINS              = 2
 };
 
+enum EYAchievCriterias
+{
+    EY_ACHIEV_CRIT_DOMINATION       = 1239,
+    EY_ACHIEV_CRIT_STORM_GLORY      = 3693,
+};
+
 #define EY_NODES_MAX 4
 
 // node-events work like this: event1:nodeid, event2:state (0alliance,1horde,2neutral)
@@ -277,6 +283,7 @@ class BattleGroundEY : public BattleGround
 
         /* achievement req. */
         bool IsAllNodesControlledByTeam(Team team) const override;
+        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
 
         virtual Team GetPrematureWinner() override;
 
