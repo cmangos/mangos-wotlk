@@ -13676,8 +13676,10 @@ void Spell::EffectSpiritHeal(SpellEffectIndex /*eff_idx*/)
         return;
     if (!unitTarget->IsInWorld())
         return;
+    // check spell id; aura on player and area id (Wintergrasp)
     if (m_spellInfo->Id == 22012 && !unitTarget->HasAura(2584))
-        return;
+        if (unitTarget->GetAreaId() != 4197)
+            return;
 
     ((Player*)unitTarget)->ResurrectPlayer(1.0f);
     ((Player*)unitTarget)->SpawnCorpseBones();
