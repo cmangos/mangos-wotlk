@@ -101,7 +101,9 @@ enum EYEvents
     EVENT_DRAENEI_RUINS_PROGRESS_ALLIANCE       = 12907,
     EVENT_DRAENEI_RUINS_PROGRESS_HORDE          = 12906,
     EVENT_DRAENEI_RUINS_NEUTRAL_ALLIANCE        = 12958,
-    EVENT_DRAENEI_RUINS_NEUTRAL_HORDE           = 12959
+    EVENT_DRAENEI_RUINS_NEUTRAL_HORDE           = 12959,
+
+    EVENT_NETHERSTOMR_FLAG_PICKUP               = 13000,
 };
 
 enum EYSounds
@@ -157,6 +159,8 @@ enum EYNodes
 
 enum EYAchievCriteria
 {
+    EY_TIMED_ACHIEV_FLURRY          = 13180,
+
     EY_ACHIEV_CRIT_DOMINATION       = 1239,
     EY_ACHIEV_CRIT_STORM_GLORY      = 3693,
 };
@@ -171,7 +175,6 @@ enum EYAchievCriteria
 
 #define EY_NORMAL_HONOR_INTERVAL        260
 #define EY_WEEKEND_HONOR_INTERVAL       160
-#define EY_EVENT_START_BATTLE           13180
 
 enum EYScore
 {

@@ -94,7 +94,7 @@ void BattleGroundEY::StartingEventOpenDoors()
     SpawnEvent(BG_EVENT_DOOR, 0, false);
 
     // Players that join battleground after start are not eligible to get achievement.
-    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, EY_EVENT_START_BATTLE);
+    StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, EY_TIMED_ACHIEV_FLURRY);
 }
 
 void BattleGroundEY::AddPoints(Team team, uint32 points)
