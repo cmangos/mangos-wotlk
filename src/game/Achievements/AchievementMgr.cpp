@@ -454,6 +454,10 @@ void AchievementMgr::ResetAchievementCriteria(AchievementCriteriaTypes type, uin
         AchievementEntry const* achievement = sAchievementStore.LookupEntry(achievementCriteria->referredAchievement);
         // Checked in LoadAchievementCriteriaList
 
+        // don't reset completed achievs
+        if (IsCompletedAchievement(achievement))
+            continue;
+
         // don't update already completed criteria; exception for criterias that can fail
         if (IsCompletedCriteria(achievementCriteria, achievement) && !(achievementCriteria->completionFlag & ACHIEVEMENT_CRITERIA_FLAG_FAIL_ACHIEVEMENT))
             continue;
