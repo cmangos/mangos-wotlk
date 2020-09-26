@@ -5293,12 +5293,12 @@ void Spell::EffectTriggerMissileSpell(SpellEffectIndex effect_idx)
 
     SpellCastTargets targets;
     if (unitTarget)
-        m_targets.setUnitTarget(unitTarget);
+        targets.setUnitTarget(unitTarget);
     else if (gameObjTarget)
-        m_targets.setGOTarget(gameObjTarget);
+        targets.setGOTarget(gameObjTarget);
     else
-        m_targets.setDestination(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
-    m_caster->CastSpell(m_targets, spellInfo, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
+        targets.setDestination(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
+    m_caster->CastSpell(targets, spellInfo, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
 }
 
 void Spell::EffectJump(SpellEffectIndex eff_idx)
