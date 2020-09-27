@@ -25,6 +25,9 @@
 #include "BattleGroundMgr.h"
 #include "Tools/Language.h"
 #include "WorldPacket.h"
+#include "Util.h"
+#include "Maps/MapManager.h"
+#include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 
 BattleGroundEY::BattleGroundEY(): m_flagState(), m_towersAlliance(0), m_towersHorde(0), m_honorTicks(0), m_flagRespawnTimer(0), m_resourceUpdateTimer(0), m_felReaverFlagTimer(0)
 {
