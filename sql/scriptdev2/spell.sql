@@ -41,7 +41,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (40251,'spell_shadow_of_death'),
 (41289,'spell_ethereal_ring_signal_flare'),
 (41999,'spell_shadow_of_death_remove'),
-(44006,'spell_teleport_self_akilzon');
+(44006,'spell_teleport_self_akilzon'),
+(43681,'spell_inactive');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

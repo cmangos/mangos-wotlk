@@ -140,6 +140,15 @@ struct OpeningCapping : public SpellScript
     }
 };
 
+struct InactiveBattleground : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Player* player = spell->GetCaster()->GetBeneficiaryPlayer();
+        return player && player->InBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_ONLY_BATTLEGROUNDS;
+    }
+};
+
 void AddSC_battleground()
 {
     Script* pNewScript = new Script;
@@ -150,4 +159,5 @@ void AddSC_battleground()
 
     RegisterSpellScript<GYMidTrigger>("spell_gy_mid_trigger");
     RegisterSpellScript<OpeningCapping>("spell_opening_capping");
+    RegisterSpellScript<InactiveBattleground>("spell_inactive");
 }
