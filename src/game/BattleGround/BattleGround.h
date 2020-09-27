@@ -50,6 +50,12 @@ struct BattleGroundEventIdx
     uint8 event2;
 };
 
+enum SpritiHealers
+{
+    NPC_SPIRIT_GUIDE_A = 13116,
+    NPC_SPIRIT_GUIDE_H = 13117,
+};
+
 enum BattleGroundSounds
 {
     SOUND_HORDE_WINS                = 8454,
@@ -93,6 +99,7 @@ enum BattleGroundMarksCount
 
 enum BattleGroundSpells
 {
+    SPELL_GRAVEYARD_TELEPORT        = 24237,
     SPELL_ARENA_PREPARATION         = 32727,                // use this one, 32728 not correct
     SPELL_ALLIANCE_GOLD_FLAG        = 32724,
     SPELL_ALLIANCE_GREEN_FLAG       = 32725,

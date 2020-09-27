@@ -234,7 +234,7 @@ bool BattleGroundEY::HandleEvent(uint32 eventId, GameObject* go, Unit* /*invoker
     return false;
 }
 
-void BattleGroundEY::ProcessCaptureEvent(GameObject* /*go*/, uint32 towerId, Team team, uint32 newWorldState, uint32 message)
+void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState, uint32 message)
 {
     if (team == ALLIANCE)
     {
@@ -243,9 +243,6 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* /*go*/, uint32 towerId, Tea
         UpdateWorldState(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE, m_towersAlliance);
 
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_ALLIANCE);
-
-        // spawn gameobjects
-        SpawnEvent(towerId, TEAM_INDEX_ALLIANCE, true);
     }
     else if (team == HORDE)
     {
@@ -254,9 +251,6 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* /*go*/, uint32 towerId, Tea
         UpdateWorldState(WORLD_STATE_EY_TOWER_COUNT_HORDE, m_towersHorde);
 
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
-
-        // spawn gameobjects
-        SpawnEvent(towerId, TEAM_INDEX_HORDE, true);
     }
     else
     {
@@ -276,9 +270,6 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* /*go*/, uint32 towerId, Tea
 
             SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
         }
-
-        // despawn gameobjects
-        SpawnEvent(towerId, EY_NEUTRAL_TEAM, true);
     }
 
     // update tower state
@@ -287,7 +278,28 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* /*go*/, uint32 towerId, Tea
     UpdateWorldState(m_towerWorldState[towerId], WORLD_STATE_ADD);
 
     // update capture point owner
+    Team oldTeam = m_towerOwner[towerId];
     m_towerOwner[towerId] = team;
+
+    if (oldTeam == ALLIANCE || oldTeam == HORDE) // only on going to grey
+    {
+        // teleport players off of GY
+        Creature* spiritHealer = nullptr;
+        if (oldTeam == ALLIANCE)
+            spiritHealer = GetClosestCreatureWithEntry(go, NPC_SPIRIT_GUIDE_A, 100.f);
+        else
+            spiritHealer = GetClosestCreatureWithEntry(go, NPC_SPIRIT_GUIDE_H, 100.f);
+        if (spiritHealer)
+            spiritHealer->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spiritHealer, spiritHealer);
+    }
+
+    // must be done after GY teleport
+    switch (team)
+    {
+        case ALLIANCE: SpawnEvent(towerId, TEAM_INDEX_ALLIANCE, true); break;
+        case HORDE: SpawnEvent(towerId, TEAM_INDEX_HORDE, true); break;
+        default: SpawnEvent(towerId, EY_NEUTRAL_TEAM, true); break;
+    }
 }
 
 bool BattleGroundEY::HandleAreaTrigger(Player* source, uint32 trigger)
