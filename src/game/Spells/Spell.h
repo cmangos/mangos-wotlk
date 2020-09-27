@@ -344,6 +344,7 @@ class Spell
         void EffectOpenLock(SpellEffectIndex eff_idx);
         void EffectSummonChangeItem(SpellEffectIndex eff_idx);
         void EffectProficiency(SpellEffectIndex eff_idx);
+        void EffectTeleportGraveyard(SpellEffectIndex eff_idx);
         void EffectApplyAreaAura(SpellEffectIndex eff_idx);
         void EffectSummonType(SpellEffectIndex eff_idx);
         void EffectLearnSpell(SpellEffectIndex eff_idx);
