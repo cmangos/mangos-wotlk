@@ -50,6 +50,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (47431,'spell_capture_jormungar_spawn'),
 (47435,'spell_scrape_corrosive_spit'),
 (48268,'spell_container_of_rats'),
+(47447,'spell_corrosive_spit'),
 (49099,'spell_army_of_the_dead');
 
 -- Hunter

@@ -281,6 +281,27 @@ struct ArmyOfTheDead : public AuraScript
     }
 };
 
+enum
+{
+    SPELL_UNDIGESTIBLE = 47430,
+};
+
+struct CorrosiveSpit : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        if (Unit* target = spell->m_targets.getUnitTarget())
+        {
+            if (target->HasAura(SPELL_UNDIGESTIBLE))
+            {
+                auto& list = spell->GetTargetList();
+                for (auto& target : list)
+                    target.effectHitMask &= ~(1 << EFFECT_INDEX_1);
+            }
+        }
+    }
+};
+
 void AddSC_dragonblight()
 {
     Script* pNewScript = new Script;
@@ -298,4 +319,5 @@ void AddSC_dragonblight()
     RegisterSpellScript<ScrapeCorrosiveSpit>("spell_scrape_corrosive_spit");
     RegisterSpellScript<ContainerOfRatsSpellScript>("spell_container_of_rats");
     RegisterAuraScript<ArmyOfTheDead>("spell_army_of_the_dead");
+    RegisterSpellScript<CorrosiveSpit>("spell_corrosive_spit");
 }
