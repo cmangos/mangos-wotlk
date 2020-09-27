@@ -26,10 +26,10 @@
 
 BattleGroundSA::BattleGroundSA(): m_defendingTeamIdx(TEAM_INDEX_NEUTRAL), m_battleRoundTimer(0), m_boatStartTimer(0), m_battleStage(BG_SA_STAGE_ROUND_1)
 {
-    m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_SA_START_TWO_MINUTES;
-    m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_SA_START_ONE_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_SA_START_HALF_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = 0;
+    m_startMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_SA_START_TWO_MINUTES;
+    m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_SA_START_ONE_MINUTE;
+    m_startMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_SA_START_HALF_MINUTE;
+    m_startMessageIds[BG_STARTING_EVENT_FOURTH] = 0;
 }
 
 void BattleGroundSA::Reset()
@@ -133,7 +133,7 @@ void BattleGroundSA::Update(uint32 diff)
                         SetupBattleground();
 
                         // setup player spells
-                        for (auto& m_player : m_Players)
+                        for (auto& m_player : m_players)
                         {
                             if (!m_player.first)
                                 continue;
@@ -176,7 +176,7 @@ void BattleGroundSA::Update(uint32 diff)
                     case BG_SA_STAGE_SECOND_ROUND_3:
 
                         // remove preparation aura
-                        for (auto& m_player : m_Players)
+                        for (auto& m_player : m_players)
                             if (Player* player = sObjectMgr.GetPlayer(m_player.first))
                                 player->RemoveAurasDueToSpell(SPELL_PREPARATION);
 
@@ -221,7 +221,7 @@ void BattleGroundSA::AddPlayer(Player* player)
     // create score and add it to map, default values are set in constructor
     BattleGroundSAScore* score = new BattleGroundSAScore;
 
-    m_PlayerScores[player->GetObjectGuid()] = score;
+    m_playerScores[player->GetObjectGuid()] = score;
 
     TeleportPlayerToStartArea(player);
 }
@@ -271,8 +271,8 @@ void BattleGroundSA::EnableDemolishers()
 
 void BattleGroundSA::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
-    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
-    if (itr == m_PlayerScores.end())
+    BattleGroundScoreMap::iterator itr = m_playerScores.find(source->GetObjectGuid());
+    if (itr == m_playerScores.end())
         return;
 
     switch (type)

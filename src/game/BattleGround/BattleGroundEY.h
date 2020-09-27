@@ -285,7 +285,6 @@ class BattleGroundEY : public BattleGround
         virtual void EventPlayerDroppedFlag(Player* source) override;
 
         /* achievement req. */
-        bool IsAllNodesControlledByTeam(Team team) const override;
         bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
 
         virtual Team GetPrematureWinner() override;
@@ -294,6 +293,7 @@ class BattleGroundEY : public BattleGround
         // process capture events
         void ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState, uint32 message);
         void EventPlayerCapturedFlag(Player* source, EYNodes node);     // NOTE: virtual BattleGround::EventPlayerCapturedFlag has different parameters list
+        bool IsAllNodesControlledByTeam(Team team);
         void UpdateResources();
 
         /* Scorekeeping */

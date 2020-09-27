@@ -4067,7 +4067,7 @@ SpellCastResult SpellMgr::GetSpellAllowedInLocationError(SpellEntry const* spell
                 return SPELL_FAILED_ONLY_BATTLEGROUNDS;
 
             BattleGround* bg = player->GetBattleGround();
-            return bg && !bg->isArena() ? SPELL_CAST_OK : SPELL_FAILED_ONLY_BATTLEGROUNDS;
+            return bg && !bg->IsArena() ? SPELL_CAST_OK : SPELL_FAILED_ONLY_BATTLEGROUNDS;
         }
     }
 

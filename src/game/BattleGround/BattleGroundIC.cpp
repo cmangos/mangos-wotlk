@@ -26,11 +26,11 @@
 
 BattleGroundIC::BattleGroundIC() : m_hordeInnerGateGuid(ObjectGuid()), m_allianceInnerGate1Guid(ObjectGuid()), m_allianceInnerGate2Guid(ObjectGuid()), m_closeDoorTimer(0)
 {
-    m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_IC_START_TWO_MINUTES;
-    m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_IC_START_ONE_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_IC_START_HALF_MINUTE;
-    // ToDo: use the text LANG_BG_IC_START_15_SECONDS
-    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_IC_BEGIN;
+    m_startMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_IC_START_TWO_MINUTES;
+    m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_IC_START_ONE_MINUTE;
+    m_startMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_IC_START_HALF_MINUTE;
+    //sToDo: use the text LANG_BG_IC_START_15_SECONDS
+    m_startMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_IC_BEGIN;
 }
 
 void BattleGroundIC::Reset()
@@ -91,7 +91,7 @@ void BattleGroundIC::AddPlayer(Player* plr)
     // create score and add it to map, default values are set in constructor
     BattleGroundICScore* sc = new BattleGroundICScore;
 
-    m_PlayerScores[plr->GetObjectGuid()] = sc;
+    m_playerScores[plr->GetObjectGuid()] = sc;
 
     // spawn starting area honorable defenders alliance
     if (m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_ALLY].IsEmpty() && plr->GetTeam() == ALLIANCE)
@@ -152,9 +152,9 @@ void BattleGroundIC::StartingEventOpenDoors()
 
 void BattleGroundIC::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
-    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
+    BattleGroundScoreMap::iterator itr = m_playerScores.find(source->GetObjectGuid());
 
-    if (itr == m_PlayerScores.end())                        // player not found...
+    if (itr == m_playerScores.end())                        // player not found...
         return;
 
     switch (type)
@@ -902,7 +902,7 @@ void BattleGroundIC::DoApplyTeamBuff(PvpTeamIndex teamIdx, uint32 spellEntry, bo
         CastSpellOnTeam(spellEntry, teamId);
     else
     {
-        for (BattleGroundPlayerMap::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+        for (BattleGroundPlayerMap::const_iterator itr = m_players.begin(); itr != m_players.end(); ++itr)
         {
             if (Player* plr = sObjectMgr.GetPlayer(itr->first))
             {

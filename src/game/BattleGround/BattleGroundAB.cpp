@@ -28,10 +28,10 @@
 
 BattleGroundAB::BattleGroundAB(): m_IsInformedNearVictory(false), m_honorTicks(0), m_ReputationTics(0)
 {
-    m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
-    m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_AB_START_ONE_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_AB_START_HALF_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_AB_HAS_BEGUN;
+    m_startMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
+    m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_AB_START_ONE_MINUTE;
+    m_startMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_AB_START_HALF_MINUTE;
+    m_startMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_AB_HAS_BEGUN;
 }
 
 BattleGroundAB::~BattleGroundAB()
@@ -106,7 +106,7 @@ void BattleGroundAB::Update(uint32 diff)
             if (m_lastTick[team] > BG_AB_TickIntervals[points])
             {
                 m_lastTick[team] -= BG_AB_TickIntervals[points];
-                m_TeamScores[team] += BG_AB_TickPoints[points];
+                m_teamScores[team] += BG_AB_TickPoints[points];
                 m_honorScoreTicks[team] += BG_AB_TickPoints[points];
                 m_ReputationScoreTics[team] += BG_AB_TickPoints[points];
                 if (m_ReputationScoreTics[team] >= m_ReputationTics)
@@ -119,7 +119,7 @@ void BattleGroundAB::Update(uint32 diff)
                     RewardHonorToTeam(GetBonusHonorFromKill(1), (team == TEAM_INDEX_ALLIANCE) ? ALLIANCE : HORDE);
                     m_honorScoreTicks[team] -= m_honorTicks;
                 }
-                if (!m_IsInformedNearVictory && m_TeamScores[team] > BG_AB_WARNING_NEAR_VICTORY_SCORE)
+                if (!m_IsInformedNearVictory && m_teamScores[team] > BG_AB_WARNING_NEAR_VICTORY_SCORE)
                 {
                     if (team == TEAM_INDEX_ALLIANCE)
                         SendMessageToAll(LANG_BG_AB_A_NEAR_VICTORY, CHAT_MSG_BG_SYSTEM_NEUTRAL);
@@ -129,26 +129,26 @@ void BattleGroundAB::Update(uint32 diff)
                     m_IsInformedNearVictory = true;
                 }
 
-                if (m_TeamScores[team] > BG_AB_MAX_TEAM_SCORE)
-                    m_TeamScores[team] = BG_AB_MAX_TEAM_SCORE;
+                if (m_teamScores[team] > BG_AB_MAX_TEAM_SCORE)
+                    m_teamScores[team] = BG_AB_MAX_TEAM_SCORE;
                 if (team == TEAM_INDEX_ALLIANCE)
-                    UpdateWorldState(BG_AB_OP_RESOURCES_ALLY, m_TeamScores[team]);
+                    UpdateWorldState(BG_AB_OP_RESOURCES_ALLY, m_teamScores[team]);
                 if (team == TEAM_INDEX_HORDE)
-                    UpdateWorldState(BG_AB_OP_RESOURCES_HORDE, m_TeamScores[team]);
+                    UpdateWorldState(BG_AB_OP_RESOURCES_HORDE, m_teamScores[team]);
 
                 // update achievement flags
                 // we increased m_TeamScores[team] so we just need to check if it is 500 more than other teams resources
                 // horde will be a bit disadvantaged, but we can assume that points aren't updated for both team in same Update() call
                 uint8 otherTeam = (team + 1) % PVP_TEAM_COUNT;
-                if (m_TeamScores[team] > m_TeamScores[otherTeam] + 500)
+                if (m_teamScores[team] > m_teamScores[otherTeam] + 500)
                     m_TeamScores500Disadvantage[otherTeam] = true;
             }
         }
 
         // Test win condition
-        if (m_TeamScores[TEAM_INDEX_ALLIANCE] >= BG_AB_MAX_TEAM_SCORE)
+        if (m_teamScores[TEAM_INDEX_ALLIANCE] >= BG_AB_MAX_TEAM_SCORE)
             EndBattleGround(ALLIANCE);
-        if (m_TeamScores[TEAM_INDEX_HORDE] >= BG_AB_MAX_TEAM_SCORE)
+        if (m_teamScores[TEAM_INDEX_HORDE] >= BG_AB_MAX_TEAM_SCORE)
             EndBattleGround(HORDE);
     }
 }
@@ -167,7 +167,7 @@ void BattleGroundAB::AddPlayer(Player* plr)
     // create score and add it to map, default values are set in the constructor
     BattleGroundABScore* sc = new BattleGroundABScore;
 
-    m_PlayerScores[plr->GetObjectGuid()] = sc;
+    m_playerScores[plr->GetObjectGuid()] = sc;
 }
 
 void BattleGroundAB::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
@@ -259,8 +259,8 @@ void BattleGroundAB::FillInitialWorldStates(WorldPacket& data, uint32& count)
     // Team scores
     FillInitialWorldState(data, count, BG_AB_OP_RESOURCES_MAX,      BG_AB_MAX_TEAM_SCORE);
     FillInitialWorldState(data, count, BG_AB_OP_RESOURCES_WARNING,  BG_AB_WARNING_NEAR_VICTORY_SCORE);
-    FillInitialWorldState(data, count, BG_AB_OP_RESOURCES_ALLY,     m_TeamScores[TEAM_INDEX_ALLIANCE]);
-    FillInitialWorldState(data, count, BG_AB_OP_RESOURCES_HORDE,    m_TeamScores[TEAM_INDEX_HORDE]);
+    FillInitialWorldState(data, count, BG_AB_OP_RESOURCES_ALLY,     m_teamScores[TEAM_INDEX_ALLIANCE]);
+    FillInitialWorldState(data, count, BG_AB_OP_RESOURCES_HORDE,    m_teamScores[TEAM_INDEX_HORDE]);
 
     // other unknown
     FillInitialWorldState(data, count, 0x745, 0x2);         // 37 1861 unk
@@ -431,7 +431,7 @@ void BattleGroundAB::Reset()
 
     for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
     {
-        m_TeamScores[i] = 0;
+        m_teamScores[i] = 0;
         m_lastTick[i] = 0;
         m_honorScoreTicks[i] = 0;
         m_ReputationScoreTics[i] = 0;
@@ -439,7 +439,7 @@ void BattleGroundAB::Reset()
     }
 
     m_IsInformedNearVictory = false;
-    bool isBGWeekend = BattleGroundMgr::IsBGWeekend(GetTypeID());
+    bool isBGWeekend = BattleGroundMgr::IsBGWeekend(GetTypeId());
     m_honorTicks = isBGWeekend ? AB_WEEKEND_HONOR_INTERVAL : AB_NORMAL_HONOR_INTERVAL;
     m_ReputationTics = isBGWeekend ? AB_WEEKEND_REPUTATION_INTERVAL : AB_NORMAL_REPUTATION_INTERVAL;
 
@@ -451,7 +451,7 @@ void BattleGroundAB::Reset()
         m_BannerTimers[i].timer = 0;
 
         // all nodes owned by neutral team at beginning
-        m_ActiveEvents[i] = BG_AB_NODE_TYPE_NEUTRAL;
+        m_activeEvents[i] = BG_AB_NODE_TYPE_NEUTRAL;
     }
 }
 
@@ -510,8 +510,8 @@ WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(Player* player)
 
 void BattleGroundAB::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
-    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
-    if (itr == m_PlayerScores.end())                        // player not found...
+    BattleGroundScoreMap::iterator itr = m_playerScores.find(source->GetObjectGuid());
+    if (itr == m_playerScores.end())                        // player not found...
         return;
 
     switch (type)
@@ -528,7 +528,7 @@ void BattleGroundAB::UpdatePlayerScore(Player* source, uint32 type, uint32 value
     }
 }
 
-bool BattleGroundAB::IsAllNodesControlledByTeam(Team team) const
+bool BattleGroundAB::IsAllNodesControlledByTeam(Team team)
 {
     for (unsigned char m_Node : m_Nodes)
         if ((team == ALLIANCE && m_Node != BG_AB_NODE_STATUS_ALLY_OCCUPIED) ||
@@ -540,8 +540,8 @@ bool BattleGroundAB::IsAllNodesControlledByTeam(Team team) const
 
 Team BattleGroundAB::GetPrematureWinner()
 {
-    int32 hordeScore = m_TeamScores[TEAM_INDEX_HORDE];
-    int32 allianceScore = m_TeamScores[TEAM_INDEX_ALLIANCE];
+    int32 hordeScore = m_teamScores[TEAM_INDEX_HORDE];
+    int32 allianceScore = m_teamScores[TEAM_INDEX_ALLIANCE];
 
     if (hordeScore > allianceScore)
         return HORDE;
@@ -559,7 +559,7 @@ bool BattleGroundAB::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
         case AB_ACHIEV_TERRITORIAL_DOMINANCE:
             return IsAllNodesControlledByTeam(source->GetTeam());
         case AB_ACHIEV_HAD_IT_ALL_ALONG:
-            return abs(m_TeamScores[TEAM_INDEX_HORDE] - m_TeamScores[TEAM_INDEX_ALLIANCE]) <= 10;
+            return abs(m_teamScores[TEAM_INDEX_HORDE] - m_teamScores[TEAM_INDEX_ALLIANCE]) <= 10;
         case AB_ACHIEV_RESILIET_VICTORY_1:
         case AB_ACHIEV_RESILIET_VICTORY_2:
         case AB_ACHIEV_RESILIET_VICTORY_3:

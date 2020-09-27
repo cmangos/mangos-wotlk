@@ -25,15 +25,16 @@
 
 BattleGroundBE::BattleGroundBE()
 {
-    m_StartDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_1M;
-    m_StartDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_30S;
-    m_StartDelayTimes[BG_STARTING_EVENT_THIRD]  = BG_START_DELAY_15S;
-    m_StartDelayTimes[BG_STARTING_EVENT_FOURTH] = BG_START_DELAY_NONE;
+    m_startDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_1M;
+    m_startDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_30S;
+    m_startDelayTimes[BG_STARTING_EVENT_THIRD]  = BG_START_DELAY_15S;
+    m_startDelayTimes[BG_STARTING_EVENT_FOURTH] = BG_START_DELAY_NONE;
+
     // we must set messageIds
-    m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_ARENA_ONE_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_ARENA_THIRTY_SECONDS;
-    m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_ARENA_FIFTEEN_SECONDS;
-    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
+    m_startMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_ARENA_ONE_MINUTE;
+    m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_ARENA_THIRTY_SECONDS;
+    m_startMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_ARENA_FIFTEEN_SECONDS;
+    m_startMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_ARENA_HAS_BEGUN;
 }
 
 void BattleGroundBE::StartingEventOpenDoors()
@@ -47,7 +48,7 @@ void BattleGroundBE::AddPlayer(Player* plr)
     // create score and add it to map, default values are set in constructor
     BattleGroundBEScore* sc = new BattleGroundBEScore;
 
-    m_PlayerScores[plr->GetObjectGuid()] = sc;
+    m_playerScores[plr->GetObjectGuid()] = sc;
 
     UpdateWorldState(0x9f1, GetAlivePlayersCountByTeam(ALLIANCE));
     UpdateWorldState(0x9f0, GetAlivePlayersCountByTeam(HORDE));
@@ -98,8 +99,8 @@ void BattleGroundBE::FillInitialWorldStates(WorldPacket& data, uint32& count)
 
 void BattleGroundBE::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
-    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
-    if (itr == m_PlayerScores.end())                        // player not found...
+    BattleGroundScoreMap::iterator itr = m_playerScores.find(source->GetObjectGuid());
+    if (itr == m_playerScores.end())                        // player not found...
         return;
 
     // there is nothing special in this score

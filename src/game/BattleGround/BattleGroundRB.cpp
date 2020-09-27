@@ -24,10 +24,10 @@
 BattleGroundRB::BattleGroundRB()
 {
     // TODO FIX ME!
-    m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
-    m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_WS_START_ONE_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_WS_START_HALF_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_WS_HAS_BEGUN;
+    m_startMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
+    m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_WS_START_ONE_MINUTE;
+    m_startMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_WS_START_HALF_MINUTE;
+    m_startMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_WS_HAS_BEGUN;
 }
 
 void BattleGroundRB::AddPlayer(Player* plr)
@@ -36,14 +36,14 @@ void BattleGroundRB::AddPlayer(Player* plr)
     // create score and add it to map, default values are set in constructor
     BattleGroundABGScore* sc = new BattleGroundABGScore;
 
-    m_PlayerScores[plr->GetObjectGuid()] = sc;
+    m_playerScores[plr->GetObjectGuid()] = sc;
 }
 
 void BattleGroundRB::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
-    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
+    BattleGroundScoreMap::iterator itr = m_playerScores.find(source->GetObjectGuid());
 
-    if (itr == m_PlayerScores.end())                        // player not found...
+    if (itr == m_playerScores.end())                        // player not found...
         return;
 
     BattleGround::UpdatePlayerScore(source, type, value);

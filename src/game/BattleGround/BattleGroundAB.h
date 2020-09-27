@@ -197,8 +197,6 @@ class BattleGroundAB : public BattleGround
         virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
 
         /* achievement req. */
-        bool IsAllNodesControlledByTeam(Team team) const override;
-        bool IsTeamScores500Disadvantage(Team team) const { return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(team)]; }
         bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
 
         virtual Team GetPrematureWinner() override;
@@ -207,6 +205,9 @@ class BattleGroundAB : public BattleGround
         /* Gameobject spawning/despawning */
         void _CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool delay);
         void _SendNodeUpdate(uint8 node);
+
+        bool IsAllNodesControlledByTeam(Team team);
+        bool IsTeamScores500Disadvantage(Team team) { return m_TeamScores500Disadvantage[GetTeamIndexByTeamId(team)]; }
 
         /* Creature spawning/despawning */
         // TODO: working, scripted peons spawning

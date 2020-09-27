@@ -31,10 +31,10 @@
 
 BattleGroundEY::BattleGroundEY(): m_flagState(), m_towersAlliance(0), m_towersHorde(0), m_honorTicks(0), m_flagRespawnTimer(0), m_resourceUpdateTimer(0), m_felReaverFlagTimer(0)
 {
-    m_StartMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
-    m_StartMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_EY_START_ONE_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_THIRD] = LANG_BG_EY_START_HALF_MINUTE;
-    m_StartMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_EY_HAS_BEGUN;
+    m_startMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
+    m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_EY_START_ONE_MINUTE;
+    m_startMessageIds[BG_STARTING_EVENT_THIRD] = LANG_BG_EY_START_HALF_MINUTE;
+    m_startMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_EY_HAS_BEGUN;
 }
 
 void BattleGroundEY::Update(uint32 diff)
@@ -103,7 +103,7 @@ void BattleGroundEY::StartingEventOpenDoors()
 void BattleGroundEY::AddPoints(Team team, uint32 points)
 {
     PvpTeamIndex team_index = GetTeamIndexByTeamId(team);
-    m_TeamScores[team_index] += points;
+    m_teamScores[team_index] += points;
     m_honorScoreTicks[team_index] += points;
     if (m_honorScoreTicks[team_index] >= m_honorTicks)
     {
@@ -128,7 +128,7 @@ void BattleGroundEY::UpdateResources()
 
 void BattleGroundEY::UpdateTeamScore(Team team)
 {
-    uint32 score = m_TeamScores[GetTeamIndexByTeamId(team)];
+    uint32 score = m_teamScores[GetTeamIndexByTeamId(team)];
 
     if (score >= EY_MAX_TEAM_SCORE)
     {
@@ -167,7 +167,7 @@ void BattleGroundEY::AddPlayer(Player* plr)
     // create score and add it to map
     BattleGroundEYScore* sc = new BattleGroundEYScore;
 
-    m_PlayerScores[plr->GetObjectGuid()] = sc;
+    m_playerScores[plr->GetObjectGuid()] = sc;
 }
 
 void BattleGroundEY::RemovePlayer(Player* plr, ObjectGuid guid)
@@ -342,13 +342,13 @@ void BattleGroundEY::Reset()
     // call parent's class reset
     BattleGround::Reset();
 
-    m_TeamScores[TEAM_INDEX_ALLIANCE] = 0;
-    m_TeamScores[TEAM_INDEX_HORDE] = 0;
+    m_teamScores[TEAM_INDEX_ALLIANCE] = 0;
+    m_teamScores[TEAM_INDEX_HORDE] = 0;
 
     m_towersAlliance = 0;
     m_towersHorde = 0;
 
-    m_honorTicks = BattleGroundMgr::IsBGWeekend(GetTypeID()) ? EY_WEEKEND_HONOR_INTERVAL : EY_NORMAL_HONOR_INTERVAL;
+    m_honorTicks = BattleGroundMgr::IsBGWeekend(GetTypeId()) ? EY_WEEKEND_HONOR_INTERVAL : EY_NORMAL_HONOR_INTERVAL;
     m_honorScoreTicks[TEAM_INDEX_ALLIANCE] = 0;
     m_honorScoreTicks[TEAM_INDEX_HORDE] = 0;
 
@@ -368,11 +368,11 @@ void BattleGroundEY::Reset()
     for (uint8 i = 0; i < EY_NODES_MAX; ++i)
     {
         m_towerOwner[i] = TEAM_NONE;
-        m_ActiveEvents[i] = EY_NEUTRAL_TEAM;
+        m_activeEvents[i] = EY_NEUTRAL_TEAM;
     }
 
     // the flag in the middle is spawned at beginning
-    m_ActiveEvents[EY_EVENT_CAPTURE_FLAG] = EY_EVENT2_FLAG_CENTER;
+    m_activeEvents[EY_EVENT_CAPTURE_FLAG] = EY_EVENT2_FLAG_CENTER;
 }
 
 void BattleGroundEY::RespawnFlag()
@@ -522,8 +522,8 @@ void BattleGroundEY::EventPlayerCapturedFlag(Player* source, EYNodes node)
 
 void BattleGroundEY::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
-    BattleGroundScoreMap::iterator itr = m_PlayerScores.find(source->GetObjectGuid());
-    if (itr == m_PlayerScores.end())                        // player not found
+    BattleGroundScoreMap::iterator itr = m_playerScores.find(source->GetObjectGuid());
+    if (itr == m_playerScores.end())                        // player not found
         return;
 
     switch (type)
@@ -543,8 +543,8 @@ void BattleGroundEY::FillInitialWorldStates(WorldPacket& data, uint32& count)
     FillInitialWorldState(data, count, WORLD_STATE_EY_TOWER_COUNT_ALLIANCE, m_towersAlliance);
     FillInitialWorldState(data, count, WORLD_STATE_EY_TOWER_COUNT_HORDE, m_towersHorde);
 
-    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_ALLIANCE, m_TeamScores[TEAM_INDEX_ALLIANCE]);
-    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_HORDE, m_TeamScores[TEAM_INDEX_HORDE]);
+    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_ALLIANCE, m_teamScores[TEAM_INDEX_ALLIANCE]);
+    FillInitialWorldState(data, count, WORLD_STATE_EY_RESOURCES_HORDE, m_teamScores[TEAM_INDEX_HORDE]);
 
     // tower world states
     FillInitialWorldState(data, count, WORLD_STATE_EY_BLOOD_ELF_TOWER_ALLIANCE, m_towerOwner[NODE_BLOOD_ELF_TOWER] == ALLIANCE);
@@ -622,7 +622,7 @@ WorldSafeLocsEntry const* BattleGroundEY::GetClosestGraveYard(Player* player)
     return nearestEntry;
 }
 
-bool BattleGroundEY::IsAllNodesControlledByTeam(Team team) const
+bool BattleGroundEY::IsAllNodesControlledByTeam(Team team)
 {
     for (auto i : m_towerOwner)
         if (i != team)
@@ -645,8 +645,8 @@ bool BattleGroundEY::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
 
 Team BattleGroundEY::GetPrematureWinner()
 {
-    int32 hordeScore = m_TeamScores[TEAM_INDEX_HORDE];
-    int32 allianceScore = m_TeamScores[TEAM_INDEX_ALLIANCE];
+    int32 hordeScore = m_teamScores[TEAM_INDEX_HORDE];
+    int32 allianceScore = m_teamScores[TEAM_INDEX_ALLIANCE];
 
     if (hordeScore > allianceScore)
         return HORDE;
