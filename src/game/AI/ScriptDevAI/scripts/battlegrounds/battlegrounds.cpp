@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 // **** Script Info ****
 // Spiritguides in battlegrounds resurrecting many players at once
@@ -140,12 +141,18 @@ struct OpeningCapping : public SpellScript
     }
 };
 
-struct InactiveBattleground : public SpellScript
+struct InactiveBattleground : public SpellScript, public AuraScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
         Player* player = spell->GetCaster()->GetBeneficiaryPlayer();
         return player && player->InBattleGround() ? SPELL_CAST_OK : SPELL_FAILED_ONLY_BATTLEGROUNDS;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE && aura->GetTarget()->GetTypeId() == TYPEID_PLAYER)
+            static_cast<Player*>(aura->GetTarget())->ToggleAFK();
     }
 };
 
@@ -159,5 +166,5 @@ void AddSC_battleground()
 
     RegisterSpellScript<GYMidTrigger>("spell_gy_mid_trigger");
     RegisterSpellScript<OpeningCapping>("spell_opening_capping");
-    RegisterSpellScript<InactiveBattleground>("spell_inactive");
+    RegisterScript<InactiveBattleground>("spell_inactive");
 }
