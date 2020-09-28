@@ -8964,10 +8964,12 @@ SpellCastResult Spell::OnCheckCast(bool strict)
             if (ObjectGuid target = m_targets.getUnitTargetGuid())
                 if (target.GetEntry() != 24396)
                     return SPELL_FAILED_BAD_TARGETS;
+            break;
         case 42489:
             if (ObjectGuid target = m_targets.getUnitTargetGuid())
                 if (target.GetEntry() != 4393 && target.GetEntry() != 4394)
                     return SPELL_FAILED_BAD_TARGETS;
+            break;
         default:
             if (SpellScript* script = GetSpellScript())
                 return script->OnCheckCast(this, strict);
