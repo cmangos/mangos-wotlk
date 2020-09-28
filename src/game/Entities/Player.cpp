@@ -8829,7 +8829,7 @@ void Player::FillBGWeekendWorldStates(WorldPacket& data, uint32& count) const
         BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(i);
         if (bl && bl->HolidayWorldStateId)
         {
-            if (BattleGroundMgr::IsBGWeekend(BattleGroundTypeId(bl->id)))
+            if (BattleGroundMgr::IsBgWeekend(BattleGroundTypeId(bl->id)))
                 FillInitialWorldState(data, count, bl->HolidayWorldStateId, 1);
             else
                 FillInitialWorldState(data, count, bl->HolidayWorldStateId, 0);
@@ -16153,7 +16153,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
 
         if (player_at_bg && currentBg->GetStatus() != STATUS_WAIT_LEAVE)
         {
-            BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(currentBg->GetTypeId(), currentBg->GetArenaType());
+            BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BgQueueTypeId(currentBg->GetTypeId(), currentBg->GetArenaType());
             AddBattleGroundQueueId(bgQueueTypeId);
 
             m_bgData.bgTypeID = currentBg->GetTypeId();     // bg data not marked as modified

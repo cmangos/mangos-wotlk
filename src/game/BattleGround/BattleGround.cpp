@@ -353,7 +353,7 @@ void BattleGround::Update(uint32 diff)
             EndBattleGround(GetPrematureWinner());
             m_prematureCountDown = false;
         }
-        else if (!sBattleGroundMgr.isTesting())
+        else if (!sBattleGroundMgr.IsTesting())
         {
             uint32 newtime = m_prematureCountDownTimer - diff;
             // announce every minute
@@ -961,7 +961,7 @@ void BattleGround::EndBattleGround(Team winner)
         sBattleGroundMgr.BuildPvpLogDataPacket(data, this);
         plr->GetSession()->SendPacket(data);
 
-        BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeId(), GetArenaType());
+        BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BgQueueTypeId(GetTypeId(), GetArenaType());
         sBattleGroundMgr.BuildBattleGroundStatusPacket(data, this, plr->GetBattleGroundQueueIndex(bgQueueTypeId), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime(), GetArenaType(), plr->GetBGTeam());
         plr->GetSession()->SendPacket(data);
         plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_COMPLETE_BATTLEGROUND, 1);
@@ -1250,7 +1250,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid playerGuid, bool isOnTransport
     if (participant) // if the player was a match participant, remove auras, calc rating, update queue
     {
         BattleGroundTypeId bgTypeId = GetTypeId();
-        BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeId(), GetArenaType());
+        BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BgQueueTypeId(GetTypeId(), GetArenaType());
 
         if (player)
         {
@@ -1581,7 +1581,7 @@ void BattleGround::AddToBgFreeSlotQueue()
     // make sure to add only once
     if (!m_hasBgFreeSlotQueue && IsBattleGround())
     {
-        sBattleGroundMgr.BGFreeSlotQueue[m_typeId].push_front(this);
+        sBattleGroundMgr.BgFreeSlotQueue[m_typeId].push_front(this);
         m_hasBgFreeSlotQueue = true;
     }
 }
@@ -1593,8 +1593,9 @@ void BattleGround::RemoveFromBgFreeSlotQueue()
 {
     // set to be able to re-add if needed
     m_hasBgFreeSlotQueue = false;
-    BGFreeSlotQueueType& bgFreeSlot = sBattleGroundMgr.BGFreeSlotQueue[m_typeId];
-    for (BGFreeSlotQueueType::iterator itr = bgFreeSlot.begin(); itr != bgFreeSlot.end(); ++itr)
+    BgFreeSlotQueueType& bgFreeSlot = sBattleGroundMgr.BgFreeSlotQueue[m_typeId];
+
+    for (BgFreeSlotQueueType::iterator itr = bgFreeSlot.begin(); itr != bgFreeSlot.end(); ++itr)
     {
         if ((*itr)->GetInstanceId() == GetInstanceId())
         {
@@ -1716,6 +1717,7 @@ Team BattleGround::GetPrematureWinner()
 
     if (hordePlayers > alliancePlayers)
         return HORDE;
+
     if (alliancePlayers > hordePlayers)
         return ALLIANCE;
 
@@ -1732,6 +1734,7 @@ void BattleGround::OnObjectDBLoad(Creature* creature)
     const BattleGroundEventIdx eventId = sBattleGroundMgr.GetCreatureEventIndex(creature->GetGUIDLow());
     if (eventId.event1 == BG_EVENT_NONE)
         return;
+
     m_eventObjects[MAKE_PAIR32(eventId.event1, eventId.event2)].creatures.push_back(creature->GetObjectGuid());
     if (!IsActiveEvent(eventId.event1, eventId.event2))
         ChangeBgCreatureSpawnState(creature->GetObjectGuid(), RESPAWN_ONE_DAY);
@@ -1748,6 +1751,7 @@ ObjectGuid BattleGround::GetSingleCreatureGuid(uint8 event1, uint8 event2)
     GuidVector::const_iterator itr = m_eventObjects[MAKE_PAIR32(event1, event2)].creatures.begin();
     if (itr != m_eventObjects[MAKE_PAIR32(event1, event2)].creatures.end())
         return *itr;
+
     return ObjectGuid();
 }
 
@@ -1863,6 +1867,7 @@ void BattleGround::ChangeBgObjectSpawnState(ObjectGuid guid, uint32 respawntime)
     GameObject* obj = map->GetGameObject(guid);
     if (!obj)
         return;
+
     if (respawntime == 0)
     {
         // we need to change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
@@ -1898,6 +1903,7 @@ void BattleGround::ChangeBgCreatureSpawnState(ObjectGuid guid, uint32 respawntim
     Creature* obj = map->GetCreature(guid);
     if (!obj)
         return;
+
     if (respawntime == 0)
     {
         obj->Respawn();
@@ -1938,6 +1944,7 @@ void BattleGround::SendYellToAll(int32 entry, uint32 language, ObjectGuid guid)
     Creature* source = GetBgMap()->GetCreature(guid);
     if (!source)
         return;
+
     MaNGOS::BattleGroundYellBuilder bg_builder(Language(language), entry, source);
     MaNGOS::LocalizedPacketDo<MaNGOS::BattleGroundYellBuilder> bg_do(bg_builder);
     BroadcastWorker(bg_do);
@@ -1956,6 +1963,7 @@ void BattleGround::SendMessageToAll(int32 entry, ChatMsg type, uint32 language, 
     Creature* source = GetBgMap()->GetCreature(guid);
     if (!source)
         return;
+
     MaNGOS::BattleGroundMessageBuilder bg_builder(type, Language(language), entry, source);
     MaNGOS::LocalizedPacketDo<MaNGOS::BattleGroundMessageBuilder> bg_do(bg_builder);
     BroadcastWorker(bg_do);
@@ -2113,7 +2121,7 @@ void BattleGround::PlayerAddedToBgCheckIfBgIsRunning(Player* player)
         return;
 
     WorldPacket data;
-    BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BGQueueTypeId(GetTypeId(), GetArenaType());
+    BattleGroundQueueTypeId bgQueueTypeId = BattleGroundMgr::BgQueueTypeId(GetTypeId(), GetArenaType());
 
     BlockMovement(player);
 

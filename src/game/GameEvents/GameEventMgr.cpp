@@ -1006,7 +1006,7 @@ void GameEventMgr::UpdateWorldStates(uint16 event_id, bool Activate)
     GameEventData const& event = m_gameEvents[event_id];
     if (event.holiday_id != HOLIDAY_NONE)
     {
-        BattleGroundTypeId bgTypeId = BattleGroundMgr::WeekendHolidayIdToBGType(event.holiday_id);
+        BattleGroundTypeId bgTypeId = BattleGroundMgr::WeekendHolidayIdToBgType(event.holiday_id);
         if (bgTypeId != BATTLEGROUND_TYPE_NONE)
         {
             BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(bgTypeId);
