@@ -21,13 +21,13 @@
 
 struct EarthShield : public AuraScript
 {
-    int32 OnAuraValueCalculate(Aura* aura, Unit* caster, int32 value) const override
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
     {
-        Unit* target = aura->GetTarget();
-        if (Unit* caster = aura->GetCaster())
+        Unit* target = data.target;
+        if (Unit* caster = data.caster)
         {
-            value = caster->SpellHealingBonusDone(target, aura->GetSpellProto(), value, SPELL_DIRECT_DAMAGE);
-            value = target->SpellHealingBonusTaken(caster, aura->GetSpellProto(), value, SPELL_DIRECT_DAMAGE);
+            value = caster->SpellHealingBonusDone(target, data.spellProto, value, SPELL_DIRECT_DAMAGE);
+            value = target->SpellHealingBonusTaken(caster, data.spellProto, value, SPELL_DIRECT_DAMAGE);
         }
         return value;
     }

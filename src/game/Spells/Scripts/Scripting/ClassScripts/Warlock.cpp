@@ -121,16 +121,16 @@ struct LifeTap : public SpellScript
 
 struct DemonicKnowledge : public AuraScript
 {
-    int32 OnAuraValueCalculate(Aura* aura, Unit* caster, int32 value) const override
+    int32 OnAuraValueCalculate(AuraCalcData& data, int32 value) const override
     {
-        if (!caster)
-            caster = aura->GetCaster();
-        if (caster)
+        if (!data.aura)
+            return value;
+        if (Unit* caster = data.caster)
         {
-            Unit* target = aura->GetTarget();
-            if (!aura->GetScriptValue())
-                aura->SetScriptValue((target->HasAura(35693) ? 12 : target->HasAura(35692) ? 8 : target->HasAura(35691) ? 4 : 0));
-            value = aura->GetScriptValue() * (caster->GetStat(STAT_STAMINA) + caster->GetStat(STAT_INTELLECT)) / 100;
+            Unit* target = data.target;
+            if (!data.aura->GetScriptValue())
+                data.aura->SetScriptValue((target->HasAura(35693) ? 12 : target->HasAura(35692) ? 8 : target->HasAura(35691) ? 4 : 0));
+            value = data.aura->GetScriptValue() * (caster->GetStat(STAT_STAMINA) + caster->GetStat(STAT_INTELLECT)) / 100;
         }
         return value;
     }
