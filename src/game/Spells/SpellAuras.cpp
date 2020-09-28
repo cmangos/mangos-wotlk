@@ -423,7 +423,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* curr
             }
         }
 
-        // scripting location for custom aura damage
+        // scripting location for custom aura damage - needs to be moved to spellscripting for proper checkcast interaction
         switch (spellproto->Id)
         {
             case 34501: // Expose Weakness
@@ -11736,6 +11736,26 @@ void SpellAuraHolder::OnDispel(Unit* dispeller, uint32 dispellingSpellId, uint32
 {
     if (AuraScript* script = GetAuraScript())
         script->OnDispel(this, dispeller, dispellingSpellId, originalStacks);
+}
+
+uint32 Aura::CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry const* spellProto, SpellEffectIndex effIdx, uint32 value)
+{
+    switch (spellProto->EffectApplyAuraName[effIdx])
+    {
+        case SPELL_AURA_SCHOOL_ABSORB:
+        {
+            float DoneActualBenefit = 0.0f;
+            if (SpellBonusEntry const* bonus = sSpellMgr.GetSpellBonusData(spellProto->Id))
+            {
+                DoneActualBenefit = caster->SpellBaseHealingBonusDone(GetSpellSchoolMask(spellProto)) * bonus->direct_damage;
+                DoneActualBenefit *= caster->CalculateLevelPenalty(spellProto);
+
+                value += (int32)DoneActualBenefit;
+            }
+            return value;
+        }
+    }
+    return value;
 }
 
 int32 Aura::OnAuraValueCalculate(Unit* caster, int32 currentValue)

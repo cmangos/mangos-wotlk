@@ -19417,44 +19417,6 @@ void Player::AddSpellMod(Aura* aura, bool apply)
         m_spellMods[mod->m_miscvalue].remove(aura);
 }
 
-template <class T> void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue)
-{
-    SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
-    if (!spellInfo || spellInfo->SpellFamilyName != GetSpellClass() || spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS)) return; // client condition
-    int32 totalpct = 100;
-    int32 totalflat = 0;
-    for (auto aura : m_spellMods[op])
-    {
-        Modifier const* mod = aura->GetModifier();
-
-        if (!aura->isAffectedOnSpell(spellInfo))
-            continue;
-
-        if (mod->m_auraname == SPELL_AURA_ADD_FLAT_MODIFIER)
-            totalflat += mod->m_amount;
-        else
-        {
-            // skip percent mods for null basevalue (most important for spell mods with charges )
-            if (basevalue == T(0))
-                continue;
-
-            // special case (skip >10sec spell casts for instant cast setting)
-            if (mod->m_miscvalue == SPELLMOD_CASTING_TIME
-                    && basevalue >= T(10 * IN_MILLISECONDS) && mod->m_amount <= -100)
-                continue;
-
-            totalpct += mod->m_amount;
-        }
-    }
-
-    if (totalflat != 0 || totalpct != 100)
-        basevalue = T((basevalue + totalflat) * std::max(0, totalpct) / 100);
-}
-
-template void Player::ApplySpellMod<int32>(uint32 spellId, SpellModOp op, int32& basevalue);
-template void Player::ApplySpellMod<uint32>(uint32 spellId, SpellModOp op, uint32& basevalue);
-template void Player::ApplySpellMod<float>(uint32 spellId, SpellModOp op, float& basevalue);
-
 void Player::SetSpellClass(uint8 playerClass)
 {
     SpellFamily name;
