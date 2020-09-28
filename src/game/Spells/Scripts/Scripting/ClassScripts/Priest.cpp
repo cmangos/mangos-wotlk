@@ -65,10 +65,43 @@ struct Shadowfiend : public SpellScript
     }
 };
 
+struct PrayerOfMending : public SpellScript
+{
+    // not needed in wotlk
+    SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target)
+            return SPELL_FAILED_BAD_TARGETS;
+        if (strict)
+        {
+            if (Aura* aura = target->GetAura(41635, EFFECT_INDEX_0))
+            {
+                uint32 value = 0;
+                value = spell->CalculateSpellEffectValue(EFFECT_INDEX_0, target, true, false);
+                value = spell->GetCaster()->SpellHealingBonusDone(target, sSpellTemplate.LookupEntry<SpellEntry>(41635), value, HEAL);
+                if (aura->GetModifier()->m_amount > (int32)value)
+                    return SPELL_FAILED_AURA_BOUNCED;
+            }
+        }
+        return SPELL_CAST_OK;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+        uint32 value = spell->GetDamage();
+        value = spell->GetCaster()->SpellHealingBonusDone(spell->GetUnitTarget(), sSpellTemplate.LookupEntry<SpellEntry>(41635), value, HEAL);
+        spell->SetDamage(value);
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
     RegisterSpellScript<ShadowWordDeath>("spell_shadow_word_death");
     RegisterSpellScript<SpiritOfRedemptionHeal>("spell_spirit_of_redemption_heal");
+    RegisterSpellScript<PrayerOfMending>("spell_prayer_of_mending");
     RegisterSpellScript<Shadowfiend>("spell_shadowfiend");
 }

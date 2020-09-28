@@ -6275,10 +6275,7 @@ void Aura::HandleAuraPowerBurn(bool apply, bool /*Real*/)
 
 void Aura::HandlePrayerOfMending(bool apply, bool /*Real*/)
 {
-    if (apply) // only on initial cast apply SP
-        if (const SpellEntry* entry = GetSpellProto())
-            if (GetHolder()->GetAuraCharges() == entry->procCharges)
-                m_modifier.m_amount = GetCaster()->SpellHealingBonusDone(GetTarget(), GetSpellProto(), m_modifier.m_amount, HEAL);
+
 }
 
 void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
