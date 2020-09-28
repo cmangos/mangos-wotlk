@@ -11479,7 +11479,7 @@ bool Unit::SetStunned(bool apply, ObjectGuid casterGuid, uint32 spellID, bool lo
 
                 // Broadcast orientation change on stun start for creatures
                 // FIXME: TODO
-                SetFacingTo(GetOrientation());
+                // SetFacingTo(GetOrientation());
             }
         }
 
