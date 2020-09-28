@@ -19,6 +19,20 @@
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
+struct EarthShield : public AuraScript
+{
+    int32 OnAuraValueCalculate(Aura* aura, Unit* caster, int32 value) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (Unit* caster = aura->GetCaster())
+        {
+            value = caster->SpellHealingBonusDone(target, aura->GetSpellProto(), value, SPELL_DIRECT_DAMAGE);
+            value = target->SpellHealingBonusTaken(caster, aura->GetSpellProto(), value, SPELL_DIRECT_DAMAGE);
+        }
+        return value;
+    }
+};
+
 enum
 {
     SPELL_SHAMAN_ELEMENTAL_MASTERY = 16166,
@@ -37,5 +51,6 @@ struct ItemShamanT10Elemental2PBonus : public AuraScript
 
 void LoadShamanScripts()
 {
+    RegisterAuraScript<EarthShield>("spell_earth_shield");
     RegisterAuraScript<ItemShamanT10Elemental2PBonus>("spell_item_shaman_t10_elemental_2p_bonus");
 }

@@ -451,6 +451,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Shaman
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(974,'spell_earth_shield'),
+(32593,'spell_earth_shield'),
+(32594,'spell_earth_shield'),
+(49283,'spell_earth_shield'),
+(49284,'spell_earth_shield'),
 (70811,'spell_item_shaman_t10_elemental_2p_bonus');
 
 -- Battleground and Outdoor PvP
