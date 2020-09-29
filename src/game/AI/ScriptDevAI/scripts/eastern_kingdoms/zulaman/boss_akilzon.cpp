@@ -218,8 +218,11 @@ struct boss_akilzonAI : public CombatAI
             }
             case AKILZON_ACTION_CALL_LIGHTNING:
             {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CALL_LIGHTNING) == CAST_OK)
-                    ResetCombatAction(action, urand(15000, 25000));
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0, nullptr, SELECT_FLAG_PLAYER))
+                {
+                    if (DoCastSpellIfCan(target, SPELL_CALL_LIGHTNING) == CAST_OK)
+                        ResetCombatAction(action, urand(15000, 25000));
+                }
                 break;
             }
             case AKILZON_ACTION_GUST_OF_WIND:
