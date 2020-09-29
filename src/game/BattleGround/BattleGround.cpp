@@ -474,11 +474,10 @@ void BattleGround::Update(uint32 diff)
                 for (BattleGroundPlayerMap::const_iterator itr = m_players.begin(); itr != m_players.end(); ++itr)
                     if (Player* plr = sObjectMgr.GetPlayer(itr->first))
                         plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
+
                 // Announce BG starting
                 if (sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_QUEUE_ANNOUNCER_START))
-                {
                     sWorld.SendWorldText(LANG_BG_STARTED_ANNOUNCE_WORLD, GetName(), GetMinLevel(), GetMaxLevel());
-                }
             }
         }
     }
@@ -755,6 +754,42 @@ void BattleGround::UpdateWorldStateForPlayer(uint32 field, uint32 value, Player*
     WorldPacket data;
     sBattleGroundMgr.BuildUpdateWorldStatePacket(data, field, value);
     player->GetSession()->SendPacket(data);
+}
+
+/**
+  Method updates initial world states - main function used mainly for arenas
+
+  @param    data
+  @param    count
+*/
+void BattleGround::FillInitialWorldStates(WorldPacket& data, uint32& count)
+{
+    if (IsArena())
+    {
+        FillInitialWorldState(data, count, WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
+        FillInitialWorldState(data, count, WORLD_STATE_ARENA_COUNT_H, GetAlivePlayersCountByTeam(HORDE));
+
+        // the main arena world state is different for the old 2.x arenas
+        uint32 state = 0;
+        switch (GetTypeId())
+        {
+            case BATTLEGROUND_NA:
+                state = WORLD_STATE_ARENA_MAIN_NA;
+                break;
+            case BATTLEGROUND_BE:
+                state = WORLD_STATE_ARENA_MAIN_BE;
+                break;
+            case BATTLEGROUND_RL:
+                state = WORLD_STATE_ARENA_MAIN_RL;
+                break;
+            default:
+                state = WORLD_STATE_ARENA_MAIN;
+                break;
+        }
+
+        if (state)
+            FillInitialWorldState(data, count, state, 1);
+    }
 }
 
 /**
@@ -1464,6 +1499,15 @@ void BattleGround::AddPlayer(Player* player)
             player->CastSpell(player, SPELL_ARENA_PREPARATION, TRIGGERED_OLD_TRIGGERED);
 
         player->CastSpell(player, SPELL_ARENA_DAMPENING, TRIGGERED_OLD_TRIGGERED);
+
+        // create score and add it to map, default values are set in constructor
+        BattleGroundScore* score = new BattleGroundScore;
+
+        m_playerScores[player->GetObjectGuid()] = score;
+
+        // update world states on player enter
+        UpdateWorldState(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
+        UpdateWorldState(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(HORDE));
     }
     else
     {
@@ -1570,6 +1614,28 @@ void BattleGround::EventPlayerLoggedOut(Player* player)
         if (IsArena())
             if (GetAlivePlayersCountByTeam(player->GetTeam()) <= 1 && GetPlayersCountByTeam(GetOtherTeam(player->GetTeam())))
                 EndBattleGround(GetOtherTeam(player->GetTeam()));
+    }
+}
+
+/**
+  Method that handles generic logic when removing a player
+  - used mainly for arena logic
+
+  @param    player
+  @param    guid
+*/
+void BattleGround::RemovePlayer(Player* /*player*/, ObjectGuid /*guid*/)
+{
+    // Handle arena logic
+    if (IsArena())
+    {
+        if (GetStatus() == STATUS_WAIT_LEAVE)
+            return;
+
+        UpdateWorldState(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
+        UpdateWorldState(WORLD_STATE_ARENA_COUNT_H, GetAlivePlayersCountByTeam(HORDE));
+
+        CheckArenaWinConditions();
     }
 }
 
@@ -2049,12 +2115,16 @@ void BattleGround::HandleTriggerBuff(ObjectGuid go_guid)
 
 /**
   Method that handles killing players
+  - also handles generic logic for arena updates
 
   @param    victim player
   @param    killer player
 */
 void BattleGround::HandleKillPlayer(Player* player, Player* killer)
 {
+    if (GetStatus() != STATUS_IN_PROGRESS)
+        return;
+
     // add +1 deaths
     UpdatePlayerScore(player, SCORE_DEATHS, 1);
 
@@ -2084,6 +2154,17 @@ void BattleGround::HandleKillPlayer(Player* player, Player* killer)
     player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
     player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_HONORABLE_KILL, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
     player->GetAchievementMgr().ResetAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GET_KILLING_BLOWS, ACHIEVEMENT_CRITERIA_CONDITION_NO_DEATH);
+
+    // handle generic arena logic
+    if (IsArena())
+    {
+        // update world states on player kill
+        UpdateWorldState(WORLD_STATE_ARENA_COUNT_A, GetAlivePlayersCountByTeam(ALLIANCE));
+        UpdateWorldState(WORLD_STATE_ARENA_COUNT_H, GetAlivePlayersCountByTeam(HORDE));
+
+        // check win conditions
+        CheckArenaWinConditions();
+    }
 }
 
 /**

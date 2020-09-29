@@ -25,12 +25,13 @@
 
 BattleGroundBE::BattleGroundBE()
 {
+    // set start delay timers
     m_startDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_1M;
     m_startDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_30S;
     m_startDelayTimes[BG_STARTING_EVENT_THIRD]  = BG_START_DELAY_15S;
     m_startDelayTimes[BG_STARTING_EVENT_FOURTH] = BG_START_DELAY_NONE;
 
-    // we must set messageIds
+    // set arena start message id
     m_startMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_ARENA_ONE_MINUTE;
     m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_ARENA_THIRTY_SECONDS;
     m_startMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_ARENA_FIFTEEN_SECONDS;
@@ -42,67 +43,9 @@ void BattleGroundBE::StartingEventOpenDoors()
     OpenDoorEvent(BG_EVENT_DOOR);
 }
 
-void BattleGroundBE::AddPlayer(Player* plr)
-{
-    BattleGround::AddPlayer(plr);
-    // create score and add it to map, default values are set in constructor
-    BattleGroundBEScore* sc = new BattleGroundBEScore;
-
-    m_playerScores[plr->GetObjectGuid()] = sc;
-
-    UpdateWorldState(0x9f1, GetAlivePlayersCountByTeam(ALLIANCE));
-    UpdateWorldState(0x9f0, GetAlivePlayersCountByTeam(HORDE));
-}
-
-void BattleGroundBE::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
-{
-    if (GetStatus() == STATUS_WAIT_LEAVE)
-        return;
-
-    UpdateWorldState(0x9f1, GetAlivePlayersCountByTeam(ALLIANCE));
-    UpdateWorldState(0x9f0, GetAlivePlayersCountByTeam(HORDE));
-
-    CheckArenaWinConditions();
-}
-
-void BattleGroundBE::HandleKillPlayer(Player* player, Player* killer)
-{
-    if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
-
-    if (!killer)
-    {
-        sLog.outError("Killer player not found");
-        return;
-    }
-
-    BattleGround::HandleKillPlayer(player, killer);
-
-    UpdateWorldState(0x9f1, GetAlivePlayersCountByTeam(ALLIANCE));
-    UpdateWorldState(0x9f0, GetAlivePlayersCountByTeam(HORDE));
-
-    CheckArenaWinConditions();
-}
-
 bool BattleGroundBE::HandlePlayerUnderMap(Player* player)
 {
     player->TeleportTo(GetMapId(), 6238.930176f, 262.963470f, 0.889519f, player->GetOrientation());
     return true;
 }
 
-void BattleGroundBE::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    FillInitialWorldState(data, count, 0x9f1, GetAlivePlayersCountByTeam(ALLIANCE));
-    FillInitialWorldState(data, count, 0x9f0, GetAlivePlayersCountByTeam(HORDE));
-    FillInitialWorldState(data, count, 0x9f3, 1);
-}
-
-void BattleGroundBE::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
-{
-    BattleGroundScoreMap::iterator itr = m_playerScores.find(source->GetObjectGuid());
-    if (itr == m_playerScores.end())                        // player not found...
-        return;
-
-    // there is nothing special in this score
-    BattleGround::UpdatePlayerScore(source, type, value);
-}

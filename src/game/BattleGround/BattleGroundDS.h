@@ -37,14 +37,6 @@ enum
 
 class BattleGround;
 
-class BattleGroundDSScore : public BattleGroundScore
-{
-    public:
-        BattleGroundDSScore() {};
-        virtual ~BattleGroundDSScore() {};
-        // TODO fix me
-};
-
 class BattleGroundDS : public BattleGround
 {
         friend class BattleGroundMgr;
@@ -53,20 +45,16 @@ class BattleGroundDS : public BattleGround
         BattleGroundDS();
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr) override;
         virtual void StartingEventOpenDoors() override;
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         virtual void Reset() override;
 
-        void RemovePlayer(Player* plr, ObjectGuid guid) override;
-        bool HandleAreaTrigger(Player* player, uint32 triggerId) override;
-        void HandleKillPlayer(Player* player, Player* killer) override;
-        bool HandlePlayerUnderMap(Player* player) override;
+        bool HandleAreaTrigger(Player* /*player*/, uint32 /*triggerId*/) override;
+        bool HandlePlayerUnderMap(Player* /*player*/) override;
 
-        void HandleCreatureCreate(Creature* creature) override;
-        void HandleGameObjectCreate(GameObject* go) override;
+        void HandleCreatureCreate(Creature* /*creature*/) override;
+        void HandleGameObjectCreate(GameObject* /*go*/) override;
 
-        void Update(uint32 diff) override;
+        void Update(uint32 /*diff*/) override;
 
     private:
         uint32 m_uiFlushTimer;

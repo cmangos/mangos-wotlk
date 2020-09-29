@@ -51,14 +51,6 @@ enum
 
 class BattleGround;
 
-class BattleGroundRVScore : public BattleGroundScore
-{
-    public:
-        BattleGroundRVScore() {};
-        virtual ~BattleGroundRVScore() {};
-        // TODO fix me
-};
-
 class BattleGroundRV : public BattleGround
 {
         friend class BattleGroundMgr;
@@ -67,18 +59,15 @@ class BattleGroundRV : public BattleGround
         BattleGroundRV();
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr) override;
-        virtual void StartingEventOpenDoors() override;
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        void StartingEventOpenDoors() override;
 
-        void RemovePlayer(Player* plr, ObjectGuid guid) override;
-        bool HandleAreaTrigger(Player* plr, uint32 triggerId) override;
-        void HandleKillPlayer(Player* player, Player* killer) override;
-        bool HandlePlayerUnderMap(Player* player) override;
+        bool HandleAreaTrigger(Player* /*player*/, uint32 /*triggerId*/) override;
 
-        void HandleGameObjectCreate(GameObject* go) override;
+        bool HandlePlayerUnderMap(Player* /*player*/) override;
 
-        void Update(uint32 diff) override;
+        void HandleGameObjectCreate(GameObject* /*go*/) override;
+
+        void Update(uint32 /*diff*/) override;
 
     private:
         void DoSwitchPillars();

@@ -170,10 +170,6 @@ void BattleGroundAB::AddPlayer(Player* plr)
     m_playerScores[plr->GetObjectGuid()] = sc;
 }
 
-void BattleGroundAB::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
-{
-}
-
 bool BattleGroundAB::HandleAreaTrigger(Player* source, uint32 trigger)
 {
     switch (trigger)

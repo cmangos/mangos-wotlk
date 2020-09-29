@@ -26,11 +26,13 @@
 
 BattleGroundRV::BattleGroundRV(): m_uiPillarTimer(0)
 {
+    // set start delay timers
     m_startDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_1M;
     m_startDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_30S;
     m_startDelayTimes[BG_STARTING_EVENT_THIRD]  = BG_START_DELAY_15S;
     m_startDelayTimes[BG_STARTING_EVENT_FOURTH] = BG_START_DELAY_NONE;
-    // we must set messageIds
+
+    // set arena start message id
     m_startMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_ARENA_ONE_MINUTE;
     m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_ARENA_THIRTY_SECONDS;
     m_startMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_ARENA_FIFTEEN_SECONDS;
@@ -58,48 +60,6 @@ void BattleGroundRV::StartingEventOpenDoors()
     OpenDoorEvent(BG_EVENT_DOOR);
 
     m_uiPillarTimer = 45000;
-}
-
-void BattleGroundRV::AddPlayer(Player* plr)
-{
-    BattleGround::AddPlayer(plr);
-    // create score and add it to map, default values are set in constructor
-    BattleGroundRVScore* sc = new BattleGroundRVScore;
-
-    m_playerScores[plr->GetObjectGuid()] = sc;
-
-    UpdateWorldState(0xe11, GetAlivePlayersCountByTeam(ALLIANCE));
-    UpdateWorldState(0xe10, GetAlivePlayersCountByTeam(HORDE));
-}
-
-void BattleGroundRV::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
-{
-    if (GetStatus() == STATUS_WAIT_LEAVE)
-        return;
-
-    UpdateWorldState(0xe11, GetAlivePlayersCountByTeam(ALLIANCE));
-    UpdateWorldState(0xe10, GetAlivePlayersCountByTeam(HORDE));
-
-    CheckArenaWinConditions();
-}
-
-void BattleGroundRV::HandleKillPlayer(Player* player, Player* killer)
-{
-    if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
-
-    if (!killer)
-    {
-        sLog.outError("BattleGroundRV: Killer player not found");
-        return;
-    }
-
-    BattleGround::HandleKillPlayer(player, killer);
-
-    UpdateWorldState(0xe11, GetAlivePlayersCountByTeam(ALLIANCE));
-    UpdateWorldState(0xe10, GetAlivePlayersCountByTeam(HORDE));
-
-    CheckArenaWinConditions();
 }
 
 bool BattleGroundRV::HandlePlayerUnderMap(Player* player)
@@ -151,33 +111,20 @@ void BattleGroundRV::HandleGameObjectCreate(GameObject* go)
     }
 }
 
-void BattleGroundRV::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    FillInitialWorldState(data, count, 0xe11, GetAlivePlayersCountByTeam(ALLIANCE));
-    FillInitialWorldState(data, count, 0xe10, GetAlivePlayersCountByTeam(HORDE));
-    FillInitialWorldState(data, count, 0xe1a, 1);
-}
-
 void BattleGroundRV::DoSwitchPillars()
 {
     // change collision state
-    for (GuidList::const_iterator itr = m_lCollisionsGuids.begin(); itr != m_lCollisionsGuids.end(); ++itr)
-    {
-        if (GameObject* animGo = GetBgMap()->GetGameObject(*itr))
+    for (const auto& guid : m_lCollisionsGuids)
+        if (GameObject* animGo = GetBgMap()->GetGameObject(guid))
             animGo->SetGoState(animGo->GetGoState() == GO_STATE_READY ? GO_STATE_ACTIVE : GO_STATE_READY);
-    }
 
     // change animations
-    for (GuidList::const_iterator itr = m_lAnimationsGuids.begin(); itr != m_lAnimationsGuids.end(); ++itr)
-    {
-        if (GameObject* animGo = GetBgMap()->GetGameObject(*itr))
+    for (const auto& guid : m_lAnimationsGuids)
+        if (GameObject* animGo = GetBgMap()->GetGameObject(guid))
             animGo->SetGoState(animGo->GetGoState() == GO_STATE_READY ? GO_STATE_ACTIVE : GO_STATE_READY);
-    }
 
     // change pillars
-    for (GuidList::const_iterator itr = m_lPillarsGuids.begin(); itr != m_lPillarsGuids.end(); ++itr)
-    {
-        if (GameObject* pillarGo = GetBgMap()->GetGameObject(*itr))
+    for (const auto& guid : m_lPillarsGuids)
+        if (GameObject* pillarGo = GetBgMap()->GetGameObject(guid))
             pillarGo->SetGoState(pillarGo->GetGoState() == GO_STATE_READY ? GO_STATE_ACTIVE : GO_STATE_READY);
-    }
 }

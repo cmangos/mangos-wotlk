@@ -97,18 +97,34 @@ enum BattleGroundMarksCount
     ITEM_LOSER_COUNT                = 1
 };
 
-enum BattleGroundSpells
+enum ArenaWorldStates
 {
-    SPELL_GRAVEYARD_TELEPORT        = 24237,
+    WORLD_STATE_ARENA_COUNT_A       = 3601,
+    WORLD_STATE_ARENA_COUNT_H       = 3600,
+
+    WORLD_STATE_ARENA_MAIN_BE       = 2547,
+    WORLD_STATE_ARENA_MAIN_NA       = 2577,
+    WORLD_STATE_ARENA_MAIN_RL       = 3002,
+    WORLD_STATE_ARENA_MAIN          = 3610,
+};
+
+enum ArenaSpells
+{
+    SPELL_LAST_MAN_STANDING         = 26549,
     SPELL_ARENA_PREPARATION         = 32727,                // use this one, 32728 not correct
     SPELL_ALLIANCE_GOLD_FLAG        = 32724,
     SPELL_ALLIANCE_GREEN_FLAG       = 32725,
     SPELL_HORDE_GOLD_FLAG           = 35774,
     SPELL_HORDE_GREEN_FLAG          = 35775,
+    SPELL_ARENA_DAMPENING           = 74410,                // Arena - Dampening
+};
+
+enum BattleGroundSpells
+{
+    SPELL_GRAVEYARD_TELEPORT        = 24237,
     SPELL_PREPARATION               = 44521,                // Preparation
     SPELL_RECENTLY_DROPPED_FLAG     = 42792,                // Recently Dropped Flag
     SPELL_AURA_PLAYER_INACTIVE      = 43681,                // Inactive
-    SPELL_ARENA_DAMPENING           = 74410,                // Arena - Dampening
     SPELL_BATTLEGROUND_DAMPENING    = 74411,                // Battleground - Dampening
 };
 
@@ -434,7 +450,7 @@ class BattleGround
 
         /* Packet Transfer */
         // method that should fill worldpacket with actual world states (not yet implemented for all battlegrounds!)
-        virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/) {}
+        virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/);
         void SendPacketToTeam(Team teamId, WorldPacket const& packet, Player* sender = nullptr, bool self = true);
         void SendPacketToAll(WorldPacket const& packet);
 
@@ -520,7 +536,7 @@ class BattleGround
         // handle player in area trigger
         virtual bool HandleAreaTrigger(Player* /*player*/, uint32 /*triggerId*/) { return false;  }
 
-        // handle player killed
+        // handle player killed; also supports generic player kill logic for arenas
         virtual void HandleKillPlayer(Player* /*player*/, Player* /*killer*/);
 
         // handle creature killed
@@ -652,8 +668,8 @@ class BattleGround
         /* Scorekeeping */
         BattleGroundScoreMap m_playerScores;                // Player scores
 
-        // must be implemented in BG subclass
-        virtual void RemovePlayer(Player* /*player*/, ObjectGuid /*guid*/) {}
+        // can be implemented in BG subclass
+        virtual void RemovePlayer(Player* /*player*/, ObjectGuid /*guid*/);
 
         /* Player lists, those need to be accessible by inherited classes */
         BattleGroundPlayerMap  m_players;

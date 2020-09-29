@@ -20,14 +20,6 @@
 
 class BattleGround;
 
-class BattleGroundNAScore : public BattleGroundScore
-{
-    public:
-        BattleGroundNAScore() {};
-        virtual ~BattleGroundNAScore() {};
-        // TODO fix me
-};
-
 class BattleGroundNA : public BattleGround
 {
         friend class BattleGroundMgr;
@@ -36,12 +28,8 @@ class BattleGroundNA : public BattleGround
         BattleGroundNA();
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr) override;
         virtual void StartingEventOpenDoors() override;
 
-        void RemovePlayer(Player* plr, ObjectGuid guid) override;
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-        void HandleKillPlayer(Player* player, Player* killer) override;
-        bool HandlePlayerUnderMap(Player* player) override;
+        bool HandlePlayerUnderMap(Player* /*player*/) override;
 };
 #endif

@@ -182,7 +182,6 @@ class BattleGroundAB : public BattleGround
         void Update(uint32 diff) override;
         void AddPlayer(Player* plr) override;
         virtual void StartingEventOpenDoors() override;
-        void RemovePlayer(Player* plr, ObjectGuid guid) override;
         bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         virtual void Reset() override;
         void EndBattleGround(Team winner) override;

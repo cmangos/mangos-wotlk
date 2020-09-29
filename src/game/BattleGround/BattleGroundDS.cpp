@@ -26,12 +26,13 @@
 
 BattleGroundDS::BattleGroundDS(): m_uiFlushTimer(0), m_uiWaterfallTimer(0), m_uiWaterfallSpellTimer(0), m_uiWaterfallStage(0)
 {
+    // set start delay timers
     m_startDelayTimes[BG_STARTING_EVENT_FIRST]  = BG_START_DELAY_1M;
     m_startDelayTimes[BG_STARTING_EVENT_SECOND] = BG_START_DELAY_30S;
     m_startDelayTimes[BG_STARTING_EVENT_THIRD]  = BG_START_DELAY_15S;
     m_startDelayTimes[BG_STARTING_EVENT_FOURTH] = BG_START_DELAY_NONE;
 
-    // we must set messageIds
+    // set arena start message id
     m_startMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_ARENA_ONE_MINUTE;
     m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_ARENA_THIRTY_SECONDS;
     m_startMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_ARENA_FIFTEEN_SECONDS;
@@ -48,11 +49,9 @@ void BattleGroundDS::Update(uint32 diff)
         if (m_uiFlushTimer <= diff)
         {
             // cast flush spell
-            for (GuidList::const_iterator itr = m_lGateTriggersGuids.begin(); itr != m_lGateTriggersGuids.end(); ++itr)
-            {
-                if (Creature* trigger = GetBgMap()->GetCreature(*itr))
+            for (const auto& guid : m_lGateTriggersGuids)
+                if (Creature* trigger = GetBgMap()->GetCreature(guid))
                     trigger->CastSpell(trigger, BG_DS_SPELL_FLUSH, TRIGGERED_OLD_TRIGGERED);
-            }
 
             // knockback players manually due to missing triggered spell 61698
             for (const auto& itr : GetPlayers())
@@ -135,48 +134,6 @@ void BattleGroundDS::StartingEventOpenDoors()
     m_uiFlushTimer = 5000;
 }
 
-void BattleGroundDS::AddPlayer(Player* plr)
-{
-    BattleGround::AddPlayer(plr);
-    // create score and add it to map, default values are set in constructor
-    BattleGroundDSScore* sc = new BattleGroundDSScore;
-
-    m_playerScores[plr->GetObjectGuid()] = sc;
-
-    UpdateWorldState(0xe11, GetAlivePlayersCountByTeam(ALLIANCE));
-    UpdateWorldState(0xe10, GetAlivePlayersCountByTeam(HORDE));
-}
-
-void BattleGroundDS::RemovePlayer(Player* /*plr*/, ObjectGuid /*guid*/)
-{
-    if (GetStatus() == STATUS_WAIT_LEAVE)
-        return;
-
-    UpdateWorldState(0xe11, GetAlivePlayersCountByTeam(ALLIANCE));
-    UpdateWorldState(0xe10, GetAlivePlayersCountByTeam(HORDE));
-
-    CheckArenaWinConditions();
-}
-
-void BattleGroundDS::HandleKillPlayer(Player* player, Player* killer)
-{
-    if (GetStatus() != STATUS_IN_PROGRESS)
-        return;
-
-    if (!killer)
-    {
-        sLog.outError("BattleGroundDS: Killer player not found");
-        return;
-    }
-
-    BattleGround::HandleKillPlayer(player, killer);
-
-    UpdateWorldState(0xe11, GetAlivePlayersCountByTeam(ALLIANCE));
-    UpdateWorldState(0xe10, GetAlivePlayersCountByTeam(HORDE));
-
-    CheckArenaWinConditions();
-}
-
 bool BattleGroundDS::HandlePlayerUnderMap(Player* player)
 {
     player->TeleportTo(GetMapId(), 1299.046f, 784.825f, 9.338f, player->GetOrientation(), false);
@@ -227,13 +184,6 @@ void BattleGroundDS::HandleGameObjectCreate(GameObject* go)
             m_waterfallAnimGuid = go->GetObjectGuid();
             break;
     }
-}
-
-void BattleGroundDS::FillInitialWorldStates(WorldPacket& data, uint32& count)
-{
-    FillInitialWorldState(data, count, 0xe11, GetAlivePlayersCountByTeam(ALLIANCE));
-    FillInitialWorldState(data, count, 0xe10, GetAlivePlayersCountByTeam(HORDE));
-    FillInitialWorldState(data, count, 0xe1a, 1);
 }
 
 void BattleGroundDS::Reset()
