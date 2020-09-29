@@ -26,6 +26,7 @@
 
 BattleGroundSA::BattleGroundSA(): m_defendingTeamIdx(TEAM_INDEX_NEUTRAL), m_battleRoundTimer(0), m_boatStartTimer(0), m_battleStage(BG_SA_STAGE_ROUND_1)
 {
+    // set battleground start message ids
     m_startMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_SA_START_TWO_MINUTES;
     m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_SA_START_ONE_MINUTE;
     m_startMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_SA_START_HALF_MINUTE;
@@ -278,10 +279,10 @@ void BattleGroundSA::UpdatePlayerScore(Player* source, uint32 type, uint32 value
     switch (type)
     {
         case SCORE_DEMOLISHERS_DESTROYED:
-            ((BattleGroundSAScore*)itr->second)->DemolishersDestroyed += value;
+            ((BattleGroundSAScore*)itr->second)->demolishersDestroyed += value;
             break;
         case SCORE_GATES_DESTROYED:
-            ((BattleGroundSAScore*)itr->second)->GatesDestroyed += value;
+            ((BattleGroundSAScore*)itr->second)->gatesDestroyed += value;
             break;
         default:
             BattleGround::UpdatePlayerScore(source, type, value);

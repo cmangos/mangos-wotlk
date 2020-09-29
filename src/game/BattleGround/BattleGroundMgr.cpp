@@ -1495,35 +1495,35 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg)
         {
             case BATTLEGROUND_AV:
                 data << (uint32)0x00000005;                // count of next fields
-                data << (uint32)((BattleGroundAVScore*)score)->GraveyardsAssaulted;  // GraveyardsAssaulted
-                data << (uint32)((BattleGroundAVScore*)score)->GraveyardsDefended;   // GraveyardsDefended
-                data << (uint32)((BattleGroundAVScore*)score)->TowersAssaulted;      // TowersAssaulted
-                data << (uint32)((BattleGroundAVScore*)score)->TowersDefended;       // TowersDefended
-                data << (uint32)((BattleGroundAVScore*)score)->SecondaryObjectives;  // SecondaryObjectives - free some of the Lieutnants
+                data << (uint32)((BattleGroundAVScore*)score)->graveyardsAssaulted;  // GraveyardsAssaulted
+                data << (uint32)((BattleGroundAVScore*)score)->graveyardsDefended;   // GraveyardsDefended
+                data << (uint32)((BattleGroundAVScore*)score)->towersAssaulted;      // TowersAssaulted
+                data << (uint32)((BattleGroundAVScore*)score)->towersDefended;       // TowersDefended
+                data << (uint32)((BattleGroundAVScore*)score)->secondaryObjectives;  // SecondaryObjectives - free some of the Lieutnants
                 break;
             case BATTLEGROUND_WS:
                 data << (uint32)0x00000002;                // count of next fields
-                data << (uint32)((BattleGroundWGScore*)score)->FlagCaptures;         // flag captures
-                data << (uint32)((BattleGroundWGScore*)score)->FlagReturns;          // flag returns
+                data << (uint32)((BattleGroundWGScore*)score)->flagCaptures;         // flag captures
+                data << (uint32)((BattleGroundWGScore*)score)->flagReturns;          // flag returns
                 break;
             case BATTLEGROUND_AB:
                 data << (uint32)0x00000002;                // count of next fields
-                data << (uint32)((BattleGroundABScore*)score)->BasesAssaulted;       // bases asssulted
-                data << (uint32)((BattleGroundABScore*)score)->BasesDefended;        // bases defended
+                data << (uint32)((BattleGroundABScore*)score)->basesAssaulted;       // bases asssulted
+                data << (uint32)((BattleGroundABScore*)score)->basesDefended;        // bases defended
                 break;
             case BATTLEGROUND_EY:
                 data << (uint32)0x00000001;                // count of next fields
-                data << (uint32)((BattleGroundEYScore*)score)->FlagCaptures;         // flag captures
+                data << (uint32)((BattleGroundEYScore*)score)->flagCaptures;         // flag captures
                 break;
             case BATTLEGROUND_SA:                          // wotlk
                 data << (uint32)0x00000002;                // count of next fields
-                data << (uint32)((BattleGroundSAScore*)itr->second)->DemolishersDestroyed; // demolishers destroyed
-                data << (uint32)((BattleGroundSAScore*)itr->second)->GatesDestroyed;       // gates destroyed
+                data << (uint32)((BattleGroundSAScore*)score)->demolishersDestroyed; // demolishers destroyed
+                data << (uint32)((BattleGroundSAScore*)score)->gatesDestroyed;       // gates destroyed
                 break;
             case BATTLEGROUND_IC:                           // wotlk
                 data << uint32(0x00000002);                 // count of next fields
-                data << uint32(((BattleGroundICScore*)itr->second)->BasesAssaulted);       // bases asssulted
-                data << uint32(((BattleGroundICScore*)itr->second)->BasesDefended);        // bases defended
+                data << uint32(((BattleGroundICScore*)score)->basesAssaulted);       // bases asssulted
+                data << uint32(((BattleGroundICScore*)score)->basesDefended);        // bases defended
                 break;
             case BATTLEGROUND_NA:
             case BATTLEGROUND_BE:

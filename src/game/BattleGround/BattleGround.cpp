@@ -788,7 +788,7 @@ void BattleGround::FillInitialWorldStates(WorldPacket& data, uint32& count)
         }
 
         if (state)
-            FillInitialWorldState(data, count, state, 1);
+            FillInitialWorldState(data, count, state, WORLD_STATE_ADD);
     }
 }
 

@@ -23,9 +23,12 @@
 
 class BattleGround;
 
-#define EY_FLAG_RESPAWN_TIME            (10 * IN_MILLISECONDS) //10 seconds
-#define EY_RESOURCES_UPDATE_TIME        (2 * IN_MILLISECONDS) //2 seconds
-#define EY_FEL_REAVER_FLAG_UPDATE_TIME  (1 * IN_MILLISECONDS) //1 second
+enum EYUpdateTimers
+{
+    EY_FLAG_RESPAWN_TIME                                = 10 * IN_MILLISECONDS,
+    EY_RESOURCES_UPDATE_TIME                            = 2 * IN_MILLISECONDS,
+    EY_FEL_REAVER_FLAG_UPDATE_TIME                      = 1 * IN_MILLISECONDS,
+};
 
 enum EYWorldStates
 {
@@ -103,6 +106,7 @@ enum EYEvents
     EVENT_DRAENEI_RUINS_NEUTRAL_ALLIANCE        = 12958,
     EVENT_DRAENEI_RUINS_NEUTRAL_HORDE           = 12959,
 
+    // The following event ids are used for the flag handling
     EVENT_NETHERSTORM_FLAG_PICKUP               = 13000,
     EVENT_NETHERSTORM_FLAG_SPELL                = 13042,
 };
@@ -149,13 +153,23 @@ enum EYGaveyards
     GRAVEYARD_MAGE_TOWER            = 1108
 };
 
+// node-events work like this: event1:nodeid, event2:state (0alliance,1horde,2neutral)
+// all other event2 are just node Ids; see the next enum
+enum EYScriptEvents
+{
+    EY_EVENT_CAPTURE_FLAG = 4,            // event1=4, event2=nodeid or 4 for the default center spawn
+    EY_EVENT2_FLAG_CENTER = 4,            // maximum node is 3 so 4 for center is ok
+};
+
 enum EYNodes
 {
     // TODO: Re-change order after we drop battleground_event and associated tables
     NODE_BLOOD_ELF_TOWER            = 1,
     NODE_FEL_REAVER_RUINS           = 0,
     NODE_MAGE_TOWER                 = 3,
-    NODE_DRAENEI_RUINS              = 2
+    NODE_DRAENEI_RUINS              = 2,
+
+    EY_MAX_NODES                    = 4,
 };
 
 enum EYAchievCriteria
@@ -166,16 +180,11 @@ enum EYAchievCriteria
     EY_ACHIEV_CRIT_STORM_GLORY      = 3693,
 };
 
-#define EY_NODES_MAX 4
-
-// node-events work like this: event1:nodeid, event2:state (0alliance,1horde,2neutral)
-#define EY_NEUTRAL_TEAM 2
-#define EY_EVENT_CAPTURE_FLAG 4 // event1=4, event2=nodeid or 4 for the default center spawn
-#define EY_EVENT2_FLAG_CENTER 4 // maximum node is 3 so 4 for center is ok
-// all other event2 are just nodeids, i won't define something here
-
-#define EY_NORMAL_HONOR_INTERVAL        260
-#define EY_WEEKEND_HONOR_INTERVAL       160
+enum EYHonorIntervals
+{
+    EY_NORMAL_HONOR_INTERVAL        = 260,
+    EY_WEEKEND_HONOR_INTERVAL       = 160
+};
 
 enum EYScore
 {
@@ -192,11 +201,11 @@ enum EYFlagState
     EY_FLAG_STATE_ON_GROUND             = 4
 };
 
-static const uint8 eyTickPoints[EY_NODES_MAX] = {1, 2, 5, 10};
-static const uint32 eyFlagPoints[EY_NODES_MAX] = {75, 85, 100, 500};
+static const uint8 eyTickPoints[EY_MAX_NODES] = {1, 2, 5, 10};
+static const uint32 eyFlagPoints[EY_MAX_NODES] = {75, 85, 100, 500};
 
-static const uint32 eyGraveyards[EY_NODES_MAX] = {GRAVEYARD_FEL_REAVER_RUINS, GRAVEYARD_BLOOD_ELF_TOWER, GRAVEYARD_DRAENEI_RUINS, GRAVEYARD_MAGE_TOWER};
-static const uint32 eyTriggers[EY_NODES_MAX] = {AREATRIGGER_FEL_REAVER_RUINS_BUFF, AREATRIGGER_BLOOD_ELF_TOWER_BUFF, AREATRIGGER_DRAENEI_RUINS_BUFF, AREATRIGGER_MAGE_TOWER_BUFF};
+static const uint32 eyGraveyards[EY_MAX_NODES] = {GRAVEYARD_FEL_REAVER_RUINS, GRAVEYARD_BLOOD_ELF_TOWER, GRAVEYARD_DRAENEI_RUINS, GRAVEYARD_MAGE_TOWER};
+static const uint32 eyTriggers[EY_MAX_NODES] = {AREATRIGGER_FEL_REAVER_RUINS_BUFF, AREATRIGGER_BLOOD_ELF_TOWER_BUFF, AREATRIGGER_DRAENEI_RUINS_BUFF, AREATRIGGER_MAGE_TOWER_BUFF};
 
 struct EYTowerEvent
 {
@@ -206,7 +215,7 @@ struct EYTowerEvent
     uint32  worldState;
 };
 
-static const EYTowerEvent eyTowerEvents[EY_NODES_MAX][4] =
+static const EYTowerEvent eyTowerEvents[EY_MAX_NODES][4] =
 {
     {
         {EVENT_FEL_REAVER_RUINS_PROGRESS_ALLIANCE,  ALLIANCE,   LANG_BG_EY_HAS_TAKEN_A_B_TOWER, WORLD_STATE_EY_FEL_REAVER_RUINS_ALLIANCE},
@@ -234,14 +243,15 @@ static const EYTowerEvent eyTowerEvents[EY_NODES_MAX][4] =
     },
 };
 
-static const uint32 eyTowers[EY_NODES_MAX] = {GO_CAPTURE_POINT_FEL_REAVER_RUINS, GO_CAPTURE_POINT_BLOOD_ELF_TOWER, GO_CAPTURE_POINT_DRAENEI_RUINS, GO_CAPTURE_POINT_MAGE_TOWER};
+static const uint32 eyTowers[EY_MAX_NODES] = {GO_CAPTURE_POINT_FEL_REAVER_RUINS, GO_CAPTURE_POINT_BLOOD_ELF_TOWER, GO_CAPTURE_POINT_DRAENEI_RUINS, GO_CAPTURE_POINT_MAGE_TOWER};
 
 class BattleGroundEYScore : public BattleGroundScore
 {
     public:
-        BattleGroundEYScore() : FlagCaptures(0) {};
+        BattleGroundEYScore() : flagCaptures(0) {};
         virtual ~BattleGroundEYScore() {};
-        uint32 FlagCaptures;
+
+        uint32 flagCaptures;
 };
 
 class BattleGroundEY : public BattleGround
@@ -253,42 +263,45 @@ class BattleGroundEY : public BattleGround
         void Update(uint32 diff) override;
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr) override;
-        virtual void StartingEventOpenDoors() override;
+        void AddPlayer(Player* player) override;
+        void StartingEventOpenDoors() override;
 
         /* BG Flags */
         ObjectGuid const& GetFlagCarrierGuid() const { return m_flagCarrier; }
         void SetFlagCarrier(ObjectGuid guid) { m_flagCarrier = guid; }
         void ClearFlagCarrier() { m_flagCarrier.Clear(); }
+
         bool IsFlagPickedUp() const  { return !m_flagCarrier.IsEmpty(); }
         uint8 GetFlagState() const { return m_flagState; }
+
         void RespawnFlag();
         void RespawnDroppedFlag();
 
-        void RemovePlayer(Player* plr, ObjectGuid guid) override;
+        void RemovePlayer(Player* player, ObjectGuid guid) override;
         bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
         void HandleGameObjectCreate(GameObject* go) override;
         bool HandleAreaTrigger(Player* source, uint32 trigger) override;
         void HandleKillPlayer(Player* player, Player* killer) override;
 
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
-        virtual void Reset() override;
+        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
+        void Reset() override;
         void UpdateTeamScore(Team team);
         void EndBattleGround(Team winner) override;
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-        void SetDroppedFlagGuid(ObjectGuid guid)     { m_DroppedFlagGuid = guid;}
-        void ClearDroppedFlagGuid()                  { m_DroppedFlagGuid.Clear();}
-        ObjectGuid const& GetDroppedFlagGuid() const { return m_DroppedFlagGuid;}
+        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+
+        void SetDroppedFlagGuid(ObjectGuid guid)     { m_droppedFlagGuid = guid;}
+        void ClearDroppedFlagGuid()                  { m_droppedFlagGuid.Clear();}
+        ObjectGuid const& GetDroppedFlagGuid() const { return m_droppedFlagGuid;}
 
         /* Battleground Events */
-        virtual void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
-        virtual void EventPlayerDroppedFlag(Player* source) override;
+        void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        void EventPlayerDroppedFlag(Player* source) override;
 
         /* achievement req. */
         bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
 
-        virtual Team GetPrematureWinner() override;
+        Team GetPrematureWinner() override;
 
     private:
         // process capture events
@@ -302,15 +315,15 @@ class BattleGroundEY : public BattleGround
 
         EYFlagState m_flagState;
         ObjectGuid m_flagCarrier;
-        ObjectGuid m_DroppedFlagGuid;
+        ObjectGuid m_droppedFlagGuid;
 
         uint8 m_towersAlliance;
         uint8 m_towersHorde;
 
-        uint32 m_towerWorldState[EY_NODES_MAX];
+        uint32 m_towerWorldState[EY_MAX_NODES];
 
-        Team m_towerOwner[EY_NODES_MAX];
-        ObjectGuid m_towers[EY_NODES_MAX];
+        Team m_towerOwner[EY_MAX_NODES];
+        ObjectGuid m_towers[EY_MAX_NODES];
 
         uint32 m_honorTicks;
         uint32 m_honorScoreTicks[PVP_TEAM_COUNT];

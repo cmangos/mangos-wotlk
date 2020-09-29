@@ -278,14 +278,14 @@ static const float strandTeleportLoc[4][4] =
 class BattleGroundSAScore : public BattleGroundScore
 {
     public:
-        BattleGroundSAScore(): DemolishersDestroyed(0), GatesDestroyed(0) {};
+        BattleGroundSAScore(): demolishersDestroyed(0), gatesDestroyed(0) {};
         virtual ~BattleGroundSAScore() {};
 
-        uint32 GetAttr1() const { return DemolishersDestroyed; }
-        uint32 GetAttr2() const { return GatesDestroyed; }
+        uint32 GetAttr1() const { return demolishersDestroyed; }
+        uint32 GetAttr2() const { return gatesDestroyed; }
 
-        uint32 DemolishersDestroyed;
-        uint32 GatesDestroyed;
+        uint32 demolishersDestroyed;
+        uint32 gatesDestroyed;
 };
 
 class BattleGroundSA : public BattleGround

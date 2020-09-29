@@ -31,9 +31,10 @@
 
 BattleGroundEY::BattleGroundEY(): m_flagState(), m_towersAlliance(0), m_towersHorde(0), m_honorTicks(0), m_flagRespawnTimer(0), m_resourceUpdateTimer(0), m_felReaverFlagTimer(0)
 {
+    // set battleground start message id
     m_startMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
     m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_EY_START_ONE_MINUTE;
-    m_startMessageIds[BG_STARTING_EVENT_THIRD] = LANG_BG_EY_START_HALF_MINUTE;
+    m_startMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_EY_START_HALF_MINUTE;
     m_startMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_EY_HAS_BEGUN;
 }
 
@@ -105,6 +106,7 @@ void BattleGroundEY::AddPoints(Team team, uint32 points)
     PvpTeamIndex team_index = GetTeamIndexByTeamId(team);
     m_teamScores[team_index] += points;
     m_honorScoreTicks[team_index] += points;
+
     if (m_honorScoreTicks[team_index] >= m_honorTicks)
     {
         RewardHonorToTeam(GetBonusHonorFromKill(1), team);
@@ -149,6 +151,7 @@ void BattleGroundEY::EndBattleGround(Team winner)
         RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
     if (winner == HORDE)
         RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
+
     // complete map reward
     RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
     RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
@@ -161,24 +164,25 @@ void BattleGroundEY::EndBattleGround(Team winner)
     BattleGround::EndBattleGround(winner);
 }
 
-void BattleGroundEY::AddPlayer(Player* plr)
+void BattleGroundEY::AddPlayer(Player* player)
 {
-    BattleGround::AddPlayer(plr);
-    // create score and add it to map
-    BattleGroundEYScore* sc = new BattleGroundEYScore;
+    BattleGround::AddPlayer(player);
 
-    m_playerScores[plr->GetObjectGuid()] = sc;
+    // create score and add it to map
+    BattleGroundEYScore* score = new BattleGroundEYScore;
+
+    m_playerScores[player->GetObjectGuid()] = score;
 }
 
-void BattleGroundEY::RemovePlayer(Player* plr, ObjectGuid guid)
+void BattleGroundEY::RemovePlayer(Player* player, ObjectGuid guid)
 {
     // sometimes flag aura not removed :(
     if (IsFlagPickedUp())
     {
         if (m_flagCarrier == guid)
         {
-            if (plr)
-                EventPlayerDroppedFlag(plr);
+            if (player)
+                EventPlayerDroppedFlag(player);
             else
             {
                 ClearFlagCarrier();
@@ -215,7 +219,7 @@ void BattleGroundEY::HandleGameObjectCreate(GameObject* go)
 // process the capture events
 bool BattleGroundEY::HandleEvent(uint32 eventId, GameObject* go, Unit* /*invoker*/)
 {
-    for (uint8 i = 0; i < EY_NODES_MAX; ++i)
+    for (uint8 i = 0; i < EY_MAX_NODES; ++i)
     {
         if (eyTowers[i] == go->GetEntry())
         {
@@ -301,7 +305,7 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
     {
         case ALLIANCE: SpawnEvent(towerId, TEAM_INDEX_ALLIANCE, true); break;
         case HORDE: SpawnEvent(towerId, TEAM_INDEX_HORDE, true); break;
-        default: SpawnEvent(towerId, EY_NEUTRAL_TEAM, true); break;
+        default: SpawnEvent(towerId, TEAM_INDEX_NEUTRAL, true); break;
     }
 }
 
@@ -354,7 +358,7 @@ void BattleGroundEY::Reset()
 
     m_flagState = EY_FLAG_STATE_ON_BASE;
     m_flagCarrier.Clear();
-    m_DroppedFlagGuid.Clear();
+    m_droppedFlagGuid.Clear();
 
     m_flagRespawnTimer = 0;
     m_resourceUpdateTimer = 0;
@@ -365,10 +369,10 @@ void BattleGroundEY::Reset()
     m_towerWorldState[NODE_MAGE_TOWER] = WORLD_STATE_EY_MAGE_TOWER_NEUTRAL;
     m_towerWorldState[NODE_DRAENEI_RUINS] = WORLD_STATE_EY_DRAENEI_RUINS_NEUTRAL;
 
-    for (uint8 i = 0; i < EY_NODES_MAX; ++i)
+    for (uint8 i = 0; i < EY_MAX_NODES; ++i)
     {
         m_towerOwner[i] = TEAM_NONE;
-        m_activeEvents[i] = EY_NEUTRAL_TEAM;
+        m_activeEvents[i] = TEAM_INDEX_NEUTRAL;
     }
 
     // the flag in the middle is spawned at beginning
@@ -529,7 +533,7 @@ void BattleGroundEY::UpdatePlayerScore(Player* source, uint32 type, uint32 value
     switch (type)
     {
         case SCORE_FLAG_CAPTURES:                           // flags captured
-            ((BattleGroundEYScore*)itr->second)->FlagCaptures += value;
+            ((BattleGroundEYScore*)itr->second)->flagCaptures += value;
             break;
         default:
             BattleGround::UpdatePlayerScore(source, type, value);
@@ -600,7 +604,7 @@ WorldSafeLocsEntry const* BattleGroundEY::GetClosestGraveYard(Player* player)
     float distance = (entry->x - plr_x) * (entry->x - plr_x) + (entry->y - plr_y) * (entry->y - plr_y) + (entry->z - plr_z) * (entry->z - plr_z);
     float nearestDistance = distance;
 
-    for (uint8 i = 0; i < EY_NODES_MAX; ++i)
+    for (uint8 i = 0; i < EY_MAX_NODES; ++i)
     {
         if (m_towerOwner[i] == player->GetTeam())
         {

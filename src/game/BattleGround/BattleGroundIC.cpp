@@ -26,10 +26,11 @@
 
 BattleGroundIC::BattleGroundIC() : m_hordeInnerGateGuid(ObjectGuid()), m_allianceInnerGate1Guid(ObjectGuid()), m_allianceInnerGate2Guid(ObjectGuid()), m_closeDoorTimer(0)
 {
+    // set battleground start message ids
     m_startMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_IC_START_TWO_MINUTES;
     m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_IC_START_ONE_MINUTE;
     m_startMessageIds[BG_STARTING_EVENT_THIRD]  = LANG_BG_IC_START_HALF_MINUTE;
-    //sToDo: use the text LANG_BG_IC_START_15_SECONDS
+    // ToDo: use the text LANG_BG_IC_START_15_SECONDS
     m_startMessageIds[BG_STARTING_EVENT_FOURTH] = LANG_BG_IC_BEGIN;
 }
 
@@ -160,10 +161,10 @@ void BattleGroundIC::UpdatePlayerScore(Player* source, uint32 type, uint32 value
     switch (type)
     {
         case SCORE_BASES_ASSAULTED:
-            ((BattleGroundICScore*)itr->second)->BasesAssaulted += value;
+            ((BattleGroundICScore*)itr->second)->basesAssaulted += value;
             break;
         case SCORE_BASES_DEFENDED:
-            ((BattleGroundICScore*)itr->second)->BasesDefended += value;
+            ((BattleGroundICScore*)itr->second)->basesDefended += value;
             break;
         default:
             BattleGround::UpdatePlayerScore(source, type, value);

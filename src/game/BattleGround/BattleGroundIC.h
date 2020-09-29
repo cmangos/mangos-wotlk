@@ -591,14 +591,14 @@ static const IsleWallsData isleHordeWallsData[] =
 class BattleGroundICScore : public BattleGroundScore
 {
     public:
-        BattleGroundICScore(): BasesAssaulted(0), BasesDefended(0) {};
+        BattleGroundICScore(): basesAssaulted(0), basesDefended(0) {};
         virtual ~BattleGroundICScore() {};
 
-        uint32 GetAttr1() const { return BasesAssaulted; }
-        uint32 GetAttr2() const { return BasesDefended; }
+        uint32 GetAttr1() const { return basesAssaulted; }
+        uint32 GetAttr2() const { return basesDefended; }
 
-        uint32 BasesAssaulted;
-        uint32 BasesDefended;
+        uint32 basesAssaulted;
+        uint32 basesDefended;
 };
 
 class BattleGroundIC : public BattleGround
@@ -609,10 +609,10 @@ class BattleGroundIC : public BattleGround
         BattleGroundIC();
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr) override;
-        virtual void StartingEventOpenDoors() override;
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-        virtual void Reset() override;
+        void AddPlayer(Player* plr) override;
+        void StartingEventOpenDoors() override;
+        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        void Reset() override;
         void EndBattleGround(Team winner) override;
 
         void HandleCreatureCreate(Creature* creature) override;
