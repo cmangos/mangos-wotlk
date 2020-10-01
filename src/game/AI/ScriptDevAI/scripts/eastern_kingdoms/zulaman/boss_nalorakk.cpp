@@ -123,7 +123,7 @@ struct boss_nalorakkAI : public CombatAI
         {
             m_creature->GetMotionMaster()->Clear(false, true);
             m_creature->GetMotionMaster()->MoveIdle();
-            m_creature->SetFacingTo(aBearEventInfo[m_uiCurrentWave].ori);
+            m_creature->SetFacingTo(aBearEventInfo[m_uiCurrentWave + 1].ori); // First point is spawn
 
             if (m_uiCurrentWave < MAX_BEAR_WAVES - 1)
             {
