@@ -198,9 +198,9 @@ void instance_zulaman::OnCreatureEvade(Creature* creature)
                 if (!temp)
                     break;
 
-                if (!temp->IsAlive())
-                    temp->Respawn();
-                
+                temp->ForcedDespawn();
+                temp->Respawn();
+
                 temp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             }
             m_nalorakkEvent[m_uiBearEventPhase].trashKilledCount = 0;
