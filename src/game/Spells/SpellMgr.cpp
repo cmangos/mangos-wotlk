@@ -2042,10 +2042,16 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
                     break;
                 }
                 case SPELLFAMILY_MAGE:
+                {
                     // Arcane Intellect and Insight
                     if (spellInfo_2->SpellIconID == 125 && spellInfo_1->Id == 18820)
                         return false;
+
+                    // Polymorph and Polymorph Heal Effect
+                    if (spellInfo_1->SpellIconID == 82 && spellInfo_2->SpellIconID == 82)
+                        return false;
                     break;
+                }
                 case SPELLFAMILY_WARRIOR:
                 {
                     // Scroll of Protection and Defensive Stance (multi-family check)
