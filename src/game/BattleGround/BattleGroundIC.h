@@ -25,7 +25,7 @@
 
 class BattleGround;
 
-enum
+enum ICGenericVariables
 {
     // generic enums
     BG_IC_MAX_REINFORCEMENTS                = 300,
@@ -36,7 +36,10 @@ enum
     BG_IC_CLOSE_DOORS_TIME                  = 20000,
 
     BG_IC_ZONE_ID_ISLE                      = 4710,
+};
 
+enum ICWorldStates
+{
     // world states
     BG_IC_STATE_ALLY_REINFORCE_SHOW         = 4221,         // reinforcements counters
     BG_IC_STATE_HORDE_REINFORCE_SHOW        = 4222,
@@ -98,7 +101,10 @@ enum
     BG_IC_STATE_HORDE_KEEP_CONFLICT_H       = 4348,
     BG_IC_STATE_HORDE_KEEP_CONTROLLED_A     = 4344,
     BG_IC_STATE_HORDE_KEEP_CONTROLLED_H     = 4345,
+};
 
+enum ICCreatures
+{
     // creatures
     BG_IC_NPC_COMMANDER_WYRMBANE            = 34924,        // Alliance Boss
     BG_IC_NPC_OVERLORD_AGMAR                = 34922,        // Horde Boss
@@ -134,7 +140,10 @@ enum
     BG_IC_NPC_HON_DEFENDER_TRIGGER_H        = 35380,
     BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A     = 36349,        // has aura 68652
     BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H     = 36350,
+};
 
+enum ICVehicles
+{
     // siege vehicles
     BG_IC_VEHICLE_GUNSHIP_CANNON_H          = 34935,
     BG_IC_VEHICLE_GUNSHIP_CANNON_A          = 34929,
@@ -146,8 +155,10 @@ enum
     BG_IC_VEHICLE_GLAIVE_THROWER_A          = 34802,
     BG_IC_VEHICLE_GLAIVE_THROWER_H          = 35273,
     BG_IC_VEHICLE_CATAPULT                  = 34793,
+};
 
-
+enum ICObjects
+{
     // destructible gameobjects
     BG_IC_GO_GATE_WEST_A                    = 195699,
     BG_IC_GO_GATE_EAST_A                    = 195698,
@@ -202,8 +213,10 @@ enum
     BG_IC_GO_TELEPORTER_OUTSIDE_A           = 195315,       // teleports from outside to inside; has spell 66549
     BG_IC_GO_TELEPORTER_INSIDE_A            = 195316,       // teleports from inside to outside; has spell 66548
     BG_IC_GO_TELEPORTER_EFFECTS_A           = 195701,
+};
 
-
+enum ICBanners
+{
     // neutral banners - all spawned at the beginning of the battleground
     BG_IC_GO_BANNER_DOCKS                   = 195157,       // triggers spell 65826
     BG_IC_GO_BANNER_HANGAR                  = 195158,       // triggers spell 65825
@@ -247,8 +260,10 @@ enum
     BG_IC_GO_BANNER_WORKSHOP_A_GREY         = 195150,
     BG_IC_GO_BANNER_WORKSHOP_H              = 195151,
     BG_IC_GO_BANNER_WORKSHOP_H_GREY         = 195152,
+};
 
-
+enum ICEvents
+{
     // event ids - keep gates breached (individual events for each gate)
     BG_IC_EVENT_ID_KEEP_BREACHED_A1         = 22082,        // west gate
     BG_IC_EVENT_ID_KEEP_BREACHED_A2         = 22078,        // east gate
@@ -257,8 +272,10 @@ enum
     BG_IC_EVENT_ID_KEEP_BREACHED_H1         = 22081,        // east gate
     BG_IC_EVENT_ID_KEEP_BREACHED_H2         = 22083,        // west gate
     BG_IC_EVENT_ID_KEEP_BREACHED_H3         = 22079,        // front gate
+};
 
-
+enum ICSpells
+{
     // spells
     BG_IC_SPELL_REFINERY                    = 68719,        // triggers 68722 on vehicles
     BG_IC_SPELL_QUARRY                      = 68720,        // triggers 68723 on vehicles
@@ -266,6 +283,19 @@ enum
     BG_IC_SPELL_SEAFORIUM_BLAST             = 66676,
     BG_IC_SPELL_HUGE_SEAFORIUM_BLAST        = 66672,
 
+    // achievement spells
+    BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE    = 68357,        // used for achiev id 3845 and 3850
+    BG_IC_SPELL_ACHIEV_BACK_DOOR_JOB        = 68502,        // used for achiev id 3854
+    // BG_IC_SPELL_DRIVING_CREDIT_DEMOLISHER= 68365,        // used for achiev id 3847
+    // BG_IC_SPELL_DRIVING_CREDIT_GLAIVE    = 68363,        // used for achiev id 3847
+    // BG_IC_SPELL_DRIVING_CREDIT_SIEGE     = 68364,        // used for achiev id 3847
+    // BG_IC_SPELL_DRIVING_CREDIT_CATAPULT  = 68362,        // used for achiev id 3847
+    BG_IC_SPELL_BOMB_CREDIT                 = 68366,        // used for achiev id 3848; triggered from spell 66676
+    BG_IC_SPELL_HUGE_BOMB_CREDIT            = 68367,        // used for achiev id 3849; triggered from spell 66672
+};
+
+enum ICAchievCriteria
+{
     // achievements
     // BG_IC_CRIT_CUT_BLUE_WIRE             = 12132,        // achiev id 3852; type 29; spell id 1843
     BG_IC_CRIT_RESOURCE_GLUT_A              = 12060,        // achiev id 3846
@@ -277,17 +307,10 @@ enum
     BG_IC_CRIT_MOVED_DOWN_VEHICLE           = 12114,        // achiev id 3850
     BG_IC_CRIT_MOVED_DOWN_PLAYER            = 12068,
     BG_IC_CRIT_GLAIVE_GRAVE                 = 12183,        // achiev id 3855
+};
 
-    // achievement spells
-    BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE    = 68357,        // used for achiev id 3845 and 3850
-    BG_IC_SPELL_ACHIEV_BACK_DOOR_JOB        = 68502,        // used for achiev id 3854
-    // BG_IC_SPELL_DRIVING_CREDIT_DEMOLISHER= 68365,        // used for achiev id 3847
-    // BG_IC_SPELL_DRIVING_CREDIT_GLAIVE    = 68363,        // used for achiev id 3847
-    // BG_IC_SPELL_DRIVING_CREDIT_SIEGE     = 68364,        // used for achiev id 3847
-    // BG_IC_SPELL_DRIVING_CREDIT_CATAPULT  = 68362,        // used for achiev id 3847
-    BG_IC_SPELL_BOMB_CREDIT                 = 68366,        // used for achiev id 3848; triggered from spell 66676
-    BG_IC_SPELL_HUGE_BOMB_CREDIT            = 68367,        // used for achiev id 3849; triggered from spell 66672
-
+enum ICGraveyards
+{
     // graveyard links
     BG_IC_GRAVEYARD_ID_DOCKS                = 1480,
     BG_IC_GRAVEYARD_ID_HANGAR               = 1481,
@@ -296,18 +319,27 @@ enum
     BG_IC_GRAVEYARD_ID_HORDE                = 1484,         // last option for horde; not capturable
     BG_IC_GRAVEYARD_ID_KEEP_ALLY            = 1485,
     BG_IC_GRAVEYARD_ID_KEEP_HORDE           = 1486,
+};
 
+enum ICSounds
+{
     // sounds
     BG_IC_SOUND_NODE_CLAIMED                = 8192,
     BG_IC_SOUND_NODE_CAPTURED_ALLIANCE      = 8173,
     BG_IC_SOUND_NODE_CAPTURED_HORDE         = 8213,
     BG_IC_SOUND_NODE_ASSAULTED_ALLIANCE     = 8212,
     BG_IC_SOUND_NODE_ASSAULTED_HORDE        = 8174,
+};
 
+enum ICFactions
+{
     // factions
     BG_IC_FACTION_ID_ALLIANCE               = 1732,
     BG_IC_FACTION_ID_HORDE                  = 1735,
+};
 
+enum ICAreaTriggers
+{
     // area triggers - probably checked for achiev 3854
     BG_IC_AREATRIGGER_KEEP_ALLIANCE         = 5555,
     BG_IC_AREATRIGGER_KEEP_HORDE            = 5535,
@@ -559,6 +591,21 @@ static const IsleObjectiveBasicData isleObjectiveData[] =
     {BG_IC_OBJECTIVE_QUARY,      LANG_BG_IC_NODE_QUARRY,        0,                             BG_IC_SPELL_QUARRY,   251.016f,  -1159.32f,  17.2376f}
 };
 
+struct IsleGraveyardSpawnData
+{
+    uint8 objectiveId;
+    float x, y, z, o;
+};
+
+static const IsleGraveyardSpawnData isleGraveyardData[] =
+{
+    {BG_IC_OBJECTIVE_KEEP_ALLY,  278.42f,  -883.2f,   49.89f,  1.53f},
+    {BG_IC_OBJECTIVE_KEEP_HORDE, 1300.91f, -834.04f,  48.91f,  1.69f},
+    {BG_IC_OBJECTIVE_WORKSHOP,   775.74f,  -652.77f,  9.31f,   4.27f},
+    {BG_IC_OBJECTIVE_DOCKS,      629.57f,  -279.83f,  11.33f,  0},
+    {BG_IC_OBJECTIVE_HANGAR,     780.729f, -1103.08f, 135.51f, 2.27f},
+};
+
 enum IsleGates
 {
     BG_IC_GATE_FRONT,
@@ -645,6 +692,7 @@ class BattleGroundIC : public BattleGround
         ObjectGuid m_keepGatesGuid[PVP_TEAM_COUNT][BG_IC_MAX_KEEP_GATES];
         ObjectGuid m_currentFlagGuid[BG_IC_MAX_OBJECTIVES];
         ObjectGuid m_honorableDefenderGuid[BG_IC_MAX_OBJECTIVES];
+        ObjectGuid m_spiritHealerGuid[BG_IC_MAX_OBJECTIVES];
         ObjectGuid m_workshopMechanicGuids[PVP_TEAM_COUNT];
         ObjectGuid m_hordeInnerGateGuid;
         ObjectGuid m_allianceInnerGate1Guid;

@@ -119,6 +119,27 @@ void BattleGroundIC::AddPlayer(Player* plr)
                 m_keepHonorTriggerGuids[BG_IC_OBJECTIVE_KEEP_HORDE].push_back(pTrigger->GetObjectGuid());
         }
     }
+
+    // summon the initial spirit healers
+    if (m_spiritHealerGuid[BG_IC_OBJECTIVE_KEEP_ALLY].IsEmpty() && plr->GetTeam() == ALLIANCE)
+    {
+        if (Creature* pHealer = plr->SummonCreature(NPC_SPIRIT_GUIDE_A, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].x, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].y, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].z, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_spiritHealerGuid[BG_IC_OBJECTIVE_KEEP_ALLY] = pHealer->GetObjectGuid();
+    }
+
+    if (m_spiritHealerGuid[BG_IC_OBJECTIVE_KEEP_HORDE].IsEmpty() && plr->GetTeam() == HORDE)
+    {
+        if (Creature* pHealer = plr->SummonCreature(NPC_SPIRIT_GUIDE_H, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].x, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].y, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].z, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_spiritHealerGuid[BG_IC_OBJECTIVE_KEEP_HORDE] = pHealer->GetObjectGuid();
+    }
+
+    // apply buff auras
+    if (m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY] != TEAM_INDEX_NEUTRAL)
+        if (plr->GetTeam() == GetTeamIdByTeamIndex(m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY]) && m_objectiveConquerer[BG_IC_OBJECTIVE_REFINERY] == m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY])
+            plr->CastSpell(plr, BG_IC_SPELL_REFINERY, TRIGGERED_OLD_TRIGGERED);
+    if (m_objectiveOwner[BG_IC_OBJECTIVE_QUARY] != TEAM_INDEX_NEUTRAL)
+        if (plr->GetTeam() == GetTeamIdByTeamIndex(m_objectiveOwner[BG_IC_OBJECTIVE_QUARY]) && m_objectiveConquerer[BG_IC_OBJECTIVE_QUARY] == m_objectiveOwner[BG_IC_OBJECTIVE_QUARY])
+            plr->CastSpell(plr, BG_IC_SPELL_QUARRY, TRIGGERED_OLD_TRIGGERED);
 }
 
 void BattleGroundIC::StartingEventOpenDoors()
@@ -373,14 +394,13 @@ void BattleGroundIC::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
         PlaySoundToAll(soundId);
 
         // despawn the current flag
-        go->SetLootState(GO_JUST_DEACTIVATED);
+        ChangeBgObjectSpawnState(go->GetObjectGuid(), RESPAWN_ONE_DAY);
 
         // respawn the new flag
         if (GameObject* pFlag = GetSingleGameObjectFromStorage(nextFlagEntry))
         {
             m_currentFlagGuid[objectiveId] = pFlag->GetObjectGuid();
-            pFlag->SetRespawnTime(60 * MINUTE);
-            pFlag->Refresh();
+            ChangeBgObjectSpawnState(pFlag->GetObjectGuid(), RESPAWN_IMMEDIATELY);
         }
     }
 }
@@ -674,14 +694,13 @@ void BattleGroundIC::DoCaptureObjective(IsleObjective objective)
             PlaySoundToAll(soundId);
 
             // change flag object
-            pOriginalFlag->SetLootState(GO_JUST_DEACTIVATED);
+            ChangeBgObjectSpawnState(pOriginalFlag->GetObjectGuid(), RESPAWN_ONE_DAY);
 
             // respawn the new flag
             if (GameObject* pFlag = GetSingleGameObjectFromStorage(i.nextObject))
             {
                 m_currentFlagGuid[objId] = pFlag->GetObjectGuid();
-                pFlag->SetRespawnTime(60 * MINUTE);
-                pFlag->Refresh();
+                ChangeBgObjectSpawnState(pFlag->GetObjectGuid(), RESPAWN_IMMEDIATELY);
             }
 
             // apply benefits
@@ -703,6 +722,9 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIn
     if (graveyardId)
         sObjectMgr.SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, GetTeamIdByTeamIndex(teamIdx));
 
+    if (Creature* pHealer = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? NPC_SPIRIT_GUIDE_A : NPC_SPIRIT_GUIDE_H, isleGraveyardData[objective].x, isleGraveyardData[objective].y, isleGraveyardData[objective].z, isleGraveyardData[objective].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+        m_spiritHealerGuid[objective] = pHealer->GetObjectGuid();
+
     // spawn the honor defender trigger
     if (Creature* pTrigger = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? BG_IC_NPC_HON_DEFENDER_TRIGGER_A : BG_IC_NPC_HON_DEFENDER_TRIGGER_H, isleObjectiveData[objective].x, isleObjectiveData[objective].y, isleObjectiveData[objective].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
         m_honorableDefenderGuid[objective] = pTrigger->GetObjectGuid();
@@ -722,12 +744,10 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIn
             // respawn the workshop bombs and give them the right faction
             for (const auto& guid : m_bombsGuids)
             {
+                ChangeBgObjectSpawnState(guid, RESPAWN_IMMEDIATELY);
+
                 if (GameObject* pBomb = GetBgMap()->GetGameObject(guid))
-                {
                     pBomb->SetFaction(iocTeamFactions[teamIdx]);
-                    pBomb->SetRespawnTime(60 * MINUTE);
-                    pBomb->Refresh();
-                }
             }
 
             break;
@@ -746,23 +766,15 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIn
         {
             // respawn portals
             for (const auto& guid : m_hangarPortalsGuids[teamIdx])
-            {
-                if (GameObject* pPortal = GetBgMap()->GetGameObject(guid))
-                {
-                    pPortal->SetRespawnTime(60 * MINUTE);
-                    pPortal->Refresh();
-                }
-            }
+                ChangeBgObjectSpawnState(guid, RESPAWN_IMMEDIATELY);
 
             // respawn and enable the animations
             for (const auto& guid : m_hangarAnimGuids[teamIdx])
             {
+                ChangeBgObjectSpawnState(guid, RESPAWN_IMMEDIATELY);
+
                 if (GameObject* pAnim = GetBgMap()->GetGameObject(guid))
-                {
-                    pAnim->SetRespawnTime(60 * MINUTE);
-                    pAnim->Refresh();
                     pAnim->UseDoorOrButton();
-                }
             }
             break;
         }
@@ -808,16 +820,22 @@ void BattleGroundIC::DoResetObjective(IsleObjective objective)
     if (Creature* pTrigger = GetBgMap()->GetCreature(m_honorableDefenderGuid[objective]))
         pTrigger->ForcedDespawn();
 
+    // reset graveyard
+    uint32 graveyardId = isleObjectiveData[objective].graveyardId;
+    if (graveyardId)
+        sObjectMgr.SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
+
+    // despawn healer
+    if (Creature* pHealer = GetBgMap()->GetCreature(m_spiritHealerGuid[objective]))
+        pHealer->ForcedDespawn();
+
     switch (objective)
     {
         case BG_IC_OBJECTIVE_WORKSHOP:
         {
             // despwn bombs
             for (const auto& guid : m_bombsGuids)
-            {
-                if (GameObject* pBomb = GetBgMap()->GetGameObject(guid))
-                    pBomb->SetLootState(GO_JUST_DEACTIVATED);
-            }
+                ChangeBgObjectSpawnState(guid, RESPAWN_ONE_DAY);
 
             // despwn the vehicles if not already in use
             for (const auto& guid : m_workshopSpawnsGuids[ownerIdx])
@@ -851,18 +869,14 @@ void BattleGroundIC::DoResetObjective(IsleObjective objective)
         {
             // reset the animations and depswn the portals
             for (const auto& guid : m_hangarPortalsGuids[ownerIdx])
-            {
-                if (GameObject* pPortal = GetBgMap()->GetGameObject(guid))
-                    pPortal->SetLootState(GO_JUST_DEACTIVATED);
-            }
+                ChangeBgObjectSpawnState(guid, RESPAWN_ONE_DAY);
 
             for (const auto& guid : m_hangarAnimGuids[ownerIdx])
             {
+                ChangeBgObjectSpawnState(guid, RESPAWN_ONE_DAY);
+
                 if (GameObject* pAnim = GetBgMap()->GetGameObject(guid))
-                {
                     pAnim->ResetDoorOrButton();
-                    pAnim->SetLootState(GO_JUST_DEACTIVATED);
-                }
             }
             break;
         }
