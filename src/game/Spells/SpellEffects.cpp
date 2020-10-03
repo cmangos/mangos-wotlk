@@ -3436,7 +3436,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                         return;
 
                     if (BattleGround* bg = ((Player*)m_caster)->GetBattleGround())
-                        bg->EventPlayerDroppedFlag((Player*)m_caster);
+                        bg->HandlePlayerDroppedFlag((Player*)m_caster);
 
                     m_caster->CastSpell(m_caster, 30452, TRIGGERED_OLD_TRIGGERED, nullptr);
                     return;
@@ -6279,31 +6279,17 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
     if (gameObjTarget)
     {
         GameObjectInfo const* goInfo = gameObjTarget->GetGOInfo();
-        // Arathi Basin banner opening !
+
+        // Specific battleground flags that trigger battleground actions; BG handler is called as part of GO use gode
+        // CanUseBattleGroundObject() already called in checkcast() in battleground check
         if ((goInfo->type == GAMEOBJECT_TYPE_BUTTON && goInfo->button.noDamageImmune) ||
-                (goInfo->type == GAMEOBJECT_TYPE_GOOBER && goInfo->goober.losOK))
+            (goInfo->type == GAMEOBJECT_TYPE_GOOBER && goInfo->goober.isPvPObject) ||
+            goInfo->type == GAMEOBJECT_TYPE_FLAGSTAND)
         {
-            // CanUseBattleGroundObject() already called in CheckCast()
-            // in battleground check
-            if (BattleGround* bg = player->GetBattleGround())
-            {
-                // check if it's correct bg
-                if (bg->GetTypeId() == BATTLEGROUND_AB || bg->GetTypeId() == BATTLEGROUND_AV || bg->GetTypeId() == BATTLEGROUND_SA || bg->GetTypeId() == BATTLEGROUND_IC)
-                    bg->EventPlayerClickedOnFlag(player, gameObjTarget);
-                return;
-            }
+            gameObjTarget->Use(player);
+            return;
         }
-        else if (goInfo->type == GAMEOBJECT_TYPE_FLAGSTAND)
-        {
-            // CanUseBattleGroundObject() already called in CheckCast()
-            // in battleground check
-            if (BattleGround* bg = player->GetBattleGround())
-            {
-                if (bg->GetTypeId() == BATTLEGROUND_EY)
-                    bg->EventPlayerClickedOnFlag(player, gameObjTarget);
-                return;
-            }
-        }
+
         lockId = goInfo->GetLockId();
     }
     else if (itemTarget)
@@ -8514,34 +8500,6 @@ void Spell::EffectSummonObjectWild(SpellEffectIndex eff_idx)
 
     // Store the GO to the caster
     m_caster->AddWildGameObject(pGameObj);
-
-    if (pGameObj->GetGoType() == GAMEOBJECT_TYPE_FLAGDROP && m_caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        Player* pl = (Player*)m_caster;
-        BattleGround* bg = ((Player*)m_caster)->GetBattleGround();
-
-        switch (pGameObj->GetMapId())
-        {
-            case 489:                                       // WS
-            {
-                if (bg && bg->GetTypeId() == BATTLEGROUND_WS && bg->GetStatus() == STATUS_IN_PROGRESS)
-                {
-                    Team team = pl->GetTeam() == ALLIANCE ? HORDE : ALLIANCE;
-
-                    ((BattleGroundWS*)bg)->SetDroppedFlagGuid(pGameObj->GetObjectGuid(), team);
-                }
-                break;
-            }
-            case 566:                                       // EY
-            {
-                if (bg && bg->GetTypeId() == BATTLEGROUND_EY && bg->GetStatus() == STATUS_IN_PROGRESS)
-                {
-                    ((BattleGroundEY*)bg)->SetDroppedFlagGuid(pGameObj->GetObjectGuid());
-                }
-                break;
-            }
-        }
-    }
 
     // Notify Summoner
     if (m_originalCaster && (m_originalCaster != m_caster) && (m_originalCaster->AI()))
@@ -13794,7 +13752,7 @@ void Spell::EffectWMODamage(SpellEffectIndex /*effIdx*/)
     if (caster->GetTypeId() == TYPEID_PLAYER && caster->GetMap()->IsBattleGround())
     {
         if (BattleGround* bg = ((Player*)caster)->GetBattleGround())
-            bg->EventGameObjectDamaged((Player*)caster, gameObjTarget, m_spellInfo->Id);
+            bg->HandleGameObjectDamaged((Player*)caster, gameObjTarget, m_spellInfo->Id);
     }
 }
 

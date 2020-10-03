@@ -205,11 +205,11 @@ enum
 
 
     // neutral banners - all spawned at the beginning of the battleground
-    BG_IC_GO_BANNER_DOCKS                   = 195157,
-    BG_IC_GO_BANNER_HANGAR                  = 195158,
-    BG_IC_GO_BANNER_QUARRY                  = 195338,
-    BG_IC_GO_BANNER_WORKSHOP                = 195133,
-    BG_IC_GO_BANNER_REFINERY                = 195343,
+    BG_IC_GO_BANNER_DOCKS                   = 195157,       // triggers spell 65826
+    BG_IC_GO_BANNER_HANGAR                  = 195158,       // triggers spell 65825
+    BG_IC_GO_BANNER_QUARRY                  = 195338,       // triggers spell 66686
+    BG_IC_GO_BANNER_WORKSHOP                = 195133,       // triggers spell 35092
+    BG_IC_GO_BANNER_REFINERY                = 195343,       // triggers spell 66687
 
     // keep banners
     BG_IC_GO_BANNER_ALLIANCE_KEEP_A         = 195396,       // spawmed at the beginning of battleground
@@ -625,8 +625,8 @@ class BattleGroundIC : public BattleGround
         void HandleKillUnit(Creature* creature, Player* killer) override;
         void HandleKillPlayer(Player* player, Player* killer) override;
 
-        void EventPlayerClickedOnFlag(Player* player, GameObject* go) override;
-        void EventGameObjectDamaged(Player* player, GameObject* object, uint32 spellId) override;
+        void HandlePlayerClickedOnFlag(Player* player, GameObject* go) override;
+        void HandleGameObjectDamaged(Player* player, GameObject* object, uint32 spellId) override;
 
         bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
 

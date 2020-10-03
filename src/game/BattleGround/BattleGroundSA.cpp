@@ -501,7 +501,7 @@ bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 }
 
 // Called when a player clicks a graveyard banner
-void BattleGroundSA::EventPlayerClickedOnFlag(Player* player, GameObject* go)
+void BattleGroundSA::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
 {
     for (uint8 i = 0; i < BG_SA_MAX_GRAVEYARDS; ++i)
     {
@@ -721,7 +721,7 @@ void BattleGroundSA::SendBattlegroundWarning(int32 messageId)
     SendMessageToAll(messageId, CHAT_MSG_RAID_BOSS_EMOTE, LANG_UNIVERSAL, guid);
 }
 
-void BattleGroundSA::EventGameObjectDamaged(Player* player, GameObject* object, uint32 spellId)
+void BattleGroundSA::HandleGameObjectDamaged(Player* player, GameObject* object, uint32 spellId)
 {
     if (spellId == BG_SA_SPELL_SEAFORIUM_BLAST)
         player->CastSpell(player, BG_SA_SPELL_ACHIEV_SEAFORIUM_DAMAGE, TRIGGERED_OLD_TRIGGERED);

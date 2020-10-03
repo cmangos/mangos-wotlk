@@ -192,7 +192,7 @@ class BattleGroundAB : public BattleGround
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
 
         /* Nodes occupying */
-        void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        void HandlePlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
 
         /* achievement req. */
         bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;

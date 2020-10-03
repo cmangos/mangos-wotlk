@@ -270,7 +270,7 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 }
 
 // Called when a player clicks a capturable banner
-void BattleGroundIC::EventPlayerClickedOnFlag(Player* player, GameObject* go)
+void BattleGroundIC::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
 {
     DEBUG_LOG("BattleGroundIC: Handle flag clicked for gameobject entry %u.", go->GetEntry());
 
@@ -461,7 +461,7 @@ void BattleGroundIC::HandleKillPlayer(Player* player, Player* killer)
         EndBattleGround(killer->GetTeam());
 }
 
-void BattleGroundIC::EventGameObjectDamaged(Player* player, GameObject* object, uint32 spellId)
+void BattleGroundIC::HandleGameObjectDamaged(Player* player, GameObject* object, uint32 spellId)
 {
     switch (spellId)
     {

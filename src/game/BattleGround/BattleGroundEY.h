@@ -76,6 +76,17 @@ enum EYCapturePoints
     GO_CAPTURE_POINT_DRAENEI_RUINS              = 184083
 };
 
+enum EYGameObjects
+{
+    GO_EY_NETHERSTORM_FLAG                      = 184141,
+    GO_EY_NETHERSTORM_FLAG_DROP                 = 184142,                   // temp summoned gameobject when flag is dropped
+    GO_EY_NETHERSTORM_FLAG_VISUAL               = 184493,                   // visual flag; spawned at any of the bases when team scores
+
+    GO_EY_VISUAL_BANNER_HORDE                   = 184380,                   // visual gameobjects; the usage of these objects isn't clear
+    GO_EY_VISUAL_BANNER_ALLIANCE                = 184381,                   // main capture point objects use art kit for alliance / horde flags
+    GO_EY_VISUAL_BANNER_NEUTRAL                 = 184382,
+};
+
 enum EYEvents
 {
     //EVENT_BLOOD_ELF_TOWER_WIN_ALLIANCE        = 12965,
@@ -107,8 +118,8 @@ enum EYEvents
     EVENT_DRAENEI_RUINS_NEUTRAL_HORDE           = 12959,
 
     // The following event ids are used for the flag handling
-    EVENT_NETHERSTORM_FLAG_PICKUP               = 13000,
-    EVENT_NETHERSTORM_FLAG_SPELL                = 13042,
+    EVENT_NETHERSTORM_FLAG_PICKUP               = 13000,                    // called when player clicks on the flag drop
+    EVENT_NETHERSTORM_FLAG_SPELL                = 13042,                    // not used; called when player clicks on flag; triggered from spell
 };
 
 enum EYSounds
@@ -122,8 +133,8 @@ enum EYSounds
 
 enum EYSpells
 {
-    EY_NETHERSTORM_FLAG_SPELL           = 34976,
-    EY_PLAYER_DROPPED_FLAG_SPELL        = 34991
+    EY_SPELL_NETHERSTORM_FLAG           = 34976,                            // cast on player click on GO 184141 or 184142; sends event 13042
+    EY_SPELL_PLAYER_DROPPED_FLAG        = 34991,                            // summon gameobject 184142
 };
 
 enum EYPointsTrigger
@@ -260,62 +271,60 @@ class BattleGroundEY : public BattleGround
 
     public:
         BattleGroundEY();
+        void Reset() override;
         void Update(uint32 diff) override;
 
-        /* inherited from BattlegroundClass */
+        // Main battleground functions
         void AddPlayer(Player* player) override;
+        void RemovePlayer(Player* player, ObjectGuid guid) override;
         void StartingEventOpenDoors() override;
+        void EndBattleGround(Team winner) override;
 
-        /* BG Flags */
+        // General functions
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
+        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
+        Team GetPrematureWinner() override;
+
+        // Battleground event handlers
+        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
+        bool HandleAreaTrigger(Player* source, uint32 trigger) override;
+        void HandleGameObjectCreate(GameObject* go) override;
+        void HandleKillPlayer(Player* player, Player* killer) override;
+        void HandlePlayerClickedOnFlag(Player* player, GameObject* go) override;
+        void HandlePlayerDroppedFlag(Player* source) override;
+
+        // Flag handler
         ObjectGuid const& GetFlagCarrierGuid() const { return m_flagCarrier; }
+
+        // Achievements
+        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
+
+    private:
+        // Battleground flag functions
         void SetFlagCarrier(ObjectGuid guid) { m_flagCarrier = guid; }
         void ClearFlagCarrier() { m_flagCarrier.Clear(); }
 
-        bool IsFlagPickedUp() const  { return !m_flagCarrier.IsEmpty(); }
+        bool IsFlagPickedUp() const { return !m_flagCarrier.IsEmpty(); }
         uint8 GetFlagState() const { return m_flagState; }
 
-        void RespawnFlag();
+        void RespawnFlagAtCenter(bool wasCaptured);
         void RespawnDroppedFlag();
 
-        void RemovePlayer(Player* player, ObjectGuid guid) override;
-        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
-        void HandleGameObjectCreate(GameObject* go) override;
-        bool HandleAreaTrigger(Player* source, uint32 trigger) override;
-        void HandleKillPlayer(Player* player, Player* killer) override;
-
-        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
-        void Reset() override;
-        void UpdateTeamScore(Team team);
-        void EndBattleGround(Team winner) override;
-        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
-        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-
-        void SetDroppedFlagGuid(ObjectGuid guid)     { m_droppedFlagGuid = guid;}
-        void ClearDroppedFlagGuid()                  { m_droppedFlagGuid.Clear();}
-        ObjectGuid const& GetDroppedFlagGuid() const { return m_droppedFlagGuid;}
-
-        /* Battleground Events */
-        void EventPlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
-        void EventPlayerDroppedFlag(Player* source) override;
-
-        /* achievement req. */
-        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
-
-        Team GetPrematureWinner() override;
-
-    private:
         // process capture events
         void ProcessCaptureEvent(GameObject* go, uint32 towerId, Team team, uint32 newWorldState, uint32 message);
-        void EventPlayerCapturedFlag(Player* source, EYNodes node);     // NOTE: virtual BattleGround::EventPlayerCapturedFlag has different parameters list
-        bool IsAllNodesControlledByTeam(Team team);
-        void UpdateResources();
+        void ProcessPlayerFlagScoreEvent(Player* source, EYNodes node);
+        bool AreAllNodesControlledByTeam(Team team);
 
-        /* Scorekeeping */
+        // Process score and resources
+        void UpdateTeamScore(Team team);
+        void UpdateResources();
         void AddPoints(Team team, uint32 points);
 
         EYFlagState m_flagState;
         ObjectGuid m_flagCarrier;
         ObjectGuid m_droppedFlagGuid;
+        ObjectGuid m_mainFlagGuid;
 
         uint8 m_towersAlliance;
         uint8 m_towersHorde;

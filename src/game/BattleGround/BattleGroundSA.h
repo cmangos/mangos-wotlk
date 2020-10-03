@@ -309,8 +309,8 @@ class BattleGroundSA : public BattleGround
 
         void HandleKillUnit(Creature* unit, Player* killer) override;
 
-        void EventPlayerClickedOnFlag(Player* player, GameObject* go) override;
-        void EventGameObjectDamaged(Player* player, GameObject* object, uint32 spellId) override;
+        void HandlePlayerClickedOnFlag(Player* player, GameObject* go) override;
+        void HandleGameObjectDamaged(Player* player, GameObject* object, uint32 spellId) override;
 
         bool IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType) override;
 

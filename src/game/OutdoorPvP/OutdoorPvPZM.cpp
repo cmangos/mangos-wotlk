@@ -381,7 +381,8 @@ bool OutdoorPvPZM::HandleGameObjectUse(Player* player, GameObject* go)
     // update graveyard owner
     m_graveyardOwner = team;
 
-    return false;
+    // return true when completed successfully
+    return true;
 }
 
 // Handle the ZM beacons - this is done by npcs which have certain auras

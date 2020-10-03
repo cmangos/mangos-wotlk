@@ -6042,7 +6042,7 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool /*Real*/)
             player->pvpInfo.isPvPFlagCarrier = false;
 
             if (BattleGround* bg = player->GetBattleGround())
-                bg->EventPlayerDroppedFlag(player);
+                bg->HandlePlayerDroppedFlag(player);
             else if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(player->GetCachedZoneId()))
                 outdoorPvP->HandleDropFlag(player, GetSpellProto()->Id);
         }
