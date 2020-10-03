@@ -252,6 +252,8 @@ void BattleGroundSA::TeleportPlayerToStartArea(Player* player)
 void BattleGroundSA::StartingEventOpenDoors()
 {
     EnableDemolishers();
+    SetupGraveyards();
+
     SendBattlegroundWarning(LANG_BG_SA_BEGIN);
     UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, 1);
     StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_ACHIEV_START_ID_STORM_BEACH_ALLY : BG_SA_ACHIEV_START_ID_STORM_BEACH_HORDE);
@@ -269,6 +271,20 @@ void BattleGroundSA::EnableDemolishers()
     m_noScratchAchiev = true;
     m_defenseAncients = true;
 }
+
+void BattleGroundSA::SetupGraveyards()
+{
+    Creature* master = GetBgMap()->GetCreature(m_battlegroundMasterGuid);
+    if (!master)
+        return;
+
+    uint32 defenderHealerEntry = GetAttacker() == TEAM_INDEX_ALLIANCE ? NPC_SPIRIT_GUIDE_H : NPC_SPIRIT_GUIDE_A;
+
+    // summon the spirit healer
+    for (uint8 i = 0; i < BG_SA_MAX_GRAVEYARDS; ++i)
+        if (Creature* healer = master->SummonCreature(defenderHealerEntry, strandGraveyardData[i].x, strandGraveyardData[i].y, strandGraveyardData[i].z, strandGraveyardData[i].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_spiritHealersGuid[i] = healer->GetObjectGuid();
+};
 
 void BattleGroundSA::UpdatePlayerScore(Player* source, uint32 type, uint32 value)
 {
@@ -362,6 +378,13 @@ void BattleGroundSA::HandleGameObjectCreate(GameObject* go)
         case BG_SA_GO_GY_FLAG_HORDE_WEST:
         case BG_SA_GO_GY_FLAG_HORDE_SOUTH:
             m_graveyardBannersGuids[TEAM_INDEX_HORDE].push_back(go->GetObjectGuid());
+            break;
+        case BG_SA_GO_SIGIL_YELLOW_MOON:
+        case BG_SA_GO_SIGIL_GREEN_MOON:
+        case BG_SA_GO_SIGIL_BLUE_MOON:
+        case BG_SA_GO_SIGIL_RED_MOON:
+        case BG_SA_GO_SIGIL_PURPLE_MOON:
+            m_sigilsGuids.push_back(go->GetObjectGuid());
             break;
     }
 }
@@ -484,7 +507,10 @@ bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
                 // fail the achievement
                 m_defenseAncients = false;
 
-                // ToDo: despawn sigil
+                // despawn sigil
+                if (strandSigils[i.index])
+                    if (GameObject* sigil = GetClosestGameObjectWithEntry(go, strandSigils[i.index], 10.0f))
+                        ChangeBgObjectSpawnState(sigil->GetObjectGuid(), RESPAWN_ONE_DAY);
             }
             else if (eventId == i.eventRebuild)
             {
@@ -559,6 +585,14 @@ void BattleGroundSA::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
                 SendBattlegroundWarning(sotaGraveyardData[i].textCaptureHorde);
                 PlaySoundToAll(BG_SA_SOUND_GRAVEYARD_TAKEN_HORDE);
             }
+
+            // update spirit healer; despawn old healer and summon new one
+            if (Creature* pHealer = GetBgMap()->GetCreature(m_spiritHealersGuid[i]))
+                pHealer->ForcedDespawn();
+
+            uint32 healerEntry = go->GetEntry() == sotaGraveyardData[i].goEntryAlliance ? NPC_SPIRIT_GUIDE_H : NPC_SPIRIT_GUIDE_A;
+            if (Creature* pHealer = go->SummonCreature(healerEntry, strandGraveyardData[i].x, strandGraveyardData[i].y, strandGraveyardData[i].z, strandGraveyardData[i].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                m_spiritHealersGuid[i] = pHealer->GetObjectGuid();
 
             break;
         }
@@ -671,6 +705,11 @@ void BattleGroundSA::SetupBattleground()
         }
     }
 
+    // despawn the spirit healers
+    for (uint8 i = 0; i < BG_SA_MAX_GRAVEYARDS; ++i)
+        if (Creature* pHealer = GetBgMap()->GetCreature(m_spiritHealersGuid[i]))
+            pHealer->ForcedDespawn();
+
     // reset Gates
     if (Creature* master = GetBgMap()->GetCreature(m_battlegroundMasterGuid))
     {
@@ -681,6 +720,10 @@ void BattleGroundSA::SetupBattleground()
         }
     }
 
+    // reset sigils
+    for (const auto& guid : m_sigilsGuids)
+        ChangeBgObjectSpawnState(guid, RESPAWN_IMMEDIATELY);
+
     // set capturable graveyard links and states
     for (uint8 i = 0; i < BG_SA_MAX_GRAVEYARDS; ++i)
     {
@@ -690,20 +733,15 @@ void BattleGroundSA::SetupBattleground()
 
     // despawn the attacker banners
     for (const auto& guid : m_graveyardBannersGuids[GetAttacker()])
-    {
-         if (GameObject* banner = GetBgMap()->GetGameObject(guid))
-            banner->SetLootState(GO_JUST_DEACTIVATED);
-    }
+        ChangeBgObjectSpawnState(guid, RESPAWN_ONE_DAY);
 
     // respawn graveyard banners and remove the no interact flag
     for (const auto& guid : m_graveyardBannersGuids[m_defendingTeamIdx])
     {
+        ChangeBgObjectSpawnState(guid, RESPAWN_IMMEDIATELY);
+
         if (GameObject* banner = GetBgMap()->GetGameObject(guid))
-        {
             banner->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
-            banner->SetRespawnTime(13 * MINUTE);
-            banner->Refresh();
-        }
     }
 
     // set static graveyards

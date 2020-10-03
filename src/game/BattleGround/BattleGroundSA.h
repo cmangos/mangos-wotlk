@@ -25,7 +25,7 @@
 
 class BattleGround;
 
-enum
+enum SAGlobalVariables
 {
     BG_SA_MAX_GATES                             = 6,
     BG_SA_MAX_GRAVEYARDS                        = 3,                // max capturable graveyards
@@ -42,7 +42,10 @@ enum
     BG_SA_TIMER_ROUND_LENGTH                    = 10 * MINUTE * IN_MILLISECONDS,
     //BG_SA_TIMER_UPDATE_TIME                     = 1000,
     BG_SA_TIMER_BOAT_START                      = 60000,
+};
 
+enum SAWorldStates
+{
     // world states
     BG_SA_STATE_TIMER_MINUTES                   = 3559,
     BG_SA_STATE_TIMER_SEC_SECOND_DIGIT          = 3560,             // tens
@@ -79,7 +82,10 @@ enum
 
     BG_SA_STATE_DEFENSE_TOKEN_HORDE             = 3631,
     BG_SA_STATE_DEFENSE_TOKEN_ALLIANCE          = 3630,
+};
 
+enum SACreatures
+{
     // creatures
     BG_SA_VEHICLE_DEMOLISHER                    = 28781,
     BG_SA_VEHICLE_CANNON                        = 27894,
@@ -92,7 +98,10 @@ enum
     // workshop owners - used when the attacker takes over the east / west graveyard
     BG_SA_NPC_RIGGER_SPARKLIGHT                 = 29260,
     BG_SA_NPC_GORGRIL_RIGSPARK                  = 29262,
+};
 
+enum SAObjects
+{
     // gameobjects
     // Main gates
     BG_SA_GO_GATE_GREEN_EMERALD                 = 190722,
@@ -120,7 +129,10 @@ enum
     BG_SA_GO_SEAFORIUM_BOMB_ALLIANCE            = 190753,               // phased for attacker
     BG_SA_GO_SEAFORIUM_BOMB_HORDE               = 194086,
     BG_SA_GO_SEAFORIUM_BOMB                     = 190752,               // actual bomb - trap triggering spell 52408
+};
 
+enum SABanners
+{
     // graveyard flags - type buttons
     BG_SA_GO_GY_FLAG_ALLIANCE_EAST              = 191306,
     BG_SA_GO_GY_FLAG_ALLIANCE_WEST              = 191308,
@@ -129,13 +141,19 @@ enum
     BG_SA_GO_GY_FLAG_HORDE_EAST                 = 191305,
     BG_SA_GO_GY_FLAG_HORDE_WEST                 = 191307,
     BG_SA_GO_GY_FLAG_HORDE_SOUTH                = 191309,
+};
 
+enum SAShips
+{
     // transport ships
     BG_SA_GO_TRANSPORT_SHIP_HORDE_1             = 193183,               // phased for attacker
     BG_SA_GO_TRANSPORT_SHIP_HORDE_2             = 193184,
     BG_SA_GO_TRANSPORT_SHIP_ALLIANCE_1          = 193182,
     BG_SA_GO_TRANSPORT_SHIP_ALLIANCE_2          = 193185,
+};
 
+enum SAGraveyards
+{
     // graveyard links
     BG_SA_GRAVEYARD_ID_EAST                     = 1346,                 // controllable graveyards
     BG_SA_GRAVEYARD_ID_WEST                     = 1347,
@@ -143,7 +161,10 @@ enum
     BG_SA_GRAVEYARD_ID_SHRINE                   = 1349,                 // defender graveyard
     BG_SA_GRAVEYARD_ID_BEACH                    = 1350,                 // attacker graveyards
     BG_SA_GRAVEYARD_ID_SHIP                     = 1351,
+};
 
+enum SASpells
+{
     // spells
     BG_SA_SPELL_TELEPORT_DEFENDER               = 52364,                // teleport defender team to the south graveyard platform
     BG_SA_SPELL_TELEPORT_ATTACKERS              = 60178,
@@ -155,7 +176,10 @@ enum
     // phasing auras implemented in DB in spell area
     // BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT = 60027,                // phase 65 - alliance is defender
     // BG_SA_SPELL_HORDE_CONTROL_PHASE_SHIFT    = 60028,                // phase 129 - horde is defender
+};
 
+enum SAAchievCriteria
+{
     // achiev criterias
     BG_SA_CRIT_NOT_A_SCRATCH_ALLY               = 7626,                 // achiev id 1762; criteria type 1
     BG_SA_CRIT_NOT_A_SCRATCH_HORDE              = 7634,                 // achiev id 2192; criteria type 1
@@ -176,13 +200,19 @@ enum
     // missing achiev criteria spells
     BG_SA_SPELL_ACHIEV_STORM_BEACH              = 65246,                // achiev id 1310 | serverside spell
     BG_SA_SPELL_ACHIEV_SEAFORIUM_DAMAGE         = 60937,                // achiev ids 1761, 2193 | serverside spell
+};
 
+enum SAEvents
+{
     // events
     BG_SA_EVENT_ID_RELIC                        = 20572,                // event used to end the round
     BG_SA_EVENT_ID_SHIP_PAUSE_1                 = 22095,                // events used to pause the ships
     BG_SA_EVENT_ID_SHIP_PAUSE_2                 = 18829,
     BG_SA_EVENT_SHRINE_DOOR_DESTROY             = 19837,
+};
 
+enum SASounds
+{
     // sounds
     BG_SA_SOUND_GRAVEYARD_TAKEN_HORDE           = 8174,
     BG_SA_SOUND_GRAVEYARD_TAKEN_ALLIANCE        = 8212,
@@ -194,11 +224,17 @@ enum
     BG_SA_SOUND_WALL_DESTROYED_HORDE            = 15910,
     BG_SA_SOUND_WALL_ATTACKED_HORDE             = 15911,
     BG_SA_SOUND_WALL_ATTACKED_ALLIANCE          = 15912,
+};
 
+enum SAFactions
+{
     // factions
     BG_SA_FACTION_ID_ALLIANCE                   = 1732,
     BG_SA_FACTION_ID_HORDE                      = 1735,
+};
 
+enum SABattleStages
+{
     // battle stages
     BG_SA_STAGE_ROUND_1                         = 0,
     BG_SA_STAGE_RESET                           = 1,
@@ -206,13 +242,18 @@ enum
     BG_SA_STAGE_SECOND_ROUND_2                  = 3,
     BG_SA_STAGE_SECOND_ROUND_3                  = 4,
     BG_SA_STAGE_ROUND_2                         = 5,
+};
 
+enum SAConditions
+{
     // conditions
     BG_SA_COND_DEFENDER_ALLIANCE                = 0,
     BG_SA_COND_DEFENDER_HORDE                   = 1,
 };
 
 static const uint32 strandGates[BG_SA_MAX_GATES] = { BG_SA_STATE_GREEN_GATE, BG_SA_STATE_PURPLE_GATE, BG_SA_STATE_BLUE_GATE, BG_SA_STATE_RED_GATE, BG_SA_STATE_YELLOW_GATE, BG_SA_STATE_ANCIENT_GATE };
+
+static const uint32 strandSigils[BG_SA_MAX_GATES] = { BG_SA_GO_SIGIL_GREEN_MOON, BG_SA_GO_SIGIL_PURPLE_MOON, BG_SA_GO_SIGIL_BLUE_MOON, BG_SA_GO_SIGIL_RED_MOON, BG_SA_GO_SIGIL_YELLOW_MOON, 0 };
 
 // *** Battleground factions *** //
 const uint32 sotaTeamFactions[PVP_TEAM_COUNT] = { BG_SA_FACTION_ID_ALLIANCE, BG_SA_FACTION_ID_HORDE };
@@ -275,6 +316,19 @@ static const float strandTeleportLoc[4][4] =
     {1599.188f, -103.563f, 8.87f, 4.037f}       // right dock
 };
 
+struct StrandGraveyardSpawnData
+{
+    uint32 graveyardId;
+    float x, y, z, o;
+};
+
+static const StrandGraveyardSpawnData strandGraveyardData[] =
+{
+    {BG_SA_GRAVEYARD_ID_EAST,   1400.12f, -293.852f, 32.07f,  1.888f},
+    {BG_SA_GRAVEYARD_ID_WEST,   1388.8f,   203.355f, 32.153f, 4.488f},
+    {BG_SA_GRAVEYARD_ID_SOUTH,  1122.28f,    4.416f, 68.936f, 6.063f},
+};
+
 class BattleGroundSAScore : public BattleGroundScore
 {
     public:
@@ -296,10 +350,10 @@ class BattleGroundSA : public BattleGround
         BattleGroundSA();
 
         /* inherited from BattlegroundClass */
-        virtual void AddPlayer(Player* plr) override;
-        virtual void StartingEventOpenDoors() override;
-        virtual void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-        virtual void Reset() override;
+        void AddPlayer(Player* plr) override;
+        void StartingEventOpenDoors() override;
+        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+        void Reset() override;
         void EndBattleGround(Team winner) override;
 
         void HandleCreatureCreate(Creature* creature) override;
@@ -327,6 +381,7 @@ class BattleGroundSA : public BattleGround
         void ProcessBattlegroundWinner();
         void SendBattlegroundWarning(int32 messageId);
         void EnableDemolishers();
+        void SetupGraveyards();
 
         void TeleportPlayerToStartArea(Player* player);
 
@@ -351,11 +406,13 @@ class BattleGroundSA : public BattleGround
         ObjectGuid m_gorgrilGuid;
 
         ObjectGuid m_relicGuid[PVP_TEAM_COUNT];
+        ObjectGuid m_spiritHealersGuid[BG_SA_MAX_GRAVEYARDS];
 
         GuidList m_cannonsGuids;
         GuidList m_demolishersGuids;
         GuidList m_tempDemolishersGuids;
         GuidList m_gatesGuids;
+        GuidList m_sigilsGuids;
         GuidList m_attackerTeleportStalkersGuids;
         GuidVector m_triggerGuids;
 
