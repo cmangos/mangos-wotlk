@@ -195,7 +195,7 @@ struct boss_archimondeAI : public CombatAI
 
     void EnterEvadeMode() override
     {
-        ScriptedAI::EnterEvadeMode();
+        CombatAI::EnterEvadeMode();
 
         if (m_instance)
             m_instance->SetData(TYPE_ARCHIMONDE, FAIL);
@@ -254,6 +254,13 @@ struct boss_archimondeAI : public CombatAI
         }
     }
 
+    void OnSpellCooldownAdded(SpellEntry const* spellInfo) override
+    {
+        CombatAI::OnSpellCooldownAdded(spellInfo);
+        if (spellInfo->Id == SPELL_AIR_BURST)
+            ResetCombatAction(ARCHIMONDE_ACTION_AIR_BURST, GetSubsequentActionTimer(ARCHIMONDE_ACTION_AIR_BURST));
+    }
+
     void ExecuteAction(uint32 action) override
     {
 		switch (action)
@@ -290,13 +297,8 @@ struct boss_archimondeAI : public CombatAI
                 return;
 			case ARCHIMONDE_ACTION_AIR_BURST:
 				if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
-				{
 					if (DoCastSpellIfCan(target, SPELL_AIR_BURST) == CAST_OK)
-					{
 						DoScriptText(urand(0, 1) ? SAY_AIR_BURST1 : SAY_AIR_BURST2, m_creature);
-                        ResetCombatAction(action, GetSubsequentActionTimer(action));
-					}
-				}
                 return;
 			case ARCHIMONDE_ACTION_FEAR:
 				if (DoCastSpellIfCan(nullptr, SPELL_FEAR) == CAST_OK)
