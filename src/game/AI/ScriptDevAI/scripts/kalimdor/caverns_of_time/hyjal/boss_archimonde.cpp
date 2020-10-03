@@ -107,7 +107,6 @@ struct boss_archimondeAI : public CombatAI
 {
     boss_archimondeAI(Creature* creature) : CombatAI(creature, ARCHIMONDE_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        m_instance = (ScriptedInstance*)creature->GetInstanceData();
         m_hasIntro = false;
         AddTimerlessCombatAction(ARCHIMONDE_ACTION_PHASE_2, true);
         AddCombatAction(ARCHIMONDE_ACTION_GRIP_OF_THE_LEGION, 5000, 25000);
