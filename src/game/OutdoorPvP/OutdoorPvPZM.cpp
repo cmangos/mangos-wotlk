@@ -382,6 +382,7 @@ bool OutdoorPvPZM::HandleGameObjectUse(Player* player, GameObject* go)
     m_graveyardOwner = team;
 
     // return true when completed successfully
+    // this is required for the proper despawn of the flag; it won't stop further DB scripts from being executed
     return true;
 }
 
