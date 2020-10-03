@@ -263,98 +263,98 @@ struct boss_archimondeAI : public CombatAI
 
     void ExecuteAction(uint32 action) override
     {
-		switch (action)
-		{
-			case ARCHIMONDE_ACTION_PHASE_2:
-			{
-				if (m_creature->GetHealthPercent() > 10.0f)
-					return;
+        switch (action)
+        {
+            case ARCHIMONDE_ACTION_PHASE_2:
+            {
+                if (m_creature->GetHealthPercent() > 10.0f)
+                    return;
 
-				DoScriptText(SAY_EPILOGUE, m_creature);
-				m_creature->PlayDirectSound(10992);
-				m_creature->PlayDirectSound(10843);
-				// move at home position and start outro
-				SetCombatScriptStatus(true);
-				m_creature->GetMotionMaster()->MovePoint(POINT_EPILOGUE, outroPoint[0], outroPoint[1], outroPoint[2], FORCED_MOVEMENT_RUN);
-				SetCombatMovement(false);
-				m_creature->SetActiveObjectState(true);
-				SetMeleeEnabled(false);
-				m_phase = true;
-				return;
-			}
-			case ARCHIMONDE_ACTION_HAND_OF_DEATH:
-				if (DoCastSpellIfCan(nullptr, SPELL_HAND_OF_DEATH) == CAST_OK)
-				{
-					DoScriptText(SAY_ENRAGE, m_creature);
+                DoScriptText(SAY_EPILOGUE, m_creature);
+                m_creature->PlayDirectSound(10992);
+                m_creature->PlayDirectSound(10843);
+                // move at home position and start outro
+                SetCombatScriptStatus(true);
+                m_creature->GetMotionMaster()->MovePoint(POINT_EPILOGUE, outroPoint[0], outroPoint[1], outroPoint[2], FORCED_MOVEMENT_RUN);
+                SetCombatMovement(false);
+                m_creature->SetActiveObjectState(true);
+                SetMeleeEnabled(false);
+                m_phase = true;
+                return;
+            }
+            case ARCHIMONDE_ACTION_HAND_OF_DEATH:
+                if (DoCastSpellIfCan(nullptr, SPELL_HAND_OF_DEATH) == CAST_OK)
+                {
+                    DoScriptText(SAY_ENRAGE, m_creature);
                     ResetCombatAction(action, GetSubsequentActionTimer(action));
                     EnterEvadeMode();
-				}
+                }
                 return;
-			case ARCHIMONDE_ACTION_GRIP_OF_THE_LEGION:
-				if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-					if (DoCastSpellIfCan(target, SPELL_GRIP_OF_THE_LEGION) == CAST_OK)
+            case ARCHIMONDE_ACTION_GRIP_OF_THE_LEGION:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_GRIP_OF_THE_LEGION) == CAST_OK)
                         ResetCombatAction(action, GetSubsequentActionTimer(action));
                 return;
-			case ARCHIMONDE_ACTION_AIR_BURST:
-				if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
-					if (DoCastSpellIfCan(target, SPELL_AIR_BURST) == CAST_OK)
-						DoScriptText(urand(0, 1) ? SAY_AIR_BURST1 : SAY_AIR_BURST2, m_creature);
+            case ARCHIMONDE_ACTION_AIR_BURST:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
+                    if (DoCastSpellIfCan(target, SPELL_AIR_BURST) == CAST_OK)
+                        DoScriptText(urand(0, 1) ? SAY_AIR_BURST1 : SAY_AIR_BURST2, m_creature);
                 return;
-			case ARCHIMONDE_ACTION_FEAR:
-				if (DoCastSpellIfCan(nullptr, SPELL_FEAR) == CAST_OK)
-					ResetCombatAction(action, GetSubsequentActionTimer(action));
-                return;
-			case ARCHIMONDE_ACTION_DOOMFIRE:
-				if (DoCastSpellIfCan(nullptr, SPELL_DOOMFIRE_STRIKE) == CAST_OK)
-				{
-					DoScriptText(urand(0, 1) ? SAY_DOOMFIRE1 : SAY_DOOMFIRE2, m_creature);
+            case ARCHIMONDE_ACTION_FEAR:
+                if (DoCastSpellIfCan(nullptr, SPELL_FEAR) == CAST_OK)
                     ResetCombatAction(action, GetSubsequentActionTimer(action));
-				}
                 return;
-			case ARCHIMONDE_ACTION_FINGER_OF_DEATH_COOLUP:
-				if (Unit* closest = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, nullptr, SELECT_FLAG_PLAYER))
-				{
-					if (!m_creature->CanReachWithMeleeAttack(closest))
-					{
-						if (DoCastSpellIfCan(nullptr, SPELL_FINGER_OF_DEATH_COOLUP) == CAST_OK)
-						{
+            case ARCHIMONDE_ACTION_DOOMFIRE:
+                if (DoCastSpellIfCan(nullptr, SPELL_DOOMFIRE_STRIKE) == CAST_OK)
+                {
+                    DoScriptText(urand(0, 1) ? SAY_DOOMFIRE1 : SAY_DOOMFIRE2, m_creature);
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                }
+                return;
+            case ARCHIMONDE_ACTION_FINGER_OF_DEATH_COOLUP:
+                if (Unit* closest = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, nullptr, SELECT_FLAG_PLAYER))
+                {
+                    if (!m_creature->CanReachWithMeleeAttack(closest))
+                    {
+                        if (DoCastSpellIfCan(nullptr, SPELL_FINGER_OF_DEATH_COOLUP) == CAST_OK)
+                        {
                             ResetCombatAction(action, GetSubsequentActionTimer(action));
                             SetActionReadyStatus(ARCHIMONDE_ACTION_FINGER_OF_DEATH, true); // when GCD expires, cast this
-						}
-					}
-				}
+                        }
+                    }
+                }
                 return;
-			case ARCHIMONDE_ACTION_FINGER_OF_DEATH:
-				if (Unit* closest = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, nullptr, SELECT_FLAG_PLAYER))
-				{
-					if (!m_creature->CanReachWithMeleeAttack(closest))
-					{
-						if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-						{
-							if (DoCastSpellIfCan(target, SPELL_FINGER_OF_DEATH) == CAST_OK)
-							{
+            case ARCHIMONDE_ACTION_FINGER_OF_DEATH:
+                if (Unit* closest = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, nullptr, SELECT_FLAG_PLAYER))
+                {
+                    if (!m_creature->CanReachWithMeleeAttack(closest))
+                    {
+                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                        {
+                            if (DoCastSpellIfCan(target, SPELL_FINGER_OF_DEATH) == CAST_OK)
+                            {
                                 SetActionReadyStatus(action, false);
-								return;
-							}
-						}
-					}
-					else SetActionReadyStatus(action, false); // if someone is tanking again, disable
-				}
+                                return;
+                            }
+                        }
+                    }
+                    else SetActionReadyStatus(action, false); // if someone is tanking again, disable
+                }
                 return;
-			case ARCHIMONDE_ACTION_SOUL_CHARGE:
-				uint32 spellId = 0;
-				if (m_creature->HasAura(SPELL_SOUL_CHARGE_YELLOW_CHARGE))
-					spellId = SPELL_SOUL_CHARGE_YELLOW;
-				else if (m_creature->HasAura(SPELL_SOUL_CHARGE_RED_CHARGE))
-					spellId = SPELL_SOUL_CHARGE_RED;
-				else if (m_creature->HasAura(SPELL_SOUL_CHARGE_GREEN_CHARGE))
-					spellId = SPELL_SOUL_CHARGE_GREEN;
+            case ARCHIMONDE_ACTION_SOUL_CHARGE:
+                uint32 spellId = 0;
+                if (m_creature->HasAura(SPELL_SOUL_CHARGE_YELLOW_CHARGE))
+                    spellId = SPELL_SOUL_CHARGE_YELLOW;
+                else if (m_creature->HasAura(SPELL_SOUL_CHARGE_RED_CHARGE))
+                    spellId = SPELL_SOUL_CHARGE_RED;
+                else if (m_creature->HasAura(SPELL_SOUL_CHARGE_GREEN_CHARGE))
+                    spellId = SPELL_SOUL_CHARGE_GREEN;
                 ResetCombatAction(action, GetSubsequentActionTimer(action)); // does not seem to reset cd only on spell cast
-				if (spellId)
-					if (DoCastSpellIfCan(nullptr, spellId) == CAST_OK)
-						return;
+                if (spellId)
+                    if (DoCastSpellIfCan(nullptr, spellId) == CAST_OK)
+                        return;
                 return;
-		}
+        }
     }
 
     void HandleOutro(const uint32 diff)
