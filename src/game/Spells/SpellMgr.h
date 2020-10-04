@@ -1393,19 +1393,6 @@ inline void GetChainJumpRange(SpellEntry const* spellInfo, SpellEffectIndex effI
     }
 }
 
-// Research function for spells that should be send as GO caster in packet
-inline bool IsGOCastSpell(SpellEntry const* spellInfo)
-{
-    switch (spellInfo->Id)
-    {
-        case 6636: // Wagon Explode
-        case 30979:  // Flames
-            return true;
-        default:
-            return false;
-    }
-}
-
 inline bool IsSpellCanTargetUnattackable(SpellEntry const* spellInfo) // TODO: Remove through targeting research
 {
     switch (spellInfo->Id) // spells that target minipets, which are inherently non attackable
