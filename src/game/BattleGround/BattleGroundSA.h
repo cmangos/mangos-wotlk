@@ -28,6 +28,7 @@ class BattleGround;
 enum SAGlobalVariables
 {
     BG_SA_MAX_GATES                             = 6,
+    BG_SA_MAX_SIGILS                            = 5,
     BG_SA_MAX_GRAVEYARDS                        = 3,                // max capturable graveyards
 
     BG_SA_ZONE_ID_STRAND                        = 4384,
@@ -253,7 +254,7 @@ enum SAConditions
 
 static const uint32 strandGates[BG_SA_MAX_GATES] = { BG_SA_STATE_GREEN_GATE, BG_SA_STATE_PURPLE_GATE, BG_SA_STATE_BLUE_GATE, BG_SA_STATE_RED_GATE, BG_SA_STATE_YELLOW_GATE, BG_SA_STATE_ANCIENT_GATE };
 
-static const uint32 strandSigils[BG_SA_MAX_GATES] = { BG_SA_GO_SIGIL_GREEN_MOON, BG_SA_GO_SIGIL_PURPLE_MOON, BG_SA_GO_SIGIL_BLUE_MOON, BG_SA_GO_SIGIL_RED_MOON, BG_SA_GO_SIGIL_YELLOW_MOON, 0 };
+static const uint32 strandSigils[BG_SA_MAX_SIGILS] = { BG_SA_GO_SIGIL_GREEN_MOON, BG_SA_GO_SIGIL_PURPLE_MOON, BG_SA_GO_SIGIL_BLUE_MOON, BG_SA_GO_SIGIL_RED_MOON, BG_SA_GO_SIGIL_YELLOW_MOON };
 
 // *** Battleground factions *** //
 const uint32 sotaTeamFactions[PVP_TEAM_COUNT] = { BG_SA_FACTION_ID_ALLIANCE, BG_SA_FACTION_ID_HORDE };
@@ -412,7 +413,6 @@ class BattleGroundSA : public BattleGround
         GuidList m_demolishersGuids;
         GuidList m_tempDemolishersGuids;
         GuidList m_gatesGuids;
-        GuidList m_sigilsGuids;
         GuidList m_attackerTeleportStalkersGuids;
         GuidVector m_triggerGuids;
 

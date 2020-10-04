@@ -23,7 +23,6 @@
 #include "BattleGroundSA.h"
 #include "Tools/Language.h"
 #include "Globals/ObjectMgr.h"
-#include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 
 BattleGroundSA::BattleGroundSA(): m_defendingTeamIdx(TEAM_INDEX_NEUTRAL), m_battleRoundTimer(0), m_boatStartTimer(0), m_battleStage(BG_SA_STAGE_ROUND_1)
 {
@@ -385,7 +384,7 @@ void BattleGroundSA::HandleGameObjectCreate(GameObject* go)
         case BG_SA_GO_SIGIL_BLUE_MOON:
         case BG_SA_GO_SIGIL_RED_MOON:
         case BG_SA_GO_SIGIL_PURPLE_MOON:
-            m_sigilsGuids.push_back(go->GetObjectGuid());
+            m_goEntryGuidStore[go->GetEntry()] = go->GetObjectGuid();
             break;
     }
 }
@@ -509,8 +508,8 @@ bool BattleGroundSA::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
                 m_defenseAncients = false;
 
                 // despawn sigil
-                if (strandSigils[i.index])
-                    if (GameObject* sigil = GetClosestGameObjectWithEntry(go, strandSigils[i.index], 10.0f))
+                if (i.index < BG_SA_MAX_SIGILS)
+                    if (GameObject* sigil = GetSingleGameObjectFromStorage(strandSigils[i.index]))
                         ChangeBgObjectSpawnState(sigil->GetObjectGuid(), RESPAWN_ONE_DAY);
             }
             else if (eventId == i.eventRebuild)
@@ -722,8 +721,9 @@ void BattleGroundSA::SetupBattleground()
     }
 
     // reset sigils
-    for (const auto& guid : m_sigilsGuids)
-        ChangeBgObjectSpawnState(guid, RESPAWN_IMMEDIATELY);
+    for (uint8 i = 0; i < BG_SA_MAX_SIGILS; ++i)
+        if (GameObject* pSigil = GetSingleGameObjectFromStorage(strandSigils[i]))
+            ChangeBgObjectSpawnState(pSigil->GetObjectGuid(), RESPAWN_IMMEDIATELY);
 
     // set capturable graveyard links and states
     for (uint8 i = 0; i < BG_SA_MAX_GRAVEYARDS; ++i)
