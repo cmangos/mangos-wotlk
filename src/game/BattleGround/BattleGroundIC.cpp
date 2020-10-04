@@ -196,21 +196,21 @@ void BattleGroundIC::UpdatePlayerScore(Player* source, uint32 type, uint32 value
 void BattleGroundIC::FillInitialWorldStates(WorldPacket& data, uint32& count)
 {
     // show the reinforcements
-    FillInitialWorldState(data, count, BG_IC_STATE_ALLY_REINFORCE_SHOW, 1);
-    FillInitialWorldState(data, count, BG_IC_STATE_HORDE_REINFORCE_SHOW, 1);
+    FillInitialWorldState(data, count, BG_IC_STATE_ALLY_REINFORCE_SHOW, WORLD_STATE_ADD);
+    FillInitialWorldState(data, count, BG_IC_STATE_HORDE_REINFORCE_SHOW, WORLD_STATE_ADD);
     FillInitialWorldState(data, count, BG_IC_STATE_ALLY_REINFORCE_COUNT, m_reinforcements[TEAM_INDEX_ALLIANCE]);
     FillInitialWorldState(data, count, BG_IC_STATE_HORDE_REINFORCE_COUNT, m_reinforcements[TEAM_INDEX_HORDE]);
 
     // show the capturable bases
     for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
-        FillInitialWorldState(data, count, m_objectiveState[i], 1);
+        FillInitialWorldState(data, count, m_objectiveState[i], WORLD_STATE_ADD);
 
     // show the walls
     for (uint8 i = 0; i < BG_IC_MAX_KEEP_GATES; ++i)
-        FillInitialWorldState(data, count, m_gatesAllianceState[i], 1);
+        FillInitialWorldState(data, count, m_gatesAllianceState[i], WORLD_STATE_ADD);
 
     for (uint8 i = 0; i < BG_IC_MAX_KEEP_GATES; ++i)
-        FillInitialWorldState(data, count, m_gatesHordeState[i], 1);
+        FillInitialWorldState(data, count, m_gatesHordeState[i], WORLD_STATE_ADD);
 }
 
 // process the gate events
@@ -222,9 +222,9 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
     {
         if (eventId == isleAllianceWallsData[i].eventId)
         {
-            UpdateWorldState(m_gatesAllianceState[i], 0);
+            UpdateWorldState(m_gatesAllianceState[i], WORLD_STATE_REMOVE);
             m_gatesAllianceState[i] = isleAllianceWallsData[i].stateOpened;
-            UpdateWorldState(m_gatesAllianceState[i], 1);
+            UpdateWorldState(m_gatesAllianceState[i], WORLD_STATE_ADD);
 
             if (GameObject* pGate = GetBgMap()->GetGameObject(m_keepGatesGuid[TEAM_INDEX_ALLIANCE][i]))
                 pGate->UseDoorOrButton(0, true);
@@ -256,9 +256,9 @@ bool BattleGroundIC::HandleEvent(uint32 eventId, GameObject* go, Unit* invoker)
 
         if (eventId == isleHordeWallsData[i].eventId)
         {
-            UpdateWorldState(m_gatesHordeState[i], 0);
+            UpdateWorldState(m_gatesHordeState[i], WORLD_STATE_REMOVE);
             m_gatesHordeState[i] = isleHordeWallsData[i].stateOpened;
-            UpdateWorldState(m_gatesHordeState[i], 1);
+            UpdateWorldState(m_gatesHordeState[i], WORLD_STATE_ADD);
 
             if (GameObject* pGate = GetBgMap()->GetGameObject(m_keepGatesGuid[TEAM_INDEX_HORDE][i]))
                 pGate->UseDoorOrButton(0, true);
@@ -379,9 +379,9 @@ void BattleGroundIC::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
         m_objectiveOwner[objectiveId] = newOwnerIdx;
 
         // update world states
-        UpdateWorldState(m_objectiveState[objectiveId], 0);
+        UpdateWorldState(m_objectiveState[objectiveId], WORLD_STATE_REMOVE);
         m_objectiveState[objectiveId] = newWorldState;
-        UpdateWorldState(m_objectiveState[objectiveId], 1);
+        UpdateWorldState(m_objectiveState[objectiveId], WORLD_STATE_ADD);
 
         // start timer
         m_objectiveTimer[objectiveId] = BG_IC_FLAG_CAPTURING_TIME;
@@ -679,9 +679,9 @@ void BattleGroundIC::DoCaptureObjective(IsleObjective objective)
             m_objectiveConquerer[objId] = ownerIdx;
 
             // update world states
-            UpdateWorldState(m_objectiveState[objId], 0);
+            UpdateWorldState(m_objectiveState[objId], WORLD_STATE_REMOVE);
             m_objectiveState[objId] = i.nextState;
-            UpdateWorldState(m_objectiveState[objId], 1);
+            UpdateWorldState(m_objectiveState[objId], WORLD_STATE_ADD);
 
             ChatMsg chatSystem = ownerIdx == TEAM_INDEX_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE;
             uint32 factionStrig = ownerIdx == TEAM_INDEX_ALLIANCE ? LANG_BG_ALLY : LANG_BG_HORDE;

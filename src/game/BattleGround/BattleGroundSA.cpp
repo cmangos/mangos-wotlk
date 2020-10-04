@@ -118,7 +118,7 @@ void BattleGroundSA::Update(uint32 diff)
                         }
                         // send warning
                         SendBattlegroundWarning(LANG_BG_SA_ROUND_FINISHED);
-                        UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, 0);
+                        UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, WORLD_STATE_REMOVE);
 
                         // cast end of round spell
                         CastSpellOnTeam(BG_SA_SPELL_END_OF_ROUND, ALLIANCE);
@@ -182,7 +182,7 @@ void BattleGroundSA::Update(uint32 diff)
                                 player->RemoveAurasDueToSpell(SPELL_PREPARATION);
 
                         SendBattlegroundWarning(LANG_BG_SA_BEGIN);
-                        UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, 1);
+                        UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, WORLD_STATE_ADD);
                         EnableDemolishers();
                         StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_ACHIEV_START_ID_STORM_BEACH_ALLY : BG_SA_ACHIEV_START_ID_STORM_BEACH_HORDE);
                         m_battleRoundTimer = BG_SA_TIMER_ROUND_LENGTH;
@@ -255,7 +255,7 @@ void BattleGroundSA::StartingEventOpenDoors()
     SetupGraveyards();
 
     SendBattlegroundWarning(LANG_BG_SA_BEGIN);
-    UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, 1);
+    UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, WORLD_STATE_ADD);
     StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_BE_SPELL_TARGET, GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_SA_ACHIEV_START_ID_STORM_BEACH_ALLY : BG_SA_ACHIEV_START_ID_STORM_BEACH_HORDE);
 }
 
@@ -398,7 +398,7 @@ void BattleGroundSA::UpdateTimerWorldState()
     UpdateWorldState(BG_SA_STATE_TIMER_SEC_FIRST_DIGIT, ((secondsLeft % 60000) % 10000) / 1000);
     UpdateWorldState(BG_SA_STATE_TIMER_SEC_SECOND_DIGIT, (secondsLeft % 60000) / 10000);
     UpdateWorldState(BG_SA_STATE_TIMER_MINUTES, secondsLeft / 60000);
-    UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, 1);
+    UpdateWorldState(BG_SA_STATE_ENABLE_TIMER, WORLD_STATE_ADD);
 }
 
 void BattleGroundSA::FillInitialWorldStates(WorldPacket& data, uint32& count)
@@ -571,16 +571,16 @@ void BattleGroundSA::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
             // send text and update world states
             if (go->GetEntry() == sotaGraveyardData[i].goEntryHorde)
             {
-                UpdateWorldState(sotaGraveyardData[i].worldStateHorde, 0);
-                UpdateWorldState(sotaGraveyardData[i].worldStateAlliance, 1);
+                UpdateWorldState(sotaGraveyardData[i].worldStateHorde, WORLD_STATE_REMOVE);
+                UpdateWorldState(sotaGraveyardData[i].worldStateAlliance, WORLD_STATE_ADD);
 
                 SendBattlegroundWarning(sotaGraveyardData[i].textCaptureAlliance);
                 PlaySoundToAll(BG_SA_SOUND_GRAVEYARD_TAKEN_ALLIANCE);
             }
             else if (go->GetEntry() == sotaGraveyardData[i].goEntryAlliance)
             {
-                UpdateWorldState(sotaGraveyardData[i].worldStateAlliance, 0);
-                UpdateWorldState(sotaGraveyardData[i].worldStateHorde, 1);
+                UpdateWorldState(sotaGraveyardData[i].worldStateAlliance, WORLD_STATE_REMOVE);
+                UpdateWorldState(sotaGraveyardData[i].worldStateHorde, WORLD_STATE_ADD);
 
                 SendBattlegroundWarning(sotaGraveyardData[i].textCaptureHorde);
                 PlaySoundToAll(BG_SA_SOUND_GRAVEYARD_TAKEN_HORDE);
