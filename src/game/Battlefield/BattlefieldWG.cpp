@@ -205,6 +205,13 @@ void BattlefieldWG::HandlePlayerEnterZone(Player* player, bool isMainZone)
     if (GetDefender() != TEAM_NONE)
         player->CastSpell(player, wgTeamControlAuras[GetTeamIndexByTeamId(GetDefender())], TRIGGERED_OLD_TRIGGERED);
 
+    // remove all buff auras first; will be added back shortly
+    player->RemoveAurasDueToSpell(SPELL_ESSENCE_WINTERGRASP_ZONE);
+    player->RemoveAurasDueToSpell(SPELL_TOWER_CONTROL);
+    player->RemoveAurasDueToSpell(SPELL_RECRUIT);
+    player->RemoveAurasDueToSpell(SPELL_CORPORAL);
+    player->RemoveAurasDueToSpell(SPELL_LIEUTENANT);
+
     // defenders are phased and get increase XP
     if (GetBattlefieldStatus() == BF_STATUS_COOLDOWN && GetDefender() == player->GetTeam())
         player->CastSpell(player, SPELL_ESSENCE_WINTERGRASP_ZONE, TRIGGERED_OLD_TRIGGERED);
@@ -500,10 +507,12 @@ void BattlefieldWG::HandleGameObjectCreate(GameObject* go)
         case GO_WG_FORTRESS_COLLISION_WALL:
             m_fortressDoorWallGuid = go->GetObjectGuid();
             return;
-        case GO_WINTERGRASP_ALLIANCE_BANNER:
+        case GO_WINTERGRASP_BANNER_DEFENSE_ALLIANCE:
+        case GO_WINTERGRASP_BANNER_OFFENSE_ALLIANCE:
             m_towerBannersGuids[TEAM_INDEX_ALLIANCE].push_back(go->GetObjectGuid());
             return;
-        case GO_WINTERGRASP_HORDE_BANNER:
+        case GO_WINTERGRASP_BANNER_DEFENSE_HORDE:
+        case GO_WINTERGRASP_BANNER_OFFENSE_HORDE:
             m_towerBannersGuids[TEAM_INDEX_HORDE].push_back(go->GetObjectGuid());
             return;
     }
@@ -812,6 +821,8 @@ void BattlefieldWG::EndBattle(Team winner)
     // get player reference in order to end the battlefield
     if (Player* player = GetPlayerInZone())
         CleanupBattlefield(player, winner);
+
+    // ToDo: does the fortress rebuild immediately after battle end?
 
     // must be called after cleanup
     Battlefield::EndBattle(winner);

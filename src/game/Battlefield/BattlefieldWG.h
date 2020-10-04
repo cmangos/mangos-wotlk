@@ -306,8 +306,10 @@ enum
     // GO_PORTAL_TO_WINTERGRASP                 = 193772,               // portal from dalaran to WG
 
     // banners
-    GO_WINTERGRASP_ALLIANCE_BANNER              = 192487,               // banners that have to be despawned when object is damaged or destroyed
-    GO_WINTERGRASP_HORDE_BANNER                 = 192488,
+    GO_WINTERGRASP_BANNER_DEFENSE_ALLIANCE      = 192487,               // banners that have to be despawned when object is damaged or destroyed
+    GO_WINTERGRASP_BANNER_DEFENSE_HORDE         = 192488,
+    GO_WINTERGRASP_BANNER_OFFENSE_ALLIANCE      = 192501,
+    GO_WINTERGRASP_BANNER_OFFENSE_HORDE         = 192502,
 
     // note: wintergrasp portal objects are phased based on battlefield defender; handled by DB
 

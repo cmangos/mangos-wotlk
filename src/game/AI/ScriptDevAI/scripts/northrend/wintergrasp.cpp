@@ -210,17 +210,6 @@ bool ProcessEventId_event_go_tower_destroy(uint32 uiEventId, Object* pSource, Ob
         GetCreatureListWithEntryInGrid(lCannonsInRange, tower, NPC_WINTERGRASP_TOWER_CANNON, 50.0f);
         for (auto cannon : lCannonsInRange)
             cannon->ForcedDespawn();
-
-        GameObjectList lAllianceBanners;
-        GetGameObjectListWithEntryInGrid(lAllianceBanners, tower, GO_WINTERGRASP_ALLIANCE_BANNER, 50.0f);
-        for (auto banner : lAllianceBanners)
-            banner->SetLootState(GO_JUST_DEACTIVATED);
-
-        GameObjectList lHordeBanners;
-        GetGameObjectListWithEntryInGrid(lHordeBanners, tower, GO_WINTERGRASP_HORDE_BANNER, 50.0f);
-        for (auto banner : lHordeBanners)
-            banner->SetLootState(GO_JUST_DEACTIVATED);
-
     }
 
     // always return false to allow battlefield script to process
