@@ -280,6 +280,10 @@ struct essence_base_AI : public ScriptedAI, public CombatActions
         {
             m_creature->SetInCombatWithZone();
         });
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+            {
+                return x > 660.9f && y > 66.8902f;
+            });
     }
 
     ScriptedInstance* m_instance;
