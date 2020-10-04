@@ -23,6 +23,7 @@
 #include "BattleGroundSA.h"
 #include "Tools/Language.h"
 #include "Globals/ObjectMgr.h"
+#include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 
 BattleGroundSA::BattleGroundSA(): m_defendingTeamIdx(TEAM_INDEX_NEUTRAL), m_battleRoundTimer(0), m_boatStartTimer(0), m_battleStage(BG_SA_STAGE_ROUND_1)
 {
