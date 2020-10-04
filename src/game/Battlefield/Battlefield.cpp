@@ -303,6 +303,17 @@ void Battlefield::EndBattle(Team winner)
     RewardPlayersOnBattleEnd(winner);
 
     DEBUG_LOG("Battlefield: Battle has ended. Winner Team: %s.", winner == ALLIANCE ? "Alliance" : "Horde");
+
+    // disband battlefield raid groups
+    for (auto& m_battlefieldRaid : m_battlefieldRaids)
+    {
+        for (auto group : m_battlefieldRaid)
+        {
+            group->Disband();
+            delete group;
+        }
+        m_battlefieldRaid.clear();
+    }
 }
 
 /**
