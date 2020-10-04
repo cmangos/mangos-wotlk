@@ -110,9 +110,9 @@ uint32 GetSpellCastTime(SpellEntry const* spellInfo, WorldObject* caster, Spell*
         switch (spellInfo->Id)
         {
             case 3366: // Opening - seems to have a settable timer per usage
-                if (spell->m_CastItem)
+                if (spell->GetCastItem())
                 {
-                    switch (spell->m_CastItem->GetEntry())
+                    switch (spell->GetCastItem()->GetEntry())
                     {
                         case 31088: // Tainted Core - instant opening
                             return 0;
@@ -515,7 +515,7 @@ bool IsExplicitNegativeTarget(uint32 targetA)
     return false;
 }
 
-uint32 GetAffectedTargets(SpellEntry const* spellInfo, Unit* caster)
+uint32 GetAffectedTargets(SpellEntry const* spellInfo, WorldObject* caster)
 {
     // custom target amount cases
     switch (spellInfo->SpellFamilyName)
@@ -626,7 +626,7 @@ uint32 GetAffectedTargets(SpellEntry const* spellInfo, Unit* caster)
         {
             // Sunder Armor (main spell)
             if (spellInfo->IsFitToFamilyMask(uint64(0x0000000000004000), 0x00000000) && spellInfo->SpellVisual[0] == 406)
-                if (caster->HasAura(58387))               // Glyph of Sunder Armor
+                if (static_cast<Unit*>(caster)->HasAura(58387))               // Glyph of Sunder Armor
                     return 2;
             break;
         }
