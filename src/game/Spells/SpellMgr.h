@@ -425,8 +425,12 @@ inline bool IsSpellSetRun(SpellEntry const* spellInfo)
 {
     switch (spellInfo->Id)
     {
-        case 30445:     // Stillpine Ancestor Yor
-        case 39163:     // [DND]Rescue Wyvern
+        case 30445: // Stillpine Ancestor Yor
+        case 39163: // [DND]Rescue Wyvern
+        case 43486: // Summon Amani'shi Warriors
+        case 43487: // Summon Amani Eagle
+        case 46214: // Summon Imp
+        case 46245: // Summon Shadowsword Deathbringer
             return true;
         default:
             return false;
