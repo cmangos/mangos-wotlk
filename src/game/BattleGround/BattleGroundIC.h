@@ -134,12 +134,6 @@ enum ICCreatures
     BG_IC_NPC_WORLD_TRIGGER_NOT_FLOAT       = 34984,        // teleport triggers on gunships
     BG_IC_NPC_WORLD_TRIGGER_A               = 20213,        // parachute trigger on gunship
     BG_IC_NPC_WORLD_TRIGGER_H               = 20212,        // parachute trigger on gunship
-
-    // triggers that apply extra honor to players
-    BG_IC_NPC_HON_DEFENDER_TRIGGER_A        = 35379,        // has aura 66157
-    BG_IC_NPC_HON_DEFENDER_TRIGGER_H        = 35380,
-    BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A     = 36349,        // has aura 68652
-    BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H     = 36350,
 };
 
 enum ICVehicles
@@ -408,18 +402,18 @@ static const IsleDualSummonData iocDocksSpawns[] =
 // *** Alliance Keep extra Honor triggers spawn data *** //
 static const IsleDualSummonData iocHonorTriggerAllySpawns[] =
 {
-    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 298.8455f, -784.8785f, 48.9995f, 0},
-    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 261.5868f, -784.7656f, 48.9996f, 0},
-    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 298.0756f, -879.5717f, 48.9169f, 0},         // guesswork
-    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 260.1043f, -879.8110f, 48.9163f, 0},         // guesswork
+    {BG_NPC_HON_DEFENDER_TRIGGER_25_A, BG_NPC_HON_DEFENDER_TRIGGER_25_H, 298.8455f, -784.8785f, 48.9995f, 0},
+    {BG_NPC_HON_DEFENDER_TRIGGER_25_A, BG_NPC_HON_DEFENDER_TRIGGER_25_H, 261.5868f, -784.7656f, 48.9996f, 0},
+    {BG_NPC_HON_DEFENDER_TRIGGER_25_A, BG_NPC_HON_DEFENDER_TRIGGER_25_H, 298.0756f, -879.5717f, 48.9169f, 0},         // guesswork
+    {BG_NPC_HON_DEFENDER_TRIGGER_25_A, BG_NPC_HON_DEFENDER_TRIGGER_25_H, 260.1043f, -879.8110f, 48.9163f, 0},         // guesswork
 };
 
 // *** Horde Keep extra Honor triggers spawn data *** //
 static const IsleDualSummonData iocHonorTriggerHordeSpawns[] =
 {
-    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 1284.76f, -705.668f, 48.9163f, 0},             // all entries for horde are guesswork
-    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 1284.548f, -816.063f, 48.916f, 0},
-    {BG_IC_NPC_HON_DEFENDER_TRIGGER_25_A, BG_IC_NPC_HON_DEFENDER_TRIGGER_25_H, 1319.526f, -816.779f, 48.929f, 0},
+    {BG_NPC_HON_DEFENDER_TRIGGER_25_A, BG_NPC_HON_DEFENDER_TRIGGER_25_H, 1284.76f, -705.668f, 48.9163f, 0},             // all entries for horde are guesswork
+    {BG_NPC_HON_DEFENDER_TRIGGER_25_A, BG_NPC_HON_DEFENDER_TRIGGER_25_H, 1284.548f, -816.063f, 48.916f, 0},
+    {BG_NPC_HON_DEFENDER_TRIGGER_25_A, BG_NPC_HON_DEFENDER_TRIGGER_25_H, 1319.526f, -816.779f, 48.929f, 0},
 };
 
 // *** Refinery extra spawn data *** //
@@ -654,33 +648,32 @@ class BattleGroundIC : public BattleGround
 
     public:
         BattleGroundIC();
+        void Reset() override;
+        void Update(uint32 diff) override;
 
-        /* inherited from BattlegroundClass */
+        // Main battleground functions
         void AddPlayer(Player* plr) override;
         void StartingEventOpenDoors() override;
-        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-        void Reset() override;
         void EndBattleGround(Team winner) override;
 
+        // General functions
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
+        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+
+        // Battleground event handlers
         void HandleCreatureCreate(Creature* creature) override;
         void HandleGameObjectCreate(GameObject* go) override;
-
-        /* Scorekeeping */
-        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
-
         bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
         void HandleKillUnit(Creature* creature, Player* killer) override;
         void HandleKillPlayer(Player* player, Player* killer) override;
-
         void HandlePlayerClickedOnFlag(Player* player, GameObject* go) override;
         void HandleGameObjectDamaged(Player* player, GameObject* object, uint32 spellId) override;
 
+        // Achievements
         bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
 
-        void Update(uint32 diff) override;
-
     private:
-
+        // Battleground objectives helper functions
         void DoApplyTeamBuff(PvpTeamIndex teamIdx, uint32 spellEntry, bool apply);
         void DoCaptureObjective(IsleObjective objective);
         void DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIndex teamIdx, GameObject* objRef);

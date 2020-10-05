@@ -278,7 +278,7 @@ void BattleGroundSA::SetupGraveyards()
     if (!master)
         return;
 
-    uint32 defenderHealerEntry = GetAttacker() == TEAM_INDEX_ALLIANCE ? NPC_SPIRIT_GUIDE_H : NPC_SPIRIT_GUIDE_A;
+    uint32 defenderHealerEntry = GetAttacker() == TEAM_INDEX_ALLIANCE ? BG_NPC_SPIRIT_GUIDE_HORDE : BG_NPC_SPIRIT_GUIDE_ALLIANCE;
 
     // summon the spirit healer
     for (uint8 i = 0; i < BG_SA_MAX_GRAVEYARDS; ++i)
@@ -590,7 +590,7 @@ void BattleGroundSA::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
             if (Creature* pHealer = GetBgMap()->GetCreature(m_spiritHealersGuid[i]))
                 pHealer->ForcedDespawn();
 
-            uint32 healerEntry = go->GetEntry() == sotaGraveyardData[i].goEntryAlliance ? NPC_SPIRIT_GUIDE_H : NPC_SPIRIT_GUIDE_A;
+            uint32 healerEntry = go->GetEntry() == sotaGraveyardData[i].goEntryAlliance ? BG_NPC_SPIRIT_GUIDE_HORDE : BG_NPC_SPIRIT_GUIDE_ALLIANCE;
             if (Creature* pHealer = go->SummonCreature(healerEntry, strandGraveyardData[i].x, strandGraveyardData[i].y, strandGraveyardData[i].z, strandGraveyardData[i].o, TEMPSPAWN_DEAD_DESPAWN, 0))
                 m_spiritHealersGuid[i] = pHealer->GetObjectGuid();
 

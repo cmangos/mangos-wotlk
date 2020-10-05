@@ -97,7 +97,7 @@ void BattleGroundIC::AddPlayer(Player* plr)
     // spawn starting area honorable defenders alliance
     if (m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_ALLY].IsEmpty() && plr->GetTeam() == ALLIANCE)
     {
-        if (Creature* pTrigger = plr->SummonCreature(BG_IC_NPC_HON_DEFENDER_TRIGGER_A, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].x, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].y, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+        if (Creature* pTrigger = plr->SummonCreature(BG_NPC_HON_DEFENDER_TRIGGER_A, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].x, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].y, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
             m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_ALLY] = pTrigger->GetObjectGuid();
 
         for (const auto& i : iocHonorTriggerAllySpawns)
@@ -110,7 +110,7 @@ void BattleGroundIC::AddPlayer(Player* plr)
     // spawn starting area honorable defenders horde
     if (m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_HORDE].IsEmpty() && plr->GetTeam() == HORDE)
     {
-        if (Creature* pTrigger = plr->SummonCreature(BG_IC_NPC_HON_DEFENDER_TRIGGER_H, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].x, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].y, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+        if (Creature* pTrigger = plr->SummonCreature(BG_NPC_HON_DEFENDER_TRIGGER_H, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].x, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].y, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
             m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_HORDE] = pTrigger->GetObjectGuid();
 
         for (const auto& i : iocHonorTriggerHordeSpawns)
@@ -123,13 +123,13 @@ void BattleGroundIC::AddPlayer(Player* plr)
     // summon the initial spirit healers
     if (m_spiritHealerGuid[BG_IC_OBJECTIVE_KEEP_ALLY].IsEmpty() && plr->GetTeam() == ALLIANCE)
     {
-        if (Creature* pHealer = plr->SummonCreature(NPC_SPIRIT_GUIDE_A, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].x, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].y, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].z, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+        if (Creature* pHealer = plr->SummonCreature(BG_NPC_SPIRIT_GUIDE_ALLIANCE, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].x, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].y, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].z, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].o, TEMPSPAWN_DEAD_DESPAWN, 0))
             m_spiritHealerGuid[BG_IC_OBJECTIVE_KEEP_ALLY] = pHealer->GetObjectGuid();
     }
 
     if (m_spiritHealerGuid[BG_IC_OBJECTIVE_KEEP_HORDE].IsEmpty() && plr->GetTeam() == HORDE)
     {
-        if (Creature* pHealer = plr->SummonCreature(NPC_SPIRIT_GUIDE_H, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].x, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].y, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].z, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+        if (Creature* pHealer = plr->SummonCreature(BG_NPC_SPIRIT_GUIDE_HORDE, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].x, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].y, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].z, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].o, TEMPSPAWN_DEAD_DESPAWN, 0))
             m_spiritHealerGuid[BG_IC_OBJECTIVE_KEEP_HORDE] = pHealer->GetObjectGuid();
     }
 
@@ -722,11 +722,11 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIn
     if (graveyardId)
         sObjectMgr.SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, GetTeamIdByTeamIndex(teamIdx));
 
-    if (Creature* pHealer = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? NPC_SPIRIT_GUIDE_A : NPC_SPIRIT_GUIDE_H, isleGraveyardData[objective].x, isleGraveyardData[objective].y, isleGraveyardData[objective].z, isleGraveyardData[objective].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+    if (Creature* pHealer = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? BG_NPC_SPIRIT_GUIDE_ALLIANCE : BG_NPC_SPIRIT_GUIDE_HORDE, isleGraveyardData[objective].x, isleGraveyardData[objective].y, isleGraveyardData[objective].z, isleGraveyardData[objective].o, TEMPSPAWN_DEAD_DESPAWN, 0))
         m_spiritHealerGuid[objective] = pHealer->GetObjectGuid();
 
     // spawn the honor defender trigger
-    if (Creature* pTrigger = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? BG_IC_NPC_HON_DEFENDER_TRIGGER_A : BG_IC_NPC_HON_DEFENDER_TRIGGER_H, isleObjectiveData[objective].x, isleObjectiveData[objective].y, isleObjectiveData[objective].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+    if (Creature* pTrigger = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? BG_NPC_HON_DEFENDER_TRIGGER_A : BG_NPC_HON_DEFENDER_TRIGGER_H, isleObjectiveData[objective].x, isleObjectiveData[objective].y, isleObjectiveData[objective].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
         m_honorableDefenderGuid[objective] = pTrigger->GetObjectGuid();
 
     // spawn the vehicles / enable the gunship

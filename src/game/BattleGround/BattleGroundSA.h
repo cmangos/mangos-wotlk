@@ -349,38 +349,40 @@ class BattleGroundSA : public BattleGround
 
     public:
         BattleGroundSA();
-
-        /* inherited from BattlegroundClass */
-        void AddPlayer(Player* plr) override;
-        void StartingEventOpenDoors() override;
-        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
         void Reset() override;
-        void EndBattleGround(Team winner) override;
-
-        void HandleCreatureCreate(Creature* creature) override;
-        void HandleGameObjectCreate(GameObject* go) override;
-
-        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
-
-        void HandleKillUnit(Creature* unit, Player* killer) override;
-
-        void HandlePlayerClickedOnFlag(Player* player, GameObject* go) override;
-        void HandleGameObjectDamaged(Player* player, GameObject* object, uint32 spellId) override;
-
-        bool IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType) override;
-
-        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
-
-        /* Scorekeeping */
-        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
-
         void Update(uint32 diff) override;
 
+        // Main battleground functions
+        void AddPlayer(Player* player) override;
+        void StartingEventOpenDoors() override;
+        void EndBattleGround(Team winner) override;
+
+        // General functions
+        void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
+        void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
+
+        // Battleground event handlers
+        void HandleCreatureCreate(Creature* creature) override;
+        void HandleGameObjectCreate(GameObject* go) override;
+        void HandlePlayerClickedOnFlag(Player* player, GameObject* go) override;
+        bool HandleEvent(uint32 eventId, GameObject* go, Unit* invoker) override;
+        void HandleKillUnit(Creature* unit, Player* killer) override;
+        void HandleGameObjectDamaged(Player* player, GameObject* object, uint32 spellId) override;
+
+        // Conditions
+        bool IsConditionFulfilled(Player const* source, uint32 conditionId, WorldObject const* conditionSource, uint32 conditionSourceType) override;
+
+        // Achievements
+        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
+
     private:
+        // Helper functions
         void UpdateTimerWorldState();
-        void SetupBattleground();
         void ProcessBattlegroundWinner();
         void SendBattlegroundWarning(int32 messageId);
+
+        // Battleground setup functions
+        void SetupBattleground();
         void EnableDemolishers();
         void SetupGraveyards();
 
