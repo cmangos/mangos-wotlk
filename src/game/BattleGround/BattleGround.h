@@ -50,12 +50,6 @@ struct BattleGroundEventIdx
     uint8 event2;
 };
 
-enum SpritiHealers
-{
-    NPC_SPIRIT_GUIDE_A              = 13116,
-    NPC_SPIRIT_GUIDE_H              = 13117,
-};
-
 enum BattleGroundSounds
 {
     SOUND_HORDE_WINS                = 8454,
@@ -163,6 +157,14 @@ enum BattlegroundSpiritHealers
 {
     BG_NPC_SPIRIT_GUIDE_ALLIANCE    = 13116,
     BG_NPC_SPIRIT_GUIDE_HORDE       = 13117,
+};
+
+enum BattlegroundHonorableDefenders
+{
+    BG_NPC_HON_DEFENDER_TRIGGER_A    = 35379,               // has aura 66157
+    BG_NPC_HON_DEFENDER_TRIGGER_H    = 35380,
+    BG_NPC_HON_DEFENDER_TRIGGER_25_A = 36349,               // has aura 68652
+    BG_NPC_HON_DEFENDER_TRIGGER_25_H = 36350,
 };
 
 const uint32 Buff_Entries[3] = { BG_OBJECTID_SPEEDBUFF_ENTRY, BG_OBJECTID_REGENBUFF_ENTRY, BG_OBJECTID_BERSERKERBUFF_ENTRY };
