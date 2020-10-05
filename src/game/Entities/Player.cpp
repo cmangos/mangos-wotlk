@@ -50,7 +50,6 @@
 #include "Weather/Weather.h"
 #include "BattleGround/BattleGround.h"
 #include "BattleGround/BattleGroundMgr.h"
-#include "BattleGround/BattleGroundAV.h"
 #include "OutdoorPvP/OutdoorPvP.h"
 #include "Battlefield/Battlefield.h"
 #include "Arena/ArenaTeam.h"
@@ -14346,10 +14345,6 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
     }
 
     RemoveTimedQuest(quest_id);
-
-    if (BattleGround* bg = GetBattleGround())
-        if (bg->GetTypeId() == BATTLEGROUND_AV)
-            ((BattleGroundAV*)bg)->HandleQuestComplete(pQuest->GetQuestId(), this);
 
     if (pQuest->GetRewChoiceItemsCount() > 0)
     {
