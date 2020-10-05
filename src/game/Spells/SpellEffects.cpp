@@ -6277,18 +6277,6 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
     // Get lockId
     if (gameObjTarget)
     {
-        GameObjectInfo const* goInfo = gameObjTarget->GetGOInfo();
-
-        // Specific battleground flags that trigger battleground actions; BG handler is called as part of GO use gode
-        // CanUseBattleGroundObject() already called in checkcast() in battleground check
-        /*if ((goInfo->type == GAMEOBJECT_TYPE_BUTTON && goInfo->button.noDamageImmune) ||
-            (goInfo->type == GAMEOBJECT_TYPE_GOOBER && goInfo->goober.isPvPObject) ||
-            goInfo->type == GAMEOBJECT_TYPE_FLAGSTAND)
-        {
-            gameObjTarget->Use(player);
-            return;
-        }*/
-
         lockId = gameObjTarget->GetGOInfo()->GetLockId();
     }
     else if (itemTarget)
