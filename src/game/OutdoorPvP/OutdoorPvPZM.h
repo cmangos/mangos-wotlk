@@ -39,9 +39,9 @@ enum
     // gameobjects
     GO_ZANGA_BANNER_WEST                    = 182522,
     GO_ZANGA_BANNER_EAST                    = 182523,
-    GO_ZANGA_BANNER_CENTER_ALLIANCE         = 182527,
-    GO_ZANGA_BANNER_CENTER_HORDE            = 182528,
-    GO_ZANGA_BANNER_CENTER_NEUTRAL          = 182529,
+    GO_ZANGA_BANNER_CENTER_ALLIANCE         = 182527,           // triggers spell 32433
+    GO_ZANGA_BANNER_CENTER_HORDE            = 182528,           // triggers spell 32433
+    GO_ZANGA_BANNER_CENTER_NEUTRAL          = 182529,           // triggers spell 32438
 
     // spells
     SPELL_TWIN_SPIRE_BLESSING               = 33779,
