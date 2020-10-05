@@ -312,11 +312,7 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
     if (oldTeam == ALLIANCE || oldTeam == HORDE) // only on going to grey
     {
         // teleport players off of GY
-        Creature* spiritHealer = nullptr;
-        if (oldTeam == ALLIANCE)
-            spiritHealer = GetClosestCreatureWithEntry(go, NPC_SPIRIT_GUIDE_A, 100.f);
-        else
-            spiritHealer = GetClosestCreatureWithEntry(go, NPC_SPIRIT_GUIDE_H, 100.f);
+        Creature* spiritHealer = GetClosestCreatureWithEntry(go, oldTeam == ALLIANCE ? BG_NPC_SPIRIT_GUIDE_ALLIANCE : BG_NPC_SPIRIT_GUIDE_HORDE, 100.f);
 
         if (spiritHealer)
             spiritHealer->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spiritHealer, spiritHealer);
