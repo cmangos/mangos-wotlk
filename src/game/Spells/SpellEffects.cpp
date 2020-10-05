@@ -39,8 +39,6 @@
 #include "Entities/Totem.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "BattleGround/BattleGround.h"
-#include "BattleGround/BattleGroundEY.h"
-#include "BattleGround/BattleGroundWS.h"
 #include "Tools/Language.h"
 #include "Social/SocialMgr.h"
 #include "Util.h"
@@ -6203,6 +6201,7 @@ void Spell::SendLoot(ObjectGuid guid, LootType loottype, LockType lockType)
                     case GAMEOBJECT_TYPE_QUESTGIVER:
                     case GAMEOBJECT_TYPE_SPELL_FOCUS:
                     case GAMEOBJECT_TYPE_GOOBER:
+                    case GAMEOBJECT_TYPE_FLAGSTAND:
                         gameObjTarget->Use(m_caster);
                         return;
 
@@ -6282,15 +6281,15 @@ void Spell::EffectOpenLock(SpellEffectIndex eff_idx)
 
         // Specific battleground flags that trigger battleground actions; BG handler is called as part of GO use gode
         // CanUseBattleGroundObject() already called in checkcast() in battleground check
-        if ((goInfo->type == GAMEOBJECT_TYPE_BUTTON && goInfo->button.noDamageImmune) ||
+        /*if ((goInfo->type == GAMEOBJECT_TYPE_BUTTON && goInfo->button.noDamageImmune) ||
             (goInfo->type == GAMEOBJECT_TYPE_GOOBER && goInfo->goober.isPvPObject) ||
             goInfo->type == GAMEOBJECT_TYPE_FLAGSTAND)
         {
             gameObjTarget->Use(player);
             return;
-        }
+        }*/
 
-        lockId = goInfo->GetLockId();
+        lockId = gameObjTarget->GetGOInfo()->GetLockId();
     }
     else if (itemTarget)
     {
