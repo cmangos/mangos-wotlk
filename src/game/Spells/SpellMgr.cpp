@@ -1774,6 +1774,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
             {
                 case SPELLFAMILY_GENERIC:                   // same family case
                 {
+                    // Helpless Wintergarde Villager Aggro Aura and Cower + Fear Visual
+                    if (spellInfo_1->SpellIconID == 1 && spellInfo_2->SpellIconID == 1)
+                        return false;
+
                     // Felsteed (Summon) and Summon Nightmare
                     if (spellInfo_1->SpellIconID == 115 && spellInfo_2->SpellIconID == 115)
                         return false;
