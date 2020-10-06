@@ -236,7 +236,7 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI, public CombatActions
             m_phase1 = true;
             DoCastSpellIfCan(nullptr, SPELL_ACIDIC_WOUND, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
             m_creature->CastSpell(nullptr, SPELL_FEL_GEYSER, TRIGGERED_OLD_TRIGGERED);
-            ResetTimer(GURTOGG_ACTION_BLOODBOIL, 12000);
+            ResetTimer(GURTOGG_ACTION_BLOODBOIL, 10000);
             ResetTimer(GURTOGG_ACTION_ARCING_SMASH, 10000);
             ResetTimer(GURTOGG_ACTION_FEL_ACID, GetInitialActionTimer(GURTOGG_ACTION_FEL_ACID));
             ResetTimer(GURTOGG_ACTION_BEWILDERING_STRIKE, 28000);
