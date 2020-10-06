@@ -1861,6 +1861,8 @@ UPDATE spell_template SET AuraInterruptFlags = AuraInterruptFlags&~0x00001000 WH
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 48490;
 -- Ruby Arrow - should only hit one target - verified by video and sniff
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 49197;
+-- Shoot Magic Arrow - should only hit one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 48530;
 
 -- spells that have caster in the middle of terrain - LOS attribute
 UPDATE spell_template SET AttributesEx2 = AttributesEx2|4 WHERE id IN (54612, 54613);
