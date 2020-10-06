@@ -390,7 +390,7 @@ void Spell::EffectSchoolDMG(SpellEffectIndex eff_idx)
                     case 43657: // Electrical Storm - Akil'zon
                     {
                         if (Aura* aura = m_caster->GetAura(43648, EFFECT_INDEX_1))
-                            damage *= std::min(aura->GetAuraTicks(), uint32(3));
+                            damage *= aura->GetAuraTicks();
                         break;
                     }
                     // Touch the Nightmare
