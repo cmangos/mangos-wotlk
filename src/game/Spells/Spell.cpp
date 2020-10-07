@@ -4256,8 +4256,6 @@ void Spell::SendSpellStart() const
     WorldPacket data(SMSG_SPELL_START, (8 + 8 + 4 + 4 + 2));
     if (m_CastItem)
         data << m_CastItem->GetPackGUID();
-    if (m_CastItem)
-        data << m_CastItem->GetPackGUID();
     else
         data << m_trueCaster->GetPackGUID();
 
