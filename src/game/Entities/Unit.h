@@ -44,7 +44,6 @@
 #include "WorldPacket.h"
 #include "Timer.h"
 #include "AI/BaseAI/UnitAI.h"
-#include "PlayerDefines.h"
 #include "Spells/SpellDefines.h"
 
 #include <list>

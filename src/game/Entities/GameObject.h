@@ -24,7 +24,6 @@
 #include "Entities/Object.h"
 #include "Util.h"
 #include "AI/BaseAI/GameObjectAI.h"
-#include "Spells/SpellAuras.h"
 #include "Spells/SpellDefines.h"
 #include "Entities/GameObjectDefines.h"
 
