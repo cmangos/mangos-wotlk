@@ -269,6 +269,20 @@ struct ContainerOfRatsSpellScript : public SpellScript
 };
 
 /*######
+## spell_drop_off_villager
+######*/
+
+struct DropOffVillager : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool/* strict*/) const override
+    {
+        if (!spell->GetCaster()->HasAura(43671))
+            return SPELL_FAILED_NOT_READY;
+        return SPELL_CAST_OK;
+    }
+};
+
+/*######
 ## spell_army_of_the_dead
 ######*/
 
@@ -318,6 +332,7 @@ void AddSC_dragonblight()
     RegisterSpellScript<CaptureJormungarSpawnSpellScript>("spell_capture_jormungar_spawn");
     RegisterSpellScript<ScrapeCorrosiveSpit>("spell_scrape_corrosive_spit");
     RegisterSpellScript<ContainerOfRatsSpellScript>("spell_container_of_rats");
+    RegisterSpellScript<DropOffVillager>("spell_drop_off_villager");
     RegisterAuraScript<ArmyOfTheDead>("spell_army_of_the_dead");
     RegisterSpellScript<CorrosiveSpit>("spell_corrosive_spit");
 }
