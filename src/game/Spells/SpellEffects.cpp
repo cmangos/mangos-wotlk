@@ -7018,7 +7018,8 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
                 //               negative auras if non-friendly target
                 bool positive = holder->IsPositive();
                 if (positive == m_caster->CanAssistSpell(unitTarget, m_spellInfo))
-                    continue;
+                    if (positive || !holder->IsCharm())
+                        continue;
             }
             // Unholy Blight prevents dispel of diseases from target
             else if (holder->GetSpellProto()->Dispel == DISPEL_DISEASE)

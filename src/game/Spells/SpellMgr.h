@@ -32,6 +32,7 @@
 #include "Entities/GameObject.h"
 #include "Entities/Corpse.h"
 #include "Entities/Unit.h"
+#include "Spells/SpellAuras.h"
 #include "Server/SQLStorages.h"
 #include "Spells/SpellEffectDefines.h"
 
@@ -242,6 +243,57 @@ inline bool IsAuraRemoveOnStacking(SpellEntry const* spellInfo, int32 effIdx) //
         default:
             return true;
     }
+}
+
+inline bool IsCharmAura(SpellEntry const* spellInfo, int32 effIdx) // TODO: extend to all effects
+{
+    switch (spellInfo->EffectApplyAuraName[effIdx])
+    {
+        case SPELL_AURA_MOD_CHARM:
+        case SPELL_AURA_AOE_CHARM:
+        case SPELL_AURA_MOD_POSSESS:
+            return false;
+        default:
+            return true;
+    }
+}
+
+inline bool IsAuraRefreshInsteadOfRecast(SpellEntry const* spellInfo, int32 effIdx) // TODO: extend to all effects
+{
+    switch (spellInfo->EffectApplyAuraName[effIdx])
+    {
+        case SPELL_AURA_NONE:
+        case SPELL_AURA_MOD_STAT:
+        case SPELL_AURA_MOD_RESISTANCE:
+        case SPELL_AURA_MOD_BASE_RESISTANCE:
+        case SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE:
+        case SPELL_AURA_MOD_INCREASE_ENERGY:
+        case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
+        case SPELL_AURA_MOD_THREAT:
+        case SPELL_AURA_MOD_DAMAGE_TAKEN:
+        case SPELL_AURA_PROC_TRIGGER_DAMAGE:
+            return true;
+        case SPELL_AURA_DUMMY:
+        {
+            switch (spellInfo->Id)
+            {
+                case 39921:                             // Vim'Gol Pentagram Beam
+                    return true;
+                default:
+                    return false;
+            }
+        }
+        default:
+            return false;
+    }
+}
+
+inline bool IsAuraSpellRefreshInsteadOfRecast(SpellEntry const* spellInfo)
+{
+    if (IsAuraRefreshInsteadOfRecast(spellInfo, 0) && IsAuraRefreshInsteadOfRecast(spellInfo, 1) && IsAuraRefreshInsteadOfRecast(spellInfo, 2))
+        return true;
+
+    return false;
 }
 
 inline bool IsAllowingDeadTarget(SpellEntry const* spellInfo)
