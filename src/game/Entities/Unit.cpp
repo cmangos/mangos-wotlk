@@ -11112,7 +11112,7 @@ void CharmInfo::ProcessUnattackableTargets()
 
         for (auto attacker : friendlyTargets)
         {
-            attacker->AttackStop(true, true);
+            attacker->AttackStop(true);
             attacker->getThreatManager().modifyThreatPercent(m_unit, -101);
         }
     }
@@ -11131,7 +11131,7 @@ void CharmInfo::ProcessUnattackableTargets()
 
         for (auto attacker : friendlyTargets)
         {
-            attacker->AttackStop(true, true);
+            attacker->AttackStop(true);
             attacker->getThreatManager().modifyThreatPercent(m_unit, -101);
         }
     }
