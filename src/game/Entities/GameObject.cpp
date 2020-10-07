@@ -2766,6 +2766,11 @@ SpellEntry const* GameObject::GetSpellForLock(Player const* player) const
     return nullptr;
 }
 
+SpellCastResult GameObject::CastSpell(Unit* temporaryCaster, Unit* Victim, uint32 spellId, uint32 triggeredFlags, Item* castItem, Aura* triggeredByAura, ObjectGuid originalCaster, SpellEntry const* triggeredBy)
+{
+    return CastSpell(temporaryCaster, Victim, sSpellTemplate.LookupEntry<SpellEntry>(spellId), triggeredFlags, castItem, triggeredByAura, originalCaster, triggeredBy);
+}
+
 SpellCastResult GameObject::CastSpell(Unit* temporaryCaster, Unit* Victim, SpellEntry const* spellInfo, uint32 triggeredFlags, Item* castItem, Aura* triggeredByAura, ObjectGuid originalCaster, SpellEntry const* triggeredBy)
 {
     if (!spellInfo)
