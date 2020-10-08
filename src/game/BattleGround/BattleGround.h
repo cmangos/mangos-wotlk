@@ -59,15 +59,27 @@ enum BattleGroundSounds
 
 enum BattleGroundQuests
 {
-    SPELL_WS_QUEST_REWARD           = 43483,
-    SPELL_AB_QUEST_REWARD           = 43484,
-    SPELL_AV_QUEST_REWARD           = 43475,
-    SPELL_AV_QUEST_KILLED_BOSS      = 23658,
-    SPELL_EY_QUEST_REWARD           = 43477,
-    SPELL_AB_QUEST_REWARD_4_BASES   = 24061,
-    SPELL_AB_QUEST_REWARD_5_BASES   = 24064,
-    SPELL_SA_QUEST_REWARD           = 61213,
-    SPELL_IC_QUEST_REWARD           = 67033,
+    SPELL_WS_QUEST_REWARD_1         = 43483,                // quests 11338 and 11342
+    SPELL_WS_QUEST_REWARD_2         = 69158,                // quests 14180 and 14183
+    SPELL_WS_QUEST_REWARD_3         = 69496,                // quests 24224 and 24225
+    SPELL_WS_QUEST_REWARD_4         = 69497,                // quests 24218 and 24216
+    SPELL_WS_QUEST_REWARD_5         = 69498,                // quests 24219 and 24217
+
+    SPELL_AB_QUEST_REWARD_1         = 43484,                // quests 11335 and 11339
+    SPELL_AB_QUEST_REWARD_2         = 69153,                // quests 14181 and 14178
+    SPELL_AB_QUEST_REWARD_3         = 69499,                // quests 24223 and 24226
+    SPELL_AB_QUEST_REWARD_4         = 69500,                // quests 24220 and 24221
+
+    SPELL_AV_QUEST_REWARD_1         = 43475,                // quests 11336 and 11340
+    SPELL_AV_QUEST_REWARD_2         = 69160,                // quests 13427 and 13428
+    SPELL_AV_QUEST_REWARD_3         = 69501,                // quests 24427 and 24426
+
+    SPELL_EY_QUEST_REWARD_1         = 43477,                // quests 11337 and 11341
+    SPELL_EY_QUEST_REWARD_2         = 69156,                // quests 14179 and 14182
+
+    SPELL_SA_QUEST_REWARD           = 61213,                // quests 13405 and 13407
+
+    SPELL_IC_QUEST_REWARD           = 67033,                // quests 14163 and 14164
 };
 
 enum BattleGroundMarks
@@ -80,9 +92,6 @@ enum BattleGroundMarks
     SPELL_AV_MARK_WINNER            = 24955,                // not create marks now
     SPELL_SA_MARK_LOSER             = 61159,
     SPELL_SA_MARK_WINNER            = 61160,
-
-    SPELL_WG_MARK_VICTORY           = 24955,                // honor + mark
-    SPELL_WG_MARK_DEFEAT            = 58494,                // honor + mark
 };
 
 enum BattleGroundMarksCount
@@ -423,6 +432,7 @@ class BattleGround
         // Functions that handle gameobject storage
         typedef std::map<uint32, ObjectGuid> EntryGuidMap;
         GameObject* GetSingleGameObjectFromStorage(uint32 entry) const;
+        Creature* GetSingleCreatureFromStorage(uint32 entry, bool skipDebugLog = false) const;
 
         // Function that set and get battleground map id
         void SetMapId(uint32 mapId) { m_mapId = mapId; }
@@ -499,15 +509,15 @@ class BattleGround
         // Function that blocks movement at the end of the battleground
         static void BlockMovement(Player* /*player*/);
 
-        // Functions that handle messaging
+        // Functions that handle battleground announcements; Used usually when players capture battleground objectives
         void SendMessageToAll(int32 /*entry*/, ChatMsg /*type*/, Player const* source = nullptr);
         void SendMessageToAll(int32 /*entry*/, ChatMsg /*type*/, uint32 /*language*/, ObjectGuid /*guid*/);
-        void SendYellToAll(int32 /*entry*/, uint32 /*language*/, ObjectGuid /*guid*/);
         void PSendMessageToAll(int32 /*entry*/, ChatMsg /*type*/, Player const* /*source*/, ...);
-
-        // Functions to send messages and yells to all battleground players
         void SendMessage2ToAll(int32 /*entry*/, ChatMsg /*type*/, Player const* /*source*/, int32 arg1 = 0, int32 arg2 = 0);
-        void SendYell2ToAll(int32 /*entry*/, uint32 /*language*/, ObjectGuid /*guid*/, int32 /*arg1*/, int32 /*arg2*/);
+
+        // Functions that handle creature yells in battleground; Used specifically in Alterac Valley
+        void SendYellToAll(int32 /*entry*/, uint32 /*language*/, Creature const* /*source*/);
+        void SendYell2ToAll(int32 /*entry*/, uint32 /*language*/, Creature const* /*source*/, int32 /*arg1*/, int32 /*arg2*/);
 
         // Handle raid groups
         Group* GetBgRaid(Team team) const { return m_bgRaids[GetTeamIndexByTeamId(team)]; }
@@ -685,6 +695,7 @@ class BattleGround
 
         /* Storage lists */
         EntryGuidMap m_goEntryGuidStore;                   // Store unique GO-Guids by entry
+        EntryGuidMap m_npcEntryGuidStore;                  // Store unique NPC-Guids by entry
 
     private:
         /* Battleground */
