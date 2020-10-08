@@ -252,9 +252,9 @@ inline bool IsCharmAura(SpellEntry const* spellInfo, int32 effIdx) // TODO: exte
         case SPELL_AURA_MOD_CHARM:
         case SPELL_AURA_AOE_CHARM:
         case SPELL_AURA_MOD_POSSESS:
-            return false;
-        default:
             return true;
+        default:
+            return false;
     }
 }
 
