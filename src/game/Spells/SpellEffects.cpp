@@ -5865,18 +5865,6 @@ bool Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype, bool reportE
         return false;
     }
 
-    // bg reward have some special in code work
-    bool bg_mark = false;
-    switch (m_spellInfo->Id)
-    {
-        case SPELL_WG_MARK_VICTORY:
-        case SPELL_WG_MARK_DEFEAT:
-            bg_mark = true;
-            break;
-        default:
-            break;
-    }
-
     uint32 num_to_add = damage;
 
     if (num_to_add < 1)
@@ -5911,16 +5899,6 @@ bool Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype, bool reportE
         if (msg == EQUIP_ERR_INVENTORY_FULL || msg == EQUIP_ERR_CANT_CARRY_MORE_OF_THIS)
             num_to_add -= no_space;
 
-        // TODO:: ported code from tbc/classic need to confirm if its no needed here
-        // for battleground marks send by mail if not add all expected
-        /*if (no_space > 0 && bgType)
-        {
-            if (BattleGround * bg = sBattleGroundMgr.GetBattleGroundTemplate(BattleGroundTypeId(bgType)))
-            {
-                bg->SendRewardMarkByMail(player, newitemid, no_space);
-                return true;
-            }
-        }*/
         // ignore mana gem case (next effect will recharge existing example)
         if (eff_idx == EFFECT_INDEX_0 && m_spellInfo->Effect[EFFECT_INDEX_1] == SPELL_EFFECT_DUMMY)
             return false;
@@ -5949,11 +5927,10 @@ bool Spell::DoCreateItem(SpellEffectIndex eff_idx, uint32 itemtype, bool reportE
             pItem->SetGuidValue(ITEM_FIELD_CREATOR, player->GetObjectGuid());
 
         // send info to the client
-        player->SendNewItem(pItem, num_to_add, true, !bg_mark);
+        player->SendNewItem(pItem, num_to_add, true, true);
 
         // we succeeded in creating at least one item, so a levelup is possible
-        if (!bg_mark)
-            player->UpdateCraftSkill(m_spellInfo->Id);
+        player->UpdateCraftSkill(m_spellInfo->Id);
     }
     return true;
 }
