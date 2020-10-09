@@ -423,16 +423,7 @@ Aura::Aura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* curr
             }
         }
 
-        // scripting location for custom aura damage - needs to be moved to spellscripting for proper checkcast interaction
-        switch (spellproto->Id)
-        {
-            case 34501: // Expose Weakness
-                damage = (caster->GetStat(STAT_AGILITY) * damage) / 100;
-                break;
-            default:
-                damage = OnAuraValueCalculate(caster, damage);
-                break;
-        }
+        damage = OnAuraValueCalculate(caster, damage);
     }
 
     damage *= holder->GetStackAmount();
