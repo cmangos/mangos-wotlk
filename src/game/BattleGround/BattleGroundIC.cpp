@@ -48,21 +48,22 @@ void BattleGroundIC::Reset()
         switch (i)
         {
             case BG_IC_OBJECTIVE_KEEP_ALLY:
-                m_objectiveOwner[i]  = TEAM_INDEX_ALLIANCE;
-                m_objectiveConquerer[i] = TEAM_INDEX_ALLIANCE;
+                m_isleNode[i].nodeOwner  = TEAM_INDEX_ALLIANCE;
+                m_isleNode[i].nodeConquerer = TEAM_INDEX_ALLIANCE;
                 break;
             case BG_IC_OBJECTIVE_KEEP_HORDE:
-                m_objectiveOwner[i] = TEAM_INDEX_HORDE;
-                m_objectiveConquerer[i] = TEAM_INDEX_HORDE;
+                m_isleNode[i].nodeOwner = TEAM_INDEX_HORDE;
+                m_isleNode[i].nodeConquerer = TEAM_INDEX_HORDE;
                 break;
             default:
-                m_objectiveOwner[i] = TEAM_INDEX_NEUTRAL;
+                m_isleNode[i].nodeOwner = TEAM_INDEX_NEUTRAL;
+                m_isleNode[i].nodeConquerer = TEAM_INDEX_NEUTRAL;
                 break;
         }
 
-        m_objectiveConquerer[i] = TEAM_INDEX_NEUTRAL;
-        m_objectiveState[i] = iocDefaultStates[i];
-        m_objectiveTimer[i] = 0;
+        m_isleNode[i].nodeWorldState = iocDefaultStates[i];
+        m_isleNode[i].nodeChangeTimer = 0;
+        m_isleNode[i].bannerChangeTimer = 0;
     }
 
     // setup the state for the keep walls
@@ -72,9 +73,16 @@ void BattleGroundIC::Reset()
     for (uint8 i = 0; i < BG_IC_MAX_KEEP_GATES; ++i)
         m_gatesHordeState[i] = isleHordeWallsData[i].stateClosed;
 
+    for (uint8 i = 0; i < BG_IC_MAX_RESOURCE_NODES; ++i)
+        m_resourceTickTimer[i] = 0;
+
     m_closeDoorTimer = 0;
     m_isKeepInvaded[TEAM_INDEX_ALLIANCE] = false;
     m_isKeepInvaded[TEAM_INDEX_HORDE] = false;
+
+    // setup master graveyards
+    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_ALLIANCE, BG_IC_ZONE_ID_ISLE, ALLIANCE);
+    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_HORDE, BG_IC_ZONE_ID_ISLE, HORDE);
 
     // setup initial graveyards
     sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_KEEP_ALLY, BG_IC_ZONE_ID_ISLE, ALLIANCE);
@@ -95,50 +103,50 @@ void BattleGroundIC::AddPlayer(Player* plr)
     m_playerScores[plr->GetObjectGuid()] = sc;
 
     // spawn starting area honorable defenders alliance
-    if (m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_ALLY].IsEmpty() && plr->GetTeam() == ALLIANCE)
+    if (m_isleNode[BG_IC_OBJECTIVE_KEEP_ALLY].honorableDefenderGuid.IsEmpty() && plr->GetTeam() == ALLIANCE)
     {
-        if (Creature* pTrigger = plr->SummonCreature(BG_NPC_HON_DEFENDER_TRIGGER_A, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].x, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].y, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
-            m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_ALLY] = pTrigger->GetObjectGuid();
+        if (Creature* trigger = plr->SummonCreature(BG_NPC_HON_DEFENDER_TRIGGER_A, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].x, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].y, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_ALLY].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_isleNode[BG_IC_OBJECTIVE_KEEP_ALLY].honorableDefenderGuid = trigger->GetObjectGuid();
 
         for (const auto& i : iocHonorTriggerAllySpawns)
         {
-            if (Creature* pTrigger = plr->SummonCreature(i.entryAlly, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
-                m_keepHonorTriggerGuids[BG_IC_OBJECTIVE_KEEP_ALLY].push_back(pTrigger->GetObjectGuid());
+            if (Creature* trigger = plr->SummonCreature(i.entryAlly, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                m_isleNode[BG_IC_OBJECTIVE_KEEP_ALLY].creatureGuids.push_back(trigger->GetObjectGuid());
         }
     }
 
     // spawn starting area honorable defenders horde
-    if (m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_HORDE].IsEmpty() && plr->GetTeam() == HORDE)
+    if (m_isleNode[BG_IC_OBJECTIVE_KEEP_HORDE].honorableDefenderGuid.IsEmpty() && plr->GetTeam() == HORDE)
     {
-        if (Creature* pTrigger = plr->SummonCreature(BG_NPC_HON_DEFENDER_TRIGGER_H, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].x, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].y, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
-            m_honorableDefenderGuid[BG_IC_OBJECTIVE_KEEP_HORDE] = pTrigger->GetObjectGuid();
+        if (Creature* trigger = plr->SummonCreature(BG_NPC_HON_DEFENDER_TRIGGER_H, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].x, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].y, isleObjectiveData[BG_IC_OBJECTIVE_KEEP_HORDE].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_isleNode[BG_IC_OBJECTIVE_KEEP_HORDE].honorableDefenderGuid = trigger->GetObjectGuid();
 
         for (const auto& i : iocHonorTriggerHordeSpawns)
         {
-            if (Creature* pTrigger = plr->SummonCreature(i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
-                m_keepHonorTriggerGuids[BG_IC_OBJECTIVE_KEEP_HORDE].push_back(pTrigger->GetObjectGuid());
+            if (Creature* trigger = plr->SummonCreature(i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                m_isleNode[BG_IC_OBJECTIVE_KEEP_HORDE].creatureGuids.push_back(trigger->GetObjectGuid());
         }
     }
 
     // summon the initial spirit healers
-    if (m_spiritHealerGuid[BG_IC_OBJECTIVE_KEEP_ALLY].IsEmpty() && plr->GetTeam() == ALLIANCE)
+    if (m_isleNode[BG_IC_OBJECTIVE_KEEP_ALLY].spiritHealerGuid.IsEmpty() && plr->GetTeam() == ALLIANCE)
     {
-        if (Creature* pHealer = plr->SummonCreature(BG_NPC_SPIRIT_GUIDE_ALLIANCE, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].x, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].y, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].z, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].o, TEMPSPAWN_DEAD_DESPAWN, 0))
-            m_spiritHealerGuid[BG_IC_OBJECTIVE_KEEP_ALLY] = pHealer->GetObjectGuid();
+        if (Creature* healer = plr->SummonCreature(BG_NPC_SPIRIT_GUIDE_ALLIANCE, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].x, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].y, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].z, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_ALLY].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_isleNode[BG_IC_OBJECTIVE_KEEP_ALLY].spiritHealerGuid = healer->GetObjectGuid();
     }
 
-    if (m_spiritHealerGuid[BG_IC_OBJECTIVE_KEEP_HORDE].IsEmpty() && plr->GetTeam() == HORDE)
+    if (m_isleNode[BG_IC_OBJECTIVE_KEEP_HORDE].spiritHealerGuid.IsEmpty() && plr->GetTeam() == HORDE)
     {
-        if (Creature* pHealer = plr->SummonCreature(BG_NPC_SPIRIT_GUIDE_HORDE, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].x, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].y, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].z, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].o, TEMPSPAWN_DEAD_DESPAWN, 0))
-            m_spiritHealerGuid[BG_IC_OBJECTIVE_KEEP_HORDE] = pHealer->GetObjectGuid();
+        if (Creature* healer = plr->SummonCreature(BG_NPC_SPIRIT_GUIDE_HORDE, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].x, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].y, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].z, isleGraveyardData[BG_IC_OBJECTIVE_KEEP_HORDE].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_isleNode[BG_IC_OBJECTIVE_KEEP_HORDE].spiritHealerGuid = healer->GetObjectGuid();
     }
 
     // apply buff auras
-    if (m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY] != TEAM_INDEX_NEUTRAL)
-        if (plr->GetTeam() == GetTeamIdByTeamIndex(m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY]) && m_objectiveConquerer[BG_IC_OBJECTIVE_REFINERY] == m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY])
+    if (m_isleNode[BG_IC_OBJECTIVE_REFINERY].nodeOwner != TEAM_INDEX_NEUTRAL)
+        if (plr->GetTeam() == GetTeamIdByTeamIndex(m_isleNode[BG_IC_OBJECTIVE_REFINERY].nodeOwner) && m_isleNode[BG_IC_OBJECTIVE_REFINERY].nodeConquerer == m_isleNode[BG_IC_OBJECTIVE_REFINERY].nodeOwner)
             plr->CastSpell(plr, BG_IC_SPELL_REFINERY, TRIGGERED_OLD_TRIGGERED);
-    if (m_objectiveOwner[BG_IC_OBJECTIVE_QUARY] != TEAM_INDEX_NEUTRAL)
-        if (plr->GetTeam() == GetTeamIdByTeamIndex(m_objectiveOwner[BG_IC_OBJECTIVE_QUARY]) && m_objectiveConquerer[BG_IC_OBJECTIVE_QUARY] == m_objectiveOwner[BG_IC_OBJECTIVE_QUARY])
+    if (m_isleNode[BG_IC_OBJECTIVE_QUARY].nodeOwner != TEAM_INDEX_NEUTRAL)
+        if (plr->GetTeam() == GetTeamIdByTeamIndex(m_isleNode[BG_IC_OBJECTIVE_QUARY].nodeOwner) && m_isleNode[BG_IC_OBJECTIVE_QUARY].nodeConquerer == m_isleNode[BG_IC_OBJECTIVE_QUARY].nodeOwner)
             plr->CastSpell(plr, BG_IC_SPELL_QUARRY, TRIGGERED_OLD_TRIGGERED);
 }
 
@@ -203,7 +211,7 @@ void BattleGroundIC::FillInitialWorldStates(WorldPacket& data, uint32& count)
 
     // show the capturable bases
     for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
-        FillInitialWorldState(data, count, m_objectiveState[i], WORLD_STATE_ADD);
+        FillInitialWorldState(data, count, m_isleNode[i].nodeWorldState, WORLD_STATE_ADD);
 
     // show the walls
     for (uint8 i = 0; i < BG_IC_MAX_KEEP_GATES; ++i)
@@ -296,7 +304,7 @@ void BattleGroundIC::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
     DEBUG_LOG("BattleGroundIC: Handle flag clicked for gameobject entry %u.", go->GetEntry());
 
     PvpTeamIndex newOwnerIdx = GetTeamIndexByTeamId(player->GetTeam());
-    uint8 objectiveId       = 0;
+    uint8 nodeId            = 0;
     uint32 newWorldState    = 0;
     uint32 soundId          = 0;
     uint32 nextFlagEntry    = 0;
@@ -310,7 +318,7 @@ void BattleGroundIC::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
             UpdatePlayerScore(player, SCORE_BASES_ASSAULTED, 1);
             player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 245);
 
-            objectiveId = i.objectiveId;
+            nodeId = i.objectiveId;
             newWorldState = newOwnerIdx == TEAM_INDEX_ALLIANCE ? i.nextWorldStateAlly : i.nextWorldStateHorde;
 
             textEntry = LANG_BG_IC_NODE_ASSAULTED;
@@ -321,7 +329,7 @@ void BattleGroundIC::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
         }
     }
 
-    if (!objectiveId)
+    if (!nodeId)
     {
         // *** Check if status changed from owned to contested ***
         for (const auto& i : isleGameObjectOwnedData)
@@ -331,7 +339,7 @@ void BattleGroundIC::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
                 UpdatePlayerScore(player, SCORE_BASES_ASSAULTED, 1);
                 player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 245);
 
-                objectiveId = i.objectiveId;
+                nodeId = i.objectiveId;
                 newWorldState = i.nextState;
 
                 textEntry = LANG_BG_IC_NODE_ASSAULTED;
@@ -340,68 +348,63 @@ void BattleGroundIC::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
                 nextFlagEntry = i.nextObject;
 
                 // reset the objective
-                DoResetObjective(IsleObjective(objectiveId));
+                DoResetObjective(IsleObjective(nodeId));
                 break;
             }
         }
     }
 
-    if (!objectiveId)
+    if (!nodeId)
     {
         // *** Check if status changed from contested to owned / contested ***
         for (const auto& i : isleGameObjectContestedData)
         {
             if (go->GetEntry() == i.objectEntry)
             {
-                objectiveId = i.objectiveId;
+                nodeId = i.objectiveId;
 
-                UpdatePlayerScore(player, m_objectiveConquerer[objectiveId] == newOwnerIdx ? SCORE_BASES_DEFENDED : SCORE_BASES_ASSAULTED, 1);
-                player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, m_objectiveConquerer[objectiveId] == newOwnerIdx ? 246 : 245);
+                UpdatePlayerScore(player, m_isleNode[nodeId].nodeConquerer == newOwnerIdx ? SCORE_BASES_DEFENDED : SCORE_BASES_ASSAULTED, 1);
+                player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, m_isleNode[nodeId].nodeConquerer == newOwnerIdx ? 246 : 245);
 
-                newWorldState = m_objectiveConquerer[objectiveId] == newOwnerIdx ? i.nextStateDefend : i.nextStateAssault;
+                newWorldState = m_isleNode[nodeId].nodeConquerer == newOwnerIdx ? i.nextStateDefend : i.nextStateAssault;
 
-                textEntry = m_objectiveConquerer[objectiveId] == newOwnerIdx ? LANG_BG_IC_NODE_DEFENDED : LANG_BG_IC_NODE_ASSAULTED;
+                textEntry = m_isleNode[nodeId].nodeConquerer == newOwnerIdx ? LANG_BG_IC_NODE_DEFENDED : LANG_BG_IC_NODE_ASSAULTED;
                 soundId = newOwnerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_SOUND_NODE_ASSAULTED_ALLIANCE : BG_IC_SOUND_NODE_ASSAULTED_HORDE;
 
-                nextFlagEntry = m_objectiveConquerer[objectiveId] == newOwnerIdx ? i.nextObjectDefend : i.nextObjectDefend;
+                nextFlagEntry = m_isleNode[nodeId].nodeConquerer == newOwnerIdx ? i.nextObjectDefend : i.nextObjectDefend;
 
                 // re-apply benefits
-                if (m_objectiveConquerer[objectiveId] == newOwnerIdx)
-                    DoApplyObjectiveBenefits(IsleObjective(objectiveId), newOwnerIdx, go);
+                if (m_isleNode[nodeId].nodeConquerer == newOwnerIdx)
+                    DoApplyObjectiveBenefits(IsleObjective(nodeId), go);
                 break;
             }
         }
     }
 
     // only process the event if needed
-    if (objectiveId)
+    if (nodeId)
     {
-        m_objectiveOwner[objectiveId] = newOwnerIdx;
+        m_isleNode[nodeId].nodeOwner = newOwnerIdx;
 
         // update world states
-        UpdateWorldState(m_objectiveState[objectiveId], WORLD_STATE_REMOVE);
-        m_objectiveState[objectiveId] = newWorldState;
-        UpdateWorldState(m_objectiveState[objectiveId], WORLD_STATE_ADD);
+        UpdateWorldState(m_isleNode[nodeId].nodeWorldState, WORLD_STATE_REMOVE);
+        m_isleNode[nodeId].nodeWorldState = newWorldState;
+        UpdateWorldState(m_isleNode[nodeId].nodeWorldState, WORLD_STATE_ADD);
 
         // start timer
-        m_objectiveTimer[objectiveId] = BG_IC_FLAG_CAPTURING_TIME;
+        m_isleNode[nodeId].nodeChangeTimer = BG_IC_FLAG_CAPTURING_TIME;
 
         // send the zone message and sound
         ChatMsg chatSystem = newOwnerIdx == TEAM_INDEX_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE;
         uint32 factionStrig = newOwnerIdx == TEAM_INDEX_ALLIANCE ? LANG_BG_ALLY : LANG_BG_HORDE;
 
-        SendMessage2ToAll(textEntry, chatSystem, player, isleObjectiveData[objectiveId].message, factionStrig);
+        SendMessage2ToAll(textEntry, chatSystem, player, isleObjectiveData[nodeId].message, factionStrig);
         PlaySoundToAll(soundId);
 
-        // despawn the current flag
-        ChangeBgObjectSpawnState(go->GetObjectGuid(), RESPAWN_ONE_DAY);
-
-        // respawn the new flag
-        if (GameObject* pFlag = GetSingleGameObjectFromStorage(nextFlagEntry))
-        {
-            m_currentFlagGuid[objectiveId] = pFlag->GetObjectGuid();
-            ChangeBgObjectSpawnState(pFlag->GetObjectGuid(), RESPAWN_IMMEDIATELY);
-        }
+        // change banners
+        m_isleNode[nodeId].bannerChangeTimer = 3000;
+        m_isleNode[nodeId].currentBannerEntry = nextFlagEntry;
+        m_isleNode[nodeId].oldBannerEntry = go->GetEntry();
     }
 }
 
@@ -416,9 +419,11 @@ void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
     switch (creature->GetEntry())
     {
         case BG_IC_NPC_COMMANDER_WYRMBANE:
+            RewardHonorToTeam(GetBonusHonorFromKill(BG_IC_BONUS_HONOR_BOSS_KILL), HORDE);
             EndBattleGround(HORDE);
             break;
         case BG_IC_NPC_OVERLORD_AGMAR:
+            RewardHonorToTeam(GetBonusHonorFromKill(BG_IC_BONUS_HONOR_BOSS_KILL), ALLIANCE);
             EndBattleGround(ALLIANCE);
             break;
         case BG_IC_VEHICLE_DEMOLISHER:
@@ -428,35 +433,22 @@ void BattleGroundIC::HandleKillUnit(Creature* creature, Player* killer)
             creature->CastSpell(killer, BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE, TRIGGERED_OLD_TRIGGERED);
             break;
         case BG_IC_VEHICLE_SIEGE_ENGINE_A:
-        {
-            // kill credit
-            creature->CastSpell(killer, BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE, TRIGGERED_OLD_TRIGGERED);
-
-            // summon a new siege engine
-            if (m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP] == TEAM_INDEX_ALLIANCE)
-            {
-                if (Creature* pSiegeEngine = creature->SummonCreature(BG_IC_VEHICLE_SIEGE_ENGINE_A, iocWorkshopSpawns[0].x, iocWorkshopSpawns[0].y, iocWorkshopSpawns[0].z, iocWorkshopSpawns[0].o, TEMPSPAWN_DEAD_DESPAWN, 0))
-                    m_workshopSpawnsGuids[TEAM_INDEX_ALLIANCE].push_back(pSiegeEngine->GetObjectGuid());
-
-                if (Creature* pMechanic = GetBgMap()->GetCreature(m_workshopMechanicGuids[TEAM_INDEX_ALLIANCE]))
-                    creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, pMechanic, pMechanic);
-
-            }
-            break;
-        }
         case BG_IC_VEHICLE_SIEGE_ENGINE_H:
         {
             // kill credit
             creature->CastSpell(killer, BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE, TRIGGERED_OLD_TRIGGERED);
 
-            // summon a new siege engine
-            if (m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP] == TEAM_INDEX_HORDE)
-            {
-                if (Creature* pSiegeEngine = creature->SummonCreature(BG_IC_VEHICLE_SIEGE_ENGINE_H, iocWorkshopSpawns[0].x, iocWorkshopSpawns[0].y, iocWorkshopSpawns[0].z, iocWorkshopSpawns[0].o, TEMPSPAWN_DEAD_DESPAWN, 0))
-                    m_workshopSpawnsGuids[TEAM_INDEX_HORDE].push_back(pSiegeEngine->GetObjectGuid());
+            PvpTeamIndex vehicleTeamIdx = creature->GetEntry() == BG_IC_VEHICLE_SIEGE_ENGINE_A ? TEAM_INDEX_ALLIANCE : TEAM_INDEX_HORDE;
 
-                if (Creature* pMechanic = GetBgMap()->GetCreature(m_workshopMechanicGuids[TEAM_INDEX_ALLIANCE]))
-                    creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, pMechanic, pMechanic);
+            // summon a new siege engine
+            if (m_isleNode[BG_IC_OBJECTIVE_WORKSHOP].nodeOwner == vehicleTeamIdx)
+            {
+                if (Creature* siegeEngine = creature->SummonCreature(creature->GetEntry(), iocWorkshopSpawns[0].x, iocWorkshopSpawns[0].y, iocWorkshopSpawns[0].z, iocWorkshopSpawns[0].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_isleNode[BG_IC_OBJECTIVE_WORKSHOP].creatureGuids.push_back(siegeEngine->GetObjectGuid());
+
+                if (Creature* mechanic = GetBgMap()->GetCreature(m_workshopMechanicGuids[vehicleTeamIdx]))
+                    creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, mechanic, mechanic);
+
             }
             break;
         }
@@ -472,13 +464,18 @@ void BattleGroundIC::HandleKillPlayer(Player* player, Player* killer)
 
     // remove one resource for each player killed
     PvpTeamIndex killedPlayerIdx = GetTeamIndexByTeamId(player->GetTeam());
-    --m_reinforcements[killedPlayerIdx];
-
-    UpdateWorldState(killedPlayerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_STATE_ALLY_REINFORCE_COUNT : BG_IC_STATE_HORDE_REINFORCE_COUNT, m_reinforcements[killedPlayerIdx]);
+    DoUpdateReinforcements(killedPlayerIdx, -1);
 
     // if reached 0, the other team wins
     if (!m_reinforcements[killedPlayerIdx])
         EndBattleGround(killer->GetTeam());
+}
+
+// Function that updates reinforcements score
+void BattleGroundIC::DoUpdateReinforcements(PvpTeamIndex teamIdx, int32 value)
+{
+    m_reinforcements[teamIdx] = m_reinforcements[teamIdx] + value;
+    UpdateWorldState(teamIdx == TEAM_INDEX_ALLIANCE ? BG_IC_STATE_ALLY_REINFORCE_COUNT : BG_IC_STATE_HORDE_REINFORCE_COUNT, m_reinforcements[teamIdx]);
 }
 
 void BattleGroundIC::HandleGameObjectDamaged(Player* player, GameObject* object, uint32 spellId)
@@ -499,13 +496,13 @@ void BattleGroundIC::HandleCreatureCreate(Creature* creature)
             break;
         case BG_IC_VEHICLE_DEMOLISHER:
         {
-            PvpTeamIndex ownerTeam = m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP];
+            PvpTeamIndex ownerTeam = m_isleNode[BG_IC_OBJECTIVE_WORKSHOP].nodeOwner;
             creature->SetFactionTemporary(iocTeamFactions[ownerTeam], TEMPFACTION_NONE);
             break;
         }
         case BG_IC_VEHICLE_CATAPULT:
         {
-            PvpTeamIndex ownerTeam = m_objectiveOwner[BG_IC_OBJECTIVE_DOCKS];
+            PvpTeamIndex ownerTeam = m_isleNode[BG_IC_OBJECTIVE_DOCKS].nodeOwner;
             creature->SetFactionTemporary(iocTeamFactions[ownerTeam], TEMPFACTION_NONE);
             break;
         }
@@ -523,8 +520,11 @@ void BattleGroundIC::HandleGameObjectCreate(GameObject* go)
 {
     switch (go->GetEntry())
     {
-        case BG_IC_GO_SEAFORIUM_BOMBS:
-            m_bombsGuids.push_back(go->GetObjectGuid());
+        case BG_IC_GO_SEAFORIUM_BOMBS_A:
+            m_seaforiumBombsGuids[TEAM_INDEX_ALLIANCE].push_back(go->GetObjectGuid());
+            break;
+        case BG_IC_GO_SEAFORIUM_BOMBS_H:
+            m_seaforiumBombsGuids[TEAM_INDEX_HORDE].push_back(go->GetObjectGuid());
             break;
         case BG_IC_GO_PORTCULLIS_GATE_A:
             // sort each portculis gate, to use it later in script
@@ -613,6 +613,11 @@ void BattleGroundIC::HandleGameObjectCreate(GameObject* go)
         case BG_IC_GO_BANNER_QUARRY_A_GREY:
         case BG_IC_GO_BANNER_QUARRY_H:
         case BG_IC_GO_BANNER_QUARRY_H_GREY:
+        case BG_IC_GO_BANNER_DOCKS:
+        case BG_IC_GO_BANNER_HANGAR:
+        case BG_IC_GO_BANNER_QUARRY:
+        case BG_IC_GO_BANNER_WORKSHOP:
+        case BG_IC_GO_BANNER_REFINERY:
             m_goEntryGuidStore[go->GetEntry()] = go->GetObjectGuid();
             break;
     }
@@ -621,14 +626,11 @@ void BattleGroundIC::HandleGameObjectCreate(GameObject* go)
 void BattleGroundIC::EndBattleGround(Team winner)
 {
     // win reward
-    if (winner == ALLIANCE)
-        RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
-    if (winner == HORDE)
-        RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
+    RewardHonorToTeam(GetBonusHonorFromKill(1), winner);
 
     // complete map_end rewards (even if no team wins)
-    RewardHonorToTeam(GetBonusHonorFromKill(1), HORDE);
-    RewardHonorToTeam(GetBonusHonorFromKill(1), ALLIANCE);
+    RewardHonorToTeam(GetBonusHonorFromKill(2), HORDE);
+    RewardHonorToTeam(GetBonusHonorFromKill(2), ALLIANCE);
 
     BattleGround::EndBattleGround(winner);
 }
@@ -638,19 +640,19 @@ bool BattleGroundIC::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
     switch (criteria_id)
     {
         case BG_IC_CRIT_RESOURCE_GLUT_A:
-            return m_objectiveOwner[BG_IC_OBJECTIVE_QUARY] == TEAM_INDEX_ALLIANCE && m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY] == TEAM_INDEX_ALLIANCE;
+            return m_isleNode[BG_IC_OBJECTIVE_QUARY].nodeOwner == TEAM_INDEX_ALLIANCE && m_isleNode[BG_IC_OBJECTIVE_REFINERY].nodeOwner == TEAM_INDEX_ALLIANCE;
         case BG_IC_CRIT_RESOURCE_GLUT_H:
-            return m_objectiveOwner[BG_IC_OBJECTIVE_QUARY] == TEAM_INDEX_HORDE && m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY] == TEAM_INDEX_HORDE;
+            return m_isleNode[BG_IC_OBJECTIVE_QUARY].nodeOwner == TEAM_INDEX_HORDE && m_isleNode[BG_IC_OBJECTIVE_REFINERY].nodeOwner == TEAM_INDEX_HORDE;
         case BG_IC_CRIT_MINE_A_1:
         case BG_IC_CRIT_MINE_A_2:
-            return m_objectiveOwner[BG_IC_OBJECTIVE_QUARY] == TEAM_INDEX_ALLIANCE && m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY] == TEAM_INDEX_ALLIANCE &&
-                m_objectiveOwner[BG_IC_OBJECTIVE_DOCKS] == TEAM_INDEX_ALLIANCE && m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP] == TEAM_INDEX_ALLIANCE &&
-                m_objectiveOwner[BG_IC_OBJECTIVE_HANGAR] == TEAM_INDEX_ALLIANCE;
+            return m_isleNode[BG_IC_OBJECTIVE_QUARY].nodeOwner == TEAM_INDEX_ALLIANCE && m_isleNode[BG_IC_OBJECTIVE_REFINERY].nodeOwner == TEAM_INDEX_ALLIANCE &&
+                m_isleNode[BG_IC_OBJECTIVE_DOCKS].nodeOwner == TEAM_INDEX_ALLIANCE && m_isleNode[BG_IC_OBJECTIVE_WORKSHOP].nodeOwner == TEAM_INDEX_ALLIANCE &&
+                m_isleNode[BG_IC_OBJECTIVE_HANGAR].nodeOwner == TEAM_INDEX_ALLIANCE;
         case BG_IC_CRIT_MINE_H_1:
         case BG_IC_CRIT_MINE_H_2:
-            return m_objectiveOwner[BG_IC_OBJECTIVE_QUARY] == TEAM_INDEX_HORDE && m_objectiveOwner[BG_IC_OBJECTIVE_REFINERY] == TEAM_INDEX_HORDE &&
-                m_objectiveOwner[BG_IC_OBJECTIVE_DOCKS] == TEAM_INDEX_HORDE && m_objectiveOwner[BG_IC_OBJECTIVE_WORKSHOP] == TEAM_INDEX_HORDE &&
-                m_objectiveOwner[BG_IC_OBJECTIVE_HANGAR] == TEAM_INDEX_HORDE;
+            return m_isleNode[BG_IC_OBJECTIVE_QUARY].nodeOwner == TEAM_INDEX_HORDE && m_isleNode[BG_IC_OBJECTIVE_REFINERY].nodeOwner == TEAM_INDEX_HORDE &&
+                m_isleNode[BG_IC_OBJECTIVE_DOCKS].nodeOwner == TEAM_INDEX_HORDE && m_isleNode[BG_IC_OBJECTIVE_WORKSHOP].nodeOwner == TEAM_INDEX_HORDE &&
+                m_isleNode[BG_IC_OBJECTIVE_HANGAR].nodeOwner == TEAM_INDEX_HORDE;
         case BG_IC_CRIT_MOVED_DOWN_VEHICLE:
         case BG_IC_CRIT_MOVED_DOWN_PLAYER:
             return source->IsBoarded() && source->GetTransportInfo()->GetTransport()->GetEntry() == BG_IC_VEHICLE_KEEP_CANNON;
@@ -662,93 +664,96 @@ bool BattleGroundIC::CheckAchievementCriteriaMeet(uint32 criteria_id, Player con
     return false;
 }
 
-// Function that handles the completion of objective
-void BattleGroundIC::DoCaptureObjective(IsleObjective objective)
+// Method that will swap the objective banners
+void BattleGroundIC::DoChangeBannerState(IsleObjective nodeId)
 {
-    GameObject* pOriginalFlag = GetBgMap()->GetGameObject(m_currentFlagGuid[objective]);
-    if (!pOriginalFlag)
-        return;
+    if (GameObject* oldBanner = GetSingleGameObjectFromStorage(m_isleNode[nodeId].oldBannerEntry))
+        ChangeBgObjectSpawnState(oldBanner->GetObjectGuid(), RESPAWN_ONE_DAY);
 
+    if (GameObject* newBanner = GetSingleGameObjectFromStorage(m_isleNode[nodeId].currentBannerEntry))
+        ChangeBgObjectSpawnState(newBanner->GetObjectGuid(), RESPAWN_IMMEDIATELY);
+}
+
+// Function that handles the completion of objective
+void BattleGroundIC::DoCaptureObjective(IsleObjective nodeId)
+{
     // Loop through the list of objects in the Conquer data list
     for (const auto& i : isleGameObjectConquerData)
     {
-        if (pOriginalFlag->GetEntry() == i.objectEntry)
+        if (m_isleNode[nodeId].currentBannerEntry == i.objectEntry)
         {
-            uint8 objId = i.objectiveId;
-            PvpTeamIndex ownerIdx = m_objectiveOwner[objId];
-            m_objectiveConquerer[objId] = ownerIdx;
+            PvpTeamIndex ownerIdx = m_isleNode[nodeId].nodeOwner;
+            m_isleNode[nodeId].nodeConquerer = ownerIdx;
 
             // update world states
-            UpdateWorldState(m_objectiveState[objId], WORLD_STATE_REMOVE);
-            m_objectiveState[objId] = i.nextState;
-            UpdateWorldState(m_objectiveState[objId], WORLD_STATE_ADD);
+            UpdateWorldState(m_isleNode[nodeId].nodeWorldState, WORLD_STATE_REMOVE);
+            m_isleNode[nodeId].nodeWorldState = i.nextState;
+            UpdateWorldState(m_isleNode[nodeId].nodeWorldState, WORLD_STATE_ADD);
 
             ChatMsg chatSystem = ownerIdx == TEAM_INDEX_ALLIANCE ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE;
             uint32 factionStrig = ownerIdx == TEAM_INDEX_ALLIANCE ? LANG_BG_ALLY : LANG_BG_HORDE;
 
             // send zone message; the AB string is the same for IC
-            SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, chatSystem, nullptr, factionStrig, isleObjectiveData[objId].message);
+            SendMessage2ToAll(LANG_BG_AB_NODE_TAKEN, chatSystem, nullptr, factionStrig, isleObjectiveData[nodeId].message);
 
             // play sound is
             uint32 soundId = ownerIdx == TEAM_INDEX_ALLIANCE ? BG_IC_SOUND_NODE_CAPTURED_ALLIANCE : BG_IC_SOUND_NODE_CAPTURED_HORDE;
             PlaySoundToAll(soundId);
 
-            // change flag object
-            ChangeBgObjectSpawnState(pOriginalFlag->GetObjectGuid(), RESPAWN_ONE_DAY);
-
-            // respawn the new flag
-            if (GameObject* pFlag = GetSingleGameObjectFromStorage(i.nextObject))
-            {
-                m_currentFlagGuid[objId] = pFlag->GetObjectGuid();
-                ChangeBgObjectSpawnState(pFlag->GetObjectGuid(), RESPAWN_IMMEDIATELY);
-            }
+            // change banners
+            m_isleNode[nodeId].bannerChangeTimer = 3000;
+            m_isleNode[nodeId].oldBannerEntry = m_isleNode[nodeId].currentBannerEntry;
+            m_isleNode[nodeId].currentBannerEntry = i.nextObject;
 
             // apply benefits
-            DoApplyObjectiveBenefits(IsleObjective(objId), ownerIdx, pOriginalFlag);
+            if (GameObject* originalFlag = GetSingleGameObjectFromStorage(m_isleNode[nodeId].oldBannerEntry))
+                DoApplyObjectiveBenefits(nodeId, originalFlag);
+
+            return;
         }
     }
 }
 
 // Function that applies the objective benefits
-void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIndex teamIdx, GameObject* objRef)
+void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective nodeId, GameObject* objRef)
 {
+    PvpTeamIndex ownerIdx = m_isleNode[nodeId].nodeOwner;
+
     // if spell is provided, apply spell
-    uint32 spellId = isleObjectiveData[objective].spellEntry;
+    uint32 spellId = isleObjectiveData[nodeId].spellEntry;
     if (spellId)
-        DoApplyTeamBuff(teamIdx, spellId, true);
+        DoApplyTeamBuff(ownerIdx, spellId, true);
 
     // if graveyard is provided, link the graveyard
-    uint32 graveyardId = isleObjectiveData[objective].graveyardId;
+    uint32 graveyardId = isleObjectiveData[nodeId].graveyardId;
     if (graveyardId)
-        sObjectMgr.SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, GetTeamIdByTeamIndex(teamIdx));
+    {
+        sObjectMgr.SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, GetTeamIdByTeamIndex(ownerIdx));
 
-    if (Creature* pHealer = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? BG_NPC_SPIRIT_GUIDE_ALLIANCE : BG_NPC_SPIRIT_GUIDE_HORDE, isleGraveyardData[objective].x, isleGraveyardData[objective].y, isleGraveyardData[objective].z, isleGraveyardData[objective].o, TEMPSPAWN_DEAD_DESPAWN, 0))
-        m_spiritHealerGuid[objective] = pHealer->GetObjectGuid();
+        // summon spirit healer if possible
+        if (Creature* healer = objRef->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? BG_NPC_SPIRIT_GUIDE_ALLIANCE : BG_NPC_SPIRIT_GUIDE_HORDE, isleGraveyardData[nodeId].x, isleGraveyardData[nodeId].y, isleGraveyardData[nodeId].z, isleGraveyardData[nodeId].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_isleNode[nodeId].spiritHealerGuid = healer->GetObjectGuid();
+    }
 
     // spawn the honor defender trigger
-    if (Creature* pTrigger = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? BG_NPC_HON_DEFENDER_TRIGGER_A : BG_NPC_HON_DEFENDER_TRIGGER_H, isleObjectiveData[objective].x, isleObjectiveData[objective].y, isleObjectiveData[objective].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
-        m_honorableDefenderGuid[objective] = pTrigger->GetObjectGuid();
+    if (Creature* trigger = objRef->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? BG_NPC_HON_DEFENDER_TRIGGER_A : BG_NPC_HON_DEFENDER_TRIGGER_H, isleObjectiveData[nodeId].x, isleObjectiveData[nodeId].y, isleObjectiveData[nodeId].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+        m_isleNode[nodeId].honorableDefenderGuid = trigger->GetObjectGuid();
 
     // spawn the vehicles / enable the gunship
-    switch (objective)
+    switch (nodeId)
     {
         case BG_IC_OBJECTIVE_WORKSHOP:
         {
             // summon the vehicles and the mechanic
             for (const auto& i : iocWorkshopSpawns)
             {
-                if (Creature* pCreature = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
-                    m_workshopSpawnsGuids[teamIdx].push_back(pCreature->GetObjectGuid());
+                if (Creature* creature = objRef->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_isleNode[nodeId].creatureGuids.push_back(creature->GetObjectGuid());
             }
 
             // respawn the workshop bombs and give them the right faction
-            for (const auto& guid : m_bombsGuids)
-            {
+            for (const auto& guid : m_seaforiumBombsGuids[ownerIdx])
                 ChangeBgObjectSpawnState(guid, RESPAWN_IMMEDIATELY);
-
-                if (GameObject* pBomb = GetBgMap()->GetGameObject(guid))
-                    pBomb->SetFaction(iocTeamFactions[teamIdx]);
-            }
 
             break;
         }
@@ -757,19 +762,19 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIn
             // summon the docks vehicles
             for (const auto& i : iocDocksSpawns)
             {
-                if (Creature* pCreature = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
-                    m_docksSpawnsGuids[teamIdx].push_back(pCreature->GetObjectGuid());
+                if (Creature* creature = objRef->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_isleNode[nodeId].creatureGuids.push_back(creature->GetObjectGuid());
             }
             break;
         }
         case BG_IC_OBJECTIVE_HANGAR:
         {
             // respawn portals
-            for (const auto& guid : m_hangarPortalsGuids[teamIdx])
+            for (const auto& guid : m_hangarPortalsGuids[ownerIdx])
                 ChangeBgObjectSpawnState(guid, RESPAWN_IMMEDIATELY);
 
             // respawn and enable the animations
-            for (const auto& guid : m_hangarAnimGuids[teamIdx])
+            for (const auto& guid : m_hangarAnimGuids[ownerIdx])
             {
                 ChangeBgObjectSpawnState(guid, RESPAWN_IMMEDIATELY);
 
@@ -783,9 +788,16 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIn
             // summon the refinery npcs
             for (const auto& i : iocRefinerySpawns)
             {
-                if (Creature* pCreature = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
-                    m_refinerySpawnsGuids[teamIdx].push_back(pCreature->GetObjectGuid());
+                if (Creature* creature = objRef->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_isleNode[nodeId].creatureGuids.push_back(creature->GetObjectGuid());
             }
+
+            m_resourceTickTimer[BG_IC_RESOURCE_REFINERY] = BG_IC_RESOURCE_TICK_TIMER;
+            break;
+        }
+        case BG_IC_OBJECTIVE_QUARY:
+        {
+            m_resourceTickTimer[BG_IC_RESOURCE_QUARY] = BG_IC_RESOURCE_TICK_TIMER;
             break;
         }
         case BG_IC_OBJECTIVE_KEEP_ALLY:
@@ -793,8 +805,8 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIn
             // summon extra honor triggers
             for (const auto& i : iocHonorTriggerAllySpawns)
             {
-                if (Creature* pTrigger = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
-                    m_keepHonorTriggerGuids[BG_IC_OBJECTIVE_KEEP_HORDE].push_back(pTrigger->GetObjectGuid());
+                if (Creature* trigger = objRef->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_isleNode[nodeId].creatureGuids.push_back(trigger->GetObjectGuid());
             }
             break;
         }
@@ -803,8 +815,8 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIn
             // summon extra honor triggers
             for (const auto& i : iocHonorTriggerHordeSpawns)
             {
-                if (Creature* pTrigger = objRef->SummonCreature(teamIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
-                    m_keepHonorTriggerGuids[BG_IC_OBJECTIVE_KEEP_HORDE].push_back(pTrigger->GetObjectGuid());
+                if (Creature* trigger = objRef->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_isleNode[nodeId].creatureGuids.push_back(trigger->GetObjectGuid());
             }
             break;
         }
@@ -812,57 +824,67 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIn
 }
 
 // Function that handles the reset of objective
-void BattleGroundIC::DoResetObjective(IsleObjective objective)
+void BattleGroundIC::DoResetObjective(IsleObjective nodeId)
 {
-    PvpTeamIndex ownerIdx = m_objectiveOwner[objective];
+    PvpTeamIndex ownerIdx = m_isleNode[nodeId].nodeOwner;
 
     // despawn the main honor trigger
-    if (Creature* pTrigger = GetBgMap()->GetCreature(m_honorableDefenderGuid[objective]))
-        pTrigger->ForcedDespawn();
+    if (Creature* trigger = GetBgMap()->GetCreature(m_isleNode[nodeId].honorableDefenderGuid))
+        trigger->ForcedDespawn();
 
     // reset graveyard
-    uint32 graveyardId = isleObjectiveData[objective].graveyardId;
+    uint32 graveyardId = isleObjectiveData[nodeId].graveyardId;
     if (graveyardId)
+    {
         sObjectMgr.SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
 
-    // despawn healer
-    if (Creature* pHealer = GetBgMap()->GetCreature(m_spiritHealerGuid[objective]))
-        pHealer->ForcedDespawn();
+        // despawn healer
+        if (Creature* healer = GetBgMap()->GetCreature(m_isleNode[nodeId].spiritHealerGuid))
+        {
+            healer->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, healer, healer);
+            healer->ForcedDespawn();
+        }
+    }
 
-    switch (objective)
+    // remove spell aura buff
+    uint32 spellId = isleObjectiveData[nodeId].spellEntry;
+    if (spellId)
+        DoApplyTeamBuff(ownerIdx, spellId, false);
+
+    switch (nodeId)
     {
         case BG_IC_OBJECTIVE_WORKSHOP:
         {
             // despwn bombs
-            for (const auto& guid : m_bombsGuids)
+            for (const auto& guid : m_seaforiumBombsGuids[ownerIdx])
                 ChangeBgObjectSpawnState(guid, RESPAWN_ONE_DAY);
 
             // despwn the vehicles if not already in use
-            for (const auto& guid : m_workshopSpawnsGuids[ownerIdx])
+            for (const auto& guid : m_isleNode[nodeId].creatureGuids)
             {
-                if (Creature* pCreature = GetBgMap()->GetCreature(guid))
+                if (Creature* creature = GetBgMap()->GetCreature(guid))
                 {
-                    if (!pCreature->IsVehicle() || (pCreature->IsVehicle() && !pCreature->GetVehicleInfo()->GetPassenger(0)))
-                        pCreature->ForcedDespawn();
+                    if (!creature->IsVehicle() || (creature->IsVehicle() && !creature->GetVehicleInfo()->GetPassenger(0)))
+                        creature->ForcedDespawn();
                 }
             }
 
-            m_workshopSpawnsGuids[ownerIdx].clear();
+            m_isleNode[nodeId].creatureGuids.clear();
             break;
         }
         case BG_IC_OBJECTIVE_DOCKS:
         {
             // despwn the vehicles if not already in use
-            for (const auto& guid : m_docksSpawnsGuids[ownerIdx])
+            for (const auto& guid : m_isleNode[nodeId].creatureGuids)
             {
-                if (Creature* pVehicle = GetBgMap()->GetCreature(guid))
+                if (Creature* vehicle = GetBgMap()->GetCreature(guid))
                 {
-                    if (!pVehicle->GetVehicleInfo()->GetPassenger(0))
-                        pVehicle->ForcedDespawn();
+                    if (!vehicle->GetVehicleInfo()->GetPassenger(0))
+                        vehicle->ForcedDespawn();
                 }
             }
 
-            m_docksSpawnsGuids[ownerIdx].clear();
+            m_isleNode[nodeId].creatureGuids.clear();
             break;
         }
         case BG_IC_OBJECTIVE_HANGAR:
@@ -875,32 +897,32 @@ void BattleGroundIC::DoResetObjective(IsleObjective objective)
             {
                 ChangeBgObjectSpawnState(guid, RESPAWN_ONE_DAY);
 
-                if (GameObject* pAnim = GetBgMap()->GetGameObject(guid))
-                    pAnim->ResetDoorOrButton();
+                if (GameObject* anim = GetBgMap()->GetGameObject(guid))
+                    anim->ResetDoorOrButton();
             }
             break;
         }
         case BG_IC_OBJECTIVE_REFINERY:
         {
-            for (const auto& guid : m_refinerySpawnsGuids[ownerIdx])
-                if (Creature* pCreature = GetBgMap()->GetCreature(guid))
-                    pCreature->ForcedDespawn();
+            for (const auto& guid : m_isleNode[nodeId].creatureGuids)
+                if (Creature* creature = GetBgMap()->GetCreature(guid))
+                    creature->ForcedDespawn();
 
-            // no break;
+            m_resourceTickTimer[BG_IC_RESOURCE_REFINERY] = 0;
+            break;
         }
         case BG_IC_OBJECTIVE_QUARY:
         {
-            // remove spell aura
-            DoApplyTeamBuff(ownerIdx, isleObjectiveData[objective].spellEntry, false);
+            m_resourceTickTimer[BG_IC_RESOURCE_QUARY] = 0;
             break;
         }
         case BG_IC_OBJECTIVE_KEEP_ALLY:
         case BG_IC_OBJECTIVE_KEEP_HORDE:
         {
             // despawn honor triggers inside the keep
-            for (const auto& guid : m_keepHonorTriggerGuids[objective])
-                if (Creature* pTrigger = GetBgMap()->GetCreature(guid))
-                    pTrigger->ForcedDespawn();
+            for (const auto& guid : m_isleNode[nodeId].creatureGuids)
+                if (Creature* trigger = GetBgMap()->GetCreature(guid))
+                    trigger->ForcedDespawn();
 
             break;
         }
@@ -919,10 +941,10 @@ void BattleGroundIC::DoApplyTeamBuff(PvpTeamIndex teamIdx, uint32 spellEntry, bo
     {
         for (BattleGroundPlayerMap::const_iterator itr = m_players.begin(); itr != m_players.end(); ++itr)
         {
-            if (Player* plr = sObjectMgr.GetPlayer(itr->first))
+            if (Player* player = sObjectMgr.GetPlayer(itr->first))
             {
-                if (plr->GetTeam() == teamId)
-                    plr->RemoveAurasDueToSpell(spellEntry);
+                if (player->GetTeam() == teamId)
+                    player->RemoveAurasDueToSpell(spellEntry);
             }
         }
     }
@@ -955,15 +977,61 @@ void BattleGroundIC::Update(uint32 diff)
     // objective timers
     for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
     {
-        if (m_objectiveTimer[i])
+        // timer to change the node owner
+        if (m_isleNode[i].nodeChangeTimer)
         {
-            if (m_objectiveTimer[i] <= diff)
+            if (m_isleNode[i].nodeChangeTimer <= diff)
             {
                 DoCaptureObjective(IsleObjective(i));
-                m_objectiveTimer[i] = 0;
+                m_isleNode[i].nodeChangeTimer = 0;
             }
             else
-                m_objectiveTimer[i] -= diff;
+                m_isleNode[i].nodeChangeTimer -= diff;
+        }
+
+        // timer to change the node banner
+        if (m_isleNode[i].bannerChangeTimer)
+        {
+            if (m_isleNode[i].bannerChangeTimer <= diff)
+            {
+                DoChangeBannerState(IsleObjective(i));
+                m_isleNode[i].bannerChangeTimer = 0;
+            }
+            else
+                m_isleNode[i].bannerChangeTimer -= diff;
+        }
+    }
+
+    // resource timers
+    for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
+    {
+        if (m_resourceTickTimer[i])
+        {
+            if (m_resourceTickTimer[i] <= diff)
+            {
+                switch (i)
+                {
+                    case BG_IC_RESOURCE_REFINERY:
+                    {
+                        PvpTeamIndex index = m_isleNode[BG_IC_OBJECTIVE_REFINERY].nodeOwner;
+
+                        DoUpdateReinforcements(index, 1);
+                        RewardHonorToTeam(GetBonusHonorFromKill(1), GetTeamIdByTeamIndex(index));
+                        break;
+                    }
+                    case BG_IC_RESOURCE_QUARY:
+                    {
+                        PvpTeamIndex index = m_isleNode[BG_IC_OBJECTIVE_QUARY].nodeOwner;
+
+                        DoUpdateReinforcements(index, 1);
+                        RewardHonorToTeam(GetBonusHonorFromKill(1), GetTeamIdByTeamIndex(index));
+                        break;
+                    }
+                }
+                m_resourceTickTimer[i] = BG_IC_RESOURCE_TICK_TIMER;
+            }
+            else
+                m_resourceTickTimer[i] -= diff;
         }
     }
 }

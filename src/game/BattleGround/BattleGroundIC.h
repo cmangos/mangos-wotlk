@@ -29,11 +29,14 @@ enum ICGenericVariables
 {
     // generic enums
     BG_IC_MAX_REINFORCEMENTS                = 300,
+
     BG_IC_WORKSHOP_UPDATE_TIME              = 3 * MINUTE * IN_MILLISECONDS,
     BG_IC_TRANSPORT_PERIOD_TIME             = 2 * MINUTE * IN_MILLISECONDS,
     BG_IC_FLAG_CAPTURING_TIME               = MINUTE * IN_MILLISECONDS,
     BG_IC_RESOURCE_TICK_TIMER               = 45000,
     BG_IC_CLOSE_DOORS_TIME                  = 20000,
+
+    BG_IC_BONUS_HONOR_BOSS_KILL             = 4,
 
     BG_IC_ZONE_ID_ISLE                      = 4710,
 };
@@ -196,7 +199,9 @@ enum ICObjects
     BG_IC_GO_HUGE_SEAFORIUM_BOMB_H          = 195333,
     // BG_IC_GO_HUGE_SEAFORIUM_BOMB_TRAP    = 195331,       // actual bomb; triggers spell 66672
 
-    BG_IC_GO_SEAFORIUM_BOMBS                = 195237,       // spawned at the workshop; takes faction from workshop owner
+    // workshop seaforium bombs - faction allows click from the opposite team
+    BG_IC_GO_SEAFORIUM_BOMBS_A              = 195237,
+    BG_IC_GO_SEAFORIUM_BOMBS_H              = 195232,
     // BG_IC_GO_SEAFORIUM_BOMB_TRAP         = 195235,       // actual bomb; triggers spell 66676
 
     // teleporters
@@ -450,7 +455,16 @@ enum IsleObjective
     BG_IC_OBJECTIVE_HANGAR,
     BG_IC_OBJECTIVE_REFINERY,
     BG_IC_OBJECTIVE_QUARY,
-    BG_IC_MAX_OBJECTIVES
+
+    BG_IC_MAX_OBJECTIVES        // max node ids: 7
+};
+
+enum IsleResourceNode
+{
+    BG_IC_RESOURCE_REFINERY,
+    BG_IC_RESOURCE_QUARY,
+
+    BG_IC_MAX_RESOURCE_NODES    // max resources: 2
 };
 
 // *** Default world states *** //
@@ -605,6 +619,7 @@ enum IsleGates
     BG_IC_GATE_FRONT,
     BG_IC_GATE_WEST,
     BG_IC_GATE_EAST,
+
     BG_IC_MAX_KEEP_GATES
 };
 
@@ -627,6 +642,27 @@ static const IsleWallsData isleHordeWallsData[] =
     {BG_IC_GATE_FRONT, BG_IC_EVENT_ID_KEEP_BREACHED_H3, BG_IC_STATE_GATE_FRONT_H_CLOSED, BG_IC_STATE_GATE_FRONT_H_OPEN, LANG_BG_IC_FRONT_GATE_HORDE},
     {BG_IC_GATE_WEST, BG_IC_EVENT_ID_KEEP_BREACHED_H2, BG_IC_STATE_GATE_WEST_H_CLOSED,  BG_IC_STATE_GATE_WEST_H_OPEN,  LANG_BG_IC_WEST_GATE_HORDE},
     {BG_IC_GATE_EAST, BG_IC_EVENT_ID_KEEP_BREACHED_H1, BG_IC_STATE_GATE_EAST_H_CLOSED,  BG_IC_STATE_GATE_EAST_H_OPEN,  LANG_BG_IC_EAST_GATE_HORDE}
+};
+
+struct IsleNode
+{
+    // banner entries and timers
+    uint32 oldBannerEntry;
+    uint32 currentBannerEntry;
+    uint32 bannerChangeTimer;
+
+    // node state and change timer
+    uint32 nodeChangeTimer;
+    uint32 nodeWorldState;
+
+    // owner and spirit healer
+    PvpTeamIndex nodeOwner;                     // current node owner
+    PvpTeamIndex nodeConquerer;                 // prev node owner; required if node is defended
+
+    ObjectGuid spiritHealerGuid;
+    ObjectGuid honorableDefenderGuid;
+
+    GuidList creatureGuids;                     // stores the current creatures guids
 };
 
 class BattleGroundICScore : public BattleGroundScore
@@ -670,43 +706,37 @@ class BattleGroundIC : public BattleGround
         void HandleGameObjectDamaged(Player* player, GameObject* object, uint32 spellId) override;
 
         // Achievements
-        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
+        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target, uint32 miscvalue1) override;
 
     private:
         // Battleground objectives helper functions
         void DoApplyTeamBuff(PvpTeamIndex teamIdx, uint32 spellEntry, bool apply);
-        void DoCaptureObjective(IsleObjective objective);
-        void DoApplyObjectiveBenefits(IsleObjective objective, PvpTeamIndex teamIdx, GameObject* objRef);
-        void DoResetObjective(IsleObjective objective);
+        void DoCaptureObjective(IsleObjective nodeId);
+        void DoApplyObjectiveBenefits(IsleObjective nodeId, GameObject* objRef);
+        void DoResetObjective(IsleObjective nodeId);
+        void DoChangeBannerState(IsleObjective nodeId);
+        void DoUpdateReinforcements(PvpTeamIndex teamIdx, int32 value);
 
-        PvpTeamIndex m_objectiveOwner[BG_IC_MAX_OBJECTIVES];
-        PvpTeamIndex m_objectiveConquerer[BG_IC_MAX_OBJECTIVES];
+        IsleNode m_isleNode[BG_IC_MAX_OBJECTIVES];
 
         ObjectGuid m_keepGatesGuid[PVP_TEAM_COUNT][BG_IC_MAX_KEEP_GATES];
-        ObjectGuid m_currentFlagGuid[BG_IC_MAX_OBJECTIVES];
-        ObjectGuid m_honorableDefenderGuid[BG_IC_MAX_OBJECTIVES];
-        ObjectGuid m_spiritHealerGuid[BG_IC_MAX_OBJECTIVES];
         ObjectGuid m_workshopMechanicGuids[PVP_TEAM_COUNT];
         ObjectGuid m_hordeInnerGateGuid;
         ObjectGuid m_allianceInnerGate1Guid;
         ObjectGuid m_allianceInnerGate2Guid;
 
-        uint32 m_objectiveState[BG_IC_MAX_OBJECTIVES];
         uint32 m_gatesAllianceState[BG_IC_MAX_KEEP_GATES];
         uint32 m_gatesHordeState[BG_IC_MAX_KEEP_GATES];
         uint32 m_reinforcements[PVP_TEAM_COUNT];
-        uint32 m_objectiveTimer[BG_IC_MAX_OBJECTIVES];
+        uint32 m_resourceTickTimer[BG_IC_MAX_RESOURCE_NODES];
         uint32 m_closeDoorTimer;
 
         bool m_isKeepInvaded[PVP_TEAM_COUNT];
 
-        GuidList m_workshopSpawnsGuids[PVP_TEAM_COUNT];
-        GuidList m_docksSpawnsGuids[PVP_TEAM_COUNT];
-        GuidList m_refinerySpawnsGuids[PVP_TEAM_COUNT];
+        GuidList m_dummy[PVP_TEAM_COUNT];               // BIG NOTE: this is here because there is a memory overwrite
         GuidList m_hangarPortalsGuids[PVP_TEAM_COUNT];
         GuidList m_hangarAnimGuids[PVP_TEAM_COUNT];
-        GuidList m_keepHonorTriggerGuids[PVP_TEAM_COUNT];
-        GuidList m_bombsGuids;
+        GuidList m_seaforiumBombsGuids[PVP_TEAM_COUNT];
         GuidList m_towerGatesGuids;
         GuidList m_teleporterGuids;
         GuidList m_teleporterAnimGuids;
