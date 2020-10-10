@@ -106,6 +106,12 @@ void BattleGroundWS::StartingEventOpenDoors()
 
     // Players that join battleground after start are not eligible to get achievement.
     StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, WS_TIMED_ACHIEV_WARSONG_EXP);
+
+    // setup graveyard
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_MAIN_ALLIANCE,     BG_WS_ZONE_ID_MAIN, ALLIANCE);
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_MAIN_HORDE,        BG_WS_ZONE_ID_MAIN, HORDE);
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_FLAGROOM_ALLIANCE, BG_WS_ZONE_ID_MAIN, TEAM_INVALID);
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_FLAGROOM_HORDE,    BG_WS_ZONE_ID_MAIN, TEAM_INVALID);
 }
 
 void BattleGroundWS::AddPlayer(Player* player)
@@ -475,6 +481,12 @@ void BattleGroundWS::Reset()
     m_honorWinKills = (isBgWeekend) ? BG_WS_WEEKEND_WIN_KILLS : BG_WS_NORMAL_WIN_KILLS;
     m_honorEndKills = (isBgWeekend) ? BG_WS_WEEKEND_MAP_COMPLETE_KILLS : BG_WS_NORMAL_MAP_COMPLETE_KILLS;
 
+    // setup graveyard
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_MAIN_ALLIANCE,     BG_WS_ZONE_ID_MAIN, TEAM_INVALID);
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_MAIN_HORDE,        BG_WS_ZONE_ID_MAIN, TEAM_INVALID);
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_FLAGROOM_ALLIANCE, BG_WS_ZONE_ID_MAIN, ALLIANCE);
+    sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_FLAGROOM_HORDE,    BG_WS_ZONE_ID_MAIN, HORDE);
+
     m_endTimer = BG_WS_TIME_LIMIT;
     m_lastCapturedFlagTeam = TEAM_NONE;
 }
@@ -519,26 +531,6 @@ void BattleGroundWS::UpdatePlayerScore(Player* player, uint32 type, uint32 value
             BattleGround::UpdatePlayerScore(player, type, value);
             break;
     }
-}
-
-WorldSafeLocsEntry const* BattleGroundWS::GetClosestGraveYard(Player* player)
-{
-    // if status in progress, it returns main graveyards with spiritguides
-    // else it will return the graveyard in the flagroom - this is especially good
-    // if a player dies in preparation phase - then the player can't cheat
-    // and teleport to the graveyard outside the flagroom
-    // and start running around, while the doors are still closed
-    if (player->GetTeam() == ALLIANCE)
-    {
-        if (GetStatus() == STATUS_IN_PROGRESS)
-            return sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(WS_GRAVEYARD_MAIN_ALLIANCE);
-
-        return sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(WS_GRAVEYARD_FLAGROOM_ALLIANCE);
-    }
-    if (GetStatus() == STATUS_IN_PROGRESS)
-        return sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(WS_GRAVEYARD_MAIN_HORDE);
-
-    return sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(WS_GRAVEYARD_FLAGROOM_HORDE);
 }
 
 void BattleGroundWS::FillInitialWorldStates(WorldPacket& data, uint32& count)

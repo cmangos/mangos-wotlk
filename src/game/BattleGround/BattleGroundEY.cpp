@@ -271,6 +271,8 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
         UpdateWorldState(WORLD_STATE_EY_TOWER_COUNT_ALLIANCE, m_towersAlliance);
 
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_ALLIANCE);
+
+        sObjectMgr.SetGraveYardLinkTeam(eyGraveyards[towerId], EY_ZONE_ID_MAIN, ALLIANCE);
     }
     else if (team == HORDE)
     {
@@ -279,6 +281,8 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
         UpdateWorldState(WORLD_STATE_EY_TOWER_COUNT_HORDE, m_towersHorde);
 
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
+
+        sObjectMgr.SetGraveYardLinkTeam(eyGraveyards[towerId], EY_ZONE_ID_MAIN, HORDE);
     }
     else
     {
@@ -298,6 +302,8 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
 
             SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
         }
+
+        sObjectMgr.SetGraveYardLinkTeam(eyGraveyards[towerId], EY_ZONE_ID_MAIN, TEAM_INVALID);
     }
 
     // update tower state
@@ -392,7 +398,13 @@ void BattleGroundEY::Reset()
     {
         m_towerOwner[i] = TEAM_NONE;
         m_activeEvents[i] = TEAM_INDEX_NEUTRAL;
+
+        sObjectMgr.SetGraveYardLinkTeam(eyGraveyards[i], EY_ZONE_ID_MAIN, TEAM_INVALID);
     }
+
+    // setup graveyards
+    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_EY_MAIN_ALLIANCE, EY_ZONE_ID_MAIN, ALLIANCE);
+    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_EY_MAIN_HORDE, EY_ZONE_ID_MAIN, HORDE);
 
     // the flag in the middle is spawned at beginning
     m_activeEvents[EY_EVENT_CAPTURE_FLAG] = EY_EVENT2_FLAG_CENTER;
@@ -605,55 +617,6 @@ void BattleGroundEY::FillInitialWorldStates(WorldPacket& data, uint32& count)
     // capture point states
     // if you leave the bg while being in capture point radius - and later join same type of bg the slider would still be displayed because the client caches it
     FillInitialWorldState(data, count, WORLD_STATE_EY_CAPTURE_POINT_SLIDER_DISPLAY, WORLD_STATE_REMOVE);
-}
-
-WorldSafeLocsEntry const* BattleGroundEY::GetClosestGraveYard(Player* player)
-{
-    uint32 g_id;
-
-    switch (player->GetTeam())
-    {
-        case ALLIANCE: g_id = GRAVEYARD_EY_MAIN_ALLIANCE; break;
-        case HORDE:    g_id = GRAVEYARD_EY_MAIN_HORDE;    break;
-        default:       return nullptr;
-    }
-
-    WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(g_id);
-    WorldSafeLocsEntry const* nearestEntry = entry;
-
-    if (!entry)
-    {
-        sLog.outError("BattleGroundEY: Not found the main team graveyard. Graveyard system isn't working!");
-        return nullptr;
-    }
-
-    float plr_x = player->GetPositionX();
-    float plr_y = player->GetPositionY();
-    float plr_z = player->GetPositionZ();
-
-    float distance = (entry->x - plr_x) * (entry->x - plr_x) + (entry->y - plr_y) * (entry->y - plr_y) + (entry->z - plr_z) * (entry->z - plr_z);
-    float nearestDistance = distance;
-
-    for (uint8 i = 0; i < EY_MAX_NODES; ++i)
-    {
-        if (m_towerOwner[i] == player->GetTeam())
-        {
-            entry = sWorldSafeLocsStore.LookupEntry<WorldSafeLocsEntry>(eyGraveyards[i]);
-            if (!entry)
-                sLog.outError("BattleGroundEY: Not found graveyard: %u", eyGraveyards[i]);
-            else
-            {
-                distance = (entry->x - plr_x) * (entry->x - plr_x) + (entry->y - plr_y) * (entry->y - plr_y) + (entry->z - plr_z) * (entry->z - plr_z);
-                if (distance < nearestDistance)
-                {
-                    nearestDistance = distance;
-                    nearestEntry = entry;
-                }
-            }
-        }
-    }
-
-    return nearestEntry;
 }
 
 bool BattleGroundEY::AreAllNodesControlledByTeam(Team team)

@@ -161,7 +161,9 @@ enum EYGaveyards
     GRAVEYARD_FEL_REAVER_RUINS      = 1105,
     GRAVEYARD_BLOOD_ELF_TOWER       = 1106,
     GRAVEYARD_DRAENEI_RUINS         = 1107,
-    GRAVEYARD_MAGE_TOWER            = 1108
+    GRAVEYARD_MAGE_TOWER            = 1108,
+
+    EY_ZONE_ID_MAIN                 = 3820,
 };
 
 // node-events work like this: event1:nodeid, event2:state (0alliance,1horde,2neutral)
@@ -283,7 +285,6 @@ class BattleGroundEY : public BattleGround
         // General functions
         void UpdatePlayerScore(Player* source, uint32 type, uint32 value) override;
         void FillInitialWorldStates(WorldPacket& data, uint32& count) override;
-        WorldSafeLocsEntry const* GetClosestGraveYard(Player* player) override;
         Team GetPrematureWinner() override;
 
         // Battleground event handlers
