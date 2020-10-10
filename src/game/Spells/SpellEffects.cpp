@@ -10831,6 +10831,16 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     }
                     return;
                 }
+                case 52459:                                 // End of Round
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->IsAlive())
+                        return;
+
+                    // resurrect dead players
+                    ((Player*)unitTarget)->ResurrectPlayer(1.0f);
+                    ((Player*)unitTarget)->SpawnCorpseBones();
+                    return;
+                }
                 case 52479:                                 // Gift of the Harvester
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER || !unitTarget)
