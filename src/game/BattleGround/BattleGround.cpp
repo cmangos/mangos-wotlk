@@ -2262,16 +2262,6 @@ void BattleGround::SetBgRaid(Team team, Group* bgRaid)
 }
 
 /**
-  Function that returns the closes graveyard
-
-  @param    player
-*/
-WorldSafeLocsEntry const* BattleGround::GetClosestGraveYard(Player* player)
-{
-    return sObjectMgr.GetClosestGraveYard(player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetMapId(), player->GetTeam());
-}
-
-/**
   Function that checkes if team score is in range
 
   @param    team

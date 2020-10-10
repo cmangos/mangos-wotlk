@@ -5216,12 +5216,7 @@ void Player::RepopAtGraveyard()
     }
 
     WorldSafeLocsEntry const* ClosestGrave;
-
-    // Special handle for battleground maps
-    if (BattleGround* bg = GetBattleGround())
-        ClosestGrave = bg->GetClosestGraveYard(this);
-    else
-        ClosestGrave = sObjectMgr.GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam());
+    ClosestGrave = sObjectMgr.GetClosestGraveYard(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam());
 
     // stop countdown until repop
     m_deathTimer = 0;
