@@ -1045,12 +1045,12 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
 
             SetEscortPaused(true);
 
-            if (m_creature->GetPositionZ() < 310.0f)
-                SetCurrentWaypoint(19);
-            else if (m_creature->GetPositionZ() < 330.0f)
-                SetCurrentWaypoint(33);
-            else
-                SetCurrentWaypoint(0);
+            if (m_creature->GetPositionZ() < 310.0f)        // -3720.35, 3789.91, 302.888
+                SetCurrentWaypoint(20);
+            else if (m_creature->GetPositionZ() < 320.0f)   // -3669.57, 3386.74, 312.955
+                SetCurrentWaypoint(34);
+            else if (m_creature->GetPositionZ() < 350.0f)   // -4106.64, 3029.76, 344.877
+                SetCurrentWaypoint(1);
 
             SetEscortPaused(false);
 
