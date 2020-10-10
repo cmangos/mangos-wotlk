@@ -2316,7 +2316,7 @@ GameObject* BattleGround::GetSingleGameObjectFromStorage(uint32 entry) const
 /**
   Function that returns pointer to a loaded Creature that was stored in m_goEntryGuidStore. Can return nullptr
 
-  @param    gameobject entry
+  @param    creature entry
   @param    skip debug log
 */
 Creature* BattleGround::GetSingleCreatureFromStorage(uint32 entry, bool skipDebugLog /*=false*/) const
