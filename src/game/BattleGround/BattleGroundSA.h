@@ -30,6 +30,7 @@ enum SAGlobalVariables
     BG_SA_MAX_GATES                             = 6,
     BG_SA_MAX_SIGILS                            = 5,
     BG_SA_MAX_GRAVEYARDS                        = 3,                // max capturable graveyards
+    BG_SA_MAX_DEFENSE_LINES                     = 4,                // there are 3 defense lines and 1 relic that count for the bonus honor
 
     BG_SA_ZONE_ID_STRAND                        = 4384,
     // BG_SA_ZONE_ID_COURTYARD_ANCIENTS         = 4609,
@@ -330,6 +331,18 @@ static const StrandGraveyardSpawnData strandGraveyardData[] =
     {BG_SA_GRAVEYARD_ID_SOUTH,  1122.28f,    4.416f, 68.936f, 6.063f},
 };
 
+struct StrandGraveyardNode
+{
+    // banner entries and timers
+    uint32 oldEntry;
+    uint32 newEntry;
+    uint32 changeTimer;
+
+    // owner and spirit healer
+    PvpTeamIndex graveyardOwner;
+    ObjectGuid spiritHealerGuid;
+};
+
 class BattleGroundSAScore : public BattleGroundScore
 {
     public:
@@ -380,6 +393,8 @@ class BattleGroundSA : public BattleGround
         void UpdateTimerWorldState();
         void ProcessBattlegroundWinner();
         void SendBattlegroundWarning(int32 messageId);
+        void ChangeBannerState(uint8 nodeId);
+        void AwardBonusHonor();
 
         // Battleground setup functions
         void SetupBattleground();
@@ -389,12 +404,13 @@ class BattleGroundSA : public BattleGround
         void TeleportPlayerToStartArea(Player* player);
 
         PvpTeamIndex GetAttacker() { return m_defendingTeamIdx == TEAM_INDEX_ALLIANCE ? TEAM_INDEX_HORDE : TEAM_INDEX_ALLIANCE; }
-
-        PvpTeamIndex m_graveyardOwner[BG_SA_MAX_GRAVEYARDS];
         PvpTeamIndex m_defendingTeamIdx;
+
+        StrandGraveyardNode m_strandGraveyard[BG_SA_MAX_GRAVEYARDS];
 
         bool m_noScratchAchiev;                     // no demolisher is destroyed
         bool m_defenseAncients;                     // no wall is destroyed
+        bool m_defenseLineCaptured[BG_SA_MAX_DEFENSE_LINES];
 
         uint32 m_gateStateValue[BG_SA_MAX_GATES];
         uint32 m_winTime[PVP_TEAM_COUNT];
@@ -409,7 +425,6 @@ class BattleGroundSA : public BattleGround
         ObjectGuid m_gorgrilGuid;
 
         ObjectGuid m_relicGuid[PVP_TEAM_COUNT];
-        ObjectGuid m_spiritHealersGuid[BG_SA_MAX_GRAVEYARDS];
 
         GuidList m_cannonsGuids;
         GuidList m_demolishersGuids;
@@ -419,6 +434,5 @@ class BattleGroundSA : public BattleGround
         GuidVector m_triggerGuids;
 
         GuidList m_transportShipGuids[PVP_TEAM_COUNT];
-        GuidList m_graveyardBannersGuids[PVP_TEAM_COUNT];
 };
 #endif
