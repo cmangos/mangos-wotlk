@@ -3,7 +3,7 @@
 #####################################
 
 [MangosdConf]
-ConfVersion=2020060701
+ConfVersion=2020101101
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -1625,6 +1625,10 @@ Death.Ghost.RunSpeed.Battleground = 1.0
 #        Default: 1800000 (30 minutes)
 #                 0 - disable premade group matches (group always added to bg team in normal way)
 #
+#    BattleGround.Random.ResetHour
+#        Hour when random bg reset (0..23)
+#        Default: 6
+#
 ###################################################################################################################
 
 Battleground.CastDeserter = 1
@@ -1634,6 +1638,7 @@ Battleground.ScoreStatistics = 0
 Battleground.InvitationType = 0
 BattleGround.PrematureFinishTimer = 300000
 BattleGround.PremadeGroupWaitForMatch = 1800000
+BattleGround.Random.ResetHour = 6
 
 ###################################################################################################################
 # ARENA CONFIG

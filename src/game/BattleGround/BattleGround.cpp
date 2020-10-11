@@ -203,6 +203,7 @@ void BattleGround::BroadcastWorker(Do& _do)
 BattleGround::BattleGround(): m_buffChange(false), m_arenaBuffSpawned(false), m_startDelayTime(0), m_startMaxDist(0)
 {
     m_typeId            = BattleGroundTypeId(0);
+    m_randomTypeId      = BattleGroundTypeId(0);
     m_status            = STATUS_NONE;
     m_clientInstanceId  = 0;
     m_endTime           = 0;
@@ -216,6 +217,7 @@ BattleGround::BattleGround(): m_buffChange(false), m_arenaBuffSpawned(false), m_
     m_validStartPositionTimer = 0;
     m_events            = 0;
     m_isRated           = false;
+    m_isRandom          = false;
     m_name              = "";
     m_levelMin          = 0;
     m_levelMax          = 0;
@@ -980,14 +982,35 @@ void BattleGround::EndBattleGround(Team winner)
             stmt.Execute();
         }
 
+        // check if player has already completed a random battleground for the day; for the first random battleground, more bonus honor is awarded
+        uint32 winKills  = plr->HasWonRandomBattleground() ? BG_REWARD_WINNER_HONOR_LAST : BG_REWARD_WINNER_HONOR_FIRST;
+        uint32 loseKills = plr->HasWonRandomBattleground() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
+        uint32 winArena  = plr->HasWonRandomBattleground() ? BG_REWARD_WINNER_ARENA_LAST : BG_REWARD_WINNER_ARENA_FIRST;
+
         if (team == winner)
         {
             RewardMark(plr, ITEM_WINNER_COUNT);
             RewardQuestComplete(plr);
+
+            if (IsRandom())
+            {
+                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(winKills * 4));
+                plr->ModifyArenaPoints(winArena);
+
+                // Mark player as winner for random battleground
+                if(!plr->HasWonRandomBattleground())
+                    plr->SetRandomBattlegroundWinner(true);
+            }
+
             plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, 1);
         }
         else
+        {
             RewardMark(plr, ITEM_LOSER_COUNT);
+
+            if (IsRandom())
+                UpdatePlayerScore(plr, SCORE_BONUS_HONOR, GetBonusHonorFromKill(loseKills * 4));
+        }
 
         plr->CombatStopWithPets(true);
 

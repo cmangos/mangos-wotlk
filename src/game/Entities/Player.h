@@ -845,6 +845,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADTALENTS,
     PLAYER_LOGIN_QUERY_LOADWEEKLYQUESTSTATUS,
     PLAYER_LOGIN_QUERY_LOADMONTHLYQUESTSTATUS,
+    PLAYER_LOGIN_QUERY_LOADRANDOMBATTLEGROUND,
 
     MAX_PLAYER_LOGIN_QUERY
 };
@@ -2160,6 +2161,10 @@ class Player : public Unit
         bool CanUseBattleGroundObject() const;
         bool isTotalImmune() const;
 
+        // set and get random battleground winner status
+        bool HasWonRandomBattleground() { return m_hasWonRandomBattleground; }
+        void SetRandomBattlegroundWinner(bool isWinner);
+
         // returns true if the player is in active state for capture point capturing
         bool CanUseCapturePoint() const;
 
@@ -2450,6 +2455,8 @@ class Player : public Unit
         BgBattleGroundQueueID_Rec m_bgBattleGroundQueueID[PLAYER_MAX_BATTLEGROUND_QUEUES];
         BGData                    m_bgData;
 
+        bool m_hasWonRandomBattleground;
+
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
         /*********************************************************/
@@ -2478,6 +2485,7 @@ class Player : public Unit
         void _LoadDailyQuestStatus(QueryResult* result);
         void _LoadWeeklyQuestStatus(QueryResult* result);
         void _LoadMonthlyQuestStatus(QueryResult* result);
+        void _LoadRandomBattlegroundStatus(QueryResult* result);
         void _LoadGroup(QueryResult* result);
         void _LoadSkills(QueryResult* result);
         void _LoadSpells(QueryResult* result);

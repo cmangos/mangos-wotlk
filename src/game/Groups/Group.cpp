@@ -27,6 +27,7 @@
 #include "Tools/Formulas.h"
 #include "Globals/ObjectAccessor.h"
 #include "BattleGround/BattleGround.h"
+#include "BattleGround/BattleGroundMgr.h"
 #include "Maps/MapManager.h"
 #include "Maps/MapPersistentStateMgr.h"
 #include "Spells/SpellAuras.h"
@@ -1227,6 +1228,8 @@ GroupJoinBattlegroundResult Group::CanJoinBattleGroundQueue(BattleGround const* 
     uint32 arenaTeamId = reference->GetArenaTeamId(arenaSlot);
     Team team = reference->GetTeam();
 
+    BattleGroundQueueTypeId bgQueueTypeIdRandom = BattleGroundMgr::BgQueueTypeId(BATTLEGROUND_RB, ARENA_TYPE_NONE);
+
     // check every member of the group to be able to join
     for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
     {
@@ -1247,6 +1250,12 @@ GroupJoinBattlegroundResult Group::CanJoinBattleGroundQueue(BattleGround const* 
         // don't let join if someone from the group is already in that bg queue
         if (member->InBattleGroundQueueForBattleGroundQueueType(bgQueueTypeId))
             return ERR_BATTLEGROUND_JOIN_FAILED;            // not blizz-like
+        // don't let join if someone from the group is in bg queue random
+        if (bgOrTemplate->GetTypeId() != BATTLEGROUND_AA && member->InBattleGroundQueueForBattleGroundQueueType(bgQueueTypeIdRandom))
+            return ERR_IN_RANDOM_BG;
+        // don't let join to bg queue random if someone from the group is already in bg queue
+        if (bgOrTemplate->GetTypeId() == BATTLEGROUND_RB && member->InBattleGroundQueue())
+            return ERR_IN_NON_RANDOM_BG;
         // check for deserter debuff in case not arena queue
         if (bgOrTemplate->GetTypeId() != BATTLEGROUND_AA && !member->CanJoinToBattleground())
             return ERR_GROUP_JOIN_BATTLEGROUND_DESERTERS;

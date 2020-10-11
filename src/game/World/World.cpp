@@ -728,6 +728,7 @@ void World::LoadConfigSettings(bool reload)
     setConfig(CONFIG_UINT32_BATTLEGROUND_INVITATION_TYPE,              "Battleground.InvitationType", 0);
     setConfig(CONFIG_UINT32_BATTLEGROUND_PREMATURE_FINISH_TIMER,       "BattleGround.PrematureFinishTimer", 5 * MINUTE * IN_MILLISECONDS);
     setConfig(CONFIG_UINT32_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH, "BattleGround.PremadeGroupWaitForMatch", 30 * MINUTE * IN_MILLISECONDS);
+    setConfigMinMax(CONFIG_UINT32_BATTLEGROUND_RANDOM_RESET_HOUR,      "BattleGround.Random.ResetHour", 6, 0, 23);
     setConfig(CONFIG_UINT32_ARENA_MAX_RATING_DIFFERENCE,               "Arena.MaxRatingDifference", 150);
     setConfig(CONFIG_UINT32_ARENA_RATING_DISCARD_TIMER,                "Arena.RatingDiscardTimer", 10 * MINUTE * IN_MILLISECONDS);
     setConfig(CONFIG_BOOL_ARENA_AUTO_DISTRIBUTE_POINTS,                "Arena.AutoDistributePoints", false);
@@ -1428,6 +1429,10 @@ void World::SetInitialWorldSettings()
     SetMonthlyQuestResetTime();
     sLog.outString();
 
+    sLog.outString("Calculate random battleground reset time...");
+    InitRandomBattlegroundResetTime();
+    sLog.outString();
+
     sLog.outString("Loading Spam records...");
     LoadSpamRecords();
     sLog.outString();
@@ -1546,6 +1551,10 @@ void World::Update(uint32 diff)
     /// Handle monthly quests reset time
     if (m_gameTime > m_NextMonthlyQuestReset)
         ResetMonthlyQuests();
+
+    /// Handle daily random battleground reset time
+    if (m_gameTime > m_NextRandomBattlegroundReset)
+        ResetRandomBattleground();
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
@@ -2344,6 +2353,37 @@ void World::LoadSpamRecords(bool reload)
     }
 }
 
+void World::InitRandomBattlegroundResetTime()
+{
+    QueryResult * result = CharacterDatabase.Query("SELECT NextRandomBattlegroundResetTime FROM saved_variables");
+    if (!result)
+        m_NextRandomBattlegroundReset = time_t(time(NULL));         // game time not yet init
+    else
+        m_NextRandomBattlegroundReset = time_t((*result)[0].GetUInt64());
+
+    // generate time by config
+    time_t curTime = time(NULL);
+    tm localTm = *localtime(&curTime);
+    localTm.tm_hour = getConfig(CONFIG_UINT32_BATTLEGROUND_RANDOM_RESET_HOUR);
+    localTm.tm_min  = 0;
+    localTm.tm_sec  = 0;
+
+    // current day reset time
+    time_t nextDayResetTime = mktime(&localTm);
+
+    // next reset time before current moment
+    if (curTime >= nextDayResetTime)
+        nextDayResetTime += DAY;
+
+    // normalize reset time
+    m_NextRandomBattlegroundReset = m_NextRandomBattlegroundReset < curTime ? nextDayResetTime - DAY : nextDayResetTime;
+
+    if (!result)
+        CharacterDatabase.PExecute("INSERT INTO saved_variables (NextRandomBattlegroundResetTime) VALUES ('" UI64FMTD "')", uint64(m_NextRandomBattlegroundReset));
+    else
+        delete result;
+}
+
 void World::ResetDailyQuests()
 {
     DETAIL_LOG("Daily quests reset for all characters.");
@@ -2383,6 +2423,20 @@ void World::ResetMonthlyQuests()
             itr->second->GetPlayer()->ResetMonthlyQuestStatus();
 
     SetMonthlyQuestResetTime(false);
+}
+
+void World::ResetRandomBattleground()
+{
+    DETAIL_LOG("Random battleground reset for all characters.");
+
+    CharacterDatabase.Execute("DELETE FROM character_battleground_random");
+
+    for (SessionMap::const_iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        if (itr->second->GetPlayer())
+            itr->second->GetPlayer()->SetRandomBattlegroundWinner(false);
+
+    m_NextRandomBattlegroundReset = time_t(m_NextRandomBattlegroundReset + DAY);
+    CharacterDatabase.PExecute("UPDATE saved_variables SET NextRandomBattlegroundResetTime = '" UI64FMTD "'", uint64(m_NextRandomBattlegroundReset));
 }
 
 void World::SetPlayerLimit(int32 limit, bool needUpdate)

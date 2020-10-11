@@ -177,6 +177,7 @@ enum eConfigUInt32Values
     CONFIG_UINT32_BATTLEGROUND_PREMATURE_FINISH_TIMER,
     CONFIG_UINT32_BATTLEGROUND_PREMADE_GROUP_WAIT_FOR_MATCH,
     CONFIG_UINT32_BATTLEGROUND_QUEUE_ANNOUNCER_JOIN,
+    CONFIG_UINT32_BATTLEGROUND_RANDOM_RESET_HOUR,
     CONFIG_UINT32_ARENA_MAX_RATING_DIFFERENCE,
     CONFIG_UINT32_ARENA_RATING_DISCARD_TIMER,
     CONFIG_UINT32_ARENA_AUTO_DISTRIBUTE_INTERVAL_DAYS,
@@ -523,9 +524,10 @@ class World
         time_t const& GetGameTime() const { return m_gameTime; }
         /// Uptime (in secs)
         uint32 GetUptime() const { return uint32(m_gameTime - m_startTime); }
-        /// Next daily quests reset time
+        /// Next daily quests and random bg reset time
         time_t GetNextDailyQuestsResetTime() const { return m_NextDailyQuestReset; }
         time_t GetNextWeeklyQuestsResetTime() const { return m_NextWeeklyQuestReset; }
+        time_t GetNextRandomBattlegroundResetTime() const { return m_NextRandomBattlegroundReset; }
 
         /// Get the maximum skill level a player can reach
         uint16 GetConfigMaxSkillValue() const
@@ -647,6 +649,7 @@ class World
 
         void InitDailyQuestResetTime();
         void InitWeeklyQuestResetTime();
+        void InitRandomBattlegroundResetTime();
         void SetMonthlyQuestResetTime(bool initialize = true);
 
         void GenerateEventGroupEvents(bool daily, bool weekly, bool deleteColumns);
@@ -655,6 +658,7 @@ class World
         void ResetDailyQuests();
         void ResetWeeklyQuests();
         void ResetMonthlyQuests();
+        void ResetRandomBattleground();
 
     private:
         void setConfig(eConfigUInt32Values index, char const* fieldname, uint32 defvalue);
@@ -714,10 +718,11 @@ class World
         std::mutex m_cliCommandQueueLock;
         std::deque<const CliCommandHolder*> m_cliCommandQueue;
 
-        // next daily quests reset time
+        // next daily quests and random BG reset time
         time_t m_NextDailyQuestReset;
         time_t m_NextWeeklyQuestReset;
         time_t m_NextMonthlyQuestReset;
+        time_t m_NextRandomBattlegroundReset;
 
         // Player Queue
         Queue m_QueuedSessions;

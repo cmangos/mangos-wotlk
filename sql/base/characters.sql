@@ -21,7 +21,7 @@
 
 DROP TABLE IF EXISTS `character_db_version`;
 CREATE TABLE `character_db_version` (
-  `required_14020_01_characters_ahbot_items` bit(1) DEFAULT NULL
+  `required_14024_01_characters_battleground_random` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Last applied sql update to DB';
 
 --
@@ -420,6 +420,25 @@ CREATE TABLE `character_battleground_data` (
 LOCK TABLES `character_battleground_data` WRITE;
 /*!40000 ALTER TABLE `character_battleground_data` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_battleground_data` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `character_battleground_random`
+--
+
+DROP TABLE IF EXISTS `character_battleground_random`;
+CREATE TABLE `character_battleground_random` (
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  PRIMARY KEY  (`guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player Battleground System';
+
+--
+-- Dumping data for table `character_battleground_random`
+--
+
+LOCK TABLES `character_battleground_random` WRITE;
+/*!40000 ALTER TABLE `character_battleground_random` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_battleground_random` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -2086,6 +2105,7 @@ CREATE TABLE `saved_variables` (
   `NextDailyQuestResetTime` bigint(40) unsigned NOT NULL DEFAULT '0',
   `NextWeeklyQuestResetTime` bigint(40) unsigned NOT NULL DEFAULT '0',
   `NextMonthlyQuestResetTime` bigint(40) unsigned NOT NULL DEFAULT '0',
+  `NextRandomBattlegroundResetTime` bigint(40) unsigned NOT NULL default '0',
   `cleaning_flags` int(11) unsigned NOT NULL DEFAULT '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Variable Saves';
 

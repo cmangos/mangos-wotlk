@@ -176,6 +176,16 @@ enum BattlegroundHonorableDefenders
     BG_NPC_HON_DEFENDER_TRIGGER_25_H = 36350,
 };
 
+enum BattleGroundRandomRewards
+{
+    BG_REWARD_WINNER_HONOR_FIRST     = 30,
+    BG_REWARD_WINNER_ARENA_FIRST     = 25,
+    BG_REWARD_WINNER_HONOR_LAST      = 15,
+    BG_REWARD_WINNER_ARENA_LAST      = 0,
+    BG_REWARD_LOOSER_HONOR_FIRST     = 5,
+    BG_REWARD_LOOSER_HONOR_LAST      = 5
+};
+
 const uint32 Buff_Entries[3] = { BG_OBJECTID_SPEEDBUFF_ENTRY, BG_OBJECTID_REGENBUFF_ENTRY, BG_OBJECTID_BERSERKERBUFF_ENTRY };
 
 enum BattleGroundStatus
@@ -212,11 +222,13 @@ enum BattleGroundQueueTypeId
     BATTLEGROUND_QUEUE_EY       = 4,
     BATTLEGROUND_QUEUE_SA       = 5,
     BATTLEGROUND_QUEUE_IC       = 6,
-    BATTLEGROUND_QUEUE_2v2      = 7,
-    BATTLEGROUND_QUEUE_3v3      = 8,
-    BATTLEGROUND_QUEUE_5v5      = 9
+    BATTLEGROUND_QUEUE_RB       = 7,
+    BATTLEGROUND_QUEUE_2v2      = 8,
+    BATTLEGROUND_QUEUE_3v3      = 9,
+    BATTLEGROUND_QUEUE_5v5      = 10,
+
+    MAX_BATTLEGROUND_QUEUE_TYPES = 11
 };
-#define MAX_BATTLEGROUND_QUEUE_TYPES 10
 
 enum ScoreType
 {
@@ -348,7 +360,7 @@ class BattleGround
         /* Battleground */
         // Get methods:
         char const* GetName() const         { return m_name; }
-        BattleGroundTypeId GetTypeId() const { return m_typeId; }
+        BattleGroundTypeId GetTypeId(bool getRandom = false) const { return getRandom ? m_randomTypeId : m_typeId; }
         BattleGroundBracketId GetBracketId() const { return m_bracketId; }
         // the instanceId check is also used to determine a bg-template
         // that's why the m_map hack is here..
@@ -369,12 +381,14 @@ class BattleGround
         int32 GetStartDelayTime() const     { return m_startDelayTime; }
         ArenaType GetArenaType() const          { return m_arenaType; }
         Team GetWinner() const              { return m_winner; }
+        bool IsRandom() const               { return m_isRandom; }
         uint32 GetBattlemasterEntry() const;
         uint32 GetBonusHonorFromKill(uint32 kills) const;
 
         // Set methods:
         void SetName(char const* name)      { m_name = name; }
         void SetTypeId(BattleGroundTypeId typeId) { m_typeId = typeId; }
+        void SetRandomTypeId(BattleGroundTypeId typeId) { m_randomTypeId = typeId; }
         // here we can count minlevel and maxlevel for players
         void SetBracket(PvPDifficultyEntry const* bracketEntry);
         void SetStatus(BattleGroundStatus status) { m_status = status; }
@@ -388,6 +402,7 @@ class BattleGround
         void SetArenaType(ArenaType type)   { m_arenaType = type; }
         void SetArenaorBGType(bool isArena) { m_isArena = isArena; }
         void SetWinner(Team winner)         { m_winner = winner; }
+        void SetRandom(bool isRandom)       { m_isRandom = isRandom; }
 
         void ModifyStartDelayTime(int diff) { m_startDelayTime -= diff; }
         void SetStartDelayTime(int time)    { m_startDelayTime = time; }
@@ -689,6 +704,7 @@ class BattleGround
         uint32 m_startMessageIds[BG_STARTING_EVENT_COUNT];
 
         bool   m_buffChange;
+        bool   m_isRandom;
 
         /* Storage lists */
         EntryGuidMap m_goEntryGuidStore;                   // Store unique GO-Guids by entry
@@ -697,6 +713,7 @@ class BattleGround
     private:
         /* Battleground */
         BattleGroundTypeId m_typeId;
+        BattleGroundTypeId m_randomTypeId;
         BattleGroundStatus m_status;
         BattleGroundBracketId m_bracketId;
         ArenaType  m_arenaType;                             // 2=2v2, 3=3v3, 5=5v5
