@@ -272,7 +272,14 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
 
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_ALLIANCE);
 
-        sObjectMgr.SetGraveYardLinkTeam(eyGraveyards[towerId], EY_ZONE_ID_MAIN, ALLIANCE);
+        // link graveyard
+        sObjectMgr.SetGraveYardLinkTeam(eyeGraveyardData[towerId].id, EY_ZONE_ID_MAIN, ALLIANCE);
+
+        // spawn spirit healer and defender
+        if (Creature* healer = go->SummonCreature(BG_NPC_SPIRIT_GUIDE_ALLIANCE, eyeGraveyardData[towerId].x, eyeGraveyardData[towerId].y, eyeGraveyardData[towerId].z, eyeGraveyardData[towerId].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_spiritHealers[towerId] = healer->GetObjectGuid();
+        if (Creature* defender = go->SummonCreature(BG_NPC_HON_DEFENDER_TRIGGER_A, eyeTowerdData[towerId].x, eyeTowerdData[towerId].y, eyeTowerdData[towerId].z, eyeTowerdData[towerId].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_honorableDefender[towerId] = defender->GetObjectGuid();
     }
     else if (team == HORDE)
     {
@@ -282,7 +289,14 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
 
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
 
-        sObjectMgr.SetGraveYardLinkTeam(eyGraveyards[towerId], EY_ZONE_ID_MAIN, HORDE);
+        // link graveyard
+        sObjectMgr.SetGraveYardLinkTeam(eyeGraveyardData[towerId].id, EY_ZONE_ID_MAIN, HORDE);
+
+        // spawn spirit healer and defender
+        if (Creature* healer = go->SummonCreature(BG_NPC_SPIRIT_GUIDE_HORDE, eyeGraveyardData[towerId].x, eyeGraveyardData[towerId].y, eyeGraveyardData[towerId].z, eyeGraveyardData[towerId].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_spiritHealers[towerId] = healer->GetObjectGuid();
+        if (Creature* defender = go->SummonCreature(BG_NPC_HON_DEFENDER_TRIGGER_H, eyeTowerdData[towerId].x, eyeTowerdData[towerId].y, eyeTowerdData[towerId].z, eyeTowerdData[towerId].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_honorableDefender[towerId] = defender->GetObjectGuid();
     }
     else
     {
@@ -303,7 +317,14 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
             SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
         }
 
-        sObjectMgr.SetGraveYardLinkTeam(eyGraveyards[towerId], EY_ZONE_ID_MAIN, TEAM_INVALID);
+        // unlink graveyard
+        sObjectMgr.SetGraveYardLinkTeam(eyeGraveyardData[towerId].id, EY_ZONE_ID_MAIN, TEAM_INVALID);
+
+        // despawn spirit healer and defender
+        if (Creature* healer = GetBgMap()->GetCreature(m_spiritHealers[towerId]))
+            healer->ForcedDespawn();
+        if (Creature* defender = GetBgMap()->GetCreature(m_honorableDefender[towerId]))
+            defender->ForcedDespawn();
     }
 
     // update tower state
@@ -399,7 +420,7 @@ void BattleGroundEY::Reset()
         m_towerOwner[i] = TEAM_NONE;
         m_activeEvents[i] = TEAM_INDEX_NEUTRAL;
 
-        sObjectMgr.SetGraveYardLinkTeam(eyGraveyards[i], EY_ZONE_ID_MAIN, TEAM_INVALID);
+        sObjectMgr.SetGraveYardLinkTeam(eyeGraveyardData[i].id, EY_ZONE_ID_MAIN, TEAM_INVALID);
     }
 
     // setup graveyards

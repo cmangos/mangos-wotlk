@@ -196,6 +196,20 @@ bool BattleGroundAB::HandleAreaTrigger(Player* source, uint32 trigger)
     return true;
 }
 
+void BattleGroundAB::HandleGameObjectCreate(GameObject* go)
+{
+    switch (go->GetEntry())
+    {
+        case BG_AB_BANNER_MINE:
+        case BG_AB_BANNER_LUMBER_MILL:
+        case BG_AB_BANNER_FARM:
+        case BG_AB_BANNER_BLACKSMITH:
+        case BG_AB_BANNER_STABLE:
+            m_goEntryGuidStore[go->GetEntry()] = go->GetObjectGuid();
+            break;
+    }
+}
+
 // Method that updates the node banner (despawn old one; spawn new one)
 void BattleGroundAB::DoUpdateBanner(uint8 node, ABNodeStatus status, bool delay)
 {
@@ -270,7 +284,24 @@ void BattleGroundAB::ProcessNodeCapture(uint8 node, PvpTeamIndex teamIdx)
         CastSpellOnTeam(BG_AB_SPELL_QUEST_REWARD_4_BASES, team);
 
     // setup graveyard
-    sObjectMgr.SetGraveYardLinkTeam(abGraveyardIds[node], BG_AB_ZONE_MAIN, team);
+    sObjectMgr.SetGraveYardLinkTeam(abGraveyardData[node].id, BG_AB_ZONE_MAIN, team);
+
+    uint32 healerEntry = teamIdx == TEAM_INDEX_ALLIANCE ? BG_NPC_SPIRIT_GUIDE_ALLIANCE : BG_NPC_SPIRIT_GUIDE_HORDE;
+    uint32 defenderEntry = teamIdx == TEAM_INDEX_ALLIANCE ? BG_NPC_HON_DEFENDER_TRIGGER_25_A : BG_NPC_HON_DEFENDER_TRIGGER_25_H;
+
+    // get an object as a reference to spawn for summoning
+    GameObject* object = GetSingleGameObjectFromStorage(abNodeData[node].id);
+    if (!object)
+    {
+        sLog.outError("BattleGroundAB: Cannot find gameobject entry %u used as a reference in node capture.", abNodeData[node].id);
+        return;
+    }
+
+    // spawn spirit healer and defender
+    if (Creature* healer = object->SummonCreature(healerEntry, abGraveyardData[node].x, abGraveyardData[node].y, abGraveyardData[node].z, abGraveyardData[node].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+        m_spiritHealers[node] = healer->GetObjectGuid();
+    if (Creature* defender = object->SummonCreature(defenderEntry, abNodeData[node].x, abNodeData[node].y, abNodeData[node].z, abNodeData[node].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+        m_honorableDefender[node] = defender->GetObjectGuid();
 }
 
 // Method that handles the banner click
@@ -373,7 +404,14 @@ void BattleGroundAB::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
         PvpTeamIndex otherTeamIndex = GetOtherTeamIndex(teamIndex);
         --m_capturedNodeCount[otherTeamIndex];
 
-        sObjectMgr.SetGraveYardLinkTeam(abGraveyardIds[node], BG_AB_ZONE_MAIN, TEAM_INVALID);
+        // unlink graveyard
+        sObjectMgr.SetGraveYardLinkTeam(abGraveyardData[node].id, BG_AB_ZONE_MAIN, TEAM_INVALID);
+
+        // despawn spirit healer and defender
+        if (Creature* healer = GetBgMap()->GetCreature(m_spiritHealers[node]))
+            healer->ForcedDespawn();
+        if (Creature* defender = GetBgMap()->GetCreature(m_honorableDefender[node]))
+            defender->ForcedDespawn();
 
         // update achievements
         player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, 122);
@@ -432,7 +470,7 @@ void BattleGroundAB::Reset()
         // all nodes owned by neutral team at beginning
         m_activeEvents[i] = BG_AB_NODE_TYPE_NEUTRAL;
 
-        sObjectMgr.SetGraveYardLinkTeam(abGraveyardIds[i], BG_AB_ZONE_MAIN, TEAM_INVALID);
+        sObjectMgr.SetGraveYardLinkTeam(abGraveyardData[i].id, BG_AB_ZONE_MAIN, TEAM_INVALID);
     }
 
     sObjectMgr.SetGraveYardLinkTeam(AB_GRAVEYARD_ALLIANCE, BG_AB_ZONE_MAIN, ALLIANCE);

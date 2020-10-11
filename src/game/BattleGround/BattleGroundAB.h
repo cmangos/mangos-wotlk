@@ -200,8 +200,31 @@ const uint32 abContestedStates[PVP_TEAM_COUNT][BG_AB_MAX_NODES] =
 const uint32 abTickIntervals[6] = {0, 12000, 9000, 6000, 3000, 1000};
 const uint32 abTickPoints[6] = {0, 10, 10, 10, 10, 30};
 
-// WorldSafeLocs ids
-const uint32 abGraveyardIds[BG_AB_MAX_NODES] = { AB_GRAVEYARD_STABLES, AB_GRAVEYARD_BLACKSMITH, AB_GRAVEYARD_FARM, AB_GRAVEYARD_LUMBER_MILL, AB_GRAVEYARD_GOLD_MINE };
+struct BasinSummonData
+{
+    uint32 id;
+    float x, y, z, o;
+};
+
+// Data used to summon spirit healers
+static const BasinSummonData abGraveyardData[] =
+{
+    {AB_GRAVEYARD_STABLES,     1200.03f, 1171.09f, -56.47f, 5.15f},
+    {AB_GRAVEYARD_BLACKSMITH,  1017.43f, 960.61f,  -42.95f, 4.88f},
+    {AB_GRAVEYARD_FARM,        833,      793,      -57.25f, 5.27f},
+    {AB_GRAVEYARD_LUMBER_MILL, 775.17f,  1206.4f,   15.79f, 1.9f},
+    {AB_GRAVEYARD_GOLD_MINE,   1207.48f, 787,      -83.36f, 5.51f},
+};
+
+// Data used to summon honorable defenders
+static const BasinSummonData abNodeData[] =
+{
+    {BG_AB_BANNER_STABLE,      1166.79f, 1200.13f, -56.7086f, 0},
+    {BG_AB_BANNER_BLACKSMITH,  977.016f, 1046.62f, -44.8092f, 0},
+    {BG_AB_BANNER_FARM,        806.182f, 874.272f, -55.9937f, 0},
+    {BG_AB_BANNER_LUMBER_MILL, 856.142f, 1148.9f,  11.1847f, 0},
+    {BG_AB_BANNER_MINE,        1146.92f, 848.178f, -110.917f, 0},
+};
 
 struct ArathiBannerTimer
 {
@@ -243,7 +266,8 @@ class BattleGroundAB : public BattleGround
 
         // Battleground event handlers
         bool HandleAreaTrigger(Player* source, uint32 trigger) override;
-        void HandlePlayerClickedOnFlag(Player* source, GameObject* target_obj) override;
+        void HandleGameObjectCreate(GameObject* go) override;
+        void HandlePlayerClickedOnFlag(Player* source, GameObject* go) override;
 
         // Achievements
         bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
@@ -266,6 +290,9 @@ class BattleGroundAB : public BattleGround
         ABNodeStatus m_nodeStatus[BG_AB_MAX_NODES];         // store the current node status
         ABNodeStatus m_prevNodeStatus[BG_AB_MAX_NODES];     // store the previous node status
         ArathiBannerTimer m_bannerTimers[BG_AB_MAX_NODES];
+
+        ObjectGuid m_spiritHealers[BG_AB_MAX_NODES];
+        ObjectGuid m_honorableDefender[BG_AB_MAX_NODES];
 
         uint8 m_capturedNodeCount[PVP_TEAM_COUNT];
         uint32 m_nodeVisualState[BG_AB_MAX_NODES];

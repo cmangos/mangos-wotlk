@@ -27,7 +27,7 @@
 #include "Globals/ObjectMgr.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 
-BattleGroundAV::BattleGroundAV(): m_honorMapComplete(0), m_repTowerDestruction(0), m_repCaptain(0), m_repBoss(0), m_repOwnedGrave(0), m_repOwnedMine(0), m_repSurviveCaptain(0), m_repSurviveTower(0)
+BattleGroundAV::BattleGroundAV(): m_honorMapComplete(0), m_repTowerDestruction(0), m_repCaptain(0), m_repBoss(0), m_repOwnedGrave(0), m_repOwnedMine(0), m_repSurviveCaptain(0), m_repSurviveTower(0), m_spiritHealersSet(false)
 {
     m_startMessageIds[BG_STARTING_EVENT_FIRST]  = 0;
     m_startMessageIds[BG_STARTING_EVENT_SECOND] = LANG_BG_AV_START_ONE_MINUTE;
@@ -173,7 +173,7 @@ void BattleGroundAV::HandleQuestComplete(uint32 questid, Player* player)
             if (m_teamQuestStatus[teamIdx][0] == 500 || m_teamQuestStatus[teamIdx][0] == 1000 || m_teamQuestStatus[teamIdx][0] == 1500)  // 25,50,75 turn ins
             {
                 DEBUG_LOG("BattleGroundAV: Quest %i completed starting with unit upgrading..", questid);
-                for (uint8 i = BG_AV_NODES_FIRSTAID_STATION; i < BG_AV_NODES_FROSTWOLF_HUT; ++i)
+                for (uint8 i = BG_AV_NODE_GY_DUN_BALDAR; i < BG_AV_NODE_GY_FROSTWOLF_KEEP; ++i)
                     if (m_nodes[i].owner == teamIdx && m_nodes[i].state == POINT_CONTROLLED)
                         PopulateNode(AVNodeIds(i));
             }
@@ -349,6 +349,26 @@ void BattleGroundAV::AddPlayer(Player* player)
     // create score and add it to map, default values are set in constructor
     BattleGroundAVScore* sc = new BattleGroundAVScore;
     m_playerScores[player->GetObjectGuid()] = sc;
+
+    // spawn initial spirit healers
+    if (!m_spiritHealersSet)
+    {
+        for (uint8 i = 0; i < BG_AV_MAX_GRAVEYARDS; ++i)
+        {
+            uint32 entry = 0;
+            if (avNodeDefaults[i].initialOwner != TEAM_INDEX_NEUTRAL)
+                entry = avNodeDefaults[i].initialOwner == TEAM_INDEX_ALLIANCE ? BG_NPC_SPIRIT_GUIDE_ALLIANCE : BG_NPC_SPIRIT_GUIDE_HORDE;
+
+            // spawn only the healers that have a default
+            if (entry)
+            {
+                if (Creature* healer = player->SummonCreature(entry, avGraveyardData[i].x, avGraveyardData[i].y, avGraveyardData[i].z, avGraveyardData[i].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    m_nodes[i].spiritHealerGuid = healer->GetObjectGuid();
+            }
+        }
+
+        m_spiritHealersSet = true;
+    }
 }
 
 void BattleGroundAV::EndBattleGround(Team winner)
@@ -478,7 +498,7 @@ void BattleGroundAV::ProcessPlayerDestroyedPoint(AVNodeIds node)
 
     if (isTower)
     {
-        uint8 tmp = node - BG_AV_NODES_DUNBALDAR_SOUTH;
+        uint8 tmp = node - BG_AV_NODE_DUNBALDAR_SOUTH;
 
         // despawn marshal (one of those guys protecting the boss)
         SpawnEvent(BG_AV_MARSHAL_A_SOUTH + tmp, 0, false);
@@ -499,6 +519,17 @@ void BattleGroundAV::ProcessPlayerDestroyedPoint(AVNodeIds node)
 
         // setup graveyard to new team
         sObjectMgr.SetGraveYardLinkTeam(avNodeDefaults[node].graveyardId, BG_AV_ZONE_MAIN, GetTeamIdByTeamIndex(ownerTeamIdx));
+
+        Creature* herald = GetSingleCreatureFromStorage(ownerTeamIdx == TEAM_INDEX_ALLIANCE ? BG_AV_NPC_STORMPIKE_HERALD : BG_AV_NPC_FROSTWOLF_HERALD);
+        if (!herald)
+        {
+            sLog.outError("BattleGroundAV: Cannot find battleground herald.");
+            return;
+        }
+
+        uint32 healerEntry = ownerTeamIdx == TEAM_INDEX_ALLIANCE ? BG_NPC_SPIRIT_GUIDE_ALLIANCE : BG_NPC_SPIRIT_GUIDE_HORDE;
+        if (Creature* healer = herald->SummonCreature(healerEntry, avGraveyardData[node].x, avGraveyardData[node].y, avGraveyardData[node].z, avGraveyardData[node].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            m_nodes[node].spiritHealerGuid = healer->GetObjectGuid();
     }
 }
 
@@ -618,7 +649,7 @@ void BattleGroundAV::ProcessPlayerDefendsPoint(Player* player, AVNodeIds node)
         return;
 
     // ToDo: improve this part; The middle graveyard should be handled directly as an assault
-    if (m_nodes[node].totalOwner == TEAM_INDEX_NEUTRAL && node == BG_AV_NODES_SNOWFALL_GRAVE)     // initial snowfall capture
+    if (m_nodes[node].totalOwner == TEAM_INDEX_NEUTRAL && node == BG_AV_NODE_GY_SNOWFALL)     // initial snowfall capture
     {
         ProcessPlayerAssaultsPoint(player, node);
         return;
@@ -648,7 +679,7 @@ void BattleGroundAV::ProcessPlayerDefendsPoint(Player* player, AVNodeIds node)
     PlaySoundToAll(soundId);
 
     // update score
-    UpdatePlayerScore(player, SCORE_GRAVEYARDS_DEFENDED, 1);
+    UpdatePlayerScore(player, scoreType, 1);
 
     // update achievements
     player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_BG_OBJECTIVE_CAPTURE, objId);
@@ -686,6 +717,10 @@ void BattleGroundAV::ProcessPlayerAssaultsPoint(Player* player, AVNodeIds node)
 
         // make graveyard invalid
         sObjectMgr.SetGraveYardLinkTeam(avNodeDefaults[node].graveyardId, BG_AV_ZONE_MAIN, TEAM_INVALID);
+
+        // despawn spirit healer
+        if (Creature* healer = GetBgMap()->GetCreature(m_nodes[node].spiritHealerGuid))
+            healer->ForcedDespawn();
     }
 
     // send yell and sound
@@ -741,21 +776,21 @@ int32 BattleGroundAV::GetNodeMessageId(AVNodeIds node) const
 {
     switch (node)
     {
-        case BG_AV_NODES_FIRSTAID_STATION:  return LANG_BG_AV_NODE_GRAVE_STORM_AID;
-        case BG_AV_NODES_DUNBALDAR_SOUTH:   return LANG_BG_AV_NODE_TOWER_DUN_S;
-        case BG_AV_NODES_DUNBALDAR_NORTH:   return LANG_BG_AV_NODE_TOWER_DUN_N;
-        case BG_AV_NODES_STORMPIKE_GRAVE:   return LANG_BG_AV_NODE_GRAVE_STORMPIKE;
-        case BG_AV_NODES_ICEWING_BUNKER:    return LANG_BG_AV_NODE_TOWER_ICEWING;
-        case BG_AV_NODES_STONEHEART_GRAVE:  return LANG_BG_AV_NODE_GRAVE_STONE;
-        case BG_AV_NODES_STONEHEART_BUNKER: return LANG_BG_AV_NODE_TOWER_STONE;
-        case BG_AV_NODES_SNOWFALL_GRAVE:    return LANG_BG_AV_NODE_GRAVE_SNOW;
-        case BG_AV_NODES_ICEBLOOD_TOWER:    return LANG_BG_AV_NODE_TOWER_ICE;
-        case BG_AV_NODES_ICEBLOOD_GRAVE:    return LANG_BG_AV_NODE_GRAVE_ICE;
-        case BG_AV_NODES_TOWER_POINT:       return LANG_BG_AV_NODE_TOWER_POINT;
-        case BG_AV_NODES_FROSTWOLF_GRAVE:   return LANG_BG_AV_NODE_GRAVE_FROST;
-        case BG_AV_NODES_FROSTWOLF_ETOWER:  return LANG_BG_AV_NODE_TOWER_FROST_E;
-        case BG_AV_NODES_FROSTWOLF_WTOWER:  return LANG_BG_AV_NODE_TOWER_FROST_W;
-        case BG_AV_NODES_FROSTWOLF_HUT:     return LANG_BG_AV_NODE_GRAVE_FROST_HUT;
+        case BG_AV_NODE_GY_DUN_BALDAR:     return LANG_BG_AV_NODE_GRAVE_STORM_AID;
+        case BG_AV_NODE_GY_STORMPIKE:      return LANG_BG_AV_NODE_GRAVE_STORMPIKE;
+        case BG_AV_NODE_GY_STONEHEARTH:    return LANG_BG_AV_NODE_GRAVE_STONE;
+        case BG_AV_NODE_GY_SNOWFALL:       return LANG_BG_AV_NODE_GRAVE_SNOW;
+        case BG_AV_NODE_GY_ICEBLOOD:       return LANG_BG_AV_NODE_GRAVE_ICE;
+        case BG_AV_NODE_GY_FROSTWOLF:      return LANG_BG_AV_NODE_GRAVE_FROST;
+        case BG_AV_NODE_GY_FROSTWOLF_KEEP: return LANG_BG_AV_NODE_GRAVE_FROST_HUT;
+        case BG_AV_NODE_DUNBALDAR_SOUTH:   return LANG_BG_AV_NODE_TOWER_DUN_S;
+        case BG_AV_NODE_DUNBALDAR_NORTH:   return LANG_BG_AV_NODE_TOWER_DUN_N;
+        case BG_AV_NODE_ICEWING_BUNKER:    return LANG_BG_AV_NODE_TOWER_ICEWING;
+        case BG_AV_NODE_STONEHEART_BUNKER: return LANG_BG_AV_NODE_TOWER_STONE;
+        case BG_AV_NODE_ICEBLOOD_TOWER:    return LANG_BG_AV_NODE_TOWER_ICE;
+        case BG_AV_NODE_TOWER_POINT:       return LANG_BG_AV_NODE_TOWER_POINT;
+        case BG_AV_NODE_FROSTWOLF_EAST:    return LANG_BG_AV_NODE_TOWER_FROST_E;
+        case BG_AV_NODE_FROSTWOLF_WEST:    return LANG_BG_AV_NODE_TOWER_FROST_W;
     }
 
     return 0;
@@ -873,7 +908,7 @@ void BattleGroundAV::Reset()
     m_activeEvents[BG_AV_BOSS_H] = 0;
 
     for (uint8 i = 0; i < BG_AV_MAX_NODES; ++i)  // towers
-        m_activeEvents[BG_AV_MARSHAL_A_SOUTH + i - BG_AV_NODES_DUNBALDAR_SOUTH] = 0;
+        m_activeEvents[BG_AV_MARSHAL_A_SOUTH + i - BG_AV_NODE_DUNBALDAR_SOUTH] = 0;
 
     // initialize all nodes
     for (uint8 i = 0; i < BG_AV_MAX_NODES; ++i)
@@ -882,6 +917,8 @@ void BattleGroundAV::Reset()
     // setup graveyards
     sObjectMgr.SetGraveYardLinkTeam(BG_AV_GRAVE_MAIN_ALLIANCE, BG_AV_ZONE_MAIN, ALLIANCE);
     sObjectMgr.SetGraveYardLinkTeam(BG_AV_GRAVE_MAIN_HORDE, BG_AV_ZONE_MAIN, HORDE);
+
+    m_spiritHealersSet = false;
 }
 
 // Handle battleground yells

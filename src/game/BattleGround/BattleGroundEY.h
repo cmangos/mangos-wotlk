@@ -217,8 +217,32 @@ enum EYFlagState
 static const uint8 eyTickPoints[EY_MAX_NODES] = {1, 2, 5, 10};
 static const uint32 eyFlagPoints[EY_MAX_NODES] = {75, 85, 100, 500};
 
-static const uint32 eyGraveyards[EY_MAX_NODES] = {GRAVEYARD_FEL_REAVER_RUINS, GRAVEYARD_BLOOD_ELF_TOWER, GRAVEYARD_DRAENEI_RUINS, GRAVEYARD_MAGE_TOWER};
 static const uint32 eyTriggers[EY_MAX_NODES] = {AREATRIGGER_FEL_REAVER_RUINS_BUFF, AREATRIGGER_BLOOD_ELF_TOWER_BUFF, AREATRIGGER_DRAENEI_RUINS_BUFF, AREATRIGGER_MAGE_TOWER_BUFF};
+
+struct EyeSummonData
+{
+    uint32 id;
+    float x, y, z, o;
+};
+
+// Data used to summon spirit healers
+// Note: the orientation has to be confirmed
+static const EyeSummonData eyeGraveyardData[] =
+{
+    {GRAVEYARD_FEL_REAVER_RUINS, 2013.06f, 1677.24f, 1182.13f, 3.14159f},
+    {GRAVEYARD_BLOOD_ELF_TOWER,  2012.4f,  1455.41f, 1172.2f,  3.14159f},
+    {GRAVEYARD_DRAENEI_RUINS,    2351.78f, 1455.4f,  1185.33f, 3.14159f},
+    {GRAVEYARD_MAGE_TOWER,       2355.3f,  1683.71f, 1173.15f, 3.14159f},
+};
+
+// Data used to summon honorable defenders
+static const EyeSummonData eyeTowerdData[] =
+{
+    {NODE_FEL_REAVER_RUINS, 2024.6f,  1742.82f, 1195.16f, 0},
+    {NODE_BLOOD_ELF_TOWER,  2050.49f, 1372.24f, 1194.56f, 0},
+    {NODE_DRAENEI_RUINS,    2301.01f, 1386.93f, 1197.18f, 0},
+    {NODE_MAGE_TOWER,       2282.12f, 1760.01f, 1189.71f, 0},
+};
 
 struct EYTowerEvent
 {
@@ -299,7 +323,7 @@ class BattleGroundEY : public BattleGround
         ObjectGuid const& GetFlagCarrierGuid() const { return m_flagCarrier; }
 
         // Achievements
-        bool CheckAchievementCriteriaMeet(uint32 criteria_id, Player const* source, Unit const* target, uint32 miscvalue1) override;
+        bool CheckAchievementCriteriaMeet(uint32 criteriaId, Player const* source, Unit const* target, uint32 miscvalue1) override;
 
     private:
         // Battleground flag functions
@@ -334,6 +358,8 @@ class BattleGroundEY : public BattleGround
 
         Team m_towerOwner[EY_MAX_NODES];
         ObjectGuid m_towers[EY_MAX_NODES];
+        ObjectGuid m_spiritHealers[EY_MAX_NODES];
+        ObjectGuid m_honorableDefender[EY_MAX_NODES];
 
         uint32 m_honorTicks;
         uint32 m_honorScoreTicks[PVP_TEAM_COUNT];

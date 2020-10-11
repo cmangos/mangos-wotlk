@@ -35,13 +35,13 @@ enum AVGenericVariables
 {
     BG_AV_MAX_MINES                     = 2,
     BG_AV_MAX_GRAVETYPES                = 4,
-    BG_AV_MAX_GRAVEYARDS                = 9,
+    BG_AV_MAX_GRAVEYARDS                = 7,                // max capturable graveyards; doesn't count main faction graveyards
     BG_AV_MAX_STATES                    = 2,
     BG_AV_MAX_NODES                     = 15,
     BG_AV_MAX_TOWERS_PER_TEAM           = 4,
     BG_AV_TEAMS_COUNT                   = PVP_TEAM_COUNT + 1,
 
-    BG_AV_MAX_NODE_DISTANCE             = 25,              // distance in which players are still counted in range of a banner (for alliance towers this is calculated from the center of the tower)
+    BG_AV_MAX_NODE_DISTANCE             = 25,               // distance in which players are still counted in range of a banner (for alliance towers this is calculated from the center of the tower)
 
     BG_AV_SCORE_INITIAL_POINTS          = 600,
     BG_AV_SCORE_NEAR_LOSE               = 120,
@@ -238,25 +238,25 @@ enum AVKillCredits
 
 enum AVNodeIds
 {
-    BG_AV_NODES_FIRSTAID_STATION        = 0,
-    BG_AV_NODES_STORMPIKE_GRAVE         = 1,
-    BG_AV_NODES_STONEHEART_GRAVE        = 2,
+    BG_AV_NODE_GY_DUN_BALDAR            = 0,
+    BG_AV_NODE_GY_STORMPIKE             = 1,
+    BG_AV_NODE_GY_STONEHEARTH           = 2,
 
-    BG_AV_NODES_SNOWFALL_GRAVE          = 3,
+    BG_AV_NODE_GY_SNOWFALL              = 3,
 
-    BG_AV_NODES_ICEBLOOD_GRAVE          = 4,
-    BG_AV_NODES_FROSTWOLF_GRAVE         = 5,
-    BG_AV_NODES_FROSTWOLF_HUT           = 6,
+    BG_AV_NODE_GY_ICEBLOOD              = 4,
+    BG_AV_NODE_GY_FROSTWOLF             = 5,
+    BG_AV_NODE_GY_FROSTWOLF_KEEP        = 6,
 
-    BG_AV_NODES_DUNBALDAR_SOUTH         = 7,
-    BG_AV_NODES_DUNBALDAR_NORTH         = 8,
-    BG_AV_NODES_ICEWING_BUNKER          = 9,
-    BG_AV_NODES_STONEHEART_BUNKER       = 10,
+    BG_AV_NODE_DUNBALDAR_SOUTH          = 7,
+    BG_AV_NODE_DUNBALDAR_NORTH          = 8,
+    BG_AV_NODE_ICEWING_BUNKER           = 9,
+    BG_AV_NODE_STONEHEART_BUNKER        = 10,
 
-    BG_AV_NODES_ICEBLOOD_TOWER          = 11,
-    BG_AV_NODES_TOWER_POINT             = 12,
-    BG_AV_NODES_FROSTWOLF_ETOWER        = 13,
-    BG_AV_NODES_FROSTWOLF_WTOWER        = 14,
+    BG_AV_NODE_ICEBLOOD_TOWER           = 11,
+    BG_AV_NODE_TOWER_POINT              = 12,
+    BG_AV_NODE_FROSTWOLF_EAST           = 13,
+    BG_AV_NODE_FROSTWOLF_WEST           = 14,
 };
 
 // for nodeevents we will use event1=node
@@ -317,17 +317,17 @@ enum AVEventTypes
 
 enum AVGraveyards
 {
-    BG_AV_GRAVE_STORM_AID               = 751,
-    BG_AV_GRAVE_STORM_GRAVE             = 689,
-    BG_AV_GRAVE_STONE_GRAVE             = 729,
+    BG_AV_GY_DUN_BALDAR                 = 751,              // alliance side graveyards
+    BG_AV_GY_STORMPIKE                  = 689,
+    BG_AV_GY_STONEHEARTH                = 729,
 
-    BG_AV_GRAVE_SNOWFALL                = 169,
+    BG_AV_GY_SNOWFALL                   = 169,              // middle neutral graveyard
 
-    BG_AV_GRAVE_ICE_GRAVE               = 749,
-    BG_AV_GRAVE_FROSTWOLF               = 690,
-    BG_AV_GRAVE_FROST_HUT               = 750,
+    BG_AV_GY_ICEBLOOD                   = 749,              // hode side graveyards
+    BG_AV_GY_FROSTWOLF                  = 690,
+    BG_AV_GY_FROSTWOLF_KEEP             = 750,
 
-    BG_AV_GRAVE_MAIN_ALLIANCE           = 611,
+    BG_AV_GRAVE_MAIN_ALLIANCE           = 611,              // main team graveyards
     BG_AV_GRAVE_MAIN_HORDE              = 610,
 
     BG_AV_ZONE_MAIN                     = 2597,
@@ -473,17 +473,23 @@ enum AVQuestIds
     BG_AV_QUEST_EMPTY_STABLES_H         = 7001,
 };
 
-const uint32 avGraveyardEntries[BG_AV_MAX_GRAVEYARDS] =
+struct AlteracSummonData
 {
-    BG_AV_GRAVE_STORM_AID,
-    BG_AV_GRAVE_STORM_GRAVE,
-    BG_AV_GRAVE_STONE_GRAVE,
-    BG_AV_GRAVE_SNOWFALL,
-    BG_AV_GRAVE_ICE_GRAVE,
-    BG_AV_GRAVE_FROSTWOLF,
-    BG_AV_GRAVE_FROST_HUT,
-    BG_AV_GRAVE_MAIN_ALLIANCE,
-    BG_AV_GRAVE_MAIN_HORDE
+    uint32 id;
+    float x, y, z, o;
+};
+
+// Data used to summon spirit healers
+// Note: the data has to be confirmed
+static const AlteracSummonData avGraveyardData[BG_AV_MAX_GRAVEYARDS] =
+{
+    {BG_AV_GY_DUN_BALDAR,      643,       44,       69.7402f, -0.001854f},
+    {BG_AV_GY_STORMPIKE,       676,      -374,      30,       -0.001854f},
+    {BG_AV_GY_STONEHEARTH,     73.4178f, -496.433f, 48.7319f, -0.001854f},
+    {BG_AV_GY_SNOWFALL,       -157.409f,  31.2063f, 77.0506f, -0.001854f},
+    {BG_AV_GY_ICEBLOOD,       -531.218f, -405.231f, 49.5514f, -0.001854f},
+    {BG_AV_GY_FROSTWOLF,      -1090.48f, -253.309f, 57.6724f, -0.001854f},
+    {BG_AV_GY_FROSTWOLF_KEEP, -1496.07f, -333.338f, 101.135f, -0.001854f},
 };
 
 // alliance_control horde_control neutral_control
@@ -542,15 +548,15 @@ struct AlteracNodeData
 
 const AlteracNodeData avNodeDefaults[BG_AV_MAX_NODES] =
 {
-    {BG_AV_STATE_GY_DUN_BALDAR_A,  TEAM_INDEX_ALLIANCE, BG_AV_GRAVE_STORM_AID},
-    {BG_AV_STATE_GY_STORMPIKE_A,   TEAM_INDEX_ALLIANCE, BG_AV_GRAVE_STORM_GRAVE},
-    {BG_AV_STATE_GY_STONEHEARTH_A, TEAM_INDEX_ALLIANCE, BG_AV_GRAVE_STONE_GRAVE},
+    {BG_AV_STATE_GY_DUN_BALDAR_A,  TEAM_INDEX_ALLIANCE, BG_AV_GY_DUN_BALDAR},
+    {BG_AV_STATE_GY_STORMPIKE_A,   TEAM_INDEX_ALLIANCE, BG_AV_GY_STORMPIKE},
+    {BG_AV_STATE_GY_STONEHEARTH_A, TEAM_INDEX_ALLIANCE, BG_AV_GY_STONEHEARTH},
 
-    {BG_AV_STATE_GY_SNOWFALL_N,    TEAM_INDEX_NEUTRAL, BG_AV_GRAVE_SNOWFALL},
+    {BG_AV_STATE_GY_SNOWFALL_N,    TEAM_INDEX_NEUTRAL, BG_AV_GY_SNOWFALL},
 
-    {BG_AV_STATE_GY_ICEBLOOD_H,    TEAM_INDEX_HORDE, BG_AV_GRAVE_ICE_GRAVE},
-    {BG_AV_STATE_GY_FROSTWOLF_H,   TEAM_INDEX_HORDE, BG_AV_GRAVE_FROSTWOLF},
-    {BG_AV_STATE_GY_FROST_KEEP_H,  TEAM_INDEX_HORDE, BG_AV_GRAVE_FROST_HUT},
+    {BG_AV_STATE_GY_ICEBLOOD_H,    TEAM_INDEX_HORDE, BG_AV_GY_ICEBLOOD},
+    {BG_AV_STATE_GY_FROSTWOLF_H,   TEAM_INDEX_HORDE, BG_AV_GY_FROSTWOLF},
+    {BG_AV_STATE_GY_FROST_KEEP_H,  TEAM_INDEX_HORDE, BG_AV_GY_FROSTWOLF_KEEP},
 
     {BG_AV_STATE_SOUTH_BUNKER_A,   TEAM_INDEX_ALLIANCE, 0},
     {BG_AV_STATE_NORTH_BUNKER_A,   TEAM_INDEX_ALLIANCE, 0},
@@ -571,6 +577,8 @@ struct AVNodeInfo
 
     AVStates state;
     AVStates prevState;
+
+    ObjectGuid spiritHealerGuid;
 
     uint32 worldState;
     uint32 timer;
@@ -671,6 +679,7 @@ class BattleGroundAV : public BattleGround
         uint8 m_enemyTowersDestroyed[PVP_TEAM_COUNT];
 
         bool m_wasInformedNearLose[PVP_TEAM_COUNT];
+        bool m_spiritHealersSet;
 
         uint32 m_honorMapComplete;
         uint32 m_repTowerDestruction;
