@@ -319,8 +319,8 @@ struct boss_lady_vashjAI : public RangedCombatAI
             uint32 randomPath = urand(1, PATH_ID_COUNT); // 1-3
             summoned->StopMoving();
             summoned->GetMotionMaster()->Clear(false, true);
-            summoned->GetMotionMaster()->MoveWaypoint(randomPath);
             summoned->SetWalk(false);
+            summoned->GetMotionMaster()->MoveWaypoint(randomPath);
         }
     }
 
