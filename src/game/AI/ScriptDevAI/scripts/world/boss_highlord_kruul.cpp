@@ -418,8 +418,9 @@ void AddSC_boss_highlord_kruul()
     pNewScript->GetAI = &GetAI_npc_infernal_hound;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
+    // Script not use
+    /*pNewScript = new Script;
     pNewScript->Name = "go_infernaling_summoner";
     pNewScript->GetGameObjectAI = &GetAI_go_infernaling_summoner;
-    pNewScript->RegisterSelf();
+    pNewScript->RegisterSelf();*/
 }
