@@ -47,6 +47,7 @@ enum
 
     // spell used by eagles
     SPELL_EAGLE_SWOOP       = 44732,
+    SOUND_EAGLE_SWOOP       = 12196,
 
     NPC_SOARING_EAGLE       = 24858,
     MAX_EAGLE_COUNT         = 8,
@@ -351,7 +352,10 @@ struct mob_soaring_eagleAI : public ScriptedAI
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(target, SPELL_EAGLE_SWOOP) == CAST_OK)
+                    {
+                        DoPlaySoundToSet(m_creature, SOUND_EAGLE_SWOOP);
                         m_uiEagleSwoopTimer = 0;
+                    }
             }
             else
                 m_uiEagleSwoopTimer -= diff;
