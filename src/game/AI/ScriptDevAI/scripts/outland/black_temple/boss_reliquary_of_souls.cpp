@@ -279,6 +279,9 @@ struct essence_base_AI : public ScriptedAI, public CombatActions
         AddCustomAction(ESSENCE_GENERIC_ACTION_ATTACK, 3500u, [&]()
         {
             m_creature->SetInCombatWithZone();
+            AttackClosestEnemy();
+            if (!m_creature->GetVictim())
+                JustReachedHome();
         });
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
             {
