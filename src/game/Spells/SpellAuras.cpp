@@ -5432,9 +5432,6 @@ void Aura::HandleModStealth(bool apply, bool Real)
                 }
             }
         }
-
-        if (GetId() == 29448) // Moroes Vanish
-            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, target);
     }
 }
 

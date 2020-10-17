@@ -93,6 +93,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (29883,'spell_blink_arcane_anomaly'),
 (29907,'spell_astral_bite'),
 (29690,'spell_inebriate_removal'),
+(29448,'spell_moroes_vanish'),
 (30115,'spell_sacrifice'),
 (31702,'spell_someone_grab_me'),
 (31703,'spell_magnetic_pull'),

@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "karazhan.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -287,10 +288,21 @@ struct boss_moroesAI : public CombatAI
     }
 };
 
+struct MoroesVanish : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            aura->GetTarget()->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, aura->GetTarget(), aura->GetTarget());
+    }
+};
+
 void AddSC_boss_moroes()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_moroes";
     pNewScript->GetAI = &GetNewAIInstance<boss_moroesAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<MoroesVanish>("spell_moroes_vanish");
 }
