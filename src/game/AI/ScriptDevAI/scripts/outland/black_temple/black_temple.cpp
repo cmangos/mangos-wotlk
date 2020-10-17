@@ -180,6 +180,15 @@ void instance_black_temple::OnCreatureRespawn(Creature* creature)
             if (m_auiEncounter[TYPE_SHADE] == DONE)
                 creature->setFaction(FACTION_ASHTONGUE_FRIENDLY);
             break;
+        case NPC_ANGERED_SOUL_FRAGMENT:
+        case NPC_SUFFERING_SOUL_FRAGMENT:
+        case NPC_HUNGERING_SOUL_FRAGMENT:
+            if (GetData(NPC_RELIQUARY_OF_SOULS) == DONE)
+            {
+                creature->SetRespawnDelay(time(nullptr) + 7 * DAY);
+                creature->ForcedDespawn();
+            }
+            break;
     }
 }
 
@@ -326,17 +335,6 @@ void instance_black_temple::SetData(uint32 type, uint32 data)
                         return;
                     }
                 }
-                for (ObjectGuid guid : m_soulFragments)
-                {
-                    if (Creature* soul = instance->GetCreature(guid))
-                    {
-                        if (!soul->IsAlive())
-                        {
-                            soul->SetRespawnDelay(time(nullptr) + 7 * DAY);
-                            soul->SaveRespawnTime();
-                        }
-                    }
-                }
             }
             if (data == DONE || data == FAIL)
                 if (Creature* trigger = GetSingleCreatureFromStorage(NPC_RELIQUARY_COMBAT_TRIGGER))
@@ -347,6 +345,17 @@ void instance_black_temple::SetData(uint32 type, uint32 data)
                     if (Creature* soul = instance->GetCreature(guid))
                         soul->ForcedDespawn();
                 DoOpenPreMotherDoor();
+            }
+            if (data == FAIL)
+            {
+                for (ObjectGuid guid : m_soulFragments)
+                {
+                    if (Creature* soul = instance->GetCreature(guid))
+                    {
+                        soul->SetRespawnDelay(15);
+                        soul->Respawn();
+                    }
+                }
             }
             break;
         case TYPE_SHAHRAZ:
