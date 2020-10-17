@@ -1255,6 +1255,16 @@ UnitAI* GetAI_npc_minion_of_terokk(Creature* pCreature)
     return new npc_minion_of_terokkAI(pCreature);
 }
 
+struct ShadowyDisguise : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!apply)
+            target->RemoveAurasDueToSpell(target->getGender() == GENDER_MALE ? 38080 : 38081);
+    }
+};
+
 void AddSC_terokkar_forest()
 {
     Script* pNewScript = new Script;
@@ -1316,4 +1326,6 @@ void AddSC_terokkar_forest()
     pNewScript->Name = "npc_minion_of_terokk";
     pNewScript->GetAI = &GetAI_npc_minion_of_terokk;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<ShadowyDisguise>("spell_shadowy_disguise");
 }

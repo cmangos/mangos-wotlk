@@ -115,6 +115,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (32264,'spell_shirrak_inhibit_magic'),
 (33332,'spell_suppression_blast'),
 (32830,'spell_auchenai_possess'),
+(32756,'spell_shadowy_disguise'),
 (36557,'spell_cursed_scarab_periodic'),
 (36560,'spell_cursed_scarab_despawn_periodic'),
 (34874,'spell_despawn_underbog_mushrooms'),
