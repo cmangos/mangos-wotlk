@@ -6910,9 +6910,6 @@ void Aura::HandleAuraModDispelResist(bool apply, bool Real)
 {
     if (!Real || !apply)
         return;
-
-    if (GetId() == 33206)
-        GetTarget()->CastSpell(GetTarget(), 44416, TRIGGERED_OLD_TRIGGERED, nullptr, this, GetCasterGuid());
 }
 
 void Aura::HandleModSpellDamagePercentFromAttackPower(bool /*apply*/, bool /*Real*/)

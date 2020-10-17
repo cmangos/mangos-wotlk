@@ -480,8 +480,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (10060,'spell_power_infusion'),
 (27827,'spell_spirit_of_redemption_heal'),
-(34433,'spell_shadowfiend'),
-(33076,'spell_prayer_of_mending');
+(33076,'spell_prayer_of_mending'),
+(33206,'spell_pain_suppression'),
+(34433,'spell_shadowfiend');
 
 -- Paladin
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

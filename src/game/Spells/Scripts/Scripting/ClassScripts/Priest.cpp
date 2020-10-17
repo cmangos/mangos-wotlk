@@ -97,11 +97,26 @@ struct PrayerOfMending : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_PAIN_SUPPRESSION_THREAT_REDUCTION = 44416,
+};
+
+struct PainSuppression : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->CastSpell(nullptr, SPELL_PAIN_SUPPRESSION_THREAT_REDUCTION, TRIGGERED_OLD_TRIGGERED, nullptr, aura, aura->GetCasterGuid());
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
     RegisterSpellScript<ShadowWordDeath>("spell_shadow_word_death");
     RegisterSpellScript<SpiritOfRedemptionHeal>("spell_spirit_of_redemption_heal");
     RegisterSpellScript<PrayerOfMending>("spell_prayer_of_mending");
+    RegisterAuraScript<PainSuppression>("spell_pain_suppression");
     RegisterSpellScript<Shadowfiend>("spell_shadowfiend");
 }
