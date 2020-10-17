@@ -5566,10 +5566,6 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
     }
 
     target->SetImmobilizedState(apply);
-
-    if (!apply)
-        if (GetSpellProto()->Id == 41476) // Vanish - Veras Darkshadow
-            target->CastSpell(nullptr, 41479, TRIGGERED_NONE);
 }
 
 void Aura::HandleAuraModSilence(bool apply, bool Real)
