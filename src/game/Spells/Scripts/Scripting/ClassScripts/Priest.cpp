@@ -107,7 +107,7 @@ struct PainSuppression : public AuraScript
     void OnApply(Aura* aura, bool apply) const override
     {
         if (apply)
-            aura->GetTarget()->CastSpell(nullptr, SPELL_PAIN_SUPPRESSION_THREAT_REDUCTION, TRIGGERED_OLD_TRIGGERED, nullptr, aura, aura->GetCasterGuid());
+            aura->GetTarget()->CastSpell(aura->GetTarget(), SPELL_PAIN_SUPPRESSION_THREAT_REDUCTION, TRIGGERED_OLD_TRIGGERED, nullptr, aura, aura->GetCasterGuid());
     }
 };
 
