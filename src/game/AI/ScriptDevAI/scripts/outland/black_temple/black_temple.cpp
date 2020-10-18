@@ -51,6 +51,13 @@ void instance_black_temple::OnPlayerEnter(Player* /*pPlayer*/)
     DoTeleportAkamaIfCan();
 }
 
+void instance_black_temple::OnPlayerResurrect(Player* player)
+{
+    if (GetData(TYPE_RELIQUIARY) == IN_PROGRESS)
+        if (Creature* trigger = GetSingleCreatureFromStorage(NPC_RELIQUARY_COMBAT_TRIGGER))
+            trigger->EngageInCombatWith(player);
+}
+
 bool instance_black_temple::IsEncounterInProgress() const
 {
     for (uint32 i : m_auiEncounter)
@@ -328,7 +335,7 @@ void instance_black_temple::SetData(uint32 type, uint32 data)
             {
                 if (Creature* trigger = GetSingleCreatureFromStorage(NPC_RELIQUARY_COMBAT_TRIGGER))
                 {
-                    trigger->SetInCombatWithZone();
+                    trigger->SetInCombatWithZone(false);
                     if (!trigger->IsInCombat())
                     {
                         SetData(TYPE_RELIQUIARY, FAIL);

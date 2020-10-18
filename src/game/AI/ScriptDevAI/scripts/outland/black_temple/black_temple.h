@@ -109,6 +109,7 @@ class instance_black_temple : public ScriptedInstance
         bool IsEncounterInProgress() const override;
 
         void OnPlayerEnter(Player* player) override;
+        void OnPlayerResurrect(Player* player) override;
         void OnCreatureCreate(Creature* creature) override;
         void OnCreatureRespawn(Creature* creature) override;
         void OnObjectCreate(GameObject* go) override;
