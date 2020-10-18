@@ -342,8 +342,13 @@ void instance_black_temple::SetData(uint32 type, uint32 data)
             if (data == DONE)
             {
                 for (ObjectGuid guid : m_soulFragments)
+                {
                     if (Creature* soul = instance->GetCreature(guid))
+                    {
+                        soul->SetRespawnDelay(time(nullptr) + 7 * DAY);
                         soul->ForcedDespawn();
+                    }
+                }
                 DoOpenPreMotherDoor();
             }
             if (data == FAIL)
