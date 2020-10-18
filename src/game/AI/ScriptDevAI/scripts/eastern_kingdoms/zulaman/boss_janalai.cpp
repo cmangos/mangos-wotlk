@@ -78,8 +78,8 @@ enum
     PATH_ID_RIGHT_SHORT             = 3,
     PATH_ID_LEFT_SHORT              = 4,
 
-    RIGHT_LAST_POINT                = 2,
-    LEFT_LAST_POINT                 = 2,
+    RIGHT_LAST_POINT                = 3,
+    LEFT_LAST_POINT                 = 3,
     SHORT_LAST_POINT                = 1,
 };
 
