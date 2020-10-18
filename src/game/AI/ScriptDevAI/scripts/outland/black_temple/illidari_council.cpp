@@ -709,12 +709,12 @@ void AddSC_boss_illidari_council()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "mob_illidari_council";
-    pNewScript->GetAI = &GetNewAIInstance<mob_blood_elf_council_voice_triggerAI>;
+    pNewScript->GetAI = &GetNewAIInstance<mob_illidari_councilAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_blood_elf_council_voice_trigger";
-    pNewScript->GetAI = &GetNewAIInstance<mob_illidari_councilAI>;
+    pNewScript->GetAI = &GetNewAIInstance<mob_blood_elf_council_voice_triggerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
