@@ -529,6 +529,12 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             m_instance->SetData(TYPE_ILLIDAN, FAIL);
     }
 
+    void JustRespawned() override
+    {
+        CombatAI::JustRespawned();
+        DisableDialogue();
+    }
+
     void CorpseRemoved(uint32& respawnDelay) override
     {
         // Respawn after 10 seconds
