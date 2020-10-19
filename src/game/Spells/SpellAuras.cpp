@@ -6135,7 +6135,9 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool /*Real*/)
                 target->CastSpell(nullptr, 39831, TRIGGERED_NONE);
                 target->CastSpell(nullptr, 39832, TRIGGERED_NONE);
                 break;
-            case 41194:                                     // Whirlwind
+            case 41194:                                     // Whirlwind - Bonechewer Blade Fury 23235
+            case 41399:                                     // Whirlwind - Image of Dementia 23436
+            case 46270:                                     // Whirlwind - Priestess of Torment 25509
                 if (Unit* caster = GetCaster())
                 {
                     ThreatList const& threatList = caster->getThreatManager().getThreatList();
