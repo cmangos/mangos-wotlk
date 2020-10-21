@@ -274,10 +274,11 @@ struct essence_base_AI : public ScriptedAI, public CombatActions
     essence_base_AI(Creature* creature, uint32 maxActions) : ScriptedAI(creature), CombatActions(maxActions), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         SetDeathPrevention(true);
-        SetReactState(REACT_DEFENSIVE);
+        SetReactState(REACT_PASSIVE);
         m_bIsPhaseFinished = false;
         AddCustomAction(ESSENCE_GENERIC_ACTION_ATTACK, 3500u, [&]()
         {
+            SetReactState(REACT_AGGRESSIVE);
             m_creature->SetInCombatWithZone();
             AttackClosestEnemy();
             if (!m_creature->GetVictim())
