@@ -652,7 +652,7 @@ class World
 
         void UpdateSessionExpansion(uint8 expansion);
 
-        auto& GetMessager() { return m_messager; }
+        Messager<World>& GetMessager() { return m_messager; }
 
         void IncrementOpcodeCounter(uint32 opcodeId); // thread safe due to atomics
     protected:
