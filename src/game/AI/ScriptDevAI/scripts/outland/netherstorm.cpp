@@ -1477,7 +1477,7 @@ struct npc_zeppitAI : public ScriptedPetAI
             if (m_creature->IsWithinDistInMap(pVictim, 10.0f))
             {
                 DoScriptText(EMOTE_GATHER_BLOOD, m_creature);
-                m_creature->CastSpell(m_creature, SPELL_GATHER_WARP_BLOOD, TRIGGERED_NONE);
+                m_creature->CastSpell(nullptr, SPELL_GATHER_WARP_BLOOD, TRIGGERED_NONE);
             }
         }
     }
