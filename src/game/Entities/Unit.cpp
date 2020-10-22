@@ -629,6 +629,9 @@ void Unit::SendMoveRoot(bool state, bool/* broadcastOnly*/)
             m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT);
     }
 
+    if (!IsInWorld())
+        return;
+
     const PackedGuid &guid = GetPackGUID();
     // Wrath+ spline root: when unit is currently not controlled by a player
     if (!client)
