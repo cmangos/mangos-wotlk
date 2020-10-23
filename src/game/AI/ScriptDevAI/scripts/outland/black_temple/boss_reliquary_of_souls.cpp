@@ -247,6 +247,10 @@ struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI, public TimerMan
         m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE_VISUAL);
         ResetTimer(RELIQUARY_ACTION_SUMMON_SOUL, 1000);
         ResetTimer(RELIQUARY_ACTION_SUBMERGE, 41000);
+
+        if (m_instance)
+            if (Creature* trigger = m_instance->GetSingleCreatureFromStorage(NPC_RELIQUARY_COMBAT_TRIGGER))
+                trigger->SetInCombatWithZone();
     }
 
     // Wrapper to count the dead spirits

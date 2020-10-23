@@ -335,6 +335,7 @@ void instance_black_temple::SetData(uint32 type, uint32 data)
             {
                 if (Creature* trigger = GetSingleCreatureFromStorage(NPC_RELIQUARY_COMBAT_TRIGGER))
                 {
+                    trigger->SetActiveObjectState(true);
                     trigger->SetInCombatWithZone(false);
                     if (!trigger->IsInCombat())
                     {
@@ -344,8 +345,13 @@ void instance_black_temple::SetData(uint32 type, uint32 data)
                 }
             }
             if (data == DONE || data == FAIL)
+            {
                 if (Creature* trigger = GetSingleCreatureFromStorage(NPC_RELIQUARY_COMBAT_TRIGGER))
+                {
                     trigger->CombatStop();
+                    trigger->SetActiveObjectState(false);
+                }
+            }
             if (data == DONE)
             {
                 for (ObjectGuid guid : m_soulFragments)
