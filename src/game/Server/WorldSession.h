@@ -274,7 +274,7 @@ class WorldSession
         friend class CharacterHandler;
 
     public:
-        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale);
+        WorldSession(uint32 id, WorldSocket* sock, AccountTypes sec, uint8 expansion, time_t mute_time, LocaleConstant locale, uint32 recruitingFriend, bool isARecruiter);
         ~WorldSession();
 
         // Set this session have no attached socket but keep it alive for short period of time to permit a possible reconnection
@@ -478,6 +478,10 @@ class WorldSession
 
         uint32 GetOrderCounter() const { return m_orderCounter; }
         void IncrementOrderCounter() { ++m_orderCounter; }
+
+        // Recruit-A-Friend Handling
+        uint32 GetRecruitingFriendId() const { return m_recruitingFriendId; }
+        bool IsARecruiter() const { return m_isRecruiter; }
 
         // Time Synchronisation
         void ResetTimeSync();
@@ -979,6 +983,11 @@ class WorldSession
         void HandleQueryQuestsCompletedOpcode(WorldPacket& recv_data);
         void HandleQuestPOIQueryOpcode(WorldPacket& recv_data);
 
+        // Raf
+        void HandleGrantLevel(WorldPacket& recv_data);
+        void HandleReferAFriend(WorldPacket& recv_data);
+        void HandleAcceptLevelGrant(WorldPacket& recv_data);
+
         // Movement
         void SynchronizeMovement(MovementInfo& movementInfo);
 
@@ -1044,6 +1053,10 @@ class WorldSession
         std::map<uint32, uint32> m_pendingTimeSyncRequests; // key: counter. value: server time when packet with that counter was sent.
         uint32 m_timeSyncNextCounter;
         uint32 m_timeSyncTimer;
+
+        // Recruit-A-Friend
+        uint32 m_recruitingFriendId;
+        bool m_isRecruiter;
 
         // Thread safety mechanisms
         std::mutex m_recvQueueLock;

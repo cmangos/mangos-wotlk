@@ -527,8 +527,26 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
     }
     else
     {
+        uint32 otherRaf = 0;
+        bool isRecruiter = false;
+        {
+            std::unique_ptr<QueryResult> result(LoginDatabase.PQuery("SELECT referrer, referred FROM account_raf WHERE referrer=%u OR referred=%u", id, id));
+            if (result)
+            {
+                Field* fields = result->Fetch();
+                uint32 recruiter = fields[0].GetUInt32();
+                if (id == recruiter)
+                {
+                    isRecruiter = true;
+                    otherRaf = fields[1].GetUInt32();
+                }
+                else
+                    otherRaf = recruiter;
+            }
+        }
+
         // new session
-        if (!(m_session = new WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale)))
+        if (!(m_session = new WorldSession(id, this, AccountTypes(security), expansion, mutetime, locale, otherRaf, isRecruiter)))
             return false;
 
         m_session->LoadGlobalAccountData();

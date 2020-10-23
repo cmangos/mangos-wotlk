@@ -6351,6 +6351,16 @@ SpellCastResult Spell::CheckCast(bool strict)
                     return SPELL_FAILED_BAD_TARGETS;
                 break;
             }
+            case SPELL_EFFECT_SUMMON_RAF_FRIEND:
+            {
+                if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                Player* caster = static_cast<Player*>(m_caster);
+                if (!caster->GetSession()->GetRecruitingFriendId())
+                    return SPELL_FAILED_BAD_TARGETS;
+                break;
+            }
             default: break;
         }
     }

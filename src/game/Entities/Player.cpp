@@ -662,6 +662,8 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_cinematicMgr = nullptr;
 
     m_energyRegenRate = 1.f;
+
+    m_grantableLevels = 0;
 }
 
 Player::~Player()
@@ -2753,7 +2755,7 @@ void Player::RemoveFromGroup(Group* group, ObjectGuid guid)
     }
 }
 
-void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP, float groupRate) const
+void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP, bool recruitAFriend, float groupRate) const
 {
     WorldPacket data(SMSG_LOG_XPGAIN, 21);
     data << (victim ? victim->GetObjectGuid() : ObjectGuid());// guid
@@ -2764,7 +2766,7 @@ void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP, float gr
         data << uint32(GivenXP);                            // experience without rested bonus
         data << float(groupRate);                           // 1 - none 0 - 100% raid bonus penalty 100%+ group bonus
     }
-    data << uint8(0);                                       // Refer-A-Friend bonus unk value
+    data << uint8(recruitAFriend);                          // Refer-A-Friend bonus used
     GetSession()->SendPacket(data);
 }
 
@@ -2801,13 +2803,19 @@ void Player::GiveXP(uint32 xp, Creature* victim, float groupRate)
     }
 
     // XP resting bonus for kill
-    uint32 rested_bonus_xp = victim ? GetXPRestBonus(xp) : 0;
+    uint32 bonus_xp;
+    bool recruitAFriend = GetsRecruitAFriendBonus();
+    // RaF does NOT stack with rested experience
+    if (recruitAFriend)
+        bonus_xp = 2 * xp; // xp + bonus_xp must add up to 3 * xp for RaF; calculation for quests done client-side
+    else
+        bonus_xp = victim ? GetXPRestBonus(xp) : 0;
 
-    SendLogXPGain(xp, victim, rested_bonus_xp, groupRate);
+    SendLogXPGain(xp, victim, bonus_xp, recruitAFriend, groupRate);
 
     uint32 curXP = GetUInt32Value(PLAYER_XP);
     uint32 nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
-    uint32 newXP = curXP + xp + rested_bonus_xp;
+    uint32 newXP = curXP + xp + bonus_xp;
 
     while (newXP >= nextLvlXP && level < GetMaxAttainableLevel())
     {
@@ -2902,6 +2910,18 @@ void Player::GiveLevel(uint32 level)
     if (m_playerbotAI)
         m_playerbotAI->GiveLevel(level);
 #endif
+
+    // Refer-A-Friend
+    if (!GetSession()->IsARecruiter() && GetSession()->GetRecruitingFriendId())
+        if (level < sWorld.getConfig(CONFIG_UINT32_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
+            if (level % 2 == 0)
+            {
+                ++m_grantableLevels;
+
+                if (!HasByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_RAF_GRANTABLE_LEVEL, 0x01))
+                    SetByteFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_RAF_GRANTABLE_LEVEL, 0x01);
+            }
+
     // resend quests status directly
     GetSession()->SetCurrentPlayerLevel(level);
     SendQuestGiverStatusMultiple();
@@ -4876,6 +4896,9 @@ void Player::ResurrectPlayer(float restore_percent, bool applySickness)
     if (getRace() == RACE_NIGHTELF)
         RemoveAurasDueToSpell(20584);                       // speed bonuses
     RemoveAurasDueToSpell(8326);                            // SPELL_AURA_GHOST
+
+    if ((GetSession()->GetRecruitingFriendId() != 0))
+        SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_REFER_A_FRIEND);
 
     SendMoveRoot(false);
 
@@ -16183,8 +16206,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     //"resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, online, death_expire_time, taxi_path, dungeon_difficulty,"
     // 39           40                41                42                    43          44          45              46           47               48              49
     //"arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk,"
-    // 50      51      52      53      54      55      56      57      58         59          60             61              62      63           64
-    //"health, power1, power2, power3, power4, power5, power6, power7, specCount, activeSpec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars  FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
+    // 50      51      52      53      54      55      56      57      58         59          60             61              62      63           64          65
+    //"health, power1, power2, power3, power4, power5, power6, power7, specCount, activeSpec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels  FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
     QueryResult* result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     Object::_Create(guid.GetCounter(), 0, HIGHGUID_PLAYER);
@@ -16349,6 +16372,8 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
     }
 
     _LoadBGData(holder->GetResult(PLAYER_LOGIN_QUERY_LOADBGDATA));
+
+    
 
     if (m_bgData.bgInstanceID)                              // saved in BattleGround
     {
@@ -16749,6 +16774,14 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
         uint32 savedpower = fields[51 + i].GetUInt32();
         SetPower(Powers(i), savedpower > GetMaxPower(Powers(i)) ? GetMaxPower(Powers(i)) : savedpower);
     }
+
+    // RaF stuff.
+    m_grantableLevels = fields[65].GetUInt8();
+    if ((GetSession()->GetRecruitingFriendId() != 0))
+        SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_REFER_A_FRIEND);
+
+    if (m_grantableLevels > 0)
+        SetByteValue(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTES_OFFSET_RAF_GRANTABLE_LEVEL, 0x01);
 
     DEBUG_FILTER_LOG(LOG_FILTER_PLAYER_STATS, "The value of player %s after load item and aura is: ", m_name.c_str());
     outDebugStatsValues();
@@ -18053,7 +18086,7 @@ void Player::SaveToDB()
                               "trans_x, trans_y, trans_z, trans_o, transguid, extra_flags, stable_slots, at_login, zone, "
                               "death_expire_time, taxi_path, arenaPoints, totalHonorPoints, todayHonorPoints, yesterdayHonorPoints, totalKills, "
                               "todayKills, yesterdayKills, chosenTitle, knownCurrencies, watchedFaction, drunk, health, power1, power2, power3, "
-                              "power4, power5, power6, power7, specCount, activeSpec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars) "
+                              "power4, power5, power6, power7, specCount, activeSpec, exploredZones, equipmentCache, ammoId, knownTitles, actionBars, grantableLevels) "
                               "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, "
@@ -18061,7 +18094,7 @@ void Player::SaveToDB()
                               "?, ?, ?, ?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, ?, ?, ?, ?, "
                               "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "
-                              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
+                              "?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ");
 
     uberInsert.addUInt32(GetGUIDLow());
     uberInsert.addUInt32(GetSession()->GetAccountId());
@@ -18196,6 +18229,8 @@ void Player::SaveToDB()
     uberInsert.addString(ss);
 
     uberInsert.addUInt32(uint32(GetByteValue(PLAYER_FIELD_BYTES, 2)));
+
+    uberInsert.addUInt32(uint32(m_grantableLevels));
 
     uberInsert.Execute();
 
@@ -19536,14 +19571,21 @@ void Player::SetRestBonus(float rest_bonus_new)
     else
         m_rest_bonus = rest_bonus_new;
 
+    bool isRafResting = IsRafResting();
+
     // update data for client
     if (m_rest_bonus > 10)
-        SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_RESTED);
+        SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_RESTED | (isRafResting ? REST_STATE_RAF_LINKED : 0));
     else if (m_rest_bonus <= 1)
-        SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_NORMAL);
+        SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_NORMAL | (isRafResting ? REST_STATE_RAF_LINKED : 0));
 
     // RestTickUpdate
     SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, uint32(m_rest_bonus));
+}
+
+bool Player::IsRafResting() const
+{
+    return (GetByteValue(PLAYER_BYTES_2, 3) & REST_STATE_RAF_LINKED) != 0;
 }
 
 void Player::ResetMap()
@@ -24012,7 +24054,7 @@ void Player::SetRestType(RestType n_r_type, uint32 areaTriggerId /*= 0*/)
     else
     {
         if (getLevel() < GetMaxAttainableLevel() && (time_inn_enter == 0 || time(nullptr) - time_inn_enter > 180))
-            SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_RESTED);
+            SetByteValue(PLAYER_BYTES_2, 3, REST_STATE_RESTED | (IsRafResting() ? REST_STATE_RAF_LINKED : 0));
 
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
@@ -24802,4 +24844,51 @@ void Player::SendOverrideLightUpdate(uint32 lightId, uint32 fadeInTime) const
     data << uint32(fadeInTime);
 
     GetSession()->SendPacket(data);
+}
+
+bool Player::IsAtRecruitAFriendDistance(WorldObject const* other) const
+{
+    if (!other || !IsInMap(other))
+        return false;
+
+    WorldObject const* player = GetCorpse();
+    if (!player || IsAlive())
+        player = this;
+
+    return other->GetDistance(player) <= sWorld.getConfig(CONFIG_FLOAT_MAX_RECRUIT_A_FRIEND_DISTANCE);
+}
+
+bool Player::GetsRecruitAFriendBonus()
+{
+    if (!GetSession()->GetRecruitingFriendId())
+        return false;
+
+    if (getLevel() <= sWorld.getConfig(CONFIG_UINT32_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
+    {
+        if (Group* group = GetGroup())
+        {
+            for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+            {
+                Player* player = itr->getSource();
+                if (!player)
+                    continue;
+
+                if (!player->IsAtRecruitAFriendDistance(this))
+                    continue;                               // member (alive or dead) or his corpse at req. distance
+
+                    // level must be allowed to get RaF bonus
+                if (player->getLevel() > sWorld.getConfig(CONFIG_UINT32_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
+                    continue;
+
+                // level difference must be small enough to get RaF bonus, UNLESS we are lower level
+                if (player->getLevel() < getLevel())
+                    if (uint8(getLevel() - player->getLevel()) > sWorld.getConfig(CONFIG_UINT32_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL_DIFFERENCE))
+                        continue;
+
+                if (player->GetSession()->GetRecruitingFriendId() == GetSession()->GetAccountId())
+                    return true;
+            }
+        }
+    }
+    return false;
 }
