@@ -777,6 +777,10 @@ class ChatHandler
         bool HandleWarEffortCommand(char* args);
         bool HandleExpansionRelease(char* args);
 
+        // Battleground
+        bool HandleBattlegroundStartCommand(char* args);
+        bool HandleBattlegroundStopCommand(char* args);
+
         //! Development Commands
         bool HandleSaveAllCommand(char* args);
 

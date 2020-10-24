@@ -711,17 +711,6 @@ bool ChatHandler::HandleDebugBattlegroundCommand(char* /*args*/)
     return true;
 }
 
-bool ChatHandler::HandleDebugBattlegroundStartCommand(char* /*args*/)
-{
-    if (auto bg = m_session->GetPlayer()->GetBattleGround())
-    {
-        bg->SetStartDelayTime(-1);
-        return true;
-    }
-
-    return false;
-}
-
 bool ChatHandler::HandleDebugArenaCommand(char* /*args*/)
 {
     sBattleGroundMgr.ToggleArenaTesting();
