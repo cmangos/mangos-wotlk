@@ -601,11 +601,16 @@ struct boss_essence_of_angerAI : public ScriptedAI, public CombatActions
 {
     boss_essence_of_angerAI(Creature* pCreature) : ScriptedAI(pCreature), CombatActions(ANGER_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(pCreature->GetInstanceData()))
     {
+        SetReactState(REACT_PASSIVE);
         AddCombatAction(ANGER_ACTION_SOUL_SCREAM, 0u);
         AddCombatAction(ANGER_ACTION_SPITE, 0u);
         AddCustomAction(ESSENCE_GENERIC_ACTION_ATTACK, 3500u, [&]()
         {
+            SetReactState(REACT_AGGRESSIVE);
             m_creature->SetInCombatWithZone();
+            AttackClosestEnemy();
+            if (!m_creature->GetVictim())
+                JustReachedHome();
         });
     }
 
