@@ -91,7 +91,7 @@ struct boss_akilzonAI : public CombatAI
         AddCombatAction(AKILZON_ACTION_STATIC_DISRUPT, 7000, 14000);
         AddCombatAction(AKILZON_ACTION_CALL_LIGHTNING, 15000, 25000);
         AddCombatAction(AKILZON_ACTION_GUST_OF_WIND, 20000, 30000);
-        AddCombatAction(AKILZON_ACTION_STORM_WEATHER, 48000u);
+        AddCombatAction(AKILZON_ACTION_STORM_WEATHER, 42000u);
         AddCombatAction(AKILZON_ACTION_STORM, true);
         AddCombatAction(AKILZON_ACTION_SUMMON_EAGLE, 62000u);
         AddCustomAction(AKILZON_WIND_WALL_DELAY, true, [&]()
@@ -240,7 +240,7 @@ struct boss_akilzonAI : public CombatAI
                 // change weather 8.5 seconds prior to storm
                 if (m_instance)
                     m_instance->ChangeWeather(true);
-                ResetCombatAction(action, urand(50000, 55000));
+                ResetCombatAction(action, urand(46000, 52000));
                 ResetCombatAction(AKILZON_ACTION_STORM, 8500);
                 break;
             }
