@@ -487,6 +487,13 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Paladin
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(21082,'spell_seal_of_the_crusader'),
+(20162,'spell_seal_of_the_crusader'),
+(20305,'spell_seal_of_the_crusader'),
+(20306,'spell_seal_of_the_crusader'),
+(20307,'spell_seal_of_the_crusader'),
+(20308,'spell_seal_of_the_crusader'),
+(27158,'spell_seal_of_the_crusader'),
 (31789,'spell_righteous_defense');
 
 -- Warlock

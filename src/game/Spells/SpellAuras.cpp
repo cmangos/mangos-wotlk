@@ -7461,14 +7461,6 @@ void Aura::HandleModCombatSpeedPct(bool apply, bool /*Real*/)
 void Aura::HandleModAttackSpeed(bool apply, bool /*Real*/)
 {
     GetTarget()->ApplyAttackTimePercentMod(BASE_ATTACK, float(m_modifier.m_amount), apply);
-
-    // Seal of the Crusader damage reduction
-    // SotC increases attack speed but reduces damage to maintain the same DPS
-    if (GetSpellProto()->IsFitToFamily(SPELLFAMILY_PALADIN, uint64(0x0000000000000200)))
-    {
-        float reduction = (-100.0f * m_modifier.m_amount) / (m_modifier.m_amount + 100.0f);
-        GetTarget()->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, reduction, apply);
-    }
 }
 
 void Aura::HandleModMeleeSpeedPct(bool apply, bool /*Real*/)
