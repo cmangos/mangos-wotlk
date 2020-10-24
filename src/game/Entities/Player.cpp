@@ -22389,9 +22389,6 @@ bool Player::CanUseBattleGroundObject() const
     // maybe gameobject code should handle that ForceReaction usage
     // BUG: sometimes when player clicks on flag in AB - client won't send gameobject_use, only gameobject_report_use packet
     return (IsAlive() &&                                    // living
-            // the following two are incorrect, because invisible/stealthed players should get visible when they click on flag
-            !HasStealthAura() &&                            // not stealthed
-            !HasInvisibilityAura() &&                       // visible
             !isTotalImmune() &&                             // vulnerable (not immune)
             !HasAura(SPELL_RECENTLY_DROPPED_FLAG, EFFECT_INDEX_0));
 }
