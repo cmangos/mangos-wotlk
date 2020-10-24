@@ -240,7 +240,7 @@ struct boss_akilzonAI : public CombatAI
                 // change weather 8.5 seconds prior to storm
                 if (m_instance)
                     m_instance->ChangeWeather(true);
-                ResetCombatAction(action, urand(46000, 52000));
+                ResetCombatAction(action, urand(54000, 60000));
                 ResetCombatAction(AKILZON_ACTION_STORM, 8500);
                 break;
             }
