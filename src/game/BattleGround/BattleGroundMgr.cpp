@@ -1457,7 +1457,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg)
     else
     {
         data << uint8(1);                                  // bg ended
-        data << uint8(bg->GetWinner() == ALLIANCE ? 1 : 0);// who win
+        data << uint8(bg->GetWinner());                    // who wins
     }
 
     data << (int32)(bg->GetPlayerScoresSize());

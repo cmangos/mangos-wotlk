@@ -379,8 +379,8 @@ class BattleGround
         uint32 GetMinPlayersPerTeam() const { return m_minPlayersPerTeam; }
 
         int32 GetStartDelayTime() const     { return m_startDelayTime; }
-        ArenaType GetArenaType() const          { return m_arenaType; }
-        Team GetWinner() const              { return m_winner; }
+        ArenaType GetArenaType() const      { return m_arenaType; }
+        BattleGroundWinner GetWinner() const{ return m_winner; }
         bool IsRandom() const               { return m_isRandom; }
         uint32 GetBattlemasterEntry() const;
         uint32 GetBonusHonorFromKill(uint32 kills) const;
@@ -401,7 +401,7 @@ class BattleGround
         void SetRated(bool state)           { m_isRated = state; }
         void SetArenaType(ArenaType type)   { m_arenaType = type; }
         void SetArenaorBGType(bool isArena) { m_isArena = isArena; }
-        void SetWinner(Team winner)         { m_winner = winner; }
+        void SetWinner(BattleGroundWinner winner) { m_winner = winner; }
         void SetRandom(bool isRandom)       { m_isRandom = isRandom; }
 
         void ModifyStartDelayTime(int diff) { m_startDelayTime -= diff; }
@@ -717,7 +717,7 @@ class BattleGround
         BattleGroundStatus m_status;
         BattleGroundBracketId m_bracketId;
         ArenaType  m_arenaType;                             // 2=2v2, 3=3v3, 5=5v5
-        Team   m_winner;
+        BattleGroundWinner m_winner;
 
         uint32 m_clientInstanceId;                          // the instance-id which is sent to the client and without any other internal use
         uint32 m_startTime;
