@@ -64,6 +64,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- TBC
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(38048,'spell_curse_of_pain'),
 (42144,'spell_horseman_create_water_bucket'),
 (42074,'spell_horseman_fire'),
 (43885,'spell_horseman_maniacal_laugh'),
