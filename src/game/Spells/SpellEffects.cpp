@@ -1812,6 +1812,16 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 26921, TRIGGERED_OLD_TRIGGERED);      // cast Cancel Heartbroken, Create Bracelet
                     return;
                 }
+                case 28000:                                 // Land Mine Trigger
+                {
+                    if (!unitTarget)
+                        return;
+
+                    m_caster->CastSpell(nullptr, 25099, TRIGGERED_OLD_TRIGGERED);       // Detonation
+                    m_caster->RemoveAurasDueToSpell(27999);                             // Land Mine Periodic
+                    static_cast<Creature*>(m_caster)->ForcedDespawn(2000);
+                    return;
+                }
                 case 28006:                                 // Arcane Cloaking
                 {
                     // Naxxramas Entry Flag Effect DND
@@ -8753,6 +8763,14 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, roll_chance_i(50) ? 24714 : 24715, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
+                case 24935:                                 // Summon RC Tank
+                {
+                    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    m_caster->CastSpell(unitTarget, 24934, TRIGGERED_OLD_TRIGGERED); // Summon RC Tank
+                    return;
+                }
                 case 25140:                                 // Orb teleport spells
                 case 25143:
                 case 25650:
@@ -9006,6 +9024,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 27697, TRIGGERED_OLD_TRIGGERED);
                     unitTarget->CastSpell(unitTarget, 27698, TRIGGERED_OLD_TRIGGERED);
                     unitTarget->CastSpell(unitTarget, 27699, TRIGGERED_OLD_TRIGGERED);
+                    return;
+                }
+                case 27749:                                 // Initialize Tank
+                {
+                    if (!unitTarget)
+                        return;
+
+                    unitTarget->CastSpell(nullptr, 24936, TRIGGERED_OLD_TRIGGERED);  // RC Tank Control
+                    unitTarget->CastSpell(nullptr, 27747, TRIGGERED_OLD_TRIGGERED);  // Steam Tank Passive
                     return;
                 }
                 case 28352:                                 // Breath of Sargeras
@@ -12508,9 +12535,7 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
         case 2:                     // unk - 2 spells
         case 4:                     // unk - 1 spell
         case 5:                     // GO trap usage
-        case 7:                     // unk - 2 spells
         case 8:                     // GO usage with TargetB = none or random
-        case 10:                    // GO explosions
         case 11:                    // unk - 1 spell
         case 19:                    // unk - 1 spell
         case 20:                    // unk - 2 spells
@@ -12539,6 +12564,17 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
                     break;
                 }
             }
+            break;
+        }
+        case 7:                     // unk - 2 spells
+        {
+            gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+            break;
+        }
+        case 10:                    // unk - 2 spells
+        {
+            gameObjTarget->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+            gameObjTarget->ResetDoorOrButton();
             break;
         }
         case 12:                    // GO state active alternative - found mostly in Simon Game spells
