@@ -1849,6 +1849,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntr
                             (spellInfo_2->Id == 47418 && spellInfo_1->Id == 47396))
                         return false;
 
+                    // See Wintergarde Invisibility Type B and See Wintergarde Invisibility Type C
+                    if ((spellInfo_1->Id == 48358 && spellInfo_2->Id == 48797) ||
+                        (spellInfo_2->Id == 48797 && spellInfo_1->Id == 48358))
+                        return false;
+
                     // Cool Down (See PeriodicAuraTick())
                     if ((spellInfo_1->Id == 52441 && spellInfo_2->Id == 52443) ||
                             (spellInfo_2->Id == 52441 && spellInfo_1->Id == 52443))

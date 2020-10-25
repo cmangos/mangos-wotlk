@@ -316,6 +316,19 @@ struct CorrosiveSpit : public SpellScript
     }
 };
 
+/*######
+## go_scrying_orb
+######*/
+
+struct go_scrying_orb : public GameObjectAI
+{
+    go_scrying_orb(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(1, true);
+        go->GetVisibilityData().AddInvisibilityValue(1, 1000);
+    }
+};
+
 void AddSC_dragonblight()
 {
     Script* pNewScript = new Script;
@@ -335,4 +348,9 @@ void AddSC_dragonblight()
     RegisterSpellScript<DropOffVillager>("spell_drop_off_villager");
     RegisterAuraScript<ArmyOfTheDead>("spell_army_of_the_dead");
     RegisterSpellScript<CorrosiveSpit>("spell_corrosive_spit");
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_scrying_orb";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_scrying_orb>;
+    pNewScript->RegisterSelf();
 }
