@@ -104,7 +104,7 @@ class OutdoorPvP
         // Handle script condition state change by an external factor
         virtual void HandleConditionStateChange(uint32 /*conditionId*/, bool /*state*/) {}
 
-        void SetGraveYardLinkTeam(uint32 id, uint32 locKey, Team team, uint32 mapId);
+        void SetGraveYardLinkTeam(uint32 id, uint32 locKey, Team team, std::vector<uint32> mapIds);
 
         // Handle achievement criteria requirements
         virtual bool CheckAchievementCriteriaMeet(uint32 /*criteria_id*/, Player const* /*source*/, Unit const* /*target*/, uint32 /*miscvalue1*/) { return false; }

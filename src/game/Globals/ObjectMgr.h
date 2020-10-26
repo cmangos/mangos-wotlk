@@ -34,7 +34,6 @@
 #include "Globals/ObjectAccessor.h"
 #include "Entities/ObjectGuid.h"
 #include "Globals/Conditions.h"
-#include "Globals/GraveyardManager.h"
 
 #include <map>
 #include <climits>
@@ -576,10 +575,6 @@ class ObjectMgr
 
         QuestgiverGreeting const* GetQuestgiverGreetingData(uint32 entry, uint32 type) const;
         TrainerGreeting const* GetTrainerGreetingData(uint32 entry) const;
-
-        void LoadWorldSafeLocs() const;
-        void LoadGraveyardZones();
-        GraveYardMap& GetGraveYardMap() { return m_graveYardMap; }
 
         AreaTrigger const* GetAreaTrigger(uint32 trigger) const
         {
@@ -1290,8 +1285,6 @@ class ObjectMgr
         void LoadGossipMenuItems(std::set<uint32>& gossipScriptSet);
 
         MailLevelRewardMap m_mailLevelRewardMap;
-
-        GraveYardMap m_graveYardMap;
 
         typedef std::map<uint32, PetLevelInfo*> PetLevelInfoMap;
         // PetLevelInfoMap[creature_id][level]
