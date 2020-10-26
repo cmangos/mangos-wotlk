@@ -4031,6 +4031,16 @@ struct ThrowBoomsDoom : public SpellScript
     }
 };
 
+struct RingOfFlame : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() != AURA_REMOVE_BY_EXPIRE)
+
+            aura->GetTarget()->CastSpell(nullptr, 35995, TRIGGERED_OLD_TRIGGERED); // Immolation
+    }
+};
+
 void AddSC_netherstorm()
 {
     Script* pNewScript = new Script;
@@ -4152,6 +4162,7 @@ void AddSC_netherstorm()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<Soulbind>("spell_soulbind");
+    RegisterAuraScript<RingOfFlame>("spell_ring_of_flame");
     RegisterSpellScript<UltraDeconsolodationZapper>("spell_ultra_deconsolodation_zapper");
     RegisterSpellScript<ThrowBoomsDoom>("spell_throw_booms_doom");
     RegisterScript<ScrapReaverSpell>("spell_scrap_reaver_spell");
