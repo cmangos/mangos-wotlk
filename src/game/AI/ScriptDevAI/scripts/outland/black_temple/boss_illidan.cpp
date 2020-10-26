@@ -27,8 +27,8 @@ EndScriptData */
 #include "AI/ScriptDevAI/base/escort_ai.h"
 
 // #define FAST_TIMERS
-//#define NO_SHADOWFIEND
-#define NO_SHEAR
+// #define NO_SHADOWFIEND
+// #define NO_SHEAR
 
 enum
 {
