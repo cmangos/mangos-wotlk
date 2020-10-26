@@ -518,7 +518,7 @@ void BattleGroundAV::ProcessPlayerDestroyedPoint(AVNodeIds node)
         DoSendYellToTeam(ownerTeamIdx, LANG_BG_AV_GRAVE_TAKEN, node);
 
         // setup graveyard to new team
-        sObjectMgr.SetGraveYardLinkTeam(avNodeDefaults[node].graveyardId, BG_AV_ZONE_MAIN, GetTeamIdByTeamIndex(ownerTeamIdx));
+        GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(avNodeDefaults[node].graveyardId, BG_AV_ZONE_MAIN, GetTeamIdByTeamIndex(ownerTeamIdx));
 
         Creature* herald = GetSingleCreatureFromStorage(ownerTeamIdx == TEAM_INDEX_ALLIANCE ? BG_AV_NPC_STORMPIKE_HERALD : BG_AV_NPC_FROSTWOLF_HERALD);
         if (!herald)
@@ -716,7 +716,7 @@ void BattleGroundAV::ProcessPlayerAssaultsPoint(Player* player, AVNodeIds node)
             spiritHealer->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, spiritHealer, spiritHealer);
 
         // make graveyard invalid
-        sObjectMgr.SetGraveYardLinkTeam(avNodeDefaults[node].graveyardId, BG_AV_ZONE_MAIN, TEAM_INVALID);
+        GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(avNodeDefaults[node].graveyardId, BG_AV_ZONE_MAIN, TEAM_INVALID);
 
         // despawn spirit healer
         if (Creature* healer = GetBgMap()->GetCreature(m_nodes[node].spiritHealerGuid))
@@ -846,7 +846,7 @@ void BattleGroundAV::InitializeNode(AVNodeIds node)
             team = GetTeamIdByTeamIndex(avNodeDefaults[node].initialOwner);
 
         // initalize graveyard
-        sObjectMgr.SetGraveYardLinkTeam(avNodeDefaults[node].graveyardId, BG_AV_ZONE_MAIN, team);
+        GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(avNodeDefaults[node].graveyardId, BG_AV_ZONE_MAIN, team);
     }
 }
 
@@ -915,8 +915,8 @@ void BattleGroundAV::Reset()
         InitializeNode(AVNodeIds(i));
 
     // setup graveyards
-    sObjectMgr.SetGraveYardLinkTeam(BG_AV_GRAVE_MAIN_ALLIANCE, BG_AV_ZONE_MAIN, ALLIANCE);
-    sObjectMgr.SetGraveYardLinkTeam(BG_AV_GRAVE_MAIN_HORDE, BG_AV_ZONE_MAIN, HORDE);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_AV_GRAVE_MAIN_ALLIANCE, BG_AV_ZONE_MAIN, ALLIANCE);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_AV_GRAVE_MAIN_HORDE, BG_AV_ZONE_MAIN, HORDE);
 
     m_spiritHealersSet = false;
 }

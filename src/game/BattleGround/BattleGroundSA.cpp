@@ -578,7 +578,7 @@ void BattleGroundSA::HandlePlayerClickedOnFlag(Player* player, GameObject* go)
             m_strandGraveyard[i].graveyardOwner = GetAttacker();
 
             uint32 newBannerEntry = GetAttacker() == TEAM_INDEX_ALLIANCE ? sotaGraveyardData[i].goEntryAlliance : sotaGraveyardData[i].goEntryHorde;
-            sObjectMgr.SetGraveYardLinkTeam(sotaGraveyardData[i].graveyardId, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(GetAttacker()));
+            GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(sotaGraveyardData[i].graveyardId, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(GetAttacker()));
 
             // spawn demolishers
             if (sotaGraveyardData[i].graveyardId == BG_SA_GRAVEYARD_ID_EAST)
@@ -794,15 +794,15 @@ void BattleGroundSA::SetupBattleground(bool initialSetup)
 
         // set capturable graveyard links and states
         m_strandGraveyard[i].graveyardOwner = m_defendingTeamIdx;
-        sObjectMgr.SetGraveYardLinkTeam(sotaGraveyardData[i].graveyardId, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(m_defendingTeamIdx));
+        GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(sotaGraveyardData[i].graveyardId, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(m_defendingTeamIdx));
 
         m_strandGraveyard[i].changeTimer = 0;
     }
 
     // set static graveyards
-    sObjectMgr.SetGraveYardLinkTeam(BG_SA_GRAVEYARD_ID_SHRINE, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(m_defendingTeamIdx));
-    sObjectMgr.SetGraveYardLinkTeam(BG_SA_GRAVEYARD_ID_BEACH, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(GetAttacker()));
-    sObjectMgr.SetGraveYardLinkTeam(BG_SA_GRAVEYARD_ID_SHIP, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(GetAttacker()));
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_SA_GRAVEYARD_ID_SHRINE, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(m_defendingTeamIdx));
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_SA_GRAVEYARD_ID_BEACH, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(GetAttacker()));
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_SA_GRAVEYARD_ID_SHIP, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(GetAttacker()));
 
     // sigil and gates don't have to be initialized
     if (initialSetup)

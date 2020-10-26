@@ -35,7 +35,7 @@ OutdoorPvPNA::OutdoorPvPNA() : OutdoorPvP(),
     m_isUnderSiege(false)
 {
     // initially set graveyard owner to neither faction
-    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_HALAA, GRAVEYARD_ZONE_ID_HALAA, TEAM_INVALID);
+    SetGraveYardLinkTeam(GRAVEYARD_ID_HALAA, GRAVEYARD_ZONE_ID_HALAA, TEAM_INVALID, 530);
 }
 
 void OutdoorPvPNA::FillInitialWorldStates(WorldPacket& data, uint32& count)
@@ -339,7 +339,7 @@ void OutdoorPvPNA::ProcessCaptureEvent(GameObject* go, Team team)
 
     UpdateWorldState(WORLD_STATE_REMOVE);
     DespawnVendors(go);
-    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_HALAA, GRAVEYARD_ZONE_ID_HALAA, m_zoneOwner);
+    SetGraveYardLinkTeam(GRAVEYARD_ID_HALAA, GRAVEYARD_ZONE_ID_HALAA, m_zoneOwner, 530);
 
     if (m_zoneOwner == ALLIANCE)
     {

@@ -82,17 +82,17 @@ void BattleGroundIC::Reset()
     m_isKeepInvaded[TEAM_INDEX_HORDE] = false;
 
     // setup master graveyards
-    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_ALLIANCE, BG_IC_ZONE_ID_ISLE, ALLIANCE);
-    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_HORDE, BG_IC_ZONE_ID_ISLE, HORDE);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_ALLIANCE, BG_IC_ZONE_ID_ISLE, ALLIANCE);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_HORDE, BG_IC_ZONE_ID_ISLE, HORDE);
 
     // setup initial graveyards
-    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_KEEP_ALLY, BG_IC_ZONE_ID_ISLE, ALLIANCE);
-    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_KEEP_HORDE, BG_IC_ZONE_ID_ISLE, HORDE);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_KEEP_ALLY, BG_IC_ZONE_ID_ISLE, ALLIANCE);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_KEEP_HORDE, BG_IC_ZONE_ID_ISLE, HORDE);
 
     // make sure that the middle graveyards are disabled to begin with
-    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_DOCKS, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
-    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_HANGAR, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
-    sObjectMgr.SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_WORKSHOP, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_DOCKS, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_HANGAR, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(BG_IC_GRAVEYARD_ID_WORKSHOP, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
 }
 
 void BattleGroundIC::AddPlayer(Player* plr)
@@ -734,7 +734,7 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective nodeId, GameObject* 
     uint32 graveyardId = isleObjectiveData[nodeId].graveyardId;
     if (graveyardId)
     {
-        sObjectMgr.SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, GetTeamIdByTeamIndex(ownerIdx));
+        GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, GetTeamIdByTeamIndex(ownerIdx));
 
         // summon spirit healer if possible
         if (Creature* healer = objRef->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? BG_NPC_SPIRIT_GUIDE_ALLIANCE : BG_NPC_SPIRIT_GUIDE_HORDE, isleGraveyardData[nodeId].x, isleGraveyardData[nodeId].y, isleGraveyardData[nodeId].z, isleGraveyardData[nodeId].o, TEMPSPAWN_DEAD_DESPAWN, 0))
@@ -863,7 +863,7 @@ void BattleGroundIC::DoResetObjective(IsleObjective nodeId)
     uint32 graveyardId = isleObjectiveData[nodeId].graveyardId;
     if (graveyardId)
     {
-        sObjectMgr.SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
+        GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(graveyardId, BG_IC_ZONE_ID_ISLE, TEAM_INVALID);
 
         // despawn healer
         if (Creature* healer = GetBgMap()->GetCreature(m_isleNode[nodeId].spiritHealerGuid))

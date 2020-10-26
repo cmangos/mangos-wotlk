@@ -49,7 +49,7 @@ OutdoorPvPZM::OutdoorPvPZM() : OutdoorPvP(),
     }
 
     // initially set graveyard owner to neither faction
-    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, TEAM_INVALID);
+    SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, TEAM_INVALID, 530);
 }
 
 void OutdoorPvPZM::FillInitialWorldStates(WorldPacket& data, uint32& count)
@@ -368,7 +368,7 @@ bool OutdoorPvPZM::HandleGameObjectUse(Player* player, GameObject* go)
     }
 
     // change the graveyard link
-    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, team);
+    SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, team, 530);
 
     // apply zone buff
     if (m_graveyardOwner != TEAM_NONE)

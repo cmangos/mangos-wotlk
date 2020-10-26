@@ -35,6 +35,7 @@
 #include "Entities/CreatureLinkingMgr.h"
 #include "Vmap/DynamicTree.h"
 #include "Multithreading/Messager.h"
+#include "Globals/GraveyardManager.h"
 
 #include <bitset>
 #include <functional>
@@ -363,6 +364,8 @@ class Map : public GridRefManager<NGridType>
 
         Messager<Map>& GetMessager() { return m_messager; }
 
+        GraveyardManager& GetGraveyardManager() { return m_graveyardManager; }
+
         GenericTransport* GetTransport(ObjectGuid guid);
 
         void AddTransport(Transport* transport);
@@ -431,6 +434,8 @@ class Map : public GridRefManager<NGridType>
         WorldObjectSet::iterator m_onEventNotifiedIter;
 
         Messager<Map> m_messager;
+
+        GraveyardManager m_graveyardManager;
     private:
         time_t i_gridExpiry;
 

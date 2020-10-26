@@ -100,6 +100,10 @@ void BattleGroundEY::StartingEventOpenDoors()
 
     // Players that join battleground after start are not eligible to get achievement.
     StartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_WIN_BG, EY_TIMED_ACHIEV_FLURRY);
+
+    // setup graveyards
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(GRAVEYARD_EY_MAIN_ALLIANCE, EY_ZONE_ID_MAIN, ALLIANCE);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(GRAVEYARD_EY_MAIN_HORDE, EY_ZONE_ID_MAIN, HORDE);
 }
 
 void BattleGroundEY::AddPoints(Team team, uint32 points)
@@ -273,7 +277,7 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_ALLIANCE);
 
         // link graveyard
-        sObjectMgr.SetGraveYardLinkTeam(eyeGraveyardData[towerId].id, EY_ZONE_ID_MAIN, ALLIANCE);
+        GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(eyeGraveyardData[towerId].id, EY_ZONE_ID_MAIN, ALLIANCE);
 
         // spawn spirit healer and defender
         if (Creature* healer = go->SummonCreature(BG_NPC_SPIRIT_GUIDE_ALLIANCE, eyeGraveyardData[towerId].x, eyeGraveyardData[towerId].y, eyeGraveyardData[towerId].z, eyeGraveyardData[towerId].o, TEMPSPAWN_DEAD_DESPAWN, 0))
@@ -290,7 +294,7 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
         SendMessageToAll(message, CHAT_MSG_BG_SYSTEM_HORDE);
 
         // link graveyard
-        sObjectMgr.SetGraveYardLinkTeam(eyeGraveyardData[towerId].id, EY_ZONE_ID_MAIN, HORDE);
+        GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(eyeGraveyardData[towerId].id, EY_ZONE_ID_MAIN, HORDE);
 
         // spawn spirit healer and defender
         if (Creature* healer = go->SummonCreature(BG_NPC_SPIRIT_GUIDE_HORDE, eyeGraveyardData[towerId].x, eyeGraveyardData[towerId].y, eyeGraveyardData[towerId].z, eyeGraveyardData[towerId].o, TEMPSPAWN_DEAD_DESPAWN, 0))
@@ -318,7 +322,7 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
         }
 
         // unlink graveyard
-        sObjectMgr.SetGraveYardLinkTeam(eyeGraveyardData[towerId].id, EY_ZONE_ID_MAIN, TEAM_INVALID);
+        GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(eyeGraveyardData[towerId].id, EY_ZONE_ID_MAIN, TEAM_INVALID);
 
         // despawn spirit healer and defender
         if (Creature* healer = GetBgMap()->GetCreature(m_spiritHealers[towerId]))
@@ -421,12 +425,12 @@ void BattleGroundEY::Reset()
         m_towerOwner[i] = TEAM_NONE;
         m_activeEvents[i] = TEAM_INDEX_NEUTRAL;
 
-        sObjectMgr.SetGraveYardLinkTeam(eyeGraveyardData[i].id, EY_ZONE_ID_MAIN, TEAM_INVALID);
+        GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(eyeGraveyardData[i].id, EY_ZONE_ID_MAIN, TEAM_INVALID);
     }
 
     // setup graveyards
-    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_EY_MAIN_ALLIANCE, EY_ZONE_ID_MAIN, ALLIANCE);
-    sObjectMgr.SetGraveYardLinkTeam(GRAVEYARD_EY_MAIN_HORDE, EY_ZONE_ID_MAIN, HORDE);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(GRAVEYARD_EY_MAIN_ALLIANCE, EY_ZONE_ID_MAIN, ALLIANCE);
+    GetBgMap()->GetGraveyardManager().SetGraveYardLinkTeam(GRAVEYARD_EY_MAIN_HORDE, EY_ZONE_ID_MAIN, HORDE);
 
     // the flag in the middle is spawned at beginning
     m_activeEvents[EY_EVENT_CAPTURE_FLAG] = EY_EVENT2_FLAG_CENTER;
