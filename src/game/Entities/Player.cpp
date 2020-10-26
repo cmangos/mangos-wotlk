@@ -4523,16 +4523,16 @@ void Player::DeleteFromDB(ObjectGuid playerguid, uint32 accountId, bool updateRe
                     if (has_items)
                     {
                         // data needs to be at first place for Item::LoadFromDB
-                        //                                                          0    1    2         3
-                        QueryResult* resultItems = CharacterDatabase.PQuery("SELECT data,text,item_guid,item_template FROM mail_items JOIN item_instance ON item_guid = guid WHERE mail_id='%u'", mail_id);
+                        //                                                          0          1            2                3      4         5        6      7             8                 9           10          11    12         13
+                        QueryResult* resultItems = CharacterDatabase.PQuery("SELECT itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text, item_guid, item_template FROM mail_items JOIN item_instance ON item_guid = guid WHERE mail_id='%u'", mail_id);
                         if (resultItems)
                         {
                             do
                             {
                                 Field* fields2 = resultItems->Fetch();
 
-                                uint32 item_guidlow = fields2[2].GetUInt32();
-                                uint32 item_template = fields2[3].GetUInt32();
+                                uint32 item_guidlow = fields2[12].GetUInt32();
+                                uint32 item_template = fields2[13].GetUInt32();
 
                                 ItemPrototype const* itemProto = ObjectMgr::GetItemPrototype(item_template);
                                 if (!itemProto)
@@ -16794,7 +16794,8 @@ void Player::LoadCorpse()
 
 void Player::_LoadInventory(QueryResult* result, uint32 timediff)
 {
-    // QueryResult *result = CharacterDatabase.PQuery("SELECT data,text,bag,slot,item,item_template FROM character_inventory JOIN item_instance ON character_inventory.item = item_instance.guid WHERE character_inventory.guid = '%u' ORDER BY bag,slot", GetGUIDLow());
+    //        0          1            2                3      4         5        6      7             8                 9           10          11    12   13    14    15
+    // SELECT itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime, text, bag, slot, item, item_template FROM character_inventory JOIN item_instance ON character_inventory.item = item_instance.guid WHERE character_inventory.guid = '%u' ORDER BY bag, slot
     std::map<uint32, Bag*> bagMap;                          // fast guid lookup for bags
     // NOTE: the "order by `bag`" is important because it makes sure
     // the bagMap is filled before items in the bags are loaded
@@ -16812,10 +16813,10 @@ void Player::_LoadInventory(QueryResult* result, uint32 timediff)
         do
         {
             Field* fields = result->Fetch();
-            uint32 bag_guid  = fields[2].GetUInt32();
-            uint8  slot      = fields[3].GetUInt8();
-            uint32 item_lowguid = fields[4].GetUInt32();
-            uint32 item_id   = fields[5].GetUInt32();
+            uint32 bag_guid  = fields[12].GetUInt32();
+            uint8  slot      = fields[13].GetUInt8();
+            uint32 item_lowguid = fields[14].GetUInt32();
+            uint32 item_id   = fields[15].GetUInt32();
 
             ItemPrototype const* proto = ObjectMgr::GetItemPrototype(item_id);
 
@@ -16998,17 +16999,17 @@ void Player::_LoadItemLoot(QueryResult* result)
 void Player::_LoadMailedItems(QueryResult* result)
 {
     // data needs to be at first place for Item::LoadFromDB
-    //         0     1     2        3          4
-    // "SELECT data, text, mail_id, item_guid, item_template FROM mail_items JOIN item_instance ON item_guid = guid WHERE receiver = '%u'", GUID_LOPART(m_guid)
+    //        0          1            2                3      4         5        6      7             8                 9           10         11    12       13         14
+    // SELECT itemEntry, creatorGuid, giftCreatorGuid, count, duration, charges, flags, enchantments, randomPropertyId, durability, playedTime text, mail_id, item_guid, item_template FROM mail_items JOIN item_instance ON item_guid = guid WHERE receiver = '%u'", m_guid.GetCounter());
     if (!result)
         return;
 
     do
     {
         Field* fields = result->Fetch();
-        uint32 mail_id       = fields[2].GetUInt32();
-        uint32 item_guid_low = fields[3].GetUInt32();
-        uint32 item_template = fields[4].GetUInt32();
+        uint32 mail_id       = fields[12].GetUInt32();
+        uint32 item_guid_low = fields[13].GetUInt32();
+        uint32 item_template = fields[14].GetUInt32();
 
         Mail* mail = GetMail(mail_id);
         if (!mail)
