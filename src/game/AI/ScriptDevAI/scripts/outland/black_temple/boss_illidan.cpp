@@ -28,7 +28,7 @@ EndScriptData */
 
 // #define FAST_TIMERS
 //#define NO_SHADOWFIEND
-//#define NO_SHEAR
+#define NO_SHEAR
 
 enum
 {
@@ -1385,6 +1385,7 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
         });
         AddCustomAction(AKAMA_OUTRO_DELAY, true, [&]()
         {
+            m_creature->SetImmobilizedState(false);
             m_creature->GetMotionMaster()->MoveWaypoint(PATH_ID_AKAMA_BACK_UP);
         });
         AddCustomAction(AKAMA_OUTRO_ACTIONS, true, [&]()
@@ -1393,7 +1394,6 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
         });
         InitializeDialogueHelper(m_instance);
         m_creature->SetNoThreatState(true);
-        Reset();
     }
 
     instance_black_temple* m_instance;
@@ -1406,13 +1406,6 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
     GuidVector m_summons;
 
     uint32 m_outroStage;
-
-    void Reset() override
-    {
-        CombatAI::Reset();
-        m_bFightMinions = false;
-        m_bIsIntroFinished = false;
-    }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
@@ -1428,7 +1421,7 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
         {
             SetCombatScriptStatus(true);
             m_creature->CombatStop(true);
-            SetReactState(REACT_DEFENSIVE);
+            SetReactState(REACT_PASSIVE);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
             m_creature->GetMotionMaster()->MoveWaypoint(PATH_ID_AKAMA_FIGHT_ILLIDARI);
         }
@@ -1443,6 +1436,9 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
     void JustRespawned() override
     {
         ScriptedAI::JustRespawned();
+        m_creature->SetImmobilizedState(false);
+        m_bFightMinions = false;
+        m_bIsIntroFinished = false;
         SetCombatScriptStatus(false);
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         SetReactState(REACT_AGGRESSIVE);
@@ -1535,6 +1531,7 @@ struct npc_akama_illidanAI : public CombatAI, private DialogueHelper
                         SetCombatScriptStatus(false);
                         SetReactState(REACT_AGGRESSIVE);
                         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
+                        m_creature->SetImmobilizedState(true);
                     }
                     break;
                 }
