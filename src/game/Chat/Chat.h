@@ -486,6 +486,7 @@ class ChatHandler
         bool HandleNpcWhisperCommand(char* args);
         bool HandleNpcYellCommand(char* args);
         bool HandleNpcTempSpawn(char* args);
+        bool HandleNpcEvade(char* args);
 
         // TODO: NpcCommands that needs to be fixed :
         bool HandleNpcAddWeaponCommand(char* args);
