@@ -4,6 +4,8 @@
 
 enum
 {
+    // TYPE_SHADE_OF_HEADLESS_HORSEMAN = 1000, // High number against collisions
+
     // Quest 6403
     NPC_JONATHAN                = 466,
     NPC_WRYNN                   = 1747,

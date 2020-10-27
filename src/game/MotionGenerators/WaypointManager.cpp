@@ -317,7 +317,7 @@ bool WaypointManager::AddExternalNode(uint32 entry, int32 pathId, uint32 pointId
 
     if (!MaNGOS::IsValidMapCoord(x, y, z, o))
     {
-        sLog.outErrorScriptLib("WaypointManager::AddExternalNode: (Npc-Entry %u, PathId %i) Invalid coordinates", entry, pathId);
+        sLog.outErrorScriptLib("WaypointManager::AddExternalNode: (Npc-Entry %u, PathId %i, PointId %u) Invalid coordinates", entry, pathId, pointId);
         return false;
     }
 

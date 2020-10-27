@@ -25,7 +25,7 @@
  */
 struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
 {
-    world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap)
+    world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap), m_shadeData({ AREAID_GOLDSHIRE, AREAID_KHARANOS, AREAID_BRILL })
     {
         AddCustomAction(EVENT_SPAWN, true, [&]
         {
@@ -131,6 +131,7 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
             }
             ResetTimer(EVENT_REINFORCEMENTS_LEADER_SPEAK, urand(60000, 90000));
         });
+        Initialize();
     }
 
     std::set<ObjectGuid> _spawn;
@@ -143,6 +144,24 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
     Position const spawnPortalPos1 = { -11901.25f, -3202.272f, -14.7534f, 0.146405f };
     Position const spawnBossPortalPos = { -11891.500f, -3207.010f, -14.798f, 0.146405f };
     Position const spawnReinforcementPos = { -11815.1f, -3190.39f, -30.7338f, 3.32447f };
+
+    // Shade of the Horseman village attack event
+    ShadeOfTheHorsemanData m_shadeData;
+
+    void Initialize() override
+    {
+        m_shadeData.Reset();
+    }
+
+    bool CheckConditionCriteriaMeet(Player const* player, uint32 instanceConditionId, WorldObject const* conditionSource, uint32 conditionSourceType) const override
+    {
+        if (instanceConditionId >= INSTANCE_CONDITION_ID_FIRE_BRIGADE_PRACTICE_GOLDSHIRE && instanceConditionId <= INSTANCE_CONDITION_ID_LET_THE_FIRES_COME_HORDE)
+            return m_shadeData.IsConditionFulfilled(instanceConditionId, player->GetAreaId());
+
+        script_error_log("world_map_eastern_kingdoms::CheckConditionCriteriaMeet called with unsupported Id %u. Called with param plr %s, src %s, condition source type %u",
+            instanceConditionId, player ? player->GetGuidStr().c_str() : "nullptr", conditionSource ? conditionSource->GetGuidStr().c_str() : "nullptr", conditionSourceType);
+        return false;
+    }
 
     void OnCreatureCreate(Creature* pCreature) override
     {
@@ -313,7 +332,18 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
         UpdateTimers(uiDiff);
     }
 
-    void SetData(uint32 /*uiType*/, uint32 /*uiData*/) override {}
+    uint32 GetData(uint32 type) const override
+    {
+        if (type >= TYPE_SHADE_OF_THE_HORSEMAN_ATTACK_PHASE && type <= TYPE_SHADE_OF_THE_HORSEMAN_MAX)
+            return m_shadeData.HandleGetData(type);
+        return 0;
+    }
+
+    void SetData(uint32 type, uint32 data) override
+    {
+        if (type >= TYPE_SHADE_OF_THE_HORSEMAN_ATTACK_PHASE && type <= TYPE_SHADE_OF_THE_HORSEMAN_MAX)
+            return m_shadeData.HandleSetData(type, data);
+    }
 };
 
 struct go_infernaling_summoner_portal_hound : public GameObjectAI

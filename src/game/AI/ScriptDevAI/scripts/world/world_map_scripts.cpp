@@ -135,6 +135,103 @@ bool ProcessEventTransports(uint32 uiEventId, Object* pSource, Object* /*pTarget
     return true;
 }
 
+void ShadeOfTheHorsemanData::Reset()
+{
+    memset(m_shadeOfTheHorsemanAttackPhases, 0, sizeof(m_shadeOfTheHorsemanAttackPhases));
+}
+
+uint32 ShadeOfTheHorsemanData::GetDataAttackPhase(uint32 id) const
+{
+    return m_shadeOfTheHorsemanAttackPhases[id];
+}
+
+void ShadeOfTheHorsemanData::SetDataAttackPhase(uint32 id, uint32 value)
+{
+    m_shadeOfTheHorsemanAttackPhases[id] = value;
+}
+
+bool ShadeOfTheHorsemanData::IsConditionFulfilled(uint32 conditionId, uint32 areaId) const
+{
+    uint32 checkAreaId = 0;
+    switch (conditionId)
+    {
+        case INSTANCE_CONDITION_ID_FIRE_BRIGADE_PRACTICE_GOLDSHIRE:
+            checkAreaId = AREAID_GOLDSHIRE;
+            break;
+        case INSTANCE_CONDITION_ID_FIRE_BRIGADE_PRACTICE_KHARANOS:
+            checkAreaId = AREAID_KHARANOS;
+            break;
+        case INSTANCE_CONDITION_ID_FIRE_BRIGADE_PRACTICE_AZURE_WATCH:
+            checkAreaId = AREAID_AZURE_WATCH;
+            break;
+        case INSTANCE_CONDITION_ID_FIRE_TRAINING_BRILL:
+            checkAreaId = AREAID_BRILL;
+            break;
+        case INSTANCE_CONDITION_ID_FIRE_TRAINING_RAZOR_HILL:
+            checkAreaId = AREAID_RAZOR_HILL;
+            break;
+        case INSTANCE_CONDITION_ID_FIRE_TRAINING_FALCONWING:
+            checkAreaId = AREAID_FALCONWING_SQUARE;
+            break;
+    }
+    
+    if (checkAreaId)
+        return m_shadeOfTheHorsemanAttackPhases[conditionId - INSTANCE_CONDITION_ID_FIRE_BRIGADE_PRACTICE_GOLDSHIRE] != SHADE_PHASE_SPAWNED && areaId == checkAreaId;
+
+    switch (conditionId)
+    {
+        case INSTANCE_CONDITION_ID_STOP_THE_FIRES_ALLIANCE:
+            return (m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_GOLDSHIRE] == SHADE_PHASE_SPAWNED && areaId == AREAID_GOLDSHIRE) ||
+                   (m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_KHARANOS] == SHADE_PHASE_SPAWNED && areaId == AREAID_KHARANOS) ||
+                   (m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_AZURE_WATCH] == SHADE_PHASE_SPAWNED && areaId == AREAID_AZURE_WATCH);
+        case INSTANCE_CONDITION_ID_STOP_THE_FIRES_HORDE:
+            return (m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_BRILL] == SHADE_PHASE_SPAWNED && areaId == AREAID_BRILL) ||
+                   (m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_RAZOR_HILL] == SHADE_PHASE_SPAWNED && areaId == AREAID_RAZOR_HILL) ||
+                   (m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_FALCONWING_SQUARE] == SHADE_PHASE_SPAWNED && areaId == AREAID_FALCONWING_SQUARE);
+        case INSTANCE_CONDITION_ID_THE_HEADLESS_HORSEMAN_ALLIANCE:
+            return (m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_GOLDSHIRE] == SHADE_PHASE_VICTORY && areaId == AREAID_GOLDSHIRE) ||
+                   (m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_KHARANOS] == SHADE_PHASE_VICTORY && areaId == AREAID_KHARANOS) ||
+                   (m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_AZURE_WATCH] == SHADE_PHASE_VICTORY && areaId == AREAID_AZURE_WATCH);
+        case INSTANCE_CONDITION_ID_THE_HEADLESS_HORSEMAN_HORDE:
+            return (m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_BRILL] == SHADE_PHASE_VICTORY && areaId == AREAID_BRILL) ||
+                   (m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_RAZOR_HILL] == SHADE_PHASE_VICTORY && areaId == AREAID_RAZOR_HILL) ||
+                   (m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_FALCONWING_SQUARE] == SHADE_PHASE_VICTORY && areaId == AREAID_FALCONWING_SQUARE);
+        case INSTANCE_CONDITION_ID_LET_THE_FIRES_COME_ALLIANCE:
+            return ((m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_GOLDSHIRE] == SHADE_PHASE_ALL_CLEAR || m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_GOLDSHIRE] == SHADE_PHASE_VICTORY) && areaId == AREAID_GOLDSHIRE) || 
+                   ((m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_KHARANOS] == SHADE_PHASE_ALL_CLEAR || m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_GOLDSHIRE] == SHADE_PHASE_VICTORY) && areaId == AREAID_KHARANOS) ||
+                   ((m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_AZURE_WATCH] == SHADE_PHASE_ALL_CLEAR || m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_GOLDSHIRE] == SHADE_PHASE_VICTORY) && areaId == AREAID_AZURE_WATCH);
+        case INSTANCE_CONDITION_ID_LET_THE_FIRES_COME_HORDE:
+            return ((m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_BRILL] == SHADE_PHASE_ALL_CLEAR || m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_BRILL] == SHADE_PHASE_VICTORY) && areaId == AREAID_BRILL) ||
+                   ((m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_RAZOR_HILL] == SHADE_PHASE_ALL_CLEAR || m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_RAZOR_HILL] == SHADE_PHASE_VICTORY) && areaId == AREAID_RAZOR_HILL) ||
+                   ((m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_FALCONWING_SQUARE] == SHADE_PHASE_ALL_CLEAR || m_shadeOfTheHorsemanAttackPhases[SHADE_VILLAGE_FALCONWING_SQUARE] == SHADE_PHASE_VICTORY) && areaId == AREAID_FALCONWING_SQUARE);
+        default: return false;
+    }
+}
+
+uint32 ShadeOfTheHorsemanData::HandleGetData(uint32 id) const
+{
+    return m_shadeOfTheHorsemanAttackPhases[id - TYPE_SHADE_OF_THE_HORSEMAN_ATTACK_PHASE];
+}
+
+void ShadeOfTheHorsemanData::HandleSetData(uint32 id, uint32 value)
+{
+    m_shadeOfTheHorsemanAttackPhases[id - TYPE_SHADE_OF_THE_HORSEMAN_ATTACK_PHASE] = value;
+}
+
+uint32 ShadeOfTheHorsemanData::GetTypeFromZoneId(uint32 zoneId)
+{
+    switch (zoneId)
+    {
+        case ZONEID_ELWYNN_FOREST: return SHADE_VILLAGE_GOLDSHIRE;
+        case ZONEID_DUN_MOROGH: return SHADE_VILLAGE_KHARANOS;
+        case ZONEID_AZUREMYST_ISLE: return SHADE_VILLAGE_AZURE_WATCH;
+        case ZONEID_TIRISFAL_GLADES: return SHADE_VILLAGE_BRILL;
+        case ZONEID_DUROTAR: return SHADE_VILLAGE_RAZOR_HILL;
+        case ZONEID_EVERSONG_WOODS: return SHADE_VILLAGE_FALCONWING_SQUARE;
+        default: return 0;
+    }
+}
+
 void AddSC_world_map_scripts()
 {    
     Script* pNewScript = new Script;

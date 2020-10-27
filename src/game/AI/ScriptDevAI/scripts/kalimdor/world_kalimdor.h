@@ -4,6 +4,8 @@
 
 enum
 {
+    // TYPE_SHADE_OF_HEADLESS_HORSEMAN = 1000, // High number against collisions
+
     // Quest 4740
     NPC_GREYMIST_COASTRUNNNER   = 2202,
     NPC_GREYMIST_WARRIOR        = 2205,

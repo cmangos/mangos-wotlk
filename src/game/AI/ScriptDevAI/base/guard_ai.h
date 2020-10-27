@@ -24,6 +24,28 @@ enum eShattrathGuard
     SPELL_EXILE                     = 39533
 };
 
+enum eHallowsEndGuard
+{
+    SPELL_START_FIRE_TARGET_TEST_GUARD  = 43711,
+    SPELL_FIRE                          = 42074,
+
+    TEXT_ID_AZUREMYST_PEACEKEEPER       = 12119,
+    TEXT_ID_RAZOR_HILL_GRUNT            = 60004,
+    TEXT_ID_DEATHGUARD_FLORENCE         = 60005,
+    TEXT_ID_SILVERMOON_GUARDIAN         = 60006,
+    TEXT_ID_IRONFORGE_MOUNTAINEER       = 60007,
+    TEXT_ID_STORMWIND_GUARD             = 60008,
+    SAY_GUARD_RELIGHT_FIRE              = -1015137,
+    
+    NPC_HEADLESS_HORSEMAN_FIRE          = 23537,
+    NPC_DEATHGUARD_FLORENCE             = 24491,
+    NPC_RAZOR_HILL_GRUNT                = 5953,
+    NPC_IRONFORGE_MOUNTAINEER           = 727,
+    NPC_STORMWIND_GUARD                 = 1423,
+    NPC_SILVERMOON_GUARDIAN             = 16221,
+    NPC_AZUREMYST_PEACEKEEPER           = 18038,
+};
+
 struct guardAI : public ScriptedAI
 {
     public:

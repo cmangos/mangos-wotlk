@@ -37,6 +37,12 @@ enum
     NPC_HIVE_ASHI_DRONES        = 13136,
 
     NPC_HIGHLORD_KRUUL          = 18338,
+
+    // Shade of the Horseman
+    NPC_COSTUMED_ORPHAN_MATRON  = 24519,
+    NPC_TOURING_ORPHAN          = 23712,
+    NPC_MASKED_ORPHAN_MATRON    = 23973,
+    NPC_TRAVELING_ORPHAN        = 23971,
 };
 
 enum ElementalInvasionIndexes
@@ -46,6 +52,52 @@ enum ElementalInvasionIndexes
     ELEMENTAL_FIRE              = 2,
     ELEMENTAL_WATER             = 3,
     MAX_ELEMENTS
+};
+
+// Shade of the Horseman village attack event
+enum ShadeOfTheHorsemanPhase
+{
+    SHADE_PHASE_ALL_CLEAR = 0,
+    SHADE_PHASE_SPAWNED   = 1,
+    SHADE_PHASE_LANDED    = 2,
+    SHADE_PHASE_VICTORY   = 3,
+};
+
+enum ShadeOfTheHorsemanVillages
+{
+    SHADE_VILLAGE_GOLDSHIRE,
+    SHADE_VILLAGE_KHARANOS,
+    SHADE_VILLAGE_AZURE_WATCH,
+    SHADE_VILLAGE_BRILL,
+    SHADE_VILLAGE_RAZOR_HILL,
+    SHADE_VILLAGE_FALCONWING_SQUARE,
+    MAX_VILLAGES
+};
+
+enum
+{
+    TYPE_SHADE_OF_THE_HORSEMAN_ATTACK_PHASE = 1000, // High number against collisions
+    TYPE_SHADE_OF_THE_HORSEMAN_MAX = TYPE_SHADE_OF_THE_HORSEMAN_ATTACK_PHASE + MAX_VILLAGES,
+};
+
+struct ShadeOfTheHorsemanData
+{
+    ShadeOfTheHorsemanData(std::vector<uint32> areaIds) : m_areaIds(areaIds) {}
+    uint32 m_shadeOfTheHorsemanAttackPhases[MAX_VILLAGES];
+
+    void Reset();
+
+    uint32 GetDataAttackPhase(uint32 id) const;
+    void SetDataAttackPhase(uint32 id, uint32 value);
+
+    bool IsConditionFulfilled(uint32 conditionId, uint32 areaId) const;
+
+    uint32 HandleGetData(uint32 id) const;
+    void HandleSetData(uint32 id, uint32 value);
+
+    static uint32 GetTypeFromZoneId(uint32 zoneId);
+
+    std::vector<uint32> m_areaIds;
 };
 
 #endif

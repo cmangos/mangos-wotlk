@@ -30,6 +30,13 @@
 
 enum ZoneIds
 {
+    ZONEID_DUN_MOROGH           = 1,
+    ZONEID_ELWYNN_FOREST        = 12,
+    ZONEID_AZUREMYST_ISLE       = 3524,
+    ZONEID_DUROTAR              = 14,
+    ZONEID_TIRISFAL_GLADES      = 85,
+    ZONEID_EVERSONG_WOODS       = 3430,
+
     ZONEID_STORMWIND_CITY       = 1519,
     ZONEID_DARNASSUS            = 1657,
     ZONEID_IRONFORGE            = 1537,
@@ -56,6 +63,13 @@ enum AreaIds
     AREAID_SHARTUUL_TRANSPORTER = 4008,
     AREAID_DEATHS_DOOR          = 3831,
     AREAID_THERAMORE_ISLE       = 513,
+
+    AREAID_GOLDSHIRE            = 87,
+    AREAID_KHARANOS             = 131,
+    AREAID_AZURE_WATCH          = 3576,
+    AREAID_BRILL                = 159,
+    AREAID_RAZOR_HILL           = 362,
+    AREAID_FALCONWING_SQUARE    = 3665,
 };
 
 enum SpellId

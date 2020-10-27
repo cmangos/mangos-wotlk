@@ -30,6 +30,7 @@ extern void AddSC_world_map_scripts();
 extern void AddSC_boss_highlord_kruul();
 extern void AddSC_war_effort();
 extern void AddSC_world_map_ebon_hold();
+extern void AddSC_shade_of_the_horseman();
 
 // eastern kingdoms
 extern void AddSC_blackrock_depths();                       // blackrock_depths
@@ -522,6 +523,7 @@ void AddScripts()
     AddSC_boss_highlord_kruul();
     AddSC_war_effort();
     AddSC_world_map_ebon_hold();
+    AddSC_shade_of_the_horseman();
 
     // eastern kingdoms
     AddSC_blackrock_depths();                               // blackrock_depths

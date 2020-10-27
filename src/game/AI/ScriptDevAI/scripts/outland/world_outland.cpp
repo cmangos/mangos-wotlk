@@ -16,6 +16,7 @@
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "world_outland.h"
+#include "AI/ScriptDevAI/scripts/world/world_map_scripts.h"
 #include "World/WorldState.h"
 #include "World/WorldStateDefines.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
@@ -208,7 +209,7 @@ float bashirCustomSpawnPositions[][4] =
 
 struct world_map_outland : public ScriptedMap, public TimerManager
 {
-    world_map_outland(Map* pMap) : ScriptedMap(pMap) { Initialize(); }
+    world_map_outland(Map* pMap) : ScriptedMap(pMap), m_shadeData({ AREAID_AZURE_WATCH, AREAID_FALCONWING_SQUARE }) { Initialize(); }
 
     uint8 m_uiEmissaryOfHate_KilledAddCount;
     uint8 m_uiRazaan_KilledAddCount;
@@ -223,10 +224,9 @@ struct world_map_outland : public ScriptedMap, public TimerManager
     uint32 m_deathsDoorEventActive;
     int32 m_deathsDoorNorthHP;
     int32 m_deathsDoorSouthHP;
-
+    // Shartuul
     uint32 m_shartuulEventActive;
     uint32 m_shartuulShieldPercent;
-
     std::tm m_bashirTime;
     uint32 m_bashirTimer;
     BashirPhases m_bashirPhase;
@@ -239,6 +239,8 @@ struct world_map_outland : public ScriptedMap, public TimerManager
     uint32 m_bashirKillCounter;
     std::vector<BashirCombatSpawn*> m_bashirPhaseSpawnData;
     std::vector<BashirCombatSpawn*> m_bashirPhaseSpawnDataUsed;
+    // Shade of the Horseman village attack event
+    ShadeOfTheHorsemanData m_shadeData;
 
     uint32 GetIntroTimer(uint32 eventId)
     {
@@ -460,6 +462,8 @@ struct world_map_outland : public ScriptedMap, public TimerManager
             }
             DespawnBashir(false);
         });
+
+        m_shadeData.Reset();
     }
 
     uint32 GetActionTimer(BashirActions action)
@@ -728,6 +732,13 @@ struct world_map_outland : public ScriptedMap, public TimerManager
         }
     }
 
+    uint32 GetData(uint32 type) const override
+    {
+        if (type >= TYPE_SHADE_OF_THE_HORSEMAN_ATTACK_PHASE && type <= TYPE_SHADE_OF_THE_HORSEMAN_MAX)
+            return m_shadeData.HandleGetData(type);
+        return 0;
+    }
+
     void SetData(uint32 type, uint32 data) override
     {
         switch (type)
@@ -771,6 +782,10 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                     }
                 }
                 break;
+            default:
+                if (type >= TYPE_SHADE_OF_THE_HORSEMAN_ATTACK_PHASE && type <= TYPE_SHADE_OF_THE_HORSEMAN_MAX)
+                    return m_shadeData.HandleSetData(type, data);
+                break;
         }
     }
 
@@ -790,6 +805,9 @@ struct world_map_outland : public ScriptedMap, public TimerManager
             case INSTANCE_CONDITION_ID_BASHIR_IN_PROGRESS:
                 return m_bashirPhase > BASHIR_PHASE_START;
         }
+        
+        if (instanceConditionId >= INSTANCE_CONDITION_ID_FIRE_BRIGADE_PRACTICE_GOLDSHIRE && instanceConditionId <= INSTANCE_CONDITION_ID_LET_THE_FIRES_COME_HORDE)
+            return m_shadeData.IsConditionFulfilled(instanceConditionId, player->GetAreaId());
 
         script_error_log("world_map_outland::CheckConditionCriteriaMeet called with unsupported Id %u. Called with param plr %s, src %s, condition source type %u",
             instanceConditionId, player ? player->GetGuidStr().c_str() : "nullptr", conditionSource ? conditionSource->GetGuidStr().c_str() : "nullptr", conditionSourceType);
