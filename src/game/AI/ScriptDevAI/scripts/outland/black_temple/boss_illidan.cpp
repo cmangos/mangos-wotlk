@@ -440,6 +440,10 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
         }
         InitializeDialogueHelper(m_instance);
         Reset();
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+            {
+                return z < 352.0f;
+            });
     }
 
     instance_black_temple* m_instance;
