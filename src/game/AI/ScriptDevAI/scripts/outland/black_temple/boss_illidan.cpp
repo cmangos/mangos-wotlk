@@ -281,8 +281,8 @@ static const DialogueEntry aEventDialogue[] =
     {SAY_ILLIDAN_SPEECH_3,      NPC_ILLIDAN_STORMRAGE,  3000},
     {DUMMY_EMOTE_ID_3,          0,                      4000},
     {SAY_AKAMA_SPEECH_4,        NPC_AKAMA,              4000},
-    {EQUIP_ID_MAIN_HAND,        0,                      1000},
-    {SAY_ILLIDAN_SPEECH_5,      NPC_ILLIDAN_STORMRAGE,  4000},
+    {SAY_ILLIDAN_SPEECH_5,      NPC_ILLIDAN_STORMRAGE,  1000},
+    {EQUIP_ID_MAIN_HAND,        0,                      4000},
     {NPC_ILLIDAN_STORMRAGE,     0,                      0},
     // Akama leaves fight
     {SAY_ILLIDAN_MINION,        NPC_ILLIDAN_STORMRAGE,  8000},
