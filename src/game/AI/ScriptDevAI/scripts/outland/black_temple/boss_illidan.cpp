@@ -479,6 +479,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
         m_creature->SetImmobilizedState(false);
         SetCombatMovement(true);
         m_creature->SetWalk(false, true);
+        SetCombatScriptStatus(false);
 
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC);
         m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
