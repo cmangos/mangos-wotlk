@@ -891,7 +891,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                 ResetCombatAction(ILLIDAN_ACTION_FLAME_BURST, GetInitialActionTimer(ILLIDAN_ACTION_FLAME_BURST));
                 ResetCombatAction(ILLIDAN_ACTION_SHADOW_BLAST, GetInitialActionTimer(ILLIDAN_ACTION_SHADOW_BLAST));
                 ResetCombatAction(ILLIDAN_ACTION_SHADOW_DEMON, GetInitialActionTimer(ILLIDAN_ACTION_SHADOW_DEMON));
-                ResetCombatAction(ILLIDAN_ACTION_TRANSFORM, 53000u);
+                ResetCombatAction(ILLIDAN_ACTION_TRANSFORM, 50000u);
                 break;
             }
             case PHASE_5_MAIEV:
