@@ -614,7 +614,7 @@ struct npc_amanishi_lookoutAI : public ScriptedAI
             m_instance->SetAkilzonGauntletProgress(true);
             DoScriptText(SAY_GAUNTLET_START, m_creature);
             m_creature->SetWalk(false);
-            m_creature->GetMotionMaster()->MoveWaypoint(0, 3, 1000);
+            m_creature->GetMotionMaster()->MoveWaypoint(0, PATH_FROM_EXTERNAL, 1000);
         }
     }
 
@@ -997,7 +997,7 @@ struct npc_harkorAI : public ScriptedAI
             pCage->Use(m_creature);
 
         m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
-        m_creature->GetMotionMaster()->MoveWaypoint(0, 3, 2000);
+        m_creature->GetMotionMaster()->MoveWaypoint(0, PATH_FROM_EXTERNAL, 2000);
     }
 
     void MovementInform(uint32 motionType, uint32 pointId) override
@@ -1329,7 +1329,7 @@ struct npc_tanzarAI : public ScriptedAI
             pCage->Use(m_creature);
 
         m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
-        m_creature->GetMotionMaster()->MoveWaypoint(0, 3, 1000);
+        m_creature->GetMotionMaster()->MoveWaypoint(0, PATH_FROM_EXTERNAL, 1000);
     }
 
     void MovementInform(uint32 motionType, uint32 pointId) override
@@ -1623,7 +1623,7 @@ struct npc_krazAI : public ScriptedAI
             pCage->Use(m_creature);
 
         m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
-        m_creature->GetMotionMaster()->MoveWaypoint(0, 3, 2000);
+        m_creature->GetMotionMaster()->MoveWaypoint(0, PATH_FROM_EXTERNAL, 2000);
     }
 
     void MovementInform(uint32 motionType, uint32 pointId) override
@@ -1950,7 +1950,7 @@ struct npc_ashliAI : public ScriptedAI
             pCage->Use(m_creature);
 
         m_creature->HandleEmote(EMOTE_ONESHOT_KICK);
-        m_creature->GetMotionMaster()->MoveWaypoint(0, 3, 2000);
+        m_creature->GetMotionMaster()->MoveWaypoint(0, PATH_FROM_EXTERNAL, 2000);
 
         m_uiEvent = 1;
         m_uiEventTimer = 3000;
@@ -1971,23 +1971,23 @@ struct npc_ashliAI : public ScriptedAI
                     m_uiEvent = 2;
                     m_uiEventTimer = 1000;
                     break;
-                case 7:
+                case 8:
                     m_uiEvent = 3;
                     m_uiEventTimer = 3000;
                     break;
-                case 13:
+                case 14:
                     m_uiEvent = 5;
                     m_uiEventTimer = 1000;
                     break;
-                case 21:
+                case 22:
                     m_uiEvent = 7;
                     m_uiEventTimer = 2000;
                     break;
-                case 23:
+                case 24:
                     m_uiEvent = 9;
                     m_uiEventTimer = 1000;
                     break;
-                case 84:
+                case 85:
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_bReachedEntrance = true;
                     break;
