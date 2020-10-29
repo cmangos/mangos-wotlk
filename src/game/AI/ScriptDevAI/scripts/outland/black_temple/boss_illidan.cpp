@@ -433,17 +433,13 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
         SetDeathPrevention(true);
         if (m_instance)
         {
-            m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float x, float y, float z)
+            m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float /*x*/, float /*y*/, float z)
             {
-                return static_cast<ScriptedInstance*>(unit->GetInstanceData())->GetPlayerInMap(true, false) == nullptr;
+                return static_cast<ScriptedInstance*>(unit->GetInstanceData())->GetPlayerInMap(true, false) == nullptr || z < 352.0f;
             });
         }
         InitializeDialogueHelper(m_instance);
         Reset();
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
-            {
-                return z < 352.0f;
-            });
     }
 
     instance_black_temple* m_instance;
