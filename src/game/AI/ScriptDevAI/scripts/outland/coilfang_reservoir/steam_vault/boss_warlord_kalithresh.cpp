@@ -70,7 +70,6 @@ struct boss_warlord_kalithreshAI : public ScriptedAI, public CombatActions
                 return x < -95.7f && y > -439.6f;
             });
         Reset();
-        Reset();
     }
 
     instance_steam_vault* m_instance;
