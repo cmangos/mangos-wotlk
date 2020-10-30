@@ -1495,7 +1495,7 @@ class Player : public Unit
         void AreaExploredOrEventHappens(uint32 questId);
         void ItemAddedQuestCheck(uint32 entry, uint32 count);
         void ItemRemovedQuestCheck(uint32 entry, uint32 count);
-        void KilledMonster(CreatureInfo const* cInfo, ObjectGuid guid);
+        void KilledMonster(CreatureInfo const* cInfo, Creature const* creature);
         void KilledMonsterCredit(uint32 entry, ObjectGuid guid = ObjectGuid());
         void KilledPlayerCredit(uint16 count = 1);
         void KilledPlayerCreditForQuest(uint16 count, Quest const* quest);
