@@ -384,8 +384,8 @@ enum IllidanActions
     ILLIDAN_ACTION_TRANSFORM,
     ILLIDAN_ACTION_TRAP,
     ILLIDAN_ACTION_ENRAGE,
-    ILLIDAN_ACTION_SHADOW_DEMON,
     ILLIDAN_ACTION_FLAME_BURST,
+    ILLIDAN_ACTION_SHADOW_DEMON,
     ILLIDAN_ACTION_SHADOW_BLAST,
     ILLIDAN_ACTION_AGONISING_FLAMES,
     ILLIDAN_ACTION_EYE_BLAST,
@@ -455,6 +455,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
     uint32 m_phaseTransitionStage;
     uint8 m_curEyeBlastLoc;
     ObjectGuid m_curEyeBlastTarget;
+    uint32 m_flameBlasts;
 
     GuidList m_bladesGuidList;
 
@@ -498,7 +499,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             case ILLIDAN_ACTION_ENRAGE: return 40000;
             case ILLIDAN_ACTION_TRAP: return 30000;
             case ILLIDAN_ACTION_SHADOW_DEMON: return 20000;
-            case ILLIDAN_ACTION_FLAME_BURST: return 7500;
+            case ILLIDAN_ACTION_FLAME_BURST: return 7000;
             case ILLIDAN_ACTION_SHADOW_BLAST: return urand(1000, 2000);
             case ILLIDAN_ACTION_AGONISING_FLAMES: return 25000;
             case ILLIDAN_ACTION_EYE_BLAST: return 10000;
@@ -810,9 +811,11 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             {
                 DisableCombatAction(ILLIDAN_ACTION_ENRAGE);
                 DisableCombatAction(ILLIDAN_ACTION_TRAP);
+                // [[fallthrough]]
             }
             case PHASE_3_NORMAL:
             {
+                m_flameBlasts = 0;
                 DoCastSpellIfCan(nullptr, SPELL_DEMON_TRANSFORM_1);
                 m_attackDistance = 80.f;
                 SetCombatScriptStatus(true);
@@ -887,13 +890,12 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                 ResetCombatAction(ILLIDAN_ACTION_FLAME_BURST, GetInitialActionTimer(ILLIDAN_ACTION_FLAME_BURST));
                 ResetCombatAction(ILLIDAN_ACTION_SHADOW_BLAST, GetInitialActionTimer(ILLIDAN_ACTION_SHADOW_BLAST));
                 ResetCombatAction(ILLIDAN_ACTION_SHADOW_DEMON, GetInitialActionTimer(ILLIDAN_ACTION_SHADOW_DEMON));
-                ResetCombatAction(ILLIDAN_ACTION_TRANSFORM, 50000u);
+                ResetCombatAction(ILLIDAN_ACTION_TRANSFORM, 48000u);
                 break;
             }
             case PHASE_5_MAIEV:
                 ResetCombatAction(ILLIDAN_ACTION_ENRAGE, GetInitialActionTimer(ILLIDAN_ACTION_ENRAGE));
                 ResetCombatAction(ILLIDAN_ACTION_TRAP, GetInitialActionTimer(ILLIDAN_ACTION_TRAP));
-                ResetCombatAction(ILLIDAN_ACTION_TRANSFORM, GetInitialActionTimer(ILLIDAN_ACTION_TRANSFORM));
                 // [fallthrough]
             case PHASE_3_NORMAL:
             {
@@ -1246,6 +1248,9 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             }
             case ILLIDAN_ACTION_TRANSFORM:
             {
+                if (m_phase == PHASE_4_DEMON && m_flameBlasts < 3)
+                    return;
+
                 HandlePhaseBehaviour(); // Phase 4 transition start
                 return;
             }
@@ -1273,7 +1278,10 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             case ILLIDAN_ACTION_FLAME_BURST:
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_FLAME_BURST) == CAST_OK)
-                    ResetCombatAction(action, 20000u);
+                {
+                    ResetCombatAction(action, 19500);
+                    ++m_flameBlasts;
+                }
                 return;
             }
             case ILLIDAN_ACTION_SHADOW_BLAST:
