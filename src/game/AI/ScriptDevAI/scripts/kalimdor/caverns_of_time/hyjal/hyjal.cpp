@@ -1589,6 +1589,15 @@ void instance_mount_hyjal::RetreatBase(BaseArea index)
     DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENABLE, 0);
     DoUpdateWorldState(WORLD_STATE_MOUNT_HYJAL_ENEMYCOUNT, 0);
 
+    for (ObjectGuid& guid : m_baseSpawns[index])
+    {
+        if (Creature* spawn = instance->GetCreature(guid))
+        {
+            spawn->SetCanEnterCombat(false);
+            spawn->AI()->SetReactState(REACT_PASSIVE);
+        }
+    }
+
     switch (index)
     {
         case BASE_ALLY:
