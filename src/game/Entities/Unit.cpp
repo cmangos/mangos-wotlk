@@ -10498,10 +10498,7 @@ bool Unit::IsSuppressedTarget(Unit* target) const
 
 bool Unit::IsOfflineTarget(Unit* victim) const
 {
-    if (IsFeigningDeathSuccessfully())
-        return true;
-
-    if (!CanAttack(victim))
+    if (victim->IsFeigningDeathSuccessfully())
         return true;
 
     return false;
