@@ -239,7 +239,7 @@ void HostileRefManager::HandleSuppressed(bool apply, bool immunity)
             HostileReference& ref = static_cast<HostileReference&>(data);
             Unit* source = ref.getSource()->getOwner();
             Unit* target = ref.getTarget();
-            if (!target->IsSuppressedTarget(source))
+            if (!source->IsSuppressedTarget(target))
             {
                 ref.SetSuppressabilityToggle();
                 continue;
