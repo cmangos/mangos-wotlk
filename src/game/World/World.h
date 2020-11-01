@@ -654,7 +654,7 @@ class World
         void ExecuteForAllSessions(T executor)
         {
             for (auto& data : m_sessions)
-                executor(data);
+                executor(*data.second);
         }
 
         Messager<World>& GetMessager() { return m_messager; }
