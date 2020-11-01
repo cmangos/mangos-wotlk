@@ -289,9 +289,9 @@ struct mob_illidari_councilAI : public ScriptedAI, public TimerManager
 ## boss_illidari_council
 ######*/
 
-struct boss_illidari_councilAI : public CombatAI
+struct boss_illidari_councilAI : public RangedCombatAI
 {
-    boss_illidari_councilAI(Creature* creature, uint32 combatActions) : CombatAI(creature, combatActions),
+    boss_illidari_councilAI(Creature* creature, uint32 combatActions) : RangedCombatAI(creature, combatActions),
             m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
@@ -304,7 +304,7 @@ struct boss_illidari_councilAI : public CombatAI
 
     void Reset() override
     {
-        CombatAI::Reset();
+        RangedCombatAI::Reset();
         DoCastSpellIfCan(nullptr, SPELL_BALANCE_OF_POWER, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
@@ -387,7 +387,7 @@ struct boss_gathios_the_shattererAI : public boss_illidari_councilAI
 
     void Reset() override
     {
-        CombatAI::Reset();
+        boss_illidari_councilAI::Reset();
         m_seal = false;
     }
 
@@ -493,7 +493,6 @@ struct boss_high_nethermancer_zerevorAI : public boss_illidari_councilAI
 {
     boss_high_nethermancer_zerevorAI(Creature* creature) : boss_illidari_councilAI(creature, ZEREVOR_ACTION_MAX)
     {
-        m_attackDistance = 30.0f;
         SetMeleeEnabled(false);
 
         AddCombatAction(ZEREVOR_ACTION_BLIZZARD, 10000, 20000);
@@ -501,6 +500,9 @@ struct boss_high_nethermancer_zerevorAI : public boss_illidari_councilAI
         AddCombatAction(ZEREVOR_ACTION_ARCANE_BOLT, 3000u);
         AddCombatAction(ZEREVOR_ACTION_DAMPEN_MAGIC, 2000u);
         AddCombatAction(ZEREVOR_ACTION_ARCANE_EXPLOSION, 13000u);
+
+        SetRangedMode(true, 30.f, TYPE_FULL_CASTER);
+        AddMainSpell(SPELL_ARCANE_BOLT);
     }
 
     void KilledUnit(Unit* /*victim*/) override
