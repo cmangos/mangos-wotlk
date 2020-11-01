@@ -10493,6 +10493,12 @@ bool Unit::IsSuppressedTarget(Unit* target) const
     if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_STUNNED) && target->HasDamageInterruptibleStunAura())
         return true;
 
+#ifdef PRENERF_2_1
+    // 2.3.0 - fear no longer applies suppression - in case of uncomment, need to adjust IsSuppressedTarget
+    if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING))
+        return true;
+#endif
+
     return false;
 }
 

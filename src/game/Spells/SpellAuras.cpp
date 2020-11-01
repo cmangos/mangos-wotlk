@@ -5123,7 +5123,9 @@ void Aura::HandleModFear(bool apply, bool Real)
     GetTarget()->SetFleeing(apply, GetCasterGuid(), GetId());
 
     // 2.3.0 - fear no longer applies suppression - in case of uncomment, need to adjust IsSuppressedTarget
-    // GetTarget()->getHostileRefManager().HandleSuppressed(apply);
+#ifdef PRENERF_2_1
+    GetTarget()->getHostileRefManager().HandleSuppressed(apply);
+#endif
 }
 
 void Aura::HandleFeignDeath(bool apply, bool Real)
