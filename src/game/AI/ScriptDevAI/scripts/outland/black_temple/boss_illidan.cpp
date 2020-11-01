@@ -1954,15 +1954,19 @@ struct npc_cage_trap_triggerAI : public ScriptedAI
     {
         if (!m_activated)
             return;
-
+#ifndef PRENERF_2_1
         // post 2.3
-        //if (!m_active && who->GetEntry() == NPC_ILLIDAN_STORMRAGE && m_creature->IsWithinDistInMap(who, 3.0f))
-        //{
-        //    m_creature->CastSpell(nullptr, SPELL_CAGE_TRAP_DUMMY, TRIGGERED_OLD_TRIGGERED);
+        if (!m_active && who->GetEntry() == NPC_ILLIDAN_STORMRAGE && m_creature->IsWithinDistInMap(who, 3.0f))
+        {
+            if (static_cast<boss_illidan_stormrageAI*>(who->AI())->m_phase != PHASE_4_DEMON && !static_cast<boss_illidan_stormrageAI*>(who->AI())->GetCombatScriptStatus())
+            {
+                m_creature->CastSpell(nullptr, SPELL_CAGE_TRAP_DUMMY, TRIGGERED_OLD_TRIGGERED);
 
-        //    m_active = true;
-        //    m_creature->ForcedDespawn(15000);
-        //}
+                m_active = true;
+                m_creature->ForcedDespawn(15000);
+            }
+        }
+#endif
     }
 
     void UpdateAI(const uint32 /*diff*/) override { }
@@ -2294,14 +2298,17 @@ bool GOUse_go_cage_trap(Player* player, GameObject* go)
     if (trapTrigger)
     {
         // pre 2.3
+#ifdef PRENERF_2_1
         Creature* illidan = GetClosestCreatureWithEntry(go, NPC_ILLIDAN_STORMRAGE, 5.f);
         if (illidan && static_cast<boss_illidan_stormrageAI*>(illidan->AI())->m_phase != PHASE_4_DEMON && !static_cast<boss_illidan_stormrageAI*>(illidan->AI())->GetCombatScriptStatus())
         {
             trapTrigger->CastSpell(nullptr, SPELL_CAGE_TRAP_DUMMY, TRIGGERED_OLD_TRIGGERED);
             trapTrigger->ForcedDespawn(15000);
         }
+#else
         // post 2.3
-        // static_cast<npc_cage_trap_triggerAI*>(trapTrigger->AI())->m_activated = true;
+        static_cast<npc_cage_trap_triggerAI*>(trapTrigger->AI())->m_activated = true;
+#endif
     }
     return true;
 }
