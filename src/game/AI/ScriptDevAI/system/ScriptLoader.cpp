@@ -147,6 +147,7 @@ extern void AddSC_zulgurub();
 extern void AddSC_alterac_mountains();
 extern void AddSC_arathi_highlands();
 extern void AddSC_blasted_lands();
+extern void AddSC_boss_kazzakAI();
 extern void AddSC_burning_steppes();
 extern void AddSC_dun_morogh();
 extern void AddSC_eastern_plaguelands();
@@ -638,6 +639,7 @@ void AddScripts()
     AddSC_alterac_mountains();
     AddSC_arathi_highlands();
     AddSC_blasted_lands();
+    AddSC_boss_kazzakAI();
     AddSC_burning_steppes();
     AddSC_dun_morogh();
     AddSC_eastern_plaguelands();
