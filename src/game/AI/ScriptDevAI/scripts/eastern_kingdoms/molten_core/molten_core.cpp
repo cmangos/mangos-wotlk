@@ -293,7 +293,7 @@ void instance_molten_core::ExecuteChatCommand(ChatHandler* handler, char* args)
             return;
         }
 
-        SpawnMajordomo(handler->GetPlayer(), true, summonPos);
+        SpawnMajordomo(handler->GetSession()->GetPlayer(), true, summonPos);
     }
 }
 

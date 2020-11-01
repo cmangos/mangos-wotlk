@@ -1043,7 +1043,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 case BASHIR_PHASE_3:
                 case BASHIR_PHASE_TRANSITION_3:
                 case BASHIR_PHASE_ALL_VENDORS_SPAWNED:
-                    StartBashirAtCustomSpot(BashirPhases(startPhase), handler->GetPlayer());
+                    StartBashirAtCustomSpot(BashirPhases(startPhase), handler->GetSession()->GetPlayer());
                     break;
                 case BASHIR_DESPAWN:
                     DespawnBashir(true);
