@@ -956,7 +956,7 @@ class WorldSession
 
         std::deque<uint32> GetOpcodeHistory();
 
-        auto& GetMessager() { return m_messager; }
+        Messager<WorldSession>& GetMessager() { return m_messager; }
     private:
         // Additional private opcode handlers
         void HandleComplainMail(WorldPacket& recv_data);
