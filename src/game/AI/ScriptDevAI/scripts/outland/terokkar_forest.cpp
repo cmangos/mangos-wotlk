@@ -1033,6 +1033,7 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
         }
         DoCastSpellIfCan(m_creature, SPELL_CAGE_SUMMON);
         m_creature->SetActiveObjectState(false);
+        m_creature->SetImmuneToNPC(true); // hack, cage should break los and prevent any interaction with npcs outside the cage befor the escort is started
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 uiMiscValue) override
@@ -1040,6 +1041,7 @@ struct npc_skyguard_prisonerAI : public npc_escortAI
         if (eventType == AI_EVENT_START_ESCORT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
             m_creature->SetFactionTemporary(FACTION_ESCORT_N_NEUTRAL_ACTIVE, TEMPFACTION_RESTORE_RESPAWN);
+            m_creature->SetImmuneToNPC(false); // hack, cage should break los and prevent any interaction with npcs outside the cage befor the escort is started
 
             Start(false, (Player*)pInvoker, GetQuestTemplateStore(uiMiscValue));
 
