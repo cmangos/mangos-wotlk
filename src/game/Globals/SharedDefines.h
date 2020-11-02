@@ -447,9 +447,9 @@ enum SpellAttributesEx4
     SPELL_ATTR_EX4_CAST_ONLY_IN_OUTLAND        = 0x04000000,// 26 Can only be used in Outland.
     SPELL_ATTR_EX4_UNK27                       = 0x08000000,// 27
     SPELL_ATTR_EX4_UNK28                       = 0x10000000,// 28
-    SPELL_ATTR_EX4_UNK29                       = 0x20000000,// 29 Related to client selfcheck about dispel in 2.4.3 client but no spells, CC seems to have them
-    SPELL_ATTR_EX4_UNK30                       = 0x40000000,// 30
-    SPELL_ATTR_EX4_UNK31                       = 0x80000000,// 31
+    SPELL_ATTR_EX4_UNK29                       = 0x20000000,// 29 Related to client check about dispel, CC seems to have them - dispel effect 0
+    SPELL_ATTR_EX4_UNK30                       = 0x40000000,// 30 - dispel effect 1
+    SPELL_ATTR_EX4_UNK31                       = 0x80000000,// 31 - dispel effect 2
 };
 
 enum SpellAttributesEx5
