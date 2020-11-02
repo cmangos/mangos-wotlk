@@ -1,4 +1,4 @@
-ALTER TABLE character_db_version CHANGE COLUMN required_14024_01_characters_random_battleground required_14025_00_characters_item_instance_data_drop bit;
+ALTER TABLE character_db_version CHANGE COLUMN required_14024_01_characters_battleground_random required_14025_00_characters_item_instance_data_drop bit;
 
 -- WARNING: You MUST use iteminstance_converter script in contrib folder to preserve character item data.
 -- Follow the README instructions located in the tool's folder.
