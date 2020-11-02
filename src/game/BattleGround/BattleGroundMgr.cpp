@@ -1457,7 +1457,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg)
     else
     {
         data << uint8(1);                                  // bg ended
-        data << uint8(bg->GetWinner());                    // who wins
+        data << uint8(bg->GetWinner());                    // who won
     }
 
     data << (int32)(bg->GetPlayerScoresSize());
@@ -1482,10 +1482,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg)
                 if (Player* player = sObjectMgr.GetPlayer(itr->first))
                     team = player->GetTeam();
 
-            if (bg->GetWinner() == team && team != TEAM_NONE)
-                data << uint8(1);
-            else
-                data << uint8(0);
+            data << uint8(team == ALLIANCE ? 1 : 0); // green or yellow
         }
         data << (int32)score->damageDone;            // damage done
         data << (int32)score->healingDone;           // healing done
