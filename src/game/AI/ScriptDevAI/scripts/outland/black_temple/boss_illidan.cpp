@@ -96,8 +96,8 @@ enum
     SPELL_SHEAR                     = 41032,                // Reduces Max. Health by 60% for 7 seconds. Can stack 19 times. 1.5 second cast
     SPELL_FLAME_CRASH               = 40832,                // Summons an invis/unselect passive mob that has an uiAura of flame in a circle around him.
     SPELL_DRAW_SOUL                 = 40904,                // 5k Shadow Damage in front of him. Heals Illidan for 100k health (script effect)
-    SPELL_PARASITIC_SHADOWFIEND     = 41917,                // DoT of 3k Shadow every 2 seconds. Lasts 10 seconds. (Script effect: Summon 2 parasites once the debuff has ticked off)
-    // SPELL_SUMMON_PARASITICS       = 41915,               // Summons 2 Parasitic Shadowfiends on the target. Handled in core.
+    SPELL_PARASITIC_SHADOWFIEND_BOSS= 41917,                // DoT of 3k Shadow every 2 seconds. Lasts 10 seconds. (Script effect: Summon 2 parasites once the debuff has ticked off)
+    SPELL_SUMMON_PARASITICS         = 41915,                // Summons 2 Parasitic Shadowfiends on the target. Handled in core.
     SPELL_AGONIZING_FLAMES          = 40834,                // triggers 40932
     SPELL_FRENZY                    = 40683,                // Increases damage by 50% and attack speed by 30%. 20 seconds, PHASE 5 ONLY
 
@@ -169,6 +169,7 @@ enum
 
     // Parasitic Shadowfiend
     SPELL_PARASITIC_SHADOWFIEND_P   = 41913,
+    SPELL_PARASITIC_SHADOWFIEND_ADD = 41914,
     SPELL_SHADOWFORM_PARASITE       = 34429,
 
     // Shadow Demon
@@ -1322,8 +1323,8 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
 #ifndef NO_SHADOWFIEND
             case ILLIDAN_ACTION_SHADOW_FIEND:
             {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PARASITIC_SHADOWFIEND, SELECT_FLAG_PLAYER))
-                    if (DoCastSpellIfCan(target, SPELL_PARASITIC_SHADOWFIEND) == CAST_OK)
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_PARASITIC_SHADOWFIEND_BOSS, SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, SPELL_PARASITIC_SHADOWFIEND_BOSS) == CAST_OK)
                         ResetCombatAction(action, 25000u);
                 return;
             }
@@ -2275,7 +2276,7 @@ struct npc_parasitic_shadowfiendAI : public ScriptedAI, public TimerManager
     {
         ScriptedAI::JustRespawned();
         DoCastSpellIfCan(nullptr, SPELL_SHADOWFORM_PARASITE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        DoCastSpellIfCan(nullptr, SPELL_PARASITIC_SHADOWFIEND_P, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_PARASITIC_SHADOWFIEND_ADD, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         m_creature->SetCorpseDelay(1);
     }
 
@@ -2312,6 +2313,28 @@ bool GOUse_go_cage_trap(Player* player, GameObject* go)
     }
     return true;
 }
+
+struct ParasiticShadowfiendAura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            if (aura->GetRemoveMode() != AURA_REMOVE_BY_DISPEL)
+                aura->GetTarget()->CastSpell(nullptr, SPELL_SUMMON_PARASITICS, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct ShadowPrison : public AuraScript
+{
+    void OnApply(Aura * aura, bool apply) const override
+    {
+        if (apply)
+        {
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_PARASITIC_SHADOWFIEND_BOSS, nullptr, AURA_REMOVE_BY_DISPEL);
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_PARASITIC_SHADOWFIEND_ADD, nullptr, AURA_REMOVE_BY_DISPEL);
+        }
+    }
+};
 
 UnitAI* GetAI_boss_illidan_stormrage(Creature* creature)
 {
@@ -2401,4 +2424,7 @@ void AddSC_boss_illidan()
     pNewScript->Name = "go_cage_trap";
     pNewScript->pGOUse = &GOUse_go_cage_trap;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<ShadowPrison>("spell_shadow_prison");
+    RegisterAuraScript<ParasiticShadowfiendAura>("spell_parasitic_shadowfiend");
 }
