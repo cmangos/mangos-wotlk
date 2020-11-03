@@ -245,7 +245,7 @@ struct boss_kalecgosAI : public CombatAI
             case 0:
             {
                 m_creature->HandleEmote(EMOTE_ONESHOT_LIFTOFF);
-                m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM | UNIT_BYTE1_FLAG_ALWAYS_STAND);
+                m_creature->SetByteValue(UNIT_FIELD_BYTES_1, UNIT_BYTES_1_OFFSET_MISC_FLAGS, UNIT_BYTE1_FLAG_FLY_ANIM | UNIT_BYTE1_FLAG_ALWAYS_STAND);
                 m_creature->SetLevitate(true);
                 m_creature->SetHover(true);
                 ResetTimer(KALECGOS_EXIT_TIMER, 4000);
