@@ -254,7 +254,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (43101,'spell_head_requests_body'),
 (35831,'spell_ring_of_flame'),
 (41914,'spell_parasitic_shadowfiend'),
-(41917,'spell_parasitic_shadowfiend');
+(41917,'spell_parasitic_shadowfiend'),
+(40647,'spell_shadow_prison');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
