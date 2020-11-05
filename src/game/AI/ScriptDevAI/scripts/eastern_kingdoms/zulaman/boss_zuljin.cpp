@@ -350,7 +350,7 @@ struct boss_zuljinAI : public CombatAI
         SetCombatMovement(false);
         SetMeleeEnabled(false);
         m_creature->SetTarget(nullptr);
-        m_creature->GetMotionMaster()->MovePoint(POINT_ID_CENTER, fZuljinMoveLoc[0], fZuljinMoveLoc[1], fZuljinMoveLoc[2]);
+        m_creature->GetMotionMaster()->MovePoint(POINT_ID_CENTER, fZuljinMoveLoc[0], fZuljinMoveLoc[1], fZuljinMoveLoc[2], FORCED_MOVEMENT_RUN);
         DoScriptText(aZuljinPhases[m_phase + 1].yellId, m_creature);
 
         // don't do this after troll phase
