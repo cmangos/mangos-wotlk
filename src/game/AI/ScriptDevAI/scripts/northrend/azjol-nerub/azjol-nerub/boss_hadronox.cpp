@@ -65,7 +65,7 @@ struct boss_hadronoxAI : public ScriptedAI
     {
         m_pInstance = (instance_azjol_nerub*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_uiGauntletStartTimer = 1000;
+        m_uiGauntletStartTimer = 0;
         Reset();
     }
 
@@ -102,6 +102,12 @@ struct boss_hadronoxAI : public ScriptedAI
             return;
 
         ScriptedAI::AttackStart(pWho);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+            m_uiGauntletStartTimer = 1000;
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -214,9 +220,15 @@ struct boss_hadronoxAI : public ScriptedAI
                 {
                     if (Creature* pTrigger = m_creature->GetMap()->GetCreature(*itr))
                     {
-                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_CHAMPION, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_NECROMANCER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_CRYPT_FIEND, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+                        uint32 summonSpellEntry = 0;
+                        switch (urand(0, 2))
+                        {
+                            case 0: summonSpellEntry = SPELL_SUMMON_CHAMPION;    break;
+                            case 1: summonSpellEntry = SPELL_SUMMON_NECROMANCER; break;
+                            case 2: summonSpellEntry = SPELL_SUMMON_CRYPT_FIEND; break;
+                        }
+
+                        pTrigger->CastSpell(pTrigger, summonSpellEntry, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                     }
                 }
 

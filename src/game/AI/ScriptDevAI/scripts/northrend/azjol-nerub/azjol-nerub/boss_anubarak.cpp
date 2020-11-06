@@ -180,9 +180,6 @@ struct boss_anubarakAI : public ScriptedAI
                     pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
                 }
                 break;
-            case NPC_IMPALE_TARGET:
-                pSummoned->CastSpell(pSummoned, SPELL_IMPALE_VISUAL, TRIGGERED_OLD_TRIGGERED);
-                break;
             default:
                 break;
         }
@@ -230,28 +227,30 @@ struct boss_anubarakAI : public ScriptedAI
 
             if (m_creature->GetHealthPercent() < 100 - 25 * m_uiSubmergePhase)
             {
-                DoCastSpellIfCan(m_creature, SPELL_IMPALE_AURA, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUBMERGE, CAST_TRIGGERED);
-                DoScriptText(urand(0, 1) ? SAY_SUBMERGE_1 : SAY_SUBMERGE_2, m_creature);
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
-                m_uiPhase = PHASE_SUBMERGED;
-                m_bIsFirstWave = true;
-                m_uiSummonTimer = 5000;
-
-                // Emerge timers aren't the same. They depend on the submerge phase
-                switch (m_uiSubmergePhase)
+                if (DoCastSpellIfCan(m_creature, SPELL_SUBMERGE) == CAST_OK)
                 {
-                    case 1:
-                        m_uiEmergeTimer = 20000;
-                        break;
-                    case 2:
-                        m_uiEmergeTimer = 45000;
-                        break;
-                    case 3:
-                        m_uiEmergeTimer = 50000;
-                        break;
+                    DoCastSpellIfCan(m_creature, SPELL_IMPALE_AURA, CAST_TRIGGERED);
+                    DoScriptText(urand(0, 1) ? SAY_SUBMERGE_1 : SAY_SUBMERGE_2, m_creature);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+                    m_uiPhase = PHASE_SUBMERGED;
+                    m_bIsFirstWave = true;
+                    m_uiSummonTimer = 5000;
+
+                    // Emerge timers aren't the same. They depend on the submerge phase
+                    switch (m_uiSubmergePhase)
+                    {
+                        case 1:
+                            m_uiEmergeTimer = 20000;
+                            break;
+                        case 2:
+                            m_uiEmergeTimer = 45000;
+                            break;
+                        case 3:
+                            m_uiEmergeTimer = 50000;
+                            break;
+                    }
+                    ++m_uiSubmergePhase;
                 }
-                ++m_uiSubmergePhase;
             }
 
             DoMeleeAttackIfReady();
@@ -341,6 +340,7 @@ struct npc_impale_targetAI : public Scripted_NoMovementAI
 
     void Reset() override
     {
+        DoCastSpellIfCan(m_creature, SPELL_IMPALE_VISUAL);
         m_uiImpaleTimer = 3000;
     }
 
