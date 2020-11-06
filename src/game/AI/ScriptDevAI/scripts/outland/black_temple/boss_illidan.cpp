@@ -2324,100 +2324,60 @@ struct ParasiticShadowfiendAura : public AuraScript
     }
 };
 
-struct ShadowPrison : public AuraScript
+struct ShadowPrison : public SpellScript
 {
-    void OnApply(Aura * aura, bool apply) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        if (apply)
+        if (effIdx == EFFECT_INDEX_2 && spell->GetUnitTarget())
         {
-            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_PARASITIC_SHADOWFIEND_BOSS, nullptr, AURA_REMOVE_BY_DISPEL);
-            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_PARASITIC_SHADOWFIEND_ADD, nullptr, AURA_REMOVE_BY_DISPEL);
+            spell->GetUnitTarget()->RemoveAurasDueToSpell(SPELL_PARASITIC_SHADOWFIEND_BOSS, nullptr, AURA_REMOVE_BY_DISPEL);
+            spell->GetUnitTarget()->RemoveAurasDueToSpell(SPELL_PARASITIC_SHADOWFIEND_ADD, nullptr, AURA_REMOVE_BY_DISPEL);
         }
     }
 };
-
-UnitAI* GetAI_boss_illidan_stormrage(Creature* creature)
-{
-    return new boss_illidan_stormrageAI(creature);
-}
-
-UnitAI* GetAI_npc_akama_illidan(Creature* creature)
-{
-    return new npc_akama_illidanAI(creature);
-}
-
-UnitAI* GetAI_boss_maiev(Creature* creature)
-{
-    return new boss_maievAI(creature);
-}
-
-UnitAI* GetAI_mob_flame_of_azzinoth(Creature* creature)
-{
-    return new npc_flame_of_azzinothAI(creature);
-}
-
-UnitAI* GetAI_npc_cage_trap_trigger(Creature* creature)
-{
-    return new npc_cage_trap_triggerAI(creature);
-}
-
-UnitAI* GetAI_npc_shadow_demon(Creature* creature)
-{
-    return new npc_shadow_demonAI(creature);
-}
-
-UnitAI* GetAI_npc_blade_of_azzinoth(Creature* creature)
-{
-    return new npc_blade_of_azzinothAI(creature);
-}
-
-UnitAI* GetAI_npc_parasitic_shadowfiend(Creature* creature)
-{
-    return new npc_parasitic_shadowfiendAI(creature);
-}
 
 void AddSC_boss_illidan()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_illidan_stormrage";
-    pNewScript->GetAI = &GetAI_boss_illidan_stormrage;
+    pNewScript->GetAI = &GetNewAIInstance<boss_illidan_stormrageAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_akama_illidan";
-    pNewScript->GetAI = &GetAI_npc_akama_illidan;
+    pNewScript->GetAI = &GetNewAIInstance<npc_akama_illidanAI>;
     pNewScript->pGossipHello = &GossipHello_npc_akama_illidan;
     pNewScript->pGossipSelect = &GossipSelect_npc_akama_illidan;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_maiev_shadowsong";
-    pNewScript->GetAI = &GetAI_boss_maiev;
+    pNewScript->GetAI = &GetNewAIInstance<boss_maievAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_flame_of_azzinoth";
-    pNewScript->GetAI = &GetAI_mob_flame_of_azzinoth;
+    pNewScript->GetAI = &GetNewAIInstance<npc_flame_of_azzinothAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_blade_of_azzinoth";
-    pNewScript->GetAI = &GetAI_npc_blade_of_azzinoth;
+    pNewScript->GetAI = &GetNewAIInstance<npc_blade_of_azzinothAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_cage_trap_trigger";
-    pNewScript->GetAI = &GetAI_npc_cage_trap_trigger;
+    pNewScript->GetAI = &GetNewAIInstance<npc_cage_trap_triggerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_shadow_demon";
-    pNewScript->GetAI = &GetAI_npc_shadow_demon;
+    pNewScript->GetAI = &GetNewAIInstance<npc_shadow_demonAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_parasitic_shadowfiend";
-    pNewScript->GetAI = &GetAI_npc_parasitic_shadowfiend;
+    pNewScript->GetAI = &GetNewAIInstance<npc_parasitic_shadowfiendAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -2425,6 +2385,6 @@ void AddSC_boss_illidan()
     pNewScript->pGOUse = &GOUse_go_cage_trap;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<ShadowPrison>("spell_shadow_prison");
     RegisterAuraScript<ParasiticShadowfiendAura>("spell_parasitic_shadowfiend");
+    RegisterSpellScript<ShadowPrison>("spell_shadow_prison");
 }
