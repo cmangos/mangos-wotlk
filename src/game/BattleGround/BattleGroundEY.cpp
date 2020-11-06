@@ -509,7 +509,7 @@ void BattleGroundEY::HandlePlayerClickedOnFlag(Player* source, GameObject* go)
     if (GetStatus() != STATUS_IN_PROGRESS || IsFlagPickedUp() || !source->IsWithinDistInMap(go, 10))
         return;
 
-    DEBUG_LOG("BattleGroundEY: Team %u has taken the flag, gameobject entry.", source->GetTeam(), go->GetEntry());
+    DEBUG_LOG("BattleGroundEY: Team %u has taken the flag, gameobject entry %u.", source->GetTeam(), go->GetEntry());
 
     // remove world state for base flag
     if (m_flagState == EY_FLAG_STATE_ON_BASE)
