@@ -2223,6 +2223,20 @@ bool GOUse_go_wooden_door(Player* player, GameObject* go)
     return false;
 }
 
+enum
+{
+    SPELL_CALL_OF_THE_BEAST = 43360,
+};
+
+struct CallOfTheBeast : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->CastSpell(nullptr, SPELL_CALL_OF_THE_BEAST, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_zulaman()
 {
     Script* pNewScript = new Script;
@@ -2289,4 +2303,6 @@ void AddSC_zulaman()
     pNewScript->Name = "go_wooden_door";
     pNewScript->pGOUse = &GOUse_go_wooden_door;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<CallOfTheBeast>("spell_call_of_the_beast");
 }
