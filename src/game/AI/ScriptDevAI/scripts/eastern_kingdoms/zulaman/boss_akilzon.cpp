@@ -96,7 +96,7 @@ struct boss_akilzonAI : public CombatAI
         AddCombatAction(AKILZON_ACTION_SUMMON_EAGLE, 62000u);
         AddCustomAction(AKILZON_WIND_WALL_DELAY, true, [&]()
         {
-            if (m_creature->IsInCombat())
+            if (m_creature->IsInCombat() && !m_creature->GetCombatManager().IsEvadingHome())
                 m_instance->DoUseDoorOrButton(GO_WIND_DOOR);
         });
     }
