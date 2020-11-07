@@ -740,20 +740,29 @@ struct boss_essence_of_angerAI : public ScriptedAI, public CombatActions
 
 struct npc_enslaved_soulAI : public ScriptedAI, TimerManager
 {
-    npc_enslaved_soulAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    npc_enslaved_soulAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_postpone(false)
     {
-        SetReactState(REACT_DEFENSIVE);
+        SetReactState(REACT_PASSIVE);
         AddCustomAction(1, 2000u, [&]()
         {
+            if (m_creature->GetCombatManager().IsEvadingHome())
+            {
+                 m_postpone = true;
+                 return;
+            }
+            SetReactState(REACT_AGGRESSIVE);
             if (Creature* reliquary = m_instance->GetSingleCreatureFromStorage(NPC_RELIQUARY_COMBAT_TRIGGER))
                 if (Unit* target = reliquary->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                     AttackStart(target);
             m_creature->SetInCombatWithZone();
+            if (!m_creature->IsInCombat())
+                JustReachedHome();
         });
         Reset();
     }
 
     ScriptedInstance* m_instance;
+    bool m_postpone;
 
     void Reset() override
     {
@@ -782,10 +791,17 @@ struct npc_enslaved_soulAI : public ScriptedAI, TimerManager
 
     void JustReachedHome() override
     {
+        if (m_postpone)
+        {
+            m_postpone = false;
+            ResetTimer(1, 1);
+            return;
+        }
+
         // Reset encounter and despawn the spirit
         if (m_instance)
         {
-            if (Creature* pReliquary = m_instance->GetSingleCreatureFromStorage(NPC_RELIQUARY_OF_SOULS))
+            if (Creature* pReliquary = m_instance->GetSingleCreatureFromStorage(NPC_RELIQUARY_COMBAT_TRIGGER))
                 pReliquary->AI()->EnterEvadeMode();
         }
 
