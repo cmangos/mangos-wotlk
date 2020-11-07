@@ -2280,12 +2280,6 @@ struct npc_parasitic_shadowfiendAI : public ScriptedAI, public TimerManager
         m_creature->SetCorpseDelay(1);
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
-    {
-        if (eventType == AI_EVENT_CUSTOM_A) // Parasitic Shadowfiend hit target
-            m_creature->ForcedDespawn();
-    }
-
     void UpdateAI(const uint32 diff)
     {
         UpdateTimers(diff);
@@ -2314,8 +2308,18 @@ bool GOUse_go_cage_trap(Player* player, GameObject* go)
     return true;
 }
 
-struct ParasiticShadowfiendAura : public AuraScript
+struct ParasiticShadowfiendAura : public SpellScript, public AuraScript
 {
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_1) // on hit despawn
+        {
+            Unit* target = spell->GetUnitTarget();
+            if (target->IsCreature())
+                static_cast<Creature*>(target)->ForcedDespawn();
+        }
+    }
+
     void OnApply(Aura* aura, bool apply) const override
     {
         if (!apply)
@@ -2385,6 +2389,6 @@ void AddSC_boss_illidan()
     pNewScript->pGOUse = &GOUse_go_cage_trap;
     pNewScript->RegisterSelf();
 
-    RegisterAuraScript<ParasiticShadowfiendAura>("spell_parasitic_shadowfiend");
+    RegisterScript<ParasiticShadowfiendAura>("spell_parasitic_shadowfiend");
     RegisterSpellScript<ShadowPrison>("spell_shadow_prison");
 }

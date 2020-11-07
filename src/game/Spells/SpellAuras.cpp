@@ -6613,10 +6613,6 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 if (m_removeMode == AURA_REMOVE_BY_DEFAULT)
                     target->CastSpell(target, 35202, TRIGGERED_OLD_TRIGGERED); // Paralysis
                 break;
-            case 41914: // Parasitic Shadowfiend - handle summoning of two Shadowfiends on DoT expire
-            case 41917:
-                target->CastSpell(nullptr, 41915, TRIGGERED_OLD_TRIGGERED);
-                break;
             case 39044: // Serpentshrine Parasite
             case 39053:
                 if (m_removeMode == AURA_REMOVE_BY_DEATH && target->GetTypeId() == TYPEID_PLAYER)

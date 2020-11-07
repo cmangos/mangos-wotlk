@@ -9466,13 +9466,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 41914:                                 // Parasitic Shadowfiend
-                {
-                    if (!unitTarget || !m_caster->AI())
-                        return;
-                    m_caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, unitTarget, m_caster);
-                    return;
-                }
                 case 42179:                                 // Summon Amani'shi Sentries
                 {
                     if (!unitTarget)
