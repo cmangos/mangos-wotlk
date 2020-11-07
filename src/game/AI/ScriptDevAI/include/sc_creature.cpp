@@ -403,7 +403,6 @@ enum
     NPC_AKILZON                 = 23574,
     NPC_NALORAKK                = 23576,
     NPC_JANALAI                 = 23578,
-    NPC_HALAZZI                 = 23577,
     NPC_MALACRASS               = 24239,
 
     NPC_SINDRAGOSA              = 36853,
@@ -457,10 +456,6 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
             break;
         case NPC_JANALAI:
             if (x < -8.f && x > -57.f)
-                return false;
-            break;
-        case NPC_HALAZZI:
-            if (x > 307.f && y > 1036.f)
                 return false;
             break;
         case NPC_MALACRASS:
