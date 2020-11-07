@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: GO_Scripts
 SD%Complete: 100
-SDComment: Quest support: 5097, 5098, 12557, 14092/14076.
+SDComment: Quest support: 1920, 1960, 5097, 5098, 12557, 14092/14076.
 SDCategory: Game Objects
 EndScriptData */
 
@@ -30,6 +30,7 @@ go_tele_to_violet_stand
 go_andorhal_tower
 go_scourge_enclosure
 go_lab_work_reagents
+go_containment_coffer
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
@@ -1116,6 +1117,47 @@ GameObjectAI* GetAI_go_unadorned_spike(GameObject* go)
     return new go_unadorned_spike(go);
 }
 
+/*######################
+## go_containment_coffer
+######################*/
+
+enum
+{
+    NPC_RIFT_SPAWN = 6492
+};
+
+struct go_containment : public GameObjectAI
+{
+    go_containment(GameObject* go) : GameObjectAI(go), m_activated(false), m_startTimer(2000) {}
+
+    bool m_activated;
+    uint32 m_startTimer;
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!m_activated)
+        {
+            if (m_startTimer < diff)
+            {
+                // Nearest Rift Spawn NPC must activate this GO_TYPE_BUTTON in order to trigger the linked trap
+                if (Creature* riftSpawn = GetClosestCreatureWithEntry(m_go, NPC_RIFT_SPAWN, 5.0f))
+                {
+                    m_go->Use(riftSpawn);
+                    m_activated = true;
+                    m_startTimer = 0;
+                }
+            }
+            else
+                m_startTimer -= diff;
+        }
+    }
+};
+
+GameObjectAI* GetAI_go_containment(GameObject* go)
+{
+    return new go_containment(go);
+}
+
 void AddSC_go_scripts()
 {
     Script* pNewScript = new Script;
@@ -1221,5 +1263,10 @@ void AddSC_go_scripts()
     pNewScript = new Script;
     pNewScript->Name = "go_unadorned_spike";
     pNewScript->GetGameObjectAI = &GetAI_go_unadorned_spike;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_containment_coffer";
+    pNewScript->GetGameObjectAI = &GetAI_go_containment;
     pNewScript->RegisterSelf();
 }
