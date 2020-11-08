@@ -379,7 +379,7 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
             break;
         case TYPE_AKILZON:
             if (data != IN_PROGRESS) // start is done with delay in boss script
-                DoUseDoorOrButton(GO_WIND_DOOR);
+                DoUseOpenableObject(GO_WIND_DOOR, true);
             if (data == DONE)
             {
                 DoUseDoorOrButton(GO_ALTAR_TORCH_EAGLE_GOD);
@@ -438,7 +438,7 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
         case TYPE_ZULJIN:
             m_auiEncounter[type] = data;
             if (data != IN_PROGRESS) // start is done with delay in boss script
-                DoUseDoorOrButton(GO_FIRE_DOOR);
+                DoUseOpenableObject(GO_WIND_DOOR, true);
             if (data == DONE)
             {
                 if (Creature* pTanzar = instance->GetCreature(m_aEventNpcInfo[INDEX_NALORAKK].npGuid))
