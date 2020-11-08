@@ -1875,7 +1875,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     if (procSpell->SpellFamilyFlags & uint64(0x0000000000008000))
                         triggered_spell_id = 40441;
                     // Renew
-                    else if (procSpell->SpellFamilyFlags & uint64(0x0000000000000010))
+                    else if (procSpell->SpellFamilyFlags & uint64(0x0000000000000040))
                         triggered_spell_id = 40440;
                     else
                         return SPELL_AURA_PROC_FAILED;
