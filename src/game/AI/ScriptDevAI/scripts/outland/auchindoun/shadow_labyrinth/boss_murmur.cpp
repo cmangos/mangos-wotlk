@@ -134,7 +134,7 @@ struct boss_murmurAI : public Scripted_NoMovementAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->isInCombat())
+        if (!m_creature->IsInCombat())
         {
             if (m_uiAttackTimer)
             {
