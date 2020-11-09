@@ -317,6 +317,8 @@ bool AreaTrigger_at_shattered_halls(Player* pPlayer, AreaTriggerEntry const* /*p
     return true;
 }
 
+// TODO: Port SHH gauntlet script from tbc after GO casting is implemented
+
 void AddSC_instance_shattered_halls()
 {
     Script* pNewScript = new Script;
