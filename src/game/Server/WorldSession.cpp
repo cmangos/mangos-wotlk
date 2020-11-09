@@ -183,7 +183,7 @@ void WorldSession::SetExpansion(uint8 expansion)
 {
     m_expansion = expansion;
     if (_player)
-        _player->OnExpansionChange(expansion);
+        _player->OnExpansionChange();
     SendAuthOk(); // this is a hack but does what we need - resets expansion setting in client
 }
 
