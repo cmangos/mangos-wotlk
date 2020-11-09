@@ -42,7 +42,8 @@
 #include "Loot/LootMgr.h"
 #include "Cinematics/CinematicMgr.h"
 
-#include<vector>
+#include <functional>
+#include <vector>
 
 struct Mail;
 class Channel;

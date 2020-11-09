@@ -10,6 +10,8 @@
 #include "Server/SQLStorages.h"
 #include "Spells/SpellMgr.h"
 
+#include <functional>
+
 class Player;
 class Creature;
 class UnitAI;

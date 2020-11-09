@@ -31,6 +31,7 @@
 #include "Entities/Player.h"
 #include "Entities/Corpse.h"
 
+#include <functional>
 #include <mutex>
 
 class Unit;

@@ -27,6 +27,8 @@
 #include "Grids/GridStates.h"
 #include "Maps/MapUpdater.h"
 
+#include <functional>
+
 class Transport;
 class BattleGround;
 

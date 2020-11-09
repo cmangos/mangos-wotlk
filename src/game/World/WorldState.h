@@ -25,6 +25,7 @@
 #include "Entities/Player.h"
 #include "Globals/SharedDefines.h"
 #include <atomic>
+#include <functional>
 #include <string>
 
 enum ZoneIds

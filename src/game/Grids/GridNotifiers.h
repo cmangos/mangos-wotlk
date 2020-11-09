@@ -28,6 +28,7 @@
 #include "Entities/Player.h"
 #include "Entities/Unit.h"
 
+#include <functional>
 #include <memory>
 
 namespace MaNGOS
