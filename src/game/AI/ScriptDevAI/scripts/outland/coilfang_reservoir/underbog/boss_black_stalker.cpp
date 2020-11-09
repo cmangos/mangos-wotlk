@@ -165,7 +165,7 @@ struct SomeoneGrabMe : public SpellScript
         spell->SetMaxAffectedTargets(1);
     }
 
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         if (Unit* unitTarget = spell->GetUnitTarget())
         {

@@ -2182,7 +2182,7 @@ enum
 
 struct CursedScarabPeriodicTrigger : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* target = spell->GetUnitTarget();
         if (target && target->getFaction() != FACTION_SCARAB_HOSTILE && urand(0, 10) == 0)
@@ -2192,7 +2192,7 @@ struct CursedScarabPeriodicTrigger : public SpellScript
 
 struct CursedScarabDespawnPeriodicTrigger : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* target = spell->GetUnitTarget();
         if (target && target->IsCreature())

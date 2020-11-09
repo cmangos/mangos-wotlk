@@ -924,7 +924,7 @@ struct mob_torlothAI : public CombatAI
         ++m_uiAnimationCount;
     }
 
-    void JustDied(Unit* killer) override
+    void JustDied(Unit* /*killer*/) override
     {
         if (Player* player = m_creature->GetMap()->GetPlayer(m_playerGuid))
         {

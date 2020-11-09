@@ -441,7 +441,7 @@ struct boss_aranAI : public RangedCombatAI
 
 struct SummonBlizzard : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         if (Unit* target = spell->GetUnitTarget())
             target->CastSpell(nullptr, 29952, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, spell->GetCaster()->GetObjectGuid());
@@ -450,7 +450,7 @@ struct SummonBlizzard : public SpellScript
 
 struct DispelBlizzard : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         if (Unit* target = spell->GetUnitTarget())
             target->RemoveAurasDueToSpell(29952);
@@ -459,7 +459,7 @@ struct DispelBlizzard : public SpellScript
 
 struct MassiveMagneticPull : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         if (Unit* target = spell->GetUnitTarget())
             spell->GetCaster()->CastSpell(target, 30010, TRIGGERED_OLD_TRIGGERED);
@@ -468,7 +468,7 @@ struct MassiveMagneticPull : public SpellScript
 
 struct FlameWreath : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         if (Unit* target = spell->GetUnitTarget())
             if (target->IsPlayer())

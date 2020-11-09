@@ -304,7 +304,7 @@ struct SuppressionBlast : public SpellScript
         spell->SetMaxAffectedTargets(5);
     }
 
-    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
     {
         if (target->IsInCombat())
             return false;

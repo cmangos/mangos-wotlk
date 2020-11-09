@@ -225,15 +225,13 @@ struct dummy_blackheart_the_inciterAI : public ScriptedAI
         SetCombatMovement(false);
     }
 
+    ScriptedInstance* m_instance;
     bool m_threat;
     bool m_attack;
 
     void Reset() override
     {
-
     }
-
-    ScriptedInstance* m_instance;
 
     void JustRespawned() override
     {
@@ -256,7 +254,7 @@ struct dummy_blackheart_the_inciterAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 diff) override
+    void UpdateAI(const uint32 /*diff*/) override
     {
         if (!m_threat)
         {

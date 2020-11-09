@@ -26,8 +26,8 @@ EndScriptData */
 
 instance_mechanar::instance_mechanar(Map* pMap) : ScriptedInstance(pMap),
     m_uiBridgeEventTimer(2000),
-    m_uiPathaleonEngageTimer(0),
-    m_uiBridgeEventPhase(0)
+    m_uiBridgeEventPhase(0),
+    m_uiPathaleonEngageTimer(0)
 {
     Initialize();
 }

@@ -46,7 +46,7 @@ uint32 PlayerAI::LookupHighestLearnedRank(uint32 spellId)
     return ownedRank;
 }
 
-void PlayerAI::AddPlayerSpellAction(uint32 priority, uint32 spellId, std::function<Unit*()> selector)
+void PlayerAI::AddPlayerSpellAction(uint32 /*priority*/, uint32 spellId, std::function<Unit*()> selector)
 {
     m_playerSpellActions.emplace_back(spellId, (selector ? selector : [&]()->Unit* { return m_player->GetVictim(); }));
 }

@@ -85,7 +85,7 @@ struct boss_fathomlord_karathressAI : public ScriptedAI
     boss_fathomlord_karathressAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float /*x*/, float y, float /*z*/)
         {
             return y > -425.f || y < -624.f;
         });
@@ -233,7 +233,7 @@ struct boss_fathomguard_sharkkisAI : public ScriptedAI
     boss_fathomguard_sharkkisAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float /*x*/, float y, float /*z*/)
         {
             return y > -425.f || y < -624.f;
         });
@@ -348,7 +348,7 @@ struct boss_fathomguard_tidalvessAI : public ScriptedAI
     boss_fathomguard_tidalvessAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float /*x*/, float y, float /*z*/)
         {
             return y > -425.f || y < -624.f;
         });
@@ -416,7 +416,7 @@ struct boss_fathomguard_caribdisAI : public ScriptedAI
     boss_fathomguard_caribdisAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
+        m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float /*x*/, float y, float /*z*/)
         {
             return y > -425.f || y < -624.f;
         });

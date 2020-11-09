@@ -232,7 +232,7 @@ struct NetherCharge : public ScriptedAI, public TimerManager
         m_creature->GetMotionMaster()->MovePoint(1, xR, yR, zR);
     }
 
-    void MovementInform(uint32 motionType, uint32 data) override
+    void MovementInform(uint32 motionType, uint32 /*data*/) override
     {
         if (motionType == POINT_MOTION_TYPE && !m_stopMoving)
             ResetTimer(1, urand(0, 2000));

@@ -231,7 +231,7 @@ struct GDRChannel : public SpellScript
 
 struct GDRPeriodicDamage : public AuraScript
 {
-    int32 OnAuraValueCalculate(Aura* /*aura*/, Unit* /*caster*/, int32 value) const override
+    int32 OnAuraValueCalculate(Aura* /*aura*/, Unit* /*caster*/, int32 /*value*/) const override
     {
         return urand(100, 500);
     }

@@ -61,8 +61,8 @@ enum ShaffarActions // order based on priority
 
 struct boss_nexusprince_shaffarAI : public RangedCombatAI
 {
-    boss_nexusprince_shaffarAI(Creature* creature) : RangedCombatAI(creature, SHAFFAR_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_hasTaunted(false),
-        m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    boss_nexusprince_shaffarAI(Creature* creature) : RangedCombatAI(creature, SHAFFAR_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+        m_isRegularMode(creature->GetMap()->IsRegularDifficulty()), m_hasTaunted(false)
     {
         if (m_isRegularMode)
         {

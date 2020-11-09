@@ -554,7 +554,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
             case NPC_WARMAUL_CHAMPION:
             case NPC_MOGOR:
                 creature->SetCorpseDelay(20);
-                creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float x, float y, float z)
+                creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float /*x*/, float /*y*/, float /*z*/)
                     {
                         return unit->GetDistance(-707.214f, 7877.495f, 45.191f, DIST_CALC_NONE) > 2500.f; // squared
                     });
