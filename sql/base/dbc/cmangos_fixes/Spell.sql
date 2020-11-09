@@ -2185,6 +2185,9 @@ UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id` IN(45785,45892);
 -- Fire Bloom
 UPDATE `spell_template` SET `MaxAffectedTargets`=5 WHERE `id` IN(45641);
 
+-- Lifebloom final bloom should be able to crit - requires DmgClass 1
+UPDATE `spell_template` SET `DmgClass`=1 WHERE `id` IN(33778);
+
 -- ============================================================
 -- WOTLK section
 -- ============================================================
