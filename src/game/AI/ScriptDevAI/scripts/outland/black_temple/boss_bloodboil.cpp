@@ -227,6 +227,7 @@ struct boss_gurtogg_bloodboilAI : public ScriptedAI, public CombatActions
                 DisableCombatAction(GURTOGG_ACTION_BLOODBOIL);
                 DisableCombatAction(GURTOGG_ACTION_BEWILDERING_STRIKE);
                 ResetTimer(GURTOGG_ACTION_ARCING_SMASH, 10000);
+                ResetTimer(GURTOGG_ACTION_FEL_ACID, urand(12000, 15000));
             }
         }
         else
