@@ -25,6 +25,7 @@
 #include "magtheridons_lair.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -534,7 +535,7 @@ struct QuakeMagthKnockback : public SpellScript
 {
     bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
     {
-        if (target->IsJumping() || target->IsFalling())
+        if (target->IsFalling())
             return false;
         return true;
     }
