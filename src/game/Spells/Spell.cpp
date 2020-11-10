@@ -640,7 +640,7 @@ void Spell::FillTargetMap()
                         }
 
                         // Special target filter before adding targets to list
-                        FilterTargetMap(unitTargetList, SpellEffectIndex(i), scheme, targetingData.chainTargetCount[i]);
+                        FilterTargetMap(unitTargetList, scheme, targetingData.chainTargetCount[i]);
 
                         if (m_caster->GetTypeId() == TYPEID_PLAYER)
                         {
@@ -8298,7 +8298,7 @@ void Spell::ProcReflectProcs(TargetInfo& targetInfo)
         Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, m_caster, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
 }
 
-void Spell::FilterTargetMap(UnitList& filterUnitList, SpellEffectIndex effIndex, SpellTargetFilterScheme scheme, uint32 chainTargetCount)
+void Spell::FilterTargetMap(UnitList& filterUnitList, SpellTargetFilterScheme scheme, uint32 chainTargetCount)
 {
     switch (scheme)
     {
