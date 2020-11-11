@@ -487,6 +487,7 @@ struct npc_harrison_jones_zaAI : public npc_escortAI
                     }
 
                     itr->SetImmuneToPlayer(false);
+                    itr->SetInCombatWithZone();
                 }
 
                 m_uiSoundAlarmTimer = 0;
