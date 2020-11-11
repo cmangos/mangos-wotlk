@@ -1840,6 +1840,7 @@ UPDATE creature_template SET ScriptName='npc_kraz' WHERE entry=24024;
 UPDATE creature_template SET ScriptName='npc_ashli' WHERE entry=24001;
 UPDATE creature_template SET ScriptName='npc_amanishi_scout' WHERE entry=23586;
 UPDATE gameobject_template SET ScriptName='go_wooden_door' WHERE entry=186306;
+UPDATE creature_template SET ScriptName='npc_eagle_trash_aggro_trigger' WHERE entry IN(24223);
 
 /* ZUL'DRAK */
 UPDATE creature_template SET ScriptName='npc_gurgthock' WHERE entry=30007;

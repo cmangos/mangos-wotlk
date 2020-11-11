@@ -607,15 +607,29 @@ struct npc_amanishi_lookoutAI : public ScriptedAI
     {
         ScriptedAI::MoveInLineOfSight(who);
 
-        if (m_instance && m_instance->IsAkilzonGauntletInProgress())
+        if (!m_instance || m_instance->IsAkilzonGauntletInProgress())
             return;
 
         if (who->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(who)->IsGameMaster() && m_creature->IsWithinDistInMap(who, 25.0f))
+            StartEvent();
+    }
+
+    void StartEvent()
+    {
+        m_instance->SetAkilzonGauntletProgress(true);
+        DoScriptText(SAY_GAUNTLET_START, m_creature);
+        m_creature->SetWalk(false);
+        m_creature->GetMotionMaster()->MoveWaypoint(0, PATH_FROM_EXTERNAL, 1000);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
         {
-            m_instance->SetAkilzonGauntletProgress(true);
-            DoScriptText(SAY_GAUNTLET_START, m_creature);
-            m_creature->SetWalk(false);
-            m_creature->GetMotionMaster()->MoveWaypoint(0, PATH_FROM_EXTERNAL, 1000);
+            if (!m_instance || m_instance->IsAkilzonGauntletInProgress())
+                return;
+
+            StartEvent();
         }
     }
 
@@ -2238,6 +2252,43 @@ struct CallOfTheBeast : public AuraScript
     }
 };
 
+struct npc_eagle_trash_aggro_triggerAI : public ScriptedAI
+{
+    npc_eagle_trash_aggro_triggerAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<instance_zulaman*>(creature->GetMap()->GetInstanceData()))
+    {
+        SetReactState(REACT_PASSIVE);
+    }
+
+    instance_zulaman* m_instance;
+
+    void Reset() override
+    {
+
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        if (who->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        if (!m_instance)
+            return;
+
+        Player* player = static_cast<Player*>(who);
+        if (player->isGameMaster())
+            return;
+
+        if (m_instance->IsAkilzonGauntletInProgress())
+            return;
+
+        if (!m_creature->IsWithinLOSInMap(who))
+            return;
+
+        if (Creature* creature = m_instance->GetSingleCreatureFromStorage(NPC_LOOKOUT))
+            SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, creature);
+    }
+};
+
 void AddSC_zulaman()
 {
     Script* pNewScript = new Script;
@@ -2303,6 +2354,11 @@ void AddSC_zulaman()
     pNewScript = new Script;
     pNewScript->Name = "go_wooden_door";
     pNewScript->pGOUse = &GOUse_go_wooden_door;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_eagle_trash_aggro_trigger";
+    pNewScript->GetAI = &GetNewAIInstance<npc_eagle_trash_aggro_triggerAI>;
     pNewScript->RegisterSelf();
 
     RegisterAuraScript<CallOfTheBeast>("spell_call_of_the_beast");

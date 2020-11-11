@@ -97,6 +97,7 @@ void instance_zulaman::OnCreatureCreate(Creature* creature)
                 sAkilzonTrashGuidSet.insert(creature->GetObjectGuid());
             break;
         case NPC_LOOKOUT:
+            m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
         case NPC_PROTECTOR:
         case NPC_WIND_WALKER:
             if (creature->GetPositionZ() > 26.0f) // excludes Wind Walker in first patrol
