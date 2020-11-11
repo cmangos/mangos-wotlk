@@ -56,7 +56,7 @@ bool instance_zulaman::IsEncounterInProgress() const
 
 void instance_zulaman::OnPlayerEnter(Player* /*player*/)
 {
-    if (!m_startCheck)
+    if (m_startCheck)
         return;
 
     m_startCheck = true;
