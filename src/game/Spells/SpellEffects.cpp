@@ -7144,7 +7144,7 @@ void Spell::EvaluateResultLists(std::list<std::pair<SpellAuraHolder*, uint32> >&
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->Category == SPELLCATEGORY_DEVOUR_MAGIC)
         {
             int32 heal_amount = m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1);
-            m_caster->CastCustomSpell(m_caster, 19658, &heal_amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            m_caster->CastCustomSpell(nullptr, 19658, &heal_amount, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
         }
     }
     // Send fail log to client
