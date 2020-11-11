@@ -8188,6 +8188,9 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
                 }
                 default:
                     break;
+                case 59464:                                 // Hurl Boulder
+                    radius = 100.f;
+                    break;
                 case 49554:                                 // Summon Injured Soldier
                     radius = 100.f;
                     break;
