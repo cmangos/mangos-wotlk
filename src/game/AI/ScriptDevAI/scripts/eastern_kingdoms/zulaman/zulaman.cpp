@@ -26,11 +26,10 @@ EndScriptData */
 #include "MotionGenerators/WaypointManager.h"
 
 instance_zulaman::instance_zulaman(Map* map) : ScriptedInstance(map),
+    m_startCheck(false),
     m_uiEventTimer(MINUTE * IN_MILLISECONDS),
     m_uiBearEventPhase(0),
     m_isBearPhaseInProgress(false),
-    m_bIsAkilzonGauntletInProgress(false),
-    m_startCheck(false),
     m_spiritFadeTimer(0)
 {
     Initialize();
@@ -212,7 +211,7 @@ void instance_zulaman::OnCreatureEvade(Creature* creature)
         case NPC_WIND_WALKER:
             if (sAkilzonTrashGuidSet.find(creature->GetObjectGuid()) != sAkilzonTrashGuidSet.end())
             {
-                m_bIsAkilzonGauntletInProgress = false;
+                SetData(TYPE_AKILZON_GAUNTLET, NOT_STARTED);
                 for (auto itr : sAkilzonTrashGuidSet)
                 {
                     Creature* pTemp = instance->GetCreature(itr);
@@ -474,14 +473,15 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
             m_auiEncounter[type] = data;
             DoUpdateWorldState(WORLD_STATE_ZUL_AMAN_TIME_COUNTER, m_auiEncounter[type]);
             break;
-
+        case TYPE_AKILZON_GAUNTLET:
+            m_auiEncounter[type] = data;
+            return;
         case TYPE_RAND_VENDOR_1:
             m_auiRandVendor[0] = data;
             break;
         case TYPE_RAND_VENDOR_2:
             m_auiRandVendor[1] = data;
             break;
-
         default:
             script_error_log("Instance Zulaman: ERROR SetData = %u for type %u does not exist/not implemented.", type, data);
             return;
@@ -535,6 +535,8 @@ void instance_zulaman::Load(const char* chrIn)
     // Restart TYPE_EVENT_RUN if was already started
     if (m_auiEncounter[TYPE_RUN_EVENT_TIME] != 0 && m_auiEncounter[TYPE_EVENT_RUN] != DONE && m_auiEncounter[TYPE_EVENT_RUN] != FAIL)
         SetData(TYPE_EVENT_RUN, IN_PROGRESS);
+    if (GetData(TYPE_AKILZON) == DONE)
+        SetData(TYPE_AKILZON_GAUNTLET, DONE);
 
     OUT_LOAD_INST_DATA_COMPLETE;
 }

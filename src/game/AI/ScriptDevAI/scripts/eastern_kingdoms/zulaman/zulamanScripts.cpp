@@ -616,7 +616,7 @@ struct npc_amanishi_lookoutAI : public ScriptedAI
 
     void StartEvent()
     {
-        m_instance->SetAkilzonGauntletProgress(true);
+        m_instance->SetData(TYPE_AKILZON_GAUNTLET, IN_PROGRESS);
         DoScriptText(SAY_GAUNTLET_START, m_creature);
         m_creature->SetWalk(false);
         m_creature->GetMotionMaster()->MoveWaypoint(0, PATH_FROM_EXTERNAL, 1000);
@@ -683,7 +683,7 @@ struct npc_amanishi_tempestAI : public ScriptedAI
     void Aggro(Unit* /*who*/) override
     {
         if (m_instance && m_instance->IsAkilzonGauntletInProgress())
-            m_instance->SetAkilzonGauntletProgress(false);
+            m_instance->SetData(TYPE_AKILZON_GAUNTLET, SPECIAL);
     }
 
     void JustSummoned(Creature* summoned) override
@@ -693,7 +693,7 @@ struct npc_amanishi_tempestAI : public ScriptedAI
 
     void UpdateAI(const uint32 diff) override
     {
-        if (m_instance && m_instance->IsAkilzonGauntletInProgress())
+        if (m_instance && m_instance->IsAkilzonGauntletSpawning())
         {
             if (m_uiSummonEagleTimer <= diff)
             {
@@ -2282,6 +2282,9 @@ struct npc_eagle_trash_aggro_triggerAI : public ScriptedAI
             return;
 
         if (!m_creature->IsWithinLOSInMap(who))
+            return;
+
+        if (!m_creature->IsWithinDistInMap(who, 30.0f))
             return;
 
         if (Creature* creature = m_instance->GetSingleCreatureFromStorage(NPC_LOOKOUT))

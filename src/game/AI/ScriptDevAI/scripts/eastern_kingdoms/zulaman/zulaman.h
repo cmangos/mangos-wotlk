@@ -9,7 +9,7 @@
 
 enum InstanceZA
 {
-    MAX_ENCOUNTER           = 8,
+    MAX_ENCOUNTER           = 9,
     MAX_VENDOR              = 2,
     MAX_CHESTS              = 4,
     MAX_BEAR_WAVES          = 4,
@@ -45,9 +45,10 @@ enum InstanceZA
     TYPE_MALACRASS          = 5,
     TYPE_ZULJIN             = 6,
     TYPE_RUN_EVENT_TIME     = 7,                            // Must be MAX_ENCOUNTER -1
+    TYPE_AKILZON_GAUNTLET   = 8,
 
-    TYPE_RAND_VENDOR_1      = 8,
-    TYPE_RAND_VENDOR_2      = 9,
+    TYPE_RAND_VENDOR_1      = 9,
+    TYPE_RAND_VENDOR_2      = 10,
 
     NPC_AKILZON             = 23574,
     NPC_NALORAKK            = 23576,
@@ -217,8 +218,8 @@ class instance_zulaman : public ScriptedInstance
         void SetBearEventProgress(bool bIsInProgress) { m_isBearPhaseInProgress = bIsInProgress; }
         void SendNextBearWave(Unit* pTarget);
 
-        bool IsAkilzonGauntletInProgress() const { return m_bIsAkilzonGauntletInProgress; }
-        void SetAkilzonGauntletProgress(bool bIsInProgress) { m_bIsAkilzonGauntletInProgress = bIsInProgress; }
+        bool IsAkilzonGauntletSpawning() const { return m_auiEncounter[TYPE_AKILZON_GAUNTLET] == IN_PROGRESS; }
+        bool IsAkilzonGauntletInProgress() const { return m_auiEncounter[TYPE_AKILZON_GAUNTLET] != NOT_STARTED; }
 
         bool CheckConditionCriteriaMeet(Player const* player, uint32 instanceConditionId, WorldObject const* conditionSource, uint32 conditionSourceType) const override;
 
@@ -254,7 +255,6 @@ class instance_zulaman : public ScriptedInstance
         bool m_isBearPhaseInProgress;
 
         GuidSet sAkilzonTrashGuidSet;
-        bool m_bIsAkilzonGauntletInProgress;
 
         uint32 m_spiritFadeTimer;
 };
