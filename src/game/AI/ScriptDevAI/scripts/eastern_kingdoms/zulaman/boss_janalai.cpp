@@ -425,25 +425,15 @@ struct npc_amanishi_hatcherAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_janalaiAI(Creature* creature)
-{
-    return new boss_janalaiAI(creature);
-}
-
-UnitAI* GetAI_npc_amanishi_hatcherAI(Creature* creature)
-{
-    return new npc_amanishi_hatcherAI(creature);
-}
-
 void AddSC_boss_janalai()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_janalai";
-    pNewScript->GetAI = &GetAI_boss_janalaiAI;
+    pNewScript->GetAI = &GetNewAIInstance<boss_janalaiAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_amanishi_hatcher";
-    pNewScript->GetAI = &GetAI_npc_amanishi_hatcherAI;
+    pNewScript->GetAI = &GetNewAIInstance<npc_amanishi_hatcherAI>;
     pNewScript->RegisterSelf();
 }

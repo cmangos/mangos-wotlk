@@ -357,11 +357,6 @@ struct npc_forest_frogAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_forest_frog(Creature* creature)
-{
-    return new npc_forest_frogAI(creature);
-}
-
 /*######
 ## npc_harrison_jones_za
 ######*/
@@ -557,11 +552,6 @@ bool GossipSelect_npc_harrison_jones_za(Player* player, Creature* creature, uint
     return true;
 }
 
-UnitAI* GetAI_npc_harrison_jones_za(Creature* creature)
-{
-    return new npc_harrison_jones_zaAI(creature);
-}
-
 /*######
 ## event_ritual_of_power
 ######*/
@@ -642,11 +632,6 @@ struct npc_amanishi_lookoutAI : public ScriptedAI
             m_creature->ForcedDespawn();
     }
 };
-
-UnitAI* GetAI_npc_amanishi_lookout(Creature* creature)
-{
-    return new npc_amanishi_lookoutAI(creature);
-}
 
 /*######
 ## npc_amanishi_tempest
@@ -730,11 +715,6 @@ struct npc_amanishi_tempestAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_npc_amanishi_tempest(Creature* creature)
-{
-    return new npc_amanishi_tempestAI(creature);
-}
 
 /*######
 ## npc_harkor
@@ -1073,11 +1053,6 @@ struct npc_harkorAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_harkor(Creature* creature)
-{
-    return new npc_harkorAI(creature);
-}
-
 bool GossipHello_npc_harkor(Player* player, Creature* creature)
 {
     ScriptedInstance* instance = static_cast<ScriptedInstance*>(creature->GetInstanceData());
@@ -1402,11 +1377,6 @@ struct npc_tanzarAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_tanzar(Creature* creature)
-{
-    return new npc_tanzarAI(creature);
-}
-
 bool GossipHello_npc_tanzar(Player* player, Creature* creature)
 {
     ScriptedInstance* instance = static_cast<ScriptedInstance*>(creature->GetInstanceData());
@@ -1667,11 +1637,6 @@ struct npc_krazAI : public ScriptedAI
         }
     }
 };
-
-UnitAI* GetAI_npc_kraz(Creature* creature)
-{
-    return new npc_krazAI(creature);
-}
 
 bool GossipHello_npc_kraz(Player* player, Creature* creature)
 {
@@ -2029,11 +1994,6 @@ struct npc_ashliAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_ashli(Creature* creature)
-{
-    return new npc_ashliAI(creature);
-}
-
 bool GossipHello_npc_ashli(Player* player, Creature* creature)
 {
     ScriptedInstance* instance = static_cast<ScriptedInstance*>(creature->GetInstanceData());
@@ -2207,11 +2167,6 @@ struct npc_amanishi_scoutAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_amanishi_scout(Creature* creature)
-{
-    return new npc_amanishi_scoutAI(creature);
-}
-
 /*######
 ## go_wooden_door
 ######*/
@@ -2296,12 +2251,12 @@ void AddSC_zulaman()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_forest_frog";
-    pNewScript->GetAI = &GetAI_npc_forest_frog;
+    pNewScript->GetAI = &GetNewAIInstance<npc_forest_frogAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_harrison_jones_za";
-    pNewScript->GetAI = &GetAI_npc_harrison_jones_za;
+    pNewScript->GetAI = &GetNewAIInstance<npc_harrison_jones_zaAI>;
     pNewScript->pGossipHello =  &GossipHello_npc_harrison_jones_za;
     pNewScript->pGossipSelect = &GossipSelect_npc_harrison_jones_za;
     pNewScript->RegisterSelf();
@@ -2313,45 +2268,45 @@ void AddSC_zulaman()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_amanishi_lookout";
-    pNewScript->GetAI = &GetAI_npc_amanishi_lookout;
+    pNewScript->GetAI = &GetNewAIInstance<npc_amanishi_lookoutAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_amanishi_tempest";
-    pNewScript->GetAI = &GetAI_npc_amanishi_tempest;
+    pNewScript->GetAI = &GetNewAIInstance<npc_amanishi_tempestAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_harkor";
-    pNewScript->GetAI = &GetAI_npc_harkor;
+    pNewScript->GetAI = &GetNewAIInstance<npc_harkorAI>;
     pNewScript->pGossipHello = &GossipHello_npc_harkor;
     pNewScript->pGossipSelect = &GossipSelect_npc_harkor;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_tanzar";
-    pNewScript->GetAI = &GetAI_npc_tanzar;
+    pNewScript->GetAI = &GetNewAIInstance<npc_tanzarAI>;
     pNewScript->pGossipHello = &GossipHello_npc_tanzar;
     pNewScript->pGossipSelect = &GossipSelect_npc_tanzar;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_kraz";
-    pNewScript->GetAI = &GetAI_npc_kraz;
+    pNewScript->GetAI = &GetNewAIInstance<npc_krazAI>;
     pNewScript->pGossipHello = &GossipHello_npc_kraz;
     pNewScript->pGossipSelect = &GossipSelect_npc_kraz;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_ashli";
-    pNewScript->GetAI = &GetAI_npc_ashli;
+    pNewScript->GetAI = &GetNewAIInstance<npc_ashliAI>;
     pNewScript->pGossipHello = &GossipHello_npc_ashli;
     pNewScript->pGossipSelect = &GossipSelect_npc_ashli;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_amanishi_scout";
-    pNewScript->GetAI = &GetAI_npc_amanishi_scout;
+    pNewScript->GetAI = &GetNewAIInstance<npc_amanishi_scoutAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

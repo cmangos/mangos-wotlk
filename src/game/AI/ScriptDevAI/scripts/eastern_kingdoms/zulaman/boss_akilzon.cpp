@@ -274,11 +274,6 @@ struct boss_akilzonAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_akilzon(Creature* creature)
-{
-    return new boss_akilzonAI(creature);
-}
-
 struct mob_soaring_eagleAI : public ScriptedAI
 {
     mob_soaring_eagleAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
@@ -363,11 +358,6 @@ struct mob_soaring_eagleAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_mob_soaring_eagle(Creature* creature)
-{
-    return new mob_soaring_eagleAI(creature);
-}
-
 struct TeleportSelf : public SpellScript
 {
     void OnDestTarget(Spell* spell) const override
@@ -380,12 +370,12 @@ void AddSC_boss_akilzon()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_akilzon";
-    pNewScript->GetAI = &GetAI_boss_akilzon;
+    pNewScript->GetAI = &GetNewAIInstance<boss_akilzonAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_soaring_eagle";
-    pNewScript->GetAI = &GetAI_mob_soaring_eagle;
+    pNewScript->GetAI = &GetNewAIInstance<mob_soaring_eagleAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<TeleportSelf>("spell_teleport_self_akilzon");

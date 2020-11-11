@@ -573,25 +573,15 @@ struct npc_feather_vortexAI : public ScriptedAI, public TimerManager
     }
 };
 
-UnitAI* GetAI_boss_zuljin(Creature* creature)
-{
-    return new boss_zuljinAI(creature);
-}
-
-UnitAI* GetAI_npc_feather_vortex(Creature* creature)
-{
-    return new npc_feather_vortexAI(creature);
-}
-
 void AddSC_boss_zuljin()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_zuljin";
-    pNewScript->GetAI = &GetAI_boss_zuljin;
+    pNewScript->GetAI = &GetNewAIInstance<boss_zuljinAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_feather_vortex";
-    pNewScript->GetAI = &GetAI_npc_feather_vortex;
+    pNewScript->GetAI = &GetNewAIInstance<npc_feather_vortexAI>;
     pNewScript->RegisterSelf();
 }

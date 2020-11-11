@@ -465,17 +465,10 @@ struct boss_malacrassAI : public CombatAI
     }
 };
 
-
-
-UnitAI* GetAI_boss_malacrass(Creature* creature)
-{
-    return new boss_malacrassAI(creature);
-}
-
 void AddSC_boss_malacrass()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_malacrass";
-    pNewScript->GetAI = &GetAI_boss_malacrass;
+    pNewScript->GetAI = &GetNewAIInstance<boss_malacrassAI>;
     pNewScript->RegisterSelf();
 }

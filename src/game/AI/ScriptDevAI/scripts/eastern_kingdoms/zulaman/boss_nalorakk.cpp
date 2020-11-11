@@ -256,15 +256,10 @@ struct boss_nalorakkAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_nalorakk(Creature* creature)
-{
-    return new boss_nalorakkAI(creature);
-}
-
 void AddSC_boss_nalorakk()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_nalorakk";
-    pNewScript->GetAI = &GetAI_boss_nalorakk;
+    pNewScript->GetAI = &GetNewAIInstance<boss_nalorakkAI>;
     pNewScript->RegisterSelf();
 }

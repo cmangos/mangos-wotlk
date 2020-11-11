@@ -392,35 +392,20 @@ struct npc_corrupted_lightning_totemAI : public ScriptedAI
 	}
 };
 
-UnitAI* GetAI_boss_halazzi(Creature* creature)
-{
-    return new boss_halazziAI(creature);
-}
-
-UnitAI* GetAI_boss_spirit_lynx(Creature* creature)
-{
-    return new boss_spirit_lynxAI(creature);
-}
-
-UnitAI* GetAI_npc_corrupted_lightning_totem(Creature* creature)
-{
-	return new npc_corrupted_lightning_totemAI(creature);
-}
-
 void AddSC_boss_halazzi()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_halazzi";
-    pNewScript->GetAI = &GetAI_boss_halazzi;
+    pNewScript->GetAI = &GetNewAIInstance<boss_halazziAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_spirit_lynx";
-    pNewScript->GetAI = &GetAI_boss_spirit_lynx;
+    pNewScript->GetAI = &GetNewAIInstance<boss_spirit_lynxAI>;
     pNewScript->RegisterSelf();
 
 	pNewScript = new Script;
 	pNewScript->Name = "npc_corrupted_lightning_totem";
-	pNewScript->GetAI = &GetAI_npc_corrupted_lightning_totem;
+	pNewScript->GetAI = &GetNewAIInstance<npc_corrupted_lightning_totemAI>;
 	pNewScript->RegisterSelf();
 }
