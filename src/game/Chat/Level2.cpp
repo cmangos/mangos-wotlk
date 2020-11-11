@@ -1145,7 +1145,8 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
     }
 
     GameObject* pGameObj = new GameObject;
-    if (!pGameObj->Create(db_lowGUID, gInfo->id, map, plr->GetPhaseMaskForSpawn(), x, y, z, o))
+    QuaternionData data(0.f, 0.f, sin(o / 2), cos(o / 2));
+    if (!pGameObj->Create(db_lowGUID, gInfo->id, map, plr->GetPhaseMaskForSpawn(), x, y, z, o, data))
     {
         delete pGameObj;
         return false;
