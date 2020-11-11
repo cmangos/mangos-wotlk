@@ -439,7 +439,7 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
         case TYPE_ZULJIN:
             m_auiEncounter[type] = data;
             if (data != IN_PROGRESS) // start is done with delay in boss script
-                DoUseOpenableObject(GO_WIND_DOOR, true);
+                DoUseOpenableObject(GO_FIRE_DOOR, true);
             if (data == DONE)
             {
                 if (Creature* pTanzar = instance->GetCreature(m_aEventNpcInfo[INDEX_NALORAKK].npGuid))
