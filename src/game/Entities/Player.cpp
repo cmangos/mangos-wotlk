@@ -6497,7 +6497,7 @@ void Player::LearnDefaultSkills()
                     step = (predefined ? tskill.Step : 1);
                     uint32 stepIndex = (step - 1);
 
-                    auto filterfunc = [&] (SkillRaceClassInfoEntry const& entry)
+                    auto filterfunc = [&] (SkillRaceClassInfoEntry const& entry) -> bool
                     {
                         if (entry.skillTierId)
                         {
@@ -6513,6 +6513,12 @@ void Player::LearnDefaultSkills()
                                 return true;
                             }
                         }
+                        else if (entry.flags & SKILL_FLAG_MAXIMIZED)
+                        {
+                            value = max = GetSkillMaxForLevel();
+                            return true;
+                        }
+
                         return false;
                     };
 
