@@ -1823,7 +1823,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         case TARGET_LOCATION_CASTER_LEFT:
         case TARGET_LOCATION_CASTER_RIGHT:
         {
-            float angle = m_caster->GetOrientation();
+            float angle = m_trueCaster->GetOrientation();
             switch (targetMode)
             {
                 case TARGET_LOCATION_UNIT_MINION_POSITION:
@@ -8253,6 +8253,8 @@ WorldObject* Spell::GetAffectiveCasterObject() const
 
 WorldObject* Spell::GetCastingObject() const
 {
+    if (m_trueCaster->IsGameObject())
+        return m_trueCaster;
     if (m_originalCasterGUID.IsGameObject())
         return m_caster->IsInWorld() ? m_caster->GetMap()->GetGameObject(m_originalCasterGUID) : nullptr;
     else if (m_originalCasterGUID.IsDynamicObject())
