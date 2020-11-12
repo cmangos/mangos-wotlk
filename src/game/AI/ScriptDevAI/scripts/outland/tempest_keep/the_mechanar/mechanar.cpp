@@ -124,7 +124,7 @@ void instance_mechanar::SetData(uint32 uiType, uint32 uiData)
 
     if (uiData == TYPE_GYRO_KILL || uiData == TYPE_IRON_HAND)
         if (GetData(TYPE_GYRO_KILL) == DONE && GetData(TYPE_IRON_HAND) == DONE)
-            if (GameObject* chest = GetSingleGameObjectFromStorage(GO_CACHE_OF_THE_LEGION))
+            if (GameObject* chest = GetSingleGameObjectFromStorage(instance->IsRegularDifficulty() ? GO_CACHE_OF_THE_LEGION : GO_CACHE_OF_THE_LEGION_H))
                 if (Player* player = GetPlayerInMap(false, false))
                     chest->GenerateLootFor(player);
 
