@@ -685,15 +685,27 @@ void instance_zulaman::DoChestEvent(BossToChestIndex uiIndex)
                 break;
             case NPC_KRAZ:
                 if (GameObject* pPackage = GetSingleGameObjectFromStorage(GO_KRAZS_PACKAGE))
+                {
+                    if (Player* player = GetPlayerInMap(false, false))
+                        pPackage->GenerateLootFor(player);
                     pPackage->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                }
                 break;
             case NPC_ASHLI:
                 if (GameObject* pBag = GetSingleGameObjectFromStorage(GO_ASHLIS_BAG))
+                {
+                    if (Player* player = GetPlayerInMap(false, false))
+                        pBag->GenerateLootFor(player);
                     pBag->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                }
                 break;
             case NPC_HARKOR:
                 if (GameObject* pSatchel = GetSingleGameObjectFromStorage(GO_HARKORS_SATCHEL))
+                {
+                    if (Player* player = GetPlayerInMap(false, false))
+                        pSatchel->GenerateLootFor(player);
                     pSatchel->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+                }
                 break;
         }
     }

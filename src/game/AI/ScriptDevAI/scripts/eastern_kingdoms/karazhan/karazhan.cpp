@@ -648,6 +648,9 @@ void instance_karazhan::DoFinishChessEvent()
         DoUseDoorOrButton(GO_GAMESMANS_HALL_EXIT_DOOR);
         DoRespawnGameObject(GO_DUST_COVERED_CHEST, DAY);
         DoToggleGameObjectFlags(GO_DUST_COVERED_CHEST, GO_FLAG_NO_INTERACT, false);
+        if (GameObject* chest = GetSingleGameObjectFromStorage(GO_DUST_COVERED_CHEST))
+            if (Player* player = GetPlayerInMap(false, false))
+                chest->GenerateLootFor(player);
     }
 
     // cast game end spells

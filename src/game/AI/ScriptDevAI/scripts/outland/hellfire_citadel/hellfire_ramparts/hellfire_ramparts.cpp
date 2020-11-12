@@ -98,6 +98,9 @@ void instance_ramparts::SetData(uint32 uiType, uint32 uiData)
             {
                 DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_FEL_IRON_CHEST : GO_FEL_IRON_CHEST_H, HOUR);
                 DoToggleGameObjectFlags(instance->IsRegularDifficulty() ? GO_FEL_IRON_CHEST : GO_FEL_IRON_CHEST_H, GO_FLAG_NO_INTERACT, false);
+                if (GameObject* chest = GetSingleGameObjectFromStorage(instance->IsRegularDifficulty() ? GO_FEL_IRON_CHEST : GO_FEL_IRON_CHEST_H))
+                    if (Player* player = GetPlayerInMap(false, false))
+                        chest->GenerateLootFor(player);
             }
             if (uiData == FAIL && m_auiEncounter[1] != FAIL)
                 DoFailVazruden();

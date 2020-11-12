@@ -161,7 +161,12 @@ void instance_molten_core::SetData(uint32 uiType, uint32 uiData)
         case TYPE_MAJORDOMO:
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
+            {
                 DoRespawnGameObject(GO_CACHE_OF_THE_FIRE_LORD, HOUR);
+                if (GameObject* chest = GetSingleGameObjectFromStorage(GO_CACHE_OF_THE_FIRE_LORD))
+                    if (Player* player = GetPlayerInMap(false, false))
+                        chest->GenerateLootFor(player);
+            }
             break;
         case TYPE_RAGNAROS:
             m_auiEncounter[uiType] = uiData;

@@ -85,8 +85,8 @@ void instance_mechanar::OnObjectCreate(GameObject* pGo)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_NETHERMANCER_DOOR:
+        case GO_CACHE_OF_THE_LEGION:
             break;
-
         default:
             return;
     }
@@ -121,6 +121,12 @@ void instance_mechanar::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             break;
     }
+
+    if (uiData == TYPE_GYRO_KILL || uiData == TYPE_IRON_HAND)
+        if (GetData(TYPE_GYRO_KILL) == DONE && GetData(TYPE_IRON_HAND) == DONE)
+            if (GameObject* chest = GetSingleGameObjectFromStorage(GO_CACHE_OF_THE_LEGION))
+                if (Player* player = GetPlayerInMap(false, false))
+                    chest->GenerateLootFor(player);
 
     if (uiData == DONE)
     {

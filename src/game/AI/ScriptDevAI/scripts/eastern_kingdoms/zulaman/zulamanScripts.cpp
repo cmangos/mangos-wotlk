@@ -1220,7 +1220,11 @@ struct npc_tanzarAI : public ScriptedAI
                         DoScriptText(SAY_TANZAR_EVENT_4, m_creature);
 
                         if (GameObject* pTrunk = m_instance->GetSingleGameObjectFromStorage(GO_TANZARS_TRUNK))
+                        {
+                            if (Player* player = m_instance->GetPlayerInMap(false, false))
+                                pTrunk->GenerateLootFor(player);
                             pTrunk->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
+                        }
 
                         m_uiEventTimer = 0;
                         m_uiEvent = 0;
