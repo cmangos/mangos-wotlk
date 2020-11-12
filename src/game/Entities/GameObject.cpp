@@ -2854,6 +2854,12 @@ SpellCastResult GameObject::CastSpell(Unit* temporaryCaster, Unit* Victim, Spell
     return spell->SpellStart(&targets, triggeredByAura);
 }
 
+void GameObject::GenerateLootFor(Player* player)
+{
+    if (!m_loot)
+        m_loot = new Loot(player, this, LOOT_SKINNING);
+}
+
 QuaternionData GameObject::GetWorldRotation() const
 {
     QuaternionData localRotation = GetLocalRotation();
