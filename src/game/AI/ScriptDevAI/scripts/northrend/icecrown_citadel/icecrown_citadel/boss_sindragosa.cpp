@@ -142,6 +142,10 @@ struct boss_sindragosaAI : public ScriptedAI
     boss_sindragosaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float, float)
+        {
+            return x < 4314.0f;
+        });
         Reset();
     }
 
@@ -449,9 +453,6 @@ struct boss_sindragosaAI : public ScriptedAI
                 break;
             }
         }
-
-        // evade on top of the stairs
-        EnterEvadeIfOutOfCombatArea(uiDiff);
     }
 };
 

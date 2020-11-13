@@ -254,8 +254,6 @@ struct boss_anubarakAI : public ScriptedAI
             else
                 m_uiEmergeTimer -= uiDiff;
         }
-
-        EnterEvadeIfOutOfCombatArea(uiDiff);
     }
 };
 

@@ -499,8 +499,6 @@ struct boss_sartharionAI : public ScriptedAI
         }
 
         DoMeleeAttackIfReady();
-
-        EnterEvadeIfOutOfCombatArea(uiDiff);
     }
 };
 

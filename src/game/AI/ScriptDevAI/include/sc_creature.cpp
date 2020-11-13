@@ -391,64 +391,6 @@ void ScriptedAI::SetEquipmentSlots(bool loadDefault, int32 mainHand, int32 offHa
     }
 }
 
-// Hacklike storage used for misc creatures that are expected to evade of outside of a certain area.
-// It is assumed the information is found elswehere and can be handled by mangos. So far no luck finding such information/way to extract it.
-enum
-{
-    NPC_BROODLORD               = 12017,
-    NPC_TALON_KING_IKISS        = 18473,
-    NPC_KARGATH_BLADEFIST       = 16808,
-
-    NPC_SINDRAGOSA              = 36853,
-};
-
-bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
-{
-    if (m_uiEvadeCheckCooldown < diff)
-        m_uiEvadeCheckCooldown = 2500;
-    else
-    {
-        m_uiEvadeCheckCooldown -= diff;
-        return false;
-    }
-
-    if (m_creature->GetCombatManager().IsInEvadeMode() || !m_creature->GetVictim())
-        return false;
-
-    float x = m_creature->GetPositionX();
-    float y = m_creature->GetPositionY();
-    float z = m_creature->GetPositionZ();
-
-    switch (m_creature->GetEntry())
-    {
-        case NPC_BROODLORD:                                 // broodlord (not move down stairs)
-            if (z > 448.60f)
-                return false;
-            break;
-        case NPC_TALON_KING_IKISS:
-        {
-            m_creature->GetRespawnCoord(x, y, z);
-            if (m_creature->GetDistance2d(x, y) < 70.0f)
-                return false;
-            break;
-        }
-        case NPC_KARGATH_BLADEFIST:
-            if (x < 270.0f && x > 185.0f)
-                return false;
-            break;
-        case NPC_SINDRAGOSA:
-            if (x > 4314.0f)
-                return false;
-            break;
-        default:
-            script_error_log("EnterEvadeIfOutOfCombatArea used for creature entry %u, but does not have any definition.", m_creature->GetEntry());
-            return false;
-    }
-
-    EnterEvadeMode();
-    return true;
-}
-
 void Scripted_NoMovementAI::GetAIInformation(ChatHandler& reader)
 {
     reader.PSendSysMessage("Subclass of Scripted_NoMovementAI");
