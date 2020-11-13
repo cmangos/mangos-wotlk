@@ -399,12 +399,6 @@ enum
     NPC_TALON_KING_IKISS        = 18473,
     NPC_KARGATH_BLADEFIST       = 16808,
 
-    // Zul'Aman
-    NPC_AKILZON                 = 23574,
-    NPC_NALORAKK                = 23576,
-    NPC_JANALAI                 = 23578,
-    NPC_MALACRASS               = 24239,
-
     NPC_SINDRAGOSA              = 36853,
 };
 
@@ -444,22 +438,6 @@ bool ScriptedAI::EnterEvadeIfOutOfCombatArea(const uint32 diff)
             break;
         case NPC_SINDRAGOSA:
             if (x > 4314.0f)
-                return false;
-            break;
-        case NPC_AKILZON:
-            if (x > 336.259f)
-                return false;
-            break;
-        case NPC_NALORAKK:
-            if (y < 1378.009f)
-                return false;
-            break;
-        case NPC_JANALAI:
-            if (x < -8.f && x > -57.f)
-                return false;
-            break;
-        case NPC_MALACRASS:
-            if (y < 1025.f)
                 return false;
             break;
         default:

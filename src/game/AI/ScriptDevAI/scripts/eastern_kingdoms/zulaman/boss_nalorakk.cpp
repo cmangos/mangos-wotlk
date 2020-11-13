@@ -79,6 +79,10 @@ struct boss_nalorakkAI : public CombatAI
         AddCombatAction(NALORAKK_ACTION_SLASH, true);
         AddCombatAction(NALORAKK_ACTION_REND, true);
         AddCombatAction(NALORAKK_ACTION_ROAR, true);
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        {
+            return y > 1378.009f;
+        });
         Reset();
     }
 
@@ -246,13 +250,6 @@ struct boss_nalorakkAI : public CombatAI
                 return;
             }
         }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        CombatAI::UpdateAI(diff);
-        if (m_creature->IsInCombat())
-            EnterEvadeIfOutOfCombatArea(diff);
     }
 };
 

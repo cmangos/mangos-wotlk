@@ -99,6 +99,10 @@ struct boss_akilzonAI : public CombatAI
             if (m_creature->IsInCombat() && !m_creature->GetCombatManager().IsEvadingHome())
                 m_instance->DoUseDoorOrButton(GO_WIND_DOOR);
         });
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        {
+            return x < 336.259f;
+        });
     }
 
     instance_zulaman* m_instance;
@@ -264,13 +268,6 @@ struct boss_akilzonAI : public CombatAI
                 break;
             }
         }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        CombatAI::UpdateAI(diff);
-        if (m_creature->IsInCombat())
-            EnterEvadeIfOutOfCombatArea(diff);
     }
 };
 

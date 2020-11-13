@@ -232,6 +232,10 @@ struct boss_malacrassAI : public CombatAI
         AddCombatAction(MALACRASS_PLAYER_ABILITY_2, true);
         AddCombatAction(MALACRASS_PLAYER_ABILITY_3, true);
         AddCombatAction(MALACRASS_PLAYER_ABILITY_4, true);
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        {
+            return y > 1025.f;
+        });
         Reset();
     }
 
@@ -455,13 +459,6 @@ struct boss_malacrassAI : public CombatAI
                     ResetCombatAction(action, aMalacrassStolenAbility[m_playerClass][action - MALACRASS_PLAYER_ABILITY_1].m_uiCooldown);
                 break;
         }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        CombatAI::UpdateAI(diff);
-        if (m_creature->IsInCombat())
-            EnterEvadeIfOutOfCombatArea(diff);
     }
 };
 

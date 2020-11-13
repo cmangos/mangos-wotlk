@@ -113,6 +113,10 @@ struct boss_janalaiAI : public CombatAI
             if (bomb)
                 bomb->CastSpell(nullptr, SPELL_FIRE_BOMB_EXPLODE, TRIGGERED_NONE);
         });
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        {
+            return x > -8.f || x < -57.f;
+        });
         Reset();
     }
 
@@ -309,13 +313,6 @@ struct boss_janalaiAI : public CombatAI
                         ResetCombatAction(action, 8000);
                 return;
         }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        CombatAI::UpdateAI(diff);
-        if (m_creature->IsInCombat())
-            EnterEvadeIfOutOfCombatArea(diff);
     }
 };
 
