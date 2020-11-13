@@ -291,7 +291,7 @@ class Loot
         friend class LootMgr;
 
         Loot(Player* player, Creature* creature, LootType type);
-        Loot(Player* player, GameObject* gameObject, LootType type);
+        Loot(Player* player, GameObject* gameObject, LootType type, bool lootSnapshot = false);
         Loot(Player* player, Corpse* corpse, LootType type);
         Loot(Player* player, Item* item, LootType type);
         Loot(Player* player, uint32 id, LootType type);

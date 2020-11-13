@@ -2857,7 +2857,7 @@ SpellCastResult GameObject::CastSpell(Unit* temporaryCaster, Unit* Victim, Spell
 void GameObject::GenerateLootFor(Player* player)
 {
     if (!m_loot)
-        m_loot = new Loot(player, this, LOOT_SKINNING);
+        m_loot = new Loot(player, this, LOOT_SKINNING, true);
 }
 
 QuaternionData GameObject::GetWorldRotation() const
