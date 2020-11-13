@@ -453,7 +453,7 @@ struct boss_zuljinAI : public CombatAI
                     ResetCombatAction(action, urand(15000, 20000));
                 return;
             case ZULJIN_ACTION_GRIEVOUS_THROW:
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA))
                     if (DoCastSpellIfCan(target, SPELL_GRIEVOUS_THROW) == CAST_OK)
                         ResetCombatAction(action, 10000);
                 return;
