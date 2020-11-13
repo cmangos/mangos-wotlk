@@ -295,13 +295,6 @@ struct boss_halazziAI : public CombatAI
                 return;
         }
     }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        CombatAI::UpdateAI(diff);
-        if (m_creature->IsInCombat())
-            EnterEvadeIfOutOfCombatArea(diff);
-    }
 };
 
 enum
