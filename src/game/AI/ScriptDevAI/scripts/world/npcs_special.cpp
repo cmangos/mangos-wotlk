@@ -2219,7 +2219,7 @@ struct npc_mojoAI : public ScriptedAI
                 // affect only the same faction
                 if (player->GetTeam() == ((Player*)m_creature->GetOwner())->GetTeam())
                 {
-                    player->CastSpell(player, SPELL_FEELING_FROGGY, TRIGGERED_NONE);
+                    player->CastSpell(player, SPELL_FEELING_FROGGY, TRIGGERED_OLD_TRIGGERED);
                     m_creature->CastSpell(m_creature, SPELL_HEARTS, TRIGGERED_NONE);
                     m_creature->SetSelectionGuid(player->GetObjectGuid());
 
