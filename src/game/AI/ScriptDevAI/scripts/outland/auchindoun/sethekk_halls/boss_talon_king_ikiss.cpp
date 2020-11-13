@@ -226,9 +226,6 @@ struct boss_talon_king_ikissAI : public ScriptedAI, public CombatActions
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
-        if (EnterEvadeIfOutOfCombatArea(diff))
-            return;
-
         if (m_Blink)
         {
             DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_ARCANE_EXPLOSION : SPELL_ARCANE_EXPLOSION_H);
