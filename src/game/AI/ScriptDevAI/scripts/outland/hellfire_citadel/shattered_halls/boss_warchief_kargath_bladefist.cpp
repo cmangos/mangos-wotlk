@@ -62,6 +62,10 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        {
+            return x > 270.0f || x < 185.0f;
+        });        
         Reset();
     }
 
@@ -156,6 +160,11 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
             m_pInstance->SetData(TYPE_BLADEFIST, FAIL);
     }
 
+    void OnLeash() override
+    {
+        DoScriptText(SAY_EVADE, m_creature);
+    }
+
     // Note: this should be done by creature linkin in core
     void DoDespawnAdds()
     {
@@ -204,13 +213,6 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
         {
             if (GetCombatScriptStatus())
                 EnterEvadeMode();
-            return;
-        }
-
-        // Check if out of range
-        if (EnterEvadeIfOutOfCombatArea(uiDiff))
-        {
-            DoScriptText(SAY_EVADE, m_creature);
             return;
         }
 
