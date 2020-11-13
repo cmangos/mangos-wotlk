@@ -120,7 +120,7 @@ OutdoorPvP* OutdoorPvPMgr::GetScriptOfAffectedZone(uint32 zoneId)
         case ZONE_ID_BLOOD_FURNACE:
         case ZONE_ID_SHATTERED_HALLS:
             return m_scripts[OPVP_ID_HP];
-        case ZONE_ID_STREAMVAULT:
+        case ZONE_ID_STEAMVAULT:
         case ZONE_ID_UNDERBOG:
         case ZONE_ID_SLAVE_PENS:
             return m_scripts[OPVP_ID_ZM];

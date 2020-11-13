@@ -66,7 +66,7 @@ enum OutdoorPvPZones
 
     ZONE_ID_ZANGARMARSH             = 3521,
     ZONE_ID_SERPENTSHRINE_CAVERN    = 3607,
-    ZONE_ID_STREAMVAULT             = 3715,
+    ZONE_ID_STEAMVAULT              = 3715,
     ZONE_ID_UNDERBOG                = 3716,
     ZONE_ID_SLAVE_PENS              = 3717,
 
