@@ -1981,7 +1981,8 @@ struct npc_snakesAI : public ScriptedAI
     void Reset() override
     {
         m_spellTimer = 3000;
-
+        m_creature->GetMotionMaster()->Clear();
+        m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 5.f);
         DoCastSpellIfCan(nullptr, SPELL_DEADLY_POISON_PASSIVE, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
     }
 
