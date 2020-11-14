@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
@@ -85,16 +85,16 @@ enum GorefiendActions
     GOREFIEND_ACTION_MAX,
 };
 
-struct boss_teron_gorefiendAI : public ScriptedAI, public CombatActions
+struct boss_teron_gorefiendAI : public CombatAI
 {
-    boss_teron_gorefiendAI(Creature* creature) : ScriptedAI(creature), CombatActions(GOREFIEND_ACTION_MAX), m_introDone(false)
+    boss_teron_gorefiendAI(Creature* creature) : CombatAI(creature, GOREFIEND_ACTION_MAX), m_introDone(false)
     {
         m_instance = static_cast<instance_black_temple*>(creature->GetInstanceData());
-        AddCombatAction(GOREFIEND_ACTION_DOOM_BLOSSOM, 0u);
-        AddCombatAction(GOREFIEND_ACTION_INCINERATE, 0u);
-        AddCombatAction(GOREFIEND_ACTION_SHADOW_OF_DEATH, 0u);
-        AddCombatAction(GOREFIEND_ACTION_CRUSHING_SHADOWS, 0u);
-        AddCombatAction(GOREFIEND_ACTION_BERSERK, 0u);
+        AddCombatAction(GOREFIEND_ACTION_DOOM_BLOSSOM, GetInitialActionTimer(GOREFIEND_ACTION_DOOM_BLOSSOM));
+        AddCombatAction(GOREFIEND_ACTION_INCINERATE, GetInitialActionTimer(GOREFIEND_ACTION_INCINERATE));
+        AddCombatAction(GOREFIEND_ACTION_SHADOW_OF_DEATH, GetInitialActionTimer(GOREFIEND_ACTION_SHADOW_OF_DEATH));
+        AddCombatAction(GOREFIEND_ACTION_CRUSHING_SHADOWS, GetInitialActionTimer(GOREFIEND_ACTION_CRUSHING_SHADOWS));
+        AddCombatAction(GOREFIEND_ACTION_BERSERK, GetInitialActionTimer(GOREFIEND_ACTION_BERSERK));
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
             {
                 return x < 516.8f && y > 402.7f;
@@ -110,14 +110,7 @@ struct boss_teron_gorefiendAI : public ScriptedAI, public CombatActions
 
     void Reset() override
     {
-        for (uint32 i = 0; i < GOREFIEND_ACTION_MAX; ++i)
-            SetActionReadyStatus(i, false);
-
-        ResetTimer(GOREFIEND_ACTION_DOOM_BLOSSOM, GetInitialActionTimer(GOREFIEND_ACTION_DOOM_BLOSSOM));
-        ResetTimer(GOREFIEND_ACTION_INCINERATE, GetInitialActionTimer(GOREFIEND_ACTION_INCINERATE));
-        ResetTimer(GOREFIEND_ACTION_SHADOW_OF_DEATH, GetInitialActionTimer(GOREFIEND_ACTION_SHADOW_OF_DEATH));
-        ResetTimer(GOREFIEND_ACTION_CRUSHING_SHADOWS, GetInitialActionTimer(GOREFIEND_ACTION_CRUSHING_SHADOWS));
-        ResetTimer(GOREFIEND_ACTION_BERSERK, GetInitialActionTimer(GOREFIEND_ACTION_BERSERK));
+        CombatAI::Reset();
 
         DespawnSummons();
     }
@@ -220,90 +213,62 @@ struct boss_teron_gorefiendAI : public ScriptedAI, public CombatActions
         }
     }
 
-    void ExecuteActions()
+    void ExecuteAction(uint32 action) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < GOREFIEND_ACTION_MAX; ++i)
+        switch (action)
         {
-            if (GetActionReadyStatus(i))
+            case GOREFIEND_ACTION_BERSERK:
             {
-                switch (i)
+                if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
                 {
-                    case GOREFIEND_ACTION_BERSERK:
-                    {
-                        if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
-                        {
-                            DoScriptText(EMOTE_BERSERK, m_creature);
-                            SetActionReadyStatus(i, false);
-                            return;
-                        }
-                        continue;
-                    }
-                    case GOREFIEND_ACTION_DOOM_BLOSSOM:
-                    {
-                        if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_DOOM_BLOSSOM) == CAST_OK)
-                        {
-                            if (urand(0, 1))
-                                DoScriptText(urand(0, 1) ? SAY_SPELL1 : SAY_SPELL2, m_creature);
+                    DoScriptText(EMOTE_BERSERK, m_creature);
+                    DisableCombatAction(action);
+                }
+                return;
+            }
+            case GOREFIEND_ACTION_DOOM_BLOSSOM:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_DOOM_BLOSSOM) == CAST_OK)
+                {
+                    if (urand(0, 1))
+                        DoScriptText(urand(0, 1) ? SAY_SPELL1 : SAY_SPELL2, m_creature);
 
-                            ResetTimer(i, GetSubsequentActionTimer(GorefiendActions(i)));
-                            SetActionReadyStatus(i, false);
-                            return;
-                        }
-                        continue;
-                    }
-                    case GOREFIEND_ACTION_INCINERATE:
+                    ResetCombatAction(action, GetSubsequentActionTimer(GorefiendActions(action)));
+                }
+                return;
+            }
+            case GOREFIEND_ACTION_INCINERATE:
+            {
+                Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_SKIP_TANK);
+                if (DoCastSpellIfCan(target, SPELL_INCINERATE) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(GorefiendActions(action)));
+                return;
+            }
+            case GOREFIEND_ACTION_SHADOW_OF_DEATH:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHADOW_OF_DEATH, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA | SELECT_FLAG_SKIP_TANK))
+                {
+                    if (DoCastSpellIfCan(target, SPELL_SHADOW_OF_DEATH) == CAST_OK)
                     {
-                        Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_SKIP_TANK);
-                        if (DoCastSpellIfCan(target, SPELL_INCINERATE) == CAST_OK)
-                        {
-                            ResetTimer(i, GetSubsequentActionTimer(GorefiendActions(i)));
-                            SetActionReadyStatus(i, false);
-                            return;
-                        }
-                        continue;
-                    }
-                    case GOREFIEND_ACTION_SHADOW_OF_DEATH:
-                    {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SHADOW_OF_DEATH, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_AURA | SELECT_FLAG_SKIP_TANK))
-                        {
-                            if (DoCastSpellIfCan(target, SPELL_SHADOW_OF_DEATH) == CAST_OK)
-                            {
-                                DoScriptText(urand(0, 1) ? SAY_SPECIAL1 : SAY_SPECIAL2, m_creature);
-                                return;
-                            }
-                        }
-                        continue;
-                    }
-                    case GOREFIEND_ACTION_CRUSHING_SHADOWS:
-                    {
-                        if (DoCastSpellIfCan(nullptr, SPELL_CRUSHING_SHADOWS) == CAST_OK)
-                        {
-                            if (urand(0, 1))
-                                DoScriptText(urand(0, 1) ? SAY_SPECIAL1 : SAY_SPECIAL2, m_creature);
-
-                            ResetTimer(i, GetSubsequentActionTimer(GorefiendActions(i)));
-                            SetActionReadyStatus(i, false);
-                            return;
-                        }
-                        continue;
+                        DoScriptText(urand(0, 1) ? SAY_SPECIAL1 : SAY_SPECIAL2, m_creature);
+                        return;
                     }
                 }
+                return;
+            }
+            case GOREFIEND_ACTION_CRUSHING_SHADOWS:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_CRUSHING_SHADOWS) == CAST_OK)
+                {
+                    if (urand(0, 1))
+                        DoScriptText(urand(0, 1) ? SAY_SPECIAL1 : SAY_SPECIAL2, m_creature);
+
+                    ResetCombatAction(action, GetSubsequentActionTimer(GorefiendActions(action)));
+                    return;
+                }
+                return;
             }
         }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff, m_creature->IsInCombat());
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        ExecuteActions();
-        DoMeleeAttackIfReady();
     }
 };
 
