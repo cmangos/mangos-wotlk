@@ -480,7 +480,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34026,'spell_kill_command'),
 (34477,'spell_misdirection'),
-(34501,'spell_expose_weakness');
+(34501,'spell_expose_weakness'),
+(781,'Disengage');
 
 -- Priest
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

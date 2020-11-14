@@ -52,9 +52,21 @@ struct ExposeWeakness : public AuraScript
     }
 };
 
+struct Disengage : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        if (!spell->GetCaster()->IsInCombat())
+            return SPELL_FAILED_CASTER_AURASTATE;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 void LoadHunterScripts()
 {
     RegisterSpellScript<KillCommand>("spell_kill_command");
     RegisterSpellScript<Misdirection>("spell_misdirection");
     RegisterAuraScript<ExposeWeakness>("spell_expose_weakness");
+    RegisterSpellScript<Disengage>("spell_disengage");
 }
