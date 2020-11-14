@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Scripts/SpellScript.h"
 
 enum
@@ -86,16 +86,16 @@ enum SupremusActions // order based on priority
     SUPREMUS_ACTION_DELAY,
 };
 
-struct boss_supremusAI : public ScriptedAI, CombatActions
+struct boss_supremusAI : public CombatAI
 {
-    boss_supremusAI(Creature* creature) : ScriptedAI(creature), CombatActions(SUPREMUS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_supremusAI(Creature* creature) : CombatAI(creature, SUPREMUS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        AddCombatAction(SUPREMUS_ACTION_PHASE_SWITCH, 0u);
-        AddCombatAction(SUPREMUS_ACTION_BERSERK, 0u);
-        AddCombatAction(SUPREMUS_ACTION_MOLTEN_PUNCH, 0u);
-        AddCombatAction(SUPREMUS_ACTION_VOLCANIC_ERUPTION, 0u);
-        AddCombatAction(SUPREMUS_ACTION_SWITCH_TARGET, 0u);
-        AddCombatAction(SUPREMUS_ACTION_HATEFUL_STRIKE, 0u);
+        AddCombatAction(SUPREMUS_ACTION_PHASE_SWITCH, GetInitialActionTimer(SUPREMUS_ACTION_PHASE_SWITCH));
+        AddCombatAction(SUPREMUS_ACTION_BERSERK, GetInitialActionTimer(SUPREMUS_ACTION_BERSERK));
+        AddCombatAction(SUPREMUS_ACTION_MOLTEN_PUNCH, GetInitialActionTimer(SUPREMUS_ACTION_MOLTEN_PUNCH));
+        AddCombatAction(SUPREMUS_ACTION_VOLCANIC_ERUPTION, true);
+        AddCombatAction(SUPREMUS_ACTION_SWITCH_TARGET, true);
+        AddCombatAction(SUPREMUS_ACTION_HATEFUL_STRIKE, GetInitialActionTimer(SUPREMUS_ACTION_HATEFUL_STRIKE));
         AddCustomAction(SUPREMUS_ACTION_DELAY, true, [&]
         {
             SetCombatScriptStatus(false);
@@ -114,18 +114,7 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
 
     void Reset() override
     {
-        for (uint32 i = 0; i < SUPREMUS_ACTION_MAX; ++i)
-            SetActionReadyStatus(i, false);
-
-        ResetTimer(SUPREMUS_ACTION_PHASE_SWITCH, GetInitialActionTimer(SUPREMUS_ACTION_PHASE_SWITCH));
-        ResetTimer(SUPREMUS_ACTION_BERSERK, GetInitialActionTimer(SUPREMUS_ACTION_BERSERK));
-        ResetTimer(SUPREMUS_ACTION_MOLTEN_PUNCH, GetInitialActionTimer(SUPREMUS_ACTION_MOLTEN_PUNCH));
-        ResetTimer(SUPREMUS_ACTION_HATEFUL_STRIKE, GetInitialActionTimer(SUPREMUS_ACTION_HATEFUL_STRIKE));
-
-        DisableTimer(SUPREMUS_ACTION_SWITCH_TARGET);
-        DisableTimer(SUPREMUS_ACTION_VOLCANIC_ERUPTION);
-
-        DisableTimer(SUPREMUS_ACTION_DELAY);
+        CombatAI::Reset();
 
         m_creature->FixateTarget(nullptr);
         m_bTankPhase = true;
@@ -242,117 +231,83 @@ struct boss_supremusAI : public ScriptedAI, CombatActions
             ResetTimer(SUPREMUS_ACTION_SWITCH_TARGET, 1000);
     }
 
-    void ExecuteActions()
+    void ExecuteAction(uint32 action) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < SUPREMUS_ACTION_MAX; ++i)
+        switch (action)
         {
-            if (GetActionReadyStatus(i))
+            case SUPREMUS_ACTION_PHASE_SWITCH:
             {
-                switch (i)
+                if (m_bTankPhase)
                 {
-                    case SUPREMUS_ACTION_PHASE_SWITCH:
-                    {
-                        if (m_bTankPhase)
-                        {
-                            m_creature->CastSpell(nullptr, SPELL_SLOW_SELF, TRIGGERED_OLD_TRIGGERED);
-                            DoScriptText(EMOTE_GROUND_CRACK, m_creature);
-                            m_bTankPhase = false;
-                            DoResetThreat();
-                            DisableTimer(SUPREMUS_ACTION_HATEFUL_STRIKE);
-                            SetActionReadyStatus(SUPREMUS_ACTION_HATEFUL_STRIKE, false);
-                            ResetTimer(SUPREMUS_ACTION_VOLCANIC_ERUPTION, GetInitialActionTimer(SUPREMUS_ACTION_VOLCANIC_ERUPTION));
-                            SetCombatScriptStatus(true);
-                            SetCombatMovement(false, true);
-                            m_creature->AttackStop(true);
-                            ResetTimer(SUPREMUS_ACTION_DELAY, 1500);
-                        }
-                        else
-                        {
-                            if (m_creature->HasAura(SPELL_SLOW_SELF))
-                                m_creature->RemoveAurasDueToSpell(SPELL_SLOW_SELF);
-
-                            m_creature->FixateTarget(nullptr); // fixate aura runs a tad longer
-                            m_bTankPhase = true;
-                            DoResetThreat();
-                            DoScriptText(EMOTE_PUNCH_GROUND, m_creature);
-                            DisableCombatAction(SUPREMUS_ACTION_SWITCH_TARGET);
-                            DisableCombatAction(SUPREMUS_ACTION_VOLCANIC_ERUPTION);
-                            ResetTimer(SUPREMUS_ACTION_HATEFUL_STRIKE, GetInitialActionTimer(SUPREMUS_ACTION_HATEFUL_STRIKE));
-                            SetCombatScriptStatus(true);
-                            SetCombatMovement(false, true);
-                            m_creature->AttackStop(true);
-                            ResetTimer(SUPREMUS_ACTION_DELAY, 1500);
-                        }
-
-                        ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
-                        SetActionReadyStatus(i, false);
-                        return;
-                    }
-                    case SUPREMUS_ACTION_BERSERK:
-                        if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
-                        {
-                            SetActionReadyStatus(i, false);
-                            return;
-                        }
-                        break;
-                    case SUPREMUS_ACTION_MOLTEN_PUNCH:
-                        if (DoCastSpellIfCan(nullptr, SPELL_MOLTEN_PUNCH) == CAST_OK)
-                        {
-                            ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
-                            SetActionReadyStatus(i, false);
-                            return;
-                        }
-                        break;
-                    case SUPREMUS_ACTION_VOLCANIC_ERUPTION:
-                    {
-                        if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
-                        {
-                            if (DoCastSpellIfCan(target, SPELL_VOLCANIC_ERUPTION) == CAST_OK)
-                            {
-                                ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
-                                SetActionReadyStatus(i, false);
-                                return;
-                            }
-                        }
-                        break;
-                    }
-                    case SUPREMUS_ACTION_SWITCH_TARGET:
-                        if (DoCastSpellIfCan(nullptr, SPELL_RANDOM_TARGET) == CAST_OK)
-                        {
-                            DoScriptText(EMOTE_NEW_TARGET, m_creature);
-                            SetActionReadyStatus(i, false);
-                            return;
-                        }
-                        break;
-                    case SUPREMUS_ACTION_HATEFUL_STRIKE:
-                        if (Unit* target = GetHatefulStrikeTarget())
-                        {
-                            if (DoCastSpellIfCan(target, SPELL_HATEFUL_STRIKE) == CAST_OK)
-                            {
-                                m_creature->SetTarget(target);
-                                ResetTimer(i, GetSubsequentActionTimer(SupremusActions(i)));
-                                SetActionReadyStatus(i, false);
-                            }
-                            return;
-                        }
-                        break;
+                    m_creature->CastSpell(nullptr, SPELL_SLOW_SELF, TRIGGERED_OLD_TRIGGERED);
+                    DoScriptText(EMOTE_GROUND_CRACK, m_creature);
+                    m_bTankPhase = false;
+                    DoResetThreat();
+                    DisableTimer(SUPREMUS_ACTION_HATEFUL_STRIKE);
+                    SetActionReadyStatus(SUPREMUS_ACTION_HATEFUL_STRIKE, false);
+                    ResetTimer(SUPREMUS_ACTION_VOLCANIC_ERUPTION, GetInitialActionTimer(SUPREMUS_ACTION_VOLCANIC_ERUPTION));
+                    SetCombatScriptStatus(true);
+                    SetCombatMovement(false, true);
+                    SetMeleeEnabled(false);
+                    m_creature->SetTarget(nullptr);
+                    ResetTimer(SUPREMUS_ACTION_DELAY, 1500);
                 }
+                else
+                {
+                    if (m_creature->HasAura(SPELL_SLOW_SELF))
+                        m_creature->RemoveAurasDueToSpell(SPELL_SLOW_SELF);
+
+                    m_creature->FixateTarget(nullptr); // fixate aura runs a tad longer
+                    m_bTankPhase = true;
+                    DoResetThreat();
+                    DoScriptText(EMOTE_PUNCH_GROUND, m_creature);
+                    DisableCombatAction(SUPREMUS_ACTION_SWITCH_TARGET);
+                    DisableCombatAction(SUPREMUS_ACTION_VOLCANIC_ERUPTION);
+                    ResetTimer(SUPREMUS_ACTION_HATEFUL_STRIKE, GetInitialActionTimer(SUPREMUS_ACTION_HATEFUL_STRIKE));
+                    SetCombatScriptStatus(true);
+                    SetCombatMovement(false, true);
+                    SetMeleeEnabled(false);
+                    m_creature->SetTarget(nullptr);
+                    ResetTimer(SUPREMUS_ACTION_DELAY, 1500);
+                }
+
+                DisableCombatAction(action);
+                return;
             }
+            case SUPREMUS_ACTION_BERSERK:
+                if (DoCastSpellIfCan(nullptr, SPELL_BERSERK) == CAST_OK)
+                    DisableCombatAction(action);
+                return;
+            case SUPREMUS_ACTION_MOLTEN_PUNCH:
+                if (DoCastSpellIfCan(nullptr, SPELL_MOLTEN_PUNCH) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(SupremusActions(action)));
+                return;
+            case SUPREMUS_ACTION_VOLCANIC_ERUPTION:
+            {
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
+                    if (DoCastSpellIfCan(target, SPELL_VOLCANIC_ERUPTION) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(SupremusActions(action)));
+                return;
+            }
+            case SUPREMUS_ACTION_SWITCH_TARGET:
+                if (DoCastSpellIfCan(nullptr, SPELL_RANDOM_TARGET) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_NEW_TARGET, m_creature);
+                    DisableCombatAction(action);
+                }
+                return;
+            case SUPREMUS_ACTION_HATEFUL_STRIKE:
+                if (Unit* target = GetHatefulStrikeTarget())
+                {
+                    if (DoCastSpellIfCan(target, SPELL_HATEFUL_STRIKE) == CAST_OK)
+                    {
+                        m_creature->SetTarget(target);
+                        ResetCombatAction(action, GetSubsequentActionTimer(SupremusActions(action)));
+                    }
+                    return;
+                }
+                break;
         }
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff, m_creature->IsInCombat());
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-        
-        ExecuteActions();
-        DoMeleeAttackIfReady();
     }
 };
 
