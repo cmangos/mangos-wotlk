@@ -23,7 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "black_temple.h"
-#include "AI/ScriptDevAI/base/TimerAI.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -169,17 +169,16 @@ enum AkamaActions
 ## npc_akama
 ######*/
 
-struct npc_akamaAI : public ScriptedAI, public CombatActions, private DialogueHelper
+struct npc_akamaAI : public CombatAI, private DialogueHelper
 {
-    npc_akamaAI(Creature* creature) : ScriptedAI(creature), CombatActions(AKAMA_ACTION_MAX),
+    npc_akamaAI(Creature* creature) : CombatAI(creature, AKAMA_ACTION_MAX),
         DialogueHelper(aOutroDialogue)
     {
         m_instance = static_cast<instance_black_temple*>(creature->GetInstanceData());
         InitializeDialogueHelper(m_instance);
-        AddCombatAction(AKAMA_ACTION_LOW_HEALTH, 0u);
-        AddCombatAction(AKAMA_ACTION_DESTRUCTIVE_POISON, 0u);
-        AddCombatAction(AKAMA_ACTION_CHAIN_LIGHTNING, 0u);
-        Reset();
+        AddTimerlessCombatAction(AKAMA_ACTION_LOW_HEALTH, true);
+        AddCombatAction(AKAMA_ACTION_DESTRUCTIVE_POISON, true);
+        AddCombatAction(AKAMA_ACTION_CHAIN_LIGHTNING, true);
     }
 
     instance_black_temple* m_instance;
@@ -190,13 +189,7 @@ struct npc_akamaAI : public ScriptedAI, public CombatActions, private DialogueHe
 
     void Reset() override
     {
-        for (uint32 i = 0; i < AKAMA_ACTION_MAX; ++i)
-            SetActionReadyStatus(i, false);
-
-        SetActionReadyStatus(AKAMA_ACTION_LOW_HEALTH, true);
-
-        DisableTimer(AKAMA_ACTION_DESTRUCTIVE_POISON);
-        DisableTimer(AKAMA_ACTION_CHAIN_LIGHTNING);
+        CombatAI::Reset();
 
         SetCombatMovement(false);
 
@@ -204,7 +197,7 @@ struct npc_akamaAI : public ScriptedAI, public CombatActions, private DialogueHe
 
         m_lBrokenGUIDList.clear();
 
-        DoCastSpellIfCan(m_creature, SPELL_STEALTH);
+        DoCastSpellIfCan(nullptr, SPELL_STEALTH);
         m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
     }
 
@@ -413,47 +406,30 @@ struct npc_akamaAI : public ScriptedAI, public CombatActions, private DialogueHe
         }
     }
 
-    void ExecuteActions()
+    void ExecuteAction(uint32 action) override
     {
-        if (!CanExecuteCombatAction())
-            return;
-
-        for (uint32 i = 0; i < AKAMA_ACTION_MAX; ++i)
+        switch (action)
         {
-            if (GetActionReadyStatus(i))
+            case AKAMA_ACTION_LOW_HEALTH:
             {
-                switch (i)
+                if (m_creature->GetHealthPercent() < 15.0f)
                 {
-                    case AKAMA_ACTION_LOW_HEALTH:
-                    {
-                        if (m_creature->GetHealthPercent() < 15.0f)
-                        {
-                            DoScriptText(SAY_LOW_HEALTH, m_creature);
-                            SetActionReadyStatus(i, false);
-                        }
-                        continue;
-                    }
-                    case AKAMA_ACTION_DESTRUCTIVE_POISON:
-                    {
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DESTRUCTIVE_POISON) == CAST_OK)
-                        {
-                            ResetTimer(i, GetSubsequentActionTimer(AkamaActions(i)));
-                            SetActionReadyStatus(i, false);
-                            return;
-                        }
-                        continue;
-                    }
-                    case AKAMA_ACTION_CHAIN_LIGHTNING:
-                    {
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHAIN_LIGHTNING) == CAST_OK)
-                        {
-                            ResetTimer(i, GetSubsequentActionTimer(AkamaActions(i)));
-                            SetActionReadyStatus(i, false);
-                            return;
-                        }
-                        continue;
-                    }
+                    DoScriptText(SAY_LOW_HEALTH, m_creature);
+                    SetActionReadyStatus(action, false);
                 }
+                return;
+            }
+            case AKAMA_ACTION_DESTRUCTIVE_POISON:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DESTRUCTIVE_POISON) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(AkamaActions(action)));
+                return;
+            }
+            case AKAMA_ACTION_CHAIN_LIGHTNING:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CHAIN_LIGHTNING) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(AkamaActions(action)));
+                return;
             }
         }
     }
@@ -580,11 +556,6 @@ struct boss_shade_of_akamaAI : public ScriptedAI
     {
         if (spell->Id == SPELL_AKAMA_SOUL_CHANNEL)
             m_creature->GetMotionMaster()->MovePoint(1, akamaWaypoints[1].x, akamaWaypoints[1].y, akamaWaypoints[1].z);
-    }
-
-    void EnterEvadeMode() override
-    {
-        ScriptedAI::EnterEvadeMode();
     }
 
     void UpdateAI(const uint32 /*diff*/) override
@@ -809,57 +780,32 @@ struct npc_creature_generatorAI : public ScriptedAI, public TimerManager
     }
 };
 
-UnitAI* GetAI_npc_akama_shade(Creature* creature)
-{
-    return new npc_akamaAI(creature);
-}
-
-UnitAI* GetAI_boss_shade_of_akama(Creature* creature)
-{
-    return new boss_shade_of_akamaAI(creature);
-}
-
-UnitAI* GetAI_mob_ashtongue_channeler(Creature* creature)
-{
-    return new mob_ashtongue_channelerAI(creature);
-}
-
-UnitAI* GetAI_mob_ashtongue_sorcerer(Creature* creature)
-{
-    return new mob_ashtongue_sorcererAI(creature);
-}
-
-UnitAI* GetAI_npc_creature_generator(Creature* creature)
-{
-    return new npc_creature_generatorAI(creature);
-}
-
 void AddSC_boss_shade_of_akama()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_akama_shade";
-    pNewScript->GetAI = &GetAI_npc_akama_shade;
+    pNewScript->GetAI = &GetNewAIInstance<npc_akamaAI>;
     pNewScript->pGossipHello = &GossipHello_npc_akama;
     pNewScript->pGossipSelect = &GossipSelect_npc_akama;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_shade_of_akama";
-    pNewScript->GetAI = &GetAI_boss_shade_of_akama;
+    pNewScript->GetAI = &GetNewAIInstance<boss_shade_of_akamaAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_ashtongue_channeler";
-    pNewScript->GetAI = &GetAI_mob_ashtongue_channeler;
+    pNewScript->GetAI = &GetNewAIInstance<mob_ashtongue_channelerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_ashtongue_sorcerer";
-    pNewScript->GetAI = &GetAI_mob_ashtongue_sorcerer;
+    pNewScript->GetAI = &GetNewAIInstance<mob_ashtongue_sorcererAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_creature_generator";
-    pNewScript->GetAI = &GetAI_npc_creature_generator;
+    pNewScript->GetAI = &GetNewAIInstance<npc_creature_generatorAI>;
     pNewScript->RegisterSelf();
 }
