@@ -413,7 +413,7 @@ void SpellLog::SendToSet()
 // ***********
 
 Spell::Spell(WorldObject * caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy) :
-    m_spellLog(this), m_spellScript(SpellScriptMgr::GetSpellScript(info->Id)), m_spellEvent(nullptr), m_auraScript(SpellScriptMgr::GetAuraScript(info->Id)), m_trueCaster(caster)
+    m_spellLog(this), m_spellScript(SpellScriptMgr::GetSpellScript(info->Id)), m_spellEvent(nullptr), m_auraScript(SpellScriptMgr::GetAuraScript(info->Id)), m_param1(0), m_param2(0), m_trueCaster(caster)
 {
     MANGOS_ASSERT(caster != nullptr && info != nullptr);
     MANGOS_ASSERT(info == sSpellTemplate.LookupEntry<SpellEntry>(info->Id) && "`info` must be pointer to sSpellTemplate element");
@@ -4136,10 +4136,10 @@ void Spell::SendCastResult(SpellCastResult result) const
     if (recipient->GetSession()->PlayerLoading()) // don't send cast results at loading time
         return;
 
-    SendCastResult(recipient, m_spellInfo, m_cast_count, result, m_petCast);
+    SendCastResult(recipient, m_spellInfo, m_cast_count, result, m_petCast, m_param1, m_param2);
 }
 
-void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, uint8 cast_count, SpellCastResult result, bool isPetCastResult /*=false*/)
+void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, uint8 cast_count, SpellCastResult result, bool isPetCastResult /*=false*/, uint32 param1 /*=0*/, uint32 param2 /*=0*/)
 {
     if (result == SPELL_CAST_OK)
         return;
@@ -4151,12 +4151,13 @@ void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, ui
     switch (result)
     {
         case SPELL_FAILED_NOT_READY:
-            data << uint32(0);                              // unknown, value 1 seen for 14177 (update cooldowns on client flag)
+            if (spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
+                data << uint32(spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE));
             break;
         case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
             data << uint32(spellInfo->RequiresSpellFocus);  // SpellFocusObject.dbc id
             break;
-        case SPELL_FAILED_REQUIRES_AREA:                    // AreaTable.dbc id
+        case SPELL_FAILED_REQUIRES_AREA:
             // hardcode areas limitation case
             switch (spellInfo->Id)
             {
@@ -4193,7 +4194,7 @@ void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, ui
             data << uint32(spellInfo->EquippedItemSubClassMask);
             break;
         case SPELL_FAILED_PREVENTED_BY_MECHANIC:
-            data << uint32(0);                              // SpellMechanic.dbc id
+            data << param1;                                 // SpellMechanic.dbc id
             break;
         case SPELL_FAILED_CUSTOM_ERROR:
             data << uint32(0);                              // custom error id (see enum SpellCastResultCustom)
@@ -4205,8 +4206,8 @@ void Spell::SendCastResult(Player const* caster, SpellEntry const* spellInfo, ui
             data << uint32(0);                              // item id
             break;
         case SPELL_FAILED_NEED_MORE_ITEMS:
-            data << uint32(0);                              // item id
-            data << uint32(0);                              // item count?
+            data << param1;
+            data << param2;
             break;
         case SPELL_FAILED_MIN_SKILL:
             data << uint32(0);                              // SkillLine.dbc id
@@ -5195,7 +5196,7 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (m_triggeredByAuraSpell)
             return SPELL_FAILED_DONT_REPORT;
         else
-            return m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_READY;
+            return SPELL_FAILED_NOT_READY;
     }
 
     if (!m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))
@@ -5216,7 +5217,7 @@ SpellCastResult Spell::CheckCast(bool strict)
 
     // check global cooldown
     if (strict && !m_ignoreGCD && m_caster->HasGCD(m_spellInfo))
-        return m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_READY;
+        return SPELL_FAILED_NOT_READY;
 
     // only allow triggered spells if at an ended battleground
     if (!m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -7551,8 +7552,13 @@ SpellCastResult Spell::CheckItems()
                 if (item_prospectingskilllevel > p_caster->GetSkillValue(SKILL_JEWELCRAFTING))
                     return SPELL_FAILED_LOW_CASTLEVEL;
                 // make sure the player has the required ores in inventory
-                if (int32(itemTarget->GetCount()) < CalculateSpellEffectValue(SpellEffectIndex(i), m_caster))
+                int32 requiredCount = CalculateSpellEffectValue(SpellEffectIndex(i), m_caster);
+                if (int32(itemTarget->GetCount()) < requiredCount)
+                {
+                    m_param1 = itemTarget->GetEntry();
+                    m_param2 = requiredCount - int32(itemTarget->GetCount());
                     return SPELL_FAILED_NEED_MORE_ITEMS;
+                }
 
                 if (!LootTemplates_Prospecting.HaveLootFor(m_targets.getItemTargetEntry()))
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
@@ -7563,19 +7569,25 @@ SpellCastResult Spell::CheckItems()
             {
                 if (!m_targets.getItemTarget())
                     return SPELL_FAILED_CANT_BE_MILLED;
+                Item* itemTarget = m_targets.getItemTarget();
                 // ensure item is a millable herb
-                if (!(m_targets.getItemTarget()->GetProto()->Flags & ITEM_FLAG_IS_MILLABLE))
+                if (!(itemTarget->GetProto()->Flags & ITEM_FLAG_IS_MILLABLE))
                     return SPELL_FAILED_CANT_BE_MILLED;
                 // prevent milling in trade slot
-                if (m_targets.getItemTarget()->GetOwnerGuid() != m_caster->GetObjectGuid())
+                if (itemTarget->GetOwnerGuid() != m_caster->GetObjectGuid())
                     return SPELL_FAILED_CANT_BE_MILLED;
                 // Check for enough skill in inscription
-                uint32 item_millingskilllevel = m_targets.getItemTarget()->GetProto()->RequiredSkillRank;
+                uint32 item_millingskilllevel = itemTarget->GetProto()->RequiredSkillRank;
                 if (item_millingskilllevel > p_caster->GetSkillValue(SKILL_INSCRIPTION))
                     return SPELL_FAILED_LOW_CASTLEVEL;
                 // make sure the player has the required herbs in inventory
-                if (int32(m_targets.getItemTarget()->GetCount()) < CalculateSpellEffectValue(SpellEffectIndex(i), m_caster))
+                int32 requiredCount = CalculateSpellEffectValue(SpellEffectIndex(i), m_caster);
+                if (int32(itemTarget->GetCount()) < requiredCount)
+                {
+                    m_param1 = itemTarget->GetEntry();
+                    m_param2 = requiredCount - int32(itemTarget->GetCount());
                     return SPELL_FAILED_NEED_MORE_ITEMS;
+                }
 
                 if (!LootTemplates_Milling.HaveLootFor(m_targets.getItemTargetEntry()))
                     return SPELL_FAILED_CANT_BE_MILLED;
