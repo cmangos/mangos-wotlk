@@ -450,6 +450,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     bool handled = false;
     Spell* spell = new Spell(caster, spellInfo, triggeredByAura ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE, caster->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : nullptr);
     spell->m_cast_count = cast_count;                       // set count of casts
+    spell->m_clientCast = true;
     if (!triggeredByAura && (caster->HasGCD(spellInfo) || !caster->IsSpellReady(*spellInfo)))
     {
         if (caster->HasGCDOrCooldownWithinMargin(*spellInfo))

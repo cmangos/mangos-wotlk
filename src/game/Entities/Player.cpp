@@ -8539,6 +8539,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets& targets, uint8 cast_
         spell->SetCastItem(item);
         item->SetUsedInSpell(true);
         spell->m_cast_count = cast_count;                   // set count of casts
+        spell->m_clientCast = true;
         spell->m_currentBasePoints[EFFECT_INDEX_0] = learning_spell_id;
         spell->SpellStart(&targets);
         return;
@@ -8575,6 +8576,7 @@ void Player::CastItemUseSpell(Item* item, SpellCastTargets& targets, uint8 cast_
         spell->SetCastItem(item);
         item->SetUsedInSpell(true);
         spell->m_cast_count = cast_count;                   // set count of casts
+        spell->m_clientCast = true;
         spell->m_glyphIndex = glyphIndex;                   // glyph index
         spell->SpellStart(&targets);
 

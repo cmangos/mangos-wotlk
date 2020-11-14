@@ -489,7 +489,15 @@ class Spell
         SpellCastResult CheckRange(bool strict);
         SpellCastResult CheckPower(bool strict);
         SpellCastResult CheckOrTakeRunePower(bool take);
-        SpellCastResult CheckCasterAuras() const;
+        SpellCastResult CheckCasterAuras(uint32& param1) const;
+
+        bool CheckSpellCancelsAuraEffect(AuraType auraType, uint32& param1) const;
+        bool CheckSpellCancelsCharm(uint32& param1) const;
+        bool CheckSpellCancelsStun(uint32& param1) const;
+        bool CheckSpellCancelsSilence(uint32& param1) const;
+        bool CheckSpellCancelsPacify(uint32& param1) const;
+        bool CheckSpellCancelsFear(uint32& param1) const;
+        bool CheckSpellCancelsConfuse(uint32& param1) const;
 
         int32 CalculateSpellEffectValue(SpellEffectIndex i, Unit* target, bool maximum = false, bool finalUse = true)
         { return m_trueCaster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i], maximum, finalUse); }
@@ -581,6 +589,8 @@ class Spell
         bool m_ignoreCooldowns;
         bool m_ignoreConcurrentCasts;
         bool m_hideInCombatLog;
+        // Not a trigger flag but same type of information
+        bool m_clientCast;
 
         int32 GetCastTime() const { return m_casttime; }
         uint32 GetCastedTime() const { return m_timer; }
