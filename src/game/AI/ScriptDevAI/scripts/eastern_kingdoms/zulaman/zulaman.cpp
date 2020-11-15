@@ -44,7 +44,7 @@ void instance_zulaman::Initialize()
 bool instance_zulaman::IsEncounterInProgress() const
 {
     // Skip Time-Event and Time-Event timer
-    for (uint8 i = 1; i < MAX_ENCOUNTER - 1; ++i)
+    for (uint8 i = 1; i < TYPE_RUN_EVENT_TIME - 1; ++i)
     {
         if (m_auiEncounter[i] == IN_PROGRESS)
             return true;
