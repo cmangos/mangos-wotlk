@@ -731,6 +731,7 @@ class Spell
         void OnSuccessfulFinish();
         SpellCastResult OnCheckCast(bool strict);
         void OnEffectExecute(SpellEffectIndex effIndex);
+        void OnRadiusCalculate(SpellEffectIndex effIndex, bool targetB, float& radius);
         void OnDestTarget();
         bool OnCheckTarget(GameObject* target, SpellEffectIndex eff) const;
         bool OnCheckTarget(Unit* target, SpellEffectIndex eff) const;
@@ -860,7 +861,7 @@ class Spell
 
         // Returns a target that was filled by SPELL_SCRIPT_TARGET (or selected victim) Can return nullptr
         Unit* GetPrefilledUnitTargetOrUnitTarget(SpellEffectIndex effIndex) const;
-        void GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, bool targetB, uint32& effectChainTarget) const;
+        void GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, bool targetB, uint32& effectChainTarget);
         float GetCone();
 
         //*****************************************
