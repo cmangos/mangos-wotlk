@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "shadow_labyrinth.h"
+#include "Spells/Scripts/SpellScript.h"
 
 /* Shadow Labyrinth encounters:
 1 - Ambassador Hellmaw event
@@ -233,8 +234,21 @@ GameObjectAI* GetAIgo_screaming_hall_door(GameObject* go)
     return new go_screaming_hall_door(go);
 }
 
+struct ShapeOfTheBeast : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetCaster()->CastSpell(aura->GetCaster(), SPELL_SHAPE_OF_BEAST, TRIGGERED_OLD_TRIGGERED);
+        else
+            aura->GetCaster()->RemoveAurasDueToSpell(SPELL_SHAPE_OF_BEAST);
+    }
+};
+
 void AddSC_instance_shadow_labyrinth()
 {
+    RegisterAuraScript<ShapeOfTheBeast>("spell_shape_of_the_beast");
+
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_shadow_labyrinth";
     pNewScript->GetInstanceData = &GetInstanceData_instance_shadow_labyrinth;
