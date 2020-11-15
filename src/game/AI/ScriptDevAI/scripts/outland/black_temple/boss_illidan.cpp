@@ -2276,7 +2276,7 @@ struct npc_parasitic_shadowfiendAI : public ScriptedAI, public TimerManager
     {
         ScriptedAI::JustRespawned();
         DoCastSpellIfCan(nullptr, SPELL_SHADOWFORM_PARASITE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        DoCastSpellIfCan(nullptr, SPELL_PARASITIC_SHADOWFIEND_ADD, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(nullptr, SPELL_PARASITIC_SHADOWFIEND_P, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         m_creature->SetCorpseDelay(1);
     }
 
