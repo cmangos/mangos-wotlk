@@ -153,7 +153,7 @@ ObjectMgr::ObjectMgr() :
     m_PetNumbers("Pet numbers"),
     m_FirstTemporaryCreatureGuid(1),
     m_FirstTemporaryGameObjectGuid(1),
-    DBCLocaleIndex(LOCALE_enUS)
+    DBCLocaleIndex(DEFAULT_LOCALE)
 {
 }
 

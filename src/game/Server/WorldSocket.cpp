@@ -415,11 +415,7 @@ bool WorldSocket::HandleAuthSession(WorldPacket& recvPacket)
 
     time_t mutetime = time_t (fields[8].GetUInt64());
 
-    uint8 tempLoc = LocaleConstant(fields[9].GetUInt8());
-    if (tempLoc >= static_cast<uint8>(MAX_LOCALE))
-        locale = LOCALE_enUS;
-    else
-        locale = LocaleConstant(tempLoc);
+    locale = GetLocaleByName(fields[9].GetString());
 
     delete result;
 
