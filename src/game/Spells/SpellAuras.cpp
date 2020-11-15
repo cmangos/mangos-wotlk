@@ -533,17 +533,24 @@ Unit* SingleEnemyTargetAura::GetTriggerTarget() const
 
 Aura* CreateAura(SpellEntry const* spellproto, SpellEffectIndex eff, int32 const* currentDamage, int32 const* currentBasePoints, SpellAuraHolder* holder, Unit* target, Unit* caster, Item* castItem)
 {
+    Aura* aura = nullptr;
     if (IsAreaAuraEffect(spellproto->Effect[eff]))
-        return new AreaAura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem);
+        aura = new AreaAura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem);
 
-    uint32 triggeredSpellId = spellproto->EffectTriggerSpell[eff];
+    if (!aura)
+    {
+        uint32 triggeredSpellId = spellproto->EffectTriggerSpell[eff];
+        if (SpellEntry const* triggeredSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(triggeredSpellId))
+            for (unsigned int i : triggeredSpellInfo->EffectImplicitTargetA)
+                if (i == TARGET_UNIT_CHANNEL_TARGET)
+                    aura = new SingleEnemyTargetAura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem);
+    }
 
-    if (SpellEntry const* triggeredSpellInfo = sSpellTemplate.LookupEntry<SpellEntry>(triggeredSpellId))
-        for (unsigned int i : triggeredSpellInfo->EffectImplicitTargetA)
-            if (i == TARGET_UNIT_CHANNEL_TARGET)
-                return new SingleEnemyTargetAura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem);
+    if (!aura)
+        aura = new Aura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem);
 
-    return new Aura(spellproto, eff, currentDamage, currentBasePoints, holder, target, caster, castItem);
+    aura->OnAuraInit();
+    return aura;
 }
 
 SpellAuraHolder* CreateSpellAuraHolder(SpellEntry const* spellproto, Unit* target, WorldObject* caster, Item* castItem /*= nullptr*/, SpellEntry const* triggeredBy /*= nullptr*/)
@@ -11752,6 +11759,12 @@ uint32 Aura::CalculateAuraEffectValue(Unit* caster, Unit* target, SpellEntry con
         }
     }
     return value;
+}
+
+void Aura::OnAuraInit()
+{
+    if (AuraScript* script = GetAuraScript())
+        script->OnAuraInit(this);
 }
 
 int32 Aura::OnAuraValueCalculate(Unit* caster, int32 currentValue)
