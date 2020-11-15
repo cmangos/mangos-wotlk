@@ -10404,12 +10404,13 @@ void Unit::IncrDiminishing(DiminishingGroup group, bool pvp)
     m_Diminishing.push_back(DiminishingReturn(group, WorldTimer::getMSTime(), DIMINISHING_LEVEL_2));
 }
 
-void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, Unit* caster, DiminishingLevels Level, int32 limitduration, bool isReflected)
+void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32& duration, Unit* caster, DiminishingLevels Level, bool isReflected, SpellEntry const* spellInfo)
 {
     if (duration == -1 || group == DIMINISHING_NONE || (!isReflected && caster->CanAssist(this)))
         return;
 
     // Duration of crowd control abilities on pvp target is limited by 10 sec. (2.2.0)
+    int32 limitduration = GetDiminishingReturnsLimitDuration(group, spellInfo);
     if (limitduration > 0 && duration > limitduration)
     {
         // test pet/charm masters instead pets/charmeds
