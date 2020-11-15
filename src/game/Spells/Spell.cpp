@@ -6255,10 +6255,6 @@ SpellCastResult Spell::CheckCast(bool strict)
                 if (m_caster->GetTypeId() != TYPEID_PLAYER)
                     return SPELL_FAILED_BAD_TARGETS;
 
-                // pre 2.4 - could not summon to netherstorm
-                if (m_caster->GetZoneId() == 3523)
-                    return SPELL_FAILED_FIZZLE;
-
                 Player* caster = static_cast<Player*>(m_caster);
                 if (!caster->GetSelectionGuid())
                     return SPELL_FAILED_BAD_TARGETS;
@@ -6266,6 +6262,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                 Player* target = sObjectMgr.GetPlayer(caster->GetSelectionGuid());
                 if (!target || caster == target || !target->IsInGroup(m_caster))
                     return SPELL_FAILED_BAD_TARGETS;
+
+#ifdef PRENERF_2_3
+                // pre 2.4 - could not summon to netherstorm
+                if (m_caster->GetZoneId() == 3523)
+                    return SPELL_FAILED_FIZZLE;
 
                 uint32 mapId = m_caster->GetMapId();
                 const MapEntry* map = sMapStore.LookupEntry(mapId);
@@ -6276,6 +6277,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                         return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
                 }
                 break;
+#endif
             }
             case SPELL_EFFECT_SUMMON_PLAYER:
             {
@@ -6294,9 +6296,11 @@ SpellCastResult Spell::CheckCast(bool strict)
                 const MapEntry* map = sMapStore.LookupEntry(mapId);
                 if (map->IsDungeon())
                 {
+#ifdef PRENERF_2_3
                     // pre 2.4 - could not summon to instance
                     if (target->GetMapId() != mapId)
                         return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
+#endif
 
                     InstanceTemplate const* instance = ObjectMgr::GetInstanceTemplate(mapId);
                     if (!instance)
