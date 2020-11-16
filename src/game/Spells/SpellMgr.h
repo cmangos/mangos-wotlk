@@ -175,6 +175,16 @@ inline bool IsSpellWithNonAuraEffect(SpellEntry const* spellInfo)
     return false;
 }
 
+inline uint32 GetAuraEffectMask(SpellEntry const* spellInfo)
+{
+    uint32 mask = 0;
+    for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+        if (IsAuraApplyEffect(spellInfo, SpellEffectIndex(i)))
+            mask |= (1 << i);
+
+    return mask;
+}
+
 inline bool IsEffectHandledImmediatelySpellLaunch(SpellEntry const* spellInfo, SpellEffectIndex effecIdx)
 {
     switch (spellInfo->Effect[effecIdx])
@@ -2201,6 +2211,7 @@ bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group);
 bool IsDiminishingReturnsGroupDurationDiminished(DiminishingGroup group, bool pvp);
 DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group);
 int32 GetDiminishingReturnsLimitDuration(DiminishingGroup group, SpellEntry const* spellproto);
+bool IsSubjectToDiminishingLevels(DiminishingGroup group, bool pvp);
 bool IsCreatureDRSpell(SpellEntry const* spellInfo);
 
 SpellEntry const* GetSpellEntryByDifficulty(uint32 id, Difficulty difficulty, bool isRaid);

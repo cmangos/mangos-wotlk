@@ -3618,6 +3618,13 @@ DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
     return DRTYPE_NONE;
 }
 
+bool IsSubjectToDiminishingLevels(DiminishingGroup group, bool pvp)
+{
+    if ((GetDiminishingReturnsGroupType(group) == DRTYPE_PLAYER && pvp) || GetDiminishingReturnsGroupType(group) == DRTYPE_ALL)
+        return true;
+    return false;
+}
+
 bool IsCreatureDRSpell(SpellEntry const* spellInfo)
 {
     switch (spellInfo->Id)

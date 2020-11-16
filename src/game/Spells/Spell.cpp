@@ -924,7 +924,7 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     targetInfo.procReflect = false;
     targetInfo.isCrit = false;
     targetInfo.heartbeatResistChance = 0;
-    targetInfo.diminishDuration = 0;
+    targetInfo.diminishDuration = m_duration;
     targetInfo.diminishLevel = DIMINISHING_LEVEL_1;
     targetInfo.diminishGroup = DIMINISHING_NONE;
 
@@ -998,6 +998,23 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     }
     else
         targetInfo.reflectResult = SPELL_MISS_NONE;
+
+    bool isReflected = targetInfo.missCondition == SPELL_MISS_REFLECT && targetInfo.reflectResult == SPELL_MISS_NONE;
+    if ((targetInfo.missCondition == SPELL_MISS_NONE || isReflected) && CanSpellDiminish())
+    {
+        Unit* targetForDiminish = isReflected ? m_caster : target;
+        targetInfo.diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell != nullptr || (m_IsTriggeredSpell && m_CastItem));
+        targetInfo.diminishLevel = targetForDiminish->GetDiminishing(targetInfo.diminishGroup);
+
+        if (m_duration > 0)
+        {
+            int32 duration = m_duration;
+            targetForDiminish->ApplyDiminishingToDuration(targetInfo.diminishGroup, duration, m_caster, targetInfo.diminishLevel, isReflected, m_spellInfo);
+            targetInfo.diminishDuration = duration;
+            if (targetInfo.diminishDuration == 0 && targetInfo.diminishLevel == DIMINISHING_LEVEL_IMMUNE)
+                targetInfo.effectHitMask &= ~GetAuraEffectMask(m_spellInfo);
+        }
+    }
 
     // Add target to list
     m_UniqueTargetInfo.push_back(targetInfo);
@@ -1200,7 +1217,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         {
             if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
             {
-                DoSpellHitOnUnit(m_caster, effectMask, target);
+                DoSpellHitOnUnit(m_caster, effectMask, target, true);
                 reflectTarget = unit;
                 unitTarget = m_caster;
             }
@@ -1360,14 +1377,14 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
     }
 }
 
-void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target)
+void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, bool isReflected)
 {
     if (!unit)
         return;
 
     Unit* realCaster = GetAffectiveCaster();
 
-    const bool traveling = (GetSpellSpeed() > 0.0f);
+    const bool traveling = m_spellState == SPELL_STATE_TRAVELING;
 
     // Recheck immune (only for delayed spells)
     if (traveling && !m_spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
@@ -1421,12 +1438,28 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target)
 
     if (IsSpellAppliesAura(m_spellInfo, effectMask))
     {
+        if (traveling) // if travelling, need to recalculate diminishing level and duration
+        {
+            target->diminishLevel = unit->GetDiminishing(target->diminishGroup);
+            if (m_duration > 0)
+            {
+                int32 duration = m_duration;
+                unit->ApplyDiminishingToDuration(target->diminishGroup, duration, m_caster, target->diminishLevel, isReflected, m_spellInfo);
+                target->diminishDuration = duration;
+            }
+        }
+
         if (m_duration != target->diminishDuration && target->diminishDuration == 0 && target->diminishLevel > DIMINISHING_LEVEL_1 && !IsSpellWithNonAuraEffect(m_spellInfo))
         {
             realCaster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
             ResetEffectDamageAndHeal();
             return;
         }
+
+        const bool pvp = (unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && realCaster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED));
+        // Increase Diminishing on unit, actual durations are already calculated
+        if (IsSubjectToDiminishingLevels(target->diminishGroup, pvp))
+            unit->IncrDiminishing(target->diminishGroup, pvp);
 
         m_spellAuraHolder = CreateSpellAuraHolder(m_spellInfo, unit, realCaster, m_CastItem, m_triggeredBySpellInfo);
         m_spellAuraHolder->setDiminishGroup(target->diminishGroup);
@@ -1618,30 +1651,17 @@ void Spell::HandleImmediateEffectExecution(TargetInfo* target)
         ExecuteEffects(unit, nullptr, nullptr, mask);
     }
 
-    // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
-    if (m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || IsCreatureDRSpell(m_spellInfo))
-    {
-        target->diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo, m_triggeredByAuraSpell != nullptr || (m_IsTriggeredSpell && m_CastItem));
-        target->diminishLevel = unit->GetDiminishing(target->diminishGroup);
-        // Increase Diminishing on unit, current informations for actually casts will use values above
-        if ((GetDiminishingReturnsGroupType(target->diminishGroup) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) ||
-            GetDiminishingReturnsGroupType(target->diminishGroup) == DRTYPE_ALL)
-            unit->IncrDiminishing(target->diminishGroup, (unit->GetTypeId() == TYPEID_PLAYER && m_caster->GetTypeId() == TYPEID_PLAYER));
-
-        if (m_duration > 0)
-        {
-            int32 duration = m_duration;
-            unit->ApplyDiminishingToDuration(target->diminishGroup, duration, m_caster, target->diminishLevel, (missInfo == SPELL_MISS_REFLECT && target->reflectResult == SPELL_MISS_NONE), m_spellInfo);
-            target->diminishDuration = duration;
-        }
-    }
-
     target->damage = m_damage;
     target->healing = m_healing;
     target->HitInfo = 0;
     target->effectMaskProcessed = mask;
     if (m_damage > 0 || m_healing > 0)
         target->isCrit = caster->RollSpellCritOutcome(unit, m_spellSchoolMask, m_spellInfo);
+}
+
+bool Spell::CanSpellDiminish() const
+{
+    return m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || IsCreatureDRSpell(m_spellInfo);
 }
 
 void Spell::InitializeDamageMultipliers()
@@ -3537,12 +3557,13 @@ void Spell::cast(bool skipCheck)
     // set to real guid to be sent later to the client
     m_targets.updateTradeSlotItem();
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    m_duration = CalculateSpellDuration(m_spellInfo, m_caster);
+    if (m_trueCaster->IsPlayer())
     {
         if (!m_IsTriggeredSpell && m_CastItem)
-            ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM, m_CastItem->GetEntry());
+            static_cast<Player*>(m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_USE_ITEM, m_CastItem->GetEntry());
 
-        ((Player*)m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
+        static_cast<Player*>(m_caster)->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, m_spellInfo->Id);
     }
 
     FillTargetMap();
@@ -3553,8 +3574,6 @@ void Spell::cast(bool skipCheck)
         SetExecutedCurrently(false);
         return;
     }
-
-    m_duration = CalculateSpellDuration(m_spellInfo, m_caster);
 
     if (Unit* unitCaster = dynamic_cast<Unit*>(m_trueCaster))
         if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISMISS_PET))
@@ -3619,9 +3638,6 @@ void Spell::cast(bool skipCheck)
 
 void Spell::handle_immediate()
 {
-    if (m_spellState != SPELL_STATE_CHANNELING)
-        m_spellState = SPELL_STATE_LANDING;
-
     // Remove used for cast item if need (it can be already nullptr after TakeReagents call
     TakeCastItem();
 
@@ -4677,7 +4693,8 @@ void Spell::SendChannelStart(uint32 duration)
             if (((itr->effectHitMask & (1 << EFFECT_INDEX_0)) && itr->reflectResult == SPELL_MISS_NONE &&
                     m_CastItem) || itr->targetGUID != m_caster->GetObjectGuid())
             {
-                if ((itr->diminishGroup > DIMINISHING_NONE && itr->diminishDuration != duration))
+                // when immune, duration is already 0, still need to fetch data for caster
+                if (itr->diminishGroup > DIMINISHING_NONE && (itr->diminishDuration != duration || diminishLevel == DIMINISHING_LEVEL_IMMUNE))
                 {
                     diminishDuration = itr->diminishDuration;
                     diminishGroup = itr->diminishGroup;
@@ -4701,7 +4718,7 @@ void Spell::SendChannelStart(uint32 duration)
     }
 
     // change channel duration to account for DR if neccessary, also store in caster's targetInfo to use later for setting aura duration
-    if (diminishDuration != duration)
+    if (diminishDuration != duration || diminishLevel == DIMINISHING_LEVEL_IMMUNE)
     {
         duration = diminishDuration;
         for (auto& target : m_UniqueTargetInfo)

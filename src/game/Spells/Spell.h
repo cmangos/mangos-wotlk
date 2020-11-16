@@ -907,7 +907,7 @@ class Spell
         void HandleImmediateEffectExecution(TargetInfo* target);
         void InitializeDamageMultipliers();
         void ResetEffectDamageAndHeal();
-        void DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target);
+        void DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, bool isReflected = true);
         void DoAllTargetlessEffects(bool dest);
         void DoAllEffectOnTarget(GOTargetInfo* target);
         void DoAllEffectOnTarget(ItemTargetInfo* target);
@@ -919,6 +919,9 @@ class Spell
         bool CanExecuteTriggersOnHit(uint8 effMask, SpellEntry const* triggeredByAura) const;
         uint64 CalculateDelayMomentForDst() const;
         // -------------------------------------------
+
+        // Diminishing returns
+        bool CanSpellDiminish() const;
 
         // List For Triggered Spells
         typedef std::list<SpellEntry const*> SpellInfoList;
