@@ -2867,7 +2867,7 @@ void AchievementGlobalMgr::LoadRewardLocales()
             std::string str = fields[2 + 2 * (i - 1)].GetCppString();
             if (!str.empty())
             {
-                int idx = sObjectMgr.GetOrNewIndexForLocale(LocaleConstant(i));
+                int idx = sObjectMgr.GetOrNewStorageLocaleIndexFor(LocaleConstant(i));
                 if (idx >= 0)
                 {
                     if (data.subject.size() <= size_t(idx))
@@ -2879,7 +2879,7 @@ void AchievementGlobalMgr::LoadRewardLocales()
             str = fields[2 + 2 * (i - 1) + 1].GetCppString();
             if (!str.empty())
             {
-                int idx = sObjectMgr.GetOrNewIndexForLocale(LocaleConstant(i));
+                int idx = sObjectMgr.GetOrNewStorageLocaleIndexFor(LocaleConstant(i));
                 if (idx >= 0)
                 {
                     if (data.text.size() <= size_t(idx))

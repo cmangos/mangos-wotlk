@@ -10173,7 +10173,7 @@ void PlayerbotAI::_HandleCommandMail(std::string& text, Player& fromPlayer)
                                     sender_accId = sObjectMgr.GetPlayerAccountIdByGUID(sender_guid);
 
                                     if (!sObjectMgr.GetPlayerNameByGUID(sender_guid, sender_name))
-                                        sender_name = sObjectMgr.GetMangosStringForDBCLocale(LANG_UNKNOWN);
+                                        sender_name = sObjectMgr.GetMangosStringForDbcLocale(LANG_UNKNOWN);
                                 }
                                 sLog.outCommand(GetMaster()->GetSession()->GetAccountId(), "GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
                                                 GetMaster()->GetSession()->GetPlayerName(), GetMaster()->GetSession()->GetAccountId(), item->GetProto()->Name1, item->GetEntry(), item->GetCount(), m->COD, sender_name.c_str(), sender_accId);
