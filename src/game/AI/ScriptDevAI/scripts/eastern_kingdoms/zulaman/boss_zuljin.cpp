@@ -444,6 +444,9 @@ struct boss_zuljinAI : public CombatAI
             }
             case ZULJIN_ACTION_PHASE_TRANSITION:
             {
+                if (m_creature->HasAura(SPELL_LYNX_RUSH) || m_creature->HasAura(SPELL_CLAW_RAGE_TRIGGER)) // do not allow phase transition during lynx rush/claw rage
+                    return;
+
                 if (m_creature->GetHealthPercent() < m_healthCheck)
                     ExecutePhaseTransition();
                 return;
