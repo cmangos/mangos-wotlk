@@ -1930,9 +1930,8 @@ struct boss_maievAI : public CombatAI, private DialogueHelper
 
 struct npc_cage_trap_triggerAI : public ScriptedAI
 {
-    npc_cage_trap_triggerAI(Creature* creature) : ScriptedAI(creature), m_activated(false) { Reset(); }
+    npc_cage_trap_triggerAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
 
-    bool m_activated;
     bool m_active;
 
     void Reset() override
@@ -1953,8 +1952,6 @@ struct npc_cage_trap_triggerAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_activated)
-            return;
 #ifndef PRENERF_2_1
         // post 2.3
         if (!m_active && who->GetEntry() == NPC_ILLIDAN_STORMRAGE && m_creature->IsWithinDistInMap(who, 3.0f))
@@ -2300,9 +2297,6 @@ bool GOUse_go_cage_trap(Player* player, GameObject* go)
             trapTrigger->CastSpell(nullptr, SPELL_CAGE_TRAP_DUMMY, TRIGGERED_OLD_TRIGGERED);
             trapTrigger->ForcedDespawn(15000);
         }
-#else
-        // post 2.3
-        static_cast<npc_cage_trap_triggerAI*>(trapTrigger->AI())->m_activated = true;
 #endif
     }
     return true;
