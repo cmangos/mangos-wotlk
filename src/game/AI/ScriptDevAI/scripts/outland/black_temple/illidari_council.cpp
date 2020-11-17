@@ -681,12 +681,14 @@ struct boss_veras_darkshadowAI : public boss_illidari_councilAI
     {
         if (action == VERAS_ACTION_VANISH)
         {
-            m_creature->CastSpell(nullptr, SPELL_DEADLY_STRIKE, TRIGGERED_NONE);
-            DoScriptText(SAY_VERA_VANISH, m_creature);
             if (DoCastSpellIfCan(nullptr, SPELL_VANISH) == CAST_OK)
+            {
+                m_creature->CastSpell(nullptr, SPELL_DEADLY_STRIKE, TRIGGERED_NONE);
+                DoScriptText(SAY_VERA_VANISH, m_creature);
                 ResetCombatAction(action, 55000);
-            if (Unit* victim = m_creature->GetVictim())
-                m_creature->getThreatManager().SetTargetSuppressed(victim);
+                if (Unit* victim = m_creature->GetVictim())
+                    m_creature->getThreatManager().SetTargetSuppressed(victim);
+            }
         }
     }
 
