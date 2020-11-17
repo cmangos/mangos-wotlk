@@ -489,10 +489,6 @@ void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
     if (!_player->IsClientControlled(_player))
         return;
 
-    // FIXME: hack, ignore unexpected client cancel Deadly Throw cast
-    if (spellId == 26679)
-        return;
-
     if (mover->IsNonMeleeSpellCasted(false))
         mover->InterruptNonMeleeSpells(false, spellId);
 }
