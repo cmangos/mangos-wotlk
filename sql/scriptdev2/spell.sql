@@ -257,7 +257,13 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (41914,'spell_parasitic_shadowfiend'),
 (41917,'spell_parasitic_shadowfiend'),
 (40647,'spell_shadow_prison'),
-(33499,'spell_shape_of_the_beast');
+(33499,'spell_shape_of_the_beast'),
+(40848,'spell_dragonmaw_knockdown_the_aggro_check'),
+(40985,'spell_dragonmaw_knockdown_the_aggro_check'),
+(40993,'spell_dragonmaw_knockdown_the_aggro_check'),
+(41007,'spell_dragonmaw_knockdown_the_aggro_check'),
+(41015,'spell_dragonmaw_knockdown_the_aggro_check'),
+(41022,'spell_dragonmaw_knockdown_the_aggro_check');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
