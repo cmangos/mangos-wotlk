@@ -1835,8 +1835,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             }
             // Get a random point AT the circumference
             float angle = 2.0f * M_PI_F * rand_norm_f();
-            Position pos;
-            target->GetFirstCollisionPosition(pos, radius, angle);
+            Position pos = target->GetFirstRandomAngleCollisionPosition(radius, angle);
             m_targets.setDestination(pos.x, pos.y, pos.z);
             break;
         }
