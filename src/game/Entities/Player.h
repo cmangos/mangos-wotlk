@@ -1658,6 +1658,7 @@ class Player : public Unit
         void SendPetGUIDs() const;
         void PossessSpellInitialize() const;
         void CharmSpellInitialize() const;
+        void CharmCooldownInitialize(WorldPacket& data) const;
         void RemovePetActionBar() const;
 
         bool HasSpell(uint32 spell) const override;
