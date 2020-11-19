@@ -207,10 +207,7 @@ struct boss_teron_gorefiendAI : public CombatAI
     void OnSpellCooldownAdded(SpellEntry const* spellInfo) override
     {
         if (spellInfo->Id == SPELL_SHADOW_OF_DEATH)
-        {
-            ResetTimer(GOREFIEND_ACTION_SHADOW_OF_DEATH, GetSubsequentActionTimer(GorefiendActions(GOREFIEND_ACTION_SHADOW_OF_DEATH)));
-            SetActionReadyStatus(GOREFIEND_ACTION_SHADOW_OF_DEATH, false);
-        }
+            ResetCombatAction(GOREFIEND_ACTION_SHADOW_OF_DEATH, GetSubsequentActionTimer(GorefiendActions(GOREFIEND_ACTION_SHADOW_OF_DEATH)));
     }
 
     void ExecuteAction(uint32 action) override
@@ -407,7 +404,7 @@ struct ShadowOfDeath : public AuraScript
 
     void OnApply(Aura* aura, bool apply) const override
     {
-        if (!apply)
+        if (!apply && aura->GetEffIndex() == EFFECT_INDEX_0)
         {
             Unit* target = aura->GetTarget();
             target->DeleteThreatList();
