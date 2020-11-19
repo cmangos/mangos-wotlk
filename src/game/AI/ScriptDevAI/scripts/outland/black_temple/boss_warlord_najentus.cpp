@@ -181,7 +181,7 @@ struct boss_najentusAI : public CombatAI
                 return;
             case NAJENTUS_ACTION_IMPALING_SPINE:
             {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_IMPALING_SPINE, SELECT_FLAG_PLAYER))
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_IMPALING_SPINE, SELECT_FLAG_PLAYER | SELECT_FLAG_SKIP_TANK))
                 {
                     if (DoCastSpellIfCan(target, SPELL_IMPALING_SPINE) == CAST_OK)
                     {
