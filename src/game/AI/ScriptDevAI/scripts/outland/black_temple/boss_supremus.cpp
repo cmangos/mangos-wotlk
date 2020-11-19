@@ -271,7 +271,7 @@ struct boss_supremusAI : public CombatAI
                     ResetTimer(SUPREMUS_ACTION_DELAY, 1500);
                 }
 
-                DisableCombatAction(action);
+                ResetCombatAction(action, GetSubsequentActionTimer(SupremusActions(action)));
                 return;
             }
             case SUPREMUS_ACTION_BERSERK:
