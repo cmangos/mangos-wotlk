@@ -2333,6 +2333,14 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                         pushType = PUSH_CONE;
                     FillAreaTargets(tempAoeList, maxRadiusTarget, cone, pushType, SPELL_TARGETS_AOE_ATTACKABLE);
                     tempAoeList.erase(std::remove(tempAoeList.begin(), tempAoeList.end(), newUnitTarget), tempAoeList.end());
+
+                    for (auto itr = tempAoeList.begin(); itr != tempAoeList.end();)
+                    {
+                        if(!(*itr)->IsVisibleForOrDetect(m_caster, m_originalCaster, false))
+                            itr = tempAoeList.erase(itr);
+                        else
+                            ++itr;
+                    }
                 }
 
                 // No targets. No need to process.
