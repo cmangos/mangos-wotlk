@@ -191,6 +191,12 @@ struct boss_reliquary_of_soulsAI : public ScriptedAI, public TimerManager
     // TODO: use LOS triggers
     void MoveInLineOfSight(Unit* who) override
     {
+        if (!m_instance)
+            return;
+
+        if (m_instance->GetData(TYPE_RELIQUIARY) == IN_PROGRESS || m_instance->GetData(TYPE_RELIQUIARY) == DONE)
+            return;
+
         if (m_phase == PHASE_0_NOT_BEGUN && who->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(who)->IsGameMaster() &&
             m_creature->IsWithinDistInMap(who, m_creature->GetAttackDistance(who)) && m_creature->IsWithinLOSInMap(who))
             StartEvent();
