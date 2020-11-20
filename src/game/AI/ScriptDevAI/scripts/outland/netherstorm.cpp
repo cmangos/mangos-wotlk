@@ -40,6 +40,7 @@ EndContentData */
 #include "AI/ScriptDevAI/base/pet_ai.h"
 #include "AI/ScriptDevAI/scripts/outland/world_outland.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 /*######
 ## npc_manaforge_control_console

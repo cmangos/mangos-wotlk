@@ -330,7 +330,6 @@ class ChatHandler
         bool HandleGameObjectNearCommand(char* args);
         bool HandleGameObjectNearSpawnedCommand(char* args);
         bool HandleGameObjectPhaseCommand(char* args);
-        bool HandleGameObjectRespawnCommand(char* args);
         bool HandleGameObjectTargetCommand(char* args);
         bool HandleGameObjectTurnCommand(char* args);
         bool HandleGameObjectActivateCommand(char* args);
