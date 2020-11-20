@@ -667,6 +667,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder* holder)
 
     m_initialZoneUpdated = false;
 
+    SetOnline();
+
     // "GetAccountId()==db stored account id" checked in LoadFromDB (prevent login not own character using cheating tools)
     if (!pCurrChar->LoadFromDB(playerGuid, holder))
     {
@@ -929,6 +931,8 @@ void WorldSession::HandlePlayerReconnect()
     _player->m_clientGUIDs.clear();
 
     m_initialZoneUpdated = false;
+
+    SetOnline();
 
     Group* group = _player->GetGroup();
 

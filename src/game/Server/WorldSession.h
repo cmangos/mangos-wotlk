@@ -276,6 +276,7 @@ class WorldSession
 
         // Set this session have no attached socket but keep it alive for short period of time to permit a possible reconnection
         void SetOffline();
+        void SetOnline();
         void SetInCharSelection();
 
         // Request set offline, close socket and put session offline

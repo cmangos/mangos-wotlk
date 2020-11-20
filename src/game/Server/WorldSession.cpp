@@ -141,6 +141,15 @@ void WorldSession::SetOffline()
     m_sessionState = WORLD_SESSION_STATE_OFFLINE;
 }
 
+void WorldSession::SetOnline()
+{
+    if (_player && m_Socket && !m_Socket->IsClosed())
+    {
+        m_sessionState = WORLD_SESSION_STATE_READY;
+        m_kickTime = 0;
+    }
+}
+
 void WorldSession::SetInCharSelection()
 {
     m_sessionState = WORLD_SESSION_STATE_CHAR_SELECTION;
