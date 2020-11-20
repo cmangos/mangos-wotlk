@@ -11074,7 +11074,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
                 }
-<<<<<<< HEAD
                 case 62262:                                 // Brightleaf Flux
                 {
                     if (!unitTarget)
@@ -11095,9 +11094,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 62440:                                 // Strengthened Iron Roots
                 case 63598:                                 // Iron Roots (h)
                 case 63601:                                 // Strengthened Iron Roots (h)
-=======
-                case 37641:                                 // Whirlwind
->>>>>>> ed70d8e21ae... SSC: Rewrite Lurker Below using CombatAI and SpellScript
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || !((Creature*)unitTarget)->IsTemporarySummon())
                         return;
