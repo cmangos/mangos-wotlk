@@ -464,6 +464,16 @@ inline bool IsPossessCharmType(uint32 spellId)
     }
 }
 
+inline bool IsSpellNeedSendOnObjectUpdate(uint32 spellId)
+{
+    switch (spellId)
+    {
+        case 39123:
+            return true;
+        default: return false;
+    }
+}
+
 inline bool IsSpellRemoveAllMovementAndControlLossEffects(SpellEntry const* spellProto)
 {
     return spellProto->EffectApplyAuraName[EFFECT_INDEX_0] == SPELL_AURA_MECHANIC_IMMUNITY &&
