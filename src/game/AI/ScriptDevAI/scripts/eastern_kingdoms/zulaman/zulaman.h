@@ -85,6 +85,7 @@ enum InstanceZA
     NPC_KORAGG              = 24247,
 
     NPC_HARRISON            = 24358,
+    NPC_AMANISHI_GUARDIAN   = 23597,
     // Time Run Event NPCs
     NPC_TANZAR              = 23790,                        // at bear
     NPC_KRAZ                = 24024,                        // at phoenix
@@ -227,6 +228,9 @@ class instance_zulaman : public ScriptedInstance
 
         GuidSet sDrumTriggerGuidSet;
         GuidSet sHutTriggerGuidSet;
+
+        GuidSet sGongGuardianGuidSet;
+        ObjectGuid m_GongGuardianAttackerGuid;
 
         void ChangeWeather(bool rain);
 

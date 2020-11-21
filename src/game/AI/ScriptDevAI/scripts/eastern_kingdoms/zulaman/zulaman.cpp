@@ -145,6 +145,15 @@ void instance_zulaman::OnCreatureCreate(Creature* creature)
         case NPC_DRAGONHAWK_EGG:
             creature->SetCorpseDelay(5);
             break;
+        case NPC_AMANISHI_GUARDIAN:
+            if (creature->GetPositionZ() > 43.f) // only 2 involved with opening RP event in total
+            {
+                // choose which one will speak and attack Harrison
+                if (creature->GetPositionX() > 130.0f)
+                    m_GongGuardianAttackerGuid = creature->GetObjectGuid();
+                sGongGuardianGuidSet.insert(creature->GetObjectGuid());
+            }
+            break;
     }
 }
 
