@@ -4331,9 +4331,27 @@ SpellAuraProcResult Unit::HandleRaidProcFromChargeAuraProc(ProcExecutionData& da
     SpellEffectIndex effIdx = triggeredByAura->GetEffIndex();
     ObjectGuid caster_guid = triggeredByAura->GetCasterGuid();
 
-    // triggered spell - only one in TBC
-    uint32 triggeredSpellId = 43594;
-    uint32 animationSpellId = 43613;
+    uint32 triggeredSpellId = 0;
+    uint32 animationSpellId = 0;
+
+    switch (spellProto->Id)
+    {
+        case 43593:
+            triggeredSpellId = 43594;
+            animationSpellId = 43613;
+            break;
+        case 57949:
+            triggeredSpellId = 57952;
+            animationSpellId = 57951;
+            break;
+        case 59978:
+            triggeredSpellId = 59979;
+            animationSpellId = 57951;
+            break;
+    }
+
+    if (!triggeredSpellId || !animationSpellId)
+        return SPELL_AURA_PROC_FAILED;
 
     if (data.procSpell && data.procSpell->Id == triggeredSpellId)
         return SPELL_AURA_PROC_FAILED;
