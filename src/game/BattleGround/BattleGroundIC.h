@@ -733,7 +733,6 @@ class BattleGroundIC : public BattleGround
 
         bool m_isKeepInvaded[PVP_TEAM_COUNT];
 
-        GuidList m_dummy[PVP_TEAM_COUNT];               // BIG NOTE: this is here because there is a memory overwrite
         GuidList m_hangarPortalsGuids[PVP_TEAM_COUNT];
         GuidList m_hangarAnimGuids[PVP_TEAM_COUNT];
         GuidList m_seaforiumBombsGuids[PVP_TEAM_COUNT];

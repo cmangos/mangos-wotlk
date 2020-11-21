@@ -1003,7 +1003,7 @@ void BattleGroundIC::Update(uint32 diff)
     }
 
     // resource timers
-    for (uint8 i = 0; i < BG_IC_MAX_OBJECTIVES; ++i)
+    for (uint8 i = 0; i < BG_IC_MAX_RESOURCE_NODES; ++i)
     {
         if (m_resourceTickTimer[i])
         {
