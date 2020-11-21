@@ -24,6 +24,8 @@ LocaleNameStr const fullLocaleNameList[] =
     { "zhCN",   LOCALE_zhCN },
     { "zhTW",   LOCALE_zhTW },
     { "esES",   LOCALE_esES },
+    { "esMX",   LOCALE_esMX },
+    { "ruRU",   LOCALE_ruRU },
     { nullptr,  LOCALE_enUS }
 };
 
