@@ -38,6 +38,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26591,'spell_teleport_image'),
 (26619,'spell_periodic_scarab_trigger'),
 (26686,'spell_aq_whirlwind'),
+(26767,'spell_cthun_giant_eye_tentacle'),
 (28282,'spell_ashbringer_item');
 
 -- TBC
