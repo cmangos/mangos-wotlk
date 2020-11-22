@@ -810,7 +810,7 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
     recvPacket >> targets.ReadForCaster(petUnit);
 
     // some spell cast packet including more data (for projectiles)
-    targets.ReadAdditionalSpellData(recvPacket, cast_flags);
+    HandleClientCastFlags(recvPacket, cast_flags, targets);
 
     petUnit->clearUnitState(UNIT_STAT_MOVING);
 

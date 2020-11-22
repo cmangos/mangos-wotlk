@@ -799,15 +799,15 @@ class MovementInfo
         static float GetOrientationInMotion(MovementFlags flags, float orientation);
 
         // Position manipulations
-        Position const* GetPos() const { return &pos; }
-        void SetTransportData(ObjectGuid guid, float x, float y, float z, float o, uint32 newTime, int8 seat)
+        Position const& GetPos() const { return pos; }
+        void SetTransportData(ObjectGuid guid, float x, float y, float z, float o, uint32 time, int8 seat)
         {
             t_guid = guid;
             t_pos.x = x;
             t_pos.y = y;
             t_pos.z = z;
             t_pos.o = o;
-            t_time = newTime;
+            t_time = time;
             t_seat = seat;
         }
         void ClearTransportData()
@@ -821,7 +821,7 @@ class MovementInfo
             t_seat = -1;
         }
         ObjectGuid const& GetTransportGuid() const { return t_guid; }
-        Position const* GetTransportPos() const { return &t_pos; }
+        Position const& GetTransportPos() const { return t_pos; }
         int8 GetTransportSeat() const { return t_seat; }
         uint32 GetTransportTime() const { return t_time; }
         uint32 GetFallTime() const { return fallTime; }
@@ -1154,10 +1154,10 @@ class WorldObject : public Object
         MovementInfo m_movementInfo;
         GenericTransport* m_transport;
 
-        float GetTransOffsetX() const { return m_movementInfo.GetTransportPos()->x; }
-        float GetTransOffsetY() const { return m_movementInfo.GetTransportPos()->y; }
-        float GetTransOffsetZ() const { return m_movementInfo.GetTransportPos()->z; }
-        float GetTransOffsetO() const { return m_movementInfo.GetTransportPos()->o; }
+        float GetTransOffsetX() const { return m_movementInfo.GetTransportPos().x; }
+        float GetTransOffsetY() const { return m_movementInfo.GetTransportPos().y; }
+        float GetTransOffsetZ() const { return m_movementInfo.GetTransportPos().z; }
+        float GetTransOffsetO() const { return m_movementInfo.GetTransportPos().o; }
         uint32 GetTransTime() const { return m_movementInfo.GetTransportTime(); }
         int8 GetTransSeat() const { return m_movementInfo.GetTransportSeat(); }
 

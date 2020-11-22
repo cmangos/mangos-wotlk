@@ -83,15 +83,16 @@ namespace Movement
         if (transportInfo || transport)
         {
             data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
-<<<<<<< HEAD
-            data << transportInfo->GetTransportGuid().WriteAsPacked();
-            data << int8(transportInfo->GetTransportSeat());
-=======
             if (transportInfo)
+            {
                 data << transportInfo->GetTransportGuid().WriteAsPacked();
+                data << int8(transportInfo->GetTransportSeat());
+            }
             else if (transport)
+            {
                 data << transport->GetPackGUID();
->>>>>>> 28b8acee86d... Transport: Enable UpdateAllowedPositionZ for transports and fix transport model transfer from map to map
+                data << int8(-1);
+            }
         }
 
         PacketBuilder::WriteMonsterMove(move_spline, data);
