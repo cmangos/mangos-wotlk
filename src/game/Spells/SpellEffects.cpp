@@ -9882,6 +9882,15 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     ((Creature*)unitTarget)->ForcedDespawn(100 * unitTarget->GetDistance(m_caster, false, DIST_CALC_BOUNDING_RADIUS));
                     return;
                 }
+                case 43488:                                 // Wrath of the Lich King
+                case 50156:                                 // Wrath of the Lich King
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    unitTarget->Suicide();
+                    return;
+                }
                 case 44364:                                 // Rock Falcon Primer
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)

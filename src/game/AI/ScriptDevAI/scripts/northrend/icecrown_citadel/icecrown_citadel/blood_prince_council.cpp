@@ -405,14 +405,14 @@ struct npc_blood_orb_controlAI : public Scripted_NoMovementAI
             m_pInstance->SetData(TYPE_BLOOD_PRINCE_COUNCIL, DONE);
 
             // Kill the 3 princes
-            if (Creature* pTmp = m_pInstance->GetSingleCreatureFromStorage(NPC_VALANAR))
-                m_creature->Suicide();
+            if (Creature* pValanar = m_pInstance->GetSingleCreatureFromStorage(NPC_VALANAR))
+                pValanar->Suicide();
 
-            if (Creature* pTmp = m_pInstance->GetSingleCreatureFromStorage(NPC_KELESETH))
-                m_creature->Suicide();
+            if (Creature* pKeleseth = m_pInstance->GetSingleCreatureFromStorage(NPC_KELESETH))
+                pKeleseth->Suicide();
 
-            if (Creature* pTmp = m_pInstance->GetSingleCreatureFromStorage(NPC_TALDARAM))
-                m_creature->Suicide();
+            if (Creature* pTaldaram = m_pInstance->GetSingleCreatureFromStorage(NPC_TALDARAM))
+                pTaldaram->Suicide();
         }
     }
 

@@ -380,19 +380,11 @@ struct npc_lich_king_villageAI : public ScriptedAI, private DialogueHelper
                 break;
             case SPELL_WRATH_LICH_KING_FIRST:
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_pHeldPlayer))
-                {
                     DoCastSpellIfCan(pPlayer, SPELL_WRATH_LICH_KING_FIRST);
-                    // handle spell scriptEffect in the script
-                    m_creature->Suicide();
-                }
                 break;
             case SPELL_WRATH_LICH_KING:
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_pHeldPlayer))
-                {
                     DoCastSpellIfCan(pPlayer, SPELL_WRATH_LICH_KING);
-                    // handle spell scriptEffect in the script
-                    m_creature->Suicide();
-                }
                 break;
             case NPC_LICH_KING_WYRMSKULL:
                 EnterEvadeMode();

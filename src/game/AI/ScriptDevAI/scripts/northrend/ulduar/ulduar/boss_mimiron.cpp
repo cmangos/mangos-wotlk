@@ -695,9 +695,10 @@ struct boss_mimironAI : public ScriptedAI, private DialogueHelper
                     StartNextDialogueText(SPELL_SLEEP_VISUAL);
 
                     // kill the robot parts
-                    Unit::DealDamage(m_creature, pLeviathan, pLeviathan->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-                    Unit::DealDamage(m_creature, pVx001, pVx001->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
-                    Unit::DealDamage(m_creature, pAerial, pAerial->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                    // TODO: Check if this should really be a suicide
+                    pLeviathan->Suicide();
+                    pVx001->Suicide();
+                    pAerial->Suicide();
                 }
                 m_uiWakeUpTimer = 0;
             }
@@ -847,7 +848,7 @@ struct boss_leviathan_mk2AI : public ScriptedAI
                     if (Creature* pTurret = m_pInstance->GetSingleCreatureFromStorage(NPC_LEVIATHAN_MK_TURRET))
                     {
                         m_creature->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, pTurret->GetObjectGuid());
-                        Unit::DealDamage(m_creature, pTurret, pTurret->GetHealth(), nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NONE, nullptr, false);
+                        pTurret->Suicide();
                     }
                 }
 

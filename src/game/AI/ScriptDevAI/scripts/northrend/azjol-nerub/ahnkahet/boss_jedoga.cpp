@@ -445,13 +445,7 @@ bool EffectAuraDummy_spell_aura_dummy_sacrifice_beam(const Aura* pAura, bool bAp
     if (pAura->GetId() == SPELL_SACRIFICE_BEAM && pAura->GetEffIndex() == EFFECT_INDEX_0 && !bApply)
     {
         if (Creature* pTarget = (Creature*)pAura->GetTarget())
-        {
-            if (ScriptedInstance* pInstance = (ScriptedInstance*)pTarget->GetInstanceData())
-            {
-                if (Creature* pJedoga = pInstance->GetSingleCreatureFromStorage(NPC_JEDOGA_SHADOWSEEKER))
-                    pJedoga->Suicide();
-            }
-        }
+            pTarget->Suicide();
     }
     return true;
 }
