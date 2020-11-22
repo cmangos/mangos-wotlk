@@ -22,6 +22,7 @@ SDCategory: Ahn'kahet
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Spells/Scripts/SpellScript.h"
 #include "ahnkahet.h"
 
 enum
@@ -64,8 +65,18 @@ struct boss_taldaramAI : public ScriptedAI
     {
         m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+
         // Don't set the visual timers if the devices are already activated (reload case)
-        m_uiVisualTimer = m_pInstance->GetData(TYPE_TALDARAM) == SPECIAL ? 0 : 1000;
+        if (m_pInstance)
+        {
+            if (m_pInstance->GetData(TYPE_TALDARAM) == SPECIAL)
+            {
+                m_creature->GetMotionMaster()->MovePoint(1, aTaldaramLandingLoc[0], aTaldaramLandingLoc[1], aTaldaramLandingLoc[2]);
+                m_uiVisualTimer = 0;
+            }
+            else
+                m_uiVisualTimer = 1000;
+        }
         Reset();
     }
 
@@ -126,6 +137,8 @@ struct boss_taldaramAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_TALDARAM, FAIL);
+
+        m_creature->SetLevitate(false);
     }
 
     void EnterEvadeMode() override
@@ -134,17 +147,7 @@ struct boss_taldaramAI : public ScriptedAI
         if (m_uiEmbraceTimer)
             return;
 
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-
-        // should evade on the ground
-        if (m_creature->IsAlive())
-            m_creature->GetMotionMaster()->MovePoint(1, aTaldaramLandingLoc[0], aTaldaramLandingLoc[1], aTaldaramLandingLoc[2]);
-
-        m_creature->SetLootRecipient(nullptr);
-
-        Reset();
+        ScriptedAI::EnterEvadeMode();
     }
 
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
@@ -158,11 +161,17 @@ struct boss_taldaramAI : public ScriptedAI
             m_creature->SetLevitate(false);
             m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
             m_creature->SetFacingTo(aTaldaramLandingLoc[3]);
+
+            m_creature->GetMotionMaster()->Clear(false, true);
+            m_creature->GetMotionMaster()->MoveIdle();
         }
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
+        pSummoned->AI()->SetReactState(REACT_PASSIVE);
+        pSummoned->SetCanEnterCombat(false);
+
         pSummoned->CastSpell(pSummoned, SPELL_FLAME_SPHERE_SPAWN_EFFECT, TRIGGERED_OLD_TRIGGERED);
         pSummoned->CastSpell(pSummoned, SPELL_FLAME_SPHERE_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
@@ -172,6 +181,12 @@ struct boss_taldaramAI : public ScriptedAI
     void SummonedCreatureDespawn(Creature* pSummoned) override
     {
         pSummoned->CastSpell(pSummoned, SPELL_FLAME_SPHERE_DEATH_EFFECT, TRIGGERED_OLD_TRIGGERED);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+            DoSetSpheresInMotion();
     }
 
     // Wrapper which sends each sphere in a different direction
@@ -262,7 +277,7 @@ struct boss_taldaramAI : public ScriptedAI
 
         if (m_uiFlameOrbTimer < uiDiff)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_CONJURE_FLAME_SPHERE) == CAST_OK)
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CONJURE_FLAME_SPHERE) == CAST_OK)
             {
                 m_lFlameOrbsGuidList.clear();
 
@@ -292,20 +307,23 @@ UnitAI* GetAI_boss_taldaram(Creature* pCreature)
     return new boss_taldaramAI(pCreature);
 }
 
-bool EffectDummyCreature_spell_conjure_flame_orbs(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+struct spell_conjure_flame_sphere : public SpellScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_CONJURE_FLAME_SPHERE && uiEffIndex == EFFECT_INDEX_0)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
     {
-        if (boss_taldaramAI* pBossAI = dynamic_cast<boss_taldaramAI*>(pCreatureTarget->AI()))
-            pBossAI->DoSetSpheresInMotion();
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
 
-        // always return true when we are handling this spell and effect
-        return true;
+        ScriptedInstance* pInstance = (ScriptedInstance*)target->GetInstanceData();
+        if (!pInstance)
+            return;
+
+        if (Creature* pTaldaram = pInstance->GetSingleCreatureFromStorage(NPC_TALDARAM))
+            pTaldaram->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, pTaldaram);
     }
+};
 
-    return false;
-}
 
 /*######
 ## go_nerubian_device
@@ -331,11 +349,12 @@ void AddSC_boss_taldaram()
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_taldaram";
     pNewScript->GetAI = &GetAI_boss_taldaram;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_conjure_flame_orbs;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "go_nerubian_device";
     pNewScript->pGOUse = &GOUse_go_nerubian_device;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_conjure_flame_sphere>("spell_conjure_flame_sphere");
 }

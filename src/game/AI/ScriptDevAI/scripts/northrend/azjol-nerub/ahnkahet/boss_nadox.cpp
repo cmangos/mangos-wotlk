@@ -69,21 +69,19 @@ struct mob_ahnkahar_eggAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
+        if (!m_pInstance)
+            return;
+
         if (pSummoned->GetEntry() == NPC_AHNKAHAR_GUARDIAN)
         {
             pSummoned->CastSpell(pSummoned, SPELL_GUARDIAN_AURA, TRIGGERED_OLD_TRIGGERED);
             DoScriptText(EMOTE_HATCH, m_creature);
         }
 
-        if (m_pInstance)
+        if (Creature* pElderNadox = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_NADOX))
         {
-            if (Creature* pElderNadox = m_pInstance->GetSingleCreatureFromStorage(NPC_ELDER_NADOX))
-            {
-                float fPosX, fPosY, fPosZ;
-                pElderNadox->GetPosition(fPosX, fPosY, fPosZ);
-                pSummoned->SetWalk(false);
-                pSummoned->GetMotionMaster()->MovePoint(0, fPosX, fPosY, fPosZ);
-            }
+            if (pElderNadox->GetVictim())
+                pSummoned->AI()->AttackStart(pElderNadox->GetVictim());
         }
     }
 
