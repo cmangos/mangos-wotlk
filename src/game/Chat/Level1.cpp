@@ -1788,7 +1788,7 @@ bool ChatHandler::HandleGoHelper(Player* player, uint32 mapid, float x, float y,
         }
 
         TerrainInfo const* map = sTerrainMgr.LoadTerrain(mapid);
-        float groundZ = player->GetMap()->GetHeight(player->GetPhaseMask(), x, y, z);
+        float groundZ = player->GetMap()->GetHeight(player->GetPhaseMask(), x, y, 0.f);
         z = map->GetWaterOrGroundLevel(x, y, MAX_HEIGHT, groundZ);
     }
 
