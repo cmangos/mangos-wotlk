@@ -12864,7 +12864,7 @@ void Player::RemoveEnchantmentDurations(Item* item)
     }
 }
 
-void Player::RemoveAllEnchantments(EnchantmentSlot slot)
+void Player::RemoveAllEnchantments(EnchantmentSlot slot, bool arena)
 {
     // remove enchantments from equipped items first to clean up the m_enchantDuration list
     for (EnchantDurationList::iterator itr = m_enchantDuration.begin(), next; itr != m_enchantDuration.end(); itr = next)
@@ -12872,6 +12872,19 @@ void Player::RemoveAllEnchantments(EnchantmentSlot slot)
         next = itr;
         if (itr->slot == slot)
         {
+            if (arena && itr->item)
+            {
+                uint32 enchant_id = itr->item->GetEnchantmentId(slot);
+                if (enchant_id)
+                {
+                    SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+                    if (pEnchant && pEnchant->aura_id == ITEM_ENCHANTMENT_AURAID_POISON)
+                    {
+                        ++next;
+                        continue;
+                    }
+                }
+            }
             if (itr->item && itr->item->GetEnchantmentId(slot))
             {
                 // remove from stats
@@ -12889,18 +12902,43 @@ void Player::RemoveAllEnchantments(EnchantmentSlot slot)
     // remove enchants from inventory items
     // NOTE: no need to remove these from stats, since these aren't equipped
     // in inventory
-    for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; ++i)
-        if (Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            if (pItem->GetEnchantmentId(slot))
-                pItem->ClearEnchantment(slot);
+    for (int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        Item* pItem = GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        if (pItem && pItem->GetEnchantmentId(slot))
+        {
+            if (arena)
+            {
+                SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(pItem->GetEnchantmentId(slot));
+                if (pEnchant && pEnchant->aura_id == ITEM_ENCHANTMENT_AURAID_POISON)
+                    continue;
+            }
+            pItem->ClearEnchantment(slot);
+        }
+    }
 
     // in inventory bags
-    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
-        if (Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i))
-            for (uint32 j = 0; j < pBag->GetBagSize(); ++j)
-                if (Item* pItem = pBag->GetItemByPos(j))
-                    if (pItem->GetEnchantmentId(slot))
-                        pItem->ClearEnchantment(slot);
+    for (int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        Bag* pBag = (Bag*)GetItemByPos(INVENTORY_SLOT_BAG_0, i);
+        if (pBag)
+        {
+            for (uint32 j = 0; j < pBag->GetBagSize(); j++)
+            {
+                Item* pItem = pBag->GetItemByPos(j);
+                if (pItem && pItem->GetEnchantmentId(slot))
+                {
+                    if (arena)
+                    {
+                        SpellItemEnchantmentEntry const* pEnchant = sSpellItemEnchantmentStore.LookupEntry(pItem->GetEnchantmentId(slot));
+                        if (pEnchant && pEnchant->aura_id == ITEM_ENCHANTMENT_AURAID_POISON)
+                            continue;
+                    }
+                    pItem->ClearEnchantment(slot);
+                }
+            }
+        }
+    }
 }
 
 // duration == 0 will remove item enchant
