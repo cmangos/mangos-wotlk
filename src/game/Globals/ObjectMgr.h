@@ -1188,6 +1188,8 @@ class ObjectMgr
         **/
         CreatureClassLvlStats const* GetCreatureClassLvlStats(uint32 level, uint32 unitClass, int32 expansion) const;
 
+        bool IsEnchantNonRemoveInArena(uint32 enchantId) const { return m_roguePoisonEnchantIds.find(enchantId) != m_roguePoisonEnchantIds.end(); }
+
         // Transports
         std::vector<std::pair<TypeID, uint32>> const& GetDbGuidsForTransport(uint32 mapId) const;
     protected:
@@ -1349,6 +1351,8 @@ class ObjectMgr
         CacheTrainerSpellMap m_mCacheTrainerSpellMap;
 
         BroadcastTextMap m_broadcastTextMap;
+
+        std::map<uint32, bool> m_roguePoisonEnchantIds;
 
         std::map<uint32, uint32> m_transportMaps;
         std::map<uint32, std::vector<std::pair<TypeID, uint32>>> m_guidsForMap; // used for transports only atm
