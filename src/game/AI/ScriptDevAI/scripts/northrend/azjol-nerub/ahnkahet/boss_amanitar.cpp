@@ -220,7 +220,10 @@ struct spell_remove_mushroom_power : public AuraScript
     void OnApply(Aura* aura, bool apply) const override
     {
         if (apply)
+        {
             aura->GetTarget()->RemoveAurasDueToSpell(SPELL_MINI);
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_POTENT_FUNGUS);
+        }
     }
 };
 
