@@ -25,6 +25,7 @@
 #include "Tools/Formulas.h"
 #include "Spells/SpellAuras.h"
 #include "Entities/Unit.h"
+#include "Entities/Transports.h"
 
 Pet::Pet(PetType type) :
     Creature(CREATURE_SUBTYPE_PET),
@@ -398,6 +399,9 @@ bool Pet::LoadPetFromDB(Player* owner, uint32 petentry /*= 0*/, uint32 petnumber
         if (spellInfo && spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE))
             owner->AddCooldown(*spellInfo, nullptr, true);
     }
+
+    if (GenericTransport* transport = owner->GetTransport())
+        transport->AddPetToTransport(owner, this);
     return true;
 }
 

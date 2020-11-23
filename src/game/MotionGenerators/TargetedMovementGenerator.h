@@ -23,6 +23,7 @@
 #include "MotionGenerators/MovementGenerator.h"
 #include "MotionGenerators/FollowerReference.h"
 #include "Entities/ObjectGuid.h"
+#include "Entities/Object.h"
 
 class PathFinder;
 

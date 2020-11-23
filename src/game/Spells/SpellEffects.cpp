@@ -55,6 +55,7 @@
 #include "Movement/MoveSpline.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"
 #include "Maps/InstanceData.h"
+#include "Entities/Transports.h"
 
 pEffect SpellEffects[MAX_SPELL_EFFECTS] =
 {
@@ -7960,6 +7961,9 @@ void Spell::EffectSummonPet(SpellEffectIndex eff_idx)
         else if (m_caster->AI())
             m_caster->AI()->JustSummoned(NewSummon);
     }
+
+    if (GenericTransport* transport = m_caster->GetTransport())
+        transport->AddPetToTransport(m_caster, NewSummon);
 
     m_spellLog.AddLog(uint32(SPELL_EFFECT_SUMMON_PET), NewSummon->GetPackGUID());
 }
