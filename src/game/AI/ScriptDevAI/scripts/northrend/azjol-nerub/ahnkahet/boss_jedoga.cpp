@@ -90,7 +90,13 @@ struct boss_jedogaAI : public ScriptedAI
     {
         m_pInstance = (instance_ahnkahet*)pCreature->GetInstanceData();
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_bHasDoneIntro = false;
+
+        if (DoCastSpellIfCan(m_creature, SPELL_SPHERE_VISUAL) == CAST_OK)
+        {
+            m_uiVisualTimer = 5000;
+            m_bHasDoneIntro = false;
+        }
+
         Reset();
     }
 
@@ -113,14 +119,11 @@ struct boss_jedogaAI : public ScriptedAI
         m_uiThundershockTimer  = 40000;
         m_uiCycloneStrikeTimer = 15000;
         m_uiLightningBoltTimer = 7000;
-        m_uiVisualTimer        = 5000;
         m_bSacrifice           = false;
         m_bIsSacrificing       = false;
 
+        // Note: volunteers despawned by creature_linking
         m_lVolunteerGuidList.clear();
-
-        SetCombatMovement(true);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
     ObjectGuid SelectRandomVolunteer()
@@ -163,6 +166,9 @@ struct boss_jedogaAI : public ScriptedAI
 
     void JustReachedHome() override
     {
+        SetCombatMovement(true);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_JEDOGA, FAIL);
     }

@@ -156,8 +156,6 @@ void instance_ahnkahet::SetData(uint32 uiType, uint32 uiData)
                 m_bVolunteerWork = true;
             else if (uiData == SPECIAL)
                 m_bVolunteerWork = false;
-            else if (uiData == FAIL)
-                m_uiInitiatesKilled = 0;
             break;
         case TYPE_AMANITAR:
             m_auiEncounter[uiType] = uiData;

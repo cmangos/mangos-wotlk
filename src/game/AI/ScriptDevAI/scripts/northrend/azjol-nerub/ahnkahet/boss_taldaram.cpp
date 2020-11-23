@@ -141,15 +141,6 @@ struct boss_taldaramAI : public ScriptedAI
         m_creature->SetLevitate(false);
     }
 
-    void EnterEvadeMode() override
-    {
-        // Don't allow him to evade during vanish
-        if (m_uiEmbraceTimer)
-            return;
-
-        ScriptedAI::EnterEvadeMode();
-    }
-
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE)
@@ -161,9 +152,6 @@ struct boss_taldaramAI : public ScriptedAI
             m_creature->SetLevitate(false);
             m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
             m_creature->SetFacingTo(aTaldaramLandingLoc[3]);
-
-            m_creature->GetMotionMaster()->Clear(false, true);
-            m_creature->GetMotionMaster()->MoveIdle();
         }
     }
 
