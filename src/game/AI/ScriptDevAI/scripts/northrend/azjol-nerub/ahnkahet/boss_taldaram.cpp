@@ -312,7 +312,6 @@ struct spell_conjure_flame_sphere : public SpellScript
     }
 };
 
-
 /*######
 ## go_nerubian_device
 ######*/

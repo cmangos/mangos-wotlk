@@ -22,6 +22,8 @@ SDCategory: Ahn'kahet
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 #include "ahnkahet.h"
 
 enum
@@ -87,6 +89,8 @@ struct boss_amanitarAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_AMANITAR, DONE);
+
+        DoCastSpellIfCan(m_creature, SPELL_REMOVE_MUSHROOM_POWER, CAST_TRIGGERED);
     }
 
     void JustReachedHome() override
@@ -211,6 +215,15 @@ UnitAI* GetAI_npc_amanitar_mushroom(Creature* pCreature)
     return new npc_amanitar_mushroomAI(pCreature);
 }
 
+struct spell_remove_mushroom_power : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_MINI);
+    }
+};
+
 void AddSC_boss_amanitar()
 {
     Script* pNewScript = new Script;
@@ -222,4 +235,6 @@ void AddSC_boss_amanitar()
     pNewScript->Name = "npc_amanitar_mushroom";
     pNewScript->GetAI = &GetAI_npc_amanitar_mushroom;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<spell_remove_mushroom_power>("spell_remove_mushroom_power");
 }
