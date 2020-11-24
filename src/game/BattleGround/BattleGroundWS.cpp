@@ -44,7 +44,7 @@ void BattleGroundWS::Update(uint32 diff)
     // compute flag respawn timers
     for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
     {
-        // resapwn flag after team score
+        // respawn flag after team score
         if (m_flagState[i] == BG_WS_FLAG_STATE_WAIT_RESPAWN && m_flagState[i])
         {
             if (m_flagsTimer[i] <= diff)
@@ -92,6 +92,46 @@ void BattleGroundWS::Update(uint32 diff)
         if (minutesLeft != minutesLeftPrev)
             UpdateWorldState(BG_WS_STATE_TIME_REMAINING, minutesLeft);
     }
+
+    // as long as both flags are missing from bases, progress the FC debuff timer until 15 minutes have elapsed
+    if (m_flagState[TEAM_INDEX_ALLIANCE] && (m_flagState[TEAM_INDEX_ALLIANCE] == BG_WS_FLAG_STATE_ON_PLAYER || m_flagState[TEAM_INDEX_ALLIANCE] == BG_WS_FLAG_STATE_ON_GROUND) &&
+        m_flagState[TEAM_INDEX_HORDE] && (m_flagState[TEAM_INDEX_HORDE] == BG_WS_FLAG_STATE_ON_PLAYER || m_flagState[TEAM_INDEX_HORDE] == BG_WS_FLAG_STATE_ON_GROUND))
+    {
+        if (m_flagCarrierDebuffTimer)
+        {
+            if (m_flagCarrierDebuffTimer <= BG_WS_FOCUSED_ASSAULT_TIME && !m_focusedAssaultActive)
+            {
+                for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
+                {
+                    Team playerTeam = GetTeamIdByTeamIndex((PvpTeamIndex)i);
+                    if (IsFlagPickedUp(playerTeam))
+                        if (Player* player = GetBgMap()->GetPlayer(GetFlagCarrierGuid((PvpTeamIndex)i)))
+                            player->CastSpell(player, BG_WS_SPELL_FOCUSED_ASSAULT, TRIGGERED_OLD_TRIGGERED);
+                }
+                m_focusedAssaultActive = true;
+            }
+            if (m_flagCarrierDebuffTimer <= diff)
+            {
+                for (uint8 i = 0; i < PVP_TEAM_COUNT; ++i)
+                {
+                    Team playerTeam = GetTeamIdByTeamIndex((PvpTeamIndex)i);
+                    if (IsFlagPickedUp(playerTeam))
+                    {
+                        if (Player* player = GetBgMap()->GetPlayer(GetFlagCarrierGuid((PvpTeamIndex)i)))
+                        {
+                            player->RemoveAurasDueToSpell(BG_WS_SPELL_FOCUSED_ASSAULT);
+                            player->CastSpell(player, BG_WS_SPELL_BRUTAL_ASSAULT, TRIGGERED_OLD_TRIGGERED);
+                        }
+                    }
+                }
+                m_focusedAssaultActive = false;
+                m_brutalAssaultActive = true;
+                m_flagCarrierDebuffTimer = 0; // stop timer here for now - no reason to resume until the current stalemate is over and another begins (capture occurs, or both flags are returned?)
+            }
+            else
+                m_flagCarrierDebuffTimer -= diff;
+        }
+    }
 }
 
 void BattleGroundWS::StartingEventOpenDoors()
@@ -128,6 +168,7 @@ void BattleGroundWS::AddPlayer(Player* player)
 void BattleGroundWS::RespawnFlagAtBase(Team team, bool wasCaptured)
 {
     PvpTeamIndex teamIdx = GetTeamIndexByTeamId(team);
+    PvpTeamIndex otherTeamIdx = GetOtherTeamIndex(teamIdx);
     m_flagState[teamIdx] = BG_WS_FLAG_STATE_ON_BASE;
     SpawnEvent(teamIdx, 0, true);
 
@@ -136,12 +177,23 @@ void BattleGroundWS::RespawnFlagAtBase(Team team, bool wasCaptured)
     {
         DEBUG_LOG("BattleGroundWS: The main flag for team %u has respawned after enemy score.", team);
 
+        m_flagCarrierDebuffTimer = BG_WS_BRUTAL_ASSAULT_TIME;
+        m_brutalAssaultActive = false;
+        m_focusedAssaultActive = false;
+
         // when map_update will be allowed for battlegrounds this code will be useless
         SpawnEvent(WS_EVENT_FLAG_A, 0, true);
         SpawnEvent(WS_EVENT_FLAG_H, 0, true);
 
         SendMessageToAll(LANG_BG_WS_F_PLACED, CHAT_MSG_BG_SYSTEM_NEUTRAL);
         PlaySoundToAll(BG_WS_SOUND_FLAGS_RESPAWNED);        // flag respawned sound...
+    }
+    // if both team flags have been returned, reset FC debuffs like a capture would (TODO: confirm this and remove if required)
+    else if (m_flagState[otherTeamIdx] == BG_WS_FLAG_STATE_ON_BASE)
+    {
+        m_flagCarrierDebuffTimer = BG_WS_BRUTAL_ASSAULT_TIME;
+        m_brutalAssaultActive = false;
+        m_focusedAssaultActive = false;
     }
 }
 
@@ -193,6 +245,8 @@ void BattleGroundWS::ProcessPlayerFlagScoreEvent(Player* player)
 
     // Drop Horde Flag from Player
     player->RemoveAurasDueToSpell(wsgFlagData[otherTeamIdx][BG_WS_FLAG_ACTION_PICKEDUP].spellId);
+    player->RemoveAurasDueToSpell(BG_WS_SPELL_FOCUSED_ASSAULT);
+    player->RemoveAurasDueToSpell(BG_WS_SPELL_BRUTAL_ASSAULT);
 
     // play sound and reward reputation
     PlaySoundToAll(wsgFlagData[teamIdx][BG_WS_FLAG_ACTION_CAPTURED].soundId);
@@ -244,6 +298,9 @@ void BattleGroundWS::HandlePlayerDroppedFlag(Player* player)
     PvpTeamIndex teamIdx = GetTeamIndexByTeamId(team);
     PvpTeamIndex otherTeamIdx = GetOtherTeamIndex(teamIdx);
 
+    player->RemoveAurasDueToSpell(BG_WS_SPELL_FOCUSED_ASSAULT);
+    player->RemoveAurasDueToSpell(BG_WS_SPELL_BRUTAL_ASSAULT);
+
     if (GetStatus() != STATUS_IN_PROGRESS)
     {
         if (IsFlagPickedUp(teamIdx) && GetFlagCarrierGuid(teamIdx) == player->GetObjectGuid())
@@ -291,6 +348,10 @@ void BattleGroundWS::ProcessFlagPickUpFromBase(Player* player, Team attackerTeam
     UpdateWorldState(wsStateUpdateId[otherTeamIdx], 1);
 
     player->CastSpell(player, wsgFlagData[otherTeamIdx][BG_WS_FLAG_ACTION_PICKEDUP].spellId, TRIGGERED_OLD_TRIGGERED);
+    if (m_brutalAssaultActive)
+        player->CastSpell(player, BG_WS_SPELL_BRUTAL_ASSAULT, TRIGGERED_OLD_TRIGGERED);
+    else if (m_focusedAssaultActive)
+        player->CastSpell(player, BG_WS_SPELL_FOCUSED_ASSAULT, TRIGGERED_OLD_TRIGGERED);
 
     PlaySoundToAll(wsgFlagData[otherTeamIdx][BG_WS_FLAG_ACTION_PICKEDUP].soundId);
     SendMessageToAll(wsgFlagData[otherTeamIdx][BG_WS_FLAG_ACTION_PICKEDUP].messageId, wsgFlagData[teamIdx][BG_WS_FLAG_ACTION_PICKEDUP].chatType, player);
@@ -345,6 +406,10 @@ void BattleGroundWS::ProcessDroppedFlagActions(Player* player, GameObject* targe
         SetFlagCarrier(otherTeamIdx, player->GetObjectGuid());
 
         player->CastSpell(player, wsgFlagData[otherTeamIdx][actionId].spellId, TRIGGERED_OLD_TRIGGERED);
+        if (m_brutalAssaultActive)
+            player->CastSpell(player, BG_WS_SPELL_BRUTAL_ASSAULT, TRIGGERED_OLD_TRIGGERED);
+        else if (m_focusedAssaultActive)
+            player->CastSpell(player, BG_WS_SPELL_FOCUSED_ASSAULT, TRIGGERED_OLD_TRIGGERED);
 
         m_flagState[otherTeamIdx] = BG_WS_FLAG_STATE_ON_PLAYER;
         UpdateFlagState(team, BG_WS_FLAG_STATE_ON_PLAYER);
@@ -490,6 +555,9 @@ void BattleGroundWS::Reset()
     m_reputationCapture = (isBgWeekend) ? BG_WS_WEEKEND_FLAG_CAPTURE_REPUTATION : BG_WS_NORMAL_FLAG_CAPTURE_REPUTATION;
     m_honorWinKills = (isBgWeekend) ? BG_WS_WEEKEND_WIN_KILLS : BG_WS_NORMAL_WIN_KILLS;
     m_honorEndKills = (isBgWeekend) ? BG_WS_WEEKEND_MAP_COMPLETE_KILLS : BG_WS_NORMAL_MAP_COMPLETE_KILLS;
+    m_flagCarrierDebuffTimer = BG_WS_BRUTAL_ASSAULT_TIME;
+    m_brutalAssaultActive = false;
+    m_focusedAssaultActive = false;
 
     // setup graveyard
     sObjectMgr.SetGraveYardLinkTeam(WS_GRAVEYARD_MAIN_ALLIANCE,     BG_WS_ZONE_ID_MAIN, TEAM_INVALID);

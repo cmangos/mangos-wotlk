@@ -30,6 +30,8 @@ enum WSTimers
     BG_WS_FLAG_RESPAWN_TIME                 = 23 * IN_MILLISECONDS,
     BG_WS_FLAG_DROP_TIME                    = 10 * IN_MILLISECONDS,
     BG_WS_TIME_LIMIT                        = 25 * MINUTE * IN_MILLISECONDS,
+    BG_WS_FOCUSED_ASSAULT_TIME              = 10 * MINUTE * IN_MILLISECONDS,
+    BG_WS_BRUTAL_ASSAULT_TIME               = 15 * MINUTE * IN_MILLISECONDS,
 };
 
 enum WSVariables
@@ -58,7 +60,9 @@ enum WSSpells
     BG_WS_SPELL_WARSONG_FLAG            = 23333,
     BG_WS_SPELL_WARSONG_FLAG_DROPPED    = 23334,
     BG_WS_SPELL_SILVERWING_FLAG         = 23335,
-    BG_WS_SPELL_SILVERWING_FLAG_DROPPED = 23336
+    BG_WS_SPELL_SILVERWING_FLAG_DROPPED = 23336,
+    BG_WS_SPELL_FOCUSED_ASSAULT         = 46392,            // 50% increased damage to flag carriers after 10 minute stalemate
+    BG_WS_SPELL_BRUTAL_ASSAULT          = 46393,            // 100% increased damage to flag carriers after 15 minute stalemate
 };
 
 enum WSWorldStates
@@ -263,6 +267,9 @@ class BattleGroundWS : public BattleGround
         uint8 m_flagState[PVP_TEAM_COUNT];
         uint32 m_flagsTimer[PVP_TEAM_COUNT];
         uint32 m_flagsDropTimer[PVP_TEAM_COUNT];
+        uint32 m_flagCarrierDebuffTimer;
+        bool m_focusedAssaultActive;
+        bool m_brutalAssaultActive;
 
         uint32 m_reputationCapture;
         uint32 m_honorWinKills;
