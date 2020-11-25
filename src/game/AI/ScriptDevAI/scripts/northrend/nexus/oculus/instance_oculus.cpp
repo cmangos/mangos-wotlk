@@ -57,6 +57,13 @@ void instance_oculus::OnCreatureCreate(Creature* pCreature)
         case NPC_EREGOS:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
+        case NPC_EMERALD_DRAKE:
+        case NPC_AMBER_DRAKE:
+        case NPC_RUBY_DRAKE:
+            // after the 3rd encounter the vehicles receive additional spells
+            if (GetData(TYPE_UROM) == DONE)
+                pCreature->UpdateSpellSet(1);
+            break;
     }
 }
 

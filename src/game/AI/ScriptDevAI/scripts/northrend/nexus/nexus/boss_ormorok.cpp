@@ -132,6 +132,10 @@ struct boss_ormorokAI : public ScriptedAI
                 ++m_uiSpikeCount;
             // no break;
             case NPC_CRYSTAL_SPIKE_INITIAL:
+                // make creature passive
+                pSummoned->AI()->SetReactState(REACT_PASSIVE);
+                pSummoned->SetCanEnterCombat(false);
+
                 // Update orientation so we can always face the boss
                 pSummoned->SetFacingToObject(m_creature);
 

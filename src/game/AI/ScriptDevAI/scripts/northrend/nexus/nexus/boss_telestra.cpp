@@ -201,6 +201,9 @@ struct boss_telestraAI : public ScriptedAI
             case NPC_TELEST_ARCANE: pSummoned->CastSpell(pSummoned, SPELL_ARCANE_VISUAL, TRIGGERED_OLD_TRIGGERED); break;
             case NPC_TELEST_FROST: pSummoned->CastSpell(pSummoned, SPELL_FROST_VISUAL, TRIGGERED_OLD_TRIGGERED); break;
         }
+
+        if (m_creature->GetVictim())
+            pSummoned->AI()->AttackStart(m_creature->GetVictim());
     }
 
     void UpdateAI(const uint32 uiDiff) override
