@@ -1995,7 +1995,11 @@ Creature* WorldObject::SummonCreature(TempSpawnSettings settings, Map* map, uint
         return nullptr;
     }
 
-    TemporarySpawn* creature = new TemporarySpawn(settings.spawner ? settings.spawner->GetObjectGuid() : ObjectGuid());
+    TemporarySpawn* creature;
+    if (!settings.tempSpawnMovegen)
+        creature = new TemporarySpawn(settings.spawner ? settings.spawner->GetObjectGuid() : ObjectGuid());
+    else
+        creature = new TemporarySpawnWaypoint(settings.spawner ? settings.spawner->GetObjectGuid() : ObjectGuid(), settings.waypointId, settings.spawnPathId, settings.pathOrigin);
 
     GenericTransport* transport = nullptr;
     if (settings.spawner)
