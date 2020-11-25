@@ -689,7 +689,7 @@ class BattleGround
         /* Scorekeeping */
         BattleGroundScoreMap m_playerScores;                // Player scores
 
-        // can be implemented in BG subclass
+        // can be implemented in BG subclass - player can be nullptr
         virtual void RemovePlayer(Player* /*player*/, ObjectGuid /*guid*/);
 
         /* Player lists, those need to be accessible by inherited classes */
