@@ -270,7 +270,7 @@ struct boss_malacrassAI : public CombatAI
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 miscValue) override
     {
-        if (eventType == AI_EVENT_CUSTOM_A) // encounter wipe
+        if (eventType == AI_EVENT_CUSTOM_A) // malacrass kill or wipe
         {
             m_creature->ForcedDespawn();
             for (uint8 i = 0; i < MAX_ACTIVE_ADDS; ++i)

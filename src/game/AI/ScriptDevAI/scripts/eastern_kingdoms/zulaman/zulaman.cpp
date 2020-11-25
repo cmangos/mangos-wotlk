@@ -440,7 +440,7 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
                 if (GameObject* pDoor = GetSingleGameObjectFromStorage(GO_WOODEN_DOOR))
                     pDoor->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
             m_auiEncounter[type] = data;
-            if (data == FAIL)
+            if (data == FAIL || data == DONE)
                 if (Creature* malacrass = GetSingleCreatureFromStorage(NPC_MALACRASS))
                     malacrass->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, malacrass, malacrass);
             break;
