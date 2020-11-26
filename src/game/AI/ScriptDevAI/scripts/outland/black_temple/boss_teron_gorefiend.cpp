@@ -97,7 +97,7 @@ struct boss_teron_gorefiendAI : public CombatAI
         AddCombatAction(GOREFIEND_ACTION_BERSERK, GetInitialActionTimer(GOREFIEND_ACTION_BERSERK));
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
             {
-                return x < 516.8f && y > 402.7f;
+                return x < 512.8f && y > 402.8f;
             });
         Reset();
     }
