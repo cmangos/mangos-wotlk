@@ -807,10 +807,10 @@ void WorldSession::HandleUpdateMissileTrajectory(WorldPacket& recv_data)
 
     if (moveFlag)
     {
-        MovementInfo movementInfo;                      // MovementInfo
-
-        recv_data >> Unused<uint32>();                  // >> MSG_MOVE_STOP
-        recv_data >> guid.ReadAsPacked();
-        recv_data >> movementInfo;
+        uint32 opcode;
+        recv_data >> opcode;
+        if (opcode != MSG_MOVE_STOP)
+            return; // hacking attempt
+        HandleMovementOpcodes(recv_data);
     }
 }
