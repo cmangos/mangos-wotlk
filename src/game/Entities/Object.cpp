@@ -171,7 +171,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) c
 
     if (isType(TYPEMASK_UNIT))
     {
-        if (((Unit*) this)->GetVictim())
+        if (static_cast<const Unit*>(this)->GetVictim())
             updateFlags |= UPDATEFLAG_HAS_ATTACKING_TARGET;
     }
 
@@ -273,17 +273,13 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     // 0x20
     if (updateFlags & UPDATEFLAG_LIVING)
     {
-        Unit* unit = ((Unit*)this);
+        Unit const* unit = static_cast<Unit const*>(this);
 
-        // ToDo: Remove this hack
-        if (GetTypeId() == TYPEID_PLAYER)
-        {
-            Player* player = ((Player*)unit);
-            if (player->GetTransport() || player->IsBoarded())
-                player->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
-            else
-                player->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
-        }
+        // TODO: Remove this when moveflag is properly used
+        if (unit->GetTransport())
+            const_cast<Unit*>(unit)->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
+        else
+            const_cast<Unit*>(unit)->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
 
         // Write movement info
         unit->m_movementInfo.Write(*data);
@@ -652,7 +648,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                 // Handle tapped flag
                 else if (index == UNIT_DYNAMIC_FLAGS)
                 {
-                    Creature* creature = (Creature*)this;
+                    Creature const* creature = static_cast<Creature const*>(this);
                     uint32 dynflagsValue = m_uint32Values[index];
                     bool setTapFlags = false;
 
@@ -728,7 +724,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
 
                     if (GetTypeId() == TYPEID_UNIT || GetTypeId() == TYPEID_PLAYER)
                     {
-                        Unit* unit = (Unit*)this; // hunters mark effects should only be visible to owners and not all players
+                        Unit const* unit = static_cast<const Unit*>(this); // hunters mark effects should only be visible to owners and not all players
                         if (!unit->HasAuraTypeWithCaster(SPELL_AURA_MOD_STALKED, target->GetObjectGuid()))
                             dynflagsValue &= ~UNIT_DYNFLAG_TRACK_UNIT;
                     }
@@ -1237,7 +1233,7 @@ void WorldObject::Relocate(float x, float y, float z, float orientation)
     m_position.o = orientation;
 
     if (isType(TYPEMASK_UNIT))
-        ((Unit*)this)->m_movementInfo.ChangePosition(x, y, z, orientation);
+        m_movementInfo.ChangePosition(x, y, z, orientation);
 }
 
 void WorldObject::Relocate(float x, float y, float z)
@@ -1247,7 +1243,7 @@ void WorldObject::Relocate(float x, float y, float z)
     m_position.z = z;
 
     if (isType(TYPEMASK_UNIT))
-        ((Unit*)this)->m_movementInfo.ChangePosition(x, y, z, GetOrientation());
+        m_movementInfo.ChangePosition(x, y, z, GetOrientation());
 }
 
 void WorldObject::SetOrientation(float orientation)
@@ -1255,7 +1251,7 @@ void WorldObject::SetOrientation(float orientation)
     m_position.o = orientation;
 
     if (isType(TYPEMASK_UNIT))
-        ((Unit*)this)->m_movementInfo.ChangeOrientation(orientation);
+        m_movementInfo.ChangeOrientation(orientation);
 }
 
 uint32 WorldObject::GetZoneId() const
