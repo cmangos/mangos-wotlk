@@ -54,6 +54,7 @@
 #include "Loot/LootMgr.h"
 #include "Movement/MoveSpline.h"
 #include "AI/ScriptDevAI/include/sc_grid_searchers.h"
+#include "Maps/InstanceData.h"
 
 pEffect SpellEffects[MAX_SPELL_EFFECTS] =
 {
