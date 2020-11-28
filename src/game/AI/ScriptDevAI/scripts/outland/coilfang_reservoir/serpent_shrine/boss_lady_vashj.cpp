@@ -25,6 +25,7 @@ EndScriptData */
 #include "serpent_shrine.h"
 #include "Entities/TemporarySpawn.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {

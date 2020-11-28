@@ -24049,7 +24049,7 @@ void Player::_fillGearScoreData(Item* item, GearScoreVec* gearScore, uint32& two
     }
 }
 
-AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficulty difficulty, uint32& miscRequirement, bool forceAllChecks = false)
+AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficulty difficulty, uint32& miscRequirement, bool forceAllChecks)
 {
     miscRequirement = 0;
 
