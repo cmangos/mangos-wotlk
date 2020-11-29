@@ -13583,6 +13583,19 @@ void Unit::AddComboPoints(Unit* target, int8 count)
 
     if (IsPlayer())
         static_cast<Player*>(this)->SendComboPoints();
+    if (Player const* player = GetControllingPlayer())
+    {
+        if (player != this)
+        {
+            auto packedComboTarget = GetComboTargetGuid().WriteAsPacked();
+            WorldPacket data;
+            data.Initialize(SMSG_PET_UPDATE_COMBO_POINTS, GetPackGUID().size() + packedComboTarget.size() + 1);
+            data << GetPackGUID();
+            data << packedComboTarget;
+            data << uint8(m_comboPoints);
+            player->SendDirectMessage(data);
+        }
+    }
 }
 
 void Unit::ClearComboPoints()
