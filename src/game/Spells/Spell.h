@@ -306,6 +306,21 @@ class SpellLog
         uint32 m_currentEffect;
 };
 
+class SpellEvent : public BasicEvent
+{
+    public:
+        SpellEvent(Spell* spell);
+        virtual ~SpellEvent();
+
+        virtual bool Execute(uint64 e_time, uint32 p_time) override;
+        virtual void Abort(uint64 e_time) override;
+        virtual bool IsDeletable() const override;
+
+        Spell* GetSpell() const { return m_Spell; }
+    protected:
+        Spell* m_Spell;
+};
+
 class Spell
 {
         friend struct MaNGOS::SpellNotifierPlayer;
@@ -609,6 +624,7 @@ class Spell
         WorldObject* GetCastingObject() const;
         // channels are generally instant - until more research provided all need to have speed 0
         float GetSpellSpeed() const;
+        void RecalculateDelayMomentForDest();
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
 
@@ -864,6 +880,7 @@ class Spell
         SpellCastResult CanOpenLock(SpellEffectIndex effIndex, uint32 lockid, SkillType& skillId, int32& reqSkillValue, int32& skillValue);
         void ProcSpellAuraTriggers();
         bool CanExecuteTriggersOnHit(uint8 effMask, SpellEntry const* triggeredByAura) const;
+        uint64 CalculateDelayMomentForDst() const;
         // -------------------------------------------
 
         // List For Triggered Spells
@@ -902,6 +919,8 @@ class Spell
         // we can't store original aura link to prevent access to deleted auras
         // and in same time need aura data and after aura deleting.
         SpellEntry const* m_triggeredByAuraSpell;
+
+        SpellEvent* m_spellEvent;
 
     private:
         // needed to store all log for this spell
@@ -1095,18 +1114,4 @@ namespace MaNGOS
 
 typedef void(Spell::*pEffect)(SpellEffectIndex eff_idx);
 
-class SpellEvent : public BasicEvent
-{
-    public:
-        SpellEvent(Spell* spell);
-        virtual ~SpellEvent();
-
-        virtual bool Execute(uint64 e_time, uint32 p_time) override;
-        virtual void Abort(uint64 e_time) override;
-        virtual bool IsDeletable() const override;
-
-        Spell* GetSpell() const { return m_Spell; }
-    protected:
-        Spell* m_Spell;
-};
 #endif

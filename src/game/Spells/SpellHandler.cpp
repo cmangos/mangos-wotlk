@@ -814,3 +814,41 @@ void WorldSession::HandleUpdateMissileTrajectory(WorldPacket& recv_data)
         HandleMovementOpcodes(recv_data);
     }
 }
+
+void WorldSession::HandleOnMissileTrajectoryCollision(WorldPacket& recvPacket)
+{
+    DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: CMSG_ON_MISSILE_TRAJECTORY_COLLISION");
+
+    ObjectGuid casterGuid;
+    uint32 spellId;
+    uint8 castCount;
+    float x, y, z;    // Position of missile hit
+
+    recvPacket >> casterGuid;
+    recvPacket >> spellId;
+    recvPacket >> castCount;
+    recvPacket >> x;
+    recvPacket >> y;
+    recvPacket >> z;
+
+    Unit* caster = ObjectAccessor::GetUnit(*_player, casterGuid);
+    if (!caster)
+        return;
+
+    Spell* spell = caster->FindCurrentSpellBySpellId(spellId);
+    if (!spell || !(spell->m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
+        return;
+
+    spell->m_targets.setDestination(x, y, z);
+
+    // we changed dest, recalculate flight time
+    spell->RecalculateDelayMomentForDest();
+
+    WorldPacket data(SMSG_NOTIFY_MISSILE_TRAJECTORY_COLLISION, 21);
+    data << uint64(casterGuid);
+    data << uint8(castCount);
+    data << float(x);
+    data << float(y);
+    data << float(z);
+    caster->SendMessageToSet(data, true);
+}

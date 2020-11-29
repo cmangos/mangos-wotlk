@@ -402,7 +402,7 @@ void SpellLog::SendToSet()
 // ***********
 
 Spell::Spell(Unit* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID, SpellEntry const* triggeredBy) :
-    m_spellLog(this), m_spellScript(SpellScriptMgr::GetSpellScript(info->Id))
+    m_spellLog(this), m_spellScript(SpellScriptMgr::GetSpellScript(info->Id)), m_spellEvent(nullptr)
 {
     MANGOS_ASSERT(caster != nullptr && info != nullptr);
     MANGOS_ASSERT(info == sSpellTemplate.LookupEntry<SpellEntry>(info->Id) && "`info` must be pointer to sSpellTemplate element");
@@ -1078,34 +1078,46 @@ void Spell::AddDestExecution(SpellEffectIndex effIndex)
 {
     if (m_destTargetInfo.effectMask == 0)
     {
-        // spell fly from visual cast object
-        WorldObject* affectiveObject = GetAffectiveCasterObject();
-        float baseSpeed = GetSpellSpeed();
-        if (baseSpeed > 0.0f)
-        {
-            // calculate spell incoming interval
-            float x, y, z;
-            m_targets.getDestination(x, y, z);
-            float dist = affectiveObject->GetDistance(x, y, z, DIST_CALC_NONE);
-            dist = sqrt(dist); // default distance calculation is raw, apply sqrt before the next step
-            float speed;
-            if (m_targets.getSpeed() > 0.0f)
-                speed = m_targets.getSpeed() * cos(m_targets.getElevation());
-            else
-            {
-                speed = baseSpeed;
-
-                if (dist < 5.0f)
-                    dist = 5.0f;
-            }
-            m_destTargetInfo.timeDelay = (uint64)floor(dist / speed * 1000.0f);
+        m_destTargetInfo.timeDelay = CalculateDelayMomentForDst();
+        if (GetSpellSpeed() > 0.f)
             if (m_delayMoment == 0 || m_delayMoment > m_destTargetInfo.timeDelay)
                 m_delayMoment = m_destTargetInfo.timeDelay;
-        }
-        else
-            m_destTargetInfo.timeDelay = uint64(0);
     }
     m_destTargetInfo.effectMask |= (1 << effIndex);
+}
+
+uint64 Spell::CalculateDelayMomentForDst() const
+{
+    // spell fly from visual cast object
+    WorldObject* affectiveObject = GetAffectiveCasterObject();
+    float baseSpeed = GetSpellSpeed();
+    if (baseSpeed > 0.0f)
+    {
+        // calculate spell incoming interval
+        float x, y, z;
+        m_targets.getDestination(x, y, z);
+        float dist = affectiveObject->GetDistance(x, y, z, DIST_CALC_NONE);
+        dist = sqrt(dist); // default distance calculation is raw, apply sqrt before the next step
+        float speed;
+        if (m_targets.getSpeed() > 0.0f)
+            speed = m_targets.getSpeed() * cos(m_targets.getElevation());
+        else
+        {
+            speed = baseSpeed;
+
+            if (dist < 5.0f)
+                dist = 5.0f;
+        }
+        return (uint64)floor(dist / speed * 1000.0f);
+    }
+
+    return 0;     
+}
+
+void Spell::RecalculateDelayMomentForDest()
+{
+    m_delayMoment = CalculateDelayMomentForDst();
+    m_caster->m_events.ModifyEventTime(m_spellEvent, GetDelayStart() + m_delayMoment);
 }
 
 void Spell::DoAllEffectOnTarget(TargetInfo* target)
@@ -3083,8 +3095,8 @@ SpellCastResult Spell::SpellStart(SpellCastTargets const* targets, Aura* trigger
         m_triggeredByAuraSpell = triggeredByAura->GetSpellProto();
 
     // create and add update event for this spell
-    SpellEvent* Event = new SpellEvent(this);
-    m_caster->m_events.AddEvent(Event, m_caster->m_events.CalculateTime(1));
+    m_spellEvent = new SpellEvent(this);
+    m_caster->m_events.AddEvent(m_spellEvent, m_caster->m_events.CalculateTime(1));
 
     // Prevent casting at cast another spell (ServerSide check)
     if (m_caster->IsNonMeleeSpellCasted(false, true, true) && m_cast_count && !m_ignoreConcurrentCasts)

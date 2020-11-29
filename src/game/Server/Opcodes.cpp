@@ -1240,7 +1240,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x4BB*/ { "SMSG_CALENDAR_CLEAR_PENDING_ACTION",           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x4BC*/ { "SMSG_LOAD_EQUIPMENT_SET",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x4BD*/ { "CMSG_SAVE_EQUIPMENT_SET",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleEquipmentSetSaveOpcode    },
-    /*0x4BE*/ { "CMSG_ON_MISSILE_TRAJECTORY_COLLISION",         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x4BE*/ { "CMSG_ON_MISSILE_TRAJECTORY_COLLISION",         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::HandleOnMissileTrajectoryCollision },
     /*0x4BF*/ { "SMSG_NOTIFY_MISSILE_TRAJECTORY_COLLISION",     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x4C0*/ { "SMSG_TALENT_UPDATE",                           STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x4C1*/ { "CMSG_LEARN_TALENT_GROUP",                      STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleLearnPreviewTalents       },
