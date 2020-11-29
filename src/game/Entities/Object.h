@@ -142,7 +142,7 @@ class CooldownData
         }
 
         // wotlk+ feature
-        void SpellCDExpireTime(TimePoint& expireTime)
+        void SpellCDExpireTime(TimePoint expireTime)
         {
             m_expireTime = expireTime;
         }
