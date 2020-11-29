@@ -1801,14 +1801,14 @@ void World::SendWorldTextToAcceptingTickets(int32 string_id, ...)
 }
 
 /// Sends a packet to all players with optional team and instance restrictions
-void World::SendGlobalMessage(WorldPacket const& packet) const
+void World::SendGlobalMessage(WorldPacket const& packet, uint32 team) const
 {
     for (const auto& m_session : m_sessions)
     {
         if (WorldSession* session = m_session.second)
         {
             Player* player = session->GetPlayer();
-            if (player && player->IsInWorld())
+            if (player && player->IsInWorld() && (team == 0 || team == player->GetTeam()))
                 session->SendPacket(packet);
         }
     }

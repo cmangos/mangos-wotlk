@@ -1185,7 +1185,7 @@ enum Opcodes
     SMSG_SET_PHASE_SHIFT                            = 0x47C,
     SMSG_ALL_ACHIEVEMENT_DATA                       = 0x47D,
     CMSG_FORCE_SAY_CHEAT                            = 0x47E,
-    SMSG_HEALTH_UPDATE                              = 0x47F,
+    SMSG_HEALTH_UPDATE                              = 0x47F, // TODO: Implement
     SMSG_POWER_UPDATE                               = 0x480,
     CMSG_GAMEOBJ_REPORT_USE                         = 0x481,
     SMSG_HIGHEST_THREAT_UPDATE                      = 0x482,

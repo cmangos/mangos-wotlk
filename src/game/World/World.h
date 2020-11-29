@@ -555,7 +555,7 @@ class World
         void SendWorldText(int32 string_id, ...);
         void SendWorldTextToAboveSecurity(uint32 securityLevel, int32 string_id, ...);
         void SendWorldTextToAcceptingTickets(int32 string_id, ...);
-        void SendGlobalMessage(WorldPacket const& packet) const;
+        void SendGlobalMessage(WorldPacket const& packet, uint32 team = 0) const;
         void SendServerMessage(ServerMessageType type, const char* text = "", Player* player = nullptr) const;
         void SendZoneUnderAttackMessage(uint32 zoneId, Team team);
         void SendDefenseMessage(uint32 zoneId, int32 textId);
