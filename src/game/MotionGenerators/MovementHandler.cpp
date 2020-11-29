@@ -314,6 +314,13 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
         recv_data.rpos(recv_data.wpos());                   // prevent warnings spam
         return;
     }
+
+    if (opcode == CMSG_MOVE_SET_COLLISION_HGT_ACK)
+    {
+        // TODO: Send MSG_MOVE_SET_COLLISION_HGT
+        return;
+    }
+
     /*----------------*/
 
     // client ACK send one packet for mounted/run case and need skip all except last from its
