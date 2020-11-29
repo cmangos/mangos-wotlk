@@ -845,14 +845,56 @@ void GroupLootRoll::Finish(RollVoteMap::const_iterator& winnerItr)
     {
         SendLootRollWon(winnerItr->first, winnerItr->second.number, winnerItr->second.vote);
 
-        Player* plr = sObjectMgr.GetPlayer(winnerItr->first);
-        if (plr && plr->GetSession())
+        Player* player = sObjectMgr.GetPlayer(winnerItr->first);
+        if (player && player->GetSession())
         {
             if (winnerItr->second.vote == ROLL_NEED)
-                plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_NEED_ON_LOOT, m_lootItem->itemId, winnerItr->second.number);
+                player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_NEED_ON_LOOT, m_lootItem->itemId, winnerItr->second.number);
+            else if (winnerItr->second.vote == ROLL_DISENCHANT)
+                player->UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_CAST_SPELL, 13262);
             else
-                plr->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_GREED_ON_LOOT, m_lootItem->itemId, winnerItr->second.number);
-            m_loot->SendItem(plr, m_itemSlot);
+                player->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_ROLL_GREED_ON_LOOT, m_lootItem->itemId, winnerItr->second.number);
+
+            if (winnerItr->second.vote == ROLL_DISENCHANT)
+            {
+                m_lootItem->isReleased = true;
+                m_lootItem->allowedGuid.clear();                
+                ItemPrototype const* pProto = sObjectMgr.GetItemPrototype(m_lootItem->itemId);
+                ItemPosCountVec dest;
+                InventoryResult msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, m_lootItem->itemId, m_lootItem->count);
+                Loot loot;
+                loot.FillLoot(pProto->DisenchantID, LootTemplates_Disenchant, player, true);
+                if (!loot.AutoStore(player, true))
+                {
+                    LootItemList itemList;
+                    loot.GetLootItemsListFor(player, itemList);
+                    if (itemList.size() > 0)
+                    {
+                        if (itemList.size() >= 1) // overwrite existing first item
+                        {
+                            LootItem* item = itemList[0];
+                            m_lootItem->itemId = item->itemId;
+                            m_lootItem->itemProto = item->itemProto;
+                            m_lootItem->randomSuffix = item->randomSuffix;
+                            m_lootItem->randomPropertyId = item->randomPropertyId;
+                            m_lootItem->displayID = item->displayID;
+                            m_lootItem->count = item->count;
+                            m_lootItem->allowedGuid.clear();
+                            m_lootItem->allowedGuid.emplace(player->GetObjectGuid());
+                            m_loot->NotifyItemChanged(m_lootItem);
+                        }
+                        for (uint32 i = 1; i < itemList.size(); ++i) // append subsequent items
+                        {
+                            LootItem* item = itemList[1];
+                            m_loot->AddItem(item->itemId, item->count, item->randomSuffix, item->randomPropertyId, player, true);
+                        }
+                    }
+                }
+                else
+                    m_loot->NotifyItemRemoved(m_lootItem->lootSlot);
+            }
+            else
+                m_loot->SendItem(player, m_itemSlot);
         }
         else
         {
@@ -890,7 +932,7 @@ void Loot::AddItem(LootStoreItem const& item)
 }
 
 // Insert item into the loot explicit way. (used for container item and Item::LoadFromDB)
-void Loot::AddItem(uint32 itemid, uint32 count, uint32 randomSuffix, int32 randomPropertyId)
+void Loot::AddItem(uint32 itemid, uint32 count, uint32 randomSuffix, int32 randomPropertyId, Player* player, bool notify)
 {
     if (m_lootItems.size() < MAX_NR_LOOT_ITEMS)                              // Normal drop
     {
@@ -898,9 +940,15 @@ void Loot::AddItem(uint32 itemid, uint32 count, uint32 randomSuffix, int32 rando
 
         m_lootItems.push_back(lootItem);
 
-        // add permission to pick this item to loot owner
-        for (auto allowedGuid : m_ownerSet)
-            lootItem->allowedGuid.emplace(allowedGuid);
+        if (player) // disenchant roll case
+        {
+            lootItem->allowedGuid.emplace(player->GetObjectGuid());
+            if (notify)
+                NotifyItemChanged(lootItem);
+        }
+        else // add permission to pick this item to loot owner
+            for (auto allowedGuid : m_ownerSet)
+                lootItem->allowedGuid.emplace(allowedGuid);
     }
 }
 
@@ -1094,6 +1142,31 @@ void Loot::NotifyItemRemoved(Player* player, uint32 lootIndex) const
     WorldPacket data(SMSG_LOOT_REMOVED, 1);
     data << uint8(lootIndex);
     player->GetSession()->SendPacket(data);
+}
+
+void Loot::NotifyItemChanged(LootItem* item)
+{
+    WorldPacket data(SMSG_LOOT_UPDATE, 8 + 1 + 4 + 4 + 4 + 4 + 4);
+    data << m_guidTarget;
+    data << uint8(item->lootSlot);
+    data << item->itemId;
+    data << item->displayID;
+    data << item->randomSuffix;
+    data << item->randomPropertyId;
+    data << item->count;
+    // notify all players that are looting this that the item was removed
+    GuidSet::iterator i_next;
+    for (GuidSet::iterator i = m_playersLooting.begin(); i != m_playersLooting.end(); i = i_next)
+    {
+        i_next = i;
+        ++i_next;
+        Player* player = ObjectAccessor::FindPlayer(*i);
+
+        if (player && player->GetSession())
+            player->GetSession()->SendPacket(data);
+        else
+            m_playersLooting.erase(i);
+    }
 }
 
 void Loot::NotifyMoneyRemoved()

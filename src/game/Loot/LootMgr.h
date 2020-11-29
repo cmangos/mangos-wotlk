@@ -302,7 +302,7 @@ class Loot
 
         // Inserts the item into the loot (called by LootTemplate processors)
         void AddItem(LootStoreItem const& item);
-        void AddItem(uint32 itemid, uint32 count, uint32 randomSuffix, int32 randomPropertyId);             // used in item.cpp to explicitly load a saved item
+        void AddItem(uint32 itemid, uint32 count, uint32 randomSuffix, int32 randomPropertyId, Player* player = nullptr, bool notify = false); // used in item.cpp to explicitly load a saved item and roll disenchant
         bool AutoStore(Player* player, bool broadcast = false, uint32 bag = NULL_BAG, uint32 slot = NULL_SLOT);
         bool CanLoot(Player const* player);
         void ShowContentTo(Player* plr);
@@ -342,6 +342,7 @@ class Loot
         void NotifyMoneyRemoved();
         void NotifyItemRemoved(uint32 lootIndex);
         void NotifyItemRemoved(Player* player, uint32 lootIndex) const;
+        void NotifyItemChanged(LootItem* item);
         void GroupCheck();
         void SetGroupLootRight(Player* player);
         void GenerateMoneyLoot(uint32 minAmount, uint32 maxAmount);
