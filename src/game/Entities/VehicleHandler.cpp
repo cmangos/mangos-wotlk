@@ -67,6 +67,30 @@ void WorldSession::HandleRequestVehicleExit(WorldPacket& recvPacket)
             vehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, _player->GetObjectGuid());
 }
 
+void WorldSession::HandleRequestVehicleNextSeat(WorldPacket& recvPacket)
+{
+    if (recvPacket.GetOpcode() == CMSG_REQUEST_VEHICLE_PREV_SEAT)
+        DEBUG_LOG("WORLD: Received opcode CMSG_REQUEST_VEHICLE_PREV_SEAT");
+    else
+        DEBUG_LOG("WORLD: Received opcode CMSG_REQUEST_VEHICLE_NEXT_SEAT");
+
+    TransportInfo* transportInfo = _player->GetTransportInfo();
+    if (!transportInfo || !transportInfo->IsOnVehicle())
+        return;
+
+    Unit* vehicle = static_cast<Unit*>(transportInfo->GetTransport());
+
+    switch (recvPacket.GetOpcode())
+    {
+        case CMSG_REQUEST_VEHICLE_PREV_SEAT:
+            vehicle->GetVehicleInfo()->ChangeSeat(_player, transportInfo->GetTransportSeat(), false);
+            break;
+        case CMSG_REQUEST_VEHICLE_NEXT_SEAT:
+            vehicle->GetVehicleInfo()->ChangeSeat(_player, transportInfo->GetTransportSeat(), true);
+            break;
+    }
+}
+
 void WorldSession::HandleRequestVehicleSwitchSeat(WorldPacket& recvPacket)
 {
     DEBUG_LOG("WORLD: Received opcode CMSG_REQUEST_VEHICLE_SWITCH_SEAT");
@@ -84,11 +108,24 @@ void WorldSession::HandleRequestVehicleSwitchSeat(WorldPacket& recvPacket)
 
     Unit* vehicle = (Unit*)transportInfo->GetTransport();
 
-    // Something went wrong
     if (vehicleGuid != vehicle->GetObjectGuid())
-        return;
+    {
+        Unit* destVehicle = _player->GetMap()->GetUnit(vehicleGuid);
 
-    vehicle->GetVehicleInfo()->SwitchSeat(_player, seat);
+        if (!destVehicle || !destVehicle->IsVehicle())
+            return;
+
+        // Change vehicle is not possible
+        if (destVehicle->GetVehicleInfo()->GetVehicleEntry()->m_flags & VEHICLE_FLAG_DISABLE_SWITCH)
+            return;
+
+        SpellClickInfoMapBounds clickPair = sObjectMgr.GetSpellClickInfoMapBounds(destVehicle->GetEntry());
+        for (SpellClickInfoMap::const_iterator itr = clickPair.first; itr != clickPair.second; ++itr)
+            if (itr->second.IsFitToRequirements(_player, destVehicle->GetTypeId() == TYPEID_UNIT ? (Creature*)destVehicle : nullptr))
+                _player->CastSpell(destVehicle, itr->second.spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+    else
+        vehicle->GetVehicleInfo()->SwitchSeat(_player, seat);
 }
 
 void WorldSession::HandleChangeSeatsOnControlledVehicle(WorldPacket& recvPacket)

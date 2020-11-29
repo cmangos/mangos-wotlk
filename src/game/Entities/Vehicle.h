@@ -71,7 +71,8 @@ class VehicleInfo : public TransportBase
         VehicleSeatEntry const* GetSeatEntry(uint8 seat) const;
 
         void Board(Unit* passenger, uint8 seat);            // Board a passenger to a vehicle
-        void SwitchSeat(Unit* passenger, uint8 seat);       // Used to switch seats of a passenger
+        void ChangeSeat(Unit* passenger, uint8 currentSeat, bool next); // Used to switch seat to next/previous seat
+        void SwitchSeat(Unit* passenger, uint8 seat);        // Used to switch seats of a passenger
         void UnBoard(Unit* passenger, bool changeVehicle);  // Used to Unboard a passenger from a vehicle
 
         bool CanBoard(Unit* passenger) const;               // Used to check if a Unit can board a vehicle
@@ -84,7 +85,7 @@ class VehicleInfo : public TransportBase
         void CalculateBoardingPositionOf(float gx, float gy, float gz, float go, float& lx, float& ly, float& lz, float& lo) const;
 
         // Seat information
-        bool GetUsableSeatFor(Unit* passenger, uint8& seat) const;
+        bool GetUsableSeatFor(Unit* passenger, uint8& seat, bool reset, bool next) const;
         bool IsSeatAvailableFor(Unit* passenger, uint8 seat) const;
 
         uint8 GetTakenSeatsMask() const;

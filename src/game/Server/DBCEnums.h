@@ -545,7 +545,7 @@ enum VehicleSeatFlags
     // SEAT_FLAG_UNK11              = 0x00001000,           // "Can Cast Mount Spell" | Note: there are no seats with this flag in 3.3.5a
     SEAT_FLAG_UNCONTROLLED          = 0x00002000,           // "Uncontrolled"
     SEAT_FLAG_CAN_ATTACK            = 0x00004000,           // Can attack, cast spells and use items from vehicle?
-    SEAT_FLAG_UNK13                 = 0x00008000,           // "ShouldUseVehicleSeatExitAnimationOnForcedExit"
+    SEAT_FLAG_SHOULD_USE_VEH_SEAT_EXIT_ANIM_ON_FORCED_EXIT = 0x00008000,           // "ShouldUseVehicleSeatExitAnimationOnForcedExit"
     SEAT_FLAG_UNK14                 = 0x00010000,
     SEAT_FLAG_UNK15                 = 0x00020000,
     SEAT_FLAG_UNK16                 = 0x00040000,           // "HasVehicleExitAnimForVoluntaryExit"

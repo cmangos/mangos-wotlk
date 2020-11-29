@@ -192,7 +192,7 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
 
     // Use the planned seat only if the seat is valid, possible to choose and empty
     if (!IsSeatAvailableFor(passenger, seat))
-        if (!GetUsableSeatFor(passenger, seat))
+        if (!GetUsableSeatFor(passenger, seat, true, true))
             return;
 
     VehicleSeatEntry const* seatEntry = GetSeatEntry(seat);
@@ -251,6 +251,18 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     ApplySeatMods(passenger, seatEntry->m_flags);
 }
 
+void VehicleInfo::ChangeSeat(Unit* passenger, uint8 currentSeat, bool next)
+{
+    // Switching seats is not possible
+    if (m_vehicleEntry->m_flags & VEHICLE_FLAG_DISABLE_SWITCH)
+        return;
+
+    if (!GetUsableSeatFor(passenger, currentSeat, false, next))
+        return;
+
+    SwitchSeat(passenger, currentSeat);
+}
+
 /**
  * This function will switch the seat of a passenger on the same vehicle
  *
@@ -282,7 +294,7 @@ void VehicleInfo::SwitchSeat(Unit* passenger, uint8 seat)
     MANGOS_ASSERT(seatEntry);
 
     // Switching seats is only allowed if this flag is set
-    if (~seatEntry->m_flags & SEAT_FLAG_CAN_SWITCH)
+    if (seatEntry->CanSwitchFromSeat())
         return;
 
     // Remove passenger modifications of the old seat
@@ -461,7 +473,7 @@ VehicleSeatEntry const* VehicleInfo::GetSeatEntry(uint8 seat) const
  * @param seat              will contain an available seat if returned true
  * @return                  return TRUE if and only if an available seat was found. In this case @seat will contain the id
  */
-bool VehicleInfo::GetUsableSeatFor(Unit* passenger, uint8& seat) const
+bool VehicleInfo::GetUsableSeatFor(Unit* passenger, uint8& seat, bool reset, bool next) const
 {
     MANGOS_ASSERT(passenger);
 
@@ -472,11 +484,21 @@ bool VehicleInfo::GetUsableSeatFor(Unit* passenger, uint8& seat) const
         return false;
 
     // Start with 0
-    seat = 0;
+    if (reset)
+        seat = 0;
 
-    for (uint8 i = 1; seat < MAX_VEHICLE_SEAT; i <<= 1, ++seat)
-        if (possibleSeats & i)
-            return true;
+    if (next)
+    {
+        for (uint32 i = 0; i < MAX_VEHICLE_SEAT; ++i, seat = (seat + 1) % MAX_VEHICLE_SEAT)
+            if (possibleSeats & (1 << (seat + 1)))
+                return true;
+    }
+    else
+    {
+        for (uint32 i = 0; i < MAX_VEHICLE_SEAT; ++i, seat = (seat + MAX_VEHICLE_SEAT - 1) % MAX_VEHICLE_SEAT)
+            if (possibleSeats & (1 << (seat + 1)))
+                return true;
+    }
 
     return false;
 }

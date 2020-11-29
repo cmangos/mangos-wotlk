@@ -2274,6 +2274,18 @@ struct VehicleSeatEntry
     // 55       m_cameraEnteringZoom"
     // 56       m_cameraSeatZoomMin
     // 57       m_cameraSeatZoomMax
+
+    inline bool HasFlag(VehicleSeatFlags flag) const { return (m_flags & flag) != 0; }
+    inline bool HasFlag(VehicleSeatFlagsB flag) const { return (m_flagsB & flag) != 0; }
+
+    inline bool CanEnterOrExit() const { return HasFlag(VehicleSeatFlags(SEAT_FLAG_CAN_EXIT | SEAT_FLAG_CAN_CONTROL | SEAT_FLAG_SHOULD_USE_VEH_SEAT_EXIT_ANIM_ON_FORCED_EXIT)); }
+    inline bool CanSwitchFromSeat() const { return HasFlag(SEAT_FLAG_CAN_SWITCH); }
+    inline bool IsUsableByOverride() const {
+        return HasFlag(VehicleSeatFlags(SEAT_FLAG_UNCONTROLLED | SEAT_FLAG_UNK15))
+            || HasFlag(VehicleSeatFlagsB(SEAT_FLAG_B_USABLE_FORCED | SEAT_FLAG_B_USABLE_FORCED_2 |
+                SEAT_FLAG_B_USABLE_FORCED_3 | SEAT_FLAG_B_USABLE_FORCED_4));
+    }
+    inline bool IsEjectable() const { return HasFlag(SEAT_FLAG_B_EJECTABLE); }
 };
 
 struct WMOAreaTableEntry
