@@ -24518,6 +24518,32 @@ void Player::LockOutSpells(SpellSchoolMask schoolMask, uint32 duration)
     WorldObject::LockOutSpells(schoolMask, duration);
 }
 
+void Player::ModifyCooldown(uint32 spellId, int32 cooldownModMs)
+{
+    auto cdItr = m_cooldownMap.begin();
+    for (; cdItr != m_cooldownMap.end(); ++cdItr)
+    {
+        auto& cdData = cdItr->second;
+        TimePoint expireTime;
+        if (!cdData->GetSpellCDExpireTime(expireTime) && cdData->GetSpellId() == spellId)
+        {
+            if (GetMap()->GetCurrentClockTime() > expireTime + std::chrono::milliseconds(cooldownModMs))
+            {
+                m_cooldownMap.erase(cdItr);
+                break; // invalidated iterator
+            }
+            else
+                cdData->SpellCDExpireTime(expireTime + std::chrono::milliseconds(cooldownModMs));
+        }
+    }
+
+    WorldPacket modifyCooldown(SMSG_MODIFY_COOLDOWN, 4 + 8 + 4);
+    modifyCooldown << uint32(spellId);
+    modifyCooldown << uint64(GetObjectGuid());
+    modifyCooldown << int32(cooldownModMs);
+    SendDirectMessage(modifyCooldown);
+}
+
 void Player::RemoveSpellLockout(SpellSchoolMask spellSchoolMask, std::set<uint32>* spellAlreadySent /*= nullptr*/)
 {
     for (auto ownerSpellItr : GetSpellMap())

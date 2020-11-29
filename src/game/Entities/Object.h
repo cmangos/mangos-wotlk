@@ -141,6 +141,12 @@ class CooldownData
             return true;
         }
 
+        // wotlk+ feature
+        void SpellCDExpireTime(TimePoint& expireTime)
+        {
+            m_expireTime = expireTime;
+        }
+
         // return false if permanent
         bool GetCatCDExpireTime(TimePoint& expireTime) const
         {
