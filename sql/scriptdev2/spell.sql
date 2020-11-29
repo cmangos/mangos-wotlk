@@ -65,6 +65,19 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 -- TBC
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (38048,'spell_curse_of_pain'),
+(430,'spell_drink'),
+(431,'spell_drink'),
+(432,'spell_drink'),
+(1133,'spell_drink'),
+(1135,'spell_drink'),
+(1137,'spell_drink'),
+(10250,'spell_drink'),
+(22734,'spell_drink'),
+(27089,'spell_drink'),
+(34291,'spell_drink'),
+(43706,'spell_drink'),
+(46755,'spell_drink'),
+(49472,'spell_drink'),
 (42144,'spell_horseman_create_water_bucket'),
 (42074,'spell_horseman_fire'),
 (43885,'spell_horseman_maniacal_laugh'),
@@ -267,6 +280,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(57073,'spell_drink'),
+(61830,'spell_drink'),
+(72623,'spell_drink'),
 (28728,'spell_feigh_death_pos_aura'),
 (41253,'spell_greater_invisibility_mob'),
 (42672,'spell_frost_tomb_aura'),
