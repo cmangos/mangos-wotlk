@@ -1191,7 +1191,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x48A*/ { "CMSG_REMOVE_GLYPH",                            STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleRemoveGlyphOpcode         },
     /*0x48B*/ { "CMSG_DUMP_OBJECTS",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x48C*/ { "SMSG_DUMP_OBJECTS_DATA",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x48D*/ { "CMSG_DISMISS_CRITTER",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x48D*/ { "CMSG_DISMISS_CRITTER",                         STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleDismissCritter            },
     /*0x48E*/ { "SMSG_NOTIFY_DEST_LOC_SPELL_CAST",              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x48F*/ { "CMSG_AUCTION_LIST_PENDING_SALES",              STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleAuctionListPendingSales   },
     /*0x490*/ { "SMSG_AUCTION_LIST_PENDING_SALES",              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
