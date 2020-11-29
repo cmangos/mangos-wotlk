@@ -241,6 +241,19 @@ void Object::DestroyForPlayer(Player* target, bool anim) const
 {
     MANGOS_ASSERT(target);
 
+    if (isType(TYPEMASK_UNIT) || isType(TYPEMASK_PLAYER))
+    {
+        if (BattleGround* bg = target->GetBattleGround())
+        {
+            if (bg->IsArena())
+            {
+                WorldPacket data(SMSG_DESTROY_ARENA_UNIT, 8);
+                data << uint64(GetObjectGuid());
+                target->SendDirectMessage(data);
+            }
+        }
+    }
+
     WorldPacket data(SMSG_DESTROY_OBJECT, 9);
     data << GetObjectGuid();
     data << uint8(anim ? 1 : 0);                            // WotLK (bool), may be despawn animation
