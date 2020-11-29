@@ -23753,6 +23753,8 @@ void Player::ActivateSpec(uint8 specNum)
         SetPower(POWER_MANA, 0);
 
     SetPower(powerType, 0);
+
+    ModifyCooldown(62757, -1800000); // Call Stabled Pet
 }
 
 void Player::UpdateSpecCount(uint8 count)
