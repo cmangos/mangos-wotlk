@@ -344,6 +344,8 @@ class Item : public Object
         std::string const& GetText() const { return m_text; }
         void SetText(std::string const& text) { m_text = text; }
 
+        void SendUpdateSockets();
+
         void SendTimeUpdate(Player* owner) const;
         void UpdateDuration(Player* owner, uint32 diff);
 

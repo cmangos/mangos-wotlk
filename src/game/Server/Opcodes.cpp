@@ -1317,7 +1317,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x508*/ { "CMSG_LOW_LEVEL_RAID",                          STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleSetAllowLowLevelRaidOpcode},
     /*0x509*/ { "CMSG_LOW_LEVEL_RAID_USER",                     STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleSetAllowLowLevelRaidOpcode},
     /*0x50A*/ { "SMSG_CAMERA_SHAKE",                            STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x50B*/ { "SMSG_SOCKET_GEMS",                             STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
+    /*0x50B*/ { "SMSG_SOCKET_GEMS_RESULT",                      STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x50C*/ { "CMSG_SET_CHARACTER_MODEL",                     STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x50D*/ { "SMSG_CONNECT_TO",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x50E*/ { "CMSG_CONNECT_TO_FAILED",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },

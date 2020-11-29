@@ -1325,7 +1325,7 @@ enum Opcodes
     CMSG_LOW_LEVEL_RAID                             = 0x508,
     CMSG_LOW_LEVEL_RAID_USER                        = 0x509,
     SMSG_CAMERA_SHAKE                               = 0x50A,
-    SMSG_SOCKET_GEMS                                = 0x50B,
+    SMSG_SOCKET_GEMS_RESULT                         = 0x50B,
     CMSG_SET_CHARACTER_MODEL                        = 0x50C,
     SMSG_CONNECT_TO                                 = 0x50D,
     CMSG_CONNECT_TO_FAILED                          = 0x50E,
