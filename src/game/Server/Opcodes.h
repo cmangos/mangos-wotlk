@@ -543,7 +543,7 @@ enum Opcodes
     CMSG_GM_NUKE                                    = 0x1FA,
     MSG_RANDOM_ROLL                                 = 0x1FB,
     SMSG_ENVIRONMENTALDAMAGELOG                     = 0x1FC,
-    CMSG_CHANGEPLAYER_DIFFICULTY                    = 0x1FD,
+    CMSG_CHANGEPLAYER_DIFFICULTY                    = 0x1FD, // TODO: Implement dynamic difficulty persistent state
     SMSG_RWHOIS                                     = 0x1FE,
     SMSG_LFG_PLAYER_REWARD                          = 0x1FF,
     SMSG_LFG_TELEPORT_DENIED                        = 0x200,
@@ -1200,7 +1200,7 @@ enum Opcodes
     CMSG_DUMP_OBJECTS                               = 0x48B,
     SMSG_DUMP_OBJECTS_DATA                          = 0x48C,
     CMSG_DISMISS_CRITTER                            = 0x48D,
-    SMSG_NOTIFY_DEST_LOC_SPELL_CAST                 = 0x48E,
+    SMSG_NOTIFY_DEST_LOC_SPELL_CAST                 = 0x48E, // TODO: Implement
     CMSG_AUCTION_LIST_PENDING_SALES                 = 0x48F,
     SMSG_AUCTION_LIST_PENDING_SALES                 = 0x490,
     SMSG_MODIFY_COOLDOWN                            = 0x491,
@@ -1275,7 +1275,7 @@ enum Opcodes
     SMSG_USE_EQUIPMENT_SET_RESULT                   = 0x4D6,
     CMSG_FORCE_ANIM                                 = 0x4D7,
     SMSG_FORCE_ANIM                                 = 0x4D8,
-    CMSG_CHAR_FACTION_CHANGE                        = 0x4D9,
+    CMSG_CHAR_FACTION_CHANGE                        = 0x4D9, // TODO: Implement from TC
     SMSG_CHAR_FACTION_CHANGE                        = 0x4DA,
     CMSG_PVP_QUEUE_STATS_REQUEST                    = 0x4DB,
     SMSG_PVP_QUEUE_STATS                            = 0x4DC,
@@ -1306,7 +1306,7 @@ enum Opcodes
     SMSG_SERVERINFO                                 = 0x4F5,
     CMSG_UI_TIME_REQUEST                            = 0x4F6,
     SMSG_UI_TIME                                    = 0x4F7,
-    CMSG_CHAR_RACE_CHANGE                           = 0x4F8,
+    CMSG_CHAR_RACE_CHANGE                           = 0x4F8, // TODO: Implement from TC
     MSG_VIEW_PHASE_SHIFT                            = 0x4F9,
     SMSG_TALENTS_INVOLUNTARILY_RESET                = 0x4FA,
     CMSG_DEBUG_SERVER_GEO                           = 0x4FB,
@@ -1344,7 +1344,7 @@ enum Opcodes
     CMSG_COMMENTATOR_SKIRMISH_QUEUE_COMMAND         = 0x51B,// lua: CommentatorSetSkirmishMatchmakingMode/CommentatorRequestSkirmishQueueData/CommentatorRequestSkirmishMode/CommentatorStartSkirmishMatch
     SMSG_COMMENTATOR_SKIRMISH_QUEUE_RESULT1         = 0x51C,// event EVENT_COMMENTATOR_SKIRMISH_QUEUE_REQUEST, CGCommentator::QueueNode
     SMSG_COMMENTATOR_SKIRMISH_QUEUE_RESULT2         = 0x51D,// event EVENT_COMMENTATOR_SKIRMISH_QUEUE_REQUEST
-    SMSG_MULTIPLE_MOVES                             = 0x51E,// some compressed packet
+    SMSG_MULTIPLE_MOVES                             = 0x51E,// TODO: Implement from TC
     NUM_MSG_TYPES                                   = 0x51F
 };
 
