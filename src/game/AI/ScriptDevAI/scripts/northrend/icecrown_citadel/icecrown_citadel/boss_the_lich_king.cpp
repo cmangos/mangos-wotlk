@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -82,7 +83,7 @@ enum
     SPELL_FROSTMOURNE_DESPAWN   = 72726, // 4
     SPELL_FROSTMOURNE_SPIRITS   = 72405, // 5
     SPELL_SOUL_BARRAGE          = 72305, // strangulation and sounds
-    SPELL_LK_CINEMATIC          = 73159,
+    SPELL_PLAY_MOVIE            = 73159,
 
     // Tirion
     SPELL_LIGHTS_BLESSING       = 71797, // after 5secs smashes Ice Lock
@@ -326,6 +327,7 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
 
         DoScriptText(SAY_OUTRO_14, m_creature);
 
+        DoCastSpellIfCan(nullptr, SPELL_PLAY_MOVIE);
         // TODO: finish event, after around 8 seconds play cinematic
     }
 
@@ -722,15 +724,22 @@ struct boss_the_lich_king_iccAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_the_lich_king_icc(Creature* pCreature)
+struct PlayMovie : public SpellScript
 {
-    return new boss_the_lich_king_iccAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (Unit* target = spell->GetUnitTarget())
+            if (target->IsPlayer())
+                static_cast<Player*>(target)->SendMovieStart(MOVIE_ID_FALL_OF_THE_LICH_KING);
+    }
+};
 
 void AddSC_boss_the_lich_king()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_the_lich_king_icc";
-    pNewScript->GetAI = &GetAI_boss_the_lich_king_icc;
+    pNewScript->GetAI = &GetNewAIInstance<boss_the_lich_king_iccAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<PlayMovie>("spell_play_movie");
 }
