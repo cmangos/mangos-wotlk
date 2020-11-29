@@ -17,8 +17,25 @@
 */
 
 #include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
+
+enum
+{
+    SPELL_SHAMAN_ELEMENTAL_MASTERY = 16166,
+};
+
+struct ItemShamanT10Elemental2PBonus : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (Unit* target = aura->GetTarget())
+            if (target->IsPlayer())
+                static_cast<Player*>(target)->ModifyCooldown(SPELL_SHAMAN_ELEMENTAL_MASTERY, -aura->GetAmount());
+        return SPELL_AURA_PROC_OK;
+    }
+};
 
 void LoadShamanScripts()
 {
-
+    RegisterAuraScript<ItemShamanT10Elemental2PBonus>("spell_item_shaman_t10_elemental_2p_bonus");
 }

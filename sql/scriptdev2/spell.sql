@@ -233,6 +233,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (12576,'spell_arcane_concentration'),
 (12577,'spell_arcane_concentration');
 
+-- Shaman
+INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(70811,'spell_item_shaman_t10_elemental_2p_bonus');
+
 -- Battleground and Outdoor PvP
 -- Alterac Valley
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
