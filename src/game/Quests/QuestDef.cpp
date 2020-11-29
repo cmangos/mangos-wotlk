@@ -285,6 +285,26 @@ bool Quest::IsAllowedInRaid() const
     return sWorld.getConfig(CONFIG_BOOL_QUEST_IGNORE_RAID);
 }
 
+bool Quest::IsRaidQuest(Difficulty difficulty) const
+{
+    switch (Type)
+    {
+        case QUEST_TYPE_RAID:
+            return true;
+        case QUEST_TYPE_RAID_10:
+            return !(difficulty & RAID_DIFFICULTY_MASK_25MAN);
+        case QUEST_TYPE_RAID_25:
+            return difficulty & RAID_DIFFICULTY_MASK_25MAN;
+        default:
+            break;
+    }
+
+    if ((m_QuestFlags & QUEST_FLAGS_RAID) != 0)
+        return true;
+
+    return false;
+}
+
 uint32 Quest::CalculateRewardHonor(uint32 level) const
 {
     if (level > GT_MAX_LEVEL)

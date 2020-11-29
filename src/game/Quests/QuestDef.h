@@ -38,6 +38,7 @@ class ObjectMgr;
 #define QUEST_DEPLINK_COUNT 10
 #define QUEST_REPUTATIONS_COUNT 5
 #define QUEST_EMOTE_COUNT 4
+#define QUEST_PVP_KILL_SLOT 0
 
 enum QuestFailedReasons
 {
@@ -175,6 +176,7 @@ enum QuestSpecialFlags
     QUEST_SPECIAL_FLAG_SPEAKTO              = 0x010,        // Internal flag computed only
     QUEST_SPECIAL_FLAG_KILL_OR_CAST         = 0x020,        // Internal flag computed only
     QUEST_SPECIAL_FLAG_TIMED                = 0x040,        // Internal flag computed only
+    QUEST_SPECIAL_FLAGS_PLAYER_KILL         = 0x080,        // Internal flag computed only
 };
 
 #define QUEST_SPECIAL_FLAG_DB_ALLOWED (QUEST_SPECIAL_FLAG_REPEATABLE | QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT | QUEST_SPECIAL_FLAG_MONTHLY)
@@ -275,6 +277,7 @@ class Quest
         bool   IsDailyOrWeekly() const { return (m_QuestFlags & (QUEST_FLAGS_DAILY | QUEST_FLAGS_WEEKLY)) != 0; }
         bool   IsAutoAccept() const { return (m_QuestFlags & QUEST_FLAGS_AUTO_ACCEPT) != 0; }
         bool   IsAllowedInRaid() const;
+        bool   IsRaidQuest(Difficulty difficulty) const;
 
         // quest can be fully deactivated and will not be available for any player
         void SetQuestActiveState(bool state) { m_isActive = state; }
@@ -396,7 +399,7 @@ struct QuestStatusData
 {
     QuestStatusData()
         : m_status(QUEST_STATUS_NONE), m_rewarded(false),
-          m_explored(false), m_timer(0), uState(QUEST_NEW)
+          m_explored(false), m_timer(0), uState(QUEST_NEW), m_playerCount(0)
     {
         memset(m_itemcount, 0, QUEST_ITEM_OBJECTIVES_COUNT * sizeof(uint32));
         memset(m_creatureOrGOcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
@@ -410,5 +413,6 @@ struct QuestStatusData
 
     uint32 m_itemcount[ QUEST_ITEM_OBJECTIVES_COUNT ];
     uint32 m_creatureOrGOcount[ QUEST_OBJECTIVES_COUNT ];
+    uint32 m_playerCount;
 };
 #endif

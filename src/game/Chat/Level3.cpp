@@ -5140,6 +5140,11 @@ bool ChatHandler::HandleQuestCompleteCommand(char* args)
         }
     }
 
+    // player kills
+    if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_PLAYER_KILL))
+        if (uint32 reqPlayers = pQuest->GetPlayersSlain())
+            player->KilledPlayerCreditForQuest(reqPlayers, pQuest);
+
     // If the quest requires reputation to complete
     if (uint32 repFaction = pQuest->GetRepObjectiveFaction())
     {

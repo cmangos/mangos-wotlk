@@ -1526,7 +1526,12 @@ static void RewardGroupAtKill_helper(Player* pGroupGuy, Unit* pVictim, uint32 co
 {
     // honor can be in PvP and !PvP (racial leader) cases (for alive)
     if (pGroupGuy->IsAlive())
+    {
         pGroupGuy->RewardHonor(pVictim, count);
+        // Send player killcredit for quests with PlayerSlain
+        if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            pGroupGuy->KilledPlayerCredit();
+    }
 
     // xp and reputation only in !PvP case
     if (!PvP)

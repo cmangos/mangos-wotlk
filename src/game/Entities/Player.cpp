@@ -14059,7 +14059,7 @@ bool Player::CanCompleteQuest(uint32 quest_id) const
         }
     }
 
-    if (qInfo->HasSpecialFlag(QuestSpecialFlags(QUEST_SPECIAL_FLAG_KILL_OR_CAST | QUEST_SPECIAL_FLAG_SPEAKTO)))
+    if (qInfo->HasSpecialFlag(QuestSpecialFlags(QUEST_SPECIAL_FLAG_KILL_OR_CAST | QUEST_SPECIAL_FLAG_SPEAKTO | QUEST_SPECIAL_FLAGS_PLAYER_KILL)))
     {
         for (int i = 0; i < QUEST_OBJECTIVES_COUNT; ++i)
         {
@@ -14070,6 +14070,10 @@ bool Player::CanCompleteQuest(uint32 quest_id) const
                 return false;
         }
     }
+
+    if (qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_PLAYER_KILL))
+        if (qInfo->GetPlayersSlain() != 0 && q_status.m_playerCount < qInfo->GetPlayersSlain())
+            return false;
 
     if (qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAG_EXPLORATION_OR_EVENT) && !q_status.m_explored)
         return false;
@@ -14214,6 +14218,9 @@ void Player::AddQuest(Quest const* pQuest, Object* questGiver)
         for (unsigned int& i : questStatusData.m_creatureOrGOcount)
             i = 0;
     }
+
+    if (pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_PLAYER_KILL))
+        questStatusData.m_playerCount = 0;
 
     if (pQuest->GetRepObjectiveFaction())
         if (FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->GetRepObjectiveFaction()))
@@ -15358,6 +15365,57 @@ void Player::KilledMonsterCredit(uint32 entry, ObjectGuid guid)
     }
 }
 
+void Player::KilledPlayerCredit(uint16 count)
+{
+    for (uint8 i = 0; i < MAX_QUEST_LOG_SIZE; ++i)
+    {
+        uint32 questid = GetQuestSlotQuestId(i);
+        if (!questid)
+            continue;
+
+        Quest const* qInfo = sObjectMgr.GetQuestTemplate(questid);
+        if (!qInfo)
+            continue;
+        // just if !ingroup || !noraidgroup || raidgroup
+        QuestStatusData& q_status = mQuestStatus[questid];
+        if (q_status.uState == QUEST_STATUS_INCOMPLETE && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->IsRaidQuest(GetMap()->GetDifficulty())))
+        {
+            // PvP Killing quest require player to be in same zone as quest zone (only 2 quests so no doubt)
+            if (qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_PLAYER_KILL) && GetZoneId() == static_cast<uint32>(qInfo->GetZoneOrSort()))
+            {
+                KilledPlayerCreditForQuest(count, qInfo);
+                break; // there is only one quest per zone
+            }
+        }
+    }
+}
+
+void Player::KilledPlayerCreditForQuest(uint16 count, Quest const* quest)
+{
+    uint32 const questId = quest->GetQuestId();
+    auto it = mQuestStatus.find(questId);
+    if (it == mQuestStatus.end())
+        return;
+    QuestStatusData& questStatus = it->second;
+
+    uint16 curKill = questStatus.m_playerCount;
+    uint32 reqKill = quest->GetPlayersSlain();
+
+    if (curKill < reqKill)
+    {
+        count = std::min<uint16>(reqKill - curKill, count);
+        questStatus.m_playerCount = curKill + count;
+
+        if (questStatus.uState != QUEST_NEW)
+            questStatus.uState = QUEST_CHANGED;
+
+        SendQuestUpdateAddPlayer(quest, curKill + count);
+    }
+
+    if (CanCompleteQuest(questId))
+        CompleteQuest(questId);
+}
+
 void Player::CastedCreatureOrGO(uint32 entry, ObjectGuid guid, uint32 spell_id, bool original_caster)
 {
     bool isCreature = guid.IsCreatureOrVehicle();
@@ -15772,6 +15830,21 @@ void Player::SendQuestUpdateAddCreatureOrGo(Quest const* pQuest, ObjectGuid guid
     uint16 slot = FindQuestSlot(pQuest->GetQuestId());
     if (slot < MAX_QUEST_LOG_SIZE)
         SetQuestSlotCounter(slot, uint8(creatureOrGO_idx), uint16(count));
+}
+
+void Player::SendQuestUpdateAddPlayer(Quest const* quest, uint32 count)
+{
+    MANGOS_ASSERT(count < 65536 && "Quest player count store is limited to 16 bits 2^16 = 65536 (0..65535)");
+
+    WorldPacket data(SMSG_QUESTUPDATE_ADD_PVP_KILL, (3 * 4));
+    data << uint32(quest->GetQuestId());
+    data << uint32(count);
+    data << uint32(quest->GetPlayersSlain());
+    GetSession()->SendPacket(data);
+
+    uint16 slot = FindQuestSlot(quest->GetQuestId());
+    if (slot < MAX_QUEST_LOG_SIZE)
+        SetQuestSlotCounter(slot, QUEST_PVP_KILL_SLOT, count);
 }
 
 void Player::SendQuestGiverStatusMultiple() const
@@ -21625,6 +21698,9 @@ void Player::RewardSinglePlayerAtKill(Unit* pVictim)
 {
     // honor can be in PvP and !PvP (racial leader) cases
     RewardHonor(pVictim, 1);
+    // Send player killcredit for quests with PlayerSlain
+    if (pVictim->GetTypeId() == TYPEID_PLAYER)
+        KilledPlayerCredit();
 
     // xp and reputation only in !PvP case
     if ((!pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) || (pVictim->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && pVictim->IsVehicle())) && pVictim->GetTypeId() == TYPEID_UNIT)
