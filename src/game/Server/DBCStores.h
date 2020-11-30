@@ -59,6 +59,9 @@ ChatChannelsEntry const* GetChatChannelsEntryFor(const std::string& name, uint32
 
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);
 
+CharacterFacialHairStylesEntry const* GetCharFacialHairEntry(uint8 race, uint8 gender, uint8 facialHairId);
+CharSectionsEntry const* GetCharSectionEntry(uint8 race, CharSectionType genType, uint8 gender, uint8 type, uint8 color);
+
 bool MapCoordinateVsZoneCheck(float x, float y, uint32 mapid, uint32 zone);
 bool Zone2MapCoordinates(float& x, float& y, uint32 zone);
 bool Map2ZoneCoordinates(float& x, float& y, uint32 zone);
@@ -112,6 +115,8 @@ extern DBCStorage <BattlemasterListEntry>        sBattlemasterListStore;
 extern DBCStorage <CharStartOutfitEntry>         sCharStartOutfitStore;
 extern DBCStorage <CharTitlesEntry>              sCharTitlesStore;
 extern DBCStorage <ChatChannelsEntry>            sChatChannelsStore;
+extern DBCStorage <CharacterFacialHairStylesEntry>  sCharacterFacialHairStylesStore;
+extern DBCStorage <CharSectionsEntry>            sCharSectionsStore;
 extern DBCStorage <ChrClassesEntry>              sChrClassesStore;
 extern DBCStorage <ChrRacesEntry>                sChrRacesStore;
 extern DBCStorage <CinematicCameraEntry>         sCinematicCameraStore;
