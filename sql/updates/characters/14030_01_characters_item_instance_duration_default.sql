@@ -1,0 +1,3 @@
+ALTER TABLE character_db_version CHANGE COLUMN required_14025_00_characters_item_instance_data_drop required_14030_01_characters_item_instance_duration_default bit;
+
+ALTER TABLE item_instance ALTER duration SET DEFAULT 0;
