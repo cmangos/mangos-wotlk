@@ -312,29 +312,8 @@ void WorldSession::HandleMovementOpcodes(WorldPacket& recv_data)
     recv_data >> movementInfo;
     /*----------------*/
 
-    if (!VerifyMovementInfo(movementInfo, guid))
+    if (!ProcessMovementInfo(movementInfo, mover, plMover, recv_data))
         return;
-
-    if (!mover->movespline->Finalized())
-        return;
-
-    // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
-    if (opcode == MSG_MOVE_FALL_LAND && plMover && !plMover->IsTaxiFlying())
-        plMover->HandleFall(movementInfo);
-
-    // Remove auras that should be removed at landing on ground or water
-    if (opcode == MSG_MOVE_FALL_LAND || opcode == MSG_MOVE_START_SWIM)
-        mover->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_LANDING); // Parachutes
-
-    /* process position-change */
-    HandleMoverRelocation(movementInfo);
-
-    // just landed from a knockback? update status
-    if (plMover && plMover->IsLaunched() && (recv_data.GetOpcode() == MSG_MOVE_FALL_LAND || recv_data.GetOpcode() == MSG_MOVE_START_SWIM))
-        plMover->SetLaunched(false);
-
-    if (plMover)
-        plMover->UpdateFallInformationIfNeed(movementInfo, opcode);
 
     WorldPacket data(opcode, recv_data.size());
     data << mover->GetPackGUID();             // write guid
@@ -349,11 +328,12 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
 
     /* extract packet */
     ObjectGuid guid;
+    uint32 counter;
     MovementInfo movementInfo;
     float  newspeed;
 
     recv_data >> guid.ReadAsPacked();
-    recv_data >> Unused<uint32>();                          // counter or moveEvent
+    recv_data >> counter;                                   // counter or moveEvent
     recv_data >> movementInfo;
     recv_data >> newspeed;
 
@@ -394,6 +374,15 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
             sLog.outError("WorldSession::HandleForceSpeedChangeAck: Unknown move type opcode: %u", opcode);
             return;
     }
+
+    if (!ProcessMovementInfo(movementInfo, _player, _player, recv_data))
+        return;
+
+    const SpeedOpcodePair& speedOpcodes = SetSpeed2Opc_table[move_type];
+    WorldPacket data(speedOpcodes[2], 18);
+    data << guid.WriteAsPacked();
+    data << movementInfo;
+    data << newspeed;
 
     // skip all forced speed changes except last and unexpected
     // in run/mounted case used one ACK and it must be skipped.m_forced_speed_changes[MOVE_RUN} store both.
@@ -491,10 +480,8 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
     recv_data >> Unused<uint32>();                          // knockback packets counter
     recv_data >> movementInfo;
 
-    if (!VerifyMovementInfo(movementInfo, guid))
+    if (!ProcessMovementInfo(movementInfo, _player, _player, recv_data))
         return;
-
-    HandleMoverRelocation(movementInfo);
 
     if (mover->IsPlayer() && static_cast<Player*>(mover)->IsFreeFlying())
         mover->SetCanFly(true);
@@ -526,30 +513,39 @@ void WorldSession::SendKnockBack(Unit* who, float angle, float horizontalSpeed, 
     IncrementOrderCounter();
 }
 
-void WorldSession::HandleMoveHoverAck(WorldPacket& recv_data)
+void WorldSession::HandleMoveFlagChangeOpcode(WorldPacket& recv_data)
 {
-    DEBUG_LOG("CMSG_MOVE_HOVER_ACK");
+    DEBUG_LOG("%s", recv_data.GetOpcodeName());
 
-    ObjectGuid guid;                                        // guid - unused
+    ObjectGuid guid;
+    uint32 counter;
     MovementInfo movementInfo;
+    uint32 isApplied;
 
     recv_data >> guid.ReadAsPacked();
-    recv_data >> Unused<uint32>();                          // unk1
+    recv_data >> counter;
     recv_data >> movementInfo;
-    recv_data >> Unused<uint32>();                          // unk2
-}
+    recv_data >> isApplied;
 
-void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
-{
-    DEBUG_LOG("CMSG_MOVE_WATER_WALK_ACK");
+    if (!ProcessMovementInfo(movementInfo, _player, _player, recv_data))
+        return;
 
-    ObjectGuid guid;                                        // guid - unused
-    MovementInfo movementInfo;
+    Opcodes response = MSG_NULL_ACTION;
 
-    recv_data >> guid.ReadAsPacked();
-    recv_data >> Unused<uint32>();                          // unk1
-    recv_data >> movementInfo;
-    recv_data >> Unused<uint32>();                          // unk2
+    switch (recv_data.GetOpcode())
+    {
+        case CMSG_MOVE_HOVER_ACK: response = MSG_MOVE_HOVER; break;
+        case CMSG_MOVE_FEATHER_FALL_ACK: response = MSG_MOVE_FEATHER_FALL; break;
+        case CMSG_MOVE_WATER_WALK_ACK: response = MSG_MOVE_WATER_WALK; break;
+        case CMSG_MOVE_SET_CAN_FLY_ACK: response = MSG_MOVE_UPDATE_CAN_FLY; break;
+    }
+
+    Unit* mover = _player->GetMover();
+
+    WorldPacket data(response, 8);
+    data << guid.WriteAsPacked();
+    data << movementInfo;
+    mover->SendMessageToSetExcept(data, _player);
 }
 
 void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)
@@ -676,6 +672,31 @@ void WorldSession::HandleMoveTimeSkippedOpcode(WorldPacket& recv_data)
     data << mover->GetPackGUID();
     data << timeSkipped;
     mover->SendMessageToSetExcept(data, _player);
+}
+
+bool WorldSession::ProcessMovementInfo(MovementInfo& movementInfo, Unit* mover, Player* plMover, WorldPacket& recv_data)
+{
+    if (!VerifyMovementInfo(movementInfo, mover->GetObjectGuid()))
+        return false;
+
+    if (!mover->movespline->Finalized())
+        return false;
+
+    // fall damage generation (ignore in flight case that can be triggered also at lags in moment teleportation to another map).
+    if (recv_data.GetOpcode() == MSG_MOVE_FALL_LAND && plMover && !plMover->IsTaxiFlying())
+        plMover->HandleFall(movementInfo);
+
+    /* process position-change */
+    HandleMoverRelocation(movementInfo);
+
+    // just landed from a knockback? update status
+    if (plMover && plMover->IsLaunched() && (recv_data.GetOpcode() == MSG_MOVE_FALL_LAND || recv_data.GetOpcode() == MSG_MOVE_START_SWIM))
+        plMover->SetLaunched(false);
+
+    if (plMover && recv_data.GetOpcode() == CMSG_MOVE_KNOCK_BACK_ACK)
+        plMover->UpdateFallInformationIfNeed(movementInfo, recv_data.GetOpcode());
+
+    return true;
 }
 
 void WorldSession::HandleTimeSyncResp(WorldPacket& recvData)

@@ -4756,49 +4756,59 @@ void Player::DeleteOldCharacters(uint32 keepDays)
 
 void Player::SetWaterWalk(bool enable)
 {
+    if (!IsInWorld()) // is sent on add to map
+        return;
+
+    auto const counter = GetSession()->GetOrderCounter();
+
     WorldPacket data(enable ? SMSG_MOVE_WATER_WALK : SMSG_MOVE_LAND_WALK, GetPackGUID().size() + 4);
     data << GetPackGUID();
-    data << uint32(0);
+    data << counter;
     GetSession()->SendPacket(data);
+    GetSession()->IncrementOrderCounter();
 }
 
 void Player::SetLevitate(bool enable)
 {
-    WorldPacket data;
-    if (enable)
-        data.Initialize(SMSG_MOVE_GRAVITY_DISABLE, 12);
-    else
-        data.Initialize(SMSG_MOVE_GRAVITY_ENABLE, 12);
+    if (!IsInWorld()) // is sent on add to map
+        return;
 
-    data << GetPackGUID();
-    data << uint32(0);                                      // unk
-    SendMessageToSet(data, true);
+    auto const counter = GetSession()->GetOrderCounter();
 
-    data.Initialize(MSG_MOVE_GRAVITY_CHNG, 64);
+    WorldPacket data(enable ? SMSG_MOVE_GRAVITY_DISABLE : SMSG_MOVE_GRAVITY_ENABLE, GetPackGUID().size() + 4);
     data << GetPackGUID();
-    m_movementInfo.Write(data);
-    SendMessageToSet(data, false);
+    data << counter;
+    GetSession()->SendPacket(data);
+    GetSession()->IncrementOrderCounter();
 }
 
 void Player::SetCanFly(bool enable)
 {
+    if (!IsInWorld()) // is sent on add to map
+        return;
+
+    auto const counter = GetSession()->GetOrderCounter();
+
     WorldPacket data(enable ? SMSG_MOVE_SET_CAN_FLY : SMSG_MOVE_UNSET_CAN_FLY, GetPackGUID().size() + 4);
     data << GetPackGUID();
-    data << uint32(0);
+    data << counter;
     GetSession()->SendPacket(data);
+    GetSession()->IncrementOrderCounter();
 }
 
 void Player::SetFeatherFall(bool enable)
 {
-    WorldPacket data;
-    if (enable)
-        data.Initialize(SMSG_MOVE_FEATHER_FALL, 8 + 4);
-    else
-        data.Initialize(SMSG_MOVE_NORMAL_FALL, 8 + 4);
+    if (!IsInWorld()) // is sent on add to map
+        return;
+
+    auto const counter = GetSession()->GetOrderCounter();
+
+    WorldPacket data(enable ? SMSG_MOVE_FEATHER_FALL : SMSG_MOVE_NORMAL_FALL, GetPackGUID().size() + 4);
 
     data << GetPackGUID();
-    data << uint32(0);
-    SendMessageToSet(data, true);
+    data << counter;
+    GetSession()->SendPacket(data);
+    GetSession()->IncrementOrderCounter();
 
     // start fall from current height
     if (!enable)
@@ -4807,15 +4817,17 @@ void Player::SetFeatherFall(bool enable)
 
 void Player::SetHover(bool enable)
 {
-    WorldPacket data;
-    if (enable)
-        data.Initialize(SMSG_MOVE_SET_HOVER, 8 + 4);
-    else
-        data.Initialize(SMSG_MOVE_UNSET_HOVER, 8 + 4);
+    if (!IsInWorld()) // is sent on add to map
+        return;
+
+    WorldPacket data(enable ? SMSG_MOVE_SET_HOVER : SMSG_MOVE_UNSET_HOVER, GetPackGUID().size() + 4);
+
+    auto const counter = GetSession()->GetOrderCounter();
 
     data << GetPackGUID();
-    data << uint32(0);
-    SendMessageToSet(data, true);
+    data << counter;
+    GetSession()->SendPacket(data);
+    GetSession()->IncrementOrderCounter();
 }
 
 /* Preconditions:
