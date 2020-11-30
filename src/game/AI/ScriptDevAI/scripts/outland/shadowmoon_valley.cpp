@@ -3312,6 +3312,7 @@ struct npc_dragonmaw_racerAI : public ScriptedAI
 
     void FailRace()
     {
+        m_creature->RemoveAurasDueToSpell(dragonmawRacesScriptInfo[m_racerId].burstSpellId);
         if (Player* player = m_creature->GetMap()->GetPlayer(m_playerRacerGuid))
             player->FailQuest(m_questId);
         m_creature->ForcedDespawn();
@@ -3345,6 +3346,7 @@ struct npc_dragonmaw_racerAI : public ScriptedAI
         m_creature->SetLevitate(false);
         m_creature->SetWalk(true);
         m_uiAttackTimer = 0;
+        m_creature->RemoveAurasDueToSpell(dragonmawRacesScriptInfo[m_racerId].burstSpellId);
         if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_playerRacerGuid))
         {
             DoScriptText(dragonmawRacesScriptInfo[m_racerId].winText, m_creature, pPlayer);
