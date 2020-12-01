@@ -191,6 +191,26 @@ void ObjectMessageDistDeliverer::Visit(CameraMapType& m)
     }
 }
 
+void SpellMessageDestLocDeliverer::Visit(CameraMapType& m)
+{
+    for (auto& iter : m)
+    {
+        Player* player = iter.getSource()->GetOwner();
+        if (i_accumulate && !player->HaveAtClient(&i_object))
+            continue;
+
+        if (!i_accumulate && i_guids.find(player->GetObjectGuid()) != i_guids.end())
+            continue;
+
+        if (WorldSession* session = player->GetSession())
+        {
+            session->SendPacket(i_message);
+            if (i_accumulate)
+                i_guids.insert(player->GetObjectGuid());
+        }
+    }
+}
+
 template<class T>
 void ObjectUpdater::Visit(GridRefManager<T>& m)
 {

@@ -939,6 +939,10 @@ class WorldObject : public Object
         void SetDebugFlag(CMDebugFlags flag) { m_debugFlags |= uint64(flag); }
         void ClearDebugFlag(CMDebugFlags flag) { m_debugFlags &= ~(uint64(flag)); }
 
+        // Spell system
+        uint8 GetDestLocCounter() { return m_destLocCounter; }
+        void IncrementDestLocCounter() { m_destLocCounter++; }
+
     protected:
         explicit WorldObject();
 
@@ -976,6 +980,9 @@ class WorldObject : public Object
         ViewPoint m_viewPoint;
         bool m_isActiveObject;
         uint64 m_debugFlags;
+
+        // Spell system
+        uint8 m_destLocCounter;
 };
 
 #endif

@@ -4291,9 +4291,14 @@ void Spell::SendSpellGo()
         data << uint32(0);                                  // overrides previous field if > 0 and violencelevel client cvar < 2
     }
 
+    bool sendDestLoc = false;
+    uint32 destLocCounter = 0;
     if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
-        data << uint8(0);                                   // The value increase for each time, can remind of a cast count for the spell
+        sendDestLoc = true;
+        destLocCounter = m_caster->GetDestLocCounter();
+        m_caster->IncrementDestLocCounter();
+        data << uint8(destLocCounter);                                   // The value increase for each time, can remind of a cast count for the spell
     }
 
     if (m_targets.m_targetMask & TARGET_FLAG_VISUAL_CHAIN)  // probably used (or can be used) with CAST_FLAG_VISUAL_CHAIN flag
@@ -4307,7 +4312,30 @@ void Spell::SendSpellGo()
         //}
     }
 
-    m_caster->SendMessageToSet(data, true);
+    if (!sendDestLoc)
+        m_caster->SendMessageToSet(data, true);
+    else
+    {
+        WorldPacket destLocData(SMSG_NOTIFY_DEST_LOC_SPELL_CAST);
+        destLocData << m_caster->GetObjectGuid();
+        destLocData << m_targets.getDestTransportGuid();
+        destLocData << m_spellInfo->Id;
+        destLocData << m_targets.m_srcPos.x << m_targets.m_srcPos.y << m_targets.m_srcPos.z;
+        destLocData << m_targets.m_destPos.x << m_targets.m_destPos.y << m_targets.m_destPos.z;
+        destLocData << float(m_targets.getElevation());
+        destLocData << float(m_targets.getSpeed());
+        destLocData << uint32(m_delayMoment);
+        destLocData << uint32(destLocCounter);
+        if (m_cast_count > 0)
+            destLocData << uint32(m_cast_count);
+
+        MaNGOS::SpellMessageDestLocDeliverer notifier(*static_cast<WorldObject*>(m_caster), data); // broadcast around caster normal packet to those who see caster
+        Cell::VisitAllObjects(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetMap(), notifier, m_caster->GetVisibilityData().GetVisibilityDistance());
+        notifier.StopAccumulating(); // broadcast around destination to those who dont see caster
+        float destX = m_targets.m_destPos.x, destY = m_targets.m_destPos.y;
+        // TODO: Add transport coords transformation to real space for grid search
+        Cell::VisitAllObjects(destX, destY, m_caster->GetMap(), notifier, m_caster->GetVisibilityData().GetVisibilityDistance());
+    }
 }
 
 void Spell::WriteAmmoToPacket(WorldPacket& data) const

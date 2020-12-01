@@ -1200,7 +1200,7 @@ enum Opcodes
     CMSG_DUMP_OBJECTS                               = 0x48B,
     SMSG_DUMP_OBJECTS_DATA                          = 0x48C,
     CMSG_DISMISS_CRITTER                            = 0x48D,
-    SMSG_NOTIFY_DEST_LOC_SPELL_CAST                 = 0x48E, // TODO: Implement
+    SMSG_NOTIFY_DEST_LOC_SPELL_CAST                 = 0x48E,
     CMSG_AUCTION_LIST_PENDING_SALES                 = 0x48F,
     SMSG_AUCTION_LIST_PENDING_SALES                 = 0x490,
     SMSG_MODIFY_COOLDOWN                            = 0x491,

@@ -112,6 +112,18 @@ namespace MaNGOS
         template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
     };
 
+    struct SpellMessageDestLocDeliverer
+    {
+        WorldObject const& i_object;
+        WorldPacket const& i_message;
+        bool i_accumulate;
+        GuidSet i_guids;
+        SpellMessageDestLocDeliverer(WorldObject const& obj, WorldPacket const& msg) : i_object(obj), i_message(msg), i_accumulate(true) {}
+        void Visit(CameraMapType& m);
+        template<class SKIP> void Visit(GridRefManager<SKIP>&) {}
+        void StopAccumulating() { i_accumulate = false; }
+    };
+
     struct ObjectUpdater
     {
         ObjectUpdater(WorldObjectUnSet& otus, const uint32& diff) : m_objectToUpdateSet(otus), m_timeDiff(diff) {}

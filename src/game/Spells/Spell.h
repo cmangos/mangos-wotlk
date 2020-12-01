@@ -180,6 +180,8 @@ class SpellCastTargets
         Item* getItemTarget() const { return m_itemTarget; }
         uint32 getItemTargetEntry() const { return m_itemTargetEntry; }
 
+        ObjectGuid getDestTransportGuid() const { return m_destTransportGUID; }
+
         void setTradeItemTarget(Player* caster);
 
         void updateTradeSlotItem()
