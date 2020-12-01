@@ -22532,6 +22532,18 @@ bool Player::IsBaseRuneSlotsOnCooldown(RuneType runeType) const
     return true;
 }
 
+uint32 Player::GetRuneBaseCooldown(uint8 index)
+{
+    uint8 rune = GetBaseRune(index);
+    uint32 cooldown = RUNE_COOLDOWN;
+    AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    for (auto ModPowerRegenPCTAura : ModPowerRegenPCTAuras)
+        if (ModPowerRegenPCTAura->GetModifier()->m_miscvalue == POWER_RUNE && ModPowerRegenPCTAura->GetMiscBValue() == GetCurrentRune(rune))
+            cooldown = cooldown * (ModPowerRegenPCTAura->GetModifier()->m_amount + 100) / 100;
+
+    return cooldown;
+}
+
 Item* Player::ConvertItem(Item* item, uint32 newItemId)
 {
     uint16 pos = item->GetPos();

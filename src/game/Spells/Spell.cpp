@@ -4191,24 +4191,6 @@ void Spell::SendSpellStart() const
 
     data << m_targets;
 
-    if (castFlags & CAST_FLAG_PREDICTED_POWER)              // predicted power
-        data << uint32(0);
-
-    if (castFlags & CAST_FLAG_PREDICTED_RUNES)              // predicted runes
-    {
-        uint8 v1 = 0;// m_runesState;
-        uint8 v2 = 0;//((Player*)m_caster)->GetRunesState();
-        data << uint8(v1);                                  // runes state before
-        data << uint8(v2);                                  // runes state after
-        for (uint8 i = 0; i < MAX_RUNES; ++i)
-        {
-            uint8 m = (1 << i);
-            if (m & v1)                                     // usable before...
-                if (!(m & v2))                              // ...but on cooldown now...
-                    data << uint8(0);                       // some unknown byte (time?)
-        }
-    }
-
     if (castFlags & CAST_FLAG_AMMO)                         // projectile info
         WriteAmmoToPacket(data);
 
@@ -4246,7 +4228,7 @@ void Spell::SendSpellGo()
         castFlags |= CAST_FLAG_PREDICTED_RUNES;             // rune cooldowns list
     }
 
-    if (m_powerCost)
+    if (m_powerCost && m_spellInfo->powerType != POWER_HEALTH)
         castFlags |= CAST_FLAG_PREDICTED_POWER;             // all powerCost spells have this
 
     if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) && (m_targets.getSpeed() > 0.0f))
@@ -4274,16 +4256,19 @@ void Spell::SendSpellGo()
 
     if (castFlags & CAST_FLAG_PREDICTED_RUNES)              // predicted runes
     {
-        uint8 v1 = m_runesState;
-        uint8 v2 =  m_caster->getClass() == CLASS_DEATH_KNIGHT ? ((Player*)m_caster)->GetRunesState() : 0;
-        data << uint8(v1);                                  // runes state before
-        data << uint8(v2);                                  // runes state after
+        uint8 runeMaskInitial = m_runesState;
+        uint8 runeMaskAfterCast = (m_caster->getClass() == CLASS_DEATH_KNIGHT ? static_cast<Player*>(m_caster)->GetRunesState() : 0);
+        data << uint8(runeMaskInitial);                                  // runes state before
+        data << uint8(runeMaskAfterCast);                                  // runes state after
         for (uint8 i = 0; i < MAX_RUNES; ++i)
         {
-            uint8 m = (1 << i);
-            if (m & v1)                                     // usable before...
-                if (!(m & v2))                              // ...but on cooldown now...
-                    data << uint8(0);                       // some unknown byte (time?)
+            uint8 mask = (1 << i);
+            if (mask & runeMaskInitial && (!(mask & runeMaskAfterCast))) // usable before...but on cooldown now...
+            {
+                // float casts ensure the division is performed on floats as we need float result
+                float baseCd = float(static_cast<Player*>(m_caster)->GetRuneBaseCooldown(i));
+                data << uint8((baseCd - float(static_cast<Player*>(m_caster)->GetRuneCooldown(i))) / baseCd * 255);
+            }
         }
     }
 
