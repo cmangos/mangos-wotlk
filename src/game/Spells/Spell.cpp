@@ -596,6 +596,9 @@ void Spell::FillTargetMap()
                 if (effectTargetType == TARGET_TYPE_UNIT_DEST) // special case - no unit target, but need to check for valid units
                     if (SpellTargetInfoTable[targetA].type != TARGET_TYPE_UNIT && SpellTargetInfoTable[targetB].type != TARGET_TYPE_UNIT) // no fill for unit out of targets
                         FillFromTargetFlags(targetingData, SpellEffectIndex(i)); // inefficient call, very rare, less code duplicity
+                if (effectTargetType == TARGET_TYPE_LOCATION_TRAJ && (m_targets.m_targetMask & TARGET_FLAG_SOURCE_LOCATION) == 0)
+                    if (WorldObject* caster = GetCastingObject())
+                        m_targets.setSource(caster->GetPositionX(), caster->GetPositionY(), caster->GetPositionZ());
             }
         }
 
@@ -608,6 +611,7 @@ void Spell::FillTargetMap()
                 break;
             case TARGET_TYPE_LOCATION_DEST:
             case TARGET_TYPE_SPECIAL_DEST:
+            case TARGET_TYPE_LOCATION_TRAJ:
                 OnDestTarget();
                 AddDestExecution(SpellEffectIndex(i));
                 break;
@@ -8136,6 +8140,7 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
         switch (data.type)
         {
             case TARGET_TYPE_LOCATION_DEST:
+            case TARGET_TYPE_LOCATION_TRAJ:
                 if (data.filter == TARGET_SCRIPT) // TODO: Fix this whole shebang
                     radius = 100.f;
                 else

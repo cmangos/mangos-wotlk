@@ -368,6 +368,11 @@ void SpellTargetMgr::Initialize()
                     data.implicitType[effIdx] = TARGET_TYPE_GAMEOBJECT;
                     continue;
                 }
+                if (SpellTargetInfoTable[targetA].type == TARGET_TYPE_LOCATION_TRAJ || SpellTargetInfoTable[targetB].type == TARGET_TYPE_LOCATION_TRAJ)
+                {
+                    data.implicitType[effIdx] = TARGET_TYPE_LOCATION_TRAJ;
+                    continue;
+                }
                 if ((SpellTargetInfoTable[targetA].type == TARGET_TYPE_LOCATION_DEST && SpellTargetInfoTable[targetB].type == TARGET_TYPE_UNIT)
                         || (SpellTargetInfoTable[targetA].type == TARGET_TYPE_UNIT && SpellTargetInfoTable[targetB].type == TARGET_TYPE_LOCATION_DEST))
                 {
@@ -453,6 +458,7 @@ void SpellTargetMgr::Initialize()
                                 {
                                     case TARGET_TYPE_LOCATION_SRC:
                                     case TARGET_TYPE_LOCATION_DEST:
+                                    case TARGET_TYPE_LOCATION_TRAJ:
                                     case TARGET_TYPE_LOCK:
                                     case TARGET_TYPE_CORPSE: ignore = true; break; // always ignore subsequent
                                     case TARGET_TYPE_GAMEOBJECT:
@@ -543,6 +549,7 @@ bool SpellTargetMgr::CanEffectBeFilledWithMask(uint32 spellId, uint32 effIdx, ui
     {
         case TARGET_TYPE_SPECIAL_DEST:
         case TARGET_TYPE_LOCATION_DEST: return bool(mask & TARGET_FLAG_DEST_LOCATION);
+        case TARGET_TYPE_LOCATION_TRAJ: return bool(mask & (TARGET_FLAG_SOURCE_LOCATION | TARGET_FLAG_DEST_LOCATION));
         case TARGET_TYPE_GAMEOBJECT: return bool(mask & (TARGET_FLAG_GAMEOBJECT | TARGET_FLAG_LOCKED));
         case TARGET_TYPE_UNIT_DEST: return bool(mask & (TARGET_FLAG_UNIT_ALLY | TARGET_FLAG_UNIT | TARGET_FLAG_UNIT_ENEMY | TARGET_FLAG_UNIT_DEAD | TARGET_FLAG_DEST_LOCATION));
         case TARGET_TYPE_PLAYER:
