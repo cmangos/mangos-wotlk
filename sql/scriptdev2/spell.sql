@@ -128,6 +128,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(43768,'spell_flying_machine_controls'),
 (47028,'spell_taunka_face_me'),
 (47431,'spell_capture_jormungar_spawn'),
 (47435,'spell_scrape_corrosive_spit'),

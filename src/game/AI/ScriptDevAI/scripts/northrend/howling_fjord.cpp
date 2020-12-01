@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Howling_Fjord
 SD%Complete: ?
-SDComment: Quest support: 11154, 11241, 11343, 11344, 11464, 11476.
+SDComment: Quest support: 11154, 11241, 11343, 11344, 11391, 11464, 11476
 SDCategory: Howling Fjord
 EndScriptData */
 
@@ -30,10 +30,13 @@ npc_king_ymiron
 npc_firecrackers_bunny
 npc_apothecary_hanes
 npc_scalawag_frog
+spell_flying_machine_controls
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -874,6 +877,25 @@ bool NpcSpellClick_npc_scalawag_frog(Player* pPlayer, Creature* pClickedCreature
     return true;
 }
 
+/*######
+## spell_flying_machine_controls
+######*/
+
+struct FlyingMachineControls : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_1 || !apply || !aura->GetTarget()->IsUnit())
+            return;
+
+        Unit* caster = aura->GetCaster();
+        if (!caster || !caster->IsPlayer() || static_cast<Player*>(caster)->GetQuestStatus(11391) != QUEST_STATUS_INCOMPLETE)
+            return;
+
+        static_cast<Creature*>(aura->GetTarget())->UpdateSpellSet(1);
+    }
+};
+
 void AddSC_howling_fjord()
 {
     Script* pNewScript = new Script;
@@ -923,4 +945,6 @@ void AddSC_howling_fjord()
     pNewScript->Name = "npc_scalawag_frog";
     pNewScript->pNpcSpellClick = &NpcSpellClick_npc_scalawag_frog;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<FlyingMachineControls>("spell_flying_machine_controls");
 }
