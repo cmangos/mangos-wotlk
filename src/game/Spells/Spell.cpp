@@ -7984,7 +7984,7 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
                 // all ok by some way or another, skip normal check
                 break;
             default:                                            // normal case
-                if (!IsIgnoreLosSpellEffect(m_spellInfo, eff))
+                if (exception != EXCEPTION_MAGNET && !IsIgnoreLosSpellEffect(m_spellInfo, eff))
                 {
                     if (target != m_caster)
                     {
