@@ -7067,8 +7067,12 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
         return false;
     }
 
-    Creature* spawnCreature = m_caster->SummonCreature(creatureEntry, list[0].x, list[0].y, list[0].z, m_caster->GetOrientation(),
-                              (m_duration == 0) ? TEMPSPAWN_CORPSE_DESPAWN : TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, m_duration);
+    TempSpawnSettings spawnSettings(m_caster, creatureEntry, list[0].x, list[0].y, list[0].z, m_caster->GetOrientation(), (m_duration == 0) ? TEMPSPAWN_CORPSE_DESPAWN : TEMPSPAWN_TIMED_OOC_OR_CORPSE_DESPAWN, m_duration);
+    spawnSettings.spellId = m_spellInfo->Id;
+    spawnSettings.ownerGuid = m_caster->GetObjectGuid();
+    if (prop->FactionId)
+        spawnSettings.faction = prop->FactionId;
+    Creature* spawnCreature = WorldObject::SummonCreature(spawnSettings, m_caster->GetMap(), m_caster->GetPhaseMask());
 
     if (!spawnCreature)
     {
@@ -7078,17 +7082,25 @@ bool Spell::DoSummonVehicle(CreatureSummonPositions& list, SummonPropertiesEntry
 
     list[0].creature = spawnCreature;
 
-    // Changes to be sent
-    spawnCreature->SetOwnerGuid(m_caster->GetObjectGuid());
-    spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-    //spawnCreature->SetLevel(level); // Do we need to set level for vehicles?
-
     // Board the caster right after summoning
-    SpellEntry const* controlSpellEntry = sSpellTemplate.LookupEntry<SpellEntry>(m_spellInfo->CalculateSimpleValue(effIdx));
-    if (controlSpellEntry && IsSpellHaveAura(controlSpellEntry, SPELL_AURA_CONTROL_VEHICLE))
-        m_caster->CastSpell(spawnCreature, controlSpellEntry, TRIGGERED_OLD_TRIGGERED);
+    int32 basePoints = m_spellInfo->CalculateSimpleValue(effIdx);
+    bool executed = false;
+    if (basePoints > MAX_VEHICLE_SEAT)
+    {
+        SpellEntry const* controlSpellEntry = sSpellTemplate.LookupEntry<SpellEntry>(basePoints);
+        if (controlSpellEntry && IsSpellHaveAura(controlSpellEntry, SPELL_AURA_CONTROL_VEHICLE))
+        {
+            m_caster->CastSpell(spawnCreature, controlSpellEntry, TRIGGERED_OLD_TRIGGERED);
+            executed = true;
+        }
+    }
     else
-        m_caster->CastSpell(spawnCreature, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
+    {
+        if (basePoints > 0 && basePoints < MAX_VEHICLE_SEAT)
+            m_caster->CastCustomSpell(spawnCreature, SPELL_RIDE_VEHICLE_HARDCODED, &basePoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        else
+            m_caster->CastSpell(spawnCreature, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
+    }
 
     // If the boarding failed...
     if (!spawnCreature->HasAuraType(SPELL_AURA_CONTROL_VEHICLE))
