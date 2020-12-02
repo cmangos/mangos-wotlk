@@ -60,7 +60,7 @@ enum SpellCastFlags
     CAST_FLAG_UNKNOWN16         = 0x00008000,
     CAST_FLAG_UNKNOWN17         = 0x00010000,
     CAST_FLAG_ADJUST_MISSILE    = 0x00020000,               // wotlk
-    CAST_FLAG_UNKNOWN19         = 0x00040000,               // spell cooldown related (may be category cooldown)
+    CAST_FLAG_NO_GCD            = 0x00040000,               // spell cooldown related (may be category cooldown)
     CAST_FLAG_VISUAL_CHAIN      = 0x00080000,               // wotlk
     CAST_FLAG_UNKNOWN21         = 0x00100000,
     CAST_FLAG_PREDICTED_RUNES   = 0x00200000,               // wotlk, rune cooldown list

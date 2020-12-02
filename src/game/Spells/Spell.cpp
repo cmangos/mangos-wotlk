@@ -4175,8 +4175,8 @@ void Spell::SendSpellStart() const
     if (HasPersistentAuraEffect(m_spellInfo))
         castFlags |= CAST_FLAG_PERSISTENT_AA;
 
-    if (m_spellInfo->runeCostID)
-        castFlags |= CAST_FLAG_UNKNOWN19;
+    if (m_spellInfo->runeCostID && m_spellInfo->powerType == POWER_RUNE)
+        castFlags |= CAST_FLAG_NO_GCD; // not needed, but Blizzard sends it
 
     if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) && (m_targets.getSpeed() > 0.0f))
         castFlags |= CAST_FLAG_ADJUST_MISSILE;              // spell has trajectory
@@ -4227,8 +4227,7 @@ void Spell::SendSpellGo()
 
     if ((m_caster->GetTypeId() == TYPEID_PLAYER) && (m_caster->getClass() == CLASS_DEATH_KNIGHT) && m_spellInfo->runeCostID)
     {
-        castFlags |= CAST_FLAG_UNKNOWN19;                   // same as in SMSG_SPELL_START
-        castFlags |= CAST_FLAG_PREDICTED_POWER;             // makes cooldowns visible
+        castFlags |= CAST_FLAG_NO_GCD;                      // same as in SMSG_SPELL_START
         castFlags |= CAST_FLAG_PREDICTED_RUNES;             // rune cooldowns list
     }
 
@@ -4237,6 +4236,9 @@ void Spell::SendSpellGo()
 
     if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) && (m_targets.getSpeed() > 0.0f))
         castFlags |= CAST_FLAG_ADJUST_MISSILE;              // spell has trajectory
+
+    if (!m_spellInfo->StartRecoveryTime)
+        castFlags |= CAST_FLAG_NO_GCD;
 
     WorldPacket data(SMSG_SPELL_GO, 50);                    // guess size
 
