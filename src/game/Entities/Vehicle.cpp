@@ -380,6 +380,10 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
     // Some creature vehicles get despawned after passenger unboarding
     if (m_owner->GetTypeId() == TYPEID_UNIT)
     {
+        // only for flyable vehicles
+        if (passenger->IsFlying())
+            static_cast<Unit*>(m_owner)->CastSpell(passenger, SPELL_VEHICLE_PARACHUTE, TRIGGERED_OLD_TRIGGERED);
+
         // TODO: Guesswork, but seems to be fairly near correct
         // Only if the passenger was on control seat? Also depending on some flags
         if ((seatEntry->m_flags & SEAT_FLAG_CAN_CONTROL) &&

@@ -2895,6 +2895,7 @@ static const MaxLevel maxLevelForExpansion[MAX_EXPANSION + 1] = { MAX_LEVEL_CLAS
 
 // This spell is used for general boarding serverside
 #define SPELL_RIDE_VEHICLE_HARDCODED    46598
+#define SPELL_VEHICLE_PARACHUTE         45472
 
 enum TeleportLocation
 {
