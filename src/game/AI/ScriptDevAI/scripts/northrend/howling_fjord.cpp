@@ -896,6 +896,34 @@ struct FlyingMachineControls : public AuraScript
     }
 };
 
+enum
+{
+    SPELL_GRAPPLING_BEAM = 43789,
+};
+
+struct GrapplingHook : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (!spell->GetUnitTarget())
+            return;
+
+        spell->GetCaster()->CastSpell(spell->GetUnitTarget(), SPELL_GRAPPLING_BEAM, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct GrapplingBeam : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1 || !spell->GetUnitTarget())
+            return;
+
+        int32 seatId = 2;
+        spell->GetUnitTarget()->CastCustomSpell(spell->GetCaster(), SPELL_RIDE_VEHICLE_HARDCODED, &seatId, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_howling_fjord()
 {
     Script* pNewScript = new Script;
@@ -947,4 +975,6 @@ void AddSC_howling_fjord()
     pNewScript->RegisterSelf();
 
     RegisterAuraScript<FlyingMachineControls>("spell_flying_machine_controls");
+    RegisterSpellScript<GrapplingHook>("spell_grappling_hook");
+    RegisterSpellScript<GrapplingBeam>("spell_grappling_beam");
 }
