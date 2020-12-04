@@ -7400,6 +7400,12 @@ void Player::UpdateArea(uint32 newArea)
     }
 
     UpdateAreaDependentAuras();
+
+    uint32 const areaRestFlag = (GetTeam() == ALLIANCE) ? AREA_FLAG_REST_ZONE_ALLIANCE : AREA_FLAG_REST_ZONE_HORDE;
+    if (area && area->flags & areaRestFlag)
+        SetRestType(REST_TYPE_FACTION_AREA);
+    else
+        SetRestType(REST_TYPE_FACTION_AREA);
 }
 
 bool Player::CanUseCapturePoint() const
@@ -7470,7 +7476,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
     if (pvpInfo.inPvPEnforcedArea)                              // in hostile area
         UpdatePvP(true);
 
-    if (zone->flags & AREA_FLAG_SANCTUARY)                  // in sanctuary
+    if (zone->flags & AREA_FLAG_SANCTUARY) // in sanctuary
     {
         SetPvPSanctuary(true);
 

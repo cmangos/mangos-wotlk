@@ -775,7 +775,8 @@ enum RestType
 {
     REST_TYPE_NO                = 0,
     REST_TYPE_IN_TAVERN         = 1,
-    REST_TYPE_IN_CITY           = 2
+    REST_TYPE_IN_CITY           = 2,
+    REST_TYPE_FACTION_AREA      = 4,
 };
 
 enum DuelCompleteType
