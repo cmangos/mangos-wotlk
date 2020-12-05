@@ -145,8 +145,16 @@ namespace Movement
         if (transportInfo || transport)
         {
             data.SetOpcode(SMSG_MONSTER_MOVE_TRANSPORT);
-            data << transportInfo->GetTransportGuid().WriteAsPacked();
-            data << int8(transportInfo->GetTransportSeat());
+            if (transportInfo)
+            {
+                data << transportInfo->GetTransportGuid().WriteAsPacked();
+                data << int8(transportInfo->GetTransportSeat());
+            }
+            else if (transport)
+            {
+                data << transport->GetPackGUID();
+                data << int8(-1);
+            }
         }
 
         data << uint8(0);
