@@ -3971,7 +3971,7 @@ bool ChatHandler::HandleCombatStopCommand(char* args)
     if (HasLowerSecurity(target))
         return false;
 
-    target->CombatStop();
+    target->CombatStopWithPets();
     return true;
 }
 
