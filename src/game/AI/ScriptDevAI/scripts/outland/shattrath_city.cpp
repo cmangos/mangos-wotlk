@@ -32,6 +32,7 @@ EndContentData */
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "World/WorldState.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -698,6 +699,17 @@ bool QuestRewarded_npc_adal(Player* player, Creature* creature, Quest const* que
     return false; // unhandled
 }
 
+struct DemonBroiledSurprise : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        spell->GetCaster()->CastSpell(nullptr, 43753, TRIGGERED_NONE); // demon broiled surprise
+    }
+};
+
 void AddSC_shattrath_city()
 {
     Script* pNewScript = new Script;
@@ -722,4 +734,6 @@ void AddSC_shattrath_city()
     pNewScript->Name = "npc_adal";
     pNewScript->pQuestRewardedNPC = &QuestRewarded_npc_adal;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<DemonBroiledSurprise>("spell_demon_broiled_surprise");
 }

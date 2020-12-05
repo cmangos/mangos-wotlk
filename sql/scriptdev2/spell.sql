@@ -264,6 +264,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34438,'spell_unstable_affliction'),
 (34439,'spell_unstable_affliction'),
 (35183,'spell_unstable_affliction'),
+(43723,'spell_demon_broiled_surprise'),
 (42399,'spell_send_head'),
 (43101,'spell_head_requests_body'),
 (35831,'spell_ring_of_flame'),
