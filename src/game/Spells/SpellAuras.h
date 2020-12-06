@@ -439,6 +439,7 @@ class Aura
         void HandleTriggerLinkedAura(bool apply, bool Real);
         void HandleAuraDetaunt(bool Apply, bool Real);
         void HandleOverrideClassScript(bool apply, bool real);
+        void HandleAuraAllowOnlyAbility(bool apply, bool real);
 
         virtual ~Aura();
 

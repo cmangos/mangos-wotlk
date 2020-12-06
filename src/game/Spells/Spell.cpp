@@ -5089,6 +5089,16 @@ SpellCastResult Spell::CheckCast(bool strict)
             return m_spellInfo->HasAttribute(SPELL_ATTR_DISABLED_WHILE_ACTIVE) ? SPELL_FAILED_DONT_REPORT : SPELL_FAILED_NOT_READY;
     }
 
+    if (!m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))
+    {
+        if (m_caster->IsPlayer())
+        {
+            //can cast triggered (by aura only?) spells while have this flag
+            if (static_cast<Player*>(m_caster)->HasFlag(PLAYER_FLAGS, PLAYER_ALLOW_ONLY_ABILITY))
+                return SPELL_FAILED_SPELL_IN_PROGRESS;
+        }
+    }
+
     if (!m_caster->IsAlive() && m_caster->GetTypeId() == TYPEID_PLAYER && !m_spellInfo->HasAttribute(SPELL_ATTR_CASTABLE_WHILE_DEAD) && !m_spellInfo->HasAttribute(SPELL_ATTR_PASSIVE))
         return SPELL_FAILED_CASTER_DEAD;
 
@@ -6567,18 +6577,6 @@ SpellCastResult Spell::CheckCasterAuras() const
         prevented_reason = SPELL_FAILED_SILENCED;
     else if (unitflag & UNIT_FLAG_PACIFIED && m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_PACIFY)
         prevented_reason = SPELL_FAILED_PACIFIED;
-    else if (m_caster->HasAuraType(SPELL_AURA_ALLOW_ONLY_ABILITY))
-    {
-        Unit::AuraList const& casingLimit = m_caster->GetAurasByType(SPELL_AURA_ALLOW_ONLY_ABILITY);
-        for (auto itr : casingLimit)
-        {
-            if (!itr->isAffectedOnSpell(m_spellInfo))
-            {
-                prevented_reason = SPELL_FAILED_CASTER_AURASTATE;
-                break;
-            }
-        }
-    }
 
     // Attr must make flag drop spell totally immune from all effects
     if (prevented_reason != SPELL_CAST_OK)
