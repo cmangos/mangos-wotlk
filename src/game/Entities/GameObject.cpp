@@ -2722,9 +2722,9 @@ bool GameObject::IsAtInteractDistance(Position const& pos, float radius, bool is
         QuaternionData worldRotation = GetWorldRotation();
         G3D::Quat worldRotationQuat(worldRotation.x, worldRotation.y, worldRotation.z, worldRotation.w);
 
-        return G3D::CoordinateFrame{ { worldRotationQuat }, { GetPositionX(), GetPositionY(), is3D ? GetPositionZ() : 0.f } }
-            .toWorldSpace(G3D::Box{ { minX, minY, is3D ? minZ : 0.f }, { maxX, maxY, is3D ? maxZ : 0.f } })
-            .contains({ pos.GetPositionX(), pos.GetPositionY(), is3D ? pos.GetPositionZ() : 0.f });
+        return G3D::CoordinateFrame{ { worldRotationQuat }, { GetPositionX(), GetPositionY(), GetPositionZ() } }
+            .toWorldSpace(G3D::Box{ { minX, minY, minZ }, { maxX, maxY, maxZ } })
+            .contains({ pos.GetPositionX(), pos.GetPositionY(), is3D ? pos.GetPositionZ() : GetPositionZ() });
     }
 
     return GetDistance(pos.GetPositionX(), pos.GetPositionY(), pos.GetPositionZ(), DIST_CALC_NONE) <= (radius * radius);
