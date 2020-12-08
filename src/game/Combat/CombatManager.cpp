@@ -20,6 +20,7 @@
 
 #include "Entities/Pet.h"
 #include "Maps/Map.h"
+#include "World/World.h"
 
 CombatManager::CombatManager(Unit* owner) : m_owner(owner), m_evadeTimer(0), m_evadeState(EVADE_NONE), m_combatTimer(0), m_leashingDisabled(false), m_leashingCheck(nullptr)
 {
@@ -92,8 +93,8 @@ void CombatManager::Update(const uint32 diff)
                         // if timer ran out and we are far away from last refresh pos, evade
                         else if (m_owner->GetVictim() && m_owner->GetVictim()->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
                         {
-                            if (m_owner->GetVictim()->GetDistance2d(m_lastRefreshPos.GetPositionX(), m_lastRefreshPos.GetPositionY()) > 30.0f)
-                                m_owner->HandleExitCombat();
+                            if (m_owner->GetVictim()->GetDistance2d(m_lastRefreshPos.GetPositionX(), m_lastRefreshPos.GetPositionY()) > sWorld.getConfig(CONFIG_FLOAT_LEASH_RADIUS))
+                                m_owner->HandleExitCombat(false);
                         }
                     }
                 }
