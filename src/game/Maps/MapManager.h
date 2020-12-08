@@ -31,6 +31,7 @@
 
 class Transport;
 class BattleGround;
+struct TransportTemplate;
 
 struct MapID
 {
@@ -136,11 +137,8 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
 
         void LoadTransports();
 
-        typedef std::set<Transport*> TransportSet;
-        TransportSet m_Transports;
-
-        typedef std::map<uint32, TransportSet> TransportMap;
-        TransportMap m_TransportsByMap;
+        typedef std::map<uint32, std::vector<const TransportTemplate*>> TransportMap;
+        TransportMap m_transportsByMap;
 
         void InitializeVisibilityDistanceInfo();
         /* statistics */

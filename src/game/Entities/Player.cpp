@@ -16367,7 +16367,20 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
             if (transportInfo->type == GAMEOBJECT_TYPE_TRANSPORT)
                 guid = ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, transGUID);
         }
-        if (GenericTransport* transport = GetMap()->GetTransport(guid))
+        GenericTransport* transport = GetMap()->GetTransport(guid);
+        Map* map = GetMap();
+        if (!transport)
+        {
+            if (TransportTemplate const* transportTemplate = sTransportMgr.GetTransportTemplate(guid.GetCounter()))
+            {
+                uint32 mapId = *transportTemplate->mapsUsed.begin();
+                if (mapId == map->GetId()) // only two maps max
+                    mapId = *transportTemplate->mapsUsed.rbegin();
+                map = sMapMgr.CreateMap(mapId, this);
+                transport = map->GetTransport(guid);
+            }
+        }
+        if (transport)
         {
             MapEntry const* transMapEntry = sMapStore.LookupEntry(transport->GetMapId());
             // client without expansion support
@@ -16378,7 +16391,7 @@ bool Player::LoadFromDB(ObjectGuid guid, SqlQueryHolder* holder)
                 transport->AddPassenger(this);
                 SetLocationMapId(transport->GetMapId());
                 transport->UpdatePassengerPosition(this);
-                SetMap(sMapMgr.CreateMap(GetMapId(), this));
+                SetMap(map);
             }
         }
 

@@ -57,6 +57,7 @@ class GameObjectModel;
 class WeatherSystem;
 class GenericTransport;
 namespace MaNGOS { struct ObjectUpdater; }
+class Transport;
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
@@ -363,6 +364,9 @@ class Map : public GridRefManager<NGridType>
 
         GenericTransport* GetTransport(ObjectGuid guid);
 
+        void AddTransport(Transport* transport);
+        void RemoveTransport(Transport* transport);
+
     private:
         void LoadMapAndVMap(int gx, int gy);
 
@@ -372,6 +376,7 @@ class Map : public GridRefManager<NGridType>
 
         void SendInitTransports(Player* player) const;
         void SendRemoveTransports(Player* player) const;
+        void LoadTransports();
 
         void SendZoneDynamicInfo(Player* player) const;
 
@@ -464,6 +469,10 @@ class Map : public GridRefManager<NGridType>
 
         // WeatherSystem
         WeatherSystem* m_weatherSystem;
+
+        // Transports
+        typedef std::set<Transport*> TransportSet;
+        TransportSet m_transports;
 
         std::unordered_map<uint32, std::set<ObjectGuid>> m_spawnedCount;
 
