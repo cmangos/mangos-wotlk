@@ -184,10 +184,13 @@ void WorldSession::HandleMoveSplineDoneOpcode(WorldPacket& recv_data)
 
     ObjectGuid guid;                                        // used only for proper packet read
     MovementInfo movementInfo;                              // used only for proper packet read
+    uint32 movementCounter;                                 // spline counter
 
     recv_data >> guid.ReadAsPacked();
     recv_data >> movementInfo;
-    recv_data >> Unused<uint32>();                          // unk
+    recv_data >> movementCounter;
+
+    // TODO: Add checking for correct point end for correct spline
 }
 
 void WorldSession::HandleActivateTaxiOpcode(WorldPacket& recv_data)
