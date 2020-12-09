@@ -261,7 +261,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x0E8*/ { "SMSG_FORCE_MOVE_ROOT",                         STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x0E9*/ { "CMSG_FORCE_MOVE_ROOT_ACK",                     STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleMoveRootAck               },
     /*0x0EA*/ { "SMSG_FORCE_MOVE_UNROOT",                       STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x0EB*/ { "CMSG_FORCE_MOVE_UNROOT_ACK",                   STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleMoveUnRootAck             },
+    /*0x0EB*/ { "CMSG_FORCE_MOVE_UNROOT_ACK",                   STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleMoveRootAck               },
     /*0x0EC*/ { "MSG_MOVE_ROOT",                                STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x0ED*/ { "MSG_MOVE_UNROOT",                              STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x0EE*/ { "MSG_MOVE_HEARTBEAT",                           STATUS_LOGGEDIN, PROCESS_THREADSAFE,   &WorldSession::HandleMovementOpcodes           },
