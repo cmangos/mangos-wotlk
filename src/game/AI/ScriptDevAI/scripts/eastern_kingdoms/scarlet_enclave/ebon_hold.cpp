@@ -599,6 +599,10 @@ struct npc_death_knight_initiateAI : public ScriptedAI
 
     void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
+        // no damage check unless in duel with a player
+        if (m_duelerGuid.IsEmpty())
+            return;
+
         if (uiDamage >= m_creature->GetHealth())
         {
             uiDamage = 0;
