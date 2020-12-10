@@ -22,6 +22,8 @@
 #include "AI/BaseAI/AIDefines.h"
 
 class GameObject;
+class Unit;
+struct SpellEntry;
 
 class GameObjectAI
 {
@@ -64,7 +66,12 @@ class GameObjectAI
         /*
         * Enables generic receiving of events
         */
-        virtual void ReceiveAIEvent(AIEventType /*eventType*/, uint32 miscValue = 0) {}
+        virtual void ReceiveAIEvent(AIEventType /*eventType*/, uint32 /*miscValue*/ = 0) {}
+        
+        /*
+         * Enables handling of GO Use by all units
+         */
+        virtual void OnUse(Unit* /*user*/, SpellEntry const* /*spellInfo*/);
 
     protected:
         GameObject* m_go;
