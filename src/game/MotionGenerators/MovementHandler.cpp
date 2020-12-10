@@ -563,10 +563,24 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
     recv_data >> counter;
     recv_data >> movementInfo;
 
-    if (!ProcessMovementInfo(movementInfo, _player, _player, recv_data))
+    Unit* mover = _player->GetMover();
+
+    if (mover->GetObjectGuid() != guid)
         return;
 
-    Unit* mover = _player->GetMover();
+    if (recv_data.GetOpcode() == CMSG_FORCE_MOVE_UNROOT_ACK) // unroot case
+    {
+        if (!mover->m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT))
+            return;
+    }
+    else // root case
+    {
+        if (mover->m_movementInfo.HasMovementFlag(MOVEFLAG_ROOT))
+            return;
+    }
+
+    if (!ProcessMovementInfo(movementInfo, _player, _player, recv_data))
+        return;
 
     WorldPacket data(recv_data.GetOpcode() == CMSG_FORCE_MOVE_UNROOT_ACK ? MSG_MOVE_UNROOT : MSG_MOVE_ROOT);
     data << guid;
