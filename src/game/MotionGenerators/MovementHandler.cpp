@@ -368,10 +368,10 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
             return;
     }
 
-    if (!ProcessMovementInfo(movementInfo, _player, _player, recv_data))
-        return;
-
     Unit* mover = _player->GetMover();
+
+    if (!ProcessMovementInfo(movementInfo, mover, _player, recv_data))
+        return;
 
     const SpeedOpcodePair& speedOpcodes = SetSpeed2Opc_table[move_type];
     WorldPacket data(speedOpcodes[2], 18);
@@ -477,7 +477,7 @@ void WorldSession::HandleMoveKnockBackAck(WorldPacket& recv_data)
     recv_data >> counter;                                   // knockback packets counter
     recv_data >> movementInfo;
 
-    if (!ProcessMovementInfo(movementInfo, _player, _player, recv_data))
+    if (!ProcessMovementInfo(movementInfo, mover, _player, recv_data))
         return;
 
     if (mover->IsPlayer() && static_cast<Player*>(mover)->IsFreeFlying())
@@ -524,7 +524,9 @@ void WorldSession::HandleMoveFlagChangeOpcode(WorldPacket& recv_data)
     recv_data >> movementInfo;
     recv_data >> isApplied;
 
-    if (!ProcessMovementInfo(movementInfo, _player, _player, recv_data))
+    Unit* mover = _player->GetMover();
+
+    if (!ProcessMovementInfo(movementInfo, mover, _player, recv_data))
         return;
 
     Opcodes response = MSG_NULL_ACTION;
@@ -537,10 +539,8 @@ void WorldSession::HandleMoveFlagChangeOpcode(WorldPacket& recv_data)
         case CMSG_MOVE_SET_CAN_FLY_ACK: response = MSG_MOVE_UPDATE_CAN_FLY; break;
     }
 
-    Unit* mover = _player->GetMover();
-
     WorldPacket data(response, 8);
-    data << guid;
+    data << guid.WriteAsPacked();
     data << movementInfo;
     mover->SendMessageToSetExcept(data, _player);
 }
@@ -572,11 +572,11 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
             return;
     }
 
-    if (!ProcessMovementInfo(movementInfo, _player, _player, recv_data))
+    if (!ProcessMovementInfo(movementInfo, mover, _player, recv_data))
         return;
 
     WorldPacket data(recv_data.GetOpcode() == CMSG_FORCE_MOVE_UNROOT_ACK ? MSG_MOVE_UNROOT : MSG_MOVE_ROOT);
-    data << guid;
+    data << guid.WriteAsPacked();
     data << movementInfo;
     mover->SendMessageToSetExcept(data, _player);
 }
