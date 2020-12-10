@@ -282,7 +282,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
             const_cast<Unit*>(unit)->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
 
         // Write movement info
-        unit->m_movementInfo.Write(*data);
+        *data << unit->m_movementInfo;
 
         // Unit speeds
         *data << float(unit->GetSpeed(MOVE_WALK));
