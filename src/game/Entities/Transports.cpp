@@ -288,7 +288,7 @@ bool GenericTransport::AddPassenger(Unit* passenger)
         if (Pet* pet =passenger->GetPet())
         {
             AddPassenger(pet);
-            pet->m_movementInfo.SetTransportData(GetObjectGuid(), passenger->m_movementInfo.t_pos.x, passenger->m_movementInfo.t_pos.y, passenger->m_movementInfo.t_pos.z, passenger->m_movementInfo.t_pos.o, GetPathProgress());
+            pet->m_movementInfo.SetTransportData(GetObjectGuid(), passenger->m_movementInfo.t_pos.x, passenger->m_movementInfo.t_pos.y, passenger->m_movementInfo.t_pos.z, passenger->m_movementInfo.t_pos.o, GetPathProgress(), -1);
             pet->NearTeleportTo(passenger->m_movementInfo.pos.x, passenger->m_movementInfo.pos.y, passenger->m_movementInfo.pos.z, passenger->m_movementInfo.pos.o);
         }
     }
@@ -317,7 +317,7 @@ bool GenericTransport::RemovePassenger(Unit* passenger)
     {
         DETAIL_LOG("Unit %s removed from transport %s.", passenger->GetName(), GetName());
         passenger->SetTransport(nullptr);
-        passenger->m_movementInfo.SetTransportData(ObjectGuid(), 0, 0, 0, 0, 0);
+        passenger->m_movementInfo.SetTransportData(ObjectGuid(), 0, 0, 0, 0, 0, -1);
         if (Pet* pet = passenger->GetPet())
         {
             RemovePassenger(pet);
