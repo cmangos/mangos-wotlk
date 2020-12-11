@@ -1440,7 +1440,7 @@ void ObjectMgr::LoadCreatures()
                           //   13         14       15          16            17         18         19
                           "curhealth, curmana, DeathState, MovementType, spawnMask, phaseMask, event,"
                           //   20                        21
-                          "pool_creature.pool_entry, pool_creature_template.pool_entry "
+                          "pool_creature.pool_entry, pool_creature_template.pool_entry,"
                           //   21
                           "creature_spawn_data.id "
                           "FROM creature "

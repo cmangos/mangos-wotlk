@@ -19,3 +19,4 @@ Id INT UNSIGNED NOT NULL COMMENT 'ID of template',
 PRIMARY KEY(Guid)
 );
 
+INSERT INTO creature_spawn_data_template(entry) VALUES(0);
