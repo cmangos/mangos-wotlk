@@ -413,6 +413,45 @@ namespace MMAP
         buildGameObject("Cf_Elevatorplatform_Small.m2.vmo", 7060);
         buildGameObject("Factoryelevator.m2.vmo", 7077);
         buildGameObject("Ancdrae_Elevatorpiece_Netherstorm.m2.vmo", 7163);
+        // WOTLK+
+        buildGameObject("Blackcitadel.wmo.vmo", 6637);
+        buildGameObject("Transport_Icebreaker_Ship.wmo.vmo", 7446);
+        buildGameObject("Vr_Elevator_Gate.m2.vmo", 7451);
+        buildGameObject("Vr_Elevator_Lift.m2.vmo", 7452);
+        buildGameObject("Vr_Elevator_Gears.m2.vmo", 7491);
+        buildGameObject("Hf_Elevator_Gate.m2.vmo", 7519);
+        buildGameObject("Hf_Elevator_Lift_02.m2.vmo", 7520);
+        buildGameObject("Hf_Elevator_Lift.m2.vmo", 7521);
+        buildGameObject("Transport_Horde_Zeppelin.wmo.vmo", 7546);
+        buildGameObject("Transport_Pirate_Ship.wmo.vmo", 7570);
+        buildGameObject("Transport_Tuskarr_Ship.wmo.vmo", 7636);
+        buildGameObject("Vrykul_Gondola.m2.vmo", 7642);
+        buildGameObject("Logrun_Pumpelevator01.m2.vmo", 7648);
+        buildGameObject("Vrykul_Gondola_02.m2.vmo", 7767);
+        buildGameObject("Nexus_Elevator_Basestructure_01.m2.vmo", 7793);
+        buildGameObject("Id_Elevator.m2.vmo", 7794);
+        buildGameObject("Orc_Fortress_Elevator01.m2.vmo", 7797);
+        buildGameObject("Org_Arena_Pillar.m2.vmo", 7966);
+        buildGameObject("Org_Arena_Elevator.m2.vmo", 7973);
+        buildGameObject("Logrun_Pumpelevator02.m2.vmo", 8079);
+        buildGameObject("Logrun_Pumpelevator03.m2.vmo", 8080);
+        buildGameObject("Nd_Hordegunship.wmo.vmo", 8253);
+        buildGameObject("Nd_Alliancegunship.wmo.vmo", 8254);
+        buildGameObject("Org_Arena_Yellow_Elevator.m2.vmo", 8258);
+        buildGameObject("Org_Arena_Axe_Pillar.m2.vmo", 8259);
+        buildGameObject("Org_Arena_Lightning_Pillar.m2.vmo", 8260);
+        buildGameObject("Org_Arena_Ivory_Pillar.m2.vmo", 8261);
+        buildGameObject("Gundrak_Elevator_01.m2.vmo", 8277);
+        buildGameObject("Nd_Icebreaker_Ship_Bg_Transport.wmo.vmo", 8409);
+        buildGameObject("Nd_Ship_Ud_Bg_Transport.wmo.vmo", 8410);
+        buildGameObject("Ulduarraid_Gnomewing_Transport_Wmo.wmo.vmo", 8587);
+        buildGameObject("Nd_Hordegunship_Bg.wmo.vmo", 9001);
+        buildGameObject("Nd_Alliancegunship_Bg.wmo.vmo", 9002);
+        buildGameObject("Icecrown_Elevator.m2.vmo", 9136);
+        buildGameObject("Nd_Alliancegunship_Icecrown.wmo.vmo", 9150);
+        buildGameObject("Nd_Hordegunship_Icecrown.wmo.vmo", 9151);
+        buildGameObject("Icecrown_Elevator02.m2.vmo", 9248);
+
     }
 
     /**************************************************************************/
