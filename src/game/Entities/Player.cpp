@@ -21942,14 +21942,7 @@ bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
     if (IsInWorld() && pRewardSource->GetMap() == GetMap() && (GetMap()->IsDungeon() || pRewardSource->IsWithinDistInMap(this, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE))))
         return true;
 
-    if (IsAlive())
-        return false;
-
-    Corpse* corpse = GetCorpse();
-    if (!corpse)
-        return false;
-
-    return corpse->IsInWorld() && pRewardSource->GetMap() == corpse->GetMap() && (corpse->GetMap()->IsDungeon() || pRewardSource->IsWithinDistInMap(corpse, sWorld.getConfig(CONFIG_FLOAT_GROUP_XP_DISTANCE)));
+    return false;
 }
 
 void Player::QueueOrAddResurrectRequest(Corpse* corpseTarget, Unit* caster, Player* player, SpellEntry const* spellInfo, uint32 damage, SpellEffectIndex effIdx, bool ghoul)
