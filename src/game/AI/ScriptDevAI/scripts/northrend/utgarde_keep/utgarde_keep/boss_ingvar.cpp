@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "utgarde_keep.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -75,7 +76,8 @@ enum
     SPELL_SCOURGE_RES_BUBBLE    = 42862,                    // black bubble
     SPELL_SCOURGE_RES_CHANNEL   = 42857,                    // the whirl from annhylde
 
-    POINT_ID_ANNHYLDE           = 1
+    POINT_ID_ANNHYLDE           = 1,
+    POINT_ID_AXE_RETURN         = 2,
 };
 
 /*######
@@ -96,21 +98,27 @@ struct boss_ingvarAI : public ScriptedAI
 
     bool m_bIsResurrected;
     bool m_bIsFakingDeath;
+    bool m_bHasAxe;
+
+    ObjectGuid m_axeDummyGuid;
 
     uint32 m_uiCleaveTimer;
     uint32 m_uiSmashTimer;
     uint32 m_uiStaggeringRoarTimer;
     uint32 m_uiEnrageTimer;
+    uint32 m_uiAxeReturnTimer;
 
     void Reset() override
     {
-        m_bIsResurrected = false;
-        m_bIsFakingDeath = false;
+        m_bIsResurrected    = false;
+        m_bIsFakingDeath    = false;
+        m_bHasAxe           = true;
 
-        m_uiCleaveTimer = urand(5000, 7000);
-        m_uiSmashTimer = urand(8000, 15000);
+        m_uiCleaveTimer     = urand(5000, 7000);
+        m_uiSmashTimer      = urand(8000, 15000);
         m_uiStaggeringRoarTimer = urand(10000, 25000);
-        m_uiEnrageTimer = 30000;
+        m_uiEnrageTimer     = 30000;
+        m_uiAxeReturnTimer  = 0;
     }
 
     void Aggro(Unit* pWho) override
@@ -169,15 +177,16 @@ struct boss_ingvarAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_THROW_DUMMY:
-                // ToDo: should this move to the target?
+                pSummoned->AI()->SetReactState(REACT_PASSIVE);
+                pSummoned->SetCanEnterCombat(false);
                 pSummoned->CastSpell(pSummoned, m_bIsRegularMode ? SPELL_SHADOW_AXE_PROC : SPELL_SHADOW_AXE_PROC_H, TRIGGERED_OLD_TRIGGERED);
+                m_axeDummyGuid = pSummoned->GetObjectGuid();
                 break;
 
             case NPC_ANNHYLDE:
-                // This is not blizzlike - npc should be summoned above the boss and should move slower
                 pSummoned->CastSpell(pSummoned, SPELL_ASTRAL_TELEPORT, TRIGGERED_NONE);
                 pSummoned->SetLevitate(true);
-                pSummoned->GetMotionMaster()->MovePoint(POINT_ID_ANNHYLDE, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ() + 15.0f);
+                pSummoned->GetMotionMaster()->MovePoint(POINT_ID_ANNHYLDE, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ() - 6.0f);
                 break;
 
             case NPC_GROUND_VISUAL:
@@ -208,6 +217,18 @@ struct boss_ingvarAI : public ScriptedAI
             m_pInstance->SetData(TYPE_INGVAR, FAIL);
 
         m_creature->UpdateEntry(NPC_INGVAR);
+    }
+
+    void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
+    {
+        if (uiType != POINT_MOTION_TYPE || uiPointId != POINT_ID_AXE_RETURN || pSummoned->GetEntry() != NPC_THROW_DUMMY)
+            return;
+
+        // return axe to owner and despawn
+        SetEquipmentSlots(true);
+        pSummoned->ForcedDespawn();
+        m_bHasAxe = true;
+        m_uiEnrageTimer = urand(20000, 30000);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -254,21 +275,29 @@ struct boss_ingvarAI : public ScriptedAI
         }
         else                                                // Second phase
         {
-            if (m_uiCleaveTimer < uiDiff)
+            // ability only when boss has the axe
+            if (m_bHasAxe)
             {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_WOE_STRIKE : SPELL_WOE_STRIKE_H) == CAST_OK)
-                    m_uiCleaveTimer = urand(2500, 7000);
+                if (m_uiCleaveTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_WOE_STRIKE : SPELL_WOE_STRIKE_H) == CAST_OK)
+                        m_uiCleaveTimer = urand(2500, 7000);
+                }
+                else
+                    m_uiCleaveTimer -= uiDiff;
             }
-            else
-                m_uiCleaveTimer -= uiDiff;
 
-            if (m_uiSmashTimer < uiDiff)
+            // ability only when boss has the axe
+            if (m_bHasAxe)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_DARK_SMASH_H) == CAST_OK)
-                    m_uiSmashTimer = urand(8000, 15000);
+                if (m_uiSmashTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_DARK_SMASH_H) == CAST_OK)
+                        m_uiSmashTimer = urand(8000, 15000);
+                }
+                else
+                    m_uiSmashTimer -= uiDiff;
             }
-            else
-                m_uiSmashTimer -= uiDiff;
 
             if (m_uiStaggeringRoarTimer < uiDiff)
             {
@@ -281,13 +310,38 @@ struct boss_ingvarAI : public ScriptedAI
             else
                 m_uiStaggeringRoarTimer -= uiDiff;
 
-            if (m_uiEnrageTimer < uiDiff)
+            if (m_uiEnrageTimer)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_AXE) == CAST_OK)
-                    m_uiEnrageTimer = urand(10000, 20000);
+                if (m_uiEnrageTimer <= uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SHADOW_AXE) == CAST_OK)
+                    {
+                        // change equipment temporarely
+                        SetEquipmentSlots(false, EQUIP_UNEQUIP);
+                        m_bHasAxe = false;
+                        m_uiAxeReturnTimer = 10000;
+                        m_uiEnrageTimer = 0;
+                    }
+                }
+                else
+                    m_uiEnrageTimer -= uiDiff;
             }
-            else
-                m_uiEnrageTimer -= uiDiff;
+
+            if (m_uiAxeReturnTimer)
+            {
+                if (m_uiAxeReturnTimer <= uiDiff)
+                {
+                    // return the axe to the boss; note: maybe the axe should actually follow the boss, instead of using MovePoint
+                    if (Creature* pAxe = m_creature->GetMap()->GetCreature(m_axeDummyGuid))
+                    {
+                        pAxe->SetWalk(false);
+                        pAxe->GetMotionMaster()->MovePoint(POINT_ID_AXE_RETURN, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
+                    }
+                    m_uiAxeReturnTimer = 0;
+                }
+                else
+                    m_uiAxeReturnTimer -= uiDiff;
+            }
         }
 
         DoMeleeAttackIfReady();
@@ -308,10 +362,13 @@ struct npc_annhyldeAI : public ScriptedAI
     npc_annhyldeAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
     ScriptedInstance* m_pInstance;
+
+    bool m_bIsRegularMode;
 
     uint32 m_uiResurrectTimer;
     uint8 m_uiResurrectPhase;
@@ -359,11 +416,7 @@ struct npc_annhyldeAI : public ScriptedAI
                         break;
                     case 1:
                         if (Creature* pIngvar = m_pInstance->GetSingleCreatureFromStorage(NPC_INGVAR))
-                        {
                             pIngvar->CastSpell(pIngvar, SPELL_SCOURGE_RES_SUMMON, TRIGGERED_OLD_TRIGGERED);
-                            // Workaround - set Feign death again because it's removed by the previous casted spell
-                            pIngvar->CastSpell(pIngvar, SPELL_FEIGN_DEATH, TRIGGERED_OLD_TRIGGERED);
-                        }
                         m_uiResurrectTimer = 5000;
                         break;
                     case 2:
@@ -373,7 +426,10 @@ struct npc_annhyldeAI : public ScriptedAI
                         break;
                     case 3:
                         if (Creature* pIngvar = m_pInstance->GetSingleCreatureFromStorage(NPC_INGVAR))
-                            pIngvar->CastSpell(pIngvar, SPELL_TRANSFORM, TRIGGERED_NONE);
+                        {
+                            pIngvar->CastSpell(pIngvar, m_bIsRegularMode ? SPELL_DREADFUL_ROAR : SPELL_DREADFUL_ROAR_H, TRIGGERED_NONE);
+                            pIngvar->CastSpell(pIngvar, SPELL_TRANSFORM, TRIGGERED_OLD_TRIGGERED);
+                        }
                         // despawn the creature
                         m_creature->GetMotionMaster()->MovePoint(2, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 50);
                         m_creature->ForcedDespawn(5000);
@@ -386,6 +442,14 @@ struct npc_annhyldeAI : public ScriptedAI
             else
                 m_uiResurrectTimer -= uiDiff;
         }
+    }
+};
+
+struct spell_summon_banshee : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destPos.z += 30.0f;
     }
 };
 
@@ -405,4 +469,6 @@ void AddSC_boss_ingvar()
     pNewScript->Name = "npc_annhylde";
     pNewScript->GetAI = &GetAI_npc_annhylde;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_summon_banshee>("spell_summon_banshee");
 }
