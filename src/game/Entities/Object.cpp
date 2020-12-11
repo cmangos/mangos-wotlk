@@ -308,17 +308,34 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         {
             WorldObject const* wo = static_cast<WorldObject const*>(this);
 
-            *data << uint8(0);                              // unk PGUID!
-            *data << float(((WorldObject*)this)->GetPositionX());
-            *data << float(((WorldObject*)this)->GetPositionY());
-            *data << float(((WorldObject*)this)->GetPositionZ());
-            *data << float(((WorldObject*)this)->GetPositionX());
-            *data << float(((WorldObject*)this)->GetPositionY());
-            *data << float(((WorldObject*)this)->GetPositionZ());
-            *data << float(((WorldObject*)this)->GetOrientation());
+            GenericTransport* transport = wo->GetTransport();
+
+            if (transport)
+                *data << transport->GetPackGUID();
+            else
+                *data << uint8(0);
+
+            *data << wo->GetPositionX();
+            *data << wo->GetPositionY();
+            *data << wo->GetPositionZ();
+
+            if (transport)
+            {
+                *data << wo->GetTransOffsetX();
+                *data << wo->GetTransOffsetY();
+                *data << wo->GetTransOffsetZ();
+            }
+            else
+            {
+                *data << wo->GetPositionX();
+                *data << wo->GetPositionY();
+                *data << wo->GetPositionZ();
+            }
+
+            *data << wo->GetOrientation();
 
             if (GetTypeId() == TYPEID_CORPSE)
-                *data << float(((WorldObject*)this)->GetOrientation());
+                *data << float(wo->GetOrientation());
             else
                 *data << float(0);
         }

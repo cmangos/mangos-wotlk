@@ -1150,9 +1150,15 @@ class WorldObject : public Object
         GenericTransport* GetTransport() const { return m_transport; }
         void SetTransport(GenericTransport* t) { m_transport = t; }
 
-        // only needed for unit+ but put here due to hiding and wotlk
         MovementInfo m_movementInfo;
         GenericTransport* m_transport;
+
+        float GetTransOffsetX() const { return m_movementInfo.GetTransportPos()->x; }
+        float GetTransOffsetY() const { return m_movementInfo.GetTransportPos()->y; }
+        float GetTransOffsetZ() const { return m_movementInfo.GetTransportPos()->z; }
+        float GetTransOffsetO() const { return m_movementInfo.GetTransportPos()->o; }
+        uint32 GetTransTime() const { return m_movementInfo.GetTransportTime(); }
+        int8 GetTransSeat() const { return m_movementInfo.GetTransportSeat(); }
 
         // Spell system
         uint8 GetDestLocCounter() { return m_destLocCounter; }
