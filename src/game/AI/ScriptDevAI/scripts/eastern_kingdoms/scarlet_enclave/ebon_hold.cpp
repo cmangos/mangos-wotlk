@@ -39,6 +39,8 @@ EndContentData */
 #include "world_map_ebon_hold.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"
 #include "Entities/TemporarySpawn.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 /*######
 ## npc_a_special_surprise
@@ -2904,6 +2906,62 @@ UnitAI* GetAI_npc_scarlet_courier(Creature* pCreature)
     return new npc_scarlet_courierAI(pCreature);
 }
 
+struct spell_emblazon_runeblade : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        Unit* caster = spell->GetAffectiveCaster();
+        if (!caster)
+            return;
+
+        uint32 uiSpell = spell->CalculateSpellEffectValue(effIdx, caster);
+
+        caster->CastSpell(caster, uiSpell, TRIGGERED_NONE);
+    }
+};
+
+struct spell_emblazon_runeblade_aura : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        // override target; the real caster of the triggered spell is the player
+        data.caster = aura->GetCaster();
+        data.target = nullptr;
+    }
+};
+
+struct spell_death_knight_initiate_visual : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget)
+            return;
+
+        uint32 spellId;
+
+        bool isMale = unitTarget->getGender() == GENDER_MALE;
+        switch (unitTarget->getRace())
+        {
+            case RACE_HUMAN:    spellId = isMale ? 51520 : 51534; break;
+            case RACE_DWARF:    spellId = isMale ? 51538 : 51537; break;
+            case RACE_NIGHTELF: spellId = isMale ? 51535 : 51536; break;
+            case RACE_GNOME:    spellId = isMale ? 51539 : 51540; break;
+            case RACE_DRAENEI:  spellId = isMale ? 51541 : 51542; break;
+            case RACE_ORC:      spellId = isMale ? 51543 : 51544; break;
+            case RACE_UNDEAD:   spellId = isMale ? 51549 : 51550; break;
+            case RACE_TAUREN:   spellId = isMale ? 51547 : 51548; break;
+            case RACE_TROLL:    spellId = isMale ? 51546 : 51545; break;
+            case RACE_BLOODELF: spellId = isMale ? 51551 : 51552; break;
+            default:
+                return;
+        }
+
+        unitTarget->CastSpell(unitTarget, spellId, TRIGGERED_OLD_TRIGGERED);
+        return;
+    }
+};
+
 void AddSC_ebon_hold()
 {
     Script* pNewScript = new Script;
@@ -2966,4 +3024,8 @@ void AddSC_ebon_hold()
     pNewScript->Name = "npc_scarlet_courier";
     pNewScript->GetAI = &GetAI_npc_scarlet_courier;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_emblazon_runeblade>("spell_emblazon_runeblade");
+    RegisterAuraScript<spell_emblazon_runeblade_aura>("spell_emblazon_runeblade_aura");
+    RegisterSpellScript<spell_death_knight_initiate_visual>("spell_death_knight_initiate_visual");
 }
