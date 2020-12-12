@@ -204,7 +204,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
 
     SetObjectScale(goinfo->size);
 
-    SetWorldRotation(rotation.x, rotation.y, rotation.z, rotation.w);
+    SetLocalRotation(rotation.x, rotation.y, rotation.z, rotation.w);
     // For most of gameobjects is (0, 0, 0, 1) quaternion, only some transports has not standart rotation
     if (const GameObjectDataAddon* addon = sGameObjectDataAddonStorage.LookupEntry<GameObjectDataAddon>(guidlow))
         SetTransportPathRotation(addon->path_rotation);
@@ -789,10 +789,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask) const
     data.posY = GetPositionY();
     data.posZ = GetPositionZ();
     data.orientation = GetOrientation();
-    data.rotation.x = m_worldRotation.x;
-    data.rotation.y = m_worldRotation.y;
-    data.rotation.z = m_worldRotation.z;
-    data.rotation.w = m_worldRotation.w;
+    data.rotation.x = m_localRotation.x;
+    data.rotation.y = m_localRotation.y;
+    data.rotation.z = m_localRotation.z;
+    data.rotation.w = m_localRotation.w;
     data.spawntimesecsmin = m_spawnedByDefault ? (int32)m_respawnDelay : -(int32)m_respawnDelay;
     data.spawntimesecsmax = m_spawnedByDefault ? (int32)m_respawnDelay : -(int32)m_respawnDelay;
     data.animprogress = GetGoAnimProgress();
@@ -811,10 +811,10 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask) const
        << GetPositionY() << ", "
        << GetPositionZ() << ", "
        << GetOrientation() << ", "
-       << m_worldRotation.x << ", "
-       << m_worldRotation.y << ", "
-       << m_worldRotation.z << ", "
-       << m_worldRotation.w << ", "
+       << m_localRotation.x << ", "
+       << m_localRotation.y << ", "
+       << m_localRotation.z << ", "
+       << m_localRotation.w << ", "
        << m_respawnDelay << ", "
        << m_respawnDelay << ", " // TODO: Add variance
        << uint32(GetGoAnimProgress()) << ", "
@@ -1998,7 +1998,7 @@ struct QuaternionCompressed
     int64 m_raw;
 };
 
-void GameObject::SetWorldRotation(float qx, float qy, float qz, float qw)
+void GameObject::SetLocalRotation(float qx, float qy, float qz, float qw)
 {
     Quat rotation(qx, qy, qz, qw);
     // Temporary solution for gameobjects that has no rotation data in DB:
@@ -2007,10 +2007,10 @@ void GameObject::SetWorldRotation(float qx, float qy, float qz, float qw)
 
     rotation.unitize();
     m_packedRotation = QuaternionCompressed(rotation).m_raw;
-    m_worldRotation.x = rotation.x;
-    m_worldRotation.y = rotation.y;
-    m_worldRotation.z = rotation.z;
-    m_worldRotation.w = rotation.w;
+    m_localRotation.x = rotation.x;
+    m_localRotation.y = rotation.y;
+    m_localRotation.z = rotation.z;
+    m_localRotation.w = rotation.w;
 }
 
 void GameObject::SetTransportPathRotation(const QuaternionData& rotation)
@@ -2021,10 +2021,10 @@ void GameObject::SetTransportPathRotation(const QuaternionData& rotation)
     SetFloatValue(GAMEOBJECT_PARENTROTATION + 3, rotation.w);
 }
 
-void GameObject::SetWorldRotationAngles(float z_rot, float y_rot, float x_rot)
+void GameObject::SetLocalRotationAngles(float z_rot, float y_rot, float x_rot)
 {
     Quat quat(G3D::Matrix3::fromEulerAnglesZYX(z_rot, y_rot, x_rot));
-    SetWorldRotation(quat.x, quat.y, quat.z, quat.w);
+    SetLocalRotation(quat.x, quat.y, quat.z, quat.w);
 }
 
 void GameObject::SetLootState(LootState state)
@@ -2785,5 +2785,5 @@ QuaternionData GameObject::GetWorldRotation() const
 
 const QuaternionData GameObject::GetLocalRotation() const
 {
-    return m_worldRotation;
+    return m_localRotation;
 }

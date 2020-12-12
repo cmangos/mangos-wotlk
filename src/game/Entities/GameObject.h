@@ -730,11 +730,11 @@ class GameObject : public WorldObject
         bool HasStaticDBSpawnData() const;                  // listed in `gameobject` table and have fixed in DB guid
 
         // z_rot, y_rot, x_rot - rotation angles around z, y and x axes
-        void SetWorldRotationAngles(float z_rot, float y_rot, float x_rot);
-        void SetWorldRotation(float qx, float qy, float qz, float qw);
+        void SetLocalRotationAngles(float z_rot, float y_rot, float x_rot);
+        void SetLocalRotation(float qx, float qy, float qz, float qw);
         void SetTransportPathRotation(const QuaternionData& rotation);      // transforms(rotates) transport's path
-        int64 GetPackedWorldRotation() const { return m_packedRotation; }
-        QuaternionData GetWorldRotation() const; // compatibility with wotlk
+        int64 GetPackedLocalRotation() const { return m_packedRotation; }
+        QuaternionData GetWorldRotation() const;
         QuaternionData const GetLocalRotation() const;
 
         // overwrite WorldObject function for proper name localization
@@ -928,7 +928,7 @@ class GameObject : public WorldObject
         GameObjectInfo const* m_goInfo;
         GameObjectDisplayInfoEntry const* m_displayInfo;
         int64 m_packedRotation;
-        QuaternionData m_worldRotation;
+        QuaternionData m_localRotation;
 
         Position m_stationaryPosition;
 
