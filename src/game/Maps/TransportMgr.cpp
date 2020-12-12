@@ -310,6 +310,11 @@ void TransportMgr::AddPathNodeToTransport(uint32 transportEntry, uint32 timeSeg,
     animNode.Path[timeSeg] = node;
 }
 
+void TransportMgr::AddPathRotationToTransport(uint32 transportEntry, uint32 timeSeg, TransportRotationEntry const* node)
+{
+    m_transportAnimations[transportEntry].Rotations[timeSeg] = node;
+}
+
 TransportAnimationEntry const* TransportAnimation::GetPrevAnimNode(uint32 time) const
 {
     auto itr = Path.lower_bound(time);
@@ -326,6 +331,27 @@ TransportAnimationEntry const* TransportAnimation::GetNextAnimNode(uint32 time) 
 {
     auto itr = Path.lower_bound(time);
     if (itr != Path.end())
+        return itr->second;
+
+    return nullptr;
+}
+
+TransportRotationEntry const* TransportAnimation::GetPrevRotation(uint32 time) const
+{
+    auto itr = Rotations.lower_bound(time);
+    if (itr != Rotations.end() && itr != Rotations.begin())
+    {
+        --itr;
+        return itr->second;
+    }
+
+    return nullptr;
+}
+
+TransportRotationEntry const* TransportAnimation::GetNextRotation(uint32 time) const
+{
+    auto itr = Rotations.lower_bound(time);
+    if (itr != Rotations.end())
         return itr->second;
 
     return nullptr;

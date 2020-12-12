@@ -28,19 +28,20 @@
 struct GameObjectInfo;
 
 typedef std::map<uint32, TransportAnimationEntry const*> TransportPathContainer;
-// typedef std::map<uint32, TransportRotationEntry const*> TransportPathRotationContainer;
+typedef std::map<uint32, TransportRotationEntry const*> TransportPathRotationContainer;
 
 struct TransportAnimation
 {
     TransportAnimation() : TotalTime(0) { }
 
     TransportPathContainer Path;
-    // TransportPathRotationContainer Rotations;
+    TransportPathRotationContainer Rotations;
     uint32 TotalTime;
 
     TransportAnimationEntry const* GetPrevAnimNode(uint32 time) const;
     TransportAnimationEntry const* GetNextAnimNode(uint32 time) const;
-    // TransportRotationEntry const* GetAnimRotation(uint32 time) const; - wotlk onwards
+    TransportRotationEntry const* GetPrevRotation(uint32 time) const;
+    TransportRotationEntry const* GetNextRotation(uint32 time) const;
 };
 
 typedef std::map<uint32, TransportAnimation> TransportAnimationContainer;
@@ -115,6 +116,7 @@ class TransportMgr
 
     private:
         void AddPathNodeToTransport(uint32 transportEntry, uint32 timeSeg, TransportAnimationEntry const* node);
+        void AddPathRotationToTransport(uint32 transportEntry, uint32 timeSeg, TransportRotationEntry const* node);
         bool GenerateWaypoints(GameObjectInfo const* goinfo, TransportTemplate& transportTemplate);
 
         TransportAnimationContainer m_transportAnimations;

@@ -2769,20 +2769,10 @@ SpellEntry const* GameObject::GetSpellForLock(Player const* player) const
 QuaternionData GameObject::GetWorldRotation() const
 {
     QuaternionData localRotation = GetLocalRotation();
-    QuaternionData worldRotation(GetFloatValue(GAMEOBJECT_PARENTROTATION), GetFloatValue(GAMEOBJECT_PARENTROTATION + 1), GetFloatValue(GAMEOBJECT_PARENTROTATION + 2), GetFloatValue(GAMEOBJECT_PARENTROTATION + 3));
-    //if (Transport * transport = GetTransport()) // - for wotlk - TC code
-    //{
-    //    QuaternionData worldRotation = transport->GetWorldRotation();
-
-    //    G3D::Quat worldRotationQuat(worldRotation.x, worldRotation.y, worldRotation.z, worldRotation.w);
-    //    G3D::Quat localRotationQuat(localRotation.x, localRotation.y, localRotation.z, localRotation.w);
-
-    //    G3D::Quat resultRotation = localRotationQuat * worldRotationQuat;
-
-    //    return QuaternionData(resultRotation.x, resultRotation.y, resultRotation.z, resultRotation.w);
-    //}
-    if (worldRotation.x != 0.f || worldRotation.y != 0.f || worldRotation.z != 0.f || worldRotation.w != 0.f)
+    if (GenericTransport* transport = GetTransport())
     {
+        QuaternionData worldRotation = transport->GetWorldRotation();
+
         G3D::Quat worldRotationQuat(worldRotation.x, worldRotation.y, worldRotation.z, worldRotation.w);
         G3D::Quat localRotationQuat(localRotation.x, localRotation.y, localRotation.z, localRotation.w);
 

@@ -31,6 +31,8 @@
 
 #include "Movement/MoveSpline.h"
 
+#include <G3D/Quat.h>
+
 void MapManager::LoadTransports()
 {
     sTransportMgr.LoadTransportTemplates();
@@ -470,6 +472,25 @@ void ElevatorTransport::Update(const uint32 diff)
                 currentPos = G3D::Vector3(timeElapsed * velocityX, timeElapsed * velocityY, timeElapsed * velocityZ);
                 currentPos += posPrev;
             }
+
+            TransportRotationEntry const* rotPrev = m_animationInfo->GetPrevRotation(timer);
+            if (rotPrev)
+            {
+                G3D::Quat rotation;
+                TransportRotationEntry const* rotNext = m_animationInfo->GetNextRotation(timer);
+                if (rotPrev == rotNext)
+                    rotation = G3D::Quat(rotPrev->x, rotPrev->y, rotPrev->z, rotPrev->w);
+                else
+                {
+                    uint32 timeElapsed = timer - rotPrev->TimeSeg;
+                    uint32 timeDiff = rotNext->TimeSeg - rotPrev->TimeSeg;
+                    G3D::Quat quaternionDiff((rotNext->x - rotPrev->x) / timeDiff, (rotNext->y - rotPrev->y) / timeDiff, (rotNext->z - rotPrev->z) / timeDiff, (rotNext->w - rotPrev->w) / timeDiff);
+                    rotation = G3D::Quat(rotPrev->x + quaternionDiff.x * timeElapsed, rotPrev->y + quaternionDiff.y * timeElapsed, rotPrev->z + quaternionDiff.z * timeElapsed, rotPrev->w + quaternionDiff.w * timeElapsed);
+                }
+
+                currentPos = rotation.toRotationMatrix() * G3D::Matrix3::fromEulerAnglesZYX(GetOrientation(), 0.0f, 0.0f) * G3D::Vector3(currentPos.x, currentPos.y, currentPos.z);
+            }
+
 
             currentPos += G3D::Vector3(m_stationaryPosition.x, m_stationaryPosition.y, m_stationaryPosition.z);
 
