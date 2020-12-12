@@ -50,6 +50,7 @@ void SpellScriptMgr::SetAuraScript(std::string scriptName, AuraScript* script)
     m_auraScriptStringMap.emplace(scriptName, script);
 }
 
+extern void LoadDeathKnightScripts();
 extern void LoadDruidScripts();
 extern void LoadHunterScripts();
 extern void LoadMageScripts();
@@ -64,6 +65,7 @@ extern void LoadScalingScripts();
 void SpellScriptMgr::LoadScripts()
 {
     // load all scripts with names
+    LoadDeathKnightScripts();
     LoadDruidScripts();
     LoadHunterScripts();
     LoadMageScripts();
