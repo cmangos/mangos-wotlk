@@ -623,7 +623,7 @@ struct boss_valanar_iccAI : public blood_prince_council_baseAI
         {
             // Handle Kinetic bomb movement
             pSummoned->SetLevitate(true);
-            pSummoned->GetMotionMaster()->MovePoint(1, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ() - 20.0f, false);
+            pSummoned->GetMotionMaster()->MovePoint(1, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ() - 20.0f);
         }
     }
 

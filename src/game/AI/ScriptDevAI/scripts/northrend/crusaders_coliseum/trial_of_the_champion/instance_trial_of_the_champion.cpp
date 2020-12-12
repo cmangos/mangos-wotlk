@@ -881,7 +881,7 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
                 {
                     if (Creature* pHelper = pHerald->SummonCreature(aArgentChallengeHelpers[i].uiEntry, aArgentChallengeHelpers[i].fX, aArgentChallengeHelpers[i].fY, aArgentChallengeHelpers[i].fZ, aArgentChallengeHelpers[i].fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                     {
-                        pHelper->GetMotionMaster()->MovePoint(POINT_ID_CENTER, aArgentChallengeHelpers[i].fTargetX, aArgentChallengeHelpers[i].fTargetY, aArgentChallengeHelpers[i].fTargetZ, false);
+                        pHelper->GetMotionMaster()->MovePoint(POINT_ID_CENTER, aArgentChallengeHelpers[i].fTargetX, aArgentChallengeHelpers[i].fTargetY, aArgentChallengeHelpers[i].fTargetZ, FORCED_MOVEMENT_NONE, false);
                         pHelper->SetRespawnCoord(aArgentChallengeHelpers[i].fTargetX, aArgentChallengeHelpers[i].fTargetY, aArgentChallengeHelpers[i].fTargetZ, pHelper->GetOrientation());
                     }
                 }
@@ -890,7 +890,7 @@ void instance_trial_of_the_champion::JustDidDialogueStep(int32 iEntry)
         case NPC_JAEREN_SUNSWORN:
             if (Creature* pChampion = GetSingleCreatureFromStorage(m_uiGrandChampionEntry))
             {
-                pChampion->GetMotionMaster()->MovePoint(POINT_ID_CENTER, aArgentChallengeHelpers[9].fTargetX, aArgentChallengeHelpers[9].fTargetY, aArgentChallengeHelpers[9].fTargetZ, false);
+                pChampion->GetMotionMaster()->MovePoint(POINT_ID_CENTER, aArgentChallengeHelpers[9].fTargetX, aArgentChallengeHelpers[9].fTargetY, aArgentChallengeHelpers[9].fTargetZ, FORCED_MOVEMENT_NONE, false);
                 pChampion->SetRespawnCoord(aArgentChallengeHelpers[9].fTargetX, aArgentChallengeHelpers[9].fTargetY, aArgentChallengeHelpers[9].fTargetZ, pChampion->GetOrientation());
             }
             break;
@@ -1096,7 +1096,7 @@ void instance_trial_of_the_champion::Update(uint32 uiDiff)
 
                                 pMount->SetWalk(false);
                                 pCenterTrigger->GetContactPoint(pChampion, fX, fY, fZ, 2 * INTERACTION_DISTANCE);
-                                pMount->GetMotionMaster()->MovePoint(POINT_ID_CENTER, fX, fY, fZ, false);
+                                pMount->GetMotionMaster()->MovePoint(POINT_ID_CENTER, fX, fY, fZ, FORCED_MOVEMENT_NONE, false);
 
                                 // set guid
                                 m_ArenaChampionsGuids[m_uiIntroStage] = pChampion->GetObjectGuid();

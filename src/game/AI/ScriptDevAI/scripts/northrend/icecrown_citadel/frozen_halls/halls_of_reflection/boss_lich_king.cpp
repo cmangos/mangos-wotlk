@@ -153,7 +153,7 @@ struct boss_lich_king_horAI : public ScriptedAI
             if (Creature* pCreature = m_pInstance->GetSingleCreatureFromStorage(m_pInstance->GetPlayerTeam() == ALLIANCE ? NPC_JAINA_PART2 : NPC_SYLVANAS_PART2))
             {
                 pSummoned->SetWalk(false);
-                pSummoned->GetMotionMaster()->MovePoint(0, pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ(), false);
+                pSummoned->GetMotionMaster()->MovePoint(0, pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ(), FORCED_MOVEMENT_NONE, false);
             }
         }
 

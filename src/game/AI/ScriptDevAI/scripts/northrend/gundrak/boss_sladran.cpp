@@ -131,7 +131,7 @@ struct boss_sladranAI : public ScriptedAI
             return;
 
         pSummoned->SetWalk(false);
-        pSummoned->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), false);
+        pSummoned->GetMotionMaster()->MovePoint(0, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
     }
 
     void UpdateAI(const uint32 uiDiff) override

@@ -157,7 +157,7 @@ struct boss_lord_marrowgarAI : public ScriptedAI
             float fZ = pSummoned->GetPositionZ();
             // Note: the NearPoint2D function may not be correct here, because we may use a wrong Z value
             m_creature->GetNearPoint2d(fX, fY, 80.0f, m_creature->GetAngle(pSummoned));
-            pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ, false);
+            pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ, FORCED_MOVEMENT_NONE, false);
         }
     }
 

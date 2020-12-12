@@ -163,7 +163,7 @@ struct boss_blood_queen_lanathelAI : public ScriptedAI
                     m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
 
                     m_creature->GetMotionMaster()->Clear();
-                    m_creature->GetMotionMaster()->MovePoint(POINT_CENTER_AIR, aQueenPosition[1][0], aQueenPosition[1][1], aQueenPosition[1][2], false);
+                    m_creature->GetMotionMaster()->MovePoint(POINT_CENTER_AIR, aQueenPosition[1][0], aQueenPosition[1][1], aQueenPosition[1][2]);
                 }
             }
             else if (m_uiPhase == PHASE_FLYING)

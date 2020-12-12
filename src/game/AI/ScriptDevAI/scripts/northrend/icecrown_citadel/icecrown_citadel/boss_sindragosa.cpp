@@ -193,7 +193,7 @@ struct boss_sindragosaAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_SINDRAGOSA, FAIL);
 
-        m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_EAST, SindragosaPosition[8][0], SindragosaPosition[8][1], SindragosaPosition[8][2], false);
+        m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_EAST, SindragosaPosition[8][0], SindragosaPosition[8][1], SindragosaPosition[8][2]);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -212,7 +212,7 @@ struct boss_sindragosaAI : public ScriptedAI
             SetCombatMovement(false);
             m_creature->SetWalk(true);
             m_creature->GetMotionMaster()->Clear();
-            m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_CENTER, SindragosaPosition[1][0], SindragosaPosition[1][1], SindragosaPosition[1][2], false);
+            m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_CENTER, SindragosaPosition[1][0], SindragosaPosition[1][1], SindragosaPosition[1][2]);
         }
     }
 
@@ -237,11 +237,11 @@ struct boss_sindragosaAI : public ScriptedAI
 
         if (uiPointId == SINDRAGOSA_POINT_AIR_EAST)
         {
-            m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_WEST, SindragosaPosition[9][0], SindragosaPosition[9][1], SindragosaPosition[9][2], false);
+            m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_WEST, SindragosaPosition[9][0], SindragosaPosition[9][1], SindragosaPosition[9][2]);
         }
         else if (uiPointId == SINDRAGOSA_POINT_AIR_WEST)
         {
-            m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_EAST, SindragosaPosition[8][0], SindragosaPosition[8][1], SindragosaPosition[8][2], false);
+            m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_EAST, SindragosaPosition[8][0], SindragosaPosition[8][1], SindragosaPosition[8][2]);
         }
         else if (uiPointId == SINDRAGOSA_POINT_GROUND_CENTER)
         {
@@ -250,7 +250,7 @@ struct boss_sindragosaAI : public ScriptedAI
             {
                 m_uiPhase = SINDRAGOSA_PHASE_FLYING_TO_AIR;
                 SetFlying(true);
-                m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_CENTER, SindragosaPosition[1][0], SindragosaPosition[1][1], SindragosaPosition[1][2], false);
+                m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_CENTER, SindragosaPosition[1][0], SindragosaPosition[1][1], SindragosaPosition[1][2]);
             }
             else // land and attack
             {
@@ -277,12 +277,12 @@ struct boss_sindragosaAI : public ScriptedAI
             if (m_uiPhase == SINDRAGOSA_PHASE_AGGRO || m_uiPhase == SINDRAGOSA_PHASE_FLYING_TO_GROUND)
             {
                 // land
-                m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_GROUND_CENTER, SindragosaPosition[0][0], SindragosaPosition[0][1], SindragosaPosition[0][2], false);
+                m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_GROUND_CENTER, SindragosaPosition[0][0], SindragosaPosition[0][1], SindragosaPosition[0][2]);
             }
             else if (m_uiPhase == SINDRAGOSA_PHASE_FLYING_TO_AIR)
             {
                 // fly up (air phase)
-                m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_PHASE_2, SindragosaPosition[2][0], SindragosaPosition[2][1], SindragosaPosition[2][2], false);
+                m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_PHASE_2, SindragosaPosition[2][0], SindragosaPosition[2][1], SindragosaPosition[2][2]);
             }
         }
         else if (uiPointId == SINDRAGOSA_POINT_AIR_PHASE_2)
@@ -362,7 +362,7 @@ struct boss_sindragosaAI : public ScriptedAI
                         m_uiPhaseTimer = 33000;
                         DoScriptText(SAY_TAKEOFF, m_creature);
                         SetCombatMovement(false);
-                        m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_GROUND_CENTER, SindragosaPosition[0][0], SindragosaPosition[0][1], SindragosaPosition[0][2], false);
+                        m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_GROUND_CENTER, SindragosaPosition[0][0], SindragosaPosition[0][1], SindragosaPosition[0][2]);
                     }
                     else
                         m_uiPhaseTimer -= uiDiff;
@@ -432,7 +432,7 @@ struct boss_sindragosaAI : public ScriptedAI
                 {
                     m_uiPhase = SINDRAGOSA_PHASE_FLYING_TO_GROUND;
                     m_uiPhaseTimer = 42000;
-                    m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_CENTER, SindragosaPosition[1][0], SindragosaPosition[1][1], SindragosaPosition[1][2], false);
+                    m_creature->GetMotionMaster()->MovePoint(SINDRAGOSA_POINT_AIR_CENTER, SindragosaPosition[1][0], SindragosaPosition[1][1], SindragosaPosition[1][2]);
                 }
                 else
                     m_uiPhaseTimer -= uiDiff;
@@ -522,7 +522,7 @@ struct npc_rimefang_iccAI : public ScriptedAI
             if (!m_bHasLanded)
             {
                 m_bHasLanded = true;
-                m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_INITIAL_LAND_AIR, SindragosaPosition[4][0], SindragosaPosition[4][1], SindragosaPosition[4][2], false);
+                m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_INITIAL_LAND_AIR, SindragosaPosition[4][0], SindragosaPosition[4][1], SindragosaPosition[4][2]);
             }
 
             return;
@@ -551,7 +551,7 @@ struct npc_rimefang_iccAI : public ScriptedAI
         m_creature->CombatStop(true);
 
         if (m_creature->IsAlive())
-            m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_INITIAL_LAND, SindragosaPosition[3][0], SindragosaPosition[3][1], SindragosaPosition[3][2], false);
+            m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_INITIAL_LAND, SindragosaPosition[3][0], SindragosaPosition[3][1], SindragosaPosition[3][2]);
 
         m_creature->SetLootRecipient(nullptr);
 
@@ -565,7 +565,7 @@ struct npc_rimefang_iccAI : public ScriptedAI
 
         if (uiPointId == RIMEFANG_POINT_INITIAL_LAND_AIR)
         {
-            m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_INITIAL_LAND, SindragosaPosition[3][0], SindragosaPosition[3][1], SindragosaPosition[3][2], false);
+            m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_INITIAL_LAND, SindragosaPosition[3][0], SindragosaPosition[3][1], SindragosaPosition[3][2]);
         }
         else if (uiPointId == RIMEFANG_POINT_INITIAL_LAND)
         {
@@ -612,7 +612,7 @@ struct npc_rimefang_iccAI : public ScriptedAI
                 m_uiPhase = RIMEFANG_PHASE_FLYING;
                 SetFlying(true);
                 SetCombatMovement(false);
-                m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_AIR, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 20.0f, false);
+                m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_AIR, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 20.0f);
                 return;
             }
             m_uiPhaseTimer -= uiDiff;
@@ -637,7 +637,7 @@ struct npc_rimefang_iccAI : public ScriptedAI
                             m_uiIcyBlastCounter = 0;
                             m_uiIcyBlastTimer = 0;
                             m_uiPhase = RIMEFANG_PHASE_FLYING;
-                            m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_GROUND, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() - 20.0f, false);
+                            m_creature->GetMotionMaster()->MovePoint(RIMEFANG_POINT_GROUND, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() - 20.0f);
                         }
                     }
                 }
@@ -710,7 +710,7 @@ struct npc_spinestalker_iccAI : public ScriptedAI
             if (!m_bHasLanded)
             {
                 m_bHasLanded = true;
-                m_creature->GetMotionMaster()->MovePoint(SPINESTALKER_POINT_INITIAL_LAND_AIR, SindragosaPosition[6][0], SindragosaPosition[6][1], SindragosaPosition[6][2], false);
+                m_creature->GetMotionMaster()->MovePoint(SPINESTALKER_POINT_INITIAL_LAND_AIR, SindragosaPosition[6][0], SindragosaPosition[6][1], SindragosaPosition[6][2]);
             }
 
             return;
@@ -739,7 +739,7 @@ struct npc_spinestalker_iccAI : public ScriptedAI
 
         if (uiPointId == SPINESTALKER_POINT_INITIAL_LAND_AIR)
         {
-            m_creature->GetMotionMaster()->MovePoint(SPINESTALKER_POINT_INITIAL_LAND, SindragosaPosition[5][0], SindragosaPosition[5][1], SindragosaPosition[5][2], false);
+            m_creature->GetMotionMaster()->MovePoint(SPINESTALKER_POINT_INITIAL_LAND, SindragosaPosition[5][0], SindragosaPosition[5][1], SindragosaPosition[5][2]);
         }
         else if (uiPointId == SPINESTALKER_POINT_INITIAL_LAND)
         {

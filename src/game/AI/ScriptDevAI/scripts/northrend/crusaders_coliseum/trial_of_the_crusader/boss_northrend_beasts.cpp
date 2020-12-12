@@ -123,7 +123,7 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
         m_aSummonedBossGuid[m_uiPhase] = pSummoned->GetObjectGuid();
 
         pSummoned->SetWalk(false);
-        pSummoned->GetMotionMaster()->MovePoint(m_uiPhase, aMovePositions[m_uiPhase][0], aMovePositions[m_uiPhase][1], aMovePositions[m_uiPhase][2], false);
+        pSummoned->GetMotionMaster()->MovePoint(m_uiPhase, aMovePositions[m_uiPhase][0], aMovePositions[m_uiPhase][1], aMovePositions[m_uiPhase][2], FORCED_MOVEMENT_NONE, false);
 
         // Next beasts are summoned only for heroic modes
         if (m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_10MAN_HEROIC || m_creature->GetMap()->GetDifficulty() == RAID_DIFFICULTY_25MAN_HEROIC)
