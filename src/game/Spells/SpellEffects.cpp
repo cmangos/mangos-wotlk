@@ -6310,6 +6310,7 @@ void Spell::EffectSummonType(SpellEffectIndex eff_idx)
         case 44322: // Hacky fix for summon spell in Vexallus fight (MGT)
         case 46154: // need more info on how to handle this
         case 46159:
+        case 51852: // Eye of Acherus
             break;
         default:
         {
