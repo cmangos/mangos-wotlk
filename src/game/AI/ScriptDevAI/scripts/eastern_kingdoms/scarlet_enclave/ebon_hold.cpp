@@ -17,21 +17,23 @@
 /* ScriptData
 SDName: Ebon_Hold
 SD%Complete: 95
-SDComment: Quest support: 12641, 12687, 12698, 12733, 12739(and 12742 to 12750), 12754, 12801, 12848
+SDComment: Quest support: 12619, 12641, 12687, 12698, 12733, 12739(and 12742 to 12750), 12754, 12801
 SDCategory: Ebon Hold
 EndScriptData */
 
 /* ContentData
 npc_a_special_surprise
 npc_death_knight_initiate
-npc_unworthy_initiate_anchor
-npc_unworthy_initiate
-go_acherus_soul_prison
 npc_eye_of_acherus
 npc_scarlet_ghoul
 npc_highlord_darion_mograine
 npc_fellow_death_knight
 npc_scarlet_courier
+spell_emblazon_runeblade
+spell_death_knight_initiate_visual
+spell_siphon_of_acherus
+spell_recall_eye_of_acherus
+spell_summon_ghouls_scarlet_crusade
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
@@ -753,268 +755,6 @@ bool EffectDummyCreature_npc_death_knight_initiate(Unit* pCaster, uint32 uiSpell
     {
         pCreatureTarget->AI()->SendAIEvent(AI_EVENT_START_EVENT, pCaster, pCreatureTarget);
         return true;
-    }
-
-    return false;
-}
-
-/*######
-## npc_unworthy_initiate_anchor
-######*/
-
-enum
-{
-    SAY_START                       = -1609000,             // 8 texts in total, GetTextId() generates random with this as base
-    SAY_AGGRO                       = -1609008,             // 8 texts in total, GetTextId() generates random with this as base
-
-    // SPELL_CHAINED_PESANT_LH         = 54602,             // not used. possible it determine side, where to go get "weapon"
-    // SPELL_CHAINED_PESANT_RH         = 54610,
-    SPELL_CHAINED_PESANT_CHEST      = 54612,
-    SPELL_CHAINED_PESANT_BREATH     = 54613,
-    SPELL_INITIATE_VISUAL           = 51519,
-
-    NPC_ANCHOR                      = 29521,
-    FACTION_MONSTER                 = 16,
-
-    PHASE_INACTIVE_OR_COMBAT        = 0,
-    PHASE_DRESSUP                   = 1,
-    PHASE_ACTIVATE                  = 2
-};
-
-struct npc_unworthy_initiate_anchorAI : public ScriptedAI
-{
-    npc_unworthy_initiate_anchorAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    ObjectGuid m_myInitiateGuid;
-    ObjectGuid m_myPrisonGuid;
-
-    void Reset() override {}
-
-    void NotifyMe(Unit* pSource, GameObject* pGo)
-    {
-        m_myPrisonGuid = pGo->GetObjectGuid();
-        Creature* pInitiate = m_creature->GetMap()->GetCreature(m_myInitiateGuid);
-
-        if (pInitiate && pSource)
-        {
-            pInitiate->SetLootRecipient(pSource);
-            m_creature->InterruptNonMeleeSpells(false);
-            m_creature->CastSpell(pInitiate, SPELL_CHAINED_PESANT_BREATH, TRIGGERED_NONE);
-        }
-    }
-
-    void RegisterCloseInitiate(Creature* pCreature)
-    {
-        m_myInitiateGuid = pCreature->GetObjectGuid();
-    }
-
-    void ResetPrison()
-    {
-        if (GameObject* pPrison = m_creature->GetMap()->GetGameObject(m_myPrisonGuid))
-            pPrison->ResetDoorOrButton();
-    }
-};
-
-UnitAI* GetAI_npc_unworthy_initiate_anchor(Creature* pCreature)
-{
-    return new npc_unworthy_initiate_anchorAI(pCreature);
-}
-
-/*######
-## npc_unworthy_initiate
-######*/
-
-struct npc_unworthy_initiateAI : public ScriptedAI
-{
-    npc_unworthy_initiateAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        Reset();
-    }
-
-    ObjectGuid m_myAnchorGuid;
-    uint32 m_uiAnchorCheckTimer;
-    uint32 m_uiPhase;
-    uint32 m_uiPhaseTimer;
-    uint32 m_uiBloodStrike_Timer;
-    uint32 m_uiDeathCoil_Timer;
-    uint32 m_uiIcyTouch_Timer;
-    uint32 m_uiPlagueStrike_Timer;
-
-    void Reset() override
-    {
-        m_uiAnchorCheckTimer = 5000;
-        m_uiPhase = PHASE_INACTIVE_OR_COMBAT;
-        m_uiPhaseTimer = 7500;
-        m_uiBloodStrike_Timer = 4000;
-        m_uiDeathCoil_Timer = 6000;
-        m_uiIcyTouch_Timer = 2000;
-        m_uiPlagueStrike_Timer = 5000;
-
-        m_creature->SetImmuneToPlayer(true);
-    }
-
-    void JustReachedHome() override
-    {
-        SetAnchor();
-
-        if (Creature* pAnchor = GetAnchor())
-        {
-            if (npc_unworthy_initiate_anchorAI* pAnchorAI = dynamic_cast<npc_unworthy_initiate_anchorAI*>(pAnchor->AI()))
-                pAnchorAI->ResetPrison();
-        }
-    }
-
-    void JustRespawned() override
-    {
-        if (Creature* pAnchor = GetAnchor())
-        {
-            if (npc_unworthy_initiate_anchorAI* pAnchorAI = dynamic_cast<npc_unworthy_initiate_anchorAI*>(pAnchor->AI()))
-                pAnchorAI->ResetPrison();
-        }
-
-        Reset();
-    }
-
-    int32 GetTextId() const
-    {
-        return m_uiPhase == PHASE_DRESSUP ? SAY_START - urand(0, 7) : SAY_AGGRO - urand(0, 7);
-    }
-
-    Creature* GetAnchor() const
-    {
-        if (m_myAnchorGuid)
-            return m_creature->GetMap()->GetCreature(m_myAnchorGuid);
-        return GetClosestCreatureWithEntry(m_creature, NPC_ANCHOR, INTERACTION_DISTANCE * 2);
-    }
-
-    void SetAnchor()
-    {
-        if (Creature* pAnchor = GetAnchor())
-        {
-            if (npc_unworthy_initiate_anchorAI* pAnchorAI = dynamic_cast<npc_unworthy_initiate_anchorAI*>(pAnchor->AI()))
-                pAnchorAI->RegisterCloseInitiate(m_creature);
-
-            pAnchor->CastSpell(m_creature, SPELL_CHAINED_PESANT_CHEST, TRIGGERED_NONE);
-            m_myAnchorGuid = pAnchor->GetObjectGuid();
-
-            m_uiAnchorCheckTimer = 0;
-            return;
-        }
-
-        m_uiAnchorCheckTimer = 5000;
-    }
-
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
-    {
-        if (pSpell->Id == SPELL_CHAINED_PESANT_BREATH)
-        {
-            pCaster->InterruptNonMeleeSpells(true);
-            m_creature->SetStandState(UNIT_STAND_STATE_STAND);
-
-            m_uiPhase = PHASE_DRESSUP;
-
-            if (Player* pSource = m_creature->GetLootRecipient())
-                DoScriptText(GetTextId(), m_creature, pSource);
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiAnchorCheckTimer)
-        {
-            if (m_uiAnchorCheckTimer <= uiDiff)
-                SetAnchor();
-            else
-                m_uiAnchorCheckTimer -= uiDiff;
-        }
-
-        if (m_uiPhase == PHASE_INACTIVE_OR_COMBAT)
-        {
-            if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-                return;
-
-            if (m_uiBloodStrike_Timer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BLOOD_STRIKE);
-                m_uiBloodStrike_Timer = 9000;
-            }
-            else
-                m_uiBloodStrike_Timer -= uiDiff;
-
-            if (m_uiDeathCoil_Timer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DEATH_COIL);
-                m_uiDeathCoil_Timer = 8000;
-            }
-            else
-                m_uiDeathCoil_Timer -= uiDiff;
-
-            if (m_uiIcyTouch_Timer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ICY_TOUCH);
-                m_uiIcyTouch_Timer = 8000;
-            }
-            else
-                m_uiIcyTouch_Timer -= uiDiff;
-
-            if (m_uiPlagueStrike_Timer < uiDiff)
-            {
-                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PLAGUE_STRIKE);
-                m_uiPlagueStrike_Timer = 8000;
-            }
-            else
-                m_uiPlagueStrike_Timer -= uiDiff;
-
-            DoMeleeAttackIfReady();
-        }
-        else
-        {
-            if (m_uiPhaseTimer < uiDiff)
-            {
-                if (m_uiPhase == PHASE_DRESSUP)
-                {
-                    // ToDo: send the creature to the left / right in order to grab a weapon
-                    m_creature->CastSpell(m_creature, SPELL_INITIATE_VISUAL, TRIGGERED_NONE);
-
-                    m_uiPhase = PHASE_ACTIVATE;
-                }
-                else
-                {
-                    m_creature->SetFactionTemporary(FACTION_MONSTER, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
-
-                    m_uiPhase = PHASE_INACTIVE_OR_COMBAT;
-
-                    if (Player* pTarget = m_creature->GetLootRecipient())
-                    {
-                        DoScriptText(GetTextId(), m_creature, pTarget);
-                        m_creature->SetImmuneToPlayer(false);
-                        AttackStart(pTarget);
-                    }
-                }
-
-                m_uiPhaseTimer = 5000;
-            }
-            else
-                m_uiPhaseTimer -= uiDiff;
-        }
-    }
-};
-
-UnitAI* GetAI_npc_unworthy_initiate(Creature* pCreature)
-{
-    return new npc_unworthy_initiateAI(pCreature);
-}
-
-/*######
-## go_acherus_soul_prison
-######*/
-
-bool GOUse_go_acherus_soul_prison(Player* pPlayer, GameObject* pGo)
-{
-    if (Creature* pAnchor = GetClosestCreatureWithEntry(pGo, NPC_ANCHOR, INTERACTION_DISTANCE))
-    {
-        if (npc_unworthy_initiate_anchorAI* pAnchorAI = dynamic_cast<npc_unworthy_initiate_anchorAI*>(pAnchor->AI()))
-            pAnchorAI->NotifyMe(pPlayer, pGo);
     }
 
     return false;
@@ -3073,21 +2813,6 @@ void AddSC_ebon_hold()
     pNewScript->pGossipHello = &GossipHello_npc_death_knight_initiate;
     pNewScript->pGossipSelect = &GossipSelect_npc_death_knight_initiate;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_death_knight_initiate;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_unworthy_initiate";
-    pNewScript->GetAI = &GetAI_npc_unworthy_initiate;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_unworthy_initiate_anchor";
-    pNewScript->GetAI = &GetAI_npc_unworthy_initiate_anchor;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "go_acherus_soul_prison";
-    pNewScript->pGOUse = &GOUse_go_acherus_soul_prison;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

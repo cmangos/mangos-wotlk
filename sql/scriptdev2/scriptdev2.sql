@@ -778,9 +778,6 @@ UPDATE creature_template SET ScriptName='npc_eris_havenfire' WHERE entry=14494;
 
 /* EBON HOLD */
 UPDATE creature_template SET ScriptName='npc_death_knight_initiate' WHERE entry=28406;
-UPDATE creature_template SET ScriptName='npc_unworthy_initiate_anchor' WHERE entry=29521;
-UPDATE creature_template SET ScriptName='npc_unworthy_initiate' WHERE entry IN (29519,29520,29565,29566,29567);
-UPDATE gameobject_template SET ScriptName='go_acherus_soul_prison' WHERE entry IN (191577,191580,191581,191582,191583,191584,191585,191586,191587,191588,191589,191590);
 UPDATE creature_template SET ScriptName='npc_a_special_surprise' WHERE entry IN (29032,29061,29065,29067,29068,29070,29074,29072,29073,29071);
 UPDATE creature_template SET ScriptName='npc_eye_of_acherus' WHERE entry=28511;
 UPDATE creature_template SET ScriptName='npc_scarlet_ghoul' WHERE entry=28845;
@@ -6492,23 +6489,23 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 609 000 EBON HOLD (DK START)
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1609000','You have made a grave error, fiend!','0','0','0','0','0','unworthy SAY_START_1'),
-('-1609001','I was a soldier of the Light once... Look at what I have become... ','0','0','0','0','0','unworthy SAY_START_2'),
-('-1609002','You are hopelessly outmatched, $R.','0','0','0','0','0','unworthy SAY_START_3'),
-('-1609003','They brand me unworthy? I will show them unmorthy!','0','0','0','0','0','unworthy SAY_START_4'),
-('-1609004','You will allow me a weapon and armor, yes?','0','0','0','0','0','unworthy SAY_START_5'),
-('-1609005','I will win my freedom and leave this cursed place!','0','0','0','0','0','unworthy SAY_START_6'),
-('-1609006','I will dismantle this festering hellhole!','0','0','0','0','0','unworthy SAY_START_7'),
-('-1609007','There can be only one survivor!','0','0','0','0','0','unworthy SAY_START_8'),
+('-1609000','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609001','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609002','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609003','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609004','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609005','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609006','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609007','REUSE ME','0','0','0','0','0','REUSE ME'),
 
-('-1609008','Let your fears consume you!','0','0','0','0','0','unworthy SAY_AGGRO_1'),
-('-1609009','HAH! You can barely hold a blade! Yours will be a quick death.','0','0','0','0','0','unworthy SAY_AGGRO_2'),
-('-1609010','And now you die','0','0','0','0','0','unworthy SAY_AGGRO_3'),
-('-1609011','To battle!','0','0','0','0','0','unworthy SAY_AGGRO_4'),
-('-1609012','There is no hope for our future...','0','0','0','0','0','unworthy SAY_AGGRO_5'),
-('-1609013','Sate your hunger on cold steel, $R','0','0','0','0','0','unworthy SAY_AGGRO_6'),
-('-1609014','It ends here!','0','0','0','0','0','unworthy SAY_AGGRO_7'),
-('-1609015','Death is the only cure!','0','0','0','0','0','unworthy SAY_AGGRO_8'),
+('-1609008','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609009','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609010','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609011','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609012','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609013','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609014','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1609015','REUSE ME','0','0','0','0','0','REUSE ME'),
 
 ('-1609016','No potions!','0','0','0','0','0','dk_initiate SAY_DUEL_A'),
 ('-1609017','Remember this day, $n, for it is the day that you will be thoroughly owned.','0','0','0','0','0','dk_initiate SAY_DUEL_B'),
