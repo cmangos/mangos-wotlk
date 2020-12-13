@@ -59,6 +59,7 @@ class MovementInfo;
 class WorldSession;
 
 struct OpcodeHandler;
+class SpellCastTargets;
 
 enum AccountDataType
 {
@@ -958,6 +959,7 @@ class WorldSession
         void HandleGetMirrorimageData(WorldPacket& recv_data);
         void HandleUpdateMissileTrajectory(WorldPacket& recv_data);
         void HandleOnMissileTrajectoryCollision(WorldPacket& recv_data);
+        void HandleClientCastFlags(WorldPacket& recvPacket, uint8 castFlags, SpellCastTargets& targets);
         void HandleAlterAppearanceOpcode(WorldPacket& recv_data);
         void HandleRemoveGlyphOpcode(WorldPacket& recv_data);
         void HandleCharCustomizeOpcode(WorldPacket& recv_data);

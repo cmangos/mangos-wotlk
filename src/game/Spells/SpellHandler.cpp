@@ -157,7 +157,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     recvPacket >> targets.ReadForCaster(pUser);
 
     // some spell cast packet including more data (for projectiles)
-    targets.ReadAdditionalSpellData(recvPacket, cast_flags);
+    HandleClientCastFlags(recvPacket, cast_flags, targets);
 
     targets.Update(pUser);
 
@@ -418,7 +418,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 #endif
 
     // some spell cast packet including more data (for projectiles)
-    targets.ReadAdditionalSpellData(recvPacket, cast_flags);
+    HandleClientCastFlags(recvPacket, cast_flags, targets);
 
     // auto-selection buff level base at target level (in spellInfo)
     if (Unit* target = targets.getUnitTarget())
@@ -811,6 +811,7 @@ void WorldSession::HandleUpdateMissileTrajectory(WorldPacket& recv_data)
         recv_data >> opcode;
         if (opcode != MSG_MOVE_STOP)
             return; // hacking attempt
+        recv_data.SetOpcode(Opcodes(opcode));
         HandleMovementOpcodes(recv_data);
     }
 }
@@ -851,4 +852,31 @@ void WorldSession::HandleOnMissileTrajectoryCollision(WorldPacket& recvPacket)
     data << float(y);
     data << float(z);
     caster->SendMessageToSet(data, true);
+}
+
+void WorldSession::HandleClientCastFlags(WorldPacket& recv_data, uint8 castFlags, SpellCastTargets& targets)
+{
+    // some spell cast packet including more data (for projectiles?)
+    if (castFlags & 0x02)
+    {
+        // not sure about these two
+        float elevation, speed;
+        recv_data >> elevation;
+        recv_data >> speed;
+
+        targets.setElevation(elevation);
+        targets.setSpeed(speed);
+
+        uint8 hasMovementData;
+        recv_data >> hasMovementData;
+        if (hasMovementData)
+        {
+            uint32 opcode;
+            recv_data >> opcode;
+            if (opcode != MSG_MOVE_STOP)
+                return; // hacking attempt
+            recv_data.SetOpcode(Opcodes(opcode));
+            HandleMovementOpcodes(recv_data);
+        }
+    }
 }

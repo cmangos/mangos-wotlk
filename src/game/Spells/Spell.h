@@ -118,8 +118,6 @@ class SpellCastTargets
 
         SpellCastTargetsReader ReadForCaster(Unit* caster) { return SpellCastTargetsReader(*this, caster); }
 
-        void ReadAdditionalSpellData(ByteBuffer& data, uint8 castFlags);
-
         SpellCastTargets& operator=(const SpellCastTargets& target)
         {
             m_unitTarget = target.m_unitTarget;
