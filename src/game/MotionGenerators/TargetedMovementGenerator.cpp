@@ -1029,7 +1029,6 @@ void FollowMovementGenerator::HandleTargetedMovement(Unit& owner, const uint32& 
             i_recheckDistance.Reset(_getPollRate(owner, m_targetMoving, targetMovingLast));
 
             G3D::Vector3 currentTargetPos;
-
             i_target->GetPosition(currentTargetPos.x, currentTargetPos.y, currentTargetPos.z);
 
             targetRelocation = (currentTargetPos != i_lastTargetPos || RequiresNewPosition(owner, owner.GetPositionX(), owner.GetPositionY(), owner.GetPositionZ()));
