@@ -13448,7 +13448,7 @@ void Unit::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=null
     if (!CanFly())
     {
         bool canSwim = CanSwim();
-        float groundZ = GetMap()->GetHeight(x, y, z, canSwim), maxZ;
+        float groundZ = GetMap()->GetHeight(GetPhaseMask(), x, y, z, canSwim), maxZ;
         if (canSwim)
             maxZ = atMap->GetTerrain()->GetWaterOrGroundLevel(x, y, z, groundZ, !HasAuraType(SPELL_AURA_WATER_WALK), GetCollisionHeight());
         else
