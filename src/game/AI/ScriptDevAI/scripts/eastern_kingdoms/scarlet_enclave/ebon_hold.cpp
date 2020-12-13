@@ -1026,10 +1026,11 @@ bool GOUse_go_acherus_soul_prison(Player* pPlayer, GameObject* pGo)
 
 enum
 {
-    SPELL_EYE_CONTROL       = 51852,                        // player control aura
-    SPELL_EYE_VISUAL        = 51892,
-    SPELL_EYE_FLIGHT        = 51890,                        // player flight control
-    SPELL_EYE_FLIGHT_BOOST  = 51923,                        // flight boost to reach new avalon
+    // SPELL_EYE_CONTROL    = 51852,                        // apply phase aura: 2; summon creature 28511 and apply player control aura
+    SPELL_EYE_VISUAL        = 51892,                        // apply visual aura
+    SPELL_EYE_FLIGHT        = 51890,                        // apply fly aura and change mounted speed; cast by the eye of acherus
+    SPELL_EYE_FLIGHT_BOOST  = 51923,                        // apply fly aura and increase speed aura
+    SPELL_RECALL_EYE        = 52694,
 
     EMOTE_DESTIANTION       = -1609089,
     EMOTE_CONTROL           = -1609090,
@@ -1048,23 +1049,26 @@ struct npc_eye_of_acherusAI : public ScriptedAI
 {
     npc_eye_of_acherusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
+        m_creature->SetDisplayId(26320);                // HACK remove when correct modelid will be taken by core
+
         m_isFinished = false;
         m_reachPoint = false;
-        m_timer = START_POINT_PAUSE_TIME;
+        m_flightTimer = START_POINT_PAUSE_TIME;
         m_phase = 0;
         Reset();
     }
 
     bool m_isFinished;
     bool m_reachPoint;
-    uint32 m_timer;
+    uint32 m_flightTimer;
     uint32 m_phase;
 
     void Reset() override {}
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        m_creature->CastSpell(m_creature, 52694, TRIGGERED_OLD_TRIGGERED);     // HACK - Remove this when mangos supports proper spell casting
+        // recall the eye when it dies - need to remove phase and control aura from player
+        DoCastSpellIfCan(m_creature, SPELL_RECALL_EYE, CAST_TRIGGERED);
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
@@ -1078,22 +1082,8 @@ struct npc_eye_of_acherusAI : public ScriptedAI
             case POINT_EYE_DESTINATION:
                 m_reachPoint = true;
                 break;
-
-            default:
-                return;
         }
     }
-
-    void SummonedCreatureDespawn(Creature* pCreature) override
-    {
-        if (Unit* unit = pCreature->GetCharmer())
-        {
-            // this aura is applied to the master instead to the creature
-            unit->RemoveAurasDueToSpell(SPELL_EYE_FLIGHT_BOOST);
-        }
-    }
-
-    void AttackStart(Unit* /*pWho*/) override {}
 
     void UpdateAI(const uint32 uiDiff) override
     {
@@ -1102,67 +1092,64 @@ struct npc_eye_of_acherusAI : public ScriptedAI
 
         switch (m_phase)
         {
-            case 0: // initialization > move to start position
+            case 0:         // initialization and move to start position
+            {
                 if (m_creature->GetBeneficiaryPlayer())
                 {
-                    m_creature->SetPhaseMask(2, true);              // HACK remove when summon spells and auras are implemented properly in mangos
-                    m_creature->SetDisplayId(26320);                // HACK remove when correct modelid will be taken by core
-
-                    DoCastSpellIfCan(m_creature, SPELL_EYE_VISUAL, CAST_TRIGGERED);
-                    m_creature->GetMotionMaster()->MovePoint(POINT_EYE_DESTINATION, aEyeStartPos[0], aEyeStartPos[1], aEyeStartPos[2]);
+                    if (DoCastSpellIfCan(m_creature, SPELL_EYE_VISUAL) == CAST_OK)
+                        m_creature->GetMotionMaster()->MovePoint(POINT_EYE_DESTINATION, aEyeStartPos[0], aEyeStartPos[1], aEyeStartPos[2]);
                 }
                 else
                 {
+                    // Failsafe: creature isn't controlled -> despawn
                     m_creature->ForcedDespawn();
                     m_isFinished = true;
                 }
+
                 ++m_phase;
                 break;
-
-            case 1: // wait start position reached then wait 5 sec before the journey to the end point
+            }
+            case 1:         // wait for start position reached, then wait 5 sec before the journey to the end point
+            {
                 if (!m_reachPoint)
                     return;
 
-                if (m_timer < uiDiff)
+                if (m_flightTimer < uiDiff)
                 {
-                    Player* player = m_creature->GetBeneficiaryPlayer();
-                    if (!player)
-                        return;
+                    // Apply flight aura and start moving to position
+                    if (DoCastSpellIfCan(m_creature, SPELL_EYE_FLIGHT_BOOST) == CAST_OK)
+                    {
+                        if (Player* player = m_creature->GetBeneficiaryPlayer())
+                            DoScriptText(EMOTE_DESTIANTION, m_creature, player);
 
-                    // Update Speed for Eye
-                    DoScriptText(EMOTE_DESTIANTION, m_creature, player);
-                    DoCastSpellIfCan(m_creature, SPELL_EYE_FLIGHT_BOOST, CAST_FORCE_TARGET_SELF);
-                    ++m_phase;
+                        // move to the destination position
+                        Position tgtPos = Position(aEyeDestination[0], aEyeDestination[1], aEyeDestination[2], 0);
+                        m_creature->GetMotionMaster()->MovePoint(POINT_EYE_DESTINATION, tgtPos, FORCED_MOVEMENT_NONE, m_creature->GetSpawner()->GetSpeed(MOVE_RUN));
+
+                        m_reachPoint = false;
+                        ++m_phase;
+                    }
                 }
                 else
-                    m_timer -= uiDiff;
-                break;
+                    m_flightTimer -= uiDiff;
 
-            case 2: // go to the end point
-                m_creature->GetMotionMaster()->MovePoint(POINT_EYE_DESTINATION, aEyeDestination[0], aEyeDestination[1], aEyeDestination[2]);
-                m_reachPoint = false;
-                ++m_phase;
                 break;
-
-            case 3: // wait to reach end point then set fly mode by applying SPELL_EYE_FLIGHT
+            }
+            case 2:         // wait to reach end point then set fly mode by applying SPELL_EYE_FLIGHT
+            {
                 if (!m_reachPoint)
                     return;
 
-                if (Player* pPlayer = m_creature->GetBeneficiaryPlayer())
-                    DoScriptText(EMOTE_CONTROL, m_creature, pPlayer);
-
-                if (m_creature->m_movementInfo.HasMovementFlag(MOVEFLAG_LEVITATING))
-                    m_creature->SetLevitate(false);             // HACK to remove levitating flag and thus permit fly.
-
-                if (Unit* unit = m_creature->GetCharmer())
+                if (DoCastSpellIfCan(m_creature, SPELL_EYE_FLIGHT) == CAST_OK)
                 {
-                    // this aura is applied to the master instead to the creature
-                    unit->RemoveAurasDueToSpell(SPELL_EYE_FLIGHT_BOOST);
-                }
-                DoCastSpellIfCan(m_creature, SPELL_EYE_FLIGHT, CAST_TRIGGERED);
-                ++m_phase;
-                break;
+                    if (Player* pPlayer = m_creature->GetBeneficiaryPlayer())
+                        DoScriptText(EMOTE_CONTROL, m_creature, pPlayer);
 
+                    m_isFinished = true;
+                    ++m_phase;
+                }
+                break;
+            }
             default:
                 m_isFinished = true;
                 break;
@@ -2906,6 +2893,10 @@ UnitAI* GetAI_npc_scarlet_courier(Creature* pCreature)
     return new npc_scarlet_courierAI(pCreature);
 }
 
+/*######
+## spell_emblazon_runeblade
+######*/
+
 struct spell_emblazon_runeblade : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
@@ -2929,6 +2920,10 @@ struct spell_emblazon_runeblade_aura : public AuraScript
         data.target = nullptr;
     }
 };
+
+/*######
+## spell_death_knight_initiate_visual
+######*/
 
 struct spell_death_knight_initiate_visual : public SpellScript
 {
@@ -2958,6 +2953,109 @@ struct spell_death_knight_initiate_visual : public SpellScript
         }
 
         unitTarget->CastSpell(unitTarget, spellId, TRIGGERED_OLD_TRIGGERED);
+        return;
+    }
+};
+
+/*######
+## spell_siphon_of_acherus
+######*/
+
+struct spell_siphon_of_acherus_aura : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& data) const override
+    {
+        // override target; the real caster of the triggered spell is the player
+        data.caster = aura->GetCaster();
+        data.target = nullptr;
+    }
+};
+
+struct spell_siphon_of_acherus : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!caster || !target)
+            return;
+
+        uint32 spellId;
+
+        switch (target->GetEntry())
+        {
+            case 28525: spellId = 51973; break;     // New Avalon Forge
+            case 28542: spellId = 51979; break;     // Scarlet Hold
+            case 28543: spellId = 51976; break;     // New Avalon Town Hall
+            case 28544: spellId = 51981; break;     // Chapel of the Crimson Flame
+            default:
+                return;
+        }
+
+        target->CastSpell(caster, spellId, TRIGGERED_NONE);
+    }
+};
+
+struct spell_siphon_of_acherus_credit : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        uint32 triggerSpellId;
+
+        switch (spell->m_spellInfo->Id)
+        {
+            case 51973: triggerSpellId = 51974; break;  // New Avalon Forge
+            case 51979: triggerSpellId = 51980; break;  // Scarlet Hold
+            case 51976: triggerSpellId = 51977; break;  // New Avalon Town Hall
+            case 51981: triggerSpellId = 51982; break;  // Chapel of the Crimson Flame
+            default:
+                return;
+        }
+
+        target->CastSpell(target, triggerSpellId, TRIGGERED_NONE);
+    }
+};
+
+/*######
+## spell_recall_eye_of_acherus
+######*/
+
+struct spell_recall_eye_of_acherus : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        Unit* caster = spell->GetAffectiveCaster();
+        if (!caster)
+            return;
+
+        Unit* charmer = caster->GetCharmer();
+        if (!charmer || charmer->GetTypeId() != TYPEID_PLAYER)
+            return;
+
+        charmer->RemoveAurasDueToSpell(51852);
+        charmer->RemoveAurasDueToSpell(51923);
+        return;
+    }
+};
+
+/*######
+## spell_summon_ghouls_scarlet_crusade
+######*/
+
+struct spell_summon_ghouls_scarlet_crusade : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // cast Summon Ghouls On Scarlet Crusade
+        target->CastSpell(target, 51900, TRIGGERED_OLD_TRIGGERED);
         return;
     }
 };
@@ -3028,4 +3126,9 @@ void AddSC_ebon_hold()
     RegisterSpellScript<spell_emblazon_runeblade>("spell_emblazon_runeblade");
     RegisterAuraScript<spell_emblazon_runeblade_aura>("spell_emblazon_runeblade_aura");
     RegisterSpellScript<spell_death_knight_initiate_visual>("spell_death_knight_initiate_visual");
+    RegisterAuraScript<spell_siphon_of_acherus_aura>("spell_siphon_of_acherus_aura");
+    RegisterSpellScript<spell_siphon_of_acherus>("spell_siphon_of_acherus");
+    RegisterSpellScript<spell_siphon_of_acherus_credit>("spell_siphon_of_acherus_credit");
+    RegisterSpellScript<spell_recall_eye_of_acherus>("spell_recall_eye_of_acherus");
+    RegisterSpellScript<spell_summon_ghouls_scarlet_crusade>("spell_summon_ghouls_scarlet_crusade");
 }

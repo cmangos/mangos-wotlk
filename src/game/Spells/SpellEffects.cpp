@@ -3483,14 +3483,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 51858:                                 // Siphon of Acherus
-                {
-                    if (m_originalCaster && unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT)
-                        if (Player* pPlayer = m_originalCaster->GetBeneficiaryPlayer())
-                            pPlayer->KilledMonsterCredit(unitTarget->GetEntry(), unitTarget->GetObjectGuid());
-
-                    return;
-                }
                 case 52308:                                 // Take Sputum Sample
                 {
                     switch (eff_idx)
@@ -10673,17 +10665,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 51864, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 51904:                                 // Summon Ghouls On Scarlet Crusade
-                {
-                    if (!unitTarget)
-                        return;
-
-                    // cast Summon Ghouls On Scarlet Crusade
-                    float x, y, z;
-                    m_targets.getDestination(x, y, z);
-                    unitTarget->CastSpell(x, y, z, 54522, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_originalCasterGUID);
-                    return;
-                }
                 case 51910:                                 // Kickin' Nass: Quest Completion
                 {
                     if (m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -10725,18 +10706,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         return;
 
                     unitTarget->RemoveAurasByCasterSpell(m_spellInfo->CalculateSimpleValue(eff_idx), m_caster->GetObjectGuid());
-                    return;
-                }
-                case 52694:                                 // Recall Eye of Acherus
-                {
-                    if (!m_caster || m_caster->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    Unit* charmer = m_caster->GetCharmer();
-                    if (!charmer || charmer->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    charmer->RemoveAurasDueToSpell(51852);
                     return;
                 }
                 case 52751:                                 // Death Gate
