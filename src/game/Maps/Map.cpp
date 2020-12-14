@@ -1124,9 +1124,13 @@ void Map::SendInitSelf(Player* player) const
     {
         for (auto itr : transport->GetPassengers())
         {
-            if (player != itr && player->HaveAtClient(itr))
+            if (player != itr)
             {
-                itr->BuildCreateUpdateBlockForPlayer(&updateData, player);
+                if (player->HaveAtClient(itr) || itr->isVisibleForInState(player, player, false))
+                {
+                    player->m_clientGUIDs.insert(itr->GetObjectGuid());
+                    itr->BuildCreateUpdateBlockForPlayer(&updateData, player);
+                }
             }
         }
     }
