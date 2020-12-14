@@ -468,16 +468,16 @@ void ElevatorTransport::Update(const uint32 /*diff*/)
                 currentPos += posPrev;
             }
 
-            TransportRotationEntry const* rotPrev = m_animationInfo->GetPrevRotation(timer);
+            TransportRotationEntry const* rotPrev = m_animationInfo->GetPrevRotation(m_pathProgress);
             if (rotPrev)
             {
                 G3D::Quat rotation;
-                TransportRotationEntry const* rotNext = m_animationInfo->GetNextRotation(timer);
+                TransportRotationEntry const* rotNext = m_animationInfo->GetNextRotation(m_pathProgress);
                 if (rotPrev == rotNext)
                     rotation = G3D::Quat(rotPrev->x, rotPrev->y, rotPrev->z, rotPrev->w);
                 else
                 {
-                    uint32 timeElapsed = timer - rotPrev->TimeSeg;
+                    uint32 timeElapsed = m_pathProgress - rotPrev->TimeSeg;
                     uint32 timeDiff = rotNext->TimeSeg - rotPrev->TimeSeg;
                     G3D::Quat quaternionDiff((rotNext->x - rotPrev->x) / timeDiff, (rotNext->y - rotPrev->y) / timeDiff, (rotNext->z - rotPrev->z) / timeDiff, (rotNext->w - rotPrev->w) / timeDiff);
                     rotation = G3D::Quat(rotPrev->x + quaternionDiff.x * timeElapsed, rotPrev->y + quaternionDiff.y * timeElapsed, rotPrev->z + quaternionDiff.z * timeElapsed, rotPrev->w + quaternionDiff.w * timeElapsed);
