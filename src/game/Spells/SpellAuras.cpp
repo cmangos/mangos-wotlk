@@ -4456,6 +4456,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 void Aura::HandleAuraTransform(bool apply, bool Real)
 {
     Unit* target = GetTarget();
+    bool skipDisplayUpdate = false;
     if (apply)
     {
         // special case (spell specific functionality)
@@ -4692,10 +4693,14 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
 
             // creature case, need to update equipment if additional provided
             if (cInfo && target->GetTypeId() == TYPEID_UNIT)
+            {
+                skipDisplayUpdate = ((Creature*)target)->IsTotem();
                 ((Creature*)target)->LoadEquipment(cInfo->EquipmentTemplateId, false);
+            }
         }
 
-        target->SetDisplayId(m_modifier.m_amount);
+        if (!skipDisplayUpdate)
+            target->SetDisplayId(m_modifier.m_amount);
 
         // polymorph case
         if (Real && GetSpellProto()->Mechanic == MECHANIC_POLYMORPH)

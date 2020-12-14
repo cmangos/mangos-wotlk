@@ -1062,7 +1062,7 @@ CreatureModelInfo const* ObjectMgr::GetCreatureModelRandomGender(uint32 display_
 
 uint32 ObjectMgr::GetModelForRace(uint32 sourceModelId, uint32 racemask)
 {
-    uint32 modelId = 0;
+    uint32 modelId = sourceModelId;
 
     CreatureModelRaceMapBounds bounds = m_mCreatureModelRaceMap.equal_range(sourceModelId);
 
