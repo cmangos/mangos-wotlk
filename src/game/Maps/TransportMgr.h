@@ -110,7 +110,7 @@ class TransportMgr
             return nullptr;
         }
 
-        TransportTemplate const* GetTransportTemplate(uint32 entry);
+        TransportTemplate* GetTransportTemplate(uint32 entry);
 
         void LoadTransportTemplates();
 
