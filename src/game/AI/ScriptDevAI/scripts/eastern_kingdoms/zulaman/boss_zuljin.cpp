@@ -205,7 +205,7 @@ struct boss_zuljinAI : public CombatAI
         ResetTimer(ZULJIN_FIRE_WALL_DELAY, 5000);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
         if (m_instance)
             m_instance->SetData(TYPE_ZULJIN, FAIL);
@@ -217,6 +217,10 @@ struct boss_zuljinAI : public CombatAI
         for (const auto& aZuljinPhase : aZuljinPhases)
             if (Creature* spirit = m_instance->GetSingleCreatureFromStorage(aZuljinPhase.spiritId))
                 spirit->RemoveAurasDueToSpell(SPELL_SPIRIT_DRAINED);
+
+        m_creature->SetHealthPercent(100.f); // TODO: Remove this hack once evade issues are resolved
+
+        CombatAI::EnterEvadeMode();
     }
 
     void KilledUnit(Unit* /*victim*/) override
