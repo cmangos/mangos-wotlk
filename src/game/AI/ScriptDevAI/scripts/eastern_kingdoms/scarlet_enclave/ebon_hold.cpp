@@ -2693,7 +2693,6 @@ struct spell_death_knight_initiate_visual : public SpellScript
         }
 
         unitTarget->CastSpell(unitTarget, spellId, TRIGGERED_OLD_TRIGGERED);
-        return;
     }
 };
 
@@ -2778,7 +2777,6 @@ struct spell_recall_eye_of_acherus : public SpellScript
 
         charmer->RemoveAurasDueToSpell(51852);
         charmer->RemoveAurasDueToSpell(51923);
-        return;
     }
 };
 
@@ -2796,7 +2794,6 @@ struct spell_summon_ghouls_scarlet_crusade : public SpellScript
 
         // cast Summon Ghouls On Scarlet Crusade
         target->CastSpell(target, 51900, TRIGGERED_OLD_TRIGGERED);
-        return;
     }
 };
 
