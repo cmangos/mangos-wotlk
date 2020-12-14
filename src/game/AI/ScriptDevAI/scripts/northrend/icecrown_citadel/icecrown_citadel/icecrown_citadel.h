@@ -5,6 +5,8 @@
 #ifndef DEF_ICECROWN_CITADEL_H
 #define DEF_ICECROWN_CITADEL_H
 
+#include "Chat/Chat.h"
+
 enum
 {
     MAX_ENCOUNTER                   = 15,
@@ -295,6 +297,9 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget = nullptr, uint32 uiMiscvalue1 = 0) const override;
 
         void Update(const uint32 diff) override;
+
+        void ShowChatCommands(ChatHandler* handler) override;
+        void ExecuteChatCommand(ChatHandler* handler, char* args) override;
 
     private:
         std::string m_strInstData;

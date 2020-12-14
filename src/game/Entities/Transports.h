@@ -30,7 +30,7 @@ typedef std::set<WorldObject*> PassengerSet;
 class GenericTransport : public GameObject
 {
     public:
-        GenericTransport() : m_passengerTeleportIterator(m_passengers.end()), m_pathProgress(0), m_movementStarted(0) {}
+        GenericTransport() : m_passengerTeleportIterator(m_passengers.end()), m_pathProgress(0), m_movementStarted(0), m_pendingStop(false){}
         bool AddPassenger(Unit* passenger);
         bool RemovePassenger(Unit* passenger);
         bool AddPetToTransport(Unit* passenger, Pet* pet);
@@ -59,6 +59,8 @@ class GenericTransport : public GameObject
         static void CalculatePassengerOffset(float& x, float& y, float& z, float* o, float transX, float transY, float transZ, float transO);
 
         uint32 GetPathProgress() const { return m_pathProgress; }
+
+        void SetGoState(GOState state) override;
     protected:
         void UpdatePassengerPositions(PassengerSet& passengers);
 
@@ -67,6 +69,7 @@ class GenericTransport : public GameObject
 
         uint32 m_pathProgress; // for MO transport its full time since start for normal time in cycle
         uint32 m_movementStarted;
+        bool m_pendingStop;
 };
 
 class ElevatorTransport : public GenericTransport
@@ -105,7 +108,6 @@ class Transport : public GenericTransport
 
         ShortTimeTracker m_positionChangeTimer;
         bool m_isMoving;
-        bool m_pendingStop;
 
         KeyFrameVec::const_iterator m_currentFrame;
         KeyFrameVec::const_iterator m_nextFrame;

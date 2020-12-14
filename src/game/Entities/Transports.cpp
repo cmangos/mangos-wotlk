@@ -118,7 +118,7 @@ void MapManager::LoadTransports()
     sLog.outString();
 }
 
-Transport::Transport(TransportTemplate const& transportTemplate) : GenericTransport(), m_transportTemplate(transportTemplate), m_isMoving(true), m_pendingStop(false)
+Transport::Transport(TransportTemplate const& transportTemplate) : GenericTransport(), m_transportTemplate(transportTemplate), m_isMoving(true)
 {
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_HIGHGUID | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION);
 }
@@ -336,14 +336,16 @@ void Transport::Update(const uint32 /*diff*/)
     if (GetKeyFrames().size() <= 1)
         return;
 
+    if (GetGoState() != GO_STATE_READY && !m_pendingStop)
+        return;
+
     uint32 currentMsTime = GetMap()->GetCurrentMSTime() - m_movementStarted;
     if (m_pathProgress >= currentMsTime) // map transition and update happened in same tick due to MT
         return;
 
     const uint32 diff = currentMsTime - m_pathProgress;
 
-    if (IsMoving() || !m_pendingStop)
-        m_pathProgress = currentMsTime;
+    m_pathProgress = currentMsTime;
 
     uint32 pathProgress = m_pathProgress % GetPeriod();
     while (true)
@@ -351,6 +353,11 @@ void Transport::Update(const uint32 /*diff*/)
         if (pathProgress >= m_currentFrame->ArriveTime && pathProgress < m_currentFrame->DepartureTime)
         {
             SetMoving(false);
+            if (m_pendingStop)
+            {
+                m_pendingStop = false;
+                m_movementStarted = m_pathProgress;
+            }
             break;  // its a stop frame and we are waiting
         }
 
@@ -505,6 +512,15 @@ void GenericTransport::UpdatePosition(float x, float y, float z, float o)
     UpdateModelPosition();
 
     UpdatePassengerPositions(m_passengers);
+}
+
+void GenericTransport::SetGoState(GOState state)
+{
+    GameObject::SetGoState(state);
+    if (state == GO_STATE_READY)
+        m_movementStarted = GetMap()->GetCurrentMSTime();
+    else
+        m_pendingStop = true;
 }
 
 void GenericTransport::UpdatePassengerPositions(PassengerSet& passengers)

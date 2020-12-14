@@ -213,13 +213,9 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_DEATHWHISPER_ELEVATOR:
+            pGo->SetInt16Value(GAMEOBJECT_DYNAMIC, 1, -1);
             if (m_auiEncounter[TYPE_LADY_DEATHWHISPER] == DONE)
-            {
-                pGo->SetRespawnTime(30);
-                pGo->Refresh();
-                pGo->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
                 pGo->SetGoState(GO_STATE_READY);
-            }
             break;
         case GO_SAURFANG_DOOR:
             break;
@@ -481,11 +477,7 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
             {
                 if (GameObject* pElevator = GetSingleGameObjectFromStorage(GO_DEATHWHISPER_ELEVATOR))
-                {
-                    DoRespawnGameObject(GO_DEATHWHISPER_ELEVATOR, 30);
-                    pElevator->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
                     pElevator->SetGoState(GO_STATE_READY);
-                }
 
                 // enable teleporter
                 DoToggleGameObjectFlags(GO_TRANSPORTER_RAMPART_SKULLS, GO_FLAG_NO_INTERACT, false);
@@ -808,6 +800,27 @@ void instance_icecrown_citadel::Update(uint32 uiDiff)
         }
         else
             m_uiPutricideValveTimer -= uiDiff;
+    }
+}
+
+void instance_icecrown_citadel::ShowChatCommands(ChatHandler* handler)
+{
+    handler->SendSysMessage("This instance supports the following commands:\n startelevator");
+}
+
+void instance_icecrown_citadel::ExecuteChatCommand(ChatHandler* handler, char* args)
+{
+    char* result = handler->ExtractLiteralArg(&args);
+    if (!result)
+        return;
+    std::string val = result;
+    if (val == "startelevator")
+    {
+        if (GameObject* elevator = GetSingleGameObjectFromStorage(GO_DEATHWHISPER_ELEVATOR))
+        {
+            // elevator->SetInt16Value(GAMEOBJECT_DYNAMIC, 1, -1);
+            elevator->SetGoState(GO_STATE_READY);
+        }
     }
 }
 
