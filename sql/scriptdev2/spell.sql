@@ -139,6 +139,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (47447,'spell_corrosive_spit'),
 (48268,'spell_container_of_rats'),
 (48397,'spell_drop_off_villager'),
+(48630,'spell_summon_gauntlet_mobs_periodic_aura'),
+(48642,'spell_launch_harpoon'),
 (49099,'spell_army_of_the_dead'),
 (51519,'spell_death_knight_initiate_visual'),
 (51769,'spell_emblazon_runeblade_aura'),
@@ -153,6 +155,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (52694,'spell_recall_eye_of_acherus'),
 (55931,'spell_conjure_flame_sphere'),
 (57283,'spell_remove_mushroom_power'),
+(59275,'spell_summon_gauntlet_mobs_periodic_aura'),
 (73159,'spell_play_movie');
 
 -- Hunter

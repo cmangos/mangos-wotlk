@@ -36,7 +36,7 @@ enum
     NPC_YMIRJAR_WITCH_DOCTOR        = 26691,
     NPC_YMIRJAR_HARPOONER           = 26692,
     // NPC_FLAME_BREATH_TRIGGER     = 28351,            // triggers the freezing cloud spell in script
-    // NPC_WORLD_TRIGGER_LARGE      = 23472,            // only one spawn in this instance - casts 49308 during the gauntlet event
+    NPC_WORLD_TRIGGER_LARGE         = 23472,            // only one spawn in this instance - casts 49308 during the gauntlet event
 
     NPC_FURBOLG                     = 26684,
     NPC_WORGEN                      = 26683,
@@ -61,9 +61,8 @@ enum
     SPELL_AWAKEN_GORTOK             = 47670,
 
     // Skadi event spells
-    // The reset check spell is cast by npc 23472 every 7 seconds during the event
-    // If the spell doesn't hit any player then the event resets
-    // SPELL_GAUNTLET_RESET_CHECK   = 49308,            // for the moment we don't use this because of the lack of core support
+    SPELL_GAUNTLET_PERIODIC         = 47546,            // cast by each player; triggers 47547 every 5 secs. Potentially used to check if boss has to reset during the fight
+    SPELL_GAUNTLET_RESET_CHECK      = 49308,            // cast by 23472 every 7 seconds during the Skadi fight; its purpose is to reset the flame breath triggers
 };
 
 static const float aArthasSpawnPos[4] = { 296.2659f, -364.3349f, 92.9248f, 1.588f};
@@ -88,8 +87,9 @@ class instance_pinnacle : public ScriptedInstance, private DialogueHelper
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
-        void OnCreatureEvade(Creature* pCreature);
+        void OnCreatureEvade(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureRespawn(Creature* creature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
@@ -123,6 +123,9 @@ class instance_pinnacle : public ScriptedInstance, private DialogueHelper
 
         uint32 m_uiGortokOrbTimer;
         uint8 m_uiGortokOrbPhase;
+
+        uint32 m_uiGauntletCheckTimer;
+        uint32 m_uiSkadiResetTimer;
 
         ObjectGuid m_gortokEventTriggerGuid;
         ObjectGuid m_gortokEventStarterGuid;

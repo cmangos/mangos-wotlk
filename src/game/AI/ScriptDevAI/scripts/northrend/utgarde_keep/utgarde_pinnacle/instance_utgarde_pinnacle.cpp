@@ -59,7 +59,9 @@ static const DialogueEntry aPinnacleDialogue[] =
 
 instance_pinnacle::instance_pinnacle(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aPinnacleDialogue),
     m_uiGortokOrbTimer(0),
-    m_uiGortokOrbPhase(0)
+    m_uiGortokOrbPhase(0),
+    m_uiGauntletCheckTimer(0),
+    m_uiSkadiResetTimer(0)
 {
     Initialize();
 }
@@ -111,6 +113,7 @@ void instance_pinnacle::OnCreatureCreate(Creature* pCreature)
         case NPC_ARTHAS_IMAGE:
         case NPC_SVALA:
         case NPC_SVALA_SORROWGRAVE:
+        case NPC_WORLD_TRIGGER_LARGE:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_WORLD_TRIGGER:
@@ -126,6 +129,26 @@ void instance_pinnacle::OnCreatureCreate(Creature* pCreature)
             break;
         case NPC_FLAME_BRAZIER:
             m_vbrazierVector.push_back(pCreature->GetObjectGuid());
+            break;
+    }
+}
+
+void instance_pinnacle::OnCreatureRespawn(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_YMIRJAR_HARPOONER:
+        case NPC_YMIRJAR_WARRIOR:
+        case NPC_YMIRJAR_WITCH_DOCTOR:
+            if (!pCreature->IsTemporarySummon())
+                break;
+
+            // creatures spawned for the gauntlet event have waypoint movement after 5 secs delay
+            if (pCreature->GetSpawnerGuid().GetEntry() == NPC_WORLD_TRIGGER)
+            {
+                pCreature->SetWalk(false);
+                pCreature->GetMotionMaster()->MoveWaypoint(0, 0, 5000);
+            }
             break;
     }
 }
@@ -208,19 +231,35 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
             {
                 case DONE:
                     DoUseDoorOrButton(GO_DOOR_SKADI);
+                    m_uiGauntletCheckTimer = 0;
                     break;
                 case SPECIAL:
                     // Prepare achievements
                     SetSpecialAchievementCriteria(TYPE_ACHIEV_LOVE_SKADI, true);
                     DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_SKADI_ID);
 
+                    m_uiGauntletCheckTimer = 7000;
                     m_auiEncounter[uiType] = uiData;
                     return;
                 case FAIL:
-                    // Handle Grauf evade - if event is in phase 1
+                {
+                    // Handle event reset
                     if (Creature* pGrauf = GetSingleCreatureFromStorage(NPC_GRAUF))
-                        pGrauf->AI()->EnterEvadeMode();
+                        pGrauf->ForcedDespawn();
+                    if (Creature* pSkadi = GetSingleCreatureFromStorage(NPC_SKADI))
+                        pSkadi->ForcedDespawn();
 
+                    m_uiGauntletCheckTimer = 0;
+                    m_uiSkadiResetTimer = 30000;
+
+                    // remove periodic gauntlet spell on all players
+                    Map::PlayerList const& lPlayers = instance->GetPlayers();
+                    for (const auto& lPlayer : lPlayers)
+                    {
+                        if (Player* pPlayer = lPlayer.getSource())
+                            pPlayer->RemoveAurasDueToSpell(SPELL_GAUNTLET_PERIODIC);
+                    }
+                }
                 // no break;
                 case NOT_STARTED:
                     // Despawn all summons
@@ -229,11 +268,6 @@ void instance_pinnacle::SetData(uint32 uiType, uint32 uiData)
                         if (Creature* pYmirjar = instance->GetCreature(*itr))
                             pYmirjar->ForcedDespawn();
                     }
-
-                    // Reset position
-                    if (Creature* pGrauf = GetSingleCreatureFromStorage(NPC_GRAUF))
-                        pGrauf->GetMotionMaster()->MoveTargetedHome();
-
                 // no break;
                 case IN_PROGRESS:
 
@@ -448,6 +482,36 @@ void instance_pinnacle::Update(uint32 const uiDiff)
         }
         else
             m_uiGortokOrbTimer -= uiDiff;
+    }
+
+    if (m_uiGauntletCheckTimer)
+    {
+        if (m_uiGauntletCheckTimer <= uiDiff)
+        {
+            if (Creature* pTrigger = GetSingleCreatureFromStorage(NPC_WORLD_TRIGGER_LARGE))
+                pTrigger->CastSpell(pTrigger, SPELL_GAUNTLET_RESET_CHECK, TRIGGERED_NONE);
+
+            m_uiGauntletCheckTimer = 7000;
+        }
+        else
+            m_uiGauntletCheckTimer -= uiDiff;
+    }
+
+    // Reset Skadi encounter if fail
+    if (m_uiSkadiResetTimer)
+    {
+        if (m_uiSkadiResetTimer <= uiDiff)
+        {
+            if (Creature* pGrauf = GetSingleCreatureFromStorage(NPC_GRAUF))
+                pGrauf->Respawn();
+
+            if (Creature* pSkadi = GetSingleCreatureFromStorage(NPC_SKADI))
+                pSkadi->Respawn();
+
+            m_uiSkadiResetTimer = 0;
+        }
+        else
+            m_uiSkadiResetTimer -= uiDiff;
     }
 }
 

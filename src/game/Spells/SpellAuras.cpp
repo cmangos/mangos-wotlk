@@ -9434,20 +9434,6 @@ void Aura::PeriodicDummyTick()
 //              case 47489: break;
 //              case 47941: break; // Crystal Spike
 //              case 48200: break; // Healer Aura
-                case 48630:                                 // Summon Gauntlet Mobs Periodic
-                case 59275:                                 // Below may need some adjustment, pattern for amount of summon and where is not verified 100% (except for odd/even tick)
-                {
-                    bool chance = roll_chance_i(50);
-
-                    target->CastSpell(target, chance ? 48631 : 48632, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-
-                    if (GetAuraTicks() % 2)                 // which doctor at odd tick
-                        target->CastSpell(target, chance ? 48636 : 48635, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                    else                                    // or harponeer, at even tick
-                        target->CastSpell(target, chance ? 48634 : 48633, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-
-                    return;
-                }
 //              case 49313: break; // Proximity Mine Area Aura
 //              // Mole Machine Portal Schedule
 //              case 49466: break;
