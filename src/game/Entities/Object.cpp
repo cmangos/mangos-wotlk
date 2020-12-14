@@ -276,7 +276,7 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
         Unit const* unit = static_cast<Unit const*>(this);
 
         // TODO: Remove this when moveflag is properly used
-        if (unit->GetTransport())
+        if (unit->GetTransport() || unit->IsBoarded())
             const_cast<Unit*>(unit)->m_movementInfo.AddMovementFlag(MOVEFLAG_ONTRANSPORT);
         else
             const_cast<Unit*>(unit)->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
