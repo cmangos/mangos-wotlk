@@ -114,6 +114,7 @@ class Transport : public GenericTransport
         uint32 m_pathTime;
 
         uint32 m_period;
+        int32 m_lastStopIndex;
 
         TransportTemplate const& m_transportTemplate;
 };

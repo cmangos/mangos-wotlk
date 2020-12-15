@@ -118,7 +118,7 @@ void MapManager::LoadTransports()
     sLog.outString();
 }
 
-Transport::Transport(TransportTemplate const& transportTemplate) : GenericTransport(), m_transportTemplate(transportTemplate), m_isMoving(true)
+Transport::Transport(TransportTemplate const& transportTemplate) : GenericTransport(), m_transportTemplate(transportTemplate), m_isMoving(true), m_lastStopIndex(-1)
 {
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_HIGHGUID | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION);
 }
@@ -162,10 +162,8 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
     SetEntry(goinfo->id);
 
     SetDisplayId(goinfo->displayId);
-    SetUInt32Value(GAMEOBJECT_DISPLAYID, goinfo->displayId);
-    m_displayInfo = sGameObjectDisplayInfoStore.LookupEntry(goinfo->displayId);
-
     SetGoState(GO_STATE_READY);
+
     m_movementStarted = 0;
     SetGoType(GameobjectTypes(goinfo->type));
     SetGoArtKit(0);
@@ -342,30 +340,48 @@ void Transport::Update(const uint32 diff)
     if (AI())
         AI()->UpdateAI(diff);
 
-    if (m_stopped)
-        return;
-
-    uint32 currentMsTime = GetMap()->GetCurrentMSTime() - m_movementStarted;
-    if (m_pathProgress >= currentMsTime) // map transition and update happened in same tick due to MT
-        return;
-
     uint32 transportDiff = diff;
     if (!GetGOInfo()->moTransport.canBeStopped)
     {
+        uint32 currentMsTime = GetMap()->GetCurrentMSTime() - m_movementStarted;
+        if (m_pathProgress >= currentMsTime) // map transition and update happened in same tick due to MT
+            return;
         transportDiff = currentMsTime - m_pathProgress; // override diff for nonstoppable GOs
         m_pathProgress = currentMsTime;
     }
     else
-        m_pathProgress += diff;    
+    {
+        if (m_stopped)
+            m_pathProgress = std::min(m_pathProgress + diff, (m_pathProgress / GetPeriod()) * GetPeriod() + m_currentFrame->DepartureTime);
+        else
+            m_pathProgress += diff;
+    }
 
     uint32 pathProgress = m_pathProgress % GetPeriod();
     while (true)
     {
+        if (m_currentFrame->IsStopFrame() && GetGOInfo()->moTransport.canBeStopped && m_lastStopIndex != m_currentFrame->Index)
+        {
+            m_lastStopIndex = m_currentFrame->Index;
+            transportDiff = 0;
+            m_stopped = true;
+            if (pathProgress > m_currentFrame->DepartureTime)
+                m_pathProgress = (m_pathProgress / GetPeriod()) * GetPeriod() + m_currentFrame->DepartureTime;
+            SetUInt16Value(GAMEOBJECT_DYNAMIC, 0, GO_DYNFLAG_LO_STOPPED);
+            SetUInt16Value(GAMEOBJECT_DYNAMIC, 1, pathProgress % GetPeriod());
+            GameObject::SetGoState(GO_STATE_READY);
+            if (AI())
+                AI()->JustReachedStopPoint();
+        }
+
         if (pathProgress >= m_currentFrame->ArriveTime && pathProgress < m_currentFrame->DepartureTime)
         {
             SetMoving(false);
             break;  // its a stop frame and we are waiting
         }
+
+        if (m_stopped)
+            return;
 
         // not waiting anymore
         SetMoving(true);
@@ -384,15 +400,6 @@ void Transport::Update(const uint32 diff)
         {
             TeleportTransport(m_nextFrame->Node->mapid, m_nextFrame->Node->x, m_nextFrame->Node->y, m_nextFrame->Node->z, m_nextFrame->InitialOrientation);
             return;
-        }
-
-        if (m_currentFrame->IsStopFrame() && GetGOInfo()->moTransport.canBeStopped)
-        {
-            m_stopped = true;
-            SetUInt16Value(GAMEOBJECT_DYNAMIC, 0, GO_DYNFLAG_LO_STOPPED);
-            SetUInt16Value(GAMEOBJECT_DYNAMIC, 1, pathProgress);
-            if (AI())
-                AI()->JustReachedStopPoint();
         }
 
         if (m_currentFrame == GetKeyFrames().begin())
