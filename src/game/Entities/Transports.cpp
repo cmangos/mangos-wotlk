@@ -151,7 +151,7 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
     m_nextFrame = GetKeyFrames().begin();
     m_currentFrame = m_nextFrame++;
 
-    m_pathProgress = GetMap()->GetCurrentMSTime();
+    m_pathProgress = 0;
 
     SetObjectScale(goinfo->size);
 
@@ -166,6 +166,7 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
     m_displayInfo = sGameObjectDisplayInfoStore.LookupEntry(goinfo->displayId);
 
     SetGoState(GO_STATE_READY);
+    m_movementStarted = 0;
     SetGoType(GameobjectTypes(goinfo->type));
     SetGoArtKit(0);
     SetGoAnimProgress(animprogress);
@@ -236,12 +237,14 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
             transport->RemoveModelFromMap();
             map->RemoveTransport(transport);
             transport->UpdateForMap(map, false);
+            transport->Object::RemoveFromWorld();
             transport->ResetMap();
 
             Map* newMap = sMapMgr.CreateMap(newMapid, transport);
             newMap->GetMessager().AddMessage([transport = transport](Map* map)
             {
                 transport->SetMap(map);
+                transport->Object::AddToWorld();
                 map->AddTransport(transport);
                 transport->AddModelToMap();
                 transport->UpdateForMap(map, true);
@@ -329,23 +332,31 @@ bool GenericTransport::AddPetToTransport(Unit* passenger, Pet* pet)
     return false;
 }
 
-void Transport::Update(const uint32 /*diff*/)
+void Transport::Update(const uint32 diff)
 {
     uint32 const positionUpdateDelay = 50;
 
     if (GetKeyFrames().size() <= 1)
         return;
 
-    if (GetGoState() != GO_STATE_READY && !m_pendingStop)
+    if (AI())
+        AI()->UpdateAI(diff);
+
+    if (m_stopped)
         return;
 
     uint32 currentMsTime = GetMap()->GetCurrentMSTime() - m_movementStarted;
     if (m_pathProgress >= currentMsTime) // map transition and update happened in same tick due to MT
         return;
 
-    const uint32 diff = currentMsTime - m_pathProgress;
-
-    m_pathProgress = currentMsTime;
+    uint32 transportDiff = diff;
+    if (!GetGOInfo()->moTransport.canBeStopped)
+    {
+        transportDiff = currentMsTime - m_pathProgress; // override diff for nonstoppable GOs
+        m_pathProgress = currentMsTime;
+    }
+    else
+        m_pathProgress += diff;    
 
     uint32 pathProgress = m_pathProgress % GetPeriod();
     while (true)
@@ -353,11 +364,6 @@ void Transport::Update(const uint32 /*diff*/)
         if (pathProgress >= m_currentFrame->ArriveTime && pathProgress < m_currentFrame->DepartureTime)
         {
             SetMoving(false);
-            if (m_pendingStop)
-            {
-                m_pendingStop = false;
-                m_movementStarted = m_pathProgress;
-            }
             break;  // its a stop frame and we are waiting
         }
 
@@ -380,6 +386,15 @@ void Transport::Update(const uint32 /*diff*/)
             return;
         }
 
+        if (m_currentFrame->IsStopFrame() && GetGOInfo()->moTransport.canBeStopped)
+        {
+            m_stopped = true;
+            SetUInt16Value(GAMEOBJECT_DYNAMIC, 0, GO_DYNFLAG_LO_STOPPED);
+            SetUInt16Value(GAMEOBJECT_DYNAMIC, 1, pathProgress);
+            if (AI())
+                AI()->JustReachedStopPoint();
+        }
+
         if (m_currentFrame == GetKeyFrames().begin())
             DETAIL_FILTER_LOG(LOG_FILTER_TRANSPORT_MOVES, " ************ BEGIN ************** %s", GetName());
 
@@ -387,7 +402,7 @@ void Transport::Update(const uint32 /*diff*/)
     }
 
     // Set position
-    m_positionChangeTimer.Update(diff);
+    m_positionChangeTimer.Update(transportDiff);
     if (m_positionChangeTimer.Passed())
     {
         m_positionChangeTimer.Reset(positionUpdateDelay);
@@ -440,7 +455,6 @@ bool ElevatorTransport::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 
         m_pathProgress = GetGOInfo()->transport.startOpen ? GetGOInfo()->transport.pause : 0; // these start in the middle of their path
         m_animationInfo = sTransportMgr.GetTransportAnimInfo(GetGOInfo()->id);
         m_currentSeg = 0;
-        m_stopped = false;
         return true;
     }
     return false;
@@ -522,13 +536,6 @@ void ElevatorTransport::Update(const uint32 diff)
         AI()->UpdateAI(diff);
 }
 
-void ElevatorTransport::SetGoState(GOState state)
-{
-    GameObject::SetGoState(state);
-    m_movementStarted = GetMap()->GetCurrentMSTime();
-    m_stopped = false;
-}
-
 void GenericTransport::UpdatePosition(float x, float y, float z, float o)
 {
     Relocate(x, y, z, o);
@@ -540,10 +547,9 @@ void GenericTransport::UpdatePosition(float x, float y, float z, float o)
 void GenericTransport::SetGoState(GOState state)
 {
     GameObject::SetGoState(state);
-    if (state == GO_STATE_READY)
-        m_movementStarted = GetMap()->GetCurrentMSTime();
-    else
-        m_pendingStop = true;
+    m_movementStarted = GetMap()->GetCurrentMSTime();
+    m_stopped = false;
+    SetUInt16Value(GAMEOBJECT_DYNAMIC, 0, 0);
 }
 
 void GenericTransport::UpdatePassengerPositions(PassengerSet& passengers)
@@ -558,18 +564,13 @@ void GenericTransport::UpdatePassengerPosition(WorldObject* passenger)
     if (passenger->IsInWorld() && passenger->GetMap() != GetMap())
         return;
 
-    if (!passenger->IsUnit())
-        return;
-
-    Unit* passengerUnit = static_cast<Unit*>(passenger);
-
     // Do not use Unit::UpdatePosition here, we don't want to remove auras
     // as if regular movement occurred
     float x, y, z, o;
-    x = passengerUnit->GetTransOffsetX();
-    y = passengerUnit->GetTransOffsetY();
-    z = passengerUnit->GetTransOffsetZ();
-    o = passengerUnit->GetTransOffsetO();
+    x = passenger->GetTransOffsetX();
+    y = passenger->GetTransOffsetY();
+    z = passenger->GetTransOffsetZ();
+    o = passenger->GetTransOffsetO();
     CalculatePassengerPosition(x, y, z, &o);
     if (!MaNGOS::IsValidMapCoord(x, y, z))
     {
@@ -600,10 +601,10 @@ void GenericTransport::UpdatePassengerPosition(WorldObject* passenger)
             dynamic_cast<Player*>(passenger)->m_movementInfo.t_time = GetPathProgress();
             break;
         case TYPEID_GAMEOBJECT:
-            //GetMap()->GameObjectRelocation(passenger->ToGameObject(), x, y, z, o, false);
+            GetMap()->GameObjectRelocation(static_cast<GameObject*>(passenger), x, y, z, o, false);
             break;
         case TYPEID_DYNAMICOBJECT:
-            //GetMap()->DynamicObjectRelocation(passenger->ToDynObject(), x, y, z, o);
+            GetMap()->DynamicObjectRelocation(static_cast<DynamicObject*>(passenger), x, y, z, o);
             break;
         default:
             break;

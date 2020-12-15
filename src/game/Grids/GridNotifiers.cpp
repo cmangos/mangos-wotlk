@@ -70,6 +70,16 @@ void VisibleNotifier::Notify()
         }
     }
 
+    for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end();)
+    {
+        if ((*itr).IsMOTransport())
+        {
+            itr = i_clientGUIDs.erase(itr);
+            continue;
+        }
+        ++itr;
+    }
+
     // generate outOfRange for not iterate objects
     i_data.AddOutOfRangeGUID(i_clientGUIDs);
     for (GuidSet::iterator itr = i_clientGUIDs.begin(); itr != i_clientGUIDs.end(); ++itr)

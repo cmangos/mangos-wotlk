@@ -830,10 +830,6 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                                 *data << uint16(GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
                                 *data << uint16(-1);
                                 break;
-                            case GAMEOBJECT_TYPE_TRANSPORT:
-                            case GAMEOBJECT_TYPE_MO_TRANSPORT:
-                                *data << m_uint32Values[index];
-                                break;
                             default:
                                 // unknown, not happen.
                                 *data << uint16(0);
@@ -843,9 +839,19 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     }
                     else
                     {
-                        // disable quest object
-                        *data << uint16(0);
-                        *data << uint16(-1);
+                        GameObject const* gameObject = static_cast<GameObject const*>(this);
+                        switch (((GameObject*)this)->GetGoType())
+                        {
+                            case GAMEOBJECT_TYPE_TRANSPORT:
+                            case GAMEOBJECT_TYPE_MO_TRANSPORT:
+                                *data << m_uint32Values[index];
+                                break;
+                            default:
+                                // disable quest object
+                                *data << uint16(0);
+                                *data << uint16(-1);
+                                break;
+                        }
                     }
                 }
                 else

@@ -965,6 +965,40 @@ void Map::GameObjectRelocation(GameObject* go, float x, float y, float z, float 
     }
 }
 
+void Map::DynamicObjectRelocation(DynamicObject* dynObj, float x, float y, float z, float orientation)
+{
+    Cell new_cell(MaNGOS::ComputeCellPair(x, y));
+    Cell old_cell = dynObj->GetCurrentCell();
+
+    if (!getNGrid(new_cell.GridX(), new_cell.GridY()))
+        return;
+
+    if (old_cell.DiffGrid(new_cell))
+    {
+        if (!dynObj->isActiveObject() && !loaded(new_cell.gridPair()))
+        {
+            DEBUG_FILTER_LOG(LOG_FILTER_CREATURE_MOVES, "Creature (GUID: %u Entry: %u) attempt move from grid[%u,%u]cell[%u,%u] to unloaded grid[%u,%u]cell[%u,%u].", dynObj->GetGUIDLow(), dynObj->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
+            return;
+        }
+        EnsureGridLoadedAtEnter(new_cell);
+    }
+
+    // delay creature move for grid/cell to grid/cell moves
+    if (old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell))
+    {
+        NGridType* oldGrid = getNGrid(old_cell.GridX(), old_cell.GridY());
+        NGridType* newGrid = getNGrid(new_cell.GridX(), new_cell.GridY());
+        RemoveFromGrid(dynObj, oldGrid, old_cell);
+        AddToGrid(dynObj, newGrid, new_cell);
+        dynObj->GetViewPoint().Event_GridChanged(&(*newGrid)(new_cell.CellX(), new_cell.CellY()));
+    }
+    else
+    {
+        dynObj->Relocate(x, y, z, orientation);
+        dynObj->UpdateObjectVisibility();
+    }
+}
+
 bool Map::CreatureCellRelocation(Creature* c, const Cell& new_cell)
 {
     Cell const& old_cell = c->GetCurrentCell();
@@ -1113,6 +1147,7 @@ void Map::SendInitSelf(Player* player) const
     // attach to player data current transport data
     if (GenericTransport* transport = player->GetTransport())
     {
+        player->m_clientGUIDs.insert(transport->GetObjectGuid());
         transport->BuildCreateUpdateBlockForPlayer(&updateData, player);
     }
 
@@ -1156,6 +1191,7 @@ void Map::SendInitTransports(Player* player) const
         // send data for current transport in other place
         if (i != player->GetTransport() && i->GetMapId() == i_id)
         {
+            player->m_clientGUIDs.insert(i->GetObjectGuid());
             i->BuildCreateUpdateBlockForPlayer(&updateData, player);
         }
     }
@@ -1178,8 +1214,13 @@ void Map::SendRemoveTransports(Player* player) const
 
     // except used transport
     for (auto i : m_transports)
+    {
         if (i != player->GetTransport() && i->GetMapId() != i_id)
+        {
             i->BuildOutOfRangeUpdateBlock(&updateData);
+            player->m_clientGUIDs.erase(i->GetObjectGuid());
+        }
+    }
 
     for (size_t i = 0; i < updateData.GetPacketCount(); ++i)
     {
@@ -1207,6 +1248,7 @@ void Map::LoadTransports()
 
         // If we someday decide to use the grid to track transports, here:
         t->SetMap(this);
+        t->Object::AddToWorld();
 
         // creates the Gameobject
         if (!t->Create(transportTemplate->entry, mapId, x, y, z, o, GO_ANIMPROGRESS_DEFAULT, 0))

@@ -30,7 +30,7 @@ typedef std::set<WorldObject*> PassengerSet;
 class GenericTransport : public GameObject
 {
     public:
-        GenericTransport() : m_passengerTeleportIterator(m_passengers.end()), m_pathProgress(0), m_movementStarted(0), m_pendingStop(false){}
+        GenericTransport() : m_passengerTeleportIterator(m_passengers.end()), m_pathProgress(0), m_movementStarted(0), m_stopped(false){}
         bool AddPassenger(Unit* passenger);
         bool RemovePassenger(Unit* passenger);
         bool AddPetToTransport(Unit* passenger, Pet* pet);
@@ -69,7 +69,7 @@ class GenericTransport : public GameObject
 
         uint32 m_pathProgress; // for MO transport its full time since start for normal time in cycle
         uint32 m_movementStarted;
-        bool m_pendingStop;
+        bool m_stopped;
 };
 
 class ElevatorTransport : public GenericTransport
@@ -78,8 +78,6 @@ class ElevatorTransport : public GenericTransport
         bool Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang,
             const QuaternionData& rotation = QuaternionData(), uint8 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY) override;
         void Update(const uint32 diff) override;
-
-        void SetGoState(GOState state) override;
     private:
         TransportAnimation const* m_animationInfo;
         uint32 m_currentSeg;
