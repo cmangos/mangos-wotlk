@@ -101,6 +101,8 @@ enum
     GO_ORATORY_DOOR                 = 201563,
     GO_DEATHWHISPER_ELEVATOR        = 202220,
 
+    GO_THE_SKYBREAKER               = 201580,
+
     GO_SAURFANG_DOOR                = 201825,
 
     GO_GREEN_PLAGUE                 = 201370,       // Rotface combat door

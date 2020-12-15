@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
+#include "Entities/Transports.h"
 
 enum
 {
@@ -817,10 +818,12 @@ void instance_icecrown_citadel::ExecuteChatCommand(ChatHandler* handler, char* a
     if (val == "startelevator")
     {
         if (GameObject* elevator = GetSingleGameObjectFromStorage(GO_DEATHWHISPER_ELEVATOR))
-        {
-            // elevator->SetInt16Value(GAMEOBJECT_DYNAMIC, 1, -1);
             elevator->SetGoState(GO_STATE_READY);
-        }
+    }
+    else if (val == "continuegunship")
+    {
+        if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER))))
+            gunship->SetGoState(gunship->GetGoState() == GO_STATE_READY ? GO_STATE_ACTIVE : GO_STATE_READY);
     }
 }
 
