@@ -97,7 +97,7 @@ bool TransportMgr::GenerateWaypoints(GameObjectInfo const* goinfo, TransportTemp
     orientationSpline.init_spline_custom(initer);
     orientationSpline.initLengths();
 
-    for (size_t i = 1; i < path.size() - 1; ++i)
+    for (size_t i = 0; i < path.size() - 1; ++i)
     {
         if (!mapChange)
         {
