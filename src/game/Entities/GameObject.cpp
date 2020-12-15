@@ -2042,6 +2042,8 @@ void GameObject::SetGoState(GOState state)
 {
     SetByteValue(GAMEOBJECT_BYTES_1, 0, state);
     UpdateCollisionState();
+    if (AI())
+        AI()->OnGoStateChange(state);
 }
 
 void GameObject::SetDisplayId(uint32 modelId)

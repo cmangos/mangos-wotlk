@@ -20,6 +20,7 @@
 
 #include "Platform/Define.h"
 #include "AI/BaseAI/AIDefines.h"
+#include "Entities/GameObjectDefines.h"
 
 class GameObject;
 class Unit;
@@ -52,6 +53,11 @@ class GameObjectAI
         * No params as LootState to which the GO is changed to is accessible in the GameObjectAI through GetLootState()
         */
         virtual void OnLootStateChange() {}
+
+        /*
+        * Called when GO state changes.
+        */
+        virtual void OnGoStateChange(GOState /*state*/) {}
 
         /*
         * Called when a GO appears in the world to normal observers

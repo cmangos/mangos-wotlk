@@ -26,6 +26,7 @@
 #include "AI/BaseAI/GameObjectAI.h"
 #include "Spells/SpellAuras.h"
 #include "Spells/SpellDefines.h"
+#include "Entities/GameObjectDefines.h"
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
@@ -607,16 +608,6 @@ struct GameObjectLocale
     std::vector<std::string> Name;
     std::vector<std::string> CastBarCaption;
 };
-
-// client side GO show states
-enum GOState
-{
-    GO_STATE_ACTIVE             = 0,                        // show in world as used and not reset (closed door open)
-    GO_STATE_READY              = 1,                        // show in world as ready (closed door close)
-    GO_STATE_ACTIVE_ALTERNATIVE = 2                         // show in world as used in alt way and not reset (closed door open by cannon fire)
-};
-
-#define MAX_GO_STATE              3
 
 struct QuaternionData
 {
