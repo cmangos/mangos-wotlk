@@ -330,7 +330,7 @@ struct boss_brundirAI : public ScriptedAI
                     if (m_uiTendrilsEndTimer <= uiDiff)
                     {
                         // Get proper Z position and land
-                        float groundZ = m_creature->GetMap()->GetHeight(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), false), maxZ;
+                        float groundZ = m_creature->GetMap()->GetHeight(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), false);
                         float fZ = m_creature->GetTerrain()->GetWaterOrGroundLevel(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), groundZ);
                         m_creature->GetMotionMaster()->MovePoint(POINT_ID_LAND, m_creature->GetPositionX(), m_creature->GetPositionY(), fZ);
                         m_uiOverloadTimer       = 40000;
