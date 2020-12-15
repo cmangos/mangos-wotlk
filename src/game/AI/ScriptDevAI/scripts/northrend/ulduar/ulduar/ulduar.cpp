@@ -29,6 +29,8 @@ event_go_ulduar_tower
 npc_storm_tempered_keeper
 npc_charged_sphere
 npc_ulduar_keeper
+go_activate_tram
+event_ulduar_tram
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
@@ -591,6 +593,56 @@ bool GossipSelect_npc_ulduar_keeper(Player* pPlayer, Creature* pCreature, uint32
     return true;
 }
 
+/*######
+## go_activate_tram
+######*/
+
+bool GOUse_go_activate_tram(Player* pPlayer, GameObject* pGo)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+    if (!pInstance)
+        return true;
+
+    // Note: clicking the buttons starts the tram in one of the directions; Tram triggers event id once reached the destination
+    if (GameObject* pTram = pInstance->GetSingleGameObjectFromStorage(GO_TRAM))
+        pTram->SetGoState(pTram->GetGoState() == GO_STATE_READY ? GO_STATE_ACTIVE : GO_STATE_READY);
+
+    return false;
+}
+
+/*######
+## event_ulduar_tram
+######*/
+
+bool ProcessEventId_event_ulduar_tram(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+{
+    if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
+    {
+        GameObject* pTram = (GameObject*)pSource;
+
+        // Event ids triggered by the tram reaching the destination; This triggers the turnaround objects
+        if (uiEventId == EVENT_ID_TRAM_1 || uiEventId == EVENT_ID_TRAM_2)
+        {
+            ScriptedInstance* pInstance = (ScriptedInstance*)pTram->GetInstanceData();
+            if (!pInstance)
+                return true;
+
+            uint32 uiTurnaroundEntry;
+
+            switch (uiEventId)
+            {
+                case EVENT_ID_TRAM_1: uiTurnaroundEntry = GO_TRAM_TURNAROUND_CENTER; break;
+                case EVENT_ID_TRAM_2: uiTurnaroundEntry = GO_TRAM_TURNAROUND_MIMIRON; break;
+                default: return true;
+            }
+
+            pInstance->DoUseDoorOrButton(uiTurnaroundEntry);
+        }
+    }
+
+    return false;
+}
+
 void AddSC_ulduar()
 {
     Script* pNewScript = new Script;
@@ -630,5 +682,15 @@ void AddSC_ulduar()
     pNewScript->Name = "npc_ulduar_keeper";
     pNewScript->pGossipHello = &GossipHello_npc_ulduar_keeper;
     pNewScript->pGossipSelect = &GossipSelect_npc_ulduar_keeper;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_activate_tram";
+    pNewScript->pGOUse = &GOUse_go_activate_tram;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "event_ulduar_tram";
+    pNewScript->pProcessEventId = &ProcessEventId_event_ulduar_tram;
     pNewScript->RegisterSelf();
 }

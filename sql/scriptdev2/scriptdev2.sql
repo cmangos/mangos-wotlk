@@ -1662,6 +1662,7 @@ UPDATE creature_template SET ScriptName='npc_mimiron_flames' WHERE entry IN (343
 UPDATE creature_template SET ScriptName='boss_leviathan_mk2_turret' WHERE entry=34071;
 UPDATE creature_template SET ScriptName='npc_computer' WHERE entry=34143;
 UPDATE gameobject_template SET ScriptName='go_big_red_button' WHERE entry=194739;
+UPDATE gameobject_template SET ScriptName='go_activate_tram' WHERE entry IN (194914,194912,194437);
 UPDATE creature_template SET ScriptName='npc_ulduar_keeper' WHERE entry IN (33241,33242,33244,33213);
 UPDATE creature_template SET ScriptName='boss_sara' WHERE entry=33134;
 UPDATE creature_template SET ScriptName='boss_yogg_saron' WHERE entry=33288;
@@ -1684,6 +1685,8 @@ INSERT INTO scripted_event_id VALUES
 (21032,'event_go_ulduar_tower'),        -- Tower of Frost destroyed event
 (21033,'event_go_ulduar_tower'),        -- Tower of Flame destroyed event
 (21045,'event_boss_hodir'),             -- Hodir attack start event
+(21393,'event_ulduar_tram'),            -- Ulduar tram transport stop event
+(21394,'event_ulduar_tram'),            -- Ulduar tram transport stop event
 (21605,'event_ulduar'),                 -- Flame Leviathan shutdown event
 (21606,'event_ulduar'),                 -- XT-002 Scrap repair event
 (21620,'event_ulduar');                 -- Ignis construct shatter event
