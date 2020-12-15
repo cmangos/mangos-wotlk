@@ -437,22 +437,34 @@ bool ElevatorTransport::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 
 {
     if (GenericTransport::Create(guidlow, name_id, map, phaseMask, x, y, z, ang, rotation, animprogress, go_state))
     {
-        m_pathProgress = 0;
+        m_pathProgress = GetGOInfo()->transport.startOpen ? GetGOInfo()->transport.pause : 0; // these start in the middle of their path
         m_animationInfo = sTransportMgr.GetTransportAnimInfo(GetGOInfo()->id);
         m_currentSeg = 0;
+        m_stopped = false;
         return true;
     }
     return false;
 }
 
-void ElevatorTransport::Update(const uint32 /*diff*/)
+void ElevatorTransport::Update(const uint32 diff)
 {
     if (!m_animationInfo)
         return;
 
-    if (GetGoState() == GO_STATE_READY)
+    if (!m_stopped)
     {
-        m_pathProgress = (GetMap()->GetCurrentMSTime() - m_movementStarted) % m_animationInfo->TotalTime;
+        uint32 timeSinceLastStop = (GetMap()->GetCurrentMSTime() - m_movementStarted) % m_animationInfo->TotalTime;
+        if (!GetGOInfo()->transport.pause)
+            m_pathProgress = timeSinceLastStop;
+        else
+        {
+            if (timeSinceLastStop >= GetGOInfo()->transport.pause) // stopped and needs to be reenabled by script
+            {
+                m_stopped = true;
+                timeSinceLastStop = GetGOInfo()->transport.pause;
+            }
+            m_pathProgress = ((m_pathProgress / GetGOInfo()->transport.pause) * GetGOInfo()->transport.pause + timeSinceLastStop) % m_animationInfo->TotalTime;
+        }
         TransportAnimationEntry const* nodeNext = m_animationInfo->GetNextAnimNode(m_pathProgress);
         TransportAnimationEntry const* nodePrev = m_animationInfo->GetPrevAnimNode(m_pathProgress);
         if (nodeNext && nodePrev)
@@ -502,8 +514,17 @@ void ElevatorTransport::Update(const uint32 /*diff*/)
 
             UpdatePassengerPositions(GetPassengers());
         }
-
     }
+
+    if (AI())
+        AI()->UpdateAI(diff);
+}
+
+void ElevatorTransport::SetGoState(GOState state)
+{
+    GameObject::SetGoState(state);
+    m_movementStarted = GetMap()->GetCurrentMSTime();
+    m_stopped = false;
 }
 
 void GenericTransport::UpdatePosition(float x, float y, float z, float o)

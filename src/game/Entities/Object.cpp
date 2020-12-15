@@ -430,11 +430,8 @@ void Object::BuildMovementUpdate(ByteBuffer* data, uint16 updateFlags) const
     // 0x2
     if (updateFlags & UPDATEFLAG_TRANSPORT)
     {
-        GameObject const* go = static_cast<GameObject const*>(this);
-        if (go && go->IsTransport())
-            *data << uint32(static_cast<GenericTransport const*>(go)->GetPathProgress());
-        else
-            *data << uint32(WorldTimer::getMSTime());
+        WorldObject const* wo = static_cast<WorldObject const*>(this);
+        *data << uint32(wo->GetMap()->GetCurrentMSTime());
     }
 
     // 0x80
