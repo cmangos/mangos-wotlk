@@ -79,6 +79,11 @@ class GameObjectAI
          */
         virtual void OnUse(Unit* /*user*/, SpellEntry const* /*spellInfo*/);
 
+        /*
+        * Enables handling transport
+        */
+        virtual void JustReachedStopPoint() {}
+
     protected:
         GameObject* m_go;
 };

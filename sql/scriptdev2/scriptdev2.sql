@@ -979,6 +979,7 @@ INSERT INTO scripted_areatrigger VALUES
 (5709,'at_icecrown_citadel'),
 (5718,'at_frozen_throne_tele'),
 (5732,'at_icecrown_citadel');
+UPDATE gameobject_template SET ScriptName='go_lady_deathwhisper_elevator' WHERE entry IN(202220);
 
 /* FORGE OF SOULS */
 UPDATE creature_template SET ScriptName='boss_bronjahm' WHERE entry=36497;

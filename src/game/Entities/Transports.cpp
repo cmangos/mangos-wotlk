@@ -462,6 +462,8 @@ void ElevatorTransport::Update(const uint32 diff)
             {
                 m_stopped = true;
                 timeSinceLastStop = GetGOInfo()->transport.pause;
+                if (AI())
+                    AI()->JustReachedStopPoint();
             }
             m_pathProgress = ((m_pathProgress / GetGOInfo()->transport.pause) * GetGOInfo()->transport.pause + timeSinceLastStop) % m_animationInfo->TotalTime;
         }

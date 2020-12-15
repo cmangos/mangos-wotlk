@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
+#include "AI/BaseAI/GameObjectAI.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 
 /*#####
 ## go_icc_teleporter
@@ -403,6 +405,32 @@ UnitAI* GetAI_npc_putricides_trap(Creature* pCreature)
     return new npc_putricides_trapAI(pCreature);
 };
 
+struct LadyDeathwhisperElevator : public GameObjectAI, public TimerManager
+{
+    LadyDeathwhisperElevator(GameObject* go) : GameObjectAI(go)
+    {
+        AddCustomAction(1, true, [&]()
+        {
+            HandleStateChange();
+        });
+    }
+
+    void JustReachedStopPoint() override
+    {
+        ResetTimer(1, 5000);
+    }
+
+    void HandleStateChange()
+    {
+        m_go->SetGoState(m_go->GetGoState() == GO_STATE_READY ? GO_STATE_ACTIVE : GO_STATE_READY);
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        UpdateTimers(diff);
+    }
+};
+
 void AddSC_icecrown_citadel()
 {
     Script* pNewScript = new Script;
@@ -429,5 +457,10 @@ void AddSC_icecrown_citadel()
     pNewScript = new Script;
     pNewScript->Name = "npc_putricides_trap";
     pNewScript->GetAI = &GetAI_npc_putricides_trap;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_lady_deathwhisper_elevator";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<LadyDeathwhisperElevator>;
     pNewScript->RegisterSelf();
 }
