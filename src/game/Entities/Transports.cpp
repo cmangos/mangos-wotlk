@@ -483,6 +483,17 @@ void ElevatorTransport::Update(const uint32 diff)
             {
                 m_stopped = true;
                 timeSinceLastStop = GetGOInfo()->transport.pause;
+
+                // handle events
+                uint32 eventPause1 = GetGOInfo()->transport.pause1EventID;
+                uint32 eventPause2 = GetGOInfo()->transport.pause2EventID;
+
+                if (eventPause1 && GetGoState() == GO_STATE_ACTIVE)
+                    StartEvents_Event(GetMap(), eventPause1, this, this, true);
+
+                if (eventPause2 && GetGoState() == GO_STATE_READY)
+                    StartEvents_Event(GetMap(), eventPause2, this, this, true);
+
                 if (AI())
                     AI()->JustReachedStopPoint();
             }
