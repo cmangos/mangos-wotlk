@@ -242,8 +242,9 @@ void Transport::SpawnPassengers()
     for (auto& data : guids)
     {
         if (data.first == TYPEID_GAMEOBJECT)
-            WorldObject::SummonGameObject(data.second, GetMap(), this);
-        // TODO: TYPEID_UNIT
+            WorldObject::SpawnGameObject(data.second, GetMap(), this);
+        else if (data.first == TYPEID_UNIT)
+            WorldObject::SpawnCreature(data.second, GetMap(), this);
     }
 }
 
