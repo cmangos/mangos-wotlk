@@ -139,6 +139,7 @@ class MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockab
 
         typedef std::map<uint32, std::vector<const TransportTemplate*>> TransportMap;
         TransportMap m_transportsByMap;
+        TransportMap m_transportsByEntry;
 
         void InitializeVisibilityDistanceInfo();
         /* statistics */

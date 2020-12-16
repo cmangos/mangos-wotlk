@@ -850,6 +850,9 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTran
     float z = data->posZ;
     float ang = data->orientation;
 
+    if (transport)
+        transport->CalculatePassengerPosition(x, y, z, &ang);
+
     uint8 animprogress = data->animprogress;
     GOState go_state = data->go_state;
 
@@ -890,6 +893,12 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTran
     }
 
     AIM_Initialize();
+
+    if (transport)
+    {
+        m_movementInfo.SetTransportPos(Position(data->posX, data->posY, data->posZ, data->orientation));
+        transport->AddPassenger(this);
+    }
 
     return true;
 }

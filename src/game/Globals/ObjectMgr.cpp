@@ -981,6 +981,11 @@ CreatureClassLvlStats const* ObjectMgr::GetCreatureClassLvlStats(uint32 level, u
     return nullptr;
 }
 
+std::vector<uint32> const& ObjectMgr::GetDbGuidsForTransport(uint32 mapId) const
+{
+    return (*m_guidsForMap.find(mapId)).second;
+}
+
 void ObjectMgr::LoadEquipmentTemplates()
 {
     sEquipmentStorage.Load();
@@ -1649,7 +1654,9 @@ void ObjectMgr::LoadCreatures()
         else
             data.OriginalZoneId = 0;
 
-        if (data.IsNotPartOfPoolOrEvent()) // if not this is to be managed by GameEvent System or Pool system
+        if (m_transportMaps.find(data.mapid) != m_transportMaps.end())
+            m_guidsForMap[data.mapid].push_back(data.id);
+        else if (data.IsNotPartOfPoolOrEvent()) // if not this is to be managed by GameEvent System or Pool system
         {
             AddCreatureToGrid(guid, &data);
 
@@ -1872,7 +1879,9 @@ void ObjectMgr::LoadGameObjects()
         else
             data.OriginalZoneId = 0;
 
-        if (data.IsNotPartOfPoolOrEvent()) // if not this is to be managed by GameEvent System or Pool system
+        if (m_transportMaps.find(data.mapid) != m_transportMaps.end())
+            m_guidsForMap[data.mapid].push_back(data.id);
+        else if (data.IsNotPartOfPoolOrEvent()) // if not this is to be managed by GameEvent System or Pool system
             AddGameobjectToGrid(guid, &data);
 
         ++count;
@@ -7100,6 +7109,8 @@ std::vector<uint32> ObjectMgr::LoadGameobjectInfo()
                                         goInfo->id, goInfo->type, goInfo->moTransport.taxiPathId, goInfo->moTransport.taxiPathId);
                 }
                 transportDisplayIds.push_back(goInfo->displayId);
+                if (goInfo->moTransport.mapID)
+                    m_transportMaps.emplace(goInfo->moTransport.mapID, goInfo->id);
                 break;
             }
             case GAMEOBJECT_TYPE_SUMMONING_RITUAL:          // 18

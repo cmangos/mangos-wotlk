@@ -1216,6 +1216,9 @@ class ObjectMgr
         * Qualifier: const
         **/
         CreatureClassLvlStats const* GetCreatureClassLvlStats(uint32 level, uint32 unitClass, int32 expansion) const;
+
+        // Transports
+        std::vector<uint32> const& GetDbGuidsForTransport(uint32 mapId) const;
     protected:
 
         // current locale settings
@@ -1380,6 +1383,9 @@ class ObjectMgr
         CacheTrainerSpellMap m_mCacheTrainerSpellMap;
 
         BroadcastTextMap m_broadcastTextMap;
+
+        std::map<uint32, uint32> m_transportMaps;
+        std::map<uint32, std::vector<uint32>> m_guidsForMap; // used for transports only atm
 };
 
 #define sObjectMgr MaNGOS::Singleton<ObjectMgr>::Instance()

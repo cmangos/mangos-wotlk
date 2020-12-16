@@ -46,6 +46,7 @@
 #include "Grids/CellImpl.h"
 #include "Movement/MoveSplineInit.h"
 #include "Entities/CreatureLinkingMgr.h"
+#include "Entities/Transports.h"
 
 // apply implementation of the singletons
 #include "Policies/Singleton.h"
@@ -1548,7 +1549,11 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTransp
     if (map->GetCreature(cinfo->GetObjectGuid(dbGuid)))
         return false;
 
-    CreatureCreatePos pos(map, data->posX, data->posY, data->posZ, data->orientation, data->phaseMask);
+    Position dbPos(data->posX, data->posY, data->posZ, data->orientation);
+    if (transport)
+        transport->CalculatePassengerPosition(dbPos.x, dbPos.y, dbPos.z, &dbPos.o);
+
+    CreatureCreatePos pos(map, dbPos.x, dbPos.y, dbPos.z, dbPos.o, data->phaseMask);
 
     if (!Create(newGuid, pos, cinfo, data, eventData))
         return false;
@@ -1618,6 +1623,12 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTransp
 
         if (now_tm.tm_mon == rabbit_day_tm.tm_mon && now_tm.tm_mday == rabbit_day_tm.tm_mday)
             CastSpell(this, 10710 + urand(0, 2), TRIGGERED_OLD_TRIGGERED);
+    }
+
+    if (transport)
+    {
+        m_movementInfo.SetTransportPos(Position(data->posX, data->posY, data->posZ, data->orientation));
+        transport->AddPassenger(this);
     }
 
     return true;

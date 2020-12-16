@@ -90,6 +90,7 @@ void MapManager::LoadTransports()
         transportTemplate->pathTime = period;
 
         m_transportsByMap[pMapInfo->MapID].push_back(transportTemplate);
+        m_transportsByEntry[entry].push_back(transportTemplate);
 
         ++count;
     }
@@ -123,8 +124,24 @@ Transport::Transport(TransportTemplate const& transportTemplate) : GenericTransp
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_HIGHGUID | UPDATEFLAG_HAS_POSITION | UPDATEFLAG_ROTATION);
 }
 
+bool Transport::IsSpawnedByDefault(uint32 entry, Team team)
+{
+    switch (entry)
+    {
+        case 201834: // ICC zeppelin after gunship fight
+            return false;
+    }
+    return true;
+}
+
 void Transport::LoadTransport(TransportTemplate const& transportTemplate, Map* map)
 {
+    Team team = TEAM_NONE;
+    if (DungeonMap* dungeon = dynamic_cast<DungeonMap*>(map))
+        team = dungeon->GetInstanceTeam();
+    if (!IsSpawnedByDefault(transportTemplate.entry, team))
+        return;
+
     Transport* t = new Transport(transportTemplate);
 
     t->SetPeriod(transportTemplate.pathTime);
@@ -281,7 +298,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
         UpdateModelPosition();
 }
 
-bool GenericTransport::AddPassenger(Unit* passenger)
+bool GenericTransport::AddPassenger(WorldObject* passenger)
 {
     if (m_passengers.find(passenger) == m_passengers.end())
     {
@@ -300,16 +317,20 @@ bool GenericTransport::AddPassenger(Unit* passenger)
             CalculatePassengerOffset(passenger->m_movementInfo.t_pos.x, passenger->m_movementInfo.t_pos.y, passenger->m_movementInfo.t_pos.z, &passenger->m_movementInfo.t_pos.o);
         }
 
-        if (Pet* pet = passenger->GetPet())
-            AddPetToTransport(passenger, pet);
+        if (passenger->IsUnit())
+        {
+            Unit* unitPassenger = static_cast<Unit*>(passenger);
+            if (Pet* pet = unitPassenger->GetPet())
+                AddPetToTransport(unitPassenger, pet);
 
-        if (Pet* miniPet = passenger->GetMiniPet())
-            AddPetToTransport(passenger, miniPet);
+            if (Pet* miniPet = unitPassenger->GetMiniPet())
+                AddPetToTransport(unitPassenger, miniPet);
+        }
     }
     return true;
 }
 
-bool GenericTransport::RemovePassenger(Unit* passenger)
+bool GenericTransport::RemovePassenger(WorldObject* passenger)
 {
     bool erased = false;
     if (m_passengerTeleportIterator != m_passengers.end())
@@ -332,16 +353,21 @@ bool GenericTransport::RemovePassenger(Unit* passenger)
         DETAIL_LOG("Unit %s removed from transport %s.", passenger->GetName(), GetName());
         passenger->SetTransport(nullptr);
         passenger->m_movementInfo.SetTransportData(ObjectGuid(), 0, 0, 0, 0, 0, -1);
-        if (Pet* pet = passenger->GetPet())
-        {
-            RemovePassenger(pet);
-            pet->NearTeleportTo(passenger->m_movementInfo.pos.x, passenger->m_movementInfo.pos.y, passenger->m_movementInfo.pos.z, passenger->m_movementInfo.pos.o);
-        }
 
-        if (Pet* pet = passenger->GetMiniPet())
+        if (passenger->IsUnit())
         {
-            RemovePassenger(pet);
-            pet->NearTeleportTo(passenger->m_movementInfo.pos.x, passenger->m_movementInfo.pos.y, passenger->m_movementInfo.pos.z, passenger->m_movementInfo.pos.o);
+            Unit* unitPassenger = static_cast<Unit*>(passenger);
+            if (Pet* pet = unitPassenger->GetPet())
+            {
+                RemovePassenger(pet);
+                pet->NearTeleportTo(passenger->m_movementInfo.pos.x, passenger->m_movementInfo.pos.y, passenger->m_movementInfo.pos.z, passenger->m_movementInfo.pos.o);
+            }
+
+            if (Pet* pet = unitPassenger->GetMiniPet())
+            {
+                RemovePassenger(pet);
+                pet->NearTeleportTo(passenger->m_movementInfo.pos.x, passenger->m_movementInfo.pos.y, passenger->m_movementInfo.pos.z, passenger->m_movementInfo.pos.o);
+            }
         }
     }
     return true;
