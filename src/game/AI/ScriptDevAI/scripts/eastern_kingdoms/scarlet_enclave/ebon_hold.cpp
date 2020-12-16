@@ -2639,7 +2639,7 @@ UnitAI* GetAI_npc_scarlet_courier(Creature* pCreature)
 
 struct spell_emblazon_runeblade : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         Unit* caster = spell->GetAffectiveCaster();
         if (!caster)
@@ -2667,7 +2667,7 @@ struct spell_emblazon_runeblade_aura : public AuraScript
 
 struct spell_death_knight_initiate_visual : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         Unit* unitTarget = spell->GetUnitTarget();
         if (!unitTarget)
@@ -2712,7 +2712,7 @@ struct spell_siphon_of_acherus_aura : public AuraScript
 
 struct spell_siphon_of_acherus : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         Unit* caster = spell->GetAffectiveCaster();
         Unit* target = spell->GetUnitTarget();
@@ -2737,7 +2737,7 @@ struct spell_siphon_of_acherus : public SpellScript
 
 struct spell_siphon_of_acherus_credit : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         Unit* target = spell->GetUnitTarget();
         if (!target)
@@ -2765,7 +2765,7 @@ struct spell_siphon_of_acherus_credit : public SpellScript
 
 struct spell_recall_eye_of_acherus : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         Unit* caster = spell->GetAffectiveCaster();
         if (!caster)
@@ -2786,7 +2786,7 @@ struct spell_recall_eye_of_acherus : public SpellScript
 
 struct spell_summon_ghouls_scarlet_crusade : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         Unit* target = spell->GetUnitTarget();
         if (!target)
