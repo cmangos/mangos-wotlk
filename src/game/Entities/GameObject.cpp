@@ -69,7 +69,8 @@ GameObject::GameObject() : WorldObject(),
     m_captureState(),
     m_goInfo(nullptr),
     m_displayInfo(nullptr),
-    m_AI(nullptr)
+    m_AI(nullptr),
+    m_dbGuid(0)
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -174,7 +175,7 @@ void GameObject::RemoveFromWorld()
         GetMap()->GetObjectsStore().erase<GameObject>(GetObjectGuid(), (GameObject*)nullptr);
     }
 
-    Object::RemoveFromWorld();
+    WorldObject::RemoveFromWorld();
 }
 
 bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang, const QuaternionData& rotation, uint8 animprogress, GOState go_state)
@@ -831,13 +832,13 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask) const
     WorldDatabase.CommitTransaction();
 }
 
-bool GameObject::LoadFromDB(uint32 guid, Map* map)
+bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTransport* transport)
 {
-    GameObjectData const* data = sObjectMgr.GetGOData(guid);
+    GameObjectData const* data = sObjectMgr.GetGOData(dbGuid);
 
     if (!data)
     {
-        sLog.outErrorDb("Gameobject (GUID: %u) not found in table `gameobject`, can't load. ", guid);
+        sLog.outErrorDb("Gameobject (GUID: %u) not found in table `gameobject`, can't load. ", dbGuid);
         return false;
     }
 
@@ -852,8 +853,10 @@ bool GameObject::LoadFromDB(uint32 guid, Map* map)
     uint8 animprogress = data->animprogress;
     GOState go_state = data->go_state;
 
-    if (!Create(guid, entry, map, phaseMask, x, y, z, ang, data->rotation, animprogress, go_state))
+    if (!Create(newGuid, entry, map, phaseMask, x, y, z, ang, data->rotation, animprogress, go_state))
         return false;
+
+    m_dbGuid = dbGuid;
 
     if (!GetGOInfo()->GetDespawnPossibility() && !GetGOInfo()->IsDespawnAtAction() && data->spawntimesecsmin >= 0)
     {
@@ -2229,7 +2232,7 @@ struct SpawnGameObjectInMapsWorker
             MANGOS_ASSERT(data);
             GameObject* pGameobject = GameObject::CreateGameObject(data->id);
             // DEBUG_LOG("Spawning gameobject %u", *itr);
-            if (!pGameobject->LoadFromDB(i_guid, map))
+            if (!pGameobject->LoadFromDB(i_guid, map, i_guid))
             {
                 delete pGameobject;
             }

@@ -2115,6 +2115,20 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     return WorldObject::SummonCreature(TempSpawnSettings(this, id, x, y, z, ang, spwtype, despwtime, asActiveObject, setRun, pathId, faction, modelId, spawnCounting, forcedOnTop), GetMap(), GetPhaseMask());
 }
 
+GameObject* WorldObject::SummonGameObject(uint32 dbGuid, Map* map, GenericTransport* transport)
+{
+    GameObjectData const* data = sObjectMgr.GetGOData(dbGuid);
+    MANGOS_ASSERT(data);
+    GameObject* gameobject = GameObject::CreateGameObject(data->id);
+    if (!gameobject->LoadFromDB(dbGuid, map, map->GenerateLocalLowGuid(HIGHGUID_GAMEOBJECT), transport))
+    {
+        delete gameobject;
+        return nullptr;
+    }
+    map->Add(gameobject);
+    return gameobject;
+}
+
 // how much space should be left in front of/ behind a mob that already uses a space
 #define OCCUPY_POS_DEPTH_FACTOR                          1.8f
 
