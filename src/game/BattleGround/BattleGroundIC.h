@@ -183,15 +183,15 @@ enum ICObjects
     BG_IC_GO_PORTCULLIS_KEEP_H              = 195223,
 
     // portals to the gunship (on the ground)
-    BG_IC_GO_GUNSHIP_GROUND_PORTAL_A        = 195320,
-    BG_IC_GO_GUNSHIP_GROUND_PORTAL_H        = 195326,
+    BG_IC_GO_GUNSHIP_GROUND_PORTAL_A        = 195320,       // casts spell 66629 to teleport player to alliance gunship; uses unit target 34984
+    BG_IC_GO_GUNSHIP_GROUND_PORTAL_H        = 195326,       // casts spell 66638 to teleport player to horde ship; uses unit target 34984
 
     // gunship portals visual effects
     BG_IC_GO_GUNSHIP_PORTAL_EFFECTS_A       = 195705,
     BG_IC_GO_GUNSHIP_PORTAL_EFFECTS_H       = 195706,
 
     // gunship_portals on the ship
-    BG_IC_GO_GUNSHIP_AIR_PORTAL_1           = 195371,
+    BG_IC_GO_GUNSHIP_AIR_PORTAL_1           = 195371,       // casts spell 66899 in order to teleport players to the ground
     BG_IC_GO_GUNSHIP_AIR_PORTAL_2           = 196413,
 
     // seaforium bombs - faction allows click from the opposite team
@@ -343,6 +343,9 @@ enum ICAreaTriggers
     BG_IC_AREATRIGGER_KEEP_ALLIANCE         = 5555,
     BG_IC_AREATRIGGER_KEEP_HORDE            = 5535,
 };
+
+// *** Battleground Gunships *** //
+const uint32 iocGunships[PVP_TEAM_COUNT] = { BG_IC_GO_GUNSHIP_A, BG_IC_GO_GUNSHIP_H };
 
 // *** Battleground factions *** //
 const uint32 iocTeamFactions[PVP_TEAM_COUNT] = { BG_IC_FACTION_ID_ALLIANCE, BG_IC_FACTION_ID_HORDE };

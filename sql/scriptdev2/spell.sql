@@ -279,5 +279,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (35092,'spell_battleground_banner_trigger'),
 (65826,'spell_battleground_banner_trigger'),
 (65825,'spell_battleground_banner_trigger'),
+(66630,'spell_gunship_portal_click'),
+(66637,'spell_gunship_portal_click'),
 (66686,'spell_battleground_banner_trigger'),
 (66687,'spell_battleground_banner_trigger');

@@ -23,6 +23,7 @@
 #include "BattleGroundIC.h"
 #include "Tools/Language.h"
 #include "Globals/ObjectMgr.h"
+#include "Entities/Transports.h"
 
 BattleGroundIC::BattleGroundIC() : m_hordeInnerGateGuid(ObjectGuid()), m_allianceInnerGate1Guid(ObjectGuid()), m_allianceInnerGate2Guid(ObjectGuid()), m_closeDoorTimer(0)
 {
@@ -618,6 +619,8 @@ void BattleGroundIC::HandleGameObjectCreate(GameObject* go)
         case BG_IC_GO_BANNER_QUARRY:
         case BG_IC_GO_BANNER_WORKSHOP:
         case BG_IC_GO_BANNER_REFINERY:
+        case BG_IC_GO_GUNSHIP_A:
+        case BG_IC_GO_GUNSHIP_H:
             m_goEntryGuidStore[go->GetEntry()] = go->GetObjectGuid();
             break;
     }
@@ -781,6 +784,12 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective nodeId, GameObject* 
                 if (GameObject* pAnim = GetBgMap()->GetGameObject(guid))
                     pAnim->UseDoorOrButton();
             }
+
+            // start the gunship
+            if (GenericTransport* gunship = GetBgMap()->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(iocGunships[ownerIdx]))))
+                gunship->SetGoState(GO_STATE_ACTIVE);
+
+            // ToDo: spawn creature BG_IC_NPC_WORLD_TRIGGER_NOT_FLOAT on the active ship
             break;
         }
         case BG_IC_OBJECTIVE_REFINERY:
@@ -900,6 +909,12 @@ void BattleGroundIC::DoResetObjective(IsleObjective nodeId)
                 if (GameObject* anim = GetBgMap()->GetGameObject(guid))
                     anim->ResetDoorOrButton();
             }
+
+            // stop the gunship
+            if (GenericTransport* gunship = GetBgMap()->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(iocGunships[ownerIdx]))))
+                gunship->SetGoState(GO_STATE_READY);
+
+            // ToDo: despawn creature BG_IC_NPC_WORLD_TRIGGER_NOT_FLOAT on the active ship
             break;
         }
         case BG_IC_OBJECTIVE_REFINERY:

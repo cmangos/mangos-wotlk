@@ -137,7 +137,6 @@ struct InactiveBattleground : public SpellScript, public AuraScript
     }
 };
 
-
 /*#####
 # spell_battleground_banner_trigger
 #
@@ -205,8 +204,30 @@ struct spell_split_teleport_boat : public SpellScript
         GenericTransport* transport = static_cast<GenericTransport*>(target);
         Player* player = static_cast<Player*>(caster);
 
-        // teleport passes local transport coords
+        // teleport uses local transport coords
         player->TeleportTo(player->GetMapId(), -6.0f, 3.0f, 8.8f, 3.8f, 0, nullptr, transport);
+    }
+};
+
+/*#####
+# spell_gunship_portal_click
+#####*/
+
+struct spell_gunship_portal_click : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster || !caster->IsPlayer())
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // teleport player to the unit target which is boarded on the ship; the correct ship is chosen base on where is the invis trigger spawned
+        Player* player = static_cast<Player*>(caster);
+        player->TeleportTo(player->GetMapId(), target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation());
     }
 };
 
@@ -223,4 +244,5 @@ void AddSC_battleground()
     RegisterSpellScript<spell_battleground_banner_trigger>("spell_battleground_banner_trigger");
     RegisterSpellScript<spell_outdoor_pvp_banner_trigger>("spell_outdoor_pvp_banner_trigger");
     RegisterSpellScript<spell_split_teleport_boat>("spell_split_teleport_boat");
+    RegisterSpellScript<spell_gunship_portal_click>("spell_gunship_portal_click");
 }
