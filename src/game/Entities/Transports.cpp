@@ -488,6 +488,7 @@ bool ElevatorTransport::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 
     if (GenericTransport::Create(guidlow, name_id, map, phaseMask, x, y, z, ang, rotation, animprogress, go_state))
     {
         m_pathProgress = GetGOInfo()->transport.startOpen ? GetGOInfo()->transport.pause : 0; // these start in the middle of their path
+        m_stopped = GetGOInfo()->transport.pause > 0;
         m_animationInfo = sTransportMgr.GetTransportAnimInfo(GetGOInfo()->id);
         m_currentSeg = 0;
         return true;
@@ -564,7 +565,9 @@ void ElevatorTransport::Update(const uint32 diff)
                     rotation = G3D::Quat(rotPrev->x + quaternionDiff.x * timeElapsed, rotPrev->y + quaternionDiff.y * timeElapsed, rotPrev->z + quaternionDiff.z * timeElapsed, rotPrev->w + quaternionDiff.w * timeElapsed);
                 }
 
-                currentPos = rotation.toRotationMatrix() * G3D::Matrix3::fromEulerAnglesZYX(GetOrientation(), 0.0f, 0.0f) * G3D::Vector3(currentPos.x, currentPos.y, currentPos.z);
+                SetOrientation(std::asin(rotation.z) * 2);
+
+                SetLocalRotation(rotation.x, rotation.y, rotation.z, rotation.w);
             }
 
 
