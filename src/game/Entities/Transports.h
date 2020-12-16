@@ -81,7 +81,6 @@ class ElevatorTransport : public GenericTransport
     private:
         TransportAnimation const* m_animationInfo;
         uint32 m_currentSeg;
-        bool m_stopped;
 };
 
 class Transport : public GenericTransport
