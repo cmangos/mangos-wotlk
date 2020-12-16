@@ -2118,7 +2118,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     return WorldObject::SummonCreature(TempSpawnSettings(this, id, x, y, z, ang, spwtype, despwtime, asActiveObject, setRun, pathId, faction, modelId, spawnCounting, forcedOnTop), GetMap(), GetPhaseMask());
 }
 
-GameObject* WorldObject::SummonGameObject(uint32 dbGuid, Map* map, GenericTransport* transport)
+GameObject* WorldObject::SpawnGameObject(uint32 dbGuid, Map* map, GenericTransport* transport)
 {
     GameObjectData const* data = sObjectMgr.GetGOData(dbGuid);
     MANGOS_ASSERT(data);
@@ -2130,6 +2130,32 @@ GameObject* WorldObject::SummonGameObject(uint32 dbGuid, Map* map, GenericTransp
     }
     map->Add(gameobject);
     return gameobject;
+}
+
+Creature* WorldObject::SpawnCreature(uint32 dbGuid, Map* map, GenericTransport* transport)
+{
+    CreatureData const* data = sObjectMgr.GetCreatureData(dbGuid);
+    if (!data)
+    {
+        sLog.outErrorDb("Creature (GUID: %u) not found in table `creature`, can't load. ", dbGuid);
+        return false;
+    }
+
+    CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(data->id);
+    if (!cinfo)
+    {
+        sLog.outErrorDb("Creature (Entry: %u) not found in table `creature_template`, can't load. ", data->id);
+        return false;
+    }
+
+    Creature* creature = new Creature;
+    // DEBUG_LOG("Spawning creature %u",*itr);
+    if (!creature->LoadFromDB(dbGuid, map, map->GenerateLocalLowGuid(cinfo->GetHighGuid()), transport))
+    {
+        delete creature;
+        return nullptr;
+    }
+    return creature;
 }
 
 // how much space should be left in front of/ behind a mob that already uses a space
