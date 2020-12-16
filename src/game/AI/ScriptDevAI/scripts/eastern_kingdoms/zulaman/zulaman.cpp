@@ -152,6 +152,7 @@ void instance_zulaman::OnCreatureCreate(Creature* creature)
                 if (creature->GetPositionX() > 130.0f)
                     m_GongGuardianAttackerGuid = creature->GetObjectGuid();
                 sGongGuardianGuidSet.insert(creature->GetObjectGuid());
+                creature->SetImmuneToPlayer(true);
             }
             break;
     }

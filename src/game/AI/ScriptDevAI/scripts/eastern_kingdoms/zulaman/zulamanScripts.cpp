@@ -418,14 +418,6 @@ struct npc_harrison_jones_zaAI : public npc_escortAI
                 m_creature->HandleEmoteState(EMOTE_STATE_USESTANDING);
                 break;
             case 10:
-                for (auto& itr : m_instance->sGongGuardianGuidSet)
-                {
-                    if (Creature* gongGuardian = m_creature->GetMap()->GetCreature(itr))
-                    {
-                        gongGuardian->SetImmuneToPlayer(true);
-                        gongGuardian->AI()->SetReactState(REACT_PASSIVE);
-                    }
-                }
                 m_creature->HandleEmoteState(EMOTE_ONESHOT_NONE);
                 m_instance->SetData(TYPE_EVENT_RUN, IN_PROGRESS);
                 DoCastSpellIfCan(m_creature, SPELL_STEALTH);
@@ -456,7 +448,6 @@ struct npc_harrison_jones_zaAI : public npc_escortAI
                             gongGuardian->LoadEquipment(EQUIP_ID_GUARDIAN, true);
                         }
                         gongGuardian->SetImmuneToPlayer(false);
-                        gongGuardian->AI()->SetReactState(REACT_AGGRESSIVE);
                     }
                 }
 
