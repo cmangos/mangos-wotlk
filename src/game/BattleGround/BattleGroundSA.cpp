@@ -65,13 +65,7 @@ void BattleGroundSA::Update(uint32 diff)
             for (const auto& guid : m_transportShipGuids[GetAttacker()])
             {
                 if (GameObject* pShip = GetBgMap()->GetGameObject(guid))
-                {
-                    pShip->SetRespawnTime(30);
-                    pShip->Refresh();
-                    pShip->SetUInt32Value(GAMEOBJECT_LEVEL, 0);
-                    pShip->SetGoState(GO_STATE_READY);
-                    pShip->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
-                }
+                    pShip->SetGoState(GO_STATE_ACTIVE);
             }
 
             // ToDo: stop the boats when they reach the destination. Should be handled by event id 22095 and 18829
@@ -252,17 +246,11 @@ void BattleGroundSA::TeleportPlayerToStartArea(Player* player)
     // Teleport player to the correct location
     if (GetTeamIndexByTeamId(player->GetTeam()) == GetAttacker())
     {
-        // TODO: make this location more dyanmic, depending on the transport real time position
-        player->CastSpell(player, BG_SA_SPELL_TELEPORT_ATTACKERS, TRIGGERED_OLD_TRIGGERED);
-
-        // Note: the following code is temporary until spell effect 60178 is implemented
-        uint8 randLoc = (urand(0, 1));
-
-        // in case the battle is already in progress use the dock locations
-        if (GetStatus() == STATUS_IN_PROGRESS && (m_battleStage == BG_SA_STAGE_ROUND_2 || m_battleStage == BG_SA_STAGE_ROUND_1))
-            randLoc = (urand(2, 3));
-
-        player->TeleportTo(player->GetMapId(), strandTeleportLoc[randLoc][0], strandTeleportLoc[randLoc][1], strandTeleportLoc[randLoc][2], strandTeleportLoc[randLoc][3]);
+        // randomly teleport each player to the corresponding boat
+        if (player->GetTeam() == ALLIANCE)
+            player->CastSpell(player, urand(0, 1) ? BG_SA_SPELL_SPLIT_TELEPORT_A_BOAT1 : BG_SA_SPELL_SPLIT_TELEPORT_A_BOAT2, TRIGGERED_OLD_TRIGGERED);
+        else
+            player->CastSpell(player, urand(0, 1) ? BG_SA_SPELL_SPLIT_TELEPORT_H_BOAT1 : BG_SA_SPELL_SPLIT_TELEPORT_H_BOAT2, TRIGGERED_OLD_TRIGGERED);
     }
     else
         player->CastSpell(player, BG_SA_SPELL_TELEPORT_DEFENDER, TRIGGERED_OLD_TRIGGERED);

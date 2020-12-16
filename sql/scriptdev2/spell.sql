@@ -270,6 +270,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 -- Zangarmarsh
 (32433,'spell_outdoor_pvp_banner_trigger'),
 (32438,'spell_outdoor_pvp_banner_trigger'),
+-- Strand of the Ancients
+(52365,'spell_split_teleport_boat'),
+(52528,'spell_split_teleport_boat'),
+(53464,'spell_split_teleport_boat'),
+(53465,'spell_split_teleport_boat'),
 -- Isle of Conquest
 (35092,'spell_battleground_banner_trigger'),
 (65826,'spell_battleground_banner_trigger'),

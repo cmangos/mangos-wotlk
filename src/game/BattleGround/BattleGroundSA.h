@@ -147,9 +147,9 @@ enum SABanners
 
 enum SAShips
 {
-    // transport ships
-    BG_SA_GO_TRANSPORT_SHIP_HORDE_1             = 193183,               // phased for attacker
-    BG_SA_GO_TRANSPORT_SHIP_HORDE_2             = 193184,
+    // transport ships - phased for attacker
+    BG_SA_GO_TRANSPORT_SHIP_HORDE_1             = 193184,
+    BG_SA_GO_TRANSPORT_SHIP_HORDE_2             = 193183,
     BG_SA_GO_TRANSPORT_SHIP_ALLIANCE_1          = 193182,
     BG_SA_GO_TRANSPORT_SHIP_ALLIANCE_2          = 193185,
 };
@@ -169,11 +169,17 @@ enum SASpells
 {
     // spells
     BG_SA_SPELL_TELEPORT_DEFENDER               = 52364,                // teleport defender team to the south graveyard platform
-    BG_SA_SPELL_TELEPORT_ATTACKERS              = 60178,
+    // BG_SA_SPELL_TELEPORT_ATTACKERS           = 60178,                // unk or not used
     BG_SA_SPELL_END_OF_ROUND                    = 52459,                // stun the players at the end of the round; after 5 seconds, teleport and reset for round 2
     BG_SA_SPELL_REMOVE_SEAFORIUM                = 59077,
     BG_SA_SPELL_SEAFORIUM_BLAST                 = 52408,
     BG_SA_SPELL_CARRY_SEAFORIUM                 = 52418,
+
+    // spells that will split teleport attacker team to each boat
+    BG_SA_SPELL_SPLIT_TELEPORT_H_BOAT1          = 52365,                // teleport to boat 193184
+    BG_SA_SPELL_SPLIT_TELEPORT_H_BOAT2          = 52528,                // teleport to boat 193183
+    BG_SA_SPELL_SPLIT_TELEPORT_A_BOAT1          = 53464,
+    BG_SA_SPELL_SPLIT_TELEPORT_A_BOAT2          = 53465,
 
     // phasing auras implemented in DB in spell area
     // BG_SA_SPELL_ALLIANCE_CONTROL_PHASE_SHIFT = 60027,                // phase 65 - alliance is defender
@@ -308,14 +314,6 @@ static const StrandGraveyardData sotaGraveyardData[] =
     {BG_SA_GRAVEYARD_ID_EAST,   BG_SA_STATE_GY_RIGHT_ALLIANCE,  BG_SA_STATE_GY_RIGHT_HORDE,   BG_SA_GO_GY_FLAG_ALLIANCE_EAST,   BG_SA_GO_GY_FLAG_HORDE_EAST,   LANG_BG_SA_GRAVE_EAST_ALLIANCE,  LANG_BG_SA_GRAVE_EAST_HORDE},
     {BG_SA_GRAVEYARD_ID_WEST,   BG_SA_STATE_GY_LEFT_ALLIANCE,   BG_SA_STATE_GY_LEFT_HORDE,    BG_SA_GO_GY_FLAG_ALLIANCE_WEST,   BG_SA_GO_GY_FLAG_HORDE_WEST,   LANG_BG_SA_GRAVE_WEST_ALLIANCE,  LANG_BG_SA_GRAVE_WEST_HORDE},
     {BG_SA_GRAVEYARD_ID_SOUTH,  BG_SA_STATE_GY_CENTER_ALLIANCE, BG_SA_STATE_GY_CENTER_HORDE,  BG_SA_GO_GY_FLAG_ALLIANCE_SOUTH,  BG_SA_GO_GY_FLAG_HORDE_SOUTH,  LANG_BG_SA_GRAVE_SOUTH_ALLIANCE, LANG_BG_SA_GRAVE_SOUTH_HORDE},
-};
-
-static const float strandTeleportLoc[4][4] =
-{
-    {2682.936f, -830.368f, 19.0f, 2.895f},      // left side boat
-    {2577.003f, 980.261f,  19.0f, 0.807f},      // right side boat
-    {1608.677f, 47.832f,   7.57f, 2.309f},      // left dock - used after the match started
-    {1599.188f, -103.563f, 8.87f, 4.037f}       // right dock
 };
 
 struct StrandGraveyardSpawnData

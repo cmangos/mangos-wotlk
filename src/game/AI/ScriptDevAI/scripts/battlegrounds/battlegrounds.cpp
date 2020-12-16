@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
+#include "Entities/Transports.h"
 
 // **** Script Info ****
 // Spiritguides in battlegrounds resurrecting many players at once
@@ -136,6 +137,30 @@ struct InactiveBattleground : public SpellScript, public AuraScript
     }
 };
 
+/*#####
+# spell_split_teleport_boat
+#####*/
+
+struct spell_split_teleport_boat : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster || !caster->IsPlayer())
+            return;
+
+        GameObject* target = spell->GetGOTarget();
+        if (!target || !target->IsTransport())
+            return;
+
+        GenericTransport* transport = static_cast<GenericTransport*>(target);
+        Player* player = static_cast<Player*>(caster);
+
+        // teleport passes local transport coords
+        player->TeleportTo(player->GetMapId(), -6.0f, 3.0f, 8.8f, 3.8f, 0, nullptr, transport);
+    }
+};
+
 void AddSC_battleground()
 {
     Script* pNewScript = new Script;
@@ -146,4 +171,5 @@ void AddSC_battleground()
 
     RegisterSpellScript<OpeningCapping>("spell_opening_capping");
     RegisterScript<InactiveBattleground>("spell_inactive");
+    RegisterSpellScript<OpeningCapping>("spell_split_teleport_boat");
 }
