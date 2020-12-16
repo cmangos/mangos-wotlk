@@ -27,6 +27,15 @@
 
 #include <mysql.h>
 
+// MySQL 8.0+ compatibility on FreeBSD
+#ifdef __FreeBSD__
+  #if !defined(MARIADB_BASE_VERSION) && !defined(MARIADB_VERSION_ID) && defined(MYSQL_VERSION_ID)
+    #if (MYSQL_VERSION_ID >= 80001)
+      typedef bool my_bool;
+    #endif
+  #endif
+#endif
+
 // MySQL prepared statement class
 class MySqlPreparedStatement : public SqlPreparedStatement
 {
