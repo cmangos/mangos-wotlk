@@ -9233,6 +9233,18 @@ void Spell::OnAfterHit()
         return script->OnAfterHit(this);
 }
 
+void Spell::OnSummon(GameObject* summon)
+{
+    if (SpellScript* script = GetSpellScript())
+        return script->OnSummon(this, summon);
+}
+
+void Spell::OnSummon(Creature* summon)
+{
+    if (SpellScript* script = GetSpellScript())
+        return script->OnSummon(this, summon);
+}
+
 SpellCastResult Spell::CheckVehicle(Unit const* caster, SpellEntry const& spellInfo)
 {
     // All creatures should be able to cast as passengers freely, restriction and attribute are only for players
