@@ -591,6 +591,7 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
+        void OnObjectSpawn(GameObject* go) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;

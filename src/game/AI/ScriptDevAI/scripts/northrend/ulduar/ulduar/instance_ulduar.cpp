@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "ulduar.h"
+#include "Entities/Transports.h"
 
 enum
 {
@@ -463,6 +464,16 @@ void instance_ulduar::OnObjectCreate(GameObject* pGo)
             return;
     }
     m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+}
+
+void instance_ulduar::OnObjectSpawn(GameObject* go)
+{
+    switch (go->GetEntry())
+    {
+        case GO_TRAM:
+            WorldObject::SummonGameObject(6030078, go->GetMap(), static_cast<GenericTransport*>(go));
+            break;
+    }
 }
 
 // Used in order to unlock the door to Vezax
