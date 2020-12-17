@@ -21,6 +21,7 @@
 
 #include "Platform/Define.h"
 #include "Database/DatabaseEnv.h"
+#include "Server/DBCEnums.h"
 
 #include <vector>
 
