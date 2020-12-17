@@ -263,7 +263,6 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (70811,'spell_item_shaman_t10_elemental_2p_bonus');
 
 -- Battleground and Outdoor PvP
--- Alterac Valley
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 -- Arathi basin
 (23936,'spell_battleground_banner_trigger'),
@@ -281,6 +280,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (52528,'spell_split_teleport_boat'),
 (53464,'spell_split_teleport_boat'),
 (53465,'spell_split_teleport_boat'),
+-- Wintergrasp
+(58622,'spell_teleport_lake_wintergrasp'),
 -- Isle of Conquest
 (35092,'spell_battleground_banner_trigger'),
 (65826,'spell_battleground_banner_trigger'),

@@ -25,10 +25,12 @@ EndScriptData */
 npc_spirit_guide_wintergrasp
 go_vehicle_teleporter
 event_go_tower_destroy
+spell_teleport_lake_wintergrasp
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "Battlefield/BattlefieldWG.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -216,6 +218,40 @@ bool ProcessEventId_event_go_tower_destroy(uint32 uiEventId, Object* pSource, Ob
     return false;
 }
 
+/*######
+## spell_teleport_lake_wintergrasp
+######*/
+
+struct spell_teleport_lake_wintergrasp : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(ZONE_ID_WINTERGRASP);
+        if (outdoorPvP && outdoorPvP->IsBattlefield())
+        {
+            Player* player = static_cast<Player*>(target);
+            Battlefield* battlefield = static_cast<Battlefield*>(outdoorPvP);
+
+            if (!player || !battlefield)
+                return;
+
+            // teleport to Wintergrasp, depending on location and battlefield status
+            if (battlefield->GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS || battlefield->GetTimer() < battlefield->GetStartInviteDelay())
+                player->CastSpell(player, player->GetTeam() == battlefield->GetDefender() ? 60035 : 59096, TRIGGERED_OLD_TRIGGERED);
+            if (battlefield->GetBattlefieldStatus() == BF_STATUS_COOLDOWN)
+            {
+                if (player->GetTeam() == battlefield->GetDefender())
+                    player->CastSpell(player, 58681, TRIGGERED_OLD_TRIGGERED);
+                else
+                    player->CastSpell(player, player->GetTeam() == ALLIANCE ? 58633 : 58632, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+};
 
 void AddSC_wintergrasp()
 {
@@ -233,4 +269,6 @@ void AddSC_wintergrasp()
     pNewScript->Name = "event_go_tower_destroy";
     pNewScript->pProcessEventId = &ProcessEventId_event_go_tower_destroy;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_teleport_lake_wintergrasp>("spell_teleport_lake_wintergrasp");
 }

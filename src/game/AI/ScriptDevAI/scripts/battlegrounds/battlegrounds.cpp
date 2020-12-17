@@ -270,7 +270,6 @@ struct spell_repair_cannon : public SpellScript
 
         // reset faction based on battleground location; unfortunately updating entry causes the faction to reset
         cannon->SetFactionTemporary(cannon->GetPositionX() < 500.0f ? 1732 : 1735, TEMPFACTION_NONE);
-        return;
     }
 };
 
