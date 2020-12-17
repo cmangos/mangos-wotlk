@@ -4914,12 +4914,7 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
         case 29950:
             m_caster->RemoveAurasDueToSpellByCancel(29947);
             return;
-        case 41967:                                         // Priest Shadowfiend (34433) need apply mana gain trigger aura on pet
-        {
-            if (Unit* pet = unitTarget->GetPet())
-                pet->CastSpell(pet, 28305, TRIGGERED_OLD_TRIGGERED);
-            return;
-        }
+        case 41967: // Priest Shadowfiend (34433) - handled in spell script
         case 47531: // Dismiss pet - suppress error
             return;
         case 53258:                                         // Empower Rune Weapon

@@ -51,9 +51,24 @@ struct ShadowWordDeath : public SpellScript
     }
 };
 
+enum
+{
+    MANA_LEECH_PASSIVE = 28305,
+};
+
+struct Shadowfiend : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->CastSpell(summon, MANA_LEECH_PASSIVE, TRIGGERED_OLD_TRIGGERED);
+        summon->AI()->AttackStart(spell->m_targets.getUnitTarget());
+    }
+};
+
 void LoadPriestScripts()
 {
     RegisterSpellScript<PowerInfusion>("spell_power_infusion");
     RegisterSpellScript<ShadowWordDeath>("spell_shadow_word_death");
     RegisterSpellScript<SpiritOfRedemptionHeal>("spell_spirit_of_redemption_heal");
+    RegisterSpellScript<Shadowfiend>("spell_shadowfiend");
 }
