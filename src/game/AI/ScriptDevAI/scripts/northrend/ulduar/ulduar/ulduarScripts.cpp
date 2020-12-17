@@ -122,7 +122,7 @@ bool GossipHello_go_ulduar_teleporter(Player* pPlayer, GameObject* pGo)
     return true;
 }
 
-bool GossipSelect_go_ulduar_teleporter(Player* pPlayer, GameObject* pGO, uint32 uiSender, uint32 uiAction)
+bool GossipSelect_go_ulduar_teleporter(Player* pPlayer, GameObject* pGo, uint32 uiSender, uint32 uiAction)
 {
     instance_ulduar* pInstance = (instance_ulduar*)pPlayer->GetInstanceData();
     if (!pInstance)
@@ -160,23 +160,23 @@ bool GossipSelect_go_ulduar_teleporter(Player* pPlayer, GameObject* pGO, uint32 
             break;
         // Antechamber
         case GOSSIP_ACTION_INFO_DEF + 4:
-            // pPlayer->CastSpell(pPlayer, SPELL_TELE_ANTECHAMBER_OF_ULDUAR, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
-            pPlayer->TeleportTo(603, 1498.09f, -24.246f, 420.967f, 0);
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_ANTECHAMBER_OF_ULDUAR, TRIGGERED_OLD_TRIGGERED);
+            //pPlayer->TeleportTo(603, 1498.09f, -24.246f, 420.967f, 0);
             break;
         // Shattered walkway
         case GOSSIP_ACTION_INFO_DEF + 5:
-            // pPlayer->CastSpell(pPlayer, SPELL_TELE_SHATTERED_WALKWAY, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
-            pPlayer->TeleportTo(603, 1859.45f, -24.1f, 448.9f, 0);
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_SHATTERED_WALKWAY, TRIGGERED_OLD_TRIGGERED);
+            // pPlayer->TeleportTo(603, 1859.45f, -24.1f, 448.9f, 0);
             break;
         // Conservatory of life
         case GOSSIP_ACTION_INFO_DEF + 6:
-            // pPlayer->CastSpell(pPlayer, SPELL_TELE_CONSERVATORY_OF_LIFE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
-            pPlayer->TeleportTo(603, 2086.27f, -24.3134f, 421.239f, 0);
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_CONSERVATORY_OF_LIFE, TRIGGERED_OLD_TRIGGERED);
+            // pPlayer->TeleportTo(603, 2086.27f, -24.3134f, 421.239f, 0);
             break;
         // Spark of imagination
         case GOSSIP_ACTION_INFO_DEF + 7:
-            // pPlayer->CastSpell(pPlayer, SPELL_TELE_SPARK_OF_IMAGINATION, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
-            pPlayer->TeleportTo(603, 2518.16f, 2569.03f, 412.299f, 0);
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_SPARK_OF_IMAGINATION, TRIGGERED_OLD_TRIGGERED);
+            // pPlayer->TeleportTo(603, 2518.16f, 2569.03f, 412.299f, 0);
             break;
         // Prison of Yogg-Saron
         case GOSSIP_ACTION_INFO_DEF + 8:
@@ -621,7 +621,7 @@ bool ProcessEventId_event_ulduar_tram(uint32 uiEventId, Object* pSource, Object*
         GameObject* pTram = (GameObject*)pSource;
 
         // Event ids triggered by the tram reaching the destination; This triggers the turnaround objects
-        if (uiEventId == EVENT_ID_TRAM_1 || uiEventId == EVENT_ID_TRAM_2)
+        if (uiEventId == EVENT_ID_TRAM_MIMIRON || uiEventId == EVENT_ID_TRAM_CENTER)
         {
             ScriptedInstance* pInstance = (ScriptedInstance*)pTram->GetInstanceData();
             if (!pInstance)
@@ -631,8 +631,8 @@ bool ProcessEventId_event_ulduar_tram(uint32 uiEventId, Object* pSource, Object*
 
             switch (uiEventId)
             {
-                case EVENT_ID_TRAM_1: uiTurnaroundEntry = GO_TRAM_TURNAROUND_CENTER; break;
-                case EVENT_ID_TRAM_2: uiTurnaroundEntry = GO_TRAM_TURNAROUND_MIMIRON; break;
+                case EVENT_ID_TRAM_CENTER: uiTurnaroundEntry = GO_TRAM_TURNAROUND_CENTER; break;
+                case EVENT_ID_TRAM_MIMIRON: uiTurnaroundEntry = GO_TRAM_TURNAROUND_MIMIRON; break;
                 default: return true;
             }
 

@@ -369,8 +369,8 @@ enum
     EVENT_ID_TOWER_FROST        = 21032,
     EVENT_ID_TOWER_STORMS       = 21031,
 
-    EVENT_ID_TRAM_1             = 21393,                    // events triggered by the tram reaching the destination
-    EVENT_ID_TRAM_2             = 21394,
+    EVENT_ID_TRAM_MIMIRON       = 21393,                    // tram reached Mimiron
+    EVENT_ID_TRAM_CENTER        = 21394,                    // tram reached Center
 
     // area triggers
     AREATRIGGER_ID_INTRO        = 5388,                     // starts the intro dialogue
