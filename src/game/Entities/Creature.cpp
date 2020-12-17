@@ -556,12 +556,12 @@ bool Creature::UpdateEntry(uint32 Entry, const CreatureData* data /*=nullptr*/, 
 
 void Creature::ResetEntry(bool respawn)
 {
-    CreatureData const* data = sObjectMgr.GetCreatureData(GetGUIDLow());
-    GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(GetGUIDLow());
+    CreatureData const* data = sObjectMgr.GetCreatureData(m_dbGuid);
+    GameEventCreatureData const* eventData = sGameEventMgr.GetCreatureUpdateDataForActiveEvent(m_dbGuid);
 
     if (respawn)
     {
-        uint32 newEntry = sObjectMgr.GetRandomEntry(GetGUIDLow());
+        uint32 newEntry = sObjectMgr.GetRandomEntry(m_dbGuid);
         if (newEntry)
         {
             UpdateEntry(newEntry, data, eventData, false);
@@ -686,8 +686,8 @@ void Creature::Update(const uint32 diff)
 
                 GetMap()->Add(this);
 
-                if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(GetGUIDLow()))
-                    sPoolMgr.UpdatePool<Creature>(*GetMap()->GetPersistentState(), poolid, GetGUIDLow());
+                if (uint16 poolid = sPoolMgr.IsPartOfAPool<Creature>(m_dbGuid))
+                    sPoolMgr.UpdatePool<Creature>(*GetMap()->GetPersistentState(), poolid, m_dbGuid);
             }
             break;
         }
@@ -1167,7 +1167,7 @@ void Creature::SaveToDB()
 {
     // this should only be used when the creature has already been loaded
     // preferably after adding to map, because mapid may not be valid otherwise
-    CreatureData const* data = sObjectMgr.GetCreatureData(GetGUIDLow());
+    CreatureData const* data = sObjectMgr.GetCreatureData(m_dbGuid);
     if (!data)
     {
         sLog.outError("Creature::SaveToDB failed, cannot get creature data!");
@@ -1511,7 +1511,7 @@ bool Creature::CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const 
 
     Object::_Create(guidlow, newEntry, cinfo->GetHighGuid());
 
-    if (uint32 entry = sObjectMgr.GetRandomEntry(data ? data->id : guidlow))
+    if (uint32 entry = sObjectMgr.GetRandomEntry(m_dbGuid))
         newEntry = entry;
 
     return UpdateEntry(newEntry, data, eventData, false);
@@ -1555,10 +1555,10 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTransp
 
     CreatureCreatePos pos(map, dbPos.x, dbPos.y, dbPos.z, dbPos.o, data->phaseMask);
 
+    m_dbGuid = dbGuid;
+
     if (!Create(newGuid, pos, cinfo, data, eventData))
         return false;
-
-    m_dbGuid = dbGuid;
 
     SetRespawnCoord(pos);
     m_respawnradius = data->spawndist;
@@ -1568,7 +1568,7 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTransp
     m_isDeadByDefault = data->is_dead;
     m_deathState = m_isDeadByDefault ? DEAD : ALIVE;
 
-    m_respawnTime  = map->GetPersistentState()->GetCreatureRespawnTime(GetGUIDLow());
+    m_respawnTime  = map->GetPersistentState()->GetCreatureRespawnTime(m_dbGuid);
 
     if (m_respawnTime > time(nullptr))                         // not ready to respawn
     {
@@ -1585,7 +1585,7 @@ bool Creature::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTransp
     {
         m_respawnTime = 0;
 
-        GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), 0);
+        GetMap()->GetPersistentState()->SaveCreatureRespawnTime(m_dbGuid, 0);
     }
 
     if (sCreatureLinkingMgr.IsSpawnedByLinkedMob(this))
@@ -1733,7 +1733,7 @@ void Creature::SetDeathState(DeathState s)
     {
         if (!m_respawnOverriden)
         {
-            if (CreatureData const* data = sObjectMgr.GetCreatureData(GetGUIDLow()))
+            if (CreatureData const* data = sObjectMgr.GetCreatureData(m_dbGuid))
                 m_respawnDelay = data->GetRandomRespawnTime();
         }
         else if (m_respawnOverrideOnce)
@@ -1800,7 +1800,7 @@ void Creature::Respawn()
     if (IsDespawned())
     {
         if (HasStaticDBSpawnData())
-            GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), 0);
+            GetMap()->GetPersistentState()->SaveCreatureRespawnTime(m_dbGuid, 0);
         m_respawnTime = time(nullptr);                         // respawn at next tick
     }
 }
@@ -2080,9 +2080,9 @@ void Creature::SaveRespawnTime()
         return;
 
     if (m_respawnTime > time(nullptr))                         // dead (no corpse)
-        GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), m_respawnTime);
+        GetMap()->GetPersistentState()->SaveCreatureRespawnTime(m_dbGuid, m_respawnTime);
     else if (!IsCorpseExpired())                               // dead (corpse)
-        GetMap()->GetPersistentState()->SaveCreatureRespawnTime(GetGUIDLow(), std::chrono::system_clock::to_time_t(m_corpseExpirationTime));
+        GetMap()->GetPersistentState()->SaveCreatureRespawnTime(m_dbGuid, std::chrono::system_clock::to_time_t(m_corpseExpirationTime));
 }
 
 CreatureDataAddon const* Creature::GetCreatureAddon() const
@@ -2536,7 +2536,7 @@ void Creature::GetRespawnCoord(float& x, float& y, float& z, float* ori, float* 
 
 void Creature::ResetRespawnCoord()
 {
-    if (CreatureData const* data = sObjectMgr.GetCreatureData(GetGUIDLow()))
+    if (CreatureData const* data = sObjectMgr.GetCreatureData(m_dbGuid))
     {
         m_respawnPos.x = data->posX;
         m_respawnPos.y = data->posY;
@@ -2807,7 +2807,7 @@ void Creature::SpawnInMaps(uint32 db_guid, CreatureData const* data)
 
 bool Creature::HasStaticDBSpawnData() const
 {
-    return sObjectMgr.GetCreatureData(GetGUIDLow()) != nullptr;
+    return sObjectMgr.GetCreatureData(m_dbGuid) != nullptr;
 }
 
 bool Creature::hasWeapon(WeaponAttackType type) const
