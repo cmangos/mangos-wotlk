@@ -231,6 +231,49 @@ struct spell_gunship_portal_click : public SpellScript
     }
 };
 
+/*######
+## spell_repair_cannon
+######*/
+
+struct spell_repair_cannon_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+        {
+            Unit* target = aura->GetTarget();
+            if (!target)
+                return;
+
+            target->CastSpell(target, 68078, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+struct spell_repair_cannon : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        if (!target || !target->GetMap()->IsBattleGround() || !target->IsCreature())
+            return;
+
+        Creature* cannon = static_cast<Creature*>(target);
+
+        // change entry back to keep cannon, remove feign death and heal
+        cannon->UpdateEntry(34944);
+        cannon->RemoveAurasDueToSpell(29266);
+        cannon->CastSpell(cannon, 43978, TRIGGERED_OLD_TRIGGERED);
+
+        // reset faction based on battleground location; unfortunately updating entry causes the faction to reset
+        cannon->SetFactionTemporary(cannon->GetPositionX() < 500.0f ? 1732 : 1735, TEMPFACTION_NONE);
+        return;
+    }
+};
+
 void AddSC_battleground()
 {
     Script* pNewScript = new Script;
@@ -245,4 +288,6 @@ void AddSC_battleground()
     RegisterSpellScript<spell_outdoor_pvp_banner_trigger>("spell_outdoor_pvp_banner_trigger");
     RegisterSpellScript<spell_split_teleport_boat>("spell_split_teleport_boat");
     RegisterSpellScript<spell_gunship_portal_click>("spell_gunship_portal_click");
+    RegisterAuraScript<spell_repair_cannon_aura>("spell_repair_cannon_aura");
+    RegisterSpellScript<spell_repair_cannon>("spell_repair_cannon");
 }
