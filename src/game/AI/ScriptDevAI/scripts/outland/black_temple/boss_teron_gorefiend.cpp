@@ -404,7 +404,7 @@ struct ShadowOfDeath : public AuraScript
 
     void OnApply(Aura* aura, bool apply) const override
     {
-        if (!apply && aura->GetEffIndex() == EFFECT_INDEX_0)
+        if (!apply && aura->GetEffIndex() == EFFECT_INDEX_0 && aura->GetTarget()->IsInWorld()) // login safeguard
         {
             Unit* target = aura->GetTarget();
             target->DeleteThreatList();
