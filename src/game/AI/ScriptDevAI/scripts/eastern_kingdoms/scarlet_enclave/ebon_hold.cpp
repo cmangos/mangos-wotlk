@@ -2647,7 +2647,7 @@ struct spell_emblazon_runeblade : public SpellScript
         if (!caster)
             return;
 
-        uint32 uiSpell = spell->CalculateSpellEffectValue(effIdx, caster);
+        uint32 uiSpell = spell->m_spellInfo->CalculateSimpleValue(effIdx);
 
         caster->CastSpell(caster, uiSpell, TRIGGERED_NONE);
     }
@@ -2863,7 +2863,7 @@ struct spell_dispel_scarlet_ghoul_credit : public SpellScript
         if (!target || !caster || !caster->IsCreature())
             return;
 
-        uint32 spellId = spell->CalculateSpellEffectValue(effIdx, target);
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
 
         // remove ghoul counter aura - 52500
         target->RemoveAurasByCasterSpell(spellId, caster->GetObjectGuid());
@@ -2892,7 +2892,7 @@ struct spell_gift_of_the_harvester : public SpellScript
             return;
 
         // summon ghoul using spell 52490
-        uint32 spellId = spell->CalculateSpellEffectValue(effIdx, caster);
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
 
         // Each ghoul casts 52500 onto player, so use number of auras as check
         Unit::SpellAuraHolderConstBounds bounds = caster->GetSpellAuraHolderBounds(52500);

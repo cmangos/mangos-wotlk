@@ -281,7 +281,7 @@ struct spell_svala_transforming : public SpellScript
             return;
 
         // remove aura based on effect value
-        uint32 spellId = spell->CalculateSpellEffectValue(effIdx, target);
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
         target->RemoveAurasDueToSpell(spellId);
     }
 };

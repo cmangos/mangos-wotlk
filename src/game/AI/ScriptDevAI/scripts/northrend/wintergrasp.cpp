@@ -272,7 +272,7 @@ struct spell_build_wintergrasp_vehicle : public SpellScript
             return;
 
         // calculate and cast proper spell to summon vehicle
-        uint32 spellId = spell->CalculateSpellEffectValue(effIdx, target);
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
 
         target->CastSpell(target, spellId, TRIGGERED_NONE);
     }
