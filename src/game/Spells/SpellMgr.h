@@ -761,6 +761,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 46048:         // Fel Lightning
         case 46277:         // Bring Pain
         case 46308:         // Burning Winds
+        case 46565:         // Holyform
         case 47287:         // Burning Destruction
             return false;
         default:
