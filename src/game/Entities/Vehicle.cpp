@@ -43,6 +43,7 @@
 #include "Server/SQLStorages.h"
 #include "Movement/MoveSplineInit.h"
 #include "Maps/MapManager.h"
+#include "Entities/Transports.h"
 
 void ObjectMgr::LoadVehicleAccessory()
 {
@@ -345,9 +346,14 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
     if (!changeVehicle)                                     // Send expected unboarding packages
     {
-        // Update movementInfo
-        passenger->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
-        passenger->m_movementInfo.ClearTransportData();
+        if (GenericTransport* transport = m_owner->GetTransport())
+            transport->AddPassenger(passenger);
+        else
+        {
+            // Update movementInfo
+            passenger->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ONTRANSPORT);
+            passenger->m_movementInfo.ClearTransportData();
+        }
 
         if (passenger->GetTypeId() == TYPEID_PLAYER)
         {
@@ -363,7 +369,8 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
 
         Movement::MoveSplineInit init(*passenger);
         // ToDo: Set proper unboard coordinates
-        init.MoveTo(m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ());
+        Position pos = m_owner->GetPosition(m_owner->GetTransport());
+        init.MoveTo(pos.x, pos.y, pos.z);
         init.SetExitVehicle();
         init.Launch();
 
