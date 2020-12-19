@@ -10664,26 +10664,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     ((Player*)unitTarget)->SpawnCorpseBones();
                     return;
                 }
-                case 52479:                                 // Gift of the Harvester
-                {
-                    if (m_caster->GetTypeId() != TYPEID_PLAYER || !unitTarget)
-                        return;
-
-                    // Each ghoul casts 52500 onto player, so use number of auras as check
-                    Unit::SpellAuraHolderConstBounds bounds = m_caster->GetSpellAuraHolderBounds(52500);
-                    uint32 summonedGhouls = std::distance(bounds.first, bounds.second);
-
-                    m_caster->CastSpell(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), urand(0, 2) || summonedGhouls >= 5 ? 52505 : 52490, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
-                case 52555:                                 // Dispel Scarlet Ghoul Credit Counter
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->RemoveAurasByCasterSpell(m_spellInfo->CalculateSimpleValue(eff_idx), m_caster->GetObjectGuid());
-                    return;
-                }
                 case 52751:                                 // Death Gate
                 {
                     if (!unitTarget || unitTarget->getClass() != CLASS_DEATH_KNIGHT)

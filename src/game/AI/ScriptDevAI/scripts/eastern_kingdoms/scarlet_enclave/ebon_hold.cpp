@@ -913,37 +913,40 @@ enum
     SAY_GHUL_SPAWN_3            = -1609093,
     SAY_GHUL_SPAWN_4            = -1609094,
     SAY_GHUL_SPAWN_5            = -1609095,
-    SAY_GOTHIK_THROW_IN_PIT     = -1609096,                 // TODO: Unclear if there exist more texts
+    SAY_GOTHIK_THROW_IN_PIT_1   = -1609096,
+    SAY_GOTHIK_THROW_IN_PIT_2   = -1609097,
 
-    SPELL_GHOUL_SUMMONED        = 52500,
-    SPELL_GOTHIK_GHOUL_PING     = 52514,
-    SPELL_QUEST_CREDIT          = 52517,
-    SPELL_GHOUL_UNSUMMON        = 52555,
+    SPELL_GHOUL_SUMMONED        = 52500,                    // dummy aura applied on owner player
+    SPELL_GOTHIK_GHOUL_PING     = 52514,                    // aoe ping cast by Gothik using spell 52513; targets creature 28845
+    SPELL_GHOUL_CREDIT          = 52517,                    // kill credit id: 28845
+    SPELL_GHOULPLOSION          = 52519,                    // cast by Gothik on the Scarlet Ghoul before destroying the creature; triggers 52555 from ghoul target to ghoul master
 
     NPC_GOTHIK                  = 28658,
 };
 
-static const float aPitPosition[3] = {2380.13f, -5783.06f, 151.367f};
+static const float aPitPosition[3] = { 2369.276f, -5778.689f, 151.367f};
 
 struct npc_scarlet_ghoulAI : public ScriptedPetAI
 {
     npc_scarlet_ghoulAI(Creature* pCreature) : ScriptedPetAI(pCreature)
     {
-        m_bGotHit = false;
-        m_bIsJumping = false;
-        m_bDidInitText = false;
-        m_uiUnsummonTimer = 0;
-        DoCastSpellIfCan(m_creature, SPELL_GHOUL_SUMMONED);
+        // apply aura on the player master
+        if (DoCastSpellIfCan(m_creature, SPELL_GHOUL_SUMMONED) == CAST_OK)
+        {
+            m_bGotHit       = false;
+            m_bIsJumping    = false;
+            m_bDidInitText  = false;
 
-        SetReactState(REACT_DEFENSIVE);
-
+            SetReactState(REACT_DEFENSIVE);
+        }
         Reset();
     }
+
+    ObjectGuid m_gothikGuid;
 
     bool m_bGotHit;
     bool m_bIsJumping;
     bool m_bDidInitText;
-    uint32 m_uiUnsummonTimer;
 
     void Reset() override {}
 
@@ -951,15 +954,40 @@ struct npc_scarlet_ghoulAI : public ScriptedPetAI
     {
         if (uiMotionType == EFFECT_MOTION_TYPE && uiPointId == 1)
         {
-            m_uiUnsummonTimer = 1000;
-            DoCastSpellIfCan(m_creature, SPELL_GHOUL_UNSUMMON);
-            m_creature->GetMotionMaster()->MoveIdle();
+            // make Gothik despawn the ghoul; notification to player follows in spell chain
+            if (Creature* pGothik = m_creature->GetMap()->GetCreature(m_gothikGuid))
+                pGothik->CastSpell(m_creature, SPELL_GHOULPLOSION, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
-        DoCastSpellIfCan(m_creature, SPELL_GHOUL_UNSUMMON, CAST_TRIGGERED);
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            // first spell hit - apply kill credit
+            if (!m_bGotHit)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_GHOUL_CREDIT) == CAST_OK)
+                    m_bGotHit = true;
+            }
+            // following spell hit - jump and despawn
+            else
+            {
+                m_gothikGuid = pInvoker->GetObjectGuid();
+
+                // make caster yell if possible
+                world_map_ebon_hold* pInstance = static_cast<world_map_ebon_hold*>(m_creature->GetInstanceData());
+                if (pInstance && pInstance->CanAndToggleGothikYell())
+                    DoScriptText(urand(0, 1) ? SAY_GOTHIK_THROW_IN_PIT_1 : SAY_GOTHIK_THROW_IN_PIT_2, pInvoker);
+
+                // jump to the pit
+                float fX, fY, fZ;
+                m_creature->GetRandomPoint(aPitPosition[0], aPitPosition[1], aPitPosition[2], 10.0f, fX, fY, fZ);
+                m_creature->GetMotionMaster()->MoveJump(fX, fY, fZ, 24.21229f, 6.0f, 1);
+
+                m_bIsJumping = true;
+            }
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -970,18 +998,6 @@ struct npc_scarlet_ghoulAI : public ScriptedPetAI
             DoScriptText(SAY_GHUL_SPAWN_1 - urand(0, 4), m_creature, pOwner);
 
             m_bDidInitText = true;
-        }
-
-        if (m_uiUnsummonTimer)
-        {
-            if (m_uiUnsummonTimer <= uiDiff)
-            {
-                m_creature->Suicide();
-                if (m_creature->IsPet())
-                    ((Pet*)m_creature)->Unsummon(PET_SAVE_AS_DELETED);
-                return;
-            }
-            m_uiUnsummonTimer -= uiDiff;
         }
 
         if (m_bIsJumping)
@@ -995,25 +1011,8 @@ bool EffectDummyCreature_npc_scarlet_ghoul(Unit* pCaster, uint32 uiSpellId, Spel
 {
     if (uiSpellId == SPELL_GOTHIK_GHOUL_PING && uiEffIndex == EFFECT_INDEX_0)
     {
-        if (npc_scarlet_ghoulAI* pGhoulAi = dynamic_cast<npc_scarlet_ghoulAI*>(pCreatureTarget->AI()))
-        {
-            if (!pGhoulAi->m_bGotHit)                       // First hit
-            {
-                pCreatureTarget->CastSpell(pCreatureTarget, 52517, TRIGGERED_NONE);
-                pGhoulAi->m_bGotHit = true;
-            }
-            else                                            // Second hit
-            {
-                world_map_ebon_hold* pInstance = static_cast<world_map_ebon_hold*>(pCreatureTarget->GetInstanceData());
-                if (pCaster && pInstance && pInstance->CanAndToggleGothikYell())
-                    DoScriptText(SAY_GOTHIK_THROW_IN_PIT, pCaster);
-
-                float fX, fY, fZ;
-                pCreatureTarget->GetRandomPoint(aPitPosition[0], aPitPosition[1], aPitPosition[2], 10.0f, fX, fY, fZ);
-                pGhoulAi->m_bIsJumping = true;
-                pCreatureTarget->GetMotionMaster()->MoveJump(fX, fY, fZ, 24.21229f, 6.0f, 1);
-            }
-        }
+        // inform creature AI that was hit by spell
+        pCaster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
         return true;
     }
 
@@ -2634,13 +2633,16 @@ UnitAI* GetAI_npc_scarlet_courier(Creature* pCreature)
 }
 
 /*######
-## spell_emblazon_runeblade
+## spell_emblazon_runeblade - 51770
 ######*/
 
 struct spell_emblazon_runeblade : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         Unit* caster = spell->GetAffectiveCaster();
         if (!caster)
             return;
@@ -2650,6 +2652,10 @@ struct spell_emblazon_runeblade : public SpellScript
         caster->CastSpell(caster, uiSpell, TRIGGERED_NONE);
     }
 };
+
+/*######
+## spell_emblazon_runeblade_aura - 51769
+######*/
 
 struct spell_emblazon_runeblade_aura : public AuraScript
 {
@@ -2662,13 +2668,16 @@ struct spell_emblazon_runeblade_aura : public AuraScript
 };
 
 /*######
-## spell_death_knight_initiate_visual
+## spell_death_knight_initiate_visual - 51519
 ######*/
 
 struct spell_death_knight_initiate_visual : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         Unit* unitTarget = spell->GetUnitTarget();
         if (!unitTarget)
             return;
@@ -2697,7 +2706,7 @@ struct spell_death_knight_initiate_visual : public SpellScript
 };
 
 /*######
-## spell_siphon_of_acherus
+## spell_siphon_of_acherus_aura - 51859
 ######*/
 
 struct spell_siphon_of_acherus_aura : public AuraScript
@@ -2710,10 +2719,17 @@ struct spell_siphon_of_acherus_aura : public AuraScript
     }
 };
 
+/*######
+## spell_siphon_of_acherus - 51858
+######*/
+
 struct spell_siphon_of_acherus : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         Unit* caster = spell->GetAffectiveCaster();
         Unit* target = spell->GetUnitTarget();
         if (!caster || !target)
@@ -2735,10 +2751,17 @@ struct spell_siphon_of_acherus : public SpellScript
     }
 };
 
+/*######
+## spell_siphon_of_acherus_credit - 51973, 51976, 51979, 51981
+######*/
+
 struct spell_siphon_of_acherus_credit : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         Unit* target = spell->GetUnitTarget();
         if (!target)
             return;
@@ -2760,13 +2783,16 @@ struct spell_siphon_of_acherus_credit : public SpellScript
 };
 
 /*######
-## spell_recall_eye_of_acherus
+## spell_recall_eye_of_acherus - 52694
 ######*/
 
 struct spell_recall_eye_of_acherus : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         Unit* caster = spell->GetAffectiveCaster();
         if (!caster)
             return;
@@ -2781,19 +2807,99 @@ struct spell_recall_eye_of_acherus : public SpellScript
 };
 
 /*######
-## spell_summon_ghouls_scarlet_crusade
+## spell_summon_ghouls_scarlet_crusade - 51904
 ######*/
 
 struct spell_summon_ghouls_scarlet_crusade : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         Unit* target = spell->GetUnitTarget();
         if (!target)
             return;
 
         // cast Summon Ghouls On Scarlet Crusade
         target->CastSpell(target, 51900, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_ghoulplosion - 52519
+######*/
+
+struct spell_ghoulplosion : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        // action handled by effect 2; effect 0 is for visual
+        if (effIdx != EFFECT_INDEX_2)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // cast Dispel Scarlet Ghoul Credit Counter on ghoul owner
+        target->CastSpell(target, 52555, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_dispel_scarlet_ghoul_credit - 52555
+######*/
+
+struct spell_dispel_scarlet_ghoul_credit : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !caster || !caster->IsCreature())
+            return;
+
+        uint32 spellId = spell->CalculateSpellEffectValue(effIdx, target);
+
+        // remove ghoul counter aura - 52500
+        target->RemoveAurasByCasterSpell(spellId, caster->GetObjectGuid());
+
+        // unsummon pet
+        Creature* ghoul = static_cast<Creature*>(caster);
+        if (ghoul->IsPet())
+            (static_cast<Pet*>(caster))->Unsummon(PET_SAVE_AS_DELETED);
+    }
+};
+
+/*######
+## spell_gift_of_the_harvester - 52479
+######*/
+
+struct spell_gift_of_the_harvester : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !caster || !caster->IsPlayer())
+            return;
+
+        // summon ghoul using spell 52490
+        uint32 spellId = spell->CalculateSpellEffectValue(effIdx, caster);
+
+        // Each ghoul casts 52500 onto player, so use number of auras as check
+        Unit::SpellAuraHolderConstBounds bounds = caster->GetSpellAuraHolderBounds(52500);
+        uint32 summonedGhouls = std::distance(bounds.first, bounds.second);
+
+        // randomly summon a ghoul pet (creature id 28845) or a hostile ghost (creature id 28846)
+        caster->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), urand(0, 2) || summonedGhouls >= 5 ? 52505 : spellId, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -2853,4 +2959,7 @@ void AddSC_ebon_hold()
     RegisterSpellScript<spell_siphon_of_acherus_credit>("spell_siphon_of_acherus_credit");
     RegisterSpellScript<spell_recall_eye_of_acherus>("spell_recall_eye_of_acherus");
     RegisterSpellScript<spell_summon_ghouls_scarlet_crusade>("spell_summon_ghouls_scarlet_crusade");
+    RegisterSpellScript<spell_ghoulplosion>("spell_ghoulplosion");
+    RegisterSpellScript<spell_dispel_scarlet_ghoul_credit>("spell_dispel_scarlet_ghoul_credit");
+    RegisterSpellScript<spell_gift_of_the_harvester>("spell_gift_of_the_harvester");
 }

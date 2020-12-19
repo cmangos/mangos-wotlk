@@ -6607,9 +6607,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1609093','Must feed...','0','0','0','434','0','scarlet ghoul SAY_GHUL_SPAWN_3'),
 ('-1609094','So hungry...','0','0','0','434','0','scarlet ghoul SAY_GHUL_SPAWN_4'),
 ('-1609095','$gPoppy:Mama;!','0','0','0','434','0','scarlet ghoul SAY_GHUL_SPAWN_5'),
-('-1609096','It puts the ghoul in the pit or else it gets the lash!','0','0','0','25','0','gothik the harvester SAY_GOTHIK_THROW_IN_PIT'),
+('-1609096','It puts the ghoul in the pit or else it gets the lash!','0','0','0','25','0','gothik the harvester SAY_GOTHIK_THROW_IN_PIT_1'),
+('-1609097','Get in that pit before I turn you into a pile of ash and feces!','0','0','0','25','0','gothik the harvester SAY_GOTHIK_THROW_IN_PIT_2'),
 
-('-1609097','REUSE ME','0','0','0','0','0','REUSE ME'),
 ('-1609098','REUSE ME','0','0','0','0','0','REUSE ME'),
 
 ('-1609201','Soldiers of the Scourge, stand ready! Prepare to unleash your fury upon the Argent Dawn!','14677','1','0','0','0','Highlord Darion Mograine'),
