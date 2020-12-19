@@ -199,7 +199,12 @@ void instance_halls_of_reflection::OnObjectCreate(GameObject* pGo)
         case GO_CAPTAIN_CHEST_HORDE_H:
         case GO_CAPTAIN_CHEST_ALLIANCE:
         case GO_CAPTAIN_CHEST_ALLIANCE_H:
+        case GO_TRANSPORT_SKYBREAKER:
+        case GO_TRANSPORT_OGRIMS_HAMMER:
             break;
+        case GO_GUNSHIP_STAIRS:
+            m_lGunshipStairsGuids.push_back(pGo->GetObjectGuid());
+            return;
         default:
             return;
     }
@@ -252,11 +257,25 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
         case TYPE_LICH_KING:
             if (uiData == DONE)
             {
-                // ToDo: handle transports
-                // Note: loot needs to be hacked in DB until the ships are implemented
+                // Handle Transports
+                if (m_uiTeam == ALLIANCE)
+                {
+                    if (GameObject* pShip = GetSingleGameObjectFromStorage(GO_TRANSPORT_SKYBREAKER))
+                        pShip->SetGoState(GO_STATE_ACTIVE);
+                }
+                else
+                {
+                    if (GameObject* pShip = GetSingleGameObjectFromStorage(GO_TRANSPORT_OGRIMS_HAMMER))
+                        pShip->SetGoState(GO_STATE_ACTIVE);
+
+                    // horde ship has separte stairs
+                    for (GuidList::const_iterator itr = m_lGunshipStairsGuids.begin(); itr != m_lGunshipStairsGuids.end(); ++itr)
+                        DoRespawnGameObject(*itr, 5 * MINUTE);
+                }
+
                 uint32 uiChestEntry = m_uiTeam == ALLIANCE ? (instance->IsRegularDifficulty() ? GO_CAPTAIN_CHEST_ALLIANCE : GO_CAPTAIN_CHEST_ALLIANCE_H) :
                                       (instance->IsRegularDifficulty() ? GO_CAPTAIN_CHEST_HORDE : GO_CAPTAIN_CHEST_HORDE_H);
-                DoRespawnGameObject(uiChestEntry, 60 * MINUTE);
+
                 DoToggleGameObjectFlags(uiChestEntry, GO_FLAG_NO_INTERACT, false);
 
                 // remove active object status for ice wall targets

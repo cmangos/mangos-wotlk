@@ -66,8 +66,8 @@ enum
     GO_ICE_WALL                     = 201385,                   // summoned during the Lich King escape
     GO_CAVE_IN                      = 201596,                   // door after the final encounter
     GO_PORTAL_DALARAN               = 202079,
-    GO_TRANSPORT_SKYBREAKER         = 201598,                   // transport ships used at the end of the event; requires more research
-    GO_TRANSPORT_OGRIMS_HAMMER      = 201599,
+    GO_TRANSPORT_SKYBREAKER         = 201598,                   // alliance transport; map 712
+    GO_TRANSPORT_OGRIMS_HAMMER      = 201599,                   // horde transport; map 713
     GO_GUNSHIP_STAIRS               = 201709,
 
     GO_CAPTAIN_CHEST_HORDE          = 202212,
@@ -166,6 +166,7 @@ class instance_halls_of_reflection : public ScriptedInstance, private DialogueHe
         GuidList m_lDungeonTrapsGuids;
         GuidList m_lSpiritReflectionsGuids;
         GuidList m_lIceWallTargetsGuids;
+        GuidList m_lGunshipStairsGuids;
 };
 
 #endif
