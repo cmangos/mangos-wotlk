@@ -789,7 +789,7 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective nodeId, GameObject* 
             if (GenericTransport* gunship = GetBgMap()->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(iocGunships[ownerIdx]))))
                 gunship->SetGoState(GO_STATE_ACTIVE);
 
-            // ToDo: spawn creature BG_IC_NPC_WORLD_TRIGGER_NOT_FLOAT on the active ship
+            // ToDo: spawn the ship captain and yell when starting the ship
             break;
         }
         case BG_IC_OBJECTIVE_REFINERY:
@@ -914,7 +914,6 @@ void BattleGroundIC::DoResetObjective(IsleObjective nodeId)
             if (GenericTransport* gunship = GetBgMap()->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(iocGunships[ownerIdx]))))
                 gunship->SetGoState(GO_STATE_READY);
 
-            // ToDo: despawn creature BG_IC_NPC_WORLD_TRIGGER_NOT_FLOAT on the active ship
             break;
         }
         case BG_IC_OBJECTIVE_REFINERY:

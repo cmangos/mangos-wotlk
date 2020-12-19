@@ -120,17 +120,18 @@ enum ICCreatures
     BG_IC_NPC_GNOME_ENGINEER                = 13000,        // has emote state 69
     BG_IC_NPC_GOBLIN_ENGINEER               = 36162,        // this one is guesswork but most likely correct
 
-    // gunship creatures
+    // gunship creatures - spawned by DB directly on the transport
+    // ToDo: implement intro event for each faction. When Hangar is captured the captain of the ship spawns and yells near the ground teleporters
     BG_IC_NPC_HORDE_GUNSHIP_CAPTAIN         = 35003,
-    BG_IC_NPC_KORKORN_REAVER                = 36164,
-    BG_IC_NPC_GOBLIN_ENGINEERING_CREW       = 36162,
-    BG_IC_NPC_OGRIMS_HAMMER_ENGINEER        = 30753,
+    // BG_IC_NPC_KORKORN_REAVER             = 36164,
+    // BG_IC_NPC_GOBLIN_ENGINEERING_CREW    = 36162,
+    // BG_IC_NPC_OGRIMS_HAMMER_ENGINEER     = 30753,
 
     BG_IC_NPC_ALLIANCE_GUNSHIP_CAPTAIN      = 34960,
-    BG_IC_NPC_LEGION_MARINE                 = 36166,
-    BG_IC_NPC_LEGION_DECKHAND               = 36165,
-    BG_IC_NPC_NAVIGATOR_TAYLOR              = 36151,
-    BG_IC_NPC_NAVIGATOR_SARACEN             = 36152,
+    // BG_IC_NPC_LEGION_MARINE              = 36166,
+    // BG_IC_NPC_LEGION_DECKHAND            = 36165,
+    // BG_IC_NPC_NAVIGATOR_TAYLOR           = 36151,
+    // BG_IC_NPC_NAVIGATOR_SARACEN          = 36152,
 
     // triggers
     BG_IC_NPC_WORLD_TRIGGER                 = 22515,
@@ -166,8 +167,8 @@ enum ICObjects
     BG_IC_GO_GATE_FRONT_H                   = 195494,
 
     // gunships
-    BG_IC_GO_GUNSHIP_A                      = 195121,
-    BG_IC_GO_GUNSHIP_H                      = 195276,
+    BG_IC_GO_GUNSHIP_A                      = 195121,       // acts as map 641
+    BG_IC_GO_GUNSHIP_H                      = 195276,       // acts as map 642
 
     // keep gates - they open and close after battleground start
     BG_IC_GO_PORTCULLIS_GATE_A              = 195703,
@@ -191,8 +192,8 @@ enum ICObjects
     BG_IC_GO_GUNSHIP_PORTAL_EFFECTS_H       = 195706,
 
     // gunship_portals on the ship
-    BG_IC_GO_GUNSHIP_AIR_PORTAL_1           = 195371,       // casts spell 66899 in order to teleport players to the ground
-    BG_IC_GO_GUNSHIP_AIR_PORTAL_2           = 196413,
+    // BG_IC_GO_GUNSHIP_AIR_PORTAL_A        = 195371,       // casts spell 66899 in order to teleport players to the ground
+    // BG_IC_GO_GUNSHIP_AIR_PORTAL_H        = 196413,
 
     // seaforium bombs - faction allows click from the opposite team
     BG_IC_GO_HUGE_SEAFORIUM_BOMB_A          = 195332,
