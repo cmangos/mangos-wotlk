@@ -617,6 +617,8 @@ void ElevatorTransport::Update(const uint32 diff)
                 SetLocalRotation(rotation.x, rotation.y, rotation.z, rotation.w);
             }
 
+            G3D::Quat transportPathRotation(GetFloatValue(GAMEOBJECT_PARENTROTATION + 0), GetFloatValue(GAMEOBJECT_PARENTROTATION + 1), GetFloatValue(GAMEOBJECT_PARENTROTATION + 2), GetFloatValue(GAMEOBJECT_PARENTROTATION + 3));
+            currentPos = currentPos * transportPathRotation;
 
             currentPos += G3D::Vector3(m_stationaryPosition.x, m_stationaryPosition.y, m_stationaryPosition.z);
 
@@ -643,7 +645,8 @@ void GenericTransport::UpdatePosition(float x, float y, float z, float o)
 void GenericTransport::SetGoState(GOState state)
 {
     GameObject::SetGoState(state);
-    m_movementStarted = GetMap()->GetCurrentMSTime();
+    if ((GetGOInfo()->type == GAMEOBJECT_TYPE_TRANSPORT && GetGOInfo()->transport.pause) || (GetGOInfo()->type == GAMEOBJECT_TYPE_MO_TRANSPORT && GetGOInfo()->moTransport.canBeStopped))
+        m_movementStarted = GetMap()->GetCurrentMSTime();
     m_stopped = false;
     SetUInt16Value(GAMEOBJECT_DYNAMIC, 0, 0);
 }
