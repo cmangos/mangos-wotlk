@@ -806,7 +806,7 @@ void instance_icecrown_citadel::Update(uint32 uiDiff)
 
 void instance_icecrown_citadel::ShowChatCommands(ChatHandler* handler)
 {
-    handler->SendSysMessage("This instance supports the following commands:\n startelevator");
+    handler->SendSysMessage("This instance supports the following commands:\n startelevator, continuegunship");
 }
 
 void instance_icecrown_citadel::ExecuteChatCommand(ChatHandler* handler, char* args)
@@ -824,6 +824,25 @@ void instance_icecrown_citadel::ExecuteChatCommand(ChatHandler* handler, char* a
     {
         if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER))))
             gunship->SetGoState(GO_STATE_ACTIVE);
+    }
+    else if (val == "lichkingfloor")
+    {
+        if (GameObject* frosty = GetSingleGameObjectFromStorage(GO_FROSTY_WIND))
+            frosty->SetGoState(GO_STATE_ACTIVE);
+        if (GameObject* frosty = GetSingleGameObjectFromStorage(GO_FROSTY_EDGE))
+            frosty->SetGoState(GO_STATE_ACTIVE);
+        if (GameObject* frosty = GetSingleGameObjectFromStorage(GO_SNOW_EDGE))
+            frosty->SetGoState(GO_STATE_ACTIVE);
+        if (GameObject* frosty = GetSingleGameObjectFromStorage(GO_ARTHAS_PLATFORM))
+        {
+            frosty->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_NODESPAWN);
+            frosty->SetGoState(GO_STATE_ACTIVE);
+        }
+        if (GameObject* frosty = GetSingleGameObjectFromStorage(GO_ARTHAS_PRECIPICE))
+        {
+            frosty->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_NODESPAWN);
+            frosty->SetGoState(GO_STATE_ACTIVE);
+        }
     }
 }
 
