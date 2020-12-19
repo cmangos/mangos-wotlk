@@ -3629,14 +3629,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, spellShrink, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 54148:                                 // Ritual of the Sword
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    m_caster->CastSpell(unitTarget, 48267, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 54577:                                 // Throw U.D.E.D.
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
@@ -10697,14 +10689,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     // Remove aura (Mojo of Rhunok) given at quest accept / gossip
                     unitTarget->RemoveAurasDueToSpell(51967);
-                    return;
-                }
-                case 54205:                                 // Svala Transforming
-                {
-                    if (unitTarget->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
                 }
                 case 54581:                                 // Mammoth Explosion Spell Spawner

@@ -244,6 +244,48 @@ bool ProcessEventId_event_spell_call_flames(uint32 /*uiEventId*/, Object* pSourc
     return false;
 }
 
+/*######
+## spell_ritual_of_the_sword - 54148
+######*/
+
+struct spell_ritual_of_the_sword : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        Unit* caster = spell->GetCaster();
+        if (!target || !caster)
+            return;
+
+        // teleport target to the given location and stun it using spell
+        caster->CastSpell(target, 48267, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_svala_transforming - 54205
+######*/
+
+struct spell_svala_transforming : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        // remove aura based on effect value
+        uint32 spellId = spell->CalculateSpellEffectValue(effIdx, target);
+        target->RemoveAurasDueToSpell(spellId);
+    }
+};
+
 void AddSC_boss_svala()
 {
     Script* pNewScript = new Script;
@@ -260,4 +302,7 @@ void AddSC_boss_svala()
     pNewScript->Name = "npc_ritual_target";
     pNewScript->GetAI = GetAI_npc_ritual_target;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_ritual_of_the_sword>("spell_ritual_of_the_sword");
+    RegisterSpellScript<spell_svala_transforming>("spell_svala_transforming");
 }
