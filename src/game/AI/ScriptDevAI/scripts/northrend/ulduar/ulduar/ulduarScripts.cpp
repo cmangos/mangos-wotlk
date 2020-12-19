@@ -30,7 +30,6 @@ npc_storm_tempered_keeper
 npc_charged_sphere
 npc_ulduar_keeper
 go_activate_tram
-event_ulduar_tram
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
@@ -599,7 +598,7 @@ bool GossipSelect_npc_ulduar_keeper(Player* pPlayer, Creature* pCreature, uint32
 
 bool GOUse_go_activate_tram(Player* pPlayer, GameObject* pGo)
 {
-    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+    instance_ulduar* pInstance = static_cast<instance_ulduar*>(pGo->GetInstanceData());
     if (!pInstance)
         return true;
 
@@ -607,38 +606,9 @@ bool GOUse_go_activate_tram(Player* pPlayer, GameObject* pGo)
     if (GameObject* pTram = pInstance->GetSingleGameObjectFromStorage(GO_TRAM))
         pTram->SetGoState(pTram->GetGoState() == GO_STATE_READY ? GO_STATE_ACTIVE : GO_STATE_READY);
 
-    return false;
-}
-
-/*######
-## event_ulduar_tram
-######*/
-
-bool ProcessEventId_event_ulduar_tram(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
-{
-    if (pSource->GetTypeId() == TYPEID_GAMEOBJECT)
-    {
-        GameObject* pTram = (GameObject*)pSource;
-
-        // Event ids triggered by the tram reaching the destination; This triggers the turnaround objects
-        if (uiEventId == EVENT_ID_TRAM_MIMIRON || uiEventId == EVENT_ID_TRAM_CENTER)
-        {
-            ScriptedInstance* pInstance = (ScriptedInstance*)pTram->GetInstanceData();
-            if (!pInstance)
-                return true;
-
-            uint32 uiTurnaroundEntry;
-
-            switch (uiEventId)
-            {
-                case EVENT_ID_TRAM_CENTER: uiTurnaroundEntry = GO_TRAM_TURNAROUND_CENTER; break;
-                case EVENT_ID_TRAM_MIMIRON: uiTurnaroundEntry = GO_TRAM_TURNAROUND_MIMIRON; break;
-                default: return true;
-            }
-
-            pInstance->DoUseDoorOrButton(uiTurnaroundEntry);
-        }
-    }
+    // trigger the rotation on timer
+    // ToDo: check if there is a better way to handle this; Timer is an approximation
+    pInstance->SetTramRotateTimer();
 
     return false;
 }
@@ -687,10 +657,5 @@ void AddSC_ulduar()
     pNewScript = new Script;
     pNewScript->Name = "go_activate_tram";
     pNewScript->pGOUse = &GOUse_go_activate_tram;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "event_ulduar_tram";
-    pNewScript->pProcessEventId = &ProcessEventId_event_ulduar_tram;
     pNewScript->RegisterSelf();
 }

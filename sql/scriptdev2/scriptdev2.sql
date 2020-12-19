@@ -1685,8 +1685,6 @@ INSERT INTO scripted_event_id VALUES
 (21032,'event_go_ulduar_tower'),        -- Tower of Frost destroyed event
 (21033,'event_go_ulduar_tower'),        -- Tower of Flame destroyed event
 (21045,'event_boss_hodir'),             -- Hodir attack start event
-(21393,'event_ulduar_tram'),            -- Ulduar tram transport stop event
-(21394,'event_ulduar_tram'),            -- Ulduar tram transport stop event
 (21605,'event_ulduar'),                 -- Flame Leviathan shutdown event
 (21606,'event_ulduar'),                 -- XT-002 Scrap repair event
 (21620,'event_ulduar');                 -- Ignis construct shatter event

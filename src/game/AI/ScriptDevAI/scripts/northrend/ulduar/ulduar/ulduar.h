@@ -369,8 +369,8 @@ enum
     EVENT_ID_TOWER_FROST        = 21032,
     EVENT_ID_TOWER_STORMS       = 21031,
 
-    EVENT_ID_TRAM_MIMIRON       = 21393,                    // tram reached Mimiron
-    EVENT_ID_TRAM_CENTER        = 21394,                    // tram reached Center
+    // EVENT_ID_TRAM_MIMIRON    = 21393,                    // tram reached Mimiron
+    // EVENT_ID_TRAM_CENTER     = 21394,                    // tram reached Center
 
     // area triggers
     AREATRIGGER_ID_INTRO        = 5388,                     // starts the intro dialogue
@@ -619,6 +619,9 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         void GetSmashTargetsGuids(GuidList& lTargets, bool bLeft) { lTargets = bLeft ? m_lLeftHandBunniesGuids : m_lRightHandBunniesGuids; }
         void GetOminousCloudGuids(GuidList& lClouds) const { lClouds = m_lOminousCloudsGuids; }
 
+        // Function that will trigger the tram turnaround object, based on the tram location
+        void SetTramRotateTimer() { m_uiTramRotateTimer = m_bTramAtCenter ? 33000 : 30000; }
+
         void Update(uint32 uiDiff);
 
     protected:
@@ -638,12 +641,14 @@ class instance_ulduar : public ScriptedInstance, private DialogueHelper
         uint32 m_auiAchievEncounter[MAX_ACHIEV_ENCOUNTER]; // for achievements which need saving
 
         bool m_bHelpersLoaded;
+        bool m_bTramAtCenter;
 
         uint32 m_uiAlgalonTimer;
         uint32 m_uiYoggResetTimer;
         uint32 m_uiShatterAchievTimer;
         uint32 m_uiGauntletStatus;
         uint32 m_uiStairsSpawnTimer;
+        uint32 m_uiTramRotateTimer;
         uint8 m_uiSlayedArenaMobs;
 
         ObjectGuid m_leftKoloStalkerGuid;

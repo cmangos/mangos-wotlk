@@ -74,12 +74,14 @@ static UlduarKeeperSpawns m_aKeeperHelperLocs[] =
 
 instance_ulduar::instance_ulduar(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aUlduarDialogue),
     m_bHelpersLoaded(false),
+    m_bTramAtCenter(true),
     m_uiAlgalonTimer(MINUTE * IN_MILLISECONDS),
     m_uiYoggResetTimer(0),
     m_uiShatterAchievTimer(0),
     m_uiGauntletStatus(0),
     m_uiStairsSpawnTimer(0),
-    m_uiSlayedArenaMobs(0)
+    m_uiSlayedArenaMobs(0),
+    m_uiTramRotateTimer(0)
 {
     Initialize();
 }
@@ -629,11 +631,6 @@ void instance_ulduar::SetData(uint32 uiType, uint32 uiData)
             {
                 DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_CACHE_OF_LIVING_STONE_10 : GO_CACHE_OF_LIVING_STONE_25, 30 * MINUTE);
                 DoUseDoorOrButton(GO_KOLOGARN_BRIDGE);
-
-                // enable Mimiron tram buttons
-                // ToDo: check if these flags are dynamically changed based on the location of the tram
-                DoToggleGameObjectFlags(GO_CALL_TRAM_CENTER, GO_FLAG_NO_INTERACT, false);
-                DoToggleGameObjectFlags(GO_CALL_TRAM_MIMIRON, GO_FLAG_NO_INTERACT, false);
 
             }
             else if (uiData == IN_PROGRESS)
@@ -1674,6 +1671,24 @@ void instance_ulduar::Update(uint32 uiDiff)
         }
         else
             m_uiStairsSpawnTimer -= uiDiff;
+    }
+
+    if (m_uiTramRotateTimer)
+    {
+        if (m_uiTramRotateTimer <= uiDiff)
+        {
+            // activate the tram turnaround animation depending on the tram location
+            m_bTramAtCenter = !m_bTramAtCenter;
+            DoUseDoorOrButton(m_bTramAtCenter ? GO_TRAM_TURNAROUND_CENTER : GO_TRAM_TURNAROUND_MIMIRON);
+
+            // enable / disable the call tram consoles depending on the tram location
+            DoToggleGameObjectFlags(GO_CALL_TRAM_CENTER, GO_FLAG_NO_INTERACT, m_bTramAtCenter);
+            DoToggleGameObjectFlags(GO_CALL_TRAM_MIMIRON, GO_FLAG_NO_INTERACT, !m_bTramAtCenter);
+
+            m_uiTramRotateTimer = 0;
+        }
+        else
+            m_uiTramRotateTimer -= uiDiff;
     }
 }
 
