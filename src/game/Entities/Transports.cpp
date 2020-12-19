@@ -253,6 +253,8 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
     Map* oldMap = GetMap();
     Relocate(x, y, z);
 
+    bool mapChange = GetMapId() != newMapid;
+
     auto& passengers = GetPassengers();
     for (m_passengerTeleportIterator = passengers.begin(); m_passengerTeleportIterator != passengers.end();)
     {
@@ -274,9 +276,12 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
         {
             case TYPEID_UNIT:
             {
-                RemovePassenger(passengerUnit);
-                if (obj->IsCreature() && !static_cast<Creature*>(obj)->IsPet())
-                    passengerUnit->AddObjectToRemoveList();
+                if (mapChange)
+                {
+                    RemovePassenger(passengerUnit);
+                    if (obj->IsCreature() && !static_cast<Creature*>(obj)->IsPet())
+                        passengerUnit->AddObjectToRemoveList();
+                }
                 break;
             }
             case TYPEID_PLAYER:
@@ -293,7 +298,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
     // we need to create and save new Map object with 'newMapid' because if not done -> lead to invalid Map object reference...
     // player far teleport would try to create same instance, but we need it NOW for transport...
     // correct me if I'm wrong O.o
-    if (GetMapId() != newMapid)
+    if (mapChange)
     {
         oldMap->GetMessager().AddMessage([transport = this, newMapid](Map* map)
         {
