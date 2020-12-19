@@ -1840,7 +1840,7 @@ enum SpellTargetType
     SPELL_TARGET_TYPE_GAMEOBJECT_GUID = 4, // works only for global fetch spells
 };
 
-#define MAX_SPELL_TARGET_TYPE 4
+#define MAX_SPELL_TARGET_TYPE 5
 
 // pre-defined targeting for spells
 struct SpellTargetEntry
