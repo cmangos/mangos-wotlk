@@ -24,7 +24,7 @@
 #include "Tools/Language.h"
 #include "Globals/ObjectMgr.h"
 
-BattleGroundSA::BattleGroundSA(): m_defendingTeamIdx(TEAM_INDEX_NEUTRAL), m_battleRoundTimer(0), m_boatStartTimer(0), m_battleStage(BG_SA_STAGE_ROUND_1)
+BattleGroundSA::BattleGroundSA(): m_defendingTeamIdx(TEAM_INDEX_NEUTRAL), m_battleRoundTimer(0), m_boatStartTimer(0), m_battleStage(BG_SA_STAGE_ROUND_1), m_initialSetup(false)
 {
     // set battleground start message ids
     m_startMessageIds[BG_STARTING_EVENT_FIRST]  = LANG_BG_SA_START_TWO_MINUTES;
@@ -48,9 +48,6 @@ void BattleGroundSA::Reset()
         m_scoreCount[i] = 0;
         m_winTime[i] = 0;
     }
-
-    // setup the battleground
-    SetupBattleground();
 }
 
 void BattleGroundSA::Update(uint32 diff)
@@ -145,7 +142,7 @@ void BattleGroundSA::Update(uint32 diff)
                     m_defendingTeamIdx = m_defendingTeamIdx == TEAM_INDEX_ALLIANCE ? TEAM_INDEX_HORDE : TEAM_INDEX_ALLIANCE;
 
                     // reset
-                    SetupBattleground();
+                    SetupBattleground(false);
 
                     // setup player spells
                     for (auto& m_player : m_players)
@@ -238,6 +235,13 @@ void BattleGroundSA::AddPlayer(Player* player)
     m_playerScores[player->GetObjectGuid()] = score;
 
     TeleportPlayerToStartArea(player);
+
+    // setup the battleground
+    if (!m_initialSetup)
+    {
+        SetupBattleground(true);
+        m_initialSetup = true;
+    }
 }
 
 // function to teleport player to the starting area
@@ -725,7 +729,7 @@ void BattleGroundSA::ChangeBannerState(uint8 nodeId)
 }
 
 // Function to setup battleground
-void BattleGroundSA::SetupBattleground()
+void BattleGroundSA::SetupBattleground(bool initialSetup)
 {
     DEBUG_LOG("BattleGroundSA: Setup battleground for stage: %u", m_battleStage);
 
@@ -795,6 +799,15 @@ void BattleGroundSA::SetupBattleground()
         m_strandGraveyard[i].changeTimer = 0;
     }
 
+    // set static graveyards
+    sObjectMgr.SetGraveYardLinkTeam(BG_SA_GRAVEYARD_ID_SHRINE, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(m_defendingTeamIdx));
+    sObjectMgr.SetGraveYardLinkTeam(BG_SA_GRAVEYARD_ID_BEACH, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(GetAttacker()));
+    sObjectMgr.SetGraveYardLinkTeam(BG_SA_GRAVEYARD_ID_SHIP, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(GetAttacker()));
+
+    // sigil and gates don't have to be initialized
+    if (initialSetup)
+        return;
+
     // reset gates
     if (Creature* master = GetBgMap()->GetCreature(m_battlegroundMasterGuid))
     {
@@ -809,11 +822,6 @@ void BattleGroundSA::SetupBattleground()
     for (uint8 i = 0; i < BG_SA_MAX_SIGILS; ++i)
         if (GameObject* pSigil = GetSingleGameObjectFromStorage(strandSigils[i]))
             ChangeBgObjectSpawnState(pSigil->GetObjectGuid(), RESPAWN_IMMEDIATELY);
-
-    // set static graveyards
-    sObjectMgr.SetGraveYardLinkTeam(BG_SA_GRAVEYARD_ID_SHRINE, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(m_defendingTeamIdx));
-    sObjectMgr.SetGraveYardLinkTeam(BG_SA_GRAVEYARD_ID_BEACH, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(GetAttacker()));
-    sObjectMgr.SetGraveYardLinkTeam(BG_SA_GRAVEYARD_ID_SHIP, BG_SA_ZONE_ID_STRAND, GetTeamIdByTeamIndex(GetAttacker()));
 }
 
 // Function to handle the warnings

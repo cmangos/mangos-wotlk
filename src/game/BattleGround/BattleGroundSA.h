@@ -395,7 +395,7 @@ class BattleGroundSA : public BattleGround
         void AwardBonusHonor();
 
         // Battleground setup functions
-        void SetupBattleground();
+        void SetupBattleground(bool initialSetup);
         void EnableDemolishers();
         void SetupGraveyards();
 
@@ -406,6 +406,7 @@ class BattleGroundSA : public BattleGround
 
         StrandGraveyardNode m_strandGraveyard[BG_SA_MAX_GRAVEYARDS];
 
+        bool m_initialSetup;
         bool m_noScratchAchiev;                     // no demolisher is destroyed
         bool m_defenseAncients;                     // no wall is destroyed
         bool m_defenseLineCaptured[BG_SA_MAX_DEFENSE_LINES];
