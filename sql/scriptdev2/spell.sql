@@ -280,6 +280,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (32438,'spell_outdoor_pvp_banner_trigger'),
 -- Strand of the Ancients
 (52365,'spell_split_teleport_boat'),
+(52459,'spell_end_of_round'),
 (52528,'spell_split_teleport_boat'),
 (53464,'spell_split_teleport_boat'),
 (53465,'spell_split_teleport_boat'),

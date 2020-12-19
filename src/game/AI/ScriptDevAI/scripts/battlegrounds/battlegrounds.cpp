@@ -150,6 +150,9 @@ struct spell_battleground_banner_trigger : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         // TODO: Fix when go casting is fixed
         WorldObject* obj = spell->GetAffectiveCasterObject();
 
@@ -172,6 +175,9 @@ struct spell_outdoor_pvp_banner_trigger : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         // TODO: Fix when go casting is fixed
         WorldObject* obj = spell->GetAffectiveCasterObject();
 
@@ -186,13 +192,16 @@ struct spell_outdoor_pvp_banner_trigger : public SpellScript
 };
 
 /*#####
-# spell_split_teleport_boat
+# spell_split_teleport_boat - 52365, 52528, 53464, 53465
 #####*/
 
 struct spell_split_teleport_boat : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         Unit* caster = spell->GetCaster();
         if (!caster || !caster->IsPlayer())
             return;
@@ -210,13 +219,17 @@ struct spell_split_teleport_boat : public SpellScript
 };
 
 /*#####
-# spell_gunship_portal_click
+# spell_gunship_portal_click - 66630, 66637
 #####*/
 
 struct spell_gunship_portal_click : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        // effect 0 is for teleport; effect 1 unk, probably related to transport teleport logic
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         Unit* caster = spell->GetCaster();
         if (!caster || !caster->IsPlayer())
             return;
@@ -232,7 +245,7 @@ struct spell_gunship_portal_click : public SpellScript
 };
 
 /*######
-## spell_repair_cannon
+## spell_repair_cannon_aura - 68077
 ######*/
 
 struct spell_repair_cannon_aura : public AuraScript
@@ -250,10 +263,17 @@ struct spell_repair_cannon_aura : public AuraScript
     }
 };
 
+/*######
+## spell_repair_cannon - 68078
+######*/
+
 struct spell_repair_cannon : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         Unit* target = spell->GetUnitTarget();
         if (!target)
             return;
@@ -273,6 +293,29 @@ struct spell_repair_cannon : public SpellScript
     }
 };
 
+/*######
+## spell_end_of_round - 52459
+######*/
+
+struct spell_end_of_round : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->GetMap()->IsBattleGround() || !target->IsPlayer() || target->IsAlive())
+            return;
+
+        Player* player = static_cast<Player*>(target);
+
+        // resurrect dead players
+        player->ResurrectPlayer(1.0f);
+        player->SpawnCorpseBones();
+    }
+};
+
 void AddSC_battleground()
 {
     Script* pNewScript = new Script;
@@ -289,4 +332,5 @@ void AddSC_battleground()
     RegisterSpellScript<spell_gunship_portal_click>("spell_gunship_portal_click");
     RegisterAuraScript<spell_repair_cannon_aura>("spell_repair_cannon_aura");
     RegisterSpellScript<spell_repair_cannon>("spell_repair_cannon");
+    RegisterSpellScript<spell_end_of_round>("spell_end_of_round");
 }
