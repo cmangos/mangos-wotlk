@@ -2883,7 +2883,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                     {
                         for (uint32 guid : entriesToUse)
                         {
-                            CreatureData const* data = sObjectMgr.GetCreatureData(guid);
+                            GameObjectData const* data = sObjectMgr.GetGOData(guid);
                             if (GameObject* go = m_caster->GetMap()->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, guid)))
                                 if (go->IsWithinDist(m_caster, radius))
                                     foundScriptGOTargets.push_back(go);
