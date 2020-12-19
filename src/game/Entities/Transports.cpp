@@ -543,6 +543,7 @@ bool ElevatorTransport::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 
         m_stopped = GetGOInfo()->transport.pause > 0;
         m_animationInfo = sTransportMgr.GetTransportAnimInfo(GetGOInfo()->id);
         m_currentSeg = 0;
+        m_eventTriggered = false;
         return true;
     }
     return false;
@@ -564,16 +565,6 @@ void ElevatorTransport::Update(const uint32 diff)
             {
                 m_stopped = true;
                 timeSinceLastStop = GetGOInfo()->transport.pause;
-
-                // handle events
-                uint32 eventPause1 = GetGOInfo()->transport.pause1EventID;
-                uint32 eventPause2 = GetGOInfo()->transport.pause2EventID;
-
-                if (eventPause1 && GetGoState() == GO_STATE_ACTIVE)
-                    StartEvents_Event(GetMap(), eventPause1, this, this, true);
-
-                if (eventPause2 && GetGoState() == GO_STATE_READY)
-                    StartEvents_Event(GetMap(), eventPause2, this, this, true);
 
                 if (AI())
                     AI()->JustReachedStopPoint();
@@ -632,6 +623,29 @@ void ElevatorTransport::Update(const uint32 diff)
             UpdateModelPosition();
 
             UpdatePassengerPositions(GetPassengers());
+
+            if (!m_eventTriggered && (GetGOInfo()->transport.pause1EventID || GetGOInfo()->transport.pause2EventID))
+            {
+                uint32 eventId = 0;
+                switch (GetGOInfo()->id)
+                {
+                    case 194675: // Ulduar Tram
+                    {
+                        if (nodePrev->id == 179512)
+                            eventId = GetGOInfo()->transport.pause1EventID;
+                        else if (nodePrev->id == 179620)
+                            eventId = GetGOInfo()->transport.pause2EventID;
+                        break;
+                    }
+                    default:
+                        break;
+                }
+                if (eventId)
+                {
+                    m_eventTriggered = true;
+                    StartEvents_Event(GetMap(), eventId, this, this, true);
+                }
+            }
         }
     }
 
@@ -654,6 +668,12 @@ void GenericTransport::SetGoState(GOState state)
         m_movementStarted = GetMap()->GetCurrentMSTime();
     m_stopped = false;
     SetUInt16Value(GAMEOBJECT_DYNAMIC, 0, 0);
+}
+
+void ElevatorTransport::SetGoState(GOState state)
+{
+    GenericTransport::SetGoState(state);
+    m_eventTriggered = false;
 }
 
 void GenericTransport::UpdatePassengerPositions(PassengerSet& passengers)

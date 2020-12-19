@@ -78,9 +78,12 @@ class ElevatorTransport : public GenericTransport
         bool Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang,
             const QuaternionData& rotation = QuaternionData(), uint8 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY) override;
         void Update(const uint32 diff) override;
+
+        void SetGoState(GOState state) override;
     private:
         TransportAnimation const* m_animationInfo;
         uint32 m_currentSeg;
+        bool m_eventTriggered;
 };
 
 class Transport : public GenericTransport

@@ -2159,7 +2159,7 @@ struct TotemCategoryEntry
 
 struct TransportAnimationEntry
 {
-    // uint32 id;                                           // 0        // m_id
+    uint32 id;                                              // 0        // m_id
     uint32 TransportEntry;                                  // 1        // m_transportId (matched with gameobjects type 11 and 15)
     uint32 TimeSeg;                                         // 2        // m_timeIndex
     float   X;                                              // 3        // m_x
