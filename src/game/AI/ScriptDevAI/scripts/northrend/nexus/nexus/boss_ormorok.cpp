@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "nexus.h"
+#include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
 enum
@@ -266,6 +267,29 @@ bool EffectAuraDummy_spell_aura_dummy_crystal_spike_visual(const Aura* pAura, bo
     return true;
 }
 
+/*######
+## spell_crystal_spikes - 57082
+######*/
+
+struct spell_crystal_spikes : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // trigger spells that will summon creature 27101 around the caster
+        target->CastSpell(target, 57077, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(target, 57078, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(target, 57080, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(target, 57081, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_ormorok()
 {
     Script* pNewScript = new Script;
@@ -278,4 +302,6 @@ void AddSC_boss_ormorok()
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_crystal_spike_trigger;
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_crystal_spike_visual;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_crystal_spikes>("spell_crystal_spikes");
 }

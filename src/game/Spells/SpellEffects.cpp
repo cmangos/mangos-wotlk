@@ -10764,17 +10764,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_NONE);
                     break;
                 }
-                case 57082:                                 // Crystal Spikes (h1)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 57077, TRIGGERED_OLD_TRIGGERED);
-                    unitTarget->CastSpell(unitTarget, 57078, TRIGGERED_OLD_TRIGGERED);
-                    unitTarget->CastSpell(unitTarget, 57080, TRIGGERED_OLD_TRIGGERED);
-                    unitTarget->CastSpell(unitTarget, 57081, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 57337:                                 // Great Feast
                 {
                     if (!unitTarget)

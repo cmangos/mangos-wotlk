@@ -165,6 +165,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (54148,'spell_ritual_of_the_sword'),
 (54205,'spell_svala_transforming'),
 (55931,'spell_conjure_flame_sphere'),
+(57082,'spell_crystal_spikes'),
 (57283,'spell_remove_mushroom_power'),
 (59275,'spell_summon_gauntlet_mobs_periodic_aura'),
 (73159,'spell_play_movie');
