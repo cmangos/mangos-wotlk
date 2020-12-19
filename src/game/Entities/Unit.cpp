@@ -12094,11 +12094,11 @@ void Unit::SetPhaseMask(uint32 newPhaseMask, bool update)
     WorldObject::SetPhaseMask(newPhaseMask, update);
 }
 
-void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool casting /*= false*/)
+void Unit::NearTeleportTo(float x, float y, float z, float orientation, bool casting /*= false*/, bool transportLeave /*= false*/)
 {
     if (IsPlayer())
     {
-        uint32 options = TELE_TO_NOT_LEAVE_TRANSPORT | (casting ? TELE_TO_SPELL : 0);
+        uint32 options = (transportLeave ? 0 : TELE_TO_NOT_LEAVE_TRANSPORT) | (casting ? TELE_TO_SPELL : 0);
         if (GetDistance(x, y, z, DIST_CALC_NONE) < 100.f * 100.f)
             options |= TELE_TO_NOT_LEAVE_COMBAT;
         static_cast<Player*>(this)->TeleportTo(GetMapId(), x, y, z, orientation, options);
