@@ -219,13 +219,16 @@ bool ProcessEventId_event_go_tower_destroy(uint32 uiEventId, Object* pSource, Ob
 }
 
 /*######
-## spell_teleport_lake_wintergrasp
+## spell_teleport_lake_wintergrasp - 58622
 ######*/
 
 struct spell_teleport_lake_wintergrasp : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         Unit* target = spell->GetUnitTarget();
         if (!target || !target->IsPlayer())
             return;
@@ -253,6 +256,28 @@ struct spell_teleport_lake_wintergrasp : public SpellScript
     }
 };
 
+/*######
+## spell_build_wintergrasp_vehicle - 56659, 56662, 56664, 56666, 56668, 56670, 61409
+######*/
+
+struct spell_build_wintergrasp_vehicle : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        // calculate and cast proper spell to summon vehicle
+        uint32 spellId = spell->CalculateSpellEffectValue(effIdx, target);
+
+        target->CastSpell(target, spellId, TRIGGERED_NONE);
+    }
+};
+
 void AddSC_wintergrasp()
 {
     Script* pNewScript = new Script;
@@ -271,4 +296,5 @@ void AddSC_wintergrasp()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_teleport_lake_wintergrasp>("spell_teleport_lake_wintergrasp");
+    RegisterSpellScript<spell_build_wintergrasp_vehicle>("spell_build_wintergrasp_vehicle");
 }

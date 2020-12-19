@@ -288,7 +288,14 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (53464,'spell_split_teleport_boat'),
 (53465,'spell_split_teleport_boat'),
 -- Wintergrasp
+(56659,'spell_build_wintergrasp_vehicle'),
+(56662,'spell_build_wintergrasp_vehicle'),
+(56664,'spell_build_wintergrasp_vehicle'),
+(56666,'spell_build_wintergrasp_vehicle'),
+(56668,'spell_build_wintergrasp_vehicle'),
+(56670,'spell_build_wintergrasp_vehicle'),
 (58622,'spell_teleport_lake_wintergrasp'),
+(61409,'spell_build_wintergrasp_vehicle'),
 -- Isle of Conquest
 (35092,'spell_battleground_banner_trigger'),
 (65826,'spell_battleground_banner_trigger'),
