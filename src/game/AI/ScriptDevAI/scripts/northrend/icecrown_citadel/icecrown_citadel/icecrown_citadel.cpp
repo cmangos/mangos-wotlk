@@ -520,6 +520,10 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                 DoToggleGameObjectFlags(GO_TRANSPORTER_DEATHBRINGER, GO_FLAG_NO_INTERACT, false);
                 if (GameObject* pTransporter = GetSingleGameObjectFromStorage(GO_TRANSPORTER_DEATHBRINGER))
                     pTransporter->SetGoState(GO_STATE_ACTIVE);
+
+                // spawn the Saurfang's ship
+                TransportTemplate* const zeppelinHorde = sTransportMgr.GetTransportTemplate(GO_ZEPPELIN_HORDE);
+                Transport::LoadTransport(*zeppelinHorde, instance, true);
             }
             break;
         case TYPE_DEATHBRINGER_SAURFANG:
@@ -843,6 +847,11 @@ void instance_icecrown_citadel::ExecuteChatCommand(ChatHandler* handler, char* a
             frosty->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DAMAGED | GO_FLAG_NODESPAWN);
             frosty->SetGoState(GO_STATE_ACTIVE);
         }
+    }
+    else if (val == "spawnzeppelin")
+    {
+        TransportTemplate* const zeppelinHorde = sTransportMgr.GetTransportTemplate(GO_ZEPPELIN_HORDE);
+        Transport::LoadTransport(*zeppelinHorde, instance, true);
     }
 }
 
