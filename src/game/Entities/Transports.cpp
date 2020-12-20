@@ -136,12 +136,6 @@ bool Transport::IsSpawnedByDefault(uint32 entry, Team team)
 
 void Transport::LoadTransport(TransportTemplate const& transportTemplate, Map* map)
 {
-    Team team = TEAM_NONE;
-    if (DungeonMap* dungeon = dynamic_cast<DungeonMap*>(map))
-        team = dungeon->GetInstanceTeam();
-    if (!IsSpawnedByDefault(transportTemplate.entry, team))
-        return;
-
     Transport* t = new Transport(transportTemplate);
 
     t->SetPeriod(transportTemplate.pathTime);
