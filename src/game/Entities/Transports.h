@@ -90,9 +90,9 @@ class Transport : public GenericTransport
 {
     public:
         explicit Transport(TransportTemplate const& transportTemplate);
-        
+
         static bool IsSpawnedByDefault(uint32 entry, Team team);
-        static void LoadTransport(TransportTemplate const& transportTemplate, Map* map);
+        static void LoadTransport(TransportTemplate const& transportTemplate, Map* map, bool spawnOnDemand = false);
         bool Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint8 animprogress, uint16 dynamicHighValue);
         void Update(const uint32 diff) override;
 

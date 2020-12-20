@@ -133,18 +133,21 @@ bool Transport::IsSpawnedByDefault(uint32 entry, Team team)
         case 201581:        // ICC raid - Orgrim's Hammer - alliance
             if (team == HORDE)
                 return false;
+            break;
         case 201599:        // Halls of Reflection - horde
         case 201811:        // ICC Raid - Skybreaker - horde
         case 201812:        // ICC Raid - Orgrim's Hammer - horde
             if (team == ALLIANCE)
                 return false;
+            break;
         case 201834:        // ICC zeppelin after gunship fight
             return false;
     }
+
     return true;
 }
 
-void Transport::LoadTransport(TransportTemplate const& transportTemplate, Map* map)
+void Transport::LoadTransport(TransportTemplate const& transportTemplate, Map* map, bool spawnOnDemand /*= false*/)
 {
     Transport* t = new Transport(transportTemplate);
 
@@ -172,6 +175,9 @@ void Transport::LoadTransport(TransportTemplate const& transportTemplate, Map* m
     map->AddTransport(t);
 
     t->SpawnPassengers();
+
+    if (spawnOnDemand)
+        t->UpdateForMap(map, true);
 }
 
 bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint8 animprogress, uint16 dynamicHighValue)
