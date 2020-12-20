@@ -1693,9 +1693,6 @@ bool DungeonMap::Add(Player* player)
     m_resetAfterUnload = false;
     m_unloadWhenEmpty = false;
 
-    if (!m_team)
-        m_team = player->GetTeam();
-
     if (i_mapEntry->IsNonRaidDungeon() && GetDifficulty() == DUNGEON_DIFFICULTY_NORMAL)
         player->AddNewInstanceId(GetInstanceId());
 

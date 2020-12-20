@@ -510,6 +510,7 @@ class DungeonMap : public Map
         void SetResetSchedule(bool on);
 
         Team GetInstanceTeam() { return m_team; };
+        void SetInstanceTeam( Team team ) { m_team = team; }
 
         // can't be nullptr for loaded map
         DungeonPersistentState* GetPersistanceState() const;
