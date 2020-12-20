@@ -822,7 +822,7 @@ void instance_icecrown_citadel::ExecuteChatCommand(ChatHandler* handler, char* a
     }
     else if (val == "continuegunship")
     {
-        if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER))))
+        if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER_A))))
             gunship->SetGoState(GO_STATE_ACTIVE);
     }
     else if (val == "lichkingfloor")
