@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "halls_of_reflection.h"
+#include "Entities/Transports.h"
 
 enum
 {
@@ -202,8 +203,11 @@ void instance_halls_of_reflection::OnObjectCreate(GameObject* pGo)
         case GO_TRANSPORT_SKYBREAKER:
         case GO_TRANSPORT_OGRIMS_HAMMER:
             break;
-        case GO_GUNSHIP_STAIRS:
-            m_lGunshipStairsGuids.push_back(pGo->GetObjectGuid());
+        case GO_GUNSHIP_STAIRS_A:
+            m_lGunshipStairsAllyGuids.push_back(pGo->GetObjectGuid());
+            return;
+        case GO_GUNSHIP_STAIRS_H:
+            m_lGunshipStairsHordeGuids.push_back(pGo->GetObjectGuid());
             return;
         default:
             return;
@@ -257,11 +261,14 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
         case TYPE_LICH_KING:
             if (uiData == DONE)
             {
-                // Handle Transports
+                // Move ship to final position and spawn stairs
                 if (m_uiTeam == ALLIANCE)
                 {
                     if (GameObject* pShip = GetSingleGameObjectFromStorage(GO_TRANSPORT_SKYBREAKER))
                         pShip->SetGoState(GO_STATE_ACTIVE);
+
+                    for (GuidList::const_iterator itr = m_lGunshipStairsAllyGuids.begin(); itr != m_lGunshipStairsAllyGuids.end(); ++itr)
+                        DoRespawnGameObject(*itr, 5 * MINUTE);
                 }
                 else
                 {
@@ -269,7 +276,7 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
                         pShip->SetGoState(GO_STATE_ACTIVE);
 
                     // horde ship has separte stairs
-                    for (GuidList::const_iterator itr = m_lGunshipStairsGuids.begin(); itr != m_lGunshipStairsGuids.end(); ++itr)
+                    for (GuidList::const_iterator itr = m_lGunshipStairsHordeGuids.begin(); itr != m_lGunshipStairsHordeGuids.end(); ++itr)
                         DoRespawnGameObject(*itr, 5 * MINUTE);
                 }
 
@@ -639,6 +646,24 @@ void instance_halls_of_reflection::Update(uint32 uiDiff)
         }
         else
             m_uiEscapeResetTimer -= uiDiff;
+    }
+}
+
+void instance_halls_of_reflection::ExecuteChatCommand(ChatHandler* handler, char* args)
+{
+    char* result = handler->ExtractLiteralArg(&args);
+    if (!result)
+        return;
+    std::string val = result;
+    if (val == "startallianceship")
+    {
+        if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_TRANSPORT_SKYBREAKER))))
+            gunship->SetGoState(GO_STATE_ACTIVE);
+    }
+    else if (val == "starthordeship")
+    {
+        if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_TRANSPORT_OGRIMS_HAMMER))))
+            gunship->SetGoState(GO_STATE_ACTIVE);
     }
 }
 

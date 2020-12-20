@@ -68,7 +68,8 @@ enum
     GO_PORTAL_DALARAN               = 202079,
     GO_TRANSPORT_SKYBREAKER         = 201598,                   // alliance transport; map 712
     GO_TRANSPORT_OGRIMS_HAMMER      = 201599,                   // horde transport; map 713
-    GO_GUNSHIP_STAIRS               = 201709,
+    GO_GUNSHIP_STAIRS_A             = 201709,
+    GO_GUNSHIP_STAIRS_H             = 202211,
 
     GO_CAPTAIN_CHEST_HORDE          = 202212,
     GO_CAPTAIN_CHEST_HORDE_H        = 202337,
@@ -146,6 +147,8 @@ class instance_halls_of_reflection : public ScriptedInstance, private DialogueHe
 
         void Update(uint32 uiDiff);
 
+        void ExecuteChatCommand(ChatHandler* handler, char* args) override;
+
     protected:
         void JustDidDialogueStep(int32 iEntry) override;
         void DoCleanupFrostmourneEvent();
@@ -166,7 +169,8 @@ class instance_halls_of_reflection : public ScriptedInstance, private DialogueHe
         GuidList m_lDungeonTrapsGuids;
         GuidList m_lSpiritReflectionsGuids;
         GuidList m_lIceWallTargetsGuids;
-        GuidList m_lGunshipStairsGuids;
+        GuidList m_lGunshipStairsAllyGuids;
+        GuidList m_lGunshipStairsHordeGuids;
 };
 
 #endif

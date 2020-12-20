@@ -247,6 +247,7 @@ struct boss_lich_king_horAI : public ScriptedAI
                     pCreature->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
                 }
 
+                // ToDo: handle last part of the event: do the intro dialogue, start the ship to first position; collapse the wall; set the event complete
                 m_pInstance->SetData(TYPE_LICH_KING, DONE);
             }
 
