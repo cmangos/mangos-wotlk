@@ -214,7 +214,7 @@ struct spell_split_teleport_boat : public SpellScript
         Player* player = static_cast<Player*>(caster);
 
         // teleport uses local transport coords
-        player->TeleportTo(player->GetMapId(), -6.0f, 3.0f, 8.8f, 3.8f, 0, nullptr, transport); // X: 0 Y : 5 Z : 9.6 O : 3.14
+        player->TeleportTo(player->GetMapId(), 0.0f, 5.0f, 9.6f, 3.14f, 0, nullptr, transport);
     }
 };
 
