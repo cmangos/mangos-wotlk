@@ -44,8 +44,6 @@ EndContentData */
 * All teleporters are GO with entry 194569 - on them are npcs of entry 32780 spawned.
 * However for reload case we would need to be able to target these npcs of not yet loaded grids (currently impossible)
 * And in general we would need some "good" way of selecting appropriate target-npcs for each spell, but sorting is nearly impossible, as there are > 50 of these npcs spawned in Ulduar
-
-* So --  TODO -- remove the TeleportTo Hacks when correct target selection for this spell is working.
 */
 
 enum TeleporterSpells
@@ -128,8 +126,6 @@ bool GossipSelect_go_ulduar_teleporter(Player* pPlayer, GameObject* pGo, uint32 
         return true;
 
     // Additional checks for the teleporters to prevent exploiting
-    // -- TODO -- HACK HERE, use spells when possible!
-
     // There needs to be displayed a msg when in Combat, it is likely that this is to be handled by core and spell can-cast check
     // -- TODO -- Remove the combat check when spells are correctly working
     if (pPlayer->IsInCombat())
@@ -139,23 +135,23 @@ bool GossipSelect_go_ulduar_teleporter(Player* pPlayer, GameObject* pGo, uint32 
     {
         // Basecamp
         case GOSSIP_ACTION_INFO_DEF:
-            // pPlayer->CastSpell(pPlayer, SPELL_TELE_EXPEDITION_BASE_CAMP, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
-            pPlayer->TeleportTo(603, -706.122f, -92.6024f, 429.876f, 0);
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_EXPEDITION_BASE_CAMP, TRIGGERED_OLD_TRIGGERED);
+            // pPlayer->TeleportTo(603, -706.122f, -92.6024f, 429.876f, 0);
             break;
         // Formation Grounds
         case GOSSIP_ACTION_INFO_DEF + 1:
-            // pPlayer->CastSpell(pPlayer, SPELL_TELE_FORMATION_GROUNDS, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
-            pPlayer->TeleportTo(603, 131.248f, -35.3802f, 409.804f, 0);
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_FORMATION_GROUNDS, TRIGGERED_OLD_TRIGGERED);
+            // pPlayer->TeleportTo(603, 131.248f, -35.3802f, 409.804f, 0);
             break;
         // Colossal Forge
         case GOSSIP_ACTION_INFO_DEF + 2:
-            // pPlayer->CastSpell(pPlayer, SPELL_TELE_COLOSSAL_FORGE, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
-            pPlayer->TeleportTo(603, 553.233f, -12.3247f, 409.679f, 0);
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_COLOSSAL_FORGE, TRIGGERED_OLD_TRIGGERED);
+            // pPlayer->TeleportTo(603, 553.233f, -12.3247f, 409.679f, 0);
             break;
         // Scrapyard
         case GOSSIP_ACTION_INFO_DEF + 3:
-            // pPlayer->CastSpell(pPlayer, SPELL_TELE_SCRAPYARD, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
-            pPlayer->TeleportTo(603, 926.292f, -11.4635f, 418.595f, 0);
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_SCRAPYARD, TRIGGERED_OLD_TRIGGERED);
+            // pPlayer->TeleportTo(603, 926.292f, -11.4635f, 418.595f, 0);
             break;
         // Antechamber
         case GOSSIP_ACTION_INFO_DEF + 4:
@@ -179,8 +175,8 @@ bool GossipSelect_go_ulduar_teleporter(Player* pPlayer, GameObject* pGo, uint32 
             break;
         // Prison of Yogg-Saron
         case GOSSIP_ACTION_INFO_DEF + 8:
-            // pPlayer->CastSpell(pPlayer, SPELL_TELE_PRISON_OF_YOGG, TRIGGERED_OLD_TRIGGERED, NULL, NULL, pGo->GetObjectGuid());
-            pPlayer->TeleportTo(603, 1854.82f, -11.56f, 334.175f, 4.71f);
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_PRISON_OF_YOGG, TRIGGERED_OLD_TRIGGERED);
+            // pPlayer->TeleportTo(603, 1854.82f, -11.56f, 334.175f, 4.71f);
             break;
         default:
             return true;
