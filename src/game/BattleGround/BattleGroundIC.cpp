@@ -514,6 +514,9 @@ void BattleGroundIC::HandleCreatureCreate(Creature* creature)
         case BG_IC_NPC_GOBLIN_MECHANIC:
             m_workshopMechanicGuids[TEAM_INDEX_HORDE] = creature->GetObjectGuid();
             break;
+        case BG_IC_NPC_BOAT_FIRE:
+            m_boatFiresGuids.push_back(creature->GetObjectGuid());
+            break;
     }
 }
 
@@ -768,6 +771,13 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective nodeId, GameObject* 
                 if (Creature* creature = objRef->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
                     m_isleNode[nodeId].creatureGuids.push_back(creature->GetObjectGuid());
             }
+
+            // spawn boats for visual reference
+            for (const auto& i : iocBoatsSpawns)
+            {
+                if (Creature* creature = objRef->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0, true, true))
+                    m_isleNode[nodeId].specialCreatureGuid = creature->GetObjectGuid();
+            }
             break;
         }
         case BG_IC_OBJECTIVE_HANGAR:
@@ -789,7 +799,12 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective nodeId, GameObject* 
             if (GenericTransport* gunship = GetBgMap()->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(iocGunships[ownerIdx]))))
                 gunship->SetGoState(GO_STATE_ACTIVE);
 
-            // ToDo: spawn the ship captain and yell when starting the ship
+            // spawn the captain and start wp movement for script purpose
+            for (const auto& i : iocHangarSpawns)
+            {
+                if (Creature* creature = objRef->SummonCreature(ownerIdx == TEAM_INDEX_ALLIANCE ? i.entryAlly : i.entryHorde, i.x, i.y, i.z, i.o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    creature->GetMotionMaster()->MoveWaypoint();
+            }
             break;
         }
         case BG_IC_OBJECTIVE_REFINERY:
@@ -893,6 +908,24 @@ void BattleGroundIC::DoResetObjective(IsleObjective nodeId)
                 }
             }
 
+            // boat fire animations and despawn
+            for (const auto& guid : m_boatFiresGuids)
+            {
+                if (Creature* fire = GetBgMap()->GetCreature(guid))
+                {
+                    fire->CastSpell(fire, BG_IC_SPELL_BOAT_FIRE, TRIGGERED_OLD_TRIGGERED);
+                    fire->ForcedDespawn(10000);
+                }
+            }
+
+            // despawn boat and let it sink
+            if (Creature* boat = GetBgMap()->GetCreature(m_isleNode[nodeId].specialCreatureGuid))
+            {
+                boat->SetLevitate(false);
+                boat->ForcedDespawn(10000);
+            }
+
+            m_boatFiresGuids.clear();
             m_isleNode[nodeId].creatureGuids.clear();
             break;
         }

@@ -133,6 +133,11 @@ enum ICCreatures
     // BG_IC_NPC_NAVIGATOR_TAYLOR           = 36151,
     // BG_IC_NPC_NAVIGATOR_SARACEN          = 36152,
 
+    // creatures that act like boats; used during the docks event
+    BG_IC_NPC_ALLIANCE_BOAT                 = 35335,        // vehicles with passengers: creature 35339
+    BG_IC_NPC_HORDE_BOAT                    = 35336,
+    BG_IC_NPC_BOAT_FIRE                     = 35339,
+
     // triggers
     BG_IC_NPC_WORLD_TRIGGER                 = 22515,
     BG_IC_NPC_WORLD_TRIGGER_NOT_FLOAT       = 34984,        // teleport triggers on gunships
@@ -282,6 +287,7 @@ enum ICSpells
     BG_IC_SPELL_PARACHUTE                   = 66656,        // triggers 66657
     BG_IC_SPELL_SEAFORIUM_BLAST             = 66676,
     BG_IC_SPELL_HUGE_SEAFORIUM_BLAST        = 66672,
+    BG_IC_SPELL_BOAT_FIRE                   = 67302,        // boat fire visual
 
     // achievement spells
     BG_IC_SPELL_ACHIEV_DESTROYED_VEHICLE    = 68357,        // used for achiev id 3845 and 3850
@@ -406,6 +412,18 @@ static const IsleDualSummonData iocDocksSpawns[] =
     {BG_IC_VEHICLE_CATAPULT,         BG_IC_VEHICLE_CATAPULT,         766.948f, -342.054f, 12.201f,  4.694f},
     {BG_IC_VEHICLE_CATAPULT,         BG_IC_VEHICLE_CATAPULT,         800.378f, -342.608f, 12.167f,  4.6774f},
     {BG_IC_VEHICLE_CATAPULT,         BG_IC_VEHICLE_CATAPULT,         810.726f, -342.083f, 12.1676f, 4.66f},
+};
+
+// *** Boats spawn data *** //
+static const IsleDualSummonData iocBoatsSpawns[] =
+{
+    {BG_IC_NPC_ALLIANCE_BOAT, BG_IC_NPC_HORDE_BOAT, 806.8698f,  32.90625f, -0.5591627f, 0.0f},
+};
+
+// *** Hangar spawn data *** //
+static const IsleDualSummonData iocHangarSpawns[] =
+{
+    {BG_IC_NPC_ALLIANCE_GUNSHIP_CAPTAIN, BG_IC_NPC_HORDE_GUNSHIP_CAPTAIN, 825.6667f, -994.0052f, 134.35689f, 3.403392f},
 };
 
 // *** Alliance Keep extra Honor triggers spawn data *** //
@@ -665,6 +683,7 @@ struct IsleNode
 
     ObjectGuid spiritHealerGuid;
     ObjectGuid honorableDefenderGuid;
+    ObjectGuid specialCreatureGuid;             // holder for special creatures
 
     GuidList creatureGuids;                     // stores the current creatures guids
 };
@@ -743,5 +762,6 @@ class BattleGroundIC : public BattleGround
         GuidList m_towerGatesGuids;
         GuidList m_teleporterGuids;
         GuidList m_teleporterAnimGuids;
+        GuidList m_boatFiresGuids;
 };
 #endif
