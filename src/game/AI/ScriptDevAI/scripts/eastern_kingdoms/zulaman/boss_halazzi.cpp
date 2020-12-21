@@ -170,6 +170,7 @@ struct boss_halazziAI : public CombatAI
         {
             m_spiritLynxGuid = summoned->GetObjectGuid();
             summoned->SetInCombatWithZone();
+            summoned->AI()->AttackClosestEnemy();
             summoned->CastSpell(m_creature, SPELL_HALAZZI_TRANSFORM_DUMMY, TRIGGERED_OLD_TRIGGERED);
         }
 
