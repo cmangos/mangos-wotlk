@@ -649,9 +649,9 @@ struct boss_essence_of_angerAI : public CombatAI
 ## npc_enslaved_soul
 ######*/
 
-struct npc_enslaved_soulAI : public ScriptedAI, TimerManager
+struct npc_enslaved_soulAI : public CombatAI
 {
-    npc_enslaved_soulAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_postpone(false)
+    npc_enslaved_soulAI(Creature* creature) : CombatAI(creature, 0), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_postpone(false)
     {
         SetReactState(REACT_PASSIVE);
         AddCustomAction(1, 2000u, [&]()
@@ -669,16 +669,10 @@ struct npc_enslaved_soulAI : public ScriptedAI, TimerManager
             if (!m_creature->IsInCombat())
                 JustReachedHome();
         });
-        Reset();
     }
 
     ScriptedInstance* m_instance;
     bool m_postpone;
-
-    void Reset() override
-    {
-        
-    }
 
     void JustRespawned() override
     {
@@ -717,16 +711,6 @@ struct npc_enslaved_soulAI : public ScriptedAI, TimerManager
         }
 
         m_creature->ForcedDespawn();
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        DoMeleeAttackIfReady();
     }
 };
 
