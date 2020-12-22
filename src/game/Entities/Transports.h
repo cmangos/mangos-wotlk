@@ -113,6 +113,7 @@ class Transport : public GenericTransport
         void SetMoving(bool val) { m_isMoving = val; }
 
         ShortTimeTracker m_positionChangeTimer;
+        ShortTimeTracker m_dynamicChangeTimer;
         bool m_isMoving;
 
         KeyFrameVec::const_iterator m_currentFrame;

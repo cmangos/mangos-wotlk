@@ -431,6 +431,7 @@ bool GenericTransport::AddPetToTransport(Unit* passenger, Pet* pet)
 void Transport::Update(const uint32 diff)
 {
     uint32 const positionUpdateDelay = 50;
+    uint32 const dynChangeTimer = 1000;
 
     if (GetKeyFrames().size() <= 1)
         return;
@@ -467,6 +468,7 @@ void Transport::Update(const uint32 diff)
                 m_pathProgress = (m_pathProgress / GetPeriod()) * GetPeriod() + m_currentFrame->DepartureTime;
             SetUInt16Value(GAMEOBJECT_DYNAMIC, 0, GO_DYNFLAG_LO_STOPPED);
             SetUInt16Value(GAMEOBJECT_DYNAMIC, 1, pathProgress % GetPeriod());
+            m_dynamicChangeTimer.Reset(dynChangeTimer);
             GameObject::SetGoState(GO_STATE_READY);
             if (AI())
                 AI()->JustReachedStopPoint();
@@ -519,6 +521,12 @@ void Transport::Update(const uint32 diff)
             m_currentFrame->Spline->evaluate_derivative(m_currentFrame->Index, t, dir);
             UpdatePosition(pos.x, pos.y, pos.z, atan2(dir.y, dir.x) + M_PI);
         }
+    }
+
+    if ((GetUInt16Value(GAMEOBJECT_DYNAMIC, 0) & GO_DYNFLAG_LO_STOPPED) == 0 && m_dynamicChangeTimer.Passed())
+    {
+        m_dynamicChangeTimer.Reset(dynChangeTimer);
+        SetUInt16Value(GAMEOBJECT_DYNAMIC, 1, pathProgress % GetPeriod());
     }
 }
 
