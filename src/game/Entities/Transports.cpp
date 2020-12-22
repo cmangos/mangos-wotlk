@@ -297,6 +297,16 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
                 player->TeleportTo(newMapid, pos.x, pos.y, pos.z, pos.o, TELE_TO_NOT_LEAVE_TRANSPORT, nullptr, this);
                 break;
             }
+            case TYPEID_GAMEOBJECT:
+            case TYPEID_DYNAMICOBJECT:
+            {
+                if (mapChange)
+                {
+                    RemovePassenger(passengerUnit);
+                    passengerUnit->AddObjectToRemoveList();
+                }
+                break;
+            }
         }
     }
 
@@ -326,7 +336,10 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
         });
     }
     else
+    {
         UpdateModelPosition();
+        UpdatePassengerPositions(m_passengers);
+    }
 }
 
 bool GenericTransport::AddPassenger(WorldObject* passenger)
