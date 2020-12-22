@@ -267,17 +267,18 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
                     if (GameObject* pShip = GetSingleGameObjectFromStorage(GO_TRANSPORT_SKYBREAKER))
                         pShip->SetGoState(GO_STATE_ACTIVE);
 
-                    for (GuidList::const_iterator itr = m_lGunshipStairsAllyGuids.begin(); itr != m_lGunshipStairsAllyGuids.end(); ++itr)
-                        DoRespawnGameObject(*itr, 5 * MINUTE);
+                    // alliance ship stairs - handled by DBscript
+                    /*for (GuidList::const_iterator itr = m_lGunshipStairsAllyGuids.begin(); itr != m_lGunshipStairsAllyGuids.end(); ++itr)
+                        DoRespawnGameObject(*itr, 5 * MINUTE);*/
                 }
                 else
                 {
                     if (GameObject* pShip = GetSingleGameObjectFromStorage(GO_TRANSPORT_OGRIMS_HAMMER))
                         pShip->SetGoState(GO_STATE_ACTIVE);
 
-                    // horde ship has separte stairs
-                    for (GuidList::const_iterator itr = m_lGunshipStairsHordeGuids.begin(); itr != m_lGunshipStairsHordeGuids.end(); ++itr)
-                        DoRespawnGameObject(*itr, 5 * MINUTE);
+                    // horde ship has separte stairs - handled by DBscript
+                    /*for (GuidList::const_iterator itr = m_lGunshipStairsHordeGuids.begin(); itr != m_lGunshipStairsHordeGuids.end(); ++itr)
+                        DoRespawnGameObject(*itr, 5 * MINUTE);*/
                 }
 
                 uint32 uiChestEntry = m_uiTeam == ALLIANCE ? (instance->IsRegularDifficulty() ? GO_CAPTAIN_CHEST_ALLIANCE : GO_CAPTAIN_CHEST_ALLIANCE_H) :
@@ -293,7 +294,10 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
                 }
             }
             else if (uiData == IN_PROGRESS)
+            {
                 StartNextDialogueText(SAY_ALLY_INTRO_1);
+                DoRespawnWallTargets();
+            }
             else if (uiData == FAIL)
             {
                 m_uiEscapeResetTimer = 10000;
@@ -577,6 +581,19 @@ void instance_halls_of_reflection::DoSetupEscapeEvent(Player* pPlayer)
     }
 }
 
+// Function to respawn the wall targets
+void instance_halls_of_reflection::DoRespawnWallTargets()
+{
+    for (GuidList::const_iterator itr = m_lIceWallTargetsGuids.begin(); itr != m_lIceWallTargetsGuids.end(); ++itr)
+    {
+        if (Creature* pCreature = instance->GetCreature(*itr))
+        {
+            if (!pCreature->IsAlive())
+                pCreature->Respawn();
+        }
+    }
+}
+
 void instance_halls_of_reflection::Update(uint32 uiDiff)
 {
     DialogueUpdate(uiDiff);
@@ -633,14 +650,7 @@ void instance_halls_of_reflection::Update(uint32 uiDiff)
                 if (GameObject* pWall = GetSingleGameObjectFromStorage(GO_ICE_WALL))
                     pWall->Use(pPlayer);
 
-                for (GuidList::const_iterator itr = m_lIceWallTargetsGuids.begin(); itr != m_lIceWallTargetsGuids.end(); ++itr)
-                {
-                    if (Creature* pCreature = instance->GetCreature(*itr))
-                    {
-                        if (!pCreature->IsAlive())
-                            pCreature->Respawn();
-                    }
-                }
+                DoRespawnWallTargets();
             }
             m_uiEscapeResetTimer = 0;
         }

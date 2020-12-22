@@ -55,7 +55,7 @@ enum
     SPELL_SUMMON_WITCH_DOCTOR       = 69836,                // summon 36941
 
     // other
-    EVENT_ID_SUMMON_ICE_WALL        = 22795,
+    EVENT_ID_SUMMON_ICE_WALL        = 22795,                // sent by spell 69767
 };
 
 struct boss_lich_king_horAI : public ScriptedAI
@@ -75,24 +75,20 @@ struct boss_lich_king_horAI : public ScriptedAI
     bool m_bIsEventStarted;
     bool m_bIsEventFailed;
     bool m_bCanSummonCreatures;
-    bool m_bCanSummonWall;
 
-    uint8 m_uiCreatureWavesCount;
-    uint8 m_uiCreaturesAliveCount;
+    uint32 m_uiCreatureWavesCount;
     uint32 m_uiSoulReaperTimer;
-    uint32 m_uiResumeMovementTimer;
+    uint32 m_uiSummonWallTimer;
 
-    ObjectGuid m_iceWallGuid;
+    GuidList m_lSummonedCreaturesGuids;
 
     void Reset() override
     {
         m_uiSoulReaperTimer     = urand(3000, 5000);
         m_uiCreatureWavesCount  = 0;
-        m_uiCreaturesAliveCount = 0;
-        m_uiResumeMovementTimer = 0;
+        m_uiSummonWallTimer     = 0;
 
         m_bCanSummonCreatures   = false;
-        m_bCanSummonWall        = false;
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -130,34 +126,24 @@ struct boss_lich_king_horAI : public ScriptedAI
             pTarget->CastSpell(m_creature, SPELL_SOUL_REAPER_TRIGGER, TRIGGERED_OLD_TRIGGERED);
     }
 
-    void JustSummoned(GameObject* pGo) override
-    {
-        if (pGo->GetEntry() == GO_ICE_WALL)
-            m_iceWallGuid = pGo->GetObjectGuid();
-    }
-
     void JustSummoned(Creature* pSummoned) override
     {
         if (!m_pInstance)
             return;
 
-        // check position of the summoned. Sometimes, creatures are spawned below or above the map (bad targeting)
-        if (std::abs(m_creature->GetPositionZ() - pSummoned->GetPositionZ()) <= 5.0f)
+        switch (pSummoned->GetEntry())
         {
-            if (Player* pPlayer = m_pInstance->GetPlayerInMap(true, false))
-                pSummoned->AI()->AttackStart(pPlayer);
-        }
-        else
-        {
-            // sometimes the creature is summoned in a bad place, so make sure that it always move to the creature
-            if (Creature* pCreature = m_pInstance->GetSingleCreatureFromStorage(m_pInstance->GetPlayerTeam() == ALLIANCE ? NPC_JAINA_PART2 : NPC_SYLVANAS_PART2))
-            {
-                pSummoned->SetWalk(false);
-                pSummoned->GetMotionMaster()->MovePoint(0, pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ(), FORCED_MOVEMENT_NONE, false);
-            }
+            case NPC_LUMBERING_ABOMINATION:
+                if (Player* pPlayer = m_pInstance->GetPlayerInMap(true, false))
+                    pSummoned->AI()->AttackStart(pPlayer);
+                break;
+            default:
+                // combat for the others is handled by EAI
+                break;
         }
 
-        ++m_uiCreaturesAliveCount;
+        // count the summoned creatures
+        m_lSummonedCreaturesGuids.push_back(pSummoned->GetObjectGuid());
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -165,26 +151,33 @@ struct boss_lich_king_horAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        --m_uiCreaturesAliveCount;
+        m_lSummonedCreaturesGuids.remove(pSummoned->GetObjectGuid());
 
         // when all creatures are cleared, destroy the wall and allow Jaina / Sylvanas to continue
-        if (!m_uiCreaturesAliveCount)
+        if (m_lSummonedCreaturesGuids.empty())
         {
-            if (GameObject* pWall = m_creature->GetMap()->GetGameObject(m_iceWallGuid))
+            if (Creature* pCreature = m_pInstance->GetSingleCreatureFromStorage(m_pInstance->GetPlayerTeam() == ALLIANCE ? NPC_JAINA_PART2 : NPC_SYLVANAS_PART2))
+            {
+                pCreature->InterruptNonMeleeSpells(false);
+                pCreature->GetMotionMaster()->UnpauseWaypoints();
+            }
+            else
+                script_error_log("instance_halls_of_reflection: Error: cannot find creature with entry %u.", m_pInstance->GetPlayerTeam() == ALLIANCE ? NPC_JAINA_PART2 : NPC_SYLVANAS_PART2);
+
+            if (GameObject* pWall = m_pInstance->GetSingleGameObjectFromStorage(GO_ICE_WALL))
             {
                 if (Creature* pTarget = GetClosestCreatureWithEntry(pWall, NPC_ICE_WALL_TARGET, 5.0f))
                     pTarget->ForcedDespawn();
 
                 pWall->Use(m_creature);
             }
-
-            if (Creature* pCreature = m_pInstance->GetSingleCreatureFromStorage(m_pInstance->GetPlayerTeam() == ALLIANCE ? NPC_JAINA_PART2 : NPC_SYLVANAS_PART2))
-                pCreature->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
+            else
+                script_error_log("instance_halls_of_reflection: Error: cannot find gameobject with entry %u.", GO_ICE_WALL);
 
             if (m_uiCreatureWavesCount >= 20)
                 m_creature->RemoveAurasDueToSpell(SPELL_REMORSLESS_WINTER);
             else
-                m_bCanSummonWall = true;
+                m_uiSummonWallTimer = 5000;
         }
     }
 
@@ -207,8 +200,7 @@ struct boss_lich_king_horAI : public ScriptedAI
             {
                 case 0:
                     DoScriptText(SAY_FIRST_WALL, m_creature);
-                    // ToDo: fix spell targets
-                    // DoCastSpellIfCan(m_creature, SPELL_PAIN_AND_SUFFERING, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_PAIN_AND_SUFFERING, CAST_TRIGGERED);
                     break;
                 case 2:
                     DoScriptText(SAY_SECOND_WALL, m_creature);
@@ -240,15 +232,17 @@ struct boss_lich_king_horAI : public ScriptedAI
         {
             if (m_pInstance)
             {
-                // epilog script handled by DB scripts
                 if (Creature* pCreature = m_pInstance->GetSingleCreatureFromStorage(m_pInstance->GetPlayerTeam() == ALLIANCE ? NPC_JAINA_PART2 : NPC_SYLVANAS_PART2))
                 {
-                    DoCastSpellIfCan(pCreature, SPELL_HARVEST_SOUL);
-                    pCreature->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
-                }
+                    if (DoCastSpellIfCan(pCreature, SPELL_HARVEST_SOUL) == CAST_OK)
+                    {
+                        m_creature->GetMotionMaster()->PauseWaypoints(0);
+                        pCreature->GetMotionMaster()->PauseWaypoints(0);
 
-                // ToDo: handle last part of the event: do the intro dialogue, start the ship to first position; collapse the wall; set the event complete
-                m_pInstance->SetData(TYPE_LICH_KING, DONE);
+                        // mark the encounter as done; epilog script handled by DB scripts
+                        m_pInstance->SetData(TYPE_LICH_KING, DONE);
+                    }
+                }
             }
 
             return;
@@ -264,7 +258,16 @@ struct boss_lich_king_horAI : public ScriptedAI
             {
                 // reset instance, walls and creatures
                 if (m_pInstance)
+                {
                     m_pInstance->SetData(TYPE_LICH_KING, FAIL);
+
+                    // clear the summoned list
+                    for (const auto& guid : m_lSummonedCreaturesGuids)
+                    {
+                        if (Creature* pSummoned = m_pInstance->instance->GetCreature(guid))
+                            pSummoned->ForcedDespawn(10000);
+                    }
+                }
 
                 m_creature->ForcedDespawn(10000);
             }
@@ -284,10 +287,7 @@ struct boss_lich_king_horAI : public ScriptedAI
                 case 12:
                 case 17:
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_RAGING_GHOUL) == CAST_OK)
-                    {
-                        m_creature->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
-                        m_uiResumeMovementTimer = 3000;
-                    }
+                        m_creature->GetMotionMaster()->PauseWaypoints(3000);
                     break;
                 case 2:
                 case 4:
@@ -321,31 +321,24 @@ struct boss_lich_king_horAI : public ScriptedAI
                     break;
             }
         }
-
-        // handle wall summoning
-        if (m_bCanSummonWall)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ICE_WALL) == CAST_OK)
-            {
-                m_creature->addUnitState(UNIT_STAT_WAYPOINT_PAUSED);
-                m_uiResumeMovementTimer = 3000;
-                m_bCanSummonWall = false;
-            }
-        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        // resume wp movement after specified timer
-        if (m_uiResumeMovementTimer)
+        // handle wall summoning
+        // Note: first wall is summoned directly by DB script when the LK reaches a certain point; After that we use this timer
+        if (m_uiSummonWallTimer)
         {
-            if (m_uiResumeMovementTimer <= uiDiff)
+            if (m_uiSummonWallTimer <= uiDiff)
             {
-                m_creature->clearUnitState(UNIT_STAT_WAYPOINT_PAUSED);
-                m_uiResumeMovementTimer = 0;
+                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ICE_WALL) == CAST_OK)
+                {
+                    m_creature->GetMotionMaster()->PauseWaypoints(3000);
+                    m_uiSummonWallTimer = 0;
+                }
             }
             else
-                m_uiResumeMovementTimer -= uiDiff;
+                m_uiSummonWallTimer -= uiDiff;
         }
 
         // no combat during escape event
@@ -377,7 +370,7 @@ bool EffectScriptEffectCreature_spell_stun_break(Unit* pCaster, uint32 uiSpellId
     if (uiSpellId == SPELL_STUN_BREAK && uiEffIndex == EFFECT_INDEX_0)
     {
         pCreatureTarget->AI()->EnterEvadeMode();
-        pCreatureTarget->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
+        pCreatureTarget->SetImmuneToPlayer(true);
         pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCaster, pCreatureTarget);
 
         return true;
@@ -484,14 +477,22 @@ bool AreaTrigger_at_wrath_lich_king(Player* pPlayer, AreaTriggerEntry const* pAt
 
 bool ProcessEventId_event_spell_summon_ice_wall(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool bIsStart)
 {
-    if (uiEventId == EVENT_ID_SUMMON_ICE_WALL && bIsStart && pSource->GetTypeId() == TYPEID_UNIT)
+    if (uiEventId == EVENT_ID_SUMMON_ICE_WALL && bIsStart && pSource->IsCreature() && pSource->GetEntry() == NPC_ICE_WALL_TARGET)
     {
-        Creature* pLichKing = (Creature*)pSource;
-        if (!pLichKing)
+        Creature* pWallTarget = static_cast<Creature*>(pSource);
+        if (!pWallTarget)
             return false;
 
-        pLichKing->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pLichKing, pLichKing);
+        instance_halls_of_reflection* pInstance = static_cast<instance_halls_of_reflection*>(pWallTarget->GetInstanceData());
+        if (!pInstance)
+            return false;
+
+        // Inform the Lich King that the ice wall is in place and that he can start summoning creatures
+        if (Creature* pLichKing = pInstance->GetSingleCreatureFromStorage(NPC_LICH_KING))
+            pLichKing->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pWallTarget, pLichKing);
     }
+    else
+        script_error_log("instance_halls_of_reflection: Error: process script event %u failed.", uiEventId);
 
     return false;
 }

@@ -52,7 +52,7 @@ enum
     // escape event creatures
     NPC_RAGING_GHOUL                = 36940,
     NPC_RISEN_WHITCH_DOCTOR         = 36941,
-    NPC_LUMBERING_ABONIMATION       = 37069,
+    NPC_LUMBERING_ABOMINATION       = 37069,
     NPC_ICE_WALL_TARGET             = 37014,                    // dummy ice wall target
 
     // objects
@@ -154,6 +154,7 @@ class instance_halls_of_reflection : public ScriptedInstance, private DialogueHe
         void DoCleanupFrostmourneEvent();
         void DoSendNextSpiritWave();
         void DoSetupEscapeEvent(Player* pPlayer);
+        void DoRespawnWallTargets();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
