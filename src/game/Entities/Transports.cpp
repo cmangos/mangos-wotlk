@@ -518,6 +518,7 @@ void Transport::Update(const uint32 diff)
         }
     }
 
+    m_dynamicChangeTimer.Update(transportDiff);
     if ((GetUInt16Value(GAMEOBJECT_DYNAMIC, 0) & GO_DYNFLAG_LO_STOPPED) == 0 && m_dynamicChangeTimer.Passed())
     {
         m_dynamicChangeTimer.Reset(dynChangeTimer);
