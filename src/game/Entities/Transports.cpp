@@ -270,12 +270,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
     {
         WorldObject* obj = (*m_passengerTeleportIterator++);
 
-        if (!obj->IsUnit())
-            return; // should never happen on tbc
-
-        Unit* passengerUnit = static_cast<Unit*>(obj);
-
-        Position pos = passengerUnit->m_movementInfo.GetTransportPos();
+        Position pos = obj->m_movementInfo.GetTransportPos();
 
         switch (obj->GetTypeId())
         {
@@ -283,9 +278,9 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
             {
                 if (mapChange)
                 {
-                    RemovePassenger(passengerUnit);
+                    RemovePassenger(obj);
                     if (obj->IsCreature() && !static_cast<Creature*>(obj)->IsPet())
-                        passengerUnit->AddObjectToRemoveList();
+                        obj->AddObjectToRemoveList();
                 }
                 break;
             }
@@ -302,8 +297,8 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
             {
                 if (mapChange)
                 {
-                    RemovePassenger(passengerUnit);
-                    passengerUnit->AddObjectToRemoveList();
+                    RemovePassenger(obj);
+                    obj->AddObjectToRemoveList();
                 }
                 break;
             }
