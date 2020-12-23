@@ -99,6 +99,8 @@ struct boss_varosAI : public ScriptedAI
     uint32 m_uiEnergizeCoresTimer;
     uint32 m_uiCallCaptainTimer;
 
+    ObjectGuid m_arcaneBeamGuid;
+
     void Reset() override
     {
         m_uiShieldTimer         = 2000;
@@ -133,6 +135,30 @@ struct boss_varosAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_VAROS, FAIL);
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 uiMiscValue) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+            m_arcaneBeamGuid = pSender->GetObjectGuid();
+    }
+
+    void SummonedCreatureJustDied(Creature* pSummoned) override
+    {
+        // despawn the arcane beam when the ring captain dies
+        if (pSummoned->GetEntry() == NPC_AZURE_RING_CAPTAIN)
+            if (Creature* pTemp = m_creature->GetMap()->GetCreature(m_arcaneBeamGuid))
+                pTemp->ForcedDespawn();
+    }
+
+    void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
+    {
+        if (uiType != POINT_MOTION_TYPE || !uiPointId || pSummoned->GetEntry() != NPC_AZURE_RING_CAPTAIN)
+            return;
+
+        // the Azure captain summons arcane bean once in position
+        pSummoned->CastSpell(pSummoned, SPELL_SUMMON_ARCANE_BEAM, TRIGGERED_NONE);
+        pSummoned->ForcedDespawn(11000);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -236,10 +262,7 @@ bool ProcessEventId_event_spell_call_captain(uint32 uiEventId, Object* pSource, 
             if (uiEventId == i.uiEventId)
             {
                 if (Creature* pGuardian = pVaros->SummonCreature(NPC_AZURE_RING_CAPTAIN, i.fX, i.fY, i.fZ, i.fO, TEMPSPAWN_DEAD_DESPAWN, 0))
-                {
-                    pGuardian->SetWalk(false);
-                    pGuardian->GetMotionMaster()->MovePoint(1, i.fDestX, i.fDestY, i.fDestZ);
-                }
+                    pGuardian->GetMotionMaster()->MovePoint(1, i.fDestX, i.fDestY, i.fDestZ, FORCED_MOVEMENT_FLIGHT, false);
 
                 return true;
             }
@@ -261,41 +284,9 @@ struct npc_azure_ring_captainAI : public ScriptedAI
         Reset();
     }
 
-    ObjectGuid m_arcaneBeamGuid;
-
     void Reset() override { }
     void AttackStart(Unit* /*pWho*/) override { }
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_ARCANE_BEAM)
-        {
-            pSummoned->SetDisplayId(11686);                     // HACK remove when correct modelid will be taken by core
-
-            pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BEAM_PERIODIC, TRIGGERED_OLD_TRIGGERED);
-            pSummoned->CastSpell(pSummoned, SPELL_ARCANE_BEAM_SPAWN, TRIGGERED_OLD_TRIGGERED);
-            m_arcaneBeamGuid = pSummoned->GetObjectGuid();
-        }
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        // Despawn the arcane beam in case of getting killed
-        if (Creature* pTemp = m_creature->GetMap()->GetCreature(m_arcaneBeamGuid))
-            pTemp->ForcedDespawn();
-    }
-
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
-    {
-        if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        // Spawn arcane beam when the position is reached. Also prepare to despawn after the beam event is finished
-        if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ARCANE_BEAM) == CAST_OK)
-            m_creature->ForcedDespawn(11000);
-    }
-
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
@@ -310,7 +301,13 @@ UnitAI* GetAI_npc_azure_ring_captain(Creature* pCreature)
 
 struct npc_arcane_beamAI : public ScriptedAI
 {
-    npc_arcane_beamAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_arcane_beamAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = (instance_oculus*)pCreature->GetInstanceData();
+        Reset();
+    }
+
+    instance_oculus* m_pInstance;
 
     void Reset() override
     {
@@ -321,8 +318,20 @@ struct npc_arcane_beamAI : public ScriptedAI
                 m_creature->GetMotionMaster()->MoveFollow(pSummoner, 0, 0);
         }
 
+        // HACK remove when correct modelid will be taken by core
+        m_creature->SetDisplayId(11686);                     
+
+        // cast spells
+        DoCastSpellIfCan(m_creature, SPELL_ARCANE_BEAM_PERIODIC, CAST_TRIGGERED);
+        DoCastSpellIfCan(m_creature, SPELL_ARCANE_BEAM_SPAWN, CAST_TRIGGERED);
+
         // despawn manually because of combat bug
         m_creature->ForcedDespawn(10000);
+
+        // Store creature guid in main boss script
+        if (m_pInstance)
+            if (Creature* pVaros = m_pInstance->GetSingleCreatureFromStorage(NPC_VAROS))
+                SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pVaros);
     }
 
     void AttackStart(Unit* /*pWho*/) override { }
