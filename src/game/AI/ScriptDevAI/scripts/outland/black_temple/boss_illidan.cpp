@@ -2244,6 +2244,9 @@ struct npc_parasitic_shadowfiendAI : public ScriptedAI, public TimerManager
         SetReactState(REACT_PASSIVE);
         AddCustomAction(1, 2000u, [&]()
         {
+            if (!m_instance)
+                return;
+
             if (Creature* illidan = m_instance->GetSingleCreatureFromStorage(NPC_ILLIDAN_STORMRAGE))
             {
                 if (!illidan->IsInCombat())
