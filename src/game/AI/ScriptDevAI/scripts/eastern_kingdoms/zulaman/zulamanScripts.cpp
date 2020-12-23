@@ -584,6 +584,9 @@ struct npc_amanishi_lookoutAI : public ScriptedAI
         if (!m_instance || m_instance->IsAkilzonGauntletInProgress())
             return;
 
+        if (!m_creature->IsWithinLOSInMap(who))
+            return;
+
         if (who->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(who)->IsGameMaster() && m_creature->IsWithinDistInMap(who, 25.0f))
             StartEvent();
     }
@@ -669,7 +672,7 @@ struct npc_amanishi_tempestAI : public ScriptedAI
                 for (int i = 0; i < 5; i++)
                     DoCastSpellIfCan(m_creature, SPELL_SUMMON_EAGLE);
 
-                m_uiSummonEagleTimer = 25000;
+                m_uiSummonEagleTimer = urand(29000, 53000);
             }
             else
                 m_uiSummonEagleTimer -= diff;
@@ -2200,6 +2203,8 @@ struct npc_eagle_trash_aggro_triggerAI : public ScriptedAI
     npc_eagle_trash_aggro_triggerAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<instance_zulaman*>(creature->GetMap()->GetInstanceData()))
     {
         SetReactState(REACT_PASSIVE);
+        creature->SetCanEnterCombat(false);
+        SetCombatMovement(false);
     }
 
     instance_zulaman* m_instance;
