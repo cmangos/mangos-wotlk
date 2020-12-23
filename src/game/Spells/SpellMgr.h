@@ -434,7 +434,7 @@ inline bool IsPassiveSpellStackableWithRanks(SpellEntry const* spellProto)
 
 inline bool IsSpellAffectedBySpellMods(SpellEntry const* spellInfo)
 {
-    return !(spellInfo->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED_SPECIAL) && IsPassiveSpell(spellInfo));
+    return !(spellInfo->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED) && IsPassiveSpell(spellInfo));
 }
 
 inline bool IsAutocastable(SpellEntry const* spellInfo)
