@@ -468,6 +468,16 @@ class IdGenerator
         T m_nextGuid;
 };
 
+struct CreatureImmunity
+{
+    uint32 type;
+    uint32 value;
+};
+
+typedef std::vector<CreatureImmunity> CreatureImmunityVector;
+typedef std::map<uint32, CreatureImmunityVector> CreatureImmunitySetMap;
+typedef std::map<uint32, CreatureImmunitySetMap> CreatureImmunityContainer;
+
 class ObjectMgr
 {
         friend class PlayerDumpReader;
@@ -746,6 +756,7 @@ class ObjectMgr
 
         void LoadCreatureTemplateSpells();
         void LoadCreatureCooldowns();
+        void LoadCreatureImmunities();
 
         void LoadGameTele();
 
@@ -1190,6 +1201,8 @@ class ObjectMgr
 
         bool IsEnchantNonRemoveInArena(uint32 enchantId) const { return m_roguePoisonEnchantIds.find(enchantId) != m_roguePoisonEnchantIds.end(); }
 
+        CreatureImmunityVector const* GetCreatureImmunitySet(uint32 entry, uint32 setId) const;
+
         // Transports
         std::vector<std::pair<TypeID, uint32>> const& GetDbGuidsForTransport(uint32 mapId) const;
     protected:
@@ -1353,6 +1366,8 @@ class ObjectMgr
         BroadcastTextMap m_broadcastTextMap;
 
         std::map<uint32, bool> m_roguePoisonEnchantIds;
+
+        CreatureImmunityContainer m_creatureImmunities;
 
         std::map<uint32, uint32> m_transportMaps;
         std::map<uint32, std::vector<std::pair<TypeID, uint32>>> m_guidsForMap; // used for transports only atm

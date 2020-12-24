@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14034_01_mangos_column_fix` bit(1) DEFAULT NULL
+  `required_14036_01_mangos_creature_immunity` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1521,6 +1521,18 @@ CREATE TABLE creature_cooldowns (
   `CooldownMin` int(10) unsigned NOT NULL,
   `CooldownMax` int(10) unsigned NOT NULL,
   PRIMARY KEY (`entry`, `SpellId`)
+);
+
+--
+-- Table structure for table `creature_immunities`
+--
+
+CREATE TABLE creature_immunities(
+`Entry` INT UNSIGNED NOT NULL COMMENT 'creature_template entry',
+`SetId` INT UNSIGNED NOT NULL DEFAULT '0' COMMENT 'immunity set ID',
+`Type` TINYINT UNSIGNED NOT NULL COMMENT 'enum SpellImmunity',
+`Value` INT UNSIGNED NOT NULL COMMENT 'value depending on type',
+PRIMARY KEY(`Entry`,`SetId`,`Type`,`Value`)
 );
 
 --
