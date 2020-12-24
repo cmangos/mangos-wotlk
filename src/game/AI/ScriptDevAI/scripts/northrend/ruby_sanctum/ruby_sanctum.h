@@ -30,9 +30,10 @@ enum
     NPC_XERESTRASZA                 = 40429,            // friendly npc, used for some cinematic and quest
     NPC_ZARITHRIAN_SPAWN_STALKER    = 39794,
 
-    GO_TWILIGHT_PORTAL_ENTER_1      = 202794,           // Portals used in the Halion encounter
-    GO_TWILIGHT_PORTAL_ENTER_2      = 202795,
-    GO_TWILIGHT_PORTAL_LEAVE        = 202796,
+    // Portals used in the Halion encounter
+    GO_TWILIGHT_PORTAL_ENTER_1      = 202794,           // uses spell 75074; summoned by 74809
+    GO_TWILIGHT_PORTAL_ENTER_2      = 202795,           // uses spell 75074; static spawn; used in the 3rd encounter phase
+    GO_TWILIGHT_PORTAL_LEAVE        = 202796,           // uses spell 74812; static spawn; used in the 3rd encounter phase
 
     GO_FIRE_FIELD                   = 203005,           // Xerestrasza flame door
     GO_FLAME_WALLS                  = 203006,           // Zarithrian flame walls
@@ -75,6 +76,7 @@ class instance_ruby_sanctum : public ScriptedInstance
         void Update(const uint32 diff) override;
 
         void GetSpawnStalkersGuidList(GuidList& lList) const { lList = m_lSpawnStalkersGuidList; }
+        void GetPortalsGuidList(GuidList& lPortals) const { lPortals = m_lTwilightPortalsGuidList; }
 
         const char* Save() const override { return strInstData.c_str(); }
         void Load(const char* chrIn) override;
@@ -94,6 +96,7 @@ class instance_ruby_sanctum : public ScriptedInstance
         uint32 m_uiHalionResetTimer;
 
         GuidList m_lSpawnStalkersGuidList;
+        GuidList m_lTwilightPortalsGuidList;
 };
 
 #endif

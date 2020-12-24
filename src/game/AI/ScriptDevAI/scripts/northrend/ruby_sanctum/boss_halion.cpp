@@ -17,12 +17,14 @@
 /* ScriptData
 SDName: boss_halion
 SD%Complete: 50
-SDComment: Phase 3 and related transition NYI; Twilight portals NYI; Shadow Orbs NYI; Meteor Strikes NYI; Heroic abilities NYI.
+SDComment: Phase 3 and related transition NYI; Shadow Orbs NYI; Meteor Strikes NYI; Heroic abilities NYI.
 SDCategory: Ruby Sanctum
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "ruby_sanctum.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -49,15 +51,16 @@ enum
     SPELL_CLEAVE                = 74524,
     SPELL_TAIL_LASH             = 74531,
     SPELL_BERSERK               = 26662,
-
-    // Transitions
-    SPELL_TWILIGHT_PHASING      = 74808,                    // Start phase 2
-    SPELL_SUMMON_PORTAL         = 74809,
-    SPELL_TWILIGHT_DIVISION     = 75063,
-    SPELL_TWILIGHT_REALM        = 74807,
-    SPELL_TWILIGHT_MENDING      = 75509,
-    SPELL_LEAVE_TWILIGHT_REALM  = 74812,                    // handled by GO 202796
     //share damage spell: 74810 - serverside spell
+    // Transitions
+    SPELL_TWILIGHT_PHASING      = 74808,                    // Halion real - encounter phase 2 aura; applied at the start of phase 2
+    SPELL_SUMMON_PORTAL         = 74809,                    // summon GO 202794; GO has serverside spell 75074
+    SPELL_TWILIGHT_DIVISION     = 75063,                    // Halion twilight; applied at the start of encounter phase 3
+    SPELL_TWILIGHT_MENDING      = 75509,                    // Halion healing spell when left unchecked
+
+    // Player spells
+    SPELL_TWILIGHT_REALM        = 74807,                    // player phasing aura; applies aura phase 32
+    SPELL_LEAVE_TWILIGHT_REALM  = 74812,                    // handled by GO 202796; remove phasing aura
 
     // Real
     SPELL_FLAME_BREATH          = 74525,
@@ -97,8 +100,8 @@ enum
     SPELL_BIRTH                 = 40031,                    // cast by the meteor strike npcs
 
     // Cutter
-    SPELL_TWILIGHT_CUTTER       = 74768,
-    SEPLL_TWILIGHT_PULSE        = 78861,
+    SPELL_TWILIGHT_CUTTER       = 74768,                    // cast by shadow orb 1 and 3 to shadow orb 2 and 4
+    // SEPLL_TWILIGHT_PULSE     = 78861,                    // use unk
     SPELL_TRACK_ROTATION        = 74758,                    // cast by 40081 on 40091
 
     // Living Inferno
@@ -111,7 +114,8 @@ enum
     NPC_COMBUSTION              = 40001,
     NPC_METEOR_STRIKE_MAIN      = 40029,                    // summons the other meteor strikes using serverside spells like 74680, 74681, 74682, 74683
     NPC_CONSUMPTION             = 40135,
-    NPC_ORB_CARRIER             = 40081,                    // vehicle for shadow orbs
+
+    NPC_ORB_CARRIER             = 40081,                    // vehicle for shadow orbs; has 2 or 4 shadoworbs boarded
     NPC_ORB_ROTATION_FOCUS      = 40091,
 
     NPC_METEOR_STRIKE_1         = 40041,                    // Npc 40029 summons the first 4 secondary meteor strike npcs, then each of them summons one 40055 npc using serverside spells 74687, 74688
@@ -133,9 +137,8 @@ enum
 static const uint32 aShadowOrbs[4] = { NPC_SHADOW_ORB_1, NPC_SHADOW_ORB_2, NPC_SHADOW_ORB_3, NPC_SHADOW_ORB_4 };
 static const uint32 aMeteorStrikes[4] = { NPC_METEOR_STRIKE_1, NPC_METEOR_STRIKE_2, NPC_METEOR_STRIKE_3, NPC_METEOR_STRIKE_4 };
 
-static const float aRotationFocusPosition[4] = {3113.711f, 533.5382f, 72.96f, 1.93f};
-static const float aOrbCarrierPosition1[3] = {3153.75f, 579.1875f, 70.47f};
-static const float aOrbCarrierPosition2[3] = {3153.75f, 487.1875f, 70.47f};
+static const float aRotationFocusPosition[4] = { 3184.448f, 530.314f, 73.0f, 4.586f };
+static const float aOrbCarrierPosition1[3] = { 3153.75f, 533.1875f, 72.972f };
 
 /*######
 ## boss_halion_real
@@ -145,7 +148,7 @@ struct boss_halion_realAI : public ScriptedAI
 {
     boss_halion_realAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_ruby_sanctum*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_ruby_sanctum*>(pCreature->GetInstanceData());
         Reset();
     }
 
@@ -201,13 +204,10 @@ struct boss_halion_realAI : public ScriptedAI
             m_pInstance->SetData(TYPE_HALION, DONE);
 
         DoScriptText(SAY_DEATH, m_creature);
-        DoRemoveTwilightPhaseAura();
     }
 
     void JustReachedHome() override
     {
-        DoRemoveTwilightPhaseAura();
-
         if (m_pInstance)
             m_pInstance->SetData(TYPE_HALION, FAIL);
     }
@@ -227,53 +227,27 @@ struct boss_halion_realAI : public ScriptedAI
         }
     }
 
-    // On death or evade, Halion should remove all phase aura from players.
-    void DoRemoveTwilightPhaseAura()
+    // share damage with the twilight version
+    void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
-        // remove phase aura type.
-        Map* pMap = m_creature->GetMap();
-        if (pMap->IsDungeon())
+        if (m_creature->GetHealth() <= damage)
+            damage = m_creature->GetHealth() - 1;
+
+        if (m_pInstance)
         {
-            Map::PlayerList const& PlayerList = pMap->GetPlayers();
-
-            if (PlayerList.isEmpty())
-                return;
-
-            for (const auto& i : PlayerList)
-            {
-                if (i.getSource()->IsAlive() && i.getSource()->HasAuraType(SPELL_AURA_PHASE))
-                    i.getSource()->RemoveSpellsCausingAura(SPELL_AURA_PHASE);
-            }
+            if (Creature* halion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
+                Unit::DealDamage(dealer, halion, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
-        if (eventType == AI_EVENT_CUSTOM_A)
-            DoRemoveTwilightPhaseAura();
-    }
-
-    void DoPrepareTwilightPhase()
-    {
-        if (!m_pInstance)
-            return;
-
-        // Spawn the orbs and the carriers. Use the twilight Halion version to preserve the phase
-        if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
+        // phase 3 switch
+        if (eventType == AI_EVENT_CUSTOM_B)
         {
-            // Set current Halion hp
-            pHalion->SetHealth(m_creature->GetHealth());
-
-            // NOTE: the spawn coords seem to be totally off, compared to the actual map layout - requires additional research!!!
-
-            // Spawn the rotation focus first
-            // pHalion->SummonCreature(NPC_ORB_ROTATION_FOCUS, aRotationFocusPosition[0], aRotationFocusPosition[1], aRotationFocusPosition[2], aRotationFocusPosition[3], TEMPSPAWN_DEAD_DESPAWN, 0);
-
-            // Then spawn the orb carriers and the shadow orbs. ToDo: research if it's possible to make this dynamic
-            // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
-            // pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
-            // pHalion->SummonCreature(NPC_SHADOW_ORB_1, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
-            // pHalion->SummonCreature(NPC_SHADOW_ORB_2, aOrbCarrierPosition2[0], aOrbCarrierPosition2[1], aOrbCarrierPosition2[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+            m_creature->RemoveAurasDueToSpell(SPELL_TWILIGHT_PHASING);
+            DoScriptText(SAY_PHASE_3, m_creature);
+            m_uiPhase = PHASE_BOTH_REALMS;
         }
     }
 
@@ -291,7 +265,7 @@ struct boss_halion_realAI : public ScriptedAI
                     // Do the same for the Twilight halion
                     if (m_pInstance)
                     {
-                        if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT, true))
+                        if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
                             pHalion->CastSpell(pHalion, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
                     }
 
@@ -366,22 +340,20 @@ struct boss_halion_realAI : public ScriptedAI
                     {
                         DoCastSpellIfCan(m_creature, SPELL_SUMMON_PORTAL, CAST_TRIGGERED);
                         DoScriptText(SAY_PHASE_2, m_creature);
-                        DoPrepareTwilightPhase();
+
+                        // inform controller about phase 2
+                        if (m_pInstance)
+                        {
+                            if (Creature* pController = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
+                                SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pController);
+                        }
                         m_uiPhase = PHASE_TWILIGHT_REALM;
                     }
                 }
 
                 break;
             case PHASE_TWILIGHT_REALM:
-
-                // Switch to phase 3
-                if (m_creature->GetHealthPercent() < 50.0f)
-                {
-                    m_creature->RemoveAurasDueToSpell(SPELL_TWILIGHT_PHASING);
-                    DoScriptText(SAY_PHASE_3, m_creature);
-                    m_uiPhase = PHASE_BOTH_REALMS;
-                }
-
+                // this AI doesn't handle this phase
                 break;
         }
 
@@ -397,7 +369,7 @@ struct boss_halion_twilightAI : public ScriptedAI
 {
     boss_halion_twilightAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_ruby_sanctum*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_ruby_sanctum*>(pCreature->GetInstanceData());
         Reset();
     }
 
@@ -429,26 +401,16 @@ struct boss_halion_twilightAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        // Allow real Halion to evade
         if (m_pInstance)
-        {
-            if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
-                pHalion->AI()->EnterEvadeMode();
-        }
+            m_pInstance->SetData(TYPE_HALION, FAIL);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        // ToDo: handle the damage sharing!
-
         DoScriptText(SAY_DEATH, m_creature);
 
-        // Allow real Halion to remove all phase aura from player.
         if (m_pInstance)
-        {
-            if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
-                m_creature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pHalion);
-        }
+            m_pInstance->SetData(TYPE_HALION, DONE);
     }
 
     void KilledUnit(Unit* pVictim) override
@@ -470,16 +432,22 @@ struct boss_halion_twilightAI : public ScriptedAI
             case NPC_CONSUMPTION:
                 pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION_PERIODIC, TRIGGERED_OLD_TRIGGERED);
                 break;
-            case NPC_SHADOW_ORB_1:
-            case NPC_SHADOW_ORB_2:
-            case NPC_SHADOW_ORB_3:
-            case NPC_SHADOW_ORB_4:
-                if (Creature* pCarrier = GetClosestCreatureWithEntry(pSummoned, NPC_ORB_CARRIER, 5.0f))
-                    pSummoned->CastSpell(pCarrier, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
-                break;
             case NPC_ORB_CARRIER:
                 pSummoned->CastSpell(pSummoned, SPELL_TRACK_ROTATION, TRIGGERED_OLD_TRIGGERED);
                 break;
+        }
+    }
+
+    // share damage with the real version
+    void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
+    {
+        if (m_creature->GetHealth() <= damage)
+            damage = m_creature->GetHealth() - 1;
+
+        if (m_pInstance)
+        {
+            if (Creature* halion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
+                Unit::DealDamage(dealer, halion, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         }
     }
 
@@ -538,13 +506,14 @@ struct boss_halion_twilightAI : public ScriptedAI
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_TWILIGHT_DIVISION, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
                     {
+                        // inform controller and halion about the phase change
                         if (m_pInstance)
                         {
-                            // ToDo: Update world states and spawn the exit portals
+                            if (Creature* pController = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
+                                SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pController);
 
-                            // Set the real Halion health, so it can also begin phase 3
                             if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
-                                pHalion->SetHealth(m_creature->GetHealth());
+                                SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pHalion);
                         }
 
                         DoScriptText(SAY_PHASE_3, m_creature);
@@ -559,6 +528,67 @@ struct boss_halion_twilightAI : public ScriptedAI
     }
 };
 
+/*######
+## npc_halion_controller
+######*/
+
+struct npc_halion_controllerAI : public ScriptedAI
+{
+    npc_halion_controllerAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = static_cast<instance_ruby_sanctum*>(pCreature->GetInstanceData());
+        SetReactState(REACT_PASSIVE);
+        Reset();
+    }
+
+    instance_ruby_sanctum* m_pInstance;
+
+    void Reset() override { }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (!m_pInstance)
+            return;
+
+        // phase 2
+        if (eventType == AI_EVENT_CUSTOM_A)
+        {
+            // Spawn the orbs and the carriers. Use the twilight Halion version to preserve the phase
+            if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
+            {
+                pHalion->SummonCreature(NPC_ORB_ROTATION_FOCUS, aRotationFocusPosition[0], aRotationFocusPosition[1], aRotationFocusPosition[2], aRotationFocusPosition[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+                pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+            }
+        }
+        // phase 3
+        else if (eventType == AI_EVENT_CUSTOM_B)
+        {
+            // update world states
+            m_pInstance->DoUpdateWorldState(WORLD_STATE_CORPOREALITY, 1);
+            m_pInstance->DoUpdateWorldState(WORLD_STATE_CORP_PHYSICAL, 50);
+            m_pInstance->DoUpdateWorldState(WORLD_STATE_CORP_TWILIGHT, 50);
+
+            // despawn phase 1 portal
+            if (GameObject* pPortal = m_pInstance->GetSingleGameObjectFromStorage(GO_TWILIGHT_PORTAL_ENTER_1))
+            {
+                pPortal->SetForcedDespawn();
+                pPortal->SetLootState(GO_JUST_DEACTIVATED);
+            }
+
+            // spawn phase 3 portals
+            GuidList lPortalsGuids;
+            m_pInstance->GetPortalsGuidList(lPortalsGuids);
+
+            for (const auto& guid : lPortalsGuids)
+                m_pInstance->DoRespawnGameObject(guid, 30 * MINUTE);
+        }
+    }
+
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+    void AttackStart(Unit* /*pWho*/) override { }
+    void UpdateAI(const uint32 /*uiDiff*/) override { }
+};
+
 UnitAI* GetAI_boss_halion_real(Creature* pCreature)
 {
     return new boss_halion_realAI(pCreature);
@@ -567,6 +597,122 @@ UnitAI* GetAI_boss_halion_real(Creature* pCreature)
 UnitAI* GetAI_boss_halion_twilight(Creature* pCreature)
 {
     return new boss_halion_twilightAI(pCreature);
+};
+
+UnitAI* GetAI_npc_halion_controller(Creature* pCreature)
+{
+    return new npc_halion_controllerAI(pCreature);
+}
+
+/*######
+## go_twilight_portal
+######*/
+
+bool GOUse_go_twilight_portal(Player* pPlayer, GameObject* pGo)
+{
+    ScriptedInstance* pInstance = (ScriptedInstance*)pGo->GetInstanceData();
+    if (!pInstance)
+        return true;
+
+    if (pInstance->GetData(TYPE_HALION) != IN_PROGRESS)
+        return true;
+
+    // ToDo: check if this removes the real realm damage auras
+
+    pPlayer->CastSpell(pPlayer, SPELL_TWILIGHT_REALM, TRIGGERED_OLD_TRIGGERED);
+    return false;
+}
+
+/*######
+## spell_leave_twilight_realm_aura - 74812
+######*/
+
+struct spell_leave_twilight_realm_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+        {
+            Unit* target = aura->GetTarget();
+            if (!target || !target->IsPlayer())
+                return;
+
+            if (target->HasAura(SPELL_TWILIGHT_REALM))
+                target->RemoveAurasDueToSpell(SPELL_TWILIGHT_REALM);
+
+            // ToDo: check if this removes the twilight realm damage auras
+        }
+    }
+};
+
+/*######
+## spell_clear_debuffs - 75396
+######*/
+
+struct spell_clear_debuffs : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        uint32 uiSpell = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        if (target->HasAura(uiSpell))
+            target->RemoveAurasDueToSpell(uiSpell);
+
+        // ToDo: check if this removes other debuffs as well
+    }
+};
+
+/*######
+## spell_fiery_combustion_aura - 74562
+######*/
+
+struct spell_fiery_combustion_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        if (apply)
+            target->CastSpell(target, 74567, TRIGGERED_OLD_TRIGGERED);
+        else
+        {
+            target->RemoveAurasDueToSpell(74567);
+            target->CastSpell(target, 74607, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(target, 74610, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+/*######
+## spell_soul_consumption_aura - 74792
+######*/
+
+struct spell_soul_consumption_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        if (apply)
+            target->CastSpell(target, 74795, TRIGGERED_OLD_TRIGGERED);
+        else
+        {
+            target->RemoveAurasDueToSpell(74795);
+            target->CastSpell(target, 74799, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(target, 74800, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
 };
 
 void AddSC_boss_halion()
@@ -580,4 +726,19 @@ void AddSC_boss_halion()
     pNewScript->Name = "boss_halion_twilight";
     pNewScript->GetAI = &GetAI_boss_halion_twilight;
     pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_halion_controller";
+    pNewScript->GetAI = &GetAI_npc_halion_controller;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_twilight_portal";
+    pNewScript->pGOUse = &GOUse_go_twilight_portal;
+    pNewScript->RegisterSelf();
+
+    RegisterAuraScript<spell_leave_twilight_realm_aura>("spell_leave_twilight_realm_aura");
+    RegisterSpellScript<spell_clear_debuffs>("spell_clear_debuffs");
+    RegisterAuraScript<spell_fiery_combustion_aura>("spell_fiery_combustion_aura");
+    RegisterAuraScript<spell_soul_consumption_aura>("spell_soul_consumption_aura");
 }
