@@ -197,6 +197,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (59275,'spell_summon_gauntlet_mobs_periodic_aura'),
 (73159,'spell_play_movie'),
 (74562,'spell_fiery_combustion_aura'),
+(74758,'spell_track_rotation_aura'),
 (74792,'spell_soul_consumption_aura'),
 (74812,'spell_leave_twilight_realm_aura'),
 (75396,'spell_clear_debuffs');

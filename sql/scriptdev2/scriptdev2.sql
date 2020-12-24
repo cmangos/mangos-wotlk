@@ -1272,6 +1272,7 @@ UPDATE creature_template SET ScriptName='npc_baltharus_clone' WHERE entry=39899;
 UPDATE creature_template SET ScriptName='boss_halion_real' WHERE entry=39863;
 UPDATE creature_template SET ScriptName='boss_halion_twilight' WHERE entry=40142;
 UPDATE creature_template SET ScriptName='npc_halion_controller' WHERE entry=40146;
+UPDATE creature_template SET ScriptName='npc_orb_carrier' WHERE entry=40081;
 UPDATE gameobject_template SET ScriptName='go_twilight_portal' WHERE entry IN (202794,202795);
 
 /* RUINS OF AHN'QIRAJ */
@@ -7428,7 +7429,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1724030','Beware the shadow!','17506','1','0','0','0','halion SAY_SPHERES'),
 ('-1724031','You will find only suffering within the realm of twilight! Enter if you dare!','17507','1','0','0','0','halion SAY_PHASE_2'),
 ('-1724032','I am the light and the darkness! Cower, mortals, before the herald of Deathwing!','17508','1','0','0','0','halion SAY_PHASE_3'),
-('-1724033','The orbining spheres pulse with dark energy!','0','3','0','0','0','halion EMOTE_SPHERES'),
+('-1724033','The orbiting spheres pulse with dark energy!','0','3','0','0','0','halion EMOTE_SPHERES'),
 ('-1724034','Your efforts force %s further out of the twillight realm!','0','3','0','0','0','halion EMOTE_OUT_OF_TWILLIGHT'),
 ('-1724035','Your efforts force %s further out of the physical realm!','0','3','0','0','0','halion EMOTE_OUT_OF_PHYSICAL'),
 ('-1724036','Your companions'' efforts force Halion further into the twillight realm!','0','3','0','0','0','halion EMOTE_INTO_TWILLIGHT'),

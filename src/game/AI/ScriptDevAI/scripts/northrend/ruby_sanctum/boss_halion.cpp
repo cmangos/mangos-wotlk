@@ -86,11 +86,11 @@ enum
     SPELL_CORPOREALITY_100D     = 74836,                    // Damage dealt reduced by 200%   - Damage taken reduced by 400%
 
     // *** Other spells ***
-    //Combustion
-    SPELL_COMBUSTION_PERIODIC   = 74629,                    // cast by npc 40001
+    // Combustion
+    // SPELL_COMBUSTION_PERIODIC   = 74629,                 // cast by npc 40001 in creature_template_addon
 
     // Consumption
-    SPELL_CONSUMPTION_PERIODIC  = 74803,                    // cast by npc 40135
+    // SPELL_CONSUMPTION_PERIODIC  = 74803,                 // cast by npc 40135 in creature_template_addon
 
     // Meteor
     SPELL_METEOR_VISUAL         = 74641,                    // cast by npc 40029 (all meteor spells)
@@ -100,8 +100,8 @@ enum
     SPELL_BIRTH                 = 40031,                    // cast by the meteor strike npcs
 
     // Cutter
+    SPELL_TWILIGHT_PULSE        = 78861,                    // cast by each shadow orb individually
     SPELL_TWILIGHT_CUTTER       = 74768,                    // cast by shadow orb 1 and 3 to shadow orb 2 and 4
-    // SEPLL_TWILIGHT_PULSE     = 78861,                    // use unk
     SPELL_TRACK_ROTATION        = 74758,                    // cast by 40081 on 40091
 
     // Living Inferno
@@ -111,12 +111,7 @@ enum
     SPELL_AWAKEN_FLAMES         = 75889,                    // cast by 40683
 
     // Npcs
-    NPC_COMBUSTION              = 40001,
     NPC_METEOR_STRIKE_MAIN      = 40029,                    // summons the other meteor strikes using serverside spells like 74680, 74681, 74682, 74683
-    NPC_CONSUMPTION             = 40135,
-
-    NPC_ORB_CARRIER             = 40081,                    // vehicle for shadow orbs; has 2 or 4 shadoworbs boarded
-    NPC_ORB_ROTATION_FOCUS      = 40091,
 
     NPC_METEOR_STRIKE_1         = 40041,                    // Npc 40029 summons the first 4 secondary meteor strike npcs, then each of them summons one 40055 npc using serverside spells 74687, 74688
     NPC_METEOR_STRIKE_2         = 40042,
@@ -161,7 +156,6 @@ struct boss_halion_realAI : public ScriptedAI
     uint32 m_uiFieryCombustionTimer;
     uint32 m_uiMeteorTimer;
     uint32 m_uiFlameBreathTimer;
-    uint32 m_uiBerserkTimer;
 
     void Reset() override
     {
@@ -171,7 +165,6 @@ struct boss_halion_realAI : public ScriptedAI
         m_uiCleaveTimer             = urand(5000, 10000);
         m_uiFieryCombustionTimer    = 15000;
         m_uiMeteorTimer             = 20000;
-        m_uiBerserkTimer            = 8 * MINUTE * IN_MILLISECONDS;
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -180,6 +173,10 @@ struct boss_halion_realAI : public ScriptedAI
         {
             m_pInstance->SetData(TYPE_HALION, IN_PROGRESS);
             m_pInstance->SendEncounterFrame(ENCOUNTER_FRAME_ENGAGE, m_creature->GetObjectGuid(), 1);
+
+            // set berserk timer
+            if (Creature* pController = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
+                SendAIEvent(AI_EVENT_CUSTOM_C, m_creature, pController, 8 * MINUTE * IN_MILLISECONDS);
         }
 
         DoScriptText(SAY_AGGRO, m_creature);
@@ -216,9 +213,6 @@ struct boss_halion_realAI : public ScriptedAI
     {
         switch (pSummoned->GetEntry())
         {
-            case NPC_COMBUSTION:
-                pSummoned->CastSpell(pSummoned, SPELL_COMBUSTION_PERIODIC, TRIGGERED_OLD_TRIGGERED);
-                break;
             case NPC_METEOR_STRIKE_MAIN:
                 // ToDo: summon the other meteor strikes around this one
                 pSummoned->CastSpell(pSummoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
@@ -255,27 +249,6 @@ struct boss_halion_realAI : public ScriptedAI
     {
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
-
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
-                {
-                    // Do the same for the Twilight halion
-                    if (m_pInstance)
-                    {
-                        if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
-                            pHalion->CastSpell(pHalion, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
-                    }
-
-                    DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
-                }
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
 
         switch (m_uiPhase)
         {
@@ -346,6 +319,9 @@ struct boss_halion_realAI : public ScriptedAI
                         {
                             if (Creature* pController = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
                                 SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pController);
+
+                            if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
+                                SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pHalion);
                         }
                         m_uiPhase = PHASE_TWILIGHT_REALM;
                     }
@@ -359,6 +335,11 @@ struct boss_halion_realAI : public ScriptedAI
 
         DoMeleeAttackIfReady();
     }
+};
+
+UnitAI* GetAI_boss_halion_real(Creature* pCreature)
+{
+    return new boss_halion_realAI(pCreature);
 };
 
 /*######
@@ -379,15 +360,18 @@ struct boss_halion_twilightAI : public ScriptedAI
     uint32 m_uiTailLashTimer;
     uint32 m_uiCleaveTimer;
     uint32 m_uiDarkBreathTimer;
+    uint32 m_uiTwilightCutterTimer;;
     uint32 m_uiSoulConsumptionTimer;
 
     void Reset() override
     {
-        m_uiPhase                = PHASE_TWILIGHT_REALM;
+        m_uiPhase                = PHASE_PHISYCAL_REALM;
         m_uiTailLashTimer        = 10000;
         m_uiCleaveTimer          = urand(5000, 10000);
         m_uiDarkBreathTimer      = 15000;
         m_uiSoulConsumptionTimer = 20000;
+        m_uiTwilightCutterTimer  = 30000;
+
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -425,19 +409,6 @@ struct boss_halion_twilightAI : public ScriptedAI
         }
     }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
-        {
-            case NPC_CONSUMPTION:
-                pSummoned->CastSpell(pSummoned, SPELL_CONSUMPTION_PERIODIC, TRIGGERED_OLD_TRIGGERED);
-                break;
-            case NPC_ORB_CARRIER:
-                pSummoned->CastSpell(pSummoned, SPELL_TRACK_ROTATION, TRIGGERED_OLD_TRIGGERED);
-                break;
-        }
-    }
-
     // share damage with the real version
     void DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*damagetype*/, SpellEntry const* /*spellInfo*/) override
     {
@@ -449,6 +420,13 @@ struct boss_halion_twilightAI : public ScriptedAI
             if (Creature* halion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
                 Unit::DealDamage(dealer, halion, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
         }
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        // phase 2 switch
+        if (eventType == AI_EVENT_CUSTOM_A)
+            m_uiPhase = PHASE_TWILIGHT_REALM;
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -501,6 +479,46 @@ struct boss_halion_twilightAI : public ScriptedAI
                 else
                     m_uiSoulConsumptionTimer -= uiDiff;
 
+                if (m_uiTwilightCutterTimer < uiDiff)
+                {
+                    if (m_pInstance)
+                    {
+                        DoScriptText(SAY_SPHERES, m_creature);
+
+                        Creature* pOrb1 = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADOW_ORB_1);
+                        Creature* pOrb2 = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADOW_ORB_2);
+
+                        if (pOrb1 && pOrb2)
+                        {
+                            // self twilight pulse
+                            pOrb1->CastSpell(pOrb1, SPELL_TWILIGHT_PULSE, TRIGGERED_OLD_TRIGGERED);
+                            pOrb2->CastSpell(pOrb2, SPELL_TWILIGHT_PULSE, TRIGGERED_OLD_TRIGGERED);
+
+                            // cutter
+                            pOrb1->CastSpell(pOrb2, SPELL_TWILIGHT_CUTTER, TRIGGERED_NONE);
+                        }
+
+                        // heroic instance has 2 extra orbs
+                        if (m_pInstance->IsHeroicDifficulty())
+                        {
+                            Creature* pOrb3 = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADOW_ORB_3);
+                            Creature* pOrb4 = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADOW_ORB_4);
+
+                            if (pOrb3 && pOrb4)
+                            {
+                                pOrb3->CastSpell(pOrb3, SPELL_TWILIGHT_PULSE, TRIGGERED_OLD_TRIGGERED);
+                                pOrb4->CastSpell(pOrb4, SPELL_TWILIGHT_PULSE, TRIGGERED_OLD_TRIGGERED);
+
+                                pOrb3->CastSpell(pOrb4, SPELL_TWILIGHT_CUTTER, TRIGGERED_NONE);
+                            }
+                        }
+                    }
+
+                    m_uiTwilightCutterTimer = 30000;
+                }
+                else
+                    m_uiTwilightCutterTimer -= uiDiff;
+
                 // Switch to phase 3
                 if (m_creature->GetHealthPercent() < 50.0f && m_uiPhase == PHASE_TWILIGHT_REALM)
                 {
@@ -528,6 +546,11 @@ struct boss_halion_twilightAI : public ScriptedAI
     }
 };
 
+UnitAI* GetAI_boss_halion_twilight(Creature* pCreature)
+{
+    return new boss_halion_twilightAI(pCreature);
+};
+
 /*######
 ## npc_halion_controller
 ######*/
@@ -543,9 +566,14 @@ struct npc_halion_controllerAI : public ScriptedAI
 
     instance_ruby_sanctum* m_pInstance;
 
-    void Reset() override { }
+    uint32 m_uiBerserkTimer;
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    void Reset() override
+    {
+        m_uiBerserkTimer = 0;
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 miscValue) override
     {
         if (!m_pInstance)
             return;
@@ -582,26 +610,81 @@ struct npc_halion_controllerAI : public ScriptedAI
             for (const auto& guid : lPortalsGuids)
                 m_pInstance->DoRespawnGameObject(guid, 30 * MINUTE);
         }
+        // set Berserk timer
+        else if (eventType == AI_EVENT_CUSTOM_C)
+            m_uiBerserkTimer = miscValue;
     }
 
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
     void AttackStart(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
-};
 
-UnitAI* GetAI_boss_halion_real(Creature* pCreature)
-{
-    return new boss_halion_realAI(pCreature);
-};
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiBerserkTimer)
+        {
+            if (m_uiBerserkTimer <= uiDiff)
+            {
+                if (m_pInstance)
+                {
+                    if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
+                    {
+                        DoScriptText(SAY_BERSERK, pHalion);
+                        pHalion->CastSpell(pHalion, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
+                    }
 
-UnitAI* GetAI_boss_halion_twilight(Creature* pCreature)
-{
-    return new boss_halion_twilightAI(pCreature);
+                    if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
+                    {
+                        DoScriptText(SAY_BERSERK, pHalion);
+                        pHalion->CastSpell(pHalion, SPELL_BERSERK, TRIGGERED_OLD_TRIGGERED);
+                    }
+                }
+
+                m_uiBerserkTimer = 0;
+            }
+            else
+                m_uiBerserkTimer -= uiDiff;
+        }
+    }
 };
 
 UnitAI* GetAI_npc_halion_controller(Creature* pCreature)
 {
     return new npc_halion_controllerAI(pCreature);
+}
+
+/*######
+## npc_orb_carrier
+######*/
+
+struct npc_orb_carrierAI : public ScriptedAI
+{
+    npc_orb_carrierAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiTrackRotationTimer;
+
+    void Reset() override
+    {
+        m_uiTrackRotationTimer = 1000;
+    }
+
+    void AttackStart(Unit* /*pWho*/) override { }
+    void MoveInLineOfSight(Unit* /*pWho*/) override { }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiTrackRotationTimer < uiDiff)
+        {
+            if (DoCastSpellIfCan(m_creature, SPELL_TRACK_ROTATION, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                m_uiTrackRotationTimer = 1000;
+        }
+        else
+            m_uiTrackRotationTimer -= uiDiff;
+    }
+};
+
+UnitAI* GetAI_npc_orb_carrier(Creature* pCreature)
+{
+    return new npc_orb_carrierAI(pCreature);
 }
 
 /*######
@@ -619,7 +702,9 @@ bool GOUse_go_twilight_portal(Player* pPlayer, GameObject* pGo)
 
     // ToDo: check if this removes the real realm damage auras
 
-    pPlayer->CastSpell(pPlayer, SPELL_TWILIGHT_REALM, TRIGGERED_OLD_TRIGGERED);
+    if (!pPlayer->HasAura(SPELL_TWILIGHT_REALM))
+        pPlayer->CastSpell(pPlayer, SPELL_TWILIGHT_REALM, TRIGGERED_OLD_TRIGGERED);
+
     return false;
 }
 
@@ -665,7 +750,9 @@ struct spell_clear_debuffs : public SpellScript
         if (target->HasAura(uiSpell))
             target->RemoveAurasDueToSpell(uiSpell);
 
-        // ToDo: check if this removes other debuffs as well
+        // remove other debuffs
+        target->RemoveAurasDueToSpell(74562);
+        target->RemoveAurasDueToSpell(74792);
     }
 };
 
@@ -686,8 +773,12 @@ struct spell_fiery_combustion_aura : public AuraScript
         else
         {
             target->RemoveAurasDueToSpell(74567);
-            target->CastSpell(target, 74607, TRIGGERED_OLD_TRIGGERED);
-            target->CastSpell(target, 74610, TRIGGERED_OLD_TRIGGERED);
+
+            if (aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE || aura->GetRemoveMode() == AURA_REMOVE_BY_DISPEL)
+            {
+                target->CastSpell(target, 74607, TRIGGERED_OLD_TRIGGERED);
+                target->CastSpell(target, 74610, TRIGGERED_OLD_TRIGGERED);
+            }
         }
     }
 };
@@ -709,8 +800,38 @@ struct spell_soul_consumption_aura : public AuraScript
         else
         {
             target->RemoveAurasDueToSpell(74795);
-            target->CastSpell(target, 74799, TRIGGERED_OLD_TRIGGERED);
-            target->CastSpell(target, 74800, TRIGGERED_OLD_TRIGGERED);
+
+            if (aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE || aura->GetRemoveMode() == AURA_REMOVE_BY_DISPEL)
+            {
+                target->CastSpell(target, 74799, TRIGGERED_OLD_TRIGGERED);
+                target->CastSpell(target, 74800, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+};
+
+/*######
+## spell_track_rotation_aura - 74758
+######*/
+
+struct spell_track_rotation_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        // spell has attrribute: channel track target
+        // this means that the caster will follow the target rotation
+        // by changing the rotation the channel will get interrupted every 1 sec, so the caster will be forced to start the channel again
+        if (apply)
+        {
+            float newAngle = target->GetOrientation();
+            newAngle += 2 * M_PI_F / 100;
+            newAngle = MapManager::NormalizeOrientation(newAngle);
+
+            target->SetFacingTo(newAngle);
         }
     }
 };
@@ -733,6 +854,11 @@ void AddSC_boss_halion()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
+    pNewScript->Name = "npc_orb_carrier";
+    pNewScript->GetAI = &GetAI_npc_orb_carrier;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
     pNewScript->Name = "go_twilight_portal";
     pNewScript->pGOUse = &GOUse_go_twilight_portal;
     pNewScript->RegisterSelf();
@@ -741,4 +867,5 @@ void AddSC_boss_halion()
     RegisterSpellScript<spell_clear_debuffs>("spell_clear_debuffs");
     RegisterAuraScript<spell_fiery_combustion_aura>("spell_fiery_combustion_aura");
     RegisterAuraScript<spell_soul_consumption_aura>("spell_soul_consumption_aura");
+    RegisterAuraScript<spell_track_rotation_aura>("spell_track_rotation_aura");
 }

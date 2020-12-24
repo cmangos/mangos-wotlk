@@ -18,10 +18,15 @@ enum
     NPC_HALION_TWILIGHT             = 40142,            // Halion - Twilight Realm NPC
     NPC_HALION_CONTROLLER           = 40146,
 
+    // npcs used in the Halion encounter
+    NPC_COMBUSTION                  = 40001,
+    NPC_CONSUMPTION                 = 40135,
     NPC_SHADOW_ORB_1                = 40083,            // shadow orbs for Halion encounter
     NPC_SHADOW_ORB_2                = 40100,
     NPC_SHADOW_ORB_3                = 40468,            // heroic only
     NPC_SHADOW_ORB_4                = 40469,            // heroic only
+    NPC_ORB_CARRIER                 = 40081,            // vehicle for shadow orbs; has 2 or 4 shadoworbs boarded
+    NPC_ORB_ROTATION_FOCUS          = 40091,
 
     NPC_SAVIANA                     = 39747,            // minibosses
     NPC_BALTHARUS                   = 39751,
@@ -69,6 +74,7 @@ class instance_ruby_sanctum : public ScriptedInstance
         void OnPlayerEnter(Player* pPlayer) override;
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureRespawn(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;

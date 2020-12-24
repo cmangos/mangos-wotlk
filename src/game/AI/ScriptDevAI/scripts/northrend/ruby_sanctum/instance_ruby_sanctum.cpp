@@ -111,6 +111,7 @@ void instance_ruby_sanctum::OnObjectCreate(GameObject* pGo)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_FLAME_RING:
+        case GO_TWILIGHT_FLAME_RING:
             break;
         case GO_BURNING_TREE_1:
         case GO_BURNING_TREE_2:
@@ -129,6 +130,25 @@ void instance_ruby_sanctum::OnObjectCreate(GameObject* pGo)
             return;
     }
     m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+}
+
+void instance_ruby_sanctum::OnCreatureRespawn(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        // following creatures have a passive behavior
+        case NPC_COMBUSTION:
+        case NPC_CONSUMPTION:
+        case NPC_SHADOW_ORB_1:
+        case NPC_SHADOW_ORB_2:
+        case NPC_SHADOW_ORB_3:
+        case NPC_SHADOW_ORB_4:
+        case NPC_ORB_CARRIER:
+        case NPC_ORB_ROTATION_FOCUS:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
+            break;
+    }
 }
 
 // Wrapper to unlock the flame wall in from of Zarithrian
@@ -182,8 +202,10 @@ void instance_ruby_sanctum::SetData(uint32 uiType, uint32 uiData)
             // Don't set the same data twice
             if (m_auiEncounter[uiType] == uiData)
                 return;
+
             m_auiEncounter[uiType] = uiData;
             DoUseDoorOrButton(GO_FLAME_RING);
+            DoUseDoorOrButton(GO_TWILIGHT_FLAME_RING);
 
             // encounter unit frame
             if (uiData == DONE || uiData == FAIL)
@@ -231,6 +253,10 @@ void instance_ruby_sanctum::SetData(uint32 uiType, uint32 uiData)
                             pPortal->SetLootState(GO_JUST_DEACTIVATED);
                         }
                     }
+
+                    // reset berserk timer
+                    if (Creature* pController = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
+                        pController->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pController, pController, 0);
                     break;
             }
             break;
