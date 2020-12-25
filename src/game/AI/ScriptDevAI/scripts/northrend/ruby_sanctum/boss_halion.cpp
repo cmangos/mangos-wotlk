@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_halion
-SD%Complete: 80
-SDComment: Heroic abilities NYI.
+SD%Complete: 100
+SDComment:
 SDCategory: Ruby Sanctum
 EndScriptData */
 
@@ -814,7 +814,13 @@ struct npc_halion_controllerAI : public ScriptedAI
 
 struct npc_meteor_strike_initialAI : public ScriptedAI
 {
-    npc_meteor_strike_initialAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_meteor_strike_initialAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = static_cast<instance_ruby_sanctum*>(pCreature->GetInstanceData());
+        Reset();
+    }
+
+    instance_ruby_sanctum* m_pInstance;
 
     uint32 m_uiImpactTimer;
 
@@ -855,7 +861,22 @@ struct npc_meteor_strike_initialAI : public ScriptedAI
 
                     pSummoned->GetFirstCollisionPosition(spawnPos, radius, angle);
                     m_creature->SummonCreature(NPC_METEOR_STRIKE_FLAME, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.o, TEMPSPAWN_TIMED_DESPAWN, 30000);
+
+                    // heroic; not clear if this only applies for 25 men or for both
+                    if (m_pInstance)
+                    {
+                        if (m_pInstance->IsHeroicDifficulty())
+                            m_creature->SummonCreature(NPC_LIVING_EMBER, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.o, TEMPSPAWN_DEAD_DESPAWN, 0);
+                    }
                 }
+                break;
+            case NPC_LIVING_INFERNO:
+                pSummoned->CastSpell(pSummoned, SPELL_BLAZING_AURA, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->SetInCombatWithZone();
+                break;
+            case NPC_LIVING_EMBER:
+                pSummoned->CastSpell(pSummoned, SPELL_AWAKEN_FLAMES, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->SetInCombatWithZone();
                 break;
         }
     }
@@ -887,6 +908,7 @@ struct npc_meteor_strike_initialAI : public ScriptedAI
         {
             if (m_uiImpactTimer <= uiDiff)
             {
+                // Note: the 25 men heroic version of the spell will automatically summon a Living Inferno
                 if (DoCastSpellIfCan(m_creature, SPELL_METEOR_IMPACT) == CAST_OK)
                 {
                     DoCastSpellIfCan(m_creature, SPELL_METEOR_FLAME_MAIN, CAST_TRIGGERED);
