@@ -199,7 +199,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (74562,'spell_fiery_combustion_aura'),
 (74792,'spell_soul_consumption_aura'),
 (74812,'spell_leave_twilight_realm_aura'),
-(75396,'spell_clear_debuffs');
+(75396,'spell_clear_debuffs'),
+(75415,'spell_rallying_shout');
 
 -- Hunter
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
