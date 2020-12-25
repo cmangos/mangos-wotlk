@@ -23,6 +23,7 @@
 #include "Entities/Creature.h"
 #include "AI/BaseAI/CreatureAI.h"
 #include "Entities/Unit.h"
+#include "AI/ScriptDevAI/base/TimerAI.h"
 #include <set>
 
 class Player;
@@ -824,7 +825,7 @@ struct CreatureEventAIHolder
     bool UpdateRepeatTimer(Creature* creature, uint32 repeatMin, uint32 repeatMax);
 };
 
-class CreatureEventAI : public CreatureAI
+class CreatureEventAI : public CreatureAI, public TimerManager
 {
     public:
         explicit CreatureEventAI(Creature* creature);
@@ -940,6 +941,9 @@ class CreatureEventAI : public CreatureAI
         SpellSchoolMask m_mainAttackMask;
 
         MovementGeneratorType m_defaultMovement; // TODO: Extend to all of AI
+
+        // Distancer
+        bool m_distancingCooldown;
 };
 
 #endif
