@@ -346,6 +346,7 @@ extern void AddSC_boss_halion();
 extern void AddSC_boss_saviana();
 extern void AddSC_boss_zarithrian();
 extern void AddSC_instance_ruby_sanctum();
+extern void AddSC_ruby_sanctum();
 extern void AddSC_boss_bjarngrim();                         // ulduar, halls_of_lightning
 extern void AddSC_boss_ionar();
 extern void AddSC_boss_loken();
@@ -839,6 +840,7 @@ void AddScripts()
     AddSC_boss_saviana();
     AddSC_boss_zarithrian();
     AddSC_instance_ruby_sanctum();
+    AddSC_ruby_sanctum();
     AddSC_boss_bjarngrim();                                 // ulduar, halls_of_lightning
     AddSC_boss_ionar();
     AddSC_boss_loken();
