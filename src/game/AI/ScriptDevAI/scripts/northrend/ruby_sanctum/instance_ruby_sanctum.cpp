@@ -61,7 +61,8 @@ void instance_ruby_sanctum::OnPlayerEnter(Player* /*pPlayer*/)
     // spawn both real and twilight versions
     if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
     {
-        pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSPAWN_DEAD_DESPAWN, 0);
+        if (Creature* pHalion = pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSPAWN_DEAD_DESPAWN, 0))
+            pHalion->SetPhaseMask(1, true);
 
         if (Creature* pHalion = pSummoner->SummonCreature(NPC_HALION_TWILIGHT, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSPAWN_DEAD_DESPAWN, 0))
             pHalion->SetPhaseMask(32, true);
@@ -145,6 +146,12 @@ void instance_ruby_sanctum::OnCreatureRespawn(Creature* pCreature)
         case NPC_SHADOW_ORB_4:
         case NPC_ORB_CARRIER:
         case NPC_ORB_ROTATION_FOCUS:
+        case NPC_METEOR_STRIKE_MAIN:
+        case NPC_METEOR_STRIKE_1:
+        case NPC_METEOR_STRIKE_2:
+        case NPC_METEOR_STRIKE_3:
+        case NPC_METEOR_STRIKE_4:
+        case NPC_METEOR_STRIKE_FLAME:
             pCreature->AI()->SetReactState(REACT_PASSIVE);
             pCreature->SetCanEnterCombat(false);
             break;
@@ -254,9 +261,9 @@ void instance_ruby_sanctum::SetData(uint32 uiType, uint32 uiData)
                         }
                     }
 
-                    // reset berserk timer
+                    // reset the controller
                     if (Creature* pController = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
-                        pController->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pController, pController, 0);
+                        pController->AI()->EnterEvadeMode();
                     break;
             }
             break;
@@ -314,7 +321,10 @@ void instance_ruby_sanctum::Update(uint32 uiDiff)
                     if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
                     {
                         if (Creature* pHalion = pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSPAWN_DEAD_DESPAWN, 0))
+                        {
                             DoScriptText(SAY_HALION_SPAWN, pHalion);
+                            pHalion->SetPhaseMask(1, true);
+                        }
 
                         if (Creature* pHalion = pSummoner->SummonCreature(NPC_HALION_TWILIGHT, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSPAWN_DEAD_DESPAWN, 0))
                             pHalion->SetPhaseMask(32, true);
@@ -335,7 +345,8 @@ void instance_ruby_sanctum::Update(uint32 uiDiff)
         {
             if (Creature* pSummoner = GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
             {
-                pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSPAWN_DEAD_DESPAWN, 0);
+                if (Creature* pHalion = pSummoner->SummonCreature(NPC_HALION_REAL, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSPAWN_DEAD_DESPAWN, 0))
+                    pHalion->SetPhaseMask(1, true);
 
                 if (Creature* pHalion = pSummoner->SummonCreature(NPC_HALION_TWILIGHT, pSummoner->GetPositionX(), pSummoner->GetPositionY(), pSummoner->GetPositionZ(), 3.159f, TEMPSPAWN_DEAD_DESPAWN, 0))
                     pHalion->SetPhaseMask(32, true);

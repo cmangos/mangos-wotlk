@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_halion
-SD%Complete: 50
-SDComment: Phase 3 and related transition NYI; Shadow Orbs NYI; Meteor Strikes NYI; Heroic abilities NYI.
+SD%Complete: 80
+SDComment: Heroic abilities NYI.
 SDCategory: Ruby Sanctum
 EndScriptData */
 
@@ -39,11 +39,11 @@ enum
     SAY_PHASE_3                 = -1724032,
 
     EMOTE_SPHERES               = -1724033,
-    EMOTE_OUT_OF_TWILLIGHT      = -1724034,
+    EMOTE_OUT_OF_TWILLIGHT      = -1724034,                 // emote when Halion receives more damage
     EMOTE_OUT_OF_PHYSICAL       = -1724035,
-    EMOTE_INTO_TWILLIGHT        = -1724036,
+    EMOTE_INTO_TWILLIGHT        = -1724036,                 // emote when the other Halion receives more damage
     EMOTE_INTO_PHYSICAL         = -1724037,
-    EMOTE_REGENERATE            = -1724038,
+    EMOTE_REGENERATE            = -1724038,                 // emote when no damage is received
 
     // *** Spells ***
     // General
@@ -72,7 +72,7 @@ enum
     SPELL_DUSK_SHROUD           = 75476,
     SPELL_SOUL_CONSUMPTION      = 74792,                    // curse - triggers 74795 on self (player); on dispell triggers 74799 and 74800
 
-    // Corporeality
+    // Corporeality - these auras are cast by the main bosses
     SPELL_CORPOREALITY_EVEN     = 74826,                    // Deals & receives normal damage
     SPELL_CORPOREALITY_20I      = 74827,                    // Damage dealt increased by 10%  - Damage taken increased by 15%
     SPELL_CORPOREALITY_40I      = 74828,                    // Damage dealt increased by 30%  - Damage taken increased by 50%
@@ -93,11 +93,11 @@ enum
     // SPELL_CONSUMPTION_PERIODIC  = 74803,                 // cast by npc 40135 in creature_template_addon
 
     // Meteor
-    SPELL_METEOR_VISUAL         = 74641,                    // cast by npc 40029 (all meteor spells)
-    SPELL_METEOR_IMPACT         = 74648,                    // cast on visual aura expire
-    SPELL_METEOR_FLAME          = 74713,
-    SPELL_METEOR_FLAME2         = 74718,                    // cast by the secondary strike npcs
-    SPELL_BIRTH                 = 40031,                    // cast by the meteor strike npcs
+    SPELL_METEOR_VISUAL         = 74641,                    // cast by npc 40029
+    SPELL_METEOR_IMPACT         = 74648,                    // cast by the source metero strike on visual aura expire
+    SPELL_METEOR_FLAME_MAIN     = 74713,                    // cast by the source meteor strike, npc id 40029
+    SPELL_METEOR_FLAME          = 74718,                    // cast by the secondary strike npcs and the following flames
+    SPELL_BIRTH                 = 40031,                    // cast by all meteor strike npcs
 
     // Cutter
     SPELL_TWILIGHT_PULSE        = 78861,                    // cast by each shadow orb individually
@@ -110,15 +110,6 @@ enum
     // Living Ember
     SPELL_AWAKEN_FLAMES         = 75889,                    // cast by 40683
 
-    // Npcs
-    NPC_METEOR_STRIKE_MAIN      = 40029,                    // summons the other meteor strikes using serverside spells like 74680, 74681, 74682, 74683
-
-    NPC_METEOR_STRIKE_1         = 40041,                    // Npc 40029 summons the first 4 secondary meteor strike npcs, then each of them summons one 40055 npc using serverside spells 74687, 74688
-    NPC_METEOR_STRIKE_2         = 40042,
-    NPC_METEOR_STRIKE_3         = 40043,
-    NPC_METEOR_STRIKE_4         = 40044,
-    NPC_METEOR_STRIKE_FLAME     = 40055,                    // Each npc 40055 summons other 10 40055 npcs resulting in a total spawns of 40 40055 npcs.
-
     // Heroic npcs
     NPC_LIVING_INFERNO          = 40681,                    // summoned by 75879 (heroic version spell)
     NPC_LIVING_EMBER            = 40683,
@@ -127,11 +118,33 @@ enum
     PHASE_PHISYCAL_REALM        = 1,
     PHASE_TWILIGHT_REALM        = 2,
     PHASE_BOTH_REALMS           = 3,
+
+    // Corporeality events: handles the increase or decrease of corporeality compared to the previous check
+    CORPOREALITY_NONE           = 0,
+    CORPOREALITY_INCREASE       = 1,
+    CORPOREALITY_DECREASE       = 2,
+
+    MAX_ALLOWED_FLAMES          = 10,                       // this defines the maximum number of meteor strike flames (npcs 40055) summoned per turn
+    MAX_CORPOREALITY_STATES     = 11,
 };
 
-static const uint32 aShadowOrbs[4] = { NPC_SHADOW_ORB_1, NPC_SHADOW_ORB_2, NPC_SHADOW_ORB_3, NPC_SHADOW_ORB_4 };
-static const uint32 aMeteorStrikes[4] = { NPC_METEOR_STRIKE_1, NPC_METEOR_STRIKE_2, NPC_METEOR_STRIKE_3, NPC_METEOR_STRIKE_4 };
+// Corporeality states: handles the combination between the increase and decrease damage auras
+static const uint32 halionCorporeality[MAX_CORPOREALITY_STATES] =
+{
+    SPELL_CORPOREALITY_100D,        // max decrease
+    SPELL_CORPOREALITY_80D,
+    SPELL_CORPOREALITY_60D,
+    SPELL_CORPOREALITY_40D,
+    SPELL_CORPOREALITY_20D,
+    SPELL_CORPOREALITY_EVEN,        // middle point
+    SPELL_CORPOREALITY_20I,
+    SPELL_CORPOREALITY_40I,
+    SPELL_CORPOREALITY_60I,
+    SPELL_CORPOREALITY_80I,
+    SPELL_CORPOREALITY_100I         // max increase
+};
 
+// spawn coords for the rotation focus and the orb carrier
 static const float aRotationFocusPosition[4] = { 3184.448f, 530.314f, 73.0f, 4.586f };
 static const float aOrbCarrierPosition1[3] = { 3153.75f, 533.1875f, 72.972f };
 
@@ -211,13 +224,14 @@ struct boss_halion_realAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        switch (pSummoned->GetEntry())
+        if (pSummoned->GetEntry() == NPC_METEOR_STRIKE_MAIN)
         {
-            case NPC_METEOR_STRIKE_MAIN:
-                // ToDo: summon the other meteor strikes around this one
-                pSummoned->CastSpell(pSummoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
-                pSummoned->CastSpell(pSummoned, SPELL_METEOR_VISUAL, TRIGGERED_OLD_TRIGGERED);
-                break;
+            // cast pre-event visual
+            pSummoned->CastSpell(pSummoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->CastSpell(pSummoned, SPELL_METEOR_VISUAL, TRIGGERED_OLD_TRIGGERED);
+
+            // spawn the other meteor strikes
+            DoSpawnMeteorStrike(pSummoned);
         }
     }
 
@@ -231,6 +245,13 @@ struct boss_halion_realAI : public ScriptedAI
         {
             if (Creature* halion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
                 Unit::DealDamage(dealer, halion, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+
+            // inform controller about damage taken
+            if (m_uiPhase == PHASE_BOTH_REALMS)
+            {
+                if (Creature* controller = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
+                    SendAIEvent(AI_EVENT_CUSTOM_D, m_creature, controller, damage);
+            }
         }
     }
 
@@ -240,9 +261,32 @@ struct boss_halion_realAI : public ScriptedAI
         if (eventType == AI_EVENT_CUSTOM_B)
         {
             m_creature->RemoveAurasDueToSpell(SPELL_TWILIGHT_PHASING);
+
+            DoCastSpellIfCan(m_creature, SPELL_CORPOREALITY_EVEN, CAST_TRIGGERED);
             DoScriptText(SAY_PHASE_3, m_creature);
             m_uiPhase = PHASE_BOTH_REALMS;
         }
+    }
+
+    // Method that spawns the meteor strike npcs; this replaces server side spell 74680, 74681, 74682, 74683
+    void DoSpawnMeteorStrike(Unit* pSummoner)
+    {
+        // spawn the initial 4 meteor strikes around the main one
+        float angle = pSummoner->GetOrientation();
+        float radius = 3.0f;
+        Position spawnPos;
+
+        pSummoner->GetFirstCollisionPosition(spawnPos, radius, angle);
+        pSummoner->SummonCreature(NPC_METEOR_STRIKE_1, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.o, TEMPSPAWN_TIMED_DESPAWN, 30000);
+
+        pSummoner->GetFirstCollisionPosition(spawnPos, radius, angle + M_PI_F);
+        pSummoner->SummonCreature(NPC_METEOR_STRIKE_2, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.o, TEMPSPAWN_TIMED_DESPAWN, 30000);
+
+        pSummoner->GetFirstCollisionPosition(spawnPos, radius, angle + M_PI_F / 2);
+        pSummoner->SummonCreature(NPC_METEOR_STRIKE_3, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.o, TEMPSPAWN_TIMED_DESPAWN, 30000);
+
+        pSummoner->GetFirstCollisionPosition(spawnPos, radius, angle - M_PI_F / 2);
+        pSummoner->SummonCreature(NPC_METEOR_STRIKE_3, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.o, TEMPSPAWN_TIMED_DESPAWN, 30000);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -294,7 +338,7 @@ struct boss_halion_realAI : public ScriptedAI
 
                 if (m_uiMeteorTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_METEOR_SUMMON, SELECT_FLAG_NOT_IN_MELEE_RANGE))
                     {
                         if (DoCastSpellIfCan(pTarget, SPELL_METEOR_SUMMON) == CAST_OK)
                         {
@@ -414,6 +458,13 @@ struct boss_halion_twilightAI : public ScriptedAI
         {
             if (Creature* halion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
                 Unit::DealDamage(dealer, halion, damage, nullptr, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, nullptr, false);
+
+            // inform controller about damage taken
+            if (m_uiPhase == PHASE_BOTH_REALMS)
+            {
+                if (Creature* controller = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_CONTROLLER))
+                    SendAIEvent(AI_EVENT_CUSTOM_D, m_creature, controller, damage);
+            }
         }
     }
 
@@ -422,6 +473,41 @@ struct boss_halion_twilightAI : public ScriptedAI
         // phase 2 switch
         if (eventType == AI_EVENT_CUSTOM_A)
             m_uiPhase = PHASE_TWILIGHT_REALM;
+    }
+
+    // Method to handle shadow orbs
+    void DoHandleShadowOrbEvent()
+    {
+        if (!m_pInstance)
+            return;
+
+        Creature* pOrb1 = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADOW_ORB_1);
+        Creature* pOrb2 = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADOW_ORB_2);
+
+        if (pOrb1 && pOrb2)
+        {
+            // self twilight pulse
+            pOrb1->CastSpell(pOrb1, SPELL_TWILIGHT_PULSE, TRIGGERED_OLD_TRIGGERED);
+            pOrb2->CastSpell(pOrb2, SPELL_TWILIGHT_PULSE, TRIGGERED_OLD_TRIGGERED);
+
+            // cutter
+            pOrb1->CastSpell(pOrb2, SPELL_TWILIGHT_CUTTER, TRIGGERED_NONE);
+        }
+
+        // heroic instance has 2 extra orbs
+        if (m_pInstance->IsHeroicDifficulty())
+        {
+            Creature* pOrb3 = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADOW_ORB_3);
+            Creature* pOrb4 = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADOW_ORB_4);
+
+            if (pOrb3 && pOrb4)
+            {
+                pOrb3->CastSpell(pOrb3, SPELL_TWILIGHT_PULSE, TRIGGERED_OLD_TRIGGERED);
+                pOrb4->CastSpell(pOrb4, SPELL_TWILIGHT_PULSE, TRIGGERED_OLD_TRIGGERED);
+
+                pOrb3->CastSpell(pOrb4, SPELL_TWILIGHT_CUTTER, TRIGGERED_NONE);
+            }
+        }
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -476,38 +562,8 @@ struct boss_halion_twilightAI : public ScriptedAI
 
                 if (m_uiTwilightCutterTimer < uiDiff)
                 {
-                    if (m_pInstance)
-                    {
-                        DoScriptText(SAY_SPHERES, m_creature);
-
-                        Creature* pOrb1 = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADOW_ORB_1);
-                        Creature* pOrb2 = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADOW_ORB_2);
-
-                        if (pOrb1 && pOrb2)
-                        {
-                            // self twilight pulse
-                            pOrb1->CastSpell(pOrb1, SPELL_TWILIGHT_PULSE, TRIGGERED_OLD_TRIGGERED);
-                            pOrb2->CastSpell(pOrb2, SPELL_TWILIGHT_PULSE, TRIGGERED_OLD_TRIGGERED);
-
-                            // cutter
-                            pOrb1->CastSpell(pOrb2, SPELL_TWILIGHT_CUTTER, TRIGGERED_NONE);
-                        }
-
-                        // heroic instance has 2 extra orbs
-                        if (m_pInstance->IsHeroicDifficulty())
-                        {
-                            Creature* pOrb3 = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADOW_ORB_3);
-                            Creature* pOrb4 = m_pInstance->GetSingleCreatureFromStorage(NPC_SHADOW_ORB_4);
-
-                            if (pOrb3 && pOrb4)
-                            {
-                                pOrb3->CastSpell(pOrb3, SPELL_TWILIGHT_PULSE, TRIGGERED_OLD_TRIGGERED);
-                                pOrb4->CastSpell(pOrb4, SPELL_TWILIGHT_PULSE, TRIGGERED_OLD_TRIGGERED);
-
-                                pOrb3->CastSpell(pOrb4, SPELL_TWILIGHT_CUTTER, TRIGGERED_NONE);
-                            }
-                        }
-                    }
+                    DoScriptText(SAY_SPHERES, m_creature);
+                    DoHandleShadowOrbEvent();
 
                     m_uiTwilightCutterTimer = 30000;
                 }
@@ -529,6 +585,7 @@ struct boss_halion_twilightAI : public ScriptedAI
                                 SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pHalion);
                         }
 
+                        DoCastSpellIfCan(m_creature, SPELL_CORPOREALITY_EVEN, CAST_TRIGGERED);
                         DoScriptText(SAY_PHASE_3, m_creature);
                         m_uiPhase = PHASE_BOTH_REALMS;
                     }
@@ -551,19 +608,30 @@ struct npc_halion_controllerAI : public ScriptedAI
     {
         m_pInstance = static_cast<instance_ruby_sanctum*>(pCreature->GetInstanceData());
         SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
         Reset();
     }
 
     instance_ruby_sanctum* m_pInstance;
 
     uint32 m_uiBerserkTimer;
+    uint32 m_uiCorporealityTimer;
+
+    uint32 m_uiMaterialDamage;
+    uint32 m_uiTwilightDamage;
+
+    uint8 m_uiCorporealityIndex;
 
     void Reset() override
     {
-        m_uiBerserkTimer = 0;
+        m_uiBerserkTimer        = 0;
+        m_uiCorporealityTimer   = 0;
+        m_uiCorporealityIndex   = 0;
+        m_uiMaterialDamage      = 0;
+        m_uiTwilightDamage      = 0;
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 miscValue) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 miscValue) override
     {
         if (!m_pInstance)
             return;
@@ -599,17 +667,108 @@ struct npc_halion_controllerAI : public ScriptedAI
 
             for (const auto& guid : lPortalsGuids)
                 m_pInstance->DoRespawnGameObject(guid, 30 * MINUTE);
+
+            m_uiCorporealityTimer = 5000;
+            m_uiCorporealityIndex = 5;
         }
-        // set Berserk timer
+        // set Berserk timer and reset timers
         else if (eventType == AI_EVENT_CUSTOM_C)
             m_uiBerserkTimer = miscValue;
+        // handle corporeality values
+        else if (eventType == AI_EVENT_CUSTOM_D)
+        {
+            if (sender->GetEntry() == NPC_HALION_REAL)
+                m_uiMaterialDamage += miscValue;
+            else if (sender->GetEntry() == NPC_HALION_TWILIGHT)
+                m_uiTwilightDamage += miscValue;
+        }
     }
 
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void AttackStart(Unit* /*pWho*/) override { }
+    // Method that checks and updates corporeality for the encounter phase 3
+    void DoUpdateCorporeality()
+    {
+        // apply twilight melding if damage is 0
+        if (!m_uiMaterialDamage)
+        {
+            if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
+            {
+                DoScriptText(EMOTE_REGENERATE, pHalion);
+                pHalion->CastSpell(pHalion, SPELL_TWILIGHT_MENDING, TRIGGERED_OLD_TRIGGERED);
+            }
+
+            return;
+        }
+
+        // apply twilight melding if damage is 0
+        if (!m_uiTwilightDamage)
+        {
+            if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
+            {
+                DoScriptText(EMOTE_REGENERATE, pHalion);
+                pHalion->CastSpell(pHalion, SPELL_TWILIGHT_MENDING, TRIGGERED_OLD_TRIGGERED);
+            }
+
+            return;
+        }
+
+        // calculate ratio
+        uint8 oldIndex = m_uiCorporealityIndex;
+        float damageRatio = m_uiMaterialDamage / m_uiTwilightDamage;
+
+        uint8 action = CORPOREALITY_NONE;
+
+        // check damage ratio
+        if (damageRatio < 0.98f)                // signals a decrease; more damage in Twlight than in Material realm
+            action = CORPOREALITY_DECREASE;
+        else if (1.02f < damageRatio)           // signals an increase; more damage in Material than in Twilight realm
+            action = CORPOREALITY_INCREASE;
+
+        switch (action)
+        {
+            case CORPOREALITY_NONE:
+                m_uiTwilightDamage = 0;
+                m_uiMaterialDamage = 0;
+                return;
+            case CORPOREALITY_INCREASE:
+                if (m_uiCorporealityIndex >= (MAX_CORPOREALITY_STATES - 1))
+                    return;
+
+                ++m_uiCorporealityIndex;
+                break;
+            case CORPOREALITY_DECREASE:
+                if (m_uiCorporealityIndex <= 0)
+                    return;
+
+                --m_uiCorporealityIndex;
+                break;
+        }
+
+        m_uiTwilightDamage = 0;
+        m_uiMaterialDamage = 0;
+
+        if (m_pInstance)
+        {
+            // update world states
+            m_pInstance->DoUpdateWorldState(WORLD_STATE_CORP_PHYSICAL, m_uiCorporealityIndex * 10);
+            m_pInstance->DoUpdateWorldState(WORLD_STATE_CORP_TWILIGHT, -m_uiCorporealityIndex * 10);
+
+            // apply auras and handle emotes
+            if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_REAL))
+            {
+                DoScriptText(m_uiCorporealityIndex > oldIndex ? EMOTE_INTO_TWILLIGHT : EMOTE_OUT_OF_TWILLIGHT, pHalion);
+                pHalion->CastSpell(pHalion, halionCorporeality[m_uiCorporealityIndex], TRIGGERED_OLD_TRIGGERED);
+            }
+            if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
+            {
+                DoScriptText(m_uiCorporealityIndex > oldIndex ? EMOTE_OUT_OF_PHYSICAL : EMOTE_INTO_PHYSICAL , pHalion);
+                pHalion->CastSpell(pHalion, halionCorporeality[MAX_CORPOREALITY_STATES - m_uiCorporealityIndex - 1], TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        // handle berserk global timer
         if (m_uiBerserkTimer)
         {
             if (m_uiBerserkTimer <= uiDiff)
@@ -634,6 +793,111 @@ struct npc_halion_controllerAI : public ScriptedAI
             else
                 m_uiBerserkTimer -= uiDiff;
         }
+
+        // handle corporeality update during phase 3 of the encounter
+        if (m_uiCorporealityTimer)
+        {
+            if (m_uiCorporealityTimer <= uiDiff)
+            {
+                DoUpdateCorporeality();
+                m_uiCorporealityTimer = 5000;
+            }
+            else
+                m_uiCorporealityTimer -= uiDiff;
+        }
+    }
+};
+
+/*######
+## npc_meteor_strike_initial
+######*/
+
+struct npc_meteor_strike_initialAI : public ScriptedAI
+{
+    npc_meteor_strike_initialAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+
+    uint32 m_uiImpactTimer;
+
+    uint8 m_uiFlameCount;
+
+    GuidList m_lMeteorStrikesGuids;
+
+    void Reset() override
+    {
+        m_uiImpactTimer = 5000;
+        m_uiFlameCount = 0;
+    }
+
+    void JustSummoned(Creature* pSummoned) override
+    {
+        switch (pSummoned->GetEntry())
+        {
+            case NPC_METEOR_STRIKE_1:
+            case NPC_METEOR_STRIKE_2:
+            case NPC_METEOR_STRIKE_3:
+            case NPC_METEOR_STRIKE_4:
+                // store the guids and make sure that the summoned faces the owner
+                m_lMeteorStrikesGuids.push_back(pSummoned->GetObjectGuid());
+                pSummoned->SetFacingToObject(m_creature);
+                pSummoned->CastSpell(pSummoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case NPC_METEOR_STRIKE_FLAME:
+                pSummoned->CastSpell(pSummoned, SPELL_BIRTH, TRIGGERED_OLD_TRIGGERED);
+                pSummoned->CastSpell(pSummoned, SPELL_METEOR_FLAME, TRIGGERED_OLD_TRIGGERED);
+                ++m_uiFlameCount;
+
+                // summon follow-up flames, until reached a certain threshold
+                if (m_uiFlameCount <= MAX_ALLOWED_FLAMES)
+                {
+                    float angle = pSummoned->GetOrientation();
+                    float radius = 5.0f;
+                    Position spawnPos;
+
+                    pSummoned->GetFirstCollisionPosition(spawnPos, radius, angle);
+                    m_creature->SummonCreature(NPC_METEOR_STRIKE_FLAME, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.o, TEMPSPAWN_TIMED_DESPAWN, 30000);
+                }
+                break;
+        }
+    }
+
+    // Method that starts the flame strike
+    void DoStartFlameStrikes()
+    {
+        for (const auto& guid : m_lMeteorStrikesGuids)
+        {
+            if (Creature* pFlame = m_creature->GetMap()->GetCreature(guid))
+            {
+                pFlame->CastSpell(pFlame, SPELL_METEOR_FLAME, TRIGGERED_NONE);
+                m_uiFlameCount = 0;
+
+                // summon a meteor strike behind each of the 4 initial strikes
+                float angle = pFlame->GetOrientation();
+                float radius = 5.0f;
+                Position spawnPos;
+
+                pFlame->GetFirstCollisionPosition(spawnPos, radius, angle + M_PI_F);
+                m_creature->SummonCreature(NPC_METEOR_STRIKE_FLAME, spawnPos.x, spawnPos.y, spawnPos.z, spawnPos.o, TEMPSPAWN_TIMED_DESPAWN, 30000);
+            }
+        }
+    }
+
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiImpactTimer)
+        {
+            if (m_uiImpactTimer <= uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_METEOR_IMPACT) == CAST_OK)
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_METEOR_FLAME_MAIN, CAST_TRIGGERED);
+
+                    DoStartFlameStrikes();
+                    m_uiImpactTimer = 0;
+                }
+            }
+            else
+                m_uiImpactTimer -= uiDiff;
+        }
     }
 };
 
@@ -651,9 +915,6 @@ struct npc_orb_carrierAI : public ScriptedAI
     {
         m_uiTrackRotationTimer = 1000;
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
     void UpdateAI(const uint32 uiDiff) override
     {
@@ -759,7 +1020,7 @@ struct spell_fiery_combustion_aura : public AuraScript
 
             if (aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE || aura->GetRemoveMode() == AURA_REMOVE_BY_DISPEL)
             {
-                target->CastSpell(target, 74607, TRIGGERED_OLD_TRIGGERED);
+                target->CastSpell(nullptr, 74607, TRIGGERED_OLD_TRIGGERED);
                 target->CastSpell(target, 74610, TRIGGERED_OLD_TRIGGERED);
             }
         }
@@ -786,7 +1047,7 @@ struct spell_soul_consumption_aura : public AuraScript
 
             if (aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE || aura->GetRemoveMode() == AURA_REMOVE_BY_DISPEL)
             {
-                target->CastSpell(target, 74799, TRIGGERED_OLD_TRIGGERED);
+                target->CastSpell(nullptr, 74799, TRIGGERED_OLD_TRIGGERED);
                 target->CastSpell(target, 74800, TRIGGERED_OLD_TRIGGERED);
             }
         }
@@ -808,6 +1069,11 @@ void AddSC_boss_halion()
     pNewScript = new Script;
     pNewScript->Name = "npc_halion_controller";
     pNewScript->GetAI = &GetNewAIInstance<npc_halion_controllerAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_meteor_strike_initial";
+    pNewScript->GetAI = &GetNewAIInstance<npc_meteor_strike_initialAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

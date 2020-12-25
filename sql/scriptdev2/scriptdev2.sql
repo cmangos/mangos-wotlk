@@ -1272,6 +1272,7 @@ UPDATE creature_template SET ScriptName='npc_baltharus_clone' WHERE entry=39899;
 UPDATE creature_template SET ScriptName='boss_halion_real' WHERE entry=39863;
 UPDATE creature_template SET ScriptName='boss_halion_twilight' WHERE entry=40142;
 UPDATE creature_template SET ScriptName='npc_halion_controller' WHERE entry=40146;
+UPDATE creature_template SET ScriptName='npc_meteor_strike_initial' WHERE entry=40029;
 UPDATE creature_template SET ScriptName='npc_orb_carrier' WHERE entry=40081;
 UPDATE gameobject_template SET ScriptName='go_twilight_portal' WHERE entry IN (202794,202795);
 
@@ -7432,8 +7433,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1724033','The orbiting spheres pulse with dark energy!','0','3','0','0','0','halion EMOTE_SPHERES'),
 ('-1724034','Your efforts force %s further out of the twillight realm!','0','3','0','0','0','halion EMOTE_OUT_OF_TWILLIGHT'),
 ('-1724035','Your efforts force %s further out of the physical realm!','0','3','0','0','0','halion EMOTE_OUT_OF_PHYSICAL'),
-('-1724036','Your companions'' efforts force Halion further into the twillight realm!','0','3','0','0','0','halion EMOTE_INTO_TWILLIGHT'),
-('-1724037','Your companions'' efforts force Halion further into the physical realm!','0','3','0','0','0','halion EMOTE_INTO_PHYSICAL'),
+('-1724036','Your companions\' efforts force %s further into the twilight realm!','0','3','0','0','0','halion EMOTE_INTO_TWILLIGHT'),
+('-1724037','Your companions\' efforts force %s further into the physical realm!','0','3','0','0','0','halion EMOTE_INTO_PHYSICAL'),
 ('-1724038','Without pressure in both realms %s begins to regenerate.','0','3','0','0','0','halion EMOTE_REGENERATE');
 
 -- -1 999 900 EXAMPLE TEXT

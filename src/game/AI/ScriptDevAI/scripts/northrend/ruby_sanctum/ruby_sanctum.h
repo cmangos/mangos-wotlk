@@ -21,12 +21,21 @@ enum
     // npcs used in the Halion encounter
     NPC_COMBUSTION                  = 40001,
     NPC_CONSUMPTION                 = 40135,
+
     NPC_SHADOW_ORB_1                = 40083,            // shadow orbs for Halion encounter
     NPC_SHADOW_ORB_2                = 40100,
     NPC_SHADOW_ORB_3                = 40468,            // heroic only
     NPC_SHADOW_ORB_4                = 40469,            // heroic only
-    NPC_ORB_CARRIER                 = 40081,            // vehicle for shadow orbs; has 2 or 4 shadoworbs boarded
+
+    NPC_ORB_CARRIER                 = 40081,            // vehicle for shadow orbs; has 2 or 4 shadow orbs boarded; boarding handled by DB
     NPC_ORB_ROTATION_FOCUS          = 40091,            // npc that moves in a circle, around the center of the boss arena; the orb carrier will alter rotation based on the position of this npc
+
+    NPC_METEOR_STRIKE_MAIN          = 40029,            // summons the other meteor strikes using serverside spells like 74680, 74681, 74682, 74683
+    NPC_METEOR_STRIKE_1             = 40041,            // Npc 40029 summons the first 4 secondary meteor strike npcs around the main one; then each of them summons one 40055 towards the back using serverside spells 74687, 74688
+    NPC_METEOR_STRIKE_2             = 40042,
+    NPC_METEOR_STRIKE_3             = 40043,
+    NPC_METEOR_STRIKE_4             = 40044,
+    NPC_METEOR_STRIKE_FLAME         = 40055,            // Each npc 40055 summons other 10 40055 npcs towards the back of the creature
 
     NPC_SAVIANA                     = 39747,            // minibosses
     NPC_BALTHARUS                   = 39751,
