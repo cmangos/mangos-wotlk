@@ -26,7 +26,7 @@ enum
     NPC_SHADOW_ORB_3                = 40468,            // heroic only
     NPC_SHADOW_ORB_4                = 40469,            // heroic only
     NPC_ORB_CARRIER                 = 40081,            // vehicle for shadow orbs; has 2 or 4 shadoworbs boarded
-    NPC_ORB_ROTATION_FOCUS          = 40091,
+    NPC_ORB_ROTATION_FOCUS          = 40091,            // npc that moves in a circle, around the center of the boss arena; the orb carrier will alter rotation based on the position of this npc
 
     NPC_SAVIANA                     = 39747,            // minibosses
     NPC_BALTHARUS                   = 39751,

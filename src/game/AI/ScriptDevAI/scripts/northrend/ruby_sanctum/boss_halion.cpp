@@ -337,11 +337,6 @@ struct boss_halion_realAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_halion_real(Creature* pCreature)
-{
-    return new boss_halion_realAI(pCreature);
-};
-
 /*######
 ## boss_halion_twilight
 ######*/
@@ -546,11 +541,6 @@ struct boss_halion_twilightAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_halion_twilight(Creature* pCreature)
-{
-    return new boss_halion_twilightAI(pCreature);
-};
-
 /*######
 ## npc_halion_controller
 ######*/
@@ -647,11 +637,6 @@ struct npc_halion_controllerAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_halion_controller(Creature* pCreature)
-{
-    return new npc_halion_controllerAI(pCreature);
-}
-
 /*######
 ## npc_orb_carrier
 ######*/
@@ -672,6 +657,9 @@ struct npc_orb_carrierAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
+        // spell has attrribute: channel track target
+        // this means that the caster will follow the target and automatically change the rotation
+        // by changing the rotation the channel will get interrupted every 1 sec, so the caster has to be be forced to start the channel again
         if (m_uiTrackRotationTimer < uiDiff)
         {
             if (DoCastSpellIfCan(m_creature, SPELL_TRACK_ROTATION, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
@@ -681,11 +669,6 @@ struct npc_orb_carrierAI : public ScriptedAI
             m_uiTrackRotationTimer -= uiDiff;
     }
 };
-
-UnitAI* GetAI_npc_orb_carrier(Creature* pCreature)
-{
-    return new npc_orb_carrierAI(pCreature);
-}
 
 /*######
 ## go_twilight_portal
@@ -810,52 +793,26 @@ struct spell_soul_consumption_aura : public AuraScript
     }
 };
 
-/*######
-## spell_track_rotation_aura - 74758
-######*/
-
-struct spell_track_rotation_aura : public AuraScript
-{
-    void OnApply(Aura* aura, bool apply) const override
-    {
-        Unit* target = aura->GetTarget();
-        if (!target)
-            return;
-
-        // spell has attrribute: channel track target
-        // this means that the caster will follow the target rotation
-        // by changing the rotation the channel will get interrupted every 1 sec, so the caster will be forced to start the channel again
-        if (apply)
-        {
-            float newAngle = target->GetOrientation();
-            newAngle += 2 * M_PI_F / 100;
-            newAngle = MapManager::NormalizeOrientation(newAngle);
-
-            target->SetFacingTo(newAngle);
-        }
-    }
-};
-
 void AddSC_boss_halion()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_halion_real";
-    pNewScript->GetAI = &GetAI_boss_halion_real;
+    pNewScript->GetAI = &GetNewAIInstance<boss_halion_realAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_halion_twilight";
-    pNewScript->GetAI = &GetAI_boss_halion_twilight;
+    pNewScript->GetAI = &GetNewAIInstance<boss_halion_twilightAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_halion_controller";
-    pNewScript->GetAI = &GetAI_npc_halion_controller;
+    pNewScript->GetAI = &GetNewAIInstance<npc_halion_controllerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_orb_carrier";
-    pNewScript->GetAI = &GetAI_npc_orb_carrier;
+    pNewScript->GetAI = &GetNewAIInstance<npc_orb_carrierAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -867,5 +824,4 @@ void AddSC_boss_halion()
     RegisterSpellScript<spell_clear_debuffs>("spell_clear_debuffs");
     RegisterAuraScript<spell_fiery_combustion_aura>("spell_fiery_combustion_aura");
     RegisterAuraScript<spell_soul_consumption_aura>("spell_soul_consumption_aura");
-    RegisterAuraScript<spell_track_rotation_aura>("spell_track_rotation_aura");
 }
