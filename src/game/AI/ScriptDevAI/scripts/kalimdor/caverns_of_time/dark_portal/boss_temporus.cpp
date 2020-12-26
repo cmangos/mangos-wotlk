@@ -52,29 +52,19 @@ enum TemporusActions // order based on priority
 
 struct boss_temporusAI : public CombatAI
 {
-    boss_temporusAI(Creature* creature) : CombatAI(creature, TEMPORUS_ACTION_MAX)
+    boss_temporusAI(Creature* creature) : CombatAI(creature, TEMPORUS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        m_instance = (ScriptedInstance*)creature->GetInstanceData();
-        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
-
-        AddCombatAction(TEMPORUS_ACTION_SPELL_REFLECTION, 0u);
-        AddCombatAction(TEMPORUS_ACTION_WING_BUFFET, 0u);
-        AddCombatAction(TEMPORUS_ACTION_HASTEN, 0u);
-        AddCombatAction(TEMPORUS_ACTION_MORTAL_WOUND, 0u);
+        if (!m_isRegularMode)
+            AddCombatAction(TEMPORUS_ACTION_SPELL_REFLECTION, GetInitialActionTimer(TEMPORUS_ACTION_SPELL_REFLECTION));
+        AddCombatAction(TEMPORUS_ACTION_WING_BUFFET, GetInitialActionTimer(TEMPORUS_ACTION_WING_BUFFET));
+        AddCombatAction(TEMPORUS_ACTION_HASTEN, GetInitialActionTimer(TEMPORUS_ACTION_HASTEN));
+        AddCombatAction(TEMPORUS_ACTION_MORTAL_WOUND, GetInitialActionTimer(TEMPORUS_ACTION_MORTAL_WOUND));
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
         Reset();
     }
 
     ScriptedInstance* m_instance;
     bool m_isRegularMode;
-
-    void Reset() override
-    {
-        CombatAI::Reset();
-        ResetTimer(TEMPORUS_ACTION_SPELL_REFLECTION, GetInitialActionTimer(TEMPORUS_ACTION_SPELL_REFLECTION));
-        ResetTimer(TEMPORUS_ACTION_WING_BUFFET, GetInitialActionTimer(TEMPORUS_ACTION_WING_BUFFET));
-        ResetTimer(TEMPORUS_ACTION_HASTEN, GetInitialActionTimer(TEMPORUS_ACTION_HASTEN));
-        ResetTimer(TEMPORUS_ACTION_MORTAL_WOUND, GetInitialActionTimer(TEMPORUS_ACTION_MORTAL_WOUND));
-    }
 
     uint32 GetInitialActionTimer(TemporusActions id)
     {
@@ -130,50 +120,45 @@ struct boss_temporusAI : public CombatAI
     {
         switch (spellInfo->Id)
         {
-        case SPELL_REFLECTION:
-            ResetCombatAction(TEMPORUS_ACTION_SPELL_REFLECTION, GetSubsequentActionTimer(TemporusActions(TEMPORUS_ACTION_SPELL_REFLECTION)));
-            break;
-        case SPELL_WING_BUFFET:
-        case SPELL_WING_BUFFET_H:
-            ResetCombatAction(TEMPORUS_ACTION_WING_BUFFET, GetSubsequentActionTimer(TemporusActions(TEMPORUS_ACTION_WING_BUFFET)));
-            break;
-        case SPELL_HASTEN:
-            ResetCombatAction(TEMPORUS_ACTION_HASTEN, GetSubsequentActionTimer(TemporusActions(TEMPORUS_ACTION_HASTEN)));
-            break;
-        case SPELL_MORTAL_WOUND:
-            ResetCombatAction(TEMPORUS_ACTION_MORTAL_WOUND, GetSubsequentActionTimer(TemporusActions(TEMPORUS_ACTION_MORTAL_WOUND)));
-            break;
+			case SPELL_REFLECTION:
+				ResetCombatAction(TEMPORUS_ACTION_SPELL_REFLECTION, GetSubsequentActionTimer(TemporusActions(TEMPORUS_ACTION_SPELL_REFLECTION)));
+				break;
+			case SPELL_WING_BUFFET:
+			case SPELL_WING_BUFFET_H:
+				ResetCombatAction(TEMPORUS_ACTION_WING_BUFFET, GetSubsequentActionTimer(TemporusActions(TEMPORUS_ACTION_WING_BUFFET)));
+				break;
+			case SPELL_HASTEN:
+				ResetCombatAction(TEMPORUS_ACTION_HASTEN, GetSubsequentActionTimer(TemporusActions(TEMPORUS_ACTION_HASTEN)));
+				break;
+			case SPELL_MORTAL_WOUND:
+				ResetCombatAction(TEMPORUS_ACTION_MORTAL_WOUND, GetSubsequentActionTimer(TemporusActions(TEMPORUS_ACTION_MORTAL_WOUND)));
+				break;
         }
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
         // Despawn Time Keeper
-        if (pWho->GetTypeId() == TYPEID_UNIT && pWho->GetEntry() == NPC_TIME_KEEPER)
+        if (who->GetTypeId() == TYPEID_UNIT && who->GetEntry() == NPC_TIME_KEEPER)
         {
-            if (m_creature->IsWithinDistInMap(pWho, 20.0f))
+            if (m_creature->IsWithinDistInMap(who, 20.0f))
             {
-                if (DoCastSpellIfCan(pWho, SPELL_BANISH_HELPER) == CAST_OK)
+                if (DoCastSpellIfCan(who, SPELL_BANISH_HELPER) == CAST_OK)
                     DoScriptText(SAY_BANISH, m_creature);
             }
         }
 
-        ScriptedAI::MoveInLineOfSight(pWho);
+        ScriptedAI::MoveInLineOfSight(who);
     }
 
     void ExecuteAction(uint32 action) override
@@ -181,40 +166,25 @@ struct boss_temporusAI : public CombatAI
         switch (action)
         {
             case TEMPORUS_ACTION_SPELL_REFLECTION:
-                if (m_isRegularMode)
-                    return;
                 DoCastSpellIfCan(m_creature, SPELL_REFLECTION);
+                break;
             case TEMPORUS_ACTION_WING_BUFFET:
                 DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_WING_BUFFET : SPELL_WING_BUFFET_H);
+                break;
             case TEMPORUS_ACTION_HASTEN:
                 DoCastSpellIfCan(m_creature, SPELL_HASTEN);
+                break;
             case TEMPORUS_ACTION_MORTAL_WOUND:
                 DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MORTAL_WOUND);
+                break;
         }
     }
-
-    void UpdateAI(const uint32 diff)
-    {
-        UpdateTimers(diff, m_creature->IsInCombat());
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        ExecuteActions();
-
-        DoMeleeAttackIfReady();
-    }
 };
-
-UnitAI* GetAI_boss_temporus(Creature* creature)
-{
-    return new boss_temporusAI(creature);
-}
 
 void AddSC_boss_temporus()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_temporus";
-    pNewScript->GetAI = &GetAI_boss_temporus;
+    pNewScript->GetAI = &GetNewAIInstance<boss_temporusAI>;
     pNewScript->RegisterSelf();
 }
