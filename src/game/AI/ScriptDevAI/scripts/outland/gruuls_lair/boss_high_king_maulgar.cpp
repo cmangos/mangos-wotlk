@@ -90,6 +90,7 @@ struct boss_high_king_maulgarAI : public CombatAI
         AddCombatAction(MAULGAR_WHIRLWIND, 30000u);
         AddCombatAction(MAULGAR_CHARGE, true);
         AddCombatAction(MAULGAR_FEAR, true);
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3);
     }
 
     ScriptedInstance* m_instance;
@@ -106,16 +107,6 @@ struct boss_high_king_maulgarAI : public CombatAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_MAULGAR_EVENT, FAIL);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        switch (urand(0, 2))
-        {
-            case 0: DoScriptText(SAY_SLAY1, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY2, m_creature); break;
-            case 2: DoScriptText(SAY_SLAY3, m_creature); break;
-        }
     }
 
     void JustDied(Unit* /*killer*/) override

@@ -76,6 +76,7 @@ struct boss_gruulAI : public CombatAI
         AddCombatAction(GRUUL_ACTION_REVERBERATION, 115000u);
         AddCombatAction(GRUUL_ACTION_GROUND_SLAM, 35000, 40000);
         AddCombatAction(GRUUL_ACTION_HURTFUL_STRIKE, 6000u);
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3);
     }
 
     ScriptedInstance* m_instance;
@@ -101,16 +102,6 @@ struct boss_gruulAI : public CombatAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_GRUUL_EVENT, FAIL);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        switch (urand(0, 2))
-        {
-            case 0: DoScriptText(SAY_SLAY1, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY2, m_creature); break;
-            case 2: DoScriptText(SAY_SLAY3, m_creature); break;
-        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
