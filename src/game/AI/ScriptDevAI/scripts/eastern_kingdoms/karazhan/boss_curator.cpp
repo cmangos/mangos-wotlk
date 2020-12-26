@@ -93,6 +93,7 @@ struct boss_curatorAI : public CombatAI
         {
             return y < -1926.f && z < 164.f && x > -11045.f;
         });
+        AddOnKillText(SAY_KILL1, SAY_KILL2);
         Reset();
     }
 
@@ -123,11 +124,6 @@ struct boss_curatorAI : public CombatAI
             case CURATOR_ACTION_HATEFUL_BOLT: return GetActionReadyStatus(CURATOR_ACTION_ARCANE_INFUSION) ? 15000 : 7000;
             default: return 0; // never occurs but for compiler
         }
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override

@@ -62,6 +62,8 @@ struct boss_maiden_of_virtueAI : public CombatAI
         {
             return y > -2071.f && x > -10924.f;
         });
+
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3);
     }
 
     ScriptedInstance* m_instance;
@@ -111,16 +113,6 @@ struct boss_maiden_of_virtueAI : public CombatAI
                     ResetCombatAction(action, GetSubsequentActionTimer(action));
                 return;
             }
-        }
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        switch (urand(0, 5)) // 50% chance to say something out of 3 texts
-        {
-            case 0: DoScriptText(SAY_SLAY1, m_creature); break;
-            case 1: DoScriptText(SAY_SLAY2, m_creature); break;
-            case 2: DoScriptText(SAY_SLAY3, m_creature); break;
         }
     }
 

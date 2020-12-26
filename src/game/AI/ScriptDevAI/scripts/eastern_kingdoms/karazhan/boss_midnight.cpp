@@ -244,6 +244,8 @@ struct boss_attumenAI : public CombatAI
         {
             return (y < -1945.f && x > -11096.f) || z > 73.5f;
         });
+
+        AddOnKillText(SAY_KILL_1, SAY_KILL_2);
     }
 
     instance_karazhan* m_instance;
@@ -324,11 +326,6 @@ struct boss_attumenAI : public CombatAI
                 midnight->AI()->EnterEvadeMode();
             }
         }
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL_1 : SAY_KILL_2, m_creature);
     }
 
     void SpellHit(Unit* /*source*/, const SpellEntry* spellInfo) override

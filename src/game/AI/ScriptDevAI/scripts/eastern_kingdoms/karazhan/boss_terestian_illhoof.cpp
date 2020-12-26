@@ -85,6 +85,7 @@ struct boss_terestianAI : public CombatAI
         AddCombatAction(ILLHOOF_ACTION_SHADOWBOLT, 5000, 7000);
         AddCombatAction(ILLHOOF_ACTION_SUMMON, 10000u);
         AddCombatAction(ILLHOOF_ACTION_BERSERK, uint32(10 * MINUTE * IN_MILLISECONDS));
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
     }
 
     ScriptedInstance* m_instance;
@@ -175,11 +176,6 @@ struct boss_terestianAI : public CombatAI
             m_instance->SetData(TYPE_TERESTIAN, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
-    }
-
     void JustReachedHome() override
     {
         Creature* kilrek = m_creature->GetMap()->GetAnyTypeCreature(m_kilrekGuid);
@@ -246,17 +242,6 @@ struct boss_terestianAI : public CombatAI
 
         if (m_instance)
             m_instance->SetData(TYPE_TERESTIAN, DONE);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        UpdateTimers(uiDiff, m_creature->IsInCombat());
-        ExecuteActions();
-
-        DoMeleeAttackIfReady();
     }
 };
 
