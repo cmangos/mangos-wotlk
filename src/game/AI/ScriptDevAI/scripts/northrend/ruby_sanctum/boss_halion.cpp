@@ -119,6 +119,12 @@ enum
     PHASE_TWILIGHT_REALM        = 2,
     PHASE_BOTH_REALMS           = 3,
 
+    // Shadow orb vehicle seats
+    SEAT_ID_LEFT                = 1,
+    SEAT_ID_RIGHT               = 2,
+    SEAT_ID_BACK                = 3,
+    SEAT_ID_FRONT               = 4,
+
     // Corporeality events: handles the increase or decrease of corporeality compared to the previous check
     CORPOREALITY_NONE           = 0,
     CORPOREALITY_INCREASE       = 1,
@@ -643,7 +649,30 @@ struct npc_halion_controllerAI : public ScriptedAI
             if (Creature* pHalion = m_pInstance->GetSingleCreatureFromStorage(NPC_HALION_TWILIGHT))
             {
                 pHalion->SummonCreature(NPC_ORB_ROTATION_FOCUS, aRotationFocusPosition[0], aRotationFocusPosition[1], aRotationFocusPosition[2], aRotationFocusPosition[3], TEMPSPAWN_DEAD_DESPAWN, 0);
-                pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+
+                // spawn the orbs manually because of the seat difference between normal and heroic mode; this cannot be handled in DB
+                if (Creature* pCarrier = pHalion->SummonCreature(NPC_ORB_CARRIER, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+                {
+                    int32 uiSeat = (int32)SEAT_ID_RIGHT;
+                    if (Creature* pOrb = pHalion->SummonCreature(NPC_SHADOW_ORB_1, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+                        pOrb->CastCustomSpell(pCarrier, SPELL_RIDE_VEHICLE_HARDCODED, &uiSeat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+
+                    uiSeat = (int32)SEAT_ID_LEFT;
+                    if (Creature* pOrb = pHalion->SummonCreature(NPC_SHADOW_ORB_2, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+                        pOrb->CastCustomSpell(pCarrier, SPELL_RIDE_VEHICLE_HARDCODED, &uiSeat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+
+                    // heroic difficulty has two extra orbs
+                    if (m_pInstance->IsHeroicDifficulty())
+                    {
+                        uiSeat = (int32)SEAT_ID_BACK;
+                        if (Creature* pOrb = pHalion->SummonCreature(NPC_SHADOW_ORB_3, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+                            pOrb->CastCustomSpell(pCarrier, SPELL_RIDE_VEHICLE_HARDCODED, &uiSeat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+
+                        uiSeat = (int32)SEAT_ID_FRONT;
+                        if (Creature* pOrb = pHalion->SummonCreature(NPC_SHADOW_ORB_4, aOrbCarrierPosition1[0], aOrbCarrierPosition1[1], aOrbCarrierPosition1[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+                            pOrb->CastCustomSpell(pCarrier, SPELL_RIDE_VEHICLE_HARDCODED, &uiSeat, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                    }
+                }
             }
         }
         // phase 3
