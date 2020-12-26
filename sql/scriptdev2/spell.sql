@@ -163,6 +163,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (47431,'spell_capture_jormungar_spawn'),
 (47435,'spell_scrape_corrosive_spit'),
 (47447,'spell_corrosive_spit'),
+(47938,'spell_twisting_blade'),
 (48268,'spell_container_of_rats'),
 (48397,'spell_drop_off_villager'),
 (48630,'spell_summon_gauntlet_mobs_periodic_aura'),
