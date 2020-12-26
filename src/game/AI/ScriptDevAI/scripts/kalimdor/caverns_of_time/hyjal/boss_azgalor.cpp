@@ -61,6 +61,7 @@ struct boss_azgalorAI : public CombatAI
         AddCombatAction(AZGALOR_ENRAGE, GetInitialActionTimer(AZGALOR_ENRAGE));
         m_rainOfFireParams.range.minRange = SPELL_RAIN_OF_FIRE_MINRANGE;
         m_rainOfFireParams.range.maxRange = SPELL_RAIN_OF_FIRE_MAXRANGE;
+        AddOnKillText(SAY_KILL1, SAY_KILL2, SAY_KILL3);
         Reset();
     }
 
@@ -105,21 +106,6 @@ struct boss_azgalorAI : public CombatAI
         DoScriptText(SAY_DEATH, m_creature);
         if (m_instance)
             m_instance->SetData(TYPE_AZGALOR, DONE);
-    }
-
-    void KilledUnit(Unit* victim) override
-    {
-        if (victim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        uint32 textId;
-        switch (urand(0, 2))
-        {
-            case 0: textId = SAY_KILL1; break;
-            case 1: textId = SAY_KILL2; break;
-            case 2: textId = SAY_KILL3; break;
-        }
-        DoScriptText(textId, m_creature);
     }
 
     void OnSpellCooldownAdded(SpellEntry const* spellInfo) override

@@ -118,7 +118,7 @@ struct boss_archimondeAI : public CombatAI
         AddCombatAction(ARCHIMONDE_ACTION_HAND_OF_DEATH, uint32(10 * MINUTE * IN_MILLISECONDS));
         AddCombatAction(ARCHIMONDE_ACTION_SOUL_CHARGE, 5000u);
         SetDeathPrevention(true);
-        AddOnKillText({ SAY_SLAY1, SAY_SLAY2, SAY_SLAY3 });
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2, SAY_SLAY3);
         Reset();
     }
 

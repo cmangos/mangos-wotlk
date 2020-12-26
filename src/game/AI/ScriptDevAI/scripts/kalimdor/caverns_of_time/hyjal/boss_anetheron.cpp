@@ -73,6 +73,7 @@ struct boss_anetheronAI : public CombatAI
                 infernal->SetInCombatWithZone();
             }
         });
+        AddOnKillText(SAY_KILL1, SAY_KILL2, SAY_KILL3);
         Reset();
     }
 
@@ -89,13 +90,6 @@ struct boss_anetheronAI : public CombatAI
                 infernal->ForcedDespawn();
 
         m_infernals.clear();
-    }
-
-    void EnterEvadeMode() override
-    {
-        ScriptedAI::EnterEvadeMode();
-
-        Reset();
     }
 
     uint32 GetSubsequentActionTimer(const uint32 action) const
@@ -132,21 +126,6 @@ struct boss_anetheronAI : public CombatAI
                 infernal->Suicide();
 
         m_infernals.clear();
-    }
-
-    void KilledUnit(Unit* victim) override
-    {
-        if (victim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        uint32 textId;
-        switch (urand(0, 2))
-        {
-            case 0: textId = SAY_KILL1; break;
-            case 1: textId = SAY_KILL2; break;
-            case 2: textId = SAY_KILL3; break;
-        }
-        DoScriptText(textId, m_creature);
     }
 
     void JustSummoned(Creature* summoned) override
