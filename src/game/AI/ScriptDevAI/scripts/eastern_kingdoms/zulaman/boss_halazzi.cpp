@@ -104,6 +104,7 @@ struct boss_halazziAI : public CombatAI
             {
                 return x < 307.f || y < 1055.f;
             });
+        AddOnKillText(SAY_KILL1, SAY_KILL2);
         Reset();
     }
 
@@ -146,14 +147,6 @@ struct boss_halazziAI : public CombatAI
 
         if (m_instance)
             m_instance->SetData(TYPE_HALAZZI, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* victim) override
-    {
-        if (victim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override

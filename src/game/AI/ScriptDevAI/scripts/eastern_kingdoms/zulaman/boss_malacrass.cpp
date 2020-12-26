@@ -236,6 +236,7 @@ struct boss_malacrassAI : public CombatAI
         {
             return y > 1025.f;
         });
+        AddOnKillText(SAY_KILL1, SAY_KILL2);
         Reset();
     }
 
@@ -321,14 +322,6 @@ struct boss_malacrassAI : public CombatAI
 
         if (m_instance)
             m_instance->SetData(TYPE_MALACRASS, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override

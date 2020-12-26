@@ -103,6 +103,7 @@ struct boss_akilzonAI : public CombatAI
         {
             return x < 336.259f;
         });
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
     }
 
     instance_zulaman* m_instance;
@@ -123,11 +124,6 @@ struct boss_akilzonAI : public CombatAI
             m_instance->SetData(TYPE_AKILZON, IN_PROGRESS);
 
         ResetTimer(AKILZON_WIND_WALL_DELAY, 5000);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override

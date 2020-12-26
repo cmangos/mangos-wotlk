@@ -83,6 +83,7 @@ struct boss_nalorakkAI : public CombatAI
         {
             return y > 1378.009f;
         });
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
         Reset();
     }
 
@@ -144,11 +145,6 @@ struct boss_nalorakkAI : public CombatAI
 
         if (m_instance)
             m_instance->SetData(TYPE_NALORAKK, IN_PROGRESS);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override

@@ -169,6 +169,7 @@ struct boss_zuljinAI : public CombatAI
             {
                 return y > 734.0f;
             });
+        AddOnKillText(SAY_KILL1, SAY_KILL2);
     }
 
     instance_zulaman* m_instance;
@@ -221,11 +222,6 @@ struct boss_zuljinAI : public CombatAI
         m_creature->SetHealthPercent(100.f); // TODO: Remove this hack once evade issues are resolved
 
         CombatAI::EnterEvadeMode();
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override

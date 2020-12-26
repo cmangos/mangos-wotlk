@@ -117,6 +117,7 @@ struct boss_janalaiAI : public CombatAI
         {
             return x > -8.f || x < -57.f;
         });
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
         Reset();
     }
 
@@ -160,11 +161,6 @@ struct boss_janalaiAI : public CombatAI
 
         if (m_instance)
             m_instance->SetData(TYPE_JANALAI, DONE);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
     void Aggro(Unit* /*who*/) override
