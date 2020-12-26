@@ -82,7 +82,6 @@ enum OssirianActions
 
 struct boss_ossirianAI : public CombatAI
 {
-
     boss_ossirianAI(Creature* creature) : CombatAI(creature, OSSIRIAN_ACTION_MAX), m_instance(static_cast<instance_ruins_of_ahnqiraj*>(m_creature->GetInstanceData())), m_saidIntro(false)
     {
         AddCombatAction(OSSIRIAN_INITIAL_SPAWN, 10000u);
@@ -91,6 +90,7 @@ struct boss_ossirianAI : public CombatAI
         AddCombatAction(OSSIRIAN_STOMP, 30000u);
         AddCombatAction(OSSIRIAN_CURSE_OF_TONGUES, 30000u);
         AddCombatAction(OSSIRIAN_SPEEDUP, 10000u);
+        AddOnKillText(SAY_SLAY);
     }
 
     instance_ruins_of_ahnqiraj* m_instance;
@@ -129,11 +129,6 @@ struct boss_ossirianAI : public CombatAI
     void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(SAY_SLAY, m_creature);
     }
 
     void DoSpawnNextCrystal(uint32 spawnCount)
