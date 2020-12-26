@@ -43,7 +43,10 @@ enum
     SPELL_FRENZY_H              = 57086,
     SPELL_TRAMPLE               = 48016,
     SPELL_TRAMPLE_H             = 57066,
-    SPELL_SUMMON_TANGLER_H      = 61564,
+    SPELL_SUMMON_TANGLER_H      = 61564,        // summons creature 32665
+
+    // crystalline tangler spell
+    SPELL_CRYSTALLINE_TANGLER   = 61555,        // procs aura 61556 on melee attack
 
     // crystal spike spells
     SPELL_CRYSTAL_SPIKE_BACK    = 47936,
@@ -59,7 +62,7 @@ enum
     NPC_CRYSTAL_SPIKE_INITIAL   = 27101,
     NPC_CRYSTAL_SPIKE_TRIGGER   = 27079,
     //NPC_CRYSTAL_SPIKE           = 27099,          // summoned by 47947 - handled in eventAI
-    NPC_CRYSTALLINE_TANGLER     = 32665,
+    NPC_CRYSTALLINE_TANGLER     = 32665,            // has aura 61555
 
     GO_CRYSTAL_SPIKE            = 188537,
 
@@ -125,6 +128,8 @@ struct boss_ormorokAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_CRYSTALLINE_TANGLER:
+                pSummoned->CastSpell(pSummoned, SPELL_CRYSTALLINE_TANGLER, TRIGGERED_OLD_TRIGGERED);
+
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
                     pSummoned->AI()->AttackStart(pTarget);
                 break;
