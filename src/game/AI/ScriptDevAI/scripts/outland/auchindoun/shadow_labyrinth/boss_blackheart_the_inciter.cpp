@@ -106,7 +106,7 @@ struct boss_blackheart_the_inciterAI : public CombatAI
         AddCombatAction(BLACKHEART_CHARGE, 30000, 50000);
         AddCombatAction(BLACKHEART_KNOCKBACK, 10000, 14000);
         AddCustomAction(BLACKHEART_INCITE_TIMER, true, [&]() { HandleInciteEnd(); });
-        Reset();
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
     }
 
     ScriptedInstance* m_instance;
@@ -122,11 +122,6 @@ struct boss_blackheart_the_inciterAI : public CombatAI
             case BLACKHEART_KNOCKBACK: return urand(15000, 30000);
             default: return 0;
         }
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override
