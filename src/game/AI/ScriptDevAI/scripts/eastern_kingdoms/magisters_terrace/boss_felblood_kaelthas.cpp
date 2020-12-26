@@ -491,25 +491,15 @@ struct mob_arcane_sphereAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_felblood_kaelthas(Creature* creature)
-{
-    return new boss_felblood_kaelthasAI(creature);
-}
-
-UnitAI* GetAI_mob_arcane_sphere(Creature* creature)
-{
-    return new mob_arcane_sphereAI(creature);
-}
-
 void AddSC_boss_felblood_kaelthas()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_felblood_kaelthas";
-    pNewScript->GetAI = &GetAI_boss_felblood_kaelthas;
+    pNewScript->GetAI = &GetNewAIInstance<boss_felblood_kaelthasAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_arcane_sphere";
-    pNewScript->GetAI = &GetAI_mob_arcane_sphere;
+    pNewScript->GetAI = &GetNewAIInstance<mob_arcane_sphereAI>;
     pNewScript->RegisterSelf();
 }

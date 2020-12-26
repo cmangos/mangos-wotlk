@@ -79,6 +79,7 @@ struct boss_vexallusAI : public CombatAI
         AddCombatAction(VEXALLUS_ACTION_SHOCK, 25000, 30000);
         AddTimerlessCombatAction(VEXALLUS_SUMMON_PURE_ENERGY, true);
         AddTimerlessCombatAction(VEXALLUS_OVERLOAD, true);
+        AddOnKillText(SAY_KILL);
     }
 
     ScriptedInstance* m_instance;
@@ -103,11 +104,6 @@ struct boss_vexallusAI : public CombatAI
             case VEXALLUS_ACTION_SHOCK: return 8000;
             default: return 0; // never occurs but for compiler
         }
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(SAY_KILL, m_creature);
     }
 
     void JustReachedHome() override

@@ -277,11 +277,6 @@ struct boss_priestess_delrissaAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_priestess_delrissa(Creature* creature)
-{
-    return new boss_priestess_delrissaAI(creature);
-}
-
 /*######
 ## priestess_companion_common
 ######*/
@@ -459,11 +454,6 @@ struct npc_kagani_nightstrikeAI : public priestess_companion_commonAI
     }
 };
 
-UnitAI* GetAI_npc_kagani_nightstrike(Creature* creature)
-{
-    return new npc_kagani_nightstrikeAI(creature);
-}
-
 enum
 {
     SPELL_IMMOLATE              = 44267,
@@ -558,11 +548,6 @@ struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
     }
 };
 
-UnitAI* GetAI_npc_ellris_duskhallow(Creature* creature)
-{
-    return new npc_ellris_duskhallowAI(creature);
-}
-
 enum
 {
     SPELL_KNOCKDOWN     = 11428,
@@ -612,11 +597,6 @@ struct npc_eramas_brightblazeAI : public priestess_companion_commonAI
         priestess_companion_commonAI::ExecuteAction(action);
     }
 };
-
-UnitAI* GetAI_npc_eramas_brightblaze(Creature* creature)
-{
-    return new npc_eramas_brightblazeAI(creature);
-}
 
 enum
 {
@@ -718,11 +698,6 @@ struct npc_yazzaiAI : public priestess_companion_commonAI
     }
 };
 
-UnitAI* GetAI_npc_yazzai(Creature* creature)
-{
-    return new npc_yazzaiAI(creature);
-}
-
 enum
 {
     SPELL_INTERCEPT_STUN        = 27577,
@@ -807,11 +782,6 @@ struct npc_warlord_salarisAI : public priestess_companion_commonAI
         priestess_companion_commonAI::ExecuteAction(action);
     }
 };
-
-UnitAI* GetAI_npc_warlord_salaris(Creature* creature)
-{
-    return new npc_warlord_salarisAI(creature);
-}
 
 enum
 {
@@ -901,11 +871,6 @@ struct npc_garaxxasAI : public priestess_companion_commonAI
     }
 };
 
-UnitAI* GetAI_npc_garaxxas(Creature* creature)
-{
-    return new npc_garaxxasAI(creature);
-}
-
 enum
 {
     SPELL_WAR_STOMP             = 46026,
@@ -981,11 +946,6 @@ struct npc_apokoAI : public priestess_companion_commonAI
         priestess_companion_commonAI::ExecuteAction(action);
     }
 };
-
-UnitAI* GetAI_npc_apoko(Creature* creature)
-{
-    return new npc_apokoAI(creature);
-}
 
 enum
 {
@@ -1074,55 +1034,50 @@ struct npc_zelfanAI : public priestess_companion_commonAI
     }
 };
 
-UnitAI* GetAI_npc_zelfan(Creature* creature)
-{
-    return new npc_zelfanAI(creature);
-}
-
 void AddSC_boss_priestess_delrissa()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_priestess_delrissa";
-    pNewScript->GetAI = &GetAI_boss_priestess_delrissa;
+    pNewScript->GetAI = &GetNewAIInstance<boss_priestess_delrissaAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_kagani_nightstrike";
-    pNewScript->GetAI = &GetAI_npc_kagani_nightstrike;
+    pNewScript->GetAI = &GetNewAIInstance<npc_kagani_nightstrikeAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_ellris_duskhallow";
-    pNewScript->GetAI = &GetAI_npc_ellris_duskhallow;
+    pNewScript->GetAI = &GetNewAIInstance<npc_ellris_duskhallowAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_eramas_brightblaze";
-    pNewScript->GetAI = &GetAI_npc_eramas_brightblaze;
+    pNewScript->GetAI = &GetNewAIInstance<npc_eramas_brightblazeAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_yazzai";
-    pNewScript->GetAI = &GetAI_npc_yazzai;
+    pNewScript->GetAI = &GetNewAIInstance<npc_yazzaiAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_warlord_salaris";
-    pNewScript->GetAI = &GetAI_npc_warlord_salaris;
+    pNewScript->GetAI = &GetNewAIInstance<npc_warlord_salarisAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_garaxxas";
-    pNewScript->GetAI = &GetAI_npc_garaxxas;
+    pNewScript->GetAI = &GetNewAIInstance<npc_garaxxasAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_apoko";
-    pNewScript->GetAI = &GetAI_npc_apoko;
+    pNewScript->GetAI = &GetNewAIInstance<npc_apokoAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_zelfan";
-    pNewScript->GetAI = &GetAI_npc_zelfan;
+    pNewScript->GetAI = &GetNewAIInstance<npc_zelfanAI>;
     pNewScript->RegisterSelf();
 }
