@@ -99,6 +99,7 @@ struct boss_teron_gorefiendAI : public CombatAI
             {
                 return x < 512.8f && y > 402.8f;
             });
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
         Reset();
     }
 
@@ -170,14 +171,6 @@ struct boss_teron_gorefiendAI : public CombatAI
                 break;
             default: break;
         }
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
 
     void JustDied(Unit* /*pKiller*/) override

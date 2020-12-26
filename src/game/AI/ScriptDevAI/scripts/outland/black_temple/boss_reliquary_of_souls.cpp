@@ -360,6 +360,7 @@ struct boss_essence_of_sufferingAI : public essence_base_AI
     {
         AddCombatAction(SUFFERING_ACTION_ENRAGE, GetInitialActionTimer(SUFFERING_ACTION_ENRAGE));
         AddCombatAction(SUFFERING_ACTION_SOUL_DRAIN, GetInitialActionTimer(SUFFERING_ACTION_SOUL_DRAIN));
+        AddOnKillText(SUFF_SAY_SLAY1, SUFF_SAY_SLAY2);
     }
 
     uint32 GetInitialActionTimer(SufferingActions id)
@@ -389,12 +390,7 @@ struct boss_essence_of_sufferingAI : public essence_base_AI
         DoCastSpellIfCan(nullptr, SPELL_SUFFERING_PASSIVE, CAST_TRIGGERED);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SUFF_SAY_SLAY1 : SUFF_SAY_SLAY2, m_creature);
-    }
-
-    void OnPhaseFinished()
+    void OnPhaseFinished() override
     {
         DoScriptText(SUFF_SAY_RECAP, m_creature);
     }
@@ -442,6 +438,7 @@ struct boss_essence_of_desireAI : public essence_base_AI
         AddCombatAction(DESIRE_ACTION_RUNE_SHIELD, GetInitialActionTimer(DESIRE_ACTION_RUNE_SHIELD));
         AddCombatAction(DESIRE_ACTION_DEADEN, GetInitialActionTimer(DESIRE_ACTION_DEADEN));
         AddCombatAction(DESIRE_ACTION_SPIRIT_SHOCK, GetInitialActionTimer(DESIRE_ACTION_SPIRIT_SHOCK));
+        AddOnKillText(DESI_SAY_SLAY1, DESI_SAY_SLAY2, DESI_SAY_SLAY3);
     }
 
     uint32 GetInitialActionTimer(DesireActions id)
@@ -472,17 +469,7 @@ struct boss_essence_of_desireAI : public essence_base_AI
         DoCastSpellIfCan(nullptr, SPELL_AURA_OF_DESIRE);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        switch (urand(0, 2))
-        {
-            case 0: DoScriptText(DESI_SAY_SLAY1, m_creature); break;
-            case 1: DoScriptText(DESI_SAY_SLAY2, m_creature); break;
-            case 2: DoScriptText(DESI_SAY_SLAY3, m_creature); break;
-        }
-    }
-
-    void OnPhaseFinished()
+    void OnPhaseFinished() override
     {
         DoScriptText(DESI_SAY_RECAP, m_creature);
     }
@@ -556,6 +543,7 @@ struct boss_essence_of_angerAI : public CombatAI
             if (!m_creature->GetVictim())
                 JustReachedHome();
         });
+        AddOnKillText(ANGER_SAY_SLAY1, ANGER_SAY_SLAY2);
     }
 
     ScriptedInstance* m_instance;
@@ -593,12 +581,7 @@ struct boss_essence_of_angerAI : public CombatAI
         DoCastSpellIfCan(nullptr, SPELL_AURA_OF_ANGER);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? ANGER_SAY_SLAY1 : ANGER_SAY_SLAY2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(ANGER_SAY_DEATH, m_creature);
     }

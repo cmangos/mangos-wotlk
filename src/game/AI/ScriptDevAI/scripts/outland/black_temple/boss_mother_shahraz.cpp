@@ -86,6 +86,7 @@ struct boss_shahrazAI : public CombatAI
         AddCombatAction(SHAHRAZ_ACTION_BEAM, GetInitialActionTimer(SHAHRAZ_ACTION_BEAM));
         AddCombatAction(SHAHRAZ_ACTION_SHRIEK, GetInitialActionTimer(SHAHRAZ_ACTION_SHRIEK));
         AddCombatAction(SHAHRAZ_ACTION_PRISMATIC_SHIELD, GetInitialActionTimer(SHAHRAZ_ACTION_PRISMATIC_SHIELD));
+        AddOnKillText(SAY_SLAY_1, SAY_SLAY_2);
     }
 
     instance_black_temple* m_instance;
@@ -139,11 +140,6 @@ struct boss_shahrazAI : public CombatAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_SHAHRAZ, FAIL);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override

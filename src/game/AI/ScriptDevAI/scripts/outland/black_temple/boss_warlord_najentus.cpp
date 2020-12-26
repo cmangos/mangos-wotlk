@@ -73,6 +73,7 @@ struct boss_najentusAI : public CombatAI
         {
             return x < 300.f;
         });
+        AddOnKillText(SAY_SLAY1, SAY_SLAY2);
     }
 
     instance_black_temple* m_instance;
@@ -115,11 +116,6 @@ struct boss_najentusAI : public CombatAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_NAJENTUS, NOT_STARTED);
-    }
-
-    void KilledUnit(Unit* /*victim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY1 : SAY_SLAY2, m_creature);
     }
 
     void JustDied(Unit* /*killer*/) override

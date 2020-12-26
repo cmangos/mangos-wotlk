@@ -440,6 +440,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             });
         }
         InitializeDialogueHelper(m_instance);
+        AddOnKillText(SAY_KILL1, SAY_KILL2);
         Reset();
     }
 
@@ -554,14 +555,6 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             if (m_instance)
                 m_instance->SetData(TYPE_ILLIDAN, DONE);
         }
-    }
-
-    void KilledUnit(Unit* victim) override
-    {
-        if (victim->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        DoScriptText(urand(0, 1) ? SAY_KILL1 : SAY_KILL2, m_creature);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 miscValue) override
