@@ -3303,22 +3303,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 50439, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 50546:                                 // Ley Line Focus Control Ring Effect
-                case 50547:                                 // Ley Line Focus Control Amulet Effect
-                case 50548:                                 // Ley Line Focus Control Talisman Effect
-                {
-                    if (!m_originalCaster || !unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    switch (m_spellInfo->Id)
-                    {
-                        case 50546: unitTarget->CastSpell(m_originalCaster, 47390, TRIGGERED_OLD_TRIGGERED); break;
-                        case 50547: unitTarget->CastSpell(m_originalCaster, 47472, TRIGGERED_OLD_TRIGGERED); break;
-                        case 50548: unitTarget->CastSpell(m_originalCaster, 47635, TRIGGERED_OLD_TRIGGERED); break;
-                    }
-
-                    return;
-                }
                 case 51276:                                 // Incinerate Corpse
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
