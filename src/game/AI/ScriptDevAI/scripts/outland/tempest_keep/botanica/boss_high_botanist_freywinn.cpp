@@ -62,6 +62,7 @@ struct boss_high_botanist_freywinnAI : public ScriptedAI
         m_uiFrayerAddsCount     = 0;
         m_uiFrayerTimer         = 0;
         m_bCanMoveFree          = true;
+        SetCombatMovement(true);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -90,13 +91,12 @@ struct boss_high_botanist_freywinnAI : public ScriptedAI
             {
                 m_uiTreeFormEndTimer = 0;
 
-                if (m_creature->GetVictim())
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-
                 // Interrupt all spells and remove auras
                 m_creature->InterruptNonMeleeSpells(true);
                 m_creature->RemoveAllAuras();
                 m_bCanMoveFree = true;
+
+                SetCombatMovement(true, true);
             }
         }
     }
@@ -125,7 +125,7 @@ struct boss_high_botanist_freywinnAI : public ScriptedAI
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+        if (!m_creature->SelectHostileTarget())
             return;
 
         if (m_uiTreeFormTimer < uiDiff)
