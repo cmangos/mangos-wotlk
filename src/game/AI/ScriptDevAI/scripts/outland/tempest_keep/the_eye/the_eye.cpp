@@ -207,21 +207,16 @@ bool instance_the_eye::CheckDoorOpening() const
 
 void instance_the_eye::OpenDoors()
 {
-    DoUseDoorOrButton(GO_RAID_DOOR_3);
-    DoUseDoorOrButton(GO_RAID_DOOR_4);
-    DoUseDoorOrButton(GO_ARCANE_DOOR_VERT_3);
-    DoUseDoorOrButton(GO_ARCANE_DOOR_VERT_4);
-}
-
-InstanceData* GetInstanceData_instance_the_eye(Map* pMap)
-{
-    return new instance_the_eye(pMap);
+    DoUseOpenableObject(GO_RAID_DOOR_3, true);
+    DoUseOpenableObject(GO_RAID_DOOR_4, true);
+    DoUseOpenableObject(GO_ARCANE_DOOR_VERT_3, true);
+    DoUseOpenableObject(GO_ARCANE_DOOR_VERT_4, true);
 }
 
 void AddSC_instance_the_eye()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_the_eye";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_the_eye;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_the_eye>;
     pNewScript->RegisterSelf();
 }

@@ -98,7 +98,7 @@ void instance_shattered_halls::SetData(uint32 uiType, uint32 uiData)
             if (uiData == DONE)
             {
                 DoUseDoorOrButton(GO_NETHEKURSE_DOOR);
-                DoUseDoorOrButton(GO_NETHEKURSE_ENTER_DOOR);
+                DoUseOpenableObject(GO_NETHEKURSE_ENTER_DOOR, true);
             }
             break;
         case TYPE_OMROGG:
