@@ -14,6 +14,9 @@ enum
     NPC_LARGE_TRIGGER               = 22517,
     NPC_ALEXSTRASZAS_GIFT           = 32448,
 
+    NPC_NEXUS_LORD                  = 30245,            // spawned by DB as vehicle passenger
+    NPC_SCION_OF_ETERNITY           = 30249,            // spawned by DB as vehicle passenger
+
     GO_EXIT_PORTAL                  = 193908,
     GO_PLATFORM                     = 193070,
     GO_FOCUSING_IRIS                = 193958,
@@ -25,18 +28,9 @@ enum
     GO_ALEXSTRASZAS_GIFT_H          = 193967,
 
     ACHIEV_START_MALYGOS_ID         = 20387,
-
-    // epilogue related
-    SAY_OUTRO_1                     = -1616029,
-    SAY_OUTRO_2                     = -1616030,
-    SAY_OUTRO_3                     = -1616031,
-    SAY_OUTRO_4                     = -1616032,
-
-    SPELL_ALEXSTRASZAS_GIFT_BEAM    = 61028,
-    SPELL_ALEXSTRASZAS_GIFT_VISUAL  = 61023,
 };
 
-class instance_eye_of_eternity : public ScriptedInstance, private DialogueHelper
+class instance_eye_of_eternity : public ScriptedInstance
 {
     public:
         instance_eye_of_eternity(Map* pMap);
@@ -48,15 +42,15 @@ class instance_eye_of_eternity : public ScriptedInstance, private DialogueHelper
 
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureDeath(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
 
-        void Update(uint32 uiDiff) { DialogueUpdate(uiDiff); }
-
     protected:
-        void JustDidDialogueStep(int32 iEntry) override;
 
         uint32 m_uiEncounter;
+
+        GuidList m_lDiskRidersGuids;
 };
 
 #endif

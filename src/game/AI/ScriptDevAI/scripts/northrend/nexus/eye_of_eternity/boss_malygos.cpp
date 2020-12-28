@@ -104,17 +104,15 @@ enum
     SPELL_STATIC_FIELD              = 57428,
 
     // vehicle related
-    SPELL_SUMMON_DISC               = 56378,            // summons npc 30234 for players
-    SPELL_RIDE_RED_DRAGON           = 56072,
-    SPELL_FLIGHT                    = 60534,            // ToDo: check if id is correct!
+    // SPELL_SUMMON_DISC            = 56378,            // not used
+    // SPELL_RIDE_RED_DRAGON        = 56072,            // handled by EAI
 
     // summoned npcs
     NPC_VORTEX                      = 30090,
     NPC_POWER_SPARK                 = 30084,
 
-    NPC_NEXUS_LORD                  = 30245,
-    NPC_HOVER_DISK                  = 30248,
-    NPC_SCION_OF_ETERNITY           = 30249,
+    NPC_HOVER_DISK_LORD             = 30234,            // this disk can be used by players
+    NPC_HOVER_DISK_SCION            = 30248,
     NPC_ARCANE_OVERLOAD             = 30282,
 
     NPC_STATIC_FIELD                = 30592,
@@ -157,8 +155,20 @@ static const DialogueEntry aIntroDialogue[] =
 };
 
 static const float aCenterMovePos[3] = {754.395f, 1301.270f, 266.253f};
-static const float aAlextraszaSpawnPos[4] = {700.354f, 1310.718f, 298.13f, 6.02f};
-static const float aAlextraszaMovePos[3] = {726.754f, 1307.259f, 282.679f};
+
+struct HoverDiskSummonData
+{
+    float x, y, z;
+    uint8 pathId;
+};
+
+static const HoverDiskSummonData lordDiskSummonData[] =
+{
+    {753.9635f, 1319.003f, 285.052f, 0},
+    {773.4768f, 1301.474f, 266.582f, 1},
+    {778.6023f, 1301.635f, 285.671f, 2},            // heroic spawns
+    {730.3984f, 1301.644f, 285.091f, 3}
+};
 
 /*######
 ## boss_malygos
@@ -189,7 +199,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     uint8 m_uiPhase;
     uint8 m_uiMaxNexusLords;
     uint8 m_uiMaxScions;
-    uint8 m_uiAddsDeadCount;
+
     uint8 m_uiMaxStaticFieldTargets;
 
     uint32 m_uiBerserkTimer;
@@ -216,7 +226,6 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         m_uiArcanePulseTimer    = 60000;
         m_uiOverloadTimer       = 1000;
         m_uiArcaneStormTimer    = 15000;
-        m_uiAddsDeadCount       = 0;
 
         m_uiStaticFieldTimer    = 15000;
         m_uiSurgeOfPowerTimer   = 30000;
@@ -278,7 +287,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     void JustDied(Unit* /*pKiller*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
-        m_creature->SummonCreature(NPC_ALEXSTRASZA, aAlextraszaSpawnPos[0], aAlextraszaSpawnPos[1], aAlextraszaSpawnPos[2], aAlextraszaSpawnPos[3], TEMPSPAWN_TIMED_DESPAWN, 5 * MINUTE * IN_MILLISECONDS);
+        m_creature->SetLevitate(false);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MALYGOS, DONE);
@@ -308,10 +317,6 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     {
         switch (pSummoned->GetEntry())
         {
-            case NPC_ALEXSTRASZA:
-                pSummoned->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
-                pSummoned->GetMotionMaster()->MovePoint(0, aAlextraszaMovePos[0], aAlextraszaMovePos[1], aAlextraszaMovePos[2]);
-                break;
             case NPC_POWER_SPARK:
                 pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0, 0);
                 break;
@@ -321,37 +326,22 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
             case NPC_STATIC_FIELD:
                 pSummoned->CastSpell(pSummoned, SPELL_STATIC_FIELD, TRIGGERED_NONE);
                 break;
-            case NPC_NEXUS_LORD:
-            case NPC_SCION_OF_ETERNITY:
-                if (Creature* pDisk = GetClosestCreatureWithEntry(pSummoned, NPC_HOVER_DISK, 10.0f))
-                    pSummoned->CastSpell(pDisk, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
-                pSummoned->SetInCombatWithZone();
-                break;
-            case NPC_HOVER_DISK:
-                pSummoned->CastSpell(pSummoned, SPELL_FLIGHT, TRIGGERED_OLD_TRIGGERED);
-                break;
         }
     }
 
-    void SummonedCreatureJustDied(Creature* pSummoned) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
-        if (pSummoned->GetEntry() == NPC_NEXUS_LORD || pSummoned->GetEntry() == NPC_SCION_OF_ETERNITY)
+        // start third phase
+        if (eventType == AI_EVENT_CUSTOM_A)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SUMMON_DISC, TRIGGERED_OLD_TRIGGERED);
-            ++m_uiAddsDeadCount;
+            StartNextDialogueText(SAY_END_PHASE_2);
+            m_uiPhase = PHASE_TRANSITION_2;
 
-            // When all adds are killed start phase 3
-            if (m_uiAddsDeadCount == m_uiMaxScions + m_uiMaxNexusLords)
+            // Start platform animation - not sure if this is cast by the right npc
+            if (m_pInstance)
             {
-                StartNextDialogueText(SAY_END_PHASE_2);
-                m_uiPhase = PHASE_TRANSITION_2;
-
-                // Start platform animation - not sure if this is cast by the right npc
-                if (m_pInstance)
-                {
-                    if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_LARGE_TRIGGER))
-                        pTrigger->CastSpell(pTrigger, SPELL_DESTROY_PLATFORM_PRE, TRIGGERED_NONE);
-                }
+                if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_LARGE_TRIGGER))
+                    pTrigger->CastSpell(pTrigger, SPELL_DESTROY_PLATFORM_PRE, TRIGGERED_NONE);
             }
         }
     }
@@ -400,19 +390,16 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     // Wrapper to spawn the adds in phase 2
     void DoSpawnAdds()
     {
-        float fX, fY, fZ;
+        // spawn the nexus lord disks; 2 for normal | 4 for heroic
         for (uint8 i = 0; i < m_uiMaxNexusLords; ++i)
-        {
-            m_creature->GetRandomPoint(aCenterMovePos[0], aCenterMovePos[1], aCenterMovePos[2], 50.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_HOVER_DISK, fX, fY, fZ + 30.0f, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
-            m_creature->SummonCreature(NPC_NEXUS_LORD, fX, fY, fZ + 30.0f, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
-        }
+            m_creature->SummonCreature(NPC_HOVER_DISK_LORD, lordDiskSummonData[i].x, lordDiskSummonData[i].y, lordDiskSummonData[i].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0, false, true, lordDiskSummonData[i].pathId);
 
+        // spawn the scion hover disks; 4 for normal | 8 for heroic
+        float fX, fY, fZ;
         for (uint8 i = 0; i < m_uiMaxScions; ++i)
         {
             m_creature->GetRandomPoint(aCenterMovePos[0], aCenterMovePos[1], aCenterMovePos[2], 50.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_HOVER_DISK, fX, fY, fZ + 30.0f, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
-            m_creature->SummonCreature(NPC_SCION_OF_ETERNITY, fX, fY, fZ + 30.0f, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_HOVER_DISK_SCION, fX, fY, fZ + urand(15, 20), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
         }
     }
 
@@ -573,11 +560,6 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     }
 };
 
-UnitAI* GetAI_boss_malygos(Creature* pCreature)
-{
-    return new boss_malygosAI(pCreature);
-}
-
 /*######
 ## npc_power_spark
 ######*/
@@ -610,71 +592,6 @@ struct npc_power_sparkAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-UnitAI* GetAI_npc_power_spark(Creature* pCreature)
-{
-    return new npc_power_sparkAI(pCreature);
-}
-
-/*######
-## npc_wyrmrest_skytalon
-######*/
-
-struct npc_wyrmrest_skytalonAI : public ScriptedAI
-{
-    npc_wyrmrest_skytalonAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        SetCombatMovement(false);
-        m_bHasMounted = false;
-        Reset();
-    }
-
-    bool m_bHasMounted;
-
-    void Reset() override { }
-
-    // TODO: Temporary workaround - please remove when the boarding wrappers are implemented in core
-    void SpellHit(Unit* pCaster, const SpellEntry* pSpell) override
-    {
-        if (pCaster->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        if (pSpell->Id == 56071)
-            DoCastSpellIfCan(m_creature, SPELL_FLIGHT, CAST_TRIGGERED);
-    }
-
-    // TODO: Enable the wrappers below, when they will be properly supported by the core
-    /*
-    void PassengerBoarded(Unit* pPassenger, uint8 uiSeat) override
-    {
-        if (pPassenger->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        // Set vehicle auras
-        DoCastSpellIfCan(m_creature, SPELL_FLIGHT, CAST_TRIGGERED);
-    }
-    */
-
-    void UpdateAI(const uint32 /*uiDiff*/) override
-    {
-        if (!m_bHasMounted)
-        {
-            if (m_creature->IsTemporarySummon())
-            {
-                // Force player to mount
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
-                    pSummoner->CastSpell(m_creature, SPELL_RIDE_RED_DRAGON, TRIGGERED_OLD_TRIGGERED);
-            }
-
-            m_bHasMounted = true;
-        }
-    }
-};
-
-UnitAI* GetAI_npc_wyrmrest_skytalon(Creature* pCreature)
-{
-    return new npc_wyrmrest_skytalonAI(pCreature);
-}
-
 /*######
 ## event_go_focusing_iris
 ######*/
@@ -705,25 +622,45 @@ bool ProcessEventId_event_go_focusing_iris(uint32 /*uiEventId*/, Object* pSource
     return false;
 }
 
+/*######
+## spell_ride_red_dragon_buddy - 56072
+######*/
+
+struct spell_ride_red_dragon_buddy : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!caster || !target || !target->IsPlayer())
+            return;
+
+        uint32 uiSpell = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        // player cast 56071 on caster
+        target->CastSpell(caster, uiSpell, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_malygos()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_malygos";
-    pNewScript->GetAI = &GetAI_boss_malygos;
+    pNewScript->GetAI = &GetNewAIInstance<boss_malygosAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_power_spark";
-    pNewScript->GetAI = &GetAI_npc_power_spark;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_wyrmrest_skytalon";
-    pNewScript->GetAI = &GetAI_npc_wyrmrest_skytalon;
+    pNewScript->GetAI = &GetNewAIInstance<npc_power_sparkAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "event_go_focusing_iris";
     pNewScript->pProcessEventId = &ProcessEventId_event_go_focusing_iris;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_ride_red_dragon_buddy>("spell_ride_red_dragon_buddy");
 }

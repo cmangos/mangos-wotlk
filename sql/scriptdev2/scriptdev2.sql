@@ -1200,7 +1200,6 @@ UPDATE creature_template SET ScriptName='npc_commander_arcus' WHERE entry IN(234
 UPDATE instance_template SET ScriptName='instance_eye_of_eternity' WHERE map=616;
 UPDATE creature_template SET ScriptName='boss_malygos' WHERE entry=28859;
 UPDATE creature_template SET ScriptName='npc_power_spark' WHERE entry=30084;
-UPDATE creature_template SET ScriptName='npc_wyrmrest_skytalon' WHERE entry=30161;
 INSERT INTO scripted_event_id VALUES
 (20711,'event_go_focusing_iris');
 
@@ -6807,11 +6806,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1616025','Still standing? Not for long...','14537','1','0','0','0','malygos SAY_SPELL_1'),
 ('-1616026','Your cause is lost!','14538','1','0','0','0','malygos SAY_SPELL_2'),
 ('-1616027','Your fragile mind will be shattered!','14539','1','0','0','0','malygos SAY_SPELL_3'),
-('-1616028','UNTHINKABLE! The mortals will destroy... e-everything... my sister... what have you-','14540','1','0','0','0','malygos SAY_DEATH'),
-('-1616029','I did what I had to, brother. You gave me no alternative.','14406','1','0','1','0','alextrasza SAY_OUTRO_1'),
-('-1616030','And so ends the Nexus War.','14407','1','0','1','0','alextrasza SAY_OUTRO_2'),
-('-1616031','This resolution pains me deeply, but the destruction, the monumental loss of life had to end. Regardless of Malygos'' recent transgressions, I will mourn his loss. He was once a guardian, a protector. This day, one of the world''s mightiest has fallen.','14408','1','0','1','0','alextrasza SAY_OUTRO_3'),
-('-1616032','The red dragonflight will take on the burden of mending the devastation wrought on Azeroth. Return home to your people and rest. Tomorrow will bring you new challenges, and you must be ready to face them. Life...goes on.','14409','1','0','1','0','alextrasza SAY_OUTRO_4'),
+('-1616028','Unthinkable! The mortals will destroy... everything! My sister, what have you...','14540','1','0','0','0','malygos SAY_DEATH'),
+('-1616029','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1616030','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1616031','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1616032','REUSE ME','0','0','0','0','0','REUSE ME'),
 ('-1616033','A Power Spark forms from a nearby rift!','0','3','0','0','0','malygos SAY_EMOTE_SPARK'),
 ('-1616034','%s takes a deep breath.','0','3','0','0','0','malygos SAY_EMOTE_BREATH');
 

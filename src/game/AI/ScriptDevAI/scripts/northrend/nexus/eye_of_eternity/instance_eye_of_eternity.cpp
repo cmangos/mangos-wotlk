@@ -24,21 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "eye_of_eternity.h"
 
-static const DialogueEntry aEpilogueDialogue[] =
-{
-    {NPC_ALEXSTRASZA,               0,                  10000},
-    {SPELL_ALEXSTRASZAS_GIFT_BEAM,  0,                  3000},
-    {NPC_ALEXSTRASZAS_GIFT,         0,                  2000},
-    {SAY_OUTRO_1,                   NPC_ALEXSTRASZA,    6000},
-    {SAY_OUTRO_2,                   NPC_ALEXSTRASZA,    4000},
-    {SAY_OUTRO_3,                   NPC_ALEXSTRASZA,    23000},
-    {SAY_OUTRO_4,                   NPC_ALEXSTRASZA,    20000},
-    {GO_PLATFORM,                   0,                  0},
-    {0, 0, 0},
-};
-
-instance_eye_of_eternity::instance_eye_of_eternity(Map* pMap) : ScriptedInstance(pMap),
-    DialogueHelper(aEpilogueDialogue)
+instance_eye_of_eternity::instance_eye_of_eternity(Map* pMap) : ScriptedInstance(pMap)
 {
     Initialize();
 }
@@ -46,7 +32,6 @@ instance_eye_of_eternity::instance_eye_of_eternity(Map* pMap) : ScriptedInstance
 void instance_eye_of_eternity::Initialize()
 {
     m_uiEncounter = NOT_STARTED;
-    InitializeDialogueHelper(this);
 }
 
 bool instance_eye_of_eternity::IsEncounterInProgress() const
@@ -63,6 +48,10 @@ void instance_eye_of_eternity::OnCreatureCreate(Creature* pCreature)
         case NPC_LARGE_TRIGGER:
         case NPC_ALEXSTRASZAS_GIFT:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+        case NPC_NEXUS_LORD:
+        case NPC_SCION_OF_ETERNITY:
+            m_lDiskRidersGuids.push_back(pCreature->GetObjectGuid());
             break;
     }
 }
@@ -92,42 +81,43 @@ void instance_eye_of_eternity::SetData(uint32 uiType, uint32 uiData)
     m_uiEncounter = uiData;
     if (uiData == IN_PROGRESS)
     {
-        // ToDo: Despawn the exit portal
-
+        // Portal and iris despawn handled in DB
         DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_MALYGOS_ID);
     }
     else if (uiData == FAIL)
     {
-        // ToDo: respawn the focus iris and the portal
+        // respawn iris and portal
+        DoRespawnGameObject(GO_EXIT_PORTAL, 7 * DAY);
+        DoRespawnGameObject(instance->GetDifficulty() == RAID_DIFFICULTY_10MAN_NORMAL ? GO_FOCUSING_IRIS : GO_FOCUSING_IRIS_H, 7 * DAY);
 
-        if (GameObject* pPlatform = GetSingleGameObjectFromStorage(GO_PLATFORM))
-            pPlatform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
+        // rebuild platform
+        if (Creature* pMalygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
+            if (GameObject* pPlatform = GetSingleGameObjectFromStorage(GO_PLATFORM))
+                pPlatform->RebuildGameObject(pMalygos);
     }
     else if (uiData == DONE)
-        StartNextDialogueText(NPC_ALEXSTRASZA);
+    {
+        // Note: ending event handled by DB
+
+        // Spawn the Heart of Malygos
+        DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_HEART_OF_MAGIC : GO_HEART_OF_MAGIC_H, 30 * MINUTE);
+    }
 
     // Currently no reason to save anything
 }
 
-void instance_eye_of_eternity::JustDidDialogueStep(int32 iEntry)
+void instance_eye_of_eternity::OnCreatureDeath(Creature* pCreature)
 {
-    switch (iEntry)
+    switch (pCreature->GetEntry())
     {
-        case SPELL_ALEXSTRASZAS_GIFT_BEAM:
-            if (Creature* pAlextrasza = GetSingleCreatureFromStorage(NPC_ALEXSTRASZA))
-                pAlextrasza->CastSpell(pAlextrasza, SPELL_ALEXSTRASZAS_GIFT_BEAM, TRIGGERED_NONE);
-            break;
-        case NPC_ALEXSTRASZAS_GIFT:
-            if (Creature* pGift = GetSingleCreatureFromStorage(NPC_ALEXSTRASZAS_GIFT))
-                pGift->CastSpell(pGift, SPELL_ALEXSTRASZAS_GIFT_VISUAL, TRIGGERED_NONE);
-            DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_ALEXSTRASZAS_GIFT : GO_ALEXSTRASZAS_GIFT_H, 30 * MINUTE);
-            break;
-        case GO_PLATFORM:
-            // ToDo: respawn the portal
-            if (GameObject* pPlatform = GetSingleGameObjectFromStorage(GO_PLATFORM))
-                pPlatform->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
-            // Spawn the Heart of Malygos
-            DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_HEART_OF_MAGIC : GO_HEART_OF_MAGIC_H, 30 * MINUTE);
+        case NPC_NEXUS_LORD:
+        case NPC_SCION_OF_ETERNITY:
+            m_lDiskRidersGuids.remove(pCreature->GetObjectGuid());
+
+            // start phase 3 if all adds are dead
+            if (m_lDiskRidersGuids.empty())
+                if (Creature* pMalygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
+                    pMalygos->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pMalygos, pMalygos);
             break;
     }
 }
