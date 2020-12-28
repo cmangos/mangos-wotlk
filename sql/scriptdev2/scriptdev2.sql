@@ -1004,8 +1004,6 @@ INSERT INTO scripted_areatrigger VALUES
 (5740,'at_frostworn_general'),
 (5605,'at_wrath_lich_king'),
 (5660,'at_queldelar_start');
-INSERT INTO scripted_event_id VALUES
-(22795,'event_spell_summon_ice_wall');
 
 /* PIT OF SARON */
 UPDATE instance_template SET ScriptName='instance_pit_of_saron' WHERE map=658;
@@ -7384,10 +7382,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1668003','I will not make the same mistake again, Sylvanas. This time there will be no escape. You will all serve me in death!','17213','1','0','0','0','lich king SAY_HORDE_INTRO_1'),
 ('-1668004','He''s too powerful! Heroes, quickly, come to me! We must leave this place immediately! I will do what I can do hold him in place while we flee.','17058','1','0','1','0','sylvanas SAY_HORDE_INTRO_2'),
 
-('-1668005','Death''s cold embrace awaits.','17221','1','0','0','0','Lich King - SAY_FIRST_WALL'),
-('-1668006','Succumb to the chill of the grave.','17218','1','0','0','0','Lich King - SAY_SECOND_WALL'),
-('-1668007','Another dead end.','17219','1','0','0','0','Lich King - SAY_THIRD_WALL'),
-('-1668008','How long can you fight it?','17220','1','0','0','0','Lich King - SAY_LAST_WALL'),
+('-1668005','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1668006','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1668007','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1668008','REUSE ME','0','0','0','0','0','REUSE ME'),
 
 ('-1668009','Halt! Do not carry that blade any further!','16675','1','0','1','0','Uther - SAY_INTRO_QUELDELAR');
 

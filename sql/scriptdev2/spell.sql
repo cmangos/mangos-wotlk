@@ -202,6 +202,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (57082,'spell_crystal_spikes'),
 (57283,'spell_remove_mushroom_power'),
 (59275,'spell_summon_gauntlet_mobs_periodic_aura'),
+(70017,'spell_gunship_cannon_fire_aura'),
 (73159,'spell_play_movie'),
 (74562,'spell_fiery_combustion_aura'),
 (74792,'spell_soul_consumption_aura'),

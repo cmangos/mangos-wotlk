@@ -50,10 +50,10 @@ enum
     NPC_SHADOWY_MERCENARY           = 38177,
 
     // escape event creatures
-    NPC_RAGING_GHOUL                = 36940,
-    NPC_RISEN_WHITCH_DOCTOR         = 36941,
+    // NPC_RAGING_GHOUL             = 36940,
+    // NPC_RISEN_WHITCH_DOCTOR      = 36941,
     NPC_LUMBERING_ABOMINATION       = 37069,
-    NPC_ICE_WALL_TARGET             = 37014,                    // dummy ice wall target
+    // NPC_ICE_WALL_TARGET          = 37014,                    // dummy ice wall target
 
     // objects
     GO_ICECROWN_DOOR_ENTRANCE       = 201976,                   // entrance door; used in combat during the spirit event
@@ -64,8 +64,8 @@ enum
     GO_FROSTMOURNE                  = 202302,
 
     GO_ICE_WALL                     = 201385,                   // summoned during the Lich King escape
-    GO_CAVE_IN                      = 201596,                   // door after the final encounter
-    GO_PORTAL_DALARAN               = 202079,
+    // GO_CAVE_IN                   = 201596,                   // door after the final encounter
+    // GO_PORTAL_DALARAN            = 202079,
     GO_TRANSPORT_SKYBREAKER         = 201598,                   // alliance transport; map 712
     GO_TRANSPORT_OGRIMS_HAMMER      = 201599,                   // horde transport; map 713
     GO_GUNSHIP_STAIRS_A             = 201709,
@@ -154,7 +154,6 @@ class instance_halls_of_reflection : public ScriptedInstance, private DialogueHe
         void DoCleanupFrostmourneEvent();
         void DoSendNextSpiritWave();
         void DoSetupEscapeEvent(Player* pPlayer);
-        void DoRespawnWallTargets();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
@@ -163,15 +162,16 @@ class instance_halls_of_reflection : public ScriptedInstance, private DialogueHe
         uint32 m_uiEventTimer;
         uint32 m_uiActivateTimer;
         uint32 m_uiEscapeResetTimer;
+        uint32 m_uiShipUpdateTimer;
         uint8 m_uiEventStage;
 
         GuidList m_lRisenSpiritsGuids;
         GuidList m_lActiveSpiritsGuids;
         GuidList m_lDungeonTrapsGuids;
         GuidList m_lSpiritReflectionsGuids;
-        GuidList m_lIceWallTargetsGuids;
         GuidList m_lGunshipStairsAllyGuids;
         GuidList m_lGunshipStairsHordeGuids;
+        GuidList m_lIceWallGuids;
 };
 
 #endif

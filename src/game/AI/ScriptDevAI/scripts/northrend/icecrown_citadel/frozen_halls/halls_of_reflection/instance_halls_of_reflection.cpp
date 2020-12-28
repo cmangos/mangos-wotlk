@@ -64,6 +64,7 @@ instance_halls_of_reflection::instance_halls_of_reflection(Map* pMap) : Scripted
     m_uiEventTimer(0),
     m_uiActivateTimer(0),
     m_uiEscapeResetTimer(0),
+    m_uiShipUpdateTimer(0),
     m_uiEventStage(0)
 {
     Initialize();
@@ -165,11 +166,6 @@ void instance_halls_of_reflection::OnCreatureCreate(Creature* pCreature)
         case NPC_SPIRITUAL_REFLECTION_2:
             m_lSpiritReflectionsGuids.push_back(pCreature->GetObjectGuid());
             return;
-        case NPC_ICE_WALL_TARGET:
-            // add creatures to the list and mark as active to handle the future event
-            m_lIceWallTargetsGuids.push_back(pCreature->GetObjectGuid());
-            pCreature->SetActiveObjectState(true);
-            return;
         default:
             return;
     }
@@ -193,8 +189,6 @@ void instance_halls_of_reflection::OnObjectCreate(GameObject* pGo)
         case GO_ICECROWN_DOOR_ENTRANCE:
         case GO_ICECROWN_DOOR_LK_ENTRANCE:
         case GO_ICECROWN_DOOR_LK_EXIT:
-        case GO_CAVE_IN:
-        case GO_ICE_WALL:
 
         case GO_CAPTAIN_CHEST_HORDE:
         case GO_CAPTAIN_CHEST_HORDE_H:
@@ -209,6 +203,8 @@ void instance_halls_of_reflection::OnObjectCreate(GameObject* pGo)
         case GO_GUNSHIP_STAIRS_H:
             m_lGunshipStairsHordeGuids.push_back(pGo->GetObjectGuid());
             return;
+        case GO_ICE_WALL:
+            m_lIceWallGuids.push_back(pGo->GetObjectGuid());
         default:
             return;
     }
@@ -261,49 +257,29 @@ void instance_halls_of_reflection::SetData(uint32 uiType, uint32 uiData)
         case TYPE_LICH_KING:
             if (uiData == DONE)
             {
-                // Move ship to final position and spawn stairs
+                // Move ship to battle position
                 if (m_uiTeam == ALLIANCE)
                 {
-                    if (GameObject* pShip = GetSingleGameObjectFromStorage(GO_TRANSPORT_SKYBREAKER))
-                        pShip->SetGoState(GO_STATE_ACTIVE);
-
-                    // alliance ship stairs - handled by DBscript
-                    /*for (GuidList::const_iterator itr = m_lGunshipStairsAllyGuids.begin(); itr != m_lGunshipStairsAllyGuids.end(); ++itr)
-                        DoRespawnGameObject(*itr, 5 * MINUTE);*/
+                    if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_TRANSPORT_SKYBREAKER))))
+                        gunship->SetGoState(GO_STATE_ACTIVE);
                 }
                 else
                 {
-                    if (GameObject* pShip = GetSingleGameObjectFromStorage(GO_TRANSPORT_OGRIMS_HAMMER))
-                        pShip->SetGoState(GO_STATE_ACTIVE);
-
-                    // horde ship has separte stairs - handled by DBscript
-                    /*for (GuidList::const_iterator itr = m_lGunshipStairsHordeGuids.begin(); itr != m_lGunshipStairsHordeGuids.end(); ++itr)
-                        DoRespawnGameObject(*itr, 5 * MINUTE);*/
+                    if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_TRANSPORT_OGRIMS_HAMMER))))
+                        gunship->SetGoState(GO_STATE_ACTIVE);
                 }
 
-                uint32 uiChestEntry = m_uiTeam == ALLIANCE ? (instance->IsRegularDifficulty() ? GO_CAPTAIN_CHEST_ALLIANCE : GO_CAPTAIN_CHEST_ALLIANCE_H) :
-                                      (instance->IsRegularDifficulty() ? GO_CAPTAIN_CHEST_HORDE : GO_CAPTAIN_CHEST_HORDE_H);
-
-                DoToggleGameObjectFlags(uiChestEntry, GO_FLAG_NO_INTERACT, false);
-
-                // remove active object status for ice wall targets
-                for (GuidList::const_iterator itr = m_lIceWallTargetsGuids.begin(); itr != m_lIceWallTargetsGuids.end(); ++itr)
-                {
-                    if (Creature* pCreature = instance->GetCreature(*itr))
-                        pCreature->SetActiveObjectState(false);
-                }
+                // update the shio one more time after the timer expires
+                m_uiShipUpdateTimer = 15000;
             }
             else if (uiData == IN_PROGRESS)
-            {
                 StartNextDialogueText(SAY_ALLY_INTRO_1);
-                DoRespawnWallTargets();
-            }
             else if (uiData == FAIL)
             {
                 m_uiEscapeResetTimer = 10000;
 
                 if (Creature* pCreature = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_JAINA_PART2 : NPC_SYLVANAS_PART2))
-                    pCreature->ForcedDespawn(10000);
+                    pCreature->ForcedDespawn(5000);
             }
             m_auiEncounter[uiType] = uiData;
             break;
@@ -581,19 +557,6 @@ void instance_halls_of_reflection::DoSetupEscapeEvent(Player* pPlayer)
     }
 }
 
-// Function to respawn the wall targets
-void instance_halls_of_reflection::DoRespawnWallTargets()
-{
-    for (GuidList::const_iterator itr = m_lIceWallTargetsGuids.begin(); itr != m_lIceWallTargetsGuids.end(); ++itr)
-    {
-        if (Creature* pCreature = instance->GetCreature(*itr))
-        {
-            if (!pCreature->IsAlive())
-                pCreature->Respawn();
-        }
-    }
-}
-
 void instance_halls_of_reflection::Update(uint32 uiDiff)
 {
     DialogueUpdate(uiDiff);
@@ -646,16 +609,48 @@ void instance_halls_of_reflection::Update(uint32 uiDiff)
             {
                 DoSetupEscapeEvent(pPlayer);
 
-                // reset walls and respawn wall targets
-                if (GameObject* pWall = GetSingleGameObjectFromStorage(GO_ICE_WALL))
-                    pWall->Use(pPlayer);
-
-                DoRespawnWallTargets();
+                // reset walls
+                for (const auto& guid : m_lIceWallGuids)
+                    if (GameObject* pWall = instance->GetGameObject(guid))
+                        pWall->Use(pPlayer);
             }
             m_uiEscapeResetTimer = 0;
         }
         else
             m_uiEscapeResetTimer -= uiDiff;
+    }
+
+    if (m_uiShipUpdateTimer)
+    {
+        if (m_uiShipUpdateTimer <= uiDiff)
+        {
+            // Move ship to final position and spawn stairs
+            if (m_uiTeam == ALLIANCE)
+            {
+                if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_TRANSPORT_SKYBREAKER))))
+                    gunship->SetGoState(GO_STATE_ACTIVE);
+
+                for (const auto& guid : m_lGunshipStairsAllyGuids)
+                    DoRespawnGameObject(guid, 30 * MINUTE);
+            }
+            else
+            {
+                if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_TRANSPORT_OGRIMS_HAMMER))))
+                    gunship->SetGoState(GO_STATE_ACTIVE);
+
+                for (const auto& guid : m_lGunshipStairsHordeGuids)
+                    DoRespawnGameObject(guid, 30 * MINUTE);
+            }
+
+            uint32 uiChestEntry = m_uiTeam == ALLIANCE ? (instance->IsRegularDifficulty() ? GO_CAPTAIN_CHEST_ALLIANCE : GO_CAPTAIN_CHEST_ALLIANCE_H) :
+                (instance->IsRegularDifficulty() ? GO_CAPTAIN_CHEST_HORDE : GO_CAPTAIN_CHEST_HORDE_H);
+
+            DoToggleGameObjectFlags(uiChestEntry, GO_FLAG_NO_INTERACT, false);
+
+            m_uiShipUpdateTimer = 0;
+        }
+        else
+            m_uiShipUpdateTimer -= uiDiff;
     }
 }
 
@@ -664,6 +659,7 @@ void instance_halls_of_reflection::ExecuteChatCommand(ChatHandler* handler, char
     char* result = handler->ExtractLiteralArg(&args);
     if (!result)
         return;
+
     std::string val = result;
     if (val == "startallianceship")
     {

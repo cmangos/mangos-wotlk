@@ -223,11 +223,6 @@ struct npc_phantom_mageAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_phantom_mage(Creature* pCreature)
-{
-    return new npc_phantom_mageAI(pCreature);
-}
-
 /*######
 ## at_frostworn_general
 ######*/
@@ -388,6 +383,32 @@ bool AreaTrigger_at_queldelar_start(Player* pPlayer, AreaTriggerEntry const* pAt
     return true;
 };
 
+/*######
+## spell_gunship_cannon_fire_aura - 70017
+######*/
+
+struct spell_gunship_cannon_fire_aura : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /*data*/) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        uint32 spellId;
+
+        // handle gunship fire at the end of Lich King event
+        switch (target->GetEntry())
+        {
+            case 22515: spellId = 70021; break;
+            case 37593: spellId = 70246; break;
+            default: return;
+        }
+
+        target->CastSpell(target, spellId, TRIGGERED_NONE);
+    }
+};
+
 void AddSC_halls_of_reflection()
 {
     Script* pNewScript = new Script;
@@ -402,7 +423,7 @@ void AddSC_halls_of_reflection()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_phantom_mage";
-    pNewScript->GetAI = &GetAI_npc_phantom_mage;
+    pNewScript->GetAI = &GetNewAIInstance<npc_phantom_mageAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -419,4 +440,6 @@ void AddSC_halls_of_reflection()
     pNewScript->Name = "at_queldelar_start";
     pNewScript->pAreaTrigger = &AreaTrigger_at_queldelar_start;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<spell_gunship_cannon_fire_aura>("spell_gunship_cannon_fire_aura");
 }
