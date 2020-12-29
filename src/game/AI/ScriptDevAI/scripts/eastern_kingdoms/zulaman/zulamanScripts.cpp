@@ -902,6 +902,9 @@ struct npc_harkorAI : public ScriptedAI
                             itr->SetRespawnTime(7 * DAY);
                         }
 
+                        if (m_instance)
+                            m_instance->SetData(TYPE_HARKOR, DONE);
+
                         m_uiEventTimer = 0;
                         m_uiEvent = 0;
                         break;
@@ -971,6 +974,9 @@ struct npc_harkorAI : public ScriptedAI
 
     void StartEvent()
     {
+        if (m_instance && m_instance->GetData(TYPE_HARKOR) == DONE)
+            return;
+
         m_bChestEventInProgress = true;
 
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -1213,6 +1219,9 @@ struct npc_tanzarAI : public ScriptedAI
                             pTrunk->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_LOCKED);
                         }
 
+                        if (m_instance)
+                            m_instance->SetData(TYPE_TANZAR, DONE);
+
                         m_uiEventTimer = 0;
                         m_uiEvent = 0;
                         break;
@@ -1302,6 +1311,9 @@ struct npc_tanzarAI : public ScriptedAI
 
     void StartEvent()
     {
+        if (m_instance && m_instance->GetData(TYPE_TANZAR) == DONE)
+            return;
+
         m_bChestEventInProgress = true;
 
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -1560,6 +1572,9 @@ struct npc_krazAI : public ScriptedAI
                             itr->SetRespawnTime(7 * DAY);
                         }
 
+                        if (m_instance)
+                            m_instance->SetData(TYPE_KRAZ, DONE);
+
                         lCoinList.clear();
 
                         m_uiEventTimer = 1000;
@@ -1591,6 +1606,9 @@ struct npc_krazAI : public ScriptedAI
 
     void StartEvent()
     {
+        if (m_instance && m_instance->GetData(TYPE_KRAZ) == DONE)
+            return;
+
         m_bChestEventInProgress = true;
 
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
@@ -1909,10 +1927,16 @@ struct npc_ashliAI : public ScriptedAI
 
         if (GameObject* pVase = GetClosestGameObjectWithEntry(pTarget, GO_ASHLIS_VASE, 10.0f))
             pVase->Delete();
+
+        if (m_instance)
+            m_instance->SetData(TYPE_ASHLI, DONE);
     }
 
     void StartEvent()
     {
+        if (m_instance && m_instance->GetData(TYPE_ASHLI) == DONE)
+            return;
+
         m_bChestEventInProgress = true;
 
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);

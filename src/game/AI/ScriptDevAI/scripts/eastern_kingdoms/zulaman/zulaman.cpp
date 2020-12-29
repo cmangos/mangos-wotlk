@@ -479,6 +479,12 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
             }
             
             break;
+        case TYPE_TANZAR:
+        case TYPE_KRAZ:
+        case TYPE_ASHLI:
+        case TYPE_HARKOR:
+            m_auiEncounter[type] = data;
+            break;
         case TYPE_RUN_EVENT_TIME:
             m_auiEncounter[type] = data;
             DoUpdateWorldState(WORLD_STATE_ZUL_AMAN_TIME_COUNTER, m_auiEncounter[type]);
@@ -512,7 +518,8 @@ void instance_zulaman::SetData(uint32 type, uint32 data)
         std::ostringstream saveStream;
         saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2] << " "
                    << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
-                   << m_auiEncounter[6] << " " << m_auiEncounter[7];
+                   << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
+                   << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11];
 
         m_strInstData = saveStream.str();
 
@@ -533,7 +540,8 @@ void instance_zulaman::Load(const char* chrIn)
 
     std::istringstream loadStream(chrIn);
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
-               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7];
+               >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
+               >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11];
 
     // Skip m_auiEncounter[7], to start the time event properly if needed
     for (uint8 i = 0; i < MAX_ENCOUNTER - 1; ++i)

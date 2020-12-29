@@ -44,11 +44,17 @@ enum InstanceZA
     TYPE_HALAZZI            = 4,
     TYPE_MALACRASS          = 5,
     TYPE_ZULJIN             = 6,
-    TYPE_RUN_EVENT_TIME     = 7,                            // Must be MAX_ENCOUNTER -1
-    TYPE_AKILZON_GAUNTLET   = 8,
+    TYPE_RUN_EVENT_TIME     = 7,
 
-    TYPE_RAND_VENDOR_1      = 9,
-    TYPE_RAND_VENDOR_2      = 10,
+    TYPE_TANZAR             = 8,
+    TYPE_KRAZ               = 9,
+    TYPE_ASHLI              = 10,
+    TYPE_HARKOR             = 11, // Must be MAX_ENCOUNTER -1
+
+    TYPE_AKILZON_GAUNTLET   = 12,
+
+    TYPE_RAND_VENDOR_1      = 13,
+    TYPE_RAND_VENDOR_2      = 14,
 
     NPC_AKILZON             = 23574,
     NPC_NALORAKK            = 23576,
