@@ -385,7 +385,8 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
     }
 
     // Some creature vehicles get despawned after passenger unboarding
-    if (m_owner->GetTypeId() == TYPEID_UNIT)
+    // Condition only applies for player passengers; creature passengers are controlled by script
+    if (m_owner->IsUnit() && passenger->IsPlayer())
     {
         // only for flyable vehicles
         if (passenger->IsFlying())
