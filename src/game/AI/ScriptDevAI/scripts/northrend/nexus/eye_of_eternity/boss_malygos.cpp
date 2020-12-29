@@ -39,7 +39,7 @@ enum
     SAY_SLAY_1_B            = -1616009,
     SAY_SLAY_1_C            = -1616010,
     SAY_END_PHASE_1         = -1616011,
-    SAY_START_PHASE_2       = -1616012,
+    SAY_START_PHASE_2       = -1616012,                 // not used
     SAY_DEEP_BREATH         = -1616013,
     SAY_SHELL               = -1616014,
     SAY_SLAY_2_A            = -1616015,
@@ -47,7 +47,7 @@ enum
     SAY_SLAY_2_C            = -1616017,
     SAY_END_PHASE_2         = -1616018,
     SAY_INTRO_PHASE_3       = -1616019,
-    SAY_START_PHASE_3       = -1616020,
+    SAY_START_PHASE_3       = -1616020,                 // not used
     SAY_SLAY_3_A            = -1616021,
     SAY_SLAY_3_B            = -1616022,
     SAY_SLAY_3_C            = -1616023,
@@ -67,8 +67,8 @@ enum
     SPELL_ARCANE_BREATH             = 56272,
     SPELL_ARCANE_BREATH_H           = 60072,
     SPELL_SUMMON_SPARK              = 56140,            // triggers 56142 which summons 30084
-    SPELL_VORTEX                    = 56105,            // forces all players into vortex; triggers 55853 on player
-    SPELL_VORTEX_CHANNEL            = 56237,            // channeling visual aura
+    SPELL_VORTEX                    = 56105,            // forces all players into vortex; triggers vehicle control aura on players
+    SPELL_VORTEX_STUN               = 56237,            // visual aura on the boss
 
     // phase 2 spells
     SPELL_ARCANE_STORM_MASTER       = 57473,            // depending on the encounter phase can trigger 61693 | 61694 in P2 or 57459 in P3
@@ -76,7 +76,6 @@ enum
     SPELL_ARCANE_STORM_H            = 61694,
     SPELL_ARCANE_STORM_VEHICLE      = 57459,            // targets vehicles
     SPELL_SUMMON_ARCANE_BOMB        = 56429,            // summons 30282
-    SPELL_ARCANE_BOMB               = 56430,            // triggers 56432 and 56431 on target hit
     SPELL_SURGE_OF_POWER_PULSE      = 56505,            // deep breath spell
     // SPELL_ARCANE_PULSE           = 57432,            // purpose unk
 
@@ -114,17 +113,20 @@ enum
     SPELL_VORTEX_CONTROL_4_H        = 61074,
     SPELL_VORTEX_CONTROL_5_H        = 61075,
     // SPELL_VORTEX_PERIODIC        = 59666,            // not used; probably unrelated
-    SPELL_VORTEX_AURA               = 55883,            // cast by creature 30090
+    // SPELL_VORTEX_AURA            = 55883,            // cast by creature 30090; handled in c_t_a
 
     // arcane overload - handled in spell script
     // SPELL_ARCANE_OVERLOAD        = 56432,
     // SPELL_ARCANE_BOMB_KNOCKBACK  = 56431,
 
+    // arcane bomb
+    SPELL_ARCANE_BOMB               = 56430,            // triggers 56432 and 56431 on target hit
+
     // static field
     SPELL_STATIC_FIELD              = 57428,
 
     // vehicle related
-    // SPELL_SUMMON_DISC            = 56378,            // needs more research
+    // SPELL_SUMMON_DISC            = 56378,            // not used
     // SPELL_RIDE_RED_DRAGON        = 56072,            // handled by EAI
 
     // npcs
@@ -135,18 +137,21 @@ enum
 
     NPC_HOVER_DISK_LORD             = 30234,            // this disk can be used by players
     NPC_HOVER_DISK_SCION            = 30248,
+
     NPC_ARCANE_OVERLOAD             = 30282,
 
     NPC_STATIC_FIELD                = 30592,
 
     // phases
     PHASE_FLOOR                     = 1,
-    PHASE_TRANSITION_1              = 2,
+    PHASE_TRANSITION                = 2,
     PHASE_DISCS                     = 3,
-    PHASE_TRANSITION_2              = 4,
-    PHASE_DRAGONS                   = 5,
+    PHASE_DRAGONS                   = 4,
+    PHASE_VORTEX                    = 9,                // sub-phase, part of phase 1
 
     POINT_ID_COMBAT                 = 1,
+    POINT_ID_VORTEX                 = 2,
+    POINT_ID_FLIGHT                 = 3,
 
     // light overrid id
     LIGHT_ID_DEFAULT                = 1773,
@@ -175,7 +180,9 @@ static const DialogueEntry aIntroDialogue[] =
     {0, 0, 0},
 };
 
-static const float aCenterMovePos[3] = {754.395f, 1301.270f, 266.253f};
+static const float aCenterMovePos[3] = {754.395f, 1301.270f, 266.253f};                 // platform center location
+static const float aVortexMovePos[3] = { 756.70105f, 1303.9907f, 286.1703f };           // vortex center location
+static const float aHoverMovePos[3] = { 828.996f, 1298.84f, 300.0f };                   // phase 2+ location
 
 struct HoverDiskSummonData
 {
@@ -228,6 +235,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     uint32 m_uiVortexTimer;
     uint32 m_uiArcaneBreathTimer;
     uint32 m_uiPowerSparkTimer;
+    uint32 m_uiVortexEndTimer;
 
     uint32 m_uiArcanePulseTimer;
     uint32 m_uiOverloadTimer;
@@ -245,6 +253,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         m_uiVortexTimer         = 60000;
         m_uiArcaneBreathTimer   = 15000;
         m_uiPowerSparkTimer     = 30000;
+        m_uiVortexEndTimer      = 10000;
 
         m_uiArcanePulseTimer    = 60000;
         m_uiOverloadTimer       = 1000;
@@ -255,7 +264,6 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
 
         // reset flags
         m_creature->SetImmuneToPlayer(true);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
         m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
 
         SetCombatMovement(false);
@@ -319,12 +327,35 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         // remove flight anim and start moving
-        if (uiMoveType == POINT_MOTION_TYPE && uiPointId == POINT_ID_COMBAT)
+        if (uiMoveType == POINT_MOTION_TYPE)
         {
-            m_creature->SetLevitate(false);
-            SetCombatMovement(true);
-            DoStartMovement(m_creature->GetVictim());
-            m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+            switch (uiPointId)
+            {
+                case POINT_ID_COMBAT:
+                    m_creature->SetLevitate(false);
+                    SetCombatMovement(true);
+                    DoStartMovement(m_creature->GetVictim());
+                    m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+
+                    // after vortex phase inform the Power sparks and set phase
+                    SendAIEventAround(AI_EVENT_CUSTOM_D, m_creature, 0, 50.0f);
+                    m_uiPhase = PHASE_FLOOR;
+                    break;
+                case POINT_ID_VORTEX:
+                    if (m_pInstance)
+                    {
+                        if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_LARGE_TRIGGER))
+                            pTrigger->CastSpell(pTrigger, SPELL_VORTEX_VISUAL, TRIGGERED_NONE);
+                    }
+                    if (DoCastSpellIfCan(m_creature, SPELL_VORTEX) == CAST_OK)
+                    {
+                        DoCastSpellIfCan(m_creature, SPELL_VORTEX_STUN, CAST_TRIGGERED);
+                        m_creature->GetMotionMaster()->MoveIdle();
+                        m_uiPhase = PHASE_VORTEX;
+                        m_uiVortexEndTimer = 10000;
+                    }
+                    break;
+            }
         }
         // intro yells; handled once per boss circle; ToDo: maybe this is more dyanmic than this
         else if (uiMoveType == WAYPOINT_MOTION_TYPE && uiPointId == 1 && m_uiIntroStage < 5)
@@ -365,7 +396,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         if (eventType == AI_EVENT_CUSTOM_A)
         {
             StartNextDialogueText(SAY_END_PHASE_2);
-            m_uiPhase = PHASE_TRANSITION_2;
+            m_uiPhase = PHASE_TRANSITION;
         }
         else if (eventType == AI_EVENT_CUSTOM_B)
         {
@@ -392,8 +423,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_ARCANE_RUNES, 5);
                 break;
             case PHASE_DISCS:
-                // ToDo: start some movement over the platform
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_FLIGHT, aHoverMovePos[0], aHoverMovePos[1], aHoverMovePos[2]);
                 m_uiPhase = PHASE_DISCS;
                 DoSpawnAdds();
                 break;
@@ -430,8 +460,6 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_OBSCURE_ARCANE_RUNES, 5);
                 DoCastSpellIfCan(m_creature, SPELL_CLEAR_ALL_DEBUFFS, CAST_TRIGGERED);
                 DoCastSpellIfCan(m_creature, SPELL_IMMUNE_CURSES, CAST_TRIGGERED);
-
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 m_uiPhase = PHASE_DRAGONS;
                 break;
         }
@@ -442,7 +470,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     {
         // spawn the nexus lord disks; 2 for normal | 4 for heroic
         for (uint8 i = 0; i < m_uiMaxNexusLords; ++i)
-            m_creature->SummonCreature(NPC_HOVER_DISK_LORD, lordDiskSummonData[i].x, lordDiskSummonData[i].y, lordDiskSummonData[i].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0, false, true, lordDiskSummonData[i].pathId);
+            m_creature->SummonCreature(NPC_HOVER_DISK_LORD, lordDiskSummonData[i].x, lordDiskSummonData[i].y, lordDiskSummonData[i].z, 0, TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 5 * MINUTE * IN_MILLISECONDS, false, true, lordDiskSummonData[i].pathId);
 
         // spawn the scion hover disks; 4 for normal | 8 for heroic
         float fX, fY, fZ;
@@ -475,18 +503,25 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         {
             case PHASE_FLOOR:
 
-                /* ToDo: Enable this when the spells are properly supported in core
                 if (m_uiVortexTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_VORTEX) == CAST_OK)
-                    {
-                        DoScriptText(SAY_VORTEX, m_creature);
-                        m_uiVortexTimer = 60000;
-                    }
+                    // start flying and prepare vortex sub-phase
+                    SetCombatMovement(false);
+                    m_creature->SetLevitate(true);
+                    m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+
+                    // Move idle first, so we can avoid evading, because of the waypoint movement
+                    m_creature->GetMotionMaster()->MoveIdle();
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_VORTEX, aVortexMovePos[0], aVortexMovePos[1], aVortexMovePos[2]);
+
+                    SendAIEventAround(AI_EVENT_CUSTOM_C, m_creature, 0, 50.0f);
+                    m_uiPhase = PHASE_TRANSITION;
+
+                    DoScriptText(SAY_VORTEX, m_creature);
+                    m_uiVortexTimer = 60000;
                 }
                 else
                     m_uiVortexTimer -= uiDiff;
-                */
 
                 if (m_uiArcaneBreathTimer < uiDiff)
                 {
@@ -509,15 +544,30 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                     SetCombatMovement(false);
                     m_creature->SetLevitate(true);
                     m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+
                     // Move idle first, so we can avoid evading, because of the waypoint movement
                     m_creature->GetMotionMaster()->MoveIdle();
-                    m_creature->GetMotionMaster()->MovePoint(0, aCenterMovePos[0], aCenterMovePos[1], aCenterMovePos[2] + 30.0f);
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_FLIGHT, aVortexMovePos[0], aVortexMovePos[1], aVortexMovePos[2]);
 
                     StartNextDialogueText(SAY_END_PHASE_1);
-                    m_uiPhase = PHASE_TRANSITION_1;
+                    m_uiPhase = PHASE_TRANSITION;
                 }
 
                 DoMeleeAttackIfReady();
+
+                break;
+            case PHASE_VORTEX:
+
+                // end Vortex and lower the boss on the ground
+                if (m_uiVortexEndTimer < uiDiff)
+                {
+                    m_creature->RemoveAurasDueToSpell(SPELL_VORTEX_STUN);
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_COMBAT, aCenterMovePos[0], aCenterMovePos[1], aCenterMovePos[2]);
+                    m_uiPhase = PHASE_TRANSITION;
+                    m_uiVortexEndTimer = 10000;
+                }
+                else
+                    m_uiVortexEndTimer -= uiDiff;
 
                 break;
             case PHASE_DISCS:
@@ -620,8 +670,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                     m_uiSurgeOfPowerTimer -= uiDiff;
 
                 break;
-            case PHASE_TRANSITION_1:
-            case PHASE_TRANSITION_2:
+            case PHASE_TRANSITION:
                 // Nothing here - wait for transition to finish
                 break;
         }
@@ -670,9 +719,9 @@ struct npc_power_sparkAI : public ScriptedAI
     void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
     {
         // start / stop following during vortex
-        if (eventType == AI_EVENT_CUSTOM_A)
+        if (eventType == AI_EVENT_CUSTOM_C)
             m_creature->GetMotionMaster()->MoveIdle();
-        else if (eventType == AI_EVENT_CUSTOM_B)
+        else if (eventType == AI_EVENT_CUSTOM_D)
             m_creature->GetMotionMaster()->MoveFollow(pSender, 0, 0);
     }
 
@@ -779,6 +828,25 @@ struct spell_arcane_storm : public SpellScript
     }
 };
 
+/*######
+## spell_vortex - 56105
+######*/
+
+struct spell_vortex : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        // ToDo: add vortex effect on player target
+    }
+};
+
 void AddSC_boss_malygos()
 {
     Script* pNewScript = new Script;
@@ -799,4 +867,5 @@ void AddSC_boss_malygos()
     RegisterSpellScript<spell_ride_red_dragon_buddy>("spell_ride_red_dragon_buddy");
     RegisterSpellScript<spell_arcane_bomb>("spell_arcane_bomb");
     RegisterSpellScript<spell_arcane_storm>("spell_arcane_storm");
+    RegisterSpellScript<spell_vortex>("spell_vortex");
 }
