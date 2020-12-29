@@ -3668,15 +3668,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 56430:                                 // Arcane Bomb
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 56431, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
-                    unitTarget->CastSpell(unitTarget, 56432, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid());
-                    return;
-                }
                 case 57578:                                 // Lava Strike
                 {
                     if (unitTarget)

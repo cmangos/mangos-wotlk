@@ -24,7 +24,8 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "eye_of_eternity.h"
 
-instance_eye_of_eternity::instance_eye_of_eternity(Map* pMap) : ScriptedInstance(pMap)
+instance_eye_of_eternity::instance_eye_of_eternity(Map* pMap) : ScriptedInstance(pMap),
+    m_uiMalygosResetTimer(0)
 {
     Initialize();
 }
@@ -46,7 +47,7 @@ void instance_eye_of_eternity::OnCreatureCreate(Creature* pCreature)
         case NPC_MALYGOS:
         case NPC_ALEXSTRASZA:
         case NPC_LARGE_TRIGGER:
-        case NPC_ALEXSTRASZAS_GIFT:
+        case NPC_ALEXSTRASZA_INVIS:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_NEXUS_LORD:
@@ -79,6 +80,7 @@ void instance_eye_of_eternity::SetData(uint32 uiType, uint32 uiData)
         return;
 
     m_uiEncounter = uiData;
+
     if (uiData == IN_PROGRESS)
     {
         // Portal and iris despawn handled in DB
@@ -92,8 +94,14 @@ void instance_eye_of_eternity::SetData(uint32 uiType, uint32 uiData)
 
         // rebuild platform
         if (Creature* pMalygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
+        {
             if (GameObject* pPlatform = GetSingleGameObjectFromStorage(GO_PLATFORM))
                 pPlatform->RebuildGameObject(pMalygos);
+
+            // despawn and respawn boss
+            pMalygos->ForcedDespawn(5000);
+            m_uiMalygosResetTimer = 30000;
+        }
     }
     else if (uiData == DONE)
     {
@@ -119,6 +127,23 @@ void instance_eye_of_eternity::OnCreatureDeath(Creature* pCreature)
                 if (Creature* pMalygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
                     pMalygos->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pMalygos, pMalygos);
             break;
+    }
+}
+
+void instance_eye_of_eternity::Update(uint32 uiDiff)
+{
+    // Respawn Malygos
+    if (m_uiMalygosResetTimer)
+    {
+        if (m_uiMalygosResetTimer <= uiDiff)
+        {
+            if (Creature* pMalygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
+                pMalygos->Respawn();
+
+            m_uiMalygosResetTimer = 0;
+        }
+        else
+            m_uiMalygosResetTimer -= uiDiff;
     }
 }
 

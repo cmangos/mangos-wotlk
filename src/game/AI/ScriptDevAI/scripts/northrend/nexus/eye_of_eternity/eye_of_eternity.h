@@ -11,8 +11,9 @@ enum
 
     NPC_MALYGOS                     = 28859,
     NPC_ALEXSTRASZA                 = 32295,
+    NPC_ALEXSTRASZA_INVIS           = 31253,            // trigger used during the encounter
     NPC_LARGE_TRIGGER               = 22517,
-    NPC_ALEXSTRASZAS_GIFT           = 32448,
+    // NPC_ALEXSTRASZAS_GIFT        = 32448,
 
     NPC_NEXUS_LORD                  = 30245,            // spawned by DB as vehicle passenger
     NPC_SCION_OF_ETERNITY           = 30249,            // spawned by DB as vehicle passenger
@@ -46,9 +47,13 @@ class instance_eye_of_eternity : public ScriptedInstance
 
         void SetData(uint32 uiType, uint32 uiData) override;
 
+        void Update(const uint32 diff) override;
+
     protected:
 
         uint32 m_uiEncounter;
+
+        uint32 m_uiMalygosResetTimer;
 
         GuidList m_lDiskRidersGuids;
 };

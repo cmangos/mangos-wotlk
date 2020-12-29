@@ -60,16 +60,21 @@ enum
     SAY_EMOTE_SPARK         = -1616033,
     SAY_EMOTE_BREATH        = -1616034,
 
+    // SPELL_BEAM_PORTAL            = 56046,            // visual, before encounter; handled by DB script
+
     // phase 1 spells
     SPELL_BERSERK                   = 26662,
     SPELL_ARCANE_BREATH             = 56272,
     SPELL_ARCANE_BREATH_H           = 60072,
-    SPELL_SUMMON_SPARK              = 56140,
-    SPELL_VORTEX                    = 56105,
+    SPELL_SUMMON_SPARK              = 56140,            // triggers 56142 which summons 30084
+    SPELL_VORTEX                    = 56105,            // forces all players into vortex; triggers 55853 on player
+    SPELL_VORTEX_CHANNEL            = 56237,            // channeling visual aura
 
     // phase 2 spells
-    SPELL_ARCANE_STORM              = 57459,            // related to spell 61693
+    SPELL_ARCANE_STORM_MASTER       = 57473,            // depending on the encounter phase can trigger 61693 | 61694 in P1 or 57459 in P3
+    SPELL_ARCANE_STORM              = 61693,
     SPELL_ARCANE_STORM_H            = 61694,
+    SPELL_ARCANE_STORM_VEHICLE      = 57459,            // targets vehicles
     SPELL_SUMMON_ARCANE_BOMB        = 56429,            // summons 30282
     SPELL_ARCANE_BOMB               = 56430,            // triggers 56432 and 56431 on target hit
     SPELL_SURGE_OF_POWER_PULSE      = 56505,            // deep breath spell
@@ -81,6 +86,9 @@ enum
     SPELL_DESTROY_PLATFORM_EVENT    = 59099,
     SPELL_SUMMON_RED_DRAGON         = 58846,
 
+    SPELL_CLEAR_ALL_DEBUFFS         = 34098,
+    SPELL_IMMUNE_CURSES             = 64515,
+
     // phase 3 spells
     SPELL_STATIC_FIELD_SUMMON       = 57430,            // cast on 1 or 3 targets based on difficulty
     SPELL_SURGE_OF_POWER            = 57407,            // related to 60936 and 60939
@@ -90,13 +98,23 @@ enum
     SPELL_POWER_SPARK_PLAYERS       = 55852,
     SPELL_POWER_SPARK_VISUAL        = 55845,
 
-    // vortex - thse spells require additional research
-    // related auras: 55853, 55883, 56263, 56264, 56265, 56266, 59666, 61071, 61072, 61073, 61074, 61075
-    SPELL_VORTEX_SPAWN              = 59670,
-    SPELL_VORTEX_VISUAL             = 55873,
-    SPELL_VORTEX_CHANNEL            = 56237,
+    // vortex spells
+    // SPELL_VORTEX_SPAWN           = 59670,            // not used; probably unrelated
+    SPELL_VORTEX_VISUAL             = 55873,            // cast by creature 22517
+    SPELL_VORTEX_CONTROL_1          = 55853,            // cast by player on creature 30090; each spell controlls a specific seat id
+    SPELL_VORTEX_CONTROL_2          = 56263,
+    SPELL_VORTEX_CONTROL_3          = 56264,
+    SPELL_VORTEX_CONTROL_4          = 56265,
+    SPELL_VORTEX_CONTROL_5          = 56266,
+    SPELL_VORTEX_CONTROL_1_H        = 61071,
+    SPELL_VORTEX_CONTROL_2_H        = 61072,
+    SPELL_VORTEX_CONTROL_3_H        = 61073,
+    SPELL_VORTEX_CONTROL_4_H        = 61074,
+    SPELL_VORTEX_CONTROL_5_H        = 61075,
+    // SPELL_VORTEX_PERIODIC        = 59666,            // not used; probably unrelated
+    SPELL_VORTEX_AURA               = 55883,            // cast by creature 30090
 
-    // arcane overload - handled in core
+    // arcane overload - handled in spell script
     // SPELL_ARCANE_OVERLOAD        = 56432,
     // SPELL_ARCANE_BOMB_KNOCKBACK  = 56431,
 
@@ -104,11 +122,13 @@ enum
     SPELL_STATIC_FIELD              = 57428,
 
     // vehicle related
-    // SPELL_SUMMON_DISC            = 56378,            // not used
+    // SPELL_SUMMON_DISC            = 56378,            // needs more research
     // SPELL_RIDE_RED_DRAGON        = 56072,            // handled by EAI
 
-    // summoned npcs
-    NPC_VORTEX                      = 30090,
+    // npcs
+    // NPC_MALYGOS_PORTAL           = 30118,            // used for intro and for power sparks
+
+    NPC_VORTEX                      = 30090,            // vehicle with 5 seats
     NPC_POWER_SPARK                 = 30084,
 
     NPC_HOVER_DISK_LORD             = 30234,            // this disk can be used by players
@@ -127,6 +147,7 @@ enum
     POINT_ID_COMBAT                 = 1,
 
     // light overrid id
+    LIGHT_ID_DEFAULT                = 1773,
     LIGHT_ID_OBSCURE_SPACE          = 1822,
     LIGHT_ID_CHANGE_DIMENSIONS      = 1823,
     LIGHT_ID_ARCANE_RUNES           = 1824,
@@ -137,20 +158,18 @@ enum
 
 static const DialogueEntry aIntroDialogue[] =
 {
-    // Intro dialogue
-    {SAY_INTRO_1,   NPC_MALYGOS,    11000},
-    {SAY_INTRO_2,   NPC_MALYGOS,    13000},
-    {SAY_INTRO_3,   NPC_MALYGOS,    14000},
-    {SAY_INTRO_4,   NPC_MALYGOS,    12000},
-    {SAY_INTRO_5,   NPC_MALYGOS,    0},
-
     // Phase transitions
-    {SAY_END_PHASE_1,             NPC_MALYGOS,  25000},
+    {SAY_END_PHASE_1,             NPC_MALYGOS,  3000},
+    {LIGHT_ID_ARCANE_RUNES,       0,            22000},
     {PHASE_DISCS,                 0,            0},
-    {SAY_END_PHASE_2,             NPC_MALYGOS,  13000},
+    {SAY_END_PHASE_2,             NPC_MALYGOS,  1000},
+    {LIGHT_ID_CHANGE_DIMENSIONS,  0,            6000},
+    {LIGHT_ID_OBSCURE_SPACE,      0,            4000},
+    {SPELL_DESTROY_PLATFORM_PRE,  0,            3000},
     {SPELL_DESTROY_PLATFORM_BOOM, 0,            2000},
     {SPELL_SUMMON_RED_DRAGON,     0,            5000},
-    {SAY_INTRO_PHASE_3,           NPC_MALYGOS,  0},
+    {SAY_INTRO_PHASE_3,           NPC_MALYGOS,  11000},
+    {LIGHT_ID_OBSCURE_ARCANE_RUNES, 0,          0},
     {0, 0, 0},
 };
 
@@ -187,14 +206,13 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         m_uiMaxNexusLords = m_bIsRegularMode ? 2 : 4;
         m_uiMaxScions = m_bIsRegularMode ? 4 : 8;
 
-        m_bHasDoneIntro = false;
         Reset();
     }
 
     instance_eye_of_eternity* m_pInstance;
     bool m_bIsRegularMode;
 
-    bool m_bHasDoneIntro;
+    uint8 m_uiIntroStage;
 
     uint8 m_uiPhase;
     uint8 m_uiMaxNexusLords;
@@ -216,6 +234,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
 
     void Reset() override
     {
+        m_uiIntroStage          = 0;
         m_uiPhase               = PHASE_FLOOR;
 
         m_uiBerserkTimer        = 10 * MINUTE * IN_MILLISECONDS;
@@ -236,6 +255,9 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
 
         SetCombatMovement(false);
+
+        // reset lights
+        m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_DEFAULT, 0);
     }
 
     void Aggro(Unit* /*pWho*/) override
@@ -245,17 +267,6 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MALYGOS, IN_PROGRESS);
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_bHasDoneIntro && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 110.0f))
-        {
-            StartNextDialogueText(SAY_INTRO_1);
-            m_bHasDoneIntro = true;
-        }
-
-        ScriptedAI::MoveInLineOfSight(pWho);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -295,21 +306,35 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
 
     void JustReachedHome() override
     {
+        m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_DEFAULT, 0);
+
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MALYGOS, FAIL);
     }
 
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
-        if (uiMoveType != POINT_MOTION_TYPE)
-            return;
-
-        if (uiPointId == POINT_ID_COMBAT)
+        // remove flight anim and start moving
+        if (uiMoveType == POINT_MOTION_TYPE && uiPointId == POINT_ID_COMBAT)
         {
             m_creature->SetLevitate(false);
             SetCombatMovement(true);
             DoStartMovement(m_creature->GetVictim());
             m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
+        }
+        // intro yells; handled once per boss circle; ToDo: maybe this is more dyanmic than this
+        else if (uiMoveType == WAYPOINT_MOTION_TYPE && uiPointId == 1 && m_uiIntroStage < 5)
+        {
+            switch (m_uiIntroStage)
+            {
+                case 0: DoScriptText(SAY_INTRO_1, m_creature); break;
+                case 1: DoScriptText(SAY_INTRO_2, m_creature); break;
+                case 2: DoScriptText(SAY_INTRO_3, m_creature); break;
+                case 3: DoScriptText(SAY_INTRO_4, m_creature); break;
+                case 4: DoScriptText(SAY_INTRO_5, m_creature); break;
+            }
+
+            ++m_uiIntroStage;
         }
     }
 
@@ -321,9 +346,13 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0, 0);
                 break;
             case NPC_ARCANE_OVERLOAD:
+                pSummoned->AI()->SetReactState(REACT_PASSIVE);
+                pSummoned->SetCanEnterCombat(false);
                 DoCastSpellIfCan(pSummoned, SPELL_ARCANE_BOMB, CAST_TRIGGERED);
                 break;
             case NPC_STATIC_FIELD:
+                pSummoned->AI()->SetReactState(REACT_PASSIVE);
+                pSummoned->SetCanEnterCombat(false);
                 pSummoned->CastSpell(pSummoned, SPELL_STATIC_FIELD, TRIGGERED_NONE);
                 break;
         }
@@ -336,13 +365,6 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         {
             StartNextDialogueText(SAY_END_PHASE_2);
             m_uiPhase = PHASE_TRANSITION_2;
-
-            // Start platform animation - not sure if this is cast by the right npc
-            if (m_pInstance)
-            {
-                if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_LARGE_TRIGGER))
-                    pTrigger->CastSpell(pTrigger, SPELL_DESTROY_PLATFORM_PRE, TRIGGERED_NONE);
-            }
         }
     }
 
@@ -357,30 +379,49 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     {
         switch (iEntry)
         {
+            case LIGHT_ID_ARCANE_RUNES:
+                m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_ARCANE_RUNES, 5);
+                break;
             case PHASE_DISCS:
                 // ToDo: start some movement over the platform
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 m_uiPhase = PHASE_DISCS;
                 DoSpawnAdds();
                 break;
+            case LIGHT_ID_CHANGE_DIMENSIONS:
+                m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_CHANGE_DIMENSIONS, 5);
+                break;
+            case LIGHT_ID_OBSCURE_SPACE:
+                m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_OBSCURE_SPACE, 5);
+                break;
+            case SPELL_DESTROY_PLATFORM_PRE:
+                DoCastSpellIfCan(m_creature, SPELL_DESTROY_PLATFORM_PRE);
+                break;
             case SPELL_DESTROY_PLATFORM_BOOM:
                 if (m_pInstance)
                 {
-                    if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_LARGE_TRIGGER))
-                        pTrigger->CastSpell(pTrigger, SPELL_DESTROY_PLATFORM_BOOM, TRIGGERED_NONE);
+                    if (Creature* pTrigger = m_pInstance->GetSingleCreatureFromStorage(NPC_ALEXSTRASZA_INVIS))
+                    {
+                        pTrigger->CastSpell(pTrigger, SPELL_DESTROY_PLATFORM_EVENT, TRIGGERED_NONE);
+                        pTrigger->CastSpell(pTrigger, SPELL_DESTROY_PLATFORM_BOOM, TRIGGERED_OLD_TRIGGERED);
+                    }
                 }
                 break;
             case SPELL_SUMMON_RED_DRAGON:
                 if (m_pInstance)
                 {
-                    // Destroy the platform
+                    // Destroy the platform; this can be also handled by event 20158
                     if (GameObject* pPlatform = m_pInstance->GetSingleGameObjectFromStorage(GO_PLATFORM))
                         pPlatform->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
                 }
 
                 DoCastSpellIfCan(m_creature, SPELL_SUMMON_RED_DRAGON);
                 break;
-            case SAY_INTRO_PHASE_3:
+            case LIGHT_ID_OBSCURE_ARCANE_RUNES:
+                m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_OBSCURE_ARCANE_RUNES, 5);
+                DoCastSpellIfCan(m_creature, SPELL_CLEAR_ALL_DEBUFFS, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_IMMUNE_CURSES, CAST_TRIGGERED);
+
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
                 m_uiPhase = PHASE_DRAGONS;
                 break;
@@ -611,11 +652,14 @@ bool ProcessEventId_event_go_focusing_iris(uint32 /*uiEventId*/, Object* pSource
         if (!pMalygos || !pTrigger)
             return false;
 
+        // interrupt spells and allow attack
+        pMalygos->InterruptNonMeleeSpells(false);
+
         // Enter combat area - Move to ground point first, then start chasing target
         float fX, fY, fZ;
         pTrigger->GetNearPoint(pTrigger, fX, fY, fZ, 0, 30.0f, pTrigger->GetAngle(pMalygos));
         pMalygos->GetMotionMaster()->MovePoint(POINT_ID_COMBAT, fX, fY, fZ);
-        pMalygos->AI()->AttackStart((Player*)pSource);
+        pMalygos->SetInCombatWithZone();
 
         return true;
     }
@@ -645,6 +689,26 @@ struct spell_ride_red_dragon_buddy : public SpellScript
     }
 };
 
+/*######
+## spell_arcane_bomb - 56430
+######*/
+
+struct spell_arcane_bomb : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        target->CastSpell(target, 56431, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(target, 56432, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_malygos()
 {
     Script* pNewScript = new Script;
@@ -663,4 +727,5 @@ void AddSC_boss_malygos()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_ride_red_dragon_buddy>("spell_ride_red_dragon_buddy");
+    RegisterSpellScript<spell_arcane_bomb>("spell_arcane_bomb");
 }
