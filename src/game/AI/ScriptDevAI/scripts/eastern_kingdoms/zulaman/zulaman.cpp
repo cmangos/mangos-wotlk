@@ -571,6 +571,10 @@ uint32 instance_zulaman::GetData(uint32 type) const
         case TYPE_ZULJIN:
         case TYPE_MALACRASS:
         case TYPE_RUN_EVENT_TIME:
+        case TYPE_TANZAR:
+        case TYPE_KRAZ:
+        case TYPE_ASHLI:
+        case TYPE_HARKOR:
             return m_auiEncounter[type];
         case TYPE_RAND_VENDOR_1: return m_auiRandVendor[0];
         case TYPE_RAND_VENDOR_2: return m_auiRandVendor[1];
