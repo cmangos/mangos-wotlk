@@ -203,6 +203,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (56430,'spell_arcane_bomb'),
 (57082,'spell_crystal_spikes'),
 (57283,'spell_remove_mushroom_power'),
+(57473,'spell_arcane_storm'),
 (59275,'spell_summon_gauntlet_mobs_periodic_aura'),
 (70017,'spell_gunship_cannon_fire_aura'),
 (73159,'spell_play_movie'),

@@ -63,7 +63,7 @@ enum
     // SPELL_BEAM_PORTAL            = 56046,            // visual, before encounter; handled by DB script
 
     // phase 1 spells
-    SPELL_BERSERK                   = 26662,
+    SPELL_BERSERK                   = 60670,
     SPELL_ARCANE_BREATH             = 56272,
     SPELL_ARCANE_BREATH_H           = 60072,
     SPELL_SUMMON_SPARK              = 56140,            // triggers 56142 which summons 30084
@@ -71,7 +71,7 @@ enum
     SPELL_VORTEX_CHANNEL            = 56237,            // channeling visual aura
 
     // phase 2 spells
-    SPELL_ARCANE_STORM_MASTER       = 57473,            // depending on the encounter phase can trigger 61693 | 61694 in P1 or 57459 in P3
+    SPELL_ARCANE_STORM_MASTER       = 57473,            // depending on the encounter phase can trigger 61693 | 61694 in P2 or 57459 in P3
     SPELL_ARCANE_STORM              = 61693,
     SPELL_ARCANE_STORM_H            = 61694,
     SPELL_ARCANE_STORM_VEHICLE      = 57459,            // targets vehicles
@@ -86,12 +86,14 @@ enum
     SPELL_DESTROY_PLATFORM_EVENT    = 59099,
     SPELL_SUMMON_RED_DRAGON         = 58846,
 
-    SPELL_CLEAR_ALL_DEBUFFS         = 34098,
+    SPELL_CLEAR_ALL_DEBUFFS         = 34098,            // not clear exactly which debuffs have to be removed
     SPELL_IMMUNE_CURSES             = 64515,
 
     // phase 3 spells
     SPELL_STATIC_FIELD_SUMMON       = 57430,            // cast on 1 or 3 targets based on difficulty
-    SPELL_SURGE_OF_POWER            = 57407,            // related to 60936 and 60939
+    SPELL_SURGE_OF_POWER            = 57407,
+    SPELL_SURGE_OF_POWER_H          = 60936,
+    SPELL_SURGE_OF_POWER_WARNING    = 60939,            // dummy effect which sends a warning to the targets
 
     // power spark
     SPELL_POWER_SPARK_MALYGOS       = 56152,
@@ -198,11 +200,12 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     boss_malygosAI(Creature* pCreature) : ScriptedAI(pCreature),
         DialogueHelper(aIntroDialogue)
     {
-        m_pInstance = (instance_eye_of_eternity*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_eye_of_eternity*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         InitializeDialogueHelper(m_pInstance);
 
         m_uiMaxStaticFieldTargets = m_bIsRegularMode ? 1 : 3;
+        m_uiMaxStormTargets = m_bIsRegularMode ? 5 : 15;
         m_uiMaxNexusLords = m_bIsRegularMode ? 2 : 4;
         m_uiMaxScions = m_bIsRegularMode ? 4 : 8;
 
@@ -218,6 +221,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     uint8 m_uiMaxNexusLords;
     uint8 m_uiMaxScions;
 
+    uint8 m_uiMaxStormTargets;
     uint8 m_uiMaxStaticFieldTargets;
 
     uint32 m_uiBerserkTimer;
@@ -342,9 +346,6 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     {
         switch (pSummoned->GetEntry())
         {
-            case NPC_POWER_SPARK:
-                pSummoned->GetMotionMaster()->MoveFollow(m_creature, 0, 0);
-                break;
             case NPC_ARCANE_OVERLOAD:
                 pSummoned->AI()->SetReactState(REACT_PASSIVE);
                 pSummoned->SetCanEnterCombat(false);
@@ -358,13 +359,21 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
         // start third phase
         if (eventType == AI_EVENT_CUSTOM_A)
         {
             StartNextDialogueText(SAY_END_PHASE_2);
             m_uiPhase = PHASE_TRANSITION_2;
+        }
+        else if (eventType == AI_EVENT_CUSTOM_B)
+        {
+            // arcane storm spell
+            if (m_uiPhase == PHASE_DISCS)
+                DoCastSpellIfCan(pInvoker, m_bIsRegularMode ? SPELL_ARCANE_STORM : SPELL_ARCANE_STORM_H, CAST_TRIGGERED);
+            else if (m_uiPhase == PHASE_DRAGONS)
+                DoCastSpellIfCan(pInvoker, SPELL_ARCANE_STORM_VEHICLE, CAST_TRIGGERED);
         }
     }
 
@@ -490,10 +499,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 if (m_uiPowerSparkTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPARK) == CAST_OK)
-                    {
-                        DoScriptText(SAY_EMOTE_SPARK, m_creature);
                         m_uiPowerSparkTimer = 30000;
-                    }
                 }
                 else
                     m_uiPowerSparkTimer -= uiDiff;
@@ -544,14 +550,30 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
 
                 if (m_uiArcaneStormTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARCANE_STORM : SPELL_ARCANE_STORM_H) == CAST_OK)
-                        m_uiArcaneStormTimer = urand(15000, 17000);
+                    for (uint8 i = 0; i < m_uiMaxStormTargets; ++i)
+                    {
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                            DoCastSpellIfCan(pTarget, SPELL_ARCANE_STORM_MASTER);
+                    }
+                    m_uiArcaneStormTimer = 10000;
                 }
                 else
                     m_uiArcaneStormTimer -= uiDiff;
 
                 break;
             case PHASE_DRAGONS:
+
+                if (m_uiArcaneStormTimer < uiDiff)
+                {
+                    for (uint8 i = 0; i < m_uiMaxStormTargets; ++i)
+                    {
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                            DoCastSpellIfCan(pTarget, SPELL_ARCANE_STORM_MASTER);
+                    }
+                    m_uiArcaneStormTimer = 10000;
+                }
+                else
+                    m_uiArcaneStormTimer -= uiDiff;
 
                 if (m_uiStaticFieldTimer < uiDiff)
                 {
@@ -578,16 +600,21 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
 
                 if (m_uiSurgeOfPowerTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    if (m_bIsRegularMode)
                     {
-                        if (DoCastSpellIfCan(pTarget, SPELL_SURGE_OF_POWER) == CAST_OK)
-                        {
-                            if (!urand(0, 3))
-                                DoScriptText(SAY_SURGE, m_creature);
-
-                            m_uiSurgeOfPowerTimer = urand(5000, 15000);
-                        }
+                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                            DoCastSpellIfCan(pTarget, SPELL_SURGE_OF_POWER);
                     }
+                    else
+                    {
+                        if (DoCastSpellIfCan(m_creature, SPELL_SURGE_OF_POWER_H) == CAST_OK)
+                            DoCastSpellIfCan(m_creature, SPELL_SURGE_OF_POWER_WARNING, CAST_TRIGGERED);
+                    }
+
+                    if (!urand(0, 3))
+                        DoScriptText(SAY_SURGE, m_creature);
+
+                    m_uiSurgeOfPowerTimer = urand(5000, 15000);
                 }
                 else
                     m_uiSurgeOfPowerTimer -= uiDiff;
@@ -607,10 +634,27 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
 
 struct npc_power_sparkAI : public ScriptedAI
 {
-    npc_power_sparkAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_power_sparkAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        m_pInstance = static_cast<instance_eye_of_eternity*>(pCreature->GetInstanceData());
+
+        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
+
+        DoScriptText(SAY_EMOTE_SPARK, m_creature);
+        Reset();
+    }
+
+    instance_eye_of_eternity* m_pInstance;
 
     void Reset() override
     {
+        if (m_pInstance)
+        {
+            if (Creature* pMalygos = m_pInstance->GetSingleCreatureFromStorage(NPC_MALYGOS))
+                m_creature->GetMotionMaster()->MoveFollow(pMalygos, 0, 0);
+        }
+
         DoCastSpellIfCan(m_creature, SPELL_POWER_SPARK_VISUAL);
     }
 
@@ -623,14 +667,19 @@ struct npc_power_sparkAI : public ScriptedAI
         }
     }
 
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    {
+        // start / stop following during vortex
+        if (eventType == AI_EVENT_CUSTOM_A)
+            m_creature->GetMotionMaster()->MoveIdle();
+        else if (eventType == AI_EVENT_CUSTOM_B)
+            m_creature->GetMotionMaster()->MoveFollow(pSender, 0, 0);
+    }
+
     void JustDied(Unit* /*pKiller*/) override
     {
         DoCastSpellIfCan(m_creature, SPELL_POWER_SPARK_PLAYERS, CAST_TRIGGERED);
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
 /*######
@@ -709,6 +758,27 @@ struct spell_arcane_bomb : public SpellScript
     }
 };
 
+/*######
+## spell_arcane_storm - 57473
+######*/
+
+struct spell_arcane_storm : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // inform the boss to cast the proper spell on target depending on the encounter phase
+        caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, target, caster);
+    }
+};
+
 void AddSC_boss_malygos()
 {
     Script* pNewScript = new Script;
@@ -728,4 +798,5 @@ void AddSC_boss_malygos()
 
     RegisterSpellScript<spell_ride_red_dragon_buddy>("spell_ride_red_dragon_buddy");
     RegisterSpellScript<spell_arcane_bomb>("spell_arcane_bomb");
+    RegisterSpellScript<spell_arcane_storm>("spell_arcane_storm");
 }
