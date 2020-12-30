@@ -25,7 +25,8 @@ EndScriptData */
 #include "eye_of_eternity.h"
 
 instance_eye_of_eternity::instance_eye_of_eternity(Map* pMap) : ScriptedInstance(pMap),
-    m_uiMalygosResetTimer(0)
+    m_uiMalygosResetTimer(0),
+    m_uiMalygosCompleteTimer(0)
 {
     Initialize();
 }
@@ -126,8 +127,11 @@ void instance_eye_of_eternity::SetData(uint32 uiType, uint32 uiData)
     {
         // Note: ending event handled by DB
 
-        // Spawn the Heart of Malygos
-        DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_HEART_OF_MAGIC : GO_HEART_OF_MAGIC_H, 30 * MINUTE);
+        // Spawn the Heart of Malygos immediately after death
+        DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_HEART_OF_MAGIC : GO_HEART_OF_MAGIC_H, 24 * HOUR);
+
+        // respawn the other loot on timer
+        m_uiMalygosCompleteTimer = 18000;
     }
 
     // Currently no reason to save anything
@@ -170,6 +174,20 @@ void instance_eye_of_eternity::Update(uint32 uiDiff)
         }
         else
             m_uiMalygosResetTimer -= uiDiff;
+    }
+
+    // respawn loot and portal
+    if (m_uiMalygosCompleteTimer)
+    {
+        if (m_uiMalygosCompleteTimer <= uiDiff)
+        {
+            DoRespawnGameObject(GO_EXIT_PORTAL, 24 * HOUR);
+            DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_ALEXSTRASZAS_GIFT : GO_ALEXSTRASZAS_GIFT_H, 24 * HOUR);
+
+            m_uiMalygosCompleteTimer = 0;
+        }
+        else
+            m_uiMalygosCompleteTimer -= uiDiff;
     }
 }
 

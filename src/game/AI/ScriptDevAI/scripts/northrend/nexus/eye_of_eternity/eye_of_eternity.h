@@ -59,6 +59,7 @@ class instance_eye_of_eternity : public ScriptedInstance
         uint32 m_uiEncounter;
 
         uint32 m_uiMalygosResetTimer;
+        uint32 m_uiMalygosCompleteTimer;
 
         GuidList m_lDiskRidersGuids;
         GuidList m_lHoverDiskGuids;
