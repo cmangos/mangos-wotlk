@@ -132,12 +132,8 @@ enum
 
     // npcs
     // NPC_MALYGOS_PORTAL           = 30118,            // used for intro and for power sparks
-
     NPC_VORTEX                      = 30090,            // vehicle with 5 seats
     NPC_POWER_SPARK                 = 30084,
-
-    NPC_ARCANE_OVERLOAD             = 30282,            // summoned by spell 56429
-
     NPC_STATIC_FIELD                = 30592,            // summoned by spell 57430
 
     // phases

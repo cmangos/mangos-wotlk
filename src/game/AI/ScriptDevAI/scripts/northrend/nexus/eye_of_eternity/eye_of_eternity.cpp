@@ -57,7 +57,8 @@ void instance_eye_of_eternity::OnCreatureCreate(Creature* pCreature)
             break;
         case NPC_HOVER_DISK_LORD:
         case NPC_HOVER_DISK_SCION:
-            m_lHoverDiskGuids.push_back(pCreature->GetObjectGuid());
+        case NPC_ARCANE_OVERLOAD:
+            m_lSecondPhaseCreaturesGuids.push_back(pCreature->GetObjectGuid());
             break;
     }
 }
@@ -151,10 +152,10 @@ void instance_eye_of_eternity::OnCreatureDeath(Creature* pCreature)
                 if (Creature* pMalygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
                     pMalygos->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pMalygos, pMalygos);
 
-                // despawn all disks before phase 3
-                for (const auto& guid : m_lHoverDiskGuids)
-                    if (Creature* pDisk = instance->GetCreature(guid))
-                        pDisk->ForcedDespawn();
+                // despawn all disks and arcane bombs before phase 3
+                for (const auto& guid : m_lSecondPhaseCreaturesGuids)
+                    if (Creature* pCreature = instance->GetCreature(guid))
+                        pCreature->ForcedDespawn();
             }
             break;
     }

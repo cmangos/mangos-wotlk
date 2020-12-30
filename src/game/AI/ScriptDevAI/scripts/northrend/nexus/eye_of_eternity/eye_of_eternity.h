@@ -19,6 +19,7 @@ enum
     NPC_SCION_OF_ETERNITY           = 30249,            // spawned by DB as vehicle passenger
     NPC_HOVER_DISK_LORD             = 30234,            // this disk can be used by players
     NPC_HOVER_DISK_SCION            = 30248,
+    NPC_ARCANE_OVERLOAD             = 30282,            // summoned by spell 56429
 
     NPC_SURGE_OF_POWER              = 30334,            // involved in the surge of power pulse event
 
@@ -62,7 +63,7 @@ class instance_eye_of_eternity : public ScriptedInstance
         uint32 m_uiMalygosCompleteTimer;
 
         GuidList m_lDiskRidersGuids;
-        GuidList m_lHoverDiskGuids;
+        GuidList m_lSecondPhaseCreaturesGuids;
 };
 
 #endif
