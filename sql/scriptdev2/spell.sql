@@ -50,7 +50,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26686,'spell_aq_whirlwind'),
 (26767,'spell_cthun_tentacles_summon'),
 (26769,'spell_cthun_periodic_eye_trigger'),
-(28282,'spell_ashbringer_item');
+(28282,'spell_ashbringer_item'),
+(28441,'spell_ab_effect_000');
 
 -- TBC
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
