@@ -478,6 +478,11 @@ VehicleSeatEntry const* VehicleInfo::GetSeatEntry(uint8 seat) const
     return itr != m_vehicleSeats.end() ? itr->second : nullptr;
 }
 
+VehicleSeatEntry const* VehicleInfo::GetSeatForPassenger(Unit const* passenger) const
+{
+    return GetSeatEntry(passenger->GetTransSeat());
+}
+
 /**
  * This function will get a usable seat for a passenger
  *

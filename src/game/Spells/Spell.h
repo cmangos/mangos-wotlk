@@ -741,6 +741,9 @@ class Spell
 
         // GO casting preparations
         void SetTrueCaster(WorldObject* caster) { m_trueCaster = caster; }
+
+        // Vehicle casting subsection
+        static SpellCastResult CheckVehicle(Unit const* caster, SpellEntry const& spellInfo);
     protected:
         void SendLoot(ObjectGuid guid, LootType loottype, LockType lockType);
         bool IgnoreItemRequirements() const;                // some item use spells have unexpected reagent data

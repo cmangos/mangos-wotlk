@@ -9065,3 +9065,56 @@ void Spell::OnAfterHit()
     if (SpellScript* script = GetSpellScript())
         return script->OnAfterHit(this);
 }
+
+SpellCastResult Spell::CheckVehicle(Unit const* caster, SpellEntry const& spellInfo)
+{
+    // All creatures should be able to cast as passengers freely, restriction and attribute are only for players
+    if (caster->GetTypeId() != TYPEID_PLAYER)
+        return SPELL_CAST_OK;
+
+    VehicleInfo* vehicle = nullptr;
+    if (caster->GetTransportInfo())
+        if (caster->GetTransportInfo()->GetTransport()->IsUnit())
+            vehicle = static_cast<Unit*>(caster->GetTransportInfo()->GetTransport())->GetVehicleInfo();
+    if (vehicle)
+    {
+        uint16 checkMask = 0;
+        for (uint8 effIdx = 0; effIdx < MAX_EFFECT_INDEX; ++effIdx)
+        {
+            if (spellInfo.EffectApplyAuraName[effIdx] == SPELL_AURA_MOD_SHAPESHIFT)
+            {
+                SpellShapeshiftFormEntry const* shapeShiftEntry = sSpellShapeshiftFormStore.LookupEntry(spellInfo.EffectMiscValue[effIdx]);
+                if (shapeShiftEntry && (shapeShiftEntry->flags1 & 1) == 0)  // unk flag
+                    checkMask |= SEAT_FLAG_UNCONTROLLED;
+                break;
+            }
+        }
+
+        if (IsSpellHaveAura(&spellInfo, SPELL_AURA_MOUNTED))
+            checkMask |= SEAT_FLAG_CAN_CAST_MOUNT_SPELL;
+
+        if (!checkMask)
+            checkMask = SEAT_FLAG_CAN_ATTACK;
+
+        VehicleSeatEntry const* vehicleSeat = vehicle->GetSeatForPassenger(caster);
+        if (!spellInfo.HasAttribute(SPELL_ATTR_EX6_CASTABLE_WHILE_ON_VEHICLE) && !spellInfo.HasAttribute(SPELL_ATTR_CASTABLE_WHILE_MOUNTED)
+            && (vehicleSeat->m_flags & checkMask) != checkMask)
+            return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+
+        // Can only summon uncontrolled minions/guardians when on controlled vehicle
+        if (vehicleSeat->m_flags & (SEAT_FLAG_CAN_CONTROL | SEAT_FLAG_UNK25))
+        {
+            for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
+            {
+                if (spellInfo.Effect[i] != SPELL_EFFECT_SUMMON)
+                    continue;
+
+                SummonPropertiesEntry const* props = sSummonPropertiesStore.LookupEntry(spellInfo.EffectMiscValueB[i]);
+                if (props && props->Group != SUMMON_PROP_GROUP_WILD)
+                    return SPELL_FAILED_CANT_DO_THAT_RIGHT_NOW;
+            }
+        }
+    }
+
+    return SPELL_CAST_OK;
+}

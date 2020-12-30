@@ -69,6 +69,7 @@ class VehicleInfo : public TransportBase
 
         VehicleEntry const* GetVehicleEntry() const { return m_vehicleEntry; }
         VehicleSeatEntry const* GetSeatEntry(uint8 seat) const;
+        VehicleSeatEntry const* GetSeatForPassenger(Unit const* passenger) const;
 
         void Board(Unit* passenger, uint8 seat);            // Board a passenger to a vehicle
         void ChangeSeat(Unit* passenger, uint8 currentSeat, bool next); // Used to switch seat to next/previous seat

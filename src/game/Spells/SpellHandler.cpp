@@ -29,6 +29,7 @@
 #include "Entities/Totem.h"
 #include "Spells/SpellAuras.h"
 #include "Loot/LootMgr.h"
+#include "Maps/TransportSystem.h"
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
@@ -385,6 +386,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     Aura* triggeredByAura = mover->GetTriggeredByClientAura(spellId);
 
+    Unit* caster = mover;
     if (mover->GetTypeId() == TYPEID_PLAYER)
     {
         // not have spell in spellbook or spell passive and not casted by client
@@ -399,20 +401,27 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
     else
     {
-        // not have spell in spellbook or spell passive and not casted by client
-        if (!mover->HasSpell(spellId) || IsPassiveSpell(spellInfo))
+        // If the vehicle creature does not have the spell but it allows the passenger to cast own spells
+        // change caster to player and let him cast
+        if (!_player->GetTransportInfo() || _player->GetTransportInfo()->GetTransport() != caster || Spell::CheckVehicle(_player, *spellInfo) != SPELL_CAST_OK)
         {
-            // cheater? kick? ban?
-            recvPacket.rpos(recvPacket.wpos());             // prevent spam at ignore packet
-            return;
+            // not have spell in spellbook or spell passive and not casted by client
+            if (!mover->HasSpell(spellId) || IsPassiveSpell(spellInfo))
+            {
+                // cheater? kick? ban?
+                recvPacket.rpos(recvPacket.wpos());             // prevent spam at ignore packet
+                return;
+            }
         }
+        else
+            caster = _player;
     }
 
     // client provided targets
     SpellCastTargets targets;
 
 #ifdef BUILD_PLAYERBOT
-    recvPacket >> targets.ReadForCaster(mover);
+    recvPacket >> targets.ReadForCaster(caster);
 #else
     recvPacket >> targets.ReadForCaster(_player);
 #endif
@@ -429,21 +438,21 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     if (HasMissingTargetFromClient(spellInfo))
-        targets.setUnitTarget(mover->GetTarget());
+        targets.setUnitTarget(caster->GetTarget());
 
     if (_player->HasQueuedSpell())
         return;
 
     bool handled = false;
-    Spell* spell = new Spell(mover, spellInfo, triggeredByAura ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE, mover->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : nullptr);
+    Spell* spell = new Spell(caster, spellInfo, triggeredByAura ? TRIGGERED_OLD_TRIGGERED : TRIGGERED_NONE, caster->GetObjectGuid(), triggeredByAura ? triggeredByAura->GetSpellProto() : nullptr);
     spell->m_cast_count = cast_count;                       // set count of casts
-    if (!triggeredByAura && (mover->HasGCD(spellInfo) || !mover->IsSpellReady(*spellInfo)))
+    if (!triggeredByAura && (caster->HasGCD(spellInfo) || !caster->IsSpellReady(*spellInfo)))
     {
-        if (mover->HasGCDOrCooldownWithinMargin(*spellInfo))
+        if (caster->HasGCDOrCooldownWithinMargin(*spellInfo))
         {
             handled = true;
             _player->SetQueuedSpell(spell);
-            GetMessager().AddMessage([guid = mover->GetObjectGuid(), targets = targets](WorldSession* session) mutable
+            GetMessager().AddMessage([guid = caster->GetObjectGuid(), targets = targets](WorldSession* session) mutable
             {
                 if (session->GetPlayer()) // in case of logout
                 {

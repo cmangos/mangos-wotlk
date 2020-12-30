@@ -560,7 +560,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     }
 
     // Tracking spells (exclude Well Fed, some other always allowed cases)
-    if (spellInfo->HasAttribute(SPELL_ATTR_EX6_UNK12) && (IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_CREATURES) ||
+    if (spellInfo->HasAttribute(SPELL_ATTR_EX6_CASTABLE_WHILE_ON_VEHICLE) && (IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_CREATURES) ||
         IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_STEALTHED) ||
         IsSpellHaveAura(spellInfo, SPELL_AURA_TRACK_RESOURCES)))
         return SPELL_TRACKER;
