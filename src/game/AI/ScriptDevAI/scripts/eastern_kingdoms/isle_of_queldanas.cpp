@@ -76,10 +76,77 @@ UnitAI* GetAI_npc_converted_sentry(Creature* pCreature)
     return new npc_converted_sentryAI(pCreature);
 }
 
+/*######
+# npc_shattered_sun_fighter
+######*/
+
+enum
+{
+    ZONEID_ISLE_OF_QUELDANAS                = 4080,
+    NPC_SHATTERED_SUN_WARRIOR               = 25115,
+    NPC_SHATTERED_SUN_MARKSMAN              = 24938,
+    // relay dbscripts - each of which cast 1 of 4 transformation spells based on current Sun's Reach game event information
+    SCRIPT_TRANSFORM_ARCHER_BE_MALE         = 2493801,
+    SCRIPT_TRANSFORM_ARCHER_BE_FEMALE       = 2493802,
+    SCRIPT_TRANSFORM_ARCHER_DRAENEI_MALE    = 2493803,
+    SCRIPT_TRANSFORM_ARCHER_DRAENEI_FEMALE  = 2493804,
+    SCRIPT_TRANSFORM_WARRIOR_BE_MALE        = 2511502,
+    SCRIPT_TRANSFORM_WARRIOR_BE_FEMALE      = 2511501,
+    SCRIPT_TRANSFORM_WARRIOR_DRAENEI_MALE   = 2511504,
+    SCRIPT_TRANSFORM_WARRIOR_DRAENEI_FEMALE = 2511503,
+};
+
+struct npc_shattered_sun_fighterAI : public ScriptedAI
+{
+    npc_shattered_sun_fighterAI(Creature* creature) : ScriptedAI(creature)
+    {
+        if (creature->GetZoneId() == ZONEID_ISLE_OF_QUELDANAS) // let the spawns in Shattrath be handled via movement dbscript
+        {
+            uint32 transformScriptId = 0;
+            if (creature->GetEntry() == NPC_SHATTERED_SUN_MARKSMAN)
+            {
+                switch (urand(0, 3))
+                {
+                    case 0: transformScriptId = SCRIPT_TRANSFORM_ARCHER_BE_MALE;
+                    case 1: transformScriptId = SCRIPT_TRANSFORM_ARCHER_BE_FEMALE;
+                    case 2: transformScriptId = SCRIPT_TRANSFORM_ARCHER_DRAENEI_MALE;
+                    case 3: transformScriptId = SCRIPT_TRANSFORM_ARCHER_DRAENEI_FEMALE;
+                }
+            }
+            else if (creature->GetEntry() == NPC_SHATTERED_SUN_WARRIOR)
+            {
+                switch (urand(0, 3))
+                {
+                    case 0: transformScriptId = SCRIPT_TRANSFORM_WARRIOR_BE_MALE;
+                    case 1: transformScriptId = SCRIPT_TRANSFORM_WARRIOR_BE_FEMALE;
+                    case 2: transformScriptId = SCRIPT_TRANSFORM_WARRIOR_DRAENEI_MALE;
+                    case 3: transformScriptId = SCRIPT_TRANSFORM_WARRIOR_DRAENEI_FEMALE;
+                }
+            }
+            if (transformScriptId)
+                creature->GetMap()->ScriptsStart(sRelayScripts, transformScriptId, m_creature, creature);
+        }
+        Reset();
+    }
+
+    void Reset() override
+    {
+        if (m_creature->GetEntry() == NPC_SHATTERED_SUN_MARKSMAN)
+            SetCombatMovement(false);
+    }
+
+    void UpdateAI(const uint32 diff) override {}
+};
+
 void AddSC_isle_of_queldanas()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_converted_sentry";
     pNewScript->GetAI = &GetAI_npc_converted_sentry;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_shattered_sun_fighter";
+    pNewScript->GetAI = &GetNewAIInstance<npc_shattered_sun_fighterAI>;
     pNewScript->RegisterSelf();
 }
