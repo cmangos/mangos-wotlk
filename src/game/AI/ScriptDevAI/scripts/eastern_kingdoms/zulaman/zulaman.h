@@ -9,7 +9,7 @@
 
 enum InstanceZA
 {
-    MAX_ENCOUNTER           = 9,
+    MAX_ENCOUNTER           = 13,
     MAX_VENDOR              = 2,
     MAX_CHESTS              = 4,
     MAX_BEAR_WAVES          = 4,
