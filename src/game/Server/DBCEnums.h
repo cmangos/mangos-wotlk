@@ -542,7 +542,7 @@ enum VehicleSeatFlags
     SEAT_FLAG_HIDE_PASSENGER        = 0x00000200,           // Passenger is hidden
     SEAT_FLAG_ALLOW_TURNING         = 0x00000400,           // "AllowsTurning" | Note: allows the passenger to turn (change orientation) while boarded
     SEAT_FLAG_CAN_CONTROL           = 0x00000800,           // Lua_UnitInVehicleControlSeat
-    // SEAT_FLAG_UNK11              = 0x00001000,           // "Can Cast Mount Spell" | Note: there are no seats with this flag in 3.3.5a
+    SEAT_FLAG_CAN_CAST_MOUNT_SPELL  = 0x00001000,           // "Can Cast Mount Spell" | Note: there are no seats with this flag in 3.3.5a
     SEAT_FLAG_UNCONTROLLED          = 0x00002000,           // "Uncontrolled"
     SEAT_FLAG_CAN_ATTACK            = 0x00004000,           // Can attack, cast spells and use items from vehicle?
     SEAT_FLAG_SHOULD_USE_VEH_SEAT_EXIT_ANIM_ON_FORCED_EXIT = 0x00008000,           // "ShouldUseVehicleSeatExitAnimationOnForcedExit"
