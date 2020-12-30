@@ -8291,6 +8291,9 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
                 case 42442:                                 // Vengeance Landing Cannonfire
                     radius = MAX_VISIBILITY_DISTANCE;
                     break;
+                case 56429:                                 // Summon Arcane Bomb (Eye of Eternity, Malygos) - only target A
+                    if (targetB)
+                        break;
                 case 69057:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 10N)
                 case 70826:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 25N)
                 case 72088:                                 // Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar encounter, 10H)
