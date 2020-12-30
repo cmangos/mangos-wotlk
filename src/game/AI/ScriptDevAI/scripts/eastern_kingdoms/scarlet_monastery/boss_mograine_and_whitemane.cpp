@@ -61,7 +61,7 @@ enum
     NPC_SCARLET_CHAPLAIN            = 4299,
 
     ASHBRINGER_RELAY_SCRIPT_ID   = 9001,
-    ITEM_CORRUPTED_ASHBRINGER    = 22691,
+    SPELL_AB_EFFECT_000          = 28441,
 
     SOUND_MOGRAINE_FAKE_DEATH    = 1326,
 };
@@ -141,26 +141,6 @@ struct boss_scarlet_commander_mograineAI : public CombatAI
         }
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        if (!m_instance)
-            return;
-
-        if (m_instance->GetData(TYPE_ASHBRINGER_EVENT) == IN_PROGRESS)
-        {
-            if (pWho->GetTypeId() == TYPEID_PLAYER)
-            {
-                Player* player = static_cast<Player*>(pWho);
-                if (player->HasItemOrGemWithIdEquipped(ITEM_CORRUPTED_ASHBRINGER, 1) && m_creature->IsWithinDist(player, 20.0f))
-                {
-                    player->GetMap()->ScriptsStart(sRelayScripts, ASHBRINGER_RELAY_SCRIPT_ID, m_creature, player);
-                    m_instance->SetData(TYPE_ASHBRINGER_EVENT, DONE);
-                }
-            }
-        }
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_MO_AGGRO, m_creature);
@@ -212,7 +192,7 @@ struct boss_scarlet_commander_mograineAI : public CombatAI
         }
     }
 
-    void SpellHit(Unit* /*pWho*/, const SpellEntry* pSpell) override
+    void SpellHit(Unit* pWho, const SpellEntry* pSpell) override
     {
         // When hit with ressurection say text
         if (pSpell->Id == SPELL_SCARLETRESURRECTION)
@@ -220,6 +200,15 @@ struct boss_scarlet_commander_mograineAI : public CombatAI
             if (m_instance)
                 m_instance->SetData(TYPE_MOGRAINE_AND_WHITE_EVENT, SPECIAL);
             ResetTimer(MOGRAINE_ACTION_LAY_ON_HANDS, 3000u);
+        }
+        // casted by player every 5 seconds while wielding Corrupted Ashbringer
+        else if (pSpell->Id == SPELL_AB_EFFECT_000)
+        {
+            if (m_instance->GetData(TYPE_ASHBRINGER_EVENT) == IN_PROGRESS)
+            {
+                pWho->GetMap()->ScriptsStart(sRelayScripts, ASHBRINGER_RELAY_SCRIPT_ID, m_creature, pWho);
+                m_instance->SetData(TYPE_ASHBRINGER_EVENT, DONE);
+            }
         }
     }
 
