@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_malygos
-SD%Complete: 80
-SDComment: Timers need adjustments; Vortex event NYI; Npc movement in Phase 2 NYI.
+SD%Complete: 90
+SDComment: Spells need additional support
 SDCategory: Eye of Eternity
 EndScriptData */
 
@@ -69,12 +69,11 @@ enum
     SPELL_SUMMON_SPARK              = 56140,            // triggers 56142 which summons 30084
     SPELL_VORTEX                    = 56105,            // forces all players into vortex; triggers vehicle control aura on players
     SPELL_VORTEX_STUN               = 56237,            // visual aura on the boss
-
-    // phase 2 spells
     SPELL_ARCANE_STORM_MASTER       = 57473,            // depending on the encounter phase can trigger 61693 | 61694 in P2 or 57459 in P3
     SPELL_ARCANE_STORM              = 61693,
     SPELL_ARCANE_STORM_H            = 61694,
-    SPELL_ARCANE_STORM_VEHICLE      = 57459,            // targets vehicles
+
+    // phase 2 spells
     SPELL_SUMMON_ARCANE_BOMB        = 56429,            // summons 30282
     SPELL_SURGE_OF_POWER_PULSE      = 56505,            // deep breath spell
     // SPELL_ARCANE_PULSE           = 57432,            // purpose unk
@@ -89,6 +88,7 @@ enum
     SPELL_IMMUNE_CURSES             = 64515,
 
     // phase 3 spells
+    SPELL_ARCANE_STORM_VEHICLE      = 57459,            // targets vehicles
     SPELL_STATIC_FIELD_SUMMON       = 57430,            // cast on 1 or 3 targets based on difficulty
     SPELL_SURGE_OF_POWER            = 57407,
     SPELL_SURGE_OF_POWER_H          = 60936,
@@ -112,6 +112,7 @@ enum
     SPELL_VORTEX_CONTROL_3_H        = 61073,
     SPELL_VORTEX_CONTROL_4_H        = 61074,
     SPELL_VORTEX_CONTROL_5_H        = 61075,
+    SPELL_VORTEX_TELEPORT           = 73040,            // teleport player at the end of vortex
     // SPELL_VORTEX_PERIODIC        = 59666,            // not used; probably unrelated
     // SPELL_VORTEX_AURA            = 55883,            // cast by creature 30090; handled in c_t_a
 
@@ -135,23 +136,26 @@ enum
     NPC_VORTEX                      = 30090,            // vehicle with 5 seats
     NPC_POWER_SPARK                 = 30084,
 
-    NPC_HOVER_DISK_LORD             = 30234,            // this disk can be used by players
-    NPC_HOVER_DISK_SCION            = 30248,
+    NPC_ARCANE_OVERLOAD             = 30282,            // summoned by spell 56429
 
-    NPC_ARCANE_OVERLOAD             = 30282,
-
-    NPC_STATIC_FIELD                = 30592,
+    NPC_STATIC_FIELD                = 30592,            // summoned by spell 57430
 
     // phases
     PHASE_FLOOR                     = 1,
     PHASE_TRANSITION                = 2,
     PHASE_DISCS                     = 3,
     PHASE_DRAGONS                   = 4,
-    PHASE_VORTEX                    = 9,                // sub-phase, part of phase 1
+    PHASE_VORTEX                    = 8,                // sub-phase, part of phase 1
+    PHASE_SURGE                     = 9,                // sub-phase, part of phase 2
 
+    // move point ids
     POINT_ID_COMBAT                 = 1,
     POINT_ID_VORTEX                 = 2,
-    POINT_ID_FLIGHT                 = 3,
+    POINT_ID_TRANSITION_1           = 3,
+    POINT_ID_FLIGHT                 = 4,
+    POINT_ID_SURGE                  = 5,
+    POINT_ID_TRANSITION_2           = 6,
+    POINT_ID_PHASE_3                = 7,
 
     // light overrid id
     LIGHT_ID_DEFAULT                = 1773,
@@ -169,6 +173,7 @@ static const DialogueEntry aIntroDialogue[] =
     {SAY_END_PHASE_1,             NPC_MALYGOS,  3000},
     {LIGHT_ID_ARCANE_RUNES,       0,            22000},
     {PHASE_DISCS,                 0,            0},
+
     {SAY_END_PHASE_2,             NPC_MALYGOS,  1000},
     {LIGHT_ID_CHANGE_DIMENSIONS,  0,            6000},
     {LIGHT_ID_OBSCURE_SPACE,      0,            4000},
@@ -177,12 +182,19 @@ static const DialogueEntry aIntroDialogue[] =
     {SPELL_SUMMON_RED_DRAGON,     0,            5000},
     {SAY_INTRO_PHASE_3,           NPC_MALYGOS,  11000},
     {LIGHT_ID_OBSCURE_ARCANE_RUNES, 0,          0},
+
     {0, 0, 0},
 };
 
 static const float aCenterMovePos[3] = {754.395f, 1301.270f, 266.253f};                 // platform center location
-static const float aVortexMovePos[3] = { 756.70105f, 1303.9907f, 286.1703f };           // vortex center location
-static const float aHoverMovePos[3] = { 828.996f, 1298.84f, 300.0f };                   // phase 2+ location
+static const float aVortexMovePos[3] = { 756.70105f, 1303.9907f, 286.1703f };           // phase 1 vortex center location
+static const float aHoverMovePos[3] = { 828.996f, 1298.84f, 300.0f };                   // phase 2 transition location
+static const float aSurgeMovePos[3] = { 746.10187f, 1305.9847f, 316.653f };             // phase 2 surge of power location
+static const float aTransitionPos[3] = { 754.544f, 1301.71f, 320.0f };                  // phase 3 transition location
+static const float aDragonsMovePos[3] = { 752.20557f, 1304.3005f, 220.06091f };         // phase 3 static location
+
+static const uint32 vortexSpellsNormal[] = { SPELL_VORTEX_CONTROL_1, SPELL_VORTEX_CONTROL_2, SPELL_VORTEX_CONTROL_3, SPELL_VORTEX_CONTROL_4, SPELL_VORTEX_CONTROL_5 };
+static const uint32 vortexSpellsHeroic[] = { SPELL_VORTEX_CONTROL_1_H, SPELL_VORTEX_CONTROL_2_H, SPELL_VORTEX_CONTROL_3_H, SPELL_VORTEX_CONTROL_4_H, SPELL_VORTEX_CONTROL_5_H };
 
 struct HoverDiskSummonData
 {
@@ -196,6 +208,18 @@ static const HoverDiskSummonData lordDiskSummonData[] =
     {773.4768f, 1301.474f, 266.582f, 1},
     {778.6023f, 1301.635f, 285.671f, 2},            // heroic spawns
     {730.3984f, 1301.644f, 285.091f, 3}
+};
+
+static const HoverDiskSummonData scionDiskSummonData[] =
+{
+    {753.960f, 1272.719f, 282.3402f, 0},
+    {724.828f, 1301.750f, 282.3402f, 2},
+    {754.020f, 1330.910f, 282.3402f, 3},
+    {784.416f, 1301.570f, 282.3402f, 4},
+    {734.432f, 1280.950f, 282.3402f, 5},            // heroic spawns
+    {733.814f, 1323.340f, 282.3402f, 6},
+    {774.969f, 1322.170f, 282.3402f, 7},
+    {773.226f, 1279.437f, 282.3402f, 8},
 };
 
 /*######
@@ -235,11 +259,12 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     uint32 m_uiVortexTimer;
     uint32 m_uiArcaneBreathTimer;
     uint32 m_uiPowerSparkTimer;
+    uint32 m_uiArcaneStormTimer;
     uint32 m_uiVortexEndTimer;
 
     uint32 m_uiArcanePulseTimer;
     uint32 m_uiOverloadTimer;
-    uint32 m_uiArcaneStormTimer;
+    uint32 m_uiArcanePulseEndTimer;
 
     uint32 m_uiStaticFieldTimer;
     uint32 m_uiSurgeOfPowerTimer;
@@ -250,17 +275,18 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         m_uiPhase               = PHASE_FLOOR;
 
         m_uiBerserkTimer        = 10 * MINUTE * IN_MILLISECONDS;
-        m_uiVortexTimer         = 60000;
+        m_uiVortexTimer         = 35000;
         m_uiArcaneBreathTimer   = 15000;
         m_uiPowerSparkTimer     = 30000;
+        m_uiArcaneStormTimer    = 10000;
         m_uiVortexEndTimer      = 10000;
 
         m_uiArcanePulseTimer    = 60000;
         m_uiOverloadTimer       = 1000;
-        m_uiArcaneStormTimer    = 15000;
+        m_uiArcanePulseEndTimer = 8000;
 
-        m_uiStaticFieldTimer    = 15000;
-        m_uiSurgeOfPowerTimer   = 30000;
+        m_uiStaticFieldTimer    = 25000;
+        m_uiSurgeOfPowerTimer   = 10000;
 
         // reset flags
         m_creature->SetImmuneToPlayer(true);
@@ -338,8 +364,12 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                     m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
 
                     // after vortex phase inform the Power sparks and set phase
-                    SendAIEventAround(AI_EVENT_CUSTOM_D, m_creature, 0, 50.0f);
-                    m_uiPhase = PHASE_FLOOR;
+                    if (m_uiPhase != PHASE_FLOOR)
+                    {
+                        SendAIEventAround(AI_EVENT_CUSTOM_D, m_creature, 0, 50.0f);
+                        m_uiPowerSparkTimer = 10000;
+                        m_uiPhase = PHASE_FLOOR;
+                    }
                     break;
                 case POINT_ID_VORTEX:
                     if (m_pInstance)
@@ -355,10 +385,27 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                         m_uiVortexEndTimer = 10000;
                     }
                     break;
+                case POINT_ID_TRANSITION_1:
+                case POINT_ID_TRANSITION_2:
+                    // no action here
+                    break;
+                case POINT_ID_FLIGHT:
+                    // start wp movement during phase 2; use path id 1
+                    m_creature->GetMotionMaster()->MoveWaypoint(1);
+                    break;
+                case POINT_ID_SURGE:
+                    if (DoCastSpellIfCan(m_creature, SPELL_SURGE_OF_POWER_PULSE) == CAST_OK)
+                    {
+                        DoScriptText(SAY_DEEP_BREATH, m_creature);
+                        DoScriptText(SAY_EMOTE_BREATH, m_creature);
+                        m_uiArcanePulseEndTimer = 8000;
+                        m_uiPhase = PHASE_SURGE;
+                    }
+                    break;
             }
         }
         // intro yells; handled once per boss circle; ToDo: maybe this is more dyanmic than this
-        else if (uiMoveType == WAYPOINT_MOTION_TYPE && uiPointId == 1 && m_uiIntroStage < 5)
+        else if (uiMoveType == WAYPOINT_MOTION_TYPE && uiPointId == 1 && m_uiIntroStage < 5 && !m_creature->IsInCombat())
         {
             switch (m_uiIntroStage)
             {
@@ -395,13 +442,17 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
         // start third phase
         if (eventType == AI_EVENT_CUSTOM_A)
         {
+            m_creature->GetMotionMaster()->Clear(false, true);
+            m_creature->GetMotionMaster()->MoveIdle();
+            m_creature->GetMotionMaster()->MovePoint(POINT_ID_TRANSITION_2, aTransitionPos[0], aTransitionPos[1], aTransitionPos[2]);
+
             StartNextDialogueText(SAY_END_PHASE_2);
             m_uiPhase = PHASE_TRANSITION;
         }
         else if (eventType == AI_EVENT_CUSTOM_B)
         {
             // arcane storm spell
-            if (m_uiPhase == PHASE_DISCS)
+            if (m_uiPhase == PHASE_FLOOR)
                 DoCastSpellIfCan(pInvoker, m_bIsRegularMode ? SPELL_ARCANE_STORM : SPELL_ARCANE_STORM_H, CAST_TRIGGERED);
             else if (m_uiPhase == PHASE_DRAGONS)
                 DoCastSpellIfCan(pInvoker, SPELL_ARCANE_STORM_VEHICLE, CAST_TRIGGERED);
@@ -451,15 +502,22 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 {
                     // Destroy the platform; this can be also handled by event 20158
                     if (GameObject* pPlatform = m_pInstance->GetSingleGameObjectFromStorage(GO_PLATFORM))
+                    {
                         pPlatform->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_DESTROYED);
+                        pPlatform->SetGoState(GO_STATE_ACTIVE);
+                    }
                 }
 
                 DoCastSpellIfCan(m_creature, SPELL_SUMMON_RED_DRAGON);
+                break;
+            case SAY_INTRO_PHASE_3:
+                m_creature->GetMotionMaster()->MovePoint(POINT_ID_PHASE_3, aDragonsMovePos[0], aDragonsMovePos[1], aDragonsMovePos[2]);
                 break;
             case LIGHT_ID_OBSCURE_ARCANE_RUNES:
                 m_creature->GetMap()->SetZoneOverrideLight(AREA_ID_EYE_OF_ETERNITY, LIGHT_ID_OBSCURE_ARCANE_RUNES, 5);
                 DoCastSpellIfCan(m_creature, SPELL_CLEAR_ALL_DEBUFFS, CAST_TRIGGERED);
                 DoCastSpellIfCan(m_creature, SPELL_IMMUNE_CURSES, CAST_TRIGGERED);
+                m_uiArcaneStormTimer = 20000;
                 m_uiPhase = PHASE_DRAGONS;
                 break;
         }
@@ -470,15 +528,11 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     {
         // spawn the nexus lord disks; 2 for normal | 4 for heroic
         for (uint8 i = 0; i < m_uiMaxNexusLords; ++i)
-            m_creature->SummonCreature(NPC_HOVER_DISK_LORD, lordDiskSummonData[i].x, lordDiskSummonData[i].y, lordDiskSummonData[i].z, 0, TEMPSPAWN_TIMED_OR_DEAD_DESPAWN, 5 * MINUTE * IN_MILLISECONDS, false, true, lordDiskSummonData[i].pathId);
+            m_creature->SummonCreature(NPC_HOVER_DISK_LORD, lordDiskSummonData[i].x, lordDiskSummonData[i].y, lordDiskSummonData[i].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0, false, true, lordDiskSummonData[i].pathId);
 
         // spawn the scion hover disks; 4 for normal | 8 for heroic
-        float fX, fY, fZ;
         for (uint8 i = 0; i < m_uiMaxScions; ++i)
-        {
-            m_creature->GetRandomPoint(aCenterMovePos[0], aCenterMovePos[1], aCenterMovePos[2], 50.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_HOVER_DISK_SCION, fX, fY, fZ + urand(15, 20), 0, TEMPSPAWN_DEAD_DESPAWN, 0);
-        }
+            m_creature->SummonCreature(NPC_HOVER_DISK_SCION, scionDiskSummonData[i].x, scionDiskSummonData[i].y, scionDiskSummonData[i].z, 0, TEMPSPAWN_DEAD_DESPAWN, 0, false, true, scionDiskSummonData[i].pathId);
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -510,7 +564,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                     m_creature->SetLevitate(true);
                     m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
 
-                    // Move idle first, so we can avoid evading, because of the waypoint movement
+                    m_creature->GetMotionMaster()->Clear(false, true);
                     m_creature->GetMotionMaster()->MoveIdle();
                     m_creature->GetMotionMaster()->MovePoint(POINT_ID_VORTEX, aVortexMovePos[0], aVortexMovePos[1], aVortexMovePos[2]);
 
@@ -518,7 +572,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                     m_uiPhase = PHASE_TRANSITION;
 
                     DoScriptText(SAY_VORTEX, m_creature);
-                    m_uiVortexTimer = 60000;
+                    m_uiVortexTimer = 45000;
                 }
                 else
                     m_uiVortexTimer -= uiDiff;
@@ -526,7 +580,7 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 if (m_uiArcaneBreathTimer < uiDiff)
                 {
                     if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARCANE_BREATH : SPELL_ARCANE_BREATH_H) == CAST_OK)
-                        m_uiArcaneBreathTimer = urand(13000, 16000);
+                        m_uiArcaneBreathTimer = urand(20000, 25000);
                 }
                 else
                     m_uiArcaneBreathTimer -= uiDiff;
@@ -539,15 +593,39 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                 else
                     m_uiPowerSparkTimer -= uiDiff;
 
+                if (m_uiArcaneStormTimer < uiDiff)
+                {
+                    std::vector<Unit*> suitableTargets;
+                    ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+
+                    for (auto itr : threatList)
+                    {
+                        if (Unit* target = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
+                            suitableTargets.push_back(target);
+                    }
+
+                    // shuffle the targets
+                    std::shuffle(suitableTargets.begin(), suitableTargets.end(), *GetRandomGenerator());
+                    uint8 maxTargets = suitableTargets.size() >= m_uiMaxStormTargets ? m_uiMaxStormTargets : suitableTargets.size();
+
+                    // cast spell
+                    for (uint8 i = 0; i < maxTargets; ++i)
+                        DoCastSpellIfCan(suitableTargets[i], SPELL_ARCANE_STORM_MASTER, CAST_TRIGGERED);
+
+                    m_uiArcaneStormTimer = 10000;
+                }
+                else
+                    m_uiArcaneStormTimer -= uiDiff;
+
                 if (m_creature->GetHealthPercent() < 50.0f)
                 {
                     SetCombatMovement(false);
                     m_creature->SetLevitate(true);
                     m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
 
-                    // Move idle first, so we can avoid evading, because of the waypoint movement
+                    m_creature->GetMotionMaster()->Clear(false, true);
                     m_creature->GetMotionMaster()->MoveIdle();
-                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_FLIGHT, aVortexMovePos[0], aVortexMovePos[1], aVortexMovePos[2]);
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_TRANSITION_1, aVortexMovePos[0], aVortexMovePos[1], aVortexMovePos[2]);
 
                     StartNextDialogueText(SAY_END_PHASE_1);
                     m_uiPhase = PHASE_TRANSITION;
@@ -574,76 +652,89 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
 
                 if (m_uiOverloadTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_ARCANE_BOMB) == CAST_OK)
+                    if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_ARCANE_BOMB) == CAST_OK)
                     {
-                        if (!urand(0, 3))
-                            DoScriptText(SAY_SHELL, m_creature);
-
+                        m_creature->GetMotionMaster()->PauseWaypoints(1000);
                         m_uiOverloadTimer = urand(16000, 19000);
                     }
                 }
                 else
                     m_uiOverloadTimer -= uiDiff;
 
-                // Note: the boss should move in certain points before he does the breath ability
+                // move to center position before deep breath
                 if (m_uiArcanePulseTimer < uiDiff)
                 {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SURGE_OF_POWER_PULSE) == CAST_OK)
-                    {
-                        DoScriptText(SAY_DEEP_BREATH, m_creature);
-                        DoScriptText(SAY_EMOTE_BREATH, m_creature);
-                        m_uiArcanePulseTimer = 60000;
-                    }
+                    // pause WP movement; don't clear the movegen
+                    m_creature->GetMotionMaster()->PauseWaypoints(15000);
+                    m_creature->GetMotionMaster()->MovePoint(POINT_ID_SURGE, aSurgeMovePos[0], aSurgeMovePos[1], aSurgeMovePos[2]);
+                    m_uiPhase = PHASE_TRANSITION;
+                    m_uiArcanePulseTimer = 55000;
                 }
                 else
                     m_uiArcanePulseTimer -= uiDiff;
 
-                if (m_uiArcaneStormTimer < uiDiff)
+                break;
+            case PHASE_SURGE:
+
+                // end of power surge; resume WP movement
+                if (m_uiArcanePulseEndTimer < uiDiff)
                 {
-                    for (uint8 i = 0; i < m_uiMaxStormTargets; ++i)
-                    {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                            DoCastSpellIfCan(pTarget, SPELL_ARCANE_STORM_MASTER);
-                    }
-                    m_uiArcaneStormTimer = 10000;
+                    m_creature->GetMotionMaster()->UnpauseWaypoints();
+                    m_uiPhase = PHASE_DISCS;
+                    m_uiArcanePulseEndTimer = 8000;
                 }
                 else
-                    m_uiArcaneStormTimer -= uiDiff;
+                    m_uiArcanePulseEndTimer -= uiDiff;
 
                 break;
             case PHASE_DRAGONS:
 
+                // Arcane storm targets
                 if (m_uiArcaneStormTimer < uiDiff)
                 {
-                    for (uint8 i = 0; i < m_uiMaxStormTargets; ++i)
+                    std::vector<Unit*> suitableTargets;
+                    ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+
+                    for (auto itr : threatList)
                     {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                            DoCastSpellIfCan(pTarget, SPELL_ARCANE_STORM_MASTER);
+                        if (Unit* target = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
+                            suitableTargets.push_back(target);
                     }
-                    m_uiArcaneStormTimer = 10000;
+
+                    // shuffle the targets
+                    std::shuffle(suitableTargets.begin(), suitableTargets.end(), *GetRandomGenerator());
+                    uint8 maxTargets = suitableTargets.size() >= m_uiMaxStormTargets ? m_uiMaxStormTargets : suitableTargets.size();
+
+                    // cast spell
+                    for (uint8 i = 0; i < maxTargets; ++i)
+                        DoCastSpellIfCan(suitableTargets[i], SPELL_ARCANE_STORM_MASTER, CAST_TRIGGERED);
+
+                    m_uiArcaneStormTimer = urand(3000, 5000);
                 }
                 else
                     m_uiArcaneStormTimer -= uiDiff;
 
+                // Cast Static Field spell on a number of targets, based on difficulty
                 if (m_uiStaticFieldTimer < uiDiff)
                 {
-                    // Cast Static Field spell on a number of targets, based on difficulty
-                    for (uint8 i = 0; i < m_uiMaxStaticFieldTargets; ++i)
+                    std::vector<Unit*> suitableTargets;
+                    ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
+
+                    for (auto itr : threatList)
                     {
-                        if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                        {
-                            if (DoCastSpellIfCan(pTarget, SPELL_STATIC_FIELD_SUMMON, CAST_TRIGGERED) == CAST_OK)
-                            {
-                                switch (urand(0, 2))
-                                {
-                                    case 0: DoScriptText(SAY_SPELL_1, m_creature); break;
-                                    case 1: DoScriptText(SAY_SPELL_2, m_creature); break;
-                                    case 2: DoScriptText(SAY_SPELL_3, m_creature); break;
-                                }
-                                m_uiStaticFieldTimer = urand(10000, 17000);
-                            }
-                        }
+                        if (Unit* target = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
+                            suitableTargets.push_back(target);
                     }
+
+                    // shuffle the targets
+                    std::shuffle(suitableTargets.begin(), suitableTargets.end(), *GetRandomGenerator());
+                    uint8 maxTargets = suitableTargets.size() >= m_uiMaxStaticFieldTargets ? m_uiMaxStaticFieldTargets : suitableTargets.size();
+
+                    // cast spell
+                    for (uint8 i = 0; i < maxTargets; ++i)
+                        DoCastSpellIfCan(suitableTargets[i], SPELL_STATIC_FIELD_SUMMON, CAST_TRIGGERED);
+
+                    m_uiStaticFieldTimer = 15000;
                 }
                 else
                     m_uiStaticFieldTimer -= uiDiff;
@@ -664,7 +755,8 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
                     if (!urand(0, 3))
                         DoScriptText(SAY_SURGE, m_creature);
 
-                    m_uiSurgeOfPowerTimer = urand(5000, 15000);
+                    m_uiArcaneStormTimer += 6000;
+                    m_uiSurgeOfPowerTimer = 15000;
                 }
                 else
                     m_uiSurgeOfPowerTimer -= uiDiff;
@@ -839,11 +931,35 @@ struct spell_vortex : public SpellScript
         if (effIdx != EFFECT_INDEX_0)
             return;
 
+        uint32 targetCount = spell->GetTargetList().size();
+        uint8 index = uint8((targetCount - 1) * 0.2);
+
         Unit* target = spell->GetUnitTarget();
         if (!target || !target->IsPlayer())
             return;
 
-        // ToDo: add vortex effect on player target
+        // cast the corresponding vortex control spell, based on the target index
+        target->CastSpell(nullptr, target->GetMap()->IsRegularDifficulty() ? vortexSpellsNormal[index] : vortexSpellsHeroic[index], TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_vortex_aura - 55853, 56263, 56264, 56265, 56266, 61071, 61072, 61073, 61074, 61075
+######*/
+
+struct spell_vortex_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* caster = aura->GetCaster();
+        Unit* target = aura->GetTarget();
+        if (!target || !caster || !caster->IsPlayer())
+            return;
+
+        // teleport vehicle passenger outside of the vortex
+        // ToDo: enable this when script hook works properly; spell has to be cast after vehicle unboard is completed
+        // if (!apply)
+        //     target->CastSpell(caster, 73040, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -868,4 +984,5 @@ void AddSC_boss_malygos()
     RegisterSpellScript<spell_arcane_bomb>("spell_arcane_bomb");
     RegisterSpellScript<spell_arcane_storm>("spell_arcane_storm");
     RegisterSpellScript<spell_vortex>("spell_vortex");
+    RegisterAuraScript<spell_vortex_aura>("spell_vortex_aura");
 }

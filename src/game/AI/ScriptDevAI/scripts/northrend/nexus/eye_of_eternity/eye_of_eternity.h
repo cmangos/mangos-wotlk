@@ -17,6 +17,10 @@ enum
 
     NPC_NEXUS_LORD                  = 30245,            // spawned by DB as vehicle passenger
     NPC_SCION_OF_ETERNITY           = 30249,            // spawned by DB as vehicle passenger
+    NPC_HOVER_DISK_LORD             = 30234,            // this disk can be used by players
+    NPC_HOVER_DISK_SCION            = 30248,
+
+    NPC_SURGE_OF_POWER              = 30334,            // involved in the surge of power pulse event
 
     GO_EXIT_PORTAL                  = 193908,
     GO_PLATFORM                     = 193070,
@@ -44,6 +48,7 @@ class instance_eye_of_eternity : public ScriptedInstance
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
         void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureRespawn(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
 
@@ -56,6 +61,7 @@ class instance_eye_of_eternity : public ScriptedInstance
         uint32 m_uiMalygosResetTimer;
 
         GuidList m_lDiskRidersGuids;
+        GuidList m_lHoverDiskGuids;
 };
 
 #endif

@@ -54,6 +54,10 @@ void instance_eye_of_eternity::OnCreatureCreate(Creature* pCreature)
         case NPC_SCION_OF_ETERNITY:
             m_lDiskRidersGuids.push_back(pCreature->GetObjectGuid());
             break;
+        case NPC_HOVER_DISK_LORD:
+        case NPC_HOVER_DISK_SCION:
+            m_lHoverDiskGuids.push_back(pCreature->GetObjectGuid());
+            break;
     }
 }
 
@@ -70,6 +74,18 @@ void instance_eye_of_eternity::OnObjectCreate(GameObject* pGo)
         case GO_ALEXSTRASZAS_GIFT:
         case GO_ALEXSTRASZAS_GIFT_H:
             m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+            break;
+    }
+}
+
+void instance_eye_of_eternity::OnCreatureRespawn(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        // following creatures have a passive behavior
+        case NPC_SURGE_OF_POWER:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
             break;
     }
 }
@@ -96,7 +112,10 @@ void instance_eye_of_eternity::SetData(uint32 uiType, uint32 uiData)
         if (Creature* pMalygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
         {
             if (GameObject* pPlatform = GetSingleGameObjectFromStorage(GO_PLATFORM))
+            {
                 pPlatform->RebuildGameObject(pMalygos);
+                pPlatform->SetGoState(GO_STATE_READY);
+            }
 
             // despawn and respawn boss
             pMalygos->ForcedDespawn(5000);
@@ -124,8 +143,15 @@ void instance_eye_of_eternity::OnCreatureDeath(Creature* pCreature)
 
             // start phase 3 if all adds are dead
             if (m_lDiskRidersGuids.empty())
+            {
                 if (Creature* pMalygos = GetSingleCreatureFromStorage(NPC_MALYGOS))
                     pMalygos->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pMalygos, pMalygos);
+
+                // despawn all disks before phase 3
+                for (const auto& guid : m_lHoverDiskGuids)
+                    if (Creature* pDisk = instance->GetCreature(guid))
+                        pDisk->ForcedDespawn();
+            }
             break;
     }
 }
