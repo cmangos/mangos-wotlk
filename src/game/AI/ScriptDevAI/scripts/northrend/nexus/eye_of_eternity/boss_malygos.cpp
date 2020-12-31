@@ -959,6 +959,32 @@ struct spell_vortex_aura : public AuraScript
     }
 };
 
+/*######
+## spell_align_disk_aggro - 61210
+######*/
+
+struct spell_align_disk_aggro : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsVehicle() || !caster || !caster->GetVictim())
+            return;
+
+        // no reaction while the disk is still flying
+        if (target->GetPositionZ() > 267.0f)
+            return;
+
+        // start chasing players
+        if (target->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
+            target->GetMotionMaster()->MoveChase(caster->GetVictim());
+    }
+};
+
 void AddSC_boss_malygos()
 {
     Script* pNewScript = new Script;
@@ -981,4 +1007,5 @@ void AddSC_boss_malygos()
     RegisterSpellScript<spell_arcane_storm>("spell_arcane_storm");
     RegisterSpellScript<spell_vortex>("spell_vortex");
     RegisterAuraScript<spell_vortex_aura>("spell_vortex_aura");
+    RegisterSpellScript<spell_align_disk_aggro>("spell_align_disk_aggro");
 }
