@@ -39,6 +39,10 @@ enum
     NPC_AMBER_DRAKE                 = 27755,
     NPC_RUBY_DRAKE                  = 27756,
 
+    // other creatures
+    NPC_CENTRIFUGE_CORE             = 28183,
+    NPC_AZURE_RING_CAPTAIN          = 28236,
+
     // Cages in which the friendly dragons are hold
     GO_DRAGON_CAGE_DOOR             = 193995,
 
@@ -76,8 +80,9 @@ class instance_oculus : public ScriptedInstance
         void OnObjectCreate(GameObject* pGo) override;
 
         void OnCreatureEnterCombat(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
+        void OnCreatureEvade(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureRespawn(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;

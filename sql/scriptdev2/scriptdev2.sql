@@ -1217,9 +1217,7 @@ UPDATE instance_template SET ScriptName='instance_oculus' WHERE map=578;
 UPDATE creature_template SET ScriptName='boss_eregos' WHERE entry=27656;
 UPDATE creature_template SET ScriptName='boss_urom' WHERE entry=27655;
 UPDATE creature_template SET ScriptName='boss_varos' WHERE entry=27447;
-UPDATE creature_template SET ScriptName='npc_azure_ring_captain' WHERE entry=28236;
 UPDATE creature_template SET ScriptName='npc_arcane_beam' WHERE entry=28239;
-UPDATE creature_template SET ScriptName='npc_centrifuge_core' WHERE entry=28183;
 UPDATE creature_template SET ScriptName='npc_planar_anomaly' WHERE entry=30879;
 INSERT INTO scripted_event_id VALUES
 (10665,'event_spell_call_captain'),

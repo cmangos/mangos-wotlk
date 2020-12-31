@@ -60,7 +60,6 @@ enum
     SPELL_ARCANE_BEAM_PERIODIC  = 51019,
     SPELL_ARCANE_BEAM_SPAWN     = 51022,
 
-    NPC_AZURE_RING_CAPTAIN      = 28236,
     NPC_ARCANE_BEAM             = 28239,
 };
 
@@ -86,7 +85,7 @@ struct boss_varosAI : public ScriptedAI
 {
     boss_varosAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_oculus*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_oculus*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -239,11 +238,6 @@ struct boss_varosAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_varos(Creature* pCreature)
-{
-    return new boss_varosAI(pCreature);
-}
-
 /*######
 ## event_spell_call_captain
 ######*/
@@ -273,29 +267,6 @@ bool ProcessEventId_event_spell_call_captain(uint32 uiEventId, Object* pSource, 
 }
 
 /*######
-## npc_azure_ring_captain
-######*/
-
-struct npc_azure_ring_captainAI : public ScriptedAI
-{
-    npc_azure_ring_captainAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        SetCombatMovement(false);
-        Reset();
-    }
-
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
-};
-
-UnitAI* GetAI_npc_azure_ring_captain(Creature* pCreature)
-{
-    return new npc_azure_ring_captainAI(pCreature);
-}
-
-/*######
 ## npc_arcane_beam
 ######*/
 
@@ -303,7 +274,9 @@ struct npc_arcane_beamAI : public ScriptedAI
 {
     npc_arcane_beamAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_oculus*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_oculus*>(pCreature->GetInstanceData());
+        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
         Reset();
     }
 
@@ -319,7 +292,7 @@ struct npc_arcane_beamAI : public ScriptedAI
         }
 
         // HACK remove when correct modelid will be taken by core
-        m_creature->SetDisplayId(11686);                     
+        m_creature->SetDisplayId(11686);
 
         // cast spells
         DoCastSpellIfCan(m_creature, SPELL_ARCANE_BEAM_PERIODIC, CAST_TRIGGERED);
@@ -333,43 +306,13 @@ struct npc_arcane_beamAI : public ScriptedAI
             if (Creature* pVaros = m_pInstance->GetSingleCreatureFromStorage(NPC_VAROS))
                 SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, pVaros);
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-UnitAI* GetAI_npc_arcane_beam(Creature* pCreature)
-{
-    return new npc_arcane_beamAI(pCreature);
-}
-
-/*######
-## npc_centrifuge_core
-######*/
-
-// TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_centrifuge_coreAI : public Scripted_NoMovementAI
-{
-    npc_centrifuge_coreAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
-
-    // Note: visual already handled in creature_template_addon
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
-};
-
-UnitAI* GetAI_npc_centrifuge_core(Creature* pCreature)
-{
-    return new npc_centrifuge_coreAI(pCreature);
-}
 
 void AddSC_boss_varos()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_varos";
-    pNewScript->GetAI = &GetAI_boss_varos;
+    pNewScript->GetAI = &GetNewAIInstance<boss_varosAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -378,17 +321,7 @@ void AddSC_boss_varos()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "npc_azure_ring_captain";
-    pNewScript->GetAI = &GetAI_npc_azure_ring_captain;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "npc_arcane_beam";
-    pNewScript->GetAI = &GetAI_npc_arcane_beam;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_centrifuge_core";
-    pNewScript->GetAI = &GetAI_npc_centrifuge_core;
+    pNewScript->GetAI = &GetNewAIInstance<npc_arcane_beamAI>;
     pNewScript->RegisterSelf();
 }

@@ -61,22 +61,23 @@ struct boss_eregosAI : public ScriptedAI
 {
     boss_eregosAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_oculus*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+
+        // ToDo: check if different for heroic
+        m_uiMaxWhelps = 4;
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_oculus* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiArcaneBarrageTimer;
     uint32 m_uiArcaneVolleyTimer;
     uint32 m_uiEnrageTimer;
     uint32 m_uiSummonWhelpsTimer;
+    uint8 m_uiMaxWhelps;
     float m_fHpPercent;
-
-    uint8 m_uiAnomalyTargetIndex;
-    GuidVector m_vAnomalyTargets;
 
     void Reset() override
     {
@@ -85,7 +86,6 @@ struct boss_eregosAI : public ScriptedAI
         m_uiEnrageTimer         = 35000;
         m_uiSummonWhelpsTimer   = urand(15000, 20000);
         m_fHpPercent            = 60.0f;
-        m_uiAnomalyTargetIndex  = 0;
 
         m_attackDistance = 20.0f;
     }
@@ -124,21 +124,7 @@ struct boss_eregosAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        if (pSummoned->GetEntry() == NPC_PLANAR_ANOMALY)
-        {
-            pSummoned->CastSpell(pSummoned, SPELL_PLANAR_ANOMALY_AGGRO, TRIGGERED_OLD_TRIGGERED);
-
-            // If this happens then something is really wrong
-            if (m_vAnomalyTargets.empty())
-                return;
-
-            if (Unit* pTarget = m_creature->GetMap()->GetUnit(m_vAnomalyTargets[m_uiAnomalyTargetIndex]))
-                pSummoned->GetMotionMaster()->MoveFollow(pTarget, 0, 0);
-
-            if (m_uiAnomalyTargetIndex < m_vAnomalyTargets.size() - 1)
-                ++m_uiAnomalyTargetIndex;
-        }
-        else if (pSummoned->GetEntry() == NPC_GREATER_LEY_WHELP)
+        if (pSummoned->GetEntry() == NPC_GREATER_LEY_WHELP)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 pSummoned->AI()->AttackStart(pTarget);
@@ -157,20 +143,6 @@ struct boss_eregosAI : public ScriptedAI
         {
             if (DoCastSpellIfCan(m_creature, SPELL_PLANAR_SHIFT) == CAST_OK)
             {
-                // Get all the vehicle entries which are in combat with the boss
-                m_vAnomalyTargets.clear();
-                m_uiAnomalyTargetIndex = 0;
-
-                ThreatList const& threatList = m_creature->getThreatManager().getThreatList();
-                for (auto itr : threatList)
-                {
-                    if (Unit* pTarget = m_creature->GetMap()->GetUnit(itr->getUnitGuid()))
-                    {
-                        if (pTarget->GetEntry() == NPC_RUBY_DRAKE || pTarget->GetEntry() == NPC_AMBER_DRAKE || pTarget->GetEntry() == NPC_EMERALD_DRAKE)
-                            m_vAnomalyTargets.push_back(pTarget->GetObjectGuid());
-                    }
-                }
-
                 // This will summon an anomaly for each player (vehicle)
                 DoCastSpellIfCan(m_creature, SPELL_PLANAR_ANOMALIES, CAST_TRIGGERED);
 
@@ -200,12 +172,10 @@ struct boss_eregosAI : public ScriptedAI
 
         if (m_uiSummonWhelpsTimer < uiDiff)
         {
-            // ToDo: the number of whelps summoned may be different based on difficulty. Needs research!
-            for (uint8 i = 0; i < 4; ++i)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_LEY_WHELP, CAST_TRIGGERED) == CAST_OK)
-                    m_uiSummonWhelpsTimer = 20000;
-            }
+            for (uint8 i = 0; i < m_uiMaxWhelps; ++i)
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_LEY_WHELP, CAST_TRIGGERED);
+
+            m_uiSummonWhelpsTimer = 20000;
         }
         else
             m_uiSummonWhelpsTimer -= uiDiff;
@@ -231,45 +201,55 @@ struct boss_eregosAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_eregos(Creature* pCreature)
-{
-    return new boss_eregosAI(pCreature);
-}
-
 /*######
 ## npc_planar_anomaly
 ######*/
 
 struct npc_planar_anomalyAI : public ScriptedAI
 {
-    npc_planar_anomalyAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_planar_anomalyAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
+        Reset();
+    }
 
     uint32 m_uiPlanarBlastTimer;
     bool m_bHasBlastCasted;
 
+    ObjectGuid m_spawnerGuid;
+
     void Reset() override
     {
+        // fix visual - hack
+        m_creature->SetDisplayId(11686);
+
+        // visual spell
+        DoCastSpellIfCan(m_creature, SPELL_PLANAR_ANOMALY_AGGRO);
+
         m_uiPlanarBlastTimer = 15000;
         m_bHasBlastCasted = false;
-    }
 
-    void AttackStart(Unit* /*pWho*/) override { }
+        // start chasing the summoner (player / vehicle)
+        if (Unit* pSpawner = m_creature->GetSpawner())
+        {
+            m_creature->GetMotionMaster()->MoveChase(pSpawner);
+            m_spawnerGuid = pSpawner->GetObjectGuid();
+        }
+    }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
         if (m_bHasBlastCasted)
             return;
 
-        // Check for the players mounted on the vehicles
-        if (pWho->GetTypeId() == TYPEID_PLAYER)
+        // Check if the spawner Guid is in range
+        if (pWho->GetObjectGuid() == m_spawnerGuid && m_creature->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))
         {
-            if (m_creature->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))
+            if (DoCastSpellIfCan(m_creature, SPELL_PLANAR_BLAST) == CAST_OK)
             {
-                if (DoCastSpellIfCan(m_creature, SPELL_PLANAR_BLAST) == CAST_OK)
-                {
-                    m_bHasBlastCasted = true;
-                    m_creature->ForcedDespawn(1000);
-                }
+                m_bHasBlastCasted = true;
+                m_creature->ForcedDespawn(1000);
             }
         }
     }
@@ -292,20 +272,15 @@ struct npc_planar_anomalyAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_planar_anomaly(Creature* pCreature)
-{
-    return new npc_planar_anomalyAI(pCreature);
-}
-
 void AddSC_boss_eregos()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_eregos";
-    pNewScript->GetAI = &GetAI_boss_eregos;
+    pNewScript->GetAI = &GetNewAIInstance<boss_eregosAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_planar_anomaly";
-    pNewScript->GetAI = &GetAI_npc_planar_anomaly;
+    pNewScript->GetAI = &GetNewAIInstance<npc_planar_anomalyAI>;
     pNewScript->RegisterSelf();
 }

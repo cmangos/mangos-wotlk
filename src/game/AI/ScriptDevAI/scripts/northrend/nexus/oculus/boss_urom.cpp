@@ -77,7 +77,7 @@ struct boss_uromAI : public ScriptedAI
 {
     boss_uromAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_oculus*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
 
         // Randomize the trash mobs packs
@@ -87,7 +87,7 @@ struct boss_uromAI : public ScriptedAI
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_oculus* m_pInstance;
     bool m_bIsRegularMode;
 
     bool m_bIsTeleporting;
@@ -357,15 +357,10 @@ struct boss_uromAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_urom(Creature* pCreature)
-{
-    return new boss_uromAI(pCreature);
-}
-
 void AddSC_boss_urom()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_urom";
-    pNewScript->GetAI = &GetAI_boss_urom;
+    pNewScript->GetAI = &GetNewAIInstance<boss_uromAI>;
     pNewScript->RegisterSelf();
 }

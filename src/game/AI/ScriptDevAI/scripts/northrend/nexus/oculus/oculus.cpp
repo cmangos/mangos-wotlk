@@ -83,6 +83,20 @@ void instance_oculus::OnObjectCreate(GameObject* pGo)
     }
 }
 
+void instance_oculus::OnCreatureRespawn(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        // following creatures have a passive behavior
+        case NPC_IMAGE_OF_BELGARISTRASZ:
+        case NPC_CENTRIFUGE_CORE:
+        case NPC_AZURE_RING_CAPTAIN:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
+        break;
+    }
+}
+
 void instance_oculus::SetData(uint32 uiType, uint32 uiData)
 {
     switch (uiType)
