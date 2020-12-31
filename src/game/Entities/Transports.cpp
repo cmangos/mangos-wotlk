@@ -31,6 +31,9 @@
 
 #include "Movement/MoveSpline.h"
 
+#include "Entities/Vehicle.h"
+#include "Entities/Unit.h"
+
 #include <G3D/Quat.h>
 
 void MapManager::LoadTransports()
@@ -271,6 +274,15 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z, fl
         WorldObject* obj = (*m_passengerTeleportIterator++);
 
         Position pos = obj->m_movementInfo.GetTransportPos();
+
+        if (obj->IsUnit())
+        {
+            Unit* unit = static_cast<Unit*>(obj);
+            if (unit->GetVehicleInfo())
+            {
+                unit->GetVehicleInfo()->TeleportPassengers(newMapid);
+            }
+        }
 
         switch (obj->GetTypeId())
         {

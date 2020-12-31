@@ -91,6 +91,7 @@ VehicleInfo::VehicleInfo(Unit* owner, VehicleEntry const* vehicleEntry, uint32 o
     m_playerSeats(0),
     m_overwriteNpcEntry(overwriteNpcEntry),
     m_isInitialized(false),
+    m_disabledAccessoryInit(false),
     m_originalFaction(owner->getFaction())
 {
     MANGOS_ASSERT(vehicleEntry);
@@ -126,16 +127,19 @@ void VehicleInfo::Initialize()
     if (!m_overwriteNpcEntry)
         m_overwriteNpcEntry = m_owner->GetEntry();
 
-    // Loading passengers (rough version only!)
-    SQLMultiStorage::SQLMSIteratorBounds<VehicleAccessory> bounds = sVehicleAccessoryStorage.getBounds<VehicleAccessory>(m_overwriteNpcEntry);
-    for (SQLMultiStorage::SQLMultiSIterator<VehicleAccessory> itr = bounds.first; itr != bounds.second; ++itr)
+    if (!m_disabledAccessoryInit)
     {
-        if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ(), 2 * m_owner->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
+        // Loading passengers (rough version only!)
+        SQLMultiStorage::SQLMSIteratorBounds<VehicleAccessory> bounds = sVehicleAccessoryStorage.getBounds<VehicleAccessory>(m_overwriteNpcEntry);
+        for (SQLMultiStorage::SQLMultiSIterator<VehicleAccessory> itr = bounds.first; itr != bounds.second; ++itr)
         {
-            DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
-            m_accessoryGuids.insert(summoned->GetObjectGuid());
-            int32 basepoint0 = itr->seatId + 1;
-            summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            if (Creature* summoned = m_owner->SummonCreature(itr->passengerEntry, m_owner->GetPositionX(), m_owner->GetPositionY(), m_owner->GetPositionZ(), 2 * m_owner->GetOrientation(), TEMPSPAWN_DEAD_DESPAWN, 0))
+            {
+                DEBUG_LOG("VehicleInfo(of %s)::Initialize: Load vehicle accessory %s onto seat %u", m_owner->GetGuidStr().c_str(), summoned->GetGuidStr().c_str(), itr->seatId);
+                m_accessoryGuids.insert(summoned->GetObjectGuid());
+                int32 basepoint0 = itr->seatId + 1;
+                summoned->CastCustomSpell((Unit*)m_owner, SPELL_RIDE_VEHICLE_HARDCODED, &basepoint0, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            }
         }
     }
 
@@ -215,6 +219,9 @@ void VehicleInfo::Board(Unit* passenger, uint8 seat)
     // Calculate passengers local position
     float lx, ly, lz, lo;
     CalculateBoardingPositionOf(passenger->GetPositionX(), passenger->GetPositionY(), passenger->GetPositionZ(), passenger->GetOrientation(), lx, ly, lz, lo);
+
+    if (GenericTransport* transport = passenger->GetTransport())
+        transport->RemovePassenger(passenger);
 
     BoardPassenger(passenger, lx, ly, lz, lo, seat);        // Use TransportBase to store the passenger
 
@@ -467,6 +474,27 @@ void VehicleInfo::RemoveAccessoriesFromMap()
     m_isInitialized = false;
 }
 
+void VehicleInfo::TeleportPassengers(uint32 mapId)
+{
+    std::vector<Player*> players;
+    for (auto& passenger : m_passengers)
+    {
+        if (passenger.first->IsPlayer())
+        {
+            players.push_back((Player*)passenger.first);
+        }
+    }
+    GenericTransport* transport = GetOwner()->GetTransport();
+    Position pos = GetOwner()->GetPosition(transport);
+    for (auto player : players)
+    {
+        if (player->IsDead() && !player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+            player->ResurrectPlayer(1.0);
+        UnBoard(player, true);
+        player->TeleportTo(mapId, pos.x, pos.y, pos.z, pos.o, TELE_TO_NOT_LEAVE_TRANSPORT, nullptr, transport);
+    }
+}
+
 /* ************************************************************************************************
  *          Helper function for seat control
  * ***********************************************************************************************/
@@ -507,13 +535,13 @@ bool VehicleInfo::GetUsableSeatFor(Unit* passenger, uint8& seat, bool reset, boo
     if (next)
     {
         for (uint32 i = 0; i < MAX_VEHICLE_SEAT; ++i, seat = (seat + 1) % MAX_VEHICLE_SEAT)
-            if (possibleSeats & (1 << (seat + 1)))
+            if (possibleSeats & (1 << seat))
                 return true;
     }
     else
     {
         for (uint32 i = 0; i < MAX_VEHICLE_SEAT; ++i, seat = (seat + MAX_VEHICLE_SEAT - 1) % MAX_VEHICLE_SEAT)
-            if (possibleSeats & (1 << (seat + 1)))
+            if (possibleSeats & (1 << seat))
                 return true;
     }
 

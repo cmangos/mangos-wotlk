@@ -81,6 +81,10 @@ class VehicleInfo : public TransportBase
 
         void RemoveAccessoriesFromMap();                    ///< Unsummones accessory in case of far-teleport or death
 
+        void TeleportPassengers(uint32 mapId);
+
+        void DisableAccessoryInit() { m_disabledAccessoryInit = true; }
+
     private:
         // Internal use to calculate the boarding position
         void CalculateBoardingPositionOf(float gx, float gy, float gz, float go, float& lx, float& ly, float& lz, float& lo) const;
@@ -107,6 +111,7 @@ class VehicleInfo : public TransportBase
 
         uint32 m_overwriteNpcEntry;                         // Internal use to store the entry with which the vehicle-accessories are fetched
         bool m_isInitialized;                               // Internal use to store if the accessory is initialized
+        bool m_disabledAccessoryInit;
         uint32 m_originalFaction;                           // Internal use to store the original unit faction before taking control of the unit
         GuidSet m_accessoryGuids;                           ///< Stores the summoned accessories of this vehicle
 };

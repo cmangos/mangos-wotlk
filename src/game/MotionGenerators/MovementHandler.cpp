@@ -130,6 +130,8 @@ void WorldSession::HandleMoveWorldportAckOpcode()
             {
                 transport->AddPassenger(GetPlayer(), false);
                 transport->UpdatePassengerPosition(GetPlayer());
+                if (GetPlayer()->IsVehicle()) // when teleporting onto transport, protocol doesnt support summoning accessories
+                    GetPlayer()->GetVehicleInfo()->DisableAccessoryInit();
             }
         }
         GetPlayer()->m_teleportTransport = ObjectGuid();
