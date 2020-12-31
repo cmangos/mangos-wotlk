@@ -2809,11 +2809,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                         target->MonsterWhisper(text, target, true);
                         return;
                     }
-                    case 61187:                             // Twilight Shift (single target)
-                    case 61190:                             // Twilight Shift (many targets)
-                        target->RemoveAurasDueToSpell(57620);
-                        target->CastSpell(target, 61885, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                        return;
                     case 62061:                             // Festive Holiday Mount
                         if (target->HasAuraType(SPELL_AURA_MOUNTED))
                             // Reindeer Transformation

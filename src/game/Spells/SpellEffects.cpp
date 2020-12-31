@@ -3668,13 +3668,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 57578:                                 // Lava Strike
-                {
-                    if (unitTarget)
-                        m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
-
-                    return;
-                }
                 case 57908:                                 // Stain Cloth
                 {
                     // nothing do more

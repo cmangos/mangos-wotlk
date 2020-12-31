@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "obsidian_sanctum.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -81,23 +83,11 @@ enum
     SPELL_TWILIGHT_TORMENT_VESP                 = 57948,    // (Shadow only) trigger 57935 then 57988
     SPELL_TWILIGHT_TORMENT_VESP_ACO             = 58853,    // (Fire and Shadow) trigger 58835 then 57988
 
-    // Vesperon related npcs
-    NPC_DISCIPLE_OF_VESPERON                    = 30858,    // Disciple of Vesperon
-    NPC_ACOLYTE_OF_VESPERON                     = 31219,    // Acolyte of Vesperon - summoned during Sartharion event
-    // NPC_VESPERON_CONTROLLER                  = 30878,    // not clear how to use this; used only to cast 61190 to eject players to normal realm
-    // NPC_VESPERON_CONTROLLER_DEBUFF_CLEAR     = 32694,    // not used
-
     // Shadron
     // In portal is a disciple, when disciple killed remove Power_of_vesperon, portal open multiple times
     SPELL_POWER_OF_SHADRON                      = 58105,    // Shadron's presence increases Fire damage taken by all enemies by 100%.
     SPELL_GIFT_OF_TWILIGTH_SHA                  = 57835,    // TARGET_SCRIPT shadron
     SPELL_GIFT_OF_TWILIGTH_SAR                  = 58766,    // TARGET_SCRIPT sartharion
-
-    // Shadron related npcs
-    NPC_DISCIPLE_OF_SHADRON                     = 30688,    // Disciple of Shadron
-    NPC_ACOLYTE_OF_SHADRON                      = 31218,    // Acolyte of Shadron - summoned during Sartharion event
-    // NPC_SHADRON_PORTAL                       = 30741,    // not used
-    // NPC_SHADRON_PORTAL_VISUAL                = 30650,    // not used
 
     // Tenebron
     // in the portal spawns 6 eggs, if not killed in time (approx. 20s)  they will hatch,  whelps can cast 60708
@@ -110,17 +100,9 @@ enum
     SPELL_HATCH_EGGS_EFFECT_H                   = 59190,
     SPELL_HATCH_EGGS_EFFECT                     = 58685,
 
-    // Tenebron related npcs
-    NPC_TWILIGHT_EGG                            = 30882,    // Twilight Egg - summoned during Tenebron event
-    NPC_SARTHARION_TWILIGHT_EGG                 = 31204,    // Twilight Egg - summoned during Sartharion event
-    NPC_TWILIGHT_EGG_CONTROLLER                 = 31138,    // not clear how to use this; used only to eject players to normal realm
-
     // Twilight eggs spells
     SPELL_SUMMON_TWILIGHT_WHELP                 = 58035,    // will spawn 30890
     SPELL_SUMMON_SARTHARION_TWILIGHT_WHELP      = 58826,    // will spawn 31214
-
-    NPC_TWILIGHT_WHELP                          = 30890,
-    NPC_SHARTHARION_TWILIGHT_WHELP              = 31214,
 
     // Flame tsunami
     SPELL_FLAME_TSUNAMI                         = 57494,    // the visual dummy
@@ -133,6 +115,7 @@ enum
     // SPELL_CYCLONE_AURA                       = 57560,    // in creature_template_addon
     SPELL_CYCLONE_AURA_STRIKE                   = 57598,    // triggers 57578
 
+    // other npcs related to this encounter
     NPC_FLAME_TSUNAMI                           = 30616,    // for the flame waves
     NPC_LAVA_BLAZE                              = 30643,    // adds spawning from flame strike
 
@@ -521,11 +504,6 @@ struct boss_sartharionAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_sartharion(Creature* pCreature)
-{
-    return new boss_sartharionAI(pCreature);
-}
-
 enum TeneText
 {
     SAY_TENEBRON_AGGRO                      = -1615009,
@@ -843,7 +821,7 @@ struct mob_tenebronAI : public dummy_dragonAI
 
     void JustSummoned(Creature* pSummoned) override
     {
-        if (pSummoned->GetEntry() == NPC_TWILIGHT_EGG_CONTROLLER)
+        if (pSummoned->GetEntry() == NPC_TENEBRON_EGG_CONTROLLER)
             m_portalOwnerGuid = pSummoned->GetObjectGuid();
 
         // update phasemask manually
@@ -852,7 +830,7 @@ struct mob_tenebronAI : public dummy_dragonAI
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
     {
-        if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_TWILIGHT_EGG_CONTROLLER)
+        if (eventType == AI_EVENT_CUSTOM_A && pInvoker->GetEntry() == NPC_TENEBRON_EGG_CONTROLLER)
         {
             if (m_pInstance)
                 m_pInstance->SetPortalStatus(m_uiPortalId, false);
@@ -886,7 +864,7 @@ struct mob_tenebronAI : public dummy_dragonAI
 
             // spawn the controller as well in order to eject players from twilight realm
             m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 20.0f, fX, fY, fZ);
-            m_creature->SummonCreature(NPC_TWILIGHT_EGG_CONTROLLER, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_TENEBRON_EGG_CONTROLLER, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
 
             // used only for visual - the result is handled by the Twilight eggs script
             if (DoCastSpellIfCan(m_creature, SPELL_HATCH_EGGS_MAIN) == CAST_OK)
@@ -902,11 +880,6 @@ struct mob_tenebronAI : public dummy_dragonAI
             m_uiSpawnEggsTimer -= uiDiff;
     }
 };
-
-UnitAI* GetAI_mob_tenebron(Creature* pCreature)
-{
-    return new mob_tenebronAI(pCreature);
-}
 
 /*######
 ## Mob Shadron
@@ -1021,11 +994,6 @@ struct mob_shadronAI : public dummy_dragonAI
     }
 };
 
-UnitAI* GetAI_mob_shadron(Creature* pCreature)
-{
-    return new mob_shadronAI(pCreature);
-}
-
 /*######
 ## Mob Vesperon
 ######*/
@@ -1131,18 +1099,18 @@ struct mob_vesperonAI : public dummy_dragonAI
     }
 };
 
-UnitAI* GetAI_mob_vesperon(Creature* pCreature)
-{
-    return new mob_vesperonAI(pCreature);
-}
-
 /*######
 ## Mob Twilight Eggs
 ######*/
 
 struct mob_twilight_eggsAI : public Scripted_NoMovementAI
 {
-    mob_twilight_eggsAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    mob_twilight_eggsAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
+        Reset();
+    }
 
     uint32 m_uiHatchTimer;
 
@@ -1150,9 +1118,6 @@ struct mob_twilight_eggsAI : public Scripted_NoMovementAI
     {
         m_uiHatchTimer = 20000;
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
     void JustSummoned(Creature* pSummoned) override
     {
@@ -1182,11 +1147,6 @@ struct mob_twilight_eggsAI : public Scripted_NoMovementAI
     }
 };
 
-UnitAI* GetAI_mob_twilight_eggs(Creature* pCreature)
-{
-    return new mob_twilight_eggsAI(pCreature);
-}
-
 /*######
 ## npc_tenebron_egg_controller
 ######*/
@@ -1196,6 +1156,8 @@ struct npc_tenebron_egg_controllerAI : public Scripted_NoMovementAI
     npc_tenebron_egg_controllerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
         Reset();
     }
 
@@ -1207,9 +1169,6 @@ struct npc_tenebron_egg_controllerAI : public Scripted_NoMovementAI
     {
         m_uiHatchTimer = 20000;
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
     void UpdateAI(const uint32 uiDiff) override
     {
@@ -1232,18 +1191,18 @@ struct npc_tenebron_egg_controllerAI : public Scripted_NoMovementAI
     }
 };
 
-UnitAI* GetAI_npc_tenebron_egg_controller(Creature* pCreature)
-{
-    return new npc_tenebron_egg_controllerAI(pCreature);
-}
-
 /*######
 ## npc_flame_tsunami
 ######*/
 
 struct npc_flame_tsunamiAI : public ScriptedAI
 {
-    npc_flame_tsunamiAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_flame_tsunamiAI(Creature* pCreature) : ScriptedAI(pCreature)
+    {
+        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
+        Reset();
+    }
 
     uint32 m_uiTsunamiTimer;
 
@@ -1254,9 +1213,6 @@ struct npc_flame_tsunamiAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_FLAME_TSUNAMI, CAST_TRIGGERED);
         DoCastSpellIfCan(m_creature, SPELL_FLAME_TSUNAMI_DMG_AURA, CAST_TRIGGERED);
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
     {
@@ -1285,11 +1241,6 @@ struct npc_flame_tsunamiAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_flame_tsunami(Creature* pCreature)
-{
-    return new npc_flame_tsunamiAI(pCreature);
-}
-
 /*######
 ## npc_fire_cyclone
 ######*/
@@ -1299,15 +1250,14 @@ struct npc_fire_cycloneAI : public ScriptedAI
     npc_fire_cycloneAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
         Reset();
     }
 
     ScriptedInstance* m_pInstance;
 
     void Reset()  override { }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
@@ -1323,50 +1273,90 @@ struct npc_fire_cycloneAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_fire_cyclone(Creature* pCreature)
+/*######
+## spell_twilight_shift_aura - 61187, 61190
+######*/
+
+struct spell_twilight_shift_aura : public AuraScript
 {
-    return new npc_fire_cycloneAI(pCreature);
-}
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        if (apply)
+        {
+            target->RemoveAurasDueToSpell(57620);
+            target->CastSpell(target, 61885, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+/*######
+## spell_lava_strike - 57578
+######*/
+
+struct spell_lava_strike : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // trigger spell 57571
+        uint32 uiSpell = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        target->CastSpell(nullptr, uiSpell, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_sartharion()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_sartharion";
-    pNewScript->GetAI = &GetAI_boss_sartharion;
+    pNewScript->GetAI = &GetNewAIInstance<boss_sartharionAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_vesperon";
-    pNewScript->GetAI = &GetAI_mob_vesperon;
+    pNewScript->GetAI = &GetNewAIInstance<mob_vesperonAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_shadron";
-    pNewScript->GetAI = &GetAI_mob_shadron;
+    pNewScript->GetAI = &GetNewAIInstance<mob_shadronAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_tenebron";
-    pNewScript->GetAI = &GetAI_mob_tenebron;
+    pNewScript->GetAI = &GetNewAIInstance<mob_tenebronAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_twilight_eggs";
-    pNewScript->GetAI = &GetAI_mob_twilight_eggs;
+    pNewScript->GetAI = &GetNewAIInstance<mob_twilight_eggsAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_tenebron_egg_controller";
-    pNewScript->GetAI = &GetAI_npc_tenebron_egg_controller;
+    pNewScript->GetAI = &GetNewAIInstance<npc_tenebron_egg_controllerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_flame_tsunami";
-    pNewScript->GetAI = &GetAI_npc_flame_tsunami;
+    pNewScript->GetAI = &GetNewAIInstance<npc_flame_tsunamiAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_fire_cyclone";
-    pNewScript->GetAI = &GetAI_npc_fire_cyclone;
+    pNewScript->GetAI = &GetNewAIInstance<npc_fire_cycloneAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<spell_twilight_shift_aura>("spell_twilight_shift_aura");
+    RegisterSpellScript<spell_lava_strike>("spell_lava_strike");
 }

@@ -53,6 +53,9 @@ void instance_obsidian_sanctum::OnCreatureCreate(Creature* pCreature)
         case NPC_VESPERON:
             pCreature->SetActiveObjectState(true);
         case NPC_SARTHARION:
+        case NPC_VESPERON_CONTROLLER:
+        case NPC_VESPERON_CONTROLLER_DEBUFF_CLEAR:
+        case NPC_TENEBRON_EGG_CONTROLLER:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_FIRE_CYCLONE:
