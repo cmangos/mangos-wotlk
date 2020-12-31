@@ -291,10 +291,6 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
 
     DEBUG_LOG("WORLD: Received opcode CMSG_GAMEOBJ_USE guid: %s", guid.GetString().c_str());
 
-    // ignore for remote control state
-    if (!_player->IsSelfMover())
-        return;
-
     GameObject* obj = _player->GetMap()->GetGameObject(guid);
     if (!obj)
         return;
@@ -307,6 +303,14 @@ void WorldSession::HandleGameObjectUseOpcode(WorldPacket& recv_data)
     {
         sLog.outError("HandleGameObjectUseOpcode: CMSG_GAMEOBJ_USE for despawned GameObject (Entry %u), didn't expect this to happen.", obj->GetEntry());
         return;
+    }
+
+    // ignore for remote control state
+    if (!_player->IsSelfMover())
+    {
+        // check player on vehicle
+        if (!_player->GetTransportInfo() || !_player->GetTransportInfo()->IsOnVehicle() || !obj->GetGOInfo()->IsUsableMounted())
+            return;
     }
 
     // Never expect this opcode for some type GO's
