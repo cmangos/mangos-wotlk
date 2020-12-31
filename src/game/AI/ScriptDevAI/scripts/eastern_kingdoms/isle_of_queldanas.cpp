@@ -107,20 +107,20 @@ struct npc_shattered_sun_fighterAI : public ScriptedAI
             {
                 switch (urand(0, 3))
                 {
-                    case 0: transformScriptId = SCRIPT_TRANSFORM_ARCHER_BE_MALE;
-                    case 1: transformScriptId = SCRIPT_TRANSFORM_ARCHER_BE_FEMALE;
-                    case 2: transformScriptId = SCRIPT_TRANSFORM_ARCHER_DRAENEI_MALE;
-                    case 3: transformScriptId = SCRIPT_TRANSFORM_ARCHER_DRAENEI_FEMALE;
+                    case 0: transformScriptId = SCRIPT_TRANSFORM_ARCHER_BE_MALE; break;
+                    case 1: transformScriptId = SCRIPT_TRANSFORM_ARCHER_BE_FEMALE; break;
+                    case 2: transformScriptId = SCRIPT_TRANSFORM_ARCHER_DRAENEI_MALE; break;
+                    case 3: transformScriptId = SCRIPT_TRANSFORM_ARCHER_DRAENEI_FEMALE; break;
                 }
             }
             else if (creature->GetEntry() == NPC_SHATTERED_SUN_WARRIOR)
             {
                 switch (urand(0, 3))
                 {
-                    case 0: transformScriptId = SCRIPT_TRANSFORM_WARRIOR_BE_MALE;
-                    case 1: transformScriptId = SCRIPT_TRANSFORM_WARRIOR_BE_FEMALE;
-                    case 2: transformScriptId = SCRIPT_TRANSFORM_WARRIOR_DRAENEI_MALE;
-                    case 3: transformScriptId = SCRIPT_TRANSFORM_WARRIOR_DRAENEI_FEMALE;
+                    case 0: transformScriptId = SCRIPT_TRANSFORM_WARRIOR_BE_MALE; break;
+                    case 1: transformScriptId = SCRIPT_TRANSFORM_WARRIOR_BE_FEMALE; break;
+                    case 2: transformScriptId = SCRIPT_TRANSFORM_WARRIOR_DRAENEI_MALE; break;
+                    case 3: transformScriptId = SCRIPT_TRANSFORM_WARRIOR_DRAENEI_FEMALE; break;
                 }
             }
             if (transformScriptId)
