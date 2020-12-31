@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "eye_of_eternity.h"
+#include "Maps/TransportSystem.h"
 
 instance_eye_of_eternity::instance_eye_of_eternity(Map* pMap) : ScriptedInstance(pMap),
     m_uiMalygosResetTimer(0),
@@ -144,6 +145,19 @@ void instance_eye_of_eternity::OnCreatureDeath(Creature* pCreature)
     {
         case NPC_NEXUS_LORD:
         case NPC_SCION_OF_ETERNITY:
+            // disk vehicles fall down once passenger is killed
+            if (pCreature->GetTransportInfo() && pCreature->GetTransportInfo()->IsOnVehicle())
+            {
+                if (Unit* pVehicle = static_cast<Unit*>(pCreature->GetTransportInfo()->GetTransport()))
+                {
+                    pVehicle->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE, pCreature->GetObjectGuid());
+                    pVehicle->GetMotionMaster()->Clear(false, true);
+                    pVehicle->SetLevitate(false);
+                    pVehicle->GetMotionMaster()->MoveFall();
+                }
+            }
+
+            // remove passenger from riders list
             m_lDiskRidersGuids.remove(pCreature->GetObjectGuid());
 
             // start phase 3 if all adds are dead
