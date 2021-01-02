@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "trial_of_the_crusader.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -76,7 +78,7 @@ struct boss_fjolaAI : public ScriptedAI
 {
     boss_fjolaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_trial_of_the_crusader*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_trial_of_the_crusader*>(pCreature->GetInstanceData());
         Reset();
     }
 
@@ -272,11 +274,6 @@ struct boss_fjolaAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_fjola(Creature* pCreature)
-{
-    return new boss_fjolaAI(pCreature);
-}
-
 /*######
 ## boss_eydis
 ######*/
@@ -285,7 +282,7 @@ struct boss_eydisAI : public ScriptedAI
 {
     boss_eydisAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_trial_of_the_crusader*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_trial_of_the_crusader*>(pCreature->GetInstanceData());
         Reset();
     }
 
@@ -347,11 +344,6 @@ struct boss_eydisAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_eydis(Creature* pCreature)
-{
-    return new boss_eydisAI(pCreature);
-}
-
 /*######
 ## npc_concentrated_bullet
 ######*/
@@ -360,7 +352,9 @@ struct npc_concentrated_bulletAI : public ScriptedAI
 {
     npc_concentrated_bulletAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_trial_of_the_crusader*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_trial_of_the_crusader*>(pCreature->GetInstanceData());
+        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
         Reset();
     }
 
@@ -391,56 +385,155 @@ struct npc_concentrated_bulletAI : public ScriptedAI
         if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_vStalkersGuids[urand(0, m_vStalkersGuids.size() - 1)]))
             m_creature->GetMotionMaster()->MovePoint(1, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ());
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-UnitAI* GetAI_npc_concentrated_bullet(Creature* pCreature)
-{
-    return new npc_concentrated_bulletAI(pCreature);
-}
 
 /*######
-## npc_valkyr_stalker
+## spell_light_ball_passive - 66312
 ######*/
 
-// TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_valkyr_stalkerAI : public Scripted_NoMovementAI
+struct spell_light_ball_passive : public SpellScript
 {
-    npc_valkyr_stalkerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
 
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!caster || !caster->IsCreature() || !target || !target->IsPlayer())
+            return;
+
+        if (target->HasAuraOfDifficulty(65686))
+            target->CastSpell(target, 67590, TRIGGERED_OLD_TRIGGERED);
+        else
+            caster->CastSpell(caster, 65795, TRIGGERED_OLD_TRIGGERED);
+
+        Creature* lightBall = static_cast<Creature*>(caster);
+        lightBall->ForcedDespawn();
+    }
 };
 
-UnitAI* GetAI_npc_valkyr_stalker(Creature* pCreature)
+/*######
+## spell_dark_ball_passive - 66314
+######*/
+
+struct spell_dark_ball_passive : public SpellScript
 {
-    return new npc_valkyr_stalkerAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!caster || !caster->IsCreature() || !target || !target->IsPlayer())
+            return;
+
+        if (target->HasAuraOfDifficulty(65684))
+            target->CastSpell(target, 67590, TRIGGERED_OLD_TRIGGERED);
+        else
+            caster->CastSpell(caster, 65808, TRIGGERED_OLD_TRIGGERED);
+
+        Creature* darkBall = static_cast<Creature*>(caster);
+        darkBall->ForcedDespawn();
+    }
+};
+
+/*######
+## spell_clear_valkyr_essence - 67547
+######*/
+
+struct spell_clear_valkyr_essence : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        uint32 uiSpell = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        target->RemoveAurasDueToSpell(67590);
+        target->RemoveAurasDueToSpell(65684);
+        target->RemoveAurasDueToSpell(uiSpell);
+    }
+};
+
+/*######
+## spell_clear_valkyr_touch - 68084
+######*/
+
+struct spell_clear_valkyr_touch : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        uint32 uiSpell = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        target->RemoveAurasDueToSpell(66001);
+        target->RemoveAurasDueToSpell(uiSpell);
+    }
+};
+
+/*######
+## spell_powering_up - 67590
+######*/
+
+struct spell_powering_up : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        if (SpellAuraHolder* playerAura = target->GetSpellAuraHolder(spell->m_spellInfo->Id))
+        {
+            if (playerAura && playerAura->GetStackAmount() == 100)
+            {
+                if (target->HasAuraOfDifficulty(65684))
+                    target->CastSpell(target, 65724, TRIGGERED_OLD_TRIGGERED);
+                else if (target->HasAuraOfDifficulty(65686))
+                    target->CastSpell(target, 65748, TRIGGERED_OLD_TRIGGERED);
+
+                target->RemoveAurasDueToSpell(spell->m_spellInfo->Id);
+            }
+        }
+    }
+};
 
 void AddSC_twin_valkyr()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_fjola";
-    pNewScript->GetAI = &GetAI_boss_fjola;
+    pNewScript->GetAI = &GetNewAIInstance<boss_fjolaAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_eydis";
-    pNewScript->GetAI = &GetAI_boss_eydis;
+    pNewScript->GetAI = &GetNewAIInstance<boss_eydisAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_concentrated_bullet";
-    pNewScript->GetAI = &GetAI_npc_concentrated_bullet;
+    pNewScript->GetAI = &GetNewAIInstance<npc_concentrated_bulletAI>;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_valkyr_stalker";
-    pNewScript->GetAI = &GetAI_npc_valkyr_stalker;
-    pNewScript->RegisterSelf();
+    RegisterSpellScript<spell_light_ball_passive>("spell_light_ball_passive");
+    RegisterSpellScript<spell_dark_ball_passive>("spell_dark_ball_passive");
+    RegisterSpellScript<spell_clear_valkyr_essence>("spell_clear_valkyr_essence");
+    RegisterSpellScript<spell_clear_valkyr_touch>("spell_clear_valkyr_touch");
+    RegisterSpellScript<spell_powering_up>("spell_powering_up");
 }

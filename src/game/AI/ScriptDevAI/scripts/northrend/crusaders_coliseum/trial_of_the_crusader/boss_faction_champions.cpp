@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "trial_of_the_crusader.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -256,7 +258,7 @@ struct trial_crusader_commonAI : public ScriptedAI
         m_pAbilityArray(pAbilityArray),
         m_uiMaxAbilities(uiMaxAbilities)
     {
-        m_pInstance = (instance_trial_of_the_crusader*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_trial_of_the_crusader*>(pCreature->GetInstanceData());
         m_uiSpellTimer.resize(m_uiMaxAbilities);
         Reset();
     }
@@ -592,11 +594,6 @@ struct boss_crusader_druid_restoAI : public trial_crusader_commonAI
     }
 };
 
-UnitAI* GetAI_boss_crusader_druid_resto(Creature* pCreature)
-{
-    return new boss_crusader_druid_restoAI(pCreature);
-}
-
 /*######
 ## boss_crusader_paladin_holy
 ######*/
@@ -668,11 +665,6 @@ struct boss_crusader_paladin_holyAI : public trial_crusader_commonAI
     }
 };
 
-UnitAI* GetAI_boss_crusader_paladin_holy(Creature* pCreature)
-{
-    return new boss_crusader_paladin_holyAI(pCreature);
-}
-
 /*######
 ## boss_crusader_priest_disc
 ######*/
@@ -742,11 +734,6 @@ struct boss_crusader_priest_discAI : public trial_crusader_commonAI
         }
     }
 };
-
-UnitAI* GetAI_boss_crusader_priest_disc(Creature* pCreature)
-{
-    return new boss_crusader_priest_discAI(pCreature);
-}
 
 /*######
 ## boss_crusader_shaman_resto
@@ -818,11 +805,6 @@ struct boss_crusader_shaman_restoAI : public trial_crusader_commonAI
     }
 };
 
-UnitAI* GetAI_boss_crusader_shaman_resto(Creature* pCreature)
-{
-    return new boss_crusader_shaman_restoAI(pCreature);
-}
-
 /*######
 ## CRUSADERS RANGED
 ######*/
@@ -879,11 +861,6 @@ struct boss_crusader_druid_balanceAI : public trial_crusader_commonAI
         }
     }
 };
-
-UnitAI* GetAI_boss_crusader_druid_balance(Creature* pCreature)
-{
-    return new boss_crusader_druid_balanceAI(pCreature);
-}
 
 /*######
 ## boss_crusader_hunter
@@ -947,11 +924,6 @@ struct boss_crusader_hunterAI : public trial_crusader_commonAI
     }
 };
 
-UnitAI* GetAI_boss_crusader_hunter(Creature* pCreature)
-{
-    return new boss_crusader_hunterAI(pCreature);
-}
-
 /*######
 ## boss_crusader_mage
 ######*/
@@ -1006,11 +978,6 @@ struct boss_crusader_mageAI : public trial_crusader_commonAI
         }
     }
 };
-
-UnitAI* GetAI_boss_crusader_mage(Creature* pCreature)
-{
-    return new boss_crusader_mageAI(pCreature);
-}
 
 /*######
 ## boss_crusader_priest_shadow
@@ -1077,11 +1044,6 @@ struct boss_crusader_priest_shadowAI : public trial_crusader_commonAI
     }
 };
 
-UnitAI* GetAI_boss_crusader_priest_shadow(Creature* pCreature)
-{
-    return new boss_crusader_priest_shadowAI(pCreature);
-}
-
 /*######
 ## boss_crusader_warlock
 ######*/
@@ -1140,11 +1102,6 @@ struct boss_crusader_warlockAI : public trial_crusader_commonAI
     }
 };
 
-UnitAI* GetAI_boss_crusader_warlock(Creature* pCreature)
-{
-    return new boss_crusader_warlockAI(pCreature);
-}
-
 /*######
 ## MELEE CRUSADERS
 ######*/
@@ -1198,11 +1155,6 @@ struct boss_crusader_death_knightAI : public trial_crusader_commonAI
     }
 };
 
-UnitAI* GetAI_boss_crusader_death_knight(Creature* pCreature)
-{
-    return new boss_crusader_death_knightAI(pCreature);
-}
-
 /*######
 ## boss_crusader_warrior
 ######*/
@@ -1249,11 +1201,6 @@ struct boss_crusader_warriorAI : public trial_crusader_commonAI
         }
     }
 };
-
-UnitAI* GetAI_boss_crusader_warrior(Creature* pCreature)
-{
-    return new boss_crusader_warriorAI(pCreature);
-}
 
 /*######
 ## boss_crusader_paladin_retri
@@ -1304,11 +1251,6 @@ struct boss_crusader_paladin_retriAI : public trial_crusader_commonAI
     }
 };
 
-UnitAI* GetAI_boss_crusader_paladin_retri(Creature* pCreature)
-{
-    return new boss_crusader_paladin_retriAI(pCreature);
-}
-
 /*######
 ## boss_crusader_shaman_enha
 ######*/
@@ -1329,11 +1271,6 @@ struct boss_crusader_shaman_enhaAI : public trial_crusader_commonAI
 
     void Reset() override { trial_crusader_commonAI::Reset(); }
 };
-
-UnitAI* GetAI_boss_crusader_shaman_enha(Creature* pCreature)
-{
-    return new boss_crusader_shaman_enhaAI(pCreature);
-}
 
 /*######
 ## boss_crusader_rogue
@@ -1381,80 +1318,96 @@ struct boss_crusader_rogueAI : public trial_crusader_commonAI
     }
 };
 
-UnitAI* GetAI_boss_crusader_rogue(Creature* pCreature)
+/*######
+## spell_disengage - 65869
+######*/
+
+struct spell_disengage : public SpellScript
 {
-    return new boss_crusader_rogueAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        target->CastSpell(target, 65870, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_faction_champions()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_crusader_death_knight";
-    pNewScript->GetAI = &GetAI_boss_crusader_death_knight;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_death_knightAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_druid_balance";
-    pNewScript->GetAI = &GetAI_boss_crusader_druid_balance;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_druid_balanceAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_druid_resto";
-    pNewScript->GetAI = &GetAI_boss_crusader_druid_resto;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_druid_restoAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_hunter";
-    pNewScript->GetAI = &GetAI_boss_crusader_hunter;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_hunterAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_mage";
-    pNewScript->GetAI = &GetAI_boss_crusader_mage;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_mageAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_paladin_holy";
-    pNewScript->GetAI = &GetAI_boss_crusader_paladin_holy;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_paladin_holyAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_paladin_retri";
-    pNewScript->GetAI = &GetAI_boss_crusader_paladin_retri;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_paladin_retriAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_priest_disc";
-    pNewScript->GetAI = &GetAI_boss_crusader_priest_disc;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_priest_discAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_priest_shadow";
-    pNewScript->GetAI = &GetAI_boss_crusader_priest_shadow;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_priest_shadowAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_rogue";
-    pNewScript->GetAI = &GetAI_boss_crusader_rogue;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_rogueAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_shaman_enha";
-    pNewScript->GetAI = &GetAI_boss_crusader_shaman_enha;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_shaman_enhaAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_shaman_resto";
-    pNewScript->GetAI = &GetAI_boss_crusader_shaman_resto;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_shaman_restoAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_warlock";
-    pNewScript->GetAI = &GetAI_boss_crusader_warlock;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_warlockAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_crusader_warrior";
-    pNewScript->GetAI = &GetAI_boss_crusader_warrior;
+    pNewScript->GetAI = &GetNewAIInstance<boss_crusader_warriorAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_disengage>("spell_disengage");
 }

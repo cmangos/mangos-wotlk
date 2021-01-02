@@ -43,13 +43,13 @@ enum
     // Anub'arak
     SPELL_FREEZING_SLASH                = 66012,
     SPELL_PENETRATING_COLD              = 66013,
-    SPELL_SUMMON_NERUBIAN_BURROWER      = 66332,
-    SPELL_SUMMON_SCARAB                 = 66339,
+    SPELL_SUMMON_NERUBIAN_BURROWER      = 66332,            // triggers spell that summons creature 34607 (number of targets depend on difficulty)
+    SPELL_SUMMON_SCARAB                 = 66339,            // triggers spell that summons creature 34605
     SPELL_SUBMERGE                      = 65981,
     SPELL_EMERGE                        = 65982,
     SPELL_TELEPORT_TO_SPIKE             = 66170,            // used when the underground phase ends
     SPELL_CLEAR_ALL_DEBUFFS             = 34098,
-    SPELL_SUMMON_SPIKES                 = 66169,
+    SPELL_SUMMON_SPIKES                 = 66169,            // summons creature 34660
     SPELL_LEECHING_SWARM                = 66118,
     SPELL_BERSERK                       = 26662,
 
@@ -79,7 +79,6 @@ enum
     NPC_FROSTSPHERE                     = 34606,
     NPC_NERUBIAN_BURROWER               = 34607,
     NPC_ANUBARAK_SPIKE                  = 34660,
-    NPC_BURROW                          = 34862,
 
     MAX_FROSTSPHERES                    = 6,
     MAX_BURROWS                         = 4
@@ -127,7 +126,7 @@ struct boss_anubarak_trialAI : public ScriptedAI
 {
     boss_anubarak_trialAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_trial_of_the_crusader*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_trial_of_the_crusader*>(pCreature->GetInstanceData());
         m_bDidIntroYell = false;
         Reset();
     }
@@ -204,7 +203,7 @@ struct boss_anubarak_trialAI : public ScriptedAI
 
         // It's not clear if these should be spawned by DB or summoned
         for (auto aBurrowSpawnPosition : aBurrowSpawnPositions)
-            m_creature->SummonCreature(NPC_BURROW, aBurrowSpawnPosition[0], aBurrowSpawnPosition[1], aBurrowSpawnPosition[2], aBurrowSpawnPosition[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+            m_creature->SummonCreature(NPC_NERUBIAN_BURROW, aBurrowSpawnPosition[0], aBurrowSpawnPosition[1], aBurrowSpawnPosition[2], aBurrowSpawnPosition[3], TEMPSPAWN_DEAD_DESPAWN, 0);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_ANUBARAK, IN_PROGRESS);
@@ -398,11 +397,6 @@ struct boss_anubarak_trialAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_anubarak_trial(Creature* pCreature)
-{
-    return new boss_anubarak_trialAI(pCreature);
-}
-
 /*######
 ## npc_anubarak_trial_spike
 ######*/
@@ -515,11 +509,6 @@ struct npc_anubarak_trial_spikeAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_anubarak_trial_spike(Creature* pCreature)
-{
-    return new npc_anubarak_trial_spikeAI(pCreature);
-}
-
 bool EffectDummyCreature_spell_dummy_permafrost(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     // always check spellid and effectindex
@@ -541,7 +530,12 @@ bool EffectDummyCreature_spell_dummy_permafrost(Unit* pCaster, uint32 uiSpellId,
 
 struct npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
 {
-    npc_anubarak_trial_frostsphereAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
+    npc_anubarak_trial_frostsphereAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    {
+        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
+        Reset();
+    }
 
     bool m_bPermafrost;
 
@@ -551,9 +545,6 @@ struct npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
 
         m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f);
     }
-
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void AttackStart(Unit* /*pWho*/) override { }
 
     void DamageTaken(Unit* pDoneBy, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
     {
@@ -604,46 +595,21 @@ UnitAI* GetAI_npc_anubarak_trial_frostsphere(Creature* pCreature)
     return new npc_anubarak_trial_frostsphereAI(pCreature);
 }
 
-/*######
-## npc_nerubian_borrow
-######*/
-
-// TODO Remove this 'script' when combat movement can be proper prevented from core-side
-struct npc_nerubian_borrowAI : public Scripted_NoMovementAI
-{
-    npc_nerubian_borrowAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
-
-    void Reset() override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
-};
-
-UnitAI* GetAI_npc_nerubian_borrow(Creature* pCreature)
-{
-    return new npc_nerubian_borrowAI(pCreature);
-}
-
 void AddSC_boss_anubarak_trial()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_anubarak_trial";
-    pNewScript->GetAI = &GetAI_boss_anubarak_trial;
+    pNewScript->GetAI = &GetNewAIInstance<boss_anubarak_trialAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_anubarak_spike";
-    pNewScript->GetAI = &GetAI_npc_anubarak_trial_spike;
+    pNewScript->GetAI = &GetNewAIInstance<npc_anubarak_trial_spikeAI>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_dummy_permafrost;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_frost_sphere";
-    pNewScript->GetAI = &GetAI_npc_anubarak_trial_frostsphere;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_nerubian_borrow";
-    pNewScript->GetAI = &GetAI_npc_nerubian_borrow;
+    pNewScript->GetAI = &GetNewAIInstance<npc_anubarak_trial_frostsphereAI>;
     pNewScript->RegisterSelf();
 }

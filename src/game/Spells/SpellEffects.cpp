@@ -3903,45 +3903,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     m_caster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                     return;
                 }
-                case 65869:                                 // Disengage
-                {
-                    if (unitTarget)
-                        unitTarget->CastSpell(unitTarget, 65870, TRIGGERED_OLD_TRIGGERED);
-
-                    return;
-                }
-                case 66312:                                 // Light Ball Passive
-                {
-                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        if (unitTarget->HasAuraOfDifficulty(65686))
-                            unitTarget->CastSpell(unitTarget, 67590, TRIGGERED_OLD_TRIGGERED);
-                        else
-                            m_caster->CastSpell(m_caster, 65795, TRIGGERED_OLD_TRIGGERED);
-
-                        ((Creature*)m_caster)->ForcedDespawn();
-                    }
-                    return;
-                }
-                case 66314:                                 // Dark Ball Passive
-                {
-                    if (!unitTarget || m_caster->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    if (unitTarget->GetTypeId() == TYPEID_PLAYER)
-                    {
-                        if (unitTarget->HasAuraOfDifficulty(65684))
-                            unitTarget->CastSpell(unitTarget, 67590, TRIGGERED_OLD_TRIGGERED);
-                        else
-                            m_caster->CastSpell(m_caster, 65808, TRIGGERED_OLD_TRIGGERED);
-
-                        ((Creature*)m_caster)->ForcedDespawn();
-                    }
-                    return;
-                }
                 case 66390:                                 // Read Last Rites
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -11254,45 +11215,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 66747, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 67009:                                 // Nether Power (ToC25: Lord Jaraxxus)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    for (uint8 i = 0; i < 11; ++i)
-                        unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
-
-                    return;
-                }
-                case 67547:                                 // Clear Val'kyr Essence
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->RemoveAurasDueToSpell(67590);
-                    unitTarget->RemoveAurasDueToSpell(65684);
-                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
-                    return;
-                }
-                case 67590:                                 // Powering Up
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    if (SpellAuraHolder* playerAura = unitTarget->GetSpellAuraHolder(m_spellInfo->Id))
-                    {
-                        if (playerAura && playerAura->GetStackAmount() == 100)
-                        {
-                            if (unitTarget->HasAuraOfDifficulty(65684))
-                                unitTarget->CastSpell(unitTarget, 65724, TRIGGERED_OLD_TRIGGERED);
-                            else if (unitTarget->HasAuraOfDifficulty(65686))
-                                unitTarget->CastSpell(unitTarget, 65748, TRIGGERED_OLD_TRIGGERED);
-
-                            unitTarget->RemoveAurasDueToSpell(m_spellInfo->Id);
-                        }
-                    }
-                    return;
-                }
                 case 67751:                                 // Ghoul Explode
                 {
                     if (!unitTarget)
@@ -11300,15 +11222,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     unitTarget->InterruptNonMeleeSpells(false);
                     unitTarget->CastSpell(unitTarget, 67729, TRIGGERED_NONE);
-                    return;
-                }
-                case 68084:                                 // Clear Val'kyr Touch of Light/Dark
-                {
-                    if (!unitTarget || !unitTarget->IsInCombat())
-                        return;
-
-                    unitTarget->RemoveAurasDueToSpell(66001);
-                    unitTarget->RemoveAurasDueToSpell(m_spellInfo->CalculateSimpleValue(eff_idx));
                     return;
                 }
                 case 68861:                                 // Consume Soul (ICC FoS: Bronjahm)

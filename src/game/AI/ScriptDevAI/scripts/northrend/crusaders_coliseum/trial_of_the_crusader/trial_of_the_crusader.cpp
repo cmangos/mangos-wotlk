@@ -215,6 +215,20 @@ void instance_trial_of_the_crusader::OnCreatureCreate(Creature* pCreature)
     m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
 }
 
+void instance_trial_of_the_crusader::OnCreatureRespawn(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        // following have passive behavior movement
+        case NPC_VALKYR_STALKER_DARK:
+        case NPC_VALKYR_STALKER_LIGHT:
+        case NPC_NERUBIAN_BURROW:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
+            break;
+    }
+}
+
 void instance_trial_of_the_crusader::OnObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())

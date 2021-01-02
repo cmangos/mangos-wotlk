@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "trial_of_the_crusader.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 /*######
 ## boss_jaraxxus
@@ -61,11 +63,11 @@ struct boss_jaraxxusAI : public ScriptedAI
 {
     boss_jaraxxusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_trial_of_the_crusader*>(pCreature->GetInstanceData());
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_trial_of_the_crusader* m_pInstance;
 
     uint32 m_uiFelFireballTimer;
     uint32 m_uiFelLightningTimer;
@@ -152,10 +154,14 @@ struct boss_jaraxxusAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_INFERNAL_VOLCANO:
-                pSummoned->CastSpell(pSummoned, SPELL_ERUPTION, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+                pSummoned->AI()->SetReactState(REACT_PASSIVE);
+                pSummoned->SetCanEnterCombat(false);
+                pSummoned->CastSpell(pSummoned, SPELL_ERUPTION, TRIGGERED_OLD_TRIGGERED);
                 break;
             case NPC_NETHER_PORTAL:
-                pSummoned->CastSpell(pSummoned, SPELL_NETHER_PORTAL, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
+                pSummoned->AI()->SetReactState(REACT_PASSIVE);
+                pSummoned->SetCanEnterCombat(false);
+                pSummoned->CastSpell(pSummoned, SPELL_NETHER_PORTAL, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
@@ -271,15 +277,34 @@ struct boss_jaraxxusAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_jaraxxus(Creature* pCreature)
+/*######
+## spell_nether_power - 66314
+######*/
+
+struct spell_nether_power : public SpellScript
 {
-    return new boss_jaraxxusAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        uint32 uiSpell = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        for (uint8 i = 0; i < 11; ++i)
+            target->CastSpell(target, uiSpell, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_jaraxxus()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_jaraxxus";
-    pNewScript->GetAI = &GetAI_boss_jaraxxus;
+    pNewScript->GetAI = &GetNewAIInstance<boss_jaraxxusAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_nether_power>("spell_nether_power");
 }

@@ -51,7 +51,7 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
 {
     npc_beast_combat_stalkerAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
-        m_pInstance = (instance_trial_of_the_crusader*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_trial_of_the_crusader*>(pCreature->GetInstanceData());
         Reset();
     }
 
@@ -345,11 +345,6 @@ struct npc_beast_combat_stalkerAI : public Scripted_NoMovementAI
     }
 };
 
-UnitAI* GetAI_npc_beast_combat_stalker(Creature* pCreature)
-{
-    return new npc_beast_combat_stalkerAI(pCreature);
-}
-
 /*######
 ## boss_gormok, vehicle driven by 34800 (multiple times)
 ######*/
@@ -370,7 +365,7 @@ struct boss_gormokAI : public ScriptedAI
 {
     boss_gormokAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_trial_of_the_crusader*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_trial_of_the_crusader*>(pCreature->GetInstanceData());
         Reset();
     }
 
@@ -473,7 +468,7 @@ struct boss_gormokAI : public ScriptedAI
                 {
                     pSnobold->CastSpell(m_creature, SPELL_RISING_ANGER, TRIGGERED_OLD_TRIGGERED);
 
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SNOBOLLED, SELECT_FLAG_PLAYER))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_SNOBOLLED, SELECT_FLAG_PLAYER | SELECT_FLAG_NOT_IN_MELEE_RANGE))
                     {
                         // ToDo: change this to setup the player vehicle for the snobold. It seems that the spell that will handle this is missing
                         pSnobold->FixateTarget(pTarget);
@@ -511,11 +506,6 @@ struct boss_gormokAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_gormok(Creature* pCreature)
-{
-    return new boss_gormokAI(pCreature);
-}
-
 /*######
 ## twin_jormungars_common
 ######*/
@@ -552,7 +542,7 @@ struct twin_jormungars_commonAI : public ScriptedAI
 {
     twin_jormungars_commonAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_trial_of_the_crusader*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_trial_of_the_crusader*>(pCreature->GetInstanceData());
         Reset();
     }
 
@@ -583,10 +573,14 @@ struct twin_jormungars_commonAI : public ScriptedAI
         m_uiSweepTimer      = urand(12000, 15000);
     }
 
-    void JustSummoned(Creature* pSummned) override
+    void JustSummoned(Creature* pSummoned) override
     {
-        if (pSummned->GetEntry() == NPC_SLIME_POOL)
-            pSummned->CastSpell(pSummned, SPELL_SLIME_POOL_AURA, TRIGGERED_NONE);
+        if (pSummoned->GetEntry() == NPC_SLIME_POOL)
+        {
+            pSummoned->AI()->SetReactState(REACT_PASSIVE);
+            pSummoned->SetCanEnterCombat(false);
+            pSummoned->CastSpell(pSummoned, SPELL_SLIME_POOL_AURA, TRIGGERED_NONE);
+        }
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
@@ -796,11 +790,6 @@ struct boss_acidmawAI : public twin_jormungars_commonAI
     uint32 GetBiteSpell() { return SPELL_PARALYTIC_BITE; }
 };
 
-UnitAI* GetAI_boss_acidmaw(Creature* pCreature)
-{
-    return new boss_acidmawAI(pCreature);
-}
-
 /*######
 ## boss_dreadscale
 ######*/
@@ -867,11 +856,6 @@ struct boss_dreadscaleAI : public twin_jormungars_commonAI
     uint32 GetBiteSpell() { return SPELL_BURNING_BITE; }
 };
 
-UnitAI* GetAI_boss_dreadscale(Creature* pCreature)
-{
-    return new boss_dreadscaleAI(pCreature);
-}
-
 bool EffectDummyCreature_worm_emerge(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     // always check spellid and effectindex
@@ -917,7 +901,7 @@ struct boss_icehowlAI : public ScriptedAI
 {
     boss_icehowlAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_trial_of_the_crusader*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_trial_of_the_crusader*>(pCreature->GetInstanceData());
         m_fSpeedRate = m_creature->GetSpeedRate(MOVE_RUN);
         Reset();
     }
@@ -963,7 +947,11 @@ struct boss_icehowlAI : public ScriptedAI
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_FURIOUS_CHARGE_STALKER)
+        {
+            pSummoned->AI()->SetReactState(REACT_PASSIVE);
+            pSummoned->SetCanEnterCombat(false);
             m_chargeStalkerGuid = pSummoned->GetObjectGuid();
+        }
     }
 
     void MovementInform(uint32 uiType, uint32 uiPointId) override
@@ -1123,37 +1111,32 @@ struct boss_icehowlAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_icehowl(Creature* pCreature)
-{
-    return new boss_icehowlAI(pCreature);
-}
-
 void AddSC_northrend_beasts()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_beast_combat_stalker";
-    pNewScript->GetAI = &GetAI_npc_beast_combat_stalker;
+    pNewScript->GetAI = &GetNewAIInstance<npc_beast_combat_stalkerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_gormok";
-    pNewScript->GetAI = &GetAI_boss_gormok;
+    pNewScript->GetAI = &GetNewAIInstance<boss_gormokAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_acidmaw";
-    pNewScript->GetAI = &GetAI_boss_acidmaw;
+    pNewScript->GetAI = &GetNewAIInstance<boss_acidmawAI>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_worm_emerge;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_dreadscale";
-    pNewScript->GetAI = &GetAI_boss_dreadscale;
+    pNewScript->GetAI = &GetNewAIInstance<boss_dreadscaleAI>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_worm_emerge;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_icehowl";
-    pNewScript->GetAI = &GetAI_boss_icehowl;
+    pNewScript->GetAI = &GetNewAIInstance<boss_icehowlAI>;
     pNewScript->RegisterSelf();
 }
