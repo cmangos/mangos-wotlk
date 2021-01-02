@@ -277,7 +277,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (40993,'spell_dragonmaw_knockdown_the_aggro_check'),
 (41007,'spell_dragonmaw_knockdown_the_aggro_check'),
 (41015,'spell_dragonmaw_knockdown_the_aggro_check'),
-(41022,'spell_dragonmaw_knockdown_the_aggro_check');
+(41022,'spell_dragonmaw_knockdown_the_aggro_check'),
+(45219,'spell_shattered_sun_marksman_shoot'),
+(45223,'spell_shattered_sun_marksman_shoot'),
+(45229,'spell_shattered_sun_marksman_shoot'),
+(45233,'spell_shattered_sun_marksman_shoot');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

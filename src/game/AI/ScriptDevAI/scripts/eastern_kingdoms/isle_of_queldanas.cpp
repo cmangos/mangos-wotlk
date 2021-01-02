@@ -202,6 +202,25 @@ struct npc_shattered_sun_marksmanAI : public npc_shattered_sun_fighterAI
     }
 };
 
+struct ShatteredSunMarksmanShoot : public SpellScript
+{
+    void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex /*effIdx*/, bool targetB, float& radius)
+    {
+        if (targetB)
+            radius = INTERACTION_DISTANCE;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (Unit* caster = spell->GetCaster())
+        {
+            float angle = caster->GetAngle(spell->m_targets.m_destPos.x, spell->m_targets.m_destPos.y);
+            caster->SetFacingTo(angle);
+            caster->SetOrientation(angle);
+        }
+    }
+};
+
 void AddSC_isle_of_queldanas()
 {
     Script* pNewScript = new Script;
@@ -218,4 +237,6 @@ void AddSC_isle_of_queldanas()
     pNewScript->Name = "npc_shattered_sun_warrior";
     pNewScript->GetAI = &GetNewAIInstance<npc_shattered_sun_warriorAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ShatteredSunMarksmanShoot>("spell_shattered_sun_marksman_shoot");
 }
