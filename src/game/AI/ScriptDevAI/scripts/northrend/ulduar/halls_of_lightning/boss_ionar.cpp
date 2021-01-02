@@ -61,12 +61,12 @@ struct boss_ionarAI : public ScriptedAI
 {
     boss_ionarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_halls_of_lightning*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_halls_of_lightning* m_pInstance;
 
     GuidList m_lSparkGUIDList;
 
@@ -184,6 +184,7 @@ struct boss_ionarAI : public ScriptedAI
                     if (ScriptedAI* pSparkAI = dynamic_cast<ScriptedAI*>(pSpark->AI()))
                         pSparkAI->SetCombatMovement(false);
 
+                    pSpark->SetWalk(false);
                     pSpark->GetMotionMaster()->MovePoint(POINT_CALLBACK, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ());
                 }
             }
@@ -288,11 +289,6 @@ struct boss_ionarAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_ionar(Creature* pCreature)
-{
-    return new boss_ionarAI(pCreature);
-}
-
 bool EffectDummyCreature_boss_ionar(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     // always check spellid and effectindex
@@ -334,11 +330,11 @@ struct mob_spark_of_ionarAI : public ScriptedAI
 {
     mob_spark_of_ionarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_halls_of_lightning*>(pCreature->GetInstanceData());
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_halls_of_lightning* m_pInstance;
 
     void Reset() override { }
 
@@ -366,21 +362,16 @@ struct mob_spark_of_ionarAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_mob_spark_of_ionar(Creature* pCreature)
-{
-    return new mob_spark_of_ionarAI(pCreature);
-}
-
 void AddSC_boss_ionar()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_ionar";
-    pNewScript->GetAI = &GetAI_boss_ionar;
+    pNewScript->GetAI = &GetNewAIInstance<boss_ionarAI>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_boss_ionar;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_spark_of_ionar";
-    pNewScript->GetAI = &GetAI_mob_spark_of_ionar;
+    pNewScript->GetAI = &GetNewAIInstance<mob_spark_of_ionarAI>;
     pNewScript->RegisterSelf();
 }

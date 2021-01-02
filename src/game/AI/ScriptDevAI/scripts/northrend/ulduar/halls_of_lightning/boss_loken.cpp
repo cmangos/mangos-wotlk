@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "halls_of_lightning.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -58,12 +60,12 @@ struct boss_lokenAI : public ScriptedAI
 {
     boss_lokenAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_halls_of_lightning*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_halls_of_lightning* m_pInstance;
 
     bool m_bIsRegularMode;
 
@@ -87,9 +89,9 @@ struct boss_lokenAI : public ScriptedAI
         if (m_pInstance)
             m_pInstance->SetData(TYPE_LOKEN, IN_PROGRESS);
 
-        // Cast Pulsing Shockwave at aggro - ToDo: enable this when the core will properly support this spell
-        // DoCastSpellIfCan(m_creature, SPELL_PULSING_SHOCKWAVE_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-        // DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PULSING_SHOCKWAVE : SPELL_PULSING_SHOCKWAVE_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        // Cast Pulsing Shockwave at aggro
+        DoCastSpellIfCan(m_creature, SPELL_PULSING_SHOCKWAVE_AURA, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_PULSING_SHOCKWAVE : SPELL_PULSING_SHOCKWAVE_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -166,15 +168,37 @@ struct boss_lokenAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_loken(Creature* pCreature)
+/*######
+## spell_pulsing_shockwave - 52942, 59837
+######*/
+
+struct spell_pulsing_shockwave : public SpellScript
 {
-    return new boss_lokenAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !caster)
+            return;
+
+        // increase the damage based on the distance from boss
+        float dist = caster->GetDistance(target);
+        float damage = spell->GetDamage();
+
+        if (dist > 1.0f)
+            spell->SetDamage(uint32(dist * damage));
+    }
+};
 
 void AddSC_boss_loken()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_loken";
-    pNewScript->GetAI = &GetAI_boss_loken;
+    pNewScript->GetAI = &GetNewAIInstance<boss_lokenAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_pulsing_shockwave>("spell_pulsing_shockwave");
 }

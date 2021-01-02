@@ -76,13 +76,13 @@ struct boss_bjarngrimAI : public ScriptedAI
 {
     boss_bjarngrimAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_halls_of_lightning*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         m_uiStance = STANCE_DEFENSIVE;
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_halls_of_lightning* m_pInstance;
 
     bool m_bIsRegularMode;
     bool m_bIsChangingStance;
@@ -316,12 +316,12 @@ struct mob_stormforged_lieutenantAI : public ScriptedAI
 {
     mob_stormforged_lieutenantAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_halls_of_lightning*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_halls_of_lightning* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiArcWeldTimer;
@@ -366,25 +366,15 @@ struct mob_stormforged_lieutenantAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_bjarngrim(Creature* pCreature)
-{
-    return new boss_bjarngrimAI(pCreature);
-}
-
-UnitAI* GetAI_mob_stormforged_lieutenant(Creature* pCreature)
-{
-    return new mob_stormforged_lieutenantAI(pCreature);
-}
-
 void AddSC_boss_bjarngrim()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_bjarngrim";
-    pNewScript->GetAI = &GetAI_boss_bjarngrim;
+    pNewScript->GetAI = &GetNewAIInstance<boss_bjarngrimAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_stormforged_lieutenant";
-    pNewScript->GetAI = &GetAI_mob_stormforged_lieutenant;
+    pNewScript->GetAI = &GetNewAIInstance<mob_stormforged_lieutenantAI>;
     pNewScript->RegisterSelf();
 }

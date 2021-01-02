@@ -73,12 +73,12 @@ struct boss_volkhanAI : public ScriptedAI
 {
     boss_volkhanAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_halls_of_lightning*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_halls_of_lightning* m_pInstance;
 
     GuidList m_lGolemGUIDList;
 
@@ -243,6 +243,7 @@ struct boss_volkhanAI : public ScriptedAI
                     {
                         float fX, fY, fZ;
                         pAnvil->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
+                        m_creature->SetWalk(false);
                         m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                     }
                     else
@@ -267,11 +268,6 @@ struct boss_volkhanAI : public ScriptedAI
         DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_volkhan(Creature* pCreature)
-{
-    return new boss_volkhanAI(pCreature);
-}
 
 bool EffectDummyCreature_boss_volkhan(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
@@ -327,12 +323,12 @@ struct mob_molten_golemAI : public ScriptedAI
 {
     mob_molten_golemAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_halls_of_lightning*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_halls_of_lightning* m_pInstance;
 
     bool m_bIsRegularMode;
 
@@ -409,16 +405,11 @@ struct mob_molten_golemAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_mob_molten_golem(Creature* pCreature)
-{
-    return new mob_molten_golemAI(pCreature);
-}
-
 void AddSC_boss_volkhan()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_volkhan";
-    pNewScript->GetAI = &GetAI_boss_volkhan;
+    pNewScript->GetAI = &GetNewAIInstance<boss_volkhanAI>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_boss_volkhan;
     pNewScript->RegisterSelf();
 
@@ -429,6 +420,6 @@ void AddSC_boss_volkhan()
 
     pNewScript = new Script;
     pNewScript->Name = "mob_molten_golem";
-    pNewScript->GetAI = &GetAI_mob_molten_golem;
+    pNewScript->GetAI = &GetNewAIInstance<mob_molten_golemAI>;
     pNewScript->RegisterSelf();
 }
