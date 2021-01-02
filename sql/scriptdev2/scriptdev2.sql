@@ -680,6 +680,7 @@ UPDATE creature_template SET ScriptName='boss_eydis' WHERE entry=34496;
 UPDATE creature_template SET ScriptName='npc_concentrated_bullet' WHERE entry IN (34628,34630);
 UPDATE creature_template SET ScriptName='npc_anubarak_spike' WHERE entry=34660;
 UPDATE creature_template SET ScriptName='npc_frost_sphere' WHERE entry=34606;
+UPDATE creature_template SET ScriptName='npc_nerubian_burrower' WHERE entry=34607;
 UPDATE creature_template SET ScriptName='boss_crusader_death_knight' WHERE entry IN (34461,34458);
 UPDATE creature_template SET ScriptName='boss_crusader_druid_balance' WHERE entry IN (34460,34451);
 UPDATE creature_template SET ScriptName='boss_crusader_druid_resto' WHERE entry IN (34469,34459);

@@ -23,6 +23,9 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "trial_of_the_crusader.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -72,7 +75,12 @@ enum
     SPELL_PERMAFROST_SLOW               = 66193,            // slow spell
     SPELL_FROSTSPHERE_VISUAL            = 67539,
 
-    POINT_GROUND                        = 0,
+    // Nerubian Burrower
+    SPELL_SPIDER_FRENZY                 = 66128,
+    SPELL_EXPOSE_WEAKNESS               = 67720,
+    SPELL_RECENTLY_AWAKENED             = 66311,
+    SPELL_SHADOW_STRIKE                 = 66134,
+    SPELL_BURROWER_SUBMERGE             = 67322,
 
     // npcs
     NPC_SCARAB                          = 34605,
@@ -147,6 +155,8 @@ struct boss_anubarak_trialAI : public ScriptedAI
 
     void Reset() override
     {
+        DoCastSpellIfCan(m_creature, SPELL_SUBMERGE);
+
         m_Phase                  = PHASE_GROUND;
         m_PhaseSwitchTimer       = 80000;
         m_uiFreezingSlashTimer   = 20000;
@@ -422,7 +432,8 @@ struct npc_anubarak_trial_spikeAI : public ScriptedAI
         {
             DoScriptText(EMOTE_PURSUE, m_creature, pTarget);
             DoCastSpellIfCan(pTarget, SPELL_MARK, CAST_TRIGGERED);
-            DoStartMovement(pTarget);
+            m_creature->GetMotionMaster()->Clear(false, true);
+            m_creature->GetMotionMaster()->MoveChase(pTarget, 0, 0, false, false, false);
         }
     }
 
@@ -537,11 +548,11 @@ struct npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
         Reset();
     }
 
-    bool m_bPermafrost;
+    uint32 m_uiPermafrostTimer;
 
     void Reset() override
     {
-        m_bPermafrost = false;
+        m_uiPermafrostTimer = 0;
 
         m_creature->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f);
     }
@@ -554,7 +565,7 @@ struct npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
         // Set fake death in order to apply permafrost
         uiDamage = 0;
 
-        if (m_bPermafrost)
+        if (m_uiPermafrostTimer)
             return;
 
         m_creature->InterruptNonMeleeSpells(false);
@@ -575,25 +586,128 @@ struct npc_anubarak_trial_frostsphereAI : public Scripted_NoMovementAI
 
         // Note: This should be fall movement
         m_creature->GetMotionMaster()->Clear();
-        m_creature->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX(), m_creature->GetPositionY(), fZ);
-        m_bPermafrost = true;
+        m_creature->GetMotionMaster()->MoveFall();
+        m_uiPermafrostTimer = 2000;
     }
 
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
+    void UpdateAI(const uint32 uiDiff) override
     {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
-            return;
+        if (m_uiPermafrostTimer)
+        {
+            if (m_uiPermafrostTimer <= uiDiff)
+            {
+                DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_VISUAL, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_TRANSFORM, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_SLOW, CAST_TRIGGERED);
 
-        DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_VISUAL, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_TRANSFORM, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_PERMAFROST_SLOW, CAST_TRIGGERED);
+                m_uiPermafrostTimer = 0;
+            }
+            else
+                m_uiPermafrostTimer -= uiDiff;
+        }
     }
 };
 
-UnitAI* GetAI_npc_anubarak_trial_frostsphere(Creature* pCreature)
+/*######
+## npc_nerubian_burrowerAI
+######*/
+
+enum NerubianBurrowerActions
 {
-    return new npc_anubarak_trial_frostsphereAI(pCreature);
-}
+    BURROWER_SUBMERGE,
+    BURROWER_SHADOW_STRIKE,
+    BURROWER_ACTION_MAX,
+    BURROWER_EMERGE,
+};
+
+struct npc_nerubian_burrowerAI : public CombatAI
+{
+    npc_nerubian_burrowerAI(Creature* creature) : CombatAI(creature, BURROWER_ACTION_MAX), m_instance(static_cast<instance_trial_of_the_crusader*>(creature->GetInstanceData()))
+    {
+        AddCombatAction(BURROWER_SUBMERGE, 30000u);
+        AddCustomAction(BURROWER_EMERGE, true, [&]() { HandleEmerge(); });
+
+        if (m_instance->instance->IsHeroic())
+            AddCombatAction(BURROWER_SHADOW_STRIKE, 10000, 15000);
+    }
+
+    instance_trial_of_the_crusader* m_instance;
+
+    void JustRespawned() override
+    {
+        CombatAI::JustRespawned();
+
+        DoCastSpellIfCan(nullptr, SPELL_SPIDER_FRENZY, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_RECENTLY_AWAKENED, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_EMERGE, CAST_TRIGGERED);
+        DoCastSpellIfCan(nullptr, SPELL_EXPOSE_WEAKNESS, CAST_TRIGGERED);
+
+        m_creature->SetInCombatWithZone();
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case BURROWER_SUBMERGE:
+                if (DoCastSpellIfCan(nullptr, SPELL_BURROWER_SUBMERGE) == CAST_OK)
+                {
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                    ResetCombatAction(action, urand(30 * IN_MILLISECONDS, 60 * IN_MILLISECONDS));
+                    ResetTimer(BURROWER_EMERGE, 30 * IN_MILLISECONDS);
+                }
+                break;
+            case BURROWER_SHADOW_STRIKE:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOW_STRIKE) == CAST_OK)
+                    ResetCombatAction(action, urand(20 * IN_MILLISECONDS, 25 * IN_MILLISECONDS));
+                break;
+        }
+    }
+
+    void HandleEmerge()
+    {
+        m_creature->RemoveAurasDueToSpell(SPELL_BURROWER_SUBMERGE);
+
+        if (DoCastSpellIfCan(nullptr, SPELL_EMERGE) == CAST_OK)
+        {
+            DoCastSpellIfCan(nullptr, SPELL_RECENTLY_AWAKENED, CAST_TRIGGERED);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+        }
+    }
+};
+
+/*######
+## spell_burrower_submerge - 67322
+######*/
+
+struct spell_burrower_submerge : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // attempt to submerge
+        if (!target->HasAura(66193))
+            target->CastSpell(target, 68394, TRIGGERED_OLD_TRIGGERED);
+    }
+
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* caster = spell->GetAffectiveCaster();
+        if (!caster)
+            return SPELL_FAILED_ERROR;
+
+        if (caster->HasAura(66193))
+            return SPELL_FAILED_ERROR;
+
+        return SPELL_CAST_OK;
+    }
+};
 
 void AddSC_boss_anubarak_trial()
 {
@@ -612,4 +726,11 @@ void AddSC_boss_anubarak_trial()
     pNewScript->Name = "npc_frost_sphere";
     pNewScript->GetAI = &GetNewAIInstance<npc_anubarak_trial_frostsphereAI>;
     pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_nerubian_burrower";
+    pNewScript->GetAI = &GetNewAIInstance<npc_nerubian_burrowerAI>;
+    pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_burrower_submerge>("spell_burrower_submerge");
 }
