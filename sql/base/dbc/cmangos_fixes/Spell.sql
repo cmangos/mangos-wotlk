@@ -2315,7 +2315,7 @@ UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (66336,67077);
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 66339;
 -- Wailing Souls (FoS) - one target
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 68912;
---Fear (FoS) - one target
+-- Fear (FoS) - one target
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 68950;
 -- Pursuit (PoS) - one target
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 68987;
