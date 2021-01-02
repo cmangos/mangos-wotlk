@@ -57,7 +57,7 @@ struct boss_krikthirAI : public ScriptedAI
 {
     boss_krikthirAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_azjol_nerub*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_azjol_nerub*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -171,15 +171,10 @@ struct boss_krikthirAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_krikthir(Creature* pCreature)
-{
-    return new boss_krikthirAI(pCreature);
-}
-
 void AddSC_boss_krikthir()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_krikthir";
-    pNewScript->GetAI = &GetAI_boss_krikthir;
+    pNewScript->GetAI = &GetNewAIInstance<boss_krikthirAI>;
     pNewScript->RegisterSelf();
 }

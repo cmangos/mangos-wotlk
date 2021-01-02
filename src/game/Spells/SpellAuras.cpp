@@ -9465,28 +9465,6 @@ void Aura::PeriodicDummyTick()
                 case 52441:                                 // Cool Down
                     target->CastSpell(target, 52443, TRIGGERED_OLD_TRIGGERED);
                     return;
-                case 53035:                                 // Summon Anub'ar Champion Periodic (Azjol Nerub)
-                case 53036:                                 // Summon Anub'ar Necromancer Periodic (Azjol Nerub)
-                case 53037:                                 // Summon Anub'ar Crypt Fiend Periodic (Azjol Nerub)
-                {
-                    uint32 summonSpells[3][3] =
-                    {
-                        {53090, 53014, 53064},              // Summon Anub'ar Champion
-                        {53092, 53015, 53066},              // Summon Anub'ar Necromancer
-                        {53091, 53016, 53065}               // Summon Anub'ar Crypt Fiend
-                    };
-
-                    // Cast different spell depending on trigger position
-                    // This will summon a different npc entry on each location - each of those has individual movement patern
-                    if (target->GetPositionZ() < 750.0f)
-                        target->CastSpell(target, summonSpells[spell->Id - 53035][0], TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                    else if (target->GetPositionX() > 500.0f)
-                        target->CastSpell(target, summonSpells[spell->Id - 53035][1], TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                    else
-                        target->CastSpell(target, summonSpells[spell->Id - 53035][2], TRIGGERED_OLD_TRIGGERED, nullptr, this);
-
-                    return;
-                }
                 case 53520:                                 // Carrion Beetles
                     target->CastSpell(target, 53521, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                     target->CastSpell(target, 53521, TRIGGERED_OLD_TRIGGERED, nullptr, this);

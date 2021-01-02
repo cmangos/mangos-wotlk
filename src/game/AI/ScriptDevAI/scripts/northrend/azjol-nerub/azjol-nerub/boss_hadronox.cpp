@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Hadronox
-SD%Complete: 90%
-SDComment: Some details and timers can be improved.
+SD%Complete: 100%
+SDComment:
 SDCategory: Azjol'Nerub
 EndScriptData */
 
@@ -26,8 +26,6 @@ EndScriptData */
 
 enum
 {
-    EMOTE_MOVE_TUNNEL           = -1601013,
-
     SPELL_TAUNT                 = 53799,
     SPELL_PIERCE_ARMOR          = 53418,
     SPELL_ACID_CLOUD            = 53400,
@@ -36,18 +34,7 @@ enum
     SPELL_LEECH_POISON_H        = 59417,
     SPELL_WEB_GRAB              = 57731,
     SPELL_WEB_GRAB_H            = 59421,
-
-    // Gauntlet spells
-    SPELL_SUMMON_CHAMPION       = 53035,
-    SPELL_SUMMON_NECROMANCER    = 53036,
-    SPELL_SUMMON_CRYPT_FIEND    = 53037,
-    SPELL_WEB_FRONT_DOORS       = 53177,            // sends event 19101
-    SPELL_WEB_SIDE_DOORS        = 53185,            // sends event 19102 - it seems that this isn't actually used here
-
-    MAX_SPIDERS                 = 9,
 };
-
-static const uint32 aSpiderEntries[MAX_SPIDERS] = {28924, 28925, 29051, 29062, 29063, 29064, 29096, 29097, 29098};
 
 /* ##### Gauntlet description #####
  * This is the timed gauntlet - waves of non-elite spiders will spawn from the 3 doors located a little above the main room
@@ -63,16 +50,13 @@ struct boss_hadronoxAI : public ScriptedAI
 {
     boss_hadronoxAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_azjol_nerub*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_azjol_nerub*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_uiGauntletStartTimer = 0;
         Reset();
     }
 
     instance_azjol_nerub* m_pInstance;
     bool m_bIsRegularMode;
-
-    uint32 m_uiGauntletStartTimer;
 
     uint32 m_uiAcidTimer;
     uint32 m_uiLeechTimer;
@@ -89,44 +73,10 @@ struct boss_hadronoxAI : public ScriptedAI
         m_uiTauntTimer  = urand(2000, 5000);
     }
 
-    void Aggro(Unit* pWho) override
+    void AttackedBy(Unit* pAttacker) override
     {
-        if (pWho->GetTypeId() == TYPEID_PLAYER && m_pInstance)
-            m_pInstance->SetData(TYPE_HADRONOX, IN_PROGRESS);
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        // No more attacks during the movement upstairs
-        if ((m_pInstance && m_pInstance->GetData(TYPE_HADRONOX) == SPECIAL) && pWho->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        ScriptedAI::AttackStart(pWho);
-    }
-
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
-    {
-        if (eventType == AI_EVENT_CUSTOM_A)
-            m_uiGauntletStartTimer = 1000;
-    }
-
-    void MoveInLineOfSight(Unit* pWho) override
-    {
-        // Force the spiders to attack him
-        if (pWho->GetTypeId() == TYPEID_UNIT && m_creature->IsWithinDistInMap(pWho, 2 * ATTACK_DISTANCE) && !pWho->GetVictim())
-        {
-            for (unsigned int aSpiderEntrie : aSpiderEntries)
-            {
-                if (pWho->GetEntry() == aSpiderEntrie)
-                    ((Creature*)pWho)->AI()->AttackStart(m_creature);
-            }
-        }
-
-        // No more attacks during the movement upstairs
-        if ((m_pInstance && m_pInstance->GetData(TYPE_HADRONOX) == SPECIAL) && pWho->GetTypeId() != TYPEID_PLAYER)
-            return;
-
-        ScriptedAI::MoveInLineOfSight(pWho);
+        if (pAttacker->IsPlayer() && GetReactState() == REACT_PASSIVE)
+            SetReactState(REACT_AGGRESSIVE);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -140,104 +90,32 @@ struct boss_hadronoxAI : public ScriptedAI
             m_pInstance->SetData(TYPE_HADRONOX, DONE);
     }
 
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-
-        m_creature->SetLootRecipient(nullptr);
-
-        Reset();
-
-        if (!m_creature->IsAlive() || !m_pInstance)
-            return;
-
-        // Moving upstairs, don't disturb
-        if (m_pInstance->GetData(TYPE_HADRONOX) == SPECIAL)
-        {
-            m_creature->GetMotionMaster()->MoveWaypoint();
-            DoScriptText(EMOTE_MOVE_TUNNEL, m_creature);
-        }
-        // Stay upstairs if evade from players
-        else if (m_pInstance->GetData(TYPE_HADRONOX) == IN_PROGRESS)
-            m_creature->GetMotionMaster()->MovePoint(1, 530.42f, 560.003f, 733.0308f);
-        else
-            m_creature->GetMotionMaster()->MoveTargetedHome();
-    }
-
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
-        // Mark as failed if evaded while upstairs
-        if (uiMoveType == POINT_MOTION_TYPE && uiPointId)
+        if (uiMoveType == WAYPOINT_MOTION_TYPE && uiPointId == 11)
         {
-            if (m_pInstance)
-                m_pInstance->SetData(TYPE_HADRONOX, FAIL);
-        }
-        // Web the doors when upstairs
-        else if (uiMoveType == WAYPOINT_MOTION_TYPE && uiPointId == 10)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_WEB_FRONT_DOORS, CAST_TRIGGERED) == CAST_OK)
-            {
-                // These should be handled by the scripted event
-                if (m_pInstance)
-                {
-                    m_pInstance->SetData(TYPE_HADRONOX, IN_PROGRESS);
-                    m_pInstance->ResetHadronoxTriggers();
-                    m_pInstance->SetHadronoxDeniedAchievCriteria(false);
-                }
+            // stop the spiders
+            DoCastSpellIfCan(m_creature, SPELL_WEB_FRONT_DOORS, CAST_TRIGGERED);
 
-                // No more movement
-                m_creature->GetMotionMaster()->MoveIdle();
+            // No more movement
+            m_creature->GetMotionMaster()->Clear(false, true);
+            m_creature->GetMotionMaster()->MoveIdle();
+
+            // reset react state
+            SetReactState(REACT_AGGRESSIVE);
+
+            // fail achievement and stop the spiders
+            // if boss isn't pulled before it reaches this point, the spider gauntlet will stop
+            if (m_pInstance)
+            {
+                m_pInstance->SetHadronoxDeniedAchievCriteria(false);
+                m_pInstance->SetData(TYPE_HADRONOX, SPECIAL);
             }
         }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        // Allow the spawns to make a few steps so we can use move maps
-        pSummoned->SetWalk(false);
-        pSummoned->GetMotionMaster()->MoveWaypoint();
     }
 
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiGauntletStartTimer)
-        {
-            if (m_uiGauntletStartTimer <= uiDiff)
-            {
-                if (!m_pInstance)
-                {
-                    script_error_log("Instance Azjol-Nerub: ERROR Failed to load instance data for this instace.");
-                    return;
-                }
-
-                GuidList m_lTriggersGuids;
-                m_pInstance->GetHadronoxTriggerList(m_lTriggersGuids);
-
-                // Need to force the triggers to cast this with Hadronox Guid so we can control the summons better
-                for (GuidList::const_iterator itr = m_lTriggersGuids.begin(); itr != m_lTriggersGuids.end(); ++itr)
-                {
-                    if (Creature* pTrigger = m_creature->GetMap()->GetCreature(*itr))
-                    {
-                        uint32 summonSpellEntry = 0;
-                        switch (urand(0, 2))
-                        {
-                            case 0: summonSpellEntry = SPELL_SUMMON_CHAMPION;    break;
-                            case 1: summonSpellEntry = SPELL_SUMMON_NECROMANCER; break;
-                            case 2: summonSpellEntry = SPELL_SUMMON_CRYPT_FIEND; break;
-                        }
-
-                        pTrigger->CastSpell(pTrigger, summonSpellEntry, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-                    }
-                }
-
-                m_uiGauntletStartTimer = 0;
-            }
-            else
-                m_uiGauntletStartTimer -= uiDiff;
-        }
-
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
@@ -294,15 +172,74 @@ struct boss_hadronoxAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_hadronox(Creature* pCreature)
+/*######
+## spell_web_door_aura - 53177, 53185
+######*/
+
+struct spell_web_door_aura : public AuraScript
 {
-    return new boss_hadronoxAI(pCreature);
-}
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        // remove summoning auras
+        target->RemoveAurasDueToSpell(53035);
+        target->RemoveAurasDueToSpell(53036);
+        target->RemoveAurasDueToSpell(53037);
+    }
+};
+
+/*######
+## spell_summon_anubar_periodic_aura - 53035, 53036, 53037
+## this aura will spawn the mobs used to engage in combat with Hadronox
+######*/
+
+struct spell_summon_anubar_periodic_aura : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        // random chance of 2/3 of triggering
+        if (!urand(0, 2))
+            return;
+
+        switch (aura->GetId())
+        {
+            case 53035:                         // Summon Anub'ar Champion Periodic (Azjol Nerub)
+            case 53036:                         // Summon Anub'ar Necromancer Periodic (Azjol Nerub)
+            case 53037:                         // Summon Anub'ar Crypt Fiend Periodic (Azjol Nerub)
+            {
+                // gauntlet spells
+                uint32 summonSpells[3][2] =
+                {
+                    {53090, 53064},             // Summon Anub'ar Champion
+                    {53092, 53066},             // Summon Anub'ar Necromancer
+                    {53091, 53065}              // Summon Anub'ar Crypt Fiend
+                };
+
+                // Cast different spell depending on trigger position
+                // This will summon a different npc entry on each location - each of those has individual movement patern
+                if (target->GetPositionZ() < 750.0f)
+                    target->CastSpell(target, summonSpells[aura->GetId() - 53035][0], TRIGGERED_OLD_TRIGGERED);
+                else
+                    target->CastSpell(target, summonSpells[aura->GetId() - 53035][1], TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+};
 
 void AddSC_boss_hadronox()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_hadronox";
-    pNewScript->GetAI = &GetAI_boss_hadronox;
+    pNewScript->GetAI = &GetNewAIInstance<boss_hadronoxAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<spell_web_door_aura>("spell_web_door_aura");
+    RegisterAuraScript<spell_summon_anubar_periodic_aura>("spell_summon_anubar_periodic_aura");
 }

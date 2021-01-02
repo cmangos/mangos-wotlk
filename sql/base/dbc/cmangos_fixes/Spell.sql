@@ -2223,6 +2223,10 @@ UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 48490;
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 49197;
 -- Shoot Magic Arrow - should only hit one target
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 48530;
+-- Summon Anub'ar Champion | Necromancer | Crypt Fiend - should only hit one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (53826,53827,53828);
+-- Summon Anub'ar Assassin - should only hit two targets
+UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id = 53609;
 
 -- spells that have caster in the middle of terrain - LOS attribute
 UPDATE spell_template SET AttributesEx2 = AttributesEx2|4 WHERE id IN (54612, 54613);

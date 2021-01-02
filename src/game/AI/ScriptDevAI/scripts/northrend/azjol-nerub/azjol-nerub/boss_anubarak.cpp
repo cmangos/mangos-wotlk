@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Anubarak
-SD%Complete: 80%
-SDComment: Summoned creatures movement may need some adjustments - may be solved with movement maps
+SD%Complete: 100%
+SDComment:
 SDCategory: Azjol'Nerub
 EndScriptData */
 
@@ -47,11 +47,8 @@ enum
     SPELL_SUBMERGE                  = 53421,
     SPELL_EMERGE                    = 53500,
 
-    // NOTES:
-    // The Assassin and Guardian summon spell should be 53609 and 53613
-    // They are currently not used because of the ignore LoS issue in core
-    SPELL_SUMMON_ASSASSIN           = 53610,        // summons 29214
-    SPELL_SUMMON_GUARDIAN           = 53614,        // summons 29216
+    SPELL_SUMMON_ASSASSIN           = 53609,        // triggers 53610 and summons 29214
+    SPELL_SUMMON_GUARDIAN           = 53613,        // triggers 53614 and summons 29216
     SPELL_SUMMON_VENOMANCER         = 53615,        // summons 29217
     SPELL_SUMMON_DARTER             = 53599,        // summons 29213
 
@@ -60,16 +57,9 @@ enum
     SPELL_IMPALE                    = 53454,
     SPELL_IMPALE_H                  = 59446,
 
-    NPC_ANUBAR_DARTER               = 29213,
-    NPC_ANUBAR_ASSASSIN             = 29214,
-    NPC_ANUBAR_GUARDIAN             = 29216,
-    NPC_ANUBAR_VENOMANCER           = 29217,
-    NPC_IMPALE_TARGET               = 29184,
-
     PHASE_GROUND                    = 1,
     PHASE_SUBMERGED                 = 2
 };
-
 
 /*######
 ## boss_anubarak
@@ -79,7 +69,7 @@ struct boss_anubarakAI : public ScriptedAI
 {
     boss_anubarakAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_azjol_nerub*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_azjol_nerub*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         m_bDoneIntro = false;
         Reset();
@@ -97,7 +87,6 @@ struct boss_anubarakAI : public ScriptedAI
     uint32 m_uiEmergeTimer;
     uint32 m_uiSummonTimer;
     uint32 m_uiDarterTimer;
-    bool m_bIsFirstWave;
     bool m_bDoneIntro;
 
     void Reset() override
@@ -110,6 +99,7 @@ struct boss_anubarakAI : public ScriptedAI
         m_uiPoundTimer          = 15000;
         m_uiDarterTimer         = 5000;
 
+        // reset flags
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
     }
 
@@ -142,7 +132,7 @@ struct boss_anubarakAI : public ScriptedAI
     void JustReachedHome() override
     {
         if (m_pInstance)
-            m_pInstance->SetData(TYPE_ANUBARAK, NOT_STARTED);
+            m_pInstance->SetData(TYPE_ANUBARAK, FAIL);
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -156,38 +146,9 @@ struct boss_anubarakAI : public ScriptedAI
         ScriptedAI::MoveInLineOfSight(pWho);
     }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (!m_pInstance)
-            return;
-
-        switch (pSummoned->GetEntry())
-        {
-            case NPC_ANUBAR_GUARDIAN:
-            case NPC_ANUBAR_VENOMANCER:
-                pSummoned->SetWalk(false);
-                if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetAnubTrigger()))
-                    pSummoned->GetMotionMaster()->MovePoint(0, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ());
-                break;
-            case NPC_ANUBAR_DARTER:
-            case NPC_ANUBAR_ASSASSIN:
-                if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetAnubTrigger()))
-                {
-                    float fX, fY, fZ;
-                    m_creature->GetRandomPoint(pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 15.0f, fX, fY, fZ);
-
-                    pSummoned->SetWalk(false);
-                    pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
-                }
-                break;
-            default:
-                break;
-        }
-    }
-
     void UpdateAI(const uint32 uiDiff) override
     {
-        if (!m_creature->SelectHostileTarget())
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;
 
         if (m_uiPhase == PHASE_GROUND)
@@ -233,21 +194,14 @@ struct boss_anubarakAI : public ScriptedAI
                     DoScriptText(urand(0, 1) ? SAY_SUBMERGE_1 : SAY_SUBMERGE_2, m_creature);
                     m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
                     m_uiPhase = PHASE_SUBMERGED;
-                    m_bIsFirstWave = true;
                     m_uiSummonTimer = 5000;
 
                     // Emerge timers aren't the same. They depend on the submerge phase
                     switch (m_uiSubmergePhase)
                     {
-                        case 1:
-                            m_uiEmergeTimer = 20000;
-                            break;
-                        case 2:
-                            m_uiEmergeTimer = 45000;
-                            break;
-                        case 3:
-                            m_uiEmergeTimer = 50000;
-                            break;
+                        case 1: m_uiEmergeTimer = 20000; break;
+                        case 2: m_uiEmergeTimer = 45000; break;
+                        case 3: m_uiEmergeTimer = 50000; break;
                     }
                     ++m_uiSubmergePhase;
                 }
@@ -259,22 +213,14 @@ struct boss_anubarakAI : public ScriptedAI
         {
             if (m_uiSummonTimer < uiDiff)
             {
-                if (!m_pInstance)
-                    return;
+                // summon guardian and assassins
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_ASSASSIN, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_SUMMON_GUARDIAN, CAST_TRIGGERED);
 
-                // Summon 2 Assassins
-                for (uint8 i = 0; i < 2; ++i)
-                {
-                    if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetRandomAssassinTrigger()))
-                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_ASSASSIN, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-                }
-
-                // on the first wave summon a guardian; on the second wave summon a venonmancer
-                if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetGuardianTrigger()))
-                {
-                    pTrigger->CastSpell(pTrigger, m_bIsFirstWave ? SPELL_SUMMON_GUARDIAN : SPELL_SUMMON_VENOMANCER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-                    m_bIsFirstWave = false;
-                }
+                // venomancer summoned by trigger
+                if (m_pInstance)
+                    if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetVenomancerTrigger()))
+                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_VENOMANCER, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiSummonTimer = 26000;
             }
@@ -286,14 +232,12 @@ struct boss_anubarakAI : public ScriptedAI
             {
                 if (m_uiDarterTimer < uiDiff)
                 {
-                    if (!m_pInstance)
-                        return;
+                    // Darter summoned by trigger
+                    if (m_pInstance)
+                        if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetDarterTrigger()))
+                            pTrigger->CastSpell(pTrigger, SPELL_SUMMON_DARTER, TRIGGERED_OLD_TRIGGERED);
 
-                    if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetDarterTrigger()))
-                    {
-                        pTrigger->CastSpell(pTrigger, SPELL_SUMMON_DARTER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-                        m_uiDarterTimer = urand(10000, 15000);
-                    }
+                    m_uiDarterTimer = urand(10000, 15000);
                 }
                 else
                     m_uiDarterTimer -= uiDiff;
@@ -315,11 +259,6 @@ struct boss_anubarakAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_anubarak(Creature* pCreature)
-{
-    return new boss_anubarakAI(pCreature);
-}
-
 /*######
 ## npc_impale_target
 ######*/
@@ -328,7 +267,7 @@ struct npc_impale_targetAI : public Scripted_NoMovementAI
 {
     npc_impale_targetAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_azjol_nerub*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -343,9 +282,6 @@ struct npc_impale_targetAI : public Scripted_NoMovementAI
         DoCastSpellIfCan(m_creature, SPELL_IMPALE_VISUAL);
         m_uiImpaleTimer = 3000;
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
     void UpdateAI(const uint32 uiDiff) override
     {
@@ -371,20 +307,15 @@ struct npc_impale_targetAI : public Scripted_NoMovementAI
     }
 };
 
-UnitAI* GetAI_npc_impale_target(Creature* pCreature)
-{
-    return new npc_impale_targetAI(pCreature);
-}
-
 void AddSC_boss_anubarak()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_anubarak";
-    pNewScript->GetAI = &GetAI_boss_anubarak;
+    pNewScript->GetAI = &GetNewAIInstance<boss_anubarakAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_impale_target";
-    pNewScript->GetAI = &GetAI_npc_impale_target;
+    pNewScript->GetAI = &GetNewAIInstance<npc_impale_targetAI>;
     pNewScript->RegisterSelf();
 }

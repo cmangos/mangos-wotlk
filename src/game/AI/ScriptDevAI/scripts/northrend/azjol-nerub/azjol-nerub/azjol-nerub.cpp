@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Instance_Azjol-Nerub
-SD%Complete: 50
-SDComment:
+SD%Complete: 90
+SDComment: Supports Krik'thir watcher event, Hadronox gauntlet event and Anub'arak submerged phase mobs
 SDCategory: Azjol-Nerub
 EndScriptData */
 
@@ -26,10 +26,11 @@ EndScriptData */
 
 instance_azjol_nerub::instance_azjol_nerub(Map* pMap) : ScriptedInstance(pMap),
     m_uiWatcherTimer(0),
-    m_uiGauntletEndTimer(0),
+    m_uiPeriodicAuraTimer(0),
+    m_uiPeriodicAuraStage(0),
+    m_uiSpiderSummonTimer(0),
     m_bWatchHimDie(true),
-    m_bHadronoxDenied(true),
-    m_bGauntletStarted(false)
+    m_bHadronoxDenied(true)
 {
     Initialize();
 }
@@ -71,10 +72,94 @@ void instance_azjol_nerub::OnCreatureCreate(Creature* pCreature)
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_WORLD_TRIGGER:
-            m_lTriggerGuids.push_back(pCreature->GetObjectGuid());
+            // sort triggers based on position
+            if (pCreature->GetPositionZ() < 150.0f)
+                m_darterSummonTarget = pCreature->GetObjectGuid();
+            else if (pCreature->GetPositionZ() < 230.0f)
+                m_anubSummonTarget = pCreature->GetObjectGuid();
+            else if (pCreature->GetPositionZ() < 245.0f && pCreature->GetPositionY() < 360.0f)
+                m_guardianSummonTarget = pCreature->GetObjectGuid();
+            else if (pCreature->GetPositionZ() > 270.0f && pCreature->GetPositionZ() < 285.0f && pCreature->GetPositionY() < 410.0f)
+                m_venomancerSummonTarget = pCreature->GetObjectGuid();
+            break;
+        case NPC_ANUBAR_CRUSHER:
+            m_lCrusherGuids.push_back(pCreature->GetObjectGuid());
             break;
         case NPC_WORLD_TRIGGER_LARGE:
+            if (pCreature->IsTemporarySummon())
+                return;
+
             m_lSpiderTriggersGuids.push_back(pCreature->GetObjectGuid());
+
+            // sort the triggers
+            if (pCreature->GetPositionZ() > 750.0f)
+            {
+                if (pCreature->GetPositionX() < 500.0f)
+                    m_rightTargetTriggerGuid = pCreature->GetObjectGuid();
+                else
+                    m_leftTargetTriggerGuid = pCreature->GetObjectGuid();
+            }
+            break;
+    }
+}
+
+void instance_azjol_nerub::OnCreatureRespawn(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        // following have passive behavior movement
+        case NPC_WORLD_TRIGGER_LARGE:
+        case NPC_WORLD_TRIGGER:
+        case NPC_IMPALE_TARGET:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
+            break;
+        // following creatures have WP movement
+        case NPC_ANUBAR_CHAMPION_1:
+        case NPC_ANUBAR_CRYPT_FIEND_1:
+        case NPC_ANUBAR_NECROMANCER_1:
+        case NPC_ANUBAR_GUARDIAN:
+        case NPC_ANUBAR_VENOMANCER:
+            pCreature->SetWalk(false);
+            pCreature->GetMotionMaster()->MoveWaypoint();
+            break;
+        // following creature has levitate and WP movement
+        case NPC_ANUBAR_DARTER:
+            pCreature->SetLevitate(true);
+            pCreature->SetWalk(false);
+            pCreature->GetMotionMaster()->MoveWaypoint();
+            break;
+        // following creatures have WP movement with variable path
+        case NPC_ANUBAR_CHAMPION_2:
+        case NPC_ANUBAR_CRYPT_FIEND_2:
+        case NPC_ANUBAR_NECROMANCER_2:
+            pCreature->SetWalk(false);
+            pCreature->GetMotionMaster()->MoveWaypoint(pCreature->GetPositionX() < 500.0f ? 0 : 1);
+            break;
+        // following creatures attack the player directly
+        case NPC_ANUBAR_CHAMPION_3:
+        case NPC_ANUBAR_CRYPT_FIEND_3:
+        case NPC_ANUBAR_NECROMANCER_3:
+            pCreature->CastSpell(pCreature, SPELL_CHECK_RESET, TRIGGERED_OLD_TRIGGERED);
+
+            if (Player* pTarget = instance->GetPlayer(m_playerGuid))
+            {
+                if (pTarget->IsAlive())
+                    pCreature->AI()->AttackStart(pTarget);
+            }
+            else if (Player* pPlayer = GetPlayerInMap(true))
+                pCreature->AI()->AttackStart(pPlayer);
+            else if (Creature* pHadronox = GetSingleCreatureFromStorage(NPC_HADRONOX))
+                pCreature->AI()->AttackStart(pHadronox);
+            break;
+        // following creatures have jump movement
+        case NPC_ANUBAR_ASSASSIN:
+            if (Creature* pTrigger = instance->GetCreature(m_anubSummonTarget))
+            {
+                float fX, fY, fZ;
+                pCreature->GetRandomPoint(pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 15.0f, fX, fY, fZ);
+                pCreature->GetMotionMaster()->MoveJump(fX, fY, fZ, 3 * pCreature->GetSpeed(MOVE_RUN), 10.0f);
+            }
             break;
     }
 }
@@ -90,6 +175,24 @@ void instance_azjol_nerub::OnCreatureDeath(Creature* pCreature)
         // Set achiev criteriat to false if one of the watchers dies
         m_bWatchHimDie = false;
     }
+    else if (uiEntry == NPC_ANUBAR_CRUSHER)
+    {
+        m_lCrusherGuids.remove(pCreature->GetObjectGuid());
+
+        // make boss passive to ignore mobs and speed up the tunnel movement
+        if (m_lCrusherGuids.empty())
+        {
+            if (Creature* pHadronox = GetSingleCreatureFromStorage(NPC_HADRONOX))
+            {
+                pHadronox->AI()->EnterEvadeMode();
+                pHadronox->AI()->SetReactState(REACT_PASSIVE);
+
+                pHadronox->SetWalk(false);
+                pHadronox->GetMotionMaster()->Clear(false, true);
+                pHadronox->GetMotionMaster()->MoveWaypoint();
+            }
+        }
+    }
 }
 
 void instance_azjol_nerub::OnCreatureEnterCombat(Creature* pCreature)
@@ -104,77 +207,152 @@ void instance_azjol_nerub::OnCreatureEnterCombat(Creature* pCreature)
     }
     else if (uiEntry == NPC_ANUBAR_CRUSHER)
     {
+        // there is only one Crusher which is spawned in DB; the script reacts only to that one
+        if (pCreature->IsTemporarySummon())
+            return;
+
         // Only for the first try
-        if (m_bGauntletStarted)
+        if (GetData(TYPE_HADRONOX) == IN_PROGRESS)
             return;
 
         DoScriptText(SAY_CRUSHER_AGGRO, pCreature);
 
-        // Spawn 2 more crushers - note these are not the exact spawn coords, but we need to use this workaround for better movement
-        if (Creature* pCrusher = pCreature->SummonCreature(NPC_ANUBAR_CRUSHER, 485.25f, 611.46f, 771.42f, 4.74f, TEMPSPAWN_DEAD_DESPAWN, 0))
+        if (pCreature->GetVictim())
+            m_playerGuid = pCreature->GetVictim()->GetBeneficiaryPlayer()->GetObjectGuid();
+
+        // spawn and store additional triggers for player attack
+        for (uint8 i = 0; i < MAX_GAUNTLET_SPELLS; ++i)
+            if (Creature* pTrigger = pCreature->SummonCreature(triggerSummonData[i].entry, triggerSummonData[i].x, triggerSummonData[i].y, triggerSummonData[i].z, triggerSummonData[i].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+                m_playerTriggerGuid[i] = pTrigger->GetObjectGuid();
+
+        // Spawn 6 extra spawns; movement in DB
+        for (uint8 i = 0; i < MAX_GAUNTLET_SPAWNS; ++i)
         {
-            pCrusher->SetWalk(false);
-            pCrusher->GetMotionMaster()->MovePoint(0, 517.51f, 561.439f, 734.0306f);
-            pCrusher->SetRespawnCoord(517.51f, 561.439f, 734.0306f, pCrusher->GetOrientation());
-            pCrusher->HandleEmote(EMOTE_STATE_READYUNARMED);
-        }
-        if (Creature* pCrusher = pCreature->SummonCreature(NPC_ANUBAR_CRUSHER, 575.21f, 611.47f, 771.46f, 3.59f, TEMPSPAWN_DEAD_DESPAWN, 0))
-        {
-            pCrusher->SetWalk(false);
-            pCrusher->GetMotionMaster()->MovePoint(0, 543.414f, 551.728f, 732.0522f);
-            pCrusher->SetRespawnCoord(543.414f, 551.728f, 732.0522f, pCrusher->GetOrientation());
-            pCrusher->HandleEmote(EMOTE_STATE_READYUNARMED);
+            if (Creature* pMob = pCreature->SummonCreature(gauntletSummonData[i].entry, gauntletSummonData[i].x, gauntletSummonData[i].y, gauntletSummonData[i].z, gauntletSummonData[i].o, TEMPSPAWN_DEAD_DESPAWN, 0))
+            {
+                pMob->SetWalk(false);
+                pMob->GetMotionMaster()->MoveWaypoint(gauntletSummonData[i].pathId);
+            }
         }
 
-        // Spawn 2 more crushers and start the countdown
-        m_uiGauntletEndTimer = 2 * MINUTE * IN_MILLISECONDS;
-        m_bGauntletStarted = true;
+        // start gauntlet; spider moves up the tunnel
+        if (Creature* pHadronox = GetSingleCreatureFromStorage(NPC_HADRONOX))
+            DoScriptText(EMOTE_MOVE_TUNNEL, pHadronox);
+
+        SetData(TYPE_HADRONOX, IN_PROGRESS);
+
+        m_uiSpiderSummonTimer = 20000;
     }
 }
 
 void instance_azjol_nerub::OnCreatureEvade(Creature* pCreature)
 {
-    uint32 uiEntry = pCreature->GetEntry();
-    if (uiEntry == NPC_GASHRA || uiEntry == NPC_NARJIL || uiEntry == NPC_SILTHIK)
-        m_playerGuid.Clear();
+    switch (pCreature->GetEntry())
+    {
+        case NPC_GASHRA:
+        case NPC_NARJIL:
+        case NPC_SILTHIK:
+            m_playerGuid.Clear();
+            break;
+        case NPC_ANUBAR_GUARDIAN:
+        case NPC_ANUBAR_VENOMANCER:
+        case NPC_ANUBAR_ASSASSIN:
+        case NPC_ANUBAR_DARTER:
+            if (Creature* pAnub = GetSingleCreatureFromStorage(NPC_ANUBARAK))
+                pAnub->AI()->EnterEvadeMode();
+            break;
+    }
 }
 
-void instance_azjol_nerub::Update(uint32 uiDiff)
+void instance_azjol_nerub::SetData(uint32 uiType, uint32 uiData)
 {
-    if (m_uiWatcherTimer)
+    switch (uiType)
     {
-        if (m_uiWatcherTimer <= uiDiff)
-        {
-            DoSendWatcherOrKrikthir();
-            m_uiWatcherTimer = 0;
-        }
-        else
-            m_uiWatcherTimer -= uiDiff;
+        case TYPE_KRIKTHIR:
+            m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE)
+            {
+                DoUseDoorOrButton(GO_DOOR_KRIKTHIR);
+
+                // start gauntlet event
+                m_uiPeriodicAuraTimer = 1000;
+                m_uiPeriodicAuraStage = 0;
+            }
+            break;
+        case TYPE_HADRONOX:
+            m_auiEncounter[uiType] = uiData;
+            if (uiData == DONE || uiData == SPECIAL)
+                ResetHadronoxTriggers();
+            break;
+        case TYPE_ANUBARAK:
+            m_auiEncounter[uiType] = uiData;
+            DoUseDoorOrButton(GO_DOOR_ANUBARAK_1);
+            DoUseDoorOrButton(GO_DOOR_ANUBARAK_2);
+            DoUseDoorOrButton(GO_DOOR_ANUBARAK_3);
+            if (uiData == IN_PROGRESS)
+                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_ANUB_ID);
+            break;
     }
 
-    if (m_uiGauntletEndTimer)
+    if (uiData == DONE)
     {
-        if (m_uiGauntletEndTimer <= uiDiff)
-        {
-            if (GetData(TYPE_HADRONOX) == IN_PROGRESS)
-            {
-                m_uiGauntletEndTimer = 0;
-                return;
-            }
+        OUT_SAVE_INST_DATA;
 
-            SetData(TYPE_HADRONOX, SPECIAL);
+        std::ostringstream saveStream;
+        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2];
 
-            // Allow him to evade - this will start the waypoint movement
-            if (Creature* pHadronox = GetSingleCreatureFromStorage(NPC_HADRONOX))
-                pHadronox->AI()->EnterEvadeMode();
+        m_strInstData = saveStream.str();
 
-            m_uiGauntletEndTimer = 0;
-        }
-        else
-            m_uiGauntletEndTimer -= uiDiff;
+        SaveToDB();
+        OUT_SAVE_INST_DATA_COMPLETE;
     }
 }
 
+void instance_azjol_nerub::Load(const char* chrIn)
+{
+    if (!chrIn)
+    {
+        OUT_LOAD_INST_DATA_FAIL;
+        return;
+    }
+
+    OUT_LOAD_INST_DATA(chrIn);
+
+    std::istringstream loadStream(chrIn);
+    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2];
+
+    for (uint32& i : m_auiEncounter)
+    {
+        if (i == IN_PROGRESS)
+            i = NOT_STARTED;
+    }
+
+    OUT_LOAD_INST_DATA_COMPLETE;
+}
+
+uint32 instance_azjol_nerub::GetData(uint32 uiType) const
+{
+    if (uiType < MAX_ENCOUNTER)
+        return m_auiEncounter[uiType];
+
+    return 0;
+}
+
+bool instance_azjol_nerub::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* /*pSource*/, Unit const* /*pTarget*/, uint32 /*uiMiscValue1*/ /* = 0*/) const
+{
+    switch (uiCriteriaId)
+    {
+        case ACHIEV_CRITERIA_WATCH_DIE:
+            return m_bWatchHimDie;
+        case ACHIEV_CRITERIA_DENIED:
+            return m_bHadronoxDenied;
+
+        default:
+            return false;
+    }
+}
+
+// Method that will send watchers to engange in combat for Krikthir
 void instance_azjol_nerub::DoSendWatcherOrKrikthir()
 {
     Creature* pAttacker = nullptr;
@@ -215,147 +393,73 @@ void instance_azjol_nerub::DoSendWatcherOrKrikthir()
     }
 }
 
-void instance_azjol_nerub::DoSortWorldTriggers()
-{
-    if (Creature* pAnub = GetSingleCreatureFromStorage(NPC_ANUBARAK))
-    {
-        float fZ = pAnub->GetPositionZ();
-        float fTriggZ = 0;
-
-        for (ObjectGuid& guid : m_lTriggerGuids)
-        {
-            if (Creature* pTrigg = instance->GetCreature(guid))
-            {
-                // Sort only triggers in a range of 100
-                if (pTrigg->GetPositionY() < pAnub->GetPositionY() + 110)
-                {
-                    fTriggZ = pTrigg->GetPositionZ();
-
-                    // One npc below the platform
-                    if (fTriggZ < fZ + aSortDistance[0])
-                        m_darterSummonTarget = pTrigg->GetObjectGuid();
-                    // One npc on the boss platform - used to handle the summoned movement
-                    else if (fTriggZ < fZ + aSortDistance[1])
-                        m_anubSummonTarget = pTrigg->GetObjectGuid();
-                    // One npc on the upper pathway
-                    else if (fTriggZ < fZ + aSortDistance[2])
-                        m_guardianSummonTarget = pTrigg->GetObjectGuid();
-                    // Eight npcs on the upper ledges
-                    else if (fTriggZ < fZ +  aSortDistance[3])
-                        m_vAssassinSummonTargetsVect.push_back(pTrigg->GetObjectGuid());
-                }
-            }
-        }
-    }
-}
-
-ObjectGuid instance_azjol_nerub::GetRandomAssassinTrigger()
-{
-    // Get a random summon target
-    if (!m_vAssassinSummonTargetsVect.empty())
-        return m_vAssassinSummonTargetsVect[urand(0, m_vAssassinSummonTargetsVect.size() - 1)];
-    return ObjectGuid();
-}
-
+// Method to reset the web triggers that spawn the gauntlet mobs
 void instance_azjol_nerub::ResetHadronoxTriggers()
 {
     // Drop the summon auras from the triggers
-    for (GuidList::const_iterator itr = m_lSpiderTriggersGuids.begin(); itr != m_lSpiderTriggersGuids.end(); ++itr)
+    for (const auto& guid : m_lSpiderTriggersGuids)
     {
-        if (Creature* pTrigger = instance->GetCreature(*itr))
-            pTrigger->RemoveAllAurasOnEvade();
+        if (Creature* pTrigger = instance->GetCreature(guid))
+        {
+            pTrigger->RemoveAurasDueToSpell(SPELL_SUMMON_CHAMPION_S);
+            pTrigger->RemoveAurasDueToSpell(SPELL_SUMMON_NECROMANCER_S);
+            pTrigger->RemoveAurasDueToSpell(SPELL_SUMMON_CRYPT_FIEND_S);
+        }
     }
+
+    // despawn temp triggers
+    for (uint8 i = 0; i < MAX_GAUNTLET_SPELLS; ++i)
+        if (Creature* pTrigger = instance->GetCreature(m_playerTriggerGuid[i]))
+            pTrigger->ForcedDespawn();
+
+    // stop the timer
+    m_uiSpiderSummonTimer = 0;
 }
 
-void instance_azjol_nerub::SetData(uint32 uiType, uint32 uiData)
+void instance_azjol_nerub::Update(uint32 uiDiff)
 {
-    switch (uiType)
+    // timer to engange watchers for Krikthir
+    if (m_uiWatcherTimer)
     {
-        case TYPE_KRIKTHIR:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == DONE)
-            {
-                DoUseDoorOrButton(GO_DOOR_KRIKTHIR);
-
-                // start gauntlet event
-                if (Creature* pHadronox = GetSingleCreatureFromStorage(NPC_HADRONOX))
-                    pHadronox->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pHadronox, pHadronox);
-            }
-            break;
-        case TYPE_HADRONOX:
-            m_auiEncounter[uiType] = uiData;
-            if (uiData == DONE)
-                ResetHadronoxTriggers();
-            break;
-        case TYPE_ANUBARAK:
-            m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_DOOR_ANUBARAK_1);
-            DoUseDoorOrButton(GO_DOOR_ANUBARAK_2);
-            DoUseDoorOrButton(GO_DOOR_ANUBARAK_3);
-            if (uiData == IN_PROGRESS)
-            {
-                DoSortWorldTriggers();
-                DoStartTimedAchievement(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, ACHIEV_START_ANUB_ID);
-            }
-            break;
+        if (m_uiWatcherTimer <= uiDiff)
+        {
+            DoSendWatcherOrKrikthir();
+            m_uiWatcherTimer = 0;
+        }
+        else
+            m_uiWatcherTimer -= uiDiff;
     }
 
-    if (uiData == DONE)
+    // apply period auras on the triggers
+    if (m_uiPeriodicAuraTimer)
     {
-        OUT_SAVE_INST_DATA;
+        if (m_uiPeriodicAuraTimer <= uiDiff)
+        {
+            for (const auto& guid : m_lSpiderTriggersGuids)
+                if (Creature* pTrigger = instance->GetCreature(guid))
+                    pTrigger->CastSpell(pTrigger, aSpiderSummonSpells[m_uiPeriodicAuraStage], TRIGGERED_OLD_TRIGGERED);
 
-        std::ostringstream saveStream;
-        saveStream << m_auiEncounter[0] << " " << m_auiEncounter[1] << " " << m_auiEncounter[2];
-
-        m_strInstData = saveStream.str();
-
-        SaveToDB();
-        OUT_SAVE_INST_DATA_COMPLETE;
-    }
-}
-
-uint32 instance_azjol_nerub::GetData(uint32 uiType) const
-{
-    if (uiType < MAX_ENCOUNTER)
-        return m_auiEncounter[uiType];
-
-    return 0;
-}
-
-bool instance_azjol_nerub::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* /*pSource*/, Unit const* /*pTarget*/, uint32 /*uiMiscValue1*/ /* = 0*/) const
-{
-    switch (uiCriteriaId)
-    {
-        case ACHIEV_CRITERIA_WATCH_DIE:
-            return m_bWatchHimDie;
-        case ACHIEV_CRITERIA_DENIED:
-            return m_bHadronoxDenied;
-
-        default:
-            return false;
-    }
-}
-
-void instance_azjol_nerub::Load(const char* chrIn)
-{
-    if (!chrIn)
-    {
-        OUT_LOAD_INST_DATA_FAIL;
-        return;
+            ++m_uiPeriodicAuraStage;
+            m_uiPeriodicAuraTimer = m_uiPeriodicAuraStage == 2 ? 0 : 5000;
+        }
+        else
+            m_uiPeriodicAuraTimer -= uiDiff;
     }
 
-    OUT_LOAD_INST_DATA(chrIn);
-
-    std::istringstream loadStream(chrIn);
-    loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2];
-
-    for (uint32& i : m_auiEncounter)
+    // spider summon timer
+    if (m_uiSpiderSummonTimer)
     {
-        if (i == IN_PROGRESS)
-            i = NOT_STARTED;
-    }
+        if (m_uiSpiderSummonTimer <= uiDiff)
+        {
+            for (uint8 i = 0; i < MAX_GAUNTLET_SPELLS; ++i)
+                if (Creature* pTrigger = instance->GetCreature(m_playerTriggerGuid[i]))
+                    pTrigger->CastSpell(pTrigger, aPlayerSummonSpells[i], TRIGGERED_OLD_TRIGGERED);
 
-    OUT_LOAD_INST_DATA_COMPLETE;
+            m_uiSpiderSummonTimer = 60000;
+        }
+        else
+            m_uiSpiderSummonTimer -= uiDiff;
+    }
 }
 
 InstanceData* GetInstanceData_instance_azjol_nerub(Map* pMap)
