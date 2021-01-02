@@ -2217,16 +2217,198 @@ UPDATE `spell_template` SET `DmgClass`=1 WHERE `id` IN(33778);
 -- Removes aura interrupt flag 0x00001000-AURA_INTERRUPT_FLAG_MELEE_ATTACK - Player should be able to use male during fight with 3 mobs
 UPDATE spell_template SET AuraInterruptFlags = AuraInterruptFlags&~0x00001000 WHERE Id IN (48761,48763);
 
+-- Vengeance Landing Cannonfire (Borean Tundra) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 42442;
+-- Cosmetic - Incinerate to Random Target (Borean Tundra) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 45863;
+-- Awaken Subboss (Utgarde Pinnacle) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 47669;
+-- Paralyze (Utgarde Pinnacle) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 48278;
 -- Onslaught Deckhand: Water Bucket: should only hit one target - verified by video and sniff
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 48490;
 -- Ruby Arrow - should only hit one target - verified by video and sniff
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 49197;
 -- Shoot Magic Arrow - should only hit one target
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 48530;
+-- Ooze Combine (Halls of Stone) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 50742;
+-- Glare of the Tribunal | normal and heroic (Halls of Stone) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (50988,59870);
+-- Summon Dark Matter Target (Halls of Stone) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 51003;
+-- Summon Searing Gaze Target (Halls of Stone) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 51146;
+-- Summon Skittering Swarmer | Infector (Azjol Nerub, Krik'thir the Gatewatcher) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (52438,52449);
+-- Impale (Azjol Nerub, Anub'arak) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 53457;
 -- Summon Anub'ar Champion | Necromancer | Crypt Fiend - should only hit one target
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (53826,53827,53828);
+-- Ritual of the Sword (Utgarde Pinnacle, Svala) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 54148;
+-- Forced Obedience (Naxxramas, Razovius) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 55479;
+-- Summon Power Spark (Eye of Eternity, Malygos) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 56140;
+-- Lava Strike (Obsidian Sanctum, Sartharion) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 57578;
+-- Blazing Harpoon (Howling Fjord) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 61588;
+-- Charge Orb (Ulduar, Thorim) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 62016;
+-- Stormhammer (Ulduar, Thorim) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 62042;
+-- Stone Grip (Ulduar, Kologarn) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 62166;
+-- Cosmic Smash (Ulduar, Algalon) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 62301;
+-- Pursued (Ulduar, Flame Leviathan) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 62374;
+-- Activate Construct (Ulduar, Ignis) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 62488;
+-- Blizzard (Ulduar, Thorim) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (62577,62603);
+-- Storm Cloud (Ulduar, Hodir) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 62797;
+-- Summon Guardian (Ulduar, Yogg Saron) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 62978;
+-- Searing Light (Ulduar, XT-002)) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (63018,65121);
+-- Gravity Bomb (Ulduar, XT-002) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (63024,64234);
+-- Icicle (Ulduar, Hodir) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 63545;
+-- Sara's Anger (Ulduar, Yogg-Saron) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 63744;
+-- Sara's Blessing (Ulduar, Yogg-Saron) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 63745;
+-- Sara's Fervor (Ulduar, Yogg-Saron) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 63747;
+-- Psychosis (Ulduar, Yogg-Saron) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (63795,65301);
+-- Summon Scrap Bot Trigger (Ulduar, Mimiron) use for Scrap Bots, hits npc 33856
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (63820,64425);
+-- Malady of the Mind (Ulduar, Yogg-Saron) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 63830;
+-- Overcharge (VoA, Emalon) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 64218;
+-- Rocket Strike (Ulduar, Mimiron) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 64402;
+-- Shadow Beacon (Ulduar, Yogg-Saron) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 64465;
+-- Melt Ice (Ulduar, Hodir) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 64543;
+-- Frost Bomb (Ulduar, Mimiron) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 64623;
+-- Pursuing Spikes (ToCrusader, Anub'arak) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 65872;
+-- Touch of Light | Darkness (ToCrusader, Val'kyr Twins) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (65950,66001,67281,67282,67283,67296,67297,67298);
+-- Bullet Controller Summon Periodic Trigger Light | Dark (ToCrusader) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (66152,66153);
+-- Nerubian Burrower (Mode 0) (ToCrusader, Anub'arak) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 66332;
+-- Mistress' Kiss (ToCrusader, Jaraxxus) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (66336,67077);
+-- Summon Scarab (ToCrusader, Anub'arak) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 66339;
+-- Wailing Souls (FoS) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 68912;
+--Fear (FoS) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 68950;
+-- Pursuit (PoS) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 68987;
+-- Mirrored Soul (FoS) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 69048;
+-- Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (69057,72088,73142,73144);
+-- Coldflame (ICC, Marrowgar) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 69140;
+-- Mutated Infection (ICC, Rotface) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (69674,71224,73022,73023);
+-- Volatile Ooze Adhesive (ICC, Putricide) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (70447,72836,72837,72838);
+-- Blood Mirror (ICC Bloodqueen) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (70450,70837);
+-- Slime Spray Summon Trigger (ICC, Rotface) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 70882;
+-- Unbound Plague Search Effect (ICC, Putricide) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 70920;
+-- Twilight Bloodbolt (ICC Bloodqueen) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (71445,71471);
+-- Vampiric Bite (ICC Bloodqueen) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 71837;
+-- Swarming Shadows (ICC Bloodqueen) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 71861;
+-- Frozen Orb (Vault of Archavon, Toravon) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 72091;
+-- Mark of Fallen Champion (target selection) (ICC, Deathbringer Saurfang) - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 72254;
+
 -- Summon Anub'ar Assassin - should only hit two targets
 UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id = 53609;
+-- Icicle (Ulduar, Hodir) - two targets
+UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id = 62476;
+-- Brain Link (Ulduar, Yogg-Saron) - two targets
+UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id = 63802;
+-- Penetrating Cold (10 normal | 10 heroic) (ToCrusader, Anub'arak) - two targets
+UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id IN (66013,68509);
+-- Nerubian Burrower (Mode 1 and 2) (ToCrusader, Anub'arak) - two targets
+UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id IN (67755,67756);
+-- Bone Slice (ICC, Lord Marrowgar) - two targets
+UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id = 69055;
+-- Gas spore (ICC, Festergut) - two targets
+UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id = 69278;
+-- Ooze Flood (ICC, Rotface) - two targets
+UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id = 69782;
+-- Slime Puddle (ICC, Putricide) - two targets
+UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id = 70341;
+-- Pact of the Darkfallen (ICC Bloodqueen) - two targets
+UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id IN (71336,71390);
+-- Slime Puddle Trigger (ICC, Putricide) - two targets
+UPDATE spell_template SET MaxAffectedTargets = 2 WHERE id = 71424;
+
+-- Summon Ghouls On Scarlet Crusade (Scarlet Enclave) - three targets
+UPDATE spell_template SET MaxAffectedTargets = 3 WHERE id IN (51904,54522);
+-- Surge of Power (h) (Malygos) - three targets
+UPDATE spell_template SET MaxAffectedTargets = 3 WHERE id = 60936;
+-- Icicle (h) (Ulduar, Hodir) - three targets
+UPDATE spell_template SET MaxAffectedTargets = 3 WHERE id = 62477;
+
+-- StoneGrip (h) (Ulduar, Kologarn) - three targets
+UPDATE spell_template SET MaxAffectedTargets = 3 WHERE id = 63981;
+-- Cosmic Smash (h) (Ulduar, Algalon) - three targets
+UPDATE spell_template SET MaxAffectedTargets = 3 WHERE id = 64598;
+-- Summon Fire Bot Trigger (Ulduar, Mimiron) hits npc 33856 - three targets
+UPDATE spell_template SET MaxAffectedTargets = 3 WHERE id = 64620;
+-- Bone Slice (ICC, Lord Marrowgar, heroic) - three targets
+UPDATE spell_template SET MaxAffectedTargets = 3 WHERE id = 70814;
+-- Frozen Orb (h) (Vault of Archavon, Toravon) - three targets
+UPDATE spell_template SET MaxAffectedTargets = 3 WHERE id = 72095;
+-- Bone Spike Graveyard (Icecrown Citadel, Lord Marrowgar) 25 man - three targets
+UPDATE spell_template SET MaxAffectedTargets = 3 WHERE id IN (72089,70826,73143,73145);
+
+-- Nerubian Burrower (Mode 3) (ToCrusader, Anub'arak) - four targets
+UPDATE spell_template SET MaxAffectedTargets = 4 WHERE id = 67757;
+-- Gas spore (Mode 1) (ICC, Festergut) - four targets
+UPDATE spell_template SET MaxAffectedTargets = 4 WHERE id = 71221;
+
+-- Life Drain (h) (Naxx, Sapphiron) - five targets
+UPDATE spell_template SET MaxAffectedTargets = 5 WHERE id = 55665;
+-- Consume Minions (Dragonblight) - five targets
+UPDATE spell_template SET MaxAffectedTargets = 5 WHERE id = 58917;
+-- Nature Bomb (Ulduar, Freya) - five targets
+UPDATE spell_template SET MaxAffectedTargets = 5 WHERE id = 64604;
+-- Mistress' Kiss (Mode 1 and 3) (ToCrusader, Jaraxxus) - five targets
+UPDATE spell_template SET MaxAffectedTargets = 5 WHERE id IN (67076,67078);
+-- Penetrating Cold (25 man normal | heroic) - five targets
+UPDATE spell_template SET MaxAffectedTargets = 5 WHERE id IN (67700,68510);
+
+-- Poison Bolt Volley (h) (Naxx, Faerlina) - ten targets
+UPDATE spell_template SET MaxAffectedTargets = 10 WHERE id = 54098;
+-- Curse of the Plaguebringer (h) (Naxx, Noth the Plaguebringer) - ten targets
+UPDATE spell_template SET MaxAffectedTargets = 10 WHERE id = 54835;
 
 -- spells that have caster in the middle of terrain - LOS attribute
 UPDATE spell_template SET AttributesEx2 = AttributesEx2|4 WHERE id IN (54612, 54613);
