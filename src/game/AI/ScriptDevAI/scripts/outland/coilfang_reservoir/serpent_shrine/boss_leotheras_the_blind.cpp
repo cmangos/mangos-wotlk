@@ -104,7 +104,7 @@ struct boss_leotheras_the_blindAI : public CombatAI
         AddCustomAction(LEOTHERAS_PHASE_TRANSITION, true, [&]() { HandlePhaseTransition(); });
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float /*z*/)
         {
-            return !(x > 298.0f && x < 411.0f && y > -526.0f &&  y < -299.0f);
+            return !(x > 290.0f && x < 411.0f && y > -526.0f &&  y < -299.0f);
         });
     }
 
