@@ -1050,7 +1050,8 @@ UPDATE creature_template SET ScriptName='npc_grand_admiral_westwind' WHERE entry
 /* ISLE OF QUEL'DANAS */
 UPDATE creature_template SET ScriptName='npc_converted_sentry' WHERE entry=24981;
 UPDATE creature_template SET ScriptName='npc_suns_reach_reclamation' WHERE entry IN(24965,24967,25061,25057,24932,25108,25069,25046,24975,25112,25163);
-UPDATE creature_template SET ScriptName='npc_shattered_sun_fighter' WHERE entry IN(24938,25115);
+UPDATE creature_template SET ScriptName='npc_shattered_sun_marksman' WHERE entry=24938;
+UPDATE creature_template SET ScriptName='npc_shattered_sun_warrior' WHERE entry=25115;
 
 /* KARAZHAN */
 UPDATE instance_template SET ScriptName='instance_karazhan' WHERE map=532;

@@ -107,10 +107,22 @@ struct npc_shattered_sun_fighterAI : public ScriptedAI
             {
                 switch (urand(0, 3))
                 {
-                    case 0: transformScriptId = SCRIPT_TRANSFORM_ARCHER_BE_MALE; break;
-                    case 1: transformScriptId = SCRIPT_TRANSFORM_ARCHER_BE_FEMALE; break;
-                    case 2: transformScriptId = SCRIPT_TRANSFORM_ARCHER_DRAENEI_MALE; break;
-                    case 3: transformScriptId = SCRIPT_TRANSFORM_ARCHER_DRAENEI_FEMALE; break;
+                    case 0:
+                        transformScriptId = SCRIPT_TRANSFORM_ARCHER_BE_MALE;
+                        m_uiMarksmanRace = RACE_BLOODELF;
+                        break;
+                    case 1:
+                        transformScriptId = SCRIPT_TRANSFORM_ARCHER_BE_FEMALE;
+                        m_uiMarksmanRace = RACE_BLOODELF;
+                        break;
+                    case 2:
+                        transformScriptId = SCRIPT_TRANSFORM_ARCHER_DRAENEI_MALE;
+                        m_uiMarksmanRace = RACE_DRAENEI;
+                        break;
+                    case 3:
+                        transformScriptId = SCRIPT_TRANSFORM_ARCHER_DRAENEI_FEMALE;
+                        m_uiMarksmanRace = RACE_DRAENEI;
+                        break;
                 }
             }
             else if (creature->GetEntry() == NPC_SHATTERED_SUN_WARRIOR)
@@ -128,14 +140,66 @@ struct npc_shattered_sun_fighterAI : public ScriptedAI
         }
         Reset();
     }
+    
+    uint32 m_uiMarksmanRace;
+
+    void Reset() override {}
+    void UpdateAI(const uint32 diff) override {}
+};
+
+struct npc_shattered_sun_warriorAI : public npc_shattered_sun_fighterAI
+{
+    npc_shattered_sun_warriorAI(Creature* creature) : npc_shattered_sun_fighterAI(creature) { Reset(); }
+    void Reset() override {}
+    void UpdateAI(const uint32 diff) override {}
+};
+
+enum
+{
+    SPELL_SHOOT_BLOODELF_NW = 45219,
+    SPELL_SHOOT_DRAENEI_NW  = 45223,
+    SPELL_SHOOT_BLOODELF_SE = 45229,
+    SPELL_SHOOT_DRAENEI_SE  = 45233,
+};
+
+struct npc_shattered_sun_marksmanAI : public npc_shattered_sun_fighterAI
+{
+    npc_shattered_sun_marksmanAI(Creature* creature) : npc_shattered_sun_fighterAI(creature) { Reset(); }
+
+    uint32 m_uiShootTimer;
+    uint32 m_uiShootSpell;
 
     void Reset() override
     {
-        if (m_creature->GetEntry() == NPC_SHATTERED_SUN_MARKSMAN)
-            SetCombatMovement(false);
+        SetCombatMovement(false);
     }
 
-    void UpdateAI(const uint32 diff) override {}
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (sender->GetObjectGuid() != m_creature->GetObjectGuid())
+            return;
+        // Facing North-West
+        if (eventType == AI_EVENT_CUSTOM_A)
+            m_uiShootSpell = m_uiMarksmanRace == RACE_BLOODELF ? SPELL_SHOOT_BLOODELF_NW : SPELL_SHOOT_DRAENEI_NW;
+        // Facing South-East
+        else if (eventType == AI_EVENT_CUSTOM_B)
+            m_uiShootSpell = m_uiMarksmanRace == RACE_BLOODELF ? SPELL_SHOOT_BLOODELF_SE : SPELL_SHOOT_DRAENEI_SE;
+        m_uiShootTimer = urand(1000, 10000);
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (m_uiShootTimer)
+        {
+            if (m_uiShootTimer <= diff)
+            {
+                DoCastSpellIfCan(m_creature, m_uiShootSpell);
+                m_uiShootTimer = urand(8000, 14000);
+            }
+            else
+                m_uiShootTimer -= diff;
+        }
+    }
 };
 
 void AddSC_isle_of_queldanas()
@@ -146,7 +210,12 @@ void AddSC_isle_of_queldanas()
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
-    pNewScript->Name = "npc_shattered_sun_fighter";
-    pNewScript->GetAI = &GetNewAIInstance<npc_shattered_sun_fighterAI>;
+    pNewScript->Name = "npc_shattered_sun_marksman";
+    pNewScript->GetAI = &GetNewAIInstance<npc_shattered_sun_marksmanAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_shattered_sun_warrior";
+    pNewScript->GetAI = &GetNewAIInstance<npc_shattered_sun_warriorAI>;
     pNewScript->RegisterSelf();
 }
