@@ -136,10 +136,22 @@ struct DemonicKnowledge : public AuraScript
     }
 };
 
+struct EyeOfKilrogg : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->CastSpell(nullptr, 2585, TRIGGERED_OLD_TRIGGERED);
+        summon->DisableThreatPropagationToOwner();
+        if (spell->GetCaster()->GetMapId() == 571) // Northrend - Flight
+            summon->CastSpell(nullptr, 58083, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterAuraScript<UnstableAffliction>("spell_unstable_affliction");
     RegisterAuraScript<CurseOfAgony>("spell_curse_of_agony");
     RegisterSpellScript<LifeTap>("spell_life_tap");
     RegisterAuraScript<DemonicKnowledge>("spell_demonic_knowledge");
+    RegisterSpellScript<EyeOfKilrogg>("spell_eye_of_kilrogg");
 }

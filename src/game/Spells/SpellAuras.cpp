@@ -3051,25 +3051,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
                 break;
             }
-            case SPELLFAMILY_WARLOCK:
-            {
-                switch (GetId())
-                {
-                    case 126:                               // Eye of Kilrogg
-                    {
-                        if (target->IsPlayer())
-                        {
-                            Unit* pet = static_cast<Player*>(target)->GetCharm();
-                            if (pet && pet->GetEntry() == 4277)
-                            {
-                                pet->CastSpell(pet, 2585, TRIGGERED_OLD_TRIGGERED);
-                                pet->DisableThreatPropagationToOwner();
-                            }
-                        }
-                        break;
-                    }
-                }
-            }
         }
     }
     // AT REMOVE
