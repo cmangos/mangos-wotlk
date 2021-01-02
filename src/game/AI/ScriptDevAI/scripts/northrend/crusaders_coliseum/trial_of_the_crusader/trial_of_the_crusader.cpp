@@ -199,6 +199,7 @@ void instance_trial_of_the_crusader::OnCreatureCreate(Creature* pCreature)
         case NPC_DREADSCALE:
         case NPC_ZHAAGRYM:
         case NPC_CAT:
+        case NPC_ANUBARAK:
             break;
         case NPC_SNOBOLD_VASSAL:
         case NPC_MISTRESS_OF_PAIN:
@@ -520,6 +521,18 @@ void instance_trial_of_the_crusader::OnCreatureDeath(Creature* pCreature)
         case NPC_SNOBOLD_VASSAL:
         case NPC_MISTRESS_OF_PAIN:
             m_lSummonedGuidsList.remove(pCreature->GetObjectGuid());
+            break;
+    }
+}
+
+void instance_trial_of_the_crusader::OnCreatureEvade(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_NERUBIAN_BURROWER:
+        case NPC_SCARAB:
+            if (Creature* pAnub = GetSingleCreatureFromStorage(NPC_ANUBARAK))
+                pAnub->AI()->EnterEvadeMode();
             break;
     }
 }

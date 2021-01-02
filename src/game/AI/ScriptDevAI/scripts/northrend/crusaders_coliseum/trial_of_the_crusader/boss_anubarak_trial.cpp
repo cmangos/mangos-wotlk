@@ -81,11 +81,10 @@ enum
     SPELL_RECENTLY_AWAKENED             = 66311,
     SPELL_SHADOW_STRIKE                 = 66134,
     SPELL_BURROWER_SUBMERGE             = 67322,
+    SPELL_SUBMERGE_BURROWER_STUN        = 68394,
 
     // npcs
-    NPC_SCARAB                          = 34605,
     NPC_FROSTSPHERE                     = 34606,
-    NPC_NERUBIAN_BURROWER               = 34607,
     NPC_ANUBARAK_SPIKE                  = 34660,
 
     MAX_FROSTSPHERES                    = 6,
@@ -666,7 +665,7 @@ struct npc_nerubian_burrowerAI : public CombatAI
 
     void HandleEmerge()
     {
-        m_creature->RemoveAurasDueToSpell(SPELL_BURROWER_SUBMERGE);
+        m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE_BURROWER_STUN);
 
         if (DoCastSpellIfCan(nullptr, SPELL_EMERGE) == CAST_OK)
         {
