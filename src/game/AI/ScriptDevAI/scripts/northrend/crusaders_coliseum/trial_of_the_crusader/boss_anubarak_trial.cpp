@@ -708,6 +708,32 @@ struct spell_burrower_submerge : public SpellScript
     }
 };
 
+/*######
+## spell_leeching_swarm_aura - 66118, 67630, 68646, 68647
+######*/
+
+struct spell_leeching_swarm_aura : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        Unit* caster = aura->GetCaster();
+        if (!caster || !target)
+            return;
+
+        int32 lifeLeeched = int32(target->GetHealth() * aura->GetModifier()->m_amount * 0.01f);
+
+        if (lifeLeeched < 250)
+            lifeLeeched = 250;
+
+        // Leeching swarm damage
+        caster->CastCustomSpell(target, 66240, &lifeLeeched, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+
+        // Leeching swarm heal
+        target->CastCustomSpell(caster, 66125, &lifeLeeched, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_anubarak_trial()
 {
     Script* pNewScript = new Script;
@@ -732,4 +758,5 @@ void AddSC_boss_anubarak_trial()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_burrower_submerge>("spell_burrower_submerge");
+    RegisterAuraScript<spell_leeching_swarm_aura>("spell_leeching_swarm_aura");
 }

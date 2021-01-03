@@ -9584,28 +9584,6 @@ void Aura::PeriodicDummyTick()
                     target->CastSpell(target, 62501, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                     return;
                 }
-                case 66118:                                 // Leeching Swarm
-                case 67630:                                 // Leeching Swarm
-                case 68646:                                 // Leeching Swarm
-                case 68647:                                 // Leeching Swarm
-                {
-                    Unit* caster = GetCaster();
-                    if (!caster)
-                        return;
-
-                    int32 lifeLeeched = int32(target->GetHealth() * m_modifier.m_amount * 0.01f);
-
-                    if (lifeLeeched < 250)
-                        lifeLeeched = 250;
-
-                    // Leeching swarm damage
-                    caster->CastCustomSpell(target, 66240, &lifeLeeched, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-
-                    // Leeching swarm heal
-                    target->CastCustomSpell(caster, 66125, &lifeLeeched, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-
-                    return;
-                }
                 case 66798:                                 // Death's Respite
                 {
                     Unit* caster = GetCaster();
