@@ -36,7 +36,7 @@ enum
     // ABEDNEUM
     SPELL_SUMMON_SEARING_GAZE_TARGET    = 51146,                // The other spells are handled in individual script
 
-    SPELL_KILL_TRIBUNAL_ADD             = 51288,                // Cleanup event on finish
+    SPELL_KILL_TRIBUNAL_ADD             = 51289,                // Cleanup event on finish
     SPELL_ACHIEVEMENT_CHECK             = 59046,                // Doesn't exist in client dbc - added in spell_template
 };
 
@@ -70,6 +70,12 @@ void instance_halls_of_stone::OnCreatureCreate(Creature* pCreature)
             else
                 m_custodianStalkerGuid = pCreature->GetObjectGuid();
             break;
+        case NPC_RUNE_PROTECTOR:
+        case NPC_RUNE_STORMCALLER:
+        case NPC_GOLEM_CUSTODIAN:
+            m_lRuneDwarfGUIDs.push_back(pCreature->GetObjectGuid());
+            break;
+        case NPC_BRANN:
         case NPC_DARK_MATTER:
         case NPC_SJONNIR:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
@@ -81,6 +87,7 @@ void instance_halls_of_stone::OnCreatureRespawn(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
+        // WP movement for these creatures
         case NPC_IRON_TROGG:
         case NPC_IRON_DWARF:
         case NPC_EARTHEN_DWARF:
@@ -88,9 +95,34 @@ void instance_halls_of_stone::OnCreatureRespawn(Creature* pCreature)
             pCreature->SetWalk(false);
             pCreature->GetMotionMaster()->MoveWaypoint(pCreature->GetPositionY() > 700 ? 0 : 1, 0, 1000);
             break;
-        case NPC_SEARING_GAZE:
+        // passive behavior
+        case NPC_SEARING_GAZE_TARGET:
+        case NPC_LIGHTNING_STALKER:
+        case NPC_TRIBUNAL_OF_AGES:
+        case NPC_KADDRAK:
+        case NPC_ABEDNEUM:
+        case NPC_MARNAK:
+        case NPC_WORLDTRIGGER:
             pCreature->AI()->SetReactState(REACT_PASSIVE);
             pCreature->SetCanEnterCombat(false);
+            break;
+        // special movement
+        case NPC_DARK_MATTER_TARGET:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
+
+            if (Creature* pDarkMatter = GetSingleCreatureFromStorage(NPC_DARK_MATTER))
+            {
+                pDarkMatter->SetWalk(false);
+                pDarkMatter->GetMotionMaster()->MovePoint(1, pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ());
+            }
+            break;
+        // attack Bran
+        case NPC_RUNE_PROTECTOR:
+        case NPC_RUNE_STORMCALLER:
+        case NPC_GOLEM_CUSTODIAN:
+            if (Creature* pBrann = GetSingleCreatureFromStorage(NPC_BRANN))
+                pCreature->AI()->AttackStart(pBrann);
             break;
     }
 }
@@ -157,6 +189,13 @@ void instance_halls_of_stone::SetData(uint32 uiType, uint32 uiData)
                             DoUseDoorOrButton(m_aFace.m_goFaceGuid);
                         m_aFace.m_bIsActive = false;
                         m_aFace.m_uiTimer = 1000;
+
+                        // despawn drawfs
+                        for (const auto& guid : m_lRuneDwarfGUIDs)
+                            if (Creature* pDwarf = instance->GetCreature(guid))
+                                pDwarf->ForcedDespawn();
+
+                        m_lRuneDwarfGUIDs.clear();
                     }
                     break;
                 case SPECIAL:
@@ -407,27 +446,18 @@ void instance_halls_of_stone::ProcessFace(uint8 uiFace)
             if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_leftEyeGuid))
                 pEye->CastSpell(pEye, instance->IsRegularDifficulty() ? SPELL_GLARE_OF_THE_TRIBUNAL : SPELL_GLARE_OF_THE_TRIBUNAL_H, TRIGGERED_OLD_TRIGGERED);
             if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_rightEyeGuid))
-                pEye->CastSpell(pEye, instance->IsRegularDifficulty() ? SPELL_GLARE_OF_THE_TRIBUNAL : SPELL_GLARE_OF_THE_TRIBUNAL_H, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_aFaces[uiFace].m_leftEyeGuid);
+                pEye->CastSpell(pEye, instance->IsRegularDifficulty() ? SPELL_GLARE_OF_THE_TRIBUNAL : SPELL_GLARE_OF_THE_TRIBUNAL_H, TRIGGERED_OLD_TRIGGERED);
             m_aFaces[uiFace].m_uiTimer = urand(1000, 2000);
             break;
         case FACE_MARNAK:
             if (Creature* pDarkMatter = GetSingleCreatureFromStorage(NPC_DARK_MATTER))
                 pDarkMatter->CastSpell(pDarkMatter, SPELL_DARK_MATTER_START, TRIGGERED_OLD_TRIGGERED);
-            // Note: Marnak doesn't cast anything directly. Keep this code for reference only.
-            // if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_leftEyeGuid))
-            //    pEye->CastSpell(pEye, SPELL_SUMMON_DARK_MATTER_TARGET, TRIGGERED_OLD_TRIGGERED);
-            // One should be enough..
-            // if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_rightEyeGuid))
-            //    pEye->CastSpell(pEye, SPELL_SUMMON_DARK_MATTER_TARGET, TRIGGERED_OLD_TRIGGERED);
             m_aFaces[uiFace].m_uiTimer = urand(21000, 30000);
             break;
         case FACE_ABEDNEUM:
             if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_leftEyeGuid))
                 pEye->CastSpell(pEye, SPELL_SUMMON_SEARING_GAZE_TARGET, TRIGGERED_OLD_TRIGGERED);
-            // One should be enough..
-            // if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_rightEyeGuid))
-            //    pEye->CastSpell(pEye, SPELL_SUMMON_SEARING_GAZE_TARGET, TRIGGERED_OLD_TRIGGERED);
-            m_aFaces[uiFace].m_uiTimer = urand(15000, 20000);
+            m_aFaces[uiFace].m_uiTimer = urand(30000, 35000);
             break;
         default:
             return;

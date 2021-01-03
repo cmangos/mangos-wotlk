@@ -109,10 +109,6 @@ enum
 
     SPELL_STEALTH                       = 58506,
 
-    NPC_DARK_RUNE_PROTECTOR             = 27983,
-    NPC_DARK_RUNE_STORMCALLER           = 27984,
-    NPC_IRON_GOLEM_CUSTODIAN            = 27985,
-
     QUEST_HALLS_OF_STONE                = 13207,
 };
 
@@ -138,8 +134,6 @@ struct npc_brann_hosAI : public npc_escortAI
 
     uint32 m_uiStep;
     uint32 m_uiPhaseTimer;
-
-    GuidList m_luiDwarfGUIDs;
 
     void Reset() override
     {
@@ -175,13 +169,6 @@ struct npc_brann_hosAI : public npc_escortAI
             if (m_bHasContinued)
                 m_pInstance->SetData(TYPE_TRIBUNAL, IN_PROGRESS);
         }
-
-        for (GuidList::const_iterator itr = m_luiDwarfGUIDs.begin(); itr != m_luiDwarfGUIDs.end(); ++itr)
-        {
-            if (Creature* pDwarf = m_creature->GetMap()->GetCreature(*itr))
-                pDwarf->ForcedDespawn();
-        }
-        m_luiDwarfGUIDs.clear();
     }
 
     void AttackStart(Unit* pWho) override
@@ -258,7 +245,7 @@ struct npc_brann_hosAI : public npc_escortAI
         // each case has an individual spawn stalker
         switch (uEntry)
         {
-            case NPC_DARK_RUNE_PROTECTOR:
+            case NPC_RUNE_PROTECTOR:
             {
                 Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetProtectorStalkerGuid());
                 if (!pStalker)
@@ -270,7 +257,7 @@ struct npc_brann_hosAI : public npc_escortAI
                 pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                 break;
             }
-            case NPC_DARK_RUNE_STORMCALLER:
+            case NPC_RUNE_STORMCALLER:
             {
                 Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GeStormcallerStalkerGuid());
                 if (!pStalker)
@@ -280,7 +267,7 @@ struct npc_brann_hosAI : public npc_escortAI
                     pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
                 break;
             }
-            case NPC_IRON_GOLEM_CUSTODIAN:
+            case NPC_GOLEM_CUSTODIAN:
             {
                 Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetCustodianStalkerGuid());
                 if (!pStalker)
@@ -290,13 +277,6 @@ struct npc_brann_hosAI : public npc_escortAI
                 break;
             }
         }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        m_luiDwarfGUIDs.push_back(pSummoned->GetObjectGuid());
-
-        pSummoned->AI()->AttackStart(m_creature);
     }
 
     void UpdateEscortAI(const uint32 uiDiff) override
@@ -346,7 +326,7 @@ struct npc_brann_hosAI : public npc_escortAI
                     m_uiPhaseTimer = 5000;
                     break;
                 case 8:
-                    SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
+                    SpawnDwarf(NPC_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 20000;
                     break;
 
@@ -358,7 +338,7 @@ struct npc_brann_hosAI : public npc_escortAI
                 case 10:
                     if (m_pInstance)
                         m_pInstance->DoFaceSpeak(FACE_MARNAK, SAY_EVENT_B_2_MARN);
-                    SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
+                    SpawnDwarf(NPC_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 20000;
                     break;
                 case 11:
@@ -371,20 +351,20 @@ struct npc_brann_hosAI : public npc_escortAI
                     m_uiPhaseTimer = 10000;
                     break;
                 case 13:
-                    SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
+                    SpawnDwarf(NPC_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 10000;
                     break;
                 case 14:
-                    SpawnDwarf(NPC_DARK_RUNE_STORMCALLER);
+                    SpawnDwarf(NPC_RUNE_STORMCALLER);
                     m_uiPhaseTimer = (20000);
                     break;
                 case 15:
                     DoScriptText(SAY_EVENT_C_1, m_creature);
-                    SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
+                    SpawnDwarf(NPC_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 10000;
                     break;
                 case 16:
-                    SpawnDwarf(NPC_DARK_RUNE_STORMCALLER);
+                    SpawnDwarf(NPC_RUNE_STORMCALLER);
                     m_uiPhaseTimer = 20000;
                     break;
 
@@ -392,7 +372,7 @@ struct npc_brann_hosAI : public npc_escortAI
                 case 17:
                     if (m_pInstance)
                         m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_C_2_ABED);
-                    SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
+                    SpawnDwarf(NPC_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 20000;
                     break;
                 case 18:
@@ -405,46 +385,46 @@ struct npc_brann_hosAI : public npc_escortAI
                     m_uiPhaseTimer = 5000;
                     break;
                 case 20:
-                    SpawnDwarf(NPC_DARK_RUNE_STORMCALLER);
+                    SpawnDwarf(NPC_RUNE_STORMCALLER);
                     m_uiPhaseTimer = 10000;
                     break;
                 case 21:
-                    SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
+                    SpawnDwarf(NPC_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 15000;
                     break;
 
                 case 22:
                     DoScriptText(SAY_EVENT_D_1, m_creature);
-                    SpawnDwarf(NPC_IRON_GOLEM_CUSTODIAN);
+                    SpawnDwarf(NPC_GOLEM_CUSTODIAN);
                     m_uiPhaseTimer = 20000;
                     break;
                 case 23:
                     if (m_pInstance)
                         m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_D_2_ABED);
-                    SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
+                    SpawnDwarf(NPC_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 5000;
                     break;
                 case 24:
-                    SpawnDwarf(NPC_DARK_RUNE_STORMCALLER);
+                    SpawnDwarf(NPC_RUNE_STORMCALLER);
                     m_uiPhaseTimer = 15000;
                     break;
                 case 25:
                     DoScriptText(SAY_EVENT_D_3, m_creature);
-                    SpawnDwarf(NPC_IRON_GOLEM_CUSTODIAN);
+                    SpawnDwarf(NPC_GOLEM_CUSTODIAN);
                     m_uiPhaseTimer = 5000;
                     break;
                 case 26:
-                    SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
+                    SpawnDwarf(NPC_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 5000;
                     break;
                 case 27:
-                    SpawnDwarf(NPC_DARK_RUNE_STORMCALLER);
+                    SpawnDwarf(NPC_RUNE_STORMCALLER);
                     m_uiPhaseTimer = 10000;
                     break;
                 case 28:
                     if (m_pInstance)
                         m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_D_4_ABED);
-                    SpawnDwarf(NPC_DARK_RUNE_PROTECTOR);
+                    SpawnDwarf(NPC_RUNE_PROTECTOR);
                     m_uiPhaseTimer = 10000;
                     break;
 
@@ -668,11 +648,10 @@ enum
     SPELL_SUMMON_DARK_MATTER_TARGET     = 51003,
     SPELL_DARK_MATTER                   = 51012,
     SPELL_DARK_MATTER_H                 = 59868,
-    NPC_DARK_MATTER_TARGET              = 28237,
 
-    SPELL_SEARING_GAZE                  = 51136,
-    SPELL_SEARING_GAZE_H                = 59867,
-    // NPC_SEARING_GAZE_TARGET          = 28265,
+    // searing gaze handled in EAI
+    // SPELL_SEARING_GAZE               = 51136,
+    // SPELL_SEARING_GAZE_H             = 59867,
 };
 
 /*######
@@ -684,6 +663,12 @@ struct npc_dark_matterAI : public ScriptedAI
     npc_dark_matterAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
+        m_creature->SetLevitate(true);
+        homeX = m_creature->GetPositionX();
+        homeY = m_creature->GetPositionY();
+        homeZ = m_creature->GetPositionZ();
         Reset();
     }
 
@@ -691,13 +676,14 @@ struct npc_dark_matterAI : public ScriptedAI
 
     uint32 m_uiSummonTimer;
 
+    float homeX;
+    float homeY;
+    float homeZ;
+
     void Reset() override
     {
         m_uiSummonTimer = 0;
     }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
     {
@@ -705,22 +691,17 @@ struct npc_dark_matterAI : public ScriptedAI
             m_uiSummonTimer = 5000;
     }
 
-    void JustSummoned(Creature* pSummoned) override
-    {
-        if (pSummoned->GetEntry() == NPC_DARK_MATTER_TARGET)
-            m_creature->GetMotionMaster()->MovePoint(1, pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ());
-    }
-
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
     {
         if (uiMoveType != POINT_MOTION_TYPE || !uiPointId)
             return;
 
-        // Cast the Dark Matter spell and despawn for reset
-        if (DoCastSpellIfCan(m_creature,  m_bIsRegularMode ? SPELL_DARK_MATTER : SPELL_DARK_MATTER_H) == CAST_OK)
+        // Cast the Dark Matter spell and reset to home position
+        if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DARK_MATTER : SPELL_DARK_MATTER_H) == CAST_OK)
         {
-            m_creature->SetRespawnDelay(3);
-            m_creature->ForcedDespawn(1000);
+            EnterEvadeMode();
+            m_creature->SetWalk(false);
+            m_creature->GetMotionMaster()->MovePoint(0, homeX, homeY, homeZ);
         }
     }
 

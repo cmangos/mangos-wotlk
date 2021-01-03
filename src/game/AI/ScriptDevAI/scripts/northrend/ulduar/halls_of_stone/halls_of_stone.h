@@ -14,7 +14,7 @@ enum
     TYPE_KRYSTALLUS         = 2,
     TYPE_SJONNIR            = 3,
 
-    // NPC_BRANN            = 28070,
+    NPC_BRANN               = 28070,
 
     NPC_KADDRAK             = 30898,
     NPC_ABEDNEUM            = 30899,
@@ -22,8 +22,12 @@ enum
     NPC_TRIBUNAL_OF_AGES    = 28234,
     NPC_WORLDTRIGGER        = 22515,
     NPC_DARK_MATTER         = 28235,                        // used by the Tribunal event
-    NPC_SEARING_GAZE        = 28265,
     NPC_LIGHTNING_STALKER   = 28130,                        // used by the Tribunal event as spawn point for the dwarfs
+    NPC_DARK_MATTER_TARGET  = 28237,
+    NPC_SEARING_GAZE_TARGET = 28265,
+    NPC_RUNE_PROTECTOR      = 27983,
+    NPC_RUNE_STORMCALLER    = 27984,
+    NPC_GOLEM_CUSTODIAN     = 27985,
 
     // Sjonnir mobs
     NPC_SJONNIR             = 27978,
@@ -128,6 +132,7 @@ class instance_halls_of_stone : public ScriptedInstance
         GuidList m_lMarnakGUIDs;
         GuidList m_lTribunalGUIDs;
         GuidList m_lWorldtriggerGUIDs;
+        GuidList m_lRuneDwarfGUIDs;
 };
 
 #endif
