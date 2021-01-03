@@ -180,6 +180,15 @@ inline void MaNGOS::CreatureVisitObjectsNotifier::Visit(CreatureMapType& m)
     }
 }
 
+inline MaNGOS::DynamicObjectUpdater::DynamicObjectUpdater(DynamicObject& dynobject, Unit* caster, bool positive) : i_dynobject(dynobject), i_positive(positive),
+    i_script(i_dynobject.GetTarget() == TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DEST_LOC || i_dynobject.GetTarget() == TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DYNOBJ_LOC)
+{
+    i_check = caster;
+    Unit* owner = i_check->GetOwner();
+    if (owner)
+        i_check = owner;
+}
+
 inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
 {
     if (!target->IsAlive() || target->IsTaxiFlying())
@@ -231,7 +240,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
             return;
     }
     // This condition is only needed due to missing neutral spell type
-    else if(i_dynobject.GetTarget() != TARGET_ENUM_UNITS_SCRIPT_AOE_AT_DEST_LOC)
+    else if(!i_script)
     {
         // for player casts use less strict negative and more stricted positive targeting
         if (i_positive)

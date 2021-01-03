@@ -165,13 +165,8 @@ namespace MaNGOS
         DynamicObject& i_dynobject;
         Unit* i_check;
         bool i_positive;
-        DynamicObjectUpdater(DynamicObject& dynobject, Unit* caster, bool positive) : i_dynobject(dynobject), i_positive(positive)
-        {
-            i_check = caster;
-            Unit* owner = i_check->GetOwner();
-            if (owner)
-                i_check = owner;
-        }
+        bool i_script;
+        DynamicObjectUpdater(DynamicObject& dynobject, Unit* caster, bool positive);
 
         template<class T> inline void Visit(GridRefManager<T>&) {}
 #ifdef _MSC_VER
