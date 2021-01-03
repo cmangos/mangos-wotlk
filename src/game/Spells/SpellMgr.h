@@ -1903,8 +1903,6 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         case SPELL_AURA_MOD_SHAPESHIFT: // Forms and stances
         case SPELL_AURA_MOUNTED: // Mount
         case SPELL_AURA_EMPATHY: // Beast Lore
-        case SPELL_AURA_CONTROL_VEHICLE:
-        case SPELL_AURA_SET_VEHICLE_ID:
         case SPELL_AURA_PHASE:
         // TODO: Make these exclusive rather than unstackable physically and move to nonmui:
         case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK: // Heroism, Bloodlust, Icy Veins, Power Infusion
