@@ -86,7 +86,7 @@ struct boss_devourer_of_soulsAI : public ScriptedAI
 {
     boss_devourer_of_soulsAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_forge_of_souls*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_forge_of_souls*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -315,15 +315,110 @@ struct boss_devourer_of_soulsAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_devourer_of_souls(Creature* pCreature)
+/*######
+## spell_wailing_souls - 68871
+######*/
+
+struct spell_wailing_souls : public SpellScript
 {
-    return new boss_devourer_of_soulsAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // Left or Right direction?
+        target->CastSpell(target, urand(0, 1) ? 68875 : 68876, TRIGGERED_NONE);
+        // Clear TargetGuid for sweeping
+        target->SetTarget(nullptr);
+    }
+};
+
+/*######
+## spell_mirrored_soul - 69048
+######*/
+
+struct spell_mirrored_soul : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !caster)
+            return;
+
+        // This is extremely strange!
+        // The spell should send MSG_CHANNEL_START, SMSG_SPELL_START
+        // However it has cast time 2s, but should send SMSG_SPELL_GO instantly.
+        caster->CastSpell(target, 69051, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_mirrored_soul_proc - 69051
+######*/
+
+struct spell_mirrored_soul_proc : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !caster)
+            return;
+
+        // Actually this spell should be sent with SMSG_SPELL_START
+        target->CastSpell(caster, 69023, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_wailing_souls_aura - 68875, 68876
+######*/
+
+struct spell_wailing_souls_aura : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        Unit* caster = aura->GetCaster();
+        if (!caster || !target)
+            return;
+
+        // Sweep around
+        float newAngle = target->GetOrientation();
+        if (aura->GetId() == 68875)
+            newAngle += 0.09f;
+        else
+            newAngle -= 0.09f;
+
+        newAngle = MapManager::NormalizeOrientation(newAngle);
+
+        target->SetFacingTo(newAngle);
+
+        // Should actually be SMSG_SPELL_START, too
+        target->CastSpell(target, 68873, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_devourer_of_souls()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_devourer_of_souls";
-    pNewScript->GetAI = &GetAI_boss_devourer_of_souls;
+    pNewScript->GetAI = &GetNewAIInstance<boss_devourer_of_soulsAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_wailing_souls>("spell_wailing_souls");
+    RegisterSpellScript<spell_mirrored_soul>("spell_mirrored_soul");
+    RegisterSpellScript<spell_mirrored_soul_proc>("spell_mirrored_soul_proc");
+    RegisterAuraScript<spell_wailing_souls_aura>("spell_wailing_souls_aura");
 }

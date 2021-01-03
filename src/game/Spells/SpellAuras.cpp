@@ -9594,24 +9594,6 @@ void Aura::PeriodicDummyTick()
                     target->RemoveAurasDueToSpell(GetId());
                     return;
                 }
-                case 68875:                                 // Wailing Souls
-                case 68876:                                 // Wailing Souls
-                {
-                    // Sweep around
-                    float newAngle = target->GetOrientation();
-                    if (spell->Id == 68875)
-                        newAngle += 0.09f;
-                    else
-                        newAngle -= 0.09f;
-
-                    newAngle = MapManager::NormalizeOrientation(newAngle);
-
-                    target->SetFacingTo(newAngle);
-
-                    // Should actually be SMSG_SPELL_START, too
-                    target->CastSpell(target, 68873, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 70069:                                 // Ooze Flood Periodic Trigger
                 {
                     target->CastSpell(target, GetSpellProto()->CalculateSimpleValue(m_effIndex), TRIGGERED_OLD_TRIGGERED);

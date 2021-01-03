@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "forge_of_souls.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -51,7 +53,7 @@ struct boss_bronjahmAI : public ScriptedAI
 {
     boss_bronjahmAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_forge_of_souls*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_forge_of_souls*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -206,11 +208,6 @@ struct boss_bronjahmAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_bronjahm(Creature* pCreature)
-{
-    return new boss_bronjahmAI(pCreature);
-}
-
 struct npc_corrupted_soul_fragmentAI : public ScriptedAI
 {
     npc_corrupted_soul_fragmentAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -254,20 +251,39 @@ struct npc_corrupted_soul_fragmentAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_corrupted_soul_fragment(Creature* pCreature)
+/*######
+## spell_consume_soul - 68861
+######*/
+
+struct spell_consume_soul : public SpellScript
 {
-    return new npc_corrupted_soul_fragmentAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // trigger spell 68858
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_bronjahm()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_bronjahm";
-    pNewScript->GetAI = &GetAI_boss_bronjahm;
+    pNewScript->GetAI = &GetNewAIInstance<boss_bronjahmAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_corrupted_soul_fragment";
-    pNewScript->GetAI = &GetAI_npc_corrupted_soul_fragment;
+    pNewScript->GetAI = &GetNewAIInstance<npc_corrupted_soul_fragmentAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_consume_soul>("spell_consume_soul");
 }
