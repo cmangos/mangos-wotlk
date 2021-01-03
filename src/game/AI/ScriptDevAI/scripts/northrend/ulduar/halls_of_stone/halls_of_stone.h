@@ -22,9 +22,16 @@ enum
     NPC_TRIBUNAL_OF_AGES    = 28234,
     NPC_WORLDTRIGGER        = 22515,
     NPC_DARK_MATTER         = 28235,                        // used by the Tribunal event
+    NPC_SEARING_GAZE        = 28265,
     NPC_LIGHTNING_STALKER   = 28130,                        // used by the Tribunal event as spawn point for the dwarfs
-    NPC_IRON_SLUDGE         = 28165,                        // checked in the Sjonnir achiev
+
+    // Sjonnir mobs
     NPC_SJONNIR             = 27978,
+    NPC_IRON_TROGG          = 27979,
+    NPC_IRON_DWARF          = 27982,
+    NPC_MALFORMED_OOZE      = 27981,
+    NPC_EARTHEN_DWARF       = 27980,
+    NPC_IRON_SLUDGE         = 28165,                        // checked in the Sjonnir achiev
 
     GO_DOOR_MAIDEN          = 191292,
     GO_DOOR_TRIBUNAL        = 191294,                       // possibly closed during event?
@@ -42,6 +49,8 @@ enum
     GO_TRIBUNAL_FLOOR       = 191527,
 
     GO_SJONNIR_CONSOLE      = 193906,
+    // GO_LEFT_PIPE         = 192163,                       // pipes used for animation purpose only
+    // GO_RIGHT_PIPE        = 192164,
 
     SPELL_DARK_MATTER_START = 51001,                        // Channeled spells used by the Tribunal event
 
@@ -78,7 +87,7 @@ class instance_halls_of_stone : public ScriptedInstance
 
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
-
+        void OnCreatureRespawn(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;

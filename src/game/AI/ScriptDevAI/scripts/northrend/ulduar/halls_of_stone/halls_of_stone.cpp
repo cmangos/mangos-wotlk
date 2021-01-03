@@ -24,6 +24,8 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "halls_of_stone.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 /* Notes
  * The timers and handling of texts is not confirmed, but should also not be too far off
@@ -122,7 +124,7 @@ struct npc_brann_hosAI : public npc_escortAI
 {
     npc_brann_hosAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
-        m_pInstance = (instance_halls_of_stone*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_halls_of_stone*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -661,11 +663,6 @@ bool GossipSelect_npc_brann_hos(Player* pPlayer, Creature* pCreature, uint32 /*u
     return true;
 }
 
-UnitAI* GetAI_npc_brann_hos(Creature* pCreature)
-{
-    return new npc_brann_hosAI(pCreature);
-}
-
 enum
 {
     SPELL_SUMMON_DARK_MATTER_TARGET     = 51003,
@@ -742,59 +739,39 @@ struct npc_dark_matterAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_dark_matter(Creature* pCreature)
-{
-    return new npc_dark_matterAI(pCreature);
-}
-
 /*######
-## npc_searing_gaze
+## spell_shatter - 50810, 61546
 ######*/
 
-// TODO Move this 'script' to eventAI when combat can be proper prevented from core-side
-struct npc_searing_gazeAI : public Scripted_NoMovementAI
+struct spell_shatter : public SpellScript
 {
-    npc_searing_gazeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer() || !target->HasAura(50812))
+            return;
+
+        target->RemoveAurasDueToSpell(50812);
+        target->CastSpell(target, spell->m_spellInfo->Id == 50810 ? 50811 : 61547, TRIGGERED_OLD_TRIGGERED);
     }
-
-    bool m_bIsRegularMode;
-
-    void Reset() override
-    {
-        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SEARING_GAZE : SPELL_SEARING_GAZE_H);
-        // despawn manually because of combat bug
-        m_creature->ForcedDespawn(30000);
-    }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-UnitAI* GetAI_npc_searing_gaze(Creature* pCreature)
-{
-    return new npc_searing_gazeAI(pCreature);
-}
 
 void AddSC_halls_of_stone()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_brann_hos";
-    pNewScript->GetAI = &GetAI_npc_brann_hos;
+    pNewScript->GetAI = &GetNewAIInstance<npc_brann_hosAI>;
     pNewScript->pGossipHello = &GossipHello_npc_brann_hos;
     pNewScript->pGossipSelect = &GossipSelect_npc_brann_hos;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_dark_matter";
-    pNewScript->GetAI = &GetAI_npc_dark_matter;
+    pNewScript->GetAI = &GetNewAIInstance<npc_dark_matterAI>;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_searing_gaze";
-    pNewScript->GetAI = &GetAI_npc_searing_gaze;
-    pNewScript->RegisterSelf();
+    RegisterSpellScript<spell_shatter>("spell_shatter");
 }

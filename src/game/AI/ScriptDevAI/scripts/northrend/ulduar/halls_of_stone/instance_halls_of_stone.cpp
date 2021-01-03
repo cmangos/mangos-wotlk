@@ -77,6 +77,24 @@ void instance_halls_of_stone::OnCreatureCreate(Creature* pCreature)
     }
 }
 
+void instance_halls_of_stone::OnCreatureRespawn(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_IRON_TROGG:
+        case NPC_IRON_DWARF:
+        case NPC_EARTHEN_DWARF:
+        case NPC_MALFORMED_OOZE:
+            pCreature->SetWalk(false);
+            pCreature->GetMotionMaster()->MoveWaypoint(pCreature->GetPositionY() > 700 ? 0 : 1, 0, 1000);
+            break;
+        case NPC_SEARING_GAZE:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
+            break;
+    }
+}
+
 void instance_halls_of_stone::OnObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())

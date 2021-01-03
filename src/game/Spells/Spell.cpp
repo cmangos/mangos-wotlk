@@ -8318,6 +8318,14 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
                 case 42442:                                 // Vengeance Landing Cannonfire
                     radius = MAX_VISIBILITY_DISTANCE;
                     break;
+                case 50790:                                 // Summon Iron Dwarf (Halls of Stone, Sjonnir) - only target A
+                case 50791:                                 // Summon Iron Dwarf (Halls of Stone, Sjonnir) - only target A
+                case 50793:                                 // Summon Iron Trogg (Halls of Stone, Sjonnir) - only target A
+                case 50794:                                 // Summon Iron Trogg (Halls of Stone, Sjonnir) - only target A
+                case 50802:                                 // Summon Malformed Ooze (Halls of Stone, Sjonnir) - only target A
+                case 50803:                                 // Summon Malformed Ooze (Halls of Stone, Sjonnir) - only target A
+                case 50825:                                 // Summon Earthen  Dwarf (Halls of Stone, Sjonnir) - only target A
+                case 50826:                                 // Summon Earthen  Dwarf (Halls of Stone, Sjonnir) - only target A
                 case 56429:                                 // Summon Arcane Bomb (Eye of Eternity, Malygos) - only target A
                     if (targetB)
                         break;

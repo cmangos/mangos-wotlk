@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "halls_of_stone.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -63,14 +65,9 @@ enum
     SPELL_SUMMON_EARTHEN_DWARF      = 50824,                // left/right 50825, 50826
 
     // Ooze and Sludge spells
-    SPELL_OOZE_COMBINE              = 50741,                // periodic aura - cast by 27981
+    // SPELL_OOZE_COMBINE              = 50741,             // periodic aura - cast by 27981 in EAI
     // SPELL_SUMMON_IRON_SLUDGE        = 50747,             // instakill TARGET_SCRIPT
     // SPELL_IRON_SLUDGE_SPAWN_VISUAL  = 50777,
-
-    NPC_IRON_TROGG                  = 27979,
-    NPC_IRON_DWARF                  = 27982,
-    NPC_MALFORMED_OOZE              = 27981,
-    NPC_EARTHEN_DWARF               = 27980,
 };
 
 /*######
@@ -81,12 +78,12 @@ struct boss_sjonnirAI : public ScriptedAI
 {
     boss_sjonnirAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_halls_of_stone*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_halls_of_stone* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiChainLightningTimer;
@@ -131,47 +128,6 @@ struct boss_sjonnirAI : public ScriptedAI
     {
         if (m_pInstance)
             m_pInstance->SetData(TYPE_SJONNIR, FAIL);
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        switch (pSummoned->GetEntry())
-        {
-            case NPC_EARTHEN_DWARF:
-                pSummoned->AI()->AttackStart(m_creature);
-                break;
-            case NPC_MALFORMED_OOZE:
-            {
-                pSummoned->CastSpell(pSummoned, SPELL_OOZE_COMBINE, TRIGGERED_OLD_TRIGGERED);
-
-                // Always move to the center of the room
-                float fX, fY, fZ;
-                m_creature->GetRespawnCoord(fX, fY, fZ);
-
-                pSummoned->SetWalk(false);
-                pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
-                break;
-            }
-            case NPC_IRON_TROGG:
-            case NPC_IRON_DWARF:
-            {
-                // Move to a random point around the room in order to start the attack
-                float fX, fY, fZ;
-                pSummoned->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10.0f, fX, fY, fZ);
-
-                pSummoned->SetWalk(false);
-                pSummoned->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
-                break;
-            }
-        }
-    }
-
-    void SummonedMovementInform(Creature* pSummoned, uint32 uiType, uint32 uiPointId) override
-    {
-        if (uiType != POINT_MOTION_TYPE || pSummoned->GetEntry() != NPC_MALFORMED_OOZE || !uiPointId)
-            return;
-
-        pSummoned->GetMotionMaster()->MoveRandomAroundPoint(pSummoned->GetPositionX(), pSummoned->GetPositionY(), pSummoned->GetPositionZ(), 10.0f);
     }
 
     void KilledUnit(Unit* /*pVictim*/) override
@@ -269,15 +225,91 @@ struct boss_sjonnirAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_sjonnir(Creature* pCreature)
+/*######
+## spell_summon_iron_dwarf_aura - 50789, 59860
+######*/
+
+struct spell_summon_iron_dwarf_aura : public AuraScript
 {
-    return new boss_sjonnirAI(pCreature);
-}
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        if (Unit* target = aura->GetTarget())
+            target->CastSpell(target, roll_chance_i(50) ? 50790 : 50791, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_summon_iron_trogg_aura - 50792, 59859
+######*/
+
+struct spell_summon_iron_trogg_aura : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        if (Unit* target = aura->GetTarget())
+            target->CastSpell(target, roll_chance_i(50) ? 50793 : 50794, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_summon_malformed_ooze_aura - 50801, 59858
+######*/
+
+struct spell_summon_malformed_ooze_aura : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        if (Unit* target = aura->GetTarget())
+            target->CastSpell(target, roll_chance_i(50) ? 50802 : 50803, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_summon_earthen_dwarf_aura - 50824
+######*/
+
+struct spell_summon_earthen_dwarf_aura : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        if (Unit* target = aura->GetTarget())
+            target->CastSpell(target, roll_chance_i(50) ? 50825 : 50826, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_ooze_combine - 50742
+######*/
+
+struct spell_ooze_combine : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!caster || !caster->IsCreature() || !target || !target->IsCreature())
+            return;
+
+        caster->CastSpell(target, 50747, TRIGGERED_OLD_TRIGGERED);
+
+        Creature* ooze = static_cast<Creature*>(caster);
+        ooze->ForcedDespawn();
+    }
+};
 
 void AddSC_boss_sjonnir()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_sjonnir";
-    pNewScript->GetAI = &GetAI_boss_sjonnir;
+    pNewScript->GetAI = &GetNewAIInstance<boss_sjonnirAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<spell_summon_iron_dwarf_aura>("spell_summon_iron_dwarf_aura");
+    RegisterAuraScript<spell_summon_iron_trogg_aura>("spell_summon_iron_trogg_aura");
+    RegisterAuraScript<spell_summon_malformed_ooze_aura>("spell_summon_malformed_ooze_aura");
+    RegisterAuraScript<spell_summon_earthen_dwarf_aura>("spell_summon_earthen_dwarf_aura");
+    RegisterSpellScript<spell_ooze_combine>("spell_ooze_combine");
 }

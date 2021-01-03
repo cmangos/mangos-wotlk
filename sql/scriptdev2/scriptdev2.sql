@@ -1597,7 +1597,6 @@ UPDATE creature_template SET ScriptName='boss_maiden_of_grief' WHERE entry=27975
 UPDATE creature_template SET ScriptName='boss_sjonnir' WHERE entry=27978;
 UPDATE creature_template SET ScriptName='npc_brann_hos' WHERE entry=28070;
 UPDATE creature_template SET ScriptName='npc_dark_matter' WHERE entry=28235;
-UPDATE creature_template SET ScriptName='npc_searing_gaze' WHERE entry=28265;
 
 /* ULDUAR */
 UPDATE instance_template SET ScriptName='instance_ulduar' WHERE map=603;
