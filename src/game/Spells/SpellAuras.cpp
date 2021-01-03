@@ -743,8 +743,14 @@ void AreaAura::Update(uint32 diff)
                             if (aur->GetModifier()->m_auraname != SPELL_AURA_NONE)
                                 apply = false;
                             break;
+                        case AREA_AURA_PARTY:
                         case AREA_AURA_RAID:
                             // non caster self-casted auras (stacked from diff. casters)
+                            if (aur->GetModifier()->m_auraname != SPELL_AURA_NONE && i->second->GetCasterGuid() != GetCasterGuid())
+                            {
+                                apply = IsStackableSpell(actualSpellInfo, i->second->GetSpellProto(), target);
+                                break;
+                            }
                             if (aur->GetModifier()->m_auraname != SPELL_AURA_NONE || i->second->GetCasterGuid() == GetCasterGuid())
                                 apply = false;
                             break;

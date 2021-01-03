@@ -222,8 +222,6 @@ inline bool IsSpellLastAuraEffect(SpellEntry const* spellInfo, SpellEffectIndex 
     return true;
 }
 
-bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 spellId_2);
-
 inline bool IsSealSpell(SpellEntry const* spellInfo)
 {
     // Collection of all the seal family flags. No other paladin spell has any of those.
@@ -352,8 +350,6 @@ inline bool IsSpellAbleToCrit(const SpellEntry* entry)
     }
     return false;
 }
-
-int32 CompareAuraRanks(uint32 spellId_1, uint32 spellId_2);
 
 bool IsPassiveSpell(uint32 spellId);
 bool IsPassiveSpell(SpellEntry const* spellInfo);
@@ -1684,6 +1680,350 @@ inline bool IsSpellSpecificIdentical(SpellSpecific specific, SpellSpecific speci
     return false;
 }
 
+inline bool IsSimilarAuraEffect(SpellEntry const* entry, uint32 effect, SpellEntry const* entry2, uint32 effect2)
+{
+    return (entry2->EffectApplyAuraName[effect2] && entry->EffectApplyAuraName[effect] &&
+            entry2->Effect[effect2] == entry->Effect[effect] &&
+            entry2->EffectApplyAuraName[effect2] == entry->EffectApplyAuraName[effect] &&
+            IsPositiveEffect(entry2, SpellEffectIndex(effect2)) == IsPositiveEffect(entry, SpellEffectIndex(effect)));
+}
+
+inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* entry2, uint32 i, Unit* pTarget = nullptr)
+{
+    const uint32 aura = entry->EffectApplyAuraName[i];
+    // Ignore non-aura effects
+    if (!aura)
+        return true;
+
+    // Get first similar - second spell's same aura with the same sign
+    uint32 similar = EFFECT_INDEX_0;
+    for (uint32 e = EFFECT_INDEX_0; e < MAX_EFFECT_INDEX; ++e)
+    {
+        if (IsSimilarAuraEffect(entry, i, entry2, e))
+        {
+            similar = e;
+            break;
+        }
+        else if (e == (MAX_EFFECT_INDEX - 1))
+            return true; // No similarities
+    }
+
+    // Special case for potions
+    if (entry->SpellFamilyName == SPELLFAMILY_POTION || entry2->SpellFamilyName == SPELLFAMILY_POTION)
+        return true;
+
+    // Special rule for food buffs
+    if (GetSpellSpecific(entry->Id) == SPELL_WELL_FED && GetSpellSpecific(entry2->Id) != SPELL_WELL_FED)
+        return true;
+
+    // Short alias
+    const bool positive = (IsPositiveEffect(entry, SpellEffectIndex(i)));
+    const bool related = (entry->SpellFamilyName == entry2->SpellFamilyName);
+    const bool siblings = (entry->SpellFamilyFlags == entry2->SpellFamilyFlags);
+    const bool player = (entry->SpellFamilyName && !entry->SpellFamilyFlags.Empty());
+    const bool multirank = (related && siblings && player);
+    const bool instance = (entry->Id == entry2->Id || multirank);
+    const bool icon = (entry->SpellIconID == entry2->SpellIconID); // Old bad practice, but a few old spells detection may still depend on it
+    const bool visual = (entry->SpellVisual[0] == entry2->SpellVisual[0]); // Old bad practice, but a few old spells detection may still depend on it
+
+    // If aura makes spell not multi-instanceable (do not stack the same spell id or ranks of this spell)
+    bool nonmui = false;
+
+    // Stack rules
+    switch (aura)
+    {
+        // Dummy/Triggers
+        case SPELL_AURA_DUMMY:
+        case SPELL_AURA_PERIODIC_DUMMY:
+        case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
+        {
+            if (!related)
+                break;
+            switch (entry->SpellFamilyName)
+            {
+                case SPELLFAMILY_GENERIC:
+                    if (entry->SpellIconID == 92 && entry->SpellVisual[0] == 99 && icon && visual)
+                        return false; // Soulstone Resurrection
+                    if (entry->Id == 31944) // Archimonde - Doomfire
+                        return false;
+                    break;
+                case SPELLFAMILY_SHAMAN:
+                    if (entry->IsFitToFamilyMask(uint64(0x200)) && multirank)
+                        return true; // Shaman Reincarnation (Passive) and Twisting Nether
+                    break;
+                case SPELLFAMILY_DRUID:
+                    if (entry->IsFitToFamilyMask(uint64(0x44000000000)) && entry2->IsFitToFamilyMask(uint64(0x44000000000)))
+                        return false; // Mangle (Cat) & Mangle (Bear)
+                    if (entry->IsFitToFamilyMask(uint64(0x80)) && multirank)
+                        return true; // Tranquility
+                    if (entry->IsFitToFamilyMask(uint64(0x01000000000)))
+                        return true; // Lifebloom
+                    break;
+            }
+            break;
+        }
+        // DoT
+        case SPELL_AURA_PERIODIC_LEECH:
+        case SPELL_AURA_PERIODIC_MANA_LEECH:
+            if (pTarget && pTarget->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+                return false;
+            break;
+        case SPELL_AURA_PERIODIC_DAMAGE:
+        case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+        case SPELL_AURA_POWER_BURN_MANA:
+            if (entry->Id == 38575) // Vashj - Toxic Spores
+                return false;
+            return true;
+            break;
+        // HoT
+        case SPELL_AURA_PERIODIC_HEAL:
+        case SPELL_AURA_OBS_MOD_HEALTH:
+        case SPELL_AURA_OBS_MOD_MANA:
+            return true;
+            break;
+        // Raid debuffs: Hunter's Mark and Expose Weakness stack with each other, but not itself
+        case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
+        case SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS:
+            return (!related || !siblings);
+            break;
+        case SPELL_AURA_MOD_ATTACK_POWER:
+            // Attack Power debuffs logic: Do not stack Curse of Weakness, Demoralizing Roars/Shouts
+            if (!positive && entry->EffectBasePoints[i] < 1 && entry2->EffectBasePoints[similar] < 1)
+                return (!entry->SpellFamilyName && !entry2->SpellFamilyName);
+            break;
+        // Armor & Resistance buffs and debuffs logic
+        case SPELL_AURA_MOD_RESISTANCE:
+        {
+            if (entry->EffectMiscValue[i] != entry2->EffectMiscValue[similar])
+                break;
+            if (positive)
+            {
+                // Used as a non-zero type in this context
+                const bool type = (entry->Dispel && entry->Dispel == entry2->Dispel);
+                const bool attacktable = (entry->DmgClass && entry->DmgClass == entry2->DmgClass);
+                if ((attacktable || type) && !entry->SpellFamilyName && !entry2->SpellFamilyName)
+                    return false; // Do not stack scrolls with other srolls and some procs (such as Hyjal ring)
+                if (player && related && siblings && entry->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS))
+                    return true;
+            }
+            else
+            {
+                const bool type = (entry->Dispel == entry2->Dispel);
+                const bool prevention = (entry->PreventionType && entry->PreventionType == entry2->PreventionType);
+                if (type && prevention)
+                    return false;
+            }
+            break;
+        }
+        case SPELL_AURA_MOD_RESISTANCE_PCT:
+        {
+            if (entry->EffectMiscValue[i] != entry2->EffectMiscValue[similar])
+                break;
+            if (positive && entry->Dispel && entry->Dispel == entry2->Dispel)
+                return false; // Inspiration / Ancestral Fortitude
+            nonmui = true;
+            break;
+        }
+        // By default base stats cannot stack if they're similar
+        case SPELL_AURA_MOD_STAT:
+        {
+            if (entry->EffectMiscValue[i] != entry2->EffectMiscValue[similar])
+                break;
+            if (positive)
+            {
+                // Used as a non-zero type in this context
+                const bool type = (entry->Dispel && entry->Dispel == entry2->Dispel);
+                const bool family = (entry->SpellFamilyName || entry2->SpellFamilyName);
+                const bool uncategorized = (!entry->SpellFamilyName || !entry2->SpellFamilyName);
+                if (type && family && uncategorized)
+                    return false; // Do not stack player buffs with scrolls
+                if (!entry->SpellFamilyName && !entry2->SpellFamilyName)
+                {
+                    if (type)
+                        return false; // Do not stack scrolls and other non-player buffs with each other
+                    if (entry->HasAttribute(SPELL_ATTR_EX2_UNK28) && entry2->HasAttribute(SPELL_ATTR_EX2_UNK28))
+                        return false; // FIXME: Cozy fire hack
+                }
+            }
+            else
+            {
+                // Debuffs are based on patch notes decription of Shrink effects stacking
+                // Used as a non-zero type in this context
+                const bool type = (entry->Dispel && entry->Dispel == entry2->Dispel);
+                if (type)
+                    return false;
+                nonmui = true;
+            }
+            break;
+        }
+        case SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE:
+        case SPELL_AURA_MOD_PERCENT_STAT:
+            nonmui = true;
+            break;
+        case SPELL_AURA_MOD_HEALING_DONE:
+        case SPELL_AURA_MOD_HEALING_PCT:
+            // Do not stack similar debuffs: Mortal Strike, Aimed Shot, Hex of Weakness
+            if (!positive)
+                return (entry->EffectMiscValue[i] == entry2->EffectMiscValue[similar]);
+            break;
+        case SPELL_AURA_MOD_MELEE_HASTE:
+        case SPELL_AURA_MOD_RANGED_HASTE:
+        case SPELL_AURA_MOD_DAMAGE_DONE:
+        case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE: // Ferocious Inspiration, Shadow Embrace
+            if (positive)
+                return true;
+            nonmui = true;
+            break;
+        case SPELL_AURA_MOD_SPELL_CRIT_CHANCE:
+        case SPELL_AURA_MOD_SPELL_HIT_CHANCE:
+        case SPELL_AURA_MOD_DAMAGE_TAKEN:
+        case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
+        case SPELL_AURA_MOD_DECREASE_SPEED: // Bonus stacking handled by core
+        case SPELL_AURA_MOD_INCREASE_SPEED: // Bonus stacking handled by core
+        case SPELL_AURA_MOD_HEALTH_REGEN_PERCENT:
+        case SPELL_AURA_PREVENTS_FLEEING:
+            nonmui = true;
+            break;
+        case SPELL_AURA_PROC_TRIGGER_SPELL:
+            if (instance && !icon)
+                // Exception: Judgement of Light and Judgement of Wisdom have exact same spell family flags
+                // Comparing icons is the fastest (but hacky) way to destinguish between two without poking spell chain
+                break;
+            nonmui = true;
+            break;
+        case SPELL_AURA_MOD_RATING: // Whitelisted, Rejuvenation has this
+        case SPELL_AURA_SPELL_MAGNET: // Party auras whitelist for Grounding Totem
+            return true; // Always stacking auras
+            break;
+        case SPELL_AURA_MOD_POSSESS: // Mind control derrivatives
+        case SPELL_AURA_MOD_POSSESS_PET: // Eyes of the beast
+        case SPELL_AURA_MOD_CHARM: // Temporary Enslave/Tame derrivatives
+        case SPELL_AURA_AOE_CHARM: // Mass charm by Boss/NPC
+        case SPELL_AURA_DAMAGE_SHIELD: // Damage shields: Fire Shield, Thorns...
+        case SPELL_AURA_MOD_SHAPESHIFT: // Forms and stances
+        case SPELL_AURA_MOUNTED: // Mount
+        case SPELL_AURA_EMPATHY: // Beast Lore
+        case SPELL_AURA_CONTROL_VEHICLE:
+        case SPELL_AURA_SET_VEHICLE_ID:
+        case SPELL_AURA_PHASE:
+        // TODO: Make these exclusive rather than unstackable physically and move to nonmui:
+        case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK: // Heroism, Bloodlust, Icy Veins, Power Infusion
+        case SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK: // Mounted Speed effects
+        case SPELL_AURA_HASTE_SPELLS: // Post 2.0 Mind-numbing Poison and Curse of Tongues
+            return false; // Never stacking auras
+            break;
+    }
+    if (nonmui && instance && !IsChanneledSpell(entry) && !IsChanneledSpell(entry2))
+        return false; // Forbids multi-ranking and multi-application on rule, exclude channeled spells (like Mind Flay)
+
+    if (multirank && IsPositiveSpell(entry) && IsPositiveSpell(entry2))
+        return false; // Forbids multi-ranking for positive spells
+
+    return true;
+}
+
+inline bool IsStackableSpell(SpellEntry const* entry, SpellEntry const* entry2, Unit* pTarget = nullptr)
+{
+    for (uint32 i = EFFECT_INDEX_0; i < MAX_EFFECT_INDEX; ++i)
+    {
+        if (entry->Effect[i] && entry->EffectApplyAuraName[i] && !IsStackableAuraEffect(entry, entry2, i, pTarget))
+            return false;
+    }
+    return true;
+}
+
+inline bool IsSimilarExistingAuraStronger(const SpellAuraHolder* holder, const SpellAuraHolder* existing)
+{
+    if (!holder || !existing)
+        return false;
+    const SpellEntry* entry = holder->GetSpellProto();
+    const SpellEntry* entry2 = existing->GetSpellProto();
+    if (!entry || !entry2)
+        return false;
+
+    // Already compared effects masks to avoid re-entrance
+    uint32 effectmask1 = 0;
+    uint32 effectmask2 = 0;
+
+    for (uint32 e = EFFECT_INDEX_0; e < MAX_EFFECT_INDEX; ++e)
+    {
+        for (uint32 e2 = EFFECT_INDEX_0; e2 < MAX_EFFECT_INDEX; ++e2)
+        {
+            if (IsSimilarAuraEffect(entry, e, entry2, e2) && !(effectmask1 & (1 << e)) && !(effectmask2 & (1 << e2)))
+            {
+                effectmask1 |= (1 << e);
+                effectmask2 |= (1 << e2);
+                Aura* aura1 = holder->GetAuraByEffectIndex(SpellEffectIndex(e));
+                Aura* aura2 = existing->GetAuraByEffectIndex(SpellEffectIndex(e2));
+                int32 value = aura1 ? (aura1->GetModifier()->m_amount / int32(aura1->GetStackAmount())) : 0;
+                int32 value2 = aura2 ? (aura2->GetModifier()->m_amount / int32(aura2->GetStackAmount())) : 0;
+                if (value < 0 && value2 < 0)
+                {
+                    value = abs(value);
+                    value2 = abs(value2);
+                }
+                if (value2 > value)
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+inline bool IsSimilarExistingAuraStronger(const Unit* caster, const SpellEntry* entry, const SpellAuraHolder* existing)
+{
+    if (!caster || !existing)
+        return false;
+    const SpellEntry* entry2 = existing->GetSpellProto();
+    if (!entry || !entry2)
+        return false;
+
+    // Already compared effects masks to avoid re-entrance
+    uint32 effectmask1 = 0;
+    uint32 effectmask2 = 0;
+
+    for (uint32 e = EFFECT_INDEX_0; e < MAX_EFFECT_INDEX; ++e)
+    {
+        for (uint32 e2 = EFFECT_INDEX_0; e2 < MAX_EFFECT_INDEX; ++e2)
+        {
+            if (IsSimilarAuraEffect(entry, e, entry2, e2) && !(effectmask1 & (1 << e)) && !(effectmask2 & (1 << e2)))
+            {
+                effectmask1 |= (1 << e);
+                effectmask2 |= (1 << e2);
+                Aura* aura = existing->GetAuraByEffectIndex(SpellEffectIndex(e2));
+                int32 value = entry->CalculateSimpleValue(SpellEffectIndex(e));
+                int32 value2 = aura ? (aura->GetModifier()->m_amount / int32(aura->GetStackAmount())) : 0;
+                // FIXME: We need API to peacefully pre-calculate static base spell damage without destroying mods
+                // Until then this is a rather lame set of hacks
+                // Apply combo points base damage for spells like expose armor
+                if (caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    const Player* player = (const Player*)caster;
+                    const Unit* target = existing->GetTarget();
+                    const float comboDamage = entry->EffectPointsPerComboPoint[e];
+                    if (player && target && (target->GetObjectGuid() == player->GetComboTargetGuid()))
+                        value += int32(comboDamage * player->GetComboPoints());
+                }
+                if (value < 0 && value2 < 0)
+                {
+                    value = abs(value);
+                    value2 = abs(value2);
+                }
+                if (value2 > value)
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+inline bool IsSimilarExistingAuraStronger(const Unit* caster, uint32 spellid, const SpellAuraHolder* existing)
+{
+    if (!spellid)
+        return false;
+    return IsSimilarExistingAuraStronger(caster, sSpellTemplate.LookupEntry<SpellEntry>(spellid), existing);
+}
+
 // Diminishing Returns interaction with spells
 DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto, bool triggered);
 bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group);
@@ -2313,7 +2653,6 @@ class SpellMgr
             return (spellId1 != spellId2 && GetFirstSpellInChain(spellId1) == GetFirstSpellInChain(spellId2));
         }
 
-        bool IsNoStackSpellDueToSpell(SpellEntry const* spellInfo_1, SpellEntry const* spellInfo_2) const;
         bool IsSingleTargetSpell(SpellEntry const* entry) const
         {
             if (entry->HasAttribute(SPELL_ATTR_EX5_SINGLE_TARGET_SPELL))
@@ -2349,6 +2688,43 @@ class SpellMgr
             }
 
             return false;
+        }
+
+        bool IsSpellStackableWithSpell(const SpellEntry* entry1, const SpellEntry* entry2) const
+        {
+            if (!entry1 || !entry2)
+                return true;
+
+            // Uncancellable spells are expected to be persistent at all times
+            if (entry1->HasAttribute(SPELL_ATTR_CANT_CANCEL) || entry2->HasAttribute(SPELL_ATTR_CANT_CANCEL))
+                return true;
+
+            // Allow stacking passive and active spells
+            if (entry1->HasAttribute(SPELL_ATTR_PASSIVE) != entry2->HasAttribute(SPELL_ATTR_PASSIVE))
+                return true;
+
+            return IsStackableSpell(entry1, entry2);
+        }
+
+        bool IsSpellStackableWithSpellForDifferentCasters(const SpellEntry* entry1, const SpellEntry* entry2) const
+        {
+            if (!entry1 || !entry2)
+                return true;
+
+            // If spells are two instances of the same spell, check attribute first, and formal aura holder stacking rules after
+            if (entry1 == entry2)
+                return (entry1->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS) || IsSpellStackableWithSpell(entry1, entry2));
+
+            // If spells are in the same spell chain
+            if (IsSpellAnotherRankOfSpell(entry1->Id, entry2->Id))
+            {
+                // Both ranks have attribute, allow stacking
+                if (entry1->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS) && entry2->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS))
+                    return true;
+            }
+
+            // By default, check formal aura holder stacking rules
+            return IsSpellStackableWithSpell(entry1, entry2);
         }
 
         uint32 GetSpellBookSuccessorSpellId(uint32 spellId)

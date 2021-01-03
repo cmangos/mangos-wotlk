@@ -5328,54 +5328,27 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                 RemoveSpellAuraHolder(foundHolder, AURA_REMOVE_BY_STACK);
                 break;
             }
-
-            bool stop = false;
-
-            for (int32 i = 0; i < MAX_EFFECT_INDEX && !stop; ++i)
+            else
             {
-                // no need to check non stacking auras that weren't/won't be applied on this target
-                if (!foundHolder->m_auras[i] || !holder->m_auras[i])
-                    continue;
-
-                // m_auraname can be modified to SPELL_AURA_NONE for area auras, use original
-                AuraType aurNameReal = AuraType(aurSpellInfo->EffectApplyAuraName[i]);
-
-                switch (aurNameReal)
+                //any stackable case with amount should mod existing stack amount
+                if (aurSpellInfo->StackAmount && !IsChanneledSpell(aurSpellInfo) && !aurSpellInfo->HasAttribute(SPELL_ATTR_EX3_STACK_FOR_DIFF_CASTERS))
                 {
-                    // DoT/HoT/etc
-                    case SPELL_AURA_DUMMY:                  // allow stack
-                    case SPELL_AURA_PERIODIC_DAMAGE:
-                    case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
-                    case SPELL_AURA_PERIODIC_LEECH:
-                    case SPELL_AURA_PERIODIC_HEAL:
-                    case SPELL_AURA_OBS_MOD_HEALTH:
-                    case SPELL_AURA_PERIODIC_MANA_LEECH:
-                    case SPELL_AURA_OBS_MOD_MANA:
-                    case SPELL_AURA_POWER_BURN_MANA:
-                    case SPELL_AURA_CONTROL_VEHICLE:
-                    case SPELL_AURA_TRIGGER_LINKED_AURA:
-                    case SPELL_AURA_PERIODIC_DUMMY:
-                        break;
-                    case SPELL_AURA_PERIODIC_ENERGIZE:      // all or self or clear non-stackable
-                    default:                                // not allow
-                        // can be only single (this check done at _each_ aura add
-                        RemoveSpellAuraHolder(foundHolder, AURA_REMOVE_BY_STACK);
-                        stop = true;
-                        break;
+                    foundHolder->ModStackAmount(holder->GetStackAmount(), holder->GetCaster());
+                    return false;
+                }
+                else if (!IsStackableSpell(aurSpellInfo, foundHolder->GetSpellProto(), holder->GetTarget()))
+                {
+                    RemoveSpellAuraHolder(foundHolder, AURA_REMOVE_BY_STACK);
+                    break;
                 }
             }
-
-            if (stop)
-                break;
         }
     }
 
     // normal spell or passive auras not stackable with other ranks
     if (!IsPassiveSpell(aurSpellInfo) || !IsPassiveSpellStackableWithRanks(aurSpellInfo))
     {
-        // Hack exceptions for Vehicle/Linked auras
-        if (!IsSpellHaveAura(aurSpellInfo, SPELL_AURA_CONTROL_VEHICLE) && !IsSpellHaveAura(aurSpellInfo, SPELL_AURA_TRIGGER_LINKED_AURA) &&
-                !RemoveNoStackAurasDueToAuraHolder(holder))
+        if (!RemoveNoStackAurasDueToAuraHolder(holder))
         {
             return false;                                   // couldn't remove conflicting aura with higher rank
         }
@@ -5605,7 +5578,8 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
             unique = diminished;
         }
 
-        const bool stackable = !sSpellMgr.IsNoStackSpellDueToSpell(spellProto, existingSpellProto);
+        bool stackable = (own ? sSpellMgr.IsSpellStackableWithSpell(spellProto, existingSpellProto) : sSpellMgr.IsSpellStackableWithSpellForDifferentCasters(spellProto, existingSpellProto));
+
         // Remove only own auras when multiranking
         if (!unique && own && stackable && sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId))
         {
@@ -5632,7 +5606,7 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
             if (!IsSpellWithCasterSourceTargetsOnly(spellProto) && !IsSpellWithCasterSourceTargetsOnly(existingSpellProto))
             {
                 // holder cannot remove higher/stronger rank if it isn't from the same caster
-                if (CompareAuraRanks(spellId, existingSpellId) < 0)
+                if (IsSimilarExistingAuraStronger(holder, existing))
                     return false;
 
                 if (!diminished && sSpellMgr.IsSpellAnotherRankOfSpell(spellId, existingSpellId) && sSpellMgr.IsSpellHigherRankOfSpell(existingSpellId, spellId))
@@ -5648,22 +5622,6 @@ bool Unit::RemoveNoStackAurasDueToAuraHolder(SpellAuraHolder* holder)
                 break;
 
             next = m_spellAuraHolders.begin();
-        }
-
-        // Potions stack aura by aura (elixirs/flask already checked)
-        if (spellProto->SpellFamilyName == SPELLFAMILY_POTION && existingSpellProto->SpellFamilyName == SPELLFAMILY_POTION)
-        {
-            if (IsNoStackAuraDueToAura(spellId, existingSpellId))
-            {
-                if (CompareAuraRanks(spellId, existingSpellId) < 0)
-                    return false;                       // cannot remove higher rank
-
-                RemoveAurasDueToSpell(existingSpellId);
-
-                if (m_spellAuraHolders.empty())
-                    break;
-                next =  m_spellAuraHolders.begin();
-            }
         }
     }
     return true;
