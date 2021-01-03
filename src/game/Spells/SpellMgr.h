@@ -1904,6 +1904,7 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         case SPELL_AURA_MOUNTED: // Mount
         case SPELL_AURA_EMPATHY: // Beast Lore
         case SPELL_AURA_PHASE:
+        case SPELL_AURA_SET_VEHICLE_ID: // Enable Vehicle template on players or other non vehicle units
         // TODO: Make these exclusive rather than unstackable physically and move to nonmui:
         case SPELL_AURA_MOD_CASTING_SPEED_NOT_STACK: // Heroism, Bloodlust, Icy Veins, Power Infusion
         case SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK: // Mounted Speed effects
