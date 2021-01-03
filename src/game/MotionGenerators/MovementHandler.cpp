@@ -71,9 +71,24 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
     // get the destination map entry, not the current one, this will fix homebind and reset greeting
     MapEntry const* mEntry = sMapStore.LookupEntry(loc.mapid);
-
-    auto returnHomeFunc = [player = GetPlayer(), old_loc]()
+    
+    auto returnHomeFunc = [this, player = GetPlayer(), old_loc, loc]()
     {
+        Map* map = nullptr;
+        // must have map in teleport
+        if (!map)
+            map = sMapMgr.CreateMap(loc.mapid, player);
+        if (!map)
+            map = sMapMgr.CreateMap(old_loc.mapid, player);
+
+        if (!map)
+        {
+            KickPlayer();
+            return;
+        }
+
+        player->SetMap(map);
+
         player->SetSemaphoreTeleportFar(false);
 
         // Teleport to previous place, if cannot be ported back TP to homebind place
@@ -107,8 +122,13 @@ void WorldSession::HandleMoveWorldportAckOpcode()
     Difficulty diff = GetPlayer()->GetGroup() ? GetPlayer()->GetGroup()->GetDifficulty(mEntry->IsRaid()) : GetPlayer()->GetDifficulty(mEntry->IsRaid());
     uint32 miscRequirement = 0;
     if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(loc.mapid))
+    {
         if (AREA_LOCKSTATUS_OK != GetPlayer()->GetAreaTriggerLockStatus(at, diff, miscRequirement))
+        {
             returnHomeFunc();
+            return;
+        }
+    }
 
     InstanceTemplate const* mInstance = ObjectMgr::GetInstanceTemplate(loc.mapid);
 
@@ -222,8 +242,7 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         if (GetPlayer()->pvpInfo.inPvPEnforcedArea)
             GetPlayer()->CastSpell(GetPlayer(), 2479, TRIGGERED_OLD_TRIGGERED);
 
-        // resummon pet
-        GetPlayer()->ResummonPetTemporaryUnSummonedIfAny();
+        _player->ResummonPetTemporaryUnSummonedIfAny();
 
         // lets process all delayed operations on successful teleport
         GetPlayer()->ProcessDelayedOperations();
