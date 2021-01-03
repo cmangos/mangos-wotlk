@@ -2390,6 +2390,81 @@ class SpellMgr
             return SPELL_NORMAL;
         }
 
+        SpellSpecific GetSpellFoodSpecific(const SpellEntry* entry) const
+        {
+            if (!entry)
+                return SPELL_NORMAL;
+            // Food / Drinks (mostly)
+            if (entry->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
+            {
+                if (entry->SpellFamilyName == SPELLFAMILY_GENERIC)
+                {
+                    bool food = false;
+                    bool drink = false;
+                    for (int i = 0; i < MAX_EFFECT_INDEX; ++i)
+                    {
+                        switch (entry->EffectApplyAuraName[i])
+                        {
+                            // Food
+                            case SPELL_AURA_MOD_REGEN:
+                            case SPELL_AURA_OBS_MOD_HEALTH:
+                                food = true;
+                                break;
+                            // Drink
+                            case SPELL_AURA_MOD_POWER_REGEN:
+                            case SPELL_AURA_OBS_MOD_MANA:
+                                drink = true;
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+
+                    if (food && drink)
+                        return SPELL_FOOD_AND_DRINK;
+                    else if (food)
+                        return SPELL_FOOD;
+                    else if (drink)
+                        return SPELL_DRINK;
+                }
+            }
+            // Well Fed buffs (must be exclusive with Food / Drink replenishment effects, or else Well Fed will cause them to be removed)
+            else if (entry->HasAttribute(SPELL_ATTR_EX2_FOOD_BUFF))
+                return SPELL_WELL_FED;
+
+            // Spells without attributes, but classified as well fed
+            // Multi-family check
+            switch (entry->Id)
+            {
+                // Food buffs without attribute: instantly applied ones
+                // Parent spell contains the attribute for them (TODO: add a query for parent spell in the future?)
+                case 18125: // Blessed Sunfruit
+                case 18141: // Blessed Sunfruit Juice
+                case 18191: // Windblossom Berries
+                case 18192: // Grilled Squid
+                case 18193: // Marsh Lichen
+                case 22730: // Runn Tum Tuber Surprise
+                case 25661: // Dirge's Kickin' Chimaerok Chops
+                case 46687: // Juicy Bear Burger
+                // Alcohol: instant application, no attribute
+                case 5020:  // Stormstout
+                case 5021:  // Trogg Ale
+                case 5257:  // Thunderbrew Lager
+                case 5909:  // Watered-down Beer
+                case 6114:  // Raptor Punch
+                case 8553:  // Barleybrew Scalder
+                case 20875: // Rumsey Rum
+                case 22789: // Gordok Green Grog
+                case 22790: // Kreeg's Stout Beatdown
+                case 25037: // Rumsey Rum Light
+                case 25722: // Rumsey Rum Dark
+                case 25804: // Rumsey Rum Black Label
+                case 37058: // Halaani Whiskey
+                    return SPELL_WELL_FED;
+            }
+            return SPELL_NORMAL;
+        }
+
         // Reverse engineered from binary: do not alter
         static inline bool IsSpellTargetHarmfulAtClient(uint32 target)
         {
