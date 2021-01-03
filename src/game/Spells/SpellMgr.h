@@ -764,6 +764,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 46565:         // Holyform
         case 46744:         // Chilling Touch
         case 47287:         // Burning Destruction
+        case 47399:         // Frenzy
             return false;
         default:
             return true;
