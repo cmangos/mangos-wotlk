@@ -25,7 +25,7 @@
 #include "Spells/SpellMgr.h"
 #include "Server/DBCStores.h"
 
-DynamicObject::DynamicObject() : WorldObject(), m_spellId(0), m_effIndex(), m_aliveDuration(0), m_radius(0), m_positive(false), m_target()
+DynamicObject::DynamicObject() : WorldObject(), m_spellId(0), m_effIndex(), m_radius(0), m_positive(false), m_target()
 {
     m_objectType |= TYPEMASK_DYNAMICOBJECT;
     m_objectTypeId = TYPEID_DYNAMICOBJECT;
@@ -88,7 +88,7 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
 
     SetUInt32Value(DYNAMICOBJECT_SPELLID, spellId);
     SetFloatValue(DYNAMICOBJECT_RADIUS, radius);
-    SetUInt32Value(DYNAMICOBJECT_CASTTIME, WorldTimer::getMSTime());    // new 2.4.0
+    SetUInt32Value(DYNAMICOBJECT_CASTTIME, GetMap()->GetCurrentMSTime());    // new 2.4.0
 
     SpellEntry const* spellProto = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!spellProto)
@@ -97,7 +97,7 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
         return false;
     }
 
-    m_aliveDuration = duration;
+    m_aliveTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(duration);
     m_radius = radius;
     m_effIndex = effIndex;
     m_spellId = spellId;
@@ -127,9 +127,7 @@ void DynamicObject::Update(const uint32 diff)
 
     bool deleteThis = false;
 
-    if (m_aliveDuration > int32(diff))
-        m_aliveDuration -= diff;
-    else
+    if (m_aliveTime < GetMap()->GetCurrentClockTime())
         deleteThis = true;
 
     // have radius and work as persistent effect
@@ -156,7 +154,7 @@ void DynamicObject::Delete()
 
 void DynamicObject::Delay(int32 delaytime)
 {
-    m_aliveDuration -= delaytime;
+    m_aliveTime -= std::chrono::milliseconds(delaytime);
     for (GuidSet::iterator iter = m_affected.begin(); iter != m_affected.end();)
     {
         Unit* target = GetMap()->GetUnit((*iter));
