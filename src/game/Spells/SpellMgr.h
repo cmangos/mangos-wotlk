@@ -745,6 +745,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 40899:         // Felfire Proc
         case 41634:         // Invisibility and Stealth Detection
         case 42459:         // Dual Wield (Passive)
+        case 44480:         // Seal of Wrath
         case 44537:         // Fel Lightning
         case 44604:         // Enchantment of Spell Haste
         case 44855:         // Out of Phase
@@ -758,6 +759,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 45829:         // Dun Baldar South Marshal
         case 45830:         // Stonehearth Marshal
         case 45831:         // Icewing Marshal
+        case 46030:         // Seal of Wrath
         case 46048:         // Fel Lightning
         case 46277:         // Bring Pain
         case 46308:         // Burning Winds
