@@ -212,9 +212,12 @@ struct npc_corrupted_soul_fragmentAI : public ScriptedAI
 {
     npc_corrupted_soul_fragmentAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        Reset();
+        m_pInstance = static_cast<instance_forge_of_souls*>(pCreature->GetInstanceData());
         DoCastSpellIfCan(m_creature, SPELL_BANISH_VISUAL);
+        Reset();
     }
+
+    instance_forge_of_souls* m_pInstance;
 
     void Reset() override
     {
@@ -223,8 +226,8 @@ struct npc_corrupted_soul_fragmentAI : public ScriptedAI
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        if (instance_forge_of_souls* pInstance = (instance_forge_of_souls*)m_creature->GetInstanceData())
-            pInstance->SetGuid(DATA_SOULFRAGMENT_REMOVE, m_creature->GetObjectGuid());
+        if (m_pInstance)
+            m_pInstance->SetGuid(DATA_SOULFRAGMENT_REMOVE, m_creature->GetObjectGuid());
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -236,8 +239,8 @@ struct npc_corrupted_soul_fragmentAI : public ScriptedAI
                 DoCastSpellIfCan(pWho, SPELL_CONSUME_SOUL_TRIGGER, CAST_TRIGGERED);
 
                 // Inform the instance about a used soul fragment
-                if (instance_forge_of_souls* pInstance = (instance_forge_of_souls*)m_creature->GetInstanceData())
-                    pInstance->SetGuid(DATA_SOULFRAGMENT_REMOVE, m_creature->GetObjectGuid());
+                if (m_pInstance)
+                    m_pInstance->SetGuid(DATA_SOULFRAGMENT_REMOVE, m_creature->GetObjectGuid());
 
                 m_creature->ForcedDespawn();
                 return;
@@ -266,10 +269,32 @@ struct spell_consume_soul : public SpellScript
         if (!target)
             return;
 
-        // trigger spell 68858
+        // trigger spell 68858; difficulty handled in core
         uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
 
         target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_corrupt_soul_aura - 68839
+######*/
+
+struct spell_corrupt_soul_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        if (!apply)
+        {
+            // Knockdown Stun
+            target->CastSpell(target, 68848, TRIGGERED_OLD_TRIGGERED);
+            // Draw Corrupted Soul
+            target->CastSpell(target, 68846, TRIGGERED_OLD_TRIGGERED);
+        }
     }
 };
 
@@ -286,4 +311,5 @@ void AddSC_boss_bronjahm()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_consume_soul>("spell_consume_soul");
+    RegisterAuraScript<spell_corrupt_soul_aura>("spell_corrupt_soul_aura");
 }

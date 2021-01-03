@@ -3470,14 +3470,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
                 return;
             }
-            case 68839:                                     // Corrupt Soul
-            {
-                // Knockdown Stun
-                target->CastSpell(target, 68848, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                // Draw Corrupted Soul
-                target->CastSpell(target, 68846, TRIGGERED_OLD_TRIGGERED, nullptr, this);
-                return;
-            }
             case 70308:                                     // Mutated Transformation
             {
                 if (target->GetMap()->IsDungeon())

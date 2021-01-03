@@ -126,11 +126,10 @@ void instance_forge_of_souls::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[0] = uiData;
 
             // Despawn remaining adds and clear list
-            for (GuidList::const_iterator itr = m_luiSoulFragmentAliveGUIDs.begin(); itr != m_luiSoulFragmentAliveGUIDs.end(); ++itr)
-            {
-                if (Creature* pFragment = instance->GetCreature(*itr))
+            for (const auto& guid : m_luiSoulFragmentAliveGUIDs)
+                if (Creature* pFragment = instance->GetCreature(guid))
                     pFragment->ForcedDespawn();
-            }
+
             m_luiSoulFragmentAliveGUIDs.clear();
             break;
         case TYPE_DEVOURER_OF_SOULS:
