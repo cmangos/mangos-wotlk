@@ -666,19 +666,12 @@ struct npc_dark_matterAI : public ScriptedAI
         SetReactState(REACT_PASSIVE);
         m_creature->SetCanEnterCombat(false);
         m_creature->SetLevitate(true);
-        homeX = m_creature->GetPositionX();
-        homeY = m_creature->GetPositionY();
-        homeZ = m_creature->GetPositionZ();
         Reset();
     }
 
     bool m_bIsRegularMode;
 
     uint32 m_uiSummonTimer;
-
-    float homeX;
-    float homeY;
-    float homeZ;
 
     void Reset() override
     {
@@ -701,7 +694,10 @@ struct npc_dark_matterAI : public ScriptedAI
         {
             EnterEvadeMode();
             m_creature->SetWalk(false);
-            m_creature->GetMotionMaster()->MovePoint(0, homeX, homeY, homeZ);
+
+            float fX, fY, fZ;
+            m_creature->GetRespawnCoord(fX, fY, fZ);
+            m_creature->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
         }
     }
 
