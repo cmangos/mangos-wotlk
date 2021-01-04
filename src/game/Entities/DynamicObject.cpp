@@ -97,6 +97,9 @@ bool DynamicObject::Create(uint32 guidlow, Unit* caster, uint32 spellId, SpellEf
         return false;
     }
 
+    if (spellId == 44007) // Akilzon - Electrical storm - always takes 500 ms more than spell data - confirmed in sniff
+        duration += 500;
+
     m_aliveTime = GetMap()->GetCurrentClockTime() + std::chrono::milliseconds(duration);
     m_radius = radius;
     m_effIndex = effIndex;
