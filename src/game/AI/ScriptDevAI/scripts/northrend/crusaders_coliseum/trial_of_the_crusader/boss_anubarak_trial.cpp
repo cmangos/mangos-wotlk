@@ -63,7 +63,7 @@ enum
     SPELL_PURSUING_SPIKES_FAIL          = 66181,
     SPELL_PURSUING_SPIKES_DUMMY         = 67470,            // target selection spell
     SPELL_PURSUING_SPIKES_SPEED1        = 65920,
-    // SPELL_PURSUING_SPIKES_GROUND      = 65921,           // included in creature_template_addon
+    SPELL_PURSUING_SPIKES_GROUND        = 65921,           // visual ground aura
     SPELL_PURSUING_SPIKES_SPEED2        = 65922,
     SPELL_PURSUING_SPIKES_SPEED3        = 65923,
     SPELL_MARK                          = 67574,
@@ -419,6 +419,11 @@ struct npc_anubarak_trial_spikeAI : public ScriptedAI
 
     void Reset() override
     {
+        // fix visual - hack
+        m_creature->SetDisplayId(11686);
+
+        DoCastSpellIfCan(m_creature, SPELL_PURSUING_SPIKES_GROUND);
+
         m_Phase = PHASE_NO_MOVEMENT;
         m_PhaseSwitchTimer = 5000;
 
@@ -431,6 +436,8 @@ struct npc_anubarak_trial_spikeAI : public ScriptedAI
         {
             DoScriptText(EMOTE_PURSUE, m_creature, pTarget);
             DoCastSpellIfCan(pTarget, SPELL_MARK, CAST_TRIGGERED);
+
+            SetCombatMovement(true);
             m_creature->GetMotionMaster()->Clear(false, true);
             m_creature->GetMotionMaster()->MoveChase(pTarget, 0, 0, false, false, false);
         }
