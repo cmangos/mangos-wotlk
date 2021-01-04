@@ -524,6 +524,11 @@ struct npc_arthasAI : public npc_escortAI, private DialogueHelper
         }
     }
 
+    void GetAIInformation(ChatHandler& reader) override
+    {
+        reader.PSendSysMessage("Arthas latest reached waypoint %u", m_creature->GetMotionMaster()->getLastReachedWaypoint());
+    }
+
     void MovementInform(uint32 uiType, uint32 uiPointId) override
     {
         if (uiType == WAYPOINT_MOTION_TYPE)
