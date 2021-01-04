@@ -154,8 +154,11 @@ void PetAI::UpdateAI(const uint32 diff)
     if (victim && victim->GetCombatManager().IsEvadingHome())
         victim = nullptr;
 
+    CharmInfo* charminfo = m_unit->GetCharmInfo();
+    MANGOS_ASSERT(charminfo);
+
     // Stop auto attack and chase if victim was dropped
-    if (inCombat && !victim)
+    if (inCombat && (!victim || (victim->IsCrowdControlled() && victim->HasAuraPetShouldAvoidBreaking(pet, charminfo->GetPetLastAttackCommandTime()))))
     {
         m_unit->AttackStop(true, true);
         inCombat = false;
@@ -165,9 +168,6 @@ void PetAI::UpdateAI(const uint32 diff)
         if (mm->GetCurrentMovementGeneratorType() == CHASE_MOTION_TYPE)
             mm->MovementExpired();
     }
-
-    CharmInfo* charminfo = m_unit->GetCharmInfo();
-    MANGOS_ASSERT(charminfo);
 
     if (charminfo->GetIsRetreating())
     {
