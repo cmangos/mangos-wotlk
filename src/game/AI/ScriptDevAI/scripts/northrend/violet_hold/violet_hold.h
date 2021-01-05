@@ -80,8 +80,6 @@ enum
     NPC_AZURE_MAGE_SLAYER_INTRO = 31010,
 
     NPC_AZURE_SABOTEUR          = 31079,
-
-    NPC_DEFENSE_SYSTEM          = 30837,
     NPC_DEFENSE_DUMMY_TARGET    = 30857,
 
     // 'Ghosts' for Killed mobs after Wipe
@@ -95,6 +93,7 @@ enum
 
     SPELL_DEFENSE_SYSTEM_VISUAL = 57887,
     SPELL_DEFENSE_SYSTEM_SPAWN  = 57886,
+    SPELL_ARCANE_LIGHTNING_I    = 57912,                    // intro spell
     SPELL_LIGHTNING_INTRO       = 60038,                    // intro kill spells, also related to spell 58152
     SPELL_ARCANE_LIGHTNING      = 57930,                    // damage spells, related to spell 57912
 
@@ -102,7 +101,7 @@ enum
     SPELL_TELEPORTATION_PORTAL  = 57687,                    // visual aura, but possibly not used? creature_template model for portals are same
 
     SPELL_SHIELD_DISRUPTION     = 58291,                    // dummy when opening a cell
-    SPELL_SIMPLE_TELEPORT       = 12980,                    // used after a cell has been opened - not sure if the id is correct
+    SPELL_SIMPLE_TELEPORT       = 51347,                    // used after a cell has been opened
 
     SPELL_PORTAL_PERIODIC       = 58008,                    // most likely the tick for each summon (tick each 15 seconds)
     SPELL_PORTAL_CHANNEL        = 58012,                    // the blue "stream" between portal and guardian/keeper
@@ -200,6 +199,7 @@ class instance_violet_hold : public ScriptedInstance
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
+        void DoReleaseBoss(uint32 entry = 0);
         void UpdateCellForBoss(uint32 uiBossEntry, bool bForceClosing = false);
 
         void SetIntroPortals(bool bDeactivate);
@@ -234,6 +234,9 @@ class instance_violet_hold : public ScriptedInstance
         uint32 GetData(uint32 uiType) const override;
 
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
+
+        void ShowChatCommands(ChatHandler* handler) override;
+        void ExecuteChatCommand(ChatHandler* handler, char* args) override;
 
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;

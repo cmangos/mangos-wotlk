@@ -67,10 +67,13 @@ void instance_violet_hold::ResetAll()
     for (auto spawn : m_vRandomBosses)
     {
         const BossInformation* pData = GetBossInformation(spawn->uiEntry);
-        if (pData && m_auiEncounter[pData->uiType] == DONE)
+        if (!pData)
+            return;
+
+        if (m_auiEncounter[pData->uiType] == DONE)
         {
             // Despawn ghost boss
-            if (Creature* pGhostBoss = GetSingleCreatureFromStorage(pData->uiGhostEntry))
+            if (Creature* pGhostBoss = GetSingleCreatureFromStorage(pData->uiGhostEntry, true))
                 pGhostBoss->ForcedDespawn();
 
             // Spawn new boss replacement
@@ -104,6 +107,20 @@ void instance_violet_hold::ResetAll()
                         pGuard->SummonCreature(NPC_ARAKKOA_GUARD, fX, fY, fZ, fO, TEMPSPAWN_DEAD_DESPAWN, 0);
                     }
                 }
+            }
+        }
+        // failed encounters make boss to respawn
+        else if (m_auiEncounter[pData->uiType] == FAIL)
+        {
+            if (Creature* pBoss = GetSingleCreatureFromStorage(pData->uiEntry))
+                pBoss->Respawn();
+
+            if (pData->uiType == TYPE_EREKEM)
+            {
+                // respawn guards
+                for (const auto& guid : m_lArakkoaGuardList)
+                    if (Creature* pGhostGuard = instance->GetCreature(guid))
+                        pGhostGuard->Respawn();
             }
         }
 
@@ -500,6 +517,48 @@ void instance_violet_hold::SetRandomBosses()
         debug_log("SD2: instance_violet_hold random boss %u is entry %u", i, m_vRandomBosses[i]->uiEntry);
 }
 
+// Method that will release the boss from the cage
+void instance_violet_hold::DoReleaseBoss(uint32 entry)
+{
+    const BossInformation* pData = GetBossInformation(entry);
+    if (!pData)
+    {
+        script_error_log("instance_violet_hold: cannot find boss information");
+        return;
+    }
+
+    Creature* pBoss = GetSingleCreatureFromStorage(GetData(pData->uiType) != DONE ? pData->uiEntry : pData->uiGhostEntry);
+    if (!pBoss)
+    {
+        script_error_log("instance_violet_hold: cannot find boss creature %u", pBoss->GetEntry());
+        return;
+    }
+
+    UpdateCellForBoss(pData->uiEntry);
+
+    if (pData->iSayEntry)
+        DoScriptText(pData->iSayEntry, pBoss);
+
+    pBoss->GetMotionMaster()->MovePoint(1, pData->fX, pData->fY, pData->fZ);
+    pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+
+    // Handle Erekem guards
+    if (pData->uiType == TYPE_EREKEM)
+    {
+        GuidList& lAddGuids = GetData(TYPE_EREKEM) != DONE ? m_lErekemGuardList : m_lArakkoaGuardList;
+
+        for (const auto& guid : lAddGuids)
+        {
+            if (Creature* pAdd = instance->GetCreature(guid))
+            {
+                float fMoveX = (pData->fX - pAdd->GetPositionX()) * .25;
+                pAdd->GetMotionMaster()->MovePoint(0, pData->fX - fMoveX, pData->fY, pData->fZ);
+                pAdd->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+            }
+        }
+    }
+}
+
 void instance_violet_hold::CallGuards(bool bRespawn)
 {
     for (GuidList::const_iterator itr = m_lGuardsList.begin(); itr != m_lGuardsList.end(); ++itr)
@@ -520,7 +579,7 @@ void instance_violet_hold::CallGuards(bool bRespawn)
 
 void instance_violet_hold::ProcessActivationCrystal(Unit* pUser, bool bIsIntro)
 {
-    if (Creature* pSummon = pUser->SummonCreature(NPC_DEFENSE_SYSTEM, fDefenseSystemLoc[0], fDefenseSystemLoc[1], fDefenseSystemLoc[2], fDefenseSystemLoc[3], TEMPSPAWN_TIMED_DESPAWN, 10000))
+    if (Creature* pSummon = pUser->SummonCreature(NPC_DEFENSE_DUMMY_TARGET, fDefenseSystemLoc[0], fDefenseSystemLoc[1], fDefenseSystemLoc[2], fDefenseSystemLoc[3], TEMPSPAWN_TIMED_DESPAWN, 10000))
     {
         pSummon->CastSpell(pSummon, SPELL_DEFENSE_SYSTEM_VISUAL, TRIGGERED_OLD_TRIGGERED);
 
@@ -746,6 +805,38 @@ BossInformation const* instance_violet_hold::GetBossInformation(uint32 uiEntry/*
     }
 
     return nullptr;
+}
+
+void instance_violet_hold::ShowChatCommands(ChatHandler* handler)
+{
+    handler->SendSysMessage("This instance supports the following commands:\n stopintro, erekem, moragg, ichoron, xevozz, lavanthor, zuramat");
+}
+
+// Debug commands for Violet Hold bosses
+void instance_violet_hold::ExecuteChatCommand(ChatHandler* handler, char* args)
+{
+    char* result = handler->ExtractLiteralArg(&args);
+    if (!result)
+        return;
+    std::string val = result;
+
+    if (val == "stopintro")
+    {
+        SetIntroPortals(true);
+        CallGuards(false);
+    }
+    else if (val == "erekem")
+        DoReleaseBoss(NPC_EREKEM);
+    else if (val == "moragg")
+        DoReleaseBoss(NPC_MORAGG);
+    else if (val == "ichoron")
+        DoReleaseBoss(NPC_ICHORON);
+    else if (val == "xevozz")
+        DoReleaseBoss(NPC_XEVOZZ);
+    else if (val == "lavanthor")
+        DoReleaseBoss(NPC_LAVANTHOR);
+    else if (val == "zuramat")
+        DoReleaseBoss(NPC_ZURAMAT);
 }
 
 instance_violet_hold::~instance_violet_hold()

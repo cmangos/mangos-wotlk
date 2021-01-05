@@ -32,6 +32,8 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "violet_hold.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 /*######
 ## go_activation_crystal
@@ -88,7 +90,7 @@ struct npc_sinclariAI : public npc_escortAI
 {
     npc_sinclariAI(Creature* pCreature) : npc_escortAI(pCreature)
     {
-        m_pInstance = (instance_violet_hold*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_violet_hold*>(pCreature->GetInstanceData());
         Reset();
     }
 
@@ -153,11 +155,6 @@ struct npc_sinclariAI : public npc_escortAI
         }
     }
 };
-
-UnitAI* GetAI_npc_sinclari(Creature* pCreature)
-{
-    return new npc_sinclariAI(pCreature);
-}
 
 bool GossipHello_npc_sinclari(Player* pPlayer, Creature* pCreature)
 {
@@ -224,7 +221,7 @@ struct npc_prison_event_controllerAI : public ScriptedAI
 {
     npc_prison_event_controllerAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_violet_hold*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_violet_hold*>(pCreature->GetInstanceData());
         Reset();
     }
 
@@ -326,44 +323,6 @@ struct npc_prison_event_controllerAI : public ScriptedAI
         }
     }
 
-    // Release a boss from a prison cell
-    void DoReleaseBoss()
-    {
-        if (!m_pInstance)
-            return;
-
-        if (const BossInformation* pData = m_pInstance->GetBossInformation())
-        {
-            if (Creature* pBoss = m_pInstance->GetSingleCreatureFromStorage(m_pInstance->GetData(pData->uiType) != DONE ? pData->uiEntry : pData->uiGhostEntry))
-            {
-                m_pInstance->UpdateCellForBoss(pData->uiEntry);
-                if (pData->iSayEntry)
-                    DoScriptText(pData->iSayEntry, pBoss);
-
-                pBoss->GetMotionMaster()->MovePoint(1, pData->fX, pData->fY, pData->fZ);
-                pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
-
-                // Handle Erekem guards
-                if (pData->uiType == TYPE_EREKEM)
-                {
-                    GuidList lAddGuids;
-                    if (m_pInstance)
-                        m_pInstance->GetErekemGuardList(lAddGuids);
-
-                    for (GuidList::const_iterator itr = lAddGuids.begin(); itr != lAddGuids.end(); ++itr)
-                    {
-                        if (Creature* pAdd = m_pInstance->instance->GetCreature(*itr))
-                        {
-                            float fMoveX = (pData->fX - pAdd->GetPositionX()) * .25;
-                            pAdd->GetMotionMaster()->MovePoint(0, pData->fX - fMoveX, pData->fY, pData->fZ);
-                            pAdd->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
-                        }
-                    }
-                }
-            }
-        }
-    }
-
     void UpdateAI(const uint32 uiDiff) override
     {
         if (m_uiSaboteurTimer)
@@ -385,9 +344,15 @@ struct npc_prison_event_controllerAI : public ScriptedAI
                         m_uiSaboteurTimer = 1000;
                         break;
                     case 2:
-                        DoReleaseBoss();
+                        pSaboteur->CastSpell(pSaboteur, SPELL_SHIELD_DISRUPTION, TRIGGERED_NONE);
+                        m_uiSaboteurTimer = 1000;
+                        break;
+                    case 3:
+                        if (m_pInstance)
+                            m_pInstance->DoReleaseBoss();
+
                         pSaboteur->CastSpell(pSaboteur, SPELL_SIMPLE_TELEPORT, TRIGGERED_NONE);
-                        pSaboteur->ForcedDespawn(1000);
+                        pSaboteur->ForcedDespawn(2000);
                         m_uiSaboteurTimer = 0;
                         break;
                 }
@@ -399,11 +364,6 @@ struct npc_prison_event_controllerAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_prison_event_controller(Creature* pCreature)
-{
-    return new npc_prison_event_controllerAI(pCreature);
-}
-
 /*######
 ## npc_teleportation_portal
 ######*/
@@ -414,7 +374,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
 {
     npc_teleportation_portalAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_violet_hold*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_violet_hold*>(pCreature->GetInstanceData());
         m_uiMyPortalNumber = 0;
         Reset();
     }
@@ -447,7 +407,9 @@ struct npc_teleportation_portalAI : public ScriptedAI
         if (m_creature->GetEntry() == NPC_PORTAL_INTRO)
         {
             // ToDo: uncomment this when the information and DB data is confirmed. Right now the mobs may overrun the guards after a few min of fightning
-            // m_creature->SummonCreature(m_pInstance->GetRandomMobForIntroPortal(), 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+            // ToDo2: Check if the chance of summoning is correct
+            if (roll_chance_i(40))
+                m_creature->SummonCreature(m_pInstance->GetRandomMobForIntroPortal(), 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             return;
         }
 
@@ -580,11 +542,6 @@ struct npc_teleportation_portalAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_teleportation_portal(Creature* pCreature)
-{
-    return new npc_teleportation_portalAI(pCreature);
-}
-
 bool EffectDummyCreature_npc_teleportation_portal(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     // always check spellid and effectindex
@@ -600,6 +557,42 @@ bool EffectDummyCreature_npc_teleportation_portal(Unit* /*pCaster*/, uint32 uiSp
     return false;
 }
 
+/*######
+## spell_teleport_inside_violet_hold - 62138
+######*/
+
+struct spell_teleport_inside_violet_hold : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        target->CastSpell(target, 62139, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_void_shift_aura - 54361, 59743
+######*/
+
+struct spell_void_shift_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        if (!apply)
+            target->CastSpell(target, 54343, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_violet_hold()
 {
     Script* pNewScript = new Script;
@@ -614,19 +607,22 @@ void AddSC_violet_hold()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_sinclari";
-    pNewScript->GetAI = &GetAI_npc_sinclari;
+    pNewScript->GetAI = &GetNewAIInstance<npc_sinclariAI>;
     pNewScript->pGossipHello = &GossipHello_npc_sinclari;
     pNewScript->pGossipSelect = &GossipSelect_npc_sinclari;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_prison_event_controller";
-    pNewScript->GetAI = &GetAI_npc_prison_event_controller;
+    pNewScript->GetAI = &GetNewAIInstance<npc_prison_event_controllerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_teleportation_portal";
-    pNewScript->GetAI = &GetAI_npc_teleportation_portal;
+    pNewScript->GetAI = &GetNewAIInstance<npc_teleportation_portalAI>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_teleportation_portal;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_teleport_inside_violet_hold>("spell_teleport_inside_violet_hold");
+    RegisterAuraScript<spell_void_shift_aura>("spell_void_shift_aura");
 }
