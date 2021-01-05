@@ -1537,7 +1537,8 @@ UPDATE creature_template SET ScriptName='mob_giant_claw_tentacle' WHERE entry=15
 UPDATE creature_template SET ScriptName='mob_anubisath_sentinel' WHERE entry=15264;
 INSERT INTO scripted_areatrigger VALUES
 (4033,'at_stomach_cthun'),
-(4034,'at_stomach_cthun');
+(4034,'at_stomach_cthun'),
+(4036,'at_stomach_cthun');
 
 /* TEROKKAR FOREST */
 UPDATE creature_template SET ScriptName='mob_netherweb_victim' WHERE entry=22355;
