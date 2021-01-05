@@ -1436,17 +1436,17 @@ void instance_mount_hyjal::SpawnInvasionWave(uint32 index, bool setTimer)
                 settings.movegen = IDLE_MOTION_TYPE;
             if (index < 7)
             {
-                Creature* waveSpawn = WorldObject::SummonCreature(settings, spawner->GetMap());
+                Creature* waveSpawn = WorldObject::SummonCreature(settings, spawner->GetMap(), spawner->GetPhaseMask());
                 m_overrunSpawns[BASE_ALLY].push_back(waveSpawn->GetObjectGuid());
             }
             else if (index < 14)
             {
-                Creature* waveSpawn = WorldObject::SummonCreature(settings, spawner->GetMap());
+                Creature* waveSpawn = WorldObject::SummonCreature(settings, spawner->GetMap(), spawner->GetPhaseMask());
                 m_overrunSpawns[BASE_HORDE].push_back(waveSpawn->GetObjectGuid());
             }
             else
             {
-                Creature* waveSpawn = WorldObject::SummonCreature(settings, spawner->GetMap());
+                Creature* waveSpawn = WorldObject::SummonCreature(settings, spawner->GetMap(), spawner->GetPhaseMask());
                 waveSpawn->SetRespawnDelay(350);
                 waveSpawn->SetCorpseDelay(300);
                 m_overrunSpawns[BASE_ELF].push_back(waveSpawn->GetObjectGuid());
