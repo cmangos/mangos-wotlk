@@ -984,6 +984,8 @@ INSERT INTO scripted_areatrigger VALUES
 (5604,'at_icecrown_citadel'),
 (5611,'at_lights_hammer'),
 (5612,'at_lights_hammer'),
+(5628,'at_rampart_skull'),
+(5630,'at_rampart_skull'),
 (5647,'at_putricides_trap'),
 (5709,'at_icecrown_citadel'),
 (5718,'at_frozen_throne_tele'),

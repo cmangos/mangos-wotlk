@@ -165,6 +165,7 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_GAS_STALKER:
         case NPC_OOZE_TENTACLE_STALKER:
         case NPC_SLIMY_TENTACLE_STALKER:
+        case NPC_SPIRE_FROSTWYRM:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_DEATHWHISPER_SPAWN_STALKER:
@@ -445,6 +446,9 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
                         DoToggleGameObjectFlags(pOrb->GetObjectGuid(), GO_FLAG_NO_INTERACT, false);
                 }
             }
+        case NPC_SPIRE_FROSTWYRM:
+            SetData(TYPE_SPIRE_FROSTWYRM, DONE);
+            break;
     }
 }
 
@@ -694,6 +698,9 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                     pDoor->SetGoState(GO_STATE_ACTIVE_ALTERNATIVE);
             }
             break;
+        case TYPE_SPIRE_FROSTWYRM:
+            m_auiEncounter[uiType] = uiData;
+            break;
         default:
             script_error_log("Instance Icecrown Citadel: ERROR SetData = %u for type %u does not exist/not implemented.", uiType, uiData);
             return;
@@ -709,7 +716,8 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                    << m_auiEncounter[3] << " " << m_auiEncounter[4] << " " << m_auiEncounter[5] << " "
                    << m_auiEncounter[6] << " " << m_auiEncounter[7] << " " << m_auiEncounter[8] << " "
                    << m_auiEncounter[9] << " " << m_auiEncounter[10] << " " << m_auiEncounter[11] << " "
-                   << m_auiEncounter[12] << " " << m_auiEncounter[13] << " " << m_auiEncounter[14];
+                   << m_auiEncounter[12] << " " << m_auiEncounter[13] << " " << m_auiEncounter[14] << " "
+                   << m_auiEncounter[15];
 
         m_strInstData = saveStream.str();
 
@@ -775,7 +783,7 @@ void instance_icecrown_citadel::Load(const char* strIn)
     loadStream >> m_auiEncounter[0] >> m_auiEncounter[1] >> m_auiEncounter[2] >> m_auiEncounter[3]
                >> m_auiEncounter[4] >> m_auiEncounter[5] >> m_auiEncounter[6] >> m_auiEncounter[7]
                >> m_auiEncounter[8] >> m_auiEncounter[9] >> m_auiEncounter[10] >> m_auiEncounter[11]
-               >> m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14];
+               >> m_auiEncounter[12] >> m_auiEncounter[13] >> m_auiEncounter[14] >> m_auiEncounter[15];
 
     for (uint32& i : m_auiEncounter)
     {
@@ -810,7 +818,7 @@ void instance_icecrown_citadel::Update(uint32 uiDiff)
 
 void instance_icecrown_citadel::ShowChatCommands(ChatHandler* handler)
 {
-    handler->SendSysMessage("This instance supports the following commands:\n startelevator, continuegunship");
+    handler->SendSysMessage("This instance supports the following commands:\n startelevator, continuegunship, lichkingfloor, spawnzeppelin");
 }
 
 void instance_icecrown_citadel::ExecuteChatCommand(ChatHandler* handler, char* args)
@@ -818,6 +826,7 @@ void instance_icecrown_citadel::ExecuteChatCommand(ChatHandler* handler, char* a
     char* result = handler->ExtractLiteralArg(&args);
     if (!result)
         return;
+
     std::string val = result;
     if (val == "startelevator")
     {

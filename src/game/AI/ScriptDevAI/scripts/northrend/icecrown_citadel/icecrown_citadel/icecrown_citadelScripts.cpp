@@ -230,6 +230,37 @@ bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
     return false;
 }
 
+/*#####
+## at_rampart_skull
+#####*/
+
+static const float aFrostwyrmAllySpawnLocs[3] = { -326.5525f, 2236.194f, 328.9574f };
+static const float aFrostwyrmHordeSpawnLocs[3] = { -317.854f ,2190.76f ,328.711f };
+
+bool AreaTrigger_at_rampart_skull(Player* pPlayer, AreaTriggerEntry const* pAt)
+{
+    if (pPlayer->isGameMaster() || pPlayer->IsDead())
+        return false;
+
+    instance_icecrown_citadel* pInstance = static_cast<instance_icecrown_citadel*>(pPlayer->GetInstanceData());
+    if (!pInstance)
+        return false;
+
+    if (pInstance->GetData(TYPE_LADY_DEATHWHISPER) != DONE || pInstance->GetData(TYPE_SPIRE_FROSTWYRM) == DONE)
+        return false;
+
+    if (pInstance->GetSingleCreatureFromStorage(NPC_SPIRE_FROSTWYRM))
+        return false;
+
+    // spawn a Spire Frostwyrm based on the team faction
+    if (pAt->id == AT_RAMPART_ALLIANCE && pInstance->GetPlayerTeam() == ALLIANCE)
+        pPlayer->SummonCreature(NPC_SPIRE_FROSTWYRM, aFrostwyrmAllySpawnLocs[0], aFrostwyrmAllySpawnLocs[1], aFrostwyrmAllySpawnLocs[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0, false, true, 0);
+    else if (pAt->id == AT_RAMPART_HORDE && pInstance->GetPlayerTeam() == HORDE)
+        pPlayer->SummonCreature(NPC_SPIRE_FROSTWYRM, aFrostwyrmHordeSpawnLocs[0], aFrostwyrmHordeSpawnLocs[1], aFrostwyrmHordeSpawnLocs[2], 0, TEMPSPAWN_DEAD_DESPAWN, 0, false, true, 1);
+
+    return false;
+}
+
 enum
 {
     SPELL_GIANT_INSECT_SWARM        = 70475,
@@ -447,6 +478,11 @@ void AddSC_icecrown_citadel()
     pNewScript = new Script;
     pNewScript->Name = "at_lights_hammer";
     pNewScript->pAreaTrigger = &AreaTrigger_at_lights_hammer;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_rampart_skull";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_rampart_skull;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
