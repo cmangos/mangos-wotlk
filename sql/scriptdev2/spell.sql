@@ -337,11 +337,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 -- Hunter
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (34026,'spell_kill_command'),
-(34477,'spell_stacking_rules_override');
+(34477,'spell_misdirection');
 
 -- Priest
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
-(10060,'spell_stacking_rules_override'),
+(10060,'spell_power_infusion'),
 (27827,'spell_spirit_of_redemption_heal');
 
 -- Paladin

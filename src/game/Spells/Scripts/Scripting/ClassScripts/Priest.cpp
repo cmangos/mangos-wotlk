@@ -28,6 +28,20 @@ struct SpiritOfRedemptionHeal : public SpellScript
     }
 };
 
+struct PowerInfusion : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool/* strict*/) const override
+    {
+        // Patch 1.10.2 (2006-05-02):
+        // Power Infusion: This aura will no longer stack with Arcane Power. If you attempt to cast it on someone with Arcane Power, the spell will fail.
+        if (Unit* target = spell->m_targets.getUnitTarget())
+            if (target->GetAuraCount(12042))
+                return SPELL_FAILED_AURA_BOUNCED;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 struct ShadowWordDeath : public SpellScript
 {
     void OnHit(Spell* spell, SpellMissInfo /*missInfo*/) const override
@@ -39,6 +53,7 @@ struct ShadowWordDeath : public SpellScript
 
 void LoadPriestScripts()
 {
+    RegisterSpellScript<PowerInfusion>("spell_power_infusion");
     RegisterSpellScript<ShadowWordDeath>("spell_shadow_word_death");
     RegisterSpellScript<SpiritOfRedemptionHeal>("spell_spirit_of_redemption_heal");
 }

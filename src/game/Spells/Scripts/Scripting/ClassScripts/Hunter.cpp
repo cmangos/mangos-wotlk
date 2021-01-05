@@ -27,7 +27,22 @@ struct KillCommand : public SpellScript
     }
 };
 
+struct Misdirection : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool/* strict*/) const override
+    {
+        // Patch 2.3.0 (2007-11-13):
+        // Misdirection: If a Hunter attempts to use this ability on a target which already has an active Misdirection, the spell will fail to apply due to a more powerful spell already being in effect.
+        if (Unit* target = spell->m_targets.getUnitTarget())
+            if (target->HasAura(35079))
+                return SPELL_FAILED_AURA_BOUNCED;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 void LoadHunterScripts()
 {
     RegisterSpellScript<KillCommand>("spell_kill_command");
+    RegisterSpellScript<Misdirection>("spell_misdirection");
 }
