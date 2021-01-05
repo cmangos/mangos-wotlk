@@ -91,11 +91,12 @@ enum
     NPC_WATCHER                 = 32235,
     NPC_LAVA_HOUND              = 32237,
 
-    SPELL_DEFENSE_SYSTEM_VISUAL = 57887,
+    SPELL_DEFENSE_SYSTEM_VISUAL = 57887,                    // spawn spells
     SPELL_DEFENSE_SYSTEM_SPAWN  = 57886,
-    SPELL_ARCANE_LIGHTNING_I    = 57912,                    // intro spell
-    SPELL_LIGHTNING_INTRO       = 60038,                    // intro kill spells, also related to spell 58152
-    SPELL_ARCANE_LIGHTNING      = 57930,                    // damage spells, related to spell 57912
+    SPELL_LIGHTNING_DAMAGE      = 57912,                    // intro damage spell
+    SPELL_LIGHTNING_VISUAL      = 57930,                    // targets creature 30857 all around the room
+    SPELL_LIGHTNING_KILL        = 58152,                    // instant kill spell
+    SPELL_LIGHTNING_VISUAL2     = 60038,                    // second visual spell - purpose unk
 
     SPELL_DESTROY_DOOR_SEAL     = 58040,                    // spell periodic cast by misc
     SPELL_TELEPORTATION_PORTAL  = 57687,                    // visual aura, but possibly not used? creature_template model for portals are same
@@ -289,6 +290,7 @@ class instance_violet_hold : public ScriptedInstance
         GuidList m_lErekemGuardList;
         GuidList m_lArakkoaGuardList;
         GuidList m_lIchoronTargetsList;
+        GuidList m_lActivationCrystalList;
         std::vector<uint32> m_vRandomBossList;
 
         std::vector<BossSpawn*> m_vRandomBosses;

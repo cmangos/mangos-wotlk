@@ -85,10 +85,8 @@ void instance_violet_hold::ResetAll()
             {
                 // Despawn ghost guards
                 for (const auto& guid : m_lArakkoaGuardList)
-                {
                     if (Creature* pGhostGuard = instance->GetCreature(guid))
                         pGhostGuard->ForcedDespawn();
-                }
 
                 m_lArakkoaGuardList.clear();
 
@@ -118,7 +116,7 @@ void instance_violet_hold::ResetAll()
             if (pData->uiType == TYPE_EREKEM)
             {
                 // respawn guards
-                for (const auto& guid : m_lArakkoaGuardList)
+                for (const auto& guid : m_lErekemGuardList)
                     if (Creature* pGhostGuard = instance->GetCreature(guid))
                         pGhostGuard->Respawn();
             }
@@ -207,6 +205,9 @@ void instance_violet_hold::OnObjectCreate(GameObject* pGo)
         case GO_CELL_EREKEM_GUARD_R:
             m_mBossToCellMap.insert(BossToCellMap::value_type(NPC_EREKEM, pGo->GetObjectGuid()));
             return;
+        case GO_PRISON_CRYSTAL:
+            m_lActivationCrystalList.push_back(pGo->GetObjectGuid());
+            return;
 
         case GO_INTRO_CRYSTAL:
         case GO_PRISON_SEAL_DOOR:
@@ -215,6 +216,7 @@ void instance_violet_hold::OnObjectCreate(GameObject* pGo)
     m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
+// Method that will update the cell door for the given boss entry
 void instance_violet_hold::UpdateCellForBoss(uint32 uiBossEntry, bool bForceClosing /*= false*/)
 {
     BossToCellMap::const_iterator itrCellLower = m_mBossToCellMap.lower_bound(uiBossEntry);
@@ -424,6 +426,7 @@ void instance_violet_hold::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
+// Method to Enable / Disable the intro portals
 void instance_violet_hold::SetIntroPortals(bool bDeactivate)
 {
     for (GuidList::const_iterator itr = m_lIntroPortalList.begin(); itr != m_lIntroPortalList.end(); ++itr)
@@ -438,6 +441,7 @@ void instance_violet_hold::SetIntroPortals(bool bDeactivate)
     }
 }
 
+// Method to spawn event portal
 void instance_violet_hold::SpawnPortal()
 {
     if (const PortalData* pData = GetPortalData())
@@ -451,6 +455,7 @@ void instance_violet_hold::SpawnPortal()
     }
 }
 
+// Method to set a random portal id
 void instance_violet_hold::SetPortalId()
 {
     if (IsCurrentPortalForTrash())
@@ -476,6 +481,7 @@ void instance_violet_hold::SetPortalId()
     }
 }
 
+// Function to return the boss spawn location
 BossSpawn* instance_violet_hold::CreateBossSpawnByEntry(uint32 uiEntry)
 {
     BossSpawn* pBossSpawn = new BossSpawn;
@@ -487,6 +493,7 @@ BossSpawn* instance_violet_hold::CreateBossSpawnByEntry(uint32 uiEntry)
     return pBossSpawn;
 }
 
+// Method to randomise encounters; only 2 are actually fighting
 void instance_violet_hold::SetRandomBosses()
 {
     // Store bosses that are already done
@@ -539,8 +546,8 @@ void instance_violet_hold::DoReleaseBoss(uint32 entry)
     if (pData->iSayEntry)
         DoScriptText(pData->iSayEntry, pBoss);
 
-    pBoss->GetMotionMaster()->MovePoint(1, pData->fX, pData->fY, pData->fZ);
-    pBoss->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+    // move boss outside of the cell; flags are removed by DB script
+    pBoss->GetMotionMaster()->MoveWaypoint();
 
     // Handle Erekem guards
     if (pData->uiType == TYPE_EREKEM)
@@ -548,22 +555,17 @@ void instance_violet_hold::DoReleaseBoss(uint32 entry)
         GuidList& lAddGuids = GetData(TYPE_EREKEM) != DONE ? m_lErekemGuardList : m_lArakkoaGuardList;
 
         for (const auto& guid : lAddGuids)
-        {
             if (Creature* pAdd = instance->GetCreature(guid))
-            {
-                float fMoveX = (pData->fX - pAdd->GetPositionX()) * .25;
-                pAdd->GetMotionMaster()->MovePoint(0, pData->fX - fMoveX, pData->fY, pData->fZ);
-                pAdd->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
-            }
-        }
+                pAdd->GetMotionMaster()->MoveWaypoint();
     }
 }
 
+// Method to handle guards
 void instance_violet_hold::CallGuards(bool bRespawn)
 {
-    for (GuidList::const_iterator itr = m_lGuardsList.begin(); itr != m_lGuardsList.end(); ++itr)
+    for (const auto& guid : m_lGuardsList)
     {
-        if (Creature* pGuard = instance->GetCreature(*itr))
+        if (Creature* pGuard = instance->GetCreature(guid))
         {
             if (bRespawn)
                 pGuard->Respawn();
@@ -577,14 +579,18 @@ void instance_violet_hold::CallGuards(bool bRespawn)
     }
 }
 
+// Method that processes the Defense System crystal activation
 void instance_violet_hold::ProcessActivationCrystal(Unit* pUser, bool bIsIntro)
 {
     if (Creature* pSummon = pUser->SummonCreature(NPC_DEFENSE_DUMMY_TARGET, fDefenseSystemLoc[0], fDefenseSystemLoc[1], fDefenseSystemLoc[2], fDefenseSystemLoc[3], TEMPSPAWN_TIMED_DESPAWN, 10000))
     {
+        // setup visual and start WP movement
+        pSummon->SetLevitate(true);
         pSummon->CastSpell(pSummon, SPELL_DEFENSE_SYSTEM_VISUAL, TRIGGERED_OLD_TRIGGERED);
+        pSummon->CastSpell(pSummon, SPELL_DEFENSE_SYSTEM_SPAWN, TRIGGERED_OLD_TRIGGERED);
 
-        // TODO: figure out how the rest work
-        // NPC's NPC_DEFENSE_DUMMY_TARGET are probably channeling some spell to the defense system
+        // spells are cast by DB script; the system casts specific visual and damage spells
+        pSummon->GetMotionMaster()->MoveWaypoint();
     }
 
     if (bIsIntro)
@@ -784,6 +790,7 @@ void instance_violet_hold::Update(uint32 uiDiff)
     }
 }
 
+// Function that returns boss info by entry
 BossInformation const* instance_violet_hold::GetBossInformation(uint32 uiEntry/* = 0*/)
 {
     uint32 mEntry = uiEntry;
