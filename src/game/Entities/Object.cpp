@@ -2143,7 +2143,8 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 GameObject* WorldObject::SpawnGameObject(uint32 dbGuid, Map* map, GenericTransport* transport)
 {
     GameObjectData const* data = sObjectMgr.GetGOData(dbGuid);
-    MANGOS_ASSERT(data);
+    if (!data)
+        return nullptr;
 
     if (data->spawnMask && !map->CanSpawn(TYPEID_GAMEOBJECT, dbGuid))
         return nullptr;
