@@ -746,6 +746,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 41634:         // Invisibility and Stealth Detection
         case 42459:         // Dual Wield (Passive)
         case 44480:         // Seal of Wrath
+        case 44505:         // Drink Fel Infusion
         case 44520:         // Fel Armor (Rank 2)
         case 44537:         // Fel Lightning
         case 44604:         // Enchantment of Spell Haste
