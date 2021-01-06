@@ -59,25 +59,92 @@ static const float aLackeyLocations[MAX_DELRISSA_ADDS][4] =
     {129.988f, 17.2355f, -19.921f, 4.98f},
 };
 
+enum CommonActions
+{
+    COMMON_RETARGET,
+    COMMON_MEDALLION,
+    COMMON_ACTION_MAX,
+};
+
+struct priestess_commonAI : public CombatAI
+{
+    priestess_commonAI(Creature* creature, uint32 actions) : CombatAI(creature, actions),
+        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    {
+        AddCombatAction(COMMON_RETARGET, 5000u);
+        if (!m_isRegularMode)
+            AddCombatAction(COMMON_MEDALLION, 1000, 2000);
+        Reset();
+    }
+
+    ScriptedInstance* m_instance;
+    bool m_isRegularMode;
+
+    virtual void ExecuteActions() override
+    {
+        if (!m_creature->IsAlive() || m_creature->GetCombatManager().IsEvadingHome() || (m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) ||
+            m_unit->hasUnitState(UNIT_STAT_PROPELLED | UNIT_STAT_RETREATING) || m_unit->IsNonMeleeSpellCasted(false))
+            return; // custom condition due to her medallion - TODO: resolve globally
+
+        for (uint32 i = 0; i < GetCombatActionCount(); ++i)
+        {
+            // can be changed on any action - prevent all additional ones
+            if (GetCombatScriptStatus())
+                return;
+
+            if (GetActionReadyStatus(i))
+                ExecuteAction(i);
+        }
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case COMMON_RETARGET:
+            {
+                if (m_creature->getThreatManager().getThreatList().size() <= 1)
+                    break;
+
+                std::vector<Unit*> units;
+                DoResetThreat();
+                for (auto& data : m_creature->getThreatManager().getThreatList())
+                    if (data->isValid())
+                        units.push_back(data->getTarget());
+                std::shuffle(units.begin(), units.end(), *GetRandomGenerator());
+                uint32 i = 0;
+                for (Unit* unit : units)
+                    m_creature->AddThreat(unit, urand(1, (++i) * 100000));
+                ResetCombatAction(action, 10000);
+                break;
+            }
+            case COMMON_MEDALLION:
+                if (m_creature->isFrozen() || m_creature->IsCrowdControlled())
+                    if (DoCastSpellIfCan(nullptr, SPELL_MEDALLION) == CAST_OK)
+                        DisableCombatAction(action);
+                break;
+        }
+    }
+};
+
 /*######
 ## boss_priestess_delrissa
 ######*/
 
 enum DelrissaActions
 {
-    DELRISSA_HEAL,
+    DELRISSA_HEAL = COMMON_ACTION_MAX,
     DELRISSA_RENEW,
     DELRISSA_SHIELD,
     DELRISSA_SHADOW_WORD_PAIN,
     DELRISSA_DISPEL,
     DELRISSA_SCREAM,
-    DELRISSA_MEDALLION,
     DELRISSA_ACTION_MAX,
 };
 
-struct boss_priestess_delrissaAI : public CombatAI
+struct boss_priestess_delrissaAI : public priestess_commonAI
 {
-    boss_priestess_delrissaAI(Creature* creature) : CombatAI(creature, DELRISSA_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    boss_priestess_delrissaAI(Creature* creature) : priestess_commonAI(creature, DELRISSA_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         AddCombatAction(DELRISSA_HEAL, 15000u);
         AddCombatAction(DELRISSA_RENEW, 10000u);
@@ -85,10 +152,6 @@ struct boss_priestess_delrissaAI : public CombatAI
         AddCombatAction(DELRISSA_SHADOW_WORD_PAIN, 5000u);
         AddCombatAction(DELRISSA_DISPEL, 7500u);
         AddCombatAction(DELRISSA_SCREAM, 9000u);
-        if (!m_isRegularMode)
-            AddCombatAction(DELRISSA_MEDALLION, 1000, 2000);
-        else
-            AddCombatAction(DELRISSA_MEDALLION, true);
         SetDeathPrevention(true);
         Reset();
     }
@@ -208,23 +271,6 @@ struct boss_priestess_delrissaAI : public CombatAI
             m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
     }
 
-    virtual void ExecuteActions() override
-    {
-        if (!m_creature->IsAlive() || m_creature->GetCombatManager().IsEvadingHome() || (m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) ||
-            m_unit->hasUnitState(UNIT_STAT_PROPELLED | UNIT_STAT_RETREATING) || m_unit->IsNonMeleeSpellCasted(false))
-            return; // custom condition due to her medallion - TODO: resolve globally
-
-        for (uint32 i = 0; i < GetCombatActionCount(); ++i)
-        {
-            // can be changed on any action - prevent all additional ones
-            if (GetCombatScriptStatus())
-                return;
-
-            if (GetActionReadyStatus(i))
-                ExecuteAction(i);
-        }
-    }
-
     void ExecuteAction(uint32 action) override
     {
         switch (action)
@@ -259,11 +305,6 @@ struct boss_priestess_delrissaAI : public CombatAI
                         ResetCombatAction(action, urand(12000, 15000));
                 break;
             }
-            case DELRISSA_MEDALLION:
-                if (m_creature->isFrozen() || m_creature->IsCrowdControlled())
-                    if (DoCastSpellIfCan(nullptr, SPELL_MEDALLION) == CAST_OK)
-                        DisableCombatAction(action);
-                break;
             case DELRISSA_SHADOW_WORD_PAIN:
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(target, m_isRegularMode ? SPELL_SHADOW_WORD_PAIN : SPELL_SHADOW_WORD_PAIN_H) == CAST_OK)
@@ -283,40 +324,16 @@ struct boss_priestess_delrissaAI : public CombatAI
 
 enum CompanionActions
 {
-    COMPANION_POTION,
-    COMPANION_RETARGET,
-    COMPANION_MEDALLION,
+    COMPANION_POTION = COMMON_ACTION_MAX,
     COMPANION_ACTION_MAX,
 };
 
-struct priestess_companion_commonAI : public CombatAI
+struct priestess_companion_commonAI : public priestess_commonAI
 {
-    priestess_companion_commonAI(Creature* creature, uint32 actions) : CombatAI(creature, actions),
-        m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
+    priestess_companion_commonAI(Creature* creature, uint32 actions) : priestess_commonAI(creature, actions)
     {
         AddTimerlessCombatAction(COMPANION_POTION, true);
-        AddCombatAction(COMPANION_RETARGET, 5000, 15000);
-        if (!m_isRegularMode)
-            AddCombatAction(COMPANION_MEDALLION, 1000, 2000);
-        else
-            AddCombatAction(COMPANION_MEDALLION, true);
         Reset();
-    }
-
-    ScriptedInstance* m_instance;
-    bool m_isRegularMode;
-
-    uint32 m_uiResetThreatTimer;
-    uint32 m_uiMedallionTimer;
-
-    void Reset() override
-    {
-        CombatAI::Reset();
-
-        // These guys does not follow normal threat system rules
-        // For later development, some alternative threat system should be made
-        // We do not know what this system is based upon, but one theory is class (healers=high threat, dps=medium, etc)
-        // We reset their threat frequently as an alternative until such a system exist
     }
 
     void KilledUnit(Unit* victim) override
@@ -328,23 +345,6 @@ struct priestess_companion_commonAI : public CombatAI
             delrissa->AI()->KilledUnit(victim);
     }
 
-    virtual void ExecuteActions() override
-    {
-        if (!m_creature->IsAlive() || m_creature->GetCombatManager().IsEvadingHome() || (m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_unit->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED)) ||
-            m_unit->hasUnitState(UNIT_STAT_PROPELLED | UNIT_STAT_RETREATING) || m_unit->IsNonMeleeSpellCasted(false))
-            return; // custom condition due to medallion - TODO: resolve globally
-
-        for (uint32 i = 0; i < GetCombatActionCount(); ++i)
-        {
-            // can be changed on any action - prevent all additional ones
-            if (GetCombatScriptStatus())
-                return;
-
-            if (GetActionReadyStatus(i))
-                ExecuteAction(i);
-        }
-    }
-
     void ExecuteAction(uint32 action) override
     {
         switch (action)
@@ -354,19 +354,6 @@ struct priestess_companion_commonAI : public CombatAI
                     return;
                 if (DoCastSpellIfCan(nullptr, SPELL_HEALING_POTION) == CAST_OK)
                     SetActionReadyStatus(action, false);
-                break;
-            case COMPANION_RETARGET:
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, nullptr, SELECT_FLAG_PLAYER))
-                {
-                    DoResetThreat();
-                    AttackStart(target);
-                    ResetCombatAction(action, urand(5000, 15000));
-                }
-                break;
-            case COMPANION_MEDALLION:
-                if (m_creature->isFrozen() || m_creature->IsCrowdControlled())
-                    if (DoCastSpellIfCan(nullptr, SPELL_MEDALLION) == CAST_OK)
-                        DisableCombatAction(action);
                 break;
         }
     }
