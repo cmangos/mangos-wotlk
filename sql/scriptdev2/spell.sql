@@ -281,7 +281,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (45219,'spell_shattered_sun_marksman_shoot'),
 (45223,'spell_shattered_sun_marksman_shoot'),
 (45229,'spell_shattered_sun_marksman_shoot'),
-(45233,'spell_shattered_sun_marksman_shoot');
+(45233,'spell_shattered_sun_marksman_shoot'),
+(32727,'spell_arena_preparation');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
