@@ -135,6 +135,7 @@ bool Map::CanSpawn(TypeID typeId, uint32 dbGuid)
             if ((data->spawnMask & (1 << GetDifficulty())) == 0)
                 return false;
     }
+    return false;
 }
 
 void Map::LoadMapAndVMap(int gx, int gy)
