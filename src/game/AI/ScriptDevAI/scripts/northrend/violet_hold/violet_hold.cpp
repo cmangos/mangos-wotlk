@@ -35,6 +35,7 @@ instance_violet_hold::instance_violet_hold(Map* pMap) : ScriptedInstance(pMap),
 
     m_uiSealYellCount(0),
     m_uiEventResetTimer(0),
+    m_uiEventStartTimer(0),
 
     m_bIsVoidDance(false),
     m_bIsDefenseless(false),
@@ -56,13 +57,41 @@ void instance_violet_hold::ResetVariables()
     m_uiSealYellCount = 0;
 }
 
-void instance_violet_hold::ResetAll()
+// Method that will start teh event
+void instance_violet_hold::StartEvent()
 {
+    // Close door; update world state; enable crystals and set variables
+    DoUseDoorOrButton(GO_PRISON_SEAL_DOOR);
+
+    UpdateWorldState();
+    UpdateCrystals(false);
+
+    m_bIsDefenseless = true;
+    m_uiPortalId = urand(0, 2);
+    m_uiPortalTimer = 15000;
+}
+
+// Method that will reset the event in case of a fail
+void instance_violet_hold::ResetEvent()
+{
+    // reset everything
     ResetVariables();
     UpdateWorldState(false);
-    CallGuards(true);
-    SetIntroPortals(false);
-    // ToDo: reset the activation crystals when implemented
+    ResetGuards();
+    ResetIntroPortals();
+    UpdateCrystals(true);
+
+    // respawn sinclari and the controller
+    if (Creature* pSinclari = GetSingleCreatureFromStorage(NPC_SINCLARI))
+    {
+        if (!pSinclari->IsAlive())
+            pSinclari->Respawn();
+    }
+    if (Creature* pController = GetSingleCreatureFromStorage(NPC_EVENT_CONTROLLER))
+    {
+        if (!pController->IsAlive())
+            pController->Respawn();
+    }
 
     for (auto spawn : m_vRandomBosses)
     {
@@ -133,6 +162,8 @@ void instance_violet_hold::OnCreatureCreate(Creature* pCreature)
     switch (pCreature->GetEntry())
     {
         case NPC_SINCLARI:
+            if (pCreature->IsTemporarySummon())
+                return;
         case NPC_SINCLARI_ALT:
         case NPC_DOOR_SEAL:
         case NPC_EVENT_CONTROLLER:
@@ -170,6 +201,11 @@ void instance_violet_hold::OnCreatureCreate(Creature* pCreature)
         case NPC_WATCHER:
         case NPC_LAVA_HOUND:
             break;
+
+        case NPC_DEFENSE_SYSTEM:
+            if (GetData(TYPE_MAIN) == IN_PROGRESS)
+                m_bIsDefenseless = false;
+            return;
 
         default:
             return;
@@ -254,7 +290,7 @@ void instance_violet_hold::OnPlayerEnter(Player* /*pPlayer*/)
     if (m_vRandomBosses.empty())
     {
         SetRandomBosses();
-        ResetAll();
+        ResetEvent();
     }
 }
 
@@ -274,21 +310,18 @@ void instance_violet_hold::SetData(uint32 uiType, uint32 uiData)
             switch (uiData)
             {
                 case IN_PROGRESS:
-                    // ToDo: enable the prison defense system when implemented
-                    DoUseDoorOrButton(GO_PRISON_SEAL_DOOR);
-                    UpdateWorldState();
-                    m_bIsDefenseless = true;
-                    m_uiPortalId = urand(0, 2);
-                    m_uiPortalTimer = 15000;
+                    StartEvent();
                     break;
                 case FAIL:
+                    // Despawn sinclari and the controller
+                    // creature despawn (creature cleanup is handled in creature_linking)
                     if (Creature* pSinclari = GetSingleCreatureFromStorage(NPC_SINCLARI))
-                        pSinclari->Suicide();
+                        pSinclari->ForcedDespawn();
                     if (Creature* pController = GetSingleCreatureFromStorage(NPC_EVENT_CONTROLLER))
-                        pController->AI()->EnterEvadeMode();
-                    // Reset the event (creature cleanup is handled in creature_linking)
-                    DoUseDoorOrButton(GO_PRISON_SEAL_DOOR); // open instance door
-                    ResetAll();
+                        pController->ForcedDespawn();
+
+                    // open instance door
+                    DoUseDoorOrButton(GO_PRISON_SEAL_DOOR);
                     m_uiEventResetTimer = 20000;            // Timer may not be correct - 20 sec is default reset timer for blizz
                     break;
                 case DONE:
@@ -296,6 +329,7 @@ void instance_violet_hold::SetData(uint32 uiType, uint32 uiData)
                     UpdateWorldState(false);
                     break;
                 case SPECIAL:
+                    m_uiEventStartTimer = 20000;
                     break;
             }
             m_auiEncounter[uiType] = uiData;
@@ -369,7 +403,13 @@ void instance_violet_hold::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_CYANIGOSA:
             if (uiData == DONE)
+            {
                 SetData(TYPE_MAIN, DONE);
+
+                // Despawn dummy Sinclari; DB script will spawn a new one
+                if (Creature* pSinclari = GetSingleCreatureFromStorage(NPC_SINCLARI))
+                    pSinclari->ForcedDespawn();
+            }
             if (uiData == FAIL)
                 SetData(TYPE_MAIN, FAIL);
             m_auiEncounter[uiType] = uiData;
@@ -426,19 +466,12 @@ void instance_violet_hold::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
-// Method to Enable / Disable the intro portals
-void instance_violet_hold::SetIntroPortals(bool bDeactivate)
+// Method to reset the intro portals
+void instance_violet_hold::ResetIntroPortals()
 {
-    for (GuidList::const_iterator itr = m_lIntroPortalList.begin(); itr != m_lIntroPortalList.end(); ++itr)
-    {
-        if (Creature* pPortal = instance->GetCreature(*itr))
-        {
-            if (bDeactivate)
-                pPortal->ForcedDespawn();
-            else
-                pPortal->Respawn();
-        }
-    }
+    for (const auto& guid : m_lIntroPortalList)
+        if (Creature* pPortal = instance->GetCreature(guid))
+            pPortal->Respawn();
 }
 
 // Method to spawn event portal
@@ -561,42 +594,18 @@ void instance_violet_hold::DoReleaseBoss(uint32 entry)
 }
 
 // Method to handle guards
-void instance_violet_hold::CallGuards(bool bRespawn)
+void instance_violet_hold::ResetGuards()
 {
     for (const auto& guid : m_lGuardsList)
-    {
         if (Creature* pGuard = instance->GetCreature(guid))
-        {
-            if (bRespawn)
-                pGuard->Respawn();
-            else if (pGuard->IsAlive())
-            {
-                pGuard->SetWalk(false);
-                pGuard->GetMotionMaster()->MovePoint(0, fGuardExitLoc[0], fGuardExitLoc[1], fGuardExitLoc[2]);
-                pGuard->ForcedDespawn(6000);
-            }
-        }
-    }
+            pGuard->Respawn();
 }
 
-// Method that processes the Defense System crystal activation
-void instance_violet_hold::ProcessActivationCrystal(Unit* pUser, bool bIsIntro)
+// Method to reset Crystals
+void instance_violet_hold::UpdateCrystals(bool reset)
 {
-    if (Creature* pSummon = pUser->SummonCreature(NPC_DEFENSE_DUMMY_TARGET, fDefenseSystemLoc[0], fDefenseSystemLoc[1], fDefenseSystemLoc[2], fDefenseSystemLoc[3], TEMPSPAWN_TIMED_DESPAWN, 10000))
-    {
-        // setup visual and start WP movement
-        pSummon->SetLevitate(true);
-        pSummon->CastSpell(pSummon, SPELL_DEFENSE_SYSTEM_VISUAL, TRIGGERED_OLD_TRIGGERED);
-        pSummon->CastSpell(pSummon, SPELL_DEFENSE_SYSTEM_SPAWN, TRIGGERED_OLD_TRIGGERED);
-
-        // spells are cast by DB script; the system casts specific visual and damage spells
-        pSummon->GetMotionMaster()->MoveWaypoint();
-    }
-
-    if (bIsIntro)
-        DoUseDoorOrButton(GO_INTRO_CRYSTAL);
-
-    // else, kill (and despawn?) certain trash mobs. Also boss affected, but not killed.
+    for (const auto& guid : m_lActivationCrystalList)
+        DoToggleGameObjectFlags(guid, GO_FLAG_NO_INTERACT, reset);
 }
 
 bool instance_violet_hold::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* /*pSource*/, Unit const* /*pTarget*/, uint32 /*uiMiscValue1 = 0*/) const
@@ -604,8 +613,8 @@ bool instance_violet_hold::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Pla
     switch (uiCriteriaId)
     {
         // ToDo: uncomment these when they are implemented
-        // case ACHIEV_CRIT_DEFENSELES:
-        //    return m_bIsDefenseless;
+        case ACHIEV_CRIT_DEFENSELES:
+            return m_bIsDefenseless;
         // case ACHIEV_CRIT_DEHYDRATATION:
         //    return m_bIsDehydratation;
         case ACHIEV_CRIT_VOID_DANCE:
@@ -758,22 +767,34 @@ void instance_violet_hold::OnCreatureDeath(Creature* pCreature)
 
 void instance_violet_hold::Update(uint32 uiDiff)
 {
+    // event reset timer
     if (m_uiEventResetTimer)
     {
         if (m_uiEventResetTimer <= uiDiff)
         {
-            if (Creature* pSinclari = GetSingleCreatureFromStorage(NPC_SINCLARI))
-                pSinclari->Respawn();
-
+            ResetEvent();
             m_uiEventResetTimer = 0;
         }
         else
             m_uiEventResetTimer -= uiDiff;
     }
 
+    // event start timer
+    if (m_uiEventStartTimer)
+    {
+        if (m_uiEventStartTimer <= uiDiff)
+        {
+            SetData(TYPE_MAIN, IN_PROGRESS);
+            m_uiEventStartTimer = 0;
+        }
+        else
+            m_uiEventStartTimer -= uiDiff;
+    }
+
     if (m_auiEncounter[TYPE_MAIN] != IN_PROGRESS)
         return;
 
+    // portal timer
     if (m_uiPortalTimer)
     {
         if (m_uiPortalTimer <= uiDiff)
@@ -816,7 +837,7 @@ BossInformation const* instance_violet_hold::GetBossInformation(uint32 uiEntry/*
 
 void instance_violet_hold::ShowChatCommands(ChatHandler* handler)
 {
-    handler->SendSysMessage("This instance supports the following commands:\n stopintro, erekem, moragg, ichoron, xevozz, lavanthor, zuramat");
+    handler->SendSysMessage("This instance supports the following commands:\n erekem, moragg, ichoron, xevozz, lavanthor, zuramat");
 }
 
 // Debug commands for Violet Hold bosses
@@ -827,12 +848,7 @@ void instance_violet_hold::ExecuteChatCommand(ChatHandler* handler, char* args)
         return;
     std::string val = result;
 
-    if (val == "stopintro")
-    {
-        SetIntroPortals(true);
-        CallGuards(false);
-    }
-    else if (val == "erekem")
+    if (val == "erekem")
         DoReleaseBoss(NPC_EREKEM);
     else if (val == "moragg")
         DoReleaseBoss(NPC_MORAGG);

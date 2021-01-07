@@ -1746,14 +1746,11 @@ INSERT INTO scripted_event_id VALUES
 
 /* VIOLET HOLD */
 UPDATE instance_template SET ScriptName='instance_violet_hold' WHERE map=608;
-UPDATE gameobject_template SET ScriptName='go_activation_crystal' WHERE entry=193611;
 UPDATE creature_template SET ScriptName='npc_door_seal' WHERE entry=30896;
 UPDATE creature_template SET ScriptName='npc_sinclari' WHERE entry=30658;
 UPDATE creature_template SET ScriptName='npc_prison_event_controller' WHERE entry=30883;
 UPDATE creature_template SET ScriptName='npc_teleportation_portal' WHERE entry IN (31011,30679,32174);
 UPDATE creature_template SET ScriptName='boss_ichoron' WHERE entry IN (29313,32234);
-UPDATE creature_template SET ScriptName='boss_erekem' WHERE entry IN (29315,32226);
-UPDATE creature_template SET ScriptName='npc_erekem_guard' WHERE entry IN (29395,32228);
 
 /* WAILING CAVERNS */
 UPDATE instance_template SET ScriptName='instance_wailing_caverns' WHERE map=43;
@@ -6487,8 +6484,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 608 000 VIOLET HOLD
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1608000','Prison guards, we are leaving! These adventurers are taking over! Go, go, go!','0','1','0','0','0','sinclari SAY_BEGIN'),
-('-1608001','I''m locking the door. Good luck, and thank you for doing this.','0','0','0','1','0','sinclari SAY_LOCK_DOOR'),
+('-1608000','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1608001','REUSE ME','0','0','0','0','0','REUSE ME'),
 
 ('-1608002','Adventurers, the door is beinning to weaken!','0','1','0','0','0','sinclair SAY_SEAL_75'),
 ('-1608003','Only half of the door seal''s strength remains! You must fight on!','0','1','0','0','0','sinclair SAY_SEAL_50'),
@@ -6500,13 +6497,13 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1608008','Free to--mm--fly now. Ra-aak... Not find us--ekh-ekh! Escape!','14218','1','0','0','0','erekem SAY_RELEASE_EREKEM'),
 ('-1608009','I... am fury... unrestrained!','14229','1','0','0','0','ichoron SAY_RELEASE_ICHORON'),
-('-1608010','Back in business! Now to execute an exit strategy.','14498','1','0','0','0','xevozz SAY_RELEASE_XEVOZZ'),
+('-1608010','Back in business! Now to execute an exit strategy.','14498','1','0','396','0','xevozz SAY_RELEASE_XEVOZZ'),
 ('-1608011','I am... renewed.','13995','1','0','0','0','zuramat SAY_RELEASE_ZURAMAT'),
 
-('-1608012','Not--caww--get in way of--rrak-rrak--flee!','14219','1','0','0','0','erekem SAY_AGGRO'),
-('-1608013','My---raaak--favorite! Awk awk awk! Raa-kaa!','14220','1','0','0','0','erekem SAY_ADD_DIE_1'),
-('-1608014','Nasty little...A-ak,kaw! Kill! Yes,kill you!','14221','1','0','0','0','erekem SAY_ADD_DIE_2'),
-('-1608018','No--kaw,kaw--flee...','14225','1','0','0','0','erekem SAY_DEATH'),
+('-1608012','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1608013','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1608014','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1608018','REUSE ME','0','0','0','0','0','REUSE ME'),
 
 ('-1608019','Stand aside, mortals!','14230','1','0','0','0','ichoron SAY_AGGRO'),
 ('-1608020','I will not be contained! Ngyah!!','14233','1','0','0','0','ichoron SAY_SHATTERING'),
@@ -6517,7 +6514,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1608025','I shall consume,decimate, devastate,and destroy! Yield now to the wrath of the pounding sea!','14231','1','0','0','0','ichoron SAY_ENRAGE'),
 ('-1608026','I... recede.','14237','1','0','0','0','ichoron SAY_DEATH'),
 
-('-1608027','You did it! You held the Blue Dragonflight back and defeated their commander. Amazing work!','0','0','0','1','0','sinclari SAY_VICTORY'),
+('-1608027','REUSE ME','0','0','0','0','0','REUSE ME'),
 
 ('-1608028','%s''s Protective Bubble shatters!','0','3','0','0','0','ichoron EMOTE_BUBBLE');
 
@@ -12517,12 +12514,6 @@ INSERT INTO `script_waypoint` (`entry`, `pathId`, `pointid`, `position_x`, `posi
 (29434,0,45,6640.45,-1088.53,403.227,0,0,0,''),
 (29434,0,46,6659.59,-1073.82,402.945,0,0,0,''),
 (29434,0,47,6671.06,-1064.83,405.381,0,0,0,'continue at wp 13'),
-(30658,0,1,1830.5,799.357,44.3418,0,5000,0,'use activation'),
-(30658,0,2,1832.46,800.431,44.3117,0,10000,0,'SAY_BEGIN call back guards'),
-(30658,0,3,1824.79,803.828,44.3634,0,3000,0,'SAY_LOCK_DOOR'),
-(30658,0,4,1824.79,803.828,44.3634,0,0,0,'close door'),
-(30658,0,5,1817.32,804.061,44.364,0,0,0,'escort paused - allow teleport inside'),
-(30658,0,6,1826.89,803.93,44.3632,0,30000,0,'SAY_VICTORY'),
 (31279,0,1,6717.81,3451.98,683.747,0,5000,0,'SAY_ESCORT_START_1'),
 (31279,0,2,6717.81,3451.98,683.747,0,2000,0,'SAY_ESCORT_START_2'),
 (31279,0,3,6718.85,3436.95,682.197,0,0,0,''),

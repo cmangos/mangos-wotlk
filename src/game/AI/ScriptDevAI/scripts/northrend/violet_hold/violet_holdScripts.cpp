@@ -22,7 +22,6 @@ SDCategory: Violet Hold
 EndScriptData */
 
 /* ContentData
-go_activation_crystal
 npc_door_seal
 npc_sinclari
 npc_prison_event_controller
@@ -34,18 +33,6 @@ EndContentData */
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
-
-/*######
-## go_activation_crystal
-######*/
-
-bool GOUse_go_activation_crystal(Player* pPlayer, GameObject* pGo)
-{
-    if (instance_violet_hold* pInstance = (instance_violet_hold*)pGo->GetInstanceData())
-        pInstance->ProcessActivationCrystal(pPlayer);
-
-    return false;
-}
 
 /*######
 ## npc_door_seal
@@ -72,10 +59,6 @@ bool EffectDummyCreature_npc_door_seal(Unit* /*pCaster*/, uint32 uiSpellId, Spel
 
 enum
 {
-    SAY_BEGIN                   = -1608000,
-    SAY_LOCK_DOOR               = -1608001,
-    SAY_VICTORY                 = -1608027,
-
     GOSSIP_ITEM_INTRO           = -3608000,
     GOSSIP_ITEM_START           = -3608001,
     GOSSIP_ITEM_TELEPORT        = -3608002,
@@ -84,76 +67,6 @@ enum
     GOSSIP_TEXT_ID_START        = 13854,
 
     SPELL_TELEPORT_INSIDE       = 62138,            // script effect - should trigger 62139
-};
-
-struct npc_sinclariAI : public npc_escortAI
-{
-    npc_sinclariAI(Creature* pCreature) : npc_escortAI(pCreature)
-    {
-        m_pInstance = static_cast<instance_violet_hold*>(pCreature->GetInstanceData());
-        Reset();
-    }
-
-    instance_violet_hold* m_pInstance;
-
-    bool m_bIsEpilogue;
-
-    void Reset() override
-    {
-        m_bIsEpilogue = false;
-    }
-
-    void WaypointReached(uint32 uiPointId) override
-    {
-        if (!m_pInstance)
-            return;
-
-        switch (uiPointId)
-        {
-            case 1:
-                m_pInstance->ProcessActivationCrystal(m_creature, true);
-                break;
-            case 2:
-                DoScriptText(SAY_BEGIN, m_creature);
-                m_pInstance->SetIntroPortals(true);
-                m_pInstance->CallGuards(false);
-                break;
-            case 3:
-                DoScriptText(SAY_LOCK_DOOR, m_creature);
-                m_creature->SetFacingTo(0.05f);
-                break;
-            case 4:
-                m_pInstance->SetData(TYPE_MAIN, IN_PROGRESS);
-                break;
-            case 5:
-                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                SetEscortPaused(true);
-                break;
-            case 6:
-                m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                DoScriptText(SAY_VICTORY, m_creature);
-                SetEscortPaused(true);
-                break;
-        }
-    }
-
-    void JustRespawned() override
-    {
-        if (m_pInstance && m_pInstance->GetData(TYPE_MAIN) != DONE)
-            m_pInstance->SetData(TYPE_MAIN, NOT_STARTED);
-
-        npc_escortAI::JustRespawned();                      // Needed, to reset escort state, waypoints, etc
-    }
-
-    void UpdateEscortAI(const uint32 /*uiDiff*/) override
-    {
-        // Say outro after event is finished
-        if (m_pInstance && m_pInstance->GetData(TYPE_MAIN) == DONE && !m_bIsEpilogue)
-        {
-            SetEscortPaused(false);
-            m_bIsEpilogue = true;
-        }
-    }
 };
 
 bool GossipHello_npc_sinclari(Player* pPlayer, Creature* pCreature)
@@ -195,9 +108,7 @@ bool GossipSelect_npc_sinclari(Player* pPlayer, Creature* pCreature, uint32 /*ui
             if (pInstance->GetData(TYPE_MAIN) == NOT_STARTED)
             {
                 pInstance->SetData(TYPE_MAIN, SPECIAL);
-
-                if (npc_sinclariAI* pEscortAI = dynamic_cast<npc_sinclariAI*>(pCreature->AI()))
-                    pEscortAI->Start();
+                pCreature->GetMotionMaster()->MoveWaypoint();
             }
         }
         else
@@ -229,19 +140,12 @@ struct npc_prison_event_controllerAI : public ScriptedAI
 
     GuidSet m_sTrashPackSet;
 
-    uint32 m_uiSaboteurTimer;
-    uint8 m_uiSaboteurPhase;
     uint8 m_uiCurrentTrashPortalId;
-
-    ObjectGuid m_currentSaboteurGuid;
 
     void Reset() override
     {
         m_uiCurrentTrashPortalId = 0;
-        m_uiSaboteurPhase        = 0;
-        m_uiSaboteurTimer        = 0;
 
-        m_currentSaboteurGuid.Clear();
         m_sTrashPackSet.clear();
     }
 
@@ -275,9 +179,8 @@ struct npc_prison_event_controllerAI : public ScriptedAI
                 if (pData)
                 {
                     pSummoned->SetWalk(false);
-                    pSummoned->GetMotionMaster()->MovePoint(pData->uiWayPointId, pData->fX, pData->fY, pData->fZ);
+                    pSummoned->GetMotionMaster()->MoveWaypoint(pData->pathId);
                 }
-                m_currentSaboteurGuid = pSummoned->GetObjectGuid();
                 break;
             }
         }
@@ -288,16 +191,7 @@ struct npc_prison_event_controllerAI : public ScriptedAI
         if (uiMotionType != POINT_MOTION_TYPE && !uiPointId)
             return;
 
-        if (pSummoned->GetEntry() == NPC_AZURE_SABOTEUR)
-        {
-            // Prepare to release the boss
-            m_uiSaboteurPhase = 0;
-            m_uiSaboteurTimer = 1000;
-            pSummoned->CastSpell(pSummoned, SPELL_SHIELD_DISRUPTION, TRIGGERED_NONE);
-        }
-        // For other summons, cast destroy seal when they reach the door
-        else
-            pSummoned->CastSpell(pSummoned, SPELL_DESTROY_DOOR_SEAL, TRIGGERED_NONE);
+        pSummoned->CastSpell(pSummoned, SPELL_DESTROY_DOOR_SEAL, TRIGGERED_NONE);
     }
 
     void SummonedCreatureJustDied(Creature* pSummoned) override
@@ -323,43 +217,13 @@ struct npc_prison_event_controllerAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
-        if (m_uiSaboteurTimer)
+        // release boss when event is sent
+        if (eventType == AI_EVENT_CUSTOM_A && sender->GetEntry() == NPC_AZURE_SABOTEUR)
         {
-            if (m_uiSaboteurTimer <= uiDiff)
-            {
-                Creature* pSaboteur = m_creature->GetMap()->GetCreature(m_currentSaboteurGuid);
-                if (!pSaboteur)
-                    return;
-
-                switch (m_uiSaboteurPhase)
-                {
-                    case 0:
-                        pSaboteur->CastSpell(pSaboteur, SPELL_SHIELD_DISRUPTION, TRIGGERED_NONE);
-                        m_uiSaboteurTimer = 1000;
-                        break;
-                    case 1:
-                        pSaboteur->CastSpell(pSaboteur, SPELL_SHIELD_DISRUPTION, TRIGGERED_NONE);
-                        m_uiSaboteurTimer = 1000;
-                        break;
-                    case 2:
-                        pSaboteur->CastSpell(pSaboteur, SPELL_SHIELD_DISRUPTION, TRIGGERED_NONE);
-                        m_uiSaboteurTimer = 1000;
-                        break;
-                    case 3:
-                        if (m_pInstance)
-                            m_pInstance->DoReleaseBoss();
-
-                        pSaboteur->CastSpell(pSaboteur, SPELL_SIMPLE_TELEPORT, TRIGGERED_NONE);
-                        pSaboteur->ForcedDespawn(2000);
-                        m_uiSaboteurTimer = 0;
-                        break;
-                }
-                ++m_uiSaboteurPhase;
-            }
-            else
-                m_uiSaboteurTimer -= uiDiff;
+            if (m_pInstance)
+                m_pInstance->DoReleaseBoss();
         }
     }
 };
@@ -408,7 +272,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
         {
             // ToDo: uncomment this when the information and DB data is confirmed. Right now the mobs may overrun the guards after a few min of fightning
             // ToDo2: Check if the chance of summoning is correct
-            if (roll_chance_i(40))
+            if (roll_chance_i(30))
                 m_creature->SummonCreature(m_pInstance->GetRandomMobForIntroPortal(), 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
             return;
         }
@@ -420,7 +284,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
             {
                 // Summon a guardian keeper or Cyanigosa
                 if (m_uiMyPortalNumber == 18)
-                    m_creature->SummonCreature(NPC_CYANIGOSA, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
+                    m_creature->SummonCreature(NPC_CYANIGOSA, fCyanigosaLoc[0], fCyanigosaLoc[1], fCyanigosaLoc[2], fCyanigosaLoc[3], TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
                 else
                     m_creature->SummonCreature(m_pInstance->GetRandomPortalEliteEntry(), 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
             }
@@ -474,7 +338,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
         {
             case NPC_CYANIGOSA:
                 m_cyanigosaGuid = pSummoned->GetObjectGuid();
-                m_uiCyanigosaMoveTimer = 5000;
+                m_uiCyanigosaMoveTimer = 8000;
                 m_creature->ForcedDespawn(5000);
                 break;
             case NPC_PORTAL_GUARDIAN:
@@ -529,10 +393,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
             if (m_uiCyanigosaMoveTimer <= uiDiff)
             {
                 if (Creature* pCyanigosa = m_creature->GetMap()->GetCreature(m_cyanigosaGuid))
-                {
                     pCyanigosa->GetMotionMaster()->MoveJump(afPortalLocation[8].fX, afPortalLocation[8].fY, afPortalLocation[8].fZ, pCyanigosa->GetSpeed(MOVE_RUN) * 2, 10.0f);
-                    pCyanigosa->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
-                }
 
                 m_uiCyanigosaMoveTimer = 0;
             }
@@ -596,18 +457,12 @@ struct spell_void_shift_aura : public AuraScript
 void AddSC_violet_hold()
 {
     Script* pNewScript = new Script;
-    pNewScript->Name = "go_activation_crystal";
-    pNewScript->pGOUse = &GOUse_go_activation_crystal;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "npc_door_seal";
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_door_seal;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_sinclari";
-    pNewScript->GetAI = &GetNewAIInstance<npc_sinclariAI>;
     pNewScript->pGossipHello = &GossipHello_npc_sinclari;
     pNewScript->pGossipSelect = &GossipSelect_npc_sinclari;
     pNewScript->RegisterSelf();
