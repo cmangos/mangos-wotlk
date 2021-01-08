@@ -512,6 +512,15 @@ UPDATE creature_template SET ScriptName='npc_bashir_flesh_fiend' WHERE entry IN(
 UPDATE creature_template SET ScriptName='npc_disruptor_tower' WHERE entry IN(23250);
 UPDATE creature_template SET ScriptName='npc_grand_collector' WHERE entry IN(23333);
 UPDATE gameobject_template SET ScriptName='go_nether_drake_egg_trap' WHERE entry=184958;
+UPDATE creature_template SET ScriptName='npc_doomguard_punisher' WHERE entry IN(23113);
+UPDATE creature_template SET ScriptName='npc_shivan_assassin' WHERE entry IN(23220);
+UPDATE creature_template SET ScriptName='npc_eye_of_shartuul' WHERE entry IN(23228);
+UPDATE creature_template SET ScriptName='npc_dreadmaw' WHERE entry IN(23275);
+UPDATE creature_template SET ScriptName='npc_shartuul' WHERE entry IN(23230);
+UPDATE creature_template SET ScriptName='npc_stun_field' WHERE entry IN(23312);
+INSERT INTO scripted_event_id VALUES
+(14913,'event_doomguard_punisher'),
+(14942,'event_shivan_assassin');
 
 /* BLASTED LANDS */
 UPDATE creature_template SET ScriptName='boss_kazzak' WHERE entry=12397;
