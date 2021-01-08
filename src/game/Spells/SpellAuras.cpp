@@ -8525,7 +8525,7 @@ void Aura::PeriodicTick()
             if (pdamage)
                 procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
-            CleanDamage cleanDamage = CleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL);
+            CleanDamage cleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL, pdamage || absorb);
             // send critical in hit info for threat calculation
             if (isCrit)
                 cleanDamage.hitOutCome = MELEE_HIT_CRIT;
@@ -8616,7 +8616,7 @@ void Aura::PeriodicTick()
             if (pdamage)
                 procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
-            CleanDamage cleanDamage = CleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL);
+            CleanDamage cleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL, pdamage || absorb);
             // send critical in hit info for threat calculation
             if (isCrit)
                 cleanDamage.hitOutCome = MELEE_HIT_CRIT;
@@ -8736,7 +8736,7 @@ void Aura::PeriodicTick()
                 Unit::DealDamageMods(pCaster, pCaster, damage, &absorb, NODAMAGE, spellProto);
                 if (pCaster->GetHealth() > damage)
                 {
-                    CleanDamage cleanDamage = CleanDamage(damage, BASE_ATTACK, MELEE_HIT_NORMAL);
+                    CleanDamage cleanDamage(damage, BASE_ATTACK, MELEE_HIT_NORMAL, damage > 0);
                     Unit::DealDamage(pCaster, pCaster, damage, &cleanDamage, NODAMAGE, GetSpellSchoolMask(spellProto), spellProto, true);
                 }
                 else
@@ -9010,7 +9010,7 @@ void Aura::PeriodicTick()
             if (spellDamageInfo.damage)
                 procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
 
-            pCaster->DealSpellDamage(&spellDamageInfo, true);
+            pCaster->DealSpellDamage(&spellDamageInfo, true, false);
 
             Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, spellDamageInfo.target, procAttacker, procVictim, procEx, spellDamageInfo.damage, BASE_ATTACK, spellProto));
             break;
