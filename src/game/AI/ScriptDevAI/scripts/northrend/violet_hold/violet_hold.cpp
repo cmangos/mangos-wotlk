@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Instance_Violet_Hold
-SD%Complete: 75
-SDComment: Prison defense system requires more research
+SD%Complete: 80
+SDComment:
 SDCategory: Violet Hold
 EndScriptData */
 
@@ -34,6 +34,7 @@ instance_violet_hold::instance_violet_hold(Map* pMap) : ScriptedInstance(pMap),
     m_uiMaxCountPortalLoc(0),
 
     m_uiSealYellCount(0),
+    m_uiIntroSummonTimer(0),
     m_uiEventResetTimer(0),
     m_uiEventStartTimer(0),
 
@@ -55,6 +56,7 @@ void instance_violet_hold::ResetVariables()
     m_uiWorldStateSealCount = 100;
     m_uiWorldStatePortalCount = 0;
     m_uiSealYellCount = 0;
+    m_uiIntroSummonTimer = 1000;
 }
 
 // Method that will start teh event
@@ -140,14 +142,28 @@ void instance_violet_hold::ResetEvent()
         else if (m_auiEncounter[pData->uiType] == FAIL)
         {
             if (Creature* pBoss = GetSingleCreatureFromStorage(pData->uiEntry))
+            {
                 pBoss->Respawn();
+
+                // make sure it has proper flags just in case; normally handled directly in core
+                pBoss->SetImmuneToNPC(true);
+                pBoss->SetImmuneToPlayer(true);
+            }
 
             if (pData->uiType == TYPE_EREKEM)
             {
                 // respawn guards
                 for (const auto& guid : m_lErekemGuardList)
-                    if (Creature* pGhostGuard = instance->GetCreature(guid))
-                        pGhostGuard->Respawn();
+                {
+                    if (Creature* pGuard = instance->GetCreature(guid))
+                    {
+                        pGuard->Respawn();
+
+                        // make sure it has proper flags just in case
+                        pGuard->SetImmuneToNPC(true);
+                        pGuard->SetImmuneToPlayer(true);
+                    }
+                }
             }
         }
 
@@ -155,6 +171,9 @@ void instance_violet_hold::ResetEvent()
         if (pData && (m_auiEncounter[pData->uiType] == DONE || m_auiEncounter[pData->uiType] == FAIL))
             UpdateCellForBoss(pData->uiEntry, true);
     }
+
+    // reset data
+    SetData(TYPE_MAIN, NOT_STARTED);
 }
 
 void instance_violet_hold::OnCreatureCreate(Creature* pCreature)
@@ -179,7 +198,7 @@ void instance_violet_hold::OnCreatureCreate(Creature* pCreature)
             break;
 
         case NPC_PORTAL_INTRO:
-            m_lIntroPortalList.push_back(pCreature->GetObjectGuid());
+            m_lIntroPortalVector.push_back(pCreature->GetObjectGuid());
             return;
         case NPC_HOLD_GUARD:
             m_lGuardsList.push_back(pCreature->GetObjectGuid());
@@ -287,11 +306,16 @@ void instance_violet_hold::OnPlayerEnter(Player* /*pPlayer*/)
 {
     UpdateWorldState(m_auiEncounter[TYPE_MAIN] == IN_PROGRESS);
 
+    // randomize bosses
     if (m_vRandomBosses.empty())
     {
         SetRandomBosses();
         ResetEvent();
     }
+
+    // set the initial intro timer
+    if (GetData(TYPE_MAIN) == NOT_STARTED && !m_uiIntroSummonTimer)
+        m_uiIntroSummonTimer = 1000;
 }
 
 void instance_violet_hold::SetData(uint32 uiType, uint32 uiData)
@@ -315,8 +339,6 @@ void instance_violet_hold::SetData(uint32 uiType, uint32 uiData)
                 case FAIL:
                     // Despawn sinclari and the controller
                     // creature despawn (creature cleanup is handled in creature_linking)
-                    if (Creature* pSinclari = GetSingleCreatureFromStorage(NPC_SINCLARI))
-                        pSinclari->ForcedDespawn();
                     if (Creature* pController = GetSingleCreatureFromStorage(NPC_EVENT_CONTROLLER))
                         pController->ForcedDespawn();
 
@@ -329,6 +351,7 @@ void instance_violet_hold::SetData(uint32 uiType, uint32 uiData)
                     UpdateWorldState(false);
                     break;
                 case SPECIAL:
+                    m_uiIntroSummonTimer = 0;
                     m_uiEventStartTimer = 20000;
                     break;
             }
@@ -403,13 +426,7 @@ void instance_violet_hold::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_CYANIGOSA:
             if (uiData == DONE)
-            {
                 SetData(TYPE_MAIN, DONE);
-
-                // Despawn dummy Sinclari; DB script will spawn a new one
-                if (Creature* pSinclari = GetSingleCreatureFromStorage(NPC_SINCLARI))
-                    pSinclari->ForcedDespawn();
-            }
             if (uiData == FAIL)
                 SetData(TYPE_MAIN, FAIL);
             m_auiEncounter[uiType] = uiData;
@@ -469,7 +486,7 @@ void instance_violet_hold::Load(const char* chrIn)
 // Method to reset the intro portals
 void instance_violet_hold::ResetIntroPortals()
 {
-    for (const auto& guid : m_lIntroPortalList)
+    for (const auto& guid : m_lIntroPortalVector)
         if (Creature* pPortal = instance->GetCreature(guid))
             pPortal->Respawn();
 }
@@ -587,9 +604,10 @@ void instance_violet_hold::DoReleaseBoss(uint32 entry)
     {
         GuidList& lAddGuids = GetData(TYPE_EREKEM) != DONE ? m_lErekemGuardList : m_lArakkoaGuardList;
 
+        // creature path depending on location
         for (const auto& guid : lAddGuids)
             if (Creature* pAdd = instance->GetCreature(guid))
-                pAdd->GetMotionMaster()->MoveWaypoint();
+                pAdd->GetMotionMaster()->MoveWaypoint(pAdd->GetPositionX() > 1880.0f ? 0 : 1);
     }
 }
 
@@ -606,6 +624,26 @@ void instance_violet_hold::UpdateCrystals(bool reset)
 {
     for (const auto& guid : m_lActivationCrystalList)
         DoToggleGameObjectFlags(guid, GO_FLAG_NO_INTERACT, reset);
+}
+
+// Method to spawn an intro mob
+void instance_violet_hold::DoSpawnIntroMob()
+{
+    uint32 mobEntry = aRandomIntroNpcs[urand(0, 3)];
+
+    Creature* pPortal = instance->GetCreature(m_lIntroPortalVector[urand(0, m_lIntroPortalVector.size() - 1)]);
+    if (!pPortal)
+    {
+        script_error_log("instance_violet_hold, cannot find intro portals");
+        return;
+    }
+
+    // spawn mob and make it move to the entrance; it will attack the guards automatically
+    if (Creature* pMob = pPortal->SummonCreature(mobEntry, 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0))
+    {
+        pMob->SetWalk(false);
+        pMob->GetMotionMaster()->MovePoint(1, fSealAttackLoc[0], fSealAttackLoc[1], fSealAttackLoc[2]);
+    }
 }
 
 bool instance_violet_hold::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* /*pSource*/, Unit const* /*pTarget*/, uint32 /*uiMiscValue1 = 0*/) const
@@ -678,35 +716,28 @@ void instance_violet_hold::OnCreatureEvade(Creature* pCreature)
         case NPC_ZURAMAT:
         case NPC_VOID_LORD:
             SetData(TYPE_ZURAMAT, FAIL);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_XEVOZZ:
         case NPC_ETHERAL:
             SetData(TYPE_XEVOZZ, FAIL);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_LAVANTHOR:
         case NPC_LAVA_HOUND:
             SetData(TYPE_LAVANTHOR, FAIL);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_MORAGG:
         case NPC_WATCHER:
             SetData(TYPE_MORAGG, FAIL);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_EREKEM:
         case NPC_ARAKKOA:
             SetData(TYPE_EREKEM, FAIL);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_EREKEM_GUARD:
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_ICHORON:
         case NPC_SWIRLING:
             SetData(TYPE_ICHORON, FAIL);
-            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             break;
         case NPC_CYANIGOSA:
             SetData(TYPE_CYANIGOSA, FAIL);
@@ -791,6 +822,20 @@ void instance_violet_hold::Update(uint32 uiDiff)
             m_uiEventStartTimer -= uiDiff;
     }
 
+    // spawn intro mobs
+    if (m_uiIntroSummonTimer)
+    {
+        if (m_uiIntroSummonTimer <= uiDiff)
+        {
+            // Note: timer and frequency of intro mobs requires more research
+            DoSpawnIntroMob();
+            m_uiIntroSummonTimer = urand(5000, 10000);
+        }
+        else
+            m_uiIntroSummonTimer -= uiDiff;
+    }
+
+    // no update when event isn't in progress
     if (m_auiEncounter[TYPE_MAIN] != IN_PROGRESS)
         return;
 

@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Violet_Hold
-SD%Complete: 80
-SDComment: Intro event required more research and core support.
+SD%Complete: 100
+SDComment:
 SDCategory: Violet Hold
 EndScriptData */
 
@@ -149,8 +149,6 @@ struct npc_prison_event_controllerAI : public ScriptedAI
         m_sTrashPackSet.clear();
     }
 
-    void DoSetCurrentTrashPortal(uint8 uiPortalId) { m_uiCurrentTrashPortalId = uiPortalId; }
-
     void JustSummoned(Creature* pSummoned) override
     {
         switch (pSummoned->GetEntry())
@@ -191,6 +189,10 @@ struct npc_prison_event_controllerAI : public ScriptedAI
         if (uiMotionType != POINT_MOTION_TYPE && !uiPointId)
             return;
 
+        // the Saboteaur is handled in DB; ignore
+        if (pSummoned->GetEntry() == NPC_AZURE_SABOTEUR)
+            return;
+
         pSummoned->CastSpell(pSummoned, SPELL_DESTROY_DOOR_SEAL, TRIGGERED_NONE);
     }
 
@@ -217,7 +219,7 @@ struct npc_prison_event_controllerAI : public ScriptedAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 miscValue) override
     {
         // release boss when event is sent
         if (eventType == AI_EVENT_CUSTOM_A && sender->GetEntry() == NPC_AZURE_SABOTEUR)
@@ -225,6 +227,8 @@ struct npc_prison_event_controllerAI : public ScriptedAI
             if (m_pInstance)
                 m_pInstance->DoReleaseBoss();
         }
+        else if (eventType == AI_EVENT_CUSTOM_B && sender->GetEntry() == NPC_PORTAL_ELITE)
+            m_uiCurrentTrashPortalId = miscValue;
     }
 };
 
@@ -240,12 +244,14 @@ struct npc_teleportation_portalAI : public ScriptedAI
     {
         m_pInstance = static_cast<instance_violet_hold*>(pCreature->GetInstanceData());
         m_uiMyPortalNumber = 0;
+        m_uiCyanigosaMoveTimer = 0;
+        m_bFirstTick = true;
         Reset();
     }
 
     instance_violet_hold* m_pInstance;
 
-    bool m_bIntro;
+    bool m_bFirstTick;
     uint32 m_uiMyPortalNumber;
     uint32 m_uiCyanigosaMoveTimer;
 
@@ -253,13 +259,17 @@ struct npc_teleportation_portalAI : public ScriptedAI
 
     void Reset() override
     {
-        DoCastSpellIfCan(m_creature, SPELL_PORTAL_PERIODIC);
-
-        m_bIntro = true;
-        m_uiCyanigosaMoveTimer = 0;
+        DoCastSpellIfCan(m_creature, SPELL_PORTAL_PERIODIC, CAST_AURA_NOT_PRESENT);
 
         if (m_pInstance)
             m_uiMyPortalNumber = m_pInstance->GetCurrentPortalNumber();
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        // release boss when event is sent
+        if (eventType == AI_EVENT_CUSTOM_A)
+            DoSummon();
     }
 
     void DoSummon()
@@ -267,19 +277,10 @@ struct npc_teleportation_portalAI : public ScriptedAI
         if (!m_pInstance)
             return;
 
-        // Portal event used for intro
-        if (m_creature->GetEntry() == NPC_PORTAL_INTRO)
-        {
-            // ToDo: uncomment this when the information and DB data is confirmed. Right now the mobs may overrun the guards after a few min of fightning
-            // ToDo2: Check if the chance of summoning is correct
-            if (roll_chance_i(30))
-                m_creature->SummonCreature(m_pInstance->GetRandomMobForIntroPortal(), 0, 0, 0, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
-            return;
-        }
-
         // First summon tick
-        if (m_bIntro)
+        if (m_bFirstTick)
         {
+            // Elite portal
             if (m_creature->GetEntry() == NPC_PORTAL)
             {
                 // Summon a guardian keeper or Cyanigosa
@@ -308,9 +309,8 @@ struct npc_teleportation_portalAI : public ScriptedAI
                         pController->SummonCreature(uiSummonId, fX, fY, fZ, m_creature->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
                     }
 
-                    // If this is a trash portal, set the current number in the
-                    if (npc_prison_event_controllerAI* pControllerAI = dynamic_cast<npc_prison_event_controllerAI*>(pController->AI()))
-                        pControllerAI->DoSetCurrentTrashPortal(m_uiMyPortalNumber);
+                    // If this is a trash portal, track the current number in the controller
+                    SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, pController, m_uiMyPortalNumber);
                 }
                 else
                     pController->SummonCreature(NPC_AZURE_SABOTEUR, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation(), TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 600 * IN_MILLISECONDS);
@@ -322,7 +322,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
             if (m_pInstance && m_uiMyPortalNumber != 18)
                 m_pInstance->SetData(TYPE_PORTAL, SPECIAL);
 
-            m_bIntro = false;
+            m_bFirstTick = false;
         }
         else
         {
@@ -345,17 +345,10 @@ struct npc_teleportation_portalAI : public ScriptedAI
                 DoScriptText(EMOTE_GUARDIAN_PORTAL, pSummoned);
                 DoCastSpellIfCan(pSummoned, SPELL_PORTAL_CHANNEL);
                 break;
-            case NPC_PORTAL_KEEPER:
+            case NPC_PORTAL_KEEPER_1:
+            case NPC_PORTAL_KEEPER_2:
                 DoScriptText(EMOTE_KEEPER_PORTAL, pSummoned);
                 DoCastSpellIfCan(pSummoned, SPELL_PORTAL_CHANNEL);
-                break;
-            case NPC_AZURE_BINDER_INTRO:
-            case NPC_AZURE_INVADER_INTRO:
-            case NPC_AZURE_SPELLBREAKER_INTRO:
-            case NPC_AZURE_MAGE_SLAYER_INTRO:
-                // Move them to the entrance. They will attack the guards automatically
-                pSummoned->SetWalk(false);
-                pSummoned->GetMotionMaster()->MovePoint(1, fSealAttackLoc[0], fSealAttackLoc[1], fSealAttackLoc[2]);
                 break;
         }
     }
@@ -365,7 +358,8 @@ struct npc_teleportation_portalAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_PORTAL_GUARDIAN:
-            case NPC_PORTAL_KEEPER:
+            case NPC_PORTAL_KEEPER_1:
+            case NPC_PORTAL_KEEPER_2:
                 m_creature->ForcedDespawn(3000);
                 // no need if a new portal was made while this was in progress
                 if (m_pInstance && m_uiMyPortalNumber == m_pInstance->GetCurrentPortalNumber())
@@ -379,7 +373,8 @@ struct npc_teleportation_portalAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_PORTAL_GUARDIAN:
-            case NPC_PORTAL_KEEPER:
+            case NPC_PORTAL_KEEPER_1:
+            case NPC_PORTAL_KEEPER_2:
                 // Despawn in case of event reset
                 m_creature->ForcedDespawn();
                 break;
@@ -408,8 +403,7 @@ bool EffectDummyCreature_npc_teleportation_portal(Unit* /*pCaster*/, uint32 uiSp
     // always check spellid and effectindex
     if (uiSpellId == SPELL_PORTAL_PERIODIC && uiEffIndex == EFFECT_INDEX_0)
     {
-        if (npc_teleportation_portalAI* pPortalAI = dynamic_cast<npc_teleportation_portalAI*>(pCreatureTarget->AI()))
-            pPortalAI->DoSummon();
+        pCreatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pCreatureTarget, pCreatureTarget);
 
         // always return true when we are handling this spell and effect
         return true;

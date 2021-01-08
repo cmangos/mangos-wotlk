@@ -1894,10 +1894,6 @@ void Aura::TriggerSpell()
 //                    case 55861: break;
 //                    // Shadow Sickle
 //                    case 56702: break;
-//                    // Portal Periodic
-//                    case 58008: break;
-//                    // Destroy Door Seal
-//                    case 58040: break;
 //                    // Draw Magic
 //                    case 58185: break;
                     case 58886:                             // Food

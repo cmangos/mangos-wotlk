@@ -1758,7 +1758,7 @@ UPDATE instance_template SET ScriptName='instance_violet_hold' WHERE map=608;
 UPDATE creature_template SET ScriptName='npc_door_seal' WHERE entry=30896;
 UPDATE creature_template SET ScriptName='npc_sinclari' WHERE entry=30658;
 UPDATE creature_template SET ScriptName='npc_prison_event_controller' WHERE entry=30883;
-UPDATE creature_template SET ScriptName='npc_teleportation_portal' WHERE entry IN (31011,30679,32174);
+UPDATE creature_template SET ScriptName='npc_teleportation_portal' WHERE entry IN (30679,32174);
 UPDATE creature_template SET ScriptName='boss_ichoron' WHERE entry IN (29313,32234);
 
 /* WAILING CAVERNS */

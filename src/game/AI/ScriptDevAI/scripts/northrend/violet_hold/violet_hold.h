@@ -57,18 +57,19 @@ enum
     NPC_ZURAMAT                 = 29314,
     NPC_CYANIGOSA               = 31134,
 
-    NPC_PORTAL_GUARDIAN         = 30660,
-    NPC_PORTAL_KEEPER           = 30695,
+    NPC_PORTAL_GUARDIAN         = 30660,                    // summoned by serverside spell 58028
+    NPC_PORTAL_KEEPER_1         = 30695,
+    NPC_PORTAL_KEEPER_2         = 30893,
 
-    NPC_AZURE_INVADER           = 30661,
+    NPC_AZURE_INVADER           = 30661,                    // summoned by serverside spell 58087
     NPC_AZURE_SPELLBREAKER      = 30662,
     NPC_AZURE_BINDER            = 30663,
-    NPC_AZURE_MAGE_SLAYER       = 30664,
-    NPC_MAGE_HUNTER             = 30665,
-    NPC_AZURE_CAPTAIN           = 30666,
-    NPC_AZURE_SORCEROR          = 30667,
-    NPC_AZURE_RAIDER            = 30668,
-    NPC_AZURE_STALKER           = 32191,
+    NPC_AZURE_MAGE_SLAYER       = 30664,                    // summoned by serverside spell 58091
+    NPC_MAGE_HUNTER             = 30665,                    // summoned by serverside spell 58093
+    NPC_AZURE_CAPTAIN           = 30666,                    // summoned by serverside spell 60048
+    NPC_AZURE_SORCEROR          = 30667,                    // summoned by serverside spell 60050
+    NPC_AZURE_RAIDER            = 30668,                    // summoned by serverside spell 60049
+    NPC_AZURE_STALKER           = 32191,                    // summoned by serverside spell 60086
 
     NPC_VOID_SENTRY             = 29364,                    // Npc checked for Zuramat achiev
     NPC_ICHORON_SUMMON_TARGET   = 29326,                    // Npc which summons the Ichoron globules
@@ -104,15 +105,11 @@ enum
     SPELL_DESTROY_DOOR_SEAL     = 58040,                    // spell periodic cast by misc
     SPELL_TELEPORTATION_PORTAL  = 57687,                    // visual aura, but possibly not used? creature_template model for portals are same
 
-    SPELL_SHIELD_DISRUPTION     = 58291,                    // dummy when opening a cell
-    SPELL_SIMPLE_TELEPORT       = 51347,                    // used after a cell has been opened
+    // SPELL_SHIELD_DISRUPTION  = 58291,                    // dummy when opening a cell
+    // SPELL_SIMPLE_TELEPORT    = 51347,                    // used after a cell has been opened
 
     SPELL_PORTAL_PERIODIC       = 58008,                    // most likely the tick for each summon (tick each 15 seconds)
     SPELL_PORTAL_CHANNEL        = 58012,                    // the blue "stream" between portal and guardian/keeper
-    SPELL_PORTAL_BEAM           = 56046,                    // large beam, unsure if really used here (or possible for something different)
-
-    SPELL_PORTAL_VISUAL_1       = 57872,                    // no idea, but is possibly related based on it's visual appearence
-    SPELL_PORTAL_VISUAL_2       = 57630,
 
     // yells when the door is about to be breached
     SAY_SEAL_75                 = -1608002,
@@ -139,6 +136,7 @@ enum
 static const float fCyanigosaLoc[4] = { 1922.109f, 804.44934f, 52.492542f, 3.17649f };
 static const float fSealAttackLoc[3] = {1858.027f, 804.11f, 44.008f};
 
+static const uint32 aRandomPortalElite[3] = { NPC_PORTAL_GUARDIAN, NPC_PORTAL_KEEPER_1, NPC_PORTAL_KEEPER_2 };
 static const uint32 aRandomPortalNpcs[5] = {NPC_AZURE_INVADER, NPC_MAGE_HUNTER, NPC_AZURE_SPELLBREAKER, NPC_AZURE_BINDER, NPC_AZURE_MAGE_SLAYER};
 static const uint32 aRandomIntroNpcs[4] = {NPC_AZURE_BINDER_INTRO, NPC_AZURE_INVADER_INTRO, NPC_AZURE_SPELLBREAKER_INTRO, NPC_AZURE_MAGE_SLAYER_INTRO};
 
@@ -206,9 +204,8 @@ class instance_violet_hold : public ScriptedInstance
 
         void DoReleaseBoss(uint32 entry = 0);
 
-        uint32 GetRandomPortalEliteEntry() const { return (urand(0, 1) ? NPC_PORTAL_GUARDIAN : NPC_PORTAL_KEEPER); }
+        uint32 GetRandomPortalEliteEntry() const { return aRandomPortalElite[urand(0, 2)]; }
         uint32 GetRandomMobForNormalPortal() const { return aRandomPortalNpcs[urand(0, 4)]; }
-        uint32 GetRandomMobForIntroPortal() const { return aRandomIntroNpcs[urand(0, 3)]; }
 
         uint32 GetCurrentPortalNumber() const { return m_uiWorldStatePortalCount; }
 
@@ -255,6 +252,7 @@ class instance_violet_hold : public ScriptedInstance
         void UpdateWorldState(bool bEnable = true);
         void UpdateCellForBoss(uint32 uiBossEntry, bool bForceClosing = false);
 
+        void DoSpawnIntroMob();
         void SetRandomBosses();
 
         void SpawnPortal();
@@ -280,6 +278,7 @@ class instance_violet_hold : public ScriptedInstance
         uint32 m_uiMaxCountPortalLoc;
 
         uint32 m_uiSealYellCount;
+        uint32 m_uiIntroSummonTimer;
         uint32 m_uiEventResetTimer;
         uint32 m_uiEventStartTimer;
 
@@ -289,7 +288,7 @@ class instance_violet_hold : public ScriptedInstance
 
         BossToCellMap m_mBossToCellMap;
 
-        GuidList m_lIntroPortalList;
+        GuidVector m_lIntroPortalVector;
         GuidList m_lGuardsList;
         GuidList m_lErekemGuardList;
         GuidList m_lArakkoaGuardList;
