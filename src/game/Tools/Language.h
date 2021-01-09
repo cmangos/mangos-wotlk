@@ -767,7 +767,7 @@ enum MangosStrings
     LANG_YOUR_ARENA_LEVEL_REQ_ERROR     = 713,
 //                                      = 714, not used
     LANG_YOUR_BG_LEVEL_REQ_ERROR        = 715,
-//                                      = 716, not used
+    LANG_ARENA_STARTED_ANNOUNCE_WORLD   = 716,
     LANG_BG_STARTED_ANNOUNCE_WORLD      = 717,
     LANG_ARENA_QUEUE_ANNOUNCE_WORLD_JOIN = 718,
     LANG_ARENA_QUEUE_ANNOUNCE_WORLD_EXIT = 719,
