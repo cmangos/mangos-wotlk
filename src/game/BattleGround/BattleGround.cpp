@@ -1341,7 +1341,7 @@ void BattleGround::RemovePlayerAtLeave(ObjectGuid playerGuid, bool isOnTransport
                 player->RemovePet(PET_SAVE_NOT_IN_SLOT);
                 player->ResummonPetTemporaryUnSummonedIfAny();
 
-                if (IsRated() && GetStatus() == STATUS_IN_PROGRESS)
+                if (IsRated() && (GetStatus() == STATUS_WAIT_JOIN || GetStatus() == STATUS_IN_PROGRESS))
                 {
                     // left a rated match while the encounter was in progress, consider as loser
                     ArenaTeam* winner_arena_team = sObjectMgr.GetArenaTeamById(GetArenaTeamIdForTeam(GetOtherTeam(team)));
