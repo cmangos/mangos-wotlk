@@ -1486,7 +1486,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket& data, BattleGround* bg)
             Team team = bg->GetPlayerTeam(itr->first);
             if (team != ALLIANCE && team != HORDE)
                 if (Player* player = sObjectMgr.GetPlayer(itr->first))
-                    team = player->GetTeam();
+                    team = bg->IsArena() ? Team(itr->second->Team) : player->GetTeam();
 
             data << uint8(team == ALLIANCE ? 1 : 0); // green or yellow
         }

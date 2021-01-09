@@ -308,7 +308,7 @@ class BattleGroundScore
 {
     public:
         BattleGroundScore() : killingBlows(0), deaths(0), honorableKills(0),
-            bonusHonor(0), damageDone(0), healingDone(0)
+            bonusHonor(0), damageDone(0), healingDone(0), Team(ALLIANCE)
         {}
         virtual ~BattleGroundScore() {}                     // virtual destructor is used when deleting score from scores map
 
@@ -331,6 +331,8 @@ class BattleGroundScore
         uint32 bonusHonor;
         uint32 damageDone;
         uint32 healingDone;
+
+        uint32 Team;
 };
 
 /*
