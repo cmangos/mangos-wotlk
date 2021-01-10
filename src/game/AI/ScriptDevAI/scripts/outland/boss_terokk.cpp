@@ -24,6 +24,7 @@ EndScriptData */
 #include <utility>
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/CombatAI.h"
+#include "AI/ScriptDevAI/scripts/outland/world_outland.h"
 
 enum
 {
@@ -40,7 +41,6 @@ enum
     NPC_TEROKK              = 21838,
     NPC_ACE                 = 23377,
     NPC_INVISIBLE_STALKER   = 15214,
-    NPC_SKYGUARD_TARGET     = 23277,
 
     // Intro
     SPELL_RED_BEAM      = 24240,
@@ -152,10 +152,16 @@ struct boss_terokkAI : public CombatAI
         m_phase = false;
 
         DespawnGuids(m_aces);
+
+        if (InstanceData* instance = m_creature->GetInstanceData())
+            instance->SetData(TYPE_TEROKK, 0);
     }
 
     void JustDied(Unit* killer) override
     {
+        if (InstanceData* instance = m_creature->GetInstanceData())
+            instance->SetData(TYPE_TEROKK, 0);
+
         if (m_aces.empty())
             return;
 

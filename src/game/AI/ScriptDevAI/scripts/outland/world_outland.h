@@ -4,6 +4,14 @@
 
 enum
 {
+    TYPE_DEATHS_DOOR_NORTH  = 0,
+    TYPE_DEATHS_DOOR_SOUTH  = 1,
+    TYPE_SHARTUUL           = 2,
+    TYPE_BASHIR             = 3,
+    TYPE_MOGOR              = 4,
+    TYPE_TEROKK             = 5,
+    // TYPE_SHADE_OF_HEADLESS_HORSEMAN = 1000, // High number against collisions
+
         // Quest 11538
     NPC_EMISSARY_OF_HATE        = 25003,
     NPC_IRESPEAKER              = 24999,
@@ -30,12 +38,6 @@ enum
     NPC_DEATHS_DOOR_NORTH_WARP_GATE = 22471,
     NPC_DEATHS_DOOR_SOUTH_WARP_GATE = 22472,
 
-    TYPE_DEATHS_DOOR_NORTH  = 0,
-    TYPE_DEATHS_DOOR_SOUTH  = 1,
-    TYPE_SHARTUUL           = 2,
-    TYPE_BASHIR             = 3,
-    TYPE_MOGOR              = 4,
-
     // Bashir
     SPELL_SPIRIT_SPAWN_IN       = 17321,
     SPELL_ETHEREAL_TELEPORT     = 34427,
@@ -59,6 +61,9 @@ enum
 
     NPC_ETHEREUM_PRISONER   = 20520,
     GO_SALVAGED_ETHEREUM_PRISON = 184488,
+
+    // Terokk
+    NPC_SKYGUARD_TARGET     = 23277,
 };
 
 enum Shartuul
