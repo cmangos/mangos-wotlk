@@ -193,11 +193,6 @@ struct boss_vexallusAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_vexallus(Creature* creature)
-{
-    return new boss_vexallusAI(creature);
-};
-
 struct mob_pure_energyAI : public ScriptedAI
 {
     mob_pure_energyAI(Creature* creature) : ScriptedAI(creature)
@@ -223,20 +218,15 @@ struct mob_pure_energyAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_mob_pure_energy(Creature* creature)
-{
-    return new mob_pure_energyAI(creature);
-};
-
 void AddSC_boss_vexallus()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_vexallus";
-    pNewScript->GetAI = &GetAI_boss_vexallus;
+    pNewScript->GetAI = &GetNewAIInstance<boss_vexallusAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_pure_energy";
-    pNewScript->GetAI = &GetAI_mob_pure_energy;
+    pNewScript->GetAI = &GetNewAIInstance<mob_pure_energyAI>;
     pNewScript->RegisterSelf();
 }
