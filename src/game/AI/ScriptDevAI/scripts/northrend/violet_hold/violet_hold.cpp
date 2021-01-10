@@ -650,11 +650,10 @@ bool instance_violet_hold::CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Pla
 {
     switch (uiCriteriaId)
     {
-        // ToDo: uncomment these when they are implemented
         case ACHIEV_CRIT_DEFENSELES:
             return m_bIsDefenseless;
-        // case ACHIEV_CRIT_DEHYDRATATION:
-        //    return m_bIsDehydratation;
+        case ACHIEV_CRIT_DEHYDRATATION:
+            return m_bIsDehydratation;
         case ACHIEV_CRIT_VOID_DANCE:
             return m_bIsVoidDance;
 
@@ -882,7 +881,7 @@ BossInformation const* instance_violet_hold::GetBossInformation(uint32 uiEntry/*
 
 void instance_violet_hold::ShowChatCommands(ChatHandler* handler)
 {
-    handler->SendSysMessage("This instance supports the following commands:\n erekem, moragg, ichoron, xevozz, lavanthor, zuramat");
+    handler->SendSysMessage("This instance supports the following commands:\n stopintro, erekem, moragg, ichoron, xevozz, lavanthor, zuramat");
 }
 
 // Debug commands for Violet Hold bosses
@@ -893,7 +892,9 @@ void instance_violet_hold::ExecuteChatCommand(ChatHandler* handler, char* args)
         return;
     std::string val = result;
 
-    if (val == "erekem")
+    if (val == "stopintro")
+        m_uiIntroSummonTimer = 0;
+    else if (val == "erekem")
         DoReleaseBoss(NPC_EREKEM);
     else if (val == "moragg")
         DoReleaseBoss(NPC_MORAGG);
