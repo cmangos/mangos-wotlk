@@ -437,10 +437,12 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 }
                 break;
             case TYPE_TEROKK:
+            {
                 GuidVector targets;
                 GetCreatureGuidVectorFromStorage(NPC_SKYGUARD_TARGET, targets);
                 DespawnGuids(targets);
                 break;
+            }
             default:
                 if (type >= TYPE_SHADE_OF_THE_HORSEMAN_ATTACK_PHASE && type <= TYPE_SHADE_OF_THE_HORSEMAN_MAX)
                     return m_shadeData.HandleSetData(type, data);

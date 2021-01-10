@@ -44,7 +44,7 @@ enum
 
     // Intro
     SPELL_RED_BEAM      = 24240,
-    SPELL_SHADOWFORM    = 41408,
+    SPELL_SHADOWFORM_TEROKK = 41408,
 
     // Combat
     SPELL_SHADOW_BOLT_VOLLEY        = 40721,
@@ -94,7 +94,7 @@ struct boss_terokkAI : public CombatAI
         AddCustomAction(TEROKK_ACTION_SPAWN, 0u, [&] { m_creature->CastSpell(nullptr, SPELL_RED_BEAM, TRIGGERED_OLD_TRIGGERED); });
         AddCustomAction(TEROKK_ACTION_SAY, 2000u, [&]
         {
-            m_creature->CastSpell(nullptr, SPELL_SHADOWFORM, TRIGGERED_OLD_TRIGGERED);
+            m_creature->CastSpell(nullptr, SPELL_SHADOWFORM_TEROKK, TRIGGERED_OLD_TRIGGERED);
             DoScriptText(SAY_SPAWN, m_creature);
         });
         AddCustomAction(TEROKK_ACTION_ATTACK, 9000u, [&]
