@@ -33,6 +33,17 @@ struct EarthShield : public AuraScript
     }
 };
 
+// used for Water and Lightning Shield
+struct DamageTriggerShield : public AuraScript
+{
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
+    {
+        if (data.spell && data.spell->m_spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_INITIAL_AGGRO)) // exclude Sap
+            return false;
+        return true;
+    }
+};
+
 enum
 {
     SPELL_SHAMAN_ELEMENTAL_MASTERY = 16166,
@@ -52,5 +63,6 @@ struct ItemShamanT10Elemental2PBonus : public AuraScript
 void LoadShamanScripts()
 {
     RegisterAuraScript<EarthShield>("spell_earth_shield");
+    RegisterAuraScript<DamageTriggerShield>("spell_damage_trigger_shield");
     RegisterAuraScript<ItemShamanT10Elemental2PBonus>("spell_item_shaman_t10_elemental_2p_bonus");
 }
