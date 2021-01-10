@@ -71,8 +71,9 @@ enum
     NPC_AZURE_RAIDER            = 30668,                    // summoned by serverside spell 60049
     NPC_AZURE_STALKER           = 32191,                    // summoned by serverside spell 60086
 
-    NPC_VOID_SENTRY             = 29364,                    // Npc checked for Zuramat achiev
-    NPC_ICHORON_SUMMON_TARGET   = 29326,                    // Npc which summons the Ichoron globules
+    NPC_VOID_SENTRY             = 29364,                    // Npc checked for Zuramat achiev; has phasing aura
+    NPC_VOID_SENTRY_BALL        = 29365,                    // void sentry which deals damage during the encounter
+    // NPC_ICHORON_SUMMON_TARGET= 29326,                    // Npc which summons the Ichoron globules
 
     // used for intro
     NPC_AZURE_BINDER_INTRO      = 31007,
@@ -216,13 +217,12 @@ class instance_violet_hold : public ScriptedInstance
             return (m_uiWorldStatePortalCount % MAX_MINIBOSSES) != 0;
         }
 
-        void GetIchoronTriggerList(GuidList& lList) const { lList = m_lIchoronTargetsList; }
-
         void OnPlayerEnter(Player* pPlayer) override;
 
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureEvade(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureRespawn(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
@@ -259,6 +259,8 @@ class instance_violet_hold : public ScriptedInstance
         void SetPortalId();
         void UpdateCrystals(bool reset);
 
+        void DoClearBossMobs(GuidList& list);
+
         bool IsNextPortalForTrash() const
         {
             return ((m_uiWorldStatePortalCount + 1) % MAX_MINIBOSSES) != 0;
@@ -292,7 +294,7 @@ class instance_violet_hold : public ScriptedInstance
         GuidList m_lGuardsList;
         GuidList m_lErekemGuardList;
         GuidList m_lArakkoaGuardList;
-        GuidList m_lIchoronTargetsList;
+        GuidList m_lVoidSentriesList;
         GuidList m_lActivationCrystalList;
         std::vector<uint32> m_vRandomBossList;
 

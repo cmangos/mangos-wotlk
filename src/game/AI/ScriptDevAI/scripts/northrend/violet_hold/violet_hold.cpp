@@ -209,8 +209,8 @@ void instance_violet_hold::OnCreatureCreate(Creature* pCreature)
         case NPC_ARAKKOA_GUARD:
             m_lArakkoaGuardList.push_back(pCreature->GetObjectGuid());
             return;
-        case NPC_ICHORON_SUMMON_TARGET:
-            m_lIchoronTargetsList.push_back(pCreature->GetObjectGuid());
+        case NPC_VOID_SENTRY:
+            m_lVoidSentriesList.push_back(pCreature->GetObjectGuid());
             return;
 
         case NPC_ARAKKOA:
@@ -230,6 +230,18 @@ void instance_violet_hold::OnCreatureCreate(Creature* pCreature)
             return;
     }
     m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+}
+
+void instance_violet_hold::OnCreatureRespawn(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        // passive behavior
+        case NPC_VOID_SENTRY_BALL:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
+            break;
+    }
 }
 
 void instance_violet_hold::OnObjectCreate(GameObject* pGo)
@@ -626,6 +638,14 @@ void instance_violet_hold::UpdateCrystals(bool reset)
         DoToggleGameObjectFlags(guid, GO_FLAG_NO_INTERACT, reset);
 }
 
+// Method to clear the adds from an encounter
+void instance_violet_hold::DoClearBossMobs(GuidList& list)
+{
+    for (const auto& guid : list)
+        if (Creature* pMob = instance->GetCreature(guid))
+            pMob->ForcedDespawn();
+}
+
 // Method to spawn an intro mob
 void instance_violet_hold::DoSpawnIntroMob()
 {
@@ -715,6 +735,7 @@ void instance_violet_hold::OnCreatureEvade(Creature* pCreature)
         case NPC_ZURAMAT:
         case NPC_VOID_LORD:
             SetData(TYPE_ZURAMAT, FAIL);
+            DoClearBossMobs(m_lVoidSentriesList);
             break;
         case NPC_XEVOZZ:
         case NPC_ETHERAL:
@@ -764,6 +785,7 @@ void instance_violet_hold::OnCreatureDeath(Creature* pCreature)
         case NPC_ZURAMAT:
         case NPC_VOID_LORD:
             SetData(TYPE_ZURAMAT, DONE);
+            DoClearBossMobs(m_lVoidSentriesList);
             break;
         case NPC_XEVOZZ:
         case NPC_ETHERAL:

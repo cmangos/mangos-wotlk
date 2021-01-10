@@ -165,6 +165,8 @@ struct boss_ichoronAI : public CombatAI
             m_creature->SetHealthPercent(m_creature->GetHealthPercent() - 30.0f);
             m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
+            m_creature->SetFeignDeath(true);
+
             DisableCombatAction(ICHORON_WATER_BLAST);
             DisableCombatAction(ICHORON_WATER_BOLT_VOLLEY);
         }
@@ -217,6 +219,8 @@ struct boss_ichoronAI : public CombatAI
             m_creature->RemoveAurasDueToSpell(SPELL_DRAINED);
             DoScriptText(SAY_SHIELD, m_creature);
         }
+
+        m_creature->SetFeignDeath(false);
 
         // apply shield if HP is high enough
         if (m_creature->GetHealthPercent() > 35.0f)
