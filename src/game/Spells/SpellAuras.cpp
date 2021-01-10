@@ -5315,13 +5315,6 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                     if (UnitAI * ai = caster->AI())
                         ai->SendAIEvent(AI_EVENT_CUSTOM_A, caster, caster);
                 break;
-            case 44320: // Mana Rage - Selin Fireheart
-            {
-                Unit* caster = GetCaster();
-                if (UnitAI * ai = target->AI())
-                    ai->SendAIEvent(AI_EVENT_CUSTOM_A, caster, target, m_removeMode == AURA_REMOVE_BY_EXPIRE);
-                break;
-            }
         }
     }
 }

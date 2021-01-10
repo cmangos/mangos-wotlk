@@ -246,11 +246,6 @@ struct boss_selin_fireheartAI : public CombatAI
     }
 };
 
-UnitAI* GetAI_boss_selin_fireheart(Creature* creature)
-{
-    return new boss_selin_fireheartAI(creature);
-};
-
 struct mob_fel_crystalAI : public ScriptedAI
 {
     mob_fel_crystalAI(Creature* creature) : ScriptedAI(creature) { Reset(); }
@@ -274,20 +269,40 @@ struct mob_fel_crystalAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_mob_fel_crystal(Creature* creature)
+struct spell_fel_crystal_dummy : public SpellScript
 {
-    return new mob_fel_crystalAI(creature);
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (Unit* target = spell->GetUnitTarget())
+            target->CastSpell(nullptr, SPELL_MANA_RAGE_CHANNEL, TRIGGERED_NONE);
+    }
+};
+
+struct spell_mana_rage_selin : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetEffIndex() == EFFECT_INDEX_0)
+        {
+            Unit* caster = aura->GetCaster();
+            if (UnitAI* ai = aura->GetTarget()->AI())
+                ai->SendAIEvent(AI_EVENT_CUSTOM_A, caster, aura->GetTarget(), aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE);
+        }
+    }
 };
 
 void AddSC_boss_selin_fireheart()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_selin_fireheart";
-    pNewScript->GetAI = &GetAI_boss_selin_fireheart;
+    pNewScript->GetAI = &GetNewAIInstance<boss_selin_fireheartAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "mob_fel_crystal";
-    pNewScript->GetAI = &GetAI_mob_fel_crystal;
+    pNewScript->GetAI = &GetNewAIInstance<mob_fel_crystalAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_fel_crystal_dummy>("spell_fel_crystal_dummy");
+    RegisterAuraScript<spell_mana_rage_selin>("spell_mana_rage_selin");
 }
