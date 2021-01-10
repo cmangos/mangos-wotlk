@@ -925,8 +925,12 @@ void Aura::ApplyModifier(bool apply, bool Real)
 
     if (apply)
         OnApply(apply);
+    if (!apply)
+        OnAfterApply(apply);
     if (aura < TOTAL_AURAS)
         (*this.*AuraHandler [aura])(apply, Real);
+    if (apply)
+        OnAfterApply(apply);
     if (!apply)
         OnApply(apply);
 
@@ -11773,6 +11777,12 @@ void Aura::OnApply(bool apply)
 {
     if (AuraScript* script = GetAuraScript())
         script->OnApply(this, apply);
+}
+
+void Aura::OnAfterApply(bool apply)
+{
+    if (AuraScript* script = GetAuraScript())
+        script->OnAfterApply(this, apply);
 }
 
 bool Aura::OnCheckProc(ProcExecutionData& data)
