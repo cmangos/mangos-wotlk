@@ -11557,6 +11557,8 @@ bool SpellAuraHolder::DropAuraCharge()
 
     --m_procCharges;
 
+    SendAuraUpdate(false);
+
     if (GetCasterGuid() != m_target->GetObjectGuid() && IsAreaAura())
         if (Unit* caster = GetCaster())
             caster->RemoveAuraCharge(m_spellProto->Id);
