@@ -199,6 +199,7 @@ struct boss_selin_fireheartAI : public CombatAI
                     if (invoker->IsAlive()) // Kill crystal
                         invoker->CastSpell(nullptr, SPELL_INSTAKILL_SELF, TRIGGERED_OLD_TRIGGERED);
                 }
+                ResetCombatAction(SELIN_ACTION_DRAIN_CRYSTAL, GetSubsequentActionTimer(SELIN_ACTION_DRAIN_CRYSTAL));
             break;
             default: break;
         }
@@ -232,8 +233,7 @@ struct boss_selin_fireheartAI : public CombatAI
             }
             case SELIN_ACTION_DRAIN_CRYSTAL:
             {
-                if (DoSelectNearestCrystal())
-                    ResetCombatAction(action, GetSubsequentActionTimer(action));
+                DoSelectNearestCrystal();
                 return;
             }
         }
