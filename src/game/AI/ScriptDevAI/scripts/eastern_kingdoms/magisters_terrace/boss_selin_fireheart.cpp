@@ -88,6 +88,8 @@ struct boss_selin_fireheartAI : public CombatAI
         CombatAI::Reset();
 
         SetCombatScriptStatus(false);
+        SetMeleeEnabled(true);
+        SetCombatMovement(true, true);
         m_empowered = false;
 
         DoCastSpellIfCan(nullptr, SPELL_DUAL_WEILD, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
@@ -120,24 +122,16 @@ struct boss_selin_fireheartAI : public CombatAI
             DoScriptText(urand(0, 1) ? SAY_DRAIN_1 : SAY_DRAIN_2, m_creature);
 
             float x, y, z;
-            m_creature->GetContactPoint(crystal, x, y, z, INTERACTION_DISTANCE);
+            crystal->GetClosePoint(x, y, z, 0.f, 3.f, m_creature->GetAngle(crystal), m_creature);
             m_creature->GetMotionMaster()->MovePoint(POINT_CRYSTAL, x, y, z);
             SetCombatScriptStatus(true);
             SetMeleeEnabled(false);
             m_creature->SetTarget(nullptr);
-            SetCombatMovement(false, true);
 
             return true;
         }
 
         return false;
-    }
-
-    void DoEndCrystalDraining()
-    {
-        SetCombatScriptStatus(false);
-        SetMeleeEnabled(true);
-        SetCombatMovement(true, true);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -173,6 +167,9 @@ struct boss_selin_fireheartAI : public CombatAI
         if (moveType != POINT_MOTION_TYPE || pointId != POINT_CRYSTAL)
             return;
 
+        SetCombatScriptStatus(false);
+        SetMeleeEnabled(true);
+
         bool castSuccessful = false;
         if (DoCastSpellIfCan(nullptr, SPELL_FEL_CRYSTAL_DUMMY) == CAST_OK)
         {
@@ -182,7 +179,6 @@ struct boss_selin_fireheartAI : public CombatAI
 
         // Make an error message in case something weird happened here
         script_error_log("Selin Fireheart unable to drain crystal as the crystal is either dead or deleted..");
-        DoEndCrystalDraining(); // Just in case
     }
 
     void JustDied(Unit* /*killer*/) override
@@ -203,8 +199,6 @@ struct boss_selin_fireheartAI : public CombatAI
                     if (invoker->IsAlive()) // Kill crystal
                         invoker->CastSpell(nullptr, SPELL_INSTAKILL_SELF, TRIGGERED_OLD_TRIGGERED);
                 }
-
-                DoEndCrystalDraining();
             break;
             default: break;
         }
