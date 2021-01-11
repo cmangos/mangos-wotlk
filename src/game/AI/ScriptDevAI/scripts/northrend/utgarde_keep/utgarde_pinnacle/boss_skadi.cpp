@@ -499,7 +499,7 @@ bool EffectAuraDummy_npc_flame_breath_trigger(const Aura* pAura, bool bApply)
 
 bool AreaTrigger_at_skadi(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
-    if (pPlayer->isGameMaster())
+    if (pPlayer->IsGameMaster())
         return false;
 
     if (ScriptedInstance* pInstance = (ScriptedInstance*)pPlayer->GetInstanceData())

@@ -1019,7 +1019,7 @@ Item* Player::StoreNewItemInInventorySlot(uint32 itemEntry, uint32 amount)
 
 uint32 Player::EnvironmentalDamage(EnviromentalDamage type, uint32 damage)
 {
-    if (!IsAlive() || isGameMaster())
+    if (!IsAlive() || IsGameMaster())
         return 0;
 
     // Absorb, resist some environmental damage type
@@ -6817,7 +6817,7 @@ void Player::CheckAreaExploreAndOutdoor()
             CastSpell(this, spellInfo, TRIGGERED_OLD_TRIGGERED, nullptr);
         }
     }
-    else if (sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) && !isGameMaster())
+    else if (sWorld.getConfig(CONFIG_BOOL_VMAP_INDOOR_CHECK) && !IsGameMaster())
         RemoveAurasWithAttribute(SPELL_ATTR_OUTDOORS_ONLY);
 
     if (areaFlag == 0xffff)
@@ -7424,7 +7424,7 @@ void Player::UpdateArea(uint32 newArea)
     // so apply them accordingly
     if (area && (area->flags & AREA_FLAG_ARENA))
     {
-        if (!isGameMaster())
+        if (!IsGameMaster())
             SetPvPFreeForAll(true);
     }
     else
@@ -7438,11 +7438,11 @@ void Player::UpdateArea(uint32 newArea)
     if (area)
     {
         // Dalaran restricted flight zone
-        if ((area->flags & AREA_FLAG_CANNOT_FLY) && IsFreeFlying() && !isGameMaster() && !HasAura(58600))
+        if ((area->flags & AREA_FLAG_CANNOT_FLY) && IsFreeFlying() && !IsGameMaster() && !HasAura(58600))
             CastSpell(this, 58600, TRIGGERED_OLD_TRIGGERED);                   // Restricted Flight Area
 
         // Wintergrasp parachute when battle in progress
-        if ((area->flags & AREA_FLAG_OUTDOOR_PVP) && IsFreeFlying() && !isGameMaster() && !HasAura(58730))
+        if ((area->flags & AREA_FLAG_OUTDOOR_PVP) && IsFreeFlying() && !IsGameMaster() && !HasAura(58730))
         {
             OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript(GetCachedZoneId());
             if (outdoorPvP && outdoorPvP->IsBattlefield() && ((Battlefield*)outdoorPvP)->GetBattlefieldStatus() == BF_STATUS_IN_PROGRESS)
@@ -7467,7 +7467,7 @@ bool Player::CanUseCapturePoint() const
            (IsPvP() || sWorld.IsPvPRealm()) &&
            !HasMovementFlag(MOVEFLAG_FLYING) &&
            !IsTaxiFlying() &&
-           !isGameMaster();
+           !IsGameMaster();
 }
 
 void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
@@ -13300,7 +13300,7 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
 
         if (gossipMenu.conditionId && !sObjectMgr.IsConditionSatisfied(gossipMenu.conditionId, this, GetMap(), pSource, CONDITION_FROM_GOSSIP_OPTION))
         {
-            if (isGameMaster())                             // Let GM always see menu items regardless of conditions
+            if (IsGameMaster())                             // Let GM always see menu items regardless of conditions
                 isGMSkipConditionCheck = true;
             else
             {
@@ -20204,7 +20204,7 @@ bool Player::BuyItemFromVendorSlot(ObjectGuid vendorGuid, uint32 vendorslot, uin
         }
     }
 
-    if (crItem->conditionId && !isGameMaster() && !sObjectMgr.IsConditionSatisfied(crItem->conditionId, this, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
+    if (crItem->conditionId && !IsGameMaster() && !sObjectMgr.IsConditionSatisfied(crItem->conditionId, this, pCreature->GetMap(), pCreature, CONDITION_FROM_VENDOR))
     {
         SendBuyError(BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
         return false;
@@ -20326,7 +20326,7 @@ uint8 Player::GetHighestPvPRankIndex() const
 void Player::UpdateHomebindTime(uint32 time)
 {
     // GMs never get homebind timer online
-    if (m_InstanceValid || isGameMaster())
+    if (m_InstanceValid || IsGameMaster())
     {
         if (m_HomebindTimer)                                // instance valid, but timer not reset
         {
@@ -20666,7 +20666,7 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
         bg->RemovePlayerAtLeave(GetObjectGuid(), teleportToEntryPoint, true);
 
         // call after remove to be sure that player resurrected for correct cast
-        if (bg->IsBattleGround() && !isGameMaster() && sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CAST_DESERTER))
+        if (bg->IsBattleGround() && !IsGameMaster() && sWorld.getConfig(CONFIG_BOOL_BATTLEGROUND_CAST_DESERTER))
         {
             if (bg->GetStatus() == STATUS_IN_PROGRESS || bg->GetStatus() == STATUS_WAIT_JOIN)
             {
@@ -20719,7 +20719,7 @@ void Player::ReportedAfkBy(Player* reporter)
 bool Player::IsVisibleInGridForPlayer(Player* pl) const
 {
     // gamemaster in GM mode see all, including ghosts
-    if (pl->isGameMaster() && GetSession()->GetSecurity() <= pl->GetSession()->GetSecurity())
+    if (pl->IsGameMaster() && GetSession()->GetSecurity() <= pl->GetSession()->GetSecurity())
         return true;
 
     // player see dead player/ghost from own group/raid
@@ -20883,7 +20883,7 @@ template void Player::UpdateVisibilityOf(WorldObject const* viewPoint, DynamicOb
 void Player::SetPhaseMask(uint32 newPhaseMask, bool update)
 {
     // GM-mode have mask PHASEMASK_ANYWHERE always
-    if (isGameMaster())
+    if (IsGameMaster())
         newPhaseMask = static_cast<uint32>(PHASEMASK_ANYWHERE);
 
     // phase auras normally not expected at BG but anyway better check
@@ -22705,7 +22705,7 @@ uint32 Player::CalculateTalentsPoints() const
 
 bool Player::CanStartFlyInArea(uint32 mapid, uint32 zone, uint32 area) const
 {
-    if (isGameMaster())
+    if (IsGameMaster())
         return true;
     // continent checked in SpellMgr::GetSpellAllowedInLocationError at cast and area update
     uint32 v_map = GetVirtualMapForMapAndZone(mapid, zone);
@@ -22879,7 +22879,7 @@ void Player::_LoadSkills(QueryResult* result)
 uint32 Player::GetPhaseMaskForSpawn() const
 {
     uint32 phase = PHASEMASK_NORMAL;
-    if (!isGameMaster())
+    if (!IsGameMaster())
         phase = GetPhaseMask();
     else
     {
@@ -22967,7 +22967,7 @@ void Player::HandleFall(MovementInfo const& movementInfo)
 
     // Players with low fall distance, Feather Fall or physical immunity (charges used) are ignored
     // 14.57 can be calculated by resolving damageperc formula below to 0
-    if (z_diff >= 14.57f && !IsDead() && !isGameMaster() && !HasMovementFlag(MOVEFLAG_ONTRANSPORT) &&
+    if (z_diff >= 14.57f && !IsDead() && !IsGameMaster() && !HasMovementFlag(MOVEFLAG_ONTRANSPORT) &&
             !HasAuraType(SPELL_AURA_HOVER) && !HasAuraType(SPELL_AURA_FEATHER_FALL) &&
             !IsFreeFlying() && !IsImmuneToDamage(SPELL_SCHOOL_MASK_NORMAL))
     {
@@ -24233,7 +24233,7 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
     }
 
     // Gamemaster can always enter
-    if (isGameMaster())
+    if (IsGameMaster())
         return AREA_LOCKSTATUS_OK;
 
     // Level Requirements
@@ -24657,7 +24657,7 @@ void Player::RemoveSpellLockout(SpellSchoolMask spellSchoolMask, std::set<uint32
 // check if player can enter new instance
 bool Player::CanEnterNewInstance(uint32 instanceId)
 {
-    if (isGameMaster())
+    if (IsGameMaster())
         return true;
 
     if (m_enteredInstances.find(instanceId) != m_enteredInstances.end())

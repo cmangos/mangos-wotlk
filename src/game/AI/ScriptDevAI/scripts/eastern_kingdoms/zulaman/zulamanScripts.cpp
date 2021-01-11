@@ -609,7 +609,7 @@ struct npc_amanishi_lookoutAI : public ScriptedAI
         if (m_instance && m_instance->IsAkilzonGauntletInProgress())
             return;
 
-        if (who->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(who)->isGameMaster() && m_creature->IsWithinDistInMap(who, 25.0f))
+        if (who->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(who)->IsGameMaster() && m_creature->IsWithinDistInMap(who, 25.0f))
         {
             m_instance->SetAkilzonGauntletProgress(true);
             DoScriptText(SAY_GAUNTLET_START, m_creature);
@@ -791,7 +791,7 @@ struct npc_harkorAI : public ScriptedAI
     {
         ScriptedAI::MoveInLineOfSight(who);
 
-        if (m_bCanCelebrate && who->GetTypeId() == TYPEID_PLAYER && !((Player*)who)->isGameMaster() && m_creature->IsWithinDistInMap(who, 30.0f))
+        if (m_bCanCelebrate && who->GetTypeId() == TYPEID_PLAYER && !((Player*) who)->IsGameMaster() && m_creature->IsWithinDistInMap(who, 30.0f))
         {
             m_creature->SetFacingToObject(who);
 
@@ -1770,7 +1770,7 @@ struct npc_ashliAI : public ScriptedAI
     {
         ScriptedAI::MoveInLineOfSight(who);
 
-        if (m_bCanCelebrate && who->GetTypeId() == TYPEID_PLAYER && !((Player*)who)->isGameMaster() && m_creature->IsWithinDistInMap(who, 30.0f))
+        if (m_bCanCelebrate && who->GetTypeId() == TYPEID_PLAYER && !((Player*) who)->IsGameMaster() && m_creature->IsWithinDistInMap(who, 30.0f))
         {
             m_creature->SetFacingToObject(who);
 

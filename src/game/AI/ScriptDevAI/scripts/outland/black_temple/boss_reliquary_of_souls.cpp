@@ -190,8 +190,8 @@ struct boss_reliquary_of_soulsAI : public Scripted_NoMovementAI, public TimerMan
     // TODO: use LOS triggers
     void MoveInLineOfSight(Unit* who) override
     {
-        if (m_phase == PHASE_0_NOT_BEGUN && who->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(who)->isGameMaster() &&
-                m_creature->IsWithinDistInMap(who, m_creature->GetAttackDistance(who)) && m_creature->IsWithinLOSInMap(who))
+        if (m_phase == PHASE_0_NOT_BEGUN && who->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(who)->IsGameMaster() &&
+            m_creature->IsWithinDistInMap(who, m_creature->GetAttackDistance(who)) && m_creature->IsWithinLOSInMap(who))
             StartEvent();
     }
 
@@ -809,7 +809,7 @@ struct npc_reliquary_LOS_aggro_triggerAI : ScriptedAI
             return;
 
         Player* player = static_cast<Player*>(who);
-        if (player->isGameMaster())
+        if (player->IsGameMaster())
             return;
 
         if (m_instance->GetData(TYPE_RELIQUIARY) == IN_PROGRESS || m_instance->GetData(TYPE_RELIQUIARY) == DONE)

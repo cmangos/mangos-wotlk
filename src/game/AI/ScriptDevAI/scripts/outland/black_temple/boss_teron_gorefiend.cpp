@@ -410,7 +410,7 @@ struct npc_shadow_constructAI : public ScriptedAI, public TimerManager
 
 bool AreaTrigger_at_teron_gorefiend(Player* player, AreaTriggerEntry const* /*at*/)
 {
-    if (player->isGameMaster())
+    if (player->IsGameMaster())
         return false;
 
     instance_black_temple* temple = static_cast<instance_black_temple*>(player->GetMap()->GetInstanceData());

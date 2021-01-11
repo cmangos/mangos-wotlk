@@ -190,7 +190,7 @@ void world_map_ebon_hold::DoUpdateBattleWorldState(uint32 uiStateId, uint32 uiSt
         if (Player* pPlayer = lPlayer.getSource())
         {
             // we need to manually check the phase mask because the value from DBC is not used yet
-            if (pPlayer->HasAura(SPELL_CHAPTER_IV) || pPlayer->isGameMaster())
+            if (pPlayer->HasAura(SPELL_CHAPTER_IV) || pPlayer->IsGameMaster())
                 pPlayer->SendUpdateWorldState(uiStateId, uiStateData);
         }
     }

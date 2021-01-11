@@ -460,7 +460,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
     {
         if (isType(TYPEMASK_GAMEOBJECT) && !((GameObject*)this)->IsDynTransport())
         {
-            if (((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster())
+            if (((GameObject*)this)->ActivateToQuest(target) || target->IsGameMaster())
                 IsActivateToQuest = true;
 
             updateMask->SetBit(GAMEOBJECT_DYNAMIC);
@@ -478,7 +478,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
     {
         if (isType(TYPEMASK_GAMEOBJECT) && !((GameObject*)this)->IsDynTransport())
         {
-            if (((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster())
+            if (((GameObject*)this)->ActivateToQuest(target) || target->IsGameMaster())
                 IsActivateToQuest = true;
 
             updateMask->SetBit(GAMEOBJECT_DYNAMIC);
@@ -618,7 +618,7 @@ void Object::BuildValuesUpdate(uint8 updatetype, ByteBuffer* data, UpdateMask* u
                     uint32 value = m_uint32Values[index];
 
                     // For gamemasters in GM mode:
-                    if (target->isGameMaster())
+                    if (target->IsGameMaster())
                     {
                         // Gamemasters should be always able to select units - remove not selectable flag:
                         value &= ~UNIT_FLAG_NOT_SELECTABLE;

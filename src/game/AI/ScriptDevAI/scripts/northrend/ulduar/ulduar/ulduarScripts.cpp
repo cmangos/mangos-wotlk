@@ -83,35 +83,35 @@ bool GossipHello_go_ulduar_teleporter(Player* pPlayer, GameObject* pGo)
     pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_BASE_CAMP, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF);
 
     // Formation grounds
-    if (pInstance->GetData(TYPE_LEVIATHAN) != NOT_STARTED || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_LEVIATHAN) != NOT_STARTED || pPlayer->IsGameMaster())
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_FORMATION_GROUNDS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
 
     // Colossal Forge
-    if (pInstance->GetData(TYPE_LEVIATHAN) == DONE || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_LEVIATHAN) == DONE || pPlayer->IsGameMaster())
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_COLOSSAL_FORGE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
 
     // Scrapyard
-    if (pInstance->GetData(TYPE_XT002) != NOT_STARTED || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_XT002) != NOT_STARTED || pPlayer->IsGameMaster())
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_SCRAPYARD, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
 
     // Antechamber
-    if (pInstance->GetData(TYPE_XT002) == DONE || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_XT002) == DONE || pPlayer->IsGameMaster())
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_ANTECHAMBER, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
 
     // Shattered walkway
-    if (pInstance->GetData(TYPE_KOLOGARN) == DONE || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_KOLOGARN) == DONE || pPlayer->IsGameMaster())
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_WALKWAY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
 
     // Conservatory of life
-    if (pInstance->GetData(TYPE_AURIAYA) == DONE || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_AURIAYA) == DONE || pPlayer->IsGameMaster())
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_CONSERVATORY, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 6);
 
     // Spark of imagination
-    if (pInstance->GetData(TYPE_MIMIRON) != NOT_STARTED || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_MIMIRON) != NOT_STARTED || pPlayer->IsGameMaster())
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_SPARK_IMAGINATION, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 7);
 
     // Prison of Yogg-Saron
-    if (pInstance->GetData(TYPE_VEZAX) == DONE || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_VEZAX) == DONE || pPlayer->IsGameMaster())
         pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_YOGG_SARON, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 8);
 
     pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pGo->GetGOInfo()->GetGossipMenuId(), pGo), pGo->GetObjectGuid());

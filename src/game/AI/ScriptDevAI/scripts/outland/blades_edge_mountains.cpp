@@ -1628,7 +1628,7 @@ enum
 
 bool AreaTrigger_at_raven_prophecy(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (/*pPlayer->isGameMaster() ||*/ pPlayer->IsAlive() &&
+    if (/*pPlayer->IsGameMaster() ||*/ pPlayer->IsAlive() &&
                                        pPlayer->HasAura(UNDERSTAND_RAVENSPEECH_AURA) &&
         pPlayer->GetQuestStatus(QUEST_WHISPERS_OF_THE_RAVEN_GOD) == QUEST_STATUS_INCOMPLETE)
     {

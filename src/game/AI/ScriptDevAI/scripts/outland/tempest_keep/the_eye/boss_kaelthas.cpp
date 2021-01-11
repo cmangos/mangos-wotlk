@@ -425,7 +425,7 @@ struct boss_kaelthasAI : public ScriptedAI
         if (m_uiPhase == PHASE_0_NOT_BEGUN && who->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) &&
                 m_creature->IsWithinDistInMap(who, m_creature->GetAttackDistance(who)) && m_creature->IsWithinLOSInMap(who) && m_creature->CanAttackOnSight(who))
         {
-            if (who->IsPlayer() && static_cast<Player*>(who)->isGameMaster())
+            if (who->IsPlayer() && static_cast<Player*>(who)->IsGameMaster())
                 return;
             DoScriptText(SAY_INTRO, m_creature);
             m_creature->CastSpell(nullptr, SPELL_REMOVE_WEAPONS, TRIGGERED_OLD_TRIGGERED);

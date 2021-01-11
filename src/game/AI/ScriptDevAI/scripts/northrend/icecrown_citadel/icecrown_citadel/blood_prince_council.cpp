@@ -153,8 +153,8 @@ struct npc_queen_lanathel_introAI : public ScriptedAI, private DialogueHelper
     void MoveInLineOfSight(Unit* pWho) override
     {
         // The range distance is not sure
-        if (!m_bEventStarted && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
-                pWho->IsWithinDistInMap(m_creature, 100.0f) && pWho->IsWithinLOSInMap(m_creature))
+        if (!m_bEventStarted && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*) pWho)->IsGameMaster() &&
+            pWho->IsWithinDistInMap(m_creature, 100.0f) && pWho->IsWithinLOSInMap(m_creature))
         {
             StartNextDialogueText(SAY_COUNCIL_INTRO_1);
             m_bEventStarted = true;

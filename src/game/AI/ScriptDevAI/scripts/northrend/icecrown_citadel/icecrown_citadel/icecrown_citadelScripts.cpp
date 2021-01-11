@@ -58,7 +58,7 @@ bool GossipHello_go_icc_teleporter(Player* pPlayer, GameObject* pGo)
     if (!pInstance)
         return true;
 
-    if (pInstance->GetData(TYPE_MARROWGAR) == DONE || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_MARROWGAR) == DONE || pPlayer->IsGameMaster())
     {
         // Lights Hammer
         if (pGo->GetEntry() != GO_TRANSPORTER_LIGHTS_HAMMER)
@@ -70,28 +70,28 @@ bool GossipHello_go_icc_teleporter(Player* pPlayer, GameObject* pGo)
     }
 
     // Rampart of Skulls
-    if (pInstance->GetData(TYPE_LADY_DEATHWHISPER) == DONE || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_LADY_DEATHWHISPER) == DONE || pPlayer->IsGameMaster())
     {
         if (pGo->GetEntry() != GO_TRANSPORTER_RAMPART_SKULLS)
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_RAMPART_OF_SKULLS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
     }
 
     // Deathbringer's Rise
-    if (pInstance->GetData(TYPE_GUNSHIP_BATTLE) == DONE || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_GUNSHIP_BATTLE) == DONE || pPlayer->IsGameMaster())
     {
         if (pGo->GetEntry() != GO_TRANSPORTER_DEATHBRINGER)
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_DEATHBRINGERS_RISE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
     }
 
     // Upper Spire
-    if (pInstance->GetData(TYPE_DEATHBRINGER_SAURFANG) == DONE || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_DEATHBRINGER_SAURFANG) == DONE || pPlayer->IsGameMaster())
     {
         if (pGo->GetEntry() != GO_TRANSPORTER_UPPER_SPIRE)
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_UPPER_SPIRE, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
     }
 
     // Sindragosa's Lair
-    if (pInstance->GetData(TYPE_VALITHRIA) == DONE || pPlayer->isGameMaster())
+    if (pInstance->GetData(TYPE_VALITHRIA) == DONE || pPlayer->IsGameMaster())
     {
         if (pGo->GetEntry() != GO_TRANSPORTER_SINDRAGOSA)
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELE_SINDRAGOSAS_LAIR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 5);
@@ -167,7 +167,7 @@ bool AreaTrigger_at_frozen_throne_tele(Player* pPlayer, AreaTriggerEntry const* 
 
     // Frozen Throne teleport
     if ((pInstance->GetData(TYPE_PROFESSOR_PUTRICIDE) == DONE && pInstance->GetData(TYPE_QUEEN_LANATHEL) == DONE &&
-            pInstance->GetData(TYPE_SINDRAGOSA) == DONE) || pPlayer->isGameMaster())
+            pInstance->GetData(TYPE_SINDRAGOSA) == DONE) || pPlayer->IsGameMaster())
     {
         pPlayer->CastSpell(pPlayer, SPELL_TELE_FROZEN_THRONE, TRIGGERED_OLD_TRIGGERED);
         return true;
@@ -189,7 +189,7 @@ enum
 
 bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (pPlayer->isGameMaster() || pPlayer->IsDead())
+    if (pPlayer->IsGameMaster() || pPlayer->IsDead())
         return false;
 
     // search for the first set of Nerubar Broodkeepers and lower them to the ground
@@ -239,7 +239,7 @@ static const float aFrostwyrmHordeSpawnLocs[3] = { -317.854f ,2190.76f ,328.711f
 
 bool AreaTrigger_at_rampart_skull(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (pPlayer->isGameMaster() || pPlayer->IsDead())
+    if (pPlayer->IsGameMaster() || pPlayer->IsDead())
         return false;
 
     instance_icecrown_citadel* pInstance = static_cast<instance_icecrown_citadel*>(pPlayer->GetInstanceData());
@@ -278,7 +278,7 @@ enum
 
 bool AreaTrigger_at_putricides_trap(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
-    if (pPlayer->isGameMaster() || pPlayer->IsDead())
+    if (pPlayer->IsGameMaster() || pPlayer->IsDead())
         return false;
 
     if (pAt->id != AT_PUTRICIDES_TRAP)

@@ -100,7 +100,7 @@ struct boss_nalorakkAI : public CombatAI
         if (m_instance && m_instance->IsBearPhaseInProgress())
             return;
 
-        if (who->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(who)->isGameMaster() && m_creature->IsWithinDistInMap(who, aBearEventInfo[m_uiCurrentWave].aggroDist))
+        if (who->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(who)->IsGameMaster() && m_creature->IsWithinDistInMap(who, aBearEventInfo[m_uiCurrentWave].aggroDist))
         {
             DoScriptText(aBearEventInfo[m_uiCurrentWave].yellId, m_creature);
             if (m_instance)

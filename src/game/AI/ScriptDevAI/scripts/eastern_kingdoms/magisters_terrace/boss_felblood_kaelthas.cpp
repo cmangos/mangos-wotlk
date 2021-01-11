@@ -206,8 +206,8 @@ struct boss_felblood_kaelthasAI : public CombatAI
 
     void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_introStarted && who->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(who)->isGameMaster() &&
-                m_creature->IsWithinDistInMap(who, 55.0) && m_creature->IsWithinLOSInMap(who))
+        if (!m_introStarted && who->GetTypeId() == TYPEID_PLAYER && !static_cast<Player*>(who)->IsGameMaster() &&
+            m_creature->IsWithinDistInMap(who, 55.0) && m_creature->IsWithinLOSInMap(who))
         {
             m_introStarted = true;
             HandleIntro();

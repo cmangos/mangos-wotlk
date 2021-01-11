@@ -183,8 +183,8 @@ struct boss_anubarak_trialAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (!m_bDidIntroYell && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
-                !m_creature->GetCombatManager().IsInEvadeMode() && pWho->IsWithinDistInMap(m_creature, 100) && pWho->IsWithinLOSInMap(m_creature))
+        if (!m_bDidIntroYell && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*) pWho)->IsGameMaster() &&
+            !m_creature->GetCombatManager().IsInEvadeMode() && pWho->IsWithinDistInMap(m_creature, 100) && pWho->IsWithinLOSInMap(m_creature))
         {
             DoScriptText(SAY_INTRO, m_creature);
 

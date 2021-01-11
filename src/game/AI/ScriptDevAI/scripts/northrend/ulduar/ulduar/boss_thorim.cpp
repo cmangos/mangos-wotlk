@@ -297,7 +297,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
     void MoveInLineOfSight(Unit* pWho) override
     {
         // spawn the arena npcs only when players are close to Thorim in order to avoid the possible bugs
-        if (!m_bArenaSpawned && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE))
+        if (!m_bArenaSpawned && pWho->GetTypeId() == TYPEID_PLAYER && pWho->IsAlive() && !((Player*) pWho)->IsGameMaster() && m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE))
         {
             if (m_pInstance && m_pInstance->GetData(TYPE_THORIM) != DONE)
                 m_pInstance->DoSpawnThorimNpcs((Player*)pWho);
@@ -871,8 +871,8 @@ struct npc_runic_colossusAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (!m_bSmashStarted && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() &&
-                m_creature->IsWithinDistInMap(pWho, 80.0f) && m_creature->IsWithinLOSInMap(pWho))
+        if (!m_bSmashStarted && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*) pWho)->IsGameMaster() &&
+            m_creature->IsWithinDistInMap(pWho, 80.0f) && m_creature->IsWithinLOSInMap(pWho))
         {
             m_uiRunicSmashTimer = 1000;
             m_bSmashStarted = true;

@@ -586,7 +586,7 @@ bool AreaTrigger_at_dark_portal(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     if (pAt->id == AREATRIGGER_MEDIVH || pAt->id == AREATRIGGER_ENTER)
     {
-        if (pPlayer->isGameMaster() || pPlayer->IsDead())
+        if (pPlayer->IsGameMaster() || pPlayer->IsDead())
             return false;
 
         if (instance_dark_portal* pInstance = (instance_dark_portal*)pPlayer->GetInstanceData())

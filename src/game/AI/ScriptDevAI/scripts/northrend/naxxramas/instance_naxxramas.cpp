@@ -779,7 +779,7 @@ bool AreaTrigger_at_naxxramas(Player* pPlayer, AreaTriggerEntry const* pAt)
 {
     if (pAt->id == AREATRIGGER_KELTHUZAD)
     {
-        if (pPlayer->isGameMaster() || !pPlayer->IsAlive())
+        if (pPlayer->IsGameMaster() || !pPlayer->IsAlive())
             return false;
 
         instance_naxxramas* pInstance = (instance_naxxramas*)pPlayer->GetInstanceData();

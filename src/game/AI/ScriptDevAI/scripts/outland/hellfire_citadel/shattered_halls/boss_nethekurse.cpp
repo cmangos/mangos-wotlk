@@ -196,7 +196,7 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
     // todo: use areatrigger 4347 instead (or when door lock is picked)
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (!m_bIntroOnce && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 45.0f) && m_creature->IsWithinLOSInMap(pWho))
+        if (!m_bIntroOnce && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*) pWho)->IsGameMaster() && m_creature->IsWithinDistInMap(pWho, 45.0f) && m_creature->IsWithinLOSInMap(pWho))
         {
             m_bIntroOnce = true;
             m_bIsIntroEvent = true;
@@ -332,7 +332,7 @@ struct mob_fel_orc_convertAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster() && m_creature->IsWithinDistInMap(pWho, 20.0f) && m_creature->IsWithinLOSInMap(pWho))
+        if (pWho->GetTypeId() == TYPEID_PLAYER && !((Player*) pWho)->IsGameMaster() && m_creature->IsWithinDistInMap(pWho, 20.0f) && m_creature->IsWithinLOSInMap(pWho))
             m_creature->SetInCombatWithZone();
     }
 

@@ -120,7 +120,7 @@ struct boss_baltharusAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (!m_bHasDoneIntro && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*)pWho)->isGameMaster())
+        if (!m_bHasDoneIntro && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*) pWho)->IsGameMaster())
         {
             m_introDialogue.StartNextDialogueText(SAY_HELP);
             m_bHasDoneIntro = true;

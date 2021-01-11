@@ -200,7 +200,7 @@ bool GossipHello_npc_barnes(Player* pPlayer, Creature* pCreature)
                 case NOT_STARTED:
                     pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_OPERA_1, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
                     // for GMs we add the possibility to change the event
-                    if (pPlayer->isGameMaster())
+                    if (pPlayer->IsGameMaster())
                     {
                         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_OZ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
                         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_HOOD", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
@@ -209,7 +209,7 @@ bool GossipHello_npc_barnes(Player* pPlayer, Creature* pCreature)
                     pPlayer->SEND_GOSSIP_MENU(TEXT_ID_OPERA_1, pCreature->GetObjectGuid());
                     break;
                 case FAIL:
-                    if (pPlayer->isGameMaster())
+                    if (pPlayer->IsGameMaster())
                     {
                         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_OZ", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
                         pPlayer->ADD_GOSSIP_ITEM(GOSSIP_ICON_DOT, "[GM] Change event to EVENT_HOOD", GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);

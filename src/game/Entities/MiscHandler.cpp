@@ -1064,7 +1064,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     WorldPacket data(SMSG_INSPECT_RESULTS, 50);
     data << plr->GetPackGUID();
 
-    if (sWorld.getConfig(CONFIG_BOOL_TALENTS_INSPECTING) || _player->isGameMaster())
+    if (sWorld.getConfig(CONFIG_BOOL_TALENTS_INSPECTING) || _player->IsGameMaster())
         plr->BuildPlayerTalentsInfoData(data);
     else
     {
@@ -1560,7 +1560,7 @@ void WorldSession::HandleCommentatorModeOpcode(WorldPacket& recv_data)
     Player* _player = GetPlayer();
 
     // Allow commentator mode only for players in GM mode
-    if (!_player->isGameMaster())
+    if (!_player->IsGameMaster())
         return;
 
     // This opcode can be used in three ways:

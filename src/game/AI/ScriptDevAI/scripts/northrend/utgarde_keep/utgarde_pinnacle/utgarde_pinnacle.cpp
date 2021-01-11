@@ -522,7 +522,7 @@ InstanceData* GetInstanceData_instance_pinnacle(Map* pMap)
 
 bool AreaTrigger_at_svala_intro(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
-    if (pPlayer->isGameMaster())
+    if (pPlayer->IsGameMaster())
         return false;
 
     if (instance_pinnacle* pInstance = (instance_pinnacle*)pPlayer->GetInstanceData())
