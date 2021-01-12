@@ -18,7 +18,20 @@
 
 #include "Spells/Scripts/SpellScript.h"
 
+struct spell_preparation : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (spell->GetCaster()->IsPlayer())
+        {
+            // immediately finishes the cooldown on certain Rogue abilities
+            auto cdCheck = [](SpellEntry const & spellEntry) -> bool { return (spellEntry.SpellFamilyName == SPELLFAMILY_ROGUE && (spellEntry.SpellFamilyFlags & uint64(0x0000024000000860))); };
+            static_cast<Player*>(spell->GetCaster())->RemoveSomeCooldown(cdCheck);
+        }
+    }
+};
+
 void LoadRogueScripts()
 {
-
+    RegisterSpellScript<spell_preparation>("spell_preparation");
 }
