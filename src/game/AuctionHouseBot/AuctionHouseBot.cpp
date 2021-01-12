@@ -26,7 +26,7 @@
 
 // Format is YYYYMMDDRR where RR is the change in the conf file
 // for that day.
-#define AUCTIONHOUSEBOT_CONF_VERSION    2020010101
+#define AUCTIONHOUSEBOT_CONF_VERSION    2021011201
 
 INSTANTIATE_SINGLETON_1(AuctionHouseBot);
 
@@ -185,6 +185,8 @@ void AuctionHouseBot::Update()
                     if (!prototype || prototype->Quality == 0 || urand(0, (1 << (prototype->Quality - 1)) - 1) > 0)
                         continue; // make it decreasingly likely that crafted items of higher quality is added to the auction house (white: 100%, green: 50%, blue: 25%, purple: 12.5%, ...)
                     uint32 count = (uint32) round(prototype->GetMaxStackSize() * urand(m_professionItemsConfig[2], m_professionItemsConfig[3]) / 100.0);
+                    if (count <= 0)
+                        count = 1;
                     itemMap[item] += count;
                 }
             }
@@ -479,7 +481,9 @@ void AuctionHouseBot::AddLootToItemMap(LootStore* store, std::vector<int32>& loo
 uint32 AuctionHouseBot::CalculateBuyoutPrice(ItemPrototype const* prototype)
 {
     uint32 buyoutPrice = prototype->BuyPrice;
-    if (buyoutPrice == 0) // if no buy price then use sell price multiplied by 4 if white or gray item, 5 if green or better
+    // test whether we have a buy price or if buy price greatly exceed sell price (causes item to be valued too high, notably arrows/shells do this)
+    // if using sell price then price must be multiplied by 4 if white or gray item, 5 if green or better to match expected buy price
+    if (buyoutPrice == 0 || (prototype->SellPrice > 0 && buyoutPrice / prototype->SellPrice > 5))
         buyoutPrice = prototype->SellPrice * (prototype->Quality <= ITEM_QUALITY_NORMAL ? 4 : 5);
     // multiply buyoutPrice with item quality price percentage
     // if item is sold by a vendor and vendor value is forced, then multiply by 100 (setting vendor price)
