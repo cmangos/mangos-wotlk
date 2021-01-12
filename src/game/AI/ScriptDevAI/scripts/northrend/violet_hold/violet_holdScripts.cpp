@@ -73,9 +73,9 @@ bool GossipHello_npc_sinclari(Player* pPlayer, Creature* pCreature)
 {
     if (instance_violet_hold* pInstance = (instance_violet_hold*)pCreature->GetInstanceData())
     {
-        if (pInstance->GetData(TYPE_MAIN) != IN_PROGRESS)
+        if (pInstance->GetData(TYPE_MAIN) == NOT_STARTED)
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_INTRO, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 1);
-        else
+        else if (pInstance->GetData(TYPE_MAIN) == IN_PROGRESS)
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_TELEPORT, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
     }
 
@@ -244,7 +244,6 @@ struct npc_teleportation_portalAI : public ScriptedAI
     {
         m_pInstance = static_cast<instance_violet_hold*>(pCreature->GetInstanceData());
         m_uiMyPortalNumber = 0;
-        m_uiCyanigosaMoveTimer = 0;
         m_bFirstTick = true;
         Reset();
     }
@@ -253,9 +252,6 @@ struct npc_teleportation_portalAI : public ScriptedAI
 
     bool m_bFirstTick;
     uint32 m_uiMyPortalNumber;
-    uint32 m_uiCyanigosaMoveTimer;
-
-    ObjectGuid m_cyanigosaGuid;
 
     void Reset() override
     {
@@ -337,8 +333,6 @@ struct npc_teleportation_portalAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_CYANIGOSA:
-                m_cyanigosaGuid = pSummoned->GetObjectGuid();
-                m_uiCyanigosaMoveTimer = 8000;
                 m_creature->ForcedDespawn(5000);
                 break;
             case NPC_PORTAL_GUARDIAN:
@@ -381,21 +375,7 @@ struct npc_teleportation_portalAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiCyanigosaMoveTimer)
-        {
-            if (m_uiCyanigosaMoveTimer <= uiDiff)
-            {
-                if (Creature* pCyanigosa = m_creature->GetMap()->GetCreature(m_cyanigosaGuid))
-                    pCyanigosa->GetMotionMaster()->MoveJump(afPortalLocation[8].fX, afPortalLocation[8].fY, afPortalLocation[8].fZ, pCyanigosa->GetSpeed(MOVE_RUN) * 2, 10.0f);
-
-                m_uiCyanigosaMoveTimer = 0;
-            }
-            else
-                m_uiCyanigosaMoveTimer -= uiDiff;
-        }
-    }
+    void UpdateAI(const uint32 uiDiff) override { }
 };
 
 bool EffectDummyCreature_npc_teleportation_portal(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)

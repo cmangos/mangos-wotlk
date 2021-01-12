@@ -137,8 +137,19 @@ struct boss_ichoronAI : public CombatAI
         }
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {
+        // allow events only from the following entries
+        switch (sender->GetEntry())
+        {
+            case NPC_ICHORON:
+            case NPC_ICHOR_GLOBULE:
+            case NPC_SWIRLING:
+                break;
+            default:
+                return;
+        }
+
         // handle water globules
         if (eventType == AI_EVENT_CUSTOM_A)
         {

@@ -37,6 +37,7 @@ instance_violet_hold::instance_violet_hold(Map* pMap) : ScriptedInstance(pMap),
     m_uiIntroSummonTimer(0),
     m_uiEventResetTimer(0),
     m_uiEventStartTimer(0),
+    m_uiCyanigosaMoveTimer(0),
 
     m_bIsVoidDance(false),
     m_bIsDefenseless(false),
@@ -212,7 +213,7 @@ void instance_violet_hold::OnCreatureCreate(Creature* pCreature)
         case NPC_VOID_SENTRY:
             m_lVoidSentriesList.push_back(pCreature->GetObjectGuid());
             return;
-        NPC_ICHOR_GLOBULE:
+        case NPC_ICHOR_GLOBULE:
             m_lIchorGlobuleList.push_back(pCreature->GetObjectGuid());
             return;
         case NPC_ETHEREAL_SPHERE_1:
@@ -226,6 +227,7 @@ void instance_violet_hold::OnCreatureCreate(Creature* pCreature)
         case NPC_SWIRLING:
         case NPC_WATCHER:
         case NPC_LAVA_HOUND:
+        case NPC_CYANIGOSA:
             break;
 
         case NPC_DEFENSE_SYSTEM:
@@ -247,6 +249,9 @@ void instance_violet_hold::OnCreatureRespawn(Creature* pCreature)
         case NPC_VOID_SENTRY_BALL:
             pCreature->AI()->SetReactState(REACT_PASSIVE);
             pCreature->SetCanEnterCombat(false);
+            break;
+        case NPC_CYANIGOSA:
+            m_uiCyanigosaMoveTimer = 8000;
             break;
     }
 }
@@ -865,6 +870,19 @@ void instance_violet_hold::Update(uint32 uiDiff)
         }
         else
             m_uiIntroSummonTimer -= uiDiff;
+    }
+
+    if (m_uiCyanigosaMoveTimer)
+    {
+        if (m_uiCyanigosaMoveTimer <= uiDiff)
+        {
+            if (Creature* pCyanigosa = GetSingleCreatureFromStorage(NPC_CYANIGOSA))
+                pCyanigosa->GetMotionMaster()->MoveJump(afPortalLocation[8].fX, afPortalLocation[8].fY, afPortalLocation[8].fZ, pCyanigosa->GetSpeed(MOVE_RUN) * 2, 10.0f);
+
+            m_uiCyanigosaMoveTimer = 0;
+        }
+        else
+            m_uiCyanigosaMoveTimer -= uiDiff;
     }
 
     // no update when event isn't in progress
