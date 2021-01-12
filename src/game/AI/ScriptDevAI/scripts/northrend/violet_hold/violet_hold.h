@@ -73,6 +73,9 @@ enum
 
     NPC_VOID_SENTRY             = 29364,                    // Npc checked for Zuramat achiev; has phasing aura
     NPC_VOID_SENTRY_BALL        = 29365,                    // void sentry which deals damage during the encounter
+    NPC_ETHEREAL_SPHERE_1       = 29271,
+    NPC_ETHEREAL_SPHERE_2       = 32582,
+    NPC_ICHOR_GLOBULE           = 29321,
     // NPC_ICHORON_SUMMON_TARGET= 29326,                    // Npc which summons the Ichoron globules
 
     // used for intro
@@ -295,6 +298,8 @@ class instance_violet_hold : public ScriptedInstance
         GuidList m_lErekemGuardList;
         GuidList m_lArakkoaGuardList;
         GuidList m_lVoidSentriesList;
+        GuidList m_lIchorGlobuleList;
+        GuidList m_lEtherealSphereList;
         GuidList m_lActivationCrystalList;
         std::vector<uint32> m_vRandomBossList;
 

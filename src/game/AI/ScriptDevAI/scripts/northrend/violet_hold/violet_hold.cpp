@@ -212,6 +212,13 @@ void instance_violet_hold::OnCreatureCreate(Creature* pCreature)
         case NPC_VOID_SENTRY:
             m_lVoidSentriesList.push_back(pCreature->GetObjectGuid());
             return;
+        NPC_ICHOR_GLOBULE:
+            m_lIchorGlobuleList.push_back(pCreature->GetObjectGuid());
+            return;
+        case NPC_ETHEREAL_SPHERE_1:
+        case NPC_ETHEREAL_SPHERE_2:
+            m_lEtherealSphereList.push_back(pCreature->GetObjectGuid());
+            return;
 
         case NPC_ARAKKOA:
         case NPC_VOID_LORD:
@@ -740,6 +747,7 @@ void instance_violet_hold::OnCreatureEvade(Creature* pCreature)
         case NPC_XEVOZZ:
         case NPC_ETHERAL:
             SetData(TYPE_XEVOZZ, FAIL);
+            DoClearBossMobs(m_lEtherealSphereList);
             break;
         case NPC_LAVANTHOR:
         case NPC_LAVA_HOUND:
@@ -758,6 +766,7 @@ void instance_violet_hold::OnCreatureEvade(Creature* pCreature)
         case NPC_ICHORON:
         case NPC_SWIRLING:
             SetData(TYPE_ICHORON, FAIL);
+            DoClearBossMobs(m_lIchorGlobuleList);
             break;
         case NPC_CYANIGOSA:
             SetData(TYPE_CYANIGOSA, FAIL);
@@ -790,6 +799,7 @@ void instance_violet_hold::OnCreatureDeath(Creature* pCreature)
         case NPC_XEVOZZ:
         case NPC_ETHERAL:
             SetData(TYPE_XEVOZZ, DONE);
+            DoClearBossMobs(m_lEtherealSphereList);
             break;
         case NPC_LAVANTHOR:
         case NPC_LAVA_HOUND:
@@ -806,6 +816,7 @@ void instance_violet_hold::OnCreatureDeath(Creature* pCreature)
         case NPC_ICHORON:
         case NPC_SWIRLING:
             SetData(TYPE_ICHORON, DONE);
+            DoClearBossMobs(m_lIchorGlobuleList);
             break;
         case NPC_CYANIGOSA:
             SetData(TYPE_CYANIGOSA, DONE);

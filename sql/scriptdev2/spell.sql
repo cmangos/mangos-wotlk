@@ -277,6 +277,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (53177,'spell_web_door_aura'),
 (53185,'spell_web_door_aura'),
 (54148,'spell_ritual_of_the_sword'),
+(54164,'spell_summon_players'),
 (54205,'spell_svala_transforming'),
 (54259,'spell_splatter_aura'),
 (54260,'spell_water_globule_missile'),

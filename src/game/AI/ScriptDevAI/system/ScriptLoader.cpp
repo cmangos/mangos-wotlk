@@ -388,8 +388,8 @@ extern void AddSC_boss_emalon();
 extern void AddSC_boss_koralon();
 extern void AddSC_boss_toravon();
 extern void AddSC_instance_vault_of_archavon();
-extern void AddSC_boss_erekem();                            // violet_hold
-extern void AddSC_boss_ichoron();
+extern void AddSC_boss_ichoron();                           // violet_hold
+extern void AddSC_boss_xevozz();
 extern void AddSC_instance_violet_hold();
 extern void AddSC_violet_hold();
 
@@ -885,8 +885,8 @@ void AddScripts()
     AddSC_boss_koralon();
     AddSC_boss_toravon();
     AddSC_instance_vault_of_archavon();
-    AddSC_boss_erekem();                                    // violet_hold
-    AddSC_boss_ichoron();
+    AddSC_boss_ichoron();                                   // violet_hold
+    AddSC_boss_xevozz();
     AddSC_instance_violet_hold();
     AddSC_violet_hold();
 

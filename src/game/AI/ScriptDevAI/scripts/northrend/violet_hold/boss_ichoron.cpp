@@ -63,8 +63,6 @@ enum
     SPELL_MERGE                 = 54269,                // used by globules
     SPELL_WATER_GLOBULE_TRANS   = 54268,                // triggered by 54260
     SPELL_SPLASH                = 59516,
-
-    NPC_ICHOR_GLOBULE           = 29321,
 };
 
 enum IchoronActions
@@ -93,8 +91,6 @@ struct boss_ichoronAI : public CombatAI
     instance_violet_hold* m_instance;
     bool m_isRegularMode;
 
-    GuidList m_ichorGlobuleGuids;
-
     void Aggro(Unit* who) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
@@ -117,10 +113,6 @@ struct boss_ichoronAI : public CombatAI
     void JustDied(Unit* killer) override
     {
         DoScriptText(SAY_DEATH, m_creature);
-
-        for (const auto& guid : m_ichorGlobuleGuids)
-            if (Creature* globule = m_creature->GetMap()->GetCreature(guid))
-                globule->ForcedDespawn();
     }
 
     void EnterEvadeMode() override
@@ -128,10 +120,6 @@ struct boss_ichoronAI : public CombatAI
         CombatAI::EnterEvadeMode();
 
         m_creature->ForcedDespawn();
-
-        for (const auto& guid : m_ichorGlobuleGuids)
-            if (Creature* globule = m_creature->GetMap()->GetCreature(guid))
-                globule->ForcedDespawn();
     }
 
     void KilledUnit(Unit* who) override
@@ -197,18 +185,13 @@ struct boss_ichoronAI : public CombatAI
             DoCastSpellIfCan(summoned, SPELL_WATER_GLOBULE, CAST_TRIGGERED);
 
             summoned->AI()->SetCombatMovement(false);
-            m_ichorGlobuleGuids.push_back(summoned->GetObjectGuid());
         }
     }
 
     void SummonedCreatureJustDied(Creature* summoned) override
     {
         if (summoned->GetEntry() == NPC_ICHOR_GLOBULE)
-        {
             summoned->CastSpell(summoned, SPELL_SPLASH, TRIGGERED_OLD_TRIGGERED);
-
-            m_ichorGlobuleGuids.remove(summoned->GetObjectGuid());
-        }
     }
 
     // method to end the split phase

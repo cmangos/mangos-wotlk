@@ -1760,6 +1760,8 @@ UPDATE creature_template SET ScriptName='npc_sinclari' WHERE entry=30658;
 UPDATE creature_template SET ScriptName='npc_prison_event_controller' WHERE entry=30883;
 UPDATE creature_template SET ScriptName='npc_teleportation_portal' WHERE entry IN (30679,32174);
 UPDATE creature_template SET ScriptName='boss_ichoron' WHERE entry IN (29313,32234);
+UPDATE creature_template SET ScriptName='boss_xevozz' WHERE entry IN (29266,32231);
+UPDATE creature_template SET ScriptName='npc_ethereal_sphere' WHERE entry IN (29271,32582);
 
 /* WAILING CAVERNS */
 UPDATE instance_template SET ScriptName='instance_wailing_caverns' WHERE map=43;
@@ -6490,11 +6492,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1604029','%s transforms into a Mammoth!','14724','2','0','0','0','moorabi EMOTE_TRANSFORMED'),
 ('-1604030','$N is impaled!','0','3','0','0','0','EMOTE_IMPALED');
 
-
 -- -1 608 000 VIOLET HOLD
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1608000','REUSE ME','0','0','0','0','0','REUSE ME'),
-('-1608001','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1608000','It seems my freedom must be bought... with blood.','14499','1','0','0','0','xevozz SAY_AGGRO'),
+('-1608001','Intriguing... a high quantity of arcane energy is near. Time for some prospecting...','14500','1','0','0','0','xevozz SAY_SUMMON_1'),
 
 ('-1608002','Adventurers, the door is beinning to weaken!','0','1','0','0','0','sinclair SAY_SEAL_75'),
 ('-1608003','Only half of the door seal''s strength remains! You must fight on!','0','1','0','0','0','sinclair SAY_SEAL_50'),
@@ -6509,10 +6510,14 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1608010','Back in business! Now to execute an exit strategy.','14498','1','0','396','0','xevozz SAY_RELEASE_XEVOZZ'),
 ('-1608011','I am... renewed.','13995','1','0','0','0','zuramat SAY_RELEASE_ZURAMAT'),
 
-('-1608012','REUSE ME','0','0','0','0','0','REUSE ME'),
-('-1608013','REUSE ME','0','0','0','0','0','REUSE ME'),
-('-1608014','REUSE ME','0','0','0','0','0','REUSE ME'),
-('-1608018','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1608012','Nothing personal...','14504','1','0','0','0','xevozz SAY_SLAY_1'),
+('-1608013','Business concluded.','14505','1','0','0','0','xevozz SAY_SLAY_2'),
+('-1608014','Profit!','14506','1','0','0','0','xevozz SAY_SLAY_3'),
+('-1608015','The air teems with latent energy... quite the harvest!','14501','1','0','0','0','xevozz SAY_SUMMON_2'),
+('-1608016','Plentiful, exploitable resources... primed for acquisition!','14502','1','0','0','0','xevozz SAY_SUMMON_3'),
+('-1608017','This... is an unrecoverable... loss.','14507','1','0','0','0','xevozz SAY_DEATH'),
+
+('-1608018','%s begins to summon!','0','3','0','0','0','ethereal sphere EMOTE_SUMMON'),
 
 ('-1608019','Stand aside, mortals!','14230','1','0','0','0','ichoron SAY_AGGRO'),
 ('-1608020','I will not be contained! Ngyah!!','14233','1','0','0','0','ichoron SAY_SHATTERING'),
