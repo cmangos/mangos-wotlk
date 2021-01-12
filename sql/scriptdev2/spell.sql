@@ -320,6 +320,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (66314,'spell_dark_ball_passive'),
 (67009,'spell_nether_power'),
 (67322,'spell_burrower_submerge'),
+(67470,'spell_pursuing_spikes'),
 (67547,'spell_clear_valkyr_essence'),
 (67590,'spell_powering_up'),
 (67630,'spell_leeching_swarm_aura'),

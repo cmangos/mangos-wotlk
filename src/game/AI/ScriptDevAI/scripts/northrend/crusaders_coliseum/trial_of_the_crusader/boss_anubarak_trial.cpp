@@ -63,7 +63,7 @@ enum
     SPELL_PURSUING_SPIKES_FAIL          = 66181,
     SPELL_PURSUING_SPIKES_DUMMY         = 67470,            // target selection spell
     SPELL_PURSUING_SPIKES_SPEED1        = 65920,
-    SPELL_PURSUING_SPIKES_GROUND        = 65921,           // visual ground aura
+    SPELL_PURSUING_SPIKES_GROUND        = 65921,            // visual ground aura
     SPELL_PURSUING_SPIKES_SPEED2        = 65922,
     SPELL_PURSUING_SPIKES_SPEED3        = 65923,
     SPELL_MARK                          = 67574,
@@ -430,16 +430,17 @@ struct npc_anubarak_trial_spikeAI : public ScriptedAI
         SetCombatMovement(false);
     }
 
-    void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* invoker, uint32 /*miscValue*/) override
     {
-        if (pSpell->Id == SPELL_PURSUING_SPIKES_DUMMY && pTarget->GetTypeId() == TYPEID_PLAYER)
+        // handle water globules
+        if (eventType == AI_EVENT_CUSTOM_A)
         {
-            DoScriptText(EMOTE_PURSUE, m_creature, pTarget);
-            DoCastSpellIfCan(pTarget, SPELL_MARK, CAST_TRIGGERED);
+            DoScriptText(EMOTE_PURSUE, m_creature, invoker);
+            DoCastSpellIfCan(invoker, SPELL_MARK, CAST_TRIGGERED);
 
             SetCombatMovement(true);
             m_creature->GetMotionMaster()->Clear(false, true);
-            m_creature->GetMotionMaster()->MoveChase(pTarget, 0, 0, false, false, false);
+            m_creature->GetMotionMaster()->MoveChase(invoker, 0, 0, false, false, false);
         }
     }
 
@@ -741,6 +742,26 @@ struct spell_leeching_swarm_aura : public AuraScript
     }
 };
 
+/*######
+## spell_pursuing_spikes - 67470
+######*/
+
+struct spell_pursuing_spikes : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer() || !caster)
+            return;
+
+        caster->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, caster);
+    }
+};
+
 void AddSC_boss_anubarak_trial()
 {
     Script* pNewScript = new Script;
@@ -766,4 +787,5 @@ void AddSC_boss_anubarak_trial()
 
     RegisterSpellScript<spell_burrower_submerge>("spell_burrower_submerge");
     RegisterAuraScript<spell_leeching_swarm_aura>("spell_leeching_swarm_aura");
+    RegisterSpellScript<spell_pursuing_spikes>("spell_pursuing_spikes");
 }
