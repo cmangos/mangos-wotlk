@@ -1047,7 +1047,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
             default: break;
         }
         if (entry)
-            return GetSingleCreatureFromStorage(entry);
+            return GetSingleCreatureFromStorage(entry, true);
         return nullptr;
     }
 
