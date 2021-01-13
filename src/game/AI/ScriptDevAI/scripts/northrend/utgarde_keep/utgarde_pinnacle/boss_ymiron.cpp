@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "utgarde_pinnacle.h"
+#include "Spells/SpellAuras.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -70,7 +72,7 @@ enum
     SPELL_RANULF_TRANSFORM      = 48312,
     SPELL_TORGYN_TRANSFORM      = 48313,
 
-    NPC_SPIRIT_FOUNT            = 27339,
+    // NPC_SPIRIT_FOUNT          = 27339,
     // NPC_AVENGING_SPIRIT       = 27386,
     // NPC_SPIRIT_SUMMONER       = 27392,            // summoned around the boss - triggers 48592
 
@@ -106,7 +108,7 @@ struct boss_ymironAI : public ScriptedAI
 {
     boss_ymironAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_pinnacle*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
 
         for (uint8 i = 0; i < MAX_BOATS; ++i)
@@ -115,7 +117,7 @@ struct boss_ymironAI : public ScriptedAI
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_pinnacle* m_pInstance;
     bool m_bIsRegularMode;
 
     uint32 m_uiFetidRotTimer;
@@ -337,6 +339,7 @@ struct boss_ymironAI : public ScriptedAI
                     float fX, fY, fZ;
                     m_uiCurrentSpiritGuid = pSpirit->GetObjectGuid();
                     pSpirit->GetContactPoint(m_creature, fX, fY, fZ, INTERACTION_DISTANCE);
+                    m_creature->SetWalk(false);
                     m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                 }
             }
@@ -401,14 +404,9 @@ struct boss_ymironAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_ymiron(Creature* pCreature)
-{
-    return new boss_ymironAI(pCreature);
-}
-
 bool ProcessEventId_event_achiev_kings_bane(uint32 /*uiEventId*/, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
 {
-    if (instance_pinnacle* pInstance = (instance_pinnacle*)((Creature*)pSource)->GetInstanceData())
+    if (instance_pinnacle* pInstance = static_cast<instance_pinnacle*>(static_cast<Creature*>(pSource)->GetInstanceData()))
     {
         if (pInstance->GetData(TYPE_YMIRON) != IN_PROGRESS)
             return false;
@@ -419,15 +417,57 @@ bool ProcessEventId_event_achiev_kings_bane(uint32 /*uiEventId*/, Object* pSourc
     return false;
 }
 
+/*######
+## spell_create_spirit_fount_beam_aura - 48385
+######*/
+
+struct spell_create_spirit_fount_beam_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        if (!apply)
+            target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 48380 : 59320, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_avenging_spirits - 48590
+######*/
+
+struct spell_avenging_spirits : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        target->CastSpell(target, 48586, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(target, 48587, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(target, 48588, TRIGGERED_OLD_TRIGGERED);
+        target->CastSpell(target, 48589, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_ymiron()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_ymiron";
-    pNewScript->GetAI = &GetAI_boss_ymiron;
+    pNewScript->GetAI = &GetNewAIInstance<boss_ymironAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "event_achiev_kings_bane";
     pNewScript->pProcessEventId = &ProcessEventId_event_achiev_kings_bane;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<spell_create_spirit_fount_beam_aura>("spell_create_spirit_fount_beam_aura");
+    RegisterSpellScript<spell_avenging_spirits>("spell_avenging_spirits");
 }

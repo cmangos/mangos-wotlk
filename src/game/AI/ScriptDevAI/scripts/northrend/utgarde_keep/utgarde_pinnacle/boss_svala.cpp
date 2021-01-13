@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "utgarde_pinnacle.h"
+#include "Spells/SpellAuras.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -55,6 +57,7 @@ enum
     // spells used by channelers
     SPELL_PARALIZE              = 48278,        // should apply effect 48267 on target
     SPELL_SHADOWS_IN_THE_DARK   = 59407,
+    SPELL_SIMPLE_TELEPORT       = 12980,
 
     SPELL_BALL_OF_FLAME         = 48246,
 };
@@ -67,7 +70,7 @@ struct boss_svalaAI : public ScriptedAI
 {
     boss_svalaAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_pinnacle*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_pinnacle*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -114,11 +117,14 @@ struct boss_svalaAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_CHANNELER)
         {
+            pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, TRIGGERED_OLD_TRIGGERED);
+
             if (!m_bIsRegularMode)
                 pSummoned->CastSpell(pSummoned, SPELL_SHADOWS_IN_THE_DARK, TRIGGERED_OLD_TRIGGERED);
 
             // cast paralize; the spell will automatically pick the target with aura 48267
-            pSummoned->CastSpell(pSummoned, SPELL_PARALIZE, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->CastSpell(pSummoned, SPELL_PARALIZE, TRIGGERED_NONE);
+            pSummoned->AI()->SetCombatMovement(false);
         }
     }
 
@@ -207,34 +213,9 @@ struct boss_svalaAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_svala(Creature* pCreature)
-{
-    return new boss_svalaAI(pCreature);
-}
-
-/*######
-## npc_ritual_target
-######*/
-
-// TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_ritual_targetAI : public Scripted_NoMovementAI
-{
-    npc_ritual_targetAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
-
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
-};
-
-UnitAI* GetAI_npc_ritual_target(Creature* pCreature)
-{
-    return new npc_ritual_targetAI(pCreature);
-}
-
 bool ProcessEventId_event_spell_call_flames(uint32 /*uiEventId*/, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
 {
-    if (instance_pinnacle* pInstance = (instance_pinnacle*)((Creature*)pSource)->GetInstanceData())
+    if (instance_pinnacle* pInstance = static_cast<instance_pinnacle*>(static_cast<Creature*>(pSource)->GetInstanceData()))
     {
         if (Creature* pBrazier = pInstance->instance->GetCreature(pInstance->GetRandomBrazier()))
             pBrazier->CastSpell(pBrazier, SPELL_BALL_OF_FLAME, TRIGGERED_OLD_TRIGGERED);
@@ -290,17 +271,12 @@ void AddSC_boss_svala()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_svala";
-    pNewScript->GetAI = &GetAI_boss_svala;
+    pNewScript->GetAI = &GetNewAIInstance<boss_svalaAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "event_spell_call_flames";
     pNewScript->pProcessEventId = &ProcessEventId_event_spell_call_flames;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_ritual_target";
-    pNewScript->GetAI = GetAI_npc_ritual_target;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_ritual_of_the_sword>("spell_ritual_of_the_sword");

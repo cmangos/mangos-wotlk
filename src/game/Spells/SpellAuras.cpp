@@ -3360,11 +3360,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
                 break;
             }
-            case 48385:                                     // Create Spirit Fount Beam
-            {
-                target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 48380 : 59320, TRIGGERED_OLD_TRIGGERED);
-                return;
-            }
             case 50141:                                     // Blood Oath
             {
                 // Blood Oath

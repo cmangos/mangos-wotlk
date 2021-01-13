@@ -150,6 +150,12 @@ void instance_pinnacle::OnCreatureRespawn(Creature* pCreature)
                 pCreature->GetMotionMaster()->MoveWaypoint(0, 0, 5000);
             }
             break;
+        case NPC_FLAME_BREATH_TRIGGER:
+        case NPC_RITUAL_TARGET:
+        case NPC_SPIRIT_FOUNT:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
+            break;
     }
 }
 

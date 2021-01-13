@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "utgarde_pinnacle.h"
 #include "Spells/SpellAuras.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -98,7 +99,7 @@ struct boss_skadiAI : public ScriptedAI
 {
     boss_skadiAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_pinnacle*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_pinnacle*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -290,11 +291,6 @@ struct boss_skadiAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_skadi(Creature* pCreature)
-{
-    return new boss_skadiAI(pCreature);
-}
-
 /*######
 ## npc_grauf
 ######*/
@@ -303,7 +299,7 @@ struct npc_graufAI : public ScriptedAI
 {
     npc_graufAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_pinnacle*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_pinnacle*>(pCreature->GetInstanceData());
         SetReactState(REACT_PASSIVE);
         Reset();
     }
@@ -445,54 +441,6 @@ struct npc_graufAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_grauf(Creature* pCreature)
-{
-    return new npc_graufAI(pCreature);
-}
-
-/*######
-## npc_flame_breath_trigger
-######*/
-
-struct npc_flame_breath_triggerAI : public ScriptedAI
-{
-    npc_flame_breath_triggerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    void Reset() override
-    {
-        SetReactState(REACT_PASSIVE);
-        m_creature->SetCanEnterCombat(false);
-    }
-};
-
-UnitAI* GetAI_npc_flame_breath_trigger(Creature* pCreature)
-{
-    return new npc_flame_breath_triggerAI(pCreature);
-}
-
-bool EffectAuraDummy_npc_flame_breath_trigger(const Aura* pAura, bool bApply)
-{
-    if (pAura->GetEffIndex() != EFFECT_INDEX_0 || !bApply)
-        return true;
-
-    Creature* pTarget = (Creature*)pAura->GetTarget();
-    if (!pTarget)
-        return true;
-
-    // apply auras based on creature position
-    if (pAura->GetId() == SPELL_CLOUD_AURA_LEFT)
-    {
-        if (pTarget->GetPositionY() > -511.0f)
-            pTarget->CastSpell(pTarget, SPELL_CLOUD_AURA_DAMAGE, TRIGGERED_OLD_TRIGGERED);
-    }
-    else if (pAura->GetId() == SPELL_CLOUD_AURA_RIGHT)
-    {
-        if (pTarget->GetPositionY() < -511.0f)
-            pTarget->CastSpell(pTarget, SPELL_CLOUD_AURA_DAMAGE, TRIGGERED_OLD_TRIGGERED);
-    }
-    return true;
-}
-
 /*######
 ## at_skadi
 ######*/
@@ -502,7 +450,7 @@ bool AreaTrigger_at_skadi(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
     if (pPlayer->IsGameMaster())
         return false;
 
-    if (ScriptedInstance* pInstance = (ScriptedInstance*)pPlayer->GetInstanceData())
+    if (instance_pinnacle* pInstance = static_cast<instance_pinnacle*>(pPlayer->GetInstanceData()))
     {
         if (pInstance->GetData(TYPE_SKADI) == NOT_STARTED)
         {
@@ -529,13 +477,16 @@ bool AreaTrigger_at_skadi(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 }
 
 /*######
-## spell_launch_harpoon
+## spell_launch_harpoon - 48642
 ######*/
 
 struct spell_launch_harpoon : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
     {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
         Unit* target = spell->GetUnitTarget();
         if (!target)
             return;
@@ -546,7 +497,7 @@ struct spell_launch_harpoon : public SpellScript
         // yell when hit
         if (target->GetHealth() > target->GetMaxHealth() * 0.35f)
         {
-            instance_pinnacle* pInstance = (instance_pinnacle*)target->GetInstanceData();
+            instance_pinnacle* pInstance = static_cast<instance_pinnacle*>(target->GetInstanceData());
             if (!pInstance)
                 return;
 
@@ -560,7 +511,7 @@ struct spell_launch_harpoon : public SpellScript
 };
 
 /*######
-## spell_summon_gauntlet_mobs_periodic_aura
+## spell_summon_gauntlet_mobs_periodic_aura - 48630
 ######*/
 
 struct spell_summon_gauntlet_mobs_periodic_aura : public AuraScript
@@ -582,22 +533,36 @@ struct spell_summon_gauntlet_mobs_periodic_aura : public AuraScript
     }
 };
 
+/*######
+## spell_freezing_cloud_aura - 47574, 47594
+######*/
+
+struct spell_freezing_cloud_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        // apply auras based on creature position
+        if (aura->GetId() == 47574 && target->GetPositionY() > -511.0f)
+            target->CastSpell(target, 47579, TRIGGERED_OLD_TRIGGERED);
+        else if (aura->GetId() == 47594 && target->GetPositionY() < -511.0f)
+            target->CastSpell(target, 47579, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_skadi()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_skadi";
-    pNewScript->GetAI = &GetAI_boss_skadi;
+    pNewScript->GetAI = &GetNewAIInstance<boss_skadiAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_grauf";
-    pNewScript->GetAI = &GetAI_npc_grauf;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_flame_breath_trigger";
-    pNewScript->GetAI = &GetAI_npc_flame_breath_trigger;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_npc_flame_breath_trigger;
+    pNewScript->GetAI = &GetNewAIInstance<npc_graufAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -607,4 +572,5 @@ void AddSC_boss_skadi()
 
     RegisterSpellScript<spell_launch_harpoon>("spell_launch_harpoon");
     RegisterAuraScript<spell_summon_gauntlet_mobs_periodic_aura>("spell_summon_gauntlet_mobs_periodic_aura");
+    RegisterAuraScript<spell_freezing_cloud_aura>("spell_freezing_cloud_aura");
 }

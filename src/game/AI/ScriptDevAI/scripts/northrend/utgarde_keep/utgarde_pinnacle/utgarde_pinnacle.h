@@ -35,8 +35,10 @@ enum
     NPC_YMIRJAR_WARRIOR             = 26690,
     NPC_YMIRJAR_WITCH_DOCTOR        = 26691,
     NPC_YMIRJAR_HARPOONER           = 26692,
-    // NPC_FLAME_BREATH_TRIGGER     = 28351,            // triggers the freezing cloud spell in script
+    NPC_RITUAL_TARGET               = 27327,
+    NPC_FLAME_BREATH_TRIGGER        = 28351,            // triggers the freezing cloud spell in script
     NPC_WORLD_TRIGGER_LARGE         = 23472,            // only one spawn in this instance - casts 49308 during the gauntlet event
+    NPC_SPIRIT_FOUNT                = 27339,
 
     NPC_FURBOLG                     = 26684,
     NPC_WORGEN                      = 26683,
