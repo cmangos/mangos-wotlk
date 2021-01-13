@@ -68,7 +68,7 @@ struct SpawnAssociation
 enum
 {
     SPELL_GUARDS_MARK               = 38067,
-    AURA_DURATION_TIME_LEFT         = 5000
+    AURA_DURATION_TIME_LEFT         = 10000
 };
 
 const float RANGE_TRIPWIRE          = 15.0f;
@@ -143,10 +143,14 @@ struct npc_air_force_botsAI : public ScriptedAI
 
     Creature* SummonGuard()
     {
-        Creature* pSummoned = m_creature->SummonCreature(m_pSpawnAssoc->m_uiSpawnedCreatureEntry, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 300000);
+        Creature* pSummoned = m_creature->SummonCreature(m_pSpawnAssoc->m_uiSpawnedCreatureEntry, 0.0f, 0.0f, 0.0f, 0.0f, TEMPSPAWN_TIMED_OOC_DESPAWN, 360000);
 
         if (pSummoned)
+        {
             m_spawnedGuid = pSummoned->GetObjectGuid();
+            pSummoned->GetMotionMaster()->MovePoint(1, m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ() + 10.0f, FORCED_MOVEMENT_FLIGHT);
+        }
+
         else
         {
             error_db_log("SD2: npc_air_force_bots: wasn't able to spawn creature %u", m_pSpawnAssoc->m_uiSpawnedCreatureEntry);
