@@ -42,7 +42,7 @@ bool GOUse_go_containment_sphere(Player* /*pPlayer*/, GameObject* pGo)
     pGo->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
 
     if (Creature* pCaster = GetClosestCreatureWithEntry(pGo, NPC_BREATH_CASTER, 20.0f))
-        pCaster->RemoveAurasDueToSpell(SPELL_FROST_BREATH);
+        pCaster->InterruptNonMeleeSpells(false);
 
     return false;
 }

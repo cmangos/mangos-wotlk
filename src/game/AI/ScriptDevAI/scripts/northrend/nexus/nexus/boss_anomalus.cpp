@@ -53,7 +53,7 @@ struct boss_anomalusAI : public ScriptedAI
 {
     boss_anomalusAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_nexus*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_nexus*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -179,15 +179,10 @@ struct boss_anomalusAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_anomalus(Creature* pCreature)
-{
-    return new boss_anomalusAI(pCreature);
-}
-
 void AddSC_boss_anomalus()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_anomalus";
-    pNewScript->GetAI = &GetAI_boss_anomalus;
+    pNewScript->GetAI = &GetNewAIInstance<boss_anomalusAI>;
     pNewScript->RegisterSelf();
 }

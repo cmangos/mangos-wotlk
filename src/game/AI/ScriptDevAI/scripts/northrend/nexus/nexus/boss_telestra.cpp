@@ -75,7 +75,7 @@ struct boss_telestraAI : public ScriptedAI
 {
     boss_telestraAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_nexus*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_nexus*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
@@ -146,49 +146,56 @@ struct boss_telestraAI : public ScriptedAI
             DoScriptText(SAY_KILL, m_creature);
     }
 
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 miscValue) override
     {
-        switch (pSpell->Id)
+        switch (eventType)
         {
-            // eventAi must make sure clones cast spells when each of them die
-            case SPELL_FIRE_DIES:
-            case SPELL_ARCANE_DIES:
-            case SPELL_FROST_DIES:
-            {
-                ++m_uiCloneDeadCount;
-
-                // After the first clone from each split phase is dead start the achiev timer
-                if (m_uiCloneDeadCount == 1 || m_uiCloneDeadCount == 4)
-                {
-                    m_bCanCheckAchiev = true;
-                    m_uiPersonalityTimer = 0;
-                }
-
-                if (m_uiCloneDeadCount == 3 || m_uiCloneDeadCount == 6)
-                {
-                    m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_CLONES);
-                    m_creature->CastSpell(m_creature, SPELL_SPAWN_BACK_IN, TRIGGERED_NONE);
-
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                    m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true);
-
-                    DoScriptText(SAY_MERGE, m_creature);
-
-                    // Check if it took longer than 5 sec
-                    if (m_uiPersonalityTimer > 5000)
-                    {
-                        if (m_pInstance)
-                            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPLIT_PERSONALITY, false);
-                    }
-                    m_bCanCheckAchiev = false;
-
-                    m_uiPhase = m_uiCloneDeadCount == 3 ? PHASE_3 : PHASE_4;
-                }
-                break;
-            }
-            case SPELL_SUMMON_CLONES:
+            case AI_EVENT_CUSTOM_A:
                 m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, 0);
+                break;
+            case AI_EVENT_CUSTOM_B:
+                switch (miscValue)
+                {
+                    // eventAi must make sure clones cast spells when each of them die
+                    case SPELL_FIRE_DIES:
+                    case SPELL_ARCANE_DIES:
+                    case SPELL_FROST_DIES:
+                        ++m_uiCloneDeadCount;
+
+                        // After the first clone from each split phase is dead start the achiev timer
+                        if (m_uiCloneDeadCount == 1 || m_uiCloneDeadCount == 4)
+                        {
+                            m_bCanCheckAchiev = true;
+                            m_uiPersonalityTimer = 0;
+                        }
+
+                        if (m_uiCloneDeadCount == 3 || m_uiCloneDeadCount == 6)
+                        {
+                            m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_CLONES);
+                            m_creature->RemoveAurasDueToSpell(SPELL_FIRE_DIES);
+                            m_creature->RemoveAurasDueToSpell(SPELL_ARCANE_DIES);
+                            m_creature->RemoveAurasDueToSpell(SPELL_FROST_DIES);
+
+                            m_creature->CastSpell(m_creature, SPELL_SPAWN_BACK_IN, TRIGGERED_NONE);
+
+                            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                            m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true);
+
+                            DoScriptText(SAY_MERGE, m_creature);
+
+                            // Check if it took longer than 5 sec
+                            if (m_uiPersonalityTimer > 5000)
+                            {
+                                if (m_pInstance)
+                                    m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPLIT_PERSONALITY, false);
+                            }
+                            m_bCanCheckAchiev = false;
+
+                            m_uiPhase = m_uiCloneDeadCount == 3 ? PHASE_3 : PHASE_4;
+                        }
+                        break;
+                }
                 break;
         }
     }
@@ -219,44 +226,39 @@ struct boss_telestraAI : public ScriptedAI
             case PHASE_1:
             case PHASE_3:
             case PHASE_4:
-            {
-                if (!m_creature->GetCurrentSpell(CURRENT_CHANNELED_SPELL))
+
+                if (m_uiFirebombTimer < uiDiff)
                 {
-                    if (m_uiFirebombTimer < uiDiff)
-                    {
-                        if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_FIREBOMB : SPELL_FIREBOMB_H) == CAST_OK)
-                            m_uiFirebombTimer = urand(4000, 6000);
-                    }
-                    else
-                        m_uiFirebombTimer -= uiDiff;
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_FIREBOMB : SPELL_FIREBOMB_H) == CAST_OK)
+                        m_uiFirebombTimer = urand(4000, 6000);
+                }
+                else
+                    m_uiFirebombTimer -= uiDiff;
 
-                    if (m_uiIceNovaTimer < uiDiff)
-                    {
-                        if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ICE_NOVA : SPELL_ICE_NOVA_H) == CAST_OK)
-                            m_uiIceNovaTimer = urand(10000, 15000);
-                    }
-                    else
-                        m_uiIceNovaTimer -= uiDiff;
+                if (m_uiIceNovaTimer < uiDiff)
+                {
+                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ICE_NOVA : SPELL_ICE_NOVA_H) == CAST_OK)
+                        m_uiIceNovaTimer = urand(10000, 15000);
+                }
+                else
+                    m_uiIceNovaTimer -= uiDiff;
 
-                    if (m_uiPhase == PHASE_1 && m_creature->GetHealthPercent() < 50.0f)
+                if (m_uiPhase == PHASE_1 && m_creature->GetHealthPercent() < 50.0f)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_CLONES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
                     {
-                        if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_CLONES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                        {
-                            DoScriptText(urand(0, 1) ? SAY_SPLIT_1 : SAY_SPLIT_2, m_creature);
-                            m_uiPhase = PHASE_2;
-                        }
+                        DoScriptText(urand(0, 1) ? SAY_SPLIT_1 : SAY_SPLIT_2, m_creature);
+                        m_uiPhase = PHASE_2;
                     }
+                }
 
-                    if (m_uiPhase == PHASE_3 && !m_bIsRegularMode && m_creature->GetHealthPercent() < 15.0f)
+                if (m_uiPhase == PHASE_3 && !m_bIsRegularMode && m_creature->GetHealthPercent() < 15.0f)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_CLONES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
                     {
-                        if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_CLONES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                        {
-                            DoScriptText(urand(0, 1) ? SAY_SPLIT_1 : SAY_SPLIT_2, m_creature);
-                            m_uiPhase = PHASE_2;
-                        }
+                        DoScriptText(urand(0, 1) ? SAY_SPLIT_1 : SAY_SPLIT_2, m_creature);
+                        m_uiPhase = PHASE_2;
                     }
-
-                    DoMeleeAttackIfReady();
                 }
 
                 if (m_uiGravityWellTimer < uiDiff)
@@ -267,25 +269,60 @@ struct boss_telestraAI : public ScriptedAI
                 else
                     m_uiGravityWellTimer -= uiDiff;
 
+                DoMeleeAttackIfReady();
+
                 break;
-            }
             case PHASE_2:
-            {
                 break;
-            }
         }
     }
 };
 
-UnitAI* GetAI_boss_telestra(Creature* pCreature)
+/*######
+## spell_summon_telestra_clones - 47710
+######*/
+
+struct spell_summon_telestra_clones : public SpellScript
 {
-    return new boss_telestraAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // inform boss about clones summon
+        target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, target);
+    }
+};
+
+/*######
+## spell_telestra_clone_dies_aura - 47711, 47712, 47713
+######*/
+
+struct spell_telestra_clone_dies_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        // inform about the clone death
+        if (apply)
+            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, target, target, aura->GetId());
+    }
+};
 
 void AddSC_boss_telestra()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_telestra";
-    pNewScript->GetAI = &GetAI_boss_telestra;
+    pNewScript->GetAI = &GetNewAIInstance<boss_telestraAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_summon_telestra_clones>("spell_summon_telestra_clones");
+    RegisterAuraScript<spell_telestra_clone_dies_aura>("spell_telestra_clone_dies_aura");
 }
