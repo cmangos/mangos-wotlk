@@ -297,7 +297,6 @@ struct boss_malygosAI : public ScriptedAI, private DialogueHelper
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
-        m_creature->SetImmuneToPlayer(false);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_MALYGOS, IN_PROGRESS);
@@ -789,7 +788,7 @@ struct npc_power_sparkAI : public ScriptedAI
         if (m_pInstance)
         {
             if (Creature* pMalygos = m_pInstance->GetSingleCreatureFromStorage(NPC_MALYGOS))
-                m_creature->GetMotionMaster()->MoveFollow(pMalygos, 0, 0);
+                m_creature->GetMotionMaster()->MoveChase(pMalygos, 0.f, 0.f, false, true, false);
         }
 
         DoCastSpellIfCan(m_creature, SPELL_POWER_SPARK_VISUAL);
@@ -810,7 +809,7 @@ struct npc_power_sparkAI : public ScriptedAI
         if (eventType == AI_EVENT_CUSTOM_C)
             m_creature->GetMotionMaster()->MoveIdle();
         else if (eventType == AI_EVENT_CUSTOM_D)
-            m_creature->GetMotionMaster()->MoveFollow(pSender, 0, 0);
+            m_creature->GetMotionMaster()->MoveChase(pSender, 0.f, 0.f, false, true, false);
     }
 
     void JustDied(Unit* /*pKiller*/) override
@@ -840,6 +839,7 @@ bool ProcessEventId_event_go_focusing_iris(uint32 /*uiEventId*/, Object* pSource
 
         // interrupt spells and allow attack
         pMalygos->InterruptNonMeleeSpells(false);
+        pMalygos->SetImmuneToPlayer(false);
 
         // Enter combat area - Move to ground point first, then start chasing target
         float fX, fY, fZ;
@@ -981,7 +981,7 @@ struct spell_align_disk_aggro : public SpellScript
 
         // start chasing players
         if (target->GetMotionMaster()->GetCurrentMovementGeneratorType() != CHASE_MOTION_TYPE)
-            target->GetMotionMaster()->MoveChase(caster->GetVictim());
+            target->GetMotionMaster()->MoveChase(caster->GetVictim(), 0.f, 0.f, false, false, false);
     }
 };
 

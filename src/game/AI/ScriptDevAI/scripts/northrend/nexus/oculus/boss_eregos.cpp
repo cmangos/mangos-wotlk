@@ -233,7 +233,7 @@ struct npc_planar_anomalyAI : public ScriptedAI
         // start chasing the summoner (player / vehicle)
         if (Unit* pSpawner = m_creature->GetSpawner())
         {
-            m_creature->GetMotionMaster()->MoveChase(pSpawner);
+            m_creature->GetMotionMaster()->MoveChase(pSpawner, 0.f, 0.f, false, false, false);
             m_spawnerGuid = pSpawner->GetObjectGuid();
         }
     }
