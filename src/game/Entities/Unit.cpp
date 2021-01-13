@@ -9780,6 +9780,8 @@ bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, boo
         if (visibleDistance <= 0 || GetDistance(viewPoint, true, DIST_CALC_NONE) > visibleDistance * visibleDistance)
             return false;
     }
+    else
+        return true; // Shadow Sight seems to allow ignoring LoS check (not confirmed 100%)
 
     // Now check is target visible with LoS
     float x, y, z;
