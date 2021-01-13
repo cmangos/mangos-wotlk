@@ -46,7 +46,7 @@ class instance_utgarde_keep : public ScriptedInstance
 
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
-
+        void OnCreatureRespawn(Creature* creature) override;
         void OnCreatureDeath(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;

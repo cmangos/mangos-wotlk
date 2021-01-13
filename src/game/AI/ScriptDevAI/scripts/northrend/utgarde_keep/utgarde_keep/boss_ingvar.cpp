@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Ingvar
-SD%Complete: 70%
-SDComment: TODO: correct timers, spell 42912 requires proper position fix in core
+SD%Complete: 90%
+SDComment: check timers,
 SDCategory: Utgarde Keep
 EndScriptData */
 
@@ -88,12 +88,12 @@ struct boss_ingvarAI : public ScriptedAI
 {
     boss_ingvarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_utgarde_keep*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_utgarde_keep* m_pInstance;
     bool m_bIsRegularMode;
 
     bool m_bIsResurrected;
@@ -348,11 +348,6 @@ struct boss_ingvarAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_ingvar(Creature* pCreature)
-{
-    return new boss_ingvarAI(pCreature);
-}
-
 /*######
 ## npc_annhylde
 ######*/
@@ -361,12 +356,12 @@ struct npc_annhyldeAI : public ScriptedAI
 {
     npc_annhyldeAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_utgarde_keep*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_utgarde_keep* m_pInstance;
 
     bool m_bIsRegularMode;
 
@@ -453,21 +448,16 @@ struct spell_summon_banshee : public SpellScript
     }
 };
 
-UnitAI* GetAI_npc_annhylde(Creature* pCreature)
-{
-    return new npc_annhyldeAI(pCreature);
-}
-
 void AddSC_boss_ingvar()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_ingvar";
-    pNewScript->GetAI = &GetAI_boss_ingvar;
+    pNewScript->GetAI = &GetNewAIInstance<boss_ingvarAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_annhylde";
-    pNewScript->GetAI = &GetAI_npc_annhylde;
+    pNewScript->GetAI = &GetNewAIInstance<npc_annhyldeAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_summon_banshee>("spell_summon_banshee");

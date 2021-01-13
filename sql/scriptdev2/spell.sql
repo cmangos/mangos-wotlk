@@ -223,6 +223,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(42672,'spell_frost_tomb_aura'),
 (42912,'spell_summon_banshee'),
 (43768,'spell_flying_machine_controls'),
 (43770,'spell_grappling_hook'),

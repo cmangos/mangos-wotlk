@@ -48,6 +48,17 @@ void instance_utgarde_keep::OnCreatureCreate(Creature* pCreature)
     }
 }
 
+void instance_utgarde_keep::OnCreatureRespawn(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_FROST_TOMB:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
+            break;
+    }
+}
+
 void instance_utgarde_keep::OnObjectCreate(GameObject* pGo)
 {
     switch (pGo->GetEntry())

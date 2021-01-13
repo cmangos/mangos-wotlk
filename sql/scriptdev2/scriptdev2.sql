@@ -5625,7 +5625,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1574021','%s casts Frost Tomb on $N','0','3','0','0','0','keleseth EMOTE_FROST_TOMB'),
 
 ('-1574022','%s roars!','0','3','0','0','0','ingvar EMOTE_ROAR'),
-('-1574023','Ingvar! Your pathetic failure will serve as a warning to all... you are damned! Arise and carry out the masters will!','13754','1','0','0','0','annhylde REZZ');
+('-1574023','Ingvar! Your pathetic failure will serve as a warning to all... you are damned! Arise and carry out the masters will!','13754','1','0','0','0','annhylde REZZ'),
+
+('-1574024','%s rises from the floor!','0','2','0','0','0','keleseth EMOTE_RISE_SKELETON');
 
 -- -1 575 000 UTGARDE PINNACLE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

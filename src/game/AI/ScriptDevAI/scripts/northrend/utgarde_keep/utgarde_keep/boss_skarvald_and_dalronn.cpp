@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Skarvald_and_Dalronn
-SD%Complete: 60%
-SDComment: TODO: correct timers
+SD%Complete: 90%
+SDComment: check timers
 SDCategory: Utgarde Keep
 EndScriptData */
 
@@ -78,12 +78,12 @@ struct boss_s_and_d_dummyAI : public ScriptedAI
 {
     boss_s_and_d_dummyAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_utgarde_keep*>(pCreature->GetInstanceData());
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
+    instance_utgarde_keep* m_pInstance;
     bool m_bIsRegularMode;
     ObjectGuid m_ghostGuid;
 
@@ -215,25 +215,26 @@ struct boss_skarvaldAI : public boss_s_and_d_dummyAI
         if (m_uiChargeTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-                DoCastSpellIfCan(pTarget, SPELL_CHARGE);
-
-            m_uiChargeTimer = urand(8000, 16000);
+            {
+                if (DoCastSpellIfCan(pTarget, SPELL_CHARGE) == CAST_OK)
+                    m_uiChargeTimer = urand(8000, 16000);
+            }
         }
         else
             m_uiChargeTimer -= uiDiff;
 
         if (m_uiEnrageTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature, SPELL_ENRAGE);
-            m_uiEnrageTimer = 20000;
+            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGE) == CAST_OK)
+                m_uiEnrageTimer = 20000;
         }
         else
             m_uiEnrageTimer -= uiDiff;
 
         if (m_uiStoneStrikeTimer < uiDiff)
         {
-            DoCastSpellIfCan(m_creature->GetVictim(), SPELL_STONE_STRIKE);
-            m_uiStoneStrikeTimer = urand(5000, 15000);
+            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_STONE_STRIKE) == CAST_OK)
+                m_uiStoneStrikeTimer = urand(5000, 15000);
         }
         else
             m_uiStoneStrikeTimer -= uiDiff;
@@ -241,11 +242,6 @@ struct boss_skarvaldAI : public boss_s_and_d_dummyAI
         DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_skarvald(Creature* pCreature)
-{
-    return new boss_skarvaldAI(pCreature);
-}
 
 /*######
 ## boss_dalronn
@@ -279,9 +275,10 @@ struct boss_dalronnAI : public boss_s_and_d_dummyAI
         if (m_uiDebilitateTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_DEBILITATE : SPELL_DEBILITATE_H);
-
-            m_uiDebilitateTimer = urand(12000, 20000);
+            {
+                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_DEBILITATE : SPELL_DEBILITATE_H) == CAST_OK)
+                    m_uiDebilitateTimer = urand(12000, 20000);
+            }
         }
         else
             m_uiDebilitateTimer -= uiDiff;
@@ -289,9 +286,10 @@ struct boss_dalronnAI : public boss_s_and_d_dummyAI
         if (m_uiShadowBoltTimer < uiDiff)
         {
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H);
-
-            m_uiShadowBoltTimer = urand(3000, 6000);
+            {
+                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H) == CAST_OK)
+                    m_uiShadowBoltTimer = urand(3000, 6000);
+            }
         }
         else
             m_uiShadowBoltTimer -= uiDiff;
@@ -301,9 +299,12 @@ struct boss_dalronnAI : public boss_s_and_d_dummyAI
             if (m_uiSkeletonTimer < uiDiff)
             {
                 if (!m_creature->FindGuardianWithEntry(NPC_SKELETAL))
-                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_SKELETONS);
-
-                m_uiSkeletonTimer = 30000;
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SKELETONS) == CAST_OK)
+                        m_uiSkeletonTimer = 30000;
+                }
+                else
+                    m_uiSkeletonTimer = 3000;
             }
             else
                 m_uiSkeletonTimer -= uiDiff;
@@ -313,20 +314,15 @@ struct boss_dalronnAI : public boss_s_and_d_dummyAI
     }
 };
 
-UnitAI* GetAI_boss_dalronn(Creature* pCreature)
-{
-    return new boss_dalronnAI(pCreature);
-}
-
 void AddSC_boss_skarvald_and_dalronn()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_skarvald";
-    pNewScript->GetAI = &GetAI_boss_skarvald;
+    pNewScript->GetAI = &GetNewAIInstance<boss_skarvaldAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_dalronn";
-    pNewScript->GetAI = &GetAI_boss_dalronn;
+    pNewScript->GetAI = &GetNewAIInstance<boss_dalronnAI>;
     pNewScript->RegisterSelf();
 }
