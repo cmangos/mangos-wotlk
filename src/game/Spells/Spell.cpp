@@ -7941,17 +7941,32 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
             default:                                            // normal case
                 if (exception != EXCEPTION_MAGNET && !IsIgnoreLosSpellEffect(m_spellInfo, eff))
                 {
-                    if (target != m_caster)
+                    float x, y, z;
+                    switch (info.los)
                     {
-                        if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_LOCATION_DYNOBJ_POSITION)
-                        {
-                            if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
-                                if (!target->IsWithinLOSInMap(dynObj, true))
-                                    return false;
-                        }
-                        else if (WorldObject* caster = GetCastingObject())
-                            if (!target->IsWithinLOSInMap(caster, true))
+                        case TARGET_LOS_DEST:
+                            m_targets.getDestination(x, y, z);
+                            if (!target->IsWithinLOS(x, y, z + target->GetCollisionHeight(), true))
                                 return false;
+                            break;
+                        case TARGET_LOS_SRC:
+                            m_targets.getSource(x, y, z);
+                            if (!target->IsWithinLOS(x, y, z + target->GetCollisionHeight(), true))
+                                return false;
+                            break;
+                        case TARGET_LOS_CASTER:
+                            if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_LOCATION_DYNOBJ_POSITION)
+                            {
+                                if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
+                                    if (!target->IsWithinLOSInMap(dynObj, true))
+                                        return false;
+                            }
+                            else if (WorldObject* caster = GetCastingObject())
+                            {
+                                if (!target->IsWithinLOSInMap(caster, true))
+                                    return false;
+                            }
+                            break;
                     }
                 }
                 break;
