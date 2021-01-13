@@ -10180,18 +10180,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     m_caster->CastSpell(m_caster, 50239, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 47958:                                 // Crystal Spikes
-                case 57083:                                 // Crystal Spikes (h2)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 47954, TRIGGERED_OLD_TRIGGERED);
-                    unitTarget->CastSpell(unitTarget, 47955, TRIGGERED_OLD_TRIGGERED);
-                    unitTarget->CastSpell(unitTarget, 47956, TRIGGERED_OLD_TRIGGERED);
-                    unitTarget->CastSpell(unitTarget, 47957, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 48603:                                 // High Executor's Branding Iron
                     // Torture the Torturer: High Executor's Branding Iron Impact
                     unitTarget->CastSpell(unitTarget, 48614, TRIGGERED_OLD_TRIGGERED);

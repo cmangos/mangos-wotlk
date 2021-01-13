@@ -268,7 +268,7 @@ bool EffectAuraDummy_spell_aura_dummy_crystal_spike_visual(const Aura* pAura, bo
 }
 
 /*######
-## spell_crystal_spikes - 57082
+## spell_crystal_spikes - 47958, 57082, 57083
 ######*/
 
 struct spell_crystal_spikes : public SpellScript
@@ -283,10 +283,20 @@ struct spell_crystal_spikes : public SpellScript
             return;
 
         // trigger spells that will summon creature 27101 around the caster
-        target->CastSpell(target, 57077, TRIGGERED_OLD_TRIGGERED);
-        target->CastSpell(target, 57078, TRIGGERED_OLD_TRIGGERED);
-        target->CastSpell(target, 57080, TRIGGERED_OLD_TRIGGERED);
-        target->CastSpell(target, 57081, TRIGGERED_OLD_TRIGGERED);
+        if (spell->m_spellInfo->Id == 47958)
+        {
+            target->CastSpell(target, 47954, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(target, 47955, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(target, 47956, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(target, 47957, TRIGGERED_OLD_TRIGGERED);
+        }
+        else
+        {
+            target->CastSpell(target, 57077, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(target, 57078, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(target, 57080, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(target, 57081, TRIGGERED_OLD_TRIGGERED);
+        }
     }
 };
 
