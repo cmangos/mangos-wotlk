@@ -451,7 +451,8 @@ void instance_blood_furnace::DoSortBroggokOrcs()
             {
                 if (GameObject* pDoor = instance->GetGameObject(i.m_cellGuid))
                 {
-                    if (pOrc->IsWithinDistInMap(pDoor, 15.0f) && pOrc->GetPositionZ() < 15.0f)
+                    Position orcPos = pOrc->GetRespawnPosition();
+                    if (pDoor->IsWithinDist3d(orcPos.x, orcPos.y, orcPos.z, 16.0f) && orcPos.GetPositionZ() < 15.0f)
                     {
                         i.m_sSortedOrcGuids.insert(pOrc->GetObjectGuid());
                         if (!pOrc->IsAlive())
