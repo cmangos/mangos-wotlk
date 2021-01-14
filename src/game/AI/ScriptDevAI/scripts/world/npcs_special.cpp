@@ -1454,6 +1454,7 @@ enum npc_burster_worm
     NPC_GREATER_CRUST_BURSTER           = 21380,
 
     // npcs that use bone bore
+    NPC_CRUST_BURSTER                   = 16844,
     NPC_BONE_CRAWLER                    = 21849,
     NPC_HAISHULUD                       = 22038,
     NPC_BONE_SIFTER                     = 22466,
@@ -1516,6 +1517,7 @@ struct npc_burster_wormAI : public CombatAI
     {
         switch (m_creature->GetEntry())
         {
+            case NPC_CRUST_BURSTER:
             case NPC_MARAUDING_BURSTER:
             case NPC_FULGORGE:
                 return SPELL_TUNNEL_BORE_RED_PASSIVE;
