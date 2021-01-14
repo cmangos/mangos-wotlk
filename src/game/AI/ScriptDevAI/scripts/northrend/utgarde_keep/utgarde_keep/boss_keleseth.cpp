@@ -210,8 +210,6 @@ struct boss_kelesethAI : public RangedCombatAI
 {
     boss_kelesethAI(Creature* creature) : RangedCombatAI(creature, KELESETH_ACTION_MAX), m_instance(static_cast<instance_utgarde_keep*>(creature->GetInstanceData()))
     {
-        DoCastSpellIfCan(m_creature, SPELL_CUSTOM_WALK);
-
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
 
         AddCombatAction(KELESETH_ACTION_SUMMON_ADDS, 5000u);
@@ -231,6 +229,11 @@ struct boss_kelesethAI : public RangedCombatAI
 
         if (m_instance)
             m_instance->SetData(TYPE_KELESETH, IN_PROGRESS);
+    }
+
+    void JustRespawned() override
+    {
+        DoCastSpellIfCan(m_creature, SPELL_CUSTOM_WALK);
     }
 
     void SummonAdds()
