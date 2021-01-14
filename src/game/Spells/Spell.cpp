@@ -7955,16 +7955,19 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
                                 return false;
                             break;
                         case TARGET_LOS_CASTER:
-                            if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_LOCATION_DYNOBJ_POSITION)
+                            if (target != m_caster)
                             {
-                                if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
-                                    if (!target->IsWithinLOSInMap(dynObj, true))
+                                if (m_spellInfo->EffectImplicitTargetA[eff] == TARGET_LOCATION_DYNOBJ_POSITION)
+                                {
+                                    if (DynamicObject* dynObj = m_caster->GetDynObject(m_triggeredByAuraSpell ? m_triggeredByAuraSpell->Id : m_spellInfo->Id))
+                                        if (!target->IsWithinLOSInMap(dynObj, true))
+                                            return false;
+                                }
+                                else if (WorldObject* caster = GetCastingObject())
+                                {
+                                    if (!target->IsWithinLOSInMap(caster, true))
                                         return false;
-                            }
-                            else if (WorldObject* caster = GetCastingObject())
-                            {
-                                if (!target->IsWithinLOSInMap(caster, true))
-                                    return false;
+                                }
                             }
                             break;
                     }
