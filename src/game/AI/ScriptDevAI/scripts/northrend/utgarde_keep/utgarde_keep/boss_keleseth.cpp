@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "utgarde_keep.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
@@ -197,49 +198,39 @@ struct mob_vrykul_skeletonAI : public ScriptedAI
 ## boss_keleseth
 ######*/
 
-struct boss_kelesethAI : public ScriptedAI
+enum KelesethActions
 {
-    boss_kelesethAI(Creature* pCreature) : ScriptedAI(pCreature)
+    KELESETH_ACTION_SUMMON_ADDS,
+    KELESETH_ACTION_FROST_TOMB,
+    KELESETH_ACTION_SHADOW_BOLT,
+    KELESETH_ACTION_MAX
+};
+
+struct boss_kelesethAI : public RangedCombatAI
+{
+    boss_kelesethAI(Creature* creature) : RangedCombatAI(creature, KELESETH_ACTION_MAX), m_instance(static_cast<instance_utgarde_keep*>(creature->GetInstanceData()))
     {
-        m_pInstance = static_cast<instance_utgarde_keep*>(pCreature->GetInstanceData());
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        DoCastSpellIfCan(m_creature, SPELL_CUSTOM_WALK);
+
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
+
+        AddCombatAction(KELESETH_ACTION_SUMMON_ADDS, 5000u);
+        AddCombatAction(KELESETH_ACTION_FROST_TOMB, 20000u);
+        AddCombatAction(KELESETH_ACTION_SHADOW_BOLT, 0u);
+        AddMainSpell(m_isRegularMode ? SPELL_SHADOWBOLT : SPELL_SHADOWBOLT_H);
+        SetRangedMode(true, 20.f, TYPE_PROXIMITY);
     }
 
-    instance_utgarde_keep* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiFrostTombTimer;
-    uint32 m_uiSummonTimer;
-    uint32 m_uiShadowboltTimer;
-
-    void Reset() override
-    {
-        // timers need confirmation
-        m_uiFrostTombTimer = 20000;
-        m_uiSummonTimer = 5000 ;
-        m_uiShadowboltTimer = 0;
-    }
-
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-
-            m_creature->GetMotionMaster()->MoveChase(pWho, ATTACK_DISTANCE * 4);
-        }
-    }
+    instance_utgarde_keep* m_instance;
+    bool m_isRegularMode;
 
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
         m_creature->RemoveAurasDueToSpell(SPELL_CUSTOM_WALK);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KELESETH, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_KELESETH, IN_PROGRESS);
     }
 
     void SummonAdds()
@@ -252,61 +243,49 @@ struct boss_kelesethAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KELESETH, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_KELESETH, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KELESETH, FAIL);
+        DoCastSpellIfCan(m_creature, SPELL_CUSTOM_WALK);
+
+        if (m_instance)
+            m_instance->SetData(TYPE_KELESETH, FAIL);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* victim) override
     {
+        RangedCombatAI::KilledUnit(victim);
+
         DoScriptText(SAY_KILL, m_creature);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiSummonTimer)
+        switch (action)
         {
-            if (m_uiSummonTimer <= uiDiff)
-            {
+            case KELESETH_ACTION_SUMMON_ADDS:
                 SummonAdds();
-                m_uiSummonTimer = 0;
-            }
-            else
-                m_uiSummonTimer -= uiDiff;
-        }
-
-        if (m_uiShadowboltTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_SHADOWBOLT : SPELL_SHADOWBOLT_H) == CAST_OK)
-                m_uiShadowboltTimer = 3000;
-        }
-        else
-            m_uiShadowboltTimer -= uiDiff;
-
-        if (m_uiFrostTombTimer < uiDiff)
-        {
-            if (Unit* pTombTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SUMMON_FROST_TOMB, SELECT_FLAG_PLAYER))
-            {
-                if (DoCastSpellIfCan(pTombTarget, SPELL_FROST_TOMB_TARGET) == CAST_OK)
+                DisableCombatAction(action);
+                break;
+            case KELESETH_ACTION_SHADOW_BOLT:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_SHADOWBOLT : SPELL_SHADOWBOLT_H) == CAST_OK)
+                    ResetCombatAction(action, 3000u);
+                break;
+            case KELESETH_ACTION_FROST_TOMB:
+                if (Unit* pTombTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SUMMON_FROST_TOMB, SELECT_FLAG_PLAYER))
                 {
-                    DoScriptText(SAY_FROSTTOMB, m_creature);
-                    DoScriptText(EMOTE_FROST_TOMB, m_creature, pTombTarget);
-                    m_uiFrostTombTimer = 25000;
+                    if (DoCastSpellIfCan(pTombTarget, SPELL_FROST_TOMB_TARGET) == CAST_OK)
+                    {
+                        DoScriptText(SAY_FROSTTOMB, m_creature);
+                        DoScriptText(EMOTE_FROST_TOMB, m_creature, pTombTarget);
+                        ResetCombatAction(action, 25000u);
+                    }
                 }
-            }
+                break;
         }
-        else
-            m_uiFrostTombTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
