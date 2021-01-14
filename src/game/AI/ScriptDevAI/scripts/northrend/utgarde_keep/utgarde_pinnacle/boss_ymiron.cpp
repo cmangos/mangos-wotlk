@@ -430,7 +430,11 @@ struct spell_create_spirit_fount_beam_aura : public AuraScript
             return;
 
         if (!apply)
+        {
             target->CastSpell(target, target->GetMap()->IsRegularDifficulty() ? 48380 : 59320, TRIGGERED_OLD_TRIGGERED);
+            target->SetImmuneToNPC(false);
+            target->SetImmuneToPlayer(false);
+        }
     }
 };
 
