@@ -185,7 +185,7 @@ struct boss_swamplord_muselekAI : public RangedCombatAI
                 if (!GetCurrentRangedMode())
                     return;
 
-                uint32 RangedSpell = urand(0, 2) ? SPELL_SHOOT : SPELL_MULTI_SHOT; // 66% shoot, 33% multishot
+                uint32 RangedSpell = urand(0, 4) ? SPELL_SHOOT : SPELL_MULTI_SHOT; // 66% shoot, 33% multishot
                 if (DoCastSpellIfCan(m_creature->GetVictim(), RangedSpell) == CAST_OK)
                     ResetCombatAction(action, GetSubsequentActionTimer(action));
                 return;
