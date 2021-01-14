@@ -505,7 +505,6 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_questRewardTalentCount = 0;
 
     m_regenTimer = 0;
-    m_weaponChangeTimer = 0;
 
     m_zoneUpdateId = 0;
     m_zoneUpdateTimer = 0;
@@ -1554,14 +1553,6 @@ void Player::Update(const uint32 diff)
             m_positionStatusUpdateTimer = 0;
         else
             m_positionStatusUpdateTimer -= diff;
-    }
-
-    if (m_weaponChangeTimer > 0)
-    {
-        if (diff >= m_weaponChangeTimer)
-            m_weaponChangeTimer = 0;
-        else
-            m_weaponChangeTimer -= diff;
     }
 
     if (m_zoneUpdateTimer > 0)
@@ -10843,9 +10834,6 @@ InventoryResult Player::CanEquipItem(uint8 slot, uint16& dest, Item* pItem, bool
                 if (GetSession()->isLogingOut())
                     return EQUIP_ERR_YOU_ARE_STUNNED;
 
-                if (IsInCombat() && pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer != 0)
-                    return EQUIP_ERR_CANT_DO_RIGHT_NOW;     // maybe exist better err
-
                 if (IsNonMeleeSpellCasted(false))
                     return EQUIP_ERR_CANT_DO_RIGHT_NOW;
 
@@ -11530,7 +11518,7 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
             ApplyItemOnStoreSpell(pItem, true);
 
             // Weapons and also Totem/Relic/Sigil/etc
-            if (pProto && IsInCombat() && (pProto->Class == ITEM_CLASS_WEAPON || pProto->InventoryType == INVTYPE_RELIC) && m_weaponChangeTimer == 0)
+            if (pProto && IsInCombat() && (pProto->Class == ITEM_CLASS_WEAPON || pProto->InventoryType == INVTYPE_RELIC))
             {
                 uint32 cooldownSpell = SPELL_ID_WEAPON_SWITCH_COOLDOWN_1_5s;
 
@@ -11543,7 +11531,6 @@ Item* Player::EquipItem(uint16 pos, Item* pItem, bool update)
                     sLog.outError("Weapon switch cooldown spell %u couldn't be found in Spell.dbc", cooldownSpell);
                 else
                 {
-                    m_weaponChangeTimer = spellProto->StartRecoveryTime;
                     AddGCD(*spellProto, 0, true);
                 }
             }
