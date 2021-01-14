@@ -74,7 +74,7 @@ struct boss_swamplord_muselekAI : public RangedCombatAI
     {
         AddTimerlessCombatAction(MUSELEK_TRAP_ONE, true);
         AddTimerlessCombatAction(MUSELEK_TRAP_TWO, true);
-        AddTimerlessCombatAction(MUSELEK_AIMED_SHOT, true);
+        AddTimerlessCombatAction(MUSELEK_AIMED_SHOT, false);
         AddCombatAction(MUSELEK_ACTION_KNOCK_AWAY, 25000, 30000);
         AddCombatAction(MUSELEK_ACTION_RAPTOR_STRIKE, 1500, 4000);
         AddCombatAction(MUSELEK_ACTION_BEAR_COMMAND, 8000, 12000);
@@ -197,11 +197,6 @@ struct boss_swamplord_muselekAI : public RangedCombatAI
                 return;
             }
         }
-    }
-
-    void DistancingStarted()
-    {
-        SetCombatScriptStatus(true);
     }
     
     void DistancingEnded() override
