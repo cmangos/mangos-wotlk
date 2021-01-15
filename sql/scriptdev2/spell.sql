@@ -556,7 +556,13 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (30404,'spell_unstable_affliction'),
 (30405,'spell_unstable_affliction'),
 (32379,'spell_shadow_word_death'),
-(32996,'spell_shadow_word_death');
+(32996,'spell_shadow_word_death'),
+(19505,'spell_devour_magic'),
+(19731,'spell_devour_magic'),
+(19734,'spell_devour_magic'),
+(19736,'spell_devour_magic'),
+(27276,'spell_devour_magic'),
+(27277,'spell_devour_magic');
 
 -- Pet Scaling
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
