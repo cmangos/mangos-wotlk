@@ -42,6 +42,7 @@ spell 51331
 spell 51332
 spell 51366
 spell 52090
+spell 52419
 spell 56099
 EndContentData */
 
@@ -1166,6 +1167,17 @@ struct TKDive : public SpellScript
     }
 };
 
+struct deflection : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool/* strict*/) const override
+    {
+        if (spell->GetCaster()->GetHealthPercent() > 35.f)
+            return SPELL_FAILED_FIZZLE;
+        return SPELL_CAST_OK;
+    }
+};
+
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1190,4 +1202,5 @@ void AddSC_spell_scripts()
     RegisterSpellScript<RaiseDead>("spell_raise_dead");
     RegisterSpellScript<SplitDamage>("spell_split_damage");
     RegisterSpellScript<TKDive>("spell_tk_dive");
+    RegisterSpellScript<deflection>("spell_deflection");
 }
