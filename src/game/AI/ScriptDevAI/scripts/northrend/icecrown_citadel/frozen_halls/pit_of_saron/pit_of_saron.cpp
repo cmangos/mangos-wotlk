@@ -26,6 +26,8 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "pit_of_saron.h"
+#include "Spells/SpellAuras.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -181,6 +183,26 @@ bool AreaTrigger_at_pit_of_saron(Player* pPlayer, AreaTriggerEntry const* pAt)
     return false;
 }
 
+/*######
+## spell_necromantic_power - 69347
+######*/
+
+struct spell_necromantic_power : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        // ToDo: handle the transformation of npcs
+        // spells involved: 28728, 69350, SetLevitate(true)
+    }
+};
+
 void AddSC_pit_of_saron()
 {
     Script* pNewScript = new Script;
@@ -198,4 +220,6 @@ void AddSC_pit_of_saron()
     pNewScript->Name = "at_pit_of_saron";
     pNewScript->pAreaTrigger = &AreaTrigger_at_pit_of_saron;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_necromantic_power>("spell_necromantic_power");
 }

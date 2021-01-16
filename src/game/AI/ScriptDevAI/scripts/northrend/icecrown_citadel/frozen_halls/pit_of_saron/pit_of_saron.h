@@ -55,6 +55,16 @@ enum
     NPC_FREE_ALLIANCE_SLAVE_1       = 37572,
     NPC_FREE_ALLIANCE_SLAVE_2       = 37575,
     NPC_FREE_ALLIANCE_SLAVE_3       = 37576,
+    NPC_HORDE_SLAVE_1               = 36770,
+    NPC_HORDE_SLAVE_2               = 36771,
+    NPC_HORDE_SLAVE_3               = 36772,
+    NPC_HORDE_SLAVE_4               = 36773,
+    NPC_ALLIANCE_SLAVE_1            = 36764,
+    NPC_ALLIANCE_SLAVE_2            = 36765,
+    NPC_ALLIANCE_SLAVE_3            = 36766,
+    NPC_ALLIANCE_SLAVE_4            = 36767,
+
+    NPC_FORGEMASTER_STALKER         = 36495,                // used to mark Garfrost jump locations
 
     // Ambush npcs
     NPC_YMIRJAR_DEATHBRINGER        = 36892,
@@ -72,6 +82,7 @@ enum
 
     GO_ICEWALL                      = 201885,               // open after gafrost/krick
     GO_HALLS_OF_REFLECT_PORT        = 201848,               // unlocked by jaina/sylvanas at last outro
+    GO_SARONITE_ROCK                = 196485,
 
     AREATRIGGER_ID_TUNNEL_START     = 5578,
     AREATRIGGER_ID_TUNNEL_END       = 5581,
@@ -182,6 +193,7 @@ class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
         GuidList m_lAmbushNpcsGuidList;
         GuidList m_lArcaneShieldBunniesGuidList;
         GuidList m_lFrozenAftermathBunniesGuidList;
+        GuidList m_lSaroniteRockGuidList;
 };
 
 #endif

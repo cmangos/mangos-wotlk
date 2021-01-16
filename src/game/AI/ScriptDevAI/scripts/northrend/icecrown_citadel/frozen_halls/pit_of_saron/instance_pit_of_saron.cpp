@@ -262,6 +262,9 @@ void instance_pit_of_saron::OnObjectCreate(GameObject* pGo)
             break;
         case GO_HALLS_OF_REFLECT_PORT:
             break;
+        case GO_SARONITE_ROCK:
+            m_lSaroniteRockGuidList.push_back(pGo->GetObjectGuid());
+            break;
 
         default:
             return;
@@ -276,6 +279,14 @@ void instance_pit_of_saron::SetData(uint32 uiType, uint32 uiData)
         case TYPE_GARFROST:
             if (uiData == DONE && m_auiEncounter[TYPE_KRICK] == DONE)
                 DoUseDoorOrButton(GO_ICEWALL);
+            if (uiData == DONE || uiData == FAIL)
+            {
+                for (const auto& guid : m_lSaroniteRockGuidList)
+                    if (GameObject* pRock = instance->GetGameObject(guid))
+                        pRock->SetLootState(GO_JUST_DEACTIVATED);
+
+                m_lSaroniteRockGuidList.clear();
+            }
             if (uiData == IN_PROGRESS)
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_DOESNT_GO_ELEVEN, true);
             else if (uiData == DONE)
