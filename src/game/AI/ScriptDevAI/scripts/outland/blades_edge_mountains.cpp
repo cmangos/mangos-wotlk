@@ -1762,16 +1762,6 @@ struct npc_frequency_scanner : public ScriptedAI
         static_cast<go_aura_generator_000AI*>(go->AI())->m_player = m_creature->GetSpawnerGuid();
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* pInvoker, uint32 /*uiMiscValue*/) override
-    {
-        if (eventType == AI_EVENT_CUSTOM_A)
-        {
-            m_guidWyrm = pInvoker->GetObjectGuid();
-            pInvoker->CastSpell(nullptr, SPELL_SUMMON_SINGING_RIDGE_VOID_STORM, TRIGGERED_NONE);
-            m_uiAttackOwnerTimer = 3000;
-        }
-    }
-
     void UpdateAI(const uint32 uiDiff) override
     {
         if (m_uiOscillationFieldTimer <= uiDiff)
@@ -1781,33 +1771,6 @@ struct npc_frequency_scanner : public ScriptedAI
         }
         else
             m_uiOscillationFieldTimer -= uiDiff;
-
-        if (m_uiAttackOwnerTimer)
-        {
-            if (m_uiAttackOwnerTimer <= uiDiff)
-            {
-                if (m_bAttack)
-                {
-                    m_uiAttackOwnerTimer = 0;
-                    if (Unit* owner = m_creature->GetSpawner())
-                        if (Creature* creature = m_creature->GetMap()->GetCreature(m_guidWyrm))
-                            creature->AI()->AttackStart(owner);
-                }
-                else
-                {
-                    m_uiAttackOwnerTimer = 1000;
-                    m_bAttack = true;
-                    if (Creature* creature = m_creature->GetMap()->GetCreature(m_guidWyrm))
-                    {
-                        creature->SetDisplayId(MODEL_WYRM_FROM_BEYOND);
-                        creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-                    }
-                }                
-            }
-            else
-                m_uiAttackOwnerTimer -= uiDiff;
-        }        
     }
 };
 
