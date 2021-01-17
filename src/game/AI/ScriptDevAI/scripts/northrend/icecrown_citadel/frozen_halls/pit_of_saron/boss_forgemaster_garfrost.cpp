@@ -215,7 +215,7 @@ struct boss_forgemaster_garfrostAI : public CombatAI
                     m_creature->SetTarget(m_creature->GetVictim());
                     m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
                 }
-                SetActionReadyStatus(action, false);
+                DisableCombatAction(action);
                 break;
             case GARFROST_FROZEN_BLADE:
                 if (m_creature->GetHealthPercent() < 66.0f)
@@ -230,7 +230,7 @@ struct boss_forgemaster_garfrostAI : public CombatAI
                         m_creature->SetTarget(nullptr);
 
                         SetActionReadyStatus(action, false);
-                        SetActionReadyStatus(GARFROST_THROW_SARONITE, false);
+                        DisableCombatAction(GARFROST_THROW_SARONITE);
                     }
                 }
                 break;
@@ -249,8 +249,8 @@ struct boss_forgemaster_garfrostAI : public CombatAI
                         m_creature->SetTarget(nullptr);
 
                         SetActionReadyStatus(action, false);
-                        SetActionReadyStatus(GARFROST_CHILLING_WAVE, false);
-                        SetActionReadyStatus(GARFROST_THROW_SARONITE, false);
+                        DisableCombatAction(GARFROST_CHILLING_WAVE);
+                        DisableCombatAction(GARFROST_THROW_SARONITE);
                     }
                 }
                 break;
