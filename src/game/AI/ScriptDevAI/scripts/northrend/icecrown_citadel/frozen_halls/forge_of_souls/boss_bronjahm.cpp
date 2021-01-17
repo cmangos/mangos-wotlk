@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_bronjahm
-SD%Complete: 90%
-SDComment: Small unknown behaviour for his Shadow Bold use in phase 1; Soulstorm needs additional handling in core
+SD%Complete: 100%
+SDComment:
 SDCategory: The Forge of Souls
 EndScriptData */
 

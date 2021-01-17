@@ -54,9 +54,9 @@ enum
     SPELL_PHANTOM_BLAST         = 68982,
     SPELL_PHANTOM_BLAST_H       = 70322,
     SPELL_WELL_OF_SOULS         = 68820,                    // spawns 36536, this one should cast 68854 (triggers normal dmg spell 68863 ) - 68855(visual) - 72630 (visual)
-    SPELL_WELL_OF_SOULS_TRIGGER = 68854,
-    SPELL_WELL_OF_SOULS_VISUAL1 = 68855,
-    SPELL_WELL_OF_SOULS_VISUAL2 = 72630,
+    SPELL_WELL_OF_SOULS_TRIGGER = 68854,                    // damage aura
+    SPELL_WELL_OF_SOULS_VISUAL1 = 68855,                    // visual aura
+    SPELL_WELL_OF_SOULS_VISUAL2 = 72630,                    // use unk
 
     SPELL_MIRRORED_SOUL         = 69048,                    // selecting target, applying aura 69023 to pass on dmg, dmg triggers 69034 with right amount
     SPELL_UNLEASHED_SOULS       = 68939,                    // trigger (68967, select nearby target trigger 68979(summon 36595)), transform, root
@@ -102,8 +102,6 @@ struct boss_devourer_of_soulsAI : public ScriptedAI
     uint32 m_uiWailingTimer;
     uint32 m_uiEndPhaseTimer;
 
-    GuidList m_lWellGuids;
-
     void Reset() override
     {
         m_uiFace = FACE_NORMAL;
@@ -138,13 +136,6 @@ struct boss_devourer_of_soulsAI : public ScriptedAI
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_DEVOURER_OF_SOULS, DONE);
-
-        for (GuidList::const_iterator itr = m_lWellGuids.begin(); itr != m_lWellGuids.end(); ++itr)
-        {
-            if (Creature* pWell = m_creature->GetMap()->GetCreature(*itr))
-                pWell->ForcedDespawn();
-        }
-        m_lWellGuids.clear();
     }
 
     void JustReachedHome() override
@@ -155,24 +146,16 @@ struct boss_devourer_of_soulsAI : public ScriptedAI
             // If we previously failed, set such that possible to try again
             m_pInstance->SetData(TYPE_ACHIEV_PHANTOM_BLAST, IN_PROGRESS);
         }
-
-        for (GuidList::const_iterator itr = m_lWellGuids.begin(); itr != m_lWellGuids.end(); ++itr)
-        {
-            if (Creature* pWell = m_creature->GetMap()->GetCreature(*itr))
-                pWell->ForcedDespawn();
-        }
-        m_lWellGuids.clear();
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
         if (pSummoned->GetEntry() == NPC_WELL_OF_SOULS)
         {
-            m_lWellGuids.push_back(pSummoned->GetObjectGuid());
-            pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_TRIGGER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-            // Commented as of not stacking auras
-            // pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_VISUAL1, TRIGGERED_OLD_TRIGGERED);
-            // pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_VISUAL2, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->AI()->SetReactState(REACT_PASSIVE);
+            pSummoned->SetCanEnterCombat(false);
+            pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_TRIGGER, TRIGGERED_OLD_TRIGGERED);
+            pSummoned->CastSpell(pSummoned, SPELL_WELL_OF_SOULS_VISUAL1, TRIGGERED_OLD_TRIGGERED);
         }
         else if (pSummoned->GetEntry() == NPC_UNLEASHED_SOUL)
         {
