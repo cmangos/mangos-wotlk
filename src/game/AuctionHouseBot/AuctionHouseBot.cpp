@@ -210,9 +210,9 @@ void AuctionHouseBot::Update()
             if (iterator == m_itemData.end() || iterator->second.AddChance == 0)
             {
                 if (prototype->Bonding == BIND_WHEN_PICKED_UP || prototype->Bonding == BIND_QUEST_ITEM)
-                    continue; // nor BoP and quest items
+                    continue; // no BoP and quest items
                 if (prototype->Flags & ITEM_FLAG_HAS_LOOT)
-                    continue; // no items containing loot
+                    continue; // nor items containing loot
                 if (m_itemValue[prototype->Quality][prototype->Class] == 0)
                     continue; // item class is filtered out
             }
@@ -241,6 +241,8 @@ void AuctionHouseBot::Update()
             if (auction->owner == 0 && auction->bid == 0)
                 continue; // ignore bidding/buying auctions that were created by ahbot and not bidded on by player
             Item* item = sAuctionMgr.GetAItem(auction->itemGuidLow);
+            if (!item)
+                continue; // shouldn't happen, but apparently it does(?)
             auto prototype = item->GetProto();
             if (!prototype)
                 continue; // shouldn't happen
