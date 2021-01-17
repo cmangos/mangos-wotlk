@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "forge_of_souls.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
@@ -49,49 +50,48 @@ enum
     SPELL_FEAR                  = 68950,
 };
 
-struct boss_bronjahmAI : public ScriptedAI
+enum KelesethActions
 {
-    boss_bronjahmAI(Creature* pCreature) : ScriptedAI(pCreature)
+    BRONJAHM_ACTION_SHADOW_BOLT,
+    BRONJAHM_ACTION_MAGIC_BANE,
+    BRONJAHM_ACTION_FEAR,
+    BRONJAHM_ACTION_TELEPORT,
+    BRONJAHM_ACTION_CORRUPT_SOUL,
+    BRONJAHM_ACTION_MAX
+};
+
+struct boss_bronjahmAI : public RangedCombatAI
+{
+    boss_bronjahmAI(Creature* creature) : RangedCombatAI(creature, BRONJAHM_ACTION_MAX), m_instance(static_cast<instance_forge_of_souls*>(creature->GetInstanceData()))
     {
-        m_pInstance = static_cast<instance_forge_of_souls*>(pCreature->GetInstanceData());
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddCombatAction(BRONJAHM_ACTION_MAGIC_BANE, 8000u, 12000U);
+        AddCombatAction(BRONJAHM_ACTION_CORRUPT_SOUL, 20000u, 30000u);
+        AddCombatAction(BRONJAHM_ACTION_SHADOW_BOLT, 2000u);
+        AddCombatAction(BRONJAHM_ACTION_FEAR, true);
+        AddTimerlessCombatAction(BRONJAHM_ACTION_TELEPORT, true);
+        AddMainSpell(SPELL_SHADOW_BOLT);
+        SetRangedMode(true, 20.f, TYPE_PROXIMITY);
     }
 
-    instance_forge_of_souls* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint8 m_uiPhase;
-
-    uint32 m_uiMagicsBaneTimer;
-    uint32 m_uiCorruptSoulTimer;
-    uint32 m_uiFearTimer;
-    uint32 m_uiShadowboltTimer;
-
-    void Reset() override
-    {
-        m_uiPhase = 0;
-        m_uiMagicsBaneTimer = urand(8000, 12000);
-        m_uiCorruptSoulTimer = urand(20000, 30000);
-        m_uiFearTimer = 1000;
-        m_uiShadowboltTimer = 5000;
-        SetCombatMovement(true);
-    }
+    instance_forge_of_souls* m_instance;
 
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(urand(0, 1) ? SAY_AGGRO_1 : SAY_AGGRO_2, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BRONJAHM, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_BRONJAHM, IN_PROGRESS);
 
         // Remove OOC visual soulstorm effect (added in creature_template_addon
+        m_creature->InterruptNonMeleeSpells(false);
         m_creature->RemoveAurasDueToSpell(SPELL_SOULSTORM_VISUAL_OOC);
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void KilledUnit(Unit* victim) override
     {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
+        RangedCombatAI::KilledUnit(victim);
+
+        if (victim->GetTypeId() != TYPEID_PLAYER)
             return;
 
         if (urand(0, 1))
@@ -102,14 +102,21 @@ struct boss_bronjahmAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BRONJAHM, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_BRONJAHM, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_BRONJAHM, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_BRONJAHM, FAIL);
+
+        SetCombatMovement(true);
+    }
+
+    void JustRespawned() override
+    {
+        SetCombatMovement(true);
     }
 
     void SpellHitTarget(Unit* pTarget, SpellEntry const* pSpellEntry) override
@@ -120,90 +127,63 @@ struct boss_bronjahmAI : public ScriptedAI
             DoScriptText(SAY_SOULSTORM, m_creature);
             DoCastSpellIfCan(m_creature, SPELL_SOULSTORM_VISUAL, CAST_TRIGGERED | CAST_INTERRUPT_PREVIOUS);
             DoCastSpellIfCan(m_creature, SPELL_SOULSTORM, CAST_INTERRUPT_PREVIOUS);
+
+            // enable phase 2 spells
+            SetCombatMovement(false);
+            ResetCombatAction(BRONJAHM_ACTION_FEAR, urand(1000, 2000));
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiPhase == 0)                                 // Phase 1
+        switch (action)
         {
-            // Switching Phase, Soulstorm is cast in SpellHitTarget
-            if (m_creature->GetHealthPercent() < 30.0f)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
-                    m_uiPhase = 1;
-            }
-
-            // Corrupt Soul
-            if (m_uiCorruptSoulTimer < uiDiff)
-            {
+            case BRONJAHM_ACTION_MAGIC_BANE:
+                if (DoCastSpellIfCan(m_creature, SPELL_MAGICS_BANE) == CAST_OK)
+                    ResetCombatAction(action, urand(7000, 15000));
+                break;
+            case BRONJAHM_ACTION_CORRUPT_SOUL:
                 if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
                     if (DoCastSpellIfCan(pTarget, SPELL_CORRUPT_SOUL) == CAST_OK)
                     {
                         DoScriptText(SAY_CORRUPT_SOUL, m_creature);
-                        m_uiCorruptSoulTimer = urand(20000, 30000);
+                        ResetCombatAction(action, urand(20000, 30000));
                     }
                 }
-            }
-            else
-                m_uiCorruptSoulTimer -= uiDiff;
-
-            // Magic's Bane
-            if (m_uiMagicsBaneTimer < uiDiff)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_MAGICS_BANE) == CAST_OK)
-                    m_uiMagicsBaneTimer = urand(7000, 15000);
-            }
-            else
-                m_uiMagicsBaneTimer -= uiDiff;
-
-            // Used to prevent Shadowbolt-Casting on Aggro for a few seconds
-            if (m_uiShadowboltTimer <= uiDiff)
-                m_uiShadowboltTimer = 0;
-            else
-                m_uiShadowboltTimer -= uiDiff;
-
-            // Use ShadowBolt as default attack if victim is not in range
-            // TODO - not entirely clear how this works in case the tank is out of shadow-bolt range
-            if (!m_uiShadowboltTimer && !m_creature->CanReachWithMeleeAttack(m_creature->GetVictim()) && m_creature->GetDistance(m_creature->GetVictim(), true, DIST_CALC_COMBAT_REACH) < 20.0f)
-            {
-                if (IsCombatMovement())
+                break;
+            case BRONJAHM_ACTION_SHADOW_BOLT:
+                if (m_creature->GetHealthPercent() < 30.0f)
                 {
-                    SetCombatMovement(false);
-                    m_creature->GetMotionMaster()->MoveIdle();
-                    m_creature->StopMoving();
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_BOLT) == CAST_OK)
+                            ResetCombatAction(action, urand(1000, 2000));
+                    }
                 }
-                DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOW_BOLT);
-            }
-            else
-            {
-                if (!IsCombatMovement())
+                else
                 {
-                    SetCombatMovement(true);
-                    m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
-                    m_uiShadowboltTimer = 2000;             // Give some time to chase
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_SHADOW_BOLT) == CAST_OK)
+                        ResetCombatAction(action, urand(1000, 2000));
                 }
-
-                DoMeleeAttackIfReady();
-            }
-        }
-        else                                                // Soulstorm Phase
-        {
-            if (m_uiFearTimer < uiDiff)
-            {
+                break;
+            case BRONJAHM_ACTION_FEAR:
                 if (DoCastSpellIfCan(m_creature, SPELL_FEAR) == CAST_OK)
-                    m_uiFearTimer = urand(10000, 15000);
-            }
-            else
-                m_uiFearTimer -= uiDiff;
+                    ResetCombatAction(action, urand(10000, 15000));
+                break;
+            case BRONJAHM_ACTION_TELEPORT:
+                if (m_creature->GetHealthPercent() < 30.0f)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_TELEPORT) == CAST_OK)
+                    {
+                        // prepare phase 2; disable phase 1 spells
+                        SetActionReadyStatus(action, false);
 
-            // Default attack
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                DoCastSpellIfCan(pTarget, SPELL_SHADOW_BOLT);
+                        DisableCombatAction(BRONJAHM_ACTION_MAGIC_BANE);
+                        DisableCombatAction(BRONJAHM_ACTION_CORRUPT_SOUL);
+                    }
+                }
+                break;
         }
     }
 };
@@ -212,44 +192,40 @@ struct npc_corrupted_soul_fragmentAI : public ScriptedAI
 {
     npc_corrupted_soul_fragmentAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = static_cast<instance_forge_of_souls*>(pCreature->GetInstanceData());
+        m_instance = static_cast<instance_forge_of_souls*>(pCreature->GetInstanceData());
         DoCastSpellIfCan(m_creature, SPELL_BANISH_VISUAL);
+        SetReactState(REACT_PASSIVE);
         Reset();
     }
 
-    instance_forge_of_souls* m_pInstance;
+    instance_forge_of_souls* m_instance;
 
-    void Reset() override
+    void Reset() override { }
+
+    void JustRespawned() override
     {
-        SetCombatMovement(true);
+        if (m_instance)
+            if (Creature* pBronjahm = m_instance->GetSingleCreatureFromStorage(NPC_BRONJAHM))
+                m_creature->GetMotionMaster()->MoveChase(pBronjahm, 0.f, 0.f, false, true, false);
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetGuid(DATA_SOULFRAGMENT_REMOVE, m_creature->GetObjectGuid());
+        if (m_instance)
+            m_instance->SetGuid(DATA_SOULFRAGMENT_REMOVE, m_creature->GetObjectGuid());
     }
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (pWho->GetEntry() == NPC_BRONJAHM)
+        if (pWho->GetEntry() == NPC_BRONJAHM && m_creature->IsWithinDistInMap(pWho, CONTACT_DISTANCE * 3))
         {
-            if (m_creature->IsWithinDistInMap(pWho, INTERACTION_DISTANCE))
-            {
-                DoCastSpellIfCan(pWho, SPELL_CONSUME_SOUL_TRIGGER, CAST_TRIGGERED);
+            DoCastSpellIfCan(pWho, SPELL_CONSUME_SOUL_TRIGGER, CAST_TRIGGERED);
 
-                // Inform the instance about a used soul fragment
-                if (m_pInstance)
-                    m_pInstance->SetGuid(DATA_SOULFRAGMENT_REMOVE, m_creature->GetObjectGuid());
+            // Inform the instance about a used soul fragment
+            if (m_instance)
+                m_instance->SetGuid(DATA_SOULFRAGMENT_REMOVE, m_creature->GetObjectGuid());
 
-                m_creature->ForcedDespawn();
-                return;
-            }
-            if (IsCombatMovement())
-            {
-                SetCombatMovement(false);
-                m_creature->GetMotionMaster()->MoveFollow(pWho, 0.0f, 0.0f);
-            }
+            m_creature->ForcedDespawn();
         }
     }
 };
