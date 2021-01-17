@@ -934,7 +934,7 @@ void Aura::ApplyModifier(bool apply, bool Real)
     if (!apply)
         OnApply(apply);
 
-    if (GetSpellProto()->HasAttribute(SPELL_ATTR_EX4_IS_PET_SCALING))
+    if (GetSpellProto()->HasAttribute(SPELL_ATTR_EX4_IS_PET_SCALING) && m_removeMode != AURA_REMOVE_BY_GAINED_STACK)
         GetTarget()->RegisterScalingAura(this, apply);
 }
 
