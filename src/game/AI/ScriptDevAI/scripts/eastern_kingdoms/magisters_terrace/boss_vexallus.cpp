@@ -88,12 +88,16 @@ struct boss_vexallusAI : public CombatAI
 
     float m_intervalHealthAmount;
 
+    GuidVector m_sparks;
+
     void Reset() override
     {
         CombatAI::Reset();
 
         SetCombatMovement(true);
         m_intervalHealthAmount = 85;
+
+        DespawnGuids(m_sparks);
     }
 
     uint32 GetSubsequentActionTimer(uint32 id)
@@ -118,6 +122,8 @@ struct boss_vexallusAI : public CombatAI
 
         if (m_instance)
             m_instance->SetData(TYPE_VEXALLUS, DONE);
+
+        DespawnGuids(m_sparks);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -138,6 +144,7 @@ struct boss_vexallusAI : public CombatAI
             summoned->AddThreat(target, 1000000.f);
             summoned->AI()->AttackStart(target);
         }
+        m_sparks.push_back(summoned->GetObjectGuid());
     }
 
     void ExecuteAction(uint32 action) override

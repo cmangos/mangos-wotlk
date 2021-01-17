@@ -54,10 +54,10 @@ enum
 
 enum SelinActions
 {
+    SELIN_ACTION_DRAIN_CRYSTAL,
     SELIN_ACTION_FEL_EXPLOSION,
     SELIN_ACTION_DRAIN_LIFE,
     SELIN_ACTION_DRAIN_MANA,
-    SELIN_ACTION_DRAIN_CRYSTAL,
     SELIN_ACTION_MAX,
 };
 
@@ -74,7 +74,14 @@ struct boss_selin_fireheartAI : public CombatAI
             AddCombatAction(SELIN_ACTION_DRAIN_MANA, true);
         AddCombatAction(SELIN_ACTION_DRAIN_CRYSTAL, 15000, 25000);
         m_creature->SetWalk(false);
-        Reset();
+
+        m_creature->GetCombatManager().SetLeashingCheck([](Unit*, float x, float y, float z)
+        {
+            return x < 214.f;
+        });
+
+        SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(SPELL_FEL_EXPLOSION);
+        m_felExplosionCost = Spell::CalculatePowerCost(spellInfo, m_creature);
     }
 
     instance_magisters_terrace* m_instance;
@@ -82,6 +89,8 @@ struct boss_selin_fireheartAI : public CombatAI
     bool m_empowered;
 
     ObjectGuid m_crystalGuid;
+
+    uint32 m_felExplosionCost;
 
     void Reset() override
     {
@@ -200,6 +209,7 @@ struct boss_selin_fireheartAI : public CombatAI
                         invoker->CastSpell(nullptr, SPELL_INSTAKILL_SELF, TRIGGERED_OLD_TRIGGERED);
                 }
                 ResetCombatAction(SELIN_ACTION_DRAIN_CRYSTAL, GetSubsequentActionTimer(SELIN_ACTION_DRAIN_CRYSTAL));
+                DoStartMovement(m_creature->GetVictim());
             break;
             default: break;
         }
@@ -211,24 +221,28 @@ struct boss_selin_fireheartAI : public CombatAI
         {
             case SELIN_ACTION_FEL_EXPLOSION:
             {
-                DoCastSpellIfCan(nullptr, SPELL_FEL_EXPLOSION);
-                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                if (DoCastSpellIfCan(nullptr, SPELL_FEL_EXPLOSION) == CAST_OK)
+                    ResetCombatAction(action, GetSubsequentActionTimer(action));
                 return;
             }
             case SELIN_ACTION_DRAIN_LIFE:
             {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DRAIN_LIFE, SELECT_FLAG_IN_LOS | SELECT_FLAG_PLAYER))
-                    DoCastSpellIfCan(target, m_isRegularMode ? SPELL_DRAIN_LIFE : SPELL_DRAIN_LIFE_H);
+                if (m_creature->GetPower(POWER_MANA) >= m_felExplosionCost) // do not cast if enough mana for fel explosion
+                    return;
 
-                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DRAIN_LIFE, SELECT_FLAG_IN_LOS | SELECT_FLAG_PLAYER))
+                    if (DoCastSpellIfCan(target, m_isRegularMode ? SPELL_DRAIN_LIFE : SPELL_DRAIN_LIFE_H) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
                 return;
             }
             case SELIN_ACTION_DRAIN_MANA:
             {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DRAIN_MANA, SELECT_FLAG_IN_LOS | SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
-                    DoCastSpellIfCan(target, SPELL_DRAIN_MANA);
+                if (m_creature->GetPower(POWER_MANA) >= m_felExplosionCost) // do not cast if enough mana for fel explosion
+                    return;
 
-                ResetCombatAction(action, GetSubsequentActionTimer(action));
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, SPELL_DRAIN_MANA, SELECT_FLAG_IN_LOS | SELECT_FLAG_PLAYER | SELECT_FLAG_POWER_MANA))
+                    if (DoCastSpellIfCan(target, SPELL_DRAIN_MANA) == CAST_OK)
+                        ResetCombatAction(action, GetSubsequentActionTimer(action));
                 return;
             }
             case SELIN_ACTION_DRAIN_CRYSTAL:
