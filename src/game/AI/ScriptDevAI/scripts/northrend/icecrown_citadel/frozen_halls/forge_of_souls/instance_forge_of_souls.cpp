@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: instance_forge_of_souls
 SD%Complete: 90%
-SDComment: TODO: Movement of the extro-event is missing, implementation unclear!
+SDComment:
 SDCategory: The Forge of Souls
 EndScriptData */
 
@@ -55,16 +55,16 @@ void instance_forge_of_souls::OnPlayerEnter(Player* pPlayer)
     if (!m_uiTeam)                                          // very first player to enter
     {
         m_uiTeam = pPlayer->GetTeam();
-        ProcessEventNpcs(pPlayer, false);
+        ProcessEventNpcs(pPlayer);
     }
 }
 
-void instance_forge_of_souls::ProcessEventNpcs(Player* pPlayer, bool bChanged)
+void instance_forge_of_souls::ProcessEventNpcs(Player* pPlayer)
 {
     if (!pPlayer)
         return;
 
-    if (m_auiEncounter[0] != DONE || m_auiEncounter[1] != DONE)
+    if (GetData(TYPE_BRONJAHM) != DONE || GetData(TYPE_DEVOURER_OF_SOULS) != DONE)
     {
         // Spawn Begin Mobs
         for (const auto& aEventBeginLocation : aEventBeginLocations)
@@ -76,30 +76,19 @@ void instance_forge_of_souls::ProcessEventNpcs(Player* pPlayer, bool bChanged)
     }
     else
     {
-        // if bChanged, despawn Begin Mobs, spawn End Mobs at Spawn, else spawn EndMobs at End
-        if (bChanged)
-        {
-            for (GuidList::const_iterator itr = m_lEventMobGUIDs.begin(); itr != m_lEventMobGUIDs.end(); ++itr)
-            {
-                if (Creature* pSummoned = instance->GetCreature(*itr))
-                    pSummoned->ForcedDespawn();
-            }
+        // Despawn entrance mobs
+        for (const auto& guid : m_lEventMobGUIDs)
+            if (Creature* pSummoned = instance->GetCreature(guid))
+                pSummoned->ForcedDespawn();
 
-            for (const auto& aEventEndLocation : aEventEndLocations)
-            {
-                pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventEndLocation.uiEntryHorde : aEventEndLocation.uiEntryAlliance,
-                    aEventEndLocation.fSpawnX, aEventEndLocation.fSpawnY, aEventEndLocation.fSpawnZ, aEventEndLocation.fStartO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS);
-
-                // TODO: Let the NPCs Move along their paths
-            }
-        }
-        else
+        // spawn exit mobs; movement and texts handled by DB script
+        for (const auto& aEventEndLocation : aEventEndLocations)
         {
-            // Summon at end, without event
-            for (const auto& aEventEndLocation : aEventEndLocations)
+            if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventEndLocation.uiEntryHorde : aEventEndLocation.uiEntryAlliance,
+                aEventEndLocation.fSpawnX, aEventEndLocation.fSpawnY, aEventEndLocation.fSpawnZ, aEventEndLocation.fOrient, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
             {
-                pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventEndLocation.uiEntryHorde : aEventEndLocation.uiEntryAlliance,
-                    aEventEndLocation.fEndX, aEventEndLocation.fEndY, aEventEndLocation.fEndZ, aEventEndLocation.fEndO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS);
+                pCreature->SetWalk(false);
+                pCreature->GetMotionMaster()->MoveWaypoint(aEventEndLocation.pathId);
             }
         }
     }
@@ -135,7 +124,7 @@ void instance_forge_of_souls::SetData(uint32 uiType, uint32 uiData)
         case TYPE_DEVOURER_OF_SOULS:
             m_auiEncounter[1] = uiData;
             if (uiData == DONE)
-                ProcessEventNpcs(GetPlayerInMap(), true);
+                ProcessEventNpcs(GetPlayerInMap());
             break;
         case TYPE_ACHIEV_PHANTOM_BLAST:
             m_bCriteriaPhantomBlastFailed = (uiData == FAIL);
