@@ -802,6 +802,7 @@ UPDATE creature_template SET ScriptName='npc_highlord_darion_mograine' WHERE ent
 UPDATE creature_template SET ScriptName='npc_fellow_death_knight' WHERE entry IN (29199, 29204, 29200);
 UPDATE creature_template SET ScriptName='npc_lich_king_light_dawn' WHERE entry=29183;
 UPDATE creature_template SET ScriptName='npc_scarlet_courier' WHERE entry=29076;
+UPDATE gameobject_template SET ScriptName='go_plague_cauldron' WHERE entry = 190936;
 
 /* ELWYNN FOREST */
 

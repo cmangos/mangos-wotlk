@@ -2903,6 +2903,19 @@ struct spell_gift_of_the_harvester : public SpellScript
     }
 };
 
+/*######
+## go_plague_cauldron
+######*/
+
+struct go_plague_cauldron : public GameObjectAI
+{
+    go_plague_cauldron(GameObject* go) : GameObjectAI(go)
+    {
+        go->GetVisibilityData().SetInvisibilityMask(10, true);
+        go->GetVisibilityData().AddInvisibilityValue(10, 1000);
+    }
+};
+
 void AddSC_ebon_hold()
 {
     Script* pNewScript = new Script;
@@ -2949,6 +2962,11 @@ void AddSC_ebon_hold()
     pNewScript = new Script;
     pNewScript->Name = "npc_scarlet_courier";
     pNewScript->GetAI = &GetAI_npc_scarlet_courier;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "go_plague_cauldron";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_plague_cauldron>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_emblazon_runeblade>("spell_emblazon_runeblade");
