@@ -65,6 +65,7 @@ instance_halls_of_reflection::instance_halls_of_reflection(Map* pMap) : Scripted
     m_uiActivateTimer(0),
     m_uiEscapeResetTimer(0),
     m_uiShipUpdateTimer(0),
+    m_uiSummonDelayTimer(0),
     m_uiEventStage(0)
 {
     Initialize();
@@ -90,20 +91,9 @@ void instance_halls_of_reflection::OnPlayerEnter(Player* pPlayer)
         m_uiTeam = pPlayer->GetTeam();
         SetDialogueSide(m_uiTeam == ALLIANCE);
 
-        // intro event
+        // intro event starts on timer
         if (GetData(TYPE_FROSTMOURNE_INTRO) != DONE)
-        {
-            // Spawn intro npcs and make the start the movement
-            for (const auto& aEventBeginLocation : aEventBeginLocations)
-            {
-                if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
-                    aEventBeginLocation.fX, aEventBeginLocation.fY, aEventBeginLocation.fZ, aEventBeginLocation.fO, TEMPSPAWN_DEAD_DESPAWN, 0, true))
-                {
-                    pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
-                    pCreature->GetMotionMaster()->MoveWaypoint();
-                }
-            }
-        }
+            m_uiSummonDelayTimer = 5000;
         // last encounter
         else if (GetData(TYPE_FROSTWORN_GENERAL) == DONE && !GetSingleCreatureFromStorage(NPC_LICH_KING, true))
             DoSetupEscapeEvent(pPlayer);
@@ -560,6 +550,36 @@ void instance_halls_of_reflection::DoSetupEscapeEvent(Player* pPlayer)
 void instance_halls_of_reflection::Update(uint32 uiDiff)
 {
     DialogueUpdate(uiDiff);
+
+    // Entrance spawn timer
+    if (m_uiSummonDelayTimer)
+    {
+        if (m_uiSummonDelayTimer <= uiDiff)
+        {
+            Player* pPlayer = GetPlayerInMap();
+            if (!pPlayer)
+            {
+                script_error_log("instance_halls_of_reflection: Error: couldn't find any player in instance");
+                m_uiSummonDelayTimer = 0;
+                return;
+            }
+
+            // Spawn intro npcs and make the start the movement
+            for (const auto& aEventBeginLocation : aEventBeginLocations)
+            {
+                if (Creature* pCreature = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
+                    aEventBeginLocation.fX, aEventBeginLocation.fY, aEventBeginLocation.fZ, aEventBeginLocation.fO, TEMPSPAWN_DEAD_DESPAWN, 0, true))
+                {
+                    pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+                    pCreature->GetMotionMaster()->MoveWaypoint();
+                }
+            }
+
+            m_uiSummonDelayTimer = 0;
+        }
+        else
+            m_uiSummonDelayTimer -= uiDiff;
+    }
 
     // Main spirits event timer
     if (m_uiEventTimer)

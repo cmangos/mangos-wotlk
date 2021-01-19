@@ -24,7 +24,6 @@ EndScriptData */
 /* ContentData
 at_frostmourne_chamber
 spell_aura_dummy_frostmourne_equip
-npc_phantom_mage
 at_frostworn_general
 spell_summon_reflections
 EndContentData */
@@ -106,122 +105,6 @@ bool EffectAuraDummy_spell_aura_dummy_frostmourne_equip(const Aura* pAura, bool 
     }
     return true;
 }
-
-/*######
-## npc_phantom_mage
-######*/
-
-enum
-{
-    SPELL_CHAIN_OF_ICE          = 72171,
-    SPELL_FIREBALL              = 72163,
-    SPELL_FLAMESTRIKE           = 72169,
-    SPELL_FROSTBOLT             = 72166,
-    SPELL_HALLUCINATION         = 72342,
-};
-
-struct npc_phantom_mageAI : public ScriptedAI
-{
-    npc_phantom_mageAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    bool m_bHasHallucination;
-
-    uint32 m_uiHallucinationTimer;
-    uint32 m_uiChainsIceTimer;
-    uint32 m_uiFireballTimer;
-    uint32 m_uiFrostboltTimer;
-    uint32 m_uiFlamestrikeTimer;
-
-    void Reset() override
-    {
-        m_bHasHallucination     = false;
-
-        m_uiHallucinationTimer  = 0;
-        m_uiChainsIceTimer      = urand(4000, 7000);
-        m_uiFlamestrikeTimer    = urand(6000, 9000);
-        m_uiFireballTimer       = urand(2000, 5000);
-        m_uiFrostboltTimer      = urand(3000, 5000);
-    }
-
-    void EnterEvadeMode() override
-    {
-        if (m_uiHallucinationTimer)
-            return;
-
-        ScriptedAI::EnterEvadeMode();
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        pSummoned->AI()->AttackStart(m_creature->GetVictim());
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiHallucinationTimer)
-        {
-            if (m_uiHallucinationTimer <= uiDiff)
-                m_uiHallucinationTimer = 0;
-            else
-                m_uiHallucinationTimer -= uiDiff;
-
-            // no other actions during Hallucination
-            return;
-        }
-
-        if (!m_bHasHallucination && m_creature->GetHealthPercent() <= 50.0f)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_HALLUCINATION) == CAST_OK)
-            {
-                m_uiHallucinationTimer = 1000;
-                m_bHasHallucination = true;
-            }
-        }
-
-        if (m_uiChainsIceTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_CHAIN_OF_ICE) == CAST_OK)
-                    m_uiChainsIceTimer = urand(8000, 13000);
-            }
-        }
-        else
-            m_uiChainsIceTimer -= uiDiff;
-
-        if (m_uiFlamestrikeTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_FLAMESTRIKE) == CAST_OK)
-                    m_uiFlamestrikeTimer = urand(7000, 12000);
-            }
-        }
-        else
-            m_uiFlamestrikeTimer -= uiDiff;
-
-        if (m_uiFireballTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIREBALL) == CAST_OK)
-                m_uiFireballTimer = urand(4000, 8000);
-        }
-        else
-            m_uiFireballTimer -= uiDiff;
-
-        if (m_uiFrostboltTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FROSTBOLT) == CAST_OK)
-                m_uiFrostboltTimer = urand(3000, 6000);
-        }
-        else
-            m_uiFrostboltTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-    }
-};
 
 /*######
 ## at_frostworn_general
@@ -409,6 +292,30 @@ struct spell_gunship_cannon_fire_aura : public AuraScript
     }
 };
 
+/*######
+## spell_halls_of_reflection_clone - 69828
+######*/
+
+struct spell_halls_of_reflection_clone : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        // run code for eff1 and eff2
+        if (effIdx == EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !caster)
+            return;
+
+        // trigger spell 69891 and 69892
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        target->CastSpell(caster, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_halls_of_reflection()
 {
     Script* pNewScript = new Script;
@@ -419,11 +326,6 @@ void AddSC_halls_of_reflection()
     pNewScript = new Script;
     pNewScript->Name = "npc_spell_aura_dummy_frostmourne_equip";
     pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_frostmourne_equip;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
-    pNewScript->Name = "npc_phantom_mage";
-    pNewScript->GetAI = &GetNewAIInstance<npc_phantom_mageAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -442,4 +344,5 @@ void AddSC_halls_of_reflection()
     pNewScript->RegisterSelf();
 
     RegisterAuraScript<spell_gunship_cannon_fire_aura>("spell_gunship_cannon_fire_aura");
+    RegisterSpellScript<spell_halls_of_reflection_clone>("spell_halls_of_reflection_clone");
 }

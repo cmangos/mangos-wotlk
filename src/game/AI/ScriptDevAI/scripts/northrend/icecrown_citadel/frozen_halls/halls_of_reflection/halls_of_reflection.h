@@ -163,6 +163,7 @@ class instance_halls_of_reflection : public ScriptedInstance, private DialogueHe
         uint32 m_uiActivateTimer;
         uint32 m_uiEscapeResetTimer;
         uint32 m_uiShipUpdateTimer;
+        uint32 m_uiSummonDelayTimer;
         uint8 m_uiEventStage;
 
         GuidList m_lRisenSpiritsGuids;

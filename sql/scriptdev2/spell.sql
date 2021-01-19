@@ -351,6 +351,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (69048,'spell_mirrored_soul'),
 (69051,'spell_mirrored_soul_proc'),
 (69347,'spell_necromantic_power'),
+(69828,'spell_halls_of_reflection_clone'),
 (70017,'spell_gunship_cannon_fire_aura'),
 (70336,'spell_permafrost_aura'),
 (73159,'spell_play_movie'),
