@@ -31,7 +31,7 @@ enum
 
 enum WarriorSpells
 {
-    AUTO_SHOT_2                     = 75,
+    AUTO_SHOT_2                     = 3018,
     BATTLE_SHOUT_1                  = 6673,
     BATTLE_STANCE_1                 = 2457,
     BERSERKER_RAGE_1                = 18499,
