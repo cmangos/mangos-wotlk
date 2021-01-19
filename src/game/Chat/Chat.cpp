@@ -840,10 +840,12 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand sunsReachReclamationTable[] =
     {
-        { "phase",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSunsReachReclamationPhaseCommand, "", nullptr },
+        { "phase",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSunsReachReclamationPhaseCommand,    "", nullptr },
         { "subphase",       SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSunsReachReclamationSubPhaseCommand, "", nullptr },
-        { "counter",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSunsReachReclamationCounterCommand, "", nullptr },
-        { nullptr,          0,                  false, nullptr,                                        "", nullptr }
+        { "counter",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSunsReachReclamationCounterCommand,  "", nullptr },
+        { "gate",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSunwellGateCommand,                  "", nullptr },
+        { "gatecounter",    SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSunwellGateCounterCommand,           "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                                 "", nullptr }
     };
 
     static ChatCommand worldStateTable[] =

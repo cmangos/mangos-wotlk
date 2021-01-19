@@ -21,6 +21,7 @@
 bool QuestRewarded_suns_reach_reclamation(Player* player, Creature* creature, Quest const* quest)
 {
     sWorldState.AddSunsReachProgress(quest->GetQuestId());
+    sWorldState.AddSunwellGateProgress(quest->GetQuestId());
     return true;
 }
 

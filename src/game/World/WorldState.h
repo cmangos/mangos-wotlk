@@ -162,10 +162,10 @@ enum GameEvents
     GAME_EVENT_QUEL_DANAS_PHASE_4_ALCHEMY_LAB   = 314,
     GAME_EVENT_QUEL_DANAS_PHASE_4_KIRU          = 315,
     // SWP Phases
-    GAME_EVENT_SWP_GATES_PHASE_0 = 316,
-    GAME_EVENT_SWP_GATES_PHASE_1 = 317,
-    GAME_EVENT_SWP_GATES_PHASE_2 = 318,
-    GAME_EVENT_SWP_GATES_PHASE_3 = 319,
+    GAME_EVENT_SWP_GATES_PHASE_0 = 316, // All Gates Closed
+    GAME_EVENT_SWP_GATES_PHASE_1 = 317, // First Gate Open
+    GAME_EVENT_SWP_GATES_PHASE_2 = 318, // Second Gate Open
+    GAME_EVENT_SWP_GATES_PHASE_3 = 319, // All Gates Open
 
     // wotlk range for events
     GAME_EVENT_ECHOES_OF_DOOM = 401,
@@ -267,20 +267,40 @@ enum SunsReachCounters
     COUNTERS_MAX,
 };
 
+enum SunwellGates
+{
+    SUNWELL_ALL_GATES_CLOSED,
+    SUNWELL_AGAMATH_GATE1_OPEN,
+    SUNWELL_ROHENDOR_GATE2_OPEN,
+    SUNWELL_ARCHONISUS_GATE3_OPEN,
+};
+
+enum SunwellGateCounters
+{
+    COUNTER_AGAMATH_THE_FIRST_GATE,
+    COUNTER_ROHENDOR_THE_SECOND_GATE,
+    COUNTER_ARCHONISUS_THE_FINAL_GATE,
+    COUNTERS_MAX_GATES,
+};
+
 struct SunsReachReclamationData
 {
     uint32 m_phase;
     uint32 m_subphaseMask;
     uint32 m_sunsReachReclamationCounters[COUNTERS_MAX];
+    uint32 m_gate;
+    uint32 m_gateCounters[COUNTERS_MAX_GATES];
     GuidVector m_sunsReachReclamationPlayers;
     std::mutex m_sunsReachReclamationMutex;
-    SunsReachReclamationData() : m_phase(SUNS_REACH_PHASE_1_STAGING_AREA), m_subphaseMask(0)
+    SunsReachReclamationData() : m_phase(SUNS_REACH_PHASE_1_STAGING_AREA), m_subphaseMask(0), m_gate(SUNWELL_ARCHONISUS_GATE3_OPEN) // optional - all SWP gates open by default in 2.4.3
     {
         memset(m_sunsReachReclamationCounters, 0, sizeof(m_sunsReachReclamationCounters));
+        memset(m_gateCounters, 0, sizeof(m_gateCounters));
     }
     std::string GetData();
     uint32 GetPhasePercentage(uint32 phase);
     uint32 GetSubPhasePercentage(uint32 subPhase);
+    uint32 GetSunwellGatePercentage(uint32 gate);
 };
 
 enum LoveIsInTheAirLeaders
@@ -353,7 +373,7 @@ class WorldState
         uint8 GetExpansion() const { return m_expansion; }
         bool SetExpansion(uint8 expansion);
 
-        // Suns reach reclamation
+        // Sun's Reach Reclamation
         void AddSunsReachProgress(uint32 questId);
         void HandleSunsReachPhaseTransition(uint32 newPhase);
         void HandleSunsReachSubPhaseTransition(int32 subPhaseMask, bool initial = false);
@@ -361,6 +381,11 @@ class WorldState
         void StopSunsReachPhase(bool forward);
         void StartSunsReachPhase(bool initial = false);
         std::string GetSunsReachPrintout();
+        void AddSunwellGateProgress(uint32 questId);
+        void HandleSunwellGateTransition(uint32 newGate);
+        void SetSunwellGateCounter(SunwellGateCounters index, uint32 value);
+        void StopSunwellGatePhase();
+        void StartSunwellGatePhase();
 
         void FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId, uint32 areaId);
 

@@ -7369,6 +7369,38 @@ bool ChatHandler::HandleSunsReachReclamationCounterCommand(char* args)
     return true;
 }
 
+bool ChatHandler::HandleSunwellGateCommand(char* args)
+{
+    uint32 param;
+    if (!ExtractUInt32(&args, param))
+    {
+        PSendSysMessage("%s", sWorldState.GetSunsReachPrintout().data());
+        return true;
+    }
+    sWorldState.HandleSunwellGateTransition(param);
+    return true;
+}
+
+bool ChatHandler::HandleSunwellGateCounterCommand(char* args)
+{
+    uint32 index;
+    if (!ExtractUInt32(&args, index) || index >= COUNTERS_MAX_GATES)
+    {
+        PSendSysMessage("Enter valid index for counter.");
+        return true;
+    }
+
+    uint32 value;
+    if (!ExtractUInt32(&args, value))
+    {
+        PSendSysMessage("Enter valid value for counter.");
+        return true;
+    }
+
+    sWorldState.SetSunwellGateCounter(SunwellGateCounters(index), value);
+    return true;
+}
+
 bool ChatHandler::HandleExpansionRelease(char* args)
 {
     uint32 curExpansion = sWorldState.GetExpansion();

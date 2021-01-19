@@ -785,6 +785,8 @@ class ChatHandler
         bool HandleSunsReachReclamationPhaseCommand(char* args);
         bool HandleSunsReachReclamationSubPhaseCommand(char* args);
         bool HandleSunsReachReclamationCounterCommand(char* args);
+        bool HandleSunwellGateCommand(char* args);
+        bool HandleSunwellGateCounterCommand(char* args);
         bool HandleExpansionRelease(char* args);
 
         // Battleground
