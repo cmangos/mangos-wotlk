@@ -40,8 +40,8 @@ enum
     NPC_CHAMPION_2_HORDE            = 37587,
     NPC_CHAMPION_3_HORDE            = 37588,
     NPC_CHAMPION_1_ALLIANCE         = 37496,
-    NPC_CHAMPION_2_ALLIANCE         = 37497,
-    NPC_CHAMPION_3_ALLIANCE         = 37498,
+    NPC_CHAMPION_2_ALLIANCE         = 37498,
+    NPC_CHAMPION_3_ALLIANCE         = 37497,
     NPC_CORRUPTED_CHAMPION          = 36796,
 
     // Enslaved npcs
@@ -103,48 +103,67 @@ struct EventNpcLocations
 {
     uint32 uiEntryHorde, uiEntryAlliance;
     float fX, fY, fZ, fO;
+    uint8 pathId;
+    // Temp: move this to DB movement
     float fMoveX, fMoveY, fMoveZ;
 };
 
-const EventNpcLocations aEventBeginLocations[3] =
+const EventNpcLocations aEventBeginLocations[19] =
 {
-    {NPC_SYLVANAS_PART1, NPC_JAINA_PART1,   430.3012f, 212.204f,  530.1146f, 0.042f, 440.7882f, 213.7587f, 528.7103f},
-    {NPC_KILARA,         NPC_ELANDRA,       429.7142f, 212.3021f, 530.2822f, 0.14f,  438.9462f, 215.4271f, 528.7087f},
-    {NPC_LORALEN,        NPC_KORELN,        429.5675f, 211.7748f, 530.3246f, 5.972f, 438.5052f, 211.5399f, 528.7085f},
-    // ToDo: add the soldiers here when proper waypoint movement is supported
+    {NPC_SYLVANAS_PART1, NPC_JAINA_PART1,   430.3012f, 212.204f,  530.1146f, 0.042f, 0},
+    {NPC_KILARA,         NPC_ELANDRA,       429.7142f, 212.3021f, 530.2822f, 0.14f,  1},
+    {NPC_LORALEN,        NPC_KORELN,        429.5675f, 211.7748f, 530.3246f, 5.972f, 2},
+
+    {NPC_CHAMPION_1_HORDE, NPC_CHAMPION_1_ALLIANCE, 425.911f,   213.33363f, 528.7967f,  0.21628f, 9},
+    {NPC_CHAMPION_1_HORDE, NPC_CHAMPION_1_ALLIANCE, 425.95148f, 213.43628f, 528.7967f,  0.91054f, 10},
+    {NPC_CHAMPION_1_HORDE, NPC_CHAMPION_1_ALLIANCE, 425.42874f, 213.30286f, 528.805f,   0.16026f, 11},
+    {NPC_CHAMPION_1_HORDE, NPC_CHAMPION_1_ALLIANCE, 429.37402f, 212.1061f,  528.80206f, 6.16585f, 12},
+    {NPC_CHAMPION_1_HORDE, NPC_CHAMPION_1_ALLIANCE, 429.98132f, 213.41042f, 528.8051f,  0.09478f, 13},
+    {NPC_CHAMPION_1_HORDE, NPC_CHAMPION_1_ALLIANCE, 429.5885f,  210.69595f, 528.8051f,  5.95487f, 14},
+    {NPC_CHAMPION_1_HORDE, NPC_CHAMPION_1_ALLIANCE, 426.13156f, 211.77509f, 528.7967f,  6.14891f, 15},
+    {NPC_CHAMPION_1_HORDE, NPC_CHAMPION_1_ALLIANCE, 426.7432f,  212.22388f, 528.805f,   5.85526f, 16},
+    {NPC_CHAMPION_1_HORDE, NPC_CHAMPION_1_ALLIANCE, 424.07047f, 211.1222f,  528.7967f,  5.57246f, 17},
+
+    {NPC_CHAMPION_2_HORDE, NPC_CHAMPION_2_ALLIANCE, 424.7531f,  212.52791f, 528.8003f,  6.17507f, 3},
+    {NPC_CHAMPION_2_HORDE, NPC_CHAMPION_2_ALLIANCE, 425.66174f, 214.27966f, 528.80505f, 0.12017f, 4},
+    {NPC_CHAMPION_2_HORDE, NPC_CHAMPION_2_ALLIANCE, 425.34244f, 210.50476f, 528.80505f, 5.95579f, 5},
+
+    {NPC_CHAMPION_3_HORDE, NPC_CHAMPION_3_ALLIANCE, 426.8169f,  210.74643f, 528.7967f,  5.63237f, 4},
+    {NPC_CHAMPION_3_HORDE, NPC_CHAMPION_3_ALLIANCE, 427.46008f, 209.36372f, 528.80505f, 5.71778f, 5},
+    {NPC_CHAMPION_3_HORDE, NPC_CHAMPION_3_ALLIANCE, 427.26782f, 213.06624f, 528.7967f,  0.06322f, 6},
+    {NPC_CHAMPION_3_HORDE, NPC_CHAMPION_3_ALLIANCE, 427.55377f, 216.24657f, 528.80505f, 0.78343f, 7},
 };
 
 const EventNpcLocations aEventFirstAmbushLocations[2] =
 {
-    {NPC_YMIRJAR_DEATHBRINGER, 0, 951.6696f, 53.06405f, 567.5153f, 1.51f, 914.7256f, 76.66406f, 553.8029f},
-    {NPC_YMIRJAR_DEATHBRINGER, 0, 950.9911f, 60.26712f, 566.7658f, 1.79f, 883.1805f, 52.69792f, 527.6385f},
+    {NPC_YMIRJAR_DEATHBRINGER, 0, 951.6696f, 53.06405f, 567.5153f, 1.51f, 0},
+    {NPC_YMIRJAR_DEATHBRINGER, 0, 950.9911f, 60.26712f, 566.7658f, 1.79f, 1},
 };
 
 const EventNpcLocations aEventSecondAmbushLocations[] =
 {
-    {NPC_FALLEN_WARRIOR, 0, 916.658f, -55.94097f, 591.6827f, 1.85f, 950.5694f, 31.85649f, 572.2693f},
-    {NPC_FALLEN_WARRIOR, 0, 923.8055f, -55.63195f, 591.8663f, 1.85f, 941.3954f, 35.83769f, 571.4308f},
-    {NPC_FALLEN_WARRIOR, 0, 936.0625f, -53.52778f, 592.0226f, 1.85f, 934.8011f, 8.024931f, 577.3419f},
-    {NPC_FALLEN_WARRIOR, 0, 919.7518f, -68.39236f, 592.2916f, 1.85f, 932.5734f, -22.54153f, 587.403f},
-    {NPC_FALLEN_WARRIOR, 0, 926.8993f, -68.08334f, 592.0798f, 1.85f, 922.6043f, -22.07627f, 585.6684f},
-    {NPC_FALLEN_WARRIOR, 0, 939.1563f, -65.97916f, 592.2205f, 1.85f, 927.0928f, -32.97949f, 589.3028f},
-    {NPC_COLDWRAITH, 0, 924.0261f, -62.3316f, 592.0191f, 2.01f, 929.4673f, 9.722589f, 577.4904f},
-    {NPC_COLDWRAITH, 0, 936.4531f, -60.45486f, 592.1215f, 1.63f, 936.1395f, -4.003471f, 581.3139f},
-    {NPC_COLDWRAITH, 0, 935.8055f, -72.76736f, 592.077f, 1.66f, 933.8441f, -47.83234f, 591.7538f},
-    {NPC_COLDWRAITH, 0, 923.3785f, -74.6441f, 592.368f, 2.37f, 920.726f, -42.32272f, 589.9808f}
+    {NPC_FALLEN_WARRIOR, 0, 916.658f, -55.94097f, 591.6827f, 1.85f, 0, 950.5694f, 31.85649f, 572.2693f},
+    {NPC_FALLEN_WARRIOR, 0, 923.8055f, -55.63195f, 591.8663f, 1.85f, 0, 941.3954f, 35.83769f, 571.4308f},
+    {NPC_FALLEN_WARRIOR, 0, 936.0625f, -53.52778f, 592.0226f, 1.85f, 0, 934.8011f, 8.024931f, 577.3419f},
+    {NPC_FALLEN_WARRIOR, 0, 919.7518f, -68.39236f, 592.2916f, 1.85f, 0, 932.5734f, -22.54153f, 587.403f},
+    {NPC_FALLEN_WARRIOR, 0, 926.8993f, -68.08334f, 592.0798f, 1.85f, 0, 922.6043f, -22.07627f, 585.6684f},
+    {NPC_FALLEN_WARRIOR, 0, 939.1563f, -65.97916f, 592.2205f, 1.85f, 0, 927.0928f, -32.97949f, 589.3028f},
+    {NPC_COLDWRAITH, 0, 924.0261f, -62.3316f, 592.0191f, 2.01f, 0, 929.4673f, 9.722589f, 577.4904f},
+    {NPC_COLDWRAITH, 0, 936.4531f, -60.45486f, 592.1215f, 1.63f, 0, 936.1395f, -4.003471f, 581.3139f},
+    {NPC_COLDWRAITH, 0, 935.8055f, -72.76736f, 592.077f, 1.66f, 0, 933.8441f, -47.83234f, 591.7538f},
+    {NPC_COLDWRAITH, 0, 923.3785f, -74.6441f, 592.368f, 2.37f, 0, 920.726f, -42.32272f, 589.9808f}
 };
 
 const EventNpcLocations aEventTunnelEndLocations[] =
 {
-    {NPC_IRONSKULL_PART2, NPC_VICTUS_PART2, 1071.45f, 48.23907f, 630.4871f, 1.68f, 1046.361f, 124.7031f, 628.2811f},
+    {NPC_IRONSKULL_PART2, NPC_VICTUS_PART2, 1071.45f, 48.23907f, 630.4871f, 1.68f, 0, 1046.361f, 124.7031f, 628.2811f},
     // ToDo: add the freed slaves here when proper waypoint movement is supported
 };
 const EventNpcLocations aEventOutroLocations[] =
 {
-    {NPC_SINDRAGOSA, 0, 842.8611f, 194.5556f, 531.6536f, 6.108f, 900.106f, 181.677f, 659.374f},
-    {NPC_SYLVANAS_PART2, NPC_JAINA_PART2, 1062.85f, 100.075f, 631.0021f, 1.77f, 1062.85f, 100.075f, 631.0021f},
+    {NPC_SINDRAGOSA, 0, 842.8611f, 194.5556f, 531.6536f, 6.108f, 0, 900.106f, 181.677f, 659.374f},
+    {NPC_SYLVANAS_PART2, NPC_JAINA_PART2, 1062.85f, 100.075f, 631.0021f, 1.77f, 0, 1062.85f, 100.075f, 631.0021f},
 };
-
 
 class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
 {
@@ -178,7 +197,6 @@ class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
 
     protected:
         void JustDidDialogueStep(int32 iEntry) override;
-        void ProcessIntroEventNpcs(Player* pPlayer);
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
@@ -187,6 +205,7 @@ class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
 
         uint8 m_uiAmbushAggroCount;
         uint32 m_uiTeam;                                    // Team of first entered player, used to set if Jaina or Silvana to spawn
+        uint32 m_uiSummonDelayTimer;
         uint32 m_uiIciclesTimer;
 
         GuidList m_lTunnelStalkersGuidList;

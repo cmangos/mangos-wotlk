@@ -84,11 +84,6 @@ struct npc_ymirjar_deathbringerAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_ymirjar_deathbringer(Creature* pCreature)
-{
-    return new npc_ymirjar_deathbringerAI(pCreature);
-}
-
 bool EffectDummyCreature_spell_summon_undead(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     // always check spellid and effectindex
@@ -143,11 +138,6 @@ struct npc_collapsing_icicleAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-UnitAI* GetAI_npc_collapsing_icicle(Creature* pCreature)
-{
-    return new npc_collapsing_icicleAI(pCreature);
-}
-
 /*######
 ## at_pit_of_saron
 ######*/
@@ -198,6 +188,9 @@ struct spell_necromantic_power : public SpellScript
         if (!target || !target->IsCreature())
             return;
 
+        target->CastSpell(target, 69413, TRIGGERED_OLD_TRIGGERED);
+        target->SetLevitate(true);
+
         // ToDo: handle the transformation of npcs
         // spells involved: 28728, 69350, SetLevitate(true)
     }
@@ -207,13 +200,13 @@ void AddSC_pit_of_saron()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_ymirjar_deathbringer";
-    pNewScript->GetAI = &GetAI_npc_ymirjar_deathbringer;
+    pNewScript->GetAI = &GetNewAIInstance<npc_ymirjar_deathbringerAI>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_summon_undead;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_collapsing_icicle";
-    pNewScript->GetAI = &GetAI_npc_collapsing_icicle;
+    pNewScript->GetAI = &GetNewAIInstance<npc_collapsing_icicleAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

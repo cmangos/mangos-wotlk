@@ -26,21 +26,6 @@ EndScriptData */
 
 enum
 {
-    // Intro
-    SAY_TYRANNUS_INTRO_1            = -1658001,
-    SAY_JAINA_INTRO_1               = -1658002,
-    SAY_SYLVANAS_INTRO_1            = -1658003,
-    SAY_TYRANNUS_INTRO_2            = -1658004,
-    SAY_TYRANNUS_INTRO_3            = -1658005,
-    SAY_JAINA_INTRO_2               = -1658006,
-    SAY_SYLVANAS_INTRO_2            = -1658007,
-    SAY_TYRANNUS_INTRO_4            = -1658008,
-    SAY_JAINA_INTRO_3               = -1658009,
-    SAY_JAINA_INTRO_4               = -1658010,
-    SAY_SYLVANAS_INTRO_3            = -1658011,
-    SAY_JAINA_INTRO_5               = -1658012,
-    SAY_SYLVANAS_INTRO_4            = -1658013,
-
     // Intro spells
     SPELL_NECROMATIC_POWER          = 69347,
     SPELL_FEIGN_DEATH               = 28728,
@@ -108,19 +93,6 @@ enum
 
 static const DialogueEntryTwoSide aPoSDialogues[] =
 {
-    // Instance intro
-    {NPC_TYRANNUS_INTRO,   0,                  0,                    0,                  4000},
-    {SAY_TYRANNUS_INTRO_1, NPC_TYRANNUS_INTRO, 0,                    0,                  6000},
-    {SAY_TYRANNUS_INTRO_2, NPC_TYRANNUS_INTRO, 0,                    0,                  12000},
-    {SAY_JAINA_INTRO_1,    NPC_JAINA_PART1,    SAY_SYLVANAS_INTRO_1, NPC_SYLVANAS_PART1, 5000},         // ToDo: move the soldiers to attack position
-    {SAY_TYRANNUS_INTRO_3, NPC_TYRANNUS_INTRO, 0,                    0,                  5000},
-    {SPELL_NECROMATIC_POWER, 0,                0,                    0,                  3000},
-    {SAY_JAINA_INTRO_2,    NPC_JAINA_PART1,    SAY_SYLVANAS_INTRO_2, NPC_SYLVANAS_PART1, 4000},
-    {SAY_TYRANNUS_INTRO_4, NPC_TYRANNUS_INTRO, 0,                    0,                  4000},         // ToDo: send the solderis back to fight as zombies
-    {SAY_JAINA_INTRO_3,    NPC_JAINA_PART1,    0,                    0,                  6000},
-    {SAY_JAINA_INTRO_4,    NPC_JAINA_PART1,    SAY_SYLVANAS_INTRO_3, NPC_SYLVANAS_PART1, 5000},
-    {SAY_JAINA_INTRO_5,    NPC_JAINA_PART1,    SAY_SYLVANAS_INTRO_4, NPC_SYLVANAS_PART1, 0},
-
     // Garfrost outro
     {NPC_GARFROST,         0,                  0,                    0,                  4000},         // ToDo: move the freed slaves to position
     {SAY_GENERAL_GARFROST, NPC_VICTUS_PART1,   SAY_GENERAL_GARFROST, NPC_IRONSKULL_PART1, 2000},
@@ -159,6 +131,7 @@ static const DialogueEntryTwoSide aPoSDialogues[] =
 instance_pit_of_saron::instance_pit_of_saron(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aPoSDialogues),
     m_uiAmbushAggroCount(0),
     m_uiTeam(TEAM_NONE),
+    m_uiSummonDelayTimer(0),
     m_uiIciclesTimer(0)
 {
     Initialize();
@@ -179,31 +152,12 @@ void instance_pit_of_saron::OnPlayerEnter(Player* pPlayer)
     {
         m_uiTeam = pPlayer->GetTeam();
         SetDialogueSide(m_uiTeam == ALLIANCE);
-        ProcessIntroEventNpcs(pPlayer);
-    }
-}
 
-void instance_pit_of_saron::ProcessIntroEventNpcs(Player* pPlayer)
-{
-    if (!pPlayer)
-        return;
+        // dialogue starts on timer if any of the first two bosses are not already dead
+        if (GetData(TYPE_GARFROST) == DONE || GetData(TYPE_KRICK) == DONE)
+            return;
 
-    // Not if the bosses are already killed
-    if (GetData(TYPE_GARFROST) == DONE || GetData(TYPE_KRICK) == DONE)
-        return;
-
-    StartNextDialogueText(NPC_TYRANNUS_INTRO);
-
-    // Spawn Begin Mobs
-    for (const auto& aEventBeginLocation : aEventBeginLocations)
-    {
-        // ToDo: maybe despawn the intro npcs when the other events occur
-        if (Creature* pSummon = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
-            aEventBeginLocation.fX, aEventBeginLocation.fY, aEventBeginLocation.fZ, aEventBeginLocation.fO, TEMPSPAWN_TIMED_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
-        {
-            pSummon->SetWalk(false);
-            pSummon->GetMotionMaster()->MovePoint(0, aEventBeginLocation.fMoveX, aEventBeginLocation.fMoveY, aEventBeginLocation.fMoveZ);
-        }
+        m_uiSummonDelayTimer = 10000;
     }
 }
 
@@ -493,7 +447,6 @@ void instance_pit_of_saron::JustDidDialogueStep(int32 iEntry)
                 pKrick->CastSpell(pKrick, SPELL_SUICIDE, TRIGGERED_OLD_TRIGGERED);
             }
             break;
-        case SAY_JAINA_INTRO_3:
         case SAY_JAINA_KRICK_3:
             // Move Tyrannus to a safe position
             if (Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO))
@@ -617,7 +570,7 @@ void instance_pit_of_saron::DoStartAmbushEvent()
             aEventFirstAmbushLocation.fZ, aEventFirstAmbushLocation.fO, TEMPSPAWN_DEAD_DESPAWN, 0))
         {
             pSummon->SetWalk(false);
-            pSummon->GetMotionMaster()->MovePoint(1, aEventFirstAmbushLocation.fMoveX, aEventFirstAmbushLocation.fMoveY, aEventFirstAmbushLocation.fMoveZ);
+            pSummon->GetMotionMaster()->MoveWaypoint(aEventFirstAmbushLocation.pathId);
         }
     }
 }
@@ -625,6 +578,36 @@ void instance_pit_of_saron::DoStartAmbushEvent()
 void instance_pit_of_saron::Update(uint32 uiDiff)
 {
     DialogueUpdate(uiDiff);
+
+    if (m_uiSummonDelayTimer)
+    {
+        if (m_uiSummonDelayTimer <= uiDiff)
+        {
+            Player* pPlayer = GetPlayerInMap();
+            if (!pPlayer)
+            {
+                script_error_log("instance_pit_of_saron: Error: couldn't find any player in instance");
+                m_uiSummonDelayTimer = 0;
+                return;
+            }
+
+            // Spawn Begin Mobs; script handled in DB
+            for (const auto& aEventBeginLocation : aEventBeginLocations)
+            {
+                // ToDo: maybe despawn the intro npcs when the other events occur
+                if (Creature* pSummon = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
+                    aEventBeginLocation.fX, aEventBeginLocation.fY, aEventBeginLocation.fZ, aEventBeginLocation.fO, TEMPSPAWN_TIMED_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
+                {
+                    pSummon->SetWalk(false);
+                    pSummon->GetMotionMaster()->MoveWaypoint(aEventBeginLocation.pathId);
+                }
+            }
+
+            m_uiSummonDelayTimer = 0;
+        }
+        else
+            m_uiSummonDelayTimer -= uiDiff;
+    }
 
     if (m_uiIciclesTimer)
     {

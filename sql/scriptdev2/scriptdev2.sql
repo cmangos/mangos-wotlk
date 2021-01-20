@@ -7309,19 +7309,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 -- -1 658 000 ICC: PIT OF SARON
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
-('-1658001','Intruders have entered the masters domain. Signal the alarms!','16747','1','0','0','0','tyrannus SAY_TYRANNUS_INTRO_1'),
-('-1658002','Heroes of the Alliance, attack!','16626','1','0','0','0','jaina SAY_JAINA_INTRO_1'),
-('-1658003','Soldiers of the Horde, attack!','17045','1','0','0','0','sylvanas SAY_SYLVANAS_INTRO_1'),
-('-1658004','Hrmph, fodder. Not even fit to labor in the quarry. Relish these final moments for soon you will be nothing more than mindless undead.','16748','1','0','0','0','tyrannus SAY_TYRANNUS_INTRO_2'),
-('-1658005','Your last waking memory will be of agonizing pain.','16749','1','0','0','0','tyrannus SAY_TYRANNUS_INTRO_3'),
-('-1658006','No! You monster!','16627','1','0','0','0','jaina SAY_JAINA_INTRO_2'),
-('-1658007','Pathetic weaklings!','17046','1','0','1','0','sylvanas SAY_SYLVANAS_INTRO_2'),
-('-1658008','Minions, destroy these interlopers!','16751','1','0','0','0','tyrannus SAY_TYRANNUS_INTRO_4'),
-('-1658009','I do what I must. Please forgive me, noble soldiers.','16628','1','0','0','0','jaina SAY_JAINA_INTRO_3'),
-('-1658010','You will have to make your way across this quarry on your own.','16629','0','0','1','0','jaina SAY_JAINA_INTRO_4'),
-('-1658011','You will have to battle your way through this cesspit on your own.','17047','0','0','1','0','sylvanas SAY_SYLVANAS_INTRO_3'),
-('-1658012','Free any Alliance slaves that you come across. We will most certainly need their assistance in battling Tyrannus. I will gather reinforcements and join you on the other side of the quarry.','16630','0','0','0','0','jaina SAY_JAINA_INTRO_5'),
-('-1658013','Free any Horde slaves that you come across. We will most certainly need their assistance in battling Tyrannus. I will gather reinforcements and join you on the other side of the quarry.','17048','0','0','0','0','sylvanas SAY_SYLVANAS_INTRO_4'),
+
+-- REUSE -1658001 to -1658013
 
 ('-1658014','Tiny creatures under feet, you bring Garfrost something good to eat!','16912','1','0','0','0','garfrost SAY_AGGRO'),
 ('-1658015','Will save for snack. For later.','16913','1','0','0','0','garfrost SAY_SLAY_1'),
