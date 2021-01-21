@@ -699,14 +699,31 @@ bool QuestRewarded_npc_adal(Player* player, Creature* creature, Quest const* que
     return false; // unhandled
 }
 
+enum
+{
+    SPELL_DEMON_BROILED_SURPRISE    = 43753,
+};
+
 struct DemonBroiledSurprise : public SpellScript
 {
+    SpellCastResult OnCheckCast(Spell* spell, bool strict) const
+    {
+        if (strict)
+        {
+            float radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spell->m_spellInfo->rangeIndex));
+            UnitList tempUnitList;
+            GameObjectList tempGOList;
+            return spell->CheckScriptTargeting(EFFECT_INDEX_1, 1, radius, TARGET_ENUM_UNITS_SCRIPT_AOE_AT_SRC_LOC, tempUnitList, tempGOList);
+        }
+        return SPELL_CAST_OK;
+    }
+
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_0)
             return;
 
-        spell->GetCaster()->CastSpell(nullptr, 43753, TRIGGERED_NONE); // demon broiled surprise
+        spell->GetCaster()->CastSpell(nullptr, SPELL_DEMON_BROILED_SURPRISE, TRIGGERED_NONE);
     }
 };
 
