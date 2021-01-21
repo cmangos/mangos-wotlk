@@ -330,7 +330,7 @@ class WorldState
 
         void Update(const uint32 diff);
 
-        void SendWorldstateUpdate(std::mutex& mutex, uint32 value, uint32 worldStateId);
+        void SendWorldstateUpdate(std::mutex& mutex, GuidVector const& guids, uint32 value, uint32 worldStateId);
 
         // vanilla section
 
