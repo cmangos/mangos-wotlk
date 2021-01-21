@@ -225,7 +225,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
     if (goinfo->type == GAMEOBJECT_TYPE_TRANSPORT)
     {
         SetFlag(GAMEOBJECT_FLAGS, (GO_FLAG_TRANSPORT | GO_FLAG_NODESPAWN));
-        m_updateFlag |= UPDATEFLAG_TRANSPORT;
+        m_updateFlag = (m_updateFlag | UPDATEFLAG_TRANSPORT) & ~UPDATEFLAG_POSITION;
     }
 
     SetEntry(goinfo->id);
