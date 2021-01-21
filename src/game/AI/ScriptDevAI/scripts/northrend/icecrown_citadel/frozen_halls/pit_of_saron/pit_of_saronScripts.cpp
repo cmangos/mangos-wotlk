@@ -188,11 +188,61 @@ struct spell_necromantic_power : public SpellScript
         if (!target || !target->IsCreature())
             return;
 
-        target->CastSpell(target, 69413, TRIGGERED_OLD_TRIGGERED);
-        target->SetLevitate(true);
+        target->RemoveAurasDueToSpell(69413);
 
-        // ToDo: handle the transformation of npcs
-        // spells involved: 28728, 69350, SetLevitate(true)
+        // apply feign death aura 28728; calculated spell value is 22516, but this isn't used
+        target->CastSpell(target, 28728, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_strangulating_aura - 69413
+######*/
+
+struct spell_strangulating_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        target->SetLevitate(apply);
+
+        // on apply move randomly around Tyrannus
+        if (apply)
+            target->GetMotionMaster()->MoveRandomAroundPoint(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), frand(5.0f, 8.0f), frand(5.0f, 10.0f));
+        // on remove fall to the ground
+        else
+        {
+            target->GetMotionMaster()->Clear(false, true);
+            target->GetMotionMaster()->MoveFall();
+        }
+    }
+};
+
+/*######
+## spell_feigh_death_pos_aura - 28728
+######*/
+
+struct spell_feigh_death_pos_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        target->SetFeignDeath(apply, aura->GetCasterGuid(), aura->GetId());
+
+        if (!apply)
+        {
+            Creature* champion = static_cast<Creature*>(target);
+
+            target->CastSpell(target, 69350, TRIGGERED_OLD_TRIGGERED);
+            champion->UpdateEntry(36796);
+            champion->AIM_Initialize();
+        }
     }
 };
 
@@ -215,4 +265,6 @@ void AddSC_pit_of_saron()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_necromantic_power>("spell_necromantic_power");
+    RegisterAuraScript<spell_strangulating_aura>("spell_strangulating_aura");
+    RegisterAuraScript<spell_feigh_death_pos_aura>("spell_feigh_death_pos_aura");
 }

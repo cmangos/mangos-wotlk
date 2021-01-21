@@ -223,6 +223,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
+(28728,'spell_feigh_death_pos_aura'),
 (42672,'spell_frost_tomb_aura'),
 (42912,'spell_summon_banshee'),
 (43768,'spell_flying_machine_controls'),
@@ -351,6 +352,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (69048,'spell_mirrored_soul'),
 (69051,'spell_mirrored_soul_proc'),
 (69347,'spell_necromantic_power'),
+(69413,'spell_strangulating_aura'),
 (69828,'spell_halls_of_reflection_clone'),
 (70017,'spell_gunship_cannon_fire_aura'),
 (70336,'spell_permafrost_aura'),
