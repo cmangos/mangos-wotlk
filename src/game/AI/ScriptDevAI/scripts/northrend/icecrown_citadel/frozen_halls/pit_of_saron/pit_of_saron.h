@@ -64,7 +64,10 @@ enum
     NPC_ALLIANCE_SLAVE_3            = 36766,
     NPC_ALLIANCE_SLAVE_4            = 36767,
 
+    // Various npcs
+    NPC_FROSTBLADE                  = 37670,
     NPC_FORGEMASTER_STALKER         = 36495,                // used to mark Garfrost jump locations
+    NPC_EYE_LICH_KING               = 36913,
 
     // Ambush npcs
     NPC_YMIRJAR_DEATHBRINGER        = 36892,
@@ -83,6 +86,9 @@ enum
     GO_ICEWALL                      = 201885,               // open after gafrost/krick
     GO_HALLS_OF_REFLECT_PORT        = 201848,               // unlocked by jaina/sylvanas at last outro
     GO_SARONITE_ROCK                = 196485,
+
+    // GO_BALL_AND_CHAIN_ALLIANCE   = 202168,               // ball and chain used in the quests; kept for reference only
+    // GO_BALL_AND_CHAIN_HORDE      = 201969,
 
     AREATRIGGER_ID_TUNNEL_START     = 5578,
     AREATRIGGER_ID_TUNNEL_END       = 5581,
@@ -179,6 +185,7 @@ class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
         void OnPlayerEnter(Player* pPlayer) override;
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureRespawn(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
@@ -207,6 +214,7 @@ class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
         uint32 m_uiTeam;                                    // Team of first entered player, used to set if Jaina or Silvana to spawn
         uint32 m_uiSummonDelayTimer;
         uint32 m_uiIciclesTimer;
+        uint32 m_uiEyeLichKingTimer;
 
         GuidList m_lTunnelStalkersGuidList;
         GuidList m_lAmbushNpcsGuidList;

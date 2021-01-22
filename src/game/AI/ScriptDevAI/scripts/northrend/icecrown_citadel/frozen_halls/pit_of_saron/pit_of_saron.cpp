@@ -132,7 +132,8 @@ instance_pit_of_saron::instance_pit_of_saron(Map* pMap) : ScriptedInstance(pMap)
     m_uiAmbushAggroCount(0),
     m_uiTeam(TEAM_NONE),
     m_uiSummonDelayTimer(0),
-    m_uiIciclesTimer(0)
+    m_uiIciclesTimer(0),
+    m_uiEyeLichKingTimer(0)
 {
     Initialize();
 }
@@ -152,6 +153,9 @@ void instance_pit_of_saron::OnPlayerEnter(Player* pPlayer)
     {
         m_uiTeam = pPlayer->GetTeam();
         SetDialogueSide(m_uiTeam == ALLIANCE);
+
+        if (GetData(TYPE_AMBUSH) == NOT_STARTED)
+            m_uiEyeLichKingTimer = 5000;
 
         // dialogue starts on timer if any of the first two bosses are not already dead
         if (GetData(TYPE_GARFROST) == DONE || GetData(TYPE_KRICK) == DONE)
@@ -180,6 +184,7 @@ void instance_pit_of_saron::OnCreatureCreate(Creature* pCreature)
         case NPC_JAINA_PART2:
         case NPC_SYLVANAS_PART2:
         case NPC_SINDRAGOSA:
+        case NPC_EYE_LICH_KING:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_STALKER:
@@ -202,6 +207,18 @@ void instance_pit_of_saron::OnCreatureCreate(Creature* pCreature)
                 else
                     m_lFrozenAftermathBunniesGuidList.push_back(pCreature->GetObjectGuid());
             }
+            break;
+    }
+}
+
+void instance_pit_of_saron::OnCreatureRespawn(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        // following have passive behavior movement
+        case NPC_FROSTBLADE:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
             break;
     }
 }
@@ -277,6 +294,7 @@ void instance_pit_of_saron::SetData(uint32 uiType, uint32 uiData)
                     pTyrannus->CastSpell(pTyrannus, SPELL_ACHIEVEMENT_CHECK, TRIGGERED_OLD_TRIGGERED);
 
                 m_uiIciclesTimer = 0;
+                m_uiEyeLichKingTimer = 0;
             }
             m_auiEncounter[uiType] = uiData;
             break;
@@ -626,6 +644,29 @@ void instance_pit_of_saron::Update(uint32 uiDiff)
         }
         else
             m_uiIciclesTimer -= uiDiff;
+    }
+
+    if (m_uiEyeLichKingTimer)
+    {
+        if (m_uiEyeLichKingTimer <= uiDiff)
+        {
+            // the eye will randomly face the players
+            if (Creature* pEye = GetSingleCreatureFromStorage(NPC_EYE_LICH_KING))
+            {
+                Player* pPlayer = GetPlayerInMap();
+                if (!pPlayer)
+                {
+                    script_error_log("instance_pit_of_saron: Error: couldn't find any player in instance");
+                    m_uiEyeLichKingTimer = 0;
+                }
+
+                pEye->SetFacingToObject(pPlayer);
+
+                m_uiEyeLichKingTimer = urand(10000, 30000);
+            }
+        }
+        else
+            m_uiEyeLichKingTimer -= uiDiff;
     }
 }
 

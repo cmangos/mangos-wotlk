@@ -211,7 +211,7 @@ struct spell_strangulating_aura : public AuraScript
 
         // on apply move randomly around Tyrannus
         if (apply)
-            target->GetMotionMaster()->MoveRandomAroundPoint(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), frand(5.0f, 8.0f), frand(5.0f, 10.0f));
+            target->GetMotionMaster()->MoveRandomAroundPoint(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), frand(8.0f, 16.0f), frand(5.0f, 10.0f));
         // on remove fall to the ground
         else
         {
@@ -246,6 +246,37 @@ struct spell_feigh_death_pos_aura : public AuraScript
     }
 };
 
+/*######
+## spell_slave_trigger_closest - 71281
+######*/
+
+struct spell_slave_trigger_closest : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsCreature() || !caster || !caster->IsPlayer())
+            return;
+
+        Player* player = static_cast<Player*>(caster);
+        player->RewardPlayerAndGroupAtEventCredit(player->GetTeam() == ALLIANCE ? 36764 : 36770, target);
+
+        Creature* pSlave = static_cast<Creature*>(target);
+
+        // Note: emotes are handled in EAI
+
+        float fX, fY, fZ;
+        pSlave->GetNearPoint(pSlave, fX, fY, fZ, 0, 50.0f, M_PI_F * 0.5f);
+        pSlave->HandleEmote(EMOTE_ONESHOT_NONE);
+        pSlave->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+        pSlave->ForcedDespawn(20000);
+    }
+};
+
 void AddSC_pit_of_saron()
 {
     Script* pNewScript = new Script;
@@ -267,4 +298,5 @@ void AddSC_pit_of_saron()
     RegisterSpellScript<spell_necromantic_power>("spell_necromantic_power");
     RegisterAuraScript<spell_strangulating_aura>("spell_strangulating_aura");
     RegisterAuraScript<spell_feigh_death_pos_aura>("spell_feigh_death_pos_aura");
+    RegisterSpellScript<spell_slave_trigger_closest>("spell_slave_trigger_closest");
 }

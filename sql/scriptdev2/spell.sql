@@ -356,6 +356,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (69828,'spell_halls_of_reflection_clone'),
 (70017,'spell_gunship_cannon_fire_aura'),
 (70336,'spell_permafrost_aura'),
+(71281,'spell_slave_trigger_closest'),
 (73159,'spell_play_movie'),
 (74562,'spell_fiery_combustion_aura'),
 (74792,'spell_soul_consumption_aura'),
