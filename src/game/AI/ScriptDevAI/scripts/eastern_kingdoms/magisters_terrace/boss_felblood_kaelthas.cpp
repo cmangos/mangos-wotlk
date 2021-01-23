@@ -110,9 +110,9 @@ enum FelbloodKaelthasActions
     KAEL_OUTRO,
 };
 
-struct boss_felblood_kaelthasAI : public CombatAI
+struct boss_felblood_kaelthasAI : public RangedCombatAI
 {
-    boss_felblood_kaelthasAI(Creature* creature) : CombatAI(creature, KAEL_ACTION_MAX),
+    boss_felblood_kaelthasAI(Creature* creature) : RangedCombatAI(creature, KAEL_ACTION_MAX),
         m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty()), m_introStarted(false)
     {
         AddTimerlessCombatAction(KAEL_ACTION_ENERGY_FEEDBACK, false);
@@ -121,8 +121,6 @@ struct boss_felblood_kaelthasAI : public CombatAI
         AddCombatAction(KAEL_ACTION_PYROBLAST, true);
         if (!m_isRegularMode)
             AddCombatAction(KAEL_ACTION_SHOCK_BARRIER, 60000u);
-        else
-            AddCombatAction(KAEL_ACTION_SHOCK_BARRIER, true);
         AddCombatAction(KAEL_ACTION_FLAMESTRIKE, 25000u);
         AddCombatAction(KAEL_ACTION_PHOENIX, 10000u);
         AddCombatAction(KAEL_ACTION_FIREBALL, 0u);
@@ -139,6 +137,15 @@ struct boss_felblood_kaelthasAI : public CombatAI
             HandleOutro();
         });
         SetDeathPrevention(true);
+        SetRangedMode(true, 20.f, TYPE_FULL_CASTER);
+        AddMainSpell(m_isRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H);
+        if (m_instance)
+        {
+            m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float /*x*/, float /*y*/, float /*z*/)
+            {
+                return static_cast<ScriptedInstance*>(unit->GetInstanceData())->GetPlayerInMap(true, false) == nullptr;
+            });
+        }
         Reset();
     }
 
@@ -173,8 +180,6 @@ struct boss_felblood_kaelthasAI : public CombatAI
 
         SetCombatMovement(true);
 
-        m_attackDistance = 20.0f;
-
         DespawnGuids(m_spawns);
     }
 
@@ -182,7 +187,6 @@ struct boss_felblood_kaelthasAI : public CombatAI
     {
         if (m_instance)
             m_instance->SetData(TYPE_KAELTHAS, DONE);
-        DespawnGuids(m_spawns);
     }
 
     void Aggro(Unit* /*who*/) override
@@ -261,6 +265,7 @@ struct boss_felblood_kaelthasAI : public CombatAI
         switch (m_outroStage)
         {
             case 0:
+                DespawnGuids(m_spawns);
                 SetCombatScriptStatus(true);
                 m_creature->SetTarget(nullptr);
                 DoScriptText(SAY_DEATH, m_creature);
@@ -323,7 +328,7 @@ struct boss_felblood_kaelthasAI : public CombatAI
             case 1:
                 DoCastSpellIfCan(nullptr, SPELL_GRAVITY_LAPSE_VISUAL);
                 SetCombatScriptStatus(false);
-                SetMeleeEnabled(false);
+                SetMeleeEnabled(true);
                 break;
         }
         ++m_gravityLapseStage;
@@ -427,7 +432,7 @@ struct boss_felblood_kaelthasAI : public CombatAI
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(target, m_isRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
-                        ResetCombatAction(action, urand(2000, 4000));
+                        ResetCombatAction(action, urand(2000, 3000));
                 return;
             }
         }

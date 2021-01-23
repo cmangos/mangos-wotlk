@@ -62,7 +62,7 @@ struct npc_kalecgosAI : public ScriptedAI
         m_uiTransformTimer = 0;
 
         // Move the dragon to landing point
-        m_creature->GetMotionMaster()->MovePoint(1, afKaelLandPoint[0], afKaelLandPoint[1], afKaelLandPoint[2]);
+        m_creature->GetMotionMaster()->MovePoint(1, afKaelLandPoint[0], afKaelLandPoint[1], afKaelLandPoint[2], FORCED_MOVEMENT_RUN);
     }
 
     void JustRespawned() override
@@ -105,11 +105,6 @@ struct npc_kalecgosAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_npc_kalecgos(Creature* pCreature)
-{
-    return new npc_kalecgosAI(pCreature);
-}
-
 bool ProcessEventId_event_go_scrying_orb(uint32 /*uiEventId*/, Object* pSource, Object* /*pTarget*/, bool bIsStart)
 {
     if (bIsStart && pSource->GetTypeId() == TYPEID_PLAYER)
@@ -128,7 +123,7 @@ void AddSC_magisters_terrace()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_kalecgos";
-    pNewScript->GetAI = &GetAI_npc_kalecgos;
+    pNewScript->GetAI = &GetNewAIInstance<npc_kalecgosAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

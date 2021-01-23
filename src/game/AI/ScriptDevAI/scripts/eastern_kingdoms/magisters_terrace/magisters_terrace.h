@@ -56,8 +56,6 @@ class instance_magisters_terrace : public ScriptedInstance
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
 
-        void OnCreatureDeath(Creature* pCreature) override;
-
         uint32 GetData(uint32 uiType) const override;
         void SetData(uint32 uiType, uint32 uiData) override;
 
@@ -69,8 +67,6 @@ class instance_magisters_terrace : public ScriptedInstance
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
-
-        uint32 m_uiDelrissaDeathCount;
 
         GuidList m_lFelCrystalGuid;
 };

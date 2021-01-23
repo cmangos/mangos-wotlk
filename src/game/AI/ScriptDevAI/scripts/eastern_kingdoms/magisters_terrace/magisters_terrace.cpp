@@ -31,8 +31,7 @@ EndScriptData */
 3  - Kael'thas Sunstrider
 */
 
-instance_magisters_terrace::instance_magisters_terrace(Map* pMap) : ScriptedInstance(pMap),
-    m_uiDelrissaDeathCount(0)
+instance_magisters_terrace::instance_magisters_terrace(Map* pMap) : ScriptedInstance(pMap)
 {
     Initialize();
 }
@@ -94,36 +93,6 @@ void instance_magisters_terrace::OnObjectCreate(GameObject* pGo)
     m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
-void instance_magisters_terrace::OnCreatureDeath(Creature* pCreature)
-{
-    switch (pCreature->GetEntry())
-    {
-        case NPC_KAGANI:
-        case NPC_ELLRYS:
-        case NPC_ERAMAS:
-        case NPC_YAZZAI:
-        case NPC_SALARIS:
-        case NPC_GARAXXAS:
-        case NPC_APOKO:
-        case NPC_ZELFAN:
-            ++m_uiDelrissaDeathCount;
-            if (m_uiDelrissaDeathCount == MAX_DELRISSA_ADDS)
-                SetData(TYPE_DELRISSA, SPECIAL);
-            // yell on summoned death
-            if (Creature* pDelrissa = GetSingleCreatureFromStorage(NPC_DELRISSA))
-            {
-                if (pDelrissa->IsAlive())
-                    DoScriptText(aDelrissaAddDeath[m_uiDelrissaDeathCount - 1], pDelrissa);
-                else if (GetData(TYPE_DELRISSA) == SPECIAL)
-                {
-                    SetData(TYPE_DELRISSA, DONE);
-                    pDelrissa->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-                }
-            }
-            break;
-    }
-}
-
 void instance_magisters_terrace::SetData(uint32 uiType, uint32 uiData)
 {
     switch (uiType)
@@ -176,8 +145,6 @@ void instance_magisters_terrace::SetData(uint32 uiType, uint32 uiData)
         case TYPE_DELRISSA:
             if (uiData == DONE)
                 DoUseDoorOrButton(GO_DELRISSA_DOOR);
-            if (uiData == IN_PROGRESS)
-                m_uiDelrissaDeathCount = 0;
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_KAELTHAS:
@@ -242,15 +209,10 @@ uint32 instance_magisters_terrace::GetData(uint32 uiType) const
     return 0;
 }
 
-InstanceData* GetInstanceData_instance_magisters_terrace(Map* pMap)
-{
-    return new instance_magisters_terrace(pMap);
-}
-
 void AddSC_instance_magisters_terrace()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_magisters_terrace";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_magisters_terrace;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_magisters_terrace>;
     pNewScript->RegisterSelf();
 }

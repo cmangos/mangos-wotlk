@@ -179,9 +179,6 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
 
     void Aggro(Unit* who) override
     {
-        if (who->GetTypeId() != TYPEID_PLAYER)
-            return;
-
         DoScriptText(SAY_AGGRO, m_creature);
 
         if (m_instance)
@@ -216,7 +213,7 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
 
             // Summon the 4 entries
             for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)
-                m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSPAWN_CORPSE_TIMED_DESPAWN, 7000);
         }
         // Resummon the killed adds
         else
@@ -230,7 +227,7 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
                 if (m_instance->GetSingleCreatureFromStorage(m_vuiLackeyEnties[i], true))
                     continue;
 
-                m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSPAWN_CORPSE_DESPAWN, 0);
+                m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSPAWN_CORPSE_TIMED_DESPAWN, 7000);
             }
         }
     }
@@ -251,7 +248,9 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
     void SummonedCreatureJustDied(Creature* summoned) override
     {
         ++m_summonsKilled;
-        if (m_summonsKilled >= 4)
+        if (!m_creature->HasAura(SPELL_PERMANENT_FEIGN_DEATH))
+            DoScriptText(aDelrissaAddDeath[m_summonsKilled - 1], m_creature);
+        if (m_summonsKilled >= 4 && m_creature->HasAura(SPELL_PERMANENT_FEIGN_DEATH))
             m_creature->CastSpell(nullptr, SPELL_SUICIDE, TRIGGERED_OLD_TRIGGERED);
     }
 
@@ -259,14 +258,8 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (!m_instance)
-            return;
-
-        // Remove lootable flag if the lackeys are not killed
-        if (m_instance->GetData(TYPE_DELRISSA) == SPECIAL)
+        if (m_instance)
             m_instance->SetData(TYPE_DELRISSA, DONE);
-        else
-            m_creature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
     }
 
     void ExecuteAction(uint32 action) override
@@ -274,17 +267,17 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
         switch (action)
         {
             case DELRISSA_HEAL:
-                if (Unit* target = DoSelectLowestHpFriendly(40.f, 75.0f, true))
+                if (Unit* target = DoSelectLowestHpFriendly(40.f, 25.0f, true))
                     if (DoCastSpellIfCan(target, SPELL_FLASH_HEAL) == CAST_OK)
                         ResetCombatAction(action, urand(2000, 4000));
                 break;
             case DELRISSA_RENEW:
-                if (Unit* target = DoSelectLowestHpFriendly(40.f, 95.0f, true))
+                if (Unit* target = DoSelectLowestHpFriendly(40.f, 5.0f, true))
                     if (DoCastSpellIfCan(target, m_isRegularMode ? SPELL_RENEW : SPELL_RENEW_H) == CAST_OK)
                         ResetCombatAction(action, urand(15000, 17000));
                 break;
             case DELRISSA_SHIELD:
-                if (Unit* target = DoSelectLowestHpFriendly(40.f, 99.f, true))
+                if (Unit* target = DoSelectLowestHpFriendly(40.f, 1.f, true))
                     if (DoCastSpellIfCan(target, m_isRegularMode ? SPELL_SHIELD : SPELL_SHIELD_H) == CAST_OK)
                         ResetCombatAction(action, urand(15000, 19000));
                 break;
@@ -337,6 +330,14 @@ struct priestess_companion_commonAI : public priestess_commonAI
 
         if (Creature* delrissa = m_instance->GetSingleCreatureFromStorage(NPC_DELRISSA))
             delrissa->AI()->KilledUnit(victim);
+    }
+
+    void EnterEvadeMode() override
+    {
+        priestess_commonAI::EnterEvadeMode();
+        if (Creature* delrissa = m_instance->GetSingleCreatureFromStorage(NPC_DELRISSA))
+            if (delrissa->IsAlive() && delrissa->IsInCombat())
+                delrissa->AI()->EnterEvadeMode();
     }
 
     void ExecuteAction(uint32 action) override
@@ -492,6 +493,7 @@ struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
         AddCombatAction(ELLRIS_FEAR, 8000, 23000);
         AddCombatAction(ELLRIS_DEATH_COIL, 8000u);
         SetRangedMode(true, 20.f, TYPE_FULL_CASTER);
+        AddMainSpell(m_isRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H);
     }
 
     void Reset() override
@@ -946,7 +948,7 @@ struct npc_apokoAI : public priestess_companion_commonAI
                         ResetCombatAction(action, urand(7000, 11000));
                 break;
             case APOKO_HEALING_WAVE:
-                if (Unit* target = DoSelectLowestHpFriendly(40.f, 75.0f, true))
+                if (Unit* target = DoSelectLowestHpFriendly(40.f, 25.0f, true))
                     if (DoCastSpellIfCan(target, m_isRegularMode ? SPELL_LESSER_HEALING_WAVE : SPELL_LESSER_HEALING_WAVE_H) == CAST_OK)
                         ResetCombatAction(action, urand(4000, 6000));
                 break;
