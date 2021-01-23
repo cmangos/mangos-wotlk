@@ -2245,6 +2245,8 @@ UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 51003;
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 51146;
 -- Summon Skittering Swarmer | Infector (Azjol Nerub, Krik'thir the Gatewatcher) - one target
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (52438,52449);
+-- Torch - one target
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 52953;
 -- Impale (Azjol Nerub, Anub'arak) - one target
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 53457;
 -- Summon Anub'ar Champion | Necromancer | Crypt Fiend - should only hit one target
