@@ -5732,6 +5732,17 @@ SpellCastResult Spell::CheckCast(bool strict)
         if (m_spellInfo->Effect[i])
             availableEffectMask |= (1 << i);
 
+    auto partialApplication = [&](uint32 i) -> SpellCastResult
+    {
+        availableEffectMask &= (~(1 << i));
+        if (availableEffectMask == 0)
+            return SPELL_FAILED_BAD_TARGETS;
+        else
+            m_partialApplicationMask |= (1 << i);
+
+        return SPELL_CAST_OK;
+    };
+
     for (uint32 i = 0; i < MAX_EFFECT_INDEX; ++i)
     {
         // for effects of spells that have only one target
@@ -6578,8 +6589,14 @@ SpellCastResult Spell::CheckCast(bool strict)
             case SPELL_AURA_PERIODIC_MANA_LEECH:
             {
                 if (expectedTarget)
+                {
                     if (expectedTarget->GetPowerType() != POWER_MANA)
-                        return SPELL_FAILED_BAD_TARGETS;
+                    {
+                        SpellCastResult result = partialApplication(i);
+                        if (result != SPELL_CAST_OK)
+                            return result;
+                    }
+                }
 
                 break;
             }
@@ -6635,11 +6652,9 @@ SpellCastResult Spell::CheckCast(bool strict)
                     // Target must be a weapon wielder
                     if (!expectedTarget->hasMainhandWeapon())
                     {
-                        availableEffectMask &= (~(1 << i));
-                        if (availableEffectMask == 0)
-                            return SPELL_FAILED_BAD_TARGETS;
-                        else
-                            m_partialApplicationMask |= (1 << i);
+                        SpellCastResult result = partialApplication(i);
+                        if (result != SPELL_CAST_OK)
+                            return result;
                     }
                 }
                 break;
