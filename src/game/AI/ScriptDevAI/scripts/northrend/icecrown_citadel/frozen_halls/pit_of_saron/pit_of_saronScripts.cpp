@@ -31,80 +31,11 @@ EndContentData */
 
 enum
 {
-    // Ambush event
-    SPELL_EMPOWERED_SHADOW_BOLT         = 69528,
-    SPELL_SUMMON_UNDEAD                 = 69516,
-
     // Icicles
     SPELL_ICICLE                        = 69426,
     SPELL_ICICLE_DUMMY                  = 69428,
     SPELL_ICE_SHARDS_H                  = 70827,            // used to check the tunnel achievement
 };
-
-/*######
-## npc_ymirjar_deathbringer
-######*/
-
-struct npc_ymirjar_deathbringerAI : public ScriptedAI
-{
-    npc_ymirjar_deathbringerAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
-
-    uint32 m_uiShadowBoltTimer;
-
-    void Reset() override
-    {
-        m_uiShadowBoltTimer = urand(1000, 3000);
-    }
-
-    void MovementInform(uint32 uiMotionType, uint32 uiPointId) override
-    {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        DoCastSpellIfCan(m_creature, SPELL_SUMMON_UNDEAD);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiShadowBoltTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_EMPOWERED_SHADOW_BOLT) == CAST_OK)
-                    m_uiShadowBoltTimer = urand(2000, 3000);
-            }
-        }
-        else
-            m_uiShadowBoltTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-    }
-};
-
-bool EffectDummyCreature_spell_summon_undead(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_SUMMON_UNDEAD && uiEffIndex == EFFECT_INDEX_0)
-    {
-        if (pCreatureTarget->GetEntry() != NPC_YMIRJAR_DEATHBRINGER)
-            return true;
-
-        float fX, fY, fZ;
-        for (uint8 i = 0; i < 4; ++i)
-        {
-            pCreatureTarget->GetNearPoint(pCreatureTarget, fX, fY, fZ, 0, frand(8.0f, 12.0f), M_PI_F * 0.5f * i);
-            pCreatureTarget->SummonCreature(i % 2 ? NPC_YMIRJAR_WRATHBRINGER : NPC_YMIRJAR_FLAMEBEARER, fX, fY, fZ, 3.75f, TEMPSPAWN_DEAD_DESPAWN, 0);
-        }
-
-        // always return true when we are handling this spell and effect
-        return true;
-    }
-
-    return false;
-}
 
 /*######
 ## npc_collapsing_icicle
@@ -189,6 +120,10 @@ struct spell_necromantic_power : public SpellScript
             return;
 
         target->RemoveAurasDueToSpell(69413);
+
+        // Krick has separate script
+        if (target->GetEntry() == NPC_KRICK)
+            return;
 
         // apply feign death aura 28728; calculated spell value is 22516, but this isn't used
         target->CastSpell(target, 28728, TRIGGERED_OLD_TRIGGERED);
@@ -277,15 +212,33 @@ struct spell_slave_trigger_closest : public SpellScript
     }
 };
 
+/*######
+## spell_summon_undead - 69516
+######*/
+
+struct spell_summon_undead : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        if (!caster || !caster->IsCreature())
+            return;
+
+        float fX, fY, fZ;
+        for (uint8 i = 0; i < 4; ++i)
+        {
+            caster->GetNearPoint(caster, fX, fY, fZ, 0, frand(8.0f, 12.0f), M_PI_F * 0.5f * i);
+            caster->SummonCreature(i % 2 ? NPC_YMIRJAR_WRATHBRINGER : NPC_YMIRJAR_FLAMEBEARER, fX, fY, fZ, 3.75f, TEMPSPAWN_DEAD_DESPAWN, 0);
+        }
+    }
+};
+
 void AddSC_pit_of_saron()
 {
     Script* pNewScript = new Script;
-    pNewScript->Name = "npc_ymirjar_deathbringer";
-    pNewScript->GetAI = &GetNewAIInstance<npc_ymirjar_deathbringerAI>;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_summon_undead;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "npc_collapsing_icicle";
     pNewScript->GetAI = &GetNewAIInstance<npc_collapsing_icicleAI>;
     pNewScript->RegisterSelf();
@@ -299,4 +252,5 @@ void AddSC_pit_of_saron()
     RegisterAuraScript<spell_strangulating_aura>("spell_strangulating_aura");
     RegisterAuraScript<spell_feigh_death_pos_aura>("spell_feigh_death_pos_aura");
     RegisterSpellScript<spell_slave_trigger_closest>("spell_slave_trigger_closest");
+    RegisterSpellScript<spell_summon_undead>("spell_summon_undead");
 }

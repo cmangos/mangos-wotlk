@@ -50,6 +50,7 @@ enum
     SPELL_TOXIC_WASTE                   = 69024,
     SPELL_SHADOW_BOLT                   = 69028,
     SPELL_EXPLOSIVE_BARRAGE_KRICK       = 69012,                // Triggers 69015 every 2 sec
+    SPELL_KRICK_KILL_CREDIT             = 71308,
 
     NPC_EXPLODING_ORB                   = 36610,
 
@@ -63,8 +64,12 @@ enum
     MAX_HASTY_GROW_STACKS               = 15,
 };
 
-static const float afOutroNpcSpawnLoc[4] = {777.2274f, 119.5521f, 510.0363f, 6.05f};
-static const float afTyrannusTeleLoc[4] = {841.01f, 196.245f, 573.964f, 4.46f};
+static const EventNpcLocations aKrickSummonData[1]
+{
+    {NPC_SYLVANAS_PART1, NPC_JAINA_PART1, 777.2274f, 119.5521f, 510.0363f, 6.05f, 1},
+};
+
+static const float afTyrannusTeleLoc[4] = { 841.01f, 196.245f, 573.964f, 3.75118f };
 
 /*######
 ## boss_ick
@@ -131,18 +136,26 @@ struct boss_ickAI : public ScriptedAI
         {
             m_pInstance->SetData(TYPE_KRICK, DONE);
 
+            // summon Jaina / Sylvanas
+            if (Creature* pCreature = m_creature->SummonCreature(m_pInstance->GetPlayerTeam() == HORDE ? aKrickSummonData[0].uiEntryHorde : aKrickSummonData[0].uiEntryAlliance,
+                aKrickSummonData[0].fX, aKrickSummonData[0].fY, aKrickSummonData[0].fZ, aKrickSummonData[0].fO, TEMPSPAWN_TIMED_DESPAWN, 10 * MINUTE * IN_MILLISECONDS))
+                pCreature->GetMotionMaster()->MoveWaypoint(aKrickSummonData[0].pathId, 0, 1000);
+
+            // move Krick into position
             if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
             {
-                DoScriptText(SAY_OUTRO_1, pKrick);
                 pKrick->AI()->EnterEvadeMode();
-
-                // Summon Jaina or Sylvanas for epilogue
-                pKrick->SummonCreature(m_pInstance->GetPlayerTeam() == HORDE ? NPC_SYLVANAS_PART1 : NPC_JAINA_PART1,
-                                       afOutroNpcSpawnLoc[0], afOutroNpcSpawnLoc[1], afOutroNpcSpawnLoc[2], afOutroNpcSpawnLoc[3], TEMPSPAWN_TIMED_DESPAWN, 2 * MINUTE * IN_MILLISECONDS);
+                pKrick->SetImmuneToNPC(true);
+                pKrick->SetImmuneToPlayer(true);
+                pKrick->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
 
+            // teleport Tyrannus for event
             if (Creature* pTyrannus = m_pInstance->GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO))
+            {
+                pTyrannus->GetMotionMaster()->MoveIdle();
                 pTyrannus->NearTeleportTo(afTyrannusTeleLoc[0], afTyrannusTeleLoc[1], afTyrannusTeleLoc[2], afTyrannusTeleLoc[3]);
+            }
         }
     }
 
@@ -280,11 +293,6 @@ struct boss_ickAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_ick(Creature* pCreature)
-{
-    return new boss_ickAI(pCreature);
-}
-
 /*######
 ## boss_krick
 ######*/
@@ -293,54 +301,25 @@ struct boss_krickAI : public ScriptedAI
 {
     boss_krickAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
         Reset();
     }
 
-    ScriptedInstance* m_pInstance;
-
     void Reset() override { }
 
-    void EnterEvadeMode() override
+    void JustDied(Unit* /*pKiller*/) override
     {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-
-        m_creature->SetLootRecipient(nullptr);
-
-        Reset();
-
-        // Don't handle movement. Boss is on vehicle so he doesn't have to go anywhere. On epilogue he needs to stay in place
+        DoCastSpellIfCan(m_creature, SPELL_KRICK_KILL_CREDIT, CAST_TRIGGERED);
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
         switch (pSummoned->GetEntry())
         {
-            case NPC_SYLVANAS_PART1:
-            case NPC_JAINA_PART1:
-            {
-                float fX, fY, fZ;
-                pSummoned->SetWalk(false);
-                m_creature->GetContactPoint(pSummoned, fX, fY, fZ, 2 * INTERACTION_DISTANCE);
-                pSummoned->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
-                break;
-            }
             case NPC_EXPLODING_ORB:
                 pSummoned->CastSpell(pSummoned, SPELL_EXPLODING_ORB_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->CastSpell(pSummoned, SPELL_AUTO_GROW_AND_SPEED_BOOST, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
-    }
-
-    void SummonedMovementInform(Creature* /*pSummoned*/, uint32 uiMotionType, uint32 uiPointId) override
-    {
-        if (uiMotionType != POINT_MOTION_TYPE || !uiPointId)
-            return;
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KRICK, SPECIAL);
     }
 
     void UpdateAI(const uint32 /*uiDiff*/) override
@@ -349,11 +328,6 @@ struct boss_krickAI : public ScriptedAI
             return;
     }
 };
-
-UnitAI* GetAI_boss_krick(Creature* pCreature)
-{
-    return new boss_krickAI(pCreature);
-}
 
 /*######
 ## npc_exploding_orb
@@ -393,25 +367,20 @@ struct npc_exploding_orbAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-UnitAI* GetAI_npc_exploding_orb(Creature* pCreature)
-{
-    return new npc_exploding_orbAI(pCreature);
-}
-
 void AddSC_boss_krick_and_ick()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_ick";
-    pNewScript->GetAI = &GetAI_boss_ick;
+    pNewScript->GetAI = &GetNewAIInstance<boss_ickAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_krick";
-    pNewScript->GetAI = &GetAI_boss_krick;
+    pNewScript->GetAI = &GetNewAIInstance<boss_krickAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_exploding_orb";
-    pNewScript->GetAI = &GetAI_npc_exploding_orb;
+    pNewScript->GetAI = &GetNewAIInstance<npc_exploding_orbAI>;
     pNewScript->RegisterSelf();
 }

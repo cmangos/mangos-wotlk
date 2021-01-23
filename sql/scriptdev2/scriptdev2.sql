@@ -1026,7 +1026,6 @@ UPDATE creature_template SET ScriptName='boss_forgemaster_garfrost' WHERE entry=
 UPDATE creature_template SET ScriptName='boss_krick' WHERE entry=36477;
 UPDATE creature_template SET ScriptName='boss_ick' WHERE entry=36476;
 UPDATE creature_template SET ScriptName='npc_exploding_orb' WHERE entry=36610;
-UPDATE creature_template SET ScriptName='npc_ymirjar_deathbringer' WHERE entry=36892;
 UPDATE creature_template SET ScriptName='npc_collapsing_icicle' WHERE entry=36847;
 UPDATE creature_template SET ScriptName='boss_tyrannus' WHERE entry=36658;
 UPDATE creature_template SET ScriptName='boss_rimefang_pos' WHERE entry=36661;
@@ -7319,8 +7318,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1658017','Garfrost hope giant underpants clean. Save boss great shame. For later.','16915','1','0','0','0','garfrost SAY_DEATH'),
 ('-1658018','Axe too weak. Garfrost make better and CRUSH YOU!','16916','1','0','0','0','garfrost SAY_FORGE_1'),
 ('-1658019','That one maybe not so good to eat now. Stupid Garfrost! BAD! BAD!','16917','1','0','0','0','garfrost SAY_FORGE_2'),
-('-1658020','Another shall take his place. You waste your time.','16752','6','0','0','0','tyrannus SAY_TYRANNUS_GARFROST'),
-('-1658021','The forgemaster is dead! Get geared up men, we have a Scourgelord to kill.','0','1','0','0','0','victus_or_ironskull SAY_GENERAL_GARFROST'),
+('-1658020','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1658021','REUSE ME','0','0','0','0','0','REUSE ME'),
 ('-1658022','%s hurls a massive saronite boulder at you!','0','5','0','0','0','garfrost EMOTE_THROW_SARONITE'),
 ('-1658023','%s casts Deep Freeze at $N.','0','3','0','0','0','garfrost EMOTE_DEEP_FREEZE'),
 
@@ -7336,18 +7335,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1658033','%s begins to unleash a toxic poison cloud!','0','3','0','0','0','ick EMOTE_ICK_POISON'),
 ('-1658034','%s is chasing you!','0','5','0','0','0','ick EMOTE_ICK_CHASING'),
 
-('-1658035','Wait! Stop! Don''t kill me, please! I''ll tell you everything!','16934','1','0','431','0','krick SAY_OUTRO_1'),
-('-1658036','I''m not so naive as to believe your appeal for clemency, but I will listen.','16611','1','0','0','0','jaina SAY_JAINA_KRICK_1'),
-('-1658037','Why should the Banshee Queen spare your miserable life?','17033','1','0','396','0','sylvanas SAY_SYLVANAS_KRICK_1'),
-('-1658038','What you seek is in the master''s lair, but you must destroy Tyrannus to gain entry. Within the Halls of Reflection you will find Frostmourne. It... it holds the truth.','16935','1','0','0','0','krick SAY_OUTRO_2'),
-('-1658039','Frostmourne lies unguarded? Impossible!','16612','1','0','0','0','jaina SAY_JAINA_KRICK_2'),
-('-1658040','Frostmourne? The Lich King is never without his blade! If you are lying to me...','17034','1','0','15','0','sylvanas SAY_SYLVANAS_KRICK_2'),
-('-1658041','I swear it is true! Please, don''t kill me!!','16936','1','0','0','0','krick SAY_OUTRO_3'),
-('-1658042','Worthless gnat! Death is all that awaits you!','16753','1','0','0','0','tyrannus SAY_TYRANNUS_KRICK_1'),
-('-1658043','Urg... no!!','16937','1','0','0','0','krick SAY_OUTRO_4'),
-('-1658044','Do not think that I shall permit you entry into my master''s sanctum so easily. Pursue me if you dare.','16754','1','0','0','0','tyrannus SAY_TYRANNUS_KRICK_2'),
-('-1658045','What a cruel end. Come, heroes. We must see if the gnome''s story is true. If we can separate Arthas from Frostmourne, we might have a chance at stopping him.','16613','1','0','0','0','jaina SAY_JAINA_KRICK_3'),
-('-1658046','A fitting end for a traitor. Come, we must free the slaves and see what is within the Lich King''s chamber for ourselves.','17035','1','0','396','0','sylvanas SAY_SYLVANAS_KRICK_3'),
+-- REUSE -1658035 to -1658046
 
 ('-1658047','Your pursuit shall be in vain, adventurers, for the Lich King has placed an army of undead at my command! Behold!','16755','6','0','0','0','tyrannus SAY_TYRANNUS_AMBUSH_1'),
 ('-1658048','Persistent whelps! You will not reach the entrance of my lord''s lair! Soldiers, destroy them!','16756','6','0','0','0','tyrannus SAY_TYRANNUS_AMBUSH_2'),

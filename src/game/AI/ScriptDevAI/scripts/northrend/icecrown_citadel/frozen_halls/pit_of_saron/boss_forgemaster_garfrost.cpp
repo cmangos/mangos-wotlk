@@ -66,36 +66,27 @@ static const float aGarfrostMoveLocs[2][3] =
     {719.785f, -230.227f, 527.033f},
 };
 
-static const float afOutroNpcSpawnLoc[4] = {};
-
-struct GarfrostSummonData
+static const EventNpcLocations aGarfrostSummonData[MAX_OUTRO_CREATURES]
 {
-    uint32 entryAlliance, entryHorde;
-    float fX, fY, fZ, fOrient;
-    uint8 pathId;
-};
-
-static const GarfrostSummonData aGarfrostSummonData[MAX_OUTRO_CREATURES]
-{
-    {NPC_VICTUS_PART1,     NPC_IRONSKULL_PART1,         695.0146f, -123.7532f, 515.3067f, 4.591077f, 0},
-    {NPC_ALLIANCE_SLAVE_1, NPC_HORDE_SLAVE_1,           692.6748f, -121.7674f, 514.3405f, 4.709978f, 0},
-    {NPC_ALLIANCE_SLAVE_1, NPC_HORDE_SLAVE_1,           682.0713f, -123.1513f, 514.9628f, 5.042383f, 1},
-    {NPC_ALLIANCE_SLAVE_1, NPC_HORDE_SLAVE_1,           706.8541f, -123.8544f, 515.3613f, 4.527848f, 2},
-    {NPC_ALLIANCE_SLAVE_1, NPC_HORDE_SLAVE_1,           704.8665f, -122.4049f, 514.6849f, 4.735648f, 3},
-    {NPC_ALLIANCE_SLAVE_1, NPC_HORDE_SLAVE_1,           688.7021f, -123.6012f, 515.2074f, 4.800186f, 4},
-    {NPC_ALLIANCE_SLAVE_1, NPC_HORDE_SLAVE_1,           698.4665f, -122.5291f, 514.7207f, 4.774229f, 5},
-    {NPC_ALLIANCE_SLAVE_2, NPC_HORDE_SLAVE_2,           699.8761f, -119.2608f, 513.8998f, 4.735563f, 0},
-    {NPC_ALLIANCE_SLAVE_2, NPC_HORDE_SLAVE_2,           696.1455f, -120.2243f, 513.8832f, 4.832599f, 1},
-    {NPC_ALLIANCE_SLAVE_2, NPC_HORDE_SLAVE_2,           690.5696f, -118.6559f, 513.8983f, 4.8393f,   2},
-    {NPC_ALLIANCE_SLAVE_2, NPC_HORDE_SLAVE_2,           703.0878f, -117.7911f, 513.9084f, 4.679399f, 3},
-    {NPC_ALLIANCE_SLAVE_4, NPC_HORDE_SLAVE_4,           683.5519f, -115.3331f, 513.9200f, 4.700382f, 0},
-    {NPC_ALLIANCE_SLAVE_4, NPC_HORDE_SLAVE_4,           686.8080f, -116.5909f, 513.9146f, 4.763132f, 1},
-    {NPC_ALLIANCE_SLAVE_4, NPC_HORDE_SLAVE_4,           690.4670f, -114.4672f, 513.9286f, 4.71512f,  2},
-    {NPC_FREE_ALLIANCE_SLAVE_1, NPC_FREE_HORDE_SLAVE_1, 685.6196f, -121.6706f, 514.2377f, 4.884729f, 0},
-    {NPC_FREE_ALLIANCE_SLAVE_1, NPC_FREE_HORDE_SLAVE_1, 701.6552f, -123.5128f, 515.2692f, 4.797701f, 1},
-    {NPC_FREE_ALLIANCE_SLAVE_2, NPC_FREE_HORDE_SLAVE_2, 683.4901f, -118.8237f, 513.8765f, 5.004347f, 0},
-    {NPC_FREE_ALLIANCE_SLAVE_3, NPC_FREE_HORDE_SLAVE_3, 708.2092f, -118.9837f, 513.8765f, 4.382425f, 0},
-    {NPC_FREE_ALLIANCE_SLAVE_3, NPC_FREE_HORDE_SLAVE_3, 694.8687f, -115.4012f, 513.9271f, 4.501494f, 1},
+    {NPC_IRONSKULL_PART1,    NPC_VICTUS_PART1,          695.0146f, -123.7532f, 515.3067f, 4.591077f, 0},
+    {NPC_HORDE_SLAVE_1,      NPC_ALLIANCE_SLAVE_1,      692.6748f, -121.7674f, 514.3405f, 4.709978f, 0},
+    {NPC_HORDE_SLAVE_1,      NPC_ALLIANCE_SLAVE_1,      682.0713f, -123.1513f, 514.9628f, 5.042383f, 1},
+    {NPC_HORDE_SLAVE_1,      NPC_ALLIANCE_SLAVE_1,      706.8541f, -123.8544f, 515.3613f, 4.527848f, 2},
+    {NPC_HORDE_SLAVE_1,      NPC_ALLIANCE_SLAVE_1,      704.8665f, -122.4049f, 514.6849f, 4.735648f, 3},
+    {NPC_HORDE_SLAVE_1,      NPC_ALLIANCE_SLAVE_1,      688.7021f, -123.6012f, 515.2074f, 4.800186f, 4},
+    {NPC_HORDE_SLAVE_1,      NPC_ALLIANCE_SLAVE_1,      698.4665f, -122.5291f, 514.7207f, 4.774229f, 5},
+    {NPC_HORDE_SLAVE_2,      NPC_ALLIANCE_SLAVE_2,      699.8761f, -119.2608f, 513.8998f, 4.735563f, 0},
+    {NPC_HORDE_SLAVE_2,      NPC_ALLIANCE_SLAVE_2,      696.1455f, -120.2243f, 513.8832f, 4.832599f, 1},
+    {NPC_HORDE_SLAVE_2,      NPC_ALLIANCE_SLAVE_2,      690.5696f, -118.6559f, 513.8983f, 4.8393f,   2},
+    {NPC_HORDE_SLAVE_2,      NPC_ALLIANCE_SLAVE_2,      703.0878f, -117.7911f, 513.9084f, 4.679399f, 3},
+    {NPC_HORDE_SLAVE_4,      NPC_ALLIANCE_SLAVE_4,      683.5519f, -115.3331f, 513.9200f, 4.700382f, 0},
+    {NPC_HORDE_SLAVE_4,      NPC_ALLIANCE_SLAVE_4,      686.8080f, -116.5909f, 513.9146f, 4.763132f, 1},
+    {NPC_HORDE_SLAVE_4,      NPC_ALLIANCE_SLAVE_4,      690.4670f, -114.4672f, 513.9286f, 4.71512f,  2},
+    {NPC_FREE_HORDE_SLAVE_1, NPC_FREE_ALLIANCE_SLAVE_1, 685.6196f, -121.6706f, 514.2377f, 4.884729f, 0},
+    {NPC_FREE_HORDE_SLAVE_1, NPC_FREE_ALLIANCE_SLAVE_1, 701.6552f, -123.5128f, 515.2692f, 4.797701f, 1},
+    {NPC_FREE_HORDE_SLAVE_2, NPC_FREE_ALLIANCE_SLAVE_2, 683.4901f, -118.8237f, 513.8765f, 5.004347f, 0},
+    {NPC_FREE_HORDE_SLAVE_3, NPC_FREE_ALLIANCE_SLAVE_3, 708.2092f, -118.9837f, 513.8765f, 4.382425f, 0},
+    {NPC_FREE_HORDE_SLAVE_3, NPC_FREE_ALLIANCE_SLAVE_3, 694.8687f, -115.4012f, 513.9271f, 4.501494f, 1},
 };
 
 enum GarfrostActions
@@ -147,8 +138,8 @@ struct boss_forgemaster_garfrostAI : public CombatAI
 
             for (uint8 i = 0; i < MAX_OUTRO_CREATURES; ++i)
             {
-                if (Creature* pCreature = m_creature->SummonCreature(m_instance->GetPlayerTeam() == HORDE ? aGarfrostSummonData[i].entryHorde : aGarfrostSummonData[i].entryAlliance,
-                    aGarfrostSummonData[i].fX, aGarfrostSummonData[i].fY, aGarfrostSummonData[i].fZ, aGarfrostSummonData[i].fOrient, TEMPSPAWN_TIMED_DESPAWN, 2 * MINUTE * IN_MILLISECONDS))
+                if (Creature* pCreature = m_creature->SummonCreature(m_instance->GetPlayerTeam() == HORDE ? aGarfrostSummonData[i].uiEntryHorde : aGarfrostSummonData[i].uiEntryAlliance,
+                    aGarfrostSummonData[i].fX, aGarfrostSummonData[i].fY, aGarfrostSummonData[i].fZ, aGarfrostSummonData[i].fO, TEMPSPAWN_TIMED_DESPAWN, 10 * MINUTE * IN_MILLISECONDS))
                 {
                     pCreature->SetWalk(false);
                     pCreature->GetMotionMaster()->MoveWaypoint(aGarfrostSummonData[i].pathId);

@@ -97,12 +97,11 @@ enum
     ACHIEV_CRIT_DONT_LOOK_UP        = 12994,                // Gauntlet, achiev 4525
 };
 
-static const float afTyrannusMovePos[4][3] =
+static const float afTyrannusMovePos[3][3] =
 {
     {922.6365f, 145.877f, 643.2216f},                       // Hide position
-    {835.5887f, 139.4345f, 530.9526f},                      // Ick position
-    {906.9048f, -49.03813f, 618.8016f},                     // Tunnel position
     {966.3345f, 159.2058f, 665.0453f},                      // Rimefang position
+    {578.7934f, 122.4046f, 583.1108f},                      // Tyrannus backup summon
 };
 
 struct EventNpcLocations
@@ -148,16 +147,16 @@ const EventNpcLocations aEventFirstAmbushLocations[2] =
 
 const EventNpcLocations aEventSecondAmbushLocations[] =
 {
-    {NPC_FALLEN_WARRIOR, 0, 916.658f, -55.94097f, 591.6827f, 1.85f, 0, 950.5694f, 31.85649f, 572.2693f},
-    {NPC_FALLEN_WARRIOR, 0, 923.8055f, -55.63195f, 591.8663f, 1.85f, 0, 941.3954f, 35.83769f, 571.4308f},
-    {NPC_FALLEN_WARRIOR, 0, 936.0625f, -53.52778f, 592.0226f, 1.85f, 0, 934.8011f, 8.024931f, 577.3419f},
-    {NPC_FALLEN_WARRIOR, 0, 919.7518f, -68.39236f, 592.2916f, 1.85f, 0, 932.5734f, -22.54153f, 587.403f},
-    {NPC_FALLEN_WARRIOR, 0, 926.8993f, -68.08334f, 592.0798f, 1.85f, 0, 922.6043f, -22.07627f, 585.6684f},
-    {NPC_FALLEN_WARRIOR, 0, 939.1563f, -65.97916f, 592.2205f, 1.85f, 0, 927.0928f, -32.97949f, 589.3028f},
-    {NPC_COLDWRAITH, 0, 924.0261f, -62.3316f, 592.0191f, 2.01f, 0, 929.4673f, 9.722589f, 577.4904f},
-    {NPC_COLDWRAITH, 0, 936.4531f, -60.45486f, 592.1215f, 1.63f, 0, 936.1395f, -4.003471f, 581.3139f},
-    {NPC_COLDWRAITH, 0, 935.8055f, -72.76736f, 592.077f, 1.66f, 0, 933.8441f, -47.83234f, 591.7538f},
-    {NPC_COLDWRAITH, 0, 923.3785f, -74.6441f, 592.368f, 2.37f, 0, 920.726f, -42.32272f, 589.9808f}
+    {NPC_FALLEN_WARRIOR, 0, 926.8993f, -68.083336f, 592.0798f, 1.85004f, 0},
+    {NPC_FALLEN_WARRIOR, 0, 919.7518f, -68.392365f, 592.2916f, 1.85004f, 1},
+    {NPC_FALLEN_WARRIOR, 0, 931.0399f, -55.154514f, 591.8819f, 1.85004f, 2},
+    {NPC_FALLEN_WARRIOR, 0, 923.8055f, -55.631947f, 591.8663f, 1.85004f, 3},
+    {NPC_FALLEN_WARRIOR, 0, 916.658f,  -55.94097f,  591.6827f, 1.85004f, 4},
+    {NPC_FALLEN_WARRIOR, 0, 939.1562f, -65.979164f, 592.2204f, 1.85004f, 5},
+    {NPC_COLDWRAITH, 0, 921.65546f, -57.30312f, 591.8749f, 2.01133f, 0},
+    {NPC_COLDWRAITH, 0, 935.2812f,  -67.22413f, 592.0464f, 1.66512f, 1},
+    {NPC_COLDWRAITH, 0, 926.8993f,  -68.08333f, 592.0798f, 1.85004f, 2},
+    {NPC_COLDWRAITH, 0, 935.5867f,  -46.55127f, 591.9112f, 1.63308f, 3},
 };
 
 const EventNpcLocations aEventTunnelEndLocations[] =

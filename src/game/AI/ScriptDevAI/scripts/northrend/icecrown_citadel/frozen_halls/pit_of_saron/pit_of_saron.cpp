@@ -26,28 +26,6 @@ EndScriptData */
 
 enum
 {
-    // Intro spells
-    SPELL_NECROMATIC_POWER          = 69347,
-    SPELL_FEIGN_DEATH               = 28728,
-    SPELL_RAISE_DEAD                = 69350,
-
-    // Garfrost outro
-    SAY_TYRANNUS_GARFROST           = -1658020,
-    SAY_GENERAL_GARFROST            = -1658021,
-
-    // Ick and Krick outro
-    SAY_JAINA_KRICK_1               = -1658036,
-    SAY_SYLVANAS_KRICK_1            = -1658037,
-    SAY_OUTRO_2                     = -1658038,
-    SAY_JAINA_KRICK_2               = -1658039,
-    SAY_SYLVANAS_KRICK_2            = -1658040,
-    SAY_OUTRO_3                     = -1658041,
-    SAY_TYRANNUS_KRICK_1            = -1658042,
-    SAY_OUTRO_4                     = -1658043,
-    SAY_TYRANNUS_KRICK_2            = -1658044,
-    SAY_JAINA_KRICK_3               = -1658045,
-    SAY_SYLVANAS_KRICK_3            = -1658046,
-
     // Ick and Krick outro spells
     SPELL_STRANGULATING             = 69413,
     SPELL_KRICK_KILL_CREDIT         = 71308,
@@ -93,22 +71,6 @@ enum
 
 static const DialogueEntryTwoSide aPoSDialogues[] =
 {
-    // Garfrost outro
-    {NPC_GARFROST,         0,                  0,                    0,                  4000},         // ToDo: move the freed slaves to position
-    {SAY_GENERAL_GARFROST, NPC_VICTUS_PART1,   SAY_GENERAL_GARFROST, NPC_IRONSKULL_PART1, 2000},
-    {SAY_TYRANNUS_GARFROST, NPC_TYRANNUS_INTRO, 0,                   0,                  0},
-
-    // Ick and Krick outro
-    {SAY_JAINA_KRICK_1,    NPC_JAINA_PART1,    SAY_SYLVANAS_KRICK_1, NPC_SYLVANAS_PART1, 6000},
-    {SAY_OUTRO_2,          NPC_KRICK,          0,                    0,                  16000},
-    {SAY_JAINA_KRICK_2,    NPC_JAINA_PART1,    SAY_SYLVANAS_KRICK_2, NPC_SYLVANAS_PART1, 7000},
-    {SAY_OUTRO_3,          NPC_KRICK,          0,                    0,                  7000},
-    {SAY_TYRANNUS_KRICK_1, NPC_TYRANNUS_INTRO, 0,                    0,                  3000},
-    {SPELL_STRANGULATING,  0,                  0,                    0,                  3000},
-    {SAY_OUTRO_4,          NPC_KRICK,          0,                    0,                  3000},
-    {SAY_TYRANNUS_KRICK_2, NPC_TYRANNUS_INTRO, 0,                    0,                  11000},
-    {SAY_JAINA_KRICK_3,    NPC_JAINA_PART1,    SAY_SYLVANAS_KRICK_3, NPC_SYLVANAS_PART1, 0},
-
     // Tyrannus intro
     {NPC_TYRANNUS,         0,                  0,                    0,                  10000},        // ToDo: move the freed slaves to position
     {SAY_PREFIGHT_1,       NPC_TYRANNUS,       0,                    0,                  13000},
@@ -159,9 +121,12 @@ void instance_pit_of_saron::OnPlayerEnter(Player* pPlayer)
 
         // dialogue starts on timer if any of the first two bosses are not already dead
         if (GetData(TYPE_GARFROST) == DONE || GetData(TYPE_KRICK) == DONE)
-            return;
-
-        m_uiSummonDelayTimer = 10000;
+        {
+            if (GetData(TYPE_AMBUSH) == NOT_STARTED)
+                pPlayer->SummonCreature(NPC_TYRANNUS_INTRO, afTyrannusMovePos[2][0], afTyrannusMovePos[2][1], afTyrannusMovePos[2][2], 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+        }
+        else
+            m_uiSummonDelayTimer = 10000;
     }
 }
 
@@ -220,6 +185,11 @@ void instance_pit_of_saron::OnCreatureRespawn(Creature* pCreature)
             pCreature->AI()->SetReactState(REACT_PASSIVE);
             pCreature->SetCanEnterCombat(false);
             break;
+        case NPC_TYRANNUS_INTRO:
+            // temp summoned Tyrannus moves in a circle around the instance
+            if (pCreature->IsTemporarySummon())
+                pCreature->GetMotionMaster()->MoveWaypoint(1);
+            break;
     }
 }
 
@@ -260,19 +230,11 @@ void instance_pit_of_saron::SetData(uint32 uiType, uint32 uiData)
             }
             if (uiData == IN_PROGRESS)
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_DOESNT_GO_ELEVEN, true);
-            else if (uiData == DONE)
-                StartNextDialogueText(NPC_GARFROST);
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_KRICK:
             if (uiData == DONE && m_auiEncounter[TYPE_GARFROST] == DONE)
                 DoUseDoorOrButton(GO_ICEWALL);
-            if (uiData == SPECIAL)
-            {
-                // Used just to start the epilogue
-                StartNextDialogueText(SAY_JAINA_KRICK_1);
-                return;
-            }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_TYRANNUS:
@@ -360,8 +322,6 @@ void instance_pit_of_saron::OnCreatureEnterCombat(Creature* pCreature)
                 return;
 
             DoScriptText(SAY_TYRANNUS_AMBUSH_2, pTyrannus);
-            pTyrannus->SetWalk(false);
-            pTyrannus->GetMotionMaster()->MovePoint(0, afTyrannusMovePos[2][0], afTyrannusMovePos[2][1], afTyrannusMovePos[2][2]);
 
             // Spawn Mobs
             for (const auto& aEventSecondAmbushLocation : aEventSecondAmbushLocations)
@@ -370,7 +330,7 @@ void instance_pit_of_saron::OnCreatureEnterCombat(Creature* pCreature)
                     aEventSecondAmbushLocation.fZ, aEventSecondAmbushLocation.fO, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pSummon->SetWalk(false);
-                    pSummon->GetMotionMaster()->MovePoint(1, aEventSecondAmbushLocation.fMoveX, aEventSecondAmbushLocation.fMoveY, aEventSecondAmbushLocation.fMoveZ);
+                    pSummon->GetMotionMaster()->MoveWaypoint(aEventSecondAmbushLocation.pathId);
                 }
             }
         }
@@ -435,41 +395,6 @@ void instance_pit_of_saron::JustDidDialogueStep(int32 iEntry)
 {
     switch (iEntry)
     {
-        case SPELL_NECROMATIC_POWER:
-            // Transfor all soldiers into undead
-            if (Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO))
-                pTyrannus->CastSpell(pTyrannus, SPELL_NECROMATIC_POWER, TRIGGERED_OLD_TRIGGERED);
-            break;
-        case SAY_OUTRO_3:
-            // Move Tyrannus into position
-            if (Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO))
-            {
-                pTyrannus->SetWalk(false);
-                pTyrannus->GetMotionMaster()->MovePoint(0, afTyrannusMovePos[1][0], afTyrannusMovePos[1][1], afTyrannusMovePos[1][2]);
-            }
-            break;
-        case SPELL_STRANGULATING:
-            // Strangulate Krick
-            if (Creature* pKrick = GetSingleCreatureFromStorage(NPC_KRICK))
-            {
-                pKrick->CastSpell(pKrick, SPELL_STRANGULATING, TRIGGERED_OLD_TRIGGERED);
-                pKrick->SetLevitate(true);
-                pKrick->GetMotionMaster()->MovePoint(0, pKrick->GetPositionX(), pKrick->GetPositionY(), pKrick->GetPositionZ() + 5.0f);
-            }
-            break;
-        case SAY_TYRANNUS_KRICK_2:
-            // Kill Krick
-            if (Creature* pKrick = GetSingleCreatureFromStorage(NPC_KRICK))
-            {
-                pKrick->CastSpell(pKrick, SPELL_KRICK_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
-                pKrick->CastSpell(pKrick, SPELL_SUICIDE, TRIGGERED_OLD_TRIGGERED);
-            }
-            break;
-        case SAY_JAINA_KRICK_3:
-            // Move Tyrannus to a safe position
-            if (Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO))
-                pTyrannus->GetMotionMaster()->MovePoint(0, afTyrannusMovePos[0][0], afTyrannusMovePos[0][1], afTyrannusMovePos[0][2]);
-            break;
         case NPC_TYRANNUS:
         {
             Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS);
@@ -494,7 +419,7 @@ void instance_pit_of_saron::JustDidDialogueStep(int32 iEntry)
             {
                 pRimefang->CastSpell(pRimefang, SPELL_EJECT_ALL_PASSENGERS, TRIGGERED_OLD_TRIGGERED);
                 pRimefang->SetWalk(false);
-                pRimefang->GetMotionMaster()->MovePoint(0, afTyrannusMovePos[3][0], afTyrannusMovePos[3][1], afTyrannusMovePos[3][2]);
+                pRimefang->GetMotionMaster()->MovePoint(0, afTyrannusMovePos[1][0], afTyrannusMovePos[1][1], afTyrannusMovePos[1][2]);
             }
             if (Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS))
                 pTyrannus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
@@ -577,7 +502,10 @@ void instance_pit_of_saron::DoStartAmbushEvent()
 {
     Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO);
     if (!pTyrannus)
+    {
+        script_error_log("instance_pit_of_saron: Error: cannot find creature %u in instance", NPC_TYRANNUS_INTRO);
         return;
+    }
 
     DoScriptText(SAY_TYRANNUS_AMBUSH_1, pTyrannus);
 
