@@ -1048,6 +1048,7 @@ UPDATE creature_template SET ScriptName='npc_grand_admiral_westwind' WHERE entry
 /* IRONFORGE */
 
 /* ISLE OF QUEL'DANAS */
+UPDATE creature_template SET ScriptName='npc_dawnblade_blood_knight' WHERE entry=24976;
 UPDATE creature_template SET ScriptName='npc_converted_sentry' WHERE entry=24981;
 UPDATE creature_template SET ScriptName='npc_suns_reach_reclamation' WHERE entry IN(24965,24967,25061,25057,24932,25108,25069,25046,24975,25112,25163,25169);
 UPDATE creature_template SET ScriptName='npc_shattered_sun_marksman' WHERE entry=24938;

@@ -26,6 +26,7 @@ npc_converted_sentry
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 /*######
 ## npc_converted_sentry
@@ -100,10 +101,19 @@ struct npc_shattered_sun_fighterAI : public ScriptedAI
 {
     npc_shattered_sun_fighterAI(Creature* creature) : ScriptedAI(creature)
     {
-        if (creature->GetZoneId() == ZONEID_ISLE_OF_QUELDANAS) // let the spawns in Shattrath be handled via movement dbscript
+        m_firstSpawn = true;
+        Reset();
+    }
+
+    uint32 m_uiMarksmanRace;
+    bool m_firstSpawn;
+
+    void JustRespawned() override
+    {
+        if (m_firstSpawn && m_creature->GetZoneId() == ZONEID_ISLE_OF_QUELDANAS) // let the spawns in Shattrath be handled via movement dbscript
         {
             uint32 transformScriptId = 0;
-            if (creature->GetEntry() == NPC_SHATTERED_SUN_MARKSMAN)
+            if (m_creature->GetEntry() == NPC_SHATTERED_SUN_MARKSMAN)
             {
                 switch (urand(0, 3))
                 {
@@ -125,7 +135,7 @@ struct npc_shattered_sun_fighterAI : public ScriptedAI
                         break;
                 }
             }
-            else if (creature->GetEntry() == NPC_SHATTERED_SUN_WARRIOR)
+            else if (m_creature->GetEntry() == NPC_SHATTERED_SUN_WARRIOR)
             {
                 switch (urand(0, 3))
                 {
@@ -136,12 +146,10 @@ struct npc_shattered_sun_fighterAI : public ScriptedAI
                 }
             }
             if (transformScriptId)
-                creature->GetMap()->ScriptsStart(sRelayScripts, transformScriptId, m_creature, creature);
+                m_creature->GetMap()->ScriptsStart(sRelayScripts, transformScriptId, m_creature, m_creature);
         }
-        Reset();
+        m_firstSpawn = false;
     }
-    
-    uint32 m_uiMarksmanRace;
 
     void Reset() override {}
     void UpdateAI(const uint32 diff) override {}
@@ -151,7 +159,13 @@ struct npc_shattered_sun_warriorAI : public npc_shattered_sun_fighterAI
 {
     npc_shattered_sun_warriorAI(Creature* creature) : npc_shattered_sun_fighterAI(creature) { Reset(); }
     void Reset() override {}
-    void UpdateAI(const uint32 diff) override {}
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+            return;
+
+        DoMeleeAttackIfReady();
+    }
 };
 
 enum
@@ -199,6 +213,11 @@ struct npc_shattered_sun_marksmanAI : public npc_shattered_sun_fighterAI
             else
                 m_uiShootTimer -= diff;
         }
+
+        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+            return;
+
+        DoMeleeAttackIfReady();
     }
 };
 
@@ -221,6 +240,145 @@ struct ShatteredSunMarksmanShoot : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_SEAL_OF_WRATH         = 45095,
+    SPELL_JOUST                 = 45105,
+    SPELL_JUDGEMENT_OF_WRATH    = 45337,
+    SPELL_HOLY_LIGHT            = 13952,
+
+    AREA_ID_DAWNSTAR_VILLAGE    = 4089,
+};
+
+enum DawnbladeBloodKnightActions
+{
+    DAWNBLADE_BLOOD_KNIGHT_STOP_EVENT,
+    DAWNBLADE_BLOOD_KNIGHT_SEAL_OF_WRATH,
+    DAWNBLADE_BLOOD_KNIGHT_JUDGEMENT_OF_WRATH,
+    DAWNBLADE_BLOOD_KNIGHT_HOLY_LIGHT,
+    DAWNBLADE_BLOOD_KNIGHT_ACTION_MAX,
+    DAWNBLADE_BLOOD_KNIGHT_START_EVENT,
+};
+
+struct npc_dawnblade_blood_knight : public CombatAI
+{
+    npc_dawnblade_blood_knight(Creature* creature) : CombatAI(creature, DAWNBLADE_BLOOD_KNIGHT_ACTION_MAX)
+    {
+        m_firstSpawn = true;
+        AddTimerlessCombatAction(DAWNBLADE_BLOOD_KNIGHT_HOLY_LIGHT, true);
+        AddCombatAction(DAWNBLADE_BLOOD_KNIGHT_SEAL_OF_WRATH, 5000, 8000);
+        AddCombatAction(DAWNBLADE_BLOOD_KNIGHT_JUDGEMENT_OF_WRATH, 8000, 18000);
+    }
+
+    bool m_firstSpawn;
+    ObjectGuid m_sparringPartner;
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case DAWNBLADE_BLOOD_KNIGHT_STOP_EVENT:
+            {
+                if (m_creature->IsInCombat())
+                {
+                    if (m_sparringPartner)
+                    {
+                        if (Unit* attacking = m_creature->GetVictim())
+                            if (attacking->GetObjectGuid() != m_sparringPartner || attacking->GetHealthPercent() <= 15.f)
+                                StopDuel();
+                    }
+                }
+                break;
+            }
+            case DAWNBLADE_BLOOD_KNIGHT_SEAL_OF_WRATH:
+            {
+                if (DoCastSpellIfCan(nullptr, SPELL_SEAL_OF_WRATH) == CAST_OK)
+                    ResetCombatAction(action, urand(35000, 45000));
+                break;
+            }
+            case DAWNBLADE_BLOOD_KNIGHT_JUDGEMENT_OF_WRATH:
+            {
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_JUDGEMENT_OF_WRATH) == CAST_OK)
+                    ResetCombatAction(action, urand(25000, 36000));
+                break;
+            }
+            case DAWNBLADE_BLOOD_KNIGHT_HOLY_LIGHT:
+            {
+                if (m_creature->GetHealthPercent() > 30.f) // todo: search for nearby in-combat ally to cast on too
+                    break;
+
+                if (DoCastSpellIfCan(m_creature, SPELL_HOLY_LIGHT) == CAST_OK)
+                    SetActionReadyStatus(action, false);
+                break;
+            }
+        }
+    }
+
+    void JustRespawned() override
+    {
+        if (m_firstSpawn)
+        {
+            if (m_creature->GetAreaId() == AREA_ID_DAWNSTAR_VILLAGE)
+            {
+                if (Creature* partner = GetClosestCreatureWithEntry(m_creature, m_creature->GetEntry(), 5.f, true, false, true))
+                {
+                    m_sparringPartner = partner->GetObjectGuid();
+                    AddCustomAction(DAWNBLADE_BLOOD_KNIGHT_START_EVENT, 5000u, [&]() { StartDuel(); });
+                    AddTimerlessCombatAction(DAWNBLADE_BLOOD_KNIGHT_STOP_EVENT, true);
+                }
+            }
+        }
+        m_firstSpawn = false;
+    }
+
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    {
+        if (sender->GetEntry() != m_creature->GetEntry())
+            return;
+
+        if (eventType == AI_EVENT_CUSTOM_A) // start duel
+        {
+            SetReactState(REACT_DEFENSIVE);
+            if (Creature* partner = m_creature->GetMap()->GetCreature(m_sparringPartner))
+                AttackStart(partner);
+        }
+        else if (eventType == AI_EVENT_CUSTOM_B) // end duel
+        {
+           SetReactState(REACT_AGGRESSIVE);
+            if (Creature* partner = m_creature->GetMap()->GetCreature(m_sparringPartner))
+                m_creature->AttackStop();
+        }
+    }
+
+    void StartDuel()
+    {
+       SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, m_creature);
+        if (Creature* partner = m_creature->GetMap()->GetCreature(m_sparringPartner))
+            SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, partner);
+    }
+
+    void StopDuel()
+    {
+        SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, m_creature);
+        if (Creature* partner = m_creature->GetMap()->GetCreature(m_sparringPartner))
+            SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, partner);
+    }
+
+    void JustReachedHome() override
+    {
+        CombatAI::JustReachedHome();
+        if (m_sparringPartner)
+            AddCustomAction(DAWNBLADE_BLOOD_KNIGHT_START_EVENT, 5000u, [&]() { StartDuel(); });
+    }
+
+    void Aggro(Unit* who) override
+    {
+        if (m_creature->IsMounted())
+            DoCastSpellIfCan(who, SPELL_JOUST);
+        CombatAI::Aggro(who);
+    }
+};
+
 void AddSC_isle_of_queldanas()
 {
     Script* pNewScript = new Script;
@@ -236,6 +394,11 @@ void AddSC_isle_of_queldanas()
     pNewScript = new Script;
     pNewScript->Name = "npc_shattered_sun_warrior";
     pNewScript->GetAI = &GetNewAIInstance<npc_shattered_sun_warriorAI>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_dawnblade_blood_knight";
+    pNewScript->GetAI = &GetNewAIInstance<npc_dawnblade_blood_knight>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<ShatteredSunMarksmanShoot>("spell_shattered_sun_marksman_shoot");
