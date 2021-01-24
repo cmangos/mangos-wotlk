@@ -274,6 +274,23 @@ struct spell_corrupt_soul_aura : public AuraScript
     }
 };
 
+/*######
+## spell_soulstorm_visual_aura - 68870, 69008
+######*/
+
+struct spell_soulstorm_visual_aura : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        uint32 auraList[8] = { 68886, 68896, 68897, 68898, 68904, 68905, 68906, 68907 };
+        target->CastSpell(target, auraList[urand(0, 7)], TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_bronjahm()
 {
     Script* pNewScript = new Script;
@@ -288,4 +305,5 @@ void AddSC_boss_bronjahm()
 
     RegisterSpellScript<spell_consume_soul>("spell_consume_soul");
     RegisterAuraScript<spell_corrupt_soul_aura>("spell_corrupt_soul_aura");
+    RegisterAuraScript<spell_soulstorm_visual_aura>("spell_soulstorm_visual_aura");
 }
