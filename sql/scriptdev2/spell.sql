@@ -349,6 +349,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (68871,'spell_wailing_souls'),
 (68875,'spell_wailing_souls_aura'),
 (68876,'spell_wailing_souls_aura'),
+(68987,'spell_pursuit'),
+(69012,'spell_explosive_barrage_aura'),
 (69048,'spell_mirrored_soul'),
 (69051,'spell_mirrored_soul_proc'),
 (69347,'spell_necromantic_power'),

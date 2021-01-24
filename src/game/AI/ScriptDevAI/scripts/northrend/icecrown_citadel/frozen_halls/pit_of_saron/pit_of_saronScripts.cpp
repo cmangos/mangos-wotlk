@@ -46,16 +46,17 @@ struct npc_collapsing_icicleAI : public ScriptedAI
     npc_collapsing_icicleAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
         m_pInstance = (instance_pit_of_saron*)pCreature->GetInstanceData();
+        m_creature->SetCanEnterCombat(false);
+        SetReactState(REACT_PASSIVE);
+        m_uiCastTimer = 3000;
         Reset();
     }
 
     instance_pit_of_saron* m_pInstance;
 
-    void Reset() override
-    {
-        DoCastSpellIfCan(m_creature, SPELL_ICICLE_DUMMY, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_ICICLE, CAST_TRIGGERED);
-    }
+    uint32 m_uiCastTimer;
+
+    void Reset() override {}
 
     void SpellHitTarget(Unit* pTarget, const SpellEntry* pSpell) override
     {
@@ -64,9 +65,22 @@ struct npc_collapsing_icicleAI : public ScriptedAI
             m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_DONT_LOOK_UP, false);
     }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+    void UpdateAI(const uint32 uiDiff) override
+    {
+        if (m_uiCastTimer)
+        {
+            if (m_uiCastTimer <= uiDiff)
+            {
+                if (DoCastSpellIfCan(m_creature, SPELL_ICICLE_DUMMY) == CAST_OK)
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_ICICLE, CAST_TRIGGERED);
+                    m_uiCastTimer = 0;
+                }
+            }
+            else
+                m_uiCastTimer -= uiDiff;
+        }
+    }
 };
 
 /*######

@@ -1025,7 +1025,6 @@ UPDATE instance_template SET ScriptName='instance_pit_of_saron' WHERE map=658;
 UPDATE creature_template SET ScriptName='boss_forgemaster_garfrost' WHERE entry=36494;
 UPDATE creature_template SET ScriptName='boss_krick' WHERE entry=36477;
 UPDATE creature_template SET ScriptName='boss_ick' WHERE entry=36476;
-UPDATE creature_template SET ScriptName='npc_exploding_orb' WHERE entry=36610;
 UPDATE creature_template SET ScriptName='npc_collapsing_icicle' WHERE entry=36847;
 UPDATE creature_template SET ScriptName='boss_tyrannus' WHERE entry=36658;
 UPDATE creature_template SET ScriptName='boss_rimefang_pos' WHERE entry=36661;

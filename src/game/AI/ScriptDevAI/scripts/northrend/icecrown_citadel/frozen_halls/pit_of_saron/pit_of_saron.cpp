@@ -26,11 +26,6 @@ EndScriptData */
 
 enum
 {
-    // Ick and Krick outro spells
-    SPELL_STRANGULATING             = 69413,
-    SPELL_KRICK_KILL_CREDIT         = 71308,
-    SPELL_SUICIDE                   = 7,
-
     // Ambush and Gauntlet
     SAY_TYRANNUS_AMBUSH_1           = -1658047,
     SAY_TYRANNUS_AMBUSH_2           = -1658048,
@@ -559,13 +554,13 @@ void instance_pit_of_saron::Update(uint32 uiDiff)
     {
         if (m_uiIciclesTimer <= uiDiff)
         {
-            for (GuidList::const_iterator itr = m_lTunnelStalkersGuidList.begin(); itr != m_lTunnelStalkersGuidList.end(); ++itr)
+            for (const auto& guid : m_lTunnelStalkersGuidList)
             {
                 // Only 5% of the stalkers will actually spawn an icicle
                 if (roll_chance_i(95))
                     continue;
 
-                if (Creature* pStalker = instance->GetCreature(*itr))
+                if (Creature* pStalker = instance->GetCreature(guid))
                     pStalker->CastSpell(pStalker, SPELL_ICICLE_SUMMON, TRIGGERED_OLD_TRIGGERED);
             }
             m_uiIciclesTimer = urand(3000, 5000);

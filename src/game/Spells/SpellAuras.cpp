@@ -1957,22 +1957,6 @@ void Aura::TriggerSpell()
 //                    case 65422: break;
 //                    // Rolling Throw
 //                    case 67546: break;
-                    case 69012:                             // Explosive Barrage
-                    {
-                        // Summon an Exploding Orb for each player in combat with the caster
-                        ThreatList const& threatList = target->getThreatManager().getThreatList();
-                        for (auto itr : threatList)
-                        {
-                            if (Unit* expectedTarget = target->GetMap()->GetUnit(itr->getUnitGuid()))
-                            {
-                                if (expectedTarget->GetTypeId() == TYPEID_PLAYER)
-                                    target->CastSpell(expectedTarget, 69015, TRIGGERED_OLD_TRIGGERED);
-                            }
-                        }
-                        return;
-                    }
-//                    // Gunship Cannon Fire
-//                    case 70017: break;
 //                    // Ice Tomb
 //                    case 70157: break;
 //                    // Mana Barrier                       // HANDLED IN SD2!

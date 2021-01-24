@@ -16,13 +16,16 @@
 
 /* ScriptData
 SDName: boss_krick_and_ick
-SD%Complete: 95
-SDComment: Timers may need adjustments.
+SD%Complete: 100
+SDComment:
 SDCategory: Pit of Saron
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "pit_of_saron.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/SpellAuras.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -52,14 +55,14 @@ enum
     SPELL_EXPLOSIVE_BARRAGE_KRICK       = 69012,                // Triggers 69015 every 2 sec
     SPELL_KRICK_KILL_CREDIT             = 71308,
 
-    NPC_EXPLODING_ORB                   = 36610,
+    NPC_EXPLODING_ORB                   = 36610,                // summoned by 69015; handled in EAI
 
     // exploding orb spells
     // SPELL_EXPLOSIVE_BARRAGE_SUMMON   = 69015,
     SPELL_EXPLODING_ORB_VISUAL          = 69017,
-    SPELL_AUTO_GROW_AND_SPEED_BOOST     = 69020,
-    SPELL_EXPLOSIVE_BARRAGE_DMG         = 69019,
-    SPELL_HASTY_GROW                    = 44851,                // Orb explodes after the 15th stack
+    SPELL_AUTO_GROW_AND_SPEED_BOOST     = 69020,                // triggers 69019 at 15 stacks
+    // SPELL_EXPLOSIVE_BARRAGE_DMG      = 69019,
+    // SPELL_HASTY_GROW                 = 44851,                // Orb explodes after the 15th stack
 
     MAX_HASTY_GROW_STACKS               = 15,
 };
@@ -75,74 +78,66 @@ static const float afTyrannusTeleLoc[4] = { 841.01f, 196.245f, 573.964f, 3.75118
 ## boss_ick
 ######*/
 
-struct boss_ickAI : public ScriptedAI
+enum IckActions
 {
-    boss_ickAI(Creature* pCreature) : ScriptedAI(pCreature)
+    ICK_MIGHTY_BLOW,
+    ICK_POISON_NOVA,
+    ICK_PURSUIT,
+    ICK_EXPLOSIVE_BARRAGE,
+    ICK_ACTION_MAX,
+};
+
+struct boss_ickAI : public CombatAI
+{
+    boss_ickAI(Creature* creature) : CombatAI(creature, ICK_ACTION_MAX), m_instance(static_cast<instance_pit_of_saron*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_pit_of_saron*)pCreature->GetInstanceData();
-        m_uiMountTimer = 1000;
-        Reset();
+        AddCombatAction(ICK_MIGHTY_BLOW, 10000u);
+        AddCombatAction(ICK_POISON_NOVA, 60000u);
+        AddCombatAction(ICK_PURSUIT, 10000u);
+        AddCombatAction(ICK_EXPLOSIVE_BARRAGE, 50000u);
     }
 
-    instance_pit_of_saron* m_pInstance;
-    uint32 m_uiMountTimer;
+    instance_pit_of_saron* m_instance;
 
-    uint32 m_uiPoisonNovaTimer;
-    uint32 m_uiPursueTimer;
-    uint32 m_uiMightKickTimer;
-    uint32 m_uiToxicWasteTimer;
-    uint32 m_uiShadowboltTimer;
-    uint32 m_uiExplosivBarrageTimer;
-    uint32 m_uiCooldownTimer;
-
-    void Reset() override
+    void Aggro(Unit* who) override
     {
-        m_uiPoisonNovaTimer      = urand(20000, 25000);
-        m_uiPursueTimer          = 20000;
-        m_uiMightKickTimer       = 1000;
-        m_uiToxicWasteTimer      = urand(3000, 5000);
-        m_uiShadowboltTimer      = urand(5000, 7000);
-        m_uiExplosivBarrageTimer = urand(30000, 35000);
-        m_uiCooldownTimer        = 0;
-    }
-
-    void Aggro(Unit* pWho) override
-    {
-        if (m_pInstance)
+        if (m_instance)
         {
-            m_pInstance->SetData(TYPE_KRICK, IN_PROGRESS);
+            m_instance->SetData(TYPE_KRICK, IN_PROGRESS);
 
             // Say aggro and also put Krick in combat
-            if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
+            if (Creature* pKrick = m_instance->GetSingleCreatureFromStorage(NPC_KRICK))
             {
                 DoScriptText(SAY_AGGRO, pKrick);
-                pKrick->AI()->AttackStart(pWho);
+                pKrick->AI()->AttackStart(who);
             }
         }
     }
 
-    void KilledUnit(Unit* /*pVictim*/)
+    void KilledUnit(Unit* victim)
     {
-        if (m_pInstance)
+        CombatAI::KilledUnit(victim);
+
+        if (m_instance)
         {
-            if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
+            if (Creature* pKrick = m_instance->GetSingleCreatureFromStorage(NPC_KRICK))
                 DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, pKrick);
         }
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
-        if (m_pInstance)
+        if (m_instance)
         {
-            m_pInstance->SetData(TYPE_KRICK, DONE);
+            m_instance->SetData(TYPE_KRICK, DONE);
 
             // summon Jaina / Sylvanas
-            if (Creature* pCreature = m_creature->SummonCreature(m_pInstance->GetPlayerTeam() == HORDE ? aKrickSummonData[0].uiEntryHorde : aKrickSummonData[0].uiEntryAlliance,
+            if (Creature* pCreature = m_creature->SummonCreature(m_instance->GetPlayerTeam() == HORDE ? aKrickSummonData[0].uiEntryHorde : aKrickSummonData[0].uiEntryAlliance,
                 aKrickSummonData[0].fX, aKrickSummonData[0].fY, aKrickSummonData[0].fZ, aKrickSummonData[0].fO, TEMPSPAWN_TIMED_DESPAWN, 10 * MINUTE * IN_MILLISECONDS))
                 pCreature->GetMotionMaster()->MoveWaypoint(aKrickSummonData[0].pathId, 0, 1000);
 
             // move Krick into position
-            if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
+            if (Creature* pKrick = m_instance->GetSingleCreatureFromStorage(NPC_KRICK))
             {
                 pKrick->AI()->EnterEvadeMode();
                 pKrick->SetImmuneToNPC(true);
@@ -151,7 +146,7 @@ struct boss_ickAI : public ScriptedAI
             }
 
             // teleport Tyrannus for event
-            if (Creature* pTyrannus = m_pInstance->GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO))
+            if (Creature* pTyrannus = m_instance->GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO))
             {
                 pTyrannus->GetMotionMaster()->MoveIdle();
                 pTyrannus->NearTeleportTo(afTyrannusTeleLoc[0], afTyrannusTeleLoc[1], afTyrannusTeleLoc[2], afTyrannusTeleLoc[3]);
@@ -161,135 +156,65 @@ struct boss_ickAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KRICK, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_KRICK, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
-        // He needs to be mounted manually, not by vehicle_accessories
-        if (m_uiMountTimer)
+        switch (action)
         {
-            if (m_uiMountTimer <= uiDiff)
-            {
-                if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
-                    pKrick->CastSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
-
-                m_uiMountTimer = 0;
-            }
-            else
-                m_uiMountTimer -= uiDiff;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        // Cooldown timer - we need to block all Krick spell during some events
-        if (m_uiCooldownTimer)
-        {
-            if (m_uiCooldownTimer <= uiDiff)
-                m_uiCooldownTimer = 0;
-            else
-                m_uiCooldownTimer -= uiDiff;
-
-            return;
-        }
-
-        if (m_uiPoisonNovaTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_POISON_NOVA) == CAST_OK)
-            {
-                if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
+            case ICK_MIGHTY_BLOW:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MIGHTY_KICK) == CAST_OK)
+                    ResetCombatAction(action, 30000);
+                break;
+            case ICK_POISON_NOVA:
+                if (DoCastSpellIfCan(m_creature, SPELL_POISON_NOVA) == CAST_OK)
                 {
-                    DoScriptText(SAY_ORDER_BLOW, pKrick);
-                    DoScriptText(EMOTE_ICK_POISON, pKrick);
-                }
-
-                m_uiCooldownTimer = 5000;
-                m_uiPoisonNovaTimer = urand(20000, 25000);
-            }
-        }
-        else
-            m_uiPoisonNovaTimer -= uiDiff;
-
-        if (m_uiPursueTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_PURSUIT) == CAST_OK)
-            {
-                if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
-                {
-                    switch (urand(0, 2))
+                    if (Creature* pKrick = m_instance->GetSingleCreatureFromStorage(NPC_KRICK))
                     {
-                        case 0: DoScriptText(SAY_TARGET_1, pKrick); break;
-                        case 1: DoScriptText(SAY_TARGET_2, pKrick); break;
-                        case 2: DoScriptText(SAY_TARGET_3, pKrick); break;
+                        DoScriptText(SAY_ORDER_BLOW, pKrick);
+                        DoScriptText(EMOTE_ICK_POISON, pKrick);
                     }
+
+                    ResetCombatAction(action, 60000);
                 }
-
-                m_uiCooldownTimer = 17000;
-                m_uiPursueTimer = urand(50000, 70000);
-            }
-        }
-        else
-            m_uiPursueTimer -= uiDiff;
-
-        if (m_uiMightKickTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_MIGHTY_KICK) == CAST_OK)
-                m_uiMightKickTimer = 10000;
-        }
-        else
-            m_uiMightKickTimer -= uiDiff;
-
-        if (m_uiToxicWasteTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
-                    pKrick->CastSpell(pTarget, SPELL_TOXIC_WASTE, TRIGGERED_OLD_TRIGGERED);
-
-                m_uiToxicWasteTimer = urand(3000, 5000);
-            }
-        }
-        else
-            m_uiToxicWasteTimer -= uiDiff;
-
-        if (m_uiShadowboltTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
-                    pKrick->CastSpell(pTarget, SPELL_SHADOW_BOLT, TRIGGERED_OLD_TRIGGERED);
-
-                m_uiShadowboltTimer = urand(4000, 8000);
-            }
-        }
-        else
-            m_uiShadowboltTimer -= uiDiff;
-
-        if (m_uiExplosivBarrageTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_EXPLOSIVE_BARRAGE_ICK) == CAST_OK)
-            {
-                if (Creature* pKrick = m_pInstance->GetSingleCreatureFromStorage(NPC_KRICK))
+                break;
+            case ICK_PURSUIT:
+                if (DoCastSpellIfCan(m_creature, SPELL_PURSUIT) == CAST_OK)
                 {
-                    pKrick->CastSpell(pKrick, SPELL_EXPLOSIVE_BARRAGE_KRICK, TRIGGERED_OLD_TRIGGERED);
+                    if (Creature* pKrick = m_instance->GetSingleCreatureFromStorage(NPC_KRICK))
+                    {
+                        switch (urand(0, 2))
+                        {
+                            case 0: DoScriptText(SAY_TARGET_1, pKrick); break;
+                            case 1: DoScriptText(SAY_TARGET_2, pKrick); break;
+                            case 2: DoScriptText(SAY_TARGET_3, pKrick); break;
+                        }
+                    }
 
-                    DoScriptText(SAY_ORDER_STOP, pKrick);
-                    DoScriptText(EMOTE_KRICK_MINES, pKrick);
+                    ResetCombatAction(action, 60000);
                 }
+                break;
+            case ICK_EXPLOSIVE_BARRAGE:
+                if (DoCastSpellIfCan(m_creature, SPELL_EXPLOSIVE_BARRAGE_ICK) == CAST_OK)
+                {
+                    if (Creature* pKrick = m_instance->GetSingleCreatureFromStorage(NPC_KRICK))
+                    {
+                        pKrick->InterruptNonMeleeSpells(false);
+                        pKrick->CastSpell(pKrick, SPELL_EXPLOSIVE_BARRAGE_KRICK, TRIGGERED_OLD_TRIGGERED);
 
-                m_uiCooldownTimer = 20000;
-                m_uiExplosivBarrageTimer = urand(25000, 30000);
-            }
+                        DoScriptText(SAY_ORDER_STOP, pKrick);
+                        DoScriptText(EMOTE_KRICK_MINES, pKrick);
+                    }
+
+                    ResetCombatAction(action, 60000);
+                }
+                break;
         }
-        else
-            m_uiExplosivBarrageTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
@@ -297,16 +222,29 @@ struct boss_ickAI : public ScriptedAI
 ## boss_krick
 ######*/
 
-struct boss_krickAI : public ScriptedAI
+enum KrickActions
 {
-    boss_krickAI(Creature* pCreature) : ScriptedAI(pCreature)
+    KRICK_SHADOW_BOLT,
+    KRICK_TOXIC_WASTE,
+    KRICK_ACTION_MAX,
+};
+
+struct boss_krickAI : public CombatAI
+{
+    boss_krickAI(Creature* creature) : CombatAI(creature, KRICK_ACTION_MAX)
     {
-        Reset();
+        AddCombatAction(KRICK_SHADOW_BOLT, 8000u);
+        AddCombatAction(KRICK_TOXIC_WASTE, 5000u);
     }
 
-    void Reset() override { }
+    void KilledUnit(Unit* victim)
+    {
+        CombatAI::KilledUnit(victim);
 
-    void JustDied(Unit* /*pKiller*/) override
+        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+    }
+
+    void JustDied(Unit* killer) override
     {
         DoCastSpellIfCan(m_creature, SPELL_KRICK_KILL_CREDIT, CAST_TRIGGERED);
     }
@@ -316,55 +254,91 @@ struct boss_krickAI : public ScriptedAI
         switch (pSummoned->GetEntry())
         {
             case NPC_EXPLODING_ORB:
+                pSummoned->AI()->SetReactState(REACT_PASSIVE);
+                pSummoned->SetCanEnterCombat(false);
                 pSummoned->CastSpell(pSummoned, SPELL_EXPLODING_ORB_VISUAL, TRIGGERED_OLD_TRIGGERED);
                 pSummoned->CastSpell(pSummoned, SPELL_AUTO_GROW_AND_SPEED_BOOST, TRIGGERED_OLD_TRIGGERED);
                 break;
         }
     }
-
-    void UpdateAI(const uint32 /*uiDiff*/) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+        switch (action)
+        {
+            case KRICK_SHADOW_BOLT:
+                if (Unit* spawner = m_creature->GetSpawner())
+                {
+                    Creature* ick = static_cast<Creature*>(spawner);
+                    if (Unit* target = ick->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    {
+                        if (DoCastSpellIfCan(target, SPELL_SHADOW_BOLT) == CAST_OK)
+                            ResetCombatAction(action, 30000);
+                    }
+                }
+                break;
+            case KRICK_TOXIC_WASTE:
+                if (DoCastSpellIfCan(m_creature, SPELL_TOXIC_WASTE) == CAST_OK)
+                    ResetCombatAction(action, 5000);
+                break;
+        }
+    }
+
+};
+
+/*######
+## spell_explosive_barrage_aura - 69012
+######*/
+
+struct spell_explosive_barrage_aura : public AuraScript
+{
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /*data*/) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsCreature())
             return;
+
+        // Summon an Exploding Orb for each player in combat with the caster
+        ThreatList const& threatList = target->getThreatManager().getThreatList();
+        for (auto itr : threatList)
+        {
+            if (Unit* expectedTarget = target->GetMap()->GetUnit(itr->getUnitGuid()))
+            {
+                if (expectedTarget->IsPlayer())
+                    target->CastSpell(expectedTarget, 69015, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
     }
 };
 
 /*######
-## npc_exploding_orb
+## spell_pursuit - 68987
 ######*/
 
-struct npc_exploding_orbAI : public Scripted_NoMovementAI
+struct spell_pursuit : public SpellScript, public AuraScript
 {
-    npc_exploding_orbAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature) { Reset(); }
-
-    uint8 m_uiGrowCount;
-
-    void Reset() override
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
     {
-        m_uiGrowCount = 0;
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        Unit* caster = spell->GetAffectiveCaster();
+        if (!target || !caster)
+            return;
+
+        caster->AddThreat(target, spell->m_spellInfo->CalculateSimpleValue(effIdx));
+        caster->FixateTarget(target);
     }
 
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-
-    void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
+    void OnApply(Aura* aura, bool apply) const override
     {
-        if (pSpell->Id == SPELL_HASTY_GROW)
-        {
-            ++m_uiGrowCount;
+        Unit* caster = aura->GetCaster();
+        if (!caster)
+            return;
 
-            if (m_uiGrowCount == MAX_HASTY_GROW_STACKS)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_EXPLOSIVE_BARRAGE_DMG) == CAST_OK)
-                {
-                    m_creature->RemoveAllAuras();
-                    m_creature->ForcedDespawn(1000);
-                }
-            }
-        }
+        if (!apply)
+            caster->AI()->DoResetThreat();
     }
-
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
 void AddSC_boss_krick_and_ick()
@@ -379,8 +353,6 @@ void AddSC_boss_krick_and_ick()
     pNewScript->GetAI = &GetNewAIInstance<boss_krickAI>;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_exploding_orb";
-    pNewScript->GetAI = &GetNewAIInstance<npc_exploding_orbAI>;
-    pNewScript->RegisterSelf();
+    RegisterAuraScript<spell_explosive_barrage_aura>("spell_explosive_barrage_aura");
+    RegisterScript<spell_pursuit>("spell_pursuit");
 }
