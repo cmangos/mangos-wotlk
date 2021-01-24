@@ -288,9 +288,7 @@ extern void AddSC_instance_gundrak();
 extern void AddSC_boss_bronjahm();                          // ICC, forge_of_souls
 extern void AddSC_boss_devourer_of_souls();
 extern void AddSC_instance_forge_of_souls();
-extern void AddSC_boss_falric();                            // ICC, halls_of_reflection
-extern void AddSC_boss_lich_king();
-extern void AddSC_boss_marwyn();
+extern void AddSC_boss_lich_king();                         // ICC, halls_of_reflection
 extern void AddSC_halls_of_reflection();
 extern void AddSC_instance_halls_of_reflection();
 extern void AddSC_boss_garfrost();                          // ICC, pit_of_saron
@@ -785,9 +783,7 @@ void AddScripts()
     AddSC_boss_bronjahm();                                  // ICC, FH, forge_of_souls
     AddSC_boss_devourer_of_souls();
     AddSC_instance_forge_of_souls();
-    AddSC_boss_falric();                                    // ICC, FH, halls_of_reflection
-    AddSC_boss_lich_king();
-    AddSC_boss_marwyn();
+    AddSC_boss_lich_king();                                 // ICC, FH, halls_of_reflection
     AddSC_halls_of_reflection();
     AddSC_instance_halls_of_reflection();
     AddSC_boss_garfrost();                                  // ICC, FH, pit_of_saron
