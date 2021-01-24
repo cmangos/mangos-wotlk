@@ -355,6 +355,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (69012,'spell_explosive_barrage_aura'),
 (69048,'spell_mirrored_soul'),
 (69051,'spell_mirrored_soul_proc'),
+(69232,'spell_icy_blast'),
 (69347,'spell_necromantic_power'),
 (69413,'spell_strangulating_aura'),
 (69516,'spell_summon_undead'),

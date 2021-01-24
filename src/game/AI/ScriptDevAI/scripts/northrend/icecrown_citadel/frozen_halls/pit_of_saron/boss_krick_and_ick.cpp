@@ -249,18 +249,17 @@ struct boss_krickAI : public CombatAI
         DoCastSpellIfCan(m_creature, SPELL_KRICK_KILL_CREDIT, CAST_TRIGGERED);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void JustSummoned(Creature* summoned) override
     {
-        switch (pSummoned->GetEntry())
+        if (summoned->GetEntry() == NPC_EXPLODING_ORB)
         {
-            case NPC_EXPLODING_ORB:
-                pSummoned->AI()->SetReactState(REACT_PASSIVE);
-                pSummoned->SetCanEnterCombat(false);
-                pSummoned->CastSpell(pSummoned, SPELL_EXPLODING_ORB_VISUAL, TRIGGERED_OLD_TRIGGERED);
-                pSummoned->CastSpell(pSummoned, SPELL_AUTO_GROW_AND_SPEED_BOOST, TRIGGERED_OLD_TRIGGERED);
-                break;
+            summoned->AI()->SetReactState(REACT_PASSIVE);
+            summoned->SetCanEnterCombat(false);
+            summoned->CastSpell(summoned, SPELL_EXPLODING_ORB_VISUAL, TRIGGERED_OLD_TRIGGERED);
+            summoned->CastSpell(summoned, SPELL_AUTO_GROW_AND_SPEED_BOOST, TRIGGERED_OLD_TRIGGERED);
         }
     }
+
     void ExecuteAction(uint32 action) override
     {
         switch (action)

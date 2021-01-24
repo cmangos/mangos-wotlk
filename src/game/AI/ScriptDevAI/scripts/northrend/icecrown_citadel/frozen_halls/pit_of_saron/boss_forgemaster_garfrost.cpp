@@ -136,6 +136,11 @@ struct boss_forgemaster_garfrostAI : public CombatAI
         {
             m_instance->SetData(TYPE_GARFROST, DONE);
 
+            // despawn the spawn at the entrance first
+            if (Creature* pCreature = m_instance->GetSingleCreatureFromStorage(m_instance->GetPlayerTeam() == HORDE ? NPC_IRONSKULL_PART1 : NPC_VICTUS_PART1))
+                pCreature->ForcedDespawn();
+
+            // summon the freed slaves
             for (uint8 i = 0; i < MAX_OUTRO_CREATURES; ++i)
             {
                 if (Creature* pCreature = m_creature->SummonCreature(m_instance->GetPlayerTeam() == HORDE ? aGarfrostSummonData[i].uiEntryHorde : aGarfrostSummonData[i].uiEntryAlliance,

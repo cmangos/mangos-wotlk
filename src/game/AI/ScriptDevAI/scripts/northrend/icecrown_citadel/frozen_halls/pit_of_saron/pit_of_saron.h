@@ -97,11 +97,12 @@ enum
     ACHIEV_CRIT_DONT_LOOK_UP        = 12994,                // Gauntlet, achiev 4525
 };
 
-static const float afTyrannusMovePos[3][3] =
+static const float afTyrannusMovePos[4][3] =
 {
     {922.6365f, 145.877f, 643.2216f},                       // Hide position
     {966.3345f, 159.2058f, 665.0453f},                      // Rimefang position
     {578.7934f, 122.4046f, 583.1108f},                      // Tyrannus backup summon
+    {1017.5917f, 37.31939f, 708.9627f},                     // Tyrannus tunnel move position
 };
 
 struct EventNpcLocations
@@ -161,9 +162,30 @@ const EventNpcLocations aEventSecondAmbushLocations[] =
 
 const EventNpcLocations aEventTunnelEndLocations[] =
 {
-    {NPC_IRONSKULL_PART2, NPC_VICTUS_PART2, 1071.45f, 48.23907f, 630.4871f, 1.68f, 0, 1046.361f, 124.7031f, 628.2811f},
-    // ToDo: add the freed slaves here when proper waypoint movement is supported
+    {NPC_IRONSKULL_PART2,    NPC_VICTUS_PART2,          1071.8212f, 45.12153f,  630.2551f,  1.83259f, 0},
+
+    {NPC_FREE_HORDE_SLAVE_1, NPC_FREE_ALLIANCE_SLAVE_1, 1070.9827f, 37.543404f, 629.8123f,  1.74532f, 2},
+    {NPC_FREE_HORDE_SLAVE_1, NPC_FREE_ALLIANCE_SLAVE_1, 1077.1823f, 31.899305f, 629.99915f, 1.88495f, 3},
+    {NPC_FREE_HORDE_SLAVE_1, NPC_FREE_ALLIANCE_SLAVE_1, 1069.2067f, 34.383682f, 629.9972f,  1.65806f, 4},
+    {NPC_FREE_HORDE_SLAVE_1, NPC_FREE_ALLIANCE_SLAVE_1, 1071.1875f, 32.758682f, 630.1298f,  1.72787f, 5},
+    {NPC_FREE_HORDE_SLAVE_1, NPC_FREE_ALLIANCE_SLAVE_1, 1079.3368f, 32.458332f, 629.9384f,  1.95476f, 6},
+    {NPC_FREE_HORDE_SLAVE_1, NPC_FREE_ALLIANCE_SLAVE_1, 1073.4149f, 31.364584f, 630.2189f,  1.78023f, 7},
+    {NPC_FREE_HORDE_SLAVE_1, NPC_FREE_ALLIANCE_SLAVE_1, 1075.0416f, 32.175346f, 630.05164f, 1.83259f, 8},
+    {NPC_FREE_HORDE_SLAVE_1, NPC_FREE_ALLIANCE_SLAVE_1, 1072.1216f, 28.32639f,  630.7766f,  1.72787f, 9},
+
+    {NPC_FREE_HORDE_SLAVE_2, NPC_FREE_ALLIANCE_SLAVE_2, 1070.5591f, 29.996529f, 630.42804f, 1.69296f, 1},
+    {NPC_FREE_HORDE_SLAVE_2, NPC_FREE_ALLIANCE_SLAVE_2, 1072.7274f, 24.48611f,  631.86096f, 1.72787f, 2},
+    {NPC_FREE_HORDE_SLAVE_2, NPC_FREE_ALLIANCE_SLAVE_2, 1079.0312f, 27.003473f, 630.8719f,  1.90240f, 3},
+    {NPC_FREE_HORDE_SLAVE_2, NPC_FREE_ALLIANCE_SLAVE_2, 1074.849f,  25.770834f, 631.36926f, 1.78023f, 4},
+
+    {NPC_FREE_HORDE_SLAVE_3, NPC_FREE_ALLIANCE_SLAVE_3, 1067.3195f, 43.131947f, 630.1227f,  1.60570f, 2},
+    {NPC_FREE_HORDE_SLAVE_3, NPC_FREE_ALLIANCE_SLAVE_3, 1070.6545f, 42.70486f,  630.0697f,  1.76278f, 3},
+    {NPC_FREE_HORDE_SLAVE_3, NPC_FREE_ALLIANCE_SLAVE_3, 1073.8733f, 40.260418f, 629.9038f,  1.86750f, 4},
+    {NPC_FREE_HORDE_SLAVE_3, NPC_FREE_ALLIANCE_SLAVE_3, 1075.3594f, 36.43403f,  629.72156f, 1.88495f, 5},
+    {NPC_FREE_HORDE_SLAVE_3, NPC_FREE_ALLIANCE_SLAVE_3, 1073.8507f, 42.680557f, 630.03265f, 1.90240f, 6},
+    {NPC_FREE_HORDE_SLAVE_3, NPC_FREE_ALLIANCE_SLAVE_3, 1075.8976f, 40.331596f, 629.86383f, 1.93731f, 7},
 };
+
 const EventNpcLocations aEventOutroLocations[] =
 {
     {NPC_SINDRAGOSA, 0, 842.8611f, 194.5556f, 531.6536f, 6.108f, 0, 900.106f, 181.677f, 659.374f},
@@ -191,8 +213,6 @@ class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
 
         uint32 GetPlayerTeam() const { return m_uiTeam; }
 
-        void DoStartAmbushEvent();
-
         void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
 
@@ -203,6 +223,10 @@ class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
 
     protected:
         void JustDidDialogueStep(int32 iEntry) override;
+
+        void DoStartIntroEvent();
+        void DoStartAmbushEvent();
+        void DoStartTyrannusEvent();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
@@ -220,6 +244,8 @@ class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
         GuidList m_lArcaneShieldBunniesGuidList;
         GuidList m_lFrozenAftermathBunniesGuidList;
         GuidList m_lSaroniteRockGuidList;
+        GuidList m_lIntroCreaturesGuidList;
+        GuidList m_lEndingCreaturesGuidList;
 };
 
 #endif

@@ -102,7 +102,6 @@ bool AreaTrigger_at_pit_of_saron(Player* pPlayer, AreaTriggerEntry const* pAt)
                 pInstance->GetData(TYPE_AMBUSH) != NOT_STARTED)
             return false;
 
-        pInstance->DoStartAmbushEvent();
         pInstance->SetData(TYPE_AMBUSH, IN_PROGRESS);
         return true;
     }

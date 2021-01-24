@@ -67,7 +67,6 @@ enum
 static const DialogueEntryTwoSide aPoSDialogues[] =
 {
     // Tyrannus intro
-    {NPC_TYRANNUS,         0,                  0,                    0,                  10000},        // ToDo: move the freed slaves to position
     {SAY_PREFIGHT_1,       NPC_TYRANNUS,       0,                    0,                  13000},
     {SAY_VICTUS_TRASH,     NPC_VICTUS_PART2,   SAY_IRONSKULL_TRASH,  NPC_IRONSKULL_PART2, 9000},
     {SAY_PREFIGHT_2,       NPC_TYRANNUS,       0,                    0,                  10000},
@@ -230,17 +229,25 @@ void instance_pit_of_saron::SetData(uint32 uiType, uint32 uiData)
         case TYPE_KRICK:
             if (uiData == DONE && m_auiEncounter[TYPE_GARFROST] == DONE)
                 DoUseDoorOrButton(GO_ICEWALL);
+            if (uiData == DONE)
+            {
+                for (const auto guid : m_lIntroCreaturesGuidList)
+                    if (Creature* creature = instance->GetCreature(guid))
+                        creature->ForcedDespawn();
+            }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_TYRANNUS:
             if (uiData == DONE)
-                StartNextDialogueText(NPC_SINDRAGOSA);
-            else if (uiData == SPECIAL)
             {
-                // Used just to start the intro
-                StartNextDialogueText(NPC_TYRANNUS);
-                return;
+                StartNextDialogueText(NPC_SINDRAGOSA);
+
+                for (const auto guid : m_lEndingCreaturesGuidList)
+                    if (Creature* creature = instance->GetCreature(guid))
+                        creature->GetMotionMaster()->UnpauseWaypoints();
             }
+            else if (uiData == SPECIAL)
+                DoStartTyrannusEvent();
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_AMBUSH:
@@ -250,9 +257,19 @@ void instance_pit_of_saron::SetData(uint32 uiType, uint32 uiData)
                 if (Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS))
                     pTyrannus->CastSpell(pTyrannus, SPELL_ACHIEVEMENT_CHECK, TRIGGERED_OLD_TRIGGERED);
 
+                // Despawn the Tyrannus at the entrance
+                if (Creature* creature = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO))
+                    creature->ForcedDespawn();
+
+                // Despawn Jaina / Sylvanas
+                if (Creature* creature = GetSingleCreatureFromStorage(GetPlayerTeam() == HORDE ? NPC_SYLVANAS_PART1 : NPC_JAINA_PART1))
+                    creature->ForcedDespawn();
+
                 m_uiIciclesTimer = 0;
                 m_uiEyeLichKingTimer = 0;
             }
+            else if (uiData == IN_PROGRESS)
+                DoStartAmbushEvent();
             m_auiEncounter[uiType] = uiData;
             break;
         default:
@@ -317,6 +334,9 @@ void instance_pit_of_saron::OnCreatureEnterCombat(Creature* pCreature)
                 return;
 
             DoScriptText(SAY_TYRANNUS_AMBUSH_2, pTyrannus);
+            pTyrannus->SetWalk(false);
+            pTyrannus->GetMotionMaster()->Clear(false, true);
+            pTyrannus->GetMotionMaster()->MovePoint(0, afTyrannusMovePos[3][0], afTyrannusMovePos[3][1], afTyrannusMovePos[3][2]);
 
             // Spawn Mobs
             for (const auto& aEventSecondAmbushLocation : aEventSecondAmbushLocations)
@@ -354,9 +374,10 @@ void instance_pit_of_saron::OnCreatureDeath(Creature* pCreature)
                         return;
 
                     DoScriptText(SAY_GAUNTLET, pTyrannus);
+
                     pTyrannus->SetWalk(false);
+                    pTyrannus->GetMotionMaster()->Clear(false, true);
                     pTyrannus->GetMotionMaster()->MovePoint(0, afTyrannusMovePos[0][0], afTyrannusMovePos[0][1], afTyrannusMovePos[0][2]);
-                    pTyrannus->ForcedDespawn(20000);
 
                     m_uiIciclesTimer = urand(3000, 5000);
                     SetSpecialAchievementCriteria(TYPE_ACHIEV_DONT_LOOK_UP, true);
@@ -390,24 +411,6 @@ void instance_pit_of_saron::JustDidDialogueStep(int32 iEntry)
 {
     switch (iEntry)
     {
-        case NPC_TYRANNUS:
-        {
-            Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS);
-            if (!pTyrannus)
-                return;
-
-            // Spawn tunnel end event mobs
-            for (const auto& aEventTunnelEndLocation : aEventTunnelEndLocations)
-            {
-                if (Creature* pSummon = pTyrannus->SummonCreature(m_uiTeam == HORDE ? aEventTunnelEndLocation.uiEntryHorde : aEventTunnelEndLocation.uiEntryAlliance,
-                    aEventTunnelEndLocation.fX, aEventTunnelEndLocation.fY, aEventTunnelEndLocation.fZ, aEventTunnelEndLocation.fO, TEMPSPAWN_DEAD_DESPAWN, 0))
-                {
-                    pSummon->SetWalk(false);
-                    pSummon->GetMotionMaster()->MovePoint(0, aEventTunnelEndLocation.fMoveX, aEventTunnelEndLocation.fMoveY, aEventTunnelEndLocation.fMoveZ);
-                }
-            }
-            break;
-        }
         case NPC_RIMEFANG:
             // Eject Tyrannus and prepare for combat
             if (Creature* pRimefang = GetSingleCreatureFromStorage(NPC_RIMEFANG))
@@ -493,6 +496,31 @@ void instance_pit_of_saron::JustDidDialogueStep(int32 iEntry)
     }
 }
 
+// Method to start the intro event
+void instance_pit_of_saron::DoStartIntroEvent()
+{
+    Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO);
+    if (!pTyrannus)
+    {
+        script_error_log("instance_pit_of_saron: Error: cannot find creature %u in instance", NPC_TYRANNUS_INTRO);
+        return;
+    }
+
+    // Spawn Begin Mobs; script handled in DB; Dialogue handled in DB
+    for (const auto& aEventBeginLocation : aEventBeginLocations)
+    {
+        if (Creature* pSummon = pTyrannus->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
+            aEventBeginLocation.fX, aEventBeginLocation.fY, aEventBeginLocation.fZ, aEventBeginLocation.fO, TEMPSPAWN_TIMED_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
+        {
+            pSummon->SetWalk(false);
+            pSummon->GetMotionMaster()->MoveWaypoint(aEventBeginLocation.pathId);
+
+            m_lIntroCreaturesGuidList.push_back(pSummon->GetObjectGuid());
+        }
+    }
+}
+
+// Method to start the ambush event
 void instance_pit_of_saron::DoStartAmbushEvent()
 {
     Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS_INTRO);
@@ -516,6 +544,33 @@ void instance_pit_of_saron::DoStartAmbushEvent()
     }
 }
 
+// Function to spawn the Tyrannus event mobs
+void instance_pit_of_saron::DoStartTyrannusEvent()
+{
+    Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS);
+    if (!pTyrannus)
+    {
+        script_error_log("instance_pit_of_saron: Error: cannot find creature %u in instance", NPC_TYRANNUS);
+        return;
+    }
+
+    // Handle dialogue
+    StartNextDialogueText(SAY_PREFIGHT_1);
+
+    // Spawn Mobs
+    for (const auto& aEventTunnelEndLocation : aEventTunnelEndLocations)
+    {
+        if (Creature* pSummon = pTyrannus->SummonCreature(m_uiTeam == HORDE ? aEventTunnelEndLocation.uiEntryHorde : aEventTunnelEndLocation.uiEntryAlliance,
+            aEventTunnelEndLocation.fX, aEventTunnelEndLocation.fY, aEventTunnelEndLocation.fZ, aEventTunnelEndLocation.fO, TEMPSPAWN_DEAD_DESPAWN, 0))
+        {
+            pSummon->SetWalk(false);
+            pSummon->GetMotionMaster()->MoveWaypoint(aEventTunnelEndLocation.pathId);
+
+            m_lEndingCreaturesGuidList.push_back(pSummon->GetObjectGuid());
+        }
+    }
+}
+
 void instance_pit_of_saron::Update(uint32 uiDiff)
 {
     DialogueUpdate(uiDiff);
@@ -524,26 +579,7 @@ void instance_pit_of_saron::Update(uint32 uiDiff)
     {
         if (m_uiSummonDelayTimer <= uiDiff)
         {
-            Player* pPlayer = GetPlayerInMap();
-            if (!pPlayer)
-            {
-                script_error_log("instance_pit_of_saron: Error: couldn't find any player in instance");
-                m_uiSummonDelayTimer = 0;
-                return;
-            }
-
-            // Spawn Begin Mobs; script handled in DB
-            for (const auto& aEventBeginLocation : aEventBeginLocations)
-            {
-                // ToDo: maybe despawn the intro npcs when the other events occur
-                if (Creature* pSummon = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
-                    aEventBeginLocation.fX, aEventBeginLocation.fY, aEventBeginLocation.fZ, aEventBeginLocation.fO, TEMPSPAWN_TIMED_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
-                {
-                    pSummon->SetWalk(false);
-                    pSummon->GetMotionMaster()->MoveWaypoint(aEventBeginLocation.pathId);
-                }
-            }
-
+            DoStartIntroEvent();
             m_uiSummonDelayTimer = 0;
         }
         else
@@ -554,10 +590,10 @@ void instance_pit_of_saron::Update(uint32 uiDiff)
     {
         if (m_uiIciclesTimer <= uiDiff)
         {
-            for (const auto& guid : m_lTunnelStalkersGuidList)
+            for (const auto guid : m_lTunnelStalkersGuidList)
             {
-                // Only 5% of the stalkers will actually spawn an icicle
-                if (roll_chance_i(95))
+                // Only 25% of the stalkers will actually spawn an icicle
+                if (roll_chance_i(50))
                     continue;
 
                 if (Creature* pStalker = instance->GetCreature(guid))

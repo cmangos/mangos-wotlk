@@ -16,13 +16,14 @@
 
 /* ScriptData
 SDName: boss_scourgelord_tyrannus
-SD%Complete: 90
-SDComment: Small adjustments may be required
+SD%Complete: 80
+SDComment: Overlord's Brand logic not impelemneted
 SDCategory: Pit of Saron
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "pit_of_saron.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -48,8 +49,8 @@ enum
     SPELL_KILLING_ICE                   = 72531,
 
     // Icy blast
-    // SPELL_ICY_BLAST_AURA             = 69238,
-    NPC_ICY_BLAST                       = 36731,                // handled in eventAI
+    SPELL_ICY_BLAST_AURA                = 69238,
+    NPC_ICY_BLAST                       = 36731,                // summoned by missing spell 69234
 };
 
 static const float afRimefangExitPos[3] = {1248.29f, 145.924f, 733.914f};
@@ -58,59 +59,58 @@ static const float afRimefangExitPos[3] = {1248.29f, 145.924f, 733.914f};
 ## boss_tyrannus
 ######*/
 
-struct boss_tyrannusAI : public ScriptedAI
+enum TyrannusActions
 {
-    boss_tyrannusAI(Creature* pCreature) : ScriptedAI(pCreature)
+    TYRANNUS_FORCEFUL_SMASH,
+    TYRANNUS_OVERLORDS_BRAND,
+    TYRANNUS_UNHOLY_POWER,
+    TYRANNUS_MARK_RIMEFANG,
+    TYRANNUS_ACTION_MAX,
+};
+
+struct boss_tyrannusAI : public CombatAI
+{
+    boss_tyrannusAI(Creature* creature) : CombatAI(creature, TYRANNUS_ACTION_MAX), m_instance(static_cast<instance_pit_of_saron*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_pit_of_saron*)pCreature->GetInstanceData();
-        pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        Reset();
+        AddCombatAction(TYRANNUS_FORCEFUL_SMASH, 15000u);
+        AddCombatAction(TYRANNUS_OVERLORDS_BRAND, 9000u);
+        AddCombatAction(TYRANNUS_UNHOLY_POWER, 15000u, 20000u);
+        AddCombatAction(TYRANNUS_MARK_RIMEFANG, 20000u, 25000u);
     }
 
-    instance_pit_of_saron* m_pInstance;
+    instance_pit_of_saron* m_instance;
 
-    uint32 m_uiForcefulSmashTimer;
-    uint32 m_uiOverlordsBrandTimer;
-    uint32 m_uiUnholyPowerTimer;
-    uint32 m_uiMarkOfRimefangTimer;
-
-    void Reset() override
-    {
-        m_uiForcefulSmashTimer  = 10000;
-        m_uiOverlordsBrandTimer = 9000;
-        m_uiUnholyPowerTimer    = urand(30000, 35000);
-        m_uiMarkOfRimefangTimer = 20000;
-    }
-
-    void Aggro(Unit* pWho) override
+    void Aggro(Unit* who) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
+        if (m_instance)
         {
-            m_pInstance->SetData(TYPE_TYRANNUS, IN_PROGRESS);
+            m_instance->SetData(TYPE_TYRANNUS, IN_PROGRESS);
 
             // Set Rimefang in combat - ToDo: research if it has some wp movement during combat
-            if (Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
-                pRimefang->AI()->AttackStart(pWho);
+            if (Creature* pRimefang = m_instance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
+                pRimefang->AI()->AttackStart(who);
         }
     }
 
-    void KilledUnit(Unit* /*pVictim*/)
+    void KilledUnit(Unit* victim)
     {
+        CombatAI::KilledUnit(victim);
+
         DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* killer) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
+        if (m_instance)
         {
-            m_pInstance->SetData(TYPE_TYRANNUS, DONE);
+            m_instance->SetData(TYPE_TYRANNUS, DONE);
 
             // Move Rimefang out of the area
-            if (Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
+            if (Creature* pRimefang = m_instance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
             {
                 pRimefang->AI()->EnterEvadeMode();
                 pRimefang->SetWalk(false);
@@ -119,7 +119,7 @@ struct boss_tyrannusAI : public ScriptedAI
             }
 
             // Move the general near the boss - ToDo: move the other freed slaves as well
-            if (Creature* pGeneral = m_pInstance->GetSingleCreatureFromStorage(m_pInstance->GetPlayerTeam() == HORDE ? NPC_IRONSKULL_PART2 : NPC_VICTUS_PART2))
+            if (Creature* pGeneral = m_instance->GetSingleCreatureFromStorage(m_instance->GetPlayerTeam() == HORDE ? NPC_IRONSKULL_PART2 : NPC_VICTUS_PART2))
             {
                 float fX, fY, fZ;
                 pGeneral->SetWalk(false);
@@ -131,200 +131,182 @@ struct boss_tyrannusAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_TYRANNUS, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_TYRANNUS, FAIL);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiForcefulSmashTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FORCEFUL_SMASH) == CAST_OK)
-                m_uiForcefulSmashTimer = 50000;
-        }
-        else
-            m_uiForcefulSmashTimer -= uiDiff;
-
-        if (m_uiOverlordsBrandTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_OVERLORDS_BRAND) == CAST_OK)
-                    m_uiOverlordsBrandTimer = urand(10000, 13000);
-            }
-        }
-        else
-            m_uiOverlordsBrandTimer -= uiDiff;
-
-        if (m_uiUnholyPowerTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_UNHOLY_POWER) == CAST_OK)
-            {
-                DoScriptText(SAY_SMASH, m_creature);
-                DoScriptText(EMOTE_SMASH, m_creature);
-                m_uiUnholyPowerTimer = 60000;
-            }
-        }
-        else
-            m_uiUnholyPowerTimer -= uiDiff;
-
-        if (m_uiMarkOfRimefangTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_MARK_OF_RIMEFANG) == CAST_OK)
+            case TYRANNUS_FORCEFUL_SMASH:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FORCEFUL_SMASH) == CAST_OK)
+                    ResetCombatAction(action, urand(40000, 50000));
+                break;
+            case TYRANNUS_OVERLORDS_BRAND:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
                 {
-                    DoScriptText(SAY_MARK, m_creature);
-                    if (m_pInstance)
-                    {
-                        if (Creature* pRimefang = m_pInstance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
-                        {
-                            pRimefang->InterruptNonMeleeSpells(true);
-                            pRimefang->CastSpell(pTarget, SPELL_HOARFROST, TRIGGERED_NONE);
-                            DoScriptText(EMOTE_RIMEFANG_ICEBOLT, pRimefang, pTarget);
-                        }
-                    }
-                    m_uiMarkOfRimefangTimer = urand(20000, 25000);
+                    if (DoCastSpellIfCan(target, SPELL_OVERLORDS_BRAND) == CAST_OK)
+                        ResetCombatAction(action, urand(10000, 13000));
                 }
-            }
+                break;
+            case TYRANNUS_UNHOLY_POWER:
+                if (DoCastSpellIfCan(m_creature, SPELL_UNHOLY_POWER) == CAST_OK)
+                {
+                    DoScriptText(SAY_SMASH, m_creature);
+                    DoScriptText(EMOTE_SMASH, m_creature);
+                    ResetCombatAction(action, urand(45000, 50000));
+                }
+                break;
+            case TYRANNUS_MARK_RIMEFANG:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(target, SPELL_MARK_OF_RIMEFANG) == CAST_OK)
+                    {
+                        DoScriptText(SAY_MARK, m_creature);
+                        if (m_instance)
+                        {
+                            if (Creature* rimefang = m_instance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
+                                SendAIEvent(AI_EVENT_CUSTOM_A, target, rimefang);
+                        }
+                        ResetCombatAction(action, urand(20000, 25000));
+                    }
+                }
+                break;
         }
-        else
-            m_uiMarkOfRimefangTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_boss_tyrannus(Creature* pCreature)
-{
-    return new boss_tyrannusAI(pCreature);
-}
 
 /*######
 ## boss_rimefang_pos
 ######*/
 
-struct boss_rimefang_posAI : public ScriptedAI
+enum RimefangPoSActions
 {
-    boss_rimefang_posAI(Creature* pCreature) : ScriptedAI(pCreature)
+    RIMEFANG_POS_ICY_BLAST,
+    RIMEFANG_POS_HOARFROST,
+    RIMEFANG_POS_ACTION_MAX,
+};
+
+struct boss_rimefang_posAI : public CombatAI
+{
+    boss_rimefang_posAI(Creature* creature) : CombatAI(creature, RIMEFANG_POS_ACTION_MAX), m_instance(static_cast<instance_pit_of_saron*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_pit_of_saron*)pCreature->GetInstanceData();
+        AddCombatAction(RIMEFANG_POS_ICY_BLAST, 5000u);
+        AddCombatAction(RIMEFANG_POS_HOARFROST, true);
+
         SetCombatMovement(false);
-        m_bHasDoneIntro = false;
-        m_uiMountTimer = 1000;
-        Reset();
     }
 
-    instance_pit_of_saron* m_pInstance;
-    uint32 m_uiMountTimer;
+    instance_pit_of_saron* m_instance;
 
-    uint32 m_uiIcyBlastTimer;
-    bool m_bHasDoneIntro;
+    ObjectGuid m_hoarfrostTarget;
 
-    void Reset() override
-    {
-        m_uiIcyBlastTimer = 8000;
-    }
-
-    void EnterEvadeMode() override
-    {
-        m_creature->RemoveAllAurasOnEvade();
-        m_creature->CombatStop(true);
-        m_creature->LoadCreatureAddon(true);
-
-        m_creature->SetLootRecipient(nullptr);
-
-        Reset();
-
-        // Don't handle movement.
-    }
-
-    void AttackStart(Unit* pWho) override
+    void AttackStart(Unit* who) override
     {
         // Don't attack unless Tyrannus is in combat or Ambush is completed
-        if (m_pInstance && (m_pInstance->GetData(TYPE_AMBUSH) != DONE || m_pInstance->GetData(TYPE_TYRANNUS) != IN_PROGRESS))
+        if (m_instance && (m_instance->GetData(TYPE_AMBUSH) != DONE || m_instance->GetData(TYPE_TYRANNUS) != IN_PROGRESS))
             return;
 
-        ScriptedAI::AttackStart(pWho);
+        CombatAI::AttackStart(who);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void MoveInLineOfSight(Unit* who) override
     {
-        if (!m_pInstance)
+        if (!m_instance || !who->IsPlayer())
+            return;
+
+        if (who->IsInCombat())
             return;
 
         // Check if ambush is done
-        if (m_pInstance->GetData(TYPE_AMBUSH) != DONE)
+        if (m_instance->GetData(TYPE_AMBUSH) != DONE)
             return;
 
         // Start the intro when possible
-        if (!m_bHasDoneIntro && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, 85.0f) && m_creature->IsWithinLOSInMap(pWho))
-        {
-            m_pInstance->SetData(TYPE_TYRANNUS, SPECIAL);
-            m_bHasDoneIntro = true;
-            return;
-        }
+        if (m_instance->GetData(TYPE_TYRANNUS) == NOT_STARTED && m_creature->IsWithinDistInMap(who, 85.0f) && m_creature->IsWithinLOSInMap(who))
+            m_instance->SetData(TYPE_TYRANNUS, SPECIAL);
 
         // Check for out of range players - ToDo: confirm the distance
-        if (m_pInstance->GetData(TYPE_TYRANNUS) == IN_PROGRESS && pWho->GetTypeId() == TYPEID_PLAYER && !m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE))
-            DoCastSpellIfCan(pWho, SPELL_KILLING_ICE);
+        if (m_instance->GetData(TYPE_TYRANNUS) == IN_PROGRESS && !m_creature->IsWithinDistInMap(who, DEFAULT_VISIBILITY_INSTANCE))
+            DoCastSpellIfCan(who, SPELL_KILLING_ICE);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (!m_pInstance)
-            return;
-
-        // He needs to be mounted manually, not by vehicle_accessories
-        if (m_uiMountTimer)
+        if (summoned->GetEntry() == NPC_ICY_BLAST)
         {
-            if (m_uiMountTimer <= uiDiff)
-            {
-                if (Creature* pTyrannus = m_pInstance->GetSingleCreatureFromStorage(NPC_TYRANNUS))
-                    pTyrannus->CastSpell(m_creature, SPELL_RIDE_VEHICLE_HARDCODED, TRIGGERED_OLD_TRIGGERED);
-
-                m_uiMountTimer = 0;
-            }
-            else
-                m_uiMountTimer -= uiDiff;
+            summoned->AI()->SetReactState(REACT_PASSIVE);
+            summoned->SetCanEnterCombat(false);
+            summoned->CastSpell(summoned, SPELL_ICY_BLAST_AURA, TRIGGERED_OLD_TRIGGERED);
         }
+    }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiIcyBlastTimer < uiDiff)
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* invoker, uint32 /*miscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A && sender->GetEntry() == NPC_TYRANNUS)
         {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_ICY_BLAST) == CAST_OK)
+            m_hoarfrostTarget = invoker->GetObjectGuid();
+            ResetCombatAction(RIMEFANG_POS_HOARFROST, 1000);
+        }
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case RIMEFANG_POS_ICY_BLAST:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    m_creature->SummonCreature(NPC_ICY_BLAST, pTarget->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ(), 0, TEMPSPAWN_TIMED_DESPAWN, 90000);
-                    m_uiIcyBlastTimer = 8000;
+                    if (DoCastSpellIfCan(target, SPELL_ICY_BLAST) == CAST_OK)
+                        ResetCombatAction(action, 8000);
                 }
-            }
+                break;
+            case RIMEFANG_POS_HOARFROST:
+                if (Unit* target = m_creature->GetMap()->GetUnit(m_hoarfrostTarget))
+                {
+                    if (DoCastSpellIfCan(target, SPELL_HOARFROST) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_RIMEFANG_ICEBOLT, m_creature, target);
+                        DisableCombatAction(action);
+                    }
+                }
+                break;
         }
-        else
-            m_uiIcyBlastTimer -= uiDiff;
     }
 };
 
-UnitAI* GetAI_boss_rimefang_pos(Creature* pCreature)
+/*######
+## spell_icy_blast - 69232
+######*/
+
+struct spell_icy_blast : public SpellScript
 {
-    return new boss_rimefang_posAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !caster)
+            return;
+
+        caster->SummonCreature(NPC_ICY_BLAST, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
+    }
+};
 
 void AddSC_boss_tyrannus()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_tyrannus";
-    pNewScript->GetAI = &GetAI_boss_tyrannus;
+    pNewScript->GetAI = &GetNewAIInstance<boss_tyrannusAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "boss_rimefang_pos";
-    pNewScript->GetAI = &GetAI_boss_rimefang_pos;
+    pNewScript->GetAI = &GetNewAIInstance<boss_rimefang_posAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_icy_blast>("spell_icy_blast");
 }
