@@ -5037,9 +5037,9 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
     caster->CastSpell(targets, spellInfo, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
 }
 
-void Spell::EffectTriggerMissileSpell(SpellEffectIndex effect_idx)
+void Spell::EffectTriggerMissileSpell(SpellEffectIndex effIndex)
 {
-    uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[effect_idx];
+    uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[effIndex];
 
     // normal case
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(triggered_spell_id);
@@ -5053,7 +5053,7 @@ void Spell::EffectTriggerMissileSpell(SpellEffectIndex effect_idx)
         }
         else
             sLog.outError("EffectTriggerMissileSpell of spell %u (eff: %u): triggering unknown spell id %u",
-                          m_spellInfo->Id, effect_idx, triggered_spell_id);
+                          m_spellInfo->Id, effIndex, triggered_spell_id);
         return;
     }
 
@@ -5061,12 +5061,38 @@ void Spell::EffectTriggerMissileSpell(SpellEffectIndex effect_idx)
         DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id);
 
     SpellCastTargets targets;
-    if (unitTarget)
-        targets.setUnitTarget(unitTarget);
-    else if (gameObjTarget)
-        targets.setGOTarget(gameObjTarget);
+
+    if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+    {
+        if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        {
+            float x, y, z;
+            m_targets.getDestination(x, y, z);
+            targets.setDestination(x, y, z);
+        }
+        else if (unitTarget)
+        {
+            float x, y, z;
+            unitTarget->GetPosition(x, y, z);
+            targets.setDestination(x, y, z);
+        }
+    }
     else
-        targets.setDestination(m_targets.m_destPos.x, m_targets.m_destPos.y, m_targets.m_destPos.z);
+    {
+        switch (m_spellInfo->EffectImplicitTargetA[effIndex])
+        {
+            case TARGET_LOCATION_UNIT_MINION_POSITION: break; // confirmed by 31348 nothing is forwarded
+            default:
+            {
+                if (unitTarget)
+                    targets.setUnitTarget(unitTarget);
+                else if (gameObjTarget)
+                    targets.setGOTarget(gameObjTarget);
+                break;
+            }
+        }
+    }
+
     m_caster->CastSpell(targets, spellInfo, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
 }
 
