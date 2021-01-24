@@ -753,6 +753,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 44537:         // Fel Lightning
         case 44604:         // Enchantment of Spell Haste
         case 44855:         // Out of Phase
+        case 44977:         // Fel Armor (Rank 2)
         case 45033:         // Abyssal Transformation
         case 45187:         // Dawnblade Attack
         case 45822:         // Iceblood Warmaster
