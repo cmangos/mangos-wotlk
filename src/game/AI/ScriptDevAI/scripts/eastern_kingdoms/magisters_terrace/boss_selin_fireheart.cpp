@@ -131,8 +131,8 @@ struct boss_selin_fireheartAI : public CombatAI
             DoScriptText(urand(0, 1) ? SAY_DRAIN_1 : SAY_DRAIN_2, m_creature);
 
             float x, y, z;
-            crystal->GetClosePoint(x, y, z, 0.f, 3.f, m_creature->GetAngle(crystal), m_creature);
-            m_creature->GetMotionMaster()->MovePoint(POINT_CRYSTAL, x, y, z);
+            m_creature->GetContactPoint(crystal, x, y, z, INTERACTION_DISTANCE);
+            m_creature->GetMotionMaster()->MovePoint(POINT_CRYSTAL, x, y, z, FORCED_MOVEMENT_RUN, true);
             SetCombatScriptStatus(true);
             SetMeleeEnabled(false);
             m_creature->SetTarget(nullptr);
