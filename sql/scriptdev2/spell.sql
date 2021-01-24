@@ -256,6 +256,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (48397,'spell_drop_off_villager'),
 (48630,'spell_summon_gauntlet_mobs_periodic_aura'),
 (48642,'spell_launch_harpoon'),
+(48778,'spell_acherus_deathcharger'),
 (49099,'spell_army_of_the_dead'),
 (49345,'spell_call_oculus_drake'),
 (49346,'spell_ride_oculus_drake_saddle'),

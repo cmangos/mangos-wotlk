@@ -34,6 +34,7 @@ spell_death_knight_initiate_visual
 spell_siphon_of_acherus
 spell_recall_eye_of_acherus
 spell_summon_ghouls_scarlet_crusade
+spell_acherus_deathcharger
 go_plague_cauldron
 EndContentData */
 
@@ -2905,6 +2906,33 @@ struct spell_gift_of_the_harvester : public SpellScript
 };
 
 /*######
+## spell_acherus_deathcharger
+######*/
+
+struct spell_acherus_deathcharger : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        if (Unit* caster = spell->GetCaster())
+        {
+            if (caster->HasAura(53081))
+            {
+                auto& list = spell->GetTargetList();
+                for (auto& target : list)
+                    if (target.targetGUID == caster->GetObjectGuid())
+                        target.effectHitMask &= ~((1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_0));
+            }
+        }
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_2 && spell->GetCaster()->HasAura(53081))
+            spell->GetCaster()->CastSpell(nullptr, 58819, TRIGGERED_INSTANT_CAST);
+    }
+};
+
+/*######
 ## go_plague_cauldron
 ######*/
 
@@ -2916,6 +2944,7 @@ struct go_plague_cauldron : public GameObjectAI
         go->GetVisibilityData().AddInvisibilityValue(10, 1000);
     }
 };
+
 
 void AddSC_ebon_hold()
 {
@@ -2981,4 +3010,5 @@ void AddSC_ebon_hold()
     RegisterSpellScript<spell_ghoulplosion>("spell_ghoulplosion");
     RegisterSpellScript<spell_dispel_scarlet_ghoul_credit>("spell_dispel_scarlet_ghoul_credit");
     RegisterSpellScript<spell_gift_of_the_harvester>("spell_gift_of_the_harvester");
+    RegisterSpellScript<spell_acherus_deathcharger>("spell_acherus_deathcharger");
 }
