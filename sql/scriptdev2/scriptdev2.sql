@@ -1575,7 +1575,15 @@ UPDATE creature_template SET ScriptName="npc_cenarion_sparrowhawk" WHERE entry=2
 UPDATE creature_template SET ScriptName="npc_skyguard_prisoner" WHERE entry=23383;
 UPDATE creature_template SET ScriptName='npc_avatar_of_terokk' WHERE entry=22375;
 UPDATE creature_template SET ScriptName='npc_minion_of_terokk' WHERE entry=22376;
+<<<<<<< HEAD
 UPDATE creature_template SET ScriptName='boss_terokk' WHERE entry IN(21838);
+=======
+UPDATE creature_template SET ScriptName='npc_draenei_tomb_guardian' WHERE entry=22285;
+UPDATE creature_template SET ScriptName='npc_vengeful_harbinger' WHERE entry=21638;
+UPDATE creature_template SET ScriptName='boss_terokk' WHERE entry=21838;
+UPDATE gameobject_template SET ScriptName='go_monstrous_kaliri_egg' WHERE entry=185549;
+
+>>>>>>> dc740eb0f4b... [SD] go: Add Despawn Script for go_monstrous_kaliri_egg 185549
 INSERT INTO scripted_event_id VALUES
 (15014,'event_summon_terokk');
 
