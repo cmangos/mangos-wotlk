@@ -127,6 +127,8 @@ class DialogueHelper
         virtual void JustDidDialogueStep(int32 /*entry*/) {}
         /// Will be called to get a speaker, MUST be implemented if not used in instances
         virtual Creature* GetSpeakerByEntry(uint32 /*entry*/) { return nullptr; }
+        /// Will be called to get a target; OPTIONAL
+        virtual Unit* GetDialogueTarget() { return nullptr; }
 
     private:
         void DoNextDialogueStep();

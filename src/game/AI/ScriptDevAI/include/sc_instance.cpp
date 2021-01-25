@@ -366,7 +366,13 @@ void DialogueHelper::DoNextDialogueStep()
         }
 
         if (pSpeaker)
-            DoScriptText(iTextEntry, pSpeaker);
+        {
+            // Use target if provided
+            if (Unit* pTarget = GetDialogueTarget())
+                DoScriptText(iTextEntry, pSpeaker, pTarget);
+            else
+                DoScriptText(iTextEntry, pSpeaker);
+        }
     }
 
     JustDidDialogueStep(m_dialogueArray ?  m_currentEntry->textEntry : m_currentEntryTwoSide->textEntry);
