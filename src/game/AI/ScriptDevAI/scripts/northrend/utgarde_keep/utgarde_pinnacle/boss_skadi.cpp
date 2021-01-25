@@ -553,6 +553,28 @@ struct spell_freezing_cloud_aura : public AuraScript
     }
 };
 
+/*######
+## spell_poisoned_spear - 50255, 59331
+######*/
+
+struct spell_poisoned_spear : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // trigger spell 50258 | 59334
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_skadi()
 {
     Script* pNewScript = new Script;
@@ -573,4 +595,5 @@ void AddSC_boss_skadi()
     RegisterSpellScript<spell_launch_harpoon>("spell_launch_harpoon");
     RegisterAuraScript<spell_summon_gauntlet_mobs_periodic_aura>("spell_summon_gauntlet_mobs_periodic_aura");
     RegisterAuraScript<spell_freezing_cloud_aura>("spell_freezing_cloud_aura");
+    RegisterSpellScript<spell_poisoned_spear>("spell_poisoned_spear");
 }

@@ -26,6 +26,8 @@ npc_dalaran_guardian_mage
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -80,15 +82,36 @@ struct npc_dalaran_guardian_mageAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override {}
 };
 
-UnitAI* GetAI_npc_dalaran_guardian_mage(Creature* pCreature)
+/*######
+## spell_teleporting_dalaran - 59317
+######*/
+
+struct spell_teleporting_dalaran : public SpellScript
 {
-    return new npc_dalaran_guardian_mageAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        Player* playerTarget = static_cast<Player*>(target);
+
+        // return from top
+        if (playerTarget->GetAreaId() == 4637)
+            target->CastSpell(target, 59316, TRIGGERED_OLD_TRIGGERED);
+        // teleport atop
+        else
+            target->CastSpell(target, 59314, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_dalaran()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_dalaran_guardian_mage";
-    pNewScript->GetAI = &GetAI_npc_dalaran_guardian_mage;
+    pNewScript->GetAI = &GetNewAIInstance<npc_dalaran_guardian_mageAI>;
     pNewScript->RegisterSelf();
 }

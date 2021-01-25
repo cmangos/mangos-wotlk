@@ -2917,6 +2917,57 @@ struct go_plague_cauldron : public GameObjectAI
     }
 };
 
+/*######
+## spell_devour_humanoid - 53110
+######*/
+
+struct spell_devour_humanoid : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!caster || !target || !target->IsCreature())
+            return;
+
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+        target->CastSpell(caster, spellId, TRIGGERED_OLD_TRIGGERED);
+
+        Creature* creatureTarget = static_cast<Creature*>(target);
+        creatureTarget->ForcedDespawn(8000);
+    }
+};
+
+/*######
+## spell_portal_to_capital_city - 58418, 58420
+######*/
+
+struct spell_portal_to_capital_city : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        Player* playerTarget = static_cast<Player*>(target);
+
+        // get quest id and spell id
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_0);
+        uint32 questId = spell->m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1);
+
+        // check for quest complete, but not rewarded
+        if (playerTarget->GetQuestStatus(questId) == QUEST_STATUS_COMPLETE && !playerTarget->GetQuestRewardStatus(questId))
+            target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_ebon_hold()
 {
     Script* pNewScript = new Script;
@@ -2981,4 +3032,6 @@ void AddSC_ebon_hold()
     RegisterSpellScript<spell_ghoulplosion>("spell_ghoulplosion");
     RegisterSpellScript<spell_dispel_scarlet_ghoul_credit>("spell_dispel_scarlet_ghoul_credit");
     RegisterSpellScript<spell_gift_of_the_harvester>("spell_gift_of_the_harvester");
+    RegisterSpellScript<spell_devour_humanoid>("spell_devour_humanoid");
+    RegisterSpellScript<spell_portal_to_capital_city>("spell_portal_to_capital_city");
 }

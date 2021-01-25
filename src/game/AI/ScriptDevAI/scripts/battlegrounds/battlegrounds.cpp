@@ -316,6 +316,29 @@ struct spell_end_of_round : public SpellScript
     }
 };
 
+/*######
+## spell_teleport_sota - 54640
+######*/
+
+struct spell_teleport_sota : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        // Check for aura 54643
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        if (!target->HasAura(spellId))
+            target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_battleground()
 {
     Script* pNewScript = new Script;
@@ -333,4 +356,5 @@ void AddSC_battleground()
     RegisterAuraScript<spell_repair_cannon_aura>("spell_repair_cannon_aura");
     RegisterSpellScript<spell_repair_cannon>("spell_repair_cannon");
     RegisterSpellScript<spell_end_of_round>("spell_end_of_round");
+    RegisterSpellScript<spell_teleport_sota>("spell_teleport_sota");
 }

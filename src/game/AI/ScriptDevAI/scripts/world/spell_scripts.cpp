@@ -37,6 +37,7 @@ spell 45111
 spell 46023
 spell 46770
 spell 47575
+spell 50630
 spell 50706
 spell 51331
 spell 51332
@@ -1177,6 +1178,24 @@ struct deflection : public SpellScript
     }
 };
 
+/*######
+## spell_eject_all_passengers - 50630
+######*/
+
+struct spell_eject_all_passengers : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        if (!caster)
+            return;
+
+        caster->RemoveSpellsCausingAura(SPELL_AURA_CONTROL_VEHICLE);
+    }
+};
 
 void AddSC_spell_scripts()
 {
@@ -1203,4 +1222,5 @@ void AddSC_spell_scripts()
     RegisterSpellScript<SplitDamage>("spell_split_damage");
     RegisterSpellScript<TKDive>("spell_tk_dive");
     RegisterSpellScript<deflection>("spell_deflection");
+    RegisterSpellScript<spell_eject_all_passengers>("spell_eject_all_passengers");
 }
