@@ -35,6 +35,9 @@ spell_siphon_of_acherus
 spell_recall_eye_of_acherus
 spell_summon_ghouls_scarlet_crusade
 go_plague_cauldron
+spell_devour_humanoid
+spell_portal_to_capital_city
+spell_acherus_deathcharger
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
@@ -2922,6 +2925,33 @@ struct spell_portal_to_capital_city : public SpellScript
     }
 };
 
+/*######
+## spell_acherus_deathcharger - 48778
+######*/
+
+struct spell_acherus_deathcharger : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        if (Unit* caster = spell->GetCaster())
+        {
+            if (caster->HasAura(53081))
+            {
+                auto& list = spell->GetTargetList();
+                for (auto& target : list)
+                    if (target.targetGUID == caster->GetObjectGuid())
+                        target.effectHitMask &= ~((1 << EFFECT_INDEX_1) | (1 << EFFECT_INDEX_0));
+            }
+        }
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_2 && spell->GetCaster()->HasAura(53081))
+            spell->GetCaster()->CastSpell(nullptr, 58819, TRIGGERED_INSTANT_CAST);
+    }
+};
+
 void AddSC_ebon_hold()
 {
     Script* pNewScript = new Script;
@@ -2988,4 +3018,5 @@ void AddSC_ebon_hold()
     RegisterSpellScript<spell_gift_of_the_harvester>("spell_gift_of_the_harvester");
     RegisterSpellScript<spell_devour_humanoid>("spell_devour_humanoid");
     RegisterSpellScript<spell_portal_to_capital_city>("spell_portal_to_capital_city");
+    RegisterSpellScript<spell_acherus_deathcharger>("spell_acherus_deathcharger");
 }
