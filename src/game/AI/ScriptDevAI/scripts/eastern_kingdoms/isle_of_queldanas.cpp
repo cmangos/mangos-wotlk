@@ -242,6 +242,8 @@ struct ShatteredSunMarksmanShoot : public SpellScript
 
 enum
 {
+    NPC_DAWNBLADE_BLOOD_KNIGHT  = 24976,
+
     SPELL_SEAL_OF_WRATH         = 45095,
     SPELL_JOUST                 = 45105,
     SPELL_JUDGEMENT_OF_WRATH    = 45337,
@@ -265,9 +267,9 @@ struct npc_dawnblade_blood_knight : public CombatAI
     npc_dawnblade_blood_knight(Creature* creature) : CombatAI(creature, DAWNBLADE_BLOOD_KNIGHT_ACTION_MAX)
     {
         m_firstSpawn = true;
-        AddTimerlessCombatAction(DAWNBLADE_BLOOD_KNIGHT_HOLY_LIGHT, true);
-        AddCombatAction(DAWNBLADE_BLOOD_KNIGHT_SEAL_OF_WRATH, 5000, 8000);
-        AddCombatAction(DAWNBLADE_BLOOD_KNIGHT_JUDGEMENT_OF_WRATH, 8000, 18000);
+        AddCombatAction(DAWNBLADE_BLOOD_KNIGHT_HOLY_LIGHT, 0, 0);
+        AddCombatAction(DAWNBLADE_BLOOD_KNIGHT_SEAL_OF_WRATH, 5000, 10000);
+        AddCombatAction(DAWNBLADE_BLOOD_KNIGHT_JUDGEMENT_OF_WRATH, 10000, 20000);
     }
 
     bool m_firstSpawn;
@@ -293,22 +295,24 @@ struct npc_dawnblade_blood_knight : public CombatAI
             case DAWNBLADE_BLOOD_KNIGHT_SEAL_OF_WRATH:
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_SEAL_OF_WRATH) == CAST_OK)
-                    ResetCombatAction(action, urand(35000, 45000));
+                    ResetCombatAction(action, urand(15000, 25000));
                 break;
             }
             case DAWNBLADE_BLOOD_KNIGHT_JUDGEMENT_OF_WRATH:
             {
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_JUDGEMENT_OF_WRATH) == CAST_OK)
-                    ResetCombatAction(action, urand(25000, 36000));
+                if (m_creature->HasAura(SPELL_SEAL_OF_WRATH))
+                    if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_JUDGEMENT_OF_WRATH) == CAST_OK)
+                    {
+                        m_creature->RemoveAurasDueToSpell(SPELL_SEAL_OF_WRATH);
+                        ResetCombatAction(action, urand(25000, 30000));
+                    }
                 break;
             }
             case DAWNBLADE_BLOOD_KNIGHT_HOLY_LIGHT:
             {
-                if (m_creature->GetHealthPercent() > 30.f) // todo: search for nearby in-combat ally to cast on too
-                    break;
-
-                if (DoCastSpellIfCan(m_creature, SPELL_HOLY_LIGHT) == CAST_OK)
-                    SetActionReadyStatus(action, false);
+                if (Unit* target = DoSelectLowestHpFriendly(40.0f, 50.0, true, true))
+                    if (DoCastSpellIfCan(target, SPELL_HOLY_LIGHT) == CAST_OK)
+                        ResetCombatAction(action, urand(16000, 24000));
                 break;
             }
         }
