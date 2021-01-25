@@ -496,15 +496,24 @@ struct npc_ellris_duskhallowAI : public priestess_companion_commonAI
         AddCombatAction(ELLRIS_DEATH_COIL, 8000u);
         SetRangedMode(true, 20.f, TYPE_FULL_CASTER);
         AddMainSpell(m_isRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H);
+        JustReachedHome();
     }
 
-    void Reset() override
+    void JustReachedHome() override
     {
         priestess_companion_commonAI::Reset();
 
-        // Check if we already have an imp summoned
-        if (!GetClosestCreatureWithEntry(m_creature, NPC_FIZZLE, 50.0f))
+        // Check if the pet was killed
+        DespawnGuids(m_spawns);
+        //if (!GetClosestCreatureWithEntry(m_creature, NPC_FIZZLE, 50.0f, true)) // does not work due to spellsummoned
             DoCastSpellIfCan(nullptr, SPELL_SUMMON_IMP);
+    }
+
+    GuidVector m_spawns;
+
+    void JustSummoned(Creature* summoned) override
+    {
+        m_spawns.push_back(summoned->GetObjectGuid());
     }
 
     void ExecuteAction(uint32 action) override
@@ -833,14 +842,15 @@ struct npc_garaxxasAI : public priestess_companion_commonAI
         AddCombatAction(GARAXXAS_FREEZING_TRAP, 15000u);
         SetRangedMode(true, 20.0f, TYPE_PROXIMITY);
         AddDistanceSpell(SPELL_FREEZING_TRAP);
+        JustReachedHome();
     }
 
-    void Reset() override
+    void JustReachedHome() override
     {
         priestess_companion_commonAI::Reset();
 
         // Check if the pet was killed
-        if (!GetClosestCreatureWithEntry(m_creature, NPC_SLIVER, 50.0f))
+        if (!GetClosestCreatureWithEntry(m_creature, NPC_SLIVER, 50.0f, true))
             m_creature->SummonCreature(NPC_SLIVER, 0, 0, 0, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
     }
 
@@ -924,6 +934,18 @@ struct npc_apokoAI : public priestess_companion_commonAI
         AddCombatAction(APOKO_FROST_SHOCK, 2000, 3000);
     }
 
+    GuidVector m_spawns;
+
+    void JustReachedHome() override
+    {
+        DespawnGuids(m_spawns);
+    }
+
+    void JustSummoned(Creature* summoned) override
+    {
+        m_spawns.push_back(summoned->GetObjectGuid());
+    }
+
     void ExecuteAction(uint32 action) override
     {
         switch (action)
@@ -1003,8 +1025,16 @@ struct npc_zelfanAI : public priestess_companion_commonAI
         AddCombatAction(ZELFAN_FEL_IRON_BOMB, 11000, 30000);
     }
 
+    GuidVector m_spawns;
+
+    void JustReachedHome() override
+    {
+        DespawnGuids(m_spawns);
+    }
+
     void JustSummoned(Creature* summoned) override
     {
+        m_spawns.push_back(summoned->GetObjectGuid());
         summoned->AI()->DoCastSpellIfCan(nullptr, SPELL_SUICIDE_TIMER);
         if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_NEAREST_BY, 0, nullptr, SELECT_FLAG_PLAYER))
             summoned->AI()->AttackStart(target);
