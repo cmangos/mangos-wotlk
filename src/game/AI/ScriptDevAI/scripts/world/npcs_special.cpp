@@ -2387,7 +2387,7 @@ struct mob_phoenix_tkAI : public CombatAI
         SetReactState(REACT_PASSIVE);
         AddCustomAction(PHOENIX_EMBER_BLAST, true, [&]() { HandleEmberBlast(); });
         AddCustomAction(PHOENIX_REBIRTH, true, [&]() { HandleRebirth(); });
-        AddCustomAction(PHOENIX_ATTACK_DELAY, 2000u, [&]() { HandleAttackDelay(); });
+        AddCustomAction(PHOENIX_ATTACK_DELAY, 3000u, [&]() { HandleAttackDelay(); });
     }
 
     uint32 m_burnSpellId;
@@ -2503,8 +2503,6 @@ struct mob_phoenix_tkAI : public CombatAI
 
         DoRebirth();
     }
-
-    void ExecuteAction(uint32 action) override { }
 };
 
 void AddSC_npcs_special()

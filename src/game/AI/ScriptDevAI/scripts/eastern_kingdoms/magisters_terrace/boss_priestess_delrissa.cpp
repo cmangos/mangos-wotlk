@@ -145,7 +145,7 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
 {
     boss_priestess_delrissaAI(Creature* creature) : priestess_commonAI(creature, DELRISSA_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
-        AddCombatAction(DELRISSA_HEAL, 15000u);
+        AddCombatAction(DELRISSA_HEAL, 0u);
         AddCombatAction(DELRISSA_RENEW, 2000u);
         AddCombatAction(DELRISSA_SHIELD, 2000u);
         AddCombatAction(DELRISSA_SHADOW_WORD_PAIN, 2000u);
@@ -169,6 +169,8 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
         m_summonsKilled = 0;
 
         DoInitializeCompanions();
+
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
     }
 
     void JustReachedHome() override
@@ -257,6 +259,8 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
     void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
+
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
         if (m_instance)
             m_instance->SetData(TYPE_DELRISSA, DONE);
@@ -396,6 +400,7 @@ struct npc_kagani_nightstrikeAI : public priestess_companion_commonAI
         AddCombatAction(KAGANI_KIDNEY_SHOT, 1000u);
         AddCustomAction(KAGANI_VANISH_END, true, [&]()
         {
+            SetMeleeEnabled(true);
             SetCombatScriptStatus(false);
         });
     }
@@ -430,6 +435,7 @@ struct npc_kagani_nightstrikeAI : public priestess_companion_commonAI
                         DoResetThreat();
                         AttackStart(target);
                         SetCombatScriptStatus(true);
+                        SetMeleeEnabled(false);
                     }
 
                     ResetCombatAction(action, 300000);
@@ -845,6 +851,8 @@ struct npc_garaxxasAI : public priestess_companion_commonAI
         JustReachedHome();
     }
 
+    GuidVector m_traps;
+
     void JustReachedHome() override
     {
         priestess_companion_commonAI::Reset();
@@ -852,6 +860,17 @@ struct npc_garaxxasAI : public priestess_companion_commonAI
         // Check if the pet was killed
         if (!GetClosestCreatureWithEntry(m_creature, NPC_SLIVER, 50.0f, true))
             m_creature->SummonCreature(NPC_SLIVER, 0, 0, 0, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
+    }
+
+    void JustSummoned(GameObject* summoned) override
+    {
+        m_traps.push_back(summoned->GetObjectGuid());
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        priestess_companion_commonAI::JustDied(killer);
+        DespawnGuids(m_traps);
     }
 
     void ExecuteAction(uint32 action) override
@@ -902,7 +921,7 @@ enum
     SPELL_FROST_SHOCK_H         = 46180,
     SPELL_WINDFURY_TOTEM        = 27621,
     SPELL_FIRE_NOVA_TOTEM       = 44257,
-    SPELL_EARTHBIND_TOTEM       = 15786
+    SPELL_EARTHBIND_TOTEM       = 15786,
 };
 
 /*######

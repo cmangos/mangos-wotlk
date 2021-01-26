@@ -195,13 +195,7 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
             m_instance->SetData(TYPE_KAELTHAS, IN_PROGRESS);
     }
 
-    void JustReachedHome() override
-    {
-        if (m_instance)
-            m_instance->SetData(TYPE_KAELTHAS, FAIL);
-    }
-
-    void JustPreventedDeath(Unit* attacker) override
+    void JustPreventedDeath(Unit* /*attacker*/) override
     {
         m_creature->HandleEmote(EMOTE_STATE_TALK);
         DoFakeDeath();
@@ -224,6 +218,15 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
     {
         if (eventType == AI_EVENT_CUSTOM_A && bool(miscValue) && !m_outroStage) // Gravity Lapse end
             SetActionReadyStatus(KAEL_ACTION_ENERGY_FEEDBACK, true);
+    }
+
+    void EnterEvadeMode() override
+    {
+        if (m_instance)
+            m_instance->SetData(TYPE_KAELTHAS, FAIL);
+
+        m_creature->SetRespawnDelay(30, true);
+        m_creature->ForcedDespawn();
     }
 
     void HandleIntro()
@@ -268,6 +271,7 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
                 DespawnGuids(m_spawns);
                 SetCombatScriptStatus(true);
                 m_creature->SetTarget(nullptr);
+                SetMeleeEnabled(false);
                 DoScriptText(SAY_DEATH, m_creature);
                 timer = 1200;
                 break;
@@ -402,7 +406,7 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
             {
                 if (DoCastSpellIfCan(nullptr, SPELL_SHOCK_BARRIER) == CAST_OK)
                 {
-                    ResetCombatAction(KAEL_ACTION_PYROBLAST, 1000);
+                    ResetCombatAction(KAEL_ACTION_PYROBLAST, 2000);
                     ResetCombatAction(action, 60000);
                 }
                 return;
@@ -432,7 +436,7 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
             {
                 if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(target, m_isRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
-                        ResetCombatAction(action, urand(2000, 3000));
+                        ResetCombatAction(action, GetCurrentRangedMode() ? urand(2000, 3000) : urand(4000, 6000));
                 return;
             }
         }
