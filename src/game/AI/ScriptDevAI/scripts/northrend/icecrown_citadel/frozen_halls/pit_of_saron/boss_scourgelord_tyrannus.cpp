@@ -109,22 +109,17 @@ struct boss_tyrannusAI : public CombatAI
         {
             m_instance->SetData(TYPE_TYRANNUS, DONE);
 
+            if (Creature* pCreature = m_instance->GetSingleCreatureFromStorage(m_instance->GetPlayerTeam() == HORDE ? NPC_SYLVANAS_PART1 : NPC_JAINA_PART1))
+                pCreature->ForcedDespawn();
+
             // Move Rimefang out of the area
             if (Creature* pRimefang = m_instance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
             {
                 pRimefang->AI()->EnterEvadeMode();
                 pRimefang->SetWalk(false);
-                pRimefang->ForcedDespawn(25000);
+                pRimefang->ForcedDespawn(15000);
+                pRimefang->GetMotionMaster()->Clear(false, true);
                 pRimefang->GetMotionMaster()->MovePoint(0, afRimefangExitPos[0], afRimefangExitPos[1], afRimefangExitPos[2]);
-            }
-
-            // Move the general near the boss - ToDo: move the other freed slaves as well
-            if (Creature* pGeneral = m_instance->GetSingleCreatureFromStorage(m_instance->GetPlayerTeam() == HORDE ? NPC_IRONSKULL_PART2 : NPC_VICTUS_PART2))
-            {
-                float fX, fY, fZ;
-                pGeneral->SetWalk(false);
-                m_creature->GetContactPoint(pGeneral, fX, fY, fZ, INTERACTION_DISTANCE);
-                pGeneral->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
             }
         }
     }

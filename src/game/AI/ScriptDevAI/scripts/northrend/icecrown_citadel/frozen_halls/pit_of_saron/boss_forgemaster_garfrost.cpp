@@ -136,7 +136,7 @@ struct boss_forgemaster_garfrostAI : public CombatAI
         {
             m_instance->SetData(TYPE_GARFROST, DONE);
 
-            // despawn the spawn at the entrance first
+            // despawn the spawn at the entrance
             if (Creature* pCreature = m_instance->GetSingleCreatureFromStorage(m_instance->GetPlayerTeam() == HORDE ? NPC_IRONSKULL_PART1 : NPC_VICTUS_PART1))
                 pCreature->ForcedDespawn();
 

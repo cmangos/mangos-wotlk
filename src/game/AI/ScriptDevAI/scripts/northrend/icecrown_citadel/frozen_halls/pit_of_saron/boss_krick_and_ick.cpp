@@ -131,6 +131,14 @@ struct boss_ickAI : public CombatAI
         {
             m_instance->SetData(TYPE_KRICK, DONE);
 
+            // despawn the spawn at the entrance first
+            if (Creature* pCreature = m_instance->GetSingleCreatureFromStorage(m_instance->GetPlayerTeam() == HORDE ? NPC_SYLVANAS_PART1 : NPC_JAINA_PART1))
+                pCreature->ForcedDespawn();
+            if (Creature* pCreature = m_instance->GetSingleCreatureFromStorage(m_instance->GetPlayerTeam() == HORDE ? NPC_KILARA : NPC_ELANDRA))
+                pCreature->ForcedDespawn();
+            if (Creature* pCreature = m_instance->GetSingleCreatureFromStorage(m_instance->GetPlayerTeam() == HORDE ? NPC_LORALEN : NPC_KORELN))
+                pCreature->ForcedDespawn();
+
             // summon Jaina / Sylvanas
             if (Creature* pCreature = m_creature->SummonCreature(m_instance->GetPlayerTeam() == HORDE ? aKrickSummonData[0].uiEntryHorde : aKrickSummonData[0].uiEntryAlliance,
                 aKrickSummonData[0].fX, aKrickSummonData[0].fY, aKrickSummonData[0].fZ, aKrickSummonData[0].fO, TEMPSPAWN_TIMED_DESPAWN, 10 * MINUTE * IN_MILLISECONDS))

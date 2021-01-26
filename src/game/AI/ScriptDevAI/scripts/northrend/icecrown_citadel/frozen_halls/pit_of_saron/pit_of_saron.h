@@ -110,8 +110,6 @@ struct EventNpcLocations
     uint32 uiEntryHorde, uiEntryAlliance;
     float fX, fY, fZ, fO;
     uint8 pathId;
-    // Temp: move this to DB movement
-    float fMoveX, fMoveY, fMoveZ;
 };
 
 const EventNpcLocations aEventBeginLocations[19] =
@@ -186,12 +184,6 @@ const EventNpcLocations aEventTunnelEndLocations[] =
     {NPC_FREE_HORDE_SLAVE_3, NPC_FREE_ALLIANCE_SLAVE_3, 1075.8976f, 40.331596f, 629.86383f, 1.93731f, 7},
 };
 
-const EventNpcLocations aEventOutroLocations[] =
-{
-    {NPC_SINDRAGOSA, 0, 842.8611f, 194.5556f, 531.6536f, 6.108f, 0, 900.106f, 181.677f, 659.374f},
-    {NPC_SYLVANAS_PART2, NPC_JAINA_PART2, 1062.85f, 100.075f, 631.0021f, 1.77f, 0, 1062.85f, 100.075f, 631.0021f},
-};
-
 class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
 {
     public:
@@ -244,7 +236,6 @@ class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
         GuidList m_lArcaneShieldBunniesGuidList;
         GuidList m_lFrozenAftermathBunniesGuidList;
         GuidList m_lSaroniteRockGuidList;
-        GuidList m_lIntroCreaturesGuidList;
         GuidList m_lEndingCreaturesGuidList;
 };
 

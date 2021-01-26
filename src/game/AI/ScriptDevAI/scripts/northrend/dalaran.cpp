@@ -114,4 +114,6 @@ void AddSC_dalaran()
     pNewScript->Name = "npc_dalaran_guardian_mage";
     pNewScript->GetAI = &GetNewAIInstance<npc_dalaran_guardian_mageAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_teleporting_dalaran>("spell_teleporting_dalaran");
 }

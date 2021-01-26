@@ -37,17 +37,12 @@ enum
 
     // Tyrannus intro
     SAY_PREFIGHT_1                  = -1658050,
-    SAY_VICTUS_TRASH                = -1658051,
-    SAY_IRONSKULL_TRASH             = -1658068,
     SAY_PREFIGHT_2                  = -1658052,
 
     SPELL_EJECT_ALL_PASSENGERS      = 50630,
     // SPELL_CSA_DUMMY_EFFECT_1     = 56685,                // What is this?
 
     // Sindragosa outro
-    SAY_VICTUS_OUTRO_1              = -1658061,
-    SAY_IRONSKULL_OUTRO_2           = -1658069,
-    SAY_GENERAL_OUTRO_2             = -1658062,
     SAY_JAINA_OUTRO_1               = -1658063,
     SAY_SYLVANAS_OUTRO_1            = -1658064,
     SAY_JAINA_OUTRO_2               = -1658065,
@@ -67,15 +62,12 @@ enum
 static const DialogueEntryTwoSide aPoSDialogues[] =
 {
     // Tyrannus intro
-    {SAY_PREFIGHT_1,       NPC_TYRANNUS,       0,                    0,                  13000},
-    {SAY_VICTUS_TRASH,     NPC_VICTUS_PART2,   SAY_IRONSKULL_TRASH,  NPC_IRONSKULL_PART2, 9000},
+    {SAY_PREFIGHT_1,       NPC_TYRANNUS,       0,                    0,                  22000},
     {SAY_PREFIGHT_2,       NPC_TYRANNUS,       0,                    0,                  10000},
     {NPC_RIMEFANG,         0,                  0,                    0,                  0},
 
     // Tyrannus outro
-    {NPC_SINDRAGOSA,       0,                  0,                    0,                  30000},
-    {SAY_VICTUS_OUTRO_1,   NPC_VICTUS_PART2,   SAY_IRONSKULL_OUTRO_2, NPC_IRONSKULL_PART2, 17000},
-    {SAY_GENERAL_OUTRO_2,  NPC_VICTUS_PART2,   SAY_GENERAL_OUTRO_2,  NPC_IRONSKULL_PART2, 14000},
+    {NPC_SINDRAGOSA,       0,                  0,                    0,                   60000},
     {SAY_JAINA_OUTRO_1,    NPC_JAINA_PART2,    SAY_SYLVANAS_OUTRO_1, NPC_SYLVANAS_PART2,  1000},
     {SPELL_FROST_BOMB,     0,                  0,                    0,                   7000},
     {NPC_JAINA_PART2,      0,                  0,                    0,                   8000},
@@ -229,12 +221,6 @@ void instance_pit_of_saron::SetData(uint32 uiType, uint32 uiData)
         case TYPE_KRICK:
             if (uiData == DONE && m_auiEncounter[TYPE_GARFROST] == DONE)
                 DoUseDoorOrButton(GO_ICEWALL);
-            if (uiData == DONE)
-            {
-                for (const auto guid : m_lIntroCreaturesGuidList)
-                    if (Creature* creature = instance->GetCreature(guid))
-                        creature->ForcedDespawn();
-            }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_TYRANNUS:
@@ -247,7 +233,11 @@ void instance_pit_of_saron::SetData(uint32 uiType, uint32 uiData)
                         creature->GetMotionMaster()->UnpauseWaypoints();
             }
             else if (uiData == SPECIAL)
+            {
+                // start event and do not save value
                 DoStartTyrannusEvent();
+                return;
+            }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_AMBUSH:
@@ -384,6 +374,9 @@ void instance_pit_of_saron::OnCreatureDeath(Creature* pCreature)
                 }
             }
             break;
+        case NPC_CORRUPTED_CHAMPION:
+            pCreature->ForcedDespawn();
+            break;
     }
 }
 
@@ -411,39 +404,21 @@ void instance_pit_of_saron::JustDidDialogueStep(int32 iEntry)
 {
     switch (iEntry)
     {
+        // Eject Tyrannus and prepare for combat
         case NPC_RIMEFANG:
-            // Eject Tyrannus and prepare for combat
             if (Creature* pRimefang = GetSingleCreatureFromStorage(NPC_RIMEFANG))
             {
                 pRimefang->CastSpell(pRimefang, SPELL_EJECT_ALL_PASSENGERS, TRIGGERED_OLD_TRIGGERED);
                 pRimefang->SetWalk(false);
-                pRimefang->GetMotionMaster()->MovePoint(0, afTyrannusMovePos[1][0], afTyrannusMovePos[1][1], afTyrannusMovePos[1][2]);
+                pRimefang->GetMotionMaster()->Clear(false, true);
+                pRimefang->GetMotionMaster()->MoveWaypoint();
             }
             if (Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS))
+            {
                 pTyrannus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-            break;
-        case SAY_VICTUS_OUTRO_1:
-        {
-            Player* pPlayer = GetPlayerInMap();
-            if (!pPlayer)
-                return;
-
-            // Spawn Sindragosa
-            if (Creature* pSummon = pPlayer->SummonCreature(aEventOutroLocations[0].uiEntryHorde, aEventOutroLocations[0].fX, aEventOutroLocations[0].fY,
-                                    aEventOutroLocations[0].fZ, aEventOutroLocations[0].fO, TEMPSPAWN_TIMED_DESPAWN, 2 * MINUTE * IN_MILLISECONDS))
-            {
-                pSummon->SetWalk(false);
-                pSummon->GetMotionMaster()->MovePoint(0, aEventOutroLocations[0].fMoveX, aEventOutroLocations[0].fMoveY, aEventOutroLocations[0].fMoveZ);
-            }
-            // Spawn Jaina or Sylvanas
-            if (Creature* pSummon = pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventOutroLocations[1].uiEntryHorde : aEventOutroLocations[1].uiEntryAlliance,
-                                    aEventOutroLocations[1].fX, aEventOutroLocations[1].fY, aEventOutroLocations[1].fZ, aEventOutroLocations[1].fO, TEMPSPAWN_TIMED_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
-            {
-                pSummon->SetWalk(false);
-                pSummon->GetMotionMaster()->MovePoint(0, aEventOutroLocations[1].fMoveX, aEventOutroLocations[1].fMoveY, aEventOutroLocations[1].fMoveZ);
+                pTyrannus->GetMotionMaster()->MoveFall();
             }
             break;
-        }
         case SAY_JAINA_OUTRO_1:
             // Visual effect
             for (GuidList::const_iterator itr = m_lArcaneShieldBunniesGuidList.begin(); itr != m_lArcaneShieldBunniesGuidList.end(); ++itr)
@@ -459,9 +434,6 @@ void instance_pit_of_saron::JustDidDialogueStep(int32 iEntry)
             }
             break;
         case SPELL_FROST_BOMB:
-            // Frost bomb on the platform
-            if (Creature* pSindragosa = GetSingleCreatureFromStorage(NPC_SINDRAGOSA))
-                pSindragosa->CastSpell(pSindragosa, SPELL_FROST_BOMB, TRIGGERED_OLD_TRIGGERED);
             // Visual effect
             for (GuidList::const_iterator itr = m_lFrozenAftermathBunniesGuidList.begin(); itr != m_lFrozenAftermathBunniesGuidList.end(); ++itr)
             {
@@ -476,9 +448,6 @@ void instance_pit_of_saron::JustDidDialogueStep(int32 iEntry)
                 if (Creature* pBunny = instance->GetCreature(*itr))
                     pBunny->RemoveAurasDueToSpell(SPELL_ARCANE_FORM);
             }
-            // Sindragosa exit
-            if (Creature* pSindragosa = GetSingleCreatureFromStorage(NPC_SINDRAGOSA))
-                pSindragosa->GetMotionMaster()->MovePoint(0, 759.148f, 199.955f, 720.857f);
             // Jaina / Sylvanas starts moving (should use wp)
             if (Creature* pTemp = GetSingleCreatureFromStorage(m_uiTeam == HORDE ? NPC_SYLVANAS_PART2 : NPC_JAINA_PART2))
             {
@@ -514,8 +483,6 @@ void instance_pit_of_saron::DoStartIntroEvent()
         {
             pSummon->SetWalk(false);
             pSummon->GetMotionMaster()->MoveWaypoint(aEventBeginLocation.pathId);
-
-            m_lIntroCreaturesGuidList.push_back(pSummon->GetObjectGuid());
         }
     }
 }
@@ -554,7 +521,7 @@ void instance_pit_of_saron::DoStartTyrannusEvent()
         return;
     }
 
-    // Handle dialogue
+    // Handle dialogue and prepare for fight
     StartNextDialogueText(SAY_PREFIGHT_1);
 
     // Spawn Mobs
@@ -592,7 +559,7 @@ void instance_pit_of_saron::Update(uint32 uiDiff)
         {
             for (const auto guid : m_lTunnelStalkersGuidList)
             {
-                // Only 25% of the stalkers will actually spawn an icicle
+                // Only 50% of the stalkers will actually spawn an icicle
                 if (roll_chance_i(50))
                     continue;
 
