@@ -64,6 +64,7 @@ struct npc_converted_sentryAI : public ScriptedAI
 
                 DoCastSpellIfCan(m_creature, SPELL_CONVERT_CREDIT);
                 ((Pet*)m_creature)->SetDuration(TIME_PET_DURATION);
+                ((Pet*)m_creature)->GetMotionMaster()->MoveRandomAroundPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 15.0f);
                 m_uiCreditTimer = 0;
             }
             else
