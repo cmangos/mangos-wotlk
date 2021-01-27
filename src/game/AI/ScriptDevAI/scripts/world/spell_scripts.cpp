@@ -1153,51 +1153,11 @@ struct CurseOfPain : public AuraScript
     }
 };
 
-enum
+enum SeedOfCorruptionNpc
 {
-    SPELL_SEED_DAMAGE = 27285,
-};
-
-struct SeedOfCorruption : public AuraScript
-{
-    void OnApply(Aura* aura, bool apply) const override
-    {
-        if (apply)
-            return;
-        if (aura->GetEffIndex() != EFFECT_INDEX_1)
-        {
-            RemoveShadowEmbraceIfNecessary(aura);
-            return;
-        }
-        if (aura->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
-            if (Unit* caster = aura->GetCaster())
-                caster->CastSpell(aura->GetTarget(), SPELL_SEED_DAMAGE, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
-    }
-
-    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
-    {
-        if (aura->GetEffIndex() != EFFECT_INDEX_1)
-            return SPELL_AURA_PROC_OK;
-        Modifier* mod = procData.triggeredByAura->GetModifier();
-        // if damage is more than need
-        if (mod->m_amount <= (int32)procData.damage)
-        {
-            // remember guid before aura delete
-            ObjectGuid casterGuid = procData.triggeredByAura->GetCasterGuid();
-
-            // Remove aura (before cast for prevent infinite loop handlers)
-            procData.victim->RemoveAurasByCasterSpell(procData.triggeredByAura->GetId(), procData.triggeredByAura->GetCasterGuid());
-
-            // Cast finish spell (triggeredByAura already not exist!)
-            if (Unit* caster = procData.triggeredByAura->GetCaster())
-                caster->CastSpell(procData.victim, SPELL_SEED_DAMAGE, TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
-            return SPELL_AURA_PROC_OK;              // no hidden cooldown
-        }
-
-        // Damage counting
-        mod->m_amount -= procData.damage;
-        return SPELL_AURA_PROC_OK;
-    }
+    SPELL_SEED_OF_CORRUPTION_PROC_DEFAULT   = 32865,
+    SPELL_SEED_OF_CORRUPTION_NPC_24558      = 44141,
+    SPELL_SEED_OF_CORRUPTION_PROC_NPC_24558 = 43991,
 };
 
 struct spell_seed_of_corruption_npc : public AuraScript
@@ -1219,8 +1179,15 @@ struct spell_seed_of_corruption_npc : public AuraScript
             procData.victim->RemoveAurasByCasterSpell(procData.triggeredByAura->GetId(), procData.triggeredByAura->GetCasterGuid());
 
             // Cast finish spell (triggeredByAura already not exist!)
-            if (Unit* caster = procData.triggeredByAura->GetCaster()) // TODO: check if 44141 should use 43991
-                caster->CastCustomSpell(procData.victim, 32865, &basePoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+            uint32 triggered_spell_id = 0;
+            switch (aura->GetSpellProto()->Id)
+            {
+                case SPELL_SEED_OF_CORRUPTION_NPC_24558: triggered_spell_id = SPELL_SEED_OF_CORRUPTION_PROC_NPC_24558; break;
+                default: triggered_spell_id = SPELL_SEED_OF_CORRUPTION_PROC_DEFAULT; break;
+            }
+            if (Unit* caster = procData.triggeredByAura->GetCaster())
+                caster->CastCustomSpell(procData.victim, triggered_spell_id, &basePoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+
             return SPELL_AURA_PROC_OK;              // no hidden cooldown
         }
 
