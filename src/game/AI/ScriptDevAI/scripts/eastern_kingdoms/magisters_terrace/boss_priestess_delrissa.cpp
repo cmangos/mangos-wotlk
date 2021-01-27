@@ -108,7 +108,7 @@ struct priestess_commonAI : public RangedCombatAI
                 std::vector<Unit*> units;
                 DoResetThreat();
                 for (auto& data : m_creature->getThreatManager().getThreatList())
-                    if (data->isValid())
+                    if (data->isValid() && !(data->getTarget()->IsCreature() && static_cast<Creature*>(data->getTarget())->IsTotem()))
                         units.push_back(data->getTarget());
                 std::shuffle(units.begin(), units.end(), *GetRandomGenerator());
                 uint32 i = 0;
