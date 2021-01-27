@@ -251,6 +251,7 @@ enum
     SPELL_HOLY_LIGHT            = 13952,
 
     AREA_ID_DAWNSTAR_VILLAGE    = 4089,
+    FACTION_SPARRING_DAWNBLADE  = 1965,
 };
 
 enum DawnbladeBloodKnightActions
@@ -350,15 +351,16 @@ struct npc_dawnblade_blood_knight : public CombatAI
         {
             SetReactState(REACT_AGGRESSIVE);
             if (Creature* partner = m_creature->GetMap()->GetCreature(m_sparringPartner))
-                m_creature->AttackStop();
+                m_creature->StopAttackFaction(FACTION_SPARRING_DAWNBLADE);
         }
     }
 
     void StartDuel()
     {
-
         if (Creature* partner = m_creature->GetMap()->GetCreature(m_sparringPartner))
         {
+            m_creature->SetFactionTemporary(FACTION_SPARRING_DAWNBLADE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
+            partner->SetFactionTemporary(FACTION_SPARRING_DAWNBLADE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
             SendAIEvent(AI_EVENT_CUSTOM_A, partner, m_creature);
             SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, partner);
         }
@@ -368,7 +370,11 @@ struct npc_dawnblade_blood_knight : public CombatAI
     {
         SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, m_creature);
         if (Creature* partner = m_creature->GetMap()->GetCreature(m_sparringPartner))
+        {
             SendAIEvent(AI_EVENT_CUSTOM_B, m_creature, partner);
+            m_creature->RestoreOriginalFaction();
+            partner->RestoreOriginalFaction();
+        }
     }
 
     void JustReachedHome() override
