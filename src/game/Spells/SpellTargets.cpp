@@ -582,6 +582,10 @@ float SpellTargetMgr::GetJumpRadius(uint32 spellId)
         case 40860:
         case 40861:
             return 25.f;
+        case 44537: // Fel Lightning - MgT / SWP
+        case 46048:
+        case 46480:
+            return 50.f;
     }
     return CHAIN_SPELL_JUMP_RADIUS;
 }
