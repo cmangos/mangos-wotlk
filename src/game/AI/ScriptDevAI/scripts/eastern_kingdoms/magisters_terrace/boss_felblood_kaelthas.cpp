@@ -224,6 +224,8 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
 
     void EnterEvadeMode() override
     {
+        DespawnGuids(m_spawns);
+
         if (m_instance)
             m_instance->SetData(TYPE_KAELTHAS, FAIL);
 
