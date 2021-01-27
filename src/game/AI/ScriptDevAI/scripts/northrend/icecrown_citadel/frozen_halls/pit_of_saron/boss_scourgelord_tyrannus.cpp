@@ -55,6 +55,13 @@ enum
 
 static const float afRimefangExitPos[3] = {1248.29f, 145.924f, 733.914f};
 
+static const EventNpcLocations aTyrannusSummonData[3]
+{
+    {NPC_SYLVANAS_PART2, NPC_JAINA_PART2, 1067.533f, 76.9548f, 630.9941f, 1.81514f, 0},
+    {NPC_KILARA,         NPC_ELANDRA,     1055.76f,  99.3194f, 629.8393f, 1.91492f, 2},
+    {NPC_LORALEN,        NPC_KORELN,      1070.483f, 81.9439f, 631.0628f, 1.71055f, 3},
+};
+
 /*######
 ## boss_tyrannus
 ######*/
@@ -88,9 +95,13 @@ struct boss_tyrannusAI : public CombatAI
         {
             m_instance->SetData(TYPE_TYRANNUS, IN_PROGRESS);
 
-            // Set Rimefang in combat - ToDo: research if it has some wp movement during combat
+            // Set Rimefang in combat
             if (Creature* pRimefang = m_instance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
+            {
                 pRimefang->AI()->AttackStart(who);
+                pRimefang->GetMotionMaster()->Clear(false, true);
+                pRimefang->GetMotionMaster()->MoveWaypoint();
+            }
         }
     }
 
@@ -109,8 +120,17 @@ struct boss_tyrannusAI : public CombatAI
         {
             m_instance->SetData(TYPE_TYRANNUS, DONE);
 
+            // despawn previous Jaina / Sylvanas
             if (Creature* pCreature = m_instance->GetSingleCreatureFromStorage(m_instance->GetPlayerTeam() == HORDE ? NPC_SYLVANAS_PART1 : NPC_JAINA_PART1))
                 pCreature->ForcedDespawn();
+
+            // spawn new Jaina / Sylvanas and helpers
+            for (uint8 i = 0; i < 3; ++i)
+            {
+                if (Creature* pCreature = m_creature->SummonCreature(m_instance->GetPlayerTeam() == HORDE ? aTyrannusSummonData[i].uiEntryHorde : aTyrannusSummonData[i].uiEntryAlliance,
+                    aTyrannusSummonData[i].fX, aTyrannusSummonData[i].fY, aTyrannusSummonData[i].fZ, aTyrannusSummonData[i].fO, TEMPSPAWN_TIMED_DESPAWN, 60 * MINUTE * IN_MILLISECONDS))
+                    pCreature->GetMotionMaster()->MoveWaypoint(aTyrannusSummonData[i].pathId);
+            }
 
             // Move Rimefang out of the area
             if (Creature* pRimefang = m_instance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
@@ -206,6 +226,15 @@ struct boss_rimefang_posAI : public CombatAI
         CombatAI::AttackStart(who);
     }
 
+    void AttackedBy(Unit* enemy) override
+    {
+        // Don't attack unless Tyrannus is in combat or Ambush is completed
+        if (m_instance && (m_instance->GetData(TYPE_AMBUSH) != DONE || m_instance->GetData(TYPE_TYRANNUS) != IN_PROGRESS))
+            return;
+
+        CombatAI::AttackedBy(enemy);
+    }
+
     void MoveInLineOfSight(Unit* who) override
     {
         if (!m_instance || !who->IsPlayer())
@@ -283,11 +312,13 @@ struct spell_icy_blast : public SpellScript
             return;
 
         Unit* caster = spell->GetAffectiveCaster();
-        Unit* target = spell->GetUnitTarget();
-        if (!target || !caster)
+        if (!caster)
             return;
 
-        caster->SummonCreature(NPC_ICY_BLAST, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), target->GetOrientation(), TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
+        float fX, fY, fZ;
+        spell->m_targets.getDestination(fX, fY, fZ);
+
+        caster->SummonCreature(NPC_ICY_BLAST, fX, fY, fZ, 0, TEMPSPAWN_CORPSE_TIMED_DESPAWN, 30000);
     }
 };
 

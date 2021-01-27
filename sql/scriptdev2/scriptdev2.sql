@@ -7350,15 +7350,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1658057','Rimefang, destroy this fool!','16764','1','0','0','0','tyrannus SAY_MARK'),
 ('-1658058','Power... overwhelming!','16765','1','0','0','0','tyrannus SAY_SMASH'),
 ('-1658059','The frostwyrm %s gazes at $N and readies an icy attack!','0','3','0','0','0','rimefang EMOTE_RIMEFANG_ICEBOLT'),
-('-1658060','%s roars and swells with dark might!','0','3','0','0','0','tyrannus EMOTE_SMASH'),
-
-('-1658061','REUSE ME','0','0','0','0','0','REUSE ME'),
-('-1658062','REUSE ME','0','0','0','0','0','REUSE ME'),
-('-1658063','Heroes, to me!','16614','0','0','5','0','jaina SAY_JAINA_OUTRO_1'),
-('-1658064','Take cover behind me! Quickly!','17037','0','0','5','0','sylvanas SAY_SYLVANAS_OUTRO_1'),
-('-1658065','The Frost Queen is gone. We must keep moving - our objective is near.','16615','0','0','0','0','jaina SAY_JAINA_OUTRO_2'),
-('-1658066','I... I could not save them... Damn you, Arthas! DAMN YOU!','16616','0','0','0','0','jaina SAY_JAINA_OUTRO_3'),
-('-1658067','I thought he''d never shut up. At last, Sindragosa silenced that long-winded fool. To the Halls of Reflection, champions! Our objective is near... I can sense it.','17036','0','0','396','0','sylvanas SAY_SYLVANAS_OUTRO_2');
+('-1658060','%s roars and swells with dark might!','0','3','0','0','0','tyrannus EMOTE_SMASH');
 
 -- -1 668 000 ICC: HALLS OF REFLECTION
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

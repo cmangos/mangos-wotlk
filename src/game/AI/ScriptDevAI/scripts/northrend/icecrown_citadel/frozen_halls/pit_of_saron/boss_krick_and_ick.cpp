@@ -249,7 +249,8 @@ struct boss_krickAI : public CombatAI
     {
         CombatAI::KilledUnit(victim);
 
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
+        if (victim != m_creature)
+            DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
     void JustDied(Unit* killer) override

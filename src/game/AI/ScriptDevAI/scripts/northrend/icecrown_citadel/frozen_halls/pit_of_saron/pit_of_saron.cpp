@@ -41,38 +41,14 @@ enum
 
     SPELL_EJECT_ALL_PASSENGERS      = 50630,
     // SPELL_CSA_DUMMY_EFFECT_1     = 56685,                // What is this?
-
-    // Sindragosa outro
-    SAY_JAINA_OUTRO_1               = -1658063,
-    SAY_SYLVANAS_OUTRO_1            = -1658064,
-    SAY_JAINA_OUTRO_2               = -1658065,
-    SAY_JAINA_OUTRO_3               = -1658066,
-    SAY_SYLVANAS_OUTRO_2            = -1658067,
-
-    SPELL_FROST_BOMB                = 70521,
-    SPELL_FROZEN_AFTERMATH          = 70518,
-    SPELL_ARCANE_FORM               = 70573,
-    SPELL_CALL_OF_SYLVANAS_1        = 70636,                // triggers 70639
-    SPELL_CALL_OF_SYLVANAS_2        = 70638,
-    // SPELL_CALL_OF_SYLVANAS_3     = 70642,
-    SPELL_JAINAS_CALL_1             = 70527,                // triggers 70525
-    SPELL_JAINAS_CALL_2             = 70623,
 };
 
-static const DialogueEntryTwoSide aPoSDialogues[] =
+static const DialogueEntry aPoSDialogues[] =
 {
-    // Tyrannus intro
-    {SAY_PREFIGHT_1,       NPC_TYRANNUS,       0,                    0,                  22000},
-    {SAY_PREFIGHT_2,       NPC_TYRANNUS,       0,                    0,                  10000},
-    {NPC_RIMEFANG,         0,                  0,                    0,                  0},
-
-    // Tyrannus outro
-    {NPC_SINDRAGOSA,       0,                  0,                    0,                   60000},
-    {SAY_JAINA_OUTRO_1,    NPC_JAINA_PART2,    SAY_SYLVANAS_OUTRO_1, NPC_SYLVANAS_PART2,  1000},
-    {SPELL_FROST_BOMB,     0,                  0,                    0,                   7000},
-    {NPC_JAINA_PART2,      0,                  0,                    0,                   8000},
-    {SAY_JAINA_OUTRO_2,    NPC_JAINA_PART2,    SAY_SYLVANAS_OUTRO_2, NPC_SYLVANAS_PART2,  15000},
-    {SAY_JAINA_OUTRO_3,    NPC_JAINA_PART2,    0,                    0,                   0},
+    // Tyrannus fight intro
+    {SAY_PREFIGHT_1,    NPC_TYRANNUS,   22000},
+    {SAY_PREFIGHT_2,    NPC_TYRANNUS,   10000},
+    {NPC_RIMEFANG,      0,              0},
     {0, 0, 0},
 };
 
@@ -100,7 +76,6 @@ void instance_pit_of_saron::OnPlayerEnter(Player* pPlayer)
     if (!m_uiTeam)                                          // very first player to enter
     {
         m_uiTeam = pPlayer->GetTeam();
-        SetDialogueSide(m_uiTeam == ALLIANCE);
 
         if (GetData(TYPE_AMBUSH) == NOT_STARTED)
             m_uiEyeLichKingTimer = 5000;
@@ -121,22 +96,25 @@ void instance_pit_of_saron::OnCreatureCreate(Creature* pCreature)
     switch (pCreature->GetEntry())
     {
         case NPC_TYRANNUS_INTRO:
-        case NPC_JAINA_PART1:
-        case NPC_SYLVANAS_PART1:
         case NPC_GARFROST:
-        case NPC_KRICK:
         case NPC_ICK:
-        case NPC_TYRANNUS:
         case NPC_RIMEFANG:
         case NPC_IRONSKULL_PART1:
         case NPC_VICTUS_PART1:
-        case NPC_IRONSKULL_PART2:
-        case NPC_VICTUS_PART2:
-        case NPC_JAINA_PART2:
-        case NPC_SYLVANAS_PART2:
-        case NPC_SINDRAGOSA:
         case NPC_EYE_LICH_KING:
+        case NPC_KRICK:
+        case NPC_JAINA_PART1:
+        case NPC_SYLVANAS_PART1:
+        case NPC_KILARA:
+        case NPC_ELANDRA:
+        case NPC_LORALEN:
+        case NPC_KORELN:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+        case NPC_TYRANNUS:
+            // store only the final version of Tyrannus
+            if (pCreature->GetPositionZ() > 600.0f)
+                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_STALKER:
             m_lTunnelStalkersGuidList.push_back(pCreature->GetObjectGuid());
@@ -226,18 +204,12 @@ void instance_pit_of_saron::SetData(uint32 uiType, uint32 uiData)
         case TYPE_TYRANNUS:
             if (uiData == DONE)
             {
-                StartNextDialogueText(NPC_SINDRAGOSA);
-
                 for (const auto guid : m_lEndingCreaturesGuidList)
                     if (Creature* creature = instance->GetCreature(guid))
                         creature->GetMotionMaster()->UnpauseWaypoints();
             }
             else if (uiData == SPECIAL)
-            {
-                // start event and do not save value
                 DoStartTyrannusEvent();
-                return;
-            }
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_AMBUSH:
@@ -375,7 +347,13 @@ void instance_pit_of_saron::OnCreatureDeath(Creature* pCreature)
             }
             break;
         case NPC_CORRUPTED_CHAMPION:
-            pCreature->ForcedDespawn();
+        case NPC_CHAMPION_1_HORDE:
+        case NPC_CHAMPION_2_HORDE:
+        case NPC_CHAMPION_3_HORDE:
+        case NPC_CHAMPION_1_ALLIANCE:
+        case NPC_CHAMPION_2_ALLIANCE:
+        case NPC_CHAMPION_3_ALLIANCE:
+            pCreature->ForcedDespawn(30000);
             break;
     }
 }
@@ -418,49 +396,6 @@ void instance_pit_of_saron::JustDidDialogueStep(int32 iEntry)
                 pTyrannus->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                 pTyrannus->GetMotionMaster()->MoveFall();
             }
-            break;
-        case SAY_JAINA_OUTRO_1:
-            // Visual effect
-            for (GuidList::const_iterator itr = m_lArcaneShieldBunniesGuidList.begin(); itr != m_lArcaneShieldBunniesGuidList.end(); ++itr)
-            {
-                if (Creature* pBunny = instance->GetCreature(*itr))
-                    pBunny->CastSpell(pBunny, SPELL_ARCANE_FORM, TRIGGERED_OLD_TRIGGERED);
-            }
-            // Teleport players
-            if (Creature* pTemp = GetSingleCreatureFromStorage(m_uiTeam == HORDE ? NPC_SYLVANAS_PART2 : NPC_JAINA_PART2))
-            {
-                pTemp->CastSpell(pTemp, m_uiTeam == HORDE ? SPELL_CALL_OF_SYLVANAS_2 : SPELL_JAINAS_CALL_2, TRIGGERED_OLD_TRIGGERED);
-                pTemp->CastSpell(pTemp, m_uiTeam == HORDE ? SPELL_CALL_OF_SYLVANAS_2 : SPELL_JAINAS_CALL_2, TRIGGERED_OLD_TRIGGERED);
-            }
-            break;
-        case SPELL_FROST_BOMB:
-            // Visual effect
-            for (GuidList::const_iterator itr = m_lFrozenAftermathBunniesGuidList.begin(); itr != m_lFrozenAftermathBunniesGuidList.end(); ++itr)
-            {
-                if (Creature* pBunny = instance->GetCreature(*itr))
-                    pBunny->CastSpell(pBunny, SPELL_FROZEN_AFTERMATH, TRIGGERED_OLD_TRIGGERED);
-            }
-            break;
-        case NPC_JAINA_PART2:
-            // Visual effect remove
-            for (GuidList::const_iterator itr = m_lArcaneShieldBunniesGuidList.begin(); itr != m_lArcaneShieldBunniesGuidList.end(); ++itr)
-            {
-                if (Creature* pBunny = instance->GetCreature(*itr))
-                    pBunny->RemoveAurasDueToSpell(SPELL_ARCANE_FORM);
-            }
-            // Jaina / Sylvanas starts moving (should use wp)
-            if (Creature* pTemp = GetSingleCreatureFromStorage(m_uiTeam == HORDE ? NPC_SYLVANAS_PART2 : NPC_JAINA_PART2))
-            {
-                pTemp->SetWalk(true);
-                pTemp->GetMotionMaster()->MovePoint(0, 1057.76f, 111.927f, 628.4123f);
-            }
-            break;
-        case SAY_JAINA_OUTRO_2:
-            if (Creature* pTemp = GetSingleCreatureFromStorage(m_uiTeam == HORDE ? NPC_SYLVANAS_PART2 : NPC_JAINA_PART2))
-                pTemp->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-
-            // ToDo: Jaina / Sylvanas should have some waypoint movement here and the door should be opened only when they get in front of it.
-            DoUseDoorOrButton(GO_HALLS_OF_REFLECT_PORT);
             break;
     }
 }

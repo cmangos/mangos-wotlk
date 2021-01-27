@@ -249,6 +249,46 @@ struct spell_summon_undead : public SpellScript
     }
 };
 
+/*######
+## spell_jainas_call - 70527
+######*/
+
+struct spell_jainas_call : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!caster || !target->IsPlayer())
+            return;
+
+        caster->CastSpell(target, 70525, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_call_of_sylvanas - 70636
+######*/
+
+struct spell_call_of_sylvanas : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!caster || !target->IsPlayer())
+            return;
+
+        caster->CastSpell(target, 70639, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_pit_of_saron()
 {
     Script* pNewScript = new Script;
@@ -266,4 +306,6 @@ void AddSC_pit_of_saron()
     RegisterAuraScript<spell_feigh_death_pos_aura>("spell_feigh_death_pos_aura");
     RegisterSpellScript<spell_slave_trigger_closest>("spell_slave_trigger_closest");
     RegisterSpellScript<spell_summon_undead>("spell_summon_undead");
+    RegisterSpellScript<spell_jainas_call>("spell_jainas_call");
+    RegisterSpellScript<spell_call_of_sylvanas>("spell_call_of_sylvanas");
 }
