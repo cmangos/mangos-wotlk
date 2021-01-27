@@ -501,7 +501,7 @@ struct npc_ellrys_duskhallowAI : public priestess_companion_commonAI
         AddCombatAction(ELLRYS_CURSE_OF_AGONY, 1000, 12000);
         AddCombatAction(ELLRYS_FEAR, 8000, 23000);
         AddCombatAction(ELLRYS_DEATH_COIL, 8000, 16000);
-        SetRangedMode(true, 25.f, TYPE_FULL_CASTER);
+        SetRangedMode(true, 25.f, TYPE_PROXIMITY);
         AddMainSpell(m_isRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H);
         JustReachedHome();
     }
@@ -658,7 +658,7 @@ struct npc_yazzaiAI : public priestess_companion_commonAI
         AddCombatAction(YAZZAI_CONE_OF_COLD, 1000, 11000);
         AddCombatAction(YAZZAI_FROSTBOLT, 0u);
         AddCombatAction(YAZZAI_BLINK, 8000, 24000);
-        SetRangedMode(true, 25.f, TYPE_FULL_CASTER);
+        SetRangedMode(true, 25.f, TYPE_PROXIMITY);
         AddDistanceSpell(SPELL_FROST_NOVA);
     }
 
