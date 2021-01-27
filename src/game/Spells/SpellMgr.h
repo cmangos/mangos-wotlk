@@ -747,6 +747,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 40899:         // Felfire Proc
         case 41634:         // Invisibility and Stealth Detection
         case 42459:         // Dual Wield (Passive)
+        case 44118:         // Fists of Arcane Fury
         case 44480:         // Seal of Wrath
         case 44505:         // Drink Fel Infusion
         case 44520:         // Fel Armor (Rank 2)
