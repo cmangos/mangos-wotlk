@@ -9855,6 +9855,21 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     return;
                 }
+                case 45115:                                 // Quest - Sunwell Daily - Ship Bombing Run Bomb
+                {
+                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    GameObject* go = GetClosestGameObjectWithEntry(unitTarget, 182071, 10.0f);
+                    if (go)
+                    {
+                        go->SetLootState(GO_READY);
+                        go->SetRespawnTime(5);
+                        go->Refresh();
+                    }
+                    static_cast<Creature*>(unitTarget)->ForcedDespawn();
+                    return;
+                }
                 case 45235:                                 // Blaze
                 {
                     if (!unitTarget)
