@@ -105,6 +105,12 @@ static const float afTyrannusMovePos[4][3] =
     {1017.5917f, 37.31939f, 708.9627f},                     // Tyrannus tunnel move position
 };
 
+static const float afTyrannusSummonPos[2][3] =
+{
+    {1066.5039f, 62.3141f, 632.0350f},                      // Summon position
+    {1059.7586f, 108.285f, 629.1584f},                      // Move position
+};
+
 struct EventNpcLocations
 {
     uint32 uiEntryHorde, uiEntryAlliance;
@@ -112,7 +118,7 @@ struct EventNpcLocations
     uint8 pathId;
 };
 
-const EventNpcLocations aEventBeginLocations[19] =
+const EventNpcLocations aEventBeginLocations[] =
 {
     {NPC_SYLVANAS_PART1, NPC_JAINA_PART1,   430.3012f, 212.204f,  530.1146f, 0.042f, 0},
     {NPC_KILARA,         NPC_ELANDRA,       429.7142f, 212.3021f, 530.2822f, 0.14f,  1},
@@ -219,6 +225,7 @@ class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
         void DoStartIntroEvent();
         void DoStartAmbushEvent();
         void DoStartTyrannusEvent();
+        void DoSpawnTyrannusUndead();
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
@@ -230,11 +237,10 @@ class instance_pit_of_saron : public ScriptedInstance, private DialogueHelper
         uint32 m_uiSummonDelayTimer;
         uint32 m_uiIciclesTimer;
         uint32 m_uiEyeLichKingTimer;
+        uint32 m_uiSummonUndeadTimer;
 
         GuidList m_lTunnelStalkersGuidList;
         GuidList m_lAmbushNpcsGuidList;
-        GuidList m_lArcaneShieldBunniesGuidList;
-        GuidList m_lFrozenAftermathBunniesGuidList;
         GuidList m_lSaroniteRockGuidList;
         GuidList m_lEndingCreaturesGuidList;
 };

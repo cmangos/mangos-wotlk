@@ -57,7 +57,8 @@ instance_pit_of_saron::instance_pit_of_saron(Map* pMap) : ScriptedInstance(pMap)
     m_uiTeam(TEAM_NONE),
     m_uiSummonDelayTimer(0),
     m_uiIciclesTimer(0),
-    m_uiEyeLichKingTimer(0)
+    m_uiEyeLichKingTimer(0),
+    m_uiSummonUndeadTimer(0)
 {
     Initialize();
 }
@@ -128,15 +129,6 @@ void instance_pit_of_saron::OnCreatureCreate(Creature* pCreature)
             if (pCreature->IsTemporarySummon())
                 m_lAmbushNpcsGuidList.push_back(pCreature->GetObjectGuid());
             break;
-        case NPC_GENERAL_BUNNY:
-            if (pCreature->GetPositionY() < 130.0f)
-            {
-                if (pCreature->GetOrientation() != 0)
-                    m_lArcaneShieldBunniesGuidList.push_back(pCreature->GetObjectGuid());
-                else
-                    m_lFrozenAftermathBunniesGuidList.push_back(pCreature->GetObjectGuid());
-            }
-            break;
     }
 }
 
@@ -164,8 +156,6 @@ void instance_pit_of_saron::OnObjectCreate(GameObject* pGo)
         case GO_ICEWALL:
             if (m_auiEncounter[TYPE_GARFROST] == DONE && m_auiEncounter[TYPE_KRICK] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
-            break;
-        case GO_HALLS_OF_REFLECT_PORT:
             break;
         case GO_SARONITE_ROCK:
             m_lSaroniteRockGuidList.push_back(pGo->GetObjectGuid());
@@ -204,12 +194,23 @@ void instance_pit_of_saron::SetData(uint32 uiType, uint32 uiData)
         case TYPE_TYRANNUS:
             if (uiData == DONE)
             {
+                // Force resume WP movement after combat
                 for (const auto guid : m_lEndingCreaturesGuidList)
+                {
                     if (Creature* creature = instance->GetCreature(guid))
-                        creature->GetMotionMaster()->UnpauseWaypoints();
+                    {
+                        creature->AI()->EnterEvadeMode();
+                        creature->GetMotionMaster()->MoveWaypoint(creature->GetMotionMaster()->GetPathId(), 0, 1000);
+                        creature->GetMotionMaster()->SetNextWaypoint(4);
+                    }
+                }
+
+                m_uiSummonUndeadTimer = 0;
             }
             else if (uiData == SPECIAL)
                 DoStartTyrannusEvent();
+            else if (uiData == IN_PROGRESS)
+                m_uiSummonUndeadTimer = 1000;
             m_auiEncounter[uiType] = uiData;
             break;
         case TYPE_AMBUSH:
@@ -346,15 +347,6 @@ void instance_pit_of_saron::OnCreatureDeath(Creature* pCreature)
                 }
             }
             break;
-        case NPC_CORRUPTED_CHAMPION:
-        case NPC_CHAMPION_1_HORDE:
-        case NPC_CHAMPION_2_HORDE:
-        case NPC_CHAMPION_3_HORDE:
-        case NPC_CHAMPION_1_ALLIANCE:
-        case NPC_CHAMPION_2_ALLIANCE:
-        case NPC_CHAMPION_3_ALLIANCE:
-            pCreature->ForcedDespawn(30000);
-            break;
     }
 }
 
@@ -414,7 +406,7 @@ void instance_pit_of_saron::DoStartIntroEvent()
     for (const auto& aEventBeginLocation : aEventBeginLocations)
     {
         if (Creature* pSummon = pTyrannus->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
-            aEventBeginLocation.fX, aEventBeginLocation.fY, aEventBeginLocation.fZ, aEventBeginLocation.fO, TEMPSPAWN_TIMED_DESPAWN, 24 * HOUR * IN_MILLISECONDS))
+            aEventBeginLocation.fX, aEventBeginLocation.fY, aEventBeginLocation.fZ, aEventBeginLocation.fO, TEMPSPAWN_DEAD_DESPAWN, 0))
         {
             pSummon->SetWalk(false);
             pSummon->GetMotionMaster()->MoveWaypoint(aEventBeginLocation.pathId);
@@ -473,6 +465,47 @@ void instance_pit_of_saron::DoStartTyrannusEvent()
     }
 }
 
+// Function to spawn the Tyrannus undead minions
+void instance_pit_of_saron::DoSpawnTyrannusUndead()
+{
+    Creature* pTyrannus = GetSingleCreatureFromStorage(NPC_TYRANNUS);
+    if (!pTyrannus)
+    {
+        script_error_log("instance_pit_of_saron: Error: cannot find creature %u in instance", NPC_TYRANNUS);
+        return;
+    }
+
+    float sX, sY, sZ;
+    float tX, tY, tZ;
+
+    // between 4 and 9 random Wrathbone skeletons
+    uint8 maxMobs = urand(4, 9);
+
+    for (uint8 i = 0; i < maxMobs; ++i)
+    {
+        uint32 uiEntry = urand(0, 1) ? NPC_WRATHBONE_SORCERER : NPC_WRATHBONE_REAVER;
+
+        pTyrannus->GetRandomPoint(afTyrannusSummonPos[0][0], afTyrannusSummonPos[0][1], afTyrannusSummonPos[0][2], 5.0f, sX, sY, sZ);
+        pTyrannus->GetRandomPoint(afTyrannusSummonPos[1][0], afTyrannusSummonPos[1][1], afTyrannusSummonPos[1][2], 5.0f, tX, tY, tZ);
+
+        if (Creature* pSummon = pTyrannus->SummonCreature(uiEntry, sX, sY, sZ, 2.0594f, TEMPSPAWN_DEAD_DESPAWN, 0))
+        {
+            pSummon->SetWalk(false);
+            pSummon->GetMotionMaster()->MovePoint(0, tX, tY, tZ);
+        }
+    }
+
+    // one fallen warrior
+    pTyrannus->GetRandomPoint(afTyrannusSummonPos[0][0], afTyrannusSummonPos[0][1], afTyrannusSummonPos[0][2], 5.0f, sX, sY, sZ);
+    pTyrannus->GetRandomPoint(afTyrannusSummonPos[1][0], afTyrannusSummonPos[1][1], afTyrannusSummonPos[1][2], 5.0f, tX, tY, tZ);
+
+    if (Creature* pSummon = pTyrannus->SummonCreature(NPC_FALLEN_WARRIOR_EPILOG, sX, sY, sZ, 2.0594f, TEMPSPAWN_DEAD_DESPAWN, 0))
+    {
+        pSummon->SetWalk(false);
+        pSummon->GetMotionMaster()->MovePoint(0, tX, tY, tZ);
+    }
+}
+
 void instance_pit_of_saron::Update(uint32 uiDiff)
 {
     DialogueUpdate(uiDiff);
@@ -528,6 +561,17 @@ void instance_pit_of_saron::Update(uint32 uiDiff)
         }
         else
             m_uiEyeLichKingTimer -= uiDiff;
+    }
+
+    if (m_uiSummonUndeadTimer)
+    {
+        if (m_uiSummonUndeadTimer <= uiDiff)
+        {
+            DoSpawnTyrannusUndead();
+            m_uiSummonUndeadTimer = urand(15000, 20000);
+        }
+        else
+            m_uiSummonUndeadTimer -= uiDiff;
     }
 }
 

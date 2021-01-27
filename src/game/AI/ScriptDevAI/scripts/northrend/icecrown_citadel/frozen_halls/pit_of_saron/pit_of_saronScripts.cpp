@@ -262,7 +262,7 @@ struct spell_jainas_call : public SpellScript
 
         Unit* caster = spell->GetAffectiveCaster();
         Unit* target = spell->GetUnitTarget();
-        if (!caster || !target->IsPlayer())
+        if (!caster || !target || !target->IsPlayer())
             return;
 
         caster->CastSpell(target, 70525, TRIGGERED_OLD_TRIGGERED);
@@ -282,10 +282,33 @@ struct spell_call_of_sylvanas : public SpellScript
 
         Unit* caster = spell->GetAffectiveCaster();
         Unit* target = spell->GetUnitTarget();
-        if (!caster || !target->IsPlayer())
+        if (!caster || !target || !target->IsPlayer())
             return;
 
         caster->CastSpell(target, 70639, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_aggro_nearest_slave - 72180
+######*/
+
+struct spell_aggro_nearest_slave : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!caster || !target || !target->IsCreature())
+            return;
+
+        // trigger 72218 from target
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        target->CastSpell(caster, spellId, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -308,4 +331,5 @@ void AddSC_pit_of_saron()
     RegisterSpellScript<spell_summon_undead>("spell_summon_undead");
     RegisterSpellScript<spell_jainas_call>("spell_jainas_call");
     RegisterSpellScript<spell_call_of_sylvanas>("spell_call_of_sylvanas");
+    RegisterSpellScript<spell_aggro_nearest_slave>("spell_aggro_nearest_slave");
 }

@@ -98,6 +98,8 @@ struct boss_tyrannusAI : public CombatAI
             // Set Rimefang in combat
             if (Creature* pRimefang = m_instance->GetSingleCreatureFromStorage(NPC_RIMEFANG))
             {
+                pRimefang->SetCanEnterCombat(true);
+                pRimefang->AI()->SetReactState(REACT_AGGRESSIVE);
                 pRimefang->AI()->AttackStart(who);
                 pRimefang->GetMotionMaster()->Clear(false, true);
                 pRimefang->GetMotionMaster()->MoveWaypoint();
@@ -211,29 +213,13 @@ struct boss_rimefang_posAI : public CombatAI
         AddCombatAction(RIMEFANG_POS_HOARFROST, true);
 
         SetCombatMovement(false);
+        SetReactState(REACT_PASSIVE);
+        m_creature->SetCanEnterCombat(false);
     }
 
     instance_pit_of_saron* m_instance;
 
     ObjectGuid m_hoarfrostTarget;
-
-    void AttackStart(Unit* who) override
-    {
-        // Don't attack unless Tyrannus is in combat or Ambush is completed
-        if (m_instance && (m_instance->GetData(TYPE_AMBUSH) != DONE || m_instance->GetData(TYPE_TYRANNUS) != IN_PROGRESS))
-            return;
-
-        CombatAI::AttackStart(who);
-    }
-
-    void AttackedBy(Unit* enemy) override
-    {
-        // Don't attack unless Tyrannus is in combat or Ambush is completed
-        if (m_instance && (m_instance->GetData(TYPE_AMBUSH) != DONE || m_instance->GetData(TYPE_TYRANNUS) != IN_PROGRESS))
-            return;
-
-        CombatAI::AttackedBy(enemy);
-    }
 
     void MoveInLineOfSight(Unit* who) override
     {
@@ -248,7 +234,7 @@ struct boss_rimefang_posAI : public CombatAI
             return;
 
         // Start the intro when possible
-        if (m_instance->GetData(TYPE_TYRANNUS) == NOT_STARTED && m_creature->IsWithinDistInMap(who, 85.0f) && m_creature->IsWithinLOSInMap(who))
+        if (m_instance->GetData(TYPE_TYRANNUS) == NOT_STARTED && m_creature->IsWithinDistInMap(who, 70.0f) && m_creature->IsWithinLOSInMap(who))
             m_instance->SetData(TYPE_TYRANNUS, SPECIAL);
 
         // Check for out of range players - ToDo: confirm the distance

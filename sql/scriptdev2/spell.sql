@@ -375,6 +375,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (70527,'spell_jainas_call'),
 (70636,'spell_call_of_sylvanas'),
 (71281,'spell_slave_trigger_closest'),
+(72180,'spell_aggro_nearest_slave'),
 (73159,'spell_play_movie'),
 (74562,'spell_fiery_combustion_aura'),
 (74792,'spell_soul_consumption_aura'),
