@@ -277,6 +277,7 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
                 m_creature->SetTarget(nullptr);
                 SetMeleeEnabled(false);
                 DoScriptText(SAY_DEATH, m_creature);
+                m_creature->SetFacingTo(m_creature->GetRespawnPosition().o);
                 timer = 1200;
                 break;
             case 1:
@@ -329,6 +330,7 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
         switch (m_gravityLapseStage)
         {
             case 0:
+                m_creature->SetFacingTo(m_creature->GetRespawnPosition().o);
                 for (uint8 i = 0; i < MAX_ARCANE_SPHERES; ++i)
                     DoCastSpellIfCan(nullptr, SPELL_ARCANE_SPHERE_SUMMON);
                 timer = 1500;
@@ -372,6 +374,7 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
                     m_gravityLapseStage = 0;
                     SetCombatScriptStatus(true);
                     m_creature->SetTarget(nullptr);
+                    m_creature->SetFacingTo(m_creature->GetRespawnPosition().o);
                 }
                 return;
             }
@@ -438,9 +441,8 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
             }
             case KAEL_ACTION_FIREBALL:
             {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_isRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H, SELECT_FLAG_PLAYER))
-                    if (DoCastSpellIfCan(target, m_isRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
-                        ResetCombatAction(action, GetCurrentRangedMode() ? urand(2000, 3000) : urand(4000, 6000));
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
+                    ResetCombatAction(action, GetCurrentRangedMode() ? urand(2000, 3000) : urand(4000, 6000));
                 return;
             }
         }
