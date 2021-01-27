@@ -27,6 +27,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "magisters_terrace.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 /*######
 ## npc_kalecgos
@@ -34,24 +35,32 @@ EndContentData */
 
 enum
 {
-    SPELL_TRANSFORM_TO_KAEL     = 44670,
+    SPELL_CAMERA_SHAKE_MED      = 44762,
+    SPELL_TRANSFORM_VISUAL      = 24085,
     SPELL_ORB_KILL_CREDIT       = 46307,
     NPC_KALECGOS                = 24848,                    // human form entry
 
     MAP_ID_MAGISTER             = 585,
 
     SAY_SPAWN                   = -1585032,
+
+    POINT_FINAL                 = 7,
+
+    ACTION_TRANSFORM            = 1,
 };
 
 static const float afKaelLandPoint[4] = {200.36f, -270.77f, -8.73f, 0.01f};
 
 // This is friendly keal that appear after used Orb.
 // If we assume DB handle summon, summon appear somewhere outside the platform where Orb is
-struct npc_kalecgosAI : public ScriptedAI
+struct npc_kalecgosAI : public CombatAI
 {
-    npc_kalecgosAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    npc_kalecgosAI(Creature* creature) : CombatAI(creature, 0), m_transformStage(0)
+    {
+        AddCustomAction(ACTION_TRANSFORM, true, [&]() { HandleTransform(); });
+    }
 
-    uint32 m_uiTransformTimer;
+    uint32 m_transformStage;
 
     void Reset() override
     {
@@ -59,10 +68,50 @@ struct npc_kalecgosAI : public ScriptedAI
         if (m_creature->GetMapId() != MAP_ID_MAGISTER)
             return;
 
-        m_uiTransformTimer = 0;
+        m_creature->SetHover(true);
 
         // Move the dragon to landing point
-        m_creature->GetMotionMaster()->MovePoint(1, afKaelLandPoint[0], afKaelLandPoint[1], afKaelLandPoint[2], FORCED_MOVEMENT_RUN);
+        m_creature->GetMotionMaster()->MovePath(1, PATH_FROM_ENTRY, FORCED_MOVEMENT_RUN, true);
+    }
+
+    void HandleTransform()
+    {
+        uint32 timer = 0;
+        switch (m_transformStage)
+        {
+            case 0:
+            {
+                m_creature->HandleEmote(EMOTE_ONESHOT_LAND);
+                m_creature->SetLevitate(false);
+                m_creature->SetHover(false);
+                timer = 1500;
+                break;
+            }
+            case 1:
+            {
+                DoCastSpellIfCan(nullptr, SPELL_CAMERA_SHAKE_MED);
+                m_creature->SetFacingTo(afKaelLandPoint[3]);
+                m_creature->SetFloatValue(OBJECT_FIELD_SCALE_X, 0.6f); // no spell for this
+                timer = 1000;
+                break;
+            }
+            case 2:
+            {
+                DoCastSpellIfCan(nullptr, SPELL_ORB_KILL_CREDIT, CAST_TRIGGERED);
+                DoCastSpellIfCan(nullptr, SPELL_TRANSFORM_VISUAL);
+                m_creature->ForcedDespawn(1500);
+                timer = 500;
+                break;
+            }
+            case 3:
+            {
+                m_creature->SpawnCreature(5850236, m_creature->GetMap());
+                break;
+            }
+        }
+        ++m_transformStage;
+        if (timer)
+            ResetTimer(ACTION_TRANSFORM, timer);
     }
 
     void JustRespawned() override
@@ -71,37 +120,13 @@ struct npc_kalecgosAI : public ScriptedAI
         DoScriptText(SAY_SPAWN, m_creature);
     }
 
-    void MovementInform(uint32 uiType, uint32 uiPointId) override
+    void MovementInform(uint32 type, uint32 pointId) override
     {
-        if (uiType != POINT_MOTION_TYPE)
+        if (type != PATH_MOTION_TYPE)
             return;
 
-        if (uiPointId)
-        {
-            m_creature->SetLevitate(false);
-            m_creature->SetFacingTo(afKaelLandPoint[3]);
-            m_uiTransformTimer = MINUTE * IN_MILLISECONDS;
-        }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (m_uiTransformTimer)
-        {
-            if (m_uiTransformTimer <= uiDiff)
-            {
-                // Transform and update entry, now ready for quest/read gossip
-                if (DoCastSpellIfCan(m_creature, SPELL_TRANSFORM_TO_KAEL) == CAST_OK)
-                {
-                    DoCastSpellIfCan(m_creature, SPELL_ORB_KILL_CREDIT, CAST_TRIGGERED);
-                    m_creature->UpdateEntry(NPC_KALECGOS);
-
-                    m_uiTransformTimer = 0;
-                }
-            }
-            else
-                m_uiTransformTimer -= uiDiff;
-        }
+        if (pointId == POINT_FINAL)
+            HandleTransform();
     }
 };
 
