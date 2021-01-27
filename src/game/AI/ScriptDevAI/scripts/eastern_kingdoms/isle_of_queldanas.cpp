@@ -336,7 +336,7 @@ struct npc_dawnblade_blood_knight : public CombatAI
         m_firstSpawn = false;
     }
 
-    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
+    void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* invoker, uint32 /*miscValue*/) override
     {
         if (sender->GetEntry() != m_creature->GetEntry())
             return;
@@ -344,12 +344,11 @@ struct npc_dawnblade_blood_knight : public CombatAI
         if (eventType == AI_EVENT_CUSTOM_A) // start duel
         {
             SetReactState(REACT_DEFENSIVE);
-            if (Creature* partner = m_creature->GetMap()->GetCreature(m_sparringPartner))
-                AttackStart(partner);
+            AttackStart(invoker);
         }
         else if (eventType == AI_EVENT_CUSTOM_B) // end duel
         {
-           SetReactState(REACT_AGGRESSIVE);
+            SetReactState(REACT_AGGRESSIVE);
             if (Creature* partner = m_creature->GetMap()->GetCreature(m_sparringPartner))
                 m_creature->AttackStop();
         }
@@ -357,9 +356,12 @@ struct npc_dawnblade_blood_knight : public CombatAI
 
     void StartDuel()
     {
-       SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, m_creature);
+
         if (Creature* partner = m_creature->GetMap()->GetCreature(m_sparringPartner))
+        {
+            SendAIEvent(AI_EVENT_CUSTOM_A, partner, m_creature);
             SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, partner);
+        }
     }
 
     void StopDuel()
