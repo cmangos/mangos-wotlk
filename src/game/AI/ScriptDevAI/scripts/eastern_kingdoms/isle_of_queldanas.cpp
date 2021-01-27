@@ -250,6 +250,9 @@ enum
     SPELL_JUDGEMENT_OF_WRATH    = 45337,
     SPELL_HOLY_LIGHT            = 13952,
 
+    SPELL_FACTION_SPAR          = 45091,
+    SPELL_FACTION_SPAR_BUDDY    = 45092,
+
     AREA_ID_DAWNSTAR_VILLAGE    = 4089,
     FACTION_SPARRING_DAWNBLADE  = 1965,
 };
@@ -359,8 +362,8 @@ struct npc_dawnblade_blood_knight : public CombatAI
     {
         if (Creature* partner = m_creature->GetMap()->GetCreature(m_sparringPartner))
         {
-            m_creature->SetFactionTemporary(FACTION_SPARRING_DAWNBLADE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
-            partner->SetFactionTemporary(FACTION_SPARRING_DAWNBLADE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
+            m_creature->CastSpell(nullptr, SPELL_FACTION_SPAR, TRIGGERED_NONE);
+            partner->CastSpell(nullptr, SPELL_FACTION_SPAR_BUDDY, TRIGGERED_NONE);
             SendAIEvent(AI_EVENT_CUSTOM_A, partner, m_creature);
             SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, partner);
         }
@@ -381,7 +384,7 @@ struct npc_dawnblade_blood_knight : public CombatAI
     {
         CombatAI::JustReachedHome();
         if (m_sparringPartner)
-            AddCustomAction(DAWNBLADE_BLOOD_KNIGHT_START_EVENT, 5000u, [&]() { StartDuel(); });
+            AddCustomAction(DAWNBLADE_BLOOD_KNIGHT_START_EVENT, 30000u, [&]() { StartDuel(); });
     }
 
     void Aggro(Unit* who) override
@@ -389,6 +392,16 @@ struct npc_dawnblade_blood_knight : public CombatAI
         if (m_creature->IsMounted())
             DoCastSpellIfCan(who, SPELL_JOUST);
         CombatAI::Aggro(who);
+    }
+};
+
+struct SparAuras : public AuraScript
+{
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const
+    {
+        if (data.attacker && !data.attacker->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+            return false;
+        return true;
     }
 };
 
@@ -415,4 +428,5 @@ void AddSC_isle_of_queldanas()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<ShatteredSunMarksmanShoot>("spell_shattered_sun_marksman_shoot");
+    RegisterAuraScript<SparAuras>("spell_spar_auras");
 }
