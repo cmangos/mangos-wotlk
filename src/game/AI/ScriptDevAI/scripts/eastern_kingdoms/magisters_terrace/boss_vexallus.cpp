@@ -80,6 +80,13 @@ struct boss_vexallusAI : public CombatAI
         AddTimerlessCombatAction(VEXALLUS_SUMMON_PURE_ENERGY, true);
         AddTimerlessCombatAction(VEXALLUS_OVERLOAD, true);
         AddOnKillText(SAY_KILL);
+        if (m_instance)
+        {
+            m_creature->GetCombatManager().SetLeashingCheck([](Unit* unit, float /*x*/, float /*y*/, float /*z*/)
+            {
+                return static_cast<ScriptedInstance*>(unit->GetInstanceData())->GetPlayerInMap(true, false) == nullptr;
+            });
+        }
     }
 
     ScriptedInstance* m_instance;

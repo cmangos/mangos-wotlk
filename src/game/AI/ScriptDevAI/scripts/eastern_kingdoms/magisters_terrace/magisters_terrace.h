@@ -65,7 +65,7 @@ class instance_magisters_terrace : public ScriptedInstance
         void Load(const char* chrIn) override;
 
         bool IsKalecgosOrbHandled() const { return m_kalecgosOrbHandled; }
-        bool SetKalecgosOrbHandled() { m_kalecgosOrbHandled = true; }
+        void SetKalecgosOrbHandled() { m_kalecgosOrbHandled = true; }
 
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];

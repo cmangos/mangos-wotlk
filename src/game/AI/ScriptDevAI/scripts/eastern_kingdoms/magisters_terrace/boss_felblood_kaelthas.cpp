@@ -438,7 +438,7 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
             }
             case KAEL_ACTION_FIREBALL:
             {
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, m_isRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H, SELECT_FLAG_PLAYER))
                     if (DoCastSpellIfCan(target, m_isRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H) == CAST_OK)
                         ResetCombatAction(action, GetCurrentRangedMode() ? urand(2000, 3000) : urand(4000, 6000));
                 return;
