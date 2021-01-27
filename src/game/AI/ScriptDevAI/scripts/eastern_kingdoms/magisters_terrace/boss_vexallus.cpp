@@ -212,6 +212,7 @@ struct mob_pure_energyAI : public ScriptedAI
     mob_pure_energyAI(Creature* creature) : ScriptedAI(creature)
     {
         SetDeathPrevention(true);
+        SetMeleeEnabled(false);
         Reset();
     }
 
@@ -221,6 +222,7 @@ struct mob_pure_energyAI : public ScriptedAI
     {
         Unit* victim = m_creature->GetVictim() ? m_creature->GetVictim() : attacker;
         DoFakeDeath();
+        m_creature->RemoveAurasDueToSpell(SPELL_ENERGY_BOLT_PERIODIC);
         m_creature->CastSpell(victim, SPELL_ENERGY_FEEDBACK_CHANNELED, TRIGGERED_NONE);
         victim->CastSpell(nullptr, SPELL_ENERGY_FEEDBACK_DEBUFF, TRIGGERED_OLD_TRIGGERED);
     }
