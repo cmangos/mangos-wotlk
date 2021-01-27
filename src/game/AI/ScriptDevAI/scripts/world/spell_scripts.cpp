@@ -1176,7 +1176,7 @@ struct spell_seed_of_corruption_npc : public AuraScript
             int32 basePoints = 2000; // guesswork, need to fill for all spells that use this because its not in spell data
 
             // Remove aura (before cast for prevent infinite loop handlers)
-            procData.victim->RemoveAurasByCasterSpell(procData.triggeredByAura->GetId(), procData.triggeredByAura->GetCasterGuid());
+            procData.target->RemoveAurasByCasterSpell(procData.triggeredByAura->GetId(), procData.triggeredByAura->GetCasterGuid());
 
             // Cast finish spell (triggeredByAura already not exist!)
             uint32 triggered_spell_id = 0;
@@ -1186,7 +1186,7 @@ struct spell_seed_of_corruption_npc : public AuraScript
                 default: triggered_spell_id = SPELL_SEED_OF_CORRUPTION_PROC_DEFAULT; break;
             }
             if (Unit* caster = procData.triggeredByAura->GetCaster())
-                caster->CastCustomSpell(procData.victim, triggered_spell_id, &basePoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                caster->CastCustomSpell(procData.target, triggered_spell_id, &basePoints, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
 
             return SPELL_AURA_PROC_OK;              // no hidden cooldown
         }

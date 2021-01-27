@@ -399,7 +399,7 @@ struct SparAuras : public AuraScript
 {
     bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const
     {
-        if (data.attacker && !data.attacker->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        if (data.source && !data.source->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
             return false;
         return true;
     }

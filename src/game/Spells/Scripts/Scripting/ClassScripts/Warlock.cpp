@@ -215,11 +215,11 @@ struct SeedOfCorruption : public AuraScript
             ObjectGuid casterGuid = procData.triggeredByAura->GetCasterGuid();
 
             // Remove aura (before cast for prevent infinite loop handlers)
-            procData.victim->RemoveAurasByCasterSpell(procData.triggeredByAura->GetId(), procData.triggeredByAura->GetCasterGuid());
+            procData.target->RemoveAurasByCasterSpell(procData.triggeredByAura->GetId(), procData.triggeredByAura->GetCasterGuid());
 
             // Cast finish spell (triggeredByAura already not exist!)
             if (Unit* caster = procData.triggeredByAura->GetCaster())
-                caster->CastSpell(procData.victim, GetSeedDamageSpell(aura->GetId()), TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+                caster->CastSpell(procData.target, GetSeedDamageSpell(aura->GetId()), TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
             return SPELL_AURA_PROC_OK;              // no hidden cooldown
         }
 
