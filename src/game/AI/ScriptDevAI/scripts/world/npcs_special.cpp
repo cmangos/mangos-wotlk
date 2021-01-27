@@ -2440,6 +2440,12 @@ struct mob_phoenix_tkAI : public CombatAI
         summoned->AI()->SetReactState(REACT_PASSIVE);
     }
 
+    void CorpseRemoved(uint32& /*respawnDelay*/) override // safeguard against wipe
+    {
+        if (Creature* egg = m_creature->GetMap()->GetCreature(m_eggGuid))
+            egg->ForcedDespawn();
+    }
+
     void DoRebirth()
     {
         if (m_creature->IsAlive())
