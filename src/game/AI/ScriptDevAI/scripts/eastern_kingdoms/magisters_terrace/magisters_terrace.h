@@ -64,11 +64,16 @@ class instance_magisters_terrace : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
+        bool IsKalecgosOrbHandled() const { return m_kalecgosOrbHandled; }
+        bool SetKalecgosOrbHandled() { m_kalecgosOrbHandled = true; }
+
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
         GuidList m_lFelCrystalGuid;
+
+        bool m_kalecgosOrbHandled;
 };
 
 #endif

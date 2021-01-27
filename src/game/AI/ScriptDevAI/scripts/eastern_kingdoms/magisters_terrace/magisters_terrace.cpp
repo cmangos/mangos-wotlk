@@ -31,7 +31,7 @@ EndScriptData */
 3  - Kael'thas Sunstrider
 */
 
-instance_magisters_terrace::instance_magisters_terrace(Map* pMap) : ScriptedInstance(pMap)
+instance_magisters_terrace::instance_magisters_terrace(Map* pMap) : ScriptedInstance(pMap), m_kalecgosOrbHandled(false)
 {
     Initialize();
 }

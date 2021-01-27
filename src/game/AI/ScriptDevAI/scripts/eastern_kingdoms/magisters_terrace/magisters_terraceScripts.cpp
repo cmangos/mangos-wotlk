@@ -130,15 +130,17 @@ struct npc_kalecgosAI : public CombatAI
     }
 };
 
-bool ProcessEventId_event_go_scrying_orb(uint32 /*uiEventId*/, Object* pSource, Object* /*pTarget*/, bool bIsStart)
+bool ProcessEventId_event_go_scrying_orb(uint32 /*eventId*/, Object* source, Object* /*target*/, bool isStart)
 {
-    if (bIsStart && pSource->GetTypeId() == TYPEID_PLAYER)
+    if (isStart && source->GetTypeId() == TYPEID_PLAYER)
     {
-        if (instance_magisters_terrace* pInstance = (instance_magisters_terrace*)((Player*)pSource)->GetInstanceData())
+        if (instance_magisters_terrace* instance = (instance_magisters_terrace*)static_cast<Player*>(source)->GetInstanceData())
         {
             // Check if the Dragon is already spawned and don't allow it to spawn it multiple times
-            if (pInstance->GetSingleCreatureFromStorage(NPC_KALECGOS_DRAGON, true))
+            if (instance->IsKalecgosOrbHandled())
                 return true;
+
+            instance->SetKalecgosOrbHandled();
         }
     }
     return false;
