@@ -137,7 +137,7 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
             HandleOutro();
         });
         SetDeathPrevention(true);
-        SetRangedMode(true, 20.f, TYPE_FULL_CASTER);
+        SetRangedMode(true, 20.f, TYPE_PROXIMITY);
         AddMainSpell(m_isRegularMode ? SPELL_FIREBALL : SPELL_FIREBALL_H);
         if (m_instance)
         {
