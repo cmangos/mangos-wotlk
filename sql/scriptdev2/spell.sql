@@ -284,6 +284,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (45223,'spell_shattered_sun_marksman_shoot'),
 (45229,'spell_shattered_sun_marksman_shoot'),
 (45233,'spell_shattered_sun_marksman_shoot'),
+(32863,'spell_seed_of_corruption_npc'),
+(36123,'spell_seed_of_corruption_npc'),
+(38252,'spell_seed_of_corruption_npc'),
+(39367,'spell_seed_of_corruption_npc'),
+(44141,'spell_seed_of_corruption_npc'),
 (32727,'spell_arena_preparation');
 
 -- Wotlk
@@ -551,6 +556,12 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (11689,'spell_life_tap'),
 (27222,'spell_life_tap'),
 (57946,'spell_life_tap'),
+(27243,'spell_seed_of_corruption'),
+(47835,'spell_seed_of_corruption'),
+(47836,'spell_seed_of_corruption'),
+(27285,'spell_seed_of_corruption_damage'),
+(47833,'spell_seed_of_corruption_damage'),
+(47834,'spell_seed_of_corruption_damage'),
 (35696,'spell_demonic_knowledge'),
 (30108,'spell_unstable_affliction'),
 (30404,'spell_unstable_affliction'),

@@ -168,12 +168,85 @@ struct DevourMagic : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_SEED = 27243,
+    SPELL_SEED_2 = 47835,
+    SPELL_SEED_3 = 47836,
+
+    SPELL_SEED_DAMAGE = 27285,
+    SPELL_SEED_DAMAGE_2 = 47833,
+    SPELL_SEED_DAMAGE_3 = 47834,
+};
+
+struct SeedOfCorruption : public AuraScript
+{
+    uint32 GetSeedDamageSpell(uint32 id) const
+    {
+        switch (id)
+        {
+            default:
+            case SPELL_SEED: return SPELL_SEED_DAMAGE;
+            case SPELL_SEED_2: return SPELL_SEED_DAMAGE_2;
+            case SPELL_SEED_3: return SPELL_SEED_DAMAGE_3;
+        }
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            return;
+        if (aura->GetEffIndex() != EFFECT_INDEX_1)
+            return;
+        if (aura->GetRemoveMode() == AURA_REMOVE_BY_DEATH)
+            if (Unit* caster = aura->GetCaster())
+                caster->CastSpell(aura->GetTarget(), GetSeedDamageSpell(aura->GetId()), TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+    }
+
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (aura->GetEffIndex() != EFFECT_INDEX_1)
+            return SPELL_AURA_PROC_OK;
+        Modifier* mod = procData.triggeredByAura->GetModifier();
+        // if damage is more than need
+        if (mod->m_amount <= (int32)procData.damage)
+        {
+            // remember guid before aura delete
+            ObjectGuid casterGuid = procData.triggeredByAura->GetCasterGuid();
+
+            // Remove aura (before cast for prevent infinite loop handlers)
+            procData.victim->RemoveAurasByCasterSpell(procData.triggeredByAura->GetId(), procData.triggeredByAura->GetCasterGuid());
+
+            // Cast finish spell (triggeredByAura already not exist!)
+            if (Unit* caster = procData.triggeredByAura->GetCaster())
+                caster->CastSpell(procData.victim, GetSeedDamageSpell(aura->GetId()), TRIGGERED_IGNORE_GCD | TRIGGERED_IGNORE_CURRENT_CASTED_SPELL | TRIGGERED_HIDE_CAST_IN_COMBAT_LOG);
+            return SPELL_AURA_PROC_OK;              // no hidden cooldown
+        }
+
+        // Damage counting
+        mod->m_amount -= procData.damage;
+        return SPELL_AURA_PROC_OK;
+    }
+};
+
+struct SeedOfCorruptionDamage : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->GetObjectGuid() == spell->m_targets.getUnitTargetGuid()) // in TBC skip target of initial aura
+            return false;
+        return true;
+    }
+};
+
 void LoadWarlockScripts()
 {
     RegisterAuraScript<UnstableAffliction>("spell_unstable_affliction");
     RegisterAuraScript<CurseOfAgony>("spell_curse_of_agony");
     RegisterSpellScript<LifeTap>("spell_life_tap");
     RegisterAuraScript<DemonicKnowledge>("spell_demonic_knowledge");
+    RegisterAuraScript<SeedOfCorruption>("spell_seed_of_corruption");
     RegisterSpellScript<EyeOfKilrogg>("spell_eye_of_kilrogg");
     RegisterSpellScript<DevourMagic>("spell_devour_magic");
+    RegisterSpellScript<SeedOfCorruptionDamage>("spell_seed_of_corruption_damage");
 }
