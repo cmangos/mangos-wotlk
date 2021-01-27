@@ -1664,6 +1664,11 @@ inline void GetChainJumpRange(SpellEntry const* spellInfo, SpellEffectIndex effI
             minSearchRangeCaster = 0.f;
             maxSearchRangeTarget = 150.f;
             break;
+        case 44537: // Fel Lightning - MgT / SWP
+        case 46048:
+        case 46480:
+            maxSearchRangeTarget = 50.f;
+            break;
         default:   // default jump radius
             break;
     }
