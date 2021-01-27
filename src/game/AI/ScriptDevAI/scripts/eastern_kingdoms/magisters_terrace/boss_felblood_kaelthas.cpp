@@ -121,6 +121,8 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
         AddCombatAction(KAEL_ACTION_PYROBLAST, true);
         if (!m_isRegularMode)
             AddCombatAction(KAEL_ACTION_SHOCK_BARRIER, 60000u);
+        else
+            AddCombatAction(KAEL_ACTION_SHOCK_BARRIER, true);
         AddCombatAction(KAEL_ACTION_FLAMESTRIKE, 25000u);
         AddCombatAction(KAEL_ACTION_PHOENIX, 10000u);
         AddCombatAction(KAEL_ACTION_FIREBALL, 0u);
