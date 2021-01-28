@@ -7361,10 +7361,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1668003','I will not make the same mistake again, Sylvanas. This time there will be no escape. You will all serve me in death!','17213','1','0','0','0','lich king SAY_HORDE_INTRO_1'),
 ('-1668004','He''s too powerful! Heroes, quickly, come to me! We must leave this place immediately! I will do what I can do hold him in place while we flee.','17058','1','0','1','0','sylvanas SAY_HORDE_INTRO_2'),
 
-('-1668005','REUSE ME','0','0','0','0','0','REUSE ME'),
-('-1668006','REUSE ME','0','0','0','0','0','REUSE ME'),
-('-1668007','REUSE ME','0','0','0','0','0','REUSE ME'),
-('-1668008','REUSE ME','0','0','0','0','0','REUSE ME'),
+-- REUSE -1668005 to -1668008
 
 ('-1668009','Halt! Do not carry that blade any further!','16675','1','0','1','0','Uther - SAY_INTRO_QUELDELAR');
 

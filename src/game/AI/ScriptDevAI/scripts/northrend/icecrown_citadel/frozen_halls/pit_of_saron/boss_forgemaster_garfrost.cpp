@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: boss_forgemaster_garfrost
-SD%Complete: 90
-SDComment: Tyrannus outro event NYI.
+SD%Complete: 100
+SDComment:
 SDCategory: Pit of Saron
 EndScriptData */
 

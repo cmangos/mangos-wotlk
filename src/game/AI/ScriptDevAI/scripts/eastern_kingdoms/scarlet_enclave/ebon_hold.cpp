@@ -144,7 +144,7 @@ enum SpecialSurprise
 
 static const DialogueEntry aSurpriseDialogue[] =
 {
-    // Human
+    // Tauren
     {NPC_PRISONER_TAUREN,   0,                      2000},
     {SAY_EXEC_START_1,      NPC_PRISONER_TAUREN,    4000},
     {DATA_NPC_STAND,        0,                      1000},
