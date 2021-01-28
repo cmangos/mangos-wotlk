@@ -16,13 +16,14 @@
 
 /* ScriptData
 SDName: Boss_Telestra
-SD%Complete: 90%
+SD%Complete: 100%
 SDComment: script depend on database spell support and eventAi for clones.
 SDCategory: Nexus
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "nexus.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
@@ -62,88 +63,95 @@ enum
     NPC_TELEST_FIRE         = 26928,
     NPC_TELEST_ARCANE       = 26929,
     NPC_TELEST_FROST        = 26930,
-
-    PHASE_1                 = 1,
-    PHASE_2                 = 2,
-    PHASE_3                 = 3,
-    PHASE_4                 = 4
 };
+
+static const float aRoomCenterCoords[3] = { 504.956f, 89.032f, -16.124f };
 
 /*######
 ## boss_telestra
 ######*/
 
-struct boss_telestraAI : public ScriptedAI
+enum KelesethActions
 {
-    boss_telestraAI(Creature* pCreature) : ScriptedAI(pCreature)
+    TELESTRA_ACTION_FIRE_BOMB,
+    TELESTRA_ACTION_ICE_NOVA,
+    TELESTRA_ACTION_GRAVITY_WELL,
+    TELESTRA_ACTION_CLONES,
+    TELESTRA_ACTION_CLONES_H,
+    TELESTRA_ACTION_TELEPORT,
+    TELESTRA_ACTION_MAX,
+    TELESTRA_SPAWN_BACK_IN
+};
+
+struct boss_telestraAI : public RangedCombatAI
+{
+    boss_telestraAI(Creature* creature) : RangedCombatAI(creature, TELESTRA_ACTION_MAX), m_instance(static_cast<instance_nexus*>(creature->GetInstanceData()))
     {
-        m_pInstance = static_cast<instance_nexus*>(pCreature->GetInstanceData());
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
+
+        AddCombatAction(TELESTRA_ACTION_FIRE_BOMB, 0u, 1000u);
+        AddCombatAction(TELESTRA_ACTION_ICE_NOVA, 15000u);
+        AddCombatAction(TELESTRA_ACTION_GRAVITY_WELL, 10000u);
+        AddCombatAction(TELESTRA_ACTION_TELEPORT, true);
+
+        AddTimerlessCombatAction(TELESTRA_ACTION_CLONES, true);
+        if (!m_isRegularMode)
+            AddTimerlessCombatAction(TELESTRA_ACTION_CLONES_H, true);
+
+        AddCustomAction(TELESTRA_SPAWN_BACK_IN, true, [&]() { HandlePersonalityMerge(); });
+
+        AddMainSpell(m_isRegularMode ? SPELL_FIREBOMB : SPELL_FIREBOMB_H);
+        AddDistanceSpell(m_isRegularMode ? SPELL_ICE_NOVA : SPELL_ICE_NOVA_H);
+        SetRangedMode(true, 20.0f, TYPE_PROXIMITY);
     }
 
-    instance_nexus* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_nexus* m_instance;
+    bool m_isRegularMode;
 
-    uint8 m_uiPhase;
     uint8 m_uiCloneDeadCount;
-
     uint32 m_uiPersonalityTimer;
-    uint32 m_uiFirebombTimer;
-    uint32 m_uiIceNovaTimer;
-    uint32 m_uiGravityWellTimer;
 
     bool m_bCanCheckAchiev;
 
     void Reset() override
     {
-        m_uiPhase = PHASE_1;
         m_uiCloneDeadCount = 0;
-
         m_uiPersonalityTimer = 0;
-        m_uiFirebombTimer = urand(2000, 4000);
-        m_uiIceNovaTimer = urand(8000, 12000);
-        m_uiGravityWellTimer = urand(15000, 25000);
-
         m_bCanCheckAchiev = false;
+        SetCombatMovement(true);
+
+        RangedCombatAI::Reset();
     }
 
     void JustReachedHome() override
     {
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
         m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true);
+
+        if (m_instance)
+            m_instance->SetData(TYPE_TELESTRA, FAIL);
     }
 
-    void AttackStart(Unit* pWho) override
-    {
-        if (m_creature->Attack(pWho, true))
-        {
-            m_creature->AddThreat(pWho);
-            m_creature->SetInCombatWith(pWho);
-            pWho->SetInCombatWith(m_creature);
-
-            m_creature->GetMotionMaster()->MoveChase(pWho, 15.0f);
-        }
-    }
-
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* who) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_TELESTRA, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_TELESTRA, IN_PROGRESS);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* killer) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_TELESTRA, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_TELESTRA, DONE);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* victim) override
     {
+        RangedCombatAI::KilledUnit(victim);
+
         if (urand(0, 1))
             DoScriptText(SAY_KILL, m_creature);
     }
@@ -172,29 +180,18 @@ struct boss_telestraAI : public ScriptedAI
                             m_uiPersonalityTimer = 0;
                         }
 
+                        // All clones dead
                         if (m_uiCloneDeadCount == 3 || m_uiCloneDeadCount == 6)
                         {
-                            m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_CLONES);
-                            m_creature->RemoveAurasDueToSpell(SPELL_FIRE_DIES);
-                            m_creature->RemoveAurasDueToSpell(SPELL_ARCANE_DIES);
-                            m_creature->RemoveAurasDueToSpell(SPELL_FROST_DIES);
-
-                            m_creature->CastSpell(m_creature, SPELL_SPAWN_BACK_IN, TRIGGERED_NONE);
-
-                            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                            m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true);
-
-                            DoScriptText(SAY_MERGE, m_creature);
+                            ResetTimer(TELESTRA_SPAWN_BACK_IN, 6000);
 
                             // Check if it took longer than 5 sec
                             if (m_uiPersonalityTimer > 5000)
                             {
-                                if (m_pInstance)
-                                    m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPLIT_PERSONALITY, false);
+                                if (m_instance)
+                                    m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_SPLIT_PERSONALITY, false);
                             }
                             m_bCanCheckAchiev = false;
-
-                            m_uiPhase = m_uiCloneDeadCount == 3 ? PHASE_3 : PHASE_4;
                         }
                         break;
                 }
@@ -206,77 +203,101 @@ struct boss_telestraAI : public ScriptedAI
     {
         switch (pSummoned->GetEntry())
         {
-            case NPC_TELEST_FIRE: pSummoned->CastSpell(pSummoned, SPELL_FIRE_VISUAL, TRIGGERED_OLD_TRIGGERED); break;
+            case NPC_TELEST_FIRE:   pSummoned->CastSpell(pSummoned, SPELL_FIRE_VISUAL, TRIGGERED_OLD_TRIGGERED);   break;
             case NPC_TELEST_ARCANE: pSummoned->CastSpell(pSummoned, SPELL_ARCANE_VISUAL, TRIGGERED_OLD_TRIGGERED); break;
-            case NPC_TELEST_FROST: pSummoned->CastSpell(pSummoned, SPELL_FROST_VISUAL, TRIGGERED_OLD_TRIGGERED); break;
+            case NPC_TELEST_FROST:  pSummoned->CastSpell(pSummoned, SPELL_FROST_VISUAL, TRIGGERED_OLD_TRIGGERED);  break;
         }
 
         if (m_creature->GetVictim())
             pSummoned->AI()->AttackStart(m_creature->GetVictim());
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    // Method to handle ther merge of the clones
+    void HandlePersonalityMerge()
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_bCanCheckAchiev)
-            m_uiPersonalityTimer += uiDiff;
-
-        switch (m_uiPhase)
+        if (DoCastSpellIfCan(m_creature, SPELL_SPAWN_BACK_IN, CAST_TRIGGERED) == CAST_OK)
         {
-            case PHASE_1:
-            case PHASE_3:
-            case PHASE_4:
+            m_creature->RemoveAurasDueToSpell(SPELL_SUMMON_CLONES);
+            m_creature->RemoveAurasDueToSpell(SPELL_FIRE_DIES);
+            m_creature->RemoveAurasDueToSpell(SPELL_ARCANE_DIES);
+            m_creature->RemoveAurasDueToSpell(SPELL_FROST_DIES);
 
-                if (m_uiFirebombTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_FIREBOMB : SPELL_FIREBOMB_H) == CAST_OK)
-                        m_uiFirebombTimer = urand(4000, 6000);
-                }
-                else
-                    m_uiFirebombTimer -= uiDiff;
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->LoadEquipment(m_creature->GetCreatureInfo()->EquipmentTemplateId, true);
 
-                if (m_uiIceNovaTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ICE_NOVA : SPELL_ICE_NOVA_H) == CAST_OK)
-                        m_uiIceNovaTimer = urand(10000, 15000);
-                }
-                else
-                    m_uiIceNovaTimer -= uiDiff;
+            DoScriptText(SAY_MERGE, m_creature);
 
-                if (m_uiPhase == PHASE_1 && m_creature->GetHealthPercent() < 50.0f)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_CLONES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                    {
-                        DoScriptText(urand(0, 1) ? SAY_SPLIT_1 : SAY_SPLIT_2, m_creature);
-                        m_uiPhase = PHASE_2;
-                    }
-                }
+            ResetCombatAction(TELESTRA_ACTION_GRAVITY_WELL, 10000);
+            ResetCombatAction(TELESTRA_ACTION_ICE_NOVA, 15000);
+            ResetCombatAction(TELESTRA_ACTION_FIRE_BOMB, urand(1000, 2000));
 
-                if (m_uiPhase == PHASE_3 && !m_bIsRegularMode && m_creature->GetHealthPercent() < 15.0f)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_CLONES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
-                    {
-                        DoScriptText(urand(0, 1) ? SAY_SPLIT_1 : SAY_SPLIT_2, m_creature);
-                        m_uiPhase = PHASE_2;
-                    }
-                }
+            SetCombatMovement(true);
+        }
+    }
 
-                if (m_uiGravityWellTimer < uiDiff)
-                {
-                    if (DoCastSpellIfCan(m_creature, SPELL_GRAVITY_WELL) == CAST_OK)
-                        m_uiGravityWellTimer = urand(15000, 30000);
-                }
-                else
-                    m_uiGravityWellTimer -= uiDiff;
-
-                DoMeleeAttackIfReady();
-
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case TELESTRA_ACTION_FIRE_BOMB:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_FIREBOMB : SPELL_FIREBOMB_H) == CAST_OK)
+                    ResetCombatAction(action, 2000);
                 break;
-            case PHASE_2:
+            case TELESTRA_ACTION_ICE_NOVA:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_ICE_NOVA : SPELL_ICE_NOVA_H) == CAST_OK)
+                    ResetCombatAction(action, urand(10000, 15000));
+                break;
+            case TELESTRA_ACTION_GRAVITY_WELL:
+                if (DoCastSpellIfCan(m_creature, SPELL_GRAVITY_WELL) == CAST_OK)
+                    ResetCombatAction(action, urand(10000, 15000));
+                break;
+            case TELESTRA_ACTION_CLONES:
+                if (m_creature->GetHealthPercent() < 50.0f)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_CLONES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        DoScriptText(urand(0, 1) ? SAY_SPLIT_1 : SAY_SPLIT_2, m_creature);
+
+                        SetActionReadyStatus(action, false);
+                        ResetCombatAction(TELESTRA_ACTION_TELEPORT, 10000);
+                        DisableCombatAction(TELESTRA_ACTION_GRAVITY_WELL);
+                        DisableCombatAction(TELESTRA_ACTION_ICE_NOVA);
+                        DisableCombatAction(TELESTRA_ACTION_FIRE_BOMB);
+
+                        SetCombatMovement(false);
+                    }
+                }
+                break;
+            case TELESTRA_ACTION_CLONES_H:
+                if (m_creature->GetHealthPercent() < 15.0f)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_CLONES, CAST_INTERRUPT_PREVIOUS) == CAST_OK)
+                    {
+                        DoScriptText(urand(0, 1) ? SAY_SPLIT_1 : SAY_SPLIT_2, m_creature);
+
+                        SetActionReadyStatus(action, false);
+                        ResetCombatAction(TELESTRA_ACTION_TELEPORT, 10000);
+                        DisableCombatAction(TELESTRA_ACTION_GRAVITY_WELL);
+                        DisableCombatAction(TELESTRA_ACTION_ICE_NOVA);
+                        DisableCombatAction(TELESTRA_ACTION_FIRE_BOMB);
+
+                        SetCombatMovement(false);
+                    }
+                }
+                break;
+            case TELESTRA_ACTION_TELEPORT:
+                m_creature->NearTeleportTo(aRoomCenterCoords[0], aRoomCenterCoords[1], aRoomCenterCoords[2], m_creature->GetOrientation());
+                DisableCombatAction(action);
                 break;
         }
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        RangedCombatAI::UpdateAI(diff);
+
+        if (m_bCanCheckAchiev)
+            m_uiPersonalityTimer += diff;
     }
 };
 
@@ -318,6 +339,18 @@ struct spell_telestra_clone_dies_aura : public AuraScript
     }
 };
 
+/*######
+## spell_gravity_well_effect - 47764
+######*/
+
+struct spell_gravity_well_effect : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destPos.z += 3.0f;
+    }
+};
+
 void AddSC_boss_telestra()
 {
     Script* pNewScript = new Script;
@@ -327,4 +360,5 @@ void AddSC_boss_telestra()
 
     RegisterSpellScript<spell_summon_telestra_clones>("spell_summon_telestra_clones");
     RegisterAuraScript<spell_telestra_clone_dies_aura>("spell_telestra_clone_dies_aura");
+    RegisterSpellScript<spell_gravity_well_effect>("spell_gravity_well_effect");
 }
