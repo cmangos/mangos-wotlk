@@ -71,7 +71,7 @@ static const float aRoomCenterCoords[3] = { 504.956f, 89.032f, -16.124f };
 ## boss_telestra
 ######*/
 
-enum KelesethActions
+enum TelestraActions
 {
     TELESTRA_ACTION_FIRE_BOMB,
     TELESTRA_ACTION_ICE_NOVA,
