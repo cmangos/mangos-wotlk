@@ -108,8 +108,11 @@ struct priestess_commonAI : public RangedCombatAI
                 std::vector<Unit*> units;
                 DoResetThreat();
                 for (auto& data : m_creature->getThreatManager().getThreatList())
-                    if (data->isValid() && !(data->getTarget()->IsCreature() && static_cast<Creature*>(data->getTarget())->IsTotem()))
-                        units.push_back(data->getTarget());
+                {
+                    if (data->isValid())
+                        if (data->getTarget()->IsPlayer())
+                            units.push_back(data->getTarget());
+                }
                 std::shuffle(units.begin(), units.end(), *GetRandomGenerator());
                 uint32 i = 0;
                 for (Unit* unit : units)
@@ -226,8 +229,9 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
             for (uint8 i = 0; i < MAX_DELRISSA_ADDS; ++i)
             {
                 // If we already have the creature on the map, then don't summon it
-                if (m_instance->GetSingleCreatureFromStorage(m_vuiLackeyEnties[i], true))
-                    continue;
+                if (Creature* creature = m_instance->GetSingleCreatureFromStorage(m_vuiLackeyEnties[i], true))
+                    if (creature->IsAlive())
+                        continue;
 
                 m_creature->SummonCreature(m_vuiLackeyEnties[i], aLackeyLocations[i][0], aLackeyLocations[i][1], aLackeyLocations[i][2], aLackeyLocations[i][3], TEMPSPAWN_CORPSE_TIMED_DESPAWN, 7000);
             }

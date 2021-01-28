@@ -51,7 +51,8 @@ enum
     SPELL_GRAVITY_LAPSE_VISUAL  = 44251,                    // Channeled; blue beam animation to every enemy in range - when removed the Gravity Lapse auras are removed from players
     SPELL_TELEPORT_CENTER       = 44218,                    // Teleport the boss in the center. Requires DB entry in spell_target_position.
     SPELL_GRAVITY_LAPSE_FLY     = 44227,                    // Hastens flyspeed and allows flying for 1 minute. Requires aura stacking exception for 44226.
-    SPELL_GRAVITY_LAPSE_DOT     = 44226,                    // Knocks up in the air and applies a 300 DPS DoT.
+    SPELL_GRAVITY_LAPSE_DOT_H   = 44226,                    // Knocks up in the air and applies a 300 DPS DoT.
+    SPELL_GRAVITY_LAPSE_DOT_N   = 49887,
     SPELL_ARCANE_SPHERE_SUMMON  = 44265,                    // Summons 1 arcane sphere
     SPELL_POWER_FEEDBACK        = 44233,                    // Stuns him, making him take 50% more damage for 10 seconds. Cast after Gravity Lapse
     SPELL_POWER_FEEDBACK_H      = 47109,
@@ -181,6 +182,8 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
         m_attackDistance = 20.0f;
 
         SetCombatMovement(true);
+        SetCombatScriptStatus(false);
+        SetMeleeEnabled(true);
 
         DespawnGuids(m_spawns);
     }
@@ -276,6 +279,7 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
                 SetCombatScriptStatus(true);
                 m_creature->SetTarget(nullptr);
                 SetMeleeEnabled(false);
+                DisableTimer(KAEL_GRAVITY_LAPSE_SCRIPT);
                 DoScriptText(SAY_DEATH, m_creature);
                 m_creature->SetFacingTo(m_creature->GetRespawnPosition().o);
                 timer = 1200;
@@ -506,6 +510,39 @@ struct mob_arcane_sphereAI : public ScriptedAI
     }
 };
 
+struct spell_gravity_lapse_mgt : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget)
+            return;
+
+        static const uint32 aGravityLapseSpells[] = { 44219, 44220, 44221, 44222, 44223 };
+        spell->GetCaster()->CastSpell(unitTarget, aGravityLapseSpells[spell->GetScriptValue()], TRIGGERED_OLD_TRIGGERED);
+        unitTarget->CastSpell(nullptr, SPELL_GRAVITY_LAPSE_FLY, TRIGGERED_OLD_TRIGGERED);
+        if (unitTarget->GetMap()->IsRegularDifficulty())
+            unitTarget->CastSpell(nullptr, SPELL_GRAVITY_LAPSE_DOT_N, TRIGGERED_OLD_TRIGGERED);
+        else
+            unitTarget->CastSpell(nullptr, SPELL_GRAVITY_LAPSE_DOT_H, TRIGGERED_OLD_TRIGGERED);
+        spell->SetScriptValue(spell->GetScriptValue() + 1);
+    }
+};
+
+struct spell_clear_flight_mgt : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* unitTarget = spell->GetUnitTarget();
+        if (!unitTarget)
+            return;
+
+        unitTarget->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_FLY);
+        unitTarget->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_DOT_H);
+        unitTarget->RemoveAurasDueToSpell(SPELL_GRAVITY_LAPSE_DOT_N);
+    }
+};
+
 void AddSC_boss_felblood_kaelthas()
 {
     Script* pNewScript = new Script;
@@ -517,4 +554,7 @@ void AddSC_boss_felblood_kaelthas()
     pNewScript->Name = "mob_arcane_sphere";
     pNewScript->GetAI = &GetNewAIInstance<mob_arcane_sphereAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_gravity_lapse_mgt>("spell_gravity_lapse_mgt");
+    RegisterSpellScript<spell_clear_flight_mgt>("spell_clear_flight_mgt");
 }

@@ -291,6 +291,12 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (44141,'spell_seed_of_corruption_npc'),
 (45091,'spell_spar_auras'),
 (45092,'spell_spar_auras'),
+(47108,'spell_clear_energy_feedback'),
+(44224,'spell_gravity_lapse_mgt'),
+(44232,'spell_clear_flight_mgt'),
+(34480,'spell_gravity_lapse_knockup'),
+(44226,'spell_gravity_lapse_knockup'),
+(49887,'spell_gravity_lapse_knockup'),
 (32727,'spell_arena_preparation');
 
 -- Wotlk

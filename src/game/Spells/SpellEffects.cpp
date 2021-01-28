@@ -9622,18 +9622,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(nullptr, 45265, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 44224:                                 // Gravity Lapse
-                {
-                    if (!unitTarget)
-                        return;
-
-                    static const uint32 aGravityLapseSpells[] = { 44219, 44220, 44221, 44222, 44223 };
-                    m_caster->CastSpell(unitTarget, aGravityLapseSpells[m_scriptValue], TRIGGERED_OLD_TRIGGERED);
-                    unitTarget->CastSpell(nullptr, 44227, TRIGGERED_OLD_TRIGGERED);
-                    unitTarget->CastSpell(nullptr, 44226, TRIGGERED_OLD_TRIGGERED);
-                    ++m_scriptValue;
-                    return;
-                }
                 case 44232:                                 // Clear Flight
                 {
                     if (!unitTarget)
@@ -10254,12 +10242,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     if (pSummoner && pSummoner == pCaster)
                         pSummon->UnSummon();
 
-                    return;
-                }
-                case 47108:                                 // Clear Energy Feedback
-                {
-                    if (unitTarget)
-                        unitTarget->RemoveAurasDueToSpell(44335);
                     return;
                 }
                 case 47977:                                 // Use Broom

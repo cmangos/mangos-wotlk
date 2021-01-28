@@ -125,7 +125,7 @@ struct boss_vexallusAI : public CombatAI
 
     void JustDied(Unit* /*killer*/) override
     {
-        m_creature->CastSpell(nullptr, SPELL_CLEAR_ENERGY_FEEDBACK, TRIGGERED_NONE);
+        m_creature->CastSpell(nullptr, SPELL_CLEAR_ENERGY_FEEDBACK, TRIGGERED_OLD_TRIGGERED);
 
         if (m_instance)
             m_instance->SetData(TYPE_VEXALLUS, DONE);
@@ -234,6 +234,15 @@ struct mob_pure_energyAI : public ScriptedAI
     }
 };
 
+struct spell_clear_energy_feedback : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (spell->GetUnitTarget())
+            spell->GetUnitTarget()->RemoveAurasDueToSpell(SPELL_ENERGY_FEEDBACK_DEBUFF);
+    }
+};
+
 void AddSC_boss_vexallus()
 {
     Script* pNewScript = new Script;
@@ -245,4 +254,6 @@ void AddSC_boss_vexallus()
     pNewScript->Name = "mob_pure_energy";
     pNewScript->GetAI = &GetNewAIInstance<mob_pure_energyAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_clear_energy_feedback>("spell_clear_energy_feedback");
 }
