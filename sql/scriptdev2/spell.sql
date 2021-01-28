@@ -243,6 +243,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (47711,'spell_telestra_clone_dies_aura'),
 (47712,'spell_telestra_clone_dies_aura'),
 (47713,'spell_telestra_clone_dies_aura'),
+(47747,'spell_charge_rifts'),
 (47764,'spell_gravity_well_effect'),
 (47958,'spell_crystal_spikes'),
 (48385,'spell_create_spirit_fount_beam_aura'),

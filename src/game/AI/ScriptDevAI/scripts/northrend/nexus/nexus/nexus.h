@@ -25,6 +25,8 @@ enum
     NPC_KERISTRASZA                = 26723,
     NPC_BREATH_CASTER              = 27048,
 
+    NPC_CRAZED_MANA_WRAITH         = 26746,
+
     GO_CONTAINMENT_SPHERE_TELESTRA = 188526,
     GO_CONTAINMENT_SPHERE_ANOMALUS = 188527,
     GO_CONTAINMENT_SPHERE_ORMOROK  = 188528,
@@ -46,6 +48,7 @@ class instance_nexus : public ScriptedInstance
 
         void OnObjectCreate(GameObject* pGo) override;
         void OnCreatureCreate(Creature* pCreature) override;
+        void OnCreatureRespawn(Creature* creature) override;
 
         uint32 GetData(uint32 uiType) const override;
         void SetData(uint32 uiType, uint32 uiData) override;

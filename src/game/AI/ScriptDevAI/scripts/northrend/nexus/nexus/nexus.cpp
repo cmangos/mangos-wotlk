@@ -89,7 +89,25 @@ void instance_nexus::OnCreatureCreate(Creature* pCreature)
     {
         case NPC_ORMOROK:
         case NPC_KERISTRASZA:
+        case NPC_ANOMALUS:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+    }
+}
+
+void instance_nexus::OnCreatureRespawn(Creature * pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_CRAZED_MANA_WRAITH:
+            if (GetData(TYPE_ANOMALUS) == IN_PROGRESS)
+            {
+                if (Creature* pAnomalus = GetSingleCreatureFromStorage(NPC_ANOMALUS))
+                {
+                    if (pAnomalus->GetVictim() && pCreature->IsWithinDistInMap(pAnomalus, 50.0f))
+                        pCreature->AI()->AttackStart(pAnomalus->GetVictim());
+                }
+            }
             break;
     }
 }
