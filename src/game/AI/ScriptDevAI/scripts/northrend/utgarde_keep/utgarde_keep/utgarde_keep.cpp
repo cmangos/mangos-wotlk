@@ -74,6 +74,7 @@ void instance_utgarde_keep::OnCreatureRespawn(Creature* pCreature)
                 if (pSkarvald->IsAlive() && pSkarvald->GetVictim())
                     pCreature->AI()->AttackStart(pSkarvald->GetVictim());
             }
+            pCreature->SetForceAttackingCapability(true);
             break;
         case NPC_SKARVALD_GHOST:
             if (Creature* pDarlonn = GetSingleCreatureFromStorage(NPC_DALRONN))
@@ -81,6 +82,7 @@ void instance_utgarde_keep::OnCreatureRespawn(Creature* pCreature)
                 if (pDarlonn->IsAlive() && pDarlonn->GetVictim())
                     pCreature->AI()->AttackStart(pDarlonn->GetVictim());
             }
+            pCreature->SetForceAttackingCapability(true);
             break;
     }
 }

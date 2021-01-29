@@ -165,6 +165,7 @@ struct boss_devourer_of_soulsAI : public ScriptedAI
                 pSummoned->AI()->AttackStart(pEnemy);
                 pSummoned->AddThreat(pEnemy, 10000.0f);
             }
+            pSummoned->SetForceAttackingCapability(true);
             pSummoned->ForcedDespawn(15000);                // Note that this is sort of a hack, the more correct fix however would require to toggle the interpretation of summon properties in mangos
         }
     }
