@@ -170,7 +170,10 @@ struct boss_felblood_kaelthasAI : public RangedCombatAI
     {
         CombatAI::Reset();
 
-        SetReactState(REACT_PASSIVE);
+        if (!m_introStarted)
+            SetReactState(REACT_PASSIVE);
+        else
+            SetReactState(REACT_AGGRESSIVE);
         m_gravityLapseStage   = 0;
 
         m_firstGravityLapse    = true;
