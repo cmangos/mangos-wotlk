@@ -1723,8 +1723,6 @@ UPDATE creature_template SET ScriptName='npc_lady_sylvanas_windrunner' WHERE ent
 /* UTGARDE KEEP */
 UPDATE instance_template SET ScriptName='instance_utgarde_keep' WHERE map=574;
 UPDATE creature_template SET ScriptName='mob_dragonflayer_forge_master' WHERE entry=24079;
-UPDATE creature_template SET ScriptName='boss_skarvald' WHERE entry=24200;
-UPDATE creature_template SET ScriptName='boss_dalronn' WHERE entry=24201;
 UPDATE creature_template SET ScriptName='boss_ingvar' WHERE entry=23954;
 UPDATE creature_template SET ScriptName='npc_annhylde' WHERE entry=24068;
 UPDATE creature_template SET ScriptName='boss_keleseth' WHERE entry=23953;
@@ -5604,17 +5602,20 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1574009','Mjul orm agn gjor!','13212','1','0','0','0','ingvar SAY_KILL_FIRST'),
 ('-1574010','I am a warrior born!','13214','1','0','0','0','ingvar SAY_KILL_SECOND'),
 
-('-1574011','Dalronn! See if you can muster the nerve to join my attack!','13229','1','0','0','0','skarvald SAY_SKA_AGGRO'),
+('-1574011','REUSE ME','0','0','0','0','0','REUSE ME'),
+
 ('-1574012','Not... over... yet.','13230','1','0','0','0','skarvald SAY_SKA_DEATH'),
 ('-1574013','A warrior''s death.','13231','1','0','0','0','skarvald SAY_SKA_DEATH_REAL'),
-('-1574014','???','13232','1','0','0','0','skarvald SAY_SKA_KILL'),
-('-1574015','Pagh! What sort of necromancer lets death stop him? I knew you were worthless!','13233','1','0','0','0','skarvald SAY_SKA_DAL_DIES_REPLY'),
 
-('-1574016','By all means, don''t assess the situation, you halfwit! Just jump into the fray!','13199','1','0','0','0','dalronn SAY_DAL_AGGRO_REPLY'),
+('-1574014','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1574015','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1574016','REUSE ME','0','0','0','0','0','REUSE ME'),
+
 ('-1574017','See... you... soon.','13200','1','0','0','0','dalronn SAY_DAL_DEATH'),
-('-1574018','There''s no... greater... glory.','13201','1','0','0','0','dalronn SAY_DAL_DEATH_REAL'),
-('-1574019','You may serve me yet.','13202','1','0','0','0','dalronn SAY_DAL_KILL'),
-('-1574020','Skarvald, you incompetent slug! Return and make yourself useful!','13203','1','0','0','0','dalronn SAY_DAL_SKA_DIES_REPLY'),
+('-1574018','There\'s no... greater... glory.','13201','1','0','0','0','dalronn SAY_DAL_DEATH_REAL'),
+
+('-1574019','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1574020','REUSE ME','0','0','0','0','0','REUSE ME'),
 
 ('-1574021','%s casts Frost Tomb on $N','0','3','0','0','0','keleseth EMOTE_FROST_TOMB'),
 

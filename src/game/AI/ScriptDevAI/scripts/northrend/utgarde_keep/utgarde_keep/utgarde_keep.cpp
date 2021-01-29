@@ -24,6 +24,18 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "utgarde_keep.h"
 
+enum
+{
+    SAY_SKA_DEATH               = -1574012,
+    SAY_SKA_DEATH_REAL          = -1574013,
+
+    SAY_DAL_DEATH               = -1574017,
+    SAY_DAL_DEATH_REAL          = -1574018,
+
+    SPELL_SUMMON_DAL_GHOST      = 48612,
+    SPELL_SUMMON_SKA_GHOST      = 48613,
+};
+
 instance_utgarde_keep::instance_utgarde_keep(Map* pMap) : ScriptedInstance(pMap),
     m_bKelesethAchievFailed(false)
 {
@@ -55,6 +67,20 @@ void instance_utgarde_keep::OnCreatureRespawn(Creature* pCreature)
         case NPC_FROST_TOMB:
             pCreature->AI()->SetReactState(REACT_PASSIVE);
             pCreature->SetCanEnterCombat(false);
+            break;
+        case NPC_DALRONN_GHOST:
+            if (Creature* pSkarvald = GetSingleCreatureFromStorage(NPC_SKARVALD))
+            {
+                if (pSkarvald->IsAlive() && pSkarvald->GetVictim())
+                    pCreature->AI()->AttackStart(pSkarvald->GetVictim());
+            }
+            break;
+        case NPC_SKARVALD_GHOST:
+            if (Creature* pDarlonn = GetSingleCreatureFromStorage(NPC_DALRONN))
+            {
+                if (pDarlonn->IsAlive() && pDarlonn->GetVictim())
+                    pCreature->AI()->AttackStart(pDarlonn->GetVictim());
+            }
             break;
     }
 }
@@ -103,8 +129,48 @@ void instance_utgarde_keep::OnObjectCreate(GameObject* pGo)
 
 void instance_utgarde_keep::OnCreatureDeath(Creature* pCreature)
 {
-    if (pCreature->GetEntry() == NPC_FROST_TOMB)
-        m_bKelesethAchievFailed = true;
+    switch (pCreature->GetEntry())
+    {
+        case NPC_FROST_TOMB:
+            m_bKelesethAchievFailed = true;
+            break;
+        case NPC_SKARVALD:
+            if (Creature* pDalronn = GetSingleCreatureFromStorage(NPC_DALRONN))
+            {
+                if (pDalronn->IsAlive())
+                {
+                    pCreature->CastSpell(pCreature, SPELL_SUMMON_SKA_GHOST, TRIGGERED_OLD_TRIGGERED);
+                    pCreature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
+                    DoScriptText(SAY_SKA_DEATH, pCreature);
+                }
+                else
+                {
+                    pDalronn->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
+                    DoScriptText(SAY_SKA_DEATH_REAL, pCreature);
+                }
+            }
+            break;
+        case NPC_DALRONN:
+            if (Creature* pSkarvald = GetSingleCreatureFromStorage(NPC_SKARVALD))
+            {
+                if (pSkarvald->IsAlive())
+                {
+                    pCreature->CastSpell(pCreature, SPELL_SUMMON_DAL_GHOST, TRIGGERED_OLD_TRIGGERED);
+                    pCreature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
+                    DoScriptText(SAY_DAL_DEATH, pCreature);
+                }
+                else
+                {
+                    pSkarvald->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
+                    DoScriptText(SAY_DAL_DEATH_REAL, pCreature);
+                }
+            }
+            break;
+    }
 }
 
 void instance_utgarde_keep::SetData(uint32 uiType, uint32 uiData)

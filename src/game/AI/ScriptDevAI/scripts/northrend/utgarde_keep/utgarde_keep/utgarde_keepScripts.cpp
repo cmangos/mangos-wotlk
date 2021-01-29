@@ -27,6 +27,7 @@ EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "utgarde_keep.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 /*######
 ## mob_dragonflayer_forge_master
@@ -41,29 +42,34 @@ enum
     MAX_FORGE               = 3
 };
 
-struct mob_dragonflayer_forge_masterAI : public ScriptedAI
+enum ForgeMasterActions
 {
-    mob_dragonflayer_forge_masterAI(Creature* pCreature) : ScriptedAI(pCreature)
+    FORGEMASTER_BURNING_BRAND,
+    FORGEMASTER_CAUTERIZE,
+    FORGEMASTER_ACTION_MAX,
+};
+
+struct mob_dragonflayer_forge_masterAI : public CombatAI
+{
+    mob_dragonflayer_forge_masterAI(Creature* creature) : CombatAI(creature, FORGEMASTER_ACTION_MAX), m_instance(static_cast<instance_utgarde_keep*>(creature->GetInstanceData()))
     {
-        m_pInstance = (ScriptedInstance*)pCreature->GetInstanceData();
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        m_uiForgeEncounterId = 0;
-        Reset();
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
+
+        AddCombatAction(FORGEMASTER_BURNING_BRAND, 5000u);
+        AddCombatAction(FORGEMASTER_CAUTERIZE, 15000u);
     }
 
-    ScriptedInstance* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_utgarde_keep* m_instance;
+    bool m_isRegularMode;
 
     uint32 m_uiForgeEncounterId;
-    uint32 m_uiBurningBrandTimer;
 
-    void Reset() override
-    {
-        m_uiBurningBrandTimer = 2000;
-    }
-
+    // Method to open / close the corresponding forge based on location
     void SetMyForge()
     {
+        if (!m_instance)
+            return;
+
         GameObjectList lGOList;
         uint32 uiGOBellow = 0;
         uint32 uiGOFire = 0;
@@ -77,7 +83,7 @@ struct mob_dragonflayer_forge_masterAI : public ScriptedAI
                 case 2: uiGOBellow = GO_BELLOW_3; break;
             }
 
-            if (GameObject* pGOTemp = m_pInstance->GetSingleGameObjectFromStorage(uiGOBellow))
+            if (GameObject* pGOTemp = m_instance->GetSingleGameObjectFromStorage(uiGOBellow))
                 lGOList.push_back(pGOTemp);
         }
 
@@ -100,7 +106,7 @@ struct mob_dragonflayer_forge_masterAI : public ScriptedAI
                 case GO_BELLOW_3: uiGOFire = GO_FORGEFIRE_3; m_uiForgeEncounterId = TYPE_BELLOW_3; break;
             }
 
-            if (GameObject* pGOTemp = m_pInstance->GetSingleGameObjectFromStorage(uiGOFire))
+            if (GameObject* pGOTemp = m_instance->GetSingleGameObjectFromStorage(uiGOFire))
             {
                 if (pGOTemp->GetLootState() == GO_READY)
                     pGOTemp->UseDoorOrButton(DAY);
@@ -110,7 +116,7 @@ struct mob_dragonflayer_forge_masterAI : public ScriptedAI
         }
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         SetMyForge();
     }
@@ -120,37 +126,56 @@ struct mob_dragonflayer_forge_masterAI : public ScriptedAI
         SetMyForge();
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(m_uiForgeEncounterId, DONE);
+        if (m_instance)
+            m_instance->SetData(m_uiForgeEncounterId, DONE);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiBurningBrandTimer < uiDiff)
+        switch (action)
         {
-            DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_BURNING_BRAND : SPELL_BURNING_BRAND_H);
-            m_uiBurningBrandTimer = 15000;
+            case FORGEMASTER_BURNING_BRAND:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_BURNING_BRAND : SPELL_BURNING_BRAND_H) == CAST_OK)
+                    ResetCombatAction(action, urand(7000, 10000));
+                break;
+            case FORGEMASTER_CAUTERIZE:
+                if (DoCastSpellIfCan(m_creature, SPELL_CAUTERIZE) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 20000));
+                break;
         }
-        else m_uiBurningBrandTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
-UnitAI* GetAI_mob_dragonflayer_forge_master(Creature* pCreature)
+/*######
+## spell_cauterize - 60211
+######*/
+
+struct spell_cauterize : public SpellScript
 {
-    return new mob_dragonflayer_forge_masterAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // trigger 43930
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_utgarde_keep()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "mob_dragonflayer_forge_master";
-    pNewScript->GetAI = &GetAI_mob_dragonflayer_forge_master;
+    pNewScript->GetAI = &GetNewAIInstance<mob_dragonflayer_forge_masterAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_cauterize>("spell_cauterize");
 }

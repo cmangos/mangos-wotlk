@@ -21,6 +21,9 @@ enum
     NPC_DALRONN                 = 24201,
     NPC_INGVAR                  = 23954,
 
+    NPC_DALRONN_GHOST           = 27389,
+    NPC_SKARVALD_GHOST          = 27390,
+
     NPC_FROST_TOMB              = 23965,
 
     GO_BELLOW_1                 = 186688,
