@@ -44,6 +44,7 @@ enum
     NPC_WORGEN                      = 26683,
     NPC_JORMUNGAR                   = 26685,
     NPC_RHINO                       = 26686,
+    NPC_GORTOK                      = 26687,
 
     // Ymiron spirits
     NPC_BJORN                       = 27303,            // front right

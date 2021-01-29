@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Boss_Gortok
 SD%Complete: 90%
-SDComment: Timers; The subbosses and Gortok should be activated on aura remove
+SDComment: The subbosses and Gortok should be activated on aura remove
 SDCategory: Utgarde Pinnacle
 EndScriptData */
 
@@ -26,114 +26,9 @@ EndScriptData */
 #include "Spells/SpellAuras.h"
 #include "Spells/Scripts/SpellScript.h"
 
-enum
-{
-    SAY_AGGRO               = -1575015,
-    SAY_SLAY_1              = -1575016,
-    SAY_SLAY_2              = -1575017,
-    SAY_DEATH               = -1575018,
-
-    SPELL_FREEZE_ANIM       = 16245,
-
-    SPELL_IMPALE            = 48261,
-    SPELL_IMPALE_H          = 59268,
-
-    SPELL_WITHERING_ROAR    = 48256,
-    SPELL_WITHERING_ROAR_H  = 59267,
-
-    SPELL_ARCING_SMASH      = 48260
-};
-
 /*######
-## boss_gortok
+## event_spell_gortok_event - 17728
 ######*/
-
-struct boss_gortokAI : public ScriptedAI
-{
-    boss_gortokAI(Creature* pCreature) : ScriptedAI(pCreature)
-    {
-        m_pInstance = static_cast<instance_pinnacle*>(pCreature->GetInstanceData());
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
-    }
-
-    instance_pinnacle* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiRoarTimer;
-    uint32 m_uiImpaleTimer;
-    uint32 m_uiArcingSmashTimer;
-
-    void Reset() override
-    {
-        m_uiRoarTimer        = 10000;
-        m_uiImpaleTimer      = 15000;
-        m_uiArcingSmashTimer = urand(5000, 8000);
-
-        // This needs to be reset in case the event fails
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
-    }
-
-    void Aggro(Unit* /*pWho*/) override
-    {
-        DoScriptText(SAY_AGGRO, m_creature);
-    }
-
-    void KilledUnit(Unit* /*pVictim*/) override
-    {
-        DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
-    }
-
-    void JustDied(Unit* /*pKiller*/) override
-    {
-        DoScriptText(SAY_DEATH, m_creature);
-
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GORTOK, DONE);
-    }
-
-    void JustReachedHome() override
-    {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_GORTOK, FAIL);
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiRoarTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_WITHERING_ROAR : SPELL_WITHERING_ROAR_H) == CAST_OK)
-                m_uiRoarTimer = 10000;
-        }
-        else
-            m_uiRoarTimer -= uiDiff;
-
-        if (m_uiImpaleTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_IMPALE : SPELL_IMPALE_H) == CAST_OK)
-                    m_uiImpaleTimer = urand(8000, 15000);
-            }
-        }
-        else
-            m_uiImpaleTimer -= uiDiff;
-
-        if (m_uiArcingSmashTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ARCING_SMASH) == CAST_OK)
-                m_uiArcingSmashTimer = urand(5000, 13000);
-        }
-        else
-            m_uiArcingSmashTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-    }
-};
 
 bool ProcessEventId_event_spell_gortok_event(uint32 /*uiEventId*/, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
 {
@@ -208,11 +103,6 @@ struct spell_awaken_gortok : public SpellScript
 void AddSC_boss_gortok()
 {
     Script* pNewScript = new Script;
-    pNewScript->Name = "boss_gortok";
-    pNewScript->GetAI = &GetNewAIInstance<boss_gortokAI>;
-    pNewScript->RegisterSelf();
-
-    pNewScript = new Script;
     pNewScript->Name = "event_spell_gortok_event";
     pNewScript->pProcessEventId = &ProcessEventId_event_spell_gortok_event;
     pNewScript->RegisterSelf();

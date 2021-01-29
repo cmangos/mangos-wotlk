@@ -429,6 +429,9 @@ void instance_pinnacle::OnCreatureEvade(Creature* pCreature)
         case NPC_WORGEN:
         case NPC_JORMUNGAR:
         case NPC_RHINO:
+        case NPC_GORTOK:
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            pCreature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
             SetData(TYPE_GORTOK, FAIL);
             break;
         case NPC_YMIRJAR_WARRIOR:
@@ -449,6 +452,9 @@ void instance_pinnacle::OnCreatureDeath(Creature* pCreature)
         case NPC_JORMUNGAR:
         case NPC_RHINO:
             m_uiGortokOrbTimer = 3000;
+            break;
+        case NPC_GORTOK:
+            SetData(TYPE_GORTOK, DONE);
             break;
     }
 }

@@ -1729,7 +1729,6 @@ UPDATE creature_template SET ScriptName='boss_keleseth' WHERE entry=23953;
 UPDATE creature_template SET ScriptName='mob_vrykul_skeleton' WHERE entry=23970;
 
 /* UTGARDE PINNACLE */
-UPDATE creature_template SET ScriptName='boss_gortok' WHERE entry=26687;
 UPDATE creature_template SET ScriptName='boss_skadi' WHERE entry=26693;
 UPDATE creature_template SET ScriptName='npc_grauf' WHERE entry=26893;
 UPDATE creature_template SET ScriptName='boss_svala' WHERE entry=26668;
@@ -5642,10 +5641,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1575013','Any last words?','13854','1','0','0','0','svala SAY_SACRIFICE_5'),
 ('-1575014','Nooo! I did not come this far... to...','13855','1','0','0','0','svala SAY_DEATH'),
 
-('-1575015','What this place? I will destroy you!','13464','1','0','0','0','gortok SAY_AGGRO'),
-('-1575016','You die! That what master wants!','13465','1','0','0','0','gortok SAY_SLAY_1'),
-('-1575017','An easy task!','13466','1','0','0','0','gortok SAY_SLAY_2'),
-('-1575018',' ','13467','1','0','0','0','gortok SAY_DEATH'),
+-- REUSE ME -1575015 to -1575018
 
 ('-1575019','What mongrels dare intrude here? Look alive, my brothers! A feast for the one that brings me their heads!','13497','1','0','22','0','skadi SAY_AGGRO'),
 ('-1575020','Sear them to the bone!','13498','1','0','0','0','skadi SAY_DRAKEBREATH_1'),
