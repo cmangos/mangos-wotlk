@@ -37,6 +37,9 @@ enum
     NPC_EARTHEN_DWARF       = 27980,
     NPC_IRON_SLUDGE         = 28165,                        // checked in the Sjonnir achiev
 
+    NPC_MAIDEN_GRIEF        = 27975,
+    NPC_KRYSTALLUS          = 27977,
+
     GO_DOOR_MAIDEN          = 191292,
     GO_DOOR_TRIBUNAL        = 191294,                       // possibly closed during event?
     GO_DOOR_TO_TRIBUNAL     = 191295,
@@ -57,6 +60,8 @@ enum
     // GO_RIGHT_PIPE        = 192164,
 
     SPELL_DARK_MATTER_START = 51001,                        // Channeled spells used by the Tribunal event
+
+    SPELL_BRANN_STEALTH     = 58506,
 
     MAX_FACES               = 3,
     FACE_MARNAK             = 0,
@@ -93,6 +98,8 @@ class instance_halls_of_stone : public ScriptedInstance
         void OnObjectCreate(GameObject* pGo) override;
         void OnCreatureRespawn(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
+        void OnCreatureEnterCombat(Creature* pCreature) override;
+        void OnCreatureEvade(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
@@ -123,9 +130,12 @@ class instance_halls_of_stone : public ScriptedInstance
         uint8 m_uiIronSludgeKilled;
         bool m_bIsBrannSpankin;
 
+        uint32 m_uiLightningChannelTimer;
+
         ObjectGuid m_protectorStalkerGuid;
         ObjectGuid m_stormcallerStalkerGuid;
         ObjectGuid m_custodianStalkerGuid;
+        ObjectGuid m_tribunalCasterGuid;
 
         GuidList m_lKaddrakGUIDs;
         GuidList m_lAbedneumGUIDs;

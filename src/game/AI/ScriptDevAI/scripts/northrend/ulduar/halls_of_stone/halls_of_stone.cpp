@@ -38,11 +38,16 @@ enum
 
     SPELL_KILL_TRIBUNAL_ADD             = 51289,                // Cleanup event on finish
     SPELL_ACHIEVEMENT_CHECK             = 59046,                // Doesn't exist in client dbc - added in spell_template
+
+    SPELL_LIGHTNING_CHANNEL_1           = 50626,                // cast by the globe in the room before the tribunal
+    SPELL_LIGHTNING_CHANNEL_2           = 50639,
+    SPELL_LIGHTNING_CHANNEL_3           = 50640,
 };
 
 instance_halls_of_stone::instance_halls_of_stone(Map* pMap) : ScriptedInstance(pMap),
     m_uiIronSludgeKilled(0),
-    m_bIsBrannSpankin(false)
+    m_bIsBrannSpankin(false),
+    m_uiLightningChannelTimer(30000)
 {
     Initialize();
 }
@@ -59,8 +64,13 @@ void instance_halls_of_stone::OnCreatureCreate(Creature* pCreature)
         case NPC_KADDRAK:          m_lKaddrakGUIDs.push_back(pCreature->GetObjectGuid());      break;
         case NPC_ABEDNEUM:         m_lAbedneumGUIDs.push_back(pCreature->GetObjectGuid());     break;
         case NPC_MARNAK:           m_lMarnakGUIDs.push_back(pCreature->GetObjectGuid());       break;
-        case NPC_TRIBUNAL_OF_AGES: m_lTribunalGUIDs.push_back(pCreature->GetObjectGuid());     break;
         case NPC_WORLDTRIGGER:     m_lWorldtriggerGUIDs.push_back(pCreature->GetObjectGuid()); break;
+        case NPC_TRIBUNAL_OF_AGES:
+            if (pCreature->GetPositionZ() > 225.0f)
+                m_tribunalCasterGuid = pCreature->GetObjectGuid();
+            else
+                m_lTribunalGUIDs.push_back(pCreature->GetObjectGuid());
+            break;
         case NPC_LIGHTNING_STALKER:
             // Sort the dwarf summoning stalkers
             if (pCreature->GetPositionY() > 400.0f)
@@ -394,8 +404,42 @@ void instance_halls_of_stone::DoFaceSpeak(uint8 uiFace, int32 iTextId)
 
 void instance_halls_of_stone::OnCreatureDeath(Creature* pCreature)
 {
-    if (pCreature->GetEntry() == NPC_IRON_SLUDGE && GetData(TYPE_SJONNIR) == IN_PROGRESS)
-        ++m_uiIronSludgeKilled;
+    switch (pCreature->GetEntry())
+    {
+        case NPC_MAIDEN_GRIEF:
+            SetData(TYPE_MAIDEN, DONE);
+            break;
+        case NPC_KRYSTALLUS:
+            SetData(TYPE_KRYSTALLUS, DONE);
+            break;
+        case NPC_IRON_SLUDGE:
+            if (GetData(TYPE_SJONNIR) == IN_PROGRESS)
+                ++m_uiIronSludgeKilled;
+            break;
+    }
+}
+
+void instance_halls_of_stone::OnCreatureEnterCombat(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_MAIDEN_GRIEF:
+            SetData(TYPE_MAIDEN, IN_PROGRESS);
+            break;
+        case NPC_KRYSTALLUS:
+            SetData(TYPE_KRYSTALLUS, IN_PROGRESS);
+            break;
+    }
+}
+
+void instance_halls_of_stone::OnCreatureEvade(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_MAIDEN_GRIEF:
+            SetData(TYPE_MAIDEN, FAIL);
+            break;
+    }
 }
 
 void instance_halls_of_stone::Update(uint32 uiDiff)
@@ -413,6 +457,26 @@ void instance_halls_of_stone::Update(uint32 uiDiff)
                 m_aFaces[i].m_uiTimer -= uiDiff;
         }
     }
+
+    // periodic lightning channel
+    if (m_uiLightningChannelTimer < uiDiff)
+    {
+        // Note: check if they are really random or cyclical
+        uint32 spellId = 0;
+        switch (urand(0, 2))
+        {
+            case 0: spellId = SPELL_LIGHTNING_CHANNEL_1; break;
+            case 1: spellId = SPELL_LIGHTNING_CHANNEL_2; break;
+            case 2: spellId = SPELL_LIGHTNING_CHANNEL_3; break;
+        }
+
+        if (Creature* pTribunal = instance->GetCreature(m_tribunalCasterGuid))
+            pTribunal->CastSpell(pTribunal, spellId, TRIGGERED_NONE);
+
+        m_uiLightningChannelTimer = urand(20000, 40000);
+    }
+    else
+        m_uiLightningChannelTimer -= uiDiff;
 }
 
 void instance_halls_of_stone::Load(const char* chrIn)

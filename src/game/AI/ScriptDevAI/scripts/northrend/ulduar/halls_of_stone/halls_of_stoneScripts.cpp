@@ -29,7 +29,6 @@ EndScriptData */
 
 /* Notes
  * The timers and handling of texts is not confirmed, but should also not be too far off
- * The spells "of the statues" (handled in instance script), need quite much of core support
  */
 
 enum
@@ -99,15 +98,17 @@ enum
 
     GOSSIP_ITEM_ID_START                = -3599000,
     GOSSIP_ITEM_ID_PROGRESS             = -3599001,
+    GOSSIP_ITEM_ID_END_TRIBUNAL         = -3599002,
+    GOSSIP_ITEM_ID_START_SJONNIR        = -3599003,
 
     TEXT_ID_START                       = 13100,
     TEXT_ID_PROGRESS                    = 13101,
+    TEXT_ID_END_TRIBUNAL                = 14176,
+    TEXT_ID_START_SJONNIR               = 13883,
 
     SPELL_SUMMON_PROTECTOR              = 51780,                // all spells are casted by stalker npcs 28130
     SPELL_SUMMON_STORMCALLER            = 51050,
     SPELL_SUMMON_CUSTODIAN              = 51051,
-
-    SPELL_STEALTH                       = 58506,
 
     QUEST_HALLS_OF_STONE                = 13207,
 };
@@ -672,10 +673,12 @@ struct npc_dark_matterAI : public ScriptedAI
     bool m_bIsRegularMode;
 
     uint32 m_uiSummonTimer;
+    uint32 m_uiResetTimer;
 
     void Reset() override
     {
         m_uiSummonTimer = 0;
+        m_uiResetTimer = 0;
     }
 
     void SpellHit(Unit* /*pCaster*/, const SpellEntry* pSpell) override
@@ -691,14 +694,7 @@ struct npc_dark_matterAI : public ScriptedAI
 
         // Cast the Dark Matter spell and reset to home position
         if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_DARK_MATTER : SPELL_DARK_MATTER_H) == CAST_OK)
-        {
-            EnterEvadeMode();
-            m_creature->SetWalk(false);
-
-            float fX, fY, fZ;
-            m_creature->GetRespawnCoord(fX, fY, fZ);
-            m_creature->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
-        }
+            m_uiResetTimer = 2000;
     }
 
     void UpdateAI(const uint32 uiDiff) override
@@ -712,6 +708,24 @@ struct npc_dark_matterAI : public ScriptedAI
             }
             else
                 m_uiSummonTimer -= uiDiff;
+        }
+
+        if (m_uiResetTimer)
+        {
+            // Reset creature to start point
+            if (m_uiResetTimer <= uiDiff)
+            {
+                EnterEvadeMode();
+                m_creature->SetWalk(false);
+
+                float fX, fY, fZ;
+                m_creature->GetRespawnCoord(fX, fY, fZ);
+                m_creature->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+
+                m_uiResetTimer = 0;
+            }
+            else
+                m_uiResetTimer -= uiDiff;
         }
     }
 };
@@ -736,6 +750,42 @@ struct spell_shatter : public SpellScript
     }
 };
 
+/*######
+## spell_petrifying_grip_aura - 50836
+######*/
+
+struct spell_petrifying_grip_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsPlayer() || !apply)
+            return;
+
+        if (aura->GetStackAmount() == 5)
+            target->CastSpell(target, 50812, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_carve_stone_aura - 50563
+######*/
+
+struct spell_carve_stone_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        if (apply)
+            target->CastSpell(target, 50549, TRIGGERED_OLD_TRIGGERED);
+        else
+            target->RemoveAurasDueToSpell(50549);
+    }
+};
+
 void AddSC_halls_of_stone()
 {
     Script* pNewScript = new Script;
@@ -751,4 +801,6 @@ void AddSC_halls_of_stone()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_shatter>("spell_shatter");
+    RegisterAuraScript<spell_petrifying_grip_aura>("spell_petrifying_grip_aura");
+    RegisterAuraScript<spell_carve_stone_aura>("spell_carve_stone_aura");
 }

@@ -1607,7 +1607,6 @@ UPDATE creature_template SET ScriptName='boss_loken' WHERE entry=28923;
 
 /* HALLS OF STONE */
 UPDATE instance_template SET ScriptName='instance_halls_of_stone' WHERE map=599;
-UPDATE creature_template SET ScriptName='boss_maiden_of_grief' WHERE entry=27975;
 UPDATE creature_template SET ScriptName='boss_sjonnir' WHERE entry=27978;
 UPDATE creature_template SET ScriptName='npc_brann_hos' WHERE entry=28070;
 UPDATE creature_template SET ScriptName='npc_dark_matter' WHERE entry=28235;
@@ -5948,18 +5947,12 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 -- -1 599 000 HALLS OF STONE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
 ('-1599000','Soft, vulnerable shells. Brief, fragile lives. You can not escape the curse of flesh!','14180','1','0','0','0','sjonnir SAY_AGGRO'),
-('-1599001','???','14181','1','0','0','0','sjonnir SAY_SLAY_1'),
+('-1599001','Folvynn buul hrom onn!','14181','1','0','0','0','sjonnir SAY_SLAY_1'),
 ('-1599002','Flesh is no match for iron!','14182','1','0','0','0','sjonnir SAY_SLAY_2'),
 ('-1599003','Armies of iron will smother the world!','14183','1','0','0','0','sjonnir SAY_SLAY_3'),
 ('-1599004','Loken will not rest, until the forge is retaken. You changed nothing!','14184','1','0','0','0','sjonnir SAY_DEATH'),
 
-('-1599005','You shouldn''t have come...now you will die!','13487','1','0','0','0','maiden SAY_AGGRO'),
-('-1599006','Why must it be this way?','13488','1','0','0','0','maiden SAY_SLAY_1'),
-('-1599007','You had it coming!','13489','1','0','0','0','maiden SAY_SLAY_2'),
-('-1599008','My burden grows heavier.','13490','1','0','0','0','maiden SAY_SLAY_3'),
-('-1599009','This is your own fault!','13491','1','0','0','0','maiden SAY_SLAY_4'),
-('-1599010','So much lost time... that you''ll never get back!','13492','1','0','0','0','maiden SAY_STUN'),
-('-1599011','I hope you all rot! I never...wanted...this.','13493','1','0','0','0','maiden SAY_DEATH'),
+-- RE-USE -1599005 to -1599011
 
 ('-1599012','Now that''s owning your supper!','14244','1','0','0','0','brann SAY_KILL_1'),
 ('-1599013','Press on, that''s the way!','14245','1','0','0','0','brann SAY_KILL_2'),
@@ -7601,7 +7594,9 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 -- -3 599 000 HALLS OF STONE
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3599000,'Brann, it would be our honor!','brann GOSSIP_ITEM_ID_START'),
-(-3599001,'Let\'s move Brann, enough of the history lessons!','brann GOSSIP_ITEM_ID_PROGRESS');
+(-3599001,'Let\'s move Brann, enough of the history lessons!','brann GOSSIP_ITEM_ID_PROGRESS'),
+(-3599002,'There will be plenty of time for this later Brann, we need to get moving!','brann GOSSIP_ITEM_ID_END_TRIBUNAL'),
+(-3599003,'We\'re with you Brann! Open it!','brann GOSSIP_ITEM_ID_START_SJONNIR');
 
 -- -3 603 000 ULDUAR
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
