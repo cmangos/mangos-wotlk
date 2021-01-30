@@ -9732,6 +9732,7 @@ void ObjectMgr::LoadCreatureTemplateSpells()
 
 void ObjectMgr::LoadCreatureCooldowns()
 {
+    // not deleting on reload because some cooldowns are SD2 based - instead we overwrite only
     uint32 count = 0;
     QueryResult* result = WorldDatabase.Query("SELECT Entry, SpellId, CooldownMin, CooldownMax FROM creature_cooldowns");
 
@@ -9760,7 +9761,7 @@ void ObjectMgr::LoadCreatureCooldowns()
                 sLog.outErrorDb("LoadCreatureCooldowns: Cooldowns are both 0 for entry %u spellId %u - redundant entry.", entry, spellId);
                 continue;
             }
-            m_creatureCooldownMap[entry].emplace(spellId, std::make_pair(cooldownMin, cooldownMax));
+            m_creatureCooldownMap[entry][spellId] = std::make_pair(cooldownMin, cooldownMax);
         } while (result->NextRow());
     }
     delete result;
