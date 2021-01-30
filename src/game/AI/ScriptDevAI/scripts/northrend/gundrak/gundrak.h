@@ -33,6 +33,7 @@ enum
     NPC_LIVIN_MOJO         = 29830,
     NPC_GALDARAH           = 29306,
     NPC_ECK                = 29932,
+    NPC_RUINS_DWELLER      = 29920,
     NPC_INVISIBLE_STALKER  = 30298,                         // Caster and Target for visual spells on altar use
     NPC_SLADRAN_SUMMON_T   = 29682,
 
@@ -82,6 +83,7 @@ class instance_gundrak : public ScriptedInstance
         void OnObjectCreate(GameObject* pGo) override;
 
         void OnCreatureEnterCombat(Creature* pCreature) override;
+        void OnCreatureDeath(Creature* pCreature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
@@ -110,6 +112,7 @@ class instance_gundrak : public ScriptedInstance
         GuidVector m_vStalkerCasterGuids;
         GuidVector m_vStalkerTargetGuids;
         GuidSet m_sColossusMojosGuids;
+        GuidSet m_sRuinsDwelerGuids;
 
         bool m_bLessRabi;
 

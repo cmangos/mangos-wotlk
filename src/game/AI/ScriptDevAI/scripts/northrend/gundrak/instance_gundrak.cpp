@@ -63,6 +63,7 @@ void instance_gundrak::OnCreatureCreate(Creature* pCreature)
         case NPC_SLADRAN:
         case NPC_ELEMENTAL:
         case NPC_COLOSSUS:
+        case NPC_ECK:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
 
@@ -77,6 +78,10 @@ void instance_gundrak::OnCreatureCreate(Creature* pCreature)
             // Store only the Mojos used to activate the Colossus
             if (pCreature->GetPositionX() > 1650.0f)
                 m_sColossusMojosGuids.insert(pCreature->GetObjectGuid());
+            break;
+        case NPC_RUINS_DWELLER:
+            if (pCreature->GetPositionZ() < 110.0f)
+                m_sRuinsDwelerGuids.insert(pCreature->GetObjectGuid());
             break;
     }
 }
@@ -141,6 +146,33 @@ void instance_gundrak::OnObjectCreate(GameObject* pGo)
             return;
     }
     m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+}
+
+void instance_gundrak::OnCreatureDeath(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_RUINS_DWELLER:
+            if (m_sRuinsDwelerGuids.find(pCreature->GetObjectGuid()) != m_sRuinsDwelerGuids.end())
+            {
+                m_sRuinsDwelerGuids.erase(pCreature->GetObjectGuid());
+
+                // when all dwellers are dead make Eck jump from the water
+                if (m_sRuinsDwelerGuids.empty())
+                {
+                    if (Creature* pEck = GetSingleCreatureFromStorage(NPC_ECK))
+                    {
+                        pEck->SetWalk(false);
+                        pEck->GetMotionMaster()->Clear(false, true);
+                        pEck->GetMotionMaster()->MoveWaypoint();
+                    }
+                }
+            }
+            break;
+        case NPC_ECK:
+            SetData(TYPE_ECK, DONE);
+            break;
+    }
 }
 
 void instance_gundrak::Load(const char* chrIn)

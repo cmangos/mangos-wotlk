@@ -859,7 +859,6 @@ UPDATE creature_template SET ScriptName='boss_krosh_firehand' WHERE entry=18832;
 UPDATE creature_template SET ScriptName='boss_drakkari_colossus' WHERE entry=29307;
 UPDATE creature_template SET ScriptName='boss_drakkari_elemental' WHERE entry=29573;
 UPDATE creature_template SET ScriptName='npc_living_mojo' WHERE entry=29830;
-UPDATE creature_template SET ScriptName='boss_eck' WHERE entry=29932;
 UPDATE creature_template SET ScriptName='boss_galdarah' WHERE entry=29306;
 UPDATE creature_template SET ScriptName='boss_moorabi' WHERE entry=29305;
 UPDATE creature_template SET ScriptName='boss_sladran' WHERE entry=29304;
