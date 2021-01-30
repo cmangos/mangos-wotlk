@@ -351,8 +351,7 @@ extern void AddSC_boss_ionar();
 extern void AddSC_boss_loken();
 extern void AddSC_boss_volkhan();
 extern void AddSC_instance_halls_of_lightning();
-extern void AddSC_boss_maiden_of_grief();                   // ulduar, halls_of_stone
-extern void AddSC_boss_sjonnir();
+extern void AddSC_boss_sjonnir();                           // ulduar, halls_of_stone
 extern void AddSC_halls_of_stone();
 extern void AddSC_instance_halls_of_stone();
 extern void AddSC_boss_assembly_of_iron();                  // ulduar, ulduar
@@ -373,7 +372,6 @@ extern void AddSC_instance_ulduar();
 extern void AddSC_ulduar();
 extern void AddSC_boss_ingvar();                            // utgarde_keep, utgarde_keep
 extern void AddSC_boss_keleseth();
-extern void AddSC_boss_skarvald_and_dalronn();
 extern void AddSC_instance_utgarde_keep();
 extern void AddSC_utgarde_keep();
 extern void AddSC_boss_gortok();                           // utgarde_keep, utgarde_pinnacle
@@ -846,8 +844,7 @@ void AddScripts()
     AddSC_boss_loken();
     AddSC_boss_volkhan();
     AddSC_instance_halls_of_lightning();
-    AddSC_boss_maiden_of_grief();                           // ulduar, halls_of_stone
-    AddSC_boss_sjonnir();
+    AddSC_boss_sjonnir();                                   // ulduar, halls_of_stone
     AddSC_halls_of_stone();
     AddSC_instance_halls_of_stone();
     AddSC_boss_assembly_of_iron();                          // ulduar, ulduar
@@ -868,7 +865,6 @@ void AddScripts()
     AddSC_ulduar();
     AddSC_boss_ingvar();                                    // UK, utgarde_keep
     AddSC_boss_keleseth();
-    AddSC_boss_skarvald_and_dalronn();
     AddSC_instance_utgarde_keep();
     AddSC_utgarde_keep();
     AddSC_boss_gortok();                                    // UK, utgarde_pinnacle
