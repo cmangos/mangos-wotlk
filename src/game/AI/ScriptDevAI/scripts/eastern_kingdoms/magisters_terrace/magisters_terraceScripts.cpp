@@ -97,7 +97,9 @@ struct npc_kalecgosAI : public CombatAI
             }
             case 2:
             {
-                DoCastSpellIfCan(nullptr, SPELL_ORB_KILL_CREDIT, CAST_TRIGGERED);
+                if (ScriptedInstance* instance = static_cast<ScriptedInstance*>(m_creature->GetInstanceData()))
+                    if (Creature* creature = instance->GetSingleCreatureFromStorage(NPC_SCRYERS_BUNNY))
+                        creature->CastSpell(nullptr, SPELL_ORB_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
                 DoCastSpellIfCan(nullptr, SPELL_TRANSFORM_VISUAL);
                 m_creature->ForcedDespawn(1500);
                 timer = 500;

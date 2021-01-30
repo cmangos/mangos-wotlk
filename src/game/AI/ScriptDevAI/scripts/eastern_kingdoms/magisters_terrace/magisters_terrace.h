@@ -21,6 +21,8 @@ enum
     NPC_KALECGOS_DRAGON         = 24844,
     NPC_KAELTHAS                = 24664,
 
+    NPC_SCRYERS_BUNNY           = 25042,
+
     // Delrissa adds
     NPC_KAGANI                  = 24557,
     NPC_ELLRYS                  = 24558,
