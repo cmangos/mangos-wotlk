@@ -121,6 +121,9 @@ class instance_halls_of_stone : public ScriptedInstance
 
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
 
+        void ShowChatCommands(ChatHandler* handler) override;
+        void ExecuteChatCommand(ChatHandler* handler, char* args) override;
+
         void ActivateFace(uint8 uiFace, bool bAfterEvent);
         void ResetFace(uint8 uiFace);
         void SetFaceTimer(uint8 uiFace, uint32 uiTimer);

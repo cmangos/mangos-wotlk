@@ -232,6 +232,14 @@ void instance_halls_of_stone::SetData(uint32 uiType, uint32 uiData)
                 case DONE:
                     if (GameObject* pFloor = GetSingleGameObjectFromStorage(GO_TRIBUNAL_FLOOR))
                         pFloor->ResetDoorOrButton();
+
+                    for (auto& m_aFace : m_aFaces)
+                    {
+                        // Shut down the faces
+                        if (m_aFace.m_bIsActive)
+                            if (GameObject* pFace = instance->GetGameObject(m_aFace.m_goFaceGuid))
+                                pFace->ResetDoorOrButton();
+                    }
                     break;
                 case FAIL:
                     for (auto& m_aFace : m_aFaces)
@@ -650,6 +658,28 @@ void instance_halls_of_stone::ProcessFaceSummon(uint8 uiFace)
                 pStalker->CastSpell(pStalker, SPELL_SUMMON_CUSTODIAN, TRIGGERED_OLD_TRIGGERED);
             m_aFaces[uiFace].m_uiSummonTimer = urand(30000, 35000);
             break;
+    }
+}
+
+void instance_halls_of_stone::ShowChatCommands(ChatHandler* handler)
+{
+    handler->SendSysMessage("This instance supports the following commands:\n completetribunal");
+}
+
+// Debug commands for Halls of Stone
+void instance_halls_of_stone::ExecuteChatCommand(ChatHandler* handler, char* args)
+{
+    char* result = handler->ExtractLiteralArg(&args);
+    if (!result)
+        return;
+    std::string val = result;
+
+    if (val == "completetribunal")
+    {
+        SetData(TYPE_TRIBUNAL, DONE);
+
+        if (Player* pPlayer = GetPlayerInMap())
+            pPlayer->SummonCreature(NPC_BRANN, fBrannDoorLocation[0], fBrannDoorLocation[1], fBrannDoorLocation[2], fBrannDoorLocation[3], TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 }
 

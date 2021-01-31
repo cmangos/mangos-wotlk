@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Halls_of_Stone
-SD%Complete: 50%
-SDComment: Just base mechanics in script, timers and stuff is very uncertain, event-spells are not working
+SD%Complete: 100%
+SDComment:
 SDCategory: Halls of Stone
 EndScriptData */
 
@@ -472,6 +472,8 @@ bool GossipHello_npc_brann_hos(Player* pPlayer, Creature* pCreature)
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_START_SJONNIR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
             pPlayer->SEND_GOSSIP_MENU(TEXT_ID_START_SJONNIR, pCreature->GetObjectGuid());
         }
+        else
+            pPlayer->SEND_GOSSIP_MENU(pPlayer->GetGossipTextId(pCreature), pCreature->GetObjectGuid());
     }
 
     return true;
