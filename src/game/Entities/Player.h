@@ -2506,6 +2506,8 @@ class Player : public Unit
         bool HasQueuedSpell();
         void ClearQueuedSpell();
         void CastQueuedSpell(SpellCastTargets& targets);
+
+        void BanPlayer(std::string const& reason);
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

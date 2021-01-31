@@ -22522,6 +22522,15 @@ void Player::CastQueuedSpell(SpellCastTargets& targets)
     spell->SpellStart(&targets);
 }
 
+void Player::BanPlayer(std::string const& reason)
+{
+    std::string reasonCopy = reason;
+    sWorld.GetMessager().AddMessage([sessionId = GetSession()->GetAccountId(), reasonCopy](World* world)
+    {
+        sWorld.BanAccount(world->FindSession(sessionId), 0, reasonCopy, "Automatic script ban.");
+    });
+}
+
 void Player::ConvertRune(uint8 index, RuneType newType)
 {
     SetCurrentRune(index, newType);
