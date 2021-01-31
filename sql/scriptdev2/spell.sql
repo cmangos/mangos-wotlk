@@ -226,6 +226,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28728,'spell_feigh_death_pos_aura'),
+(41253,'spell_greater_invisibility_mob'),
 (42672,'spell_frost_tomb_aura'),
 (42912,'spell_summon_banshee'),
 (43768,'spell_flying_machine_controls'),
