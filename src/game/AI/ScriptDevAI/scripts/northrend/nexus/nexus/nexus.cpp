@@ -109,6 +109,13 @@ void instance_nexus::OnCreatureRespawn(Creature * pCreature)
                 }
             }
             break;
+        // Passive behavior
+        case NPC_CRYSTAL_SPIKE_INITIAL:
+        case NPC_CRYSTAL_SPIKE_TRIGGER:
+        case NPC_CRYSTAL_SPIKE:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
+            break;
     }
 }
 

@@ -1220,7 +1220,6 @@ INSERT INTO scripted_event_id VALUES
 UPDATE creature_template SET ScriptName='boss_anomalus' WHERE entry=26763;
 UPDATE creature_template SET ScriptName='boss_keristrasza' WHERE entry=26723;
 UPDATE creature_template SET ScriptName='boss_ormorok' WHERE entry=26794;
-UPDATE creature_template SET ScriptName='npc_crystal_spike_trigger' WHERE entry IN (27101, 27079);
 UPDATE creature_template SET ScriptName='boss_telestra' WHERE entry=26731;
 UPDATE gameobject_template SET ScriptName='go_containment_sphere' WHERE entry IN (188526, 188527, 188528);
 UPDATE instance_template SET ScriptName='instance_nexus' WHERE map=576;

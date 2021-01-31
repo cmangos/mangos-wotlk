@@ -25,6 +25,7 @@ EndScriptData */
 #include "nexus.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -36,9 +37,9 @@ enum
     EMOTE_BOSS_GENERIC_FRENZY   = -1000005,
 
     SPELL_REFLECTION            = 47981,
-    SPELL_CRYSTAL_SPIKES        = 47958,
-    SPELL_CRYSTAL_SPIKES_H1     = 57082,
-    SPELL_CRYSTAL_SPIKES_H2     = 57083,
+    SPELL_CRYSTAL_SPIKES        = 47958,        // spawn 4x creature 27101
+    SPELL_CRYSTAL_SPIKES_H1     = 57082,        // spawn 4x creature 27101
+    SPELL_CRYSTAL_SPIKES_H2     = 57083,        // spawn 4x creature 27101
     SPELL_FRENZY                = 48017,
     SPELL_FRENZY_H              = 57086,
     SPELL_TRAMPLE               = 48016,
@@ -49,76 +50,82 @@ enum
     SPELL_CRYSTALLINE_TANGLER   = 61555,        // procs aura 61556 on melee attack
 
     // crystal spike spells
-    SPELL_CRYSTAL_SPIKE_BACK    = 47936,
-    SPELL_CRYSTAL_SPIKE_LEFT    = 47942,
-    SPELL_CRYSTAL_SPIKE_RIGHT   = 47943,
-    SPELL_CRYSTAL_SPIKE_AURA    = 47941,
-    SPELL_CRYSTAL_SPIKE_PRE     = 50442,
+    SPELL_CRYSTAL_SPIKE_BACK    = 47936,        // spawn creature 27079 and object 188537
+    SPELL_CRYSTAL_SPIKE_LEFT    = 47942,        // spawn creature 27079 and object 188537
+    SPELL_CRYSTAL_SPIKE_RIGHT   = 47943,        // spawn creature 27079 and object 188537
+    SPELL_CRYSTAL_SPIKE_AURA    = 47941,        // triggers a random of the following: 47936, 47942, 47943
+    SPELL_CRYSTAL_SPIKE_PRE     = 50442,        // visual aura; triggers the trap object which casts spell 47947
 
     //SPELL_CRYSTAL_SPIKE_DMG     = 47944,
     //SPELL_CRYSTAL_SPIKE_DMG_H   = 57067,
 
     // summons
-    NPC_CRYSTAL_SPIKE_INITIAL   = 27101,
-    NPC_CRYSTAL_SPIKE_TRIGGER   = 27079,
-    //NPC_CRYSTAL_SPIKE           = 27099,          // summoned by 47947 - handled in eventAI
-    NPC_CRYSTALLINE_TANGLER     = 32665,            // has aura 61555
+    NPC_CRYSTALLINE_TANGLER     = 32665,        // has aura 61555
 
-    GO_CRYSTAL_SPIKE            = 188537,
+    GO_CRYSTAL_SPIKE            = 188537,       // triggers spell 47947 on activation
 
-    MAX_ALLOWED_SPIKES          = 28,               // this defines the maximum number of spikes summoned per turn
+    MAX_ALLOWED_SPIKES          = 20,           // this defines the maximum number of spikes summoned per turn
+};
+
+enum OrmorokActions
+{
+    ORMOROK_ACTION_TRAMPLE,
+    ORMOROK_ACTION_REFLECTION,
+    ORMOROK_ACTION_CRYSTAL_SPIKE,
+    ORMOROK_ACTION_TANGLER,
+    ORMOROK_ACTION_ENRAGE,
+    ORMOROK_ACTION_MAX,
 };
 
 /*######
 ## boss_ormorok
 ######*/
 
-struct boss_ormorokAI : public ScriptedAI
+struct boss_ormorokAI : public CombatAI
 {
-    boss_ormorokAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_ormorokAI(Creature* creature) : CombatAI(creature, ORMOROK_ACTION_MAX), m_instance(static_cast<instance_nexus*>(creature->GetInstanceData()))
     {
-        m_pInstance = static_cast<instance_nexus*>(pCreature->GetInstanceData());
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
+
+        AddCombatAction(ORMOROK_ACTION_TRAMPLE, 10000u);
+        AddCombatAction(ORMOROK_ACTION_REFLECTION, 25000u);
+        AddCombatAction(ORMOROK_ACTION_CRYSTAL_SPIKE, 10000u, 15000u);
+
+        if (!m_isRegularMode)
+            AddCombatAction(ORMOROK_ACTION_TANGLER, 12000u);
+
+        AddTimerlessCombatAction(ORMOROK_ACTION_ENRAGE, true);
     }
 
-    instance_nexus* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_nexus* m_instance;
+    bool m_isRegularMode;
 
-    bool m_bIsEnraged;
-
-    uint32 m_uiTrampleTimer;
-    uint32 m_uiSpellReflectTimer;
-    uint32 m_uiCrystalSpikeTimer;
-    uint32 m_uiTanglerTimer;
     uint8 m_uiSpikeCount;
 
-    void Reset() override
+    void Reset()
     {
-        m_bIsEnraged = false;
+        CombatAI::Reset();
 
-        m_uiTrampleTimer      = urand(10000, 15000);
-        m_uiSpellReflectTimer = urand(20000, 23000);
-        m_uiCrystalSpikeTimer = urand(10000, 15000);
-        m_uiTanglerTimer      = urand(17000, 20000);
-        m_uiSpikeCount        = 0;
+        m_uiSpikeCount = 0;
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ORMOROK, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_ORMOROK, DONE);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* victim) override
     {
+        CombatAI::KilledUnit(victim);
+
         if (urand(0, 1))
             DoScriptText(SAY_KILL, m_creature);
     }
@@ -152,120 +159,49 @@ struct boss_ormorokAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (!m_bIsEnraged && m_creature->GetHealthPercent() < 25.0f)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_FRENZY : SPELL_FRENZY_H) == CAST_OK)
+            case ORMOROK_ACTION_TRAMPLE:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_TRAMPLE : SPELL_TRAMPLE_H) == CAST_OK)
+                    ResetCombatAction(action, 10000);
+                break;
+            case ORMOROK_ACTION_REFLECTION:
+                if (DoCastSpellIfCan(m_creature, SPELL_REFLECTION) == CAST_OK)
+                    ResetCombatAction(action, 30000);
+                break;
+            case ORMOROK_ACTION_CRYSTAL_SPIKE:
             {
-                DoScriptText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
-                m_bIsEnraged = true;
+                uint32 uiSpikeSpell = SPELL_CRYSTAL_SPIKES;
+                if (!m_isRegularMode)
+                    uiSpikeSpell = urand(0, 1) ? SPELL_CRYSTAL_SPIKES_H1 : SPELL_CRYSTAL_SPIKES_H2;
+
+                if (DoCastSpellIfCan(m_creature, uiSpikeSpell) == CAST_OK)
+                {
+                    DoScriptText(SAY_ICESPIKE, m_creature);
+                    m_uiSpikeCount = 0;
+                    ResetCombatAction(action, 30000);
+                }
+                break;
             }
-        }
-
-        if (m_uiTrampleTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_TRAMPLE : SPELL_TRAMPLE_H) == CAST_OK)
-                m_uiTrampleTimer = urand(20000, 25000);
-        }
-        else
-            m_uiTrampleTimer -= uiDiff;
-
-        if (m_uiSpellReflectTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_REFLECTION) == CAST_OK)
-                m_uiSpellReflectTimer = urand(26000, 30000);
-        }
-        else
-            m_uiSpellReflectTimer -= uiDiff;
-
-        if (m_uiCrystalSpikeTimer < uiDiff)
-        {
-            uint32 uiSpikeSpell = SPELL_CRYSTAL_SPIKES;
-            if (!m_bIsRegularMode)
-                uiSpikeSpell = urand(0, 1) ? SPELL_CRYSTAL_SPIKES_H1 : SPELL_CRYSTAL_SPIKES_H2;
-
-            if (DoCastSpellIfCan(m_creature, uiSpikeSpell) == CAST_OK)
-            {
-                DoScriptText(SAY_ICESPIKE, m_creature);
-                m_uiCrystalSpikeTimer = urand(13000, 15000);
-                m_uiSpikeCount = 0;
-            }
-        }
-        else
-            m_uiCrystalSpikeTimer -= uiDiff;
-
-        if (!m_bIsRegularMode)
-        {
-            if (m_uiTanglerTimer < uiDiff)
-            {
+            case ORMOROK_ACTION_TANGLER:
                 if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_TANGLER_H) == CAST_OK)
-                    m_uiTanglerTimer = urand(15000, 25000);
-            }
-            else
-                m_uiTanglerTimer -= uiDiff;
+                    ResetCombatAction(action, urand(15000, 20000));
+                break;
+            case ORMOROK_ACTION_ENRAGE:
+                if (m_creature->GetHealthPercent() < 25.0f)
+                {
+                    if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_FRENZY : SPELL_FRENZY_H) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
+                        SetActionReadyStatus(action, false);
+                    }
+                }
+                break;
         }
-
-        DoMeleeAttackIfReady();
     }
 };
-
-bool EffectDummyCreature_npc_crystal_spike_trigger(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_CRYSTAL_SPIKE_AURA && uiEffIndex == EFFECT_INDEX_0)
-    {
-        if (pCreatureTarget->GetEntry() == NPC_CRYSTAL_SPIKE_INITIAL || pCreatureTarget->GetEntry() == NPC_CRYSTAL_SPIKE_TRIGGER)
-        {
-            ScriptedInstance* pInstance = (ScriptedInstance*)pCreatureTarget->GetInstanceData();
-            if (!pInstance)
-                return true;
-
-            Creature* pOrmorok = pInstance->GetSingleCreatureFromStorage(NPC_ORMOROK);
-            if (!pOrmorok)
-                return true;
-
-            // The following spells define the direction of the spike line
-            // All of the spells are targeting the back of the caster, but some take a small turn to left or right
-            // The exact algorithm is unk but we know that the chances of getting a straight line are about 75%. The other two directions are about 12.5% each
-            uint32 castSpellId;
-            if (roll_chance_i(75))
-                castSpellId = SPELL_CRYSTAL_SPIKE_BACK;
-            else
-                castSpellId = urand(0, 1) ? SPELL_CRYSTAL_SPIKE_LEFT : SPELL_CRYSTAL_SPIKE_RIGHT;
-
-            pCreatureTarget->CastSpell(pCreatureTarget, castSpellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pOrmorok->GetObjectGuid());
-            // always return true when we are handling this spell and effect
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool EffectAuraDummy_spell_aura_dummy_crystal_spike_visual(const Aura* pAura, bool bApply)
-{
-    if (pAura->GetId() == SPELL_CRYSTAL_SPIKE_PRE && pAura->GetEffIndex() == EFFECT_INDEX_0 && !bApply)
-    {
-        if (Creature* pTarget = (Creature*)pAura->GetTarget())
-        {
-            if (pTarget->GetEntry() != NPC_CRYSTAL_SPIKE_TRIGGER)
-                return true;
-
-            // Use the Spike gameobject so we can summon the npc which actual does the damage
-            if (GameObject* pSpike = GetClosestGameObjectWithEntry(pTarget, GO_CRYSTAL_SPIKE, 10.0f))
-            {
-                pSpike->Use(pTarget);
-                // Note: the following command should be handled in core by the trap GO code
-                pSpike->SetLootState(GO_JUST_DEACTIVATED);
-            }
-        }
-    }
-    return true;
-}
 
 /*######
 ## spell_crystal_spikes - 47958, 57082, 57083
@@ -300,6 +236,64 @@ struct spell_crystal_spikes : public SpellScript
     }
 };
 
+/*######
+## spell_crystal_spike_aura - 47941
+######*/
+
+struct spell_crystal_spike_aura : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        instance_nexus* pInstance = static_cast<instance_nexus*>(target->GetInstanceData());
+        if (!pInstance)
+            return;
+
+        Creature* pOrmorok = pInstance->GetSingleCreatureFromStorage(NPC_ORMOROK);
+        if (!pOrmorok)
+            return;
+
+        // The following spells define the direction of the spike line
+        // All of the spells are targeting the back of the caster, but some take a small turn to left or right
+        // The exact algorithm is unk but we know that the chances of getting a straight line are about 75%. The other two directions are about 12.5% each
+        uint32 castSpellId;
+        if (roll_chance_i(75))
+            castSpellId = SPELL_CRYSTAL_SPIKE_BACK;
+        else
+            castSpellId = urand(0, 1) ? SPELL_CRYSTAL_SPIKE_LEFT : SPELL_CRYSTAL_SPIKE_RIGHT;
+
+        target->CastSpell(target, castSpellId, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pOrmorok->GetObjectGuid());
+    }
+};
+
+/*######
+## spell_crystal_spike_visual_aura - 50442
+######*/
+
+struct spell_crystal_spike_visual_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        if (!apply)
+        {
+            // Use the Spike gameobject so we can summon the npc which actual does the damage
+            if (GameObject* spike = GetClosestGameObjectWithEntry(target, GO_CRYSTAL_SPIKE, 10.0f))
+            {
+                spike->Use(target);
+                // Note: the following command should be handled in core by the trap GO code
+                spike->SetLootState(GO_JUST_DEACTIVATED);
+            }
+        }
+    }
+};
+
 void AddSC_boss_ormorok()
 {
     Script* pNewScript = new Script;
@@ -307,11 +301,7 @@ void AddSC_boss_ormorok()
     pNewScript->GetAI = &GetNewAIInstance<boss_ormorokAI>;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_crystal_spike_trigger";
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_crystal_spike_trigger;
-    pNewScript->pEffectAuraDummy = &EffectAuraDummy_spell_aura_dummy_crystal_spike_visual;
-    pNewScript->RegisterSelf();
-
     RegisterSpellScript<spell_crystal_spikes>("spell_crystal_spikes");
+    RegisterAuraScript<spell_crystal_spike_aura>("spell_crystal_spike_aura");
+    RegisterAuraScript<spell_crystal_spike_visual_aura>("spell_crystal_spike_visual_aura");
 }
