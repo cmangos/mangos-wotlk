@@ -124,7 +124,7 @@ struct boss_keristraszaAI : public CombatAI
         {
             case KERISTRASZA_ACTION_TAIL_SWEEP:
                 if (DoCastSpellIfCan(m_creature, SPELL_TAIL_SWEEP) == CAST_OK)
-                    ResetCombatAction(action, 10000u);
+                    ResetCombatAction(action, 10000);
                 break;
             case KERISTRASZA_ACTION_CRYSTALFIRE_BREATH:
                 if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_CRYSTALFIRE_BREATH : SPELL_CRYSTALFIRE_BREATH_H) == CAST_OK)

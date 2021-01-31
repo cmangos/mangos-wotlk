@@ -93,7 +93,7 @@ static const GauntletIntroData aSkadiIntroData[MAX_INTRO_MOBS] =
     {NPC_YMIRJAR_WARRIOR, 10},
 };
 
-enum KeristraszaActions
+enum SkadiActions
 {
     SKADI_ACTION_CRUSH,
     SKADI_ACTION_WHIRLWIND,
