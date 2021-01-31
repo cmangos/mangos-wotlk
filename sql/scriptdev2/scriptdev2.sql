@@ -3615,7 +3615,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1109011','You must not summon our god!','0','1','0','0','4530','Nightmare Suppressor SAY_SPAWN_1'),
 ('-1109012','Stop!  Infidels!','0','1','0','0','4532','Nightmare Suppressor SAY_SPAWN_2'),
 ('-1109013','No!  We cannot allow you to summon Hakkar!','0','1','0','0','4529','Nightmare Suppressor SAY_SPAWN_3'),
-('-1109014','You must not summon our god!','0','1','0','0','4531','Nightmare Suppressor SAY_SPAWN_4');
+('-1109014','You must not summon our god!','0','1','0','0','4531','Nightmare Suppressor SAY_SPAWN_4'),
+('-1109015','NOOOO!!','0','1','0','0','4544','avatar SAY_AVATAR_DESPAWN');
 
 -- -1 129 000 RAZORFEN DOWNS
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
