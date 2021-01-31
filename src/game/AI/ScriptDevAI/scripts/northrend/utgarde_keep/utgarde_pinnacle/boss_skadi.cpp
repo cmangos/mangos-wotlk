@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Skadi
-SD%Complete: 80%
-SDComment: The gauntlet movement needs to be random choosed for left and right. Event reset not implemented using the proper spell
+SD%Complete: 90%
+SDComment: Event reset not implemented using the proper spell
 SDCategory: Utgarde Pinnacle
 EndScriptData */
 
@@ -25,6 +25,7 @@ EndScriptData */
 #include "utgarde_pinnacle.h"
 #include "Spells/SpellAuras.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -71,57 +72,63 @@ enum
 struct GauntletIntroData
 {
     uint32 uiCreatureId;
-    float fX, fY, fZ;
+    uint8 uiPathId;
 };
 
+// Note: some paths are partially guesswork
 static const GauntletIntroData aSkadiIntroData[MAX_INTRO_MOBS] =
 {
-    {NPC_YMIRJAR_WITCH_DOCTOR, 478.31f, -511.049f, 104.7242f},
-    {NPC_YMIRJAR_HARPOONER, 482.25f, -514.1273f, 104.7234f},
-    {NPC_YMIRJAR_HARPOONER, 481.3883f, -507.1089f, 104.7241f},
-    {NPC_YMIRJAR_WARRIOR, 458.5323f, -516.2537f, 104.617f},
-    {NPC_YMIRJAR_WARRIOR, 429.4242f, -517.5624f, 104.8936f},
-    {NPC_YMIRJAR_WARRIOR, 427.4026f, -510.7716f, 104.8802f},
-    {NPC_YMIRJAR_WARRIOR, 458.5323f, -510.2537f, 104.617f},
-    {NPC_YMIRJAR_WARRIOR, 397.036f, -515.158f, 104.725f},                 // the rest are guesswork but follow the same pattern
-    {NPC_YMIRJAR_WARRIOR, 397.036f, -507.158f, 104.725f},
-    {NPC_YMIRJAR_WARRIOR, 360.297f, -508.927f, 104.662f},
-    {NPC_YMIRJAR_WARRIOR, 360.297f, -516.927f, 104.662f},
-    {NPC_YMIRJAR_WARRIOR, 328.324f, -513.387f, 104.577f},
-    {NPC_YMIRJAR_WARRIOR, 328.324f, -504.387f, 104.577f},
+    {NPC_YMIRJAR_WITCH_DOCTOR, 1},
+    {NPC_YMIRJAR_HARPOONER, 1},
+    {NPC_YMIRJAR_HARPOONER, 2},
+    {NPC_YMIRJAR_WARRIOR, 1},
+    {NPC_YMIRJAR_WARRIOR, 2},
+    {NPC_YMIRJAR_WARRIOR, 3},
+    {NPC_YMIRJAR_WARRIOR, 4},
+    {NPC_YMIRJAR_WARRIOR, 5},
+    {NPC_YMIRJAR_WARRIOR, 6},
+    {NPC_YMIRJAR_WARRIOR, 7},
+    {NPC_YMIRJAR_WARRIOR, 8},
+    {NPC_YMIRJAR_WARRIOR, 9},
+    {NPC_YMIRJAR_WARRIOR, 10},
+};
+
+enum KeristraszaActions
+{
+    SKADI_ACTION_CRUSH,
+    SKADI_ACTION_WHIRLWIND,
+    SKADI_ACTION_POISONED_SPEAR,
+    SKADI_ACTION_MAX,
+    SKADI_ACTION_MOUNT
 };
 
 /*######
 ## boss_skadi
 ######*/
 
-struct boss_skadiAI : public ScriptedAI
+struct boss_skadiAI : public CombatAI
 {
-    boss_skadiAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_skadiAI(Creature* creature) : CombatAI(creature, SKADI_ACTION_MAX), m_instance(static_cast<instance_pinnacle*>(creature->GetInstanceData()))
     {
-        m_pInstance = static_cast<instance_pinnacle*>(pCreature->GetInstanceData());
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddCombatAction(SKADI_ACTION_CRUSH, 30000u);
+        AddCombatAction(SKADI_ACTION_WHIRLWIND, 10000u);
+        AddCombatAction(SKADI_ACTION_POISONED_SPEAR, 25000u);
+
+        AddCustomAction(SKADI_ACTION_MOUNT, true, [&]() { DoBoardGrauf(); });
+
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
     }
 
-    instance_pinnacle* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_pinnacle* m_instance;
+    bool m_isRegularMode;
 
-    uint32 m_uiCrush;
-    uint32 m_uiWhirlwind;
-    uint32 m_uiPoisonedSpear;
-    uint32 m_uiMountTimer;
     uint8 m_uiPhase;
-    bool m_IntroMobs;
 
     void Reset() override
     {
-        m_uiMountTimer    = 0;
-        m_uiCrush         = 15000;
-        m_uiWhirlwind     = 23000;
-        m_uiPoisonedSpear = 10000;
+        CombatAI::Reset();
+
         m_uiPhase         = PHASE_GAUNTLET;
-        m_IntroMobs       = false;
 
         // Set proper immunity
         m_creature->SetImmuneToPlayer(true);
@@ -133,7 +140,7 @@ struct boss_skadiAI : public ScriptedAI
         if (m_uiPhase == PHASE_GAUNTLET)
             return;
 
-        ScriptedAI::AttackStart(pWho);
+        CombatAI::AttackStart(pWho);
     }
 
     void MoveInLineOfSight(Unit* pWho) override
@@ -141,23 +148,25 @@ struct boss_skadiAI : public ScriptedAI
         if (m_uiPhase == PHASE_GAUNTLET)
             return;
 
-        ScriptedAI::MoveInLineOfSight(pWho);
+        CombatAI::MoveInLineOfSight(pWho);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SKADI, NOT_STARTED);
+        if (m_instance)
+            m_instance->SetData(TYPE_SKADI, NOT_STARTED);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SKADI, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_SKADI, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* victim) override
     {
+        CombatAI::KilledUnit(victim);
+
         switch (urand(0, 2))
         {
             case 0: DoScriptText(SAY_KILL_1, m_creature); break;
@@ -170,8 +179,8 @@ struct boss_skadiAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SKADI, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_SKADI, DONE);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
@@ -187,6 +196,11 @@ struct boss_skadiAI : public ScriptedAI
                 m_creature->SetImmuneToPlayer(false);
                 m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
+        }
+        else if (eventType == AI_EVENT_CUSTOM_B)
+        {
+            DoPrepareForGauntlet();
+            ResetTimer(SKADI_ACTION_MOUNT, 3000);
         }
     }
 
@@ -208,86 +222,71 @@ struct boss_skadiAI : public ScriptedAI
     void DoPrepareForGauntlet()
     {
         DoScriptText(SAY_AGGRO, m_creature);
-        m_uiMountTimer = 3000;
 
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
         // Prepare to periodic summon the mobs
-        if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_pInstance->GetSkadiMobsTrigger()))
+        if (Creature* pTrigger = m_creature->GetMap()->GetCreature(m_instance->GetSkadiMobsTrigger()))
         {
-            pTrigger->CastSpell(pTrigger, m_bIsRegularMode ? SPELL_SUMMON_GAUNTLET_MOBS : SPELL_SUMMON_GAUNTLET_MOBS_H, TRIGGERED_NONE);
+            pTrigger->CastSpell(pTrigger, m_isRegularMode ? SPELL_SUMMON_GAUNTLET_MOBS : SPELL_SUMMON_GAUNTLET_MOBS_H, TRIGGERED_NONE);
 
             // Spawn the intro mobs
-            m_IntroMobs = true;
             for (auto i : aSkadiIntroData)
             {
                 if (Creature* pYmirjar = m_creature->SummonCreature(i.uiCreatureId, pTrigger->GetPositionX(), pTrigger->GetPositionY(), pTrigger->GetPositionZ(), 0, TEMPSPAWN_DEAD_DESPAWN, 0))
                 {
                     pYmirjar->SetWalk(false);
-                    pYmirjar->GetMotionMaster()->MovePoint(1, i.fX, i.fY, i.fZ);
+                    pYmirjar->GetMotionMaster()->MoveWaypoint(i.uiPathId);
                 }
             }
+        }
 
-            m_IntroMobs = false;
+        // set the periodic gauntlet spell on all players
+        Map::PlayerList const& lPlayers = m_instance->instance->GetPlayers();
+        for (const auto& lPlayer : lPlayers)
+        {
+            if (Player* pPlayer = lPlayer.getSource())
+                pPlayer->CastSpell(pPlayer, SPELL_GAUNTLET_PERIODIC, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    // Method to board Grauf
+    void DoBoardGrauf()
     {
-        if (m_uiMountTimer)
-        {
-            if (m_uiMountTimer <= uiDiff)
-            {
-                if (!m_pInstance)
-                    return;
-
-                if (Creature* pGrauf = m_pInstance->GetSingleCreatureFromStorage(NPC_GRAUF))
-                {
-                    if (DoCastSpellIfCan(pGrauf, SPELL_RIDE_VEHICLE) == CAST_OK)
-                    {
-                        SendAIEvent(AI_EVENT_START_EVENT, m_creature, pGrauf);
-
-                        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        m_uiMountTimer = 0;
-                    }
-                }
-            }
-            else
-                m_uiMountTimer -= uiDiff;
-        }
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
+        if (!m_instance)
             return;
 
-        if (m_uiCrush < uiDiff)
+        if (Creature* pGrauf = m_instance->GetSingleCreatureFromStorage(NPC_GRAUF))
         {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_CRUSH : SPELL_CRUSH_H) == CAST_OK)
-                m_uiCrush = urand(10000, 15000);
-        }
-        else
-            m_uiCrush -= uiDiff;
-
-        if (m_uiWhirlwind < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_WHIRLWIND : SPELL_WHIRLWIND_H) == CAST_OK)
-                m_uiWhirlwind = 23000;
-        }
-        else
-            m_uiWhirlwind -= uiDiff;
-
-        if (m_uiPoisonedSpear < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+            if (DoCastSpellIfCan(pGrauf, SPELL_RIDE_VEHICLE) == CAST_OK)
             {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_POISONED_SPEAR : SPELL_POISONED_SPEAR_H) == CAST_OK)
-                    m_uiPoisonedSpear = urand(10000, 15000);
+                SendAIEvent(AI_EVENT_START_EVENT, m_creature, pGrauf);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
             }
         }
-        else
-            m_uiPoisonedSpear -= uiDiff;
+    }
 
-        DoMeleeAttackIfReady();
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
+        {
+            case SKADI_ACTION_CRUSH:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_CRUSH : SPELL_CRUSH_H) == CAST_OK)
+                    ResetCombatAction(action, urand(10000, 15000));
+                break;
+            case SKADI_ACTION_WHIRLWIND:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_WHIRLWIND : SPELL_WHIRLWIND_H) == CAST_OK)
+                    ResetCombatAction(action, 23000);
+                break;
+            case SKADI_ACTION_POISONED_SPEAR:
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_POISONED_SPEAR : SPELL_POISONED_SPEAR_H) == CAST_OK)
+                        ResetCombatAction(action, urand(10000, 15000));
+                }
+                break;
+        }
     }
 };
 
@@ -458,18 +457,7 @@ bool AreaTrigger_at_skadi(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 
             // Start the gauntlet
             if (Creature* pSkadi = pInstance->GetSingleCreatureFromStorage(NPC_SKADI))
-            {
-                if (boss_skadiAI* pBossAI = dynamic_cast<boss_skadiAI*>(pSkadi->AI()))
-                    pBossAI->DoPrepareForGauntlet();
-            }
-
-            // set the periodic gauntlet spell on all players
-            Map::PlayerList const& lPlayers = pInstance->instance->GetPlayers();
-            for (const auto& lPlayer : lPlayers)
-            {
-                if (Player* pPlayer = lPlayer.getSource())
-                    pPlayer->CastSpell(pPlayer, SPELL_GAUNTLET_PERIODIC, TRIGGERED_OLD_TRIGGERED);
-            }
+                pSkadi->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pPlayer, pSkadi);
         }
     }
 
