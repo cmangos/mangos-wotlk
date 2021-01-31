@@ -391,6 +391,33 @@ void instance_black_temple::SetData(uint32 type, uint32 data)
                 DoTeleportAkamaIfCan();
             break;
         case TYPE_ILLIDAN:
+            if (data == IN_PROGRESS && GetData(TYPE_COUNCIL) != DONE)
+            {
+                bool found = false;
+                Map::PlayerList const& players = instance->GetPlayers();
+
+                for (const auto& playerRef : players)
+                {
+                    Player* player = playerRef.getSource();
+                    if (player && player->IsGameMaster())
+                    {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    for (const auto& playerRef : players)
+                    {
+                        Player* player = playerRef.getSource();
+                        if (player && player->GetSession()->GetSecurity() >= SEC_GAMEMASTER)
+                        {
+                            player->BanPlayer("Player engaged Illidan without killing council and Gamemaster being present in instance.");
+                            break;
+                        }
+                    }
+                }
+            }
             DoUseDoorOrButton(GO_ILLIDAN_DOOR_R);
             DoUseDoorOrButton(GO_ILLIDAN_DOOR_L);
             m_auiEncounter[type] = data;
