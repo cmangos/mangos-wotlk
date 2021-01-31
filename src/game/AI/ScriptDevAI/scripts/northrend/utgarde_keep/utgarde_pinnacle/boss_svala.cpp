@@ -25,6 +25,7 @@ EndScriptData */
 #include "utgarde_pinnacle.h"
 #include "Spells/SpellAuras.h"
 #include "Spells/Scripts/SpellScript.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -39,7 +40,7 @@ enum
     SAY_SACRIFICE_5             = -1575013,
     SAY_DEATH                   = -1575014,
 
-    NPC_CHANNELER               = 27281,
+    NPC_CHANNELER               = 27281,        // partially scripted in EAI
     NPC_SCOURGE_HULK            = 26555,        // used to check the achiev
 
     SPELL_RITUAL_OF_SWORD       = 48276,        // teleports the boss
@@ -57,50 +58,43 @@ enum
     // spells used by channelers
     SPELL_PARALIZE              = 48278,        // should apply effect 48267 on target
     SPELL_SHADOWS_IN_THE_DARK   = 59407,
-    SPELL_SIMPLE_TELEPORT       = 12980,
+    // SPELL_SIMPLE_TELEPORT    = 12980,
 
     SPELL_BALL_OF_FLAME         = 48246,
+};
+
+enum SvalaActions
+{
+    SVALA_ACTION_SINISTER_STRIKE,
+    SVALA_ACTION_CALL_FLAMES,
+    SVALA_ACTION_RITUAL_STRIKE,
+    SVALA_ACTION_RITUAL_OF_SWORD,
+    SVALA_ACTION_MAX,
 };
 
 /*######
 ## boss_svala
 ######*/
 
-struct boss_svalaAI : public ScriptedAI
+struct boss_svalaAI : public CombatAI
 {
-    boss_svalaAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_svalaAI(Creature* creature) : CombatAI(creature, SVALA_ACTION_MAX), m_instance(static_cast<instance_pinnacle*>(creature->GetInstanceData()))
     {
-        m_pInstance = static_cast<instance_pinnacle*>(pCreature->GetInstanceData());
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddCombatAction(SVALA_ACTION_SINISTER_STRIKE, 7000u);
+        AddCombatAction(SVALA_ACTION_CALL_FLAMES, 10000u);
+        AddCombatAction(SVALA_ACTION_RITUAL_STRIKE, true);
+        AddTimerlessCombatAction(SVALA_ACTION_RITUAL_OF_SWORD, true);
+
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
     }
 
-    instance_pinnacle* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiIntroTimer;
-    uint32 m_uiIntroCount;
-
-    uint32 m_uiSinisterStrikeTimer;
-    uint32 m_uiCallFlamesTimer;
-    uint32 m_uiRitualStrikeTimer;
-    bool m_bHasDoneRitual;
-
-    void Reset() override
-    {
-        m_uiIntroTimer = 2500;
-        m_uiIntroCount = 0;
-
-        m_uiSinisterStrikeTimer = 10000;
-        m_uiCallFlamesTimer     = urand(10000, 20000);
-        m_uiRitualStrikeTimer   = 0;
-        m_bHasDoneRitual        = false;
-    }
+    instance_pinnacle* m_instance;
+    bool m_isRegularMode;
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SVALA, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_SVALA, FAIL);
 
         m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
     }
@@ -115,24 +109,24 @@ struct boss_svalaAI : public ScriptedAI
 
     void JustSummoned(Creature* pSummoned) override
     {
+        // Note: creature is partially scripted in EAI
         if (pSummoned->GetEntry() == NPC_CHANNELER)
         {
-            pSummoned->CastSpell(pSummoned, SPELL_SIMPLE_TELEPORT, TRIGGERED_OLD_TRIGGERED);
-
-            if (!m_bIsRegularMode)
+            if (!m_isRegularMode)
                 pSummoned->CastSpell(pSummoned, SPELL_SHADOWS_IN_THE_DARK, TRIGGERED_OLD_TRIGGERED);
 
             // cast paralize; the spell will automatically pick the target with aura 48267
-            pSummoned->CastSpell(pSummoned, SPELL_PARALIZE, TRIGGERED_NONE);
-            pSummoned->AI()->SetCombatMovement(false);
+            pSummoned->CastSpell(pSummoned, SPELL_PARALIZE, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void KilledUnit(Unit* victim) override
     {
+        CombatAI::KilledUnit(victim);
+
         // set achiev to true if boss kills a hulk
-        if (pVictim->GetEntry() == NPC_SCOURGE_HULK && m_pInstance)
-            m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_INCREDIBLE_HULK, true);
+        if (victim->GetEntry() == NPC_SCOURGE_HULK && m_instance)
+            m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_INCREDIBLE_HULK, true);
 
         switch (urand(0, 2))
         {
@@ -146,70 +140,54 @@ struct boss_svalaAI : public ScriptedAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SVALA, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_SVALA, DONE);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiSinisterStrikeTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_SINISTER_STRIKE : SPELL_SINISTER_STRIKE_H) == CAST_OK)
-                m_uiSinisterStrikeTimer = 10000;
-        }
-        else
-            m_uiSinisterStrikeTimer -= uiDiff;
-
-        if (m_uiCallFlamesTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_CALL_FLAMES) == CAST_OK)
-                m_uiCallFlamesTimer = urand(10000, 20000);
-        }
-        else
-            m_uiCallFlamesTimer -= uiDiff;
-
-        if (m_uiRitualStrikeTimer)
-        {
-            if (m_uiRitualStrikeTimer <= uiDiff)
-            {
+            case SVALA_ACTION_SINISTER_STRIKE:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_SINISTER_STRIKE : SPELL_SINISTER_STRIKE_H) == CAST_OK)
+                    ResetCombatAction(action, 10000);
+                break;
+            case SVALA_ACTION_CALL_FLAMES:
+                if (DoCastSpellIfCan(m_creature, SPELL_CALL_FLAMES) == CAST_OK)
+                    ResetCombatAction(action, urand(15000, 20000));
+                break;
+            case SVALA_ACTION_RITUAL_STRIKE:
                 if (DoCastSpellIfCan(m_creature, SPELL_RITUAL_STRIKE, CAST_TRIGGERED) == CAST_OK)
-                    m_uiRitualStrikeTimer = 0;
-            }
-            else
-                m_uiRitualStrikeTimer -= uiDiff;
-        }
-
-        // As from patch notes: Svala Sorrowgrave now casts Ritual of the Sword 1 time during the encounter, down from 3.
-        if (m_creature->GetHealthPercent() < 50.0f && !m_bHasDoneRitual)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_RITUAL_SELECTION) == CAST_OK)
-            {
-                // summon channelers
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_CHANNELER_1, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_CHANNELER_2, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_CHANNELER_3, CAST_TRIGGERED);
-
-                // disarm and teleport the boss
-                DoCastSpellIfCan(m_creature, SPELL_RITUAL_DISARM, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_RITUAL_OF_SWORD, CAST_TRIGGERED);
-
-                switch (urand(0, 3))
+                    DisableCombatAction(action);
+                break;
+            case SVALA_ACTION_RITUAL_OF_SWORD:
+                if (m_creature->GetHealthPercent() < 50.0f)
                 {
-                    case 0: DoScriptText(SAY_SACRIFICE_1, m_creature); break;
-                    case 1: DoScriptText(SAY_SACRIFICE_2, m_creature); break;
-                    case 2: DoScriptText(SAY_SACRIFICE_3, m_creature); break;
-                    case 3: DoScriptText(SAY_SACRIFICE_4, m_creature); break;
+                    if (DoCastSpellIfCan(m_creature, SPELL_RITUAL_SELECTION) == CAST_OK)
+                    {
+                        // summon channelers
+                        DoCastSpellIfCan(m_creature, SPELL_SUMMON_CHANNELER_1, CAST_TRIGGERED);
+                        DoCastSpellIfCan(m_creature, SPELL_SUMMON_CHANNELER_2, CAST_TRIGGERED);
+                        DoCastSpellIfCan(m_creature, SPELL_SUMMON_CHANNELER_3, CAST_TRIGGERED);
+
+                        // disarm and teleport the boss
+                        DoCastSpellIfCan(m_creature, SPELL_RITUAL_DISARM, CAST_TRIGGERED);
+                        DoCastSpellIfCan(m_creature, SPELL_RITUAL_OF_SWORD, CAST_TRIGGERED);
+
+                        switch (urand(0, 3))
+                        {
+                            case 0: DoScriptText(SAY_SACRIFICE_1, m_creature); break;
+                            case 1: DoScriptText(SAY_SACRIFICE_2, m_creature); break;
+                            case 2: DoScriptText(SAY_SACRIFICE_3, m_creature); break;
+                            case 3: DoScriptText(SAY_SACRIFICE_4, m_creature); break;
+                        }
+
+                        SetActionReadyStatus(action, false);
+                        ResetCombatAction(SVALA_ACTION_RITUAL_STRIKE, 1000);
+                    }
                 }
-
-                m_uiRitualStrikeTimer = 1000;
-                m_bHasDoneRitual = true;
-            }
+                break;
         }
-
-        DoMeleeAttackIfReady();
     }
 };
 
