@@ -19,13 +19,15 @@ enum
     NPC_KADDRAK             = 30898,
     NPC_ABEDNEUM            = 30899,
     NPC_MARNAK              = 30897,
+
     NPC_TRIBUNAL_OF_AGES    = 28234,
     NPC_WORLDTRIGGER        = 22515,
     NPC_DARK_MATTER         = 28235,                        // used by the Tribunal event
     NPC_LIGHTNING_STALKER   = 28130,                        // used by the Tribunal event as spawn point for the dwarfs
     NPC_DARK_MATTER_TARGET  = 28237,
     NPC_SEARING_GAZE_TARGET = 28265,
-    NPC_RUNE_PROTECTOR      = 27983,
+
+    NPC_RUNE_PROTECTOR      = 27983,                        // mobs summoned during Tribunal event
     NPC_RUNE_STORMCALLER    = 27984,
     NPC_GOLEM_CUSTODIAN     = 27985,
 
@@ -61,6 +63,7 @@ enum
 
     SPELL_DARK_MATTER_START = 51001,                        // Channeled spells used by the Tribunal event
 
+    // SPELL_TAUNT_BRANN    = 51774,                        // cast by the summoned mobs during the Tribunal event; handled in EAI
     SPELL_BRANN_STEALTH     = 58506,
 
     MAX_FACES               = 3,
@@ -76,16 +79,22 @@ enum
     ACHIEV_CRIT_ABUSE_OOZE  = 7593,                         // Snonnir, achiev 2155
 };
 
+static const float fBrannDoorLocation[4] = { 1199.685f, 667.15497f, 196.32364f, 3.12413f };
+
 struct Face
 {
-    Face() : m_bIsActive(false), m_uiTimer(1000) {}
+    Face() : m_bIsActive(false), m_uiTimer(1000), m_uiSummonTimer(10000) {}
 
     ObjectGuid m_leftEyeGuid;
     ObjectGuid m_rightEyeGuid;
     ObjectGuid m_goFaceGuid;
     ObjectGuid m_speakerGuid;
+    ObjectGuid m_summonerGuid;
+
     bool m_bIsActive;
+
     uint32 m_uiTimer;
+    uint32 m_uiSummonTimer;
 };
 
 class instance_halls_of_stone : public ScriptedInstance
@@ -94,6 +103,7 @@ class instance_halls_of_stone : public ScriptedInstance
         instance_halls_of_stone(Map* pMap);
         void Initialize() override;
 
+        void OnPlayerEnter(Player* pPlayer) override;
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
         void OnCreatureRespawn(Creature* pCreature) override;
@@ -112,16 +122,15 @@ class instance_halls_of_stone : public ScriptedInstance
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget, uint32 uiMiscValue1 /* = 0*/) const override;
 
         void ActivateFace(uint8 uiFace, bool bAfterEvent);
-        void DoFaceSpeak(uint8 uiFace, int32 iTextId);
+        void ResetFace(uint8 uiFace);
+        void SetFaceTimer(uint8 uiFace, uint32 uiTimer);
         void SetBrannSpankin(bool bIsMet) { m_bIsBrannSpankin = bIsMet; }
-
-        ObjectGuid GetProtectorStalkerGuid() const { return m_protectorStalkerGuid; }
-        ObjectGuid GeStormcallerStalkerGuid() const { return m_stormcallerStalkerGuid; }
-        ObjectGuid GetCustodianStalkerGuid() const { return m_custodianStalkerGuid; }
+        ObjectGuid GetBrannSummonedGuid() { return m_brannSummonedGuid; }
 
     private:
         void SortFaces();
-        void ProcessFace(uint8 uiFace);
+        void ProcessFaceSpell(uint8 uiFace);
+        void ProcessFaceSummon(uint8 uiFace);
 
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         Face m_aFaces[MAX_FACES];
@@ -136,6 +145,7 @@ class instance_halls_of_stone : public ScriptedInstance
         ObjectGuid m_stormcallerStalkerGuid;
         ObjectGuid m_custodianStalkerGuid;
         ObjectGuid m_tribunalCasterGuid;
+        ObjectGuid m_brannSummonedGuid;
 
         GuidList m_lKaddrakGUIDs;
         GuidList m_lAbedneumGUIDs;

@@ -1610,6 +1610,8 @@ UPDATE instance_template SET ScriptName='instance_halls_of_stone' WHERE map=599;
 UPDATE creature_template SET ScriptName='boss_sjonnir' WHERE entry=27978;
 UPDATE creature_template SET ScriptName='npc_brann_hos' WHERE entry=28070;
 UPDATE creature_template SET ScriptName='npc_dark_matter' WHERE entry=28235;
+INSERT INTO scripted_event_id VALUES
+(20645,'event_spell_brann_achievement_fail');
 
 /* ULDUAR */
 UPDATE instance_template SET ScriptName='instance_ulduar' WHERE map=603;
@@ -5964,16 +5966,18 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1599019','I hope this is all worth it!','14262','1','0','0','0','brann SAY_PLAYER_DEATH_3'),
 ('-1599020','Time to get some answers! Let''s get this show on the road!','14259','1','0','0','0','brann SAY_ESCORT_START'),
 
-('-1599021','Don''t worry. Old Brann has got your back. Keep that metal monstrosity busy and I''ll see if I can sweet talk this machine into helping you.','14274','1','0','0','0','brann SAY_SPAWN_DWARF'),
+('-1599021','REUSE ME','0','0','0','0','0','REUSE ME'),
+
 ('-1599022','This is a wee bit trickier that before... Oh, bloody--incomin''!','14275','1','0','0','0','brann SAY_SPAWN_TROGG'),
 ('-1599023','What in the name o'' Madoran did THAT do? Oh! Wait: I just about got it...','14276','1','0','0','0','brann SAY_SPAWN_OOZE'),
 ('-1599024','Ha, that did it. Help''s a-coming. Take this you glow-eying brute!','14277','1','0','0','0','brann SAY_SPAWN_EARTHEN'),
 
-('-1599025','Take a moment and relish this with me! Soon all will be revealed! Okay then, let''s do this!','14247','1','0','0','0','brann SAY_EVENT_INTRO_1'),
-('-1599026','Now keep an eye out! I''ll have this licked in two shakes of a--','14248','1','0','0','0','brann SAY_EVENT_INTRO_2'),
+('-1599025','REUSE ME','0','0','0','0','0','REUSE ME'),
+
+('-1599026','Now keep an eye out! I''ll have this licked in two shakes of a--','14248','1','0','432','0','brann SAY_EVENT_INTRO_2'),
 ('-1599027','Warning! Life form pattern not recognized. Archival processing terminated. Continued interference will result in targeted response.','13765','1','0','0','0','brann SAY_EVENT_INTRO_3_ABED'),
 
-('-1599028','Oh, that doesn''t sound good. We might have a complication or two...','14249','1','0','0','0','brann SAY_EVENT_A_1'),
+('-1599028','Oh, that doesn''t sound good. We might have a complication or two...','14249','1','0','1','0','brann SAY_EVENT_A_1'),
 ('-1599029','Security breach in progress. Analysis of historical archives transferred to lower priority queue. Countermeasures engaged.','13756','1','0','0','0','brann SAY_EVENT_A_2_KADD'),
 ('-1599030','Ah, you want to play hardball, eh? That''s just my game!','14250','1','0','0','0','brann SAY_EVENT_A_3'),
 
@@ -6012,8 +6016,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1599060','Well now. That''s a lot to digest. I''m gonna need some time to take all of this in. Thank you!','14273','1','0','0','0','brann SAY_EVENT_END_20'),
 ('-1599061','Acknowledged Branbronzan. Session terminated.','13773','1','0','0','0','brann SAY_EVENT_END_21_ABED'),
 
-('-1599062','Loken?! That''s downright bothersome... We might''ve neutralized the iron dwarves, but I''d lay odds there''s another machine somewhere else churnin'' out a whole mess o'' these iron vrykul!','14278','1','0','0','0','brann SAY_VICTORY_SJONNIR_1'),
-('-1599063','I''ll use the forge to make badtches o'' earthen to stand guard... But our greatest challenge still remains: find and stop Loken!','14279','1','0','0','0','brann SAY_VICTORY_SJONNIR_2'),
+('-1599062','REUSE ME','0','0','0','0','0','REUSE ME'),
+('-1599063','REUSE ME','0','0','0','0','0','REUSE ME'),
 
 ('-1599064','I think it''s time to see what''s behind the door near the entrance. I''m going to sneak over there, nice and quiet. Meet me at the door and I''ll get us in.','0','1','0','0','0','brann SAY_ENTRANCE_MEET');
 
@@ -12362,28 +12366,6 @@ INSERT INTO `script_waypoint` (`entry`, `pathId`, `pointid`, `position_x`, `posi
 (26814,0,53,4667.46,-4954.76,47.993,0,0,0,''),
 (26814,0,54,4673.41,-4967.3,47.791,0,3000,0,'SAY_ESCORT_COMPLETE'),
 (26814,0,55,4694.43,-4979.96,44.715,0,0,0,''),
-(28070,0,1,1053.79,476.639,207.744,0,0,0,''),
-(28070,0,2,1032.29,467.623,207.736,0,0,0,''),
-(28070,0,3,1017.91,454.766,207.719,0,0,0,''),
-(28070,0,4,1004.81,441.305,207.373,0,0,0,''),
-(28070,0,5,988.694,424.422,207.425,0,0,0,''),
-(28070,0,6,984.816,422.178,205.994,0,0,0,''),
-(28070,0,7,977.204,420.027,205.994,0,0,0,''),
-(28070,0,8,962.388,421.983,205.994,0,0,0,''),
-(28070,0,9,950.42,416.515,205.994,0,0,0,''),
-(28070,0,10,943.972,403.071,205.994,0,0,0,''),
-(28070,0,11,947.922,387.684,205.994,0,0,0,''),
-(28070,0,12,946.555,383.271,205.994,0,0,0,''),
-(28070,0,13,944.655,380.631,207.286,0,0,0,''),
-(28070,0,14,941.102,377.373,207.421,0,0,0,'reach tribunal, set pause'),
-(28070,0,15,935.218,370.557,207.421,0,0,0,''),
-(28070,0,16,928.036,363.027,204.018,0,0,0,''),
-(28070,0,17,909.287,344.393,203.706,0,0,0,''),
-(28070,0,18,897.947,333.635,203.706,0,0,0,'reach panel'),
-(28070,0,19,918.914,351.313,203.706,0,0,0,'reach floor disc (end event begin)'),
-(28070,0,20,928.07,363.296,204.091,0,0,0,'stealth'),
-(28070,0,21,934.818,370.136,207.421,0,0,0,''),
-(28070,0,22,941.501,377.254,207.421,0,0,0,''),
 (28217,0,1,5384.22,4533.26,-129.519,0,0,0,''),
 (28217,0,2,5394.1,4531.19,-131.758,0,0,0,''),
 (28217,0,3,5401.98,4527.3,-137.599,0,0,0,''),

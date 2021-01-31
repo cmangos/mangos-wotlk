@@ -16,7 +16,7 @@
 
 /* ScriptData
 SDName: Instance_Halls_of_Stone
-SD%Complete: 50%
+SD%Complete: 100%
 SDComment:
 SDCategory: Halls of Stone
 EndScriptData */
@@ -42,6 +42,10 @@ enum
     SPELL_LIGHTNING_CHANNEL_1           = 50626,                // cast by the globe in the room before the tribunal
     SPELL_LIGHTNING_CHANNEL_2           = 50639,
     SPELL_LIGHTNING_CHANNEL_3           = 50640,
+
+    SPELL_SUMMON_PROTECTOR              = 51780,                // all spells are casted by stalker npcs 28130
+    SPELL_SUMMON_STORMCALLER            = 51050,
+    SPELL_SUMMON_CUSTODIAN              = 51051,
 };
 
 instance_halls_of_stone::instance_halls_of_stone(Map* pMap) : ScriptedInstance(pMap),
@@ -57,19 +61,55 @@ void instance_halls_of_stone::Initialize()
     memset(&m_auiEncounter, 0, sizeof(m_auiEncounter));
 }
 
+void instance_halls_of_stone::OnPlayerEnter(Player* pPlayer)
+{
+    if (GetData(TYPE_TRIBUNAL) == DONE && GetData(TYPE_SJONNIR) != DONE)
+    {
+        // Check if the right Brann is spawned for the event
+        if (Creature* pBrann = GetSingleCreatureFromStorage(NPC_BRANN))
+        {
+            pBrann->ForcedDespawn();
+            pPlayer->SummonCreature(NPC_BRANN, fBrannDoorLocation[0], fBrannDoorLocation[1], fBrannDoorLocation[2], fBrannDoorLocation[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+        }
+        else
+            pPlayer->SummonCreature(NPC_BRANN, fBrannDoorLocation[0], fBrannDoorLocation[1], fBrannDoorLocation[2], fBrannDoorLocation[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+    }
+}
+
 void instance_halls_of_stone::OnCreatureCreate(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-        case NPC_KADDRAK:          m_lKaddrakGUIDs.push_back(pCreature->GetObjectGuid());      break;
-        case NPC_ABEDNEUM:         m_lAbedneumGUIDs.push_back(pCreature->GetObjectGuid());     break;
-        case NPC_MARNAK:           m_lMarnakGUIDs.push_back(pCreature->GetObjectGuid());       break;
-        case NPC_WORLDTRIGGER:     m_lWorldtriggerGUIDs.push_back(pCreature->GetObjectGuid()); break;
+        case NPC_KADDRAK:
+            // store the upper creature for the dialogue helper
+            if (pCreature->GetPositionZ() > 230.0f)
+                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+
+            m_lKaddrakGUIDs.push_back(pCreature->GetObjectGuid());
+            break;
+        case NPC_ABEDNEUM:
+            // store the upper creature for the dialogue helper
+            if (pCreature->GetPositionZ() > 230.0f)
+                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+
+            m_lAbedneumGUIDs.push_back(pCreature->GetObjectGuid());
+            break;
+        case NPC_MARNAK:
+            // store the upper creature for the dialogue helper
+            if (pCreature->GetPositionZ() > 230.0f)
+                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+
+            m_lMarnakGUIDs.push_back(pCreature->GetObjectGuid());
+            break;
+        case NPC_WORLDTRIGGER:
+            m_lWorldtriggerGUIDs.push_back(pCreature->GetObjectGuid());
+            break;
         case NPC_TRIBUNAL_OF_AGES:
+            // store the upper creature for the globe caster
             if (pCreature->GetPositionZ() > 225.0f)
                 m_tribunalCasterGuid = pCreature->GetObjectGuid();
-            else
-                m_lTribunalGUIDs.push_back(pCreature->GetObjectGuid());
+
+            m_lTribunalGUIDs.push_back(pCreature->GetObjectGuid());
             break;
         case NPC_LIGHTNING_STALKER:
             // Sort the dwarf summoning stalkers
@@ -86,8 +126,11 @@ void instance_halls_of_stone::OnCreatureCreate(Creature* pCreature)
             m_lRuneDwarfGUIDs.push_back(pCreature->GetObjectGuid());
             break;
         case NPC_BRANN:
+            if (pCreature->IsTemporarySummon())
+                return;
         case NPC_DARK_MATTER:
         case NPC_SJONNIR:
+        case NPC_SEARING_GAZE_TARGET:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }
@@ -102,8 +145,12 @@ void instance_halls_of_stone::OnCreatureRespawn(Creature* pCreature)
         case NPC_IRON_DWARF:
         case NPC_EARTHEN_DWARF:
         case NPC_MALFORMED_OOZE:
-            pCreature->SetWalk(false);
-            pCreature->GetMotionMaster()->MoveWaypoint(pCreature->GetPositionY() > 700 ? 0 : 1, 0, 1000);
+        case NPC_IRON_SLUDGE:
+            if (pCreature->GetPositionZ() > 190)
+            {
+                pCreature->SetWalk(false);
+                pCreature->GetMotionMaster()->MoveWaypoint(pCreature->GetPositionY() > 700 ? 0 : 1, 0, 1000);
+            }
             break;
         // passive behavior
         case NPC_SEARING_GAZE_TARGET:
@@ -127,12 +174,13 @@ void instance_halls_of_stone::OnCreatureRespawn(Creature* pCreature)
                 pDarkMatter->GetMotionMaster()->MovePoint(1, pCreature->GetPositionX(), pCreature->GetPositionY(), pCreature->GetPositionZ());
             }
             break;
-        // attack Bran
-        case NPC_RUNE_PROTECTOR:
-        case NPC_RUNE_STORMCALLER:
-        case NPC_GOLEM_CUSTODIAN:
-            if (Creature* pBrann = GetSingleCreatureFromStorage(NPC_BRANN))
-                pCreature->AI()->AttackStart(pBrann);
+        case NPC_BRANN:
+            if (pCreature->IsTemporarySummon())
+            {
+                pCreature->CastSpell(pCreature, SPELL_BRANN_STEALTH, TRIGGERED_NONE);
+                pCreature->SetImmuneToNPC(true);
+                m_brannSummonedGuid = pCreature->GetObjectGuid();
+            }
             break;
     }
 }
@@ -182,38 +230,37 @@ void instance_halls_of_stone::SetData(uint32 uiType, uint32 uiData)
                     SortFaces();
                     break;
                 case DONE:
-                    // Cast achiev check spell - Note: it's not clear who casts this spell, but for the moment we'll use Abedneum
-                    if (Creature* pEye = instance->GetCreature(m_aFaces[1].m_leftEyeGuid))
-                        pEye->CastSpell(pEye, SPELL_ACHIEVEMENT_CHECK, TRIGGERED_OLD_TRIGGERED);
-                    // Spawn the loot
-                    DoRespawnGameObject(instance->IsRegularDifficulty() ? GO_TRIBUNAL_CHEST : GO_TRIBUNAL_CHEST_H, 30 * MINUTE);
-                    DoToggleGameObjectFlags(instance->IsRegularDifficulty() ? GO_TRIBUNAL_CHEST : GO_TRIBUNAL_CHEST_H, GO_FLAG_NO_INTERACT, false);
-                    // Door workaround because of the missing Bran event
-                    DoUseDoorOrButton(GO_DOOR_SJONNIR);
+                    if (GameObject* pFloor = GetSingleGameObjectFromStorage(GO_TRIBUNAL_FLOOR))
+                        pFloor->ResetDoorOrButton();
                     break;
                 case FAIL:
                     for (auto& m_aFace : m_aFaces)
                     {
                         // Shut down the faces
                         if (m_aFace.m_bIsActive)
-                            DoUseDoorOrButton(m_aFace.m_goFaceGuid);
+                            if (GameObject* pFace = instance->GetGameObject(m_aFace.m_goFaceGuid))
+                                pFace->ResetDoorOrButton();
+
                         m_aFace.m_bIsActive = false;
                         m_aFace.m_uiTimer = 1000;
-
-                        // despawn drawfs
-                        for (const auto& guid : m_lRuneDwarfGUIDs)
-                            if (Creature* pDwarf = instance->GetCreature(guid))
-                                pDwarf->ForcedDespawn();
-
-                        m_lRuneDwarfGUIDs.clear();
+                        m_aFace.m_uiSummonTimer = 10000;
                     }
+
+                    // despawn drawfs
+                    for (const auto& guid : m_lRuneDwarfGUIDs)
+                        if (Creature* pDwarf = instance->GetCreature(guid))
+                            pDwarf->ForcedDespawn();
+
+                    m_lRuneDwarfGUIDs.clear();
+
+                    if (GameObject* pConsole = GetSingleGameObjectFromStorage(GO_TRIBUNAL_CONSOLE))
+                        pConsole->ResetDoorOrButton();
                     break;
                 case SPECIAL:
                     for (auto& m_aFace : m_aFaces)
                     {
                         m_aFace.m_bIsActive = false;
                         m_aFace.m_uiTimer = 1000;
-                        // TODO - Check which stay red and how long (also find out how they get red..)
 
                         // Cleanup when finished
                         if (Creature* pEye = instance->GetCreature(m_aFace.m_leftEyeGuid))
@@ -221,6 +268,16 @@ void instance_halls_of_stone::SetData(uint32 uiType, uint32 uiData)
                         if (Creature* pEye = instance->GetCreature(m_aFace.m_rightEyeGuid))
                             pEye->CastSpell(pEye, SPELL_KILL_TRIBUNAL_ADD, TRIGGERED_OLD_TRIGGERED);
                     }
+
+                    // mark achiev as complete
+                    if (Creature* pEye = instance->GetCreature(m_aFaces[1].m_leftEyeGuid))
+                        pEye->CastSpell(pEye, SPELL_ACHIEVEMENT_CHECK, TRIGGERED_OLD_TRIGGERED);
+
+                    // enable loot
+                    DoToggleGameObjectFlags(instance->IsRegularDifficulty() ? GO_TRIBUNAL_CHEST : GO_TRIBUNAL_CHEST_H, GO_FLAG_NO_INTERACT, false);
+
+                    if (GameObject* pConsole = GetSingleGameObjectFromStorage(GO_TRIBUNAL_CONSOLE))
+                        pConsole->ResetDoorOrButton();
                     break;
             }
             break;
@@ -234,9 +291,23 @@ void instance_halls_of_stone::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_SJONNIR:
             m_auiEncounter[uiType] = uiData;
-            DoUseDoorOrButton(GO_DOOR_SJONNIR);
-            if (uiData == IN_PROGRESS)
+            if (uiData == DONE)
+            {
+                DoUseDoorOrButton(GO_DOOR_SJONNIR);
+
+                if (GameObject* pConsole = GetSingleGameObjectFromStorage(GO_SJONNIR_CONSOLE))
+                    pConsole->ResetDoorOrButton();
+            }
+            else if (uiData == FAIL)
+            {
+                if (GameObject* pConsole = GetSingleGameObjectFromStorage(GO_SJONNIR_CONSOLE))
+                    pConsole->ResetDoorOrButton();
+            }
+            else if (uiData == IN_PROGRESS)
+            {
+                DoUseDoorOrButton(GO_DOOR_SJONNIR);
                 m_uiIronSludgeKilled = 0;
+            }
             break;
     }
 
@@ -322,6 +393,8 @@ void instance_halls_of_stone::SortFaces()
             lPossibleEyes.sort(SortHelper(pFace));
             m_aFaces[FACE_MARNAK].m_rightEyeGuid = (*lPossibleEyes.begin())->GetObjectGuid();
         }
+        // Set the summon trigger
+        m_aFaces[FACE_MARNAK].m_summonerGuid = m_stormcallerStalkerGuid;
     }
 
     // FACE_ABEDNEUM
@@ -345,6 +418,8 @@ void instance_halls_of_stone::SortFaces()
             lPossibleEyes.sort(SortHelper(pFace));
             m_aFaces[FACE_ABEDNEUM].m_rightEyeGuid = (*lPossibleEyes.begin())->GetObjectGuid();
         }
+        // Set the summon trigger
+        m_aFaces[FACE_ABEDNEUM].m_summonerGuid = m_custodianStalkerGuid;
     }
 
     // FACE_KADDRAK
@@ -368,6 +443,8 @@ void instance_halls_of_stone::SortFaces()
             lPossibleEyes.sort(SortHelper(pFace));
             m_aFaces[FACE_KADDRAK].m_rightEyeGuid = (*lPossibleEyes.begin())->GetObjectGuid();
         }
+        // Set the summon trigger
+        m_aFaces[FACE_KADDRAK].m_summonerGuid = m_protectorStalkerGuid;
     }
 
     // Clear GUIDs
@@ -387,19 +464,32 @@ void instance_halls_of_stone::ActivateFace(uint8 uiFace, bool bAfterEvent)
         DoUseDoorOrButton(m_aFaces[uiFace].m_goFaceGuid);
     else
     {
-        // TODO: How to get them red?
-        DoUseDoorOrButton(m_aFaces[uiFace].m_goFaceGuid);
-        m_aFaces[uiFace].m_bIsActive = true;
+        if (GameObject* pFace = instance->GetGameObject(m_aFaces[uiFace].m_goFaceGuid))
+            pFace->SendGameObjectCustomAnim(m_aFaces[uiFace].m_goFaceGuid);
     }
 }
 
-void instance_halls_of_stone::DoFaceSpeak(uint8 uiFace, int32 iTextId)
+void instance_halls_of_stone::ResetFace(uint8 uiFace)
 {
     if (uiFace >= MAX_FACES)
         return;
 
-    if (Creature* pSpeaker = instance->GetCreature(m_aFaces[uiFace].m_speakerGuid))
-        DoScriptText(iTextId, pSpeaker);
+    if (GameObject* pFace = instance->GetGameObject(m_aFaces[uiFace].m_goFaceGuid))
+        pFace->ResetDoorOrButton();
+}
+
+void instance_halls_of_stone::SetFaceTimer(uint8 uiFace, uint32 uiTimer)
+{
+    if (uiFace >= MAX_FACES)
+        return;
+
+    if (uiTimer)
+    {
+        m_aFaces[uiFace].m_bIsActive = true;
+        m_aFaces[uiFace].m_uiTimer = uiTimer;
+    }
+    else
+        m_aFaces[uiFace].m_bIsActive = false;
 }
 
 void instance_halls_of_stone::OnCreatureDeath(Creature* pCreature)
@@ -444,6 +534,7 @@ void instance_halls_of_stone::OnCreatureEvade(Creature* pCreature)
 
 void instance_halls_of_stone::Update(uint32 uiDiff)
 {
+    // Tribunal encounter timer; handles the spell part of the event
     if (m_auiEncounter[TYPE_TRIBUNAL] == IN_PROGRESS)
     {
         for (uint8 i = 0; i < MAX_FACES; ++i)
@@ -451,10 +542,17 @@ void instance_halls_of_stone::Update(uint32 uiDiff)
             if (!m_aFaces[i].m_bIsActive)
                 continue;
 
+            // spell timers
             if (m_aFaces[i].m_uiTimer < uiDiff)
-                ProcessFace(i);
+                ProcessFaceSpell(i);
             else
                 m_aFaces[i].m_uiTimer -= uiDiff;
+
+            // summon timers
+            if (m_aFaces[i].m_uiSummonTimer < uiDiff)
+                ProcessFaceSummon(i);
+            else
+                m_aFaces[i].m_uiSummonTimer -= uiDiff;
         }
     }
 
@@ -501,7 +599,7 @@ void instance_halls_of_stone::Load(const char* chrIn)
     OUT_LOAD_INST_DATA_COMPLETE;
 }
 
-void instance_halls_of_stone::ProcessFace(uint8 uiFace)
+void instance_halls_of_stone::ProcessFaceSpell(uint8 uiFace)
 {
     // Cast dmg spell from face eyes, and reset timer for face
     switch (uiFace)
@@ -511,20 +609,47 @@ void instance_halls_of_stone::ProcessFace(uint8 uiFace)
                 pEye->CastSpell(pEye, instance->IsRegularDifficulty() ? SPELL_GLARE_OF_THE_TRIBUNAL : SPELL_GLARE_OF_THE_TRIBUNAL_H, TRIGGERED_OLD_TRIGGERED);
             if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_rightEyeGuid))
                 pEye->CastSpell(pEye, instance->IsRegularDifficulty() ? SPELL_GLARE_OF_THE_TRIBUNAL : SPELL_GLARE_OF_THE_TRIBUNAL_H, TRIGGERED_OLD_TRIGGERED);
-            m_aFaces[uiFace].m_uiTimer = urand(1000, 2000);
+            m_aFaces[uiFace].m_uiTimer = 3000;
             break;
         case FACE_MARNAK:
             if (Creature* pDarkMatter = GetSingleCreatureFromStorage(NPC_DARK_MATTER))
                 pDarkMatter->CastSpell(pDarkMatter, SPELL_DARK_MATTER_START, TRIGGERED_OLD_TRIGGERED);
-            m_aFaces[uiFace].m_uiTimer = urand(21000, 30000);
+            m_aFaces[uiFace].m_uiTimer = urand(30000, 35000);
             break;
         case FACE_ABEDNEUM:
             if (Creature* pEye = instance->GetCreature(m_aFaces[uiFace].m_leftEyeGuid))
                 pEye->CastSpell(pEye, SPELL_SUMMON_SEARING_GAZE_TARGET, TRIGGERED_OLD_TRIGGERED);
-            m_aFaces[uiFace].m_uiTimer = urand(30000, 35000);
+            m_aFaces[uiFace].m_uiTimer = 17000;
             break;
-        default:
-            return;
+    }
+}
+
+void instance_halls_of_stone::ProcessFaceSummon(uint8 uiFace)
+{
+    switch (uiFace)
+    {
+        case FACE_KADDRAK:
+            if (Creature* pStalker = instance->GetCreature(m_aFaces[uiFace].m_summonerGuid))
+            {
+                uint32 uiSpawnNumber = (instance->IsRegularDifficulty() ? 2 : 3);
+                for (uint8 i = 0; i < uiSpawnNumber; ++i)
+                    pStalker->CastSpell(pStalker, SPELL_SUMMON_PROTECTOR, TRIGGERED_OLD_TRIGGERED);
+            }
+            m_aFaces[uiFace].m_uiSummonTimer = urand(22000, 25000);
+            break;
+        case FACE_MARNAK:
+            if (Creature* pStalker = instance->GetCreature(m_aFaces[uiFace].m_summonerGuid))
+            {
+                for (uint8 i = 0; i < 2; ++i)
+                    pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, TRIGGERED_OLD_TRIGGERED);
+            }
+            m_aFaces[uiFace].m_uiSummonTimer = 30000;
+            break;
+        case FACE_ABEDNEUM:
+            if (Creature* pStalker = instance->GetCreature(m_aFaces[uiFace].m_summonerGuid))
+                pStalker->CastSpell(pStalker, SPELL_SUMMON_CUSTODIAN, TRIGGERED_OLD_TRIGGERED);
+            m_aFaces[uiFace].m_uiSummonTimer = urand(30000, 35000);
+            break;
     }
 }
 

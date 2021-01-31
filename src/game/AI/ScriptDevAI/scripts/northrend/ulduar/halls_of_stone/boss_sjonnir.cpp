@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Sjonnir
-SD%Complete: 60%
-SDComment: Brann Event missing, no proper source for timers
+SD%Complete: 100%
+SDComment:
 SDCategory: Halls of Stone
 EndScriptData */
 
@@ -25,6 +25,7 @@ EndScriptData */
 #include "halls_of_stone.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -34,6 +35,10 @@ enum
     SAY_SLAY_3                      = -1599003,
     SAY_DEATH                       = -1599004,
     EMOTE_GENERIC_FRENZY            = -1000002,
+
+    SAY_SPAWN_TROGG                 = -1599022,
+    SAY_SPAWN_OOZE                  = -1599023,
+    SAY_SPAWN_EARTHEN               = -1599024,
 
     SPELL_FRENZY                    = 28747,
 
@@ -64,74 +69,109 @@ enum
     // Cast at 15% hp when Bran repairs the machine
     SPELL_SUMMON_EARTHEN_DWARF      = 50824,                // left/right 50825, 50826
 
+    QUEST_HALLS_OF_STONE            = 13207,
+
     // Ooze and Sludge spells
     // SPELL_OOZE_COMBINE              = 50741,             // periodic aura - cast by 27981 in EAI
     // SPELL_SUMMON_IRON_SLUDGE        = 50747,             // instakill TARGET_SCRIPT
     // SPELL_IRON_SLUDGE_SPAWN_VISUAL  = 50777,
 };
 
+enum SjonnirActions
+{
+    SJONNIR_ACTION_CHAIN_LIGHTNING,
+    SJONNIR_ACTION_LIGHTNING_SHIELD,
+    SJONNIR_ACTION_STATIC_CHARGE,
+    SJONNIR_ACTION_LIGHTNING_RING,
+    SJONNIR_ACTION_SUMMON,
+    SJONNIR_ACTION_MAX,
+};
+
 /*######
 ## boss_sjonnir
 ######*/
 
-struct boss_sjonnirAI : public ScriptedAI
+struct boss_sjonnirAI : public CombatAI
 {
-    boss_sjonnirAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_sjonnirAI(Creature* creature) : CombatAI(creature, SJONNIR_ACTION_MAX), m_instance(static_cast<instance_halls_of_stone*>(creature->GetInstanceData()))
     {
-        m_pInstance = static_cast<instance_halls_of_stone*>(pCreature->GetInstanceData());
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddCombatAction(SJONNIR_ACTION_CHAIN_LIGHTNING, 10000u);
+        AddCombatAction(SJONNIR_ACTION_LIGHTNING_SHIELD, 10000u, 15000u);
+        AddCombatAction(SJONNIR_ACTION_STATIC_CHARGE, 15000u, 20000u);
+        AddCombatAction(SJONNIR_ACTION_LIGHTNING_RING, 30000u);
+        AddTimerlessCombatAction(SJONNIR_ACTION_SUMMON, true);
+
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
+
+        DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_LIGHTNING_SHIELD : SPELL_LIGHTNING_SHIELD_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 
-    instance_halls_of_stone* m_pInstance;
-    bool m_bIsRegularMode;
-
-    uint32 m_uiChainLightningTimer;
-    uint32 m_uiLightningShieldTimer;
-    uint32 m_uiStaticChargeTimer;
-    uint32 m_uiLightningRingTimer;
-    uint32 m_uiFrenzyTimer;
+    instance_halls_of_stone* m_instance;
+    bool m_isRegularMode;
 
     uint8 m_uiHpCheck;
 
     void Reset() override
     {
-        m_uiChainLightningTimer     = urand(3000, 8000);    // TODO timers weak
-        m_uiLightningShieldTimer    = urand(20000, 25000);
-        m_uiStaticChargeTimer       = urand(20000, 25000);
-        m_uiLightningRingTimer      = urand(30000, 35000);
-        m_uiFrenzyTimer             = 4 * MINUTE * IN_MILLISECONDS; // TODO no proper source for this "long"
+        CombatAI::Reset();
 
-        m_uiHpCheck                 = 75;
+        m_uiHpCheck = 75;
     }
 
     void Aggro(Unit* /*pWho*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_SHIELD : SPELL_LIGHTNING_SHIELD_H, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SUMMON_IRON_DWARF : SPELL_SUMMON_IRON_DWARF_H, CAST_TRIGGERED);
+        DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_LIGHTNING_SHIELD : SPELL_LIGHTNING_SHIELD_H, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+        DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_SUMMON_IRON_DWARF : SPELL_SUMMON_IRON_DWARF_H, CAST_TRIGGERED);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SJONNIR, IN_PROGRESS);
+        if (m_instance)
+        {
+            m_instance->SetData(TYPE_SJONNIR, IN_PROGRESS);
+
+            if (Creature* pBrann = m_instance->instance->GetCreature(m_instance->GetBrannSummonedGuid()))
+                pBrann->GetMotionMaster()->UnpauseWaypoints();
+        }
     }
 
     void JustDied(Unit* /*pKiller*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SJONNIR, DONE);
+        if (m_instance)
+        {
+            m_instance->SetData(TYPE_SJONNIR, DONE);
+
+            if (Creature* pBrann = m_instance->instance->GetCreature(m_instance->GetBrannSummonedGuid()))
+            {
+                pBrann->HandleEmote(EMOTE_ONESHOT_NONE);
+                pBrann->GetMotionMaster()->Clear(false, true);
+                pBrann->GetMotionMaster()->MoveWaypoint(5);
+            }
+
+            // complete quest
+            if (Player* pPlayer = m_instance->GetPlayerInMap(true, false))
+                pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_HALLS_OF_STONE, m_creature);
+        }
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_SJONNIR, FAIL);
+        if (m_instance)
+        {
+            m_instance->SetData(TYPE_SJONNIR, FAIL);
+
+            if (Creature* pBrann = m_instance->instance->GetCreature(m_instance->GetBrannSummonedGuid()))
+                pBrann->ForcedDespawn();
+
+            m_creature->SummonCreature(NPC_BRANN, fBrannDoorLocation[0], fBrannDoorLocation[1], fBrannDoorLocation[2], fBrannDoorLocation[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+        }
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* victim) override
     {
+        CombatAI::KilledUnit(victim);
+
         switch (urand(0, 2))
         {
             case 0: DoScriptText(SAY_SLAY_1, m_creature); break;
@@ -140,88 +180,76 @@ struct boss_sjonnirAI : public ScriptedAI
         }
     }
 
-    bool DoFrenzyIfCan()
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_uiFrenzyTimer)
-            return true;
-
-        if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+        switch (action)
         {
-            DoCastSpellIfCan(m_creature, SPELL_SUMMON_EARTHEN_DWARF, CAST_TRIGGERED);
-            m_uiFrenzyTimer = 0;
+            case SJONNIR_ACTION_CHAIN_LIGHTNING:
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
+                        ResetCombatAction(action, 15000);
+                }
+                break;
+            case SJONNIR_ACTION_LIGHTNING_SHIELD:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_LIGHTNING_SHIELD : SPELL_LIGHTNING_SHIELD_H) == CAST_OK)
+                    ResetCombatAction(action, 15000);
+                break;
+            case SJONNIR_ACTION_STATIC_CHARGE:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_STATIC_CHARGE : SPELL_STATIC_CHARGE_H) == CAST_OK)
+                    ResetCombatAction(action, 25000);
+                break;
+            case SJONNIR_ACTION_LIGHTNING_RING:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_LIGHTNING_RING : SPELL_LIGHTNING_RING_H) == CAST_OK)
+                    ResetCombatAction(action, 25000);
+                break;
+            case SJONNIR_ACTION_SUMMON:
+                if (m_creature->GetHealthPercent() <= (float)m_uiHpCheck)
+                {
+                    if (!m_instance)
+                        return;
 
-            return true;
+                    switch (m_uiHpCheck)
+                    {
+                        case 75:
+                            if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_SUMMON_IRON_TROGG : SPELL_SUMMON_IRON_TROGG_H, CAST_TRIGGERED) == CAST_OK)
+                            {
+                                m_creature->RemoveAurasDueToSpell(m_isRegularMode ? SPELL_SUMMON_IRON_DWARF : SPELL_SUMMON_IRON_DWARF_H);
+
+                                if (Creature* pBrann = m_instance->instance->GetCreature(m_instance->GetBrannSummonedGuid()))
+                                    DoScriptText(SAY_SPAWN_TROGG, pBrann);
+
+                                m_uiHpCheck = 50;
+                            }
+                            break;
+                        case 50:
+                            if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_SUMMON_MALFORMED_OOZE : SPELL_SUMMON_MALFORMED_OOZE_H, CAST_TRIGGERED) == CAST_OK)
+                            {
+                                m_creature->RemoveAurasDueToSpell(m_isRegularMode ? SPELL_SUMMON_IRON_TROGG : SPELL_SUMMON_IRON_TROGG_H);
+
+                                if (Creature* pBrann = m_instance->instance->GetCreature(m_instance->GetBrannSummonedGuid()))
+                                    DoScriptText(SAY_SPAWN_OOZE, pBrann);
+
+                                m_uiHpCheck = 15;
+                            }
+                            break;
+                        case 15:
+                            if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+                            {
+                                m_creature->RemoveAurasDueToSpell(m_isRegularMode ? SPELL_SUMMON_MALFORMED_OOZE : SPELL_SUMMON_MALFORMED_OOZE_H);
+
+                                DoCastSpellIfCan(m_creature, SPELL_SUMMON_EARTHEN_DWARF, CAST_TRIGGERED);
+
+                                if (Creature* pBrann = m_instance->instance->GetCreature(m_instance->GetBrannSummonedGuid()))
+                                    DoScriptText(SAY_SPAWN_EARTHEN, pBrann);
+
+                                m_uiHpCheck = 0;
+                            }
+                            break;
+                        }
+                }
+                break;
         }
-
-        return false;
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_creature->GetHealthPercent() <= (float)m_uiHpCheck)
-        {
-            switch (m_uiHpCheck)
-            {
-                case 75:
-                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SUMMON_IRON_TROGG : SPELL_SUMMON_IRON_TROGG_H, CAST_TRIGGERED) == CAST_OK)
-                        m_uiHpCheck = 50;
-                    break;
-                case 50:
-                    if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_SUMMON_MALFORMED_OOZE : SPELL_SUMMON_MALFORMED_OOZE_H, CAST_TRIGGERED) == CAST_OK)
-                        m_uiHpCheck = 15;
-                    break;
-                case 15:
-                    if (DoFrenzyIfCan())
-                        m_uiHpCheck = 0;
-
-                    break;
-            }
-        }
-
-        if (m_uiChainLightningTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_CHAIN_LIGHTNING : SPELL_CHAIN_LIGHTNING_H) == CAST_OK)
-                    m_uiChainLightningTimer = urand(10000, 15000);
-            }
-        }
-        else
-            m_uiChainLightningTimer -= uiDiff;
-
-        if (m_uiLightningShieldTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_SHIELD : SPELL_LIGHTNING_SHIELD_H) == CAST_OK)
-                m_uiLightningShieldTimer = urand(20000, 25000);
-        }
-        else
-            m_uiLightningShieldTimer -= uiDiff;
-
-        if (m_uiStaticChargeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_STATIC_CHARGE : SPELL_STATIC_CHARGE_H) == CAST_OK)
-                m_uiStaticChargeTimer = urand(20000, 25000);
-        }
-        else
-            m_uiStaticChargeTimer -= uiDiff;
-
-        if (m_uiLightningRingTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_LIGHTNING_RING : SPELL_LIGHTNING_RING_H) == CAST_OK)
-                m_uiLightningRingTimer = urand(30000, 35000);
-        }
-        else
-            m_uiLightningRingTimer -= uiDiff;
-
-        if (m_uiFrenzyTimer <= uiDiff)
-            DoFrenzyIfCan();
-        else
-            m_uiFrenzyTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 

@@ -23,32 +23,25 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "halls_of_stone.h"
-#include "AI/ScriptDevAI/base/escort_ai.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
-
-/* Notes
- * The timers and handling of texts is not confirmed, but should also not be too far off
- */
 
 enum
 {
     SAY_KILL_1                          = -1599012,
     SAY_KILL_2                          = -1599013,
     SAY_KILL_3                          = -1599014,
+
     SAY_LOW_HEALTH                      = -1599015,
     SAY_DEATH                           = -1599016,
+
     SAY_PLAYER_DEATH_1                  = -1599017,
     SAY_PLAYER_DEATH_2                  = -1599018,
     SAY_PLAYER_DEATH_3                  = -1599019,
+
+    // Tribunal event
     SAY_ESCORT_START                    = -1599020,
 
-    SAY_SPAWN_DWARF                     = -1599021,
-    SAY_SPAWN_TROGG                     = -1599022,
-    SAY_SPAWN_OOZE                      = -1599023,
-    SAY_SPAWN_EARTHEN                   = -1599024,
-
-    SAY_EVENT_INTRO_1                   = -1599025,
     SAY_EVENT_INTRO_2                   = -1599026,
     SAY_EVENT_INTRO_3_ABED              = -1599027,
 
@@ -69,6 +62,7 @@ enum
     SAY_EVENT_D_3                       = -1599039,
     SAY_EVENT_D_4_ABED                  = -1599040,
 
+    // ending dialogue
     SAY_EVENT_END_01                    = -1599041,
     SAY_EVENT_END_02                    = -1599042,
     SAY_EVENT_END_03_ABED               = -1599043,
@@ -91,62 +85,115 @@ enum
     SAY_EVENT_END_20                    = -1599060,
     SAY_EVENT_END_21_ABED               = -1599061,
 
-    SAY_VICTORY_SJONNIR_1               = -1599062,
-    SAY_VICTORY_SJONNIR_2               = -1599063,
-
     SAY_ENTRANCE_MEET                   = -1599064,
 
+    // gossip options
     GOSSIP_ITEM_ID_START                = -3599000,
     GOSSIP_ITEM_ID_PROGRESS             = -3599001,
     GOSSIP_ITEM_ID_END_TRIBUNAL         = -3599002,
     GOSSIP_ITEM_ID_START_SJONNIR        = -3599003,
 
+    // gossip texts
     TEXT_ID_START                       = 13100,
     TEXT_ID_PROGRESS                    = 13101,
     TEXT_ID_END_TRIBUNAL                = 14176,
     TEXT_ID_START_SJONNIR               = 13883,
 
-    SPELL_SUMMON_PROTECTOR              = 51780,                // all spells are casted by stalker npcs 28130
-    SPELL_SUMMON_STORMCALLER            = 51050,
-    SPELL_SUMMON_CUSTODIAN              = 51051,
+    // spells used for the event
+    SPELL_BRANN_HEALTH_CHECK            = 51810,
 
-    QUEST_HALLS_OF_STONE                = 13207,
+    EVENT_ID_BRANN_ACHIEV_FAIL          = 20645,
+
+    // path ids for the creature
+    PHASE_GETTING_THERE                 = 0,
+    PHASE_TRIBUNAL                      = 1,
+    PHASE_ENDING                        = 2,
+    PHASE_DESPAWN                       = 3,
+    PHASE_SJONNIR                       = 4,
 };
+
+static const DialogueEntry aTribunalDialogue[] =
+{
+    // Intro
+    {SAY_EVENT_INTRO_2,         NPC_BRANN,      6000},
+    {SAY_EVENT_INTRO_3_ABED,    NPC_ABEDNEUM,   10000},
+
+    // Combat event
+    {SAY_EVENT_A_1,             NPC_BRANN,      6000},
+    {SAY_EVENT_A_2_KADD,        NPC_KADDRAK,    11000},
+    {SAY_EVENT_A_3,             NPC_BRANN,      60000},
+
+    {SAY_EVENT_B_1,             NPC_BRANN,      3000},
+    {SAY_EVENT_B_2_MARN,        NPC_MARNAK,     7000},
+    {SAY_EVENT_B_3,             NPC_BRANN,      90000},
+
+    {SAY_EVENT_C_1,             NPC_BRANN,      5000},
+    {SAY_EVENT_C_2_ABED,        NPC_ABEDNEUM,   7000},
+    {SAY_EVENT_C_3,             NPC_BRANN,      90000},
+
+    // Event complete
+    {SAY_EVENT_D_1,             NPC_BRANN,      6000},
+    {SAY_EVENT_D_2_ABED,        NPC_ABEDNEUM,   6000},
+    {SAY_EVENT_D_3,             NPC_BRANN,      7000},
+    {SAY_EVENT_D_4_ABED,        NPC_ABEDNEUM,   4000},
+    {PHASE_ENDING,              0,              0},
+
+    // Ending dialogue
+    {SAY_EVENT_END_01,          NPC_BRANN,      6000},
+    {SAY_EVENT_END_02,          NPC_BRANN,      5000},
+    {SAY_EVENT_END_03_ABED,     NPC_ABEDNEUM,   8000},
+    {SAY_EVENT_END_04,          NPC_BRANN,      12000},
+    {SAY_EVENT_END_05_ABED,     NPC_ABEDNEUM,   11000},
+    {SAY_EVENT_END_06,          NPC_BRANN,      5000},
+    {SAY_EVENT_END_07_ABED,     NPC_ABEDNEUM,   22000},
+    {SAY_EVENT_END_08,          NPC_BRANN,      8000},
+    {SAY_EVENT_END_09_KADD,     NPC_KADDRAK,    18000},
+    {SAY_EVENT_END_10,          NPC_BRANN,      6000},
+    {SAY_EVENT_END_11_KADD,     NPC_KADDRAK,    20000},
+    {SAY_EVENT_END_12,          NPC_BRANN,      2000},
+    {SAY_EVENT_END_13_KADD,     NPC_KADDRAK,    20000},
+    {SAY_EVENT_END_14,          NPC_BRANN,      11000},
+    {SAY_EVENT_END_15_MARN,     NPC_MARNAK,     7000},
+    {SAY_EVENT_END_16,          NPC_BRANN,      5000},
+    {SAY_EVENT_END_17_MARN,     NPC_MARNAK,     25000},
+    {SAY_EVENT_END_18,          NPC_BRANN,      24000},
+    {SAY_EVENT_END_19_MARN,     NPC_MARNAK,     2000},
+    {SAY_EVENT_END_20,          NPC_BRANN,      9000},
+    {SAY_EVENT_END_21_ABED,     NPC_ABEDNEUM,   8000},
+
+    {SAY_ENTRANCE_MEET,         NPC_BRANN,      5000},
+    {PHASE_DESPAWN,             0,              0},
+    {0, 0, 0},
+};
+
+static const float fBrannResetLocation[4] = { 939.6467f, 375.48926f, 207.42229f, 3.92699f };
 
 /*######
 ## npc_brann_hos
 ######*/
 
-struct npc_brann_hosAI : public npc_escortAI
+struct npc_brann_hosAI : public ScriptedAI, private DialogueHelper
 {
-    npc_brann_hosAI(Creature* pCreature) : npc_escortAI(pCreature)
+    npc_brann_hosAI(Creature* creature) : ScriptedAI(creature),
+        DialogueHelper(aTribunalDialogue)
     {
-        m_pInstance = static_cast<instance_halls_of_stone*>(pCreature->GetInstanceData());
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        m_instance = static_cast<instance_halls_of_stone*>(creature->GetInstanceData());
+        InitializeDialogueHelper(m_instance);
+        m_uiPhase = PHASE_GETTING_THERE;
         Reset();
     }
 
-    instance_halls_of_stone* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_halls_of_stone* m_instance;
 
-    bool m_bHasContinued;
+    uint8 m_uiPhase;
+
     bool m_bIsBattle;
     bool m_bIsLowHP;
 
-    uint32 m_uiStep;
-    uint32 m_uiPhaseTimer;
-
     void Reset() override
     {
-        if (!HasEscortState(STATE_ESCORT_ESCORTING))
-        {
-            m_bIsLowHP = false;
-            m_bIsBattle = false;
-            m_bHasContinued = false;
-
-            m_uiStep = 0;
-            m_uiPhaseTimer = 0;
-        }
+        m_bIsLowHP = false;
+        m_bIsBattle = false;
     }
 
     void KilledUnit(Unit* /*pVictim*/) override                          // TODO - possible better as SummonedJustDied
@@ -163,409 +210,231 @@ struct npc_brann_hosAI : public npc_escortAI
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
+        if (!m_instance)
+            return;
+
+        m_instance->SetData(TYPE_TRIBUNAL, FAIL);
+
+        if (m_uiPhase == PHASE_TRIBUNAL)
+            m_instance->SetData(TYPE_TRIBUNAL, IN_PROGRESS);
+
+        m_creature->SetRespawnDelay(30);
+        m_creature->ForcedDespawn();
+    }
+
+    // Respawn Handling: Relocate and Set Escort to WP 14
+    void JustRespawned() override
+    {
+        if (m_instance && m_instance->GetData(TYPE_TRIBUNAL) == IN_PROGRESS)
         {
-            m_pInstance->SetData(TYPE_TRIBUNAL, FAIL);
-            // Continue at right state after respawn
-            if (m_bHasContinued)
-                m_pInstance->SetData(TYPE_TRIBUNAL, IN_PROGRESS);
+            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
+
+            // Relocate to start position
+            m_creature->GetMap()->CreatureRelocation(m_creature, fBrannResetLocation[0], fBrannResetLocation[1], fBrannResetLocation[2], fBrannResetLocation[3]);
         }
     }
 
-    void AttackStart(Unit* pWho) override
+    // Method to move Brann to the Tribunal event
+    void PrepareTribunalEvent()
     {
-        if (!pWho)
-            return;
+        if (m_instance)
+            m_instance->SetData(TYPE_TRIBUNAL, IN_PROGRESS);
 
-        if (!m_bIsBattle)
-            return;
+        DoScriptText(SAY_ESCORT_START, m_creature);
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
 
-        npc_escortAI::AttackStart(pWho);
+        m_creature->SetWalk(false);
+        m_creature->RemoveAurasDueToSpell(SPELL_BRANN_STEALTH);
+        m_creature->GetMotionMaster()->Clear(false, true);
+        m_creature->GetMotionMaster()->MoveWaypoint(m_uiPhase);
     }
 
-    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
+    // Method to begin the Tribunal event
+    void StartTribunalEvent()
     {
-        // If Brann takes damage, mark the achiev as failed
-        if (uiDamage && m_pInstance)
-            m_pInstance->SetBrannSpankin(false);
-    }
-
-    void ContinueEvent()
-    {
-        if (!m_pInstance || m_pInstance->GetData(TYPE_TRIBUNAL) != IN_PROGRESS)
+        if (!m_instance || m_instance->GetData(TYPE_TRIBUNAL) != IN_PROGRESS)
             return;
 
         // Set the achiev in progress
-        m_pInstance->SetBrannSpankin(true);
+        if (DoCastSpellIfCan(m_creature, SPELL_BRANN_HEALTH_CHECK, CAST_TRIGGERED) == CAST_OK)
+            m_instance->SetBrannSpankin(true);
 
         m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-        SetRun(true);
-        SetEscortPaused(false);
-        m_bHasContinued = true;
+        m_creature->SetWalk(false);
+        m_creature->GetMotionMaster()->Clear(false, true);
+        m_creature->GetMotionMaster()->MoveWaypoint(m_uiPhase);
     }
 
-    void JustStartedEscort() override
+    // Method that marks the event as complete and starts the ending dialogue
+    void CompleteTribunalEvent()
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_TRIBUNAL, IN_PROGRESS);
-
-        DoScriptText(SAY_ESCORT_START, m_creature);
-    }
-
-    void WaypointReached(uint32 uiPointId) override
-    {
-        switch (uiPointId)
+        // Mark the event as complete; allow the epilogue to continue
+        if (m_instance)
         {
-            case 14:                                        // Before Tribunal Event, Continue with Gossip Interaction
-                DoScriptText(SAY_EVENT_INTRO_1, m_creature);
-                SetEscortPaused(true);
-                m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+            m_instance->SetData(TYPE_TRIBUNAL, SPECIAL);
+            m_instance->ActivateFace(FACE_ABEDNEUM, true);
+        }
+
+        m_uiPhase = PHASE_ENDING;
+        m_creature->GetMotionMaster()->Clear(false, true);
+        m_creature->GetMotionMaster()->MoveWaypoint(m_uiPhase);
+    }
+
+    // Method to fully end the Tribunal event
+    void EndTribunalEvent()
+    {
+        if (m_instance)
+        {
+            m_instance->ResetFace(FACE_ABEDNEUM);
+            m_instance->SetData(TYPE_TRIBUNAL, DONE);
+        }
+
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+        m_uiPhase = PHASE_DESPAWN;
+    }
+
+    // Method to force end event; used as a shortcut
+    void ForceEndTribunalEvent()
+    {
+        StartNextDialogueText(SAY_ENTRANCE_MEET);
+    }
+
+    // Method to start Sjonnir event
+    void StartSjonnirEvent()
+    {
+        m_uiPhase = PHASE_SJONNIR;
+
+        m_creature->SetWalk(false);
+        m_creature->RemoveAurasDueToSpell(SPELL_BRANN_STEALTH);
+        m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER);
+        m_creature->GetMotionMaster()->Clear(false, true);
+        m_creature->GetMotionMaster()->MoveWaypoint(m_uiPhase);
+    }
+
+    void JustDidDialogueStep(int32 iEntry) override
+    {
+        switch (iEntry)
+        {
+            case SAY_EVENT_A_2_KADD:
+                if (m_instance)
+                    m_instance->ActivateFace(FACE_KADDRAK, false);
                 break;
-            case 18:                                        // Reach Tribunal
-                SetEscortPaused(true);
-                m_uiPhaseTimer = 500;
+            case SAY_EVENT_A_3:
+                if (m_instance)
+                    m_instance->SetFaceTimer(FACE_KADDRAK, 1000);
                 break;
-            case 19:                                        // Reach Floor Event
-                SetEscortPaused(true);
-                if (m_pInstance)
+            case SAY_EVENT_B_2_MARN:
+                if (m_instance)
+                    m_instance->ActivateFace(FACE_MARNAK, false);
+                break;
+            case SAY_EVENT_B_3:
+                if (m_instance)
+                    m_instance->SetFaceTimer(FACE_MARNAK, 1000);
+                break;
+            case SAY_EVENT_C_2_ABED:
+                if (m_instance)
+                    m_instance->ActivateFace(FACE_ABEDNEUM, false);
+                break;
+            case SAY_EVENT_C_3:
+                if (m_instance)
+                    m_instance->SetFaceTimer(FACE_ABEDNEUM, 1000);
+                break;
+            case SAY_EVENT_D_1:
+                m_creature->SetImmuneToNPC(true);
+                break;
+            case PHASE_ENDING:
+                CompleteTribunalEvent();
+                break;
+            case SAY_EVENT_END_09_KADD:
+                if (m_instance)
                 {
-                    if (GameObject* pKonsole = m_pInstance->GetSingleGameObjectFromStorage(GO_TRIBUNAL_CONSOLE))
-                        m_creature->SetFacingToObject(pKonsole);
-                    m_pInstance->DoUseDoorOrButton(GO_TRIBUNAL_FLOOR);
+                    m_instance->ActivateFace(FACE_KADDRAK, true);
+                    m_instance->ResetFace(FACE_ABEDNEUM);
                 }
-                m_uiPhaseTimer = 1000;
+                break;
+            case SAY_EVENT_END_15_MARN:
+                if (m_instance)
+                {
+                    m_instance->ActivateFace(FACE_MARNAK, true);
+                    m_instance->ResetFace(FACE_KADDRAK);
+                }
+                break;
+            case SAY_EVENT_END_20:
+                if (m_instance)
+                {
+                    m_instance->DoUseDoorOrButton(GO_TRIBUNAL_FLOOR);
+                    m_instance->ResetFace(FACE_MARNAK);
+                }
+                break;
+            case SAY_EVENT_END_21_ABED:
+                if (m_instance)
+                    m_instance->ActivateFace(FACE_ABEDNEUM, true);
+                break;
+            case SAY_ENTRANCE_MEET:
+                EndTribunalEvent();
+                break;
+            case PHASE_DESPAWN:
+                m_creature->GetMotionMaster()->Clear(false, true);
+                m_creature->GetMotionMaster()->MoveWaypoint(m_uiPhase);
                 break;
         }
     }
 
-    void SpawnDwarf(uint32 uEntry)
+    void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* /*pInvoker*/, uint32 uiMiscValue) override
     {
-        if (!m_pInstance)
+        m_uiPhase = uiMiscValue;
+
+        switch (eventType)
+        {
+            case AI_EVENT_CUSTOM_A:
+                PrepareTribunalEvent();
+                break;
+            case AI_EVENT_CUSTOM_B:
+                StartTribunalEvent();
+                break;
+            case AI_EVENT_CUSTOM_C:
+                ForceEndTribunalEvent();
+                break;
+            case AI_EVENT_CUSTOM_D:
+                StartSjonnirEvent();
+                break;
+        }
+    }
+
+    void MovementInform(uint32 uiType, uint32 uiPointId) override
+    {
+        if (uiType != WAYPOINT_MOTION_TYPE || !m_instance)
             return;
 
-        // each case has an individual spawn stalker
-        switch (uEntry)
+        if (uiPointId == 1)
         {
-            case NPC_RUNE_PROTECTOR:
+            switch (m_uiPhase)
             {
-                Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetProtectorStalkerGuid());
-                if (!pStalker)
-                    return;
-
-                uint32 uiSpawnNumber = (m_bIsRegularMode ? 2 : 3);
-                for (uint8 i = 0; i < uiSpawnNumber; ++i)
-                    pStalker->CastSpell(pStalker, SPELL_SUMMON_PROTECTOR, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-                pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-                break;
-            }
-            case NPC_RUNE_STORMCALLER:
-            {
-                Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GeStormcallerStalkerGuid());
-                if (!pStalker)
-                    return;
-
-                for (uint8 i = 0; i < 2; ++i)
-                    pStalker->CastSpell(pStalker, SPELL_SUMMON_STORMCALLER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-                break;
-            }
-            case NPC_GOLEM_CUSTODIAN:
-            {
-                Creature* pStalker = m_creature->GetMap()->GetCreature(m_pInstance->GetCustodianStalkerGuid());
-                if (!pStalker)
-                    return;
-
-                pStalker->CastSpell(pStalker, SPELL_SUMMON_CUSTODIAN, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-                break;
+                case PHASE_TRIBUNAL:                // Start combat event
+                    StartNextDialogueText(SAY_EVENT_INTRO_2);
+                    if (m_instance)
+                        m_instance->DoUseDoorOrButton(GO_TRIBUNAL_CONSOLE);
+                    break;
+                case PHASE_ENDING:                  // Start ending event
+                    StartNextDialogueText(SAY_EVENT_END_01);
+                    if (m_instance)
+                        m_instance->DoUseDoorOrButton(GO_TRIBUNAL_FLOOR);
+                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
+                    break;
+                case PHASE_DESPAWN:                 // Despawn and prepare for Sjonnir
+                    m_creature->SummonCreature(NPC_BRANN, fBrannDoorLocation[0], fBrannDoorLocation[1], fBrannDoorLocation[2], fBrannDoorLocation[3], TEMPSPAWN_DEAD_DESPAWN, 0, true);
+                    m_creature->SetRespawnDelay(24 * HOUR);
+                    m_creature->ForcedDespawn();
+                    break;
             }
         }
     }
 
-    void UpdateEscortAI(const uint32 uiDiff) override
+    void UpdateAI(const uint32 uiDiff) override
     {
-        if (m_uiPhaseTimer && m_uiPhaseTimer <= uiDiff)
-        {
-            switch (m_uiStep)
-            {
-                // Begin Event
-                case 0:
-                    // TODO, this is wrong, must be "using or similar"
-                    m_creature->SetStandState(UNIT_STAND_STATE_KNEEL);
-                    m_uiPhaseTimer = 1500;
-                    break;
-                case 1:
-                    DoScriptText(SAY_EVENT_INTRO_2, m_creature);
-                    m_uiPhaseTimer = 2500;
-                    break;
-                case 2:
-                    if (m_pInstance)
-                        m_pInstance->DoUseDoorOrButton(GO_TRIBUNAL_CONSOLE);
-                    m_uiPhaseTimer = 6500;
-                    break;
-                case 3:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_INTRO_3_ABED);
-                    m_uiPhaseTimer = 8500;
-                    break;
+        DialogueUpdate(uiDiff);
 
-                // Activate Kaddrak
-                case 4:
-                    DoScriptText(SAY_EVENT_A_1, m_creature);
-                    m_uiPhaseTimer = 6500;
-                    break;
-                case 5:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_KADDRAK, SAY_EVENT_A_2_KADD);
-                    m_uiPhaseTimer = 12500;
-                    break;
-                case 6:
-                    DoScriptText(SAY_EVENT_A_3, m_creature);
-                    m_uiPhaseTimer = 6000;
-                    break;
-                case 7:
-                    if (m_pInstance)
-                        m_pInstance->ActivateFace(FACE_KADDRAK, false);
-                    m_uiPhaseTimer = 5000;
-                    break;
-                case 8:
-                    SpawnDwarf(NPC_RUNE_PROTECTOR);
-                    m_uiPhaseTimer = 20000;
-                    break;
-
-                // Activate Marnak
-                case 9:
-                    DoScriptText(SAY_EVENT_B_1, m_creature);
-                    m_uiPhaseTimer = 6000;
-                    break;
-                case 10:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_MARNAK, SAY_EVENT_B_2_MARN);
-                    SpawnDwarf(NPC_RUNE_PROTECTOR);
-                    m_uiPhaseTimer = 20000;
-                    break;
-                case 11:
-                    DoScriptText(SAY_EVENT_B_3, m_creature);
-                    m_uiPhaseTimer = 5000;
-                    break;
-                case 12:
-                    if (m_pInstance)
-                        m_pInstance->ActivateFace(FACE_MARNAK, false);
-                    m_uiPhaseTimer = 10000;
-                    break;
-                case 13:
-                    SpawnDwarf(NPC_RUNE_PROTECTOR);
-                    m_uiPhaseTimer = 10000;
-                    break;
-                case 14:
-                    SpawnDwarf(NPC_RUNE_STORMCALLER);
-                    m_uiPhaseTimer = (20000);
-                    break;
-                case 15:
-                    DoScriptText(SAY_EVENT_C_1, m_creature);
-                    SpawnDwarf(NPC_RUNE_PROTECTOR);
-                    m_uiPhaseTimer = 10000;
-                    break;
-                case 16:
-                    SpawnDwarf(NPC_RUNE_STORMCALLER);
-                    m_uiPhaseTimer = 20000;
-                    break;
-
-                // Activate Abedneum
-                case 17:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_C_2_ABED);
-                    SpawnDwarf(NPC_RUNE_PROTECTOR);
-                    m_uiPhaseTimer = 20000;
-                    break;
-                case 18:
-                    DoScriptText(SAY_EVENT_C_3, m_creature);
-                    m_uiPhaseTimer = 5000;
-                    break;
-                case 19:
-                    if (m_pInstance)
-                        m_pInstance->ActivateFace(FACE_ABEDNEUM, false);
-                    m_uiPhaseTimer = 5000;
-                    break;
-                case 20:
-                    SpawnDwarf(NPC_RUNE_STORMCALLER);
-                    m_uiPhaseTimer = 10000;
-                    break;
-                case 21:
-                    SpawnDwarf(NPC_RUNE_PROTECTOR);
-                    m_uiPhaseTimer = 15000;
-                    break;
-
-                case 22:
-                    DoScriptText(SAY_EVENT_D_1, m_creature);
-                    SpawnDwarf(NPC_GOLEM_CUSTODIAN);
-                    m_uiPhaseTimer = 20000;
-                    break;
-                case 23:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_D_2_ABED);
-                    SpawnDwarf(NPC_RUNE_PROTECTOR);
-                    m_uiPhaseTimer = 5000;
-                    break;
-                case 24:
-                    SpawnDwarf(NPC_RUNE_STORMCALLER);
-                    m_uiPhaseTimer = 15000;
-                    break;
-                case 25:
-                    DoScriptText(SAY_EVENT_D_3, m_creature);
-                    SpawnDwarf(NPC_GOLEM_CUSTODIAN);
-                    m_uiPhaseTimer = 5000;
-                    break;
-                case 26:
-                    SpawnDwarf(NPC_RUNE_PROTECTOR);
-                    m_uiPhaseTimer = 5000;
-                    break;
-                case 27:
-                    SpawnDwarf(NPC_RUNE_STORMCALLER);
-                    m_uiPhaseTimer = 10000;
-                    break;
-                case 28:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_D_4_ABED);
-                    SpawnDwarf(NPC_RUNE_PROTECTOR);
-                    m_uiPhaseTimer = 10000;
-                    break;
-
-                // End Event
-                case 29:
-                    DoScriptText(SAY_EVENT_END_01, m_creature);
-                    m_creature->SetStandState(UNIT_STAND_STATE_STAND);// TODO TODO
-                    if (m_pInstance)
-                        m_pInstance->SetData(TYPE_TRIBUNAL, SPECIAL); // Kill remaining npcs
-
-                    // ToDo: the loot and the achiev should be triggered at this point
-                    // Brann should get the gossip option "There will be plenty of time for this later Brann, we need to get moving!"
-                    // This will allow Brann to continue the escort to the last encounter
-                    // When reaching the last door he has the gossip "We're with you Brann! Open it!"
-
-                    SetEscortPaused(false);
-                    m_uiPhaseTimer = 3000;
-                    // break;
-                    // case 30:
-                    if (m_pInstance)
-                        m_pInstance->ActivateFace(FACE_ABEDNEUM, true);
-                    m_uiPhaseTimer = 0;
-                    break;
-                case 30:
-                    DoScriptText(SAY_EVENT_END_02, m_creature);
-                    m_uiPhaseTimer = 5500;
-                    break;
-                case 31:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_END_03_ABED);
-                    m_uiPhaseTimer = 8500;
-                    break;
-                case 32:
-                    DoScriptText(SAY_EVENT_END_04, m_creature);
-                    m_uiPhaseTimer = 11500;
-                    break;
-                case 33:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_END_05_ABED);
-                    m_uiPhaseTimer = 11500;
-                    break;
-                case 34:
-                    DoScriptText(SAY_EVENT_END_06, m_creature);
-                    m_uiPhaseTimer = 4500;
-                    break;
-                case 35:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_END_07_ABED);
-                    m_uiPhaseTimer = 22500;
-                    break;
-                case 36:
-                    DoScriptText(SAY_EVENT_END_08, m_creature);
-                    m_uiPhaseTimer = 7500;
-                    break;
-                case 37:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_KADDRAK, SAY_EVENT_END_09_KADD);
-                    m_uiPhaseTimer = 18500;
-                    break;
-                case 38:
-                    DoScriptText(SAY_EVENT_END_10, m_creature);
-                    m_uiPhaseTimer = 5500;
-                    break;
-                case 39:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_KADDRAK, SAY_EVENT_END_11_KADD);
-                    m_uiPhaseTimer = 20500;
-                    break;
-                case 40:
-                    DoScriptText(SAY_EVENT_END_12, m_creature);
-                    m_uiPhaseTimer = 2500;
-                    break;
-                case 41:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_KADDRAK, SAY_EVENT_END_13_KADD);
-                    m_uiPhaseTimer = 19500;
-                    break;
-                case 42:
-                    DoScriptText(SAY_EVENT_END_14, m_creature);
-                    m_uiPhaseTimer = 10500;
-                    break;
-                case 43:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_MARNAK, SAY_EVENT_END_15_MARN);
-                    m_uiPhaseTimer = 6500;
-                    break;
-                case 44:
-                    DoScriptText(SAY_EVENT_END_16, m_creature);
-                    m_uiPhaseTimer = 6500;
-                    break;
-                case 45:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_MARNAK, SAY_EVENT_END_17_MARN);
-                    m_uiPhaseTimer = 25500;
-                    break;
-                case 46:
-                    DoScriptText(SAY_EVENT_END_18, m_creature);
-                    m_uiPhaseTimer = 23500;
-                    break;
-                case 47:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_MARNAK, SAY_EVENT_END_19_MARN);
-                    m_uiPhaseTimer = 3500;
-                    break;
-                case 48:
-                    DoScriptText(SAY_EVENT_END_20, m_creature);
-                    m_uiPhaseTimer = 8500;
-                    break;
-                case 49:
-                    if (m_pInstance)
-                        m_pInstance->DoFaceSpeak(FACE_ABEDNEUM, SAY_EVENT_END_21_ABED);
-                    m_uiPhaseTimer = 5500;
-                    break;
-                case 50:
-                {
-                    if (m_pInstance)
-                    {
-                        m_pInstance->DoUseDoorOrButton(GO_TRIBUNAL_FLOOR);
-                        m_pInstance->SetData(TYPE_TRIBUNAL, DONE);
-                    }
-
-                    Player* pPlayer = GetPlayerForEscort();
-                    if (pPlayer)
-                        pPlayer->RewardPlayerAndGroupAtEventExplored(QUEST_HALLS_OF_STONE, m_creature);
-
-                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
-                    m_creature->SetFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-
-                    m_uiPhaseTimer = 180000;
-                    break;
-                }
-                case 51:
-                    SetEscortPaused(false);
-                    break;
-            }
-            ++m_uiStep;
-        }
-        else if (m_uiPhaseTimer)
-            m_uiPhaseTimer -= uiDiff;
-
+        // HP check
         if (!m_bIsLowHP && m_creature->GetHealthPercent() < 30)
         {
             DoScriptText(SAY_LOW_HEALTH, m_creature);
@@ -573,34 +442,6 @@ struct npc_brann_hosAI : public npc_escortAI
         }
         else if (m_bIsLowHP && m_creature->GetHealthPercent() > 30)
             m_bIsLowHP = false;
-
-        // No Combat abilities needed here
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-    }
-
-    // Respawn Handling: Relocate and Set Escort to WP 14
-    void JustRespawned() override
-    {
-        if (!m_pInstance)
-            return;
-
-        Reset();
-
-        if (m_pInstance->GetData(TYPE_TRIBUNAL) == IN_PROGRESS)
-        {
-            SetEscortPaused(true);
-
-            m_uiStep = 0;
-            m_uiPhaseTimer = 0;
-
-            m_creature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER);
-
-            // Relocate to position of WP 14
-            m_creature->GetMap()->CreatureRelocation(m_creature, 941.101563f, 377.373413f, 207.421f, 3.85f);
-
-            SetCurrentWaypoint(14);
-        }
     }
 };
 
@@ -621,6 +462,16 @@ bool GossipHello_npc_brann_hos(Player* pPlayer, Creature* pCreature)
             pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_PROGRESS, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 2);
             pPlayer->SEND_GOSSIP_MENU(TEXT_ID_PROGRESS, pCreature->GetObjectGuid());
         }
+        else if (pInstance->GetData(TYPE_TRIBUNAL) == SPECIAL)
+        {
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_END_TRIBUNAL, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 3);
+            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_END_TRIBUNAL, pCreature->GetObjectGuid());
+        }
+        else if (pInstance->GetData(TYPE_TRIBUNAL) == DONE && (pInstance->GetData(TYPE_SJONNIR) == NOT_STARTED || pInstance->GetData(TYPE_SJONNIR) == FAIL))
+        {
+            pPlayer->ADD_GOSSIP_ITEM_ID(GOSSIP_ICON_CHAT, GOSSIP_ITEM_ID_START_SJONNIR, GOSSIP_SENDER_MAIN, GOSSIP_ACTION_INFO_DEF + 4);
+            pPlayer->SEND_GOSSIP_MENU(TEXT_ID_START_SJONNIR, pCreature->GetObjectGuid());
+        }
     }
 
     return true;
@@ -631,12 +482,16 @@ bool GossipSelect_npc_brann_hos(Player* pPlayer, Creature* pCreature, uint32 /*u
     switch (uiAction)
     {
         case GOSSIP_ACTION_INFO_DEF + 1:
-            if (npc_brann_hosAI* pBrannAi = dynamic_cast<npc_brann_hosAI*>(pCreature->AI()))
-                pBrannAi->Start(false, pPlayer);
+            pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, pPlayer, pCreature, PHASE_GETTING_THERE);
             break;
         case GOSSIP_ACTION_INFO_DEF + 2:
-            if (npc_brann_hosAI* pBrannAi = dynamic_cast<npc_brann_hosAI*>(pCreature->AI()))
-                pBrannAi->ContinueEvent();
+            pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, pPlayer, pCreature, PHASE_TRIBUNAL);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 3:
+            pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_C, pPlayer, pCreature, PHASE_DESPAWN);
+            break;
+        case GOSSIP_ACTION_INFO_DEF + 4:
+            pCreature->AI()->SendAIEvent(AI_EVENT_CUSTOM_D, pPlayer, pCreature, PHASE_SJONNIR);
             break;
     }
     pPlayer->CLOSE_GOSSIP_MENU();
@@ -786,6 +641,49 @@ struct spell_carve_stone_aura : public AuraScript
     }
 };
 
+/*######
+## spell_taunt_brann - 51774
+######*/
+
+struct spell_taunt_brann : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !caster)
+            return;
+
+        // trigger 51775 on caster
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        target->CastSpell(caster, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## event_spell_brann_achievement_fail
+######*/
+
+bool ProcessEventId_event_spell_brann_achievement_fail(uint32 uiEventId, Object* pSource, Object* /*pTarget*/, bool /*bIsStart*/)
+{
+    if (uiEventId == EVENT_ID_BRANN_ACHIEV_FAIL && pSource->IsCreature())
+    {
+        Creature* brann = static_cast<Creature*>(pSource);
+        instance_halls_of_stone* instance = static_cast<instance_halls_of_stone*>(brann->GetInstanceData());
+        if (!instance)
+            return true;
+
+        instance->SetBrannSpankin(false);
+        return true;
+    }
+
+    return false;
+}
+
 void AddSC_halls_of_stone()
 {
     Script* pNewScript = new Script;
@@ -800,7 +698,13 @@ void AddSC_halls_of_stone()
     pNewScript->GetAI = &GetNewAIInstance<npc_dark_matterAI>;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
+    pNewScript->Name = "event_spell_brann_achievement_fail";
+    pNewScript->pProcessEventId = &ProcessEventId_event_spell_brann_achievement_fail;
+    pNewScript->RegisterSelf();
+
     RegisterSpellScript<spell_shatter>("spell_shatter");
     RegisterAuraScript<spell_petrifying_grip_aura>("spell_petrifying_grip_aura");
     RegisterAuraScript<spell_carve_stone_aura>("spell_carve_stone_aura");
+    RegisterSpellScript<spell_taunt_brann>("spell_taunt_brann");
 }
