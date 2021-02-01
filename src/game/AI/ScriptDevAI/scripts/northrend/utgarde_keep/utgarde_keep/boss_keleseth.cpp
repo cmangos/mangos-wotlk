@@ -275,7 +275,7 @@ struct boss_kelesethAI : public RangedCombatAI
                 break;
             case KELESETH_ACTION_SHADOW_BOLT:
                 if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_SHADOWBOLT : SPELL_SHADOWBOLT_H) == CAST_OK)
-                    ResetCombatAction(action, 3000u);
+                    ResetCombatAction(action, 3000);
                 break;
             case KELESETH_ACTION_FROST_TOMB:
                 if (Unit* pTombTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_SUMMON_FROST_TOMB, SELECT_FLAG_PLAYER))
@@ -284,7 +284,7 @@ struct boss_kelesethAI : public RangedCombatAI
                     {
                         DoScriptText(SAY_FROSTTOMB, m_creature);
                         DoScriptText(EMOTE_FROST_TOMB, m_creature, pTombTarget);
-                        ResetCombatAction(action, 25000u);
+                        ResetCombatAction(action, 25000);
                     }
                 }
                 break;
