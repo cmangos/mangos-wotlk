@@ -69,9 +69,10 @@ void instance_halls_of_stone::OnPlayerEnter(Player* pPlayer)
         if (Creature* pBrann = GetSingleCreatureFromStorage(NPC_BRANN))
         {
             pBrann->ForcedDespawn();
-            pPlayer->SummonCreature(NPC_BRANN, fBrannDoorLocation[0], fBrannDoorLocation[1], fBrannDoorLocation[2], fBrannDoorLocation[3], TEMPSPAWN_DEAD_DESPAWN, 0);
+            if (!instance->GetCreature(m_brannSummonedGuid))
+                pPlayer->SummonCreature(NPC_BRANN, fBrannDoorLocation[0], fBrannDoorLocation[1], fBrannDoorLocation[2], fBrannDoorLocation[3], TEMPSPAWN_DEAD_DESPAWN, 0);
         }
-        else
+        else if (!instance->GetCreature(m_brannSummonedGuid))
             pPlayer->SummonCreature(NPC_BRANN, fBrannDoorLocation[0], fBrannDoorLocation[1], fBrannDoorLocation[2], fBrannDoorLocation[3], TEMPSPAWN_DEAD_DESPAWN, 0);
     }
 }
