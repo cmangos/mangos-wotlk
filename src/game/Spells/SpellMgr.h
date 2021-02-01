@@ -754,8 +754,40 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 44537:         // Fel Lightning
         case 44604:         // Enchantment of Spell Haste
         case 44855:         // Out of Phase
+        case 44962:         // Archer - BE Male Transform Tier 1
+        case 44918:         // Archer - BE Male Transform Tier 2
+        case 44919:         // Archer - BE Male Transform Tier 3
+        case 44920:         // Archer - BE Male Transform Tier 4
+        case 44921:         // Archer - BE Female Transform Tier 1
+        case 44922:         // Archer - BE Female Transform Tier 2
+        case 44923:         // Archer - BE Female Transform Tier 3
+        case 44924:         // Archer - BE Female Transform Tier 4
+        case 44925:         // Archer - Draenei Male Transform Tier 1
+        case 44926:         // Archer - Draenei Male Transform Tier 2
+        case 44927:         // Archer - Draenei Male Transform Tier 3
+        case 44928:         // Archer - Draenei Male Transform Tier 4
+        case 44929:         // Archer - Draenei Female Transform Tier 1
+        case 44930:         // Archer - Draenei Female Transform Tier 2
+        case 44931:         // Archer - Draenei Female Transform Tier 3
+        case 44932:         // Archer - Draenei Female Transform Tier 4
         case 44977:         // Fel Armor (Rank 2)
         case 45033:         // Abyssal Transformation
+        case 45155:         // Warrior - BE Female Transform Tier 1
+        case 45156:         // Warrior - BE Female Transform Tier 2
+        case 45157:         // Warrior - BE Female Transform Tier 3
+        case 45158:         // Warrior - BE Female Transform Tier 4
+        case 45159:         // Warrior - BE Male Transform Tier 1
+        case 45160:         // Warrior - BE Male Transform Tier 2
+        case 45161:         // Warrior - BE Male Transform Tier 3
+        case 45162:         // Warrior - BE Male Transform Tier 4
+        case 45163:         // Warrior - Draenei Female Transform Tier 1
+        case 45164:         // Warrior - Draenei Female Transform Tier 2
+        case 45165:         // Warrior - Draenei Female Transform Tier 3
+        case 45166:         // Warrior - Draenei Female Transform Tier 4
+        case 45167:         // Warrior - Draenei Male Transform Tier 1
+        case 45168:         // Warrior - Draenei Male Transform Tier 2
+        case 45169:         // Warrior - Draenei Male Transform Tier 3
+        case 45170:         // Warrior - Draenei Male Transform Tier 4
         case 45187:         // Dawnblade Attack
         case 45822:         // Iceblood Warmaster
         case 45823:         // Tower Point Warmaster
