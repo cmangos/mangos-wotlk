@@ -17,12 +17,13 @@
 /* ScriptData
 SDName: boss_eregos
 SD%Complete: 90
-SDComment: Small adjustments may be required.
+SDComment: Timers need to be confirmed.
 SDCategory: Oculus
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "oculus.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -39,6 +40,7 @@ enum
 
     SPELL_ARCANE_BARRAGE            = 50804,
     SPELL_ARCANE_BARRAGE_H          = 59381,
+
     SPELL_ARCANE_VOLLEY             = 51153,
     SPELL_ARCANE_VOLLEY_H           = 59382,
     SPELL_ENRAGED_ASSAULT           = 51170,
@@ -53,53 +55,65 @@ enum
     NPC_GREATER_LEY_WHELP           = 28276,
 };
 
+enum EregosActions
+{
+    EREGOS_ACTION_PLANAR_SHIFT,
+    EREGOS_ACTION_ARCANE_BARRAGE,
+    EREGOS_ACTION_ARCANE_VOLLEY,
+    EREGOS_ACTION_ENRAGED_ASSAULT,
+    EREGOS_ACTION_LEY_WHELP,
+    EREGOS_ACTION_MAX
+};
+
 /*######
 ## boss_eregos
 ######*/
 
-struct boss_eregosAI : public ScriptedAI
+struct boss_eregosAI : public RangedCombatAI
 {
-    boss_eregosAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_eregosAI(Creature* creature) : RangedCombatAI(creature, EREGOS_ACTION_MAX), m_instance(static_cast<instance_oculus*>(creature->GetInstanceData()))
     {
-        m_pInstance = static_cast<instance_oculus*>(pCreature->GetInstanceData());
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
 
         // ToDo: check if different for heroic
         m_uiMaxWhelps = 4;
-        Reset();
+
+        AddCombatAction(EREGOS_ACTION_ARCANE_BARRAGE, 0u);
+        AddCombatAction(EREGOS_ACTION_ARCANE_VOLLEY, 20000u);
+        AddCombatAction(EREGOS_ACTION_ENRAGED_ASSAULT, 35000u);
+        AddCombatAction(EREGOS_ACTION_LEY_WHELP, 15000u, 20000u);
+
+        AddTimerlessCombatAction(EREGOS_ACTION_PLANAR_SHIFT, true);
+        AddMainSpell(m_isRegularMode ? SPELL_ARCANE_BARRAGE : SPELL_ARCANE_BARRAGE_H);
+
+        SetRangedMode(true, 20.f, TYPE_PROXIMITY);
     }
 
-    instance_oculus* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_oculus* m_instance;
+    bool m_isRegularMode;
 
-    uint32 m_uiArcaneBarrageTimer;
-    uint32 m_uiArcaneVolleyTimer;
-    uint32 m_uiEnrageTimer;
-    uint32 m_uiSummonWhelpsTimer;
     uint8 m_uiMaxWhelps;
     float m_fHpPercent;
 
     void Reset() override
     {
-        m_uiArcaneBarrageTimer  = 0;
-        m_uiArcaneVolleyTimer   = 20000;
-        m_uiEnrageTimer         = 35000;
-        m_uiSummonWhelpsTimer   = urand(15000, 20000);
-        m_fHpPercent            = 60.0f;
+        RangedCombatAI::Reset();
 
-        m_attackDistance = 20.0f;
+        m_fHpPercent = 60.0f;
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_EREGOS, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_EREGOS, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* victim) override
     {
+        RangedCombatAI::KilledUnit(victim);
+
         switch (urand(0, 2))
         {
             case 0: DoScriptText(SAY_KILL_1, m_creature); break;
@@ -108,18 +122,18 @@ struct boss_eregosAI : public ScriptedAI
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_EREGOS, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_EREGOS, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_EREGOS, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_EREGOS, FAIL);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -131,73 +145,62 @@ struct boss_eregosAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_creature->HasAura(SPELL_PLANAR_SHIFT))
-            return;
-
-        if (m_creature->GetHealthPercent() < m_fHpPercent)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_PLANAR_SHIFT) == CAST_OK)
-            {
-                // This will summon an anomaly for each player (vehicle)
-                DoCastSpellIfCan(m_creature, SPELL_PLANAR_ANOMALIES, CAST_TRIGGERED);
-
-                switch (urand(0, 2))
+            case EREGOS_ACTION_PLANAR_SHIFT:
+                if (m_creature->GetHealthPercent() < m_fHpPercent)
                 {
-                    case 0: DoScriptText(SAY_ARCANE_SHIELD, m_creature); break;
-                    case 1: DoScriptText(SAY_FIRE_SHIELD, m_creature); break;
-                    case 2: DoScriptText(SAY_NATURE_SHIELD, m_creature); break;
+                    if (DoCastSpellIfCan(m_creature, SPELL_PLANAR_SHIFT) == CAST_OK)
+                    {
+                        // This will summon an anomaly for each player (vehicle)
+                        DoCastSpellIfCan(m_creature, SPELL_PLANAR_ANOMALIES, CAST_TRIGGERED);
+
+                        switch (urand(0, 2))
+                        {
+                            case 0: DoScriptText(SAY_ARCANE_SHIELD, m_creature); break;
+                            case 1: DoScriptText(SAY_FIRE_SHIELD, m_creature); break;
+                            case 2: DoScriptText(SAY_NATURE_SHIELD, m_creature); break;
+                        }
+                        DoScriptText(EMOTE_ASTRAL_PLANE, m_creature);
+
+                        // reset timers for other combat actions
+                        ResetCombatAction(EREGOS_ACTION_ARCANE_BARRAGE, urand(18000, 20000));
+                        ResetCombatAction(EREGOS_ACTION_ARCANE_VOLLEY, urand(25000, 30000));
+                        ResetCombatAction(EREGOS_ACTION_LEY_WHELP, urand(25000, 35000));
+                        ResetCombatAction(EREGOS_ACTION_ENRAGED_ASSAULT, urand(60000, 70000));
+
+                        // set next phase to 20%
+                        m_fHpPercent -= 40;
+                    }
                 }
-                DoScriptText(EMOTE_ASTRAL_PLANE, m_creature);
+                break;
+            case EREGOS_ACTION_ARCANE_BARRAGE:
+                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(pTarget, m_isRegularMode ? SPELL_ARCANE_BARRAGE : SPELL_ARCANE_BARRAGE_H) == CAST_OK)
+                        ResetCombatAction(action, urand(2000, 3000));
+                }
+                break;
+            case EREGOS_ACTION_ARCANE_VOLLEY:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_ARCANE_VOLLEY : SPELL_ARCANE_VOLLEY_H) == CAST_OK)
+                    ResetCombatAction(action, urand(10000, 15000));
+                break;
+            case EREGOS_ACTION_ENRAGED_ASSAULT:
+                if (DoCastSpellIfCan(m_creature, SPELL_ENRAGED_ASSAULT) == CAST_OK)
+                {
+                    DoScriptText(SAY_FRENZY, m_creature);
+                    ResetCombatAction(action, urand(40000, 50000));
+                }
+                break;
+            case EREGOS_ACTION_LEY_WHELP:
+                for (uint8 i = 0; i < m_uiMaxWhelps; ++i)
+                    DoCastSpellIfCan(m_creature, SPELL_SUMMON_LEY_WHELP, CAST_TRIGGERED);
 
-                // set next phase to 20%
-                m_fHpPercent -= 40;
-            }
+                ResetCombatAction(action, 20000);
+                break;
         }
-
-        if (m_uiArcaneBarrageTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ARCANE_BARRAGE : SPELL_ARCANE_BARRAGE_H) == CAST_OK)
-                    m_uiArcaneBarrageTimer = urand(2000, 3000);
-            }
-        }
-        else
-            m_uiArcaneBarrageTimer -= uiDiff;
-
-        if (m_uiSummonWhelpsTimer < uiDiff)
-        {
-            for (uint8 i = 0; i < m_uiMaxWhelps; ++i)
-                DoCastSpellIfCan(m_creature, SPELL_SUMMON_LEY_WHELP, CAST_TRIGGERED);
-
-            m_uiSummonWhelpsTimer = 20000;
-        }
-        else
-            m_uiSummonWhelpsTimer -= uiDiff;
-
-        if (m_uiArcaneVolleyTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_ARCANE_VOLLEY : SPELL_ARCANE_VOLLEY_H) == CAST_OK)
-                m_uiArcaneVolleyTimer = urand(10000, 15000);
-        }
-        else
-            m_uiArcaneVolleyTimer -= uiDiff;
-
-        if (m_uiEnrageTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_ENRAGED_ASSAULT) == CAST_OK)
-            {
-                DoScriptText(SAY_FRENZY, m_creature);
-                m_uiEnrageTimer = urand(40000, 50000);
-            }
-        }
-        else
-            m_uiEnrageTimer -= uiDiff;
     }
 };
 
