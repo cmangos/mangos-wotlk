@@ -217,10 +217,12 @@ void instance_karazhan::OnCreatureRespawn(Creature* creature)
     if (creature->GetEntry() == NPC_BLIZZARD)
         creature->AI()->SetReactState(REACT_PASSIVE);
     else if (creature->GetEntry() == NPC_INFERNAL)
+    {
         if (GetData(TYPE_MALCHEZZAR) == IN_PROGRESS)
             return;
         else
             creature->ForcedDespawn(1);
+    }
 }
 
 void instance_karazhan::SetData(uint32 uiType, uint32 uiData)

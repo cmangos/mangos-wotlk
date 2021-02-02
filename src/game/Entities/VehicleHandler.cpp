@@ -88,6 +88,8 @@ void WorldSession::HandleRequestVehicleNextSeat(WorldPacket& recvPacket)
         case CMSG_REQUEST_VEHICLE_NEXT_SEAT:
             vehicle->GetVehicleInfo()->ChangeSeat(_player, transportInfo->GetTransportSeat(), true);
             break;
+        default:
+            break;
     }
 }
 

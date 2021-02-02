@@ -91,10 +91,12 @@ struct boss_fankrissAI : public CombatAI
 
     void Aggro(Unit* /*who*/) override
     {
+        auto rd = std::random_device {};
+        auto rng = std::default_random_engine { rd() };
         if (m_instance)
             m_instance->SetData(TYPE_FANKRISS, IN_PROGRESS);
 
-        std::random_shuffle(m_summonWormSpells.begin(), m_summonWormSpells.end());
+        std::shuffle(m_summonWormSpells.begin(), m_summonWormSpells.end(), rng);
     }
 
     void JustReachedHome() override
@@ -147,7 +149,9 @@ struct boss_fankrissAI : public CombatAI
                         // Determine how many Spawn of Fankriss will be spawned in the next wave
                         m_wormsSpawnPerWave = urand(1, 3);
                         // Randomise the summoning spells so each NPC spawns in a different location
-                        std::random_shuffle(m_summonWormSpells.begin(), m_summonWormSpells.end());
+                        auto rd = std::random_device {};
+                        auto rng = std::default_random_engine { rd() };
+                        std::shuffle(m_summonWormSpells.begin(), m_summonWormSpells.end(), rng);
                         ResetCombatAction(action, urand(22000, 70000));
                     }
                     else    // Summon another Spawn of Fankriss in a few seconds

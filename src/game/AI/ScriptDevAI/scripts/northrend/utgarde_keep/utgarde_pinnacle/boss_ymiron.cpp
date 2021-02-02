@@ -161,7 +161,9 @@ struct boss_ymironAI : public ScriptedAI
         m_uiCurrentSpiritGuid.Clear();
 
         // Randomize spirit order
-        std::random_shuffle(m_vuiBoatPhases.begin(), m_vuiBoatPhases.end());
+        auto rd = std::random_device {};
+        auto rng = std::default_random_engine { rd() };
+        std::shuffle(m_vuiBoatPhases.begin(), m_vuiBoatPhases.end(), rng);
     }
 
     void Aggro(Unit* /*pWho*/) override

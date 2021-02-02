@@ -195,7 +195,8 @@ struct boss_selin_fireheartAI : public CombatAI
     {
         switch (eventType)
         {
-            case AI_EVENT_CUSTOM_A: 
+            case AI_EVENT_CUSTOM_A:
+            {
                 if (bool(miscValue)) // Channeling Completed
                 {
                     DoScriptText(SAY_EMPOWERED, m_creature);
@@ -205,7 +206,10 @@ struct boss_selin_fireheartAI : public CombatAI
                 }
 
                 DoEndCrystalDraining();
-            break;
+                break;
+            }
+            default:
+                break;
         }
     }
 

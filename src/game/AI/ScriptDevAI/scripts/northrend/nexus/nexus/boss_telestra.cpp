@@ -196,6 +196,8 @@ struct boss_telestraAI : public RangedCombatAI
                         break;
                 }
                 break;
+            default:
+                break;
         }
     }
 

@@ -179,10 +179,9 @@ struct npc_manaforge_spawnAI : public ScriptedAI
     void EnterEvadeMode() override
     {
         Reset();
-        Creature *manaforge;
 
         if (m_manaforgeGuid)
-            if (manaforge = m_creature->GetMap()->GetCreature(m_manaforgeGuid))
+            if (Creature *manaforge = m_creature->GetMap()->GetCreature(m_manaforgeGuid))
             {
                 uint32 uiManaforgeEntry = manaforge->GetEntry();
 
@@ -477,7 +476,7 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                             pAdd->GetMotionMaster()->MovePoint(0, m_afAraTechCoords[i + 3][0], m_afAraTechCoords[i + 3][1], m_afAraTechCoords[i + 3][2]);
                         }
                     if (!urand(0, 2)) // 1 in 3 chance to spawn a engineer
-                        if (pAdd = m_creature->SummonCreature(NPC_ARA_ENGI, m_afAraTechCoords[0][0], m_afAraTechCoords[0][1], m_afAraTechCoords[0][2], 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
+                        if ((pAdd = m_creature->SummonCreature(NPC_ARA_ENGI, m_afAraTechCoords[0][0], m_afAraTechCoords[0][1], m_afAraTechCoords[0][2], 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                             pAdd->GetMotionMaster()->MovePoint(0, m_afAraTechCoords[3][0], m_afAraTechCoords[3][1], m_afAraTechCoords[3][2]);
                 }
                 else if (route == 1)
@@ -489,7 +488,7 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                             pAdd->GetMotionMaster()->MovePoint(0, m_afAraTechCoords[i + 3][0], m_afAraTechCoords[i + 3][1], m_afAraTechCoords[i + 3][2]);
                         }
                     if (!urand(0, 2)) // 1 in 3 chance to spawn a engineer
-                        if (pAdd = m_creature->SummonCreature(NPC_ARA_ENGI, m_afAraTechCoords[6][0], m_afAraTechCoords[6][1], m_afAraTechCoords[6][2], 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
+                        if ((pAdd = m_creature->SummonCreature(NPC_ARA_ENGI, m_afAraTechCoords[6][0], m_afAraTechCoords[6][1], m_afAraTechCoords[6][2], 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                             pAdd->GetMotionMaster()->MovePoint(0, m_afAraTechCoords[9][0], m_afAraTechCoords[9][1], m_afAraTechCoords[9][2]);
                 }
                 else
@@ -501,7 +500,7 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                             pAdd->GetMotionMaster()->MovePoint(0, m_afAraTechCoords[i + 3][0], m_afAraTechCoords[i + 3][1], m_afAraTechCoords[i + 3][2]);
                         }
                     if (!urand(0, 2)) // 1 in 3 chance to spawn a engineer
-                        if (pAdd = m_creature->SummonCreature(NPC_ARA_ENGI, m_afAraTechCoords[12][0], m_afAraTechCoords[12][1], m_afAraTechCoords[12][2], 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000))
+                        if ((pAdd = m_creature->SummonCreature(NPC_ARA_ENGI, m_afAraTechCoords[12][0], m_afAraTechCoords[12][1], m_afAraTechCoords[12][2], 0.0f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                             pAdd->GetMotionMaster()->MovePoint(0, m_afAraTechCoords[15][0], m_afAraTechCoords[15][1], m_afAraTechCoords[15][2]);
                 }
                 m_uiWaveTimer = 15000;
@@ -550,7 +549,7 @@ struct npc_manaforge_control_consoleAI : public ScriptedAI
                 if ((pAdd = m_creature->SummonCreature(NPC_ARA_GORKLONN, m_afAraTechCoords[12][0], m_afAraTechCoords[12][1], m_afAraTechCoords[12][2], 4.44f, TEMPSPAWN_TIMED_OOC_OR_DEAD_DESPAWN, 120000)))
                 {
                     Player* pPlayer;
-                    if (pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid))
+                    if ((pPlayer = m_creature->GetMap()->GetPlayer(m_playerGuid)))
                         pAdd->AI()->AttackStart(pPlayer);
                     else
                         pAdd->GetMotionMaster()->MovePoint(0, m_afAraTechCoords[15][0], m_afAraTechCoords[15][1], m_afAraTechCoords[15][2]);

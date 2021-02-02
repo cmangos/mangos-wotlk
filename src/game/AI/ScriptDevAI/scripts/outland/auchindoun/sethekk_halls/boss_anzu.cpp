@@ -438,6 +438,8 @@ struct npc_anzu_bird_spiritAI : public ScriptedAI
                 FreezeSpirits();
                 break;
             }
+            default:
+                break;
         }
     }
 

@@ -217,6 +217,9 @@ CanCastResult UnitAI::DoCastSpellIfCan(Unit* target, uint32 spellId, uint32 cast
                     case SPELL_FAILED_CASTER_AURASTATE: // valid - doesnt need logging
                     case SPELL_FAILED_BAD_TARGETS:
                     case SPELL_FAILED_DONT_REPORT:
+                    case SPELL_FAILED_SUCCESS:
+                    case SPELL_FAILED_AFFECTING_COMBAT:
+                    case SPELL_FAILED_ALREADY_AT_FULL_HEALTH:
                         return CAST_FAIL_OTHER;
                 }
                 sLog.outBasic("DoCastSpellIfCan by %s attempt to cast spell %u but spell failed due to unknown result %u.", m_unit->GetObjectGuid().GetString().c_str(), spellId, result);

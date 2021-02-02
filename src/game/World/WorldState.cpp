@@ -244,6 +244,8 @@ void WorldState::Save(SaveIds saveId)
             SaveHelper(loveData, SAVE_ID_LOVE_IS_IN_THE_AIR);
             break;
         }
+        case SAVE_ID_HIGHLORD_KRUUL:
+            break;
     }
 }
 

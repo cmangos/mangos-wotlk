@@ -254,7 +254,9 @@ struct boss_freyaAI : public ScriptedAI
         m_uiStormlasherDeadCount    = 0;
 
         // make the spawn spells random
-        std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+        auto rd = std::random_device {};
+        auto rng = std::default_random_engine { rd() };
+        std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), rng);
 
         m_bDeforestationComplete    = false;
     }
@@ -499,11 +501,13 @@ struct boss_freyaAI : public ScriptedAI
             if (m_uiAlliesWaveCount == MAX_ALLIES_SPELLS)
             {
                 uint32 uiLastSpell = spawnSpellsVector[MAX_ALLIES_SPELLS - 1];
-                std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+                auto rd = std::random_device {};
+                auto rng = std::default_random_engine { rd() };
+                std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), rng);
 
                 // make sure we won't repeat the last spell
                 while (spawnSpellsVector[0] == uiLastSpell)
-                    std::random_shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end());
+                    std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), rng);
             }
         }
         else if (eventType == AI_EVENT_CUSTOM_B)

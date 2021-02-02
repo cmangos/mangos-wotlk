@@ -14497,7 +14497,7 @@ void Player::RewardQuest(Quest const* pQuest, uint32 reward, Object* questGiver,
 
     // honor reward
     uint32 honor = 0;
-    if (honor = pQuest->CalculateRewardHonor(getLevel()))
+    if ((honor = pQuest->CalculateRewardHonor(getLevel())))
         RewardHonor(nullptr, 0, honor);
 
     // title reward
@@ -15440,7 +15440,7 @@ void Player::KilledPlayerCredit(uint16 count)
             continue;
         // just if !ingroup || !noraidgroup || raidgroup
         QuestStatusData& q_status = mQuestStatus[questid];
-        if (q_status.uState == QUEST_STATUS_INCOMPLETE && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->IsRaidQuest(GetMap()->GetDifficulty())))
+        if (static_cast<int>(q_status.uState) == static_cast<int>(QUEST_STATUS_INCOMPLETE) && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->IsRaidQuest(GetMap()->GetDifficulty())))
         {
             // PvP Killing quest require player to be in same zone as quest zone (only 2 quests so no doubt)
             if (qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_PLAYER_KILL) && GetZoneId() == static_cast<uint32>(qInfo->GetZoneOrSort()))

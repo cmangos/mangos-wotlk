@@ -175,6 +175,8 @@ struct boss_teron_gorefiendAI : public ScriptedAI, public CombatActions
                     m_introDone = true;
                 }
                 break;
+            default:
+                break;
         }
     }
 

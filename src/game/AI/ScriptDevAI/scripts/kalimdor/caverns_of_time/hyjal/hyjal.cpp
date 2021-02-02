@@ -1556,6 +1556,9 @@ void instance_mount_hyjal::DespawnBase(BaseArea index)
             if (Creature* creature = GetSingleCreatureFromStorage(NPC_THRALL))
                 creature->ForcedDespawn();
             break;
+        case BASE_ELF:
+        case MAX_BASE:
+            break;
     }
 }
 
@@ -1576,6 +1579,9 @@ void instance_mount_hyjal::SpawnBase(BaseArea index, bool spawnLeader = true)
             case BASE_HORDE:
                 if (Creature* creature = GetSingleCreatureFromStorage(NPC_THRALL))
                     creature->Respawn();
+                break;
+            case BASE_ELF:
+            case MAX_BASE:
                 break;
         }
     }
@@ -1609,6 +1615,9 @@ void instance_mount_hyjal::RetreatBase(BaseArea index)
             }
             break;
         }
+        case BASE_ELF:
+        case MAX_BASE:
+            break;
 
     }
 
@@ -1636,6 +1645,8 @@ void instance_mount_hyjal::OverrunBase(BaseArea index)
         case BASE_ELF:
             m_invasionWaves = 14;
             SpawnInvasionWave(14, true);
+            break;
+        case MAX_BASE:
             break;
     }
 }

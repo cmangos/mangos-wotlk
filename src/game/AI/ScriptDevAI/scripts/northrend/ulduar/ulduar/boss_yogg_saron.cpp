@@ -789,7 +789,9 @@ struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
         m_uiPortalsCount                = 0;
         m_uiMaxPortals                  = m_bIsRegularMode ? 4 : 10;
 
-        std::random_shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end());
+        auto rd = std::random_device {};
+        auto rng = std::default_random_engine { rd() };
+        std::shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end(), rng);
     }
 
     void AttackStart(Unit* /*pWho*/) override { }

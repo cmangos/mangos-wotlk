@@ -189,6 +189,8 @@ void hyjalAI::ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoke
             Win();
             break;
         }
+        default:
+            break;
     }
 }
 

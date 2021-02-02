@@ -4576,6 +4576,8 @@ struct npc_bt_battle_sensor : public ScriptedAI
                             senderAI->m_bIsWaypointing = false;
                         break;
                     }
+                    default:
+                        break;
                 }
 
                 break;

@@ -9972,7 +9972,6 @@ void ObjectMgr::LoadCreatureTemplateSpells()
 
             templateSpells.entry = fields[0].GetUInt32();
             templateSpells.setId = fields[1].GetUInt32();
-            templateSpells.spells[CREATURE_MAX_SPELLS];
             for (uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
                 templateSpells.spells[i] = fields[2 + i].GetUInt32();
 

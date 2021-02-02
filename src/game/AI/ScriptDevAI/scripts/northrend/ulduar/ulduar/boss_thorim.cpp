@@ -503,7 +503,9 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
                     if (Creature* pBunny = m_creature->GetMap()->GetCreature(*itr))
                         vBunnies.push_back(pBunny);
                 }
-                std::random_shuffle(vBunnies.begin(), vBunnies.end());
+                auto rd = std::random_device {};
+                auto rng = std::default_random_engine { rd() };
+                std::shuffle(vBunnies.begin(), vBunnies.end(), rng);
 
                 uint8 uiMaxCommoners = urand(6, 7);
                 if (uiMaxCommoners > vBunnies.size() - 1)

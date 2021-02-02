@@ -844,6 +844,8 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective nodeId, GameObject* 
             }
             break;
         }
+        case BG_IC_MAX_OBJECTIVES:
+            break;
     }
 }
 
@@ -973,6 +975,8 @@ void BattleGroundIC::DoResetObjective(IsleObjective nodeId)
 
             break;
         }
+        case BG_IC_MAX_OBJECTIVES:
+            break;
     }
 }
 

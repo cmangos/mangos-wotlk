@@ -843,6 +843,8 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                 ResetTimer(ILLIDAN_ACTION_PHASE_TRANSITION, 1000u);
                 break;
             }
+            case PHASE_TRANSITION:
+                break;
         }
     }
 
@@ -906,6 +908,8 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                 ResetCombatAction(ILLIDAN_ACTION_TRANSFORM, GetInitialActionTimer(ILLIDAN_ACTION_TRANSFORM));
                 break;
             }
+            case PHASE_TRANSITION:
+                break;
         }
     }
 
@@ -1099,6 +1103,8 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                 //TODO
                 break;
             }
+            case PHASETRANSITION_NONE:
+                break;
         }
         if (nextTimer)
             ResetTimer(ILLIDAN_ACTION_PHASE_TRANSITION, nextTimer);

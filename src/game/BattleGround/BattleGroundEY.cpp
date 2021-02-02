@@ -348,9 +348,17 @@ void BattleGroundEY::ProcessCaptureEvent(GameObject* go, uint32 towerId, Team te
     // replace the visual flags
     switch (team)
     {
-        case ALLIANCE:  SpawnEvent(towerId, TEAM_INDEX_ALLIANCE, true); break;
-        case HORDE:     SpawnEvent(towerId, TEAM_INDEX_HORDE,    true); break;
-        case TEAM_NONE: SpawnEvent(towerId, TEAM_INDEX_NEUTRAL,  true); break;
+        case ALLIANCE:
+            SpawnEvent(towerId, TEAM_INDEX_ALLIANCE, true);
+            break;
+        case HORDE:
+            SpawnEvent(towerId, TEAM_INDEX_HORDE, true);
+            break;
+        case TEAM_NONE:
+            SpawnEvent(towerId, TEAM_INDEX_NEUTRAL, true);
+            break;
+        default:
+            break;
     }
 }
 

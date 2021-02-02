@@ -573,6 +573,8 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 vendor->HandleEmote(EMOTE_STATE_USESTANDING);
                 vendor->SetCanFly(false);
                 break;
+            default:
+                break;
         }
     }
 
@@ -726,6 +728,8 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 initialSpawnCount = PHASE_3_INITIAL_SPAWN_COUNT;
                 break;
             }
+            default:
+                break;
         }
         for (uint32 i = 0; i < initialSpawnCount; ++i)
             SpawnRandomBashirMob();
@@ -768,6 +772,8 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 break;
             case BASHIR_PHASE_ALL_VENDORS_SPAWNED:
                 ResetTimer(BASHIR_ACTION_OUTRO, (4 * 60 + 40) * IN_MILLISECONDS); // 4 minutes 40 seconds
+                break;
+            default:
                 break;
         }
     }
@@ -1025,13 +1031,20 @@ struct world_map_outland : public ScriptedMap, public TimerManager
         {
             case PHASE_0_SHARTUUL_DISABLED:
             case PHASE_1_FELGUARD_DEGRADER_ADDS:
-            case PHASE_2_FELGUARD_DEGRADER_BOSS: entry = NPC_FELGUARD_DEGRADER; break;
+            case PHASE_2_FELGUARD_DEGRADER_BOSS:
+                entry = NPC_FELGUARD_DEGRADER;
+                break;
             case PHASE_3_DOOMGUARD_PUNISHER_ADDS:
-            case PHASE_4_DOOMGUARD_PUNISHER_BOSS: entry = NPC_DOOMGUARD_PUNISHER; break;
+            case PHASE_4_DOOMGUARD_PUNISHER_BOSS:
+                entry = NPC_DOOMGUARD_PUNISHER;
+                break;
             case PHASE_5_SHIVAN_ASSASSIN_BOSS_1:
             case PHASE_6_SHIVAN_ASSASSIN_BOSS_2:
-            case PHASE_7_SHIVAN_ASSASSIN_BOSS_3: entry = NPC_SHIVAN_ASSASSIN; break;
-            default: break;
+            case PHASE_7_SHIVAN_ASSASSIN_BOSS_3:
+                entry = NPC_SHIVAN_ASSASSIN;
+                break;
+            default:
+                break;
         }
         if (entry)
             return GetSingleCreatureFromStorage(entry);
@@ -1220,8 +1233,14 @@ struct world_map_outland : public ScriptedMap, public TimerManager
                 uint32 entry = 0;
                 switch (m_shartuulPhase)
                 {
-                    case PHASE_1_FELGUARD_DEGRADER_ADDS: entry = urand(0, 1) ? NPC_FEL_IMP_DEFENDER : NPC_FELHOUND_DEFENDER; break;
-                    case PHASE_3_DOOMGUARD_PUNISHER_ADDS: entry = NPC_GANARG_UNDERLING; break;
+                    case PHASE_1_FELGUARD_DEGRADER_ADDS:
+                        entry = urand(0, 1) ? NPC_FEL_IMP_DEFENDER : NPC_FELHOUND_DEFENDER;
+                        break;
+                    case PHASE_3_DOOMGUARD_PUNISHER_ADDS:
+                        entry = NPC_GANARG_UNDERLING;
+                        break;
+                    default:
+                        break;
                 }
 
                 uint32 spellId = GetSpellIdForEntry(entry);
@@ -1854,7 +1873,7 @@ struct world_map_outland : public ScriptedMap, public TimerManager
         }
         else if (val == "debuggurthock")
         {
-            handler->PSendSysMessage("Last ring of blood guid: %lu", m_lastRingOfBlood.GetRawValue());
+            handler->PSendSysMessage("Last ring of blood guid: %lu", static_cast<unsigned long>(m_lastRingOfBlood.GetRawValue()));
         }
         else if (val == "shartuulitem")
         {
