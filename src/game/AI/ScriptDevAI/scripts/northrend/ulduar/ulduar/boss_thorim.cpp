@@ -187,7 +187,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
     GuidList m_lUpperBunniesGuids;
     GuidList m_lLowerBunniesGuids;
 
-    std::default_random_device m_rng;
+    std::default_random_engine m_rng;
 
     void Reset() override
     {

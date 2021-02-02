@@ -141,7 +141,7 @@ struct boss_ymironAI : public ScriptedAI
 
     std::vector<uint8> m_vuiBoatPhases;
 
-    std::default_random_device m_rng
+    std::default_random_engine m_rng;
 
     void Reset() override
     {

@@ -506,7 +506,7 @@ struct boss_freyaAI : public ScriptedAI
 
                 // make sure we won't repeat the last spell
                 while (spawnSpellsVector[0] == uiLastSpell)
-                    std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), rng);
+                    std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), m_rng);
             }
         }
         else if (eventType == AI_EVENT_CUSTOM_B)
