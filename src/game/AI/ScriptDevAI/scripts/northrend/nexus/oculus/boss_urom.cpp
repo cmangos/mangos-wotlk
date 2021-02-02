@@ -84,6 +84,8 @@ struct boss_uromAI : public ScriptedAI
         for (uint8 i = 0; i < MAX_PLATFORMS; ++i)
             m_vuiTrashPacksIds.push_back(i);
 
+        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count())
+
         Reset();
     }
 
@@ -102,6 +104,7 @@ struct boss_uromAI : public ScriptedAI
 
     float m_fX, m_fY, m_fZ;
 
+    std::default_random_engine m_rng;
     ObjectGuid m_attackTarget;
 
     std::vector<uint32> m_vuiTrashPacksIds;
@@ -118,9 +121,8 @@ struct boss_uromAI : public ScriptedAI
 
         ResetPlatformVariables();
 
-        auto rd = std::random_device {};
-        auto rng = std::default_random_engine { rd() };
-        std::shuffle(m_vuiTrashPacksIds.begin(), m_vuiTrashPacksIds.end(), rng);
+
+        std::shuffle(m_vuiTrashPacksIds.begin(), m_vuiTrashPacksIds.end(), m_rng);
     }
 
     void ResetPlatformVariables()

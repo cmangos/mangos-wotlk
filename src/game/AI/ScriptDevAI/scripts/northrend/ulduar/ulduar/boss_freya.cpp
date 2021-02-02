@@ -197,6 +197,7 @@ struct boss_freyaAI : public ScriptedAI
 
         m_bEventFinished = false;
         m_uiEpilogueTimer = 0;
+        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count())
         Reset();
     }
 
@@ -232,6 +233,8 @@ struct boss_freyaAI : public ScriptedAI
 
     std::vector<uint32> spawnSpellsVector;
 
+    std::default_random_engine m_rng;
+
     void Reset() override
     {
         m_uiBerserkTimer            = 10 * MINUTE * IN_MILLISECONDS;
@@ -254,9 +257,7 @@ struct boss_freyaAI : public ScriptedAI
         m_uiStormlasherDeadCount    = 0;
 
         // make the spawn spells random
-        auto rd = std::random_device {};
-        auto rng = std::default_random_engine { rd() };
-        std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), rng);
+        std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), m_rng);
 
         m_bDeforestationComplete    = false;
     }
@@ -501,9 +502,7 @@ struct boss_freyaAI : public ScriptedAI
             if (m_uiAlliesWaveCount == MAX_ALLIES_SPELLS)
             {
                 uint32 uiLastSpell = spawnSpellsVector[MAX_ALLIES_SPELLS - 1];
-                auto rd = std::random_device {};
-                auto rng = std::default_random_engine { rd() };
-                std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), rng);
+                std::shuffle(spawnSpellsVector.begin(), spawnSpellsVector.end(), m_rng);
 
                 // make sure we won't repeat the last spell
                 while (spawnSpellsVector[0] == uiLastSpell)

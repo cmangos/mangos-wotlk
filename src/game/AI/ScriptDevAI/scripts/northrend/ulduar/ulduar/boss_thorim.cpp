@@ -163,6 +163,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         InitializeDialogueHelper(m_pInstance);
         m_bEventFinished = false;
+        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count())
         Reset();
     }
 
@@ -185,6 +186,8 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
     GuidList m_lUpperOrbsGuids;
     GuidList m_lUpperBunniesGuids;
     GuidList m_lLowerBunniesGuids;
+
+    std::default_random_device m_rng;
 
     void Reset() override
     {
@@ -503,9 +506,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
                     if (Creature* pBunny = m_creature->GetMap()->GetCreature(*itr))
                         vBunnies.push_back(pBunny);
                 }
-                auto rd = std::random_device {};
-                auto rng = std::default_random_engine { rd() };
-                std::shuffle(vBunnies.begin(), vBunnies.end(), rng);
+                std::shuffle(vBunnies.begin(), vBunnies.end(), m_rng);
 
                 uint8 uiMaxCommoners = urand(6, 7);
                 if (uiMaxCommoners > vBunnies.size() - 1)

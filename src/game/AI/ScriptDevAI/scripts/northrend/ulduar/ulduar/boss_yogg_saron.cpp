@@ -753,6 +753,8 @@ struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
         for (uint8 i = 0; i < MAX_ILLUSIONS; ++i)
             m_vuiMadnessPhases.push_back(i);
 
+        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count())
+
         Reset();
     }
 
@@ -771,6 +773,7 @@ struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
     uint32 m_uiConstrictorTentacleTimer;
     uint32 m_uiMadnessTimer;
     uint32 m_uiGuardianTimer;
+    std::default_random_engine m_rng;
 
     std::vector<uint8> m_vuiMadnessPhases;
 
@@ -789,9 +792,7 @@ struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
         m_uiPortalsCount                = 0;
         m_uiMaxPortals                  = m_bIsRegularMode ? 4 : 10;
 
-        auto rd = std::random_device {};
-        auto rng = std::default_random_engine { rd() };
-        std::shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end(), rng);
+        std::shuffle(m_vuiMadnessPhases.begin(), m_vuiMadnessPhases.end(), m_rng);
     }
 
     void AttackStart(Unit* /*pWho*/) override { }
