@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "ruby_sanctum.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -39,123 +40,90 @@ enum
     NPC_ONYX_FLAMECALLER        = 39814,                // handled in ACID
 };
 
-struct boss_zarithrianAI : public ScriptedAI
+enum ZarithrianActions
 {
-    boss_zarithrianAI(Creature* pCreature) : ScriptedAI(pCreature)
+    ZARITHRIAN_CLEAVE_ARMOR,
+    ZARITHRIAN_INTIMIDATING_ROAR,
+    ZARITHRIAN_SUMMON_FLAMECALLER,
+    ZARITHRIAN_ACTION_MAX,
+};
+
+struct boss_zarithrianAI : public CombatAI
+{
+    boss_zarithrianAI(Creature* creature) : CombatAI(creature, ZARITHRIAN_ACTION_MAX), m_instance(static_cast<instance_ruby_sanctum*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_ruby_sanctum*)pCreature->GetInstanceData();
-        Reset();
+        AddCombatAction(ZARITHRIAN_CLEAVE_ARMOR, 15000u);
+        AddCombatAction(ZARITHRIAN_INTIMIDATING_ROAR, 14000u);
+        AddCombatAction(ZARITHRIAN_SUMMON_FLAMECALLER, 15000u);
     }
 
-    instance_ruby_sanctum* m_pInstance;
+    instance_ruby_sanctum* m_instance;
 
-    uint32 m_uiCleaveArmorTimer;
-    uint32 m_uiIntimidatingRoarTimer;
-    uint32 m_uiCallFlamecallerTimer;
-
-    void Reset() override
-    {
-        m_uiCleaveArmorTimer        = 15000;
-        m_uiIntimidatingRoarTimer   = 14000;
-        m_uiCallFlamecallerTimer    = 15000;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ZARITHRIAN, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_ZARITHRIAN, IN_PROGRESS);
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void KilledUnit(Unit* victim) override
     {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
+        CombatAI::KilledUnit(victim);
 
         if (urand(0, 1))
             DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ZARITHRIAN, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_ZARITHRIAN, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_ZARITHRIAN, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_ZARITHRIAN, FAIL);
     }
 
-    void JustSummoned(Creature* pSummoned) override
+    void ExecuteAction(uint32 action) override
     {
-        if (pSummoned->GetEntry() == NPC_ONYX_FLAMECALLER)
-            pSummoned->SetInCombatWithZone();
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiCleaveArmorTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE_ARMOR) == CAST_OK)
-                m_uiCleaveArmorTimer = 15000;
+            case ZARITHRIAN_CLEAVE_ARMOR:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_CLEAVE_ARMOR) == CAST_OK)
+                    ResetCombatAction(action, 15000);
+                break;
+            case ZARITHRIAN_INTIMIDATING_ROAR:
+                if (DoCastSpellIfCan(m_creature, SPELL_INTIMIDATING_ROAR) == CAST_OK)
+                    ResetCombatAction(action, 32000);
+                break;
+            case ZARITHRIAN_SUMMON_FLAMECALLER:
+                if (m_instance)
+                {
+                    GuidList m_lStalkersGuidList;
+                    m_instance->GetSpawnStalkersGuidList(m_lStalkersGuidList);
+
+                    // each stalker summons a flamekaller; there are 2 on 10 player mode and 4 on 25 player mode
+                    for (const auto& guid : m_lStalkersGuidList)
+                        if (Creature* pStalker = m_creature->GetMap()->GetCreature(guid))
+                            pStalker->CastSpell(pStalker, SPELL_SUMMON_FLAMECALLER, TRIGGERED_OLD_TRIGGERED);
+
+                    DoScriptText(SAY_SUMMON, m_creature);
+                    ResetCombatAction(action, 45000);
+                }
+                break;
         }
-        else
-            m_uiCleaveArmorTimer -= uiDiff;
-
-        if (m_uiIntimidatingRoarTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_INTIMIDATING_ROAR) == CAST_OK)
-                m_uiIntimidatingRoarTimer = 32000;
-        }
-        else
-            m_uiIntimidatingRoarTimer -= uiDiff;
-
-        if (m_uiCallFlamecallerTimer < uiDiff)
-        {
-            if (!m_pInstance)
-            {
-                script_error_log("Instance Ruby Sanctum: ERROR Failed to load instance data for this instace.");
-                return;
-            }
-
-            GuidList m_lStalkersGuidList;
-            m_pInstance->GetSpawnStalkersGuidList(m_lStalkersGuidList);
-
-            for (GuidList::const_iterator itr = m_lStalkersGuidList.begin(); itr != m_lStalkersGuidList.end(); ++itr)
-            {
-                if (Creature* pStalker = m_creature->GetMap()->GetCreature(*itr))
-                    pStalker->CastSpell(pStalker, SPELL_SUMMON_FLAMECALLER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_creature->GetObjectGuid());
-            }
-
-            DoScriptText(SAY_SUMMON, m_creature);
-            m_uiCallFlamecallerTimer = 45000;
-        }
-        else
-            m_uiCallFlamecallerTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
-
-        EnterEvadeIfOutOfCombatArea(uiDiff);
     }
 };
-
-UnitAI* GetAI_boss_zarithrian(Creature* pCreature)
-{
-    return new boss_zarithrianAI(pCreature);
-}
 
 void AddSC_boss_zarithrian()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_zarithrian";
-    pNewScript->GetAI = &GetAI_boss_zarithrian;
+    pNewScript->GetAI = &GetNewAIInstance<boss_zarithrianAI>;
     pNewScript->RegisterSelf();
 }
