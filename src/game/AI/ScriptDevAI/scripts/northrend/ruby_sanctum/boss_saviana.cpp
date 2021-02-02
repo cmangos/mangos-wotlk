@@ -23,6 +23,7 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "ruby_sanctum.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -99,7 +100,7 @@ struct boss_savianaAI : public ScriptedAI
     {
         SetCombatMovement(true);
         m_creature->SetLevitate(false);
-        m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
+        m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
 
         if (m_pInstance)
             m_pInstance->SetData(TYPE_SAVIANA, FAIL);
@@ -127,7 +128,7 @@ struct boss_savianaAI : public ScriptedAI
 
                 SetCombatMovement(true);
                 m_creature->SetLevitate(false);
-                m_creature->SetByteFlag(UNIT_FIELD_BYTES_1, 3, 0);
+                m_creature->RemoveByteFlag(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
 
                 if (m_creature->GetVictim())
                     m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
@@ -173,6 +174,7 @@ struct boss_savianaAI : public ScriptedAI
                     m_creature->SetByteValue(UNIT_FIELD_BYTES_1, 3, UNIT_BYTE1_FLAG_FLY_ANIM);
                     m_creature->SetLevitate(true);
 
+                    m_creature->SetWalk(false);
                     m_creature->GetMotionMaster()->Clear();
                     m_creature->GetMotionMaster()->MovePoint(POINT_AIR, aAirPositions[0], aAirPositions[1], aAirPositions[2]);
                 }
@@ -192,6 +194,7 @@ struct boss_savianaAI : public ScriptedAI
 
                         float fX, fY, fZ;
                         m_creature->GetRespawnCoord(fX, fY, fZ);
+                        m_creature->SetWalk(false);
                         m_creature->GetMotionMaster()->Clear();
                         m_creature->GetMotionMaster()->MovePoint(POINT_GROUND, fX, fY, fZ);
                     }
@@ -206,15 +209,57 @@ struct boss_savianaAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_saviana(Creature* pCreature)
+/*######
+## spell_conflagration_targeting - 74452
+######*/
+
+struct spell_conflagration_targeting : public SpellScript
 {
-    return new boss_savianaAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !caster || !target->IsPlayer())
+            return;
+
+        caster->CastSpell(target, 74453, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(target, 74454, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_conflagration - 74455
+######*/
+
+struct spell_conflagration : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !caster)
+            return;
+
+        // make the boss (target) cast conflagration - 74456 - on player (caster)
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        target->CastSpell(caster, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_saviana()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_saviana";
-    pNewScript->GetAI = &GetAI_boss_saviana;
+    pNewScript->GetAI = &GetNewAIInstance<boss_savianaAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_conflagration_targeting>("spell_conflagration_targeting");
+    RegisterSpellScript<spell_conflagration>("spell_conflagration");
 }

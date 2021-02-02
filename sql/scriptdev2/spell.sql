@@ -397,6 +397,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (72900,'spell_start_halls_of_reflection_quest'),
 (73142,'spell_bone_spike_graveyard_storm'),
 (73159,'spell_play_movie'),
+(74452,'spell_conflagration_targeting'),
+(74455,'spell_conflagration'),
 (74562,'spell_fiery_combustion_aura'),
 (74792,'spell_soul_consumption_aura'),
 (74812,'spell_leave_twilight_realm_aura'),

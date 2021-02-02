@@ -4037,15 +4037,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 74452:                                 // Conflagration
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    m_caster->CastSpell(unitTarget, 74453, TRIGGERED_OLD_TRIGGERED);
-                    m_caster->CastSpell(unitTarget, 74454, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, m_caster->GetObjectGuid(), m_spellInfo);
-                    return;
-                }
             }
             break;
         }
@@ -11270,14 +11261,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     return;
                 }
                 case 72409:                                 // Rune of Blood
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
-                case 74455:                                 // Conflagration
                 {
                     if (!unitTarget)
                         return;
