@@ -62,19 +62,19 @@ install:
 matrix:
   include:
     # linux builds on gcc x64
-#    - os: linux
-#      arch: amd64
-#      compiler: gcc
-#      env:
-#        - CC=gcc-7
-#        - CXX=g++-7
-#    # linux builds on clang x64
-#    - os: linux
-#      arch: amd64
-#      compiler: clang
-#      env:
-#        - CC=clang
-#        - CXX=clang++
+    - os: linux
+      arch: amd64
+      compiler: gcc
+      env:
+        - CC=gcc-7
+        - CXX=g++-7
+    # linux builds on clang x64
+    - os: linux
+      arch: amd64
+      compiler: clang
+      env:
+        - CC=clang
+        - CXX=clang++
 
 #    # linux builds on gcc ARM64
 #    - os: linux
@@ -93,17 +93,6 @@ matrix:
 #        - cd ${TRAVIS_BUILD_DIR}
 
     # osx builds on clang x64
-#    - os: osx
-#      osx_image: xcode10
-#      arch: amd64
-#      compiler: clang
-#      env:
-#        - MYSQL_HOME=/usr/local/opt/mysql-client@5.7
-#      install:
-#        - brew install mysql-client@5.7
-#        - export OPENSSL_ROOT_DIR=$(brew --prefix openssl)
-#        - brew upgrade cmake
-
     - os: osx
       osx_image: xcode12.3
       arch: amd64
