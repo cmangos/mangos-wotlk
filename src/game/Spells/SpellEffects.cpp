@@ -11086,30 +11086,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(unitTarget, 67729, TRIGGERED_NONE);
                     return;
                 }
-                case 69057:                                 // Bone Spike Graveyard
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1)))
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, 69062, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
-                case 69140:                                 // Coldflame (random target selection)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
-                case 69147:                                 // Coldflame
-                {
-                    if (!unitTarget)
-                        return;
-
-                    unitTarget->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 69195:                                 // Pungent Blight
                 {
                     if (!unitTarget)
@@ -11301,17 +11277,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 72705:                                 // Coldflame (summon around the caster)
-                {
-                    if (!unitTarget)
-                        return;
-
-                    // Cast summon spells 72701, 72702, 72703, 72704
-                    for (uint32 triggeredSpell = m_spellInfo->CalculateSimpleValue(eff_idx); triggeredSpell < m_spellInfo->Id; ++triggeredSpell)
-                        unitTarget->CastSpell(unitTarget, triggeredSpell, TRIGGERED_OLD_TRIGGERED);
-
-                    return;
-                }
                 case 72900:                                 // Start Halls of Reflection Quest AE
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
@@ -11319,22 +11284,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
 
                     if (Player* target = (Player*)unitTarget)
                         target->CastSpell(target, target->GetTeam() == ALLIANCE ? 71351 : 71542, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
-                case 73142:                                 // Bone Spike Graveyard (during storm)
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER || unitTarget->HasAura(69065))
-                        return;
-
-                    uint32 spellId = 0;
-                    switch (urand(0, 2))
-                    {
-                        case 0: spellId = 69062; break;
-                        case 1: spellId = 72669; break;
-                        case 2: spellId = 72670; break;
-                    }
-
-                    unitTarget->CastSpell(unitTarget, spellId, TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
                 case 74455:                                 // Conflagration

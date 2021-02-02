@@ -44,13 +44,17 @@ enum
     NPC_LICH_KING                   = 36597,
 
     // boss-related and other NPCs
+    NPC_COLDFLAME                   = 36672,
+
     NPC_DEATHWHISPER_SPAWN_STALKER  = 37947,
     NPC_DEATHWHISPER_CONTROLLER     = 37948,
+
     NPC_OVERLORD_SAURFANG           = 37187,
     NPC_KORKRON_REAVER              = 37920,
     NPC_MURADIN_BRONZEBEARD         = 37200,        // Saurfang's encounter and at the instance entrance
     NPC_SKYBREAKER_MARINE           = 37830,
     NPC_ALLIANCE_MARINE             = 37830,
+
     NPC_BLOOD_ORB_CONTROL           = 38008,
     NPC_PUTRICIDES_TRAP             = 38879,        // Handles trap event before Putricide
     NPC_GAS_STALKER                 = 36659,        // Handles the gas in Festergut room
@@ -283,6 +287,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         void OnPlayerEnter(Player* pPlayer) override;
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureRespawn(Creature* pCreature) override;
 
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;

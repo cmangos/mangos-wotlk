@@ -24,6 +24,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
 #include "Entities/TemporarySpawn.h"
+#include "Spells/Scripts/SpellScript.h"
 
 enum
 {
@@ -38,7 +39,7 @@ enum
     SAY_BERSERK                 = -1631010,
 
     // spells
-    SPELL_BERSERK               = 47008,
+    SPELL_BERSERK               = 26662,
     SPELL_BONE_SLICE            = 69055,
     SPELL_BONE_STORM            = 69076,
     SPELL_COLDFLAME             = 69140,
@@ -54,7 +55,6 @@ enum
     NPC_BONE_SPIKE_1            = 36619,                    // summoned by spell 69062
     NPC_BONE_SPIKE_2            = 38711,                    // summoned by spell 72670
     NPC_BONE_SPIKE_3            = 38712,                    // summoned by spell 72669
-    NPC_COLDFLAME               = 36672,
 
     // phases and max cold flame charges
     PHASE_NORMAL                = 1,
@@ -70,13 +70,15 @@ struct boss_lord_marrowgarAI : public ScriptedAI
 {
     boss_lord_marrowgarAI(Creature* pCreature) : ScriptedAI(pCreature)
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_icecrown_citadel*>(pCreature->GetInstanceData());
         // on heroic, there is 1 more Bone Storm charge
         m_uiMaxCharges = m_pInstance && m_pInstance->IsHeroicDifficulty() ? MAX_CHARGES_HEROIC : MAX_CHARGES_NORMAL;
+        m_bIsHeroicMode = m_pInstance && m_pInstance->IsHeroicDifficulty();
         Reset();
     }
 
     instance_icecrown_citadel* m_pInstance;
+    bool m_bIsHeroicMode;
 
     uint8 m_uiPhase;
     uint8 m_uiChargesCount;
@@ -96,7 +98,7 @@ struct boss_lord_marrowgarAI : public ScriptedAI
         m_uiPhase                   = PHASE_NORMAL;
         m_uiChargesCount            = 0;
         m_uiBerserkTimer            = 10 * MINUTE * IN_MILLISECONDS;
-        m_uiBoneSliceTimer          = 1000;
+        m_uiBoneSliceTimer          = 8000;
         m_uiColdflameTimer          = 5000;
         m_uiBoneSpikeTimer          = 15000;
         m_uiBoneStormTimer          = 45000;
@@ -212,10 +214,11 @@ struct boss_lord_marrowgarAI : public ScriptedAI
                 // next charge to random enemy
                 if (m_uiBoneStormChargeTimer < uiDiff)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, uint32(0), SELECT_FLAG_PLAYER))
+                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
                     {
                         float fX, fY, fZ;
                         pTarget->GetPosition(fX, fY, fZ);
+                        m_creature->SetWalk(false);
                         m_creature->GetMotionMaster()->Clear();
                         m_creature->GetMotionMaster()->MovePoint(1, fX, fY, fZ);
                         m_uiBoneStormChargeTimer = 3000;
@@ -259,7 +262,8 @@ struct boss_lord_marrowgarAI : public ScriptedAI
         }
 
         // Bone spike - different spells for the normal phase or storm phase
-        if (m_pInstance && (m_pInstance->IsHeroicDifficulty() || m_uiPhase == PHASE_NORMAL))
+        // On heroic mode Bone spike is also cast during the Bone Storm phase
+        if (m_bIsHeroicMode || m_uiPhase == PHASE_NORMAL)
         {
             if (m_uiBoneSpikeTimer < uiDiff)
             {
@@ -295,11 +299,6 @@ struct boss_lord_marrowgarAI : public ScriptedAI
     }
 };
 
-UnitAI* GetAI_boss_lord_marrowgar(Creature* pCreature)
-{
-    return new boss_lord_marrowgarAI(pCreature);
-}
-
 /*######
 ## npc_bone_spike
 ######*/
@@ -308,10 +307,14 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
 {
     npc_bone_spikeAI(Creature* pCreature) : Scripted_NoMovementAI(pCreature)
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
+        m_pInstance = static_cast<instance_icecrown_citadel*>(pCreature->GetInstanceData());
+        SetReactState(REACT_PASSIVE);
+        pCreature->SetCanEnterCombat(false);
+
         m_bHasImpaled = false;
         m_bBonedFailed = false;
         m_uiImpaledTimer = 0;
+
         Reset();
     }
 
@@ -322,9 +325,6 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
     uint32 m_uiImpaledTimer;
 
     void Reset() override { }
-
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
 
     void KilledUnit(Unit* pVictim) override
     {
@@ -338,8 +338,8 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
         if (m_creature->IsTemporarySummon())
         {
             // remove impale on death
-            if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
-                pSummoner->RemoveAurasDueToSpell(SPELL_IMPALED);
+            if (Unit* playerTarget = m_creature->GetSpawner())
+                playerTarget->RemoveAurasDueToSpell(SPELL_IMPALED);
         }
     }
 
@@ -350,8 +350,8 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
             if (m_creature->IsTemporarySummon())
             {
                 // Impale player
-                if (Player* pSummoner = m_creature->GetMap()->GetPlayer(m_creature->GetSpawnerGuid()))
-                    DoCastSpellIfCan(pSummoner, SPELL_IMPALED);
+                if (Unit* playerTarget = m_creature->GetSpawner())
+                    DoCastSpellIfCan(playerTarget, SPELL_IMPALED, CAST_TRIGGERED);
             }
 
             m_bHasImpaled = true;
@@ -373,45 +373,138 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
     }
 };
 
-UnitAI* GetAI_npc_bone_spike(Creature* pCreature)
-{
-    return new npc_bone_spikeAI(pCreature);
-}
-
 /*######
-## npc_coldflame
+## spell_bone_spike_graveyard - 69057, 70826, 72088, 72089
 ######*/
 
-// TODO Remove this 'script' when combat can be proper prevented from core-side
-struct npc_coldflameAI : public ScriptedAI
+struct spell_bone_spike_graveyard : public SpellScript
 {
-    npc_coldflameAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
 
-    void Reset() override { }
-    void AttackStart(Unit* /*pWho*/) override { }
-    void MoveInLineOfSight(Unit* /*pWho*/) override { }
-    void UpdateAI(const uint32 /*uiDiff*/) override { }
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        // check for aura 69065
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(EFFECT_INDEX_1);
+
+        if (!target->HasAura(spellId))
+            target->CastSpell(target, 69062, TRIGGERED_OLD_TRIGGERED);
+    }
 };
 
-UnitAI* GetAI_npc_coldflame(Creature* pCreature)
+/*######
+## spell_bone_spike_graveyard_storm - 73142
+######*/
+
+struct spell_bone_spike_graveyard_storm : public SpellScript
 {
-    return new npc_coldflameAI(pCreature);
-}
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer() || target->HasAura(69065))
+            return;
+
+        // Note: it's not 100% clear if the following logic is correct; this is an intelligent guess
+        uint32 spellId = 0;
+        switch (urand(0, 2))
+        {
+            case 0: spellId = 69062; break;
+            case 1: spellId = 72669; break;
+            case 2: spellId = 72670; break;
+        }
+
+        target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_coldflame_targeting - 69140
+######*/
+
+struct spell_coldflame_targeting : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // cast spell 69138
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        caster->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_coldflame - 69147
+######*/
+
+struct spell_coldflame : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_2)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // cast spell 69145
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        target->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_coldflame_summon - 72705
+######*/
+
+struct spell_coldflame_summon : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        // Cast summon spells 72701, 72702, 72703, 72704
+        for (uint32 triggeredSpell = spell->m_spellInfo->CalculateSimpleValue(effIdx); triggeredSpell < spell->m_spellInfo->Id; ++triggeredSpell)
+            target->CastSpell(target, triggeredSpell, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_lord_marrowgar()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_lord_marrowgar";
-    pNewScript->GetAI = &GetAI_boss_lord_marrowgar;
+    pNewScript->GetAI = &GetNewAIInstance<boss_lord_marrowgarAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_bone_spike";
-    pNewScript->GetAI = &GetAI_npc_bone_spike;
+    pNewScript->GetAI = &GetNewAIInstance<npc_bone_spikeAI>;
     pNewScript->RegisterSelf();
 
-    pNewScript = new Script;
-    pNewScript->Name = "npc_coldflame";
-    pNewScript->GetAI = &GetAI_npc_coldflame;
-    pNewScript->RegisterSelf();
+    RegisterSpellScript<spell_bone_spike_graveyard>("spell_bone_spike_graveyard");
+    RegisterSpellScript<spell_bone_spike_graveyard_storm>("spell_bone_spike_graveyard_storm");
+    RegisterSpellScript<spell_coldflame_targeting>("spell_coldflame_targeting");
+    RegisterSpellScript<spell_coldflame>("spell_coldflame");
+    RegisterSpellScript<spell_coldflame_summon>("spell_coldflame_summon");
 }

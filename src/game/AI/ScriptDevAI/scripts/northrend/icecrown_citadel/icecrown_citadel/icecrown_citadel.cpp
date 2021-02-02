@@ -165,8 +165,11 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
         case NPC_GAS_STALKER:
         case NPC_OOZE_TENTACLE_STALKER:
         case NPC_SLIMY_TENTACLE_STALKER:
-        case NPC_SPIRE_FROSTWYRM:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            break;
+        case NPC_SPIRE_FROSTWYRM:
+            if (pCreature->IsTemporarySummon())
+                m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_DEATHWHISPER_SPAWN_STALKER:
             m_lDeathwhisperStalkersGuids.push_back(pCreature->GetObjectGuid());
@@ -201,6 +204,18 @@ void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
                 m_leftScientistStalkerGuid = pCreature->GetObjectGuid();
             else
                 m_rightScientistStalkerGuid = pCreature->GetObjectGuid();
+    }
+}
+
+void instance_icecrown_citadel::OnCreatureRespawn(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        // following have passive behavior movement
+        case NPC_COLDFLAME:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
+            break;
     }
 }
 
