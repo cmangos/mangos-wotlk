@@ -104,6 +104,17 @@ matrix:
         - export OPENSSL_ROOT_DIR=$(brew --prefix openssl)
         - brew upgrade cmake
 
+    - os: osx
+      osx_image: xcode12.3
+      arch: amd64
+      compiler: clang
+      env:
+        - MYSQL_HOME=/usr/local/opt/mysql-client@5.7
+      install:
+        - brew install mysql-client@5.7
+        - export OPENSSL_ROOT_DIR=$(brew --prefix openssl)
+        - brew upgrade cmake
+
 script: |-
   cmake --version
   mkdir _build
