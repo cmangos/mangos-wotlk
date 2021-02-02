@@ -11277,15 +11277,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->CastSpell(m_caster, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
                     return;
                 }
-                case 72900:                                 // Start Halls of Reflection Quest AE
-                {
-                    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    if (Player* target = (Player*)unitTarget)
-                        target->CastSpell(target, target->GetTeam() == ALLIANCE ? 71351 : 71542, TRIGGERED_OLD_TRIGGERED);
-                    return;
-                }
                 case 74455:                                 // Conflagration
                 {
                     if (!unitTarget)

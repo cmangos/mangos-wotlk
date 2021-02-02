@@ -247,7 +247,7 @@ bool AreaTrigger_at_queldelar_start(Player* pPlayer, AreaTriggerEntry const* pAt
         if (!pPlayer->HasAura(SPELL_QUELDELAR_COMPULSION))
             return false;
 
-        instance_halls_of_reflection* pInstance = (instance_halls_of_reflection*)pPlayer->GetInstanceData();
+        instance_halls_of_reflection* pInstance = static_cast<instance_halls_of_reflection*>(pPlayer->GetInstanceData());
         if (!pInstance)
             return false;
 
@@ -316,6 +316,26 @@ struct spell_halls_of_reflection_clone : public SpellScript
     }
 };
 
+/*######
+## spell_start_halls_of_reflection_quest - 72900
+######*/
+
+struct spell_start_halls_of_reflection_quest : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer())
+            return;
+
+        Player* targetPlayer = static_cast<Player*>(target);
+        target->CastSpell(target, targetPlayer->GetTeam() == ALLIANCE ? 71351 : 71542, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_halls_of_reflection()
 {
     Script* pNewScript = new Script;
@@ -345,4 +365,5 @@ void AddSC_halls_of_reflection()
 
     RegisterAuraScript<spell_gunship_cannon_fire_aura>("spell_gunship_cannon_fire_aura");
     RegisterSpellScript<spell_halls_of_reflection_clone>("spell_halls_of_reflection_clone");
+    RegisterSpellScript<spell_start_halls_of_reflection_quest>("spell_start_halls_of_reflection_quest");
 }
