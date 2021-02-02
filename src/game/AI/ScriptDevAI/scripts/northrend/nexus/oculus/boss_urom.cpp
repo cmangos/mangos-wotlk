@@ -84,7 +84,7 @@ struct boss_uromAI : public ScriptedAI
         for (uint8 i = 0; i < MAX_PLATFORMS; ++i)
             m_vuiTrashPacksIds.push_back(i);
 
-        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count())
+        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
 
         Reset();
     }

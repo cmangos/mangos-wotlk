@@ -195,7 +195,7 @@ void instance_trial_of_the_champion::OnPlayerEnter(Player* pPlayer)
                 m_vChampionsIndex[i] = i;
 
             // set a random champion list
-            std::default_random_engine rng(std::chrono::system_clock::now().time_since_epoch().count())
+            std::default_random_engine rng(std::chrono::system_clock::now().time_since_epoch().count());
             std::shuffle(m_vChampionsIndex.begin(), m_vChampionsIndex.end(), rng);
         }
     }

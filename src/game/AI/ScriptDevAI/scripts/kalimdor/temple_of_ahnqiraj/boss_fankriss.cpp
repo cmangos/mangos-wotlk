@@ -67,7 +67,7 @@ struct boss_fankrissAI : public CombatAI
         AddCombatAction(FANKRISS_MORTAL_WOUND, 10000, 15000);
         AddCombatAction(FANKRISS_SUMMON_WORM, 30000, 50000);
         AddCombatAction(FANKRISS_ENTANGLE, 15000, 20000);
-        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count())
+        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
     }
 
     ScriptedInstance* m_instance;

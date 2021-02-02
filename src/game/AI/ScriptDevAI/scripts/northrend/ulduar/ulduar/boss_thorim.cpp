@@ -163,7 +163,7 @@ struct boss_thorimAI : public ScriptedAI, private DialogueHelper
         m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
         InitializeDialogueHelper(m_pInstance);
         m_bEventFinished = false;
-        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count())
+        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
         Reset();
     }
 

@@ -753,7 +753,7 @@ struct npc_voice_yogg_saronAI : public Scripted_NoMovementAI
         for (uint8 i = 0; i < MAX_ILLUSIONS; ++i)
             m_vuiMadnessPhases.push_back(i);
 
-        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count())
+        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
 
         Reset();
     }

@@ -113,7 +113,7 @@ struct boss_ymironAI : public ScriptedAI
 
         for (uint8 i = 0; i < MAX_BOATS; ++i)
             m_vuiBoatPhases.push_back(i);
-        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count())
+        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
 
         Reset();
     }

@@ -197,7 +197,7 @@ struct boss_freyaAI : public ScriptedAI
 
         m_bEventFinished = false;
         m_uiEpilogueTimer = 0;
-        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count())
+        m_rng = std::default_random_engine(std::chrono::system_clock::now().time_since_epoch().count());
         Reset();
     }
 
