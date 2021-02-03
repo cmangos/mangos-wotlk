@@ -399,6 +399,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (73159,'spell_play_movie'),
 (74452,'spell_conflagration_targeting'),
 (74455,'spell_conflagration'),
+(74502,'spell_enervating_brand_aura'),
 (74562,'spell_fiery_combustion_aura'),
 (74792,'spell_soul_consumption_aura'),
 (74812,'spell_leave_twilight_realm_aura'),

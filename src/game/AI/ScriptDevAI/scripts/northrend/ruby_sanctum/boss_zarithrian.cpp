@@ -52,7 +52,7 @@ struct boss_zarithrianAI : public CombatAI
 {
     boss_zarithrianAI(Creature* creature) : CombatAI(creature, ZARITHRIAN_ACTION_MAX), m_instance(static_cast<instance_ruby_sanctum*>(creature->GetInstanceData()))
     {
-        AddCombatAction(ZARITHRIAN_CLEAVE_ARMOR, 15000u);
+        AddCombatAction(ZARITHRIAN_CLEAVE_ARMOR, 8000u);
         AddCombatAction(ZARITHRIAN_INTIMIDATING_ROAR, 14000u);
         AddCombatAction(ZARITHRIAN_SUMMON_FLAMECALLER, 15000u);
     }

@@ -1275,7 +1275,6 @@ UPDATE instance_template SET ScriptName='instance_ruby_sanctum' WHERE map=724;
 UPDATE creature_template SET ScriptName='boss_baltharus' WHERE entry=39751;
 UPDATE creature_template SET ScriptName='boss_saviana' WHERE entry=39747;
 UPDATE creature_template SET ScriptName='boss_zarithrian' WHERE entry=39746;
-UPDATE creature_template SET ScriptName='npc_baltharus_clone' WHERE entry=39899;
 UPDATE creature_template SET ScriptName='boss_halion_real' WHERE entry=39863;
 UPDATE creature_template SET ScriptName='boss_halion_twilight' WHERE entry=40142;
 UPDATE creature_template SET ScriptName='npc_halion_controller' WHERE entry=40146;
@@ -7367,14 +7366,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
 ('-1724000','Help! I am trapped within this tree! I require aid!','17490','6','0','0','0','xerestraza SAY_HELP'),
 ('-1724001','Your power wanes, ancient one! Soon, you will join your friends!','17525','6','0','0','0','baltharus SAY_INTRO'),
-('-1724002','Thank you! I could have not held out for much longer. A terrible thing has happened here.','17491','1','0','0','0','xerestraza SAY_THANKS'),
-('-1724003','We believed that the Sanctum was well fortified, but we were not prepareted for the nature of this assault.','17492','0','0','0','0','xerestraza SAY_OUTRO_1'),
-('-1724004','The Black Dragonkin materialized from thin air, and set upon us before we could react.','17493','0','0','0','0','xerestraza SAY_OUTRO_2'),
-('-1724005','We did not stand a chance. As my brethren perished around me, I managed to retreat hear and bar the entrance.','17494','0','0','0','0','xerestraza SAY_OUTRO_3'),
-('-1724006','They slaughtered us with cold efficiency, but the true focus of their interest seemed to be the eggs kept here in the sanctum.','17495','0','0','0','0','xerestraza SAY_OUTRO_4'),
-('-1724007','The commander of the forces on the ground here is a cruel brute named Zarithrian. But I fear there are greater powers at work.','17496','0','0','0','0','xerestraza SAY_OUTRO_5'),
-('-1724008','In their initial assault I caught a glimpse of their true leader, a fearsome full-grown Twilight Dragon.','17497','0','0','0','0','xerestraza SAY_OUTRO_6'),
-('-1724009','I know not the extent of their plans heroes, but I know this: they cannot be allowed to succeed!','17498','0','0','0','0','xerestraza SAY_OUTRO_7'),
+
+-- REUSE -1724002 to -1724009
 
 ('-1724010','Ah, the entertainment has arrived.','17520','1','0','0','0','baltharus SAY_AGGRO'),
 ('-1724011','Baltharus leaves no survivors!','17521','1','0','0','0','baltharus SAY_SLAY_1'),
