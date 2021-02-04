@@ -204,7 +204,7 @@ struct boss_anomalusAI : public CombatAI
 
 struct spell_charge_rifts : public SpellScript
 {
-    void OnRadiusCalculate(Spell* spell, SpellEffectIndex /*effIdx*/, bool /*targetB*/, float& radius) override
+    void OnRadiusCalculate(Spell* spell, SpellEffectIndex /*effIdx*/, bool /*targetB*/, float& radius) const override
     {
         radius = 50.0f;
     }
