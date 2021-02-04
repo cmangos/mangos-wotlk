@@ -213,6 +213,7 @@ void instance_icecrown_citadel::OnCreatureRespawn(Creature* pCreature)
     {
         // following have passive behavior movement
         case NPC_COLDFLAME:
+        case NPC_DEATHWHISPER_SPAWN_STALKER:
             pCreature->AI()->SetReactState(REACT_PASSIVE);
             pCreature->SetCanEnterCombat(false);
             break;

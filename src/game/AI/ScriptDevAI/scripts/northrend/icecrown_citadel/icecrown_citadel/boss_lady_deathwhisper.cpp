@@ -16,13 +16,16 @@
 
 /* ScriptData
 SDName: boss_lady_deathwhisper
-SD%Complete: 95%
-SDComment: Minor adjustments may be required
+SD%Complete: 100%
+SDComment:
 SDCategory: Icecrown Citadel
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -63,33 +66,72 @@ enum
     NPC_VENGEFUL_SHADE          = 38222,            // has aura 71494
 };
 
+enum DeathwhisperActions
+{
+    DEATHWHISPER_BERSRK,
+    DEATHWHISPER_DOMINATE_MIND,
+    DEATHWHISPER_DEATH_AND_DECAY,
+
+    DEATHWHISPER_SHADOW_BOLT,
+    DEATHWHISPER_CULTIST_SUMMON,
+    DEATHWHISPER_CULTIST_BUFF,
+    DEATHWHISPER_CULTIST_MARTYRDOM,
+
+    DEATHWHISPER_INSIGNIFICANCE,
+    DEATHWHISPER_FROSTBOLT,
+    DEATHWHISPER_FROSTBOLT_VOLLEY,
+    DEATHWHISPER_SUMMON_SPIRIT,
+
+    DEATHWHISPER_ACTION_MAX
+};
+
 static const uint32 aLeftSummonedCultists[3] = {NPC_CULT_ADHERENT, NPC_CULT_FANATIC, NPC_CULT_ADHERENT};
 static const uint32 aRightSummonedCultists[3] = {NPC_CULT_FANATIC, NPC_CULT_ADHERENT, NPC_CULT_FANATIC};
 
-struct boss_lady_deathwhisperAI : public ScriptedAI
+struct boss_lady_deathwhisperAI : public CombatAI
 {
-    boss_lady_deathwhisperAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_lady_deathwhisperAI(Creature* creature) : CombatAI(creature, DEATHWHISPER_ACTION_MAX), m_instance(static_cast<instance_icecrown_citadel*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
+        // Set the max allowed mind control targets
+        if (m_instance)
+        {
+            m_bIsHeroicMode = m_instance->IsHeroicDifficulty();
+
+            if (m_instance->Is25ManDifficulty())
+                m_uiMindControlCount = m_instance->IsHeroicDifficulty() ? 3 : 1;
+            else
+                m_uiMindControlCount = m_instance->IsHeroicDifficulty() ? 1 : 0;
+        }
+
+        // common actions
+        AddCombatAction(DEATHWHISPER_BERSRK, uint32(10 * MINUTE * IN_MILLISECONDS));
+        AddCombatAction(DEATHWHISPER_DEATH_AND_DECAY, 20000u);
+        AddCombatAction(DEATHWHISPER_DOMINATE_MIND, 30000u);
+
+        // phase 1 actions
+        AddCombatAction(DEATHWHISPER_SHADOW_BOLT, 0u);
+        AddCombatAction(DEATHWHISPER_CULTIST_SUMMON, m_bIsHeroicMode ? 5000u : 10000u);
+        AddCombatAction(DEATHWHISPER_CULTIST_BUFF, true);
+        AddCombatAction(DEATHWHISPER_CULTIST_MARTYRDOM, true);
+
+        // phase 2 actions
+        AddCombatAction(DEATHWHISPER_INSIGNIFICANCE, true);
+        AddCombatAction(DEATHWHISPER_FROSTBOLT, true);
+        AddCombatAction(DEATHWHISPER_FROSTBOLT_VOLLEY, true);
+        AddCombatAction(DEATHWHISPER_SUMMON_SPIRIT, true);
+
+        SetMeleeEnabled(false);
+        SetCombatMovement(false);
+        DoCastSpellIfCan(m_creature, SPELL_SHADOW_CHANNELING);
+
         Reset();
     }
 
-    instance_icecrown_citadel* m_pInstance;
+    instance_icecrown_citadel* m_instance;
 
-    bool m_bIsPhaseOne;
+    bool m_bIsHeroicMode;
     bool m_bIsLeftSideSummon;
-
-    uint32 m_uiBerserkTimer;
-    uint32 m_uiSummonWaveTimer;
-    uint32 m_uiCultistBuffTimer;
-    uint32 m_uiDarkMartyrdomTimer;
-    uint32 m_uiTouchOfInsignificanceTimer;
-    uint32 m_uiShadowBoltTimer;
-    uint32 m_uiDeathAndDecayTimer;
-    uint32 m_uiFrostboltTimer;
-    uint32 m_uiFrostboltVolleyTimer;
-    uint32 m_uiDominateMindTimer;
-    uint32 m_uiVengefulShadeTimer;
+    bool m_bIsPhaseOne;
 
     uint8 m_uiMindControlCount;
 
@@ -100,71 +142,52 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
 
     void Reset() override
     {
-        m_bIsPhaseOne                   = true;
-        m_bIsLeftSideSummon             = roll_chance_i(50);
-        m_uiBerserkTimer                = 10 * MINUTE * IN_MILLISECONDS;
-        m_uiSummonWaveTimer             = 10000;
-        m_uiCultistBuffTimer            = 0;
-        m_uiDarkMartyrdomTimer          = 30000;
-        m_uiTouchOfInsignificanceTimer  = 7000;
-        m_uiShadowBoltTimer             = 2000;
-        m_uiDeathAndDecayTimer          = urand(10000, 15000);
-        m_uiFrostboltTimer              = urand(5000, 10000);
-        m_uiFrostboltVolleyTimer        = 5000;
-        m_uiDominateMindTimer           = urand(30000, 45000);
-        m_uiVengefulShadeTimer          = 10000;
-        m_uiMindControlCount            = 0;
+        CombatAI::Reset();
 
-        SetCombatMovement(false);
-        DoCastSpellIfCan(m_creature, SPELL_SHADOW_CHANNELING);
-
-        // Set the max allowed mind control targets
-        if (m_pInstance)
-        {
-            if (m_pInstance->Is25ManDifficulty())
-                m_uiMindControlCount = m_pInstance->IsHeroicDifficulty() ? 3 : 1;
-            else
-                m_uiMindControlCount = m_pInstance->IsHeroicDifficulty() ? 1 : 0;
-        }
+        m_bIsPhaseOne = true;
+        m_bIsLeftSideSummon = roll_chance_i(50);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
         DoCastSpellIfCan(m_creature, SPELL_MANA_BARRIER, CAST_TRIGGERED);
 
-        if (m_pInstance)
+        if (m_instance)
         {
-            m_pInstance->SetData(TYPE_LADY_DEATHWHISPER, IN_PROGRESS);
+            m_instance->SetData(TYPE_LADY_DEATHWHISPER, IN_PROGRESS);
 
             // Sort the summoning stalkers
             GuidList lStalkersGuidList;
-            m_pInstance->GetDeathwhisperStalkersList(lStalkersGuidList);
+            m_instance->GetDeathwhisperStalkersList(lStalkersGuidList);
             DoSortSummoningStalkers(lStalkersGuidList);
         }
     }
 
-    void KilledUnit(Unit* pVictim) override
+    void KilledUnit(Unit* victim) override
     {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
+        CombatAI::KilledUnit(victim);
 
         if (urand(0, 1))
             DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LADY_DEATHWHISPER, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_LADY_DEATHWHISPER, DONE);
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_LADY_DEATHWHISPER, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_LADY_DEATHWHISPER, FAIL);
+
+        SetMeleeEnabled(false);
+        SetCombatMovement(false);
+        DoCastSpellIfCan(m_creature, SPELL_SHADOW_CHANNELING);
     }
 
     void JustSummoned(Creature* pSummoned) override
@@ -174,6 +197,9 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
             case NPC_CULT_ADHERENT:
             case NPC_CULT_FANATIC:
                 m_lCultistSpawnedGuidList.push_back(pSummoned->GetObjectGuid());
+                break;
+            case NPC_VENGEFUL_SHADE:
+                pSummoned->SetForceAttackingCapability(true);
                 break;
         }
 
@@ -187,6 +213,12 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
             m_lCultistSpawnedGuidList.remove(pSummoned->GetObjectGuid());
     }
 
+    void ReceiveAIEvent(AIEventType eventType, Unit* /*pSender*/, Unit* /*pInvoker*/, uint32 /*uiMiscValue*/) override
+    {
+        if (eventType == AI_EVENT_CUSTOM_A)
+            DoStartSecondPhase();
+    }
+
     // Wrapper to help sort the summoning stalkers
     void DoSortSummoningStalkers(GuidList& lDeathwhisperStalkers)
     {
@@ -195,9 +227,9 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
 
         if (!lDeathwhisperStalkers.empty())
         {
-            for (GuidList::const_iterator itr = lDeathwhisperStalkers.begin(); itr != lDeathwhisperStalkers.end(); ++itr)
+            for (const auto& guid : lDeathwhisperStalkers)
             {
-                if (Creature* pStalker = m_creature->GetMap()->GetCreature(*itr))
+                if (Creature* pStalker = m_creature->GetMap()->GetCreature(guid))
                 {
                     if (pStalker->GetPositionZ() > 60.0f)
                         m_middleStalkerGuid = pStalker->GetObjectGuid();
@@ -217,6 +249,8 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
             for (CreatureList::const_iterator itr = lRightStalkers.begin(); itr != lRightStalkers.end(); ++itr)
                 m_vRightStalkersGuidVector.push_back((*itr)->GetObjectGuid());
         }
+        else
+            script_error_log("instance_icecrown_citadel: Error: cannot find creature %u in instance", NPC_DEATHWHISPER_SPAWN_STALKER);
     }
 
     static bool sortFromNorthToSouth(Creature* pFirst, Creature* pSecond)
@@ -230,9 +264,9 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
         std::vector<Creature*> vCultists;
         vCultists.reserve(m_lCultistSpawnedGuidList.size());
 
-        for (GuidList::const_iterator itr = m_lCultistSpawnedGuidList.begin(); itr != m_lCultistSpawnedGuidList.end(); ++itr)
+        for (const auto& guid : m_lCultistSpawnedGuidList)
         {
-            if (Creature* pCultist = m_creature->GetMap()->GetCreature(*itr))
+            if (Creature* pCultist = m_creature->GetMap()->GetCreature(guid))
             {
                 // Allow to be sorted them by entry
                 if (!uiEntry)
@@ -251,11 +285,18 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
     // Wrapper to handle the adds summmoning
     void DoSummonCultistWave()
     {
-        if (!m_pInstance)
+        if (!m_instance)
             return;
 
+        // failsafe check
+        if (m_vLeftStalkersGuidVector.size() < 3 || m_vRightStalkersGuidVector.size() < 3)
+        {
+            script_error_log("instance_icecrown_citadel: Error: Cannot find all left or right spawn stalkers.");
+            return;
+        }
+
         // On 25 man mode we need to summon on all points
-        if (m_pInstance->Is25ManDifficulty())
+        if (m_instance->Is25ManDifficulty())
         {
             for (uint8 i = 0; i < 3; ++i)
             {
@@ -272,7 +313,7 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
         else
         {
             // Summon just 1 add in phase 2 heroic
-            if (m_pInstance->IsHeroicDifficulty() && !m_bIsPhaseOne)
+            if (m_bIsHeroicMode && !m_bIsPhaseOne)
             {
                 if (Creature* pStalker = m_creature->GetMap()->GetCreature(m_middleStalkerGuid))
                     m_creature->SummonCreature(roll_chance_i(50) ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT, pStalker->GetPositionX(), pStalker->GetPositionY(), pStalker->GetPositionZ(), 0.0f, TEMPSPAWN_CORPSE_DESPAWN, 0);
@@ -297,209 +338,340 @@ struct boss_lady_deathwhisperAI : public ScriptedAI
     {
         DoScriptText(SAY_PHASE_TWO, m_creature);
         SetCombatMovement(true);
+        SetMeleeEnabled(true);
+
+        m_creature->SetWalk(false);
+        m_creature->GetMotionMaster()->Clear(false, true);
         m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
+
+        // stop the summon on normal mode
+        if (!m_bIsHeroicMode)
+            DisableCombatAction(DEATHWHISPER_CULTIST_SUMMON);
+
+        DisableCombatAction(DEATHWHISPER_SHADOW_BOLT);
+
+        ResetCombatAction(DEATHWHISPER_INSIGNIFICANCE, 1000);
+        ResetCombatAction(DEATHWHISPER_FROSTBOLT, 5000);
+        ResetCombatAction(DEATHWHISPER_FROSTBOLT_VOLLEY, 20000);
+        ResetCombatAction(DEATHWHISPER_SUMMON_SPIRIT, 20000);
+
         m_bIsPhaseOne = false;
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiBerserkTimer)
+        switch (action)
         {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
+            case DEATHWHISPER_BERSRK:
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
                     DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
+                    DisableCombatAction(action);
                 }
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
-
-        if (m_uiDeathAndDecayTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_DEATH_AND_DECAY) == CAST_OK)
-                    m_uiDeathAndDecayTimer = 20000;
-            }
-        }
-        else
-            m_uiDeathAndDecayTimer -= uiDiff;
-
-        if (m_uiMindControlCount)
-        {
-            if (m_uiDominateMindTimer < uiDiff)
-            {
+                break;
+            case DEATHWHISPER_DEATH_AND_DECAY:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1))
+                {
+                    if (DoCastSpellIfCan(target, SPELL_DEATH_AND_DECAY) == CAST_OK)
+                        ResetCombatAction(action, 20000);
+                }
+                break;
+            case DEATHWHISPER_DOMINATE_MIND:
                 for (uint8 i = 0; i < m_uiMindControlCount; ++i)
                 {
-                    if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_DOMINATE_MIND, SELECT_FLAG_PLAYER))
-                        DoCastSpellIfCan(pTarget, SPELL_DOMINATE_MIND, CAST_TRIGGERED);
+                    if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 1, SPELL_DOMINATE_MIND, SELECT_FLAG_PLAYER))
+                        DoCastSpellIfCan(target, SPELL_DOMINATE_MIND, CAST_TRIGGERED);
                 }
 
                 DoScriptText(SAY_DOMINATE_MIND, m_creature);
-                m_uiDominateMindTimer = 40000;
-            }
-            else
-                m_uiDominateMindTimer -= uiDiff;
-        }
-
-        // Summon waves - in phase 1 or on heroic
-        if (m_pInstance && (m_pInstance->IsHeroicDifficulty() || m_bIsPhaseOne))
-        {
-            if (m_uiSummonWaveTimer < uiDiff)
-            {
-                DoSummonCultistWave();
-                m_uiCultistBuffTimer = 10000;
-                m_uiDarkMartyrdomTimer = 40000;
-                m_uiSummonWaveTimer = m_pInstance->IsHeroicDifficulty() ? 45000 : 60000;
-            }
-            else
-                m_uiSummonWaveTimer -= uiDiff;
-
-            if (m_uiCultistBuffTimer)
-            {
-                if (m_uiCultistBuffTimer <= uiDiff)
+                ResetCombatAction(action, 45000);
+                break;
+            case DEATHWHISPER_SHADOW_BOLT:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    // Choose a random of Fanatic or Adherent
-                    bool bIsFanatic = roll_chance_i(50);
-                    uint32 uiNpcEntry = bIsFanatic ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT;
-                    uint32 uiSpellEntry = bIsFanatic ? SPELL_DARK_TRANSFORMATION : SPELL_DARK_EMPOWERMENT;
-                    int32 iTextEntry = bIsFanatic ? SAY_DARK_TRANSFORMATION : SAY_DARK_EMPOWERMENT;
+                    if (DoCastSpellIfCan(target, SPELL_SHADOW_BOLT) == CAST_OK)
+                        ResetCombatAction(action, urand(2000, 3000));
+                }
+                break;
+            case DEATHWHISPER_CULTIST_SUMMON:
+                DoSummonCultistWave();
+                ResetCombatAction(DEATHWHISPER_CULTIST_BUFF, 10000);
+                ResetCombatAction(DEATHWHISPER_CULTIST_MARTYRDOM, 40000);
+                ResetCombatAction(action, m_bIsHeroicMode ? 45000 : 60000);
+                break;
+            case DEATHWHISPER_CULTIST_BUFF:
+            {
+                // Choose a random of Fanatic or Adherent
+                bool bIsFanatic = roll_chance_i(50);
+                uint32 uiNpcEntry = bIsFanatic ? NPC_CULT_FANATIC : NPC_CULT_ADHERENT;
+                uint32 uiSpellEntry = bIsFanatic ? SPELL_DARK_TRANSFORMATION : SPELL_DARK_EMPOWERMENT;
+                int32 iTextEntry = bIsFanatic ? SAY_DARK_TRANSFORMATION : SAY_DARK_EMPOWERMENT;
 
-                    Creature* pTarget = DoSelectRandomCultist(uiNpcEntry);
-                    if (pTarget && DoCastSpellIfCan(pTarget, uiSpellEntry) == CAST_OK)
+                // Try to select a random Cultist of entry
+                if (Creature* target = DoSelectRandomCultist(uiNpcEntry))
+                {
+                    if (DoCastSpellIfCan(target, uiSpellEntry) == CAST_OK)
                     {
                         // Remove the selected cultist from the list because we don't want it selected twice
-                        m_lCultistSpawnedGuidList.remove(pTarget->GetObjectGuid());
+                        m_lCultistSpawnedGuidList.remove(target->GetObjectGuid());
                         DoScriptText(iTextEntry, m_creature);
-                        m_uiCultistBuffTimer = 0;
+                        DisableCombatAction(action);
                     }
                 }
-                else
-                    m_uiCultistBuffTimer -= uiDiff;
-            }
 
-            if (m_uiDarkMartyrdomTimer)
-            {
-                if (m_uiDarkMartyrdomTimer <= uiDiff)
+                break;
+            }
+            case DEATHWHISPER_CULTIST_MARTYRDOM:
+                // Try to get a target on which to cast Martyrdom
+                if (Creature* target = DoSelectRandomCultist())
                 {
-                    // Try to get a target on which to cast Martyrdom
-                    if (Creature* pTarget = DoSelectRandomCultist())
+                    if (DoCastSpellIfCan(target, SPELL_DARK_MARTYRDOM) == CAST_OK)
                     {
-                        if (DoCastSpellIfCan(pTarget, SPELL_DARK_MARTYRDOM) == CAST_OK)
-                        {
-                            DoScriptText(SAY_ANIMATE_DEAD, m_creature);
-                            m_uiDarkMartyrdomTimer = 0;
-                        }
+                        DoScriptText(SAY_ANIMATE_DEAD, m_creature);
+                        DisableCombatAction(action);
                     }
-                    else
-                        m_uiDarkMartyrdomTimer = 0;
                 }
-                else
-                    m_uiDarkMartyrdomTimer -= uiDiff;
-            }
-        }
-
-        // Phase 1 specific spells
-        if (m_bIsPhaseOne)
-        {
-            if (m_uiShadowBoltTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-                {
-                    if (DoCastSpellIfCan(pTarget, SPELL_SHADOW_BOLT) == CAST_OK)
-                        m_uiShadowBoltTimer = 2000;
-                }
-            }
-            else
-                m_uiShadowBoltTimer -= uiDiff;
-        }
-        // Phase 2 specific spells
-        else
-        {
-            if (m_uiTouchOfInsignificanceTimer < uiDiff)
-            {
+                break;
+            case DEATHWHISPER_INSIGNIFICANCE:
                 if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_INSIGNIFICANCE) == CAST_OK)
-                    m_uiTouchOfInsignificanceTimer = 7000;
-            }
-            else
-                m_uiTouchOfInsignificanceTimer -= uiDiff;
-
-            if (m_uiFrostboltTimer < uiDiff)
-            {
-                if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                    ResetCombatAction(action, 7000);
+                break;
+            case DEATHWHISPER_FROSTBOLT:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 {
-                    if (DoCastSpellIfCan(pTarget, SPELL_FROSTBOLT) == CAST_OK)
-                        m_uiFrostboltTimer = urand(2000, 4000);
+                    if (DoCastSpellIfCan(target, SPELL_FROSTBOLT) == CAST_OK)
+                        ResetCombatAction(action, 12000);
                 }
-            }
-            else
-                m_uiFrostboltTimer -= uiDiff;
-
-            if (m_uiFrostboltVolleyTimer < uiDiff)
-            {
+                break;
+            case DEATHWHISPER_FROSTBOLT_VOLLEY:
                 if (DoCastSpellIfCan(m_creature, SPELL_FROSTBOLT_VOLLEY) == CAST_OK)
-                    m_uiFrostboltVolleyTimer = urand(15000, 20000);
-            }
-            else
-                m_uiFrostboltVolleyTimer -= uiDiff;
-
-            if (m_uiVengefulShadeTimer < uiDiff)
-            {
+                    ResetCombatAction(action, 20000);
+                break;
+            case DEATHWHISPER_SUMMON_SPIRIT:
                 if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPIRIT) == CAST_OK)
-                    m_uiVengefulShadeTimer = 10000;
-            }
-            else
-                m_uiVengefulShadeTimer -= uiDiff;
-
-            DoMeleeAttackIfReady();
+                    ResetCombatAction(action, 10000);
+                break;
         }
     }
 };
 
-UnitAI* GetAI_boss_lady_deathwhisper(Creature* pCreature)
-{
-    return new boss_lady_deathwhisperAI(pCreature);
-}
+/*######
+## spell_mana_barrier_aura - 70842
+######*/
 
-bool EffectDummyCreature_spell_mana_barrier(Unit* /*pCaster*/, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
+struct spell_mana_barrier_aura : public AuraScript
 {
-    // always check spellid and effectindex
-    if (uiSpellId == SPELL_MANA_BARRIER && uiEffIndex == EFFECT_INDEX_0)
+    void OnPeriodicTrigger(Aura* aura, PeriodicTriggerData& /*data*/) const override
     {
-        uint32 uiDamage = pCreatureTarget->GetMaxHealth() - pCreatureTarget->GetHealth();
-        if (!uiDamage)
-            return true;
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
 
-        if (pCreatureTarget->GetPower(POWER_MANA) < uiDamage)
+        uint32 damage = target->GetMaxHealth() - target->GetHealth();
+        if (!damage)
+            return;
+
+        if (target->GetPower(POWER_MANA) < damage)
         {
-            uiDamage = pCreatureTarget->GetPower(POWER_MANA);
-            pCreatureTarget->RemoveAurasDueToSpell(SPELL_MANA_BARRIER);
+            damage = target->GetPower(POWER_MANA);
+            target->RemoveAurasDueToSpell(aura->GetId());
 
-            if (boss_lady_deathwhisperAI* pBossAI = dynamic_cast<boss_lady_deathwhisperAI*>(pCreatureTarget->AI()))
-                pBossAI->DoStartSecondPhase();
+            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, target);
         }
 
-        pCreatureTarget->DealHeal(pCreatureTarget, uiDamage, GetSpellStore()->LookupEntry<SpellEntry>(SPELL_MANA_BARRIER));
-        pCreatureTarget->ModifyPower(POWER_MANA, -int32(uiDamage));
-
-        // always return true when we are handling this spell and effect
-        return true;
+        target->DealHeal(target, damage, aura->GetSpellProto());
+        target->ModifyPower(POWER_MANA, -int32(damage));
     }
+};
 
-    return false;
-}
+/*######
+## spell_dark_transformation - 70895
+######*/
+
+struct spell_dark_transformation : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        target->InterruptNonMeleeSpells(false);
+        target->CastSpell(target, 70900, TRIGGERED_NONE);
+    }
+};
+
+/*######
+## spell_dark_empowerment - 70896
+######*/
+
+struct spell_dark_empowerment : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        target->InterruptNonMeleeSpells(false);
+        target->CastSpell(target, 70901, TRIGGERED_NONE);
+    }
+};
+
+/*######
+## spell_dark_martyrdom - 70897
+######*/
+
+struct spell_dark_martyrdom : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        target->InterruptNonMeleeSpells(false);
+
+        if (target->GetEntry() == NPC_CULT_FANATIC)
+            target->CastSpell(target, 71236, TRIGGERED_NONE);
+        else if (target->GetEntry() == NPC_CULT_ADHERENT)
+            target->CastSpell(target, 70903, TRIGGERED_NONE);
+    }
+};
+
+/*######
+## spell_dark_transformation_aura - 70900
+######*/
+
+struct spell_dark_transformation_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        if (apply)
+        {
+            target->CastSpell(target, 17683, TRIGGERED_OLD_TRIGGERED);
+
+            // update entry to creature 38135
+            uint32 creatureEntry = aura->GetSpellProto()->EffectMiscValue[EFFECT_INDEX_2];
+            Creature* fanatic = static_cast<Creature*>(target);
+
+            fanatic->UpdateEntry(creatureEntry);
+            fanatic->AIM_Initialize();
+
+            if (fanatic->GetVictim())
+                fanatic->GetMotionMaster()->MoveChase(fanatic->GetVictim());
+        }
+    }
+};
+
+/*######
+## spell_dark_empowerment_aura - 70901
+######*/
+
+struct spell_dark_empowerment_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        if (apply)
+        {
+            target->CastSpell(target, 17683, TRIGGERED_OLD_TRIGGERED);
+
+            // update entry to creature 38136
+            Creature* adherent = static_cast<Creature*>(target);
+
+            adherent->UpdateEntry(38136);
+            adherent->AIM_Initialize();
+        }
+    }
+};
+
+/*######
+## spell_dark_fanatic_martyrdom_aura - 71236, 72495, 72496, 72497
+######*/
+
+struct spell_dark_fanatic_martyrdom_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        if (apply)
+        {
+            target->CastSpell(target, 17683, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(target, 71235, TRIGGERED_OLD_TRIGGERED);
+
+            // update entry to creature 38009
+            uint32 creatureEntry = aura->GetSpellProto()->EffectMiscValue[EFFECT_INDEX_1];
+            Creature* fanatic = static_cast<Creature*>(target);
+
+            fanatic->UpdateEntry(creatureEntry);
+            fanatic->AIM_Initialize();
+
+            if (fanatic->GetVictim())
+                fanatic->GetMotionMaster()->MoveChase(fanatic->GetVictim());
+        }
+    }
+};
+
+/*######
+## spell_dark_adherent_martyrdom_aura - 70903, 72498, 72499, 72500
+######*/
+
+struct spell_dark_adherent_martyrdom_aura : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        if (apply)
+        {
+            target->CastSpell(target, 17683, TRIGGERED_OLD_TRIGGERED);
+            target->CastSpell(target, 71234, TRIGGERED_OLD_TRIGGERED);
+
+            // update entry to creature 38010
+            uint32 creatureEntry = aura->GetSpellProto()->EffectMiscValue[EFFECT_INDEX_1];
+            Creature* adherent = static_cast<Creature*>(target);
+
+            adherent->UpdateEntry(creatureEntry);
+            adherent->AIM_Initialize();
+        }
+    }
+};
 
 void AddSC_boss_lady_deathwhisper()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_lady_deathwhisper";
-    pNewScript->GetAI = &GetAI_boss_lady_deathwhisper;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_spell_mana_barrier;
+    pNewScript->GetAI = &GetNewAIInstance<boss_lady_deathwhisperAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<spell_mana_barrier_aura>("spell_mana_barrier_aura");
+    RegisterSpellScript<spell_dark_transformation>("spell_dark_transformation");
+    RegisterSpellScript<spell_dark_empowerment>("spell_dark_empowerment");
+    RegisterSpellScript<spell_dark_martyrdom>("spell_dark_martyrdom");
+    RegisterAuraScript<spell_dark_transformation_aura>("spell_dark_transformation_aura");
+    RegisterAuraScript<spell_dark_empowerment_aura>("spell_dark_empowerment_aura");
+    RegisterAuraScript<spell_dark_fanatic_martyrdom_aura>("spell_dark_fanatic_martyrdom_aura");
+    RegisterAuraScript<spell_dark_adherent_martyrdom_aura>("spell_dark_adherent_martyrdom_aura");
 }

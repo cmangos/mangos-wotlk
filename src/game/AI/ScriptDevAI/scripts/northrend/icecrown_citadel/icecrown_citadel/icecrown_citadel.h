@@ -65,7 +65,9 @@ enum
     NPC_MURADIN                     = 36948,        // Gunship Battle's encounter(?)
     NPC_TIRION                      = 38995,
     NPC_MENETHIL                    = 38579,
+
     NPC_SPIRE_FROSTWYRM             = 37230,
+
     NPC_FROSTMOURNE_TRIGGER         = 38584,
     NPC_FROSTMOURNE_HOLDER          = 27880,
     NPC_STINKY                      = 37025,
