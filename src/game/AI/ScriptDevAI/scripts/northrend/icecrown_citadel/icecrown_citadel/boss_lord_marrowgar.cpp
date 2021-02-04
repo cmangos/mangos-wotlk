@@ -379,7 +379,7 @@ struct npc_bone_spikeAI : public Scripted_NoMovementAI
 
 struct spell_bone_spike_graveyard : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_0)
             return;
@@ -402,7 +402,7 @@ struct spell_bone_spike_graveyard : public SpellScript
 
 struct spell_bone_spike_graveyard_storm : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_0)
             return;
@@ -430,7 +430,7 @@ struct spell_bone_spike_graveyard_storm : public SpellScript
 
 struct spell_coldflame_targeting : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_0)
             return;
@@ -453,7 +453,7 @@ struct spell_coldflame_targeting : public SpellScript
 
 struct spell_coldflame : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_2)
             return;
@@ -475,7 +475,7 @@ struct spell_coldflame : public SpellScript
 
 struct spell_coldflame_summon : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_0)
             return;

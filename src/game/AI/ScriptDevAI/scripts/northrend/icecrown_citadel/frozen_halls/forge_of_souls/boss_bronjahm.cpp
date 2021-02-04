@@ -64,7 +64,7 @@ struct boss_bronjahmAI : public RangedCombatAI
 {
     boss_bronjahmAI(Creature* creature) : RangedCombatAI(creature, BRONJAHM_ACTION_MAX), m_instance(static_cast<instance_forge_of_souls*>(creature->GetInstanceData()))
     {
-        AddCombatAction(BRONJAHM_ACTION_MAGIC_BANE, 8000u, 12000U);
+        AddCombatAction(BRONJAHM_ACTION_MAGIC_BANE, 8000u, 12000u);
         AddCombatAction(BRONJAHM_ACTION_CORRUPT_SOUL, 20000u, 30000u);
         AddCombatAction(BRONJAHM_ACTION_SHADOW_BOLT, 2000u);
         AddCombatAction(BRONJAHM_ACTION_FEAR, true);
