@@ -49,11 +49,10 @@ enum
     NPC_DEATHWHISPER_SPAWN_STALKER  = 37947,
     NPC_DEATHWHISPER_CONTROLLER     = 37948,
 
-    NPC_OVERLORD_SAURFANG           = 37187,
-    NPC_KORKRON_REAVER              = 37920,
-    NPC_MURADIN_BRONZEBEARD         = 37200,        // Saurfang's encounter and at the instance entrance
+    NPC_OVERLORD_SAURFANG           = 37187,        // Gunship encounter and Saurfang intro
+    NPC_KORKRON_REAVER              = 36957,
+    NPC_MURADIN_BRONZEBEARD         = 37200,
     NPC_SKYBREAKER_MARINE           = 37830,
-    NPC_ALLIANCE_MARINE             = 37830,
 
     NPC_BLOOD_ORB_CONTROL           = 38008,
     NPC_PUTRICIDES_TRAP             = 38879,        // Handles trap event before Putricide
@@ -119,6 +118,8 @@ enum
     GO_ZEPPELIN_HORDE               = 201834,       // ship used during the Saurfang event; map 718
 
     GO_SAURFANG_DOOR                = 201825,
+    GO_HORDE_TELEPORTER             = 201880,
+    GO_ALLIANCE_TELEPORTER          = 201858,
 
     GO_GREEN_PLAGUE                 = 201370,       // Rotface combat door
     GO_ORANGE_PLAGUE                = 201371,       // Festergut combat door
@@ -278,6 +279,21 @@ enum
     ACHIEV_CRIT_NECK_DEEP_VILE_25H         = 13164,
 };
 
+struct sEventNpcSpawnLocations
+{
+    uint32 uiEntryHorde, uiEntryAlliance;
+    float fSpawnX, fSpawnY, fSpawnZ, fSpawnO;
+};
+
+const sEventNpcSpawnLocations aSaurfangLocations[5] =
+{
+    {NPC_OVERLORD_SAURFANG, NPC_MURADIN_BRONZEBEARD, -555.958f, 2211.4f,  539.369f, 6.26573f},
+    {NPC_KORKRON_REAVER,    NPC_SKYBREAKER_MARINE,   -560.399f, 2209.3f,  539.368f, 6.23082f},
+    {NPC_KORKRON_REAVER,    NPC_SKYBREAKER_MARINE,   -557.936f, 2214.46f, 539.368f, 6.26573f},
+    {NPC_KORKRON_REAVER,    NPC_SKYBREAKER_MARINE,   -557.958f, 2207.16f, 539.368f, 6.26573f},
+    {NPC_KORKRON_REAVER,    NPC_SKYBREAKER_MARINE,   -560.451f, 2212.86f, 539.368f, 6.17846f},
+};
+
 class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelper
 {
     public:
@@ -324,6 +340,8 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         void ExecuteChatCommand(ChatHandler* handler, char* args) override;
 
     private:
+        void ProcessEventNpcs(Player* pPlayer);
+
         std::string m_strInstData;
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         bool m_abAchievCriteria[MAX_SPECIAL_ACHIEV_CRITS];
@@ -342,6 +360,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         GuidList m_lDeathwhisperStalkersGuids;
         GuidList m_lDeathwhisperCultistsGuids;
         GuidList m_lRotfaceUpperStalkersGuids;
+        GuidList m_lFactionTeleporterGuids[PVP_TEAM_COUNT];
         GuidSet m_sDarkfallenCreaturesLowerGuids;
         GuidSet m_sDarkfallenCreaturesLeftGuids;
         GuidSet m_sDarkfallenCreaturesRightGuids;

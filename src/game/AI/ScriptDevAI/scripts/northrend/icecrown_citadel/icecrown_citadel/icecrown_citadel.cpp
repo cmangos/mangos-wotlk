@@ -135,8 +135,12 @@ void instance_icecrown_citadel::DoHandleCitadelAreaTrigger(uint32 uiTriggerId, P
 
 void instance_icecrown_citadel::OnPlayerEnter(Player* pPlayer)
 {
-    if (!m_uiTeam)                                          // very first player to enter
+    if (!m_uiTeam)                      // very first player to enter
+    {
         m_uiTeam = pPlayer->GetTeam();
+
+        ProcessEventNpcs(pPlayer);
+    }
 }
 
 void instance_icecrown_citadel::OnCreatureCreate(Creature* pCreature)
@@ -237,6 +241,12 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
             break;
         case GO_SAURFANG_DOOR:
             break;
+        case GO_ALLIANCE_TELEPORTER:
+            m_lFactionTeleporterGuids[TEAM_INDEX_ALLIANCE].push_back(pGo->GetObjectGuid());
+            return;
+        case GO_HORDE_TELEPORTER:
+            m_lFactionTeleporterGuids[TEAM_INDEX_HORDE].push_back(pGo->GetObjectGuid());
+            return;
         case GO_SCIENTIST_DOOR:
             if (m_auiEncounter[TYPE_PLAGUE_WING_ENTRANCE] == DONE)
                 pGo->SetGoState(GO_STATE_ACTIVE);
@@ -512,9 +522,9 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                 // check if the entries of the remaining cultists is greater than 5
                 std::set<uint32> lCultistsEntries;
 
-                for (GuidList::const_iterator itr = m_lDeathwhisperCultistsGuids.begin(); itr != m_lDeathwhisperCultistsGuids.end(); ++itr)
+                for (const auto& guid : m_lDeathwhisperCultistsGuids)
                 {
-                    if (Creature* pTemp = instance->GetCreature(*itr))
+                    if (Creature* pTemp = instance->GetCreature(guid))
                         lCultistsEntries.insert(pTemp->GetEntry());
                 }
 
@@ -540,10 +550,6 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                 DoToggleGameObjectFlags(GO_TRANSPORTER_DEATHBRINGER, GO_FLAG_NO_INTERACT, false);
                 if (GameObject* pTransporter = GetSingleGameObjectFromStorage(GO_TRANSPORTER_DEATHBRINGER))
                     pTransporter->SetGoState(GO_STATE_ACTIVE);
-
-                // spawn the Saurfang's ship
-                TransportTemplate* const zeppelinHorde = sTransportMgr.GetTransportTemplate(GO_ZEPPELIN_HORDE);
-                Transport::LoadTransport(*zeppelinHorde, instance, true);
             }
             break;
         case TYPE_DEATHBRINGER_SAURFANG:
@@ -553,6 +559,13 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                 DoUseDoorOrButton(GO_SAURFANG_DOOR);
                 DoRespawnGameObject(GO_SAURFANG_CACHE, 60 * MINUTE);
                 DoToggleGameObjectFlags(GO_SAURFANG_CACHE, GO_FLAG_NO_INTERACT, false);
+
+                // spawn the Saurfang's ship for alliance only
+                if (m_uiTeam == ALLIANCE)
+                {
+                    TransportTemplate* const zeppelinHorde = sTransportMgr.GetTransportTemplate(GO_ZEPPELIN_HORDE);
+                    Transport::LoadTransport(*zeppelinHorde, instance, true);
+                }
             }
             else if (uiData == IN_PROGRESS)
                 SetSpecialAchievementCriteria(TYPE_ACHIEV_MADE_A_MESS, true);
@@ -829,6 +842,28 @@ void instance_icecrown_citadel::Update(uint32 uiDiff)
         }
         else
             m_uiPutricideValveTimer -= uiDiff;
+    }
+}
+
+void instance_icecrown_citadel::ProcessEventNpcs(Player* pPlayer)
+{
+    if (GetData(TYPE_DEATHBRINGER_SAURFANG) != DONE || GetData(TYPE_GUNSHIP_BATTLE) == DONE)
+    {
+        // Summon Saurfang mobs
+        for (const auto& aEventBeginLocation : aSaurfangLocations)
+        {
+            pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
+                aEventBeginLocation.fSpawnX, aEventBeginLocation.fSpawnY, aEventBeginLocation.fSpawnZ, aEventBeginLocation.fSpawnO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS);
+        }
+
+        // Show portal gameobjects
+        uint8 teamIndex = GetTeamIndexByTeamId(Team(m_uiTeam));
+
+        for (const auto& guid : m_lFactionTeleporterGuids[teamIndex])
+        {
+            DoRespawnGameObject(guid, 24 * HOUR);
+            DoUseDoorOrButton(guid);
+        }
     }
 }
 
