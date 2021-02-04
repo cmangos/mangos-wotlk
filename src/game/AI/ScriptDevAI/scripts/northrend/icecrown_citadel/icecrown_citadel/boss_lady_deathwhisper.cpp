@@ -448,8 +448,11 @@ struct boss_lady_deathwhisperAI : public CombatAI
                     ResetCombatAction(action, 20000);
                 break;
             case DEATHWHISPER_SUMMON_SPIRIT:
-                if (DoCastSpellIfCan(m_creature, SPELL_SUMMON_SPIRIT) == CAST_OK)
-                    ResetCombatAction(action, 10000);
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(target, SPELL_SUMMON_SPIRIT) == CAST_OK)
+                        ResetCombatAction(action, 10000);
+                }
                 break;
         }
     }
