@@ -224,7 +224,7 @@ struct npc_shattered_sun_marksmanAI : public npc_shattered_sun_fighterAI
 
 struct ShatteredSunMarksmanShoot : public SpellScript
 {
-    void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex /*effIdx*/, bool targetB, float& radius)
+    void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex /*effIdx*/, bool targetB, float& radius) const override
     {
         if (targetB)
             radius = INTERACTION_DISTANCE;
