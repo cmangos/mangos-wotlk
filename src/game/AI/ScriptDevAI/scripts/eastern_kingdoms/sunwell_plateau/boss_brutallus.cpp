@@ -55,6 +55,8 @@ enum
     SPELL_BERSERK                   = 26662,
     SPELL_SUMMON_DEATH_CLOUD        = 45884,                // Summoned on death
 
+    SPELL_DUAL_WEILD_PASSIVE        = 42459,
+
     // Epilogue spells
     SPELL_BRUTALLUS_DEATH_CLOUD     = 45212,
     SPELL_FELBLAZE_PREVIZUAL        = 44885,

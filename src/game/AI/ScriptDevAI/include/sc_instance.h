@@ -65,7 +65,7 @@ class ScriptedInstance : public InstanceData
             DoOrSimulateScriptTextForMap(textEntry, creatureEntry, instance, GetSingleCreatureFromStorage(creatureEntry, true));
         }
 
-        void BanPlayersIfNoGm();
+        void BanPlayersIfNoGm(const std::string& reason);
 
         // Starts a timed achievement criteria for all players in instance
         void DoStartTimedAchievement(AchievementCriteriaTypes criteriaType, uint32 uiTimedCriteriaMiscId);
