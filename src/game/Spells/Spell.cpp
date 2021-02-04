@@ -1797,8 +1797,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 case TARGET_LOCATION_CASTER_LEFT:        angle += M_PI_F / 2;     break;
                 case TARGET_LOCATION_CASTER_RIGHT:       angle -= M_PI_F / 2;     break;
             }
-            if (radius == 0.f && m_spellInfo->EffectRadiusIndex[effIndex] != 36) // All shaman totems have 0 radius - need to override with proper value
-                radius = 2.f;
 
             Position pos;
             m_trueCaster->GetFirstCollisionPosition(pos, radius, angle);
@@ -8328,14 +8326,14 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
     else
         radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
 
+    uint32 targetMode;
+    if (!targetB)
+        targetMode = m_spellInfo->EffectImplicitTargetA[effIndex];
+    else
+        targetMode = m_spellInfo->EffectImplicitTargetB[effIndex];
+    SpellTargetInfo& data = SpellTargetInfoTable[targetMode];
     if (radius == 50000.f) // safety against bad data
     {
-        uint32 targetMode;
-        if (!targetB)
-            targetMode = m_spellInfo->EffectImplicitTargetA[effIndex];
-        else
-            targetMode = m_spellInfo->EffectImplicitTargetB[effIndex];
-        SpellTargetInfo& data = SpellTargetInfoTable[targetMode];
         if (data.filter != TARGET_SCRIPT)
         {
             switch (data.type)
@@ -8353,6 +8351,23 @@ void Spell::GetSpellRangeAndRadius(SpellEffectIndex effIndex, float& radius, boo
                         radius = 200.f;
                     break;
             }
+        }
+    }
+    else if (radius == 0.f && data.type == TARGET_TYPE_LOCATION_DEST)
+    {
+        switch (targetMode) // TODO: move this to SQL
+        {
+            case TARGET_LOCATION_CASTER_FRONT_RIGHT:
+            case TARGET_LOCATION_CASTER_BACK_RIGHT:
+            case TARGET_LOCATION_CASTER_BACK_LEFT:
+            case TARGET_LOCATION_CASTER_FRONT_LEFT:
+            case TARGET_LOCATION_CASTER_FRONT:
+            case TARGET_LOCATION_CASTER_BACK:
+            case TARGET_LOCATION_CASTER_LEFT:
+            case TARGET_LOCATION_CASTER_RIGHT:
+                if (radius == 0.f && m_spellInfo->EffectRadiusIndex[effIndex] != 36) // All shaman totems have 0 radius - need to override with proper value
+                    radius = 2.f;
+                break;
         }
     }
 
