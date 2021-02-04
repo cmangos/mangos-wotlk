@@ -4552,6 +4552,10 @@ float Unit::CalculateSpellMissChance(const Unit* victim, SpellSchoolMask schoolM
     }
     else
         chance += (difference * factor);
+
+    if (victim->HasAura(45210)) // Taunt Hit Chance - Brutallus
+        chance -= 20.f;
+
     // Reduce by caster's spell hit chance
     chance -= GetHitChance(spell, schoolMask);
     // Reduce (or increase) by victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
