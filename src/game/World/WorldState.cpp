@@ -1019,8 +1019,6 @@ enum
     QUEST_A_CHARITABLE_DONATION             = 11545,
     QUEST_A_MAGNANIMOUS_BENEFACTOR          = 11549,
 
-    COUNTER_MAX_VAL_REQ                     = 10000,
-
     // optional Sunwell Plateau PTR progressive release gates
     QUEST_AGAMATH_THE_FIRST_GATE            = 11551,
     QUEST_ROHENDOR_THE_SECOND_GATE          = 11552,
@@ -1068,9 +1066,9 @@ void WorldState::AddSunsReachProgress(uint32 questId)
         SendWorldstateUpdate(m_sunsReachData.m_sunsReachReclamationMutex, m_sunsReachData.m_sunsReachReclamationPlayers, newValue, worldState);
 
     bool save = true;
-    if (m_sunsReachData.m_sunsReachReclamationCounters[counter] >= COUNTER_MAX_VAL_REQ)
+    if (m_sunsReachData.m_sunsReachReclamationCounters[counter] >= sWorld.getConfig(CONFIG_UINT32_SUNSREACH_COUNTER))
     {
-        if (otherCounter == -1 || m_sunsReachData.m_sunsReachReclamationCounters[otherCounter] >= COUNTER_MAX_VAL_REQ)
+        if (otherCounter == -1 || m_sunsReachData.m_sunsReachReclamationCounters[otherCounter] >= sWorld.getConfig(CONFIG_UINT32_SUNSREACH_COUNTER))
         {
             save = false;
             switch (questId)
@@ -1474,9 +1472,9 @@ uint32 SunsReachReclamationData::GetPhasePercentage(uint32 phase)
 {
     switch (phase)
     {
-        case SUNS_REACH_PHASE_1_STAGING_AREA: return uint32((m_sunsReachReclamationCounters[COUNTER_ERRATIC_BEHAVIOR] + m_sunsReachReclamationCounters[COUNTER_SANCTUM_WARDS]) * 100 / (2 * COUNTER_MAX_VAL_REQ));
-        case SUNS_REACH_PHASE_2_SANCTUM: return uint32((m_sunsReachReclamationCounters[COUNTER_BATTLE_FOR_THE_SUNS_REACH_ARMORY] + m_sunsReachReclamationCounters[COUNTER_DISTRACTION_AT_THE_DEAD_SCAR]) * 100 / (2 * COUNTER_MAX_VAL_REQ));
-        case SUNS_REACH_PHASE_3_ARMORY: return uint32((m_sunsReachReclamationCounters[COUNTER_INTERCEPT_THE_REINFORCEMENTS] + m_sunsReachReclamationCounters[COUNTER_TAKING_THE_HARBOR]) * 100 / (2 * COUNTER_MAX_VAL_REQ));
+        case SUNS_REACH_PHASE_1_STAGING_AREA: return uint32((m_sunsReachReclamationCounters[COUNTER_ERRATIC_BEHAVIOR] + m_sunsReachReclamationCounters[COUNTER_SANCTUM_WARDS]) * 100 / (2 * sWorld.getConfig(CONFIG_UINT32_SUNSREACH_COUNTER)));
+        case SUNS_REACH_PHASE_2_SANCTUM: return uint32((m_sunsReachReclamationCounters[COUNTER_BATTLE_FOR_THE_SUNS_REACH_ARMORY] + m_sunsReachReclamationCounters[COUNTER_DISTRACTION_AT_THE_DEAD_SCAR]) * 100 / (2 * sWorld.getConfig(CONFIG_UINT32_SUNSREACH_COUNTER)));
+        case SUNS_REACH_PHASE_3_ARMORY: return uint32((m_sunsReachReclamationCounters[COUNTER_INTERCEPT_THE_REINFORCEMENTS] + m_sunsReachReclamationCounters[COUNTER_TAKING_THE_HARBOR]) * 100 / (2 * sWorld.getConfig(CONFIG_UINT32_SUNSREACH_COUNTER)));
         default: return 0;
     }
 }
@@ -1485,10 +1483,10 @@ uint32 SunsReachReclamationData::GetSubPhasePercentage(uint32 subPhase)
 {
     switch (subPhase)
     {
-        case SUBPHASE_PORTAL: return uint32(m_sunsReachReclamationCounters[COUNTER_INTERCEPTING_THE_MANA_CELLS] * 100 / COUNTER_MAX_VAL_REQ);
-        case SUBPHASE_ANVIL: return uint32(m_sunsReachReclamationCounters[COUNTER_MAKING_READY] * 100 / COUNTER_MAX_VAL_REQ);
-        case SUBPHASE_ALCHEMY_LAB: return uint32(m_sunsReachReclamationCounters[COUNTER_DISCOVERING_YOUR_ROOTS] * 100 / COUNTER_MAX_VAL_REQ);
-        case SUBPHASE_MONUMENT: return uint32(m_sunsReachReclamationCounters[COUNTER_A_CHARITABLE_DONATION] * 100 / COUNTER_MAX_VAL_REQ);
+        case SUBPHASE_PORTAL: return uint32(m_sunsReachReclamationCounters[COUNTER_INTERCEPTING_THE_MANA_CELLS] * 100 / sWorld.getConfig(CONFIG_UINT32_SUNSREACH_COUNTER));
+        case SUBPHASE_ANVIL: return uint32(m_sunsReachReclamationCounters[COUNTER_MAKING_READY] * 100 / sWorld.getConfig(CONFIG_UINT32_SUNSREACH_COUNTER));
+        case SUBPHASE_ALCHEMY_LAB: return uint32(m_sunsReachReclamationCounters[COUNTER_DISCOVERING_YOUR_ROOTS] * 100 / sWorld.getConfig(CONFIG_UINT32_SUNSREACH_COUNTER));
+        case SUBPHASE_MONUMENT: return uint32(m_sunsReachReclamationCounters[COUNTER_A_CHARITABLE_DONATION] * 100 / sWorld.getConfig(CONFIG_UINT32_SUNSREACH_COUNTER));
         default: return 0;
     }
 }
