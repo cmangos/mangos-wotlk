@@ -1550,6 +1550,8 @@ INSERT INTO scripted_areatrigger VALUES
 (4033,'at_stomach_cthun'),
 (4034,'at_stomach_cthun'),
 (4036,'at_stomach_cthun');
+INSERT INTO scripted_event_id VALUES
+(9738, 'event_cthun_reset');
 
 /* TEROKKAR FOREST */
 UPDATE creature_template SET ScriptName='mob_netherweb_victim' WHERE entry=22355;
