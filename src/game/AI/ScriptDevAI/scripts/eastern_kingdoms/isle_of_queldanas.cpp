@@ -102,16 +102,14 @@ struct npc_shattered_sun_fighterAI : public ScriptedAI
 {
     npc_shattered_sun_fighterAI(Creature* creature) : ScriptedAI(creature)
     {
-        m_firstSpawn = true;
         Reset();
     }
 
     uint32 m_uiMarksmanRace;
-    bool m_firstSpawn;
 
     void JustRespawned() override
     {
-        if (m_firstSpawn && m_creature->GetZoneId() == ZONEID_ISLE_OF_QUELDANAS) // let the spawns in Shattrath be handled via movement dbscript
+        if (m_creature->GetZoneId() == ZONEID_ISLE_OF_QUELDANAS) // let the spawns in Shattrath be handled via movement dbscript
         {
             uint32 transformScriptId = 0;
             if (m_creature->GetEntry() == NPC_SHATTERED_SUN_MARKSMAN)
@@ -149,7 +147,6 @@ struct npc_shattered_sun_fighterAI : public ScriptedAI
             if (transformScriptId)
                 m_creature->GetMap()->ScriptsStart(sRelayScripts, transformScriptId, m_creature, m_creature);
         }
-        m_firstSpawn = false;
     }
 
     void Reset() override {}
@@ -186,7 +183,7 @@ struct npc_shattered_sun_marksmanAI : public npc_shattered_sun_fighterAI
 
     void Reset() override
     {
-        SetCombatMovement(false);
+        m_creature->SetImmobilizedState(true);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
