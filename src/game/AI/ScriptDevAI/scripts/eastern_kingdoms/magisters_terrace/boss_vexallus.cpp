@@ -39,7 +39,7 @@ enum
     SPELL_ENERGY_BOLT_PERIODIC      = 46156,
     SPELL_ENERGY_FEEDBACK_CHANNELED = 44328, // Channel
     SPELL_ENERGY_FEEDBACK_DEBUFF    = 44335, // The actual debuff
-    //SPELL_ENERGY_FEEDBACK_VISUAL    = 44339, // Visual
+    //SPELL_ENERGY_FEEDBACK_VISUAL    = 44339, // Visual procced by 44328
 
     SPELL_ENERGY_PASSIVE            = 44326,
     SPELL_ENERGY_BOLT               = 44342,
@@ -213,6 +213,7 @@ struct mob_pure_energyAI : public ScriptedAI
     {
         SetDeathPrevention(true);
         SetMeleeEnabled(false);
+        SetCombatMovement(true);
         Reset();
     }
 
@@ -220,11 +221,20 @@ struct mob_pure_energyAI : public ScriptedAI
 
     void JustPreventedDeath(Unit* attacker) override
     {
-        Unit* victim = m_creature->GetVictim() ? m_creature->GetVictim() : attacker;
+        if (attacker->GetTypeId() == TYPEID_PLAYER)
+            attacker = ((Player*)attacker);
+
+        else if (attacker->GetTypeId() == TYPEID_UNIT)
+        {
+            if (((Creature*)attacker)->IsPet() || ((Creature*)attacker)->IsTotem())
+                attacker = attacker->GetOwner();
+        }
+
         DoFakeDeath();
         m_creature->RemoveAurasDueToSpell(SPELL_ENERGY_BOLT_PERIODIC);
-        m_creature->CastSpell(victim, SPELL_ENERGY_FEEDBACK_CHANNELED, TRIGGERED_NONE);
-        victim->CastSpell(nullptr, SPELL_ENERGY_FEEDBACK_DEBUFF, TRIGGERED_OLD_TRIGGERED);
+        SetCombatMovement(false);
+        m_creature->CastSpell(attacker, SPELL_ENERGY_FEEDBACK_CHANNELED, TRIGGERED_NONE);
+        attacker->CastSpell(nullptr, SPELL_ENERGY_FEEDBACK_DEBUFF, TRIGGERED_OLD_TRIGGERED);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
