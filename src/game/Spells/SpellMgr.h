@@ -1144,6 +1144,7 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
         case 35424: // Soul Shadows - used by Shade of Mal'druk on Mal'druk the Soulrender
         case 42628: // Zul'Aman - Fire Bomb - Neutral spell
         case 44406: // Energy Infusion - supposed to be buff despite negative targeting
+        case 48598: // Ride Flamebringer Cue - the player (target) is supposed to board the dragon (caster); Positive effect needed to avoid combat
             return true;
         case 43101: // Headless Horseman Climax - Command, Head Requests Body - must be negative so that SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY isn't ignored, Headless Horseman script target is immune
         case 34190: // Arcane Orb - should be negative
