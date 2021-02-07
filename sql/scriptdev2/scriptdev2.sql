@@ -6913,7 +6913,37 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1631033','I have become...DEATH!','16698','1','0','0','0','saurfang SAY_BERSERK'),
 ('-1631034','I... Am... Released.','16697','1','0','0','0','saurfang SAY_DEATH'),
 
--- RE-USE -1631035 TO -1631069
+('-1631035','Fire up the engines! We got a meetin\' with destiny, lads!','16962','1','0','0','0','muradin SAY_GUNSHIP_START_1'),
+('-1631036','Hold on to yer hats!','16963','1','0','0','0','muradin SAY_GUNSHIP_START_2'),
+('-1631037','What in the world is that? Grab me spyglass, crewman!','16964','1','0','0','0','muradin SAY_GUNSHIP_START_3'),
+('-1631038','By me own beard! HORDE SAILIN\' IN FAST \'N HOT!','16965','1','0','0','0','muradin SAY_GUNSHIP_START_4'),
+('-1631039','EVASIVE ACTION! MAN THE GUNS!','16966','1','0','0','0','muradin SAY_GUNSHIP_START_5'),
+('-1631040','Cowardly dogs! Ye blindsided us!','16967','1','0','0','0','muradin SAY_GUNSHIP_START_6'),
+('-1631041','This is not your battle, dwarf. Back down or we will be forced to destroy your ship.','17093','1','0','0','0','saurfang SAY_GUNSHIP_START_7'),
+('-1631042','Not me battle? I dunnae who ye think ye are, mister, but I got a score to settle with Arthas and yer not gettin\' in me way! FIRE ALL GUNS! FIRE! FIRE!','16968','1','0','0','0','muradin SAY_GUNSHIP_START_8'),
+('-1631043','Reavers, Sergeants, attack!','17081','1','0','0','0','saurfang SAY_SUMMON_SOLDIERS'),
+('-1631044','We\'re taking hull damage, get a battle-mage out here to shut down those cannons!','17093','1','0','0','0','saurfang SAY_SUMMON_MAGES'),
+('-1631045','Axethrowers, hurl faster!','17079','1','0','0','0','saurfang SAY_RANDOM_ATTACK_1'),
+('-1631046','Rocketeers, reload!','0','1','0','0','0','saurfang SAY_RANDOM_ATTACK_2'),
+('-1631047','Don\'t say I didn\'t warn ya, scoundrels! Onward, brothers and sisters!','16959','1','0','0','0','muradin SAY_WIN'),
+
+('-1631048','Rise up, sons and daughters of the Horde! Today we battle a hated enemy of the Horde! LOK\'TAR OGAR!','17087','1','0','0','0','saurfang SAY_GUNSHIP_START_1'),
+('-1631049','Kor\'kron, take us out!','17088','1','0','0','0','saurfang SAY_GUNSHIP_START_2'),
+('-1631050','What is that? Something approaching in the distance.','17089','1','0','0','0','saurfang SAY_GUNSHIP_START_3'),
+('-1631051','ALLIANCE GUNSHIP! ALL HANDS ON DECK!','17090','1','0','0','0','saurfang SAY_GUNSHIP_START_4'),
+('-1631052','You answer to Saurfang now!','17091','1','0','0','0','saurfang SAY_GUNSHIP_START_5'),
+('-1631053','Move yer jalopy or we\'ll blow it out of the sky, orc! The Horde\'s got no business here. ','16969','1','0','0','0','muradin SAY_GUNSHIP_START_6'),
+('-1631054','You will know our business soon. Kor\'kron, ANNIHILATE THEM!','17092','1','0','0','0','saurfang SAY_GUNSHIP_START_7'),
+('-1631055','Marines, Sergeants, attack!','16956','1','0','0','0','muradin SAY_SUMMON_SOLDIERS'),
+('-1631056','We\'re taking hull damage, get a sorcerer out here to shut down those cannons!','16957','1','0','0','0','muradin SAY_SUMMON_MAGES'),
+('-1631057','Riflemen, shoot faster!','16954','1','0','0','0','muradin SAY_RANDOM_ATTACK_1'),
+('-1631058','Mortar team, reload!','0','1','0','0','0','muradin SAY_RANDOM_ATTACK_2'),
+('-1631059','The Alliance falter. Onward to the Lich King!','17084','1','0','0','0','saurfang SAY_WIN'),
+
+('-1631060','What\'s this then?! Ye won\t be takin\' this son o\' Ironforge\'s vessel without a fight!','16958','1','0','0','0','muradin SAY_AGGRO'),
+('-1631061','You DARE board my ship? Your death will come swiftly.','17083','1','0','0','0','saurfang SAY_AGGRO'),
+
+-- RE-USE -1631062 TO -1631069
 
 ('-1631070','What? Precious? Noooooooooo!!!','16993','6','0','0','0','rotface SAY_PRECIOUS_DIES'),
 ('-1631071','WEEEEEE!','16986','1','0','0','0','rotface SAY_AGGRO'),

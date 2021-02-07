@@ -133,16 +133,16 @@ bool Transport::IsSpawnedByDefault(uint32 entry, Team team)
     {
         case 201598:        // Halls of Reflection - alliance
         case 201580:        // ICC raid - Skybreaker - alliance
-        case 201581:        // ICC raid - Orgrim's Hammer - alliance
             if (team == HORDE)
                 return false;
             break;
         case 201599:        // Halls of Reflection - horde
-        case 201811:        // ICC Raid - Skybreaker - horde
         case 201812:        // ICC Raid - Orgrim's Hammer - horde
             if (team == ALLIANCE)
                 return false;
             break;
+        case 201581:        // ICC raid - Orgrim's Hammer - alliance
+        case 201811:        // ICC Raid - Skybreaker - horde
         case 201834:        // ICC zeppelin after gunship fight
             return false;
     }

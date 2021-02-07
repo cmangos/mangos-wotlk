@@ -23,6 +23,8 @@ EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -34,7 +36,30 @@ enum
     TEXT_ID_START_HORDE             = 15219,
     TEXT_ID_START_ALLIANCE          = 15101,
 
+    // spells
+    SPELL_FRIENDLY_BOSS_DAMAGE_MOD  = 70339,
+    SPELL_CHECK_FOR_PLAYERS         = 70332,
+    SPELL_TELEPORT_PLAYERS_VICTORY  = 72340,
+    SPELL_TELEPORT_PLAYERS_RESET_A  = 70446,
+    SPELL_TELEPORT_PLAYERS_RESET_H  = 71284,
+    SPELL_GUNSHIP_FALL_TELEPORT     = 67335,
+    SPELL_AWARD_REPUTATION          = 73845,
     SPELL_ACHIEVEMENT_CHECK         = 72959,
+    SPELL_LOCK_PLAYERS_TAP_CHEST    = 72347,
+    SPELL_SKYBREAKER_DECK           = 70120,
+    SPELL_ORGRIMS_HAMMER_DECK       = 70121,
+    SPELL_HATE_TO_ZERO              = 63984,
+
+    SPELL_MELEE_TARGETING_A         = 70219,
+    SPELL_MELEE_TARGETING_H         = 70294,
+
+    SPELL_EXPLOSION_FAIL            = 72134,
+    SPELL_EXPLOSION_VICTORY         = 72137,
+
+    SPELL_TELEPORT_ENEMY_SHIP       = 70104,            // cast by enemy combatants when teleporting to ship
+    SPELL_BERSERK                   = 72525,
+
+    SPELL_BATTLE_EXPERIENCE         = 71201,            // related to 71188, 71193, 71195
 };
 
 bool GossipHello_npc_saurfang_gunship(Player* pPlayer, Creature* pCreature)
@@ -62,7 +87,8 @@ bool GossipSelect_npc_saurfang_gunship(Player* pPlayer, Creature* pCreature, uin
     {
         case GOSSIP_ACTION_INFO_DEF + 1:
             if (instance_icecrown_citadel* pInstance = static_cast<instance_icecrown_citadel*>(pCreature->GetInstanceData()))
-                pInstance->SetData(TYPE_GUNSHIP_BATTLE, IN_PROGRESS);
+                pInstance->SetData(TYPE_GUNSHIP_BATTLE, SPECIAL);
+            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             break;
     }
     pPlayer->CLOSE_GOSSIP_MENU();
@@ -95,13 +121,41 @@ bool GossipSelect_npc_muradin_gunship(Player* pPlayer, Creature* pCreature, uint
     {
         case GOSSIP_ACTION_INFO_DEF + 1:
             if (instance_icecrown_citadel* pInstance = static_cast<instance_icecrown_citadel*>(pCreature->GetInstanceData()))
-                pInstance->SetData(TYPE_GUNSHIP_BATTLE, IN_PROGRESS);
+                pInstance->SetData(TYPE_GUNSHIP_BATTLE, SPECIAL);
+            pCreature->RemoveFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP);
             break;
     }
     pPlayer->CLOSE_GOSSIP_MENU();
 
     return true;
 }
+
+/*######
+## spell_incinerating_blast - 70175
+######*/
+
+struct spell_incinerating_blast : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !caster)
+            return;
+
+        if (effIdx == EFFECT_INDEX_1)
+        {
+            uint32 damage = spell->GetDamage();
+            uint32 energy = caster->GetPower(caster->GetPowerType());
+
+            // Note: this calculation has to be verified
+            spell->SetDamage(damage + energy * energy * 8);
+        }
+        // remove all power
+        else if (effIdx == EFFECT_INDEX_2)
+            caster->SetPower(caster->GetPowerType(), 0);
+    }
+};
 
 void AddSC_gunship_battle()
 {
@@ -116,4 +170,6 @@ void AddSC_gunship_battle()
     pNewScript->pGossipHello = &GossipHello_npc_muradin_gunship;
     pNewScript->pGossipSelect = &GossipSelect_npc_muradin_gunship;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_incinerating_blast>("spell_incinerating_blast");
 }
