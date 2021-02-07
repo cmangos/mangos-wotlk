@@ -307,7 +307,7 @@ struct essence_base_AI : public CombatAI
 
     virtual void OnPhaseFinished() {}
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
         // Reset encounter and despawn Essence
         if (m_instance)
@@ -677,7 +677,7 @@ struct npc_enslaved_soulAI : public CombatAI
         }
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
         if (m_postpone)
         {
