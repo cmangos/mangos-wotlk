@@ -34,6 +34,7 @@
 #include "AI/ScriptDevAI/ScriptDevAIMgr.h"
 #include "Maps/InstanceData.h"
 #include "Cinematics/M2Stores.h"
+#include "Entities/Transports.h"
 
 bool ChatHandler::HandleDebugSendSpellFailCommand(char* args)
 {
@@ -1619,5 +1620,18 @@ bool ChatHandler::HandleDebugObjectFlags(char* args)
         }
     }
 
+    return true;
+}
+
+bool ChatHandler::HandleDebugTransports(char* args)
+{
+    Player* player = GetSession()->GetPlayer();
+    if (!player->IsInWorld())
+        return true;
+
+    auto& transports = player->GetMap()->GetTransports();
+    SendSysMessage("Transports:");
+    for (auto transport : transports)
+        PSendSysMessage("Name %s Entry %u Position %s", transport->GetName(), transport->GetEntry(), transport->GetPosition().to_string().data());
     return true;
 }

@@ -316,6 +316,8 @@ class ChatHandler
 
         bool HandleDebugPacketHistory(char* args);
 
+        bool HandleDebugTransports(char* args);
+
         bool HandleSD2HelpCommand(char* args);
         bool HandleSD2ScriptCommand(char* args);
 
