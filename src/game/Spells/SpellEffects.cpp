@@ -4850,12 +4850,12 @@ void Spell::EffectClearQuest(SpellEffectIndex eff_idx)
     player->getQuestStatusMap()[quest_id].m_rewarded = false;
 }
 
-void Spell::EffectForceCast(SpellEffectIndex eff_idx)
+void Spell::EffectForceCast(SpellEffectIndex effIndex)
 {
     if (!unitTarget)
         return;
 
-    uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[eff_idx];
+    uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[effIndex];
 
     // normal case
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(triggered_spell_id);
@@ -4870,21 +4870,44 @@ void Spell::EffectForceCast(SpellEffectIndex eff_idx)
 
     // forced cast spells by vehicle on master always unboard the master
     if (m_caster->IsVehicle() && m_caster->GetVehicleInfo()->HasOnBoard(unitTarget) &&
-            m_spellInfo->EffectImplicitTargetA[eff_idx] == TARGET_UNIT_CASTER_MASTER)
+            m_spellInfo->EffectImplicitTargetA[effIndex] == TARGET_UNIT_CASTER_MASTER)
     {
         if (sSpellTemplate.LookupEntry<SpellEntry>(basePoints))
             m_caster->RemoveAurasDueToSpell(basePoints);
     }
 
-    Unit* target = unitTarget;
-    if (spellInfo->EffectImplicitTargetA[0] == TARGET_UNIT_CASTER_VEHICLE)
-        target = nullptr;
+    SpellCastTargets targets;
+
+    switch (m_spellInfo->EffectImplicitTargetA[effIndex])
+    {
+        case TARGET_LOCATION_UNIT_MINION_POSITION: break; // confirmed by 31348 nothing is forwarded
+        default:
+            if (IsSpellRequireTarget(spellInfo))
+                targets.setUnitTarget(unitTarget);
+            break;
+    }
+
+    if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+    {
+        if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        {
+            float x, y, z;
+            m_targets.getDestination(x, y, z);
+            targets.setDestination(x, y, z);
+        }
+        else if (unitTarget)
+        {
+            float x, y, z;
+            unitTarget->GetPosition(x, y, z);
+            targets.setDestination(x, y, z);
+        }
+    }
 
     // spell effect 141 needs to be cast as custom with basePoints
-    if (m_spellInfo->Effect[eff_idx] == SPELL_EFFECT_FORCE_CAST_WITH_VALUE)
-        unitTarget->CastCustomSpell(target, spellInfo, &basePoints, &basePoints, &basePoints, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), m_spellInfo);
+    if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_FORCE_CAST_WITH_VALUE)
+        unitTarget->CastCustomSpell(targets, spellInfo, &basePoints, &basePoints, &basePoints, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), m_spellInfo);
     else
-        unitTarget->CastSpell(target, spellInfo, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), m_spellInfo);
+        unitTarget->CastSpell(targets, spellInfo, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, ObjectGuid(), m_spellInfo);
 }
 
 void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
