@@ -84,6 +84,9 @@ enum InstanceConditionIDs                                   // Suggested values 
 
     // to check vehicles in Ulduar
     INSTANCE_CONDITION_ID_ULDUAR            = 33113,
+
+    // Icecrown citadel
+    INSTANCE_CONDITION_ID_INNER_SPIRE_TELEPORT      = 63101,
 };
 
 enum EncounterFrameTypes                                    // only raid UI specific

@@ -4002,20 +4002,6 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
 
                     return;
                 }
-                case 72202:                                 // Blood Link
-                {
-                    if (unitTarget)
-                        unitTarget->CastSpell(unitTarget, 72195, TRIGGERED_OLD_TRIGGERED);
-
-                    return;
-                }
-                case 72254:                                 // Mark of the Fallen Champion
-                {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_PLAYER && !unitTarget->HasAura(m_spellInfo->CalculateSimpleValue(eff_idx)))
-                        m_caster->CastSpell(unitTarget, m_spellInfo->CalculateSimpleValue(eff_idx), TRIGGERED_OLD_TRIGGERED);
-
-                    return;
-                }
                 case 72261:                                 // Delirious Slash
                 {
                     if (unitTarget)

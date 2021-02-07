@@ -985,6 +985,8 @@ UPDATE creature_template SET ScriptName='npc_gas_cloud_icc' WHERE entry=37562;
 UPDATE creature_template SET ScriptName='npc_growing_ooze_puddle' WHERE entry=37690;
 UPDATE creature_template SET ScriptName='npc_choking_gas_bomb' WHERE entry=38159;
 UPDATE creature_template SET ScriptName='boss_the_lich_king_icc' WHERE entry=36597;
+UPDATE creature_template SET ScriptName='npc_saurfang_gunship' WHERE entry=36939;
+UPDATE creature_template SET ScriptName='npc_muradin_gunship' WHERE entry=36948;
 UPDATE gameobject_template SET ScriptName='go_icc_teleporter' WHERE entry IN (202235,202242,202243,202244,202245,202246);
 INSERT INTO scripted_event_id VALUES
 (23426,'event_gameobject_citadel_valve'),
@@ -6910,41 +6912,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1631032','Your soul will find no redemption here!','16696','1','0','0','0','saurfang SAY_SLAY_2'),
 ('-1631033','I have become...DEATH!','16698','1','0','0','0','saurfang SAY_BERSERK'),
 ('-1631034','I... Am... Released.','16697','1','0','0','0','saurfang SAY_DEATH'),
-('-1631035','Let''s get a move on then! Move ou...','16974','1','0','0','0','bronzebeard SAY_INTRO_ALLY_0'),
-('-1631036','For every Horde soldier that you killed, for every Alliance dog that fell, the Lich King''s armies grew. Even now the Val''kyr work to raise your fallen... As Scourge.','16701','1','0','0','0','saurfang SAY_INTRO_ALLY_1'),
-('-1631037','Things are about to get much worse. Come, taste the power that the Lich King has bestowed upon me!','16702','1','0','0','0','saurfang SAY_INTRO_ALLY_2'),
-('-1631038','A lone orc, against the might of the Alliance?','16970','1','0','0','0','bronzebeard SAY_INTRO_ALLY_3'),
-('-1631039','Charge!','16971','1','0','0','0','bronzebeard SAY_INTRO_ALLY_4'),
-('-1631040','Hahahaha! Dwarves...','16703','1','0','0','0','saurfang SAY_INTRO_ALLY_5'),
-('-1631041','Kor''kron, move out! Champions, watch your backs. The Scourge have been..','17103','1','0','0','0','overlord SAY_INTRO_HORDE_1'),
-('-1631042','Join me, father. Join me and we will crush this world in the name of the Scourge -- for the glory of the Lich King!','16704','1','0','0','0','saurfang SAY_INTRO_HORDE_2'),
-('-1631043','My boy died at the Wrath Gate. I am here only to collect his body.','17097','0','0','0','0','overlord SAY_INTRO_HORDE_3'),
-('-1631044','Stubborn and old. What chance do you have? I am stronger, and more powerful than you ever were.','16705','1','0','0','0','saurfang SAY_INTRO_HORDE_4'),
-('-1631045','We named him Dranosh. It means "Heart of Draenor" in orcish. I would not let the warlocks take him. My boy would be safe, hidden away by the elders of Garadar.','17098','0','0','0','0','overlord SAY_INTRO_HORDE_5'),
-('-1631046','I made a promise to his mother before she died; that I would cross the Dark Portal alone - whether I lived or died, my son would be safe. Untainted...','17099','0','0','0','0','overlord SAY_INTRO_HORDE_6'),
-('-1631047','Today, I fulfill that promise.','17100','0','0','0','0','overlord SAY_INTRO_HORDE_7'),
-('-1631048','High Overlord Saurfang charges!','17104','2','0','0','0','overlord SAY_INTRO_HORDE_8'),
-('-1631049','Pathetic old orc. Come then heroes. Come and face the might of the Scourge!','16706','1','0','0','0','saurfang SAY_INTRO_HORDE_9'),
-('-1631050','%s gasps for air','16975','2','0','0','0','bronzebeard SAY_OUTRO_ALLY_1'),
-('-1631051','That was Saurfang''s boy - the Horde commander at the Wrath Gate. Such a tragic end...','16976','0','0','0','0','bronzebeard SAY_OUTRO_ALLY_2'),
-('-1631052','What in the... There, in the distance!','16977','0','0','0','0','bronzebeard SAY_OUTRO_ALLY_3'),
-('-1631053','Soldiers, fall in! Looks like the Horde are comin'' in to take another shot!','16978','1','0','0','0','bronzebeard SAY_OUTRO_ALLY_4'),
-('-1631054','Don''t force my hand, orc. We can''t let you pass.','16972','0','0','0','0','bronzebeard SAY_OUTRO_ALLY_5'),
-('-1631055','Behind you lies the body of my only son. Nothing will keep me from him.','17094','0','0','0','0','overlord SAY_OUTRO_ALLY_6'),
-('-1631056','He... I can''t do it. Get back on your ship and we''ll spare your life.','16973','0','0','0','0','bronzebeard SAY_OUTRO_ALLY_7'),
-('-1631057','Stand down, Muradin. Let a grieving father pass.','16690','0','0','0','0','varian SAY_OUTRO_ALLY_8'),
-('-1631058','No''ku kil zil''nok ha tar.','17096','0','1','0','0','overlord SAY_OUTRO_ALLY_9'),
-('-1631059','I will not forget this kindess. I thank you, highness.','17095','0','0','0','0','overlord SAY_OUTRO_ALLY_10'),
-('-1631060','I... I was not at the Wrathgate. But the soldiers who survived told me much of what happened. Your son fought with honor. He died a hero''s death. He deserves a hero''s burial.','16691','0','0','0','0','varian SAY_OUTRO_ALLY_11'),
-('-1631061','%s cries.','16651','2','0','0','0','proudmore SAY_OUTRO_ALLY_12'),
-('-1631062','Jaina, why are you crying?','16692','0','0','0','0','varian SAY_OUTRO_ALLY_13'),
-('-1631063','It was nothing, your majesty. Just... I''m proud of my king.','16652','0','0','0','0','proudmore SAY_OUTRO_ALLY_14'),
-('-1631064','Bah! Muradin, secure the deck and prepare our soldiers for an assault on the upper citadel. I''ll send out another regiment from Stormwind.','16693','0','0','0','0','varian SAY_OUTRO_ALLY_15'),
-('-1631065','Right away, yer majesty!','16979','0','0','0','0','bronzebeard SAY_OUTRO_ALLY_16'),
-('-1631066','%s coughs.','17105','2','0','0','0','overlord SAY_OUTRO_HORDE_1'),
-('-1631067','%s weeps over the corpse of his son.','17106','2','0','0','0','overlord SAY_OUTRO_HORDE_2'),
-('-1631068','You will have a proper ceremony in Nagrand next to the pyres of your mother and ancestors.','17101','0','0','0','0','overlord SAY_OUTRO_HORDE_3'),
-('-1631069','Honor, young heroes... no matter how dire the battle... Never forsake it!','17102','0','0','0','0','overlord SAY_OUTRO_HORDE_4'),
+
+-- RE-USE -1631035 TO -1631069
 
 ('-1631070','What? Precious? Noooooooooo!!!','16993','6','0','0','0','rotface SAY_PRECIOUS_DIES'),
 ('-1631071','WEEEEEE!','16986','1','0','0','0','rotface SAY_AGGRO'),
@@ -7636,7 +7605,9 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3631002,'Teleport to the Rampart of Skulls.','GOSSIP_ITEM_TELE_RAMPART_OF_SKULLS'),
 (-3631003,'Teleport to the Deathbringer\'s Rise.','GOSSIP_ITEM_TELE_DEATHBRINGERS_RISE'),
 (-3631004,'Teleport to the Upper Spire.','GOSSIP_ITEM_TELE_UPPER_SPIRE'),
-(-3631005,'Teleport to the Sindragosa\'s Lair.','GOSSIP_ITEM_TELE_SINDRAGOSAS_LAIR');
+(-3631005,'Teleport to the Sindragosa\'s Lair.','GOSSIP_ITEM_TELE_SINDRAGOSAS_LAIR'),
+(-3631006,'My companions are all accounted for, Saurfang. Let\'s go!','GOSSIP_ITEM_GUNSHIP_START_HORDE'),
+(-3631007,'My companions are all accounted for, Muradin. Let\'s go!','GOSSIP_ITEM_GUNSHIP_START_ALLIANCE');
 
 -- -3 649 000 TRIAL OF CRUSADER
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES

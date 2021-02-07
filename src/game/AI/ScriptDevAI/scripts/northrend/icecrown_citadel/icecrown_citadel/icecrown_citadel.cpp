@@ -235,9 +235,6 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
                 pGo->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_DEATHWHISPER_ELEVATOR:
-            pGo->SetInt16Value(GAMEOBJECT_DYNAMIC, 1, -1);
-            if (m_auiEncounter[TYPE_LADY_DEATHWHISPER] == DONE)
-                pGo->SetGoState(GO_STATE_READY);
             break;
         case GO_SAURFANG_DOOR:
             break;
@@ -393,6 +390,17 @@ void instance_icecrown_citadel::OnObjectCreate(GameObject* pGo)
     m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
 }
 
+void instance_icecrown_citadel::OnObjectSpawn(GameObject* pGo)
+{
+    switch (pGo->GetEntry())
+    {
+        case GO_DEATHWHISPER_ELEVATOR:
+            if (m_auiEncounter[TYPE_LADY_DEATHWHISPER] == DONE)
+                pGo->SetGoState(GO_STATE_READY);
+            break;
+    }
+}
+
 void instance_icecrown_citadel::OnCreatureEnterCombat(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
@@ -542,14 +550,31 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             m_auiEncounter[uiType] = uiData;
             if (uiData == DONE)
             {
-                // respawn loot
-                DoRespawnGameObject(m_uiTeam == ALLIANCE ? GO_GUNSHIP_ARMORY_A : GO_GUNSHIP_ARMORY_H, 60 * MINUTE);
+                // enable loot
                 DoToggleGameObjectFlags(m_uiTeam == ALLIANCE ? GO_GUNSHIP_ARMORY_A : GO_GUNSHIP_ARMORY_H, GO_FLAG_NO_INTERACT, false);
 
                 // enable teleporter
                 DoToggleGameObjectFlags(GO_TRANSPORTER_DEATHBRINGER, GO_FLAG_NO_INTERACT, false);
                 if (GameObject* pTransporter = GetSingleGameObjectFromStorage(GO_TRANSPORTER_DEATHBRINGER))
                     pTransporter->SetGoState(GO_STATE_ACTIVE);
+            }
+            else if (uiData == IN_PROGRESS)
+            {
+                // move the ships in position
+                if (m_uiTeam == ALLIANCE)
+                {
+                    if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER_A))))
+                        gunship->SetGoState(GO_STATE_ACTIVE);
+                    if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_ORGRIMS_HAMMER_A))))
+                        gunship->SetGoState(GO_STATE_ACTIVE);
+                }
+                else if (m_uiTeam == HORDE)
+                {
+                    if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER_H))))
+                        gunship->SetGoState(GO_STATE_ACTIVE);
+                    if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_ORGRIMS_HAMMER_H))))
+                        gunship->SetGoState(GO_STATE_ACTIVE);
+                }
             }
             break;
         case TYPE_DEATHBRINGER_SAURFANG:
@@ -798,6 +823,17 @@ bool instance_icecrown_citadel::CheckAchievementCriteriaMeet(uint32 uiCriteriaId
     return false;
 }
 
+bool instance_icecrown_citadel::CheckConditionCriteriaMeet(Player const* source, uint32 instance_condition_id, WorldObject const* conditionSource, uint32 conditionSourceType) const
+{
+    switch (instance_condition_id)
+    {
+        case INSTANCE_CONDITION_ID_INNER_SPIRE_TELEPORT:
+            return GetData(TYPE_DEATHBRINGER_SAURFANG) == DONE;
+    }
+
+    return false;
+}
+
 void instance_icecrown_citadel::Load(const char* strIn)
 {
     if (!strIn)
@@ -847,13 +883,14 @@ void instance_icecrown_citadel::Update(uint32 uiDiff)
 
 void instance_icecrown_citadel::ProcessEventNpcs(Player* pPlayer)
 {
-    if (GetData(TYPE_DEATHBRINGER_SAURFANG) != DONE || GetData(TYPE_GUNSHIP_BATTLE) == DONE)
+    // ToDo: enable this when gunship is implementee
+    //if (GetData(TYPE_GUNSHIP_BATTLE) == DONE)
     {
         // Summon Saurfang mobs
         for (const auto& aEventBeginLocation : aSaurfangLocations)
         {
             pPlayer->SummonCreature(m_uiTeam == HORDE ? aEventBeginLocation.uiEntryHorde : aEventBeginLocation.uiEntryAlliance,
-                aEventBeginLocation.fSpawnX, aEventBeginLocation.fSpawnY, aEventBeginLocation.fSpawnZ, aEventBeginLocation.fSpawnO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS);
+                aEventBeginLocation.fSpawnX, aEventBeginLocation.fSpawnY, aEventBeginLocation.fSpawnZ, aEventBeginLocation.fSpawnO, TEMPSPAWN_DEAD_DESPAWN, 24 * HOUR * IN_MILLISECONDS, true);
         }
 
         // Show portal gameobjects
@@ -887,6 +924,8 @@ void instance_icecrown_citadel::ExecuteChatCommand(ChatHandler* handler, char* a
     else if (val == "continuegunship")
     {
         if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER_A))))
+            gunship->SetGoState(GO_STATE_ACTIVE);
+        if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_ORGRIMS_HAMMER_A))))
             gunship->SetGoState(GO_STATE_ACTIVE);
     }
     else if (val == "lichkingfloor")

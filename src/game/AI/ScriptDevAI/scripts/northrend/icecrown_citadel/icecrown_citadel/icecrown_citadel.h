@@ -46,22 +46,27 @@ enum
     // boss-related and other NPCs
     NPC_COLDFLAME                   = 36672,
 
-    NPC_DEATHWHISPER_SPAWN_STALKER  = 37947,
+    NPC_DEATHWHISPER_SPAWN_STALKER  = 37947,        // Lady Deathwhisper stalkers
     NPC_DEATHWHISPER_CONTROLLER     = 37948,
 
-    NPC_OVERLORD_SAURFANG           = 37187,        // Gunship encounter and Saurfang intro
-    NPC_KORKRON_REAVER              = 36957,
+    NPC_GUNSHIP_SAURFANG            = 36939,        // Gunship npcs
+    NPC_GUNSHIP_MURADIN             = 36948,
+
+    NPC_OVERLORD_SAURFANG           = 37187,        // Saurfang intro / outro
+    NPC_KORKRON_REAVER              = 37920,
     NPC_MURADIN_BRONZEBEARD         = 37200,
     NPC_SKYBREAKER_MARINE           = 37830,
+    // Note: additional to these on the Alliance side there are also the following used: 37879, 37188, 37880
 
     NPC_BLOOD_ORB_CONTROL           = 38008,
     NPC_PUTRICIDES_TRAP             = 38879,        // Handles trap event before Putricide
     NPC_GAS_STALKER                 = 36659,        // Handles the gas in Festergut room
     NPC_MAD_SCIENTIST_STALKER       = 37824,        // Putricide stalkers
     NPC_LANATHEL_INTRO              = 38004,
+
     NPC_VALITHRIA_QUEST             = 38589,
     NPC_VALITHRIA_COMBAT_TRIGGER    = 38752,
-    NPC_MURADIN                     = 36948,        // Gunship Battle's encounter(?)
+
     NPC_TIRION                      = 38995,
     NPC_MENETHIL                    = 38579,
 
@@ -306,6 +311,7 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
         void OnCreatureCreate(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
         void OnCreatureRespawn(Creature* pCreature) override;
+        void OnObjectSpawn(GameObject* pGo) override;
 
         void OnCreatureEnterCombat(Creature* pCreature) override;
         void OnCreatureDeath(Creature* pCreature) override;
@@ -333,6 +339,8 @@ class instance_icecrown_citadel : public ScriptedInstance, private DialogueHelpe
 
         void SetSpecialAchievementCriteria(uint32 uiType, bool bIsMet);
         bool CheckAchievementCriteriaMeet(uint32 uiCriteriaId, Player const* pSource, Unit const* pTarget = nullptr, uint32 uiMiscvalue1 = 0) const override;
+
+        bool CheckConditionCriteriaMeet(Player const* source, uint32 instance_condition_id, WorldObject const* conditionSource, uint32 conditionSourceType) const override;
 
         void Update(const uint32 diff) override;
 

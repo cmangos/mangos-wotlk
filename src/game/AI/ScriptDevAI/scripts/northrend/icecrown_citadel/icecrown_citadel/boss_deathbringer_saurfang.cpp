@@ -16,13 +16,16 @@
 
 /* ScriptData
 SDName: boss_deathbringer_saurfang
-SD%Complete: 90%
-SDComment: Intro and Outro event NYI.
+SD%Complete: 100%
+SDComment:
 SDCategory: Icecrown Citadel
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "icecrown_citadel.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/Scripts/SpellScript.h"
+#include "Spells/SpellAuras.h"
 
 enum
 {
@@ -35,42 +38,6 @@ enum
     SAY_DEATH                   = -1631034,
     EMOTE_FRENZY                = -1631193,
     EMOTE_SCENT                 = -1631194,
-
-    SAY_INTRO_ALLY_0            = -1631035,
-    SAY_INTRO_ALLY_1            = -1631036,
-    SAY_INTRO_ALLY_2            = -1631037,
-    SAY_INTRO_ALLY_3            = -1631038,
-    SAY_INTRO_ALLY_4            = -1631039,
-    SAY_INTRO_ALLY_5            = -1631040,
-    SAY_INTRO_HORDE_1           = -1631041,
-    SAY_INTRO_HORDE_2           = -1631042,
-    SAY_INTRO_HORDE_3           = -1631043,
-    SAY_INTRO_HORDE_4           = -1631044,
-    SAY_INTRO_HORDE_5           = -1631045,
-    SAY_INTRO_HORDE_6           = -1631046,
-    SAY_INTRO_HORDE_7           = -1631047,
-    SAY_INTRO_HORDE_8           = -1631048,
-    SAY_INTRO_HORDE_9           = -1631049,
-    SAY_OUTRO_ALLY_1            = -1631050,
-    SAY_OUTRO_ALLY_2            = -1631051,
-    SAY_OUTRO_ALLY_3            = -1631052,
-    SAY_OUTRO_ALLY_4            = -1631053,
-    SAY_OUTRO_ALLY_5            = -1631054,
-    SAY_OUTRO_ALLY_6            = -1631055,
-    SAY_OUTRO_ALLY_7            = -1631056,
-    SAY_OUTRO_ALLY_8            = -1631057,
-    SAY_OUTRO_ALLY_9            = -1631058,
-    SAY_OUTRO_ALLY_10           = -1631059,
-    SAY_OUTRO_ALLY_11           = -1631060,
-    SAY_OUTRO_ALLY_12           = -1631061,
-    SAY_OUTRO_ALLY_13           = -1631062,
-    SAY_OUTRO_ALLY_14           = -1631063,
-    SAY_OUTRO_ALLY_15           = -1631064,
-    SAY_OUTRO_ALLY_16           = -1631065,
-    SAY_OUTRO_HORDE_1           = -1631066,
-    SAY_OUTRO_HORDE_2           = -1631067,
-    SAY_OUTRO_HORDE_3           = -1631068,
-    SAY_OUTRO_HORDE_4           = -1631069,
 
     // intro event related
     SPELL_GRIP_OF_AGONY         = 70572,
@@ -104,59 +71,76 @@ enum
     // evade / death spells
     SPELL_REMOVE_MARKS          = 72257,
     SPELL_ACHIEVEMENT           = 72928,
+    SPELL_FEIGN_DEATH           = 70628,
 
     // Summoned spells
     SPELL_RESISTANT_SKIN        = 72723,
     SPELL_BLOOD_LINK_BEAST      = 72176,
 
     FACTION_ID_UNDEAD           = 974,
-
-    POINT_ID_INTRO              = 1,
+    FACTION_ID_FRIENDLY         = 35,
 };
 
-static const float fIntroPosition[4] = { -491.30f, 2211.35f, 541.11f, 3.16f};
-
-struct boss_deathbringer_saurfangAI : public ScriptedAI
+enum DeathbringerActions
 {
-    boss_deathbringer_saurfangAI(Creature* pCreature) : ScriptedAI(pCreature)
+    DEATHBRINGER_BERSERK,
+    DEATHBRINGER_FRENZY,
+    DEATHBRINGER_RUNE_OF_BLOOD,
+    DEATHBRINGER_BOILING_BLOOD,
+    DEATHBRINGER_BLOOD_NOVA,
+    DEATHBRINGER_BLOOD_BEAST,
+    DEATHBRINGER_SCENT_OF_BLOOD,
+    DEATHBRINGER_MARK_FALLEN_CHAMPION,
+    DEATHBRINGER_ACTION_MAX,
+    DEATHBRINGER_DEATH
+};
+
+struct boss_deathbringer_saurfangAI : public CombatAI
+{
+    boss_deathbringer_saurfangAI(Creature* creature) : CombatAI(creature, DEATHBRINGER_ACTION_MAX), m_instance(static_cast<instance_icecrown_citadel*>(creature->GetInstanceData()))
     {
-        m_pInstance = (instance_icecrown_citadel*)pCreature->GetInstanceData();
-        m_bIsIntroDone = false;
+        if (m_instance)
+        {
+            m_bIsHeroicMode = m_instance->IsHeroicDifficulty();
+            m_bIs25ManMode = m_instance->Is25ManDifficulty();
+        }
+
+        // common actions
+        AddCombatAction(DEATHBRINGER_BERSERK, uint32(m_bIsHeroicMode ? 6 : 8 * MINUTE * IN_MILLISECONDS));
+        AddCombatAction(DEATHBRINGER_RUNE_OF_BLOOD, 25000u);
+        AddCombatAction(DEATHBRINGER_BOILING_BLOOD, 19000u);
+        AddCombatAction(DEATHBRINGER_BLOOD_NOVA, 20000u);
+        AddCombatAction(DEATHBRINGER_BLOOD_BEAST, 40000u);
+
+        if (m_bIsHeroicMode)
+            AddCombatAction(DEATHBRINGER_SCENT_OF_BLOOD, 47000u);
+
+        AddTimerlessCombatAction(DEATHBRINGER_FRENZY, true);
+        AddTimerlessCombatAction(DEATHBRINGER_MARK_FALLEN_CHAMPION, true);
+
+        AddCustomAction(DEATHBRINGER_DEATH, true, [&]() { HandleDeath(); });
+
+        m_bIsFakingDeath = false;
         Reset();
     }
 
-    instance_icecrown_citadel* m_pInstance;
+    instance_icecrown_citadel* m_instance;
 
-    uint32 m_uiRuneOfBloodTimer;
-    uint32 m_uiBoilingBloodTimer;
-    uint32 m_uiBloodNovaTimer;
-    uint32 m_uiBloodBeastsTimer;
-    uint32 m_uiScentOfBloodTimer;
-    uint32 m_uiBerserkTimer;
     uint8 m_uiAchievSpellCount;
 
-    bool m_bIsFrenzied;
-    bool m_bIsIntroDone;
+    bool m_bIs25ManMode;
+    bool m_bIsHeroicMode;
+    bool m_bIsFakingDeath;
 
     void Reset() override
     {
-        m_uiRuneOfBloodTimer    = 25000;
-        m_uiBoilingBloodTimer   = 19000;
-        m_uiBloodNovaTimer      = 20000;
-        m_uiBloodBeastsTimer    = 40000;
-        m_uiScentOfBloodTimer   = 47000;
-        m_uiBerserkTimer        = 8 * MINUTE * IN_MILLISECONDS;
+        CombatAI::Reset();
 
-        if (m_pInstance && m_pInstance->IsHeroicDifficulty())
-            m_uiBerserkTimer    = 6 * MINUTE * IN_MILLISECONDS;
-
-        m_bIsFrenzied           = false;
-        m_uiAchievSpellCount    = 0;
-
+        m_uiAchievSpellCount = 0;
         m_creature->SetPower(m_creature->GetPowerType(), 0);
     }
 
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
 
@@ -164,209 +148,248 @@ struct boss_deathbringer_saurfangAI : public ScriptedAI
         DoCastSpellIfCan(m_creature, SPELL_MARK_FALLEN_DAMAGE, CAST_TRIGGERED);
         DoCastSpellIfCan(m_creature, SPELL_RUNE_OF_BLOOD_PROC, CAST_TRIGGERED);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, IN_PROGRESS);
+        if (m_instance)
+            m_instance->SetData(TYPE_DEATHBRINGER_SAURFANG, IN_PROGRESS);
     }
 
-    void MoveInLineOfSight(Unit* pWho) override
+    void KilledUnit(Unit* victim) override
     {
-        if (!m_bIsIntroDone && pWho->GetTypeId() == TYPEID_PLAYER && !((Player*) pWho)->IsGameMaster() && m_creature->GetDistance(pWho, false, DIST_CALC_BOUNDING_RADIUS) < 50.0f)
-        {
-            m_creature->GetMotionMaster()->MovePoint(POINT_ID_INTRO, fIntroPosition[0], fIntroPosition[1], fIntroPosition[2]);
-            if (m_pInstance)
-                m_pInstance->DoUseDoorOrButton(GO_SAURFANG_DOOR);
-            m_bIsIntroDone = true;
-        }
-
-        ScriptedAI::MoveInLineOfSight(pWho);
-    }
-
-    void KilledUnit(Unit* pVictim) override
-    {
-        if (pVictim->GetTypeId() != TYPEID_PLAYER)
-            return;
+        CombatAI::KilledUnit(victim);
 
         if (urand(0, 1))
             DoScriptText(urand(0, 1) ? SAY_SLAY_1 : SAY_SLAY_2, m_creature);
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void EnterEvadeMode() override
     {
-        DoScriptText(SAY_DEATH, m_creature);
-        DoCastSpellIfCan(m_creature, SPELL_REMOVE_MARKS, CAST_TRIGGERED);
-        DoCastSpellIfCan(m_creature, SPELL_ACHIEVEMENT, CAST_TRIGGERED);
+        if (m_bIsFakingDeath)
+            return;
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, DONE);
+        CombatAI::EnterEvadeMode();
+    }
+
+    void DamageTaken(Unit* /*pDealer*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
+    {
+        if (m_bIsFakingDeath)
+        {
+            uiDamage = 0;
+            return;
+        }
+
+        if (uiDamage >= m_creature->GetHealth())
+        {
+            uiDamage = 0;
+            m_bIsFakingDeath = true;
+
+            // yell death and change flags
+            DoScriptText(SAY_DEATH, m_creature);
+
+            ClearSelfRoot();
+            m_unit->RemoveAllAurasOnEvade();
+            m_unit->CombatStopWithPets(true);
+
+            DoCastSpellIfCan(m_creature, SPELL_REMOVE_MARKS, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_ACHIEVEMENT, CAST_TRIGGERED);
+            DoCastSpellIfCan(m_creature, SPELL_FEIGN_DEATH, CAST_TRIGGERED);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->SetImmuneToPlayer(true);
+
+            if (m_instance)
+                m_instance->SetData(TYPE_DEATHBRINGER_SAURFANG, DONE);
+
+            // change faction and start outro
+            ResetTimer(DEATHBRINGER_DEATH, 5 * IN_MILLISECONDS);
+
+            // stop combat and movement
+            SetCombatScriptStatus(true);
+            m_creature->SetTarget(nullptr);
+            m_creature->GetMotionMaster()->Clear(false, true);
+            m_creature->GetMotionMaster()->MoveIdle();
+        }
     }
 
     void JustReachedHome() override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_DEATHBRINGER_SAURFANG, FAIL);
+        if (m_instance)
+            m_instance->SetData(TYPE_DEATHBRINGER_SAURFANG, FAIL);
 
         DoCastSpellIfCan(m_creature, SPELL_REMOVE_MARKS, CAST_TRIGGERED);
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PLAYER);
     }
 
-    void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
+    void JustSummoned(Creature* summoned) override
     {
-        if (uiMoveType != POINT_MOTION_TYPE)
-            return;
-
-        if (uiPointId == POINT_ID_INTRO)
-        {
-            if (m_pInstance)
-                m_pInstance->DoUseDoorOrButton(GO_SAURFANG_DOOR);
-
-            // Note: this should be done only after the intro event is finished
-            // ToDo: move this to the proper place after the intro will be implemented
-            // Also the faction needs to be checked if it should be handled in database
-            m_creature->SetFactionTemporary(FACTION_ID_UNDEAD, TEMPFACTION_NONE);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
-            m_creature->SetRespawnCoord(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), m_creature->GetOrientation());
-        }
-    }
-
-    void JustSummoned(Creature* pSummoned) override
-    {
-        pSummoned->CastSpell(pSummoned, SPELL_RESISTANT_SKIN, TRIGGERED_OLD_TRIGGERED);
-        pSummoned->CastSpell(pSummoned, SPELL_BLOOD_LINK_BEAST, TRIGGERED_OLD_TRIGGERED);
+        summoned->CastSpell(summoned, SPELL_RESISTANT_SKIN, TRIGGERED_OLD_TRIGGERED);
+        summoned->CastSpell(summoned, SPELL_BLOOD_LINK_BEAST, TRIGGERED_OLD_TRIGGERED);
 
         // Note: the summoned should be activated only after 2-3 seconds after summon - can be done in eventAI
         if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            pSummoned->AI()->AttackStart(pTarget);
+            summoned->AI()->AttackStart(pTarget);
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void HandleDeath()
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
+        // inform creatures to start outro event
+        SendAIEventAround(AI_EVENT_CUSTOM_EVENTAI_C, m_creature, 0, 30.0f);
 
-        // Mark of the Fallen Champion
-        if (m_creature->GetPower(m_creature->GetPowerType()) == 100)
+        m_creature->SetFactionTemporary(FACTION_ID_FRIENDLY, TEMPFACTION_NONE);
+    }
+
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_MARK_FALLEN_CHAMPION) == CAST_OK)
-            {
-                DoScriptText(SAY_FALLENCHAMPION, m_creature);
-                m_creature->RemoveAurasDueToSpell(SPELL_BLOOD_POWER);
-                m_creature->SetPower(m_creature->GetPowerType(), 0);
-
-                // check for achievement fail
-                ++m_uiAchievSpellCount;
-
-                if (m_pInstance)
-                {
-                    if (m_uiAchievSpellCount == (m_pInstance->Is25ManDifficulty() ? 5 : 3))
-                        m_pInstance->SetSpecialAchievementCriteria(TYPE_ACHIEV_MADE_A_MESS, false);
-                }
-            }
-        }
-
-        // Frenzy (soft enrage)
-        if (!m_bIsFrenzied)
-        {
-            if (m_creature->GetHealthPercent() <= 30.0f)
-            {
-                if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
-                {
-                    DoScriptText(EMOTE_FRENZY, m_creature);
-                    m_bIsFrenzied = true;
-                }
-            }
-        }
-
-        // Berserk (hard enrage)
-        if (m_uiBerserkTimer)
-        {
-            if (m_uiBerserkTimer <= uiDiff)
-            {
+            case DEATHBRINGER_BERSERK:
                 if (DoCastSpellIfCan(m_creature, SPELL_BERSERK) == CAST_OK)
                 {
                     DoScriptText(SAY_BERSERK, m_creature);
-                    m_uiBerserkTimer = 0;
+                    DisableCombatAction(action);
                 }
-            }
-            else
-                m_uiBerserkTimer -= uiDiff;
-        }
+                break;
+            case DEATHBRINGER_FRENZY:
+                if (m_creature->GetHealthPercent() <= 30.0f)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+                    {
+                        DoScriptText(EMOTE_FRENZY, m_creature);
+                        DisableCombatAction(action);
+                    }
+                }
+                break;
+            case DEATHBRINGER_RUNE_OF_BLOOD:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RUNE_OF_BLOOD) == CAST_OK)
+                    ResetCombatAction(action, 25000);
+                break;
+            case DEATHBRINGER_BOILING_BLOOD:
+                if (DoCastSpellIfCan(m_creature, SPELL_BOILING_BLOOD) == CAST_OK)
+                    ResetCombatAction(action, 15000);
+                break;
+            case DEATHBRINGER_BLOOD_NOVA:
+                if (DoCastSpellIfCan(m_creature, SPELL_BLOOD_NOVA) == CAST_OK)
+                    ResetCombatAction(action, 20000);
+                break;
+            case DEATHBRINGER_BLOOD_BEAST:
+                DoScriptText(SAY_BLOODBEASTS, m_creature);
 
-        // Rune of Blood
-        if (m_uiRuneOfBloodTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_RUNE_OF_BLOOD) == CAST_OK)
-                m_uiRuneOfBloodTimer = 25000;
-        }
-        else
-            m_uiRuneOfBloodTimer -= uiDiff;
+                DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_1, CAST_TRIGGERED);
+                DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_2, CAST_TRIGGERED);
 
-        // Boiling Blood
-        if (m_uiBoilingBloodTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BOILING_BLOOD) == CAST_OK)
-                m_uiBoilingBloodTimer = 15000;
-        }
-        else
-            m_uiBoilingBloodTimer -= uiDiff;
+                if (m_bIs25ManMode)
+                {
+                    DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_3, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_4, CAST_TRIGGERED);
+                    DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_5, CAST_TRIGGERED);
+                }
 
-        // Blood Nova
-        if (m_uiBloodNovaTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_BLOOD_NOVA) == CAST_OK)
-                m_uiBloodNovaTimer = 20000;
-        }
-        else
-            m_uiBloodNovaTimer -= uiDiff;
+                ResetCombatAction(action, 40000);
 
-        // Call Blood Beasts
-        if (m_uiBloodBeastsTimer < uiDiff)
-        {
-            DoScriptText(SAY_BLOODBEASTS, m_creature);
-
-            DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_1, CAST_TRIGGERED);
-            DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_2, CAST_TRIGGERED);
-
-            if (m_pInstance && m_pInstance->Is25ManDifficulty())
-            {
-                DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_3, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_4, CAST_TRIGGERED);
-                DoCastSpellIfCan(m_creature, SPELL_CALL_BLOOD_BEAST_5, CAST_TRIGGERED);
-            }
-
-            m_uiBloodBeastsTimer = 40000;
-            m_uiScentOfBloodTimer = 7000;
-        }
-        else
-            m_uiBloodBeastsTimer -= uiDiff;
-
-        // Scent of Blood
-        if (m_pInstance && m_pInstance->IsHeroicDifficulty())
-        {
-            if (m_uiScentOfBloodTimer < uiDiff)
-            {
+                if (m_bIsHeroicMode)
+                    ResetCombatAction(DEATHBRINGER_SCENT_OF_BLOOD, 7000);
+                break;
+            case DEATHBRINGER_SCENT_OF_BLOOD:
                 if (DoCastSpellIfCan(m_creature, SPELL_SCENT_OF_BLOOD) == CAST_OK)
                 {
                     DoScriptText(EMOTE_SCENT, m_creature);
-                    m_uiScentOfBloodTimer = 40000;
+                    ResetCombatAction(action, 40000);
                 }
-            }
-            else
-                m_uiScentOfBloodTimer -= uiDiff;
-        }
+                break;
+            case DEATHBRINGER_MARK_FALLEN_CHAMPION:
+                if (m_creature->GetPower(m_creature->GetPowerType()) == 100)
+                {
+                    if (DoCastSpellIfCan(m_creature, SPELL_MARK_FALLEN_CHAMPION) == CAST_OK)
+                    {
+                        DoScriptText(SAY_FALLENCHAMPION, m_creature);
+                        m_creature->RemoveAurasDueToSpell(SPELL_BLOOD_POWER);
+                        m_creature->SetPower(m_creature->GetPowerType(), 0);
 
-        DoMeleeAttackIfReady();
+                        // check for achievement fail
+                        ++m_uiAchievSpellCount;
+
+                        if (m_instance)
+                        {
+                            if (m_uiAchievSpellCount == (m_bIs25ManMode ? 5 : 3))
+                                m_instance->SetSpecialAchievementCriteria(TYPE_ACHIEV_MADE_A_MESS, false);
+                        }
+                    }
+                }
+                break;
+        }
     }
 };
 
-UnitAI* GetAI_boss_deathbringer_saurfang(Creature* pCreature)
+/*######
+## spell_grip_of_agony_aura - 70572
+######*/
+
+struct spell_grip_of_agony_aura : public AuraScript
 {
-    return new boss_deathbringer_saurfangAI(pCreature);
-}
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target)
+            return;
+
+        target->SetLevitate(apply);
+        target->GetMotionMaster()->Clear(false, true);
+
+        // on apply move up with 10
+        if (apply)
+            target->GetMotionMaster()->MovePoint(0, target->GetPositionX(), target->GetPositionY(), target->GetPositionZ() + 10);
+        // on remove fall to the ground
+        else
+            target->GetMotionMaster()->MoveFall();
+    }
+};
+
+/*######
+## spell_mark_fallen_champion - 72254
+######*/
+
+struct spell_mark_fallen_champion : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* caster = spell->GetAffectiveCaster();
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !caster || !target->IsPlayer())
+            return;
+
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+
+        if (!target->HasAura(spellId))
+            caster->CastSpell(target, spellId, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_blood_link - 72202
+######*/
+
+struct spell_blood_link : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target)
+            return;
+
+        target->CastSpell(target, 72195, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_boss_deathbringer_saurfang()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_deathbringer_saurfang";
-    pNewScript->GetAI = &GetAI_boss_deathbringer_saurfang;
+    pNewScript->GetAI = &GetNewAIInstance<boss_deathbringer_saurfangAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<spell_grip_of_agony_aura>("spell_grip_of_agony_aura");
+    RegisterSpellScript<spell_mark_fallen_champion>("spell_mark_fallen_champion");
+    RegisterSpellScript<spell_blood_link>("spell_blood_link");
 }
