@@ -37,29 +37,25 @@ enum
     TEXT_ID_START_ALLIANCE          = 15101,
 
     // spells
-    SPELL_FRIENDLY_BOSS_DAMAGE_MOD  = 70339,
-    SPELL_CHECK_FOR_PLAYERS         = 70332,
-    SPELL_TELEPORT_PLAYERS_VICTORY  = 72340,
+    // SPELL_FRIENDLY_BOSS_DAMAGE_MOD  = 70339,         // handled in EAI
     SPELL_TELEPORT_PLAYERS_RESET_A  = 70446,
     SPELL_TELEPORT_PLAYERS_RESET_H  = 71284,
     SPELL_GUNSHIP_FALL_TELEPORT     = 67335,
-    SPELL_AWARD_REPUTATION          = 73845,
-    SPELL_ACHIEVEMENT_CHECK         = 72959,
-    SPELL_LOCK_PLAYERS_TAP_CHEST    = 72347,
-    SPELL_SKYBREAKER_DECK           = 70120,
-    SPELL_ORGRIMS_HAMMER_DECK       = 70121,
+    SPELL_LOCK_PLAYERS_TAP_CHEST    = 72347,            // targets creature 38569
+    // SPELL_SKYBREAKER_DECK        = 70120,            // applied by creature 37519 on the Alliance ship; handled in creature_addon
+    // SPELL_ORGRIMS_HAMMER_DECK    = 70121,            // applied by creature 37519 on the Horde ship; handled in creature_addon
     SPELL_HATE_TO_ZERO              = 63984,
 
-    SPELL_MELEE_TARGETING_A         = 70219,
-    SPELL_MELEE_TARGETING_H         = 70294,
+    SPELL_MELEE_TARGETING_A         = 70219,            // cast by horde soldiers: 36957, 36960 to target hostile players
+    SPELL_MELEE_TARGETING_H         = 70294,            // cast by alliance soldiers 36950 and 36961 to target hostile players
 
     SPELL_EXPLOSION_FAIL            = 72134,
-    SPELL_EXPLOSION_VICTORY         = 72137,
+    SPELL_EXPLOSION_VICTORY         = 72137,            // cast by creature 37547 on enemy ship
 
-    SPELL_TELEPORT_ENEMY_SHIP       = 70104,            // cast by enemy combatants when teleporting to ship
+    SPELL_TELEPORT_ENEMY_SHIP       = 70104,            // cast by enemy combatants when teleporting to ship; soldiers are spawned on enemy ship and then teleport to player ship with this spell
     SPELL_BERSERK                   = 72525,
 
-    SPELL_BATTLE_EXPERIENCE         = 71201,            // related to 71188, 71193, 71195
+    SPELL_BATTLE_EXPERIENCE         = 71201,            // cast by enemy soldiers; related to 71188, 71193, 71195
 };
 
 bool GossipHello_npc_saurfang_gunship(Player* pPlayer, Creature* pCreature)
@@ -131,7 +127,7 @@ bool GossipSelect_npc_muradin_gunship(Player* pPlayer, Creature* pCreature, uint
 }
 
 /*######
-## spell_incinerating_blast - 70175
+## spell_incinerating_blast - 69402, 70175
 ######*/
 
 struct spell_incinerating_blast : public SpellScript

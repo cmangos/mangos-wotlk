@@ -76,6 +76,12 @@ enum
     SAY_STINKY_DIES                 = -1631081,
     // Rotface
     SAY_PRECIOUS_DIES               = -1631070,
+
+    // Gunship related spells
+    SPELL_AWARD_REPUTATION          = 73845,
+    SPELL_GUNSHIP_ACHIEVEMENT       = 72959,
+    SPELL_TELEPORT_PLAYERS_VICTORY  = 72340,
+    SPELL_CHECK_FOR_PLAYERS         = 70332,                // check for aura 70120 or 70121 on player; if not found cast 67335
 };
 
 static const DialogueEntry aCitadelDialogue[] =
@@ -276,6 +282,9 @@ void instance_icecrown_citadel::OnCreatureRespawn(Creature* pCreature)
         // following have passive behavior movement
         case NPC_COLDFLAME:
         case NPC_DEATHWHISPER_SPAWN_STALKER:
+        case NPC_FROST_FREEZE_TRAP:
+        case NPC_SKYBREAKER:
+        case NPC_ORGRIMS_HAMMER:
             pCreature->AI()->SetReactState(REACT_PASSIVE);
             pCreature->SetCanEnterCombat(false);
             break;
@@ -541,6 +550,12 @@ void instance_icecrown_citadel::OnCreatureDeath(Creature* pCreature)
         case NPC_SPIRE_FROSTWYRM:
             SetData(TYPE_SPIRE_FROSTWYRM, DONE);
             break;
+        case NPC_SKYBREAKER:
+            SetData(TYPE_GUNSHIP_BATTLE, m_uiTeam == HORDE ? DONE : FAIL);
+            break;
+        case NPC_ORGRIMS_HAMMER:
+            SetData(TYPE_GUNSHIP_BATTLE, m_uiTeam == ALLIANCE ? DONE : FAIL);
+            break;
     }
 }
 
@@ -616,15 +631,50 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                 if (GameObject* pTransporter = GetSingleGameObjectFromStorage(GO_TRANSPORTER_DEATHBRINGER))
                     pTransporter->SetGoState(GO_STATE_ACTIVE);
 
-                // remove frames
+                // remove frames and cast spells
                 if (Creature* pShip = GetSingleCreatureFromStorage(NPC_SKYBREAKER))
+                {
                     SendEncounterFrame(ENCOUNTER_FRAME_DISENGAGE, pShip->GetObjectGuid());
+
+                    // cast spells on opposite team
+                    if (m_uiTeam == HORDE)
+                    {
+                        pShip->CastSpell(pShip, SPELL_AWARD_REPUTATION, TRIGGERED_OLD_TRIGGERED);
+                        pShip->CastSpell(pShip, SPELL_GUNSHIP_ACHIEVEMENT, TRIGGERED_OLD_TRIGGERED);
+                        pShip->CastSpell(pShip, SPELL_TELEPORT_PLAYERS_VICTORY, TRIGGERED_OLD_TRIGGERED);
+                    }
+                }
                 if (Creature* pShip = GetSingleCreatureFromStorage(NPC_ORGRIMS_HAMMER))
+                {
                     SendEncounterFrame(ENCOUNTER_FRAME_DISENGAGE, pShip->GetObjectGuid());
+
+                    // cast spells on opposite team
+                    if (m_uiTeam == ALLIANCE)
+                    {
+                        pShip->CastSpell(pShip, SPELL_AWARD_REPUTATION, TRIGGERED_OLD_TRIGGERED);
+                        pShip->CastSpell(pShip, SPELL_GUNSHIP_ACHIEVEMENT, TRIGGERED_OLD_TRIGGERED);
+                        pShip->CastSpell(pShip, SPELL_TELEPORT_PLAYERS_VICTORY, TRIGGERED_OLD_TRIGGERED);
+                    }
+                }
+
+                // stop music
+                if (Creature* pSource = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_GUNSHIP_MURADIN : NPC_GUNSHIP_SAURFANG))
+                {
+                    DoScriptText(m_uiTeam == ALLIANCE ? SAY_GUNSHIP_ALLY_WIN : SAY_GUNSHIP_HORDE_WIN, pSource);
+                    pSource->PlayMusic(0);
+
+                    // ToDo: start WP movement on the deck and prepare to summon the entry NPCs for Saurfang
+                }
+
+                // move the actual gunships to next position
+                if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(m_uiTeam == ALLIANCE ? GO_ORGRIMS_HAMMER_A : GO_ORGRIMS_HAMMER_H))))
+                    gunship->SetGoState(GO_STATE_ACTIVE);
+                if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(m_uiTeam == ALLIANCE ? GO_THE_SKYBREAKER_A : GO_THE_SKYBREAKER_H))))
+                    gunship->SetGoState(GO_STATE_ACTIVE);
             }
             else if (uiData == SPECIAL)
             {
-                // move the ships in position
+                // move the ships in combat position
                 if (m_uiTeam == ALLIANCE)
                 {
                     if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER_A))))
@@ -644,9 +694,25 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
             {
                 // start encounters
                 if (Creature* pShip = GetSingleCreatureFromStorage(NPC_SKYBREAKER))
+                {
                     SendEncounterFrame(ENCOUNTER_FRAME_ENGAGE, pShip->GetObjectGuid());
+
+                    pShip->SetHealth(pShip->GetMaxHealth());
+
+                    // check for players during Alliance encounter
+                    if (m_uiTeam == ALLIANCE)
+                        pShip->CastSpell(pShip, SPELL_CHECK_FOR_PLAYERS, TRIGGERED_OLD_TRIGGERED);
+                }
                 if (Creature* pShip = GetSingleCreatureFromStorage(NPC_ORGRIMS_HAMMER))
+                {
                     SendEncounterFrame(ENCOUNTER_FRAME_ENGAGE, pShip->GetObjectGuid());
+
+                    pShip->SetHealth(pShip->GetMaxHealth());
+
+                    // check for players during Horde encounter
+                    if (m_uiTeam == HORDE)
+                        pShip->CastSpell(pShip, SPELL_CHECK_FOR_PLAYERS, TRIGGERED_OLD_TRIGGERED);
+                }
 
                 // play music
                 if (Creature* pSource = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_GUNSHIP_MURADIN : NPC_GUNSHIP_SAURFANG))
@@ -661,6 +727,12 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
                     SendEncounterFrame(ENCOUNTER_FRAME_DISENGAGE, pShip->GetObjectGuid());
                 if (Creature* pShip = GetSingleCreatureFromStorage(NPC_ORGRIMS_HAMMER))
                     SendEncounterFrame(ENCOUNTER_FRAME_DISENGAGE, pShip->GetObjectGuid());
+
+                // stop music
+                if (Creature* pSource = GetSingleCreatureFromStorage(m_uiTeam == ALLIANCE ? NPC_GUNSHIP_MURADIN : NPC_GUNSHIP_SAURFANG))
+                    pSource->PlayMusic(0);
+
+                // ToDo: handle fail event
             }
             break;
         case TYPE_DEATHBRINGER_SAURFANG:

@@ -383,6 +383,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (69147,'spell_coldflame'),
 (69232,'spell_icy_blast'),
 (69347,'spell_necromantic_power'),
+(69402,'spell_incinerating_blast'),
 (69413,'spell_strangulating_aura'),
 (69516,'spell_summon_undead'),
 (69828,'spell_halls_of_reflection_clone'),

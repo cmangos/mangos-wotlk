@@ -63,8 +63,8 @@ enum
     NPC_SKYBREAKER                  = 37540,        // actual ships that will take the damage
     NPC_ORGRIMS_HAMMER              = 37215,
     NPC_GUNSHIP_HULL                = 37547,
-    NPC_TELEPORT_PORTAL             = 37227,
-    NPC_TELEPORT_EXIT               = 37488,
+    NPC_TELEPORT_PORTAL             = 37227,        // spawned on enemy ship as a source to teleport soldiers
+    NPC_TELEPORT_EXIT               = 37488,        // spawned on player ship as a target to teleport soldiers
 
     NPC_SKYBREAKER_SORCERER         = 37116,        // Gunship soldiers
     NPC_SKYBREAKER_RIFLEMAN         = 36969,
@@ -82,6 +82,8 @@ enum
     NPC_MURADIN_BRONZEBEARD         = 37200,
     NPC_SKYBREAKER_MARINE_RISE      = 37830,
     // Note: additional to these on the Alliance side there are also the following used: 37879, 37188, 37880
+
+    NPC_FROST_FREEZE_TRAP           = 37744,
 
     NPC_BLOOD_ORB_CONTROL           = 38008,
     NPC_PUTRICIDES_TRAP             = 38879,        // Handles trap event before Putricide
