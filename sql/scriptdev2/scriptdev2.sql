@@ -6922,7 +6922,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1631041','This is not your battle, dwarf. Back down or we will be forced to destroy your ship.','17093','1','0','0','0','saurfang SAY_GUNSHIP_START_7'),
 ('-1631042','Not me battle? I dunnae who ye think ye are, mister, but I got a score to settle with Arthas and yer not gettin\' in me way! FIRE ALL GUNS! FIRE! FIRE!','16968','1','0','0','0','muradin SAY_GUNSHIP_START_8'),
 ('-1631043','Reavers, Sergeants, attack!','17081','1','0','0','0','saurfang SAY_SUMMON_SOLDIERS'),
-('-1631044','We\'re taking hull damage, get a battle-mage out here to shut down those cannons!','17093','1','0','0','0','saurfang SAY_SUMMON_MAGES'),
+('-1631044','We\'re taking hull damage, get a battle-mage out here to shut down those cannons!','17082','1','0','0','0','saurfang SAY_SUMMON_MAGES'),
 ('-1631045','Axethrowers, hurl faster!','17079','1','0','0','0','saurfang SAY_RANDOM_ATTACK_1'),
 ('-1631046','Rocketeers, reload!','0','1','0','0','0','saurfang SAY_RANDOM_ATTACK_2'),
 ('-1631047','Don\'t say I didn\'t warn ya, scoundrels! Onward, brothers and sisters!','16959','1','0','0','0','muradin SAY_WIN'),
