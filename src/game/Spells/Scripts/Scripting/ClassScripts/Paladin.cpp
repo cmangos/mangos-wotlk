@@ -93,6 +93,33 @@ struct spell_judgement : public SpellScript
 
         if (caster->HasAura(37188)) // improved judgement
             caster->CastSpell(nullptr, 43838, TRIGGERED_OLD_TRIGGERED);
+
+        if (caster->HasAura(40470)) // spell_paladin_tier_6_trinket
+            if (roll_chance_f(50.f))
+                caster->CastSpell(unitTarget, 40472, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct spell_paladin_tier_6_trinket : public AuraScript
+{
+    SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
+    {
+        if (!procData.procSpell)
+            return SPELL_AURA_PROC_FAILED;
+
+        float chance;
+
+        // Flash of light/Holy light
+        if (procData.procSpell->SpellFamilyFlags & uint64(0x00000000C0000000))
+        {
+            procData.triggeredSpellId = 40471;
+            chance = 15.0f;
+        }
+
+        if (!roll_chance_f(chance))
+            return SPELL_AURA_PROC_FAILED;
+
+        return SPELL_AURA_PROC_OK;
     }
 };
 
@@ -158,4 +185,5 @@ void LoadPaladinScripts()
     RegisterSpellScript<spell_judgement>("spell_judgement");
     RegisterSpellScript<RighteousDefense>("spell_righteous_defense");
     RegisterAuraScript<SealOfTheCrusader>("spell_seal_of_the_crusader");
+    RegisterAuraScript<spell_paladin_tier_6_trinket>("spell_paladin_tier_6_trinket");
 }
