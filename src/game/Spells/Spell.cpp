@@ -9069,7 +9069,7 @@ SpellCastResult Spell::OnCheckCast(bool strict)
                 if (target.GetEntry() != 23111)
                     return SPELL_FAILED_BAD_TARGETS;
             break;
-        case 40472: // Booterang -  Must have aura Defiant And Enraged or Lazy and Good for Nothing
+        case 40742: // Booterang -  Must have aura Defiant And Enraged or Lazy and Good for Nothing
         {
             Unit* target = m_targets.getUnitTarget();
             if (!target || (!target->HasAura(40732) && !target->HasAura(40735)))
