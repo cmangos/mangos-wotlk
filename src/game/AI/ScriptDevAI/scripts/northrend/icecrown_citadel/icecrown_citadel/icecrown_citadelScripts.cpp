@@ -54,7 +54,7 @@ enum TeleporterGossipItems
 
 bool GossipHello_go_icc_teleporter(Player* pPlayer, GameObject* pGo)
 {
-    instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pPlayer->GetInstanceData();
+    instance_icecrown_citadel* pInstance = static_cast<instance_icecrown_citadel*>(pPlayer->GetInstanceData());
     if (!pInstance)
         return true;
 
@@ -117,27 +117,27 @@ bool GossipSelect_go_icc_teleporter(Player* pPlayer, GameObject* pGo, uint32 uiS
     {
         // Lights Hammer
         case GOSSIP_ACTION_INFO_DEF:
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_LIGHTS_HAMMER, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pGo->GetObjectGuid());
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_LIGHTS_HAMMER, TRIGGERED_OLD_TRIGGERED);
             break;
         // Oratory Damned
         case GOSSIP_ACTION_INFO_DEF + 1:
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_ORATORY_DAMNED, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pGo->GetObjectGuid());
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_ORATORY_DAMNED, TRIGGERED_OLD_TRIGGERED);
             break;
         // Rampart of Skulls
         case GOSSIP_ACTION_INFO_DEF + 2:
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_RAMPART_OF_SKULLS, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pGo->GetObjectGuid());
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_RAMPART_OF_SKULLS, TRIGGERED_OLD_TRIGGERED);
             break;
         // Deathbringer's Rise
         case GOSSIP_ACTION_INFO_DEF + 3:
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_DEATHBRINGERS_RISE, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pGo->GetObjectGuid());
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_DEATHBRINGERS_RISE, TRIGGERED_OLD_TRIGGERED);
             break;
         // Upper Spire
         case GOSSIP_ACTION_INFO_DEF + 4:
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_UPPER_SPIRE, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pGo->GetObjectGuid());
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_UPPER_SPIRE, TRIGGERED_OLD_TRIGGERED);
             break;
         // Sindragosa's Lair
         case GOSSIP_ACTION_INFO_DEF + 5:
-            pPlayer->CastSpell(pPlayer, SPELL_TELE_SINDRAGOSAS_LAIR, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, pGo->GetObjectGuid());
+            pGo->CastSpell(pPlayer, pPlayer, SPELL_TELE_SINDRAGOSAS_LAIR, TRIGGERED_OLD_TRIGGERED);
             break;
         default:
             return true;
@@ -161,7 +161,7 @@ bool AreaTrigger_at_frozen_throne_tele(Player* pPlayer, AreaTriggerEntry const* 
     if (pPlayer->IsInCombat())
         return false;
 
-    instance_icecrown_citadel* pInstance = (instance_icecrown_citadel*)pPlayer->GetInstanceData();
+    instance_icecrown_citadel* pInstance = static_cast<instance_icecrown_citadel*>(pPlayer->GetInstanceData());
     if (!pInstance)
         return false;
 
@@ -198,14 +198,14 @@ bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
         CreatureList lKeepersInRange;
         GetCreatureListWithEntryInGrid(lKeepersInRange, pPlayer, NPC_NERUBAR_BROODKEEPER, 150.0f);
 
-        for (CreatureList::const_iterator itr = lKeepersInRange.begin(); itr != lKeepersInRange.end(); ++itr)
+        for (const auto& creature : lKeepersInRange)
         {
-            if ((*itr)->GetPositionZ() >= 75.0f && (*itr)->GetPositionZ() < 82.0f)
+            if (creature->GetPositionZ() >= 75.0f && creature->GetPositionZ() < 82.0f)
             {
-                (*itr)->CastSpell((*itr), SPELL_WEB_BEAM, TRIGGERED_OLD_TRIGGERED);
-                (*itr)->SetWalk(false);
-                (*itr)->GetMotionMaster()->MoveWaypoint();
-                (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                creature->CastSpell(creature, SPELL_WEB_BEAM, TRIGGERED_OLD_TRIGGERED);
+                creature->SetWalk(false);
+                creature->GetMotionMaster()->MoveWaypoint();
+                creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             }
         }
     }
@@ -215,14 +215,14 @@ bool AreaTrigger_at_lights_hammer(Player* pPlayer, AreaTriggerEntry const* pAt)
         CreatureList lKeepersInRange;
         GetCreatureListWithEntryInGrid(lKeepersInRange, pPlayer, NPC_NERUBAR_BROODKEEPER, 150.0f);
 
-        for (CreatureList::const_iterator itr = lKeepersInRange.begin(); itr != lKeepersInRange.end(); ++itr)
+        for (const auto& creature : lKeepersInRange)
         {
-            if ((*itr)->GetPositionZ() >= 85.0f)
+            if (creature->GetPositionZ() >= 85.0f)
             {
-                (*itr)->CastSpell((*itr), SPELL_WEB_BEAM, TRIGGERED_OLD_TRIGGERED);
-                (*itr)->SetWalk(false);
-                (*itr)->GetMotionMaster()->MoveWaypoint();
-                (*itr)->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
+                creature->CastSpell(creature, SPELL_WEB_BEAM, TRIGGERED_OLD_TRIGGERED);
+                creature->SetWalk(false);
+                creature->GetMotionMaster()->MoveWaypoint();
+                creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_IMMUNE_TO_PLAYER);
             }
         }
     }
