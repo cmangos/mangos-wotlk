@@ -11443,69 +11443,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
             }
             break;
         }
-        case SPELLFAMILY_PALADIN:
-        {
-            // Judgement (seal trigger)
-            if (m_spellInfo->Category == SPELLCATEGORY_JUDGEMENT)
-            {
-                if (!unitTarget || !unitTarget->IsAlive())
-                    return;
-
-                uint32 spellId1;
-                uint32 spellId2 = 0;
-
-                // Judgement self add switch
-                switch (m_spellInfo->Id)
-                {
-                    case 53407: spellId1 = 20184; break;    // Judgement of Justice
-                    case 20271:                             // Judgement of Light
-                    case 57774: spellId1 = 20185; break;    // Judgement of Light
-                    case 53408: spellId1 = 20186; break;    // Judgement of Wisdom
-                    default:
-                        sLog.outError("Unsupported Judgement (seal trigger) spell (Id: %u) in Spell::EffectScriptEffect", m_spellInfo->Id);
-                        return;
-                }
-
-                // offensive seals have aura dummy in 2 effect
-                Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-                for (auto m_dummyAura : m_dummyAuras)
-                {
-                    // search seal (offensive seals have judgement's aura dummy spell id in 2 effect
-                    if (m_dummyAura->GetEffIndex() != EFFECT_INDEX_2 || !IsSealSpell(m_dummyAura->GetSpellProto()))
-                        continue;
-                    spellId2 = m_dummyAura->GetModifier()->m_amount;
-                    SpellEntry const* judge = sSpellTemplate.LookupEntry<SpellEntry>(spellId2);
-                    if (!judge)
-                        continue;
-                    break;
-                }
-
-                // if there were no offensive seals than there is seal with proc trigger aura
-                if (!spellId2)
-                {
-                    Unit::AuraList const& procTriggerAuras = m_caster->GetAurasByType(SPELL_AURA_PROC_TRIGGER_SPELL);
-                    for (auto procTriggerAura : procTriggerAuras)
-                    {
-                        if (procTriggerAura->GetEffIndex() != EFFECT_INDEX_0 || !IsSealSpell(procTriggerAura->GetSpellProto()))
-                            continue;
-                        spellId2 = 54158;
-                        break;
-                    }
-                }
-
-                if (spellId1)
-                    m_caster->CastSpell(unitTarget, spellId1, TRIGGERED_OLD_TRIGGERED);
-
-                if (spellId2)
-                    m_caster->CastSpell(unitTarget, spellId2, TRIGGERED_OLD_TRIGGERED);
-
-                if (m_caster->HasAura(37188)) // improved judgement
-                    m_caster->CastSpell(nullptr, 43838, TRIGGERED_OLD_TRIGGERED);
-
-                return;
-            }
-            break;
-        }
         case SPELLFAMILY_POTION:
         {
             switch (m_spellInfo->Id)
