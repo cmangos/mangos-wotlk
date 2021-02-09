@@ -185,8 +185,8 @@ struct boss_deathbringer_saurfangAI : public CombatAI
             DoScriptText(SAY_DEATH, m_creature);
 
             ClearSelfRoot();
-            m_unit->RemoveAllAurasOnEvade();
-            m_unit->CombatStopWithPets(true);
+            m_creature->RemoveAllAurasOnEvade();
+            m_creature->CombatStopWithPets(true);
 
             DoCastSpellIfCan(m_creature, SPELL_REMOVE_MARKS, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_ACHIEVEMENT, CAST_TRIGGERED);
