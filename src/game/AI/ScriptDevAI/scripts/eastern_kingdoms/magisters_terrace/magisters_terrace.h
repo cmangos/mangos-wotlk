@@ -32,6 +32,7 @@ enum
     NPC_GARAXXAS                = 24555,
     NPC_APOKO                   = 24553,
     NPC_ZELFAN                  = 24556,
+    NPC_SLIVER                  = 24552,
 
     GO_VEXALLUS_DOOR            = 187896,
     GO_SELIN_DOOR               = 187979,                   // SunwellRaid Gate 02

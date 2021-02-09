@@ -16,8 +16,8 @@
 
 /* ScriptData
 SDName: Boss_Priestess_Delrissa
-SD%Complete: 90
-SDComment: Script handles Delrissa and her companions AI. They need special PvP-like behavior. Timers need adjustments
+SD%Complete: 100
+SDComment:
 SDCategory: Magister's Terrace
 EndScriptData */
 
@@ -507,20 +507,23 @@ struct npc_ellrys_duskhallowAI : public priestess_companion_commonAI
         AddCombatAction(ELLRYS_DEATH_COIL, 8000, 16000);
         SetRangedMode(true, 25.f, TYPE_PROXIMITY);
         AddMainSpell(m_isRegularMode ? SPELL_SHADOW_BOLT : SPELL_SHADOW_BOLT_H);
-        JustReachedHome();
+    }
+
+    GuidVector m_spawns;
+
+    void JustRespawned() override
+    {
+        priestess_companion_commonAI::JustRespawned();
+        DoCastSpellIfCan(nullptr, SPELL_SUMMON_IMP);
     }
 
     void JustReachedHome() override
     {
-        priestess_companion_commonAI::Reset();
-
-        // Check if the pet was killed
-        DespawnGuids(m_spawns);
-        //if (!GetClosestCreatureWithEntry(m_creature, NPC_FIZZLE, 50.0f, true)) // does not work due to spellsummoned
+        priestess_companion_commonAI::JustReachedHome();
+        Pet* imp = m_creature->FindGuardianWithEntry(NPC_FIZZLE);
+        if (!imp || !imp->IsAlive())
             DoCastSpellIfCan(nullptr, SPELL_SUMMON_IMP);
     }
-
-    GuidVector m_spawns;
 
     void JustSummoned(Creature* summoned) override
     {
@@ -823,8 +826,6 @@ enum Garaxxas
     SPELL_MULTI_SHOT_H          = 44285,
     SPELL_WING_CLIP             = 44286,
     SPELL_FREEZING_TRAP         = 44136,
-
-    NPC_SLIVER                  = 24552
 };
 
 /*######
@@ -864,7 +865,8 @@ struct npc_garaxxasAI : public priestess_companion_commonAI
         priestess_companion_commonAI::Reset();
 
         // Check if the pet was killed
-        if (!GetClosestCreatureWithEntry(m_creature, NPC_SLIVER, 50.0f, true))
+        Creature* sliver = m_instance->GetSingleCreatureFromStorage(NPC_SLIVER);
+        if (!sliver || !sliver->IsAlive())
             m_creature->SummonCreature(NPC_SLIVER, 0, 0, 0, 0, TEMPSPAWN_CORPSE_DESPAWN, 0);
     }
 

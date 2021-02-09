@@ -59,6 +59,7 @@ void instance_magisters_terrace::OnCreatureCreate(Creature* pCreature)
         case NPC_GARAXXAS:
         case NPC_APOKO:
         case NPC_ZELFAN:
+        case NPC_SLIVER:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_FEL_CRYSTAL:
