@@ -7619,14 +7619,15 @@ void Unit::RemoveGuardian(Pet* pet)
     m_guardianPets.erase(pet->GetObjectGuid());
 }
 
-void Unit::RemoveGuardians()
+void Unit::RemoveGuardians(bool force)
 {
     while (!m_guardianPets.empty())
     {
         ObjectGuid guid = *m_guardianPets.begin();
 
         if (Pet* pet = GetMap()->GetPet(guid))
-            pet->Unsummon(PET_SAVE_AS_DELETED, this); // can remove pet guid from m_guardianPets
+            if (force || !pet->IsInCombat())
+                pet->Unsummon(PET_SAVE_AS_DELETED, this); // can remove pet guid from m_guardianPets
 
         m_guardianPets.erase(guid);
     }
@@ -9541,7 +9542,13 @@ void Unit::ClearInCombat()
 void Unit::HandleExitCombat(bool pvpCombat)
 {
     if (AI() && !GetClientControlling())
-        AI()->EnterEvadeMode();
+    {
+        // guardians despawn on evade if their owner already despawned
+        if (IsCreature() && static_cast<Creature*>(this)->IsPet() && static_cast<Pet*>(this)->IsGuardian() && GetOwner() == nullptr)
+            static_cast<Pet*>(this)->Unsummon(PET_SAVE_AS_DELETED);
+        else
+            AI()->EnterEvadeMode();
+    }
     else
         CombatStop(false, !pvpCombat);
 
@@ -10948,7 +10955,7 @@ void Unit::RemoveFromWorld()
         RemoveNotOwnTrackedTargetAuras();
         BreakCharmOutgoing();
         BreakCharmIncoming();
-        RemoveGuardians();
+        RemoveGuardians(IsPlayer());
         RemoveMiniPet();
         UnsummonAllTotems();
         RemoveAllGameObjects();
