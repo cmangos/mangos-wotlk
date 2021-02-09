@@ -47,6 +47,7 @@ EndContentData */
 #include "Entities/TemporarySpawn.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 /*######
 ## npc_a_special_surprise
@@ -514,8 +515,21 @@ enum
 
     GO_DUEL_FLAG                = 191126,
 
+    NPC_DEATH_KNIGHT_INITIATE   = 28406,
+
     QUEST_DEATH_CHALLENGE       = 12733,
     FACTION_HOSTILE             = 2068
+};
+
+static const DialogueEntry aInitiateDialogue[] =
+{
+    {GO_DUEL_FLAG,              0,                         5000},
+    {EMOTE_DUEL_BEGIN,          NPC_DEATH_KNIGHT_INITIATE, 1000},
+    {EMOTE_DUEL_BEGIN_3,        NPC_DEATH_KNIGHT_INITIATE, 1000},
+    {EMOTE_DUEL_BEGIN_2,        NPC_DEATH_KNIGHT_INITIATE, 1000},
+    {EMOTE_DUEL_BEGIN_1,        NPC_DEATH_KNIGHT_INITIATE, 1000},
+    {NPC_DEATH_KNIGHT_INITIATE, 0,                         0},
+    {0, 0, 0},
 };
 
 int32 m_auiRandomSay[] =
@@ -523,17 +537,29 @@ int32 m_auiRandomSay[] =
     SAY_DUEL_A, SAY_DUEL_B, SAY_DUEL_C, SAY_DUEL_D, SAY_DUEL_E, SAY_DUEL_F, SAY_DUEL_G, SAY_DUEL_H, SAY_DUEL_I
 };
 
-struct npc_death_knight_initiateAI : public ScriptedAI
+enum InitiateActions
 {
-    npc_death_knight_initiateAI(Creature* pCreature) : ScriptedAI(pCreature) { Reset(); }
+    INITIATE_BLOOD_STRIKE,
+    INITIATE_DEATH_COIL,
+    INITIATE_ICY_TOUCH,
+    INITIATE_PLAGUE_STRIKE,
+    INITIATE_ACTION_MAX,
+};
+
+struct npc_death_knight_initiateAI : public CombatAI, private DialogueHelper
+{
+    npc_death_knight_initiateAI(Creature* creature) : CombatAI(creature, INITIATE_ACTION_MAX),
+        DialogueHelper(aInitiateDialogue)
+    {
+        AddCombatAction(INITIATE_BLOOD_STRIKE, 4000u);
+        AddCombatAction(INITIATE_DEATH_COIL, 6000u);
+        AddCombatAction(INITIATE_ICY_TOUCH, 2000u);
+        AddCombatAction(INITIATE_PLAGUE_STRIKE, 5000u);
+
+        Reset();
+    }
 
     ObjectGuid m_duelerGuid;
-    uint8 m_uiDuelStartStage;
-    uint32 m_uiDuelTimer;
-    uint32 m_uiBloodStrikeTimer;
-    uint32 m_uiDeathCoilTimer;
-    uint32 m_uiIcyTouchTimer;
-    uint32 m_uiPlagueStrikeTimer;
 
     bool m_bIsDuelComplete;
 
@@ -542,14 +568,9 @@ struct npc_death_knight_initiateAI : public ScriptedAI
         m_creature->SetImmuneToPlayer(true);
         m_duelerGuid.Clear();
 
-        m_uiDuelStartStage      = 0;
-        m_uiDuelTimer           = 0;
-        m_bIsDuelComplete       = false;
+        m_bIsDuelComplete = false;
 
-        m_uiBloodStrikeTimer    = 4000;
-        m_uiDeathCoilTimer      = 6000;
-        m_uiIcyTouchTimer       = 2000;
-        m_uiPlagueStrikeTimer   = 5000;
+        CombatAI::Reset();
     }
 
     void JustReachedHome() override
@@ -566,9 +587,8 @@ struct npc_death_knight_initiateAI : public ScriptedAI
         // start duel
         if (eventType == AI_EVENT_START_EVENT && pInvoker->GetTypeId() == TYPEID_PLAYER)
         {
+            StartNextDialogueText(GO_DUEL_FLAG);
             m_duelerGuid = pInvoker->GetObjectGuid();
-            m_uiDuelStartStage = 0;
-            m_uiDuelTimer = 5000;
         }
     }
 
@@ -576,7 +596,7 @@ struct npc_death_knight_initiateAI : public ScriptedAI
     {
         // evade only when duel isn't complete
         if (!m_bIsDuelComplete)
-            ScriptedAI::EnterEvadeMode();
+            CombatAI::EnterEvadeMode();
     }
 
     void DamageTaken(Unit* /*pDoneBy*/, uint32& uiDamage, DamageEffectType /*damagetype*/, SpellEntry const* spellInfo) override
@@ -593,13 +613,14 @@ struct npc_death_knight_initiateAI : public ScriptedAI
             {
                 // complete duel and evade (without home movemnet)
                 m_bIsDuelComplete = true;
+                ClearSelfRoot();
                 m_creature->RemoveAllAurasOnEvade();
-                m_creature->CombatStop(true);
+                m_creature->CombatStopWithPets(true);
                 m_creature->SetLootRecipient(nullptr);
 
                 if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_duelerGuid))
                 {
-                    m_creature->CastSpell(pPlayer, SPELL_DUEL_VICTORY, TRIGGERED_OLD_TRIGGERED);
+                    DoCastSpellIfCan(pPlayer, SPELL_DUEL_VICTORY, CAST_TRIGGERED);
                     m_creature->SetFacingToObject(pPlayer);
                 }
 
@@ -613,83 +634,59 @@ struct npc_death_knight_initiateAI : public ScriptedAI
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    Creature* GetSpeakerByEntry(uint32 entry) override
     {
-        if (m_uiDuelTimer)
+        if (entry == NPC_DEATH_KNIGHT_INITIATE)
+            return m_creature;
+
+        return nullptr;
+    }
+
+    Unit* GetDialogueTarget() override
+    {
+        return m_creature->GetMap()->GetPlayer(m_duelerGuid);
+    }
+
+    void JustDidDialogueStep(int32 entry) override
+    {
+        if (entry == NPC_DEATH_KNIGHT_INITIATE)
         {
-            if (m_uiDuelTimer <= uiDiff)
-            {
-                Player* pPlayer = m_creature->GetMap()->GetPlayer(m_duelerGuid);
-                if (!pPlayer)
-                    return;
+            m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
+            m_creature->SetImmuneToPlayer(false);
 
-                switch (m_uiDuelStartStage)
-                {
-                    case 0:
-                        DoScriptText(EMOTE_DUEL_BEGIN, m_creature, pPlayer);
-                        m_uiDuelTimer = 1000;
-                        break;
-                    case 1:
-                        DoScriptText(EMOTE_DUEL_BEGIN_3, m_creature, pPlayer);
-                        m_uiDuelTimer = 1000;
-                        break;
-                    case 2:
-                        DoScriptText(EMOTE_DUEL_BEGIN_2, m_creature, pPlayer);
-                        m_uiDuelTimer = 1000;
-                        break;
-                    case 3:
-                        DoScriptText(EMOTE_DUEL_BEGIN_1, m_creature, pPlayer);
-                        m_uiDuelTimer = 1000;
-                        break;
-                    case 4:
-                        m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_COMBAT_STOP | TEMPFACTION_RESTORE_RESPAWN);
-                        m_creature->SetImmuneToPlayer(false);
-                        AttackStart(pPlayer);
-                        m_uiDuelTimer = 0;
-                        break;
-                }
-                ++m_uiDuelStartStage;
-            }
-            else
-                m_uiDuelTimer -= uiDiff;
+            if (Player* pPlayer = m_creature->GetMap()->GetPlayer(m_duelerGuid))
+                AttackStart(pPlayer);
         }
+    }
 
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiBloodStrikeTimer < uiDiff)
+    void ExecuteAction(uint32 action) override
+    {
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BLOOD_STRIKE) == CAST_OK)
-                m_uiBloodStrikeTimer = 9000;
+            case INITIATE_BLOOD_STRIKE:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_BLOOD_STRIKE) == CAST_OK)
+                    ResetCombatAction(action, 9000);
+                break;
+            case INITIATE_DEATH_COIL:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DEATH_COIL) == CAST_OK)
+                    ResetCombatAction(action, 8000);
+                break;
+            case INITIATE_ICY_TOUCH:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ICY_TOUCH) == CAST_OK)
+                    ResetCombatAction(action, 8000);
+                break;
+            case INITIATE_PLAGUE_STRIKE:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PLAGUE_STRIKE) == CAST_OK)
+                    ResetCombatAction(action, 8000);
+                break;
         }
-        else
-            m_uiBloodStrikeTimer -= uiDiff;
+    }
 
-        if (m_uiDeathCoilTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_DEATH_COIL) == CAST_OK)
-                m_uiDeathCoilTimer = 8000;
-        }
-        else
-            m_uiDeathCoilTimer -= uiDiff;
+    void UpdateAI(const uint32 diff) override
+    {
+        DialogueUpdate(diff);
 
-        if (m_uiIcyTouchTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_ICY_TOUCH) == CAST_OK)
-                m_uiIcyTouchTimer = 8000;
-        }
-        else
-            m_uiIcyTouchTimer -= uiDiff;
-
-        if (m_uiPlagueStrikeTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PLAGUE_STRIKE) == CAST_OK)
-                m_uiPlagueStrikeTimer = 8000;
-        }
-        else
-            m_uiPlagueStrikeTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
+        CombatAI::UpdateAI(diff);
     }
 };
 
