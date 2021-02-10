@@ -292,7 +292,7 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
             case DELRISSA_DISPEL:
             {
                 std::vector<Unit*> unitVector;
-                m_creature->SelectAttackingTargets(unitVector, ATTACKING_TARGET_RANDOM, 0, SPELL_DISPEL_MAGIC, SELECT_FLAG_PLAYER);
+                m_creature->SelectAttackingTargets(unitVector, ATTACKING_TARGET_ALL_SUITABLE, 0, SPELL_DISPEL_MAGIC, SELECT_FLAG_PLAYER);
                 for (Unit* unit : unitVector) // TODO: Code dispel detection
                 {
                     if (DoCastSpellIfCan(unit, SPELL_DISPEL_MAGIC) == CAST_OK)
