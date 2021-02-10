@@ -7455,7 +7455,7 @@ void Player::UpdateArea(uint32 newArea)
     uint32 const areaRestFlag = (GetTeam() == ALLIANCE) ? AREA_FLAG_REST_ZONE_ALLIANCE : AREA_FLAG_REST_ZONE_HORDE;
     if (area && area->flags & areaRestFlag)
         SetRestType(REST_TYPE_FACTION_AREA);
-    else
+    else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType() != REST_TYPE_IN_TAVERN && GetRestType() != REST_TYPE_IN_CITY)
         SetRestType(REST_TYPE_NO);
 }
 
@@ -7546,7 +7546,7 @@ void Player::UpdateZone(uint32 newZone, uint32 newArea, bool force)
 
     if (zone->flags & AREA_FLAG_CAPITAL)                    // in capital city
         SetRestType(REST_TYPE_IN_CITY);
-    else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType() != REST_TYPE_IN_TAVERN)
+    else if (HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType() != REST_TYPE_IN_TAVERN && GetRestType() != REST_TYPE_FACTION_AREA)
         // resting and not in tavern (leave city then); tavern leave handled in CheckAreaExploreAndOutdoor
         SetRestType(REST_TYPE_NO);
 
