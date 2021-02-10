@@ -7456,7 +7456,7 @@ void Player::UpdateArea(uint32 newArea)
     if (area && area->flags & areaRestFlag)
         SetRestType(REST_TYPE_FACTION_AREA);
     else
-        SetRestType(REST_TYPE_FACTION_AREA);
+        SetRestType(REST_TYPE_NO);
 }
 
 bool Player::CanUseCapturePoint() const
