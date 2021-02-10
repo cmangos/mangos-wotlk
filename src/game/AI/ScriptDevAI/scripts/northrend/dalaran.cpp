@@ -53,7 +53,7 @@ struct npc_dalaran_guardian_mageAI : public ScriptedAI
         if (m_creature->GetDistanceZ(who) > CREATURE_Z_ATTACK_RANGE_MELEE)
             return;
 
-        if (m_creature->CanAttackOnSight(who))
+        if (m_creature->IsEnemy(who))
         {
             // exception for quests 20439 and 24451
             if (who->HasAura(SPELL_COVENANT_DISGUISE_1) || who->HasAura(SPELL_COVENANT_DISGUISE_2) ||
