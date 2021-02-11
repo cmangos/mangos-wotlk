@@ -221,14 +221,8 @@ struct mob_pure_energyAI : public ScriptedAI
 
     void JustPreventedDeath(Unit* attacker) override
     {
-        if (attacker->GetTypeId() == TYPEID_PLAYER)
-            attacker = ((Player*)attacker);
-
-        else if (attacker->GetTypeId() == TYPEID_UNIT)
-        {
-            if (((Creature*)attacker)->IsPet() || ((Creature*)attacker)->IsTotem())
-                attacker = attacker->GetOwner();
-        }
+        if (attacker->IsUnit() && attacker->IsControlledByPlayer())
+            attacker = const_cast<Player*>(attacker->GetControllingPlayer());
 
         DoFakeDeath();
         m_creature->RemoveAurasDueToSpell(SPELL_ENERGY_BOLT_PERIODIC);
