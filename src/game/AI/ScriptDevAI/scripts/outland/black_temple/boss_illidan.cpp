@@ -1224,14 +1224,14 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
                 }
                 if (DoCastSpellIfCan(nullptr, SPELL_SHADOW_PRISON) == CAST_OK) // Phase 5 transition start
                 {
+                    SetMeleeEnabled(false);
+                    m_creature->SetTarget(nullptr);
                     m_creature->PlayMusic(SOUND_KIT_ILLIDAN_P5);
                     StartNextDialogueText(DUMMY_EMOTE_ID_4);
                     SetCombatScriptStatus(true);
                     m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
 
                     SetCombatMovement(false);
-                    SetMeleeEnabled(false);
-                    m_creature->SetTarget(nullptr);
                     m_creature->GetMotionMaster()->Clear();
                     m_creature->GetMotionMaster()->MoveIdle();
 
