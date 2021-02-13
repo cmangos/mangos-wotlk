@@ -184,6 +184,7 @@ struct npc_shattered_sun_marksmanAI : public npc_shattered_sun_fighterAI
     void Reset() override
     {
         m_creature->SetImmobilizedState(true);
+        SetMeleeEnabled(false);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override

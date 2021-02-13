@@ -40,6 +40,14 @@ struct DawnbladeAttack : public SpellScript
         spell->SetMaxAffectedTargets(1);
     }
 
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (!spell->GetCaster()->IsWithinLOSInMap(target, true))
+            return false;
+
+        return true;
+    }
+
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         if (urand(0, 1) == 0)
