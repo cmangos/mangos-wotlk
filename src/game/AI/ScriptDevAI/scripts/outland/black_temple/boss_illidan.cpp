@@ -2320,6 +2320,18 @@ struct ParasiticShadowfiendAura : public SpellScript, public AuraScript
 
 struct ShadowPrison : public SpellScript
 {
+    void OnRadiusCalculate(Spell* /*spell*/, SpellEffectIndex /*effIdx*/, bool /*targetB*/, float& radius) const override
+    {
+        radius = 100.f;
+    }
+
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->IsControlledByPlayer() || (target->IsCreature() && target->GetEntry() == NPC_AKAMA))
+            return true;
+        return false;
+    }
+
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx == EFFECT_INDEX_2 && spell->GetUnitTarget())
