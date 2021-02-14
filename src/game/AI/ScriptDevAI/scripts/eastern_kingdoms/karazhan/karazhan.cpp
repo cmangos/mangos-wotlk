@@ -287,9 +287,7 @@ void instance_karazhan::SetData(uint32 uiType, uint32 uiData)
         case TYPE_CHESS:
             if (uiData == DONE)
             {
-                Player* creditedPlayer = GetPlayerInMap(true, false);
-                if (instance->IsRaidOrHeroicDungeon() && creditedPlayer)
-                    static_cast<DungeonMap*>(instance)->PermBindAllPlayers(creditedPlayer);
+                static_cast<DungeonMap*>(instance)->PermBindAllPlayers();
                 DoFinishChessEvent();
             }
             else if (uiData == FAIL)
