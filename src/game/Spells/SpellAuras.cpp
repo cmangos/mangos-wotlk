@@ -11447,6 +11447,9 @@ void SpellAuraHolder::Update(uint32 diff)
 
 void SpellAuraHolder::RefreshHolder()
 {
+    if (GetSpellProto()->HasAttribute(SPELL_ATTR_EX_DONT_REFRESH_DURATION_ON_RECAST))
+        return;
+
     SetAuraDuration(GetAuraMaxDuration());
     SendAuraUpdate(false);
 }
