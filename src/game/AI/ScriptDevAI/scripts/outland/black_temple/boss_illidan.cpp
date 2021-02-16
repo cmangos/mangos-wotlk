@@ -404,9 +404,9 @@ enum IllidanActions
 ## boss_illidan_stormrage
 ######*/
 
-struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
+struct boss_illidan_stormrageAI : public RangedCombatAI, private DialogueHelper
 {
-    boss_illidan_stormrageAI(Creature* creature) : CombatAI(creature, ILLIDAN_ACTIONS_MAX),
+    boss_illidan_stormrageAI(Creature* creature) : RangedCombatAI(creature, ILLIDAN_ACTIONS_MAX),
         DialogueHelper(aEventDialogue), m_instance(static_cast<instance_black_temple*>(creature->GetInstanceData()))
     {
         //TODO: Review timers
@@ -472,7 +472,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
         m_flameAzzinothKilled = 0;
         
         SetMeleeEnabled(true);
-        m_attackDistance = 0.0f;
+        SetRangedMode(false, 0.f, TYPE_NONE);
 
         m_bladesGuidList.clear();
 
@@ -811,7 +811,8 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             {
                 m_flameBlasts = 0;
                 DoCastSpellIfCan(nullptr, SPELL_DEMON_TRANSFORM_1);
-                m_attackDistance = 80.f;
+                AddMainSpell(SPELL_SHADOW_BLAST);
+                SetRangedMode(true, 80.f, TYPE_FULL_CASTER);
                 SetCombatScriptStatus(true);
                 SetMeleeEnabled(false);
                 SetCombatMovement(false);
@@ -823,7 +824,7 @@ struct boss_illidan_stormrageAI : public CombatAI, private DialogueHelper
             case PHASE_4_DEMON:
             {
                 DoCastSpellIfCan(nullptr, SPELL_DEMON_TRANSFORM_1);
-                m_attackDistance = 0.f;
+                SetRangedMode(false, 0.f, TYPE_NONE);
                 SetCombatScriptStatus(true);
                 SetMeleeEnabled(false);
                 SetCombatMovement(false);
