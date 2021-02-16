@@ -1237,14 +1237,20 @@ void WorldState::HandleSunsReachSubPhaseTransition(int32 subPhaseMask, bool init
             all = true;
         m_sunsReachData.m_subphaseMask &= ~subPhaseMask;
     }
-    if (initial && subPhaseMask == 0)
+    if (initial)
     {
-        switch (m_sunsReachData.m_phase)
+        if (m_sunsReachData.m_phase >= SUNS_REACH_PHASE_2_SANCTUM)
+            if ((subPhaseMask & SUBPHASE_PORTAL) == 0)
+                sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_NO_PORTAL);
+        if (m_sunsReachData.m_phase >= SUNS_REACH_PHASE_3_ARMORY)
+            if ((subPhaseMask & SUBPHASE_ANVIL) == 0)
+                sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_3_NO_ANVIL);
+        if (m_sunsReachData.m_phase >= SUNS_REACH_PHASE_4_HARBOR)
         {
-            case SUNS_REACH_PHASE_2_SANCTUM: sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_2_NO_PORTAL); break;
-            case SUNS_REACH_PHASE_3_ARMORY: sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_3_NO_ANVIL); break;
-            case SUNS_REACH_PHASE_4_HARBOR: sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_4_NO_MONUMENT); sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_4_NO_ALCHEMY_LAB); break;
-            default: break;
+            if ((subPhaseMask & SUBPHASE_ALCHEMY_LAB) == 0)
+                sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_4_NO_ALCHEMY_LAB);
+            if ((subPhaseMask & SUBPHASE_MONUMENT) == 0)
+                sGameEventMgr.StartEvent(GAME_EVENT_QUEL_DANAS_PHASE_4_NO_MONUMENT);
         }
     }
     if ((subPhaseMask & SUBPHASE_PORTAL))
