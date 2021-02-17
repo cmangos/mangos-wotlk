@@ -1842,6 +1842,21 @@ enum
     SPELL_FIRE_NOVA     = 12470,
 };
 
+struct npc_shaman_elementalAI : CombatAI
+{
+    npc_shaman_elementalAI(Creature* creature, uint32 actionCount) : CombatAI(creature, actionCount) {}
+
+    void JustRespawned() override
+    {
+        CombatAI::JustRespawned();
+        if (Player* player = const_cast<Player*>(m_creature->GetControllingPlayer()))
+            for (auto& ref : player->getHostileRefManager())
+                if (Unit* victim = ref.getSource()->getOwner())
+                    m_creature->AddThreat(victim);
+        AttackClosestEnemy();
+    }
+};
+
 enum FireElementalActions
 {
     ELEMENTAL_ACTION_FIRE_NOVA,
@@ -1849,125 +1864,70 @@ enum FireElementalActions
     ELEMENTAL_ACTION_MAX,
 };
 
-struct npc_shaman_fire_elementalAI : public ScriptedAI
+struct npc_shaman_fire_elementalAI : public npc_shaman_elementalAI
 {
-    npc_shaman_fire_elementalAI(Creature* creature) : ScriptedAI(creature)
+    npc_shaman_fire_elementalAI(Creature* creature) : npc_shaman_elementalAI(creature, ELEMENTAL_ACTION_MAX)
     {
         m_fireNovaParams.range.minRange = 0;
         m_fireNovaParams.range.maxRange = 10;
-        Reset();
+        AddCombatAction(ELEMENTAL_ACTION_FIRE_NOVA, 0u);
+        AddCombatAction(ELEMENTAL_ACTION_FIRE_BLAST, 3000u);
     }
-
-    uint32 m_actionTimers[ELEMENTAL_ACTION_MAX];
-    bool m_actionReadyStatus[ELEMENTAL_ACTION_MAX];
 
     SelectAttackingTargetParams m_fireNovaParams;
 
     void Reset() override
     {
+        CombatAI::Reset();
         DoCastSpellIfCan(m_creature, SPELL_FIRE_SHIELD, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
-
-        m_actionTimers[ELEMENTAL_ACTION_FIRE_NOVA] = 10000;
-        m_actionTimers[ELEMENTAL_ACTION_FIRE_BLAST] = 5000;
     }
 
-    void UpdateAI(const uint32 diff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        for (uint32 i = 0; i < ELEMENTAL_ACTION_MAX; ++i)
+        switch (action)
         {
-            if (!m_actionReadyStatus[i])
+            case ELEMENTAL_ACTION_FIRE_NOVA:
             {
-                if (m_actionTimers[i] <= diff)
-                {
-                    m_actionTimers[i] = 0;
-                    m_actionReadyStatus[i] = true;
-                }
-                else
-                    m_actionTimers[i] -= diff;
+                std::vector<Unit*> unitVector;
+                m_creature->SelectAttackingTargets(unitVector, ATTACKING_TARGET_ALL_SUITABLE, uint32(0), uint32(0), SELECT_FLAG_RANGE_AOE_RANGE, m_fireNovaParams);
+                if (!unitVector.empty())
+                    if (DoCastSpellIfCan(nullptr, SPELL_FIRE_NOVA) == CAST_OK)
+                        ResetCombatAction(action, 15000);
+                break;
             }
+            case ELEMENTAL_ACTION_FIRE_BLAST:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIRE_BLAST) == CAST_OK)
+                    ResetCombatAction(action, 15000);
+                break;
         }
-
-        if (m_creature->IsNonMeleeSpellCasted(false) || !CanExecuteCombatAction())
-            return;
-
-        if (m_actionReadyStatus[ELEMENTAL_ACTION_FIRE_NOVA])
-        {
-            std::vector<Unit*> unitVector;
-            m_creature->SelectAttackingTargets(unitVector, ATTACKING_TARGET_ALL_SUITABLE, uint32(0), uint32(0), SELECT_FLAG_RANGE_AOE_RANGE, m_fireNovaParams);
-            if (!unitVector.empty())
-            {
-                if (DoCastSpellIfCan(nullptr, SPELL_FIRE_NOVA) == CAST_OK)
-                {
-                    m_actionTimers[ELEMENTAL_ACTION_FIRE_NOVA] = 15000;
-                    m_actionReadyStatus[ELEMENTAL_ACTION_FIRE_NOVA] = false;
-                    return;
-                }
-            }
-        }
-        else if (m_actionReadyStatus[ELEMENTAL_ACTION_FIRE_BLAST])
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_FIRE_BLAST) == CAST_OK)
-            {
-                m_actionTimers[ELEMENTAL_ACTION_FIRE_BLAST] = 15000;
-                m_actionReadyStatus[ELEMENTAL_ACTION_FIRE_BLAST] = false;
-                return;
-            }
-        }
-
-        DoMeleeAttackIfReady();
     }
 };
 
-struct npc_shaman_earth_elementalAI : public ScriptedAI
+struct npc_shaman_earth_elementalAI : public npc_shaman_elementalAI
 {
-    npc_shaman_earth_elementalAI(Creature* creature) : ScriptedAI(creature)
+    npc_shaman_earth_elementalAI(Creature* creature) : npc_shaman_elementalAI(creature, 1)
     {
         m_angeredEarthParams.range.minRange = 0;
         m_angeredEarthParams.range.maxRange = 15;
-        Reset();
+        AddCombatAction(1, 0u);
     }
 
-    uint32 m_angeredEarthTimer;
     SelectAttackingTargetParams m_angeredEarthParams;
 
-    void Reset() override
+    void ExecuteAction(uint32 action) override
     {
-        m_angeredEarthTimer = 0;
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_angeredEarthTimer <= diff)
+        switch (action)
         {
-            m_angeredEarthTimer = 0;
-            std::vector<Unit*> unitVector;
-            m_creature->SelectAttackingTargets(unitVector, ATTACKING_TARGET_ALL_SUITABLE, uint32(0), uint32(0), SELECT_FLAG_RANGE_AOE_RANGE, m_angeredEarthParams);
-            if (!unitVector.empty())
-                if (DoCastSpellIfCan(nullptr, SPELL_ANGERED_EARTH) == CAST_OK)
-                    m_angeredEarthTimer = 15000;
+            case 1:
+                std::vector<Unit*> unitVector;
+                m_creature->SelectAttackingTargets(unitVector, ATTACKING_TARGET_ALL_SUITABLE, uint32(0), uint32(0), SELECT_FLAG_RANGE_AOE_RANGE, m_angeredEarthParams);
+                if (!unitVector.empty())
+                    if (DoCastSpellIfCan(nullptr, SPELL_ANGERED_EARTH) == CAST_OK)
+                        ResetCombatAction(action, 15000);
+                break;
         }
-        else
-            m_angeredEarthTimer -= diff;
-
-        DoMeleeAttackIfReady();
     }
 };
-
-UnitAI* GetAI_npc_shaman_fire_elemental(Creature* pCreature)
-{
-    return new npc_shaman_fire_elementalAI(pCreature);
-}
-
-UnitAI* GetAI_npc_shaman_earth_elemental(Creature* pCreature)
-{
-    return new npc_shaman_earth_elementalAI(pCreature);
-}
 
 enum
 {
@@ -2578,12 +2538,12 @@ void AddSC_npcs_special()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_shaman_fire_elemental";
-    pNewScript->GetAI = &GetAI_npc_shaman_fire_elemental;
+    pNewScript->GetAI = &GetNewAIInstance<npc_shaman_fire_elementalAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_shaman_earth_elemental";
-    pNewScript->GetAI = &GetAI_npc_shaman_earth_elemental;
+    pNewScript->GetAI = &GetNewAIInstance<npc_shaman_earth_elementalAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
