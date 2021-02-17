@@ -24783,3 +24783,23 @@ void Player::_LoadRandomBattlegroundStatus(QueryResult* result)
         delete result;
     }
 }
+
+void Player::SendWeatherUpdate(uint32 weatherId, uint32 weatherGrade) const
+{
+    WorldPacket data(SMSG_WEATHER, 4 + 4 + 1);
+    data << uint32(weatherId);
+    data << float(weatherGrade);
+    data << uint8(0);
+
+    GetSession()->SendPacket(data);
+}
+
+void Player::SendOverrideLightUpdate(uint32 lightId, uint32 fadeInTime) const
+{
+    WorldPacket data(SMSG_OVERRIDE_LIGHT, 4 + 4 + 1);
+    data << uint32(GetDefaultMapLight(GetMapId()));
+    data << uint32(lightId);
+    data << uint32(fadeInTime);
+
+    GetSession()->SendPacket(data);
+}

@@ -2230,6 +2230,9 @@ class Player : public Unit
 
         uint32 EnvironmentalDamage(EnviromentalDamage type, uint32 damage);
 
+        void SendWeatherUpdate(uint32 weatherId, uint32 weatherGrade) const;
+        void SendOverrideLightUpdate(uint32 lightId, uint32 fadeInTime) const;
+
         /*********************************************************/
         /***               FLOOD FILTER SYSTEM                 ***/
         /*********************************************************/
