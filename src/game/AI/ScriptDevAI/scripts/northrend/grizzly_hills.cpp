@@ -29,6 +29,7 @@ EndContentData */
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/base/escort_ai.h"
 #include "AI/ScriptDevAI/base/pet_ai.h"
+#include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
 
 /*######
@@ -526,6 +527,23 @@ bool QuestAccept_npc_emily(Player* pPlayer, Creature* pCreature, const Quest* pQ
     return false;
 }
 
+/*######
+## spell_eagle_eyes
+######*/
+
+struct spell_eagle_eyes : public SpellScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        // Eagle Eyes can be cast only on this target
+        if (!target || target->GetEntry() != 26369)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+};
+
 void AddSC_grizzly_hills()
 {
     Script* pNewScript = new Script;
@@ -545,4 +563,6 @@ void AddSC_grizzly_hills()
     pNewScript->GetAI = &GetAI_npc_emily;
     pNewScript->pQuestAcceptNPC = &QuestAccept_npc_emily;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<spell_eagle_eyes>("spell_eagle_eyes");
 }
