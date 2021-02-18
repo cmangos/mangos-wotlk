@@ -799,8 +799,6 @@ UPDATE creature_template SET ScriptName='npc_a_special_surprise' WHERE entry IN 
 UPDATE creature_template SET ScriptName='npc_eye_of_acherus' WHERE entry=28511;
 UPDATE creature_template SET ScriptName='npc_scarlet_ghoul' WHERE entry=28845;
 UPDATE creature_template SET ScriptName='npc_highlord_darion_mograine' WHERE entry=29173;
-UPDATE creature_template SET ScriptName='npc_fellow_death_knight' WHERE entry IN (29199, 29204, 29200);
-UPDATE creature_template SET ScriptName='npc_lich_king_light_dawn' WHERE entry=29183;
 UPDATE creature_template SET ScriptName='npc_scarlet_courier' WHERE entry=29076;
 UPDATE gameobject_template SET ScriptName='go_plague_cauldron' WHERE entry = 190936;
 
@@ -6649,8 +6647,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1609098','REUSE ME','0','0','0','0','0','REUSE ME'),
 
-('-1609201','Soldiers of the Scourge, stand ready! Prepare to unleash your fury upon the Argent Dawn!','14677','1','0','0','0','Highlord Darion Mograine'),
-('-1609202','The sky weeps at the devastation of these lands! Soon, Azeroth''s futile tears will rain down upon us!','14678','1','0','0','0','Highlord Darion Mograine'),
+('-1609201','Soldiers of the Scourge, stand ready! Prepare to unleash your fury upon the Argent Dawn!','14677','1','0','22','0','Highlord Darion Mograine'),
+('-1609202','The sky weeps at the devastation of these lands! Soon, Azeroth''s futile tears will rain down upon us!','14678','1','0','22','0','Highlord Darion Mograine'),
 ('-1609203','Death knights of Acherus, the death march begins!','14681','1','0','0','0','Highlord Darion Mograine'),
 ('-1609204','Soldiers of the Scourge, death knights of Acherus, minions of the darkness: hear the call of the Highlord!','14679','1','0','22','0','Highlord Darion Mograine'),
 ('-1609205','RISE!','14680','1','0','15','0','Highlord Darion Mograine'),
@@ -6692,7 +6690,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1609241','My son, there will come a day when you will command the Ashbringer and, with it, mete justice across this land. I have no doubt that when that day finally comes, you will bring pride to our people and that Lordaeron will be a better place because of you. But, my son, that day is not today.','14496','0','0','1','0','Highlord Alexandros Mograine'),
 ('-1609242','Do not forget...','14497','0','0','6','0','Highlord Alexandros Mograine'),
 ('-1609243','Touching...','14803','1','0','0','0','The Lich King'),
-('-1609244','You have''ve betrayed me! You betrayed us all you monster! Face the might of Mograine!','14707','1','0','0','0','Highlord Darion Mograine'),
+('-1609244','You have''ve betrayed me! You betrayed us all you monster! Face the might of Mograine!','14707','1','0','397','0','Highlord Darion Mograine'),
 ('-1609245','He''s mine now...','14805','0','0','0','0','The Lich King'),
 ('-1609246','Pathetic...','14804','0','0','0','0','The Lich King'),
 ('-1609247','You''re a damned monster, Arthas!','14589','0','0','25','0','Highlord Tirion Fordring'),
@@ -6702,11 +6700,11 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1609251','APOCALYPSE!','14808','1','0','0','0','The Lich King'),
 ('-1609252','That day is not today...','14708','0','0','0','0','Highlord Darion Mograine'),
 ('-1609253','Tirion!','14709','1','0','0','0','Highlord Darion Mograine'),
-('-1609254','ARTHAS!!!!','14591','1','0','0','0','Highlord Tirion Fordring'),
+('-1609254','ARTHAS!!!!','14591','1','0','15','0','Highlord Tirion Fordring'),
 ('-1609255','What is this?','14809','1','0','0','0','The Lich King'),
 ('-1609256','Your end.','14592','1','0','0','0','Highlord Tirion Fordring'),
 ('-1609257','Impossible...','14810','1','0','0','0','The Lich King'),
-('-1609258','This... isn''t... over...','14811','1','0','25','0','The Lich King'),
+('-1609258','This... isn''t... over...','14811','1','0','397','0','The Lich King'),
 ('-1609259','When next we meet it won''t be on holy ground, paladin.','14812','1','0','1','0','The Lich King'),
 ('-1609260','Rise, Darion, and listen...','14593','0','0','0','0','Highlord Tirion Fordring'),
 ('-1609261','We have all been witness to a terrible tragedy. The blood of good men has been shed upon this soil! Honorable knights, slain defending their lives - our lives!','14594','0','0','0','0','Highlord Tirion Fordring'),
@@ -12410,12 +12408,6 @@ INSERT INTO `script_waypoint` (`entry`, `pathId`, `pointid`, `position_x`, `posi
 (28787,0,20,5832.16,5323.15,-98.7033,0,0,0,''),
 (28787,0,21,5824.74,5315.71,-97.758,0,0,0,''),
 (28787,0,22,5819.65,5305.41,-97.4818,0,10000,0,'SAY_HELICE_COMPLETE'),
-(29173,0,1,2411.32,-5152.23,83.777,0,0,0,''),
-(29173,0,2,2386.44,-5177.38,74.049,0,0,0,''),
-(29173,0,3,2357.14,-5209.57,79.642,0,0,0,'SAY_LIGHT_OF_DAWN_STAND_1'),
-(29173,0,4,2342.68,-5232.79,85.259,0,0,0,'SAY_LIGHT_OF_DAWN_STAND_2'),
-(29173,0,5,2281.35,-5278.53,82.227,0,0,0,'Start battle'),
-(29173,0,6,2280.3,-5284.49,82.657,0,600000,0,'Go in front of the chapel for outro'),
 (29434,0,1,6643.66,-1258.14,396.812,0,0,0,'SAY_ESCORT_READY'),
 (29434,0,2,6669.84,-1261.13,396.362,0,0,0,''),
 (29434,0,3,6672.48,-1244.1,396.644,0,0,0,''),
