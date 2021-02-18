@@ -670,7 +670,7 @@ struct boss_veras_darkshadowAI : public boss_illidari_councilAI
                 m_creature->CastSpell(nullptr, SPELL_DEADLY_STRIKE, TRIGGERED_NONE);
                 DoScriptText(SAY_VERA_VANISH, m_creature);
                 ResetCombatAction(action, 55000);
-                if (Unit* victim = m_creature->GetVictim())
+                if (Unit* victim = m_creature->SelectAttackingTarget(ATTACKING_TARGET_TOPAGGRO, 0))
                     m_creature->getThreatManager().SetTargetSuppressed(victim);
             }
         }
