@@ -25,6 +25,7 @@
 #include "Globals/SharedDefines.h"
 #include "ByteBuffer.h"
 #include "Server/Opcodes.h"
+#include "Server/PacketLog.h"
 #include "Database/DatabaseEnv.h"
 #include "Auth/Sha1.h"
 #include "Server/WorldSession.h"
@@ -112,6 +113,9 @@ void WorldSocket::SendPacket(const WorldPacket& pct, bool immediate)
 {
     if (IsClosed())
         return;
+
+    if (sPacketLog->CanLogPacket())
+        sPacketLog->LogPacket(pct, SERVER_TO_CLIENT, GetRemoteIpAddress(), GetRemotePort());
 
     // Dump outgoing packet.
     sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct.GetOpcode(), pct.GetOpcodeName(), pct, false);
@@ -224,6 +228,9 @@ bool WorldSocket::ProcessIncomingData()
         pct->append(InPeak(), validBytesRemaining);
         ReadSkip(validBytesRemaining);
     }
+
+    if (sPacketLog->CanLogPacket())
+        sPacketLog->LogPacket(*pct, CLIENT_TO_SERVER, GetRemoteIpAddress(), GetRemotePort());
 
     sLog.outWorldPacketDump(GetRemoteEndpoint().c_str(), pct->GetOpcode(), pct->GetOpcodeName(), *pct, true);
 
