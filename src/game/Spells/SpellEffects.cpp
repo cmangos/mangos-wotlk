@@ -12362,7 +12362,7 @@ void Spell::EffectLeapBack(SpellEffectIndex eff_idx)
     if (unitTarget->IsTaxiFlying())
         return;
 
-    m_caster->KnockBackFrom(unitTarget, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10, float(damage) / 10);
+    unitTarget->KnockBackFrom(m_caster, float(m_spellInfo->EffectMiscValue[eff_idx]) / 10, float(damage) / 10);
 }
 
 void Spell::EffectReputation(SpellEffectIndex eff_idx)
