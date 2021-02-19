@@ -388,12 +388,8 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
                 if (BattleGround* bg = source->GetBattleGround())
                     return bg->CheckAchievementCriteriaMeet(criteria_id, source, target, miscvalue1);
             }
-            else
-            {
-                sLog.outErrorDb("Achievement system call ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT (%u) for achievement criteria %u for zone %u but zone does not have pvp script",
-                                ACHIEVEMENT_CRITERIA_REQUIRE_PVP_SCRIPT, criteria_id, source->GetZoneId());
-                return false;
-            }
+
+            return false;
         }
     }
     return false;
