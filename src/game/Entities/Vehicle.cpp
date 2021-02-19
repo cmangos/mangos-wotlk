@@ -372,7 +372,10 @@ void VehicleInfo::UnBoard(Unit* passenger, bool changeVehicle)
         }
 
         if (passenger->IsRooted())
+        {
             passenger->SetImmobilizedState(false);
+            passenger->m_movementInfo.RemoveMovementFlag(MOVEFLAG_ROOT); // do not wait on client ACK in this case - verified with sniff
+        }
 
         Movement::MoveSplineInit init(*passenger);
         // ToDo: Set proper unboard coordinates
