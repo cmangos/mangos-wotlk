@@ -293,7 +293,7 @@ struct essence_base_AI : public CombatAI
             m_creature->SetInCombatWithZone();
             AttackClosestEnemy();
             if (!m_creature->GetVictim())
-                JustReachedHome();
+                EnterEvadeMode();
         });
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
             {
@@ -541,7 +541,7 @@ struct boss_essence_of_angerAI : public CombatAI
             m_creature->SetInCombatWithZone();
             AttackClosestEnemy();
             if (!m_creature->GetVictim())
-                JustReachedHome();
+                EnterEvadeMode();
         });
         AddOnKillText(ANGER_SAY_SLAY1, ANGER_SAY_SLAY2);
     }
@@ -586,7 +586,7 @@ struct boss_essence_of_angerAI : public CombatAI
         DoScriptText(ANGER_SAY_DEATH, m_creature);
     }
 
-    void JustReachedHome() override
+    void EnterEvadeMode() override
     {
         // Reset encounter and despawn Essence
         if (m_instance)
