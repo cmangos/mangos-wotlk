@@ -4868,14 +4868,6 @@ void Spell::EffectForceCast(SpellEffectIndex effIndex)
 
     int32 basePoints = damage;
 
-    // forced cast spells by vehicle on master always unboard the master
-    if (m_caster->IsVehicle() && m_caster->GetVehicleInfo()->HasOnBoard(unitTarget) &&
-            m_spellInfo->EffectImplicitTargetA[effIndex] == TARGET_UNIT_CASTER_MASTER)
-    {
-        if (sSpellTemplate.LookupEntry<SpellEntry>(basePoints))
-            m_caster->RemoveAurasDueToSpell(basePoints);
-    }
-
     SpellCastTargets targets;
 
     switch (m_spellInfo->EffectImplicitTargetA[effIndex])
@@ -10484,15 +10476,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                             pPet->Unsummon(PET_SAVE_AS_DELETED, m_caster);
                     }
                     return;
-                }
-                case 52751:                                 // Death Gate
-                {
-                    if (!unitTarget || unitTarget->getClass() != CLASS_DEATH_KNIGHT)
-                        return;
-
-                    // triggered spell is stored in m_spellInfo->EffectBasePoints[0]
-                    unitTarget->CastSpell(unitTarget, damage, TRIGGERED_NONE);
-                    break;
                 }
                 case 52941:                                 // Song of Cleansing
                 {

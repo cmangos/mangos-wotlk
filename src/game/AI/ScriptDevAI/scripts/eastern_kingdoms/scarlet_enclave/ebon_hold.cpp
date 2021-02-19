@@ -2292,6 +2292,47 @@ struct spell_acherus_deathcharger : public SpellScript
     }
 };
 
+/*######
+## spell_skeletal_gryphon_escape - 52588
+######*/
+
+struct spell_skeletal_gryphon_escape : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer() || !target->IsBoarded())
+            return;
+
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+        target->RemoveAurasDueToSpell(spellId);
+    }
+};
+
+/*######
+## spell_death_gate - 52751
+######*/
+
+struct spell_death_gate : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsPlayer() || target->getClass() != CLASS_DEATH_KNIGHT)
+            return;
+
+        // cast spell 53822 to teleport player to Ebon Hold
+        uint32 spellId = spell->m_spellInfo->CalculateSimpleValue(effIdx);
+        target->CastSpell(target, spellId, TRIGGERED_NONE);
+    }
+};
+
 void AddSC_ebon_hold()
 {
     Script* pNewScript = new Script;
@@ -2349,4 +2390,6 @@ void AddSC_ebon_hold()
     RegisterSpellScript<spell_devour_humanoid>("spell_devour_humanoid");
     RegisterSpellScript<spell_portal_to_capital_city>("spell_portal_to_capital_city");
     RegisterSpellScript<spell_acherus_deathcharger>("spell_acherus_deathcharger");
+    RegisterSpellScript<spell_skeletal_gryphon_escape>("spell_skeletal_gryphon_escape");
+    RegisterSpellScript<spell_death_gate>("spell_death_gate");
 }
