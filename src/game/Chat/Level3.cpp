@@ -7347,8 +7347,8 @@ bool ChatHandler::HandleSunsReachReclamationPhaseCommand(char* args)
 
 bool ChatHandler::HandleSunsReachReclamationSubPhaseCommand(char* args)
 {
-    uint32 param;
-    if (!ExtractUInt32(&args, param))
+    int32 param;
+    if (!ExtractInt32(&args, param))
     {
         PSendSysMessage("%s", sWorldState.GetSunsReachPrintout().data());
         return true;
