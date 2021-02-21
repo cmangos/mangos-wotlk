@@ -10954,7 +10954,7 @@ void Unit::RemoveFromWorld()
         RemoveNotOwnTrackedTargetAuras();
         BreakCharmOutgoing();
         BreakCharmIncoming();
-        RemoveGuardians(IsPlayer());
+        RemoveGuardians(IsPlayer() || IsCreature() && static_cast<Creature*>(this)->IsTotem());
         RemoveMiniPet();
         UnsummonAllTotems();
         RemoveAllGameObjects();
