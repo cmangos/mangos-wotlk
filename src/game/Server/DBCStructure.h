@@ -1185,7 +1185,7 @@ struct HolidaysEntry
     uint32 ID;                                              // 0        m_ID
     // uint32 duration[10];                                 // 1-10     m_duration
     // uint32 date[26];                                     // 11-36    m_date (dates in unix time starting at January, 1, 2000)
-    // uint32 region;                                       // 37       m_region (wow region)
+    // uint32 region;                                       // 37       m_region (region)
     // uint32 looping;                                      // 38       m_looping
     // uint32 calendarFlags[10];                            // 39-48    m_calendarFlags
     // uint32 holidayNameId;                                // 49       m_holidayNameID (HolidayNames.dbc)

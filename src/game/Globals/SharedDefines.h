@@ -2392,7 +2392,7 @@ enum ChatMsg
     CHAT_MSG_BATTLEGROUND           = 0x2C,
     CHAT_MSG_BATTLEGROUND_LEADER    = 0x2D,
     CHAT_MSG_RESTRICTED             = 0x2E,
-    CHAT_MSG_BATTLENET              = 0x2F,
+    CHAT_MSG_BNET                   = 0x2F,
     CHAT_MSG_ACHIEVEMENT            = 0x30,
     CHAT_MSG_GUILD_ACHIEVEMENT      = 0x31,
     CHAT_MSG_ARENA_POINTS           = 0x32,
@@ -2864,7 +2864,7 @@ enum TrackedAuraType
 
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
-// will only support WoW, WoW:TBC and WoW:WotLK 3.3.5a client build 12340...
+// will only support Vanilla, TBC and WotLK 3.3.5a client build 12340...
 
 #define EXPECTED_MANGOSD_CLIENT_BUILD        {12340, 0}
 
