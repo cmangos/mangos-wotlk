@@ -2480,7 +2480,7 @@ class Unit : public WorldObject
         void DisableThreatPropagationToOwner() { m_ownerThreatPropagation = false; }
         bool IsPropagatingThreatToOwner() { return m_ownerThreatPropagation; } // TBC+ - Eye of Kilrogg
 
-        float GetAttackDistance(Unit const* pl) const;
+        float GetAttackDistance(Unit const* target) const;
         virtual uint32 GetDetectionRange() const { return 20.f; }
 
         virtual UnitAI* AI() { return nullptr; }
