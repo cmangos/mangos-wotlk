@@ -458,9 +458,9 @@ struct ViscidusFrostWeakness : public AuraScript
     {
         if (Unit* target = aura->GetTarget())
         {
-            if (procData.procSpell)
+            if (procData.spellInfo)
             {
-                if (procData.procSpell->SchoolMask == SPELL_SCHOOL_MASK_FROST)
+                if (procData.spellInfo->SchoolMask == SPELL_SCHOOL_MASK_FROST)
                     target->AI()->SendAIEvent(AI_EVENT_CUSTOM_B, target, target);
             }
         }

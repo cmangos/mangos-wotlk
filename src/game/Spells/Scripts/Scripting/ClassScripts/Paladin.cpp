@@ -105,13 +105,13 @@ struct spell_paladin_tier_6_trinket : public AuraScript
 {
     SpellAuraProcResult OnProc(Aura* aura, ProcExecutionData& procData) const override
     {
-        if (!procData.procSpell)
+        if (!procData.spellInfo)
             return SPELL_AURA_PROC_FAILED;
 
         float chance;
 
         // Flash of light/Holy light
-        if (procData.procSpell->SpellFamilyFlags & uint64(0x00000000C0000000))
+        if (procData.spellInfo->SpellFamilyFlags & uint64(0x00000000C0000000))
         {
             procData.triggeredSpellId = 40471;
             chance = 15.0f;
