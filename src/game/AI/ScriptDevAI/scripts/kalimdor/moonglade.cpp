@@ -137,37 +137,31 @@ struct npc_clintar_dw_spiritAI : public npc_escortAI
     }
 };
 
-UnitAI* GetAI_npc_clintar_dw_spirit(Creature* pCreature)
+struct GraspOfTheEmeraldDream : public SpellScript
 {
-    return new npc_clintar_dw_spiritAI(pCreature);
-}
-
-// we expect this spell to be triggered from spell casted at questAccept
-bool EffectDummyCreature_npc_clintar_dw_spirit(Unit* pCaster, uint32 spellId, SpellEffectIndex effIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
-{
-    // always check spellid and effectindex
-    if (spellId == SPELL_EMERALD_DREAM && effIndex == EFFECT_INDEX_0)
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
     {
-        if (pCaster->GetTypeId() != TYPEID_PLAYER || pCaster->HasAura(SPELL_EMERALD_DREAM))
-            return true;
+        if (spell->GetCaster()->HasAura(SPELL_EMERALD_DREAM))
+            return SPELL_FAILED_FIZZLE;
+        return SPELL_CAST_OK;
+    }
 
-        if (pCreatureTarget->GetEntry() != NPC_CLINTAR_DW_SPIRIT)
-            return true;
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        Unit* caster = spell->GetCaster();
 
         if (CreatureInfo const* pTemp = GetCreatureTemplateStore(NPC_CLINTAR_SPIRIT))
-            pCreatureTarget->SetDisplayId(Creature::ChooseDisplayId(pTemp));
-        else
-            return true;
+            target->SetDisplayId(Creature::ChooseDisplayId(pTemp));
 
         // done here, escort can start
-        if (npc_clintar_dw_spiritAI* pSpiritAI = dynamic_cast<npc_clintar_dw_spiritAI*>(pCreatureTarget->AI()))
-            pSpiritAI->DoStart(pCaster);
-
-        // always return true when we are handling this spell and effect
-        return true;
+        if (npc_clintar_dw_spiritAI* spiritAI = dynamic_cast<npc_clintar_dw_spiritAI*>(target->AI()))
+            spiritAI->DoStart(caster);
     }
-    return true;
-}
+};
 
 /*######
 ## npc_keeper_remulos
@@ -1049,8 +1043,7 @@ void AddSC_moonglade()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_clintar_dw_spirit";
-    pNewScript->GetAI = &GetAI_npc_clintar_dw_spirit;
-    pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_clintar_dw_spirit;
+    pNewScript->GetAI = &GetNewAIInstance<npc_clintar_dw_spiritAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
@@ -1069,5 +1062,6 @@ void AddSC_moonglade()
     pNewScript->pGOUse = &GOUse_go_omen_cluster;
     pNewScript->RegisterSelf();
 
+    RegisterSpellScript<GraspOfTheEmeraldDream>("spell_grasp_of_the_emerald_dream");
     RegisterSpellScript<ConjureDreamRift>("spell_conjure_dream_rift");
 }

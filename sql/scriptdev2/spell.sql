@@ -142,6 +142,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (31624,'spell_raise_dead_hyjal'),
 (31625,'spell_raise_dead_hyjal'),
 (38028,'spell_watery_grave'),
+(39601,'spell_grasp_of_the_emerald_dream'),
 (34231,'spell_increased_holy_light_healing'),
 (33793,'spell_vazruden_liquid_fire_script'),
 (33794,'spell_vazruden_liquid_fire_script'),
