@@ -650,7 +650,7 @@ struct npc_enslaved_soulAI : public CombatAI
                     AttackStart(target);
             m_creature->SetInCombatWithZone();
             if (!m_creature->IsInCombat())
-                JustReachedHome();
+                EnterEvadeMode();
         });
     }
 
@@ -685,6 +685,9 @@ struct npc_enslaved_soulAI : public CombatAI
             ResetTimer(1, 1);
             return;
         }
+
+        if (GetReactState() == REACT_PASSIVE)
+            return;
 
         // Reset encounter and despawn the spirit
         if (m_instance)
