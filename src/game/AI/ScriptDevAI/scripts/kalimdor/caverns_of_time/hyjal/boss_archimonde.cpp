@@ -153,6 +153,8 @@ struct boss_archimondeAI : public CombatAI
         SetMeleeEnabled(true);
 
         m_soulChargeId = 0;
+
+        m_creature->SetRespawnDelay(7 * DAY);
     }
 
     uint32 GetSubsequentActionTimer(const uint32 action) const
@@ -177,6 +179,7 @@ struct boss_archimondeAI : public CombatAI
 
     void JustRespawned() override
     {
+        CombatAI::JustRespawned();
         m_drainNordrassilTimer = 5000;
     }
 
