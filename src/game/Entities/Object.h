@@ -1196,6 +1196,8 @@ class WorldObject : public Object
         uint8 GetDestLocCounter() { return m_destLocCounter; }
         void IncrementDestLocCounter() { m_destLocCounter++; }
 
+        virtual uint32 GetDbGuid() const { return 0; }
+        virtual HighGuid GetParentHigh() const { return HighGuid(0); }
     protected:
         explicit WorldObject();
 

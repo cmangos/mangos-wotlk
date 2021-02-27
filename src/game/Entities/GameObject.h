@@ -911,6 +911,9 @@ class GameObject : public WorldObject
 
         void GenerateLootFor(Player* player); // used to tie chest loot to encounter at the moment of its end
 
+        uint32 GetDbGuid() const override { return m_dbGuid; }
+        HighGuid GetParentHigh() const override { return HIGHGUID_GAMEOBJECT; }
+
     protected:
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
