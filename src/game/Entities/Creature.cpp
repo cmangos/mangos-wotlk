@@ -166,8 +166,13 @@ Creature::~Creature()
 void Creature::AddToWorld()
 {
     ///- Register the creature for guid lookup
-    if (!IsInWorld() && GetObjectGuid().IsCreatureOrVehicle())
-        GetMap()->GetObjectsStore().insert<Creature>(GetObjectGuid(), (Creature*)this);
+    if (!IsInWorld())
+    {
+        if (GetObjectGuid().IsCreatureOrVehicle())
+            GetMap()->GetObjectsStore().insert<Creature>(GetObjectGuid(), (Creature*)this);
+        if (GetDbGuid())
+            GetMap()->AddDbGuidObject(this);
+    }
 
     switch (GetSubtype())
     {
@@ -208,6 +213,8 @@ void Creature::RemoveFromWorld()
     {
         if (GetObjectGuid().IsCreatureOrVehicle())
             GetMap()->GetObjectsStore().erase<Creature>(GetObjectGuid(), (Creature*)nullptr);
+        if (GetDbGuid())
+            GetMap()->RemoveDbGuidObject(this);
 
         switch (GetSubtype())
         {
