@@ -151,17 +151,17 @@ enum QuestFlags
     QUEST_FLAGS_EPIC           = 0x00000020,                // Not used currently - 1 quest in 3.3
     QUEST_FLAGS_RAID           = 0x00000040,                // Not used currently
     QUEST_FLAGS_TBC            = 0x00000080,                // Not used currently: Available if TBC expansion enabled only
-    QUEST_FLAGS_UNK2           = 0x00000100,                // Not used currently: _DELIVER_MORE Quest needs more than normal _q-item_ drops from mobs
+    QUEST_FLAGS_NO_MONEY_FROM_XP = 0x00000100,              // Not used currently: _DELIVER_MORE Quest needs more than normal _q-item_ drops from mobs
     QUEST_FLAGS_HIDDEN_REWARDS = 0x00000200,                // Items and money rewarded only sent in SMSG_QUESTGIVER_OFFER_REWARD (not in SMSG_QUESTGIVER_QUEST_DETAILS or in client quest log(SMSG_QUEST_QUERY_RESPONSE))
     QUEST_FLAGS_AUTO_REWARDED  = 0x00000400,                // These quests are automatically rewarded on quest complete and they will never appear in quest log client side.
     QUEST_FLAGS_TBC_RACES      = 0x00000800,                // Not used currently: Blood elf/Draenei starting zone quests
     QUEST_FLAGS_DAILY          = 0x00001000,                // Daily quest. Can be done once a day. Quests reset at regular intervals for all players.
     QUEST_FLAGS_FLAGS_PVP      = 0x00002000,                // activates PvP on accept
-    QUEST_FLAGS_UNK4           = 0x00004000,                // ? Membership Card Renewal
+    QUEST_FLAGS_UNAVAILABLE    = 0x00004000,                // quests not available
     QUEST_FLAGS_WEEKLY         = 0x00008000,                // Weekly quest. Can be done once a week. Quests reset at regular intervals for all players.
     QUEST_FLAGS_AUTOCOMPLETE   = 0x00010000,                // auto complete
-    QUEST_FLAGS_UNK5           = 0x00020000,                // has something to do with ReqItemId and SrcItemId
-    QUEST_FLAGS_UNK6           = 0x00040000,                // use Objective text as Complete text
+    QUEST_FLAGS_DISPLAY_IN_TRACKER = 0x00020000,            // has something to do with ReqItemId and SrcItemId
+    QUEST_FLAGS_OBJ_TEXT       = 0x00040000,                // use Objective text as Complete text
     QUEST_FLAGS_AUTO_ACCEPT    = 0x00080000,                // quests in starting areas
 };
 
@@ -252,7 +252,7 @@ class Quest
         int32  GetRewOrReqMoney() const;
         uint32 GetRewHonorAddition() const { return RewHonorAddition; }
         float GetRewHonorMultiplier() const { return RewHonorMultiplier; }
-        uint32 GetRewMoneyMaxLevel() const { return RewMoneyMaxLevel; }
+        uint32 GetRewMoneyMaxLevel() const;
         // use in XP calculation at client
         uint32 GetRewSpell() const { return RewSpell; }
         uint32 GetRewSpellCast() const { return RewSpellCast; }

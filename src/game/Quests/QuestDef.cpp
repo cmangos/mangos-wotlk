@@ -324,3 +324,11 @@ uint32 Quest::CalculateRewardHonor(uint32 level) const
 
     return honor;
 }
+
+uint32 Quest::GetRewMoneyMaxLevel() const
+{
+    if (HasQuestFlag(QUEST_FLAGS_NO_MONEY_FROM_XP))
+        return 0;
+
+    return RewMoneyMaxLevel;
+}

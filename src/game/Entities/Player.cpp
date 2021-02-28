@@ -14304,6 +14304,9 @@ void Player::AddQuest(Quest const* pQuest, Object* questGiver)
     else
         questStatusData.m_timer = 0;
 
+    if (pQuest->HasQuestFlag(QUEST_FLAGS_FLAGS_PVP))
+        UpdatePvP(true);
+
     SetQuestSlot(log_slot, quest_id, qtime);
 
     if (questStatusData.uState != QUEST_NEW)
