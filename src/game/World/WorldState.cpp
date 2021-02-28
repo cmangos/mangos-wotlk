@@ -1066,59 +1066,63 @@ void WorldState::AddSunsReachProgress(uint32 questId)
         SendWorldstateUpdate(m_sunsReachData.m_sunsReachReclamationMutex, m_sunsReachData.m_sunsReachReclamationPlayers, newValue, worldState);
 
     bool save = true;
-    if (m_sunsReachData.m_sunsReachReclamationCounters[counter] >= sWorld.getConfig(CONFIG_UINT32_SUNSREACH_COUNTER))
+    uint32 counterValue = m_sunsReachData.m_sunsReachReclamationCounters[counter];
+    uint32 modifier = 1;
+    if (otherCounter != -1)
     {
-        if (otherCounter == -1 || m_sunsReachData.m_sunsReachReclamationCounters[otherCounter] >= sWorld.getConfig(CONFIG_UINT32_SUNSREACH_COUNTER))
+        modifier = 2;
+        counterValue += m_sunsReachData.m_sunsReachReclamationCounters[otherCounter];
+    }
+    if (counterValue >= sWorld.getConfig(CONFIG_UINT32_SUNSREACH_COUNTER) * modifier)
+    {
+        save = false;
+        switch (questId)
         {
-            save = false;
-            switch (questId)
+            case QUEST_ERRATIC_BEHAVIOR:
+            case QUEST_SANCTUM_WARDS:
             {
-                case QUEST_ERRATIC_BEHAVIOR:
-                case QUEST_SANCTUM_WARDS:
-                {
-                    if (m_sunsReachData.m_phase == SUNS_REACH_PHASE_1_STAGING_AREA)
-                        HandleSunsReachPhaseTransition(SUNS_REACH_PHASE_2_SANCTUM);
-                    break;
-                }
-                case QUEST_BATTLE_FOR_THE_SUNS_REACH_ARMORY:
-                case QUEST_DISTRACTION_AT_THE_DEAD_SCAR:
-                {
-                    if (m_sunsReachData.m_phase == SUNS_REACH_PHASE_2_SANCTUM)
-                        HandleSunsReachPhaseTransition(SUNS_REACH_PHASE_3_ARMORY);
-                    break;
-                }
-                case QUEST_INTERCEPTING_THE_MANA_CELLS:
-                {
-                    if ((m_sunsReachData.m_subphaseMask & SUBPHASE_PORTAL) == 0)
-                        HandleSunsReachSubPhaseTransition(SUBPHASE_PORTAL);
-                    break;
-                }
-                case QUEST_INTERCEPT_THE_REINFORCEMENTS:
-                case QUEST_TAKING_THE_HARBOR:
-                {
-                    if (m_sunsReachData.m_phase == SUNS_REACH_PHASE_3_ARMORY)
-                        HandleSunsReachPhaseTransition(SUNS_REACH_PHASE_4_HARBOR);
-                    break;
-                }
-                case QUEST_MAKING_READY:
-                {
-                    if ((m_sunsReachData.m_subphaseMask & SUBPHASE_ANVIL) == 0)
-                        HandleSunsReachSubPhaseTransition(SUBPHASE_ANVIL);
-                    break;
-                }
-                case QUEST_DISCOVERING_YOUR_ROOTS:
-                {
-                    if ((m_sunsReachData.m_subphaseMask & SUBPHASE_ALCHEMY_LAB) == 0)
-                        HandleSunsReachSubPhaseTransition(SUBPHASE_ALCHEMY_LAB);
-                    break;
-                }
-                case QUEST_A_CHARITABLE_DONATION:
-                case QUEST_A_MAGNANIMOUS_BENEFACTOR:
-                {
-                    if ((m_sunsReachData.m_subphaseMask & SUBPHASE_MONUMENT) == 0)
-                        HandleSunsReachSubPhaseTransition(SUBPHASE_MONUMENT);
-                    break;
-                }
+                if (m_sunsReachData.m_phase == SUNS_REACH_PHASE_1_STAGING_AREA)
+                    HandleSunsReachPhaseTransition(SUNS_REACH_PHASE_2_SANCTUM);
+                break;
+            }
+            case QUEST_BATTLE_FOR_THE_SUNS_REACH_ARMORY:
+            case QUEST_DISTRACTION_AT_THE_DEAD_SCAR:
+            {
+                if (m_sunsReachData.m_phase == SUNS_REACH_PHASE_2_SANCTUM)
+                    HandleSunsReachPhaseTransition(SUNS_REACH_PHASE_3_ARMORY);
+                break;
+            }
+            case QUEST_INTERCEPTING_THE_MANA_CELLS:
+            {
+                if ((m_sunsReachData.m_subphaseMask & SUBPHASE_PORTAL) == 0)
+                    HandleSunsReachSubPhaseTransition(SUBPHASE_PORTAL);
+                break;
+            }
+            case QUEST_INTERCEPT_THE_REINFORCEMENTS:
+            case QUEST_TAKING_THE_HARBOR:
+            {
+                if (m_sunsReachData.m_phase == SUNS_REACH_PHASE_3_ARMORY)
+                    HandleSunsReachPhaseTransition(SUNS_REACH_PHASE_4_HARBOR);
+                break;
+            }
+            case QUEST_MAKING_READY:
+            {
+                if ((m_sunsReachData.m_subphaseMask & SUBPHASE_ANVIL) == 0)
+                    HandleSunsReachSubPhaseTransition(SUBPHASE_ANVIL);
+                break;
+            }
+            case QUEST_DISCOVERING_YOUR_ROOTS:
+            {
+                if ((m_sunsReachData.m_subphaseMask & SUBPHASE_ALCHEMY_LAB) == 0)
+                    HandleSunsReachSubPhaseTransition(SUBPHASE_ALCHEMY_LAB);
+                break;
+            }
+            case QUEST_A_CHARITABLE_DONATION:
+            case QUEST_A_MAGNANIMOUS_BENEFACTOR:
+            {
+                if ((m_sunsReachData.m_subphaseMask & SUBPHASE_MONUMENT) == 0)
+                    HandleSunsReachSubPhaseTransition(SUBPHASE_MONUMENT);
+                break;
             }
         }
     }
