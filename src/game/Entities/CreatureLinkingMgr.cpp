@@ -477,7 +477,7 @@ void CreatureLinkingHolder::DoCreatureLinkingEvent(CreatureLinkingEvent eventTyp
             {
                 CreatureData const* masterData = sObjectMgr.GetCreatureData(pInfo->masterDBGuid);
                 CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(masterData->id);
-                pMaster = pSource->GetMap()->GetCreature(ObjectGuid(cInfo->GetHighGuid(), cInfo->Entry, pInfo->masterDBGuid));
+                pMaster = pSource->GetMap()->GetCreature(pInfo->masterDBGuid);
             }
 
             if (pMaster)
@@ -766,7 +766,7 @@ bool CreatureLinkingHolder::TryFollowMaster(Creature* pCreature)
     {
         CreatureData const* masterData = sObjectMgr.GetCreatureData(pInfo->masterDBGuid);
         CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(masterData->id);
-        pMaster = pCreature->GetMap()->GetCreature(ObjectGuid(cInfo->GetHighGuid(), cInfo->Entry, pInfo->masterDBGuid));
+        pMaster = pCreature->GetMap()->GetCreature(pInfo->masterDBGuid);
     }
 
     if (pMaster && pMaster->IsAlive())
