@@ -16,12 +16,13 @@
 
 /* ScriptData
 SDName: Boss_Krikthir
-SD%Complete: 90%
-SDComment: Implement Achievement
+SD%Complete: 100%
+SDComment:
 SDCategory: Azjol'Nerub
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 #include "azjol-nerub.h"
 
 enum
@@ -49,46 +50,46 @@ enum
     NPC_SKITTERING_INFECTOR   = 28736
 };
 
+enum KrikthirActions
+{
+    KRIKTHIR_ACTION_FRENZY,
+    KRIKTHIR_ACTION_CURSE_FATIGUE,
+    KRIKTHIR_ACTION_MINDFLAY,
+    KIRKTHIR_ACTION_SWARM,
+    KRIKTHIR_ACTION_MAX,
+};
+
 /*######
 ## boss_krikthir
 ######*/
 
-struct boss_krikthirAI : public ScriptedAI
+struct boss_krikthirAI : public CombatAI
 {
-    boss_krikthirAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_krikthirAI(Creature* creature) : CombatAI(creature, KRIKTHIR_ACTION_MAX), m_instance(static_cast<instance_azjol_nerub*>(creature->GetInstanceData()))
     {
-        m_pInstance = static_cast<instance_azjol_nerub*>(pCreature->GetInstanceData());
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddCombatAction(KRIKTHIR_ACTION_CURSE_FATIGUE, 30000u);
+        AddCombatAction(KRIKTHIR_ACTION_MINDFLAY, 13000u);
+        AddCombatAction(KIRKTHIR_ACTION_SWARM, 10000u);
+        AddTimerlessCombatAction(KRIKTHIR_ACTION_FRENZY, true);
+
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
+        m_introSpeech = false;
     }
 
-    instance_azjol_nerub* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_azjol_nerub* m_instance;
+    bool m_isRegularMode;
 
-    bool m_bFrenzy;
-    bool m_bIntroSpeech;
+    bool m_introSpeech;
 
-    uint32 m_uiSwarmTimer;
-    uint32 m_uiCurseTimer;
-    uint32 m_uiMindFlayTimer;
-
-    void Reset() override
-    {
-        m_uiSwarmTimer    = 15000;
-        m_uiCurseTimer    = 20000;
-        m_uiMindFlayTimer = 8000;
-
-        m_bIntroSpeech    = false;
-        m_bFrenzy         = false;
-    }
-
-    void Aggro(Unit* /*pWho*/) override
+    void Aggro(Unit* /*who*/) override
     {
         DoScriptText(SAY_AGGRO, m_creature);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* victim) override
     {
+        CombatAI::KilledUnit(victim);
+
         switch (urand(0, 2))
         {
             case 0: DoScriptText(SAY_KILL_1, m_creature); break;
@@ -99,7 +100,7 @@ struct boss_krikthirAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (!m_bIntroSpeech && pWho->GetTypeId() == TYPEID_PLAYER && m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE) && m_creature->IsWithinLOSInMap(pWho))
+        if (!m_introSpeech && pWho->IsPlayer() && m_creature->IsWithinDistInMap(pWho, DEFAULT_VISIBILITY_INSTANCE) && m_creature->IsWithinLOSInMap(pWho))
         {
             switch (urand(0, 2))
             {
@@ -107,67 +108,51 @@ struct boss_krikthirAI : public ScriptedAI
                 case 1: DoScriptText(SAY_PREFIGHT_2, m_creature); break;
                 case 2: DoScriptText(SAY_PREFIGHT_3, m_creature); break;
             }
-            m_bIntroSpeech = true;
+            m_introSpeech = true;
         }
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
 
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_KRIKTHIR, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_KRIKTHIR, DONE);
     }
 
     void JustSummoned(Creature* pSummoned) override
     {
-        uint32 uiEntry = pSummoned->GetEntry();
-        if (uiEntry == NPC_SKITTERING_SWARMER || uiEntry == NPC_SKITTERING_INFECTOR)
+        if (pSummoned->GetEntry() == NPC_SKITTERING_SWARMER || pSummoned->GetEntry() == NPC_SKITTERING_INFECTOR)
             pSummoned->AI()->AttackStart(m_creature->GetVictim());
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (!m_bFrenzy && m_creature->GetHealthPercent() <= 10.0f)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
-            {
-                DoScriptText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
-                m_bFrenzy = true;
-            }
+            case KRIKTHIR_ACTION_FRENZY:
+                if (DoCastSpellIfCan(m_creature, SPELL_FRENZY) == CAST_OK)
+                {
+                    DoScriptText(EMOTE_BOSS_GENERIC_FRENZY, m_creature);
+                    DisableCombatAction(action);
+                }
+                break;
+            case KRIKTHIR_ACTION_CURSE_FATIGUE:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_CURSE_OF_FATIGUE : SPELL_CURSE_OF_FATIGUE_H) == CAST_OK)
+                    ResetCombatAction(action, 30000);
+                break;
+            case KRIKTHIR_ACTION_MINDFLAY:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_MINDFLAY : SPELL_MINDFLAY_H) == CAST_OK)
+                    ResetCombatAction(action, 10000);
+                break;
+            case KIRKTHIR_ACTION_SWARM:
+                if (DoCastSpellIfCan(m_creature, SPELL_SWARM) == CAST_OK)
+                {
+                    DoScriptText(urand(0, 1) ? SAY_SWARM_1 : SAY_SWARM_2, m_creature);
+                    ResetCombatAction(action, 30000);
+                }
+                break;
         }
-
-        if (m_uiCurseTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_CURSE_OF_FATIGUE : SPELL_CURSE_OF_FATIGUE_H) == CAST_OK)
-                m_uiCurseTimer = 20000;
-        }
-        else
-            m_uiCurseTimer -= uiDiff;
-
-        if (m_uiMindFlayTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), m_bIsRegularMode ? SPELL_MINDFLAY : SPELL_MINDFLAY_H) == CAST_OK)
-                m_uiMindFlayTimer = 8000;
-        }
-        else
-            m_uiMindFlayTimer -= uiDiff;
-
-        if (m_uiSwarmTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, SPELL_SWARM) == CAST_OK)
-            {
-                DoScriptText(urand(0, 1) ? SAY_SWARM_1 : SAY_SWARM_2, m_creature);
-                m_uiSwarmTimer = 15000;
-            }
-        }
-        else
-            m_uiSwarmTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 

@@ -22,6 +22,8 @@ SDCategory: Azjol'Nerub
 EndScriptData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
+#include "Spells/SpellAuras.h"
 #include "azjol-nerub.h"
 
 enum
@@ -32,8 +34,18 @@ enum
     SPELL_ACID_CLOUD_H          = 59419,
     SPELL_LEECH_POISON          = 53030,
     SPELL_LEECH_POISON_H        = 59417,
-    SPELL_WEB_GRAB              = 57731,
+    SPELL_WEB_GRAB              = 53406,
     SPELL_WEB_GRAB_H            = 59421,
+};
+
+enum HadronoxActions
+{
+    HADRONOX_ACTION_PIERCE_ARMOR,
+    HADRONOX_ACTION_ACID,
+    HADRONOX_ACTION_LEECH,
+    HADRONOX_ACTION_GRAB,
+    HADRONOX_ACTION_TAUNT,
+    HADRONOX_ACTION_MAX,
 };
 
 /* ##### Gauntlet description #####
@@ -46,48 +58,41 @@ enum
 ## boss_hadronox
 ######*/
 
-struct boss_hadronoxAI : public ScriptedAI
+struct boss_hadronoxAI : public CombatAI
 {
-    boss_hadronoxAI(Creature* pCreature) : ScriptedAI(pCreature)
+    boss_hadronoxAI(Creature* creature) : CombatAI(creature, HADRONOX_ACTION_MAX), m_instance(static_cast<instance_azjol_nerub*>(creature->GetInstanceData()))
     {
-        m_pInstance = static_cast<instance_azjol_nerub*>(pCreature->GetInstanceData());
-        m_bIsRegularMode = pCreature->GetMap()->IsRegularDifficulty();
-        Reset();
+        AddCombatAction(HADRONOX_ACTION_PIERCE_ARMOR, 1000u, 3000u);
+        AddCombatAction(HADRONOX_ACTION_ACID, 10000u, 14000u);
+        AddCombatAction(HADRONOX_ACTION_LEECH, 3000u, 9000u);
+        AddCombatAction(HADRONOX_ACTION_GRAB, 15000u, 19000u);
+        AddCombatAction(HADRONOX_ACTION_TAUNT, 2000u, 5000u);
+
+        m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
     }
 
-    instance_azjol_nerub* m_pInstance;
-    bool m_bIsRegularMode;
+    instance_azjol_nerub* m_instance;
+    bool m_isRegularMode;
 
-    uint32 m_uiAcidTimer;
-    uint32 m_uiLeechTimer;
-    uint32 m_uiPierceTimer;
-    uint32 m_uiGrabTimer;
-    uint32 m_uiTauntTimer;
-
-    void Reset() override
+    void AttackedBy(Unit* attacker) override
     {
-        m_uiAcidTimer   = urand(10000, 14000);
-        m_uiLeechTimer  = urand(3000, 9000);
-        m_uiPierceTimer = urand(1000, 3000);
-        m_uiGrabTimer   = urand(15000, 19000);
-        m_uiTauntTimer  = urand(2000, 5000);
-    }
-
-    void AttackedBy(Unit* pAttacker) override
-    {
-        if (pAttacker->IsPlayer() && GetReactState() == REACT_PASSIVE)
+        if (attacker->IsPlayer() && GetReactState() == REACT_PASSIVE)
             SetReactState(REACT_AGGRESSIVE);
+
+        CombatAI::AttackedBy(attacker);
     }
 
-    void KilledUnit(Unit* /*pVictim*/) override
+    void KilledUnit(Unit* victim) override
     {
+        CombatAI::KilledUnit(victim);
+
         m_creature->SetHealth(m_creature->GetHealth() + (m_creature->GetMaxHealth() * 0.1));
     }
 
-    void JustDied(Unit* /*pKiller*/) override
+    void JustDied(Unit* /*killer*/) override
     {
-        if (m_pInstance)
-            m_pInstance->SetData(TYPE_HADRONOX, DONE);
+        if (m_instance)
+            m_instance->SetData(TYPE_HADRONOX, DONE);
     }
 
     void MovementInform(uint32 uiMoveType, uint32 uiPointId) override
@@ -106,69 +111,48 @@ struct boss_hadronoxAI : public ScriptedAI
 
             // fail achievement and stop the spiders
             // if boss isn't pulled before it reaches this point, the spider gauntlet will stop
-            if (m_pInstance)
+            if (m_instance)
             {
-                m_pInstance->SetHadronoxDeniedAchievCriteria(false);
-                m_pInstance->SetData(TYPE_HADRONOX, SPECIAL);
+                m_instance->SetHadronoxDeniedAchievCriteria(false);
+                m_instance->SetData(TYPE_HADRONOX, SPECIAL);
             }
         }
     }
 
-    void UpdateAI(const uint32 uiDiff) override
+    void ExecuteAction(uint32 action) override
     {
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        if (m_uiPierceTimer < uiDiff)
+        switch (action)
         {
-            if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PIERCE_ARMOR) == CAST_OK)
-                m_uiPierceTimer = urand(8000, 15000);
+            case HADRONOX_ACTION_PIERCE_ARMOR:
+                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_PIERCE_ARMOR) == CAST_OK)
+                    ResetCombatAction(action, 20000);
+                break;
+            case HADRONOX_ACTION_ACID:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(target, m_isRegularMode ? SPELL_ACID_CLOUD : SPELL_ACID_CLOUD_H) == CAST_OK)
+                        ResetCombatAction(action, 15000);
+                }
+                break;
+            case HADRONOX_ACTION_LEECH:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(target, m_isRegularMode ? SPELL_LEECH_POISON : SPELL_LEECH_POISON_H) == CAST_OK)
+                        ResetCombatAction(action, urand(10000, 15000));
+                }
+                break;
+            case HADRONOX_ACTION_GRAB:
+                if (DoCastSpellIfCan(m_creature, m_isRegularMode ? SPELL_WEB_GRAB : SPELL_WEB_GRAB_H) == CAST_OK)
+                    ResetCombatAction(action, urand(25000, 30000));
+                break;
+            case HADRONOX_ACTION_TAUNT:
+                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
+                {
+                    if (DoCastSpellIfCan(target, SPELL_TAUNT) == CAST_OK)
+                        ResetCombatAction(action, urand(3000, 6000));
+                }
+                break;
         }
-        else
-            m_uiPierceTimer -= uiDiff;
-
-        if (m_uiAcidTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_ACID_CLOUD : SPELL_ACID_CLOUD_H) == CAST_OK)
-                    m_uiAcidTimer = urand(10000, 15000);
-            }
-        }
-        else
-            m_uiAcidTimer -= uiDiff;
-
-        if (m_uiLeechTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, m_bIsRegularMode ? SPELL_LEECH_POISON : SPELL_LEECH_POISON_H) == CAST_OK)
-                    m_uiLeechTimer = urand(10000, 15000);
-            }
-        }
-        else
-            m_uiLeechTimer -= uiDiff;
-
-        if (m_uiGrabTimer < uiDiff)
-        {
-            if (DoCastSpellIfCan(m_creature, m_bIsRegularMode ? SPELL_WEB_GRAB : SPELL_WEB_GRAB_H) == CAST_OK)
-                m_uiGrabTimer = urand(25000, 30000);
-        }
-        else
-            m_uiGrabTimer -= uiDiff;
-
-        if (m_uiTauntTimer < uiDiff)
-        {
-            if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
-            {
-                if (DoCastSpellIfCan(pTarget, SPELL_TAUNT) == CAST_OK)
-                    m_uiTauntTimer = urand(7000, 14000);
-            }
-        }
-        else
-            m_uiTauntTimer -= uiDiff;
-
-        DoMeleeAttackIfReady();
     }
 };
 
