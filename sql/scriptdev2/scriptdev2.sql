@@ -1330,7 +1330,7 @@ UPDATE creature_template SET ScriptName='npc_arugal' WHERE entry=10000;
 UPDATE creature_template SET ScriptName='npc_deathstalker_vincent' WHERE entry=4444;
 UPDATE creature_template SET ScriptName='mob_arugal_voidwalker' WHERE entry=4627;
 UPDATE creature_template SET ScriptName='boss_arugal' WHERE entry=4275;
-UPDATE creature_template SET ScriptName='npc_apothecary_hummel' WHERE entry=36296;
+UPDATE creature_template SET ScriptName='boss_apothecary_hummel' WHERE entry=36296;
 UPDATE creature_template SET ScriptName='npc_valentine_boss_manager' WHERE entry=36643;
 
 /* SHADOWMOON VALLEY */
@@ -3484,8 +3484,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1033009','I have changed my mind loyal servants, you do not need to bring the prisoner all the way to my study, I will deal with him here and now.','0','0','0','1','0','arugal SAY_INTRO_1'),
 ('-1033010','Vincent!  You and your pathetic ilk will find no more success in routing my sons and I than those beggardly remnants of the Kirin Tor.','0','0','0','0','0','arugal SAY_INTRO_2'),
 ('-1033011','If you will not serve my Master with your sword and knowledge of his enemies...','0','0','0','1','0','arugal SAY_INTRO_3'),
-('-1033012','Your moldering remains will serve ME as a testament to what happens when one is foolish enough to trespass in my domain!
-','0','0','0','0','0','arugal SAY_INTRO_4'),
+('-1033012','Your moldering remains will serve ME as a testament to what happens when one is foolish enough to trespass in my domain!','0','0','0','0','0','arugal SAY_INTRO_4'),
 
 ('-1033013','Who dares interfere with the Sons of Arugal?','5791','1','0','0','0','boss_arugal YELL_FENRUS'),
 ('-1033014','%s vanishes.','0','2','0','0','0','prisoner ashcrombe EMOTE_VANISH_AS'),
@@ -3495,9 +3494,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1033018','Another Falls!','5795','1','0','0','0','boss_arugal YELL_KILLED_PLAYER'),
 ('-1033019','Release your rage!','5797','1','0','0','0','boss_arugal YELL_COMBAT'),
 
-('-1033020','Did they bother to tell you who I am and why I am doing this?','0','0','0','0','0','hummel SAY_INTRO_1'),
-('-1033021','...or are they just using you like they do everybody else?','0','0','0','0','0','hummel SAY_INTRO_2'),
-('-1033022','But what does it matter. It is time for this to end.','0','0','0','0','0','hummel SAY_INTRO_3'),
+('-1033020','Did they bother to tell you who I am and why I am doing this?','0','0','0','6','0','hummel SAY_INTRO_1'),
+('-1033021','...or are they just using you like they do everybody else?','0','0','0','396','0','hummel SAY_INTRO_2'),
+('-1033022','But what does it matter. It is time for this to end.','0','0','0','397','0','hummel SAY_INTRO_3'),
 ('-1033023','Baxter! Get in there and help! NOW!','0','0','0','0','0','hummel SAY_CALL_BAXTER'),
 ('-1033024','It is time, Frye! Attack!','0','0','0','0','0','hummel SAY_CALL_FRYE'),
 ('-1033025','...please don''t think less of me.','0','0','0','0','0','hummel SAY_DEATH'),

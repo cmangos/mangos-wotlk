@@ -31,8 +31,11 @@ enum
     NPC_HUMMEL              = 36296,                        // Love is in the Air event
     NPC_FRYE                = 36272,
     NPC_BAXTER              = 36565,
+    NPC_CROWN_APOTHECARY    = 36885,
     NPC_VALENTINE_BOSS_MGR  = 36643,                        // controller npc for the apothecary event
     NPC_APOTHECARY_GENERATOR = 36212,                       // the npc which summons the crazed apothecary
+    NPC_CRAZED_APOTHECARY   = 36568,                        // casts spell 68957 on range check
+    NPC_VALENTINE_VIAL_BUNNY = 36530,
 
     // Wolf Master Nandos intro event
     NPC_MASTER_NANDOS       = 3927,
@@ -48,8 +51,6 @@ enum
 
     GO_APOTHECARE_VIALS     = 190678,                       // move position for Baxter
     GO_CHEMISTRY_SET        = 200335,                       // move position for Frye
-
-    SAY_HUMMEL_DEATH        = -1033025,
 
     MAX_APOTHECARY          = 3,
 };
@@ -73,7 +74,8 @@ class instance_shadowfang_keep : public ScriptedInstance
         void DoSpeech();
 
         void OnCreatureDeath(Creature* pCreature) override;
-        void OnCreatureEvade(Creature* pCreature);
+        void OnCreatureEvade(Creature* pCreature) override;
+        void OnCreatureRespawn(Creature* creature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
@@ -81,12 +83,19 @@ class instance_shadowfang_keep : public ScriptedInstance
         const char* Save() const override { return m_strInstData.c_str(); }
         void Load(const char* chrIn) override;
 
+        void Update(const uint32 diff) override;
+
+        void GetCrownApothecaryGuids(GuidList& lApothecaryList) const { lApothecaryList = m_lCrownApothecaryGuids; }
+
     private:
         uint32 m_auiEncounter[MAX_ENCOUNTER];
         std::string m_strInstData;
 
         uint8 m_uiApothecaryDead;
         GuidList m_lNandosWolvesGuids;
+        GuidList m_lCrownApothecaryGuids;
+
+        uint32 m_uiApothecaryResetTimer;
 };
 
 #endif

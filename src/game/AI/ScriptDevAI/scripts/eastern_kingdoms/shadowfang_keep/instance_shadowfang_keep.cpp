@@ -25,7 +25,8 @@ EndScriptData */
 #include "shadowfang_keep.h"
 
 instance_shadowfang_keep::instance_shadowfang_keep(Map* pMap) : ScriptedInstance(pMap),
-    m_uiApothecaryDead(0)
+    m_uiApothecaryDead(0),
+    m_uiApothecaryResetTimer(0)
 {
     Initialize();
 }
@@ -62,6 +63,9 @@ void instance_shadowfang_keep::OnCreatureCreate(Creature* pCreature)
             if (pCreature->GetPositionZ() > nandosMovement.fZ && !pCreature->IsTemporarySummon())
                 m_lNandosWolvesGuids.push_back(pCreature->GetObjectGuid());
             break;
+        case NPC_CROWN_APOTHECARY:
+            m_lCrownApothecaryGuids.push_back(pCreature->GetObjectGuid());
+            return;
         default:
             return;
     }
@@ -101,12 +105,7 @@ void instance_shadowfang_keep::OnCreatureDeath(Creature* pCreature)
 {
     switch (pCreature->GetEntry())
     {
-        // Remove lootable flag from Hummel
         // Instance data is set to SPECIAL because the encounter depends on multiple bosses
-        case NPC_HUMMEL:
-            pCreature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
-            DoScriptText(SAY_HUMMEL_DEATH, pCreature);
-        // no break;
         case NPC_FRYE:
         case NPC_BAXTER:
             SetData(TYPE_APOTHECARY, SPECIAL);
@@ -145,6 +144,24 @@ void instance_shadowfang_keep::OnCreatureEvade(Creature* pCreature)
         case NPC_FRYE:
         case NPC_BAXTER:
             SetData(TYPE_APOTHECARY, FAIL);
+            break;
+    }
+}
+
+void instance_shadowfang_keep::OnCreatureRespawn(Creature* pCreature)
+{
+    switch (pCreature->GetEntry())
+    {
+        case NPC_CRAZED_APOTHECARY:
+            if (Creature* pHummel = GetSingleCreatureFromStorage(NPC_HUMMEL))
+            {
+                if (pHummel->GetVictim())
+                    pCreature->AI()->AttackStart(pHummel->GetVictim());
+            }
+            break;
+        case NPC_VALENTINE_VIAL_BUNNY:
+            pCreature->AI()->SetReactState(REACT_PASSIVE);
+            pCreature->SetCanEnterCombat(false);
             break;
     }
 }
@@ -203,6 +220,20 @@ void instance_shadowfang_keep::SetData(uint32 uiType, uint32 uiData)
             // Reset apothecary counter on fail
             if (uiData == IN_PROGRESS)
                 m_uiApothecaryDead = 0;
+            else if (uiData == FAIL)
+            {
+                // despawn bosses and reset on timer
+                if (Creature* pBoss = GetSingleCreatureFromStorage(NPC_HUMMEL))
+                    pBoss->ForcedDespawn();
+                if (Creature* pBoss = GetSingleCreatureFromStorage(NPC_BAXTER))
+                    pBoss->ForcedDespawn();
+                if (Creature* pBoss = GetSingleCreatureFromStorage(NPC_FRYE))
+                    pBoss->ForcedDespawn();
+
+                m_uiApothecaryResetTimer = 30000;
+            }
+
+            // count dead apothecaries
             if (uiData == SPECIAL)
             {
                 ++m_uiApothecaryDead;
@@ -211,7 +242,10 @@ void instance_shadowfang_keep::SetData(uint32 uiType, uint32 uiData)
                 if (m_uiApothecaryDead == MAX_APOTHECARY)
                 {
                     if (Creature* pHummel = GetSingleCreatureFromStorage(NPC_HUMMEL))
-                        pHummel->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                    {
+                        pHummel->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+                        pHummel->Suicide();
+                    }
 
                     SetData(TYPE_APOTHECARY, DONE);
                 }
@@ -274,6 +308,28 @@ void instance_shadowfang_keep::Load(const char* chrIn)
     }
 
     OUT_LOAD_INST_DATA_COMPLETE;
+}
+
+void instance_shadowfang_keep::Update(uint32 uiDiff)
+{
+    if (m_uiApothecaryResetTimer)
+    {
+        if (m_uiApothecaryResetTimer <= uiDiff)
+        {
+            if (Creature* pBoss = GetSingleCreatureFromStorage(NPC_HUMMEL))
+                pBoss->Respawn();
+            if (Creature* pBoss = GetSingleCreatureFromStorage(NPC_BAXTER))
+                pBoss->Respawn();
+            if (Creature* pBoss = GetSingleCreatureFromStorage(NPC_FRYE))
+                pBoss->Respawn();
+
+            for (const auto& guid : m_lCrownApothecaryGuids)
+                if (Creature* pApothecary = instance->GetCreature(guid))
+                    pApothecary->Respawn();
+        }
+        else
+            m_uiApothecaryResetTimer -= uiDiff;
+    }
 }
 
 InstanceData* GetInstanceData_instance_shadowfang_keep(Map* pMap)
