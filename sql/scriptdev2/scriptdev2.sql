@@ -13,7 +13,7 @@ UPDATE world_template SET ScriptName='';
 
 /* AREATRIGGER */
 INSERT INTO scripted_areatrigger VALUES
-(171, 'at_huldar_miran'),
+(171,'at_huldar_miran'),
 (1726,'at_scent_larkorwi'),
 (1727,'at_scent_larkorwi'),
 (1728,'at_scent_larkorwi'),
@@ -36,12 +36,18 @@ INSERT INTO scripted_areatrigger VALUES
 (2067,'at_blackrock_spire'),
 (3066,'at_ravenholdt'),
 (3146,'at_hive_tower'),
-(3546,'at_childrens_week_spot'), -- Darnassian bank
-(3547,'at_childrens_week_spot'), -- Undercity - thone room
-(3548,'at_childrens_week_spot'), -- Stonewrought Dam
-(3549,'at_childrens_week_spot'), -- The Mor'shan Rampart
-(3550,'at_childrens_week_spot'), -- Ratchet Docks
-(3552,'at_childrens_week_spot'), -- Westfall Lighthouse
+-- Darnassian bank
+(3546,'at_childrens_week_spot'),
+-- Undercity - Throne Room
+(3547,'at_childrens_week_spot'),
+-- Stonewrought Dam
+(3548,'at_childrens_week_spot'),
+-- The Mor'shan Rampart
+(3549,'at_childrens_week_spot'),
+-- Ratchet Docks
+(3550,'at_childrens_week_spot'),
+-- Westfall Lighthouse
+(3552,'at_childrens_week_spot'),
 (3587,'at_ancient_leaf'),
 (3626,'at_vaelastrasz'),
 (3958,'at_zulgurub'),
@@ -197,11 +203,11 @@ UPDATE gameobject_template SET ScriptName='spell_dummy_go' WHERE entry IN (18161
 /* WORLD MAP SCRIPTS */
 DELETE FROM world_template WHERE map IN (0, 1, 530, 571, 609);
 INSERT INTO world_template VALUES
-(0, 'world_map_eastern_kingdoms'),
-(1, 'world_map_kalimdor'),
-(530, 'world_map_outland'),
-(571, 'world_map_northrend'),
-(609, 'world_map_ebon_hold');
+(0,'world_map_eastern_kingdoms'),
+(1,'world_map_kalimdor'),
+(530,'world_map_outland'),
+(571,'world_map_northrend'),
+(609,'world_map_ebon_hold');
 
 -- gromgol UC
 INSERT INTO scripted_event_id VALUES
@@ -452,26 +458,26 @@ UPDATE creature_template SET ScriptName='boss_chromaggus' WHERE entry=14020;
 UPDATE creature_template SET ScriptName='boss_victor_nefarius' WHERE entry=10162;
 UPDATE creature_template SET ScriptName='boss_nefarian' WHERE entry=11583;
 INSERT INTO scripted_event_id VALUES
-(8446, 'event_weekly_chromatic_selection'),
-(8447, 'event_weekly_chromatic_selection'),
-(8448, 'event_weekly_chromatic_selection'),
-(8449, 'event_weekly_chromatic_selection'),
-(8450, 'event_weekly_chromatic_selection'),
-(8451, 'event_weekly_chromatic_selection'),
-(8452, 'event_weekly_chromatic_selection'),
-(8453, 'event_weekly_chromatic_selection'),
-(8454, 'event_weekly_chromatic_selection'),
-(8455, 'event_weekly_chromatic_selection'),
-(8520, 'event_weekly_chromatic_selection'),
-(8521, 'event_weekly_chromatic_selection'),
-(8522, 'event_weekly_chromatic_selection'),
-(8523, 'event_weekly_chromatic_selection'),
-(8524, 'event_weekly_chromatic_selection'),
-(8525, 'event_weekly_chromatic_selection'),
-(8526, 'event_weekly_chromatic_selection'),
-(8527, 'event_weekly_chromatic_selection'),
-(8528, 'event_weekly_chromatic_selection'),
-(8529, 'event_weekly_chromatic_selection');
+(8446,'event_weekly_chromatic_selection'),
+(8447,'event_weekly_chromatic_selection'),
+(8448,'event_weekly_chromatic_selection'),
+(8449,'event_weekly_chromatic_selection'),
+(8450,'event_weekly_chromatic_selection'),
+(8451,'event_weekly_chromatic_selection'),
+(8452,'event_weekly_chromatic_selection'),
+(8453,'event_weekly_chromatic_selection'),
+(8454,'event_weekly_chromatic_selection'),
+(8455,'event_weekly_chromatic_selection'),
+(8520,'event_weekly_chromatic_selection'),
+(8521,'event_weekly_chromatic_selection'),
+(8522,'event_weekly_chromatic_selection'),
+(8523,'event_weekly_chromatic_selection'),
+(8524,'event_weekly_chromatic_selection'),
+(8525,'event_weekly_chromatic_selection'),
+(8526,'event_weekly_chromatic_selection'),
+(8527,'event_weekly_chromatic_selection'),
+(8528,'event_weekly_chromatic_selection'),
+(8529,'event_weekly_chromatic_selection');
 
 
 /* BLADE'S EDGE MOUNTAINS */
@@ -491,10 +497,10 @@ UPDATE creature_template SET ScriptName='npc_deadsoul_orb' WHERE entry=20845;
 UPDATE creature_template SET ScriptName='npc_evergrove_druid' WHERE entry=22423;
 UPDATE creature_template SET ScriptName='npc_apexis_flayer' WHERE entry=22175;
 INSERT INTO scripted_areatrigger VALUES
-(4613, "mobs_grishna_arrakoa"),
-(4615, "mobs_grishna_arrakoa"),
-(4616, "mobs_grishna_arrakoa"),
-(4617, "mobs_grishna_arrakoa");
+(4613,'mobs_grishna_arrakoa'),
+(4615,'mobs_grishna_arrakoa'),
+(4616,'mobs_grishna_arrakoa'),
+(4617,'mobs_grishna_arrakoa');
 UPDATE creature_template SET ScriptName='npc_soulgrinder' WHERE entry=23019;
 UPDATE creature_template SET ScriptName='npc_mogdorg_the_wizened' WHERE entry=22941;
 UPDATE creature_template SET ScriptName='npc_supplicant' WHERE entry IN(23052,23053);
@@ -813,7 +819,7 @@ UPDATE creature_template SET ScriptName='npc_infused_crystal' WHERE entry=16364;
 
 /* FELWOOD */
 INSERT INTO scripted_event_id VALUES
-(8328, 'npc_kroshius');
+(8328,'npc_kroshius');
 UPDATE creature_template SET ScriptName='npc_kitten' WHERE entry=9937;
 UPDATE creature_template SET ScriptName='npc_corrupt_saber' WHERE entry=10042;
 UPDATE creature_template SET ScriptName='npc_niby_the_almighty' WHERE entry=14469;
@@ -1201,7 +1207,7 @@ UPDATE creature_template SET ScriptName='npc_scrapped_fel_reaver' WHERE entry IN
 UPDATE creature_template SET ScriptName='npc_adyen_the_lightwarden' WHERE entry IN(18537);
 UPDATE creature_template SET ScriptName='npc_kaylaan_the_lost' WHERE entry IN(20794);
 INSERT INTO scripted_areatrigger VALUES
-(4523, 'at_socrethar_seat');
+(4523,'at_socrethar_seat');
 UPDATE creature_template SET ScriptName='npc_commander_hobb' WHERE entry IN(23434);
 UPDATE creature_template SET ScriptName='npc_commander_arcus' WHERE entry IN(23452);
 
@@ -1551,7 +1557,7 @@ INSERT INTO scripted_areatrigger VALUES
 (4034,'at_stomach_cthun'),
 (4036,'at_stomach_cthun');
 INSERT INTO scripted_event_id VALUES
-(9738, 'event_cthun_reset');
+(9738,'event_cthun_reset');
 
 /* TEROKKAR FOREST */
 UPDATE creature_template SET ScriptName='mob_netherweb_victim' WHERE entry=22355;
@@ -1567,7 +1573,7 @@ UPDATE creature_template SET ScriptName='npc_avatar_of_terokk' WHERE entry=22375
 UPDATE creature_template SET ScriptName='npc_minion_of_terokk' WHERE entry=22376;
 UPDATE creature_template SET ScriptName='boss_terokk' WHERE entry IN(21838);
 INSERT INTO scripted_event_id VALUES
-(15014, 'event_summon_terokk');
+(15014,'event_summon_terokk');
 
 /* THOUSAND NEEDLES */
 UPDATE creature_template SET ScriptName='npc_kanati' WHERE entry=10638;
@@ -1694,17 +1700,28 @@ UPDATE creature_template SET ScriptName='npc_descent_madness' WHERE entry=34072;
 UPDATE creature_template SET ScriptName='npc_keeper_mimiron' WHERE entry=33412;
 UPDATE creature_template SET ScriptName='npc_keeper_thorim' WHERE entry=33413;
 INSERT INTO scripted_event_id VALUES
-(9735, 'event_spell_saronite_barrier'), -- Vezax saronite barrier event
-(20907,'event_boss_hodir'),             -- Hodir shatter chest event
-(20964,'event_spell_harpoon_shot'),     -- Razorscale harpoon event
-(21030,'event_go_ulduar_tower'),        -- Tower of Life destroyed event
-(21031,'event_go_ulduar_tower'),        -- Tower of Storms destroyed event
-(21032,'event_go_ulduar_tower'),        -- Tower of Frost destroyed event
-(21033,'event_go_ulduar_tower'),        -- Tower of Flame destroyed event
-(21045,'event_boss_hodir'),             -- Hodir attack start event
-(21605,'event_ulduar'),                 -- Flame Leviathan shutdown event
-(21606,'event_ulduar'),                 -- XT-002 Scrap repair event
-(21620,'event_ulduar');                 -- Ignis construct shatter event
+-- Vezax saronite barrier event
+(9735,'event_spell_saronite_barrier'),
+-- Hodir shatter chest event
+(20907,'event_boss_hodir'),
+-- Razorscale harpoon event
+(20964,'event_spell_harpoon_shot'),
+-- Tower of Life destroyed event
+(21030,'event_go_ulduar_tower'),
+-- Tower of Storms destroyed event
+(21031,'event_go_ulduar_tower'),
+-- Tower of Frost destroyed event
+(21032,'event_go_ulduar_tower'),
+-- Tower of Flame destroyed event
+(21033,'event_go_ulduar_tower'),
+-- Hodir attack start event
+(21045,'event_boss_hodir'),
+-- Flame Leviathan shutdown event
+(21605,'event_ulduar'),
+-- XT-002 Scrap repair event
+(21606,'event_ulduar'),
+-- Ignis construct shatter event
+(21620,'event_ulduar');
 
 /* UN'GORO CRATER */
 UPDATE creature_template SET ScriptName='npc_ame01' WHERE entry=9623;
@@ -3315,10 +3332,10 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 
 ('-1010022','Thank you for freeing me.  Speak with my sister in Splintertree.  I... I must find a place to rest...','0','0','0','0','8265','Ruul Snowhoof'),
 
-('-1010023','I\'m ready when you are, $N. Lead the way!','0','0','0','0','4079','Kindal Moonweaver SAY_QUEST_START'),
+('-1010023','I''m ready when you are, $N. Lead the way!','0','0','0','0','4079','Kindal Moonweaver SAY_QUEST_START'),
 ('-1010024','Die, $n. Elune will not have you harm her creatures any longer!','0','0','0','0','4123','Kindal Moonweaver SAY_INITIAL_AGGRO'),
 ('-1010025','You dare touch me?!','0','0','0','0','4125','Kindal Moonweaver SAY_AGGRO'),
-('-1010026','We\'ve done it! Meet me back by Jer\'kai above the Grim Totem camp.','0','0','0','0','4080','Kindal Moonweaver SAY_QUEST_COMPLETE'),
+('-1010026','We''ve done it! Meet me back by Jer''kai above the Grim Totem camp.','0','0','0','0','4080','Kindal Moonweaver SAY_QUEST_COMPLETE'),
 
 ('-1010027','%s is lured out by the sweet scent of the purified food.','0','2','0','0','5617','Blackwood Furbolg - on event 3938'),
 ('-1010028','%s begins to greedily devour the food.','0','2','0','0','5618','Blackwood Furbolg - on event 3938'),
@@ -4081,7 +4098,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1509029','Come get some!','0','0','0','0','0','andorov SAY_ANDOROV_INTRO_4'),
 ('-1509030','Kill first, ask questions later... Incoming!','0','1','0','0','0','andorov SAY_ANDOROV_ATTACK_START'),
 ('-1509031','I lied...','0','1','0','0','0','andorov SAY_ANDOROV_INTRO_2'),
-('-1509032','My work here is done. I\'ll be sure to let Mar\'alith and the others at Cenarion Hold know that you helped me out a little. Be careful in here, you don\'t have me holdin\' your hand past this point.','0','0','0','0','11560','andorov SAY_ANDOROV_DESPAWN');
+('-1509032','My work here is done. I''ll be sure to let Mar''alith and the others at Cenarion Hold know that you helped me out a little. Be careful in here, you don''t have me holdin'' your hand past this point.','0','0','0','0','11560','andorov SAY_ANDOROV_DESPAWN');
 
 -- -1 531 000 TEMPLE OF AHN'QIRAJ
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
@@ -5616,7 +5633,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1574016','REUSE ME','0','0','0','0','0','REUSE ME'),
 
 ('-1574017','See... you... soon.','13200','1','0','0','0','dalronn SAY_DAL_DEATH'),
-('-1574018','There\'s no... greater... glory.','13201','1','0','0','0','dalronn SAY_DAL_DEATH_REAL'),
+('-1574018','There''s no... greater... glory.','13201','1','0','0','0','dalronn SAY_DAL_DEATH_REAL'),
 
 ('-1574019','REUSE ME','0','0','0','0','0','REUSE ME'),
 ('-1574020','REUSE ME','0','0','0','0','0','REUSE ME'),
@@ -6807,7 +6824,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1616015','Your energy will be put to good use!','14526','1','0','0','0','malygos SAY_SLAY_2_A'),
 ('-1616016','I am the spell-weaver! My power is infinite!','14527','1','0','0','0','malygos SAY_SLAY_2_B'),
 ('-1616017','Your spirit will linger here forever!','14528','1','0','0','0','malygos SAY_SLAY_2_C'),
-('-1616018','ENOUGH! If you intend to reclaim Azeroth\'s magic, then you shall have it!','14529','1','0','0','0','malygos SAY_END_PHASE_2'),
+('-1616018','ENOUGH! If you intend to reclaim Azeroth''s magic, then you shall have it!','14529','1','0','0','0','malygos SAY_END_PHASE_2'),
 ('-1616019','Now your benefactors make their appearance, but they are too late! The powers contained here are sufficient to destroy the world ten times over. What do you think they will do to you?','14530','1','0','0','0','malygos SAY_INTRO_PHASE_3'),
 ('-1616020','SUBMIT!','14531','1','0','0','0','malygos SAY_START_PHASE_3'),
 ('-1616021','Alexstrasza! Another of your brood falls!','14534','1','0','0','0','malygos SAY_SLAY_3_A'),
@@ -6910,34 +6927,34 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1631033','I have become...DEATH!','16698','1','0','0','0','saurfang SAY_BERSERK'),
 ('-1631034','I... Am... Released.','16697','1','0','0','0','saurfang SAY_DEATH'),
 
-('-1631035','Fire up the engines! We got a meetin\' with destiny, lads!','16962','1','0','0','0','muradin SAY_GUNSHIP_START_1'),
+('-1631035','Fire up the engines! We got a meetin'' with destiny, lads!','16962','1','0','0','0','muradin SAY_GUNSHIP_START_1'),
 ('-1631036','Hold on to yer hats!','16963','1','0','0','0','muradin SAY_GUNSHIP_START_2'),
 ('-1631037','What in the world is that? Grab me spyglass, crewman!','16964','1','0','0','0','muradin SAY_GUNSHIP_START_3'),
-('-1631038','By me own beard! HORDE SAILIN\' IN FAST \'N HOT!','16965','1','0','0','0','muradin SAY_GUNSHIP_START_4'),
+('-1631038','By me own beard! HORDE SAILIN'' IN FAST ''N HOT!','16965','1','0','0','0','muradin SAY_GUNSHIP_START_4'),
 ('-1631039','EVASIVE ACTION! MAN THE GUNS!','16966','1','0','0','0','muradin SAY_GUNSHIP_START_5'),
 ('-1631040','Cowardly dogs! Ye blindsided us!','16967','1','0','0','0','muradin SAY_GUNSHIP_START_6'),
 ('-1631041','This is not your battle, dwarf. Back down or we will be forced to destroy your ship.','17093','1','0','0','0','saurfang SAY_GUNSHIP_START_7'),
-('-1631042','Not me battle? I dunnae who ye think ye are, mister, but I got a score to settle with Arthas and yer not gettin\' in me way! FIRE ALL GUNS! FIRE! FIRE!','16968','1','0','0','0','muradin SAY_GUNSHIP_START_8'),
+('-1631042','Not me battle? I dunnae who ye think ye are, mister, but I got a score to settle with Arthas and yer not gettin'' in me way! FIRE ALL GUNS! FIRE! FIRE!','16968','1','0','0','0','muradin SAY_GUNSHIP_START_8'),
 ('-1631043','Reavers, Sergeants, attack!','17081','1','0','0','0','saurfang SAY_SUMMON_SOLDIERS'),
-('-1631044','We\'re taking hull damage, get a battle-mage out here to shut down those cannons!','17082','1','0','0','0','saurfang SAY_SUMMON_MAGES'),
+('-1631044','We''re taking hull damage, get a battle-mage out here to shut down those cannons!','17082','1','0','0','0','saurfang SAY_SUMMON_MAGES'),
 ('-1631045','Axethrowers, hurl faster!','17079','1','0','0','0','saurfang SAY_RANDOM_ATTACK_1'),
 ('-1631046','Rocketeers, reload!','0','1','0','0','0','saurfang SAY_RANDOM_ATTACK_2'),
-('-1631047','Don\'t say I didn\'t warn ya, scoundrels! Onward, brothers and sisters!','16959','1','0','0','0','muradin SAY_WIN'),
+('-1631047','Don''t say I didn''t warn ya, scoundrels! Onward, brothers and sisters!','16959','1','0','0','0','muradin SAY_WIN'),
 
-('-1631048','Rise up, sons and daughters of the Horde! Today we battle a hated enemy of the Horde! LOK\'TAR OGAR!','17087','1','0','0','0','saurfang SAY_GUNSHIP_START_1'),
-('-1631049','Kor\'kron, take us out!','17088','1','0','0','0','saurfang SAY_GUNSHIP_START_2'),
+('-1631048','Rise up, sons and daughters of the Horde! Today we battle a hated enemy of the Horde! LOK''TAR OGAR!','17087','1','0','0','0','saurfang SAY_GUNSHIP_START_1'),
+('-1631049','Kor''kron, take us out!','17088','1','0','0','0','saurfang SAY_GUNSHIP_START_2'),
 ('-1631050','What is that? Something approaching in the distance.','17089','1','0','0','0','saurfang SAY_GUNSHIP_START_3'),
 ('-1631051','ALLIANCE GUNSHIP! ALL HANDS ON DECK!','17090','1','0','0','0','saurfang SAY_GUNSHIP_START_4'),
 ('-1631052','You answer to Saurfang now!','17091','1','0','0','0','saurfang SAY_GUNSHIP_START_5'),
-('-1631053','Move yer jalopy or we\'ll blow it out of the sky, orc! The Horde\'s got no business here. ','16969','1','0','0','0','muradin SAY_GUNSHIP_START_6'),
-('-1631054','You will know our business soon. Kor\'kron, ANNIHILATE THEM!','17092','1','0','0','0','saurfang SAY_GUNSHIP_START_7'),
+('-1631053','Move yer jalopy or we''ll blow it out of the sky, orc! The Horde''s got no business here. ','16969','1','0','0','0','muradin SAY_GUNSHIP_START_6'),
+('-1631054','You will know our business soon. Kor''kron, ANNIHILATE THEM!','17092','1','0','0','0','saurfang SAY_GUNSHIP_START_7'),
 ('-1631055','Marines, Sergeants, attack!','16956','1','0','0','0','muradin SAY_SUMMON_SOLDIERS'),
-('-1631056','We\'re taking hull damage, get a sorcerer out here to shut down those cannons!','16957','1','0','0','0','muradin SAY_SUMMON_MAGES'),
+('-1631056','We''re taking hull damage, get a sorcerer out here to shut down those cannons!','16957','1','0','0','0','muradin SAY_SUMMON_MAGES'),
 ('-1631057','Riflemen, shoot faster!','16954','1','0','0','0','muradin SAY_RANDOM_ATTACK_1'),
 ('-1631058','Mortar team, reload!','0','1','0','0','0','muradin SAY_RANDOM_ATTACK_2'),
 ('-1631059','The Alliance falter. Onward to the Lich King!','17084','1','0','0','0','saurfang SAY_WIN'),
 
-('-1631060','What\'s this then?! Ye won\t be takin\' this son o\' Ironforge\'s vessel without a fight!','16958','1','0','0','0','muradin SAY_AGGRO'),
+('-1631060','What''s this then?! Ye won	 be takin'' this son o'' Ironforge''s vessel without a fight!','16958','1','0','0','0','muradin SAY_AGGRO'),
 ('-1631061','You DARE board my ship? Your death will come swiftly.','17083','1','0','0','0','saurfang SAY_AGGRO'),
 
 -- RE-USE -1631062 TO -1631069
@@ -7396,8 +7413,8 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1724033','The orbiting spheres pulse with dark energy!','0','3','0','0','0','halion EMOTE_SPHERES'),
 ('-1724034','Your efforts force %s further out of the twillight realm!','0','3','0','0','0','halion EMOTE_OUT_OF_TWILLIGHT'),
 ('-1724035','Your efforts force %s further out of the physical realm!','0','3','0','0','0','halion EMOTE_OUT_OF_PHYSICAL'),
-('-1724036','Your companions\' efforts force %s further into the twilight realm!','0','3','0','0','0','halion EMOTE_INTO_TWILLIGHT'),
-('-1724037','Your companions\' efforts force %s further into the physical realm!','0','3','0','0','0','halion EMOTE_INTO_PHYSICAL'),
+('-1724036','Your companions'' efforts force %s further into the twilight realm!','0','3','0','0','0','halion EMOTE_INTO_TWILLIGHT'),
+('-1724037','Your companions'' efforts force %s further into the physical realm!','0','3','0','0','0','halion EMOTE_INTO_PHYSICAL'),
 ('-1724038','Without pressure in both realms %s begins to regenerate.','0','3','0','0','0','halion EMOTE_REGENERATE');
 
 -- -1 999 900 EXAMPLE TEXT
@@ -7458,11 +7475,11 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3000107,'I am ready, as are my forces. Let us end this masquerade!','reginald windsor GOSSIP_ITEM_START'),
 (-3000108,'I need a moment of your time, sir.','prospector anvilward GOSSIP_ITEM_MOMENT'),
 (-3000109,'I am ready, Oronok. Let us destroy Cyrukh and free the elements!','oronok torn-heart GOSSIP_ITEM_FIGHT'),
-(-3000110,'Why... yes, of course. I\'ve something to show you right inside this building, Mr. Anvilward.','prospector anvilward GOSSIP_ITEM_SHOW'),
+(-3000110,'Why... yes, of course. I''ve something to show you right inside this building, Mr. Anvilward.','prospector anvilward GOSSIP_ITEM_SHOW'),
 (-3000111,'I am ready, Anchorite. Let us begin the exorcism.','anchorite barada GOSSIP_ITEM_EXORCISM'),
-(-3000112,'I\'m ready - let\'s get out of here.','injured goblin miner GOSSIP_ITEM_ESCORT_READY'),
-(-3000113,'Go on, you\'re free. Get out of here!','saronite mine slave GOSSIP_ITEM_SLAVE_FREE'),
-(-3000114,'I\'m ready to start the distillation, uh, Tipsy.','tipsy mcmanus GOSSIP_ITEM_START_DISTILLATION'),
+(-3000112,'I''m ready - let''s get out of here.','injured goblin miner GOSSIP_ITEM_ESCORT_READY'),
+(-3000113,'Go on, you''re free. Get out of here!','saronite mine slave GOSSIP_ITEM_SLAVE_FREE'),
+(-3000114,'I''m ready to start the distillation, uh, Tipsy.','tipsy mcmanus GOSSIP_ITEM_START_DISTILLATION'),
 (-3000115,'Turn the key to start the machine.','threshwackonator  GOSSIP_ITEM_TURN_KEY');
 
 -- -3 033 000 SHADOWFANG KEEP
@@ -7479,10 +7496,10 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 
 -- -3 230 000 BLACKROCK DEPTHS
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
-(-3230000,'You\'re free, Dughal! Get out of here!','dughal GOSSIP_ITEM_DUGHAL'),
-(-3230001,'Get out of here, Tobias, you\'re free!','tobias GOSSIP_ITEM_TOBIAS'),
-(-3230002,'Your bondage is at an end, Doom\'rel. I challenge you!','doomrel GOSSIP_ITEM_CHALLENGE'),
-(-3230003,'Why don\'t you and Rocknot go find somewhere private...','nagmara GOSSIP_ITEM_NAGMARA');
+(-3230000,'You''re free, Dughal! Get out of here!','dughal GOSSIP_ITEM_DUGHAL'),
+(-3230001,'Get out of here, Tobias, you''re free!','tobias GOSSIP_ITEM_TOBIAS'),
+(-3230002,'Your bondage is at an end, Doom''rel. I challenge you!','doomrel GOSSIP_ITEM_CHALLENGE'),
+(-3230003,'Why don''t you and Rocknot go find somewhere private...','nagmara GOSSIP_ITEM_NAGMARA');
 
 -- -3 409 000 MOLTEN CORE
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
@@ -7492,7 +7509,7 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 
 -- -3 469 000 BLACKWING LAIR
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
-(-3469000,'I\'ve made no mistakes.','victor_nefarius GOSSIP_ITEM_NEFARIUS_1'),
+(-3469000,'I''ve made no mistakes.','victor_nefarius GOSSIP_ITEM_NEFARIUS_1'),
 (-3469001,'You have lost your mind, Nefarius. You speak in riddles.','victor_nefarius GOSSIP_ITEM_NEFARIUS_2'),
 (-3469002,'Please do.','victor_nefarius GOSSIP_ITEM_NEFARIUS_3'),
 
@@ -7501,16 +7518,16 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 
 -- -3 509 000 RUINS OF AHN'QIRAJ
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
-(-3509000,'Let\'s find out.','andorov GOSSIP_ITEM_START'),
-(-3509001,'Let\'s see what you have.','andorov GOSSIP_ITEM_TRADE');
+(-3509000,'Let''s find out.','andorov GOSSIP_ITEM_START'),
+(-3509001,'Let''s see what you have.','andorov GOSSIP_ITEM_TRADE');
 
 -- -3 532 000 KARAZHAN
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
-(-3532000,'Teleport me to the Guardian\'s Library','berthold GOSSIP_ITEM_TELEPORT'),
-(-3532001,'I\'m not an actor.','barnes GOSSIP_ITEM_OPERA_1'),
-(-3532002,'Ok, I\'ll give it a try, then.','barnes GOSSIP_ITEM_OPERA_2'),
-(-3532003,'I\'ve never been more ready.','barnes GOSSIP_ITEM_OPERA_JULIANNE_WIPE'),
-(-3532004,'The wolf\'s going down.','barnes GOSSIP_ITEM_OPERA_WOLF_WIPE'),
+(-3532000,'Teleport me to the Guardian''s Library','berthold GOSSIP_ITEM_TELEPORT'),
+(-3532001,'I''m not an actor.','barnes GOSSIP_ITEM_OPERA_1'),
+(-3532002,'Ok, I''ll give it a try, then.','barnes GOSSIP_ITEM_OPERA_2'),
+(-3532003,'I''ve never been more ready.','barnes GOSSIP_ITEM_OPERA_JULIANNE_WIPE'),
+(-3532004,'The wolf''s going down.','barnes GOSSIP_ITEM_OPERA_WOLF_WIPE'),
 (-3532005,'Oh, grandmother, what phat lewts you have.','grandma GOSSIP_ITEM_GRANDMA_THIRD'),
 
 (-3532006,'Control Orc Grunt','orc grunt GOSSIP_ITEM_ORC_GRUNT'),
@@ -7542,57 +7559,57 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 
 -- -3 560 000 ESCAPE FROM DURNHOLDE (OLD HILLSBRAD)
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
-(-3560000,'We are ready to get you out of here, Thrall. Let\'s go!','thrall GOSSIP_ITEM_START'),
+(-3560000,'We are ready to get you out of here, Thrall. Let''s go!','thrall GOSSIP_ITEM_START'),
 (-3560001,'I need a pack of Incendiary Bombs.','erozion GOSSIP_ITEM_NEED_BOMBS'),
 (-3560002,'Taretha cannot see you, Thrall.','thrall GOSSIP_ITEM_SKARLOC1'),
-(-3560003,'The situation is rather complicated, Thrall. It would be best for you to head into the mountains now, before more of Blackmoore\'s men show up. We\'ll make sure Taretha is safe.','thrall GOSSIP_ITEM_SKARLOC2'),
-(-3560004,'We\'re ready, Thrall.','thrall GOSSIP_ITEM_TARREN_2'),
+(-3560003,'The situation is rather complicated, Thrall. It would be best for you to head into the mountains now, before more of Blackmoore''s men show up. We''ll make sure Taretha is safe.','thrall GOSSIP_ITEM_SKARLOC2'),
+(-3560004,'We''re ready, Thrall.','thrall GOSSIP_ITEM_TARREN_2'),
 (-3560005,'Strange wizard?','taretha GOSSIP_ITEM_EPOCH1'),
-(-3560006,'We\'ll get you out. Taretha. Don\'t worry. I doubt the wizard would wander too far away.','taretha GOSSIP_ITEM_EPOCH2'),
+(-3560006,'We''ll get you out. Taretha. Don''t worry. I doubt the wizard would wander too far away.','taretha GOSSIP_ITEM_EPOCH2'),
 (-3560007,'Tarren Mill.','thrall GOSSIP_ITEM_TARREN_1');
 
 -- -3 564 000 BLACK TEMPLE
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
-(-3564000,'I\'m with you, Akama.','akama(shade) GOSSIP_ITEM_START_ENCOUNTER'),
-(-3564001,'I\'m ready, Akama.','akama(illidan) GOSSIP_ITEM_PREPARE'),
-(-3564002,'We\'re ready to face Illidan.','akama(illidan) GOSSIP_ITEM_START_EVENT');
+(-3564000,'I''m with you, Akama.','akama(shade) GOSSIP_ITEM_START_ENCOUNTER'),
+(-3564001,'I''m ready, Akama.','akama(illidan) GOSSIP_ITEM_PREPARE'),
+(-3564002,'We''re ready to face Illidan.','akama(illidan) GOSSIP_ITEM_START_EVENT');
 
 -- -3 568 000 ZUL'AMAN
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
-(-3568000,'Thanks for the concern, but we intend to explore Zul\'Aman.','harrison jones GOSSIP_ITEM_BEGIN'),
-(-3568001,'The coast is clear. You\'re free!','harkor GOSSIP_ITEM_ID_HARKOR_FREE'),
+(-3568000,'Thanks for the concern, but we intend to explore Zul''Aman.','harrison jones GOSSIP_ITEM_BEGIN'),
+(-3568001,'The coast is clear. You''re free!','harkor GOSSIP_ITEM_ID_HARKOR_FREE'),
 (-3568002,'So, how does a dwarf like you end up in a place like this?','harkor GOSSIP_ITEM_ID_HARKOR_DONE'),
-(-3568003,'Nalorakk is dead, you\'re free to go.','tanzar GOSSIP_ITEM_ID_TANZAR_FREE'),
-(-3568004,'You\'re welcome... Now tell us what\'s going on here!','tanzar GOSSIP_ITEM_ID_TANZAR_DONE'),
+(-3568003,'Nalorakk is dead, you''re free to go.','tanzar GOSSIP_ITEM_ID_TANZAR_FREE'),
+(-3568004,'You''re welcome... Now tell us what''s going on here!','tanzar GOSSIP_ITEM_ID_TANZAR_DONE'),
 (-3568005,'What can you tell us about Budd?','tanzar GOSSIP_ITEM_ID_TANZAR_DONE2'),
-(-3568006,'We\'ve killed your captors. You\'re free to go.','kraz GOSSIP_ITEM_ID_KRAZ_FREE'),
+(-3568006,'We''ve killed your captors. You''re free to go.','kraz GOSSIP_ITEM_ID_KRAZ_FREE'),
 (-3568007,'What happened to you, orc?','kraz GOSSIP_ITEM_ID_KRAZ_DONE'),
-(-3568008,'It\'s safe, little gnome. You can come out now.','ashli GOSSIP_ITEM_ID_ASHLI_FREE'),
-(-3568009,'How\'d a perky little gnome like you get caught up in a mess like this?','ashli GOSSIP_ITEM_ID_ASHLI_DONE');
+(-3568008,'It''s safe, little gnome. You can come out now.','ashli GOSSIP_ITEM_ID_ASHLI_FREE'),
+(-3568009,'How''d a perky little gnome like you get caught up in a mess like this?','ashli GOSSIP_ITEM_ID_ASHLI_DONE');
 
 -- -3 595 000 CULLING OF STRATHOLME
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
-(-3595000,'What do you think they\'re up to?','chromie GOSSIP_ITEM_ENTRANCE_1'),
+(-3595000,'What do you think they''re up to?','chromie GOSSIP_ITEM_ENTRANCE_1'),
 (-3595001,'You want me to do what?','chromie GOSSIP_ITEM_ENTRANCE_2'),
 (-3595002,'Very well, Chromie.','chromie GOSSIP_ITEM_ENTRANCE_3'),
 (-3595003,'Why have I been sent back to this particular place and time?','chromie GOSSIP_ITEM_INN_1'),
 (-3595004,'What was this decision?','chromie GOSSIP_ITEM_INN_2'),
 (-3595005,'So how does the Infinite Dragonflight plan to interfere?','chromie GOSSIP_ITEM_INN_3'),
-(-3595006,'Chromie, you and I both know what\'s going to happen in this time stream. We\'ve seen this all before. Can you just skip us ahead to all the real action?','chromie GOSSIP_ITEM_INN_SKIP'),
+(-3595006,'Chromie, you and I both know what''s going to happen in this time stream. We''ve seen this all before. Can you just skip us ahead to all the real action?','chromie GOSSIP_ITEM_INN_SKIP'),
 (-3595007,'Yes, please!','chromie GOSSIP_ITEM_INN_TELEPORT'),
 (-3595008,'Yes, my Prince. We are ready.','arthas GOSSIP_ITEM_CITY_GATES'),
-(-3595009,'We\'re only doing what is best for Lordaeron, your Highness.','arthas GOSSIP_ITEM_TOWN_HALL'),
+(-3595009,'We''re only doing what is best for Lordaeron, your Highness.','arthas GOSSIP_ITEM_TOWN_HALL'),
 (-3595010,'Lead the way, Prince Arthas','arthas GOSSIP_ITEM_TOWN_HALL_2'),
-(-3595011,'I\'m ready.','arthas GOSSIP_ITEM_EPOCH'),
+(-3595011,'I''m ready.','arthas GOSSIP_ITEM_EPOCH'),
 (-3595012,'For Lordaeron!','arthas GOSSIP_ITEM_ESCORT'),
-(-3595013,'I\'m ready to battle the dreadlord, sire.','arthas GOSSIP_ITEM_DREADLORD');
+(-3595013,'I''m ready to battle the dreadlord, sire.','arthas GOSSIP_ITEM_DREADLORD');
 
 -- -3 599 000 HALLS OF STONE
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3599000,'Brann, it would be our honor!','brann GOSSIP_ITEM_ID_START'),
-(-3599001,'Let\'s move Brann, enough of the history lessons!','brann GOSSIP_ITEM_ID_PROGRESS'),
+(-3599001,'Let''s move Brann, enough of the history lessons!','brann GOSSIP_ITEM_ID_PROGRESS'),
 (-3599002,'There will be plenty of time for this later Brann, we need to get moving!','brann GOSSIP_ITEM_ID_END_TRIBUNAL'),
-(-3599003,'We\'re with you Brann! Open it!','brann GOSSIP_ITEM_ID_START_SJONNIR');
+(-3599003,'We''re with you Brann! Open it!','brann GOSSIP_ITEM_ID_START_SJONNIR');
 
 -- -3 603 000 ULDUAR
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
@@ -7609,7 +7626,7 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3603009,'We are ready to help!','Expedition Commander GOSSIP_ITEM_START_RAZORSCALE'),
 (-3603010,'Activate secondary defensive systems.','Lore Keeper of Norgannon GOSSIP_ITEM_ACTIVATE_SYSTEMS'),
 (-3603011,'Confirmed.','Lore Keeper of Norgannon GOSSIP_ITEM_CONFIRMED'),
-(-3603012,'We\'re ready. Begin the assault!','Brann Bronzebeard GOSSIP_ITEM_BEGIN_ASSAULT'),
+(-3603012,'We''re ready. Begin the assault!','Brann Bronzebeard GOSSIP_ITEM_BEGIN_ASSAULT'),
 
 (-3603013,'Lend us your aid, keeper. Together we will defeat Yogg-Saron.','Ulduar Keeper GOSSIP_ITEM_LEND_AID'),
 (-3603014,'Yes.','Ulduar Keeper GOSSIP_ITEM_KEEPER_CONFIRM');
@@ -7617,24 +7634,24 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 -- -3 608 000 VIOLET HOLD
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3608000,'Activate the crystals when we get in trouble, right?','sinclari GOSSIP_ITEM_INTRO'),
-(-3608001,'Get your people to safety, we\'ll keep the Blue Dragonflight\'s forces at bay.','sinclari GOSSIP_ITEM_START'),
-(-3608002,'I\'m not fighting, so send me in now!','sinclari GOSSIP_ITEM_TELEPORT');
+(-3608001,'Get your people to safety, we''ll keep the Blue Dragonflight''s forces at bay.','sinclari GOSSIP_ITEM_START'),
+(-3608002,'I''m not fighting, so send me in now!','sinclari GOSSIP_ITEM_TELEPORT');
 
 -- -3 609 000 EBON HOLD (DK START)
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3609000,'I challenge you, death knight!','Death Knight Initiate GOSSIP_ITEM_ACCEPT_DUEL'),
-(-3609001,'I am ready, Highlord. Let the siege of Light\'s Hope begin!','Highlord Darion Mograine GOSSIP_ITEM_READY');
+(-3609001,'I am ready, Highlord. Let the siege of Light''s Hope begin!','Highlord Darion Mograine GOSSIP_ITEM_READY');
 
 -- -3 631 000 ICECROWN CITADEL
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
-(-3631000,'Teleport to the Light\'s Hammer.','GOSSIP_ITEM_TELE_LIGHTS_HAMMER'),
+(-3631000,'Teleport to the Light''s Hammer.','GOSSIP_ITEM_TELE_LIGHTS_HAMMER'),
 (-3631001,'Teleport to the Oratory of the Damned.','GOSSIP_ITEM_TELE_ORATORY_DAMNED'),
 (-3631002,'Teleport to the Rampart of Skulls.','GOSSIP_ITEM_TELE_RAMPART_OF_SKULLS'),
-(-3631003,'Teleport to the Deathbringer\'s Rise.','GOSSIP_ITEM_TELE_DEATHBRINGERS_RISE'),
+(-3631003,'Teleport to the Deathbringer''s Rise.','GOSSIP_ITEM_TELE_DEATHBRINGERS_RISE'),
 (-3631004,'Teleport to the Upper Spire.','GOSSIP_ITEM_TELE_UPPER_SPIRE'),
-(-3631005,'Teleport to the Sindragosa\'s Lair.','GOSSIP_ITEM_TELE_SINDRAGOSAS_LAIR'),
-(-3631006,'My companions are all accounted for, Saurfang. Let\'s go!','GOSSIP_ITEM_GUNSHIP_START_HORDE'),
-(-3631007,'My companions are all accounted for, Muradin. Let\'s go!','GOSSIP_ITEM_GUNSHIP_START_ALLIANCE');
+(-3631005,'Teleport to the Sindragosa''s Lair.','GOSSIP_ITEM_TELE_SINDRAGOSAS_LAIR'),
+(-3631006,'My companions are all accounted for, Saurfang. Let''s go!','GOSSIP_ITEM_GUNSHIP_START_HORDE'),
+(-3631007,'My companions are all accounted for, Muradin. Let''s go!','GOSSIP_ITEM_GUNSHIP_START_ALLIANCE');
 
 -- -3 649 000 TRIAL OF CRUSADER
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
@@ -7642,25 +7659,25 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3649001,'Bring forth the first challenge!','barrett GOSSIP_ITEM_BEAST_START'),
 (-3649002,'We want another shot at those beasts!','barrett GOSSIP_ITEM_BEAST_WIPE_INIT'),
 (-3649003,'What new challenge awaits us?','barrett GOSSIP_ITEM_JARAXXUS_INIT'),
-(-3649004,'We\'re ready to fight the sorceror again.','barrett GOSSIP_ITEM_JARAXXUS_WIPE_INIT'),
+(-3649004,'We''re ready to fight the sorceror again.','barrett GOSSIP_ITEM_JARAXXUS_WIPE_INIT'),
 (-3649005,'Of course!','barrett GOSSIP_ITEM_PVP_INIT'),
-(-3649006,'Give the signal! We\'re ready to go!','barrett GOSSIP_ITEM_PVP_START'),
+(-3649006,'Give the signal! We''re ready to go!','barrett GOSSIP_ITEM_PVP_START'),
 (-3649007,'That tough, huh?','barrett GOSSIP_ITEM_TWINS_INIT'),
-(-3649008,'Val\'kyr? We\'re ready for them','barrett GOSSIP_ITEM_TWINS_START'),
+(-3649008,'Val''kyr? We''re ready for them','barrett GOSSIP_ITEM_TWINS_START'),
 (-3649009,'Your words of praise are appreciated, Coliseum Master.','barrett GOSSIP_ITEM_ANUB_INIT'),
 (-3649010,'That is strange...','barrett GOSSIP_ITEM_ANUB_START'),
-(-3649011,'We\'re ready for the next challenge.','barrett GOSSIP_ITEM_JARAXXUS_START'),
-(-3649012,'You\'ll be even more amazed after we take them out!','barrett GOSSIP_ITEM_PVP_WIPE_INIT'),
-(-3649013,'We\'re ready for anything!','barrett GOSSIP_ITEM_PVP_WIPE_START'),
-(-3649014,'We\'re ready. This time things will be different.','barrett GOSSIP_ITEM_BEAST_WIPE_START'),
+(-3649011,'We''re ready for the next challenge.','barrett GOSSIP_ITEM_JARAXXUS_START'),
+(-3649012,'You''ll be even more amazed after we take them out!','barrett GOSSIP_ITEM_PVP_WIPE_INIT'),
+(-3649013,'We''re ready for anything!','barrett GOSSIP_ITEM_PVP_WIPE_START'),
+(-3649014,'We''re ready. This time things will be different.','barrett GOSSIP_ITEM_BEAST_WIPE_START'),
 (-3649015,'Now.','barrett GOSSIP_ITEM_JARAXXUS_WIPE_START'),
-(-3649016,'We\'ll just have to improve our teamwork to match the two of them.','barrett GOSSIP_ITEM_TWINS_WIPE_INIT'),
+(-3649016,'We''ll just have to improve our teamwork to match the two of them.','barrett GOSSIP_ITEM_TWINS_WIPE_INIT'),
 (-3649017,'Just bring them out again, then watch.','barrett GOSSIP_ITEM_TWINS_WIPE_START');
 
 -- -3 650 000 TRIAL OF THE CHAMPION
 INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 (-3650000,'I am ready.','herald GOSSIP_ITEM_READY'),
-(-3650001,'I am ready.  However, I\'d like to skip the pageantry.','herald GOSSIP_ITEM_READY_SKIP_INTRO'),
+(-3650001,'I am ready.  However, I''d like to skip the pageantry.','herald GOSSIP_ITEM_READY_SKIP_INTRO'),
 (-3650002,'I am ready for the next challenge.','herald GOSSIP_ITEM_READY_NEXT_CHALLENGE');
 
 --
@@ -7676,7 +7693,7 @@ INSERT INTO gossip_texts (entry,content_default,comment) VALUES
 --
 
 TRUNCATE script_waypoint;
-INSERT INTO `script_waypoint` (`entry`, `pathId`, `pointid`, `position_x`, `position_y`, `position_z`, `orientation`, `waittime`, `script_id`, `comment`) VALUES
+INSERT INTO script_waypoint (entry, pathId, pointid, position_x, position_y, position_z, orientation, waittime, script_id, comment) VALUES
 (349,0,1,-8769.59,-2185.73,141.975,0,0,0,''),
 (349,0,2,-8776.54,-2193.78,140.96,0,0,0,''),
 (349,0,3,-8783.29,-2194.82,140.462,0,0,0,''),
@@ -8603,15 +8620,15 @@ INSERT INTO `script_waypoint` (`entry`, `pathId`, `pointid`, `position_x`, `posi
 (7997,0,5,-4554.02,815.75,61.37,2.09212,0,0,''),
 (7997,0,6,-4558.88,824.21,60.99,2.09212,0,0,''),
 (7997,0,7,-4568.32,837.43,59.12,2.05207,0,0,''),
-(7997,0,8,-4569.90,841.76,59.74,1.85886,0,0,'Captured Sprite Darter despawn and send kill credit'),
+(7997,0,8,-4569.9,841.76,59.74,1.85886,0,0,'Captured Sprite Darter despawn and send kill credit'),
 (7997,1,1,-4531.98,807.74,59.96,5.584,0,0,'Captured Sprite Darter leaves cage'),
 (7997,1,2,-4528.44,818.16,60.29,1.92405,0,0,''),
 (7997,1,3,-4532.99,823.72,60.45,2.57672,0,0,''),
-(7997,1,4,-4540.03,826.10,60.51,3.18462,0,0,''),
+(7997,1,4,-4540.03,826.1,60.51,3.18462,0,0,''),
 (7997,1,5,-4548.23,824.09,60.47,3.47914,0,0,''),
-(7997,1,6,-4554.04,823.40,61.07,3.04796,0,0,''),
+(7997,1,6,-4554.04,823.4,61.07,3.04796,0,0,''),
 (7997,1,7,-4559.95,827.46,60.28,2.21151,0,0,''),
-(7997,1,8,-4568.80,840.24,59.62,2.04422,0,0,'Captured Sprite Darter despawn and send kill credit'),
+(7997,1,8,-4568.8,840.24,59.62,2.04422,0,0,'Captured Sprite Darter despawn and send kill credit'),
 (7997,2,1,-4531.98,807.74,59.96,5.584,0,0,'Captured Sprite Darter leaves cage'),
 (7997,2,2,-4527.93,805.21,59.68,5.51725,0,0,''),
 (7997,2,3,-4523.21,801.48,59.55,6.00262,0,0,''),
@@ -8619,15 +8636,15 @@ INSERT INTO `script_waypoint` (`entry`, `pathId`, `pointid`, `position_x`, `posi
 (7997,2,5,-4510.99,803.04,60.55,0.489129,0,0,''),
 (7997,2,6,-4505.74,805.83,62.06,0.689405,0,0,''),
 (7997,2,7,-4502.42,810.73,62.92,1.05462,0,0,''),
-(7997,2,8,-4497.04,819.50,63.52,1.00042,0,0,'Captured Sprite Darter despawn and send kill credit'),
+(7997,2,8,-4497.04,819.5,63.52,1.00042,0,0,'Captured Sprite Darter despawn and send kill credit'),
 (7997,3,1,-4531.98,807.74,59.96,5.584,0,0,'Captured Sprite Darter leaves cage'),
-(7997,3,2,-4524.90,798.40,59.44,5.25964,0,0,''),
+(7997,3,2,-4524.9,798.4,59.44,5.25964,0,0,''),
 (7997,3,3,-4518.62,787.26,59.91,4.85437,0,0,''),
 (7997,3,4,-4516.15,768.63,60.59,4.73892,0,0,''),
 (7997,3,5,-4514.92,755.28,60.38,4.5999,0,0,''),
 (7997,3,6,-4515.78,744.25,60.54,4.5999,0,0,''),
-(7997,3,7,-4514.10,727.70,62.07,4.82531,0,0,''),
-(7997,3,8,-4510.50,696.02,64.68,4.82531,0,0,'Captured Sprite Darter despawn and send kill credit'),
+(7997,3,7,-4514.1,727.7,62.07,4.82531,0,0,''),
+(7997,3,8,-4510.5,696.02,64.68,4.82531,0,0,'Captured Sprite Darter despawn and send kill credit'),
 (7998,0,1,-510.13,-132.69,-152.5,0,0,0,''),
 (7998,0,2,-511.099,-129.74,-153.845,0,0,0,''),
 (7998,0,3,-511.79,-127.476,-155.551,0,0,0,''),
@@ -9325,7 +9342,7 @@ INSERT INTO `script_waypoint` (`entry`, `pathId`, `pointid`, `position_x`, `posi
 (12818,0,24,3449.15,-471.29,168.49,0,0,0,''),
 (12818,0,25,3426.67,-456.34,158.85,0,0,0,''),
 (12818,0,26,3406.53,-446.61,153.57,0,0,0,''),
-(12818,0,27,3386.20,-437.82,151.93,0,0,0,''),
+(12818,0,27,3386.2,-437.82,151.93,0,0,0,''),
 (12818,0,28,3349.5782,-439.28,151.92,0,0,0,''),
 (12818,0,29,3310.3,-467.28,152.24,0,0,0,''),
 (12818,0,30,3290.63,-507.6,153.61,0,0,0,''),
