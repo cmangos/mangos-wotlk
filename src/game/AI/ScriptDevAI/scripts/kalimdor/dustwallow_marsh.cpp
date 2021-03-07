@@ -970,6 +970,7 @@ struct mob_invis_firework_helper : public Scripted_NoMovementAI
     void UpdateAI(const uint32 uiDiff) override
     {
         if (m_uiFireworkTimer)
+        {
             if (m_uiFireworkTimer < uiDiff)
             {
                 if (++m_uiFireworkCounter >= 5)
@@ -991,7 +992,10 @@ struct mob_invis_firework_helper : public Scripted_NoMovementAI
                 }
             }
             else
+            {
                 m_uiFireworkTimer -= uiDiff;
+            }
+        }
     }
 };
 

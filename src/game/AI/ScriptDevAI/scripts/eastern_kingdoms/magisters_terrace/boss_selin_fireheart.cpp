@@ -206,6 +206,7 @@ struct boss_selin_fireheartAI : public CombatAI
 
                 DoEndCrystalDraining();
             break;
+            default: break;
         }
     }
 

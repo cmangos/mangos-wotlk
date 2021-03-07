@@ -4576,6 +4576,7 @@ struct npc_bt_battle_sensor : public ScriptedAI
                             senderAI->m_bIsWaypointing = false;
                         break;
                     }
+                    default: break;
                 }
 
                 break;
@@ -4661,6 +4662,7 @@ struct npc_bt_battle_sensor : public ScriptedAI
                             senderAI->m_bIsWaypointing = false;
                         break;
                     }
+                    default: break;
                 }
 
                 break;
@@ -4728,6 +4730,7 @@ struct npc_bt_battle_sensor : public ScriptedAI
                         }
                         break;
                     }
+                    default: break;
                 }
 
                 break;
@@ -4789,6 +4792,7 @@ struct npc_bt_battle_sensor : public ScriptedAI
                         }
                         break;
                     }
+                    default: break;
                 }
 
                 break;
@@ -4815,6 +4819,7 @@ struct npc_bt_battle_sensor : public ScriptedAI
                         m_caalenGuid = senderGuid;
                         break;
                     }
+                    default: break;
                 }
 
                 break;
@@ -4849,6 +4854,7 @@ struct npc_bt_battle_sensor : public ScriptedAI
                         if (Creature* senderAI = dynamic_cast<Creature*>(sender))
                             senderAI->ForcedDespawn(90000);
                         break;
+                    default: break;
                 }
 
                 break;
