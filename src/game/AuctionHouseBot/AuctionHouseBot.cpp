@@ -193,13 +193,13 @@ void AuctionHouseBot::Update()
         }
 
         // remove items we've overridden (AddChance > 0) and add using given AddChance and stack size
-        for (auto itemData : m_itemData)
+        for (auto& itemData : m_itemData)
         {
             if (itemData.second.AddChance > 0) // replace normal loot sources with custom chance of adding item
                 itemMap[itemData.first] = urand(0, 99) < itemData.second.AddChance ? urand(itemData.second.MinAmount, itemData.second.MaxAmount) : 0;
         }
 
-        for (auto itemEntry : itemMap)
+        for (auto& itemEntry : itemMap)
         {
             ItemPrototype const* prototype = ObjectMgr::GetItemPrototype(itemEntry.first);
             if (!prototype || prototype->GetMaxStackSize() == 0)
