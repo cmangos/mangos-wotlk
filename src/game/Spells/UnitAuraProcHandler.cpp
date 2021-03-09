@@ -4664,6 +4664,8 @@ SpellAuraProcResult Unit::HandleModResistanceAuraProc(ProcExecutionData& data)
 SpellAuraProcResult Unit::HandleRemoveByDamageChanceProc(ProcExecutionData& data)
 {
     uint32 damage = data.damage; Aura* triggeredByAura = data.triggeredByAura;
+    if (triggeredByAura->GetSpellProto()->Id == 46102) // does not follow this logic
+        return SPELL_AURA_PROC_OK;
     // The chance to dispel an aura depends on the damage taken with respect to the casters level.
     uint32 max_dmg = getLevel() > 8 ? 25 * getLevel() - 150 : 50;
     float chance = float(damage) / max_dmg * 100.0f;
