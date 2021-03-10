@@ -1,0 +1,47 @@
+name: CMaNGOS - macOS Build
+
+# Run the workflow when a push is made.
+on: push
+
+# Our job(s).
+jobs:
+  # Our job key.
+  build:
+    # The name of the job.
+    name: Build
+    
+    # The build environment.
+    runs-on: macos-latest
+    
+    # Setup some environment variables.
+    env:
+      OPENSSL_ROOT_DIR=$(brew --prefix openssl)
+      MYSQL_HOME=/usr/local/opt/mysql-client@5.7
+      CCACHE_SLOPPINESS=pch_defines,time_macros
+    
+    # Our build steps.
+    steps:
+      # Checks out a copy of the repository.
+      - name: Checkout Code
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 1
+          
+      - name: Install MySQL Client
+        run: |
+          brew install mysql-client@5.7
+          
+      - name: Create Directories
+        run: |
+          mkdir _build
+          mkdir _install
+          cd _build
+          
+      - name: Run cmake
+        run: cmake -DCMAKE_INSTALL_PREFIX=../_install -DBUILD_EXTRACTORS=ON -DBUILD_AHBOT=ON -DBUILD_PLAYERBOT=ON ..
+        
+      - name: Run make
+        run: make -j2
+        
+      - name: Run make install
+        run: make install
