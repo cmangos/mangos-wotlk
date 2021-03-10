@@ -30,7 +30,7 @@
 
 INSTANTIATE_SINGLETON_1(AuctionHouseBot);
 
-AuctionHouseBot::AuctionHouseBot() : m_configFileName(_AUCTIONHOUSEBOT_CONFIG), m_houseAction(-1), m_chanceSell(0), m_chanceBuy(0)
+AuctionHouseBot::AuctionHouseBot() : m_configFileName(_AUCTIONHOUSEBOT_CONFIG), m_houseAction(-1)
 {
 }
 
@@ -42,6 +42,9 @@ void AuctionHouseBot::Initialize()
 {
     if (!m_ahBotCfg.SetSource(m_configFileName))
     {
+        // set buy/sell chance to 0, this prevents Update() from accessing uninitialized variables
+        m_chanceBuy = 0;
+        m_chanceSell = 0;
         sLog.outString("AHBot is disabled. Unable to open configuration file(%s).", m_configFileName.c_str());
         return;
     }
