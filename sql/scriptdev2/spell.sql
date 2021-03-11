@@ -256,6 +256,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (48385,'spell_create_spirit_fount_beam_aura'),
 (48590,'spell_avenging_spirits'),
 (50442,'spell_crystal_spike_visual_aura'),
+(50471,'spell_escape_from_silverbrook_credit_master'),
 (50546,'spell_ley_line_focus_item_trigger'),
 (50547,'spell_ley_line_focus_item_trigger'),
 (50548,'spell_ley_line_focus_item_trigger'),
