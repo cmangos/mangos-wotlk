@@ -318,8 +318,6 @@ void WorldSession::HandlePetAction(WorldPacket& recv_data)
                     return;
             }
 
-            petUnit->clearUnitState(UNIT_STAT_MOVING);
-
             uint32 flags = TRIGGERED_NONE;
             if (!petUnit->hasUnitState(UNIT_STAT_POSSESSED))
                 flags |= TRIGGERED_PET_CAST;
@@ -811,8 +809,6 @@ void WorldSession::HandlePetCastSpellOpcode(WorldPacket& recvPacket)
 
     // some spell cast packet including more data (for projectiles)
     HandleClientCastFlags(recvPacket, cast_flags, targets);
-
-    petUnit->clearUnitState(UNIT_STAT_MOVING);
 
     if (HasMissingTargetFromClient(spellInfo))
         targets.setUnitTarget(petUnit->GetTarget());
