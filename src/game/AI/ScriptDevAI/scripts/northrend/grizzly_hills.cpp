@@ -24,6 +24,8 @@ EndScriptData */
 /* ContentData
 npc_depleted_war_golem
 npc_harrison_jones
+spell_eagle_eyes
+spell_escape_from_silverbrook_credit_master
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
@@ -31,6 +33,7 @@ EndContentData */
 #include "AI/ScriptDevAI/base/pet_ai.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
+#include "Entities/Vehicle.h"
 
 /*######
 ## npc_depleted_war_golem
@@ -544,6 +547,20 @@ struct spell_eagle_eyes : public SpellScript
     }
 };
 
+/*######
+## spell_escape_from_silverbrook_credit_master
+######*/
+
+struct spell_escape_from_silverbrook_credit_master : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (Unit* passenger = caster->GetVehicleInfo()->GetPassenger(1))
+            passenger->CastSpell(nullptr, 50473, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_grizzly_hills()
 {
     Script* pNewScript = new Script;
@@ -565,4 +582,5 @@ void AddSC_grizzly_hills()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<spell_eagle_eyes>("spell_eagle_eyes");
+    RegisterSpellScript<spell_escape_from_silverbrook_credit_master>("spell_escape_from_silverbrook_credit_master");
 }
