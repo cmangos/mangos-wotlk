@@ -2966,12 +2966,9 @@ SpellCastResult Spell::CheckScriptTargeting(SpellEffectIndex effIndex, uint32 ch
             if (type == SPELL_TARGET_TYPE_GAMEOBJECT_GUID)
             {
                 for (uint32 guid : entriesToUse)
-                {
-                    GameObjectData const* data = sObjectMgr.GetGOData(guid);
-                    if (GameObject* go = m_caster->GetMap()->GetGameObject(ObjectGuid(HIGHGUID_GAMEOBJECT, data->id, guid)))
+                    if (GameObject* go = m_caster->GetMap()->GetGameObject(guid))
                         if (go->IsWithinDist(m_caster, radius))
                             foundScriptGOTargets.push_back(go);
-                }
             }
             else
             {
@@ -3001,7 +2998,7 @@ SpellCastResult Spell::CheckScriptTargeting(SpellEffectIndex effIndex, uint32 ch
         {
             if (Unit* target = m_targets.getUnitTarget())
             {
-                if (target->GetTypeId() == TYPEID_UNIT && entriesToUse.find(type == SPELL_TARGET_TYPE_CREATURE_GUID ? target->GetGUIDLow() : target->GetEntry()) != entriesToUse.end())
+                if (target->GetTypeId() == TYPEID_UNIT && entriesToUse.find(type == SPELL_TARGET_TYPE_CREATURE_GUID ? target->GetDbGuid() : target->GetEntry()) != entriesToUse.end())
                 {
                     if ((type == SPELL_TARGET_TYPE_CREATURE && target->IsAlive()) ||
                         (type == SPELL_TARGET_TYPE_DEAD && ((Creature*)target)->IsCorpse()))
@@ -3018,12 +3015,8 @@ SpellCastResult Spell::CheckScriptTargeting(SpellEffectIndex effIndex, uint32 ch
                 if (radius == 50000.f) // only guid scripting
                 {
                     for (uint32 guid : entriesToUse)
-                    {
-                        CreatureData const* data = sObjectMgr.GetCreatureData(guid);
-                        CreatureInfo const* cinfo = ObjectMgr::GetCreatureTemplate(data->id);
-                        if (Creature* creature = m_caster->GetMap()->GetCreature(ObjectGuid(cinfo->GetHighGuid(), data->id, guid)))
+                        if (Creature* creature = m_caster->GetMap()->GetCreature(guid))
                             foundScriptCreatureTargets.push_back(creature);
-                    }
                 }
                 else
                 {
@@ -3118,7 +3111,7 @@ void Spell::CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTa
             if (spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT || spellST->type == SPELL_TARGET_TYPE_GAMEOBJECT_GUID)
                 continue;
 
-            if (spellST->type == SPELL_TARGET_TYPE_CREATURE_GUID ? target->GetGUIDLow() == spellST->targetEntry : target->GetEntry() == spellST->targetEntry)
+            if (spellST->type == SPELL_TARGET_TYPE_CREATURE_GUID ? target->GetDbGuid() == spellST->targetEntry : target->GetEntry() == spellST->targetEntry)
             {
                 switch (spellST->type)
                 {
