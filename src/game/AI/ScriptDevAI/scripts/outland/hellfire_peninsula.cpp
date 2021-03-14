@@ -1514,15 +1514,16 @@ struct npc_danath_trollbaneAI : public ScriptedAI
     }
 };
 
-bool QuestComplete_npc_trollbane(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestComplete_npc_trollbane(Player* player, Creature* creature, const Quest* quest)
 {
-    if (pQuest->GetQuestId() == QUEST_FALL_OF_MAGETHERIDON_A)
+    if (quest->GetQuestId() == QUEST_FALL_OF_MAGETHERIDON_A)
     {
         // And trigger yelling
-        pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
+        creature->AI()->SendAIEvent(AI_EVENT_START_EVENT, player, creature);
+        return true;
     }
 
-    return true;
+    return false;
 }
 
 UnitAI* GetAI_danath_trollbane(Creature* pCreature)
@@ -1600,12 +1601,15 @@ struct npc_nazgrelAI : public ScriptedAI
 };
 
 // 16819/force-commander-danath-trollbane
-bool QuestComplete_npc_nazgrel(Player* pPlayer, Creature* pCreature, const Quest* pQuest)
+bool QuestComplete_npc_nazgrel(Player* player, Creature* creature, const Quest* quest)
 {
-    if (pQuest->GetQuestId() == QUEST_FALL_OF_MAGETHERIDON_H) // And trigger yelling
-        pCreature->AI()->SendAIEvent(AI_EVENT_START_EVENT, pPlayer, pCreature);
+    if (quest->GetQuestId() == QUEST_FALL_OF_MAGETHERIDON_H) // And trigger yelling        
+    {
+        creature->AI()->SendAIEvent(AI_EVENT_START_EVENT, player, creature);
+        return true;
+    }
 
-    return true;
+    return false;
 }
 
 UnitAI* GetAI_nazgrel(Creature* pCreature)
