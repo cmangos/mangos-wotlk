@@ -39,6 +39,10 @@
 #include "Maps/TransportSystem.h"
 #include "Metric/Metric.h"
 
+#ifdef BUILD_METRICS
+ #include "Metric/Metric.h"
+#endif
+
 #include <cassert>
 
 inline bool isStatic(MovementGenerator* mv)
@@ -48,6 +52,7 @@ inline bool isStatic(MovementGenerator* mv)
 
 void MotionMaster::Initialize()
 {
+#ifdef BUILD_METRICS
     metric::duration<std::chrono::microseconds> meas("motionmaster.initialize", {
         { "entry", std::to_string(m_owner->GetEntry()) },
         { "guid", std::to_string(m_owner->GetGUIDLow()) },
@@ -55,7 +60,7 @@ void MotionMaster::Initialize()
         { "map_id", std::to_string(m_owner->GetMapId()) },
         { "instance_id", std::to_string(m_owner->GetInstanceId()) }
     }, 1000);
-
+#endif
     // stop current move
     m_owner->StopMoving();
 
@@ -92,7 +97,7 @@ void MotionMaster::UpdateMotion(uint32 diff)
 {
     if (m_owner->hasUnitState(UNIT_STAT_CAN_NOT_MOVE))
         return;
-
+#ifdef BUILD_METRICS
     metric::duration<std::chrono::microseconds> meas("motionmaster.updatemotion", {
         { "entry", std::to_string(m_owner->GetEntry()) },
         { "guid", std::to_string(m_owner->GetGUIDLow()) },
@@ -100,6 +105,7 @@ void MotionMaster::UpdateMotion(uint32 diff)
         { "map_id", std::to_string(m_owner->GetMapId()) },
         { "instance_id", std::to_string(m_owner->GetInstanceId()) }
     }, 1000);
+#endif
 
     MANGOS_ASSERT(!empty());
     m_cleanFlag |= MMCF_UPDATE;

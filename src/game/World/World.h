@@ -85,7 +85,7 @@ enum WorldTimers
     WUPDATE_AHBOT       = 5,
     WUPDATE_GROUPS      = 6,
     WUPDATE_WARDEN      = 7, // This is here for headache merge error issues
-    WUPDATE_METRICS     = 8,
+    WUPDATE_METRICS     = 8, // not used if BUILD_METRICS is not set
     WUPDATE_COUNT       = 9
 };
 
@@ -679,7 +679,9 @@ class World
         void ResetMonthlyQuests();
         void ResetRandomBattleground();
 
+#ifdef BUILD_METRICS
         void GeneratePacketMetrics(); // thread safe due to atomics
+#endif
 
     private:
         void setConfig(eConfigUInt32Values index, char const* fieldname, uint32 defvalue);

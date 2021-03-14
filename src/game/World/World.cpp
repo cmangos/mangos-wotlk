@@ -68,13 +68,15 @@
 #include "Weather/Weather.h"
 #include "World/WorldState.h"
 #include "Cinematics/CinematicMgr.h"
+#include "Maps/TransportMgr.h"
 
 #ifdef BUILD_AHBOT
-#include "AuctionHouseBot/AuctionHouseBot.h"
+ #include "AuctionHouseBot/AuctionHouseBot.h"
 #endif
 
-#include "Metric/Metric.h"
-#include "Maps/TransportMgr.h"
+#ifdef BUILD_METRICS
+ #include "Metric/Metric.h"
+#endif
 
 #include <algorithm>
 #include <mutex>
@@ -954,7 +956,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Loading world safe locs ...");
     sObjectMgr.LoadWorldSafeLocs();
-    
+
     ///- Load the DBC files
     sLog.outString("Initialize DBC data stores...");
     LoadDBCStores(m_dataPath);
@@ -1472,8 +1474,11 @@ void World::SetInitialWorldSettings()
     sWorldState.Load();
     sLog.outString();
 
+#ifdef BUILD_METRICS
     // update metrics output every second
     m_timers[WUPDATE_METRICS].SetInterval(1 * IN_MILLISECONDS);
+#endif // BUILD_METRICS
+
 
 #ifdef BUILD_PLAYERBOT
     PlayerbotMgr::SetInitialWorldSettings();
@@ -1660,12 +1665,13 @@ void World::Update(uint32 diff)
         m_timers[WUPDATE_EVENTS].Reset();
     }
 
+#ifdef BUILD_METRICS
     if (m_timers[WUPDATE_METRICS].Passed())
     {
         m_timers[WUPDATE_METRICS].Reset();
-
         GeneratePacketMetrics();
     }
+#endif
 
     /// </ul>
     ///- Move all creatures with "delayed move" and remove and delete all objects with "delayed remove"
@@ -1679,7 +1685,7 @@ void World::Update(uint32 diff)
 
     // cleanup unused GridMap objects as well as VMaps
     sTerrainMgr.Update(diff);
-
+#ifdef BUILD_METRICS
     auto updateEndTime = std::chrono::time_point_cast<std::chrono::milliseconds>(Clock::now());
     long long total = (updateEndTime - m_currentTime).count();
     long long presession = (preSessionTime - m_currentTime).count();
@@ -1695,6 +1701,7 @@ void World::Update(uint32 diff)
     meas.add_field("map", std::to_string(map));
     meas.add_field("singletons", std::to_string(singletons));
     meas.add_field("cleanup", std::to_string(cleanup));
+#endif
 }
 
 namespace MaNGOS
@@ -2711,6 +2718,7 @@ void World::IncrementOpcodeCounter(uint32 opcodeId)
     ++m_opcodeCounters[opcodeId];
 }
 
+#ifdef BUILD_METRICS
 void World::GeneratePacketMetrics()
 {
     for (uint32 i = 0; i < NUM_MSG_TYPES; ++i)
@@ -2756,3 +2764,4 @@ void World::GeneratePacketMetrics()
     meas_players.add_field("druid", std::to_string(GetOnlineClassPlayers(CLASS_DRUID)));
     meas_players.add_field("deathknight", std::to_string(GetOnlineClassPlayers(CLASS_DEATH_KNIGHT)));
 }
+#endif

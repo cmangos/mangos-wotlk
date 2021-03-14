@@ -22,7 +22,6 @@
 #include "Grids/GridNotifiers.h"
 #include "Log.h"
 #include "Grids/ObjectGridLoader.h"
-#include "Metric/Metric.h"
 #include "Grids/CellImpl.h"
 #include "Grids/GridNotifiersImpl.h"
 #include "Maps/GridDefines.h"
@@ -42,6 +41,10 @@
 #include "Chat/Chat.h"
 #include "Weather/Weather.h"
 #include "Grids/ObjectGridLoader.h"
+
+#ifdef BUILD_METRICS
+ #include "Metric/Metric.h"
+#endif
 
 Map::~Map()
 {
@@ -629,6 +632,8 @@ bool Map::loaded(const GridPair& p) const
     return (getNGrid(p.x_coord, p.y_coord) && isGridObjectDataLoaded(p.x_coord, p.y_coord));
 }
 
+#define MAP_METRICS
+
 void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<MaNGOS::ObjectUpdater, GridTypeMapContainer> &gridVisitor, TypeContainerVisitor<MaNGOS::ObjectUpdater, WorldTypeMapContainer> &worldVisitor)
 {
     // lets update mobs/objects in ALL visible cells around player!
@@ -656,10 +661,14 @@ void Map::VisitNearbyCellsOf(WorldObject* obj, TypeContainerVisitor<MaNGOS::Obje
 
 void Map::Update(const uint32& t_diff)
 {
+
+#ifdef BUILD_METRICS
     metric::duration<std::chrono::milliseconds> meas("map.update", {
         { "map_id", std::to_string(i_id) },
         { "instance_id", std::to_string(i_InstanceId) }
-        });
+});
+#endif
+
 
     uint64 count = 0;
 
@@ -685,12 +694,13 @@ void Map::Update(const uint32& t_diff)
     // the player iterator is stored in the map object
     // to make sure calls to Map::Remove don't invalidate it
     {
+#ifdef BUILD_METRICS
         uint32 updatedSessions = 0;
-
         metric::duration<std::chrono::milliseconds> sessions_meas("map.update.session", {
             { "map_id", std::to_string(i_id) },
             { "instance_id", std::to_string(i_InstanceId) },
             });
+#endif
 
         for (m_mapRefIter = m_mapRefManager.begin(); m_mapRefIter != m_mapRefManager.end(); ++m_mapRefIter)
         {
@@ -701,11 +711,13 @@ void Map::Update(const uint32& t_diff)
             // Update session first
             WorldSession* pSession = player->GetSession();
             pSession->UpdateMap(t_diff);
-
+#ifdef BUILD_METRICS
             ++updatedSessions;
+#endif
         }
-
+#ifdef BUILD_METRICS
         sessions_meas.add_field("count", std::to_string(static_cast<int32>(updatedSessions)));
+#endif
     }
 
     /// update players at tick
@@ -777,7 +789,9 @@ void Map::Update(const uint32& t_diff)
         ++count;
     }
 
+#ifdef BUILD_METRICS
     meas.add_field("count", std::to_string(static_cast<int32>(count)));
+#endif
 
     // Send world objects and item update field changes
     SendObjectUpdates();
