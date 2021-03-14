@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14037_01_mangos_corpse_decay` bit(1) DEFAULT NULL
+  `required_14038_01_mangos_gameobject_spawn_entry` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -2096,6 +2096,13 @@ LOCK TABLES `gameobject` WRITE;
 /*!40000 ALTER TABLE `gameobject` DISABLE KEYS */;
 /*!40000 ALTER TABLE `gameobject` ENABLE KEYS */;
 UNLOCK TABLES;
+
+DROP TABLE IF EXISTS `gameobject_spawn_entry`;
+CREATE TABLE `gameobject_spawn_entry`(
+`guid` INT UNSIGNED NOT NULL COMMENT 'Gameobject table guid',
+`entry` MEDIUMINT UNSIGNED NOT NULL COMMENT 'Gameobject Template entry',
+PRIMARY KEY(`guid`,`entry`)
+);
 
 --
 -- Table structure for table `gameobject_addon`

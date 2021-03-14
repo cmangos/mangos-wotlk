@@ -1439,7 +1439,7 @@ void ObjectMgr::LoadCreatureSpawnDataTemplates()
 
 void ObjectMgr::LoadCreatureSpawnEntry()
 {
-    mCreatureSpawnEntryMap.clear();
+    m_creatureSpawnEntryMap.clear();
 
     QueryResult* result = WorldDatabase.Query("SELECT guid, entry FROM creature_spawn_entry");
 
@@ -1472,7 +1472,7 @@ void ObjectMgr::LoadCreatureSpawnEntry()
             continue;
         }
 
-        auto& entries = mCreatureSpawnEntryMap[guid];
+        auto& entries = m_creatureSpawnEntryMap[guid];
         entries.push_back(entry);
 
         ++count;
@@ -1545,7 +1545,7 @@ void ObjectMgr::LoadCreatures()
             CreatureConditionalSpawn const* cSpawn = GetCreatureConditionalSpawn(guid);
             if (!cSpawn)
             {
-                if (uint32 randomEntry = sObjectMgr.GetRandomEntry(guid))
+                if (uint32 randomEntry = sObjectMgr.GetRandomCreatureEntry(guid))
                     entry = randomEntry;
                 else
                 {
@@ -1972,6 +1972,53 @@ void ObjectMgr::LoadGameObjectAddon()
     }
 
     sLog.outString(">> Loaded %u gameobject addons", sGameObjectDataAddonStorage.GetRecordCount());
+    sLog.outString();
+}
+
+void ObjectMgr::LoadGameObjectSpawnEntry()
+{
+    m_creatureSpawnEntryMap.clear();
+
+    QueryResult* result = WorldDatabase.Query("SELECT guid, entry FROM gameobject_spawn_entry");
+
+    if (!result)
+    {
+        BarGoLink bar(1);
+        bar.step();
+        sLog.outErrorDb(">> Loaded gameobject_spawn_entry, table is empty!");
+        sLog.outString();
+        return;
+    }
+
+    BarGoLink bar(result->GetRowCount());
+
+    uint32 count = 0;
+
+    do
+    {
+        bar.step();
+
+        Field* fields = result->Fetch();
+
+        uint32 guid = fields[0].GetUInt32();
+        uint32 entry = fields[1].GetUInt32();
+
+        GameObjectInfo const* info = GetGameObjectInfo(entry);
+        if (!info)
+        {
+            sLog.outErrorDb("Table `gameobject_spawn_entry` has gameobject (GUID: %u) with non existing gameobject entry %u, skipped.", guid, entry);
+            continue;
+        }
+
+        auto& entries = m_gameobjectSpawnEntryMap[guid];
+        entries.push_back(entry);
+
+        ++count;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString(">> Loaded %u gameobject_spawn_entry entries", count);
     sLog.outString();
 }
 

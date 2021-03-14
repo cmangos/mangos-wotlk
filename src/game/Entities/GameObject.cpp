@@ -867,7 +867,14 @@ bool GameObject::LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTran
 
     m_dbGuid = dbGuid;
 
+<<<<<<< HEAD
     if (!Create(newGuid, entry, map, phaseMask, x, y, z, ang, data->rotation, animprogress, go_state))
+=======
+    if (uint32 randomEntry = sObjectMgr.GetRandomGameObjectEntry(GetDbGuid()))
+        entry = randomEntry;
+
+    if (!Create(newGuid, entry, map, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, go_state))
+>>>>>>> 2197d1752a3... [s2432] DynGuid: Implement gameobject_spawn_entry
         return false;
 
     if (!GetGOInfo()->GetDespawnPossibility() && !GetGOInfo()->IsDespawnAtAction() && data->spawntimesecsmin >= 0)
