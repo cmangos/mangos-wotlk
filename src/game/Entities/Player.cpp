@@ -551,7 +551,7 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
 
     m_cinematic = 0;
 
-    PlayerTalkClass = new PlayerMenu(GetSession());
+    m_playerMenu =  std::make_unique<PlayerMenu>(GetSession());
     m_currentBuybackSlot = BUYBACK_SLOT_START;
 
     m_DailyQuestChanged = false;
@@ -684,8 +684,6 @@ Player::~Player()
 
     for (ItemMap::const_iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
         delete iter->second;                                // if item is duplicated... then server may crash ... but that item should be deallocated
-
-    delete PlayerTalkClass;
 
     if (m_transport)
     {
@@ -9032,7 +9030,7 @@ uint8 Player::FindEquipSlot(ItemPrototype const* proto, uint32 slot, bool swap) 
                 // in both scenarios, a swap is required
                 if (currentSlot == EQUIPMENT_SLOT_OFFHAND && (IsTwoHandUsed() || proto->InventoryType == INVTYPE_2HWEAPON))
                     continue;
-                
+
                 return currentSlot;
             }
         }
@@ -13276,10 +13274,9 @@ void Player::SendNewItem(Item* item, uint32 count, bool received, bool created, 
 
 void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
 {
-    PlayerMenu* pMenu = PlayerTalkClass;
-    pMenu->ClearMenus();
+    m_playerMenu->ClearMenus();
 
-    pMenu->GetGossipMenu().SetMenuId(menuId);
+    m_playerMenu->GetGossipMenu().SetMenuId(menuId);
 
     GossipMenuItemsMapBounds pMenuItemBounds = sObjectMgr.GetGossipMenuItemsMapBounds(menuId);
 
@@ -13372,7 +13369,7 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                     break;
                 case GOSSIP_OPTION_TAXIVENDOR:
                     if (GetSession()->SendLearnNewTaxiNode(pCreature))
-                        pMenu->GetGossipMenu().SetDiscoveredNode();
+                        m_playerMenu->GetGossipMenu().SetDiscoveredNode();
                     break;
                 case GOSSIP_OPTION_BATTLEFIELD:
                     if (!pCreature->CanInteractWithBattleMaster(this, false))
@@ -13486,8 +13483,8 @@ void Player::PrepareGossipMenu(WorldObject* pSource, uint32 menuId)
                 strOptionText.append(")");
             }
 
-            pMenu->GetGossipMenu().AddMenuItem(gossipMenu.option_icon, strOptionText, 0, gossipMenu.option_id, strBoxText, gossipMenu.box_money, gossipMenu.box_coded);
-            pMenu->GetGossipMenu().AddGossipMenuItemData(gossipMenu.action_menu_id, gossipMenu.action_poi_id, gossipMenu.action_script_id);
+            m_playerMenu->GetGossipMenu().AddMenuItem(gossipMenu.option_icon, strOptionText, 0, gossipMenu.option_id, strBoxText, gossipMenu.box_money, gossipMenu.box_coded);
+            m_playerMenu->GetGossipMenu().AddGossipMenuItemData(gossipMenu.action_menu_id, gossipMenu.action_poi_id, gossipMenu.action_script_id);
         }
     }
 
@@ -13516,8 +13513,8 @@ void Player::SendPreparedGossip(WorldObject* pSource)
     if (!pSource)
         return;
 
-    GossipMenu gossipMenu = PlayerTalkClass->GetGossipMenu();
-    QuestMenu questMenu = PlayerTalkClass->GetQuestMenu();
+    GossipMenu gossipMenu = m_playerMenu->GetGossipMenu();
+    QuestMenu questMenu = m_playerMenu->GetQuestMenu();
 
     if (pSource->GetTypeId() == TYPEID_UNIT)
     {
@@ -13550,12 +13547,12 @@ void Player::SendPreparedGossip(WorldObject* pSource)
     if (uint32 menuId = gossipMenu.GetMenuId())
         textId = GetGossipTextId(menuId, pSource);
 
-    PlayerTalkClass->SendGossipMenu(textId, pSource->GetObjectGuid());
+    m_playerMenu->SendGossipMenu(textId, pSource->GetObjectGuid());
 }
 
 void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 menuId)
 {
-    GossipMenu& gossipmenu = PlayerTalkClass->GetGossipMenu();
+    GossipMenu& gossipmenu = m_playerMenu->GetGossipMenu();
 
     if (gossipListId >= gossipmenu.MenuItemCount())
         return;
@@ -13604,7 +13601,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
                 break;
 
             if (menuData.m_gAction_poi)
-                PlayerTalkClass->SendPointOfInterest(menuData.m_gAction_poi);
+                m_playerMenu->SendPointOfInterest(menuData.m_gAction_poi);
 
             // send new menu || close gossip || stay at current menu
             if (menuData.m_gAction_menu > 0)
@@ -13614,7 +13611,7 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             }
             else if (menuData.m_gAction_menu < 0)
             {
-                PlayerTalkClass->CloseGossip();
+                m_playerMenu->CloseGossip();
                 TalkedToCreature(pSource->GetEntry(), pSource->GetObjectGuid());
             }
 
@@ -13639,36 +13636,36 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
             GetSession()->SendTrainerList(guid);
             break;
         case GOSSIP_OPTION_UNLEARNTALENTS:
-            PlayerTalkClass->CloseGossip();
+            m_playerMenu->CloseGossip();
             SendTalentWipeConfirm(guid);
             break;
         case GOSSIP_OPTION_UNLEARNPETSKILLS:
-            PlayerTalkClass->CloseGossip();
+            m_playerMenu->CloseGossip();
             SendPetSkillWipeConfirm();
             break;
         case GOSSIP_OPTION_TAXIVENDOR:
             GetSession()->SendTaxiMenu(((Creature*)pSource));
             break;
         case GOSSIP_OPTION_INNKEEPER:
-            PlayerTalkClass->CloseGossip();
+            m_playerMenu->CloseGossip();
             SetBindPoint(guid);
             break;
         case GOSSIP_OPTION_BANKER:
             GetSession()->SendShowBank(guid);
             break;
         case GOSSIP_OPTION_PETITIONER:
-            PlayerTalkClass->CloseGossip();
+            m_playerMenu->CloseGossip();
             GetSession()->SendPetitionShowList(guid);
             break;
         case GOSSIP_OPTION_TABARDDESIGNER:
-            PlayerTalkClass->CloseGossip();
+            m_playerMenu->CloseGossip();
             GetSession()->SendTabardVendorActivate(guid);
             break;
         case GOSSIP_OPTION_AUCTIONEER:
             GetSession()->SendAuctionHello(((Creature*)pSource));
             break;
         case GOSSIP_OPTION_MAILBOX:
-            PlayerTalkClass->CloseGossip();
+            GetPlayerMenu()->CloseGossip();
             GetSession()->SendShowMailBox(guid);
             break;
         case GOSSIP_OPTION_SPIRITGUIDE:
@@ -13692,8 +13689,8 @@ void Player::OnGossipSelect(WorldObject* pSource, uint32 gossipListId, uint32 me
         case GOSSIP_OPTION_BOT:
         {
             // DEBUG_LOG("GOSSIP_OPTION_BOT");
-            PlayerTalkClass->CloseGossip();
-            uint32 guidlo = PlayerTalkClass->GossipOptionSender(gossipListId);
+            m_playerMenu->CloseGossip();
+            uint32 guidlo = m_playerMenu->GossipOptionSender(gossipListId);
             int32 cost = botConfig.GetIntDefault("PlayerbotAI.BotguyCost", 0);
 
             if (!GetPlayerbotMgr())
@@ -13838,7 +13835,7 @@ void Player::PrepareQuestMenu(ObjectGuid guid) const
             return;
     }
 
-    QuestMenu& qm = PlayerTalkClass->GetQuestMenu();
+    QuestMenu& qm = m_playerMenu->GetQuestMenu();
     qm.ClearMenu();
 
     for (QuestRelationsMap::const_iterator itr = irbounds.first; itr != irbounds.second; ++itr)
@@ -13880,7 +13877,7 @@ void Player::PrepareQuestMenu(ObjectGuid guid) const
 
 void Player::SendPreparedQuest(ObjectGuid guid) const
 {
-    QuestMenu& questMenu = PlayerTalkClass->GetQuestMenu();
+    QuestMenu& questMenu = m_playerMenu->GetQuestMenu();
 
     if (questMenu.Empty())
         return;
@@ -13903,7 +13900,7 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
         std::string title = data->text;
         int loc_idx = GetSession()->GetSessionDbLocaleIndex();
         sObjectMgr.GetQuestgiverGreetingLocales(guid.GetEntry(), type, loc_idx, &title);
-        PlayerTalkClass->SendQuestGiverQuestList(qe, title, guid);
+        m_playerMenu->SendQuestGiverQuestList(qe, title, guid);
     }
     else
     {
@@ -13917,15 +13914,15 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
             if (pQuest)
             {
                 if (icon == 4 && !GetQuestRewardStatus(quest_id))
-                    PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanRewardQuest(pQuest, false), true);
+                    m_playerMenu->SendQuestGiverRequestItems(pQuest, guid, CanRewardQuest(pQuest, false), true);
                 else if (icon == 4)
-                    PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanRewardQuest(pQuest, false), true);
+                    m_playerMenu->SendQuestGiverRequestItems(pQuest, guid, CanRewardQuest(pQuest, false), true);
                 // Send completable on repeatable and autoCompletable quest if player don't have quest
                 // TODO: verify if check for !pQuest->IsDaily() is really correct (possibly not)
                 else if (pQuest->IsAutoComplete() && pQuest->IsRepeatable() && !pQuest->IsDailyOrWeekly())
-                    PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, CanCompleteRepeatableQuest(pQuest), true);
+                    m_playerMenu->SendQuestGiverRequestItems(pQuest, guid, CanCompleteRepeatableQuest(pQuest), true);
                 else
-                    PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, guid, true);
+                    m_playerMenu->SendQuestGiverQuestDetails(pQuest, guid, true);
             }
         }
         // multiply entries
@@ -13968,7 +13965,7 @@ void Player::SendPreparedQuest(ObjectGuid guid) const
                     }
                 }
             }
-            PlayerTalkClass->SendQuestGiverQuestList(qe, title, guid);
+            m_playerMenu->SendQuestGiverQuestList(qe, title, guid);
         }
     }
 }

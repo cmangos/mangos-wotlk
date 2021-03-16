@@ -13331,7 +13331,7 @@ void Spell::EffectQuestOffer(SpellEffectIndex eff_idx)
         Player* player = (Player*)unitTarget;
 
         if (player->CanTakeQuest(quest, false))
-            player->PlayerTalkClass->SendQuestGiverQuestDetails(quest, player->GetObjectGuid(), true);
+            player->GetPlayerMenu()->SendQuestGiverQuestDetails(quest, player->GetObjectGuid(), true);
     }
 }
 
