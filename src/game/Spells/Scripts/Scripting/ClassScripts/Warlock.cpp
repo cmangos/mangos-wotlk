@@ -148,6 +148,33 @@ struct EyeOfKilrogg : public SpellScript
     }
 };
 
+struct CurseOfDoom : public SpellScript, public AuraScript
+{
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        // not allow cast at player
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target || target->GetTypeId() == TYPEID_PLAYER)
+            return SPELL_FAILED_BAD_TARGETS;
+        return SPELL_CAST_OK;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetRemoveMode() == AURA_REMOVE_BY_DEATH && urand(0, 100) > 95)
+            if (Unit* caster = aura->GetCaster())
+                caster->CastSpell(nullptr, 18662, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct CurseOfDoomEffect : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        summon->CastSpell(nullptr, 42010, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 struct DevourMagic : public SpellScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool strict) const override
@@ -249,4 +276,6 @@ void LoadWarlockScripts()
     RegisterSpellScript<EyeOfKilrogg>("spell_eye_of_kilrogg");
     RegisterSpellScript<DevourMagic>("spell_devour_magic");
     RegisterSpellScript<SeedOfCorruptionDamage>("spell_seed_of_corruption_damage");
+    RegisterScript<CurseOfDoom>("spell_curse_of_doom");
+    RegisterSpellScript<CurseOfDoomEffect>("spell_curse_of_doom_effect");
 }
