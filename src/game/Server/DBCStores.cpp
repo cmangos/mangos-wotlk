@@ -897,8 +897,9 @@ CharSectionsEntry const* GetCharSectionEntry(uint8 race, CharSectionType genType
     auto eqr = sCharSectionMap.equal_range(uint32(genType) | uint32(gender << 8) | uint32(race << 16));
     for (auto itr = eqr.first; itr != eqr.second; ++itr)
     {
-        if (itr->second->VariationIndex == type && itr->second->ColorIndex == color && !itr->second->HasFlag(SECTION_FLAG_UNAVAILABLE))
-            return itr->second;
+        if (itr->second->VariationIndex == type && itr->second->Color == color)
+            if (itr->second->HasFlag(SECTION_FLAG_PLAYABLE))
+                return itr->second;
     }
 
     return nullptr;

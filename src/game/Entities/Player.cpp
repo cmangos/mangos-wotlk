@@ -748,14 +748,15 @@ bool Player::ValidateAppearance(uint8 race, uint8 class_, uint8 gender, uint8 ha
     if (!hairEntry)
         return false;
 
-    // These combinations don't have an entry of Type SECTION_TYPE_FACIAL_HAIR, exclude them from that check
-    bool const excludeCheck = (race == RACE_TAUREN) || (gender == GENDER_FEMALE && race != RACE_NIGHTELF && race != RACE_UNDEAD);
-    if (!excludeCheck)
-    {
-        CharSectionsEntry const* facialHairEntry = GetCharSectionEntry(race, SECTION_TYPE_FACIAL_HAIR, gender, facialHair, hairColor);
-        if (!facialHairEntry)
-            return false;
-    }
+    // TODO:: fill missing case in db when dbc will be in database
+    //// These combinations don't have an entry of Type SECTION_TYPE_FACIAL_HAIR, exclude them from that check
+    //bool const excludeCheck = (race == RACE_TAUREN) || (gender == GENDER_FEMALE && race != RACE_NIGHTELF && race != RACE_UNDEAD);
+    //if (!excludeCheck)
+    //{
+    //    CharSectionsEntry const* facialHairEntry = GetCharSectionEntry(race, SECTION_TYPE_FACIAL_HAIR, gender, facialHair, hairColor);
+    //    if (!facialHairEntry)
+    //        return false;
+    //}
 
     CharacterFacialHairStylesEntry const* entry = GetCharFacialHairEntry(race, gender, facialHair);
     if (!entry)
