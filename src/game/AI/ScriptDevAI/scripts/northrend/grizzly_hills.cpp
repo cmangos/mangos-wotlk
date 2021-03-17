@@ -17,7 +17,7 @@
 /* ScriptData
 SDName: Grizzly_Hills
 SD%Complete:
-SDComment: Quest support: 12027, 12082, 12138, 12198
+SDComment: Quest support: 11984, 12027, 12082, 12138, 12198
 SDCategory: Grizzly Hills
 EndScriptData */
 
@@ -26,6 +26,9 @@ npc_depleted_war_golem
 npc_harrison_jones
 spell_eagle_eyes
 spell_escape_from_silverbrook_credit_master
+spell_tag_troll
+spell_out_cold
+spell_assemble_cage
 EndContentData */
 
 #include "AI/ScriptDevAI/include/sc_common.h"
@@ -531,7 +534,7 @@ bool QuestAccept_npc_emily(Player* pPlayer, Creature* pCreature, const Quest* pQ
 }
 
 /*######
-## spell_eagle_eyes
+## spell_eagle_eyes - 49546
 ######*/
 
 struct spell_eagle_eyes : public SpellScript
@@ -548,7 +551,7 @@ struct spell_eagle_eyes : public SpellScript
 };
 
 /*######
-## spell_escape_from_silverbrook_credit_master
+## spell_escape_from_silverbrook_credit_master - 50471
 ######*/
 
 struct spell_escape_from_silverbrook_credit_master : public SpellScript
@@ -558,6 +561,106 @@ struct spell_escape_from_silverbrook_credit_master : public SpellScript
         Unit* caster = spell->GetCaster();
         if (Unit* passenger = caster->GetVehicleInfo()->GetPassenger(1))
             passenger->CastSpell(nullptr, 50473, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+/*######
+## spell_tag_troll - 47031
+######*/
+
+enum
+{
+    SAY_BUDD_TAG_TROLL          = -1020009,
+
+    SPELL_BUDDS_ATTENTION       = 47014,
+    SPELL_BUDDS_SNEAK           = 47032,
+    SPELL_TAG_TROLL             = 47031,
+    SPELL_OUT_COLD              = 47035,
+
+    // server side spells; implemented in AI script
+    // SPELL_PERIODIC_TRIGGER   = 47019,            // probably used to handle the texts
+    // SPELL_CANCEL_ATTENTION   = 47040,
+    // SPELL_TROLL_CHECK        = 47036,
+    // SPELL_FORCE_REACTION     = 47047,
+
+    NPC_DRAKKARI_SHAMAN         = 26447,
+    NPC_DRAKKARI_WARRIOR        = 26425,
+};
+
+struct spell_tag_troll : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        Creature* troll = GetClosestCreatureWithEntry(target, NPC_DRAKKARI_SHAMAN, 50.0f);
+        if (!troll)
+            troll = GetClosestCreatureWithEntry(target, NPC_DRAKKARI_WARRIOR, 50.0f);
+        if (!troll)
+            return;
+
+        target->CastSpell(target, SPELL_BUDDS_SNEAK, TRIGGERED_OLD_TRIGGERED);
+
+        if (Unit* owner = target->GetOwner())
+            owner->RemoveAurasDueToSpell(SPELL_BUDDS_ATTENTION);
+
+        Creature* budd = static_cast<Creature*>(target);
+        budd->SetWalk(false);
+        budd->GetMotionMaster()->MovePoint(1, troll->GetPositionX(), troll->GetPositionY(), troll->GetPositionZ());
+    }
+};
+
+/*######
+## spell_out_cold - 47035
+######*/
+
+struct spell_out_cold : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        DoScriptText(SAY_BUDD_TAG_TROLL, target);
+
+        // unsummon pet
+        Creature* budd = static_cast<Creature*>(target);
+        if (budd->IsPet())
+            (static_cast<Pet*>(budd))->Unsummon(PET_SAVE_AS_DELETED);
+    }
+};
+
+
+/*######
+## spell_assemble_cage - 47042
+######*/
+
+struct spell_assemble_cage : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_0)
+            return;
+
+        Unit* target = spell->GetUnitTarget();
+        if (!target || !target->IsCreature())
+            return;
+
+        target->CastSpell(target, 47045, TRIGGERED_OLD_TRIGGERED);
+        target->SetImmuneToNPC(true);
+        target->SetImmuneToPlayer(true);
+
+        Creature* troll = static_cast<Creature*>(target);
+        troll->ForcedDespawn(10000);
     }
 };
 
@@ -583,4 +686,7 @@ void AddSC_grizzly_hills()
 
     RegisterSpellScript<spell_eagle_eyes>("spell_eagle_eyes");
     RegisterSpellScript<spell_escape_from_silverbrook_credit_master>("spell_escape_from_silverbrook_credit_master");
+    RegisterSpellScript<spell_tag_troll>("spell_tag_troll");
+    RegisterSpellScript<spell_out_cold>("spell_out_cold");
+    RegisterSpellScript<spell_assemble_cage>("spell_assemble_cage");
 }

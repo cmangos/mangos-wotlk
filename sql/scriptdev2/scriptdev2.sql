@@ -3484,7 +3484,9 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1020005','My zeppelin has docked. Despite my being held captive, and the sorry state that she''s in, she''ll be departing the dock again in two minutes.','0','1','0','0','0','zeppelinMaster - SAY_WK_ARRIVAL'),
 ('-1020006','The zeppelin to Vengeance Landing has just arrived! All aboard for Howling Fjord!','0','1','0','0','0','zeppelinMaster - SAY_UC_FROM_VL_ARRIVAL'),
 ('-1020007','The zeppelin to Warsong Hold has just arrived! All aboard for Borean Tundra!','0','1','0','0','0','zeppelinMaster - SAY_OG_FROM_BT_ARRIVAL'),
-('-1020008','The zeppelin to Thunder Bluff has arrived! All aboard for a smooth ride across the Barrens!','0','1','0','0','0','zeppelinMaster - SAY_OG_FROM_TB_ARRIVAL');
+('-1020008','The zeppelin to Thunder Bluff has arrived! All aboard for a smooth ride across the Barrens!','0','1','0','0','0','zeppelinMaster - SAY_OG_FROM_TB_ARRIVAL'),
+
+('-1020009','You be it now, brudda!','0','1','0','0','0','budd - SAY_GET_TROLL');
 
 -- -1 033 000 SHADOWFANG KEEP
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
