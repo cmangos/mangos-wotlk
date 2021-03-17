@@ -610,6 +610,7 @@ struct spell_tag_troll : public SpellScript
             owner->RemoveAurasDueToSpell(SPELL_BUDDS_ATTENTION);
 
         Creature* budd = static_cast<Creature*>(target);
+        budd->AI()->SetReactState(REACT_PASSIVE);
         budd->SetWalk(false);
         budd->GetMotionMaster()->MovePoint(1, troll->GetPositionX(), troll->GetPositionY(), troll->GetPositionZ());
     }
