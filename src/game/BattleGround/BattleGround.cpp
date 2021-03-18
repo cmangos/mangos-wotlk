@@ -1247,6 +1247,9 @@ void BattleGround::RewardQuestComplete(Player* player)
         case BATTLEGROUND_IC:
             RewardSpellCast(player, SPELL_IC_QUEST_REWARD);
             break;
+
+        default:
+            break;
     }
 }
 

@@ -1085,7 +1085,7 @@ enum LightOfDawn
     // EMOTE_LIGHT_OF_DAWN_CHARGE       = -1609284,
     // EMOTE_LIGHT_OF_DAWN_KING_LEAVE   = -1609285,
     // EMOTE_LIGHT_OF_DAWN_LIGHT        = -1609286,
- 
+
     // sound ids
     SOUND_ID_LK_LAUGH                   = 14820,
     SOUND_ID_TIRION_ROAR                = 12300,
@@ -1428,6 +1428,9 @@ struct npc_highlord_darion_mograineAI : public CombatAI, private DialogueHelper
             case AI_EVENT_CUSTOM_D:
                 DoScriptText(SAY_LIGHT_OF_DAWN_OUTRO_2, pSender);
                 DoStartConclusion();
+                break;
+
+            default:
                 break;
         }
     }

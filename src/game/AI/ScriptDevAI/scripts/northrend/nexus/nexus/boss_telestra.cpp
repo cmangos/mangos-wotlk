@@ -194,7 +194,13 @@ struct boss_telestraAI : public RangedCombatAI
                             m_bCanCheckAchiev = false;
                         }
                         break;
+
+                    default:
+                        break;
                 }
+                break;
+
+            default:
                 break;
         }
     }

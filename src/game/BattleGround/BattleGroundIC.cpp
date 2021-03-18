@@ -844,6 +844,9 @@ void BattleGroundIC::DoApplyObjectiveBenefits(IsleObjective nodeId, GameObject* 
             }
             break;
         }
+
+        default:
+            break;
     }
 }
 
@@ -973,6 +976,8 @@ void BattleGroundIC::DoResetObjective(IsleObjective nodeId)
 
             break;
         }
+        default:
+            break;
     }
 }
 

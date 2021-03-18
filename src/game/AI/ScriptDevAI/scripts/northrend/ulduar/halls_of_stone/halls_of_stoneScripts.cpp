@@ -377,6 +377,9 @@ struct npc_brann_hosAI : public ScriptedAI, private DialogueHelper
                 m_creature->GetMotionMaster()->Clear(false, true);
                 m_creature->GetMotionMaster()->MoveWaypoint(m_uiPhase);
                 break;
+
+            default:
+                break;
         }
     }
 
