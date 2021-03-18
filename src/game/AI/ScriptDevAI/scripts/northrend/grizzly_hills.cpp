@@ -589,6 +589,18 @@ enum
 
 struct spell_tag_troll : public SpellScript
 {
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (!caster)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        if (caster->IsInCombat())
+            return SPELL_FAILED_AFFECTING_COMBAT;
+
+        return SPELL_CAST_OK;
+    }
+
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_0)
@@ -612,7 +624,10 @@ struct spell_tag_troll : public SpellScript
         Creature* budd = static_cast<Creature*>(target);
         budd->AI()->SetReactState(REACT_PASSIVE);
         budd->SetWalk(false);
-        budd->GetMotionMaster()->MovePoint(1, troll->GetPositionX(), troll->GetPositionY(), troll->GetPositionZ());
+        budd->GetMotionMaster()->MoveChase(troll, 0.f, 0.f, false, true, false);
+
+        // inform troll about the tag
+        budd->AI()->SendAIEvent(AI_EVENT_CUSTOM_EVENTAI_B, budd, troll);
     }
 };
 
@@ -632,11 +647,16 @@ struct spell_out_cold : public SpellScript
             return;
 
         DoScriptText(SAY_BUDD_TAG_TROLL, target);
+        target->RemoveAurasDueToSpell(SPELL_BUDDS_SNEAK);
 
-        // unsummon pet
+        // run away and despawn
         Creature* budd = static_cast<Creature*>(target);
-        if (budd->IsPet())
-            (static_cast<Pet*>(budd))->Unsummon(PET_SAVE_AS_DELETED);
+
+        float fX, fY, fZ;
+        budd->GetRandomPoint(budd->GetPositionX(), budd->GetPositionY(), budd->GetPositionZ(), 50.0f, fX, fY, fZ);
+        budd->SetWalk(false);
+        budd->GetMotionMaster()->MovePoint(0, fX, fY, fZ);
+        budd->ForcedDespawn(5000);
     }
 };
 
@@ -647,6 +667,18 @@ struct spell_out_cold : public SpellScript
 
 struct spell_assemble_cage : public SpellScript
 {
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* target = spell->m_targets.getUnitTarget();
+        if (!target)
+            return SPELL_FAILED_BAD_TARGETS;
+
+        if (!target->HasAura(47035))
+            return SPELL_FAILED_BAD_TARGETS;
+
+        return SPELL_CAST_OK;
+    }
+
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_0)
@@ -657,6 +689,10 @@ struct spell_assemble_cage : public SpellScript
             return;
 
         target->CastSpell(target, 47045, TRIGGERED_OLD_TRIGGERED);
+
+        target->AI()->ClearSelfRoot();
+        target->RemoveAllAurasOnEvade();
+        target->CombatStopWithPets(true);
         target->SetImmuneToNPC(true);
         target->SetImmuneToPlayer(true);
 
