@@ -425,7 +425,8 @@ inline bool IsSpellSetRun(SpellEntry const* spellInfo)
 {
     switch (spellInfo->Id)
     {
-        case 39163:    // [DND]Rescue Wyvern
+        case 30445:     // Stillpine Ancestor Yor
+        case 39163:     // [DND]Rescue Wyvern
             return true;
         default:
             return false;
