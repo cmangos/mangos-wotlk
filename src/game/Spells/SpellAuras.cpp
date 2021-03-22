@@ -1772,13 +1772,6 @@ void Aura::TriggerSpell()
                         if (UnitAI* ai = target->AI())
                             ai->SendAIEvent(AI_EVENT_CUSTOM_B, target, target, GetAuraTicks());
                         break;
-                    case 40657:                             // Ancient Flames
-                    {
-                        // 40720 is called Terokk Shield
-                        if (target->GetEntry() == 21838)
-                            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, (Creature*)target);
-                        return;
-                    }
 //                    // Ethereal Ring Cannon: Cannon Aura
 //                    case 40734: break;
                     case 40760:                             // Cage Trap

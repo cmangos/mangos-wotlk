@@ -179,7 +179,6 @@ struct boss_terokkAI : public CombatAI
         {
             if (m_creature->HasAura(SPELL_DIVINE_SHIELD))
             {
-                m_creature->RemoveAurasDueToSpell(SPELL_DIVINE_SHIELD);
                 m_creature->CastSpell(nullptr, SPELL_ENRAGE, TRIGGERED_NONE);
                 DoScriptText(SAY_ENRAGE, m_creature);
             }
@@ -300,6 +299,18 @@ bool ProcessEventId_event_summon_terokk(uint32 /*eventId*/, Object* source, Obje
     return true;
 }
 
+struct TerokkAncientFlames : public AuraScript
+{
+    // substitute for missing serverside 40720
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        target->RemoveAurasDueToSpell(SPELL_DIVINE_SHIELD);
+        if (target->GetEntry() == NPC_TEROKK)
+            target->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, target, (Creature*)target);
+    }
+};
+
 void AddSC_boss_terokk()
 {
     Script* pNewScript = new Script;
@@ -311,4 +322,6 @@ void AddSC_boss_terokk()
     pNewScript->Name = "boss_terokk";
     pNewScript->GetAI = &GetNewAIInstance<boss_terokkAI>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<TerokkAncientFlames>("spell_terokk_ancient_flames");
 }
