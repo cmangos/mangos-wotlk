@@ -3512,7 +3512,7 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1033016','Arrrgh!','0','0','0','0','1458','deathstalker vincent SAY_VINCENT_DIE'),
 ('-1033017','You, too, shall serve!','5793','1','0','0','6115','boss_arugal YELL_AGGRO'),
 ('-1033018','Another falls!','5795','1','0','0','6116','boss_arugal YELL_KILLED_PLAYER'),
-('-1033019','Release your rage!','5797','1','0','0','6535','boss_arugal YELL_COMBAT'),
+('-1033019','Release your rage!','5797','1','0','0','6535','boss_arugal YELL_WORGEN_CURSE'),
 
 ('-1033020','Did they bother to tell you who I am and why I am doing this?','0','0','0','6','0','hummel SAY_INTRO_1'),
 ('-1033021','...or are they just using you like they do everybody else?','0','0','0','396','0','hummel SAY_INTRO_2'),
