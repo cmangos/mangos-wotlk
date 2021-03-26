@@ -38,7 +38,7 @@ static const DialogueEntry aArugalDialogue[] =
     {SAY_ARUGAL_INTRO_3,      NPC_ARUGAL,   1750},
     {ARUGAL_EMOTE_LAUGH,      NPC_ARUGAL,   1750},
     {SAY_ARUGAL_INTRO_4,      NPC_ARUGAL,   2000},
-    {ARUGAL_TELEPORT_OUT,     NPC_ARUGAL,    500},
+    {ARUGAL_TELEPORT_OUT,     NPC_ARUGAL,    2500},
     {ARUGAL_INTRO_DONE,       NPC_ARUGAL,      0},
     {NPC_ARCHMAGE_ARUGAL,              0,    100},
     {YELL_FENRUS,    NPC_ARCHMAGE_ARUGAL,   2000},
@@ -49,7 +49,7 @@ static const DialogueEntry aArugalDialogue[] =
     {0, 0, 0},
 };
 
-instance_shadowfang_keep::instance_shadowfang_keep(Map* pMap) : ScriptedInstance(pMap), DialogueHelper(aArugalDialogue),
+instance_shadowfang_keep::instance_shadowfang_keep(Map* map) : ScriptedInstance(map), DialogueHelper(aArugalDialogue),
     m_uiApothecaryDead(0),
     m_uiApothecaryResetTimer(0)
 {
@@ -62,9 +62,9 @@ void instance_shadowfang_keep::Initialize()
     InitializeDialogueHelper(this);
 }
 
-void instance_shadowfang_keep::OnCreatureCreate(Creature* pCreature)
+void instance_shadowfang_keep::OnCreatureCreate(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_ASH:
         case NPC_ADA:
@@ -79,7 +79,7 @@ void instance_shadowfang_keep::OnCreatureCreate(Creature* pCreature)
         case NPC_VINCENT:
             // If Arugal has done the intro, make Vincent dead!
             if (m_auiEncounter[4] == DONE)
-                pCreature->SetStandState(UNIT_STAND_STATE_DEAD);
+                creature->SetStandState(UNIT_STAND_STATE_DEAD);
             else
                 StartNextDialogueText(NPC_VINCENT);
             break;
@@ -88,41 +88,41 @@ void instance_shadowfang_keep::OnCreatureCreate(Creature* pCreature)
         case NPC_BLEAK_WORG:
         case NPC_SLAVERING_WORG:
             // Only store the wolves/worgs that are static spawn on the top level of the instance
-            if (pCreature->GetPositionZ() > nandosMovement.fZ && !pCreature->IsTemporarySummon())
-                m_lNandosWolvesGuids.push_back(pCreature->GetObjectGuid());
+            if (creature->GetPositionZ() > nandosMovement.fZ && !creature->IsTemporarySummon())
+                m_lNandosWolvesGuids.push_back(creature->GetObjectGuid());
             break;
         case NPC_CROWN_APOTHECARY:
-            m_lCrownApothecaryGuids.push_back(pCreature->GetObjectGuid());
+            m_lCrownApothecaryGuids.push_back(creature->GetObjectGuid());
             return;
         case NPC_ARUGAL:
-            pCreature->SetVisibility(VISIBILITY_OFF);
+            creature->SetVisibility(VISIBILITY_OFF);
             break;
         case NPC_ARCHMAGE_ARUGAL:
-            m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+            m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
             break;
         default:
             return;
     }
-    m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
+    m_npcEntryGuidStore[creature->GetEntry()] = creature->GetObjectGuid();
 }
 
-void instance_shadowfang_keep::OnObjectCreate(GameObject* pGo)
+void instance_shadowfang_keep::OnObjectCreate(GameObject* go)
 {
-    switch (pGo->GetEntry())
+    switch (go->GetEntry())
     {
         case GO_COURTYARD_DOOR:
             if (m_auiEncounter[0] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                go->SetGoState(GO_STATE_ACTIVE);
             break;
         // For this we ignore voidwalkers, because if the server restarts
         // They won't be there, but Fenrus is dead so the door can't be opened!
         case GO_SORCERER_DOOR:
             if (m_auiEncounter[2] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                go->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_ARUGAL_DOOR:
             if (m_auiEncounter[3] == DONE)
-                pGo->SetGoState(GO_STATE_ACTIVE);
+                go->SetGoState(GO_STATE_ACTIVE);
             break;
         case GO_ARUGAL_FOCUS:
         case GO_APOTHECARE_VIALS:
@@ -132,12 +132,12 @@ void instance_shadowfang_keep::OnObjectCreate(GameObject* pGo)
         default:
             return;
     }
-    m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+    m_goEntryGuidStore[go->GetEntry()] = go->GetObjectGuid();
 }
 
-void instance_shadowfang_keep::OnCreatureDeath(Creature* pCreature)
+void instance_shadowfang_keep::OnCreatureDeath(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         // Instance data is set to SPECIAL because the encounter depends on multiple bosses
         case NPC_FRYE:
@@ -151,7 +151,7 @@ void instance_shadowfang_keep::OnCreatureDeath(Creature* pCreature)
             if (m_lNandosWolvesGuids.empty())
                 return;
 
-            m_lNandosWolvesGuids.remove(pCreature->GetObjectGuid());
+            m_lNandosWolvesGuids.remove(creature->GetObjectGuid());
             // If all wolves are dead, make Wolf Master Nandos engage in combat
             if (m_lNandosWolvesGuids.empty())
             {
@@ -170,9 +170,9 @@ void instance_shadowfang_keep::OnCreatureDeath(Creature* pCreature)
     }
 }
 
-void instance_shadowfang_keep::OnCreatureEvade(Creature* pCreature)
+void instance_shadowfang_keep::OnCreatureEvade(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_HUMMEL:
         case NPC_FRYE:
@@ -182,71 +182,71 @@ void instance_shadowfang_keep::OnCreatureEvade(Creature* pCreature)
     }
 }
 
-void instance_shadowfang_keep::OnCreatureRespawn(Creature* pCreature)
+void instance_shadowfang_keep::OnCreatureRespawn(Creature* creature)
 {
-    switch (pCreature->GetEntry())
+    switch (creature->GetEntry())
     {
         case NPC_CRAZED_APOTHECARY:
-            if (Creature* pHummel = GetSingleCreatureFromStorage(NPC_HUMMEL))
+            if (Creature* hummel = GetSingleCreatureFromStorage(NPC_HUMMEL))
             {
-                if (pHummel->GetVictim())
-                    pCreature->AI()->AttackStart(pHummel->GetVictim());
+                if (hummel->GetVictim())
+                    creature->AI()->AttackStart(hummel->GetVictim());
             }
             break;
         case NPC_VALENTINE_VIAL_BUNNY:
-            pCreature->AI()->SetReactState(REACT_PASSIVE);
-            pCreature->SetCanEnterCombat(false);
+            creature->AI()->SetReactState(REACT_PASSIVE);
+            creature->SetCanEnterCombat(false);
             break;
     }
 }
 
 void instance_shadowfang_keep::DoSpeech()
 {
-    Creature* pAda = GetSingleCreatureFromStorage(NPC_ADA);
-    Creature* pAsh = GetSingleCreatureFromStorage(NPC_ASH);
+    Creature* ada = GetSingleCreatureFromStorage(NPC_ADA);
+    Creature* ash = GetSingleCreatureFromStorage(NPC_ASH);
 
-    if (pAda && pAda->IsAlive() && pAsh && pAsh->IsAlive())
+    if (ada && ada->IsAlive() && ash && ash->IsAlive())
     {
-        DoScriptText(SAY_BOSS_DIE_AD, pAda);
-        DoScriptText(SAY_BOSS_DIE_AS, pAsh);
+        DoScriptText(SAY_BOSS_DIE_AD, ada);
+        DoScriptText(SAY_BOSS_DIE_AS, ash);
     }
 }
 
-void instance_shadowfang_keep::SetData(uint32 uiType, uint32 uiData)
+void instance_shadowfang_keep::SetData(uint32 type, uint32 data)
 {
-    switch (uiType)
+    switch (type)
     {
         case TYPE_FREE_NPC:
-            if (uiData == DONE)
+            if (data == DONE)
                 DoUseDoorOrButton(GO_COURTYARD_DOOR);
-            m_auiEncounter[0] = uiData;
+            m_auiEncounter[0] = data;
             break;
         case TYPE_RETHILGORE:
-            if (uiData == DONE)
+            if (data == DONE)
                 DoSpeech();
-            m_auiEncounter[1] = uiData;
+            m_auiEncounter[1] = data;
             break;
         case TYPE_FENRUS:
-            if (uiData == DONE)
+            if (data == DONE)
             {
-                if (Creature* pFenrus = GetSingleCreatureFromStorage(NPC_FENRUS))
+                if (Creature* fenrus = GetSingleCreatureFromStorage(NPC_FENRUS))
                 {
-                    pFenrus->SummonCreature(NPC_ARCHMAGE_ARUGAL, -136.89f, 2169.17f, 136.58f, 2.794f, TEMPSPAWN_TIMED_DESPAWN, 30000);
+                    fenrus->SummonCreature(NPC_ARCHMAGE_ARUGAL, -136.89f, 2169.17f, 136.58f, 2.794f, TEMPSPAWN_TIMED_DESPAWN, 30000);
                     StartNextDialogueText(NPC_ARCHMAGE_ARUGAL);
                 }
             }
-            m_auiEncounter[2] = uiData;
+            m_auiEncounter[2] = data;
             break;
         case TYPE_NANDOS:
-            if (uiData == DONE)
+            if (data == DONE)
                 DoUseDoorOrButton(GO_ARUGAL_DOOR);
-            m_auiEncounter[3] = uiData;
+            m_auiEncounter[3] = data;
             break;
         case TYPE_INTRO:
-            m_auiEncounter[4] = uiData;
+            m_auiEncounter[4] = data;
             break;
         case TYPE_VOIDWALKER:
-            if (uiData == DONE)
+            if (data == DONE)
             {
                 m_auiEncounter[5]++;
                 if (m_auiEncounter[5] > 3)
@@ -255,9 +255,9 @@ void instance_shadowfang_keep::SetData(uint32 uiType, uint32 uiData)
             break;
         case TYPE_APOTHECARY:
             // Reset apothecary counter on fail
-            if (uiData == IN_PROGRESS)
+            if (data == IN_PROGRESS)
                 m_uiApothecaryDead = 0;
-            else if (uiData == FAIL)
+            else if (data == FAIL)
             {
                 // despawn bosses and reset on timer
                 if (Creature* pBoss = GetSingleCreatureFromStorage(NPC_HUMMEL))
@@ -271,7 +271,7 @@ void instance_shadowfang_keep::SetData(uint32 uiType, uint32 uiData)
             }
 
             // count dead apothecaries
-            if (uiData == SPECIAL)
+            if (data == SPECIAL)
             {
                 ++m_uiApothecaryDead;
 
@@ -289,11 +289,11 @@ void instance_shadowfang_keep::SetData(uint32 uiType, uint32 uiData)
             }
             // We don't want to store the SPECIAL data
             else
-                m_auiEncounter[6] = uiData;
+                m_auiEncounter[6] = data;
             break;
     }
 
-    if (uiData == DONE)
+    if (data == DONE)
     {
         OUT_SAVE_INST_DATA;
 
@@ -308,9 +308,9 @@ void instance_shadowfang_keep::SetData(uint32 uiType, uint32 uiData)
     }
 }
 
-uint32 instance_shadowfang_keep::GetData(uint32 uiType) const
+uint32 instance_shadowfang_keep::GetData(uint32 type) const
 {
-    switch (uiType)
+    switch (type)
     {
         case TYPE_FREE_NPC:   return m_auiEncounter[0];
         case TYPE_RETHILGORE: return m_auiEncounter[1];
@@ -371,37 +371,38 @@ void instance_shadowfang_keep::Update(uint32 uiDiff)
     }
 }
 
-void instance_shadowfang_keep::JustDidDialogueStep(int32 iEntry)
+
+void instance_shadowfang_keep::JustDidDialogueStep(int32 entry)
 {
-    switch(iEntry)
+    switch(entry)
     {
         case VINCENT_DEATH:
-            if (Creature* pVincent = GetSingleCreatureFromStorage(NPC_VINCENT))
-                pVincent->SetStandState(UNIT_STAND_STATE_DEAD);
+            if (Creature* vincent = GetSingleCreatureFromStorage(NPC_VINCENT))
+                vincent->SetStandState(UNIT_STAND_STATE_DEAD);
             break;
         case ARUGAL_VISIBLE:
-            if (Creature* pCreature = GetSingleCreatureFromStorage(NPC_ARUGAL))
-                pCreature->SetVisibility(VISIBILITY_ON);
+            if (Creature* creature = GetSingleCreatureFromStorage(NPC_ARUGAL))
+                creature->SetVisibility(VISIBILITY_ON);
             break;
         case ARUGAL_TELEPORT_IN:
-            if (Creature* pCreature = GetSingleCreatureFromStorage(NPC_ARUGAL))
-                pCreature->AI()->DoCastSpellIfCan(pCreature, SPELL_SPAWN);
+            if (Creature* creature = GetSingleCreatureFromStorage(NPC_ARUGAL))
+                creature->AI()->DoCastSpellIfCan(creature, SPELL_SPAWN);
             break;
         case ARUGAL_EMOTE_POINT:
-            if (Creature* pCreature = GetSingleCreatureFromStorage(NPC_ARUGAL))
-                pCreature->HandleEmote(EMOTE_ONESHOT_POINT);
+            if (Creature* creature = GetSingleCreatureFromStorage(NPC_ARUGAL))
+                creature->HandleEmote(EMOTE_ONESHOT_POINT);
             break;
         case ARUGAL_EMOTE_EXCLAMATION:
-            if (Creature* pCreature = GetSingleCreatureFromStorage(NPC_ARUGAL))
-                pCreature->HandleEmote(EMOTE_ONESHOT_EXCLAMATION);
+            if (Creature* creature = GetSingleCreatureFromStorage(NPC_ARUGAL))
+                creature->HandleEmote(EMOTE_ONESHOT_EXCLAMATION);
             break;
         case ARUGAL_EMOTE_LAUGH:
-            if (Creature* pCreature = GetSingleCreatureFromStorage(NPC_ARUGAL))
-                pCreature->HandleEmote(EMOTE_ONESHOT_LAUGH);
+            if (Creature* creature = GetSingleCreatureFromStorage(NPC_ARUGAL))
+                creature->HandleEmote(EMOTE_ONESHOT_LAUGH);
             break;
         case ARUGAL_TELEPORT_OUT:
-            if (Creature* pCreature = GetSingleCreatureFromStorage(NPC_ARUGAL))
-                pCreature->AI()->DoCastSpellIfCan(pCreature, SPELL_SPAWN);
+            if (Creature* creature = GetSingleCreatureFromStorage(NPC_ARUGAL))
+                creature->AI()->DoCastSpellIfCan(creature, SPELL_SPAWN);
             break;
         case ARUGAL_INTRO_DONE:
             SetData(TYPE_INTRO, DONE);
@@ -439,15 +440,15 @@ void instance_shadowfang_keep::JustDidDialogueStep(int32 iEntry)
     }
 }
 
-InstanceData* GetInstanceData_instance_shadowfang_keep(Map* pMap)
+InstanceData* GetInstanceData_instance_shadowfang_keep(Map* map)
 {
-    return new instance_shadowfang_keep(pMap);
+    return new instance_shadowfang_keep(map);
 }
 
 void AddSC_instance_shadowfang_keep()
 {
-    Script* pNewScript = new Script;
-    pNewScript->Name = "instance_shadowfang_keep";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_shadowfang_keep;
-    pNewScript->RegisterSelf();
+    Script* newScript = new Script;
+    newScript->Name = "instance_shadowfang_keep";
+    newScript->GetInstanceData = &GetInstanceData_instance_shadowfang_keep;
+    newScript->RegisterSelf();
 }
