@@ -5186,6 +5186,8 @@ void ObjectMgr::LoadInstanceEncounters()
                 }
                 break;
             }
+            case ENCOUNTER_CREDIT_SCRIPT:
+                break;
             default:
                 sLog.outErrorDb("Table `instance_encounters` has an invalid credit type (%u) for encounter %u (%s), skipped!", creditType, entry, dungeonEncounter->encounterName[0]);
                 continue;
