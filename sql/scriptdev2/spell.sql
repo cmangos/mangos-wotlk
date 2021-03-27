@@ -675,6 +675,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (26980,'spell_regrowth'),
 (48442,'spell_regrowth'),
 (48443,'spell_regrowth');
+(1178,'spell_druid_form_scaling_ap_auras'),
+(3025,'spell_druid_form_scaling_ap_auras'),
+(9635,'spell_druid_form_scaling_ap_auras'),
+(24905,'spell_druid_form_scaling_ap_auras');
 
 -- Rogue
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
