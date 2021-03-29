@@ -85,6 +85,7 @@ class WMORoot
 
         WMODoodadData DoodadData;
         std::unordered_set<uint32> ValidDoodadNames;
+        std::vector<char> GroupNames;
 
         WMORoot(std::string& filename);
         ~WMORoot();
@@ -146,6 +147,8 @@ class WMOGroup
 
         bool open();
         int ConvertToVMAPGroupWmo(FILE* output, WMORoot* rootWMO, bool pPreciseVectorData);
+
+        bool ShouldSkip(WMORoot const& root) const;
 
     private:
         std::string filename;
