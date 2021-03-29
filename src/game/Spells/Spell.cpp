@@ -771,22 +771,22 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
     switch (m_spellInfo->DmgClass)
     {
         case SPELL_DAMAGE_CLASS_MELEE:
-            procAttacker = PROC_FLAG_SUCCESSFUL_MELEE_SPELL_HIT;
+            procAttacker = PROC_FLAG_DEAL_MELEE_ABILITY;
             if (m_attackType == OFF_ATTACK)
-                procAttacker |= PROC_FLAG_SUCCESSFUL_OFFHAND_HIT;
-            procVictim = PROC_FLAG_TAKEN_MELEE_SPELL_HIT;
+                procAttacker |= PROC_FLAG_OFF_HAND_WEAPON_SWING;
+            procVictim = PROC_FLAG_TAKE_MELEE_ABILITY;
             break;
         case SPELL_DAMAGE_CLASS_RANGED:
             // Auto attack
             if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))
             {
-                procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_HIT;
-                procVictim = PROC_FLAG_TAKEN_RANGED_HIT;
+                procAttacker = PROC_FLAG_DEAL_RANGED_ATTACK;
+                procVictim = PROC_FLAG_TAKE_RANGED_ATTACK;
             }
             else // Ranged spell attack
             {
-                procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_SPELL_HIT;
-                procVictim = PROC_FLAG_TAKEN_RANGED_SPELL_HIT;
+                procAttacker = PROC_FLAG_DEAL_RANGED_ABILITY;
+                procVictim = PROC_FLAG_TAKE_RANGED_ABILITY;
             }
             break;
         default:
@@ -794,31 +794,31 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
             {
                 if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE) // if dmg class none
                 {
-                    procAttacker = PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS;
-                    procVictim = PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS;
+                    procAttacker = PROC_FLAG_DEAL_HELPFUL_ABILITY;
+                    procVictim = PROC_FLAG_TAKE_HELPFUL_ABILITY;
                 }
                 else
                 {
-                    procAttacker = PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS;
-                    procVictim = PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS;
+                    procAttacker = PROC_FLAG_DEAL_HELPFUL_SPELL;
+                    procVictim = PROC_FLAG_TAKE_HELPFUL_SPELL;
                 }
             }
             else if (m_spellInfo->HasAttribute(SPELL_ATTR_EX2_AUTOREPEAT_FLAG))   // Wands auto attack
             {
-                procAttacker = PROC_FLAG_SUCCESSFUL_RANGED_HIT;
-                procVictim = PROC_FLAG_TAKEN_RANGED_HIT;
+                procAttacker = PROC_FLAG_DEAL_RANGED_ATTACK;
+                procVictim = PROC_FLAG_TAKE_RANGED_ATTACK;
             }
             else                                           // Negative spell
             {
                 if (m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_NONE) // if dmg class none
                 {
-                    procAttacker = PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG;
-                    procVictim = PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG;
+                    procAttacker = PROC_FLAG_DEAL_HARMFUL_ABILITY;
+                    procVictim = PROC_FLAG_TAKE_HARMFUL_ABILITY;
                 }
                 else
                 {
-                    procAttacker = PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG;
-                    procVictim = PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG;
+                    procAttacker = PROC_FLAG_DEAL_HARMFUL_SPELL;
+                    procVictim = PROC_FLAG_TAKE_HARMFUL_SPELL;
                 }
             }
             break;
@@ -826,19 +826,19 @@ void Spell::PrepareMasksForProcSystem(uint8 effectMask, uint32& procAttacker, ui
 
     // Hunter traps spells (for Entrapment trigger)
     // Gives your Immolation Trap, Frost Trap, Explosive Trap, and Snake Trap ....
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & uint64(0x000020000000001C)))
-        procAttacker |= PROC_FLAG_ON_TRAP_ACTIVATION;
+    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && m_spellInfo->SpellFamilyFlags & uint64(0x000020000000001C))
+        procAttacker |= PROC_FLAG_DEAL_HELPFUL_PERIODIC;
 
     if (IsNextMeleeSwingSpell(m_spellInfo))
     {
-        procAttacker |= PROC_FLAG_SUCCESSFUL_MELEE_HIT;
-        procVictim |= PROC_FLAG_TAKEN_MELEE_HIT;
+        procAttacker |= PROC_FLAG_DEAL_MELEE_SWING;
+        procVictim |= PROC_FLAG_TAKE_MELEE_SWING;
     }
 
     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TREAT_AS_PERIODIC))
     {
-        procAttacker = PROC_FLAG_ON_DO_PERIODIC;
-        procVictim = PROC_FLAG_ON_TAKE_PERIODIC;
+        procAttacker = PROC_FLAG_DEAL_HARMFUL_PERIODIC;
+        procVictim = PROC_FLAG_TAKE_HARMFUL_PERIODIC;
     }
 }
 
@@ -934,7 +934,7 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
         // TBC+: Reflect simply negates the spell
         if (!m_originalCasterGUID.IsUnit())
         {
-            Unit::ProcDamageAndSpell(ProcSystemArguments(nullptr, target, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
+            Unit::ProcDamageAndSpell(ProcSystemArguments(nullptr, target, PROC_FLAG_NONE, PROC_FLAG_TAKE_HARMFUL_SPELL, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
             targetInfo.reflectResult = SPELL_MISS_REFLECT;
         }
         else
@@ -1263,7 +1263,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
             caster->SendSpellNonMeleeDamageLog(&spellDamageInfo);
 
         procEx |= createProcExtendMask(&spellDamageInfo, missInfo);
-        procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
+        procVictim |= PROC_FLAG_TAKE_ANY_DAMAGE;
 
         m_damage = spellDamageInfo.damage; // update value so that script handler has access
         OnHit(missInfo); // TODO: After spell damage calc is moved to proper handler - move this before the first if
@@ -1314,7 +1314,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo* target)
         // Do triggers for unit (reflect triggers passed on hit phase for correct drop charge)
         if (m_canTrigger && missInfo != SPELL_MISS_REFLECT)
             // traps need to be procced at trap triggerer
-            Unit::ProcDamageAndSpell(ProcSystemArguments(caster, procAttacker & PROC_FLAG_ON_TRAP_ACTIVATION ? m_targets.getUnitTarget() : unit, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
+            Unit::ProcDamageAndSpell(ProcSystemArguments(caster, procAttacker & PROC_FLAG_DEAL_HELPFUL_PERIODIC ? m_targets.getUnitTarget() : unit, real_caster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
     }
 
     OnAfterHit();
@@ -1536,7 +1536,7 @@ void Spell::DoAllTargetlessEffects(bool dest)
         if (unitCaster)
         {
             PrepareMasksForProcSystem(effectMask, procAttacker, procVictim, caster, unitTarget);
-            Unit::ProcDamageAndSpell(ProcSystemArguments(unitCaster, procAttacker & PROC_FLAG_ON_TRAP_ACTIVATION ? m_targets.getUnitTarget() : nullptr, unitCaster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
+            Unit::ProcDamageAndSpell(ProcSystemArguments(unitCaster, procAttacker & PROC_FLAG_DEAL_HELPFUL_PERIODIC ? m_targets.getUnitTarget() : nullptr, unitCaster ? procAttacker : uint32(PROC_FLAG_NONE), procVictim, procEx, 0, m_attackType, m_spellInfo, this));
         }
     }
 }
@@ -6445,7 +6445,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                             return SPELL_FAILED_NO_PET;
                         break;
                     case 61336:                             // Survival Instincts
-                        if (m_caster->GetTypeId() != TYPEID_PLAYER || !((Player*)m_caster)->IsInFeralForm())
+                        if (m_caster->GetTypeId() != TYPEID_PLAYER || !m_caster->IsNoWeaponShapeShift())
                             return SPELL_FAILED_ONLY_SHAPESHIFT;
                         break;
                     default:
@@ -8722,10 +8722,10 @@ void Spell::ProcReflectProcs(TargetInfo& targetInfo)
         return;
 
     // Victim reflects, apply reflect procs
-    Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, target, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
+    Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, target, PROC_FLAG_NONE, PROC_FLAG_TAKE_HARMFUL_SPELL, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
     if (targetInfo.reflectResult == SPELL_MISS_REFLECT)
         // Apply reflect procs on self
-        Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, m_caster, PROC_FLAG_NONE, PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
+        Unit::ProcDamageAndSpell(ProcSystemArguments(m_caster, m_caster, PROC_FLAG_NONE, PROC_FLAG_TAKE_HARMFUL_SPELL, PROC_EX_REFLECT, 1, BASE_ATTACK, m_spellInfo));
 }
 
 void Spell::FilterTargetMap(UnitList& filterUnitList, SpellTargetFilterScheme scheme, uint32 chainTargetCount)

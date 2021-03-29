@@ -3747,7 +3747,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 {
                     if (apply)
                     {
-                        if (!target->IsInFeralForm())
+                        if (!target->IsNoWeaponShapeShift())
                             return;
 
                         int32 bp0 = int32(target->GetMaxHealth() * m_modifier.m_amount / 100);
@@ -8491,8 +8491,8 @@ void Aura::PeriodicTick()
             Unit::DealDamageMods(caster, target, pdamage, &absorb, DOT, spellProto);
 
             // Set trigger flag
-            uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC; //  | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
-            uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;// | PROC_FLAG_TAKEN_HARMFUL_SPELL_HIT;
+            uint32 procAttacker = PROC_FLAG_DEAL_HARMFUL_PERIODIC; //  | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
+            uint32 procVictim   = PROC_FLAG_TAKE_HARMFUL_PERIODIC;// | PROC_FLAG_TAKEN_HARMFUL_SPELL_HIT;
             uint32 procEx = isCrit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT;
 
             const uint32 bonus = (resist < 0 ? uint32(std::abs(resist)) : 0);
@@ -8505,7 +8505,7 @@ void Aura::PeriodicTick()
             target->SendPeriodicAuraLog(&pInfo);
 
             if (pdamage)
-                procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
+                procVictim |= PROC_FLAG_TAKE_ANY_DAMAGE;
 
             CleanDamage cleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL, pdamage || absorb);
             // send critical in hit info for threat calculation
@@ -8584,8 +8584,8 @@ void Aura::PeriodicTick()
             float multiplier = spellProto->EffectMultipleValue[GetEffIndex()] > 0 ? spellProto->EffectMultipleValue[GetEffIndex()] : 1;
 
             // Set trigger flag
-            uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC; //  | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
-            uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;// | PROC_FLAG_TAKEN_HARMFUL_SPELL_HIT;
+            uint32 procAttacker = PROC_FLAG_DEAL_HARMFUL_PERIODIC; //  | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
+            uint32 procVictim   = PROC_FLAG_TAKE_HARMFUL_PERIODIC;// | PROC_FLAG_TAKEN_HARMFUL_SPELL_HIT;
             uint32 procEx = isCrit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT;
 
             const uint32 bonus = (resist < 0 ? uint32(std::abs(resist)) : 0);
@@ -8596,7 +8596,7 @@ void Aura::PeriodicTick()
             pdamage = std::min(pdamage, target->GetHealth());
 
             if (pdamage)
-                procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
+                procVictim |= PROC_FLAG_TAKE_ANY_DAMAGE;
 
             CleanDamage cleanDamage(pdamage, BASE_ATTACK, MELEE_HIT_NORMAL, pdamage || absorb);
             // send critical in hit info for threat calculation
@@ -8695,8 +8695,8 @@ void Aura::PeriodicTick()
             target->SendPeriodicAuraLog(&pInfo);
 
             // Set trigger flag
-            uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC;
-            uint32 procVictim = PROC_FLAG_ON_TAKE_PERIODIC;
+            uint32 procAttacker = PROC_FLAG_DEAL_HARMFUL_PERIODIC;
+            uint32 procVictim = PROC_FLAG_TAKE_HARMFUL_PERIODIC;
             uint32 procEx = PROC_EX_INTERNAL_HOT | (isCrit ? PROC_EX_CRITICAL_HIT : PROC_EX_NORMAL_HIT);
 
             // add HoTs to amount healed in bgs
@@ -8986,11 +8986,11 @@ void Aura::PeriodicTick()
             pCaster->SendSpellNonMeleeDamageLog(&spellDamageInfo);
 
             // Set trigger flag
-            uint32 procAttacker = PROC_FLAG_ON_DO_PERIODIC; //  | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
-            uint32 procVictim   = PROC_FLAG_ON_TAKE_PERIODIC;// | PROC_FLAG_TAKEN_HARMFUL_SPELL_HIT;
+            uint32 procAttacker = PROC_FLAG_DEAL_HARMFUL_PERIODIC; //  | PROC_FLAG_SUCCESSFUL_HARMFUL_SPELL_HIT;
+            uint32 procVictim   = PROC_FLAG_TAKE_HARMFUL_PERIODIC;// | PROC_FLAG_TAKEN_HARMFUL_SPELL_HIT;
             uint32 procEx       = createProcExtendMask(&spellDamageInfo, SPELL_MISS_NONE);
             if (spellDamageInfo.damage)
-                procVictim |= PROC_FLAG_TAKEN_ANY_DAMAGE;
+                procVictim |= PROC_FLAG_TAKE_ANY_DAMAGE;
 
             pCaster->DealSpellDamage(&spellDamageInfo, true, false);
 

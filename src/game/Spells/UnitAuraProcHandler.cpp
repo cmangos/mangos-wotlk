@@ -495,8 +495,8 @@ void Unit::ProcDamageAndSpell(ProcSystemArguments&& data)
     if (data.attacker)
     {
         // trigger weapon enchants for weapon based spells; exclude spells that stop attack, because may break CC
-        if (data.attacker->GetTypeId() == TYPEID_PLAYER && (data.procExtra & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)) != 0)
-            if ((data.procFlagsAttacker & PROC_FLAG_ON_DO_PERIODIC) == 0) // do not proc this on DOTs
+		if (data.attacker->GetTypeId() == TYPEID_PLAYER && (data.procExtra & (PROC_EX_NORMAL_HIT | PROC_EX_CRITICAL_HIT)) != 0)
+            if ((data.procFlagsAttacker & PROC_FLAG_DEAL_HARMFUL_PERIODIC) == 0) // do not proc this on DOTs
 			    if (!data.spellInfo || (data.spellInfo->EquippedItemClass == ITEM_CLASS_WEAPON && !data.spellInfo->HasAttribute(SPELL_ATTR_STOP_ATTACK_TARGET)))
 				    static_cast<Player*>(data.attacker)->CastItemCombatSpell(data.victim, data.attType, data.spellInfo ? !IsNextMeleeSwingSpell(data.spellInfo) : false);
 
@@ -551,7 +551,7 @@ void Unit::ProcDamageAndSpellFor(ProcSystemArguments& argData, bool isVictim)
             // spell seem not managed by proc system, although some case need to be handled
 
             // only process damage case on victim
-            if (!isVictim || !(execData.procFlags & PROC_FLAG_TAKEN_ANY_DAMAGE) || (execData.spellInfo && execData.spellInfo->HasAttribute(SPELL_ATTR_EX4_DAMAGE_DOESNT_BREAK_AURAS)))
+            if (!isVictim || !(execData.procFlags & PROC_FLAG_TAKE_ANY_DAMAGE) || (execData.spellInfo && execData.spellInfo->HasAttribute(SPELL_ATTR_EX4_DAMAGE_DOESNT_BREAK_AURAS)))
                 continue;
 
             const SpellEntry* se = itr->second->GetSpellProto();
@@ -692,7 +692,7 @@ bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder*
     }
     // Aura added by spell can`t trigger from self (prevent drop charges/do triggers)
     // But except periodic triggers (can triggered from self)
-    if (data.spellInfo && data.spellInfo->Id == spellProto->Id && !(EventProcFlag & PROC_FLAG_ON_TAKE_PERIODIC))
+    if (data.spellInfo && data.spellInfo->Id == spellProto->Id && !(EventProcFlag & PROC_FLAG_TAKE_HARMFUL_PERIODIC))
         return false;
 
     // Check if current equipment allows aura to proc
@@ -1413,12 +1413,12 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                 // Shiny Shard of the Scale - Equip Effect
                 case 69739:
                     // Cauterizing Heal or Searing Flame
-                    triggered_spell_id = (procFlags & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS) ? 69734 : 69730;
+                    triggered_spell_id = (procFlags & PROC_FLAG_DEAL_HELPFUL_SPELL) ? 69734 : 69730;
                     break;
                 // Purified Shard of the Scale - Equip Effect
                 case 69755:
                     // Cauterizing Heal or Searing Flame
-                    triggered_spell_id = (procFlags & PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS) ? 69733 : 69729;
+                    triggered_spell_id = (procFlags & PROC_FLAG_DEAL_HELPFUL_SPELL) ? 69733 : 69729;
                     break;
                 // Item - Shadowmourne Legendary
                 case 71903:
@@ -2206,7 +2206,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
             if (dummySpell->SpellIconID == 3579)
             {
                 // Proc only from periodic (from trap activation proc another aura of this spell)
-                if (!(procFlags & PROC_FLAG_ON_DO_PERIODIC) || !roll_chance_i(triggerAmount))
+                if (!(procFlags & PROC_FLAG_DEAL_HARMFUL_PERIODIC) || !roll_chance_i(triggerAmount))
                     return SPELL_AURA_PROC_FAILED;
                 triggered_spell_id = 56453;
                 target = this;
@@ -2381,7 +2381,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         return SPELL_AURA_PROC_FAILED;
 
                     // At melee attack or Hammer of the Righteous spell damage considered as melee attack
-                    if ((procFlags & PROC_FLAG_SUCCESSFUL_MELEE_HIT) || (spellInfo && spellInfo->Id == 53595))
+                    if ((procFlags & PROC_FLAG_DEAL_MELEE_ABILITY) || (spellInfo && spellInfo->Id == 53595))
                         triggered_spell_id = 31803;         // Holy Vengeance
 
                     // Add 5-stack effect from Holy Vengeance
@@ -2446,7 +2446,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                         return SPELL_AURA_PROC_FAILED;
 
                     // At melee attack or Hammer of the Righteous spell damage considered as melee attack
-                    if ((procFlags & PROC_FLAG_SUCCESSFUL_MELEE_HIT) || (spellInfo && spellInfo->Id == 53595))
+                    if ((procFlags & PROC_FLAG_DEAL_MELEE_ABILITY) || (spellInfo && spellInfo->Id == 53595))
                         triggered_spell_id = 53742;         // Blood Corruption
 
                     // Add 5-stack effect from Blood Corruption
@@ -2604,7 +2604,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     if (!castItem || !castItem->IsEquipped())
                         return SPELL_AURA_PROC_FAILED;
 
-                    if (castItem->GetSlot() == EQUIPMENT_SLOT_MAINHAND && procFlags & PROC_FLAG_SUCCESSFUL_OFFHAND_HIT)
+                    if (castItem->GetSlot() == EQUIPMENT_SLOT_MAINHAND && procFlags & PROC_FLAG_OFF_HAND_WEAPON_SWING)
                         return SPELL_AURA_PROC_FAILED;
 
                     // custom cooldown processing case
@@ -2809,7 +2809,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     return SPELL_AURA_PROC_FAILED;
 
                 // Only proc for enchanted weapon
-                Item* usedWeapon = ((Player*)this)->GetWeaponForAttack(procFlags & PROC_FLAG_SUCCESSFUL_OFFHAND_HIT ? OFF_ATTACK : BASE_ATTACK, true, true);
+                Item* usedWeapon = ((Player*)this)->GetWeaponForAttack(procFlags & PROC_FLAG_OFF_HAND_WEAPON_SWING ? OFF_ATTACK : BASE_ATTACK, true, true);
                 if (usedWeapon != castItem)
                     return SPELL_AURA_PROC_FAILED;
 
@@ -3136,7 +3136,7 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
             if (dummySpell->SpellIconID == 138)
             {
                 // only main hand melee auto attack affected and Rune Strike
-                if ((procFlags & PROC_FLAG_SUCCESSFUL_OFFHAND_HIT) || (spellInfo && spellInfo->Id != 56815))
+                if ((procFlags & PROC_FLAG_OFF_HAND_WEAPON_SWING) || (spellInfo && spellInfo->Id != 56815))
                     return SPELL_AURA_PROC_FAILED;
 
                 // triggered_spell_id in spell data
@@ -3668,7 +3668,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
         {
             if (auraSpellInfo->SpellIconID == 2260)         // Combat Potency
             {
-                if (!(procFlags & PROC_FLAG_SUCCESSFUL_OFFHAND_HIT))
+                if (!(procFlags & PROC_FLAG_OFF_HAND_WEAPON_SWING))
                     return SPELL_AURA_PROC_FAILED;
             }
 
@@ -4091,7 +4091,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
         case 56453:
         {
             // Proc only from trap activation (from periodic proc another aura of this spell)
-            if (!(procFlags & PROC_FLAG_ON_TRAP_ACTIVATION) || !roll_chance_i(triggerAmount))
+            if (!(procFlags & PROC_FLAG_DEAL_HELPFUL_PERIODIC) || !roll_chance_i(triggerAmount))
                 return SPELL_AURA_PROC_FAILED;
             break;
         }
@@ -4122,7 +4122,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
 
     // try detect target manually if not set
     if (target == nullptr)
-        target = !(procFlags & (PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS | PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS)) && IsPositiveSpellTargetMode(triggerEntry, this, pVictim) ? this : pVictim;
+        target = !(procFlags & (PROC_FLAG_DEAL_HELPFUL_SPELL | PROC_FLAG_DEAL_HELPFUL_ABILITY)) && IsPositiveSpellTargetMode(triggerEntry, this, pVictim) ? this : pVictim;
 
     // Quick check for target modes for procs: do not cast offensive procs on friendly targets and in reverse
     if (target != nullptr)
