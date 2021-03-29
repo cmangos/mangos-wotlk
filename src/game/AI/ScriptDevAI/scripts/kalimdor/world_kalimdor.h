@@ -24,6 +24,9 @@ enum
     GO_ROCKET_CLUSTER           = 180875,
     SPELL_OMEN_MOONLIGHT        = 26392,
     MAX_ROCKETS                 = 30,
+
+    // Quest 6132
+    NPC_HORNIZZ                 = 6019,
 };
 
 enum Encounters
