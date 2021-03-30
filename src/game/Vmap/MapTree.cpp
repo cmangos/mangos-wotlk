@@ -314,7 +314,6 @@ namespace VMAP
 
         // global model spawns
         // only non-tiled maps have them, and if so exactly one (so far at least...)
-        ModelSpawn spawn;
 #ifdef VMAP_DEBUG
         DEBUG_LOG("Map isTiled: %u", static_cast<uint32>(iIsTiled));
 #endif
