@@ -529,7 +529,7 @@ bool AreaTrigger_at_area_52(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
 {
     // ToDo: research if there should be other actions happening here
     if (!pPlayer->HasAura(SPELL_A52_NEURALYZER))
-        pPlayer->CastSpell(pPlayer, SPELL_A52_NEURALYZER, TRIGGERED_NONE);
+        pPlayer->CastSpell(pPlayer, SPELL_A52_NEURALYZER, TRIGGERED_OLD_TRIGGERED); // mounted needs triggered
 
     return false;
 }
