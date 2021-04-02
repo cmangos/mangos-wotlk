@@ -7112,11 +7112,14 @@ std::vector<uint32> ObjectMgr::LoadGameobjectInfo()
                         sLog.outErrorDb("Gameobject (Entry: %u GoType: %u) have data0=%u but TaxiPath (Id: %u) not exist.",
                                         goInfo->id, goInfo->type, goInfo->moTransport.taxiPathId, goInfo->moTransport.taxiPathId);
                 }
-                transportDisplayIds.push_back(goInfo->displayId);
-                if (goInfo->moTransport.mapID)
+                if (goInfo->displayId != 462 && goInfo->displayId != 562)
                 {
-                    m_guidsForMap[goInfo->moTransport.mapID];
-                    m_transportMaps.emplace(goInfo->moTransport.mapID, goInfo->id);
+                    transportDisplayIds.push_back(goInfo->displayId);
+                    if (goInfo->moTransport.mapID)
+                    {
+                        m_guidsForMap[goInfo->moTransport.mapID];
+                        m_transportMaps.emplace(goInfo->moTransport.mapID, goInfo->id);
+                    }
                 }
                 break;
             }
