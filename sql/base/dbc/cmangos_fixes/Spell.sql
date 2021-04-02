@@ -2461,6 +2461,14 @@ INSERT INTO `spell_template` (`Id`, `Category`, `Dispel`, `Mechanic`, `Attribute
 -- Infect Ice Troll - Spell used in Grizzly Hills ... shouldnt have restricted area from Outland
 UPDATE `spell_template` SET `AreaId`=0 WHERE `id`=47176;
 
+-- Food
+-- missing effects added
+UPDATE spell_template SET EffectTriggerSpell3 = '65414' WHERE Id =65422;
+UPDATE spell_template SET EffectTriggerSpell3 = '65410' WHERE Id =65418;
+UPDATE spell_template SET EffectTriggerSpell3 = '65412' WHERE Id =65420;
+UPDATE spell_template SET EffectTriggerSpell3 = '65415' WHERE Id =65421;
+UPDATE spell_template SET EffectTriggerSpell3 = '65416' WHERE Id =65419;
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================
