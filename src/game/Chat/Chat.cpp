@@ -849,6 +849,14 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,             0,                  false, nullptr,                                           "", nullptr }
     };
 
+    static ChatCommand warEffortTable[] =
+    {
+        { "show",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWarEffortCommand,                    "", nullptr },
+        { "phase",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWarEffortPhaseCommand,               "", nullptr },
+        { "counter",        SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWarEffortCounterCommand,             "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                                 "", nullptr }
+    };
+
     static ChatCommand sunsReachReclamationTable[] =
     {
         { "phase",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSunsReachReclamationPhaseCommand,    "", nullptr },
@@ -861,7 +869,7 @@ ChatCommand* ChatHandler::getCommandTable()
 
     static ChatCommand worldStateTable[] =
     {
-        { "wareffort",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleWarEffortCommand,           "", nullptr },
+        { "wareffort",      SEC_ADMINISTRATOR,  false, nullptr,                                        "", warEffortTable },
         { "sunsreach",      SEC_ADMINISTRATOR,  false, nullptr,                                        "", sunsReachReclamationTable },
         { "expansion",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleExpansionRelease,           "", nullptr },
         { nullptr,          0,                  false, nullptr,                                        "", nullptr }
