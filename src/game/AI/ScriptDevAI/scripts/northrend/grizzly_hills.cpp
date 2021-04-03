@@ -512,6 +512,8 @@ struct npc_emilyAI : public npc_escortAI
             case 28:
                 if (Creature* pFloppy = m_creature->GetMap()->GetCreature(m_floppyGuid))
                     pFloppy->ForcedDespawn();
+                SetEscortPaused(true);
+                m_creature->ForcedDespawn(1000);
                 break;
         }
     }
