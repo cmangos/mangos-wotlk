@@ -407,6 +407,9 @@ struct world_map_kalimdor : public ScriptedMap
                         uiData = DONE;
                 }
             }
+            case TYPE_GONG_TIME:
+                // TODO: Handle initial first gong only
+                break;
             default:
                 if (uiType >= TYPE_SHADE_OF_THE_HORSEMAN_ATTACK_PHASE && uiType <= TYPE_SHADE_OF_THE_HORSEMAN_MAX)
                     return m_shadeData.HandleSetData(uiType, uiData);
