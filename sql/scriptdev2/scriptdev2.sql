@@ -869,6 +869,7 @@ UPDATE creature_template SET ScriptName='boss_tethyr' WHERE entry=23899;
 UPDATE creature_template SET ScriptName='npc_major_mills' WHERE entry=23905;
 UPDATE creature_template SET ScriptName='mob_invis_firework_helper' WHERE entry=24025;
 UPDATE creature_template SET ScriptName='npc_smolderwing' WHERE entry=23789;
+UPDATE creature_template SET ScriptName='npc_theramore_spar_controller' WHERE entry=5090;
 
 INSERT INTO scripted_areatrigger VALUES
 (302,'at_sentry_point');
