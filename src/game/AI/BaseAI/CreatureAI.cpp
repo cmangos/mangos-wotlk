@@ -107,7 +107,10 @@ void CreatureAI::DamageTaken(Unit* dealer, uint32& damage, DamageEffectType /*da
         {
             damage = m_creature->GetHealth() - 1;
             if (!m_deathPrevented)
+            {
+                m_deathPrevented = true;
                 JustPreventedDeath(dealer);
+            }
         }
     }
 }
