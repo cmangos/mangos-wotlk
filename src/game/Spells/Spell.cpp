@@ -895,7 +895,7 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
     targetInfo.diminishGroup = DIMINISHING_NONE;
 
     // Calculate hit result
-    targetInfo.missCondition = (m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(target, m_spellInfo, targetInfo.effectMask, m_reflectable, false, &targetInfo.heartbeatResistChance));
+    targetInfo.missCondition = m_ignoreHitResult ? SPELL_MISS_NONE : m_caster->SpellHitResult(target, m_spellInfo, targetInfo.effectMask, m_reflectable, false, &targetInfo.heartbeatResistChance);
 
     // spell fly from visual cast object
     WorldObject* affectiveObject = GetAffectiveCasterObject();
@@ -948,7 +948,7 @@ void Spell::AddUnitTarget(Unit* target, uint8 effectMask, CheckException excepti
 
             targetInfo.effectHitMask = notImmunedMask;
             // Calculate reflected spell result on caster
-            targetInfo.reflectResult = m_caster->SpellHitResult(m_caster, m_spellInfo, targetInfo.effectMask, m_reflectable, true, &targetInfo.heartbeatResistChance);
+            targetInfo.reflectResult =  m_caster->SpellHitResult(m_caster, m_spellInfo, targetInfo.effectMask, m_reflectable, true, &targetInfo.heartbeatResistChance);
             // Caster reflects back spell which was already reflected by victim
             if (targetInfo.reflectResult == SPELL_MISS_REFLECT)
                 // Full circle: it's impossible to reflect further, "Immune" shows up
@@ -3196,7 +3196,10 @@ void Spell::Prepare()
 
     // calculate cast time (calculated after first CheckCast check to prevent charge counting for first CheckCast fail)
     if (!m_ignoreCastTime)
-        m_casttime = GetSpellCastTime(m_spellInfo, m_caster, this);
+    {
+        SpellModRAII spellModController(this, m_caster->GetSpellModOwner(), false, true);
+        m_casttime = GetSpellCastTime(m_spellInfo, m_trueCaster, this, true);
+    }
 
     // set timer base at cast time
     ReSetTimer();
@@ -3257,6 +3260,10 @@ void Spell::cancel()
     // channeled spells don't display interrupted message even if they are interrupted, possible other cases with no "Interrupted" message
     bool sendInterrupt = !(IsChanneledSpell(m_spellInfo) || m_autoRepeat);
 
+    if (Player* player = m_caster->GetSpellModOwner()) // reset casting time mods
+        if (player->GetSpellModSpell() != this && !m_usedAuraCharges.empty())
+            player->ResetSpellModsDueToCanceledSpell(m_usedAuraCharges);
+
     m_autoRepeat = false;
     switch (m_spellState)
     {
@@ -3307,6 +3314,7 @@ void Spell::cancel()
 void Spell::cast(bool skipCheck)
 {
     SetExecutedCurrently(true);
+    SpellModRAII spellModController(this, m_caster->GetSpellModOwner());
 
     if (!m_caster->CheckAndIncreaseCastCounter())
     {
@@ -3550,6 +3558,8 @@ void Spell::cast(bool skipCheck)
         return;
     }
 
+    spellModController.SetSuccess();
+
     if (Unit* unitCaster = dynamic_cast<Unit*>(m_trueCaster))
         if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_DISMISS_PET))
             if (Pet* pet = unitCaster->GetPet())
@@ -3633,6 +3643,8 @@ void Spell::handle_immediate()
 
 uint64 Spell::handle_delayed(uint64 t_offset)
 {
+    SpellModRAII spellModController(this, m_caster->GetSpellModOwner(), true);
+
     uint64 next_time = 0;
 
     if (!m_destTargetInfo.processed)
@@ -7132,7 +7144,7 @@ int32 Spell::CalculateSpellEffectDamage(Unit* unitTarget, int32 damage)
     return damage;
 }
 
-uint32 Spell::CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell* spell, Item* castItem, bool /*finalUse*/)
+uint32 Spell::CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell* spell, Item* castItem, bool finalUse)
 {
     // item cast not used power
     if (castItem)
@@ -7189,7 +7201,7 @@ uint32 Spell::CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spel
     // Apply cost mod by spell
     if (spell)
         if (Player* modOwner = caster->GetSpellModOwner())
-            modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_COST, powerCost);
+            modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_COST, powerCost, finalUse);
 
     if (spellInfo->HasAttribute(SPELL_ATTR_LEVEL_DAMAGE_CALCULATION))
     {
@@ -9472,6 +9484,27 @@ void Spell::OnSummon(Creature* summon)
         return script->OnSummon(this, summon);
 }
 
+SpellModRAII::SpellModRAII(Spell* spell, Player* modOwner, bool success, bool onlySave) : m_spell(spell), m_modOwner(modOwner), m_success(success), m_onlySave(onlySave)
+{
+    if (m_modOwner && !modOwner->GetSpellModSpell()) // only if first spell in depth
+        m_modOwner->SetSpellModSpell(spell);
+}
+
+SpellModRAII::~SpellModRAII()
+{
+    if (m_modOwner && m_modOwner->GetSpellModSpell() == m_spell) // only if this spell is toplevel
+    {
+        if (!m_onlySave)
+        {
+            if (m_success)
+                m_modOwner->RemoveSpellMods(m_spell->m_usedAuraCharges);
+            else
+                m_modOwner->ResetSpellModsDueToCanceledSpell(m_spell->m_usedAuraCharges);
+        }
+        m_modOwner->SetSpellModSpell(nullptr);
+    }
+}
+
 SpellCastResult Spell::CheckVehicle(Unit const* caster, SpellEntry const& spellInfo)
 {
     // All creatures should be able to cast as passengers freely, restriction and attribute are only for players
@@ -9524,3 +9557,4 @@ SpellCastResult Spell::CheckVehicle(Unit const* caster, SpellEntry const& spellI
 
     return SPELL_CAST_OK;
 }
+

@@ -177,7 +177,10 @@ class SpellAuraHolder
                 SendAuraUpdate(false);
         }
 
+        // SpellMods
         bool DropAuraCharge();                               // return true if last charge dropped
+        void ResetSpellModCharges();
+        bool HasModifier(const uint64& modId) const;
 
         uint32 GetAuraApplyTime() const { return m_applyTime; }
         uint32 GetAuraApplyMSTime() const { return m_applyMSTime; } // milliseconds time
@@ -475,8 +478,6 @@ class Aura
         }
         uint32 GetStackAmount() const { return GetHolder()->GetStackAmount(); }
 
-        bool DropAuraCharge();                               // return true if last charge dropped
-
         void SetLoadedState(int32 damage, uint32 periodicTime)
         {
             m_modifier.m_amount = damage;
@@ -518,6 +519,8 @@ class Aura
         bool IsLastAuraOnHolder();
 
         bool HasMechanic(uint32 mechanic) const;
+
+        SpellModifier* GetSpellModifier() { return m_spellmod; }
 
         void UseMagnet() { m_magnetUsed = true; }
         bool IsMagnetUsed() const { return m_magnetUsed; }
@@ -562,6 +565,7 @@ class Aura
         void CastTriggeredSpell(PeriodicTriggerData& data);
 
         Modifier m_modifier;
+        SpellModifier* m_spellmod;
 
         time_t m_applyTime;
 

@@ -364,6 +364,28 @@ std::ostringstream& operator<<(std::ostringstream& ss, PlayerTaxi const& taxi)
         ss << i << " ";
     return ss;
 }
+
+uint64 SpellModifier::modCounter = 0;
+
+SpellModifier::SpellModifier(SpellModOp _op, SpellModType _type, int32 _value, SpellEntry const* spellEntry, SpellEffectIndex eff, int32 _priority, int16 _charges /*= 0*/) : op(_op), type(_type), charges(_charges), value(_value), spellId(spellEntry->Id), priority(_priority), isFinite(_charges > 0), modId(GetModId())
+{
+    mask = spellEntry->EffectSpellClassMask[eff];
+}
+
+SpellModifier::SpellModifier(SpellModOp _op, SpellModType _type, int32 _value, Aura const* aura, int32 _priority, int16 _charges /*= 0*/) : op(_op), type(_type), charges(_charges), value(_value), spellId(aura->GetId()), priority(_priority), isFinite(_charges > 0), modId(GetModId())
+{
+    mask = aura->GetAuraSpellClassMask();
+}
+
+bool SpellModifier::isAffectedOnSpell(SpellEntry const* spell) const
+{
+    SpellEntry const* affect_spell = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
+    // False if affect_spell == nullptr or spellFamily not equal
+    if (!affect_spell || affect_spell->SpellFamilyName != spell->SpellFamilyName)
+        return false;
+    return spell->IsFitToFamilyMask(mask);
+}
+
 //== TradeData =================================================
 
 TradeData* TradeData::GetTraderData() const
@@ -666,6 +688,9 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_energyRegenRate = 1.f;
 
     m_grantableLevels = 0;
+
+    m_consumedMods = nullptr;
+    m_modsSpell = nullptr;
 }
 
 Player::~Player()
@@ -19366,42 +19391,119 @@ void Player::RemovePetActionBar() const
     SendDirectMessage(data);
 }
 
-void Player::AddSpellMod(Aura* aura, bool apply)
+bool Player::IsAffectedBySpellmod(SpellEntry const* spellInfo, SpellModifier* mod, std::set<SpellModifierPair>* consumedMods)
 {
-    Modifier const* mod = aura->GetModifier();
-    Opcodes opcode = (mod->m_auraname == SPELL_AURA_ADD_FLAT_MODIFIER) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
+    if (!mod || !spellInfo)
+        return false;
 
-    for (int eff = 0; eff < 96; ++eff)
+    if (mod->charges == -1)            // marked as expired but locked until spell casting finish
     {
-        uint64 _mask = 0;
-        uint32 _mask2 = 0;
+        // prevent apply to any spell except spell that trigger expire
+        if (consumedMods)
+        {
+            if (consumedMods->find(SpellModifierPair(mod->spellId, mod->modId)) == consumedMods->end())
+                return false;
+        }
+    }
 
-        if (eff < 64)
-            _mask = uint64(1) << (eff - 0);
-        else
-            _mask2 = uint32(1) << (eff - 64);
+    return mod->isAffectedOnSpell(spellInfo);
+}
 
-        if (aura->GetAuraSpellClassMask().IsFitToFamilyMask(_mask, _mask2))
+void Player::AddSpellMod(SpellModifier* mod, bool apply)
+{
+    Opcodes opcode = (mod->type == SPELLMOD_FLAT) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
+
+    for (int eff = 0; eff < 64; ++eff)
+    {
+        uint64 _mask = uint64(1) << eff;
+        if (mod->mask.IsFitToFamilyMask(_mask))
         {
             int32 val = 0;
-            for (AuraList::const_iterator itr = m_spellMods[mod->m_miscvalue].begin(); itr != m_spellMods[mod->m_miscvalue].end(); ++itr)
+            for (SpellModifier* modifier : m_spellMods[mod->op])
             {
-                if ((*itr)->GetModifier()->m_auraname == mod->m_auraname && ((*itr)->GetAuraSpellClassMask().IsFitToFamilyMask(_mask, _mask2)))
-                    val += (*itr)->GetModifier()->m_amount;
+                if (modifier->type == mod->type && (modifier->mask.IsFitToFamilyMask(_mask)))
+                    val += modifier->value;
             }
-            val += apply ? mod->m_amount : -(mod->m_amount);
+            val += apply ? mod->value : -(mod->value);
             WorldPacket data(opcode, (1 + 1 + 4));
             data << uint8(eff);
-            data << uint8(mod->m_miscvalue);
+            data << uint8(mod->op);
             data << int32(val);
             SendDirectMessage(data);
         }
     }
 
     if (apply)
-        m_spellMods[mod->m_miscvalue].push_back(aura);
+    {
+        m_spellMods[mod->op].push_back(mod);
+        m_spellMods[mod->op].sort(SpellModifierComparator());
+    }
     else
-        m_spellMods[mod->m_miscvalue].remove(aura);
+    {
+        m_spellMods[mod->op].remove(mod);
+        delete mod;
+    }
+}
+
+void Player::SendAllSpellMods(SpellModType modType)
+{
+    Opcodes opcode = (modType == SPELLMOD_FLAT) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
+    for (uint32 eff = 0; eff < 64; ++eff)
+    {
+        for (uint32 op = 0; op < MAX_SPELLMOD; ++op)
+        {
+            uint64 _mask = uint64(1) << eff;
+            int32 val = 0;
+            for (SpellModifier* modifier : m_spellMods[op])
+            {
+                if (modifier->type == modType && (modifier->mask.IsFitToFamilyMask(_mask)))
+                    val += modifier->value;
+            }
+            WorldPacket data(opcode, (1 + 1 + 4));
+            data << uint8(eff);
+            data << uint8(op);
+            data << int32(val);
+            SendDirectMessage(data);
+        }
+    }
+}
+
+SpellModifier* Player::GetSpellMod(SpellModOp op, uint32 spellId) const
+{
+    for (SpellModifier* mod : m_spellMods[op])
+        if (mod->spellId == spellId)
+            return mod;
+
+    return nullptr;
+}
+
+void Player::RemoveSpellMods(std::set<SpellModifierPair>& usedAuraCharges)
+{
+    if (!usedAuraCharges.size())
+        return;
+
+    for (const SpellModifierPair& spellModifierPair : usedAuraCharges)
+    {
+        if (SpellAuraHolder* holder = GetSpellAuraHolder(spellModifierPair.spellId))
+        {
+            if (holder->HasModifier(spellModifierPair.modId))
+            {
+                if (holder->DropAuraCharge())
+                    RemoveAurasDueToSpell(spellModifierPair.spellId);
+            }
+        }
+    }
+}
+
+void Player::ResetSpellModsDueToCanceledSpell(std::set<SpellModifierPair>& usedAuraCharges)
+{
+    if (!usedAuraCharges.size())
+        return;
+
+    for (const SpellModifierPair& spellModifierPair : usedAuraCharges)
+        if (SpellAuraHolder* holder = GetSpellAuraHolder(spellModifierPair.spellId))
+            if (holder->HasModifier(spellModifierPair.modId))
+                holder->ResetSpellModCharges();
 }
 
 void Player::SetSpellClass(uint8 playerClass)
@@ -24842,4 +24944,16 @@ bool Player::GetsRecruitAFriendBonus()
         }
     }
     return false;
+}
+
+void Player::SetSpellModSpell(Spell* spell)
+{
+    if (!spell)
+    {
+        m_modsSpell = nullptr;
+        m_consumedMods = nullptr;
+        return;
+    }
+    m_modsSpell = spell;
+    m_consumedMods = &spell->m_usedAuraCharges;
 }

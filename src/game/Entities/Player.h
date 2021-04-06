@@ -1721,8 +1721,13 @@ class Player : public Unit
         PlayerTalent const* GetKnownTalentById(int32 talentId) const;
         SpellEntry const* GetKnownTalentRankById(int32 talentId) const;
 
-        void AddSpellMod(Aura* aura, bool apply);
+        void AddSpellMod(SpellModifier* mod, bool apply);
+        void SendAllSpellMods(SpellModType modType);
+        bool IsAffectedBySpellmod(SpellEntry const* spellInfo, SpellModifier* mod, std::set<SpellModifierPair>* consumedMods);
         template <class T> void ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, bool finalUse = true);
+        SpellModifier* GetSpellMod(SpellModOp op, uint32 spellId) const;
+        void RemoveSpellMods(std::set<SpellModifierPair>& usedAuraCharges);
+        void ResetSpellModsDueToCanceledSpell(std::set<SpellModifierPair>& usedAuraCharges);
         void SetSpellClass(uint8 playerClass);
         SpellFamily GetSpellClass() const { return m_spellClassName; } // client function equivalent - says what player can cast
 
@@ -2508,6 +2513,11 @@ class Player : public Unit
         void CastQueuedSpell(SpellCastTargets& targets);
 
         void BanPlayer(std::string const& reason);
+
+        uint32 m_teleportSpellIdDiagnostics;
+
+        Spell* GetSpellModSpell() { return m_modsSpell; }
+        void SetSpellModSpell(Spell* spell);
     protected:
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
@@ -2670,7 +2680,7 @@ class Player : public Unit
 
         uint32 m_enchantmentFlatMod[MAX_ATTACK]; // TODO: Stat system - incorporate generically, exposes a required hidden weapon stat that does not apply when unarmed
 
-        AuraList m_spellMods[MAX_SPELLMOD];
+        SpellModList m_spellMods[MAX_SPELLMOD];
         SpellFamily m_spellClassName; // s_spellClassSet
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;
@@ -2846,6 +2856,9 @@ class Player : public Unit
 
         std::unique_ptr<Spell> m_queuedSpell;
 
+        Spell* m_modsSpell;
+        std::set<SpellModifierPair>* m_consumedMods;
+
         // Recruit-A-Friend
         uint8 m_grantableLevels;
 
@@ -2856,41 +2869,63 @@ class Player : public Unit
 void AddItemsSetItem(Player* player, Item* item);
 void RemoveItemsSetItem(Player* player, ItemPrototype const* proto);
 
-// Spellmods TODO - remove this include
-#include "Spells/SpellAuras.h"
-
+// "the bodies of template functions must be made available in a header file"
 template <class T> void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, bool finalUse)
 {
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
     if (!spellInfo || spellInfo->SpellFamilyName != GetSpellClass() || spellInfo->HasAttribute(SPELL_ATTR_EX3_NO_DONE_BONUS)) return; // client condition
     int32 totalpct = 100;
     int32 totalflat = 0;
-    for (auto aura : m_spellMods[op])
+    std::vector<SpellModifier*> consumedFiniteMods;
+    for (SpellModifier* mod : m_spellMods[op])
     {
-        Modifier const* mod = aura->GetModifier();
+        if (mod->op == SPELLMOD_CASTING_TIME || mod->op == SPELLMOD_COST)
+            if (T((basevalue + totalflat) * std::max(0, totalpct) / 100) <= 0)
+                break;
 
-        if (!aura->isAffectedOnSpell(spellInfo))
+        if (!IsAffectedBySpellmod(spellInfo, mod, m_consumedMods))
             continue;
-
-        if (mod->m_auraname == SPELL_AURA_ADD_FLAT_MODIFIER)
-            totalflat += mod->m_amount;
-        else
+        if (mod->type == SPELLMOD_FLAT)
+            totalflat += mod->value;
+        else if (mod->type == SPELLMOD_PCT)
         {
-            // skip percent mods for null basevalue (most important for spell mods with charges )
-            if (basevalue == T(0))
-                continue;
-
             // special case (skip >10sec spell casts for instant cast setting)
-            if (mod->m_miscvalue == SPELLMOD_CASTING_TIME
-                && basevalue >= T(10 * IN_MILLISECONDS) && mod->m_amount <= -100)
+            if (mod->op == SPELLMOD_CASTING_TIME && basevalue >= T(10 * IN_MILLISECONDS) && mod->value <= -100)
                 continue;
 
-            totalpct += mod->m_amount;
+            totalpct += mod->value;
+        }
+
+        if (mod->isFinite && finalUse)
+        {
+            bool consume = true;
+            if (!m_consumedMods) // If empty pointer then immediately consume
+            {
+                consumedFiniteMods.push_back(mod); // need to delay in order to not corrupt the list
+                consume = false;
+            }
+            else if (m_consumedMods->find(SpellModifierPair(mod->spellId, mod->modId)) != m_consumedMods->end()) // if already consumed, dont consume again
+                consume = false;
+
+            if (consume)
+            {
+                --mod->charges;
+                m_consumedMods->insert(SpellModifierPair(mod->spellId, mod->modId));
+                if (!mod->charges)
+                    mod->charges = -1;
+            }
         }
     }
+
+    for (SpellModifier* mod : consumedFiniteMods)
+        RemoveAuraCharge(mod->spellId);
+
+    if (totalpct < 0)
+        totalpct = 0;
 
     if (totalflat != 0 || totalpct != 100)
         basevalue = T((basevalue + totalflat) * std::max(0, totalpct) / 100);
 }
+
 
 #endif

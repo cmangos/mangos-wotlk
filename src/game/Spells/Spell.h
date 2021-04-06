@@ -323,8 +323,21 @@ class SpellEvent : public BasicEvent
         virtual bool IsDeletable() const override;
 
         Spell* GetSpell() const { return m_Spell; }
-    protected:
+        protected:
         Spell* m_Spell;
+};
+
+class SpellModRAII
+{
+    public:
+        SpellModRAII(Spell* spell, Player* modOwner, bool success = false, bool onlySave = false);
+        void SetSuccess() { m_success = true; }
+        ~SpellModRAII();
+    private:
+        Spell* m_spell;
+        Player* m_modOwner;
+        bool m_success;
+        bool m_onlySave; // casting time
 };
 
 class Spell
@@ -500,7 +513,7 @@ class Spell
         bool CheckSpellCancelsConfuse(uint32& param1) const;
 
         int32 CalculateSpellEffectValue(SpellEffectIndex i, Unit* target, bool maximum = false, bool finalUse = true)
-        { return m_trueCaster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i], maximum, finalUse); }
+        { return m_caster->CalculateSpellEffectValue(target, m_spellInfo, i, &m_currentBasePoints[i], maximum, finalUse); }
         int32 CalculateSpellEffectDamage(Unit* unitTarget, int32 damage);
         static uint32 CalculatePowerCost(SpellEntry const* spellInfo, Unit* caster, Spell* spell = nullptr, Item* castItem = nullptr, bool finalUse = false);
 
@@ -661,6 +674,9 @@ class Spell
 
         void CleanupTargetList();
         void ClearCastItem();
+
+        // spell mods
+        std::set<SpellModifierPair> m_usedAuraCharges;
 
         static void SelectMountByAreaAndSkill(Unit* target, SpellEntry const* parentSpell, uint32 spellId75, uint32 spellId150, uint32 spellId225, uint32 spellId300, uint32 spellIdSpecial);
 
