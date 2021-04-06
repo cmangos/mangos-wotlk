@@ -12288,7 +12288,10 @@ void Spell::EffectResurrect(SpellEffectIndex eff_idx)
         player = static_cast<Player*>(unitTarget);
     }
 
-    m_spellLog.AddLog(uint32(m_spellInfo->Effect[eff_idx]), unitTarget->GetPackGUID());
+    if (unitTarget)
+        m_spellLog.AddLog(uint32(m_spellInfo->Effect[eff_idx]), unitTarget->GetPackGUID());
+    else if (corpseTarget)
+        m_spellLog.AddLog(uint32(m_spellInfo->Effect[eff_idx]), corpseTarget->GetPackGUID());
 
     Player::QueueOrAddResurrectRequest(corpseTarget, m_caster, player, m_spellInfo, damage, eff_idx, false);
 }
