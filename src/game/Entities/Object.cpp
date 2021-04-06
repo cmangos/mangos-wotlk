@@ -2931,7 +2931,7 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
     Player const* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? static_cast<Player const*>(this) : nullptr;
 
     float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
-    int32 basePoints = effBasePoints ? *effBasePoints - 1 : spellProto->EffectBasePoints[effect_index];
+    float basePoints = effBasePoints ? *effBasePoints - 1 : spellProto->EffectBasePoints[effect_index];
 
     if (unitCaster && basePointsPerLevel != 0.0f)
     {
@@ -2943,7 +2943,7 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
 
         // if base level is greater than spell level, reduce by base level
         level -= int32(std::max(spellProto->baseLevel, spellProto->spellLevel));
-        basePoints += int32(float(level) * basePointsPerLevel);
+        basePoints += float(level) * basePointsPerLevel;
     }
 
     int32 randomPoints = int32(spellProto->EffectDieSides[effect_index]);
@@ -2970,7 +2970,7 @@ int32 WorldObject::CalculateSpellEffectValue(Unit const* target, SpellEntry cons
         }
     }
 
-    float value = float(basePoints);
+    float value = basePoints;
     float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
 
     // random damage
