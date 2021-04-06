@@ -9819,38 +9819,39 @@ void Aura::HandleAuraMirrorImage(bool apply, bool Real)
     if (!Real)
         return;
 
+    Unit* target = GetTarget();
+    if (!target->IsCreature())
+        return;
+
     // Target of aura should always be creature (ref Spell::CheckCast)
-    Creature* pCreature = (Creature*)GetTarget();
 
     if (apply)
     {
         // Caster can be player or creature, the unit who pCreature will become an clone of.
         Unit* caster = GetCaster();
 
-        if (caster->GetTypeId() == TYPEID_PLAYER)           // TODO - Verify! Does it take a 'pseudo-race' (from display-id) for creature-mirroring, and what is sent in SMSG_MIRRORIMAGE_DATA
-            pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 0, caster->getRace());
+        target->SetByteValue(UNIT_FIELD_BYTES_0, 0, caster->getRace());
+        target->SetByteValue(UNIT_FIELD_BYTES_0, 1, caster->getClass());
+        target->SetByteValue(UNIT_FIELD_BYTES_0, 2, caster->getGender());
+        target->SetByteValue(UNIT_FIELD_BYTES_0, 3, caster->GetPowerType());
 
-        pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 1, caster->getClass());
-        pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 2, caster->getGender());
-        pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 3, caster->GetPowerType());
+        target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_CLONED);
 
-        pCreature->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_CLONED);
-
-        pCreature->SetDisplayId(caster->GetNativeDisplayId());
+        target->SetDisplayId(caster->GetNativeDisplayId());
     }
     else
     {
-        const CreatureInfo* cinfo = pCreature->GetCreatureInfo();
-        const CreatureModelInfo* minfo = sObjectMgr.GetCreatureModelInfo(pCreature->GetNativeDisplayId());
+        const CreatureInfo* cinfo = static_cast<Creature*>(target)->GetCreatureInfo();
+        const CreatureModelInfo* minfo = sObjectMgr.GetCreatureModelInfo(target->GetNativeDisplayId());
 
-        pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 0, 0);
-        pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 1, cinfo->UnitClass);
-        pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
-        pCreature->SetByteValue(UNIT_FIELD_BYTES_0, 3, 0);
+        target->SetByteValue(UNIT_FIELD_BYTES_0, 0, 0);
+        target->SetByteValue(UNIT_FIELD_BYTES_0, 1, cinfo->UnitClass);
+        target->SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
+        target->SetByteValue(UNIT_FIELD_BYTES_0, 3, 0);
 
-        pCreature->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_CLONED);
+        target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_CLONED);
 
-        pCreature->SetDisplayId(pCreature->GetNativeDisplayId());
+        target->SetDisplayId(target->GetNativeDisplayId());
     }
 }
 
