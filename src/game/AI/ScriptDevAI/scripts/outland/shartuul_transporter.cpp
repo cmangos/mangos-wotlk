@@ -45,12 +45,17 @@ struct npc_doomguard_punisherAI : public CombatAI
 {
     npc_doomguard_punisherAI(Creature* creature) : CombatAI(creature, PUNISHER_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        SetDeathPrevention(true);
         m_creature->GetCombatManager().SetLeashingDisable(true);
         AddTimerlessCombatAction(PUNISHER_POSSESSION_TRANSFER, false);
         AddCombatAction(PUNISHER_FEL_FLAMES, 30000u);
         AddCustomAction(PUNISHER_ATTACK_DELAY, true, [&]() { HandleAttackDelay(); });
         DoCastSpellIfCan(nullptr, SPELL_SHADOWFORM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void Reset() override
+    {
+        CombatAI::Reset();
+        SetDeathPrevention(true);
     }
 
     ScriptedInstance* m_instance;
@@ -117,12 +122,17 @@ struct npc_shivan_assassinAI : public CombatAI
 {
     npc_shivan_assassinAI(Creature* creature) : CombatAI(creature, SHIVAN_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        SetDeathPrevention(true);
         m_creature->GetCombatManager().SetLeashingDisable(true);
         AddCombatAction(SHIVAN_POSSESSION_TRANSFER, true);
         AddCustomAction(SHIVAN_ATTACK_DELAY, true, [&]() { HandleAttackDelay(); });
         AddCustomAction(SHIVAN_OOC_ANIM, 1000u, [&]() { HandleOocAnim(); });
         DoCastSpellIfCan(nullptr, SPELL_SHADOWFORM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
+    }
+
+    void Reset() override
+    {
+        CombatAI::Reset();
+        SetDeathPrevention(true);
     }
 
     ScriptedInstance* m_instance;
@@ -211,13 +221,18 @@ struct npc_eye_of_shartuulAI : public CombatAI
 {
     npc_eye_of_shartuulAI(Creature* creature) : CombatAI(creature, EYE_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        SetDeathPrevention(true);
         m_creature->GetCombatManager().SetLeashingDisable(true);
         AddCombatAction(EYE_DARK_GLARE, 60000u);
         AddCombatAction(EYE_DISRUPTION_RAY, 10000u);
         AddCombatAction(EYE_TONGUE_LASH, 5000u);
         AddCombatAction(EYE_FEL_FIREBALL, 15000u);
         AddCustomAction(EYE_ATTACK_DELAY, true, [&]() { HandleAttackDelay(); });
+    }
+
+    void Reset() override
+    {
+        CombatAI::Reset();
+        SetDeathPrevention(true);
     }
 
     ScriptedInstance* m_instance;
@@ -304,11 +319,16 @@ struct npc_dreadmawAI : public CombatAI
 {
     npc_dreadmawAI(Creature* creature) : CombatAI(creature, DREADMAW_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
-        SetDeathPrevention(true);
         m_creature->GetCombatManager().SetLeashingDisable(true);
         AddCombatAction(DREADMAW_RAMPAGING_CHARGE, 60000u);
         AddCombatAction(DREADMAW_GROWTH, 30000u);
         AddCustomAction(DREADMAW_ATTACK_DELAY, true, [&]() { HandleAttackDelay(); });
+    }
+
+    void Reset() override
+    {
+        CombatAI::Reset();
+        SetDeathPrevention(true);
     }
 
     ScriptedInstance* m_instance;
@@ -403,9 +423,14 @@ struct npc_shartuulAI : public RangedCombatAI
         AddCombatAction(SHARTUUL_SHADOW_RESONANCE, 15000u);
         AddCombatAction(SHARTUUL_SHADOW_BOLT, 3000u);
         AddCustomAction(SHARTUUL_HANDLE_FIGHT_START, true, [&]() { HandleFightSequence(); });
-        SetDeathPrevention(true);
         DoCastSpellIfCan(nullptr, SPELL_SHADOWFORM, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         SetRangedMode(true, 30.f, TYPE_FULL_CASTER);
+    }
+
+    void Reset() override
+    {
+        CombatAI::Reset();
+        SetDeathPrevention(true);
     }
 
     ScriptedInstance* m_instance;

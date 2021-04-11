@@ -154,7 +154,6 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
         AddCombatAction(DELRISSA_SHADOW_WORD_PAIN, 1000, 2000);
         AddCombatAction(DELRISSA_DISPEL, 0, 1000);
         AddCombatAction(DELRISSA_SCREAM, 30000, 32000);
-        SetDeathPrevention(true);
     }
 
     ScriptedInstance* m_instance;
@@ -174,6 +173,8 @@ struct boss_priestess_delrissaAI : public priestess_commonAI
         DoInitializeCompanions();
 
         m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
+
+        SetDeathPrevention(true);
     }
 
     void JustReachedHome() override
