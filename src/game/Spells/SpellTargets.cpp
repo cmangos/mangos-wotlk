@@ -569,6 +569,14 @@ float SpellTargetMgr::GetJumpRadius(uint32 spellId)
     {
         case 32445: // Holy Wrath - Maiden of Virtue
             return 7.f;
+        case 1064: // Chain Heal - 3.2.0
+        case 10622:
+        case 10623:
+        case 25422:
+        case 25423:
+        case 55458:
+        case 55459:
+            return 12.5f;
         case 40827: // Beams - Mother Shahraz
         case 40859:
         case 40860:
