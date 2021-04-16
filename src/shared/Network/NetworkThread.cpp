@@ -22,5 +22,3 @@
 #include "NetworkThread.hpp"
 
 using namespace MaNGOS;
-
-
