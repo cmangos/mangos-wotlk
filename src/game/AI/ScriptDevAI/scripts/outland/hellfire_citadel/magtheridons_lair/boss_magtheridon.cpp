@@ -26,6 +26,7 @@ EndScriptData */
 #include "AI/ScriptDevAI/base/CombatAI.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Spells/SpellAuras.h"
+#include "Entities/DynamicObject.h"
 
 enum
 {
@@ -541,6 +542,15 @@ struct QuakeMagthKnockback : public SpellScript
     }
 };
 
+struct DebrisMagtheridon : public AuraScript
+{
+    void OnPersistentAreaAuraEnd(DynamicObject* dynGo) const override
+    {
+        if (Unit* owner = dynGo->GetCaster())
+            owner->CastSpell(nullptr, 30631, TRIGGERED_OLD_TRIGGERED, nullptr, nullptr, dynGo->GetObjectGuid());
+    }
+};
+
 void AddSC_boss_magtheridon()
 {
     Script* pNewScript = new Script;
@@ -568,4 +578,5 @@ void AddSC_boss_magtheridon()
     RegisterAuraScript<ShadowGraspMagth>("spell_shadow_grasp_magtheridon");
     RegisterSpellScript<QuakeMagth>("spell_quake_magtheridon");
     RegisterSpellScript<QuakeMagthKnockback>("spell_quake_magtheridon_knockback");
+    RegisterAuraScript<DebrisMagtheridon>("spell_magtheridon_debris");
 }

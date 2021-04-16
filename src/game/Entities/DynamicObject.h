@@ -32,6 +32,7 @@ enum DynamicObjectType
 };
 
 struct SpellEntry;
+struct AuraScript;
 
 class DynamicObject : public WorldObject
 {
@@ -89,6 +90,8 @@ class DynamicObject : public WorldObject
         SpellTarget m_target;
         int32 m_damage;
         int32 m_basePoints;
+
+        AuraScript* m_auraScript;
     private:
         GridReference<DynamicObject> m_gridRef;
 };

@@ -235,6 +235,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (39497,'spell_remove_weapons'),
 (31298,'spell_anetheron_sleep'),
 (41910,'spell_alar_phoenix_ember_blast'),
+(30632,'spell_magtheridon_debris'),
+(32286,'spell_focus_target_visual'),
 (33985,'spell_use_corpse'),
 (34011,'spell_raise_dead'),
 (34012,'spell_raise_dead'),
