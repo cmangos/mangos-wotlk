@@ -117,7 +117,7 @@ class SQLStorage : public SQLStorageBase
             return reinterpret_cast<T const*>(m_Index[id]);
         }
 
-        void Load();
+        void Load(bool error_at_empty = true);
 
         void EraseEntry(uint32 id);
 

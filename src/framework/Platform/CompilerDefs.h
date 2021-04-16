@@ -63,6 +63,6 @@
 #  pragma warning(disable:4355)                             // 'this' : used in base member initializer list
 #  pragma warning(disable:4251)                             // 'function': was declared deprecated
 #endif                                                      // __SHOW_STUPID_WARNINGS__
-#endif
+#endif                                                      // __GNUC__
 
 #endif
