@@ -209,14 +209,6 @@ enum
     NPC_WEAK_TURGID                     = 27809,
     NPC_WEAK_DEATHGAZE                  = 27807,
 
-    // quest 11982
-    SPELL_THROW_BOULDER                 = 47005,
-    SPELL_BOULBER_IMPACT                = 47007,
-    SPELL_BOULDER_TOSS_CREDIT           = 47009,
-
-    NPC_IRON_RUNESHAPER                 = 26270,
-    NPC_RUNE_REAVER                     = 26268,
-
     // for quest 11730
     SPELL_ULTRASONIC_SCREWDRIVER        = 46023,
     SPELL_REPROGRAM_KILL_CREDIT         = 46027,
@@ -735,23 +727,6 @@ bool EffectDummyCreature_spell_dummy_npc(Unit* pCaster, uint32 uiSpellId, SpellE
             {
                 if (pCreatureTarget->GetEntry() == NPC_BLACKSILT_MURLOC)
                     pCreatureTarget->UpdateEntry(NPC_TAGGED_MURLOC);
-            }
-            return true;
-        }
-        case SPELL_THROW_BOULDER:
-        {
-            if (uiEffIndex == EFFECT_INDEX_0)
-            {
-                if (pCaster->GetTypeId() != TYPEID_PLAYER)
-                    return true;
-
-                if (pCreatureTarget->GetEntry() != NPC_IRON_RUNESHAPER && pCreatureTarget->GetEntry() != NPC_RUNE_REAVER)
-                    return true;
-
-                pCreatureTarget->CastSpell(pCreatureTarget, SPELL_BOULBER_IMPACT, TRIGGERED_OLD_TRIGGERED);
-                pCaster->CastSpell(pCaster, SPELL_BOULDER_TOSS_CREDIT, TRIGGERED_OLD_TRIGGERED);
-
-                return true;
             }
             return true;
         }
