@@ -5021,38 +5021,17 @@ void Spell::EffectTriggerMissileSpell(SpellEffectIndex effIndex)
         DEBUG_FILTER_LOG(LOG_FILTER_SPELL_CAST, "WORLD: cast Item spellId - %i", spellInfo->Id);
 
     SpellCastTargets targets;
-
-    if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+    if (unitTarget)
     {
-        if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-        {
-            float x, y, z;
-            m_targets.getDestination(x, y, z);
-            targets.setDestination(x, y, z);
-        }
-        else if (unitTarget)
-        {
-            float x, y, z;
-            unitTarget->GetPosition(x, y, z);
-            targets.setDestination(x, y, z);
-        }
+        if (spellInfo->Targets & TARGET_FLAG_DEST_LOCATION)
+            targets.setDestination(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ());
+        else
+            targets.setUnitTarget(unitTarget);
     }
-    else
-    {
-        switch (m_spellInfo->EffectImplicitTargetA[effIndex])
-        {
-            case TARGET_LOCATION_UNIT_MINION_POSITION: break; // confirmed by 31348 nothing is forwarded
-            default:
-            {
-                if (unitTarget)
-                    targets.setUnitTarget(unitTarget);
-                else if (gameObjTarget)
-                    targets.setGOTarget(gameObjTarget);
-                break;
-            }
-        }
-    }
-
+    else if (gameObjTarget)
+        targets.setGOTarget(gameObjTarget);
+    else if (spellInfo->EffectImplicitTargetA[0] != TARGET_LOCATION_CASTER_DEST) // TODO: Add a proper filling mechanism
+        targets.setDestination(m_targets.m_destPos.x, m_targets.m_destPos.y, m_targets.m_destPos.z);
     m_caster->CastSpell(targets, spellInfo, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
 }
 
