@@ -2287,13 +2287,13 @@ void Pet::CastOwnerTalentAuras()
                 switch (seTalent->Id)
                 {
                     case 34455: // Ferocious Inspiration Rank 1
-                        CastSpell(this, 75593, TRIGGERED_OLD_TRIGGERED); // Ferocious Inspiration 1%
+                        CastSpell(nullptr, 75593, TRIGGERED_OLD_TRIGGERED); // Ferocious Inspiration 1%
                         break;
                     case 34459: // Ferocious Inspiration Rank 2
-                        CastSpell(this, 75446, TRIGGERED_OLD_TRIGGERED); // Ferocious Inspiration 2%
+                        CastSpell(nullptr, 75446, TRIGGERED_OLD_TRIGGERED); // Ferocious Inspiration 2%
                         break;
                     case 34460: // Ferocious Inspiration Rank 3
-                        CastSpell(this, 75447, TRIGGERED_OLD_TRIGGERED); // Ferocious Inspiration 3%
+                        CastSpell(nullptr, 75447, TRIGGERED_OLD_TRIGGERED); // Ferocious Inspiration 3%
                         break;
                 }
             }
@@ -2307,7 +2307,7 @@ void Pet::CastPetAura(PetAura const* aura)
     if (!auraId)
         return;
 
-    CastSpell(this, auraId, TRIGGERED_OLD_TRIGGERED);
+    CastSpell(nullptr, auraId, TRIGGERED_OLD_TRIGGERED);
 }
 
 struct DoPetLearnSpell
