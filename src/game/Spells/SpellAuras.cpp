@@ -9114,7 +9114,7 @@ void Aura::PeriodicDummyTick()
 //              // Steal Weapon
 //              case 36207: break;
                 case 37025: // Coilfang Water
-                    if (target->IsInSwimmableWater() && target->GetPositionZ() < -20.0f) // Exclude Water at Lady Vashj
+                    if (target->IsInSwimmableWater())
                         target->CastSpell(target, 37026, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                     return;
                 case 39993: // Simon Game START timer, (DND)
