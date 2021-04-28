@@ -11469,27 +11469,9 @@ void Unit::InterruptMoving(bool forceSendStop /*=false*/)
 
     if (!movespline->Finalized())
     {
-        Movement::Location computedLoc = movespline->ComputePosition();
-        Position pos(computedLoc.x, computedLoc.y, computedLoc.z, computedLoc.orientation);
-        if (GenericTransport* transport = GetTransport())
-        {
-            m_movementInfo.UpdateTransportData(pos);
-            transport->CalculatePassengerPosition(pos.x, pos.y, pos.z, &pos.o);
-        }
-
-        if (movespline->isFacing() && movespline->isFacingTarget())
-        {
-            if (Unit const* target = ObjectAccessor::GetUnit(*this, ObjectGuid(movespline->GetFacing().target)))
-                pos.o = GetAngle(target);
-            else
-            {
-                float angle = atan2((pos.y - GetPositionY()), (pos.x - GetPositionX()));
-                pos.o = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
-            }
-        }
+        UpdateSplinePosition(true);
 
         movespline->_Interrupt();
-        Relocate(pos.x, pos.y, pos.z, pos.o);
         isMoving = true;
     }
 
@@ -12780,35 +12762,11 @@ void Unit::UpdateSplineMovement(uint32 t_diff)
     if (m_movesplineTimer.Passed() || arrived)
     {
         m_movesplineTimer.Reset(POSITION_UPDATE_DELAY);
-        Movement::Location computedLoc = movespline->ComputePosition();
-        Position pos(computedLoc.x, computedLoc.y, computedLoc.z, computedLoc.orientation);
-        if (GenericTransport* transport = GetTransport())
-        {
-            m_movementInfo.UpdateTransportData(pos);
-            transport->CalculatePassengerPosition(pos.x, pos.y, pos.z, &pos.o);
-        }
-
-        if (movespline->isFacing() && movespline->isFacingTarget())
-        {
-            if (Unit const* target = ObjectAccessor::GetUnit(*this, ObjectGuid(movespline->GetFacing().target)))
-                pos.o = GetAngle(target);
-            else
-            {
-                float angle = atan2((pos.y - GetPositionY()), (pos.x - GetPositionX()));
-                pos.o = (angle >= 0 ? angle : ((2 * M_PI_F) + angle));
-            }
-        }
-
-        if (IsBoarded())
-            GetTransportInfo()->SetLocalPosition(pos.x, pos.y, pos.z, pos.o);
-        else if (GetTypeId() == TYPEID_PLAYER)
-            ((Player*)this)->SetPosition(pos.x, pos.y, pos.z, pos.o);
-        else
-            GetMap()->CreatureRelocation((Creature*)this, pos.x, pos.y, pos.z, pos.o);
+        UpdateSplinePosition();
     }
 }
 
-void Unit::UpdateSplinePosition()
+void Unit::UpdateSplinePosition(bool relocateOnly)
 {
     Movement::Location computedLoc = movespline->ComputePosition();
     Position pos(computedLoc.x, computedLoc.y, computedLoc.z, computedLoc.orientation);
@@ -12817,13 +12775,35 @@ void Unit::UpdateSplinePosition()
         m_movementInfo.UpdateTransportData(pos);
         transport->CalculatePassengerPosition(pos.x, pos.y, pos.z, &pos.o);
     }
-    if (GenericTransport* transport = GetTransport())
-        transport->CalculatePassengerPosition(pos.x, pos.y, pos.z, &pos.o);
 
-    if (movespline->isFacing() && movespline->isFacingTarget())
+    bool faced = false;
+    if (movespline->isFacing())
     {
-        if (Unit const* target = ObjectAccessor::GetUnit(*this, ObjectGuid(movespline->GetFacing().target)))
-            pos.o = GetAngle(target);
+        if (movespline->isFacingTarget())
+        {
+            if (Unit const* target = ObjectAccessor::GetUnit(*this, ObjectGuid(movespline->GetFacing().target)))
+            {
+                pos.o = GetAngle(target);
+                faced = true;
+            }
+        }
+        else if (movespline->isFacingPoint())
+        {
+            auto& facing = movespline->GetFacing();
+            pos.o = GetAngle(facing.f.x, facing.f.y);
+            faced = true;
+        }
+        else if (movespline->isFacingAngle())
+        {
+            pos.o = movespline->GetFacing().angle;
+            faced = true;
+        }
+    }
+
+    if (!faced)
+    {
+        if (pos.y == GetPositionY() && pos.x == GetPositionX())
+            pos.o = GetOrientation();
         else
         {
             float angle = atan2((pos.y - GetPositionY()), (pos.x - GetPositionX()));
@@ -12831,7 +12811,15 @@ void Unit::UpdateSplinePosition()
         }
     }
 
-    if (IsPlayer())
+    if (relocateOnly)
+    {
+        Relocate(pos.x, pos.y, pos.z, pos.o);
+        return;
+    }
+
+    if (IsBoarded())
+       GetTransportInfo()->SetLocalPosition(pos.x, pos.y, pos.z, pos.o);
+    else if (IsPlayer())
         static_cast<Player*>(this)->SetPosition(pos.x, pos.y, pos.z, pos.o);
     else
         GetMap()->CreatureRelocation((Creature*)this, pos.x, pos.y, pos.z, pos.o);
