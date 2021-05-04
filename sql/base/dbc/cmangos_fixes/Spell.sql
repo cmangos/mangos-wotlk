@@ -2252,6 +2252,8 @@ UPDATE spell_template SET AuraInterruptFlags = AuraInterruptFlags&~0x00001000 WH
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 42442;
 -- Cosmetic - Incinerate to Random Target (Borean Tundra) - one target
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 45863;
+-- Shoot Flame Arrow & Shoot Flame Arrow - should only hit one target - verified by video and sniff
+UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id IN (47026,48896);
 -- Awaken Subboss (Utgarde Pinnacle) - one target
 UPDATE spell_template SET MaxAffectedTargets = 1 WHERE id = 47669;
 -- Paralyze (Utgarde Pinnacle) - one target
