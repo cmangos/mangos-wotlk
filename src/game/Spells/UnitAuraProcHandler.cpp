@@ -2593,6 +2593,9 @@ SpellAuraProcResult Unit::HandleDummyAuraProc(ProcExecutionData& data)
                     if (castItem->GetSlot() == EQUIPMENT_SLOT_MAINHAND && procFlags & PROC_FLAG_OFF_HAND_WEAPON_SWING)
                         return SPELL_AURA_PROC_FAILED;
 
+                    if (castItem->GetSlot() == EQUIPMENT_SLOT_OFFHAND && procFlags & PROC_FLAG_MAIN_HAND_WEAPON_SWING)
+                        return SPELL_AURA_PROC_FAILED;
+
                     // custom cooldown processing case
                     if (cooldown && !IsSpellReady(*dummySpell))
                         return SPELL_AURA_PROC_FAILED;
