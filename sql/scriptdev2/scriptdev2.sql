@@ -184,6 +184,7 @@ UPDATE creature_template SET ScriptName='npc_orphan_matron' WHERE entry IN (2451
 UPDATE creature_template SET ScriptName='npc_orphan' WHERE entry IN (23712,23971);
 UPDATE creature_template SET ScriptName='npc_shade_of_the_horseman' WHERE entry=23543;
 UPDATE creature_template SET ScriptName='npc_headless_horseman_fire' WHERE entry=23537;
+UPDATE creature_template SET ScriptName='npc_child_tbc' WHERE entry IN(22817,22818);
 
 /*Quest (quest scripts which are not in one zone)*/
 UPDATE creature_template SET ScriptName='npc_quest_attunement' WHERE entry IN(22421,18528,19935);
@@ -3487,7 +3488,69 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1015135','If my dad were alive, he would put out the fires!','0','0','0','0','22346','SAY_ORPHAN_SHADE_4'),
 ('-1015136','If my mom were alive, she would put out the fires!','0','0','0','0','22347','SAY_ORPHAN_SHADE_5'),
 
-('-1015137','Well done!  We''ll be ready when the real fires begin!','0','0','0','0','23342','SAY_GUARD_RELIGHT_FIRE');
+('-1015137','Well done!  We''ll be ready when the real fires begin!','0','0','0','0','23342','SAY_GUARD_RELIGHT_FIRE'),
+
+('-1015138','By the Light!','0','0','0','1','20469','Dark portal 1 say Ally'),
+('-1015139','Dornaa stands and gapes in awe at the immense Dark Portal.','0','2','0','0','20510','Dark portal 2 emote Ally'),
+('-1015140','For our children and the future of the Alliance! The Legion shall not prevail!','0','0','0','66','21064','Dark portal 3 soldier salute Ally'),
+
+('-1015141','Whoa, no way!','0','0','0','1','20466','Dark portal 1 say Horde'),
+('-1015142','Salandria stands and gapes in awe at the immense Dark Portal.','0','2','0','0','20467','Dark portal 2 emote Horde'),
+('-1015143','For the younglings! For the Horde!','0','0','0','66','21063','Dark portal 3 soldier salute Horde'),
+
+('-1015144','Dornaa begins to examine the stone edifice, and then touches it.','0','2','0','0','20458','Auchindoun 2 emote'),
+('-1015145','Is this where all of the adventurers come from?  Help me.','0','4','0','0','20464','Auchindoun 3 say'),
+('-1015146','Thank you for the summon, little one. My group left for the dungeon without me!','0','0','0','2','20987','Auchindoun 4 say Adventurer'),
+('-1015147','The next person who asks me for a potion is getting a knuckle sandwich. I quit alchemy!','0','0','0','1','20983','Auchindoun 5 say Adventurer'),
+('-1015148','That was neat!','0','4','0','1','20990','Auchindoun 6 say'),
+
+('-1015149','Jheel!!!','0','0','0','1','20475','Aeris Landing 1 say'),
+('-1015150','Dornaa!!!','0','0','0','0','20479','Aeris Landing 2 say Jheel'),
+('-1015151','Dornaa gives her brother a big hug, and the two children begin to talk.','0','2','0','0','20476','Aeris Landing 3 emote'),
+('-1015152','See you soon, big brother!','0','0','0','0','20484','Aeris Landing 4 say'),
+('-1015153','Back to your studies, boy!','0','0','0','1','20482','Aeris Landing 5 say teacher'),
+('-1015154','Yes, sir.','0','0','0','0','20483','Aeris Landing 6 say Jheel'),
+('-1015155','I hope that Jheel will be able to come back to the orphanage soon.','0','4','0','1','20477','Aeris Landing 7 say'),
+
+('-1015156','Dornaa walks slowly and turns in reverence as a blessing is bestowed upon her by O''ros.','0','2','0','0','20487','Seat of the Naaru 1 emote'),
+('-1015157','O''ros says that he wants to talk with you.','0','4','0','1','20691','Seat of the Naaru 2 say'),
+('-1015158','Tee hee, your mind-talk tickles.  Thank you, O''ros!  I promise to be good!!','0','0','0','1','20489','Seat of the Naaru 3 say'),
+
+('-1015159','You''re the man from my dream!','0','0','0','1','20543','Farseer 1 say'),
+('-1015160','Indeed I am, child.  And do you remember what you showed me in those dreams?','0','0','0','0','20545','Farseer 2 say Nobundo'),
+('-1015161','You mean, I can do it here, too?','0','0','0','1','20547','Farseer 3 say'),
+('-1015162','Try.','0','0','0','0','20548','Farseer 4 say Nobundo'),
+('-1015163','Concentrating a moment, Dornaa summons forth the elemental forces.','0','2','0','0','20553','Farseer 5 emote'),
+('-1015164','I did it, I did it!!!','0','0','0','1','20550','Farseer 6 emote'),
+('-1015165','Amazing, Dornaa.  Truly amazing!','0','0','0','0','20549','Farseer 7 say Nobundo'),
+
+('-1015166','Dornaa''s jaw nearly hits the ground at the sight of Zaladormu.','0','2','0','0','20514','COT 1 emote Ally'),
+('-1015167','Wow, he''s a big one!  Um... what''s going on?  Save me!','0','4','0','1','20528','COT 2 say Ally'),
+('-1015168','Scary!','0','4','0','1','20976','COT 3 say Ally'),
+('-1015169','WAIT!','0','1','0','0','20520','COT 4 say Zaladormu'),
+('-1015170','This girl has done nothing, and will not be held accountable for what she might do, or fail to do, in the future.','0','1','0','0','20521','COT 5 say Zaladormu'),
+('-1015171','Go in peace, child.','0','1','0','0','20522','COT 6 say Zaladormu'),
+
+('-1015172','Salandria''s jaw nearly hits the ground at the sight of Zaladormu.','0','2','0','0','20527','COT 1 emote Horde'),
+('-1015173','Okay, I like!  Um... what''s going on?  Save me!','0','4','0','0','20515','COT 2 whisper Horde'),
+('-1015174','Scary!','0','4','0','1','20977','COT 3 say Horde'),
+
+('-1015175','Hch''uu!!!','0','0','0','1','20457','Sporeggar 1 say'),
+('-1015176','Salandria?  Salandria!!!','0','0','0','0','20481','Sporeggar 2 say Hchuu'),
+('-1015177','Salandria and Hch''uu begin to catch up on all that has happened to them this past year.','0','2','0','0','20478','Sporeggar 3 emote'),
+('-1015178','Thank you for bringing me here to see my friend, Hch''uu!','0','4','0','1','20461','Sporeggar 4 whisper'),
+
+('-1015179','Hah, it''s true!  I''m gonna go have a closer look at the fire one!','0','4','0','0','20485','Throne 1 whisper'),
+('-1015180','Ow!  Hot!!','0','0','0','1','20486','Throne 2 say'),
+('-1015181','Heh, I got a little too close.  Don''t worry, I''m fine.','0','4','0','0','20690','Throne 3 whisper'),
+
+('-1015182','Hello sir, I''m ready to rock!','0','0','0','0','25608','Silvermoon LVL70ETC 1 say'),
+('-1015183','Salandria waves her hands in the air.','0','2','0','0','25612','Silvermoon LVL70ETC 2 emote'),
+('-1015184','Hey guys, I''m your biggest fan!  I''m ready to rock!','0','0','0','0','25609','Silvermoon LVL70ETC 3 say'),
+('-1015185','Check this out guys!  I can rock like you guys!','0','0','0','0','25610','Silvermoon LVL70ETC 4 say'),
+('-1015186','Salandria begins to play air guitar and sing The Power of the Horde.','0','2','0','0','25613','Silvermoon LVL70ETC 5 emote'),
+
+('-1015187','Oh wow!','0','0','0','1','20463','Auchindoun 1 say');
 
 -- -1 020 000 WOTLK texts
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
