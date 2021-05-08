@@ -1569,7 +1569,10 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             else
                 SetGoState(GO_STATE_ACTIVE);
 
-            m_cooldownTime = time(nullptr) + info->GetAutoCloseTime();
+            if (GetGOInfo()->id != 185871)
+                m_cooldownTime = time(nullptr) + info->GetAutoCloseTime();
+            else // hypothesis - consumable GOs despawn immediately
+                m_cooldownTime = time(nullptr) + 1;
 
             if (user->GetTypeId() == TYPEID_PLAYER)
             {
@@ -1622,6 +1625,9 @@ void GameObject::Use(Unit* user, SpellEntry const* spellInfo)
             // cast this spell later if provided
             spellId = info->goober.spellId;
             triggeredFlags = TRIGGERED_OLD_TRIGGERED;
+            // TODO: GO Casting - make caster of goober spells be GO or owner
+            if (Unit* owner = GetOwner())
+                spellCaster = owner;
 
             // database may contain a dummy spell, so it need replacement by actually existing
             switch (spellId)
