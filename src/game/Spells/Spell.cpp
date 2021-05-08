@@ -3311,7 +3311,7 @@ void Spell::cancel()
     m_caster->RemoveGameObject(m_spellInfo->Id, true);
 }
 
-void Spell::cast(bool skipCheck)
+SpellCastResult Spell::cast(bool skipCheck)
 {
     SetExecutedCurrently(true);
     SpellModRAII spellModController(this, m_caster->GetSpellModOwner());
@@ -3326,7 +3326,7 @@ void Spell::cast(bool skipCheck)
         SendCastResult(SPELL_FAILED_ERROR);
         finish(false);
         SetExecutedCurrently(false);
-        return;
+        return SPELL_FAILED_ERROR;
     }
 
     // update pointers base at GUIDs to prevent access to already nonexistent object
@@ -3338,7 +3338,7 @@ void Spell::cast(bool skipCheck)
         cancel();
         m_caster->DecreaseCastCounter();
         SetExecutedCurrently(false);
-        return;
+        return SPELL_FAILED_ERROR;
     }
 
     if (m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster && !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_DONT_TURN_DURING_CAST))
@@ -3356,7 +3356,7 @@ void Spell::cast(bool skipCheck)
         if (castResult != SPELL_CAST_OK)
         {
             StopCast(castResult);
-            return;
+            return castResult;
         }
     }
 
@@ -3555,7 +3555,7 @@ void Spell::cast(bool skipCheck)
     {
         m_caster->DecreaseCastCounter();
         SetExecutedCurrently(false);
-        return;
+        return SPELL_FAILED_ERROR; // currently not propagating right error here but it should not be needed
     }
 
     spellModController.SetSuccess();
@@ -3616,6 +3616,7 @@ void Spell::cast(bool skipCheck)
 
     m_caster->DecreaseCastCounter();
     SetExecutedCurrently(false);
+    return SPELL_CAST_OK;
 }
 
 void Spell::handle_immediate()
