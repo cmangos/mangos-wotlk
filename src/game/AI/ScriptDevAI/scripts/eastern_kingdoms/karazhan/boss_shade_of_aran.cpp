@@ -92,7 +92,14 @@ enum
     MAX_SHADOWS_OF_ARAN         = 5,                    // this is not confirmed
 
     NORMAL_SPELL_COUNT          = 3,
+
+    ITEM_ATIESH_1               = 22589,
+    ITEM_ATIESH_2               = 22632,
+    ITEM_ATIESH_3               = 22631,
+    ITEM_ATIESH_4               = 22630,
 };
+
+static std::set<uint32> atieshStaves = { ITEM_ATIESH_1, ITEM_ATIESH_2, ITEM_ATIESH_3, ITEM_ATIESH_4 };
 
 enum SuperSpells
 {
@@ -117,7 +124,7 @@ enum AranActions // order based on priority
 
 struct boss_aranAI : public RangedCombatAI
 {
-    boss_aranAI(Creature* creature) : RangedCombatAI(creature, ARAN_ACTION_MAX), m_instance(static_cast<instance_karazhan*>(creature->GetInstanceData()))
+    boss_aranAI(Creature* creature) : RangedCombatAI(creature, ARAN_ACTION_MAX), m_instance(static_cast<instance_karazhan*>(creature->GetInstanceData())), m_atiesh(false)
     {
         AddTimerlessCombatAction(ARAN_ACTION_DRINK, true);
         AddTimerlessCombatAction(ARAN_ACTION_POTION, true);
@@ -141,6 +148,7 @@ struct boss_aranAI : public RangedCombatAI
     uint8 m_uiManaRecoveryStage;
 
     bool m_bDrinkInterrupted;
+    bool m_atiesh;
 
     std::vector<uint32> m_choiceVector;
 
@@ -186,6 +194,23 @@ struct boss_aranAI : public RangedCombatAI
             case SPELL_ARCANE_MISSILES: return 7000;
             case SPELL_FIREBALL:        return 3000;
             case SPELL_FROSTBOLT:       return 3000;
+        }
+    }
+
+    void MoveInLineOfSight(Unit* who) override
+    {
+        RangedCombatAI::MoveInLineOfSight(who);
+        if (!m_atiesh && who->IsPlayer())
+        {
+            Player* player = static_cast<Player*>(who);
+            if (Item* weapon = player->GetWeaponForAttack(BASE_ATTACK))
+            {
+                if (atieshStaves.find(weapon->GetEntry()) != atieshStaves.end())
+                {
+                    m_atiesh = true;
+                    DoScriptText(SAY_ATIESH, m_creature, who);
+                }
+            }
         }
     }
 
