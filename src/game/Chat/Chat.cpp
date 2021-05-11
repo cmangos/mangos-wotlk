@@ -291,6 +291,7 @@ ChatCommand* ChatHandler::getCommandTable()
         { "transports",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugTransports,                 "", nullptr },
         { "spawn",          SEC_GAMEMASTER,     true,  nullptr,                                             "", debugSpawnsCommandtable },
         { "debugflags",     SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugObjectFlags,                "", nullptr },
+        { "packetlog",      SEC_ADMINISTRATOR,  true,  &ChatHandler::HandleDebugPacketLog,                  "", nullptr },
         { nullptr,          0,                  false, nullptr,                                             "", nullptr }
     };
 

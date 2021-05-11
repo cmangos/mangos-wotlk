@@ -993,6 +993,9 @@ class WorldSession
         std::deque<uint32> GetIncOpcodeHistory();
 
         Messager<WorldSession>& GetMessager() { return m_messager; }
+
+        void SetPacketLogging(bool state);
+
     private:
         // Additional private opcode handlers
         void HandleComplainMail(WorldPacket& recv_data);
