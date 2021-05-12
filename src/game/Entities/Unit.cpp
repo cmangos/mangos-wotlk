@@ -7067,7 +7067,7 @@ void Unit::SetPowerType(Powers new_powertype)
 
 FactionTemplateEntry const* Unit::GetFactionTemplateEntry() const
 {
-    FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(getFaction());
+    FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(GetFaction());
     if (!entry)
     {
         static ObjectGuid guid;                             // prevent repeating spam same faction problem
@@ -7078,9 +7078,9 @@ FactionTemplateEntry const* Unit::GetFactionTemplateEntry() const
 
             if (guid.GetHigh() == HIGHGUID_PET)
                 sLog.outError("%s (base creature entry %u) have invalid faction template id %u, owner %s",
-                    GetGuidStr().c_str(), GetEntry(), getFaction(), ((Pet*)this)->GetOwnerGuid().GetString().c_str());
+                    GetGuidStr().c_str(), GetEntry(), GetFaction(), ((Pet*)this)->GetOwnerGuid().GetString().c_str());
             else
-                sLog.outError("%s have invalid faction template id %u", GetGuidStr().c_str(), getFaction());
+                sLog.outError("%s have invalid faction template id %u", GetGuidStr().c_str(), GetFaction());
         }
     }
     return entry;
@@ -12438,7 +12438,7 @@ void Unit::RestoreOriginalFaction()
         if (creature->IsPet() || creature->IsTotem())
         {
             if (Unit* owner = GetOwner())
-                setFaction(owner->getFaction());
+                setFaction(owner->GetFaction());
         }
         else
             setFaction(creature->GetCreatureInfo()->Faction);
@@ -12987,7 +12987,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
 
     Player* player = GetTypeId() == TYPEID_PLAYER ? static_cast<Player*>(this) : nullptr;
 
-    possessed->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);     // set same faction than player
+    possessed->SetFactionTemporary(GetFaction(), TEMPFACTION_NONE);     // set same faction than player
     possessed->SetRespawnCoord(pos);                                    // set spawn coord
     possessed->SetCharmerGuid(GetObjectGuid());                         // save guid of the charmer
     possessed->SetCreatorGuid(GetObjectGuid());                         // save guid of the creator
@@ -13091,7 +13091,7 @@ bool Unit::TakePossessOf(Unit* possessed)
     {
         possessedCreature = static_cast<Creature*>(possessed);
         possessedCreature->GetCombatStartPosition(combatStartPosition);
-        possessedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
+        possessedCreature->SetFactionTemporary(GetFaction(), TEMPFACTION_NONE);
 
         charmInfo->SetCharmState("PossessedAI");
         possessedCreature->SetWalk(IsWalking(), true);
@@ -13103,7 +13103,7 @@ bool Unit::TakePossessOf(Unit* possessed)
         if (player && player->IsInDuelWith(possessedPlayer))
             possessedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, player->GetUInt32Value(PLAYER_DUEL_TEAM));
         else
-            possessedPlayer->setFaction(getFaction());
+            possessedPlayer->setFaction(GetFaction());
 
         charmInfo->SetCharmState("PossessedAI");
     }
@@ -13206,7 +13206,7 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
         if (charmerPlayer && charmerPlayer->IsInDuelWith(charmedPlayer))
             charmedPlayer->SetUInt32Value(PLAYER_DUEL_TEAM, charmerPlayer->GetUInt32Value(PLAYER_DUEL_TEAM));
         else
-            charmedPlayer->setFaction(getFaction());
+            charmedPlayer->setFaction(GetFaction());
 
         charmInfo->SetCharmState("PetAI");
         charmed->SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_AURAS); // important have to be after charminfo initialization
@@ -13240,7 +13240,7 @@ bool Unit::TakeCharmOf(Unit* charmed, uint32 spellId, bool advertised /*= true*/
 
         getHostileRefManager().deleteReference(charmedCreature);
 
-        charmedCreature->SetFactionTemporary(getFaction(), TEMPFACTION_NONE);
+        charmedCreature->SetFactionTemporary(GetFaction(), TEMPFACTION_NONE);
 
         if (isPossessCharm)
             charmInfo->InitPossessCreateSpells();
@@ -13477,7 +13477,7 @@ void Unit::Uncharm(Unit* charmed, uint32 spellId)
         {
             // safeguard against nullptr on totem elemental despawn
             if (Unit* owner = charmedCreature->GetOwner())
-                charmed->setFaction(owner->getFaction());
+                charmed->setFaction(owner->GetFaction());
 
             charmInfo->ResetCharmState();
 

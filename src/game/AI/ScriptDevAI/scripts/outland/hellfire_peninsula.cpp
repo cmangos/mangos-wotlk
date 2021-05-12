@@ -1164,7 +1164,7 @@ struct npc_magister_aledisAI : public RangedCombatAI
 
     void Aggro(Unit* /*who*/)
     {
-        if (m_creature->getFaction() == FACTION_ALLEDIS_HOSTILE)
+        if (m_creature->GetFaction() == FACTION_ALLEDIS_HOSTILE)
             SetDeathPrevention(true);
     }
 
@@ -1205,7 +1205,7 @@ struct npc_magister_aledisAI : public RangedCombatAI
         {
             case ALEDIS_LOW_HP:
             {
-                if (m_creature->GetHealthPercent() > 20.0f || m_creature->getFaction() != FACTION_ALLEDIS_HOSTILE)
+                if (m_creature->GetHealthPercent() > 20.0f || m_creature->GetFaction() != FACTION_ALLEDIS_HOSTILE)
                     return;
 
                 // evade when defeated; faction is reset automatically
@@ -2225,7 +2225,7 @@ struct CursedScarabPeriodicTrigger : public SpellScript
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* target = spell->GetUnitTarget();
-        if (target && target->getFaction() != FACTION_SCARAB_HOSTILE && urand(0, 10) == 0)
+        if (target && target->GetFaction() != FACTION_SCARAB_HOSTILE && urand(0, 10) == 0)
             target->setFaction(FACTION_SCARAB_HOSTILE);
     }
 };

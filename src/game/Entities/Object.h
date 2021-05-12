@@ -1207,6 +1207,7 @@ class WorldObject : public Object
 
         // Spell System compliance
         virtual uint32 GetLevel() const { return 1; }
+        virtual uint32 GetFaction() const { return 0; }
 
     protected:
         explicit WorldObject();

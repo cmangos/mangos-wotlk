@@ -329,8 +329,8 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
         if (m_pInstance)
         {
             // Reason why != is because when player takes control, chess piece gets his faction
-            if ((m_pInstance->GetPlayerTeam() == ALLIANCE && m_creature->getFaction() != FACTION_ID_CHESS_HORDE) ||
-                    (m_pInstance->GetPlayerTeam() == HORDE && m_creature->getFaction() != FACTION_ID_CHESS_ALLIANCE) ||
+            if ((m_pInstance->GetPlayerTeam() == ALLIANCE && m_creature->GetFaction() != FACTION_ID_CHESS_HORDE) ||
+                    (m_pInstance->GetPlayerTeam() == HORDE && m_creature->GetFaction() != FACTION_ID_CHESS_ALLIANCE) ||
                     m_pInstance->GetData(TYPE_CHESS) == DONE)
                 m_uiMoveCommandTimer = 0;
         }
@@ -418,11 +418,11 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
         if (!m_pInstance)
             return nullptr;
 
-        uint32 uiTeam = m_creature->getFaction() == FACTION_ID_CHESS_ALLIANCE ? FACTION_ID_CHESS_HORDE : FACTION_ID_CHESS_ALLIANCE;
+        uint32 uiTeam = m_creature->GetFaction() == FACTION_ID_CHESS_ALLIANCE ? FACTION_ID_CHESS_HORDE : FACTION_ID_CHESS_ALLIANCE;
 
         // get friendly list for this type
         if (uiType == TARGET_TYPE_FRIENDLY)
-            uiTeam = m_creature->getFaction();
+            uiTeam = m_creature->GetFaction();
 
         // Get the list of enemies
         GuidList lTempList;
@@ -496,7 +496,7 @@ struct npc_chess_piece_genericAI : public Scripted_NoMovementAI
         GuidList lTempList;
         CreatureList lEnemies;
 
-        m_pInstance->GetChessPiecesByFaction(lTempList, m_creature->getFaction() == FACTION_ID_CHESS_ALLIANCE ? FACTION_ID_CHESS_HORDE : FACTION_ID_CHESS_ALLIANCE);
+        m_pInstance->GetChessPiecesByFaction(lTempList, m_creature->GetFaction() == FACTION_ID_CHESS_ALLIANCE ? FACTION_ID_CHESS_HORDE : FACTION_ID_CHESS_ALLIANCE);
         for (GuidList::const_iterator itr = lTempList.begin(); itr != lTempList.end(); ++itr)
         {
             Creature* pTemp = m_creature->GetMap()->GetCreature(*itr);

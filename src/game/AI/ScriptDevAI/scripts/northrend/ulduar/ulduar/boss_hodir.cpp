@@ -336,7 +336,7 @@ struct npc_flash_freezeAI : public Scripted_NoMovementAI
             if (Creature* pHodir = m_pInstance->GetSingleCreatureFromStorage(NPC_HODIR))
             {
                 // ignore if event already completed
-                if (pHodir->getFaction() == FACTION_ID_FRIENDLY)
+                if (pHodir->GetFaction() == FACTION_ID_FRIENDLY)
                     return;
 
                 if (Creature* pSummoner = m_creature->GetMap()->GetCreature(m_creature->GetSpawnerGuid()))
@@ -411,7 +411,7 @@ bool ProcessEventId_event_boss_hodir(uint32 uiEventId, Object* pSource, Object* 
             if (Creature* pHodir = pInstance->GetSingleCreatureFromStorage(NPC_HODIR))
             {
                 // ignore if event already completed
-                if (pHodir->getFaction() == FACTION_ID_FRIENDLY)
+                if (pHodir->GetFaction() == FACTION_ID_FRIENDLY)
                     return true;
 
                 pHodir->SetInCombatWithZone();

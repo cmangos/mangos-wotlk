@@ -3241,7 +3241,7 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                 // case 36576: break:                   // Shaleskin (Shaleskin Flayer, Shaleskin Ripper) 30023 trigger
                 // case 37030: break;                   // Chaotic Temperament
                 case 38164:                                 // Unyielding Knights - this can only proc in hellfire peninsula with a maximum of 2 guardians against fel orc faction only
-                    if (GetZoneId() != 3483 || pVictim->getFaction() != 943 || CountGuardiansWithEntry(20117) == 2)
+                    if (GetZoneId() != 3483 || pVictim->GetFaction() != 943 || CountGuardiansWithEntry(20117) == 2)
                         return SPELL_AURA_PROC_FAILED;
                     break;
                 // case 38363: break;                   // Gushing Wound

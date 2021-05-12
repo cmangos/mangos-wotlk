@@ -3957,7 +3957,7 @@ bool GossipHello_npc_adyen_the_lightwarden(Player* player, Creature* creature)
     uint32 gossipId = GOSSIP_NETHERSTORM;
 
     // custom code required because it utilizes two entries
-    if (creature->getFaction() == FACTION_SHATTRATH)
+    if (creature->GetFaction() == FACTION_SHATTRATH)
         gossipId = GOSSIP_SHATTRATH;
     else
     {

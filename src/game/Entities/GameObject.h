@@ -797,7 +797,7 @@ class GameObject : public WorldObject
         uint32 GetDisplayId() const { return GetUInt32Value(GAMEOBJECT_DISPLAYID); }
         void SetDisplayId(uint32 modelId);
         void SetPhaseMask(uint32 newPhaseMask, bool update);
-        uint32 GetFaction() const { return GetUInt32Value(GAMEOBJECT_FACTION); }
+        uint32 GetFaction() const override { return GetUInt32Value(GAMEOBJECT_FACTION); }
         void SetFaction(uint32 faction) { SetUInt32Value(GAMEOBJECT_FACTION, faction); }
         uint32 GetLevel() const override { return GetUInt32Value(GAMEOBJECT_LEVEL); }
 

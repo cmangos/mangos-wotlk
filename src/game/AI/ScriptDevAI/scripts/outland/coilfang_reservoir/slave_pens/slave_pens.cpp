@@ -126,7 +126,7 @@ bool AreaTrigger_at_naturalist_bite(Player* player, AreaTriggerEntry const* /*pA
 bool GossipHello_npc_naturalist_bite(Player* player, Creature* creature)
 {
     // custom code required because it utilizes two entries
-    uint32 gossipId = creature->getFaction() == FACTION_RELEASED ? GOSSIP_RELEASED : GOSSIP_CAGED;
+    uint32 gossipId = creature->GetFaction() == FACTION_RELEASED ? GOSSIP_RELEASED : GOSSIP_CAGED;
     player->PrepareGossipMenu(creature, gossipId);
     player->SendPreparedGossip(creature);
 

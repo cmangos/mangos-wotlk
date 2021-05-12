@@ -255,7 +255,7 @@ bool EffectDummyCreature_npc_oil_stained_wolf(Unit* pCaster, uint32 uiSpellId, S
 {
     if (uiSpellId == SPELL_THROW_WOLF_BAIT)
     {
-        if (uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->getFaction() != FACTION_MONSTER && !pCreatureTarget->HasAura(SPELL_HAS_EATEN))
+        if (uiEffIndex == EFFECT_INDEX_0 && pCreatureTarget->GetFaction() != FACTION_MONSTER && !pCreatureTarget->HasAura(SPELL_HAS_EATEN))
         {
             pCreatureTarget->SetFactionTemporary(FACTION_MONSTER);
             pCreatureTarget->SetWalk(false);
