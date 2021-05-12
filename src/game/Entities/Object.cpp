@@ -1223,6 +1223,7 @@ WorldObject::WorldObject() :
 
 void WorldObject::CleanupsBeforeDelete()
 {
+    m_events.KillAllEvents(false);                      // non-delatable (currently casted spells) will not deleted now but it will deleted at call in Map::RemoveAllObjectsInRemoveList
     RemoveFromWorld();
 }
 

@@ -32,6 +32,7 @@
 #include "PlayerDefines.h"
 #include "Entities/ObjectVisibility.h"
 #include "Grids/Cell.h"
+#include "Utilities/EventProcessor.h"
 
 #include <set>
 
@@ -1200,6 +1201,9 @@ class WorldObject : public Object
         virtual HighGuid GetParentHigh() const { return HighGuid(0); }
 
         bool IsUsingNewSpawningSystem() const;
+
+        // Event handler
+        EventProcessor m_events;
 
         // Spell System compliance
         virtual uint32 GetLevel() const { return 1; }
