@@ -57,7 +57,10 @@
 #include "Loot/LootMgr.h"
 #include "World/WorldState.h"
 #include "Arena/ArenaTeam.h"
+#ifdef BUILD_METRICS
 #include "Metric/Metric.h"
+#endif
+#include "Server/PacketLog.h"
 
 #ifdef BUILD_AHBOT
 #include "AuctionHouseBot/AuctionHouseBot.h"
@@ -336,6 +339,7 @@ bool ChatHandler::HandleReloadConfigCommand(char* /*args*/)
 #ifdef BUILD_METRICS
     metric::metric::instance().reload_config();
 #endif
+    PacketLog::instance()->Reinitialize();
     SendGlobalSysMessage("World config settings reloaded.");
     return true;
 }
