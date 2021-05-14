@@ -1209,6 +1209,12 @@ class WorldObject : public Object
         virtual uint32 GetLevel() const { return 1; }
         virtual uint32 GetFaction() const { return 0; }
 
+        bool CheckAndIncreaseCastCounter();
+        void DecreaseCastCounter() { if (m_castCounter) --m_castCounter; }
+
+        // Spell mod owner: static player whose spell mods apply to this unit (server-side)
+        virtual Player* GetSpellModOwner() const { return nullptr; }
+
     protected:
         explicit WorldObject();
 
@@ -1248,8 +1254,9 @@ class WorldObject : public Object
         bool m_isActiveObject;
         uint64 m_debugFlags;
 
-        // Spell system
+        // Spell System compliance
         uint8 m_destLocCounter;
+        uint32 m_castCounter;                               // count casts chain of triggered spells for prevent infinity cast crashes
 };
 
 #endif
