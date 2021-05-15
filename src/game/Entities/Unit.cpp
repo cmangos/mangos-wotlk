@@ -1100,6 +1100,8 @@ void Unit::Kill(Unit* killer, Unit* victim, DamageEffectType damagetype, SpellEn
         {
             DEBUG_LOG("DealDamage: Killed %s, looing 10 percents durability", victim->GetGuidStr().c_str());
             playerVictim->DurabilityLossAll(0.10f, false);
+
+
             // durability lost message
             WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
             playerVictim->GetSession()->SendPacket(data);

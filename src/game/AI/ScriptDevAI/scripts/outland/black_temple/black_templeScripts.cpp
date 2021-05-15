@@ -294,11 +294,6 @@ struct AssistBT : public SpellScript
         if (!unitTarget || !unitTarget->IsInCombat())
             return;
 
-        if (!unitTarget->IsInWorld())
-        {
-            return;
-        }
-
         unitTarget->CastSpell(spell->GetCaster(), 40892, TRIGGERED_OLD_TRIGGERED);
     }
 };
