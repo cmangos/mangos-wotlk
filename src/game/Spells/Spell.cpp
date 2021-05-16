@@ -1741,12 +1741,15 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
 
     GetSpellRangeAndRadius(effIndex, radius, targetB, targetingData.chainTargetCount[effIndex]);
 
-    Unit::AuraList const& mod = m_caster->GetAurasByType(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS);
-    for (auto m : mod)
+    if (m_trueCaster->IsUnit())
     {
-        if (!m->isAffectedOnSpell(m_spellInfo))
-            continue;
-        unMaxTargets += m->GetModifier()->m_amount;
+        Unit::AuraList const& mod = m_caster->GetAurasByType(SPELL_AURA_MOD_MAX_AFFECTED_TARGETS);
+        for (auto m : mod)
+        {
+            if (!m->isAffectedOnSpell(m_spellInfo))
+                continue;
+            unMaxTargets += m->GetModifier()->m_amount;
+        }
     }
 
     float cone = GetCone();
@@ -1768,14 +1771,14 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         case TARGET_LOCATION_UNIT_RANDOM_CIRCUMFERENCE:
         case TARGET_LOCATION_CASTER_RANDOM_CIRCUMFERENCE:
         {
-            Unit* target;
+            WorldObject* target;
             switch (targetMode)
             {
                 case TARGET_LOCATION_UNIT_RANDOM_SIDE:
                 case TARGET_LOCATION_UNIT_RANDOM_CIRCUMFERENCE:
-                    target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster; break;
+                    target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_trueCaster; break;
                 default:
-                    target = m_caster; break;
+                    target = m_trueCaster; break;
             }
             // Get a random point AT the circumference
             float angle = 2.0f * M_PI_F * rand_norm_f();
@@ -1792,7 +1795,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 radius *= sqrtf(rand_norm_f());
                 float angle = 2.0f * M_PI_F * rand_norm_f();
                 Position pos = m_targets.getDestination();
-                m_caster->MovePositionToFirstCollision(pos, radius, angle);
+                m_trueCaster->MovePositionToFirstCollision(pos, radius, angle);
                 m_targets.setDestination(pos.x, pos.y, pos.z);
             }
             break;
@@ -1851,8 +1854,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         {
             if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) // takes current dest and offsets it
             {
-                Unit* currentTarget = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;
-                float angle = currentTarget != m_caster ? currentTarget->GetAngle(m_caster) : m_caster->GetOrientation();
+                WorldObject* currentTarget = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_trueCaster;
+                float angle = currentTarget != m_trueCaster ? currentTarget->GetAngle(m_trueCaster) : m_trueCaster->GetOrientation();
 
                 switch (targetMode)
                 {
@@ -1888,8 +1891,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 m_targets.m_mapId = st->target_mapId;
 
                 // far-teleport spells are handled in SpellEffect, elsewise report an error about an unexpected map (spells are always locally)
-                if (st->target_mapId != m_caster->GetMapId() && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_TELEPORT_UNITS && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_BIND)
-                    sLog.outError("SPELL: wrong map (%u instead %u) target coordinates for spell ID %u", st->target_mapId, m_caster->GetMapId(), m_spellInfo->Id);
+                if (st->target_mapId != m_trueCaster->GetMapId() && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_TELEPORT_UNITS && m_spellInfo->Effect[effIndex] != SPELL_EFFECT_BIND)
+                    sLog.outError("SPELL: wrong map (%u instead %u) target coordinates for spell ID %u", st->target_mapId, m_trueCaster->GetMapId(), m_spellInfo->Id);
             }
             else
                 sLog.outError("SPELL: unknown target coordinates for spell ID %u", m_spellInfo->Id);
@@ -1897,10 +1900,10 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         }
         case TARGET_LOCATION_CASTER_HOME_BIND:
         {
-            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+            if (m_trueCaster->IsPlayer())
             {
                 float x, y, z;
-                static_cast<Player*>(m_caster)->GetHomebindLocation(x, y, z, m_targets.m_mapId);
+                static_cast<Player*>(m_trueCaster)->GetHomebindLocation(x, y, z, m_targets.m_mapId);
                 m_targets.setDestination(x, y, z);
             }
             break;
@@ -2148,7 +2151,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 float dist = minRange + rand_norm_f() * (maxRange - minRange);
 
                 float _target_x, _target_y, _target_z;
-                m_caster->GetClosePoint(_target_x, _target_y, _target_z, m_caster->GetObjectBoundingRadius(), dist);
+                m_trueCaster->GetClosePoint(_target_x, _target_y, _target_z, m_trueCaster->GetObjectBoundingRadius(), dist);
                 m_targets.setDestination(_target_x, _target_y, _target_z);
             }
             break;
@@ -2196,11 +2199,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         }
         case TARGET_UNIT_CASTER_PET:
         {
-            Pet* tmpUnit = m_caster->GetPet();
-            if (tmpUnit)
-            {
+            if (Pet* tmpUnit = m_caster->GetPet())
                 tempUnitList.push_back(tmpUnit);
-            }
             break;
         }
         case TARGET_UNIT:
@@ -2209,7 +2209,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             if (!newUnitTarget)
                 break;
 
-            if (!m_caster->CanAssistSpell(newUnitTarget, m_spellInfo))
+            if (!m_trueCaster->CanAssistSpell(newUnitTarget, m_spellInfo))
             {
                 if (CheckAndAddMagnetTarget(newUnitTarget, effIndex, targetB, targetingData))
                     break;
@@ -2374,7 +2374,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             else if (targetMode == TARGET_ENUM_GAMEOBJECTS_SCRIPT_AOE_AT_DEST_LOC)
                 m_targets.getDestination(x, y, z);
             else                                            // can also happen for GO_AROUND_SOURCE without SOURCE_LOCATION
-                m_caster->GetPosition(x, y, z);
+                m_trueCaster->GetPosition(x, y, z);
 
             std::set<uint32> entriesToUse;
 
@@ -2390,9 +2390,9 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
 
             if (!entriesToUse.empty())
             {
-                MaNGOS::AllGameObjectEntriesListInPosRangeCheck go_check(*m_caster, x, y, z, entriesToUse, radius);
+                MaNGOS::AllGameObjectEntriesListInPosRangeCheck go_check(*m_trueCaster, x, y, z, entriesToUse, radius);
                 MaNGOS::GameObjectListSearcher<MaNGOS::AllGameObjectEntriesListInPosRangeCheck> checker(tempGOList, go_check);
-                Cell::VisitGridObjects(m_caster, checker, radius);
+                Cell::VisitGridObjects(m_trueCaster, checker, radius);
             }
             else
             {
@@ -2401,7 +2401,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 {
                     MaNGOS::GameObjectTypeInPosRangeCheck go_check(*m_caster, GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING, x, y, z, radius, m_spellInfo->Effect[effIndex] == SPELL_EFFECT_WMO_DAMAGE, m_spellInfo->Effect[effIndex] == SPELL_EFFECT_WMO_REPAIR);
                     MaNGOS::GameObjectListSearcher<MaNGOS::GameObjectTypeInPosRangeCheck> checker(tempGOList, go_check);
-                    Cell::VisitGridObjects(m_caster, checker, radius + GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex)));
+                    Cell::VisitGridObjects(m_trueCaster, checker, radius + GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex)));
                 }
             }
 
@@ -2411,7 +2411,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 switch (targetMode)
                 {
                     case TARGET_ENUM_GAMEOBJECTS_IN_CONE:
-                        if (!m_caster->HasInArc(*itr, M_PI_F / 2))
+                        if (!m_trueCaster->HasInArc(*itr, M_PI_F / 2))
                         {
                             itr = tempGOList.erase(itr);
                             continue;
@@ -2459,15 +2459,15 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         {
             if (Unit* target = m_targets.getUnitTarget())
             {
-                if (m_caster->CanAssistSpell(target, m_spellInfo) && (targetMode != TARGET_UNIT_RAID || target->IsInGroup(m_caster)))
+                if (m_trueCaster->CanAssistSpell(target, m_spellInfo) && (targetMode != TARGET_UNIT_RAID || target->IsInGroup(m_caster)))
                     tempUnitList.push_back(target);
                 else
                 {
                     if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_ALLOW_TARGET_OF_TARGET_AS_TARGET))
                     {
-                        if (Unit* targetOfUnitTarget = target->GetTarget(m_caster))
+                        if (Unit* targetOfUnitTarget = target->GetTarget(m_trueCaster))
                         {
-                            if (m_caster->CanAssistSpell(targetOfUnitTarget, m_spellInfo) && (targetMode != TARGET_UNIT_RAID || targetOfUnitTarget->IsInGroup(m_caster)))
+                            if (m_trueCaster->CanAssistSpell(targetOfUnitTarget, m_spellInfo) && (targetMode != TARGET_UNIT_RAID || targetOfUnitTarget->IsInGroup(m_caster)))
                                 tempUnitList.push_back(targetOfUnitTarget);
                         }
                     }
@@ -2495,8 +2495,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             break;
         }
         case TARGET_UNIT_CASTER_VEHICLE:
-            if (m_caster->IsBoarded() && m_caster->GetTransportInfo()->IsOnVehicle())
-                tempUnitList.push_back((Unit*)m_caster->GetTransportInfo()->GetTransport());
+            if (m_trueCaster->IsBoarded() && m_trueCaster->GetTransportInfo()->IsOnVehicle())
+                tempUnitList.push_back(static_cast<Unit*>(m_trueCaster->GetTransportInfo()->GetTransport()));
             break;
         case TARGET_UNIT_CASTER_DRIVER:
             if (m_caster->IsVehicle())
@@ -2697,7 +2697,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         case TARGET_UNIT_FRIEND_AND_PARTY:
         {
             Unit* target = m_targets.getUnitTarget();
-            if (!target || !m_caster->CanAssistSpell(target, m_spellInfo))
+            if (!target || !m_trueCaster->CanAssistSpell(target, m_spellInfo))
                 break;
 
             tempUnitList.push_back(target);
@@ -2737,7 +2737,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             else if (pTarget)
             {
                 if (Pet* pet = pTarget->GetPet())
-                    if (m_caster->IsWithinDistInMap(pet, radius))
+                    if (m_trueCaster->IsWithinDistInMap(pet, radius))
                         tempUnitList.push_back(pet);
             }
             break;
