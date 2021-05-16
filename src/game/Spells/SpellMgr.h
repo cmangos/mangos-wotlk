@@ -2222,6 +2222,10 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
             break;
         case SPELL_AURA_MOD_DETECT_RANGE: // Never stack
             return false;
+        case SPELL_AURA_PERIODIC_ENERGIZE:
+            if (entry->Id == 45860 && entry2->Id == 45860) // Breath: Revitalize
+                return false;
+            break;
     }
     if (nonmui && instance && !IsChanneledSpell(entry) && !IsChanneledSpell(entry2))
         return false; // Forbids multi-ranking and multi-application on rule, exclude channeled spells (like Mind Flay)
