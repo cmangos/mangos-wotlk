@@ -83,6 +83,7 @@ class PlayerbotMgr
         bool m_confCollectLoot;
         bool m_confCollectSkin;
         bool m_confCollectObjects;
+        bool m_confCollectRun;
         uint32 m_confCollectDistance;
         uint32 m_confCollectDistanceMax;
 

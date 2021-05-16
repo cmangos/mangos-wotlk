@@ -65,6 +65,11 @@ ConfVersion=2018101401
 #        Default distance that bots will search within for collection.
 #        Default: 25 (cannot be more than DistanceMax)
 #
+#    PlayerbotAI.Collect.Run
+#        Enable running to collect objects
+#        Default: 0 - off
+#                 1 - on
+#
 #    PlayerbotAI.SellGarbage
 #        Allow bots to automatically sell all [GRAY|POOR] quality items as the player activates vendor
 #        Default: 0 - off
@@ -92,5 +97,6 @@ PlayerbotAI.Collect.Skin = 1
 PlayerbotAI.Collect.Objects = 1
 PlayerbotAI.Collect.DistanceMax = 50
 PlayerbotAI.Collect.Distance = 25
+PlayerbotAI.Collect.Run = 0
 PlayerbotAI.SellGarbage = 0
 PlayerbotAI.SellAll.LevelDiff = 10
