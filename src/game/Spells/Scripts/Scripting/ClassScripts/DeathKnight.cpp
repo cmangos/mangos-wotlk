@@ -18,7 +18,30 @@
 
 #include "Spells/Scripts/SpellScript.h"
 
+struct ScourgeStrike : public SpellScript
+{
+    void OnHit(Spell* spell, SpellMissInfo missInfo) const override
+    {
+        uint32 count = 0;
+        Unit* target = spell->GetUnitTarget();
+        Unit::SpellAuraHolderMap const& auras = target->GetSpellAuraHolderMap();
+        for (const auto& aura : auras)
+        {
+            if (aura.second->GetSpellProto()->Dispel == DISPEL_DISEASE &&
+                aura.second->GetCasterGuid() == spell->GetCaster()->GetObjectGuid())
+                ++count;
+        }
+
+        if (count)
+        {
+            int32 bp = count * spell->CalculateSpellEffectValue(EFFECT_INDEX_2, target) * spell->GetTotalTargetDamage() / 100;
+            if (bp)
+                spell->GetCaster()->CastCustomSpell(target, 70890, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void LoadDeathKnightScripts()
 {
-
+    RegisterSpellScript<ScourgeStrike>("spell_scourge_strike");
 }

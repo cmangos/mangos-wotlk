@@ -8999,7 +8999,7 @@ void Aura::PeriodicTick()
             if (spellDamageInfo.damage)
                 procVictim |= PROC_FLAG_TAKE_ANY_DAMAGE;
 
-            pCaster->DealSpellDamage(&spellDamageInfo, true, false);
+            Unit::DealSpellDamage(pCaster, &spellDamageInfo, true, false);
 
             Unit::ProcDamageAndSpell(ProcSystemArguments(pCaster, spellDamageInfo.target, procAttacker, procVictim, procEx, spellDamageInfo.damage, BASE_ATTACK, spellProto));
             break;
@@ -9985,7 +9985,7 @@ bool Aura::IsCritFromAbilityAura(Unit* caster, uint32& damage) const
             !caster->HasAffectedAura(SPELL_AURA_ABILITY_PERIODIC_CRIT, GetSpellProto()))
         return false;
 
-    if (caster->RollSpellCritOutcome(GetTarget(), GetSpellSchoolMask(GetSpellProto()), GetSpellProto()))
+    if (Unit::RollSpellCritOutcome(caster, GetTarget(), GetSpellSchoolMask(GetSpellProto()), GetSpellProto()))
     {
         damage = caster->CalculateCritAmount(GetTarget(), damage, GetSpellProto());
         return true;

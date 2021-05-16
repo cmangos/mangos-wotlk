@@ -474,7 +474,7 @@ class Spell
         void EffectCreateTamedPet(SpellEffectIndex eff_ifx);
 
         Spell(WorldObject* caster, SpellEntry const* info, uint32 triggeredFlags, ObjectGuid originalCasterGUID = ObjectGuid(), SpellEntry const* triggeredBy = nullptr);
-        ~Spell();
+        virtual ~Spell();
 
         SpellCastResult SpellStart(SpellCastTargets const* targets, Aura* triggeredByAura = nullptr);
 

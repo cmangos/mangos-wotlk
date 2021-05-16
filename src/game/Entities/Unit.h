@@ -1574,10 +1574,10 @@ class Unit : public WorldObject
         void CalculateMeleeDamage(Unit* pVictim, CalcDamageInfo* calcDamageInfo, WeaponAttackType attackType = BASE_ATTACK);
         void DealMeleeDamage(CalcDamageInfo* calcDamageInfo, bool durabilityLoss);
 
-        bool IsAllowedDamageInArea(Unit* pVictim) const;
+        static bool IsAllowedDamageInArea(Unit* attacker, Unit* victim);
 
         void CalculateSpellDamage(SpellNonMeleeDamage* spellDamageInfo, int32 damage, SpellEntry const* spellInfo, WeaponAttackType attackType = BASE_ATTACK);
-        void DealSpellDamage(SpellNonMeleeDamage* spellDamageInfo, bool durabilityLoss, bool resetLeash);
+        static void DealSpellDamage(Unit* affectiveCaster, SpellNonMeleeDamage* spellDamageInfo, bool durabilityLoss, bool resetLeash);
 
         uint32 GetResilienceRatingDamageReduction(uint32 damage, SpellDmgClass dmgClass, bool periodic = false, Powers pwrType = POWER_HEALTH) const;
 
@@ -1672,7 +1672,7 @@ class Unit : public WorldObject
         /*Hack to support always hitting creatures. TODO: investigate Serpentshrine Parasite*/
         void SetAlwaysHit(bool value) { m_alwaysHit = value; }
 
-        bool RollSpellCritOutcome(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const;
+        static bool RollSpellCritOutcome(Unit* caster, const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell);
 
         float GetExpertisePercent(WeaponAttackType attType) const;
 
@@ -1825,7 +1825,7 @@ class Unit : public WorldObject
 
         void SendEnchantmentLog(ObjectGuid targetGuid, uint32 itemEntry, uint32 enchantId) const;
 
-        void CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo, bool triggered, bool success = true);
+        static void CasterHitTargetWithSpell(Unit* realCaster, Unit* target, SpellEntry const* spellInfo, bool triggered, bool success = true);
         bool CanInitiateAttack() const;
 
         Unit* SelectAttackingTarget(AttackingTarget target, uint32 position, uint32 spellId, uint32 selectFlags = 0, SelectAttackingTargetParams params = SelectAttackingTargetParams()) const;
@@ -2326,9 +2326,9 @@ class Unit : public WorldObject
         uint32 GetDamageImmunityMask() const;
         uint32 GetMechanicImmunityMask() const;
 
-        float CalcArmorReducedDamage(Unit* pVictim, const float damage);
+        static float CalcArmorReducedDamage(WorldObject* attacker, Unit* victim, const float damage);
         void CalculateDamageAbsorbAndResist(Unit* caster, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32* absorb, int32* resist, bool canReflect = false, bool canResist = true, bool binary = false);
-        void CalculateAbsorbResistBlock(Unit* pCaster, SpellNonMeleeDamage* spellDamageInfo, SpellEntry const* spellProto, WeaponAttackType attType = BASE_ATTACK);
+        void CalculateAbsorbResistBlock(Unit* caster, SpellNonMeleeDamage* spellDamageInfo, SpellEntry const* spellProto, WeaponAttackType attType = BASE_ATTACK);
         void CalculateHealAbsorb(uint32 heal, uint32* absorb);
 
         void  UpdateSpeed(UnitMoveType mtype, bool forced, float ratio = 1.0f);
