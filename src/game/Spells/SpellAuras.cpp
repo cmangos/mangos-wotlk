@@ -7398,12 +7398,43 @@ void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
 
 void Aura::HandleModCastingSpeed(bool apply, bool /*Real*/)
 {
-    GetTarget()->ApplyCastTimePercentMod(float(m_modifier.m_amount), apply);
+    Unit* target = GetTarget();
+    std::set<uint32> exclusiveAuras = { 32182, 2825, 49725 };
+    if (exclusiveAuras.find(GetId()) != exclusiveAuras.end())
+    {
+        auto& auras = target->GetAurasByType(m_modifier.m_auraname);
+        int32 max = 0;
+        for (auto& data : auras)
+        {
+            if (this != data && exclusiveAuras.find(data->GetId()) != exclusiveAuras.end() && max < data->GetAmount())
+                max = data->GetAmount();
+        }
+        if (m_modifier.m_amount < max)
+            return;
+        target->ApplyCastTimePercentMod(float(max), !apply);
+    }
+    target->ApplyCastTimePercentMod(float(m_modifier.m_amount), apply);
 }
 
 void Aura::HandleModMeleeRangedSpeedPct(bool apply, bool /*Real*/)
 {
     Unit* target = GetTarget();
+    std::set<uint32> exclusiveAuras = { 32182, 2825, 45856 };
+    if (exclusiveAuras.find(GetId()) != exclusiveAuras.end())
+    {
+        auto& auras = target->GetAurasByType(m_modifier.m_auraname);
+        int32 max = 0;
+        for (auto& data : auras)
+        {
+            if (this != data && exclusiveAuras.find(data->GetId()) != exclusiveAuras.end() && max < data->GetAmount())
+                max = data->GetAmount();
+        }
+        if (m_modifier.m_amount < max)
+            return;
+        target->ApplyAttackTimePercentMod(BASE_ATTACK, float(max), !apply);
+        target->ApplyAttackTimePercentMod(OFF_ATTACK, float(max), !apply);
+        target->ApplyAttackTimePercentMod(RANGED_ATTACK, float(max), !apply);
+    }
     target->ApplyAttackTimePercentMod(BASE_ATTACK, float(m_modifier.m_amount), apply);
     target->ApplyAttackTimePercentMod(OFF_ATTACK, float(m_modifier.m_amount), apply);
     target->ApplyAttackTimePercentMod(RANGED_ATTACK, float(m_modifier.m_amount), apply);
