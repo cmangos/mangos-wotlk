@@ -1051,9 +1051,6 @@ class Player : public Unit
 
         void CleanupsBeforeDelete() override;
 
-        static UpdateMask updateVisualBits;
-        static void InitVisibleBits();
-
         void AddToWorld() override;
         void RemoveFromWorld() override;
 
@@ -1090,6 +1087,7 @@ class Player : public Unit
 
         Creature* GetNPCIfCanInteractWith(ObjectGuid guid, uint32 npcflagmask);
         GameObject* GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameobject_type = MAX_GAMEOBJECT_TYPE);
+        bool CanSeeSpecialInfoOf(Unit const* target) const;
 
         ReputationRank GetReactionTo(Unit const* unit) const override;
         ReputationRank GetReactionTo(Corpse const* corpse) const override;
@@ -2603,9 +2601,6 @@ class Player : public Unit
         void _SaveGlyphs();
         void _SaveTalents();
         void _SaveStats();
-
-        void _SetCreateBits(UpdateMask* updateMask, Player* target) const override;
-        void _SetUpdateBits(UpdateMask* updateMask, Player* target) const override;
 
         /*********************************************************/
         /***              ENVIRONMENTAL SYSTEM                 ***/

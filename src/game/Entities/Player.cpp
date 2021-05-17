@@ -497,9 +497,6 @@ void TradeData::SetAccepted(bool state, bool crosssend /*= false*/)
 }
 
 //== Player ====================================================
-
-UpdateMask Player::updateVisualBits;
-
 Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(this), m_camera(this), m_achievementMgr(this), m_reputationMgr(this), m_launched(false)
 {
 #ifdef BUILD_PLAYERBOT
@@ -2631,6 +2628,17 @@ GameObject* Player::GetGameObjectIfCanInteractWith(ObjectGuid guid, uint32 gameo
     return nullptr;
 }
 
+bool Player::CanSeeSpecialInfoOf(Unit const* target) const
+{
+    for (const auto& aura : target->GetAurasByType(SPELL_AURA_EMPATHY))
+    {
+        if (aura->GetCasterGuid() == GetObjectGuid())
+            return true;
+    }
+
+    return false;
+}
+
 struct SetGameMasterOnHelper
 {
     explicit SetGameMasterOnHelper() {}
@@ -4245,125 +4253,6 @@ void Player::SaveItemToInventory(Item* item)
     }
 
     item->SaveToDB();                                   // item have unchanged inventory record and can be save standalone
-}
-
-void Player::_SetCreateBits(UpdateMask* updateMask, Player* target) const
-{
-    if (target == this)
-    {
-        Object::_SetCreateBits(updateMask, target);
-    }
-    else
-    {
-        for (uint16 index = 0; index < m_valuesCount; ++index)
-        {
-            if (GetUInt32Value(index) != 0 && updateVisualBits.GetBit(index))
-                updateMask->SetBit(index);
-        }
-    }
-}
-
-void Player::_SetUpdateBits(UpdateMask* updateMask, Player* target) const
-{
-    if (target == this)
-    {
-        Object::_SetUpdateBits(updateMask, target);
-    }
-    else
-    {
-        Object::_SetUpdateBits(updateMask, target);
-        *updateMask &= updateVisualBits;
-    }
-}
-
-void Player::InitVisibleBits()
-{
-    updateVisualBits.SetCount(PLAYER_END);
-
-    updateVisualBits.SetBit(OBJECT_FIELD_GUID);
-    updateVisualBits.SetBit(OBJECT_FIELD_TYPE);
-    updateVisualBits.SetBit(OBJECT_FIELD_ENTRY);
-    updateVisualBits.SetBit(OBJECT_FIELD_SCALE_X);
-    updateVisualBits.SetBit(UNIT_FIELD_CHARM + 0);
-    updateVisualBits.SetBit(UNIT_FIELD_CHARM + 1);
-    updateVisualBits.SetBit(UNIT_FIELD_SUMMON + 0);
-    updateVisualBits.SetBit(UNIT_FIELD_SUMMON + 1);
-    updateVisualBits.SetBit(UNIT_FIELD_CHARMEDBY + 0);
-    updateVisualBits.SetBit(UNIT_FIELD_CHARMEDBY + 1);
-    updateVisualBits.SetBit(UNIT_FIELD_TARGET + 0);
-    updateVisualBits.SetBit(UNIT_FIELD_TARGET + 1);
-    updateVisualBits.SetBit(UNIT_FIELD_CHANNEL_OBJECT + 0);
-    updateVisualBits.SetBit(UNIT_FIELD_CHANNEL_OBJECT + 1);
-    updateVisualBits.SetBit(UNIT_FIELD_BYTES_0);
-    updateVisualBits.SetBit(UNIT_FIELD_HEALTH);
-    updateVisualBits.SetBit(UNIT_FIELD_POWER1);
-    updateVisualBits.SetBit(UNIT_FIELD_POWER2);
-    updateVisualBits.SetBit(UNIT_FIELD_POWER3);
-    updateVisualBits.SetBit(UNIT_FIELD_POWER4);
-    updateVisualBits.SetBit(UNIT_FIELD_POWER5);
-    updateVisualBits.SetBit(UNIT_FIELD_POWER6);
-    updateVisualBits.SetBit(UNIT_FIELD_POWER7);
-    updateVisualBits.SetBit(UNIT_FIELD_MAXHEALTH);
-    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER1);
-    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER2);
-    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER3);
-    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER4);
-    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER5);
-    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER6);
-    updateVisualBits.SetBit(UNIT_FIELD_MAXPOWER7);
-    updateVisualBits.SetBit(UNIT_FIELD_LEVEL);
-    updateVisualBits.SetBit(UNIT_FIELD_FACTIONTEMPLATE);
-    updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_SLOT_ID + 0);
-    updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_SLOT_ID + 1);
-    updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_SLOT_ID + 2);
-    updateVisualBits.SetBit(UNIT_FIELD_FLAGS);
-    updateVisualBits.SetBit(UNIT_FIELD_FLAGS_2);
-    updateVisualBits.SetBit(UNIT_FIELD_AURASTATE);
-    updateVisualBits.SetBit(UNIT_FIELD_BASEATTACKTIME + 0);
-    updateVisualBits.SetBit(UNIT_FIELD_BASEATTACKTIME + 1);
-    updateVisualBits.SetBit(UNIT_FIELD_BOUNDINGRADIUS);
-    updateVisualBits.SetBit(UNIT_FIELD_COMBATREACH);
-    updateVisualBits.SetBit(UNIT_FIELD_DISPLAYID);
-    updateVisualBits.SetBit(UNIT_FIELD_NATIVEDISPLAYID);
-    updateVisualBits.SetBit(UNIT_FIELD_MOUNTDISPLAYID);
-    updateVisualBits.SetBit(UNIT_FIELD_BYTES_1);
-    updateVisualBits.SetBit(UNIT_FIELD_PETNUMBER);
-    updateVisualBits.SetBit(UNIT_FIELD_PET_NAME_TIMESTAMP);
-    updateVisualBits.SetBit(UNIT_DYNAMIC_FLAGS);
-    updateVisualBits.SetBit(UNIT_FIELD_CHANNEL_SPELL);
-    updateVisualBits.SetBit(UNIT_MOD_CAST_SPEED);
-    updateVisualBits.SetBit(UNIT_NPC_FLAGS);
-    updateVisualBits.SetBit(UNIT_FIELD_BASE_MANA);
-    updateVisualBits.SetBit(UNIT_FIELD_BYTES_2);
-    updateVisualBits.SetBit(UNIT_FIELD_HOVERHEIGHT);
-
-    updateVisualBits.SetBit(PLAYER_DUEL_ARBITER + 0);
-    updateVisualBits.SetBit(PLAYER_DUEL_ARBITER + 1);
-    updateVisualBits.SetBit(PLAYER_FLAGS);
-    updateVisualBits.SetBit(PLAYER_GUILDID);
-    updateVisualBits.SetBit(PLAYER_GUILDRANK);
-    updateVisualBits.SetBit(PLAYER_BYTES);
-    updateVisualBits.SetBit(PLAYER_BYTES_2);
-    updateVisualBits.SetBit(PLAYER_BYTES_3);
-    updateVisualBits.SetBit(PLAYER_DUEL_TEAM);
-    updateVisualBits.SetBit(PLAYER_GUILD_TIMESTAMP);
-
-    // PLAYER_QUEST_LOG_x also visible bit on official (but only on party/raid)...
-    for (uint16 i = PLAYER_QUEST_LOG_1_1; i < PLAYER_QUEST_LOG_25_2; i += MAX_QUEST_OFFSET)
-        updateVisualBits.SetBit(i);
-
-    // Players visible items are not inventory stuff
-    for (uint16 i = 0; i < EQUIPMENT_SLOT_END; ++i)
-    {
-        uint32 offset = i * 2;
-
-        // item entry
-        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_ENTRYID + offset);
-        // enchant
-        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_ENCHANTMENT + offset);
-    }
-
-    updateVisualBits.SetBit(PLAYER_CHOSEN_TITLE);
 }
 
 void Player::BuildCreateUpdateBlockForPlayer(UpdateData* data, Player* target) const
@@ -21660,7 +21549,7 @@ void Player::UpdateForQuestWorldObjects()
         if (m_clientGUID.IsGameObject())
         {
             if (GameObject* obj = GetMap()->GetGameObject(m_clientGUID))
-                obj->BuildValuesUpdateBlockForPlayer(&updateData, this);
+                obj->BuildValuesUpdateBlockForPlayer(updateData, this);
         }
         else if (m_clientGUID.IsCreatureOrVehicle())
         {
