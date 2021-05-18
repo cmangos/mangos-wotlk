@@ -748,6 +748,10 @@ bool Unit::IsTriggeredAtSpellProcEvent(ProcExecutionData& data, SpellAuraHolder*
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_FREQUENCY_OF_SUCCESS, chance);
     }
 
+    // proc chance is reduced by an additional 3.333% per level past 60
+    if (holder->IsReducedProcChancePast60() && GetLevel() > 60)
+        chance = std::max(0.f, (1.f - ((GetLevel() - 60) * 1.f / 30.f)) * chance);
+
     if (data.spell)
     {
         if (data.spell->m_IsTriggeredSpell && !spellProto->HasAttribute(SPELL_ATTR_EX3_CAN_PROC_FROM_TRIGGERED))

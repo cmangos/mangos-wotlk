@@ -84,6 +84,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (43706,'spell_drink'),
 (46755,'spell_drink'),
 (49472,'spell_drink'),
+(15600,'spell_reduced_proc_chance_past60'),
 (42144,'spell_horseman_create_water_bucket'),
 (42074,'spell_horseman_fire'),
 (43885,'spell_horseman_maniacal_laugh'),

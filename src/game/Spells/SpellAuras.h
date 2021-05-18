@@ -202,6 +202,9 @@ class SpellAuraHolder
 
         void SetCreationDelayFlag();
 
+        bool IsReducedProcChancePast60() { return m_reducedProcChancePast60; }
+        void SetReducedProcChancePast60() { m_reducedProcChancePast60 = true; }
+
         // Scripting system
         AuraScript* GetAuraScript() const { return m_auraScript; }
         // hooks
@@ -244,6 +247,8 @@ class SpellAuraHolder
         bool m_isRemovedOnShapeLost: 1;
         bool m_deleted: 1;
         bool m_skipUpdate: 1;
+
+        bool m_reducedProcChancePast60;
 
         // Scripting System
         AuraScript* m_auraScript;
