@@ -823,7 +823,7 @@ struct boss_illidan_stormrageAI : public RangedCombatAI, private DialogueHelper
             }
             case PHASE_4_DEMON:
             {
-                DoCastSpellIfCan(nullptr, SPELL_DEMON_TRANSFORM_1);
+                DoCastSpellIfCan(nullptr, SPELL_DEMON_TRANSFORM_1, CAST_INTERRUPT_PREVIOUS);
                 SetRangedMode(false, 0.f, TYPE_NONE);
                 SetCombatScriptStatus(true);
                 SetMeleeEnabled(false);
