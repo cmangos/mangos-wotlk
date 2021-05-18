@@ -2267,7 +2267,7 @@ struct ExposeRazorthornRoot : public SpellScript
 
 struct npc_razorthorn_ravager_pet : public PetAI, public TimerManager
 {
-    npc_razorthorn_ravager_pet(Creature* creature) : PetAI(creature)
+    npc_razorthorn_ravager_pet(Creature* creature) : PetAI(creature), m_animStage(0)
     {
         AddCustomAction(1, true, [&]() { HandleAnimations(); });
     }
