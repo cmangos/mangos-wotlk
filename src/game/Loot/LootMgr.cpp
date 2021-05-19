@@ -862,11 +862,10 @@ void GroupLootRoll::Finish(RollVoteMap::const_iterator& winnerItr)
             {
                 m_lootItem->isReleased = true;
                 m_lootItem->allowedGuid.clear();
-                ItemPrototype const* pProto = sObjectMgr.GetItemPrototype(m_lootItem->itemId);
-                ItemPosCountVec dest;
-                InventoryResult msg = player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, m_lootItem->itemId, m_lootItem->count);
-                Loot loot;
-                loot.FillLoot(pProto->DisenchantID, LootTemplates_Disenchant, player, true);
+                
+                ItemPrototype const* pProto = sObjectMgr.GetItemPrototype(m_lootItem->itemId);                   
+                Loot loot(player, pProto->DisenchantID, LOOT_DISENCHANTING);
+
                 if (!loot.AutoStore(player, true))
                 {
                     LootItemList itemList;
@@ -2007,6 +2006,10 @@ Loot::Loot(Player* player, uint32 id, LootType type) :
             FillLoot(id, LootTemplates_Spell, player, true, true);
             m_clientLootType = CLIENT_LOOT_PICKPOCKETING;
             break;
+        case LOOT_DISENCHANTING:
+            FillLoot(id, LootTemplates_Disenchant, player, true, true);
+            m_clientLootType = CLIENT_LOOT_PICKPOCKETING;
+            break;            
         default:
             sLog.outError("Loot::Loot> invalid loot type passed to loot constructor.");
             break;
