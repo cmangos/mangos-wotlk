@@ -2496,7 +2496,7 @@ struct WorldObjectChangeAccumulator
         for (auto& iter : m)
         {
             Player* owner = iter.getSource()->GetOwner();
-            if (owner != &i_object && owner->HaveAtClient(&i_object))
+            if (owner != &i_object && owner->HasAtClient(&i_object))
                 i_object.BuildUpdateDataForPlayer(owner, i_updateDatas);
         }
     }
@@ -3088,6 +3088,16 @@ bool operator!=(const Position& left, const Position& right)
 bool WorldObject::IsUsingNewSpawningSystem() const
 {
     return GetDbGuid() && GetDbGuid() != GetGUIDLow();
+}
+
+void WorldObject::AddClientIAmAt(Player const* player)
+{
+    m_clientGUIDsIAmAt.insert(player->GetObjectGuid());
+}
+
+void WorldObject::RemoveClientIAmAt(Player const* player)
+{
+    m_clientGUIDsIAmAt.erase(player->GetObjectGuid());
 }
 
 bool WorldObject::CheckAndIncreaseCastCounter()

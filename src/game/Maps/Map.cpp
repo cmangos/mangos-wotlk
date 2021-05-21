@@ -1185,6 +1185,9 @@ void Map::UpdateObjectVisibility(WorldObject* obj, Cell cell, const CellPair& ce
     MaNGOS::VisibleChangesNotifier notifier(*obj);
     TypeContainerVisitor<MaNGOS::VisibleChangesNotifier, WorldTypeMapContainer > player_notifier(notifier);
     cell.Visit(cellpair, player_notifier, *this, *obj, obj->GetVisibilityData().GetVisibilityDistance());
+    for (auto guid : notifier.GetUnvisitedGuids())
+        if (Player* player = GetPlayer(guid))
+            player->UpdateVisibilityOf(player->GetCamera().GetBody(), obj);
 }
 
 void Map::SendInitSelf(Player* player) const
@@ -1196,7 +1199,7 @@ void Map::SendInitSelf(Player* player) const
     // attach to player data current transport data
     if (GenericTransport* transport = player->GetTransport())
     {
-        player->m_clientGUIDs.insert(transport->GetObjectGuid());
+        player->AddAtClient(transport);
         transport->BuildCreateUpdateBlockForPlayer(&updateData, player);
     }
 
@@ -1206,14 +1209,14 @@ void Map::SendInitSelf(Player* player) const
     // build other passengers at transport also (they always visible and marked as visible and will not send at visibility update at add to map
     if (GenericTransport* transport = player->GetTransport())
     {
-        for (auto itr : transport->GetPassengers())
+        for (auto passenger : transport->GetPassengers())
         {
-            if (player != itr)
+            if (player != passenger)
             {
-                if (player->HaveAtClient(itr) || itr->isVisibleForInState(player, player, false))
+                if (player->HasAtClient(passenger) || passenger->isVisibleForInState(player, player, false))
                 {
-                    player->m_clientGUIDs.insert(itr->GetObjectGuid());
-                    itr->BuildCreateUpdateBlockForPlayer(&updateData, player);
+                    player->AddAtClient(passenger);
+                    passenger->BuildCreateUpdateBlockForPlayer(&updateData, player);
                 }
             }
         }
@@ -1240,7 +1243,7 @@ void Map::SendInitTransports(Player* player) const
         // send data for current transport in other place
         if (i != player->GetTransport() && i->GetMapId() == i_id)
         {
-            player->m_clientGUIDs.insert(i->GetObjectGuid());
+            player->AddAtClient(i);
             i->BuildCreateUpdateBlockForPlayer(&updateData, player);
         }
     }
@@ -1267,7 +1270,7 @@ void Map::SendRemoveTransports(Player* player) const
         if (i != player->GetTransport() && i->GetMapId() != i_id)
         {
             i->BuildOutOfRangeUpdateBlock(&updateData);
-            player->m_clientGUIDs.erase(i->GetObjectGuid());
+            player->RemoveAtClient(i);
         }
     }
 

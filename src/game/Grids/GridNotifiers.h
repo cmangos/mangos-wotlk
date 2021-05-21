@@ -40,7 +40,7 @@ namespace MaNGOS
         GuidSet i_clientGUIDs;
         WorldObjectSet i_visibleNow;
 
-        explicit VisibleNotifier(Camera& c) : i_camera(c), i_clientGUIDs(c.GetOwner()->m_clientGUIDs) {}
+        explicit VisibleNotifier(Camera& c) : i_camera(c), i_clientGUIDs(c.GetOwner()->GetClientGuids()) {}
         template<class T> void Visit(GridRefManager<T>& m);
         void Visit(CameraMapType& /*m*/) {}
         void Notify(void);
@@ -50,9 +50,13 @@ namespace MaNGOS
     {
         WorldObject& i_object;
 
-        explicit VisibleChangesNotifier(WorldObject& object) : i_object(object) {}
+        explicit VisibleChangesNotifier(WorldObject& object) : i_object(object), m_unvisitedGuids(i_object.GetClientGuidsIAmAt()) {}
         template<class T> void Visit(GridRefManager<T>&) {}
         void Visit(CameraMapType&);
+
+        GuidSet& GetUnvisitedGuids() { return m_unvisitedGuids; }
+
+        GuidSet m_unvisitedGuids;
     };
 
     struct MessageDeliverer
