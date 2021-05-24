@@ -503,6 +503,18 @@ void WorldState::HandlePlayerEnterZone(Player* player, uint32 zoneId)
         default:
             break;
     }
+    if (IsHolidayActive(HOLIDAY_FIRE_FESTIVAL)) // On midsummer starting, players can end up without buff but with bonfire in zone - keeping like this for simplicity and optimization
+    {
+        if (player->GetMap()->IsContinent())
+        {
+            std::lock_guard<std::mutex> guard(m_mutex);
+            m_zonePlayers[zoneId].push_back(player->GetObjectGuid());
+        }
+        std::lock_guard<std::mutex> guard(m_midsummerMutex);
+        if (uint32 entry = IsBonfireInZone(player->GetTeam(), zoneId))
+            if (IsBonfireActive(entry))
+                player->CastSpell(nullptr, SPELL_BONFIRES_BLESSING, TRIGGERED_OLD_TRIGGERED);
+    }
 }
 
 void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
@@ -572,6 +584,17 @@ void WorldState::HandlePlayerLeaveZone(Player* player, uint32 zoneId)
         }
         default:
             break;
+    }
+    if (IsHolidayActive(HOLIDAY_FIRE_FESTIVAL))
+    {
+        if (!player->IsInWorld() || player->GetMap()->IsContinent())
+        {
+            std::lock_guard<std::mutex> guard(m_mutex);
+            auto position = std::find(m_zonePlayers[zoneId].begin(), m_zonePlayers[zoneId].end(), player->GetObjectGuid());
+            if (position != m_zonePlayers[zoneId].end())
+                m_zonePlayers[zoneId].erase(position);
+        }
+        player->RemoveAurasDueToSpell(SPELL_BONFIRES_BLESSING);
     }
 }
 
@@ -819,6 +842,14 @@ void WorldState::ExecuteOnAreaPlayers(uint32 areaId, std::function<void(Player*)
             executor(player);
 }
 
+void WorldState::ExecuteOnZonePlayers(uint32 zoneId, std::function<void(Player*)> executor)
+{
+    std::lock_guard<std::mutex> guard(m_mutex);
+    for (ObjectGuid guid : m_zonePlayers[zoneId])
+        if (Player* player = sObjectMgr.GetPlayer(guid))
+            executor(player);
+}
+
 // Emerald Dragons
 enum EmeraldDragons : uint32
 {
@@ -971,7 +1002,7 @@ void WorldState::SpawnWarEffortGos()
         ChangeWarEffortGoSpawns(AQResources(i), m_aqData.m_phase == PHASE_2_TRANSPORTING_RESOURCES ? m_aqData.m_phase2Tier : -1);
 }
 
-enum AQResourceTier
+enum AQResourceTier : uint32
 {
     RESOURCE_TIER_0,
     RESOURCE_TIER_1,
@@ -1739,6 +1770,50 @@ void WorldState::StartSunwellGatePhase()
         case SUNWELL_ARCHONISUS_GATE3_OPEN: sGameEventMgr.StartEvent(GAME_EVENT_SWP_GATES_PHASE_3); break;
         default: break;
     }
+}
+
+uint32 WorldState::IsBonfireInZone(Team team, uint32 zoneId)
+{
+    auto zoneItr = m_midsummerZoneIds[team == ALLIANCE].find(zoneId);
+    if (zoneItr != m_midsummerZoneIds[team == ALLIANCE].end())
+        return (*zoneItr).second;
+    return 0;
+}
+
+bool WorldState::IsBonfireActive(uint32 entry)
+{
+    auto itr = m_midsummerBonfireStates.find(entry);
+    if (itr != m_midsummerBonfireStates.end())
+        return (*itr).second;
+    return false;
+}
+
+void WorldState::SetBonfireActive(uint32 entry, bool team, bool apply)
+{
+    uint32 zoneId = 0;
+    {
+        std::lock_guard<std::mutex> guard(m_midsummerMutex);
+        m_midsummerBonfireStates[entry] = apply;
+        zoneId = m_midsummerGoToZone[entry];
+    }
+    ExecuteOnZonePlayers(zoneId, [team, apply](Player* player)
+    {
+        Team playerTeam = team ? ALLIANCE : HORDE;
+        if (player->GetTeam() == playerTeam)
+        {
+            if (apply)
+                player->CastSpell(nullptr, SPELL_BONFIRES_BLESSING, TRIGGERED_OLD_TRIGGERED);
+            else
+                player->RemoveAurasDueToSpell(SPELL_BONFIRES_BLESSING);
+        }
+    });
+}
+
+void WorldState::SetBonfireZone(uint32 entry, uint32 zoneId, bool team)
+{
+    std::lock_guard<std::mutex> guard(m_midsummerMutex);
+    m_midsummerZoneIds[team][zoneId] = entry;
+    m_midsummerGoToZone[entry] = zoneId;
 }
 
 std::string WorldState::GetSunsReachPrintout()

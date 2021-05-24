@@ -11733,8 +11733,6 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
         case 5:                     // GO trap usage
         case 8:                     // GO usage with TargetB = none or random
         case 11:                    // unk - 1 spell
-        case 19:                    // unk - 1 spell
-        case 20:                    // unk - 2 spells
         {
             // Specific case for Darkmoon Faire Cannon (this is probably a hint that our logic about GO use / activation is not accurate)
             switch (m_spellInfo->Id)
@@ -11886,6 +11884,11 @@ void Spell::EffectActivateObject(SpellEffectIndex eff_idx)
         }
         case 17:                    // GO unlock - found mostly in Simon Game spells
             gameObjTarget->RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_NO_INTERACT);
+            break;
+        case 19:                    // Midsummer - 1 spell
+        case 20:                    // Midsummer - 2 spells
+            if (gameObjTarget->AI())
+                gameObjTarget->AI()->ReceiveAIEvent(misc_value == 19 ? AI_EVENT_CUSTOM_B : AI_EVENT_CUSTOM_A);
             break;
         default:
             sLog.outError("Spell::EffectActivateObject called with unknown misc value. Spell Id %u", m_spellInfo->Id);

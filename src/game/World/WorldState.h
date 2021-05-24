@@ -59,6 +59,8 @@ enum ZoneIds
     ZONEID_ISLE_OF_QUEL_DANAS   = 4080,
     ZONEID_MAGISTERS_TERRACE    = 4131,
     ZONEID_SUNWELL_PLATEAU      = 4075,
+
+    ZONEID_ZANGARMARSH = 3521,
 };
 
 enum AreaIds
@@ -84,6 +86,8 @@ enum SpellId
     SPELL_ADAL_SONG_OF_BATTLE   = 39953,
 
     SPELL_KIRU_SONG_OF_VICTORY  = 46302,
+
+    SPELL_BONFIRES_BLESSING     = 45444,
 };
 
 enum GoId
@@ -361,6 +365,7 @@ class WorldState
 
         void HandleExternalEvent(uint32 eventId, uint32 param);
         void ExecuteOnAreaPlayers(uint32 areaId, std::function<void(Player*)> executor);
+        void ExecuteOnZonePlayers(uint32 zoneId, std::function<void(Player*)> executor);
 
         void Update(const uint32 diff);
 
@@ -408,6 +413,12 @@ class WorldState
         void StopSunwellGatePhase();
         void StartSunwellGatePhase();
 
+        // Midsummer
+        uint32 IsBonfireInZone(Team team, uint32 zoneId);
+        bool IsBonfireActive(uint32 entry);
+        void SetBonfireActive(uint32 entry, bool team, bool apply);
+        void SetBonfireZone(uint32 entry, uint32 zoneId, bool team);
+
         void FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 zoneId, uint32 areaId);
 
         // helper functions for world state list fill
@@ -426,6 +437,7 @@ class WorldState
         }
     private:
         std::map<uint32, GuidVector> m_areaPlayers;
+        std::map<uint32, GuidVector> m_zonePlayers;
         std::map<uint32, std::atomic<uint32>> m_transportStates; // atomic to avoid having to lock
 
         std::mutex m_mutex; // all World State operations are thread unsafe
@@ -457,6 +469,13 @@ class WorldState
         uint32 m_adalSongOfBattleTimer;
 
         SunsReachReclamationData m_sunsReachData;
+
+        std::map<uint32, bool> m_midsummerBonfireStates;
+        std::map<uint32, uint32> m_midsummerZoneIds[2];
+        std::map<uint32, uint32> m_midsummerGoToZone;
+        std::map<uint32, GuidVector> m_midsummerZonePlayers;
+
+        std::mutex m_midsummerMutex;
 
         // Release Events
         void StartExpansionEvent();

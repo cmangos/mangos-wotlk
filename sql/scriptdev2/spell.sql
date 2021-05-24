@@ -313,6 +313,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (49887,'spell_gravity_lapse_knockup'),
 (46974,'spell_ocw_silvermoon_lvl70etc_cheer'),
 (40234,'spell_ocw_auchindoun_summon_adventurer'),
+(46240,'spell_earthquake_guardian'),
+(29831,'spell_light_bonfire'),
 (32727,'spell_arena_preparation');
 
 -- Wotlk
