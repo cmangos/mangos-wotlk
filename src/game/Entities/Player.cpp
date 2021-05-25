@@ -24555,7 +24555,7 @@ void Player::AddGCD(SpellEntry const& spellEntry, uint32 /*forcedDuration = 0*/,
     // send to client
     WorldPacket data(SMSG_SPELL_COOLDOWN, 8 + 1 + 4);
     data << GetObjectGuid();
-    data << uint8(1);
+    data << uint8(SPELL_COOLDOWN_FLAG_INCLUDE_GCD);
     data << uint32(spellEntry.Id);
     data << uint32(0);
     GetSession()->SendPacket(data);
