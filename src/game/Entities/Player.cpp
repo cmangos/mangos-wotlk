@@ -24522,7 +24522,7 @@ void Player::AddCooldown(SpellEntry const& spellEntry, ItemPrototype const* item
     // blizzlike code for choosing which is recTime > categoryRecTime after spellmod application
     if (recTime)
         ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, recTime);
-    else if (spellCategory && categoryRecTime)
+    if (spellCategory && categoryRecTime)
         ApplySpellMod(spellEntry.Id, SPELLMOD_COOLDOWN, categoryRecTime);
 
     if (recTime || categoryRecTime)
