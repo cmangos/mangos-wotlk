@@ -36,6 +36,7 @@ class CreatureAI : public UnitAI
         void DoFakeDeath(uint32 spellId = 0);
 
         void SetDeathPrevention(bool state);
+        bool IsPreventingDeath() const override { return m_deathPrevention; }
         void ResetDeathPrevented() { m_deathPrevented = false; }
 
         /// Helper function which handles the combat reaction for vehicle passengers
