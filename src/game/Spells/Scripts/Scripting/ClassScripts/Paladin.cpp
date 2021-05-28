@@ -108,13 +108,14 @@ struct spell_paladin_tier_6_trinket : public AuraScript
         if (!procData.spellInfo)
             return SPELL_AURA_PROC_FAILED;
 
-        float chance;
+        float chance = 0.f;
 
         // Flash of light/Holy light
         if (procData.spellInfo->SpellFamilyFlags & uint64(0x00000000C0000000))
         {
             procData.triggeredSpellId = 40471;
             chance = 15.0f;
+            procData.triggerTarget = procData.victim;
         }
 
         if (!roll_chance_f(chance))
