@@ -462,6 +462,25 @@ struct LadyDeathwhisperElevator : public GameObjectAI, public TimerManager
     }
 };
 
+struct RocketPack : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->CastSpell(nullptr, 68721, TRIGGERED_NONE);
+    }
+};
+
+struct RocketPackPeriodic : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target->IsFalling()) // remove aura after landing
+            target->RemoveAurasDueToSpell(aura->GetId());
+    }
+};
+
 void AddSC_icecrown_citadel()
 {
     Script* pNewScript = new Script;
@@ -499,4 +518,7 @@ void AddSC_icecrown_citadel()
     pNewScript->Name = "go_lady_deathwhisper_elevator";
     pNewScript->GetGameObjectAI = &GetNewAIInstance<LadyDeathwhisperElevator>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<RocketPack>("spell_rocket_pack");
+    RegisterAuraScript<RocketPackPeriodic>("spell_rocket_pack_periodic");
 }
