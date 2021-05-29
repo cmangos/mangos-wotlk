@@ -48,6 +48,7 @@
 #include "MotionGenerators/PathFinder.h"
 #include "Spells/Scripts/SpellScript.h"
 #include "Entities/ObjectGuid.h"
+#include "Entities/Transports.h"
 
 extern pEffect SpellEffects[MAX_SPELL_EFFECTS];
 
@@ -219,6 +220,26 @@ void SpellCastTargets::Update(Unit* caster)
         if (m_itemTarget)
             m_itemTargetEntry = m_itemTarget->GetEntry();
     }
+
+    if (m_srcTransportGUID)
+    {
+        if (GenericTransport* transport = caster->GetMap()->GetTransport(m_srcTransportGUID))
+        {
+            Position temp = m_srcTransportPos;
+            transport->CalculatePassengerPosition(temp.x, temp.y, temp.z, &temp.o);
+            m_srcPos = temp;
+        }
+    }
+
+    if (m_destTransportGUID)
+    {
+        if (GenericTransport* transport = caster->GetMap()->GetTransport(m_destTransportGUID))
+        {
+            Position temp = m_destTransportPos;
+            transport->CalculatePassengerPosition(temp.x, temp.y, temp.z, &temp.o);
+            m_destPos = temp;
+        }
+    }
 }
 
 void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
@@ -244,7 +265,15 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
     if (m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
     {
         data >> m_srcTransportGUID.ReadAsPacked();
-        data >> m_srcPos.x >> m_srcPos.y >> m_srcPos.z;
+        if (m_srcTransportGUID)
+        {
+            data >> m_srcTransportPos.x >> m_srcTransportPos.y >> m_srcTransportPos.z;
+            m_srcPos = m_srcTransportPos;
+            if (GenericTransport* transport = caster->GetMap()->GetTransport(m_srcTransportGUID))
+                transport->CalculatePassengerPosition(m_srcPos.x, m_srcPos.y, m_srcPos.z, &m_srcPos.o);
+        }
+        else
+            data >> m_srcPos.x >> m_srcPos.y >> m_srcPos.z;
         if (!MaNGOS::IsValidMapCoord(m_srcPos.x, m_srcPos.y, m_srcPos.z))
             throw ByteBufferException(false, data.rpos(), 0, data.size());
     }
@@ -252,7 +281,15 @@ void SpellCastTargets::read(ByteBuffer& data, Unit* caster)
     if (m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
         data >> m_destTransportGUID.ReadAsPacked();
-        data >> m_destPos.x >> m_destPos.y >> m_destPos.z;
+        if (m_destTransportGUID)
+        {
+            data >> m_destTransportPos.x >> m_destTransportPos.y >> m_destTransportPos.z;
+            m_destPos = m_destTransportPos;
+            if (GenericTransport* transport = caster->GetMap()->GetTransport(m_destTransportGUID))
+                transport->CalculatePassengerPosition(m_destPos.x, m_destPos.y, m_destPos.z, &m_destPos.o);
+        }
+        else
+            data >> m_destPos.x >> m_destPos.y >> m_destPos.z;
         if (!MaNGOS::IsValidMapCoord(m_destPos.x, m_destPos.y, m_destPos.z))
             throw ByteBufferException(false, data.rpos(), 0, data.size());
     }
@@ -1808,7 +1845,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             if ((m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION) == 0)
             {
                 float x, y, z;
-                m_caster->GetPosition(x, y, z);
+                m_trueCaster->GetPosition(x, y, z, m_trueCaster->GetTransport());
                 m_targets.setDestination(x, y, z);
             }
             break;

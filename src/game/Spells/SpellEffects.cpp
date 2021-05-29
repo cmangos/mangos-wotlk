@@ -5815,6 +5815,8 @@ void Spell::EffectPersistentAA(SpellEffectIndex eff_idx)
 
     caster->AddDynObject(dynObj);
     caster->GetMap()->Add(dynObj);
+    if (GenericTransport* transport = caster->GetTransport())
+        transport->AddPassenger(dynObj, true);
 
     // Potential Hack - at the time of channel start Dynamic Object is not created yet, so have to do it here
     // Sent in next Object Update so for client its the same
@@ -7278,6 +7280,8 @@ void Spell::EffectAddFarsight(SpellEffectIndex eff_idx)
 
     m_caster->AddDynObject(dynObj);
     m_caster->GetMap()->Add(dynObj);
+    if (GenericTransport* transport = m_caster->GetTransport())
+        transport->AddPassenger(dynObj, true);
 
     ((Player*)m_caster)->GetCamera().SetView(dynObj);
 }
@@ -12537,6 +12541,8 @@ void Spell::EffectPullTowards(SpellEffectIndex eff_idx)
     {
         z = m_caster->GetPositionZ();
         dist = unitTarget->GetDistance(m_caster, false);
+        x = m_caster->GetPositionX();
+        y = m_caster->GetPositionY();
     }
     else // SPELL_EFFECT_PULL_TOWARDS_DEST
     {
@@ -12554,8 +12560,9 @@ void Spell::EffectPullTowards(SpellEffectIndex eff_idx)
     float speedXY = float(m_spellInfo->EffectMiscValue[eff_idx]) * 0.1f;
     float time = dist / speedXY;
     float speedZ = ((z - unitTarget->GetPositionZ()) + 0.5f * time * time * Movement::gravity) / time;
+    float angle = unitTarget->GetAngle(x, y);
 
-    unitTarget->KnockBackFrom(m_caster, -speedXY, speedZ);
+    unitTarget->KnockBackWithAngle(angle, speedXY, speedZ);
 }
 
 void Spell::EffectSummonDeadPet(SpellEffectIndex /*eff_idx*/)

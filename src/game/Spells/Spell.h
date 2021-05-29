@@ -136,6 +136,9 @@ class SpellCastTargets
             m_srcPos = target.m_srcPos;
             m_destPos = target.m_destPos;
 
+            m_srcTransportPos = target.m_srcTransportPos;
+            m_destTransportPos = target.m_destTransportPos;
+
             m_strTarget = target.m_strTarget;
 
             m_targetMask = target.m_targetMask;
@@ -196,7 +199,9 @@ class SpellCastTargets
         void Update(Unit* caster);
 
         Position m_srcPos;
+        Position m_srcTransportPos;
         Position m_destPos;
+        Position m_destTransportPos;
         std::string m_strTarget;
 
         uint32 m_targetMask;
