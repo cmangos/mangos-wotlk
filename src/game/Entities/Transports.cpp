@@ -235,6 +235,8 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
 
     SetName(goinfo->name);
 
+    GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Gigantic);
+
     return true;
 }
 
@@ -806,12 +808,14 @@ void Transport::UpdateForMap(Map const* targetMap, bool newMap)
     {
         for (const auto& itr : pl)
         {
-            if (this != itr.getSource()->GetTransport())
+            Player* player = itr.getSource();
+            if (this != player->GetTransport())
             {
                 UpdateData updateData;
-                BuildCreateUpdateBlockForPlayer(&updateData, itr.getSource());
+                BuildCreateUpdateBlockForPlayer(&updateData, player);
                 WorldPacket packet = updateData.BuildPacket(0); // always only one packet
-                itr.getSource()->SendDirectMessage(packet);
+                player->SendDirectMessage(packet);
+                player->m_clientGUIDs.insert(this->GetObjectGuid());
             }
         }
     }
@@ -821,8 +825,14 @@ void Transport::UpdateForMap(Map const* targetMap, bool newMap)
         BuildOutOfRangeUpdateBlock(&updateData);
         WorldPacket packet = updateData.BuildPacket(0); // always only one packet
         for (const auto& itr : pl)
-            if (this != itr.getSource()->GetTransport())
-                itr.getSource()->SendDirectMessage(packet);
+        {
+            Player* player = itr.getSource();
+            if (this != player->GetTransport())
+            {
+                player->SendDirectMessage(packet);
+                player->m_clientGUIDs.erase(this->GetObjectGuid());
+            }
+        }
     }
 }
 
