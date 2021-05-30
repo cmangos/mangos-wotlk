@@ -956,12 +956,16 @@ void instance_icecrown_citadel::JustDidDialogueStep(int32 iEntry)
         {
             TransportTemplate* const enemyGunship = sTransportMgr.GetTransportTemplate(GO_ORGRIMS_HAMMER_A);
             Transport::LoadTransport(*enemyGunship, instance, true);
+            if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_ORGRIMS_HAMMER_A))))
+                gunship->GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Infinite);
             break;
         }
         case SAY_GUNSHIP_START_HORDE_3:
         {
             TransportTemplate* const enemyGunship = sTransportMgr.GetTransportTemplate(GO_THE_SKYBREAKER_H);
             Transport::LoadTransport(*enemyGunship, instance, true);
+            if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER_H))))
+                gunship->GetVisibilityData().SetVisibilityDistanceOverride(VisibilityDistanceType::Infinite);
             break;
         }
     }
