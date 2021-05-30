@@ -943,25 +943,25 @@ void instance_icecrown_citadel::JustDidDialogueStep(int32 iEntry)
     switch (iEntry)
     {
         case SAY_GUNSHIP_START_ALLY_5:
+            if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_ORGRIMS_HAMMER_A))))
+                gunship->SetGoState(GO_STATE_ACTIVE);
+            SetData(TYPE_GUNSHIP_BATTLE, IN_PROGRESS);
+            break;
         case SAY_GUNSHIP_START_HORDE_4:
+            if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER_H))))
+                gunship->SetGoState(GO_STATE_ACTIVE);
             SetData(TYPE_GUNSHIP_BATTLE, IN_PROGRESS);
             break;
         case SAY_GUNSHIP_START_ALLY_3:
         {
             TransportTemplate* const enemyGunship = sTransportMgr.GetTransportTemplate(GO_ORGRIMS_HAMMER_A);
             Transport::LoadTransport(*enemyGunship, instance, true);
-
-            if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_ORGRIMS_HAMMER_A))))
-                gunship->SetGoState(GO_STATE_ACTIVE);
             break;
         }
         case SAY_GUNSHIP_START_HORDE_3:
         {
             TransportTemplate* const enemyGunship = sTransportMgr.GetTransportTemplate(GO_THE_SKYBREAKER_H);
             Transport::LoadTransport(*enemyGunship, instance, true);
-
-            if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER_H))))
-                gunship->SetGoState(GO_STATE_ACTIVE);
             break;
         }
     }
@@ -1111,6 +1111,13 @@ void instance_icecrown_citadel::ExecuteChatCommand(ChatHandler* handler, char* a
     else if (val == "continuegunship")
     {
         if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER_A))))
+            gunship->SetGoState(GO_STATE_ACTIVE);
+        if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_ORGRIMS_HAMMER_H))))
+            gunship->SetGoState(GO_STATE_ACTIVE);
+    }
+    else if (val == "continueenemygunship")
+    {
+        if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_THE_SKYBREAKER_H))))
             gunship->SetGoState(GO_STATE_ACTIVE);
         if (GenericTransport* gunship = instance->GetTransport(ObjectGuid(HIGHGUID_MO_TRANSPORT, uint32(GO_ORGRIMS_HAMMER_A))))
             gunship->SetGoState(GO_STATE_ACTIVE);
