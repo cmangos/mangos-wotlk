@@ -25,6 +25,7 @@ EndScriptData */
 spell 19512
 spell 21014
 spell 21050
+spell 26275
 spell 29528
 spell 29866
 spell 34665
@@ -1172,6 +1173,20 @@ struct spell_eject_all_passengers : public SpellScript
     }
 };
 
+// PX-238 Winter Wondervolt TRAP
+struct WondervoltTrap : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            uint32 spells[4] = {26272, 26157, 26273, 26274};    // Four possible transform spells
+            if (spell->GetUnitTarget())
+                spell->GetUnitTarget()->CastSpell(spell->GetUnitTarget(), spells[urand(0, 3)], TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_spell_scripts()
 {
     Script* pNewScript = new Script;
@@ -1198,4 +1213,5 @@ void AddSC_spell_scripts()
     RegisterSpellScript<TKDive>("spell_tk_dive");
     RegisterSpellScript<deflection>("spell_deflection");
     RegisterSpellScript<spell_eject_all_passengers>("spell_eject_all_passengers");
+    RegisterSpellScript<WondervoltTrap>("spell_wondervolt_trap");
 }
