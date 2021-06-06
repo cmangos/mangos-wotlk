@@ -315,7 +315,15 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (40234,'spell_ocw_auchindoun_summon_adventurer'),
 (46240,'spell_earthquake_guardian'),
 (29831,'spell_light_bonfire'),
-(32727,'spell_arena_preparation');
+(32727,'spell_arena_preparation'),
+(29710,'spell_test_ribbon_pole_channel_trigger'),
+(29705,'spell_test_ribbon_pole_channel'),
+(29726,'spell_test_ribbon_pole_channel'),
+(29727,'spell_test_ribbon_pole_channel'),
+(45390,'spell_ribbon_pole_dancer_check_aura'),
+(45405,'spell_ribbon_pole_dancer_check'),
+(45407,'spell_reveler_applause_cheer'),
+(29708,'spell_summon_ribbon_pole_critter');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

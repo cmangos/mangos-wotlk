@@ -77,6 +77,121 @@ struct LightBonfire : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_RIBBON_DANCE = 29175,
+
+    SPELL_RIBBON_POLE_DANCER_CHECK = 45405,
+
+    SPELL_GROUND_FLOWER = 46971,
+
+    SPELL_BIG_FLAME_DANCER = 46827,
+
+    SPELL_SUMMON_RIBBON_POLE_FIRE_SPIRAL_VISUAL = 45422,
+
+    SPELL_RIBBON_POLE_FIREWORK_LAUNCHER_AURA = 46830,
+
+    SPELL_HOLIDAY_MIDSUMMER_RIBBON_POLE_PERIODIC_VISUAL = 45406,
+};
+
+struct TestRibbonPoleChannelTrigger : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        static std::vector<uint32> spellIds = { 29705, 29726, 29727 };
+        spell->GetCaster()->CastSpell(nullptr, spellIds[urand(0, 2)], TRIGGERED_NONE);
+    }
+};
+
+struct TestRibbonPoleChannel : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->CastSpell(nullptr, SPELL_HOLIDAY_MIDSUMMER_RIBBON_POLE_PERIODIC_VISUAL, TRIGGERED_OLD_TRIGGERED);
+        else
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_HOLIDAY_MIDSUMMER_RIBBON_POLE_PERIODIC_VISUAL);
+    }
+
+    void OnPeriodicTickEnd(Aura* aura) const override
+    {
+        if (SpellAuraHolder* holder = aura->GetTarget()->GetSpellAuraHolder(SPELL_RIBBON_DANCE))
+        {
+            if (holder->GetAuraMaxDuration() < 3600000)
+            {
+                holder->SetAuraMaxDuration(holder->GetAuraMaxDuration() + 180000);
+                holder->SetAuraDuration(holder->GetAuraMaxDuration());
+                holder->UpdateAuraDuration();
+            }
+        }
+        else
+            aura->GetTarget()->CastSpell(aura->GetTarget(), SPELL_RIBBON_DANCE, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct RevelerApplauseCheer : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (!spell->GetUnitTarget())
+            return;
+
+        spell->GetUnitTarget()->HandleEmote(urand(0, 1) ? 71 : 21);
+    }
+};
+
+struct RibbonPoleDancerCheckAura : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        aura->GetTarget()->CastSpell(nullptr, SPELL_RIBBON_POLE_DANCER_CHECK, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct RibbonPoleDancerCheck : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->HasAura(29705) || target->HasAura(29726) || target->HasAura(29727))
+            return true;
+
+        return false;
+    }
+
+    // TODO: Extend this to be more random 
+    void OnCast(Spell* spell) const override
+    {
+        Unit* caster = spell->GetCaster();
+        auto& targets = spell->GetTargetList();
+        if (targets.size() >= 1)
+        {
+            switch (urand(0, 3))
+            {
+                case 0:
+                    caster->CastSpell(nullptr, SPELL_GROUND_FLOWER, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                case 1:
+                    caster->CastSpell(nullptr, SPELL_BIG_FLAME_DANCER, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                case 2:
+                    caster->CastSpell(nullptr, SPELL_SUMMON_RIBBON_POLE_FIRE_SPIRAL_VISUAL, TRIGGERED_OLD_TRIGGERED);
+                    break;
+                case 3:
+                    caster->CastSpell(nullptr, SPELL_RIBBON_POLE_FIREWORK_LAUNCHER_AURA, TRIGGERED_OLD_TRIGGERED);
+                    break;
+            }
+        }
+    }
+};
+
+struct SummonRibbonPoleCritter : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        spell->m_targets.m_destPos.z += 6.5f;
+    }
+};
+
 void AddSC_midsummer_festival()
 {
     Script* pNewScript = new Script;
@@ -86,4 +201,10 @@ void AddSC_midsummer_festival()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<LightBonfire>("spell_light_bonfire");
+    RegisterSpellScript<TestRibbonPoleChannelTrigger>("spell_test_ribbon_pole_channel_trigger");
+    RegisterAuraScript<TestRibbonPoleChannel>("spell_test_ribbon_pole_channel");
+    RegisterSpellScript<RevelerApplauseCheer>("spell_reveler_applause_cheer");
+    RegisterAuraScript<RibbonPoleDancerCheckAura>("spell_ribbon_pole_dancer_check_aura");
+    RegisterSpellScript<RibbonPoleDancerCheck>("spell_ribbon_pole_dancer_check");
+    RegisterSpellScript<SummonRibbonPoleCritter>("spell_summon_ribbon_pole_critter");
 }
