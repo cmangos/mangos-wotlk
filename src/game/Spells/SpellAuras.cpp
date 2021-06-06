@@ -5468,7 +5468,10 @@ void Aura::HandleInvisibilityDetect(bool apply, bool Real)
 
 void Aura::HandleDetectAmore(bool apply, bool /*real*/)
 {
-    GetTarget()->ApplyModByteFlag(PLAYER_FIELD_BYTES2, 3, (PLAYER_FIELD_BYTE2_DETECT_AMORE_0 << m_modifier.m_amount), apply);
+    if (!GetTarget()->IsPlayer())
+        return;
+
+    GetTarget()->ApplyModByteFlag(PLAYER_FIELD_BYTES2, 3, 1 << (GetMiscValue() - 1), apply);
 }
 
 void Aura::HandleAuraModRoot(bool apply, bool Real)
