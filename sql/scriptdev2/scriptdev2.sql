@@ -124,7 +124,6 @@ UPDATE gameobject_template SET ScriptName='go_dragon_head' WHERE entry IN(179556
 UPDATE gameobject_template SET ScriptName='go_unadorned_spike' WHERE entry IN(175787);
 UPDATE gameobject_template SET ScriptName='go_containment_coffer' WHERE entry=122088;
 UPDATE gameobject_template SET ScriptName='go_large_jack_o_lantern' WHERE entry=186887;
-UPDATE gameobject_template SET ScriptName='go_midsummer_bonfire' WHERE entry IN('187943', '187929', '187945', '187946', '187930', '187944', '187914', '187927', '187564', '187916', '187920', '187923', '187924', '187925', '187926', '187928', '187931', '187932', '187934', '187936', '187938', '187940', '187971', '187973', '187952', '187963', '187950', '187961', '187959', '187957', '187968', '187948', '187953', '187970', '187966', '187975', '187969', '187951', '187956', '187954', '187947', '187972', '187964', '187559', '187965');
 
 /* GUARD */
 UPDATE creature_template SET ScriptName='guard_azuremyst' WHERE entry=18038;
@@ -252,6 +251,10 @@ INSERT INTO scripted_event_id VALUES
 /* War Effort*/
 UPDATE creature_template SET ScriptName='npc_war_effort' WHERE
 entry IN(15383,15431,15432,15434,15437,15445,15446,15448,15450,15451,15452,15453,15455,15456,15457,15459,15460,15469,15477,15508,15512,15515,15522,15525,15528,15529,15532,15533,15534,15535);
+
+/*Midsummer*/
+UPDATE gameobject_template SET ScriptName='go_midsummer_bonfire' WHERE entry IN('187943', '187929', '1879452', '187946', '187930', '187944', '187914', '187927', '187564', '187916', '187920', '187923', '187924', '187925', '187926', '187928', '187931', '187932', '187934', '187936', '187938', '187940', '187971', '187973', '187952', '187963', '187950', '187961', '187959', '187957', '187968', '187948', '187953', '187970', '187966', '187975', '187969', '187951', '187956', '187954', '187947', '187972', '187964', '187559', '187965',181332);
+UPDATE creature_template SET ScriptName='npc_torch_tossing_bunny_controller' WHERE entry IN(25536);
 
 /*  */
 /* ZONE */

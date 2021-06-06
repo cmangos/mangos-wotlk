@@ -16,6 +16,7 @@
 
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "World/WorldState.h"
+#include "AI/ScriptDevAI/base/CombatAI.h"
 
 enum
 {
@@ -192,12 +193,108 @@ struct SummonRibbonPoleCritter : public SpellScript
     }
 };
 
+enum
+{
+    SPELL_BRAZIERS_HIT = 45724,
+
+    SPELL_TARGET_INDICATOR_COSMETIC = 46901,
+    SPELL_TARGET_INDICATOR = 45723,
+
+    SPELL_TORCH_TARGET_PICKER = 45907,
+};
+
+struct TorchTossingTargetBunnyControllerAI : public CombatAI
+{
+    TorchTossingTargetBunnyControllerAI(Creature* creature) : CombatAI(creature, 0)
+    {
+        AddCustomAction(1, 3000u, [&]() { HandleTargetChange(); });
+    }
+
+    void HandleTargetChange()
+    {
+        m_creature->CastSpell(nullptr, SPELL_TORCH_TARGET_PICKER, TRIGGERED_NONE);
+        ResetTimer(1, 3000);
+    }
+};
+
+struct TorchToss : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->HasAura(SPELL_TARGET_INDICATOR))
+            return true;
+
+        return false;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        spell->GetUnitTarget()->CastSpell(spell->GetCaster(), SPELL_BRAZIERS_HIT, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct BraziersHit : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target->IsPlayer())
+            return;
+
+        Player* player = static_cast<Player*>(target);
+        if (apply)
+        {
+            if (aura->GetStackAmount() >= 8)
+            {
+                if (player->HasQuest(player->GetTeam() == HORDE ? 11922 : 11731))
+                {
+                    player->AreaExploredOrEventHappens(player->GetTeam() == HORDE ? 11922 : 11731);
+                    player->RemoveAurasDueToSpell(aura->GetId());
+                }
+            }
+            else if (aura->GetStackAmount() >= 20)
+            {
+                if (player->HasQuest(player->GetTeam() == HORDE ? 11926 : 11921))
+                {
+                    player->AreaExploredOrEventHappens(player->GetTeam() == HORDE ? 11926 : 11921);
+                    player->RemoveAurasDueToSpell(aura->GetId());
+                }
+            }
+        }
+    }
+};
+
+struct TorchTargetPicker : public SpellScript
+{
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (target->HasAura(SPELL_TARGET_INDICATOR))
+            return false;
+
+        return true;
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (!spell->GetUnitTarget())
+            return;
+
+        spell->GetUnitTarget()->CastSpell(nullptr, SPELL_TARGET_INDICATOR_COSMETIC, TRIGGERED_OLD_TRIGGERED);
+        spell->GetUnitTarget()->CastSpell(nullptr, SPELL_TARGET_INDICATOR, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_midsummer_festival()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "go_midsummer_bonfire";
     pNewScript->GetGameObjectAI = &GetNewAIInstance<go_bonfire>;
     pNewScript->pQuestRewardedGO = &QuestRewardedBonfireDesecrate;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_torch_tossing_bunny_controller";
+    pNewScript->GetAI = &GetNewAIInstance<TorchTossingTargetBunnyControllerAI>;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<LightBonfire>("spell_light_bonfire");
@@ -207,4 +304,7 @@ void AddSC_midsummer_festival()
     RegisterAuraScript<RibbonPoleDancerCheckAura>("spell_ribbon_pole_dancer_check_aura");
     RegisterSpellScript<RibbonPoleDancerCheck>("spell_ribbon_pole_dancer_check");
     RegisterSpellScript<SummonRibbonPoleCritter>("spell_summon_ribbon_pole_critter");
+    RegisterSpellScript<TorchToss>("spell_torch_toss");
+    RegisterAuraScript<BraziersHit>("spell_braziers_hit");
+    RegisterSpellScript<TorchTargetPicker>("spell_torch_target_picker");
 }

@@ -323,7 +323,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (45390,'spell_ribbon_pole_dancer_check_aura'),
 (45405,'spell_ribbon_pole_dancer_check'),
 (45407,'spell_reveler_applause_cheer'),
-(29708,'spell_summon_ribbon_pole_critter');
+(29708,'spell_summon_ribbon_pole_critter'),
+(46054,'spell_torch_toss'),
+(45724,'spell_braziers_hit'),
+(45907,'spell_torch_target_picker');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
