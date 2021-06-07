@@ -326,7 +326,10 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (29708,'spell_summon_ribbon_pole_critter'),
 (46054,'spell_torch_toss'),
 (45724,'spell_braziers_hit'),
-(45907,'spell_torch_target_picker');
+(45907,'spell_torch_target_picker'),
+(46747,'spell_fling_torch'),
+(45671,'spell_juggle_torch_catch_quest'),
+(45693,'spell_torches_caught');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

@@ -244,19 +244,19 @@ struct BraziersHit : public AuraScript
         Player* player = static_cast<Player*>(target);
         if (apply)
         {
-            if (aura->GetStackAmount() >= 8)
+            if (aura->GetStackAmount() >= 20)
             {
-                if (player->HasQuest(player->GetTeam() == HORDE ? 11922 : 11731))
+                if (player->IsCurrentQuest(player->GetTeam() == HORDE ? 11926 : 11921))
                 {
-                    player->AreaExploredOrEventHappens(player->GetTeam() == HORDE ? 11922 : 11731);
+                    player->AreaExploredOrEventHappens(player->GetTeam() == HORDE ? 11926 : 11921);
                     player->RemoveAurasDueToSpell(aura->GetId());
                 }
             }
-            else if (aura->GetStackAmount() >= 20)
+            else if (aura->GetStackAmount() >= 8)
             {
-                if (player->HasQuest(player->GetTeam() == HORDE ? 11926 : 11921))
+                if (player->IsCurrentQuest(player->GetTeam() == HORDE ? 11922 : 11731))
                 {
-                    player->AreaExploredOrEventHappens(player->GetTeam() == HORDE ? 11926 : 11921);
+                    player->AreaExploredOrEventHappens(player->GetTeam() == HORDE ? 11922 : 11731);
                     player->RemoveAurasDueToSpell(aura->GetId());
                 }
             }
@@ -284,6 +284,96 @@ struct TorchTargetPicker : public SpellScript
     }
 };
 
+struct FlignTorch : public SpellScript
+{
+    void OnDestTarget(Spell* spell) const override
+    {
+        float radius = 10.f;
+        radius *= sqrtf(rand_norm_f());
+        float angle = 2.0f * M_PI_F * rand_norm_f();
+        Unit* caster = spell->GetCaster();
+        Position pos = caster->GetPosition();
+        Position destPos = spell->m_targets.m_destPos;
+        caster->MovePositionToFirstCollision(pos, radius, angle);
+        if (destPos.GetDistance(pos) > 20 * 20)
+        {
+            angle = caster->GetAngle(destPos.x, destPos.y) + M_PI_F;
+            caster->MovePositionToFirstCollision(destPos, radius, angle);
+        }
+        spell->m_targets.setDestination(pos.x, pos.y, pos.z);
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        Unit* caster = spell->GetCaster();
+        Position pos = spell->m_targets.m_destPos;
+        caster->CastSpell(pos.x, pos.y, pos.z, 46105, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(pos.x, pos.y, pos.z, 45669, TRIGGERED_OLD_TRIGGERED | TRIGGERED_INSTANT_CAST);
+    }
+};
+
+struct JuggleTorchCatchQuest : public SpellScript
+{
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (spell->GetCaster() == target)
+            return true;
+
+        return false;
+    }
+
+    void OnCast(Spell* spell) const override
+    {
+        auto& targets = spell->GetTargetList();
+        if (targets.size() == 0) // failure
+        {
+            Unit* caster = spell->GetCaster();
+            Position pos = spell->m_targets.m_destPos;
+            caster->CastSpell(pos.x, pos.y, pos.z, 45676, TRIGGERED_OLD_TRIGGERED);
+            caster->RemoveAurasDueToSpell(45693);
+        }
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        spell->GetCaster()->CastSpell(spell->GetUnitTarget(), 45693, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct TorchesCaught : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        Unit* target = aura->GetTarget();
+        if (!target->IsPlayer())
+            return;
+
+        Player* player = static_cast<Player*>(target);
+        if (apply)
+        {
+            if (aura->GetStackAmount() >= 10)
+            {
+                if (player->IsCurrentQuest(player->GetTeam() == HORDE ? 11925 : 11924))
+                {
+                    player->AreaExploredOrEventHappens(player->GetTeam() == HORDE ? 11925 : 11924);
+                    player->RemoveAurasDueToSpell(aura->GetId());
+                    return;
+                }
+            }
+            else if (aura->GetStackAmount() >= 4)
+            {
+                if (player->IsCurrentQuest(player->GetTeam() == HORDE ? 11923 : 11657))
+                {
+                    player->AreaExploredOrEventHappens(player->GetTeam() == HORDE ? 11923 : 11657);
+                    player->RemoveAurasDueToSpell(aura->GetId());
+                    return;
+                }
+            }
+            player->CastSpell(nullptr, 46747, TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
 void AddSC_midsummer_festival()
 {
     Script* pNewScript = new Script;
@@ -307,4 +397,7 @@ void AddSC_midsummer_festival()
     RegisterSpellScript<TorchToss>("spell_torch_toss");
     RegisterAuraScript<BraziersHit>("spell_braziers_hit");
     RegisterSpellScript<TorchTargetPicker>("spell_torch_target_picker");
+    RegisterSpellScript<FlignTorch>("spell_fling_torch");
+    RegisterSpellScript<JuggleTorchCatchQuest>("spell_juggle_torch_catch_quest");
+    RegisterAuraScript<TorchesCaught>("spell_torches_caught");
 }
