@@ -207,8 +207,8 @@ struct PowerCircleAura : public AuraScript
     void OnApply(Aura* aura, bool apply) const
     {
         Unit* target = aura->GetTarget();
-        if (apply)
-            target->CastSpell(target, SPELL_LIMITLESS_POWER, TRIGGERED_OLD_TRIGGERED);
+        if (apply && target->GetObjectGuid() == aura->GetCasterGuid())
+            target->CastSpell(nullptr, SPELL_LIMITLESS_POWER, TRIGGERED_OLD_TRIGGERED);
         else
             target->RemoveAurasDueToSpell(SPELL_LIMITLESS_POWER);
     }
