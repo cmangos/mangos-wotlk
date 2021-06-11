@@ -180,6 +180,7 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
             case NPC_HIGHLORD_KRUUL:
             case NPC_AGENT_PROUDWELL:
             case NPC_FALSTAD_WILDHAMMER:
+            case NPC_SHORT_JOHN_MITHRIL:
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
             case NPC_DREADKNIGHT:
@@ -311,20 +312,25 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
 
     void OnEventHappened(uint16 event_id, bool activate, bool resume) override
     {
-        if (event_id != GAME_EVENT_BEFORE_THE_STORM)
-            return;
-
-        DespawnAdds();
-
-        if (activate && !resume)
+        if (event_id == GAME_EVENT_BEFORE_THE_STORM)
         {
-            ResetTimer(EVENT_SPAWN, 1000);
-            ResetTimer(EVENT_SPAWN_BOSS, 30000);
-            ResetTimer(EVENT_REINFORCEMENTS_NEEDED, 30000);
+            DespawnAdds();
+
+            if (activate && !resume)
+            {
+                ResetTimer(EVENT_SPAWN, 1000);
+                ResetTimer(EVENT_SPAWN_BOSS, 30000);
+                ResetTimer(EVENT_REINFORCEMENTS_NEEDED, 30000);
+            }
+            else
+            {
+                ResetAllTimers();
+            }
         }
-        else
+        else if (event_id == GAME_EVENT_GURUBASHI_ARENA && activate)
         {
-            ResetAllTimers();
+            if (Creature* creature = GetSingleCreatureFromStorage(NPC_SHORT_JOHN_MITHRIL))
+                creature->GetMotionMaster()->MoveWaypoint();
         }
     }
 
