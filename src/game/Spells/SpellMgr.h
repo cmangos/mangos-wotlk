@@ -699,6 +699,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 31332:         // Dire Wolf Visual
         case 31690:         // Putrid Mushroom
         case 31722:         // Immolation
+        case 31757:         // Pulverize
         case 31792:         // Bear Form (Shapeshift)
         case 32007:         // Mo'arg Engineer Transform Visual
         case 32064:         // Battle Shout
