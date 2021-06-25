@@ -34,8 +34,12 @@ struct Misdirection : public SpellScript
         // Patch 2.3.0 (2007-11-13):
         // Misdirection: If a Hunter attempts to use this ability on a target which already has an active Misdirection, the spell will fail to apply due to a more powerful spell already being in effect.
         if (Unit* target = spell->m_targets.getUnitTarget())
+        {
             if (target->HasAura(35079))
                 return SPELL_FAILED_AURA_BOUNCED;
+            if (target->IsMounted())
+                return SPELL_FAILED_NOT_ON_MOUNTED;
+        }
 
         return SPELL_CAST_OK;
     }
