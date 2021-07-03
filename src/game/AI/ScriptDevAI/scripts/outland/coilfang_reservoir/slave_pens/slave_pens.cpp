@@ -90,11 +90,6 @@ void instance_slave_pens::Update(const uint32 diff)
     }
 }
 
-InstanceData* GetInstanceData_instance_slave_pens(Map* map)
-{
-    return new instance_slave_pens(map);
-}
-
 /*######
 ## at_naturalist_bite
 ######*/
@@ -137,7 +132,7 @@ void AddSC_instance_slave_pens()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_slave_pens";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_slave_pens;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_slave_pens>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

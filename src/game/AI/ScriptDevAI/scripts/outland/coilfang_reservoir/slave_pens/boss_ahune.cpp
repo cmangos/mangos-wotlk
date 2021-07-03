@@ -264,11 +264,6 @@ struct boss_ahuneAI : public Scripted_NoMovementAI
     }
 };
 
-UnitAI* GetAI_boss_ahune(Creature* pCreature)
-{
-    return new boss_ahuneAI(pCreature);
-}
-
 /*######
 ## npc_frozen_core
 ######*/
@@ -309,11 +304,6 @@ struct npc_frozen_coreAI : public Scripted_NoMovementAI
     void MoveInLineOfSight(Unit* /*pWho*/) override { }
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
-
-UnitAI* GetAI_npc_frozen_core(Creature* pCreature)
-{
-    return new npc_frozen_coreAI(pCreature);
-}
 
 /*######
 ## npc_ice_spear_bunny
@@ -368,11 +358,6 @@ struct npc_ice_spear_bunnyAI : public Scripted_NoMovementAI
     void UpdateAI(const uint32 /*uiDiff*/) override { }
 };
 
-UnitAI* GetAI_npc_ice_spear_bunny(Creature* pCreature)
-{
-    return new npc_ice_spear_bunnyAI(pCreature);
-}
-
 bool EffectDummyCreature_npc_ice_spear_bunny(Unit* pCaster, uint32 uiSpellId, SpellEffectIndex uiEffIndex, Creature* pCreatureTarget, ObjectGuid /*originalCasterGuid*/)
 {
     // always check spellid and effectindex
@@ -392,17 +377,17 @@ void AddSC_boss_ahune()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_ahune";
-    pNewScript->GetAI = &GetAI_boss_ahune;
+    pNewScript->GetAI = &GetNewAIInstance<boss_ahuneAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_frozen_core";
-    pNewScript->GetAI = &GetAI_npc_frozen_core;
+    pNewScript->GetAI = &GetNewAIInstance<npc_frozen_coreAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;
     pNewScript->Name = "npc_ice_spear_bunny";
-    pNewScript->GetAI = &GetAI_npc_ice_spear_bunny;
+    pNewScript->GetAI = &GetNewAIInstance<npc_ice_spear_bunnyAI>;
     pNewScript->pEffectDummyNPC = &EffectDummyCreature_npc_ice_spear_bunny;
     pNewScript->RegisterSelf();
 }
