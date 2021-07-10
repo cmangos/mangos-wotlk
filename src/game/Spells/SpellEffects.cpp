@@ -12567,17 +12567,46 @@ void Spell::EffectSpiritHeal(SpellEffectIndex /*eff_idx*/)
 void Spell::EffectSkinPlayerCorpse(SpellEffectIndex /*eff_idx*/)
 {
     DEBUG_LOG("Effect: SkinPlayerCorpse");
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+    Player* playerCaster = m_caster->IsPlayer() ? (Player*)m_caster : nullptr;
+    if (!playerCaster)
         return;
 
-    if (!unitTarget && !corpseTarget)
-        return;
+    Unit* target = unitTarget;
+    if (!target && corpseTarget)
+        target = sObjectAccessor.FindPlayer(corpseTarget->GetOwnerGuid());
 
-    if (unitTarget)
-        static_cast<Player*>(unitTarget)->RemovedInsignia(static_cast<Player*>(m_caster));
-    if (corpseTarget) // thread safe because all must be in same battleground map
-        if (Player* player = m_caster->GetMap()->GetPlayer(corpseTarget->GetOwnerGuid()))
-            player->RemovedInsignia(static_cast<Player*>(m_caster));
+    if (!target)
+    {
+        Corpse* bones = sObjectAccessor.ConvertCorpseForPlayer(corpseTarget->GetOwnerGuid(), true);
+        if (!bones)
+            return;
+
+        // Now we must make bones lootable, and send player loot
+        bones->SetFlag(CORPSE_FIELD_DYNAMIC_FLAGS, CORPSE_DYNFLAG_LOOTABLE);
+
+        // We store the level of our player in the gold field
+        // We retrieve this information at Player::SendLoot()
+        bones->lootRecipient = playerCaster;
+
+        Loot*& bonesLoot = bones->m_loot;
+        if (!bonesLoot)
+            bonesLoot = new Loot(playerCaster, bones, LOOT_INSIGNIA);
+        else
+        {
+            if (bonesLoot->GetLootType() != LOOT_INSIGNIA)
+            {
+                delete bonesLoot;
+                bonesLoot = new Loot(playerCaster, bones, LOOT_INSIGNIA);
+            }
+        }
+
+        bonesLoot->ShowContentTo(playerCaster);
+
+        DEBUG_LOG("Effect SkinPlayerCorpse: corpse owner was not found");
+        return;
+    }
+
+    static_cast<Player*>(target)->RemovedInsignia(static_cast<Player*>(m_caster));
 }
 
 void Spell::EffectStealBeneficialBuff(SpellEffectIndex eff_idx)
