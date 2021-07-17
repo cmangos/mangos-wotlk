@@ -294,9 +294,9 @@ namespace Movement
                         {
                             // New cycle should preserve previous cycle's duration for some weird reason, even though
                             // the path is really different now. Developers are weird. Or this was just a simple oversight.
-                            // Since our splines precalculate length with velocity in mind, if we want to find the desired
-                            // velocity, we have to make a fake spline, calculate its duration and then compare it to the
-                            // desired duration, thus finding out how much the velocity has to be increased for them to match.
+                            // Since our splines precalculate length with zspeed in mind, if we want to find the desired
+                            // zspeed, we have to make a fake spline, calculate its duration and then compare it to the
+                            // desired duration, thus finding out how much the zspeed has to be increased for them to match.
                             MoveSpline tempSpline;
                             tempSpline.Initialize(args);
                             args.velocity = (float)tempSpline.Duration() / Duration();
