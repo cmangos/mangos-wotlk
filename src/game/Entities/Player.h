@@ -2479,6 +2479,9 @@ class Player : public Unit
         void ClearQueuedSpell();
         void CastQueuedSpell(SpellCastTargets& targets);
     protected:
+
+        uint32 m_foodEmoteTimerCount;
+
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/

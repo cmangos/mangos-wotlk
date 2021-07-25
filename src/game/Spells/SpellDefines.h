@@ -42,4 +42,10 @@ enum TriggerCastFlags : uint32
     TRIGGERED_FULL_MASK                         = 0xFFFFFFFF
 };
 
+enum SpellVisualKit
+{
+    SPELL_VISUAL_KIT_FOOD           = 406,
+    SPELL_VISUAL_KIT_DRINK          = 438
+};
+
 #endif

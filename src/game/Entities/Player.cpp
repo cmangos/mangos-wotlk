@@ -505,6 +505,7 @@ Player::Player(WorldSession* session): Unit(), m_taxiTracker(*this), m_mover(thi
     m_questRewardTalentCount = 0;
 
     m_regenTimer = 0;
+    m_foodEmoteTimerCount = 0;
     m_weaponChangeTimer = 0;
 
     m_zoneUpdateId = 0;
@@ -2401,6 +2402,39 @@ void Player::RegenerateAll(uint32 diff)
         Regenerate(POWER_RUNE, regenDiff);
 
     m_regenTimer = REGEN_TIME_FULL;
+
+    m_foodEmoteTimerCount += m_regenTimer;
+
+    // Handles the emotes for drinking and eating.
+    // According to sniffs there is a background timer going on that repeats independently from the time window where the aura applies.
+    // That's why we dont need to reset the timer on apply. In sniffs I have seen that the first call for the spell visual is totally random, then after
+    // 5 seconds over and over again which confirms my theory that we have an independent timer.
+    if (m_foodEmoteTimerCount >= 5000)
+    {
+        std::vector<Aura*> auraList;
+        AuraList const& ModRegenAuras = GetAurasByType(SPELL_AURA_MOD_REGEN);
+        AuraList const& ModPowerRegenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
+
+        auraList.reserve(ModRegenAuras.size() + ModPowerRegenAuras.size());
+        auraList.insert(auraList.end(), ModRegenAuras.begin(), ModRegenAuras.end());
+        auraList.insert(auraList.end(), ModPowerRegenAuras.begin(), ModPowerRegenAuras.end());
+
+        for (auto itr = auraList.begin(); itr != auraList.end(); ++itr)
+        {
+            // Food emote comes above drinking emote if we have to decide (mage regen food for example)
+            if ((*itr)->GetSpellProto()->EffectApplyAuraName[(*itr)->GetEffIndex()] == SPELL_AURA_MOD_REGEN && (*itr)->GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
+            {
+                PlaySpellVisual(SPELL_VISUAL_KIT_FOOD);
+                break;
+            }
+            else if ((*itr)->GetSpellProto()->EffectApplyAuraName[(*itr)->GetEffIndex()] == SPELL_AURA_MOD_POWER_REGEN && (*itr)->GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
+            {
+                PlaySpellVisual(SPELL_VISUAL_KIT_DRINK);
+                break;
+            }
+        }
+        m_foodEmoteTimerCount -= 5000;
+    }
 }
 
 void Player::Regenerate(Powers power, uint32 diff)
