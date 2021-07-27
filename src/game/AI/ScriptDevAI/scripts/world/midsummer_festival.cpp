@@ -93,6 +93,12 @@ enum
     SPELL_RIBBON_POLE_FIREWORK_LAUNCHER_AURA = 46830,
 
     SPELL_HOLIDAY_MIDSUMMER_RIBBON_POLE_PERIODIC_VISUAL = 45406,
+
+    NPC_FIRE_EATER = 25962,
+
+    NPC_FLAME_EATER = 25994,
+
+    RELAY_SCRIPT_ID_DELAY_RESET_ORIENTATION = 10204,
 };
 
 struct TestRibbonPoleChannelTrigger : public SpellScript
@@ -134,10 +140,22 @@ struct RevelerApplauseCheer : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
-        if (!spell->GetUnitTarget())
-            return;
+        if (Unit* target = spell->GetUnitTarget())
+        {
+            if (Unit* caster = spell->GetCaster())
+            {
+                if (caster->GetEntry() == NPC_FIRE_EATER || caster->GetEntry() == NPC_FLAME_EATER)
+                {
+                    caster->SetFacingToObject(spell->GetUnitTarget());
+                    target->SetFacingToObject(caster);
+                    caster->GetMap()->ScriptsStart(sRelayScripts, RELAY_SCRIPT_ID_DELAY_RESET_ORIENTATION, caster, caster);
+                    target->GetMap()->ScriptsStart(sRelayScripts, RELAY_SCRIPT_ID_DELAY_RESET_ORIENTATION, target, target);
+                    caster->HandleEmote(EMOTE_ONESHOT_BOW);
+                }
+            }
 
-        spell->GetUnitTarget()->HandleEmote(urand(0, 1) ? 71 : 21);
+            target->HandleEmote(urand(0, 1) ? EMOTE_ONESHOT_CHEER_NOSHEATHE : EMOTE_ONESHOT_APPLAUD);
+        }
     }
 };
 
