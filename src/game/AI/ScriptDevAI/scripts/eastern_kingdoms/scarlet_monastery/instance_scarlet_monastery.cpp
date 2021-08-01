@@ -59,6 +59,7 @@ void instance_scarlet_monastery::OnCreatureCreate(Creature* pCreature)
             m_sAshbringerFriendlyGuids.insert(pCreature->GetObjectGuid());
             break;
         case NPC_VORREL:
+        case NPC_HEADLESS_HORSEMAN_EARTHQUAKE_BUNNY:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
     }

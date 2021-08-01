@@ -240,7 +240,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (41951,'spell_supremus_random_target'),
 (34438,'spell_unstable_affliction'),
 (34439,'spell_unstable_affliction'),
-(35183,'spell_unstable_affliction');
+(35183,'spell_unstable_affliction'),
+(42399,'spell_send_head'),
+(43101,'spell_head_requests_body');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

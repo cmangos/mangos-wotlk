@@ -36,6 +36,8 @@ enum
     NPC_ABBOT       = 4303,
     NPC_MONK        = 4540,
     NPC_FAIRBANKS   = 4542,
+
+    NPC_HEADLESS_HORSEMAN_EARTHQUAKE_BUNNY = 23758,
 };
 
 class instance_scarlet_monastery : public ScriptedInstance
