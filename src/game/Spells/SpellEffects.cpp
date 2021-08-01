@@ -9660,30 +9660,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                     unitTarget->RemoveAurasDueToSpell(44226);
                     return;
                 }
-                case 42399:                                 // Headless Horseman Climax - Send Head
-                {
-                    if (unitTarget->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    Creature* creatureTarget = static_cast<Creature*>(unitTarget);
-
-                    if (creatureTarget->GetEntry() == 23775)
-                        creatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_caster, creatureTarget);
-
-                    return;
-                }
-                case 43101:                                 // Headless Horseman Climax - Command, Head Requests Body
-                {
-                    if (unitTarget->GetTypeId() != TYPEID_UNIT)
-                        return;
-
-                    Creature* creatureTarget = static_cast<Creature*>(unitTarget);
-
-                    if (creatureTarget->GetEntry() == 23682)
-                        creatureTarget->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_caster, creatureTarget);
-
-                    return;
-                }
                 case 42492:                                 // Cast Energized
                 {
                     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
