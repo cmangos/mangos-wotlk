@@ -548,7 +548,7 @@ void WorldState::HandlePlayerLeaveArea(Player* player, uint32 areaId)
 bool WorldState::IsConditionFulfilled(uint32 conditionId, uint32 state) const
 {
     if (conditionId == WAR_EFFORT_DAYS_LEFT)
-        return uint32(m_aqData.m_timer / DAY * IN_MILLISECONDS) == state;
+        return m_aqData.GetDaysRemaining() == state;
 
     return m_transportStates.at(conditionId) == state;
 }
@@ -909,6 +909,12 @@ void WorldState::HandleWarEffortPhaseTransition(uint32 newPhase)
         case PHASE_2_TRANSPORTING_RESOURCES:
             m_aqData.m_phase = PHASE_2_TRANSPORTING_RESOURCES;
             m_aqData.m_timer = 5 * DAY * IN_MILLISECONDS;
+            {
+                std::lock_guard<std::mutex> guard(m_aqData.m_warEffortMutex);
+                for (ObjectGuid& guid : m_aqData.m_warEffortWorldstatesPlayers)
+                    if (Player* player = sObjectMgr.GetPlayer(guid))
+                        player->SendUpdateWorldState(WORLD_STATE_AQ_DAYS_LEFT, m_aqData.GetDaysRemaining());
+            }
             break;
         case PHASE_4_10_HOUR_WAR:
             m_aqData.m_phase = PHASE_4_10_HOUR_WAR;
@@ -1207,6 +1213,11 @@ std::string AhnQirajData::GetData()
         output += " " + std::to_string(value);
     output += " " + std::to_string(m_phase2Tier);
     return output;
+}
+
+uint32 AhnQirajData::GetDaysRemaining() const
+{
+    return uint32(m_timer / (DAY * IN_MILLISECONDS));
 }
 
 // Highlord Kruul
@@ -1820,7 +1831,7 @@ void WorldState::FillInitialWorldStates(ByteBuffer& data, uint32& count, uint32 
                     FillInitialWorldStateData(data, count, m_aqData.m_WarEffortCounters[(*itr).first], (*itr).second);
             }
             else if (m_aqData.m_phase == PHASE_2_TRANSPORTING_RESOURCES)
-                FillInitialWorldStateData(data, count, WORLD_STATE_AQ_DAYS_LEFT, uint32(m_aqData.m_timer / DAY * IN_MILLISECONDS));
+                FillInitialWorldStateData(data, count, WORLD_STATE_AQ_DAYS_LEFT, m_aqData.GetDaysRemaining());
             break;
         }
         case ZONEID_ISLE_OF_QUEL_DANAS:
