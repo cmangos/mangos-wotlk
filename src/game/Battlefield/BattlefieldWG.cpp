@@ -109,10 +109,10 @@ void BattlefieldWG::Reset()
         if (GetDefender() && GetDefender() != TEAM_NONE)
         {
             goState = GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT;
-            SetGraveYardLinkTeam(i.graveyardId, ZONE_ID_WINTERGRASP, GetDefender(), 571);
+            SetGraveYardLinkTeam(i.graveyardId, ZONE_ID_WINTERGRASP, GetDefender(), { 571 });
         }
         else
-            SetGraveYardLinkTeam(i.graveyardId, ZONE_ID_WINTERGRASP, TEAM_INVALID, 571);
+            SetGraveYardLinkTeam(i.graveyardId, ZONE_ID_WINTERGRASP, TEAM_INVALID, { 571 });
 
         factory->SetGoState(goState);
         factory->SetOwner(GetDefender());
@@ -135,10 +135,10 @@ void BattlefieldWG::Reset()
             Team comparableTeam = i.workshopEntry == GO_WORKSHOP_BROKEN_TEMPLE || i.workshopEntry == GO_WORKSHOP_SUNKEN_RING ? GetDefender() : GetAttacker();
             goState = comparableTeam == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT;
 
-            SetGraveYardLinkTeam(i.graveyardId, ZONE_ID_WINTERGRASP, comparableTeam, 571);
+            SetGraveYardLinkTeam(i.graveyardId, ZONE_ID_WINTERGRASP, comparableTeam, { 571 });
         }
         else
-            SetGraveYardLinkTeam(i.graveyardId, ZONE_ID_WINTERGRASP, TEAM_INVALID, 571);
+            SetGraveYardLinkTeam(i.graveyardId, ZONE_ID_WINTERGRASP, TEAM_INVALID, { 571 });
 
         factory->SetGoState(goState);
         factory->SetOwner(comparableTeam);
@@ -594,7 +594,7 @@ bool BattlefieldWG::HandleCapturePointEvent(uint32 eventId, GameObject* go)
                         SetBannerVisual(go, wgCapturePointEventData[index][i].bannerArtKit, wgCapturePointEventData[index][i].bannerAnim);
 
                     // update graveyard links
-                    SetGraveYardLinkTeam(workshop->GetGraveyardId(), ZONE_ID_WINTERGRASP, wgCapturePointEventData[index][i].team, 571);
+                    SetGraveYardLinkTeam(workshop->GetGraveyardId(), ZONE_ID_WINTERGRASP, wgCapturePointEventData[index][i].team, { 571 });
 
                     // change area phasing
                     // ToDo: needs to be enabled when phase stacking is supported
@@ -905,7 +905,7 @@ void BattlefieldWG::GetBattlefieldReady(const WorldObject* objRef)
         workshop->SetOwner(GetDefender());
         workshop->SetGoState(GetDefender() == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
         SendUpdateWorldState(workshop->GetWorldState(), workshop->GetGoState());
-        SetGraveYardLinkTeam(workshop->GetGraveyardId(), ZONE_ID_WINTERGRASP, GetDefender(), 571);
+        SetGraveYardLinkTeam(workshop->GetGraveyardId(), ZONE_ID_WINTERGRASP, GetDefender(), { 571 });
 
         ++m_workshopCount[GetTeamIndexByTeamId(GetDefender())];
     }
@@ -916,7 +916,7 @@ void BattlefieldWG::GetBattlefieldReady(const WorldObject* objRef)
         workshop->SetOwner(owner);
         workshop->SetGoState(owner == ALLIANCE ? BF_GO_STATE_ALLIANCE_INTACT : BF_GO_STATE_HORDE_INTACT);
         SendUpdateWorldState(workshop->GetWorldState(), workshop->GetGoState());
-        SetGraveYardLinkTeam(workshop->GetGraveyardId(), ZONE_ID_WINTERGRASP, owner, 571);
+        SetGraveYardLinkTeam(workshop->GetGraveyardId(), ZONE_ID_WINTERGRASP, owner, { 571 });
 
         ++m_workshopCount[GetTeamIndexByTeamId(owner)];
 
@@ -977,7 +977,7 @@ void BattlefieldWG::GetBattlefieldReady(const WorldObject* objRef)
     }
 
     // unlink fortress graveyard
-    SetGraveYardLinkTeam(GRAVEYARD_ID_FORTRESS_INDOOR, ZONE_ID_WINTERGRASP, TEAM_INVALID, 571);
+    SetGraveYardLinkTeam(GRAVEYARD_ID_FORTRESS_INDOOR, ZONE_ID_WINTERGRASP, TEAM_INVALID, { 571 });
 
     // ***** Update general stated **** //
     SendUpdateGeneralWorldStates();
@@ -1013,7 +1013,7 @@ void BattlefieldWG::CleanupBattlefield(const WorldObject* objRef, Team winner)
     // BuffTeam(GetDefender(), SPELL_ESSENCE_WINTERGRASP_ZONE);
 
     // link fortress graveyard
-    SetGraveYardLinkTeam(GRAVEYARD_ID_FORTRESS_INDOOR, ZONE_ID_WINTERGRASP, winner, 571);
+    SetGraveYardLinkTeam(GRAVEYARD_ID_FORTRESS_INDOOR, ZONE_ID_WINTERGRASP, winner, { 571 });
 
     // ***** Reset creatures **** //
     // despawn cannons

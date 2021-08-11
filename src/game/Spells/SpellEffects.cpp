@@ -2594,7 +2594,7 @@ void Spell::EffectDummy(SpellEffectIndex eff_idx)
                     pCreature->ForcedDespawn(m_duration);
 
                     // EFFECT_INDEX_2 has 0 miscvalue for effect 134, doing the killcredit here instead (only one known case exist where 0)
-                    ((Player*)m_caster)->KilledMonster(pCreature->GetCreatureInfo(), pCreature->GetObjectGuid());
+                    ((Player*)m_caster)->KilledMonster(pCreature->GetCreatureInfo(), pCreature);
                     return;
                 }
                 case 43014:                                 // Despawn Self
