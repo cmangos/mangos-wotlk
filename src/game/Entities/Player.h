@@ -2823,6 +2823,9 @@ class Player : public Unit
 void AddItemsSetItem(Player* player, Item* item);
 void RemoveItemsSetItem(Player* player, ItemPrototype const* proto);
 
+// Spellmods TODO - remove this include
+#include "Spells/SpellAuras.h"
+
 template <class T> void Player::ApplySpellMod(uint32 spellId, SpellModOp op, T& basevalue, bool finalUse)
 {
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(spellId);
