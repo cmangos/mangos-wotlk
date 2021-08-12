@@ -2230,7 +2230,7 @@ struct npc_eagle_trash_aggro_triggerAI : public ScriptedAI
             return;
 
         Player* player = static_cast<Player*>(who);
-        if (player->isGameMaster())
+        if (player->IsGameMaster())
             return;
 
         if (m_instance->IsAkilzonGauntletInProgress())
