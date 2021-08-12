@@ -11181,7 +11181,7 @@ void PlayerbotAI::_HandleCommandQuest(std::string& text, Player& fromPlayer)
                         {
                             if (CreatureInfo const* cInfo = ObjectMgr::GetCreatureTemplate(creature))
                                 for (uint16 z = 0; z < creaturecount; ++z)
-                                    groupMember->KilledMonster(cInfo, ObjectGuid());
+                                    groupMember->KilledMonster(cInfo, nullptr);
                         }
                         else if (creature < 0)
                         {
