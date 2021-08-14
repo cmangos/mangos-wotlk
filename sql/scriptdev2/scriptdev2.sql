@@ -4733,6 +4733,40 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1540049','The Alliance dares to intrude this far into my fortress? Bring out the Honor Hold prisoners and call for the executioner! They''ll pay with their lives for this trespass!','0','6','0','0','0','kargath SAY_EXECUTE_ALLY'),
 ('-1540050','It looks like we have a ranking officer among our captives...how amusing. Execute the green-skinned dog at once!','0','6','0','0','0','kargath SAY_EXECUTE_HORDE');
 
+('-1540051','Invaders have breached the defenses!','10285','6','0','0','14309','Gauntlet of fire yell 1'),
+('-1540052','Archers, form ranks! On my mark!','10156','6','0','0','14310','Gauntlet of fire yell 2'),
+('-1540053','Ready!','10157','6','0','0','14311','Gauntlet of fire yell 3'),
+('-1540054','Aim!','10158','6','0','0','17910','Gauntlet of fire yell 4'),
+('-1540055','Fire!','10159','6','0','0','17911','Gauntlet of fire yell 5'),
+
+('-1540066', '%s goes into a rage after seeing a friend fall in battle!', '0', '2', '0', '0', '1151', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- Emote
+('-1540059', 'Fighter down!', '10172', '1', '0', '5', '16356', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10197,10222
+('-1540061', 'Replacement, quickly!', '10173', '1', '0', '5', '16357', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10198,10223
+('-1540057', 'Next warrior, now!', '10174', '1', '0', '5', '16358', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10199,10224
+('-1540065', 'Fall in! Mok-thora ka!', '10175', '1', '0', '5', '16359', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10200,10225
+('-1540060', 'Where''s my support?', '10176', '1', '0', '5', '16360', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10201,10226
+('-1540062', 'Look Alive!', '10177', '1', '0', '5', 'XXX', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10202,10227
+('-1540063', 'Engage the enemy!', '10178', '1', '0', '5', 'XXX', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10203,10228
+('-1540064', 'Attack!', '10179', '1', '0', '5', 'XXX', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10204,10229
+('-1540058', 'Next warrior, step up!', '10180', '1', '0', '5', '16361', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10205,10230
+('-1540056', 'Join the fight! Agrama-ka!', '10181', '1', '0', '5', '16362', 'Shattered Hand Legionnaire - Call for Reinforcements'); -- sound.10206,10231
+-- Unused
+-- ('-XXX', 'Wake up, we''re under attack!', '10182', '1', '0', '5', '16363', 'Shattered Hand Legionnaire - Call for Sleeping Reinforcements'), -- sound.10207,10232
+-- ('-XXX', 'Sleep on your own time!', '10183', '1', '0', '5', '16364', 'Shattered Hand Legionnaire - Call for Sleeping Reinforcements'), -- sound.10208,10233
+-- ('-XXX', 'Get up!', '10184', '1', '0', '5', '16365', 'Shattered Hand Legionnaire - Call for Sleeping Reinforcements'), -- sound.10209,10234
+-- ('-XXX', 'On your feet!', '10185', '1', '0', '5', '16366', 'Shattered Hand Legionnaire - Call for Sleeping Reinforcements'), -- sound.10210,10235
+-- ('-XXX', 'No time for slumber! Join the fight!', '10186', '1', '0', '5', '16367', 'Shattered Hand Legionnaire - Call for Sleeping Reinforcements'), -- sound.10211,10236
+-- ('-XXX', 'Line up and crush these fools!', '10187', '1', '0', '5', '16346', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10212,10237
+-- ('-XXX', 'Form up! Let''s make quick work of them!', '10188', '1', '0', '5', '16347', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10213,10238
+-- ('-XXX', 'Get ready! This shouldn''t take long...', '10189', '1', '0', '5', '16349', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10214,10239
+-- ('-XXX', 'Form ranks and make the intruders pay!', '10190', '1', '0', '5', '17461', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10215,10240
+-- ('-XXX', 'Show them no quarter! Form up!', '10191', '1', '0', '5', '16350', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10216,10241
+-- ('-XXX', 'Lok-Narash! Defensive positions!', '10192', '1', '0', '5', '16352', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10217,10242
+-- ('-XXX', 'Hold the line! They must not get through!', '10193', '1', '0', '5', '16353', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10218,10243
+-- ('-XXX', 'Gakarah ma!', '10194', '1', '0', '5', '16354', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10219,10244
+-- ('-XXX', 'Hold them back at all costs!', '10195', '1', '0', '5', '17462', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10220,10245
+-- ('-XXX', 'We must halt their advance! Take your positions!', '10196', '1', '0', '5', '16355', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10221,10246
+
 -- -1 542 000 BLOOD FURNACE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES
 ('-1542000','Who dares interrupt--What is this; what have you done? You''ll ruin everything!','10164','1','0','0','15130','kelidan SAY_WAKE'),
