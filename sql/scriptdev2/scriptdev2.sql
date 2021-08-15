@@ -4739,17 +4739,18 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 ('-1540054','Aim!','10158','6','0','0','17910','Gauntlet of fire yell 4'),
 ('-1540055','Fire!','10159','6','0','0','17911','Gauntlet of fire yell 5'),
 
-('-1540066', '%s goes into a rage after seeing a friend fall in battle!', '0', '2', '0', '0', '1151', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- Emote
-('-1540059', 'Fighter down!', '10172', '1', '0', '5', '16356', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10197,10222
-('-1540061', 'Replacement, quickly!', '10173', '1', '0', '5', '16357', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10198,10223
-('-1540057', 'Next warrior, now!', '10174', '1', '0', '5', '16358', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10199,10224
-('-1540065', 'Fall in! Mok-thora ka!', '10175', '1', '0', '5', '16359', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10200,10225
+('-1540056', 'Fighter down!', '10172', '1', '0', '5', '16356', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10197,10222
+('-1540057', 'Replacement, quickly!', '10173', '1', '0', '5', '16357', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10198,10223
+('-1540058', 'Next warrior, now!', '10174', '1', '0', '5', '16358', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10199,10224
+('-1540059', 'Fall in! Mok-thora ka!', '10175', '1', '0', '5', '16359', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10200,10225
 ('-1540060', 'Where''s my support?', '10176', '1', '0', '5', '16360', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10201,10226
-('-1540062', 'Look Alive!', '10177', '1', '0', '5', 'XXX', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10202,10227
-('-1540063', 'Engage the enemy!', '10178', '1', '0', '5', 'XXX', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10203,10228
-('-1540064', 'Attack!', '10179', '1', '0', '5', 'XXX', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10204,10229
-('-1540058', 'Next warrior, step up!', '10180', '1', '0', '5', '16361', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10205,10230
-('-1540056', 'Join the fight! Agrama-ka!', '10181', '1', '0', '5', '16362', 'Shattered Hand Legionnaire - Call for Reinforcements'); -- sound.10206,10231
+('-1540061', 'Look Alive!', '10177', '1', '0', '5', 'XXX', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10202,10227
+('-1540062', 'Engage the enemy!', '10178', '1', '0', '5', 'XXX', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10203,10228
+('-1540063', 'Attack!', '10179', '1', '0', '5', 'XXX', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10204,10229
+('-1540064', 'Next warrior, step up!', '10180', '1', '0', '5', '16361', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10205,10230
+('-1540065', 'Join the fight! Agrama-ka!', '10181', '1', '0', '5', '16362', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- sound.10206,10231
+('-1540066', '%s goes into a rage after seeing a friend fall in battle!', '0', '2', '0', '0', '1151', 'Shattered Hand Legionnaire - Call for Reinforcements'), -- Emote
+
 -- Unused
 -- ('-XXX', 'Wake up, we''re under attack!', '10182', '1', '0', '5', '16363', 'Shattered Hand Legionnaire - Call for Sleeping Reinforcements'), -- sound.10207,10232
 -- ('-XXX', 'Sleep on your own time!', '10183', '1', '0', '5', '16364', 'Shattered Hand Legionnaire - Call for Sleeping Reinforcements'), -- sound.10208,10233
@@ -4766,6 +4767,14 @@ INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadc
 -- ('-XXX', 'Gakarah ma!', '10194', '1', '0', '5', '16354', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10219,10244
 -- ('-XXX', 'Hold them back at all costs!', '10195', '1', '0', '5', '17462', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10220,10245
 -- ('-XXX', 'We must halt their advance! Take your positions!', '10196', '1', '0', '5', '16355', 'Shattered Hand Legionnaire - Positioning Call'), -- sound.10221,10246
+
+('-1540200','The blood is our power!','0','0','1','0','16700','Common Hellfire Orc Text'),
+('-1540201','Lok narash!','0','0','0','0','16703','Common Hellfire Orc Text'),
+('-1540202','For Kargath!  For Victory!','0','0','0','0','16698','Common Hellfire Orc Text'),
+('-1540203','Lok''tar Illadari!','0','0','0','0','16701','Common Hellfire Orc Text'),
+('-1540204','This world is OURS!','0','0','0','0','16702','Common Hellfire Orc Text'),
+('-1540205','We are the true Horde!','0','0','0','0','16697','Common Hellfire Orc Text'),
+('-1540206','Gakarah ma!','0','0','0','0','16699','Common Hellfire Orc Text');
 
 -- -1 542 000 BLOOD FURNACE
 INSERT INTO script_texts (entry,content_default,sound,type,language,emote,broadcast_text_id,comment) VALUES

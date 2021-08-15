@@ -314,6 +314,8 @@ struct boss_grand_warlock_nethekurseAI : public ScriptedAI
     }
 };
 
+static const int32 aRandomAggro[] = { -1540200, -1540201, -1540202, -1540203, -1540204, -1540205, -1540206 };
+
 struct mob_fel_orc_convertAI : public ScriptedAI
 {
     mob_fel_orc_convertAI(Creature* pCreature) : ScriptedAI(pCreature)
@@ -346,6 +348,9 @@ struct mob_fel_orc_convertAI : public ScriptedAI
 
     void Aggro(Unit* pWho) override
     {
+        if (urand(0, 4) == 4)
+            DoScriptText(aRandomAggro[urand(0, 6)], m_creature);
+
         if (m_pInstance)
         {
             Creature* pKurse = m_pInstance->GetSingleCreatureFromStorage(NPC_NETHEKURSE);
