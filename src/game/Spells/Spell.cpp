@@ -358,7 +358,7 @@ void SpellLog::Initialize()
 {
     m_spellLogData.Initialize(SMSG_SPELLLOGEXECUTE);
     //m_spellLogData << m_spell->GetCaster()->GetPackGUID();
-    m_spellLogData.appendPackGUID(m_spell->GetCaster()->GetObjectGuid().GetRawValue());
+    m_spellLogData.appendPackGUID(m_spell->GetTrueCaster()->GetObjectGuid().GetRawValue());
     m_spellLogData << uint32(m_spell->m_spellInfo->Id);
     m_spellLogDataEffectsCounterPos = m_spellLogData.wpos();
     m_spellLogData << uint32(0);                            //placeholder
