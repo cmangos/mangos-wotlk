@@ -1204,9 +1204,26 @@ struct WondervoltTrap : public SpellScript
     {
         if (effIdx == EFFECT_INDEX_0)
         {
-            uint32 spells[4] = {26272, 26157, 26273, 26274};    // Four possible transform spells
-            if (spell->GetUnitTarget())
-                spell->GetUnitTarget()->CastSpell(spell->GetUnitTarget(), spells[urand(0, 3)], TRIGGERED_OLD_TRIGGERED);
+            if (Unit* target = spell->GetUnitTarget())
+            {
+                if (WorldObject* source = spell->GetCastingObject())
+                    if (!source->IsWithinDist(target, 1.0f))
+                        return;
+
+                if (spell->GetUnitTarget()->getGender() == GENDER_MALE)
+                {
+                    target->RemoveAurasDueToSpell(26157);
+                    target->RemoveAurasDueToSpell(26273);
+                    target->CastSpell(target, urand(0, 1) ? 26157 : 26273, TRIGGERED_OLD_TRIGGERED);
+                }
+                else
+                {
+                    target->RemoveAurasDueToSpell(26272);
+                    target->RemoveAurasDueToSpell(26274);
+                    target->CastSpell(target, urand(0, 1) ? 26272 : 26274, TRIGGERED_OLD_TRIGGERED);
+                }
+            }
+            return;
         }
     }
 };
