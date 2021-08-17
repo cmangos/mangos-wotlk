@@ -104,9 +104,10 @@ void WorldSession::HandleMoveWorldportAckOpcode()
         }
     }
 
+    Difficulty diff = GetPlayer()->GetGroup() ? GetPlayer()->GetGroup()->GetDifficulty(mEntry->IsRaid()) : GetPlayer()->GetDifficulty(mEntry->IsRaid());
     uint32 miscRequirement = 0;
     if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(loc.mapid))
-        if (AREA_LOCKSTATUS_OK != GetPlayer()->GetAreaTriggerLockStatus(at, map->GetDifficulty(), miscRequirement))
+        if (AREA_LOCKSTATUS_OK != GetPlayer()->GetAreaTriggerLockStatus(at, diff, miscRequirement))
             returnHomeFunc();
 
     InstanceTemplate const* mInstance = ObjectMgr::GetInstanceTemplate(loc.mapid);
