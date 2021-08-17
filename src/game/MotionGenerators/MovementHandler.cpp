@@ -348,9 +348,18 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
         return;
     }
 
+    Unit* mover = _player->GetMover();
+
+    if (!ProcessMovementInfo(movementInfo, mover, _player, recv_data))
+        return;
+
     if (opcode == CMSG_MOVE_SET_COLLISION_HGT_ACK)
     {
-        // TODO: Send MSG_MOVE_SET_COLLISION_HGT
+        WorldPacket data(MSG_MOVE_SET_COLLISION_HGT, 18);
+        data << guid.WriteAsPacked();
+        data << movementInfo;
+        data << newspeed; // new collision height
+        mover->SendMessageToSetExcept(data, _player);
         return;
     }
 
@@ -378,11 +387,6 @@ void WorldSession::HandleForceSpeedChangeAckOpcodes(WorldPacket& recv_data)
             sLog.outError("WorldSession::HandleForceSpeedChangeAck: Unknown move type opcode: %u", opcode);
             return;
     }
-
-    Unit* mover = _player->GetMover();
-
-    if (!ProcessMovementInfo(movementInfo, mover, _player, recv_data))
-        return;
 
     const SpeedOpcodePair& speedOpcodes = SetSpeed2Opc_table[move_type];
     WorldPacket data(speedOpcodes[2], 18);

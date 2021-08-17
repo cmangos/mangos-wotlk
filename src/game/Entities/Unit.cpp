@@ -12834,13 +12834,16 @@ void Unit::DisableSpline()
 
 void Unit::SendCollisionHeightUpdate(float height)
 {
-    if (GetTypeId() == TYPEID_PLAYER)
+    if (IsClientControlled())
     {
-        WorldPacket data(SMSG_MOVE_SET_COLLISION_HGT, GetPackGUID().size() + 4 + 4);
-        data << GetPackGUID();
-        data << uint32(sWorld.GetGameTime());
-        data << height;
-        ((Player*)this)->GetSession()->SendPacket(data);
+        if (Player const* player = GetControllingPlayer())
+        {
+            WorldPacket data(SMSG_MOVE_SET_COLLISION_HGT, GetPackGUID().size() + 4 + 4);
+            data << GetPackGUID();
+            data << uint32(sWorld.GetGameTime());
+            data << height;
+            player->GetSession()->SendPacket(data);
+        }
     }
 }
 
