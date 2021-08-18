@@ -333,7 +333,9 @@ bool ChatHandler::HandleReloadConfigCommand(char* /*args*/)
     sLog.outString("Re-Loading config settings...");
     sWorld.LoadConfigSettings(true);
     sMapMgr.InitializeVisibilityDistanceInfo();
+#ifdef BUILD_METRICS
     metric::metric::instance().reload_config();
+#endif
     SendGlobalSysMessage("World config settings reloaded.");
     return true;
 }
