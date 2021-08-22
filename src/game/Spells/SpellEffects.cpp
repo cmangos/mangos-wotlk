@@ -8359,7 +8359,6 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                 case 30121:                                 // Forceful Howl - Plagued Deathhound
                 case 31389:                                 // Knock Away
                 case 32077:                                 // Boglord Bash
-                case 32637:                                 // Overrun - Doomwalker
                 case 32959:                                 // Knock Away
                 case 37102:                                 // Knock Away - Crystalcore Devastator 20040
                 case 37597:                                 // Meat Slap
@@ -8380,7 +8379,9 @@ void Spell::EffectScriptEffect(SpellEffectIndex eff_idx)
                         case 40486:
                             pct = -25;
                             break;
-                        case 32637:
+                        case 30013:                                 // Disarm - Ethereal Thief 16544
+                        case 37317:                                 // Knockback - Tempest Falconer 20037
+                        case 10101:
                             pct = -100;
                             break;
                     }
