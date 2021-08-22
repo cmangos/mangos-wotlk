@@ -1929,7 +1929,7 @@ struct spell_gravity_lapse_knockup : public AuraScript
         Unit* target = aura->GetTarget();
         float x, y, z;
         target->GetPosition(x, y, z);
-        float floorZ = target->GetMap()->GetHeight(x, y, z);
+        float floorZ = target->GetMap()->GetHeight(target->GetPhaseMask(), x, y, z);
         if (std::abs(z - floorZ) < 4.f) // knock up player if he is too close to the ground
             target->CastSpell(nullptr, 35938, TRIGGERED_OLD_TRIGGERED);
     }
