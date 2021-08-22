@@ -7828,9 +7828,9 @@ void Aura::HandleShapeshiftBoosts(bool apply)
     if (apply)
     {
         if (spellId1)
-            target->CastSpell(target, spellId1, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+            target->CastSpell(nullptr, spellId1, TRIGGERED_OLD_TRIGGERED, nullptr, this);
         if (spellId2)
-            target->CastSpell(target, spellId2, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+            target->CastSpell(nullptr, spellId2, TRIGGERED_OLD_TRIGGERED, nullptr, this);
 
         if (target->GetTypeId() == TYPEID_PLAYER)
         {
@@ -7842,7 +7842,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                 SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(itr.first);
                 if (!spellInfo || !IsNeedCastSpellAtFormApply(spellInfo, form))
                     continue;
-                target->CastSpell(target, itr.first, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                target->CastSpell(nullptr, itr.first, TRIGGERED_OLD_TRIGGERED, nullptr, this);
             }
             // remove auras that do not require shapeshift, but are not active in this specific form (like Improved Barkskin)
             Unit::SpellAuraHolderMap& tAuras = target->GetSpellAuraHolderMap();
@@ -7868,7 +7868,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                     if (ShapeShifterAura->GetSpellProto()->SpellIconID == 2851)
                     {
                         int32 ShiftMod = ShapeShifterAura->GetModifier()->m_amount;
-                        target->CastCustomSpell(target, MasterShaperSpellId, &ShiftMod, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
+                        target->CastCustomSpell(nullptr, MasterShaperSpellId, &ShiftMod, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED);
                         break;
                     }
                 }
@@ -7879,12 +7879,12 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             {
                 SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(24932);
                 if (spellInfo && spellInfo->Stances[0] & (1 << (form - 1)))
-                    target->CastSpell(target, 24932, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                    target->CastSpell(nullptr, 24932, TRIGGERED_OLD_TRIGGERED, nullptr, this);
             }
 
             // Savage Roar
             if (form == FORM_CAT && ((Player*)target)->HasAura(52610))
-                target->CastSpell(target, 62071, TRIGGERED_OLD_TRIGGERED);
+                target->CastSpell(nullptr, 62071, TRIGGERED_OLD_TRIGGERED);
 
             // Survival of the Fittest (Armor part)
             if (form == FORM_BEAR || form == FORM_DIREBEAR)
@@ -7897,7 +7897,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                     {
                         int32 bp = modAura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
                         if (bp)
-                            target->CastCustomSpell(target, 62069, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                            target->CastCustomSpell(nullptr, 62069, &bp, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         break;
                     }
                 }
@@ -7924,7 +7924,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                         }
 
                         if (spell_id)
-                            target->CastSpell(target, spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                            target->CastSpell(nullptr, spell_id, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         break;
                     }
                 }
@@ -7942,7 +7942,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                         if (GetModifier()->m_miscvalue == FORM_CAT)
                             HotWMod /= 2;
 
-                        target->CastCustomSpell(target, HotWSpellId, &HotWMod, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                        target->CastCustomSpell(nullptr, HotWSpellId, &HotWMod, nullptr, nullptr, TRIGGERED_OLD_TRIGGERED, nullptr, this);
                         break;
                     }
                 }
@@ -7970,7 +7970,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                 if (!spellInfo || !IsPassiveSpell(spellInfo))
                     continue;
                 if (spellInfo->HasAttribute(SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT) && (spellInfo->StancesNot[0] & (1 << (form - 1))))
-                    target->CastSpell(target, itr.first, TRIGGERED_OLD_TRIGGERED, nullptr, this);
+                    target->CastSpell(nullptr, itr.first, TRIGGERED_OLD_TRIGGERED, nullptr, this);
             }
         }
 
