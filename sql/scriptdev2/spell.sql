@@ -291,6 +291,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (38252,'spell_seed_of_corruption_npc'),
 (39367,'spell_seed_of_corruption_npc'),
 (44141,'spell_seed_of_corruption_npc'),
+(70388,'spell_seed_of_corruption_npc'),
 (45091,'spell_spar_auras'),
 (45092,'spell_spar_auras'),
 (47108,'spell_clear_energy_feedback'),
