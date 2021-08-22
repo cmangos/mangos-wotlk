@@ -561,7 +561,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (20271,'spell_judgement'),
 (57774,'spell_judgement'),
 (53408,'spell_judgement'),
-(31789,'spell_righteous_defense');
+(31789,'spell_righteous_defense'),
 (40470,'spell_paladin_tier_6_trinket');
 
 -- Warlock
@@ -683,7 +683,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (9858,'spell_regrowth'),
 (26980,'spell_regrowth'),
 (48442,'spell_regrowth'),
-(48443,'spell_regrowth');
+(48443,'spell_regrowth'),
 (1178,'spell_druid_form_scaling_ap_auras'),
 (3025,'spell_druid_form_scaling_ap_auras'),
 (9635,'spell_druid_form_scaling_ap_auras'),
