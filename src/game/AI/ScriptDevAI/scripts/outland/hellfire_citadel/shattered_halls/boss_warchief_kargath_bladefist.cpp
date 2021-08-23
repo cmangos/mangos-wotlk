@@ -102,6 +102,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
 
         SetCombatScriptStatus(false);
         SetCombatMovement(true);
+        SetMeleeEnabled(true);
 
         DoCastSpellIfCan(m_creature, SPELL_DOUBLE_ATTACK, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
@@ -239,6 +240,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
                         m_bInBlade = false;
                         SetCombatScriptStatus(false);
                         SetCombatMovement(true, true);
+                        SetMeleeEnabled(true);
                         m_uiWaitTimer = 0;
                         if (!m_bIsRegularMode)
                             m_uiChargeTimer = 500;
@@ -278,6 +280,7 @@ struct boss_warchief_kargath_bladefistAI : public ScriptedAI
                 m_bInBlade = true;
                 SetCombatScriptStatus(true);
                 SetCombatMovement(false);
+                SetMeleeEnabled(false);
                 m_uiBladeDanceTimer = 30000;
                 m_bladeDanceTargetGuids.clear();
                 m_creature->CastSpell(nullptr, SPELL_BLADE_DANCE_TARGETING, TRIGGERED_NONE);
