@@ -46,6 +46,7 @@ enum
     SPELL_BRUTAL_SWIPE      = 42384,
     SPELL_MANGLE            = 42389,
     SPELL_SURGE             = 42402,
+    SPELL_SURGE_MELEE_SUPPRESS = 44960,
     SPELL_BEAR_SHAPE        = 42377,
 
     // Defines for Bear form
@@ -249,10 +250,20 @@ struct boss_nalorakkAI : public CombatAI
     }
 };
 
+struct SurgeNalorakk : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        spell->GetCaster()->CastSpell(nullptr, SPELL_SURGE_MELEE_SUPPRESS, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_nalorakk()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "boss_nalorakk";
     pNewScript->GetAI = &GetNewAIInstance<boss_nalorakkAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<SurgeNalorakk>("spell_surge_nalorakk");
 }

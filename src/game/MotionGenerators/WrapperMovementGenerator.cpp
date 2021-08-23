@@ -42,7 +42,8 @@ void AbstractWrapperMovementGenerator::Initialize(Unit& owner)
 
     if (!owner.IsPlayerControlled())
     {
-        i_useTimer = true;
+        if (i_id != 43153) // Lynx Rush exception - can be done in AI - here for research
+            i_useTimer = true;
         if (owner.movespline->isFacingTarget())
         {
             if (Unit* target = ObjectAccessor::GetUnit(owner, ObjectGuid(owner.movespline->GetFacing().target)))
