@@ -620,7 +620,7 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)
     recv_data >> summonerGuid;
     recv_data >> agree;
 
-    _player->SummonIfPossible(agree);
+    _player->SummonIfPossible(agree, summonerGuid);
 }
 
 bool WorldSession::VerifyMovementInfo(MovementInfo const& movementInfo, Unit* mover, bool unroot) const
