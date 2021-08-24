@@ -496,7 +496,7 @@ void WorldState::HandlePlayerEnterZone(Player* player, uint32 zoneId)
         {
             std::lock_guard<std::mutex> guard(m_sunsReachData.m_sunsReachReclamationMutex);
             m_sunsReachData.m_sunsReachReclamationPlayers.push_back(player->GetObjectGuid());
-            if (zoneId != ZONEID_SUNWELL_PLATEAU && m_sunsReachData.m_subphaseMask == SUBPHASE_ALL)
+            if (m_sunsReachData.m_subphaseMask == SUBPHASE_ALL)
                 player->CastSpell(nullptr, SPELL_KIRU_SONG_OF_VICTORY, TRIGGERED_OLD_TRIGGERED);
             break;
         }
@@ -1647,9 +1647,6 @@ void WorldState::HandleSunsReachSubPhaseTransition(int32 subPhaseMask, bool init
             {
                 if (Player* player = sObjectMgr.GetPlayer(guid))
                 {
-                    if (player->GetZoneId() == ZONEID_SUNWELL_PLATEAU)
-                        continue;
-
                     if (start)
                     {
                         player->GetMap()->GetMessager().AddMessage([guid](Map* map) -> void
