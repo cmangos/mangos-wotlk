@@ -128,7 +128,7 @@ struct TestRibbonPoleChannel : public AuraScript
             {
                 holder->SetAuraMaxDuration(holder->GetAuraMaxDuration() + 180000);
                 holder->SetAuraDuration(holder->GetAuraMaxDuration());
-                holder->UpdateAuraDuration();
+                holder->SendAuraUpdate(false);
             }
         }
         else

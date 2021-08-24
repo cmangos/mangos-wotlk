@@ -394,6 +394,9 @@ void UnitAI::OnChannelStateChange(Spell const* spell, bool state, WorldObject* t
             return;
     }
 
+    if (spellInfo->Id == 45661) // Felmyst Encapsulate - cast time tracks target but channel time ignores him
+        return;
+
     bool forceTarget = true; // Different default than normal cast
 
     // Targeting seems to be directly affected by eff index 0 targets, client does the same thing

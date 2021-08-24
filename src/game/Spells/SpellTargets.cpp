@@ -586,6 +586,8 @@ float SpellTargetMgr::GetJumpRadius(uint32 spellId)
         case 46048:
         case 46480:
             return 50.f;
+        case 45664: // Legion Lightning - KJ
+            return 18.f;
     }
     return CHAIN_SPELL_JUMP_RADIUS;
 }

@@ -1326,7 +1326,7 @@ bool Unit::CanAttackInCombat(Unit const* target) const
                 {
                     if (const FactionTemplateEntry* thisFactionTemplate = GetFactionTemplateEntry())
                     {
-                        const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry<FactionEntry>(thisFactionTemplate->faction);
+                        const FactionEntry* thisFactionEntry = sFactionStore.LookupEntry(thisFactionTemplate->faction);
                         if (thisFactionEntry && thisFactionEntry->HasReputation() && unitPlayer->GetReputationMgr().IsAtWar(thisFactionEntry))
                             return true;
                     }

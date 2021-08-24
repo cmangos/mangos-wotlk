@@ -3304,51 +3304,6 @@ SpellAuraProcResult Unit::HandleProcTriggerSpellAuraProc(ProcExecutionData& data
                         return SPELL_AURA_PROC_FAILED;
                     break;
                 }
-                // case 47300: break;                   // Dark Flame Aura
-                case 45343:                          // Dark Flame Aura proc from scarolash
-                {
-                    if (!spellInfo)
-                        return SPELL_AURA_PROC_FAILED;
-                    if (HasAura(45345))       // SPELL_DARK_FLAME on player
-                        return SPELL_AURA_PROC_FAILED;
-                    if (spellInfo->Id == 45256      // confunding blow
-                        || spellInfo->Id == 45248    // shadow blades
-                        || spellInfo->Id == 45329)   // shadow nova
-                    {
-                        cooldown = 1;
-                        target = this;
-                        if (this->HasAura(45348))
-                        {
-                            this->RemoveAurasDueToSpell(45348);
-                            trigger_spell_id = 45345;
-                        }
-                        else
-                            trigger_spell_id = 45347;
-                    }
-                    break;
-                }
-                case 47300: // Dark Flame Aura              procs from alythess
-                {
-                    if (!spellInfo)
-                        return SPELL_AURA_PROC_FAILED;
-                    if (this->HasAura(45345))                   // SPELL_DARK_FLAME on player
-                        return SPELL_AURA_PROC_FAILED;
-                    if (spellInfo->Id == 46771                  // flame sear
-                        || spellInfo->Id == 45342           // or conflag
-                        || spellInfo->Id == 45235)          // or blaze
-                    {
-                        cooldown = 1;
-                        target = this;
-                        if (this->HasAura(45347))
-                        {
-                            this->RemoveAurasDueToSpell(45347);
-                            trigger_spell_id = 45345;
-                        }
-                        else
-                            trigger_spell_id = 45348;
-                    }
-                    break;
-                }
                 case 48473:                                 // Capture Soul - Doom Lord Kazzak
                     if (pVictim->GetTypeId() != TYPEID_PLAYER) // only player death procs
                         return SPELL_AURA_PROC_FAILED;

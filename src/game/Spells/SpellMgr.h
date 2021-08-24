@@ -2102,6 +2102,11 @@ inline bool IsStackableAuraEffect(SpellEntry const* entry, SpellEntry const* ent
         case SPELL_AURA_POWER_BURN_MANA:
             if (entry->Id == 38575) // Vashj - Toxic Spores
                 return false;
+            if (entry->Id == 45402) // Felmyst - Demonic Vapor
+                return false;
+            if (entry->Id == 45032 || entry->Id == 45034) // Kalecgos - Curse of boundless agony
+                if (entry2->Id == 45032 || entry2->Id == 45034)
+                    return false;
             return true;
             break;
         // HoT

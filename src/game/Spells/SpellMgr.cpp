@@ -549,10 +549,7 @@ uint32 GetAffectedTargets(SpellEntry const* spellInfo, WorldObject* caster)
                 case 39342:                                 // Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Alliance
                 case 40834:                                 // Agonizing Flames (BT, Illidan Stormrage)
                 case 41537:                                 // Summon Enslaved Soul (BT, Reliquary of Souls)
-                case 44869:                                 // Spectral Blast (SWP, Kalecgos)
                 case 45391:                                 // Summon Demonic Vapor (SWP, Felmyst)
-                case 45785:                                 // Sinister Reflection Clone (SWP, Kil'jaeden)
-                case 45892:                                 // Sinister Reflection (SWP, Kil'jaeden)
                 case 45976:                                 // Open Portal (SWP, M'uru)
                 case 46372:                                 // Ice Spear Target Picker (Slave Pens, Ahune)
                     return 1;
@@ -569,12 +566,8 @@ uint32 GetAffectedTargets(SpellEntry const* spellInfo, WorldObject* caster)
                 case 41303:                                 // Soul Drain (BT, Reliquary of Souls)
                 case 41376:                                 // Spite (BT, Reliquary of Souls)
                     return 3;
-                case 46650:                                 // Open Brutallus Back Door (SWP, Felmyst)
-                    return 4;
                 case 40243:                                 // Crushing Shadows (BT, Teron Gorefiend)
                 case 42005:                                 // Bloodboil (BT, Gurtogg Bloodboil)
-                case 45641:                                 // Fire Bloom (SWP, Kil'jaeden)
-                    return 5;
                 case 25676:                                 // Drain Mana (correct number has to be researched)
                 case 25754:
                     return 6;
@@ -585,8 +578,6 @@ uint32 GetAffectedTargets(SpellEntry const* spellInfo, WorldObject* caster)
                     return 12;
                 case 61916:                                 // Lightning Whirl (Ulduar, Stormcaller Brundir)
                     return urand(2, 3);
-                case 46771:                                 // Flame Sear (SWP, Grand Warlock Alythess)
-                    return urand(3, 5);
                 case 63482:                                 // Lightning Whirl (h) (Ulduar, Stormcaller Brundir)
                     return urand(3, 6);
                 case 74452:                                 // Conflagration (Saviana, Ruby Sanctum)

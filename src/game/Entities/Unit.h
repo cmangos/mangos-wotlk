@@ -2342,6 +2342,8 @@ class Unit : public WorldObject
         void KnockBackFrom(Unit* target, float horizontalSpeed, float verticalSpeed);
         void KnockBackWithAngle(float angle, float horizontalSpeed, float verticalSpeed);
 
+        bool HasHoverAura() const { return HasAuraType(SPELL_AURA_HOVER); }
+
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();
 
