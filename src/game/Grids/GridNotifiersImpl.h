@@ -197,7 +197,11 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->IsTotem())
         return;
 
-    if (i_dynobject.GetDistance(target, true, DIST_CALC_NONE) > i_dynobject.GetRadius() * i_dynobject.GetRadius())
+    Unit* caster = i_dynobject.GetCaster();
+    float radius = i_dynobject.GetRadius();
+    if (caster->IsPlayerControlled() && !target->IsPlayerControlled())
+        radius += target->GetCombatReach();
+    if (i_dynobject.GetDistance(target, true, DIST_CALC_NONE) > radius * radius)
         return;
 
     // Evade target
@@ -205,12 +209,11 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
         return;
 
     // Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
-    if (target->GetTypeId() == TYPEID_PLAYER && target != i_check && (((Player*) target)->IsGameMaster() || ((Player*)target)->GetVisibility() == VISIBILITY_OFF))
+    if (target->GetTypeId() == TYPEID_PLAYER && target != i_check && (((Player*)target)->IsGameMaster() || ((Player*)target)->GetVisibility() == VISIBILITY_OFF))
         return;
 
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(i_dynobject.GetSpellId());
-    SpellEffectIndex eff_index  = i_dynobject.GetEffIndex();
-    Unit* caster = i_dynobject.GetCaster();
+    SpellEffectIndex eff_index = i_dynobject.GetEffIndex();
 
     SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry> bounds = sSpellScriptTargetStorage.getBounds<SpellTargetEntry>(spellInfo->Id);
     if (bounds.first != bounds.second)
@@ -240,7 +243,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
             return;
     }
     // This condition is only needed due to missing neutral spell type
-    else if(!i_script)
+    else if (!i_script)
     {
         // for player casts use less strict negative and more stricted positive targeting
         if (i_positive)
