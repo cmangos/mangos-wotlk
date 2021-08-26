@@ -118,7 +118,7 @@ struct boss_uromAI : public ScriptedAI
 
         ResetPlatformVariables();
 
-        std::random_shuffle(m_vuiTrashPacksIds.begin(), m_vuiTrashPacksIds.end());
+        std::shuffle(m_vuiTrashPacksIds.begin(), m_vuiTrashPacksIds.end(), *GetRandomGenerator());
     }
 
     void ResetPlatformVariables()

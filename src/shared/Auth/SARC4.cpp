@@ -59,7 +59,7 @@ SARC4::~SARC4()
 #endif
 }
 
-void SARC4::Init(uint8* seed)
+void SARC4::Init(uint8 const* seed)
 {
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L
     EVP_EncryptInit_ex(m_ctx, nullptr, nullptr, seed, nullptr);

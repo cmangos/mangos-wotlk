@@ -30,6 +30,7 @@
 #include "Util.h"
 #include "Entities/Vehicle.h"
 #include "Maps/TransportSystem.h"
+#include "Anticheat/Anticheat.hpp"
 
 /* differeces from off:
     -you can uninvite yourself - is is useful
@@ -112,6 +113,12 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
         return;
     }
 
+    if (GetAnticheat()->IsSilenced())
+    {
+        SendPartyResult(PARTY_OP_INVITE, membername, ERR_PARTY_RESULT_OK);
+        return;
+    }
+
     Group* initiatorGroup = initiator->GetGroup();
     if (initiatorGroup && initiatorGroup->isBattleGroup())
         initiatorGroup = initiator->GetOriginalGroup();
@@ -190,6 +197,9 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
             return;
         }
     }
+
+    // Record targets for uniqueness when spamming
+    GetAnticheat()->PartyInvite(recipient->GetObjectGuid());
 
     SendGroupInvite(recipient);
     SendPartyResult(PARTY_OP_INVITE, membername, ERR_PARTY_RESULT_OK);

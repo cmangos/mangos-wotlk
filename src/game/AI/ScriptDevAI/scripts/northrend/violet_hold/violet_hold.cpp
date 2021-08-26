@@ -579,7 +579,7 @@ void instance_violet_hold::SetRandomBosses()
 
     if (m_vRandomBosses.size() < 2)                         // Get some new random bosses
     {
-        std::random_shuffle(m_vRandomBossList.begin(), m_vRandomBossList.end());
+        std::shuffle(m_vRandomBossList.begin(), m_vRandomBossList.end(), *GetRandomGenerator());
         // two required, in case the first is already pushed to m_vRandomBosses
         if (m_vRandomBossList.size() < 2)
             script_error_log("instance_violet_hold, Mini Bosses are not properly spawned");

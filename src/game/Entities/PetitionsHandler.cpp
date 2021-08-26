@@ -27,6 +27,7 @@
 #include "Guilds/Guild.h"
 #include "Guilds/GuildMgr.h"
 #include "Arena/ArenaTeam.h"
+#include "Anticheat/Anticheat.hpp"
 
 /*enum PetitionType // dbc data
 {
@@ -137,6 +138,14 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket& recv_data)
             SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ALREADY_IN_ARENA_TEAM);
             return;
         }
+    }
+
+    // Check guild petition name (use whisper type - 6)
+    if (sAnticheatLib->ValidateGuildName(name))
+    {
+        sLog.outBasic("Attempt to create guild petition with spam name \"%s\"", name.c_str());
+        SendGuildCommandResult(GUILD_CREATE_S, name, ERR_GUILD_NAME_INVALID);
+        return;
     }
 
     if (type == 9)

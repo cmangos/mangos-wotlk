@@ -50,6 +50,7 @@
 #include "MotionGenerators/MoveMap.h"                       // for mmap manager
 #include "MotionGenerators/PathFinder.h"                    // for mmap commands
 #include "Movement/MoveSplineInit.h"
+#include "Anticheat/Anticheat.hpp"
 #include "Entities/Transports.h"
 
 #include <fstream>
@@ -2789,6 +2790,9 @@ bool ChatHandler::HandlePInfoCommand(char* args)
     uint32 silv = (money % GOLD) / SILVER;
     uint32 copp = (money % GOLD) % SILVER;
     PSendSysMessage(LANG_PINFO_LEVEL,  timeStr.c_str(), level, gold, silv, copp);
+
+    if (target)
+        target->GetSession()->GetAnticheat()->SendPlayerInfo(this);
 
     return true;
 }

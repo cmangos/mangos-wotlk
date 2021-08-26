@@ -195,6 +195,8 @@ class ChatHandler
         void CheckIntegrity(ChatCommand* table, ChatCommand* parentCommand) const;
         ChatCommand* getCommandTable();
 
+#include "Anticheat/module/AnticheatChatCommandsFunctions.h"
+
         bool HandleAccountCommand(char* args);
         bool HandleAccountCharactersCommand(char* args);
         bool HandleAccountCreateCommand(char* args);
@@ -512,6 +514,8 @@ class ChatHandler
         bool HandleQuestAddCommand(char* args);
         bool HandleQuestRemoveCommand(char* args);
         bool HandleQuestCompleteCommand(char* args);
+
+        bool HandleReloadAnticheatCommand(char*);
 
         bool HandleReloadAllCommand(char* args);
         bool HandleReloadAllAchievementCommand(char* args);

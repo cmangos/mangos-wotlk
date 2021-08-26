@@ -37,6 +37,7 @@
 #include "Server/WorldSession.h"
 #include "Server/Opcodes.h"
 #include "Chat/Chat.h"
+#include "Anticheat/Anticheat.hpp"
 
 #define MAX_INBOX_CLIENT_UI_CAPACITY 50
 
@@ -278,7 +279,12 @@ void WorldSession::HandleSendMail(WorldPacket& recv_data)
         items[i] = item;
     }
 
+    m_anticheat->Mail(subject, body, rc);
+
     pl->SendMailResult(0, MAIL_SEND, MAIL_OK);
+
+    if (GetAnticheat()->IsSilenced())
+        return pl->ModifyMoney(-int32(cost));
 
     pl->ModifyMoney(-int32(reqmoney));
     pl->GetAchievementMgr().UpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_GOLD_SPENT_FOR_MAIL, cost);

@@ -28,7 +28,7 @@ class SARC4
         SARC4(uint8 len);
         SARC4(uint8* seed, uint8 len);
         ~SARC4();
-        void Init(uint8* seed);
+        void Init(uint8 const* seed);
         void UpdateData(int len, uint8* data);
     private:
 #if defined(OPENSSL_VERSION_NUMBER) && OPENSSL_VERSION_NUMBER >= 0x10100000L

@@ -2330,6 +2330,8 @@ class Unit : public WorldObject
         void  UpdateSpeed(UnitMoveType mtype, bool forced, float ratio = 1.0f);
         float GetSpeedInMotion() const;
         float GetSpeed(UnitMoveType mtype) const;
+        float GetXYFlagBasedSpeed() const;
+        float GetXYFlagBasedSpeed(uint32 moveFlags) const;
         float GetSpeedRateInMotion() const;
         float GetSpeedRate(UnitMoveType mtype) const { return m_speed_rate[mtype]; }
         void SetSpeedRate(UnitMoveType mtype, float rate, bool forced = false);

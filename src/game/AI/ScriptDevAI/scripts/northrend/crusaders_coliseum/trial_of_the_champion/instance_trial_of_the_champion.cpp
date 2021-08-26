@@ -195,7 +195,7 @@ void instance_trial_of_the_champion::OnPlayerEnter(Player* pPlayer)
                 m_vChampionsIndex[i] = i;
 
             // set a random champion list
-            std::random_shuffle(m_vChampionsIndex.begin(), m_vChampionsIndex.end());
+            std::shuffle(m_vChampionsIndex.begin(), m_vChampionsIndex.end(), *GetRandomGenerator());
         }
     }
 

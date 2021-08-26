@@ -26,6 +26,7 @@ ConfVersion=2021021901
 #    LoginDatabaseInfo
 #    WorldDatabaseInfo
 #    CharacterDatabaseInfo
+#    LogsDatabaseInfo
 #        Database connection settings for the world server.
 #        Default:
 #                ---MYSQL---
@@ -40,6 +41,7 @@ ConfVersion=2021021901
 #    LoginDatabaseConnections
 #    WorldDatabaseConnections
 #    CharacterDatabaseConnections
+#    LogsDatabaseConnections
 #        Amount of connections to database which will be used for SELECT queries. Maximum 16 connections per database.
 #        Please, note, for data consistency only one connection for each database is used for transactions and async SELECTs.
 #        So formula to find out how many connections will be established: X = #_connections + 1
@@ -68,9 +70,11 @@ LogsDir = ""
 LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;wotlkrealmd"
 WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;wotlkmangos"
 CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;wotlkcharacters"
+LogsDatabaseInfo      = "127.0.0.1;3306;mangos;mangos;wotlklogs"
 LoginDatabaseConnections = 1
 WorldDatabaseConnections = 1
 CharacterDatabaseConnections = 1
+LogsDatabaseConnections = 1
 MaxPingTime = 30
 WorldServerPort = 8085
 BindIP = "0.0.0.0"
