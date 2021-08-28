@@ -197,11 +197,6 @@ enum
     MAX_MIND_CONTROL                    = 3,
 };
 
-enum Timers
-{
-    TIMER_PHASE_2_WEAPONS_DURATION = 90000, // very early pre 2.1 - 90s (90000), later 120s (120000)
-};
-
 static const uint32 m_auiSpellSummonWeapon[MAX_WEAPONS] =
 {
     SPELL_SUMMON_WEAPONA, SPELL_SUMMON_WEAPONB, SPELL_SUMMON_WEAPONC, SPELL_SUMMON_WEAPOND,
@@ -512,7 +507,10 @@ struct boss_kaelthasAI : public ScriptedAI
 #ifdef FAST_TIMERS
             m_uiPhaseTimer = 10000;
 #else
-            m_uiPhaseTimer = TIMER_PHASE_2_WEAPONS_DURATION;
+            m_uiPhaseTimer = 120000;
+#endif
+#ifdef PRENERF_2_0_3
+            m_uiPhaseTimer = 90000; // very early pre 2.1 - 90s (90000), later 120s (120000);
 #endif
         }
     }
@@ -978,6 +976,9 @@ struct boss_kaelthasAI : public ScriptedAI
                                 m_uiPhaseTimer = 10000;
 #else
                                 m_uiPhaseTimer = 180000;
+#endif
+#ifdef PRENERF_2_0_3
+                                m_uiPhaseTimer = 120000;
 #endif
                             }
                             break;
