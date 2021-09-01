@@ -276,7 +276,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleUnused,                                    //214 Tamed Pet Passive (single test like spell 20782, also single for 157 aura)
     &Aura::HandleArenaPreparation,                          //215 SPELL_AURA_ARENA_PREPARATION
     &Aura::HandleModCastingSpeed,                           //216 SPELL_AURA_HASTE_SPELLS
-    &Aura::HandleUnused,                                    //217 unused (3.0.8a-3.2.2a)
+    &Aura::HandleModMeleeSpeedPct,                          //217 SPELL_AURA_MOD_MELEE_HASTE_2
     &Aura::HandleAuraModRangedHaste,                        //218 SPELL_AURA_HASTE_RANGED
     &Aura::HandleModManaRegen,                              //219 SPELL_AURA_MOD_MANA_REGEN_FROM_STAT
     &Aura::HandleModRatingFromStat,                         //220 SPELL_AURA_MOD_RATING_FROM_STAT
@@ -367,15 +367,15 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleAuraModIncreaseSpeed,                      //305 SPELL_AURA_MOD_MINIMUM_SPEED
     &Aura::HandleNULL,                                      //306 1 spell
     &Aura::HandleNULL,                                      //307 absorb healing?
-    &Aura::HandleNULL,                                      //308 new aura for hunter traps
+    &Aura::HandleNULL,                                      //308 SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER
     &Aura::HandleNULL,                                      //309 absorb healing?
     &Aura::HandleNoImmediateEffect,                         //310 SPELL_AURA_MOD_PET_AOE_DAMAGE_AVOIDANCE implemented in Unit::SpellDamageBonusTaken
     &Aura::HandleNULL,                                      //311 0 spells in 3.3
     &Aura::HandleNULL,                                      //312 0 spells in 3.3
     &Aura::HandleNULL,                                      //313 0 spells in 3.3
     &Aura::HandlePreventResurrection,                       //314 SPELL_AURA_PREVENT_RESURRECTION
-    &Aura::HandleNULL,                                      //315 underwater walking
-    &Aura::HandleNULL                                       //316 makes haste affect HOT/DOT ticks
+    &Aura::HandleNULL,                                      //315 SPELL_AURA_UNDERWATER_WALKING
+    &Aura::HandleNULL                                       //316 SPELL_AURA_PERIODIC_HASTE
 };
 
 static AuraType const frozenAuraTypes[] = { SPELL_AURA_MOD_ROOT, SPELL_AURA_MOD_STUN, SPELL_AURA_NONE };
