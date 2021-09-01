@@ -176,7 +176,7 @@ enum
 
 struct npc_shattered_sun_marksmanAI : public npc_shattered_sun_fighterAI
 {
-    npc_shattered_sun_marksmanAI(Creature* creature) : npc_shattered_sun_fighterAI(creature) { Reset(); }
+    npc_shattered_sun_marksmanAI(Creature* creature) : npc_shattered_sun_fighterAI(creature), m_uiShootTimer(0), m_uiShootSpell(0) { Reset(); }
 
     uint32 m_uiShootTimer;
     uint32 m_uiShootSpell;
@@ -197,7 +197,8 @@ struct npc_shattered_sun_marksmanAI : public npc_shattered_sun_fighterAI
         // Facing South-East
         else if (eventType == AI_EVENT_CUSTOM_B)
             m_uiShootSpell = m_uiMarksmanRace == RACE_BLOODELF ? SPELL_SHOOT_BLOODELF_SE : SPELL_SHOOT_DRAENEI_SE;
-        m_uiShootTimer = urand(1000, 10000);
+        if (eventType == AI_EVENT_CUSTOM_A || eventType == AI_EVENT_CUSTOM_B)
+            m_uiShootTimer = urand(1000, 10000);
     }
 
     void UpdateAI(const uint32 diff) override
