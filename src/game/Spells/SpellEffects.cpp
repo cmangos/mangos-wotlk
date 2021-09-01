@@ -207,7 +207,7 @@ pEffect SpellEffects[MAX_SPELL_EFFECTS] =
     &Spell::EffectPullTowards,                              //145 SPELL_EFFECT_PULL_TOWARDS_DEST
     &Spell::EffectActivateRune,                             //146 SPELL_EFFECT_ACTIVATE_RUNE
     &Spell::EffectQuestFail,                                //147 SPELL_EFFECT_QUEST_FAIL               quest fail
-    &Spell::EffectNULL,                                     //148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE single spell: Inflicts Fire damage to an enemy.
+    &Spell::EffectTriggerMissileSpell,                      //148 SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE single spell: Inflicts Fire damage to an enemy.
     &Spell::EffectChargeDest,                               //149 SPELL_EFFECT_CHARGE_DEST              swoop
     &Spell::EffectQuestOffer,                               //150 SPELL_EFFECT_QUEST_OFFER
     &Spell::EffectTriggerRitualOfSummoning,                 //151 SPELL_EFFECT_TRIGGER_SPELL_2
@@ -5032,7 +5032,14 @@ void Spell::EffectTriggerMissileSpell(SpellEffectIndex effIndex)
         targets.setGOTarget(gameObjTarget);
     else if (spellInfo->EffectImplicitTargetA[0] != TARGET_LOCATION_CASTER_DEST) // TODO: Add a proper filling mechanism
         targets.setDestination(m_targets.m_destPos.x, m_targets.m_destPos.y, m_targets.m_destPos.z);
-    m_caster->CastSpell(targets, spellInfo, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
+
+    if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_TRIGGER_MISSILE_SPELL_WITH_VALUE)
+    {
+        int32 value = damage;
+        m_caster->CastCustomSpell(targets, spellInfo, &value, &value, &value, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
+    }
+    else
+        m_caster->CastSpell(targets, spellInfo, TRIGGERED_OLD_TRIGGERED, m_CastItem, nullptr, m_originalCasterGUID, m_spellInfo);
 }
 
 void Spell::EffectJump(SpellEffectIndex eff_idx)
