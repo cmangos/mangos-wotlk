@@ -1754,6 +1754,7 @@ class Unit : public WorldObject
         }
         bool HasAuraOfDifficulty(uint32 spellId) const;
         bool HasAuraTypeWithCaster(AuraType auratype, ObjectGuid caster) const;
+        bool HasAuraTypeWithMiscvalue(AuraType auraType, int32 miscvalue) const;
 
         virtual bool HasSpell(uint32 /*spellID*/) const { return false; }
 

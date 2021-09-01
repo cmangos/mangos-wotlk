@@ -6328,6 +6328,15 @@ bool Unit::HasAuraType(AuraType auraType) const
     return !GetAurasByType(auraType).empty();
 }
 
+bool Unit::HasAuraTypeWithMiscvalue(AuraType auraType, int32 miscvalue) const
+{
+    Unit::AuraList const& auraList = GetAurasByType(auraType);
+    for (Aura* aura : auraList)
+        if (miscvalue == aura->GetMiscValue())
+            return true;
+    return false;
+}
+
 bool Unit::HasAffectedAura(AuraType auraType, SpellEntry const* spellProto) const
 {
     Unit::AuraList const& auras = GetAurasByType(auraType);
