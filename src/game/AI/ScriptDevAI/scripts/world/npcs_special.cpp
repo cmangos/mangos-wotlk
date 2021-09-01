@@ -1909,7 +1909,7 @@ struct npc_shaman_earth_elementalAI : public npc_shaman_elementalAI
     {
         m_angeredEarthParams.range.minRange = 0;
         m_angeredEarthParams.range.maxRange = 15;
-        AddCombatAction(1, 0u);
+        AddCombatAction(0, 0u);
     }
 
     SelectAttackingTargetParams m_angeredEarthParams;
