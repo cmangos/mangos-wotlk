@@ -1918,7 +1918,7 @@ struct npc_shaman_earth_elementalAI : public npc_shaman_elementalAI
     {
         switch (action)
         {
-            case 1:
+            case 0:
                 std::vector<Unit*> unitVector;
                 m_creature->SelectAttackingTargets(unitVector, ATTACKING_TARGET_ALL_SUITABLE, uint32(0), uint32(0), SELECT_FLAG_RANGE_AOE_RANGE, m_angeredEarthParams);
                 if (!unitVector.empty())
