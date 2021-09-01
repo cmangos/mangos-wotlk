@@ -219,7 +219,7 @@ pEffect SpellEffects[MAX_SPELL_EFFECTS] =
     &Spell::EffectCreateItem2,                              //157 SPELL_EFFECT_CREATE_ITEM_2            create item or create item template and replace by some randon spell loot item
     &Spell::EffectMilling,                                  //158 SPELL_EFFECT_MILLING                  milling
     &Spell::EffectRenamePet,                                //159 SPELL_EFFECT_ALLOW_RENAME_PET         allow rename pet once again
-    &Spell::EffectNULL,                                     //160 SPELL_EFFECT_FORCE_CAST_2                      single spell: Nerub'ar Web Random Unit
+    &Spell::EffectForceCast,                                //160 SPELL_EFFECT_FORCE_CAST_2             single spell: Nerub'ar Web Random Unit
     &Spell::EffectSpecCount,                                //161 SPELL_EFFECT_TALENT_SPEC_COUNT        second talent spec (learn/revert)
     &Spell::EffectActivateSpec,                             //162 SPELL_EFFECT_TALENT_SPEC_SELECT       activate primary/secondary spec
     &Spell::EffectUnused,                                   //163 unused in 3.3.5a
@@ -4844,7 +4844,9 @@ void Spell::EffectForceCast(SpellEffectIndex effIndex)
     {
         case TARGET_LOCATION_UNIT_MINION_POSITION: break; // confirmed by 31348 nothing is forwarded
         default:
-            if (IsSpellRequireTarget(spellInfo))
+            if (m_spellInfo->Effect[effIndex] == SPELL_EFFECT_FORCE_CAST_2)
+                targets.setUnitTarget(m_caster);
+            else if (IsSpellRequireTarget(spellInfo))
                 targets.setUnitTarget(unitTarget);
             break;
     }
