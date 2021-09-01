@@ -3991,7 +3991,7 @@ float Unit::GetCritChance(const SpellEntry* entry, SpellSchoolMask schoolMask) c
     return chance;
 }
 
-float Unit::GetCritTakenChance(SpellSchoolMask dmgSchoolMask, SpellDmgClass dmgClass, bool heal) const
+float Unit::GetCritTakenChance(Unit const* attacker, SpellSchoolMask dmgSchoolMask, SpellDmgClass dmgClass, SpellEntry const* spellInfo, bool heal) const
 {
     float chance = 0.0f;
     // Resilience and resilience-like auras:
@@ -4014,6 +4014,25 @@ float Unit::GetCritTakenChance(SpellSchoolMask dmgSchoolMask, SpellDmgClass dmgC
                 break;
         }
         chance += GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
+    }
+
+    if (spellInfo) // optimization
+    {
+        chance += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER, [attacker, spellInfo](Aura const* aura) -> bool
+        {
+            if (aura->GetCasterGuid() == attacker->GetObjectGuid() && aura->isAffectedOnSpell(spellInfo))
+                return true;
+            return false;
+        });
+    }
+    else
+    {
+        chance += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_CHANCE_FOR_CASTER, [attacker](Aura const* aura) -> bool
+        {
+            if (aura->GetCasterGuid() == attacker->GetObjectGuid())
+                return true;
+            return false;
+        });
     }
     return chance;
 }
@@ -4288,7 +4307,7 @@ float Unit::CalculateEffectiveCritChance(const Unit* victim, WeaponAttackType at
     chance += (difference * factor);
     // Victim's crit taken chance
     const SpellDmgClass dmgClass = (ranged ? SPELL_DAMAGE_CLASS_RANGED : SPELL_DAMAGE_CLASS_MELEE);
-    chance += victim->GetCritTakenChance(SPELL_SCHOOL_MASK_NORMAL, dmgClass);
+    chance += victim->GetCritTakenChance(this, SPELL_SCHOOL_MASK_NORMAL, dmgClass, ability);
     return std::max(0.0f, std::min(chance, 100.0f));
 }
 
@@ -4405,7 +4424,7 @@ float Unit::CalculateSpellCritChance(const Unit* victim, SpellSchoolMask schoolM
         return 0.0f;
     // Modify by victim in case of hostile hit
     if (!IsPositiveSpell(spell, this, victim))
-        chance += victim->GetCritTakenChance(schoolMask, SpellDmgClass(spell->DmgClass));
+        chance += victim->GetCritTakenChance(this, schoolMask, SpellDmgClass(spell->DmgClass), spell);
     // TODO: Scripted crit chance auras: class script auras need to be orgnaized and re-implemented in the future as a part of scripting system
     const AuraList& scripts = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
     for (auto script : scripts)
@@ -5134,6 +5153,18 @@ int32 Unit::GetTotalAuraModifier(AuraType auratype) const
     AuraList const& mTotalAuraList = GetAurasByType(auratype);
     for (auto i : mTotalAuraList)
         modifier += i->GetModifier()->m_amount;
+
+    return modifier;
+}
+
+int32 Unit::GetTotalAuraModifier(AuraType auratype, std::function<bool(Aura const*)> predicate) const
+{
+    int32 modifier = 0;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for (auto i : mTotalAuraList)
+        if (predicate(i))
+            modifier += i->GetModifier()->m_amount;
 
     return modifier;
 }

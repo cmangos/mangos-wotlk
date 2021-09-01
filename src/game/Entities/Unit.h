@@ -1648,7 +1648,7 @@ class Unit : public WorldObject
         virtual float GetCritChance(SpellSchoolMask schoolMask) const;
         virtual float GetCritChance(const SpellEntry* entry, SpellSchoolMask schoolMask) const;
 
-        virtual float GetCritTakenChance(SpellSchoolMask dmgSchoolMask, SpellDmgClass dmgClass, bool heal = false) const;
+        virtual float GetCritTakenChance(Unit const* attacker, SpellSchoolMask dmgSchoolMask, SpellDmgClass dmgClass, SpellEntry const* spellInfo = nullptr, bool heal = false) const;
 
         virtual float GetCritMultiplier(SpellSchoolMask dmgSchoolMask, uint32 creatureTypeMask, const SpellEntry* spell = nullptr, bool heal = false) const;
         virtual float GetCritTakenMultiplier(SpellSchoolMask dmgSchoolMask, SpellDmgClass dmgClass, float ignorePct = 0.0f, bool heal = false) const;
@@ -2202,6 +2202,7 @@ class Unit : public WorldObject
         void ApplyAuraProcTriggerDamage(Aura* aura, bool apply);
 
         int32 GetTotalAuraModifier(AuraType auratype) const;
+        int32 GetTotalAuraModifier(AuraType auratype, std::function<bool(Aura const*)> predicate) const;
         float GetTotalAuraMultiplier(AuraType auratype) const;
         int32 GetMaxPositiveAuraModifier(AuraType auratype) const;
         int32 GetMaxNegativeAuraModifier(AuraType auratype) const;
