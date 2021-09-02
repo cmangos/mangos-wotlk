@@ -29,6 +29,7 @@ extern void AddSC_spell_scripts();
 extern void AddSC_world_map_scripts();
 extern void AddSC_boss_highlord_kruul();
 extern void AddSC_war_effort();
+extern void AddSC_scourge_invasion();
 extern void AddSC_suns_reach_reclamation();
 extern void AddSC_world_map_ebon_hold();
 extern void AddSC_shade_of_the_horseman();
@@ -527,6 +528,7 @@ void AddScripts()
     AddSC_world_map_scripts();
     AddSC_boss_highlord_kruul();
     AddSC_war_effort();
+    AddSC_scourge_invasion();
     AddSC_suns_reach_reclamation();
     AddSC_world_map_ebon_hold();
     AddSC_shade_of_the_horseman();

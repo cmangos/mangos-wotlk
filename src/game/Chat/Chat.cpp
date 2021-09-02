@@ -864,6 +864,15 @@ ChatCommand* ChatHandler::getCommandTable()
         { nullptr,          0,                  false, nullptr,                                                 "", nullptr }
     };
 
+    static ChatCommand scourgeInvasionTable[] =
+    {
+        { "show",           SEC_ADMINISTRATOR,  false, &ChatHandler::HandleScourgeInvasionCommand,              "", nullptr },
+        { "state",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleScourgeInvasionStateCommand,         "", nullptr },
+        { "battleswon",     SEC_ADMINISTRATOR,  false, &ChatHandler::HandleScourgeInvasionBattlesWonCommand,    "", nullptr },
+        { "startzone",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleScourgeInvasionStartZone,            "", nullptr },
+        { nullptr,          0,                  false, nullptr,                                                 "", nullptr }
+    };
+
     static ChatCommand sunsReachReclamationTable[] =
     {
         { "phase",          SEC_ADMINISTRATOR,  false, &ChatHandler::HandleSunsReachReclamationPhaseCommand,    "", nullptr },
@@ -877,6 +886,7 @@ ChatCommand* ChatHandler::getCommandTable()
     static ChatCommand worldStateTable[] =
     {
         { "wareffort",      SEC_ADMINISTRATOR,  false, nullptr,                                        "", warEffortTable },
+        { "scourgeinvasion",SEC_ADMINISTRATOR,  false, nullptr,                                        "", scourgeInvasionTable },
         { "sunsreach",      SEC_ADMINISTRATOR,  false, nullptr,                                        "", sunsReachReclamationTable },
         { "variables",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleVariablePrint,              "", nullptr },
         { "expansion",      SEC_ADMINISTRATOR,  false, &ChatHandler::HandleExpansionRelease,           "", nullptr },

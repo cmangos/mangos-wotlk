@@ -29,6 +29,8 @@ EndScriptData */
 #include <array>
 #include <ctime>
 #include <cstring>
+#include "AI/ScriptDevAI/scripts/world/scourge_invasion.h"
+#include "World/World.h"
 #include "brewfest.h"
 
 enum

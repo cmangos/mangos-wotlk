@@ -80,6 +80,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (28282,'spell_ashbringer_item'),
 (28441,'spell_ab_effect_000'),
 (28265,'spell_scourge_strike');
+(28091,'spell_despawner_self'),
+(28345,'spell_communique_trigger'),
+(31315,'spell_summon_boss');
 
 -- TBC
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
