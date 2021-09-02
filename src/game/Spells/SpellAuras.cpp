@@ -348,16 +348,16 @@ pAuraHandler AuraHandler[TOTAL_AURAS] =
     &Aura::HandleNoImmediateEffect,                         //286 SPELL_AURA_ABILITY_PERIODIC_CRIT      implemented in Aura::IsCritFromAbilityAura called from Aura::PeriodicTick
     &Aura::HandleNoImmediateEffect,                         //287 SPELL_AURA_DEFLECT_SPELLS             implemented in Unit::MagicSpellHitResult and Unit::MeleeSpellHitResult
     &Aura::HandleNoImmediateEffect,                         //288 SPELL_AURA_MOD_PARRY_FROM_BEHIND_PERCENT percent from normal parry/deflect applied to from behind attack case (single spell used 67801, also look 4.1.0 spell 97574)
-    &Aura::HandleUnused,                                    //289 unused (3.2.2a)
+    &Aura::HandleNoImmediateEffect,                         //289 SPELL_AURA_PREVENT_DURABILITY_LOSS
     &Aura::HandleAuraModAllCritChance,                      //290 SPELL_AURA_MOD_ALL_CRIT_CHANCE
     &Aura::HandleNoImmediateEffect,                         //291 SPELL_AURA_MOD_QUEST_XP_PCT           implemented in Player::GiveXP
-    &Aura::HandleAuraOpenStable,                            //292 call stabled pet
+    &Aura::HandleAuraOpenStable,                            //292 SPELL_AURA_OPEN_STABLE
     &Aura::HandleAuraAddMechanicAbilities,                  //293 SPELL_AURA_ADD_MECHANIC_ABILITIES  replaces target's action bars with a predefined spellset
     &Aura::HandleAuraStopNaturalManaRegen,                  //294 SPELL_AURA_STOP_NATURAL_MANA_REGEN implemented in Player:Regenerate
     &Aura::HandleUnused,                                    //295 unused (3.2.2a)
-    &Aura::HandleAuraSetVehicleId,                          //296 6 spells
-    &Aura::HandleNULL,                                      //297 1 spell (counter spell school?)
-    &Aura::HandleUnused,                                    //298 unused (3.2.2a)
+    &Aura::HandleAuraSetVehicleId,                          //296 SPELL_AURA_SET_VEHICLE_ID
+    &Aura::HandleNULL,                                      //297 SPELL_AURA_BLOCK_SPELL_FAMILY
+    &Aura::HandleUnused,                                    //298 SPELL_AURA_STRANGULATE
     &Aura::HandleUnused,                                    //299 unused (3.2.2a)
     &Aura::HandleNoImmediateEffect,                         //300 SPELL_AURA_SHARE_DAMAGE_PCT 9 spells
     &Aura::HandleNULL,                                      //301 SPELL_AURA_HEAL_ABSORB 5 spells
