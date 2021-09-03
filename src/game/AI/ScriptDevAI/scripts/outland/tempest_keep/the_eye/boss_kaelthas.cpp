@@ -482,11 +482,11 @@ struct boss_kaelthasAI : public ScriptedAI
                 m_netherVapor.push_back(summoned->GetObjectGuid());
                 break;
             }
-            default:
+            default: // Weapons
             {
                 m_weapons.push_back(summoned->GetObjectGuid());
                 m_weaponAttackTimer = 2000;
-                summoned->AI()->SetReactState(REACT_DEFENSIVE);
+                summoned->AI()->SetReactState(REACT_PASSIVE);
                 summoned->SetCorpseDelay(60);
                 break;
             }
