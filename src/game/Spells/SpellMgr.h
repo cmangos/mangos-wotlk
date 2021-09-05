@@ -231,7 +231,7 @@ inline bool IsSpellHaveAura(SpellEntry const* spellInfo, AuraType aura, uint32 e
 
 inline bool IsNextMeleeSwingSpell(SpellEntry const* spellInfo)
 {
-	return spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_1) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_2);
+	return spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING_NO_DAMAGE) || spellInfo->HasAttribute(SPELL_ATTR_ON_NEXT_SWING);
 }
 
 inline bool IsSpellLastAuraEffect(SpellEntry const* spellInfo, SpellEffectIndex effecIdx)
@@ -508,7 +508,7 @@ inline bool SpellCancelsAuraEffect(SpellEntry const* spellInfo, SpellEntry const
     if (!spellInfo->HasAttribute(SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY))
         return false;
 
-    if (auraSpellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+    if (auraSpellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES))
         return false;
 
     for (uint8 i = 0; i < MAX_SPELL_EFFECTS; ++i)
@@ -1427,7 +1427,7 @@ inline bool IsPositiveEffect(const SpellEntry* spellproto, SpellEffectIndex effI
         case 44406: // Energy Infusion - supposed to be buff despite negative targeting
         case 48598: // Ride Flamebringer Cue - the player (target) is supposed to board the dragon (caster); Positive effect needed to avoid combat
             return true;
-        case 43101: // Headless Horseman Climax - Command, Head Requests Body - must be negative so that SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY isn't ignored, Headless Horseman script target is immune
+        case 43101: // Headless Horseman Climax - Command, Head Requests Body - must be negative so that SPELL_ATTR_NO_IMMUNITIES isn't ignored, Headless Horseman script target is immune
         case 34190: // Arcane Orb - should be negative
                     /*34172 is cast onto friendly target, and fails bcs its delayed and we remove negative delayed on friendlies due to Duel code, if we change target pos code
                     bcs 34190 will be evaled as neg, 34172 will be evaled as neg, and hence be removed cos its negative delayed on a friendly*/
@@ -1657,11 +1657,11 @@ inline bool IsSpellDoNotReportFailure(SpellEntry const* spellInfo)
 inline bool CanPierceImmuneAura(SpellEntry const* spellInfo, SpellEntry const* auraSpellInfo, uint8 effectMask = 0, SpellEffectIndex effIdx = EFFECT_INDEX_0)
 {
     // aura can't be pierced
-    if (auraSpellInfo && auraSpellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+    if (auraSpellInfo && auraSpellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES))
         return false;
 
     // these spells pierce all available spells (Resurrection Sickness for example)
-    if (spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY))
+    if (spellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES))
         return true;
 
     if (!auraSpellInfo)
@@ -1759,7 +1759,7 @@ inline bool IsChanneledSpell(SpellEntry const* spellInfo)
 
 inline bool IsNeedCastSpellAtFormApply(SpellEntry const* spellInfo, ShapeshiftForm form)
 {
-    if ((!spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !spellInfo->HasAttribute(SPELL_ATTR_HIDDEN_CLIENTSIDE)) || !form)
+    if ((!spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !spellInfo->HasAttribute(SPELL_ATTR_DO_NOT_DISPLAY)) || !form)
         return false;
 
     // passive spells with SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT are already active without shapeshift, do no recast!
@@ -1774,7 +1774,7 @@ inline bool IsNeedCastSpellAtOutdoor(SpellEntry const* spellInfo)
 inline bool IsReflectableSpell(SpellEntry const* spellInfo)
 {
     return spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && !spellInfo->HasAttribute(SPELL_ATTR_ABILITY)
-           && !spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REFLECTED) && !spellInfo->HasAttribute(SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)
+           && !spellInfo->HasAttribute(SPELL_ATTR_EX_CANT_BE_REFLECTED) && !spellInfo->HasAttribute(SPELL_ATTR_NO_IMMUNITIES)
            && !spellInfo->HasAttribute(SPELL_ATTR_PASSIVE) && !IsPositiveSpell(spellInfo);
 }
 
