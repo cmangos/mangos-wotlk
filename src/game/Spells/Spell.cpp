@@ -3285,7 +3285,7 @@ SpellCastResult Spell::cast(bool skipCheck)
         return SPELL_FAILED_ERROR;
     }
 
-    if (m_trueCaster->IsCreature() && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster && !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_DONT_TURN_DURING_CAST))
+    if (m_trueCaster->IsCreature() && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster && !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_AI_DOESNT_FACE_TARGET))
     {
         Unit* charmer = m_caster->GetCharmer();
         if (charmer && !(charmer->GetTypeId() == TYPEID_PLAYER && ((Player*)charmer)->GetCamera().GetBody() == m_caster)) // need to check if target doesnt have a player controlling it
@@ -5601,6 +5601,9 @@ SpellCastResult Spell::CheckCast(bool strict)
 
             if (m_spellInfo->MaxTargetLevel && target->GetLevel() > m_spellInfo->MaxTargetLevel)
                 return SPELL_FAILED_HIGHLEVEL;
+
+            if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_NOT_ON_TRIVIAL) && target->IsTrivialForTarget(m_caster))
+                return SPELL_FAILED_TARGET_IS_TRIVIAL;
         }
     }
 
@@ -8017,6 +8020,9 @@ bool Spell::CheckTarget(Unit* target, SpellEffectIndex eff, bool targetB, CheckE
 
     // If spell have ingore CC attr & unit is CC
     if (m_spellInfo->AttributesEx6 & SPELL_ATTR_EX6_IGNORE_CC_TARGETS && target != m_targets.getUnitTarget() && target->IsCrowdControlled())
+        return false;
+
+    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX5_NOT_ON_TRIVIAL) && target->IsTrivialForTarget(m_caster))
         return false;
 
     if (target->GetTypeId() != TYPEID_PLAYER && m_spellInfo->HasAttribute(SPELL_ATTR_EX3_TARGET_ONLY_PLAYER)

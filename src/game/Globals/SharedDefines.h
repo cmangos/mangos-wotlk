@@ -473,10 +473,10 @@ enum SpellAttributesEx5
     SPELL_ATTR_EX5_UNK16                       = 0x00010000,// 16
     SPELL_ATTR_EX5_USABLE_WHILE_FEARED         = 0x00020000,// 17 usable while feared
     SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED       = 0x00040000,// 18 usable while confused
-    SPELL_ATTR_EX5_DONT_TURN_DURING_CAST       = 0x00080000,// 19
+    SPELL_ATTR_EX5_AI_DOESNT_FACE_TARGET       = 0x00080000,// 19
     SPELL_ATTR_EX5_UNK20                       = 0x00100000,// 20
     SPELL_ATTR_EX5_UNK21                       = 0x00200000,// 21
-    SPELL_ATTR_EX5_UNK22                       = 0x00400000,// 22
+    SPELL_ATTR_EX5_NOT_ON_TRIVIAL              = 0x00400000,// 22
     SPELL_ATTR_EX5_UNK23                       = 0x00800000,// 23
     SPELL_ATTR_EX5_UNK24                       = 0x01000000,// 24
     SPELL_ATTR_EX5_UNK25                       = 0x02000000,// 25
