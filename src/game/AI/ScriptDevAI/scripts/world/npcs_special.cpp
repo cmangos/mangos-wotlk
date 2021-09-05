@@ -2519,6 +2519,96 @@ struct npc_advanced_target_dummyAI : public ScriptedAI, public TimerManager
     }
 };
 
+enum
+{
+    SPELL_IMP_IN_A_BOTTLE_SAY                       = 40526,
+    SPELL_IMP_IN_A_BOTTLE_OBJECT                    = 40527,
+    SPELL_IMP_IN_A_BOTTLE_CREATURE                  = 40528,
+    SPELL_IMP_IN_A_BOTTLE_SPECIAL_CASE_NOT          = 40533, // purpose unk
+    SPELL_IMP_IN_A_BOTTLE_SPECIAL_CASE_ROGUE        = 40537, // purpose unk
+    SPELL_IMP_IN_A_BOTTLE_SPECIAL_CASE_ROGUE_SOUND  = 40539, // purpose unk - summons npc 23229
+    SPELL_CREATE_IMP_IN_A_BALL                      = 40552, // unused
+
+    SOUND_ID_IMP_1                                  = 766,
+    SOUND_ID_IMP_2                                  = 770,
+};
+
+// broadcast texts (used in either whisper or party chat)
+// 21197 may have something to do with SPELL_IMP_IN_A_BOTTLE_SPECIAL_CASE_ROGUE?
+// 21244 is possibly associated with 21243
+std::vector<uint32> impInABallTexts = { 21157,21158,21159,21160,21161,21162,21163,21164,21165,21169,21170,21171,21172,21173,21174,21175,21176,21177,21178,21179,21180,21181,21182,21183,21184,21185,21186,21187,21188,21189,21190,21191,21192,21193,21194,21195,21196,21197,21198,21200,21205,21208,21209,21210,21211,21212,21213,21214,21215,21216,21217,21218,21219,21220,21221,21222,21223,21224,21225,21226,21227,21228,21229,21230,21231,21232,21233,21234,21235,21236,21237,21238,21239,21240,21241,21242,21243,21244,21245,21246,21247 };
+
+struct go_imp_in_a_ball : public GameObjectAI
+{
+    go_imp_in_a_ball(GameObject* go) : GameObjectAI(go), m_animTimer(2000) {}
+
+    uint32 m_animTimer;
+
+    void JustSpawned() override
+    {
+        if (ObjectGuid spawnerGuid = m_go->GetSpawnerGuid())
+            if (Player* player = m_go->GetMap()->GetPlayer(spawnerGuid))
+                player->CastSpell(player, SPELL_IMP_IN_A_BOTTLE_CREATURE, TRIGGERED_OLD_TRIGGERED);
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (m_animTimer)
+        {
+            if (m_animTimer < diff)
+            {
+                m_go->SendGameObjectCustomAnim(m_go->GetObjectGuid());
+                m_animTimer = 0;
+            }
+            else
+                m_animTimer -= diff;
+        }
+    }
+};
+
+struct npc_imp_in_a_ball : public ScriptedAI
+{
+    npc_imp_in_a_ball(Creature* pCreature) : ScriptedAI(pCreature), m_toldFortune(false), m_startTimer(2000) { Reset(); }
+
+    bool m_toldFortune;
+    uint32 m_startTimer;
+
+    void Reset() override {}
+
+    void JustRespawned() override
+    {
+        m_creature->PlayDistanceSound(SOUND_ID_IMP_1);
+    }
+
+    void UpdateAI(const uint32 diff) override
+    {
+        if (!m_toldFortune)
+        {
+            if (m_startTimer < diff)
+            {
+                m_creature->PlayDistanceSound(SOUND_ID_IMP_2);
+                m_creature->CastSpell(m_creature, SPELL_IMP_IN_A_BOTTLE_SAY, TRIGGERED_OLD_TRIGGERED);
+                m_toldFortune = true;
+                m_startTimer = 0;
+            }
+            else
+                m_startTimer -= diff;
+        }
+    }
+};
+
+struct ImpInABottleSay : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (Unit* caster = spell->GetCaster())
+            if (Unit* spawner = caster->GetSpawner())
+                if (spawner->IsPlayer())
+                    if (Player* player = (Player*)spawner)
+                        DoBroadcastText(impInABallTexts[urand(0, impInABallTexts.size() - 1)], caster, player, player->GetGroup() != nullptr ? CHAT_TYPE_PARTY : CHAT_TYPE_WHISPER);
+    }
+};
+
 void AddSC_npcs_special()
 {
     Script* pNewScript = new Script;
@@ -2633,4 +2723,15 @@ void AddSC_npcs_special()
     pNewScript->Name = "npc_advanced_target_dummy";
     pNewScript->GetAI = &GetNewAIInstance<npc_advanced_target_dummyAI>;
     pNewScript->RegisterSelf();
+    
+    pNewScript->Name = "go_imp_in_a_ball";
+    pNewScript->GetGameObjectAI = &GetNewAIInstance<go_imp_in_a_ball>;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "npc_imp_in_a_ball";
+    pNewScript->GetAI = &GetNewAIInstance<npc_imp_in_a_ball>;
+    pNewScript->RegisterSelf();
+
+    RegisterSpellScript<ImpInABottleSay>("spell_imp_in_a_bottle_say");
 }
