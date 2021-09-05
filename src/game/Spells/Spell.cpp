@@ -687,6 +687,17 @@ void Spell::FillTargetMap()
                             }
                         }
                     }
+
+                    if (m_spellInfo->HasAttribute(SPELL_ATTR_EX_REQUIRE_ALL_TARGETS))
+                    {
+                        // spells which should only be cast if a target was found
+                        if (unitTargetList.size() <= 0)
+                        {
+                            finish(false);
+                            return;
+                        }
+                    }
+
                     for (Unit* unit : unitTargetList)
                         AddUnitTarget(unit, effectMask);
                 }
@@ -2328,16 +2339,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
 
             switch (m_spellInfo->Id)
             {
-                case 40307: // AOEs which should only be cast if a target was found
-                case 40350:
-                {
-                    if (tempUnitList.size() <= 0)
-                    {
-                        finish(false);
-                        return;
-                    }
-                    break;
-                }
                 case 45339:
                 {
                     for (auto iter = tempUnitList.begin(); iter != tempUnitList.end();)
