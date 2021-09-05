@@ -159,7 +159,7 @@ void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry) const
 
         if (flags & 0x1)
         {
-            data << uint8(plr->getLevel());
+            data << uint8(plr->GetLevel());
             data << uint8(plr->getClass());
             data << uint8(plr->getRace());
 

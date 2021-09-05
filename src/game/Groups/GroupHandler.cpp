@@ -118,7 +118,7 @@ void WorldSession::HandleGroupInviteOpcode(WorldPacket& recv_data)
     if (!initiatorGroup)
         initiatorGroup = initiator->GetGroupInvite();
 
-    if (initiatorGroup && initiatorGroup->isRaidGroup() && !recipient->GetAllowLowLevelRaid() && (recipient->getLevel() < sWorld.getConfig(CONFIG_UINT32_MIN_LEVEL_FOR_RAID)))
+    if (initiatorGroup && initiatorGroup->isRaidGroup() && !recipient->GetAllowLowLevelRaid() && (recipient->GetLevel() < sWorld.getConfig(CONFIG_UINT32_MIN_LEVEL_FOR_RAID)))
     {
         SendPartyResult(PARTY_OP_INVITE, "", ERR_RAID_DISALLOWED_BY_LEVEL);
         return;
@@ -691,7 +691,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player* player, WorldPacke
         data << uint16(player->GetMaxPower(powerType));
 
     if (mask & GROUP_UPDATE_FLAG_LEVEL)
-        data << uint16(player->getLevel());
+        data << uint16(player->GetLevel());
 
     if (mask & GROUP_UPDATE_FLAG_ZONE)
         data << uint16(player->GetZoneId());
@@ -838,7 +838,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode(WorldPacket& recv_data)
     data << uint8(powerType);                               // GROUP_UPDATE_FLAG_POWER_TYPE
     data << uint16(player->GetPower(powerType));            // GROUP_UPDATE_FLAG_CUR_POWER
     data << uint16(player->GetMaxPower(powerType));         // GROUP_UPDATE_FLAG_MAX_POWER
-    data << uint16(player->getLevel());                     // GROUP_UPDATE_FLAG_LEVEL
+    data << uint16(player->GetLevel());                     // GROUP_UPDATE_FLAG_LEVEL
 
     // verify player coordinates and zoneid to send to teammates
     uint16 iZoneId = 0;

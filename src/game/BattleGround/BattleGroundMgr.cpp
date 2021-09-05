@@ -2358,8 +2358,8 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket& data, ObjectGuid 
     uint32 winArena  = player->HasWonRandomBattleground() ? BG_REWARD_WINNER_ARENA_LAST : BG_REWARD_WINNER_ARENA_FIRST;
     uint32 loseKills = player->HasWonRandomBattleground() ? BG_REWARD_LOOSER_HONOR_LAST : BG_REWARD_LOOSER_HONOR_FIRST;
 
-    winKills  = (uint32)MaNGOS::Honor::hk_honor_at_level(player->getLevel(), winKills * 4);
-    loseKills = (uint32)MaNGOS::Honor::hk_honor_at_level(player->getLevel(), loseKills * 4);
+    winKills  = (uint32)MaNGOS::Honor::hk_honor_at_level(player->GetLevel(), winKills * 4);
+    loseKills = (uint32)MaNGOS::Honor::hk_honor_at_level(player->GetLevel(), loseKills * 4);
 
     data.Initialize(SMSG_BATTLEFIELD_LIST);
     data << guid;                                          // battlemaster guid
@@ -2398,7 +2398,7 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket& data, ObjectGuid 
         if (BattleGround* bgTemplate = sBattleGroundMgr.GetBattleGroundTemplate(bgTypeId))
         {
             // expected bracket entry
-            if (PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bgTemplate->GetMapId(), player->getLevel()))
+            if (PvPDifficultyEntry const* bracketEntry = GetBattlegroundBracketByLevel(bgTemplate->GetMapId(), player->GetLevel()))
             {
                 BattleGroundBracketId bracketId = bracketEntry->GetBracketId();
                 ClientBattleGroundIdSet const& ids = m_clientBattleGroundIds[bgTypeId][bracketId];

@@ -784,7 +784,7 @@ void CalendarMgr::SendCalendarEventInvite(CalendarInvite const* invite) const
 
     Player* player = sObjectMgr.GetPlayer(invite->InviteeGuid);
 
-    uint8 level = player ? player->getLevel() : Player::GetLevelFromDB(invite->InviteeGuid);
+    uint8 level = player ? player->GetLevel() : Player::GetLevelFromDB(invite->InviteeGuid);
     DEBUG_FILTER_LOG(LOG_FILTER_CALENDAR, "SMSG_CALENDAR_EVENT_INVITE");
     WorldPacket data(SMSG_CALENDAR_EVENT_INVITE, 8 + 8 + 8 + 1 + 1 + 1 + (preInvite ? 0 : 4) + 1);
     data << invite->InviteeGuid.WriteAsPacked();
@@ -878,7 +878,7 @@ void CalendarMgr::SendCalendarEvent(Player* player, CalendarEvent const* event, 
         ObjectGuid inviteeGuid = invite->InviteeGuid;
         Player* invitee = sObjectMgr.GetPlayer(inviteeGuid);
 
-        uint8 inviteeLevel = invitee ? invitee->getLevel() : Player::GetLevelFromDB(inviteeGuid);
+        uint8 inviteeLevel = invitee ? invitee->GetLevel() : Player::GetLevelFromDB(inviteeGuid);
         uint32 inviteeGuildId = invitee ? invitee->GetGuildId() : Player::GetGuildIdFromDB(inviteeGuid);
 
         data << inviteeGuid.WriteAsPacked();

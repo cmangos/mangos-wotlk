@@ -189,7 +189,7 @@ uint32 Quest::XPValue(Player* pPlayer) const
         uint32 realXP = 0;
         uint32 xpMultiplier = 0;
         int32 baseLevel = 0;
-        int32 playerLevel = pPlayer->getLevel();
+        int32 playerLevel = pPlayer->GetLevel();
 
         // formula can possibly be organized better, using less if's and simplify some.
 

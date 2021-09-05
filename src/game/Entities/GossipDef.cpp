@@ -418,7 +418,7 @@ void PlayerMenu::SendQuestGiverQuestDetails(Quest const* pQuest, ObjectGuid guid
         }
 
         // send rewMoneyMaxLevel explicit for max player level, else send RewOrReqMoney
-        if (GetMenuSession()->GetPlayer()->getLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+        if (GetMenuSession()->GetPlayer()->GetLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
             data << uint32(pQuest->GetRewMoneyMaxLevel());
         else
             data << uint32(pQuest->GetRewOrReqMoney());
@@ -534,7 +534,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
     }
 
     // send rewMoneyMaxLevel explicit for max player level, else send RewOrReqMoney
-    if (GetMenuSession()->GetPlayer()->getLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
+    if (GetMenuSession()->GetPlayer()->GetLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_PLAYER_LEVEL))
         data << uint32(pQuest->GetRewMoneyMaxLevel());
     else
         data << uint32(pQuest->GetRewOrReqMoney());
@@ -543,7 +543,7 @@ void PlayerMenu::SendQuestGiverOfferReward(Quest const* pQuest, ObjectGuid npcGU
     data << uint32(pQuest->XPValue(GetMenuSession()->GetPlayer()));
 
     // TODO: fixme. rewarded honor points. Multiply with 10 to satisfy client
-    data << uint32(10 * MaNGOS::Honor::hk_honor_at_level(GetMenuSession()->GetPlayer()->getLevel(), pQuest->GetRewHonorAddition()));
+    data << uint32(10 * MaNGOS::Honor::hk_honor_at_level(GetMenuSession()->GetPlayer()->GetLevel(), pQuest->GetRewHonorAddition()));
     data << float(pQuest->GetRewHonorMultiplier());
 
     data << uint32(0x08);                                   // unused by client?

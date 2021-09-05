@@ -308,7 +308,7 @@ bool AchievementCriteriaRequirement::Meets(uint32 criteria_id, Player const* sou
         case ACHIEVEMENT_CRITERIA_REQUIRE_T_LEVEL:
             if (!target)
                 return false;
-            return target->getLevel() >= level.minlevel;
+            return target->GetLevel() >= level.minlevel;
         case ACHIEVEMENT_CRITERIA_REQUIRE_T_GENDER:
             if (!target)
                 return false;
@@ -1019,7 +1019,7 @@ void AchievementMgr::UpdateAchievementCriteria(AchievementCriteriaTypes type, ui
                 if (!ok)
                     continue;
 
-                change = GetPlayer()->getLevel();
+                change = GetPlayer()->GetLevel();
                 progressType = PROGRESS_HIGHEST;
                 break;
             }

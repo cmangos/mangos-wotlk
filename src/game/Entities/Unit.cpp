@@ -2295,9 +2295,9 @@ float Unit::CalcArmorReducedDamage(Unit* pVictim, const float damage)
     // Apply Player CR_ARMOR_PENETRATION rating and percent talents
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        float maxArmorPen = 400 + 85 * pVictim->getLevel();
-        if (getLevel() > 59)
-            maxArmorPen += 4.5f * 85 * (pVictim->getLevel() - 59);
+        float maxArmorPen = 400 + 85 * pVictim->GetLevel();
+        if (GetLevel() > 59)
+            maxArmorPen += 4.5f * 85 * (pVictim->GetLevel() - 59);
         // Cap ignored armor to this value
         maxArmorPen = std::min(((armor + maxArmorPen) / 3), armor);
         // Also, armor penetration is limited to 100% since 3.1.2, before greater values did
@@ -2309,7 +2309,7 @@ float Unit::CalcArmorReducedDamage(Unit* pVictim, const float damage)
     if (armor < 0.0f)
         armor = 0.0f;
 
-    float levelModifier = (float)getLevel();
+    float levelModifier = (float)GetLevel();
     if (levelModifier > 59)
         levelModifier = levelModifier + (4.5f * (levelModifier - 59));
 
@@ -3129,7 +3129,7 @@ float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
 
     if (spellLevel < 20)
         LvlPenalty = (20.0f - spellLevel) * 3.75f;
-    float LvlFactor = (float(spellLevel) + 6.0f) / float(getLevel());
+    float LvlFactor = (float(spellLevel) + 6.0f) / float(GetLevel());
     if (LvlFactor > 1.0f)
         LvlFactor = 1.0f;
 
@@ -8175,7 +8175,7 @@ uint32 Unit::SpellDamageBonusDone(Unit* victim, SpellEntry const* spellProto, ui
                     float multiplier = 3.0f;
 
                     // if target have higher level
-                    if (victim->getLevel() > getLevel())
+                    if (victim->GetLevel() > GetLevel())
                         // Glyph of Ice Lance
                         if (Aura* glyph = GetDummyAura(56377))
                             multiplier = glyph->GetModifier()->m_amount;
@@ -12994,7 +12994,7 @@ Unit* Unit::TakePossessOf(SpellEntry const* spellEntry, SummonPropertiesEntry co
     possessed->SetUInt32Value(UNIT_CREATED_BY_SPELL, spellEntry->Id);   // set the spell id used to create this (may be used for removing corresponding aura
     possessed->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_POSSESSED);          // set flag for client that mean this unit is controlled by a player
     possessed->addUnitState(UNIT_STAT_POSSESSED);                       // also set internal unit state flag
-    possessed->SelectLevel(getLevel());                                 // set level to same level than summoner TODO:: not sure its always the case...
+    possessed->SelectLevel(GetLevel());                                 // set level to same level than summoner TODO:: not sure its always the case...
     possessed->SetLinkedToOwnerAura(TEMPSPAWN_LINKED_AURA_OWNER_CHECK | TEMPSPAWN_LINKED_AURA_REMOVE_OWNER); // set what to do if linked aura is removed or the creature is dead.
 
     // important before adding to the map!
@@ -13669,7 +13669,7 @@ void Unit::UpdateAllowedPositionZ(float x, float y, float& z, Map* atMap /*=null
 
 uint32 Unit::GetSpellRank(SpellEntry const* spellInfo)
 {
-    uint32 spellRank = getLevel();
+    uint32 spellRank = GetLevel();
     if (spellInfo->maxLevel > 0 && spellRank >= spellInfo->maxLevel * 5)
         spellRank = spellInfo->maxLevel * 5;
     return spellRank;
@@ -13677,7 +13677,7 @@ uint32 Unit::GetSpellRank(SpellEntry const* spellInfo)
 
 float Unit::OCTRegenHPPerSpirit() const
 {
-    uint32 level = getLevel();
+    uint32 level = GetLevel();
     uint32 pclass = getClass();
 
     if (level > GT_MAX_LEVEL) level = GT_MAX_LEVEL;
@@ -13698,7 +13698,7 @@ float Unit::OCTRegenHPPerSpirit() const
 
 float Unit::OCTRegenMPPerSpirit() const
 {
-    uint32 level = getLevel();
+    uint32 level = GetLevel();
     uint32 pclass = getClass();
 
     if (level > GT_MAX_LEVEL) level = GT_MAX_LEVEL;

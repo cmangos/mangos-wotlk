@@ -1197,7 +1197,7 @@ class Player : public Unit
         // Legacy taxi system
         PlayerTaxi m_taxi;
 
-        void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(getRace(), getClass(), getLevel()); }
+        void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(getRace(), getClass(), GetLevel()); }
 
         bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, Creature* npc = nullptr, uint32 spellid = 0);
         bool ActivateTaxiPathTo(uint32 path_id, uint32 spellid = 0);
@@ -1401,7 +1401,7 @@ class Player : public Unit
         /*********************************************************/
 
         // Return player level when QuestLevel is dynamic (-1)
-        uint32 GetQuestLevelForPlayer(Quest const* pQuest) const { return pQuest && (pQuest->GetQuestLevel() > 0) ? (uint32)pQuest->GetQuestLevel() : getLevel(); }
+        uint32 GetQuestLevelForPlayer(Quest const* pQuest) const { return pQuest && (pQuest->GetQuestLevel() > 0) ? (uint32)pQuest->GetQuestLevel() : GetLevel(); }
 
         void PrepareQuestMenu(ObjectGuid guid) const;
         void SendPreparedQuest(ObjectGuid guid) const;

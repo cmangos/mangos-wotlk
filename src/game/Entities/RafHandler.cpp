@@ -44,9 +44,9 @@ void WorldSession::HandleGrantLevel(WorldPacket& recv_data)
         error = ERR_REFER_A_FRIEND_NOT_REFERRED_BY;
     else if (target->GetTeam() != _player->GetTeam())
         error = ERR_REFER_A_FRIEND_DIFFERENT_FACTION;
-    else if (target->getLevel() >= _player->getLevel())
+    else if (target->GetLevel() >= _player->GetLevel())
         error = ERR_REFER_A_FRIEND_TARGET_TOO_HIGH;
-    else if (target->getLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
+    else if (target->GetLevel() >= sWorld.getConfig(CONFIG_UINT32_MAX_RECRUIT_A_FRIEND_BONUS_PLAYER_LEVEL))
         error = ERR_REFER_A_FRIEND_GRANT_LEVEL_MAX_I;
     else if (target->GetGroup() != _player->GetGroup())
         error = ERR_REFER_A_FRIEND_NOT_IN_GROUP;
@@ -92,5 +92,5 @@ void WorldSession::HandleAcceptLevelGrant(WorldPacket& recv_data)
     else
         return;
 
-    _player->GiveLevel(_player->getLevel() + 1);
+    _player->GiveLevel(_player->GetLevel() + 1);
 }

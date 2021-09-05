@@ -1405,12 +1405,12 @@ class Unit : public WorldObject
         void clearUnitState(uint32 f) { m_state &= ~f; }
         bool CanFreeMove() const { return !hasUnitState(UNIT_STAT_NO_FREE_MOVE) && !GetOwnerGuid(); }
 
-        virtual uint32 GetLevelForTarget(Unit const* /*target*/) const { return getLevel(); }
+        virtual uint32 GetLevelForTarget(Unit const* /*target*/) const { return GetLevel(); }
         bool IsTrivialForTarget(Unit const* pov) const;
 
         void SetLevel(uint32 lvl);
 
-        uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
+        uint32 GetLevel() const override { return GetUInt32Value(UNIT_FIELD_LEVEL); }
         virtual uint8 getRace() const { return GetByteValue(UNIT_FIELD_BYTES_0, 0); }
         uint32 getRaceMask() const { return getRace() ? 1 << (getRace() - 1) : 0; }
         uint8 getClass() const { return GetByteValue(UNIT_FIELD_BYTES_0, 1); }
@@ -1550,7 +1550,7 @@ class Unit : public WorldObject
         void SetVehicleId(uint32 entry, uint32 overwriteNpcEntry);
         Unit const* FindRootVehicle(const Unit* whichVehicle = nullptr) const;
 
-        uint16 GetSkillMaxForLevel(Unit const* target = nullptr) const { return (target ? GetLevelForTarget(target) : getLevel()) * 5; }
+        uint16 GetSkillMaxForLevel(Unit const* target = nullptr) const { return (target ? GetLevelForTarget(target) : GetLevel()) * 5; }
 
         void Suicide();
         static void DealDamageMods(Unit* dealer, Unit* victim, uint32& damage, uint32* absorb, DamageEffectType damagetype, SpellEntry const* spellProto = nullptr);
@@ -1684,7 +1684,7 @@ class Unit : public WorldObject
         float CalculateSpellResistChance(const Unit* victim, SpellSchoolMask schoolMask, const SpellEntry* spell) const;
 
         virtual uint32 GetShieldBlockValue() const = 0;
-        uint32 GetUnitMeleeSkill(Unit const* target = nullptr) const { return (target ? GetLevelForTarget(target) : getLevel()) * 5; }
+        uint32 GetUnitMeleeSkill(Unit const* target = nullptr) const { return (target ? GetLevelForTarget(target) : GetLevel()) * 5; }
         uint32 GetDefenseSkillValue(Unit const* target = nullptr) const;
         uint32 GetWeaponSkillValue(WeaponAttackType attType, Unit const* target = nullptr) const;
         float GetWeaponProcChance() const;
