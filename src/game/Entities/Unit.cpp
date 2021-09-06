@@ -5427,7 +5427,7 @@ bool Unit::AddSpellAuraHolder(SpellAuraHolder* holder)
                     continue;
 
                 // Carry over removed Aura's remaining damage if Aura still has ticks remaining
-                if (foundHolder->GetSpellProto()->HasAttribute(SPELL_ATTR_EX4_STACK_DOT_MODIFIER))
+                if (foundHolder->GetSpellProto()->Id == 12654) // Rolling ignites
                 {
                     for (int32 i = 0; i < MAX_EFFECT_INDEX; ++i)
                     {
