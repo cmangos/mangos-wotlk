@@ -2489,7 +2489,7 @@ void PlayerbotAI::HandleBotOutgoingPacket(const WorldPacket& packet)
                     {
                         // calculate skill requirement
                         uint32 skillValue = m_bot->GetSkillValue(reqSkill);
-                        uint32 targetLevel = c->getLevel();
+                        uint32 targetLevel = c->GetLevel();
                         uint32 reqSkillValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel - 10) * 10 : targetLevel * 5;
                         if (skillValue >= reqSkillValue)
                         {
@@ -4012,7 +4012,7 @@ void PlayerbotAI::DoLoot()
                                                  (HasCollectFlag(COLLECT_FLAG_SKIN) && skillId == SKILL_SKINNING)))
                 {
                     // calculate skinning skill requirement
-                    uint32 targetLevel = c->getLevel();
+                    uint32 targetLevel = c->GetLevel();
                     reqSkillValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel - 10) * 10 : targetLevel * 5;
                 }
 
@@ -5760,7 +5760,7 @@ SpellCastResult PlayerbotAI::Buff(uint32 spellId, Unit* target, void (*beforeCas
         return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
     // Select appropriate spell rank for target's level
-    spellProto = sSpellMgr.SelectAuraRankForLevel(spellProto, target->getLevel());
+    spellProto = sSpellMgr.SelectAuraRankForLevel(spellProto, target->GetLevel());
     if (!spellProto)
         return SPELL_NOT_FOUND;
 
@@ -8254,14 +8254,14 @@ void PlayerbotAI::_doSellItem(Item* const item, std::ostringstream& report, std:
         // We'll check to make sure its not a tradeskill tool, quest item etc, things that we don't want to lose.
         if (pProto->SellPrice > 0 && (pProto->Quality == ITEM_QUALITY_NORMAL || pProto->Quality == ITEM_QUALITY_UNCOMMON) && pProto->SubClass != ITEM_SUBCLASS_QUEST)
         {
-            if (pProto->RequiredLevel < (m_bot->getLevel() - m_mgr.gConfigSellLevelDiff) && pProto->SubClass != ITEM_SUBCLASS_WEAPON_MISC && pProto->FoodType == 0)
+            if (pProto->RequiredLevel < (m_bot->GetLevel() - m_mgr.gConfigSellLevelDiff) && pProto->SubClass != ITEM_SUBCLASS_WEAPON_MISC && pProto->FoodType == 0)
             {
                 if (pProto->Class == ITEM_CLASS_WEAPON)
                     autosell = 1;
                 if (pProto->Class == ITEM_CLASS_ARMOR)
                     autosell = 1;
             }
-            if (pProto->SubClass == ITEM_SUBCLASS_FOOD && (pProto->RequiredLevel < (m_bot->getLevel() - m_mgr.gConfigSellLevelDiff)))
+            if (pProto->SubClass == ITEM_SUBCLASS_FOOD && (pProto->RequiredLevel < (m_bot->GetLevel() - m_mgr.gConfigSellLevelDiff)))
             {
                 autosell = 1;
             }
@@ -8986,14 +8986,14 @@ bool PlayerbotAI::DropGarbage(bool bVerbose)
             }
             if (m_dropWhite && item->GetProto()->SellPrice > 0 && (item->GetProto()->Quality == ITEM_QUALITY_NORMAL || item->GetProto()->Quality == ITEM_QUALITY_UNCOMMON) && item->GetProto()->SubClass != ITEM_SUBCLASS_QUEST)
             {
-                if (pProto->RequiredLevel < (m_bot->getLevel() - m_mgr.gConfigSellLevelDiff) && pProto->SubClass != ITEM_SUBCLASS_WEAPON_MISC && pProto->FoodType == 0)
+                if (pProto->RequiredLevel < (m_bot->GetLevel() - m_mgr.gConfigSellLevelDiff) && pProto->SubClass != ITEM_SUBCLASS_WEAPON_MISC && pProto->FoodType == 0)
                 {
                     if (pProto->Class == ITEM_CLASS_WEAPON)
                         autodrop = true;
                     if (pProto->Class == ITEM_CLASS_ARMOR)
                         autodrop = true;
                 }
-                if (pProto->SubClass == ITEM_SUBCLASS_FOOD && (pProto->RequiredLevel < (m_bot->getLevel() - m_mgr.gConfigSellLevelDiff)))
+                if (pProto->SubClass == ITEM_SUBCLASS_FOOD && (pProto->RequiredLevel < (m_bot->GetLevel() - m_mgr.gConfigSellLevelDiff)))
                 {
                     autodrop = true;
                 }
@@ -9026,14 +9026,14 @@ bool PlayerbotAI::DropGarbage(bool bVerbose)
                     }
                     if (m_dropWhite && item->GetProto()->SellPrice > 0 && (item->GetProto()->Quality == ITEM_QUALITY_NORMAL || item->GetProto()->Quality == ITEM_QUALITY_UNCOMMON) && item->GetProto()->SubClass != ITEM_SUBCLASS_QUEST)
                     {
-                        if (pProto->RequiredLevel < (m_bot->getLevel() - m_mgr.gConfigSellLevelDiff) && pProto->SubClass != ITEM_SUBCLASS_WEAPON_MISC && pProto->FoodType == 0)
+                        if (pProto->RequiredLevel < (m_bot->GetLevel() - m_mgr.gConfigSellLevelDiff) && pProto->SubClass != ITEM_SUBCLASS_WEAPON_MISC && pProto->FoodType == 0)
                         {
                             if (pProto->Class == ITEM_CLASS_WEAPON)
                                 autodrop = true;
                             if (pProto->Class == ITEM_CLASS_ARMOR)
                                 autodrop = true;
                         }
-                        if (pProto->SubClass == ITEM_SUBCLASS_FOOD && (pProto->RequiredLevel < (m_bot->getLevel() - m_mgr.gConfigSellLevelDiff)))
+                        if (pProto->SubClass == ITEM_SUBCLASS_FOOD && (pProto->RequiredLevel < (m_bot->GetLevel() - m_mgr.gConfigSellLevelDiff)))
                         {
                             autodrop = true;
                         }
