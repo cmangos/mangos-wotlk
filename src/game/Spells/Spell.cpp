@@ -8333,35 +8333,11 @@ void Spell::FillRaidOrPartyTargets(UnitList& targetUnitMap, Unit* member, Unit* 
 void Spell::FillRaidOrPartyManaPriorityTargets(UnitList& targetUnitMap, Unit* member, Unit* center, float radius, uint32 count, bool raid, bool withPets, bool withCaster)
 {
     FillRaidOrPartyTargets(targetUnitMap, member, center, radius, raid, withPets, withCaster);
-
-    PrioritizeManaUnitQueue manaUsers;
-    for (UnitList::const_iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr)
-        if ((*itr)->GetPowerType() == POWER_MANA && !(*itr)->IsDead())
-            manaUsers.push(PrioritizeManaUnitWraper(*itr));
-
-    targetUnitMap.clear();
-    while (!manaUsers.empty() && targetUnitMap.size() < count)
-    {
-        targetUnitMap.push_back(manaUsers.top().getUnit());
-        manaUsers.pop();
-    }
 }
 
 void Spell::FillRaidOrPartyHealthPriorityTargets(UnitList& targetUnitMap, Unit* member, Unit* center, float radius, uint32 count, bool raid, bool withPets, bool withCaster)
 {
     FillRaidOrPartyTargets(targetUnitMap, member, center, radius, raid, withPets, withCaster);
-
-    PrioritizeHealthUnitQueue healthQueue;
-    for (UnitList::const_iterator itr = targetUnitMap.begin(); itr != targetUnitMap.end(); ++itr)
-        if (!(*itr)->IsDead())
-            healthQueue.push(PrioritizeHealthUnitWraper(*itr));
-
-    targetUnitMap.clear();
-    while (!healthQueue.empty() && targetUnitMap.size() < count)
-    {
-        targetUnitMap.push_back(healthQueue.top().getUnit());
-        healthQueue.pop();
-    }
 }
 
 WorldObject* Spell::GetAffectiveCasterObject() const
@@ -8915,6 +8891,36 @@ void Spell::FilterTargetMap(UnitList& filterUnitList, SpellTargetFilterScheme sc
                 --chainTargetCount;
             }
             std::swap(filterUnitList, newList);
+            break;
+        }
+        case SCHEME_PRIORITIZE_HEALTH:
+        {
+            PrioritizeHealthUnitQueue healthQueue;
+            for (Unit* unit : filterUnitList)
+                if (!unit->IsDead())
+                    healthQueue.push(PrioritizeHealthUnitWraper(unit));
+
+            filterUnitList.clear();
+            while (!healthQueue.empty() && filterUnitList.size() < m_affectedTargetCount)
+            {
+                filterUnitList.push_back(healthQueue.top().getUnit());
+                healthQueue.pop();
+            }
+            break;
+        }
+        case SCHEME_PRIORITIZE_MANA:
+        {
+            PrioritizeManaUnitQueue manaUsers;
+            for (Unit* unit : filterUnitList)
+                if (unit->GetPowerType() == POWER_MANA && !unit->IsDead())
+                    manaUsers.push(PrioritizeManaUnitWraper(unit));
+
+            filterUnitList.clear();
+            while (!manaUsers.empty() && filterUnitList.size() < m_affectedTargetCount)
+            {
+                filterUnitList.push_back(manaUsers.top().getUnit());
+                manaUsers.pop();
+            }
             break;
         }
     }
