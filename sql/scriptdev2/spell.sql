@@ -432,6 +432,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (57283,'spell_remove_mushroom_power'),
 (57473,'spell_arcane_storm'),
 (57578,'spell_lava_strike'),
+(57669,'spell_replenishment'),
 (58418,'spell_portal_to_capital_city'),
 (58420,'spell_portal_to_capital_city'),
 (59275,'spell_summon_gauntlet_mobs_periodic_aura'),
@@ -556,7 +557,16 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (27827,'spell_spirit_of_redemption_heal'),
 (33076,'spell_prayer_of_mending'),
 (33206,'spell_pain_suppression'),
-(34433,'spell_shadowfiend');
+(34433,'spell_shadowfiend'),
+(64844,'spell_divine_hymn'),
+(64904,'spell_hymn_of_hope'),
+(34861,'spell_circle_of_healing'),
+(34863,'spell_circle_of_healing'),
+(34864,'spell_circle_of_healing'),
+(34865,'spell_circle_of_healing'),
+(34866,'spell_circle_of_healing'),
+(48088,'spell_circle_of_healing'),
+(48089,'spell_circle_of_healing');
 
 -- Paladin
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
@@ -697,7 +707,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (1178,'spell_druid_form_scaling_ap_auras'),
 (3025,'spell_druid_form_scaling_ap_auras'),
 (9635,'spell_druid_form_scaling_ap_auras'),
-(24905,'spell_druid_form_scaling_ap_auras');
+(24905,'spell_druid_form_scaling_ap_auras'),
+(48438,'spell_wild_growth'),
+(53248,'spell_wild_growth'),
+(53249,'spell_wild_growth'),
+(53251,'spell_wild_growth');
 
 -- Rogue
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
@@ -738,7 +752,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (52134,'spell_damage_trigger_shield'),
 (52136,'spell_damage_trigger_shield'),
 (52138,'spell_damage_trigger_shield'),
-(57960,'spell_damage_trigger_shield');
+(57960,'spell_damage_trigger_shield'),
+(52759,'spell_ancestral_awakening');
 
 -- Battleground and Outdoor PvP
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

@@ -1197,6 +1197,22 @@ struct spell_seed_of_corruption_npc : public AuraScript
     }
 };
 
+// PX-238 Winter Wondervolt TRAP
+struct WondervoltTrap : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_0)
+        {
+            uint32 spells[4] = {26272, 26157, 26273, 26274};    // Four possible transform spells
+            if (spell->GetUnitTarget())
+                spell->GetUnitTarget()->CastSpell(spell->GetUnitTarget(), spells[urand(0, 3)], TRIGGERED_OLD_TRIGGERED);
+        }
+    }
+};
+
+// wotlk section
+
 struct deflection : public SpellScript
 {
     SpellCastResult OnCheckCast(Spell* spell, bool/* strict*/) const override
@@ -1226,17 +1242,22 @@ struct spell_eject_all_passengers : public SpellScript
     }
 };
 
-// PX-238 Winter Wondervolt TRAP
-struct WondervoltTrap : public SpellScript
+struct Replenishment : public SpellScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnInit(Spell* spell) const override
     {
-        if (effIdx == EFFECT_INDEX_0)
-        {
-            uint32 spells[4] = {26272, 26157, 26273, 26274};    // Four possible transform spells
-            if (spell->GetUnitTarget())
-                spell->GetUnitTarget()->CastSpell(spell->GetUnitTarget(), spells[urand(0, 3)], TRIGGERED_OLD_TRIGGERED);
-        }
+        spell->SetMaxAffectedTargets(10);
+        spell->SetFilteringScheme(EFFECT_INDEX_0, false, SCHEME_PRIORITIZE_MANA);
+    }
+
+    bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (caster->GetMap()->IsBattleArena()) // in arenas only hits caster
+            if (target != caster)
+                return false;
+
+        return true;
     }
 };
 
@@ -1269,4 +1290,7 @@ void AddSC_spell_scripts()
     RegisterSpellScript<deflection>("spell_deflection");
     RegisterSpellScript<spell_eject_all_passengers>("spell_eject_all_passengers");
     RegisterSpellScript<WondervoltTrap>("spell_wondervolt_trap");
+
+    // wotlk section
+    RegisterSpellScript<Replenishment>("spell_replenishment");
 }

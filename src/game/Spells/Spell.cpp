@@ -2440,18 +2440,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
         }
         case TARGET_ENUM_UNITS_RAID_WITHIN_CASTER_RANGE:
         {
-            if (m_spellInfo->Id == 57669)                   // Replenishment (special target selection)
-            {
-                // in arena, target should be only caster
-                if (m_caster->GetMap()->IsBattleArena())
-                    tempUnitList.push_back(m_caster);
-                else
-                    FillRaidOrPartyManaPriorityTargets(tempUnitList, m_caster, m_caster, radius, 10, true, false, true);
-            }
-            else if (m_spellInfo->Id == 52759)              // Ancestral Awakening (special target selection)
-                FillRaidOrPartyHealthPriorityTargets(tempUnitList, m_caster, m_caster, radius, 1, true, false, true);
-            else
-                FillRaidOrPartyTargets(tempUnitList, m_caster, m_caster, radius, true, true, IsPositiveSpell(m_spellInfo->Id));
+            FillRaidOrPartyTargets(tempUnitList, m_caster, m_caster, radius, true, true, IsPositiveSpell(m_spellInfo->Id));
             break;
         }
         case TARGET_UNIT_FRIEND:
@@ -2526,21 +2515,8 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
             FillAreaTargets(tempUnitList, radius, cone, PUSH_SELF_CENTER, SPELL_TARGETS_AOE_ATTACKABLE);
             break;
         case TARGET_ENUM_UNITS_FRIEND_AOE_AT_SRC_LOC:
-            switch (m_spellInfo->Id)
-            {
-                case 64844:                                 // Divine Hymn
-                    // target amount stored in parent spell dummy effect but hard to access
-                    FillRaidOrPartyHealthPriorityTargets(tempUnitList, m_caster, m_caster, radius, 3, true, false, true);
-                    break;
-                case 64904:                                 // Hymn of Hope
-                    // target amount stored in parent spell dummy effect but hard to access
-                    FillRaidOrPartyManaPriorityTargets(tempUnitList, m_caster, m_caster, radius, 3, true, false, true);
-                    break;
-                default:
-                    // selected friendly units (for casting objects) around casting object
-                    FillAreaTargets(tempUnitList, radius, cone, PUSH_SELF_CENTER, SPELL_TARGETS_ASSISTABLE, GetCastingObject());
-                    break;
-            }
+            // selected friendly units (for casting objects) around casting object
+            FillAreaTargets(tempUnitList, radius, cone, PUSH_SELF_CENTER, SPELL_TARGETS_ASSISTABLE, GetCastingObject());
             break;
         case TARGET_ENUM_UNITS_FRIEND_AOE_AT_DEST_LOC:
             // Death Pact (in fact selection by player selection)
@@ -2550,30 +2526,6 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
                 if (m_caster->GetTypeId() == TYPEID_PLAYER)
                     if (Unit* target = m_caster->GetMap()->GetPet(((Player*)m_caster)->GetSelectionGuid()))
                         tempUnitList.push_back(target);
-            }
-            // Circle of Healing
-            else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellInfo->SpellVisual[0] == 8253)
-            {
-                Unit* target = m_targets.getUnitTarget();
-                if (!target)
-                    target = m_caster;
-
-                uint32 count = 5;
-                // Glyph of Circle of Healing
-                if (Aura const* glyph = m_caster->GetDummyAura(55675))
-                    count += glyph->GetModifier()->m_amount;
-
-                FillRaidOrPartyHealthPriorityTargets(tempUnitList, m_caster, target, radius, count, true, false, true);
-            }
-            // Wild Growth
-            else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && m_spellInfo->SpellIconID == 2864)
-            {
-                Unit* target = m_targets.getUnitTarget();
-                if (!target)
-                    target = m_caster;
-                uint32 count = CalculateSpellEffectValue(EFFECT_INDEX_2, m_caster); // stored in dummy effect, affected by mods
-
-                FillRaidOrPartyHealthPriorityTargets(tempUnitList, m_caster, target, radius, count, true, false, true);
             }
             else
                 FillAreaTargets(tempUnitList, radius, cone, PUSH_DEST_CENTER, SPELL_TARGETS_ASSISTABLE);
