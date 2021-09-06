@@ -3789,7 +3789,7 @@ void Spell::SetCastItem(Item* item)
 
 void Spell::SendSpellCooldown()
 {
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    if (m_trueCaster->IsPlayer())
     {
         Player* casterPlayer = static_cast<Player*>(m_caster);
         // mana/health/etc potions, disabled by client (until combat out as declarate)
@@ -4072,8 +4072,8 @@ void Spell::finish(bool ok)
     }
 
     // potions disabled by client, send event "not in combat" if need
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)m_caster)->UpdatePotionCooldown(this);
+    if (m_trueCaster->IsPlayer())
+        static_cast<Player*>(m_caster)->UpdatePotionCooldown(this);
 
     // call triggered spell only at successful cast (after clear combo points -> for add some if need)
     if (!m_TriggerSpells.empty())
