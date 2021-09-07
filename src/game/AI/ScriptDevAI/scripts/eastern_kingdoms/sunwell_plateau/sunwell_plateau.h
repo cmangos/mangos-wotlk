@@ -195,6 +195,7 @@ class instance_sunwell_plateau : public ScriptedInstance, private DialogueHelper
         void SpawnTwins();
         void SpawnMuru();
         void SpawnKiljaeden();
+        void FailKiljaeden();
 
         void StartImps();
         void StopImps();

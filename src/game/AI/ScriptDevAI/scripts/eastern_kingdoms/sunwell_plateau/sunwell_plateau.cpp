@@ -420,39 +420,7 @@ void instance_sunwell_plateau::SetData(uint32 type, uint32 data)
             if (data == IN_PROGRESS && GetData(TYPE_MURU) != DONE)
                 BanPlayersIfNoGm("Player engaged KJ without killing muru and Gamemaster being present in instance.");
             if (data == FAIL)
-            {
-                m_uiDeceiversKilled = 0;
-
-                // Respawn Orbs
-                std::vector<uint32> gos = { GO_ORB_BLUE_FLIGHT_1, GO_ORB_BLUE_FLIGHT_2, GO_ORB_BLUE_FLIGHT_3, GO_ORB_BLUE_FLIGHT_4};
-                for (uint32 entry : gos)
-                {
-                    if (GameObject* object = GetSingleGameObjectFromStorage(entry))
-                    {
-                        object->SetForcedDespawn();
-                        object->SetRespawnDelay(30, true);
-                        object->SetLootState(GO_JUST_DEACTIVATED);
-                    }
-                }
-
-                GuidVector guids;
-                GetCreatureGuidVectorFromStorage(NPC_BLUE_ORB_TARGET, guids);
-                for (auto& guid : guids)
-                    if (Creature* creature = instance->GetCreature(guid))
-                        creature->RemoveDynObject(SPELL_RING_BLUE_FLAME);
-
-                GuidVector sinister;
-                GetCreatureGuidVectorFromStorage(NPC_SINISTER_REFLECTION, sinister);
-                for (auto& guid : sinister)
-                    if (Creature* creature = instance->GetCreature(guid))
-                        creature->ForcedDespawn();
-
-                if (Creature* kalec = GetSingleCreatureFromStorage(NPC_KALECGOS))
-                    kalec->ForcedDespawn();
-
-                // Respawn deceivers
-                RespawnDbGuids(m_kiljaedenRespawnDbGuids, 30);
-            }
+                FailKiljaeden();
             break;
     }
 
@@ -678,6 +646,42 @@ void instance_sunwell_plateau::SpawnKiljaeden()
 {
     for (uint32 i = 349u; i <= 364u; ++i)
         Creature* creature = WorldObject::SpawnCreature(GUID_PREFIX + i, instance);
+}
+
+void instance_sunwell_plateau::FailKiljaeden()
+{
+    m_uiDeceiversKilled = 0;
+
+    // Respawn Orbs
+    std::vector<uint32> gos = { GO_ORB_BLUE_FLIGHT_1, GO_ORB_BLUE_FLIGHT_2, GO_ORB_BLUE_FLIGHT_3, GO_ORB_BLUE_FLIGHT_4 };
+    for (uint32 entry : gos)
+    {
+        if (GameObject* object = GetSingleGameObjectFromStorage(entry))
+        {
+            object->SetForcedDespawn();
+            object->SetRespawnDelay(30, true);
+            object->SetLootState(GO_JUST_DEACTIVATED);
+        }
+    }
+
+    GuidVector guids;
+    GetCreatureGuidVectorFromStorage(NPC_BLUE_ORB_TARGET, guids);
+    for (auto& guid : guids)
+        if (Creature* creature = instance->GetCreature(guid))
+            creature->RemoveDynObject(SPELL_RING_BLUE_FLAME);
+
+    GuidVector sinister;
+    GetCreatureGuidVectorFromStorage(NPC_SINISTER_REFLECTION, sinister);
+    for (auto& guid : sinister)
+        if (Creature* creature = instance->GetCreature(guid))
+            creature->ForcedDespawn();
+
+    if (Creature* kalec = GetSingleCreatureFromStorage(NPC_KALECGOS))
+        kalec->ForcedDespawn();
+
+    // Respawn deceivers
+    RespawnDbGuids(m_kiljaedenRespawnDbGuids, 30);
+    m_kiljaedenRespawnDbGuids.clear();
 }
 
 void instance_sunwell_plateau::ImpYell()
