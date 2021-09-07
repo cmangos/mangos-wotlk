@@ -28,12 +28,8 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`
 ('50574','256','0','0','0','0','101','0','90','25','0','11','0','28042','0','0','1','Captain Brandon Kill Credit'),
 ('62388','0','0','0','0','0','101','21','6','1','0','0','4','0','0','0','1','Aura required for Demonic Circle 48020');
 
--- prince malchezaar spell fixes
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id` IN(30854,30898,39095);
 -- Fix shaman passives triggers on cast
 UPDATE `spell_template` SET `AttributesEx5`=512 WHERE `id` IN(5728,6397,6398,6399,6474,8145,8167,8172,8179,8188,8229,8251,8266,8515,10425,10426,10524,10582,10583,10584,10609,10612,16388,25513,25551,25556,25581,25582,33561);
--- make spell target only one enemy, likely mismatch in dbc during tbc nerfs
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id`=34441;
 
 -- trap used to tame bear is no longer present in TBC/WOTLK yet still present in trap data
 INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`ProcChance`,`SpellLevel`,`RangeIndex`,`EquippedItemClass`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`SpellIconID`,`SpellName`,`MaxTargetLevel`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`IsServerSide`) VALUES
@@ -114,9 +110,6 @@ UPDATE `spell_template` SET `AttributesServerside`=AttributesServerside|1 WHERE 
 
 INSERT INTO `spell_template` (`Id`,`Category`,`Attributes`,`CastingTimeIndex`,`ProcChance`,`BaseLevel`,`SpellLevel`,`RangeIndex`,`EquippedItemClass`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`SpellIconID`,`SpellName`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`IsServerSide`) VALUES
 ('18941', '65', '262416', '1', '101', '14', '14', '1', '-1', '19', '1', '1', '1', '108', 'Double Attack', '2', '2', '1', '1', '1', '1');
-
--- arrow script spell should only hit one target - verified by video and sniff
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id`=30952;
 
 -- spell from classic - needed for proper script
 INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`CasterAuraState`,`TargetAuraState`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`procFlags`,`procChance`,`procCharges`,`maxLevel`,`baseLevel`,`spellLevel`,`DurationIndex`,`powerType`,`manaCost`,`manaCostPerlevel`,`manaPerSecond`,`manaPerSecondPerLevel`,`rangeIndex`,`speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`activeIconID`,`spellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`Rank1`,`Rank2`,`Rank3`,`Rank4`,`Rank5`,`Rank6`,`Rank7`,`Rank8`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`IsServerSide`) VALUES
@@ -223,9 +216,6 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`Effect1`,`Ef
 INSERT INTO `spell_template` (`Id`,`Category`,`Attributes`,`CastingTimeIndex`,`RecoveryTime`,`InterruptFlags`,`baseLevel`,`spellLevel`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectRadiusIndex1`,`EffectMiscValue1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`EffectMiscValueB1`) VALUES
 (38651,1152,256,1,5000,4,70,70,21,7,28,1,1,72,8,22250,1952,'Summon Rancid Mushroom',1,1,64); -- 	Summons a rancid mushroom.
 
--- should only hit one target
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `Id` IN(39032,39042);
-
 -- add removed serverside spell
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`CasterAuraState`,`TargetAuraState`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`ProcFlags`,`ProcChance`,`ProcCharges`,`MaxLevel`,`BaseLevel`,`SpellLevel`,`DurationIndex`,`PowerType`,`ManaCost`,`ManaCostPerlevel`,`ManaPerSecond`,`ManaPerSecondPerLevel`,`RangeIndex`,`Speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`ActiveIconID`,`SpellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`Rank1`,`Rank2`,`Rank3`,`Rank4`,`Rank5`,`Rank6`,`Rank7`,`Rank8`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`IsServerSide`) VALUES
 ('25676', '32','0', '0', '0', '536871168', '136', '4', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '13', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '77', '0', '0', '0',  '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '22', '0', '0', '15', '0', '0', '12', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Drain Mana', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0');
@@ -322,9 +312,6 @@ UPDATE `spell_template` SET `Effect1`=6 WHERE `id`=46012;
 INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`CasterAuraState`,`TargetAuraState`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`ProcFlags`,`ProcChance`,`ProcCharges`,`MaxLevel`,`BaseLevel`,`SpellLevel`,`DurationIndex`,`PowerType`,`ManaCost`,`ManaCostPerlevel`,`ManaPerSecond`,`ManaPerSecondPerLevel`,`RangeIndex`,`Speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`ActiveIconID`,`SpellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`Rank1`,`Rank2`,`Rank3`,`Rank4`,`Rank5`,`Rank6`,`Rank7`,`Rank8`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`IsServerSide`) VALUES
 ('23770', '0', '0', '0', '612368640', '268435592', '1', '1048576', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '527', '0', '0', '0', '0', '0', '6', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '6', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '25', '0', '0', '0', '0', '0', '0', '0', '0', '4', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '120', '0', '0', 'Sayge\'s Carnie Buff', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0');
 
--- Domination
-UPDATE `spell_template` SET `MaxAffectedTargets`=5 WHERE `id`=37135;
-
 -- missing Force Faction auras for Quests around kirin var
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`CastingTimeIndex`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectApplyAuraName1`,`EffectMiscValue1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
 (36216,256,268435456,1,21,13,6,1,2,1,139,1006,1,'Kirin Tor Spirits',1),
@@ -338,7 +325,7 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`rangeIndex`,`Effect1`,`EffectIm
 
 -- Water Globule New Target
 -- target only player
-UPDATE `spell_template` SET `AttributesEx3`=AttributesEx3|0x00000100, `MaxAffectedTargets`=1 WHERE `Id`=39848;
+UPDATE `spell_template` SET `AttributesEx3`=AttributesEx3|0x00000100 WHERE `Id`=39848;
 
 -- Missing vanilla dummy
 INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`CasterAuraState`,`TargetAuraState`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`ProcFlags`,`ProcChance`,`ProcCharges`,`MaxLevel`,`BaseLevel`,`SpellLevel`,`DurationIndex`,`PowerType`,`ManaCost`,`ManaCostPerlevel`,`ManaPerSecond`,`ManaPerSecondPerLevel`,`RangeIndex`,`Speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`ActiveIconID`,`SpellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`Rank1`,`Rank2`,`Rank3`,`Rank4`,`Rank5`,`Rank6`,`Rank7`,`Rank8`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`IsServerSide`) VALUES
@@ -507,10 +494,6 @@ INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Category`,`Dispel`,`Mechanic`,`
 -- C'Thun
 -- Ouro
 -- Viscidus
--- Coilfang Ambusher - Spread Shot
-UPDATE `spell_template` SET `MaxAffectedTargets`=3 WHERE `id`=37790;
--- Spitfire Totem - Scorch
-UPDATE `spell_template` SET `MaxAffectedTargets`=5 WHERE `id`=38296;
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`CastingTimeIndex`,`AuraInterruptFlags`,`DurationIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectMiscValue1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
 (37957,256,1,128,4,76,1,1,18,185033,289,'Gnome Mercy: Summon Collection of Souls Chest',1,1,1);
@@ -652,9 +635,6 @@ INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Attributes`,`AttributesEx`,`baseLevel`,`spellLevel`,`DurationIndex`,`Effect1`,`Effect2`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectImplicitTargetB1`,`EffectApplyAuraName2`,`SpellIconID`,`SpellName`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
 (33673,8,67109248,136,70,70,27,98,6,1,249,1,1,4,1397,'Shockwave',1,1,1,1);
 
--- Murmur pre event visual spell maxtarget 5
-UPDATE `spell_template` SET `MaxAffectedTargets`=5 WHERE `id`=33332;
-
 -- Alar speedup spell while invisible
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`procFlags`,`DurationIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectApplyAuraName1`,`EffectAmplitude1`,`SpellIconID`,`spellPriority`,`SpellName`,`StartRecoveryCategory`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
 (31514,16777472,268435456,268435456,1,21,6,1,74,1,31,1,1539,1,'Flight Mode',133,1,1,1);
@@ -686,18 +666,6 @@ INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`
 INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`CasterAuraState`,`TargetAuraState`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`ProcFlags`,`ProcChance`,`ProcCharges`,`MaxLevel`,`BaseLevel`,`SpellLevel`,`DurationIndex`,`PowerType`,`ManaCost`,`ManaCostPerlevel`,`ManaPerSecond`,`ManaPerSecondPerLevel`,`RangeIndex`,`Speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`ActiveIconID`,`SpellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`Rank1`,`Rank2`,`Rank3`,`Rank4`,`Rank5`,`Rank6`,`Rank7`,`Rank8`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`IsServerSide`) VALUES
 ('22707', '0', '0', '0', '384', '268435456', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '487', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '6', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '26', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '87', '0', '0', 'Root', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '0');
 
--- Serpentshrine Lurker - Rancid Mushroom Primer
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `Id`=38650;
-
--- Lady Vashj - Persuasion 38511
--- missing scripted spell interaction with 38514, the damage/healing component mced targets should also be immune to all cc effects
--- See this as basic, nerfed implementation from the once feared Persuasion Mechanic Vashj had
--- 0
-UPDATE `spell_template` SET `MaxAffectedTargets`=2 WHERE `Id`=38511;
-
--- Shoot Gun - max 1 target
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id`=45761;
-
 -- magtheridon debris select spell
 INSERT INTO `spell_template` (`Id`,`Category`,`Attributes`,`AttributesEx2`,`CategoryRecoveryTime`,`Effect1`,`EffectImplicitTargetA1`,`EffectImplicitTargetB1`,`EffectRadiusIndex1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`MaxAffectedTargets`) VALUES
 (30629,1152,256,4,5000,77,22,7,12,1,'Debris',1,1);
@@ -707,7 +675,7 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx2`,`DurationIndex`,
 (30630,256,4,3,28,18,17516,64,1,'Debris',1);
 
 -- Nightbane Target Charred Earth - should only target one player
-UPDATE `spell_template` SET `AttributesEx3`=AttributesEx3|0x00000100, `MaxAffectedTargets`=1 WHERE `Id`=30209;
+UPDATE `spell_template` SET `AttributesEx3`=AttributesEx3|0x00000100 WHERE `Id`=30209;
 
 -- Shadowmoon infernal immolation spell
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`AttributesEx`,`AttributesEx2`,`AttributesEx3`,`AttributesEx4`,`Stances`,`StancesNot`,`Targets`,`TargetCreatureType`,`RequiresSpellFocus`,`CasterAuraState`,`TargetAuraState`,`CastingTimeIndex`,`RecoveryTime`,`CategoryRecoveryTime`,`InterruptFlags`,`AuraInterruptFlags`,`ChannelInterruptFlags`,`ProcFlags`,`ProcChance`,`ProcCharges`,`MaxLevel`,`BaseLevel`,`SpellLevel`,`DurationIndex`,`PowerType`,`ManaCost`,`ManaCostPerlevel`,`ManaPerSecond`,`ManaPerSecondPerLevel`,`RangeIndex`,`Speed`,`StackAmount`,`Totem1`,`Totem2`,`Reagent1`,`Reagent2`,`Reagent3`,`Reagent4`,`Reagent5`,`Reagent6`,`Reagent7`,`Reagent8`,`ReagentCount1`,`ReagentCount2`,`ReagentCount3`,`ReagentCount4`,`ReagentCount5`,`ReagentCount6`,`ReagentCount7`,`ReagentCount8`,`EquippedItemClass`,`EquippedItemSubClassMask`,`EquippedItemInventoryTypeMask`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectRealPointsPerLevel1`,`EffectRealPointsPerLevel2`,`EffectRealPointsPerLevel3`,`EffectMechanic1`,`EffectMechanic2`,`EffectMechanic3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectImplicitTargetB3`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectRadiusIndex3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectAmplitude1`,`EffectAmplitude2`,`EffectAmplitude3`,`EffectMultipleValue1`,`EffectMultipleValue2`,`EffectMultipleValue3`,`EffectChainTarget1`,`EffectChainTarget2`,`EffectChainTarget3`,`EffectItemType1`,`EffectItemType2`,`EffectItemType3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`EffectTriggerSpell1`,`EffectTriggerSpell2`,`EffectTriggerSpell3`,`EffectPointsPerComboPoint1`,`EffectPointsPerComboPoint2`,`EffectPointsPerComboPoint3`,`SpellVisual`,`SpellIconID`,`ActiveIconID`,`SpellPriority`,`SpellName`,`SpellName2`,`SpellName3`,`SpellName4`,`SpellName5`,`SpellName6`,`SpellName7`,`SpellName8`,`Rank1`,`Rank2`,`Rank3`,`Rank4`,`Rank5`,`Rank6`,`Rank7`,`Rank8`,`ManaCostPercentage`,`StartRecoveryCategory`,`StartRecoveryTime`,`MaxTargetLevel`,`SpellFamilyName`,`SpellFamilyFlags`,`MaxAffectedTargets`,`DmgClass`,`PreventionType`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`,`IsServerSide`) VALUES
@@ -721,15 +689,9 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`rangeIndex`,`Effect1`,`EffectIm
 INSERT INTO `spell_template` (`Id`,`Attributes`,`rangeIndex`,`Effect1`,`EffectImplicitTargetA1`,`EffectItemType1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`) VALUES
 (37245,256,12,24,25,30659,1,'Give Kagrosh''s Pack',1);
 
--- Random Rocket Missile - should only hit one target - per sniff evidence
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `Id`=38054;
-
 -- Cipher of damnation flight speed aura
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`DurationIndex`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectDieSides3`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectBaseDice3`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
 (37246,384,268435456,21,6,6,6,1,1,1,249,249,249,1,1,1,206,32,31,1,'Oronok Speed Increase',1,1,1);
-
--- should only hit one player per Coilfang Sporebat spell tick
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `Id`=38573;
 
 -- serverside component of persuasion
 INSERT INTO `spell_template` (`Id`,`SchoolMask`,`Attributes`,`AttributesEx`,`AttributesEx3`,`DurationIndex`,`Effect1`,`Effect2`,`Effect3`,`EffectDieSides1`,`EffectDieSides2`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetA3`,`EffectApplyAuraName1`,`EffectApplyAuraName2`,`EffectApplyAuraName3`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValue3`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
@@ -811,9 +773,6 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`CastingTimeIndex`,`rangeIndex`,`Effect1`,`EffectImplicitTargetA1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`,`DmgMultiplier3`) VALUES
 (33797,256,268435456,268435712,1,13,3,1,1,'Laugh',1,1,1);
 
--- laugh should only hit one target per tick
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `Id`=33716;
-
 -- remove abort by dmg from all bellowing roars - suspected copy paste
 UPDATE `spell_template` SET `InterruptFlags`=InterruptFlags&~0x10 WHERE `Id` IN(18431,22686,36922,39427,40636,44863);
 
@@ -829,9 +788,6 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`
 
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`baseLevel`,`spellLevel`,`DurationIndex`,`rangeIndex`,`Effect1`,`EffectDieSides1`,`EffectBaseDice1`,`EffectImplicitTargetA1`,`EffectApplyAuraName1`,`EffectMiscValue1`,`SpellIconID`,`SpellName`,`SpellFamilyName`,`SpellFamilyFlags`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
 (35729,262544,33824,66,66,37,1,6,1,-1,1,39,126,1933,'Cloak of Shadows',8,1073741824,1,1);
-
--- Greyheart Nether-Mage - Blink only hits one target
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `Id`=38642;
 
 -- missing doomwalker spell
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx2`,`DurationIndex`,`Effect1`,`Effect2`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectImplicitTargetB1`,`EffectImplicitTargetB2`,`EffectRadiusIndex1`,`EffectRadiusIndex2`,`EffectApplyAuraName1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
@@ -899,14 +855,8 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx2`,`AttributesEx4`,
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`DurationIndex`,`Effect1`,`Effect2`,`EffectDieSides1`,`EffectDieSides2`,`EffectBaseDice1`,`EffectBaseDice2`,`EffectImplicitTargetA1`,`EffectImplicitTargetA2`,`EffectApplyAuraName2`,`EffectMiscValue1`,`EffectMiscValue2`,`EffectMiscValueB1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
 (36724,256,268435456,21,28,6,1,1,1,9999,18,1,18,21364,4,64,1,'Summon Phoenix Egg',1,1);
 
--- Kael MC should only hit 3 targets
-UPDATE `spell_template` SET `MaxAffectedTargets`=3 WHERE `Id`=36797;
-
 -- Telonicus bomb should not be interruptible by damage, Sanguinar fear the same
 UPDATE `spell_template` SET `InterruptFlags`=InterruptFlags&~0x12 WHERE `Id` IN(37036,44863);
-
--- Kael phase transition search spells should always hit only one target
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `Id` IN(36201,36290,36291);
 
 -- spells have no delay in sniff, likely blizz uses rounding and didnt notice this mistake
 UPDATE `spell_template` SET `Speed`=0 WHERE `Id` IN(36196,36197,36198);
@@ -1038,12 +988,6 @@ INSERT INTO `spell_template` (`id`,`Attributes`,`AttributesEx3`,`AttributesEx4`,
 INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`AttributesEx3`,`CastingTimeIndex`,`rangeIndex`,`Effect1`,`EffectImplicitTargetA1`,`SpellIconID`,`SpellName`,`DmgMultiplier1`,`DmgMultiplier2`) VALUES
 (32116,536871296,136,262144,1,1,1,1,122,'Denouement',1,1);
 
--- Shoot Arcane Explosion Arrow
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id`=36327;
-
--- Naberius Mind control should only hit one target
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `Id`=36146;
-
 -- Baelmon the Houndmaster - Rain of Fire mistakenly has both level point scaling and spell level calculation attribute - without attribute confirmed correct dmg
 UPDATE `spell_template` SET `Attributes`=Attributes&~0x00080000 WHERE `Id`=31598;
 
@@ -1090,9 +1034,6 @@ INSERT INTO `spell_template` (`Id`,`Category`,`Dispel`,`Mechanic`,`Attributes`,`
 -- Spell was changed to this in wotlk - conceptually it makes no sense, because triggered spell requires logically a unit for which TARGET_CURRENT_ENEMY_COORDINATES is extracted
 -- This change was very likely done by blizzard even during TBC but they never exported it, it would require a lynchpin condition which is only needed in TBC to function, hence this update
 UPDATE `spell_template` SET `EffectImplicitTargetA1`=6 WHERE `Id`=34787;
-
--- Ghazan Acid Spit should only hit one target
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `Id`=34290;
 
 -- Focused Bursts - copypaste from main spell - no cast time - in sniff not categorized as channeled - causes issues unnecessarily
 -- removal of channeled attribute and channel track target attribute
@@ -1314,9 +1255,6 @@ INSERT INTO `spell_template` (`Id`, `Category`, `Dispel`, `Mechanic`, `Attribute
 (26675, 0, 0, 0, 256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21820, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'Create Heart Candy', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0),
 (26676, 0, 0, 0, 256, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 101, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -1, 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 21817, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 'Create Heart Candy', '', '', '', '', '', '', '', '', '', '', '', '', '', '', '', 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0);
 
--- Raise Dead - Shadowmoon Deathshaper
-UPDATE spell_template SET `MaxAffectedTargets`=1 WHERE id=41071;
-
 -- Inhibit Magic 32264 - boss_shirrak 18371 - should not put into combat
 UPDATE spell_template SET AttributesEx=AttributesEx|0x00000400 WHERE id IN(32264);
 
@@ -1334,14 +1272,8 @@ UPDATE `spell_template` SET `AttributesEx`=`AttributesEx`&~0x00000004  WHERE `Id
 -- Illidari Flames 40939 - Remove SPELL_ATTR_EX_CHANNELED_2 - they should not interrupt parent spell
 UPDATE `spell_template` SET `AttributesEx`=`AttributesEx`&~0x00000040  WHERE `Id` IN(40939);
 
--- Cyclone, used by Cyclone Totem (22894)
-UPDATE spell_template SET `MaxAffectedTargets`=5 WHERE id=39594;
-
 -- Whirlwind, used by Shadowmoon Weapon Master (23049) - Add SPELL_ATTR_EX5_CAN_CHANNEL_WHEN_MOVING
 UPDATE spell_template SET `AttributesEx5`=`AttributesEx5`|0x00000001 WHERE `Id`=41097;
-
--- Disgruntled, used by Bonechewer Taskmaster (23028) - only hits one Bonechewer Worker (22963)
-UPDATE spell_template SET `MaxAffectedTargets`=1 WHERE id=40851;
 
 -- Teron Gorefiend - suicide spell
 INSERT INTO `spell_template` (Id, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, AttributesEx5, AttributesEx6, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, CasterAuraStateNot, TargetAuraStateNot, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcFlags, ProcChance, ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerlevel, ManaPerSecond, ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectMiscValueB1, EffectMiscValueB2, EffectMiscValueB3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, ActiveIconID, SpellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, SpellName9, SpellName10, SpellName11, SpellName12, SpellName13, SpellName14, SpellName15, SpellName16, `Rank1`, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, Rank9, Rank10, Rank11, Rank12, Rank13, Rank14, Rank15, Rank16, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, StanceBarOrder, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, MinFactionId, MinReputation, RequiredAuraVision, TotemCategory1, TotemCategory2, AreaId, SchoolMask, IsServerSide, AttributesServerside) VALUES
@@ -1468,9 +1400,6 @@ INSERT INTO `spell_template` (Id, Category, Dispel, Mechanic, Attributes, Attrib
 -- Defiance - Warrior Protection talent - make it applicable anytime and script threat req elsewhere
 UPDATE spell_template SET Stances=0 WHERE Id IN(12303,12788,12789);
 
--- Arcatraz Sentinel - Energy Discharge - should only hit one player
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(36717,38829);
-
 -- Mangletooth - These spells need to ignore LOS
 UPDATE spell_template SET AttributesEx2 = AttributesEx2|4 WHERE id IN (7764, 16618, 10767, 16610, 16612, 17013);
 
@@ -1485,9 +1414,6 @@ INSERT INTO `spell_template` (Id, Category, Dispel, Mechanic, Attributes, Attrib
 ('8894', '0', '0', '0', '256', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '4', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '3', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '22', '0', '0', '7', '0', '0', '9', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '695', '0', '0', 'Stromgarde Death', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0'),
 ('9144', '0', '0', '0', '256', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '4', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '3', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '22', '0', '0', '7', '0', '0', '9', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '695', '0', '0', 'Crushridge Death', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0');
 -- Avenger Trigger Dummy 37576 also triggers 8602
-
--- Power of Arrazius - should only hit one player
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id` IN(34094);
 
 -- Fire Shield used by Heckling Fel Sprite 18978, triggers Fire Shield 11968
 INSERT INTO spell_template (Id, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, AttributesEx5, AttributesEx6, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, CasterAuraStateNot, TargetAuraStateNot, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcFlags, ProcChance, ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerlevel, ManaPerSecond, ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectMiscValueB1, EffectMiscValueB2, EffectMiscValueB3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, ActiveIconID, SpellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, SpellName9, SpellName10, SpellName11, SpellName12, SpellName13, SpellName14, SpellName15, SpellName16, `Rank1`, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, Rank9, Rank10, Rank11, Rank12, Rank13, Rank14, Rank15, Rank16, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, StanceBarOrder, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, MinFactionId, MinReputation, RequiredAuraVision, TotemCategory1, TotemCategory2, AreaId, SchoolMask, IsServerSide, AttributesServerside) VALUES
@@ -1550,9 +1476,6 @@ UPDATE spell_template SET SpellFamilyFlags=0x0000000002000000 WHERE Id IN(41469)
 -- Gathios - should melee during Judgement
 UPDATE `spell_template` SET `AttributesEx4`=AttributesEx4|0x00000080 WHERE `Id`=41467;
 
--- Promenade Sentinel - L1 Arcane Charge should only hit 3 targets
-UPDATE spell_template SET MaxAffectedTargets=3 WHERE Id IN(41357);
-
 -- Illidan - Shadow Prison - doesnt put akama into combat with illidan - no aggro attribute
 UPDATE spell_template SET AttributesEx3=AttributesEx3|0x00020000 WHERE Id IN(40647);
 
@@ -1612,9 +1535,6 @@ UPDATE spell_template SET CastingTimeIndex=1 WHERE Id IN(43622);
 -- Akilzon - give category to rest of akilzon spells so that the category cooldowns from storm and gust actually do anything
 UPDATE spell_template SET Category=1152 WHERE Id IN(43648,43661,43622);
 
--- Malacrass - Priest drain Mind Control - should only hit one target
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(43550);
-
 -- Zuljin - Lynx Rush
 UPDATE spell_template SET Speed=60 WHERE Id IN(43153);
 
@@ -1632,9 +1552,6 @@ INSERT INTO `spell_template` (`Id`,`Attributes`,`AttributesEx`,`DurationIndex`,`
 -- Add Drowning Death 16563 used by Plague Ravager 8520
 INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, AttributesEx5, AttributesEx6, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, CasterAuraStateNot, TargetAuraStateNot, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcFlags, ProcChance, ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerlevel, ManaPerSecond, ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectMiscValueB1, EffectMiscValueB2, EffectMiscValueB3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, ActiveIconID, SpellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, SpellName9, SpellName10, SpellName11, SpellName12, SpellName13, SpellName14, SpellName15, SpellName16, `Rank1`, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, Rank9, Rank10, Rank11, Rank12, Rank13, Rank14, Rank15, Rank16, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, StanceBarOrder, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, MinFactionId, MinReputation, RequiredAuraVision, TotemCategory1, TotemCategory2, AreaId, SchoolMask, IsServerSide, AttributesServerside) VALUES
 ('16563', '0', '0', '0', '192', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '1048576', '5', '0', '0', '1', '1', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '-1', '0', '6', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '42', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '16555', '0', '0', '0', '0', '0', '0', '94', '0', '0', 'Drowning Death', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '1');
-
--- Axe Volley - Amanishi Axe Thrower - should only hit one random target
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(42357);
 
 -- Sleep spells have "only one target can be affected at a time" - adding attribute SPELL_ATTR_EX5_SINGLE_TARGET_SPELL
 UPDATE spell_template SET AttributesEx5=AttributesEx5|0x00000020 WHERE Id IN(700,1090,20663,20989,24004,34801,36402,41396);
@@ -1722,10 +1639,6 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, AttributesEx5, AttributesEx6, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, CasterAuraStateNot, TargetAuraStateNot, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcFlags, ProcChance, ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerlevel, ManaPerSecond, ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectMiscValueB1, EffectMiscValueB2, EffectMiscValueB3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, ActiveIconID, SpellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, SpellName9, SpellName10, SpellName11, SpellName12, SpellName13, SpellName14, SpellName15, SpellName16, `Rank1`, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, Rank9, Rank10, Rank11, Rank12, Rank13, Rank14, Rank15, Rank16, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, StanceBarOrder, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, MinFactionId, MinReputation, RequiredAuraVision, TotemCategory1, TotemCategory2, AreaId, SchoolMask, IsServerSide, AttributesServerside) VALUES
 ('26577', '0', '0', '0', '256', '0', '0', '256', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '13', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '28', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '18', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '15925', '0', '0', '64', '0', '0', '0', '0', '0', '0', '0', '0', '0', '263', '0', '0', 'Summon Toxic Slime', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '1', '1', '0', '1', '1', '0', '0', '0', '0', '0', '0', '0', '8', '0', '0');
 
--- AQ40 - Huhuran - Wyvern Sting/Poison Bolt Volley - Max 10 targets
-UPDATE spell_template SET MaxAffectedTargets=10 WHERE Id IN(26180);
-UPDATE spell_template SET MaxAffectedTargets=15 WHERE Id IN(26052);
-
 -- AQ40 - Ouro - missing serversides
 INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, AttributesEx5, AttributesEx6, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, CasterAuraStateNot, TargetAuraStateNot, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcFlags, ProcChance, ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerlevel, ManaPerSecond, ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectMiscValueB1, EffectMiscValueB2, EffectMiscValueB3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, ActiveIconID, SpellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, SpellName9, SpellName10, SpellName11, SpellName12, SpellName13, SpellName14, SpellName15, SpellName16, `Rank1`, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, Rank9, Rank10, Rank11, Rank12, Rank13, Rank14, Rank15, Rank16, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, StanceBarOrder, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, MinFactionId, MinReputation, RequiredAuraVision, TotemCategory1, TotemCategory2, AreaId, SchoolMask, IsServerSide, AttributesServerside) VALUES
 ('26075', '0', '0', '0', '256', '0', '4', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '6', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '77', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '38', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Set Ouro Health', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0'),
@@ -1767,9 +1680,6 @@ INSERT INTO spell_template (Id, Category, Dispel, Mechanic, Attributes, Attribut
 
 -- Fix Felguard Destroyer 18977 Sweeping Charge Id: 96 (SPELL_EFFECT_CHARGE) not working correctly changing to Id: 149 (SPELL_EFFECT_CHARGE_DEST)
 UPDATE `spell_template` SET `EffectImplicitTargetA1` = 6 WHERE `Id` IN (25744,25787,33971);
-
--- Nether Beam - Netherspite - restricted to one target
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(30469);
 
 -- Fix bad mask for spells - always needs to have at least 1, if disproven, fix EAI functions which check SchoolMask
 UPDATE spell_template SET SchoolMask=1 WHERE SchoolMask=0;
@@ -1826,6 +1736,16 @@ UPDATE spell_template SET Speed=0 WHERE Id IN(14824,14825,14826,14827,14828,1482
 -- ============================================================
 -- Classic section
 -- ============================================================
+
+-- MaxAffectedTargets
+UPDATE `spell_template` SET `MaxAffectedTargets` = 1 WHERE `Id` IN (
+26237, -- AQ40 - C'Thun - Summon Mouth Tentacles - restricted to one target
+26398 -- AQ40 - C'Thun - Summon Hook Tentacles - restricted to one target
+);
+
+-- AQ40 - Huhuran - Wyvern Sting/Poison Bolt Volley - Max 10 targets
+UPDATE `spell_template` SET `MaxAffectedTargets` = 10 WHERE `Id` = 26180;
+UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 26052;
 
 -- Add spells referenced by RewSpell field of missing classic quest_templates ported to TBC
 INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, AttributesEx5, AttributesEx6, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, CasterAuraStateNot, TargetAuraStateNot, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcFlags, ProcChance, ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerlevel, ManaPerSecond, ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectMiscValueB1, EffectMiscValueB2, EffectMiscValueB3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, ActiveIconID, SpellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, SpellName9, SpellName10, SpellName11, SpellName12, SpellName13, SpellName14, SpellName15, SpellName16, `Rank1`, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, Rank9, Rank10, Rank11, Rank12, Rank13, Rank14, Rank15, Rank16, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, StanceBarOrder, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, MinFactionId, MinReputation, RequiredAuraVision, TotemCategory1, TotemCategory2, AreaId, SchoolMask, IsServerSide, AttributesServerside) VALUES
@@ -1931,9 +1851,6 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 -- Remove incorrect interrupt flag for Bellowing Roar spells used in various dragon encounters
 UPDATE spell_template SET InterruptFlags=0 WHERE Id IN (18431, 22686);
 
--- AQ40 - C'Thun - Summon Hook Tentacles - restricted to one target
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id=26398;
-
 -- C'Thun - Source: Classic DBCs
 INSERT INTO `spell_template` (`Id`, `Category`, `Dispel`, `Mechanic`, `Attributes`, `AttributesEx`, `AttributesEx2`, `AttributesEx3`, `AttributesEx4`, `Stances`, `StancesNot`, `Targets`, `TargetCreatureType`, `RequiresSpellFocus`, `CasterAuraState`, `TargetAuraState`, `CastingTimeIndex`, `RecoveryTime`, `CategoryRecoveryTime`, `InterruptFlags`, `AuraInterruptFlags`, `ChannelInterruptFlags`, `ProcFlags`, `ProcChance`, `ProcCharges`, `MaxLevel`, `BaseLevel`, `SpellLevel`, `DurationIndex`, `PowerType`, `ManaCost`, `ManaCostPerlevel`, `ManaPerSecond`, `ManaPerSecondPerLevel`, `RangeIndex`, `Speed`, `ModalNextSpell`, `StackAmount`, `Totem1`, `Totem2`, `Reagent1`, `Reagent2`, `Reagent3`, `Reagent4`, `Reagent5`, `Reagent6`, `Reagent7`, `Reagent8`, `ReagentCount1`, `ReagentCount2`, `ReagentCount3`, `ReagentCount4`, `ReagentCount5`, `ReagentCount6`, `ReagentCount7`, `ReagentCount8`, `EquippedItemClass`, `EquippedItemSubClassMask`, `EquippedItemInventoryTypeMask`, `Effect1`, `Effect2`, `Effect3`, `EffectDieSides1`, `EffectDieSides2`, `EffectDieSides3`, `EffectBaseDice1`, `EffectBaseDice2`, `EffectBaseDice3`, `EffectRealPointsPerLevel1`, `EffectRealPointsPerLevel2`, `EffectRealPointsPerLevel3`, `EffectMechanic1`, `EffectMechanic2`, `EffectMechanic3`, `EffectImplicitTargetA1`, `EffectImplicitTargetA2`, `EffectImplicitTargetA3`, `EffectImplicitTargetB1`, `EffectImplicitTargetB2`, `EffectImplicitTargetB3`, `EffectRadiusIndex1`, `EffectRadiusIndex2`, `EffectRadiusIndex3`, `EffectApplyAuraName1`, `EffectApplyAuraName2`, `EffectApplyAuraName3`, `EffectAmplitude1`, `EffectAmplitude2`, `EffectAmplitude3`, `EffectMultipleValue1`, `EffectMultipleValue2`, `EffectMultipleValue3`, `EffectChainTarget1`, `EffectChainTarget2`, `EffectChainTarget3`, `EffectItemType1`, `EffectItemType2`, `EffectItemType3`, `EffectMiscValue1`, `EffectMiscValue2`, `EffectMiscValue3`, `EffectTriggerSpell1`, `EffectTriggerSpell2`, `EffectTriggerSpell3`, `EffectPointsPerComboPoint1`, `EffectPointsPerComboPoint2`, `EffectPointsPerComboPoint3`, `SpellVisual`, `SpellIconID`, `ActiveIconID`, `SpellPriority`, `SpellName`, `SpellName2`, `SpellName3`, `SpellName4`, `SpellName5`, `SpellName6`, `SpellName7`, `SpellName8`, `Rank1`, `Rank2`, `Rank3`, `Rank4`, `Rank5`, `Rank6`, `Rank7`, `Rank8`, `ManaCostPercentage`, `StartRecoveryCategory`, `StartRecoveryTime`, `MaxTargetLevel`, `SpellFamilyName`, `SpellFamilyFlags`, `MaxAffectedTargets`, `DmgClass`, `PreventionType`, `StanceBarOrder`, `DmgMultiplier1`, `DmgMultiplier2`, `DmgMultiplier3`, `MinFactionId`, `MinReputation`, `RequiredAuraVision`, `IsServerSide`, `AttributesServerside`)
 VALUES
@@ -1976,9 +1893,6 @@ INSERT INTO `spell_template` (Id, Category, Dispel, Mechanic, Attributes, Attrib
 ('15127', '0', '0', '0', '448', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '6', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '23', '0', '0', '5000', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '15126', '0', '0', '0', '0', '0', '0', '11', '0', '0', 'Summon Burning Imp', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0'),
 ('22391', '0', '0', '0', '448', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '6', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '23', '0', '0', '30000', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '22392', '0', '0', '0', '0', '0', '0', '11', '0', '0', 'Demon Portal', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0'),
 ('22788', '0', '0', '0', '384', '268435456', '4', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '225', '0', '0', '0', '0', '0', '13', '0', '0', '500', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '6', '0', '0', '1', '0', '0', '0', '0', '0', '99', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '61', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Grow', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0');
-
--- AQ40 - C'Thun - Summon Mouth Tentacles - restricted to one target
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id=26237;
 
 -- Warlock - Hellfire - Enable proccing and unify attributes
 UPDATE spell_template SET AttributesEx=AttributesEx|0x00000008,AttributesEx2=AttributesEx2|0x40000000 WHERE Id IN(5857,11681,11682,27214);
@@ -2052,6 +1966,73 @@ INSERT INTO `spell_template` (Id, Category, Dispel, Mechanic, Attributes, Attrib
 -- ============================================================
 -- TBC section
 -- ============================================================
+
+-- MaxAffectedTargets
+UPDATE `spell_template` SET `MaxAffectedTargets` = 0 WHERE `Id` = 45248; -- Eredar Twins - Sacrolash - Shadow Blades
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 1 WHERE `Id` IN (
+30209, -- Nightbane Target Charred Earth
+30469, -- Nether Beam - Netherspite - restricted to one target
+30854,30898,39095, -- prince malchezaar spell fixes
+30952, -- arrow script spell should only hit one target - verified by video and sniff
+31347, -- Azgalor - Doom - only hits one target
+33716, -- laugh should only hit one target per tick
+34094, -- Power of Arrazius - should only hit one player
+34290, -- Ghazan Acid Spit should only hit one target
+34441, -- make spell target only one enemy, likely mismatch in dbc during tbc nerfs
+36146, -- Naberius Mind control should only hit one target
+36201,36290,36291, -- Kael phase transition search spells should always hit only one target
+36327, -- Shoot Arcane Explosion Arrow
+36717,38829, -- Arcatraz Sentinel - Energy Discharge - should only hit one player
+38054, -- Random Rocket Missile - should only hit one target - per sniff evidence
+38573, -- should only hit one player per Coilfang Sporebat spell tick
+38642, -- Greyheart Nether-Mage - Blink only hits one target
+38650, -- Serpentshrine Lurker - Rancid Mushroom Primer
+39032,39042, -- should only hit one target
+39848, -- Water Globule New Target
+40851, -- Disgruntled, used by Bonechewer Taskmaster (23028) - only hits one Bonechewer Worker (22963)
+40887, -- Assist must only hit one target
+41071, -- Raise Dead - Shadowmoon Deathshaper
+42357, -- Axe Volley - Amanishi Axe Thrower - should only hit one random target
+43550, -- Malacrass - Priest drain Mind Control - should only hit one target
+43711, -- Headless Horseman - Start Fire Target Test (Guard)
+44869, -- SWP - Kalecgos - Spectral blast - 1 target
+44978,45001,45002,45004,45006,45010, -- Kalecgos - Wild Magic
+45027, -- SWP - Kalecgos - Revitalize - 1 target
+45032,45034, -- Curse of Boundless Agony
+45680, -- KJ - Shield Orb - Shadow Bolt - only one target
+45892, -- Kiljaeden - Sinister Reflection
+45907 -- Midsummer - Torch Target Picker - should hit one target
+);
+
+-- Lady Vashj - Persuasion 38511
+-- missing scripted spell interaction with 38514, the damage/healing component mced targets should also be immune to all cc effects
+-- See this as basic, nerfed implementation from the once feared Persuasion Mechanic Vashj had
+-- 0
+UPDATE `spell_template` SET `MaxAffectedTargets` = 2 WHERE `Id` = 38511;
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 3 WHERE `Id` IN (
+31298, -- Anetheron Sleep - max 3 targets
+36797, -- Kael MC should only hit 3 targets
+37790, -- Coilfang Ambusher - Spread Shot
+41357 -- Promenade Sentinel - L1 Arcane Charge should only hit 3 targets
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 4 WHERE `Id` = 38028; -- Watery Grave - Morogrim Tidewalker - restricted to 4 targets
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 5 WHERE `Id` IN (
+33332, -- Murmur pre event visual spell maxtarget 5
+37135, -- Domination
+38296, -- Spitfire Totem - Scorch
+39594, -- Cyclone, used by Cyclone Totem (22894)
+45046, -- Flames of Doom used by Eredar Sorcerer 25033 should hit at most 5 targets
+45641, -- Fire Bloom
+45741, -- KJ - Flame dart - each subsequent spell hits fewer targets
+46008 -- Muru - Negative energy - should only hit 5 targets
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 45740; -- KJ - Flame dart - each subsequent spell hits fewer targets
+
 -- Freezing circle should not be removed by damage
 UPDATE spell_template SET ProcFlags=0 WHERE Id IN(34779);
 
@@ -2167,9 +2148,6 @@ UPDATE spell_template SET CastingTimeIndex=1 WHERE Id IN(39187);
 -- Stationary Demon Portal 22336
 UPDATE `spell_template` SET `EffectMiscValueB1` = 64 WHERE `Id` = 38876;
 
--- Watery Grave - Morogrim Tidewalker - restricted to 4 targets
-UPDATE spell_template SET MaxAffectedTargets=4 WHERE Id IN(38028);
-
 -- Correct Spells which summon Units that should be Guardians
 UPDATE `spell_template` SET `EffectMiscValueB1` = 61 WHERE `Id` IN (
 36579,36584,36585,	-- Netherock 20772 - Summon Netherock Crumbler
@@ -2198,9 +2176,6 @@ UPDATE spell_template SET DmgClass=2 WHERE Id IN(22120);
 -- missing Burning Maul spell
 INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, AttributesEx5, AttributesEx6, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, CasterAuraStateNot, TargetAuraStateNot, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcFlags, ProcChance, ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerlevel, ManaPerSecond, ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectMiscValueB1, EffectMiscValueB2, EffectMiscValueB3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, ActiveIconID, SpellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, SpellName9, SpellName10, SpellName11, SpellName12, SpellName13, SpellName14, SpellName15, SpellName16, Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, Rank9, Rank10, Rank11, Rank12, Rank13, Rank14, Rank15, Rank16, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, StanceBarOrder, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, MinFactionId, MinReputation, RequiredAuraVision, TotemCategory1, TotemCategory2, AreaId, SchoolMask, IsServerSide, AttributesServerside) VALUES
 ('30620', '0', '0', '0', '384', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '3', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '16', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', 'Burning Maul', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0');
-
--- Anetheron Sleep - max 3 targets
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id`=31298;
 
 -- Light of the Naaru - NPC version - should not target players with Effect3
 UPDATE spell_template SET EffectImplicitTargetB3=EffectImplicitTargetB2 WHERE Id IN(39831);
@@ -2262,9 +2237,6 @@ UPDATE spell_template SET AttributesEx5=AttributesEx5|0x00000008 WHERE Id IN(341
 -- Raise Dead - Fix targeting based on other versions
 UPDATE spell_template SET EffectImplicitTargetA3=22,EffectImplicitTargetB3=7 WHERE Id IN(34011,34019);
 
--- Azgalor - Doom - only hits one target
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(31347);
-
 -- Coilfang Ambusher 21865 - Shoot - needs to have melee damage added instead of SPELL_DAMAGE_CLASS_RANGED (does 12dmg with that)
 UPDATE spell_template SET DmgClass=2 WHERE Id IN(37770);
 
@@ -2293,8 +2265,6 @@ UPDATE `spell_template` SET `procflags` = 0 WHERE `Id` = 40875;
 
 -- BT - Fixate - must be immune to taunt immunity
 UPDATE spell_template SET Attributes=Attributes|0x20000000 WHERE Id IN(40893);
--- Assist must only hit one target
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(40887);
 
 -- Curse of Mending should not be reflectable - confirmed on retail
 UPDATE spell_template SET AttributesEx=AttributesEx|0x00000080 WHERE Id IN(39647);
@@ -2308,24 +2278,16 @@ INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, Attribute
 
 -- Headless Horseman - Invisible Campfire, Remove - change from 0-2 yd range to 0-10 yd range so spell doesn't fail
 UPDATE spell_template SET RangeIndex=7 WHERE Id=42178; -- 96
--- Headless Horseman - Start Fire Target Test (Guard)
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id=43711;
+
 -- Headless Horseman - Start Fire (Guard) - ignore LoS, otherwise Fire Effigy gameobjects block view
 UPDATE spell_template SET `AttributesEx2`=`AttributesEx2`|4 WHERE Id=43715;
+
 -- Headless Horseman - Summon Large Jack-o'-Lantern, Missile - unlimited radius in order to match spell range (ensures reward always spawns)
 UPDATE spell_template SET `EffectRadiusIndex1`=0 WHERE Id=44255;
 
--- SWP - Kalecgos - Spectral blast - 1 target
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(44869);
--- Curse of Boundless Agony
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(45032,45034);
 -- Eredar Twins - Summon Shadow Images - Fully custom
 INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, AttributesEx5, AttributesEx6, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, CasterAuraStateNot, TargetAuraStateNot, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcFlags, ProcChance, ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerlevel, ManaPerSecond, ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectMiscValueB1, EffectMiscValueB2, EffectMiscValueB3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, ActiveIconID, SpellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, SpellName9, SpellName10, SpellName11, SpellName12, SpellName13, SpellName14, SpellName15, SpellName16, Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, Rank9, Rank10, Rank11, Rank12, Rank13, Rank14, Rank15, Rank16, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, StanceBarOrder, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, MinFactionId, MinReputation, RequiredAuraVision, TotemCategory1, TotemCategory2, AreaId, SchoolMask, IsServerSide, AttributesServerside) VALUES
 ('45258', '0', '0', '0', '384', '268435456', '0', '1048576', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '3', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '0', '0', '28', '0', '0', '1', '0', '0', '0', '0', '0', '2', '0', '0', '0', '0', '0', '72', '0', '0', '0', '0', '0', '15', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '25214', '0', '0', '64', '0', '0', '0', '0', '0', '0', '0', '0', '0', '2154', '0', '0', 'Summon Shadow Images', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '0', '0', '0', '0', '0', '0', '1', '2', '0');
--- Kiljaeden - Sinister Reflection
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE `id` IN(45892);
--- Fire Bloom
-UPDATE `spell_template` SET `MaxAffectedTargets`=5 WHERE `id` IN(45641);
 
 -- Lifebloom final bloom should be able to crit - requires DmgClass 1
 UPDATE `spell_template` SET `DmgClass`=1 WHERE `id` IN(33778);
@@ -2402,9 +2364,6 @@ REPLACE INTO `spell_template` (`Id`, `Category`, `Dispel`, `Mechanic`, `Attribut
 -- original attributes of these spells are unknown
 UPDATE spell_template SET AttributesEx3=AttributesEx3|0x00100000 WHERE Id IN(44962,44918,44919,44920,44921,44922,44923,44924,44925,44926,44927,44928,44929,44930,44931,44932,45155,45156,45157,45158,45159,45160,45161,45162,45163,45164,45165,45166,45167,45168,45169,45170);
 
--- Flames of Doom used by Eredar Sorcerer 25033 should hit at most 5 targets
-UPDATE spell_template SET MaxAffectedTargets=5 WHERE Id=45046;
-
 -- Stationary, infinite Felfire Portal 25603 - despawns on summoner death
 UPDATE `spell_template` SET `DurationIndex` = 21, `EffectMiscValueB1` = 64 WHERE `Id` = 46875;
 
@@ -2436,15 +2395,9 @@ UPDATE spell_template SET EffectMiscValue1=22897 WHERE Id IN(27621);
 -- Kalecgos - teleport to normal realm - should be usable by dead
 UPDATE spell_template SET Attributes=Attributes|0x00800000,AttributesEx6=AttributesEx6|0x00000004 WHERE Id IN(46020);
 
--- SWP - Kalecgos - Revitalize - 1 target
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(45027);
-
 -- full serverside - Taunt Hit Chance - name known, confirmed in sniff - increases hit chance of any taunt on victim - modelled after 42459
 INSERT INTO `spell_template` (`Id`, `Category`, `Dispel`, `Mechanic`, `Attributes`, `AttributesEx`, `AttributesEx2`, `AttributesEx3`, `AttributesEx4`, `AttributesEx5`, `AttributesEx6`, `Stances`, `StancesNot`, `Targets`, `TargetCreatureType`, `RequiresSpellFocus`, `FacingCasterFlags`, `CasterAuraState`, `TargetAuraState`, `CasterAuraStateNot`, `TargetAuraStateNot`, `CastingTimeIndex`, `RecoveryTime`, `CategoryRecoveryTime`, `InterruptFlags`, `AuraInterruptFlags`, `ChannelInterruptFlags`, `ProcFlags`, `ProcChance`, `ProcCharges`, `MaxLevel`, `BaseLevel`, `SpellLevel`, `DurationIndex`, `PowerType`, `ManaCost`, `ManaCostPerlevel`, `ManaPerSecond`, `ManaPerSecondPerLevel`, `RangeIndex`, `Speed`, `ModalNextSpell`, `StackAmount`, `Totem1`, `Totem2`, `Reagent1`, `Reagent2`, `Reagent3`, `Reagent4`, `Reagent5`, `Reagent6`, `Reagent7`, `Reagent8`, `ReagentCount1`, `ReagentCount2`, `ReagentCount3`, `ReagentCount4`, `ReagentCount5`, `ReagentCount6`, `ReagentCount7`, `ReagentCount8`, `EquippedItemClass`, `EquippedItemSubClassMask`, `EquippedItemInventoryTypeMask`, `Effect1`, `Effect2`, `Effect3`, `EffectDieSides1`, `EffectDieSides2`, `EffectDieSides3`, `EffectRealPointsPerLevel1`, `EffectRealPointsPerLevel2`, `EffectRealPointsPerLevel3`, `EffectBaseDice1`, `EffectBaseDice2`, `EffectBaseDice3`, `EffectMechanic1`, `EffectMechanic2`, `EffectMechanic3`, `EffectImplicitTargetA1`, `EffectImplicitTargetA2`, `EffectImplicitTargetA3`, `EffectImplicitTargetB1`, `EffectImplicitTargetB2`, `EffectImplicitTargetB3`, `EffectRadiusIndex1`, `EffectRadiusIndex2`, `EffectRadiusIndex3`, `EffectApplyAuraName1`, `EffectApplyAuraName2`, `EffectApplyAuraName3`, `EffectAmplitude1`, `EffectAmplitude2`, `EffectAmplitude3`, `EffectMultipleValue1`, `EffectMultipleValue2`, `EffectMultipleValue3`, `EffectChainTarget1`, `EffectChainTarget2`, `EffectChainTarget3`, `EffectItemType1`, `EffectItemType2`, `EffectItemType3`, `EffectMiscValue1`, `EffectMiscValue2`, `EffectMiscValue3`, `EffectMiscValueB1`, `EffectMiscValueB2`, `EffectMiscValueB3`, `EffectTriggerSpell1`, `EffectTriggerSpell2`, `EffectTriggerSpell3`, `EffectPointsPerComboPoint1`, `EffectPointsPerComboPoint2`, `EffectPointsPerComboPoint3`, `SpellVisual`, `SpellIconID`, `ActiveIconID`, `SpellPriority`, `SpellName`, `SpellName2`, `SpellName3`, `SpellName4`, `SpellName5`, `SpellName6`, `SpellName7`, `SpellName8`, `SpellName9`, `SpellName10`, `SpellName11`, `SpellName12`, `SpellName13`, `SpellName14`, `SpellName15`, `SpellName16`, `Rank1`, `Rank2`, `Rank3`, `Rank4`, `Rank5`, `Rank6`, `Rank7`, `Rank8`, `Rank9`, `Rank10`, `Rank11`, `Rank12`, `Rank13`, `Rank14`, `Rank15`, `Rank16`, `ManaCostPercentage`, `StartRecoveryCategory`, `StartRecoveryTime`, `MaxTargetLevel`, `SpellFamilyName`, `SpellFamilyFlags`, `MaxAffectedTargets`, `DmgClass`, `PreventionType`, `StanceBarOrder`, `DmgMultiplier1`, `DmgMultiplier2`, `DmgMultiplier3`, `MinFactionId`, `MinReputation`, `RequiredAuraVision`, `TotemCategory1`, `TotemCategory2`, `AreaId`, `SchoolMask`, `IsServerSide`, `AttributesServerside`) VALUES
 ('45210','0','0','0','80','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1','0','0','0','0','0','0','101','0','0','0','0','21','0','0','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','-1','0','0','6','0','0','0','1','0','0','0','0','1','0','0','0','0','0','1','1','0','0','0','0','0','0','0','4','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','344','0','0','Taunt Hit Chance','','','','','','','','','','','','','','','','Passive','','','','','','','','','','','','','','','','0','0','0','0','0','0','0','1','1','0','1','1','1','0','0','0','0','0','0','1','2','4');
-
--- Kalecgos - Wild Magic
-UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(44978,45001,45002,45004,45006,45010);
 
 -- Felmyst - Encapsulate - should not ignore resists - verified with video
 UPDATE spell_template SET AttributesEx4=AttributesEx4&~1 WHERE Id IN(45662);
@@ -2461,12 +2414,6 @@ INSERT INTO `spell_template` (`Id`, `SchoolMask`, `Category`, `Dispel`, `Mechani
 ('30445','1','0','0','0','256','268435456','0','0','0','0','0','0','0','0','0','0','0','0','0','1','0','0','0','0','0','0','101','0','0','0','0','40','0','0','0','0','0','12','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','-1','0','0','28','6','0','0','0','0','0','0','0','0','0','0','0','0','0','32','1','0','0','0','0','7','0','0','0','4','0','0','0','0','0','0','0','0','0','0','0','0','0','17393','0','0','64','0','0','0','0','0','0','0','0','0','1','0','0','Stillpine Ancestor Yor','','','','','','','','0','0','0','0','0','0','0','0','0','1','1','0','0','0','0');
 
 
--- Eredar Twins - Sacrolash - Shadow Blades
-UPDATE spell_template SET MaxAffectedTargets=0 WHERE Id IN(45248);
-
--- Muru - Negative energy - should only hit 5 targets
-UPDATE spell_template SET MaxAffectedTargets=5 WHERE Id IN(46008);
-
 -- Wyrm from Beyond Transform - req for q.10594 'Gauging the Resonant Frequency'
 INSERT INTO `spell_template` (`Id`, `Category`, `Dispel`, `Mechanic`, `Attributes`, `AttributesEx`, `AttributesEx2`, `AttributesEx3`, `AttributesEx4`, `AttributesEx5`, `AttributesEx6`, `Stances`, `StancesNot`, `Targets`, `TargetCreatureType`, `RequiresSpellFocus`, `FacingCasterFlags`, `CasterAuraState`, `TargetAuraState`, `CasterAuraStateNot`, `TargetAuraStateNot`, `CastingTimeIndex`, `RecoveryTime`, `CategoryRecoveryTime`, `InterruptFlags`, `AuraInterruptFlags`, `ChannelInterruptFlags`, `ProcFlags`, `ProcChance`, `ProcCharges`, `MaxLevel`, `BaseLevel`, `SpellLevel`, `DurationIndex`, `PowerType`, `ManaCost`, `ManaCostPerlevel`, `ManaPerSecond`, `ManaPerSecondPerLevel`, `RangeIndex`, `Speed`, `ModalNextSpell`, `StackAmount`, `Totem1`, `Totem2`, `Reagent1`, `Reagent2`, `Reagent3`, `Reagent4`, `Reagent5`, `Reagent6`, `Reagent7`, `Reagent8`, `ReagentCount1`, `ReagentCount2`, `ReagentCount3`, `ReagentCount4`, `ReagentCount5`, `ReagentCount6`, `ReagentCount7`, `ReagentCount8`, `EquippedItemClass`, `EquippedItemSubClassMask`, `EquippedItemInventoryTypeMask`, `Effect1`, `Effect2`, `Effect3`, `EffectDieSides1`, `EffectDieSides2`, `EffectDieSides3`, `EffectRealPointsPerLevel1`, `EffectRealPointsPerLevel2`, `EffectRealPointsPerLevel3`, `EffectBaseDice1`, `EffectBaseDice2`, `EffectBaseDice3`, `EffectMechanic1`, `EffectMechanic2`, `EffectMechanic3`, `EffectImplicitTargetA1`, `EffectImplicitTargetA2`, `EffectImplicitTargetA3`, `EffectImplicitTargetB1`, `EffectImplicitTargetB2`, `EffectImplicitTargetB3`, `EffectRadiusIndex1`, `EffectRadiusIndex2`, `EffectRadiusIndex3`, `EffectApplyAuraName1`, `EffectApplyAuraName2`, `EffectApplyAuraName3`, `EffectAmplitude1`, `EffectAmplitude2`, `EffectAmplitude3`, `EffectMultipleValue1`, `EffectMultipleValue2`, `EffectMultipleValue3`, `EffectChainTarget1`, `EffectChainTarget2`, `EffectChainTarget3`, `EffectItemType1`, `EffectItemType2`, `EffectItemType3`, `EffectMiscValue1`, `EffectMiscValue2`, `EffectMiscValue3`, `EffectMiscValueB1`, `EffectMiscValueB2`, `EffectMiscValueB3`, `EffectTriggerSpell1`, `EffectTriggerSpell2`, `EffectTriggerSpell3`, `EffectPointsPerComboPoint1`, `EffectPointsPerComboPoint2`, `EffectPointsPerComboPoint3`, `SpellVisual`, `SpellIconID`, `ActiveIconID`, `SpellPriority`, `SpellName`, `SpellName2`, `SpellName3`, `SpellName4`, `SpellName5`, `SpellName6`, `SpellName7`, `SpellName8`, `SpellName9`, `SpellName10`, `SpellName11`, `SpellName12`, `SpellName13`, `SpellName14`, `SpellName15`, `SpellName16`, `Rank1`, `Rank2`, `Rank3`, `Rank4`, `Rank5`, `Rank6`, `Rank7`, `Rank8`, `Rank9`, `Rank10`, `Rank11`, `Rank12`, `Rank13`, `Rank14`, `Rank15`, `Rank16`, `ManaCostPercentage`, `StartRecoveryCategory`, `StartRecoveryTime`, `MaxTargetLevel`, `SpellFamilyName`, `SpellFamilyFlags`, `MaxAffectedTargets`, `DmgClass`, `PreventionType`, `StanceBarOrder`, `DmgMultiplier1`, `DmgMultiplier2`, `DmgMultiplier3`, `MinFactionId`, `MinReputation`, `RequiredAuraVision`, `TotemCategory1`, `TotemCategory2`, `AreaId`, `SchoolMask`, `IsServerSide`, `AttributesServerside`) VALUES
 ('34876','0','0','0','384','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','1','0','0','0','0','0','0','101','0','0','0','0','21','0','0','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','-1','0','0','6','0','0','1','0','0','0','0','0','-1','0','0','0','0','0','1','0','0','0','0','0','0','0','0','56','0','0','0','0','0','0','0','0','0','0','0','0','0','0','21799','0','0','0','0','0','0','0','0','0','0','0','0','331','0','0','Wyrm from Beyond Transform','','','','','','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0','0','0','0','0','0','0','0','0','0','1','0','0','0','0','0','0','0','0','1','0','0');
@@ -2479,22 +2426,12 @@ UPDATE spell_template SET StartRecoveryTime=2500 WHERE Id IN(45664);
 
 UPDATE spell_template SET `AttributesServerside`=AttributesServerside|0x00000004 WHERE `id` IN(43119,43120,43457);
 
--- KJ - Shield Orb - Shadow Bolt - only one target
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE Id IN(45680);
-
 -- childrens week full serversides - mechano lord capacitus spells used as base - known names and ids
 INSERT INTO `spell_template` (`Id`, `Category`, `Dispel`, `Mechanic`, `Attributes`, `AttributesEx`, `AttributesEx2`, `AttributesEx3`, `AttributesEx4`, `AttributesEx5`, `AttributesEx6`, `Stances`, `StancesNot`, `Targets`, `TargetCreatureType`, `RequiresSpellFocus`, `FacingCasterFlags`, `CasterAuraState`, `TargetAuraState`, `CasterAuraStateNot`, `TargetAuraStateNot`, `CastingTimeIndex`, `RecoveryTime`, `CategoryRecoveryTime`, `InterruptFlags`, `AuraInterruptFlags`, `ChannelInterruptFlags`, `ProcFlags`, `ProcChance`, `ProcCharges`, `MaxLevel`, `BaseLevel`, `SpellLevel`, `DurationIndex`, `PowerType`, `ManaCost`, `ManaCostPerlevel`, `ManaPerSecond`, `ManaPerSecondPerLevel`, `RangeIndex`, `Speed`, `ModalNextSpell`, `StackAmount`, `Totem1`, `Totem2`, `Reagent1`, `Reagent2`, `Reagent3`, `Reagent4`, `Reagent5`, `Reagent6`, `Reagent7`, `Reagent8`, `ReagentCount1`, `ReagentCount2`, `ReagentCount3`, `ReagentCount4`, `ReagentCount5`, `ReagentCount6`, `ReagentCount7`, `ReagentCount8`, `EquippedItemClass`, `EquippedItemSubClassMask`, `EquippedItemInventoryTypeMask`, `Effect1`, `Effect2`, `Effect3`, `EffectDieSides1`, `EffectDieSides2`, `EffectDieSides3`, `EffectRealPointsPerLevel1`, `EffectRealPointsPerLevel2`, `EffectRealPointsPerLevel3`, `EffectBaseDice1`, `EffectBaseDice2`, `EffectBaseDice3`, `EffectMechanic1`, `EffectMechanic2`, `EffectMechanic3`, `EffectImplicitTargetA1`, `EffectImplicitTargetA2`, `EffectImplicitTargetA3`, `EffectImplicitTargetB1`, `EffectImplicitTargetB2`, `EffectImplicitTargetB3`, `EffectRadiusIndex1`, `EffectRadiusIndex2`, `EffectRadiusIndex3`, `EffectApplyAuraName1`, `EffectApplyAuraName2`, `EffectApplyAuraName3`, `EffectAmplitude1`, `EffectAmplitude2`, `EffectAmplitude3`, `EffectMultipleValue1`, `EffectMultipleValue2`, `EffectMultipleValue3`, `EffectChainTarget1`, `EffectChainTarget2`, `EffectChainTarget3`, `EffectItemType1`, `EffectItemType2`, `EffectItemType3`, `EffectMiscValue1`, `EffectMiscValue2`, `EffectMiscValue3`, `EffectMiscValueB1`, `EffectMiscValueB2`, `EffectMiscValueB3`, `EffectTriggerSpell1`, `EffectTriggerSpell2`, `EffectTriggerSpell3`, `EffectPointsPerComboPoint1`, `EffectPointsPerComboPoint2`, `EffectPointsPerComboPoint3`, `SpellVisual`, `SpellIconID`, `ActiveIconID`, `SpellPriority`, `SpellName`, `SpellName2`, `SpellName3`, `SpellName4`, `SpellName5`, `SpellName6`, `SpellName7`, `SpellName8`, `SpellName9`, `SpellName10`, `SpellName11`, `SpellName12`, `SpellName13`, `SpellName14`, `SpellName15`, `SpellName16`, `Rank1`, `Rank2`, `Rank3`, `Rank4`, `Rank5`, `Rank6`, `Rank7`, `Rank8`, `Rank9`, `Rank10`, `Rank11`, `Rank12`, `Rank13`, `Rank14`, `Rank15`, `Rank16`, `ManaCostPercentage`, `StartRecoveryCategory`, `StartRecoveryTime`, `MaxTargetLevel`, `SpellFamilyName`, `SpellFamilyFlags`, `MaxAffectedTargets`, `DmgClass`, `PreventionType`, `StanceBarOrder`, `DmgMultiplier1`, `DmgMultiplier2`, `DmgMultiplier3`, `MinFactionId`, `MinReputation`, `RequiredAuraVision`, `TotemCategory1`, `TotemCategory2`, `AreaId`, `SchoolMask`, `IsServerSide`, `AttributesServerside`) VALUES
 ('39607','0','0','0','384','136','0','512','128','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','18','0','0','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','-1','0','0','28','0','0','1','0','0','0','0','0','0','0','0','0','0','0','41','0','0','0','0','0','13','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','22906','0','0','64','0','0','0','0','0','0','0','0','0','143','0','0','OCW Exodar 02 Summon Elementals 01',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0','0','0','0','0','0','0','0','0','0','1','1','0','0','0','0','0','0','0','32','2','0'),
 ('39608','0','0','0','384','136','0','512','128','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','18','0','0','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','-1','0','0','28','0','0','1','0','0','0','0','0','0','0','0','0','0','0','44','0','0','0','0','0','13','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','22908','0','0','64','0','0','0','0','0','0','0','0','0','143','0','0','OCW Exodar 02 Summon Elementals 02',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0','0','0','0','0','0','0','0','0','0','1','1','0','0','0','0','0','0','0','32','2','0'),
 ('39611','0','0','0','384','136','0','512','128','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','18','0','0','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','-1','0','0','28','0','0','1','0','0','0','0','0','0','0','0','0','0','0','42','0','0','0','0','0','13','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','22907','0','0','64','0','0','0','0','0','0','0','0','0','143','0','0','OCW Exodar 02 Summon Elementals 03',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0','0','0','0','0','0','0','0','0','0','1','1','0','0','0','0','0','0','0','32','2','0'),
 ('39612','0','0','0','384','136','0','512','128','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','18','0','0','0','0','0','1','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','-1','0','0','28','0','0','1','0','0','0','0','0','0','0','0','0','0','0','43','0','0','0','0','0','13','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','0','22909','0','0','64','0','0','0','0','0','0','0','0','0','143','0','0','OCW Exodar 02 Summon Elementals 04',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'0','0','0','0','0','0','0','0','0','0','1','1','0','0','0','0','0','0','0','32','2','0');
-
--- KJ - Flame dart - each subsequent spell hits fewer targets
-UPDATE `spell_template` SET `MaxAffectedTargets`=15 WHERE Id IN(45740);
-UPDATE `spell_template` SET `MaxAffectedTargets`=5 WHERE Id IN(45741);
-
--- Midsummer - Torch Target Picker - should hit one target
-UPDATE `spell_template` SET `MaxAffectedTargets`=1 WHERE Id IN(45907);
 
 -- Fix "Invalid target" error for Salvage Wreckage 42287 & Summon Mirefin Burrower 42289 - i.33044
 UPDATE `spell_template` SET `EffectRadiusIndex1`=0 WHERE Id IN(42287,42289);
