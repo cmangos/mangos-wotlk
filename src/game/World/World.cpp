@@ -954,7 +954,7 @@ void World::SetInitialWorldSettings()
     // load SQL dbcs first, other DBCs need them
     sObjectMgr.LoadSQLDBCs();
 
-    // Load before npc_text, gossip_menu_option, script_texts, creature_ai_texts, dbscript_string
+    // Load before npc_text, gossip_menu_option, script_texts, creature_ai_texts
     sLog.outString("Loading broadcast_text...");
     sObjectMgr.LoadBroadcastText();
 
