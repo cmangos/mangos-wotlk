@@ -525,11 +525,16 @@ enum
     SPELL_A52_NEURALYZER = 34400
 };
 
-bool AreaTrigger_at_area_52(Player* pPlayer, AreaTriggerEntry const* /*pAt*/)
+bool AreaTrigger_at_area_52(Player* player, AreaTriggerEntry const* at)
 {
     // ToDo: research if there should be other actions happening here
-    if (!pPlayer->HasAura(SPELL_A52_NEURALYZER))
-        pPlayer->CastSpell(pPlayer, SPELL_A52_NEURALYZER, TRIGGERED_OLD_TRIGGERED); // mounted needs triggered
+    if (!player->HasAura(SPELL_A52_NEURALYZER))
+    {
+        SpellCastTargets targets;
+        targets.setUnitTarget(player);
+        targets.setDestination(at->x, at->y, at->z);
+        player->CastSpell(targets, sSpellTemplate.LookupEntry<SpellEntry>(SPELL_A52_NEURALYZER), TRIGGERED_OLD_TRIGGERED); // mounted needs triggered
+    }
 
     return false;
 }
