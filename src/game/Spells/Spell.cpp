@@ -3836,7 +3836,7 @@ void Spell::update(uint32 difftime)
         // always cancel for channeled spells
         if (m_spellState == SPELL_STATE_CHANNELING)
         {
-            if (m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_MOVEMENT && !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_CAN_CHANNEL_WHEN_MOVING))
+            if (m_spellInfo->ChannelInterruptFlags & AURA_INTERRUPT_FLAG_MOVE && !m_spellInfo->HasAttribute(SPELL_ATTR_EX5_CAN_CHANNEL_WHEN_MOVING))
                 cancel();
         }            
         // don't cancel for melee, autorepeat, triggered and instant spells
@@ -3905,7 +3905,7 @@ void Spell::update(uint32 difftime)
                     }
 
                     // check if player has turned if flag is set
-                    if (m_spellInfo->ChannelInterruptFlags & CHANNEL_FLAG_TURNING)
+                    if (m_spellInfo->ChannelInterruptFlags & AURA_INTERRUPT_FLAG_TURNING)
                     {
                         switch (m_caster->GetTypeId())
                         {
