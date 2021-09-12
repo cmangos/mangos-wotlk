@@ -401,6 +401,8 @@ struct npc_brann_hosAI : public ScriptedAI, private DialogueHelper
             case AI_EVENT_CUSTOM_D:
                 StartSjonnirEvent();
                 break;
+            default:
+                break;
         }
     }
 

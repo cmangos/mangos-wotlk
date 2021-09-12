@@ -49,7 +49,7 @@ OutdoorPvPZM::OutdoorPvPZM() : OutdoorPvP(),
     }
 
     // initially set graveyard owner to neither faction
-    SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, TEAM_INVALID, { 530 });
+    SetGraveYardLinkTeam(GRAVEYARD_ID_TWIN_SPIRE, GRAVEYARD_ZONE_TWIN_SPIRE, TEAM_INVALID, 530);
 }
 
 void OutdoorPvPZM::FillInitialWorldStates(WorldPacket& data, uint32& count)
