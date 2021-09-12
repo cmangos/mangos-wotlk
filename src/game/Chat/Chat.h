@@ -562,7 +562,6 @@ class ChatHandler
         bool HandleReloadDBScriptsOnSpellCommand(char* args);
         bool HandleReloadDBScriptsOnRelayCommand(char* args);
 
-        bool HandleReloadEventAITextsCommand(char* args);
         bool HandleReloadEventAISummonsCommand(char* args);
         bool HandleReloadEventAIScriptsCommand(char* args);
         bool HandleReloadGameGraveyardZoneCommand(char* args);
