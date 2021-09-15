@@ -1737,16 +1737,6 @@ UPDATE spell_template SET Speed=0 WHERE Id IN(14824,14825,14826,14827,14828,1482
 -- Classic section
 -- ============================================================
 
--- MaxAffectedTargets
-UPDATE `spell_template` SET `MaxAffectedTargets` = 1 WHERE `Id` IN (
-26237, -- AQ40 - C'Thun - Summon Mouth Tentacles - restricted to one target
-26398 -- AQ40 - C'Thun - Summon Hook Tentacles - restricted to one target
-);
-
--- AQ40 - Huhuran - Wyvern Sting/Poison Bolt Volley - Max 10 targets
-UPDATE `spell_template` SET `MaxAffectedTargets` = 10 WHERE `Id` = 26180;
-UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 26052;
-
 -- Add spells referenced by RewSpell field of missing classic quest_templates ported to TBC
 INSERT INTO spell_template(Id, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, AttributesEx5, AttributesEx6, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, CasterAuraStateNot, TargetAuraStateNot, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcFlags, ProcChance, ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerlevel, ManaPerSecond, ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectMiscValueB1, EffectMiscValueB2, EffectMiscValueB3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, ActiveIconID, SpellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, SpellName9, SpellName10, SpellName11, SpellName12, SpellName13, SpellName14, SpellName15, SpellName16, `Rank1`, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, Rank9, Rank10, Rank11, Rank12, Rank13, Rank14, Rank15, Rank16, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, StanceBarOrder, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, MinFactionId, MinReputation, RequiredAuraVision, TotemCategory1, TotemCategory2, AreaId, SchoolMask, IsServerSide, AttributesServerside) VALUES
 ('2946', '0', '0', '0', '262400', '0', '0', '0', '0', '0', '0', '0', '0', '256', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '6', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '-1', '0', '36', '0', '0', '1', '0', '0', '0', '0', '0', '-1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '2944', '0', '0', '0', '0', '0', '107', '9', '0', '0', 'Devouring Plague', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '1', '1', '0', '0', '0', '0', '0', '0', '1', '0', '0'),
@@ -1963,75 +1953,60 @@ INSERT INTO `spell_template` (Id, Category, Dispel, Mechanic, Attributes, Attrib
 INSERT INTO `spell_template` (Id, Category, Dispel, Mechanic, Attributes, AttributesEx, AttributesEx2, AttributesEx3, AttributesEx4, AttributesEx5, AttributesEx6, Stances, StancesNot, Targets, TargetCreatureType, RequiresSpellFocus, FacingCasterFlags, CasterAuraState, TargetAuraState, CasterAuraStateNot, TargetAuraStateNot, CastingTimeIndex, RecoveryTime, CategoryRecoveryTime, InterruptFlags, AuraInterruptFlags, ChannelInterruptFlags, ProcFlags, ProcChance, ProcCharges, MaxLevel, BaseLevel, SpellLevel, DurationIndex, PowerType, ManaCost, ManaCostPerlevel, ManaPerSecond, ManaPerSecondPerLevel, RangeIndex, Speed, ModalNextSpell, StackAmount, Totem1, Totem2, Reagent1, Reagent2, Reagent3, Reagent4, Reagent5, Reagent6, Reagent7, Reagent8, ReagentCount1, ReagentCount2, ReagentCount3, ReagentCount4, ReagentCount5, ReagentCount6, ReagentCount7, ReagentCount8, EquippedItemClass, EquippedItemSubClassMask, EquippedItemInventoryTypeMask, Effect1, Effect2, Effect3, EffectDieSides1, EffectDieSides2, EffectDieSides3, EffectRealPointsPerLevel1, EffectRealPointsPerLevel2, EffectRealPointsPerLevel3, EffectBaseDice1, EffectBaseDice2, EffectBaseDice3, EffectMechanic1, EffectMechanic2, EffectMechanic3, EffectImplicitTargetA1, EffectImplicitTargetA2, EffectImplicitTargetA3, EffectImplicitTargetB1, EffectImplicitTargetB2, EffectImplicitTargetB3, EffectRadiusIndex1, EffectRadiusIndex2, EffectRadiusIndex3, EffectApplyAuraName1, EffectApplyAuraName2, EffectApplyAuraName3, EffectAmplitude1, EffectAmplitude2, EffectAmplitude3, EffectMultipleValue1, EffectMultipleValue2, EffectMultipleValue3, EffectChainTarget1, EffectChainTarget2, EffectChainTarget3, EffectItemType1, EffectItemType2, EffectItemType3, EffectMiscValue1, EffectMiscValue2, EffectMiscValue3, EffectMiscValueB1, EffectMiscValueB2, EffectMiscValueB3, EffectTriggerSpell1, EffectTriggerSpell2, EffectTriggerSpell3, EffectPointsPerComboPoint1, EffectPointsPerComboPoint2, EffectPointsPerComboPoint3, SpellVisual, SpellIconID, ActiveIconID, SpellPriority, SpellName, SpellName2, SpellName3, SpellName4, SpellName5, SpellName6, SpellName7, SpellName8, SpellName9, SpellName10, SpellName11, SpellName12, SpellName13, SpellName14, SpellName15, SpellName16, Rank1, Rank2, Rank3, Rank4, Rank5, Rank6, Rank7, Rank8, Rank9, Rank10, Rank11, Rank12, Rank13, Rank14, Rank15, Rank16, ManaCostPercentage, StartRecoveryCategory, StartRecoveryTime, MaxTargetLevel, SpellFamilyName, SpellFamilyFlags, MaxAffectedTargets, DmgClass, PreventionType, StanceBarOrder, DmgMultiplier1, DmgMultiplier2, DmgMultiplier3, MinFactionId, MinReputation, RequiredAuraVision, TotemCategory1, TotemCategory2, AreaId, SchoolMask, IsServerSide, AttributesServerside) VALUES
 ('6440', '0', '0', '0', '208', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '101', '0', '0', '0', '0', '21', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '-1', '-1', '0', '6', '0', '0', '1', '0', '0', '0', '0', '0', '9', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '13', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '85', '0', '0', 'Smite\'s Dual Wield Passive', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '', '', '', '', '', '', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '0', '0', '0', '0', '0', '0', '0', '1', '1', '-1', '1', '1', '1', '0', '0', '0', '0', '0', '0', '0', '1', '0');
 
+-- ==================
+-- MaxAffectedTargets
+UPDATE `spell_template` SET `MaxAffectedTargets` = 1 WHERE `Id` IN (
+802, -- Mutate Bug (AQ40, Emperor Vek'nilash)
+804, -- Explode Bug (AQ40, Emperor Vek'lor)
+23138, -- Gate of Shazzrah (MC, Shazzrah)
+23173, -- Brood Affliction (BWL, Chromaggus) - TODO: Remove along with rework
+23603, -- Wild Polymorph (BWL, Nefarian)
+24019, -- Axe Flurry (ZG - Gurubashi Axe Thrower)
+24150, -- Stinger Charge Primer (AQ20, Hive'Zara Stinger)
+24781, -- Dream Fog (Emerald Dragons)
+26080, -- Stinger Charge Primer (AQ40, Vekniss Stinger)
+26237, -- AQ40 - C'Thun - Summon Mouth Tentacles - restricted to one target
+26398, -- AQ40 - C'Thun - Summon Hook Tentacles - restricted to one target
+26524, -- Sand Trap (AQ20 - Kurinnaxx)
+28415, -- Summon Type A Trigger (Naxxramas, Kel'Thuzad)
+28416, -- Summon Type B Trigger (Naxxramas, Kel'Thuzad)
+28417, -- Summon Type C Trigger (Naxxramas, Kel'Thuzad)
+28455, -- Summon Type D Trigger (Naxxramas, Kel'Thuzad)
+28560 -- Summon Blizzard (Naxx, Sapphiron)
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 2 WHERE `Id` IN (
+10258, -- Awaken Vault Warder (Uldaman)
+28542 -- Life Drain (Naxx, Sapphiron)
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 5 WHERE `Id` IN (
+29232 -- Fungal Bloom (Loatheb)
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 6 WHERE `Id` IN (
+25676, -- Drain Mana (correct number has to be researched)
+25754 -- Drain Mana
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 10 WHERE `Id` IN (
+26180, -- AQ40 - Huhuran - Wyvern Sting/Poison Bolt Volley - Max 10 targets
+28796, -- Poison Bolt Volley (Naxx, Faerlina)
+29213 -- Curse of the Plaguebringer (Naxx, Noth the Plaguebringer)
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 12 WHERE `Id` IN (
+26457, -- Drain Mana (correct number has to be researched)
+26559 -- Drain Mana
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 26052; -- Poison Bolt
+-- MaxAffectedTargets
+-- ==================
+
 -- ============================================================
 -- TBC section
 -- ============================================================
-
--- MaxAffectedTargets
-UPDATE `spell_template` SET `MaxAffectedTargets` = 0 WHERE `Id` = 45248; -- Eredar Twins - Sacrolash - Shadow Blades
-
-UPDATE `spell_template` SET `MaxAffectedTargets` = 1 WHERE `Id` IN (
-30209, -- Nightbane Target Charred Earth
-30469, -- Nether Beam - Netherspite - restricted to one target
-30854,30898,39095, -- prince malchezaar spell fixes
-30952, -- arrow script spell should only hit one target - verified by video and sniff
-31347, -- Azgalor - Doom - only hits one target
-33716, -- laugh should only hit one target per tick
-34094, -- Power of Arrazius - should only hit one player
-34290, -- Ghazan Acid Spit should only hit one target
-34441, -- make spell target only one enemy, likely mismatch in dbc during tbc nerfs
-36146, -- Naberius Mind control should only hit one target
-36201,36290,36291, -- Kael phase transition search spells should always hit only one target
-36327, -- Shoot Arcane Explosion Arrow
-36717,38829, -- Arcatraz Sentinel - Energy Discharge - should only hit one player
-38054, -- Random Rocket Missile - should only hit one target - per sniff evidence
-38573, -- should only hit one player per Coilfang Sporebat spell tick
-38642, -- Greyheart Nether-Mage - Blink only hits one target
-38650, -- Serpentshrine Lurker - Rancid Mushroom Primer
-39032,39042, -- should only hit one target
-39848, -- Water Globule New Target
-40851, -- Disgruntled, used by Bonechewer Taskmaster (23028) - only hits one Bonechewer Worker (22963)
-40887, -- Assist must only hit one target
-41071, -- Raise Dead - Shadowmoon Deathshaper
-42357, -- Axe Volley - Amanishi Axe Thrower - should only hit one random target
-43550, -- Malacrass - Priest drain Mind Control - should only hit one target
-43711, -- Headless Horseman - Start Fire Target Test (Guard)
-44869, -- SWP - Kalecgos - Spectral blast - 1 target
-44978,45001,45002,45004,45006,45010, -- Kalecgos - Wild Magic
-45027, -- SWP - Kalecgos - Revitalize - 1 target
-45032,45034, -- Curse of Boundless Agony
-45680, -- KJ - Shield Orb - Shadow Bolt - only one target
-45892, -- Kiljaeden - Sinister Reflection
-45907 -- Midsummer - Torch Target Picker - should hit one target
-);
-
--- Lady Vashj - Persuasion 38511
--- missing scripted spell interaction with 38514, the damage/healing component mced targets should also be immune to all cc effects
--- See this as basic, nerfed implementation from the once feared Persuasion Mechanic Vashj had
--- 0
-UPDATE `spell_template` SET `MaxAffectedTargets` = 2 WHERE `Id` = 38511;
-
-UPDATE `spell_template` SET `MaxAffectedTargets` = 3 WHERE `Id` IN (
-31298, -- Anetheron Sleep - max 3 targets
-36797, -- Kael MC should only hit 3 targets
-37790, -- Coilfang Ambusher - Spread Shot
-41357 -- Promenade Sentinel - L1 Arcane Charge should only hit 3 targets
-);
-
-UPDATE `spell_template` SET `MaxAffectedTargets` = 4 WHERE `Id` = 38028; -- Watery Grave - Morogrim Tidewalker - restricted to 4 targets
-
-UPDATE `spell_template` SET `MaxAffectedTargets` = 5 WHERE `Id` IN (
-33332, -- Murmur pre event visual spell maxtarget 5
-37135, -- Domination
-38296, -- Spitfire Totem - Scorch
-39594, -- Cyclone, used by Cyclone Totem (22894)
-45046, -- Flames of Doom used by Eredar Sorcerer 25033 should hit at most 5 targets
-45641, -- Fire Bloom
-45741, -- KJ - Flame dart - each subsequent spell hits fewer targets
-46008 -- Muru - Negative energy - should only hit 5 targets
-);
-
-UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 45740; -- KJ - Flame dart - each subsequent spell hits fewer targets
 
 -- Freezing circle should not be removed by damage
 UPDATE spell_template SET ProcFlags=0 WHERE Id IN(34779);
@@ -2435,6 +2410,99 @@ INSERT INTO `spell_template` (`Id`, `Category`, `Dispel`, `Mechanic`, `Attribute
 
 -- Fix "Invalid target" error for Salvage Wreckage 42287 & Summon Mirefin Burrower 42289 - i.33044
 UPDATE `spell_template` SET `EffectRadiusIndex1`=0 WHERE Id IN(42287,42289);
+
+-- ==================
+-- MaxAffectedTargets
+UPDATE `spell_template` SET `MaxAffectedTargets` = 0 WHERE `Id` = 45248; -- Eredar Twins - Sacrolash - Shadow Blades
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 1 WHERE `Id` IN (
+30209, -- Nightbane Target Charred Earth
+30469, -- Nether Beam - Netherspite - restricted to one target
+30541, -- Blaze (Magtheridon)
+30769, -- Pick Red Riding Hood (Karazhan, Big Bad Wolf)
+30835, -- Infernal Relay (Karazhan, Prince Malchezaar)
+30854,30898,39095, -- prince malchezaar spell fixes
+32312, -- Move 1 (Karazhan, Chess Event)
+37388, -- Move 2 (Karazhan, Chess Event)
+39338, -- Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Horde
+39342, -- Karazhan - Chess, Medivh CHEAT: Hand of Medivh, Target Alliance
+30952, -- arrow script spell should only hit one target - verified by video and sniff
+31347, -- Azgalor - Doom - only hits one target
+33711,38794, -- Murmur's Touch (Shadow Labyrinth, Murmur)
+33716, -- laugh should only hit one target per tick
+34094, -- Power of Arrazius - should only hit one player
+34290, -- Ghazan Acid Spit should only hit one target
+34441, -- make spell target only one enemy, likely mismatch in dbc during tbc nerfs
+36146, -- Naberius Mind control should only hit one target
+36201,36290,36291, -- Kael phase transition search spells should always hit only one target
+36327, -- Shoot Arcane Explosion Arrow
+36717,38829, -- Arcatraz Sentinel - Energy Discharge - should only hit one player
+38054, -- Random Rocket Missile - should only hit one target - per sniff evidence
+38194, -- Blink
+38573, -- should only hit one player per Coilfang Sporebat spell tick
+38642, -- Greyheart Nether-Mage - Blink only hits one target
+38650, -- Serpentshrine Lurker - Rancid Mushroom Primer
+39032,39042, -- should only hit one target
+39848, -- Water Globule New Target
+40834, -- Agonizing Flames (BT, Illidan Stormrage)
+40851, -- Disgruntled, used by Bonechewer Taskmaster (23028) - only hits one Bonechewer Worker (22963)
+40887, -- Assist must only hit one target
+41071, -- Raise Dead - Shadowmoon Deathshaper
+41537, -- Summon Enslaved Soul (BT, Reliquary of Souls)
+42357, -- Axe Volley - Amanishi Axe Thrower - should only hit one random target
+43550, -- Malacrass - Priest drain Mind Control - should only hit one target
+43711, -- Headless Horseman - Start Fire Target Test (Guard)
+44869, -- SWP - Kalecgos - Spectral blast - 1 target
+44978,45001,45002,45004,45006,45010, -- Kalecgos - Wild Magic
+45027, -- SWP - Kalecgos - Revitalize - 1 target
+45032,45034, -- Curse of Boundless Agony
+45391, -- Summon Demonic Vapor (SWP, Felmyst)
+45680, -- KJ - Shield Orb - Shadow Bolt - only one target
+45892, -- Kiljaeden - Sinister Reflection
+45976, -- Open Portal (SWP, M'uru)
+45907, -- Midsummer - Torch Target Picker - should hit one target
+46372 -- Ice Spear Target Picker (Slave Pens, Ahune)
+);
+
+-- Lady Vashj - Persuasion 38511
+-- missing scripted spell interaction with 38514, the damage/healing component mced targets should also be immune to all cc effects
+-- See this as basic, nerfed implementation from the once feared Persuasion Mechanic Vashj had
+-- 0
+UPDATE `spell_template` SET `MaxAffectedTargets` = 2 WHERE `Id` = 38511;
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 3 WHERE `Id` IN (
+30004, -- Flame Wreath (Karazhan, Shade of Aran)
+31298, -- Anetheron Sleep - max 3 targets
+36797, -- Kael MC should only hit 3 targets
+37790, -- Coilfang Ambusher - Spread Shot
+39341, -- Karazhan - Chess, Medivh CHEAT: Fury of Medivh, Target Horde
+39344, -- Karazhan - Chess, Medivh CHEAT: Fury of Medivh, Target Alliance
+39992, -- Needle Spine Targeting (BT, Warlord Najentus)
+40869, -- Fatal Attraction (BT, Mother Shahraz)
+41303, -- Soul Drain (BT, Reliquary of Souls)
+41357, -- Promenade Sentinel - L1 Arcane Charge should only hit 3 targets
+41376 -- Spite (BT, Reliquary of Souls)
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 4 WHERE `Id` = 38028; -- Watery Grave - Morogrim Tidewalker - restricted to 4 targets
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 5 WHERE `Id` IN (
+33332, -- Murmur pre event visual spell maxtarget 5
+37135, -- Domination
+38296, -- Spitfire Totem - Scorch
+39594, -- Cyclone, used by Cyclone Totem (22894)
+40243, -- Crushing Shadows (BT, Teron Gorefiend)
+42005, -- Bloodboil (BT, Gurtogg Bloodboil)
+45046, -- Flames of Doom used by Eredar Sorcerer 25033 should hit at most 5 targets
+45641, -- Fire Bloom
+45741, -- KJ - Flame dart - each subsequent spell hits fewer targets
+46008 -- Muru - Negative energy - should only hit 5 targets
+);
+
+UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 45740; -- KJ - Flame dart - each subsequent spell hits fewer targets
+-- MaxAffectedTargets
+-- ==================
+
 
 -- ============================================================
 -- WOTLK section
