@@ -388,11 +388,6 @@ struct npc_amanishi_hatcherAI : public ScriptedAI
         }
     }
 
-    uint32 GetScriptData() override
-    {
-        return m_hatchlingCount;
-    }
-
     void UpdateAI(const uint32 diff) override
     {
         if (m_bWaypointEnd && m_uiHatchlingTimer)
@@ -418,6 +413,17 @@ struct npc_amanishi_hatcherAI : public ScriptedAI
     }
 };
 
+struct HatchEggs : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        if (npc_amanishi_hatcherAI* ai = dynamic_cast<npc_amanishi_hatcherAI*>(static_cast<Unit*>(spell->GetCaster())->AI()))
+            spell->SetMaxAffectedTargets(ai->m_hatchlingCount);
+        else
+            spell->SetMaxAffectedTargets(1);
+    }
+};
+
 void AddSC_boss_janalai()
 {
     Script* pNewScript = new Script;
@@ -429,4 +435,6 @@ void AddSC_boss_janalai()
     pNewScript->Name = "npc_amanishi_hatcher";
     pNewScript->GetAI = &GetNewAIInstance<npc_amanishi_hatcherAI>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<HatchEggs>("spell_hatch_eggs");
 }

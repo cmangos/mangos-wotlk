@@ -219,6 +219,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (45043,'spell_power_circle'),
 (44006,'spell_teleport_self_akilzon'),
 (43359,'spell_call_of_the_beast'),
+(42471,'spell_hatch_eggs'),
 (43681,'spell_inactive'),
 (40084,'spell_harpooners_mark'),
 (31258,'spell_winterchill_death_and_decay'),
