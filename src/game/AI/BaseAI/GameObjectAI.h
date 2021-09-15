@@ -80,6 +80,11 @@ class GameObjectAI
         virtual void OnUse(Unit* /*user*/, SpellEntry const* /*spellInfo*/);
 
         /*
+         * Notifies AI on object heartbeat
+         */
+        virtual void OnHeartbeat() {}
+
+        /*
         * Enables handling transport
         */
         virtual void JustReachedStopPoint() {}

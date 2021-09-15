@@ -549,6 +549,7 @@ class Aura
         void OnPeriodicDummy();
         void OnPeriodicTickEnd();
         void OnPeriodicCalculateAmount(uint32& amount);
+        void OnHeartbeat();
         // Hook Requirements
         void ForcePeriodicity(uint32 periodicTime);
         void SetScriptValue(uint64 value) { m_scriptValue = value; }

@@ -71,7 +71,6 @@ class FixedPathMovementGenerator : public AbstractPathMovementGenerator
         void Finalize(Unit& unit) override;
         void Interrupt(Unit& unit) override;
         void Reset(Unit& unit) override;
-        bool Update(Unit& unit, const uint32& diff) override;
 
         MovementGeneratorType GetMovementGeneratorType() const override { return PATH_MOTION_TYPE; }
 
@@ -84,7 +83,6 @@ class FixedPathMovementGenerator : public AbstractPathMovementGenerator
         bool m_flying;
         float m_speed;
         uint32 m_forcedMovement;
-        ShortTimeTracker m_flightSplineSyncTimer;
 };
 
 class TaxiMovementGenerator : public AbstractPathMovementGenerator

@@ -1199,6 +1199,7 @@ class Unit : public WorldObject
         void ClearDiminishings() { m_Diminishing.clear(); }
 
         void Update(const uint32 diff) override;
+        void Heartbeat() override;
 
         /**
          * Updates the attack time for the given WeaponAttackType
@@ -2483,6 +2484,7 @@ class Unit : public WorldObject
         void OverrideMountDisplayId(uint32 newDisplayId);
 
         void UpdateSplinePosition(bool relocateOnly = false);
+        void SendFlightSplineSyncIfNeeded();
 
         virtual bool CanCallForAssistance() const { return true; }
         virtual bool CanCheckForHelp() const { return true; }

@@ -247,7 +247,6 @@ void FixedPathMovementGenerator::Initialize(Unit& unit)
     {
         m_firstCycle = true;
         m_startPoint = m_pathIndex;
-        m_flightSplineSyncTimer.Reset(5000);
         unit.addUnitState(UNIT_STAT_ROAMING_MOVE);
     }
 }
@@ -268,24 +267,6 @@ void FixedPathMovementGenerator::Reset(Unit& unit)
 {
     unit.addUnitState(UNIT_STAT_ROAMING);
     AbstractPathMovementGenerator::Reset(unit);
-}
-
-bool FixedPathMovementGenerator::Update(Unit& unit, const uint32& diff)
-{
-    m_flightSplineSyncTimer.Update(diff);
-    if (m_flightSplineSyncTimer.Passed())
-    {
-        if (!unit.movespline->Finalized())
-        {
-            WorldPacket packet(SMSG_FLIGHT_SPLINE_SYNC, 4 + 8);
-            packet << unit.movespline->GetElapsedValue();
-            packet << unit.GetObjectGuid();
-            unit.SendMessageToSet(packet, true);
-            m_flightSplineSyncTimer.Reset(5000);
-        }
-    }
-
-    return AbstractPathMovementGenerator::Update(unit, diff);
 }
 
 bool FixedPathMovementGenerator::Move(Unit& unit) const

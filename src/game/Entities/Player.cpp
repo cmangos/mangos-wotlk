@@ -1687,9 +1687,6 @@ void Player::Update(const uint32 diff)
     else
         m_createdInstanceClearTimer -= diff;
 
-    // Group update
-    SendUpdateToOutOfRangeGroupMembers();
-
     Pet* pet = GetPet();
     if (pet && !pet->IsWithinDistInMap(this, GetMap()->GetVisibilityDistance()) && (GetCharmGuid() && (pet->GetObjectGuid() != GetCharmGuid())))
         pet->Unsummon(PET_SAVE_REAGENTS, this);
@@ -1703,6 +1700,12 @@ void Player::Update(const uint32 diff)
     else if (m_playerbotMgr)
         m_playerbotMgr->UpdateAI(diff);
 #endif
+}
+
+void Player::Heartbeat()
+{
+    Unit::Heartbeat();
+    SendUpdateToOutOfRangeGroupMembers();
 }
 
 void Player::SetDeathState(DeathState s)

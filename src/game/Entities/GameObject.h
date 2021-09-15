@@ -718,6 +718,7 @@ class GameObject : public WorldObject
         virtual bool Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMask, float x, float y, float z, float ang,
                     const QuaternionData & rotation = QuaternionData(), uint8 animprogress = GO_ANIMPROGRESS_DEFAULT, GOState go_state = GO_STATE_READY);
         void Update(const uint32 diff) override;
+        void Heartbeat() override;
         GameObjectInfo const* GetGOInfo() const;
 
         bool IsTransport() const;
