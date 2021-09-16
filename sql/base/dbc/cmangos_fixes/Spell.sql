@@ -2503,6 +2503,8 @@ UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 45740; -- KJ 
 -- MaxAffectedTargets
 -- ==================
 
+-- Coilfang water should also ignore immunities just like child spells
+UPDATE spell_template SET Attributes=Attributes|0x20000000 WHERE Id IN(37025);
 
 -- ============================================================
 -- WOTLK section
