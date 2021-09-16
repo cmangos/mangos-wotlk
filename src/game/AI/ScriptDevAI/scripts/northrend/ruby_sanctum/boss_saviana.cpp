@@ -213,8 +213,27 @@ struct boss_savianaAI : public ScriptedAI
 ## spell_conflagration_targeting - 74452
 ######*/
 
-struct spell_conflagration_targeting : public SpellScript
+struct ConflagrationTargeting : public SpellScript
 {
+    void OnInit(Spell* spell) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (caster)
+        {
+            switch (caster->GetMap()->GetDifficulty())
+            {
+                case RAID_DIFFICULTY_10MAN_NORMAL:
+                case RAID_DIFFICULTY_10MAN_HEROIC:
+                    spell->SetMaxAffectedTargets(2);
+                    break;
+                case RAID_DIFFICULTY_25MAN_NORMAL:
+                case RAID_DIFFICULTY_25MAN_HEROIC:
+                    spell->SetMaxAffectedTargets(5);
+                    break;
+            }
+        }
+    }
+
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
         if (effIdx != EFFECT_INDEX_0)
@@ -234,7 +253,7 @@ struct spell_conflagration_targeting : public SpellScript
 ## spell_conflagration - 74455
 ######*/
 
-struct spell_conflagration : public SpellScript
+struct ConflagrationSaviana : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
@@ -260,6 +279,6 @@ void AddSC_boss_saviana()
     pNewScript->GetAI = &GetNewAIInstance<boss_savianaAI>;
     pNewScript->RegisterSelf();
 
-    RegisterSpellScript<spell_conflagration_targeting>("spell_conflagration_targeting");
-    RegisterSpellScript<spell_conflagration>("spell_conflagration");
+    RegisterSpellScript<ConflagrationTargeting>("spell_conflagration_targeting");
+    RegisterSpellScript<ConflagrationSaviana>("spell_conflagration");
 }

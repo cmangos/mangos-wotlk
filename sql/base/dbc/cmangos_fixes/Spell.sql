@@ -2736,6 +2736,11 @@ UPDATE spell_template SET EffectTriggerSpell3 = '65416' WHERE Id =65419;
 -- Everlasting Affliction - fix of mask - port from core
 UPDATE spell_template SET EffectSpellClassMask2_2=0x00000100,EffectSpellClassMask1_2=0x00000002 WHERE Id IN(47201,47202,47203,47204,47205);
 
+-- Starfall correct count
+UPDATE spell_template SET MaxAffectedTargets=2 WHERE Id IN(50286,53196,53197,53198);
+-- Corpse explosion correct count
+UPDATE spell_template SET MaxAffectedTargets=1 WHERE Id IN(49158,51325,51326,51327,51328);
+
 -- ============================================================
 -- Missing WotLK Achievement Spells
 -- ============================================================

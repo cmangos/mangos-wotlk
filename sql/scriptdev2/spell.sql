@@ -535,7 +535,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (61190,'spell_twilight_shift_aura'),
 (61210,'spell_align_disk_aggro'),
 (61546,'spell_shatter'),
+(61916,'spell_lightning_whirl'),
 (62138,'spell_teleport_inside_violet_hold'),
+(63482,'spell_lightning_whirl_heroic'),
 (65869,'spell_disengage'),
 (66118,'spell_leeching_swarm_aura'),
 (66312,'spell_light_ball_passive'),
@@ -759,7 +761,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (47470,'spell_warrior_execute'),
 (47471,'spell_warrior_execute'),
 (20647,'spell_warrior_execute_damage'),
-(34428,'spell_warrior_victory_rush');
+(34428,'spell_warrior_victory_rush'),
+(58567,'spell_sunder_armor');
 
 -- Mage
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

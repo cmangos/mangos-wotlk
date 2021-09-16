@@ -758,6 +758,22 @@ UnitAI* GetAI_boss_steelbreaker(Creature* pCreature)
     return new boss_steelbreakerAI(pCreature);
 }
 
+struct LightningWhirl : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetMaxAffectedTargets(urand(2, 3));
+    }
+};
+
+struct LightningWhirlHeroic : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetMaxAffectedTargets(urand(3, 6));
+    }
+};
+
 void AddSC_boss_assembly_of_iron()
 {
     Script* pNewScript = new Script;
@@ -774,4 +790,7 @@ void AddSC_boss_assembly_of_iron()
     pNewScript->Name = "boss_steelbreaker";
     pNewScript->GetAI = GetAI_boss_steelbreaker;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<LightningWhirl>("spell_lightning_whirl");
+    RegisterSpellScript<LightningWhirlHeroic>("spell_lightning_whirl_heroic");
 }

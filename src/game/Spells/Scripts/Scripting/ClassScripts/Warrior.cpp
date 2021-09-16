@@ -80,9 +80,19 @@ struct VictoryRush : public SpellScript
     }
 };
 
+struct SunderArmor : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        if (spell->GetCaster()->HasAura(58387)) // Glyph of Sunder Armor
+            spell->SetMaxAffectedTargets(2);
+    }
+};
+
 void LoadWarriorScripts()
 {
     RegisterSpellScript<WarriorExecute>("spell_warrior_execute");
     RegisterSpellScript<WarriorExecuteDamage>("spell_warrior_execute_damage");
     RegisterSpellScript<VictoryRush>("spell_warrior_victory_rush");
+    RegisterSpellScript<SunderArmor>("spell_sunder_armor");
 }
