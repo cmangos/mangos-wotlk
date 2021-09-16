@@ -239,7 +239,7 @@ struct boss_kelidan_the_breakerAI : public CombatAI
                 }
                 break;
             case KELIDAN_SHADOW_BOLT_VOLLEY:
-                if (DoCastSpellIfCan(nullptr, m_isRegularMode ? SPELL_SHADOW_BOLT_VOLLEY : SPELL_SHADOW_BOLT_VOLLEY_H) == CAST_OK)
+                if (DoCastSpellIfCan(m_creature->GetVictim(), m_isRegularMode ? SPELL_SHADOW_BOLT_VOLLEY : SPELL_SHADOW_BOLT_VOLLEY_H) == CAST_OK)
                     ResetCombatAction(action, urand(5000, 13000));
                 break;
             case KELIDAN_CORRUPTION:
