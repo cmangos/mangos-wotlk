@@ -5227,7 +5227,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             target->ModifyAuraState(AURA_STATE_FROZEN, apply);
 
         // Creature specific
-        if (target->GetTypeId() != TYPEID_PLAYER && !target->IsStunned())
+        if (target->IsInWorld() && !target->IsPlayer() && !target->IsStunned())
             target->SetFacingTo(target->GetOrientation());
 
         Unit* caster = GetCaster();
