@@ -1118,7 +1118,15 @@ namespace MaNGOS
                 // there are still more spells which can be casted on dead, but
                 // they are no AOE and don't have such a nice SPELL_ATTR flag
                 // mostly phase check
-                if (!itr->getSource()->IsInMap(i_originalCaster) || itr->getSource()->IsTaxiFlying())
+                if (i_spell.m_spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_PHASE_SHIFT))
+                {
+                    if (!itr->getSource()->IsInMapIgnorePhase(i_originalCaster))
+                        continue;
+                }
+                else if (!itr->getSource()->IsInMap(i_originalCaster))
+                    continue;
+
+                if (itr->getSource()->IsTaxiFlying())
                     continue;
 
                 switch (i_TargetType)

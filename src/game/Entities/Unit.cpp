@@ -9728,10 +9728,19 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
     return gain;
 }
 
-bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool /*inVisibleList*/, bool is3dDistance, bool spell) const
+bool Unit::IsVisibleForOrDetect(Unit const* u, WorldObject const* viewPoint, bool detect, bool /*inVisibleList*/, bool is3dDistance, bool spell, bool ignorePhase) const
 {
-    if (!u || !IsInMap(u))
+    if (!u)
         return false;
+
+    if (ignorePhase)
+    {
+        if (!IsInMapIgnorePhase(u))
+            return false;
+    }
+    else if (!IsInMap(u))
+        return false;
+
 
     // Always can see self
     if (u == this)

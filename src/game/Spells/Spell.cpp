@@ -1392,7 +1392,7 @@ void Spell::DoSpellHitOnUnit(Unit* unit, uint32 effectMask, TargetInfo* target, 
         if (m_trueCaster->CanAttackSpell(unit, m_spellInfo))
         {
             // for delayed spells ignore not visible explicit target, if caster is dead, nothing is visible for him
-            if (unit == m_targets.getUnitTarget() && ((m_trueCaster->IsGameObject() && !unit->IsAlive()) || (!unit->IsVisibleForOrDetect(m_caster, m_caster, false, false, true, true))))
+            if (unit == m_targets.getUnitTarget() && ((m_trueCaster->IsGameObject() && !unit->IsAlive()) || !unit->IsVisibleForOrDetect(m_caster, m_caster, false, false, true, true, m_spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_PHASE_SHIFT))))
             {
                 ResetEffectDamageAndHeal();
                 return;
@@ -2304,7 +2304,7 @@ void Spell::SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targ
 
                     for (auto itr = tempAoeList.begin(); itr != tempAoeList.end();)
                     {
-                        if(!(*itr)->IsVisibleForOrDetect(m_caster, m_originalCaster, false))
+                        if (!(*itr)->IsVisibleForOrDetect(m_caster, m_originalCaster, false, false, true, false, m_spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_PHASE_SHIFT)))
                             itr = tempAoeList.erase(itr);
                         else
                             ++itr;
@@ -5463,7 +5463,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                                 return SPELL_FAILED_CANT_CAST_ON_TAPPED;
                     
                     // Do not allow spells to complete which are targeting players that are invisible to the caster since the time of cast start
-                    if (!m_trueCaster->IsGameObject() && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !IsPositiveEffectMask(m_spellInfo, affectedMask, m_trueCaster, target) && !target->IsVisibleForOrDetect(m_caster, m_trueCaster, false))
+                    if (!m_trueCaster->IsGameObject() && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED) && !IsPositiveEffectMask(m_spellInfo, affectedMask, m_trueCaster, target) && !target->IsVisibleForOrDetect(m_caster, m_trueCaster, false, false, true, false, m_spellInfo->HasAttribute(SPELL_ATTR_EX6_IGNORE_PHASE_SHIFT)))
                         return SPELL_FAILED_BAD_TARGETS;
                 }
 
