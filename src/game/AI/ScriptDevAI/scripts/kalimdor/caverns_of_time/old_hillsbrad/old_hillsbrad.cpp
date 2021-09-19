@@ -1391,6 +1391,33 @@ bool AreaTrigger_at_bartolo_ginsetti(Player* player, AreaTriggerEntry const* /*p
     return true;
 }
 
+std::vector<uint32> beggarTexts = { 18148, 18149, 18150, 18151, 18152, 18153, 18154 };
+
+bool AreaTrigger_at_beggar(Player* player, AreaTriggerEntry const* /*pAt*/)
+{
+    if (player->IsGameMaster() || !player->IsAlive())
+        return false;
+
+    instance_old_hillsbrad* instance = (instance_old_hillsbrad*)player->GetInstanceData();
+
+    if (!instance)
+        return false;
+
+    TimePoint currentTime = player->GetMap()->GetCurrentClockTime();
+
+    if (currentTime > instance->m_beggarScriptTime + std::chrono::seconds(5))
+    {
+        if (Creature* beggar = GetClosestCreatureWithEntry(player, NPC_BEGGAR, 25.f))
+        {
+            instance->m_beggarScriptTime = currentTime;
+            beggar->HandleEmote(EMOTE_ONESHOT_BEG);
+            DoBroadcastText(beggarTexts[urand(0, beggarTexts.size() - 1)], beggar, player);
+        }
+    }
+
+    return true;
+}
+
 void AddSC_old_hillsbrad()
 {
     Script* pNewScript = new Script;
@@ -1421,5 +1448,10 @@ void AddSC_old_hillsbrad()
     pNewScript = new Script;
     pNewScript->Name = "at_bartolo_ginsetti";
     pNewScript->pAreaTrigger = &AreaTrigger_at_bartolo_ginsetti;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_beggar";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_beggar;
     pNewScript->RegisterSelf();
 }

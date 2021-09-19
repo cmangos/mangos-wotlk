@@ -53,6 +53,7 @@ enum
 
     // RP scripts
     NPC_BARTOLO                     = 20365,
+    NPC_BEGGAR                      = 20432,
 };
 
 static const float afInstanceLoc[][4] =
@@ -88,6 +89,8 @@ class instance_old_hillsbrad : public ScriptedInstance
         void Load(const char* chrIn) override;
 
         void Update(const uint32 diff) override;
+
+        TimePoint m_beggarScriptTime;
 
     protected:
         void HandleThrallRelocation();
