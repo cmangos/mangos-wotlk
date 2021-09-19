@@ -50,6 +50,9 @@ enum
     QUEST_ENTRY_DIVERSION           = 10283,
     QUEST_ENTRY_ESCAPE              = 10284,
     QUEST_ENTRY_RETURN              = 10285,
+
+    // RP scripts
+    NPC_BARTOLO                     = 20365,
 };
 
 static const float afInstanceLoc[][4] =
