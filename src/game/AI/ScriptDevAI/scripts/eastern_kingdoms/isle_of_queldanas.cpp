@@ -351,7 +351,11 @@ struct npc_dawnblade_blood_knight : public CombatAI
         {
             SetReactState(REACT_AGGRESSIVE);
             if (Creature* partner = m_creature->GetMap()->GetCreature(m_sparringPartner))
-                m_creature->StopAttackFaction(FACTION_SPARRING_DAWNBLADE);
+            {
+                m_creature->getHostileRefManager().deleteReference(partner);
+                if (m_creature->GetVictim() == partner)
+                    m_creature->AttackStop();
+            }
         }
     }
 
@@ -394,11 +398,22 @@ struct npc_dawnblade_blood_knight : public CombatAI
 
 struct SparAuras : public AuraScript
 {
-    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const
+    bool OnCheckProc(Aura* /*aura*/, ProcExecutionData& data) const override
     {
-        if (data.source && !data.source->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
+        if (data.attacker && !data.attacker->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PLAYER_CONTROLLED))
             return false;
         return true;
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply && aura->GetTarget())
+        {
+            if (npc_dawnblade_blood_knight* dawnbladeAI = dynamic_cast<npc_dawnblade_blood_knight*>(aura->GetTarget()->AI()))
+            {
+                dawnbladeAI->StopDuel();
+            }
+        }
     }
 };
 
