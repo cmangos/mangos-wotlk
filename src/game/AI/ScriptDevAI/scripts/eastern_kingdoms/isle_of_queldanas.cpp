@@ -250,6 +250,7 @@ enum
 
     AREA_ID_DAWNSTAR_VILLAGE    = 4089,
     FACTION_SPARRING_DAWNBLADE  = 1965,
+    FACTION_SPAR_BUDDY          = 1814,
 };
 
 enum DawnbladeBloodKnightActions
@@ -311,8 +312,9 @@ struct npc_dawnblade_blood_knight : public CombatAI
             case DAWNBLADE_BLOOD_KNIGHT_HOLY_LIGHT:
             {
                 if (Unit* target = DoSelectLowestHpFriendly(40.0f, 50.0, true, true))
-                    if (DoCastSpellIfCan(target, SPELL_HOLY_LIGHT) == CAST_OK)
-                        ResetCombatAction(action, urand(16000, 24000));
+                    if (target->GetObjectGuid() == m_creature->GetObjectGuid() || (target->GetFaction() != FACTION_SPARRING_DAWNBLADE && target->GetFaction() != FACTION_SPAR_BUDDY))
+                        if (DoCastSpellIfCan(target, SPELL_HOLY_LIGHT) == CAST_OK)
+                            ResetCombatAction(action, urand(16000, 24000));
                 break;
             }
         }
