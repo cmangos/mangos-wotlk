@@ -114,6 +114,8 @@ struct npc_shattered_sun_fighterAI : public ScriptedAI
             uint32 transformScriptId = 0;
             if (m_creature->GetEntry() == NPC_SHATTERED_SUN_MARKSMAN)
             {
+                SetCombatMovement(false);
+                SetMeleeEnabled(false);
                 switch (urand(0, 3))
                 {
                     case 0:
@@ -176,16 +178,10 @@ enum
 
 struct npc_shattered_sun_marksmanAI : public npc_shattered_sun_fighterAI
 {
-    npc_shattered_sun_marksmanAI(Creature* creature) : npc_shattered_sun_fighterAI(creature), m_uiShootTimer(0), m_uiShootSpell(0) { Reset(); }
+    npc_shattered_sun_marksmanAI(Creature* creature) : npc_shattered_sun_fighterAI(creature), m_uiShootTimer(0), m_uiShootSpell(0) {}
 
     uint32 m_uiShootTimer;
     uint32 m_uiShootSpell;
-
-    void Reset() override
-    {
-        SetCombatMovement(false);
-        SetMeleeEnabled(false);
-    }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* /*invoker*/, uint32 /*miscValue*/) override
     {

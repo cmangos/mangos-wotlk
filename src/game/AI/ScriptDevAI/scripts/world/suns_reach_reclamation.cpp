@@ -42,7 +42,7 @@ struct DawnbladeAttack : public SpellScript
 
     bool OnCheckTarget(const Spell* spell, Unit* target, SpellEffectIndex /*eff*/) const override
     {
-        if (!spell->GetCaster()->IsWithinLOSInMap(target, true))
+        if (!spell->GetCaster()->IsWithinLOSInMap(target, true) || target->GetMotionMaster()->GetCurrentMovementGeneratorType() == WAYPOINT_MOTION_TYPE)
             return false;
 
         return true;
