@@ -475,8 +475,7 @@ struct npc_doomfire_targetingAI : public ScriptedAI
         if (m_uiChangeTargetTimer < uiDiff)
         {
             float nextOrientation = MapManager::NormalizeOrientation(m_creature->GetOrientation() + irand(-1, 1) * m_turnConstant);
-            Position pos;
-            m_creature->GetFirstCollisionPosition(pos, 8.f, nextOrientation); // both orientation and distance verified with sniffs
+            Position pos = m_creature->GetFirstRandomAngleCollisionPosition(8.f, nextOrientation); // both orientation and distance verified with sniffs
             m_creature->NearTeleportTo(pos.x, pos.y, pos.z, nextOrientation);
 
             m_uiChangeTargetTimer = 1000;
