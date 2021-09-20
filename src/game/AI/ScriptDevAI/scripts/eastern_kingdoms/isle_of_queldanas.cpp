@@ -267,13 +267,13 @@ struct npc_dawnblade_blood_knight : public CombatAI
 {
     npc_dawnblade_blood_knight(Creature* creature) : CombatAI(creature, DAWNBLADE_BLOOD_KNIGHT_ACTION_MAX)
     {
-        m_firstSpawn = true;
         AddCombatAction(DAWNBLADE_BLOOD_KNIGHT_HOLY_LIGHT, 0, 0);
         AddCombatAction(DAWNBLADE_BLOOD_KNIGHT_SEAL_OF_WRATH, 5000, 10000);
         AddCombatAction(DAWNBLADE_BLOOD_KNIGHT_JUDGEMENT_OF_WRATH, 10000, 20000);
+        AddCustomAction(DAWNBLADE_BLOOD_KNIGHT_START_EVENT, true, [&]() { StartDuel(); });
+        AddTimerlessCombatAction(DAWNBLADE_BLOOD_KNIGHT_STOP_EVENT, false);
     }
 
-    bool m_firstSpawn;
     ObjectGuid m_sparringPartner;
 
     void ExecuteAction(uint32 action) override
@@ -322,19 +322,16 @@ struct npc_dawnblade_blood_knight : public CombatAI
 
     void JustRespawned() override
     {
-        if (m_firstSpawn)
+        CombatAI::JustRespawned();
+        if (m_creature->GetAreaId() == AREA_ID_DAWNSTAR_VILLAGE)
         {
-            if (m_creature->GetAreaId() == AREA_ID_DAWNSTAR_VILLAGE)
+            if (Creature* partner = GetClosestCreatureWithEntry(m_creature, m_creature->GetEntry(), 5.f, true, false, true))
             {
-                if (Creature* partner = GetClosestCreatureWithEntry(m_creature, m_creature->GetEntry(), 5.f, true, false, true))
-                {
-                    m_sparringPartner = partner->GetObjectGuid();
-                    AddCustomAction(DAWNBLADE_BLOOD_KNIGHT_START_EVENT, 5000u, [&]() { StartDuel(); });
-                    AddTimerlessCombatAction(DAWNBLADE_BLOOD_KNIGHT_STOP_EVENT, true);
-                }
+                m_sparringPartner = partner->GetObjectGuid();
+                ResetTimer(DAWNBLADE_BLOOD_KNIGHT_START_EVENT, 5000u);
+                SetActionReadyStatus(DAWNBLADE_BLOOD_KNIGHT_STOP_EVENT, true);
             }
         }
-        m_firstSpawn = false;
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* sender, Unit* invoker, uint32 /*miscValue*/) override
@@ -344,6 +341,7 @@ struct npc_dawnblade_blood_knight : public CombatAI
 
         if (eventType == AI_EVENT_CUSTOM_A) // start duel
         {
+            m_sparringPartner = invoker->GetObjectGuid();
             SetReactState(REACT_DEFENSIVE);
             AttackStart(invoker);
         }
@@ -385,7 +383,7 @@ struct npc_dawnblade_blood_knight : public CombatAI
     {
         CombatAI::JustReachedHome();
         if (m_sparringPartner)
-            AddCustomAction(DAWNBLADE_BLOOD_KNIGHT_START_EVENT, 30000u, [&]() { StartDuel(); });
+            ResetTimer(DAWNBLADE_BLOOD_KNIGHT_START_EVENT, 30000u);
     }
 
     void Aggro(Unit* who) override
@@ -407,7 +405,7 @@ struct SparAuras : public AuraScript
 
     void OnApply(Aura* aura, bool apply) const override
     {
-        if (!apply && aura->GetTarget())
+        if (!apply)
         {
             if (npc_dawnblade_blood_knight* dawnbladeAI = dynamic_cast<npc_dawnblade_blood_knight*>(aura->GetTarget()->AI()))
             {
