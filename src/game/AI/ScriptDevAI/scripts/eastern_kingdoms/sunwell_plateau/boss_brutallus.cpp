@@ -142,6 +142,7 @@ struct boss_brutallusAI : public CombatAI, private DialogueHelper
         AddCustomAction(BRUTALLUS_MADRIGOSA_SPAWN_MOVE, true, [&]() { HandleMadrigosaSpawnMove(); });
         AddOnKillText(YELL_KILL1, YELL_KILL2, YELL_KILL3);
         m_creature->SetCorpseAccelerationDelay(30000);
+        AddUnreachabilityCheck();
     }
 
     instance_sunwell_plateau* m_instance;
