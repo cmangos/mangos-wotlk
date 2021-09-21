@@ -42,7 +42,7 @@ void AbstractWrapperMovementGenerator::Initialize(Unit& owner)
 
     if (!owner.IsPlayerControlled())
     {
-        if (i_id != 43153) // Lynx Rush exception - can be done in AI - here for research
+        if (i_id != 43153 && i_id != 30751) // Lynx Rush exception | Blade Dance Charge - can be done in AI - here for research
             i_useTimer = true;
         if (owner.movespline->isFacingTarget())
         {
