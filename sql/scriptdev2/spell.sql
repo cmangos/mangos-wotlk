@@ -396,7 +396,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (46747,'spell_fling_torch'),
 (45671,'spell_juggle_torch_catch_quest'),
 (45693,'spell_torches_caught'),
-(40526,'spell_imp_in_a_bottle_say');
+(40526,'spell_imp_in_a_bottle_say'),
+(49357,'spell_brewfest_mount_transformation'),
+(52845,'spell_brewfest_mount_transformation_faction_swap');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
