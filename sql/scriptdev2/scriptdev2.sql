@@ -259,6 +259,12 @@ entry IN(15383,15431,15432,15434,15437,15445,15446,15448,15450,15451,15452,15453
 UPDATE gameobject_template SET ScriptName='go_midsummer_bonfire' WHERE entry IN(187946,187945,187944,187943,187942,187941,187940,187939,187938,187937,187936,187935,187934,187933,187932,187931,187930,187929,187928,187927,187926,187925,187924,187923,187922,187921,187920,187919,187917,187916,187914,187564,187971,187973,187952,187963,187950,187961,187959,187957,187968,187948,187953,187970,187966,187975,187969,187951,187956,187954,187947,187972,187964,187559,187965,187949,187955,187967,187958,187974,187960,187962,181332,181333,181334,181335,181336,181337,188128,188129);
 UPDATE creature_template SET ScriptName='npc_torch_tossing_bunny_controller' WHERE entry IN(25536);
 
+/* Brewfest */
+UPDATE creature_template SET ScriptName='npc_ticket_redeemer' WHERE entry IN (23710,24495); -- Belbi Quikswitch, Blix Fixwidget
+INSERT INTO scripted_areatrigger VALUES
+(4718,'at_ticket_redeemer'),
+(4800,'at_ticket_redeemer');
+
 /*  */
 /* ZONE */
 /* */
@@ -788,9 +794,6 @@ UPDATE creature_template SET ScriptName='boss_trollgore' WHERE entry=26630;
 UPDATE instance_template SET ScriptName='instance_draktharon_keep' WHERE map=600;
 
 /* DUN MOROGH */
-UPDATE creature_template SET ScriptName='npc_belbi_quikswitch' WHERE entry=23710;
-INSERT INTO scripted_areatrigger VALUES
-(4718,'at_belbi_quikswitch');
 
 /* DUROTAR */
 UPDATE creature_template SET ScriptName='npc_lazy_peon' WHERE entry=10556;

@@ -17,6 +17,7 @@ enum
 
     NPC_SHORT_JOHN_MITHRIL      = 14508,
 
+    // Brewfest
     NPC_BELBI_QUIKSWITCH        = 23710,
 };
 
