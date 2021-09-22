@@ -16,6 +16,8 @@ enum
     NPC_FALSTAD_WILDHAMMER      = 5635,
 
     NPC_SHORT_JOHN_MITHRIL      = 14508,
+
+    NPC_BELBI_QUIKSWITCH        = 23710,
 };
 
 enum BFTDP_NPCs

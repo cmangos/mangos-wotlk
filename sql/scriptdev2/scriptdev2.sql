@@ -788,6 +788,9 @@ UPDATE creature_template SET ScriptName='boss_trollgore' WHERE entry=26630;
 UPDATE instance_template SET ScriptName='instance_draktharon_keep' WHERE map=600;
 
 /* DUN MOROGH */
+UPDATE creature_template SET ScriptName='npc_belbi_quikswitch' WHERE entry=23710;
+INSERT INTO scripted_areatrigger VALUES
+(4718,'at_belbi_quikswitch');
 
 /* DUROTAR */
 UPDATE creature_template SET ScriptName='npc_lazy_peon' WHERE entry=10556;
