@@ -398,7 +398,15 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (45693,'spell_torches_caught'),
 (40526,'spell_imp_in_a_bottle_say'),
 (49357,'spell_brewfest_mount_transformation'),
-(52845,'spell_brewfest_mount_transformation_faction_swap');
+(52845,'spell_brewfest_mount_transformation_faction_swap'),
+(42924,'spell_giddy_up'),
+(43880,'spell_ramsteins_swift_work_ram'),
+(43310,'spell_ram_neutral'),
+(42992,'spell_ram_trot'),
+(42993,'spell_ram_canter'),
+(42994,'spell_ram_gallop'),
+(43052,'spell_ram_fatigue'),
+(43450,'spell_apple_trap_friendly');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

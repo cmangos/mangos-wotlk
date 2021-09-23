@@ -229,11 +229,158 @@ bool AreaTrigger_at_brewfest_barker(Player* player, AreaTriggerEntry const* pAt)
     return true;
 }
 
+enum BrewfestRamMechanics
+{
+    SPELL_GIDDYUP = 42924,
+
+    SPELL_NEUTRAL = 43310, // base speed
+    SPELL_TROT    = 42992, // rank 1 speed
+    SPELL_CANTER  = 42993, // rank 2 speed
+    SPELL_GALLOP  = 42994, // rank 3 speed
+
+    SPELL_RAM = 43880,
+    SPELL_RAM_RACING_AURA = 42146,
+    SPELL_APPLE_TRAP = 43492,
+
+    SPELL_RAM_FATIGUE = 43052,
+    SPELL_EXHAUSTED_RAM = 43332,
+};
+
+const uint32 auraPerStacks[] =
+{
+    SPELL_NEUTRAL, SPELL_TROT, SPELL_TROT, SPELL_TROT, SPELL_CANTER, SPELL_CANTER, SPELL_CANTER, SPELL_CANTER, SPELL_GALLOP, SPELL_GALLOP, SPELL_GALLOP, SPELL_GALLOP, SPELL_GALLOP
+};
+
+void RamCleanup(Unit* target)
+{
+    target->RemoveAurasDueToSpell(SPELL_NEUTRAL);
+    target->RemoveAurasDueToSpell(SPELL_TROT);
+    target->RemoveAurasDueToSpell(SPELL_CANTER);
+    target->RemoveAurasDueToSpell(SPELL_GALLOP);
+    target->RemoveAurasDueToSpell(SPELL_RAM);
+    target->RemoveAurasDueToSpell(SPELL_RAM_RACING_AURA);
+    target->RemoveAurasDueToSpell(SPELL_APPLE_TRAP);
+    target->RemoveAurasDueToSpell(SPELL_RAM_FATIGUE);
+}
+
+struct GiddyUp : public SpellScript, public AuraScript
+{
+    void HandleTickAndApplication(Unit* target, int32 modifier) const
+    {
+        uint32 stackCount = target->GetAuraCount(SPELL_GIDDYUP);
+        if (stackCount != 0)
+        {
+            uint32 oldAura = auraPerStacks[stackCount + modifier];
+            uint32 newAura = auraPerStacks[stackCount];
+            if (oldAura != newAura)
+            {
+                target->RemoveAurasDueToSpell(oldAura);
+                target->CastSpell(nullptr, newAura, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        aura->GetTarget()->RemoveAuraStack(aura->GetId());
+        HandleTickAndApplication(aura->GetTarget(), -1);
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_1)
+            HandleTickAndApplication(spell->GetUnitTarget(), 1);
+    }
+
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+        {
+            // cleanup
+            Unit* target = aura->GetTarget();
+            target->RemoveAurasDueToSpell(SPELL_NEUTRAL);
+            target->RemoveAurasDueToSpell(SPELL_TROT);
+            target->RemoveAurasDueToSpell(SPELL_CANTER);
+            target->RemoveAurasDueToSpell(SPELL_GALLOP);
+        }
+    }
+};
+
+struct RamsteinsSwiftWorkRam : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+        {
+            // cleanup
+            Unit* target = aura->GetTarget();
+            RamCleanup(target);
+        }
+    }
+};
+
+struct RamNeutral : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        aura->GetTarget()->RemoveAuraStack(SPELL_RAM_FATIGUE, -4);
+    }
+};
+
+struct RamTrot : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        aura->GetTarget()->RemoveAuraStack(SPELL_RAM_FATIGUE, -2);
+    }
+};
+
+struct RamCanter : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        aura->GetTarget()->CastSpell(nullptr, SPELL_RAM_FATIGUE, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct RamGallop : public AuraScript
+{
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        for (uint32 i = 0; i < 5; ++i)
+            aura->GetTarget()->CastSpell(nullptr, SPELL_RAM_FATIGUE, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct RamFatigue : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx == EFFECT_INDEX_1)
+        {
+            Unit* target = spell->GetUnitTarget();
+            if (target->GetAuraCount(SPELL_RAM_FATIGUE) == 101)
+            {
+                target->CastSpell(nullptr, SPELL_EXHAUSTED_RAM, TRIGGERED_OLD_TRIGGERED);
+                target->RemoveAurasDueToSpell(SPELL_CANTER);
+                target->RemoveAurasDueToSpell(SPELL_GALLOP);
+                target->CastSpell(nullptr, SPELL_NEUTRAL, TRIGGERED_OLD_TRIGGERED);
+            }
+        }
+    }
+};
+
+struct AppleTrapFriendly : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_RAM_FATIGUE);
+    }
+};
+
 void AddSC_brewfest()
 {
-    RegisterSpellScript<BrewfestMountTransformation>("spell_brewfest_mount_transformation");
-    RegisterSpellScript<BrewfestMountTransformationFactionSwap>("spell_brewfest_mount_transformation_faction_swap");
-
     Script* pNewScript = new Script;
     pNewScript->Name = "npc_brewfest_barker";
     pNewScript->GetAI = &GetNewAIInstance<npc_brewfest_barker>;
@@ -243,4 +390,15 @@ void AddSC_brewfest()
     pNewScript->Name = "at_brewfest_barker";
     pNewScript->pAreaTrigger = &AreaTrigger_at_brewfest_barker;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<BrewfestMountTransformation>("spell_brewfest_mount_transformation");
+    RegisterSpellScript<BrewfestMountTransformationFactionSwap>("spell_brewfest_mount_transformation_faction_swap");
+    RegisterScript<GiddyUp>("spell_giddy_up");
+    RegisterAuraScript<RamsteinsSwiftWorkRam>("spell_ramsteins_swift_work_ram");
+    RegisterAuraScript<RamNeutral>("spell_ram_neutral");
+    RegisterAuraScript<RamTrot>("spell_ram_trot");
+    RegisterAuraScript<RamCanter>("spell_ram_canter");
+    RegisterAuraScript<RamGallop>("spell_ram_gallop");
+    RegisterSpellScript<RamFatigue>("spell_ram_fatigue");
+    RegisterAuraScript<AppleTrapFriendly>("spell_apple_trap_friendly");
 }

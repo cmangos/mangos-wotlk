@@ -5964,10 +5964,10 @@ void Unit::RemoveAurasTriggeredBySpell(uint32 spellId, ObjectGuid casterGuid /*=
     }
 }
 
-void Unit::RemoveAuraStack(uint32 spellId)
+void Unit::RemoveAuraStack(uint32 spellId, int32 modifier)
 {
     if (SpellAuraHolder* holder = GetSpellAuraHolder(spellId))
-        if (holder->ModStackAmount(-1, nullptr)) // Remove aura on return true
+        if (holder->ModStackAmount(modifier, nullptr)) // Remove aura on return true
             RemoveSpellAuraHolder(holder, AURA_REMOVE_BY_DEFAULT);
 }
 
