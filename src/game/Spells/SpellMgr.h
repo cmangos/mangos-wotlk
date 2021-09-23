@@ -709,6 +709,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 27578:         // Battle Shout
         case 27987:         // Unholy Aura
         case 28126:         // Spirit Particles (purple)
+        case 28370:         // Toxic Gas
         case 28902:         // Bloodlust
         case 29406:         // Shadowform
         case 29526:         // Hate to Zero (Hate to Zero)
