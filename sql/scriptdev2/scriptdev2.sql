@@ -260,10 +260,18 @@ UPDATE gameobject_template SET ScriptName='go_midsummer_bonfire' WHERE entry IN(
 UPDATE creature_template SET ScriptName='npc_torch_tossing_bunny_controller' WHERE entry IN(25536);
 
 /* Brewfest */
-UPDATE creature_template SET ScriptName='npc_ticket_redeemer' WHERE entry IN (23710,24495); -- Belbi Quikswitch, Blix Fixwidget
+UPDATE creature_template SET ScriptName='npc_brewfest_barker' WHERE entry IN (23683,23684,23685,23710,24492,24493,24495,24710,24711); -- Maeve Barleybrew, Ita Thunderbrew, Gordok Brew Barker, Belbi Quikswitch, Drohn's Distillery Barker, T'chali's Voodoo Brewery Barker, Blix Fixwidget, Ipfelkofer Ironkeg, Tapper Swindlekeg
 INSERT INTO scripted_areatrigger VALUES
-(4718,'at_ticket_redeemer'),
-(4800,'at_ticket_redeemer');
+(4712,'at_brewfest_barker'), -- Ita Thunderbrew
+(4715,'at_brewfest_barker'), -- Maeve Barleybrew
+(4716,'at_brewfest_barker'), -- Gordok Brew Barker (Alliance)
+(4718,'at_brewfest_barker'), -- Belbi Quikswitch
+(4797,'at_brewfest_barker'), -- Gordok Brew Barker (Horde)
+(4798,'at_brewfest_barker'), -- Drohn's Distillery Barker
+(4799,'at_brewfest_barker'), -- T'chali's Voodoo Brewery Barker
+(4800,'at_brewfest_barker'), -- Blix Fixwidget
+(4820,'at_brewfest_barker'), -- Ipfelkofer Ironkeg
+(4829,'at_brewfest_barker'); -- Tapper Swindlekeg
 
 /*  */
 /* ZONE */

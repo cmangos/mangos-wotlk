@@ -96,6 +96,10 @@ struct world_map_kalimdor : public ScriptedMap
             case NPC_BARON_CHARR:
             case NPC_HIGHLORD_KRUUL:
             case NPC_BLIX_FIXWIDGET:
+            case NPC_DROHNS_DISTILLERY_BARKER:
+            case NPC_TCHALIS_VOODOO_BREWERY_BARKER:
+            case NPC_GORDOK_BREW_BARKER_H:
+            case NPC_TAPPER_SWINDLEKEG:
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
         }

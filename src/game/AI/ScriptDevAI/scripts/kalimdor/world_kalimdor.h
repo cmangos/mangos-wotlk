@@ -38,7 +38,11 @@ enum
     NPC_COLOSSUS_RESEARCHER_EAZEL  = 15799,
 
     // Brewfest
-    NPC_BLIX_FIXWIDGET          = 24495,
+    NPC_BLIX_FIXWIDGET                  = 24495,
+    NPC_DROHNS_DISTILLERY_BARKER        = 24492,
+    NPC_TCHALIS_VOODOO_BREWERY_BARKER   = 24493,
+    NPC_GORDOK_BREW_BARKER_H            = 23685,
+    NPC_TAPPER_SWINDLEKEG               = 24711,
 };
 
 enum Encounters

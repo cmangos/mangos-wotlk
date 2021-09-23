@@ -182,6 +182,10 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
             case NPC_FALSTAD_WILDHAMMER:
             case NPC_SHORT_JOHN_MITHRIL:
             case NPC_BELBI_QUIKSWITCH:
+            case NPC_ITA_THUNDERBREW:
+            case NPC_MAEVE_BARLEYBREW:
+            case NPC_GORDOK_BREW_BARKER:
+            case NPC_IPFELKOFER_IRONKEG:
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
             case NPC_DREADKNIGHT:
