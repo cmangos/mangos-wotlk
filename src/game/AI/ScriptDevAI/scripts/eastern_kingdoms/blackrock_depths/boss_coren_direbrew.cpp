@@ -46,6 +46,9 @@ enum
     // SPELL_BREWMAIDEN_DESPAWN_AURA = 48186,            // purpose unk
     SPELL_DIREBREW_MINION_KNOCKBACK = 50313,
 
+    SPELL_DIREBREWS_DISARM_PRECAST  = 47407,
+    SPELL_DIREBREWS_DISARM_GROW     = 47409,
+
     // npcs
     NPC_DIREBREW_MINION             = 26776,
     NPC_ILSA_DIREBREW               = 26764,
@@ -175,6 +178,28 @@ struct RequestSecondMug : public SpellScript
     }
 };
 
+struct DirebrewDisarm : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        spell->GetCaster()->CastSpell(nullptr, SPELL_DIREBREWS_DISARM_PRECAST, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct DirebrewDisarmPrecast : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply)
+            aura->GetTarget()->RemoveAurasDueToSpell(SPELL_DIREBREWS_DISARM_GROW);
+    }
+
+    void OnPeriodicDummy(Aura* aura) const override
+    {
+        aura->GetTarget()->CastSpell(nullptr, SPELL_DIREBREWS_DISARM_GROW, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_coren_direbrew()
 {
     Script* pNewScript = new Script;
@@ -184,4 +209,6 @@ void AddSC_boss_coren_direbrew()
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<RequestSecondMug>("spell_request_second_mug");
+    RegisterSpellScript<DirebrewDisarm>("spell_direbrew_disarm");
+    RegisterAuraScript<DirebrewDisarmPrecast>("spell_direbrew_disarm_precast");
 }
