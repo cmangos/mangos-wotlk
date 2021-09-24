@@ -272,6 +272,11 @@ INSERT INTO scripted_areatrigger VALUES
 (4800,'at_brewfest_barker'), -- Blix Fixwidget
 (4820,'at_brewfest_barker'), -- Ipfelkofer Ironkeg
 (4829,'at_brewfest_barker'); -- Tapper Swindlekeg
+INSERT INTO scripted_areatrigger VALUES
+(4801,'at_brewfest_quest_barking'),
+(4802,'at_brewfest_quest_barking'),
+(4803,'at_brewfest_quest_barking'),
+(4804,'at_brewfest_quest_barking');
 
 /*  */
 /* ZONE */

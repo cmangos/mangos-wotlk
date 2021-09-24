@@ -379,6 +379,80 @@ struct AppleTrapFriendly : public AuraScript
     }
 };
 
+enum
+{
+    AT_HORDE_1 = 4801,
+    AT_HORDE_2 = 4802,
+    AT_HORDE_3 = 4803,
+    AT_HORDE_4 = 4804,
+
+    SPELL_BARKING_CREDIT_1 = 43259,
+    SPELL_BARKING_CREDIT_2 = 43260,
+    SPELL_BARKING_CREDIT_3 = 43261,
+    SPELL_BARKING_CREDIT_4 = 43262,
+
+    // Alliance
+    QUEST_BARK_FOR_THE_BARLEYBREWS          = 11293,
+    QUEST_BARK_FOR_THE_THUNDERBREWS         = 11294,
+    // Horde
+    QUEST_BARK_FOR_DROHNS_DISTILLERY        = 11407,
+    QUEST_BARK_FOR_TCHALIS_VOODOO_BREWERY   = 11408,
+};
+
+const std::vector<uint32> drohnsTexts = { 23515, 23516, 23520, 23521, 23522, 23523 };
+const std::vector<uint32> tchalisTexts = { 23518, 23519, 23524, 23525, 23526, 23527 };
+const std::vector<uint32> barleyTexts = { 22134, 22134, 23464, 23465, 23466 };
+const std::vector<uint32> thunderTexts = { 22942, 23465, 23467, 23468, 23469 };
+
+bool AreaTrigger_at_brewfest_quest_barking(Player* player, AreaTriggerEntry const* at)
+{
+    uint32 spellId = 0;
+    switch (at->id)
+    {
+        case AT_HORDE_1: spellId = SPELL_BARKING_CREDIT_1; break;
+        case AT_HORDE_2: spellId = SPELL_BARKING_CREDIT_2; break;
+        case AT_HORDE_3: spellId = SPELL_BARKING_CREDIT_3; break;
+        case AT_HORDE_4: spellId = SPELL_BARKING_CREDIT_4; break;
+    }
+    if (spellId)
+        player->CastSpell(player, spellId, TRIGGERED_OLD_TRIGGERED);
+}
+
+struct BrewfestBarkerBunny : public AuraScript
+{
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (apply)
+        {
+            Unit* target = aura->GetTarget();
+            if (!target->IsPlayer())
+                return;
+
+            int32 textId = 0;
+            Player* player = static_cast<Player*>(target);
+            if (player->HasQuest(QUEST_BARK_FOR_THE_BARLEYBREWS))
+            {
+                textId = barleyTexts[urand(0, drohnsTexts.size() - 1)];
+            }
+            else if (player->HasQuest(QUEST_BARK_FOR_THE_BARLEYBREWS))
+            {
+                textId = thunderTexts[urand(0, drohnsTexts.size() - 1)];
+            }
+            else if (player->HasQuest(QUEST_BARK_FOR_DROHNS_DISTILLERY))
+            {
+                textId = drohnsTexts[urand(0, drohnsTexts.size() - 1)];
+            }
+            else if (player->HasQuest(QUEST_BARK_FOR_TCHALIS_VOODOO_BREWERY))
+            {
+                textId = tchalisTexts[urand(0, drohnsTexts.size() - 1)];
+            }
+
+            if (textId)
+                DoBroadcastText(textId, aura->GetTarget());
+        }
+    }
+};
+
 void AddSC_brewfest()
 {
     Script* pNewScript = new Script;
@@ -391,6 +465,11 @@ void AddSC_brewfest()
     pNewScript->pAreaTrigger = &AreaTrigger_at_brewfest_barker;
     pNewScript->RegisterSelf();
 
+    pNewScript = new Script;
+    pNewScript->Name = "at_brewfest_quest_barking";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_brewfest_quest_barking;
+    pNewScript->RegisterSelf();
+
     RegisterSpellScript<BrewfestMountTransformation>("spell_brewfest_mount_transformation");
     RegisterSpellScript<BrewfestMountTransformationFactionSwap>("spell_brewfest_mount_transformation_faction_swap");
     RegisterScript<GiddyUp>("spell_giddy_up");
@@ -401,4 +480,5 @@ void AddSC_brewfest()
     RegisterAuraScript<RamGallop>("spell_ram_gallop");
     RegisterSpellScript<RamFatigue>("spell_ram_fatigue");
     RegisterAuraScript<AppleTrapFriendly>("spell_apple_trap_friendly");
+    RegisterSpellScript<BrewfestBarkerBunny>("spell_brewfest_barker_bunny");
 }

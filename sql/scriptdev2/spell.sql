@@ -409,7 +409,11 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (43450,'spell_apple_trap_friendly'),
 (47344,'spell_request_second_mug'),
 (47310,'spell_direbrew_disarm'),
-(47407,'spell_direbrew_disarm_precast');
+(47407,'spell_direbrew_disarm_precast'),
+(43259,'spell_brewfest_barker_bunny'),
+(43260,'spell_brewfest_barker_bunny'),
+(43261,'spell_brewfest_barker_bunny'),
+(43262,'spell_brewfest_barker_bunny');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
