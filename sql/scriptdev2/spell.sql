@@ -406,7 +406,8 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (42993,'spell_ram_canter'),
 (42994,'spell_ram_gallop'),
 (43052,'spell_ram_fatigue'),
-(43450,'spell_apple_trap_friendly');
+(43450,'spell_apple_trap_friendly'),
+(47344,'spell_request_second_mug');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
