@@ -357,7 +357,9 @@ struct npc_squire_roweAI : public npc_escortAI, private DialogueHelper
                 {
                     windsor->Unmount();
                     windsor->SetFacingTo(1.5636f);
-                    windsor->CastSpell(windsor, SPELL_DISMISS_HORSE, TRIGGERED_NONE);
+                    Position pos;
+                    windsor->GetFirstCollisionPosition(pos, 2.f, windsor->GetOrientation() + M_PI_F / 2);
+                    windsor->SummonCreature(12581, pos.x, pos.y, pos.z, pos.o, TEMPSPAWN_TIMED_DESPAWN, 55000);
                 }
                 break;
             }
