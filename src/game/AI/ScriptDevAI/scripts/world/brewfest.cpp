@@ -88,15 +88,15 @@ struct BrewfestMountTransformationFactionSwap : public SpellScript
     }
 };
 
-std::vector<uint32> belbiTexts = { 22170, 22171, 22172, 22173, 22174, 22175 };
-std::vector<uint32> blixTexts = { 23497, 23498, 23499, 23500, 23501, 23502 };
-std::vector<uint32> itaTexts = { 22135, 22136, 22137 };
-std::vector<uint32> maeveTexts = { 22132, 22133, 22134 };
-std::vector<uint32> gordokTexts = { 22138, 22139, 22140 };
-std::vector<uint32> drohnTexts = { 23513, 23514, 23515, 23516 };
-std::vector<uint32> tchaliTexts = { 23517, 23518, 23519 };
-std::vector<uint32> ipfelkoferTexts = { 23691, 23692, 23693 };
-std::vector<uint32> tapperTexts = { 23698, 23700, 23701 };
+const std::vector<uint32> belbiTexts = { 22170, 22171, 22172, 22173, 22174, 22175 };
+const std::vector<uint32> blixTexts = { 23497, 23498, 23499, 23500, 23501, 23502 };
+const std::vector<uint32> itaTexts = { 22135, 22136, 22137 };
+const std::vector<uint32> maeveTexts = { 22132, 22133, 22134 };
+const std::vector<uint32> gordokTexts = { 22138, 22139, 22140 };
+const std::vector<uint32> drohnTexts = { 23513, 23514, 23515, 23516 };
+const std::vector<uint32> tchaliTexts = { 23517, 23518, 23519 };
+const std::vector<uint32> ipfelkoferTexts = { 23691, 23692, 23693 };
+const std::vector<uint32> tapperTexts = { 23698, 23700, 23701 };
 
 struct npc_brewfest_barker : public ScriptedAI
 {
@@ -239,6 +239,7 @@ enum BrewfestRamMechanics
     SPELL_GALLOP  = 42994, // rank 3 speed
 
     SPELL_RAM = 43880,
+    SPELL_RENTAL_RAM = 43883,
     SPELL_RAM_RACING_AURA = 42146,
     SPELL_APPLE_TRAP = 43492,
 
@@ -323,7 +324,7 @@ struct RamNeutral : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
     {
-        aura->GetTarget()->RemoveAuraStack(SPELL_RAM_FATIGUE, -4);
+        aura->GetTarget()->RemoveAuraStack(SPELL_RAM_FATIGUE, 4);
     }
 };
 
@@ -331,7 +332,7 @@ struct RamTrot : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
     {
-        aura->GetTarget()->RemoveAuraStack(SPELL_RAM_FATIGUE, -2);
+        aura->GetTarget()->RemoveAuraStack(SPELL_RAM_FATIGUE, 2);
     }
 };
 
@@ -386,6 +387,11 @@ enum
     AT_HORDE_3 = 4803,
     AT_HORDE_4 = 4804,
 
+    AT_ALLY_1 = 4769,
+    AT_ALLY_2 = 4770,
+    AT_ALLY_3 = 4772,
+    AT_ALLY_4 = 4774,
+
     SPELL_BARKING_CREDIT_1 = 43259,
     SPELL_BARKING_CREDIT_2 = 43260,
     SPELL_BARKING_CREDIT_3 = 43261,
@@ -399,23 +405,25 @@ enum
     QUEST_BARK_FOR_TCHALIS_VOODOO_BREWERY   = 11408,
 };
 
-const std::vector<uint32> drohnsTexts = { 23515, 23516, 23520, 23521, 23522, 23523 };
-const std::vector<uint32> tchalisTexts = { 23518, 23519, 23524, 23525, 23526, 23527 };
-const std::vector<uint32> barleyTexts = { 22134, 22134, 23464, 23465, 23466 };
-const std::vector<uint32> thunderTexts = { 22942, 23465, 23467, 23468, 23469 };
+const std::vector<uint32> drohnsTexts = { 23520, 23521, 23522, 23523 };
+const std::vector<uint32> tchalisTexts = { 23524, 23525, 23526, 23527 };
+const std::vector<uint32> barleyTexts = { 22134, 23464, 23465, 23466 };
+const std::vector<uint32> thunderTexts = { 22942, 23467, 23468, 23469 };
 
 bool AreaTrigger_at_brewfest_quest_barking(Player* player, AreaTriggerEntry const* at)
 {
     uint32 spellId = 0;
     switch (at->id)
     {
-        case AT_HORDE_1: spellId = SPELL_BARKING_CREDIT_1; break;
-        case AT_HORDE_2: spellId = SPELL_BARKING_CREDIT_2; break;
-        case AT_HORDE_3: spellId = SPELL_BARKING_CREDIT_3; break;
-        case AT_HORDE_4: spellId = SPELL_BARKING_CREDIT_4; break;
+        case AT_HORDE_1: case AT_ALLY_1: spellId = SPELL_BARKING_CREDIT_1; break;
+        case AT_HORDE_2: case AT_ALLY_3: spellId = SPELL_BARKING_CREDIT_2; break;
+        case AT_HORDE_3: case AT_ALLY_2: spellId = SPELL_BARKING_CREDIT_3; break;
+        case AT_HORDE_4: case AT_ALLY_4: spellId = SPELL_BARKING_CREDIT_4; break;
     }
     if (spellId)
         player->CastSpell(player, spellId, TRIGGERED_OLD_TRIGGERED);
+
+    return true;
 }
 
 struct BrewfestBarkerBunny : public AuraScript
@@ -430,21 +438,25 @@ struct BrewfestBarkerBunny : public AuraScript
 
             int32 textId = 0;
             Player* player = static_cast<Player*>(target);
-            if (player->HasQuest(QUEST_BARK_FOR_THE_BARLEYBREWS))
+
+            if (!player->HasAura(SPELL_RENTAL_RAM))
+                return;
+
+            if (player->IsCurrentQuest(QUEST_BARK_FOR_THE_BARLEYBREWS, 1))
             {
-                textId = barleyTexts[urand(0, drohnsTexts.size() - 1)];
+                textId = barleyTexts[urand(0, barleyTexts.size() - 1)];
             }
-            else if (player->HasQuest(QUEST_BARK_FOR_THE_BARLEYBREWS))
+            else if (player->IsCurrentQuest(QUEST_BARK_FOR_THE_THUNDERBREWS, 1))
             {
-                textId = thunderTexts[urand(0, drohnsTexts.size() - 1)];
+                textId = thunderTexts[urand(0, thunderTexts.size() - 1)];
             }
-            else if (player->HasQuest(QUEST_BARK_FOR_DROHNS_DISTILLERY))
+            else if (player->IsCurrentQuest(QUEST_BARK_FOR_DROHNS_DISTILLERY, 1))
             {
                 textId = drohnsTexts[urand(0, drohnsTexts.size() - 1)];
             }
-            else if (player->HasQuest(QUEST_BARK_FOR_TCHALIS_VOODOO_BREWERY))
+            else if (player->IsCurrentQuest(QUEST_BARK_FOR_TCHALIS_VOODOO_BREWERY, 1))
             {
-                textId = tchalisTexts[urand(0, drohnsTexts.size() - 1)];
+                textId = tchalisTexts[urand(0, tchalisTexts.size() - 1)];
             }
 
             if (textId)
@@ -480,5 +492,5 @@ void AddSC_brewfest()
     RegisterAuraScript<RamGallop>("spell_ram_gallop");
     RegisterSpellScript<RamFatigue>("spell_ram_fatigue");
     RegisterAuraScript<AppleTrapFriendly>("spell_apple_trap_friendly");
-    RegisterSpellScript<BrewfestBarkerBunny>("spell_brewfest_barker_bunny");
+    RegisterAuraScript<BrewfestBarkerBunny>("spell_brewfest_barker_bunny");
 }

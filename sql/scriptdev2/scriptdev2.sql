@@ -273,6 +273,10 @@ INSERT INTO scripted_areatrigger VALUES
 (4820,'at_brewfest_barker'), -- Ipfelkofer Ironkeg
 (4829,'at_brewfest_barker'); -- Tapper Swindlekeg
 INSERT INTO scripted_areatrigger VALUES
+(4769,'at_brewfest_quest_barking'),
+(4770,'at_brewfest_quest_barking'),
+(4772,'at_brewfest_quest_barking'),
+(4774,'at_brewfest_quest_barking'),
 (4801,'at_brewfest_quest_barking'),
 (4802,'at_brewfest_quest_barking'),
 (4803,'at_brewfest_quest_barking'),
