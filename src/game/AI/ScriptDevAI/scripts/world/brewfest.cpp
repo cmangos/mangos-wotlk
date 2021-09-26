@@ -465,6 +465,91 @@ struct BrewfestBarkerBunny : public AuraScript
     }
 };
 
+struct FaceStringIDFacingBunny : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (spell->GetUnitTarget())
+            spell->GetUnitTarget()->CastSpell(spell->GetCaster(), 44361, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct FaceMe : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        if (spell->GetUnitTarget())
+            spell->GetUnitTarget()->SetFacingToObject(spell->GetCaster());
+    }
+};
+
+enum KegFetching
+{
+    SPELL_BREWFEST_THROW_KEG_DND = 43660,
+    SPELL_SEE_BASE_CAMP_MARK = 44070,
+    SPELL_SEE_SUPPLIER_MARK = 44069,
+    SPELL_RELAY_RACE_HAS_PORTABLE_KEG = 44066,
+    SPELL_BREWFEST_DAILY_RELAY_RACE_PLAYER_INCREASE_MOUNT_DURATION = 43755,
+    SPELL_WORKING_FOR_THE_MAN = 43534,
+    SPELL_HOLIDAY_BREWFEST_DAILY_RELAY_RACE_CREATE_TICKETS = 44501,
+    SPELL_BREWFEST_DAILY_RELAY_RACE_PLAYER_TURN_IN = 43663,
+
+    NPC_BOK_DROPCERTAIN = 24527,
+    NPC_DRIZ_TUMBLEQUICK = 24510,
+};
+
+bool AreaTrigger_at_brewfest_quest_barking(Player* player, AreaTriggerEntry const* at)
+{
+    if (player->HasAura(SPELL_WORKING_FOR_THE_MAN) && !player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG))
+    {
+        if (Creature* thrower = GetClosestCreatureWithEntry(player, NPC_BOK_DROPCERTAIN, 50.f))
+        {
+            thrower->CastSpell(player, SPELL_BREWFEST_THROW_KEG_DND, TRIGGERED_NONE);
+            player->CastSpell(nullptr, SPELL_SEE_BASE_CAMP_MARK, TRIGGERED_OLD_TRIGGERED);
+            player->RemoveAurasDueToSpell(SPELL_SEE_SUPPLIER_MARK);
+        }
+    }
+}
+
+bool AreaTrigger_at_brewfest_quest_barking(Player* player, AreaTriggerEntry const* at)
+{
+    if (player->HasAura(SPELL_WORKING_FOR_THE_MAN) && player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG))
+    {
+        if (Creature* thrower = GetClosestCreatureWithEntry(player, NPC_DRIZ_TUMBLEQUICK, 50.f))
+        {
+            thrower->CastSpell(player, SPELL_BREWFEST_DAILY_RELAY_RACE_PLAYER_TURN_IN, TRIGGERED_NONE);
+            player->CastSpell(nullptr, SPELL_SEE_SUPPLIER_MARK, TRIGGERED_OLD_TRIGGERED);
+            player->RemoveAurasDueToSpell(SPELL_SEE_BASE_CAMP_MARK);
+        }
+    }
+}
+
+struct BrewfestThrowKegPlayerDND : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        caster->CastSpell(nullptr, SPELL_HOLIDAY_BREWFEST_DAILY_RELAY_RACE_CREATE_TICKETS, TRIGGERED_OLD_TRIGGERED);
+        caster->CastSpell(nullptr, SPELL_BREWFEST_DAILY_RELAY_RACE_PLAYER_INCREASE_MOUNT_DURATION, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct BrewfestRelayRacePlayerIncreaseMountDuration : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (SpellAuraHolder* holder = caster->GetSpellAuraHolder(SPELL_RAM))
+        {
+            uint32 duration = holder->GetAuraDuration() + 30000;
+            if (holder->GetAuraMaxDuration() < duration)
+                holder->SetAuraMaxDuration(duration);
+            holder->SetAuraDuration(duration);
+            holder->UpdateAuraDuration();
+        }
+    }
+};
+
 void AddSC_brewfest()
 {
     Script* pNewScript = new Script;
@@ -493,4 +578,8 @@ void AddSC_brewfest()
     RegisterSpellScript<RamFatigue>("spell_ram_fatigue");
     RegisterAuraScript<AppleTrapFriendly>("spell_apple_trap_friendly");
     RegisterAuraScript<BrewfestBarkerBunny>("spell_brewfest_barker_bunny");
+    RegisterSpellScript<FaceStringIDFacingBunny>("spell_face_stringid_facing_bunny");
+    RegisterSpellScript<FaceMe>("spell_face_me");
+    RegisterSpellScript<BrewfestThrowKegPlayerDND>("spell_brewfest_throw_keg_player_dnd");
+    RegisterSpellScript<BrewfestRelayRacePlayerIncreaseMountDuration>("spell_brewfest_relay_race_player_increase_mount_duration");
 }
