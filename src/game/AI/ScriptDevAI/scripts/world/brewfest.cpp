@@ -245,6 +245,13 @@ enum BrewfestRamMechanics
 
     SPELL_RAM_FATIGUE = 43052,
     SPELL_EXHAUSTED_RAM = 43332,
+
+    SPELL_BREWFEST_QUEST_SPEED_BUNNY_GREEN = 43345,
+    SPELL_BREWFEST_QUEST_SPEED_BUNNY_YELLOW = 43346,
+    SPELL_BREWFEST_QUEST_SPEED_BUNNY_RED = 43347,
+
+    QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_A = 11318,
+    QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_H = 11409,
 };
 
 const uint32 auraPerStacks[] =
@@ -332,6 +339,13 @@ struct RamTrot : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
     {
+        if (aura->GetTarget()->IsPlayer() && aura->GetAuraTicks() == 4)
+        {
+            Player* player = static_cast<Player*>(aura->GetTarget());
+            if (player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_A, 1)
+                || player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_H, 1))
+                player->CastSpell(nullptr, SPELL_BREWFEST_QUEST_SPEED_BUNNY_GREEN, TRIGGERED_OLD_TRIGGERED);
+        }
         aura->GetTarget()->RemoveAuraStack(SPELL_RAM_FATIGUE, 2);
     }
 };
@@ -340,6 +354,13 @@ struct RamCanter : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
     {
+        if (aura->GetTarget()->IsPlayer() && aura->GetAuraTicks() == 4)
+        {
+            Player* player = static_cast<Player*>(aura->GetTarget());
+            if (player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_A, 1)
+                || player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_H, 1))
+                player->CastSpell(nullptr, SPELL_BREWFEST_QUEST_SPEED_BUNNY_YELLOW, TRIGGERED_OLD_TRIGGERED);
+        }
         aura->GetTarget()->CastSpell(nullptr, SPELL_RAM_FATIGUE, TRIGGERED_OLD_TRIGGERED);
     }
 };
@@ -348,6 +369,13 @@ struct RamGallop : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
     {
+        if (aura->GetTarget()->IsPlayer() && aura->GetAuraTicks() == 4)
+        {
+            Player* player = static_cast<Player*>(aura->GetTarget());
+            if (player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_A, 1)
+                || player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_H, 1))
+                player->CastSpell(nullptr, SPELL_BREWFEST_QUEST_SPEED_BUNNY_RED, TRIGGERED_OLD_TRIGGERED);
+        }
         for (uint32 i = 0; i < 5; ++i)
             aura->GetTarget()->CastSpell(nullptr, SPELL_RAM_FATIGUE, TRIGGERED_OLD_TRIGGERED);
     }
@@ -493,14 +521,21 @@ enum KegFetching
     SPELL_WORKING_FOR_THE_MAN = 43534,
     SPELL_HOLIDAY_BREWFEST_DAILY_RELAY_RACE_CREATE_TICKETS = 44501,
     SPELL_BREWFEST_DAILY_RELAY_RACE_PLAYER_TURN_IN = 43663,
+    SPELL_BREWFEST_RELAY_RACE_INTRO_ASSIGN_KILL_CREDIT = 44601,
+    SPELL_BREWFEST_RELAY_RACE_INTRO_FORCE_PLAYER_TO_THROW = 43714,
+
+    SPELL_RELAY_RACE_ACCEPT_HIDDEN_DEBUFF = 44689,
 
     NPC_BOK_DROPCERTAIN = 24527,
     NPC_DRIZ_TUMBLEQUICK = 24510,
+
+    QUEST_THERE_AND_BACK_AGAIN_A = 11122,
+    QUEST_THERE_AND_BACK_AGAIN_H = 11412,
 };
 
 bool AreaTrigger_at_brewfest_receive_keg(Player* player, AreaTriggerEntry const* at)
 {
-    if (player->HasAura(SPELL_WORKING_FOR_THE_MAN) && !player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG))
+    if (player->HasAura(SPELL_SEE_SUPPLIER_MARK) && !player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG))
     {
         if (Creature* thrower = GetClosestCreatureWithEntry(player, NPC_BOK_DROPCERTAIN, 50.f))
         {
@@ -514,11 +549,15 @@ bool AreaTrigger_at_brewfest_receive_keg(Player* player, AreaTriggerEntry const*
 
 bool AreaTrigger_at_brewfest_send_keg(Player* player, AreaTriggerEntry const* at)
 {
-    if (player->HasAura(SPELL_WORKING_FOR_THE_MAN) && player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG))
+    if (player->HasAura(SPELL_SEE_BASE_CAMP_MARK) && player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG))
     {
         if (Creature* thrower = GetClosestCreatureWithEntry(player, NPC_DRIZ_TUMBLEQUICK, 50.f))
         {
-            thrower->CastSpell(player, SPELL_BREWFEST_DAILY_RELAY_RACE_PLAYER_TURN_IN, TRIGGERED_NONE);
+            if (player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_A)
+                || player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_H))
+                thrower->CastSpell(player, SPELL_BREWFEST_RELAY_RACE_INTRO_FORCE_PLAYER_TO_THROW, TRIGGERED_NONE);
+            else
+                thrower->CastSpell(player, SPELL_BREWFEST_DAILY_RELAY_RACE_PLAYER_TURN_IN, TRIGGERED_NONE);
             player->CastSpell(nullptr, SPELL_SEE_SUPPLIER_MARK, TRIGGERED_OLD_TRIGGERED);
             player->RemoveAurasDueToSpell(SPELL_SEE_BASE_CAMP_MARK);
         }
@@ -531,7 +570,11 @@ struct BrewfestThrowKegPlayerDND : public SpellScript
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* caster = spell->GetCaster();
-        caster->CastSpell(nullptr, SPELL_HOLIDAY_BREWFEST_DAILY_RELAY_RACE_CREATE_TICKETS, TRIGGERED_OLD_TRIGGERED);
+        if (caster->IsPlayer() && (static_cast<Player*>(caster)->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_A)
+            || static_cast<Player*>(caster)->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_H)))
+            caster->CastSpell(nullptr, SPELL_BREWFEST_RELAY_RACE_INTRO_ASSIGN_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
+        else
+            caster->CastSpell(nullptr, SPELL_HOLIDAY_BREWFEST_DAILY_RELAY_RACE_CREATE_TICKETS, TRIGGERED_OLD_TRIGGERED);
         caster->CastSpell(nullptr, SPELL_BREWFEST_DAILY_RELAY_RACE_PLAYER_INCREASE_MOUNT_DURATION, TRIGGERED_OLD_TRIGGERED);
     }
 };
