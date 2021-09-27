@@ -498,7 +498,7 @@ enum KegFetching
     NPC_DRIZ_TUMBLEQUICK = 24510,
 };
 
-bool AreaTrigger_at_brewfest_quest_barking(Player* player, AreaTriggerEntry const* at)
+bool AreaTrigger_at_brewfest_receive_keg(Player* player, AreaTriggerEntry const* at)
 {
     if (player->HasAura(SPELL_WORKING_FOR_THE_MAN) && !player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG))
     {
@@ -509,9 +509,10 @@ bool AreaTrigger_at_brewfest_quest_barking(Player* player, AreaTriggerEntry cons
             player->RemoveAurasDueToSpell(SPELL_SEE_SUPPLIER_MARK);
         }
     }
+    return true;
 }
 
-bool AreaTrigger_at_brewfest_quest_barking(Player* player, AreaTriggerEntry const* at)
+bool AreaTrigger_at_brewfest_send_keg(Player* player, AreaTriggerEntry const* at)
 {
     if (player->HasAura(SPELL_WORKING_FOR_THE_MAN) && player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG))
     {
@@ -522,6 +523,7 @@ bool AreaTrigger_at_brewfest_quest_barking(Player* player, AreaTriggerEntry cons
             player->RemoveAurasDueToSpell(SPELL_SEE_BASE_CAMP_MARK);
         }
     }
+    return true;
 }
 
 struct BrewfestThrowKegPlayerDND : public SpellScript
@@ -565,6 +567,16 @@ void AddSC_brewfest()
     pNewScript = new Script;
     pNewScript->Name = "at_brewfest_quest_barking";
     pNewScript->pAreaTrigger = &AreaTrigger_at_brewfest_quest_barking;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_brewfest_receive_keg";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_brewfest_receive_keg;
+    pNewScript->RegisterSelf();
+
+    pNewScript = new Script;
+    pNewScript->Name = "at_brewfest_send_keg";
+    pNewScript->pAreaTrigger = &AreaTrigger_at_brewfest_send_keg;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<BrewfestMountTransformation>("spell_brewfest_mount_transformation");
