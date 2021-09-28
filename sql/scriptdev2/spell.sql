@@ -401,6 +401,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (52845,'spell_brewfest_mount_transformation_faction_swap'),
 (42924,'spell_giddy_up'),
 (43880,'spell_ramsteins_swift_work_ram'),
+(43883,'spell_ramsteins_swift_work_ram'),
 (43310,'spell_ram_neutral'),
 (42992,'spell_ram_trot'),
 (42993,'spell_ram_canter'),
