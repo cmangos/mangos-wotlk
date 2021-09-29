@@ -266,51 +266,61 @@ void RamCleanup(Unit* target)
     target->RemoveAurasDueToSpell(SPELL_CANTER);
     target->RemoveAurasDueToSpell(SPELL_GALLOP);
     target->RemoveAurasDueToSpell(SPELL_RAM);
+    target->RemoveAurasDueToSpell(SPELL_RENTAL_RAM);
     target->RemoveAurasDueToSpell(SPELL_RAM_RACING_AURA);
     target->RemoveAurasDueToSpell(SPELL_APPLE_TRAP);
     target->RemoveAurasDueToSpell(SPELL_RAM_FATIGUE);
+    target->RemoveAurasDueToSpell(SPELL_GIDDYUP);
 }
 
 struct GiddyUp : public SpellScript, public AuraScript
 {
-    void HandleTickAndApplication(Unit* target, int32 modifier) const
+    SpellCastResult OnCheckCast(Spell* spell, bool /*strict*/) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (caster->HasAura(SPELL_RAM) || caster->HasAura(SPELL_RENTAL_RAM))
+            return SPELL_CAST_OK;
+        
+        return SPELL_FAILED_DONT_REPORT;
+    }
+
+    void HandleTickAndApplication(Unit* target, bool apply) const
     {
         uint32 stackCount = target->GetAuraCount(SPELL_GIDDYUP);
-        if (stackCount != 0)
+        uint32 oldAura = auraPerStacks[stackCount + (apply ? -1 : 1)];
+        uint32 newAura = auraPerStacks[stackCount];
+        if (oldAura != newAura)
         {
-            uint32 oldAura = auraPerStacks[stackCount + modifier];
-            uint32 newAura = auraPerStacks[stackCount];
-            if (oldAura != newAura)
-            {
-                target->RemoveAurasDueToSpell(oldAura);
-                target->CastSpell(nullptr, newAura, TRIGGERED_OLD_TRIGGERED);
-            }
+            target->RemoveAurasDueToSpell(oldAura);
+            target->CastSpell(nullptr, newAura, TRIGGERED_OLD_TRIGGERED);
         }
     }
 
     void OnPeriodicDummy(Aura* aura) const override
     {
         aura->GetTarget()->RemoveAuraStack(aura->GetId());
-        HandleTickAndApplication(aura->GetTarget(), -1);
-    }
-
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
-    {
-        if (effIdx == EFFECT_INDEX_1)
-            HandleTickAndApplication(spell->GetUnitTarget(), 1);
+        HandleTickAndApplication(aura->GetTarget(), false);
     }
 
     void OnApply(Aura* aura, bool apply) const override
     {
-        if (!apply)
+        if (aura->GetRemoveMode() != AURA_REMOVE_BY_GAINED_STACK)
         {
-            // cleanup
-            Unit* target = aura->GetTarget();
-            target->RemoveAurasDueToSpell(SPELL_NEUTRAL);
-            target->RemoveAurasDueToSpell(SPELL_TROT);
-            target->RemoveAurasDueToSpell(SPELL_CANTER);
-            target->RemoveAurasDueToSpell(SPELL_GALLOP);
+            if (!apply)
+            {
+                // cleanup
+                Unit* target = aura->GetTarget();
+                target->RemoveAurasDueToSpell(SPELL_NEUTRAL);
+                target->RemoveAurasDueToSpell(SPELL_TROT);
+                target->RemoveAurasDueToSpell(SPELL_CANTER);
+                target->RemoveAurasDueToSpell(SPELL_GALLOP);
+            }
         }
+    }
+
+    void OnAfterHit(Spell* spell) const override
+    {
+        HandleTickAndApplication(spell->GetUnitTarget(), true);
     }
 };
 
@@ -331,7 +341,7 @@ struct RamNeutral : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
     {
-        aura->GetTarget()->RemoveAuraStack(SPELL_RAM_FATIGUE, 4);
+        aura->GetTarget()->RemoveAuraStack(SPELL_RAM_FATIGUE, -4);
     }
 };
 
@@ -344,9 +354,9 @@ struct RamTrot : public AuraScript
             Player* player = static_cast<Player*>(aura->GetTarget());
             if (player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_A, 1)
                 || player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_H, 1))
-                player->CastSpell(nullptr, SPELL_BREWFEST_QUEST_SPEED_BUNNY_GREEN, TRIGGERED_OLD_TRIGGERED);
+                player->CastSpell(player, SPELL_BREWFEST_QUEST_SPEED_BUNNY_GREEN, TRIGGERED_OLD_TRIGGERED);
         }
-        aura->GetTarget()->RemoveAuraStack(SPELL_RAM_FATIGUE, 2);
+        aura->GetTarget()->RemoveAuraStack(SPELL_RAM_FATIGUE, -2);
     }
 };
 
@@ -354,12 +364,12 @@ struct RamCanter : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
     {
-        if (aura->GetTarget()->IsPlayer() && aura->GetAuraTicks() == 4)
+        if (aura->GetTarget()->IsPlayer() && aura->GetAuraTicks() == 8)
         {
             Player* player = static_cast<Player*>(aura->GetTarget());
             if (player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_A, 1)
                 || player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_H, 1))
-                player->CastSpell(nullptr, SPELL_BREWFEST_QUEST_SPEED_BUNNY_YELLOW, TRIGGERED_OLD_TRIGGERED);
+                player->CastSpell(player, SPELL_BREWFEST_QUEST_SPEED_BUNNY_YELLOW, TRIGGERED_OLD_TRIGGERED);
         }
         aura->GetTarget()->CastSpell(nullptr, SPELL_RAM_FATIGUE, TRIGGERED_OLD_TRIGGERED);
     }
@@ -369,12 +379,12 @@ struct RamGallop : public AuraScript
 {
     void OnPeriodicDummy(Aura* aura) const override
     {
-        if (aura->GetTarget()->IsPlayer() && aura->GetAuraTicks() == 4)
+        if (aura->GetTarget()->IsPlayer() && aura->GetAuraTicks() == 8)
         {
             Player* player = static_cast<Player*>(aura->GetTarget());
             if (player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_A, 1)
                 || player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_H, 1))
-                player->CastSpell(nullptr, SPELL_BREWFEST_QUEST_SPEED_BUNNY_RED, TRIGGERED_OLD_TRIGGERED);
+                player->CastSpell(player, SPELL_BREWFEST_QUEST_SPEED_BUNNY_RED, TRIGGERED_OLD_TRIGGERED);
         }
         for (uint32 i = 0; i < 5; ++i)
             aura->GetTarget()->CastSpell(nullptr, SPELL_RAM_FATIGUE, TRIGGERED_OLD_TRIGGERED);
@@ -553,8 +563,8 @@ bool AreaTrigger_at_brewfest_send_keg(Player* player, AreaTriggerEntry const* at
     {
         if (Creature* thrower = GetClosestCreatureWithEntry(player, NPC_DRIZ_TUMBLEQUICK, 50.f))
         {
-            if (player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_A)
-                || player->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_H))
+            if (player->IsCurrentQuest(QUEST_THERE_AND_BACK_AGAIN_A)
+                || player->IsCurrentQuest(QUEST_THERE_AND_BACK_AGAIN_H))
                 thrower->CastSpell(player, SPELL_BREWFEST_RELAY_RACE_INTRO_FORCE_PLAYER_TO_THROW, TRIGGERED_NONE);
             else
                 thrower->CastSpell(player, SPELL_BREWFEST_DAILY_RELAY_RACE_PLAYER_TURN_IN, TRIGGERED_NONE);
@@ -570,8 +580,8 @@ struct BrewfestThrowKegPlayerDND : public SpellScript
     void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
     {
         Unit* caster = spell->GetCaster();
-        if (caster->IsPlayer() && (static_cast<Player*>(caster)->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_A)
-            || static_cast<Player*>(caster)->IsCurrentQuest(QUEST_NOW_THIS_IS_RAM_RACING_ALMOST_H)))
+        if (caster->IsPlayer() && (static_cast<Player*>(caster)->IsCurrentQuest(QUEST_THERE_AND_BACK_AGAIN_A)
+            || static_cast<Player*>(caster)->IsCurrentQuest(QUEST_THERE_AND_BACK_AGAIN_H)))
             caster->CastSpell(nullptr, SPELL_BREWFEST_RELAY_RACE_INTRO_ASSIGN_KILL_CREDIT, TRIGGERED_OLD_TRIGGERED);
         else
             caster->CastSpell(nullptr, SPELL_HOLIDAY_BREWFEST_DAILY_RELAY_RACE_CREATE_TICKETS, TRIGGERED_OLD_TRIGGERED);

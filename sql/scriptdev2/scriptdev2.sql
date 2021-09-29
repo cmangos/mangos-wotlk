@@ -283,7 +283,7 @@ INSERT INTO scripted_areatrigger VALUES
 (4804,'at_brewfest_quest_barking');
 INSERT INTO scripted_areatrigger VALUES
 (4807,'at_brewfest_receive_keg'),
-(4809,'at_brewfest_send_keg');
+(4808,'at_brewfest_send_keg');
 
 /*  */
 /* ZONE */
