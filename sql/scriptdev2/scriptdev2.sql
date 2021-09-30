@@ -281,9 +281,14 @@ INSERT INTO scripted_areatrigger VALUES
 (4802,'at_brewfest_quest_barking'),
 (4803,'at_brewfest_quest_barking'),
 (4804,'at_brewfest_quest_barking');
+-- Horde
 INSERT INTO scripted_areatrigger VALUES
 (4807,'at_brewfest_receive_keg'),
 (4808,'at_brewfest_send_keg');
+-- Alliance
+INSERT INTO scripted_areatrigger VALUES
+(4786,'at_brewfest_receive_keg'),
+(4787,'at_brewfest_send_keg');
 
 /*  */
 /* ZONE */

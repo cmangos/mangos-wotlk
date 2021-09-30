@@ -539,6 +539,9 @@ enum KegFetching
     NPC_BOK_DROPCERTAIN = 24527,
     NPC_DRIZ_TUMBLEQUICK = 24510,
 
+    NPC_FLYNN_FIREBREW = 24364,
+    NPC_POL_AMBERSTILL = 24468,
+
     QUEST_THERE_AND_BACK_AGAIN_A = 11122,
     QUEST_THERE_AND_BACK_AGAIN_H = 11412,
 };
@@ -547,7 +550,8 @@ bool AreaTrigger_at_brewfest_receive_keg(Player* player, AreaTriggerEntry const*
 {
     if (player->HasAura(SPELL_SEE_SUPPLIER_MARK) && !player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG))
     {
-        if (Creature* thrower = GetClosestCreatureWithEntry(player, NPC_BOK_DROPCERTAIN, 50.f))
+        Team team = player->GetTeam();
+        if (Creature* thrower = GetClosestCreatureWithEntry(player, team == HORDE ? NPC_BOK_DROPCERTAIN : NPC_FLYNN_FIREBREW, 50.f))
         {
             thrower->CastSpell(player, SPELL_BREWFEST_THROW_KEG_DND, TRIGGERED_NONE);
             player->CastSpell(nullptr, SPELL_SEE_BASE_CAMP_MARK, TRIGGERED_OLD_TRIGGERED);
@@ -561,7 +565,8 @@ bool AreaTrigger_at_brewfest_send_keg(Player* player, AreaTriggerEntry const* at
 {
     if (player->HasAura(SPELL_SEE_BASE_CAMP_MARK) && player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG))
     {
-        if (Creature* thrower = GetClosestCreatureWithEntry(player, NPC_DRIZ_TUMBLEQUICK, 50.f))
+        Team team = player->GetTeam();
+        if (Creature* thrower = GetClosestCreatureWithEntry(player, team == HORDE ? NPC_DRIZ_TUMBLEQUICK : NPC_POL_AMBERSTILL, 50.f))
         {
             if (player->IsCurrentQuest(QUEST_THERE_AND_BACK_AGAIN_A)
                 || player->IsCurrentQuest(QUEST_THERE_AND_BACK_AGAIN_H))
