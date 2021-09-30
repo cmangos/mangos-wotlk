@@ -409,8 +409,16 @@ struct RamFatigue : public SpellScript
     }
 };
 
-struct AppleTrapFriendly : public AuraScript
+struct AppleTrapFriendly : public SpellScript, public AuraScript
 {
+    bool OnCheckTarget(const Spell* /*spell*/, Unit* target, SpellEffectIndex /*eff*/) const override
+    {
+        if (!target->IsPlayer() || !target->HasAura(SPELL_RAM_RACING_AURA))
+            return false;
+
+        return true;
+    }
+
     void OnApply(Aura* aura, bool apply) const override
     {
         if (apply)
@@ -610,6 +618,20 @@ struct BrewfestRelayRacePlayerIncreaseMountDuration : public SpellScript
     }
 };
 
+enum MoleMachine
+{
+    SPELL_MOLE_MACHINE_PORT_TO_GRIM_GUZZLER = 47523,
+};
+
+struct SummonMoleMachinePovBunny : public SpellScript
+{
+    void OnSummon(Spell* spell, Creature* summon) const override
+    {
+        // TODO: Fix this, only a temporary workaround
+        spell->GetCaster()->CastSpell(nullptr, SPELL_MOLE_MACHINE_PORT_TO_GRIM_GUZZLER, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_brewfest()
 {
     Script* pNewScript = new Script;
@@ -646,10 +668,11 @@ void AddSC_brewfest()
     RegisterAuraScript<RamCanter>("spell_ram_canter");
     RegisterAuraScript<RamGallop>("spell_ram_gallop");
     RegisterSpellScript<RamFatigue>("spell_ram_fatigue");
-    RegisterAuraScript<AppleTrapFriendly>("spell_apple_trap_friendly");
+    RegisterScript<AppleTrapFriendly>("spell_apple_trap_friendly");
     RegisterAuraScript<BrewfestBarkerBunny>("spell_brewfest_barker_bunny");
     RegisterSpellScript<FaceStringIDFacingBunny>("spell_face_stringid_facing_bunny");
     RegisterSpellScript<FaceMe>("spell_face_me");
     RegisterSpellScript<BrewfestThrowKegPlayerDND>("spell_brewfest_throw_keg_player_dnd");
     RegisterSpellScript<BrewfestRelayRacePlayerIncreaseMountDuration>("spell_brewfest_relay_race_player_increase_mount_duration");
+    RegisterSpellScript<SummonMoleMachinePovBunny>("spell_summon_mole_machine_pov_bunny");
 }
