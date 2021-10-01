@@ -2629,15 +2629,68 @@ enum GossipNPCSpells
     NPC_GOBLIN_COMMONER     = 20102,
 };
 
-struct GossipNPC : public ScriptedAI
+enum GossipNPCEvents : uint32
 {
-    GossipNPC(Creature* creature) : ScriptedAI(creature) {}
+    GOSSIP_EVENT_WINTER_VEIL,
+    GOSSIP_EVENT_LUNAR_FESTIVAL,
+    GOSSIP_EVENT_HALLOWS_END,
+    GOSSIP_EVENT_BREWFEST,
+    GOSSIP_EVENT_MIDSUMMER,
+    GOSSIP_EVENT_SPIRIT_OF_COMPETITION,
+    GOSSIP_EVENT_PIRATES_DAY,
+    GOSSIP_EVENT_DARK_PORTAL,
+};
+
+struct GossipNPCAI : public ScriptedAI
+{
+    GossipNPCAI(Creature* creature) : ScriptedAI(creature), m_chosenEvent(GOSSIP_EVENT_DARK_PORTAL), m_team(TEAM_NONE) {}
+
+    GossipNPCEvents m_chosenEvent;
+    Team m_team;
 
     void Reset() override {}
 
+    void ChooseEvent()
+    {
+        std::vector<GossipNPCEvents> activeEvents;
+        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_FEAST_OF_WINTER_VEIL))
+            activeEvents.push_back(GOSSIP_EVENT_WINTER_VEIL);
+        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LUNAR_FESTIVAL))
+            activeEvents.push_back(GOSSIP_EVENT_LUNAR_FESTIVAL);
+        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_HALLOWS_END))
+            activeEvents.push_back(GOSSIP_EVENT_HALLOWS_END);
+        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_BREWFEST))
+            activeEvents.push_back(GOSSIP_EVENT_BREWFEST);
+        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_PIRATES_DAY))
+            activeEvents.push_back(GOSSIP_EVENT_PIRATES_DAY);
+        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_FIRE_FESTIVAL))
+            activeEvents.push_back(GOSSIP_EVENT_MIDSUMMER);
+        if (sGameEventMgr.IsActiveEvent(GAME_EVENT_BEFORE_THE_STORM))
+            activeEvents.push_back(GOSSIP_EVENT_DARK_PORTAL);
+        if (sGameEventMgr.IsActiveEvent(GAME_EVENT_SPIRIT_OF_COMPETITION))
+            activeEvents.push_back(GOSSIP_EVENT_SPIRIT_OF_COMPETITION);
+        if (activeEvents.size() > 0)
+            m_chosenEvent = activeEvents[urand(0, activeEvents.size() - 1)];
+
+        switch (m_creature->GetEntry())
+        {
+            case NPC_HUMAN_COMMONER:
+            case NPC_DWARF_COMMONER:
+            case NPC_GNOME_COMMONER:
+            case NPC_NIGHT_ELF_COMMONER:
+            case NPC_DRAENEI_COMMONER: m_team = ALLIANCE; break;
+            case NPC_BLOOD_ELF_COMMONER:
+            case NPC_ORC_COMMONER:
+            case NPC_TAUREN_COMMONER:
+            case NPC_TROLL_COMMONER:
+            case NPC_FORSAKEN_COMMONER:
+            case NPC_GOBLIN_COMMONER: m_team = HORDE; break;
+        }
+    }
+
     uint32 GetGossipNPCVisualId()
     {
-        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_FEAST_OF_WINTER_VEIL))
+        if (m_chosenEvent == GOSSIP_EVENT_WINTER_VEIL)
         {
             switch (m_creature->GetEntry())
             {
@@ -2655,7 +2708,7 @@ struct GossipNPC : public ScriptedAI
             }
         }
 
-        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LUNAR_FESTIVAL))
+        if (m_chosenEvent == GOSSIP_EVENT_LUNAR_FESTIVAL)
         {
             switch (m_creature->GetEntry())
             {
@@ -2673,7 +2726,7 @@ struct GossipNPC : public ScriptedAI
             }
         }
 
-        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_HALLOWS_END))
+        if (m_chosenEvent == GOSSIP_EVENT_HALLOWS_END)
         {
             switch (m_creature->GetEntry())
             {
@@ -2691,17 +2744,35 @@ struct GossipNPC : public ScriptedAI
             }
         }
 
-        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_BREWFEST))
+        if (m_chosenEvent == GOSSIP_EVENT_MIDSUMMER)
+        {
+            switch (m_creature->GetEntry())
+            {
+                case NPC_HUMAN_COMMONER: return 46254;
+                case NPC_DWARF_COMMONER: return 46250;
+                case NPC_BLOOD_ELF_COMMONER: return 46248;
+                case NPC_DRAENEI_COMMONER: return 46249;
+                case NPC_GNOME_COMMONER: return 46252;
+                case NPC_NIGHT_ELF_COMMONER: return 46255;
+                case NPC_ORC_COMMONER: return 46256;
+                case NPC_TAUREN_COMMONER: return 46257;
+                case NPC_TROLL_COMMONER: return 46258;
+                case NPC_FORSAKEN_COMMONER: return 46259;
+                case NPC_GOBLIN_COMMONER: return 46253;
+            }
+        }
+
+        if (m_chosenEvent == GOSSIP_EVENT_BREWFEST)
             return 44186;
 
         // Spirit of competition
-        if (sGameEventMgr.IsActiveEvent(GAME_EVENT_SPIRIT_OF_COMPETITION))
+        if (m_chosenEvent == GOSSIP_EVENT_SPIRIT_OF_COMPETITION)
             return 48305;
 
-        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_PIRATES_DAY))
+        if (m_chosenEvent == GOSSIP_EVENT_PIRATES_DAY)
             return 50531;
 
-        // fallback
+        // fallback - dark portal
         switch (m_creature->GetEntry())
         {
             default:
@@ -2722,6 +2793,7 @@ struct GossipNPC : public ScriptedAI
     void JustRespawned() override
     {
         ScriptedAI::JustRespawned();
+        ChooseEvent();
         DoCastSpellIfCan(nullptr, GetGossipNPCVisualId(), CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
         DoCastSpellIfCan(nullptr, SPELL_GOSSIP_NPC_PERIODIC_DESPAWN, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
         DoCastSpellIfCan(nullptr, SPELL_GOSSIP_NPC_PERIODIC_FIDGET, CAST_AURA_NOT_PRESENT | CAST_TRIGGERED);
@@ -2751,6 +2823,9 @@ struct GossipNPCPeriodicTalk : public AuraScript
 const std::vector<uint32> winterTextsAlliance = { 16422, 24341, 16032, 24342 };
 const std::vector<uint32> winterTextsHorde = { 16464, 24324, 24325 };
 
+const std::vector<uint32> brewfestTextsAlliance = { 23629, 23630 };
+const std::vector<uint32> brewfestTextsHorde = { 23627, 23628 };
+
 uint32 GetRandomText(const std::vector<uint32> texts)
 {
     return texts[urand(0, texts.size() - 1)];
@@ -2760,8 +2835,13 @@ struct GossipNPCPeriodicTriggerTalk : public SpellScript
 {
     void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
     {
+        GossipNPCAI* ai = dynamic_cast<GossipNPCAI*>(spell->GetCaster()->AI());
+        if (!ai)
+            return;
+
         int32 textId = 0;
-        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_FEAST_OF_WINTER_VEIL))
+        GossipNPCEvents events = ai->m_chosenEvent;
+        if (events == GOSSIP_EVENT_WINTER_VEIL)
         {
             switch (spell->GetCaster()->GetEntry())
             {
@@ -2780,48 +2860,57 @@ struct GossipNPCPeriodicTriggerTalk : public SpellScript
             }
         }
 
-        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_HALLOWS_END))
+        if (events == GOSSIP_EVENT_HALLOWS_END)
         {
 
         }
 
-        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_LUNAR_FESTIVAL))
+        if (events == GOSSIP_EVENT_LUNAR_FESTIVAL)
         {
 
         }
 
-        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_BREWFEST))
+        if (events == GOSSIP_EVENT_BREWFEST)
+        {
+            switch (spell->GetCaster()->GetEntry())
+            {
+                default:
+                case NPC_HUMAN_COMMONER:
+                case NPC_DWARF_COMMONER:
+                case NPC_GNOME_COMMONER:
+                case NPC_NIGHT_ELF_COMMONER:
+                case NPC_DRAENEI_COMMONER: textId = GetRandomText(brewfestTextsAlliance); break;
+                case NPC_BLOOD_ELF_COMMONER:
+                case NPC_ORC_COMMONER:
+                case NPC_TAUREN_COMMONER:
+                case NPC_TROLL_COMMONER:
+                case NPC_FORSAKEN_COMMONER:
+                case NPC_GOBLIN_COMMONER: textId = GetRandomText(brewfestTextsHorde); break;
+            }
+        }
+
+        if (events == GOSSIP_EVENT_SPIRIT_OF_COMPETITION)
         {
 
         }
 
-        if (sGameEventMgr.IsActiveEvent(GAME_EVENT_SPIRIT_OF_COMPETITION))
+        if (events == GOSSIP_EVENT_PIRATES_DAY)
         {
 
         }
 
-        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_PIRATES_DAY))
+        if (events == GOSSIP_EVENT_SPIRIT_OF_COMPETITION)
         {
 
         }
 
-        if (sGameEventMgr.IsActiveEvent(GAME_EVENT_SPIRIT_OF_COMPETITION))
-        {
-
-        }
-
-        if (sGameEventMgr.IsActiveEvent(GAME_EVENT_BEFORE_THE_STORM))
-        {
-
-        }
-
-        if (textId == 0)
+        if (textId == 0) // dark portal fallback
         {
 
         }
 
         if (textId)
-            DoScriptText(textId, spell->GetCaster(), spell->GetUnitTarget());
+            DoBroadcastText(textId, spell->GetCaster(), spell->GetUnitTarget());
     }
 };
 
@@ -2853,8 +2942,23 @@ struct GossipNPCAppearanceAllSpiritOfCompetition : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
-        uint32 entry = 0;
-        aura->GetModifier()->m_miscvalue = entry;
+        uint32 displayId = 0;
+        switch (aura->GetTarget()->GetEntry()) // TODO
+        {
+            default:
+            case NPC_HUMAN_COMMONER: displayId = 0; break;
+            case NPC_DWARF_COMMONER: displayId = 0; break;
+            case NPC_GNOME_COMMONER: displayId = 0; break;
+            case NPC_NIGHT_ELF_COMMONER: displayId = 0; break;
+            case NPC_DRAENEI_COMMONER: displayId = 0; break;
+            case NPC_BLOOD_ELF_COMMONER: displayId = 0; break;
+            case NPC_ORC_COMMONER: displayId = 0; break;
+            case NPC_TAUREN_COMMONER: displayId = 0; break;
+            case NPC_TROLL_COMMONER: displayId = 0; break;
+            case NPC_FORSAKEN_COMMONER: displayId = 0; break;
+            case NPC_GOBLIN_COMMONER: displayId = 24523; break;
+        }
+        aura->GetModifier()->m_amount = displayId;
     }
 };
 
@@ -2862,10 +2966,66 @@ struct GossipNPCAppearanceAllPirateDay : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
-        uint32 entry = 0;
-        aura->GetModifier()->m_miscvalue = entry;
+        uint32 displayId = 0;
+        switch (aura->GetTarget()->GetEntry()) // TODO
+        {
+            default:
+            case NPC_HUMAN_COMMONER: displayId = 0; break;
+            case NPC_DWARF_COMMONER: displayId = 0; break;
+            case NPC_GNOME_COMMONER: displayId = 0; break;
+            case NPC_NIGHT_ELF_COMMONER: displayId = 0; break;
+            case NPC_DRAENEI_COMMONER: displayId = 0; break;
+            case NPC_BLOOD_ELF_COMMONER: displayId = 0; break;
+            case NPC_ORC_COMMONER: displayId = 0; break;
+            case NPC_TAUREN_COMMONER: displayId = 0; break;
+            case NPC_TROLL_COMMONER: displayId = 0; break;
+            case NPC_FORSAKEN_COMMONER: displayId = 0; break;
+            case NPC_GOBLIN_COMMONER: displayId = 0; break;
+        }
+        aura->GetModifier()->m_amount = displayId;
     }
 };
+
+enum GossipNpcGossips
+{
+    GOSSIP_WINTER_VEIL_A            = 10513,
+    GOSSIP_WINTER_VEIL_H            = 0,
+    GOSSIP_LUNAR_FESTIVAL           = 0,
+    GOSSIP_HALLOWS_END              = 8939,
+    GOSSIP_BREWFEST                 = 8988,
+    GOSSIP_MIDSUMMER                = 9148,
+    GOSSIP_SPIRIT_OF_COMPETITION    = 9522,
+    GOSSIP_PIRATES_DAY              = 0,
+    GOSSIP_DARK_PORTAL              = 0,
+};
+
+bool GossipHello_npc_gossip_npc(Player* player, Creature* creature)
+{
+    uint32 gossipId = GOSSIP_DARK_PORTAL;
+
+    GossipNPCAI* ai = dynamic_cast<GossipNPCAI*>(creature->AI());
+    if (ai)
+    {
+        GossipNPCEvents gossipEvent = ai->m_chosenEvent;
+        Team team = ai->m_team;
+        switch (gossipEvent)
+        {
+            case GOSSIP_EVENT_WINTER_VEIL: gossipId = team == ALLIANCE ? GOSSIP_WINTER_VEIL_A : GOSSIP_WINTER_VEIL_H; break;
+            case GOSSIP_EVENT_LUNAR_FESTIVAL: gossipId = GOSSIP_LUNAR_FESTIVAL; break;
+            case GOSSIP_EVENT_HALLOWS_END: gossipId = GOSSIP_HALLOWS_END; break;
+            case GOSSIP_EVENT_BREWFEST: gossipId = GOSSIP_BREWFEST; break;
+            case GOSSIP_EVENT_MIDSUMMER: gossipId = GOSSIP_MIDSUMMER; break;
+            case GOSSIP_EVENT_SPIRIT_OF_COMPETITION: gossipId = GOSSIP_SPIRIT_OF_COMPETITION; break;
+            case GOSSIP_EVENT_PIRATES_DAY: gossipId = GOSSIP_PIRATES_DAY; break;
+            default:
+            case GOSSIP_EVENT_DARK_PORTAL: gossipId = GOSSIP_DARK_PORTAL; break;
+        }
+    }
+
+    player->PrepareGossipMenu(creature, gossipId, true);
+    player->SendPreparedGossip(creature);
+    return true;
+}
 
 void AddSC_npcs_special()
 {
@@ -2993,14 +3153,15 @@ void AddSC_npcs_special()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_gossip_npc";
-    pNewScript->GetAI = &GetNewAIInstance<GossipNPC>;
+    pNewScript->GetAI = &GetNewAIInstance<GossipNPCAI>;
+    pNewScript->pGossipHello = &GossipHello_npc_gossip_npc;
     pNewScript->RegisterSelf();
 
     RegisterSpellScript<ImpInABottleSay>("spell_imp_in_a_bottle_say");
     RegisterSpellScript<GossipNPCPeriodicTriggerFidget>("spell_gossip_npc_periodic_trigger_fidget");
-    RegisterSpellScript<GossipNPCPeriodicTalk>("spell_gossip_npc_periodic_talk");
+    RegisterAuraScript<GossipNPCPeriodicTalk>("spell_gossip_npc_periodic_talk");
     RegisterSpellScript<GossipNPCPeriodicTriggerTalk>("spell_gossip_npc_periodic_trigger_talk");
-    RegisterSpellScript<GossipNPCAppearanceAllBrewfest>("spell_gossip_npc_appearance_all_brewfest");
-    RegisterSpellScript<GossipNPCAppearanceAllSpiritOfCompetition>("spell_gossip_npc_appearance_all_spirit_of_competition");
-    RegisterSpellScript<GossipNPCAppearanceAllPirateDay>("spell_gossip_npc_appearance_all_pirate_day");
+    RegisterAuraScript<GossipNPCAppearanceAllBrewfest>("spell_gossip_npc_appearance_all_brewfest");
+    RegisterAuraScript<GossipNPCAppearanceAllSpiritOfCompetition>("spell_gossip_npc_appearance_all_spirit_of_competition");
+    RegisterAuraScript<GossipNPCAppearanceAllPirateDay>("spell_gossip_npc_appearance_all_pirate_day");
 }
