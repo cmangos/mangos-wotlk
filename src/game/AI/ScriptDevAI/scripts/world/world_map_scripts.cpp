@@ -28,8 +28,8 @@ EndScriptData */
 #include "Entities/TemporarySpawn.h"
 #include <array>
 #include <ctime>
-
-
+#include <cstring>
+#include "brewfest.h"
 
 enum
 {

@@ -17,6 +17,7 @@
 #include "AI/ScriptDevAI/include/sc_common.h"
 #include "AI/ScriptDevAI/scripts/eastern_kingdoms/world_eastern_kingdoms.h"
 #include "AI/ScriptDevAI/scripts/kalimdor/world_kalimdor.h"
+#include "AI/ScriptDevAI/scripts/world/brewfest.h"
 
 struct BrewfestMountTransformation : public SpellScript
 {
@@ -657,6 +658,23 @@ struct MoleMachinePortalSchedule : public SpellScript
             target->CastSpell(target, SPELL_MOLE_MACHINE_PORT_TO_GRIM_GUZZLER_PORTAL, TRIGGERED_OLD_TRIGGERED);
     }
 };
+
+BrewfestEvent::BrewfestEvent(ScriptedInstance* instance) : m_instance(instance)
+{
+}
+
+void BrewfestEvent::Update(const uint32 diff)
+{
+
+}
+
+void BrewfestEvent::StartKegTappingEvent()
+{
+}
+
+void BrewfestEvent::StartDarkIronAttackEvent()
+{
+}
 
 void AddSC_brewfest()
 {

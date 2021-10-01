@@ -19,6 +19,8 @@
 #include "AI/ScriptDevAI/scripts/world/world_map_scripts.h"
 #include "World/WorldState.h"
 #include "World/WorldStateDefines.h"
+#include "GameEvents/GameEventMgr.h"
+#include "AI/ScriptDevAI/scripts/world/brewfest.h"
 
 /* *********************************************************
  *                     KALIMDOR
@@ -34,7 +36,7 @@ struct GhostOPlasmEvent
 
 struct world_map_kalimdor : public ScriptedMap
 {
-    world_map_kalimdor(Map* pMap) : ScriptedMap(pMap), m_shadeData({ AREAID_RAZOR_HILL }) { Initialize(); }
+    world_map_kalimdor(Map* pMap) : ScriptedMap(pMap), m_shadeData({ AREAID_RAZOR_HILL }), m_brewfestEvent(this) { Initialize(); }
 
     uint8 m_uiMurkdeepAdds_KilledAddCount;
     std::vector<GhostOPlasmEvent> m_vGOEvents;
@@ -49,6 +51,8 @@ struct world_map_kalimdor : public ScriptedMap
     uint32 m_freedSpriteDarter;
     // Shade of the Horseman village attack event
     ShadeOfTheHorsemanData m_shadeData;
+    // Brewfest events
+    BrewfestEvent m_brewfestEvent;
 
     void Initialize() override
     {
@@ -327,6 +331,9 @@ struct world_map_kalimdor : public ScriptedMap
             else
                 m_uiDronesTimer -= diff;
         }
+
+        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_BREWFEST))
+            m_brewfestEvent.Update(diff);
     }
 
     void SetData(uint32 uiType, uint32 uiData)
@@ -441,6 +448,14 @@ struct world_map_kalimdor : public ScriptedMap
         if (type >= TYPE_SHADE_OF_THE_HORSEMAN_ATTACK_PHASE && type <= TYPE_SHADE_OF_THE_HORSEMAN_MAX)
             return m_shadeData.HandleGetData(type);
         return m_encounter[type];
+    }
+
+    void OnEventHappened(uint16 event_id, bool activate, bool resume) override
+    {
+        if (event_id == GAME_EVENT_BREWFEST_DARK_IRON_ATTACK && activate)
+            m_brewfestEvent.StartDarkIronAttackEvent();
+        else if (event_id == GAME_EVENT_BREWFEST_KEG_TAPPING && activate)
+            m_brewfestEvent.StartKegTappingEvent();
     }
 };
 

@@ -19,13 +19,16 @@
 #include "AI/ScriptDevAI/scripts/world/world_map_scripts.h"
 #include "AI/ScriptDevAI/base/TimerAI.h"
 #include "World/WorldState.h"
+#include "World/WorldStateDefines.h"
+#include "GameEvents/GameEventMgr.h"
+#include "AI/ScriptDevAI/scripts/world/brewfest.h"
 
 /* *********************************************************
  *                  EASTERN KINGDOMS
  */
 struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
 {
-    world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap), m_shadeData({ AREAID_GOLDSHIRE, AREAID_KHARANOS, AREAID_BRILL })
+    world_map_eastern_kingdoms(Map* pMap) : ScriptedMap(pMap), m_brewfestEvent(this), m_shadeData({ AREAID_GOLDSHIRE, AREAID_KHARANOS, AREAID_BRILL })
     {
         AddCustomAction(EVENT_SPAWN, true, [&]
         {
@@ -147,6 +150,8 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
 
     // Shade of the Horseman village attack event
     ShadeOfTheHorsemanData m_shadeData;
+    // Brewfest events
+    BrewfestEvent m_brewfestEvent;
 
     void Initialize() override
     {
@@ -337,11 +342,18 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
             if (Creature* creature = GetSingleCreatureFromStorage(NPC_SHORT_JOHN_MITHRIL))
                 creature->GetMotionMaster()->MoveWaypoint();
         }
+        else if (event_id == GAME_EVENT_BREWFEST_DARK_IRON_ATTACK && activate)
+            m_brewfestEvent.StartDarkIronAttackEvent();
+        else if (event_id == GAME_EVENT_BREWFEST_KEG_TAPPING && activate)
+            m_brewfestEvent.StartKegTappingEvent();
     }
 
-    void Update(uint32 uiDiff) override
+    void Update(uint32 diff) override
     {
-        UpdateTimers(uiDiff);
+        UpdateTimers(diff);
+
+        if (sGameEventMgr.IsActiveHoliday(HOLIDAY_BREWFEST))
+            m_brewfestEvent.Update(diff);
     }
 
     uint32 GetData(uint32 type) const override
