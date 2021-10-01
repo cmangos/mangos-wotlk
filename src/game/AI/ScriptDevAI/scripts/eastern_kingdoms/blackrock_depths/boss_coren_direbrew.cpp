@@ -97,6 +97,9 @@ struct boss_coren_direbrewAI : public CombatAI
     {
         switch (summoned->GetEntry())
         {
+            case NPC_DIREBREW_MINION:
+                summoned->CastSpell(m_creature, SPELL_DIREBREW_MINION_KNOCKBACK, TRIGGERED_OLD_TRIGGERED);
+                break;
             case NPC_ILSA_DIREBREW:
             case NPC_URSULA_DIREBREW:
                 summoned->CastSpell(m_creature, SPELL_PORT_TO_COREN, TRIGGERED_OLD_TRIGGERED);
