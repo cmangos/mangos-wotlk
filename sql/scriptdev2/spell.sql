@@ -421,7 +421,13 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (43755,'spell_brewfest_relay_race_player_increase_mount_duration'),
 (49469,'spell_summon_mole_machine_pov_bunny'),
 (47489,'spell_mole_machine_port_schedule'),
-(49466,'spell_mole_machine_portal_schedule');
+(49466,'spell_mole_machine_portal_schedule'),
+(33228,'spell_gossip_npc_periodic_trigger_fidget'),
+(33208,'spell_gossip_npc_periodic_talk'),
+(33227,'spell_gossip_npc_periodic_trigger_talk'),
+(44186,'spell_gossip_npc_appearance_all_brewfest'),
+(48305,'spell_gossip_npc_appearance_all_spirit_of_competition'),
+(50531,'spell_gossip_npc_appearance_all_pirate_day');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

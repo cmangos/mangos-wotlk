@@ -138,6 +138,8 @@ enum GameEvents
 {
     GAME_EVENT_GURUBASHI_ARENA = 16,
 
+    GAME_EVENT_SPIRIT_OF_COMPETITION = 85,
+
     // Prepatch event
     GAME_EVENT_BEFORE_THE_STORM = 100,
 
