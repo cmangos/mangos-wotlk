@@ -2946,17 +2946,17 @@ struct GossipNPCAppearanceAllSpiritOfCompetition : public AuraScript
         switch (aura->GetTarget()->GetEntry()) // TODO
         {
             default:
-            case NPC_HUMAN_COMMONER: displayId = 0; break;
-            case NPC_DWARF_COMMONER: displayId = 0; break;
-            case NPC_GNOME_COMMONER: displayId = 0; break;
-            case NPC_NIGHT_ELF_COMMONER: displayId = 0; break;
-            case NPC_DRAENEI_COMMONER: displayId = 0; break;
-            case NPC_BLOOD_ELF_COMMONER: displayId = 0; break;
-            case NPC_ORC_COMMONER: displayId = 0; break;
-            case NPC_TAUREN_COMMONER: displayId = 0; break;
-            case NPC_TROLL_COMMONER: displayId = 0; break;
-            case NPC_FORSAKEN_COMMONER: displayId = 0; break;
-            case NPC_GOBLIN_COMMONER: displayId = 24523; break;
+            case NPC_HUMAN_COMMONER: displayId = urand(0, 1) ? 24513 : 24524; break;
+            case NPC_DWARF_COMMONER: displayId = urand(0, 1) ? 24510 : 24521; break;
+            case NPC_GNOME_COMMONER: displayId = urand(0, 1) ? 24511: 24522; break;
+            case NPC_NIGHT_ELF_COMMONER: displayId = urand(0, 1) ? 24514 : 24525; break;
+            case NPC_DRAENEI_COMMONER: displayId = urand(0, 1) ? 24509 : 24520; break;
+            case NPC_BLOOD_ELF_COMMONER: displayId = urand(0, 1) ? 24508 : 24519; break;
+            case NPC_ORC_COMMONER: displayId = urand(0, 1) ? 24515 : 24526; break;
+            case NPC_TAUREN_COMMONER: displayId = urand(0, 1) ? 24516 : 24527; break;
+            case NPC_TROLL_COMMONER: displayId = urand(0, 1) ? 24517 : 24528; break;
+            case NPC_FORSAKEN_COMMONER: displayId = urand(0, 1) ? 24518 : 24529; break;
+            case NPC_GOBLIN_COMMONER: displayId = urand(0, 1) ? 24512 : 24523; break;
         }
         aura->GetModifier()->m_amount = displayId;
     }
@@ -2970,17 +2970,17 @@ struct GossipNPCAppearanceAllPirateDay : public AuraScript
         switch (aura->GetTarget()->GetEntry()) // TODO
         {
             default:
-            case NPC_HUMAN_COMMONER: displayId = 0; break;
-            case NPC_DWARF_COMMONER: displayId = 0; break;
-            case NPC_GNOME_COMMONER: displayId = 0; break;
-            case NPC_NIGHT_ELF_COMMONER: displayId = 0; break;
-            case NPC_DRAENEI_COMMONER: displayId = 0; break;
-            case NPC_BLOOD_ELF_COMMONER: displayId = 0; break;
-            case NPC_ORC_COMMONER: displayId = 0; break;
-            case NPC_TAUREN_COMMONER: displayId = 0; break;
-            case NPC_TROLL_COMMONER: displayId = 0; break;
-            case NPC_FORSAKEN_COMMONER: displayId = 0; break;
-            case NPC_GOBLIN_COMMONER: displayId = 0; break;
+            case NPC_HUMAN_COMMONER: displayId = urand(0, 1) ? 25037 : 25048; break;
+            case NPC_DWARF_COMMONER: displayId = urand(0, 1) ? 25034 : 25045; break;
+            case NPC_GNOME_COMMONER: displayId = urand(0, 1) ? 25035 : 25046; break;
+            case NPC_NIGHT_ELF_COMMONER: displayId = urand(0, 1) ? 25038 : 25049; break;
+            case NPC_DRAENEI_COMMONER: displayId = urand(0, 1) ? 25033 : 25044; break;
+            case NPC_BLOOD_ELF_COMMONER: displayId = urand(0, 1) ? 25032 : 25043; break;
+            case NPC_ORC_COMMONER: displayId = urand(0, 1) ? 25039 : 25050; break;
+            case NPC_TAUREN_COMMONER: displayId = urand(0, 1) ? 25040 : 25051; break;
+            case NPC_TROLL_COMMONER: displayId = urand(0, 1) ? 25041 : 25052; break;
+            case NPC_FORSAKEN_COMMONER: displayId = urand(0, 1) ? 25042 : 25053; break;
+            case NPC_GOBLIN_COMMONER: displayId = urand(0, 1) ? 25036 : 25047; break;
         }
         aura->GetModifier()->m_amount = displayId;
     }
