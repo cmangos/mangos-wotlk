@@ -4541,7 +4541,6 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                             m_modifier.m_amount = 29204;    // Catrina
                             break;
                     }
-                    break;
                 }
                 // case 65511:                              // Gossip NPC Appearance - Brewfest
                 // break;
@@ -4620,7 +4619,8 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                 // case 75532:                          // Darkspear Pride
                 // break;
                 default:
-                    sLog.outError("Aura::HandleAuraTransform, spell %u does not have creature entry defined, need custom defined model.", GetId());
+                    if (!m_modifier.m_amount) // can be set through script
+                        sLog.outError("Aura::HandleAuraTransform, spell %u does not have creature entry defined, need custom defined model.", GetId());
                     break;
             }
         }
