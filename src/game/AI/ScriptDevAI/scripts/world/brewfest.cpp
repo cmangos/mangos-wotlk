@@ -620,15 +620,41 @@ struct BrewfestRelayRacePlayerIncreaseMountDuration : public SpellScript
 
 enum MoleMachine
 {
+    SPELL_MOLE_MACHINE_PORT_SCHEDULE = 47489,
     SPELL_MOLE_MACHINE_PORT_TO_GRIM_GUZZLER = 47523,
+
+    SPELL_MOLE_MACHINE_PORT_TO_GRIM_GUZZLER_PORTAL = 49846,
 };
 
 struct SummonMoleMachinePovBunny : public SpellScript
 {
     void OnSummon(Spell* spell, Creature* summon) const override
     {
-        // TODO: Fix this, only a temporary workaround
-        spell->GetCaster()->CastSpell(nullptr, SPELL_MOLE_MACHINE_PORT_TO_GRIM_GUZZLER, TRIGGERED_OLD_TRIGGERED);
+        summon->CastSpell(spell->GetCaster(), SPELL_MOLE_MACHINE_PORT_SCHEDULE, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct MoleMachinePortSchedule : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        if (Unit* target = spell->GetUnitTarget())
+            target->CastSpell(nullptr, SPELL_MOLE_MACHINE_PORT_TO_GRIM_GUZZLER, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct MoleMachinePortalSchedule : public SpellScript
+{
+    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    {
+        if (effIdx != EFFECT_INDEX_1)
+            return;
+
+        if (Unit* target = spell->GetUnitTarget())
+            target->CastSpell(target, SPELL_MOLE_MACHINE_PORT_TO_GRIM_GUZZLER_PORTAL, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
@@ -675,4 +701,6 @@ void AddSC_brewfest()
     RegisterSpellScript<BrewfestThrowKegPlayerDND>("spell_brewfest_throw_keg_player_dnd");
     RegisterSpellScript<BrewfestRelayRacePlayerIncreaseMountDuration>("spell_brewfest_relay_race_player_increase_mount_duration");
     RegisterSpellScript<SummonMoleMachinePovBunny>("spell_summon_mole_machine_pov_bunny");
+    RegisterSpellScript<MoleMachinePortSchedule>("spell_mole_machine_port_schedule");
+    RegisterSpellScript<MoleMachinePortalSchedule>("spell_mole_machine_portal_schedule");
 }

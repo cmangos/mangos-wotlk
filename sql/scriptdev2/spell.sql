@@ -419,7 +419,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (44361,'spell_face_me'),
 (43662,'spell_brewfest_throw_keg_player_dnd'),
 (43755,'spell_brewfest_relay_race_player_increase_mount_duration'),
-(49469,'spell_summon_mole_machine_pov_bunny');
+(49469,'spell_summon_mole_machine_pov_bunny'),
+(47489,'spell_mole_machine_port_schedule'),
+(49466,'spell_mole_machine_portal_schedule');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES
