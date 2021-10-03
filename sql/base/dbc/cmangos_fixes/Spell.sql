@@ -2005,7 +2005,7 @@ UPDATE `spell_template` SET `MaxAffectedTargets` = 15 WHERE `Id` = 26052; -- Poi
 -- ==================
 
 -- Stationary Demon Portal 22372
-UPDATE `spell_template` SET Effect1=41 WHERE `Id` = 22372;
+UPDATE `spell_template` SET Effect1=64 WHERE `Id` = 22372;
 
 -- ============================================================
 -- TBC section
