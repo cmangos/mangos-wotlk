@@ -191,6 +191,7 @@ struct world_map_eastern_kingdoms : public ScriptedMap, public TimerManager
             case NPC_MAEVE_BARLEYBREW:
             case NPC_GORDOK_BREW_BARKER:
             case NPC_IPFELKOFER_IRONKEG:
+            case NPC_MEKKATORQUE:
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
             case NPC_DREADKNIGHT:

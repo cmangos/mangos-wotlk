@@ -43,6 +43,7 @@ enum
     NPC_TCHALIS_VOODOO_BREWERY_BARKER   = 24493,
     NPC_GORDOK_BREW_BARKER_H            = 23685,
     NPC_TAPPER_SWINDLEKEG               = 24711,
+    NPC_VOLJIN                          = 10540,
 };
 
 enum Encounters

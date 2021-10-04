@@ -23,6 +23,7 @@ enum
     NPC_MAEVE_BARLEYBREW        = 23683,
     NPC_GORDOK_BREW_BARKER      = 23685,
     NPC_IPFELKOFER_IRONKEG      = 24710,
+    NPC_MEKKATORQUE             = 7937,
 };
 
 enum BFTDP_NPCs

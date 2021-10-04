@@ -104,6 +104,7 @@ struct world_map_kalimdor : public ScriptedMap
             case NPC_TCHALIS_VOODOO_BREWERY_BARKER:
             case NPC_GORDOK_BREW_BARKER_H:
             case NPC_TAPPER_SWINDLEKEG:
+            case NPC_VOLJIN:
                 m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
                 break;
         }

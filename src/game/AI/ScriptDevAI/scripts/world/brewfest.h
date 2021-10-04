@@ -19,7 +19,11 @@ class BrewfestEvent : public TimerManager
         void StartDarkIronAttackEvent();
 
     private:
+        void HandleKegTappingEvent();
+        
         ScriptedInstance* m_instance;
+        uint32 m_kegTappingStage;
+        bool m_kalimdor;
 };
 
 #endif

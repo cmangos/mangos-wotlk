@@ -659,8 +659,32 @@ struct MoleMachinePortalSchedule : public SpellScript
     }
 };
 
+enum BrewfestTimers
+{
+    BREWFEST_KEG_TAPPING_TIMER,
+    BREWFEST_DARK_IRON_ATTACK_TIMER,
+};
+
+enum KegTapping
+{
+    SAY_20_VOLJIN       = 23882,
+    SAY_20_MEKKATORQUE  = 23886,
+
+    SAY_10_VOLJIN       = 23881,
+    SAY_10_MEKKATORQUE  = 23887, 
+};
+
 BrewfestEvent::BrewfestEvent(ScriptedInstance* instance) : m_instance(instance)
 {
+    m_kalimdor = m_instance->instance->GetId() == 1;
+    AddCustomAction(BREWFEST_KEG_TAPPING_TIMER, true, [&]()
+    {
+        HandleKegTappingEvent();
+    });
+    AddCustomAction(BREWFEST_DARK_IRON_ATTACK_TIMER, true, [&]()
+    {
+
+    });
 }
 
 void BrewfestEvent::Update(const uint32 diff)
@@ -670,6 +694,29 @@ void BrewfestEvent::Update(const uint32 diff)
 
 void BrewfestEvent::StartKegTappingEvent()
 {
+    m_kegTappingStage = 0;
+    HandleKegTappingEvent();
+}
+
+void BrewfestEvent::HandleKegTappingEvent()
+{
+    switch (m_kegTappingStage)
+    {
+        case 0:
+            if (Creature* yeller = m_instance->GetSingleCreatureFromStorage(m_kalimdor ? NPC_TAPPER_SWINDLEKEG : NPC_IPFELKOFER_IRONKEG))
+                DoScriptText(m_kalimdor ? SAY_20_VOLJIN : SAY_20_MEKKATORQUE, yeller);
+            ResetTimer(BREWFEST_KEG_TAPPING_TIMER, 10 * MINUTE * IN_MILLISECONDS);
+            break;
+        case 1:
+            if (Creature* yeller = m_instance->GetSingleCreatureFromStorage(m_kalimdor ? NPC_TAPPER_SWINDLEKEG : NPC_IPFELKOFER_IRONKEG))
+                DoScriptText(m_kalimdor ? SAY_10_VOLJIN : SAY_10_MEKKATORQUE, yeller);
+            ResetTimer(BREWFEST_KEG_TAPPING_TIMER, m_kalimdor ? 6 * MINUTE * IN_MILLISECONDS : 5 * MINUTE * IN_MILLISECONDS);
+            break;
+        case 2:
+            if (Creature* boss = m_instance->GetSingleCreatureFromStorage(m_kalimdor ? NPC_VOLJIN : NPC_MEKKATORQUE))
+                boss->GetMotionMaster()->MoveWaypoint(1);
+            break;
+    }
 }
 
 void BrewfestEvent::StartDarkIronAttackEvent()
