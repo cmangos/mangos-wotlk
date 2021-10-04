@@ -2792,6 +2792,20 @@ void World::GeneratePacketMetrics()
     meas_players.add_field("warlock", std::to_string(GetOnlineClassPlayers(CLASS_WARLOCK)));
     meas_players.add_field("druid", std::to_string(GetOnlineClassPlayers(CLASS_DRUID)));
     meas_players.add_field("deathknight", std::to_string(GetOnlineClassPlayers(CLASS_DEATH_KNIGHT)));
+
+    metric::measurement meas_latency("world.metrics.latency");
+    meas_latency.add_field("online", std::to_string(GetAverageLatency()));
+}
+
+uint32 World::GetAverageLatency() const
+{
+    uint32 result = 0;
+    const_cast<World*>(this)->ExecuteForAllSessions([&](WorldSession const& session)
+    {
+        result += session.GetLatency();
+    });
+    result /= m_sessions.size();
+    return result;
 }
 #endif
 
