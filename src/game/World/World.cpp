@@ -2799,6 +2799,9 @@ void World::GeneratePacketMetrics()
 
 uint32 World::GetAverageLatency() const
 {
+    if (m_sessions.size() == 0)
+        return 0;
+
     uint32 result = 0;
     const_cast<World*>(this)->ExecuteForAllSessions([&](WorldSession const& session)
     {
