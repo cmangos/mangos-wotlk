@@ -89,6 +89,14 @@ struct boss_coren_direbrewAI : public CombatAI
                 m_creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN);
                 m_creature->SetInCombatWithZone();
                 AttackStart(player);
+                CreatureList staticSpawns;
+                GetCreatureListWithEntryInGrid(staticSpawns, m_creature, NPC_DARK_IRON_ANTAGONIST, 50.f);
+                for (auto creature : staticSpawns)
+                {
+                    creature->SetFactionTemporary(FACTION_HOSTILE, TEMPFACTION_RESTORE_REACH_HOME | TEMPFACTION_RESTORE_RESPAWN | TEMPFACTION_TOGGLE_IMMUNE_TO_PLAYER);
+                    creature->SetInCombatWithZone();
+                    creature->AI()->AttackClosestEnemy();
+                }
             }
         });
     }
