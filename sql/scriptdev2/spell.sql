@@ -437,7 +437,9 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (33227,'spell_gossip_npc_periodic_trigger_talk'),
 (44186,'spell_gossip_npc_appearance_all_brewfest'),
 (48305,'spell_gossip_npc_appearance_all_spirit_of_competition'),
-(50531,'spell_gossip_npc_appearance_all_pirate_day');
+(50531,'spell_gossip_npc_appearance_all_pirate_day'),
+(47691,'spell_summon_mole_machine_target_picker'),
+(47375,'spell_summon_direbrew_minion');
 
 -- Wotlk
 INSERT INTO spell_scripts(Id, ScriptName) VALUES

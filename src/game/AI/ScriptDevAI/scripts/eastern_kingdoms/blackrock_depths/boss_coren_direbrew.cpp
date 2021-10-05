@@ -33,6 +33,7 @@ enum
     SPELL_SUMMON_DIREBREW_MINION    = 47375,
     SPELL_DIREBREW_CHARGE           = 47718,
     SPELL_SUMMON_MOLE_MACHINE       = 47691,            // triggers 47690
+    SPELL_SUMMON_MOLE_MACHINE_MINION_SUMMONER = 47690,
 
     // summoned auras
     SPELL_PORT_TO_COREN             = 52850,
@@ -53,6 +54,7 @@ enum
     NPC_DIREBREW_MINION             = 26776,
     NPC_ILSA_DIREBREW               = 26764,
     NPC_URSULA_DIREBREW             = 26822,
+    NPC_DARK_IRON_ANTAGONIST        = 23795,
 
     // other
     FACTION_HOSTILE                 = 736,
@@ -92,6 +94,7 @@ struct boss_coren_direbrewAI : public CombatAI
     }
 
     ObjectGuid m_targetPlayer;
+    GuidVector m_guids;
 
     void JustSummoned(Creature* summoned) override
     {
@@ -106,6 +109,28 @@ struct boss_coren_direbrewAI : public CombatAI
                 summoned->AI()->AttackStart(m_creature->GetVictim());
                 break;
         }
+        m_guids.push_back(summoned->GetObjectGuid());
+    }
+
+    void JustSummoned(GameObject* go) override
+    {
+        go->Use(m_creature);
+        go->ForcedDespawn(7000);
+    }
+
+    void JustDied(Unit* killer) override
+    {
+        DespawnGuids(m_guids);
+        CreatureList staticSpawns;
+        GetCreatureListWithEntryInGrid(staticSpawns, m_creature, NPC_DARK_IRON_ANTAGONIST, 50.f);
+        for (auto creature : staticSpawns)
+            creature->ForcedDespawn();
+    }
+
+    void EnterEvadeMode() override
+    {
+        CombatAI::EnterEvadeMode();
+        DespawnGuids(m_guids);
     }
 
     void ExecuteAction(uint32 action) override
@@ -137,9 +162,8 @@ struct boss_coren_direbrewAI : public CombatAI
                     ResetCombatAction(action, 15000);
                 break;
             case COREN_DIREBREW_MINION:
-                if (Unit* target = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, nullptr, SELECT_FLAG_PLAYER))
-                    if (target->CastSpell(nullptr, SPELL_SUMMON_DIREBREW_MINION, TRIGGERED_OLD_TRIGGERED) == SPELL_CAST_OK)
-                        ResetCombatAction(action, 15000);
+                if (DoCastSpellIfCan(nullptr, SPELL_SUMMON_MOLE_MACHINE) == CAST_OK)
+                    ResetCombatAction(action, 15000);
                 break;
         }
     }
@@ -203,6 +227,27 @@ struct DirebrewDisarmPrecast : public AuraScript
     }
 };
 
+struct SummonMoleMachineTargetPicker : public SpellScript
+{
+    void OnInit(Spell* spell) const override
+    {
+        spell->SetMaxAffectedTargets(1);
+    }
+
+    void OnEffectExecute(Spell* spell, SpellEffectIndex /*effIdx*/) const override
+    {
+        spell->GetCaster()->CastSpell(spell->GetUnitTarget(), SPELL_SUMMON_MOLE_MACHINE_MINION_SUMMONER, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
+struct SummonDirebrewMinion : public SpellScript
+{
+    void OnSummon(Spell* /*spell*/, Creature* summon) const override
+    {
+        summon->CastSpell(nullptr, SPELL_DIREBREW_MINION_KNOCKBACK, TRIGGERED_OLD_TRIGGERED);
+    }
+};
+
 void AddSC_boss_coren_direbrew()
 {
     Script* pNewScript = new Script;
@@ -214,4 +259,6 @@ void AddSC_boss_coren_direbrew()
     RegisterSpellScript<RequestSecondMug>("spell_request_second_mug");
     RegisterSpellScript<DirebrewDisarm>("spell_direbrew_disarm");
     RegisterAuraScript<DirebrewDisarmPrecast>("spell_direbrew_disarm_precast");
+    RegisterSpellScript<SummonMoleMachineTargetPicker>("spell_summon_mole_machine_target_picker");
+    RegisterSpellScript<SummonDirebrewMinion>("spell_summon_direbrew_minion");
 }
