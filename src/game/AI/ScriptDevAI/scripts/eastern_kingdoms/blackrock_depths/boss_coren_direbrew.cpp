@@ -51,7 +51,6 @@ enum
     SPELL_DIREBREWS_DISARM_GROW     = 47409,
 
     // npcs
-    NPC_DIREBREW_MINION             = 26776,
     NPC_ILSA_DIREBREW               = 26764,
     NPC_URSULA_DIREBREW             = 26822,
     NPC_DARK_IRON_ANTAGONIST        = 23795,
@@ -108,16 +107,30 @@ struct boss_coren_direbrewAI : public CombatAI
     {
         switch (summoned->GetEntry())
         {
-            case NPC_DIREBREW_MINION:
-                summoned->CastSpell(m_creature, SPELL_DIREBREW_MINION_KNOCKBACK, TRIGGERED_OLD_TRIGGERED);
-                break;
             case NPC_ILSA_DIREBREW:
             case NPC_URSULA_DIREBREW:
                 summoned->CastSpell(m_creature, SPELL_PORT_TO_COREN, TRIGGERED_OLD_TRIGGERED);
                 summoned->AI()->AttackStart(m_creature->GetVictim());
+                summoned->SetCorpseDelay(5);
                 break;
         }
         m_guids.push_back(summoned->GetObjectGuid());
+    }
+
+    void SummonedCreatureDespawn(Creature* summoned) override
+    {
+        if (!m_creature->IsAlive() || !m_creature->IsInCombat())
+            return;
+
+        switch (summoned->GetEntry())
+        {
+            case NPC_ILSA_DIREBREW:
+                SetActionReadyStatus(COREN_SPAWN_ILSA, true);
+                break;
+            case NPC_URSULA_DIREBREW:
+                SetActionReadyStatus(COREN_SPAWN_ILSA, true);
+                break;
+        }
     }
 
     void JustSummoned(GameObject* go) override
@@ -149,9 +162,7 @@ struct boss_coren_direbrewAI : public CombatAI
                 // Spawn Ilsa
                 if (m_creature->GetHealthPercent() < 66.0f)
                 {
-                    float fX, fY, fZ;
-                    m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10, fX, fY, fZ);
-                    m_creature->SummonCreature(NPC_ILSA_DIREBREW, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_ILSA_DIREBREW, 889.1403f, -130.9002f, -49.660107f, 5.427973747253417968f, TEMPSPAWN_DEAD_DESPAWN, 0);
                     SetActionReadyStatus(action, false);
                 }
                 break;
@@ -159,9 +170,7 @@ struct boss_coren_direbrewAI : public CombatAI
                 // Spawn Ursula
                 if (m_creature->GetHealthPercent() < 33.0f)
                 {
-                    float fX, fY, fZ;
-                    m_creature->GetRandomPoint(m_creature->GetPositionX(), m_creature->GetPositionY(), m_creature->GetPositionZ(), 10, fX, fY, fZ);
-                    m_creature->SummonCreature(NPC_URSULA_DIREBREW, fX, fY, fZ, 0, TEMPSPAWN_DEAD_DESPAWN, 0);
+                    m_creature->SummonCreature(NPC_URSULA_DIREBREW, 894.956f, -127.81718f, -49.659885f, 5.270894527435302734f, TEMPSPAWN_DEAD_DESPAWN, 0);
                     SetActionReadyStatus(action, false);
                 }
                 break;

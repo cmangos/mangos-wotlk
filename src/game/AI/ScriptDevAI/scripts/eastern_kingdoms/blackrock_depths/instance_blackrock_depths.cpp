@@ -75,6 +75,7 @@ void instance_blackrock_depths::OnCreatureCreate(Creature* pCreature)
         case NPC_DUGHAL:
         case NPC_LOREGRAIN:
         case NPC_RIBBLY_SCREWSPIGGOT:
+        case NPC_COREN_DIREBREW:
             m_npcEntryGuidStore[pCreature->GetEntry()] = pCreature->GetObjectGuid();
             break;
         case NPC_WARBRINGER_CONST:
@@ -179,6 +180,13 @@ void instance_blackrock_depths::OnObjectCreate(GameObject* pGo)
             return;
     }
     m_goEntryGuidStore[pGo->GetEntry()] = pGo->GetObjectGuid();
+}
+
+void instance_blackrock_depths::OnCreatureRespawn(Creature* creature)
+{
+    if (creature->GetEntry() == NPC_DIREBREW_MINION)
+        if (Creature* coren = GetSingleCreatureFromStorage(NPC_COREN_DIREBREW))
+            coren->AI()->JustSummoned(creature);
 }
 
 void instance_blackrock_depths::SetData(uint32 uiType, uint32 uiData)

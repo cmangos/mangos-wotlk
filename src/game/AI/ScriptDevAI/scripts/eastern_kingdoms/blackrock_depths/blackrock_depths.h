@@ -141,7 +141,10 @@ enum
     YELL_SENATOR_3          = -1230062,
     YELL_SENATOR_4          = -1230063,
 
-    YELL_MAGMUS_INTRO       = -1230070
+    YELL_MAGMUS_INTRO       = -1230070,
+
+    NPC_DIREBREW_MINION     = 26776,
+    NPC_COREN_DIREBREW      = 23872,
 };
 
 // Random emotes for Grim Guzzler patrons
@@ -230,6 +233,7 @@ class instance_blackrock_depths : public ScriptedInstance
         void OnCreatureDeath(Creature* pCreature) override;
         void OnCreatureEvade(Creature* pCreature) override;
         void OnObjectCreate(GameObject* pGo) override;
+        void OnCreatureRespawn(Creature* creature) override;
 
         void SetData(uint32 uiType, uint32 uiData) override;
         uint32 GetData(uint32 uiType) const override;
