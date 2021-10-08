@@ -610,7 +610,7 @@ struct BrewfestRelayRacePlayerIncreaseMountDuration : public SpellScript
         Unit* caster = spell->GetCaster();
         if (SpellAuraHolder* holder = caster->GetSpellAuraHolder(SPELL_RAM))
         {
-            uint32 duration = holder->GetAuraDuration() + 30000;
+            int32 duration = holder->GetAuraDuration() + 30000;
             if (holder->GetAuraMaxDuration() < duration)
                 holder->SetAuraMaxDuration(duration);
             holder->SetAuraDuration(duration);
@@ -622,8 +622,9 @@ struct BrewfestRelayRacePlayerIncreaseMountDuration : public SpellScript
 enum MoleMachine
 {
     SPELL_MOLE_MACHINE_PORT_SCHEDULE                = 47489,
-    SPELL_MOLE_MACHINE_PORT_TO_GRIM_GUZZLER         = 47523,
     SPELL_MOLE_MACHINE_BIND_SIGHT                   = 47513,
+    SPELL_MOVE_BIND_SIGHT                           = 47673,
+    SPELL_MOLE_MACHINE_PORT_TO_GRIM_GUZZLER         = 47523,
 
     SPELL_MOLE_MACHINE_HEARTH_AURA_ALREADY_PORTING  = 49476,
     SPELL_MOLE_MACHINE_PLAYER_HIDE_AND_ROOT         = 47521,
@@ -638,18 +639,63 @@ struct SummonMoleMachinePovBunny : public SpellScript
     void OnSummon(Spell* spell, Creature* summon) const override
     {
         summon->CastSpell(spell->GetCaster(), SPELL_MOLE_MACHINE_PORT_SCHEDULE, TRIGGERED_OLD_TRIGGERED);
+        spell->GetCaster()->CastSpell(summon, SPELL_MOLE_MACHINE_BIND_SIGHT, TRIGGERED_OLD_TRIGGERED);
     }
 };
 
-struct MoleMachinePortSchedule : public SpellScript
+struct MoleMachinePortSchedule : public AuraScript
 {
-    void OnEffectExecute(Spell* spell, SpellEffectIndex effIdx) const override
+    void OnPeriodicDummy(Aura* aura) const override
     {
-        if (effIdx != EFFECT_INDEX_1)
-            return;
-
-        if (Unit* target = spell->GetUnitTarget())
-            target->CastSpell(nullptr, SPELL_MOLE_MACHINE_PORT_TO_GRIM_GUZZLER, TRIGGERED_OLD_TRIGGERED);
+        Unit* target = aura->GetTarget();
+        switch (aura->GetAuraTicks())
+        {
+            case 0:
+                target->CastSpell(nullptr, SPELL_MAKE_BUNNY_SUMMON_MOLE_MACHINE, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case 1: break;
+            case 2: break;
+            case 3: break;
+            case 4:
+                target->CastSpell(nullptr, SPELL_MOLE_MACHINE_PLAYER_HIDE_AND_ROOT, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case 5: break;
+            case 6: break;
+            case 7: break;
+            case 8: break;
+            case 9: break;
+            case 10: break;
+            case 11: break;
+            case 12:
+                target->CastSpell(aura->GetCaster(), SPELL_MOVE_BIND_SIGHT, TRIGGERED_OLD_TRIGGERED);
+                target->CastSpell(nullptr, SPELL_MOLE_MACHINE_PORT_TO_GRIM_GUZZLER, TRIGGERED_OLD_TRIGGERED);
+                if (Unit* caster = aura->GetCaster())
+                    caster->GetMotionMaster()->MovePath(1);
+                break;
+            case 13: break;
+            case 14: break;
+            case 15: break;
+            case 16: break;
+            case 17: break;
+            case 18: break;
+            case 19: break;
+            case 20:
+                target->CastSpell(nullptr, SPELL_MAKE_BUNNY_SUMMON_MOLE_MACHINE, TRIGGERED_OLD_TRIGGERED);
+                break;
+            case 21: break;
+            case 22: break;
+            case 23:
+                target->CastSpell(target, SPELL_MOLE_MACHINE_PLAYER_LAND, TRIGGERED_OLD_TRIGGERED);
+                target->RemoveAurasDueToSpell(SPELL_MOLE_MACHINE_PLAYER_HIDE_AND_ROOT);
+                break;
+            case 24:
+                target->InterruptSpell(CURRENT_CHANNELED_SPELL);
+                target->RemoveAurasDueToSpell(aura->GetId());
+                if (Unit* caster = aura->GetCaster())
+                    if (caster->IsCreature())
+                        static_cast<Creature*>(caster)->ForcedDespawn(1000);
+                break;
+        }
     }
 };
 
@@ -811,7 +857,7 @@ void AddSC_brewfest()
     RegisterSpellScript<BrewfestThrowKegPlayerDND>("spell_brewfest_throw_keg_player_dnd");
     RegisterSpellScript<BrewfestRelayRacePlayerIncreaseMountDuration>("spell_brewfest_relay_race_player_increase_mount_duration");
     RegisterSpellScript<SummonMoleMachinePovBunny>("spell_summon_mole_machine_pov_bunny");
-    RegisterSpellScript<MoleMachinePortSchedule>("spell_mole_machine_port_schedule");
+    RegisterAuraScript<MoleMachinePortSchedule>("spell_mole_machine_port_schedule");
     RegisterAuraScript<MoleMachinePortalSchedule>("spell_mole_machine_portal_schedule");
     RegisterSpellScript<MakeBunnySummonMoleMachine>("spell_make_bunny_summon_mole_machine");
     RegisterSpellScript<SummonMoleMachine>("spell_summon_mole_machine");
