@@ -557,14 +557,17 @@ enum KegFetching
 
 bool AreaTrigger_at_brewfest_receive_keg(Player* player, AreaTriggerEntry const* at)
 {
-    if (player->HasAura(SPELL_SEE_SUPPLIER_MARK) && !player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG))
+    if (player->HasAura(SPELL_SEE_SUPPLIER_MARK))
     {
-        Team team = player->GetTeam();
-        if (Creature* thrower = GetClosestCreatureWithEntry(player, team == HORDE ? NPC_BOK_DROPCERTAIN : NPC_FLYNN_FIREBREW, 50.f))
+        player->RemoveAurasDueToSpell(SPELL_SEE_SUPPLIER_MARK);
+        if (!player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG) && player->HasAura(SPELL_RAM))
         {
-            thrower->CastSpell(player, SPELL_BREWFEST_THROW_KEG_DND, TRIGGERED_NONE);
-            player->CastSpell(nullptr, SPELL_SEE_BASE_CAMP_MARK, TRIGGERED_OLD_TRIGGERED);
-            player->RemoveAurasDueToSpell(SPELL_SEE_SUPPLIER_MARK);
+            Team team = player->GetTeam();
+            if (Creature* thrower = GetClosestCreatureWithEntry(player, team == HORDE ? NPC_BOK_DROPCERTAIN : NPC_FLYNN_FIREBREW, 50.f))
+            {
+                thrower->CastSpell(player, SPELL_BREWFEST_THROW_KEG_DND, TRIGGERED_NONE);
+                player->CastSpell(nullptr, SPELL_SEE_BASE_CAMP_MARK, TRIGGERED_OLD_TRIGGERED);
+            }
         }
     }
     return true;
@@ -572,18 +575,21 @@ bool AreaTrigger_at_brewfest_receive_keg(Player* player, AreaTriggerEntry const*
 
 bool AreaTrigger_at_brewfest_send_keg(Player* player, AreaTriggerEntry const* at)
 {
-    if (player->HasAura(SPELL_SEE_BASE_CAMP_MARK) && player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG))
+    if (player->HasAura(SPELL_SEE_BASE_CAMP_MARK))
     {
-        Team team = player->GetTeam();
-        if (Creature* thrower = GetClosestCreatureWithEntry(player, team == HORDE ? NPC_DRIZ_TUMBLEQUICK : NPC_POL_AMBERSTILL, 50.f))
+        player->RemoveAurasDueToSpell(SPELL_SEE_BASE_CAMP_MARK);
+        if (player->HasAura(SPELL_RELAY_RACE_HAS_PORTABLE_KEG) && player->HasAura(SPELL_RAM))
         {
-            if (player->IsCurrentQuest(QUEST_THERE_AND_BACK_AGAIN_A)
-                || player->IsCurrentQuest(QUEST_THERE_AND_BACK_AGAIN_H))
-                thrower->CastSpell(player, SPELL_BREWFEST_RELAY_RACE_INTRO_FORCE_PLAYER_TO_THROW, TRIGGERED_NONE);
-            else
-                thrower->CastSpell(player, SPELL_BREWFEST_DAILY_RELAY_RACE_PLAYER_TURN_IN, TRIGGERED_NONE);
-            player->CastSpell(nullptr, SPELL_SEE_SUPPLIER_MARK, TRIGGERED_OLD_TRIGGERED);
-            player->RemoveAurasDueToSpell(SPELL_SEE_BASE_CAMP_MARK);
+            Team team = player->GetTeam();
+            if (Creature* thrower = GetClosestCreatureWithEntry(player, team == HORDE ? NPC_DRIZ_TUMBLEQUICK : NPC_POL_AMBERSTILL, 50.f))
+            {
+                if (player->IsCurrentQuest(QUEST_THERE_AND_BACK_AGAIN_A)
+                    || player->IsCurrentQuest(QUEST_THERE_AND_BACK_AGAIN_H))
+                    thrower->CastSpell(player, SPELL_BREWFEST_RELAY_RACE_INTRO_FORCE_PLAYER_TO_THROW, TRIGGERED_NONE);
+                else
+                    thrower->CastSpell(player, SPELL_BREWFEST_DAILY_RELAY_RACE_PLAYER_TURN_IN, TRIGGERED_NONE);
+                player->CastSpell(nullptr, SPELL_SEE_SUPPLIER_MARK, TRIGGERED_OLD_TRIGGERED);
+            }
         }
     }
     return true;
