@@ -460,7 +460,7 @@ const std::vector<uint32> thunderTexts = { 22942, 23467, 23468, 23469 };
 bool AreaTrigger_at_brewfest_quest_barking(Player* player, AreaTriggerEntry const* at)
 {
     if (!player->HasAura(SPELL_RENTAL_RAM))
-        return;
+        return true;
 
     uint32 spellId = 0;
     switch (at->id)
@@ -803,17 +803,17 @@ void BrewfestEvent::HandleKegTappingEvent()
     switch (m_kegTappingStage)
     {
         case 0:
-            if (Creature* yeller = m_instance->GetSingleCreatureFromStorage(m_kalimdor ? NPC_TAPPER_SWINDLEKEG : NPC_IPFELKOFER_IRONKEG))
+            if (Creature* yeller = m_instance->GetSingleCreatureFromStorage(m_kalimdor ? uint32(NPC_TAPPER_SWINDLEKEG) : uint32(NPC_IPFELKOFER_IRONKEG)))
                 DoScriptText(m_kalimdor ? SAY_20_VOLJIN : SAY_20_MEKKATORQUE, yeller);
             ResetTimer(BREWFEST_KEG_TAPPING_TIMER, 10 * MINUTE * IN_MILLISECONDS);
             break;
         case 1:
-            if (Creature* yeller = m_instance->GetSingleCreatureFromStorage(m_kalimdor ? NPC_TAPPER_SWINDLEKEG : NPC_IPFELKOFER_IRONKEG))
+            if (Creature* yeller = m_instance->GetSingleCreatureFromStorage(m_kalimdor ? uint32(NPC_TAPPER_SWINDLEKEG) : uint32(NPC_IPFELKOFER_IRONKEG)))
                 DoScriptText(m_kalimdor ? SAY_10_VOLJIN : SAY_10_MEKKATORQUE, yeller);
             ResetTimer(BREWFEST_KEG_TAPPING_TIMER, m_kalimdor ? 6 * MINUTE * IN_MILLISECONDS : 5 * MINUTE * IN_MILLISECONDS);
             break;
         case 2:
-            if (Creature* boss = m_instance->GetSingleCreatureFromStorage(m_kalimdor ? NPC_VOLJIN : NPC_MEKKATORQUE))
+            if (Creature* boss = m_instance->GetSingleCreatureFromStorage(m_kalimdor ? uint32(NPC_VOLJIN) : uint32(NPC_MEKKATORQUE)))
                 boss->GetMotionMaster()->MoveWaypoint(1);
             break;
     }
