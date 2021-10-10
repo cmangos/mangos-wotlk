@@ -459,6 +459,9 @@ const std::vector<uint32> thunderTexts = { 22942, 23467, 23468, 23469 };
 
 bool AreaTrigger_at_brewfest_quest_barking(Player* player, AreaTriggerEntry const* at)
 {
+    if (!player->HasAura(SPELL_RENTAL_RAM))
+        return;
+
     uint32 spellId = 0;
     switch (at->id)
     {
