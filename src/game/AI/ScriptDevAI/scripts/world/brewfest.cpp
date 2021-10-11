@@ -789,7 +789,7 @@ BrewfestEvent::BrewfestEvent(ScriptedInstance* instance) : m_instance(instance)
 
 void BrewfestEvent::Update(const uint32 diff)
 {
-
+    UpdateTimers(diff);
 }
 
 void BrewfestEvent::StartKegTappingEvent()
@@ -804,19 +804,20 @@ void BrewfestEvent::HandleKegTappingEvent()
     {
         case 0:
             if (Creature* yeller = m_instance->GetSingleCreatureFromStorage(m_kalimdor ? uint32(NPC_TAPPER_SWINDLEKEG) : uint32(NPC_IPFELKOFER_IRONKEG)))
-                DoScriptText(m_kalimdor ? SAY_20_VOLJIN : SAY_20_MEKKATORQUE, yeller);
-            ResetTimer(BREWFEST_KEG_TAPPING_TIMER, 10 * MINUTE * IN_MILLISECONDS);
+                DoBroadcastText(m_kalimdor ? SAY_20_VOLJIN : SAY_20_MEKKATORQUE, yeller);
+            ResetTimer(BREWFEST_KEG_TAPPING_TIMER, 1000); // 10 * MINUTE * IN_MILLISECONDS
             break;
         case 1:
             if (Creature* yeller = m_instance->GetSingleCreatureFromStorage(m_kalimdor ? uint32(NPC_TAPPER_SWINDLEKEG) : uint32(NPC_IPFELKOFER_IRONKEG)))
-                DoScriptText(m_kalimdor ? SAY_10_VOLJIN : SAY_10_MEKKATORQUE, yeller);
-            ResetTimer(BREWFEST_KEG_TAPPING_TIMER, m_kalimdor ? 6 * MINUTE * IN_MILLISECONDS : 5 * MINUTE * IN_MILLISECONDS);
+                DoBroadcastText(m_kalimdor ? SAY_10_VOLJIN : SAY_10_MEKKATORQUE, yeller);
+            ResetTimer(BREWFEST_KEG_TAPPING_TIMER, 1000); // m_kalimdor ? 6 * MINUTE * IN_MILLISECONDS : 5 * MINUTE * IN_MILLISECONDS
             break;
         case 2:
             if (Creature* boss = m_instance->GetSingleCreatureFromStorage(m_kalimdor ? uint32(NPC_VOLJIN) : uint32(NPC_MEKKATORQUE)))
                 boss->GetMotionMaster()->MoveWaypoint(1);
             break;
     }
+    ++m_kegTappingStage;
 }
 
 enum DarkIronEvent
