@@ -16,14 +16,6 @@ enum
     NPC_FALSTAD_WILDHAMMER      = 5635,
 
     NPC_SHORT_JOHN_MITHRIL      = 14508,
-
-    // Brewfest
-    NPC_BELBI_QUIKSWITCH        = 23710,
-    NPC_ITA_THUNDERBREW         = 23684,
-    NPC_MAEVE_BARLEYBREW        = 23683,
-    NPC_GORDOK_BREW_BARKER      = 23685,
-    NPC_IPFELKOFER_IRONKEG      = 24710,
-    NPC_MEKKATORQUE             = 7937,
 };
 
 enum BFTDP_NPCs

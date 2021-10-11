@@ -819,8 +819,16 @@ void BrewfestEvent::HandleKegTappingEvent()
     }
 }
 
-void BrewfestEvent::StartDarkIronAttackEvent()
+enum DarkIronEvent
 {
+    SPELL_PLAYERS_WON_A_SUMMON_DARK_IRON_DWARF_PLANS = 48145,
+    SPELL_PLAYERS_WON_H_SUMMON_DARK_IRON_DWARF_PLANS = 49318,
+};
+
+void BrewfestEvent::StartDarkIronAttackEvent() // TODO: Implement event
+{
+    if (Creature* herald = m_instance->GetSingleCreatureFromStorage(NPC_DARK_IRON_HERALD))
+        herald->CastSpell(nullptr, m_kalimdor ? SPELL_PLAYERS_WON_H_SUMMON_DARK_IRON_DWARF_PLANS : SPELL_PLAYERS_WON_A_SUMMON_DARK_IRON_DWARF_PLANS, TRIGGERED_OLD_TRIGGERED);
 }
 
 void AddSC_brewfest()
