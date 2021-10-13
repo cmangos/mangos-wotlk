@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14039_01_mangos_anticheat` bit(1) DEFAULT NULL
+  `required_14040_01_mangos_dbscript_data_flags_widening` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1618,7 +1618,7 @@ CREATE TABLE `dbscripts_on_creature_movement` (
   `datalong3` int(11) unsigned NOT NULL DEFAULT '0',
   `buddy_entry` int(10) unsigned NOT NULL DEFAULT '0',
   `search_radius` int(10) unsigned NOT NULL DEFAULT '0',
-  `data_flags` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `data_flags` int unsigned NOT NULL DEFAULT '0',
   `dataint` int(11) NOT NULL DEFAULT '0',
   `dataint2` int(11) NOT NULL DEFAULT '0',
   `dataint3` int(11) NOT NULL DEFAULT '0',
