@@ -406,7 +406,7 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
             eranikus->AI()->EnterEvadeMode();
 
         // Remulos is only targetable for friendly player spells during Eranikus event so reset on death
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_DEPRECATED);
 
         npc_escortAI::JustDied(killer);
     }
@@ -420,7 +420,7 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
                 {
                     DoScriptText(SAY_REMULOS_INTRO_1, m_creature, player);
                     // Remulos is only targetable for friendly player spells during Eranikus event
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_DEPRECATED);
                 }
                 break;
             case 2:
@@ -497,7 +497,7 @@ struct npc_keeper_remulosAI : public npc_escortAI, private DialogueHelper
 
         DoDespawnSummoned();
         // Remulos is only targetable for friendly player spells during Eranikus event: remove flag on quest completion
-        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP);
+        m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_DEPRECATED);
 
         m_outroTimer = 3 * IN_MILLISECONDS;
     }
