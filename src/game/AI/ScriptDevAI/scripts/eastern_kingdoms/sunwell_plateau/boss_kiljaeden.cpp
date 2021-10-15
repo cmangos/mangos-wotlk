@@ -1188,7 +1188,7 @@ struct DarknessOfSouls : public AuraScript
 {
     void OnApply(Aura* aura, bool apply) const override
     {
-        if (aura->GetEffIndex() == EFFECT_INDEX_0 && !apply)
+        if (aura->GetEffIndex() == EFFECT_INDEX_0 && !apply && aura->GetRemoveMode() == AURA_REMOVE_BY_EXPIRE)
         {
             Unit* target = aura->GetTarget();
             uint32 spellId = aura->GetSpellProto()->CalculateSimpleValue(EFFECT_INDEX_2);
