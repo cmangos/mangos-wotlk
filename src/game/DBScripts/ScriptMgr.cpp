@@ -1400,7 +1400,7 @@ bool ScriptAction::HandleScriptStep()
         if (!GetScriptProcessTargets(dynamic_cast<WorldObject*>(source), dynamic_cast<WorldObject*>(target), sources, targets))
             return false;
 
-        if (source->isType(TYPEMASK_ITEM))
+        if (source && source->isType(TYPEMASK_ITEM))
             itemSource = source;
     }
 
