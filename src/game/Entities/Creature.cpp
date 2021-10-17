@@ -105,7 +105,7 @@ bool ForcedDespawnDelayEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     return true;
 }
 
-void CreatureCreatePos::SelectFinalPoint(Creature* cr)
+void CreatureCreatePos::SelectFinalPoint(Creature* cr, bool staticSpawn)
 {
     // if object provided then selected point at specific dist/angle from object forward look
     if (m_closeObject)
@@ -119,7 +119,7 @@ void CreatureCreatePos::SelectFinalPoint(Creature* cr)
         else
             m_closeObject->GetClosePoint(m_pos.x, m_pos.y, m_pos.z, cr->GetObjectBoundingRadius(), m_dist, m_angle);
     }
-    else
+    else if (!staticSpawn)
         cr->UpdateAllowedPositionZ(m_pos.x, m_pos.y, m_pos.z);
 }
 
@@ -902,7 +902,7 @@ bool Creature::Create(uint32 guidlow, CreatureCreatePos& cPos, CreatureInfo cons
     if (!CreateFromProto(guidlow, cinfo, data, eventData))
         return false;
 
-    cPos.SelectFinalPoint(this);
+    cPos.SelectFinalPoint(this, data != nullptr);
 
     if (!cPos.Relocate(this))
         return false;

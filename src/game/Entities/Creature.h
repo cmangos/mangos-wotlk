@@ -521,7 +521,7 @@ struct CreatureCreatePos
     public:
         Map* GetMap() const { return m_map; }
         uint32 GetPhaseMask() const { return m_phaseMask; }
-        void SelectFinalPoint(Creature* cr);
+        void SelectFinalPoint(Creature* cr, bool staticSpawn);
         bool Relocate(Creature* cr) const;
 
         // read only after SelectFinalPoint
