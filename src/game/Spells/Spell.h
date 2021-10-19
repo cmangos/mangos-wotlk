@@ -706,6 +706,7 @@ class Spell
             bool   magnet : 1;
             bool   procReflect : 1; // Used to tell hit to proc reflect only and return reflect back
             bool   isCrit : 1;
+            bool   executionless : 1;
             uint32 heartbeatResistChance;
             uint32 diminishDuration; // Store duration after diminishing returns are applied
             DiminishingLevels diminishLevel;
@@ -895,6 +896,7 @@ class Spell
         //*****************************************
         void FillTargetMap();
         void SetTargetMap(SpellEffectIndex effIndex, uint32 targetMode, bool targetB, TempTargetingData& targetingData);
+        bool FillUnitTargets(TempTargetingData& targetingData, SpellTargetingData& data, uint32 i);
         bool CheckAndAddMagnetTarget(Unit* unitTarget, SpellEffectIndex effIndex, bool targetB, TempTargetingData& data);
         static void CheckSpellScriptTargets(SQLMultiStorage::SQLMSIteratorBounds<SpellTargetEntry>& bounds, UnitList& tempTargetUnitMap, UnitList& targetUnitMap, SpellEffectIndex effIndex);
         void FilterTargetMap(UnitList& filterUnitList, SpellTargetFilterScheme scheme, uint32 chainTargetCount);
