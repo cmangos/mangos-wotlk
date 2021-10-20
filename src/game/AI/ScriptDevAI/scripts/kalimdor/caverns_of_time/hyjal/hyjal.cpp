@@ -1885,10 +1885,14 @@ bool instance_mount_hyjal::CheckConditionCriteriaMeet(Player const* player, uint
     return false;
 }
 
-InstanceData* GetInstanceData_instance_mount_hyjal(Map* map)
+struct EternalSilence : public AuraScript
 {
-    return new instance_mount_hyjal(map);
-}
+    void OnApply(Aura* aura, bool apply) const override
+    {
+        if (!apply) // residue of eternity
+            aura->GetTarget()->CastSpell(nullptr, 42205, TRIGGERED_OLD_TRIGGERED);
+    }
+};
 
 void AddSC_instance_mount_hyjal()
 {
@@ -1896,6 +1900,8 @@ void AddSC_instance_mount_hyjal()
 
     pNewScript = new Script;
     pNewScript->Name = "instance_hyjal";
-    pNewScript->GetInstanceData = &GetInstanceData_instance_mount_hyjal;
+    pNewScript->GetInstanceData = &GetNewInstanceScript<instance_mount_hyjal>;
     pNewScript->RegisterSelf();
+
+    RegisterAuraScript<EternalSilence>("spell_eternal_silence");
 }

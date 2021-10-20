@@ -249,6 +249,7 @@ INSERT INTO spell_scripts(Id, ScriptName) VALUES
 (45960,'spell_nether_vapor_lightning'),
 (39497,'spell_remove_weapons'),
 (31298,'spell_anetheron_sleep'),
+(42201,'spell_eternal_silence'),
 (41910,'spell_alar_phoenix_ember_blast'),
 (30632,'spell_magtheridon_debris'),
 (32286,'spell_focus_target_visual'),
