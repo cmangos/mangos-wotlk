@@ -892,7 +892,7 @@ struct FlyingMachineControls : public AuraScript
         if (!caster || !caster->IsPlayer() || static_cast<Player*>(caster)->GetQuestStatus(11391) != QUEST_STATUS_INCOMPLETE)
             return;
 
-        static_cast<Creature*>(aura->GetTarget())->UpdateSpellSet(1);
+        static_cast<Creature*>(aura->GetTarget())->SetSpellList(aura->GetTarget()->GetEntry() * 100 + 1);
     }
 };
 

@@ -520,6 +520,8 @@ Spell::Spell(WorldObject * caster, SpellEntry const* info, uint32 triggeredFlags
 
     m_scriptValue = 0;
 
+    memset(m_triggerSpellChance, -1, sizeof(m_triggerSpellChance));
+
     CleanupTargetList();
 
     m_spellLog.Initialize();
@@ -7086,7 +7088,7 @@ std::pair<float, float> Spell::GetMinMaxRange(bool strict)
     if (caster)
     {
         if (m_spellInfo->HasAttribute(SPELL_ATTR_RANGED) && caster->GetTypeId() == TYPEID_PLAYER)
-            if (Item * ranged = static_cast<Player*>(caster)->GetWeaponForAttack(RANGED_ATTACK))
+            if (Item* ranged = static_cast<Player*>(caster)->GetWeaponForAttack(RANGED_ATTACK))
                 maxRange *= ranged->GetProto()->RangedModRange * 0.01f;
 
         if (Player* modOwner = caster->GetSpellModOwner())

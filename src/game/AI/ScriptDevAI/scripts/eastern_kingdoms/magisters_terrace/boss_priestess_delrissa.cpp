@@ -1093,7 +1093,7 @@ struct npc_zelfanAI : public priestess_companion_commonAI
                 break;
             case ZELFAN_RECOMBOBULATE:
             {
-                std::list<Creature*> ccedFriends = DoFindFriendlyCC(30.0f);
+                std::list<Creature*> ccedFriends = DoFindFriendlyEligibleDispel(30.0f);
                 for (Creature* creature : ccedFriends)
                 {
                     if (creature->IsPolymorphed())

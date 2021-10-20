@@ -29,13 +29,9 @@
 CreatureAI::CreatureAI(Creature* creature) : CreatureAI(creature, 0) { }
 
 CreatureAI::CreatureAI(Creature* creature, uint32 combatActions) :
-    UnitAI(creature), CombatActions(combatActions),
+    UnitAI(creature, combatActions),
     m_creature(creature),
-    m_deathPrevention(false), m_deathPrevented(false), m_teleportUnreachable(false),
-    // Caster AI components
-    m_rangedMode(false), m_rangedModeSetting(TYPE_NONE), m_chaseDistance(0.f), m_currentRangedMode(false),
-    m_mainSpellId(0), m_mainSpellCost(0), m_mainSpellInfo(nullptr), m_mainSpellMinRange(0.f),
-    m_mainAttackMask(SPELL_SCHOOL_MASK_NONE), m_distancingCooldown(false)
+    m_deathPrevention(false), m_deathPrevented(false)
 {
     m_dismountOnAggro = !(m_creature->GetCreatureInfo()->CreatureTypeFlags & CREATURE_TYPEFLAGS_MOUNTED_COMBAT);
 
@@ -44,8 +40,6 @@ CreatureAI::CreatureAI(Creature* creature, uint32 combatActions) :
         SetReactState(REACT_DEFENSIVE);
     if (m_creature->IsGuard() || m_unit->GetCharmInfo()) // guards and charmed targets
         m_visibilityDistance = sWorld.getConfig(CONFIG_FLOAT_SIGHT_GUARDER);
-
-    AddCustomAction(GENERIC_ACTION_DISTANCE, true, [&]() { m_distancingCooldown = false; });
 }
 
 void CreatureAI::Reset()
@@ -57,6 +51,7 @@ void CreatureAI::Reset()
 
 void CreatureAI::EnterCombat(Unit* enemy)
 {
+    UnitAI::EnterCombat(enemy);
     if (enemy && (m_creature->IsGuard() || m_creature->IsCivilian()))
     {
         // Send Zone Under Attack message to the LocalDefense and WorldDefense Channels
@@ -218,4 +213,14 @@ void CreatureAI::HandleAssistanceCall(Unit* sender, Unit* invoker)
         m_creature->SetNoCallAssistance(true);
         AttackStart(invoker);
     }
+}
+
+void CreatureAI::AddUnreachabilityCheck()
+{
+    m_teleportUnreachable = true;
+}
+
+CreatureSpellList const& CreatureAI::GetSpellList() const
+{
+    return m_creature->GetSpellList();
 }

@@ -883,7 +883,6 @@ class CreatureEventAI : public CreatureAI
         bool SpawnedEventConditionsCheck(CreatureEventAI_Event const& event) const;
 
         void DoFindFriendlyMissingBuff(CreatureList& list, float range, uint32 spellId, bool inCombat) const;
-        void DoFindFriendlyCC(CreatureList& list, float range) const;
 
         MovementGeneratorType GetDefaultMovement() { return m_defaultMovement; }
     protected:

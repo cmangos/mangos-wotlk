@@ -215,10 +215,26 @@ void instance_the_eye::OpenDoors()
     DoUseOpenableObject(GO_ARCANE_DOOR_VERT_4, true);
 }
 
+struct CounterCharge : public SpellScript
+{
+    void OnCast(Spell* spell) const override
+    {
+        Unit* caster = spell->GetCaster();
+        if (Unit* target = caster->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0, 35039, SELECT_FLAG_PLAYER | SELECT_FLAG_CASTING))
+        {
+            caster->CastSpell(target, 35039, TRIGGERED_OLD_TRIGGERED);
+            caster->RemoveAurasDueToSpell(35035);
+        }
+        spell->SetTriggerChance(0, EFFECT_INDEX_1);
+    }
+};
+
 void AddSC_instance_the_eye()
 {
     Script* pNewScript = new Script;
     pNewScript->Name = "instance_the_eye";
     pNewScript->GetInstanceData = &GetNewInstanceScript<instance_the_eye>;
     pNewScript->RegisterSelf();
+
+    RegisterSpellScript<CounterCharge>("spell_countercharge");
 }

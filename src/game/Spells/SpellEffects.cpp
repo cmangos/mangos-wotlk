@@ -4817,6 +4817,12 @@ void Spell::EffectTriggerSpell(SpellEffectIndex effIndex)
         }
     }
 
+    if (m_triggerSpellChance[effIndex] != -1)
+    {
+        if (m_triggerSpellChance[effIndex] == 0 || urand(1, 100) > m_triggerSpellChance[effIndex])
+            return;
+    }
+
     // normal case
     SpellEntry const* spellInfo = sSpellTemplate.LookupEntry<SpellEntry>(triggered_spell_id);
     if (!spellInfo)
@@ -6873,23 +6879,8 @@ void Spell::EffectDispel(SpellEffectIndex eff_idx)
         if (holder->GetSpellProto()->Id == 29448)
             continue;
 
-        if ((1 << holder->GetSpellProto()->Dispel) & dispelMask)
-        {
-            if (holder->GetSpellProto()->Dispel == DISPEL_MAGIC)
-            {
-                // do not remove positive auras if friendly target
-                //               negative auras if non-friendly target
-                bool positive = holder->IsPositive();
-                if (positive == m_caster->CanAssistSpell(unitTarget, m_spellInfo))
-                    if (positive || !holder->IsCharm())
-                        continue;
-            }
-            // Unholy Blight prevents dispel of diseases from target
-            else if (holder->GetSpellProto()->Dispel == DISPEL_DISEASE)
-                if (unitTarget->HasAura(50536))
-                    continue;
+        if (holder->IsDispellableByMask(dispelMask, m_caster, m_spellInfo))
             dispelList.push_back(std::pair<SpellAuraHolder*, uint32>(holder, holder->GetStackAmount()));
-        }
     }
     std::list<std::pair<SpellAuraHolder*, uint32> > successList;
     std::list <uint32> failList;
@@ -6909,11 +6900,8 @@ void Spell::EffectDispelMechanic(SpellEffectIndex eff_idx)
 
     Unit::SpellAuraHolderMap& Auras = unitTarget->GetSpellAuraHolderMap();
     for (Unit::SpellAuraHolderMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
-    {
-        SpellEntry const* spell = iter->second->GetSpellProto();
         if (iter->second->HasMechanic(mechanic))
             dispelList.push_back(std::pair<SpellAuraHolder*, uint32>(iter->second, iter->second->GetStackAmount()));
-    }
     std::list<std::pair<SpellAuraHolder*, uint32> > successList;
     std::list <uint32> failList;
     ProcessDispelList(dispelList, successList, failList);

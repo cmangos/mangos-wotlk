@@ -2492,6 +2492,7 @@ void SpellMgr::LoadPetDefaultSpells()
 
         int32 petSpellsId = -(int32)cInfo->PetSpellDataId;
         PetDefaultSpellsEntry petDefSpells;
+        memset(petDefSpells.spellid, 0, sizeof(petDefSpells.spellid));
         for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
             petDefSpells.spellid[j] = spellDataEntry->spellId[j];
 
@@ -2528,9 +2529,9 @@ void SpellMgr::LoadPetDefaultSpells()
                     continue;
 
                 PetDefaultSpellsEntry petDefSpells;
-                if (CreatureTemplateSpells const* templateSpells = sObjectMgr.GetCreatureTemplateSpellSet(cInfo->Entry, 0))
-                    for (int j = 0; j < MAX_CREATURE_SPELL_DATA_SLOT; ++j)
-                        petDefSpells.spellid[j] = templateSpells->spells[j];
+                if (CreatureSpellList* spellList = sObjectMgr.GetCreatureSpellList(cInfo->SpellList ? cInfo->SpellList : cInfo->Entry * 100))
+                    for (auto& data : spellList->Spells)
+                        petDefSpells.spellid[data.second.Position] = data.second.SpellId;
 
                 if (LoadPetDefaultSpells_helper(cInfo, petDefSpells))
                 {

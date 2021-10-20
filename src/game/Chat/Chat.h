@@ -623,6 +623,7 @@ class ChatHandler
         bool HandleReloadSpellPetAurasCommand(char* args);
         bool HandleReloadExpectedSpamRecords(char* args);
         bool HandleReloadCreatureCooldownsCommand(char* args);
+        bool HandleReloadCreatureSpellLists(char* args);
 
         bool HandleResetAchievementsCommand(char* args);
         bool HandleResetAllCommand(char* args);

@@ -62,7 +62,7 @@ void instance_oculus::OnCreatureCreate(Creature* pCreature)
         case NPC_RUBY_DRAKE:
             // after the 3rd encounter the vehicles receive additional spells
             if (GetData(TYPE_UROM) == DONE)
-                pCreature->UpdateSpellSet(1);
+                pCreature->SetSpellList(pCreature->GetEntry() * 100 + 1);
             break;
     }
 }
