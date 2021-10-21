@@ -201,7 +201,7 @@ struct boss_mechano_lord_capacitusAI : public ScriptedAI
     }
 };
 
-struct NetherCharge : public ScriptedAI, public TimerManager
+struct NetherCharge : public ScriptedAI
 {
     NetherCharge(Creature* creature) : ScriptedAI(creature), m_stopMoving(false)
     {
@@ -215,6 +215,7 @@ struct NetherCharge : public ScriptedAI, public TimerManager
             m_creature->GetMotionMaster()->Clear(false, true);
             m_creature->GetMotionMaster()->MoveIdle();
         });
+        SetReactState(REACT_PASSIVE);
     }
 
     void Reset() override { }
@@ -243,11 +244,6 @@ struct NetherCharge : public ScriptedAI, public TimerManager
         DoCastSpellIfCan(nullptr, SPELL_NETHER_CHARGE_PASSIVE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(nullptr, SPELL_NETHER_CHARGE_TIMER, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         MoveToRandomPoint();
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff);
     }
 };
 

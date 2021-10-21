@@ -77,9 +77,9 @@ enum KruulActions // order based on priority
 };
 
 
-struct boss_highlord_kruulAI : public ScriptedAI, public CombatActions
+struct boss_highlord_kruulAI : public ScriptedAI
 {
-    boss_highlord_kruulAI(Creature* creature) : ScriptedAI(creature), CombatActions(KRUUL_ACTION_MAX)
+    boss_highlord_kruulAI(Creature* creature) : ScriptedAI(creature, KRUUL_ACTION_MAX)
     {
         AddCombatAction(KRUUL_ACTION_SUPREME, 0u);
         AddCombatAction(KRUUL_ACTION_VOIDBOLT, 0u);

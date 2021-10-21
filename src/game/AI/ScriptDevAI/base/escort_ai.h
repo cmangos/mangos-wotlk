@@ -26,8 +26,6 @@ struct npc_escortAI : public ScriptedAI
 
         virtual void Aggro(Unit* who) override;
 
-        virtual void Reset() override = 0;
-
         // UnitAI functions
         void JustDied(Unit* killer) override;
 

@@ -112,9 +112,9 @@ enum AlythessActions
     ALYTHESS_DELAY,
 };
 
-struct boss_alythessAI : public RangedCombatAI
+struct boss_alythessAI : public CombatAI
 {
-    boss_alythessAI(Creature* creature) : RangedCombatAI(creature, ALYTHESS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+    boss_alythessAI(Creature* creature) : CombatAI(creature, ALYTHESS_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
         m_introDialogue(aIntroDialogue)
     {
         SetRangedMode(true, 200.f, TYPE_FULL_CASTER);
@@ -135,7 +135,7 @@ struct boss_alythessAI : public RangedCombatAI
 
     void Reset() override
     {
-        RangedCombatAI::Reset();
+        CombatAI::Reset();
 
         SetDeathPrevention(true);
         m_creature->SetNoLoot(false);

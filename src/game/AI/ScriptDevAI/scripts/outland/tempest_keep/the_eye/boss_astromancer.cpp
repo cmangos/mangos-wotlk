@@ -400,9 +400,9 @@ enum SolarianPriestActions
     SOLARIAN_PRIEST_ACTION_MAX,
 };
 
-struct mob_solarium_priestAI : public RangedCombatAI
+struct mob_solarium_priestAI : public CombatAI
 {
-    mob_solarium_priestAI(Creature* creature) : RangedCombatAI(creature, SOLARIAN_PRIEST_ACTION_MAX)
+    mob_solarium_priestAI(Creature* creature) : CombatAI(creature, SOLARIAN_PRIEST_ACTION_MAX)
     {
         AddCombatAction(SOLARIAN_PRIEST_HEAL, 9000u);
         AddCombatAction(SOLARIAN_PRIEST_ARCANE_TORRENT, 15000u);

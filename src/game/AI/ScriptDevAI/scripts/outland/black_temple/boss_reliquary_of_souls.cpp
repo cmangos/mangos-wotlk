@@ -117,9 +117,9 @@ enum ReliquaryActions
 ## boss_reliquary_of_souls
 ######*/
 
-struct boss_reliquary_of_soulsAI : public ScriptedAI, public TimerManager
+struct boss_reliquary_of_soulsAI : public ScriptedAI
 {
-    boss_reliquary_of_soulsAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<instance_black_temple*>(creature->GetInstanceData()))
+    boss_reliquary_of_soulsAI(Creature* creature) : ScriptedAI(creature, 0), m_instance(static_cast<instance_black_temple*>(creature->GetInstanceData()))
     {
         AddCustomAction(RELIQUARY_ACTION_SUBMERGE, 0u, [&]
         {
@@ -173,6 +173,8 @@ struct boss_reliquary_of_soulsAI : public ScriptedAI, public TimerManager
         GuidVector& souls = m_instance->GetEnslavedSouls();
         DespawnGuids(souls);
         SetCombatMovement(false);
+
+        SetReactState(REACT_PASSIVE);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* /*sender*/, Unit* /*invoker*/, uint32 /*miscValue*/) override
@@ -268,11 +270,6 @@ struct boss_reliquary_of_soulsAI : public ScriptedAI, public TimerManager
         // Prepare to summon the essence
         if (m_soulDeathCount == MAX_ENSLAVED_SOULS)
             ReduceTimer(RELIQUARY_ACTION_SUBMERGE, 4000);
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff);
     }
 };
 

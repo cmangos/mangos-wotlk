@@ -111,9 +111,9 @@ enum FelbloodKaelthasActions
     KAEL_OUTRO,
 };
 
-struct boss_felblood_kaelthasAI : public RangedCombatAI
+struct boss_felblood_kaelthasAI : public CombatAI
 {
-    boss_felblood_kaelthasAI(Creature* creature) : RangedCombatAI(creature, KAEL_ACTION_MAX),
+    boss_felblood_kaelthasAI(Creature* creature) : CombatAI(creature, KAEL_ACTION_MAX),
         m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty()), m_introStarted(false)
     {
         AddTimerlessCombatAction(KAEL_ACTION_ENERGY_FEEDBACK, false);

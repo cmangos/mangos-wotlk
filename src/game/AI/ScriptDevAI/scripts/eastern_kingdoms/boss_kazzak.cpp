@@ -64,9 +64,9 @@ enum KazzakActions // order based on priority
 };
 
 
-struct boss_kazzakAI : public ScriptedAI, public CombatActions
+struct boss_kazzakAI : public ScriptedAI
 {
-    boss_kazzakAI(Creature* creature) : ScriptedAI(creature), CombatActions(KAZZAK_ACTION_MAX)
+    boss_kazzakAI(Creature* creature) : ScriptedAI(creature, KAZZAK_ACTION_MAX)
     {
         AddCombatAction(KAZZAK_ACTION_SUPREME, 0u);
         AddCombatAction(KAZZAK_ACTION_VOIDBOLT, 0u);

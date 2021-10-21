@@ -1836,7 +1836,7 @@ struct boss_master_engineer_telonicusAI : public advisor_base_ai
     }
 };
 
-struct npc_nether_vaporAI : public ScriptedAI, public TimerManager
+struct npc_nether_vaporAI : public ScriptedAI
 {
     npc_nether_vaporAI(Creature* creature) : ScriptedAI(creature)
     {
@@ -1865,11 +1865,6 @@ struct npc_nether_vaporAI : public ScriptedAI, public TimerManager
         DoCastSpellIfCan(nullptr, SPELL_NETHER_VAPOR_PERIODIC_DAMAGE, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(nullptr, SPELL_NETHER_VAPOR_PERIODIC_SCRIPT, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
         DoCastSpellIfCan(nullptr, SPELL_NETHER_VAPOR_LIGHTNING, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
-    }
-
-    void UpdateAI(const uint32 diff)
-    {
-        UpdateTimers(diff);
     }
 };
 

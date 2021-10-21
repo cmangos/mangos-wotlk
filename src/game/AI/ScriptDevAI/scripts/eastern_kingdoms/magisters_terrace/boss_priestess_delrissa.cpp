@@ -66,9 +66,9 @@ enum CommonActions
     COMMON_ACTION_MAX,
 };
 
-struct priestess_commonAI : public RangedCombatAI
+struct priestess_commonAI : public CombatAI
 {
-    priestess_commonAI(Creature* creature, uint32 actions) : RangedCombatAI(creature, actions),
+    priestess_commonAI(Creature* creature, uint32 actions) : CombatAI(creature, actions),
         m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         AddCombatAction(COMMON_RETARGET, 5000u);

@@ -348,7 +348,7 @@ enum
     QUEST_CITY_LIGHT        = 10211
 };
 
-struct npc_khadgars_servantAI : public npc_escortAI, public TimerManager
+struct npc_khadgars_servantAI : public npc_escortAI
 {
     npc_khadgars_servantAI(Creature* creature) : npc_escortAI(creature), m_startPhase(0)
     {
@@ -452,7 +452,7 @@ struct npc_khadgars_servantAI : public npc_escortAI, public TimerManager
 
     void UpdateEscortAI(const uint32 diff) override
     {
-        UpdateTimers(diff);
+        UpdateTimers(diff, m_creature->IsInCombat());
 
         if (m_uiRandomTalkCooldown)
         {

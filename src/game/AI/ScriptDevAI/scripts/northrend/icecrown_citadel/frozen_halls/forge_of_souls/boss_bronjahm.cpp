@@ -60,9 +60,9 @@ enum KelesethActions
     BRONJAHM_ACTION_MAX
 };
 
-struct boss_bronjahmAI : public RangedCombatAI
+struct boss_bronjahmAI : public CombatAI
 {
-    boss_bronjahmAI(Creature* creature) : RangedCombatAI(creature, BRONJAHM_ACTION_MAX), m_instance(static_cast<instance_forge_of_souls*>(creature->GetInstanceData()))
+    boss_bronjahmAI(Creature* creature) : CombatAI(creature, BRONJAHM_ACTION_MAX), m_instance(static_cast<instance_forge_of_souls*>(creature->GetInstanceData()))
     {
         AddCombatAction(BRONJAHM_ACTION_MAGIC_BANE, 8000u, 12000u);
         AddCombatAction(BRONJAHM_ACTION_CORRUPT_SOUL, 20000u, 30000u);
@@ -89,7 +89,7 @@ struct boss_bronjahmAI : public RangedCombatAI
 
     void KilledUnit(Unit* victim) override
     {
-        RangedCombatAI::KilledUnit(victim);
+        CombatAI::KilledUnit(victim);
 
         if (victim->GetTypeId() != TYPEID_PLAYER)
             return;

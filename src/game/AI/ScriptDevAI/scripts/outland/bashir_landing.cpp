@@ -130,9 +130,9 @@ enum RangerActions
     RANGER_COMBAT_ACTION_MAX,
 };
 
-struct npc_skyguard_rangerAI : public ScriptedAI, public CombatActions
+struct npc_skyguard_rangerAI : public ScriptedAI
 {
-    npc_skyguard_rangerAI(Creature* creature) : ScriptedAI(creature), CombatActions(RANGER_COMBAT_ACTION_MAX), m_spawnId(PATH_ID_DISMOUNT) // implicit default for lieutenant
+    npc_skyguard_rangerAI(Creature* creature) : ScriptedAI(creature, RANGER_COMBAT_ACTION_MAX), m_spawnId(PATH_ID_DISMOUNT) // implicit default for lieutenant
     {
         AddCombatAction(RANGER_COMBAT_ACTION_WHIRLWIND, 0u);
         Reset();
@@ -273,9 +273,9 @@ std::map<uint32, int32> vendorText =
     {23245, SAY_MASTER },
 };
 
-struct npc_aether_tech_vendorAI : public ScriptedAI, public TimerManager
+struct npc_aether_tech_vendorAI : public ScriptedAI
 {
-    npc_aether_tech_vendorAI(Creature* creature) : ScriptedAI(creature)
+    npc_aether_tech_vendorAI(Creature* creature) : ScriptedAI(creature, 0)
     {
         SetReactState(REACT_PASSIVE);
         AddCustomAction(0, true, [&] {m_creature->GetMap()->GetInstanceData()->SetData(TYPE_BASHIR, 2); });
@@ -318,11 +318,6 @@ struct npc_aether_tech_vendorAI : public ScriptedAI, public TimerManager
             }
         }
     }
-
-    void UpdateAI(const uint32 diff)
-    {
-        UpdateTimers(diff);
-    }
 };
 
 // Bashir bosses
@@ -348,9 +343,9 @@ enum FleshFiendActions
     FIEND_ACTION_EAT_FRIEND_END,
 };
 
-struct npc_bashir_flesh_fiendAI : public ScriptedAI, public CombatActions
+struct npc_bashir_flesh_fiendAI : public ScriptedAI
 {
-    npc_bashir_flesh_fiendAI(Creature* creature) : ScriptedAI(creature), CombatActions(FIEND_ACTION_MAX)
+    npc_bashir_flesh_fiendAI(Creature* creature) : ScriptedAI(creature, FIEND_ACTION_MAX)
     {
         AddCombatAction(FIEND_ACTION_EAT_FRIEND, 0u);
         AddCombatAction(FIEND_ACTION_INFECTIOUS_POISON, 0u);
@@ -490,9 +485,9 @@ enum DisruptorTower
     SPELL_DISRUPTOR_EXPLOSION = 40799, // cast by bunny
 };
 
-struct npc_disruptor_towerAI : public ScriptedAI, public TimerManager
+struct npc_disruptor_towerAI : public ScriptedAI
 {
-    npc_disruptor_towerAI(Creature* creature) : ScriptedAI(creature)
+    npc_disruptor_towerAI(Creature* creature) : ScriptedAI(creature, 0)
     {
         SetCombatMovement(false);
         SetMeleeEnabled(false);
@@ -527,13 +522,6 @@ struct npc_disruptor_towerAI : public ScriptedAI, public TimerManager
     {
         m_creature->CastSpell(nullptr, SPELL_CANNON_DEATH_VISUAL_START, TRIGGERED_OLD_TRIGGERED);
     }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff);
-        if (!m_creature->SelectHostileTarget())
-            return;
-    }
 };
 
 enum GrandCollector
@@ -561,9 +549,9 @@ enum GrandCollectorActions
     COLLECTOR_ACTION_HANDLE_EVENT,
 };
 
-struct npc_grand_collectorAI : public ScriptedAI, public CombatActions
+struct npc_grand_collectorAI : public ScriptedAI
 {
-    npc_grand_collectorAI(Creature* creature) : ScriptedAI(creature), CombatActions(COLLECTOR_COMBAT_ACTION_MAX), m_introEventId(0),
+    npc_grand_collectorAI(Creature* creature) : ScriptedAI(creature, COLLECTOR_COMBAT_ACTION_MAX), m_introEventId(0),
         m_instance(static_cast<ScriptedInstance*>(m_creature->GetMap()->GetInstanceData()))
     {
         SetReactState(REACT_PASSIVE);

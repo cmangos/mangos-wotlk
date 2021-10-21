@@ -67,9 +67,9 @@ enum MuselekActions
     MUSELEK_ACTION_MAX,
 };
 
-struct boss_swamplord_muselekAI : public RangedCombatAI
+struct boss_swamplord_muselekAI : public CombatAI
 {
-    boss_swamplord_muselekAI(Creature* creature) : RangedCombatAI(creature, MUSELEK_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
+    boss_swamplord_muselekAI(Creature* creature) : CombatAI(creature, MUSELEK_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())),
         m_isRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         AddTimerlessCombatAction(MUSELEK_TRAP_ONE, true);
@@ -201,7 +201,7 @@ struct boss_swamplord_muselekAI : public RangedCombatAI
     
     void DistancingEnded() override
     {
-        RangedCombatAI::DistancingEnded();
+        CombatAI::DistancingEnded();
         ResetCombatAction(MUSELEK_ACTION_RANGED_ATTACK, GetSubsequentActionTimer(MUSELEK_ACTION_RANGED_ATTACK));
         SetActionReadyStatus(MUSELEK_AIMED_SHOT, false);
     }

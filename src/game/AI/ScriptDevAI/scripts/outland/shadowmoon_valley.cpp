@@ -3699,13 +3699,9 @@ enum
     SHADOWLORD_ACTION_MAX,
 };
 
-struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
+struct mob_bt_battle_fighterAI : public ScriptedAI
 {
-    uint8 m_uiPathId = 0; // only used for the Shadowlords
-    uint8 m_uiLastWaypoint = 0;
-    bool m_bIsWaypointing = true;
-
-    mob_bt_battle_fighterAI(Creature* pCreature) : ScriptedAI(pCreature), CombatActions(VINDICATOR_ACTION_MAX)
+    mob_bt_battle_fighterAI(Creature* pCreature) : ScriptedAI(pCreature, VINDICATOR_ACTION_MAX)
     {
         switch (m_creature->GetEntry())
         {
@@ -3764,8 +3760,14 @@ struct mob_bt_battle_fighterAI : public ScriptedAI, public CombatActions
         Reset();
     }
 
+    uint8 m_uiPathId = 0; // only used for the Shadowlords
+    uint8 m_uiLastWaypoint = 0;
+    bool m_bIsWaypointing = true;
+
     void Reset() override
     {
+        ScriptedAI::Reset();
+
         switch (m_creature->GetEntry())
         {
             case NPC_ILLIDARI_RAVAGER:

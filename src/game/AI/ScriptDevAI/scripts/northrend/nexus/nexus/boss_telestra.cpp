@@ -83,9 +83,9 @@ enum TelestraActions
     TELESTRA_SPAWN_BACK_IN
 };
 
-struct boss_telestraAI : public RangedCombatAI
+struct boss_telestraAI : public CombatAI
 {
-    boss_telestraAI(Creature* creature) : RangedCombatAI(creature, TELESTRA_ACTION_MAX), m_instance(static_cast<instance_nexus*>(creature->GetInstanceData()))
+    boss_telestraAI(Creature* creature) : CombatAI(creature, TELESTRA_ACTION_MAX), m_instance(static_cast<instance_nexus*>(creature->GetInstanceData()))
     {
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
 
@@ -120,7 +120,7 @@ struct boss_telestraAI : public RangedCombatAI
         m_bCanCheckAchiev = false;
         SetCombatMovement(true);
 
-        RangedCombatAI::Reset();
+        CombatAI::Reset();
     }
 
     void JustReachedHome() override
@@ -150,7 +150,7 @@ struct boss_telestraAI : public RangedCombatAI
 
     void KilledUnit(Unit* victim) override
     {
-        RangedCombatAI::KilledUnit(victim);
+        CombatAI::KilledUnit(victim);
 
         if (urand(0, 1))
             DoScriptText(SAY_KILL, m_creature);
@@ -300,7 +300,7 @@ struct boss_telestraAI : public RangedCombatAI
 
     void UpdateAI(const uint32 diff) override
     {
-        RangedCombatAI::UpdateAI(diff);
+        CombatAI::UpdateAI(diff);
 
         if (m_bCanCheckAchiev)
             m_uiPersonalityTimer += diff;

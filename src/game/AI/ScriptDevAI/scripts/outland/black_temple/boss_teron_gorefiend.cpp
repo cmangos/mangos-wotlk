@@ -262,7 +262,7 @@ struct boss_teron_gorefiendAI : public CombatAI
     }
 };
 
-struct npc_doom_blossomAI : public ScriptedAI, public TimerManager
+struct npc_doom_blossomAI : public ScriptedAI
 {
     npc_doom_blossomAI(Creature* creature) : ScriptedAI(creature)
     {
@@ -272,6 +272,7 @@ struct npc_doom_blossomAI : public ScriptedAI, public TimerManager
                 DoCastSpellIfCan(target, SPELL_SHADOW_BOLT);
             ResetTimer(0, 1200);
         });
+        SetReactState(REACT_PASSIVE);
         SetCombatMovement(false);
     }
 
@@ -298,14 +299,9 @@ struct npc_doom_blossomAI : public ScriptedAI, public TimerManager
 
         ResetTimer(0, 0);
     }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff);
-    }
 };
 
-struct npc_shadow_constructAI : public ScriptedAI, public TimerManager
+struct npc_shadow_constructAI : public ScriptedAI
 {
     npc_shadow_constructAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<instance_black_temple*>(creature->GetMap()->GetInstanceData()))
     {
@@ -347,7 +343,7 @@ struct npc_shadow_constructAI : public ScriptedAI, public TimerManager
 
     void UpdateAI(const uint32 diff) override
     {
-        UpdateTimers(diff);
+        UpdateTimers(diff, m_creature->IsInCombat());
 
         if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
             return;

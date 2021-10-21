@@ -240,7 +240,7 @@ struct boss_morogrim_tidewalkerAI : public CombatAI
     }
 };
 
-struct mob_water_globuleAI : public ScriptedAI, public TimerManager
+struct mob_water_globuleAI : public ScriptedAI
 {
     mob_water_globuleAI(Creature* creature) : ScriptedAI(creature), m_initialAggro(false)
     {
@@ -289,8 +289,7 @@ struct mob_water_globuleAI : public ScriptedAI, public TimerManager
 
     void UpdateAI(const uint32 diff) override
     {
-        UpdateTimers(diff);
-        m_creature->SelectHostileTarget();
+        ScriptedAI::UpdateAI(diff);
         if (!m_creature->GetVictim() && m_initialAggro)
         {
             AcquireNewTarget();

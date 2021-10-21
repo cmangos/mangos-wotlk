@@ -206,9 +206,9 @@ enum KelesethActions
     KELESETH_ACTION_MAX
 };
 
-struct boss_kelesethAI : public RangedCombatAI
+struct boss_kelesethAI : public CombatAI
 {
-    boss_kelesethAI(Creature* creature) : RangedCombatAI(creature, KELESETH_ACTION_MAX), m_instance(static_cast<instance_utgarde_keep*>(creature->GetInstanceData()))
+    boss_kelesethAI(Creature* creature) : CombatAI(creature, KELESETH_ACTION_MAX), m_instance(static_cast<instance_utgarde_keep*>(creature->GetInstanceData()))
     {
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
 
@@ -260,7 +260,7 @@ struct boss_kelesethAI : public RangedCombatAI
 
     void KilledUnit(Unit* victim) override
     {
-        RangedCombatAI::KilledUnit(victim);
+        CombatAI::KilledUnit(victim);
 
         DoScriptText(SAY_KILL, m_creature);
     }

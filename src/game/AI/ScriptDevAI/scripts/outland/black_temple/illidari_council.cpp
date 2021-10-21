@@ -193,9 +193,9 @@ struct mob_blood_elf_council_voice_triggerAI : public ScriptedAI
 ## mob_illidari_council
 ######*/
 
-struct mob_illidari_councilAI : public ScriptedAI, public TimerManager
+struct mob_illidari_councilAI : public ScriptedAI
 {
-    mob_illidari_councilAI(Creature* creature) : ScriptedAI(creature), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    mob_illidari_councilAI(Creature* creature) : ScriptedAI(creature, 0), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         AddCustomAction(GENERIC_ACTION_BALANCE, 0u, [&]()
         {
@@ -278,20 +278,15 @@ struct mob_illidari_councilAI : public ScriptedAI, public TimerManager
         if (Creature* voiceTrigger = m_instance->GetSingleCreatureFromStorage(NPC_COUNCIL_VOICE))
             voiceTrigger->AI()->SendAIEvent(AI_EVENT_CUSTOM_A, m_creature, voiceTrigger);
     }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff);
-    }
 };
 
 /*######
 ## boss_illidari_council
 ######*/
 
-struct boss_illidari_councilAI : public RangedCombatAI
+struct boss_illidari_councilAI : public CombatAI
 {
-    boss_illidari_councilAI(Creature* creature, uint32 combatActions) : RangedCombatAI(creature, combatActions),
+    boss_illidari_councilAI(Creature* creature, uint32 combatActions) : CombatAI(creature, combatActions),
             m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         m_creature->GetCombatManager().SetLeashingCheck([&](Unit*, float x, float y, float z)
@@ -304,7 +299,7 @@ struct boss_illidari_councilAI : public RangedCombatAI
 
     void Reset() override
     {
-        RangedCombatAI::Reset();
+        CombatAI::Reset();
         DoCastSpellIfCan(nullptr, SPELL_BALANCE_OF_POWER, CAST_TRIGGERED | CAST_AURA_NOT_PRESENT);
     }
 

@@ -412,9 +412,9 @@ enum ShartuulActions
     SHARTUUL_HANDLE_FIGHT_START,
 };
 
-struct npc_shartuulAI : public RangedCombatAI
+struct npc_shartuulAI : public CombatAI
 {
-    npc_shartuulAI(Creature* creature) : RangedCombatAI(creature, SHARTUUL_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_fightSequenceStage(0)
+    npc_shartuulAI(Creature* creature) : CombatAI(creature, SHARTUUL_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())), m_fightSequenceStage(0)
     {
         m_creature->GetCombatManager().SetLeashingDisable(true);
         // AddCombatAction(SHARTUUL_TELEPORT, 60000u);

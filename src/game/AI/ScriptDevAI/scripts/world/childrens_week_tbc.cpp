@@ -206,7 +206,7 @@ enum ChildActions
     ACTION_NOW_WHEN_I_GROW_UP,
 };
 
-struct ChildTbcAI : public PetAI, public TimerManager
+struct ChildTbcAI : public PetAI
 {
     ChildTbcAI(Creature* creature) : PetAI(creature)
     {
@@ -849,12 +849,6 @@ struct ChildTbcAI : public PetAI, public TimerManager
         ++m_eventStage;
         if (timer)
             ResetTimer(ACTION_SEAT_OF_THE_NAARU, timer);
-    }
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff);
-        PetAI::UpdateAI(diff);
     }
 };
 

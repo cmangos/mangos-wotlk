@@ -146,9 +146,9 @@ enum VashjActions
     VASHJ_TAINTED_ELEMENTAL,
 };
 
-struct boss_lady_vashjAI : public RangedCombatAI
+struct boss_lady_vashjAI : public CombatAI
 {
-    boss_lady_vashjAI(Creature* creature) : RangedCombatAI(creature, VASHJ_ACTION_MAX), m_instance(static_cast<instance_serpentshrine_cavern*>(creature->GetInstanceData()))
+    boss_lady_vashjAI(Creature* creature) : CombatAI(creature, VASHJ_ACTION_MAX), m_instance(static_cast<instance_serpentshrine_cavern*>(creature->GetInstanceData()))
     {
         AddTimerlessCombatAction(VASHJ_ACTION_PHASE_2, true);
         AddCombatAction(VASHJ_ACTION_PERSUASION, true);

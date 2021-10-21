@@ -70,7 +70,7 @@ enum SylvanasActions
     SYLV_STAND,
 };
 
-struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI, public TimerManager
+struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI
 {
     npc_lady_sylvanas_windrunnerAI(Creature* pCreature) : ScriptedAI(pCreature) 
     {
@@ -153,16 +153,6 @@ struct npc_lady_sylvanas_windrunnerAI : public ScriptedAI, public TimerManager
             ResetTimer(SYLV_LAMENT_END, 172500);
             m_guidCurrentPlayer = playerGuid;
         }
-    }
-
-    void UpdateAI(const uint32 uiDiff) override
-    {
-        UpdateTimers(uiDiff);
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        DoMeleeAttackIfReady();
     }
 };
 

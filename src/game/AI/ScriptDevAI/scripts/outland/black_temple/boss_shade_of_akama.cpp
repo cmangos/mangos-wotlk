@@ -658,7 +658,7 @@ struct mob_ashtongue_sorcererAI : public ScriptedAI
     void UpdateAI(const uint32 /*uiDiff*/) override {}
 };
 
-struct npc_creature_generatorAI : public ScriptedAI, public TimerManager
+struct npc_creature_generatorAI : public ScriptedAI
 {
     npc_creature_generatorAI(Creature* creature) : ScriptedAI(creature), m_spawn(false), m_left(creature->GetPositionY() > 400.f)
     {
@@ -773,7 +773,7 @@ struct npc_creature_generatorAI : public ScriptedAI, public TimerManager
 
     void UpdateAI(const uint32 diff) override
     {
-        UpdateTimers(diff);
+        ScriptedAI::UpdateAI(diff);
 
         if (m_spawn)
             TrySummoning();

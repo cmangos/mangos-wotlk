@@ -99,9 +99,9 @@ enum AnzuActions
     ANZU_BROOD_ATTACK,
 };
 
-struct boss_anzuAI : public ScriptedAI, public CombatActions
+struct boss_anzuAI : public ScriptedAI
 {
-    boss_anzuAI(Creature* pCreature) : ScriptedAI(pCreature), CombatActions(ANZU_COMBAT_ACTION_MAX)
+    boss_anzuAI(Creature* pCreature) : ScriptedAI(pCreature, ANZU_COMBAT_ACTION_MAX)
     {
         m_instance = (instance_sethekk_halls*)pCreature->GetInstanceData();
         AddCustomAction(ANZU_INTRO_TALK, true, [&]

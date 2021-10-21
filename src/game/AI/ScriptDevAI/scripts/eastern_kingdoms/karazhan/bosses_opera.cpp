@@ -98,9 +98,9 @@ enum DorotheeActions // order based on priority
     DOROTHEE_AGGRO,
 };
 
-struct boss_dorotheeAI : public RangedCombatAI
+struct boss_dorotheeAI : public CombatAI
 {
-    boss_dorotheeAI(Creature* creature) : RangedCombatAI(creature, DOROTHEE_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
+    boss_dorotheeAI(Creature* creature) : CombatAI(creature, DOROTHEE_ACTION_MAX), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData()))
     {
         SetReactState(REACT_PASSIVE);
         AddCombatAction(DOROTHEE_ACTION_SUMMONTITO, GetInitialActionTimer(DOROTHEE_ACTION_SUMMONTITO));
@@ -109,7 +109,6 @@ struct boss_dorotheeAI : public RangedCombatAI
         AddCustomAction(DOROTHEE_INTRO, 2000u, [&]() { HandleIntro(); });
         AddCustomAction(DOROTHEE_AGGRO, 12000u, [&]() { HandleAggro(); });
         SetRangedMode(true, 40.f, TYPE_FULL_CASTER);
-        Reset();
     }
 
     ScriptedInstance* m_instance;

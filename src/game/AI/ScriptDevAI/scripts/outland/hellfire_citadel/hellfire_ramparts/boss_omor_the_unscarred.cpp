@@ -58,9 +58,9 @@ enum OmorActions
     OMOR_PULL_BACK,
 };
 
-struct boss_omor_the_unscarredAI : public RangedCombatAI
+struct boss_omor_the_unscarredAI : public CombatAI
 {
-    boss_omor_the_unscarredAI(Creature* creature) : RangedCombatAI(creature, OMOR_ACTION_MAX), m_inRegularMode(creature->GetMap()->IsRegularDifficulty())
+    boss_omor_the_unscarredAI(Creature* creature) : CombatAI(creature, OMOR_ACTION_MAX), m_inRegularMode(creature->GetMap()->IsRegularDifficulty())
     {
         AddTimerlessCombatAction(OMOR_ENABLE_SHIELD, true);
         AddCombatAction(OMOR_DEMONIC_SHIELD, true);

@@ -114,9 +114,9 @@ const uint32 npcStasisEntry[] =
     22825, 20888, 22827, 22826, 22828
 };
 
-struct npc_ethereum_prisonerAI : public ScriptedAI, public CombatActions
+struct npc_ethereum_prisonerAI : public ScriptedAI
 {
-    npc_ethereum_prisonerAI(Creature* creature) : ScriptedAI(creature), CombatActions(0)
+    npc_ethereum_prisonerAI(Creature* creature) : ScriptedAI(creature, 0)
     {
         AddCustomAction(PRISONER_ATTACK, true, [&]
         {
@@ -187,11 +187,6 @@ struct npc_ethereum_prisonerAI : public ScriptedAI, public CombatActions
             ResetTimer(PRISONER_TALK, 3500);
     }
 
-    void Reset() override
-    {
-
-    }
-
     int32 GetTextId()
     {
         int32 textId = 0;
@@ -227,26 +222,7 @@ struct npc_ethereum_prisonerAI : public ScriptedAI, public CombatActions
         }
         return spellId;
     }
-
-    void ExecuteActions() override {}
-
-    void UpdateAI(const uint32 diff) override
-    {
-        UpdateTimers(diff, m_creature->IsInCombat());
-
-        if (!m_creature->SelectHostileTarget() || !m_creature->GetVictim())
-            return;
-
-        ExecuteActions();
-
-        DoMeleeAttackIfReady();
-    }
 };
-
-UnitAI* GetAInpc_ethereum_prisoner(Creature* creature)
-{
-    return new npc_ethereum_prisonerAI(creature);
-}
 
 bool GOUse_go_ethereum_prison(Player* player, GameObject* go)
 {
@@ -1167,7 +1143,7 @@ void AddSC_go_scripts()
 
     pNewScript = new Script;
     pNewScript->Name = "npc_ethereum_prisoner";
-    pNewScript->GetAI = &GetAInpc_ethereum_prisoner;
+    pNewScript->GetAI = &GetNewAIInstance<npc_ethereum_prisonerAI>;
     pNewScript->RegisterSelf();
 
     pNewScript = new Script;

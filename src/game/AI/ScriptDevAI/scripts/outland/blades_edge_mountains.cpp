@@ -3054,9 +3054,9 @@ enum FlayerActions
     FLAYER_ACTION_MAX,
 };
 
-struct npc_apexis_flayerAI : public ScriptedAI, public CombatActions
+struct npc_apexis_flayerAI : public ScriptedAI
 {
-    npc_apexis_flayerAI(Creature* creature) : ScriptedAI(creature), CombatActions(FLAYER_ACTION_MAX)
+    npc_apexis_flayerAI(Creature* creature) : ScriptedAI(creature, FLAYER_ACTION_MAX)
     {
         AddCombatAction(FLAYER_ACTION_REND, 0u);
         AddCombatAction(FLAYER_ACTION_SHRED_ARMOR, 0u);

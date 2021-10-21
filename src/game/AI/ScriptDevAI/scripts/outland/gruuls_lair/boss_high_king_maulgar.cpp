@@ -179,9 +179,9 @@ struct boss_high_king_maulgarAI : public CombatAI
 };
 
 // Base AI for every council member
-struct Council_Base_AI : public RangedCombatAI
+struct Council_Base_AI : public CombatAI
 {
-    Council_Base_AI(Creature* creature, uint32 actions) : RangedCombatAI(creature, actions), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())) { }
+    Council_Base_AI(Creature* creature, uint32 actions) : CombatAI(creature, actions), m_instance(static_cast<ScriptedInstance*>(creature->GetInstanceData())) { }
 
     ScriptedInstance* m_instance;
 

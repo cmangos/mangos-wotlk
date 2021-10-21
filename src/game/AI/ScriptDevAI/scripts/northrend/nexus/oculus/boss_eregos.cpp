@@ -69,9 +69,9 @@ enum EregosActions
 ## boss_eregos
 ######*/
 
-struct boss_eregosAI : public RangedCombatAI
+struct boss_eregosAI : public CombatAI
 {
-    boss_eregosAI(Creature* creature) : RangedCombatAI(creature, EREGOS_ACTION_MAX), m_instance(static_cast<instance_oculus*>(creature->GetInstanceData()))
+    boss_eregosAI(Creature* creature) : CombatAI(creature, EREGOS_ACTION_MAX), m_instance(static_cast<instance_oculus*>(creature->GetInstanceData()))
     {
         m_isRegularMode = creature->GetMap()->IsRegularDifficulty();
 
@@ -97,7 +97,7 @@ struct boss_eregosAI : public RangedCombatAI
 
     void Reset() override
     {
-        RangedCombatAI::Reset();
+        CombatAI::Reset();
 
         m_fHpPercent = 60.0f;
     }
@@ -112,7 +112,7 @@ struct boss_eregosAI : public RangedCombatAI
 
     void KilledUnit(Unit* victim) override
     {
-        RangedCombatAI::KilledUnit(victim);
+        CombatAI::KilledUnit(victim);
 
         switch (urand(0, 2))
         {
