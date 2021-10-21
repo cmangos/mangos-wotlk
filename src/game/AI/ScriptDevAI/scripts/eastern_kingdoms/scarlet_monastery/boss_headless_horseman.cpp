@@ -207,12 +207,16 @@ struct boss_headless_horsemanAI : public ScriptedAI
     void JustDied(Unit* /*pKiller*/) override
     {
         DoScriptText(SAY_DEATH, m_creature);
+        if (Creature* head = m_creature->GetMap()->GetCreature(m_headGuid))
+            head->ForcedDespawn();
     }
 
     void JustReachedHome() override
     {
         // cleanup
         m_creature->ForcedDespawn();
+        if (Creature* head = m_creature->GetMap()->GetCreature(m_headGuid))
+            head->ForcedDespawn();
     }
 
     void JustRespawned() override
