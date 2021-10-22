@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "Globals/SharedDefines.h"
 #include "MotionGenerators/WaypointManager.h"
+#include "Entities/ObjectGuid.h"
 
 #include <stack>
 #include <vector>

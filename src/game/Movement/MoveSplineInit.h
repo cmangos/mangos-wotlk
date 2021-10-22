@@ -23,6 +23,7 @@
 #include "MotionGenerators/PathFinder.h"
 
 class Unit;
+class WorldObject;
 
 namespace Movement
 {

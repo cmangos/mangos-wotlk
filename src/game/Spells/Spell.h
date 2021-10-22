@@ -39,6 +39,7 @@ class Aura;
 struct SpellTargetEntry;
 struct SpellScript;
 struct AuraScript;
+struct SpellTargetingData;
 
 enum SpellCastFlags
 {
