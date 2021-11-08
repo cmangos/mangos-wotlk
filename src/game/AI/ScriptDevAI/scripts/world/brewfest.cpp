@@ -623,7 +623,7 @@ struct BrewfestRelayRacePlayerIncreaseMountDuration : public SpellScript
             if (holder->GetAuraMaxDuration() < duration)
                 holder->SetAuraMaxDuration(duration);
             holder->SetAuraDuration(duration);
-            holder->UpdateAuraDuration();
+            holder->SendAuraUpdate(false);
         }
     }
 };
