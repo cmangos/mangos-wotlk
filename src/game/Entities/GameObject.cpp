@@ -264,10 +264,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map* map, uint32 phaseMa
         case GAMEOBJECT_TYPE_SPELL_FOCUS:
         case GAMEOBJECT_TYPE_GOOBER:
         case GAMEOBJECT_TYPE_CHEST:
-            SetUInt32Value(GAMEOBJECT_DYN_FLAGS, GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
+            SetUInt32Value(GAMEOBJECT_DYNAMIC, GO_DYNFLAG_LO_ACTIVATE | GO_DYNFLAG_LO_SPARKLE);
             break;
         case GAMEOBJECT_TYPE_QUESTGIVER:
-            SetUInt32Value(GAMEOBJECT_DYN_FLAGS, GO_DYNFLAG_LO_ACTIVATE);
+            SetUInt32Value(GAMEOBJECT_DYNAMIC, GO_DYNFLAG_LO_ACTIVATE);
             break;
         case GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING:
             ForceGameObjectHealth(GetMaxHealth(), nullptr);
