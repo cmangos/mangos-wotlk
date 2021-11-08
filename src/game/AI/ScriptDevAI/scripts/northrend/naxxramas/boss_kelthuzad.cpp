@@ -153,7 +153,7 @@ struct boss_kelthuzadAI : public ScriptedAI
         m_uiPhase               = PHASE_INTRO;
 
         // it may be some spell should be used instead, to control the intro phase
-        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
         SetCombatMovement(false);
     }
 
@@ -392,7 +392,7 @@ struct boss_kelthuzadAI : public ScriptedAI
                     m_uiPhase = PHASE_NORMAL;
                     DespawnIntroCreatures();
 
-                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
                     SetCombatMovement(true);
                     m_creature->GetMotionMaster()->MoveChase(m_creature->GetVictim());
 

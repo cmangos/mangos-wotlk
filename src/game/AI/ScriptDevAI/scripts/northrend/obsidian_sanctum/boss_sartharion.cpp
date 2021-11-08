@@ -285,8 +285,8 @@ struct boss_sartharionAI : public ScriptedAI
             ++uiCountFetchableDragons;
             pTene->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aTene[0].m_fX, m_aTene[0].m_fY, m_aTene[0].m_fZ);
 
-            if (!pTene->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                pTene->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            if (!pTene->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING))
+                pTene->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
         }
 
         if (pShad && pShad->IsAlive() && !pShad->GetVictim())
@@ -294,8 +294,8 @@ struct boss_sartharionAI : public ScriptedAI
             ++uiCountFetchableDragons;
             pShad->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aShad[0].m_fX, m_aShad[0].m_fY, m_aShad[0].m_fZ);
 
-            if (!pShad->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                pShad->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            if (!pShad->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING))
+                pShad->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
         }
 
         if (pVesp && pVesp->IsAlive() && !pVesp->GetVictim())
@@ -303,8 +303,8 @@ struct boss_sartharionAI : public ScriptedAI
             ++uiCountFetchableDragons;
             pVesp->GetMotionMaster()->MovePoint(POINT_ID_INIT, m_aVesp[0].m_fX, m_aVesp[0].m_fY, m_aVesp[0].m_fZ);
 
-            if (!pVesp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                pVesp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            if (!pVesp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING))
+                pVesp->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
         }
 
         if (uiCountFetchableDragons)
@@ -320,8 +320,8 @@ struct boss_sartharionAI : public ScriptedAI
             Creature* pTemp = m_pInstance->GetSingleCreatureFromStorage(uiEntry);
             if (pTemp && pTemp->IsAlive())
             {
-                if (pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-                    pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                if (pTemp->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING))
+                    pTemp->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
 
                 if (pTemp->GetVictim())
                     return;
@@ -575,8 +575,8 @@ struct dummy_dragonAI : public ScriptedAI
 
     void JustReachedHome() override
     {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING))
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
 
         // Despawn portal
         if (GameObject* pPortal = GetClosestGameObjectWithEntry(m_creature, GO_TWILIGHT_PORTAL, 50.0f))

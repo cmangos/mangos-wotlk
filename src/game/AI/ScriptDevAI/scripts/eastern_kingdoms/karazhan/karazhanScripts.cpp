@@ -464,12 +464,12 @@ struct npc_image_arcanagosAI : public ScriptedAI
         if (pSpell->Id == SPELL_FIREBALL && pCaster->GetEntry() == NPC_IMAGE_OF_MEDIVH)
         {
             // !!!Workaround Alert!!! - the spell should be cast on Medivh without changing the unit flags!
-            pCaster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            pCaster->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
 
             DoCastSpellIfCan(pCaster, SPELL_FIREBALL_REFLECT, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_REFLECTION, CAST_TRIGGERED);
 
-            pCaster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            pCaster->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
         }
     }
 

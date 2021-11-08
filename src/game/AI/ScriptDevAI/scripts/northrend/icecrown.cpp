@@ -775,7 +775,7 @@ struct npc_grand_admiral_westwindAI : public ScriptedAI
                 m_bIsDefeated = true;
                 m_uiEscapeTimer = 5000;
 
-                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_NON_ATTACKABLE);
+                m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_SPAWNING);
                 EnterEvadeMode();
 
                 // Note: the portal entry is guesswork!

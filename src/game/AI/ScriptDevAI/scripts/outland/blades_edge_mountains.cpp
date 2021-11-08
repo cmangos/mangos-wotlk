@@ -108,7 +108,7 @@ struct mobs_nether_drakeAI : public ScriptedAI
 
     void MoveInLineOfSight(Unit* pWho) override
     {
-        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+        if (m_creature->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING))
             return;
 
         ScriptedAI::MoveInLineOfSight(pWho);
@@ -132,7 +132,7 @@ struct mobs_nether_drakeAI : public ScriptedAI
             if (m_creature->GetEntry() == NPC_NIHIL)
             {
                 DoScriptText(SAY_NIHIL_INTERRUPT, m_creature);
-                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
                 m_bIsNihil = false;
             }
 
@@ -150,7 +150,7 @@ struct mobs_nether_drakeAI : public ScriptedAI
                 if (aNetherDrakeEntries[uiIndex] == NPC_NIHIL)
                 {
                     EnterEvadeMode();
-                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+                    m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
                     m_bIsNihil = true;
                 }
                 else

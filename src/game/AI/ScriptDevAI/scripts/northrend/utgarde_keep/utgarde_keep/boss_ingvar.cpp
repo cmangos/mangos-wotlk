@@ -152,7 +152,7 @@ struct boss_ingvarAI : public CombatAI
 
             DoCastSpellIfCan(m_creature, SPELL_SUMMON_BANSHEE, CAST_TRIGGERED);
             DoCastSpellIfCan(m_creature, SPELL_FEIGN_DEATH, CAST_TRIGGERED);
-            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            m_creature->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
             m_creature->RemoveAurasDueToSpell(m_isRegularMode ? SPELL_ENRAGE : SPELL_ENRAGE_H);
 
             SetCombatScriptStatus(true);
@@ -239,7 +239,7 @@ struct boss_ingvarAI : public CombatAI
             ResetCombatAction(INGVAR_ACTION_ENRAGE, 20000);
 
             m_creature->SetVirtualItem(VIRTUAL_ITEM_SLOT_0, EQUIP_ID_AXE_UNDEAD);
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING);
             m_creature->RemoveAurasDueToSpell(SPELL_FEIGN_DEATH);
             SetCombatScriptStatus(false);
             DoResetThreat();

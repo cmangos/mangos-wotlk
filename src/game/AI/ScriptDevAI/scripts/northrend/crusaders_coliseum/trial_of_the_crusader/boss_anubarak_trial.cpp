@@ -188,7 +188,7 @@ struct boss_anubarak_trialAI : public ScriptedAI
         {
             DoScriptText(SAY_INTRO, m_creature);
 
-            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE);
+            m_creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SPAWNING | UNIT_FLAG_NOT_SELECTABLE);
             m_creature->RemoveAurasDueToSpell(SPELL_SUBMERGE);
             DoCastSpellIfCan(m_creature, SPELL_EMERGE);
 
