@@ -1032,11 +1032,8 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts)
             {
                 for (int i : itrM->second.textId)
                 {
-                    if (i && !sObjectMgr.GetMangosStringLocale(i))
-                        sLog.outErrorDb("Table `dbscript_string` is missing string id %u, used in database script table %s id %u.", i, scripts.first, itrMM->first);
-
-                    if (ids.find(i) != ids.end())
-                        ids.erase(i);
+                    if (i && !sObjectMgr.GetBroadcastText(i))
+                        sLog.outErrorDb("Table `broadcast_text` is missing string id %u, used in database script table %s id %u.", i, scripts.first, itrMM->first);
                 }
 
                 if (itrM->second.talk.stringTemplateId)
@@ -1044,8 +1041,8 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts)
                     auto& vector = m_scriptTemplates[STRING_TEMPLATE][itrM->second.talk.stringTemplateId];
                     for (auto& data : vector)
                     {
-                        if (!sObjectMgr.GetMangosStringLocale(data.first))
-                            sLog.outErrorDb("Table `%s` is missing string id %d, used in database script template table dbscript_random_templates id %u.", itrM->second.talk.stringTemplateId > 0 ? "dbscript_string" : "creature_ai_texts", data.first, itrM->second.talk.stringTemplateId);
+                        if (!sObjectMgr.GetBroadcastText(data.first))
+                            sLog.outErrorDb("Table `broadcast_text` is missing string id %d, used in database script template table dbscript_random_templates id %u.", data.first, itrM->second.talk.stringTemplateId);
                     }
                 }
             }
