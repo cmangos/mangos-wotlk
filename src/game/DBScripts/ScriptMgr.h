@@ -643,7 +643,7 @@ class ScriptMgr
 
     private:
         void LoadScripts(ScriptMapMapName& scripts, const char* tablename);
-        void CheckScriptTexts(ScriptMapMapName const& scripts, std::set<int32>& ids);
+        void CheckScriptTexts(ScriptMapMapName const& scripts);
 
         typedef std::vector<std::string> ScriptNameMap;
         typedef std::unordered_map<uint32, uint32> AreaTriggerScriptMap;
