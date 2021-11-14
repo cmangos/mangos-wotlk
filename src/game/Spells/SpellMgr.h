@@ -2656,10 +2656,10 @@ struct PetDefaultSpellsEntry
 {
     PetDefaultSpellsEntry()
     {
-        memset(&spellid, 0, sizeof(spellid));
+
     }
 
-    uint32 spellid[MAX_CREATURE_SPELL_DATA_SLOT];
+    std::vector<uint32> spellid;
 };
 
 // < 0 for petspelldata id, > 0 for creature_id
