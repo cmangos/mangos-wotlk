@@ -1495,7 +1495,7 @@ struct npc_danath_trollbaneAI : public ScriptedAI
                 m_uiYell2DelayRemaining -= uiDiff;
         }
 
-        DoMeleeAttackIfReady(); // be sure to fight back if in combat
+        ScriptedAI::UpdateAI(uiDiff);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 /*miscValue*/) override
@@ -1579,7 +1579,7 @@ struct npc_nazgrelAI : public ScriptedAI
                 m_uiYell2DelayRemaining -= uiDiff;
         }
 
-        DoMeleeAttackIfReady();
+        ScriptedAI::UpdateAI(uiDiff);
     }
 
     void ReceiveAIEvent(AIEventType eventType, Unit* pSender, Unit* pInvoker, uint32 /*miscValue*/) override
