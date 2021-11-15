@@ -125,8 +125,11 @@ Map* MapManager::CreateMap(uint32 id, const WorldObject* obj)
     }
     else
     {
+        uint32 instanceId = 0;
+        if (id == 609 && obj->IsPlayer()) // DeathKnightStart map - alliance and horde have own version
+            instanceId = static_cast<Player const*>(obj)->GetTeam() == ALLIANCE;
         // create regular non-instanceable map
-        m = FindMap(id);
+        m = FindMap(id, instanceId);
         if (m == nullptr)
         {
             std::lock_guard<std::mutex> lock(m_lock);
