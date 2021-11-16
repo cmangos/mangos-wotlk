@@ -154,7 +154,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
         }
 
         // generic command args check
-        if (tmp.buddyEntry && !(tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GUID))
+        if (tmp.buddyEntry && !(tmp.data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID)))
         {
             if (tmp.IsCreatureBuddy() && !ObjectMgr::GetCreatureTemplate(tmp.buddyEntry))
             {
@@ -190,7 +190,7 @@ void ScriptMgr::LoadScripts(ScriptMapMapName& scripts, const char* tablename)
                 sLog.outErrorDb("Table `%s` has buddy required in data_flags %u in command %u for script id %u, but no buddy defined, skipping.", tablename, tmp.data_flags, tmp.command, tmp.id);
                 continue;
             }
-            if (tmp.data_flags & SCRIPT_FLAG_BUDDY_BY_GUID) // Check guid
+            if (tmp.data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID)) // Check guid
             {
                 if (tmp.IsCreatureBuddy())
                 {
@@ -1109,9 +1109,9 @@ bool ScriptAction::GetScriptProcessTargets(WorldObject* originalSource, WorldObj
 {
     std::vector<WorldObject*> buddies;
 
-    if (m_script->buddyEntry || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_POOL) != 0 || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID) != 0)
+    if (m_script->buddyEntry || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_POOL) != 0 || (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID)) != 0)
     {
-        if (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID)
+        if (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID))
         {
             WorldObject* buddy = nullptr;
             if (m_script->IsCreatureBuddy())
@@ -2129,16 +2129,16 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
         }
         case SCRIPT_COMMAND_TERMINATE_SCRIPT:               // 31
         {
-            if (!pSource && (!pTarget && (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID) == 0))
+            if (!pSource && (!pTarget && (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID)) == 0))
             {
                 sLog.outErrorDb(" DB-SCRIPTS: Process table `%s` id %u, command %u call for nullptr, skipping.", m_table, m_script->id, m_script->command);
                 return true;
             }
 
             bool result = false;
-            if (m_script->terminateScript.npcEntry || m_script->terminateScript.poolId || (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID))
+            if (m_script->terminateScript.npcEntry || m_script->terminateScript.poolId || (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID)))
             {
-                Creature* pCreatureBuddy = nullptr;
+                WorldObject* terminationBuddy = nullptr;
                 WorldObject* pSearcher = pSource ? pSource : pTarget;
                 if (!pSearcher)
                 {
@@ -2149,17 +2149,27 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                 if (pSearcher->GetTypeId() == TYPEID_PLAYER && pTarget && pTarget->GetTypeId() != TYPEID_PLAYER)
                     pSearcher = pTarget;
 
-                if (m_script->data_flags & SCRIPT_FLAG_BUDDY_BY_GUID)
+                if (m_script->data_flags & (SCRIPT_FLAG_BUDDY_BY_GUID | SCRIPT_FLAG_BUDDY_BY_GO_GUID))
                 {
-                    if (pTarget && pTarget->IsUnit() && pTarget->GetGUIDLow() == m_script->searchRadiusOrGuid)
-                        pCreatureBuddy = static_cast<Creature*>(pTarget);
+                    if (m_script->IsCreatureBuddy())
+                    {
+                        if (pTarget && pTarget->IsUnit() && pTarget->GetGUIDLow() == m_script->searchRadiusOrGuid)
+                            terminationBuddy = pTarget;
+                    }
+                    else
+                    {
+                        if (pTarget && pTarget->IsGameObject() && pTarget->GetGUIDLow() == m_script->searchRadiusOrGuid)
+                            terminationBuddy = pTarget;
+                    }
                 }
                 else if (m_script->terminateScript.npcEntry)
                 {
                     // npc entry is provided
+                    Creature* creatureBuddy = nullptr;
                     MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*pSearcher, m_script->terminateScript.npcEntry, true, false, m_script->terminateScript.searchDist, true);
-                    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(pCreatureBuddy, u_check);
+                    MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(creatureBuddy, u_check);
                     Cell::VisitGridObjects(pSearcher, searcher, m_script->terminateScript.searchDist);
+                    terminationBuddy = creatureBuddy;
                 }
                 else
                 {
@@ -2178,13 +2188,13 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                             if (buddy->IsAlive() &&
                                 (!m_script->terminateScript.searchDist || pSearcher->IsWithinDist3d(buddy->GetPositionX(), buddy->GetPositionY(), buddy->GetPositionZ(), m_script->terminateScript.searchDist)))
                             {
-                                pCreatureBuddy = buddy;
+                                terminationBuddy = buddy;
                                 break;
                             }
                         }
                     }
 
-                    if (!pCreatureBuddy)
+                    if (!terminationBuddy)
                     {
                         // buddy was not found so try explicitly chanced list
                         auto explicitlyChancedObjectList = pool.GetExplicitlyChanced();
@@ -2197,7 +2207,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                                 if (buddy->IsAlive() &&
                                     (!m_script->terminateScript.searchDist || pSearcher->IsWithinDist3d(buddy->GetPositionX(), buddy->GetPositionY(), buddy->GetPositionZ(), m_script->terminateScript.searchDist)))
                                 {
-                                    pCreatureBuddy = buddy;
+                                    terminationBuddy = buddy;
                                     break;
                                 }
                             }
@@ -2205,7 +2215,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                     }
                 }
 
-                if (!(m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) && !pCreatureBuddy)
+                if (!(m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL) && !terminationBuddy)
                 {
                     if (m_script->terminateScript.npcEntry)
                         DETAIL_FILTER_LOG(LOG_FILTER_DB_SCRIPT, "DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc entry(%u) was not found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
@@ -2213,7 +2223,7 @@ bool ScriptAction::ExecuteDbscriptCommand(WorldObject* pSource, WorldObject* pTa
                         DETAIL_FILTER_LOG(LOG_FILTER_DB_SCRIPT, "DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as no npc in pool id(%u) was found alive)", m_table, m_script->id, m_script->terminateScript.poolId);
                     result = true;
                 }
-                else if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && pCreatureBuddy)
+                else if (m_script->data_flags & SCRIPT_FLAG_COMMAND_ADDITIONAL && terminationBuddy)
                 {
                     if (m_script->terminateScript.npcEntry)
                         DETAIL_FILTER_LOG(LOG_FILTER_DB_SCRIPT, "DB-SCRIPTS: Process table `%s` id %u, terminate further steps of this script! (as searched npc entry(%u) was found alive)", m_table, m_script->id, m_script->terminateScript.npcEntry);
