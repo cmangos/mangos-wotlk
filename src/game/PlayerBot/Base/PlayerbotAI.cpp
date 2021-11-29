@@ -103,9 +103,9 @@ PlayerbotAI::PlayerbotAI(PlayerbotMgr &mgr, Player* const bot, bool debugWhisper
     // reset some pointers
     m_targetChanged = false;
     m_targetType = TARGET_NORMAL;
-    m_targetCombat = 0;
-    m_targetAssist = 0;
-    m_targetProtect = 0;
+    m_targetCombat = nullptr;
+    m_targetAssist = nullptr;
+    m_targetProtect = nullptr;
 
     // set collection options
     m_collectionFlags = 0;
@@ -3115,7 +3115,7 @@ void PlayerbotAI::Attack(Unit* forcedTarget)
         // m_lootCurrent = ObjectGuid(); This was clearing loot target, causing bots to leave corpses unlooted if interupted by combat. Needs testing.
         // using this caused bot to remove current loot target, and add this new threat to the loot list.  Now it remembers the loot target and adds a new one.
         // Bot will still clear the target if the master gets too far away from it.
-        m_targetCombat = 0;
+        m_targetCombat = nullptr;
         m_DelayAttackInit = CurrentTime(); // Combat started, new start time to check CombatDelay for.
     }
 
@@ -3273,7 +3273,7 @@ void PlayerbotAI::DoNextCombatManeuver()
         m_bot->SetSelectionGuid(ObjectGuid());
         MovementReset();
         m_bot->InterruptNonMeleeSpells(true);
-        m_targetCombat = 0;
+        m_targetCombat = nullptr;
         m_targetChanged = false;
         m_targetType = TARGET_NORMAL;
         SetQuestNeedCreatures();
@@ -4653,8 +4653,8 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit* target)
     if (m_combatOrder == ORDERS_PASSIVE)
     {
         m_combatOrder = ORDERS_NONE;
-        m_targetAssist = 0;
-        m_targetProtect = 0;
+        m_targetAssist = nullptr;
+        m_targetProtect = nullptr;
     }
 
     switch (co)
@@ -4694,8 +4694,8 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit* target)
         case ORDERS_PASSIVE: // 20(100000)
         {
             m_combatOrder = ORDERS_PASSIVE;
-            m_targetAssist = 0;
-            m_targetProtect = 0;
+            m_targetAssist = nullptr;
+            m_targetProtect = nullptr;
             return;
         }
         case ORDERS_MAIN_TANK:  // 1000(1000000000000)
@@ -4721,8 +4721,8 @@ void PlayerbotAI::SetCombatOrder(CombatOrderType co, Unit* target)
         case ORDERS_RESET: // FFFF(1111111111111111)
         {
             m_combatOrder = ORDERS_NONE;
-            m_targetAssist = 0;
-            m_targetProtect = 0;
+            m_targetAssist = nullptr;
+            m_targetProtect = nullptr;
             m_DelayAttackInit = CurrentTime();
             m_DelayAttack = 0;
             CharacterDatabase.DirectPExecute("UPDATE playerbot_saved_data SET combat_order = 0, primary_target = 0, secondary_target = 0, pname = '',sname = '', combat_delay = 0 WHERE guid = '%u'", m_bot->GetGUIDLow());
@@ -8066,7 +8066,7 @@ bool PlayerbotAI::DoTeleport(WorldObject& /*obj*/)
     if (m_targetCombat)
     {
         m_attackerInfo.clear();
-        m_targetCombat = 0;
+        m_targetCombat = nullptr;
     }
 
     SetIgnoreUpdateTime(6);
@@ -9310,7 +9310,7 @@ void PlayerbotAI::_HandleCommandReset(std::string& text, Player& fromPlayer)
     UpdateAttackerInfo();
     m_lootTargets.clear();
     m_lootCurrent = ObjectGuid();
-    m_targetCombat = 0;
+    m_targetCombat = nullptr;
     ClearActiveTalentSpec();
 }
 
