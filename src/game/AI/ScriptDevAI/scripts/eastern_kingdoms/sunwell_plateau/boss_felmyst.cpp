@@ -508,7 +508,7 @@ struct boss_felmystAI : public CombatAI
                     ResetCombatAction(action, urand(15000, 29000));
                 break;
             case FELMYST_GAS_NOVA:
-                if (DoCastSpellIfCan(m_creature->GetVictim(), SPELL_GAS_NOVA) == CAST_OK)
+                if (DoCastSpellIfCan(nullptr, SPELL_GAS_NOVA) == CAST_OK)
                     ResetCombatAction(action, urand(22000, 27000));
                 break;
         }
