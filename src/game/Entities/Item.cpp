@@ -247,6 +247,8 @@ Item::Item()
     m_container = nullptr;
     mb_in_trade = false;
     m_lootState = ITEM_LOOT_NONE;
+
+    m_usedInSpell = false;
 }
 
 bool Item::Create(uint32 guidlow, uint32 itemid, Player const* owner)
