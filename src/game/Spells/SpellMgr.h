@@ -651,6 +651,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 11966:         // Fire Shield
         case 11984:         // Immolate
         case 12099:         // Shield Spike
+        case 12187:         // Disease Cloud
         case 12246:         // Infected Spine
         case 12529:         // Chilling Touch
         case 12539:         // Ghoul Rot
@@ -673,6 +674,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 15506:         // Immolate
         case 15876:         // Ice Blast
         case 16140:         // Exploding Cadaver (Exploding Cadaver)
+        case 16345:         // Disease Cloud
         case 16563:         // Drowning Death
         case 16577:         // Disease Cloud
         case 16592:         // Shadowform
@@ -706,11 +708,15 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 22856:         // Ice Lock (Guard Slip'kik ice trap in Dire Maul)
         case 23255:         // Deep Wounds
         case 24313:         // Shade Visual
+        case 25039:         // Green Ghost Visual
         case 25592:         // Hate to Zero (Hate to Zero)
         case 26341:         // Saurfang's Rage
         case 27578:         // Battle Shout
+        case 27793:         // Disease Cloud
         case 27987:         // Unholy Aura
         case 28126:         // Spirit Particles (purple)
+        case 28156:         // Disease Cloud
+        case 28362:         // Disease Cloud
         case 28370:         // Toxic Gas
         case 28902:         // Bloodlust
         case 29406:         // Shadowform
@@ -718,6 +724,8 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 30205:         // Shadow Cage - Magtheridon
         case 30982:         // Crippling Poison
         case 31332:         // Dire Wolf Visual
+        case 31387:         // Time Rift Channel
+        case 31607:         // Disease Cloud
         case 31690:         // Putrid Mushroom
         case 31722:         // Immolation
         case 31757:         // Pulverize
@@ -753,6 +761,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 36784:         // Entropic Aura
         case 36788:         // Diminish Soul
         case 37119:         // Spirit Particles (Spawn)
+        case 37256:         // Disease Cloud
         case 37266:         // Disease Cloud
         case 37411:         // Skettis Corrupted Ghosts
         case 37497:         // Shadowmoon Ghost Invisibility (Ghostrider of Karabor in SMV) 
@@ -770,6 +779,7 @@ inline bool IsSpellRemovedOnEvade(SpellEntry const* spellInfo)
         case 40453:         // Aura of Fear
         case 40816:         // Saber Lash - Mother Shahraz
         case 40899:         // Felfire Proc
+        case 41290:         // Disease Cloud
         case 41634:         // Invisibility and Stealth Detection
         case 42459:         // Dual Wield (Passive)
         case 44118:         // Fists of Arcane Fury
