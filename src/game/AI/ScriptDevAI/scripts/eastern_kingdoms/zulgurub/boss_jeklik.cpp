@@ -38,6 +38,7 @@ enum
     SPELL_SONIC_BURST           = 23918,
     // SPELL_PSYHIC_SCREAM       = 22884,                   // spell not confirmed - needs research
     SPELL_SWOOP                 = 23919,
+    SPELL_ROOT_SELF             = 23973,
     SPELL_SUMMON_FRENZIED_BATS  = 23974,
 
     // Troll form spells
@@ -140,6 +141,7 @@ struct boss_jeklikAI : public ScriptedAI
     {
         if (pSummoned->GetEntry() == NPC_FRENZIED_BAT)
         {
+            pSummoned->CastSpell(pSummoned, SPELL_ROOT_SELF, TRIGGERED_NONE);
             if (Unit* pTarget = m_creature->SelectAttackingTarget(ATTACKING_TARGET_RANDOM, 0))
                 pSummoned->AI()->AttackStart(pTarget);
         }
