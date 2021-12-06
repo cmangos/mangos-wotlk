@@ -684,6 +684,7 @@ struct TempSpawnSettings
     ObjectGuid ownerGuid;
     uint32 spawnDataEntry = 0;
     int32 movegen = -1;
+    WorldObject* dbscriptTarget = nullptr;
 
     // TemporarySpawnWaypoint subsystem
     bool tempSpawnMovegen = false;

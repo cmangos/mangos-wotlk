@@ -1495,7 +1495,7 @@ void ObjectMgr::LoadCreatureSpawnDataTemplates()
 {
     m_creatureSpawnTemplateMap.clear();
 
-    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Entry, UnitFlags, Faction, ModelId, EquipmentId, CurHealth, CurMana, SpawnFlags FROM creature_spawn_data_template"));
+    std::unique_ptr<QueryResult> result(WorldDatabase.Query("SELECT Entry, UnitFlags, Faction, ModelId, EquipmentId, CurHealth, CurMana, SpawnFlags, RelayId FROM creature_spawn_data_template"));
     if (!result)
     {
         BarGoLink bar(1);
@@ -1523,6 +1523,7 @@ void ObjectMgr::LoadCreatureSpawnDataTemplates()
         uint32 curHealth =  fields[5].GetUInt32();
         uint32 curMana =    fields[6].GetUInt32();
         uint32 spawnFlags = fields[7].GetUInt32();
+        uint32 relayId = fields[8].GetUInt32();
 
         // leave room for invalidation in future
 
@@ -1534,6 +1535,7 @@ void ObjectMgr::LoadCreatureSpawnDataTemplates()
         data.curHealth = curHealth;
         data.curMana = curMana;
         data.spawnFlags = spawnFlags;
+        data.relayId = relayId;
 
         ++count;
     } while (result->NextRow());

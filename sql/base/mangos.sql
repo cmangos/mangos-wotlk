@@ -24,7 +24,7 @@ CREATE TABLE `db_version` (
   `version` varchar(120) DEFAULT NULL,
   `creature_ai_version` varchar(120) DEFAULT NULL,
   `cache_id` int(10) DEFAULT '0',
-  `required_14041_01_mangos_creature_spell_lists` bit(1) DEFAULT NULL
+  `required_14042_01_mangos_spawn_data_template_relay` bit(1) DEFAULT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Used DB version notes';
 
 --
@@ -1021,6 +1021,54 @@ LOCK TABLES `creature_conditional_spawn` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `creature_spawn_data`
+--
+
+DROP TABLE IF EXISTS `creature_spawn_data`;
+CREATE TABLE `creature_spawn_data` (
+  `Guid` int unsigned NOT NULL COMMENT 'guid of creature',
+  `Id` int unsigned NOT NULL COMMENT 'ID of template',
+  PRIMARY KEY (`Guid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System (Spawn Data)';
+
+--
+-- Dumping data for table `creature_spawn_data`
+--
+
+LOCK TABLES `creature_spawn_data` WRITE;
+/*!40000 ALTER TABLE `creature_spawn_data` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_spawn_data` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `creature_spawn_data_template`
+--
+
+DROP TABLE IF EXISTS `creature_spawn_data_template`;
+CREATE TABLE `creature_spawn_data_template` (
+  `Entry` int unsigned NOT NULL COMMENT 'ID of template',
+  `UnitFlags` bigint NOT NULL DEFAULT '-1',
+  `Faction` int unsigned NOT NULL DEFAULT '0',
+  `ModelId` mediumint unsigned NOT NULL DEFAULT '0',
+  `EquipmentId` mediumint NOT NULL DEFAULT '0',
+  `CurHealth` int unsigned NOT NULL DEFAULT '0',
+  `CurMana` int unsigned NOT NULL DEFAULT '0',
+  `SpawnFlags` int unsigned NOT NULL DEFAULT '0',
+  `RelayId` int unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`Entry`,`UnitFlags`,`ModelId`,`EquipmentId`,`CurHealth`,`CurMana`,`SpawnFlags`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System (Spawn Data Template)';
+
+--
+-- Dumping data for table `creature_spawn_data_template`
+--
+
+LOCK TABLES `creature_spawn_data_template` WRITE;
+/*!40000 ALTER TABLE `creature_spawn_data_template` DISABLE KEYS */;
+INSERT INTO `creature_spawn_data_template` (`Entry`) VALUES (0);
+/*!40000 ALTER TABLE `creature_spawn_data_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `creature_spawn_entry`
 --
 
@@ -1039,28 +1087,6 @@ LOCK TABLES `creature_spawn_entry` WRITE;
 /*!40000 ALTER TABLE `creature_spawn_entry` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_spawn_entry` ENABLE KEYS */;
 UNLOCK TABLES;
-
-DROP TABLE IF EXISTS `creature_spawn_data_template`;
-CREATE TABLE creature_spawn_data_template(
-Entry INT UNSIGNED NOT NULL COMMENT 'ID of template',
-UnitFlags BIGINT NOT NULL DEFAULT '-1',
-Faction INT UNSIGNED NOT NULL DEFAULT '0',
-ModelId MEDIUMINT UNSIGNED NOT NULL DEFAULT '0',
-EquipmentId MEDIUMINT NOT NULL DEFAULT '0',
-CurHealth INT UNSIGNED NOT NULL DEFAULT '0',
-CurMana INT UNSIGNED NOT NULL DEFAULT '0',
-SpawnFlags INT UNSIGNED NOT NULL DEFAULT '0',
-PRIMARY KEY(Entry,UnitFlags,ModelId,EquipmentId,CurHealth,CurMana,SpawnFlags)
-);
-
-DROP TABLE IF EXISTS `creature_spawn_data`;
-CREATE TABLE creature_spawn_data(
-Guid INT UNSIGNED NOT NULL COMMENT 'guid of creature',
-Id INT UNSIGNED NOT NULL COMMENT 'ID of template',
-PRIMARY KEY(Guid)
-);
-
-INSERT INTO creature_spawn_data_template(entry) VALUES(0);
 
 --
 -- Table structure for table `creature_equip_template`
