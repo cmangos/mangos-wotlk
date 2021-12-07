@@ -26,27 +26,35 @@ void WorldSession::HandleLfgJoinOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_LFG_JOIN");
 
-    uint8 dungeonsCount, counter2;
+    uint32 roles;
+    uint8 noPartialClear;
+    uint8 achievements;
+    uint8 slotsCount;
+    uint8 needCount;
+
     std::string comment;
-    std::vector<uint32> dungeons;
+    std::vector<uint32> slots;
+    std::vector<uint32> needs;
 
-    recv_data >> Unused<uint32>();                          // lfg roles
-    recv_data >> Unused<uint8>();                           // lua: GetLFGInfoLocal
-    recv_data >> Unused<uint8>();                           // lua: GetLFGInfoLocal
+    recv_data >> roles;
+    recv_data >> noPartialClear;
+    recv_data >> achievements;
 
-    recv_data >> dungeonsCount;
+    recv_data >> slotsCount;
 
-    dungeons.resize(dungeonsCount);
+    slots.resize(slotsCount);
 
-    for (uint8 i = 0; i < dungeonsCount; ++i)
-        recv_data >> dungeons[i];                           // dungeons id/type
+    for (uint8 i = 0; i < slotsCount; ++i)
+        recv_data >> slots[i];
 
-    recv_data >> counter2;                                  // const count = 3, lua: GetLFGInfoLocal
+    recv_data >> needCount;
 
-    for (uint8 i = 0; i < counter2; ++i)
-        recv_data >> Unused<uint8>();                       // lua: GetLFGInfoLocal
+    needs.resize(needCount);
 
-    recv_data >> comment;                                   // lfg comment
+    for (uint8 i = 0; i < needCount; ++i)
+        recv_data >> needs[i];
+
+    recv_data >> comment;
 
     // SendLfgJoinResult(ERR_LFG_OK);
     // SendLfgUpdate(false, LFG_UPDATE_JOIN, dungeons[0]);
@@ -63,21 +71,16 @@ void WorldSession::HandleSearchLfgJoinOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_LFG_SEARCH_JOIN");
 
-    recv_data >> Unused<uint32>();
-    //uint32 temp, entry;
-    //recv_data >> temp;
-
-    //entry = (temp & 0x00FFFFFF);
-    // LfgType type = LfgType((temp >> 24) & 0x000000FF);
-
-    // SendLfgSearchResults(type, entry);
+    uint32 entry; // Raid id to search
+    recv_data >> entry;
 }
 
 void WorldSession::HandleSearchLfgLeaveOpcode(WorldPacket& recv_data)
 {
     DEBUG_LOG("CMSG_LFG_SEARCH_LEAVE");
 
-    recv_data >> Unused<uint32>();                          // join id?
+    uint32 dungeonId; // Raid id queue to leave
+    recv_data >> dungeonId;
 }
 
 void WorldSession::HandleSetLfgCommentOpcode(WorldPacket& recv_data)
@@ -87,6 +90,44 @@ void WorldSession::HandleSetLfgCommentOpcode(WorldPacket& recv_data)
     std::string comment;
     recv_data >> comment;
     DEBUG_LOG("LFG comment \"%s\"", comment.c_str());
+}
+
+void WorldSession::HandleLfgSetBootVoteOpcode(WorldPacket& recv_data)
+{
+    bool agree; // Agree to kick player
+    recv_data >> agree;
+}
+
+void WorldSession::HandleLfgTeleport(WorldPacket& recv_data)
+{
+    bool out;
+    recv_data >> out;
+}
+
+void WorldSession::HandleLfgGetStatus(WorldPacket& recv_data)
+{
+}
+
+void WorldSession::HandleLfgProposalResultOpcode(WorldPacket& recv_data)
+{
+    uint32 lfgGroupID; // Internal lfgGroupID
+    bool accept; // Accept to join?
+    recv_data >> lfgGroupID;
+    recv_data >> accept;
+}
+
+void WorldSession::HandleLfgSetRolesOpcode(WorldPacket& recv_data)
+{
+    uint8 roles;
+    recv_data >> roles; // Player Group Roles
+}
+
+void WorldSession::HandleLfgPlayerLockInfoRequestOpcode(WorldPacket& recv_data)
+{
+}
+
+void WorldSession::HandleLfgPartyLockInfoRequestOpcode(WorldPacket& recv_data)
+{
 }
 
 void WorldSession::SendLfgSearchResults(LfgType type, uint32 entry) const
@@ -270,3 +311,27 @@ void WorldSession::SendLfgUpdate(bool isGroup, LfgUpdateType updateType, uint32 
     }
     SendPacket(data);
 }
+
+void WorldSession::SendLfgDisabled()
+{
+    DEBUG_LOG("SMSG_LFG_DISABLED");
+    WorldPacket data(SMSG_LFG_DISABLED, 0);
+    SendPacket(data);
+}
+
+void WorldSession::SendLfgOfferContinue(uint32 dungeonEntry)
+{
+    DEBUG_LOG("SMSG_LFG_OFFER_CONTINUE %u", dungeonEntry);
+    WorldPacket data(SMSG_LFG_OFFER_CONTINUE, 4);
+    data << uint32(dungeonEntry);
+    SendPacket(data);
+}
+
+void WorldSession::SendLfgTeleportError(uint8 err)
+{
+    DEBUG_LOG("SMSG_LFG_TELEPORT_DENIED %u", err);
+    WorldPacket data(SMSG_LFG_TELEPORT_DENIED, 4);
+    data << uint32(err); // Error
+    SendPacket(data);
+}
+
