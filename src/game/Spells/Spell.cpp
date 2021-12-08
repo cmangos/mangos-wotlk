@@ -5482,7 +5482,7 @@ SpellCastResult Spell::CheckCast(bool strict)
                     }
                 }
 
-                if (!IsIgnoreLosSpellCast(m_spellInfo) && !m_IsTriggeredSpell && VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_trueCaster->IsWithinLOSInMap(target, true))
+                if (!IsIgnoreLosSpellCast(m_spellInfo) && !m_IsTriggeredSpell && !m_trueCaster->IsWithinLOSInMap(target, true))
                     return SPELL_FAILED_LINE_OF_SIGHT;
 
                 if (m_trueCaster->IsPlayer())
