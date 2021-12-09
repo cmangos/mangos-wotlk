@@ -118,7 +118,7 @@ void UnitAI::EnterEvadeMode()
         if (!m_unit->IsImmobilizedState()) // if still rooted after aura removal - permarooted
             m_unit->GetMotionMaster()->MoveTargetedHome();
         else
-            JustReachedHome();
+            m_unit->TriggerHomeEvents();
     }
 
     m_unit->TriggerEvadeEvents();

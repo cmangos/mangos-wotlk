@@ -473,7 +473,7 @@ void instance_ulduar::OnObjectSpawn(GameObject* go)
     switch (go->GetEntry())
     {
         case GO_TRAM:
-            WorldObject::SpawnGameObject(6030078, go->GetMap(), static_cast<GenericTransport*>(go));
+            WorldObject::SpawnGameObject(6030078, go->GetMap(), 0, static_cast<GenericTransport*>(go));
             break;
     }
 }

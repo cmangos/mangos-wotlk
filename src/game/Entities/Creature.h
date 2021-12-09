@@ -36,6 +36,7 @@ class Group;
 class Quest;
 class Player;
 class WorldSession;
+class CreatureGroup;
 
 struct GameEventCreatureData;
 enum class VisibilityDistanceType : uint32;
@@ -702,7 +703,7 @@ class Creature : public Unit
 
         void SetDeathState(DeathState s) override;          // overwrite virtual Unit::SetDeathState
 
-        bool LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTransport* transport = nullptr);
+        bool LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forcedEntry, GenericTransport* transport = nullptr);
         virtual void SaveToDB();
         // overwrited in Pet
         virtual void SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask);
@@ -858,6 +859,10 @@ class Creature : public Unit
         std::vector<uint32> GetCharmSpells() const;
         bool GetSpellCooldown(uint32 spellId, uint32& cooldown) const;
 
+        void SetCreatureGroup(CreatureGroup* group);
+        void ClearCreatureGroup();
+        CreatureGroup* GetCreatureGroup() const { return m_creatureGroup; }
+
     protected:
         bool CreateFromProto(uint32 guidlow, CreatureInfo const* cinfo, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
         bool InitEntry(uint32 Entry, const CreatureData* data = nullptr, GameEventCreatureData const* eventData = nullptr);
@@ -929,6 +934,8 @@ class Creature : public Unit
 
         // Spell Lists
         CreatureSpellList m_spellList;
+
+        CreatureGroup* m_creatureGroup;
 
     private:
         GridReference<Creature> m_gridRef;

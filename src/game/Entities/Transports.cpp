@@ -258,9 +258,9 @@ void Transport::SpawnPassengers()
     for (auto& data : guids)
     {
         if (data.first == TYPEID_GAMEOBJECT)
-            WorldObject::SpawnGameObject(data.second, GetMap(), this);
+            WorldObject::SpawnGameObject(data.second, GetMap(), 0, this);
         else if (data.first == TYPEID_UNIT)
-            WorldObject::SpawnCreature(data.second, GetMap(), this);
+            WorldObject::SpawnCreature(data.second, GetMap(), 0, this);
     }
 }
 

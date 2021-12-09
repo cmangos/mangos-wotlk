@@ -243,8 +243,6 @@ class instance_zulaman : public ScriptedInstance
         void ShowChatCommands(ChatHandler* handler) override;
         void ExecuteChatCommand(ChatHandler* handler, char* args) override;
 
-        void FillInitialWorldStates(ByteBuffer& /*data*/, uint32& /*count*/, uint32 /*zoneId*/, uint32 /*areaId*/) override;
-
         void StartSpiritTimer();
     private:
         uint8 GetKilledPreBosses();

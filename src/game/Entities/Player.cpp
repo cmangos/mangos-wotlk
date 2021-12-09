@@ -8804,6 +8804,8 @@ void Player::SendInitWorldStates(uint32 zoneid, uint32 areaid) const
 
     FillBGWeekendWorldStates(data, count);
 
+    GetMap()->GetVariableManager().FillInitialWorldStates(data, count, zoneid, areaid);
+
     data.put<uint16>(count_pos, count);                     // set actual world state amount
 
     GetSession()->SendPacket(data);

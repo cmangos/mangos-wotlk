@@ -1168,7 +1168,7 @@ bool ChatHandler::HandleGameObjectAddCommand(char* args)
     pGameObj->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()), plr->GetPhaseMaskForSpawn());
 
     // this will generate a new guid if the object is in an instance
-    if (!pGameObj->LoadFromDB(db_lowGUID, map, db_lowGUID))
+    if (!pGameObj->LoadFromDB(db_lowGUID, map, db_lowGUID, 0))
     {
         delete pGameObj;
         return false;
@@ -1768,7 +1768,7 @@ bool ChatHandler::HandleNpcAddCommand(char* args)
     uint32 db_guid = pCreature->GetGUIDLow();
 
     // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-    pCreature->LoadFromDB(db_guid, map, db_guid);
+    pCreature->LoadFromDB(db_guid, map, db_guid, 0);
     return true;
 }
 

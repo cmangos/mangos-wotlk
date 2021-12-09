@@ -34,6 +34,7 @@
 #include "Globals/ObjectAccessor.h"
 #include "Entities/ObjectGuid.h"
 #include "Globals/Conditions.h"
+#include "Maps/SpawnGroupDefines.h"
 
 #include <map>
 #include <climits>
@@ -761,6 +762,8 @@ class ObjectMgr
         void LoadCreatureImmunities();
         std::shared_ptr<CreatureSpellListContainer> LoadCreatureSpellLists();
 
+        void LoadSpawnGroups();
+
         void LoadGameTele();
 
         void LoadNpcGossips();
@@ -1134,6 +1137,11 @@ class ObjectMgr
             return m_DungeonEncounters.equal_range(creditEntry);
         }
 
+        DungeonEncounterMapBounds GetDungeonEncounterBoundsByMap(uint32 mapId) const
+        {
+            return m_DungeonEncountersByMap.equal_range(mapId);
+        }
+
         // check if an entry on some map have is an encounter
         bool IsEncounter(uint32 creditEntry, uint32 mapId) const;
 
@@ -1223,6 +1231,8 @@ class ObjectMgr
 
         CreatureSpellList* GetCreatureSpellList(uint32 Id) const; // only for starttime checks - else use Map
         std::shared_ptr<CreatureSpellListContainer> GetCreatureSpellListContainer() { return m_spellListContainer; }
+
+        std::shared_ptr<SpawnGroupEntryContainer> GetSpawnGroupContainer() { return m_spawnGroupEntries; }
 
         // Transports
         std::vector<std::pair<TypeID, uint32>> const& GetDbGuidsForTransport(uint32 mapId) const;
@@ -1369,6 +1379,7 @@ class ObjectMgr
         PointOfInterestLocaleMap mPointOfInterestLocaleMap;
 
         DungeonEncounterMap m_DungeonEncounters;
+        DungeonEncounterMap m_DungeonEncountersByMap;
 
         QuestgiverGreetingMap m_questgiverGreetingMap[QUESTGIVER_TYPE_MAX];
         QuestgiverGreetingLocaleMap m_questgiverGreetingLocaleMap[QUESTGIVER_TYPE_MAX];
@@ -1390,6 +1401,8 @@ class ObjectMgr
         CreatureImmunityContainer m_creatureImmunities;
 
         std::shared_ptr<CreatureSpellListContainer> m_spellListContainer;
+
+        std::shared_ptr<SpawnGroupEntryContainer> m_spawnGroupEntries;
 
         std::map<uint32, uint32> m_transportMaps;
         std::map<uint32, std::vector<std::pair<TypeID, uint32>>> m_guidsForMap; // used for transports only atm

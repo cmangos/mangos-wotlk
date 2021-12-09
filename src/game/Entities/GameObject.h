@@ -698,6 +698,7 @@ class GameObjectModel;
 struct GameObjectDisplayInfoEntry;
 struct TransportAnimation;
 class Item;
+class GameObjectGroup;
 
 // 5 sec for bobber catch
 #define FISHING_BOBBER_READY_TIME 5
@@ -738,9 +739,9 @@ class GameObject : public WorldObject
         // overwrite WorldObject function for proper name localization
         const char* GetNameForLocaleIdx(int32 loc_idx) const override;
 
-        void SaveToDB();
+        void SaveToDB() const;
         void SaveToDB(uint32 mapid, uint8 spawnMask, uint32 phaseMask) const;
-        bool LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, GenericTransport* transport = nullptr);
+        bool LoadFromDB(uint32 dbGuid, Map* map, uint32 newGuid, uint32 forcedEntry, GenericTransport* transport = nullptr);
         void DeleteFromDB() const;
 
         ObjectGuid const& GetOwnerGuid() const override { return GetGuidValue(OBJECT_FIELD_CREATED_BY); }
@@ -924,6 +925,10 @@ class GameObject : public WorldObject
 
         void SetCooldown(uint32 cooldown); // seconds
 
+        void SetGameObjectGroup(GameObjectGroup* group);
+        void ClearGameObjectGroup();
+        GameObjectGroup* GetGameObjectGroup() const { return m_goGroup; }
+
     protected:
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
@@ -981,6 +986,8 @@ class GameObject : public WorldObject
         uint32 m_dbGuid;
 
         ObjectGuid m_spawnerGuid;
+
+        GameObjectGroup* m_goGroup;
 
     private:
         void SwitchDoorOrButton(bool activate, bool alternative = false);
