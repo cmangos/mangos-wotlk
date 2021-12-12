@@ -218,6 +218,7 @@ class Map : public GridRefManager<NGridType>
         uint32 GetMaxPlayers() const;                       // dependent from map difficulty
         uint32 GetMaxResetDelay() const;                    // dependent from map difficulty
         MapDifficultyEntry const* GetMapDifficulty() const; // dependent from map difficulty
+        void ChangeMapDifficulty(Difficulty difficulty);
 
         MapEntry const* GetEntry() const { return i_mapEntry; }
         bool Instanceable() const { return i_mapEntry && i_mapEntry->Instanceable(); }

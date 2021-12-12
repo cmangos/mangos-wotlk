@@ -2227,6 +2227,7 @@ enum AreaLockStatus
     AREA_LOCKSTATUS_NOT_ALLOWED                 = 11,
     AREA_LOCKSTATUS_HAS_BIND                    = 12,
     AREA_LOCKSTATUS_TOO_MANY_INSTANCE           = 13,
+    AREA_LOCKSTATUS_DIFFICULTY_REQUIREMENT      = 14,
 };
 
 enum TrackedAuraType

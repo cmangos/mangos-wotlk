@@ -1159,6 +1159,20 @@ MapDifficultyEntry const* Map::GetMapDifficulty() const
     return GetMapDifficultyData(GetId(), GetDifficulty());
 }
 
+void Map::ChangeMapDifficulty(Difficulty difficulty)
+{
+    i_spawnMode = difficulty;
+    auto& objectStore = GetObjectsStore();
+    for (auto itr = objectStore.begin<Creature>(); itr != objectStore.end<Creature>(); ++itr)
+    {
+        Creature* creature = itr->second;
+        if (creature->IsClientControlled())
+            continue;
+        CreatureData const* data = sObjectMgr.GetCreatureData(creature->GetDbGuid());
+        creature->UpdateEntry(creature->GetEntry(), data);
+    }
+}
+
 uint32 Map::GetMaxPlayers() const
 {
     if (MapDifficultyEntry const* mapDiff = GetMapDifficulty())

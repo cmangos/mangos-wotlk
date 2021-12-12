@@ -17742,7 +17742,8 @@ DungeonPersistentState* Player::GetBoundInstanceSaveForSelfOrGroup(uint32 mapid)
     if (!mapEntry)
         return nullptr;
 
-    InstancePlayerBind* pBind = GetBoundInstance(mapid, GetDifficulty(mapEntry->IsRaid()));
+    Difficulty saveDifficulty = MapPersistentState::GetSaveDifficulty(GetDifficulty(mapEntry->IsRaid()), mapEntry);
+    InstancePlayerBind* pBind = GetBoundInstance(mapid, saveDifficulty);
     DungeonPersistentState* state = pBind ? pBind->state : nullptr;
 
     // the player's permanent player bind is taken into consideration first
@@ -18910,11 +18911,11 @@ void Player::SendDungeonDifficulty(bool IsInGroup) const
     GetSession()->SendPacket(data);
 }
 
-void Player::SendRaidDifficulty(bool IsInGroup) const
+void Player::SendRaidDifficulty(bool IsInGroup, uint32 difficulty) const
 {
     uint8 val = 0x00000001;
     WorldPacket data(MSG_SET_RAID_DIFFICULTY, 12);
-    data << uint32(GetRaidDifficulty());
+    data << uint32(difficulty);
     data << uint32(val);
     data << uint32(IsInGroup);
     GetSession()->SendPacket(data);
@@ -19542,6 +19543,13 @@ void Player::LeaveAllArenaTeams(ObjectGuid guid)
     while (result->NextRow());
 
     delete result;
+}
+
+Difficulty Player::GetDifficulty(bool isRaid) const
+{
+    if (Group const* group = GetGroup())
+        return group->GetDifficulty(isRaid);
+    return isRaid ? m_raidDifficulty : m_dungeonDifficulty;
 }
 
 void Player::SetRestBonus(float rest_bonus_new)
@@ -21097,8 +21105,12 @@ void Player::SendTransferAbortedByLockStatus(MapEntry const* mapEntry, AreaLockS
     switch (lockStatus)
     {
         case AREA_LOCKSTATUS_TOO_LOW_LEVEL:
-            GetSession()->SendAreaTriggerMessage(GetSession()->GetMangosString(LANG_LEVEL_MINREQUIRED), miscRequirement);
+        case AREA_LOCKSTATUS_DIFFICULTY_REQUIREMENT:
+        {
+            auto data = sMapDifficultyStore.LookupEntry(miscRequirement);
+            GetSession()->SendAreaTriggerMessage(data->areaTriggerText[GetSession()->GetSessionDbcLocale()]);
             break;
+        }
         case AREA_LOCKSTATUS_ZONE_IN_COMBAT:
             GetSession()->SendTransferAborted(mapEntry->MapID, TRANSFER_ABORT_ZONE_IN_COMBAT);
             break;
@@ -24272,6 +24284,29 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
     if (mapEntry->IsDungeon() && !mapDiff)
         return AREA_LOCKSTATUS_MISSING_DIFFICULTY;
 
+    if (mapDiff)
+    {
+        if (mapDiff->MapId == 631) // ICC Hc LK Kill requirement
+        {
+            if (mapDiff->Difficulty == RAID_DIFFICULTY_10MAN_HEROIC)
+            {
+                if (!GetAchievementMgr().HasAchievement(4530))
+                {
+                    miscRequirement = mapDiff->Id;
+                    return AREA_LOCKSTATUS_DIFFICULTY_REQUIREMENT;
+                }
+            }
+            else if (mapDiff->Difficulty == RAID_DIFFICULTY_25MAN_HEROIC)
+            {
+                if (!GetAchievementMgr().HasAchievement(4597))
+                {
+                    miscRequirement = mapDiff->Id;
+                    return AREA_LOCKSTATUS_DIFFICULTY_REQUIREMENT;
+                }
+            }
+        }
+    }        
+
     // Expansion requirement
     if (GetSession()->GetExpansion() < mapEntry->Expansion())
     {
@@ -24286,12 +24321,12 @@ AreaLockStatus Player::GetAreaTriggerLockStatus(AreaTrigger const* at, Difficult
     // Level Requirements
     if (GetLevel() < at->requiredLevel && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_LEVEL))
     {
-        miscRequirement = at->requiredLevel;
+        miscRequirement = mapDiff->Id;
         return AREA_LOCKSTATUS_TOO_LOW_LEVEL;
     }
     if (!isRegularTargetMap && !sWorld.getConfig(CONFIG_BOOL_INSTANCE_IGNORE_LEVEL) && GetLevel() < uint32(maxLevelForExpansion[mapEntry->Expansion()]))
     {
-        miscRequirement = maxLevelForExpansion[mapEntry->Expansion()];
+        miscRequirement = mapDiff->Id;
         return AREA_LOCKSTATUS_TOO_LOW_LEVEL;
     }
 

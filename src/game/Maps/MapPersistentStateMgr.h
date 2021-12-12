@@ -117,6 +117,8 @@ class MapPersistentState
         void RemoveCreatureFromGrid(uint32 guid, CreatureData const* data);
         void AddGameobjectToGrid(uint32 guid, GameObjectData const* data);
         void RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data);
+
+        static Difficulty GetSaveDifficulty(Difficulty difficulty, MapEntry const* entry);
     protected:
         virtual bool CanBeUnload() const = 0;               // body provided for subclasses
 

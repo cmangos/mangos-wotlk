@@ -193,6 +193,14 @@ void MapPersistentState::RemoveGameobjectFromGrid(uint32 guid, GameObjectData co
     m_gridObjectGuids[cell_id].gameobjects.erase(guid);
 }
 
+Difficulty MapPersistentState::GetSaveDifficulty(Difficulty difficulty, MapEntry const* entry)
+{
+    if (entry->IsDynamicDifficultyMap())
+        if (difficulty >= RAID_DIFFICULTY_10MAN_HEROIC)
+            difficulty = Difficulty(difficulty % 2);
+    return difficulty;
+}
+
 void MapPersistentState::InitPools()
 {
     // pool system initialized already for persistent state (can be shared by map states)
@@ -654,6 +662,8 @@ MapPersistentStateManager::~MapPersistentStateManager()
 */
 MapPersistentState* MapPersistentStateManager::AddPersistentState(MapEntry const* mapEntry, uint32 instanceId, Difficulty difficulty, time_t resetTime, bool canReset, bool load /*=false*/, uint32 completedEncountersMask /*= 0*/)
 {
+    difficulty = MapPersistentState::GetSaveDifficulty(difficulty, mapEntry);
+
     if (MapPersistentState* old_save = GetPersistentState(mapEntry->MapID, instanceId))
         return old_save;
 

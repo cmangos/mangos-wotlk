@@ -317,7 +317,12 @@ Map* MapManager::CreateInstance(uint32 id, Player* player)
         map = FindMap(id, NewInstanceId);
         // it is possible that the save exists but the map doesn't
         if (!map)
-            pNewMap = CreateDungeonMap(id, NewInstanceId, pSave->GetDifficulty(), pSave, player->GetTeam());
+        {
+            Difficulty difficulty = entry->IsDynamicDifficultyMap() ? (player->GetGroup() ? player->GetGroup()->GetDifficulty(entry->IsRaid()) : player->GetDifficulty(entry->IsRaid())) : pSave->GetDifficulty();
+            pNewMap = CreateDungeonMap(id, NewInstanceId, difficulty, pSave, player->GetTeam());
+        }
+        else if (entry->IsDynamicDifficultyMap() && map->GetDifficulty() != player->GetDifficulty(entry->IsRaid()))
+            map->ChangeMapDifficulty(player->GetDifficulty(entry->IsRaid()));
     }
     else
     {

@@ -543,7 +543,7 @@ enum Opcodes
     CMSG_GM_NUKE                                    = 0x1FA,
     MSG_RANDOM_ROLL                                 = 0x1FB,
     SMSG_ENVIRONMENTALDAMAGELOG                     = 0x1FC,
-    CMSG_CHANGEPLAYER_DIFFICULTY                    = 0x1FD, // TODO: Implement dynamic difficulty persistent state
+    CMSG_CHANGEPLAYER_DIFFICULTY                    = 0x1FD,
     SMSG_RWHOIS                                     = 0x1FE,
     SMSG_LFG_PLAYER_REWARD                          = 0x1FF,
     SMSG_LFG_TELEPORT_DENIED                        = 0x200,

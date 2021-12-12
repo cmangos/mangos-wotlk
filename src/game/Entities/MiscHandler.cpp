@@ -1319,14 +1319,16 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if (Difficulty(mode) == _player->GetRaidDifficulty())
+    Difficulty difficulty = Difficulty(mode);
+    if (difficulty == _player->GetRaidDifficulty())
         return;
 
     // cannot reset while in an instance
     Map* map = _player->GetMap();
     if (map && map->IsDungeon())
     {
-        sLog.outError("WorldSession::HandleSetRaidDifficultyOpcode: player %d tried to reset the instance while inside!", _player->GetGUIDLow());
+        if (!map->GetEntry()->IsDynamicDifficultyMap()) // changing from inside is done in CMSG_CHANGEPLAYER_DIFFICULTY
+            sLog.outError("WorldSession::HandleSetRaidDifficultyOpcode: player %d tried to reset the instance while inside!", _player->GetGUIDLow());
         return;
     }
 
@@ -1334,21 +1336,86 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recv_data)
     if (_player->GetLevel() < LEVELREQUIREMENT_HEROIC && mode > REGULAR_DIFFICULTY)
         return;
 
-    if (Group* pGroup = _player->GetGroup())
+    if (Group* group = _player->GetGroup())
     {
-        if (pGroup->IsLeader(_player->GetObjectGuid()))
+        if (group->IsLeader(_player->GetObjectGuid()))
         {
             // the difficulty is set even if the instances can't be reset
             //_player->SendDungeonDifficulty(true);
-            pGroup->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, true, _player);
-            pGroup->SetRaidDifficulty(Difficulty(mode));
+            group->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, true, _player);
+            group->SetRaidDifficulty(difficulty);
         }
     }
     else
     {
         _player->ResetInstances(INSTANCE_RESET_CHANGE_DIFFICULTY, true);
-        _player->SetRaidDifficulty(Difficulty(mode));
+        _player->SetRaidDifficulty(difficulty);
     }
+}
+
+void WorldSession::HandleChangePlayerDifficulty(WorldPacket& recv_data)
+{
+    DEBUG_LOG("WORLD: Received opcode CMSG_CHANGEPLAYER_DIFFICULTY");
+
+    uint32 mode;
+    recv_data >> mode;
+
+    bool isHeroic = mode == 1;
+
+    Map* map = _player->GetMap();
+    if (!map->IsDungeon())
+    {
+        // can only be used from inside a dynamic difficulty dungeon
+        return;
+    }
+
+    uint32 currentDifficulty = map->GetDifficulty();
+    if (isHeroic && (currentDifficulty & 2) != 0)
+        return;
+    else if (!isHeroic && (currentDifficulty & 2) == 0)
+        return;
+
+    Difficulty difficulty = Difficulty(isHeroic ? currentDifficulty + 2 : currentDifficulty - 2);
+
+    bool dynamicDifficultyChange = map->GetEntry()->IsDynamicDifficultyMap();
+    if (dynamicDifficultyChange && map->GetInstanceData()->IsEncounterInProgress())
+        return;
+
+    if (Group* group = _player->GetGroup())
+    {
+        if (group->IsLeader(_player->GetObjectGuid()))
+        {
+            // everyone must be eligible to enter the other difficulty
+            if (AreaTrigger const* at = sObjectMgr.GetMapEntranceTrigger(map->GetId()))
+            {
+                uint32 miscRequirement;
+                for (GroupReference* itr = group->GetFirstMember(); itr != nullptr; itr = itr->next())
+                {
+                    Player* player = itr->getSource();
+                    auto lockStatus = player->GetAreaTriggerLockStatus(at, difficulty, miscRequirement);
+                    if (AREA_LOCKSTATUS_OK != lockStatus)
+                    {
+                        _player->SendTransferAbortedByLockStatus(map->GetEntry(), lockStatus, miscRequirement);
+                        return;
+                    }
+                }
+            }
+
+            WorldPacket result(SMSG_CHANGEPLAYER_DIFFICULTY_RESULT);
+            result << uint32(0);
+            result << uint8(isHeroic);
+            SendPacket(result);
+
+            WorldPacket resultTwo(SMSG_CHANGEPLAYER_DIFFICULTY_RESULT);
+            resultTwo << uint32(9);
+            SendPacket(resultTwo);
+
+            group->SetRaidDifficulty(difficulty);
+        }
+    }
+
+    if (dynamicDifficultyChange)
+        map->ChangeMapDifficulty(difficulty);
 }
 
 void WorldSession::HandleCancelMountAuraOpcode(WorldPacket& /*recv_data*/)

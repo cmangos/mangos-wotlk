@@ -334,10 +334,7 @@ bool Group::AddMember(ObjectGuid guid, const char* name)
                     player->SendDungeonDifficulty(true);
                 }
                 if (player->GetRaidDifficulty() != GetRaidDifficulty())
-                {
-                    player->SetRaidDifficulty(GetRaidDifficulty());
-                    player->SendRaidDifficulty(true);
-                }
+                    player->SendRaidDifficulty(true, GetRaidDifficulty());
             }
         }
         player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
@@ -1362,8 +1359,8 @@ void Group::SetRaidDifficulty(Difficulty difficulty)
         Player* player = itr->getSource();
         if (!player->GetSession() || player->GetLevel() < LEVELREQUIREMENT_HEROIC)
             continue;
-        player->SetRaidDifficulty(difficulty);
-        player->SendRaidDifficulty(true);
+
+        player->SendRaidDifficulty(true, difficulty);
     }
 }
 
@@ -1502,7 +1499,7 @@ InstanceGroupBind* Group::GetBoundInstance(uint32 mapid)
     if (!mapEntry)
         return nullptr;
 
-    Difficulty difficulty = GetDifficulty(mapEntry->IsRaid());
+    Difficulty difficulty = MapPersistentState::GetSaveDifficulty(GetDifficulty(mapEntry->IsRaid()), mapEntry);
 
     // some instances only have one difficulty
     MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mapid, difficulty);

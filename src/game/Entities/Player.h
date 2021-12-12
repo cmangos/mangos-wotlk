@@ -1821,7 +1821,7 @@ class Player : public Unit
         uint32 GetArenaTeamIdInvited() const { return m_ArenaTeamIdInvited; }
         static void LeaveAllArenaTeams(ObjectGuid guid);
 
-        Difficulty GetDifficulty(bool isRaid) const { return isRaid ? m_raidDifficulty : m_dungeonDifficulty; }
+        Difficulty GetDifficulty(bool isRaid) const;
         Difficulty GetDungeonDifficulty() const { return m_dungeonDifficulty; }
         Difficulty GetRaidDifficulty() const { return m_raidDifficulty; }
         void SetDungeonDifficulty(Difficulty dungeon_difficulty) { m_dungeonDifficulty = dungeon_difficulty; }
@@ -1915,7 +1915,7 @@ class Player : public Unit
         void SendExplorationExperience(uint32 Area, uint32 Experience) const;
 
         void SendDungeonDifficulty(bool IsInGroup) const;
-        void SendRaidDifficulty(bool IsInGroup) const;
+        void SendRaidDifficulty(bool IsInGroup, uint32 difficulty) const;
         void ResetInstances(InstanceResetMethod method, bool isRaid);
         void SendResetInstanceSuccess(uint32 MapId) const;
         void SendResetInstanceFailed(uint32 reason, uint32 MapId) const;

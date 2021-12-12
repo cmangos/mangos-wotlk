@@ -535,7 +535,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x1FA*/ { "CMSG_GM_NUKE",                                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
     /*0x1FB*/ { "MSG_RANDOM_ROLL",                              STATUS_LOGGEDIN, PROCESS_THREADUNSAFE, &WorldSession::HandleRandomRollOpcode          },
     /*0x1FC*/ { "SMSG_ENVIRONMENTALDAMAGELOG",                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
-    /*0x1FD*/ { "CMSG_CHANGEPLAYER_DIFFICULTY",                 STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_NULL                     },
+    /*0x1FD*/ { "CMSG_CHANGEPLAYER_DIFFICULTY",                 STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::HandleChangePlayerDifficulty    },
     /*0x1FE*/ { "SMSG_RWHOIS",                                  STATUS_NEVER,    PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x1FF*/ { "SMSG_LFG_PLAYER_REWARD",                       STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
     /*0x200*/ { "SMSG_LFG_TELEPORT_DENIED",                     STATUS_LOGGEDIN, PROCESS_INPLACE,      &WorldSession::Handle_ServerSide               },
