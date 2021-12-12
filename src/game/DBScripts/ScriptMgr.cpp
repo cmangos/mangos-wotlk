@@ -1041,7 +1041,7 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts)
             {
                 for (int i : itrM->second.textId)
                 {
-                    if (i && !sObjectMgr.GetBroadcastText(i))
+                    if (i && !sObjectMgr.GetBroadcastText(i) && !sObjectMgr.GetMangosString(i, -1))
                         sLog.outErrorDb("Table `broadcast_text` is missing string id %u, used in database script table %s id %u.", i, scripts.first, itrMM->first);
                 }
 
@@ -1050,7 +1050,7 @@ void ScriptMgr::CheckScriptTexts(ScriptMapMapName const& scripts)
                     auto& vector = m_scriptTemplates[STRING_TEMPLATE][itrM->second.talk.stringTemplateId];
                     for (auto& data : vector)
                     {
-                        if (!sObjectMgr.GetBroadcastText(data.first))
+                        if (!sObjectMgr.GetBroadcastText(data.first) && !sObjectMgr.GetMangosString(data.first, -1))
                             sLog.outErrorDb("Table `broadcast_text` is missing string id %d, used in database script template table dbscript_random_templates id %u.", data.first, itrM->second.talk.stringTemplateId);
                     }
                 }
