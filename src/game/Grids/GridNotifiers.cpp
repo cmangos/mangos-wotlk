@@ -25,6 +25,7 @@
 #include "Globals/ObjectAccessor.h"
 #include "BattleGround/BattleGroundMgr.h"
 #include "AI/BaseAI/UnitAI.h"
+#include "Maps/MapPersistentStateMgr.h"
 
 using namespace MaNGOS;
 
