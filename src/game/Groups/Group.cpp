@@ -690,7 +690,10 @@ void Group::SendUpdateTo(Player* player)
             data << uint8(m_lootThreshold);                 // loot threshold
             data << uint8(m_dungeonDifficulty);             // Dungeon Difficulty
             data << uint8(m_raidDifficulty);                // Raid Difficulty
-            data << uint8(0);                               // 3.3, dynamic difficulty?
+            bool isDynamicHeroic = false;
+            if (player->IsInWorld() && player->GetMap()->GetEntry()->IsDynamicDifficultyMap())
+                isDynamicHeroic = player->GetMap()->IsHeroic();
+            data << uint8(isDynamicHeroic);                 // Dynamic Difficulty - isHeroic
         }
 
         session->SendPacket(data);
