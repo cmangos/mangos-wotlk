@@ -21041,6 +21041,19 @@ void Player::SendInitialPacketsBeforeAddToMap()
     data << uint32(0);                                      // added in 3.1.2
     GetSession()->SendPacket(data);
 
+    Difficulty diff = GetMap()->GetDifficulty();
+    if (MapDifficultyEntry const* mapDiff = GetMapDifficultyData(GetMap()->GetId(), diff))
+    {
+        if (mapDiff->resetTime)
+        {
+            if (time_t timeReset = sMapPersistentStateMgr.GetScheduler().GetResetTimeFor(GetMap()->GetId(), diff))
+            {
+                uint32 timeleft = uint32(timeReset - time(nullptr));
+                SendInstanceResetWarning(GetMap()->GetId(), diff, timeleft);
+            }
+        }
+    }
+
     if (!GetSession()->PlayerLoading())
         SetMover(this);
 }

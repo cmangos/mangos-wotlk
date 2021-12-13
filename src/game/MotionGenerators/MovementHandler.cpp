@@ -224,19 +224,6 @@ void WorldSession::HandleMoveWorldportAckOpcode()
 
         if (mInstance)
         {
-            Difficulty diff = GetPlayer()->GetDifficulty(mEntry->IsRaid());
-            if (MapDifficultyEntry const* mapDiff = GetMapDifficultyData(mEntry->MapID, diff))
-            {
-                if (mapDiff->resetTime)
-                {
-                    if (time_t timeReset = sMapPersistentStateMgr.GetScheduler().GetResetTimeFor(mEntry->MapID, diff))
-                    {
-                        uint32 timeleft = uint32(timeReset - time(nullptr));
-                        GetPlayer()->SendInstanceResetWarning(mEntry->MapID, diff, timeleft);
-                    }
-                }
-            }
-
             // mount allow check
             if (!mInstance->mountAllowed)
                 _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);

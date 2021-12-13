@@ -1320,7 +1320,7 @@ void WorldSession::HandleSetRaidDifficultyOpcode(WorldPacket& recv_data)
     }
 
     Difficulty difficulty = Difficulty(mode);
-    if (difficulty == _player->GetRaidDifficulty())
+    if (difficulty == _player->GetDifficulty(true))
         return;
 
     // cannot reset while in an instance
@@ -1377,6 +1377,16 @@ void WorldSession::HandleChangePlayerDifficulty(WorldPacket& recv_data)
 
     Difficulty difficulty = Difficulty(isHeroic ? currentDifficulty + 2 : currentDifficulty - 2);
 
+    if (map->GetNewDifficultyCooldown() > map->GetCurrentClockTime())
+    {
+        auto diff = (map->GetNewDifficultyCooldown() - map->GetCurrentClockTime()).count() / 1000;
+        WorldPacket result(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
+        result << uint32(RESULT_COOLDOWN);
+        result << uint32(diff);
+        SendPacket(result);
+        return;
+    }
+
     if (map->GetInstanceData()->IsEncounterInProgress())
     {
         WorldPacket result(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
@@ -1420,15 +1430,13 @@ void WorldSession::HandleChangePlayerDifficulty(WorldPacket& recv_data)
     }
 
     WorldPacket result(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
-    result << uint32(RESULT_SET_DIFFICULTY);
-    result << uint8(isHeroic);
-    group->BroadcastPacketInMap(_player, result);
-
-    group->SetRaidDifficulty(difficulty);
-
-    result = WorldPacket(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
     result << uint32(RESULT_START);
     result << uint32(300); // 5 minute cooldown for another change
+    group->BroadcastPacketInMap(_player, result);
+
+    result = WorldPacket(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
+    result << uint32(RESULT_SET_DIFFICULTY);
+    result << uint8(isHeroic);
     group->BroadcastPacketInMap(_player, result);
 
     map->ChangeMapDifficulty(difficulty); // blizzard likely doesnt do this in-place        
@@ -1436,6 +1444,9 @@ void WorldSession::HandleChangePlayerDifficulty(WorldPacket& recv_data)
     result = WorldPacket(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
     result << uint32(RESULT_COMPLETE);
     group->BroadcastPacketInMap(_player, result);
+
+    group->SetRaidDifficulty(difficulty, false);
+    _player->SendRaidDifficulty(false, difficulty);
 }
 
 void WorldSession::HandleCancelMountAuraOpcode(WorldPacket& /*recv_data*/)

@@ -1364,11 +1364,14 @@ void Group::SetDungeonDifficulty(Difficulty difficulty)
     }
 }
 
-void Group::SetRaidDifficulty(Difficulty difficulty)
+void Group::SetRaidDifficulty(Difficulty difficulty, bool send)
 {
     m_raidDifficulty = difficulty;
     if (!isBattleGroup())
         CharacterDatabase.PExecute("UPDATE `groups` SET raiddifficulty = %u WHERE groupId='%u'", m_raidDifficulty, m_Id);
+
+    if (!send)
+        return;
 
     for (GroupReference* itr = GetFirstMember(); itr != nullptr; itr = itr->next())
     {

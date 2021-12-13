@@ -1171,6 +1171,13 @@ void Map::ChangeMapDifficulty(Difficulty difficulty)
         CreatureData const* data = sObjectMgr.GetCreatureData(creature->GetDbGuid());
         creature->UpdateEntry(creature->GetEntry(), data);
     }
+    SetNewDifficultyCooldown(GetCurrentClockTime() + std::chrono::milliseconds(300000));
+}
+
+void Map::SetNewDifficultyCooldown(TimePoint const& newCooldown)
+{
+    if (m_dynamicDifficultyCooldown < newCooldown)
+        m_dynamicDifficultyCooldown = newCooldown;
 }
 
 uint32 Map::GetMaxPlayers() const

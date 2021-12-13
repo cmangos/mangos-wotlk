@@ -937,16 +937,17 @@ void instance_icecrown_citadel::SetData(uint32 uiType, uint32 uiData)
         OUT_SAVE_INST_DATA_COMPLETE;
     }
 
-    if (uiData == FAIL) // this would need to be done in all dynamic difficulty instances but wotlk only really needs it in icc
+    if (uiData == FAIL || uiData == DONE) // this would need to be done in all dynamic difficulty instances but wotlk only really needs it in icc
     {
         if (Player* player = GetPlayerInMap(false, false))
         {
             if (Group* group = player->GetGroup())
             {
                 WorldPacket result(SMSG_CHANGE_PLAYER_DIFFICULTY_RESULT);
-                result << uint32(RESULT_FAILED_CONDITION);
+                result << uint32(RESULT_COOLDOWN);
                 result << uint32(60);
                 group->BroadcastPacketInMap(player, result);
+                instance->SetNewDifficultyCooldown(instance->GetCurrentClockTime() + std::chrono::milliseconds(60000));
             }
         }
     }

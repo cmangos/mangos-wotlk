@@ -972,6 +972,7 @@ void WorldSession::HandlePlayerReconnect()
     Group* group = _player->GetGroup();
 
     _player->SendDungeonDifficulty(false);
+    _player->SendRaidDifficulty(false, _player->GetRaidDifficulty());
 
     WorldPacket data(SMSG_LOGIN_VERIFY_WORLD, 20);
     data << _player->GetMapId();
